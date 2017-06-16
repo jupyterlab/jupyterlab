@@ -10,6 +10,7 @@ import {
 } from './shell';
 
 export { ApplicationShell } from './shell';
+export { ILayoutRestorer, LayoutRestorer } from './layoutrestorer';
 
 import '../style/index.css';
 
@@ -51,7 +52,7 @@ class JupyterLab extends Application<ApplicationShell> {
   }
 
   /**
-   * Promise that resolves when state is restored, returning layout description.
+   * Promise that resolves when state is first restored, returning layout description.
    *
    * #### Notes
    * This is just a reference to `shell.restored`.

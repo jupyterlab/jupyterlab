@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IDocumentManager, renameFileDialog
+  IDocumentManager, renameFile
 } from '@jupyterlab/docmanager';
 
 import {
@@ -289,6 +289,16 @@ class DirListing extends Widget {
   }
 
   /**
+   * Create an iterator over the listing's selected items.
+   *
+   * @returns A new iterator over the listing's selected items.
+   */
+  selectedItems(): IIterator<Contents.IModel> {
+    let items = this._sortedItems;
+    return filter(items, item => this._selection[item.name]);
+  }
+
+  /**
    * Create an iterator over the listing's sorted items.
    *
    * @returns A new iterator over the listing's sorted items.
@@ -337,6 +347,7 @@ class DirListing extends Widget {
    */
   paste(): Promise<void> {
     if (!this._clipboard.length) {
+      this._isCut = false;
       return;
     }
 
@@ -347,9 +358,10 @@ class DirListing extends Widget {
       if (this._isCut) {
         const parts = path.split('/');
         const name = parts[parts.length - 1];
-        promises.push(this._model.manager.rename(path, name, basePath));
+        const newPath = PathExt.join(basePath, name);
+        promises.push(this._model.manager.rename(path, newPath));
       } else {
-        promises.push(this._model.manager.copy(path, '.', basePath));
+        promises.push(this._model.manager.copy(path, basePath));
       }
     });
 
@@ -405,11 +417,12 @@ class DirListing extends Widget {
     const basePath = this._model.path;
     let promises: Promise<Contents.IModel>[] = [];
 
-    for (let item of this._getSelectedItems()) {
+    each(this.selectedItems(), item => {
       if (item.type !== 'directory') {
-        promises.push(this._model.manager.copy(item.name, '.', basePath));
+        let oldPath = PathExt.join(basePath, item.name);
+        promises.push(this._model.manager.copy(oldPath, basePath));
       }
-    }
+    });
     return Promise.all(promises).catch(error => {
       utils.showErrorMessage('Duplicate file', error);
     });
@@ -419,11 +432,11 @@ class DirListing extends Widget {
    * Download the currently selected item(s).
    */
   download(): void {
-    for (let item of this._getSelectedItems()) {
+    each(this.selectedItems(), item => {
       if (item.type !== 'directory') {
         this._model.download(item.path);
       }
-    }
+    });
   }
 
   /**
@@ -517,7 +530,7 @@ class DirListing extends Widget {
     let items = this._sortedItems;
 
     let index = ArrayExt.findFirstIndex(items, value => {
-      return value.name.toLowerCase().substr(0, prefix.length) === prefix
+      return value.name.toLowerCase().substr(0, prefix.length) === prefix;
     });
 
     if (index !== -1) {
@@ -550,6 +563,30 @@ class DirListing extends Widget {
     if (index !== -1) {
       return items[index].path;
     }
+  }
+
+  /**
+   * Select an item by name.
+   *
+   * @parem name - The name of the item to select.
+   *
+   * @returns A promise that resolves when the name is selected.
+   */
+  selectItemByName(name: string): Promise<void> {
+    // Make sure the file is available.
+    return this.model.refresh().then(() => {
+      if (this.isDisposed) {
+        return;
+      }
+      let items = this._sortedItems;
+      let index = ArrayExt.findFirstIndex(items, value => value.name === name);
+      if (index === -1) {
+        return;
+      }
+      this._selectItem(index, false);
+      MessageLoop.sendMessage(this, Widget.Msg.UpdateRequest);
+      ElementExt.scrollIntoViewIfNeeded(this.contentNode, this._items[index]);
+    });
   }
 
   /**
@@ -1027,15 +1064,23 @@ class DirListing extends Widget {
     // Get the path based on the target node.
     const index = ArrayExt.firstIndexOf(this._items, target);
     const items = this._sortedItems;
-    const path = items[index].name + '/';
+    let basePath = this._model.path;
+    if (items[index].type === 'directory') {
+      basePath = PathExt.join(basePath, items[index].name);
+    }
     const manager = this._manager;
 
-    // Move all of the items.
+    // Handle the items.
     const promises: Promise<Contents.IModel>[] = [];
-    const names = event.mimeData.getData(CONTENTS_MIME) as string[];
-    for (let name of names) {
-      let newPath = path + name;
-      promises.push(renameFileDialog(manager, name, newPath, this._model.path));
+    const paths = event.mimeData.getData(CONTENTS_MIME) as string[];
+    for (let path of paths) {
+      let name = PathExt.basename(path);
+      let newPath = PathExt.join(basePath, name);
+      // Skip files that are not moving.
+      if (newPath === path) {
+        continue;
+      }
+      promises.push(renameFile(manager, path, newPath));
     }
     Promise.all(promises).catch(error => {
       utils.showErrorMessage('Move Error', error);
@@ -1070,7 +1115,11 @@ class DirListing extends Widget {
       supportedActions: 'move',
       proposedAction: 'move'
     });
-    this._drag.mimeData.setData(CONTENTS_MIME, selectedNames);
+    let basePath = this._model.path;
+    let paths = toArray(map(selectedNames, name => {
+      return PathExt.join(basePath, name);
+    }));
+    this._drag.mimeData.setData(CONTENTS_MIME, paths);
     if (item && item.type !== 'directory') {
       this._drag.mimeData.setData(FACTORY_MIME, () => {
         let path = item.path;
@@ -1144,32 +1193,7 @@ class DirListing extends Widget {
       this._selection = Object.create(null);
       this._selection[name] = true;
     }
-    this._isCut = false;
     this.update();
-  }
-
-  /**
-   * Select an item by name.
-   *
-   * @parem name - The name of the item to select.
-   *
-   * @returns A promise that resolves when the name is selected.
-   */
-  private _selectItemByName(name: string): Promise<void> {
-    // Make sure the file is available.
-    return this.model.refresh().then(() => {
-      if (this.isDisposed) {
-        return;
-      }
-      let items = this._sortedItems;
-      let index = ArrayExt.findFirstIndex(items, value => value.name === name);
-      if (index === -1) {
-        return;
-      }
-      this._selectItem(index, false);
-      MessageLoop.sendMessage(this, Widget.Msg.UpdateRequest);
-      ElementExt.scrollIntoViewIfNeeded(this.contentNode, this._items[index]);
-    });
   }
 
   /**
@@ -1209,25 +1233,18 @@ class DirListing extends Widget {
     }
   }
 
-  /**
-   * Get the currently selected items.
-   */
-  private _getSelectedItems(): Contents.IModel[] {
-    let items = this._sortedItems;
-    return toArray(filter(items, item => this._selection[item.name]));
-  }
 
   /**
    * Copy the selected items, and optionally cut as well.
    */
   private _copy(): void {
     this._clipboard.length = 0;
-    for (let item of this._getSelectedItems()) {
+    each(this.selectedItems(), item => {
       if (item.type !== 'directory') {
         // Store the absolute path of the item.
         this._clipboard.push('/' + item.path);
       }
-    }
+    });
     this.update();
   }
 
@@ -1238,7 +1255,8 @@ class DirListing extends Widget {
     const promises: Promise<void>[] = [];
     const basePath = this._model.path;
     for (let name of names) {
-      let promise = this._model.manager.deleteFile(name, basePath).catch(err => {
+      let newPath = PathExt.join(basePath, name);
+      let promise = this._model.manager.deleteFile(newPath).catch(err => {
         utils.showErrorMessage('Delete Failed', err);
       });
       promises.push(promise);
@@ -1272,8 +1290,9 @@ class DirListing extends Widget {
       }
 
       const manager = this._manager;
-      const basePath = this._model.path;
-      const promise = renameFileDialog(manager, original, newName, basePath);
+      const oldPath = PathExt.join(this._model.path, original);
+      const newPath = PathExt.join(this._model.path, newName);
+      const promise = renameFile(manager, oldPath, newPath);
       return promise.catch(error => {
         utils.showErrorMessage('Rename Error', error);
         this._inRename = false;
@@ -1283,7 +1302,7 @@ class DirListing extends Widget {
           this._inRename = false;
           return;
         }
-        this._selectItemByName(newName);
+        this.selectItemByName(newName);
         this._inRename = false;
         return newName;
       });
@@ -1301,7 +1320,6 @@ class DirListing extends Widget {
     }
     let name = items[index].name;
     this._selection[name] = true;
-    this._isCut = false;
     this.update();
   }
 
@@ -1337,7 +1355,7 @@ class DirListing extends Widget {
    */
   private _onFileChanged(sender: FileBrowserModel, args: Contents.IChangedArgs) {
     if (args.type === 'new') {
-      this._selectItemByName(args.newValue.name).then(() => {
+      this.selectItemByName(args.newValue.name).then(() => {
         if (!this.isDisposed && args.newValue === 'directory') {
           this._doRename();
         }
@@ -1354,7 +1372,7 @@ class DirListing extends Widget {
       return;
     }
     let basename = PathExt.basename(args);
-    this._selectItemByName(basename);
+    this.selectItemByName(basename);
   }
 
   private _model: FileBrowserModel = null;
@@ -1766,24 +1784,43 @@ namespace Private {
    */
   export
   function sort(items: IIterator<Contents.IModel>, state: DirListing.ISortState) : Contents.IModel[] {
-    // Shortcut for unmodified.
-    if (state.key !== 'last_modified' && state.direction === 'ascending') {
-      return toArray(items);
-    }
 
     let copy = toArray(items);
 
     if (state.key === 'last_modified') {
+      // Sort by type and then by last modified.
       copy.sort((a, b) => {
+        // Compare based on type.
+        let t1 = typeWeight(a);
+        let t2 = typeWeight(b);
+        if (t1 !== t2) {
+          return t1 < t2 ? -1 : 1;  // Infinity safe
+        }
+
         let valA = new Date(a.last_modified).getTime();
         let valB = new Date(b.last_modified).getTime();
+
+        if (state.direction === 'descending') {
+          return valA - valB;
+        }
         return valB - valA;
       });
-    }
+    } else {
+      // Sort by type and then by name.
+      copy.sort((a, b) => {
+        // Compare based on type.
+        let t1 = typeWeight(a);
+        let t2 = typeWeight(b);
+        if (t1 !== t2) {
+          return t1 < t2 ? -1 : 1;  // Infinity safe
+        }
 
-    // Reverse the order if descending.
-    if (state.direction === 'descending') {
-      copy.reverse();
+        // Compare by display name.
+        if (state.direction === 'descending') {
+          return b.name.localeCompare(a.name);
+        }
+        return a.name.localeCompare(b.name);
+      });
     }
 
     return copy;
@@ -1795,5 +1832,21 @@ namespace Private {
   export
   function hitTestNodes(nodes: HTMLElement[], x: number, y: number): number {
     return ArrayExt.findFirstIndex(nodes, node => ElementExt.hitTest(node, x, y));
+  }
+
+  /**
+   * Weight a contents model by type.
+   */
+  function typeWeight(model: Contents.IModel): number {
+    switch (model.type) {
+    case 'directory':
+      return 0;
+    case 'notebook':
+      return 1;
+    case 'file':
+      return 2;
+    default:
+      return Infinity;
+    }
   }
 }

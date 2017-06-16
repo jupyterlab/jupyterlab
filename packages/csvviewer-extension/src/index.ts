@@ -2,11 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin
+  ILayoutRestorer,JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
 import {
-  ILayoutRestorer, InstanceTracker
+  InstanceTracker
 } from '@jupyterlab/apputils';
 
 import {
@@ -51,10 +51,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
     defaultFor: ['.csv'],
     readOnly: true
   });
-  const tracker = new InstanceTracker<CSVViewer>({
-    namespace: 'csvviewer',
-    shell: app.shell
-  });
+  const tracker = new InstanceTracker<CSVViewer>({ namespace: 'csvviewer' });
 
   // Handle state restoration.
   restorer.restore(tracker, {

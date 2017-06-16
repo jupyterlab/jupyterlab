@@ -46,6 +46,16 @@ const SHORTCUTS = [
     keys: ['Accel Shift Enter']
   },
   {
+    command: 'chatbox:post',
+    selector: '.jp-Chatbox-prompt',
+    keys: ['Enter']
+  },
+  {
+    command: 'chatbox:linebreak',
+    selector: '.jp-Chatbox-prompt',
+    keys: ['Ctrl Enter']
+  },
+  {
     command: 'command-palette:activate',
     selector: 'body',
     keys: ['Accel Shift P']
@@ -61,13 +71,8 @@ const SHORTCUTS = [
     keys: ['Tab']
   },
   {
-    command: 'chatbox:post',
-    selector: '.jp-Chatbox-prompt',
-    keys: ['Enter']
-  },
-  {
-    command: 'chatbox:linebreak',
-    selector: '.jp-Chatbox-prompt',
+    command: 'console:linebreak',
+    selector: '.jp-CodeConsole-promptCell',
     keys: ['Ctrl Enter']
   },
   {
@@ -76,18 +81,13 @@ const SHORTCUTS = [
     keys: ['Enter']
   },
   {
-    command: 'console:run-forced',
-    selector: '.jp-CodeConsole-promptCell',
+    command: 'editor:run-code',
+    selector: '.jp-FileEditor',
     keys: ['Shift Enter']
   },
   {
-    command: 'console:linebreak',
+    command: 'console:run-forced',
     selector: '.jp-CodeConsole-promptCell',
-    keys: ['Ctrl Enter']
-  },
-  {
-    command: 'editor:run-code',
-    selector: '.jp-FileEditor',
     keys: ['Shift Enter']
   },
   {
@@ -96,36 +96,34 @@ const SHORTCUTS = [
     keys: ['Accel Shift F']
   },
   {
-    command: 'file-operations:create-from',
-    args: { creatorName: 'Text File' },
+    command: 'file-operations:create-launcher',
     selector: 'body',
-    keys: ['Ctrl O']
-  },
-  {
-    command: 'file-operations:create-from',
-    args: { creatorName: 'Notebook' },
-    selector: 'body',
-    keys: ['Ctrl Shift N']
+    keys: ['Accel Shift L']
   },
   {
     command: 'file-operations:save',
-    selector: '.jp-Document',
+    selector: 'body',
     keys: ['Accel S']
   },
   {
     command: 'file-operations:close',
-    selector: '.jp-Document',
+    selector: '.jp-Activity',
     keys: ['Ctrl Q']
   },
   {
     command: 'file-operations:close-all-files',
-    selector: '.jp-Document',
+    selector: 'body',
     keys: ['Ctrl Shift Q']
   },
   {
     command: 'help-jupyterlab:toggle',
     selector: 'body',
     keys: ['Accel Shift H']
+  },
+  {
+    command: 'imageviewer:reset-zoom',
+    selector: '.jp-ImageViewer',
+    keys: ['0']
   },
   {
     command: 'imageviewer:zoom-in',
@@ -136,11 +134,6 @@ const SHORTCUTS = [
     command: 'imageviewer:zoom-out',
     selector: '.jp-ImageViewer',
     keys: ['-']
-  },
-  {
-    command: 'imageviewer:reset-zoom',
-    selector: '.jp-ImageViewer',
-    keys: ['0']
   },
   {
     command: 'inspector:open',
@@ -298,6 +291,11 @@ const SHORTCUTS = [
     keys: ['L']
   },
   {
+    command: 'notebook-cells:toggle-all-line-numbers',
+    selector: '.jp-Notebook:focus',
+    keys: ['Shift L']
+  },
+  {
     command: 'notebook-cells:markdown-header1',
     selector: '.jp-Notebook:focus',
     keys: ['1']
@@ -341,6 +339,11 @@ const SHORTCUTS = [
     command: 'notebook:command-mode',
     selector: '.jp-Notebook.jp-mod-editMode',
     keys: ['Ctrl M']
+  },
+  {
+    command: 'setting-editor:open',
+    selector: 'body',
+    keys: ['Accel ,']
   },
   {
     command: 'tooltip:launch-notebook',

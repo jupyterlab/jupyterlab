@@ -65,6 +65,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     this.session = new ClientSession({
       manager: manager.sessions,
       path: this._path,
+      type: ext === '.ipynb' ? 'notebook' : 'file',
       name: this._path.split('/').pop(),
       kernelPreference: options.kernelPreference || { shouldStart: false }
     });
@@ -185,7 +186,8 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     if (this._modelDB) {
       return this._modelDB.connected.then(() => {
         if (this._modelDB.isPrepopulated) {
-          return this.save();
+          this.save();
+          return void 0;
         } else {
           return this.revert();
         }

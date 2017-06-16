@@ -8,7 +8,7 @@
 export
 namespace MarkdownCodeBlocks {
   export
-  const markdownMarkers: string[] = ["```", "~~~~", "`"]
+  const CODE_BLOCK_MARKER = "```";
   const markdownExtensions: string[] = [
     '.markdown',
     '.mdown',
@@ -60,58 +60,45 @@ namespace MarkdownCodeBlocks {
     }
 
     const lines = text.split("\n");
-    const codeSnippets: MarkdownCodeBlock[] = [];
-    var currentCode = null;
+    const codeBlocks: MarkdownCodeBlock[] = [];
+    var currentBlock = null;
     for (var lineIndex = 0; lineIndex < lines.length; lineIndex++) {
       const line = lines[lineIndex];
-      const marker = findNextMarker(line);
-      const lineContainsMarker = marker != '';
-      const constructingSnippet = currentCode != null;
-      //skip this line if it is not part of any code snippet and doesn't contain a marker
-      if (!lineContainsMarker && !constructingSnippet) {
+      const lineContainsMarker = line.indexOf(CODE_BLOCK_MARKER) === 0;
+      const constructingBlock = currentBlock != null;
+      // Skip this line if it is not part of any code block and doesn't contain a marker.
+      if (!lineContainsMarker && !constructingBlock) {
         continue;
       }
 
-      //check if we are already constructing a code snippet
-      if (!constructingSnippet) {
-        //start constructing
-        currentCode = new MarkdownCodeBlock(lineIndex);
+      // Check if we are already constructing a code block.
+      if (!constructingBlock) {
+        // Start constructing a new code block.
+        currentBlock = new MarkdownCodeBlock(lineIndex);
 
-        //check whether this is a single line code snippet
-        const firstIndex = line.indexOf(marker);
-        const lastIndex = line.lastIndexOf(marker);
+        // Check whether this is a single line code block of the form ```a = 10```.
+        const firstIndex = line.indexOf(CODE_BLOCK_MARKER);
+        const lastIndex = line.lastIndexOf(CODE_BLOCK_MARKER);
         const isSingleLine = firstIndex != lastIndex
         if (isSingleLine) {
-          currentCode.code = line.substring(firstIndex + marker.length, lastIndex);
-          currentCode.endLine = lineIndex;
-          codeSnippets.push(currentCode);
-          currentCode = null;
-        } else {
-          currentCode.code = line.substring(firstIndex + marker.length);
+          currentBlock.code = line.substring(firstIndex + CODE_BLOCK_MARKER.length, lastIndex);
+          currentBlock.endLine = lineIndex;
+          codeBlocks.push(currentBlock);
+          currentBlock = null;
         }
       } else {
-        //already constructing
         if (lineContainsMarker) {
-          currentCode.code += "\n" + line.substring(0, line.indexOf(marker));
-          currentCode.endLine = lineIndex;
-          codeSnippets.push(currentCode);
-          currentCode = null;
+          // End of block, finish it up.
+          currentBlock.endLine = lineIndex-1;
+          codeBlocks.push(currentBlock);
+          currentBlock = null;
         } else {
-          currentCode.code += "\n" + line;
+          // Append the current line.
+          currentBlock.code += line + "\n";
         }
       }
     }
-    return codeSnippets;
+    return codeBlocks;
   }
 
-
-  function findNextMarker(text: string) {
-    for (let marker of markdownMarkers) {
-      const index = text.indexOf(marker);
-      if (index > -1) {
-        return marker;
-      }
-    }
-    return '';
-  }
 }

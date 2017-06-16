@@ -152,17 +152,34 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-cell-editor-border-color: #cfcfcf;
   --jp-cell-editor-background-edit: var(--jp-ui-layout-color1);
   --jp-cell-editor-border-color-edit: var(--jp-brand-color1);
-  --jp-cell-prompt-width: 68px;
+  --jp-cell-prompt-width: 100px;
   --jp-cell-prompt-font-family: 'Roboto Mono', monospace;
   --jp-cell-prompt-letter-spacing: 0px;
   --jp-cell-prompt-opacity: 1.0;
   --jp-cell-prompt-opacity-not-active: 0.4;
-  --jp-cell-inprompt-font-color: var(--md-grey-700);
-  --jp-cell-outprompt-font-color: var(--md-grey-700);
+  --jp-cell-prompt-font-color-not-active: var(--md-grey-700);
+  /* A custom blend of MD grey and blue 600
+   * See https://meyerweb.com/eric/tools/color-blend/#546E7A:1E88E5:5:hex */
+  --jp-cell-inprompt-font-color: #307FC1;
+  /* A custom blend of MD grey and orange 600
+   * https://meyerweb.com/eric/tools/color-blend/#546E7A:F4511E:5:hex */
+  --jp-cell-outprompt-font-color: #BF5B3D;
 
   /* Notebook specific styles */
 
   --jp-notebook-padding: 10px;
   --jp-notebook-scroll-padding: 100px;
 
+  /* Console specific styles */
+
+  --jp-console-background: var(--md-grey-100);
+
+  /* Toolbar specific styles */
+
+  --jp-toolbar-border-color: var(--md-grey-400);
+  --jp-toolbar-micro-height: 8px;
+  --jp-toolbar-background: var(--jp-layout-color0);
+  --jp-toolbar-box-shadow: 0px 0px 2px 0px rgba(0,0,0,0.24);
+  --jp-toolbar-header-margin: 4px 4px 0px 4px;
+  --jp-toolbar-active-background: var(--md-grey-300);
 }

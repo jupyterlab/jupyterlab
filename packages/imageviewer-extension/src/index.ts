@@ -2,11 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin
+  ILayoutRestorer, JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, ILayoutRestorer, InstanceTracker
+  ICommandPalette, InstanceTracker
 } from '@jupyterlab/apputils';
 
 import {
@@ -78,8 +78,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, palette: IComman
     defaultFor: EXTENSIONS,
     readOnly: true
   });
-  const { shell, commands } = app;
-  const tracker = new InstanceTracker<ImageViewer>({ namespace, shell });
+  const tracker = new InstanceTracker<ImageViewer>({ namespace });
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -96,7 +95,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, palette: IComman
     tracker.add(widget);
   });
 
-  addCommands(tracker, commands);
+  addCommands(tracker, app.commands);
 
   let category = 'Image Viewer';
   [CommandIDs.zoomIn, CommandIDs.zoomOut, CommandIDs.resetZoom]

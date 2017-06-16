@@ -10,7 +10,7 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  Message, MessageLoop
+  Message, MessageLoop, IMessageHandler
 } from '@phosphor/messaging';
 
 import {
@@ -53,6 +53,8 @@ const DEFAULT_RANK = 500;
  */
 const MODE_ATTRIBUTE = 'data-shell-mode';
 
+const ACTIVITY_CLASS = 'jp-Activity';
+
 
 /**
  * The application shell for JupyterLab.
@@ -70,6 +72,8 @@ class ApplicationShell extends Widget {
     let topPanel = this._topPanel = new Panel();
     let hboxPanel = this._hboxPanel = new BoxPanel();
     let dockPanel = this._dockPanel = new DockPanel();
+    MessageLoop.installMessageHook(dockPanel, Private.activityClassHook);
+
     let hsplitPanel = this._hsplitPanel = new SplitPanel();
     let leftHandler = this._leftHandler = new Private.SideBarHandler('left');
     let rightHandler = this._rightHandler = new Private.SideBarHandler('right');
@@ -127,10 +131,11 @@ class ApplicationShell extends Widget {
     this._tracker.activeChanged.connect(this._onActiveChanged, this);
 
     // Connect main layout change listener.
-    this._dockPanel.layoutModified.connect(() => {
-      this._layoutModified.emit(void 0);
-      this._save();
-    }, this);
+    this._dockPanel.layoutModified.connect(this._onLayoutModified, this);
+
+    // Catch current changed events on the side handlers.
+    this._leftHandler.sideBar.currentChanged.connect(this._onLayoutModified, this);
+    this._rightHandler.sideBar.currentChanged.connect(this._onLayoutModified, this);
   }
 
   /**
@@ -186,7 +191,9 @@ class ApplicationShell extends Widget {
 
       // In case the active widget in the dock panel is *not* the active widget
       // of the application, defer to the application.
-      dock.activateWidget(this.currentWidget);
+      if (this.currentWidget) {
+        dock.activateWidget(this.currentWidget);
+      }
 
       // Set the mode data attribute on the document body.
       document.body.setAttribute(MODE_ATTRIBUTE, mode);
@@ -226,7 +233,8 @@ class ApplicationShell extends Widget {
   }
 
   /**
-   * Promise that resolves when state is restored, returning layout description.
+   * Promise that resolves when state is first restored, returning layout
+   * description.
    */
   get restored(): Promise<ApplicationShell.ILayout> {
     return this._restored.promise;
@@ -238,14 +246,19 @@ class ApplicationShell extends Widget {
   activateById(id: string): void {
     if (this._leftHandler.has(id)) {
       this._leftHandler.activate(id);
-    } else if (this._rightHandler.has(id)) {
+      return;
+    }
+
+    if (this._rightHandler.has(id)) {
       this._rightHandler.activate(id);
-    } else {
-      const dock = this._dockPanel;
-      const widget = find(dock.widgets(), value => value.id === id);
-      if (widget) {
-        dock.activateWidget(widget);
-      }
+      return;
+    }
+
+    const dock = this._dockPanel;
+    const widget = find(dock.widgets(), value => value.id === id);
+
+    if (widget) {
+      dock.activateWidget(widget);
     }
   }
 
@@ -321,7 +334,7 @@ class ApplicationShell extends Widget {
     }
     let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
     this._leftHandler.addWidget(widget, rank);
-    this._save();
+    this._layoutModified.emit(void 0);
   }
 
   /**
@@ -332,13 +345,20 @@ class ApplicationShell extends Widget {
    * All widgets added to the main area should be disposed after removal (or
    * simply disposed in order to remove).
    */
-  addToMainArea(widget: Widget): void {
+  addToMainArea(widget: Widget, options: ApplicationShell.IMainAreaOptions = {}): void {
     if (!widget.id) {
       console.error('Widgets added to app shell must have unique id property.');
       return;
     }
 
-    this._dockPanel.addWidget(widget, { mode: 'tab-after' });
+    let dock = this._dockPanel;
+
+    let ref: Widget | null = null;
+    if (options.ref) {
+      ref = find(dock.widgets(), value => value.id === options.ref);
+    }
+
+    dock.addWidget(widget, { mode: 'tab-after', ref });
     this._tracker.add(widget);
   }
 
@@ -355,7 +375,7 @@ class ApplicationShell extends Widget {
     }
     let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
     this._rightHandler.addWidget(widget, rank);
-    this._save();
+    this._onLayoutModified();
   }
 
   /**
@@ -371,7 +391,7 @@ class ApplicationShell extends Widget {
     }
     // Temporary: widgets are added to the panel in order of insertion.
     this._topPanel.addWidget(widget);
-    this._save();
+    this._onLayoutModified();
   }
 
   /**
@@ -379,7 +399,7 @@ class ApplicationShell extends Widget {
    */
   collapseLeft(): void {
     this._leftHandler.collapse();
-    this._save();
+    this._onLayoutModified();
   }
 
   /**
@@ -387,7 +407,7 @@ class ApplicationShell extends Widget {
    */
   collapseRight(): void {
     this._rightHandler.collapse();
-    this._save();
+    this._onLayoutModified();
   }
 
   /**
@@ -419,60 +439,62 @@ class ApplicationShell extends Widget {
   }
 
   /**
-   * Set the layout data store for the application shell.
+   * Restore the layout state for the application shell.
    */
-  setLayoutDB(database: ApplicationShell.ILayoutDB): void {
-    if (this._database) {
-      throw new Error('cannot reset layout database');
+  restoreLayout(layout: ApplicationShell.ILayout): void {
+    const { mainArea, leftArea, rightArea } = layout;
+
+    // Rehydrate the main area.
+    if (mainArea) {
+      const { currentWidget, dock, mode } = mainArea;
+
+      if (dock) {
+        this._dockPanel.restoreLayout(dock);
+      }
+      if (mode) {
+        this.mode = mode;
+      }
+      if (currentWidget) {
+        this.activateById(currentWidget.id);
+      }
     }
-    this._database = database;
-    this._database.fetch().then(saved => {
-      if (this.isDisposed || !saved) {
-        return;
-      }
 
-      const { mainArea, leftArea, rightArea } = saved;
+    // Rehydrate the left area.
+    if (leftArea) {
+      this._leftHandler.rehydrate(leftArea);
+    }
 
-      // Rehydrate the main area.
-      if (mainArea) {
-        const { currentWidget, dock, mode } = mainArea;
+    // Rehydrate the right area.
+    if (rightArea) {
+      this._rightHandler.rehydrate(rightArea);
+    }
 
-        if (dock) {
-          this._dockPanel.restoreLayout(dock);
-        }
-        if (mode) {
-          this.mode = mode;
-        }
-        if (currentWidget) {
-          this.activateById(currentWidget.id);
-        }
-      }
+    if (!this._isRestored) {
+      // Make sure all messages in the queue are finished before notifying
+      // any extensions that are waiting for the promise that guarantees the
+      // application state has been restored.
+      MessageLoop.flush();
+      this._restored.resolve(layout);
+    }
+  }
 
-      // Rehydrate the left area.
-      if (leftArea) {
-        this._leftHandler.rehydrate(leftArea);
-      }
-
-      // Rehydrate the right area.
-      if (rightArea) {
-        this._rightHandler.rehydrate(rightArea);
-      }
-
-      // Set restored flag, save state, and resolve the restoration promise.
-      this._isRestored = true;
-      return this._save().then(() => {
-        // Make sure all messages in the queue are finished before notifying
-        // any extensions that are waiting for the promise that guarantees the
-        // application state has been restored.
-        MessageLoop.flush();
-        this._restored.resolve(saved);
-      });
-    });
-
-    // Catch current changed events on the side handlers.
-    this._tracker.currentChanged.connect(this._save, this);
-    this._leftHandler.sideBar.currentChanged.connect(this._save, this);
-    this._rightHandler.sideBar.currentChanged.connect(this._save, this);
+  /**
+   * Save the dehydrated state of the application shell.
+   */
+  saveLayout(): ApplicationShell.ILayout {
+    // If the application is in single document mode, use the cached layout if
+    // available. Otherwise, default to querying the dock panel for layout.
+    return {
+      mainArea: {
+        currentWidget: this._tracker.currentWidget,
+        dock: this.mode === 'single-document' ?
+          this._cachedLayout || this._dockPanel.saveLayout()
+            : this._dockPanel.saveLayout(),
+        mode: this._dockPanel.mode
+      },
+      leftArea: this._leftHandler.dehydrate(),
+      rightArea: this._rightHandler.dehydrate()
+    };
   }
 
   /**
@@ -567,36 +589,19 @@ class ApplicationShell extends Widget {
       );
     }
     this._currentChanged.emit(args);
+    this._onLayoutModified();
   }
 
   /**
-   * Save the dehydrated state of the application shell.
+   * Handle a change to the layout.
    */
-  private _save(): Promise<void> {
-    if (!this._database || !this._isRestored) {
-      return;
-    }
-
-    // If the application is in single document mode, use the cached layout if
-    // available. Otherwise, default to querying the dock panel for layout.
-    const data: ApplicationShell.ILayout = {
-      mainArea: {
-        currentWidget: this._tracker.currentWidget,
-        dock: this.mode === 'single-document' ?
-          this._cachedLayout || this._dockPanel.saveLayout()
-            : this._dockPanel.saveLayout(),
-        mode: this._dockPanel.mode
-      },
-      leftArea: this._leftHandler.dehydrate(),
-      rightArea: this._rightHandler.dehydrate()
-    };
-    return this._database.save(data);
+  private _onLayoutModified(): void {
+    this._layoutModified.emit(void 0);
   }
 
   private _activeChanged = new Signal<this, ApplicationShell.IChangedArgs>(this);
   private _cachedLayout: DockLayout.ILayoutConfig | null = null;
   private _currentChanged = new Signal<this, ApplicationShell.IChangedArgs>(this);
-  private _database: ApplicationShell.ILayoutDB = null;
   private _dockPanel: DockPanel;
   private _hboxPanel: BoxPanel;
   private _hsplitPanel: SplitPanel;
@@ -666,26 +671,6 @@ namespace ApplicationShell {
   }
 
   /**
-   * An application layout data store.
-   */
-  export
-  interface ILayoutDB {
-    /**
-     * Fetch the layout state for the application.
-     *
-     * #### Notes
-     * Fetching the layout relies on all widget restoration to be complete, so
-     * calls to `fetch` are guaranteed to return after restoration is complete.
-     */
-    fetch(): Promise<ApplicationShell.ILayout>;
-
-    /**
-     * Save the layout state for the application.
-     */
-    save(data: ApplicationShell.ILayout): Promise<void>;
-  }
-
-  /**
    * The restorable description of the main application area.
    */
   export
@@ -736,6 +721,19 @@ namespace ApplicationShell {
      * The rank order of the widget among its siblings.
      */
     rank?: number;
+  }
+
+  /**
+   * The options for adding a widget to a side area of the shell.
+   */
+  export
+  interface IMainAreaOptions {
+    /**
+     * The reference widget id for the insert location.
+     *
+     * The default is `null`.
+     */
+    ref?: string | null;
   }
 }
 
@@ -959,4 +957,19 @@ namespace Private {
     private _sideBar: TabBar<Widget>;
     private _stackedPanel: StackedPanel;
   }
+
+  /**
+   * A message hook that adds and removes the .jp-Activity class to widgets in the dock panel.
+   */
+  export
+  var activityClassHook = (handler: IMessageHandler, msg: Message): boolean => {
+    if (msg.type === 'child-added') {
+      (msg as Widget.ChildMessage).child.addClass(ACTIVITY_CLASS)
+    } else if (msg.type === 'child-removed') {
+      (msg as Widget.ChildMessage).child.removeClass(ACTIVITY_CLASS)
+    }
+    return true;
+  }
+
 }
+

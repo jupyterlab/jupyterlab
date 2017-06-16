@@ -29,7 +29,11 @@ var packagePath = '';
 if (target[0] === '.' || target[0] === '/') {
   // If the target starts with a '.' or a '/', treat it as a local path.
   packagePath = path.resolve(target);
-  packageDirName = target.split('/').pop();
+  // Possibly remove a trailing slash.
+  if (packagePath[packagePath.length-1] === '/') {
+    packagePath = packagePath.slice(0, -1);
+  }
+  packageDirName = packagePath.split('/').pop();
   // Copy the package directory contents to the sibling package.
   var newPackagePath = path.join(basePath, 'packages', packageDirName);
   fs.copySync(packagePath, newPackagePath);

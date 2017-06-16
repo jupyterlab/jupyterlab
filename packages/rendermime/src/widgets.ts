@@ -25,6 +25,10 @@ import {
 } from '@phosphor/coreutils';
 
 import {
+  URLExt
+} from '@jupyterlab/coreutils';
+
+import {
   RenderMime, typeset, removeMath, replaceMath
 } from '.';
 
@@ -255,7 +259,7 @@ class RenderedText extends Widget {
     let source = Private.getSource(options);
     let data = escape_for_html(source);
     let pre = document.createElement('pre');
-    pre.innerHTML = ansi_to_html(data);
+    pre.innerHTML = ansi_to_html(data, {use_classes: true});
     this.node.appendChild(pre);
     this.addClass(TEXT_CLASS);
     if (options.mimeType === 'application/vnd.jupyter.stderr') {
@@ -453,7 +457,7 @@ namespace Private {
     // Get the appropriate file path.
     return resolver.resolveUrl(href).then(path => {
       // Handle the click override.
-      if (linkHandler) {
+      if (linkHandler && URLExt.isLocal(path)) {
         linkHandler.handleLink(anchor, path);
       }
       // Get the appropriate file download path.

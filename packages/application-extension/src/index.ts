@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin
+  JupyterLab, JupyterLabPlugin, ILayoutRestorer, LayoutRestorer
 } from '@jupyterlab/application';
 
 import {
@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  PageConfig
+  IStateDB, PageConfig
 } from '@jupyterlab/coreutils';
 
 
@@ -38,58 +38,11 @@ namespace CommandIDs {
 /**
  * The main extension.
  */
-const plugin: JupyterLabPlugin<void> = {
+const mainPlugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.main',
   requires: [ICommandPalette],
   activate: (app: JupyterLab, palette: ICommandPalette) => {
-    const category = 'Main Area';
-    let command = CommandIDs.activateNextTab;
-    app.commands.addCommand(command, {
-      label: 'Activate Next Tab',
-      execute: () => { app.shell.activateNextTab(); }
-    });
-    palette.addItem({ command, category });
-
-    command = CommandIDs.activatePreviousTab;
-    app.commands.addCommand(command, {
-      label: 'Activate Previous Tab',
-      execute: () => { app.shell.activatePreviousTab(); }
-    });
-    palette.addItem({ command, category });
-
-    command = CommandIDs.closeAll;
-    app.commands.addCommand(command, {
-      label: 'Close All Widgets',
-      execute: () => { app.shell.closeAll(); }
-    });
-    palette.addItem({ command, category });
-
-    command = CommandIDs.setMode;
-    app.commands.addCommand(command, {
-      isVisible: args => {
-        const mode = args['mode'] as string;
-        return mode === 'single-document' || mode === 'multiple-document';
-      },
-      execute: args => {
-        const mode = args['mode'] as string;
-        if (mode === 'single-document' || mode === 'multiple-document') {
-          app.shell.mode = mode;
-          return;
-        }
-        throw new Error(`Unsupported application shell mode: ${mode}`);
-      }
-    });
-
-    command = CommandIDs.toggleMode;
-    app.commands.addCommand(command, {
-      label: 'Toggle Single-Document Mode',
-      execute: () => {
-        const args = app.shell.mode === 'multiple-document' ?
-          { mode: 'single-document' } : { mode: 'multiple-document' };
-        return app.commands.execute(CommandIDs.setMode, args);
-      }
-    });
-    palette.addItem({ command, category });
+    addCommands(app, palette);
 
     // Temporary build message for manual rebuild.
     let buildMessage = PageConfig.getOption('buildRequired');
@@ -124,6 +77,88 @@ const plugin: JupyterLabPlugin<void> = {
 
 
 /**
- * Export the plugin as default.
+ * The default layout restorer provider.
  */
-export default plugin;
+const layoutPlugin: JupyterLabPlugin<ILayoutRestorer> = {
+  id: 'jupyter.services.layout-restorer',
+  requires: [IStateDB],
+  activate: (app: JupyterLab, state: IStateDB) => {
+    const first = app.started;
+    const registry = app.commands;
+    let restorer = new LayoutRestorer({ first, registry, state });
+    restorer.fetch().then(saved => {
+      app.shell.restoreLayout(saved);
+      app.shell.layoutModified.connect(() => {
+        restorer.save(app.shell.saveLayout());
+      });
+    });
+    return restorer;
+  },
+  autoStart: true,
+  provides: ILayoutRestorer
+};
+
+
+/**
+ * Add the main application commands.
+ */
+function addCommands(app: JupyterLab, palette: ICommandPalette): void {
+  const category = 'Main Area';
+  let command = CommandIDs.activateNextTab;
+  app.commands.addCommand(command, {
+    label: 'Activate Next Tab',
+    execute: () => { app.shell.activateNextTab(); }
+  });
+  palette.addItem({ command, category });
+
+  command = CommandIDs.activatePreviousTab;
+  app.commands.addCommand(command, {
+    label: 'Activate Previous Tab',
+    execute: () => { app.shell.activatePreviousTab(); }
+  });
+  palette.addItem({ command, category });
+
+  command = CommandIDs.closeAll;
+  app.commands.addCommand(command, {
+    label: 'Close All Widgets',
+    execute: () => { app.shell.closeAll(); }
+  });
+  palette.addItem({ command, category });
+
+  command = CommandIDs.setMode;
+  app.commands.addCommand(command, {
+    isVisible: args => {
+      const mode = args['mode'] as string;
+      return mode === 'single-document' || mode === 'multiple-document';
+    },
+    execute: args => {
+      const mode = args['mode'] as string;
+      if (mode === 'single-document' || mode === 'multiple-document') {
+        app.shell.mode = mode;
+        return;
+      }
+      throw new Error(`Unsupported application shell mode: ${mode}`);
+    }
+  });
+
+  command = CommandIDs.toggleMode;
+  app.commands.addCommand(command, {
+    label: 'Toggle Single-Document Mode',
+    execute: () => {
+      const args = app.shell.mode === 'multiple-document' ?
+        { mode: 'single-document' } : { mode: 'multiple-document' };
+      return app.commands.execute(CommandIDs.setMode, args);
+    }
+  });
+  palette.addItem({ command, category });
+}
+
+
+/**
+ * Export the plugins as default.
+ */
+const plugins: JupyterLabPlugin<any>[] = [
+  mainPlugin,
+  layoutPlugin
+];
+export default plugins;

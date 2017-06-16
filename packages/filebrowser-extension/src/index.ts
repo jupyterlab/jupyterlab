@@ -2,15 +2,15 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin
+  ILayoutRestorer, JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, ILayoutRestorer, IMainMenu, InstanceTracker, IStateDB
+  ICommandPalette, IMainMenu, InstanceTracker, ToolbarButton
 } from '@jupyterlab/apputils';
 
 import {
-  IChangedArgs
+  IStateDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -24,6 +24,10 @@ import {
 import {
   FileBrowserModel, FileBrowser, IFileBrowserFactory
 } from '@jupyterlab/filebrowser';
+
+import {
+  each
+} from '@phosphor/algorithm';
 
 import {
   CommandRegistry
@@ -73,7 +77,11 @@ namespace CommandIDs {
 
   export
   const toggleBrowser = 'filebrowser-main:toggle'; // For main browser only.
+
+  export
+  const createLauncher = 'filebrowser-main:create-launcher'; // For main browser only.
 };
+
 
 /**
  * The default file browser extension.
@@ -119,8 +127,8 @@ export default plugins;
  * Activate the file browser factory provider.
  */
 function activateFactory(app: JupyterLab, docManager: IDocumentManager, state: IStateDB): IFileBrowserFactory {
-  const { commands, shell } = app;
-  const tracker = new InstanceTracker<FileBrowser>({ namespace, shell });
+  const { commands } = app;
+  const tracker = new InstanceTracker<FileBrowser>({ namespace });
 
   return {
     createFileBrowser(id: string, options: IFileBrowserFactory.IOptions = {}): FileBrowser {
@@ -133,6 +141,18 @@ function activateFactory(app: JupyterLab, docManager: IDocumentManager, state: I
         id, model, commands: options.commands || commands
       });
       const { registry } = docManager;
+
+      // Add a launcher toolbar item.
+      let launcher = new ToolbarButton({
+        className: 'jp-AddIcon',
+        onClick: () => {
+          return commands.execute('launcher-jupyterlab:create', {
+            cwd: widget.model.path
+          });
+        }
+      });
+      launcher.addClass('jp-MaterialIcon');
+      widget.toolbar.insertItem(0, 'launch', launcher);
 
       // Add a context menu handler to the file browser's directory listing.
       let node = widget.node.getElementsByClassName('jp-DirListing-content')[0];
@@ -171,10 +191,6 @@ function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, docM
 
   addCommands(app, factory.tracker, fbWidget);
 
-  fbWidget.model.pathChanged.connect((sender: any, args: IChangedArgs<string>) => {
-    docManager.cwd = args.newValue;
-  });
-
   fbWidget.title.label = 'Files';
   app.shell.addToLeftArea(fbWidget, { rank: 100 });
 
@@ -184,6 +200,10 @@ function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, docM
       app.commands.execute(CommandIDs.showBrowser, void 0);
     }
   });
+
+  let menu = createMenu(app);
+
+  mainMenu.addMenu(menu, { rank: 1 });
 }
 
 
@@ -275,7 +295,10 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
         return;
       }
 
-      return widget.open();
+      each(widget.selectedItems(), item => {
+        let path = item.path;
+        commands.execute('file-operations:open', { path });
+      });
     },
     iconClass: 'jp-MaterialIcon jp-OpenFolderIcon',
     label: 'Open',
@@ -297,12 +320,11 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
   });
 
   commands.addCommand(CommandIDs.rename, {
-    execute: () => {
+    execute: (args) => {
       const widget = tracker.currentWidget;
       if (!widget) {
         return;
       }
-
       return widget.rename();
     },
     iconClass: 'jp-MaterialIcon jp-EditIcon',
@@ -336,6 +358,49 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
       }
     }
   });
+
+  commands.addCommand(CommandIDs.createLauncher, {
+    label: 'New...',
+    execute: () => {
+      return commands.execute('launcher-jupyterlab:create', {
+        cwd: mainBrowser.model.path,
+      });
+    }
+  });
+
+  // Create a launcher with a banner if ther are no open items.
+  app.restored.then(() => {
+    if (app.shell.isEmpty('main')) {
+      commands.execute('launcher-jupyterlab:create', {
+        cwd: mainBrowser.model.path,
+        banner: true
+      });
+    }
+  });
+}
+
+
+/**
+ * Create a top level menu for the file browser.
+ */
+function createMenu(app: JupyterLab): Menu {
+  const { commands } = app;
+  const menu = new Menu({ commands });
+
+  menu.title.label = 'File';
+  [
+    CommandIDs.createLauncher,
+    'file-operations:save',
+    'file-operations:save-as',
+    'file-operations:rename',
+    'file-operations:restore-checkpoint',
+    'file-operations:close',
+    'file-operations:close-all-files'
+  ].forEach(command => { menu.addItem({ command }); });
+  menu.addItem({ type: 'separator' });
+  menu.addItem({ command: 'setting-editor:open' });
+
+  return menu;
 }
 
 

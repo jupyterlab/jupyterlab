@@ -23,17 +23,19 @@
   background-image: url(icons/md/chat.svg);
 }
 
+
 .jp-CloseIcon {
   background-image: url(icons/md/close.svg);
-}
-
-.jp-CutIcon {
-  background-image: url(icons/md/cut.svg);
 }
 
 
 .jp-CopyIcon {
   background-image: url(icons/md/copy.svg);
+}
+
+
+.jp-CutIcon {
+  background-image: url(icons/md/cut.svg);
 }
 
 
@@ -69,6 +71,11 @@
 
 .jp-FolderIcon {
   background-image: url(icons/md/landingfolder.svg);
+}
+
+
+.jp-newFolderIcon {
+  background-image: url(icons/md/new-folder.svg);
 }
 
 

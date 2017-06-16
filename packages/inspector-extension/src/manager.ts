@@ -2,12 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IDisposable
-} from '@phosphor/disposable';
-
-import {
   IInspector, InspectorPanel
 } from '@jupyterlab/inspector';
+
+import {
+  IDisposable
+} from '@phosphor/disposable';
 
 
 /**

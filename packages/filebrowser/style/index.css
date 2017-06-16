@@ -29,6 +29,13 @@
 }
 
 
+.jp-FileBrowser-toolbar {
+  border-bottom: none;
+  height: auto;
+  margin: var(--jp-toolbar-header-margin);
+}
+
+
 .jp-BreadCrumbs {
   flex: 0 0 auto;
   margin: 4px 12px;
@@ -47,7 +54,8 @@
 
 
 .jp-BreadCrumbs-item.jp-mod-dropTarget {
-  background: var(--jp-brand-color2);
+  background-color: var(--jp-brand-color2);
+  opacity: 0.7;
 }
 
 /*-----------------------------------------------------------------------------
@@ -55,55 +63,21 @@
 |----------------------------------------------------------------------------*/
 
 
-.jp-FileButtons {
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: row;
-  border-bottom: none;
-}
-
-
-.jp-FileButtons-buttonContent {
-  display: flex;
-  flex-direction: row;
-  align-items: baseline;
-}
-
-
-.jp-FileButtons-button {
+.jp-FileBrowser-toolbar > .jp-Toolbar-button {
   flex: 1 1 auto;
   height: var(--jp-private-filebrowser-button-height);
   line-height: var(--jp-private-filebrowser-button-height);
   color: var(--jp-ui-font-color1);
-  background: var(--jp-layout-color1);
-  border: none;
   font-size: var(--jp-ui-icon-font-size);
   outline: 0;
+  margin-bottom: 4px;
 }
 
 
-.jp-FileButtons-buttonIcon {
-  margin-left: auto;
-  margin-right: auto;
+.jp-FileBrowser-toolbar > .jp-Toolbar-button:focus {
+  box-shadow: var(--jp-toolbar-box-shadow);
+  border-color: var(--jp-toolbar-border-color);
 }
-
-
-.jp-FileButtons-button::-moz-focus-inner {
-  border: 0;
-}
-
-
-.jp-FileButtons-button:hover {
-  background: var(--jp-layout-color2);
-}
-
-
-.jp-FileButtons-button:active,
-.jp-FileButtons-button.jp-id-create.jp-mod-active {
-  background: var(--jp-layout-color3);
-  border-color: var(--jp-border-color3);
-}
-
 
 /*-----------------------------------------------------------------------------
 | DirListing
@@ -239,6 +213,8 @@
 
 .jp-DirListing-editor {
   flex: 1 0 64px;
+  outline: none;
+  border: none;
 }
 
 

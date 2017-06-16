@@ -2,11 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin
+  ILayoutRestorer, JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, ILayoutRestorer, InstanceTracker, IMainMenu
+  ICommandPalette, IMainMenu, InstanceTracker
 } from '@jupyterlab/apputils';
 
 import {
@@ -88,10 +88,10 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
     return;
   }
 
-  const { commands, shell } = app;
+  const { commands } = app;
   const category = 'Terminal';
   const namespace = 'terminal';
-  const tracker = new InstanceTracker<Terminal>({ namespace, shell });
+  const tracker = new InstanceTracker<Terminal>({ namespace });
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -129,8 +129,11 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
   // Add a launcher item if the launcher is available.
   if (launcher) {
     launcher.add({
-      name: 'Terminal',
-      command: CommandIDs.createNew
+      displayName: 'Terminal',
+      iconClass: TERMINAL_ICON_CLASS,
+      callback: () => {
+        return commands.execute(CommandIDs.createNew);
+      }
     });
   }
 
@@ -173,18 +176,19 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Instan
       return promise.then(session => {
         term.session = session;
         tracker.add(term);
-        tracker.activate(term);
+        shell.activateById(term.id);
+        return term;
       }).catch(() => { term.dispose(); });
     }
   });
 
   commands.addCommand(CommandIDs.open, {
     execute: args => {
-      let name = args['name'] as string;
+      const name = args['name'] as string;
       // Check for a running terminal with the given name.
-      let widget = tracker.find(value => value.session.name === name);
+      const widget = tracker.find(value => value.session.name === name);
       if (widget) {
-        tracker.activate(widget);
+        shell.activateById(widget.id);
       } else {
         // Otherwise, create a new terminal with a given name.
         return commands.execute(CommandIDs.createNew, { name });
@@ -200,12 +204,11 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Instan
       if (!current) {
         return;
       }
-      tracker.activate(current);
-      return current.refresh().then(() => {
-        current.activate();
-      });
+      shell.activateById(current.id);
+
+      return current.refresh().then(() => { current.activate(); });
     },
-    isEnabled: () => { return tracker.currentWidget !== null; }
+    isEnabled: () => tracker.currentWidget !== null
   });
 
   commands.addCommand('terminal:increase-font', {

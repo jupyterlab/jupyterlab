@@ -15,6 +15,7 @@ from traitlets import Bool, Unicode
 from ._version import __version__
 from .commands import (
     install_extension, uninstall_extension, list_extensions,
+    enable_extension, disable_extension,
     link_package, unlink_package, build, _get_linked_packages
 )
 
@@ -37,18 +38,25 @@ class BaseExtensionApp(JupyterApp):
     app_dir = Unicode('', config=True,
         help="The app directory to target")
 
-    should_build = Bool(True, config=True,
+    should_build = Bool(False, config=True,
         help="Whether to build the app after the action")
+
+    def _log_format_default(self):
+        """A default format for messages"""
+        return "%(message)s"
 
 
 class InstallLabExtensionApp(BaseExtensionApp):
     description = "Install labextension(s)"
+    should_build = Bool(True, config=True,
+        help="Whether to build the app after the action")
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        [install_extension(arg, self.app_dir) for arg in self.extra_args]
+        [install_extension(arg, self.app_dir, logger=self.log)
+         for arg in self.extra_args]
         if self.should_build:
-            build(self.app_dir)
+            build(self.app_dir, logger=self.log)
 
 
 class LinkLabExtensionApp(BaseExtensionApp):
@@ -60,51 +68,73 @@ class LinkLabExtensionApp(BaseExtensionApp):
     package is manually re-installed from its source location when
     `jupyter lab build` is run.
     """
+    should_build = Bool(True, config=True,
+        help="Whether to build the app after the action")
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        [link_package(arg, self.app_dir) for arg in self.extra_args]
+        [link_package(arg, self.app_dir, logger=self.log)
+         for arg in self.extra_args]
         if self.should_build:
-            build(self.app_dir)
+            build(self.app_dir, logger=self.log)
 
 
 class UnlinkLabExtensionApp(BaseExtensionApp):
     description = "Unlink labextension(s) or packages by name or path"
+    should_build = Bool(True, config=True,
+        help="Whether to build the app after the action")
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        ans = any([unlink_package(arg, self.app_dir)
+        ans = any([unlink_package(arg, self.app_dir, logger=self.log)
                    for arg in self.extra_args])
         if ans and self.should_build:
-            build(self.app_dir)
+            build(self.app_dir, logger=self.log)
 
 
 class UninstallLabExtensionApp(BaseExtensionApp):
     description = "Uninstall labextension(s) by name"
+    should_build = Bool(True, config=True,
+        help="Whether to build the app after the action")
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        ans = any([uninstall_extension(arg, self.app_dir)
+        ans = any([uninstall_extension(arg, self.app_dir, logger=self.log)
                    for arg in self.extra_args])
         if ans and self.should_build:
-            build(self.app_dir)
+            build(self.app_dir, logger=self.log)
 
 
 class ListLabExtensionsApp(BaseExtensionApp):
     description = "List the installed labextensions"
-    should_build = False
 
     def start(self):
-        [print(ext) for ext in list_extensions(self.app_dir)]
+        list_extensions(self.app_dir, logger=self.log)
 
 
 class ListLinkedLabExtensionsApp(BaseExtensionApp):
     description = "List the linked packages"
-    should_build = False
 
     def start(self):
-        for path in _get_linked_packages(self.app_dir).values():
+        linked = _get_linked_packages(self.app_dir, logger=self.log)
+        for path in linked.values():
             print(path)
+
+
+class EnableLabExtensionsApp(BaseExtensionApp):
+    description = "Enable labextension(s) by name"
+
+    def start(self):
+        [enable_extension(arg, self.app_dir, logger=self.log)
+         for arg in self.extra_args]
+
+
+class DisableLabExtensionsApp(BaseExtensionApp):
+    description = "Disable labextension(s) by name"
+
+    def start(self):
+        [disable_extension(arg, self.app_dir, logger=self.log)
+         for arg in self.extra_args]
 
 
 _examples = """
@@ -127,7 +157,9 @@ class LabExtensionApp(JupyterApp):
         list=(ListLabExtensionsApp, "List labextensions"),
         link=(LinkLabExtensionApp, "Link labextension(s)"),
         unlink=(UnlinkLabExtensionApp, "Unlink labextension(s)"),
-        listlinked=(ListLinkedLabExtensionsApp, "List linked extensions")
+        listlinked=(ListLinkedLabExtensionsApp, "List linked extensions"),
+        enable=(EnableLabExtensionsApp, "Enable labextension(s)"),
+        disable=(DisableLabExtensionsApp, "Disable labextensions(s)")
     )
 
     def start(self):

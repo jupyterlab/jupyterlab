@@ -6,7 +6,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONValue, Token
+  JSONObject, JSONValue, Token
 } from '@phosphor/coreutils';
 
 import {
@@ -402,7 +402,7 @@ namespace CellTools {
       this.editor = new JSONEditor({
         editorFactory,
         title: 'Edit Metadata',
-        collapsable: true
+        collapsible: true
       });
       layout.addWidget(this.editor);
     }
@@ -451,6 +451,8 @@ namespace CellTools {
       this.addClass(KEYSELECTOR_CLASS);
       this.key = options.key;
       this._validCellTypes = options.validCellTypes || [];
+      this._getter = (options.getter || this._getValue.bind(this));
+      this._setter = (options.setter || this._setValue.bind(this));
     }
 
     /**
@@ -519,8 +521,10 @@ namespace CellTools {
         return;
       }
       select.disabled = false;
-      let source = activeCell.model.metadata;
-      select.value = JSON.stringify(source.get(this.key));
+      this._changeGuard = true;
+      let getter = this._getter;
+      select.value = JSON.stringify(getter(activeCell));
+      this._changeGuard = false;
     }
 
     /**
@@ -531,9 +535,11 @@ namespace CellTools {
         return;
       }
       let select = this.selectNode;
-      if (msg.args.key === this.key) {
+      let cell = this.parent.activeCell;
+      if (msg.args.key === this.key && cell) {
         this._changeGuard = true;
-        select.value = JSON.stringify(msg.args.newValue);
+        let getter = this._getter;
+        select.value = JSON.stringify(getter(cell));
         this._changeGuard = false;
       }
     }
@@ -548,13 +554,29 @@ namespace CellTools {
       }
       this._changeGuard = true;
       let select = this.selectNode;
-      let source = activeCell.model.metadata;
-      source.set(this.key, JSON.parse(select.value));
+      let setter = this._setter;
+      setter(activeCell, JSON.parse(select.value));
       this._changeGuard = false;
+    }
+
+    /**
+     * Get the value for the data.
+     */
+    private _getValue(cell: Cell): JSONValue {
+      return cell.model.metadata.get(this.key);
+    }
+
+    /**
+     * Set the value for the data.
+     */
+    private _setValue(cell: Cell, value: JSONValue): void {
+      cell.model.metadata.set(this.key, value);
     }
 
     private _changeGuard = false;
     private _validCellTypes: string[];
+    private _getter: (cell: Cell) => JSONValue;
+    private _setter: (cell: Cell, value: JSONValue) => void;
   }
 
   /**
@@ -586,6 +608,28 @@ namespace CellTools {
        * The optional valid cell types - defaults to all valid types.
        */
       validCellTypes?: nbformat.CellType[];
+
+      /**
+       * An optional value getter for the selector.
+       *
+       * @param cell - The currently active cell.
+       *
+       * @returns The appropriate value for the selector.
+       */
+      getter?: (cell: Cell) => JSONValue;
+
+      /**
+       * An optional value setter for the selector.
+       *
+       * @param cell - The currently active cell.
+       *
+       * @param value - The value of the selector.
+       *
+       * #### Notes
+       * The setter should set the appropriate metadata value
+       * given the value of the selector.
+       */
+      setter?: (cell: Cell, value: JSONValue) => void;
     }
   }
 
@@ -594,7 +638,7 @@ namespace CellTools {
    */
   export
   function createSlideShowSelector(): KeySelector {
-    let options = {
+    let options: KeySelector.IOptions = {
       key: 'slideshow',
       title: 'Slide Type',
       optionsMap: {
@@ -604,6 +648,15 @@ namespace CellTools {
         'Fragment': 'fragment',
         'Skip': 'skip',
         'Notes': 'notes'
+      },
+      getter: cell => {
+        let value = cell.model.metadata.get('slideshow');
+        return value && (value as JSONObject)['slide_type'];
+      },
+      setter: (cell, value) => {
+        let data = cell.model.metadata.get('slideshow') || Object.create(null);
+        data['slide_type'] = value;
+        cell.model.metadata.set('slideshow', data);
       }
     };
     return new KeySelector(options);

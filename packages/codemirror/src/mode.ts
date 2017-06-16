@@ -17,7 +17,8 @@ import 'codemirror/mode/julia/julia';
 import 'codemirror/mode/r/r';
 import 'codemirror/mode/markdown/markdown';
 import 'codemirror/mode/clike/clike';
-
+import 'codemirror/mode/shell/shell';
+import 'codemirror/mode/sql/sql';
 
 // Stub for the require function.
 declare var require: any;
@@ -33,10 +34,18 @@ namespace Mode {
    */
   export
   interface ISpec {
-    [ key: string ]: string;
+    ext?: string[];
     name?: string;
     mode: string;
     mime: string;
+  }
+
+  /**
+   * Get the raw list of available modes specs.
+   */
+  export
+  function getModeInfo(): ISpec[] {
+    return CodeMirror.modeInfo;
   }
 
   /**
@@ -65,7 +74,7 @@ namespace Mode {
     }
 
     // Fetch the mode asynchronously.
-    return new Promise<CodeMirror.modespec>((resolve, reject) => {
+    return new Promise<ISpec>((resolve, reject) => {
       require([`codemirror/mode/${spec.mode}/${spec.mode}.js`], () => {
         resolve(spec);
       });

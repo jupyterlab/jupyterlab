@@ -2,17 +2,20 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin
+  ILayoutRestorer, JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, ILayoutRestorer, IMainMenu, IStateDB,
-  showDialog
+  Dialog, ICommandPalette, IMainMenu, showDialog
 } from '@jupyterlab/apputils';
 
 import {
   IEditorServices
 } from '@jupyterlab/codeeditor';
+
+import {
+  IStateDB
+} from '@jupyterlab/coreutils';
 
 import {
   IDocumentRegistry
@@ -357,9 +360,8 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     contentFactory,
     mimeTypeService: editorServices.mimeTypeService
   });
-
-  const { shell, commands } = app;
-  const tracker = new NotebookTracker({ namespace: 'notebook', shell });
+  const { commands } = app;
+  const tracker = new NotebookTracker({ namespace: 'notebook' });
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -408,12 +410,34 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
   // Add main menu notebook menu.
   mainMenu.addMenu(createMenu(app), { rank: 20 });
 
+  // The launcher callback.
+  let callback = (cwd: string, name: string) => {
+    return commands.execute(
+      'file-operations:new-untitled', { path: cwd, type: 'notebook' }
+    ).then(model => {
+      return commands.execute('file-operations:open', {
+        path: model.path, factory: FACTORY,
+        kernel: { name }
+      });
+    });
+  };
+
   // Add a launcher item if the launcher is available.
   if (launcher) {
-    launcher.add({
-      args: { creatorName: 'Notebook' },
-      command: 'file-operations:create-from',
-      name: 'Notebook'
+    services.ready.then(() => {
+      let specs = services.specs;
+      for (let name in specs.kernelspecs) {
+        let displayName = specs.kernelspecs[name].display_name;
+        let rank = name === specs.default ? 0 : Infinity;
+        launcher.add({
+          displayName,
+          category: 'Notebook',
+          name,
+          iconClass: 'jp-ImageNotebook',
+          callback,
+          rank
+        });
+      }
     });
   }
 
@@ -434,14 +458,14 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
  * Add the notebook commands to the application's command registry.
  */
 function addCommands(app: JupyterLab, services: IServiceManager, tracker: NotebookTracker): void {
-  let { commands } = app;
+  const { commands, shell } = app;
 
   // Get the current widget and activate unless the args specify otherwise.
   function getCurrent(args: JSONObject): NotebookPanel | null {
     let widget = tracker.currentWidget;
     let activate = args['activate'] !== false;
     if (activate && widget) {
-      tracker.activate(widget);
+      shell.activateById(widget.id);
     }
     return widget;
   }

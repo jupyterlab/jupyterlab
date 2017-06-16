@@ -2,18 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  KernelMessage
-} from '@jupyterlab/services';
-
-import {
-  IDisposable
-} from '@phosphor/disposable';
-
-import {
-  Signal
-} from '@phosphor/signaling';
-
-import {
   IClientSession
 } from '@jupyterlab/apputils';
 
@@ -24,6 +12,18 @@ import {
 import {
   nbformat
 } from '@jupyterlab/coreutils';
+
+import {
+  KernelMessage
+} from '@jupyterlab/services';
+
+import {
+  IDisposable
+} from '@phosphor/disposable';
+
+import {
+  Signal
+} from '@phosphor/signaling';
 
 
 /**

@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  JSONObject
+} from '@phosphor/coreutils';
+
+import {
   Message
 } from '@phosphor/messaging';
 
@@ -210,6 +214,7 @@ class OutputArea extends Widget {
       this._future.dispose();
     }
     this._future = null;
+    this._displayIdMap.clear();
     super.dispose();
   }
 
@@ -255,6 +260,9 @@ class OutputArea extends Widget {
       widget.dispose();
     }
 
+    // Clear the display id map.
+    this._displayIdMap.clear();
+
     // When an output area is cleared and then quickly replaced with new
     // content (as happens with @interact in widgets, for example), the
     // quickly changing height can make the page jitter.
@@ -279,12 +287,17 @@ class OutputArea extends Widget {
   private _onIOPub(msg: KernelMessage.IIOPubMessage): void {
     let model = this.model;
     let msgType = msg.header.msg_type;
+    let output: nbformat.IOutput;
+    let transient = (msg.content.transient || {}) as JSONObject;
+    let displayId = transient['display_id'] as string;
+    let targets: number[];
+
     switch (msgType) {
     case 'execute_result':
     case 'display_data':
     case 'stream':
     case 'error':
-      let output = msg.content as nbformat.IOutput;
+      output = msg.content as nbformat.IOutput;
       output.output_type = msgType as nbformat.OutputType;
       model.add(output);
       break;
@@ -292,8 +305,23 @@ class OutputArea extends Widget {
       let wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
       model.clear(wait);
       break;
+    case 'update_display_data':
+      output = msg.content as nbformat.IOutput;
+      output.output_type = msgType as nbformat.OutputType;
+      targets = this._displayIdMap.get(displayId);
+      if (targets) {
+        for (let index of targets) {
+          model.set(index, output);
+        }
+      }
+      break;
     default:
       break;
+    }
+    if (displayId && msgType === 'display_data') {
+       targets = this._displayIdMap.get(displayId) || [];
+       targets.push(model.length - 1);
+       this._displayIdMap.set(displayId, targets);
     }
   }
 
@@ -395,6 +423,7 @@ class OutputArea extends Widget {
 
   private _minHeightTimeout: number = null;
   private _future: Kernel.IFuture = null;
+  private _displayIdMap = new Map<string, number[]>();
 }
 
 
@@ -438,7 +467,7 @@ namespace OutputArea {
     if (!session.kernel) {
       return Promise.resolve(void 0);
     }
-    let future = session.kernel.requestExecute(content);
+    let future = session.kernel.requestExecute(content, false);
     output.future = future;
     return future.done;
   }

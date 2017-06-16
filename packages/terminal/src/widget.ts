@@ -6,12 +6,12 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Message, MessageLoop
-} from '@phosphor/messaging';
-
-import {
   ElementExt
 } from '@phosphor/domutils';
+
+import {
+  Message, MessageLoop
+} from '@phosphor/messaging';
 
 import {
   Widget

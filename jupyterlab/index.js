@@ -21,6 +21,13 @@ function main() {
     if (version[0] === 'v') {
         version = version.slice(1);
     }
+    var disabled = [];
+    try {
+        var option = PageConfig.getOption('disabledExtensions');
+        disabled = JSON.parse(option);
+    } catch (e) {
+        // No-op
+    }
 
     lab = new app({
         namespace: namespace,
@@ -32,7 +39,9 @@ function main() {
     });
     {{#each jupyterlab_extensions}}
     try {
-        lab.registerPluginModule(require('{{this}}'));
+        if (disabled.indexOf('{{this}}') === -1) {
+            lab.registerPluginModule(require('{{this}}'));
+        }
     } catch (e) {
         console.error(e);
     }
@@ -42,7 +51,7 @@ function main() {
         var option = PageConfig.getOption('ignorePlugins');
         ignorePlugins = JSON.parse(option);
     } catch (e) {
-        console.error("Invalid ignorePlugins config:", option);
+        // No-op
     }
     lab.start({ "ignorePlugins": ignorePlugins });
 }

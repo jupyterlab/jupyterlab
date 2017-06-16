@@ -12,11 +12,11 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  JupyterLab
+  ILayoutRestorer, JupyterLab
 } from '@jupyterlab/application';
 
 import {
-  ILayoutRestorer, ICommandPalette, IPaletteItem
+  ICommandPalette, IPaletteItem
 } from '@jupyterlab/apputils';
 
 
@@ -24,7 +24,6 @@ import {
 /**
  * The command IDs used by the apputils extension.
  */
-export
 namespace CommandIDs {
   export
   const activate = 'command-palette:activate';

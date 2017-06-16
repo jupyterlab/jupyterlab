@@ -2,30 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  KernelMessage
-} from '@jupyterlab/services';
-
-import {
-  map, toArray
-} from '@phosphor/algorithm';
-
-import {
-  Message
-} from '@phosphor/messaging';
-
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
-
-import {
-  Panel, PanelLayout
-} from '@phosphor/widgets';
-
-import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
   IClientSession
 } from '@jupyterlab/apputils';
 
@@ -46,6 +22,26 @@ import {
 import {
   IRenderMime
 } from '@jupyterlab/rendermime';
+
+import {
+  KernelMessage
+} from '@jupyterlab/services';
+
+import {
+  map, toArray
+} from '@phosphor/algorithm';
+
+import {
+  Message
+} from '@phosphor/messaging';
+
+import {
+  ISignal, Signal
+} from '@phosphor/signaling';
+
+import {
+  Panel, PanelLayout, Widget
+} from '@phosphor/widgets';
 
 import {
   ForeignHandler

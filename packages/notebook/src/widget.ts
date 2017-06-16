@@ -59,6 +59,9 @@ import {
   INotebookModel
 } from './model';
 
+import {
+  h, VirtualDOM
+} from '@phosphor/virtualdom';
 
 /**
  * The class name added to notebook widgets.
@@ -116,9 +119,24 @@ const DROP_SOURCE_CLASS = 'jp-mod-dropSource';
 const DRAG_IMAGE_CLASS = 'jp-dragImage';
 
 /**
- * The class name added to a filled circle.
+ * The class name added to singular drag images
  */
-const FILLED_CIRCLE_CLASS = 'jp-filledCircle';
+const SINGLE_DRAG_IMAGE_CLASS = 'jp-dragImage-singlePrompt';
+
+/**
+ * The class name added to the drag image cell content.
+ */
+const CELL_DRAG_CONTENT_CLASS = 'jp-dragImage-content';
+
+/**
+ * The class name added to the drag image cell content.
+ */
+const CELL_DRAG_PROMPT_CLASS = 'jp-dragImage-prompt';
+
+/**
+ * The class name added to the drag image cell content.
+ */
+const CELL_DRAG_MULTIPLE_BACK = 'jp-dragImage-multipleBack';
 
 /**
  * The mimetype used for Jupyter cell data.
@@ -1317,9 +1335,22 @@ class Notebook extends StaticNotebook {
         toMove.push(widget);
       }
     });
+    let activeCell = this.activeCell;
+    let dragImage: HTMLElement = null;
+    let countString: string;
+    if (activeCell.model.type === 'code') {
+      let executionCount = (activeCell.model as ICodeCellModel).executionCount;
+      countString = ' ';
+      if (executionCount) {
+        countString = executionCount.toString();
+      }
+    }
+    else {
+      countString = '';
+    }
 
     // Create the drag image.
-    let dragImage = Private.createDragImage(selected.length);
+    dragImage = Private.createDragImage(selected.length, countString, activeCell.model.value.text.split('\n')[0].slice(0,26));
 
     // Set up the drag event.
     this._drag = new Drag({
@@ -1531,14 +1562,48 @@ namespace Private {
    * Create a cell drag image.
    */
   export
-  function createDragImage(count: number): HTMLElement {
-    let node = document.createElement('div');
-    let span = document.createElement('span');
-    span.textContent = `${count}`;
-    span.className = FILLED_CIRCLE_CLASS;
-    node.appendChild(span);
-    node.className = DRAG_IMAGE_CLASS;
-    return node;
+  function createDragImage(count: number, promptNumber: string, cellContent: string): HTMLElement {
+    if (count > 1) {
+      if (promptNumber !== '') {
+        return VirtualDOM.realize(
+          h.div(
+            h.div({className: DRAG_IMAGE_CLASS},
+              h.span({className: CELL_DRAG_PROMPT_CLASS}, "In [" + promptNumber + "]:"),
+              h.span({className: CELL_DRAG_CONTENT_CLASS}, cellContent)),
+            h.div({className: CELL_DRAG_MULTIPLE_BACK}, "")
+          )
+        );
+      } else {
+        return VirtualDOM.realize(
+          h.div(
+            h.div({className: DRAG_IMAGE_CLASS},
+              h.span({className: CELL_DRAG_PROMPT_CLASS}),
+              h.span({className: CELL_DRAG_CONTENT_CLASS}, cellContent)),
+            h.div({className: CELL_DRAG_MULTIPLE_BACK}, "")
+          )
+        );
+      }
+    } else {
+      if (promptNumber !== '') {
+        return VirtualDOM.realize(
+          h.div(
+            h.div({className: `${DRAG_IMAGE_CLASS} ${SINGLE_DRAG_IMAGE_CLASS}`},
+              h.span({className: CELL_DRAG_PROMPT_CLASS}, "In [" + promptNumber + "]:"),
+              h.span({className: CELL_DRAG_CONTENT_CLASS}, cellContent)
+            )
+          )
+        );
+      } else {
+        return VirtualDOM.realize(
+          h.div(
+            h.div({className: `${DRAG_IMAGE_CLASS} ${SINGLE_DRAG_IMAGE_CLASS}`},
+              h.span({className: CELL_DRAG_PROMPT_CLASS}),
+              h.span({className: CELL_DRAG_CONTENT_CLASS}, cellContent)
+            )
+          )
+        );
+      }
+    }
   }
 
   /**

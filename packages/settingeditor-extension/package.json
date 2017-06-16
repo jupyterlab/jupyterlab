@@ -1,7 +1,7 @@
 {
-  "name": "@jupyterlab/landing-extension",
-  "version": "0.7.1",
-  "description": "JupyterLab - Landing Page Extension",
+  "name": "@jupyterlab/settingeditor-extension",
+  "version": "0.1.0",
+  "description": "JupyterLab - Setting Editor Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
@@ -15,10 +15,12 @@
   "dependencies": {
     "@jupyterlab/application": "^0.6.0",
     "@jupyterlab/apputils": "^0.6.0",
-    "@jupyterlab/filebrowser": "^0.6.1",
-    "@jupyterlab/services": "^0.45.0",
-    "@phosphor/messaging": "^1.2.0",
-    "@phosphor/virtualdom": "^1.1.0"
+    "@jupyterlab/codeeditor": "^0.6.0",
+    "@jupyterlab/coreutils": "^0.6.0",
+    "@phosphor/messaging": "^1.2.1",
+    "@phosphor/signaling": "^1.2.1",
+    "@phosphor/virtualdom": "^1.1.1",
+    "@phosphor/widgets": "^1.3.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",

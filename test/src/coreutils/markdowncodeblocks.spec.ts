@@ -9,6 +9,10 @@ import {
   MarkdownCodeBlocks
 } from '@jupyterlab/coreutils';
 
+const BLOCK1 = "Here is text\n\n```\na = 10\nb = 20\n```\n\nMore text.";
+const BLOCK2 = "Here is text\n\n```a = 10```\n\nMore text.";
+const BLOCK3 = "Here is text\n\n```python\na = 10\nb = 20\n```\n\nMore text.";
+
 
 describe('@jupyterlab/coreutils', () => {
 
@@ -17,85 +21,30 @@ describe('@jupyterlab/coreutils', () => {
     describe('.isMarkdown()', () => {
       it('should return true for a valid markdown extension', () => {
         let isMarkdown = MarkdownCodeBlocks.isMarkdown(".md");
-        expect(isMarkdown).true
+        expect(isMarkdown).true;
       });
 
     });
 
-    function performTest(text: string, startLine: number, endLine: number) {
-      for (let marker of MarkdownCodeBlocks.markdownMarkers) {
-        let markdown1 = marker + text + marker;
-        let cb = MarkdownCodeBlocks.findMarkdownCodeBlocks(markdown1)[0];
-        expect(cb.code).to.equal(text);
-        expect(cb.startLine).to.equal(startLine);
-        expect(cb.endLine).to.equal(endLine);
-      }
-    }
-
     describe('.findMarkdownCodeBlocks()', () => {
-      it('should return the codeblock for all delimiters', () => {
-        performTest("print(\"foobar\");\nprint(\"blahblah\")", 0, 1);
+      it('should find a simple block', () => {
+        let codeblocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(BLOCK1);
+        expect(codeblocks.length).to.equal(1);
+        expect(codeblocks[0].code).to.equal('a = 10\nb = 20\n');
       });
 
-      it('should return all codeblocks for multiline text', () => {
-        let text = `print("foo");
-        import os;
-        print("helloworld!")`;
-        performTest(text, 0, 2);
+      it('should find a single line block', () => {
+        let codeblocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(BLOCK2);
+        expect(codeblocks.length).to.equal(1);
+        expect(codeblocks[0].code).to.equal('a = 10');
       });
 
-      it('should return all codeblocks for text containing multiple delimiters', () => {
-        let text = `
-          pop goes the weasel!
-          \`print("amazing!");\`
-          \`
-          print("amazing!");
-          \`
-          \`print("amazing!");
-          \`
-          \`
-          print("amazing!");\`
-          
-          \`\`\`print("with triple quotes");\`\`\`
-          \`\`\`print("with triple quotes");
-          print("and multiline");
-          \`\`\`
-          \`\`\`
-          print("with triple quotes");
-          \`\`\`
-          \`\`\`
-          print("with triple quotes");\`\`\`
-
-          wheels on the bus go round and round!
-
-          ~~~~print("how about this?");~~~~
-          ~~~~
-          print("how about this?");
-          ~~~~
-          ~~~~
-          print("how about this?");~~~~
-          ~~~~print("how about this?");
-          ~~~~
-        `;
-
-        let codeblocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(text);
-        expect(codeblocks.length).to.equal(12);
-        expect(codeblocks[0].code, 'cb0').to.equal('print("amazing!");')
-        expect(codeblocks[1].code, 'cb1').to.equal('\n          print("amazing!");\n          ')
-        expect(codeblocks[2].code, 'cb2').to.equal('print("amazing!");\n          ')
-        expect(codeblocks[3].code, 'cb3').to.equal('\n          print("amazing!");')
-
-        expect(codeblocks[4].code, 'cb4').to.equal('print("with triple quotes");')
-        expect(codeblocks[5].code, 'cb5').to.equal('print("with triple quotes");\n          print("and multiline");\n          ');
-        expect(codeblocks[6].code, 'cb6').to.equal('\n          print("with triple quotes");\n          ')
-        expect(codeblocks[7].code, 'cb7').to.equal('\n          print("with triple quotes");')
-
-        expect(codeblocks[8].code, 'cb8').to.equal('print("how about this?");')
-        expect(codeblocks[9].code, 'cb9').to.equal('\n          print("how about this?");\n          ')
-        expect(codeblocks[10].code, 'cb10').to.equal('\n          print("how about this?");')
-        expect(codeblocks[11].code, 'cb11').to.equal('print("how about this?");\n          ')
-
+      it('should find a block with a language', () => {
+        let codeblocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(BLOCK1);
+        expect(codeblocks.length).to.equal(1);
+        expect(codeblocks[0].code).to.equal('a = 10\nb = 20\n');
       });
+
     });
 
   });

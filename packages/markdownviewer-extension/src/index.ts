@@ -2,11 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin
+  ILayoutRestorer, JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
 import {
-  ILayoutRestorer, InstanceTracker
+  InstanceTracker
 } from '@jupyterlab/apputils';
 
 import {
@@ -30,7 +30,16 @@ const TEXTEDITOR_ICON_CLASS = 'jp-ImageTextEditor';
 /**
  * The name of the factory that creates markdown widgets.
  */
-const FACTORY = 'Rendered Markdown';
+const FACTORY = 'Markdown Preview';
+
+
+/**
+ * The command IDs used by the document manager plugin.
+ */
+namespace CommandIDs {
+  export
+  const preview = 'markdown-preview:open';
+}
 
 
 /**
@@ -54,9 +63,10 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, rendermime: IRen
       readOnly: true,
       rendermime
     });
-    const shell = app.shell;
+
+    const { commands } = app;
     const namespace = 'rendered-markdown';
-    const tracker = new InstanceTracker<MarkdownViewer>({ namespace, shell });
+    const tracker = new InstanceTracker<MarkdownViewer>({ namespace });
 
     // Handle state restoration.
     restorer.restore(tracker, {
@@ -73,6 +83,19 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, rendermime: IRen
     });
 
     registry.addWidgetFactory(factory);
+
+    commands.addCommand(CommandIDs.preview, {
+      label: 'Markdown Preview',
+      execute: (args) => {
+        let path = args['path'];
+        if (typeof path !== 'string') {
+          return;
+        }
+        return commands.execute('file-operations:open', {
+          path, factory: FACTORY
+        });
+      }
+    });
   }
 
 

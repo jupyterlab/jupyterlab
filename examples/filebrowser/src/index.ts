@@ -4,6 +4,10 @@
 import 'es6-promise/auto';  // polyfill Promise on IE
 
 import {
+  each
+} from '@phosphor/algorithm';
+
+import {
   CommandRegistry
 } from '@phosphor/commands';
 
@@ -16,7 +20,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Dialog, showDialog
+  Dialog, ToolbarButton, showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -106,6 +110,21 @@ function createApp(manager: ServiceManager.IManager): void {
     model: fbModel
   });
 
+  // Add a creator toolbar item.
+  let creator = new ToolbarButton({
+    className: 'jp-AddIcon',
+    onClick: () => {
+      docManager.newUntitled({
+        type: 'file',
+        path: fbModel.path
+      }).then(model => {
+        docManager.open(model.path);
+      });
+    }
+  });
+  creator.addClass('jp-MaterialIcon');
+  fbWidget.toolbar.insertItem(0, 'create', creator);
+
   let panel = new SplitPanel();
   panel.id = 'main';
   panel.addWidget(fbWidget);
@@ -129,7 +148,11 @@ function createApp(manager: ServiceManager.IManager): void {
     label: 'Open',
     icon: 'fa fa-folder-open-o',
     mnemonic: 0,
-    execute: () => { fbWidget.open(); }
+    execute: () => {
+      each(fbWidget.selectedItems(), item => {
+        docManager.openOrReveal(item.path);
+      });
+    }
   });
   commands.addCommand('file-rename', {
     label: 'Rename',

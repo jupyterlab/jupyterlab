@@ -2,28 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IServiceManager
-} from '@jupyterlab/services';
-
-import {
-  find
-} from '@phosphor/algorithm';
-
-import {
-  JSONObject
-} from '@phosphor/coreutils';
-
-import {
-  Menu
-} from '@phosphor/widgets';
-
-import {
-  JupyterLab, JupyterLabPlugin
+  ILayoutRestorer, JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, InstanceTracker, ILayoutRestorer,
-  IMainMenu, showDialog
+  Dialog, ICommandPalette, IMainMenu, InstanceTracker,
+  showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -41,6 +25,22 @@ import {
 import {
   IRenderMime
 } from '@jupyterlab/rendermime';
+
+import {
+  IServiceManager
+} from '@jupyterlab/services';
+
+import {
+  find
+} from '@phosphor/algorithm';
+
+import {
+  JSONObject
+} from '@phosphor/coreutils';
+
+import {
+  Menu
+} from '@phosphor/widgets';
 
 
 /**
@@ -138,10 +138,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
   let menu = new Menu({ commands });
 
   // Create an instance tracker for all console panels.
-  const tracker = new InstanceTracker<ConsolePanel>({
-    namespace: 'console',
-    shell
-  });
+  const tracker = new InstanceTracker<ConsolePanel>({ namespace: 'console' });
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -161,11 +158,27 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
     }
   });
 
+  // The launcher callback.
+  let callback = (cwd: string, name: string) => {
+    return createConsole({ basePath: cwd, kernelPreference: { name } });
+  };
+
   // Add a launcher item if the launcher is available.
   if (launcher) {
-    launcher.add({
-      name: 'Code Console',
-      command: CommandIDs.create
+    manager.ready.then(() => {
+      let specs = manager.specs;
+      for (let name in specs.kernelspecs) {
+        let displayName = specs.kernelspecs[name].display_name;
+        let rank = name === specs.default ? 0 : Infinity;
+        launcher.add({
+          displayName,
+          category: 'Console',
+          name,
+          iconClass: 'jp-ImageCodeConsole',
+          callback,
+          rank
+        });
+      }
     });
   }
 
@@ -175,7 +188,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
   /**
    * Create a console for a given path.
    */
-  function createConsole(options: Partial<ConsolePanel.IOptions>): Promise<void> {
+  function createConsole(options: Partial<ConsolePanel.IOptions>): Promise<ConsolePanel> {
     return manager.ready.then(() => {
       let panel = new ConsolePanel({
         manager,
@@ -188,7 +201,8 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
       // Add the console panel to the tracker.
       tracker.add(panel);
       shell.addToMainArea(panel);
-      tracker.activate(panel);
+      shell.activateById(panel.id);
+      return panel;
     });
   }
 
@@ -209,7 +223,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
         }
       });
       if (widget) {
-        tracker.activate(widget);
+        shell.activateById(widget.id);
       } else {
         return manager.ready.then(() => {
           let model = find(manager.sessions.running(), item => {
@@ -238,7 +252,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
     let widget = tracker.currentWidget;
     let activate = args['activate'] !== false;
     if (activate && widget) {
-      tracker.activate(widget);
+      shell.activateById(widget.id);
     }
     return widget;
   }
@@ -350,7 +364,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
         } else {
           return false;
         }
-    });
+      });
     },
     isEnabled: hasWidget
   });
@@ -362,7 +376,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
       tracker.find(widget => {
         if (widget.console.session.path === path) {
           if (args['activate'] !== false) {
-            tracker.activate(widget);
+            shell.activateById(widget.id);
           }
           widget.console.inject(args['code'] as string);
           return true;

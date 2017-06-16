@@ -27,7 +27,7 @@ namespace KernelMessage {
     return {
       header: {
         username: options.username || '',
-        version: '5.0',
+        version: '5.2',
         session: options.session,
         msg_id: options.msgId || uuid(),
         msg_type: options.msgType

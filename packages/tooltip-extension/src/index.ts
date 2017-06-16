@@ -14,6 +14,10 @@ import {
 } from '@phosphor/widgets';
 
 import {
+  Text
+} from '@jupyterlab/coreutils';
+
+import {
   JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
@@ -190,7 +194,7 @@ namespace Private {
     let { detail, editor, kernel } = options;
     let code = editor.model.value.text;
     let position = editor.getCursorPosition();
-    let offset = editor.getOffsetAt(position);
+    let offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), code);
 
     // Clear hints if the new text value is empty or kernel is unavailable.
     if (!code || !kernel) {

@@ -3,6 +3,5 @@
 
 import '../style/index.css';
 
-export * from './table';
 export * from './toolbar';
 export * from './widget';

@@ -46,7 +46,24 @@ jupyter labextension uninstall <bar>
 ```
 
 Where `<bar>` is the name of the extension, as printed in the extension
-list.
+list.  Core extensions can also be uninstalled this way (and can later be 
+re-installed).
+
+Extensions can be disabled by running the command:
+
+```
+jupyter labextension disable <foo>
+```
+
+Where `<foo>` is the name of the extension.  This will prevent the 
+extension from loading on the front end, but does not require a rebuild.
+The extension can be re-enabled using the command:
+
+```
+jupyter labextension enable <foo>
+```
+
+Core plugins can also be disabled (and then re-enabled).
 
 
 ## Advanced usage

@@ -2,11 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IStateDB
-} from '@jupyterlab/apputils';
-
-import {
-  IChangedArgs, PathExt
+  IChangedArgs, IStateDB, PathExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -386,7 +382,7 @@ class FileBrowserModel implements IDisposable {
    * Handle a change on the contents manager.
    */
   private _onFileChanged(sender: Contents.IManager, change: Contents.IChangedArgs): void {
-    let path = this._model.path || '.';
+    let path = this._model.path;
     let value = change.oldValue;
     if (value && value.path && PathExt.dirname(value.path) === path) {
       this._fileChanged.emit(change);

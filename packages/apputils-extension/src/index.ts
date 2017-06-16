@@ -4,21 +4,25 @@
 |----------------------------------------------------------------------------*/
 
 import {
+  ILayoutRestorer, JupyterLab, JupyterLabPlugin
+} from '@jupyterlab/application';
+
+import {
+  CommandLinker, ICommandLinker, ICommandPalette,
+  IMainMenu, MainMenu
+} from '@jupyterlab/apputils';
+
+import {
+  ISettingRegistry, IStateDB, SettingRegistry, StateDB
+} from '@jupyterlab/coreutils';
+
+import {
   JSONObject
 } from '@phosphor/coreutils';
 
 import {
   Widget
 } from '@phosphor/widgets';
-
-import {
-  JupyterLab, JupyterLabPlugin
-} from '@jupyterlab/application';
-
-import {
-  CommandLinker, ICommandLinker, ICommandPalette, ILayoutRestorer,
-  IMainMenu, IStateDB, LayoutRestorer, MainMenu, StateDB
-} from '@jupyterlab/apputils';
 
 import {
   activatePalette
@@ -34,7 +38,6 @@ namespace CommandIDs {
 };
 
 
-
 /**
  * The default commmand linker provider.
  */
@@ -43,26 +46,6 @@ const linkerPlugin: JupyterLabPlugin<ICommandLinker> = {
   provides: ICommandLinker,
   activate: (app: JupyterLab) => new CommandLinker({ commands: app.commands }),
   autoStart: true
-};
-
-
-/**
- * The default layout restorer provider.
- */
-const layoutPlugin: JupyterLabPlugin<ILayoutRestorer> = {
-  id: 'jupyter.services.layout-restorer',
-  requires: [IStateDB],
-  activate: (app: JupyterLab, state: IStateDB) => {
-    const first = app.started;
-    const registry = app.commands;
-    const shell = app.shell;
-    let restorer = new LayoutRestorer({ first, registry, state });
-    // Use the restorer as the application shell's layout database.
-    shell.setLayoutDB(restorer);
-    return restorer;
-  },
-  autoStart: true,
-  provides: ILayoutRestorer
 };
 
 
@@ -97,6 +80,17 @@ const palettePlugin: JupyterLabPlugin<ICommandPalette> = {
   provides: ICommandPalette,
   requires: [ILayoutRestorer],
   autoStart: true
+};
+
+
+/**
+ * The default setting registry provider.
+ */
+const settingPlugin: JupyterLabPlugin<ISettingRegistry> = {
+  id: 'jupyter.services.setting-registry',
+  activate: () => new SettingRegistry(),
+  autoStart: true,
+  provides: ISettingRegistry
 };
 
 
@@ -136,7 +130,11 @@ const stateDBPlugin: JupyterLabPlugin<IStateDB> = {
  * Export the plugins as default.
  */
 const plugins: JupyterLabPlugin<any>[] = [
-  linkerPlugin, layoutPlugin, palettePlugin, mainMenuPlugin, stateDBPlugin
+  linkerPlugin,
+  mainMenuPlugin,
+  palettePlugin,
+  settingPlugin,
+  stateDBPlugin
 ];
 export default plugins;
 

@@ -5,6 +5,10 @@ import {
   JSONObject, Token
 } from '@phosphor/coreutils';
 
+import {
+  IDatastore
+} from '.';
+
 
 /* tslint:disable */
 /**
@@ -35,7 +39,7 @@ interface IStateItem {
  * The description of a state database.
  */
 export
-interface IStateDB {
+interface IStateDB extends IDatastore<JSONObject, JSONObject> {
   /**
    * The maximum allowed length of the data after it has been serialized.
    */
@@ -68,7 +72,7 @@ interface IStateDB {
    * The promise returned by this method may be rejected if an error occurs in
    * retrieving the data. Non-existence of an `id` will succeed, however.
    */
-  fetch(id: string): Promise<JSONObject>;
+  fetch(id: string): Promise<JSONObject | null>;
 
   /**
    * Retrieve all the saved bundles for a namespace.
@@ -177,9 +181,9 @@ class StateDB implements IStateDB {
    * using the `fetchNamespace()` method.
    *
    * The promise returned by this method may be rejected if an error occurs in
-   * retrieving the data. Non-existence of an `id` will succeed, however.
+   * retrieving the data. Non-existence of an `id` will succeed with `null`.
    */
-  fetch(id: string): Promise<JSONObject> {
+  fetch(id: string): Promise<JSONObject | null> {
     const key = `${this.namespace}:${id}`;
     try {
       return Promise.resolve(JSON.parse(window.localStorage.getItem(key)));

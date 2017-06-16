@@ -2,20 +2,20 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Token
-} from '@phosphor/coreutils';
-
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
-
-import {
   IInstanceTracker, InstanceTracker
 } from '@jupyterlab/apputils';
 
 import {
   Cell
 } from '@jupyterlab/cells';
+
+import {
+  Token
+} from '@phosphor/coreutils';
+
+import {
+  ISignal, Signal
+} from '@phosphor/signaling';
 
 import {
   NotebookPanel, Notebook

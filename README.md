@@ -81,6 +81,10 @@ the browser.
 
 Instructions on how to install the project from the git sources are available in our [contributor documentation](CONTRIBUTING.md).
 
+Note: If installing using `pip install --user`, you must add the user-level
+ `bin` directory to your `PATH` environment variable in order to launch
+ `jupyter lab`.
+
 ----
 
 ## Contributing

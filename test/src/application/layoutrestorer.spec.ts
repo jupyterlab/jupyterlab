@@ -4,12 +4,16 @@
 import expect = require('expect.js');
 
 import {
-  ApplicationShell
+  ApplicationShell, LayoutRestorer
 } from '@jupyterlab/application';
 
 import {
-  InstanceTracker, LayoutRestorer, StateDB
+  InstanceTracker
 } from '@jupyterlab/apputils';
+
+import {
+  StateDB
+} from '@jupyterlab/coreutils';
 
 import {
   CommandRegistry
@@ -145,10 +149,7 @@ describe('apputils', () => {
     describe('#restore()', () => {
 
       it('should restore the widgets in a tracker', done => {
-        let tracker = new InstanceTracker<Widget>({
-          namespace: 'foo-widget',
-          shell: new ApplicationShell()
-        });
+        let tracker = new InstanceTracker<Widget>({ namespace: 'foo-widget' });
         let registry = new CommandRegistry();
         let state = new StateDB({ namespace: NAMESPACE });
         let ready = new PromiseDelegate<void>();

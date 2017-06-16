@@ -229,6 +229,53 @@ describe('outputarea/widget', () => {
         });
       });
 
+      it('should handle routing of display messages', () => {
+        let model0 = new OutputAreaModel({ trusted: true });
+        let widget0 = new LogOutputArea({ rendermime, model: model0 });
+        let model1 = new OutputAreaModel({ trusted: true });
+        let widget1 = new LogOutputArea({ rendermime, model: model1 });
+        let model2 = new OutputAreaModel({ trusted: true });
+        let widget2 = new LogOutputArea({ rendermime, model: model2 });
+
+        let code0 = [
+          'ip = get_ipython()',
+          'from IPython.display import display',
+          'def display_with_id(obj, display_id, update=False):',
+          '  iopub = ip.kernel.iopub_socket',
+          '  session = get_ipython().kernel.session',
+          '  data, md = ip.display_formatter.format(obj)',
+          '  transient = {"display_id": display_id}',
+          '  content = {"data": data, "metadata": md, "transient": transient}',
+          '  msg_type = "update_display_data" if update else "display_data"',
+          '  session.send(iopub, msg_type, content, parent=ip.parent_header)',
+        ].join('\n');
+        let code1 = [
+          'display("above")',
+          'display_with_id(1, "here")',
+          'display("below")',
+        ].join('\n');
+        let code2 = [
+          'display_with_id(2, "here")',
+          'display_with_id(3, "there")',
+          'display_with_id(4, "here")',
+        ].join('\n');
+        let promise0 = OutputArea.execute(code0, widget0, session);
+        let promise1 = OutputArea.execute(code1, widget1, session);
+        return Promise.all([promise0, promise1]).then(() => {
+          expect(model1.length).to.be(3);
+          expect(model1.toJSON()[1].data).to.eql({ 'text/plain': '1' });
+          return OutputArea.execute(code2, widget2, session);
+        }).then(() => {
+          expect(model1.length).to.be(3);
+          expect(model1.toJSON()[1].data).to.eql({ 'text/plain': '4' });
+          expect(model2.length).to.be(3);
+          let outputs = model2.toJSON();
+          expect(outputs[0].data).to.eql({ 'text/plain': '4' });
+          expect(outputs[1].data).to.eql({ 'text/plain': '3' });
+          expect(outputs[2].data).to.eql({ 'text/plain': '4' });
+        });
+      });
+
     });
 
     describe('.ContentFactory', () => {

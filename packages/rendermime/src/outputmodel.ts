@@ -114,6 +114,7 @@ class OutputModel extends MimeModel implements IOutputModel {
     switch (this.type) {
     case 'display_data':
     case 'execute_result':
+    case 'update_display_data':
       output['data'] = this.data.toJSON();
       output['metadata'] = this.metadata.toJSON();
       break;
@@ -170,7 +171,7 @@ namespace OutputModel {
   export
   function getData(output: nbformat.IOutput): JSONObject {
     let bundle: nbformat.IMimeBundle = {};
-    if (nbformat.isExecuteResult(output) || nbformat.isDisplayData(output)) {
+    if (nbformat.isExecuteResult(output) || nbformat.isDisplayData(output) || nbformat.isDisplayUpdate(output)) {
       bundle = (output as nbformat.IExecuteResult).data;
     } else if (nbformat.isStream(output)) {
       if (output.name === 'stderr') {

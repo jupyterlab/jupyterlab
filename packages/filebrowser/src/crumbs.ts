@@ -22,12 +22,12 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  Dialog, showDialog
+  Dialog, DOMUtils, showDialog
 } from '@jupyterlab/apputils';
 
 import {
-  DOMUtils
-} from '@jupyterlab/apputils';
+  PathExt
+} from '@jupyterlab/coreutils';
 
 import {
   FileBrowserModel
@@ -275,8 +275,9 @@ class BreadCrumbs extends Widget {
     let promises: Promise<any>[] = [];
     let names = event.mimeData.getData(CONTENTS_MIME) as string[];
     for (let name of names) {
-      let newPath = path + name;
-      promises.push(model.manager.rename(name, newPath).catch(error => {
+      let oldPath = PathExt.join(this._model.path, name);
+      let newPath = PathExt.join(path, name);
+      promises.push(model.manager.rename(oldPath, newPath).catch(error => {
         if (error.xhr) {
           error.message = `${error.xhr.status}: error.statusText`;
         }
@@ -291,7 +292,7 @@ class BreadCrumbs extends Widget {
             if (!model.isDisposed && button.accept) {
               return model.manager.deleteFile(newPath).then(() => {
                 if (!model.isDisposed) {
-                  return model.manager.rename(name, newPath);
+                  return model.manager.rename(oldPath, newPath);
                 }
               });
             }

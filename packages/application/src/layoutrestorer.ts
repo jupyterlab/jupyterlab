@@ -20,12 +20,17 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  ApplicationShell
-} from '@jupyterlab/application';
+  InstanceTracker
+} from '@jupyterlab/apputils';
 
 import {
-  InstanceTracker, IStateDB
-} from './';
+  IStateDB
+} from '@jupyterlab/coreutils';
+
+import {
+  ApplicationShell
+} from '.';
+
 
 
 /* tslint:disable */
@@ -166,7 +171,9 @@ class LayoutRestorer implements ILayoutRestorer {
       // Release the tracker set.
       this._trackers.clear();
       this._trackers = null;
-    }).then(() => { this._restored.resolve(void 0); });
+    }).then(() => {
+      this._restored.resolve(void 0);
+    });
   }
 
   /**
@@ -251,7 +258,7 @@ class LayoutRestorer implements ILayoutRestorer {
     tracker.widgetAdded.connect((sender: any, widget: Widget) => {
       const widgetName = name(widget);
       if (widgetName) {
-        this.add(widget, widgetName);
+        this.add(widget, `${namespace}:${widgetName}`);
       }
     }, this);
 
