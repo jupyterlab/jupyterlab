@@ -154,6 +154,6 @@
       "@phosphor/widgets"
     ],
     "name": "JupyterLab",
-    "version": "0.24.0rc2"
+    "version": "0.24.0"
   }
 }
