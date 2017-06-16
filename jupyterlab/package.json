@@ -64,6 +64,7 @@
     "@phosphor/application": "^1.3.0",
     "@phosphor/commands": "^1.2.1",
     "@phosphor/coreutils": "^1.1.1",
+    "@phosphor/datagrid": "^0.1.1",
     "@phosphor/disposable": "^1.1.1",
     "@phosphor/domutils": "^1.1.1",
     "@phosphor/dragdrop": "^1.1.1",
@@ -153,6 +154,6 @@
       "@phosphor/widgets"
     ],
     "name": "JupyterLab",
-    "version": "0.24.0rc1"
+    "version": "0.24.0rc2"
   }
 }
