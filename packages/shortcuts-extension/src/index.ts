@@ -326,16 +326,6 @@ const SHORTCUTS = [
     keys: ['6']
   },
   {
-    command: 'notebook-cell:hide-input',
-    selector: '.jp-Notebook:focus',
-    keys: ['i']
-  },
-  {
-    command: 'notebook-cell:show-input',
-    selector: '.jp-Notebook:focus',
-    keys: ['Shift i']
-  },
-  {
     command: 'notebook:edit-mode',
     selector: '.jp-Notebook:focus',
     keys: ['Enter']

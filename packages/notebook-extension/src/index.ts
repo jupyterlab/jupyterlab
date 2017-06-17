@@ -193,10 +193,10 @@ namespace CommandIDs {
   const markdown6 = 'notebook-cells:markdown-header6';
 
   export
-  const hideInputs = 'notebook-cell:hide-input';
+  const hideInputs = 'notebook-cells:hide-input';
 
   export
-  const showInputs = 'notebook-cell:show-input';
+  const showInputs = 'notebook-cells:show-input';
 };
 
 
@@ -1104,7 +1104,9 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.markdown3,
     CommandIDs.markdown4,
     CommandIDs.markdown5,
-    CommandIDs.markdown6
+    CommandIDs.markdown6,
+    CommandIDs.hideInputs,
+    CommandIDs.showInputs
   ].forEach(command => { palette.addItem({ command, category }); });
 }
 

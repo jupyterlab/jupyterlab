@@ -784,7 +784,7 @@ namespace NotebookActions {
   }
 
   export
-  function hideInput(widget: Notebook): void {
+  function hideInputs(widget: Notebook): void {
     if (!widget.model || !widget.activeCell) {
       return;
     }
@@ -802,7 +802,7 @@ namespace NotebookActions {
   }
 
   export
-  function showInput(widget: Notebook): void {
+  function showInputs(widget: Notebook): void {
     if (!widget.model || !widget.activeCell) {
       return;
     }
