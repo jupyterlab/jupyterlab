@@ -214,7 +214,11 @@ class Cell extends Widget {
    * Get the prompt node used by the cell.
    */
   get promptNode(): HTMLElement {
-    return this._input.promptNode;
+    if (!this._inputHidden) {
+      return this._input.promptNode;
+    } else {
+      return ((this._inputPlaceholder.node as HTMLElement).firstElementChild as HTMLElement);
+    }
   }
 
   /**
@@ -267,13 +271,13 @@ class Cell extends Widget {
   }
 
   /**
-   * The view state of input being collapsed.
+   * The view state of input being hidden.
    */
-  get sourceHidden(): boolean {
-    return this._sourceHidden;
+  get inputHidden(): boolean {
+    return this._inputHidden;
   }
-  set sourceHidden(value: boolean) {
-    if (this._sourceHidden === value) {
+  set inputHidden(value: boolean) {
+    if (this._inputHidden === value) {
       return;
     }
     let layout = this._inputWrapper.layout as PanelLayout;
@@ -284,7 +288,12 @@ class Cell extends Widget {
       layout.removeWidget(this._inputPlaceholder);
       layout.addWidget(this._input);
     }
-    this._sourceHidden = value;
+    this._inputHidden = value;
+    this.handleInputHidden(value);
+  }
+
+  protected handleInputHidden(value: boolean): void {
+    return;
   }
 
   /**
@@ -332,11 +341,11 @@ class Cell extends Widget {
   }
 
   private _readOnly = false;
-  private _sourceHidden = false;
-  private _input: InputArea = null;
   private _model: ICellModel = null;
   private _header: ICellHeader = null;
   private _footer: ICellFooter = null;
+  private _inputHidden = false;
+  private _input: InputArea = null;
   private _inputCollapser: InputCollapser = null;
   private _inputWrapper: Widget = null;
   private _inputPlaceholder: InputPlaceholder = null;
@@ -541,13 +550,38 @@ class CodeCell extends Cell {
   }
 
   /**
-   * The view state of output being collapsed.
+   * The view state of input being collapsed.
    */
-  get outputCollapsed(): boolean {
-    return this._outputCollapsed;
+  get outputHidden(): boolean {
+    return this._outputHidden;
   }
-  set outputCollapsed(value: boolean) {
-    this._outputCollapsed = value;
+  set outputHidden(value: boolean) {
+    if (this._outputHidden === value) {
+      return;
+    }
+    let layout = this._outputWrapper.layout as PanelLayout;
+    if (value) {
+      layout.removeWidget(this._output);
+      layout.addWidget(this._outputPlaceholder);
+      if (this.inputHidden && !this._outputWrapper.isHidden) {
+        this._outputWrapper.hide();
+      }
+    } else {
+      if (this._outputWrapper.isHidden) {
+        this._outputWrapper.show();
+      }
+      layout.removeWidget(this._outputPlaceholder);
+      layout.addWidget(this._output);
+    }
+    this._outputHidden = value;
+  }
+
+  protected handleInputHidden(value: boolean): void {
+    if (!value && this._outputWrapper.isHidden) {
+      this._outputWrapper.show();
+    } else if (value && !this._outputWrapper.isHidden && this._outputHidden) {
+      this._outputWrapper.hide();
+    }
   }
 
   /**
@@ -614,7 +648,7 @@ class CodeCell extends Cell {
   }
 
   private _rendermime: RenderMime = null;
-  private _outputCollapsed = false;
+  private _outputHidden = false;
   private _outputWrapper: Widget = null;
   private _outputCollapser: OutputCollapser = null;
   private _outputPlaceholder: OutputPlaceholder = null;

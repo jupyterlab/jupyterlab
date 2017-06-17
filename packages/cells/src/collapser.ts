@@ -12,7 +12,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  Cell
+  Cell, CodeCell
 } from './widget';
 
 
@@ -77,7 +77,7 @@ class InputCollapser extends Collapser {
 
     protected _evtClick(event: MouseEvent) {
     let cell = this.parent.parent as Cell;
-    cell.sourceHidden = !cell.sourceHidden;
+    cell.inputHidden = !cell.inputHidden;
   }
 
 }
@@ -91,8 +91,8 @@ class OutputCollapser extends Collapser {
     }
 
     protected _evtClick(event: MouseEvent) {
-    let cell = this.parent.parent as Cell;
-    cell.sourceHidden = !cell.sourceHidden;
+    let cell = this.parent.parent as CodeCell;
+    cell.outputHidden = !cell.outputHidden;
   }
 
 }
