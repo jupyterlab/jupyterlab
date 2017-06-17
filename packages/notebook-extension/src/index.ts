@@ -191,6 +191,12 @@ namespace CommandIDs {
 
   export
   const markdown6 = 'notebook-cells:markdown-header6';
+
+  export
+  const hideInputs = 'notebook-cell:hide-input';
+
+  export
+  const showInputs = 'notebook-cell:show-input';
 };
 
 
@@ -1013,6 +1019,28 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
         return;
       }
       return NotebookActions.setMarkdownHeader(current.notebook, 6);
+    },
+    isEnabled: hasWidget
+  });
+  commands.addCommand(CommandIDs.hideInputs, {
+    label: 'Hide input(s)',
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      return NotebookActions.hideInputs(current.notebook);
+    },
+    isEnabled: hasWidget
+  });
+  commands.addCommand(CommandIDs.showInputs, {
+    label: 'Show input(s)',
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      return NotebookActions.showInputs(current.notebook);
     },
     isEnabled: hasWidget
   });
