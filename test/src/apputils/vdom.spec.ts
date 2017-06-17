@@ -10,6 +10,10 @@ import {
 } from '@phosphor/virtualdom';
 
 import {
+  Widget
+} from '@phosphor/widgets'
+
+import {
   VDomModel, VDomRenderer
 } from '@jupyterlab/apputils';
 
@@ -126,9 +130,10 @@ describe('@jupyterlab/domutils', () => {
 
       it('should work with a null model', (done) => {
         let widget = new TestWidgetNoModel();
+        Widget.attach(widget, document.body);
         requestAnimationFrame(() => {
           let span = widget.node.firstChild as HTMLElement;
-          expect(span.textContent).to.equal('No Model!');
+          expect(span.textContent).to.equal('No model!');
           done();
         });
       })

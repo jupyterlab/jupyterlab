@@ -80,6 +80,14 @@ abstract class VDomRenderer<T extends VDomRenderer.IModel | null> extends Widget
     VirtualDOM.render(vnode, this.node);
   }
 
+  /* Called after the widget is attached to the DOM
+   * 
+   * Make sure the widget is rendered, even if the model has not changed.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this.update();
+  }
+
   /**
    * Render the content of this widget using the virtial DOM.
    *
