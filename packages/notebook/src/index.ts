@@ -3,6 +3,7 @@
 
 import '../style/index.css';
 
+export * from './jsx';
 export * from './actions';
 export * from './celltools';
 export * from './default-toolbar';

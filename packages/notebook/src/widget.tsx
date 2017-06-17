@@ -30,17 +30,25 @@ import {
 } from '@phosphor/dragdrop';
 
 import {
-  PanelLayout
+  PanelLayout, Widget
 } from '@phosphor/widgets';
 
 import {
-  Widget
-} from '@phosphor/widgets';
+  h, VirtualDOM
+} from '@phosphor/virtualdom';
+
+// import {
+//   h, VirtualNode, VirtualDOM
+// } from '@phosphor/virtualdom';
+
+// import {
+//   VDomRenderer
+// } from '@jupyterlab/apputils';
 
 import {
   ICellModel, Cell, IMarkdownCellModel,
   CodeCell, MarkdownCell,
-  ICodeCellModel, RawCell, IRawCellModel, ICollapser
+  ICodeCellModel, RawCell, IRawCellModel
 } from '@jupyterlab/cells';
 
 import {
@@ -59,9 +67,6 @@ import {
   INotebookModel
 } from './model';
 
-import {
-  h, VirtualDOM
-} from '@phosphor/virtualdom';
 
 /**
  * The class name added to notebook widgets.
@@ -1509,17 +1514,7 @@ namespace Notebook {
    * methods that create notebook content.
    */
   export
-  class ContentFactory extends StaticNotebook.ContentFactory { 
-
-    /**
-     * Create a new input/output collapser for the parent widget.
-     */
-    createCollapser(): ICollapser {
-      console.log('createCollapser');
-      return new ClickableCollapser();
-    }
-
-  }
+  class ContentFactory extends StaticNotebook.ContentFactory { }
 
   /**
    * A namespace for the notebook content factory.
@@ -1636,57 +1631,4 @@ namespace Private {
       }
     }
   }
-}
-
-
-/**
- * Default implementation of the collapser.
- */
-export
-class ClickableCollapser extends Widget implements ICollapser {
-  constructor() {
-    super();
-    console.log("ClickableCollapser");
-  }
-
-  handleEvent(event: Event): void {
-    console.log("handleEvent", event);
-    if (!this.parent) {
-      return;
-    }
-    switch (event.type) {
-    case 'click':
-      this._evtClick(event as MouseEvent);
-      break;
-    default:
-      break;
-    }
-  }
-
-  private _evtClick(event: MouseEvent) {
-    console.log("_evtClick");
-    let cell = this.parent.parent as Cell;
-    console.log("parent", cell);
-    cell.sourceHidden = !cell.sourceHidden;
-  }
-
-    /**
-   * Handle `after-attach` messages for the widget.
-   */
-  protected onAfterAttach(msg: Message): void {
-    super.onAfterAttach(msg);
-    console.log("onAfterAttach");
-    let node = this.node;
-    node.addEventListener('click', this);
-  }
-
-  /**
-   * Handle `before-detach` messages for the widget.
-   */
-  protected onBeforeDetach(msg: Message): void {
-    let node = this.node;
-    console.log("onBeforeDetach");
-    node.removeEventListener('click', this);
-  }
-
 }

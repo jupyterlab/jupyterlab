@@ -1,5 +1,7 @@
-// Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
 
 import {
   KernelMessage
@@ -14,19 +16,11 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  h, VirtualNode
-} from '@phosphor/virtualdom';
-
-import {
-  PanelLayout, Panel
+  PanelLayout, Panel, Widget
 } from '@phosphor/widgets';
 
 import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
-  IClientSession, VDomRenderer
+  IClientSession
 } from '@jupyterlab/apputils';
 
 import {
@@ -55,8 +49,22 @@ import {
 } from './model';
 
 import {
+  InputCollapser, OutputCollapser
+} from './collapser';
+
+import {
   InputArea, IInputPrompt, InputPrompt
 } from './inputarea';
+
+import {
+  InputPlaceholder, OutputPlaceholder
+} from './placeholder';
+
+import {
+  CellHeader, CellFooter, ICellHeader, ICellFooter
+} from './headerfooter';
+
+
 
 
 /**
@@ -181,7 +189,7 @@ class Cell extends Widget {
     // Input
     let inputWrapper = this._inputWrapper = new Panel();
     inputWrapper.addClass(CELL_INPUT_WRAPPER_CLASS);
-    let inputCollapser = this._inputCollapser = contentFactory.createCollapser();
+    let inputCollapser = this._inputCollapser = new InputCollapser();
     inputCollapser.addClass(CELL_INPUT_COLLAPSER_CLASS);
     let input = this._input = new InputArea({model, contentFactory });
     input.addClass(CELL_INPUT_AREA_CLASS);
@@ -329,7 +337,7 @@ class Cell extends Widget {
   private _model: ICellModel = null;
   private _header: ICellHeader = null;
   private _footer: ICellFooter = null;
-  private _inputCollapser: ICollapser = null;
+  private _inputCollapser: InputCollapser = null;
   private _inputWrapper: Widget = null;
   private _inputPlaceholder: InputPlaceholder = null;
 
@@ -378,10 +386,6 @@ namespace Cell {
      */
     createCellFooter(): ICellFooter;
 
-    /**
-     * Create a new input/output collaper for the parent widget.
-     */
-    createCollapser(): ICollapser;
   }
 
   /**
@@ -420,10 +424,10 @@ namespace Cell {
     }
 
     /**
-     * Create a new input/output collapser for the parent widget.
+     * Create an input prompt.
      */
-    createCollapser(): ICollapser {
-      return new Collapser();
+    createInputPrompt(): IInputPrompt {
+      return new InputPrompt();
     }
 
     /**
@@ -438,13 +442,6 @@ namespace Cell {
      */
     createStdin(options: Stdin.IOptions): IStdin {
       return new Stdin(options);
-    }
-
-    /**
-     * Create an input prompt.
-     */
-    createInputPrompt(): IInputPrompt {
-      return new InputPrompt();
     }
 
     private _editorFactory: CodeEditor.Factory = null;
@@ -504,7 +501,7 @@ class CodeCell extends Cell {
     // Insert the output before the cell footer.
     let outputWrapper = this._outputWrapper = new Panel();
     outputWrapper.addClass(CELL_OUTPUT_WRAPPER_CLASS);
-    let outputCollapser = this._outputCollapser = contentFactory.createCollapser();
+    let outputCollapser = this._outputCollapser = new OutputCollapser();
     outputCollapser.addClass(CELL_OUTPUT_COLLAPSER_CLASS);
     let output = this._output = new OutputArea({
       model: model.outputs,
@@ -522,6 +519,8 @@ class CodeCell extends Cell {
     outputWrapper.addWidget(outputCollapser);
     outputWrapper.addWidget(output);
     (this.layout as PanelLayout).insertWidget(2, outputWrapper);
+
+    this._outputPlaceholder = new OutputPlaceholder();
 
     // Modify state
     this.setPrompt(`${model.executionCount || ''}`);
@@ -563,6 +562,7 @@ class CodeCell extends Cell {
     this._output = null;
     this._outputWrapper = null;
     this._outputCollapser = null;
+    this._outputPlaceholder = null;
     super.dispose();
   }
 
@@ -616,7 +616,8 @@ class CodeCell extends Cell {
   private _rendermime: RenderMime = null;
   private _outputCollapsed = false;
   private _outputWrapper: Widget = null;
-  private _outputCollapser: ICollapser = null;
+  private _outputCollapser: OutputCollapser = null;
+  private _outputPlaceholder: OutputPlaceholder = null;
   private _output: OutputArea = null;
 }
 
@@ -872,66 +873,10 @@ namespace RawCell {
  ******************************************************************************/
 
 
-/**
- * The cell header interface.
- */
-export
-interface ICellHeader extends Widget {}
 
 
-/**
- * Default implementation of the cell header is a Widget with a class
- */
-export
-class CellHeader extends Widget implements ICellHeader {
-}
 
 
-/**
- * The cell footer interface.
- */
-export
-interface ICellFooter extends Widget {}
 
 
-/**
- * Default implementation of the cell footer is a Widget with a class
- */
-export
-class CellFooter extends Widget implements ICellFooter {
-}
 
-
-/**
- * A collapser for input and output.
- *
- * This is the element that gets clicked on.
- */
-export
-interface ICollapser extends Widget {}
-
-
-/**
- * Default implementation of the collapser.
- */
-export
-class Collapser extends Widget implements ICollapser {
-  constructor() {
-    super();
-  }
-}
-
-
-export
-class InputPlaceholder extends VDomRenderer<null> {
-
-  protected render(): VirtualNode | ReadonlyArray<VirtualNode> {
-    return [
-        <div className="jp-InputPrompt">
-        </div>,
-        <div className="jp-InputPlaceholder">
-        </div>
-    ]
-  }
-
-}
