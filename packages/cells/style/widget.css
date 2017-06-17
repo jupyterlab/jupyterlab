@@ -1,0 +1,97 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+/*-----------------------------------------------------------------------------
+| Private CSS variables
+|----------------------------------------------------------------------------*/
+
+
+:root {
+}
+
+
+
+/*-----------------------------------------------------------------------------
+| Cell
+|----------------------------------------------------------------------------*/
+
+
+.jp-Cell {
+  padding: var(--jp-cell-padding);
+  margin: 0px;
+  border: none;
+  outline: none;
+  background: transparent;
+}
+
+
+/*-----------------------------------------------------------------------------
+| Common input/output
+|----------------------------------------------------------------------------*/
+
+
+.jp-Cell-inputWrapper, .jp-Cell-outputWrapper  {
+  display: flex;
+  flex-direction: row;
+  padding: 0px;
+  margin: 0px;
+}
+
+
+/* Only input/output areas inside cells */
+.jp-Cell-inputArea, .jp-Cell-outputArea {
+  flex: 1 1 auto;
+}
+
+
+/*-----------------------------------------------------------------------------
+| Output
+|----------------------------------------------------------------------------*/
+
+/* Put a space between input and output when there IS output */
+.jp-Cell:not(.jp-mod-noOutputs) .jp-Cell-outputWrapper {
+  margin-top: 5px;
+}
+
+/* Make the output collapser disappear when there is not output, but do so
+ * in a manner that leaves it in the layout and preserves its width.
+ */
+.jp-Cell.jp-mod-noOutputs .jp-Cell-outputCollapser {
+  border: none !important;
+  background: transparent !important;
+}
+
+/* Text output with the Out[] prompt needs a top padding to match the
+ * alignment of the Out[] prompt itself.
+ */
+.jp-OutputArea-executeResult .jp-RenderedText.jp-OutputArea-output {
+  padding-top: var(--jp-code-padding);
+}
+
+
+
+/*-----------------------------------------------------------------------------
+| CodeCell
+|----------------------------------------------------------------------------*/
+
+
+
+/*-----------------------------------------------------------------------------
+| MarkdownCell
+|----------------------------------------------------------------------------*/
+
+
+.jp-MarkdownOutput {
+  flex: 1 1 auto;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  padding-left: var(--jp-code-padding);
+}
+
+
+.jp-MarkdownOutput.jp-RenderedHTMLCommon {
+  overflow: visible;
+}

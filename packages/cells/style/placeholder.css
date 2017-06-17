@@ -3,13 +3,25 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+
 /*-----------------------------------------------------------------------------
-| Imports
+| Placeholder
 |----------------------------------------------------------------------------*/
 
+.jp-Placeholder {
+  display: flex;
+  flex-direction: row;
+  flex: 1 1 auto;
+}
 
-@import './collapser.css';
-@import './headerfooter.css';
-@import './inputarea.css';
-@import './placeholder.css';
-@import './widget.css';
+.jp-Placeholder-prompt {
+  box-sizing: border-box;
+}
+
+.jp-Placeholder-content {
+  flex: 1 1 auto;
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
+  background: var(--jp-cell-editor-background);
+  height: 16px;
+  box-sizing: border-box;
+}

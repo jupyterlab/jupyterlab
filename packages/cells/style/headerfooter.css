@@ -3,13 +3,19 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+
 /*-----------------------------------------------------------------------------
-| Imports
+| Header/Footer
 |----------------------------------------------------------------------------*/
 
 
-@import './collapser.css';
-@import './headerfooter.css';
-@import './inputarea.css';
-@import './placeholder.css';
-@import './widget.css';
+/* Hidden by zero height be default */
+.jp-CellHeader, .jp-CellFooter  {
+  height: 0px;
+  width: 100%;
+  padding: 0px;
+  margin: 0px;
+  border: none;
+  outline: none;
+  background: transparent;
+}
