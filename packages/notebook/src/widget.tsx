@@ -708,6 +708,7 @@ class Notebook extends StaticNotebook {
       if (activeCell instanceof MarkdownCell) {
         activeCell.rendered = false;
       }
+      activeCell.inputHidden = false;
     }
     this._stateChanged.emit({ name: 'mode', oldValue, newValue });
     this._ensureFocus();
