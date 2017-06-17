@@ -26,7 +26,7 @@ import {
  * Phosphor widget that encodes best practices for VDOM based rendering.
  */
 export
-abstract class VDomRenderer<T extends VDomRenderer.IModel> extends Widget {
+abstract class VDomRenderer<T extends VDomRenderer.IModel | null> extends Widget {
   /**
    * A signal emited when the model changes.
    */

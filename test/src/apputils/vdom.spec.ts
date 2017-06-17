@@ -33,6 +33,12 @@ class TestWidget extends VDomRenderer<TestModel> {
   }
 }
 
+class TestWidgetNoModel extends VDomRenderer<null> {
+  protected render(): VirtualNode {
+    return h.span("No model!");
+  }
+}
+
 
 describe('@jupyterlab/domutils', () => {
 
@@ -115,6 +121,19 @@ describe('@jupyterlab/domutils', () => {
       });
 
     });
+
+    describe('#noModel()', () => {
+
+      it('should work with a null model', (done) => {
+        let widget = new TestWidgetNoModel();
+        requestAnimationFrame(() => {
+          let span = widget.node.firstChild as HTMLElement;
+          expect(span.textContent).to.equal('No Model!');
+          done();
+        });
+      })
+
+    })
 
   });
 
