@@ -790,13 +790,23 @@ namespace NotebookActions {
     }
     let state = Private.getState(widget);
     let cells = widget.widgets;
-    let i = 0;
     each(cells, (cell: Cell) => {
-      let child = widget.widgets[i];
-      if (widget.isSelected(child)) {
+      if (widget.isSelected(cell)) {
         cell.inputHidden = true;
       }
-      i++;
+    });
+    Private.handleState(widget, state);
+  }
+
+  export
+  function hideAllInputs(widget: Notebook): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    let state = Private.getState(widget);
+    let cells = widget.widgets;
+    each(cells, (cell: Cell) => {
+      cell.inputHidden = true;
     });
     Private.handleState(widget, state);
   }
@@ -808,13 +818,23 @@ namespace NotebookActions {
     }
     let state = Private.getState(widget);
     let cells = widget.widgets;
-    let i = 0;
     each(cells, (cell: Cell) => {
-      let child = widget.widgets[i];
-      if (widget.isSelected(child)) {
+      if (widget.isSelected(cell)) {
         cell.inputHidden = false;
       }
-      i++;
+    });
+    Private.handleState(widget, state);
+  }
+
+  export
+  function showAllInputs(widget: Notebook): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    let state = Private.getState(widget);
+    let cells = widget.widgets;
+    each(cells, (cell: Cell) => {
+      cell.inputHidden = false;
     });
     Private.handleState(widget, state);
   }
