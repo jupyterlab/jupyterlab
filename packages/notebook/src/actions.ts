@@ -783,6 +783,42 @@ namespace NotebookActions {
     Private.handleState(widget, state);
   }
 
+  export
+  function hideInput(widget: Notebook): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    let state = Private.getState(widget);
+    let cells = widget.widgets;
+    let i = 0;
+    each(cells, (cell: Cell) => {
+      let child = widget.widgets[i];
+      if (widget.isSelected(child)) {
+        cell.inputHidden = true;
+      }
+      i++;
+    });
+    Private.handleState(widget, state);
+  }
+
+  export
+  function showInput(widget: Notebook): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    let state = Private.getState(widget);
+    let cells = widget.widgets;
+    let i = 0;
+    each(cells, (cell: Cell) => {
+      let child = widget.widgets[i];
+      if (widget.isSelected(child)) {
+        cell.inputHidden = false;
+      }
+      i++;
+    });
+    Private.handleState(widget, state);
+  }
+
   /**
    * Set the markdown header level.
    *
