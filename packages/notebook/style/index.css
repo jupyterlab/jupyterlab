@@ -75,6 +75,13 @@
 }
 
 
+.jp-InputPlaceholder {
+  width: 100%;
+  height: 16px;
+  background: var(--jp-layout-color0);
+  border: 1px solid var(--jp-border-color0);
+}
+
 
 /*-----------------------------------------------------------------------------
 | Notebook state related styling

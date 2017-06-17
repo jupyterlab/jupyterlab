@@ -185,7 +185,8 @@ class Cell extends Widget {
     inputWrapper.addWidget(input);
     (this.layout as PanelLayout).addWidget(inputWrapper);
 
-    this._inputPlaceholder = new Widget();
+    let inputPlaceholder = this._inputPlaceholder = new Widget();
+    inputPlaceholder.addClass('jp-InputPlaceholder');
 
     // Footer
     let footer = this._footer = this.contentFactory.createCellFooter();
@@ -264,7 +265,7 @@ class Cell extends Widget {
     if (this._sourceHidden === value) {
       return;
     }
-    let layout = this.layout as PanelLayout;
+    let layout = this._inputWrapper.layout as PanelLayout;
     if (value) {
       layout.removeWidget(this._input);
       layout.addWidget(this._inputPlaceholder);
