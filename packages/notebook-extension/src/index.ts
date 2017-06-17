@@ -196,7 +196,13 @@ namespace CommandIDs {
   const hideInputs = 'notebook-cells:hide-input';
 
   export
+  const hideAllInputs = 'notebook-cells:hide-inputs';
+
+  export
   const showInputs = 'notebook-cells:show-input';
+
+  export
+  const showAllInputs = 'notebook-cells:show-inputs';
 };
 
 
@@ -447,6 +453,8 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     });
   }
 
+  app.contextMenu.addItem({command: CommandIDs.hideAllInputs, selector: '.jp-Notebook .jp-Cell'});
+  app.contextMenu.addItem({command: CommandIDs.showAllInputs, selector: '.jp-Notebook .jp-Cell'});
   app.contextMenu.addItem({command: CommandIDs.clearOutputs, selector: '.jp-Notebook .jp-Cell'});
   app.contextMenu.addItem({command: CommandIDs.split, selector: '.jp-Notebook .jp-Cell'});
   app.contextMenu.addItem({ type: 'separator', selector: '.jp-Notebook', rank: 0 });
@@ -1033,14 +1041,25 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     },
     isEnabled: hasWidget
   });
-  commands.addCommand(CommandIDs.showInputs, {
-    label: 'Show input(s)',
+  commands.addCommand(CommandIDs.hideAllInputs, {
+    label: 'Hide all input(s)',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
         return;
       }
-      return NotebookActions.showInputs(current.notebook);
+      return NotebookActions.hideAllInputs(current.notebook);
+    },
+    isEnabled: hasWidget
+  });
+  commands.addCommand(CommandIDs.showAllInputs, {
+    label: 'Show all input(s)',
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      return NotebookActions.showAllInputs(current.notebook);
     },
     isEnabled: hasWidget
   });
@@ -1106,7 +1125,9 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.markdown5,
     CommandIDs.markdown6,
     CommandIDs.hideInputs,
-    CommandIDs.showInputs
+    CommandIDs.hideAllInputs,
+    CommandIDs.showInputs,
+    CommandIDs.showAllInputs
   ].forEach(command => { palette.addItem({ command, category }); });
 }
 
@@ -1141,6 +1162,8 @@ function createMenu(app: JupyterLab): Menu {
   menu.addItem({ command: CommandIDs.merge });
   menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.clearAllOutputs });
+  menu.addItem({ command: CommandIDs.hideAllInputs });
+  menu.addItem({ command: CommandIDs.showAllInputs });
   menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.runAll });
   menu.addItem({ command: CommandIDs.interrupt });
