@@ -13,6 +13,7 @@
     "lib": "lib/"
   },
   "dependencies": {
+    "@jupyterlab/apputils": "^0.7.0",
     "@jupyterlab/codeeditor": "^0.7.0",
     "@jupyterlab/codemirror": "^0.7.0",
     "@jupyterlab/coreutils": "^0.7.0",
@@ -22,7 +23,8 @@
     "@phosphor/coreutils": "^1.1.1",
     "@phosphor/messaging": "^1.2.1",
     "@phosphor/signaling": "^1.2.1",
-    "@phosphor/widgets": "^1.3.0"
+    "@phosphor/widgets": "^1.3.0",
+    "@phosphor/virtualdom": "^1.1.1"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",

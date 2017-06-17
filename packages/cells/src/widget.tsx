@@ -14,6 +14,10 @@ import {
 } from '@phosphor/messaging';
 
 import {
+  h, VirtualNode
+} from '@phosphor/virtualdom';
+
+import {
   PanelLayout, Panel
 } from '@phosphor/widgets';
 
@@ -22,7 +26,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IClientSession
+  IClientSession, VDomRenderer
 } from '@jupyterlab/apputils';
 
 import {
@@ -185,9 +189,8 @@ class Cell extends Widget {
     inputWrapper.addWidget(input);
     (this.layout as PanelLayout).addWidget(inputWrapper);
 
-    let inputPlaceholder = this._inputPlaceholder = new Widget();
-    inputPlaceholder.addClass('jp-InputPlaceholder');
-
+    this._inputPlaceholder = new InputPlaceholder();
+  
     // Footer
     let footer = this._footer = this.contentFactory.createCellFooter();
     footer.addClass(CELL_FOOTER_CLASS);
@@ -328,7 +331,7 @@ class Cell extends Widget {
   private _footer: ICellFooter = null;
   private _inputCollapser: ICollapser = null;
   private _inputWrapper: Widget = null;
-  private _inputPlaceholder: Widget = null;
+  private _inputPlaceholder: InputPlaceholder = null;
 
 }
 
@@ -916,4 +919,21 @@ class Collapser extends Widget implements ICollapser {
   constructor() {
     super();
   }
+}
+
+
+export
+class InputPlaceholder extends VDomRenderer<null> {
+
+  protected render(): VirtualNode | ReadonlyArray<VirtualNode> {
+    return (
+      <div>
+        <div className="jp-InputPrompt">
+        </div>
+        <div className="jp-InputPlaceholder">
+        </div>
+      </div>
+    );
+  }
+
 }
