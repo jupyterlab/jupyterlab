@@ -3,6 +3,7 @@
 
 import '../style/index.css';
 
+export * from './jsx';
 export * from './inputarea';
 export * from './model';
 export * from './widget';

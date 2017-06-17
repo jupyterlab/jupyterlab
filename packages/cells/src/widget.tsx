@@ -926,14 +926,12 @@ export
 class InputPlaceholder extends VDomRenderer<null> {
 
   protected render(): VirtualNode | ReadonlyArray<VirtualNode> {
-    return (
-      <div>
+    return [
         <div className="jp-InputPrompt">
-        </div>
+        </div>,
         <div className="jp-InputPlaceholder">
         </div>
-      </div>
-    );
+    ]
   }
 
 }
