@@ -65,8 +65,6 @@ import {
 } from './headerfooter';
 
 
-
-
 /**
  * The CSS class added to cell widgets.
  */
