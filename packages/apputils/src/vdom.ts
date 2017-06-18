@@ -26,7 +26,7 @@ import {
  * Phosphor widget that encodes best practices for VDOM based rendering.
  */
 export
-abstract class VDomRenderer<T extends VDomRenderer.IModel> extends Widget {
+abstract class VDomRenderer<T extends VDomRenderer.IModel | null> extends Widget {
   /**
    * A signal emited when the model changes.
    */
@@ -78,6 +78,14 @@ abstract class VDomRenderer<T extends VDomRenderer.IModel> extends Widget {
   protected onUpdateRequest(msg: Message): void {
     let vnode = this.render();
     VirtualDOM.render(vnode, this.node);
+  }
+
+  /* Called after the widget is attached to the DOM
+   * 
+   * Make sure the widget is rendered, even if the model has not changed.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this.update();
   }
 
   /**
