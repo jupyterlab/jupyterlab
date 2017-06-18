@@ -13,25 +13,20 @@
   background: transparent;
 }
 
+
 .jp-Collapser-child {
   width: 100%;
   height: 100%;
   box-sizing: border-box;
 }
 
-,jp-Collapser:hover {
+
+.jp-Collapser-child:hover {
   background: var(--jp-brand-color1);
 }
 
-.jp-Collapser:hover .jp-ExpandLessIcon {
-  display: block;
-}
 
-.jp-Collapser .jp-ExpandLessIcon {
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 32px;
-  width: 32px;
-  height: 32px;
+.jp-Collapser .jp-Collapser-icon {
+  /* Haven't finished the styling, hide for now */
   display: none;
 }

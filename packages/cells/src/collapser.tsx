@@ -57,8 +57,8 @@ abstract class Collapser extends VDomRenderer<null> {
       iconClass += ` ${EXPANDED_ICON_CLASS}`;
     }
     return (
-      <div className={childClass}>
-        <div className={iconClass} onclick={ (e) => this.handleClick(e) } />
+      <div className={childClass}  onclick={ (e) => this.handleClick(e) } >
+        <div className={iconClass} />
       </div>
     );
   }
@@ -85,7 +85,6 @@ class InputCollapser extends Collapser {
 
   protected handleClick(e: Event): void {
     let cell = this.parent.parent as Cell;
-    console.log("handleClick", cell);
     if (cell) {
       cell.inputHidden = !cell.inputHidden;
     }
@@ -114,7 +113,6 @@ class OutputCollapser extends Collapser {
 
     protected handleClick(e: Event): void {
       let cell = this.parent.parent as CodeCell;
-      console.log("handleClick", cell);
       if (cell) {
         cell.outputHidden = !cell.outputHidden;
       }
