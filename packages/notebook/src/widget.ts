@@ -37,14 +37,6 @@ import {
   h, VirtualDOM
 } from '@phosphor/virtualdom';
 
-// import {
-//   h, VirtualNode, VirtualDOM
-// } from '@phosphor/virtualdom';
-
-// import {
-//   VDomRenderer
-// } from '@jupyterlab/apputils';
-
 import {
   ICellModel, Cell, IMarkdownCellModel,
   CodeCell, MarkdownCell,

@@ -48,6 +48,7 @@ class InputPlaceholder extends Placeholder {
         <div className={INPUT_PROMPT_CLASS}>
         </div>,
         <div className={CONTENT_CLASS}>
+          <div className="jp-MoreHorizIcon" />
         </div>
     ]
   }
@@ -68,6 +69,7 @@ class OutputPlaceholder extends Placeholder {
         <div className={OUTPUT_PROMPT_CLASS}>
         </div>,
         <div className={CONTENT_CLASS}>
+          <div className="jp-MoreHorizIcon" />
         </div>
     ]
   }

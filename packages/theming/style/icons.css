@@ -161,3 +161,13 @@
 .jp-FilledCircleIcon {
   background-image: url(icons/md/lens.svg);
 }
+
+
+.jp-MoreHorizIcon {
+  background-image: url(icons/md/more-horiz.svg);
+}
+
+
+.jp-ExpandLessIcon {
+  background-image: url(icons/md/expand-less.svg);
+}
