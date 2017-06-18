@@ -9,9 +9,7 @@
     "target": "ES5",
     "outDir": "./lib",
     "lib": ["ES5", "ES2015.Promise", "DOM", "ES2015.Collection"],
-    "types": [],
-    "jsx": "react",
-    "jsxFactory": "h"
+    "types": []
   },
   "include": ["src/*"]
 }
