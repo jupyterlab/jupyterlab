@@ -1,19 +1,14 @@
-/*-----------------------------------------------------------------------------
-| Copyright (c) Jupyter Development Team.
-| Distributed under the terms of the Modified BSD License.
-|----------------------------------------------------------------------------*/
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
 
 
 import {
-    ElementAttrs, VirtualElement
+  VirtualElement, ElementAttrs
 } from '@phosphor/virtualdom';
 
 
-
-/**
- * Define global element types to JSX namespace.
- */
 declare global {
+
   namespace JSX {
     interface IntrinsicElements {
       a: ElementAttrs;
@@ -110,10 +105,12 @@ declare global {
       track: ElementAttrs;
       u: ElementAttrs;
       ul: ElementAttrs;
-      var_: ElementAttrs;
+      var_:ElementAttrs;
       video: ElementAttrs;
       wbr: ElementAttrs;
     }
-    interface Element extends VirtualElement { }
+
+    interface Element extends VirtualElement {}
   }
+
 }

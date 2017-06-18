@@ -5,7 +5,6 @@
 
 import '../style/index.css';
 
-export * from './jsx';
 export * from './collapser';
 export * from './headerfooter';
 export * from './inputarea';
