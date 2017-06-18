@@ -32,7 +32,20 @@ const SCHEMA = {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "$id": "http://jupyter.org/settings/0.1.0/schema#",
   "title": "Jupyter Settings/Preferences Schema",
-  "type": "object"
+  "description": "Jupyter settings/preferences schema v0.1.0",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "jupyter.lab": {
+      "title": "Plugin Settings",
+      "description": "The JupyterLab settings for an extension",
+      "type": "object",
+      "properties": {
+        "iconClass": { "type": "string", "default": "jp-FileIcon" },
+        "iconLabel": { "type": "string", "default": "Plugin" }
+      }
+    }
+  }
 };
 /* tslint:enable */
 
