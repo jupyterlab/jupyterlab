@@ -193,16 +193,29 @@ namespace CommandIDs {
   const markdown6 = 'notebook-cells:markdown-header6';
 
   export
-  const hideInputs = 'notebook-cells:hide-input';
+  const hideCode = 'notebook-cells:hide-code';
 
   export
-  const hideAllInputs = 'notebook-cells:hide-inputs';
+  const showCode = 'notebook-cells:show-code';
 
   export
-  const showInputs = 'notebook-cells:show-input';
+  const hideAllCode = 'notebook-cells:hide-all-code';
 
   export
-  const showAllInputs = 'notebook-cells:show-inputs';
+  const showAllCode = 'notebook-cells:show-all-code';
+
+  export
+  const hideOutput = 'notebook-cells:hide-outputs';
+
+  export
+  const showOutput = 'notebook-cells:show-outputs';
+
+  export
+  const hideAllOutputs = 'notebook-cells:hide-all-outputs';
+
+  export
+  const showAllOutputs = 'notebook-cells:show-all-outputs';
+
 };
 
 
@@ -453,8 +466,6 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     });
   }
 
-  app.contextMenu.addItem({command: CommandIDs.hideAllInputs, selector: '.jp-Notebook .jp-Cell'});
-  app.contextMenu.addItem({command: CommandIDs.showAllInputs, selector: '.jp-Notebook .jp-Cell'});
   app.contextMenu.addItem({command: CommandIDs.clearOutputs, selector: '.jp-Notebook .jp-Cell'});
   app.contextMenu.addItem({command: CommandIDs.split, selector: '.jp-Notebook .jp-Cell'});
   app.contextMenu.addItem({ type: 'separator', selector: '.jp-Notebook', rank: 0 });
@@ -1030,36 +1041,91 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     },
     isEnabled: hasWidget
   });
-  commands.addCommand(CommandIDs.hideInputs, {
-    label: 'Hide input(s)',
+  commands.addCommand(CommandIDs.hideCode, {
+    label: 'Hide Code',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
         return;
       }
-      return NotebookActions.hideInputs(current.notebook);
+      return NotebookActions.hideCode(current.notebook);
     },
     isEnabled: hasWidget
   });
-  commands.addCommand(CommandIDs.hideAllInputs, {
-    label: 'Hide all input(s)',
+  commands.addCommand(CommandIDs.showCode, {
+    label: 'Show Code',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
         return;
       }
-      return NotebookActions.hideAllInputs(current.notebook);
+      return NotebookActions.showCode(current.notebook);
     },
     isEnabled: hasWidget
   });
-  commands.addCommand(CommandIDs.showAllInputs, {
-    label: 'Show all input(s)',
+  commands.addCommand(CommandIDs.hideAllCode, {
+    label: 'Hide All Code',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
         return;
       }
-      return NotebookActions.showAllInputs(current.notebook);
+      return NotebookActions.hideAllCode(current.notebook);
+    },
+    isEnabled: hasWidget
+  });
+  commands.addCommand(CommandIDs.showAllCode, {
+    label: 'Show All Code',
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      return NotebookActions.showAllCode(current.notebook);
+    },
+    isEnabled: hasWidget
+  });
+  commands.addCommand(CommandIDs.hideOutput, {
+    label: 'Hide Output',
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      return NotebookActions.hideOutput(current.notebook);
+    },
+    isEnabled: hasWidget
+  });
+  commands.addCommand(CommandIDs.showOutput, {
+    label: 'Show Output',
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      return NotebookActions.showOutput(current.notebook);
+    },
+    isEnabled: hasWidget
+  });
+  commands.addCommand(CommandIDs.hideAllOutputs, {
+    label: 'Hide All Outputs',
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      return NotebookActions.hideAllOutputs(current.notebook);
+    },
+    isEnabled: hasWidget
+  });
+  commands.addCommand(CommandIDs.showAllOutputs, {
+    label: 'Show All Outputs',
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      return NotebookActions.showAllOutputs(current.notebook);
     },
     isEnabled: hasWidget
   });
@@ -1124,10 +1190,14 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.markdown4,
     CommandIDs.markdown5,
     CommandIDs.markdown6,
-    CommandIDs.hideInputs,
-    CommandIDs.hideAllInputs,
-    CommandIDs.showInputs,
-    CommandIDs.showAllInputs
+    CommandIDs.hideCode,
+    CommandIDs.showCode,
+    CommandIDs.hideAllCode,
+    CommandIDs.showAllCode,
+    CommandIDs.hideOutput,
+    CommandIDs.showOutput,
+    CommandIDs.hideAllOutputs,
+    CommandIDs.showAllOutputs,
   ].forEach(command => { palette.addItem({ command, category }); });
 }
 
@@ -1161,9 +1231,11 @@ function createMenu(app: JupyterLab): Menu {
   menu.addItem({ command: CommandIDs.split });
   menu.addItem({ command: CommandIDs.merge });
   menu.addItem({ type: 'separator' });
+  menu.addItem({ command: CommandIDs.hideAllCode });
+  menu.addItem({ command: CommandIDs.showAllCode });
+  menu.addItem({ command: CommandIDs.hideAllOutputs });
+  menu.addItem({ command: CommandIDs.showAllOutputs });
   menu.addItem({ command: CommandIDs.clearAllOutputs });
-  menu.addItem({ command: CommandIDs.hideAllInputs });
-  menu.addItem({ command: CommandIDs.showAllInputs });
   menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.runAll });
   menu.addItem({ command: CommandIDs.interrupt });

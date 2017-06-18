@@ -784,14 +784,14 @@ namespace NotebookActions {
   }
 
   export
-  function hideInputs(widget: Notebook): void {
+  function hideCode(widget: Notebook): void {
     if (!widget.model || !widget.activeCell) {
       return;
     }
     let state = Private.getState(widget);
     let cells = widget.widgets;
     each(cells, (cell: Cell) => {
-      if (widget.isSelected(cell)) {
+      if (widget.isSelected(cell) && cell.model.type === 'code') {
         cell.inputHidden = true;
       }
     });
@@ -799,27 +799,14 @@ namespace NotebookActions {
   }
 
   export
-  function hideAllInputs(widget: Notebook): void {
+  function showCode(widget: Notebook): void {
     if (!widget.model || !widget.activeCell) {
       return;
     }
     let state = Private.getState(widget);
     let cells = widget.widgets;
     each(cells, (cell: Cell) => {
-      cell.inputHidden = true;
-    });
-    Private.handleState(widget, state);
-  }
-
-  export
-  function showInputs(widget: Notebook): void {
-    if (!widget.model || !widget.activeCell) {
-      return;
-    }
-    let state = Private.getState(widget);
-    let cells = widget.widgets;
-    each(cells, (cell: Cell) => {
-      if (widget.isSelected(cell)) {
+      if (widget.isSelected(cell) && cell.model.type === 'code') {
         cell.inputHidden = false;
       }
     });
@@ -827,14 +814,93 @@ namespace NotebookActions {
   }
 
   export
-  function showAllInputs(widget: Notebook): void {
+  function hideAllCode(widget: Notebook): void {
     if (!widget.model || !widget.activeCell) {
       return;
     }
     let state = Private.getState(widget);
     let cells = widget.widgets;
     each(cells, (cell: Cell) => {
-      cell.inputHidden = false;
+      if (cell.model.type === 'code') {
+        cell.inputHidden = true;
+      }
+    });
+    Private.handleState(widget, state);
+  }
+
+
+
+  export
+  function showAllCode(widget: Notebook): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    let state = Private.getState(widget);
+    let cells = widget.widgets;
+    each(cells, (cell: Cell) => {
+      if (cell.model.type === 'code') {
+        cell.inputHidden = false;
+      }
+    });
+    Private.handleState(widget, state);
+  }
+
+    export
+  function hideOutput(widget: Notebook): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    let state = Private.getState(widget);
+    let cells = widget.widgets;
+    each(cells, (cell: Cell) => {
+      if (widget.isSelected(cell) && cell.model.type === 'code') {
+        (cell as CodeCell).inputHidden = true;
+      }
+    });
+    Private.handleState(widget, state);
+  }
+
+  export
+  function showOutput(widget: Notebook): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    let state = Private.getState(widget);
+    let cells = widget.widgets;
+    each(cells, (cell: Cell) => {
+      if (widget.isSelected(cell) && cell.model.type === 'code') {
+        (cell as CodeCell).inputHidden = false;
+      }
+    });
+    Private.handleState(widget, state);
+  }
+
+  export
+  function hideAllOutputs(widget: Notebook): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    let state = Private.getState(widget);
+    let cells = widget.widgets;
+    each(cells, (cell: Cell) => {
+      if (cell.model.type === 'code') {
+        (cell as CodeCell).outputHidden = true;
+      }
+    });
+    Private.handleState(widget, state);
+  }
+
+  export
+  function showAllOutputs(widget: Notebook): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    let state = Private.getState(widget);
+    let cells = widget.widgets;
+    each(cells, (cell: Cell) => {
+      if (cell.model.type === 'code') {
+        (cell as CodeCell).outputHidden = false;
+      }
     });
     Private.handleState(widget, state);
   }
