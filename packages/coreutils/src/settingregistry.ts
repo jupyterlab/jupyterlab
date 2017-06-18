@@ -29,8 +29,8 @@ import {
  * The schema for settings.
  */
 const SCHEMA = {
-  "$schema": "http://json-schema.org/draft-04/schema#",
-  "$id": "http://jupyter.org/settings/0.1.0/schema#",
+  "$schema": "http://json-schema.org/draft-06/schema",
+  "$id": "http://jupyter.org/settings/0.1.0/schema",
   "title": "Jupyter Settings/Preferences Schema",
   "description": "Jupyter settings/preferences schema v0.1.0",
   "type": "object",
@@ -66,16 +66,16 @@ const copy = JSONExt.deepCopy;
 export
 interface ISchemaValidator {
   /**
-   * Validate a data object against a JSON schema.
+   * Validate a data object against a plugin's JSON schema.
    *
-   * @param schema - The JSON schema.
+   * @param plugin - The plugin ID.
    *
    * @param data - The data being validated.
    *
    * @returns A promise that resolves with void if successful and rejects with a
    * list of errors if either the schema or data fails to validate.
    */
-  validate(schema: JSONObject, data: JSONObject): Promise<void | Ajv.ErrorObject[]>;
+  validateData(plugin: string, data: JSONObject): Promise<void | Ajv.ErrorObject[]>;
 }
 
 
@@ -100,37 +100,6 @@ namespace ISettingRegistry {
   type Level = 'system' | 'user';
 
   /**
-   * An annotation for a specific setting or a plugin.
-   */
-  export
-  interface IAnnotation extends JSONObject {
-    /**
-     * The caption for the setting.
-     */
-    caption?: string;
-
-    /**
-     * The extra class name for the setting.
-     */
-    className?: string;
-
-    /**
-     * The icon class for the setting.
-     */
-    iconClass?: string;
-
-    /**
-     * The icon label for the setting.
-     */
-    iconLabel?: string;
-
-    /**
-     * The label for the setting.
-     */
-    label?: string;
-  }
-
-  /**
    * The settings for a specific plugin.
    */
   export
@@ -147,15 +116,6 @@ namespace ISettingRegistry {
   }
 
   /**
-   * The annotations for a plugin.
-   */
-  export
-  interface IPluginAnnotations extends JSONObject {
-    annotation: IAnnotation;
-    keys?: { [key: string]: IAnnotation };
-  }
-
-  /**
    * The collection of user and system preferences for a plugin.
    */
   export
@@ -169,11 +129,6 @@ namespace ISettingRegistry {
    */
   export
   interface ISettings extends IDisposable {
-    /**
-     * The annotation hints for a plugin.
-     */
-    readonly annotations: IPluginAnnotations | null;
-
     /**
      * A signal that emits when the plugin's settings have changed.
      */
@@ -254,21 +209,28 @@ class DefaultSchemaValidator implements ISchemaValidator {
    */
   constructor() {
     console.log('main schema', SCHEMA);
+    this._merger.addSchema(SCHEMA, 'main');
+    this._validator.addSchema(SCHEMA, 'main');
   }
 
   /**
-   * Validate a data object against a JSON schema.
+   * Validate a data object against a plugin's JSON schema.
    *
-   * @param schema - The JSON schema.
+   * @param plugin - The plugin ID.
    *
    * @param data - The data being validated.
    *
    * @returns A promise that resolves with void if successful and rejects with a
    * list of errors if either the schema or data fails to validate.
    */
-  validate(schema: JSONObject, data: JSONObject): Promise<void | Ajv.ErrorObject[]> {
+  validateData(plugin: string, data: JSONObject): Promise<void | Ajv.ErrorObject[]> {
     try {
-      const validate = this._validator.compile(schema);
+      const validate = this._validator.getSchema(plugin);
+
+      if (!validate) {
+        throw new Error(`Schema ${plugin} is unknown.`);
+      }
+
       const result = validate(data);
       const { errors } = validate;
 
@@ -287,6 +249,7 @@ class DefaultSchemaValidator implements ISchemaValidator {
     }
   }
 
+  private _merger = new Ajv({ useDefaults: true });
   private _validator = new Ajv();
 }
 
@@ -358,9 +321,8 @@ class SettingRegistry {
 
     // If the plugin exists, resolve.
     if (plugin in plugins) {
-      const annotations = this._annotations[plugin] || null;
       const content = plugins[plugin];
-      const settings = new Settings({ annotations, content, plugin, registry });
+      const settings = new Settings({ content, plugin, registry });
 
       return Promise.resolve(settings);
     }
@@ -385,11 +347,7 @@ class SettingRegistry {
       // Set the local copy.
       plugins[plugin] = result || { id: plugin, data: { } };
 
-      // Copy over any annotations that may be available.
-      const annotations = copy(this._annotations[plugin]);
-
       return new Settings({
-        annotations: annotations as ISettingRegistry.IPluginAnnotations,
         content: copy(plugins[plugin]) as ISettingRegistry.IPlugin,
         plugin,
         registry: this
@@ -484,7 +442,6 @@ class SettingRegistry {
       .then(() => { this._pluginChanged.emit(plugin); });
   }
 
-  private _annotations: { [plugin: string]: ISettingRegistry.IPluginAnnotations } = Object.create(null);
   private _datastore: IDatastore<ISettingRegistry.IPlugin, ISettingRegistry.IPlugin> | null = null;
   private _pluginChanged = new Signal<this, string>(this);
   private _plugins: { [name: string]: ISettingRegistry.IPlugin } = Object.create(null);
@@ -500,19 +457,11 @@ class Settings implements ISettingRegistry.ISettings {
    * Instantiate a new plugin settings manager.
    */
   constructor(options: Settings.IOptions) {
-    this._annotations = options.annotations;
     this._content = options.content;
     this.plugin = options.plugin;
     this.registry = options.registry;
 
     this.registry.pluginChanged.connect(this._onPluginChanged, this);
-  }
-
-  /**
-   * The annotation hints for the plugin.
-   */
-  get annotations(): ISettingRegistry.IPluginAnnotations {
-    return this._annotations;
   }
 
   /**
@@ -625,7 +574,6 @@ class Settings implements ISettingRegistry.ISettings {
     }
   }
 
-  private _annotations: ISettingRegistry.IPluginAnnotations | null = null;
   private _changed = new Signal<this, void>(this);
   private _content: ISettingRegistry.IPlugin | null = null;
   private _isDisposed = false;
@@ -664,11 +612,6 @@ namespace Settings {
    */
   export
   interface IOptions {
-    /**
-     * The annotation hints for a plugin.
-     */
-    annotations: ISettingRegistry.IPluginAnnotations | null;
-
     /**
      * The setting values for a plugin.
      */

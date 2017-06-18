@@ -48,11 +48,6 @@ const PLUGIN_EDITOR_CLASS = 'jp-PluginEditor';
 const PLUGIN_FIELDSET_CLASS = 'jp-PluginFieldset';
 
 /**
- * The class name added to key labels in the fieldset.
- */
-const KEY_LABEL_CLASS = 'jp-PluginFieldset-key';
-
-/**
  * The class name added to all plugin lists.
  */
 const PLUGIN_LIST_CLASS = 'jp-PluginList';
@@ -310,7 +305,7 @@ class PluginList extends Widget {
 
     this.node.textContent = '';
     plugins.forEach(plugin => {
-      const item = Private.createListItem(plugin, null);
+      const item = Private.createListItem(plugin);
 
       if (plugin.id === this._selection) {
         item.classList.add(SELECTED_CLASS);
@@ -576,7 +571,7 @@ class PluginFieldset extends Widget {
 
     const settings = this._settings;
 
-    Private.populateFieldset(this.node, settings.raw, settings.annotations);
+    Private.populateFieldset(this.node, settings.raw);
   }
 
   private _settings: ISettingRegistry.ISettings | null = null;
@@ -602,41 +597,28 @@ namespace Private {
    * Create a plugin list item.
    */
   export
-  function createListItem(plugin: ISettingRegistry.IPlugin, annotations: ISettingRegistry.IPluginAnnotations): HTMLLIElement {
-    const annotation = annotations && annotations.annotation;
-    const caption = annotation && annotation.caption || plugin.id;
-    const className = annotation && annotation.className || '';
-    const iconClass = `${PLUGIN_ICON_CLASS} ${
-      annotation && annotation.iconClass || ''
-    }`;
-    const iconLabel = annotation && annotation.iconLabel || '';
-    const label = (annotation && annotation.label) || plugin.id;
+  function createListItem(plugin: ISettingRegistry.IPlugin): HTMLLIElement {
+    const caption = plugin.id;
+    const className = '';
+    const iconClass = `${PLUGIN_ICON_CLASS}`;
+    const iconLabel = '';
+    const title = plugin.id;
 
     return VirtualDOM.realize(
       h.li({ className, dataset: { id: plugin.id }, title: caption },
         h.span({ className: iconClass, title: iconLabel }),
-        h.span(label))
+        h.span(title))
     ) as HTMLLIElement;
   }
 
   /**
-   * Populate the fieldset with a specific plugin's annotation.
+   * Populate the fieldset with a specific plugin's metaata.
    */
   export
-  function populateFieldset(node: HTMLElement, plugin: ISettingRegistry.IPlugin, annotations: ISettingRegistry.IPluginAnnotations): void {
-    const label = annotations && annotations.annotation &&
-      `Available Fields - ${annotations.annotation.label}` ||
-      `Available Fields - ${plugin.id}`;
+  function populateFieldset(node: HTMLElement, plugin: ISettingRegistry.IPlugin): void {
+    const label = `Available Fields - ${plugin.id}`;
     const fields: { [key: string]: VirtualElement } = Object.create(null);
 
-    Object.keys(annotations && annotations.keys || { }).forEach(key => {
-      const annotation = annotations.keys[key];
-      const label = annotation.label ? `(${annotation.label})` : '';
-
-      fields[key] = h.li(
-        h.code(key),
-        h.span({ className: KEY_LABEL_CLASS }, label));
-    });
     Object.keys(plugin.data.system || { }).forEach(key => {
       if (!fields[key]) {
         fields[key] = h.li(h.code(key));

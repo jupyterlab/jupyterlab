@@ -34,7 +34,8 @@ class SettingClientDatastore extends StateDB {
   fetch(id: string): Promise<JSONObject | null> {
     return super.fetch(id).then(result => {
       const schema = Private.schemas[id] || null;
-      console.log('schema', schema);
+
+      result.schema = schema;
       return result;
     });
   }
@@ -66,6 +67,12 @@ namespace Private {
       "jupyter.lab": {
         "iconClass": "jp-ImageTextEditor",
         "iconLabel": "CodeMirror"
+      },
+      "properties": {
+        "jupyter.lab": { type: "object" },
+        "keyMap": { type: "string", "title": "Key Map" },
+        "matchBrackets": { type: "boolean", "title": "Match Brackets" },
+        "theme": { type: "boolean", "title": "Theme" }
       }
     }
   };
