@@ -753,6 +753,7 @@ namespace NotebookActions {
       let child = widget.widgets[i];
       if (widget.isSelected(child) && cell.type === 'code') {
         cell.outputs.clear();
+        (child as CodeCell).outputHidden = false;
         cell.executionCount = null;
       }
       i++;
@@ -774,11 +775,15 @@ namespace NotebookActions {
       return;
     }
     let state = Private.getState(widget);
+    let i = 0;
     each(widget.model.cells, (cell: ICodeCellModel) => {
+      let child = widget.widgets[i];
       if (cell.type === 'code') {
         cell.outputs.clear();
         cell.executionCount = null;
+        (child as CodeCell).outputHidden = false;
       }
+      i++;
     });
     Private.handleState(widget, state);
   }
