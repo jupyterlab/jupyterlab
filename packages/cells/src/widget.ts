@@ -691,6 +691,7 @@ namespace CodeCell {
     }
 
     model.executionCount = null;
+    cell.outputHidden = false;
     cell.setPrompt('*');
     model.trusted = true;
 

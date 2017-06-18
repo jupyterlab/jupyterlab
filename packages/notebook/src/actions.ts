@@ -1100,10 +1100,10 @@ namespace Private {
    * Run a cell.
    */
   function runCell(parent: Notebook, child: Cell, session?: IClientSession): Promise<boolean> {
-
     switch (child.model.type) {
     case 'markdown':
       (child as MarkdownCell).rendered = true;
+      child.inputHidden = false;
       break;
     case 'code':
       if (session) {
