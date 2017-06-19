@@ -25,7 +25,7 @@ import {
 function generateRenderMimePlugin(options: IOptions): JupyterLabPlugin<void> {
 
   let mimeType = options.mimeType;
-  let widget: Widget = options.widget;
+  // let widget: Widget = options.widget;
 
   class _Renderer implements RenderMime.IRenderer {
     mimeTypes = [mimeType];
@@ -33,7 +33,7 @@ function generateRenderMimePlugin(options: IOptions): JupyterLabPlugin<void> {
       return this.mimeTypes.indexOf(options.mimeType) !== -1;
     }
     render(options: RenderMime.IRenderOptions): Widget {
-      return new widget(options);
+      return new RenderedVega(options);
     }
     wouldSanitize(options: RenderMime.IRenderOptions): boolean {
       return !options.model.trusted;
@@ -59,13 +59,11 @@ function generateRenderMimePlugin(options: IOptions): JupyterLabPlugin<void> {
 
 interface IOptions {
   id: string;
-  widget: Widget;
   mimeType: string;
 }
 
 const plugin: JupyterLabPlugin<void> = generateRenderMimePlugin({
   id: 'jupyter.extensions.vega',
-  widget: RenderedVega.widget,
   mimeType: mimeType
 });
 

@@ -6,8 +6,7 @@
   "types": "lib/index.d.ts",
   "files": [
     "lib/*.d.ts",
-    "lib/*.js",
-    "style/*.css"
+    "lib/*.js"
   ],
   "directories": {
     "lib": "lib/"
