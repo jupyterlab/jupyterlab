@@ -5,7 +5,7 @@
 
 
 .jp-LauncherWidget {
-  background: var(--jp-layout-color1);
+  background: var(--md-grey-100);
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
@@ -69,17 +69,29 @@
 
 
 .jp-LauncherWidget-item {
-  width: 100px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  width: 112px;
+  vertical-align: middle;
+  background: var(--jp-layout-color0);
+  height: 112px;
+  margin: 8px;
+  box-shadow: 0px 1px 2px 0px rgba(0,0,0,.12);
+  padding: 12px;
+  border: 1px solid var(--md-grey-300);
 }
 
 
 .jp-LauncherWidget-image {
+  display: block;
+  vertical-align: middle;
   flex: 0 0 auto;
   margin: 0 auto;
-  min-height: 72px;
-  min-width: 56px;
-  max-width: 56px;
-  background-size: 56px 72px;
+  min-height: 80px;
+  min-width: 64px;
+  max-width: 64px;
+  background-size: 64px 80px;
   background-repeat: no-repeat;
   cursor: pointer;
 }
@@ -88,6 +100,9 @@
 .jp-LauncherWidget-text {
   flex: 0 0 auto;
   text-overflow: ellipsis;
+  order: 1;
+  vertical-align: middle;
+  margin: auto;
 }
 
 
