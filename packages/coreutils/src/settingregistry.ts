@@ -113,6 +113,11 @@ namespace ISettingRegistry {
      * The collection of values for a specified setting.
      */
     data: ISettingBundle | null;
+
+    /**
+     * The JSON schema for the plugin.
+     */
+    schema: JSONObject;
   }
 
   /**
@@ -313,7 +318,8 @@ class SettingRegistry {
    *
    * @param plugin - The name of the plugin whose settings are being loaded.
    *
-   * @returns A promise that resolves with a plugin settings object.
+   * @returns A promise that resolves with a plugin settings object or rejects
+   * if the plugin is not found.
    */
   load(plugin: string): Promise<ISettingRegistry.ISettings> {
     const plugins = this._plugins;
@@ -336,7 +342,8 @@ class SettingRegistry {
    *
    * @param plugin - The name of the plugin whose settings are being reloaded.
    *
-   * @returns A promise that resolves with a plugin settings object.
+   * @returns A promise that resolves with a plugin settings object or rejects
+   * if the plugin is not found.
    */
   reload(plugin: string): Promise<ISettingRegistry.ISettings> {
     const datastore = this._datastore;
@@ -344,8 +351,12 @@ class SettingRegistry {
 
     // If the plugin needs to be loaded from the datastore, fetch.
     return datastore.fetch(plugin).then(result => {
+      if (!result) {
+        throw new Error(`Setting data for ${plugin} does not exist.`);
+      }
+
       // Set the local copy.
-      plugins[plugin] = result || { id: plugin, data: { } };
+      plugins[plugin] = result;
 
       return new Settings({
         content: copy(plugins[plugin]) as ISettingRegistry.IPlugin,
