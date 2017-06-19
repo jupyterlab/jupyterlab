@@ -34,6 +34,21 @@ interface IOutputModel extends RenderMime.IMimeModel {
   readonly executionCount: nbformat.ExecutionCount;
 
   /**
+   * The data associated with the model.
+   */
+  readonly data: IObservableJSON;
+
+  /**
+   * The metadata associated with the model.
+   */
+  readonly metadata: IObservableJSON;
+
+  /**
+   * Dispose of the resources used by the output model.
+   */
+  dispose(): void;
+
+  /**
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.IOutput;
@@ -120,6 +135,14 @@ class OutputModel implements IOutputModel {
    * Whether the model is trusted.
    */
   readonly trusted: boolean;
+
+  /**
+   * Dispose of the resources used by the output model.
+   */
+  dispose(): void {
+    this.data.dispose();
+    this.metadata.dispose();
+  }
 
   /**
    * Serialize the model to JSON.
