@@ -3,7 +3,7 @@ import {
 } from '@jupyterlab/application';
 
 
-import '@jupyterlab/themes/style/variables-dark.css';
+import '@jupyterlab/theming/style/variables-dark.css';
 
 
 /**
