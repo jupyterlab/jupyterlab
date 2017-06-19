@@ -77,21 +77,6 @@ describe('rendermime/mimemodel', () => {
 
     });
 
-    describe('#toJSON()', () => {
-
-      it('should return the raw JSON values', () => {
-        let model = new MimeModel();
-        model.data.set('foo', 1);
-        model.metadata.set('bar', 'baz');
-        expect(JSONExt.deepEqual(model.toJSON(), {
-          trusted: false,
-          data: {'foo': 1 },
-          metadata: {'bar': 'baz'}
-        })).to.be(true);
-      });
-
-    });
-
   });
 
 });
