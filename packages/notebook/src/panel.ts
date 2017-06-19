@@ -31,6 +31,10 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
+  MarkdownCell
+} from '@jupyterlab/cells';
+
+import {
   IEditorMimeTypeService
 } from '@jupyterlab/codeeditor';
 
@@ -135,7 +139,15 @@ class NotebookPanel extends Widget implements DocumentRegistry.IWidget {
    * A promise that resolves when the notebook panel is ready.
    */
   get ready(): Promise<void> {
-    return this._context.ready;
+    return this._context.ready.then(() => {
+      let promises: Promise<void>[] = [];
+      each(this.notebook.widgets, widget => {
+        if (widget instanceof MarkdownCell) {
+          promises.push(widget.ready);
+        }
+      });
+      return Promise.all(promises).then(() => undefined);
+    });
   }
 
   /**

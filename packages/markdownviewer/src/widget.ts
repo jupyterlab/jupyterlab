@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  PromiseDelegate
+} from '@phosphor/coreutils';
+
+import {
   Message
 } from '@phosphor/messaging';
 
@@ -60,15 +64,16 @@ class MarkdownViewer extends Widget implements DocumentRegistry.IWidget {
     context.pathChanged.connect(this._onPathChanged, this);
 
     this._context.ready.then(() => {
+      return this._render().ready;
+    }).then(() => {
+      this._ready.resolve(undefined);
+
       // Throttle the rendering rate of the widget.
       this._monitor = new ActivityMonitor({
         signal: context.model.contentChanged,
         timeout: RENDER_TIMEOUT
       });
       this._monitor.activityStopped.connect(this.update, this);
-      if (this.isAttached) {
-        this.update();
-      }
     });
   }
 
@@ -83,7 +88,7 @@ class MarkdownViewer extends Widget implements DocumentRegistry.IWidget {
    * A promise that resolves when the markdown viewer is ready.
    */
   get ready(): Promise<void> {
-    return this._context.ready;
+    return this._ready.promise;
   }
 
   /**
@@ -106,16 +111,16 @@ class MarkdownViewer extends Widget implements DocumentRegistry.IWidget {
   }
 
   /**
-   * Handle an `after-attach` message to the widget.
-   */
-  protected onAfterAttach(msg: Message): void {
-    this.update();
-  }
-
-  /**
    * Handle an `update-request` message to the widget.
    */
   protected onUpdateRequest(msg: Message): void {
+    this._render();
+  }
+
+  /**
+   * Render the markdown content.
+   */
+  private _render(): RenderMime.IWidget {
     let context = this._context;
     let model = context.model;
     let layout = this.layout as PanelLayout;
@@ -127,6 +132,7 @@ class MarkdownViewer extends Widget implements DocumentRegistry.IWidget {
       layout.widgets[1].dispose();
     }
     layout.addWidget(widget);
+    return widget;
   }
 
   /**
@@ -139,6 +145,7 @@ class MarkdownViewer extends Widget implements DocumentRegistry.IWidget {
   private _context: DocumentRegistry.Context = null;
   private _monitor: ActivityMonitor<any, any> = null;
   private _rendermime: RenderMime = null;
+  private _ready = new PromiseDelegate<void>();
 }
 
 

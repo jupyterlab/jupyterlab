@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  JSONObject, JSONValue
+  JSONObject, JSONValue, PromiseDelegate
 } from '@phosphor/coreutils';
 
 import {
@@ -690,6 +690,13 @@ class MarkdownCell extends Cell {
   readonly model: IMarkdownCellModel;
 
   /**
+   * A promise that resolves when the widget renders for the first time.
+   */
+  get ready(): Promise<void> {
+    return this._ready.promise;
+  }
+
+  /**
    * Whether the cell is rendered.
    */
   get rendered(): boolean {
@@ -765,6 +772,12 @@ class MarkdownCell extends Cell {
       let data: JSONObject = { 'text/markdown': text };
       let bundle = new MimeModel({ data, trusted });
       let widget = this._rendermime.render(bundle);
+      if (!this._isReady) {
+        widget.ready.then(() => {
+          this._isReady = true;
+          this._ready.resolve(undefined);
+        });
+      }
       this._renderedInput = widget || new Widget();
       this._renderedInput.addClass(MARKDOWN_OUTPUT_CLASS);
     }
@@ -778,6 +791,8 @@ class MarkdownCell extends Cell {
   private _rendered = true;
   private _prevText = '';
   private _prevTrusted = false;
+  private _ready = new PromiseDelegate<void>();
+  private _isReady = false;
 }
 
 
