@@ -115,16 +115,14 @@ class CSVViewer extends Widget implements DocumentRegistry.IWidget {
     if (this._grid === null) {
       return;
     }
-    let grid = this._grid;
-    let toolbar = this._toolbar;
     let monitor = this._monitor;
     this._grid = null;
     this._toolbar = null;
     this._monitor = null;
 
-    grid.dispose();
-    toolbar.dispose();
-    monitor.dispose();
+    if (monitor) {
+      monitor.dispose();
+    }
 
     super.dispose();
   }
