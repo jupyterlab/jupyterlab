@@ -55,18 +55,6 @@ describe('rendermime/mimemodel', () => {
 
     });
 
-    describe('#dispose()', () => {
-
-      it('should dispose of the resources used by the model', () => {
-        let model = new MimeModel();
-        model.dispose();
-        expect(model.isDisposed).to.be(true);
-        model.dispose();
-        expect(model.isDisposed).to.be(true);
-      });
-
-    });
-
     describe('#data', () => {
 
       it('should be the data observable map', () => {
