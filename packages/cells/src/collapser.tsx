@@ -117,8 +117,8 @@ class InputCollapser extends Collapser {
    * Construct a new input collapser.
    */
   constructor() {
-      super();
-      this.addClass(INPUT_COLLAPSER);
+    super();
+    this.addClass(INPUT_COLLAPSER);
   }
 
   /**
@@ -153,8 +153,8 @@ class InputCollapser extends Collapser {
 export
 class OutputCollapser extends Collapser {
     /**
-    * Construct a new output collapser.
-    */
+     * Construct a new output collapser.
+     */
     constructor() {
       super();
       this.addClass(OUTPUT_COLLAPSER);

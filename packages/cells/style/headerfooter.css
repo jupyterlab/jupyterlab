@@ -9,7 +9,7 @@
 |----------------------------------------------------------------------------*/
 
 
-/* Hidden by zero height be default */
+/* Hidden by zero height by default */
 .jp-CellHeader, .jp-CellFooter  {
   height: 0px;
   width: 100%;

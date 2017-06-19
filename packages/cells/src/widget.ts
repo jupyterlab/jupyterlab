@@ -280,10 +280,10 @@ class Cell extends Widget {
     }
     let layout = this._inputWrapper.layout as PanelLayout;
     if (value) {
-      layout.removeWidget(this._input);
+      this._input.parent = null;
       layout.addWidget(this._inputPlaceholder);
     } else {
-      layout.removeWidget(this._inputPlaceholder);
+      this._inputPlaceholder.parent = null;
       layout.addWidget(this._input);
     }
     this._inputHidden = value;

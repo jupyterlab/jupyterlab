@@ -50,7 +50,7 @@ interface ICellFooter extends Widget {}
 
 
 /**
- * Default implementation of a cell header.
+ * Default implementation of a cell footer.
  */
 export
 class CellFooter extends Widget implements ICellFooter {

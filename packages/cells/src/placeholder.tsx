@@ -14,7 +14,7 @@ import {
 
 
 /**
- * The CSS class added to placehodlers.
+ * The CSS class added to placeholders.
  */
 const PLACEHOLDER_CLASS = 'jp-Placeholder';
 
