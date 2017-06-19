@@ -83,12 +83,14 @@
 button.jp-mod-styled.jp-mod-accept {
   background: var(--jp-brand-color1);
   color: var(--jp-inverse-ui-font-color0);
+  border: 1px solid var(--jp-brand-color1);
 }
 
 
 button.jp-mod-styled.jp-mod-reject {
-  background: #9E9E9E;
+  background: var(--md-grey-500);
   margin-right: 12px;
+  border: 1px solid var(--md-grey-500);
   color: var(--jp-inverse-ui-font-color0);
 }
 
@@ -96,6 +98,7 @@ button.jp-mod-styled.jp-mod-reject {
 button.jp-mod-styled.jp-mod-warn {
   background: var(--jp-error-color1);
   color: var(--jp-inverse-ui-font-color0);
+  border: 1px solid var(--jp-error-color1);
 }
 
 
@@ -117,4 +120,3 @@ button.jp-mod-styled.jp-mod-warn {
   font-size: var(--jp-ui-font-size1);
   color: var(--md-grey-700);
 }
-
