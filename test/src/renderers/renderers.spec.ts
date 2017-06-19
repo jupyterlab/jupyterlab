@@ -294,63 +294,45 @@ describe('renderers', () => {
 
     describe('#render()', () => {
 
-      it('should set the inner html', (done) => {
+      it('should set the inner html', () => {
         let r = new MarkdownRenderer();
         let source = '<p>hello</p>';
         let mimeType = 'text/markdown';
         let model = createModel(mimeType, source);
         let widget = r.render({ mimeType, model, sanitizer });
-        let loop = () => {
-          if ((widget as any)._rendered) {
-            expect(widget.node.innerHTML).to.be(source);
-            done();
-            return;
-          }
-          setTimeout(loop, 100);
-        };
-        setTimeout(loop, 100);
+        return widget.ready.then(() => {
+          expect(widget.node.innerHTML).to.be(source);
+        });
       });
 
-      it('should add header anchors', (done) => {
+      it('should add header anchors', () => {
         let source = require('../../../examples/filebrowser/sample.md') as string;
         let r = new MarkdownRenderer();
         let mimeType = 'text/markdown';
         let model = createModel(mimeType, source);
         let widget = r.render({ mimeType, model, sanitizer });
-        let loop = () => {
-          if ((widget as any)._rendered) {
-            Widget.attach(widget, document.body);
-            let node = document.getElementById('Title-third-level');
-            expect(node.localName).to.be('h3');
-            let anchor = node.firstChild.nextSibling as HTMLAnchorElement;
-            expect(anchor.href).to.contain('#Title-third-level');
-            expect(anchor.target).to.be('_self');
-            expect(anchor.className).to.contain('jp-InternalAnchorLink');
-            expect(anchor.textContent).to.be('¶');
-            Widget.detach(widget);
-            done();
-            return;
-          }
-          setTimeout(loop, 100);
-        };
-        setTimeout(loop, 100);
+        return widget.ready.then(() => {
+          Widget.attach(widget, document.body);
+          let node = document.getElementById('Title-third-level');
+          expect(node.localName).to.be('h3');
+          let anchor = node.firstChild.nextSibling as HTMLAnchorElement;
+          expect(anchor.href).to.contain('#Title-third-level');
+          expect(anchor.target).to.be('_self');
+          expect(anchor.className).to.contain('jp-InternalAnchorLink');
+          expect(anchor.textContent).to.be('¶');
+          Widget.detach(widget);
+        });
       });
 
-      it('should sanitize the html', (done) => {
+      it('should sanitize the html', () => {
         let r = new MarkdownRenderer();
         let source = '<p>hello</p><script>alert("foo")</script>';
         let mimeType = 'text/markdown';
         let model = createModel(mimeType, source);
         let widget = r.render({ mimeType, model, sanitizer });
-        let loop = () => {
-          if ((widget as any)._rendered) {
-            expect(widget.node.innerHTML).to.not.contain('script');
-            done();
-            return;
-          }
-          setTimeout(loop, 100);
-        };
-        setTimeout(loop, 100);
+        return widget.ready.then(() => {
+          expect(widget.node.innerHTML).to.not.contain('script');
+        });
       });
 
     });

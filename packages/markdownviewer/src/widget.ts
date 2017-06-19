@@ -98,7 +98,9 @@ class MarkdownViewer extends Widget implements DocumentRegistry.IWidget {
     if (this.isDisposed) {
       return;
     }
-    this._monitor.dispose();
+    if (this._monitor) {
+      this._monitor.dispose();
+    }
     super.dispose();
   }
 

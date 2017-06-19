@@ -85,14 +85,15 @@ describe('markdownviewer/widget', () => {
 
     });
 
-    describe('#onAfterAttach()', () => {
+    describe('#ready', () => {
 
-      it('should update the widget', () => {
-        let widget = new LogWidget(context, RENDERMIME);
-        expect(widget.methods).to.not.contain('onAfterAttach');
-        Widget.attach(widget, document.body);
-        expect(widget.methods).to.contain('onAfterAttach');
-        widget.dispose();
+      it('should be fulfilled when the widget is done rendering', () => {
+        let widget = new MarkdownViewer(context, RENDERMIME);
+        context.save();
+        return widget.ready.then(() => {
+          let layout = widget.layout as PanelLayout;
+          expect(layout.widgets.length).to.be(2);
+        });
       });
 
     });
