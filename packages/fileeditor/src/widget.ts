@@ -29,7 +29,7 @@ const EDITOR_CLASS = 'jp-FileEditor';
  * A document widget for editors.
  */
 export
-class FileEditor extends CodeEditorWrapper {
+class FileEditor extends CodeEditorWrapper implements DocumentRegistry.IWidget {
   /**
    * Construct a new editor widget.
    */
@@ -71,6 +71,13 @@ class FileEditor extends CodeEditorWrapper {
    */
   get context(): DocumentRegistry.Context {
     return this._context;
+  }
+
+  /**
+   * A promise that resolves when the file editor is ready.
+   */
+  get ready(): Promise<void> {
+    return this._context.ready;
   }
 
   /**

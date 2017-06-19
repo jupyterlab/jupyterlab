@@ -14,10 +14,6 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
   CodeEditor
 } from '@jupyterlab/codeeditor';
 
@@ -276,7 +272,7 @@ class Base64ModelFactory extends TextModelFactory {
  * The default implemetation of a widget factory.
  */
 export
-abstract class ABCWidgetFactory<T extends Widget, U extends DocumentRegistry.IModel> implements DocumentRegistry.IWidgetFactory<T, U> {
+abstract class ABCWidgetFactory<T extends DocumentRegistry.IWidget, U extends DocumentRegistry.IModel> implements DocumentRegistry.IWidgetFactory<T, U> {
   /**
    * Construct a new `ABCWidgetFactory`.
    */

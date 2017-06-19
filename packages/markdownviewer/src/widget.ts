@@ -41,7 +41,7 @@ const RENDER_TIMEOUT = 1000;
  * A widget for rendered markdown.
  */
 export
-class MarkdownViewer extends Widget {
+class MarkdownViewer extends Widget implements DocumentRegistry.IWidget {
   /**
    * Construct a new markdown widget.
    */
@@ -59,12 +59,17 @@ class MarkdownViewer extends Widget {
 
     context.pathChanged.connect(this._onPathChanged, this);
 
-    // Throttle the rendering rate of the widget.
-    this._monitor = new ActivityMonitor({
-      signal: context.model.contentChanged,
-      timeout: RENDER_TIMEOUT
+    this._context.ready.then(() => {
+      // Throttle the rendering rate of the widget.
+      this._monitor = new ActivityMonitor({
+        signal: context.model.contentChanged,
+        timeout: RENDER_TIMEOUT
+      });
+      this._monitor.activityStopped.connect(this.update, this);
+      if (this.isAttached) {
+        this.update();
+      }
     });
-    this._monitor.activityStopped.connect(this.update, this);
   }
 
   /**
@@ -72,6 +77,13 @@ class MarkdownViewer extends Widget {
    */
   get context(): DocumentRegistry.Context {
     return this._context;
+  }
+
+  /**
+   * A promise that resolves when the markdown viewer is ready.
+   */
+  get ready(): Promise<void> {
+    return this._context.ready;
   }
 
   /**

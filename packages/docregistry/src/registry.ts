@@ -819,10 +819,21 @@ namespace DocumentRegistry {
   }
 
   /**
+   * A widget for a document.
+   */
+  export
+  interface IWidget extends Widget {
+    /**
+     * A promise that resolves when the document is ready.
+     */
+    ready: Promise<void>;
+  }
+
+  /**
    * The interface for a widget factory.
    */
   export
-  interface IWidgetFactory<T extends Widget, U extends IModel> extends IDisposable, IWidgetFactoryOptions {
+  interface IWidgetFactory<T extends IWidget, U extends IModel> extends IDisposable, IWidgetFactoryOptions {
     /**
      * A signal emitted when a widget is created.
      */
@@ -841,7 +852,7 @@ namespace DocumentRegistry {
    * A type alias for a standard widget factory.
    */
   export
-  type WidgetFactory = IWidgetFactory<Widget, IModel>;
+  type WidgetFactory = IWidgetFactory<IWidget, IModel>;
 
   /**
    * An interface for a widget extension.

@@ -24,7 +24,7 @@ const IMAGE_CLASS = 'jp-ImageViewer';
  * A widget for images.
  */
 export
-class ImageViewer extends Widget {
+class ImageViewer extends Widget implements DocumentRegistry.IWidget {
   /**
    * Construct a new image widget.
    */
@@ -49,6 +49,13 @@ class ImageViewer extends Widget {
    */
   get context(): DocumentRegistry.Context {
     return this._context;
+  }
+
+  /**
+   * A promise that resolves when the image viewer is ready.
+   */
+  get ready(): Promise<void> {
+    return this._context.ready;
   }
 
   /**
