@@ -25,7 +25,7 @@
   "devDependencies": {
     "@types/minimist": "^1.2.0",
     "rimraf": "^2.5.2",
-    "typescript": "^2.2.1"
+    "typescript": "~2.3.1"
   },
   "scripts": {
     "build": "tsc",
