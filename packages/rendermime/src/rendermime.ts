@@ -336,6 +336,17 @@ namespace RenderMime {
   }
 
   /**
+   * A rendered widget.
+   */
+  export
+  interface IWidget extends Widget {
+    /**
+     * A promise that resolves when the widget is ready.
+     */
+    ready: Promise<void>;
+  }
+
+  /**
    * The interface for a renderer.
    */
   export
@@ -357,7 +368,7 @@ namespace RenderMime {
      *
      * @param options - The options used to render the data.
      */
-    render(options: IRenderOptions): Widget;
+    render(options: IRenderOptions): IWidget;
 
     /**
      * Whether the renderer will sanitize the data given the render options.

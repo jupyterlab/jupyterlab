@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
   RenderMime, RenderedHTML, RenderedMarkdown, RenderedText, RenderedImage,
   RenderedJavaScript, RenderedSVG, RenderedPDF, RenderedLatex
 } from '.';
@@ -31,7 +27,7 @@ class HTMLRenderer implements RenderMime.IRenderer {
   /**
    * Render the transformed mime bundle.
    */
-  render(options: RenderMime.IRenderOptions): Widget {
+  render(options: RenderMime.IRenderOptions): RenderMime.IWidget {
     return new RenderedHTML(options);
   }
 
@@ -64,7 +60,7 @@ class ImageRenderer implements RenderMime.IRenderer {
   /**
    * Render the transformed mime bundle.
    */
-  render(options: RenderMime.IRenderOptions): Widget {
+  render(options: RenderMime.IRenderOptions): RenderMime.IWidget {
     return new RenderedImage(options);
   }
 
@@ -98,7 +94,7 @@ class TextRenderer implements RenderMime.IRenderer {
   /**
    * Render the transformed mime bundle.
    */
-  render(options: RenderMime.IRenderOptions): Widget {
+  render(options: RenderMime.IRenderOptions): RenderMime.IWidget {
     return new RenderedText(options);
   }
 
@@ -134,7 +130,7 @@ class JavaScriptRenderer implements RenderMime.IRenderer {
   /**
    * Render the transformed mime bundle.
    */
-  render(options: RenderMime.IRenderOptions): Widget {
+  render(options: RenderMime.IRenderOptions): RenderMime.IWidget {
     return new RenderedJavaScript(options);
   }
 
@@ -170,7 +166,7 @@ class SVGRenderer implements RenderMime.IRenderer {
   /**
    * Render the transformed mime bundle.
    */
-  render(options: RenderMime.IRenderOptions): Widget {
+  render(options: RenderMime.IRenderOptions): RenderMime.IWidget {
     return new RenderedSVG(options);
   }
 
@@ -206,7 +202,7 @@ class PDFRenderer implements RenderMime.IRenderer {
   /**
    * Render the transformed mime bundle.
    */
-  render(options: RenderMime.IRenderOptions): Widget {
+  render(options: RenderMime.IRenderOptions): RenderMime.IWidget {
     return new RenderedPDF(options);
   }
 
@@ -239,7 +235,7 @@ class LatexRenderer implements RenderMime.IRenderer  {
   /**
    * Render the transformed mime bundle.
    */
-  render(options: RenderMime.IRenderOptions): Widget {
+  render(options: RenderMime.IRenderOptions): RenderMime.IWidget {
     return new RenderedLatex(options);
   }
 
@@ -272,7 +268,7 @@ class MarkdownRenderer implements RenderMime.IRenderer {
   /**
    * Render the transformed mime bundle.
    */
-  render(options: RenderMime.IRenderOptions): Widget {
+  render(options: RenderMime.IRenderOptions): RenderMime.IWidget {
     return new RenderedMarkdown(options);
   }
 
