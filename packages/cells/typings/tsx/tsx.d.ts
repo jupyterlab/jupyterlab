@@ -7,6 +7,10 @@ import {
 } from '@phosphor/virtualdom';
 
 
+/**
+ * Declare the global JSX namespace that allows phorphor's virtual DOM
+ * library to be used with TSX syntax in a type safe manner.
+ */
 declare global {
 
   namespace JSX {
