@@ -60,6 +60,8 @@
     "@jupyterlab/theming": "^0.7.0",
     "@jupyterlab/tooltip": "^0.7.0",
     "@jupyterlab/tooltip-extension": "^0.7.0",
+    "@jupyterlab/vega": "^0.7.0",
+    "@jupyterlab/vega-extension": "^0.7.0",
     "@phosphor/algorithm": "^1.1.1",
     "@phosphor/application": "^1.3.0",
     "@phosphor/commands": "^1.2.1",
@@ -134,7 +136,8 @@
       "@jupyterlab/tabmanager-extension",
       "@jupyterlab/terminal-extension",
       "@jupyterlab/theme-light-extension",
-      "@jupyterlab/tooltip-extension"
+      "@jupyterlab/tooltip-extension",
+      "@jupyterlab/vega-extension",
     ],
     "singletonPackages": [
       "@jupyterlab/application",
