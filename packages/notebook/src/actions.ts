@@ -788,6 +788,11 @@ namespace NotebookActions {
     Private.handleState(widget, state);
   }
 
+  /**
+   * Hide the code on selected code cells.
+   *
+   * @param widget - The target notebook widget.
+   */
   export
   function hideCode(widget: Notebook): void {
     if (!widget.model || !widget.activeCell) {
@@ -803,6 +808,11 @@ namespace NotebookActions {
     Private.handleState(widget, state);
   }
 
+  /**
+   * Show the code on selected code cells.
+   *
+   * @param widget - The target notebook widget.
+   */
   export
   function showCode(widget: Notebook): void {
     if (!widget.model || !widget.activeCell) {
@@ -818,6 +828,11 @@ namespace NotebookActions {
     Private.handleState(widget, state);
   }
 
+  /**
+   * Hide the code on all code cells.
+   *
+   * @param widget - The target notebook widget.
+   */
   export
   function hideAllCode(widget: Notebook): void {
     if (!widget.model || !widget.activeCell) {
@@ -833,8 +848,11 @@ namespace NotebookActions {
     Private.handleState(widget, state);
   }
 
-
-
+  /**
+   * Show the code on all code cells.
+   *
+   * @param widget - The target notebook widget.
+   */
   export
   function showAllCode(widget: Notebook): void {
     if (!widget.model || !widget.activeCell) {
@@ -850,7 +868,12 @@ namespace NotebookActions {
     Private.handleState(widget, state);
   }
 
-    export
+  /**
+   * Hide the output on selected code cells.
+   *
+   * @param widget - The target notebook widget.
+   */
+  export
   function hideOutput(widget: Notebook): void {
     if (!widget.model || !widget.activeCell) {
       return;
@@ -865,6 +888,11 @@ namespace NotebookActions {
     Private.handleState(widget, state);
   }
 
+  /**
+   * Show the output on selected code cells.
+   *
+   * @param widget - The target notebook widget.
+   */
   export
   function showOutput(widget: Notebook): void {
     if (!widget.model || !widget.activeCell) {
@@ -880,6 +908,11 @@ namespace NotebookActions {
     Private.handleState(widget, state);
   }
 
+  /**
+   * Hide the output on all code cells.
+   *
+   * @param widget - The target notebook widget.
+   */
   export
   function hideAllOutputs(widget: Notebook): void {
     if (!widget.model || !widget.activeCell) {
@@ -895,6 +928,11 @@ namespace NotebookActions {
     Private.handleState(widget, state);
   }
 
+  /**
+   * Show the output on all code cells.
+   *
+   * @param widget - The target notebook widget.
+   */
   export
   function showAllOutputs(widget: Notebook): void {
     if (!widget.model || !widget.activeCell) {
