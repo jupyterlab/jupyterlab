@@ -60,7 +60,10 @@ const MOD_COLLAPSED_CLASS = 'jp-mod-collapsed';
 /**
  * Abstract collapser base class.
  * 
- * 
+ * ### Notes
+ * A collapser is a visible div to the left of a cell's
+ * input/output that a user can click on to collapse the
+ * input/output.
  */
 export
 abstract class Collapser extends VDomRenderer<null> {
