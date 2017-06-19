@@ -2,12 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject
+  JSONObject, JSONValue
 } from '@phosphor/coreutils';
-
-import {
-  IObservableJSON, ObservableJSON
-} from '@jupyterlab/coreutils';
 
 import {
   RenderMime
@@ -24,50 +20,24 @@ class MimeModel implements RenderMime.IMimeModel {
    */
   constructor(options: MimeModel.IOptions = {}) {
     this.trusted = !!options.trusted;
-    this.data = new ObservableJSON({ values: options.data });
-    this.metadata = new ObservableJSON({ values: options.metadata });
+    this.data = new Private.Bundle(options.data || {});
+    this.metadata = new Private.Bundle(options.metadata || {});
   }
 
   /**
    * The data associated with the model.
    */
-  readonly data: IObservableJSON;
+  readonly data: RenderMime.IBundle;
 
   /**
    * The metadata associated with the model.
    */
-  readonly metadata: IObservableJSON;
+  readonly metadata: RenderMime.IBundle;
 
   /**
    * Whether the model is trusted.
    */
   readonly trusted: boolean;
-
-  /**
-   * Test whether the model is disposed.
-   */
-  get isDisposed(): boolean {
-    return this.data.isDisposed;
-  }
-
-  /**
-   * Dispose of the resources used by the mime model.
-   */
-  dispose(): void {
-    this.data.dispose();
-    this.metadata.dispose();
-  }
-
-  /**
-   * Serialize the model as JSON data.
-   */
-  toJSON(): JSONObject {
-    return {
-      trusted: this.trusted,
-      data: this.data.toJSON(),
-      metadata: this.metadata.toJSON()
-    };
-  }
 }
 
 
@@ -98,3 +68,61 @@ namespace MimeModel {
   }
 }
 
+
+/**
+ * A namespace for module private data.
+ */
+namespace Private {
+  /**
+   * The default implementation of an ibundle.
+   */
+  export
+  class Bundle implements RenderMime.IBundle {
+    /**
+     * Create a new bundle.
+     */
+    constructor(values: JSONObject) {
+      this._values = values;
+    }
+
+    /**
+     * Get a value for a given key.
+     *
+     * @param key - the key.
+     *
+     * @returns the value for that key.
+     */
+    get(key: string): JSONValue {
+      return this._values[key];
+    }
+
+    /**
+     * Check whether the bundle has a key.
+     *
+     * @param key - the key to check.
+     *
+     * @returns `true` if the bundle has the key, `false` otherwise.
+     */
+    has(key: string): boolean {
+      return Object.keys(this._values).indexOf(key) !== -1;
+    }
+
+    /**
+     * Set a key-value pair in the bundle.
+     *
+     * @param key - The key to set.
+     *
+     * @param value - The value for the key.
+     *
+     * @returns the old value for the key, or undefined
+     *   if that did not exist.
+     */
+    set(key: string, value: JSONValue): JSONValue {
+      let old = this._values[key];
+      this._values[key] = value;
+      return old;
+    }
+
+    private _values: JSONObject;
+  }
+}

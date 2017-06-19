@@ -6,7 +6,7 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  nbformat
+  IObservableJSON, ObservableJSON, nbformat
 } from '@jupyterlab/coreutils';
 
 import {
@@ -67,12 +67,15 @@ namespace IOutputModel {
  * The default implementation of a notebook output model.
  */
 export
-class OutputModel extends MimeModel implements IOutputModel {
+class OutputModel implements IOutputModel {
   /**
    * Construct a new output model.
    */
   constructor(options: IOutputModel.IOptions) {
-    super(Private.getBundleOptions(options));
+    let { trusted, data, metadata } = Private.getBundleOptions(options);
+    this.trusted = trusted;
+    this.data = new ObservableJSON({ values: data });
+    this.metadata = new ObservableJSON({ values: metadata });
     // Make a copy of the data.
     let value = options.value;
     for (let key in value) {
@@ -102,6 +105,21 @@ class OutputModel extends MimeModel implements IOutputModel {
    * The execution count.
    */
   readonly executionCount: nbformat.ExecutionCount;
+
+  /**
+   * The data associated with the model.
+   */
+  readonly data: IObservableJSON;
+
+  /**
+   * The metadata associated with the model.
+   */
+  readonly metadata: IObservableJSON;
+
+  /**
+   * Whether the model is trusted.
+   */
+  readonly trusted: boolean;
 
   /**
    * Serialize the model to JSON.

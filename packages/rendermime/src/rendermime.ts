@@ -10,19 +10,15 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONObject
+  JSONValue
 } from '@phosphor/coreutils';
-
-import {
-  IDisposable
-} from '@phosphor/disposable';
 
 import {
   Widget
 } from '@phosphor/widgets';
 
 import {
-  IObservableJSON, PathExt, URLExt
+  PathExt, URLExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -290,10 +286,46 @@ namespace RenderMime {
   }
 
   /**
+   * A bundle for mime data.
+   */
+  export
+  interface IBundle {
+    /**
+     * Get a value for a given key.
+     *
+     * @param key - the key.
+     *
+     * @returns the value for that key.
+     */
+    get(key: string): JSONValue;
+
+    /**
+     * Check whether the bundle has a key.
+     *
+     * @param key - the key to check.
+     *
+     * @returns `true` if the bundle has the key, `false` otherwise.
+     */
+    has(key: string): boolean;
+
+    /**
+     * Set a key-value pair in the bundle.
+     *
+     * @param key - The key to set.
+     *
+     * @param value - The value for the key.
+     *
+     * @returns the old value for the key, or undefined
+     *   if that did not exist.
+     */
+    set(key: string, value: JSONValue): JSONValue;
+  }
+
+  /**
    * An observable model for mime data.
    */
   export
-  interface IMimeModel extends IDisposable {
+  interface IMimeModel {
     /**
      * Whether the model is trusted.
      */
@@ -302,17 +334,12 @@ namespace RenderMime {
     /**
      * The data associated with the model.
      */
-    readonly data: IObservableJSON;
+    readonly data: IBundle;
 
     /**
      * The metadata associated with the model.
      */
-    readonly metadata: IObservableJSON;
-
-    /**
-     * Serialize the model as JSON data.
-     */
-    toJSON(): JSONObject;
+    readonly metadata: IBundle;
   }
 
   /**
