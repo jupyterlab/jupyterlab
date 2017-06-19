@@ -9,7 +9,7 @@
 
 
 :root {
-  --jp-private-notebook-dragImage-width: 280px;
+  --jp-private-notebook-dragImage-width: 304px;
   --jp-private-notebook-dragImage-height: 36px;
   --jp-private-notebook-selected-color: var(--md-blue-400);
   --jp-private-notebook-multiselected-color: var(--md-blue-50);
