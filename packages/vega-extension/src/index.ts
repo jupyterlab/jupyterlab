@@ -18,19 +18,16 @@ import {
 
 
 import {
-  vega
+  RenderedVega, mimeType
 } from '@jupyterlab/vega';
 
 
 function generateRenderMimePlugin(options: IOptions): JupyterLabPlugin<void> {
-  let mimeType = options.mimeType;
-  let widget = options.widget;
 
+  let mimeType = options.mimeType;
+  let widget: Widget = options.widget;
 
   class _Renderer implements RenderMime.IRenderer {
-    /**
-     * The mimeTypes this renderer accepts.
-     */
     mimeTypes = [mimeType];
     canRender(options: RenderMime.IRenderOptions): boolean {
       return this.mimeTypes.indexOf(options.mimeType) !== -1;
@@ -58,15 +55,18 @@ function generateRenderMimePlugin(options: IOptions): JupyterLabPlugin<void> {
   };
 }
 
+
+
 interface IOptions {
   id: string;
   widget: Widget;
   mimeType: string;
 }
 
-
-export default plugin = generateRenderMimePlugin({
+const plugin: JupyterLabPlugin<void> = generateRenderMimePlugin({
   id: 'jupyter.extensions.vega',
-  widget: vega.widget,
-  mimeType: vega.mimeType
+  widget: RenderedVega.widget,
+  mimeType: mimeType
 });
+
+export default plugin;
