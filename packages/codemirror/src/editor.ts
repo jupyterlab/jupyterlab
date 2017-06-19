@@ -1088,7 +1088,7 @@ namespace Private {
       editor.setOption('indentWithTabs', !value);
       break;
     case 'autoClosingBrackets':
-      editor.setOption('autoCloseBrackets', !value);
+      editor.setOption('autoCloseBrackets', value);
       break;
     case 'readOnly':
       let el = editor.getWrapperElement();
