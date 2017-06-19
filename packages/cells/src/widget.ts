@@ -290,6 +290,14 @@ class Cell extends Widget {
     this.handleInputHidden(value);
   }
 
+  /**
+   * Handle the input being hidden.
+   * 
+   * #### Notes
+   * This is called by the `inputHidden` setter so that subclasses
+   * can perform actions upon the input being hidden without accessing
+   * private state.
+   */
   protected handleInputHidden(value: boolean): void {
     return;
   }
@@ -574,6 +582,14 @@ class CodeCell extends Cell {
     this._outputHidden = value;
   }
 
+  /**
+   * Handle the input being hidden.
+   * 
+   * #### Notes
+   * This method is called by the case cell implementation and is
+   * subclasses here so the code cell can watch to see when input
+   * is hidden without accessing private state.
+   */
   protected handleInputHidden(value: boolean): void {
     if (!value && this._outputWrapper.isHidden) {
       this._outputWrapper.show();
