@@ -21,7 +21,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  JSONObject
+  JSONObject, PromiseDelegate
 } from '@phosphor/coreutils';
 
 import {
@@ -88,11 +88,18 @@ const PDF_CLASS = 'jp-RenderedPDF';
  * A widget for displaying any widget whoes representation is rendered HTML
  * */
 export
-class RenderedHTMLCommon extends Widget {
+class RenderedHTMLCommon extends Widget implements RenderMime.IWidget {
   /* Construct a new rendered HTML common widget.*/
   constructor(options: RenderMime.IRenderOptions) {
     super();
     this.addClass(HTML_COMMON_CLASS);
+  }
+
+  /**
+   * A promise that resolves when the rendered content is ready.
+   */
+  get ready(): Promise<void> {
+    return Promise.resolve(undefined);
   }
 }
 
@@ -114,23 +121,31 @@ class RenderedHTML extends RenderedHTMLCommon {
     }
     Private.appendHtml(this.node, source);
     if (options.resolver) {
-      this._urlResolved = Private.handleUrls(this.node, options.resolver,
-                                             options.linkHandler);
+      Private.handleUrls(this.node, options.resolver, options.linkHandler).then(() => {
+        this._ready.resolve(undefined);
+      });
+    } else {
+      this._ready.resolve(undefined);
     }
+  }
+
+  /**
+   * A promise that resolves when the rendered content is ready.
+   */
+  get ready(): Promise<void> {
+    return this._ready.promise;
   }
 
   /**
    * A message handler invoked on an `'after-attach'` message.
    */
   onAfterAttach(msg: Message): void {
-    if (this._urlResolved) {
-      this._urlResolved.then( () => { typeset(this.node); });
-    } else {
+    this.ready.then(() => {
       typeset(this.node);
-    }
+    });
   }
 
-  private _urlResolved: Promise<void> = null;
+  private _ready = new PromiseDelegate<void>();
 }
 
 
@@ -162,34 +177,36 @@ class RenderedMarkdown extends RenderedHTMLCommon {
         content = options.sanitizer.sanitize(content);
       }
       Private.appendHtml(this.node, content);
-      if (options.resolver) {
-        this._urlResolved = Private.handleUrls(this.node, options.resolver,
-                                               options.linkHandler);
-      }
       Private.headerAnchors(this.node);
       this.fit();
-      this._rendered = true;
-      if (this.isAttached) {
-        if (this._urlResolved) {
-          this._urlResolved.then(() => { typeset(this.node); });
-        } else {
-          typeset(this.node);
-        }
+      if (options.resolver) {
+        Private.handleUrls(
+          this.node, options.resolver, options.linkHandler).then(() => {
+            this._ready.resolve(undefined);
+        });
+      } else {
+        this._ready.resolve(undefined);
       }
     });
+  }
+
+  /**
+   * A promise that resolves when the rendered content is ready.
+   */
+  get ready(): Promise<void> {
+    return this._ready.promise;
   }
 
   /**
    * A message handler invoked on an `'after-attach'` message.
    */
   onAfterAttach(msg: Message): void {
-    if (this._rendered) {
+    this.ready.then(() => {
       typeset(this.node);
-    }
+    });
   }
 
-  private _rendered = false;
-  private _urlResolved : Promise<void> = null;
+  private _ready = new PromiseDelegate<void>();
 }
 
 
@@ -206,6 +223,13 @@ class RenderedLatex extends Widget {
     let source = Private.getSource(options);
     this.node.textContent = source;
     this.addClass(LATEX_CLASS);
+  }
+
+  /**
+   * A promise that resolves when the rendered content is ready.
+   */
+  get ready(): Promise<void> {
+    return Promise.resolve(undefined);
   }
 
   /**
@@ -243,6 +267,13 @@ class RenderedImage extends Widget {
     this.node.appendChild(img);
     this.addClass(IMAGE_CLASS);
   }
+
+  /**
+   * A promise that resolves when the rendered content is ready.
+   */
+  get ready(): Promise<void> {
+    return Promise.resolve(undefined);
+  }
 }
 
 
@@ -266,6 +297,13 @@ class RenderedText extends Widget {
       this.addClass(ERROR_CLASS);
     }
   }
+
+  /**
+   * A promise that resolves when the rendered content is ready.
+   */
+  get ready(): Promise<void> {
+    return Promise.resolve(undefined);
+  }
 }
 
 
@@ -286,6 +324,13 @@ class RenderedJavaScript extends Widget {
     this.node.appendChild(s);
     this.addClass(JAVASCRIPT_CLASS);
   }
+
+  /**
+   * A promise that resolves when the rendered content is ready.
+   */
+  get ready(): Promise<void> {
+    return Promise.resolve(undefined);
+  }
 }
 
 
@@ -305,14 +350,35 @@ class RenderedSVG extends Widget {
     if (!svgElement) {
       throw new Error('SVGRender: Error: Failed to create <svg> element');
     }
-    if (options.resolver) {
-      this._urlResolved = Private.handleUrls(this.node, options.resolver,
-                                             options.linkHandler);
-    }
     this.addClass(SVG_CLASS);
+    if (options.resolver) {
+      Private.handleUrls(
+        this.node, options.resolver, options.linkHandler
+      ).then(() => {
+        this._ready.resolve(undefined);
+      });
+    } else {
+      this._ready.resolve(undefined);
+    }
   }
 
-  private _urlResolved: Promise<void> = null;
+  /**
+   * A promise that resolves when the rendered content is ready.
+   */
+  get ready(): Promise<void> {
+    return this._ready.promise;
+  }
+
+  /**
+   * A message handler invoked on an `'after-attach'` message.
+   */
+  onAfterAttach(msg: Message): void {
+    this.ready.then(() => {
+      typeset(this.node);
+    });
+  }
+
+  private _ready = new PromiseDelegate<void>();
 }
 
 
@@ -333,6 +399,13 @@ class RenderedPDF extends Widget {
     a.href = `data:application/pdf;base64,${source}`;
     this.node.appendChild(a);
     this.addClass(PDF_CLASS);
+  }
+
+  /**
+   * A promise that resolves when the rendered content is ready.
+   */
+  get ready(): Promise<void> {
+    return Promise.resolve(undefined);
   }
 }
 
