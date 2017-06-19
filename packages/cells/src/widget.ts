@@ -548,7 +548,7 @@ class CodeCell extends Cell {
   }
 
   /**
-   * The view state of input being collapsed.
+   * The view state of output being collapsed.
    */
   get outputHidden(): boolean {
     return this._outputHidden;
