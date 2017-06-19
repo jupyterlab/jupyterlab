@@ -20,7 +20,7 @@ import embed = require('vega-embed');
 
 const VEGA_CLASS = 'jp-RenderedVega';
 
-
+export
 class RenderedVega extends Widget {
 
   constructor(options: RenderMime.IRenderOptions) {
@@ -63,12 +63,6 @@ class RenderedVega extends Widget {
 
 }
 
-export
-namespace MimeRenderer {
-  
-  export
-  const widget: Widget = RenderedVega;
 
-  export
-  const mimeType: string = 'application/vnd.vega.v2+json';
-}
+export
+const mimeType: string = 'application/vnd.vega.v2+json';

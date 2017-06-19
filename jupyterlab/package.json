@@ -137,7 +137,7 @@
       "@jupyterlab/terminal-extension",
       "@jupyterlab/theme-light-extension",
       "@jupyterlab/tooltip-extension",
-      "@jupyterlab/vega-extension",
+      "@jupyterlab/vega-extension"
     ],
     "singletonPackages": [
       "@jupyterlab/application",
