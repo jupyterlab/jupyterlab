@@ -412,6 +412,7 @@ class MimeRenderer extends Widget {
    */
   constructor(options: MimeRenderer.IOptions) {
     super();
+    this.addClass('jp-MimeRenderer');
     let layout = this.layout = new PanelLayout();
     let toolbar = new Widget();
     toolbar.addClass('jp-Toolbar');
@@ -425,12 +426,16 @@ class MimeRenderer extends Widget {
 
     context.pathChanged.connect(this._onPathChanged, this);
 
-    // Throttle the rendering rate of the widget.
-    this._monitor = new ActivityMonitor({
-      signal: context.model.contentChanged,
-      timeout: options.renderTimeout
+    this._context.ready.then(() => {
+      this._render();
+
+      // Throttle the rendering rate of the widget.
+      this._monitor = new ActivityMonitor({
+        signal: context.model.contentChanged,
+        timeout: RENDER_TIMEOUT
+      });
+      this._monitor.activityStopped.connect(this.update, this);
     });
-    this._monitor.activityStopped.connect(this.update, this);
   }
 
   /**
@@ -470,6 +475,13 @@ class MimeRenderer extends Widget {
    * Handle an `update-request` message to the widget.
    */
   protected onUpdateRequest(msg: Message): void {
+    this._render();
+  }
+
+  /**
+   * Render the mime content.
+   */
+  private _render(): void {
     let context = this._context;
     let model = context.model;
     let layout = this.layout as PanelLayout;
