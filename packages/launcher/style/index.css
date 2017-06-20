@@ -72,10 +72,10 @@
   display: flex;
   flex-direction: column;
   cursor: pointer;
-  width: 112px;
+  width: 100px;
   border: 1px solid var(--md-grey-400);
   background: var(--jp-layout-color0);
-  height: 112px;
+  height: 100px;
   margin: 8px;
   box-shadow: 0px 1px 1px 1px rgba(0,0,0,.08);
   padding: 12px;
@@ -93,10 +93,10 @@
   vertical-align: middle;
   flex: 0 0 auto;
   margin: 0 auto;
-  min-height: 80px;
-  min-width: 64px;
-  max-width: 64px;
-  background-size: 64px 80px;
+  min-height: 68px;
+  min-width: 52px;
+  max-width: 52px;
+  background-size: 52px 68px;
   background-repeat: no-repeat;
   cursor: pointer;
 }
