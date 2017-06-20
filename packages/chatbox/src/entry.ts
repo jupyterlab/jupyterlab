@@ -68,9 +68,9 @@ class ChatEntry extends Widget {
 
     this.cell = options.cell;
 
+    this._badge.node.style.backgroundColor = `rgba(${r}, ${g}, ${b}, 1)`;
+
     if (!options.isMe) {
-      this._badge.node.style.backgroundColor = `rgba(${r}, ${g}, ${b}, 1)`;
-      this.cell.node.style.border = "1px solid " + `rgba(${r}, ${g}, ${b}, 1)`;
       this._badge.addClass(CHAT_BADGE_RECEIVED_CLASS);
       this.cell.addClass(CHAT_ENTRY_RECEIVED_CLASS);
     }

@@ -59,13 +59,13 @@
 .jp-Chatbox-content .jp-Cell {
   margin: 5px;
   background-color: var(--jp-layout-color1);
+  border: 1px solid var(--md-grey-400);
   border-radius: 10px;
   flex-grow: 1;
 }
 
 .jp-Chatbox .jp-ChatEntry .p-Widget {
   cursor: move;
-  border: 1px solid var(--md-grey-400);
 }
 
 .jp-Chatbox .jp-ChatEntry {
@@ -76,21 +76,32 @@
 }
 
 .jp-Chatbox .jp-ChatEntry-badge {
+  color: var(--jp-layout-color1);
   background-color: var(--jp-layout-color1);
   border-radius: 16px;
   height: 28px;
   width: 28px;
   text-align: center;
   line-height: 1.8;
+  margin-left: 4px;
 }
 
-.jp-ChatEntry-receieved {
+.p-Widget.jp-Cell.jp-MarkdownCell.jp-ChatEntry-receieved {
   background-color: var(--md-grey-100);
+  overflow: visible;
+}
+
+.p-Widget.jp-Cell.jp-MarkdownCell.jp-ChatEntry-receieved::before {
+  content: url(../../theming/style/icons/jupyter/chat-tail.png);
+  position: absolute;
+  transform: scale(.04);
+  left: -203px;
+  bottom: -146px;
 }
 
 .p-Widget.jp-ChatEntry-badge.jp-ChatEntry-received-badge {
-  color: var(--jp-layout-color1);
-  margin-right: 4px;
+  margin-right: 12px;
+  margin-left: 0px;
 }
 
 .jp-Chatbox-content .jp-InputArea {
