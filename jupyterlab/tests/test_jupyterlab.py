@@ -127,8 +127,9 @@ class TestExtension(TestCase):
         assert '@jupyterlab/python-tests' in _get_extensions(self.app_dir)
 
     def test_install_incompatible(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError) as excinfo:
             install_extension(self.incompat_dir)
+        assert 'Conflicting Dependencies' in str(excinfo.value)
 
     def test_install_failed(self):
         path = self.mock_package
@@ -180,8 +181,9 @@ class TestExtension(TestCase):
         assert not data['name'] in linked
 
     def test_link_incompatible(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError) as excinfo:
             install_extension(self.incompat_dir)
+        assert 'Conflicting Dependencies' in str(excinfo.value)
 
     def test_unlink_package(self):
         target = self.source_dir
