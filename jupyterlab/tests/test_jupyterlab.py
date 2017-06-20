@@ -77,6 +77,7 @@ class TestExtension(TestCase):
         self.source_dir = pjoin(here, 'mockextension')
         self.incompat_dir = pjoin(here, 'mockextension-incompat')
         self.mock_package = pjoin(here, 'mockpackage')
+        self.mime_renderer_dir = pjoin(here, 'mock-mimeextension')
 
         self.patches = []
         p = patch.dict('os.environ', {
@@ -126,10 +127,16 @@ class TestExtension(TestCase):
         assert glob.glob(path)
         assert '@jupyterlab/python-tests' in _get_extensions(self.app_dir)
 
+    def test_install_mime_renderer(self):
+        install_extension(self.mime_renderer_dir)
+        assert '@jupyterlab/mime-extension-test' in _get_extensions(self.app_dir)
+
+        uninstall_extension('@jupyterlab/mime-extension-test')
+        assert '@jupyterlab/mime-extension-test' not in _get_extensions(self.app_dir)
+
     def test_install_incompatible(self):
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(ValueError):
             install_extension(self.incompat_dir)
-        assert 'Conflicting Dependencies' in str(excinfo.value)
 
     def test_install_failed(self):
         path = self.mock_package
@@ -168,6 +175,17 @@ class TestExtension(TestCase):
         assert '@jupyterlab/python-tests' in linked
         assert '@jupyterlab/python-tests' in _get_extensions(self.app_dir)
 
+    def test_link_mime_renderer(self):
+        link_package(self.mime_renderer_dir)
+        linked = _get_linked_packages().keys()
+        assert '@jupyterlab/mime-extension-test' in linked
+        assert '@jupyterlab/mime-extension-test' in _get_extensions(self.app_dir)
+
+        unlink_package('@jupyterlab/mime-extension-test')
+        linked = _get_linked_packages().keys()
+        assert '@jupyterlab/mime-extension-test' not in linked
+        assert '@jupyterlab/mime-extension-test' not in _get_extensions(self.app_dir)
+
     def test_link_package(self):
         path = self.mock_package
         link_package(path)
@@ -181,9 +199,8 @@ class TestExtension(TestCase):
         assert not data['name'] in linked
 
     def test_link_incompatible(self):
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(ValueError):
             install_extension(self.incompat_dir)
-        assert 'Conflicting Dependencies' in str(excinfo.value)
 
     def test_unlink_package(self):
         target = self.source_dir
