@@ -19,7 +19,9 @@
 
 .jp-ChatboxPanel .jp-ChatboxDocumentInfo {
   display: flex;
-  padding: 5px;
+  padding: 8px;
+  background: var(--md-grey-100);
+  border-bottom: 1px solid VAR(--jp-border-color1);
 }
 
 .jp-ChatboxPanel .jp-ChatboxDocumentInfo-name {
@@ -35,7 +37,7 @@
 }
 
 .jp-Chatbox-content {
-  background-color: var(--jp-layout-color2);
+  background-color: var(--jp-layout-color0);
   flex: 1 1 auto;
   overflow: auto;
 }
@@ -63,20 +65,32 @@
 
 .jp-Chatbox .jp-ChatEntry .p-Widget {
   cursor: move;
+  border: 1px solid var(--md-grey-400);
 }
 
 .jp-Chatbox .jp-ChatEntry {
   display: flex;
   flex-direction: row;
-  align-items: center;
-  padding: 2px;
+  align-items: baseline;
+  padding: 4px 8px;
 }
 
 .jp-Chatbox .jp-ChatEntry-badge {
   background-color: var(--jp-layout-color1);
-  border-radius: 10px;
-  padding: 2px;
-  min-width: 22px;
+  border-radius: 16px;
+  height: 28px;
+  width: 28px;
+  text-align: center;
+  line-height: 1.8;
+}
+
+.jp-ChatEntry-receieved {
+  background-color: var(--md-grey-100);
+}
+
+.p-Widget.jp-ChatEntry-badge.jp-ChatEntry-received-badge {
+  color: var(--jp-layout-color1);
+  margin-right: 4px;
 }
 
 .jp-Chatbox-content .jp-InputArea {

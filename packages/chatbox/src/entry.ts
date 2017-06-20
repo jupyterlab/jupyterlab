@@ -28,6 +28,16 @@ const CHAT_ENTRY_CLASS = 'jp-ChatEntry';
  */
 const CHAT_BADGE_CLASS = 'jp-ChatEntry-badge';
 
+/**
+ * The class name added to other user's chatbox entries
+ */
+const CHAT_ENTRY_RECEIVED_CLASS = 'jp-ChatEntry-receieved';
+
+/**
+ * The class name added to other user's chatbox badges
+ */
+const CHAT_BADGE_RECEIVED_CLASS = 'jp-ChatEntry-received-badge';
+
 
 /**
  * A chat entry widget, which hosts a user badge and a markdown cell.
@@ -59,13 +69,20 @@ class ChatEntry extends Widget {
     this.cell = options.cell;
 
     if (!options.isMe) {
-      this._badge.node.style.backgroundColor = `rgba(${r}, ${g}, ${b}, 0.1)`;
-      this.cell.node.style.backgroundColor = `rgba(${r}, ${g}, ${b}, 0.1)`;
+      this._badge.node.style.backgroundColor = `rgba(${r}, ${g}, ${b}, 1)`;
+      this.cell.node.style.border = "1px solid " + `rgba(${r}, ${g}, ${b}, 1)`;
+      this._badge.addClass(CHAT_BADGE_RECEIVED_CLASS);
+      this.cell.addClass(CHAT_ENTRY_RECEIVED_CLASS);
     }
 
     let layout = this.layout as PanelLayout;
-    layout.addWidget(this._badge);
-    layout.addWidget(this.cell);
+    if (options.isMe) {
+      layout.addWidget(this.cell);
+      layout.addWidget(this._badge);
+    } else {
+      layout.addWidget(this._badge);
+      layout.addWidget(this.cell);
+    }
   }
 
   /**
