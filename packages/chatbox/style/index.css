@@ -47,6 +47,7 @@
   flex: 0 0 auto;
   overflow: auto;
   border-top: var(--jp-border-width) solid var(--jp-border-color1);
+  background-color: var(--md-grey-100);
 }
 
 /**
@@ -91,8 +92,13 @@
   overflow: visible;
 }
 
+.p-Widget.jp-Cell.jp-MarkdownCell.jp-ChatEntry-receieved {
+  background-color: var(--md-grey-100);
+  overflow: visible;
+}
+
 .p-Widget.jp-Cell.jp-MarkdownCell.jp-ChatEntry-receieved::before {
-  content: url(../../theming/style/icons/jupyter/chat-tail.png);
+  content: url(../../theming/style/icons/jupyter/receive-chat-tail.png);
   position: absolute;
   transform: scale(.04);
   left: -203px;
@@ -119,4 +125,8 @@
 .jp-Chatbox-input .jp-Chatbox-prompt .jp-InputArea {
   height: 100%;
   min-height: 100%;
+}
+
+.jp-Chatbox-input .jp-Cell-inputArea .jp-InputArea-editor {
+  border: 1px solid #9E9E9E;
 }
