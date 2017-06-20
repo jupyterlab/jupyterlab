@@ -91,8 +91,8 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
    * Update the setting values.
    */
   function updateSettings(settings: ISettingRegistry.ISettings): void {
-    keyMap = settings.get('keyMap') as string | null || keyMap;
-    theme = settings.get('theme') as string | null || theme;
+    keyMap = settings.get('keyMap').composite as string | null || keyMap;
+    theme = settings.get('theme').composite as string | null || theme;
   }
 
   /**

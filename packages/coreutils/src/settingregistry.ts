@@ -299,17 +299,20 @@ class SettingRegistry {
    *
    * @returns A promise that resolves when the setting is retrieved.
    */
-  get(plugin: string, key: string): Promise<JSONValue> {
+  get(plugin: string, key: string): Promise<{ composite: JSONValue, user: JSONValue }> {
     const plugins = this._plugins;
 
     if (plugin in plugins) {
-      const bundle = plugins[plugin] && plugins[plugin].data;
-      const value = bundle && bundle[level] && bundle[level][key] || null;
+      const data = plugins[plugin].data;
+      const result = {
+        composite: copy(data.composite[key]),
+        user: copy(data.user[key])
+      };
 
-      return Promise.resolve(copy(value));
+      return Promise.resolve(result);
     }
 
-    return this.load(plugin).then(() => this.get(plugin, key, level));
+    return this.load(plugin).then(() => this.get(plugin, key));
   }
 
   /**
@@ -326,8 +329,7 @@ class SettingRegistry {
 
     // If the plugin exists, resolve.
     if (plugin in plugins) {
-      const content = plugins[plugin];
-      const settings = new Settings({ content, plugin, registry });
+      const settings = new Settings({ plugin: plugins[plugin], registry });
 
       return Promise.resolve(settings);
     }
@@ -358,8 +360,7 @@ class SettingRegistry {
       plugins[plugin] = result;
 
       return new Settings({
-        content: copy(plugins[plugin]) as ISettingRegistry.IPlugin,
-        plugin,
+        plugin: copy(plugins[plugin]) as ISettingRegistry.IPlugin,
         registry: this
       });
     });
@@ -553,7 +554,10 @@ class Settings implements ISettingRegistry.ISettings {
    * plugin settings that is synchronized with the registry.
    */
   get(key: string): { composite: JSONValue, user: JSONValue } {
-    return { composite: this._composite[key], user: this._user[key] };
+    return {
+      composite: copy(this._composite[key]),
+      user: copy(this._user[key])
+    };
   }
 
   /**
