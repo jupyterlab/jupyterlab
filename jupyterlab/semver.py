@@ -32,6 +32,10 @@ import re
 
 SEMVER_SPEC_VERSION = '2.0.0'
 
+try:
+    string_type = basestring # Python 2
+except NameError:
+    string_type = str # Python 3
 
 class _R(object):
     def __init__(self, i):
@@ -311,7 +315,7 @@ def semver(version, loose):
             return version
         else:
             version = version.version
-    elif not isinstance(version, str):  # xxx:
+    elif not isinstance(version, string_type):  # xxx:
         raise ValueError("Invalid Version: {}".format(version))
 
     """
