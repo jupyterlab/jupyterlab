@@ -550,7 +550,7 @@ namespace CodeEditor {
     /**
      * Set to false for horizontal scrolling.
      */
-    wordWrap: boolean;
+    lineWrap: boolean;
 
     /**
      * Whether the editor is read-only.
@@ -584,7 +584,7 @@ namespace CodeEditor {
   export
   let defaultConfig: IConfig = {
     lineNumbers: false,
-    wordWrap: true,
+    lineWrap: true,
     readOnly: false,
     tabSize: 4,
     insertSpaces: true,

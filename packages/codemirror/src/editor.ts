@@ -934,7 +934,7 @@ namespace CodeMirrorEditor {
      * option is set to true, it will be covered by an element with class
      * CodeMirror-gutter-filler.
      */
-    coverGutterNextToScrollbar: boolean;
+    coverGutterNextToScrollbar?: boolean;
 
     /**
      * Explicitly set the line separator for the editor.
@@ -944,7 +944,7 @@ namespace CodeMirrorEditor {
      * only be split on that string, and output will, by default, use that
      * same separator.
      */
-    lineSeparator: string;
+    lineSeparator?: string;
 
     /**
      * Chooses a scrollbar implementation. The default is "native", showing
@@ -952,13 +952,13 @@ namespace CodeMirrorEditor {
      * which completely hides the scrollbars. Addons can implement additional
      * scrollbar models.
      */
-    scrollbarStyle: string;
+    scrollbarStyle?: string;
 
     /**
      * When enabled, which is the default, doing copy or cut when there is no
      * selection will copy or cut the whole lines that have cursors on them.
      */
-    lineWiseCopyCut: boolean;
+    lineWiseCopyCut?: boolean;
   }
 
   /**
@@ -969,8 +969,8 @@ namespace CodeMirrorEditor {
     ...CodeEditor.defaultConfig,
     mode: 'null',
     theme: 'jupyter',
-    smartIndent: true,
-    electricChars: true,
+    smartIndent: false,
+    electricChars: false,
     keyMap: 'default',
     extraKeys: null,
     gutters: Object.freeze([]),
@@ -1060,10 +1060,12 @@ namespace Private {
   export
   function getOption<K extends keyof CodeMirrorEditor.IConfig>(editor: CodeMirror.Editor, option: K): CodeMirrorEditor.IConfig[K] {
     switch (option) {
-    case 'wordWrap':
+    case 'lineWrap':
       return editor.getOption('lineWrapping');
     case 'insertSpaces':
       return !editor.getOption('indentWithTabs');
+    case 'tabSize':
+      return editor.getOption('indentUnit');
     case 'autoClosingBrackets':
       return editor.getOption('autoCloseBrackets');
     default:
@@ -1077,12 +1079,11 @@ namespace Private {
   export
   function setOption<K extends keyof CodeMirrorEditor.IConfig>(editor: CodeMirror.Editor, option: K, value: CodeMirrorEditor.IConfig[K]): void {
     switch (option) {
-    case 'wordWrap':
+    case 'lineWrap':
       editor.setOption('lineWrapping', value);
       break;
     case 'tabSize':
-      editor.setOption('indentSize', value);
-      editor.setOption('tabSize', value);
+      editor.setOption('indentUnit', value);
       break;
     case 'insertSpaces':
       editor.setOption('indentWithTabs', !value);

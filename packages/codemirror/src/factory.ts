@@ -19,7 +19,7 @@ class CodeMirrorEditorFactory implements IEditorFactoryService {
    * Construct an IEditorFactoryService for CodeMirrorEditors.
    */
   constructor(defaults: Partial<CodeMirrorEditor.IConfig> = {}) {
-    this.inlineCodeMirrorOptions = {
+    this.inlineCodeMirrorConfig = {
       ...CodeMirrorEditor.defaultConfig,
       extraKeys: {
         'Cmd-Right': 'goLineRight',
@@ -34,7 +34,7 @@ class CodeMirrorEditorFactory implements IEditorFactoryService {
       },
       ...defaults
     };
-    this.documentCodeMirrorOptions = {
+    this.documentCodeMirrorConfig = {
       ...CodeMirrorEditor.defaultConfig,
       extraKeys: {
         'Tab': 'indentMore',
@@ -49,17 +49,23 @@ class CodeMirrorEditorFactory implements IEditorFactoryService {
    * Create a new editor for inline code.
    */
   newInlineEditor(options: CodeEditor.IOptions): CodeEditor.IEditor {
-    return new CodeMirrorEditor({...this.inlineCodeMirrorOptions, ...options});
+    return new CodeMirrorEditor({
+      ...options,
+      config: { ...this.inlineCodeMirrorConfig, ...options.config || {} }
+    });
   }
 
   /**
    * Create a new editor for a full document.
    */
   newDocumentEditor(options: CodeEditor.IOptions): CodeEditor.IEditor {
-    return new CodeMirrorEditor({...this.documentCodeMirrorOptions, ...options});
+    return new CodeMirrorEditor({
+      ...options,
+      config: { ...this.documentCodeMirrorConfig, ...options.config || {} }
+    });
   }
 
-  protected inlineCodeMirrorOptions: Partial<CodeMirrorEditor.IConfig>;
-  protected documentCodeMirrorOptions: Partial<CodeMirrorEditor.IConfig>;
+  protected inlineCodeMirrorConfig: Partial<CodeMirrorEditor.IConfig>;
+  protected documentCodeMirrorConfig: Partial<CodeMirrorEditor.IConfig>;
 
 }

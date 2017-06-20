@@ -53,7 +53,7 @@ namespace CommandIDs {
   const lineNumbers = 'editor:line-numbers';
 
   export
-  const wordWrap = 'editor:word-wrap';
+  const lineWrap = 'editor:line-wrap';
 
   export
   const changeTabs = 'editor:change-tabs';
@@ -108,7 +108,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   const hasWidget = () => tracker.currentWidget !== null;
 
   let {
-    lineNumbers, wordWrap, matchBrackets, autoClosingBrackets
+    lineNumbers, lineWrap, matchBrackets, autoClosingBrackets
   } = CodeEditor.defaultConfig;
 
   // Handle state restoration.
@@ -128,8 +128,8 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
     matchBrackets = cached === null ? matchBrackets : !!cached;
     cached = settings.get('autoClosingBrackets') as boolean | null;
     autoClosingBrackets = cached === null ? autoClosingBrackets : !!cached;
-    cached = settings.get('wordWrap') as boolean | null;
-    wordWrap = cached === null ? wordWrap : !!cached;
+    cached = settings.get('lineWrap') as boolean | null;
+    lineWrap = cached === null ? lineWrap : !!cached;
   }
 
   /**
@@ -147,7 +147,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   function updateWidget(widget: FileEditor): void {
     let editor = widget.editor;
     editor.setOption('lineNumbers', lineNumbers);
-    editor.setOption('wordWrap', wordWrap);
+    editor.setOption('lineWrap', lineWrap);
     editor.setOption('matchBrackets', matchBrackets);
     editor.setOption('autoClosingBrackets', autoClosingBrackets);
   }
@@ -190,16 +190,16 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
     label: 'Line Numbers'
   });
 
-  commands.addCommand(CommandIDs.wordWrap, {
+  commands.addCommand(CommandIDs.lineWrap, {
     execute: () => {
-      wordWrap = !wordWrap;
+      lineWrap = !lineWrap;
       tracker.forEach(widget => {
-        widget.editor.setOption('wordWrap', wordWrap);
+        widget.editor.setOption('lineWrap', lineWrap);
       });
-      return settingRegistry.set(id, 'wordWrap', wordWrap);
+      return settingRegistry.set(id, 'lineWrap', lineWrap);
     },
     isEnabled: hasWidget,
-    isToggled: () => wordWrap,
+    isToggled: () => lineWrap,
     label: 'Word Wrap'
   });
 
@@ -212,8 +212,8 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
       }
       let editor = widget.editor;
       let size = args['size'] as number || 4;
-      let tabs = !!args['tabs'];
-      editor.setOption('insertSpaces', !tabs);
+      let insertSpaces = !!args['insertSpaces'];
+      editor.setOption('insertSpaces', insertSpaces);
       editor.setOption('tabSize', size);
     },
     isEnabled: hasWidget,
@@ -222,10 +222,10 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
       if (!widget) {
         return false;
       }
-      let tabs = !!args['tabs'];
+      let insertSpaces = !!args['insertSpaces'];
       let size = args['size'] as number || 4;
       let editor = widget.editor;
-      if (editor.getOption('insertSpaces') === tabs) {
+      if (editor.getOption('insertSpaces') !== insertSpaces) {
         return false;
       }
       return editor.getOption('tabSize') === size;

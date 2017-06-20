@@ -480,7 +480,7 @@ class CodeCell extends Cell {
     let model = this.model;
 
     // Code cells should not wrap lines.
-    this.editor.setOption('wordWrap', false);
+    this.editor.setOption('lineWrap', false);
 
     // Insert the output before the cell footer.
     let outputWrapper = this._outputWrapper = new Panel();
@@ -670,7 +670,6 @@ class MarkdownCell extends Cell {
     super(options);
     this.addClass(MARKDOWN_CELL_CLASS);
     this._rendermime = options.rendermime;
-    this.editor.setOption('wordWrap', true);
 
     // Throttle the rendering rate of the widget.
     this._monitor = new ActivityMonitor({

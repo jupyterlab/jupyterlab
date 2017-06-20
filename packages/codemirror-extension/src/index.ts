@@ -244,14 +244,16 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
       });
     });
 
-    let args: JSONObject = { tabs: true, size: 4, name: 'Indent with Tab' };
+    let args: JSONObject = {
+      insertSpaces: false, size: 4, name: 'Indent with Tab'
+    };
     let command = 'editor:change-tabs';
     tabMenu.addItem({ command, args });
     palette.addItem({ command, args, category: 'Editor' });
 
     for (let size of [1, 2, 4, 8]) {
       let args: JSONObject = {
-        tabs: false, size, name: `Spaces: ${size} `
+        insertSpaces: true, size, name: `Spaces: ${size} `
       };
       tabMenu.addItem({ command, args });
       palette.addItem({ command, args, category: 'Editor' });
@@ -261,7 +263,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     menu.addItem({ type: 'submenu', submenu: tabMenu });
     menu.addItem({ type: 'separator' });
     menu.addItem({ command: 'editor:line-numbers' });
-    menu.addItem({ command: 'editor:word-wrap' });
+    menu.addItem({ command: 'editor:line-wrap' });
     menu.addItem({ command: 'editor:match-brackets' });
     menu.addItem({ command: 'editor:autoclosing-brackets' });
     menu.addItem({ type: 'submenu', submenu: keyMapMenu });
