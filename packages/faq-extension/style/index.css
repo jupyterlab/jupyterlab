@@ -11,17 +11,16 @@
 }
 
 #faq-header {
-  width: 412px;
-  display: flex;
   margin: 40px auto 40px auto;
   text-align: center;
+  max-width: 84%;
 }
 
 
 .jp-FAQ-content {
   margin: 0 auto 70px auto;
   display: block;
-  width: 94%;
+  width: 84%;
   max-width: 700px;
 }
 
@@ -29,15 +28,14 @@
 .jp-FAQ-h1 {
   font-size: 26px;
   font-weight: 400;
-  color: #313940;
-  margin: 10px 0 0 20px;
+  color: var(--jp-ui-font-color0);
 }
 
 
 .jp-FAQ-h2 {
-  font-size: 14px;
-  font-weight: 400;
-  color: var(--md-grey-500);
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--jp-ui-font-color0);
   margin: 28px 0 0 0;
   margin-bottom: 8px;
 }
@@ -63,15 +61,15 @@
 
 .jp-FAQ-question {
   list-style-type: none;
-  padding: 4px 16px;
-  margin-left: -16px;
+  padding: 4px 0px;
   display: inline-block;
+  font-weight: 500;
 }
 
 
 .jp-FAQ-question > a {
-  font-size: 20px;
-  color: var(--jp-ui-font-color0);
+  font-size: 16px;
+  color: var(--md-blue-700);
   font-weight: 400;
   line-height: 150%;
   list-style-type: none;
@@ -81,20 +79,15 @@
 }
 
 
-.jp-FAQ-question > a:hover {
-  color: var(--md-blue-500);
-}
-
-
 .jp-FAQ-answer{
   font-size: 15px;
-  font-weight: 200;
-  color: var(--md-grey-500);
+  font-weight: 400;
+  color: var(--jp-ui-font-color0);
   line-height: 160%;
-  border-left: 2px solid var(--md-grey-500);
-  padding-left: 25px;
+  border-left: 2px solid var(--md-blue-500);
+  padding-left: 24px;
   list-style-type: none;
-  margin: 15px 0 15px 20px;
+  margin: 12px 0 24px 20px;
 }
 
 
@@ -109,7 +102,6 @@
 
 
 li > jp-FAQ-answer {
-  color: var(--md-grey-500);
   text-decoration: none;
 }
 
@@ -117,6 +109,7 @@ li > jp-FAQ-answer {
 .jp-FAQ-title {
   color: var(--jp-ui-font-color0);
   display: block;
+  text-align: center;
 }
 
 
@@ -128,6 +121,9 @@ li > jp-FAQ-answer {
 
 
 .jp-QuestionMark.jp-FAQ-QuestionMark {
+  display: block;
   height: 49px;
   width: 49px;
+  margin: auto;
+  margin-bottom: 8px;
 }

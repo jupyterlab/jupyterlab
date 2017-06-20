@@ -87,7 +87,7 @@ const TITLE = 'Frequently Asked Questions';
 /**
  * Contain subheadings for each section.
  */
-const SUBHEADINGS = ['THE BASICS', 'FEATURES', 'DEVELOPER'];
+const SUBHEADINGS = ['JupyterLab Basics', 'Features', 'Developer'];
 
 /**
  * Contain questions for `the basics` section.
