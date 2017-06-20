@@ -1,6 +1,6 @@
 import {
-  RenderMime
-} from '@jupyterlab/rendermime';
+  JSONObject
+} from '@phosphor/coreutils';
 
 import {
   Message,
@@ -11,8 +11,13 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  JSONObject
-} from '@phosphor/coreutils';
+  RenderMime
+} from '@jupyterlab/rendermime';
+
+import {
+  DocumentRegistry
+} from '@jupyterlab/docregistry';
+
 
 import embed = require('vega-embed');
 
@@ -20,14 +25,11 @@ import embed = require('vega-embed');
 
 const VEGA_CLASS = 'jp-RenderedVega';
 
+export
+const VEGA_MIME_TYPE = 'application/vnd.vega.v2+json';
 
-// export
-// interface IRendererExtension {
-//   mimeType: string;
-//   renderer: RenderMime.IRenderer;
-//   index?: string;
-//   widgetFactoryOptions: I
-// }
+export
+const VEGALITE_MIME_TYPE = 'application/vnd.vegalite.v1+json';
 
 export
 class RenderedVega extends Widget {
@@ -73,5 +75,63 @@ class RenderedVega extends Widget {
 }
 
 
+/**
+ * A mime renderer for GeoJSON.
+ */
 export
-const mimeType: string = 'application/vnd.vega.v2+json';
+class VegaRenderer implements RenderMime.IRenderer {
+  /**
+   * The mimeTypes this renderer accepts.
+   */
+  mimeTypes = [VEGA_MIME_TYPE, VEGALITE_MIME_TYPE];
+
+  /**
+   * Whether the renderer can render given the render options.
+   */
+  canRender(options: RenderMime.IRenderOptions): boolean {
+    return this.mimeTypes.indexOf(options.mimeType) !== -1;
+  }
+
+  /**
+   * Render the transformed mime bundle.
+   */
+  render(options: RenderMime.IRenderOptions): Widget {
+    return new RenderedVega(options);
+  }
+
+  /**
+   * Whether the renderer will sanitize the data given the render options.
+   */
+  wouldSanitize(options: RenderMime.IRenderOptions): boolean {
+    return !options.model.trusted;
+  }
+}
+
+
+export
+interface IRendererExtension {
+  mimeType: string;
+  renderer: RenderMime.IRenderer;
+  rendererIndex?: number;
+  widgetFactoryOptions: DocumentRegistry.IWidgetFactoryOptions;
+}
+
+
+const extensions: IRendererExtension | IRendererExtension[] = [
+  {
+    mimeType: VEGA_MIME_TYPE,
+    renderer: VegaRenderer,
+    widgetFactoryOptions: {
+
+    }
+  },
+  {
+    mimeType: VEGALITE_MIME_TYPE,
+    renderer: VegaRenderer,
+    widgetFactoryOptions: {
+      
+    }
+  }
+];
+
+export default extensions;
