@@ -20,6 +20,15 @@ import embed = require('vega-embed');
 
 const VEGA_CLASS = 'jp-RenderedVega';
 
+
+// export
+// interface IRendererExtension {
+//   mimeType: string;
+//   renderer: RenderMime.IRenderer;
+//   index?: string;
+//   widgetFactoryOptions: I
+// }
+
 export
 class RenderedVega extends Widget {
 
