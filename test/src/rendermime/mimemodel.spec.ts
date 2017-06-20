@@ -4,10 +4,6 @@
 import expect = require('expect.js');
 
 import {
-  JSONExt
-} from '@phosphor/coreutils';
-
-import {
   MimeModel
 } from '@jupyterlab/rendermime';
 
@@ -18,10 +14,6 @@ describe('rendermime/mimemodel', () => {
 
   beforeEach(() => {
     model = new MimeModel();
-  });
-
-  afterEach(() => {
-    model.dispose();
   });
 
   describe('MimeModel', () => {
