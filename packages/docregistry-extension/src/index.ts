@@ -27,6 +27,7 @@ const plugin: JupyterLabPlugin<IDocumentRegistry> = {
       fileFormat: 'text'
     });
     registry.addCreator({ name: 'Text File', fileType: 'Text', });
+
     return registry;
   }
 };

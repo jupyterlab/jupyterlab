@@ -1,5 +1,6 @@
 require('es6-promise/auto');  // polyfill Promise on IE
 
+var RenderMime = require('@jupyterlab/rendermime').RenderMime;
 var PageConfig = require('@jupyterlab/coreutils').PageConfig;
 __webpack_public_path__ = PageConfig.getOption('publicUrl');
 
@@ -41,6 +42,15 @@ function main() {
     try {
         if (disabled.indexOf('{{this}}') === -1) {
             lab.registerPluginModule(require('{{this}}'));
+        }
+    } catch (e) {
+        console.error(e);
+    }
+    {{/each}}
+    {{#each jupyterlab_mime_extensions}}
+    try {
+        if (disabled.indexOf('{{this}}') === -1) {
+            RenderMime.registerExtensionModule(require('{{this}}'));
         }
     } catch (e) {
         console.error(e);

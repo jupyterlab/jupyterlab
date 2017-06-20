@@ -11,6 +11,9 @@
   "directories": {
     "lib": "lib/"
   },
+  "jupyerlab": {
+    "mimeExtension": true
+  },
   "dependencies": {
     "@jupyterlab/docregistry": "^0.7.0",
     "@jupyterlab/rendermime": "^0.7.0",

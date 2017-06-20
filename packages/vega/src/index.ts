@@ -17,10 +17,6 @@ import {
   RenderMime
 } from '@jupyterlab/rendermime';
 
-import {
-  DocumentRegistry
-} from '@jupyterlab/docregistry';
-
 /**
  * Import vega-embed in this manner due to how it is exported.
  */
@@ -28,23 +24,23 @@ import embed = require('vega-embed');
 
 
 /**
- * The CSS class to add to the Vega and Vega-Lite widget. 
+ * The CSS class to add to the Vega and Vega-Lite widget.
  */
 const VEGA_COMMON_CLASS = 'jp-RenderedVegaCommon';
 
 /**
- * The CSS class to add to the Vega. 
+ * The CSS class to add to the Vega.
  */
 const VEGA_CLASS = 'jp-RenderedVega';
 
 /**
- * The CSS class to add to the Vega-Lite. 
+ * The CSS class to add to the Vega-Lite.
  */
 const VEGALITE_CLASS = 'jp-RenderedVegaLite';
 
 /**
  * The MIME type for Vega.
- * 
+ *
  * #### Notes
  * The version of this follows the major version of Vega.
  */
@@ -53,7 +49,7 @@ const VEGA_MIME_TYPE = 'application/vnd.vega.v2+json';
 
 /**
  * The MIME type for Vega-Lite.
- * 
+ *
  * #### Notes
  * The version of this follows the major version of Vega-Lite.
  */
@@ -106,7 +102,7 @@ class RenderedVega extends Widget {
   private _renderVega(): void {
 
     let data = this._model.data.get(this._mimeType) as JSONObject;
-  
+
     let embedSpec = {
       mode: this._mode,
       spec: data
@@ -162,38 +158,13 @@ class VegaRenderer implements RenderMime.IRenderer {
 }
 
 
-/**
- * An interface for using a RenderMime.IRenderer for output and read-only documents.
- */
-export
-interface IRendererExtension {
-  /**
-   * The MIME type for the renderer, which is the output MIME type it will handle.
-   */
-  mimeType: string;
+const renderer = new VegaRenderer();
 
-  /**
-   * A renderer class to be registered to render the MIME type.
-   */
-  renderer: RenderMime.IRenderer;
-
-  /**
-   * The index passed to `RenderMime.addRenderer`.
-   */
-  rendererIndex?: number;
-
-  /**
-   * The options used for using the renderer for documents.
-   */
-  widgetFactoryOptions: DocumentRegistry.IWidgetFactoryOptions;
-}
-
-
-const extensions: IRendererExtension | IRendererExtension[] = [
+const extensions: RenderMime.IExtension | RenderMime.IExtension[] = [
   // Vega
   {
     mimeType: VEGA_MIME_TYPE,
-    renderer: VegaRenderer,
+    renderer,
     rendererIndex: 0,
     widgetFactoryOptions: {
       name: 'Vega',
@@ -205,7 +176,7 @@ const extensions: IRendererExtension | IRendererExtension[] = [
   // Vega-Lite
   {
     mimeType: VEGALITE_MIME_TYPE,
-    renderer: VegaRenderer,
+    renderer,
     rendererIndex: 0,
     widgetFactoryOptions: {
       name: 'Vega-Lite',

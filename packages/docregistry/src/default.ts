@@ -10,16 +10,32 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  JSONObject
+} from '@phosphor/coreutils';
+
+import {
+  Message
+} from '@phosphor/messaging';
+
+import {
   ISignal, Signal
 } from '@phosphor/signaling';
+
+import {
+  PanelLayout, Widget
+} from '@phosphor/widgets';
 
 import {
   CodeEditor
 } from '@jupyterlab/codeeditor';
 
 import {
-  IChangedArgs, IModelDB
+  ActivityMonitor, IChangedArgs, IModelDB
 } from '@jupyterlab/coreutils';
+
+import {
+  IRenderMime, MimeModel
+} from '@jupyterlab/rendermime';
 
 import {
   DocumentRegistry
@@ -382,4 +398,195 @@ abstract class ABCWidgetFactory<T extends DocumentRegistry.IReadyWidget, U exten
   private _fileExtensions: string[];
   private _defaultFor: string[];
   private _widgetCreated = new Signal<DocumentRegistry.IWidgetFactory<T, U>, T>(this);
+}
+
+
+
+/**
+ * A widget for rendered mimetype.
+ */
+export
+class MimeRenderer extends Widget {
+  /**
+   * Construct a new markdown widget.
+   */
+  constructor(options: MimeRenderer.IOptions) {
+    super();
+    let layout = this.layout = new PanelLayout();
+    let toolbar = new Widget();
+    toolbar.addClass('jp-Toolbar');
+    layout.addWidget(toolbar);
+    let context = options.context;
+    this.title.label = context.path.split('/').pop();
+    this._rendermime = options.rendermime;
+    this._rendermime.resolver = context;
+    this._context = context;
+    this._mimeType = options.mimeType;
+
+    context.pathChanged.connect(this._onPathChanged, this);
+
+    // Throttle the rendering rate of the widget.
+    this._monitor = new ActivityMonitor({
+      signal: context.model.contentChanged,
+      timeout: options.renderTimeout
+    });
+    this._monitor.activityStopped.connect(this.update, this);
+  }
+
+  /**
+   * The markdown widget's context.
+   */
+  get context(): DocumentRegistry.Context {
+    return this._context;
+  }
+
+  /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._monitor.dispose();
+    super.dispose();
+  }
+
+  /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this.node.tabIndex = -1;
+    this.node.focus();
+  }
+
+  /**
+   * Handle an `after-attach` message to the widget.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this.update();
+  }
+
+  /**
+   * Handle an `update-request` message to the widget.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    let context = this._context;
+    let model = context.model;
+    let layout = this.layout as PanelLayout;
+    let data: JSONObject = {};
+    data[this._mimeType] = model.toString();
+    let mimeModel = new MimeModel({ data, trusted: false });
+    let widget = this._rendermime.render(mimeModel);
+    if (layout.widgets.length === 2) {
+      // The toolbar is layout.widgets[0]
+      layout.widgets[1].dispose();
+    }
+    layout.addWidget(widget);
+  }
+
+  /**
+   * Handle a path change.
+   */
+  private _onPathChanged(): void {
+    this.title.label = this._context.path.split('/').pop();
+  }
+
+  private _context: DocumentRegistry.Context = null;
+  private _monitor: ActivityMonitor<any, any> = null;
+  private _rendermime: IRenderMime = null;
+  private _mimeType: string;
+}
+
+
+/**
+ * The namespace for MimeRenderer class statics.
+ */
+export
+namespace MimeRenderer {
+  /**
+   * The options used to initialize a MimeRenderer.
+   */
+  export
+  interface IOptions {
+    /**
+     * The document context.
+     */
+    context: DocumentRegistry.Context;
+
+    /**
+     * The rendermime instance.
+     */
+    rendermime: IRenderMime;
+
+    /**
+     * The mime type.
+     */
+    mimeType: string;
+
+    /**
+     * The render timeout.
+     */
+    renderTimeout: number;
+  }
+}
+
+
+/**
+ * An implementation of a widget factory for a rendered mimetype.
+ */
+export
+class MimeRendererFactory extends ABCWidgetFactory<MimeRenderer, DocumentRegistry.IModel> {
+  /**
+   * Construct a new markdown widget factory.
+   */
+  constructor(options: MimeRendererFactory.IOptions) {
+    super(options);
+    this._rendermime = options.rendermime;
+    this._mimeType = options.mimeType;
+    this._renderTimeout = options.renderTimeout || 1000;
+  }
+
+  /**
+   * Create a new widget given a context.
+   */
+  protected createNewWidget(context: DocumentRegistry.Context): MimeRenderer {
+    return new MimeRenderer({
+      context,
+      rendermime: this._rendermime.clone(),
+      mimeType: this._mimeType,
+      renderTimeout: this._renderTimeout
+    });
+  }
+
+  private _rendermime: IRenderMime = null;
+  private _mimeType: string;
+  private _renderTimeout: number;
+}
+
+
+/**
+ * The namespace for MimeRendererFactory class statics.
+ */
+export
+namespace MimeRendererFactory {
+  /**
+   * The options used to initialize a MimeRendererFactory.
+   */
+  export
+  interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
+    /**
+     * The rendermime instance.
+     */
+    rendermime: IRenderMime;
+
+    /**
+     * The mime type.
+     */
+    mimeType: string;
+
+    /**
+     * The render timeout.
+     */
+    renderTimeout?: number;
+  }
 }

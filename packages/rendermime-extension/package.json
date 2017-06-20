@@ -15,6 +15,7 @@
     "@jupyterlab/application": "^0.7.0",
     "@jupyterlab/apputils": "^0.7.0",
     "@jupyterlab/coreutils": "^0.7.0",
+    "@jupyterlab/docregistry": "^0.7.0",
     "@jupyterlab/rendermime": "^0.7.0"
   },
   "devDependencies": {
