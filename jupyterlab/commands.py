@@ -122,10 +122,6 @@ def install_extension(extension, app_dir=None, logger=None):
     shutil.move(pjoin(target, fname), pjoin(app_dir, 'extensions'))
     shutil.rmtree(target)
 
-    staging = pjoin(app_dir, 'staging')
-    run(['npm', 'install', pjoin(app_dir, 'extensions', fname)],
-        cwd=staging, logger=logger)
-
 
 def link_package(path, app_dir=None, logger=None):
     """Link a package against the JupyterLab build.
