@@ -427,12 +427,15 @@ class MimeRenderer extends Widget {
     context.pathChanged.connect(this._onPathChanged, this);
 
     this._context.ready.then(() => {
+      if (this.isDisposed) {
+        return;
+      }
       this._render();
 
       // Throttle the rendering rate of the widget.
       this._monitor = new ActivityMonitor({
         signal: context.model.contentChanged,
-        timeout: RENDER_TIMEOUT
+        timeout: options.renderTimeout
       });
       this._monitor.activityStopped.connect(this.update, this);
     });
@@ -452,7 +455,9 @@ class MimeRenderer extends Widget {
     if (this.isDisposed) {
       return;
     }
-    this._monitor.dispose();
+    if (this._monitor) {
+      this._monitor.dispose();
+    }
     super.dispose();
   }
 
@@ -462,13 +467,6 @@ class MimeRenderer extends Widget {
   protected onActivateRequest(msg: Message): void {
     this.node.tabIndex = -1;
     this.node.focus();
-  }
-
-  /**
-   * Handle an `after-attach` message to the widget.
-   */
-  protected onAfterAttach(msg: Message): void {
-    this.update();
   }
 
   /**
