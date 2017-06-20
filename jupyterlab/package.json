@@ -60,6 +60,7 @@
     "@jupyterlab/theming": "^0.7.0",
     "@jupyterlab/tooltip": "^0.7.0",
     "@jupyterlab/tooltip-extension": "^0.7.0",
+    "@jupyterlab/vega": "^0.7.0",
     "@phosphor/algorithm": "^1.1.1",
     "@phosphor/application": "^1.3.0",
     "@phosphor/commands": "^1.2.1",
