@@ -35,27 +35,11 @@ const SCHEMA = {
   "type": "object",
   "additionalProperties": true,
   "properties": {
-    "jupyter.lab": {
-      "title": "Plugin Settings",
-      "description": "The JupyterLab settings for an extension",
-      "type": "object",
-      "properties": {
-        "jupyter.lab.icon-class": {
-          "default": "jp-FileIcon", "type": "string"
-        },
-        "jupyter.lab.icon-label": {
-          "default": "Plugin", "type": "string"
-        }
-      }
-    }
+    "jupyter.lab.icon-class": { "type": "string", "default": "jp-FileIcon" },
+    "jupyter.lab.icon-label": { "type": "string", "default": "Plugin" }
   }
 };
 /* tslint:enable */
-
-/**
- * The default level that is used when level is unspecified in a request.
- */
-const LEVEL: ISettingRegistry.Level = 'user';
 
 /**
  * An alias for the JSON deep copy function.
@@ -315,7 +299,7 @@ class SettingRegistry {
    *
    * @returns A promise that resolves when the setting is retrieved.
    */
-  get(plugin: string, key: string, level: ISettingRegistry.Level = LEVEL): Promise<JSONValue> {
+  get(plugin: string, key: string): Promise<JSONValue> {
     const plugins = this._plugins;
 
     if (plugin in plugins) {
@@ -483,9 +467,14 @@ class Settings implements ISettingRegistry.ISettings {
    * Instantiate a new plugin settings manager.
    */
   constructor(options: Settings.IOptions) {
-    this._content = options.content;
-    this.plugin = options.plugin;
+    const { plugin } = options;
+
+    this.plugin = plugin.id;
     this.registry = options.registry;
+
+    this._composite = plugin.data.composite;
+    this._schema = plugin.schema;
+    this._user = plugin.data.user;
 
     this.registry.pluginChanged.connect(this._onPluginChanged, this);
   }
@@ -498,6 +487,13 @@ class Settings implements ISettingRegistry.ISettings {
   }
 
   /**
+   * Get the composite of user settings and extension defaults.
+   */
+  get composite(): JSONObject {
+    return this._composite;
+  }
+
+  /**
    * Test whether the plugin settings manager disposed.
    */
   get isDisposed(): boolean {
@@ -505,16 +501,23 @@ class Settings implements ISettingRegistry.ISettings {
   }
 
   /**
+   * Get the plugin settings schema.
+   */
+  get schema(): JSONObject {
+    return this._schema;
+  }
+
+  /**
+   * Get the user settings.
+   */
+  get user(): JSONObject {
+    return this._user;
+  }
+
+  /*
    * The plugin name.
    */
   readonly plugin: string;
-
-  /**
-   * Get the raw plugin settings.
-   */
-  get raw(): ISettingRegistry.IPlugin {
-    return copy(this._content) as ISettingRegistry.IPlugin;
-  }
 
   /**
    * The system registry instance used by the settings manager.
@@ -530,7 +533,11 @@ class Settings implements ISettingRegistry.ISettings {
     }
 
     this._isDisposed = true;
-    this._content = null;
+
+    this._composite = null;
+    this._schema = null;
+    this._user = null;
+
     Signal.clearData(this);
   }
 
@@ -539,18 +546,14 @@ class Settings implements ISettingRegistry.ISettings {
    *
    * @param key - The name of the setting being retrieved.
    *
-   * @param level - The setting level. Defaults to `user`.
-   *
    * @returns The setting value.
    *
    * #### Notes
    * This method returns synchronously because it uses a cached copy of the
    * plugin settings that is synchronized with the registry.
    */
-  get(key: string, level: ISettingRegistry.Level = LEVEL): JSONValue {
-    const { data } = this._content;
-
-    return data[level] && data[level][key];
+  get(key: string): { composite: JSONValue, user: JSONValue } {
+    return { composite: this._composite[key], user: this._user[key] };
   }
 
   /**
@@ -568,10 +571,14 @@ class Settings implements ISettingRegistry.ISettings {
   }
 
   /**
-   * Save all of the plugin's settings at once.
+   * Save all of the plugin's user settings at once.
    */
-  save(raw: ISettingRegistry.IPlugin): Promise<void> {
-    return this.registry.upload(raw);
+  save(user: JSONObject): Promise<void> {
+    return this.registry.upload({
+      id: this.plugin,
+      data: { composite: this._composite, user },
+      schema: this._schema
+    });
   }
 
   /**
@@ -595,14 +602,27 @@ class Settings implements ISettingRegistry.ISettings {
    */
   private _onPluginChanged(sender: any, plugin: string): void {
     if (plugin === this.plugin) {
-      this._content = find(this.registry.plugins, p => p.id === plugin);
+      const found = find(this.registry.plugins, p => p.id === plugin);
+
+      if (!found) {
+        return;
+      }
+
+      const { composite, user } = found.data;
+      const schema = found.schema;
+
+      this._composite = composite;
+      this._schema = schema;
+      this._user = user;
       this._changed.emit(void 0);
     }
   }
 
   private _changed = new Signal<this, void>(this);
-  private _content: ISettingRegistry.IPlugin | null = null;
+  private _composite: JSONObject;
   private _isDisposed = false;
+  private _schema: JSONObject;
+  private _user: JSONObject;
 }
 
 
@@ -641,12 +661,7 @@ namespace Settings {
     /**
      * The setting values for a plugin.
      */
-    content: ISettingRegistry.IPlugin;
-
-    /**
-     * The plugin that the settings object references.
-     */
-    plugin: string;
+    plugin: ISettingRegistry.IPlugin;
 
     /**
      * The system registry instance used by the settings manager.
