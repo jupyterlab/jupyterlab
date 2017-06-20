@@ -12,6 +12,7 @@
     "lib": "lib/"
   },
   "dependencies": {
+    "@jupyterlab/docregistry": "^0.7.0",
     "@jupyterlab/rendermime": "^0.7.0",
     "@phosphor/coreutils": "^1.1.1",
     "@phosphor/messaging": "^1.2.1",
