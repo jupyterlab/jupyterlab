@@ -13,8 +13,8 @@ import {
 
 
 class ExposeCodeMirrorEditorFactory extends CodeMirrorEditorFactory {
-  public inlineCodeMirrorOptions: CodeMirrorEditor.IConfig;
-  public documentCodeMirrorOptions: CodeMirrorEditor.IConfig;
+  public inlineCodeMirrorConfig: CodeMirrorEditor.IConfig;
+  public documentCodeMirrorConfig: CodeMirrorEditor.IConfig;
 }
 
 
@@ -51,8 +51,8 @@ describe('CodeMirrorEditorFactory', () => {
 
       let factory = new ExposeCodeMirrorEditorFactory(options);
       expect(factory).to.be.a(CodeMirrorEditorFactory);
-      expect(factory.inlineCodeMirrorOptions.extraKeys).to.eql(options.extraKeys);
-      expect(factory.documentCodeMirrorOptions.extraKeys).to.eql(options.extraKeys);
+      expect(factory.inlineCodeMirrorConfig.extraKeys).to.eql(options.extraKeys);
+      expect(factory.documentCodeMirrorConfig.extraKeys).to.eql(options.extraKeys);
     });
 
   });
