@@ -64,12 +64,9 @@ namespace Private {
   export
   const schemas: JSONObject = {
     "jupyter.services.codemirror-commands": {
-      "jupyter.lab": {
-        "iconClass": "jp-ImageTextEditor",
-        "iconLabel": "CodeMirror"
-      },
+      "jupyter.lab.icon-class": "jp-ImageTextEditor",
+      "jupyter.lab.icon-label": "CodeMirror",
       "properties": {
-        "jupyter.lab": { type: "object" },
         "keyMap": { type: "string", "title": "Key Map" },
         "matchBrackets": { type: "boolean", "title": "Match Brackets" },
         "theme": { type: "boolean", "title": "Theme" }

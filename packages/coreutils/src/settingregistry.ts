@@ -30,7 +30,6 @@ import {
  */
 const SCHEMA = {
   "$schema": "http://json-schema.org/draft-06/schema",
-  "$id": "http://jupyter.org/settings/0.1.0/schema",
   "title": "Jupyter Settings/Preferences Schema",
   "description": "Jupyter settings/preferences schema v0.1.0",
   "type": "object",
@@ -41,8 +40,12 @@ const SCHEMA = {
       "description": "The JupyterLab settings for an extension",
       "type": "object",
       "properties": {
-        "iconClass": { "type": "string", "default": "jp-FileIcon" },
-        "iconLabel": { "type": "string", "default": "Plugin" }
+        "jupyter.lab.icon-class": {
+          "default": "jp-FileIcon", "type": "string"
+        },
+        "jupyter.lab.icon-label": {
+          "default": "Plugin", "type": "string"
+        }
       }
     }
   }
@@ -94,12 +97,6 @@ const ISettingRegistry = new Token<ISettingRegistry>('jupyter.services.settings'
 export
 namespace ISettingRegistry {
   /**
-   * The setting level: user or system.
-   */
-  export
-  type Level = 'system' | 'user';
-
-  /**
    * The settings for a specific plugin.
    */
   export
@@ -112,7 +109,7 @@ namespace ISettingRegistry {
     /**
      * The collection of values for a specified setting.
      */
-    data: ISettingBundle | null;
+    data: ISettingBundle;
 
     /**
      * The JSON schema for the plugin.
@@ -121,12 +118,22 @@ namespace ISettingRegistry {
   }
 
   /**
-   * The collection of user and system preferences for a plugin.
+   * The setting values for a plugin.
    */
   export
   interface ISettingBundle extends JSONObject {
-    system?: { [key: string]: JSONValue };
-    user?: { [key: string]: JSONValue };
+    /**
+     * A composite of the user setting values and the plugin schema defaults.
+     *
+     * #### Notes
+     * The `composite` values will always be a superset of the `user` values.
+     */
+    composite: { [key: string]: JSONValue };
+
+    /**
+     * The user setting values.
+     */
+    user: { [key: string]: JSONValue };
   }
 
   /**
@@ -139,15 +146,25 @@ namespace ISettingRegistry {
      */
     readonly changed: ISignal<this, void>;
 
+    /**
+     * Get the composite of user settings and extension defaults.
+     */
+    readonly composite: JSONObject;
+
     /*
      * The plugin name.
      */
     readonly plugin: string;
 
     /**
-     * Get the raw plugin settings.
+     * Get the plugin settings schema.
      */
-    readonly raw: IPlugin;
+    readonly schema: JSONObject;
+
+    /**
+     * Get the user settings.
+     */
+    readonly user: JSONObject;
 
     /**
      * Remove a single setting.
@@ -166,15 +183,13 @@ namespace ISettingRegistry {
      *
      * @param key - The name of the setting being retrieved.
      *
-     * @param level - The setting level. Defaults to `user`.
-     *
      * @returns The setting value.
      *
      * #### Notes
      * This method returns synchronously because it uses a cached copy of the
      * plugin settings that is synchronized with the registry.
      */
-    get(key: string, level?: Level): JSONValue;
+    get(key: string): { composite: JSONValue, user: JSONValue };
 
     /**
      * Save all of the plugin's settings at once.
