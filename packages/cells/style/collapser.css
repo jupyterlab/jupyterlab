@@ -1,0 +1,32 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+.jp-Collapser {
+  flex: 0 0 12px;
+  padding: 0px;
+  margin: 0px;
+  border: none;
+  outline: none;
+  background: transparent;
+}
+
+
+.jp-Collapser-child {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+
+.jp-Collapser-child:hover {
+  background: var(--jp-brand-color1);
+}
+
+
+.jp-Collapser .jp-Collapser-icon {
+  /* Haven't finished the styling, hide for now */
+  display: none;
+}

@@ -753,6 +753,7 @@ namespace NotebookActions {
       let child = widget.widgets[i];
       if (widget.isSelected(child) && cell.type === 'code') {
         cell.outputs.clear();
+        (child as CodeCell).outputHidden = false;
         cell.executionCount = null;
       }
       i++;
@@ -774,10 +775,174 @@ namespace NotebookActions {
       return;
     }
     let state = Private.getState(widget);
+    let i = 0;
     each(widget.model.cells, (cell: ICodeCellModel) => {
+      let child = widget.widgets[i];
       if (cell.type === 'code') {
         cell.outputs.clear();
         cell.executionCount = null;
+        (child as CodeCell).outputHidden = false;
+      }
+      i++;
+    });
+    Private.handleState(widget, state);
+  }
+
+  /**
+   * Hide the code on selected code cells.
+   *
+   * @param widget - The target notebook widget.
+   */
+  export
+  function hideCode(widget: Notebook): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    let state = Private.getState(widget);
+    let cells = widget.widgets;
+    each(cells, (cell: Cell) => {
+      if (widget.isSelected(cell) && cell.model.type === 'code') {
+        cell.inputHidden = true;
+      }
+    });
+    Private.handleState(widget, state);
+  }
+
+  /**
+   * Show the code on selected code cells.
+   *
+   * @param widget - The target notebook widget.
+   */
+  export
+  function showCode(widget: Notebook): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    let state = Private.getState(widget);
+    let cells = widget.widgets;
+    each(cells, (cell: Cell) => {
+      if (widget.isSelected(cell) && cell.model.type === 'code') {
+        cell.inputHidden = false;
+      }
+    });
+    Private.handleState(widget, state);
+  }
+
+  /**
+   * Hide the code on all code cells.
+   *
+   * @param widget - The target notebook widget.
+   */
+  export
+  function hideAllCode(widget: Notebook): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    let state = Private.getState(widget);
+    let cells = widget.widgets;
+    each(cells, (cell: Cell) => {
+      if (cell.model.type === 'code') {
+        cell.inputHidden = true;
+      }
+    });
+    Private.handleState(widget, state);
+  }
+
+  /**
+   * Show the code on all code cells.
+   *
+   * @param widget - The target notebook widget.
+   */
+  export
+  function showAllCode(widget: Notebook): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    let state = Private.getState(widget);
+    let cells = widget.widgets;
+    each(cells, (cell: Cell) => {
+      if (cell.model.type === 'code') {
+        cell.inputHidden = false;
+      }
+    });
+    Private.handleState(widget, state);
+  }
+
+  /**
+   * Hide the output on selected code cells.
+   *
+   * @param widget - The target notebook widget.
+   */
+  export
+  function hideOutput(widget: Notebook): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    let state = Private.getState(widget);
+    let cells = widget.widgets;
+    each(cells, (cell: Cell) => {
+      if (widget.isSelected(cell) && cell.model.type === 'code') {
+        (cell as CodeCell).inputHidden = true;
+      }
+    });
+    Private.handleState(widget, state);
+  }
+
+  /**
+   * Show the output on selected code cells.
+   *
+   * @param widget - The target notebook widget.
+   */
+  export
+  function showOutput(widget: Notebook): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    let state = Private.getState(widget);
+    let cells = widget.widgets;
+    each(cells, (cell: Cell) => {
+      if (widget.isSelected(cell) && cell.model.type === 'code') {
+        (cell as CodeCell).inputHidden = false;
+      }
+    });
+    Private.handleState(widget, state);
+  }
+
+  /**
+   * Hide the output on all code cells.
+   *
+   * @param widget - The target notebook widget.
+   */
+  export
+  function hideAllOutputs(widget: Notebook): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    let state = Private.getState(widget);
+    let cells = widget.widgets;
+    each(cells, (cell: Cell) => {
+      if (cell.model.type === 'code') {
+        (cell as CodeCell).outputHidden = true;
+      }
+    });
+    Private.handleState(widget, state);
+  }
+
+  /**
+   * Show the output on all code cells.
+   *
+   * @param widget - The target notebook widget.
+   */
+  export
+  function showAllOutputs(widget: Notebook): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    let state = Private.getState(widget);
+    let cells = widget.widgets;
+    each(cells, (cell: Cell) => {
+      if (cell.model.type === 'code') {
+        (cell as CodeCell).outputHidden = false;
       }
     });
     Private.handleState(widget, state);
@@ -973,10 +1138,10 @@ namespace Private {
    * Run a cell.
    */
   function runCell(parent: Notebook, child: Cell, session?: IClientSession): Promise<boolean> {
-
     switch (child.model.type) {
     case 'markdown':
       (child as MarkdownCell).rendered = true;
+      child.inputHidden = false;
       break;
     case 'code':
       if (session) {

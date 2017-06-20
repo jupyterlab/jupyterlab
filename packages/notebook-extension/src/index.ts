@@ -191,6 +191,31 @@ namespace CommandIDs {
 
   export
   const markdown6 = 'notebook-cells:markdown-header6';
+
+  export
+  const hideCode = 'notebook-cells:hide-code';
+
+  export
+  const showCode = 'notebook-cells:show-code';
+
+  export
+  const hideAllCode = 'notebook-cells:hide-all-code';
+
+  export
+  const showAllCode = 'notebook-cells:show-all-code';
+
+  export
+  const hideOutput = 'notebook-cells:hide-outputs';
+
+  export
+  const showOutput = 'notebook-cells:show-outputs';
+
+  export
+  const hideAllOutputs = 'notebook-cells:hide-all-outputs';
+
+  export
+  const showAllOutputs = 'notebook-cells:show-all-outputs';
+
 };
 
 
@@ -1016,6 +1041,94 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     },
     isEnabled: hasWidget
   });
+  commands.addCommand(CommandIDs.hideCode, {
+    label: 'Hide Code',
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      return NotebookActions.hideCode(current.notebook);
+    },
+    isEnabled: hasWidget
+  });
+  commands.addCommand(CommandIDs.showCode, {
+    label: 'Show Code',
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      return NotebookActions.showCode(current.notebook);
+    },
+    isEnabled: hasWidget
+  });
+  commands.addCommand(CommandIDs.hideAllCode, {
+    label: 'Hide All Code',
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      return NotebookActions.hideAllCode(current.notebook);
+    },
+    isEnabled: hasWidget
+  });
+  commands.addCommand(CommandIDs.showAllCode, {
+    label: 'Show All Code',
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      return NotebookActions.showAllCode(current.notebook);
+    },
+    isEnabled: hasWidget
+  });
+  commands.addCommand(CommandIDs.hideOutput, {
+    label: 'Hide Output',
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      return NotebookActions.hideOutput(current.notebook);
+    },
+    isEnabled: hasWidget
+  });
+  commands.addCommand(CommandIDs.showOutput, {
+    label: 'Show Output',
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      return NotebookActions.showOutput(current.notebook);
+    },
+    isEnabled: hasWidget
+  });
+  commands.addCommand(CommandIDs.hideAllOutputs, {
+    label: 'Hide All Outputs',
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      return NotebookActions.hideAllOutputs(current.notebook);
+    },
+    isEnabled: hasWidget
+  });
+  commands.addCommand(CommandIDs.showAllOutputs, {
+    label: 'Show All Outputs',
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      return NotebookActions.showAllOutputs(current.notebook);
+    },
+    isEnabled: hasWidget
+  });
   }
 
 
@@ -1076,7 +1189,15 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.markdown3,
     CommandIDs.markdown4,
     CommandIDs.markdown5,
-    CommandIDs.markdown6
+    CommandIDs.markdown6,
+    CommandIDs.hideCode,
+    CommandIDs.showCode,
+    CommandIDs.hideAllCode,
+    CommandIDs.showAllCode,
+    CommandIDs.hideOutput,
+    CommandIDs.showOutput,
+    CommandIDs.hideAllOutputs,
+    CommandIDs.showAllOutputs,
   ].forEach(command => { palette.addItem({ command, category }); });
 }
 
@@ -1110,6 +1231,10 @@ function createMenu(app: JupyterLab): Menu {
   menu.addItem({ command: CommandIDs.split });
   menu.addItem({ command: CommandIDs.merge });
   menu.addItem({ type: 'separator' });
+  menu.addItem({ command: CommandIDs.hideAllCode });
+  menu.addItem({ command: CommandIDs.showAllCode });
+  menu.addItem({ command: CommandIDs.hideAllOutputs });
+  menu.addItem({ command: CommandIDs.showAllOutputs });
   menu.addItem({ command: CommandIDs.clearAllOutputs });
   menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.runAll });

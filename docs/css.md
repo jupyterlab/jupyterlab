@@ -158,8 +158,9 @@ that indicate the semantic function of the child. Thus, the `MyWidget` subclass
 of `Widget` should add `jp-MyWidget` to itself and `jp-MyWidget-toolbar` to a
 toolbar child.
 
-What if the child itself is a `Widget` and already has a proper CSS class name itself, such as `jp-Toolbar`? Why not use selectors such as
-`.jp-MyWidget .jp-Toolbar` or `.jp-MyWidget > .jp-Toolbar`?
+What if the child itself is a `Widget` and already has a proper CSS class name itself,
+such as `jp-Toolbar`? Why not use selectors such as `.jp-MyWidget .jp-Toolbar`
+or `.jp-MyWidget > .jp-Toolbar`?
 
 The reason is that these selectors are dependent on the implementation of the
 toolbar having the `jp-Toolbar` CSS class. When `MyWidget` adds the 

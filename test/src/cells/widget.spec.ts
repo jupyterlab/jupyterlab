@@ -197,9 +197,9 @@ describe('cells/widget', () => {
 
       it('should be the view state of the input being collapsed', () => {
         let widget = new LogBaseCell();
-        expect(widget.inputCollapsed).to.be(false);
-        widget.inputCollapsed = true;
-        expect(widget.inputCollapsed).to.be(true);
+        expect(widget.inputHidden).to.be(false);
+        widget.inputHidden = true;
+        expect(widget.inputHidden).to.be(true);
       });
 
     });
@@ -321,15 +321,6 @@ describe('cells/widget', () => {
 
       });
 
-      describe('#createCollapser()', () => {
-
-        it('should create a new collapser', () => {
-          let factory = new Cell.ContentFactory();
-          expect(factory.createCollapser()).to.be.a(Collapser);
-        });
-
-      });
-
       describe('#createOutputPrompt()', () => {
 
         it('should create a new output prompt', () => {
@@ -385,9 +376,9 @@ describe('cells/widget', () => {
 
       it('should be the view state of the output being collapsed', () => {
         let widget = new CodeCell({ model, rendermime });
-        expect(widget.outputCollapsed).to.be(false);
-        widget.outputCollapsed = true;
-        expect(widget.outputCollapsed).to.be(true);
+        expect(widget.outputHidden).to.be(false);
+        widget.outputHidden = true;
+        expect(widget.outputHidden).to.be(true);
       });
 
     });
@@ -598,18 +589,6 @@ describe('cells/widget', () => {
 
       it('should create a new cell footer', () => {
         expect(new CellFooter()).to.be.a(CellFooter);
-      });
-
-    });
-
-  });
-
-  describe('Collapser', () => {
-
-    describe('#constructor()', () => {
-
-      it('should create a new collapser', () => {
-        expect(new Collapser()).to.be.a(Collapser);
       });
 
     });

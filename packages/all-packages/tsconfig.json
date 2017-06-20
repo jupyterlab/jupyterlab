@@ -13,6 +13,8 @@
     "baseUrl": ".",
     "paths": {
       "@jupyterlab/*": ["../*/src"]
-    }
+    },
+    "jsx": "react",
+    "jsxFactory": "h"
   }
 }

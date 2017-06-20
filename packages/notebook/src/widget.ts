@@ -30,17 +30,17 @@ import {
 } from '@phosphor/dragdrop';
 
 import {
-  PanelLayout
+  PanelLayout, Widget
 } from '@phosphor/widgets';
 
 import {
-  Widget
-} from '@phosphor/widgets';
+  h, VirtualDOM
+} from '@phosphor/virtualdom';
 
 import {
   ICellModel, Cell, IMarkdownCellModel,
   CodeCell, MarkdownCell,
-  ICodeCellModel, RawCell, IRawCellModel,
+  ICodeCellModel, RawCell, IRawCellModel
 } from '@jupyterlab/cells';
 
 import {
@@ -59,9 +59,6 @@ import {
   INotebookModel
 } from './model';
 
-import {
-  h, VirtualDOM
-} from '@phosphor/virtualdom';
 
 /**
  * The class name added to notebook widgets.
@@ -703,6 +700,7 @@ class Notebook extends StaticNotebook {
       if (activeCell instanceof MarkdownCell) {
         activeCell.rendered = false;
       }
+      activeCell.inputHidden = false;
     }
     this._stateChanged.emit({ name: 'mode', oldValue, newValue });
     this._ensureFocus();

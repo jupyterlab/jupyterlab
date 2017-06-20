@@ -69,13 +69,6 @@
 }
 
 
-.jp-Notebook .jp-Cell .jp-Cell-inputCollapser,
-.jp-Notebook .jp-Cell .jp-Cell-outputCollapser {
-  flex: 0 0 12px;
-}
-
-
-
 /*-----------------------------------------------------------------------------
 | Notebook state related styling
 |
