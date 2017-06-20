@@ -23,7 +23,12 @@ import embed = require('vega-embed');
 
 
 
+const VEGA_COMMON_CLASS = 'jp-RenderedVegaCommon';
+
 const VEGA_CLASS = 'jp-RenderedVega';
+
+const VEGALITE_CLASS = 'jp-RenderedVegaLite';
+
 
 export
 const VEGA_MIME_TYPE = 'application/vnd.vega.v2+json';
@@ -36,9 +41,16 @@ class RenderedVega extends Widget {
 
   constructor(options: RenderMime.IRenderOptions) {
     super();
-    this.addClass(VEGA_CLASS);
+    this.addClass(VEGA_COMMON_CLASS);
     this._model = options.model;
-    this._mimeType = options.mimeType;
+    let mimeType = this._mimeType = options.mimeType;
+    if (mimeType === VEGA_MIME_TYPE) {
+      this.addClass(VEGA_CLASS);
+      this._mode = 'vega';
+    } else {
+      this.addClass(VEGALITE_CLASS);
+      this._mode = 'vega-lite';
+    }
   }
 
   dispose(): void {
@@ -53,10 +65,9 @@ class RenderedVega extends Widget {
   private _renderVega(): void {
 
     let data = this._model.data.get(this._mimeType) as JSONObject;
-    console.log(data);
-
+  
     let embedSpec = {
-      mode: 'vega',
+      mode: this._mode,
       spec: data
     };
 
@@ -71,6 +82,7 @@ class RenderedVega extends Widget {
 
   private _model: RenderMime.IMimeModel = null;
   private _mimeType: string;
+  private _mode: string;
 
 }
 
@@ -121,15 +133,23 @@ const extensions: IRendererExtension | IRendererExtension[] = [
   {
     mimeType: VEGA_MIME_TYPE,
     renderer: VegaRenderer,
+    rendererIndex: 0,
     widgetFactoryOptions: {
-
+      name: 'Vega',
+      fileExtensions: ['.vg', '.vg.json', 'json'],
+      defaultFor: ['.vg', '.vg.json'],
+      readOnly: true
     }
   },
   {
     mimeType: VEGALITE_MIME_TYPE,
     renderer: VegaRenderer,
+    rendererIndex: 0,
     widgetFactoryOptions: {
-      
+      name: 'Vega-Lite',
+      fileExtensions: ['.vl', '.vl.json', 'json'],
+      defaultFor: ['.vl', '.vl.json'],
+      readOnly: true
     }
   }
 ];
