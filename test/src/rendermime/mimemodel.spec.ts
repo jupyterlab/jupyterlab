@@ -4,10 +4,6 @@
 import expect = require('expect.js');
 
 import {
-  JSONExt
-} from '@phosphor/coreutils';
-
-import {
   MimeModel
 } from '@jupyterlab/rendermime';
 
@@ -18,10 +14,6 @@ describe('rendermime/mimemodel', () => {
 
   beforeEach(() => {
     model = new MimeModel();
-  });
-
-  afterEach(() => {
-    model.dispose();
   });
 
   describe('MimeModel', () => {
@@ -55,18 +47,6 @@ describe('rendermime/mimemodel', () => {
 
     });
 
-    describe('#dispose()', () => {
-
-      it('should dispose of the resources used by the model', () => {
-        let model = new MimeModel();
-        model.dispose();
-        expect(model.isDisposed).to.be(true);
-        model.dispose();
-        expect(model.isDisposed).to.be(true);
-      });
-
-    });
-
     describe('#data', () => {
 
       it('should be the data observable map', () => {
@@ -85,21 +65,6 @@ describe('rendermime/mimemodel', () => {
           metadata: { 'bar': 'baz' }
         });
         expect(model.metadata.get('bar')).to.be('baz');
-      });
-
-    });
-
-    describe('#toJSON()', () => {
-
-      it('should return the raw JSON values', () => {
-        let model = new MimeModel();
-        model.data.set('foo', 1);
-        model.metadata.set('bar', 'baz');
-        expect(JSONExt.deepEqual(model.toJSON(), {
-          trusted: false,
-          data: {'foo': 1 },
-          metadata: {'bar': 'baz'}
-        })).to.be(true);
       });
 
     });

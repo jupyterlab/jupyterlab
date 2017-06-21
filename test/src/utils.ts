@@ -160,7 +160,11 @@ namespace Private {
 
     mimeTypes = ['application/json'];
 
-    render(options: RenderMime.IRenderOptions): Widget {
+    get ready(): Promise<void> {
+      return Promise.resolve(undefined);
+    }
+
+    render(options: RenderMime.IRenderOptions): RenderMime.IReadyWidget {
       let source = options.model.data.get(options.mimeType);
       options.model.data.set(options.mimeType, json2html(source));
       return super.render(options);
@@ -172,7 +176,11 @@ namespace Private {
 
     mimeTypes = ['test/injector'];
 
-    render(options: RenderMime.IRenderOptions): Widget {
+    get ready(): Promise<void> {
+      return Promise.resolve(undefined);
+    }
+
+    render(options: RenderMime.IRenderOptions): RenderMime.IReadyWidget {
       options.model.data.set('application/json', { 'foo': 1 } );
       return super.render(options);
     }

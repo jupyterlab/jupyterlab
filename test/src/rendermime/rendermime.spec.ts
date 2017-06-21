@@ -152,14 +152,9 @@ describe('rendermime/index', () => {
       });
 
       it('should handle an injection', () => {
-        let called = false;
         let model = createModel({ 'test/injector': 'foo' });
-        model.data.changed.connect((sender, args) => {
-          expect(args.key).to.be('application/json');
-          called = true;
-        });
         r.render(model);
-        expect(called).to.be(true);
+        expect(model.data.get('test/injector')).to.be('foo');
       });
 
       it('should send a url resolver', (done) => {

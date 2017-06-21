@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  PromiseDelegate
+} from '@phosphor/coreutils';
+
+import {
   Message
 } from '@phosphor/messaging';
 
@@ -41,7 +45,7 @@ const RENDER_TIMEOUT = 1000;
  * A widget for rendered markdown.
  */
 export
-class MarkdownViewer extends Widget {
+class MarkdownViewer extends Widget implements DocumentRegistry.IReadyWidget {
   /**
    * Construct a new markdown widget.
    */
@@ -59,12 +63,18 @@ class MarkdownViewer extends Widget {
 
     context.pathChanged.connect(this._onPathChanged, this);
 
-    // Throttle the rendering rate of the widget.
-    this._monitor = new ActivityMonitor({
-      signal: context.model.contentChanged,
-      timeout: RENDER_TIMEOUT
+    this._context.ready.then(() => {
+      return this._render().ready;
+    }).then(() => {
+      this._ready.resolve(undefined);
+
+      // Throttle the rendering rate of the widget.
+      this._monitor = new ActivityMonitor({
+        signal: context.model.contentChanged,
+        timeout: RENDER_TIMEOUT
+      });
+      this._monitor.activityStopped.connect(this.update, this);
     });
-    this._monitor.activityStopped.connect(this.update, this);
   }
 
   /**
@@ -75,13 +85,22 @@ class MarkdownViewer extends Widget {
   }
 
   /**
+   * A promise that resolves when the markdown viewer is ready.
+   */
+  get ready(): Promise<void> {
+    return this._ready.promise;
+  }
+
+  /**
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
     if (this.isDisposed) {
       return;
     }
-    this._monitor.dispose();
+    if (this._monitor) {
+      this._monitor.dispose();
+    }
     super.dispose();
   }
 
@@ -94,16 +113,16 @@ class MarkdownViewer extends Widget {
   }
 
   /**
-   * Handle an `after-attach` message to the widget.
-   */
-  protected onAfterAttach(msg: Message): void {
-    this.update();
-  }
-
-  /**
    * Handle an `update-request` message to the widget.
    */
   protected onUpdateRequest(msg: Message): void {
+    this._render();
+  }
+
+  /**
+   * Render the markdown content.
+   */
+  private _render(): RenderMime.IReadyWidget {
     let context = this._context;
     let model = context.model;
     let layout = this.layout as PanelLayout;
@@ -115,6 +134,7 @@ class MarkdownViewer extends Widget {
       layout.widgets[1].dispose();
     }
     layout.addWidget(widget);
+    return widget;
   }
 
   /**
@@ -127,6 +147,7 @@ class MarkdownViewer extends Widget {
   private _context: DocumentRegistry.Context = null;
   private _monitor: ActivityMonitor<any, any> = null;
   private _rendermime: RenderMime = null;
+  private _ready = new PromiseDelegate<void>();
 }
 
 

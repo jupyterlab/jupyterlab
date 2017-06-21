@@ -78,7 +78,7 @@ const DIRTY_CLASS = 'jp-mod-dirty';
  * kernel on the context.
  */
 export
-class NotebookPanel extends Widget {
+class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
   /**
    * Construct a new notebook panel.
    */
@@ -129,6 +129,19 @@ class NotebookPanel extends Widget {
    */
   get session(): IClientSession {
     return this._context ? this._context.session : null;
+  }
+
+  /**
+   * A promise that resolves when the notebook panel is ready.
+   */
+  get ready(): Promise<void> {
+    return this._context.ready.then(() => {
+      let promises: Promise<void>[] = [];
+      each(this.notebook.widgets, widget => {
+        promises.push(widget.ready);
+      });
+      return Promise.all(promises).then(() => undefined);
+    });
   }
 
   /**

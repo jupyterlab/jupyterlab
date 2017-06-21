@@ -4,6 +4,10 @@
 import * as dsv from 'd3-dsv';
 
 import {
+  PromiseDelegate
+} from '@phosphor/coreutils';
+
+import {
   DataGrid, JSONModel
 } from '@phosphor/datagrid';
 
@@ -12,11 +16,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  PanelLayout
-} from '@phosphor/widgets';
-
-import {
-  Widget
+  PanelLayout, Widget
 } from '@phosphor/widgets';
 
 import {
@@ -57,7 +57,7 @@ const RENDER_TIMEOUT = 1000;
  * A viewer for CSV tables.
  */
 export
-class CSVViewer extends Widget {
+class CSVViewer extends Widget implements DocumentRegistry.IReadyWidget {
   /**
    * Construct a new CSV viewer.
    */
@@ -81,12 +81,17 @@ class CSVViewer extends Widget {
     layout.addWidget(this._grid);
 
     context.pathChanged.connect(this._onPathChanged, this);
-    // Throttle the rendering rate of the widget.
-    this._monitor = new ActivityMonitor({
-      signal: context.model.contentChanged,
-      timeout: RENDER_TIMEOUT
+
+    this._context.ready.then(() => {
+      this._updateGrid();
+      this._ready.resolve(undefined);
+      // Throttle the rendering rate of the widget.
+      this._monitor = new ActivityMonitor({
+        signal: context.model.contentChanged,
+        timeout: RENDER_TIMEOUT
+      });
+      this._monitor.activityStopped.connect(this._updateGrid, this);
     });
-    this._monitor.activityStopped.connect(this._updateGrid, this);
   }
 
   /**
@@ -97,22 +102,27 @@ class CSVViewer extends Widget {
   }
 
   /**
+   * A promise that resolves when the csv viewer is ready.
+   */
+  get ready() {
+    return this._ready.promise;
+  }
+
+  /**
    * Dispose of the resources used by the widget.
    */
   dispose(): void {
     if (this._grid === null) {
       return;
     }
-    let grid = this._grid;
-    let toolbar = this._toolbar;
     let monitor = this._monitor;
     this._grid = null;
     this._toolbar = null;
     this._monitor = null;
 
-    grid.dispose();
-    toolbar.dispose();
-    monitor.dispose();
+    if (monitor) {
+      monitor.dispose();
+    }
 
     super.dispose();
   }
@@ -160,6 +170,7 @@ class CSVViewer extends Widget {
   private _toolbar: CSVToolbar = null;
   private _monitor: ActivityMonitor<any, any> = null;
   private _delimiter = ',';
+  private _ready = new PromiseDelegate<void>();
 }
 
 

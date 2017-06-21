@@ -10,19 +10,15 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONObject
+  JSONValue
 } from '@phosphor/coreutils';
-
-import {
-  IDisposable
-} from '@phosphor/disposable';
 
 import {
   Widget
 } from '@phosphor/widgets';
 
 import {
-  IObservableJSON, PathExt, URLExt
+  PathExt, URLExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -106,7 +102,7 @@ class RenderMime {
    * Renders the model using the preferred mime type.  See
    * [[preferredMimeType]].
    */
-  render(model: RenderMime.IMimeModel): Widget {
+  render(model: RenderMime.IMimeModel): RenderMime.IReadyWidget {
     let mimeType = this.preferredMimeType(model);
     if (!mimeType) {
       return this._handleError(model);
@@ -215,7 +211,7 @@ class RenderMime {
   /**
    * Return a widget for an error.
    */
-  private _handleError(model: RenderMime.IMimeModel): Widget {
+  private _handleError(model: RenderMime.IMimeModel): RenderMime.IReadyWidget {
    let errModel = new MimeModel({
       data: {
         'application/vnd.jupyter.stderr': 'Unable to render data'
@@ -290,10 +286,63 @@ namespace RenderMime {
   }
 
   /**
+   * A bundle for mime data.
+   */
+  export
+  interface IBundle {
+    /**
+     * Get a value for a given key.
+     *
+     * @param key - the key.
+     *
+     * @returns the value for that key.
+     */
+    get(key: string): JSONValue;
+
+    /**
+     * Set a key-value pair in the bundle.
+     *
+     * @param key - The key to set.
+     *
+     * @param value - The value for the key.
+     *
+     * @returns the old value for the key, or undefined
+     *   if that did not exist.
+     */
+    set(key: string, value: JSONValue): JSONValue;
+
+    /**
+     * Check whether the bundle has a key.
+     *
+     * @param key - the key to check.
+     *
+     * @returns `true` if the bundle has the key, `false` otherwise.
+     */
+    has(key: string): boolean;
+
+    /**
+     * Get a list of the keys in the bundle.
+     *
+     * @returns - a list of keys.
+     */
+    keys(): string[];
+
+    /**
+     * Remove a key from the bundle.
+     *
+     * @param key - the key to remove.
+     *
+     * @returns the value of the given key,
+     *   or undefined if that does not exist.
+     */
+    delete(key: string): JSONValue;
+  }
+
+  /**
    * An observable model for mime data.
    */
   export
-  interface IMimeModel extends IDisposable {
+  interface IMimeModel {
     /**
      * Whether the model is trusted.
      */
@@ -302,17 +351,12 @@ namespace RenderMime {
     /**
      * The data associated with the model.
      */
-    readonly data: IObservableJSON;
+    readonly data: IBundle;
 
     /**
      * The metadata associated with the model.
      */
-    readonly metadata: IObservableJSON;
-
-    /**
-     * Serialize the model as JSON data.
-     */
-    toJSON(): JSONObject;
+    readonly metadata: IBundle;
   }
 
   /**
@@ -333,6 +377,17 @@ namespace RenderMime {
       }
     }
     return items;
+  }
+
+  /**
+   * A rendered widget.
+   */
+  export
+  interface IReadyWidget extends Widget {
+    /**
+     * A promise that resolves when the widget is ready.
+     */
+    ready: Promise<void>;
   }
 
   /**
@@ -357,7 +412,7 @@ namespace RenderMime {
      *
      * @param options - The options used to render the data.
      */
-    render(options: IRenderOptions): Widget;
+    render(options: IRenderOptions): IReadyWidget;
 
     /**
      * Whether the renderer will sanitize the data given the render options.

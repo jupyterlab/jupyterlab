@@ -24,10 +24,17 @@ import {
 } from '../utils';
 
 
-class WidgetFactory extends ABCWidgetFactory<Widget, DocumentRegistry.IModel> {
+class DocWidget extends Widget implements DocumentRegistry.IReadyWidget {
+  get ready(): Promise<void> {
+    return Promise.resolve(undefined);
+  }
+}
 
-  protected createNewWidget(context: DocumentRegistry.Context): Widget {
-    let widget = new Widget();
+
+class WidgetFactory extends ABCWidgetFactory<DocumentRegistry.IReadyWidget, DocumentRegistry.IModel> {
+
+  protected createNewWidget(context: DocumentRegistry.Context): DocumentRegistry.IReadyWidget {
+    let widget = new DocWidget();
     widget.addClass('WidgetFactory');
     return widget;
   }
