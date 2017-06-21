@@ -165,6 +165,8 @@ interface ILauncherItem {
    * The default rank is `Infinity`.
    */
   rank?: number;
+
+  kernelIconUrl?: string;
 }
 
 
@@ -261,7 +263,12 @@ class LauncherWidget extends VDomRenderer<LauncherModel> {
         });
       };
       let imageClass = `${item.iconClass} ${IMAGE_CLASS}`;
-      let icon = h.div({ className: imageClass, onclick }, item.iconLabel);
+      let icon;
+      if (item.kernelIconUrl) {
+        icon = h.img({ src: item.kernelIconUrl, onclick }, item.iconLabel);
+      } else {
+        icon = h.div({ className: imageClass, onclick }, item.iconLabel);
+      }
       let title = item.displayName + (item.category ? ' ' + item.category : '');
       let text = h.span({className: TEXT_CLASS, onclick, title }, title);
       return h.div({

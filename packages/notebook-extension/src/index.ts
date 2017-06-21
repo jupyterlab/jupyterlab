@@ -451,7 +451,8 @@ function activateNotebookHandler(app: JupyterLab, services: IServiceManager, mai
           name,
           iconClass: 'jp-ImageNotebook',
           callback,
-          rank
+          rank,
+          kernelIconUrl: specs.kernelspecs[name].resources["logo-64x64"]
         });
       }
     });
