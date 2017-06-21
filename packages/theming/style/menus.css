@@ -55,7 +55,7 @@
 
 
 .p-MenuBar-item.p-mod-disabled {
-  color: var(--jp-ui-font-color2);
+  color: var(--jp-ui-font-color3);
 }
 
 
@@ -102,7 +102,7 @@
 
 
 .p-Menu-item.p-mod-disabled {
-  color: var(--jp-ui-font-color2);
+  color: var(--jp-ui-font-color3);
 }
 
 
