@@ -615,6 +615,17 @@ describe('docmanager/default', () => {
 
     });
 
+    describe('#ready', () => {
+
+      it('should resolve when the widget is ready', () => {
+        context.save();
+        return widget.ready.then(() => {
+          expect(layout.widgets.length).to.be(2);
+        });
+      });
+
+    });
+
     describe('#onUpdateRequest()', () => {
 
       it('should update the widget', () => {
