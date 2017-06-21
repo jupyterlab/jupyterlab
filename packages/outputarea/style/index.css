@@ -47,6 +47,13 @@
   flex-grow: 1;
   flex-shrink: 1;
   height: auto;
+  overflow-x: auto;
+}
+
+
+.jp-OutputArea-output img.jp-mod-unconfined,
+.jp-OutputArea-output svg.jp-mod-unconfined {
+  max-width: none;
 }
 
 

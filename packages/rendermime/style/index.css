@@ -103,17 +103,6 @@
 }
 
 
-.jp-RenderedHTMLCommon img.jp-mod-unconfined {
-  max-width: none;
-}
-
-
-.jp-RenderedHTMLCommon img {
-  max-width: 100%;
-  height: auto;
-}
-
-
 .jp-RenderedHTMLCommon strong {
   font-weight: bold;
 }
@@ -381,16 +370,13 @@ margin-top = 14, 14, 14, 14, 8, 8
 
 
 .jp-RenderedHTMLCommon img,
-.jp-RenderedHTMLCommon svg {
+.jp-RenderedImage img,
+.jp-RenderedHTMLCommon svg,
+.jp-RenderedSVG svg {
   max-width: 100%;
   height: auto;
 }
 
-
-.jp-RenderedHTMLCommon img.unconfined,
-.jp-RenderedHTMLCommon svg.unconfined {
-  max-width: none;
-}
 
 .jp-RenderedHTMLCommon .alert {
   margin-bottom: initial;
