@@ -62,7 +62,61 @@ interface ISchemaValidator {
    * @returns A promise that resolves with void if successful and rejects with a
    * list of errors if either the schema or data fails to validate.
    */
-  validateData(plugin: string, data: JSONObject): Promise<void | Ajv.ErrorObject[]>;
+  validateData(plugin: string, data: JSONObject): Promise<void | ISchemaValidator.IError[]>;
+}
+
+
+/**
+ * A namespace for schema validator interfaces.
+ */
+export
+namespace ISchemaValidator {
+  /**
+   * A schema validation error definition.
+   */
+  export
+  interface IError {
+    /**
+     * The keyword whose validation failed.
+     */
+    keyword: string;
+
+    /**
+     * The error message.
+     */
+    message: string;
+
+    /**
+     * The path in the schema where the error occurred.
+     */
+    schemaPath: string;
+  }
+
+  /**
+   * A minimal schema type that is a minimal subset of the formal JSON Schema.
+   */
+  export
+  type Schema = {
+    /**
+     * The default value, if any.
+     */
+    default?: any;
+
+    /**
+     * The schema description.
+     */
+    description?: string;
+
+    /**
+     * The schema's child properties.
+     */
+    properties?: { [key: string]: Schema };
+
+    /**
+     * The title of the schema.
+     */
+    title?: string;
+  };
 }
 
 
@@ -176,9 +230,9 @@ namespace ISettingRegistry {
     get(key: string): { composite: JSONValue, user: JSONValue };
 
     /**
-     * Save all of the plugin's settings at once.
+     * Save all of the plugin's user settings at once.
      */
-    save(raw: IPlugin): Promise<void>;
+    save(user: JSONObject): Promise<void>;
 
     /**
      * Set a single setting.
@@ -227,7 +281,7 @@ class DefaultSchemaValidator implements ISchemaValidator {
    * @returns A promise that resolves with void if successful and rejects with a
    * list of errors if either the schema or data fails to validate.
    */
-  validateData(plugin: string, data: JSONObject): Promise<void | Ajv.ErrorObject[]> {
+  validateData(plugin: string, data: JSONObject): Promise<void | ISchemaValidator.IError[]> {
     try {
       const validate = this._validator.getSchema(plugin);
 
@@ -244,12 +298,19 @@ class DefaultSchemaValidator implements ISchemaValidator {
 
       // The Ajv promise implementation uses `Thenable` instead of `Promise`,
       // so it needs to be wrapped in a true `Promise` instance here.
-      return new Promise<void | Ajv.ErrorObject[]>((resolve, reject) => {
+      return new Promise<void | ISchemaValidator.IError[]>((resolve, reject) => {
         result.then(resolve, reject);
       });
     } catch (error) {
-      console.error('Schema validation failed.', error);
-      return Promise.reject([error]);
+      console.error('Validation against schema failed.', error);
+
+      const schemaError = {
+        keyword: '',
+        message: error.message,
+        schemaPath: ''
+      };
+
+      return Promise.reject([schemaError]);
     }
   }
 
