@@ -25,24 +25,48 @@ import {
 /**
  * The default rendermime provider.
  */
-const plugin: JupyterLabPlugin<IRenderMime> = {
+const rendermimePlugin: JupyterLabPlugin<IRenderMime> = {
   id: 'jupyter.services.rendermime',
   requires: [ICommandLinker, IDocumentRegistry],
   provides: IRenderMime,
-  activate,
+  activate: activateRendermime,
   autoStart: true
 };
 
 
 /**
- * Export the plugin as default.
+ * The rendermime document registry handler.
  */
-export default plugin;
+const docRegistryPlugin: JupyterLabPlugin<void> = {
+  id: 'jupyter.services.rendermime',
+  requires: [IRenderMime, IDocumentRegistry],
+  activate: (app: JupyterLab, rendermime: IRenderMime, registry: IDocumentRegistry) => {
+      each(RenderMime.getExtensions(), item => {
+          if (item.widgetFactoryOptions) {
+            registry.addWidgetFactory(new MimeRendererFactory({
+              mimeType: item.mimeType,
+              renderTimeout: item.renderTimeout,
+              rendermime,
+              ...item.widgetFactoryOptions,
+            }));
+          }
+      });
+    },
+  autoStart: true
+};
+
+
+
+/**
+ * Export the plugins as default.
+ */
+const plugins: JupyterLabPlugin<any>[] = [rendermimePlugin, docRegistryPlugin];
+export default plugins;
 
 /**
  * Activate the rendermine plugin.
  */
-function activate(app: JupyterLab, linker: ICommandLinker, registry: IDocumentRegistry): IRenderMime {
+function activateRendermime(app: JupyterLab, linker: ICommandLinker, registry: IDocumentRegistry): IRenderMime {
   let linkHandler = {
     handleLink: (node: HTMLElement, path: string) => {
       linker.connectNode(node, 'file-operations:open', { path });
@@ -56,15 +80,6 @@ function activate(app: JupyterLab, linker: ICommandLinker, registry: IDocumentRe
       mimeType: item.mimeType,
       renderer: item.renderer
     }, item.rendererIndex || 0);
-
-    if (item.widgetFactoryOptions) {
-      registry.addWidgetFactory(new MimeRendererFactory({
-        mimeType: item.mimeType,
-        renderTimeout: item.renderTimeout,
-        rendermime,
-        ...item.widgetFactoryOptions,
-      }));
-    }
   });
 
   return rendermime;

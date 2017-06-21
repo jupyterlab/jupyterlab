@@ -27,9 +27,3 @@ export
 const IRenderMime = new Token<IRenderMime>('jupyter.services.rendermime');
 /* tslint:enable */
 
-
-/**
- * The rendermime interface.
- */
-export
-interface IRenderMime extends RenderMime {}
