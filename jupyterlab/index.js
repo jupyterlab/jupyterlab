@@ -1,6 +1,5 @@
 require('es6-promise/auto');  // polyfill Promise on IE
 
-var RenderMime = require('@jupyterlab/rendermime').RenderMime;
 var PageConfig = require('@jupyterlab/coreutils').PageConfig;
 __webpack_public_path__ = PageConfig.getOption('publicUrl');
 
@@ -10,6 +9,7 @@ require('font-awesome/css/font-awesome.min.css');
 require('@jupyterlab/theming/style/index.css');
 
 var app = require('@jupyterlab/application').JupyterLab;
+var RenderMime = require('@jupyterlab/rendermime').RenderMime;
 
 function main() {
     var version = PageConfig.getOption('appVersion') || 'unknown';
