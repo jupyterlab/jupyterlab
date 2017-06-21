@@ -122,13 +122,13 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
    * Update the setting values.
    */
   function updateSettings(settings: ISettingRegistry.ISettings): void {
-    let cached = settings.get('lineNumbers') as boolean | null;
+    let cached = settings.get('lineNumbers').composite as boolean | null;
     lineNumbers = cached === null ? lineNumbers : !!cached;
-    cached = settings.get('matchBrackets') as boolean | null;
+    cached = settings.get('matchBrackets').composite as boolean | null;
     matchBrackets = cached === null ? matchBrackets : !!cached;
-    cached = settings.get('autoClosingBrackets') as boolean | null;
+    cached = settings.get('autoClosingBrackets').composite as boolean | null;
     autoClosingBrackets = cached === null ? autoClosingBrackets : !!cached;
-    cached = settings.get('lineWrap') as boolean | null;
+    cached = settings.get('lineWrap').composite as boolean | null;
     lineWrap = cached === null ? lineWrap : !!cached;
   }
 

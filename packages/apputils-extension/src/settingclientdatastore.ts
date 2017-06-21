@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  StateDB
+  ISettingRegistry, StateDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -31,10 +31,11 @@ class SettingClientDatastore extends StateDB {
   /**
    * Retrieve a saved bundle from the datastore.
    */
-  fetch(id: string): Promise<JSONObject | null> {
+  fetch(id: string): Promise<ISettingRegistry.IPlugin | null> {
     return super.fetch(id).then(result => {
-      const schema = Private.schemas[id] || null;
+      const schema = Private.schemas[id] || { };
 
+      result = result || { data: { composite: { }, user: { } }, id };
       result.schema = schema;
       return result;
     });
@@ -69,7 +70,17 @@ namespace Private {
       "properties": {
         "keyMap": { type: "string", "title": "Key Map" },
         "matchBrackets": { type: "boolean", "title": "Match Brackets" },
-        "theme": { type: "boolean", "title": "Theme" }
+        "theme": { type: "string", "title": "Theme" }
+      }
+    },
+    "jupyter.services.editor-tracker": {
+      "jupyter.lab.icon-class": "jp-ImageTextEditor",
+      "jupyter.lab.icon-label": "Editor",
+      "properties": {
+        "autoClosingBrackets": { type: "boolean", "title": "Auto-closing Brackets" },
+        "lineNumbers": { type: "boolean", "title": "Line Numbers" },
+        "lineWrap": { type: "boolean", "title": "Line Wrap" },
+        "matchBrackets": { type: "boolean", "title": "Match Brackets" }
       }
     }
   };
