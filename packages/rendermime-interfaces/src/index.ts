@@ -263,7 +263,6 @@ namespace IRenderMime {
     default: IExtension | IExtension[];
   }
 
-
   /**
    * The interface for a renderer.
    */
