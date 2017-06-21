@@ -300,15 +300,6 @@ namespace RenderMime {
     get(key: string): JSONValue;
 
     /**
-     * Check whether the bundle has a key.
-     *
-     * @param key - the key to check.
-     *
-     * @returns `true` if the bundle has the key, `false` otherwise.
-     */
-    has(key: string): boolean;
-
-    /**
      * Set a key-value pair in the bundle.
      *
      * @param key - The key to set.
@@ -319,6 +310,32 @@ namespace RenderMime {
      *   if that did not exist.
      */
     set(key: string, value: JSONValue): JSONValue;
+
+    /**
+     * Check whether the bundle has a key.
+     *
+     * @param key - the key to check.
+     *
+     * @returns `true` if the bundle has the key, `false` otherwise.
+     */
+    has(key: string): boolean;
+
+    /**
+     * Get a list of the keys in the bundle.
+     *
+     * @returns - a list of keys.
+     */
+    keys(): string[];
+
+    /**
+     * Remove a key from the bundle.
+     *
+     * @param key - the key to remove.
+     *
+     * @returns the value of the given key,
+     *   or undefined if that does not exist.
+     */
+    delete(key: string): JSONValue;
   }
 
   /**

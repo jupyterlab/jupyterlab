@@ -20,8 +20,8 @@ class MimeModel implements RenderMime.IMimeModel {
    */
   constructor(options: MimeModel.IOptions = {}) {
     this.trusted = !!options.trusted;
-    this.data = new Private.Bundle(options.data || {});
-    this.metadata = new Private.Bundle(options.metadata || {});
+    this.data = new MimeModel.Bundle(options.data || {});
+    this.metadata = new MimeModel.Bundle(options.metadata || {});
   }
 
   /**
@@ -66,13 +66,7 @@ namespace MimeModel {
      */
     metadata?: JSONObject;
   }
-}
 
-
-/**
- * A namespace for module private data.
- */
-namespace Private {
   /**
    * The default implementation of an ibundle.
    */
@@ -120,6 +114,29 @@ namespace Private {
     set(key: string, value: JSONValue): JSONValue {
       let old = this._values[key];
       this._values[key] = value;
+      return old;
+    }
+
+    /**
+     * Get a list of the keys in the bundle.
+     *
+     * @returns - a list of keys.
+     */
+    keys(): string[] {
+      return Object.keys(this._values);
+    }
+
+    /**
+     * Remove a key from the bundle.
+     *
+     * @param key - the key to remove.
+     *
+     * @returns the value of the given key,
+     *   or undefined if that does not exist.
+     */
+    delete(key: string): JSONValue {
+      let old = this._values[key];
+      delete this._values[key];
       return old;
     }
 
