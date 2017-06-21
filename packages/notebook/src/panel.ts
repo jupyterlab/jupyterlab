@@ -193,7 +193,8 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
     if (!oldValue) {
       newValue.ready.then(() => {
         if (this.notebook.widgets.length === 1) {
-          if (this.notebook.widgets[0].model.value.text === '') {
+          let model = this.notebook.widgets[0].model;
+          if (model.type === 'code' && model.value.text === '') {
             this.notebook.mode = 'edit';
           }
         }
