@@ -65,6 +65,8 @@ If you use `pip` you can install it as:
 pip install notebook
 ```
 
+Fork the JupyterLab [repository](https://github.com/jupyterlab/jupyterlab).
+
 Once you have installed the dependencies mentioned above, use the following
 steps::
 
