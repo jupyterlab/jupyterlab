@@ -3,9 +3,12 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+:root {
+  --jp-private-collapser-width: 16px;
+}
 
 .jp-Collapser {
-  flex: 0 0 16px;
+  flex: 0 0 var(--jp-private-collapser-width);
   padding: 0px;
   margin: 0px;
   border: none;
@@ -15,13 +18,14 @@
 
 
 .jp-Collapser-child {
+  display: block;
   width: 100%;
   height: 100%;
   box-sizing: border-box;
 }
 
 
-.jp-Collapser-child:hover {
+.jp-Cell .jp-Collapser .jp-Collapser-child:hover {
   opacity: .2;
   border-left: 2px solid var(--jp-brand-color1);
   border-top: 2px solid var(--jp-brand-color1);
@@ -29,21 +33,29 @@
 }
 
 
-.jp-mod-active .jp-Collapser-child:hover {
+.jp-Cell.jp-mod-active .jp-Collapser-child:hover {
   opacity: 1;
   border: none;
 }
 
 
-.jp-Cell.jp-mod-active .jp-Collapser .jp-Collapser-icon {
-  /* Haven't finished the styling, hide for now */
-  display: block;
+.jp-Cell .jp-Collapser .jp-Collapser-icon {
+  display: none;
   height: 100%;
   background-repeat: no-repeat;
   background-position: -3px 100%;
   background-size: 20px;
 }
 
+
+.jp-Cell.jp-mod-active .jp-Collapser-child .jp-Collapser-icon {
+  display: block;
+}
+
+
+.jp-Collapser-child:hover .jp-Collapser-icon {
+  display: block;
+}
 
 .jp-Collapser-child.jp-mod-collapsed .jp-Collapser-icon {
   background-position: -3px center !important;
