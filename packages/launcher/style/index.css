@@ -5,7 +5,7 @@
 
 
 .jp-LauncherWidget {
-  background: var(--jp-layout-color1);
+  background: var(--md-grey-50);
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
@@ -14,6 +14,21 @@
   padding: 0;
   overflow: auto;
   outline: none;
+}
+
+
+.jp-LauncherWidget::before {
+  content: 'Start a new activity';
+  display: block;
+  height: 60px;
+  width: 100%;
+  background: var(--jp-toolbar-background);
+  border-bottom: 1px solid var(--jp-toolbar-border-color);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  z-index: 10;
+  text-align: center;
+  font-size: 24px;
+  padding-top: 36px;
 }
 
 
@@ -60,26 +75,43 @@
 
 
 .jp-LauncherWidget-body {
-  width: 100%;
   display: flex;
-  flex-wrap: wrap;
   flex-direction: row;
   margin-top: 8px;
+  justify-content: center;
+  align-items: center;
 }
 
 
 .jp-LauncherWidget-item {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
   width: 100px;
+  border: 1px solid var(--md-grey-400);
+  background: var(--jp-layout-color0);
+  height: 100px;
+  margin: 8px;
+  box-shadow: 0px 1px 1px 1px rgba(0,0,0,.08);
+  padding: 12px;
+  transition: .2s box-shadow;
+}
+
+
+.jp-LauncherWidget-item:hover {
+  box-shadow: 0px 2px 4px 1px rgba(0,0,0,.20);
 }
 
 
 .jp-LauncherWidget-image {
+  display: block;
+  vertical-align: middle;
   flex: 0 0 auto;
   margin: 0 auto;
-  min-height: 72px;
-  min-width: 56px;
-  max-width: 56px;
-  background-size: 56px 72px;
+  min-height: 68px;
+  min-width: 52px;
+  max-width: 52px;
+  background-size: 52px 68px;
   background-repeat: no-repeat;
   cursor: pointer;
 }
@@ -88,6 +120,9 @@
 .jp-LauncherWidget-text {
   flex: 0 0 auto;
   text-overflow: ellipsis;
+  order: 1;
+  vertical-align: middle;
+  margin: auto;
 }
 
 
