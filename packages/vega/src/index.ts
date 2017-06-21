@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject
+  JSONObject, PromiseDelegate
 } from '@phosphor/coreutils';
 
 import {
@@ -61,7 +61,7 @@ const VEGALITE_MIME_TYPE = 'application/vnd.vegalite.v1+json';
  * A widget for rendering Vega or Vega-Lite data, for usage with rendermime.
  */
 export
-class RenderedVega extends Widget {
+class RenderedVega extends Widget implements IRenderMime.IReadyWidget {
   /**
    * Create a new widget for rendering Vega/Vega-Lite.
    */
@@ -79,6 +79,13 @@ class RenderedVega extends Widget {
       this.addClass(VEGALITE_CLASS);
       this._mode = 'vega-lite';
     }
+  }
+
+  /**
+   * A promise that resolves when the widget is ready.
+   */
+  get ready(): Promise<void> {
+    return this._ready.promise;
   }
 
   /**
@@ -109,6 +116,7 @@ class RenderedVega extends Widget {
     };
 
     embed(this.node, embedSpec, (error: any, result: any): any => {
+      this._ready.resolve(undefined);
       // This is copied out for now as there is a bug in JupyterLab
       // that triggers and infinite rendering loop when this is done.
       // let imageData = result.view.toImageURL();
@@ -120,7 +128,7 @@ class RenderedVega extends Widget {
   private _model: IRenderMime.IMimeModel = null;
   private _mimeType: string;
   private _mode: string;
-
+  private _ready = new PromiseDelegate<void>();
 }
 
 
@@ -144,7 +152,7 @@ class VegaRenderer implements IRenderMime.IRenderer {
   /**
    * Render the transformed mime bundle.
    */
-  render(options: IRenderMime.IRenderOptions): Widget {
+  render(options: IRenderMime.IRenderOptions): IRenderMime.IReadyWidget {
     return new RenderedVega(options);
   }
 
@@ -152,8 +160,7 @@ class VegaRenderer implements IRenderMime.IRenderer {
    * Whether the renderer will sanitize the data given the render options.
    */
   wouldSanitize(options: IRenderMime.IRenderOptions): boolean {
-    // TODO: Is this the correct logic?
-    return !options.model.trusted;
+    return false;
   }
 }
 

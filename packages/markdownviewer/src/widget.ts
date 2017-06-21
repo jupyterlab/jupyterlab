@@ -122,7 +122,7 @@ class MarkdownViewer extends Widget implements DocumentRegistry.IReadyWidget {
   /**
    * Render the markdown content.
    */
-  private _render(): RenderMime.IReadyWidget {
+  private _render(): IRenderMime.IReadyWidget {
     let context = this._context;
     let model = context.model;
     let layout = this.layout as PanelLayout;

@@ -6,10 +6,6 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  IObservableJSON, ObservableJSON
-} from '@jupyterlab/coreutils';
-
-import {
   IRenderMime
 } from '@jupyterlab/rendermime-interfaces';
 
@@ -31,12 +27,12 @@ class MimeModel implements IRenderMime.IMimeModel {
   /**
    * The data associated with the model.
    */
-  readonly data: RenderMime.IBundle;
+  readonly data: IRenderMime.IBundle;
 
   /**
    * The metadata associated with the model.
    */
-  readonly metadata: RenderMime.IBundle;
+  readonly metadata: IRenderMime.IBundle;
 
   /**
    * Whether the model is trusted.
@@ -75,7 +71,7 @@ namespace MimeModel {
    * The default implementation of an ibundle.
    */
   export
-  class Bundle implements RenderMime.IBundle {
+  class Bundle implements IRenderMime.IBundle {
     /**
      * Create a new bundle.
      */

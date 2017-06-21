@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  JSONObject
+  JSONObject, PromiseDelegate
 } from '@phosphor/coreutils';
 
 import {
@@ -406,7 +406,7 @@ abstract class ABCWidgetFactory<T extends DocumentRegistry.IReadyWidget, U exten
  * A widget for rendered mimetype.
  */
 export
-class MimeRenderer extends Widget {
+class MimeRenderer extends Widget implements IRenderMime.IReadyWidget {
   /**
    * Construct a new markdown widget.
    */
@@ -431,6 +431,7 @@ class MimeRenderer extends Widget {
         return;
       }
       this._render();
+      this._ready.resolve(undefined);
 
       // Throttle the rendering rate of the widget.
       this._monitor = new ActivityMonitor({
@@ -446,6 +447,13 @@ class MimeRenderer extends Widget {
    */
   get context(): DocumentRegistry.Context {
     return this._context;
+  }
+
+  /**
+   * A promise that resolves when the widget is ready.
+   */
+  get ready(): Promise<void> {
+    return this._ready.promise;
   }
 
   /**
@@ -505,6 +513,7 @@ class MimeRenderer extends Widget {
   private _monitor: ActivityMonitor<any, any> = null;
   private _rendermime: IRenderMime = null;
   private _mimeType: string;
+  private _ready = new PromiseDelegate<void>();
 }
 
 

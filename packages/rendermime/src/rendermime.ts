@@ -10,16 +10,8 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONValue
-} from '@phosphor/coreutils';
-
-import {
   IRenderMime
 } from '@jupyterlab/rendermime-interfaces';
-
-import {
-  Widget
-} from '@phosphor/widgets';
 
 import {
   PathExt, URLExt
@@ -107,7 +99,7 @@ class RenderMime implements IRenderMime {
    * Renders the model using the preferred mime type.  See
    * [[preferredMimeType]].
    */
-  render(model: IRenderMime.IMimeModel): RenderMime.IReadyWidget {
+  render(model: IRenderMime.IMimeModel): IRenderMime.IReadyWidget {
     let mimeType = this.preferredMimeType(model);
     if (!mimeType) {
       return this._handleError(model);
@@ -216,7 +208,7 @@ class RenderMime implements IRenderMime {
   /**
    * Return a widget for an error.
    */
-  private _handleError(model: IRenderMime.IMimeModel): RenderMime.IReadyWidget {
+  private _handleError(model: IRenderMime.IMimeModel): IRenderMime.IReadyWidget {
    let errModel = new MimeModel({
       data: {
         'application/vnd.jupyter.stderr': 'Unable to render data'
@@ -275,96 +267,6 @@ namespace RenderMime {
   }
 
   /**
-   * A render item.
-   */
-  export
-  interface IRendererItem {
-    /**
-     * The mimeType to be renderered.
-     */
-    mimeType: string;
-
-    /**
-     * The renderer.
-     */
-    renderer: IRenderer;
-  }
-
-  /**
-   * A bundle for mime data.
-   */
-  export
-  interface IBundle {
-    /**
-     * Get a value for a given key.
-     *
-     * @param key - the key.
-     *
-     * @returns the value for that key.
-     */
-    get(key: string): JSONValue;
-
-    /**
-     * Set a key-value pair in the bundle.
-     *
-     * @param key - The key to set.
-     *
-     * @param value - The value for the key.
-     *
-     * @returns the old value for the key, or undefined
-     *   if that did not exist.
-     */
-    set(key: string, value: JSONValue): JSONValue;
-
-    /**
-     * Check whether the bundle has a key.
-     *
-     * @param key - the key to check.
-     *
-     * @returns `true` if the bundle has the key, `false` otherwise.
-     */
-    has(key: string): boolean;
-
-    /**
-     * Get a list of the keys in the bundle.
-     *
-     * @returns - a list of keys.
-     */
-    keys(): string[];
-
-    /**
-     * Remove a key from the bundle.
-     *
-     * @param key - the key to remove.
-     *
-     * @returns the value of the given key,
-     *   or undefined if that does not exist.
-     */
-    delete(key: string): JSONValue;
-  }
-
-  /**
-   * An observable model for mime data.
-   */
-  export
-  interface IMimeModel {
-    /**
-     * Whether the model is trusted.
-     */
-    readonly trusted: boolean;
-
-    /**
-     * The data associated with the model.
-     */
-    readonly data: IBundle;
-
-    /**
-     * The metadata associated with the model.
-     */
-    readonly metadata: IBundle;
-  }
-
-  /**
    * Get an array of the default renderer items.
    */
   export
@@ -406,96 +308,6 @@ namespace RenderMime {
   export
   function getExtensions(): IIterable<IRenderMime.IExtension> {
     return iter(Private.registeredExtensions);
-  }
-
-  /**
-   * The interface for a renderer.
-   */
-  export
-  interface IRenderer {
-    /**
-     * The mimeTypes this renderer accepts.
-     */
-    readonly mimeTypes: string[];
-
-    /**
-     * Whether the renderer can render given the render options.
-     *
-     * @param options - The options that would be used to render the data.
-     */
-    canRender(options: IRenderOptions): boolean;
-
-    /**
-     * Render the transformed mime data.
-     *
-     * @param options - The options used to render the data.
-     */
-    render(options: IRenderOptions): IReadyWidget;
-
-    /**
-     * Whether the renderer will sanitize the data given the render options.
-     *
-     * @param options - The options that would be used to render the data.
-     */
-    wouldSanitize(options: IRenderOptions): boolean;
-  }
-
-  /**
-   * The options used to transform or render mime data.
-   */
-  export
-  interface IRenderOptions {
-    /**
-     * The preferred mimeType to render.
-     */
-    mimeType: string;
-
-    /**
-     * The mime data model.
-     */
-    model: IMimeModel;
-
-    /**
-     * The html sanitizer.
-     */
-    sanitizer: ISanitizer;
-
-    /**
-     * An optional url resolver.
-     */
-    resolver?: IResolver;
-
-    /**
-     * An optional link handler.
-     */
-    linkHandler?: ILinkHandler;
-  }
-
-  /**
-   * An object that handles links on a node.
-   */
-  export
-  interface ILinkHandler {
-    /**
-     * Add the link handler to the node.
-     */
-    handleLink(node: HTMLElement, url: string): void;
-  }
-
-  /**
-   * An object that resolves relative URLs.
-   */
-  export
-  interface IResolver {
-    /**
-     * Resolve a relative url to a correct server path.
-     */
-    resolveUrl(url: string): Promise<string>;
-
-    /**
-     * Get the download url of a given absolute server path.
-     */
-    getDownloadUrl(path: string): Promise<string>;
   }
 
   /**

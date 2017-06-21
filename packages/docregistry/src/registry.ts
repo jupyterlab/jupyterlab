@@ -779,7 +779,7 @@ namespace DocumentRegistry {
    * A widget for a document.
    */
   export
-  interface IReadyWidget extends RenderMime.IReadyWidget { }
+  interface IReadyWidget extends IRenderMime.IReadyWidget { }
 
   /**
    * The interface for a widget factory.
