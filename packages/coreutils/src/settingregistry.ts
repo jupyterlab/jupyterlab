@@ -271,7 +271,6 @@ class DefaultSchemaValidator implements ISchemaValidator {
    * Instantiate a schema validator.
    */
   constructor() {
-    console.log('main schema', SCHEMA);
     this._merger.addSchema(SCHEMA, 'main');
     this._validator.addSchema(SCHEMA, 'main');
   }
@@ -369,10 +368,10 @@ class SettingRegistry {
     const plugins = this._plugins;
 
     if (plugin in plugins) {
-      const data = plugins[plugin].data;
+      const { composite, user } = plugins[plugin].data;
       const result = {
-        composite: copy(data.composite[key]),
-        user: copy(data.user[key])
+        composite: composite[key] ? copy(composite[key]) : composite[key],
+        user: user[key] ? copy(user[key]) : user[key]
       };
 
       return Promise.resolve(result);
@@ -620,9 +619,11 @@ class Settings implements ISettingRegistry.ISettings {
    * plugin settings that is synchronized with the registry.
    */
   get(key: string): { composite: JSONValue, user: JSONValue } {
+    const { composite, user } = this;
+
     return {
-      composite: copy(this._composite[key]),
-      user: copy(this._user[key])
+      composite: composite[key] ? copy(composite[key]) : composite[key],
+      user: user[key] ? copy(user[key]) : user[key]
     };
   }
 
