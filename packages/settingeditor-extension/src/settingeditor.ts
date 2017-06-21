@@ -623,7 +623,7 @@ namespace Private {
     Object.keys(properties).forEach(key => {
       const field = properties[key];
       const { title } = field;
-      fields[key] = h.li(h.code(key), `(${title})`);
+      fields[key] = h.li(h.code(key), ` (${title})`);
     });
 
     const items: VirtualElement[] = Object.keys(fields)

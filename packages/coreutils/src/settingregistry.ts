@@ -153,6 +153,11 @@ namespace ISettingRegistry {
      * The title of the schema.
      */
     title?: string;
+
+    /**
+     * The type or types of the data.
+     */
+    type?: string | string[];
   }
 
   /**
@@ -534,9 +539,9 @@ class Settings implements ISettingRegistry.ISettings {
     this.plugin = plugin.id;
     this.registry = options.registry;
 
-    this._composite = plugin.data.composite;
-    this._schema = plugin.schema;
-    this._user = plugin.data.user;
+    this._composite = plugin.data.composite || { };
+    this._schema = plugin.schema || { };
+    this._user = plugin.data.user || { };
 
     this.registry.pluginChanged.connect(this._onPluginChanged, this);
   }
@@ -684,10 +689,10 @@ class Settings implements ISettingRegistry.ISettings {
   }
 
   private _changed = new Signal<this, void>(this);
-  private _composite: JSONObject;
+  private _composite: JSONObject = Object.create(null);
   private _isDisposed = false;
-  private _schema: ISettingRegistry.ISchema;
-  private _user: JSONObject;
+  private _schema: ISettingRegistry.ISchema = Object.create(null);
+  private _user: JSONObject = Object.create(null);
 }
 
 
