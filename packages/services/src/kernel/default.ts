@@ -642,9 +642,10 @@ class DefaultKernel implements Kernel.IKernel {
     let settings = this.serverSettings;
     let partialUrl = URLExt.join(settings.wsUrl, KERNEL_SERVICE_URL,
                                  encodeURIComponent(this._id));
+
     // Strip any authentication from the display string.
-    let parsed = URLExt.parse(partialUrl);
-    console.log('Starting websocket', parsed.host);
+    let display = partialUrl.replace(/^((?:\w+:)?\/\/)(?:[^@\/]+@)/, '$1');
+    console.log('Starting WebSocket:', display);
 
     let url = URLExt.join(
         partialUrl,
