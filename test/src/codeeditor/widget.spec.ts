@@ -82,7 +82,7 @@ describe('CodeEditorWrapper', () => {
   let widget: LogWidget;
   let editorFactory = (options: CodeEditor.IOptions) => {
     options.uuid = 'foo';
-    return new LogEditor(options, {});
+    return new LogEditor(options);
   };
 
   beforeEach(() => {
@@ -112,7 +112,7 @@ describe('CodeEditorWrapper', () => {
   describe('#editor', () => {
 
     it('should be a a code editor', () => {
-      expect(widget.editor.lineNumbers).to.be(false);
+      expect(widget.editor.getOption('lineNumbers')).to.be(false);
     });
 
   });

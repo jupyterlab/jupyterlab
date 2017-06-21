@@ -13,8 +13,8 @@ import {
 
 
 class ExposeCodeMirrorEditorFactory extends CodeMirrorEditorFactory {
-  public inlineCodeMirrorOptions: CodeMirror.EditorConfiguration;
-  public documentCodeMirrorOptions: CodeMirror.EditorConfiguration;
+  public inlineCodeMirrorConfig: CodeMirrorEditor.IConfig;
+  public documentCodeMirrorConfig: CodeMirrorEditor.IConfig;
 }
 
 
@@ -22,13 +22,12 @@ describe('CodeMirrorEditorFactory', () => {
   let host: HTMLElement;
   let model: CodeEditor.IModel;
 
-  const options: CodeMirror.EditorConfiguration = {
+  const options: Partial<CodeMirrorEditor.IConfig> = {
     lineNumbers: false,
-    lineWrapping: true,
+    lineWrap: true,
     extraKeys: {
       'Ctrl-Tab': 'indentAuto',
-    },
-    undoDepth: 5,
+    }
   };
 
   beforeEach(() => {
@@ -52,8 +51,8 @@ describe('CodeMirrorEditorFactory', () => {
 
       let factory = new ExposeCodeMirrorEditorFactory(options);
       expect(factory).to.be.a(CodeMirrorEditorFactory);
-      expect(factory.inlineCodeMirrorOptions).to.eql(options);
-      expect(factory.documentCodeMirrorOptions).to.eql(options);
+      expect(factory.inlineCodeMirrorConfig.extraKeys).to.eql(options.extraKeys);
+      expect(factory.documentCodeMirrorConfig.extraKeys).to.eql(options.extraKeys);
     });
 
   });
@@ -69,11 +68,11 @@ describe('CodeMirrorEditorFactory', () => {
 
     it('should create a new editor with given options', () => {
       let factory = new CodeMirrorEditorFactory(options);
-      let editor = factory.newInlineEditor({host, model});
+      let editor = factory.newInlineEditor({host, model}) as CodeMirrorEditor;
       expect(editor).to.be.a(CodeMirrorEditor);
-      let inner = (editor as CodeMirrorEditor).editor;
-      for (let key of Object.keys(options)) {
-        expect(inner.getOption(key)).to.equal((options as any)[key]);
+      for (let key in Object.keys(options)) {
+        let option = key as keyof CodeMirrorEditor.IConfig;
+        expect(editor.getOption(option)).to.equal(options[option]);
       }
       editor.dispose();
     });
@@ -91,11 +90,11 @@ describe('CodeMirrorEditorFactory', () => {
 
     it('should create a new editor with given options', () => {
       let factory = new CodeMirrorEditorFactory(options);
-      let editor = factory.newDocumentEditor({host, model});
+      let editor = factory.newDocumentEditor({host, model}) as CodeMirrorEditor;
       expect(editor).to.be.a(CodeMirrorEditor);
-      let inner = (editor as CodeMirrorEditor).editor;
-      for (let key of Object.keys(options)) {
-        expect(inner.getOption(key)).to.equal((options as any)[key]);
+      for (let key in Object.keys(options)) {
+        let option = key as keyof CodeMirrorEditor.IConfig;
+        expect(editor.getOption(option)).to.equal(options[option]);
       }
       editor.dispose();
     });

@@ -84,7 +84,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Construct a CodeMirror editor.
    */
-  constructor(options: CodeEditor.IOptions, config: CodeMirror.EditorConfiguration={}) {
+  constructor(options: CodeMirrorEditor.IOptions) {
     let host = this.host = options.host;
     host.classList.add(EDITOR_CLASS);
     host.addEventListener('focus', this, true);
@@ -93,10 +93,10 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     this._uuid = options.uuid || uuid();
     this._selectionStyle = options.selectionStyle || {};
 
-    Private.updateConfig(options, config);
-
     let model = this._model = options.model;
-    let editor = this._editor = CodeMirror(host, config);
+    let editor = this._editor = CodeMirror(host, {});
+    Private.handleConfig(editor, options.config || {});
+
     let doc = editor.getDoc();
 
     // Handle initial values for text, mimetype, and selections.
@@ -197,42 +197,6 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
-   * Control the rendering of line numbers.
-   */
-  get lineNumbers(): boolean {
-    return this._editor.getOption('lineNumbers');
-  }
-  set lineNumbers(value: boolean) {
-    this._editor.setOption('lineNumbers', value);
-  }
-
-  /**
-   * Set to false for horizontal scrolling. Defaults to true.
-   */
-  get wordWrap(): boolean {
-    return this._editor.getOption('lineWrapping');
-  }
-  set wordWrap(value: boolean) {
-    this._editor.setOption('lineWrapping', value);
-  }
-
-  /**
-   * Should the editor be read only.
-   */
-  get readOnly(): boolean {
-    return this._editor.getOption('readOnly') !== false;
-  }
-  set readOnly(readOnly: boolean) {
-    this._editor.setOption('readOnly', readOnly);
-    if (readOnly) {
-      this.host.classList.add(READ_ONLY_CLASS);
-    } else {
-      this.host.classList.remove(READ_ONLY_CLASS);
-      this.blur();
-    }
-  }
-
-  /**
    * Returns a model for this editor.
    */
   get model(): CodeEditor.IModel {
@@ -273,6 +237,20 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     this._model = null;
     this._keydownHandlers.length = 0;
     Signal.clearData(this);
+  }
+
+  /**
+   * Get a config option for the editor.
+   */
+  getOption<K extends keyof CodeMirrorEditor.IConfig>(option: K): CodeMirrorEditor.IConfig[K] {
+    return Private.getOption(this.editor, option);
+  }
+
+  /**
+   * Set a config option for the editor.
+   */
+  setOption<K extends keyof CodeMirrorEditor.IConfig>(option: K, value: CodeMirrorEditor.IConfig[K]): void {
+    Private.setOption(this.editor, option, value);
   }
 
   /**
@@ -871,10 +849,139 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
 export
 namespace CodeMirrorEditor {
   /**
-   * The name of the default CodeMirror theme
+   * The options used to initialize a code mirror editor.
    */
   export
-  const DEFAULT_THEME: string = 'jupyter';
+  interface IOptions extends CodeEditor.IOptions {
+    /**
+     * The configuration options for the editor.
+     */
+    config?: Partial<IConfig>;
+  }
+
+  /**
+   * The configuration options for a codemirror editor.
+   */
+  export
+  interface IConfig extends CodeEditor.IConfig {
+    /**
+     * The mode to use.
+     */
+    mode?: string | Mode.ISpec;
+
+    /**
+     * The theme to style the editor with.
+     * You must make sure the CSS file defining the corresponding
+     * .cm-s-[name] styles is loaded.
+     */
+    theme?: string;
+
+    /**
+     * Whether to use the context-sensitive indentation that the mode provides
+     * (or just indent the same as the line before).
+     */
+    smartIndent?: boolean;
+
+    /**
+     * Configures whether the editor should re-indent the current line when a
+     * character is typed that might change its proper indentation
+     * (only works if the mode supports indentation).
+     */
+    electricChars?: boolean;
+
+    /**
+     * Configures the keymap to use. The default is "default", which is the
+     * only keymap defined in codemirror.js itself.
+     * Extra keymaps are found in the CodeMirror keymap directory.
+     */
+    keyMap?: string;
+
+    /**
+     * Can be used to specify extra keybindings for the editor, alongside the
+     * ones defined by keyMap. Should be either null, or a valid keymap value.
+     */
+    extraKeys?: any;
+
+    /**
+     * Can be used to add extra gutters (beyond or instead of the line number
+     * gutter).
+     * Should be an array of CSS class names, each of which defines a width
+     * (and optionally a background),
+     * and which will be used to draw the background of the gutters.
+     * May include the CodeMirror-linenumbers class, in order to explicitly
+     * set the position of the line number gutter
+     * (it will default to be to the right of all other gutters).
+     * These class names are the keys passed to setGutterMarker.
+     */
+    gutters?: ReadonlyArray<string>;
+
+    /**
+     * Determines whether the gutter scrolls along with the content
+     * horizontally (false)
+     * or whether it stays fixed during horizontal scrolling (true,
+     * the default).
+     */
+    fixedGutter?: boolean;
+
+    /**
+     * Whether the cursor should be drawn when a selection is active.
+     */
+    showCursorWhenSelecting?: boolean;
+
+    /**
+     * When fixedGutter is on, and there is a horizontal scrollbar, by default
+     * the gutter will be visible to the left of this scrollbar. If this
+     * option is set to true, it will be covered by an element with class
+     * CodeMirror-gutter-filler.
+     */
+    coverGutterNextToScrollbar?: boolean;
+
+    /**
+     * Explicitly set the line separator for the editor.
+     * By default (value null), the document will be split on CRLFs as well as
+     * lone CRs and LFs, and a single LF will be used as line separator in all
+     * output (such as getValue). When a specific string is given, lines will
+     * only be split on that string, and output will, by default, use that
+     * same separator.
+     */
+    lineSeparator?: string;
+
+    /**
+     * Chooses a scrollbar implementation. The default is "native", showing
+     * native scrollbars. The core library also provides the "null" style,
+     * which completely hides the scrollbars. Addons can implement additional
+     * scrollbar models.
+     */
+    scrollbarStyle?: string;
+
+    /**
+     * When enabled, which is the default, doing copy or cut when there is no
+     * selection will copy or cut the whole lines that have cursors on them.
+     */
+    lineWiseCopyCut?: boolean;
+  }
+
+  /**
+   * The default configuration options for an editor.
+   */
+  export
+  let defaultConfig: IConfig = {
+    ...CodeEditor.defaultConfig,
+    mode: 'null',
+    theme: 'jupyter',
+    smartIndent: false,
+    electricChars: false,
+    keyMap: 'default',
+    extraKeys: null,
+    gutters: Object.freeze([]),
+    fixedGutter: true,
+    showCursorWhenSelecting: false,
+    coverGutterNextToScrollbar: false,
+    dragDrop: true,
+    lineSeparator: null,
+    scrollbarStyle: 'native',
+    lineWiseCopyCut: true,
+  };
 
   /**
    * Add a command to CodeMirror.
@@ -895,27 +1002,18 @@ namespace CodeMirrorEditor {
  */
 namespace Private {
   /**
-   * Handle extra codemirror config from codeeditor options.
+   * Handle the codemirror configuration options.
    */
   export
-  function updateConfig(options: CodeEditor.IOptions, config: CodeMirror.EditorConfiguration): void {
-    if (options.readOnly !== undefined) {
-      config.readOnly = options.readOnly;
-    } else {
-      config.readOnly = false;
+  function handleConfig(editor: CodeMirror.Editor, config: Partial<CodeMirrorEditor.IConfig>): void {
+    config = {
+      ...CodeMirrorEditor.defaultConfig,
+      ...config
+    };
+    for (let key of Object.keys(config)) {
+      let option = key as keyof CodeMirrorEditor.IConfig;
+      Private.setOption(editor, option, config[option]);
     }
-    if (options.lineNumbers !== undefined) {
-      config.lineNumbers = options.lineNumbers;
-    } else {
-      config.lineNumbers = false;
-    }
-    if (options.wordWrap !== undefined) {
-      config.lineWrapping = options.wordWrap;
-    } else {
-      config.lineWrapping = true;
-    }
-    config.theme = (config.theme || CodeMirrorEditor.DEFAULT_THEME);
-    config.indentUnit = config.indentUnit || 4;
   }
 
   /**
@@ -955,6 +1053,59 @@ namespace Private {
   function posEq(a: CodeMirror.Position, b: CodeMirror.Position): boolean {
     return a.line === b.line && a.ch === b.ch;
   };
+
+  /**
+   * Get a config option for the editor.
+   */
+  export
+  function getOption<K extends keyof CodeMirrorEditor.IConfig>(editor: CodeMirror.Editor, option: K): CodeMirrorEditor.IConfig[K] {
+    switch (option) {
+    case 'lineWrap':
+      return editor.getOption('lineWrapping');
+    case 'insertSpaces':
+      return !editor.getOption('indentWithTabs');
+    case 'tabSize':
+      return editor.getOption('indentUnit');
+    case 'autoClosingBrackets':
+      return editor.getOption('autoCloseBrackets');
+    default:
+      return editor.getOption(option);
+    }
+  }
+
+  /**
+   * Set a config option for the editor.
+   */
+  export
+  function setOption<K extends keyof CodeMirrorEditor.IConfig>(editor: CodeMirror.Editor, option: K, value: CodeMirrorEditor.IConfig[K]): void {
+    switch (option) {
+    case 'lineWrap':
+      editor.setOption('lineWrapping', value);
+      break;
+    case 'tabSize':
+      editor.setOption('indentUnit', value);
+      break;
+    case 'insertSpaces':
+      editor.setOption('indentWithTabs', !value);
+      break;
+    case 'autoClosingBrackets':
+      editor.setOption('autoCloseBrackets', value);
+      break;
+    case 'readOnly':
+      let el = editor.getWrapperElement();
+      if (value) {
+        el.classList.add(READ_ONLY_CLASS);
+      } else {
+        el.classList.remove(READ_ONLY_CLASS);
+        editor.getInputField().blur();
+      }
+      editor.setOption(option, value);
+      break;
+    default:
+      editor.setOption(option, value);
+      break;
+    }
+  }
 }
 
 

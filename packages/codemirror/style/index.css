@@ -57,7 +57,7 @@
 }
 
 
-.jp-CodeMirrorEditor.jp-mod-readOnly .CodeMirror-cursor {
+.CodeMirror.jp-mod-readOnly .CodeMirror-cursor {
   display: none;
 }
 

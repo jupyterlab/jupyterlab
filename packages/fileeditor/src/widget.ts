@@ -207,9 +207,6 @@ class FileEditorFactory extends ABCWidgetFactory<FileEditor, DocumentRegistry.IC
     let func = this._services.factoryService.newDocumentEditor.bind(
       this._services.factoryService);
     let factory: CodeEditor.Factory = options => {
-      options.lineNumbers = true;
-      options.readOnly = false;
-      options.wordWrap = true;
       return func(options);
     };
     return new FileEditor({

@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IEditorServices
+  CodeEditor, IEditorServices
 } from '@jupyterlab/codeeditor';
 
 import {
@@ -53,7 +53,16 @@ namespace CommandIDs {
   const lineNumbers = 'editor:line-numbers';
 
   export
-  const wordWrap = 'editor:word-wrap';
+  const lineWrap = 'editor:line-wrap';
+
+  export
+  const changeTabs = 'editor:change-tabs';
+
+  export
+  const matchBrackets = 'editor:match-brackets';
+
+  export
+  const autoClosingBrackets = 'editor:autoclosing-brackets';
 
   export
   const createConsole = 'editor:create-console';
@@ -98,8 +107,9 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   const tracker = new InstanceTracker<FileEditor>({ namespace });
   const hasWidget = () => tracker.currentWidget !== null;
 
-  let lineNumbers = true;
-  let wordWrap = true;
+  let {
+    lineNumbers, lineWrap, matchBrackets, autoClosingBrackets
+  } = CodeEditor.defaultConfig;
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -113,9 +123,13 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
    */
   function updateSettings(settings: ISettingRegistry.ISettings): void {
     let cached = settings.get('lineNumbers') as boolean | null;
-    lineNumbers = cached === null ? false : !!cached;
-    cached = settings.get('wordWrap') as boolean | null;
-    wordWrap = cached === null ? false : !!cached;
+    lineNumbers = cached === null ? lineNumbers : !!cached;
+    cached = settings.get('matchBrackets') as boolean | null;
+    matchBrackets = cached === null ? matchBrackets : !!cached;
+    cached = settings.get('autoClosingBrackets') as boolean | null;
+    autoClosingBrackets = cached === null ? autoClosingBrackets : !!cached;
+    cached = settings.get('lineWrap') as boolean | null;
+    lineWrap = cached === null ? lineWrap : !!cached;
   }
 
   /**
@@ -123,9 +137,19 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
    */
   function updateTracker(): void {
     tracker.forEach(widget => {
-      widget.editor.lineNumbers = lineNumbers;
-      widget.editor.wordWrap = wordWrap;
+      updateWidget(widget);
     });
+  }
+
+  /**
+   * Update the settings of a widget.
+   */
+  function updateWidget(widget: FileEditor): void {
+    let editor = widget.editor;
+    editor.setOption('lineNumbers', lineNumbers);
+    editor.setOption('lineWrap', lineWrap);
+    editor.setOption('matchBrackets', matchBrackets);
+    editor.setOption('autoClosingBrackets', autoClosingBrackets);
   }
 
   // Fetch the initial state of the settings.
@@ -144,22 +168,21 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
     // Notify the instance tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => { tracker.save(widget); });
     tracker.add(widget);
-    widget.editor.lineNumbers = lineNumbers;
-    widget.editor.wordWrap = wordWrap;
+    updateWidget(widget);
   });
   registry.addWidgetFactory(factory);
 
   // Handle the settings of new widgets.
   tracker.widgetAdded.connect((sender, widget) => {
-    const editor = widget.editor;
-    editor.lineNumbers = lineNumbers;
-    editor.wordWrap = wordWrap;
+    updateWidget(widget);
   });
 
   commands.addCommand(CommandIDs.lineNumbers, {
     execute: () => {
       lineNumbers = !lineNumbers;
-      tracker.forEach(widget => { widget.editor.lineNumbers = lineNumbers; });
+      tracker.forEach(widget => {
+        widget.editor.setOption('lineNumbers', lineNumbers);
+      });
       return settingRegistry.set(id, 'lineNumbers', lineNumbers);
     },
     isEnabled: hasWidget,
@@ -167,15 +190,72 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
     label: 'Line Numbers'
   });
 
-  commands.addCommand(CommandIDs.wordWrap, {
+  commands.addCommand(CommandIDs.lineWrap, {
     execute: () => {
-      wordWrap = !wordWrap;
-      tracker.forEach(widget => { widget.editor.wordWrap = wordWrap; });
-      return settingRegistry.set(id, 'wordWrap', wordWrap);
+      lineWrap = !lineWrap;
+      tracker.forEach(widget => {
+        widget.editor.setOption('lineWrap', lineWrap);
+      });
+      return settingRegistry.set(id, 'lineWrap', lineWrap);
     },
     isEnabled: hasWidget,
-    isToggled: () => wordWrap,
+    isToggled: () => lineWrap,
     label: 'Word Wrap'
+  });
+
+  commands.addCommand(CommandIDs.changeTabs, {
+    label: args => args['name'] as string,
+    execute: args => {
+      let widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+      let editor = widget.editor;
+      let size = args['size'] as number || 4;
+      let insertSpaces = !!args['insertSpaces'];
+      editor.setOption('insertSpaces', insertSpaces);
+      editor.setOption('tabSize', size);
+    },
+    isEnabled: hasWidget,
+    isToggled: args => {
+      let widget = tracker.currentWidget;
+      if (!widget) {
+        return false;
+      }
+      let insertSpaces = !!args['insertSpaces'];
+      let size = args['size'] as number || 4;
+      let editor = widget.editor;
+      if (editor.getOption('insertSpaces') !== insertSpaces) {
+        return false;
+      }
+      return editor.getOption('tabSize') === size;
+    }
+  });
+
+  commands.addCommand(CommandIDs.matchBrackets, {
+    execute: () => {
+      matchBrackets = !matchBrackets;
+      tracker.forEach(widget => {
+        widget.editor.setOption('matchBrackets', matchBrackets);
+      });
+      return settingRegistry.set(id, 'matchBrackets', matchBrackets);
+    },
+    label: 'Match Brackets',
+    isEnabled: hasWidget,
+    isToggled: () => matchBrackets
+  });
+
+  commands.addCommand(CommandIDs.autoClosingBrackets, {
+    execute: () => {
+      autoClosingBrackets = !autoClosingBrackets;
+      tracker.forEach(widget => {
+        widget.editor.setOption('autoClosingBrackets', autoClosingBrackets);
+      });
+      return settingRegistry.set(id, 'autoClosingBrackets', autoClosingBrackets);
+    },
+    label: 'Auto-Closing Brackets',
+    isEnabled: hasWidget,
+    isToggled: () => autoClosingBrackets
   });
 
   commands.addCommand(CommandIDs.createConsole, {

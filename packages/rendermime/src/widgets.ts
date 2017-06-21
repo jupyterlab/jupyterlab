@@ -489,7 +489,7 @@ namespace Private {
       sanitize: false,
       tables: true,
       // breaks: true; We can't use GFM breaks as it causes problems with tables
-      langPrefix: `cm-s-${CodeMirrorEditor.DEFAULT_THEME} language-`,
+      langPrefix: `cm-s-${CodeMirrorEditor.defaultConfig.theme} language-`,
       highlight: (code, lang, callback) => {
         if (!lang) {
             // no language, no highlight

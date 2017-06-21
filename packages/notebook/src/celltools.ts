@@ -363,7 +363,7 @@ namespace CellTools {
       let editorWidget = new CodeEditorWrapper({ model, factory });
       editorWidget.addClass('jp-InputArea-editor');
       editorWidget.addClass('jp-InputArea-editor');
-      editorWidget.editor.readOnly = true;
+      editorWidget.editor.setOption('readOnly', true);
       layout.addWidget(prompt);
       layout.addWidget(editorWidget);
     }
