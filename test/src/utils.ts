@@ -32,7 +32,7 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
-  IRenderMime, RenderMime, TextRenderer, HTMLRenderer
+  IRenderMime, IRenderMime, TextRenderer, HTMLRenderer
 } from '@jupyterlab/rendermime';
 
 
@@ -165,7 +165,7 @@ namespace Private {
       return Promise.resolve(undefined);
     }
 
-    render(options: IRenderMime.IRenderOptions): RenderMime.IReadyWidget {
+    render(options: IRenderMime.IRenderOptions): IRenderMime.IReadyWidget {
       let source = options.model.data.get(options.mimeType);
       options.model.data.set(options.mimeType, json2html(source));
       return super.render(options);
@@ -181,7 +181,7 @@ namespace Private {
       return Promise.resolve(undefined);
     }
 
-    render(options: IRenderMime.IRenderOptions): RenderMime.IReadyWidget {
+    render(options: IRenderMime.IRenderOptions): IRenderMime.IReadyWidget {
       options.model.data.set('application/json', { 'foo': 1 } );
       return super.render(options);
     }
@@ -191,12 +191,12 @@ namespace Private {
     new JSONRenderer(),
     new InjectionRenderer()
   ];
-  let items = RenderMime.getDefaultItems();
+  let items = IRenderMime.getDefaultItems();
   for (let renderer of renderers) {
     items.push({ mimeType: renderer.mimeTypes[0], renderer });
   }
   export
-  const rendermime = new RenderMime({ items });
+  const rendermime = new IRenderMime({ items });
 }
 
 
