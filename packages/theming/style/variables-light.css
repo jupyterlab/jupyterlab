@@ -63,9 +63,9 @@ all of MD as it is not optimized for dense, information rich UIs.
   */
 
   --jp-ui-font-color0: rgba(0,0,0,1.0);
-  --jp-ui-font-color1: rgba(0,0,0,0.87);
-  --jp-ui-font-color2: rgba(0,0,0,0.54);
-  --jp-ui-font-color3: rgba(0,0,0,0.38);
+  --jp-ui-font-color1: rgba(0,0,0,0.8);
+  --jp-ui-font-color2: rgba(0,0,0,0.5);
+  --jp-ui-font-color3: rgba(0,0,0,0.3);
 
   /* Use these against the brand/accent/warn/error colors.
      These will typically go from light to darker, in both a dark and light theme
