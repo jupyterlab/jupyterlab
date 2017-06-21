@@ -618,8 +618,15 @@ describe('docmanager/default', () => {
     describe('#ready', () => {
 
       it('should resolve when the widget is ready', () => {
+        let widget = new LogRenderer({
+          context,
+          rendermime: RENDERMIME,
+          mimeType: 'text/markdown',
+          renderTimeout: 1000
+        });
         context.save();
         return widget.ready.then(() => {
+          let layout = widget.layout as PanelLayout;
           expect(layout.widgets.length).to.be(2);
         });
       });

@@ -12,10 +12,6 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
   ClientSession
 } from '@jupyterlab/apputils';
 
@@ -32,7 +28,7 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
-  IRenderMime, IRenderMime, TextRenderer, HTMLRenderer
+  IRenderMime, RenderMime, TextRenderer, HTMLRenderer
 } from '@jupyterlab/rendermime';
 
 
@@ -191,12 +187,12 @@ namespace Private {
     new JSONRenderer(),
     new InjectionRenderer()
   ];
-  let items = IRenderMime.getDefaultItems();
+  let items = RenderMime.getDefaultItems();
   for (let renderer of renderers) {
     items.push({ mimeType: renderer.mimeTypes[0], renderer });
   }
   export
-  const rendermime = new IRenderMime({ items });
+  const rendermime = new RenderMime({ items });
 }
 
 
