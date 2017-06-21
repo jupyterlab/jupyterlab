@@ -53,6 +53,18 @@ const copy = JSONExt.deepCopy;
 export
 interface ISchemaValidator {
   /**
+   * Add a schema to the validator.
+   *
+   * @param plugin - The plugin ID.
+   *
+   * @param schema - The schema being added.
+   *
+   * @returns A promise that resolves with void if successful and rejects with a
+   * list of errors if the schema fails to validate.
+   */
+  addSchema(plugin: string, schema: ISettingRegistry.ISchema): Promise<void | ISchemaValidator.IError[]>;
+
+  /**
    * Validate a data object against a plugin's JSON schema.
    *
    * @param plugin - The plugin ID.
@@ -271,8 +283,53 @@ class DefaultSchemaValidator implements ISchemaValidator {
    * Instantiate a schema validator.
    */
   constructor() {
-    this._merger.addSchema(SCHEMA, 'main');
+    this._composer.addSchema(SCHEMA, 'main');
     this._validator.addSchema(SCHEMA, 'main');
+  }
+
+  /**
+   * Add a schema to the validator.
+   *
+   * @param plugin - The plugin ID.
+   *
+   * @param schema - The schema being added.
+   */
+  addSchema(plugin: string, schema: ISettingRegistry.ISchema): Promise<void | ISchemaValidator.IError[]> {
+    try {
+      const validate = this._validator.getSchema('main');
+      const result = validate(schema);
+      const errors = validate.errors as ISchemaValidator.IError[];
+
+      if (typeof result === 'boolean') {
+        if (result) {
+          this._composer.addSchema(schema, plugin);
+          this._validator.addSchema(schema, plugin);
+          return Promise.resolve(void 0);
+        } else {
+          return Promise.resolve(errors);
+        }
+      }
+
+      // The Ajv promise implementation uses `Thenable` instead of `Promise`,
+      // so it needs to be wrapped in a true `Promise` instance here.
+      return new Promise<void | ISchemaValidator.IError[]>((resolve, reject) => {
+        result.then(() => {
+          this._composer.addSchema(schema, plugin);
+          this._validator.addSchema(schema, plugin);
+          resolve();
+        }, reject);
+      });
+    } catch (error) {
+      console.error('Adding schema failed.', error);
+
+      const schemaError = {
+        keyword: '',
+        message: error.message,
+        schemaPath: ''
+      };
+
+      return Promise.reject([schemaError]);
+    }
   }
 
   /**
@@ -294,7 +351,7 @@ class DefaultSchemaValidator implements ISchemaValidator {
       }
 
       const result = validate(data);
-      const { errors } = validate;
+      const errors = validate.errors as ISchemaValidator.IError[];
 
       if (typeof result === 'boolean') {
         return result ? Promise.resolve(void 0) : Promise.resolve(errors);
@@ -318,7 +375,7 @@ class DefaultSchemaValidator implements ISchemaValidator {
     }
   }
 
-  private _merger = new Ajv({ useDefaults: true });
+  private _composer = new Ajv({ useDefaults: true });
   private _validator = new Ajv();
 }
 
