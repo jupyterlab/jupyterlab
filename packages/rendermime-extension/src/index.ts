@@ -38,7 +38,7 @@ const rendermimePlugin: JupyterLabPlugin<IRenderMime> = {
  * The rendermime document registry handler.
  */
 const docRegistryPlugin: JupyterLabPlugin<void> = {
-  id: 'jupyter.services.rendermime',
+  id: 'jupyter.services.mimerender-documents',
   requires: [IRenderMime, IDocumentRegistry],
   activate: (app: JupyterLab, rendermime: IRenderMime, registry: IDocumentRegistry) => {
       each(RenderMime.getExtensions(), item => {
