@@ -43,7 +43,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  RenderMime
+  IRenderMime
 } from '@jupyterlab/rendermime';
 
 import {
@@ -152,7 +152,7 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
   /**
    * The Rendermime instance used by the widget.
    */
-  readonly rendermime: RenderMime;
+  readonly rendermime: IRenderMime;
 
   /**
    * The notebook used by the widget.
@@ -395,7 +395,7 @@ export namespace NotebookPanel {
     /**
      * The rendermime instance used by the panel.
      */
-    rendermime: RenderMime;
+    rendermime: IRenderMime;
 
     /**
      * The language preference for the model.

@@ -14,8 +14,12 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IRenderMime, RenderMime
+  RenderMime
 } from '@jupyterlab/rendermime';
+
+import {
+  IRenderMime
+} from '@jupyterlab/rendermime-interfaces';
 
 import {
   ServiceManager

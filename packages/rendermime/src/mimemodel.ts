@@ -6,15 +6,19 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  RenderMime
-} from './rendermime';
+  IObservableJSON, ObservableJSON
+} from '@jupyterlab/coreutils';
+
+import {
+  IRenderMime
+} from '@jupyterlab/rendermime-interfaces';
 
 
 /**
  * The default mime model implementation.
  */
 export
-class MimeModel implements RenderMime.IMimeModel {
+class MimeModel implements IRenderMime.IMimeModel {
   /**
    * Construct a new mime model.
    */

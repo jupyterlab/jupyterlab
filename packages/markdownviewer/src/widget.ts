@@ -26,7 +26,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  MimeModel, RenderMime
+  MimeModel, IRenderMime
 } from '@jupyterlab/rendermime';
 
 
@@ -49,7 +49,7 @@ class MarkdownViewer extends Widget implements DocumentRegistry.IReadyWidget {
   /**
    * Construct a new markdown widget.
    */
-  constructor(context: DocumentRegistry.Context, rendermime: RenderMime) {
+  constructor(context: DocumentRegistry.Context, rendermime: IRenderMime) {
     super();
     this.addClass(MD_CLASS);
     let layout = this.layout = new PanelLayout();
@@ -146,7 +146,7 @@ class MarkdownViewer extends Widget implements DocumentRegistry.IReadyWidget {
 
   private _context: DocumentRegistry.Context = null;
   private _monitor: ActivityMonitor<any, any> = null;
-  private _rendermime: RenderMime = null;
+  private _rendermime: IRenderMime = null;
   private _ready = new PromiseDelegate<void>();
 }
 
@@ -171,7 +171,7 @@ class MarkdownViewerFactory extends ABCWidgetFactory<MarkdownViewer, DocumentReg
     return new MarkdownViewer(context, this._rendermime.clone());
   }
 
-  private _rendermime: RenderMime = null;
+  private _rendermime: IRenderMime = null;
 }
 
 
@@ -188,6 +188,6 @@ namespace MarkdownViewerFactory {
     /**
      * A rendermime instance.
      */
-    rendermime: RenderMime;
+    rendermime: IRenderMime;
   }
 }

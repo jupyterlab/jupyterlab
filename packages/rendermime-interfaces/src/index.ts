@@ -10,7 +10,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONObject
+  JSONObject, Token
 } from '@phosphor/coreutils';
 
 import {
@@ -20,6 +20,15 @@ import {
 import {
   Widget
 } from '@phosphor/widgets';
+
+
+/* tslint:disable */
+/**
+ * The rendermime token.
+ */
+export
+const IRenderMime = new Token<IRenderMime>('jupyter.services.rendermime');
+/* tslint:enable */
 
 
 /**

@@ -48,7 +48,7 @@ import {
 
 import {
   IRenderMime
-} from '@jupyterlab/rendermime';
+} from '@jupyterlab/rendermime-interfaces';
 
 import {
   ChatEntry, CHAT_ENTRY_CLASS

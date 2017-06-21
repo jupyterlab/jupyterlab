@@ -38,7 +38,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  RenderMime
+  IRenderMime
 } from '@jupyterlab/rendermime';
 
 
@@ -773,55 +773,7 @@ namespace DocumentRegistry {
    * The options used to initialize a widget factory.
    */
   export
-  interface IWidgetFactoryOptions {
-    /**
-     * The file extensions the widget can view.
-     *
-     * #### Notes
-     * Use "*" to denote all files. Specific file extensions must be preceded
-     * with '.', like '.png', '.txt', etc.  They may themselves contain a
-     * period (e.g. .table.json).
-     */
-    readonly fileExtensions: string[];
-
-    /**
-     * The name of the widget to display in dialogs.
-     */
-    readonly name: string;
-
-    /**
-     * The file extensions for which the factory should be the default.
-     *
-     * #### Notes
-     * Use "*" to denote all files. Specific file extensions must be preceded
-     * with '.', like '.png', '.txt', etc. Entries in this attribute must also
-     * be included in the fileExtensions attribute.
-     * The default is an empty array.
-     *
-     * **See also:** [[fileExtensions]].
-     */
-    readonly defaultFor?: string[];
-
-    /**
-     * Whether the widget factory is read only.
-     */
-    readonly readOnly?: boolean;
-
-    /**
-     * The registered name of the model type used to create the widgets.
-     */
-    readonly modelName?: string;
-
-    /**
-     * Whether the widgets prefer having a kernel started.
-     */
-    readonly preferKernel?: boolean;
-
-    /**
-     * Whether the widgets can start a kernel when opened.
-     */
-    readonly canStartKernel?: boolean;
-  }
+  interface IWidgetFactoryOptions extends IRenderMime.IWidgetFactoryOptions {}
 
   /**
    * A widget for a document.

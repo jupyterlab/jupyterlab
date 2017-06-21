@@ -32,7 +32,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  MimeModel, RenderMime
+  MimeModel, IRenderMime
 } from '@jupyterlab/rendermime';
 
 import {
@@ -196,7 +196,7 @@ class Cell extends Widget implements RenderMime.IReadyWidget {
     (this.layout as PanelLayout).addWidget(inputWrapper);
 
     this._inputPlaceholder = new InputPlaceholder();
-  
+
     // Footer
     let footer = this._footer = this.contentFactory.createCellFooter();
     footer.addClass(CELL_FOOTER_CLASS);
@@ -299,7 +299,7 @@ class Cell extends Widget implements RenderMime.IReadyWidget {
 
   /**
    * Handle the input being hidden.
-   * 
+   *
    * #### Notes
    * This is called by the `inputHidden` setter so that subclasses
    * can perform actions upon the input being hidden without accessing
@@ -591,7 +591,7 @@ class CodeCell extends Cell {
 
   /**
    * Handle the input being hidden.
-   * 
+   *
    * #### Notes
    * This method is called by the case cell implementation and is
    * subclasses here so the code cell can watch to see when input
@@ -668,7 +668,7 @@ class CodeCell extends Cell {
     this.toggleClass(NO_OUTPUTS_CLASS, force);
   }
 
-  private _rendermime: RenderMime = null;
+  private _rendermime: IRenderMime = null;
   private _outputHidden = false;
   private _outputWrapper: Widget = null;
   private _outputCollapser: OutputCollapser = null;
@@ -695,7 +695,7 @@ namespace CodeCell {
     /**
      * The mime renderer for the cell widget.
      */
-    rendermime: RenderMime;
+    rendermime: IRenderMime;
   }
 
   /**
@@ -861,7 +861,7 @@ class MarkdownCell extends Cell {
   }
 
   private _monitor: ActivityMonitor<any, any> = null;
-  private _rendermime: RenderMime = null;
+  private _rendermime: IRenderMime = null;
   private _renderedInput: Widget = null;
   private _rendered = true;
   private _prevText = '';
@@ -889,7 +889,7 @@ namespace MarkdownCell {
     /**
      * The mime renderer for the cell widget.
      */
-    rendermime: RenderMime;
+    rendermime: IRenderMime;
 
   }
 }

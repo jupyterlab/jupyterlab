@@ -16,6 +16,7 @@
     "@jupyterlab/apputils": "^0.7.0",
     "@jupyterlab/codemirror": "^0.7.0",
     "@jupyterlab/coreutils": "^0.7.0",
+    "@jupyterlab/rendermime-interfaces": "^0.1.0",
     "@jupyterlab/services": "^0.46.0",
     "@phosphor/algorithm": "^1.1.1",
     "@phosphor/coreutils": "^1.1.1",

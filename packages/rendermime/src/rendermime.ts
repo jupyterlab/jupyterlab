@@ -14,6 +14,10 @@ import {
 } from '@phosphor/coreutils';
 
 import {
+  IRenderMime
+} from '@jupyterlab/rendermime-interfaces';
+
+import {
   Widget
 } from '@phosphor/widgets';
 
@@ -38,6 +42,7 @@ import {
   RenderedText
 } from './widgets';
 
+
 /**
  * A composite renderer.
  *
@@ -46,7 +51,7 @@ import {
  * render the model into a widget.
  */
 export
-class RenderMime {
+class RenderMime implements IRenderMime {
   /**
    * Construct a renderer.
    */
@@ -65,20 +70,20 @@ class RenderMime {
   /**
    * The object used to resolve relative urls for the rendermime instance.
    */
-  get resolver(): RenderMime.IResolver {
+  get resolver(): IRenderMime.IResolver {
     return this._resolver;
   }
-  set resolver(value: RenderMime.IResolver) {
+  set resolver(value: IRenderMime.IResolver) {
     this._resolver = value;
   }
 
   /**
    * The object used to handle path opening links.
    */
-  get linkHandler(): RenderMime.ILinkHandler {
+  get linkHandler(): IRenderMime.ILinkHandler {
     return this._handler;
   }
-  set linkHandler(value: RenderMime.ILinkHandler) {
+  set linkHandler(value: IRenderMime.ILinkHandler) {
     this._handler = value;
   }
 
@@ -102,7 +107,7 @@ class RenderMime {
    * Renders the model using the preferred mime type.  See
    * [[preferredMimeType]].
    */
-  render(model: RenderMime.IMimeModel): RenderMime.IReadyWidget {
+  render(model: IRenderMime.IMimeModel): RenderMime.IReadyWidget {
     let mimeType = this.preferredMimeType(model);
     if (!mimeType) {
       return this._handleError(model);
@@ -126,7 +131,7 @@ class RenderMime {
    * The mimeTypes in the model are checked in preference order
    * until a renderer returns `true` for `.canRender`.
    */
-  preferredMimeType(model: RenderMime.IMimeModel): string {
+  preferredMimeType(model: IRenderMime.IMimeModel): string {
     let sanitizer = this.sanitizer;
     return find(this._order, mimeType => {
       if (model.data.has(mimeType)) {
@@ -177,7 +182,7 @@ class RenderMime {
    * The renderer will replace an existing renderer for the given
    * mimeType.
    */
-  addRenderer(item: RenderMime.IRendererItem, index = 0): void {
+  addRenderer(item: IRenderMime.IRendererItem, index = 0): void {
     let { mimeType, renderer } = item;
     let orig = ArrayExt.removeFirstOf(this._order, mimeType);
     if (orig !== -1 && orig < index) {
@@ -204,14 +209,14 @@ class RenderMime {
    *
    * @returns The renderer for the given mimeType, or undefined if the mimeType is unknown.
    */
-  getRenderer(mimeType: string): RenderMime.IRenderer {
+  getRenderer(mimeType: string): IRenderMime.IRenderer {
     return this._renderers[mimeType];
   }
 
   /**
    * Return a widget for an error.
    */
-  private _handleError(model: RenderMime.IMimeModel): RenderMime.IReadyWidget {
+  private _handleError(model: IRenderMime.IMimeModel): RenderMime.IReadyWidget {
    let errModel = new MimeModel({
       data: {
         'application/vnd.jupyter.stderr': 'Unable to render data'
@@ -227,10 +232,10 @@ class RenderMime {
 
   readonly sanitizer: ISanitizer;
 
-  private _renderers: { [key: string]: RenderMime.IRenderer } = Object.create(null);
+  private _renderers: { [key: string]: IRenderMime.IRenderer } = Object.create(null);
   private _order: string[] = [];
-  private _resolver: RenderMime.IResolver | null;
-  private _handler: RenderMime.ILinkHandler | null;
+  private _resolver: IRenderMime.IResolver | null;
+  private _handler: IRenderMime.ILinkHandler | null;
 }
 
 
@@ -247,26 +252,26 @@ namespace RenderMime {
     /**
      * The intial renderer items.
      */
-    items?: IRendererItem[];
+    items?: IRenderMime.IRendererItem[];
 
     /**
      * The sanitizer used to sanitize untrusted html inputs.
      *
      * If not given, a default sanitizer will be used.
      */
-    sanitizer?: ISanitizer;
+    sanitizer?: IRenderMime.ISanitizer;
 
     /**
      * The initial resolver object.
      *
      * The default is `null`.
      */
-    resolver?: IResolver;
+    resolver?: IRenderMime.IResolver;
 
     /**
      * An optional path handler.
      */
-    linkHandler?: ILinkHandler;
+    linkHandler?: IRenderMime.ILinkHandler;
   }
 
   /**
@@ -363,9 +368,9 @@ namespace RenderMime {
    * Get an array of the default renderer items.
    */
   export
-  function getDefaultItems(): IRendererItem[] {
+  function getDefaultItems(): IRenderMime.IRendererItem[] {
     let renderers = Private.defaultRenderers;
-    let items: IRendererItem[] = [];
+    let items: IRenderMime.IRendererItem[] = [];
     let mimes: { [key: string]: boolean } = {};
     for (let renderer of renderers) {
       for (let mime of renderer.mimeTypes) {
@@ -383,7 +388,7 @@ namespace RenderMime {
    * Register a rendermime extension module.
    */
   export
-  function registerExtensionModule(mod: IExtensionModule): void {
+  function registerExtensionModule(mod: IRenderMime.IExtensionModule): void {
     let data = mod.default;
     // Handle commonjs exports.
     if (!mod.hasOwnProperty('__esModule')) {
@@ -399,7 +404,7 @@ namespace RenderMime {
    * Get the registered extensions.
    */
   export
-  function getExtensions(): IIterable<IExtension> {
+  function getExtensions(): IIterable<IRenderMime.IExtension> {
     return iter(Private.registeredExtensions);
   }
 
@@ -497,7 +502,7 @@ namespace RenderMime {
    * A default resolver that uses a session and a contents manager.
    */
   export
-  class UrlResolver implements IResolver {
+  class UrlResolver implements IRenderMime.IResolver {
     /**
      * Create a new url resolver for a console.
      */
@@ -558,7 +563,7 @@ namespace Private {
    * The registered extensions.
    */
   export
-  const registeredExtensions: RenderMime.IExtension[] = [];
+  const registeredExtensions: IRenderMime.IExtension[] = [];
 
   /**
    * The default renderer instances.

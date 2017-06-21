@@ -14,8 +14,8 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  RenderMime
-} from '@jupyterlab/rendermime';
+  IRenderMime
+} from '@jupyterlab/rendermime-interfaces';
 
 /**
  * Import vega-embed in this manner due to how it is exported.
@@ -65,7 +65,7 @@ class RenderedVega extends Widget {
   /**
    * Create a new widget for rendering Vega/Vega-Lite.
    */
-  constructor(options: RenderMime.IRenderOptions) {
+  constructor(options: IRenderMime.IRenderOptions) {
     super();
     this.addClass(VEGA_COMMON_CLASS);
     this._model = options.model;
@@ -117,7 +117,7 @@ class RenderedVega extends Widget {
     });
   }
 
-  private _model: RenderMime.IMimeModel = null;
+  private _model: IRenderMime.IMimeModel = null;
   private _mimeType: string;
   private _mode: string;
 
@@ -128,7 +128,7 @@ class RenderedVega extends Widget {
  * A mime renderer for Vega/Vega-Lite data.
  */
 export
-class VegaRenderer implements RenderMime.IRenderer {
+class VegaRenderer implements IRenderMime.IRenderer {
   /**
    * The mimeTypes this renderer accepts.
    */
@@ -137,21 +137,21 @@ class VegaRenderer implements RenderMime.IRenderer {
   /**
    * Whether the renderer can render given the render options.
    */
-  canRender(options: RenderMime.IRenderOptions): boolean {
+  canRender(options: IRenderMime.IRenderOptions): boolean {
     return this.mimeTypes.indexOf(options.mimeType) !== -1;
   }
 
   /**
    * Render the transformed mime bundle.
    */
-  render(options: RenderMime.IRenderOptions): Widget {
+  render(options: IRenderMime.IRenderOptions): Widget {
     return new RenderedVega(options);
   }
 
   /**
    * Whether the renderer will sanitize the data given the render options.
    */
-  wouldSanitize(options: RenderMime.IRenderOptions): boolean {
+  wouldSanitize(options: IRenderMime.IRenderOptions): boolean {
     // TODO: Is this the correct logic?
     return !options.model.trusted;
   }
@@ -160,7 +160,7 @@ class VegaRenderer implements RenderMime.IRenderer {
 
 const renderer = new VegaRenderer();
 
-const extensions: RenderMime.IExtension | RenderMime.IExtension[] = [
+const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
   // Vega
   {
     mimeType: VEGA_MIME_TYPE,

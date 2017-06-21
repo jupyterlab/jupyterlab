@@ -19,7 +19,7 @@ import {
 
 import {
   IRenderMime
-} from '@jupyterlab/rendermime';
+} from '@jupyterlab/rendermime-interfaces';
 
 import {
   DocumentRegistry
