@@ -17,7 +17,7 @@
     "@jupyterlab/codeeditor": "^0.7.0",
     "@jupyterlab/coreutils": "^0.7.0",
     "@jupyterlab/docregistry": "^0.7.0",
-    "@jupyterlab/rendermime-interfaces": "^0.1.0",
+    "@jupyterlab/rendermime": "^0.7.0",
     "@phosphor/algorithm": "^1.1.1",
     "@phosphor/coreutils": "^1.1.1",
     "@phosphor/disposable": "^1.1.1",
