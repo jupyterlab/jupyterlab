@@ -24,16 +24,16 @@ import {
 } from '@jupyterlab/docregistry';
 
 
-class DocWidget extends Widget implements DocumentRegistry.IWidget {
+class DocWidget extends Widget implements DocumentRegistry.IReadyWidget {
   get ready(): Promise<void> {
     return Promise.resolve(undefined);
   }
 }
 
 
-class WidgetFactory extends ABCWidgetFactory<DocumentRegistry.IWidget, DocumentRegistry.IModel> {
+class WidgetFactory extends ABCWidgetFactory<DocumentRegistry.IReadyWidget, DocumentRegistry.IModel> {
 
-  protected createNewWidget(context: DocumentRegistry.Context): DocumentRegistry.IWidget {
+  protected createNewWidget(context: DocumentRegistry.Context): DocumentRegistry.IReadyWidget {
     let widget = new DocWidget();
     widget.addClass('WidgetFactory');
     return widget;
