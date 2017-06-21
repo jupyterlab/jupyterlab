@@ -17,6 +17,21 @@
 }
 
 
+.jp-LauncherWidget::before {
+  content: 'Start a new activity';
+  display: block;
+  height: 60px;
+  width: 100%;
+  background: var(--jp-toolbar-background);
+  border-bottom: 1px solid var(--jp-toolbar-border-color);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  z-index: 10;
+  text-align: center;
+  font-size: 24px;
+  padding-top: 36px;
+}
+
+
 .jp-LauncherWidget-body {
   padding-bottom: 12px;
   font-size: var(--jp-ui-font-size1);
