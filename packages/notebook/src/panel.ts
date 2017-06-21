@@ -11,7 +11,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  Token
+  PromiseDelegate, Token
 } from '@phosphor/coreutils';
 
 import {
@@ -135,13 +135,7 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
    * A promise that resolves when the notebook panel is ready.
    */
   get ready(): Promise<void> {
-    return this._context.ready.then(() => {
-      let promises: Promise<void>[] = [];
-      each(this.notebook.widgets, widget => {
-        promises.push(widget.ready);
-      });
-      return Promise.all(promises).then(() => undefined);
-    });
+    return this._ready.promise;
   }
 
   /**
@@ -195,6 +189,18 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
     this._onContextChanged(oldValue, newValue);
     this.onContextChanged(oldValue, newValue);
     this._contextChanged.emit(void 0);
+
+    if (!oldValue) {
+      newValue.ready.then(() => {
+        if (this.notebook.widgets.length === 1) {
+          let model = this.notebook.widgets[0].model;
+          if (model.type === 'code' && model.value.text === '') {
+            this.notebook.mode = 'edit';
+          }
+        }
+        this._ready.resolve(undefined);
+      });
+    }
   }
 
   /**
@@ -380,6 +386,7 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
   private _context: DocumentRegistry.IContext<INotebookModel> = null;
   private _activated = new Signal<this, void>(this);
   private _contextChanged = new Signal<this, void>(this);
+  private _ready = new PromiseDelegate<void>();
 }
 
 
