@@ -195,7 +195,9 @@ class Cell extends Widget {
     inputWrapper.addWidget(input);
     (this.layout as PanelLayout).addWidget(inputWrapper);
 
-    this._inputPlaceholder = new InputPlaceholder();
+    this._inputPlaceholder = new InputPlaceholder(() => {
+      this.inputHidden = !this.inputHidden;
+    });
 
     // Footer
     let footer = this._footer = this.contentFactory.createCellFooter();
@@ -542,7 +544,9 @@ class CodeCell extends Cell {
     outputWrapper.addWidget(output);
     (this.layout as PanelLayout).insertWidget(2, outputWrapper);
 
-    this._outputPlaceholder = new OutputPlaceholder();
+    this._outputPlaceholder = new OutputPlaceholder(() => {
+      this.outputHidden = !this.outputHidden;
+    });
 
     // Modify state
     this.setPrompt(`${model.executionCount || ''}`);
