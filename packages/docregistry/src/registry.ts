@@ -37,6 +37,11 @@ import {
   IChangedArgs as IChangedArgsGeneric, PathExt, IModelDB
 } from '@jupyterlab/coreutils';
 
+import {
+  RenderMime
+} from '@jupyterlab/rendermime';
+
+
 /* tslint:disable */
 /**
  * The document registry token.
@@ -822,18 +827,13 @@ namespace DocumentRegistry {
    * A widget for a document.
    */
   export
-  interface IWidget extends Widget {
-    /**
-     * A promise that resolves when the document is ready.
-     */
-    ready: Promise<void>;
-  }
+  interface IReadyWidget extends RenderMime.IReadyWidget { }
 
   /**
    * The interface for a widget factory.
    */
   export
-  interface IWidgetFactory<T extends IWidget, U extends IModel> extends IDisposable, IWidgetFactoryOptions {
+  interface IWidgetFactory<T extends IReadyWidget, U extends IModel> extends IDisposable, IWidgetFactoryOptions {
     /**
      * A signal emitted when a widget is created.
      */
@@ -852,7 +852,7 @@ namespace DocumentRegistry {
    * A type alias for a standard widget factory.
    */
   export
-  type WidgetFactory = IWidgetFactory<IWidget, IModel>;
+  type WidgetFactory = IWidgetFactory<IReadyWidget, IModel>;
 
   /**
    * An interface for a widget extension.

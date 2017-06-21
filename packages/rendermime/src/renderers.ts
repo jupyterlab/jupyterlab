@@ -27,7 +27,7 @@ class HTMLRenderer implements RenderMime.IRenderer {
   /**
    * Render the transformed mime bundle.
    */
-  render(options: RenderMime.IRenderOptions): RenderMime.IWidget {
+  render(options: RenderMime.IRenderOptions): RenderMime.IReadyWidget {
     return new RenderedHTML(options);
   }
 
@@ -60,7 +60,7 @@ class ImageRenderer implements RenderMime.IRenderer {
   /**
    * Render the transformed mime bundle.
    */
-  render(options: RenderMime.IRenderOptions): RenderMime.IWidget {
+  render(options: RenderMime.IRenderOptions): RenderMime.IReadyWidget {
     return new RenderedImage(options);
   }
 
@@ -94,7 +94,7 @@ class TextRenderer implements RenderMime.IRenderer {
   /**
    * Render the transformed mime bundle.
    */
-  render(options: RenderMime.IRenderOptions): RenderMime.IWidget {
+  render(options: RenderMime.IRenderOptions): RenderMime.IReadyWidget {
     return new RenderedText(options);
   }
 
@@ -130,7 +130,7 @@ class JavaScriptRenderer implements RenderMime.IRenderer {
   /**
    * Render the transformed mime bundle.
    */
-  render(options: RenderMime.IRenderOptions): RenderMime.IWidget {
+  render(options: RenderMime.IRenderOptions): RenderMime.IReadyWidget {
     return new RenderedJavaScript(options);
   }
 
@@ -166,7 +166,7 @@ class SVGRenderer implements RenderMime.IRenderer {
   /**
    * Render the transformed mime bundle.
    */
-  render(options: RenderMime.IRenderOptions): RenderMime.IWidget {
+  render(options: RenderMime.IRenderOptions): RenderMime.IReadyWidget {
     return new RenderedSVG(options);
   }
 
@@ -202,7 +202,7 @@ class PDFRenderer implements RenderMime.IRenderer {
   /**
    * Render the transformed mime bundle.
    */
-  render(options: RenderMime.IRenderOptions): RenderMime.IWidget {
+  render(options: RenderMime.IRenderOptions): RenderMime.IReadyWidget {
     return new RenderedPDF(options);
   }
 
@@ -235,7 +235,7 @@ class LatexRenderer implements RenderMime.IRenderer  {
   /**
    * Render the transformed mime bundle.
    */
-  render(options: RenderMime.IRenderOptions): RenderMime.IWidget {
+  render(options: RenderMime.IRenderOptions): RenderMime.IReadyWidget {
     return new RenderedLatex(options);
   }
 
@@ -268,7 +268,7 @@ class MarkdownRenderer implements RenderMime.IRenderer {
   /**
    * Render the transformed mime bundle.
    */
-  render(options: RenderMime.IRenderOptions): RenderMime.IWidget {
+  render(options: RenderMime.IRenderOptions): RenderMime.IReadyWidget {
     return new RenderedMarkdown(options);
   }
 

@@ -57,7 +57,7 @@ const RENDER_TIMEOUT = 1000;
  * A viewer for CSV tables.
  */
 export
-class CSVViewer extends Widget implements DocumentRegistry.IWidget {
+class CSVViewer extends Widget implements DocumentRegistry.IReadyWidget {
   /**
    * Construct a new CSV viewer.
    */

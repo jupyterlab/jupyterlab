@@ -45,7 +45,7 @@ const RENDER_TIMEOUT = 1000;
  * A widget for rendered markdown.
  */
 export
-class MarkdownViewer extends Widget implements DocumentRegistry.IWidget {
+class MarkdownViewer extends Widget implements DocumentRegistry.IReadyWidget {
   /**
    * Construct a new markdown widget.
    */
@@ -122,7 +122,7 @@ class MarkdownViewer extends Widget implements DocumentRegistry.IWidget {
   /**
    * Render the markdown content.
    */
-  private _render(): RenderMime.IWidget {
+  private _render(): RenderMime.IReadyWidget {
     let context = this._context;
     let model = context.model;
     let layout = this.layout as PanelLayout;

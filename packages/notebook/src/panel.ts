@@ -31,10 +31,6 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  MarkdownCell
-} from '@jupyterlab/cells';
-
-import {
   IEditorMimeTypeService
 } from '@jupyterlab/codeeditor';
 
@@ -82,7 +78,7 @@ const DIRTY_CLASS = 'jp-mod-dirty';
  * kernel on the context.
  */
 export
-class NotebookPanel extends Widget implements DocumentRegistry.IWidget {
+class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
   /**
    * Construct a new notebook panel.
    */
@@ -142,9 +138,7 @@ class NotebookPanel extends Widget implements DocumentRegistry.IWidget {
     return this._context.ready.then(() => {
       let promises: Promise<void>[] = [];
       each(this.notebook.widgets, widget => {
-        if (widget instanceof MarkdownCell) {
-          promises.push(widget.ready);
-        }
+        promises.push(widget.ready);
       });
       return Promise.all(promises).then(() => undefined);
     });

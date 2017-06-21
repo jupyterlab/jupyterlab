@@ -13,6 +13,10 @@ import {
   CodeEditor, IEditorServices, IEditorMimeTypeService, CodeEditorWrapper
 } from '@jupyterlab/codeeditor';
 
+import {
+  PromiseDelegate
+} from '@phosphor/coreutils';
+
 
 /**
  * The class name added to a dirty widget.
@@ -29,7 +33,7 @@ const EDITOR_CLASS = 'jp-FileEditor';
  * A document widget for editors.
  */
 export
-class FileEditor extends CodeEditorWrapper implements DocumentRegistry.IWidget {
+class FileEditor extends CodeEditorWrapper implements DocumentRegistry.IReadyWidget {
   /**
    * Construct a new editor widget.
    */
@@ -77,7 +81,7 @@ class FileEditor extends CodeEditorWrapper implements DocumentRegistry.IWidget {
    * A promise that resolves when the file editor is ready.
    */
   get ready(): Promise<void> {
-    return this._context.ready;
+    return this._ready.promise;
   }
 
   /**
@@ -101,6 +105,9 @@ class FileEditor extends CodeEditorWrapper implements DocumentRegistry.IWidget {
     // Wire signal connections.
     contextModel.stateChanged.connect(this._onModelStateChanged, this);
     contextModel.contentChanged.connect(this._onContentChanged, this);
+
+    // Resolve the ready promise.
+    this._ready.resolve(undefined);
   }
 
   /**
@@ -163,6 +170,7 @@ class FileEditor extends CodeEditorWrapper implements DocumentRegistry.IWidget {
 
   protected _context: DocumentRegistry.Context;
   private _mimeTypeService: IEditorMimeTypeService;
+  private _ready = new PromiseDelegate<void>();
 }
 
 

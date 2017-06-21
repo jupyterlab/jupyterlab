@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
+  PromiseDelegate
+} from '@phosphor/coreutils';
+
+import {
   Message
 } from '@phosphor/messaging';
 
@@ -24,7 +28,7 @@ const IMAGE_CLASS = 'jp-ImageViewer';
  * A widget for images.
  */
 export
-class ImageViewer extends Widget implements DocumentRegistry.IWidget {
+class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
   /**
    * Construct a new image widget.
    */
@@ -38,9 +42,10 @@ class ImageViewer extends Widget implements DocumentRegistry.IWidget {
     context.pathChanged.connect(this._onTitleChanged, this);
 
     context.ready.then(() => {
-      this.update();
+      this._render();
       context.model.contentChanged.connect(this.update, this);
       context.fileChanged.connect(this.update, this);
+      this._ready.resolve(void 0);
     });
   }
 
@@ -55,7 +60,7 @@ class ImageViewer extends Widget implements DocumentRegistry.IWidget {
    * A promise that resolves when the image viewer is ready.
    */
   get ready(): Promise<void> {
-    return this._context.ready;
+    return this._ready.promise;
   }
 
   /**
@@ -91,10 +96,7 @@ class ImageViewer extends Widget implements DocumentRegistry.IWidget {
     if (this.isDisposed || !context.isReady) {
       return;
     }
-    let cm = context.contentsModel;
-    let content = context.model.toString();
-    let src = `data:${cm.mimetype};${cm.format},${content}`;
-    this.node.querySelector('img').setAttribute('src', src);
+    this._render();
   }
 
   /**
@@ -111,8 +113,20 @@ class ImageViewer extends Widget implements DocumentRegistry.IWidget {
     this.title.label = this._context.path.split('/').pop();
   }
 
+  /**
+   * Render the widget content.
+   */
+  private _render(): void {
+    let context = this._context;
+    let cm = context.contentsModel;
+    let content = context.model.toString();
+    let src = `data:${cm.mimetype};${cm.format},${content}`;
+    this.node.querySelector('img').setAttribute('src', src);
+  }
+
   private _context: DocumentRegistry.Context;
   private _scale = 1;
+  private _ready = new PromiseDelegate<void>();
 }
 
 

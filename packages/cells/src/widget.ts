@@ -156,7 +156,7 @@ const RENDER_TIMEOUT = 1000;
  * A base cell widget.
  */
 export
-class Cell extends Widget {
+class Cell extends Widget implements RenderMime.IReadyWidget {
   /**
    * Construct a new base cell widget.
    */
@@ -243,6 +243,13 @@ class Cell extends Widget {
     }
     this._readOnly = value;
     this.update();
+  }
+
+  /**
+   * A promise that resolves when the widget renders for the first time.
+   */
+  get ready(): Promise<void> {
+    return Promise.resolve(undefined);
   }
 
   /**

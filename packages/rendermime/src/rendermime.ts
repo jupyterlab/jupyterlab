@@ -102,7 +102,7 @@ class RenderMime {
    * Renders the model using the preferred mime type.  See
    * [[preferredMimeType]].
    */
-  render(model: RenderMime.IMimeModel): RenderMime.IWidget {
+  render(model: RenderMime.IMimeModel): RenderMime.IReadyWidget {
     let mimeType = this.preferredMimeType(model);
     if (!mimeType) {
       return this._handleError(model);
@@ -211,7 +211,7 @@ class RenderMime {
   /**
    * Return a widget for an error.
    */
-  private _handleError(model: RenderMime.IMimeModel): RenderMime.IWidget {
+  private _handleError(model: RenderMime.IMimeModel): RenderMime.IReadyWidget {
    let errModel = new MimeModel({
       data: {
         'application/vnd.jupyter.stderr': 'Unable to render data'
@@ -366,7 +366,7 @@ namespace RenderMime {
    * A rendered widget.
    */
   export
-  interface IWidget extends Widget {
+  interface IReadyWidget extends Widget {
     /**
      * A promise that resolves when the widget is ready.
      */
@@ -395,7 +395,7 @@ namespace RenderMime {
      *
      * @param options - The options used to render the data.
      */
-    render(options: IRenderOptions): IWidget;
+    render(options: IRenderOptions): IReadyWidget;
 
     /**
      * Whether the renderer will sanitize the data given the render options.
