@@ -91,32 +91,6 @@ namespace ISchemaValidator {
      */
     schemaPath: string;
   }
-
-  /**
-   * A minimal schema type that is a minimal subset of the formal JSON Schema.
-   */
-  export
-  type Schema = {
-    /**
-     * The default value, if any.
-     */
-    default?: any;
-
-    /**
-     * The schema description.
-     */
-    description?: string;
-
-    /**
-     * The schema's child properties.
-     */
-    properties?: { [key: string]: Schema };
-
-    /**
-     * The title of the schema.
-     */
-    title?: string;
-  };
 }
 
 
@@ -152,7 +126,33 @@ namespace ISettingRegistry {
     /**
      * The JSON schema for the plugin.
      */
-    schema: JSONObject;
+    schema: ISchema;
+  }
+
+  /**
+   * A schema type that is a minimal subset of the formal JSON Schema.
+   */
+  export
+  interface ISchema extends JSONObject {
+    /**
+     * The default value, if any.
+     */
+    default?: any;
+
+    /**
+     * The schema description.
+     */
+    description?: string;
+
+    /**
+     * The schema's child properties.
+     */
+    properties?: { [key: string]: ISchema };
+
+    /**
+     * The title of the schema.
+     */
+    title?: string;
   }
 
   /**
@@ -197,7 +197,7 @@ namespace ISettingRegistry {
     /**
      * Get the plugin settings schema.
      */
-    readonly schema: JSONObject;
+    readonly schema: ISettingRegistry.ISchema;
 
     /**
      * Get the user settings.
@@ -565,7 +565,7 @@ class Settings implements ISettingRegistry.ISettings {
   /**
    * Get the plugin settings schema.
    */
-  get schema(): JSONObject {
+  get schema(): ISettingRegistry.ISchema {
     return this._schema;
   }
 
@@ -686,7 +686,7 @@ class Settings implements ISettingRegistry.ISettings {
   private _changed = new Signal<this, void>(this);
   private _composite: JSONObject;
   private _isDisposed = false;
-  private _schema: JSONObject;
+  private _schema: ISettingRegistry.ISchema;
   private _user: JSONObject;
 }
 

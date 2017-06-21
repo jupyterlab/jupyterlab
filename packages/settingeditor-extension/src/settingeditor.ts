@@ -305,6 +305,7 @@ class PluginList extends Widget {
 
     this.node.textContent = '';
     plugins.forEach(plugin => {
+      console.log('plugin', plugin);
       const item = Private.createListItem(plugin);
 
       if (plugin.id === this._selection) {
@@ -494,7 +495,7 @@ class PluginEditor extends Widget {
   private _onSettingsChanged(): void {
     const editor = this._editor;
     const settings = this._settings;
-    const values = settings.raw.data && settings.raw.data.user || { };
+    const values = settings.composite;
 
     editor.source = new ObservableJSON({ values });
     editor.source.changed.connect(this._onSourceChanged, this);
@@ -506,10 +507,8 @@ class PluginEditor extends Widget {
   private _onSourceChanged(): void {
     const editor = this._editor;
     const settings = this._settings;
-    const id = settings.plugin;
-    const data = { user: editor.source.toJSON() };
 
-    settings.save({ id, data });
+    settings.save(editor.source.toJSON());
   }
 
   private _editor: JSONEditor = null;
@@ -571,7 +570,7 @@ class PluginFieldset extends Widget {
 
     const settings = this._settings;
 
-    Private.populateFieldset(this.node, settings.raw);
+    Private.populateFieldset(this.node, settings.plugin, settings.schema);
   }
 
   private _settings: ISettingRegistry.ISettings | null = null;
@@ -615,25 +614,22 @@ namespace Private {
    * Populate the fieldset with a specific plugin's metaata.
    */
   export
-  function populateFieldset(node: HTMLElement, plugin: ISettingRegistry.IPlugin): void {
-    const label = `Available Fields - ${plugin.id}`;
+  function populateFieldset(node: HTMLElement, id: string, schema: ISettingRegistry.ISchema): void {
+    const label = `Available Fields - ${id}`;
     const fields: { [key: string]: VirtualElement } = Object.create(null);
+    const properties = schema.properties || { };
+    const title = schema.title || id;
 
-    Object.keys(plugin.data.system || { }).forEach(key => {
-      if (!fields[key]) {
-        fields[key] = h.li(h.code(key));
-      }
-    });
-    Object.keys(plugin.data.user || { }).forEach(key => {
-      if (!fields[key]) {
-        fields[key] = h.li(h.code(key));
-      }
+    Object.keys(properties).forEach(key => {
+      const field = properties[key];
+      const { title } = field;
+      fields[key] = h.li(h.code(key), `(${title})`);
     });
 
     const items: VirtualElement[] = Object.keys(fields)
       .sort((a, b) => a.localeCompare(b)).map(key => fields[key]);
 
-    node.appendChild(VirtualDOM.realize(h.legend({ title: plugin.id }, label)));
+    node.appendChild(VirtualDOM.realize(h.legend({ title }, label)));
     node.appendChild(VirtualDOM.realize(h.ul(items)));
   }
 
