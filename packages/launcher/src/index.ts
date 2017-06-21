@@ -229,7 +229,6 @@ class LauncherWidget extends VDomRenderer<LauncherModel> {
     super();
     this.cwd = options.cwd;
     this._callback = options.callback;
-    this._header = options.header;
     this.addClass(LAUNCHER_CLASS);
   }
 
@@ -277,16 +276,11 @@ class LauncherWidget extends VDomRenderer<LauncherModel> {
     });
 
     let children: VirtualNode[];
-    if (this._header) {
-      children = [this._header].concat(toArray(items));
-    } else {
-      children = toArray(items);
-    }
+    children = toArray(items);
     return h.div({ className: BODY_CLASS  }, children);
   }
 
   private _callback: (widget: Widget) => void;
-  private _header: VirtualNode;
 }
 
 
@@ -310,10 +304,6 @@ namespace LauncherWidget {
      */
     callback: (widget: Widget) => void;
 
-    /**
-     * An optional header virtual node.
-     */
-    header?: VirtualNode;
   }
 }
 

@@ -18,7 +18,6 @@ import {
   ILauncher, LauncherModel, LauncherWidget
 } from '@jupyterlab/launcher';
 
-
 import {
   Widget
 } from '@phosphor/widgets';
@@ -100,4 +99,8 @@ namespace Private {
    */
   export
   let id = 0;
+<<<<<<< HEAD
+=======
+
+>>>>>>> More work on launcher.
 }

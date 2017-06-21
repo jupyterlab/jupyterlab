@@ -171,7 +171,8 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, mainMenu: IM
           name,
           iconClass: 'jp-ImageCodeConsole',
           callback,
-          rank
+          rank,
+          kernelIconUrl: specs.kernelspecs[name].resources["logo-64x64"]
         });
       }
     });
