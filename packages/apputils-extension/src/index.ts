@@ -93,7 +93,8 @@ const palettePlugin: JupyterLabPlugin<ICommandPalette> = {
 const settingPlugin: JupyterLabPlugin<ISettingRegistry> = {
   id: 'jupyter.services.setting-registry',
   activate: () => new SettingRegistry({
-    datastore: new SettingClientDatastore()
+    datastore: new SettingClientDatastore(),
+    preload: SettingClientDatastore.preload
   }),
   autoStart: true,
   provides: ISettingRegistry

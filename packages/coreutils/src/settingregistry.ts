@@ -391,6 +391,7 @@ class SettingRegistry {
     const namespace = 'jupyter.db.settings';
     this._datastore = options.datastore || new StateDB({ namespace });
     this._validator = options.validator || new DefaultSchemaValidator();
+    this._preload = options.preload || (() => { /* no op */ });
   }
 
   /**
@@ -458,6 +459,21 @@ class SettingRegistry {
 
     // If the plugin needs to be loaded from the datastore, fetch.
     return this.reload(plugin);
+  }
+
+  /**
+   * Preload the schema for a plugin.
+   *
+   * @param plugin - The plugin ID.
+   *
+   * @param schema - The schema being added.
+   *
+   * #### Notes
+   * This method is deprecated and is only intented for use until there is a
+   * server-side API for storing setting data.
+   */
+  preload(plugin: string, schema: ISettingRegistry.ISchema): void {
+    this._preload(plugin, schema);
   }
 
   /**
@@ -578,6 +594,7 @@ class SettingRegistry {
   private _datastore: IDatastore<ISettingRegistry.IPlugin, ISettingRegistry.IPlugin> | null = null;
   private _pluginChanged = new Signal<this, string>(this);
   private _plugins: { [name: string]: ISettingRegistry.IPlugin } = Object.create(null);
+  private _preload: (plugin: string, schema: ISettingRegistry.ISchema) => void;
   private _validator: ISchemaValidator | null = null;
 }
 
@@ -768,6 +785,15 @@ namespace SettingRegistry {
      * The datastore used by the setting registry.
      */
     datastore?: IDatastore<ISettingRegistry.IPlugin, ISettingRegistry.IPlugin>;
+
+    /**
+     * A function that preloads a plugin's schema in the client-side cache.
+     *
+     * #### Notes
+     * This param is deprecated and is only intented for use until there is a
+     * server-side API for storing setting data.
+     */
+    preload?: (plugin: string, schema: ISettingRegistry.ISchema) => void;
 
     /**
      * The validator used to enforce the settings JSON schema.

@@ -58,6 +58,21 @@ class SettingClientDatastore extends StateDB {
 
 
 /**
+ * A namespace for `SettingClientDatastore` statics.
+ */
+export
+namespace SettingClientDatastore {
+  /**
+   * Preload the schema for a plugin.
+   */
+  export
+  function preload(plugin: string, schema: ISettingRegistry.ISchema): void {
+    Private.schemas[plugin] = schema;
+  }
+}
+
+
+/**
  * A namespace for private module data.
  */
 namespace Private {
