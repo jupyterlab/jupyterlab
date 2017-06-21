@@ -19,7 +19,7 @@ import {
 
 import {
   IRenderMime
-} from '@jupyterlab/rendermime-interfaces';
+} from '@jupyterlab/rendermime';
 
 import {
   ServiceManager
