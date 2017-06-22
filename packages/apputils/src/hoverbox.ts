@@ -135,8 +135,8 @@ namespace HoverBox {
       renderBelow = true;
     } else {
       renderBelow = options.privilege === 'above' ?
-      spaceAbove < maxHeight && spaceAbove < spaceBelow
-        : spaceBelow >= maxHeight || spaceBelow >= spaceAbove;
+        spaceAbove < maxHeight && spaceAbove < spaceBelow
+          : spaceBelow >= maxHeight || spaceBelow >= spaceAbove;
     }
 
     if (renderBelow) {
