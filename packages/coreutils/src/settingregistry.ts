@@ -498,10 +498,17 @@ class SettingRegistry {
         throw [{ keyword: '', message, schemaPath: '' }];
       }
 
-      console.log('1 result is', data);
-      const errors = this._validator.validateData(data);
-      console.log('2 result is', data);
+      let errors: ISchemaValidator.IError[] | null = null;
 
+      // Add the schema to the registry.
+      errors = this._validator.addSchema(plugin, data.schema);
+      if (errors) {
+        throw errors;
+      }
+
+      // Validate the user data and create the composite data.
+      data.data.composite = { };
+      errors = this._validator.validateData(data);
       if (errors) {
         throw errors;
       }
