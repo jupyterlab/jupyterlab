@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ArrayExt, ArrayIterator, IIterator, map, toArray
+  ArrayExt, ArrayIterator, IIterator, map, toArray, each
 } from '@phosphor/algorithm';
 
 import {
@@ -48,54 +48,55 @@ export
 const ILauncher = new Token<ILauncher>('jupyter.services.launcher');
 /* tslint:enable */
 
+const h = vdom.h;
 
-export
-type PropsType = JSONObject | null;
+// export
+// type PropsType = JSONObject | null;
 
-export
-type FunctionalComponent = (props: PropsType, ...children: vdom.h.Child[]) => vdom.VirtualElement;
+// export
+// type FunctionalComponent = (props: PropsType, ...children: vdom.h.Child[]) => vdom.VirtualElement;
 
-export function h(tag: string | FunctionalComponent, ...children: vdom.h.Child[]): vdom.VirtualElement;
-export function h(tag: string | FunctionalComponent, attrs: vdom.ElementAttrs | PropsType, ...children: vdom.h.Child[]): vdom.VirtualElement;
-export function h(tag: string | FunctionalComponent): vdom.VirtualElement {
-  let attrs: vdom.ElementAttrs = {};
-  let children: vdom.VirtualNode[] = [];
-  for (let i = 1, n = arguments.length; i < n; ++i) {
-    let arg = arguments[i];
-    if (typeof arg === 'string') {
-      children.push(new vdom.VirtualText(arg));
-    } else if (arg instanceof vdom.VirtualText) {
-      children.push(arg);
-    } else if (arg instanceof vdom.VirtualElement) {
-      children.push(arg);
-    } else if (arg instanceof Array) {
-      extend(children, arg);
-    } else if (i === 1 && arg && typeof arg === 'object') {
-      attrs = arg;
-    }
-  }
+// export function h(tag: string | FunctionalComponent, ...children: vdom.h.Child[]): vdom.VirtualElement;
+// export function h(tag: string | FunctionalComponent, attrs: vdom.ElementAttrs | PropsType, ...children: vdom.h.Child[]): vdom.VirtualElement;
+// export function h(tag: string | FunctionalComponent): vdom.VirtualElement {
+//   let attrs: vdom.ElementAttrs = {};
+//   let children: vdom.VirtualNode[] = [];
+//   for (let i = 1, n = arguments.length; i < n; ++i) {
+//     let arg = arguments[i];
+//     if (typeof arg === 'string') {
+//       children.push(new vdom.VirtualText(arg));
+//     } else if (arg instanceof vdom.VirtualText) {
+//       children.push(arg);
+//     } else if (arg instanceof vdom.VirtualElement) {
+//       children.push(arg);
+//     } else if (arg instanceof Array) {
+//       extend(children, arg);
+//     } else if (i === 1 && arg && typeof arg === 'object') {
+//       attrs = arg;
+//     }
+//   }
 
-  let result: any;
+//   let result: any;
 
-  if (typeof tag === 'function') {
-    result = tag(attrs, ...children);
-  } else {
-    result = new vdom.VirtualElement(tag, attrs, children);
-  }
-  return result;
+//   if (typeof tag === 'function') {
+//     result = tag(attrs, ...children);
+//   } else {
+//     result = new vdom.VirtualElement(tag, attrs, children);
+//   }
+//   return result;
 
-  function extend(array: vdom.VirtualNode[], values: vdom.h.Child[]): void {
-    for (let child of values) {
-      if (typeof child === 'string') {
-        array.push(new vdom.VirtualText(child));
-      } else if (child instanceof vdom.VirtualText) {
-        array.push(child);
-      } else if (child instanceof vdom.VirtualElement) {
-        array.push(child);
-      }
-    }
-  }
-}
+//   function extend(array: vdom.VirtualNode[], values: vdom.h.Child[]): void {
+//     for (let child of values) {
+//       if (typeof child === 'string') {
+//         array.push(new vdom.VirtualText(child));
+//       } else if (child instanceof vdom.VirtualText) {
+//         array.push(child);
+//       } else if (child instanceof vdom.VirtualElement) {
+//         array.push(child);
+//       }
+//     }
+//   }
+// }
 
 /**
  * The class name added to LauncherWidget instances.
@@ -295,8 +296,41 @@ class LauncherWidget extends VDomRenderer<LauncherModel> {
    * Render the launcher to virtual DOM nodes.
    */
   protected render(): vdom.VirtualNode | vdom.VirtualNode[] {
-    // Create an iterator that yields rendered item nodes.
-    let sorted = toArray(this.model.items()).sort(Private.sortCmp);
+    // First group-by categories
+    let categories = Object.create(null);
+    each(this.model.items(), (item, index) => {
+      let cat = item.category;
+      if (categories[cat]) {
+        (categories[cat] as Array<ILauncherItem>).push(item)
+      } else {
+        categories[cat] = [];
+      }
+    });
+    // Within each category sort by rank
+    for (let cat in categories) {
+      categories[cat] = categories[cat].sort(Private.sortCmp);
+    }
+
+    // Variable to help create sections
+    let sections: vdom.VirtualNode[] = [];
+    let section: vdom.VirtualNode;
+
+    // Render the notebook category
+    if (categories.Notebook) {
+      section = (
+        <section>
+          <h2>Notebook</h2>
+          {map(categories.Notebook, item => Card((item as ILauncherItem), this, this._callback))}
+        </section>
+      );
+      sections.push(section);
+    }
+
+    // Render the console category
+    if (categories.Console) {
+
+    }
+    if (categories.Other) {}
     let items = map(sorted, item => {
       let onclick = () => {
         let callback = item.callback;
@@ -389,29 +423,31 @@ namespace Private {
       return r1 < r2 ? -1 : 1;  // Infinity safe
     }
 
-    // Next, compare based on category.
-    let d1 = a.category.localeCompare(b.category);
-    if (d1 !== 0) {
-      return d1;
-    }
-
     // Finally, compare by display name.
     return a.displayName.localeCompare(b.displayName);
   }
 }
 
-// export
-// function Card(props: PropsType, ...children: vdom.h.Child[]): vdom.VirtualElement {
-//   return (
-//     <div className="jp-LauncherCard">
-//       <div className="jp-LauncherCard-image">
-//           {props.kernel && <img src="" />}
-//           {!props.kernel && <div className="jp-SVGIcon" />}
-//       </div>
-//       <div className="jp-LauncherCard-label">{props.labelText}</div>
-//     </div>
-//   );
-// }
+export
+function Card(item: ILauncherItem, launcher: LauncherWidget, launcherCallback: (widget: Widget) => void): vdom.VirtualElement {
+  let onclick = () => {
+    let callback = item.callback as any;
+    let value = callback(launcher.cwd, item.name);
+    Promise.resolve(value).then(widget => {
+      launcherCallback(widget);
+      launcher.dispose();
+    });
+  };
+  return (
+    <div className="jp-LauncherCard" onclick={onclick}>
+      <div className="jp-LauncherCard-image">
+          {item.kernelIconUrl && <img src="" />}
+          {!item.kernelIconUrl && <div className="jp-SVGIcon" />}
+      </div>
+      <div className="jp-LauncherCard-label">{item.displayName}</div>
+    </div>
+  );
+}
 
 // export
 // function Section(props: PropsType, ...children: vdom.h.Child[]): vdom.VirtualElement {
