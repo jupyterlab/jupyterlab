@@ -305,7 +305,6 @@ class PluginList extends Widget {
 
     this.node.textContent = '';
     plugins.forEach(plugin => {
-      console.log('plugin', plugin);
       const item = Private.createListItem(plugin);
 
       if (plugin.id === this._selection) {

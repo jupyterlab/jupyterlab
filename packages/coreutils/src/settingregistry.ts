@@ -71,22 +71,21 @@ interface ISchemaValidator {
    *
    * @param schema - The schema being added.
    *
-   * @returns A promise that resolves with void if successful and rejects with a
-   * list of errors if the schema fails to validate.
+   * @return A list of errors if the schema fails to validate or `null` if there
+   * are no errors.
    */
-  addSchema(plugin: string, schema: ISettingRegistry.ISchema): Promise<void | ISchemaValidator.IError[]>;
+  addSchema(plugin: string, schema: ISettingRegistry.ISchema): ISchemaValidator.IError[] | null;
 
   /**
    * Validate a data object against a plugin's JSON schema.
    *
-   * @param plugin - The plugin ID.
+   * @param plugin - The plugin being validated. Its `composite` data will be
+   * populated by reference.
    *
-   * @param data - The data being validated.
-   *
-   * @returns A promise that resolves with void if successful and rejects with a
-   * list of errors if either the schema or data fails to validate.
+   * @return A list of errors if either the schema or data fail to validate or
+   * `null` if there are no errors.
    */
-  validateData(plugin: string, data: JSONObject): Promise<void | ISchemaValidator.IError[]>;
+  validateData(plugin: ISettingRegistry.IPlugin): ISchemaValidator.IError[] | null;
 }
 
 
@@ -335,86 +334,48 @@ class DefaultSchemaValidator implements ISchemaValidator {
    * @param plugin - The plugin ID.
    *
    * @param schema - The schema being added.
+   *
+   * @return A list of errors if the schema fails to validate or `null` if there
+   * are no errors.
    */
-  addSchema(plugin: string, schema: ISettingRegistry.ISchema): Promise<void | ISchemaValidator.IError[]> {
-    try {
-      const validate = this._validator.getSchema('main');
-      const result = validate(schema);
-      const errors = validate.errors as ISchemaValidator.IError[];
+  addSchema(plugin: string, schema: ISettingRegistry.ISchema): ISchemaValidator.IError[] | null {
+    const validate = this._validator.getSchema('main');
+    const valid = validate(schema);
 
-      if (typeof result === 'boolean') {
-        if (result) {
-          this._composer.addSchema(schema, plugin);
-          this._validator.addSchema(schema, plugin);
-          return Promise.resolve(void 0);
-        } else {
-          return Promise.resolve(errors);
-        }
-      }
-
-      // The Ajv promise implementation uses `Thenable` instead of `Promise`,
-      // so it needs to be wrapped in a true `Promise` instance here.
-      return new Promise<void | ISchemaValidator.IError[]>((resolve, reject) => {
-        result.then(() => {
-          this._composer.addSchema(schema, plugin);
-          this._validator.addSchema(schema, plugin);
-          resolve();
-        }, reject);
-      });
-    } catch (error) {
-      console.error('Adding schema failed.', error);
-
-      const schemaError = {
-        keyword: '',
-        message: error.message,
-        schemaPath: ''
-      };
-
-      return Promise.reject([schemaError]);
+    if (valid) {
+      this._composer.addSchema(schema, plugin);
+      this._validator.addSchema(schema, plugin);
+      return null;
     }
+
+    return validate.errors as ISchemaValidator.IError[];
   }
 
   /**
    * Validate a data object against a plugin's JSON schema.
    *
-   * @param plugin - The plugin ID.
+   * @param plugin - The plugin being validated. Its `composite` data will be
+   * populated by reference.
    *
-   * @param data - The data being validated.
-   *
-   * @returns A promise that resolves with void if successful and rejects with a
-   * list of errors if either the schema or data fails to validate.
+   * @return A list of errors if either the schema or data fail to validate or
+   * `null` if there are no errors.
    */
-  validateData(plugin: string, data: JSONObject): Promise<void | ISchemaValidator.IError[]> {
-    try {
-      const validate = this._validator.getSchema(plugin);
+  validateData(plugin: ISettingRegistry.IPlugin): ISchemaValidator.IError[] | null {
+    const validate = this._validator.getSchema(plugin.id);
 
-      if (!validate) {
-        throw new Error(`Schema ${plugin} is unknown.`);
-      }
-
-      const result = validate(data);
-      const errors = validate.errors as ISchemaValidator.IError[];
-
-      if (typeof result === 'boolean') {
-        return result ? Promise.resolve(void 0) : Promise.resolve(errors);
-      }
-
-      // The Ajv promise implementation uses `Thenable` instead of `Promise`,
-      // so it needs to be wrapped in a true `Promise` instance here.
-      return new Promise<void | ISchemaValidator.IError[]>((resolve, reject) => {
-        result.then(resolve, reject);
-      });
-    } catch (error) {
-      console.error('Validation against schema failed.', error);
-
-      const schemaError = {
-        keyword: '',
-        message: error.message,
-        schemaPath: ''
-      };
-
-      return Promise.reject([schemaError]);
+    if (!validate) {
+      throw new Error(`Schema ${plugin.id} is unknown.`);
     }
+
+    const compose = this._composer.getSchema(plugin.id);
+    const valid = validate(plugin.data.user);
+
+    if (valid) {
+      compose(plugin.data.composite = copy(plugin.data.user));
+      return null;
+    }
+
+    return validate.errors as ISchemaValidator.IError[];
   }
 
   private _composer = new Ajv({ useDefaults: true });
@@ -524,20 +485,29 @@ class SettingRegistry {
    * @param plugin - The name of the plugin whose settings are being reloaded.
    *
    * @returns A promise that resolves with a plugin settings object or rejects
-   * if the plugin is not found.
+   * with a list of `ISchemaValidator.IError` objects if it fails.
    */
   reload(plugin: string): Promise<ISettingRegistry.ISettings> {
     const datastore = this._datastore;
     const plugins = this._plugins;
 
     // If the plugin needs to be loaded from the datastore, fetch.
-    return datastore.fetch(plugin).then(result => {
-      if (!result) {
-        throw new Error(`Setting data for ${plugin} does not exist.`);
+    return datastore.fetch(plugin).then(data => {
+      if (!data) {
+        const message = `Setting data for ${plugin} does not exist.`;
+        throw [{ keyword: '', message, schemaPath: '' }];
+      }
+
+      console.log('1 result is', data);
+      const errors = this._validator.validateData(data);
+      console.log('2 result is', data);
+
+      if (errors) {
+        throw errors;
       }
 
       // Set the local copy.
-      plugins[plugin] = result;
+      plugins[plugin] = data;
 
       return new Settings({
         plugin: copy(plugins[plugin]) as ISettingRegistry.IPlugin,
