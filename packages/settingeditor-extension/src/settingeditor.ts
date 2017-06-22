@@ -600,7 +600,7 @@ namespace Private {
     const iconClass = `${PLUGIN_ICON_CLASS} ${getHint(ICON_CLASS_KEY, plugin)}`;
     const iconLabel = getHint(ICON_LABEL_KEY, plugin);
     const title = plugin.schema.title || plugin.id;
-    const caption = plugin.schema.description || plugin.id;
+    const caption = `(${plugin.id}) ${plugin.schema.description}`;
 
     return VirtualDOM.realize(
       h.li({ dataset: { id: plugin.id }, title: caption },
@@ -644,13 +644,13 @@ namespace Private {
   function populateFieldset(node: HTMLElement, id: string, schema: ISettingRegistry.ISchema): void {
     const fields: { [key: string]: VirtualElement } = Object.create(null);
     const properties = schema.properties || { };
-    const title = schema.title || id;
-    const label = `Fields - ${title}`;
+    const title = `(${id}) ${schema.description}`;
+    const label = `Fields - ${schema.title || id}`;
 
     Object.keys(properties).forEach(key => {
       const field = properties[key];
       const { title } = field;
-      fields[key] = h.li(h.code(key), ` (${title})`);
+      fields[key] = h.li(h.code(key), title ? ` (${title})` : '');
     });
 
     const items: VirtualElement[] = Object.keys(fields)
