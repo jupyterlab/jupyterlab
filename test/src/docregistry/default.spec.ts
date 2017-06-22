@@ -608,7 +608,8 @@ describe('docmanager/default', () => {
           context,
           rendermime: RENDERMIME,
           mimeType: 'text/markdown',
-          renderTimeout: 1000
+          renderTimeout: 1000,
+          dataType: 'string'
         });
         expect(widget).to.be.a(MimeRenderer);
       });
@@ -622,7 +623,8 @@ describe('docmanager/default', () => {
           context,
           rendermime: RENDERMIME,
           mimeType: 'text/markdown',
-          renderTimeout: 1000
+          renderTimeout: 1000,
+          dataType: 'string'
         });
         context.save();
         return widget.ready.then(() => {
@@ -640,7 +642,8 @@ describe('docmanager/default', () => {
           context,
           rendermime: RENDERMIME,
           mimeType: 'text/markdown',
-          renderTimeout: 1000
+          renderTimeout: 1000,
+          dataType: 'string'
         });
         (context.model.contentChanged as any).emit(void 0);
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
