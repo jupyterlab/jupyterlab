@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  JSONObject, PromiseDelegate
+  JSONValue, PromiseDelegate
 } from '@phosphor/coreutils';
 
 import {
@@ -206,7 +206,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     if (model.readOnly) {
       return Promise.reject(new Error('Read only'));
     }
-    let content: JSONObject | string;
+    let content: JSONValue;
     if (this._factory.fileFormat === 'json') {
       content = model.toJSON();
     } else {

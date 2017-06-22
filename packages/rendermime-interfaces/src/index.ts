@@ -287,6 +287,11 @@ namespace IRenderMime {
     renderTimeout?: number;
 
     /**
+     * Preferred data type from the model.  Defaults to `string`.
+     */
+    dataType?: 'string' | 'json';
+
+    /**
      * The options used for using the renderer for documents.
      */
     widgetFactoryOptions?: IWidgetFactoryOptions;

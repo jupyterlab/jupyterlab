@@ -10,7 +10,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  Token
+  JSONValue, Token
 } from '@phosphor/coreutils';
 
 import {
@@ -611,7 +611,7 @@ namespace DocumentRegistry {
     /**
      * Serialize the model to JSON.
      */
-    toJSON(): any;
+    toJSON(): JSONValue;
 
     /**
      * Deserialize the model from JSON.

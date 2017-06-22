@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  JSONObject, PromiseDelegate
+  JSONObject, JSONValue, PromiseDelegate
 } from '@phosphor/coreutils';
 
 import {
@@ -140,8 +140,8 @@ class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeMo
   /**
    * Serialize the model to JSON.
    */
-  toJSON(): any {
-    return JSON.stringify(this.value.text);
+  toJSON(): JSONValue {
+    return JSON.parse(this.value.text);
   }
 
   /**
@@ -150,8 +150,8 @@ class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeMo
    * #### Notes
    * Should emit a [contentChanged] signal.
    */
-  fromJSON(value: any): void {
-    this.fromString(JSON.parse(value));
+  fromJSON(value: JSONValue): void {
+    this.fromString(JSON.stringify(value));
   }
 
   /**
@@ -423,6 +423,7 @@ class MimeRenderer extends Widget implements IRenderMime.IReadyWidget {
     this._rendermime.resolver = context;
     this._context = context;
     this._mimeType = options.mimeType;
+    this._dataType = options.dataType;
 
     context.pathChanged.connect(this._onPathChanged, this);
 
@@ -492,7 +493,11 @@ class MimeRenderer extends Widget implements IRenderMime.IReadyWidget {
     let model = context.model;
     let layout = this.layout as PanelLayout;
     let data: JSONObject = {};
-    data[this._mimeType] = model.toString();
+    if (this._dataType === 'string') {
+      data[this._mimeType] = model.toString();
+    } else {
+      data[this._mimeType] = model.toJSON();
+    }
     let mimeModel = new MimeModel({ data, trusted: false });
     let widget = this._rendermime.render(mimeModel);
     if (layout.widgets.length === 2) {
@@ -514,6 +519,7 @@ class MimeRenderer extends Widget implements IRenderMime.IReadyWidget {
   private _rendermime: IRenderMime = null;
   private _mimeType: string;
   private _ready = new PromiseDelegate<void>();
+  private _dataType: 'string' | 'json';
 }
 
 
@@ -546,6 +552,11 @@ namespace MimeRenderer {
      * The render timeout.
      */
     renderTimeout: number;
+
+    /**
+     * Preferred data type from the model.
+     */
+    dataType: 'string' | 'json';
   }
 }
 
@@ -563,6 +574,7 @@ class MimeRendererFactory extends ABCWidgetFactory<MimeRenderer, DocumentRegistr
     this._rendermime = options.rendermime;
     this._mimeType = options.mimeType;
     this._renderTimeout = options.renderTimeout || 1000;
+    this._dataType = options.dataType || 'string';
   }
 
   /**
@@ -573,13 +585,15 @@ class MimeRendererFactory extends ABCWidgetFactory<MimeRenderer, DocumentRegistr
       context,
       rendermime: this._rendermime.clone(),
       mimeType: this._mimeType,
-      renderTimeout: this._renderTimeout
+      renderTimeout: this._renderTimeout,
+      dataType: this._dataType
     });
   }
 
   private _rendermime: IRenderMime = null;
   private _mimeType: string;
   private _renderTimeout: number;
+  private _dataType: 'string' | 'json';
 }
 
 
@@ -607,5 +621,10 @@ namespace MimeRendererFactory {
      * The render timeout.
      */
     renderTimeout?: number;
+
+    /**
+     * Preferred data type from the model.
+     */
+    dataType?: 'string' | 'json';
   }
 }

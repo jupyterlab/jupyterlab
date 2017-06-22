@@ -86,6 +86,7 @@ function activateWidgetFactories(app: JupyterLab, rendermime: IRenderMime, regis
     let factory = new MimeRendererFactory({
       mimeType: item.mimeType,
       renderTimeout: item.renderTimeout,
+      dataType: item.dataType,
       rendermime,
       ...item.widgetFactoryOptions,
     });

@@ -173,6 +173,7 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
     mimeType: VEGA_MIME_TYPE,
     renderer,
     rendererIndex: 0,
+    dataType: 'json',
     widgetFactoryOptions: {
       name: 'Vega',
       fileExtensions: ['.vg', '.vg.json', 'json'],
@@ -185,6 +186,7 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
     mimeType: VEGALITE_MIME_TYPE,
     renderer,
     rendererIndex: 0,
+    dataType: 'json',
     widgetFactoryOptions: {
       name: 'Vega-Lite',
       fileExtensions: ['.vl', '.vl.json', 'json'],
