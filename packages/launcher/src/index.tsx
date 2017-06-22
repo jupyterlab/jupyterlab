@@ -401,30 +401,29 @@ namespace Private {
   }
 }
 
-{/*export
-function Card(props: PropsType, ...children: vdom.h.Child[]): vdom.VirtualElement {
-  return (
-    <div className="jp-LauncherCard">
-      <div className="jp-LauncherCard-image">
-          {props.kernel && <img src="" />}
-          {!props.kernel && <div className="jp-SVGIcon" />}
-      </div>
-      <div className="jp-LauncherCard-label">{props.labelText}</div>
-    </div>
-  );
-}
+// export
+// function Card(props: PropsType, ...children: vdom.h.Child[]): vdom.VirtualElement {
+//   return (
+//     <div className="jp-LauncherCard">
+//       <div className="jp-LauncherCard-image">
+//           {props.kernel && <img src="" />}
+//           {!props.kernel && <div className="jp-SVGIcon" />}
+//       </div>
+//       <div className="jp-LauncherCard-label">{props.labelText}</div>
+//     </div>
+//   );
+// }
 
-export
-function Section(props: PropsType, ...children: vdom.h.Child[]): vdom.VirtualElement {
-  return (
-    <div className="jp-Section">
-      <div className="jp-Section-header">
-      </div>
-      <div className="jp-Section-activities">
-        {/*{(props.activites as Array).map((activity) => <Card  />)}*/}
-      </div>
-    </div>
-  );
-}
-*/}
+// export
+// function Section(props: PropsType, ...children: vdom.h.Child[]): vdom.VirtualElement {
+//   return (
+//     <div className="jp-Section">
+//       <div className="jp-Section-header">
+//       </div>
+//       <div className="jp-Section-activities">
+//       </div>
+//     </div>
+//   );
+// }
+// }
 
