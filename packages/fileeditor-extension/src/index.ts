@@ -87,6 +87,27 @@ const plugin: JupyterLabPlugin<IEditorTracker> = {
   autoStart: true
 };
 
+
+/* tslint:disable */
+/**
+ * The commands plugin setting schema.
+ *
+ * #### Notes
+ * This will eventually reside in its own settings file.
+ */
+const schema = {
+  "jupyter.lab.icon-class": "jp-ImageTextEditor",
+  "jupyter.lab.icon-label": "Editor",
+  "properties": {
+    "autoClosingBrackets": { type: "boolean", "title": "Auto-closing Brackets" },
+    "lineNumbers": { type: "boolean", "title": "Line Numbers" },
+    "lineWrap": { type: "boolean", "title": "Line Wrap" },
+    "matchBrackets": { type: "boolean", "title": "Match Brackets" }
+  }
+};
+/* tslint:enable */
+
+
 /**
  * Export the plugins as default.
  */
@@ -151,6 +172,9 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
     editor.setOption('matchBrackets', matchBrackets);
     editor.setOption('autoClosingBrackets', autoClosingBrackets);
   }
+
+  // Preload the settings schema into the registry. This is deprecated.
+  settingRegistry.preload(id, schema);
 
   // Fetch the initial state of the settings.
   Promise.all([settingRegistry.load(id), restored]).then(([settings]) => {

@@ -78,26 +78,6 @@ namespace SettingClientDatastore {
 namespace Private {
   /* tslint:disable */
   export
-  const schemas: JSONObject = {
-    "jupyter.services.codemirror-commands": {
-      "jupyter.lab.icon-class": "jp-ImageTextEditor",
-      "jupyter.lab.icon-label": "CodeMirror",
-      "properties": {
-        "keyMap": { type: "string", "title": "Key Map" },
-        "matchBrackets": { type: "boolean", "title": "Match Brackets" },
-        "theme": { type: "string", "title": "Theme" }
-      }
-    },
-    "jupyter.services.editor-tracker": {
-      "jupyter.lab.icon-class": "jp-ImageTextEditor",
-      "jupyter.lab.icon-label": "Editor",
-      "properties": {
-        "autoClosingBrackets": { type: "boolean", "title": "Auto-closing Brackets" },
-        "lineNumbers": { type: "boolean", "title": "Line Numbers" },
-        "lineWrap": { type: "boolean", "title": "Line Wrap" },
-        "matchBrackets": { type: "boolean", "title": "Match Brackets" }
-      }
-    }
-  };
+  const schemas: { [key: string]: ISettingRegistry.ISchema } = { };
   /* tslint:enable */
 }
