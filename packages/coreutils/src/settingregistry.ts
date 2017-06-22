@@ -27,11 +27,13 @@ import {
 /**
  * The key in the schema for icon class hints.
  */
+export
 const ICON_CLASS_KEY ='jupyter.lab.icon-class';
 
 /**
  * The key in the schema for icon label hints.
  */
+export
 const ICON_LABEL_KEY = 'jupyter.lab.icon-label';
 
 /* tslint:disable */

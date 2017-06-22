@@ -12,7 +12,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  ISettingRegistry, ObservableJSON
+  ICON_CLASS_KEY, ICON_LABEL_KEY, ISettingRegistry, ObservableJSON
 } from '@jupyterlab/coreutils';
 
 import {
@@ -597,17 +597,44 @@ namespace Private {
    */
   export
   function createListItem(plugin: ISettingRegistry.IPlugin): HTMLLIElement {
-    const caption = plugin.id;
-    const className = '';
-    const iconClass = `${PLUGIN_ICON_CLASS}`;
-    const iconLabel = '';
-    const title = plugin.id;
+    const iconClass = `${PLUGIN_ICON_CLASS} ${getHint(ICON_CLASS_KEY, plugin)}`;
+    const iconLabel = getHint(ICON_LABEL_KEY, plugin);
+    const title = plugin.schema.title || plugin.id;
+    const caption = plugin.schema.description || plugin.id;
 
     return VirtualDOM.realize(
-      h.li({ className, dataset: { id: plugin.id }, title: caption },
+      h.li({ dataset: { id: plugin.id }, title: caption },
         h.span({ className: iconClass, title: iconLabel }),
         h.span(title))
     ) as HTMLLIElement;
+  }
+
+  /**
+   * Check the plugin for a rendering hint's value.
+   *
+   * #### Notes
+   * The order of priority for overridden hints is as follows, from most
+   * important to least:
+   * 1. Data set by the end user in a settings file.
+   * 2. Data set by the plugin author as a schema default.
+   * 3. Data set by the plugin author as a top-level key of the schema.
+   */
+  function getHint(key: string, plugin: ISettingRegistry.IPlugin): string {
+    // First, give priorty to checking if the hint exists in the user data.
+    let hint = plugin.data.user[key];
+
+    // Second, check to see if the hint exists in composite data, which folds
+    // in default values from the schema.
+    if (!hint) {
+      hint = plugin.data.composite[key];
+    }
+
+    // Finally, check to see if the plugin schema has defined the hint.
+    if (!hint) {
+      hint = plugin.schema[key];
+    }
+
+    return typeof hint === 'string' ? hint : '';
   }
 
   /**

@@ -99,8 +99,10 @@ const schema = {
   "$schema": "http://json-schema.org/draft-06/schema",
   "jupyter.lab.icon-class": "jp-ImageTextEditor",
   "jupyter.lab.icon-label": "Editor",
+  "title": "Text Editor",
+  "description": "Text editor settings for all editors.",
   "properties": {
-    "autoClosingBrackets": { type: "boolean", "title": "Auto-closing Brackets" },
+    "autoClosingBrackets": { type: "boolean", "title": "Autoclosing Brackets" },
     "lineNumbers": { type: "boolean", "title": "Line Numbers" },
     "lineWrap": { type: "boolean", "title": "Line Wrap" },
     "matchBrackets": { type: "boolean", "title": "Match Brackets" }

@@ -60,6 +60,8 @@ const schema = {
   "$schema": "http://json-schema.org/draft-06/schema",
   "jupyter.lab.icon-class": "jp-ImageTextEditor",
   "jupyter.lab.icon-label": "CodeMirror",
+  "title": "CodeMirror",
+  "description": "Text editor settings for all CodeMirror editors.",
   "properties": {
     "keyMap": { type: "string", "title": "Key Map" },
     "matchBrackets": { type: "boolean", "title": "Match Brackets" },
