@@ -147,6 +147,18 @@ namespace ISettingRegistry {
   export
   interface ISchema extends JSONObject {
     /**
+     * The JupyterLab icon class hint for a plugin can be overridden by user
+     * settings. It can also be root level and therefore "private".
+     */
+    'jupyter.lab.icon-class'?: string;
+
+    /**
+     * The JupyterLab icon label hint for a plugin can be overridden by user
+     * settings. It can also be root level and therefore "private".
+     */
+    'jupyter.lab.icon-label'?: string;
+
+    /**
      * The default value, if any.
      */
     default?: any;
@@ -159,7 +171,24 @@ namespace ISettingRegistry {
     /**
      * The schema's child properties.
      */
-    properties?: { [key: string]: ISchema };
+    properties?: {
+      /**
+       * The JupyterLab icon class hint for a plugin can be overridden by user
+       * settings. It can also be root level and therefore "private".
+       */
+      'jupyter.lab.icon-class'?: ISchema;
+
+      /**
+       * The JupyterLab icon label hint for a plugin can be overridden by user
+       * settings. It can also be root level and therefore "private".
+       */
+      'jupyter.lab.icon-label'?: ISchema;
+
+      /**
+       * Arbitrary setting keys can be added.
+       */
+      [key: string]: ISchema;
+    };
 
     /**
      * The title of the schema.

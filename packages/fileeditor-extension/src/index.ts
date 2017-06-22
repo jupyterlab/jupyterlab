@@ -96,6 +96,7 @@ const plugin: JupyterLabPlugin<IEditorTracker> = {
  * This will eventually reside in its own settings file.
  */
 const schema = {
+  "$schema": "http://json-schema.org/draft-06/schema",
   "jupyter.lab.icon-class": "jp-ImageTextEditor",
   "jupyter.lab.icon-label": "Editor",
   "properties": {
@@ -126,7 +127,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   });
   const { commands, restored } = app;
   const tracker = new InstanceTracker<FileEditor>({ namespace });
-  const hasWidget = () => tracker.currentWidget !== null;
+  const hasWidget = () => !!tracker.currentWidget;
 
   let {
     lineNumbers, lineWrap, matchBrackets, autoClosingBrackets
@@ -157,16 +158,14 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
    * Update the settings of the current tracker instances.
    */
   function updateTracker(): void {
-    tracker.forEach(widget => {
-      updateWidget(widget);
-    });
+    tracker.forEach(widget => { updateWidget(widget); });
   }
 
   /**
    * Update the settings of a widget.
    */
   function updateWidget(widget: FileEditor): void {
-    let editor = widget.editor;
+    const editor = widget.editor;
     editor.setOption('lineNumbers', lineNumbers);
     editor.setOption('lineWrap', lineWrap);
     editor.setOption('matchBrackets', matchBrackets);

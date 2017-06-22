@@ -615,10 +615,10 @@ namespace Private {
    */
   export
   function populateFieldset(node: HTMLElement, id: string, schema: ISettingRegistry.ISchema): void {
-    const label = `Available Fields - ${id}`;
     const fields: { [key: string]: VirtualElement } = Object.create(null);
     const properties = schema.properties || { };
     const title = schema.title || id;
+    const label = `Fields - ${title}`;
 
     Object.keys(properties).forEach(key => {
       const field = properties[key];
