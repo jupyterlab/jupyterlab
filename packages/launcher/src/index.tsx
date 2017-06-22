@@ -326,11 +326,8 @@ class LauncherWidget extends VDomRenderer<LauncherModel> {
       sections.push(section);
     }
 
-    // Render the console category
-    if (categories.Console) {
 
-    }
-    if (categories.Other) {}
+
     let items = map(sorted, item => {
       let onclick = () => {
         let callback = item.callback;
