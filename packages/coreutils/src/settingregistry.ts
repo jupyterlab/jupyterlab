@@ -24,6 +24,16 @@ import {
 } from '.';
 
 
+/**
+ * The key in the schema for icon class hints.
+ */
+const ICON_CLASS_KEY ='jupyter.lab.icon-class';
+
+/**
+ * The key in the schema for icon label hints.
+ */
+const ICON_LABEL_KEY = 'jupyter.lab.icon-label';
+
 /* tslint:disable */
 /**
  * The schema for settings.
@@ -35,8 +45,8 @@ const SCHEMA = {
   "type": "object",
   "additionalProperties": true,
   "properties": {
-    "jupyter.lab.icon-class": { "type": "string", "default": "jp-FileIcon" },
-    "jupyter.lab.icon-label": { "type": "string", "default": "Plugin" }
+    [ICON_CLASS_KEY]: { "type": "string", "default": "jp-FileIcon" },
+    [ICON_LABEL_KEY]: { "type": "string", "default": "Plugin" }
   }
 };
 /* tslint:enable */
@@ -142,7 +152,8 @@ namespace ISettingRegistry {
   }
 
   /**
-   * A schema type that is a minimal subset of the formal JSON Schema.
+   * A schema type that is a minimal subset of the formal JSON Schema along with
+   * optional JupyterLab rendering hints.
    */
   export
   interface ISchema extends JSONObject {
