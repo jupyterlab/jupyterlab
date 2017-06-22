@@ -112,7 +112,7 @@ interface IRenderMime {
 
 
 /**
- * A namespace for IRenderMime associated namespaces.
+ * A namespace for IRenderMime associated interfaces.
  */
 export
 namespace IRenderMime {
