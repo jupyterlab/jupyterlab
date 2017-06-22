@@ -479,7 +479,9 @@ describe('docmanager/default', () => {
 
       it('should serialize the model to JSON', () => {
         let model = new DocumentModel();
-        expect(model.toJSON()).to.be('""');
+        let data = { 'foo': 1 };
+        model.fromJSON(data);
+        expect(model.toJSON()).to.eql(data);
       });
 
     });
@@ -488,8 +490,9 @@ describe('docmanager/default', () => {
 
       it('should deserialize the model from JSON', () => {
         let model = new DocumentModel();
-        model.fromJSON('"foo"');
-        expect(model.toString()).to.be('foo');
+        let data = null;
+        model.fromJSON(data);
+        expect(model.toString()).to.be('null');
       });
 
     });
