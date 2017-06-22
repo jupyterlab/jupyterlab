@@ -55,10 +55,9 @@ type PropsType = JSONObject | null;
 export
 type FunctionalComponent = (props: PropsType, ...children: vdom.h.Child[]) => vdom.VirtualElement;
 
-export function h(tag: FunctionalComponent, props: PropsType, ...children: vdom.h.Child[]): vdom.VirtualElement {
-export function h(tag: string, ...children: vdom.h.Child[]): vdom.VirtualElement;
-export function h(tag: string, attrs: vdom.ElementAttrs, ...children: vdom.h.Child[]): vdom.VirtualElement;
-export function h(tag: string): vdom.VirtualElement {
+export function h(tag: string | FunctionalComponent, ...children: vdom.h.Child[]): vdom.VirtualElement;
+export function h(tag: string | FunctionalComponent, attrs: vdom.ElementAttrs | PropsType, ...children: vdom.h.Child[]): vdom.VirtualElement;
+export function h(tag: string | FunctionalComponent): vdom.VirtualElement {
   let attrs: vdom.ElementAttrs = {};
   let children: vdom.VirtualNode[] = [];
   for (let i = 1, n = arguments.length; i < n; ++i) {

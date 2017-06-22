@@ -69,7 +69,7 @@ function activate(app: JupyterLab, services: IServiceManager, palette: ICommandP
 
   commands.addCommand(CommandIDs.create, {
     label: 'New Launcher',
-    execute: (args) => {
+    execute: (args: JSONObject) => {
       let cwd = args['cwd'] ? String(args['cwd']) : '';
       let id = `launcher-${Private.id++}`;
       let callback = (item: Widget) => {
