@@ -292,6 +292,16 @@ namespace IRenderMime {
     dataType?: 'string' | 'json';
 
     /**
+     * The icon class name for the widget.
+     */
+    iconClass?: string;
+
+    /**
+     * The icon label for the widget.
+     */
+    iconLabel?: string;
+
+    /**
      * The options used for using the renderer for documents.
      */
     widgetFactoryOptions?: IWidgetFactoryOptions;

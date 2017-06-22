@@ -556,7 +556,7 @@ namespace MimeRenderer {
     /**
      * Preferred data type from the model.
      */
-    dataType: 'string' | 'json';
+    dataType?: 'string' | 'json';
   }
 }
 
@@ -575,25 +575,32 @@ class MimeRendererFactory extends ABCWidgetFactory<MimeRenderer, DocumentRegistr
     this._mimeType = options.mimeType;
     this._renderTimeout = options.renderTimeout || 1000;
     this._dataType = options.dataType || 'string';
+    this._iconClass = options.iconClass || '';
+    this._iconLabel = options.iconLabel || '';
   }
 
   /**
    * Create a new widget given a context.
    */
   protected createNewWidget(context: DocumentRegistry.Context): MimeRenderer {
-    return new MimeRenderer({
+    let widget = new MimeRenderer({
       context,
       rendermime: this._rendermime.clone(),
       mimeType: this._mimeType,
       renderTimeout: this._renderTimeout,
-      dataType: this._dataType
+      dataType: this._dataType,
     });
+    widget.title.iconClass = this._iconClass;
+    widget.title.iconLabel = this._iconLabel;
+    return widget;
   }
 
   private _rendermime: IRenderMime = null;
   private _mimeType: string;
   private _renderTimeout: number;
   private _dataType: 'string' | 'json';
+  private _iconLabel: string;
+  private _iconClass: string;
 }
 
 
@@ -621,6 +628,16 @@ namespace MimeRendererFactory {
      * The render timeout.
      */
     renderTimeout?: number;
+
+    /**
+     * The icon class name for the widget.
+     */
+    iconClass?: string;
+
+    /**
+     * The icon label for the widget.
+     */
+    iconLabel?: string;
 
     /**
      * Preferred data type from the model.
