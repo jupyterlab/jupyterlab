@@ -37,7 +37,7 @@ import '../style/index.css';
 export
 namespace CommandIDs {
   export
-  const show: string = 'launcher-jupyterlab:show';
+  const show: string = 'launcher:show';
 };
 
 
