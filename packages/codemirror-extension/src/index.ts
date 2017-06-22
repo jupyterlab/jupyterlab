@@ -64,7 +64,6 @@ const schema = {
   "description": "Text editor settings for all CodeMirror editors.",
   "properties": {
     "keyMap": { type: "string", "title": "Key Map" },
-    "matchBrackets": { type: "boolean", "title": "Match Brackets" },
     "theme": { type: "string", "title": "Theme" }
   }
 };

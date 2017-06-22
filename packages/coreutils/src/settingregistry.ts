@@ -77,7 +77,7 @@ interface ISchemaValidator {
   addSchema(plugin: string, schema: ISettingRegistry.ISchema): ISchemaValidator.IError[] | null;
 
   /**
-   * Validate a data object against a plugin's JSON schema.
+   * Validate a plugin's schema and user data; populate the `composite` data.
    *
    * @param plugin - The plugin being validated. Its `composite` data will be
    * populated by reference.
@@ -343,6 +343,11 @@ class DefaultSchemaValidator implements ISchemaValidator {
     const valid = validate(schema);
 
     if (valid) {
+      // Remove if schema already exists.
+      this._composer.removeSchema(plugin);
+      this._validator.removeSchema(plugin);
+
+      // Add schema to the validator and composer.
       this._composer.addSchema(schema, plugin);
       this._validator.addSchema(schema, plugin);
       return null;
@@ -352,7 +357,7 @@ class DefaultSchemaValidator implements ISchemaValidator {
   }
 
   /**
-   * Validate a data object against a plugin's JSON schema.
+   * Validate a plugin's schema and user data; populate the `composite` data.
    *
    * @param plugin - The plugin being validated. Its `composite` data will be
    * populated by reference.
@@ -420,8 +425,6 @@ class SettingRegistry {
    * @param plugin - The name of the plugin whose settings are being retrieved.
    *
    * @param key - The name of the setting being retrieved.
-   *
-   * @param level - The setting level. Defaults to `user`.
    *
    * @returns A promise that resolves when the setting is retrieved.
    */
@@ -498,23 +501,7 @@ class SettingRegistry {
         throw [{ keyword: '', message, schemaPath: '' }];
       }
 
-      let errors: ISchemaValidator.IError[] | null = null;
-
-      // Add the schema to the registry.
-      errors = this._validator.addSchema(plugin, data.schema);
-      if (errors) {
-        throw errors;
-      }
-
-      // Validate the user data and create the composite data.
-      data.data.composite = { };
-      errors = this._validator.validateData(data);
-      if (errors) {
-        throw errors;
-      }
-
-      // Set the local copy.
-      plugins[plugin] = data;
+      this._validate(data);
 
       return new Settings({
         plugin: copy(plugins[plugin]) as ISettingRegistry.IPlugin,
@@ -539,14 +526,7 @@ class SettingRegistry {
       return Promise.resolve(void 0);
     }
 
-    const bundle =  plugins[plugin].data;
-    const level = 'user';
-
-    if (!bundle[level]) {
-      return Promise.resolve(void 0);
-    }
-
-    delete bundle[level][key];
+    delete plugins[plugin].data.user[key];
 
     return this._save(plugin);
   }
@@ -570,13 +550,7 @@ class SettingRegistry {
       return this.load(plugin).then(() => this.set(plugin, key, value));
     }
 
-    const bundle = plugins[plugin].data;
-    const level = 'user';
-
-    if (!bundle[level]) {
-      bundle[level] = Object.create(null);
-    }
-    bundle[level][key] = value;
+    plugins[plugin].data[key] = value;
 
     return this._save(plugin);
   }
@@ -589,11 +563,24 @@ class SettingRegistry {
    * @returns A promise that resolves when the settings have been saved.
    *
    * #### Notes
-   * Only the `user` level data will be saved.
+   * Only the `user` data will be saved.
    */
-  upload(raw: ISettingRegistry.IPlugin): Promise<void> {
-    this._plugins[raw.id] = copy(raw) as ISettingRegistry.IPlugin;
-    return this._save(raw.id);
+  upload(raw: ISettingRegistry.IPlugin): Promise<void | ISchemaValidator.IError[]> {
+    const plugins = this._plugins;
+    const plugin = raw.id;
+    let errors: ISchemaValidator.IError[] | null = null;
+
+    // Validate the user data and create the composite data.
+    raw.data.composite = { };
+    errors = this._validator.validateData(raw);
+    if (errors) {
+      return Promise.reject(errors);
+    }
+
+    // Set the local copy.
+    plugins[plugin] = raw;
+
+    return this._save(plugin);
   }
 
   /**
@@ -606,8 +593,33 @@ class SettingRegistry {
       return Promise.reject(`${plugin} does not exist in setting registry.`);
     }
 
+    this._validate(plugins[plugin]);
+
     return this._datastore.save(plugin, plugins[plugin])
       .then(() => { this._pluginChanged.emit(plugin); });
+  }
+
+  /**
+   * Validate a plugin's data and schema, compose the `composite` data.
+   */
+  private _validate(plugin: ISettingRegistry.IPlugin): void {
+    let errors: ISchemaValidator.IError[] | null = null;
+
+    // Add the schema to the registry.
+    errors = this._validator.addSchema(plugin.id, plugin.schema);
+    if (errors) {
+      throw errors;
+    }
+
+    // Validate the user data and create the composite data.
+    plugin.data.composite = { };
+    errors = this._validator.validateData(plugin);
+    if (errors) {
+      throw errors;
+    }
+
+    // Set the local copy.
+    this._plugins[plugin.id] = plugin;
   }
 
   private _datastore: IDatastore<ISettingRegistry.IPlugin, ISettingRegistry.IPlugin> | null = null;

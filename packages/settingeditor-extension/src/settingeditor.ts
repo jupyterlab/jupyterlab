@@ -494,7 +494,7 @@ class PluginEditor extends Widget {
   private _onSettingsChanged(): void {
     const editor = this._editor;
     const settings = this._settings;
-    const values = settings.composite;
+    const values = settings.user;
 
     editor.source = new ObservableJSON({ values });
     editor.source.changed.connect(this._onSourceChanged, this);
