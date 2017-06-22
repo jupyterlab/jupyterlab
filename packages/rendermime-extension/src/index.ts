@@ -6,15 +6,15 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JupyterLabPlugin, JupyterLab
+  ILayoutRestorer, JupyterLabPlugin, JupyterLab
 } from '@jupyterlab/application';
 
 import {
-  ICommandLinker
+  ICommandLinker, InstanceTracker
 } from '@jupyterlab/apputils';
 
 import {
-  IDocumentRegistry, MimeRendererFactory
+  IDocumentRegistry, MimeRenderer, MimeRendererFactory
 } from '@jupyterlab/docregistry';
 
 import {
@@ -39,19 +39,8 @@ const rendermimePlugin: JupyterLabPlugin<IRenderMime> = {
  */
 const docRegistryPlugin: JupyterLabPlugin<void> = {
   id: 'jupyter.services.mimerender-documents',
-  requires: [IRenderMime, IDocumentRegistry],
-  activate: (app: JupyterLab, rendermime: IRenderMime, registry: IDocumentRegistry) => {
-      each(RenderMime.getExtensions(), item => {
-          if (item.widgetFactoryOptions) {
-            registry.addWidgetFactory(new MimeRendererFactory({
-              mimeType: item.mimeType,
-              renderTimeout: item.renderTimeout,
-              rendermime,
-              ...item.widgetFactoryOptions,
-            }));
-          }
-      });
-    },
+  requires: [IRenderMime, IDocumentRegistry, ILayoutRestorer],
+  activate: activateWidgetFactories,
   autoStart: true
 };
 
@@ -84,3 +73,39 @@ function activateRendermime(app: JupyterLab, linker: ICommandLinker, registry: I
 
   return rendermime;
 };
+
+
+/**
+ * Activate the widget factories plugin.
+ */
+function activateWidgetFactories(app: JupyterLab, rendermime: IRenderMime, registry: IDocumentRegistry, restorer: ILayoutRestorer) {
+  each(RenderMime.getExtensions(), item => {
+    if (!item.widgetFactoryOptions) {
+      return;
+    }
+    let factory = new MimeRendererFactory({
+      mimeType: item.mimeType,
+      renderTimeout: item.renderTimeout,
+      rendermime,
+      ...item.widgetFactoryOptions,
+    });
+    registry.addWidgetFactory(factory);
+
+    const factoryName = item.widgetFactoryOptions.name;
+    const namespace = `${factoryName}-renderer`;
+    const tracker = new InstanceTracker<MimeRenderer>({ namespace });
+
+    // Handle state restoration.
+    restorer.restore(tracker, {
+      command: 'file-operations:open',
+      args: widget => ({ path: widget.context.path, factory: factoryName }),
+      name: widget => widget.context.path
+    });
+
+    factory.widgetCreated.connect((sender, widget) => {
+      // Notify the instance tracker if restore data needs to update.
+      widget.context.pathChanged.connect(() => { tracker.save(widget); });
+      tracker.add(widget);
+    });
+  });
+}
