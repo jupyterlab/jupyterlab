@@ -58,7 +58,7 @@ namespace CommandIDs {
   const duplicate = 'filebrowser:duplicate';
 
   export
-  const hideBrowser = 'filebrowser-main:hide'; // For main browser only.
+  const hideBrowser = 'filebrowser:hide-main'; // For main browser only.
 
   export
   const open = 'filebrowser:open';
@@ -70,16 +70,16 @@ namespace CommandIDs {
   const rename = 'filebrowser:rename';
 
   export
-  const showBrowser = 'filebrowser-main:activate'; // For main browser only.
+  const showBrowser = 'filebrowser:activate-main'; // For main browser only.
 
   export
   const shutdown = 'filebrowser:shutdown';
 
   export
-  const toggleBrowser = 'filebrowser-main:toggle'; // For main browser only.
+  const toggleBrowser = 'filebrowser:toggle-main'; // For main browser only.
 
   export
-  const createLauncher = 'filebrowser-main:create-launcher'; // For main browser only.
+  const createLauncher = 'filebrowser:create-main-launcher'; // For main browser only.
 };
 
 
@@ -297,7 +297,7 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
 
       each(widget.selectedItems(), item => {
         let path = item.path;
-        commands.execute('file-operations:open', { path });
+        commands.execute('docmanager:open', { path });
       });
     },
     iconClass: 'jp-MaterialIcon jp-OpenFolderIcon',
@@ -390,15 +390,15 @@ function createMenu(app: JupyterLab): Menu {
   menu.title.label = 'File';
   [
     CommandIDs.createLauncher,
-    'file-operations:save',
-    'file-operations:save-as',
-    'file-operations:rename',
-    'file-operations:restore-checkpoint',
-    'file-operations:close',
-    'file-operations:close-all-files'
+    'docmanager:save',
+    'docmanager:save-as',
+    'docmanager:rename',
+    'docmanager:restore-checkpoint',
+    'docmanager:close',
+    'docmanager:close-all-files'
   ].forEach(command => { menu.addItem({ command }); });
   menu.addItem({ type: 'separator' });
-  menu.addItem({ command: 'setting-editor:open' });
+  menu.addItem({ command: 'settingeditor:open' });
 
   return menu;
 }
@@ -419,7 +419,7 @@ function createContextMenu(path: string, commands: CommandRegistry, registry: ID
   const ext = DocumentRegistry.extname(path);
   const factories = registry.preferredWidgetFactories(ext).map(f => f.name);
   if (path && factories.length > 1) {
-    const command =  'file-operations:open';
+    const command =  'docmanager:open';
     const openWith = new Menu({ commands });
     openWith.title.label = 'Open With...';
     factories.forEach(factory => {

@@ -34,7 +34,7 @@ import '../style/index.css';
  */
 namespace CommandIDs {
   export
-  const create = 'launcher-jupyterlab:create';
+  const create = 'launcher:create';
 };
 
 /**

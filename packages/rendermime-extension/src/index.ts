@@ -58,7 +58,7 @@ export default plugins;
 function activateRendermime(app: JupyterLab, linker: ICommandLinker, registry: IDocumentRegistry): IRenderMime {
   let linkHandler = {
     handleLink: (node: HTMLElement, path: string) => {
-      linker.connectNode(node, 'file-operations:open', { path });
+      linker.connectNode(node, 'docmanager:open', { path });
     }
   };
   let items = RenderMime.getDefaultItems();
@@ -98,7 +98,7 @@ function activateWidgetFactories(app: JupyterLab, rendermime: IRenderMime, regis
 
     // Handle state restoration.
     restorer.restore(tracker, {
-      command: 'file-operations:open',
+      command: 'docmanager:open',
       args: widget => ({ path: widget.context.path, factory: factoryName }),
       name: widget => widget.context.path
     });

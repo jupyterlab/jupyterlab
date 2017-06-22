@@ -49,7 +49,7 @@ function activate(app: JupyterLab, services: IServiceManager, restorer: ILayoutR
     if (model.type.toLowerCase() === 'console') {
       app.commands.execute('console:open', { path });
     } else {
-      app.commands.execute('file-operations:open', { path });
+      app.commands.execute('docmanager:open', { path });
     }
   });
 

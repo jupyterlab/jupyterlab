@@ -27,34 +27,34 @@ import {
  */
 namespace CommandIDs {
   export
-  const close = 'file-operations:close';
+  const close = 'docmanager:close';
 
   export
-  const closeAllFiles = 'file-operations:close-all-files';
+  const closeAllFiles = 'docmanager:close-all-files';
 
   export
-  const createFrom = 'file-operations:create-from';
+  const createFrom = 'docmanager:create-from';
 
   export
-  const deleteFile = 'file-operations:delete-file';
+  const deleteFile = 'docmanager:delete-file';
 
   export
-  const newUntitled = 'file-operations:new-untitled';
+  const newUntitled = 'docmanager:new-untitled';
 
   export
-  const open = 'file-operations:open';
+  const open = 'docmanager:open';
 
   export
-  const restoreCheckpoint = 'file-operations:restore-checkpoint';
+  const restoreCheckpoint = 'docmanager:restore-checkpoint';
 
   export
-  const save = 'file-operations:save';
+  const save = 'docmanager:save';
 
   export
-  const saveAs = 'file-operations:save-as';
+  const saveAs = 'docmanager:save-as';
 
   export
-  const rename = 'file-operations:rename';
+  const rename = 'docmanager:rename';
 };
 
 

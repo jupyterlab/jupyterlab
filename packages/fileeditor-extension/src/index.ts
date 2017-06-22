@@ -50,28 +50,28 @@ const FACTORY = 'Editor';
  */
 namespace CommandIDs {
   export
-  const lineNumbers = 'editor:line-numbers';
+  const lineNumbers = 'fileeditor:toggle-line-numbers';
 
   export
-  const lineWrap = 'editor:line-wrap';
+  const lineWrap = 'fileeditor:toggle-line-wrap';
 
   export
-  const changeTabs = 'editor:change-tabs';
+  const changeTabs = 'fileeditor:change-tabs';
 
   export
-  const matchBrackets = 'editor:match-brackets';
+  const matchBrackets = 'fileeditor:toggle-match-brackets';
 
   export
-  const autoClosingBrackets = 'editor:autoclosing-brackets';
+  const autoClosingBrackets = 'fileeditor:toggle-autoclosing-brackets';
 
   export
-  const createConsole = 'editor:create-console';
+  const createConsole = 'fileeditor:create-console';
 
   export
-  const runCode = 'editor:run-code';
+  const runCode = 'fileeditor:run-code';
 
   export
-  const markdownPreview = 'editor:markdown-preview';
+  const markdownPreview = 'fileeditor:markdown-preview';
 };
 
 
@@ -150,7 +150,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command: 'file-operations:open',
+    command: 'docmanager:open',
     args: widget => ({ path: widget.context.path, factory: FACTORY }),
     name: widget => widget.context.path
   });
@@ -364,7 +364,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   commands.addCommand(CommandIDs.markdownPreview, {
     execute: () => {
       let path = tracker.currentWidget.context.path;
-      return commands.execute('markdown-preview:open', { path });
+      return commands.execute('markdownviewer:open', { path });
     },
     isVisible: () => {
       let widget = tracker.currentWidget;
@@ -379,10 +379,10 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
       displayName: 'Text Editor',
       iconClass: EDITOR_ICON_CLASS,
       callback: cwd => {
-        return commands.execute('file-operations:new-untitled', {
+        return commands.execute('docmanager:new-untitled', {
           path: cwd, type: 'file'
         }).then(model => {
-          return commands.execute('file-operations:open', {
+          return commands.execute('docmanager:open', {
             path: model.path, factory: FACTORY
           });
         });

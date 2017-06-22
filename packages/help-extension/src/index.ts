@@ -32,28 +32,28 @@ import '../style/index.css';
  */
 namespace CommandIDs {
   export
-  const open = 'help-jupyterlab:open';
+  const open = 'help:open';
 
   export
-  const about = 'help-jupyterlab:about';
+  const about = 'help:about';
 
   export
-  const activate = 'help-jupyterlab:activate';
+  const activate = 'help:activate';
 
   export
-  const close = 'help-jupyterlab:close';
+  const close = 'help:close';
 
   export
-  const show = 'help-jupyterlab:show';
+  const show = 'help:show';
 
   export
-  const hide = 'help-jupyterlab:hide';
+  const hide = 'help:hide';
 
   export
-  const toggle = 'help-jupyterlab:toggle';
+  const toggle = 'help:toggle';
 
   export
-  const launchClassic = 'classic-notebook:launchClassic';
+  const launchClassic = 'help:launch-classic-notebook';
 };
 
 
@@ -209,7 +209,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
       menu.addItem({ args, command: CommandIDs.open });
     });
     menu.addItem({ type: 'separator' });
-    menu.addItem({ command: 'statedb:clear' });
+    menu.addItem({ command: 'apputils:clear-statedb' });
 
     return menu;
   }
@@ -265,7 +265,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   RESOURCES.forEach(args => {
     palette.addItem({ args, command: CommandIDs.open, category });
   });
-  palette.addItem({ command: 'statedb:clear', category });
+  palette.addItem({ command: 'apputils:clear-statedb', category });
   palette.addItem({ command: CommandIDs.launchClassic, category });
 
   mainMenu.addMenu(menu);

@@ -38,7 +38,7 @@ import {
  */
 namespace CommandIDs {
   export
-  const clearStateDB = 'statedb:clear';
+  const clearStateDB = 'apputils:clear-statedb';
 };
 
 

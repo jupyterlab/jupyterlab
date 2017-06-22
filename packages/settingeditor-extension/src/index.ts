@@ -31,7 +31,7 @@ import {
  */
 namespace CommandIDs {
   export
-  const open = 'setting-editor:open';
+  const open = 'settingeditor:open';
 };
 
 

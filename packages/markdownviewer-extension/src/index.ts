@@ -38,7 +38,7 @@ const FACTORY = 'Markdown Preview';
  */
 namespace CommandIDs {
   export
-  const preview = 'markdown-preview:open';
+  const preview = 'markdownviewer:open';
 }
 
 
@@ -70,7 +70,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, rendermime: IRen
 
     // Handle state restoration.
     restorer.restore(tracker, {
-      command: 'file-operations:open',
+      command: 'docmanager:open',
       args: widget => ({ path: widget.context.path, factory: FACTORY }),
       name: widget => widget.context.path
     });
@@ -91,7 +91,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, rendermime: IRen
         if (typeof path !== 'string') {
           return;
         }
-        return commands.execute('file-operations:open', {
+        return commands.execute('docmanager:open', {
           path, factory: FACTORY
         });
       }

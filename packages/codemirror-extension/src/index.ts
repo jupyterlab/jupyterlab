@@ -270,7 +270,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     let args: JSONObject = {
       insertSpaces: false, size: 4, name: 'Indent with Tab'
     };
-    let command = 'editor:change-tabs';
+    let command = 'fileeditor:change-tabs';
     tabMenu.addItem({ command, args });
     palette.addItem({ command, args, category: 'Editor' });
 
@@ -285,10 +285,10 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     menu.addItem({ type: 'submenu', submenu: modeMenu });
     menu.addItem({ type: 'submenu', submenu: tabMenu });
     menu.addItem({ type: 'separator' });
-    menu.addItem({ command: 'editor:line-numbers' });
-    menu.addItem({ command: 'editor:line-wrap' });
-    menu.addItem({ command: 'editor:match-brackets' });
-    menu.addItem({ command: 'editor:autoclosing-brackets' });
+    menu.addItem({ command: 'fileeditor:toggle-line-numbers' });
+    menu.addItem({ command: 'fileeditor:toggle-line-wrap' });
+    menu.addItem({ command: 'fileeditor:toggle-match-brackets' });
+    menu.addItem({ command: 'fileeditor:toggle-autoclosing-brackets' });
     menu.addItem({ type: 'submenu', submenu: keyMapMenu });
     menu.addItem({ type: 'submenu', submenu: themeMenu });
 

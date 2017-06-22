@@ -67,19 +67,19 @@ namespace CommandIDs {
   const restart = 'notebook:restart-kernel';
 
   export
-  const restartClear = 'notebook:restart-clear';
+  const restartClear = 'notebook:restart-clear-output';
 
   export
-  const restartRunAll = 'notebook:restart-runAll';
+  const restartRunAll = 'notebook:restart-run-all';
 
   export
-  const switchKernel = 'notebook:switch-kernel';
+  const changeKernel = 'notebook:change-kernel';
 
   export
   const createConsole = 'notebook:create-console';
 
   export
-  const clearAllOutputs = 'notebook:clear-outputs';
+  const clearAllOutputs = 'notebook:clear-all-cell-outputs';
 
   export
   const closeAndShutdown = 'notebook:close-and-shutdown';
@@ -91,130 +91,130 @@ namespace CommandIDs {
   const exportToFormat = 'notebook:export-to-format';
 
   export
-  const run = 'notebook-cells:run';
+  const run = 'notebook:run-cell';
 
   export
-  const runAndAdvance = 'notebook-cells:run-and-advance';
+  const runAndAdvance = 'notebook:run-cell-and-select-next';
 
   export
-  const runAndInsert = 'notebook-cells:run-and-insert';
+  const runAndInsert = 'notebook:run-cell-and-insert-below';
 
   export
-  const runAll = 'notebook:run-all';
+  const runAll = 'notebook:run-all-cells';
 
   export
-  const toCode = 'notebook-cells:to-code';
+  const toCode = 'notebook:change-cell-to-code';
 
   export
-  const toMarkdown = 'notebook-cells:to-markdown';
+  const toMarkdown = 'notebook:change-cell-to-markdown';
 
   export
-  const toRaw = 'notebook-cells:to-raw';
+  const toRaw = 'notebook:change-cell-to-raw';
 
   export
-  const cut = 'notebook-cells:cut';
+  const cut = 'notebook:cut-cell';
 
   export
-  const copy = 'notebook-cells:copy';
+  const copy = 'notebook:copy-cel';
 
   export
-  const paste = 'notebook-cells:paste';
+  const paste = 'notebook:paste-cell';
 
   export
-  const moveUp = 'notebook-cells:move-up';
+  const moveUp = 'notebook:move-cell-up';
 
   export
-  const moveDown = 'notebook-cells:move-down';
+  const moveDown = 'notebook:move-cell-down';
 
   export
-  const clearOutputs = 'notebook-cells:clear-output';
+  const clearOutputs = 'notebook:clear-cell-output';
 
   export
-  const deleteCell = 'notebook-cells:delete';
+  const deleteCell = 'notebook:delete-cell';
 
   export
-  const insertAbove = 'notebook-cells:insert-above';
+  const insertAbove = 'notebook:insert-cell-above';
 
   export
-  const insertBelow = 'notebook-cells:insert-below';
+  const insertBelow = 'notebook:insert-cell-below';
 
   export
-  const selectAbove = 'notebook-cells:select-above';
+  const selectAbove = 'notebook:move-cursor-up';
 
   export
-  const selectBelow = 'notebook-cells:select-below';
+  const selectBelow = 'notebook:move-cursor-down';
 
   export
-  const extendAbove = 'notebook-cells:extend-above';
+  const extendAbove = 'notebook:extend-marked-cells-above';
 
   export
-  const extendBelow = 'notebook-cells:extend-below';
+  const extendBelow = 'notebook:extend-marked-cells-below';
 
   export
-  const editMode = 'notebook:edit-mode';
+  const editMode = 'notebook:enter-edit-mode';
 
   export
-  const merge = 'notebook-cells:merge';
+  const merge = 'notebook:merge-cells';
 
   export
-  const split = 'notebook-cells:split';
+  const split = 'notebook:split-cell-at-cursor';
 
   export
-  const commandMode = 'notebook:command-mode';
+  const commandMode = 'notebook:enter-command-mode';
 
   export
-  const toggleLines = 'notebook-cells:toggle-line-numbers';
+  const toggleLines = 'notebook:toggle-cell-line-numbers';
 
   export
-  const toggleAllLines = 'notebook-cells:toggle-all-line-numbers';
+  const toggleAllLines = 'notebook:toggle-all-cell-line-numbers';
 
   export
-  const undo = 'notebook-cells:undo';
+  const undo = 'notebook:undo-cell-action';
 
   export
-  const redo = 'notebook-cells:redo';
+  const redo = 'notebook:redo-cell-action';
 
   export
-  const markdown1 = 'notebook-cells:markdown-header1';
+  const markdown1 = 'notebook:change-cell-to-heading-1';
 
   export
-  const markdown2 = 'notebook-cells:markdown-header2';
+  const markdown2 = 'notebook:change-cell-to-heading-2';
 
   export
-  const markdown3 = 'notebook-cells:markdown-header3';
+  const markdown3 = 'notebook:change-cell-to-heading-3';
 
   export
-  const markdown4 = 'notebook-cells:markdown-header4';
+  const markdown4 = 'notebook:change-cell-to-heading-4';
 
   export
-  const markdown5 = 'notebook-cells:markdown-header5';
+  const markdown5 = 'notebook:change-cell-to-heading-5';
 
   export
-  const markdown6 = 'notebook-cells:markdown-header6';
+  const markdown6 = 'notebook:change-cell-to-heading-6';
 
   export
-  const hideCode = 'notebook-cells:hide-code';
+  const hideCode = 'notebook:hide-cell-code';
 
   export
-  const showCode = 'notebook-cells:show-code';
+  const showCode = 'notebook:show-cell-code';
 
   export
-  const hideAllCode = 'notebook-cells:hide-all-code';
+  const hideAllCode = 'notebook:hide-all-cell-code';
 
   export
-  const showAllCode = 'notebook-cells:show-all-code';
+  const showAllCode = 'notebook:show-all-cell-code';
 
   export
-  const hideOutput = 'notebook-cells:hide-outputs';
+  const hideOutput = 'notebook:hide-cell-outputs';
 
   export
-  const showOutput = 'notebook-cells:show-outputs';
+  const showOutput = 'notebook:show-cell-outputs';
 
   export
-  const hideAllOutputs = 'notebook-cells:hide-all-outputs';
+  const hideAllOutputs = 'notebook:hide-all-cell-outputs';
 
   export
-  const showAllOutputs = 'notebook-cells:show-all-outputs';
+  const showAllOutputs = 'notebook:show-all-cell-outputs';
 
 };
 
@@ -390,7 +390,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command: 'file-operations:open',
+    command: 'docmanager:open',
     args: panel => ({ path: panel.context.path, factory: FACTORY }),
     name: panel => panel.context.path,
     when: services.ready
@@ -438,9 +438,9 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
   // The launcher callback.
   let callback = (cwd: string, name: string) => {
     return commands.execute(
-      'file-operations:new-untitled', { path: cwd, type: 'notebook' }
+      'docmanager:new-untitled', { path: cwd, type: 'notebook' }
     ).then(model => {
-      return commands.execute('file-operations:open', {
+      return commands.execute('docmanager:open', {
         path: model.path, factory: FACTORY,
         kernel: { name }
       });
@@ -944,7 +944,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     },
     isEnabled: hasWidget
   });
-  commands.addCommand(CommandIDs.switchKernel, {
+  commands.addCommand(CommandIDs.changeKernel, {
     label: 'Change Kernel',
     execute: args => {
       let current = getCurrent(args);
@@ -1147,7 +1147,7 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.toggleAllLines,
     CommandIDs.editMode,
     CommandIDs.commandMode,
-    CommandIDs.switchKernel,
+    CommandIDs.changeKernel,
     CommandIDs.createConsole,
     CommandIDs.closeAndShutdown,
     CommandIDs.trust
@@ -1240,7 +1240,7 @@ function createMenu(app: JupyterLab): Menu {
   menu.addItem({ command: CommandIDs.runAll });
   menu.addItem({ command: CommandIDs.interrupt });
   menu.addItem({ command: CommandIDs.restart });
-  menu.addItem({ command: CommandIDs.switchKernel });
+  menu.addItem({ command: CommandIDs.changeKernel });
   menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.createConsole });
   menu.addItem({ type: 'separator' });
