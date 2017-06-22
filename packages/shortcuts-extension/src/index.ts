@@ -58,7 +58,7 @@ const SHORTCUTS = [
   {
     command: 'command-palette:activate',
     selector: 'body',
-    keys: ['Accel Shift P']
+    keys: ['Accel Shift C']
   },
   {
     command: 'completer:invoke-console',
@@ -111,14 +111,9 @@ const SHORTCUTS = [
     keys: ['Ctrl Q']
   },
   {
-    command: 'file-operations:close-all-files',
-    selector: 'body',
-    keys: ['Ctrl Shift Q']
-  },
-  {
     command: 'help-jupyterlab:toggle',
     selector: 'body',
-    keys: ['Accel Shift H']
+    keys: ['Ctrl Shift H']
   },
   {
     command: 'imageviewer:reset-zoom',
