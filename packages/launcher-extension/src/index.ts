@@ -19,6 +19,10 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
+  JSONObject
+} from '@phosphor/coreutils';
+
+import {
   Widget
 } from '@phosphor/widgets';
 

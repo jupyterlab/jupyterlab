@@ -6,7 +6,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  Token
+  Token, JSONObject
 } from '@phosphor/coreutils';
 
 import {
@@ -21,9 +21,7 @@ import {
   Widget
 } from '@phosphor/widgets';
 
-import {
-  h, VirtualNode
-} from '@phosphor/virtualdom';
+import * as vdom from '@phosphor/virtualdom';
 
 import {
   VDomModel, VDomRenderer
@@ -50,6 +48,55 @@ export
 const ILauncher = new Token<ILauncher>('jupyter.services.launcher');
 /* tslint:enable */
 
+
+export
+type PropsType = JSONObject | null;
+
+export
+type FunctionalComponent = (props: PropsType, ...children: vdom.h.Child[]) => vdom.VirtualElement;
+
+export function h(tag: FunctionalComponent, props: PropsType, ...children: vdom.h.Child[]): vdom.VirtualElement {
+export function h(tag: string, ...children: vdom.h.Child[]): vdom.VirtualElement;
+export function h(tag: string, attrs: vdom.ElementAttrs, ...children: vdom.h.Child[]): vdom.VirtualElement;
+export function h(tag: string): vdom.VirtualElement {
+  let attrs: vdom.ElementAttrs = {};
+  let children: vdom.VirtualNode[] = [];
+  for (let i = 1, n = arguments.length; i < n; ++i) {
+    let arg = arguments[i];
+    if (typeof arg === 'string') {
+      children.push(new vdom.VirtualText(arg));
+    } else if (arg instanceof vdom.VirtualText) {
+      children.push(arg);
+    } else if (arg instanceof vdom.VirtualElement) {
+      children.push(arg);
+    } else if (arg instanceof Array) {
+      extend(children, arg);
+    } else if (i === 1 && arg && typeof arg === 'object') {
+      attrs = arg;
+    }
+  }
+
+  let result: any;
+
+  if (typeof tag === 'function') {
+    result = tag(attrs, ...children);
+  } else {
+    result = new vdom.VirtualElement(tag, attrs, children);
+  }
+  return result;
+
+  function extend(array: vdom.VirtualNode[], values: vdom.h.Child[]): void {
+    for (let child of values) {
+      if (typeof child === 'string') {
+        array.push(new vdom.VirtualText(child));
+      } else if (child instanceof vdom.VirtualText) {
+        array.push(child);
+      } else if (child instanceof vdom.VirtualElement) {
+        array.push(child);
+      }
+    }
+  }
+}
 
 /**
  * The class name added to LauncherWidget instances.
@@ -248,7 +295,7 @@ class LauncherWidget extends VDomRenderer<LauncherModel> {
   /**
    * Render the launcher to virtual DOM nodes.
    */
-  protected render(): VirtualNode | VirtualNode[] {
+  protected render(): vdom.VirtualNode | vdom.VirtualNode[] {
     // Create an iterator that yields rendered item nodes.
     let sorted = toArray(this.model.items()).sort(Private.sortCmp);
     let items = map(sorted, item => {
@@ -264,20 +311,24 @@ class LauncherWidget extends VDomRenderer<LauncherModel> {
       let imageClass = `${item.iconClass} ${IMAGE_CLASS}`;
       let icon;
       if (item.kernelIconUrl) {
-        icon = h.img({ src: item.kernelIconUrl, onclick }, item.iconLabel);
+        icon = <img src={item.kernelIconUrl} onclick={onclick} />
+        // icon = h.img({ src: item.kernelIconUrl, onclick }, item.iconLabel);
       } else {
-        icon = h.div({ className: imageClass, onclick }, item.iconLabel);
+        icon = <div className={imageClass} onclick={onclick}>{item.iconLabel}</div>
+        // icon = h.div({ className: imageClass, onclick }, item.iconLabel);
       }
       let title = item.displayName + (item.category ? ' ' + item.category : '');
-      let text = h.span({className: TEXT_CLASS, onclick, title }, title);
-      return h.div({
+      let text = <span className={TEXT_CLASS} onclick={onclick} title={title}>{title}</span>
+      // let text = h.span({className: TEXT_CLASS, onclick, title }, title);
+      // return <div className="">{[icon, text].map((item)=>{item}}</div>;
+      return vdom.h.div({
         className: ITEM_CLASS,
       }, [icon, text]);
     });
 
-    let children: VirtualNode[];
+    let children: vdom.VirtualNode[];
     children = toArray(items);
-    return h.div({ className: BODY_CLASS  }, children);
+    return vdom.h.div({ className: BODY_CLASS  }, children);
   }
 
   private _callback: (widget: Widget) => void;
@@ -350,4 +401,30 @@ namespace Private {
   }
 }
 
+{/*export
+function Card(props: PropsType, ...children: vdom.h.Child[]): vdom.VirtualElement {
+  return (
+    <div className="jp-LauncherCard">
+      <div className="jp-LauncherCard-image">
+          {props.kernel && <img src="" />}
+          {!props.kernel && <div className="jp-SVGIcon" />}
+      </div>
+      <div className="jp-LauncherCard-label">{props.labelText}</div>
+    </div>
+  );
+}
+
+export
+function Section(props: PropsType, ...children: vdom.h.Child[]): vdom.VirtualElement {
+  return (
+    <div className="jp-Section">
+      <div className="jp-Section-header">
+      </div>
+      <div className="jp-Section-activities">
+        {/*{(props.activites as Array).map((activity) => <Card  />)}*/}
+      </div>
+    </div>
+  );
+}
+*/}
 
