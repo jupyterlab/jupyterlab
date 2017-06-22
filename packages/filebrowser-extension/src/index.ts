@@ -362,7 +362,7 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
   commands.addCommand(CommandIDs.createLauncher, {
     label: 'New...',
     execute: () => {
-      return commands.execute('launcher-jupyterlab:create', {
+      return commands.execute('launcher:create', {
         cwd: mainBrowser.model.path,
       });
     }
@@ -371,7 +371,7 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
   // Create a launcher with a banner if there are no open items.
   app.restored.then(() => {
     if (app.shell.isEmpty('main')) {
-      commands.execute('launcher-jupyterlab:create', {
+      commands.execute('launcher:create', {
         cwd: mainBrowser.model.path,
         banner: true
       });
