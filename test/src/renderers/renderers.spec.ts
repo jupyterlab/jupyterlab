@@ -21,11 +21,11 @@ import {
 } from '@jupyterlab/rendermime';
 
 import {
-  MimeModel, RenderMime
+  MimeModel, IRenderMime
 } from '@jupyterlab/rendermime';
 
 
-function runCanRunder(renderer: RenderMime.IRenderer, trusted: boolean): boolean {
+function runCanRunder(renderer: IRenderMime.IRenderer, trusted: boolean): boolean {
   let canRender = true;
   let data: JSONObject = Object.create(null);
   for (let mimeType in renderer.mimeTypes) {
@@ -46,7 +46,7 @@ function runCanRunder(renderer: RenderMime.IRenderer, trusted: boolean): boolean
 }
 
 
-function createModel(mimeType: string, source: JSONValue, trusted=false): RenderMime.IMimeModel {
+function createModel(mimeType: string, source: JSONValue, trusted=false): IRenderMime.IMimeModel {
   let data: JSONObject = {};
   data[mimeType] = source;
   return new MimeModel({ data, trusted });

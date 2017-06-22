@@ -136,6 +136,8 @@
       "@jupyterlab/theme-light-extension",
       "@jupyterlab/tooltip-extension"
     ],
+    "mimeExtensions": [
+    ],
     "singletonPackages": [
       "@jupyterlab/application",
       "@jupyterlab/apputils",

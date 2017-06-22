@@ -13,7 +13,8 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^0.7.0",
-    "@jupyterlab/docregistry": "^0.7.0"
+    "@jupyterlab/docregistry": "^0.7.0",
+    "@phosphor/algorithm": "^1.1.1"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",

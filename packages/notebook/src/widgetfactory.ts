@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  RenderMime
+  IRenderMime
 } from '@jupyterlab/rendermime';
 
 import {
@@ -46,7 +46,7 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
   /*
    * The rendermime instance.
    */
-  readonly rendermime: RenderMime;
+  readonly rendermime: IRenderMime;
 
   /**
    * The content factory used by the widget factory.
@@ -92,7 +92,7 @@ namespace NotebookWidgetFactory {
      /*
       * A rendermime instance.
       */
-    rendermime: RenderMime;
+    rendermime: IRenderMime;
 
     /**
      * A notebook panel content factory.

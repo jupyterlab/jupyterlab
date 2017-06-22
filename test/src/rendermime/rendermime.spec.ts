@@ -20,11 +20,11 @@ import {
 } from '@phosphor/widgets';
 
 import {
-   TextRenderer
+  TextRenderer
 } from '@jupyterlab/rendermime';
 
 import {
-  MimeModel, RenderMime
+  MimeModel, IRenderMime, RenderMime
 } from '@jupyterlab/rendermime';
 
 import {
@@ -32,23 +32,23 @@ import {
 } from '../utils';
 
 
-const RESOLVER: RenderMime.IResolver = createFileContext();
+const RESOLVER: IRenderMime.IResolver = createFileContext();
 
 
-function createModel(data: JSONObject, trusted=false): RenderMime.IMimeModel {
+function createModel(data: JSONObject, trusted=false): IRenderMime.IMimeModel {
   return new MimeModel({ data, trusted });
 }
 
 
 describe('rendermime/index', () => {
 
-  let r: RenderMime;
+  let r: IRenderMime;
 
   beforeEach(() => {
     r = defaultRenderMime();
   });
 
-  describe('RenderMime', () => {
+  describe('IRenderMime', () => {
 
     describe('#constructor()', () => {
 

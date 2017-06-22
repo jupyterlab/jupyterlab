@@ -12,10 +12,6 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
   ClientSession
 } from '@jupyterlab/apputils';
 
@@ -32,7 +28,7 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
-  RenderMime, TextRenderer, HTMLRenderer
+  IRenderMime, RenderMime, TextRenderer, HTMLRenderer
 } from '@jupyterlab/rendermime';
 
 
@@ -40,7 +36,7 @@ import {
  * Get a copy of the default rendermime instance.
  */
 export
-function defaultRenderMime(): RenderMime {
+function defaultRenderMime(): IRenderMime {
   return Private.rendermime.clone();
 }
 
@@ -160,11 +156,12 @@ namespace Private {
 
     mimeTypes = ['application/json'];
 
+
     get ready(): Promise<void> {
       return Promise.resolve(undefined);
     }
 
-    render(options: RenderMime.IRenderOptions): RenderMime.IReadyWidget {
+    render(options: IRenderMime.IRenderOptions): IRenderMime.IReadyWidget {
       let source = options.model.data.get(options.mimeType);
       options.model.data.set(options.mimeType, json2html(source));
       return super.render(options);
@@ -180,7 +177,7 @@ namespace Private {
       return Promise.resolve(undefined);
     }
 
-    render(options: RenderMime.IRenderOptions): RenderMime.IReadyWidget {
+    render(options: IRenderMime.IRenderOptions): IRenderMime.IReadyWidget {
       options.model.data.set('application/json', { 'foo': 1 } );
       return super.render(options);
     }

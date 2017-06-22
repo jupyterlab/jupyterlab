@@ -29,7 +29,11 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  RenderMime, typeset, removeMath, replaceMath
+  IRenderMime
+} from '@jupyterlab/rendermime-interfaces';
+
+import {
+  typeset, removeMath, replaceMath
 } from '.';
 
 
@@ -88,9 +92,9 @@ const PDF_CLASS = 'jp-RenderedPDF';
  * A widget for displaying any widget whoes representation is rendered HTML
  * */
 export
-class RenderedHTMLCommon extends Widget implements RenderMime.IReadyWidget {
+class RenderedHTMLCommon extends Widget implements IRenderMime.IReadyWidget {
   /* Construct a new rendered HTML common widget.*/
-  constructor(options: RenderMime.IRenderOptions) {
+  constructor(options: IRenderMime.IRenderOptions) {
     super();
     this.addClass(HTML_COMMON_CLASS);
   }
@@ -112,7 +116,7 @@ class RenderedHTML extends RenderedHTMLCommon {
   /**
    * Construct a new html widget.
    */
-  constructor(options: RenderMime.IRenderOptions) {
+  constructor(options: IRenderMime.IRenderOptions) {
     super(options);
     this.addClass(HTML_CLASS);
     let source = Private.getSource(options);
@@ -157,7 +161,7 @@ class RenderedMarkdown extends RenderedHTMLCommon {
   /**
    * Construct a new markdown widget.
    */
-  constructor(options: RenderMime.IRenderOptions) {
+  constructor(options: IRenderMime.IRenderOptions) {
     super(options);
     this.addClass(MARKDOWN_CLASS);
 
@@ -218,7 +222,7 @@ class RenderedLatex extends Widget {
   /**
    * Construct a new latex widget.
    */
-  constructor(options: RenderMime.IRenderOptions) {
+  constructor(options: IRenderMime.IRenderOptions) {
     super();
     let source = Private.getSource(options);
     this.node.textContent = source;
@@ -249,7 +253,7 @@ class RenderedImage extends Widget {
   /**
    * Construct a new rendered image widget.
    */
-  constructor(options: RenderMime.IRenderOptions) {
+  constructor(options: IRenderMime.IRenderOptions) {
     super();
     let img = document.createElement('img');
     let source = Private.getSource(options);
@@ -285,7 +289,7 @@ class RenderedText extends Widget {
   /**
    * Construct a new rendered text widget.
    */
-  constructor(options: RenderMime.IRenderOptions) {
+  constructor(options: IRenderMime.IRenderOptions) {
     super();
     let source = Private.getSource(options);
     let data = escape_for_html(source);
@@ -315,7 +319,7 @@ class RenderedJavaScript extends Widget {
   /**
    * Construct a new rendered JavaScript widget.
    */
-  constructor(options: RenderMime.IRenderOptions) {
+  constructor(options: IRenderMime.IRenderOptions) {
     super();
     let s = document.createElement('script');
     s.type = options.mimeType;
@@ -342,7 +346,7 @@ class RenderedSVG extends Widget {
   /**
    * Construct a new rendered SVG widget.
    */
-  constructor(options: RenderMime.IRenderOptions) {
+  constructor(options: IRenderMime.IRenderOptions) {
     super();
     let source = Private.getSource(options);
     this.node.innerHTML = source;
@@ -390,7 +394,7 @@ class RenderedPDF extends Widget {
   /**
    * Construct a new rendered PDF widget.
    */
-  constructor(options: RenderMime.IRenderOptions) {
+  constructor(options: IRenderMime.IRenderOptions) {
     super();
     let source = Private.getSource(options);
     let a = document.createElement('a');
@@ -418,7 +422,7 @@ namespace Private {
    * Extract the source text from render options.
    */
   export
-  function getSource(options: RenderMime.IRenderOptions): string {
+  function getSource(options: IRenderMime.IRenderOptions): string {
     return String(options.model.data.get(options.mimeType));
   }
 
@@ -449,7 +453,7 @@ namespace Private {
    * @returns a promise fulfilled when the relative urls have been resolved.
    */
   export
-  function handleUrls(node: HTMLElement, resolver: RenderMime.IResolver, linkHandler?: RenderMime.ILinkHandler): Promise<void> {
+  function handleUrls(node: HTMLElement, resolver: IRenderMime.IResolver, linkHandler?: IRenderMime.ILinkHandler): Promise<void> {
     let promises: Promise<void>[] = [];
     // Handle HTML Elements with src attributes.
     let nodes = node.querySelectorAll('*[src]');
@@ -470,7 +474,7 @@ namespace Private {
   /**
    * Handle a node with a `src` or `href` attribute.
    */
-  function handleAttr(node: HTMLElement, name: 'src' | 'href', resolver: RenderMime.IResolver): Promise<void> {
+  function handleAttr(node: HTMLElement, name: 'src' | 'href', resolver: IRenderMime.IResolver): Promise<void> {
     let source = node.getAttribute(name);
     if (!source) {
       return Promise.resolve(void 0);
@@ -507,7 +511,7 @@ namespace Private {
   /**
    * Handle an anchor node.
    */
-  function handleAnchor(anchor: HTMLAnchorElement, resolver: RenderMime.IResolver, linkHandler: RenderMime.ILinkHandler | null): Promise<void> {
+  function handleAnchor(anchor: HTMLAnchorElement, resolver: IRenderMime.IResolver, linkHandler: IRenderMime.ILinkHandler | null): Promise<void> {
     anchor.target = '_blank';
     // Get the link path without the location prepended.
     // (e.g. "./foo.md#Header 1" vs "http://localhost:8888/foo.md#Header 1")

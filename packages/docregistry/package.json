@@ -6,7 +6,8 @@
   "types": "lib/index.d.ts",
   "files": [
     "lib/*.d.ts",
-    "lib/*.js"
+    "lib/*.js",
+    "style/index.css"
   ],
   "directories": {
     "lib": "lib/"
@@ -21,9 +22,9 @@
     "@phosphor/algorithm": "^1.1.1",
     "@phosphor/coreutils": "^1.1.1",
     "@phosphor/disposable": "^1.1.1",
+    "@phosphor/messaging": "^1.2.1",
     "@phosphor/signaling": "^1.2.1",
-    "@phosphor/widgets": "^1.3.0",
-    "codemirror": "^5.24.2"
+    "@phosphor/widgets": "^1.3.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",

@@ -10,19 +10,19 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  MimeModel
-} from './mimemodel';
+  IRenderMime
+} from '@jupyterlab/rendermime-interfaces';
 
 import {
-  RenderMime
-} from './rendermime';
+  MimeModel
+} from './mimemodel';
 
 
 /**
  * The interface for an output model.
  */
 export
-interface IOutputModel extends RenderMime.IMimeModel {
+interface IOutputModel extends IRenderMime.IMimeModel {
   /**
    * The output type.
    */

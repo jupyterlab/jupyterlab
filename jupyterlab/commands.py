@@ -77,7 +77,7 @@ def install_extension(extension, app_dir=None, logger=None):
 
     # Check for a core extensions here.
     data = _get_core_data()
-    if extension in data['jupyterlab']['extensions']:
+    if extension in _get_core_extensions():
         config = _get_build_config(app_dir)
         uninstalled = config.get('uninstalled_core_extensions', [])
         if extension in uninstalled:
@@ -145,8 +145,8 @@ def link_package(path, app_dir=None, logger=None):
         data = json.load(fid)
 
     # Check for a core extensions here.
-    core_data = _get_core_data()
-    if data['name'] in core_data['jupyterlab']['extensions']:
+    core_extensions = _get_core_extensions()
+    if data['name'] in core_extensions:
         raise ValueError('Cannot link a core extension')
 
     is_extension = _is_extension(data)
@@ -256,6 +256,11 @@ def should_build(app_dir=None, logger=None):
     if set(staging_exts) != set(data['jupyterlab']['extensions']):
         return True, 'Installed extensions changed'
 
+    staging_mime_exts = staging_data['jupyterlab']['mimeExtensions']
+
+    if set(staging_mime_exts) != set(data['jupyterlab']['mimeExtensions']):
+        return True, 'Installed extensions changed'
+
     deps = data.get('dependencies', dict())
 
     # Look for mismatched extension paths.
@@ -298,7 +303,7 @@ def uninstall_extension(name, app_dir=None, logger=None):
         raise ValueError('Cannot install packages in core app')
     # Allow for uninstalled core extensions here.
     data = _get_core_data()
-    if name in data['jupyterlab']['extensions']:
+    if name in _get_core_extensions():
         logger.info('Uninstalling core extension %s' % name)
         config = _get_build_config(app_dir)
         uninstalled = config.get('uninstalled_core_extensions', [])
@@ -647,10 +652,17 @@ def _ensure_package(app_dir, name=None, version=None, logger=None):
             logger.warn(msg + '\n')
             continue
         data['dependencies'][key] = value['path']
-        data['jupyterlab']['extensions'].append(key)
+        jlab_data = value['jupyterlab']
+        if jlab_data.get('extension', True):
+            data['jupyterlab']['extensions'].append(key)
+        else:
+            data['jupyterlab']['mimeExtensions'].append(key)
 
     for item in _get_uinstalled_core_extensions(app_dir):
-        data['jupyterlab']['extensions'].remove(item)
+        if item in data['jupyterlab']['extensions']:
+            data['jupyterlab']['extensions'].remove(item)
+        else:
+            data['jupyterlab']['mimeExtensions'].remove(item)
 
     data['jupyterlab']['name'] = name or 'JupyterLab'
     if version:
@@ -670,7 +682,9 @@ def _is_extension(data):
         return False
     if not isinstance(data['jupyterlab'], dict):
         return False
-    return data['jupyterlab'].get('extension', False)
+    is_extension = data['jupyterlab'].get('extension', False)
+    is_mime_extension = data['jupyterlab'].get('mimeExtension', False)
+    return is_extension or is_mime_extension
 
 
 def _get_uinstalled_core_extensions(app_dir):
@@ -698,7 +712,8 @@ def _get_disabled(app_dir):
 def _get_core_extensions():
     """Get the core extensions.
     """
-    return _get_core_data()['jupyterlab']['extensions']
+    data = _get_core_data()['jupyterlab']
+    return data['extensions'] + data['mimeExtensions']
 
 
 def _get_extensions(app_dir):
@@ -713,6 +728,7 @@ def _get_extensions(app_dir):
         deps = data.get('dependencies', dict())
         extensions[data['name']] = dict(path=os.path.realpath(target),
                                         version=data['version'],
+                                        jupyterlab=data['jupyterlab'],
                                         dependencies=deps)
 
     # Look in app_dir if different
@@ -725,6 +741,7 @@ def _get_extensions(app_dir):
         deps = data.get('dependencies', dict())
         extensions[data['name']] = dict(path=os.path.realpath(target),
                                         version=data['version'],
+                                        jupyterlab=data['jupyterlab'],
                                         dependencies=deps)
 
     return extensions

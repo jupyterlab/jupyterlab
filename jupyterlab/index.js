@@ -9,6 +9,7 @@ require('font-awesome/css/font-awesome.min.css');
 require('@jupyterlab/theming/style/index.css');
 
 var app = require('@jupyterlab/application').JupyterLab;
+var RenderMime = require('@jupyterlab/rendermime').RenderMime;
 
 function main() {
     var version = PageConfig.getOption('appVersion') || 'unknown';
@@ -41,6 +42,15 @@ function main() {
     try {
         if (disabled.indexOf('{{this}}') === -1) {
             lab.registerPluginModule(require('{{this}}'));
+        }
+    } catch (e) {
+        console.error(e);
+    }
+    {{/each}}
+    {{#each jupyterlab_mime_extensions}}
+    try {
+        if (disabled.indexOf('{{this}}') === -1) {
+            RenderMime.registerExtensionModule(require('{{this}}'));
         }
     } catch (e) {
         console.error(e);
