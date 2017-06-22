@@ -93,7 +93,7 @@ namespace PageConfig {
    */
   export
   function setOption(name: string, value: string): string {
-    let last = getOption(value);
+    let last = getOption(name);
     configData[name] = value;
     return last;
   }
