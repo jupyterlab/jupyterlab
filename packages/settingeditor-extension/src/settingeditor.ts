@@ -664,6 +664,8 @@ namespace Private {
    */
   export
   function sortPlugins(plugins: ISettingRegistry.IPlugin[]): ISettingRegistry.IPlugin[] {
-    return plugins.sort((a, b) => a.id.localeCompare(b.id));
+    return plugins.sort((a, b) => {
+      return (a.schema.title || a.id).localeCompare(b.schema.title || b.id);
+    });
   }
 }
