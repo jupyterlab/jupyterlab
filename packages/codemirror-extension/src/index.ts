@@ -58,8 +58,8 @@ namespace CommandIDs {
  */
 const schema = {
   "$schema": "http://json-schema.org/draft-06/schema",
-  "jupyter.lab.icon-class": "jp-ImageTextEditor",
-  "jupyter.lab.icon-label": "CodeMirror",
+  "jupyter.lab.setting-icon-class": "jp-ImageTextEditor",
+  "jupyter.lab.setting-icon-label": "CodeMirror",
   "title": "CodeMirror",
   "description": "Text editor settings for all CodeMirror editors.",
   "properties": {

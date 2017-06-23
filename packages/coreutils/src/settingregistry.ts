@@ -25,16 +25,16 @@ import {
 
 
 /**
- * The key in the schema for icon class hints.
+ * The key in the schema for setting editor icon class hints.
  */
 export
-const ICON_CLASS_KEY ='jupyter.lab.icon-class';
+const ICON_CLASS_KEY ='jupyter.lab.setting-icon-class';
 
 /**
- * The key in the schema for icon label hints.
+ * The key in the schema for setting editor icon label hints.
  */
 export
-const ICON_LABEL_KEY = 'jupyter.lab.icon-label';
+const ICON_LABEL_KEY = 'jupyter.lab.setting-icon-label';
 
 /* tslint:disable */
 /**
@@ -165,13 +165,13 @@ namespace ISettingRegistry {
      * The JupyterLab icon class hint for a plugin can be overridden by user
      * settings. It can also be root level and therefore "private".
      */
-    'jupyter.lab.icon-class'?: string;
+    'jupyter.lab.setting-icon-class'?: string;
 
     /**
      * The JupyterLab icon label hint for a plugin can be overridden by user
      * settings. It can also be root level and therefore "private".
      */
-    'jupyter.lab.icon-label'?: string;
+    'jupyter.lab.setting-icon-label'?: string;
 
     /**
      * The default value, if any.
@@ -191,13 +191,13 @@ namespace ISettingRegistry {
        * The JupyterLab icon class hint for a plugin can be overridden by user
        * settings. It can also be root level and therefore "private".
        */
-      'jupyter.lab.icon-class'?: ISchema;
+      'jupyter.lab.setting-icon-class'?: ISchema;
 
       /**
        * The JupyterLab icon label hint for a plugin can be overridden by user
        * settings. It can also be root level and therefore "private".
        */
-      'jupyter.lab.icon-label'?: ISchema;
+      'jupyter.lab.setting-icon-label'?: ISchema;
 
       /**
        * Arbitrary setting keys can be added.
@@ -227,12 +227,12 @@ namespace ISettingRegistry {
      * #### Notes
      * The `composite` values will always be a superset of the `user` values.
      */
-    composite: { [key: string]: JSONValue };
+    composite: JSONObject;
 
     /**
      * The user setting values.
      */
-    user: { [key: string]: JSONValue };
+    user: JSONObject;
   }
 
   /**

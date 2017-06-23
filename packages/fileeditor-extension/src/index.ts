@@ -97,8 +97,8 @@ const plugin: JupyterLabPlugin<IEditorTracker> = {
  */
 const schema = {
   "$schema": "http://json-schema.org/draft-06/schema",
-  "jupyter.lab.icon-class": "jp-ImageTextEditor",
-  "jupyter.lab.icon-label": "Editor",
+  "jupyter.lab.setting-icon-class": "jp-ImageTextEditor",
+  "jupyter.lab.setting-icon-label": "Editor",
   "title": "Text Editor",
   "description": "Text editor settings for all editors.",
   "properties": {
