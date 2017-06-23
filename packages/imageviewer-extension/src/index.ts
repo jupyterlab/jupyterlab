@@ -21,6 +21,8 @@ import {
   CommandRegistry
 } from '@phosphor/commands';
 
+import '@jupyterlab/imageviewer/style/index.css';
+
 
 /**
  * The command IDs used by the image widget plugin.

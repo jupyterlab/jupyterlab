@@ -25,8 +25,6 @@ import {
   DOMUtils
 } from '@jupyterlab/apputils';
 
-import '../style/index.css';
-
 /**
  * The class name added to a running widget.
  */

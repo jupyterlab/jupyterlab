@@ -17,6 +17,8 @@ import {
   IDocumentRegistry
 } from '@jupyterlab/docregistry';
 
+import '@jupyterlab/csvviewer/style/index.css';
+
 
 /**
  * The name of the factory that creates CSV widgets.

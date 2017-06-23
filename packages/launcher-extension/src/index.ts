@@ -27,6 +27,8 @@ import {
 } from '@phosphor/widgets';
 
 import '../style/index.css';
+import '@jupyterlab/launcher/style/index.css';
+
 
 
 /**

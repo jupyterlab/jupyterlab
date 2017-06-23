@@ -29,8 +29,6 @@ import {
   VDomModel, VDomRenderer
 } from '@jupyterlab/apputils';
 
-import '../style/index.css';
-
 /**
  * The command IDs used by the launcher plugin.
  */

@@ -13,6 +13,7 @@ import {
   IStateDB, PageConfig
 } from '@jupyterlab/coreutils';
 
+import '@jupyterlab/application/style/index.css';
 
 /**
  * The command IDs used by the application plugin.

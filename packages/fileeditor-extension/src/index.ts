@@ -33,6 +33,8 @@ import {
   ILauncher
 } from '@jupyterlab/launcher';
 
+import '@jupyterlab/fileeditor/style/index.css';
+
 
 /**
  * The class name for the text editor icon from the default theme.

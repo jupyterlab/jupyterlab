@@ -21,6 +21,7 @@ import {
   INotebookTracker
 } from '@jupyterlab/notebook';
 
+import '@jupyterlab/completer/style/index.css';
 
 
 /**

@@ -33,6 +33,8 @@ import {
   IEditorTracker
 } from '@jupyterlab/fileeditor';
 
+import '@jupyterlab/codemirror/style/index.css';
+
 
 /**
  * The command IDs used by the codemirror plugin.

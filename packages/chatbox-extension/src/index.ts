@@ -25,6 +25,8 @@ import {
   IRenderMime
 } from '@jupyterlab/rendermime';
 
+import '@jupyterlab/chatbox/style/index.css';
+
 
 /**
  * The command IDs used by the chatbox plugin.

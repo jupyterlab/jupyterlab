@@ -21,8 +21,6 @@ import {
   IRenderMime
 } from '@jupyterlab/rendermime';
 
-import '../style/index.css';
-
 export * from './widget';
 
 

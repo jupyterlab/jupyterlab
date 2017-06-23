@@ -21,6 +21,7 @@ import {
   IRenderMime, RenderMime
 } from '@jupyterlab/rendermime';
 
+import '@jupyterlab/rendermime/style/index.css';
 
 /**
  * The default rendermime provider.

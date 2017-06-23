@@ -37,6 +37,8 @@ import {
   ITooltipManager, Tooltip
 } from '@jupyterlab/tooltip';
 
+import '@jupyterlab/tooltip/style/index.css';
+
 
 /**
  * The command IDs used by the tooltip plugin.

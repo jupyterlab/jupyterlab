@@ -21,6 +21,8 @@ import {
   MarkdownViewer, MarkdownViewerFactory
 } from '@jupyterlab/markdownviewer';
 
+import '@jupyterlab/markdownviewer/style/index.css';
+
 
 /**
  * The class name for the text editor icon from the default theme.
