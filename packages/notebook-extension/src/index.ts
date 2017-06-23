@@ -54,13 +54,8 @@ import {
   URLExt
 } from '@jupyterlab/coreutils';
 
-// TODO: Should we presume webpack semantics for @import in CSS files
-// and load the dependency CSS in dependencies (e.g., load the outputarea
-// CSS in the cell CSS file, and the cell CSS file in the notebook CSS file)?
-import '@jupyterlab/cells/style/index.css';
-import '@jupyterlab/codeeditor/style/index.css';
-import '@jupyterlab/notebook/style/index.css';
-import '@jupyterlab/outputarea/style/index.css';
+// Import the style file that includes dependency style files
+import '@jupyterlab/notebook/style/module.css';
 
 
 /**
