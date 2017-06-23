@@ -73,6 +73,9 @@ interface ISchemaValidator {
    *
    * @return A list of errors if the schema fails to validate or `null` if there
    * are no errors.
+   *
+   * #### Notes
+   * It is safe to call this function multiple times with the same plugin name.
    */
   addSchema(plugin: string, schema: ISettingRegistry.ISchema): ISchemaValidator.IError[] | null;
 
@@ -337,6 +340,9 @@ class DefaultSchemaValidator implements ISchemaValidator {
    *
    * @return A list of errors if the schema fails to validate or `null` if there
    * are no errors.
+   *
+   * #### Notes
+   * It is safe to call this function multiple times with the same plugin name.
    */
   addSchema(plugin: string, schema: ISettingRegistry.ISchema): ISchemaValidator.IError[] | null {
     const validate = this._validator.getSchema('main');
@@ -550,7 +556,7 @@ class SettingRegistry {
       return this.load(plugin).then(() => this.set(plugin, key, value));
     }
 
-    plugins[plugin].data[key] = value;
+    plugins[plugin].data.user[key] = value;
 
     return this._save(plugin);
   }
