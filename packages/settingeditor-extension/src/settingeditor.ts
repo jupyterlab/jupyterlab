@@ -645,18 +645,29 @@ namespace Private {
     const properties = schema.properties || { };
     const title = `(${id}) ${schema.description}`;
     const label = `Fields - ${schema.title || id}`;
+    const headers = h.tr(
+      h.th('Key'),
+      h.th('Title'),
+      h.th('Type'),
+      h.th('Default'));
 
     Object.keys(properties).forEach(key => {
       const field = properties[key];
-      const { title } = field;
-      fields[key] = h.li(h.code(key), title ? ` (${title})` : '');
+      const { title, type } = field;
+      fields[key] = h.tr(
+        h.td(h.code(key)),
+        h.td(title || ''),
+        h.td(h.code(type)),
+        h.td('default' in field ? h.code(JSON.stringify(field.default)) : ''));
     });
 
-    const items: VirtualElement[] = Object.keys(fields)
+    const rows: VirtualElement[] = Object.keys(fields)
       .sort((a, b) => a.localeCompare(b)).map(key => fields[key]);
 
     node.appendChild(VirtualDOM.realize(h.legend({ title }, label)));
-    node.appendChild(VirtualDOM.realize(h.ul(items)));
+    if (rows.length) {
+      node.appendChild(VirtualDOM.realize(h.table(headers, rows)));
+    }
   }
 
   /**

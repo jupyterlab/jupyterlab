@@ -63,8 +63,8 @@ const schema = {
   "title": "CodeMirror",
   "description": "Text editor settings for all CodeMirror editors.",
   "properties": {
-    "keyMap": { type: "string", "title": "Key Map" },
-    "theme": { type: "string", "title": "Theme" }
+    "keyMap": { "type": "string", "title": "Key Map", "default": "default" },
+    "theme": { "type": "string", "title": "Theme", "default": "default" }
   }
 };
 /* tslint:enable */

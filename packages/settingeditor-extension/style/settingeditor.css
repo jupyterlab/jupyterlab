@@ -106,6 +106,7 @@
 #setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset {
   border: 1px solid var(--jp-brand-color1);
   margin: 0;
+  overflow-y: auto;
   padding: 0;
 }
 
@@ -118,14 +119,18 @@
 }
 
 
-#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset ul {
+#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset table{
+  border-collapse: collapse;
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
+  width: 100%;
 }
 
+#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset table,
+#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset th,
+#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset td {
+  border: 1px solid var(--md-grey-300);
+}
 
 #setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset li {
   background-color: var(--md-grey-400);

@@ -102,10 +102,18 @@ const schema = {
   "title": "Text Editor",
   "description": "Text editor settings for all editors.",
   "properties": {
-    "autoClosingBrackets": { type: "boolean", "title": "Autoclosing Brackets" },
-    "lineNumbers": { type: "boolean", "title": "Line Numbers" },
-    "lineWrap": { type: "boolean", "title": "Line Wrap" },
-    "matchBrackets": { type: "boolean", "title": "Match Brackets" }
+    "autoClosingBrackets": {
+      "type": "boolean", "title": "Autoclosing Brackets", "default": true
+    },
+    "lineNumbers": {
+      "type": "boolean", "title": "Line Numbers", "default": true
+    },
+    "lineWrap": {
+      "type": "boolean", "title": "Line Wrap", "default": false
+    },
+    "matchBrackets": {
+      "type": "boolean", "title": "Match Brackets", "default": true
+    }
   }
 };
 /* tslint:enable */
