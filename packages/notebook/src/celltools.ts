@@ -655,7 +655,7 @@ namespace CellTools {
       },
       setter: (cell, value) => {
         let data = cell.model.metadata.get('slideshow') || Object.create(null);
-        data['slide_type'] = value;
+        data = { ...data, 'slide_type': value };
         cell.model.metadata.set('slideshow', data);
       }
     };

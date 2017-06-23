@@ -179,7 +179,7 @@ class JSONEditor extends Widget {
       this._source.changed.disconnect(this._onSourceChanged, this);
     }
     this._source = value;
-    this.editor.setOption('readOnly', !this.editor.getOption('readOnly'));
+    this.editor.setOption('readOnly', value === null);
     if (value) {
       value.changed.connect(this._onSourceChanged, this);
     }
