@@ -560,16 +560,15 @@ class PluginFieldset extends Widget {
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
+    const settings = this._settings;
+
     // Empty the node.
     this.node.textContent = '';
 
-    if (!this._settings) {
-      return;
+    // Populate if possible.
+    if (settings) {
+      Private.populateFieldset(this.node, settings.plugin, settings.schema);
     }
-
-    const settings = this._settings;
-
-    Private.populateFieldset(this.node, settings.plugin, settings.schema);
   }
 
   private _settings: ISettingRegistry.ISettings | null = null;
@@ -647,7 +646,6 @@ namespace Private {
     const label = `Fields - ${schema.title || id}`;
     const headers = h.tr(
       h.th('Key'),
-      h.th('Title'),
       h.th('Type'),
       h.th('Default'));
 
@@ -655,8 +653,7 @@ namespace Private {
       const field = properties[key];
       const { title, type } = field;
       fields[key] = h.tr(
-        h.td(h.code(key)),
-        h.td(title || ''),
+        h.td(h.code({ title }, key)),
         h.td(h.code(type)),
         h.td('default' in field ? h.code(JSON.stringify(field.default)) : ''));
     });
