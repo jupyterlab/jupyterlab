@@ -28,7 +28,7 @@ import {
 } from '@phosphor/virtualdom';
 
 import {
-  BoxLayout, SplitPanel, Widget
+  PanelLayout, SplitPanel, Widget
 } from '@phosphor/widgets';
 
 
@@ -107,7 +107,7 @@ class SettingEditor extends Widget {
     this.addClass(SETTING_EDITOR_CLASS);
 
     const editorFactory = options.editorFactory;
-    const layout = this.layout = new BoxLayout();
+    const layout = this.layout = new PanelLayout();
     const registry = this.registry = options.registry;
     const panel = this._panel = new SplitPanel({
       orientation: 'horizontal',
@@ -385,7 +385,7 @@ class PluginEditor extends Widget {
 
     const { editorFactory } = options;
     const collapsible = false;
-    const layout = this.layout = new BoxLayout();
+    const layout = this.layout = new PanelLayout();
 
     const panel = new SplitPanel({
       orientation: 'vertical',

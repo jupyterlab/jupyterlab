@@ -8,6 +8,10 @@
   outline: none;
 }
 
+#setting-editor.jp-SettingEditor .p-SplitPanel {
+  height: 100%;
+  width: 100%;
+}
 
 #setting-editor.jp-SettingEditor .p-SplitPanel-handle {
   background-color: var(--md-grey-400);
