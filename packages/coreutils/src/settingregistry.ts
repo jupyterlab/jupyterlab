@@ -283,10 +283,6 @@ namespace ISettingRegistry {
      * @param key - The name of the setting being retrieved.
      *
      * @returns The setting value.
-     *
-     * #### Notes
-     * This method returns synchronously because it uses a cached copy of the
-     * plugin settings that is synchronized with the registry.
      */
     get(key: string): { composite: JSONValue, user: JSONValue };
 
@@ -373,20 +369,27 @@ class DefaultSchemaValidator implements ISchemaValidator {
    */
   validateData(plugin: ISettingRegistry.IPlugin): ISchemaValidator.IError[] | null {
     const validate = this._validator.getSchema(plugin.id);
-
-    if (!validate) {
-      throw new Error(`Schema ${plugin.id} is unknown.`);
-    }
-
     const compose = this._composer.getSchema(plugin.id);
-    const valid = validate(plugin.data.user);
 
-    if (valid) {
-      compose(plugin.data.composite = copy(plugin.data.user));
-      return null;
+    if (!validate || !compose) {
+      const errors = this.addSchema(plugin.id, plugin.schema);
+
+      if (errors) {
+        return errors;
+      }
     }
 
-    return validate.errors as ISchemaValidator.IError[];
+    if (!validate(plugin.data.user)) {
+      return validate.errors as ISchemaValidator.IError[];
+    }
+
+    // Copy the user data before validating (and merging defaults).
+    plugin.data.composite = copy(plugin.data.user);
+
+    if (!compose(plugin.data.composite)) {
+      return compose.errors as ISchemaValidator.IError[];
+    }
+
   }
 
   private _composer = new Ajv({ useDefaults: true });
