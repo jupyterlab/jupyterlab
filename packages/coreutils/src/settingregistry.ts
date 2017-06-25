@@ -592,7 +592,7 @@ class SettingRegistry {
 
     this._validate(plugins[plugin]);
 
-    return this._datastore.save(plugin, plugins[plugin])
+    return this._datastore.save(plugin, plugins[plugin].data.user)
       .then(() => { this._pluginChanged.emit(plugin); });
   }
 
@@ -619,7 +619,7 @@ class SettingRegistry {
     this._plugins[plugin.id] = plugin;
   }
 
-  private _datastore: IDatastore<ISettingRegistry.IPlugin, ISettingRegistry.IPlugin> | null = null;
+  private _datastore: IDatastore<ISettingRegistry.IPlugin, JSONObject> | null = null;
   private _pluginChanged = new Signal<this, string>(this);
   private _plugins: { [name: string]: ISettingRegistry.IPlugin } = Object.create(null);
   private _preload: (plugin: string, schema: ISettingRegistry.ISchema) => void;

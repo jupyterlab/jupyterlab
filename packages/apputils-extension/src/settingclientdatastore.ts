@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  ISettingRegistry, StateDB
+  IDatastore, ISettingRegistry, StateDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -20,7 +20,7 @@ import {
  * data while an API for server-side persistence is being implemented.
  */
 export
-class SettingClientDatastore extends StateDB {
+class SettingClientDatastore extends StateDB implements IDatastore<ISettingRegistry.IPlugin, JSONObject> {
   /**
    * Create a new setting client datastore.
    */
@@ -32,11 +32,10 @@ class SettingClientDatastore extends StateDB {
    * Retrieve a saved bundle from the datastore.
    */
   fetch(id: string): Promise<ISettingRegistry.IPlugin | null> {
-    return super.fetch(id).then(result => {
+    return super.fetch(id).then(user => {
       const schema = Private.schemas[id] || { };
+      const result = { data: { composite: { }, user }, id, schema };
 
-      result = result || { data: { composite: { }, user: { } }, id };
-      result.schema = schema;
       return result;
     });
   }
@@ -49,10 +48,10 @@ class SettingClientDatastore extends StateDB {
   }
 
   /**
-   * Save a value in the datastore.
+   * Save the user setting data in the datastore.
    */
-  save(id: string, value: JSONObject): Promise<void> {
-    return super.save(id, value);
+  save(id: string, user: JSONObject): Promise<void> {
+    return super.save(id, user);
   }
 }
 
