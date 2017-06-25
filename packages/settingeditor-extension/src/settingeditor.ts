@@ -28,7 +28,7 @@ import {
 } from '@phosphor/virtualdom';
 
 import {
-  BoxLayout, SplitLayout, SplitPanel, Widget
+  BoxLayout, SplitPanel, Widget
 } from '@phosphor/widgets';
 
 
@@ -98,34 +98,34 @@ Select a plugin from the list to view and edit its preferences.
  * An interface for modifying and saving application settings.
  */
 export
-class SettingEditor extends SplitPanel {
+class SettingEditor extends Widget {
   /**
    * Create a new setting editor.
    */
   constructor(options: SettingEditor.IOptions) {
-    super({
+    super();
+    this.addClass(SETTING_EDITOR_CLASS);
+
+    const editorFactory = options.editorFactory;
+    const layout = this.layout = new BoxLayout();
+    const registry = this.registry = options.registry;
+    const panel = this._panel = new SplitPanel({
       orientation: 'horizontal',
       renderer: SplitPanel.defaultRenderer,
       spacing: 1
     });
-    this.addClass(SETTING_EDITOR_CLASS);
+    const instructions = this._instructions = new Widget({
+      node: Private.createInstructionsNode()
+    });
+    const editor = this._editor = new PluginEditor({ editorFactory });
+    const confirm = () => editor.confirm();
+    const list = this._list = new PluginList({ confirm, registry });
 
-    const editorFactory = options.editorFactory;
-    const registry = this.registry = options.registry;
-    const layout = this.layout as SplitLayout;
-
-    this._editor = new PluginEditor({ editorFactory });
-    this._instructions = new Widget({ node: Private.createInstructionsNode() });
-
-    const confirm = () => this._editor.confirm();
-
-    this._list = new PluginList({ confirm, registry });
-    this._list.selected.connect(this._onSelected, this);
-
-    layout.addWidget(this._list);
-    layout.addWidget(this._instructions);
-    layout.setRelativeSizes([1, 3]);
-    registry.pluginChanged.connect(() => { this.update(); }, this);
+    layout.addWidget(panel);
+    panel.addWidget(list);
+    panel.addWidget(instructions);
+    panel.setRelativeSizes([1, 3]);
+    list.selected.connect(this._onSelected, this);
   }
 
   /**
@@ -143,7 +143,9 @@ class SettingEditor extends SplitPanel {
 
     super.dispose();
     this._editor.dispose();
+    this._instructions.dispose();
     this._list.dispose();
+    this._panel.dispose();
   }
 
   /**
@@ -165,36 +167,26 @@ class SettingEditor extends SplitPanel {
   }
 
   /**
-   * Handle `'update-request'` messages.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    this._list.update();
-    this._instructions.update();
-    this._editor.update();
-  }
-
-  /**
    * Handle a new selection in the plugin list.
    */
   private _onSelected(sender: any, plugin: string): void {
-    const layout = this.layout as SplitLayout;
-
-    if (!plugin) {
-      const sizes = this.relativeSizes();
-      this._editor.settings = null;
-      layout.removeWidget(this._editor);
-      layout.addWidget(this._instructions);
-      this.setRelativeSizes(sizes);
-      return;
-    }
+    const editor = this._editor;
+    const instructions = this._instructions;
+    const panel = this._panel;
 
     this.registry.load(plugin)
       .then(settings => {
-        const sizes = this.relativeSizes();
-        this._editor.settings = settings;
-        layout.removeWidget(this._instructions);
-        layout.addWidget(this._editor);
-        this.setRelativeSizes(sizes);
+        // Cache the panel relative sizes before modifying its contents.
+        const sizes = panel.relativeSizes();
+
+        if (instructions.isAttached) {
+          instructions.parent = null;
+        }
+        if (!editor.isAttached) {
+          panel.addWidget(editor);
+        }
+        editor.settings = settings;
+        panel.setRelativeSizes(sizes);
       })
       .catch(reason => { console.error('Loading settings failed.', reason); });
   }
@@ -202,6 +194,7 @@ class SettingEditor extends SplitPanel {
   private _editor: PluginEditor;
   private _instructions: Widget;
   private _list: PluginList;
+  private _panel: SplitPanel;
 }
 
 
@@ -240,6 +233,7 @@ class PluginList extends Widget {
     this.registry = options.registry;
     this.addClass(PLUGIN_LIST_CLASS);
     this._confirm = options.confirm;
+    this.registry.pluginChanged.connect(() => { this.update(); }, this);
   }
 
   /**
@@ -288,6 +282,7 @@ class PluginList extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     this.node.addEventListener('click', this);
+    this.update();
   }
 
   /**
@@ -390,16 +385,21 @@ class PluginEditor extends Widget {
 
     const { editorFactory } = options;
     const collapsible = false;
-    const editor = this._editor = new JSONEditor({
-      collapsible, editorFactory
-    });
-    const fieldset = this._fieldset = new PluginFieldset();
-    const layout = this.layout = new BoxLayout({ direction: 'top-to-bottom' });
+    const layout = this.layout = new BoxLayout();
 
-    layout.addWidget(editor);
-    layout.addWidget(fieldset);
-    BoxLayout.setStretch(editor, 5);
-    BoxLayout.setStretch(fieldset, 2);
+    const panel = new SplitPanel({
+      orientation: 'vertical',
+      renderer: SplitPanel.defaultRenderer,
+      spacing: 1
+    });
+
+    this._editor = new JSONEditor({ collapsible, editorFactory });
+    this._fieldset = new PluginFieldset();
+
+    layout.addWidget(panel);
+    panel.addWidget(this._editor);
+    panel.addWidget(this._fieldset);
+    panel.setRelativeSizes([5, 2]);
   }
 
   /**
@@ -437,7 +437,6 @@ class PluginEditor extends Widget {
       this._settings = fieldset.settings = settings;
       this._settings.changed.connect(this._onSettingsChanged, this);
       this._onSettingsChanged();
-
       editor.show();
       fieldset.show();
     } else {
@@ -464,9 +463,16 @@ class PluginEditor extends Widget {
       buttons: [Dialog.cancelButton(), Dialog.okButton()]
     }).then(result => {
       if (!result.accept) {
-        throw new Error();
+        throw new Error('User cancelled.');
       }
     });
+  }
+
+  /**
+   * Handle `after-attach` messages.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this.update();
   }
 
   /**
