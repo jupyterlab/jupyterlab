@@ -300,7 +300,7 @@ class PluginList extends Widget {
 
     this.node.textContent = '';
     plugins.forEach(plugin => {
-      const item = Private.createListItem(plugin);
+      const item = Private.createListItem(this.registry, plugin);
 
       if (plugin.id === this._selection) {
         item.classList.add(SELECTED_CLASS);
@@ -600,9 +600,10 @@ namespace Private {
    * Create a plugin list item.
    */
   export
-  function createListItem(plugin: ISettingRegistry.IPlugin): HTMLLIElement {
-    const iconClass = `${PLUGIN_ICON_CLASS} ${getHint(ICON_CLASS_KEY, plugin)}`;
-    const iconLabel = getHint(ICON_LABEL_KEY, plugin);
+  function createListItem(registry: ISettingRegistry, plugin: ISettingRegistry.IPlugin): HTMLLIElement {
+    const icon = getHint(ICON_CLASS_KEY, registry, plugin);
+    const iconClass = `${PLUGIN_ICON_CLASS}${icon ? ' ' + icon : ''}`;
+    const iconLabel = getHint(ICON_LABEL_KEY, registry, plugin);
     const title = plugin.schema.title || plugin.id;
     const caption = `(${plugin.id}) ${plugin.schema.description}`;
 
@@ -623,7 +624,7 @@ namespace Private {
    * 2. Data set by the plugin author as a schema default.
    * 3. Data set by the plugin author as a top-level key of the schema.
    */
-  function getHint(key: string, plugin: ISettingRegistry.IPlugin): string {
+  function getHint(key: string, registry: ISettingRegistry, plugin: ISettingRegistry.IPlugin): string {
     // First, give priorty to checking if the hint exists in the user data.
     let hint = plugin.data.user[key];
 
@@ -633,9 +634,14 @@ namespace Private {
       hint = plugin.data.composite[key];
     }
 
-    // Finally, check to see if the plugin schema has defined the hint.
+    // Third, check to see if the plugin schema has defined the hint.
     if (!hint) {
       hint = plugin.schema[key];
+    }
+
+    // Finally, use the defaults from the registry schema.
+    if (!hint) {
+      hint = registry.schema.properties[key].default;
     }
 
     return typeof hint === 'string' ? hint : '';
