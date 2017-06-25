@@ -81,7 +81,12 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<IEditorTracker> = {
   activate,
   id: 'jupyter.services.editor-tracker',
-  requires: [IDocumentRegistry, ILayoutRestorer, IEditorServices, ISettingRegistry],
+  requires: [
+    IDocumentRegistry,
+    ILayoutRestorer,
+    IEditorServices,
+    ISettingRegistry
+  ],
   optional: [ILauncher],
   provides: IEditorTracker,
   autoStart: true
@@ -284,7 +289,8 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
       tracker.forEach(widget => {
         widget.editor.setOption('autoClosingBrackets', autoClosingBrackets);
       });
-      return settingRegistry.set(id, 'autoClosingBrackets', autoClosingBrackets);
+      return settingRegistry
+        .set(id, 'autoClosingBrackets', autoClosingBrackets);
     },
     label: 'Auto-Closing Brackets',
     isEnabled: hasWidget,
