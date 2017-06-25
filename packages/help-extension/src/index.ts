@@ -22,7 +22,7 @@ import {
 } from '@phosphor/virtualdom';
 
 import {
-  Menu
+  Menu, PanelLayout, Widget
 } from '@phosphor/widgets';
 
 import '../style/index.css';
@@ -137,7 +137,17 @@ export default plugin;
   *
   * This is needed to clear the state restoration db when IFrames are closed.
  */
-class ClosableIFrame extends IFrame {
+class HelpWidget extends Widget {
+  /**
+   * Construct a new help widget.
+   */
+  constructor(url: string) {
+    super();
+    let layout = this.layout = new PanelLayout();
+    let iframe = new IFrame();
+    iframe.url = url;
+    layout.addWidget(iframe);
+  }
 
   /**
    * Dispose of the IFrame when closing.
@@ -161,7 +171,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   const namespace = 'help-doc';
   const menu = createMenu();
   const { commands, shell, info} = app;
-  const tracker = new InstanceTracker<ClosableIFrame>({ namespace });
+  const tracker = new InstanceTracker<HelpWidget>({ namespace });
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -171,15 +181,14 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   });
 
   /**
-   * Create a new ClosableIFrame widget.
+   * Create a new HelpWidget widget.
    */
-  function newClosableIFrame(url: string, text: string): ClosableIFrame {
-    let iframe = new ClosableIFrame();
+  function newClosableIFrame(url: string, text: string): HelpWidget {
+    let iframe = new HelpWidget(url);
     iframe.addClass(HELP_CLASS);
     iframe.title.label = text;
     iframe.title.closable = true;
     iframe.id = `${namespace}-${++counter}`;
-    iframe.url = url;
     tracker.add(iframe);
     return iframe;
   }
