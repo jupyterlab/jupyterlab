@@ -5,8 +5,22 @@
 
 #setting-editor.jp-SettingEditor {
   background-color: var(--md-grey-200);
+  border-top: var(--jp-border-width) solid var(--jp-border-color1);
+  margin-top: -1px;
   outline: none;
 }
+
+
+#setting-editor.jp-SettingEditor::before {
+  content: '';
+  display: block;
+  height: var(--jp-toolbar-micro-height);
+  background: var(--jp-toolbar-background);
+  border-bottom: 1px solid var(--jp-toolbar-border-color);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  z-index: 10;
+}
+
 
 #setting-editor.jp-SettingEditor .p-SplitPanel {
   height: 100%;
