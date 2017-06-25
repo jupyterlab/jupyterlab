@@ -36,23 +36,6 @@ const ICON_CLASS_KEY ='jupyter.lab.setting-icon-class';
 export
 const ICON_LABEL_KEY = 'jupyter.lab.setting-icon-label';
 
-/* tslint:disable */
-/**
- * The schema for settings.
- */
-const SCHEMA = {
-  "$schema": "http://json-schema.org/draft-06/schema",
-  "title": "Jupyter Settings/Preferences Schema",
-  "description": "Jupyter settings/preferences schema v0.1.0",
-  "type": "object",
-  "additionalProperties": true,
-  "properties": {
-    [ICON_CLASS_KEY]: { "type": "string", "default": "jp-FileIcon" },
-    [ICON_LABEL_KEY]: { "type": "string", "default": "Plugin" }
-  }
-};
-/* tslint:enable */
-
 /**
  * An alias for the JSON deep copy function.
  */
@@ -323,8 +306,8 @@ class DefaultSchemaValidator implements ISchemaValidator {
    * Instantiate a schema validator.
    */
   constructor() {
-    this._composer.addSchema(SCHEMA, 'main');
-    this._validator.addSchema(SCHEMA, 'main');
+    this._composer.addSchema(Private.SCHEMA, 'main');
+    this._validator.addSchema(Private.SCHEMA, 'main');
   }
 
   /**
@@ -410,6 +393,11 @@ class SettingRegistry {
     this._validator = options.validator || new DefaultSchemaValidator();
     this._preload = options.preload || (() => { /* no op */ });
   }
+
+  /**
+   * The schema of the setting registry.
+   */
+  readonly schema = Private.SCHEMA;
 
   /**
    * A signal that emits the name of a plugin when its settings change.
@@ -862,4 +850,29 @@ namespace Settings {
      */
     registry: SettingRegistry;
   }
+}
+
+
+/**
+ * A namespace for private module data.
+ */
+export
+namespace Private {
+  /* tslint:disable */
+  /**
+   * The schema for settings.
+   */
+  export
+  const SCHEMA: ISettingRegistry.ISchema = {
+    "$schema": "http://json-schema.org/draft-06/schema",
+    "title": "Jupyter Settings/Preferences Schema",
+    "description": "Jupyter settings/preferences schema v0.1.0",
+    "type": "object",
+    "additionalProperties": true,
+    "properties": {
+      [ICON_CLASS_KEY]: { "type": "string", "default": "jp-FileIcon" },
+      [ICON_LABEL_KEY]: { "type": "string", "default": "Plugin" }
+    }
+  };
+  /* tslint:enable */
 }
