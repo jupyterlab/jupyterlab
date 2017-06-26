@@ -109,16 +109,17 @@ const stateDBPlugin: JupyterLabPlugin<IStateDB> = {
   autoStart: true,
   provides: IStateDB,
   activate: (app: JupyterLab) => {
-    let state = new StateDB({ namespace: app.info.namespace });
-    let version = app.info.version;
-    let key = 'statedb:version';
-    let fetch = state.fetch(key);
-    let save = () => state.save(key, { version });
-    let reset = () => state.clear().then(save);
-    let check = (value: JSONObject) => {
+    const state = new StateDB({ namespace: app.info.namespace });
+    const version = app.info.version;
+    const key = 'statedb:version';
+    const fetch = state.fetch(key);
+    const save = () => state.save(key, { version });
+    const reset = () => state.clear().then(save);
+    const check = (value: JSONObject) => {
       let old = value && value['version'];
       if (!old || old !== version) {
-        console.log(`Upgraded: ${old || 'unknown'} to ${version}; Resetting DB.`);
+        const previous = old || 'unknown';
+        console.log(`Upgraded: ${previous} to ${version}; Resetting DB.`);
         return reset();
       }
     };
