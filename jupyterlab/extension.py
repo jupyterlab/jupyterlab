@@ -66,6 +66,7 @@ def load_jupyter_server_extension(nbapp):
     fallback = not installed and not os.path.exists(config.assets_dir)
 
     web_app.settings.setdefault('page_config_data', dict())
+    web_app.settings['page_config_data']['token'] = nbapp.token
 
     if not core_mode:
         build_needed, msg = should_build(app_dir)
