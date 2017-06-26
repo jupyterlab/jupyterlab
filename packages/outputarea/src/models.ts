@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 import {
-  IMimeBundle
+  IMimeModel
 } from '@jupyterlab/rendermime';
 
 
@@ -23,9 +23,9 @@ interface IOutputItem {
   readonly executionCount: nbformat.ExecutionCount;
 
   /**
-   * The id of the mime bundle for the item.
+   *
    */
-  readonly mimeBundleId: string;
+  mimeModelId: string;
 }
 
 
@@ -42,59 +42,7 @@ interface IOutputArea {
   /**
    * The ids for the output items.
    */
-  readonly itemIds: ReadonlyArray<string>;
-}
-
-
-/**
- * The data type for an output area store.
- */
-export
-interface IOutputStoreState {
-  /**
-   * The mime bundles table.
-   */
-  readonly mimeBundles: {
-    /**
-     * The current maximum mime bundle id.
-     */
-    readonly maxId: number;
-
-    /**
-     * A mapping of id to mime bundle.
-     */
-    readonly byId: { readonly [id: number]: IMimeBundle };
-  };
-
-  /**
-   * The output items table.
-   */
-  readonly outputItems: {
-    /**
-     * The current maximum output item id.
-     */
-    readonly maxId: number;
-
-    /**
-     * A mapping of id to output item.
-     */
-    readonly byId: { readonly [id: number]: IOutputItem };
-  };
-
-  /**
-   * The output areas table.
-   */
-  readonly outputAreas: {
-    /**
-     * The current maximum output area id.
-     */
-    readonly maxId: number;
-
-    /**
-     * A mapping of id to output area.
-     */
-    readonly byId: { readonly [id: number]: IOutputArea };
-  };
+  readonly outputItemIds: ReadonlyArray<string>;
 }
 
 
@@ -102,4 +50,70 @@ interface IOutputStoreState {
  *
  */
 export
-type OutputStore = Store<IOutputStoreState>;
+interface IByIdMap<T> {
+  /**
+   *
+   */
+  readonly [id: number]: T;
+}
+
+
+/**
+ *
+ */
+export
+interface ITable<T> {
+  /**
+   *
+   */
+  readonly maxId: number;
+
+  /**
+   *
+   */
+  readonly byId: IByIdMap<T>;
+}
+
+
+
+export
+interface IMimeStoreState {
+  /**
+   * The mime models table.
+   */
+  readonly mimeModels: ITable<IMimeModel>;
+
+    /**
+   * The mime models table.
+   */
+  readonly mimeBundles: ITable<IMimeBundle>;
+}
+
+
+/**
+ * The data type for an output area store.
+ */
+export
+interface IOutputStoreState extends IMimeStoreState {
+  /**
+   * The mime models table.
+   */
+  readonly mimeModels: ITable<IMimeModel>;
+
+  /**
+   * The output items table.
+   */
+  readonly outputItems: ITable<IOutputItem>;
+
+  /**
+   * The output areas table.
+   */
+  readonly outputAreas: ITable<IOutputArea>;
+}
+
+
+/**
+ *
+ */
+export
+type OutputStore = DataStore<IOutputStoreState>;

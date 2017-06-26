@@ -12,19 +12,25 @@ import {
  *
  */
 export
-class BeginExecute extends Action<'@jupyterlab/outputarea/BEGIN_EXECUTE'> {
+class CreateMimeModel extends Action<'@jupyterlab/outputarea/CREATE_MIME_MODEL'> {
   /**
    *
    */
-  constructor(outputAreaId: string) {
-    super('@jupyterlab/outputarea/BEGIN_EXECUTE');
-    this.outputAreaId = outputAreaId;
+  constructor(id: string, model: IMimeModel) {
+    super('@jupyterlab/outputarea/CREATE_MIME_MODEL');
+    this.id = id;
+    this.model = model;
   }
 
   /**
    *
    */
-  readonly outputAreaId: string;
+  readonly id: string;
+
+  /**
+   *
+   */
+  readonly model: IMimeModel;
 }
 
 
@@ -32,25 +38,25 @@ class BeginExecute extends Action<'@jupyterlab/outputarea/BEGIN_EXECUTE'> {
  *
  */
 export
-class ReceiveExecuteIOPub extends Action<'@jupyterlab/outputarea/RECEIVE_EXECUTE_IOPUB'> {
+class CreateOutputItem extends Action<'@jupyterlab/outputarea/CREATE_OUTPUT_ITEM'> {
   /**
    *
    */
-  constructor(outputAreaId: string, msg: KernelMessage.IIOPubMessage) {
-    super('@jupyterlab/outputarea/RECEIVE_EXECUTE_IOPUB');
-    this.outputAreaId = outputAreaId;
-    this.msg = msg;
+  constructor(id: string, item: IOutputItem) {
+    super('@jupyterlab/outputarea/CREATE_OUTPUT_ITEM');
+    this.id = id;
+    this.item = item;
   }
 
   /**
    *
    */
-  readonly outputAreaId: string;
+  readonly id: string;
 
   /**
    *
    */
-  readonly msg: KernelMessage.IIOPubMessage;
+  readonly item: IOutputItem;
 }
 
 
@@ -58,41 +64,14 @@ class ReceiveExecuteIOPub extends Action<'@jupyterlab/outputarea/RECEIVE_EXECUTE
  *
  */
 export
-class ReceiveExecuteReply extends Action<'@jupyterlab/outputarea/RECEIVE_EXECUTE_REPLY'> {
+class AddOutputItem extends Action<'@jupyterlab/outputarea/ADD_OUTPUT_ITEM'> {
   /**
    *
    */
-  constructor(outputAreaId: string, msg: KernelMessage.IExecuteReplyMsg) {
-    super('@jupyterlab/outputarea/RECEIVE_EXECUTE_REPLY');
+  constructor(outputAreaId: string, outputItemId: string) {
+    super('@jupyterlab/outputarea/ADD_OUTPUT_ITEM');
     this.outputAreaId = outputAreaId;
-    this.msg = msg;
-  }
-
-  /**
-   *
-   */
-  readonly outputAreaId: string;
-
-  /**
-   *
-   */
-  readonly msg: KernelMessage.IExecuteReplyMsg;
-}
-
-
-/**
- *
- */
-export
-class ReceiveExecuteStdin extends Action<'@jupyterlab/outputarea/RECEIVE_EXECUTE_STDIN'> {
-  /**
-   *
-   */
-  constructor(outputAreaId: string, msg: KernelMessage.IStdinMessage, reply: (content: KernelMessage.IInputReply) => void) {
-    super('@jupyterlab/outputarea/RECEIVE_EXECUTE_STDIN');
-    this.outputAreaId = outputAreaId;
-    this.msg = msg;
-    this.reply = reply;
+    this.outputItemId = outputItemId;
   }
 
   /**
@@ -103,12 +82,7 @@ class ReceiveExecuteStdin extends Action<'@jupyterlab/outputarea/RECEIVE_EXECUTE
   /**
    *
    */
-  readonly msg: KernelMessage.IStdinMessage;
-
-  /**
-   *
-   */
-  readonly reply: (content: KernelMessage.IInputReply) => void;
+  readonly outputItemId: string;
 }
 
 
@@ -116,36 +90,8 @@ class ReceiveExecuteStdin extends Action<'@jupyterlab/outputarea/RECEIVE_EXECUTE
  *
  */
 export
-class ReceiveExecuteDone extends Action<'@jupyterlab/outputarea/RECEIVE_EXECUTE_DONE'> {
-  /**
-   *
-   */
-  constructor(outputAreaId: string, msg: KernelMessage.IShellMessage) {
-    super('@jupyterlab/outputarea/RECEIVE_EXECUTE_DONE');
-    this.outputAreaId = outputAreaId;
-    this.msg = msg;
-  }
-
-  /**
-   *
-   */
-  readonly outputAreaId: string;
-
-  /**
-   *
-   */
-  readonly msg: KernelMessage.IShellMessage;
-}
-
-
-/**
- *
- */
-export
-type Actions = (
-  BeginExecute |
-  ReceiveExecuteIOPub |
-  ReceiveExecuteReply |
-  ReceiveExecuteStdin |
-  ReceiveExecuteDone
+type OutputAction = (
+  CreateMimeModel |
+  CreateOutputItem |
+  AddOutputItem
 );
