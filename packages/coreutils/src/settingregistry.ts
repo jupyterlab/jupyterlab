@@ -568,7 +568,8 @@ class SettingRegistry {
     let errors: ISchemaValidator.IError[] | null = null;
 
     // Validate the user data and create the composite data.
-    raw.data.composite = { };
+    raw.data.user = raw.data.user || { };
+    delete raw.data.composite;
     errors = this._validator.validateData(raw);
     if (errors) {
       return Promise.reject(errors);
@@ -609,7 +610,8 @@ class SettingRegistry {
     }
 
     // Validate the user data and create the composite data.
-    plugin.data.composite = { };
+    plugin.data.user = plugin.data.user || { };
+    delete plugin.data.composite;
     errors = this._validator.validateData(plugin);
     if (errors) {
       throw errors;
@@ -784,9 +786,9 @@ class Settings implements ISettingRegistry.ISettings {
       const { composite, user } = found.data;
       const schema = found.schema;
 
-      this._composite = composite;
-      this._schema = schema;
-      this._user = user;
+      this._composite = composite || { };
+      this._schema = schema || { };
+      this._user = user || { };
       this._changed.emit(void 0);
     }
   }

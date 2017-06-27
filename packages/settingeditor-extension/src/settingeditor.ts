@@ -648,7 +648,7 @@ namespace Private {
   }
 
   /**
-   * Populate the fieldset with a specific plugin's metaata.
+   * Populate the fieldset with a specific plugin's metadata.
    */
   export
   function populateFieldset(node: HTMLElement, id: string, schema: ISettingRegistry.ISchema): void {
