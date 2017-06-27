@@ -3,9 +3,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-export * from './collapser';
-export * from './headerfooter';
-export * from './inputarea';
-export * from './model';
-export * from './placeholder';
-export * from './widget';
+/* This CSS file imports dependency CSS files. */
+
+@import '~@jupyterlab/cells/style/index.css';
+@import '~@jupyterlab/codeeditor/style/index.css';
+@import '~@jupyterlab/outputarea/style/index.css';
+@import './index.css';

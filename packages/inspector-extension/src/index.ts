@@ -25,6 +25,8 @@ import {
   InspectorManager
 } from './manager';
 
+import '@jupyterlab/inspector/style/index.css';
+
 
 /**
  * The command IDs used by the inspector plugin.

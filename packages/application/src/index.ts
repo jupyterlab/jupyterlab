@@ -12,8 +12,6 @@ import {
 export { ApplicationShell } from './shell';
 export { ILayoutRestorer, LayoutRestorer } from './layoutrestorer';
 
-import '../style/index.css';
-
 /**
  * The type for all JupyterLab plugins.
  */

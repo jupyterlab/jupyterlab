@@ -37,6 +37,8 @@ import {
   Menu
 } from '@phosphor/widgets';
 
+import '@jupyterlab/filebrowser/style/index.css';
+
 
 /**
  * The command IDs used by the file browser plugin.

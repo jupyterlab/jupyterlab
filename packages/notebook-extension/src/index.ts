@@ -54,6 +54,8 @@ import {
   URLExt
 } from '@jupyterlab/coreutils';
 
+// Import the style file that includes dependency style files
+import '@jupyterlab/notebook/style/module.css';
 
 
 /**

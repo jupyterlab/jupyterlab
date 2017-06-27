@@ -42,6 +42,8 @@ import {
   Menu
 } from '@phosphor/widgets';
 
+import '@jupyterlab/console/style/index.css';
+
 
 /**
  * The command IDs used by the console plugin.

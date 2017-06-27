@@ -28,6 +28,7 @@ import {
   activatePalette
 } from './palette';
 
+import '@jupyterlab/apputils/style/index.css';
 
 /**
  * The command IDs used by the apputils plugin.

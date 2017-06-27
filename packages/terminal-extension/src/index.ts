@@ -25,6 +25,8 @@ import {
   Menu
 } from '@phosphor/widgets';
 
+import '@jupyterlab/terminal/style/index.css';
+
 
 /**
  * The command IDs used by the terminal plugin.

@@ -13,8 +13,6 @@ import {
   FileEditor
 } from './widget';
 
-import '../style/index.css';
-
 export * from './widget';
 
 

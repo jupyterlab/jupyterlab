@@ -13,6 +13,8 @@ import {
   RunningSessions
 } from '@jupyterlab/running';
 
+import '@jupyterlab/running/style/index.css';
+
 
 /**
  * The default running sessions extension.

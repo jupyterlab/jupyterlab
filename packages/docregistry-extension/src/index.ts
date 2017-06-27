@@ -9,6 +9,8 @@ import {
   DocumentRegistry, IDocumentRegistry, TextModelFactory, Base64ModelFactory
 } from '@jupyterlab/docregistry';
 
+import '@jupyterlab/docregistry/style/index.css';
+
 
 /**
  * The default document registry provider.
