@@ -3,20 +3,12 @@
 <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 22 22" style="enable-background:new 0 0 22 22;" xml:space="preserve">
 <style type="text/css">
-	.st0{fill:#FFFFFF;stroke:#FFFFFF;stroke-width:0.3;stroke-miterlimit:10;}
-	.st1{fill:none;stroke:#FF9800;stroke-width:1.7;stroke-miterlimit:10;}
-	.st2{fill:none;stroke:#FF9800;stroke-width:1.8;stroke-miterlimit:10;}
-	.st3{fill:none;stroke:#FFFFFF;stroke-width:1.8;stroke-miterlimit:10;}
+	.st0{fill:#FFFFFF;}
+	.st1{fill:none;stroke:#FFFFFF;stroke-width:1.4;stroke-miterlimit:10;}
+	.st2{fill:none;stroke:#FFFFFF;stroke-width:1.5;stroke-miterlimit:10;}
 </style>
-<g>
-	<circle class="st0" cx="18.6" cy="8.1" r="1.1"/>
-	<path class="st1" d="M12.1,14.5"/>
-	<g>
-		<path class="st2" d="M11.4,5.5"/>
-		<path class="st2" d="M8.4,5.5"/>
-		<polyline class="st3" points="8.4,14.5 5.3,14.5 5.3,5.5 8.4,5.5 		"/>
-		<polyline class="st3" points="12,5.5 15,5.5 15,14.5 12,14.5 		"/>
-	</g>
-	<circle class="st0" cx="18.6" cy="11.9" r="1.1"/>
-</g>
+<polygon class="st0" points="15.5,16.1 11.1,12.6 6.8,16.1 6.8,5.8 15.5,5.8 "/>
+<path class="st1" d="M9.1,17.1"/>
+<path class="st1" d="M9.1,2.8"/>
+<rect x="2.9" y="2.1" class="st2" width="16.5" height="16.5"/>
 </svg>
