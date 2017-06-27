@@ -124,7 +124,7 @@ class SettingEditor extends Widget {
     layout.addWidget(panel);
     panel.addWidget(list);
     panel.addWidget(instructions);
-    panel.setRelativeSizes([1, 3]);
+    panel.setRelativeSizes(this._sizes);
     list.selected.connect(this._onSelected, this);
   }
 
@@ -157,6 +157,17 @@ class SettingEditor extends Widget {
   }
 
   /**
+   * Handle `'after-attach'` messages.
+   */
+  protected onAfterAttach(msg: Message): void {
+    // Allow the message queue (which includes fit requests that might disrupt
+    // setting relative sizes) to clear before setting sizes.
+    requestAnimationFrame(() => {
+      this._panel.setRelativeSizes(this._sizes);
+    });
+  }
+
+  /**
    * Handle `'close-request'` messages.
    */
   protected onCloseRequest(msg: Message): void {
@@ -177,7 +188,7 @@ class SettingEditor extends Widget {
     this.registry.load(plugin)
       .then(settings => {
         // Cache the panel relative sizes before modifying its contents.
-        const sizes = panel.relativeSizes();
+        this._sizes = panel.relativeSizes();
 
         if (instructions.isAttached) {
           instructions.parent = null;
@@ -186,7 +197,7 @@ class SettingEditor extends Widget {
           panel.addWidget(editor);
         }
         editor.settings = settings;
-        panel.setRelativeSizes(sizes);
+        panel.setRelativeSizes(this._sizes);
       })
       .catch(reason => { console.error('Loading settings failed.', reason); });
   }
@@ -195,6 +206,7 @@ class SettingEditor extends Widget {
   private _instructions: Widget;
   private _list: PluginList;
   private _panel: SplitPanel;
+  private _sizes = [1, 3];
 }
 
 
@@ -399,7 +411,7 @@ class PluginEditor extends Widget {
     layout.addWidget(panel);
     panel.addWidget(this._editor);
     panel.addWidget(this._fieldset);
-    panel.setRelativeSizes([5, 2]);
+    panel.setRelativeSizes(this._sizes);
   }
 
   /**
@@ -519,6 +531,7 @@ class PluginEditor extends Widget {
   private _editor: JSONEditor = null;
   private _fieldset: PluginFieldset = null;
   private _settings: ISettingRegistry.ISettings | null = null;
+  private _sizes = [5, 2];
 }
 
 
