@@ -25,12 +25,12 @@ interface IChangedArgs<T> {
 
 
 /**
- * The description of a general purpose datastore.
+ * The description of a general purpose data connector.
  */
 export
-interface IDatastore<T, U> {
+interface IDataConnector<T, U> {
   /**
-   * Retrieve a saved bundle from the datastore.
+   * Retrieve a saved bundle from the data connector.
    *
    * @param id - The identifier used to retrieve a data bundle.
    *
@@ -43,7 +43,7 @@ interface IDatastore<T, U> {
   fetch(id: string): Promise<T | null>;
 
   /**
-   * Remove a value from the datastore.
+   * Remove a value from the data connector.
    *
    * @param id - The identifier for the data being removed.
    *
@@ -52,7 +52,7 @@ interface IDatastore<T, U> {
   remove(id: string): Promise<void>;
 
   /**
-   * Save a value in the datastore.
+   * Save a value in the data connector.
    *
    * @param id - The identifier for the data being saved.
    *

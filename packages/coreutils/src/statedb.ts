@@ -6,7 +6,7 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  IDatastore
+  IDataConnector
 } from '.';
 
 
@@ -39,7 +39,7 @@ interface IStateItem {
  * The description of a state database.
  */
 export
-interface IStateDB extends IDatastore<JSONObject, JSONObject> {
+interface IStateDB extends IDataConnector<JSONObject, JSONObject> {
   /**
    * The maximum allowed length of the data after it has been serialized.
    */
