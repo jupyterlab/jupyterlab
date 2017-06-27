@@ -1,203 +1,394 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
-
-import {
-  JSONExt, JSONObject, JSONValue
-} from '@phosphor/coreutils';
-
-import {
-  IObservableJSON, ObservableJSON, nbformat
-} from '@jupyterlab/coreutils';
+// Distributed under the terms of
 
 import {
   IRenderMime
 } from '@jupyterlab/rendermime-interfaces';
 
 import {
-  MimeModel
-} from './mimemodel';
+  JSONValue
+} from '@phosphor/coreutils';
+
+import {
+  Action, DataStore
+} from '@phosphor/datastore';
+
+import {
+  IDisposable
+} from '@phosphor/disposable';
+
+import {
+  Signal
+} from '@phosphor/signaling';
 
 
 /**
- * The interface for an output model.
+ * A mime model backed by output data.
  */
 export
-interface IOutputModel extends IRenderMime.IMimeModel {
+class OutputMimeModel implements IRenderMime.IMimeModel, IDisposable {
   /**
-   * The output type.
+   * Construct a new output model.
    */
-  readonly type: string;
-
-  /**
-   * The execution count of the model.
-   */
-  readonly executionCount: nbformat.ExecutionCount;
+  constructor(options: OutputMimeModel.IOptions) {
+    let { id, dataStore } = options;
+    let model = this._model = dataStore.state.mimeModels.byId[id];
+    this._data = new Private.Bundle(model.dataId, dataStore);
+    this._metadata = new Private.Bundle(model.metadataId, dataStore);
+    this._dataStore = dataStore;
+    dataStore.changed.connect(this._onStoreChanged, this);
+  }
 
   /**
    * The data associated with the model.
    */
-  readonly data: IObservableJSON;
+  get data(): IRenderMime.IBundle {
+    return this._data;
+  }
 
   /**
    * The metadata associated with the model.
    */
-  readonly metadata: IObservableJSON;
+  get metadata(): IRenderMime.IBundle {
+    return this._metadata;
+  }
 
   /**
-   * Dispose of the resources used by the output model.
+   * Whether the model is trusted.
    */
-  dispose(): void;
+  get trusted(): boolean {
+    return this._model.trusted;
+  }
 
   /**
-   * Serialize the model to JSON.
+   * Whether the output mime model is disposed.
    */
-  toJSON(): nbformat.IOutput;
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose of the resources used by the output mime model.
+   */
+  dispose(): void {
+    if (this._isDisposed) {
+      return;
+    }
+    Signal.clearData(this);
+  }
+
+  /**
+   * Handle a change to the data store.
+   */
+  private _onStoreChanged(): void {
+    let dataStore = this._dataStore;
+    let model = dataStore.state.mimeModels.byId[this._id];
+    if (model === this._model) {
+      return;
+    }
+    this._model = model;
+    this._data = new Private.Bundle(model.dataId, dataStore);
+    this._metadata = new Private.Bundle(model.metadataId, dataStore);
+  }
+
+  private _id: number;
+  private _isDisposed = false;
+  private _model: IOutputMimeModel;
+  private _dataStore: MimeModelStore;
+  private _data: IRenderMime.IBundle;
+  private _metadata: IRenderMime.IBundle;
 }
 
 
 /**
- * The namespace for IOutputModel sub-interfaces.
+ * The namespace for OutputMimeModel statics.
  */
 export
-namespace IOutputModel {
+namespace OutputMimeModel {
   /**
-   * The options used to create a notebook output model.
+   * The options used to create an OutputMimeModel.
    */
   export
   interface IOptions {
     /**
-     * The raw output value.
+     * The model id associated with the model.
      */
-    value: nbformat.IOutput;
+    id: number;
 
     /**
-     * Whether the output is trusted.  The default is false.
+     * The data store associated with the model.
      */
-    trusted?: boolean;
+    dataStore: MimeModelStore;
   }
 }
 
 
 /**
- * The default implementation of a notebook output model.
+ *
  */
 export
-class OutputModel implements IOutputModel {
+interface IByIdMap<T> {
   /**
-   * Construct a new output model.
+   *
    */
-  constructor(options: IOutputModel.IOptions) {
-    let { trusted, data, metadata } = Private.getBundleOptions(options);
-    this.trusted = trusted;
-    this.data = new ObservableJSON({ values: data });
-    this.metadata = new ObservableJSON({ values: metadata });
-    // Make a copy of the data.
-    let value = options.value;
-    for (let key in value) {
-      // Ignore data and metadata that were stripped.
-      switch (key) {
-      case 'data':
-      case 'metadata':
-        break;
-      default:
-        this._raw[key] = Private.extract(value, key);
-      }
-    }
-    this.type = value.output_type;
-    if (nbformat.isExecuteResult(value)) {
-      this.executionCount = value.execution_count;
-    } else {
-      this.executionCount = null;
-    }
-  }
+  readonly [id: number]: T;
+}
+
+/**
+ *
+ */
+export
+interface ITable<T> {
+  /**
+   *
+   */
+  readonly maxId: number;
 
   /**
-   * The output type.
+   *
    */
-  readonly type: string;
+  readonly byId: IByIdMap<T>;
+}
 
-  /**
-   * The execution count.
-   */
-  readonly executionCount: nbformat.ExecutionCount;
+/**
+ * A read-only bundle of data for a mime model.
+ */
+export
+interface IMimeBundle {
+  readonly [key: string]: JSONValue;
+}
 
-  /**
-   * The data associated with the model.
-   */
-  readonly data: IObservableJSON;
 
-  /**
-   * The metadata associated with the model.
-   */
-  readonly metadata: IObservableJSON;
-
+/**
+ * A model for output mime data.
+ */
+export
+interface IOutputMimeModel {
   /**
    * Whether the model is trusted.
    */
   readonly trusted: boolean;
 
   /**
-   * Dispose of the resources used by the output model.
+   * The data bundle id associated with the model.
    */
-  dispose(): void {
-    this.data.dispose();
-    this.metadata.dispose();
-  }
+  readonly dataId: number;
 
   /**
-   * Serialize the model to JSON.
+   * The metadata bundle id associated with the model.
    */
-  toJSON(): nbformat.IOutput {
-    let output: JSONValue = {};
-    for (let key in this._raw) {
-      output[key] = Private.extract(this._raw, key);
-    }
-    switch (this.type) {
-    case 'display_data':
-    case 'execute_result':
-    case 'update_display_data':
-      output['data'] = this.data.toJSON();
-      output['metadata'] = this.metadata.toJSON();
-      break;
-    default:
-      break;
-    }
-    // Remove transient data.
-    delete output['transient'];
-    return output as nbformat.IOutput;
-  }
-
-  private _raw: JSONObject = {};
+  readonly metadataId: number;
 }
 
 
 /**
- * The namespace for OutputModel statics.
+ * The store state for a mime model.
  */
 export
-namespace OutputModel {
+interface IMimeStoreState {
   /**
-   * Get the data for an output.
-   *
-   * @params output - A kernel output message payload.
-   *
-   * @returns - The data for the payload.
+   * The mime models table.
    */
-  export
-  function getData(output: nbformat.IOutput): JSONObject {
-    return Private.getData(output);
+  readonly mimeModels: ITable<IOutputMimeModel>;
+
+  /**
+   * The mime models table.
+   */
+  readonly mimeBundles: ITable<IMimeBundle>;
+}
+
+
+/**
+ * An action associated with a rendermime model store.
+ */
+export
+type MimeModelAction = (
+  CreateMimeModel |
+  CreateMimeBundle |
+  AddToMimeBundle |
+  RemoveFromMimeBundle
+);
+
+
+/**
+ * A store for mime models.
+ */
+export
+type MimeModelStore = DataStore<IMimeStoreState>;
+
+
+/**
+ * An action for creating a mime model.
+ */
+export
+class CreateMimeModel extends Action<'@jupyterlab/outputarea/CREATE_MIME_MODEL'> {
+  /**
+   * Construct a new CreateMimeModel object.
+   */
+  constructor(id: number, model: IOutputMimeModel) {
+    super('@jupyterlab/outputarea/CREATE_MIME_MODEL');
+    this.id = id;
+    this.model = model;
   }
 
   /**
-   * Get the metadata from an output message.
-   *
-   * @params output - A kernel output message payload.
-   *
-   * @returns - The metadata for the payload.
+   * The id of the mime model.
    */
-  export
-  function getMetadata(output: nbformat.IOutput): JSONObject {
-    return Private.getMetadata(output);
+  readonly id: number;
+
+  /**
+   * The model to add.
+   */
+  readonly model: IOutputMimeModel;
+}
+
+
+/**
+ * An action for creating a mime bundle.
+ */
+export
+class CreateMimeBundle extends Action<'@jupyterlab/outputarea/CREATE_MIME_BUNDLE'> {
+  /**
+   * Construct a new CreateMimeBundle object.
+   */
+  constructor(id: number, bundle: IMimeBundle) {
+    super('@jupyterlab/outputarea/CREATE_MIME_BUNDLE');
+    this.id = id;
+    this.bundle = bundle;
+  }
+
+  /**
+   * The id of the mime bundle.
+   */
+  readonly id: number;
+
+  /**
+   * The model to add.
+   */
+  readonly bundle: IMimeBundle;
+}
+
+
+/**
+ * An action for adding or updating a key to a mime bundle.
+ */
+export
+class AddToMimeBundle extends Action<'@jupyterlab/outputarea/ADD_TO_MIME_BUNDLE'> {
+  /**
+   * Construct a new AddToMimeBundle object.
+   */
+  constructor(id: number, key: string, value: JSONValue) {
+    super('@jupyterlab/outputarea/ADD_TO_MIME_BUNDLE');
+    this.id = id;
+    this.key = key;
+  }
+
+  /**
+   * The id of the mime bundle.
+   */
+  readonly id: number;
+
+  /**
+   * The key to add or update.
+   */
+  readonly key: string;
+
+  /**
+   * The value of the key.
+   */
+  readonly value: JSONValue;
+}
+
+
+/**
+ * An action for removing a key from a mime bundle.
+ */
+export
+class RemoveFromMimeBundle extends Action<'@jupyterlab/outputarea/REMOVE_FROM_MIME_BUNDLE'> {
+  /**
+   * Construct a new RemoveFromMimeBundle object.
+   */
+  constructor(id: number, key: string) {
+    super('@jupyterlab/outputarea/REMOVE_FROM_MIME_BUNDLE');
+    this.id = id;
+    this.key = key;
+  }
+
+  /**
+   * The id of the mime bundle.
+   */
+  readonly id: number;
+
+  /**
+   * The key to remove.
+   */
+  readonly key: string;
+}
+
+
+/**
+ *
+ */
+export
+function mimeReducer(state: IMimeStoreState, action: MimeModelAction): IMimeStoreState {
+  return {
+    ...state,
+    mimeModels: mimeModels(state.mimeModels, action),
+    mimeBundles: mimeBundles(state.mimeBundles, action),
+  };
+}
+
+
+function mimeModels(table: ITable<IOutputMimeModel>, action: MimeModelAction): ITable<IOutputMimeModel> {
+  switch (action.type) {
+  case '@jupyterlab/outputarea/CREATE_MIME_MODEL':
+    return createNewEntry(table, action.id, action.model);
+  default:
+    return table;
+  }
+}
+
+
+function mimeBundles(table: ITable<IMimeBundle>, action: MimeModelAction): ITable<IMimeBundle> {
+  let entry: IMimeBundle;
+  switch (action.type) {
+  case '@jupyterlab/outputarea/CREATE_MIME_BUNDLE':
+    return createNewEntry(table, action.id, action.bundle);
+  case '@jupyterlab/outputarea/ADD_TO_MIME_BUNDLE':
+    entry = { ...table.byId[action.id], [action.key]: action.value };
+    return {
+      ...table,
+      byId: { ...table.byId, [action.id]: entry }
+    };
+  case '@jupyterlab/outputarea/REMOVE_FROM_MIME_BUNDLE':
+    entry = { ...table.byId[action.id] };
+    delete (entry as any)[action.key];
+    return {
+      ...table,
+      byId: { ...table.byId, [action.id]: entry }
+    };
+  default:
+    return table;
+  }
+}
+
+
+/**
+ *
+ */
+function createNewEntry<T>(table: ITable<T>, id: number, entry: T): ITable<T> {
+  if (id in table.byId) {
+    throw new Error(`Id '${id}' already exists.`);
+  }
+
+  return { ...table, maxId: maxId(table.maxId), byId: byId(table.byId) };
+
+  function byId(map: IByIdMap<T>): IByIdMap<T> {
+    return { ...map, [id]: entry };
+  }
+
+  function maxId(maxId: number): number {
+    return Math.max(maxId, id);
   }
 }
 
@@ -205,82 +396,86 @@ namespace OutputModel {
 /**
  * The namespace for module private data.
  */
- namespace Private {
+namespace Private {
   /**
-   * Get the data from a notebook output.
+   * An implementation of a rendermime bundle for output data.
    */
   export
-  function getData(output: nbformat.IOutput): JSONObject {
-    let bundle: nbformat.IMimeBundle = {};
-    if (nbformat.isExecuteResult(output) || nbformat.isDisplayData(output) || nbformat.isDisplayUpdate(output)) {
-      bundle = (output as nbformat.IExecuteResult).data;
-    } else if (nbformat.isStream(output)) {
-      if (output.name === 'stderr') {
-        bundle['application/vnd.jupyter.stderr'] = output.text;
-      } else {
-        bundle['application/vnd.jupyter.stdout'] = output.text;
-      }
-    } else if (nbformat.isError(output)) {
-      let traceback = output.traceback.join('\n');
-      bundle['application/vnd.jupyter.stderr'] = (
-        traceback || `${output.ename}: ${output.evalue}`
-      );
+  class Bundle implements IRenderMime.IBundle {
+    /**
+     * Create a new bundle.
+     */
+    constructor(id: number, dataStore: MimeModelStore) {
+      this._id = id;
+      this._dataStore = dataStore;
     }
-    return convertBundle(bundle);
-  }
 
-  /**
-   * Get the metadata from an output message.
-   */
-  export
-  function getMetadata(output: nbformat.IOutput): JSONObject {
-    let value: JSONObject = Object.create(null);
-    if (nbformat.isExecuteResult(output) || nbformat.isDisplayData(output)) {
-      for (let key in output.metadata) {
-        value[key] = extract(output.metadata, key);
-      }
+    /**
+     * Get a value for a given key.
+     *
+     * @param key - the key.
+     *
+     * @returns the value for that key.
+     */
+    get(key: string): JSONValue {
+      return this._dataStore.state.mimeBundles.byId[this._id][key];
     }
-    return value;
-  }
 
-  /**
-   * Get the bundle options given output model options.
-   */
-  export
-  function getBundleOptions(options: IOutputModel.IOptions): MimeModel.IOptions {
-    let data = getData(options.value);
-    let metadata = getMetadata(options.value);
-    let trusted = !!options.trusted;
-    return { data, trusted, metadata };
-  }
-
-  /**
-   * Extract a value from a JSONObject.
-   */
-  export
-  function extract(value: JSONObject, key: string): JSONValue {
-    let item = value[key];
-    if (JSONExt.isPrimitive(item)) {
-      return item;
+    /**
+     * Check whether the bundle has a key.
+     *
+     * @param key - the key to check.
+     *
+     * @returns `true` if the bundle has the key, `false` otherwise.
+     */
+    has(key: string): boolean {
+      let model = this._dataStore.state.mimeBundles.byId[this._id];
+      return Object.keys(model).indexOf(key) !== -1;
     }
-    return JSON.parse(JSON.stringify(item));
-  }
 
-  /**
-   * Convert a mime bundle to mime data.
-   */
-  function convertBundle(bundle: nbformat.IMimeBundle): JSONObject {
-    let map: JSONObject = Object.create(null);
-    for (let mimeType in bundle) {
-      let item = bundle[mimeType];
-      // Convert multi-line strings to strings.
-      if (JSONExt.isArray(item)) {
-        item = (item as string[]).join('\n');
-      } else if (!JSONExt.isPrimitive(item)) {
-        item = JSON.parse(JSON.stringify(item));
-      }
-      map[mimeType] = item;
+    /**
+     * Set a key-value pair in the bundle.
+     *
+     * @param key - The key to set.
+     *
+     * @param value - The value for the key.
+     *
+     * @returns the old value for the key, or undefined
+     *   if that did not exist.
+     */
+    set(key: string, value: JSONValue): JSONValue {
+      let old = this.get(key);
+      let action = new AddToMimeBundle(this._id, key, value);
+      this._dataStore.dispatch(action);
+      return old;
     }
-    return map;
+
+    /**
+     * Get a list of the keys in the bundle.
+     *
+     * @returns - a list of keys.
+     */
+    keys(): string[] {
+      let model = this._dataStore.state.mimeBundles.byId[this._id];
+      return Object.keys(model);
+    }
+
+    /**
+     * Remove a key from the bundle.
+     *
+     * @param key - the key to remove.
+     *
+     * @returns the value of the given key,
+     *   or undefined if that does not exist.
+     */
+    delete(key: string): JSONValue {
+      let old = this.get(key);
+      let action = new RemoveFromMimeBundle(this._id, key);
+      this._dataStore.dispatch(action);
+      return old;
+    }
+
+    private _id: number;
+    private _dataStore: MimeModelStore;
   }
 }
