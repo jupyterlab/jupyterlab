@@ -49,6 +49,26 @@ namespace CommandIDs {
 };
 
 
+/* tslint:disable */
+/**
+ * The commands plugin setting schema.
+ *
+ * #### Notes
+ * This will eventually reside in its own settings file.
+ */
+const schema = {
+  "$schema": "http://json-schema.org/draft-06/schema",
+  "jupyter.lab.setting-icon-class": "jp-ImageTextEditor",
+  "jupyter.lab.setting-icon-label": "CodeMirror",
+  "title": "CodeMirror",
+  "description": "Text editor settings for all CodeMirror editors.",
+  "properties": {
+    "keyMap": { "type": "string", "title": "Key Map", "default": "default" },
+    "theme": { "type": "string", "title": "Theme", "default": "default" }
+  }
+};
+/* tslint:enable */
+
 /**
  * The editor services.
  */
@@ -91,8 +111,8 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
    * Update the setting values.
    */
   function updateSettings(settings: ISettingRegistry.ISettings): void {
-    keyMap = settings.get('keyMap') as string | null || keyMap;
-    theme = settings.get('theme') as string | null || theme;
+    keyMap = settings.get('keyMap').composite as string | null || keyMap;
+    theme = settings.get('theme').composite as string | null || theme;
   }
 
   /**
@@ -107,6 +127,9 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
       }
     });
   }
+
+  // Preload the settings schema into the registry. This is deprecated.
+  settingRegistry.preload(id, schema);
 
   // Fetch the initial state of the settings.
   Promise.all([settingRegistry.load(id), restored]).then(([settings]) => {

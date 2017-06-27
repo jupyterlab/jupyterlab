@@ -81,11 +81,48 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<IEditorTracker> = {
   activate,
   id: 'jupyter.services.editor-tracker',
-  requires: [IDocumentRegistry, ILayoutRestorer, IEditorServices, ISettingRegistry],
+  requires: [
+    IDocumentRegistry,
+    ILayoutRestorer,
+    IEditorServices,
+    ISettingRegistry
+  ],
   optional: [ILauncher],
   provides: IEditorTracker,
   autoStart: true
 };
+
+
+/* tslint:disable */
+/**
+ * The commands plugin setting schema.
+ *
+ * #### Notes
+ * This will eventually reside in its own settings file.
+ */
+const schema = {
+  "$schema": "http://json-schema.org/draft-06/schema",
+  "jupyter.lab.setting-icon-class": "jp-ImageTextEditor",
+  "jupyter.lab.setting-icon-label": "Editor",
+  "title": "Text Editor",
+  "description": "Text editor settings for all editors.",
+  "properties": {
+    "autoClosingBrackets": {
+      "type": "boolean", "title": "Autoclosing Brackets", "default": true
+    },
+    "lineNumbers": {
+      "type": "boolean", "title": "Line Numbers", "default": true
+    },
+    "lineWrap": {
+      "type": "boolean", "title": "Line Wrap", "default": false
+    },
+    "matchBrackets": {
+      "type": "boolean", "title": "Match Brackets", "default": true
+    }
+  }
+};
+/* tslint:enable */
+
 
 /**
  * Export the plugins as default.
@@ -105,7 +142,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   });
   const { commands, restored } = app;
   const tracker = new InstanceTracker<FileEditor>({ namespace });
-  const hasWidget = () => tracker.currentWidget !== null;
+  const hasWidget = () => !!tracker.currentWidget;
 
   let {
     lineNumbers, lineWrap, matchBrackets, autoClosingBrackets
@@ -122,13 +159,13 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
    * Update the setting values.
    */
   function updateSettings(settings: ISettingRegistry.ISettings): void {
-    let cached = settings.get('lineNumbers') as boolean | null;
+    let cached = settings.get('lineNumbers').composite as boolean | null;
     lineNumbers = cached === null ? lineNumbers : !!cached;
-    cached = settings.get('matchBrackets') as boolean | null;
+    cached = settings.get('matchBrackets').composite as boolean | null;
     matchBrackets = cached === null ? matchBrackets : !!cached;
-    cached = settings.get('autoClosingBrackets') as boolean | null;
+    cached = settings.get('autoClosingBrackets').composite as boolean | null;
     autoClosingBrackets = cached === null ? autoClosingBrackets : !!cached;
-    cached = settings.get('lineWrap') as boolean | null;
+    cached = settings.get('lineWrap').composite as boolean | null;
     lineWrap = cached === null ? lineWrap : !!cached;
   }
 
@@ -136,21 +173,22 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
    * Update the settings of the current tracker instances.
    */
   function updateTracker(): void {
-    tracker.forEach(widget => {
-      updateWidget(widget);
-    });
+    tracker.forEach(widget => { updateWidget(widget); });
   }
 
   /**
    * Update the settings of a widget.
    */
   function updateWidget(widget: FileEditor): void {
-    let editor = widget.editor;
+    const editor = widget.editor;
     editor.setOption('lineNumbers', lineNumbers);
     editor.setOption('lineWrap', lineWrap);
     editor.setOption('matchBrackets', matchBrackets);
     editor.setOption('autoClosingBrackets', autoClosingBrackets);
   }
+
+  // Preload the settings schema into the registry. This is deprecated.
+  settingRegistry.preload(id, schema);
 
   // Fetch the initial state of the settings.
   Promise.all([settingRegistry.load(id), restored]).then(([settings]) => {
@@ -251,7 +289,8 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
       tracker.forEach(widget => {
         widget.editor.setOption('autoClosingBrackets', autoClosingBrackets);
       });
-      return settingRegistry.set(id, 'autoClosingBrackets', autoClosingBrackets);
+      return settingRegistry
+        .set(id, 'autoClosingBrackets', autoClosingBrackets);
     },
     label: 'Auto-Closing Brackets',
     isEnabled: hasWidget,

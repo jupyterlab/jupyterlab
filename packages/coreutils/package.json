@@ -17,12 +17,14 @@
     "@phosphor/disposable": "^1.1.1",
     "@phosphor/messaging": "^1.2.1",
     "@phosphor/signaling": "^1.2.1",
+    "ajv": "^5.1.5",
     "minimist": "^1.2.0",
     "moment": "^2.17.1",
     "path-posix": "^1.0.0",
     "url-parse": "^1.1.8"
   },
   "devDependencies": {
+    "@types/ajv": "^1.0.0",
     "@types/minimist": "^1.2.0",
     "rimraf": "^2.5.2",
     "typescript": "~2.3.1"
