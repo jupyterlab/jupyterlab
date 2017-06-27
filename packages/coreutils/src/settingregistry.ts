@@ -20,7 +20,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  IDatastore, StateDB
+  IDataConnector, StateDB
 } from '.';
 
 
@@ -389,7 +389,7 @@ class SettingRegistry {
    */
   constructor(options: SettingRegistry.IOptions = { }) {
     const namespace = 'jupyter.db.settings';
-    this._datastore = options.datastore || new StateDB({ namespace });
+    this._connector = options.connector || new StateDB({ namespace });
     this._validator = options.validator || new DefaultSchemaValidator();
     this._preload = options.preload || (() => { /* no op */ });
   }
@@ -460,7 +460,7 @@ class SettingRegistry {
       return Promise.resolve(settings);
     }
 
-    // If the plugin needs to be loaded from the datastore, fetch.
+    // If the plugin needs to be loaded from the data connector, fetch.
     return this.reload(plugin);
   }
 
@@ -488,11 +488,11 @@ class SettingRegistry {
    * with a list of `ISchemaValidator.IError` objects if it fails.
    */
   reload(plugin: string): Promise<ISettingRegistry.ISettings> {
-    const datastore = this._datastore;
+    const connector = this._connector;
     const plugins = this._plugins;
 
-    // If the plugin needs to be loaded from the datastore, fetch.
-    return datastore.fetch(plugin).then(data => {
+    // If the plugin needs to be loaded from the connector, fetch.
+    return connector.fetch(plugin).then(data => {
       if (!data) {
         const message = `Setting data for ${plugin} does not exist.`;
         throw [{ keyword: '', message, schemaPath: '' }];
@@ -593,7 +593,7 @@ class SettingRegistry {
 
     this._validate(plugins[plugin]);
 
-    return this._datastore.save(plugin, plugins[plugin].data.user)
+    return this._connector.save(plugin, plugins[plugin].data.user)
       .then(() => { this._pluginChanged.emit(plugin); });
   }
 
@@ -621,7 +621,7 @@ class SettingRegistry {
     this._plugins[plugin.id] = plugin;
   }
 
-  private _datastore: IDatastore<ISettingRegistry.IPlugin, JSONObject> | null = null;
+  private _connector: IDataConnector<ISettingRegistry.IPlugin, JSONObject> | null = null;
   private _pluginChanged = new Signal<this, string>(this);
   private _plugins: { [name: string]: ISettingRegistry.IPlugin } = Object.create(null);
   private _preload: (plugin: string, schema: ISettingRegistry.ISchema) => void;
@@ -812,9 +812,9 @@ namespace SettingRegistry {
   export
   interface IOptions {
     /**
-     * The datastore used by the setting registry.
+     * The data connector used by the setting registry.
      */
-    datastore?: IDatastore<ISettingRegistry.IPlugin, ISettingRegistry.IPlugin>;
+    connector?: IDataConnector<ISettingRegistry.IPlugin, ISettingRegistry.IPlugin>;
 
     /**
      * A function that preloads a plugin's schema in the client-side cache.

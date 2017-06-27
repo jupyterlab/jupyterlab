@@ -29,8 +29,8 @@ import {
 } from './palette';
 
 import {
-  SettingClientDatastore
-} from './settingclientdatastore';
+  SettingClientDataConnector
+} from './settingclientdataconnector';
 
 
 /**
@@ -93,8 +93,8 @@ const palettePlugin: JupyterLabPlugin<ICommandPalette> = {
 const settingPlugin: JupyterLabPlugin<ISettingRegistry> = {
   id: 'jupyter.services.setting-registry',
   activate: () => new SettingRegistry({
-    datastore: new SettingClientDatastore(),
-    preload: SettingClientDatastore.preload
+    connector: new SettingClientDataConnector(),
+    preload: SettingClientDataConnector.preload
   }),
   autoStart: true,
   provides: ISettingRegistry

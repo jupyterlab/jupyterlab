@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  IDatastore, ISettingRegistry, StateDB
+  IDataConnector, ISettingRegistry, StateDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -13,23 +13,23 @@ import {
 
 
 /**
- * A client-side datastore for setting schemas.
+ * A client-side data connector for setting schemas.
  *
  * #### Notes
  * This class is deprecated. Its use is only as a storage mechanism of settings
  * data while an API for server-side persistence is being implemented.
  */
 export
-class SettingClientDatastore extends StateDB implements IDatastore<ISettingRegistry.IPlugin, JSONObject> {
+class SettingClientDataConnector extends StateDB implements IDataConnector<ISettingRegistry.IPlugin, JSONObject> {
   /**
-   * Create a new setting client datastore.
+   * Create a new setting client data connector.
    */
   constructor() {
-    super({ namespace: 'setting-client-datastore' });
+    super({ namespace: 'setting-client-data-connector' });
   }
 
   /**
-   * Retrieve a saved bundle from the datastore.
+   * Retrieve a saved bundle from the data connector.
    */
   fetch(id: string): Promise<ISettingRegistry.IPlugin | null> {
     return super.fetch(id).then(user => {
@@ -41,14 +41,14 @@ class SettingClientDatastore extends StateDB implements IDatastore<ISettingRegis
   }
 
   /**
-   * Remove a value from the datastore.
+   * Remove a value from the data connector.
    */
   remove(id: string): Promise<void> {
     return super.remove(id);
   }
 
   /**
-   * Save the user setting data in the datastore.
+   * Save the user setting data in the data connector.
    */
   save(id: string, user: JSONObject): Promise<void> {
     return super.save(id, user);
@@ -57,10 +57,10 @@ class SettingClientDatastore extends StateDB implements IDatastore<ISettingRegis
 
 
 /**
- * A namespace for `SettingClientDatastore` statics.
+ * A namespace for `SettingClientDataConnector` statics.
  */
 export
-namespace SettingClientDatastore {
+namespace SettingClientDataConnector {
   /**
    * Preload the schema for a plugin.
    */
