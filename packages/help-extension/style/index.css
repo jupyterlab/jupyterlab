@@ -87,6 +87,11 @@
 }
 
 
+.jp-About-externalLinks .jp-Button-flat {
+  color: #F37726;
+}
+
+
 .jp-About-copyright {
   position: relative;
   bottom: -48px;
