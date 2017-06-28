@@ -52,7 +52,6 @@ class InstallLabExtensionApp(BaseExtensionApp):
         help="Whether to build the app after the action")
 
     def start(self):
-        check_node()
         self.extra_args = self.extra_args or [os.getcwd()]
         [install_extension(arg, self.app_dir, logger=self.log)
          for arg in self.extra_args]
