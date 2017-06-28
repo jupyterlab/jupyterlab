@@ -28,7 +28,10 @@
     "addsibling": "node scripts/add-sibling.js",
     "removesibling": "node scripts/remove-sibling.js"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@phosphor/coreutils": "^1.1.3",
+    "@phosphor/datastore": "^0.4.0"
+  },
   "devDependencies": {
     "lerna": "2.0.0-beta.38"
   }
