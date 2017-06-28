@@ -217,20 +217,32 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   commands.addCommand(CommandIDs.about, {
     label: `About ${info.name}`,
     execute: () => {
+      let headerLogo = h.div({className: 'jp-About-header-logo'});
+      let headerWordmark = h.div({className: 'jp-About-header-wordmark'});
       let release = 'alpha release';
       let versionNumber = `version: ${info.version}`;
-      let versionInfo = h.span({className: 'jp-About-versionInfo'},
+      let versionInfo = h.span({className: 'jp-About-version-info'},
         h.span({className: 'jp-About-release'}, release),
         h.span({className: 'jp-About-version'}, versionNumber)
       );
+      let title = VirtualDOM.realize(h.span({className: 'jp-About-header'},
+        headerLogo,
+        h.div({className: 'jp-About-header-info'},
+          headerWordmark,
+          versionInfo
+        )
+      ));
+
+
       let externalLinks = h.span({className: 'jp-About-externalLinks'},
         h.span({className: 'jp-Button-flat'}, "CORE CONTRIBUTORS"),
         h.span({className: 'jp-Button-flat'}, "ABOUT PROJECT JUPYTER")
       );
-      let title = VirtualDOM.realize(h.span({ className: 'jp-About-logo jp-ImageJupyterLab-wordmark'}));
-      let body = VirtualDOM.realize(h.div({ className: 'jp-About' },
-        versionInfo,
-        externalLinks
+      let copyright = h.span({className: 'jp-About-copyright'}, "© 2017 Project Jupyter");
+
+      let body = VirtualDOM.realize(h.div({ className: 'jp-About-body' },
+        externalLinks,
+        copyright
       ));
       showDialog({
         title,

@@ -36,8 +36,7 @@ button.jp-mod-styled.jp-mod-warn {
 }
 
 .jp-Button-flat {
-    padding: var(--jp-flat-button-padding); 
-    margin: 0px 4px;
+    padding: var(--jp-flat-button-padding);
     color: var(--jp-warn-color1);
     font-weight: 500;
     background-color: transparent;
