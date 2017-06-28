@@ -39,8 +39,12 @@ describe('@jupyterlab/coreutils', () => {
 
   let registry: SettingRegistry;
 
-  beforeEach(() => connector.clear()
-    .then(() => { registry = new SettingRegistry({ connector }); }));
+  beforeEach(() => {
+    return connector.clear().then(() => {
+      Object.keys(schemas).forEach(key => { delete schemas[key]; });
+      registry = new SettingRegistry({ connector });
+    });
+  });
 
   describe('SettingRegistry', () => {
 
@@ -84,6 +88,119 @@ describe('@jupyterlab/coreutils', () => {
           .then(() => { expect(registry.plugins).to.have.length(2); })
           .then(done)
           .catch(done);
+      });
+
+    });
+
+    describe('#get()', () => {
+
+      it('should get a setting item from a loaded plugin', done => {
+        const id = 'foo';
+        const key = 'bar';
+        const value = 'baz';
+
+        schemas[id] = { type: 'object' };
+        connector.save(id, { [key]: value })
+          .then(() => registry.load(id))
+          .then(() => registry.get(id, key))
+          .then(saved => { expect(saved.user).to.be(value); })
+          .then(done)
+          .catch(done);
+      });
+
+      it('should get a setting item from a plugin that is not loaded', done => {
+        const id = 'alpha';
+        const key = 'beta';
+        const value = 'gamma';
+
+        schemas[id] = { type: 'object' };
+        connector.save(id, { [key]: value })
+          .then(() => registry.get(id, key))
+          .then(saved => { expect(saved.composite).to.be(value); })
+          .then(done)
+          .catch(done);
+      });
+
+      it('should use schema default if user data not available', done => {
+        const id = 'alpha';
+        const key = 'beta';
+        const value = 'gamma';
+        const schema = schemas[id] = {
+          type: 'object',
+          properties: {
+            [key]: { type: typeof value, default: value }
+          }
+        };
+
+        registry.get(id, key)
+          .then(saved => {
+            expect(saved.composite).to.be(schema.properties[key].default);
+            expect(saved.composite).to.not.be(saved.user);
+          }).then(done)
+            .catch(done);
+      });
+
+      it('should let user value override schema default', done => {
+        const id = 'alpha';
+        const key = 'beta';
+        const value = 'gamma';
+        const schema = schemas[id] = {
+          type: 'object',
+          properties: {
+            [key]: { type: typeof value, default: 'delta' }
+          }
+        };
+
+        connector.save(id, { [key]: value })
+          .then(() => registry.get(id, key))
+          .then(saved => {
+            expect(saved.composite).to.be(value);
+            expect(saved.user).to.be(value);
+            expect(saved.composite).to.not.be(schema.properties[key].default);
+            expect(saved.user).to.not.be(schema.properties[key].default);
+          }).then(done)
+            .catch(done);
+      });
+
+      it('should reject if a plugin does not exist', done => {
+        registry.get('foo', 'bar')
+          .then(saved => { throw new Error('should not resolve'); })
+          .catch(reason => { done(); });
+      });
+
+      it('should resolve `undefined` if a key does not exist', done => {
+        const id = 'foo';
+        const key = 'bar';
+
+        schemas[id] = { type: 'object' };
+
+        registry.get(id, key)
+          .then(saved => {
+            expect(saved.composite).to.be(void 0);
+            expect(saved.user).to.be(void 0);
+          }).then(done)
+            .catch(done);
+      });
+
+    });
+
+    describe('#load()', () => {
+
+      it(`should resolve a registered plugin's settings`, done => {
+        const id = 'foo';
+
+        expect(registry.plugins).to.be.empty();
+        schemas[id] = { type: 'object' };
+        registry.load(id)
+          .then(settings => { expect(settings.plugin).to.be(id); })
+          .then(done)
+          .catch(done);
+      });
+
+      it('should reject if a plugin does not exist', done => {
+        registry.load('foo')
+          .then(settings => { throw new Error('should not resolve'); })
+          .catch(reason => { done(); });
       });
 
     });
