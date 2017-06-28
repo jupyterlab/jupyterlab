@@ -643,7 +643,7 @@ class Settings implements ISettingRegistry.ISettings {
     this.registry = options.registry;
 
     this._composite = plugin.data.composite || { };
-    this._schema = plugin.schema || { };
+    this._schema = plugin.schema || { type: 'object' };
     this._user = plugin.data.user || { };
 
     this.registry.pluginChanged.connect(this._onPluginChanged, this);
@@ -787,7 +787,7 @@ class Settings implements ISettingRegistry.ISettings {
       const schema = found.schema;
 
       this._composite = composite || { };
-      this._schema = schema || { };
+      this._schema = schema || { type: 'object' };
       this._user = user || { };
       this._changed.emit(void 0);
     }

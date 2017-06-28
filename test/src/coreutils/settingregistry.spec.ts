@@ -14,16 +14,10 @@ import {
 
 export
 class TestConnector extends StateDB implements IDataConnector<ISettingRegistry.IPlugin, JSONObject> {
-  /**
-   * Create a new setting client data connector.
-   */
   constructor() {
     super({ namespace: 'setting-registry-tests' });
   }
 
-  /**
-   * Retrieve a saved bundle from the data connector.
-   */
   fetch(id: string): Promise<ISettingRegistry.IPlugin | null> {
     return super.fetch(id).then(user => {
       const schema = schemas[id] || { };
@@ -33,16 +27,10 @@ class TestConnector extends StateDB implements IDataConnector<ISettingRegistry.I
     });
   }
 
-  /**
-   * Remove a value from the data connector.
-   */
   remove(id: string): Promise<void> {
     return super.remove(id);
   }
 
-  /**
-   * Save the user setting data in the data connector.
-   */
   save(id: string, user: JSONObject): Promise<void> {
     return super.save(id, user);
   }
@@ -60,6 +48,8 @@ describe('@jupyterlab/coreutils', () => {
 
   describe('SettingRegistry', () => {
 
+    beforeEach(() => connector.clear());
+
     describe('#constructor()', () => {
 
       it('should create a new setting registry', () => {
@@ -76,12 +66,7 @@ describe('@jupyterlab/coreutils', () => {
         const value = 'baz';
 
         schemas[id] = { type: 'object' };
-
-        connector.clear()
-          .then(() => registry.load(id))
-          .then(() => registry.set(id, key, value))
-          .catch(reason => { done(JSON.stringify(reason)); });
-
+        registry.load(id).then(() => registry.set(id, key, value));
         registry.pluginChanged.connect((sender: any, plugin: string) => {
           expect(id).to.be(plugin);
           done();
