@@ -14,41 +14,35 @@ import {
 
 export
 class TestConnector extends StateDB implements IDataConnector<ISettingRegistry.IPlugin, JSONObject> {
-  constructor() {
+  constructor(schemas: { [key: string]: ISettingRegistry.ISchema }) {
     super({ namespace: 'setting-registry-tests' });
+    this._schemas = schemas;
   }
 
   fetch(id: string): Promise<ISettingRegistry.IPlugin | null> {
     return super.fetch(id).then(user => {
-      const schema = schemas[id] || { };
+      const schema = this._schemas[id] || { };
       const result = { data: { composite: { }, user }, id, schema };
 
       return result;
     });
   }
 
-  remove(id: string): Promise<void> {
-    return super.remove(id);
-  }
-
-  save(id: string, user: JSONObject): Promise<void> {
-    return super.save(id, user);
-  }
+  private _schemas: { [key: string]: ISettingRegistry.ISchema };
 }
-
-
-const connector = new TestConnector();
-
-const registry = new SettingRegistry({ connector });
-
-const schemas: { [key: string]: ISettingRegistry.ISchema } = { };
 
 
 describe('@jupyterlab/coreutils', () => {
 
-  describe('SettingRegistry', () => {
+  const schemas: { [key: string]: ISettingRegistry.ISchema } = { };
+  const connector = new TestConnector(schemas);
 
-    beforeEach(() => connector.clear());
+  let registry: SettingRegistry;
+
+  beforeEach(() => connector.clear()
+    .then(() => { registry = new SettingRegistry({ connector }); }));
+
+  describe('SettingRegistry', () => {
 
     describe('#constructor()', () => {
 
@@ -66,12 +60,31 @@ describe('@jupyterlab/coreutils', () => {
         const value = 'baz';
 
         schemas[id] = { type: 'object' };
-        registry.load(id).then(() => registry.set(id, key, value));
         registry.pluginChanged.connect((sender: any, plugin: string) => {
           expect(id).to.be(plugin);
           done();
         });
-     });
+        registry.load(id).then(() => registry.set(id, key, value)).catch(done);
+      });
+
+    });
+
+    describe('#plugins', () => {
+
+      it('should return a list of registered plugins in registry', done => {
+        const one = 'foo';
+        const two = 'bar';
+
+        expect(registry.plugins).to.be.empty();
+        schemas[one] = { type: 'object' };
+        schemas[two] = { type: 'object' };
+        registry.load(one)
+          .then(() => { expect(registry.plugins).to.have.length(1); })
+          .then(() => registry.load(two))
+          .then(() => { expect(registry.plugins).to.have.length(2); })
+          .then(done)
+          .catch(done);
+      });
 
     });
 
