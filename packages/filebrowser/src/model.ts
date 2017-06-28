@@ -221,9 +221,11 @@ class FileBrowserModel implements IDisposable {
   download(path: string): Promise<void> {
     return this.manager.services.contents.getDownloadUrl(path).then(url => {
       let element = document.createElement('a');
+      document.body.appendChild(element);
       element.setAttribute('href', url);
       element.setAttribute('download', '');
       element.click();
+      document.body.removeChild(element);
       return void 0;
     });
   }
