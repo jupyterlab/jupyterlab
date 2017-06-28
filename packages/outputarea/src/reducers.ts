@@ -16,7 +16,7 @@ import {
 
 
 /**
- *
+ * The root reducer for an output store.
  */
 export
 const reducer = combineReducers<IOutputStoreState>({
@@ -28,12 +28,12 @@ const reducer = combineReducers<IOutputStoreState>({
 
 
 /**
- *
+ * A reducer which handles actions for the `mimeModelTable` branch.
  */
 function mimeModelTable(table: Table.RecordTable<IMimeModel>, action: OutputAction): Table.RecordTable<IMimeModel> {
   switch (action.type) {
   case '@jupyterlab/outputarea/CREATE_MIME_MODEL':
-    return Table.insert(table, action.id, action.model);
+    return Table.insert(table, action.modelId, action.model);
   default:
     return table;
   }
@@ -41,12 +41,12 @@ function mimeModelTable(table: Table.RecordTable<IMimeModel>, action: OutputActi
 
 
 /**
- *
+ * A reducer which handles actions for the `outputItemTable` branch.
  */
 function outputItemTable(table: Table.RecordTable<IOutputItem>, action: OutputAction): Table.RecordTable<IOutputItem> {
   switch (action.type) {
   case '@jupyterlab/outputarea/CREATE_OUTPUT_ITEM':
-    return Table.insert(table, action.id, action.item);
+    return Table.insert(table, action.itemId, action.item);
   default:
     return table;
   }
@@ -54,12 +54,12 @@ function outputItemTable(table: Table.RecordTable<IOutputItem>, action: OutputAc
 
 
 /**
- *
+ * A reducer which handles actions for the `outputAreaTable` branch.
  */
 function outputAreaTable(table: Table.RecordTable<IOutputArea>, action: OutputAction): Table.RecordTable<IOutputArea> {
   switch (action.type) {
   case '@jupyterlab/outputarea/CREATE_OUTPUT_AREA':
-    return Table.insert(table, action.id, action.area);
+    return Table.insert(table, action.areaId, action.area);
   default:
     return table;
   }
@@ -67,16 +67,16 @@ function outputAreaTable(table: Table.RecordTable<IOutputArea>, action: OutputAc
 
 
 /**
- *
+ * A reducer which handles actions for the `outputListTable` branch.
  */
 function outputListTable(table: Table.ListTable<string>, action: OutputAction): Table.ListTable<string> {
   switch (action.type) {
   case '@jupyterlab/outputarea/CREATE_OUTPUT_LIST':
-    return Table.insert(table, action.id, action.list);
+    return Table.insert(table, action.listId, action.list);
   case '@jupyterlab/outputarea/ADD_OUTPUT':
     return Table.push(table, action.listId, [action.itemId]);
-  case '@jupyterlab/outputarea/CLEAR_OUTPUTS':
-    return Table.replace(table, action.id, []);
+  case '@jupyterlab/outputarea/SET_OUTPUTS':
+    return Table.replace(table, action.listId, action.list);
   default:
     return table;
   }
