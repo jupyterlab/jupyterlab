@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 import {
-  Action
+  Action, Table
 } from '@phosphor/datastore';
 
 
@@ -64,25 +64,97 @@ class CreateOutputItem extends Action<'@jupyterlab/outputarea/CREATE_OUTPUT_ITEM
  *
  */
 export
-class AddOutputItem extends Action<'@jupyterlab/outputarea/ADD_OUTPUT_ITEM'> {
+class CreateOutputList extends Action<'@jupyterlab/outputarea/CREATE_OUTPUT_LIST'> {
   /**
    *
    */
-  constructor(outputAreaId: string, outputItemId: string) {
-    super('@jupyterlab/outputarea/ADD_OUTPUT_ITEM');
-    this.outputAreaId = outputAreaId;
-    this.outputItemId = outputItemId;
+  constructor(id: string, list: Table.List<string>) {
+    super('@jupyterlab/outputarea/CREATE_OUTPUT_LIST');
+    this.id = id;
+    this.list = list;
   }
 
   /**
    *
    */
-  readonly outputAreaId: string;
+  readonly id: string;
 
   /**
    *
    */
-  readonly outputItemId: string;
+  readonly list: Table.List<string>;
+}
+
+
+/**
+ *
+ */
+export
+class CreateOutputArea extends Action<'@jupyterlab/outputarea/CREATE_OUTPUT_AREA'> {
+  /**
+   *
+   */
+  constructor(id: string, area: IOutputArea) {
+    super('@jupyterlab/outputarea/CREATE_OUTPUT_AREA');
+    this.id = id;
+    this.area = area;
+  }
+
+  /**
+   *
+   */
+  readonly id: string;
+
+  /**
+   *
+   */
+  readonly area: IOutputArea;
+}
+
+
+/**
+ *
+ */
+export
+class AddOutput extends Action<'@jupyterlab/outputarea/ADD_OUTPUT'> {
+  /**
+   *
+   */
+  constructor(areaId: string, itemId: string) {
+    super('@jupyterlab/outputarea/ADD_OUTPUT');
+    this.areaId = areaId;
+    this.itemId = itemId;
+  }
+
+  /**
+   *
+   */
+  readonly areaId: string;
+
+  /**
+   *
+   */
+  readonly itemId: string;
+}
+
+
+/**
+ *
+ */
+export
+class ClearOutputs extends Action<'@jupyterlab/outputarea/CLEAR_OUTPUTS'> {
+  /**
+   *
+   */
+  constructor(areaId: string) {
+    super('@jupyterlab/outputarea/CLEAR_OUTPUTS');
+    this.areaId = areaId;
+  }
+
+  /**
+   *
+   */
+  readonly areaId: string;
 }
 
 
@@ -93,5 +165,7 @@ export
 type OutputAction = (
   CreateMimeModel |
   CreateOutputItem |
+  CreateOutputList |
+  CreateOutputArea
   AddOutputItem
 );

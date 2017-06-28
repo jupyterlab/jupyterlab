@@ -3,6 +3,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 import {
+  DataStore, Table
+} from '@phosphor/datastore';
+
+import {
   IMimeModel
 } from '@jupyterlab/rendermime';
 
@@ -23,9 +27,9 @@ interface IOutputItem {
   readonly executionCount: nbformat.ExecutionCount;
 
   /**
-   *
+   * The id of the item's mime model.
    */
-  mimeModelId: string;
+  readonly mimeModelId: string;
 }
 
 
@@ -35,58 +39,14 @@ interface IOutputItem {
 export
 interface IOutputArea {
   /**
-   *
+   * Whether code is currently executing for the area.
    */
   readonly isExecuting: boolean;
 
   /**
-   * The ids for the output items.
+   * The id for the area's output list.
    */
-  readonly outputItemIds: ReadonlyArray<string>;
-}
-
-
-/**
- *
- */
-export
-interface IByIdMap<T> {
-  /**
-   *
-   */
-  readonly [id: number]: T;
-}
-
-
-/**
- *
- */
-export
-interface ITable<T> {
-  /**
-   *
-   */
-  readonly maxId: number;
-
-  /**
-   *
-   */
-  readonly byId: IByIdMap<T>;
-}
-
-
-
-export
-interface IMimeStoreState {
-  /**
-   * The mime models table.
-   */
-  readonly mimeModels: ITable<IMimeModel>;
-
-    /**
-   * The mime models table.
-   */
-  readonly mimeBundles: ITable<IMimeBundle>;
+  readonly outputListId: string;
 }
 
 
@@ -94,26 +54,31 @@ interface IMimeStoreState {
  * The data type for an output area store.
  */
 export
-interface IOutputStoreState extends IMimeStoreState {
+interface IOutputStoreState {
   /**
-   * The mime models table.
+   * The table of mime models.
    */
-  readonly mimeModels: ITable<IMimeModel>;
+  readonly mimeModelTable: Table.RecordTable<IMimeModel>;
 
   /**
-   * The output items table.
+   * The table of output items.
    */
-  readonly outputItems: ITable<IOutputItem>;
+  readonly outputItemTable: Table.RecordTable<IOutputItem>;
 
   /**
-   * The output areas table.
+   * The table of output areas.
    */
-  readonly outputAreas: ITable<IOutputArea>;
+  readonly outputAreaTable: Table.RecordTable<IOutputArea>;
+
+  /**
+   * The table of output lists.
+   */
+  readonly outputListTable: Table.ListTable<string>;
 }
 
 
 /**
- *
+ * A type alias for an output store.
  */
 export
 type OutputStore = DataStore<IOutputStoreState>;
