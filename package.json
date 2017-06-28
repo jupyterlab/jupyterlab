@@ -28,8 +28,7 @@
     "addsibling": "node scripts/add-sibling.js",
     "removesibling": "node scripts/remove-sibling.js"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "lerna": "2.0.0-beta.38"
   }
