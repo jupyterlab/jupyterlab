@@ -16,21 +16,11 @@ class CreateMimeModel extends Action<'@jupyterlab/outputarea/CREATE_MIME_MODEL'>
   /**
    *
    */
-  constructor(id: string, model: IMimeModel) {
+  constructor(
+    public readonly id: string,
+    public readonly model: IMimeModel) {
     super('@jupyterlab/outputarea/CREATE_MIME_MODEL');
-    this.id = id;
-    this.model = model;
   }
-
-  /**
-   *
-   */
-  readonly id: string;
-
-  /**
-   *
-   */
-  readonly model: IMimeModel;
 }
 
 
@@ -42,21 +32,11 @@ class CreateOutputItem extends Action<'@jupyterlab/outputarea/CREATE_OUTPUT_ITEM
   /**
    *
    */
-  constructor(id: string, item: IOutputItem) {
+  constructor(
+    public readonly id: string,
+    public readonly item: IOutputItem) {
     super('@jupyterlab/outputarea/CREATE_OUTPUT_ITEM');
-    this.id = id;
-    this.item = item;
   }
-
-  /**
-   *
-   */
-  readonly id: string;
-
-  /**
-   *
-   */
-  readonly item: IOutputItem;
 }
 
 
@@ -68,21 +48,11 @@ class CreateOutputList extends Action<'@jupyterlab/outputarea/CREATE_OUTPUT_LIST
   /**
    *
    */
-  constructor(id: string, list: Table.List<string>) {
+  constructor(
+    public readonly id: string,
+    public readonly list: Table.List<string>) {
     super('@jupyterlab/outputarea/CREATE_OUTPUT_LIST');
-    this.id = id;
-    this.list = list;
   }
-
-  /**
-   *
-   */
-  readonly id: string;
-
-  /**
-   *
-   */
-  readonly list: Table.List<string>;
 }
 
 
@@ -94,21 +64,11 @@ class CreateOutputArea extends Action<'@jupyterlab/outputarea/CREATE_OUTPUT_AREA
   /**
    *
    */
-  constructor(id: string, area: IOutputArea) {
+  constructor(
+    public readonly id: string,
+    public readonly area: IOutputArea) {
     super('@jupyterlab/outputarea/CREATE_OUTPUT_AREA');
-    this.id = id;
-    this.area = area;
   }
-
-  /**
-   *
-   */
-  readonly id: string;
-
-  /**
-   *
-   */
-  readonly area: IOutputArea;
 }
 
 
@@ -120,21 +80,11 @@ class AddOutput extends Action<'@jupyterlab/outputarea/ADD_OUTPUT'> {
   /**
    *
    */
-  constructor(areaId: string, itemId: string) {
+  constructor(
+    public readonly listId: string,
+    public readonly itemId: string) {
     super('@jupyterlab/outputarea/ADD_OUTPUT');
-    this.areaId = areaId;
-    this.itemId = itemId;
   }
-
-  /**
-   *
-   */
-  readonly areaId: string;
-
-  /**
-   *
-   */
-  readonly itemId: string;
 }
 
 
@@ -146,15 +96,10 @@ class ClearOutputs extends Action<'@jupyterlab/outputarea/CLEAR_OUTPUTS'> {
   /**
    *
    */
-  constructor(areaId: string) {
+  constructor(
+    public readonly id: string) {
     super('@jupyterlab/outputarea/CLEAR_OUTPUTS');
-    this.areaId = areaId;
   }
-
-  /**
-   *
-   */
-  readonly areaId: string;
 }
 
 
@@ -166,6 +111,7 @@ type OutputAction = (
   CreateMimeModel |
   CreateOutputItem |
   CreateOutputList |
-  CreateOutputArea
-  AddOutputItem
+  CreateOutputArea |
+  AddOutput |
+  ClearOutputs
 );

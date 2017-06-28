@@ -3,17 +3,41 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 import {
-  ITable, TableHelpers
+  Table, combineReducers
 } from '@phosphor/datastore';
 
+import {
+  IMimeModel
+} from '@jupyterlab/rendermime';
 
+import {
+  IOutputArea, IOutputItem, IOutputStoreState
+} from './models';
+
+
+/**
+ *
+ */
 export
 const reducer = combineReducers<IOutputStoreState>({
-  // mimeModelTable,
+  mimeModelTable,
   outputItemTable,
   outputAreaTable,
   outputListTable
 });
+
+
+/**
+ *
+ */
+function mimeModelTable(table: Table.RecordTable<IMimeModel>, action: OutputAction): Table.RecordTable<IMimeModel> {
+  switch (action.type) {
+  case '@jupyterlab/outputarea/CREATE_MIME_MODEL':
+    return Table.insert(table, action.id, action.model);
+  default:
+    return table;
+  }
+}
 
 
 /**
@@ -47,6 +71,8 @@ function outputAreaTable(table: Table.RecordTable<IOutputArea>, action: OutputAc
  */
 function outputListTable(table: Table.ListTable<string>, action: OutputAction): Table.ListTable<string> {
   switch (action.type) {
+  case '@jupyterlab/outputarea/CREATE_OUTPUT_LIST':
+    return Table.insert(table, action.id, action.list);
   case '@jupyterlab/outputarea/ADD_OUTPUT':
     return Table.push(table, action.listId, [action.itemId]);
   case '@jupyterlab/outputarea/CLEAR_OUTPUTS':
