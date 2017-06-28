@@ -237,8 +237,9 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
 
       //Create the body of the about dialog
       let jupyterURL = 'https://jupyter.org/about.html';
+      let contributorsURL = 'https://github.com/jupyterlab/jupyterlab/graphs/contributors';
       let externalLinks = h.span({className: 'jp-About-externalLinks'},
-        h.a({href: '#', className: 'jp-Button-flat'}, "CORE CONTRIBUTORS"),
+        h.a({href: contributorsURL, target: '_blank', className: 'jp-Button-flat'}, "CONTRIBUTOR LIST"),
         h.a({href: jupyterURL, target: '_blank', className: 'jp-Button-flat'}, "ABOUT PROJECT JUPYTER")
       );
       let copyright = h.span({className: 'jp-About-copyright'}, "© 2017 Project Jupyter");
