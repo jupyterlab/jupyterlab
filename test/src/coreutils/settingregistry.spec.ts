@@ -14,40 +14,36 @@ import {
 
 export
 class TestConnector extends StateDB implements IDataConnector<ISettingRegistry.IPlugin, JSONObject> {
-  constructor(schemas: { [key: string]: ISettingRegistry.ISchema }) {
+  constructor(public schemas: { [key: string]: ISettingRegistry.ISchema } = { }) {
     super({ namespace: 'setting-registry-tests' });
-    this._schemas = schemas;
   }
 
   fetch(id: string): Promise<ISettingRegistry.IPlugin | null> {
     return super.fetch(id).then(user => {
-      if (!user && !this._schemas[id]) {
+      if (!user && !this.schemas[id]) {
         return null;
       }
 
       user = user || { };
 
-      const schema = this._schemas[id] || { type: 'object' };
+      const schema = this.schemas[id] || { type: 'object' };
       const result = { data: { composite: { }, user }, id, schema };
 
       return result;
     });
   }
-
-  private _schemas: { [key: string]: ISettingRegistry.ISchema };
 }
 
 
 describe('@jupyterlab/coreutils', () => {
 
-  const schemas: { [key: string]: ISettingRegistry.ISchema } = { };
-  const connector = new TestConnector(schemas);
+  const connector = new TestConnector();
 
   let registry: SettingRegistry;
 
   beforeEach(() => {
     return connector.clear().then(() => {
-      Object.keys(schemas).forEach(key => { delete schemas[key]; });
+      connector.schemas = { };
       registry = new SettingRegistry({ connector });
     });
   });
@@ -69,7 +65,7 @@ describe('@jupyterlab/coreutils', () => {
         const key = 'bar';
         const value = 'baz';
 
-        schemas[id] = { type: 'object' };
+        connector.schemas[id] = { type: 'object' };
         registry.pluginChanged.connect((sender: any, plugin: string) => {
           expect(id).to.be(plugin);
           done();
@@ -86,8 +82,8 @@ describe('@jupyterlab/coreutils', () => {
         const two = 'bar';
 
         expect(registry.plugins).to.be.empty();
-        schemas[one] = { type: 'object' };
-        schemas[two] = { type: 'object' };
+        connector.schemas[one] = { type: 'object' };
+        connector.schemas[two] = { type: 'object' };
         registry.load(one)
           .then(() => { expect(registry.plugins).to.have.length(1); })
           .then(() => registry.load(two))
@@ -105,7 +101,7 @@ describe('@jupyterlab/coreutils', () => {
         const key = 'bar';
         const value = 'baz';
 
-        schemas[id] = { type: 'object' };
+        connector.schemas[id] = { type: 'object' };
         connector.save(id, { [key]: value })
           .then(() => registry.load(id))
           .then(() => registry.get(id, key))
@@ -119,7 +115,7 @@ describe('@jupyterlab/coreutils', () => {
         const key = 'beta';
         const value = 'gamma';
 
-        schemas[id] = { type: 'object' };
+        connector.schemas[id] = { type: 'object' };
         connector.save(id, { [key]: value })
           .then(() => registry.get(id, key))
           .then(saved => { expect(saved.composite).to.be(value); })
@@ -131,7 +127,7 @@ describe('@jupyterlab/coreutils', () => {
         const id = 'alpha';
         const key = 'beta';
         const value = 'gamma';
-        const schema = schemas[id] = {
+        const schema = connector.schemas[id] = {
           type: 'object',
           properties: {
             [key]: { type: typeof value, default: value }
@@ -150,7 +146,7 @@ describe('@jupyterlab/coreutils', () => {
         const id = 'alpha';
         const key = 'beta';
         const value = 'gamma';
-        const schema = schemas[id] = {
+        const schema = connector.schemas[id] = {
           type: 'object',
           properties: {
             [key]: { type: typeof value, default: 'delta' }
@@ -178,7 +174,7 @@ describe('@jupyterlab/coreutils', () => {
         const id = 'foo';
         const key = 'bar';
 
-        schemas[id] = { type: 'object' };
+        connector.schemas[id] = { type: 'object' };
 
         registry.get(id, key)
           .then(saved => {
@@ -196,7 +192,7 @@ describe('@jupyterlab/coreutils', () => {
         const id = 'foo';
 
         expect(registry.plugins).to.be.empty();
-        schemas[id] = { type: 'object' };
+        connector.schemas[id] = { type: 'object' };
         registry.load(id)
           .then(settings => { expect(settings.plugin).to.be(id); })
           .then(done)
