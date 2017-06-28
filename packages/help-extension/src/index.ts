@@ -217,7 +217,8 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   commands.addCommand(CommandIDs.about, {
     label: `About ${info.name}`,
     execute: () => {
-      let jupyterURL = 'https://jupyter.org/about.html';
+
+      //Create the header of the about dialog
       let headerLogo = h.div({className: 'jp-About-header-logo'});
       let headerWordmark = h.div({className: 'jp-About-header-wordmark'});
       let release = 'alpha release';
@@ -234,17 +235,18 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
         )
       ));
 
-
+      //Create the body of the about dialog
+      let jupyterURL = 'https://jupyter.org/about.html';
       let externalLinks = h.span({className: 'jp-About-externalLinks'},
         h.a({href: '#', className: 'jp-Button-flat'}, "CORE CONTRIBUTORS"),
         h.a({href: jupyterURL, target: '_blank', className: 'jp-Button-flat'}, "ABOUT PROJECT JUPYTER")
       );
       let copyright = h.span({className: 'jp-About-copyright'}, "© 2017 Project Jupyter");
-
       let body = VirtualDOM.realize(h.div({ className: 'jp-About-body' },
         externalLinks,
         copyright
       ));
+
       showDialog({
         title,
         body,
