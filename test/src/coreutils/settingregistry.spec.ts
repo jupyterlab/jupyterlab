@@ -21,7 +21,13 @@ class TestConnector extends StateDB implements IDataConnector<ISettingRegistry.I
 
   fetch(id: string): Promise<ISettingRegistry.IPlugin | null> {
     return super.fetch(id).then(user => {
-      const schema = this._schemas[id] || { };
+      if (!user && !this._schemas[id]) {
+        return null;
+      }
+
+      user = user || { };
+
+      const schema = this._schemas[id] || { type: 'object' };
       const result = { data: { composite: { }, user }, id, schema };
 
       return result;
@@ -164,7 +170,7 @@ describe('@jupyterlab/coreutils', () => {
 
       it('should reject if a plugin does not exist', done => {
         registry.get('foo', 'bar')
-          .then(saved => { throw new Error('should not resolve'); })
+          .then(saved => { done('should not resolve'); })
           .catch(reason => { done(); });
       });
 
@@ -199,7 +205,7 @@ describe('@jupyterlab/coreutils', () => {
 
       it('should reject if a plugin does not exist', done => {
         registry.load('foo')
-          .then(settings => { throw new Error('should not resolve'); })
+          .then(settings => { done('should not resolve'); })
           .catch(reason => { done(); });
       });
 

@@ -33,7 +33,13 @@ class SettingClientDataConnector extends StateDB implements IDataConnector<ISett
    */
   fetch(id: string): Promise<ISettingRegistry.IPlugin | null> {
     return super.fetch(id).then(user => {
-      const schema = Private.schemas[id] || { };
+      if (!user && !Private.schemas[id]) {
+        return null;
+      }
+
+      user = user || { };
+
+      const schema = Private.schemas[id] || { type: 'object' };
       const result = { data: { composite: { }, user }, id, schema };
 
       return result;
