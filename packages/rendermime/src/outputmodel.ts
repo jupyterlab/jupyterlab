@@ -6,11 +6,11 @@ import {
 } from '@jupyterlab/rendermime-interfaces';
 
 import {
-  JSONValue
+  JSONValue, JSONObject
 } from '@phosphor/coreutils';
 
 import {
-  Action, DataStore
+  Action, DataStore, Table
 } from '@phosphor/datastore';
 
 import {
@@ -32,7 +32,7 @@ class OutputMimeModel implements IRenderMime.IMimeModel, IDisposable {
    */
   constructor(options: OutputMimeModel.IOptions) {
     let { id, dataStore } = options;
-    let model = this._model = dataStore.state.mimeModels.byId[id];
+    let model = this._model = dataStore.state.mimeModels[id];
     this._data = new Private.Bundle(model.dataId, dataStore);
     this._metadata = new Private.Bundle(model.metadataId, dataStore);
     this._dataStore = dataStore;
@@ -82,7 +82,7 @@ class OutputMimeModel implements IRenderMime.IMimeModel, IDisposable {
    */
   private _onStoreChanged(): void {
     let dataStore = this._dataStore;
-    let model = dataStore.state.mimeModels.byId[this._id];
+    let model = dataStore.state.mimeModels[this._id];
     if (model === this._model) {
       return;
     }
@@ -91,7 +91,7 @@ class OutputMimeModel implements IRenderMime.IMimeModel, IDisposable {
     this._metadata = new Private.Bundle(model.metadataId, dataStore);
   }
 
-  private _id: number;
+  private _id: string;
   private _isDisposed = false;
   private _model: IOutputMimeModel;
   private _dataStore: MimeModelStore;
@@ -113,49 +113,13 @@ namespace OutputMimeModel {
     /**
      * The model id associated with the model.
      */
-    id: number;
+    id: string;
 
     /**
      * The data store associated with the model.
      */
     dataStore: MimeModelStore;
   }
-}
-
-
-/**
- *
- */
-export
-interface IByIdMap<T> {
-  /**
-   *
-   */
-  readonly [id: number]: T;
-}
-
-/**
- *
- */
-export
-interface ITable<T> {
-  /**
-   *
-   */
-  readonly maxId: number;
-
-  /**
-   *
-   */
-  readonly byId: IByIdMap<T>;
-}
-
-/**
- * A read-only bundle of data for a mime model.
- */
-export
-interface IMimeBundle {
-  readonly [key: string]: JSONValue;
 }
 
 
@@ -172,12 +136,21 @@ interface IOutputMimeModel {
   /**
    * The data bundle id associated with the model.
    */
-  readonly dataId: number;
+  readonly dataId: string;
 
   /**
    * The metadata bundle id associated with the model.
    */
-  readonly metadataId: number;
+  readonly metadataId: string;
+}
+
+
+/**
+ * A mime-type keyed dictionary of data.
+ */
+export
+interface IMimeBundle extends JSONObject {
+  [key: string]: JSONObject;
 }
 
 
@@ -189,12 +162,12 @@ interface IMimeStoreState {
   /**
    * The mime models table.
    */
-  readonly mimeModels: ITable<IOutputMimeModel>;
+  readonly mimeModels: Table.RecordTable<IOutputMimeModel>;
 
   /**
    * The mime models table.
    */
-  readonly mimeBundles: ITable<IMimeBundle>;
+  readonly mimeBundles: Table.RecordTable<IMimeBundle>;
 }
 
 
@@ -225,7 +198,7 @@ class CreateMimeModel extends Action<'@jupyterlab/outputarea/CREATE_MIME_MODEL'>
   /**
    * Construct a new CreateMimeModel object.
    */
-  constructor(id: number, model: IOutputMimeModel) {
+  constructor(id: string, model: IOutputMimeModel) {
     super('@jupyterlab/outputarea/CREATE_MIME_MODEL');
     this.id = id;
     this.model = model;
@@ -234,7 +207,7 @@ class CreateMimeModel extends Action<'@jupyterlab/outputarea/CREATE_MIME_MODEL'>
   /**
    * The id of the mime model.
    */
-  readonly id: number;
+  readonly id: string;
 
   /**
    * The model to add.
@@ -251,7 +224,7 @@ class CreateMimeBundle extends Action<'@jupyterlab/outputarea/CREATE_MIME_BUNDLE
   /**
    * Construct a new CreateMimeBundle object.
    */
-  constructor(id: number, bundle: IMimeBundle) {
+  constructor(id: string, bundle: IMimeBundle) {
     super('@jupyterlab/outputarea/CREATE_MIME_BUNDLE');
     this.id = id;
     this.bundle = bundle;
@@ -260,7 +233,7 @@ class CreateMimeBundle extends Action<'@jupyterlab/outputarea/CREATE_MIME_BUNDLE
   /**
    * The id of the mime bundle.
    */
-  readonly id: number;
+  readonly id: string;
 
   /**
    * The model to add.
@@ -277,7 +250,7 @@ class AddToMimeBundle extends Action<'@jupyterlab/outputarea/ADD_TO_MIME_BUNDLE'
   /**
    * Construct a new AddToMimeBundle object.
    */
-  constructor(id: number, key: string, value: JSONValue) {
+  constructor(id: string, key: string, value: JSONValue) {
     super('@jupyterlab/outputarea/ADD_TO_MIME_BUNDLE');
     this.id = id;
     this.key = key;
@@ -286,7 +259,7 @@ class AddToMimeBundle extends Action<'@jupyterlab/outputarea/ADD_TO_MIME_BUNDLE'
   /**
    * The id of the mime bundle.
    */
-  readonly id: number;
+  readonly id: string;
 
   /**
    * The key to add or update.
@@ -308,7 +281,7 @@ class RemoveFromMimeBundle extends Action<'@jupyterlab/outputarea/REMOVE_FROM_MI
   /**
    * Construct a new RemoveFromMimeBundle object.
    */
-  constructor(id: number, key: string) {
+  constructor(id: string, key: string) {
     super('@jupyterlab/outputarea/REMOVE_FROM_MIME_BUNDLE');
     this.id = id;
     this.key = key;
@@ -317,7 +290,7 @@ class RemoveFromMimeBundle extends Action<'@jupyterlab/outputarea/REMOVE_FROM_MI
   /**
    * The id of the mime bundle.
    */
-  readonly id: number;
+  readonly id: string;
 
   /**
    * The key to remove.
@@ -339,56 +312,28 @@ function mimeReducer(state: IMimeStoreState, action: MimeModelAction): IMimeStor
 }
 
 
-function mimeModels(table: ITable<IOutputMimeModel>, action: MimeModelAction): ITable<IOutputMimeModel> {
+function mimeModels(table: Table.RecordTable<IOutputMimeModel>, action: MimeModelAction): Table.RecordTable<IOutputMimeModel> {
   switch (action.type) {
   case '@jupyterlab/outputarea/CREATE_MIME_MODEL':
-    return createNewEntry(table, action.id, action.model);
+    return Table.insert(table, action.id, action.model);
   default:
     return table;
   }
 }
 
 
-function mimeBundles(table: ITable<IMimeBundle>, action: MimeModelAction): ITable<IMimeBundle> {
+function mimeBundles(table: Table.RecordTable<IMimeBundle>, action: MimeModelAction): Table.RecordTable<IMimeBundle> {
   let entry: IMimeBundle;
   switch (action.type) {
   case '@jupyterlab/outputarea/CREATE_MIME_BUNDLE':
-    return createNewEntry(table, action.id, action.bundle);
+    return Table.insert(table, action.id, action.bundle);
   case '@jupyterlab/outputarea/ADD_TO_MIME_BUNDLE':
-    entry = { ...table.byId[action.id], [action.key]: action.value };
-    return {
-      ...table,
-      byId: { ...table.byId, [action.id]: entry }
-    };
+    entry = { ...table[action.id], [action.key]: action.value };
+    return Table.replace(table, action.id, entry);
   case '@jupyterlab/outputarea/REMOVE_FROM_MIME_BUNDLE':
-    entry = { ...table.byId[action.id] };
-    delete (entry as any)[action.key];
-    return {
-      ...table,
-      byId: { ...table.byId, [action.id]: entry }
-    };
+    return Table.remove(table, action.id);
   default:
     return table;
-  }
-}
-
-
-/**
- *
- */
-function createNewEntry<T>(table: ITable<T>, id: number, entry: T): ITable<T> {
-  if (id in table.byId) {
-    throw new Error(`Id '${id}' already exists.`);
-  }
-
-  return { ...table, maxId: maxId(table.maxId), byId: byId(table.byId) };
-
-  function byId(map: IByIdMap<T>): IByIdMap<T> {
-    return { ...map, [id]: entry };
-  }
-
-  function maxId(maxId: number): number {
-    return Math.max(maxId, id);
   }
 }
 
@@ -405,7 +350,7 @@ namespace Private {
     /**
      * Create a new bundle.
      */
-    constructor(id: number, dataStore: MimeModelStore) {
+    constructor(id: string, dataStore: MimeModelStore) {
       this._id = id;
       this._dataStore = dataStore;
     }
@@ -418,7 +363,7 @@ namespace Private {
      * @returns the value for that key.
      */
     get(key: string): JSONValue {
-      return this._dataStore.state.mimeBundles.byId[this._id][key];
+      return this._dataStore.state.mimeBundles[this._id][key];
     }
 
     /**
@@ -429,7 +374,7 @@ namespace Private {
      * @returns `true` if the bundle has the key, `false` otherwise.
      */
     has(key: string): boolean {
-      let model = this._dataStore.state.mimeBundles.byId[this._id];
+      let model = this._dataStore.state.mimeBundles[this._id];
       return Object.keys(model).indexOf(key) !== -1;
     }
 
@@ -456,7 +401,7 @@ namespace Private {
      * @returns - a list of keys.
      */
     keys(): string[] {
-      let model = this._dataStore.state.mimeBundles.byId[this._id];
+      let model = this._dataStore.state.mimeBundles[this._id];
       return Object.keys(model);
     }
 
@@ -475,7 +420,7 @@ namespace Private {
       return old;
     }
 
-    private _id: number;
+    private _id: string;
     private _dataStore: MimeModelStore;
   }
 }
