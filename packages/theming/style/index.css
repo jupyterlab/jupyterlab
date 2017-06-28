@@ -25,6 +25,7 @@ body {
 @import './menus.css';
 @import './scrollbar.css';
 @import './tabs.css';
+@import './buttons.css';
 
 
 :root {

@@ -217,23 +217,25 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   commands.addCommand(CommandIDs.about, {
     label: `About ${info.name}`,
     execute: () => {
-      let previewMessage = `alpha (v${info.version})`;
-      let logo = h.span({
-        className: `jp-ImageJupyterLab jp-About-logo`
-      });
-      let subtitle = h.span(
-        {className: 'jp-About-subtitle'},
-        previewMessage
+      let release = 'alpha release';
+      let versionNumber = `version: ${info.version}`;
+      let versionInfo = h.span({className: 'jp-About-versionInfo'},
+        h.span({className: 'jp-About-release'}, release),
+        h.span({className: 'jp-About-version'}, versionNumber)
       );
-
+      let externalLinks = h.span({className: 'jp-About-externalLinks'},
+        h.span({className: 'jp-Button-flat'}, "CORE CONTRIBUTORS"),
+        h.span({className: 'jp-Button-flat'}, "ABOUT PROJECT JUPYTER")
+      );
+      let title = VirtualDOM.realize(h.span({ className: 'jp-About-logo jp-ImageJupyterLab-wordmark'}));
       let body = VirtualDOM.realize(h.div({ className: 'jp-About' },
-        logo,
-        subtitle
+        versionInfo,
+        externalLinks
       ));
       showDialog({
-        title: `About ${info.name}`,
+        title,
         body,
-        buttons: [Dialog.okButton()]
+        buttons: [Dialog.createButton({label: 'DISMISS', className: 'jp-About-button jp-mod-reject jp-mod-styled'})]
       });
     }
   });
