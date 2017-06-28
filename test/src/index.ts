@@ -46,6 +46,7 @@ import './coreutils/observablestring.spec';
 import './coreutils/observablelist.spec';
 import './coreutils/pageconfig.spec';
 import './coreutils/path.spec';
+import './coreutils/settingregistry.spec';
 import './coreutils/time.spec';
 import './coreutils/undoablelist.spec';
 import './coreutils/url.spec';
