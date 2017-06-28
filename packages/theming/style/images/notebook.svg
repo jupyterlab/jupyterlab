@@ -3,12 +3,13 @@
 <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 192 192" style="enable-background:new 0 0 192 192;" xml:space="preserve">
 <style type="text/css">
-	.st0{fill:#EF6C00;}
-	.st1{fill:none;stroke:#FFFFFF;stroke-width:1.4;stroke-miterlimit:10;}
+	.st0{fill:none;stroke:#FFFFFF;stroke-width:1.4;stroke-miterlimit:10;}
+	.st1{fill:#EF6C00;}
+	.st2{fill:#FFFFFF;}
 </style>
 <title>notebook-01</title>
-<polygon class="st0" points="134.5,146.9 95.6,115.9 57.5,146.9 57.5,55.7 134.5,55.7 "/>
-<path class="st1" d="M77.9,155.8"/>
-<path class="st1" d="M77.9,29.2"/>
-<path class="st0" d="M175.7,175.7H16.3V16.3h159.3V175.7z M29.6,162.4h132.8V29.6H29.6V162.4z"/>
+<path class="st0" d="M77.9,155.8"/>
+<path class="st0" d="M77.9,29.2"/>
+<path class="st1" d="M175.7,175.7H16.3V16.3h159.3L175.7,175.7L175.7,175.7z"/>
+<polygon class="st2" points="134.5,146.9 95.6,115.9 57.5,146.9 57.5,55.7 134.5,55.7 "/>
 </svg>
