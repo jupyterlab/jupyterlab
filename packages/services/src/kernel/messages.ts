@@ -596,6 +596,11 @@ namespace KernelMessage {
   export
   interface IExecuteOkReply extends IExecuteReply {
     /**
+     * The status code for the message.
+     */
+    status: 'ok';
+
+    /**
      * A list of payload objects.
      * Payloads are considered deprecated.
      * The only requirement of each payload object is that it have a 'source'
@@ -616,6 +621,11 @@ namespace KernelMessage {
    */
   export
   interface IExecuteErrorReply extends IExecuteReply {
+    /**
+     * The status code for the message.
+     */
+    status: 'error';
+
     /**
      * The exception name.
      */
