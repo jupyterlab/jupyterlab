@@ -52,7 +52,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IRenderMime
+  RenderMime
 } from '@jupyterlab/rendermime';
 
 import {
@@ -202,7 +202,7 @@ class StaticNotebook extends Widget {
   /**
    * The Rendermime instance used by the widget.
    */
-  readonly rendermime: IRenderMime;
+  readonly rendermime: RenderMime;
 
   /**
    * The model for the widget.
@@ -519,7 +519,7 @@ namespace StaticNotebook {
     /**
      * The rendermime instance used by the widget.
      */
-    rendermime: IRenderMime;
+    rendermime: RenderMime;
 
     /**
      * The language preference for the model.

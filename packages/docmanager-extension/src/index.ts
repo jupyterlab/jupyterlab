@@ -14,10 +14,6 @@ import {
 } from '@jupyterlab/docmanager';
 
 import {
-  IDocumentRegistry
-} from '@jupyterlab/docregistry';
-
-import {
   Contents, Kernel, IServiceManager
 } from '@jupyterlab/services';
 
@@ -64,8 +60,8 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<IDocumentManager> = {
   id: 'jupyter.services.document-manager',
   provides: IDocumentManager,
-  requires: [IServiceManager, IDocumentRegistry, ICommandPalette, IMainMenu],
-  activate: (app: JupyterLab, manager: IServiceManager, registry: IDocumentRegistry, palette: ICommandPalette, mainMenu: IMainMenu): IDocumentManager => {
+  requires: [IServiceManager, ICommandPalette, IMainMenu],
+  activate: (app: JupyterLab, manager: IServiceManager, palette: ICommandPalette, mainMenu: IMainMenu): IDocumentManager => {
     const opener: DocumentManager.IWidgetOpener = {
       open: widget => {
         if (!widget.id) {
@@ -81,10 +77,11 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
         app.shell.activateById(widget.id);
       }
     };
+    const registry = app.docRegistry;
     const docManager = new DocumentManager({ registry, manager, opener });
 
     // Register the file operations commands.
-    addCommands(app, docManager, registry, palette);
+    addCommands(app, docManager, palette);
 
     return docManager;
   }
@@ -100,7 +97,7 @@ export default plugin;
 /**
  * Add the file operations commands to the application's command registry.
  */
-function addCommands(app: JupyterLab, docManager: IDocumentManager, registry: IDocumentRegistry, palette: ICommandPalette): void {
+function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICommandPalette): void {
   const { commands } = app;
   const category = 'File Operations';
   const isEnabled = () => {

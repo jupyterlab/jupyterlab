@@ -18,7 +18,7 @@ import {
 } from '@jupyterlab/docmanager';
 
 import {
-  DocumentRegistry, IDocumentRegistry
+  DocumentRegistry
 } from '@jupyterlab/docregistry';
 
 import {
@@ -411,7 +411,7 @@ function createMenu(app: JupyterLab): Menu {
  * This function generates temporary commands with an incremented name. These
  * commands are disposed when the menu itself is disposed.
  */
-function createContextMenu(path: string, commands: CommandRegistry, registry: IDocumentRegistry):  Menu {
+function createContextMenu(path: string, commands: CommandRegistry, registry: DocumentRegistry):  Menu {
   const menu = new Menu({ commands });
 
   menu.addItem({ command: CommandIDs.open });

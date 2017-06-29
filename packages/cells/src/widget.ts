@@ -32,6 +32,10 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
+  DocumentRegistry
+} from '@jupyterlab/docregistry';
+
+import {
   MimeModel, RenderMime
 } from '@jupyterlab/rendermime';
 
@@ -166,7 +170,7 @@ const RENDER_TIMEOUT = 1000;
  * A base cell widget.
  */
 export
-class Cell extends Widget implements RenderMime.IReadyWidget {
+class Cell extends Widget implements DocumentRegistry.IReadyWidget {
   /**
    * Construct a new base cell widget.
    */

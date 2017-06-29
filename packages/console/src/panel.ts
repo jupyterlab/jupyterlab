@@ -18,10 +18,6 @@ import {
 } from '@jupyterlab/rendermime';
 
 import {
-  IRenderMime
-} from '@jupyterlab/rendermime';
-
-import {
   ServiceManager
 } from '@jupyterlab/services';
 
@@ -188,7 +184,7 @@ namespace ConsolePanel {
     /**
      * The rendermime instance used by the panel.
      */
-    rendermime: IRenderMime;
+    rendermime: RenderMime;
 
     /**
      * The content factory for the panel.

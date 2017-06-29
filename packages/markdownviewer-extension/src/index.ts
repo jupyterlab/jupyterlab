@@ -10,14 +10,6 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IDocumentRegistry
-} from '@jupyterlab/docregistry';
-
-import {
-  IRenderMime
-} from '@jupyterlab/rendermime';
-
-import {
   MarkdownViewer, MarkdownViewerFactory
 } from '@jupyterlab/markdownviewer';
 
@@ -48,7 +40,7 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<void> = {
   activate,
   id: 'jupyter.extensions.rendered-markdown',
-  requires: [IDocumentRegistry, IRenderMime, ILayoutRestorer],
+  requires: [ILayoutRestorer],
   autoStart: true
 };
 
@@ -56,12 +48,12 @@ const plugin: JupyterLabPlugin<void> = {
 /**
  * Activate the markdown plugin.
  */
-function activate(app: JupyterLab, registry: IDocumentRegistry, rendermime: IRenderMime, restorer: ILayoutRestorer) {
+function activate(app: JupyterLab, restorer: ILayoutRestorer) {
     const factory = new MarkdownViewerFactory({
       name: FACTORY,
       fileExtensions: ['.md'],
       readOnly: true,
-      rendermime
+      rendermime: app.rendermime
     });
 
     const { commands } = app;
@@ -82,7 +74,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, rendermime: IRen
       tracker.add(widget);
     });
 
-    registry.addWidgetFactory(factory);
+    app.docRegistry.addWidgetFactory(factory);
 
     commands.addCommand(CommandIDs.preview, {
       label: 'Markdown Preview',

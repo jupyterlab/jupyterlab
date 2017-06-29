@@ -43,13 +43,6 @@ import {
 
 
 /**
- * The interface for a document registry.
- */
-export
-interface IDocumentRegistry extends DocumentRegistry {}
-
-
-/**
  * The document registry.
  */
 export

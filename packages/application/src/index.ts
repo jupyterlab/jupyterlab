@@ -60,7 +60,8 @@ class JupyterLab extends Application<ApplicationShell> {
     if (options.devMode) {
       this.shell.addClass('jp-mod-devMode');
     }
-    let linker = this.linker = new CommandLinker({ commands: this.commands });
+    let linker = new CommandLinker({ commands: this.commands });
+    this.commandLinker = linker;
 
     let items = Private.getDefaultRendererItems();
     let linkHandler = {
@@ -70,7 +71,7 @@ class JupyterLab extends Application<ApplicationShell> {
     };
     this.rendermime = new RenderMime({ items, linkHandler });
 
-    let registry = this.docregistry = new DocumentRegistry();
+    let registry = this.docRegistry = new DocumentRegistry();
     registry.addModelFactory(new TextModelFactory());
     registry.addModelFactory(new Base64ModelFactory());
     registry.addFileType({
@@ -90,7 +91,7 @@ class JupyterLab extends Application<ApplicationShell> {
   /**
    * The document registry instance used by the application.
    */
-  readonly docregistry: DocumentRegistry;
+  readonly docRegistry: DocumentRegistry;
 
   /**
    * The rendermime instance used by the application.
@@ -100,7 +101,7 @@ class JupyterLab extends Application<ApplicationShell> {
   /**
    * The command linker used by the application.
    */
-  readonly linker: CommandLinker;
+  readonly commandLinker: CommandLinker;
 
   /**
    * The information about the application.

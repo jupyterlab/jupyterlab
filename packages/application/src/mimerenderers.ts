@@ -75,7 +75,7 @@ function createRendermimePlugin(item: IRenderMime.IExtension): JupyterLabPlugin<
         rendermime: app.rendermime,
         ...item.widgetFactoryOptions,
       });
-      app.docregistry.addWidgetFactory(factory);
+      app.docRegistry.addWidgetFactory(factory);
 
       const factoryName = item.widgetFactoryOptions.name;
       const namespace = `${factoryName}-renderer`;
