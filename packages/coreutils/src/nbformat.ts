@@ -70,17 +70,17 @@ namespace nbformat {
   }
 
   /**
-   * A multiline string.
+   * A value in a mime bundle.
    */
   export
-  type MultilineString = string | string[];
+  type MimeValue = string | string[] | JSONObject;
 
   /**
    * A mime-type keyed dictionary of data.
    */
   export
-  interface IMimeBundle extends JSONObject {
-    [key: string]: MultilineString | JSONObject;
+  interface IMimeBundle {
+    [key: string]: MimeValue;
   }
 
   /**
@@ -113,7 +113,7 @@ namespace nbformat {
    * @returns Whether the type/value pair are valid.
    */
   export
-  function validateMimeValue(type: string, value: MultilineString | JSONObject): boolean {
+  function validateMimeValue(type: string, value: MimeValue): boolean {
     // Check if "application/json" or "application/foo+json"
     const jsonTest = /^application\/(.*?)+\+json$/;
     const isJSONType = type === 'application/json' || jsonTest.test(type);
@@ -197,7 +197,7 @@ namespace nbformat {
     /**
      * Contents of the cell, represented as an array of lines.
      */
-    source: MultilineString;
+    source: string | string[];
 
     /**
      * Cell-level metadata.
@@ -441,7 +441,7 @@ namespace nbformat {
     /**
      * The stream's text output.
      */
-    text: MultilineString;
+    text: string | string[];
   }
 
   /**
