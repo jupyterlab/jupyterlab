@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  ArrayExt, find, map, toArray
+  ArrayExt, each, find
 } from '@phosphor/algorithm';
 
 import {
@@ -20,14 +20,6 @@ import {
 import {
   IClientSession, ISanitizer, defaultSanitizer
 } from '@jupyterlab/apputils';
-
-import {
-  MimeModel
-} from './mimemodel';
-
-import {
-  RenderedText
-} from './widgets';
 
 
 /**
@@ -43,12 +35,6 @@ class RenderMime {
    * Construct a renderer.
    */
   constructor(options: RenderMime.IOptions = {}) {
-    if (options.items) {
-      for (let item of options.items) {
-        this._order.push(item.mimeType);
-        this._renderers[item.mimeType] = item.renderer;
-      }
-    }
     this.sanitizer = options.sanitizer || defaultSanitizer;
     this._resolver = options.resolver || null;
     this._handler = options.linkHandler || null;
@@ -75,6 +61,11 @@ class RenderMime {
   }
 
   /**
+   * The sanitizer used by the rendermime instance.
+   */
+  readonly sanitizer: ISanitizer;
+
+  /**
    * The ordered list of mimeTypes.
    */
   get mimeTypes(): ReadonlyArray<string> {
@@ -82,27 +73,23 @@ class RenderMime {
   }
 
   /**
-   * Render a mime model.
+   * Create a renderer for a mime model.
    *
-   * @param model - the mime model to render.
+   * @param mimeType - the mime type to render.
    *
    * #### Notes
-   * Renders the model using the preferred mime type.  See
+   * Creates a renderer widget using the preferred mime type.  See
    * [[preferredMimeType]].
    */
-  render(model: IRenderMime.IMimeModel): IRenderMime.IReadyWidget {
-    let mimeType = this.preferredMimeType(model);
-    if (!mimeType) {
-      return this._handleError(model);
-    }
+  createRenderer(mimeType: string, trusted: boolean): IRenderMime.IRendererWidget {
     let rendererOptions = {
       mimeType,
-      model,
+      trusted,
       resolver: this._resolver,
       sanitizer: this.sanitizer,
       linkHandler: this._handler
     };
-    return this._renderers[mimeType].render(rendererOptions);
+    return this._factories[mimeType].createRenderer(rendererOptions);
   }
 
   /**
@@ -118,11 +105,11 @@ class RenderMime {
     let sanitizer = this.sanitizer;
     return find(this._order, mimeType => {
       if (model.data.has(mimeType)) {
-        let options = { mimeType, model, sanitizer };
-        let renderer = this._renderers[mimeType];
+        let options = { mimeType, sanitizer, trusted: model.trusted };
+        let renderer = this._factories[mimeType];
         let canRender = false;
         try {
-          canRender = renderer.canRender(options);
+          canRender = renderer.canCreateRenderer(options);
         } catch (err) {
           console.error(
             `Got an error when checking the renderer for the mimeType '${mimeType}'\n`, err);
@@ -141,20 +128,22 @@ class RenderMime {
    * The resolver is explicitly not cloned in this operation.
    */
   clone(): RenderMime {
-    let items = toArray(map(this._order, mimeType => {
-      return { mimeType, renderer: this._renderers[mimeType] };
-    }));
-    return new RenderMime({
-      items,
+    let rendermime = new RenderMime({
       sanitizer: this.sanitizer,
       linkHandler: this._handler
     });
+    each(this._order, mimeType => {
+      rendermime.addFactory(this._factories[mimeType], mimeType);
+    });
+    return rendermime;
   }
 
   /**
-   * Add a renderer by mimeType.
+   * Add a renderer factory for a given mimeType.
    *
-   * @param item - A renderer item.
+   * @param factory - The renderer factory.
+   *
+   * @param mimeType - The renderer mimeType.
    *
    * @param index - The optional order index.
    *
@@ -163,57 +152,37 @@ class RenderMime {
    * The renderer will replace an existing renderer for the given
    * mimeType.
    */
-  addRenderer(item: RenderMime.IRendererItem, index = 0): void {
-    let { mimeType, renderer } = item;
+  addFactory(factory: IRenderMime.IRendererFactory, mimeType: string, index = 0): void {
     let orig = ArrayExt.removeFirstOf(this._order, mimeType);
     if (orig !== -1 && orig < index) {
       index -= 1;
     }
-    this._renderers[mimeType] = renderer;
+    this._factories[mimeType] = factory;
     ArrayExt.insert(this._order, index, mimeType);
   }
 
   /**
-   * Remove a renderer by mimeType.
+   * Remove a renderer factory by mimeType.
    *
-   * @param mimeType - The mimeType of the renderer.
+   * @param mimeType - The mimeType of the factory.
    */
-  removeRenderer(mimeType: string): void {
-    delete this._renderers[mimeType];
+  removeFactory(mimeType: string): void {
+    delete this._factories[mimeType];
     ArrayExt.removeFirstOf(this._order, mimeType);
   }
 
   /**
-   * Get a renderer by mimeType.
+   * Get a renderer factory by mimeType.
    *
    * @param mimeType - The mimeType of the renderer.
    *
    * @returns The renderer for the given mimeType, or undefined if the mimeType is unknown.
    */
-  getRenderer(mimeType: string): IRenderMime.IRenderer {
-    return this._renderers[mimeType];
+  getFactory(mimeType: string): IRenderMime.IRendererFactory {
+    return this._factories[mimeType];
   }
 
-  /**
-   * Return a widget for an error.
-   */
-  private _handleError(model: IRenderMime.IMimeModel): IRenderMime.IReadyWidget {
-   let errModel = new MimeModel({
-      data: {
-        'application/vnd.jupyter.stderr': 'Unable to render data'
-      }
-   });
-   let options = {
-      mimeType: 'application/vnd.jupyter.stderr',
-      model: errModel,
-      sanitizer: this.sanitizer,
-    };
-   return new RenderedText(options);
-  }
-
-  readonly sanitizer: ISanitizer;
-
-  private _renderers: { [key: string]: IRenderMime.IRenderer } = Object.create(null);
+  private _factories: { [key: string]: IRenderMime.IRendererFactory } = Object.create(null);
   private _order: string[] = [];
   private _resolver: IRenderMime.IResolver | null;
   private _handler: IRenderMime.ILinkHandler | null;
@@ -230,11 +199,6 @@ namespace RenderMime {
    */
   export
   interface IOptions {
-    /**
-     * The intial renderer items.
-     */
-    items?: IRendererItem[];
-
     /**
      * The sanitizer used to sanitize untrusted html inputs.
      *
@@ -253,22 +217,6 @@ namespace RenderMime {
      * An optional path handler.
      */
     linkHandler?: IRenderMime.ILinkHandler;
-  }
-
-  /**
-   * A render item.
-   */
-  export
-  interface IRendererItem {
-    /**
-     * The mimeType to be renderered.
-     */
-    mimeType: string;
-
-    /**
-     * The renderer.
-     */
-    renderer: IRenderMime.IRenderer;
   }
 
   /**

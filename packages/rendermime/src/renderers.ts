@@ -15,7 +15,7 @@ import {
  * A renderer for raw html.
  */
 export
-class HTMLRenderer implements IRenderMime.IRenderer {
+class HTMLRenderer implements IRenderMime.IRendererFactory {
   /**
    * The mimeTypes this renderer accepts.
    */
@@ -24,22 +24,24 @@ class HTMLRenderer implements IRenderMime.IRenderer {
   /**
    * Whether the renderer can render given the render options.
    */
-  canRender(options: IRenderMime.IRenderOptions): boolean {
+  canCreateRenderer(options: IRenderMime.IRendererOptions): boolean {
     return this.mimeTypes.indexOf(options.mimeType) !== -1;
   }
 
   /**
-   * Render the transformed mime bundle.
+   * Create a renderer the transformed mime data.
+   *
+   * @param options - The options used to render the data.
    */
-  render(options: IRenderMime.IRenderOptions): IRenderMime.IReadyWidget {
+  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRendererWidget {
     return new RenderedHTML(options);
   }
 
   /**
    * Whether the renderer will sanitize the data given the render options.
    */
-  wouldSanitize(options: IRenderMime.IRenderOptions): boolean {
-    return !options.model.trusted;
+  wouldSanitize(options: IRenderMime.IRendererOptions): boolean {
+    return !options.trusted;
   }
 }
 
@@ -48,7 +50,7 @@ class HTMLRenderer implements IRenderMime.IRenderer {
  * A renderer for `<img>` data.
  */
 export
-class ImageRenderer implements IRenderMime.IRenderer {
+class ImageRenderer implements IRenderMime.IRendererFactory {
   /**
    * The mimeTypes this renderer accepts.
    */
@@ -57,21 +59,23 @@ class ImageRenderer implements IRenderMime.IRenderer {
   /**
    * Whether the renderer can render given the render options.
    */
-  canRender(options: IRenderMime.IRenderOptions): boolean {
+  canCreateRenderer(options: IRenderMime.IRendererOptions): boolean {
     return this.mimeTypes.indexOf(options.mimeType) !== -1;
   }
 
   /**
-   * Render the transformed mime bundle.
+   * Create a renderer the transformed mime data.
+   *
+   * @param options - The options used to render the data.
    */
-  render(options: IRenderMime.IRenderOptions): IRenderMime.IReadyWidget {
+  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRendererWidget {
     return new RenderedImage(options);
   }
 
   /**
    * Whether the renderer will sanitize the data given the render options.
    */
-  wouldSanitize(options: IRenderMime.IRenderOptions): boolean {
+  wouldSanitize(options: IRenderMime.IRendererOptions): boolean {
     return false;
   }
 }
@@ -81,7 +85,7 @@ class ImageRenderer implements IRenderMime.IRenderer {
  * A renderer for plain text and Jupyter console text data.
  */
 export
-class TextRenderer implements IRenderMime.IRenderer {
+class TextRenderer implements IRenderMime.IRendererFactory {
   /**
    * The mimeTypes this renderer accepts.
    */
@@ -91,21 +95,23 @@ class TextRenderer implements IRenderMime.IRenderer {
   /**
    * Whether the renderer can render given the render options.
    */
-  canRender(options: IRenderMime.IRenderOptions): boolean {
+  canCreateRenderer(options: IRenderMime.IRendererOptions): boolean {
     return this.mimeTypes.indexOf(options.mimeType) !== -1;
   }
 
   /**
-   * Render the transformed mime bundle.
+   * Create a renderer the transformed mime data.
+   *
+   * @param options - The options used to render the data.
    */
-  render(options: IRenderMime.IRenderOptions): IRenderMime.IReadyWidget {
+  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRendererWidget {
     return new RenderedText(options);
   }
 
   /**
    * Whether the renderer will sanitize the data given the render options.
    */
-  wouldSanitize(options: IRenderMime.IRenderOptions): boolean {
+  wouldSanitize(options: IRenderMime.IRendererOptions): boolean {
     return false;
   }
 }
@@ -115,7 +121,7 @@ class TextRenderer implements IRenderMime.IRenderer {
  * A renderer for raw `<script>` data.
  */
 export
-class JavaScriptRenderer implements IRenderMime.IRenderer {
+class JavaScriptRenderer implements IRenderMime.IRendererFactory {
   /**
    * The mimeTypes this renderer accepts.
    */
@@ -124,24 +130,26 @@ class JavaScriptRenderer implements IRenderMime.IRenderer {
   /**
    * Whether the renderer can render given the render options.
    */
-  canRender(options: IRenderMime.IRenderOptions): boolean {
+  canCreateRenderer(options: IRenderMime.IRendererOptions): boolean {
     return (
-      options.model.trusted &&
+      options.trusted &&
       this.mimeTypes.indexOf(options.mimeType) !== -1
     );
   }
 
   /**
-   * Render the transformed mime bundle.
+   * Create a renderer the transformed mime data.
+   *
+   * @param options - The options used to render the data.
    */
-  render(options: IRenderMime.IRenderOptions): IRenderMime.IReadyWidget {
+  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRendererWidget {
     return new RenderedJavaScript(options);
   }
 
   /**
    * Whether the renderer will sanitize the data given the render options.
    */
-  wouldSanitize(options: IRenderMime.IRenderOptions): boolean {
+  wouldSanitize(options: IRenderMime.IRendererOptions): boolean {
     return false;
   }
 }
@@ -151,7 +159,7 @@ class JavaScriptRenderer implements IRenderMime.IRenderer {
  * A renderer for `<svg>` data.
  */
 export
-class SVGRenderer implements IRenderMime.IRenderer {
+class SVGRenderer implements IRenderMime.IRendererFactory {
   /**
    * The mimeTypes this renderer accepts.
    */
@@ -160,24 +168,26 @@ class SVGRenderer implements IRenderMime.IRenderer {
   /**
    * Whether the renderer can render given the render options.
    */
-  canRender(options: IRenderMime.IRenderOptions): boolean {
+  canCreateRenderer(options: IRenderMime.IRendererOptions): boolean {
     return (
-      options.model.trusted &&
+      options.trusted &&
       this.mimeTypes.indexOf(options.mimeType) !== -1
     );
   }
 
   /**
-   * Render the transformed mime bundle.
+   * Create a renderer the transformed mime data.
+   *
+   * @param options - The options used to render the data.
    */
-  render(options: IRenderMime.IRenderOptions): IRenderMime.IReadyWidget {
+  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRendererWidget {
     return new RenderedSVG(options);
   }
 
   /**
    * Whether the renderer will sanitize the data given the render options.
    */
-  wouldSanitize(options: IRenderMime.IRenderOptions): boolean {
+  wouldSanitize(options: IRenderMime.IRendererOptions): boolean {
     return false;
   }
 }
@@ -187,7 +197,7 @@ class SVGRenderer implements IRenderMime.IRenderer {
  * A renderer for PDF data.
  */
 export
-class PDFRenderer implements IRenderMime.IRenderer {
+class PDFRenderer implements IRenderMime.IRendererFactory {
   /**
    * The mimeTypes this renderer accepts.
    */
@@ -196,24 +206,26 @@ class PDFRenderer implements IRenderMime.IRenderer {
   /**
    * Whether the renderer can render given the render options.
    */
-  canRender(options: IRenderMime.IRenderOptions): boolean {
+  canCreateRenderer(options: IRenderMime.IRendererOptions): boolean {
     return (
-      options.model.trusted &&
+      options.trusted &&
       this.mimeTypes.indexOf(options.mimeType) !== -1
     );
   }
 
   /**
-   * Render the transformed mime bundle.
+   * Create a renderer the transformed mime data.
+   *
+   * @param options - The options used to render the data.
    */
-  render(options: IRenderMime.IRenderOptions): IRenderMime.IReadyWidget {
+  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRendererWidget {
     return new RenderedPDF(options);
   }
 
   /**
    * Whether the renderer will sanitize the data given the render options.
    */
-  wouldSanitize(options: IRenderMime.IRenderOptions): boolean {
+  wouldSanitize(options: IRenderMime.IRendererOptions): boolean {
     return false;
   }
 }
@@ -223,7 +235,7 @@ class PDFRenderer implements IRenderMime.IRenderer {
  * A renderer for LateX data.
  */
 export
-class LatexRenderer implements IRenderMime.IRenderer  {
+class LatexRenderer implements IRenderMime.IRendererFactory  {
   /**
    * The mimeTypes this renderer accepts.
    */
@@ -232,21 +244,23 @@ class LatexRenderer implements IRenderMime.IRenderer  {
   /**
    * Whether the renderer can render given the render options.
    */
-  canRender(options: IRenderMime.IRenderOptions): boolean {
+  canCreateRenderer(options: IRenderMime.IRendererOptions): boolean {
     return this.mimeTypes.indexOf(options.mimeType) !== -1;
   }
 
   /**
-   * Render the transformed mime bundle.
+   * Create a renderer the transformed mime data.
+   *
+   * @param options - The options used to render the data.
    */
-  render(options: IRenderMime.IRenderOptions): IRenderMime.IReadyWidget {
+  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRendererWidget {
     return new RenderedLatex(options);
   }
 
   /**
    * Whether the renderer will sanitize the data given the render options.
    */
-  wouldSanitize(options: IRenderMime.IRenderOptions): boolean {
+  wouldSanitize(options: IRenderMime.IRendererOptions): boolean {
     return false;
   }
 }
@@ -256,7 +270,7 @@ class LatexRenderer implements IRenderMime.IRenderer  {
  * A renderer for Jupyter Markdown data.
  */
 export
-class MarkdownRenderer implements IRenderMime.IRenderer {
+class MarkdownRenderer implements IRenderMime.IRendererFactory {
   /**
    * The mimeTypes this renderer accepts.
    */
@@ -265,21 +279,23 @@ class MarkdownRenderer implements IRenderMime.IRenderer {
   /**
    * Whether the renderer can render given the render options.
    */
-  canRender(options: IRenderMime.IRenderOptions): boolean {
+  canCreateRenderer(options: IRenderMime.IRendererOptions): boolean {
     return this.mimeTypes.indexOf(options.mimeType) !== -1;
   }
 
   /**
-   * Render the transformed mime bundle.
+   * Create a renderer the transformed mime data.
+   *
+   * @param options - The options used to render the data.
    */
-  render(options: IRenderMime.IRenderOptions): IRenderMime.IReadyWidget {
+  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRendererWidget {
     return new RenderedMarkdown(options);
   }
 
   /**
    * Whether the renderer will sanitize the data given the render options.
    */
-  wouldSanitize(options: IRenderMime.IRenderOptions): boolean {
-    return !options.model.trusted;
+  wouldSanitize(options: IRenderMime.IRendererOptions): boolean {
+    return !options.trusted;
   }
 }

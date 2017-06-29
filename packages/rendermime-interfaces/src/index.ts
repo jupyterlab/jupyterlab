@@ -16,6 +16,27 @@ import {
 export
 namespace IRenderMime {
   /**
+   * An observable model for mime data.
+   */
+  export
+  interface IMimeModel {
+    /**
+     * Whether the model is trusted.
+     */
+    readonly trusted: boolean;
+
+    /**
+     * The data associated with the model.
+     */
+    readonly data: IBundle;
+
+    /**
+     * The metadata associated with the model.
+     */
+    readonly metadata: IBundle;
+  }
+
+  /**
    * A bundle for mime data.
    */
   export
@@ -69,31 +90,10 @@ namespace IRenderMime {
   }
 
   /**
-   * An observable model for mime data.
-   */
-  export
-  interface IMimeModel {
-    /**
-     * Whether the model is trusted.
-     */
-    readonly trusted: boolean;
-
-    /**
-     * The data associated with the model.
-     */
-    readonly data: IBundle;
-
-    /**
-     * The metadata associated with the model.
-     */
-    readonly metadata: IBundle;
-  }
-
-  /**
    * The options used to initialize a document widget factory.
    */
   export
-  interface IWidgetFactoryOptions {
+  interface IDocumentWidgetFactoryOptions {
     /**
      * The file extensions the widget can view.
      *
@@ -154,9 +154,9 @@ namespace IRenderMime {
     mimeType: string;
 
     /**
-     * A renderer class to be registered to render the MIME type.
+     * A renderer factory to be registered to render the MIME type.
      */
-    renderer: IRenderer;
+    rendererFactory: IRendererFactory;
 
     /**
      * The index passed to `RenderMime.addRenderer`.
@@ -186,7 +186,7 @@ namespace IRenderMime {
     /**
      * The options used for using the renderer for documents.
      */
-    widgetFactoryOptions?: IWidgetFactoryOptions;
+    documentWidgetFactoryOptions?: IDocumentWidgetFactoryOptions;
   }
 
   /**
@@ -205,18 +205,18 @@ namespace IRenderMime {
    * A widget that provides a ready promise.
    */
   export
-  interface IReadyWidget extends Widget {
+  interface IRendererWidget extends Widget {
     /**
-     * A promise that resolves when the widget is ready.
+     * Render a mime model.
      */
-    ready: Promise<void>;
+    render(model: IMimeModel): Promise<void>;
   }
 
   /**
-   * The interface for a renderer.
+   * The interface for a renderer factory.
    */
   export
-  interface IRenderer {
+  interface IRendererFactory {
     /**
      * The mimeTypes this renderer accepts.
      */
@@ -227,37 +227,37 @@ namespace IRenderMime {
      *
      * @param options - The options that would be used to render the data.
      */
-    canRender(options: IRenderOptions): boolean;
+    canCreateRenderer(options: IRendererOptions): boolean;
 
     /**
-     * Render the transformed mime data.
+     * Create a renderer the transformed mime data.
      *
      * @param options - The options used to render the data.
      */
-    render(options: IRenderOptions): IReadyWidget;
+    createRenderer(options: IRendererOptions): IRendererWidget;
 
     /**
      * Whether the renderer will sanitize the data given the render options.
      *
      * @param options - The options that would be used to render the data.
      */
-    wouldSanitize(options: IRenderOptions): boolean;
+    wouldSanitize(options: IRendererOptions): boolean;
   }
 
   /**
-   * The options used to transform or render mime data.
+   * The options used to create a renderer.
    */
   export
-  interface IRenderOptions {
+  interface IRendererOptions {
     /**
      * The preferred mimeType to render.
      */
     mimeType: string;
 
     /**
-     * The mime data model.
+     * Whether the data is trusted.
      */
-    model: IMimeModel;
+    trusted: boolean;
 
     /**
      * The html sanitizer.
