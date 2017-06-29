@@ -352,7 +352,7 @@ namespace nbformat {
     /**
      * Type of cell output.
      */
-    output_type: string;
+    output_type: OutputType;
   }
 
   /**
@@ -526,5 +526,5 @@ namespace nbformat {
    * An output union type.
    */
   export
-  type IOutput = IUnrecognizedOutput | IExecuteResult | IDisplayData | IStream | IError;
+  type IOutput = IUnrecognizedOutput | IExecuteResult | IDisplayData | IDisplayUpdate | IStream | IError;
 }
