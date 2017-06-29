@@ -632,6 +632,7 @@ class SettingRegistry {
 /**
  * A manager for a specific plugin's settings.
  */
+export
 class Settings implements ISettingRegistry.ISettings {
   /**
    * Instantiate a new plugin settings manager.
@@ -836,6 +837,7 @@ namespace SettingRegistry {
 /**
  * A namespace for `Settings` statics.
  */
+export
 namespace Settings {
   /**
    * The instantiation options for a `Settings` object.
