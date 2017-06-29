@@ -519,6 +519,50 @@ describe('@jupyterlab/coreutils', () => {
 
     });
 
+    describe('#save()', () => {
+
+      it('should save user setting data', done => {
+        const id = 'foo';
+        const one = 'one';
+        const two = 'two';
+
+        connector.schemas[id] = { type: 'object' };
+        registry.load(id).then(s => {
+          return (settings = s as Settings).save({ one, two });
+        }).then(() => {
+          let saved = settings.get('one');
+
+          expect(saved.composite).to.be(one);
+          expect(saved.user).to.be(one);
+
+          saved = settings.get('two');
+
+          expect(saved.composite).to.be(two);
+          expect(saved.user).to.be(two);
+        }).then(done).catch(done);
+      });
+
+    });
+
+    describe('#set()', () => {
+
+      it('should set a user setting item', done => {
+        const id = 'foo';
+        const one = 'one';
+
+        connector.schemas[id] = { type: 'object' };
+        registry.load(id).then(s => {
+          return (settings = s as Settings).set('one', one);
+        }).then(() => {
+          let saved = settings.get('one');
+
+          expect(saved.composite).to.be(one);
+          expect(saved.user).to.be(one);
+        }).then(done).catch(done);
+      });
+
+    });
+
   });
 
 });
