@@ -7,78 +7,93 @@ import {
 } from '@phosphor/datastore';
 
 import {
-  IMimeModel
-} from '@jupyterlab/rendermime';
+  nbformat
+} from '@jupyterlab/coreutils';
 
 
 /**
- * The model for a single item in an output area.
+ * The type of an output item in an output area.
  */
 export
-interface IOutputItem {
+type OutputItem = {
   /**
-   * The output type.
+   * The nbformat type of the output.
    */
-  readonly type: string;
+  type: nbformat.OutputType;
 
   /**
-   * The execution count of the item.
+   * Whether the output is trusted.
+   */
+  readonly trusted: boolean;
+
+  /**
+   * The id of mime data bundle for the output.
+   */
+  readonly mimeDataId: string;
+
+  /**
+   * The id of the mime metadata bundle for the output.
+   */
+  readonly mimeMetadataId: string;
+
+  /**
+   * The stream type for 'stream' items.
+   */
+  readonly streamType: nbformat.StreamType | null;
+
+  /**
+   * The execution count of the output.
    */
   readonly executionCount: nbformat.ExecutionCount;
-
-  /**
-   * The id of the item's mime model.
-   */
-  readonly mimeModelId: string;
-}
+};
 
 
 /**
- * The model for an output area.
+ * The type of an output area.
  */
 export
-interface IOutputArea {
+type OutputArea = {
   /**
-   * Whether code is currently executing for the area.
+   * Whether the output area is trusted.
    */
-  readonly isExecuting: boolean;
+  readonly trusted: boolean;
 
   /**
    * The id for the area's output list.
    */
   readonly outputListId: string;
-}
+};
 
 
 /**
- * The data type for an output area store.
+ * The state type for an output area store.
  */
 export
-interface IOutputStoreState {
+type OutputState = {
   /**
-   * The table of mime models.
+   * The table of output item mime data bundles.
    */
-  readonly mimeModelTable: Table.RecordTable<IMimeModel>;
+  readonly mimeBundleTable: Table.JSONTable<JSONObject>;
 
   /**
    * The table of output items.
    */
-  readonly outputItemTable: Table.RecordTable<IOutputItem>;
+  readonly outputItemTable: Table.RecordTable<OutputItem>;
 
   /**
    * The table of output areas.
    */
-  readonly outputAreaTable: Table.RecordTable<IOutputArea>;
+  readonly outputAreaTable: Table.RecordTable<OutputArea>;
 
   /**
    * The table of output lists.
    */
   readonly outputListTable: Table.ListTable<string>;
-}
+};
 
 
 /**
  * A type alias for an output store.
  */
 export
-type OutputStore = DataStore<IOutputStoreState>;
+type OutputStore = DataStore<OutputState>;
