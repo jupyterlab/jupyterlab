@@ -654,7 +654,9 @@ namespace Private {
 
     // Finally, use the defaults from the registry schema.
     if (!hint) {
-      hint = registry.schema.properties[key].default;
+      const properties = registry.schema.properties;
+
+      hint = properties && properties[key] && properties[key].default;
     }
 
     return typeof hint === 'string' ? hint : '';

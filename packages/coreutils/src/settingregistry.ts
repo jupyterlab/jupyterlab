@@ -431,8 +431,8 @@ class SettingRegistry {
     if (plugin in plugins) {
       const { composite, user } = plugins[plugin].data;
       const result = {
-        composite: composite[key] ? copy(composite[key]) : composite[key],
-        user: user[key] ? copy(user[key]) : user[key]
+        composite: key in composite ? copy(composite[key]) : void 0,
+        user: key in user ? copy(user[key]) : void 0
       };
 
       return Promise.resolve(result);
@@ -632,6 +632,7 @@ class SettingRegistry {
 /**
  * A manager for a specific plugin's settings.
  */
+export
 class Settings implements ISettingRegistry.ISettings {
   /**
    * Instantiate a new plugin settings manager.
@@ -643,7 +644,7 @@ class Settings implements ISettingRegistry.ISettings {
     this.registry = options.registry;
 
     this._composite = plugin.data.composite || { };
-    this._schema = plugin.schema || { };
+    this._schema = plugin.schema || { type: 'object' };
     this._user = plugin.data.user || { };
 
     this.registry.pluginChanged.connect(this._onPluginChanged, this);
@@ -703,7 +704,6 @@ class Settings implements ISettingRegistry.ISettings {
     }
 
     this._isDisposed = true;
-
     this._composite = null;
     this._schema = null;
     this._user = null;
@@ -726,8 +726,8 @@ class Settings implements ISettingRegistry.ISettings {
     const { composite, user } = this;
 
     return {
-      composite: composite[key] ? copy(composite[key]) : composite[key],
-      user: user[key] ? copy(user[key]) : user[key]
+      composite: key in composite ? copy(composite[key]) : void 0,
+      user: key in user ? copy(user[key]) : void 0
     };
   }
 
@@ -787,7 +787,7 @@ class Settings implements ISettingRegistry.ISettings {
       const schema = found.schema;
 
       this._composite = composite || { };
-      this._schema = schema || { };
+      this._schema = schema || { type: 'object' };
       this._user = user || { };
       this._changed.emit(void 0);
     }
@@ -836,6 +836,7 @@ namespace SettingRegistry {
 /**
  * A namespace for `Settings` statics.
  */
+export
 namespace Settings {
   /**
    * The instantiation options for a `Settings` object.

@@ -101,7 +101,6 @@ const plugin: JupyterLabPlugin<IEditorTracker> = {
  * This will eventually reside in its own settings file.
  */
 const schema = {
-  "$schema": "http://json-schema.org/draft-06/schema",
   "jupyter.lab.setting-icon-class": "jp-ImageTextEditor",
   "jupyter.lab.setting-icon-label": "Editor",
   "title": "Text Editor",
@@ -119,7 +118,8 @@ const schema = {
     "matchBrackets": {
       "type": "boolean", "title": "Match Brackets", "default": true
     }
-  }
+  },
+  "type": "object"
 };
 /* tslint:enable */
 

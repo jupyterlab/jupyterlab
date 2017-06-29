@@ -57,7 +57,6 @@ namespace CommandIDs {
  * This will eventually reside in its own settings file.
  */
 const schema = {
-  "$schema": "http://json-schema.org/draft-06/schema",
   "jupyter.lab.setting-icon-class": "jp-ImageTextEditor",
   "jupyter.lab.setting-icon-label": "CodeMirror",
   "title": "CodeMirror",
@@ -65,7 +64,8 @@ const schema = {
   "properties": {
     "keyMap": { "type": "string", "title": "Key Map", "default": "default" },
     "theme": { "type": "string", "title": "Theme", "default": "default" }
-  }
+  },
+  "type": "object"
 };
 /* tslint:enable */
 
