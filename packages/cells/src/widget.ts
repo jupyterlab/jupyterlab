@@ -32,7 +32,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  MimeModel, IRenderMime
+  MimeModel, RenderMime
 } from '@jupyterlab/rendermime';
 
 import {
@@ -166,7 +166,7 @@ const RENDER_TIMEOUT = 1000;
  * A base cell widget.
  */
 export
-class Cell extends Widget implements IRenderMime.IReadyWidget {
+class Cell extends Widget implements RenderMime.IReadyWidget {
   /**
    * Construct a new base cell widget.
    */
@@ -668,7 +668,7 @@ class CodeCell extends Cell {
     this.toggleClass(NO_OUTPUTS_CLASS, force);
   }
 
-  private _rendermime: IRenderMime = null;
+  private _rendermime: RenderMime = null;
   private _outputHidden = false;
   private _outputWrapper: Widget = null;
   private _outputCollapser: OutputCollapser = null;
@@ -695,7 +695,7 @@ namespace CodeCell {
     /**
      * The mime renderer for the cell widget.
      */
-    rendermime: IRenderMime;
+    rendermime: RenderMime;
   }
 
   /**
@@ -861,7 +861,7 @@ class MarkdownCell extends Cell {
   }
 
   private _monitor: ActivityMonitor<any, any> = null;
-  private _rendermime: IRenderMime = null;
+  private _rendermime: RenderMime = null;
   private _renderedInput: Widget = null;
   private _rendered = true;
   private _prevText = '';
@@ -889,7 +889,7 @@ namespace MarkdownCell {
     /**
      * The mime renderer for the cell widget.
      */
-    rendermime: IRenderMime;
+    rendermime: RenderMime;
 
   }
 }

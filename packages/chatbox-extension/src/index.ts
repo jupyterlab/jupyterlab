@@ -22,7 +22,7 @@ import {
 } from '@jupyterlab/chatbox';
 
 import {
-  IRenderMime
+  RenderMime
 } from '@jupyterlab/rendermime';
 
 
@@ -47,7 +47,7 @@ namespace CommandIDs {
 export
 const chatboxPlugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.chatbox',
-  requires: [IRenderMime, ICommandPalette, IEditorServices, IDocumentManager, ILayoutRestorer],
+  requires: [RenderMime, ICommandPalette, IEditorServices, IDocumentManager, ILayoutRestorer],
   autoStart: true,
   activate: activateChatbox
 };
@@ -62,7 +62,7 @@ export default chatboxPlugin;
 /**
  * Activate the chatbox extension.
  */
-function activateChatbox(app: JupyterLab, rendermime: IRenderMime, palette: ICommandPalette, editorServices: IEditorServices, docManager: IDocumentManager, restorer: ILayoutRestorer): void {
+function activateChatbox(app: JupyterLab, rendermime: RenderMime, palette: ICommandPalette, editorServices: IEditorServices, docManager: IDocumentManager, restorer: ILayoutRestorer): void {
   const id = 'chatbox';
   let { commands, shell } = app;
   let category = 'Chatbox';

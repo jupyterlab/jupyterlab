@@ -779,13 +779,18 @@ namespace DocumentRegistry {
    * A widget for a document.
    */
   export
-  interface IReadyWidget extends IRenderMime.IReadyWidget { }
+  interface IDocumentWidget<T extends IModel> extends IRenderMime.IReadyWidget {
+    /**
+     * The context associated with the widget.
+     */
+    context: IContext<T>;
+  }
 
   /**
    * The interface for a widget factory.
    */
   export
-  interface IWidgetFactory<T extends IReadyWidget, U extends IModel> extends IDisposable, IWidgetFactoryOptions {
+  interface IWidgetFactory<T extends IDocumentWidget<U>, U extends IModel> extends IDisposable, IWidgetFactoryOptions {
     /**
      * A signal emitted when a widget is created.
      */
@@ -804,7 +809,7 @@ namespace DocumentRegistry {
    * A type alias for a standard widget factory.
    */
   export
-  type WidgetFactory = IWidgetFactory<IReadyWidget, IModel>;
+  type WidgetFactory = IWidgetFactory<IDocumentWidget<IModel>, IModel>;
 
   /**
    * An interface for a widget extension.

@@ -34,7 +34,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IRenderMime, MimeModel
+  RenderMime, MimeModel
 } from '@jupyterlab/rendermime';
 
 import {
@@ -288,7 +288,7 @@ class Base64ModelFactory extends TextModelFactory {
  * The default implemetation of a widget factory.
  */
 export
-abstract class ABCWidgetFactory<T extends DocumentRegistry.IReadyWidget, U extends DocumentRegistry.IModel> implements DocumentRegistry.IWidgetFactory<T, U> {
+abstract class ABCWidgetFactory<T extends DocumentRegistry.IDocumentWidget<U>, U extends DocumentRegistry.IModel> implements DocumentRegistry.IWidgetFactory<T, U> {
   /**
    * Construct a new `ABCWidgetFactory`.
    */
@@ -406,7 +406,7 @@ abstract class ABCWidgetFactory<T extends DocumentRegistry.IReadyWidget, U exten
  * A widget for rendered mimetype.
  */
 export
-class MimeRenderer extends Widget implements IRenderMime.IReadyWidget {
+class MimeRenderer extends Widget implements DocumentRegistry.IDocumentWidget<DocumentRegistry.IModel> {
   /**
    * Construct a new markdown widget.
    */
@@ -516,7 +516,7 @@ class MimeRenderer extends Widget implements IRenderMime.IReadyWidget {
 
   private _context: DocumentRegistry.Context = null;
   private _monitor: ActivityMonitor<any, any> = null;
-  private _rendermime: IRenderMime = null;
+  private _rendermime: RenderMime = null;
   private _mimeType: string;
   private _ready = new PromiseDelegate<void>();
   private _dataType: 'string' | 'json';
@@ -541,7 +541,7 @@ namespace MimeRenderer {
     /**
      * The rendermime instance.
      */
-    rendermime: IRenderMime;
+    rendermime: RenderMime;
 
     /**
      * The mime type.
@@ -595,7 +595,7 @@ class MimeRendererFactory extends ABCWidgetFactory<MimeRenderer, DocumentRegistr
     return widget;
   }
 
-  private _rendermime: IRenderMime = null;
+  private _rendermime: RenderMime = null;
   private _mimeType: string;
   private _renderTimeout: number;
   private _dataType: 'string' | 'json';
@@ -617,7 +617,7 @@ namespace MimeRendererFactory {
     /**
      * The rendermime instance.
      */
-    rendermime: IRenderMime;
+    rendermime: RenderMime;
 
     /**
      * The mime type.

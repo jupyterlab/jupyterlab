@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  ArrayExt, ArrayIterator, IIterable, find, iter, map, toArray
+  ArrayExt, find, map, toArray
 } from '@phosphor/algorithm';
 
 import {
@@ -26,11 +26,6 @@ import {
 } from './mimemodel';
 
 import {
-  HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
-  JavaScriptRenderer, SVGRenderer, MarkdownRenderer, PDFRenderer
-} from './renderers';
-
-import {
   RenderedText
 } from './widgets';
 
@@ -43,7 +38,7 @@ import {
  * render the model into a widget.
  */
 export
-class RenderMime implements IRenderMime {
+class RenderMime {
   /**
    * Construct a renderer.
    */
@@ -80,14 +75,10 @@ class RenderMime implements IRenderMime {
   }
 
   /**
-   * Get an iterator over the ordered list of mimeTypes.
-   *
-   * #### Notes
-   * These mimeTypes are searched from beginning to end, and the first matching
-   * mimeType is used.
+   * The ordered list of mimeTypes.
    */
-  mimeTypes(): IIterable<string> {
-    return new ArrayIterator(this._order);
+  get mimeTypes(): ReadonlyArray<string> {
+    return this._order;
   }
 
   /**
@@ -169,12 +160,10 @@ class RenderMime implements IRenderMime {
    *
    * ####Notes
    * Negative indices count from the end, so -1 refers to the last index.
-   * Use the index of `.order.length` to add to the end of the render precedence list,
-   * which would make the new renderer the last choice.
    * The renderer will replace an existing renderer for the given
    * mimeType.
    */
-  addRenderer(item: IRenderMime.IRendererItem, index = 0): void {
+  addRenderer(item: RenderMime.IRendererItem, index = 0): void {
     let { mimeType, renderer } = item;
     let orig = ArrayExt.removeFirstOf(this._order, mimeType);
     if (orig !== -1 && orig < index) {
@@ -244,7 +233,7 @@ namespace RenderMime {
     /**
      * The intial renderer items.
      */
-    items?: IRenderMime.IRendererItem[];
+    items?: IRendererItem[];
 
     /**
      * The sanitizer used to sanitize untrusted html inputs.
@@ -267,47 +256,19 @@ namespace RenderMime {
   }
 
   /**
-   * Get an array of the default renderer items.
+   * A render item.
    */
   export
-  function getDefaultItems(): IRenderMime.IRendererItem[] {
-    let renderers = Private.defaultRenderers;
-    let items: IRenderMime.IRendererItem[] = [];
-    let mimes: { [key: string]: boolean } = {};
-    for (let renderer of renderers) {
-      for (let mime of renderer.mimeTypes) {
-        if (mime in mimes) {
-          continue;
-        }
-        mimes[mime] = true;
-        items.push({ mimeType: mime, renderer });
-      }
-    }
-    return items;
-  }
+  interface IRendererItem {
+    /**
+     * The mimeType to be renderered.
+     */
+    mimeType: string;
 
-  /**
-   * Register a rendermime extension module.
-   */
-  export
-  function registerExtensionModule(mod: IRenderMime.IExtensionModule): void {
-    let data = mod.default;
-    // Handle commonjs exports.
-    if (!mod.hasOwnProperty('__esModule')) {
-      data = mod as any;
-    }
-    if (!Array.isArray(data)) {
-      data = [data];
-    }
-    data.forEach(item => { Private.registeredExtensions.push(item); });
-  }
-
-  /**
-   * Get the registered extensions.
-   */
-  export
-  function getExtensions(): IIterable<IRenderMime.IExtension> {
-    return iter(Private.registeredExtensions);
+    /**
+     * The renderer.
+     */
+    renderer: IRenderMime.IRenderer;
   }
 
   /**
@@ -363,32 +324,4 @@ namespace RenderMime {
      */
     contents: Contents.IManager;
   }
-}
-
-
-/**
- * The namespace for private module data.
- */
-export
-namespace Private {
-  /**
-   * The registered extensions.
-   */
-  export
-  const registeredExtensions: IRenderMime.IExtension[] = [];
-
-  /**
-   * The default renderer instances.
-   */
-  export
-  const defaultRenderers = [
-    new JavaScriptRenderer(),
-    new HTMLRenderer(),
-    new MarkdownRenderer(),
-    new LatexRenderer(),
-    new SVGRenderer(),
-    new ImageRenderer(),
-    new PDFRenderer(),
-    new TextRenderer()
-  ];
 }

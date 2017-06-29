@@ -23,7 +23,7 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
-  IRenderMime
+  RenderMime
 } from '@jupyterlab/rendermime';
 
 import {
@@ -91,7 +91,6 @@ const trackerPlugin: JupyterLabPlugin<IConsoleTracker> = {
   provides: IConsoleTracker,
   requires: [
     IServiceManager,
-    IRenderMime,
     IMainMenu,
     ICommandPalette,
     ConsolePanel.IContentFactory,
@@ -131,7 +130,7 @@ export default plugins;
 /**
  * Activate the console extension.
  */
-function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): IConsoleTracker {
+function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: RenderMime, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): IConsoleTracker {
   let { commands, shell } = app;
   let category = 'Console';
   let command: string;

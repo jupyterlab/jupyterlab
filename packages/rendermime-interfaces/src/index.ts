@@ -2,11 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IIterable
-} from '@phosphor/algorithm';
-
-import {
-  JSONValue, Token
+  JSONValue
 } from '@phosphor/coreutils';
 
 import {
@@ -14,125 +10,11 @@ import {
 } from '@phosphor/widgets';
 
 
-/* tslint:disable */
 /**
- * The rendermime token.
- */
-export
-const IRenderMime = new Token<IRenderMime>('jupyter.services.rendermime');
-/* tslint:enable */
-
-
-/**
- * The rendermime interface.
- */
-export
-interface IRenderMime {
-  /**
-   * The object used to resolve relative urls for the rendermime instance.
-   */
-  resolver: IRenderMime.IResolver;
-
-  /**
-   * The object used to handle path opening links.
-   */
-  linkHandler: IRenderMime.ILinkHandler;
-
-  /**
-   * Get an iterator over the ordered list of mimeTypes.
-   *
-   * #### Notes
-   * These mimeTypes are searched from beginning to end, and the first matching
-   * mimeType is used.
-   */
-  mimeTypes(): IIterable<string>;
-
-  /**
-   * Render a mime model.
-   *
-   * @param model - the mime model to render.
-   *
-   * #### Notes
-   * Renders the model using the preferred mime type.  See
-   * [[preferredMimeType]].
-   */
-  render(model: IRenderMime.IMimeModel): IRenderMime.IReadyWidget;
-
-  /**
-   * Find the preferred mimeType for a model.
-   *
-   * @param model - the mime model of interest.
-   *
-   * #### Notes
-   * The mimeTypes in the model are checked in preference order
-   * until a renderer returns `true` for `.canRender`.
-   */
-  preferredMimeType(model: IRenderMime.IMimeModel): string;
-
-  /**
-   * Clone the rendermime instance with shallow copies of data.
-   *
-   * #### Notes
-   * The resolver is explicitly not cloned in this operation.
-   */
-  clone(): IRenderMime;
-
-  /**
-   * Add a renderer by mimeType.
-   *
-   * @param item - A renderer item.
-   *
-   * @param index - The optional order index.
-   *
-   * ####Notes
-   * Negative indices count from the end, so -1 refers to the last index.
-   * Use the index of `.order.length` to add to the end of the render precedence list,
-   * which would make the new renderer the last choice.
-   * The renderer will replace an existing renderer for the given
-   * mimeType.
-   */
-  addRenderer(item: IRenderMime.IRendererItem, index?: number): void;
-
-  /**
-   * Remove a renderer by mimeType.
-   *
-   * @param mimeType - The mimeType of the renderer.
-   */
-  removeRenderer(mimeType: string): void;
-
-  /**
-   * Get a renderer by mimeType.
-   *
-   * @param mimeType - The mimeType of the renderer.
-   *
-   * @returns The renderer for the given mimeType, or undefined if the mimeType is unknown.
-   */
-  getRenderer(mimeType: string): IRenderMime.IRenderer;
-}
-
-
-/**
- * A namespace for IRenderMime associated interfaces.
+ * A namespace for rendermime associated interfaces.
  */
 export
 namespace IRenderMime {
-  /**
-   * A render item.
-   */
-  export
-  interface IRendererItem {
-    /**
-     * The mimeType to be renderered.
-     */
-    mimeType: string;
-
-    /**
-     * The renderer.
-     */
-    renderer: IRenderer;
-  }
-
-
   /**
    * A bundle for mime data.
    */

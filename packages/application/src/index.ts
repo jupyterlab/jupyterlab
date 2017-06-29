@@ -2,6 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  CommandLinker
+} from '@jupyterlab/apputils';
+
+import {
+  IRenderMime, RenderMime,
+  HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
+  JavaScriptRenderer, SVGRenderer, MarkdownRenderer, PDFRenderer
+} from '@jupyterlab/rendermime';
+
+import {
   Application, IPlugin
 } from '@phosphor/application';
 
@@ -42,7 +52,26 @@ class JupyterLab extends Application<ApplicationShell> {
     if (options.devMode) {
       this.shell.addClass('jp-mod-devMode');
     }
+    let linker = this.linker = new CommandLinker({ commands: this.commands });
+
+    let items = Private.getDefaultRendererItems();
+    let linkHandler = {
+      handleLink: (node: HTMLElement, path: string) => {
+        linker.connectNode(node, 'file-operations:open', { path });
+      }
+    };
+    this.rendermime = new RenderMime({ items, linkHandler });
   }
+
+  /**
+   * The rendermime instance used by the application.
+   */
+  readonly rendermime: RenderMime;
+
+  /**
+   * The command linker used by the application.
+   */
+  readonly linker: CommandLinker;
 
   /**
    * The information about the application.
@@ -85,6 +114,28 @@ class JupyterLab extends Application<ApplicationShell> {
    */
   registerPluginModules(mods: JupyterLab.IPluginModule[]): void {
     mods.forEach(mod => { this.registerPluginModule(mod); });
+  }
+
+  /**
+   * Register a rendermime extension module.
+   */
+  registerMimeModule(mod: IRenderMime.IExtensionModule): void {
+    let data = mod.default;
+    // Handle commonjs exports.
+    if (!mod.hasOwnProperty('__esModule')) {
+      data = mod as any;
+    }
+    if (!Array.isArray(data)) {
+      data = [data];
+    }
+    let rendermime = this.rendermime;
+
+    data.forEach(item => {
+      rendermime.addRenderer({
+        mimeType: item.mimeType,
+        renderer: item.renderer
+      }, item.rendererIndex || 0);
+    });
   }
 
   private _info: JupyterLab.IInfo;
@@ -184,5 +235,41 @@ namespace JupyterLab {
      * The default export.
      */
     default: JupyterLabPlugin<any> | JupyterLabPlugin<any>[];
+  }
+}
+
+
+/**
+ * The namespace for module private data.
+ */
+export
+namespace Private {
+  /**
+   * Get an array of the default renderer items.
+   */
+  export
+  function getDefaultRendererItems(): RenderMime.IRendererItem[] {
+    let renderers = [
+    new JavaScriptRenderer(),
+    new HTMLRenderer(),
+    new MarkdownRenderer(),
+    new LatexRenderer(),
+    new SVGRenderer(),
+    new ImageRenderer(),
+    new PDFRenderer(),
+    new TextRenderer()
+    ];
+    let items: RenderMime.IRendererItem[] = [];
+    let mimes: { [key: string]: boolean } = {};
+    for (let renderer of renderers) {
+      for (let mime of renderer.mimeTypes) {
+        if (mime in mimes) {
+          continue;
+        }
+        mimes[mime] = true;
+        items.push({ mimeType: mime, renderer });
+      }
+    }
+    return items;
   }
 }
