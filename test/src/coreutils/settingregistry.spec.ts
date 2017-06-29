@@ -87,8 +87,7 @@ describe('@jupyterlab/coreutils', () => {
           .then(() => { expect(registry.plugins).to.have.length(1); })
           .then(() => registry.load(two))
           .then(() => { expect(registry.plugins).to.have.length(2); })
-          .then(done)
-          .catch(done);
+          .then(done).catch(done);
       });
 
     });
@@ -105,8 +104,7 @@ describe('@jupyterlab/coreutils', () => {
           .then(() => registry.load(id))
           .then(() => registry.get(id, key))
           .then(saved => { expect(saved.user).to.be(value); })
-          .then(done)
-          .catch(done);
+          .then(done).catch(done);
       });
 
       it('should get a setting item from a plugin that is not loaded', done => {
@@ -118,8 +116,7 @@ describe('@jupyterlab/coreutils', () => {
         connector.save(id, { [key]: value })
           .then(() => registry.get(id, key))
           .then(saved => { expect(saved.composite).to.be(value); })
-          .then(done)
-          .catch(done);
+          .then(done).catch(done);
       });
 
       it('should use schema default if user data not available', done => {
@@ -194,8 +191,7 @@ describe('@jupyterlab/coreutils', () => {
         connector.schemas[id] = { type: 'object' };
         registry.load(id)
           .then(settings => { expect(settings.plugin).to.be(id); })
-          .then(done)
-          .catch(done);
+          .then(done).catch(done);
       });
 
       it('should reject if a plugin does not exist', done => {
@@ -215,8 +211,7 @@ describe('@jupyterlab/coreutils', () => {
         connector.schemas[id] = { type: 'object' };
         registry.reload(id)
           .then(settings => { expect(settings.plugin).to.be(id); })
-          .then(done)
-          .catch(done);
+          .then(done).catch(done);
       });
 
       it(`should replace a registered plugin's settings`, done => {
@@ -231,8 +226,7 @@ describe('@jupyterlab/coreutils', () => {
           .then(() => { connector.schemas[id].title = second; })
           .then(() => registry.reload(id))
           .then(settings => { expect(settings.schema.title).to.be(second); })
-          .then(done)
-          .catch(done);
+          .then(done).catch(done);
       });
 
       it('should reject if a plugin does not exist', done => {
@@ -379,6 +373,124 @@ describe('@jupyterlab/coreutils', () => {
           .then(() => settings.set(key, value))
           .then(() => { expect(settings.user[key]).to.equal(value); })
           .then(done).catch(done);
+      });
+
+    });
+
+    describe('#plugin', () => {
+
+      it('should expose the plugin ID', () => {
+        const id = 'alpha';
+        const data = { composite: { }, user: { } };
+        const schema = { type: 'object' };
+        const plugin = { id, data, schema };
+
+        settings = new Settings({ plugin, registry });
+        expect(settings.plugin).to.equal(id);
+      });
+
+    });
+
+    describe('#registry', () => {
+
+      it('should expose the setting registry', () => {
+        const id = 'alpha';
+        const data = { composite: { }, user: { } };
+        const schema = { type: 'object' };
+        const plugin = { id, data, schema };
+
+        settings = new Settings({ plugin, registry });
+        expect(settings.registry).to.be(registry);
+      });
+
+    });
+
+    describe('#dispose()', () => {
+
+      it('should dispose the settings object', () => {
+        const id = 'alpha';
+        const data = { composite: { }, user: { } };
+        const schema = { type: 'object' };
+        const plugin = { id, data, schema };
+
+        settings = new Settings({ plugin, registry });
+        expect(settings.isDisposed).to.be(false);
+        settings.dispose();
+        expect(settings.isDisposed).to.be(true);
+      });
+
+    });
+
+    describe('#get()', () => {
+
+      it('should get a setting item', done => {
+        const id = 'foo';
+        const key = 'bar';
+        const value = 'baz';
+
+        connector.schemas[id] = { type: 'object' };
+        connector.save(id, { [key]: value }).then(() => registry.load(id))
+          .then(s => {
+            const saved = (settings = s as Settings).get(key);
+
+            expect(saved.user).to.be(value);
+          }).then(done).catch(done);
+      });
+
+      it('should use schema default if user data not available', done => {
+        const id = 'alpha';
+        const key = 'beta';
+        const value = 'gamma';
+        const schema = connector.schemas[id] = {
+          type: 'object',
+          properties: {
+            [key]: { type: typeof value, default: value }
+          }
+        };
+
+        registry.load(id).then(s => {
+          const saved = (settings = s as Settings).get(key);
+
+          expect(saved.composite).to.be(schema.properties[key].default);
+          expect(saved.composite).to.not.be(saved.user);
+        }).then(done).catch(done);
+      });
+
+      it('should let user value override schema default', done => {
+        const id = 'alpha';
+        const key = 'beta';
+        const value = 'gamma';
+        const schema = connector.schemas[id] = {
+          type: 'object',
+          properties: {
+            [key]: { type: typeof value, default: 'delta' }
+          }
+        };
+
+        connector.save(id, { [key]: value })
+          .then(() => registry.load(id))
+          .then(s => {
+            const saved = (settings = s as Settings).get(key);
+
+            expect(saved.composite).to.be(value);
+            expect(saved.user).to.be(value);
+            expect(saved.composite).to.not.be(schema.properties[key].default);
+            expect(saved.user).to.not.be(schema.properties[key].default);
+          }).then(done).catch(done);
+      });
+
+      it('should be `undefined` if a key does not exist', done => {
+        const id = 'foo';
+        const key = 'bar';
+
+        connector.schemas[id] = { type: 'object' };
+
+        registry.load(id).then(s => {
+          const saved = (settings = s as Settings).get(key);
+
+          expect(saved.composite).to.be(void 0);
+          expect(saved.user).to.be(void 0);
+        }).then(done).catch(done);
       });
 
     });
