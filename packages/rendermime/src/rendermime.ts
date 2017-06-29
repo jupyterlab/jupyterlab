@@ -88,14 +88,21 @@ class RenderMime {
    * [[preferredMimeType]].
    */
   createRenderer(mimeType: string, trusted: boolean): IRenderMime.IRendererWidget {
-    let rendererOptions = {
+    let factory = this._factories[mimeType];
+    if (!factory) {
+      throw new Error(`Unregistered mimeType: ${mimeType}`);
+    }
+    let options = {
       mimeType,
       trusted,
       resolver: this._resolver,
       sanitizer: this.sanitizer,
       linkHandler: this._handler
     };
-    return this._factories[mimeType].createRenderer(rendererOptions);
+    if (!factory.canCreateRenderer(options)) {
+      throw new Error('Cannot create renderer');
+    }
+    return factory.createRenderer(options);
   }
 
   /**
@@ -141,7 +148,7 @@ class RenderMime {
       linkHandler: this._handler
     });
     each(this._order, mimeType => {
-      rendermime.addFactory(this._factories[mimeType], mimeType);
+      rendermime.addFactory(this._factories[mimeType], mimeType, -1);
     });
     return rendermime;
   }

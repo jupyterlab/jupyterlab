@@ -28,7 +28,7 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
-  IRenderMime, RenderMime, TextRenderer, HTMLRenderer
+  IRenderMime, RenderMime, TextRendererFactory, RenderedHTML
 } from '@jupyterlab/rendermime';
 
 
@@ -36,7 +36,7 @@ import {
  * Get a copy of the default rendermime instance.
  */
 export
-function defaultRenderMime(): IRenderMime {
+function defaultRenderMime(): RenderMime {
   return Private.rendermime.clone();
 }
 
@@ -152,34 +152,22 @@ namespace Private {
   const notebookFactory = new NotebookModelFactory({});
 
 
-  class JSONRenderer extends HTMLRenderer {
+  class JSONRenderer extends RenderedHTML {
 
-    mimeTypes = ['application/json'];
-
-
-    get ready(): Promise<void> {
-      return Promise.resolve(undefined);
-    }
-
-    render(options: IRenderMime.IRenderOptions): IRenderMime.IReadyWidget {
-      let source = options.model.data.get(options.mimeType);
-      options.model.data.set(options.mimeType, json2html(source));
-      return super.render(options);
+    render(model: IRenderMime.IMimeModel): Promise<void> {
+      let source = model.data.get('application/json');
+      model.data.set('text/html', json2html(source));
+      return super.render(model);
     }
   }
 
 
-  class InjectionRenderer extends TextRenderer {
+  class JSONRendererFactory extends TextRendererFactory {
 
-    mimeTypes = ['test/injector'];
+    mimeTypes = ['application/json'];
 
-    get ready(): Promise<void> {
-      return Promise.resolve(undefined);
-    }
-
-    render(options: IRenderMime.IRenderOptions): IRenderMime.IReadyWidget {
-      options.model.data.set('application/json', { 'foo': 1 } );
-      return super.render(options);
+    createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRendererWidget {
+      return new JSONRenderer(options);
     }
   }
 
@@ -187,8 +175,7 @@ namespace Private {
   const rendermime = new RenderMime();
 
   RenderMime.addDefaultFactories(rendermime);
-  rendermime.addFactory(new JSONRenderer(), 'application/json');
-  rendermime.addFactory(new InjectionRenderer(), 'test/injector');
+  rendermime.addFactory(new JSONRendererFactory(), 'application/json');
 }
 
 
