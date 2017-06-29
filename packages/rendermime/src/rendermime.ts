@@ -97,15 +97,17 @@ class RenderMime {
    *
    * @param model - the mime model of interest.
    *
+   * @param trusted - Whether the model is trusted.
+   *
    * #### Notes
    * The mimeTypes in the model are checked in preference order
    * until a renderer returns `true` for `.canRender`.
    */
-  preferredMimeType(model: IRenderMime.IMimeModel): string {
+  preferredMimeType(model: IRenderMime.IMimeModel, trusted: boolean): string {
     let sanitizer = this.sanitizer;
     return find(this._order, mimeType => {
       if (model.data.has(mimeType)) {
-        let options = { mimeType, sanitizer, trusted: model.trusted };
+        let options = { mimeType, sanitizer, trusted };
         let renderer = this._factories[mimeType];
         let canRender = false;
         try {

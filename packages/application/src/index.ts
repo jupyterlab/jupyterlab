@@ -63,13 +63,13 @@ class JupyterLab extends Application<ApplicationShell> {
     let linker = new CommandLinker({ commands: this.commands });
     this.commandLinker = linker;
 
-    let items = Private.getDefaultRendererItems();
     let linkHandler = {
       handleLink: (node: HTMLElement, path: string) => {
         linker.connectNode(node, 'file-operations:open', { path });
       }
     };
-    this.rendermime = new RenderMime({ items, linkHandler });
+    this.rendermime = new RenderMime({ linkHandler });
+    Private.populateRenderers(this.rendermime);
 
     let registry = this.docRegistry = new DocumentRegistry();
     registry.addModelFactory(new TextModelFactory());
@@ -261,28 +261,21 @@ namespace Private {
    * Get an array of the default renderer items.
    */
   export
-  function getDefaultRendererItems(): RenderMime.IRendererItem[] {
+  function populateRenderers(rendermime: RenderMime): void {
     let renderers = [
-    new JavaScriptRenderer(),
-    new HTMLRenderer(),
-    new MarkdownRenderer(),
-    new LatexRenderer(),
-    new SVGRenderer(),
-    new ImageRenderer(),
-    new PDFRenderer(),
-    new TextRenderer()
+      new JavaScriptRenderer(),
+      new HTMLRenderer(),
+      new MarkdownRenderer(),
+      new LatexRenderer(),
+      new SVGRenderer(),
+      new ImageRenderer(),
+      new PDFRenderer(),
+      new TextRenderer()
     ];
-    let items: RenderMime.IRendererItem[] = [];
-    let mimes: { [key: string]: boolean } = {};
     for (let renderer of renderers) {
       for (let mime of renderer.mimeTypes) {
-        if (mime in mimes) {
-          continue;
-        }
-        mimes[mime] = true;
-        items.push({ mimeType: mime, renderer });
+        rendermime.addFactory(renderer, mime);
       }
     }
-    return items;
   }
 }

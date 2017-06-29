@@ -21,11 +21,6 @@ namespace IRenderMime {
   export
   interface IMimeModel {
     /**
-     * Whether the model is trusted.
-     */
-    readonly trusted: boolean;
-
-    /**
      * The data associated with the model.
      */
     readonly data: IBundle;

@@ -58,13 +58,11 @@ function createRendermimePlugin(item: IRenderMime.IExtension): JupyterLabPlugin<
     autoStart: true,
     activate: (app: JupyterLab, restorer: ILayoutRestorer) => {
       // Add the mime renderer.
-      app.rendermime.addRenderer({
-        mimeType: item.mimeType,
-        renderer: item.renderer
-      }, item.rendererIndex || 0);
+      let index = item.rendererIndex || -1;
+      app.rendermime.addFactory(item.rendererFactory, item.mimeType, index);
 
       // Handle the widget factory.
-      if (!item.widgetFactoryOptions) {
+      if (!item.documentWidgetFactoryOptions) {
         return;
       }
 
@@ -73,11 +71,11 @@ function createRendermimePlugin(item: IRenderMime.IExtension): JupyterLabPlugin<
         renderTimeout: item.renderTimeout,
         dataType: item.dataType,
         rendermime: app.rendermime,
-        ...item.widgetFactoryOptions,
+        ...item.documentWidgetFactoryOptions,
       });
       app.docRegistry.addWidgetFactory(factory);
 
-      const factoryName = item.widgetFactoryOptions.name;
+      const factoryName = factory.name;
       const namespace = `${factoryName}-renderer`;
       const tracker = new InstanceTracker<MimeRenderer>({ namespace });
 

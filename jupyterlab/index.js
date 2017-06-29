@@ -9,7 +9,6 @@ require('font-awesome/css/font-awesome.min.css');
 require('@jupyterlab/theming/style/index.css');
 
 var app = require('@jupyterlab/application').JupyterLab;
-var RenderMime = require('@jupyterlab/rendermime').RenderMime;
 
 function main() {
     var version = PageConfig.getOption('appVersion') || 'unknown';

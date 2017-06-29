@@ -10,8 +10,8 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  MarkdownViewer, MarkdownViewerFactory
-} from '@jupyterlab/markdownviewer';
+  MimeRendererFactory, MimeRenderer
+} from '@jupyterlab/docregistry';
 
 
 /**
@@ -49,16 +49,17 @@ const plugin: JupyterLabPlugin<void> = {
  * Activate the markdown plugin.
  */
 function activate(app: JupyterLab, restorer: ILayoutRestorer) {
-    const factory = new MarkdownViewerFactory({
+    const factory = new MimeRendererFactory({
       name: FACTORY,
       fileExtensions: ['.md'],
-      readOnly: true,
+      mimeType: 'text/markdown',
       rendermime: app.rendermime
     });
+    app.docRegistry.addWidgetFactory(factory);
 
     const { commands } = app;
     const namespace = 'rendered-markdown';
-    const tracker = new InstanceTracker<MarkdownViewer>({ namespace });
+    const tracker = new InstanceTracker<MimeRenderer>({ namespace });
 
     // Handle state restoration.
     restorer.restore(tracker, {
@@ -73,8 +74,6 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer) {
       widget.context.pathChanged.connect(() => { tracker.save(widget); });
       tracker.add(widget);
     });
-
-    app.docRegistry.addWidgetFactory(factory);
 
     commands.addCommand(CommandIDs.preview, {
       label: 'Markdown Preview',

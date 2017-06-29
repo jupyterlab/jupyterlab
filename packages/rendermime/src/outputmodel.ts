@@ -44,6 +44,11 @@ interface IOutputModel extends IRenderMime.IMimeModel {
   readonly metadata: IObservableJSON;
 
   /**
+   * Whether the output is trusted.
+   */
+  trusted: boolean;
+
+  /**
    * Dispose of the resources used by the output model.
    */
   dispose(): void;

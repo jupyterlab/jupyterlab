@@ -570,7 +570,7 @@ class MimeRendererFactory extends ABCWidgetFactory<MimeRenderer, DocumentRegistr
    * Construct a new markdown widget factory.
    */
   constructor(options: MimeRendererFactory.IOptions) {
-    super(options);
+    super({ ...options, readOnly: true });
     this._rendermime = options.rendermime;
     this._mimeType = options.mimeType;
     this._renderTimeout = options.renderTimeout || 1000;
