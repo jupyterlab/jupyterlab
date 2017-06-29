@@ -431,8 +431,8 @@ class SettingRegistry {
     if (plugin in plugins) {
       const { composite, user } = plugins[plugin].data;
       const result = {
-        composite: composite[key] ? copy(composite[key]) : composite[key],
-        user: user[key] ? copy(user[key]) : user[key]
+        composite: key in composite ? copy(composite[key]) : composite[key],
+        user: key in user ? copy(user[key]) : user[key]
       };
 
       return Promise.resolve(result);
@@ -726,8 +726,8 @@ class Settings implements ISettingRegistry.ISettings {
     const { composite, user } = this;
 
     return {
-      composite: composite[key] ? copy(composite[key]) : composite[key],
-      user: user[key] ? copy(user[key]) : user[key]
+      composite: key in composite ? copy(composite[key]) : composite[key],
+      user: key in user ? copy(user[key]) : user[key]
     };
   }
 
