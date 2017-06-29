@@ -292,6 +292,97 @@ describe('@jupyterlab/coreutils', () => {
 
     });
 
+    describe('#composite', () => {
+
+      it('should contain the merged user and default data', done => {
+        const id = 'alpha';
+        const key = 'beta';
+        const value = 'gamma';
+        const schema = connector.schemas[id] = {
+          type: 'object',
+          properties: {
+            [key]: { type: typeof value, default: value }
+          }
+        };
+
+        connector.schemas[id] = schema;
+        registry.load(id).then(s => { settings = s as Settings; })
+          .then(() => { expect(settings.composite[key]).to.equal(value); })
+          .then(done).catch(done);
+      });
+
+      it('should privilege user data', done => {
+        const id = 'alpha';
+        const key = 'beta';
+        const value = 'gamma';
+        const schema = connector.schemas[id] = {
+          type: 'object',
+          properties: {
+            [key]: { type: typeof value, default: 'delta' }
+          }
+        };
+
+        connector.schemas[id] = schema;
+        registry.load(id).then(s => { settings = s as Settings; })
+          .then(() => settings.set(key, value))
+          .then(() => { expect(settings.composite[key]).to.equal(value); })
+          .then(done).catch(done);
+      });
+
+    });
+
+    describe('#isDisposed', () => {
+
+      it('should test whether the settings object is disposed', () => {
+        const id = 'alpha';
+        const data = { composite: { }, user: { } };
+        const schema = { type: 'object' };
+        const plugin = { id, data, schema };
+
+        settings = new Settings({ plugin, registry });
+        expect(settings.isDisposed).to.be(false);
+        settings.dispose();
+        expect(settings.isDisposed).to.be(true);
+      });
+
+    });
+
+    describe('#schema', () => {
+
+      it('should expose the plugin schema', () => {
+        const id = 'alpha';
+        const data = { composite: { }, user: { } };
+        const schema = { type: 'object' };
+        const plugin = { id, data, schema };
+
+        settings = new Settings({ plugin, registry });
+        expect(settings.schema).to.eql(schema);
+      });
+
+    });
+
+    describe('#user', () => {
+
+      it('should privilege user data', done => {
+        const id = 'alpha';
+        const key = 'beta';
+        const value = 'gamma';
+        const schema = connector.schemas[id] = {
+          type: 'object',
+          properties: {
+            [key]: { type: typeof value, default: 'delta' }
+          }
+        };
+
+        connector.schemas[id] = schema;
+        registry.load(id).then(s => { settings = s as Settings; })
+          .then(() => settings.set(key, value))
+          .then(() => { expect(settings.user[key]).to.equal(value); })
+          .then(done).catch(done);
+      });
+
+    });
+
   });
 
 });
