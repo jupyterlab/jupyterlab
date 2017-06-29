@@ -55,7 +55,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command: 'file-operations:open',
+    command: 'docmanager:open',
     args: widget => ({ path: widget.context.path, factory: FACTORY }),
     name: widget => widget.context.path
   });

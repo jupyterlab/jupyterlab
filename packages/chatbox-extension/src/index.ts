@@ -40,6 +40,7 @@ namespace CommandIDs {
   const linebreak = 'chatbox:linebreak';
 };
 
+
 /**
  * The chatbox widget content factory.
  */
@@ -49,7 +50,7 @@ const chatboxPlugin: JupyterLabPlugin<void> = {
   requires: [IRenderMime, ICommandPalette, IEditorServices, IDocumentManager, ILayoutRestorer],
   autoStart: true,
   activate: activateChatbox
-}
+};
 
 
 /**

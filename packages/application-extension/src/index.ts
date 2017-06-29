@@ -19,19 +19,19 @@ import {
  */
 namespace CommandIDs {
   export
-  const activateNextTab: string = 'main-jupyterlab:activate-next-tab';
+  const activateNextTab: string = 'application:activate-next-tab';
 
   export
-  const activatePreviousTab: string = 'main-jupyterlab:activate-previous-tab';
+  const activatePreviousTab: string = 'application:activate-previous-tab';
 
   export
-  const closeAll: string = 'main-jupyterlab:close-all';
+  const closeAll: string = 'application:close-all';
 
   export
-  const setMode: string = 'main-jupyterlab:set-mode';
+  const setMode: string = 'application:set-mode';
 
   export
-  const toggleMode: string = 'main-jupyterlab:toggle-mode';
+  const toggleMode: string = 'application:toggle-mode';
 };
 
 

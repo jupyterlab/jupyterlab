@@ -78,7 +78,7 @@ namespace CommandIDs {
   const inject = 'console:inject';
 
   export
-  const switchKernel = 'console:switch-kernel';
+  const changeKernel = 'console:change-kernel';
 };
 
 
@@ -386,7 +386,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
     isEnabled: hasWidget
   });
 
-  command = CommandIDs.switchKernel;
+  command = CommandIDs.changeKernel;
   commands.addCommand(command, {
     label: 'Change Kernel',
     execute: args => {
@@ -408,7 +408,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
   menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.interrupt });
   menu.addItem({ command: CommandIDs.restart });
-  menu.addItem({ command: CommandIDs.switchKernel });
+  menu.addItem({ command: CommandIDs.changeKernel });
   menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.closeAndShutdown });
 
