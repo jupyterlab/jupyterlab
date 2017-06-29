@@ -183,16 +183,12 @@ namespace Private {
     }
   }
 
-  let renderers = [
-    new JSONRenderer(),
-    new InjectionRenderer()
-  ];
-  let items = RenderMime.getDefaultItems();
-  for (let renderer of renderers) {
-    items.push({ mimeType: renderer.mimeTypes[0], renderer });
-  }
   export
-  const rendermime = new RenderMime({ items });
+  const rendermime = new RenderMime();
+
+  RenderMime.addDefaultFactories(rendermime);
+  rendermime.addFactory(new JSONRenderer(), 'application/json');
+  rendermime.addFactory(new InjectionRenderer(), 'test/injector');
 }
 
 

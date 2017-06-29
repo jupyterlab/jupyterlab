@@ -21,6 +21,12 @@ import {
   IClientSession, ISanitizer, defaultSanitizer
 } from '@jupyterlab/apputils';
 
+import {
+  JavaScriptRendererFactory, HTMLRendererFactory, MarkdownRendererFactory,
+  LatexRendererFactory, SVGRendererFactory, ImageRendererFactory,
+  TextRendererFactory, PDFRendererFactory
+} from './factories';
+
 
 /**
  * A composite renderer.
@@ -273,5 +279,27 @@ namespace RenderMime {
      * The contents manager used by the resolver.
      */
     contents: Contents.IManager;
+  }
+
+  /**
+   * Add the default renderer factories to a rendermime instance.
+   */
+  export
+  function addDefaultFactories(rendermime: RenderMime): void {
+    let renderers = [
+      new JavaScriptRendererFactory(),
+      new HTMLRendererFactory(),
+      new MarkdownRendererFactory(),
+      new LatexRendererFactory(),
+      new SVGRendererFactory(),
+      new ImageRendererFactory(),
+      new PDFRendererFactory(),
+      new TextRendererFactory()
+    ];
+    for (let renderer of renderers) {
+      for (let mime of renderer.mimeTypes) {
+        rendermime.addFactory(renderer, mime);
+      }
+    }
   }
 }

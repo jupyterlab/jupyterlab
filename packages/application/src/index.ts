@@ -10,9 +10,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  IRenderMime, RenderMime,
-  HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
-  JavaScriptRenderer, SVGRenderer, MarkdownRenderer, PDFRenderer
+  IRenderMime, RenderMime
 } from '@jupyterlab/rendermime';
 
 import {
@@ -69,7 +67,7 @@ class JupyterLab extends Application<ApplicationShell> {
       }
     };
     this.rendermime = new RenderMime({ linkHandler });
-    Private.populateRenderers(this.rendermime);
+    RenderMime.addDefaultFactories(this.rendermime);
 
     let registry = this.docRegistry = new DocumentRegistry();
     registry.addModelFactory(new TextModelFactory());
@@ -248,34 +246,5 @@ namespace JupyterLab {
      * The default export.
      */
     default: JupyterLabPlugin<any> | JupyterLabPlugin<any>[];
-  }
-}
-
-
-/**
- * The namespace for module private data.
- */
-export
-namespace Private {
-  /**
-   * Get an array of the default renderer items.
-   */
-  export
-  function populateRenderers(rendermime: RenderMime): void {
-    let renderers = [
-      new JavaScriptRenderer(),
-      new HTMLRenderer(),
-      new MarkdownRenderer(),
-      new LatexRenderer(),
-      new SVGRenderer(),
-      new ImageRenderer(),
-      new PDFRenderer(),
-      new TextRenderer()
-    ];
-    for (let renderer of renderers) {
-      for (let mime of renderer.mimeTypes) {
-        rendermime.addFactory(renderer, mime);
-      }
-    }
   }
 }

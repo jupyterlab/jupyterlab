@@ -94,7 +94,8 @@ function createApp(manager: ServiceManager.IManager): void {
     commands.processKeydownEvent(event);
   }, useCapture);
 
-  let rendermime = new RenderMime({ items: RenderMime.getDefaultItems() });
+  let rendermime = new RenderMime();
+  RenderMime.addDefaultFactories(rendermime);
   let opener = {
     open: (widget: Widget) => {
       // Do nothing for sibling widgets for now.

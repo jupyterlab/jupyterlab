@@ -15,14 +15,14 @@ import {
  * A renderer for raw html.
  */
 export
-class HTMLRenderer implements IRenderMime.IRendererFactory {
+class HTMLRendererFactory implements IRenderMime.IRendererFactory {
   /**
-   * The mimeTypes this renderer accepts.
+   * The mimeTypes this factory accepts.
    */
   mimeTypes = ['text/html'];
 
   /**
-   * Whether the renderer can render given the render options.
+   * Whether the factory can create a renderer given the options.
    */
   canCreateRenderer(options: IRenderMime.IRendererOptions): boolean {
     return this.mimeTypes.indexOf(options.mimeType) !== -1;
@@ -47,17 +47,17 @@ class HTMLRenderer implements IRenderMime.IRendererFactory {
 
 
 /**
- * A renderer for `<img>` data.
+ * A renderer factory for `<img>` data.
  */
 export
-class ImageRenderer implements IRenderMime.IRendererFactory {
+class ImageRendererFactory implements IRenderMime.IRendererFactory {
   /**
-   * The mimeTypes this renderer accepts.
+   * The mimeTypes this factory accepts.
    */
   mimeTypes = ['image/png', 'image/jpeg', 'image/gif'];
 
   /**
-   * Whether the renderer can render given the render options.
+   * Whether the factory can create a renderer given the options.
    */
   canCreateRenderer(options: IRenderMime.IRendererOptions): boolean {
     return this.mimeTypes.indexOf(options.mimeType) !== -1;
@@ -82,18 +82,18 @@ class ImageRenderer implements IRenderMime.IRendererFactory {
 
 
 /**
- * A renderer for plain text and Jupyter console text data.
+ * A renderer factory for plain text and Jupyter console text data.
  */
 export
-class TextRenderer implements IRenderMime.IRendererFactory {
+class TextRendererFactory implements IRenderMime.IRendererFactory {
   /**
-   * The mimeTypes this renderer accepts.
+   * The mimeTypes this factory accepts.
    */
   mimeTypes = ['text/plain', 'application/vnd.jupyter.stdout',
                'application/vnd.jupyter.stderr'];
 
   /**
-   * Whether the renderer can render given the render options.
+   * Whether the factory can create a renderer given the options.
    */
   canCreateRenderer(options: IRenderMime.IRendererOptions): boolean {
     return this.mimeTypes.indexOf(options.mimeType) !== -1;
@@ -118,17 +118,17 @@ class TextRenderer implements IRenderMime.IRendererFactory {
 
 
 /**
- * A renderer for raw `<script>` data.
+ * A renderer factory for raw `<script>` data.
  */
 export
-class JavaScriptRenderer implements IRenderMime.IRendererFactory {
+class JavaScriptRendererFactory implements IRenderMime.IRendererFactory {
   /**
-   * The mimeTypes this renderer accepts.
+   * The mimeTypes this factory accepts.
    */
   mimeTypes = ['text/javascript', 'application/javascript'];
 
   /**
-   * Whether the renderer can render given the render options.
+   * Whether the factory can create a renderer given the options.
    */
   canCreateRenderer(options: IRenderMime.IRendererOptions): boolean {
     return (
@@ -156,17 +156,17 @@ class JavaScriptRenderer implements IRenderMime.IRendererFactory {
 
 
 /**
- * A renderer for `<svg>` data.
+ * A renderer factory for `<svg>` data.
  */
 export
-class SVGRenderer implements IRenderMime.IRendererFactory {
+class SVGRendererFactory implements IRenderMime.IRendererFactory {
   /**
-   * The mimeTypes this renderer accepts.
+   * The mimeTypes this factory accepts.
    */
   mimeTypes = ['image/svg+xml'];
 
   /**
-   * Whether the renderer can render given the render options.
+   * Whether the factory can create a renderer given the options.
    */
   canCreateRenderer(options: IRenderMime.IRendererOptions): boolean {
     return (
@@ -194,17 +194,17 @@ class SVGRenderer implements IRenderMime.IRendererFactory {
 
 
 /**
- * A renderer for PDF data.
+ * A renderer factory for PDF data.
  */
 export
-class PDFRenderer implements IRenderMime.IRendererFactory {
+class PDFRendererFactory implements IRenderMime.IRendererFactory {
   /**
-   * The mimeTypes this renderer accepts.
+   * The mimeTypes this factory accepts.
    */
   mimeTypes = ['application/pdf'];
 
   /**
-   * Whether the renderer can render given the render options.
+   * Whether the factory can create a renderer given the options.
    */
   canCreateRenderer(options: IRenderMime.IRendererOptions): boolean {
     return (
@@ -232,17 +232,17 @@ class PDFRenderer implements IRenderMime.IRendererFactory {
 
 
 /**
- * A renderer for LateX data.
+ * A renderer factory for LateX data.
  */
 export
-class LatexRenderer implements IRenderMime.IRendererFactory  {
+class LatexRendererFactory implements IRenderMime.IRendererFactory  {
   /**
-   * The mimeTypes this renderer accepts.
+   * The mimeTypes this factory accepts.
    */
   mimeTypes = ['text/latex'];
 
   /**
-   * Whether the renderer can render given the render options.
+   * Whether the factory can create a renderer given the options.
    */
   canCreateRenderer(options: IRenderMime.IRendererOptions): boolean {
     return this.mimeTypes.indexOf(options.mimeType) !== -1;
@@ -267,17 +267,17 @@ class LatexRenderer implements IRenderMime.IRendererFactory  {
 
 
 /**
- * A renderer for Jupyter Markdown data.
+ * A renderer factory for Jupyter Markdown data.
  */
 export
-class MarkdownRenderer implements IRenderMime.IRendererFactory {
+class MarkdownRendererFactory implements IRenderMime.IRendererFactory {
   /**
-   * The mimeTypes this renderer accepts.
+   * The mimeTypes this factory accepts.
    */
   mimeTypes = ['text/markdown'];
 
   /**
-   * Whether the renderer can render given the render options.
+   * Whether the factory can create a renderer given the options.
    */
   canCreateRenderer(options: IRenderMime.IRendererOptions): boolean {
     return this.mimeTypes.indexOf(options.mimeType) !== -1;
