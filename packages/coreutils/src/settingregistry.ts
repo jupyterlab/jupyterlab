@@ -704,7 +704,6 @@ class Settings implements ISettingRegistry.ISettings {
     }
 
     this._isDisposed = true;
-
     this._composite = null;
     this._schema = null;
     this._user = null;

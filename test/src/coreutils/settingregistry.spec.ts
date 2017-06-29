@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  IDataConnector, ISettingRegistry, SettingRegistry, StateDB
+  IDataConnector, ISettingRegistry, SettingRegistry, Settings, StateDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -239,6 +239,40 @@ describe('@jupyterlab/coreutils', () => {
         registry.reload('foo')
           .then(settings => { done('should not resolve'); })
           .catch(reason => { done(); });
+      });
+
+    });
+
+  });
+
+  describe('Settings', () => {
+
+    const connector = new TestConnector();
+    let registry: SettingRegistry;
+    let settings: Settings;
+
+    beforeEach(() => {
+      if (settings) {
+        settings.dispose();
+        settings = null;
+      }
+
+      return connector.clear().then(() => {
+        connector.schemas = { };
+        registry = new SettingRegistry({ connector });
+      });
+    });
+
+    describe('#constructor()', () => {
+
+      it('should create a new settings object for a plugin', () => {
+        const id = 'alpha';
+        const data = { composite: { }, user: { } };
+        const schema = { type: 'object' };
+        const plugin = { id, data, schema };
+
+        settings = new Settings({ plugin, registry });
+        expect(settings).to.be.a(Settings);
       });
 
     });
