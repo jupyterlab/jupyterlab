@@ -37,18 +37,17 @@ class TestConnector extends StateDB implements IDataConnector<ISettingRegistry.I
 
 describe('@jupyterlab/coreutils', () => {
 
-  const connector = new TestConnector();
-
-  let registry: SettingRegistry;
-
-  beforeEach(() => {
-    return connector.clear().then(() => {
-      connector.schemas = { };
-      registry = new SettingRegistry({ connector });
-    });
-  });
-
   describe('SettingRegistry', () => {
+
+    const connector = new TestConnector();
+    let registry: SettingRegistry;
+
+    beforeEach(() => {
+      return connector.clear().then(() => {
+        connector.schemas = { };
+        registry = new SettingRegistry({ connector });
+      });
+    });
 
     describe('#constructor()', () => {
 
@@ -201,6 +200,43 @@ describe('@jupyterlab/coreutils', () => {
 
       it('should reject if a plugin does not exist', done => {
         registry.load('foo')
+          .then(settings => { done('should not resolve'); })
+          .catch(reason => { done(); });
+      });
+
+    });
+
+    describe('#reload()', () => {
+
+      it(`should load a registered plugin's settings`, done => {
+        const id = 'foo';
+
+        expect(registry.plugins).to.be.empty();
+        connector.schemas[id] = { type: 'object' };
+        registry.reload(id)
+          .then(settings => { expect(settings.plugin).to.be(id); })
+          .then(done)
+          .catch(done);
+      });
+
+      it(`should replace a registered plugin's settings`, done => {
+        const id = 'foo';
+        const first = 'Foo';
+        const second = 'Bar';
+
+        expect(registry.plugins).to.be.empty();
+        connector.schemas[id] = { type: 'object', title: first};
+        registry.reload(id)
+          .then(settings => { expect(settings.schema.title).to.be(first); })
+          .then(() => { connector.schemas[id].title = second; })
+          .then(() => registry.reload(id))
+          .then(settings => { expect(settings.schema.title).to.be(second); })
+          .then(done)
+          .catch(done);
+      });
+
+      it('should reject if a plugin does not exist', done => {
+        registry.reload('foo')
           .then(settings => { done('should not resolve'); })
           .catch(reason => { done(); });
       });
