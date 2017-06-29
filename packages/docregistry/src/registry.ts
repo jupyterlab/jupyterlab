@@ -757,13 +757,18 @@ namespace DocumentRegistry {
    * The options used to initialize a widget factory.
    */
   export
-  interface IWidgetFactoryOptions extends IRenderMime.IWidgetFactoryOptions {}
+  interface IWidgetFactoryOptions extends IRenderMime.IDocumentWidgetFactoryOptions {}
 
   /**
    * A widget for a document.
    */
   export
-  interface IReadyWidget extends IRenderMime.IReadyWidget { }
+  interface IReadyWidget extends Widget {
+    /**
+     * A promise that resolves when the widget is ready.
+     */
+    readonly ready: Promise<void>;
+  }
 
   /**
    * The interface for a widget factory.

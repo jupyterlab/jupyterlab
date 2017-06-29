@@ -2,12 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject, PromiseDelegate
+  JSONObject
 } from '@phosphor/coreutils';
-
-import {
-  Message,
-} from '@phosphor/messaging';
 
 import {
   Widget
@@ -61,14 +57,13 @@ const VEGALITE_MIME_TYPE = 'application/vnd.vegalite.v1+json';
  * A widget for rendering Vega or Vega-Lite data, for usage with rendermime.
  */
 export
-class RenderedVega extends Widget implements IRenderMime.IReadyWidget {
+class RenderedVega extends Widget implements IRenderMime.IRendererWidget {
   /**
    * Create a new widget for rendering Vega/Vega-Lite.
    */
-  constructor(options: IRenderMime.IRenderOptions) {
+  constructor(options: IRenderMime.IRendererOptions) {
     super();
     this.addClass(VEGA_COMMON_CLASS);
-    this._model = options.model;
 
     // Handle things related to the MIME type.
     let mimeType = this._mimeType = options.mimeType;
@@ -82,99 +77,77 @@ class RenderedVega extends Widget implements IRenderMime.IReadyWidget {
   }
 
   /**
-   * A promise that resolves when the widget is ready.
+   * Render Vega/Vega-Lite into this widget's node.
    */
-  get ready(): Promise<void> {
-    return this._ready.promise;
-  }
+  render(model: IRenderMime.IMimeModel): Promise<void> {
 
-  /**
-   * Dispose of the widget.
-   */
-  dispose(): void {
-    this._model = null;
-    super.dispose();
-  }
-
-  /**
-   * Trigger rendering after the widget is attached to the DOM.
-   */
-  onAfterAttach(msg: Message): void {
-    this._renderVega();
-  }
-
-  /**
-   * Actual render Vega/Vega-Lite into this widget's node.
-   */
-  private _renderVega(): void {
-
-    let data = this._model.data.get(this._mimeType) as JSONObject;
+    let data = model.data.get(this._mimeType) as JSONObject;
 
     let embedSpec = {
       mode: this._mode,
       spec: data
     };
 
-    embed(this.node, embedSpec, (error: any, result: any): any => {
-      this._ready.resolve(undefined);
-      // This is copied out for now as there is a bug in JupyterLab
-      // that triggers and infinite rendering loop when this is done.
-      // let imageData = result.view.toImageURL();
-      // imageData = imageData.split(',')[1];
-      // this._injector('image/png', imageData);
+    return new Promise<void>((resolve, reject) => {
+      embed(this.node, embedSpec, (error: any, result: any): any => {
+        resolve(undefined);
+        // This is copied out for now as there is a bug in JupyterLab
+        // that triggers and infinite rendering loop when this is done.
+        // let imageData = result.view.toImageURL();
+        // imageData = imageData.split(',')[1];
+        // this._injector('image/png', imageData);
+      });
     });
   }
 
-  private _model: IRenderMime.IMimeModel = null;
   private _mimeType: string;
   private _mode: string;
-  private _ready = new PromiseDelegate<void>();
 }
 
 
 /**
- * A mime renderer for Vega/Vega-Lite data.
+ * A mime renderer factory for Vega/Vega-Lite data.
  */
 export
-class VegaRenderer implements IRenderMime.IRenderer {
+class VegaRenderer implements IRenderMime.IRendererFactory {
   /**
    * The mimeTypes this renderer accepts.
    */
   mimeTypes = [VEGA_MIME_TYPE, VEGALITE_MIME_TYPE];
 
   /**
-   * Whether the renderer can render given the render options.
+   * Whether the renderer can create a renderer given the render options.
    */
-  canRender(options: IRenderMime.IRenderOptions): boolean {
+  canCreateRenderer(options: IRenderMime.IRendererOptions): boolean {
     return this.mimeTypes.indexOf(options.mimeType) !== -1;
   }
 
   /**
    * Render the transformed mime bundle.
    */
-  render(options: IRenderMime.IRenderOptions): IRenderMime.IReadyWidget {
+  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRendererWidget {
     return new RenderedVega(options);
   }
 
   /**
    * Whether the renderer will sanitize the data given the render options.
    */
-  wouldSanitize(options: IRenderMime.IRenderOptions): boolean {
+  wouldSanitize(options: IRenderMime.IRendererOptions): boolean {
     return false;
   }
 }
 
 
-const renderer = new VegaRenderer();
+const rendererFactory = new VegaRenderer();
 
 const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
   // Vega
   {
     mimeType: VEGA_MIME_TYPE,
-    renderer,
+    rendererFactory,
     rendererIndex: 0,
     dataType: 'json',
-    widgetFactoryOptions: {
+    documentWidgetFactoryOptions: {
       name: 'Vega',
       fileExtensions: ['.vg', '.vg.json', 'json'],
       defaultFor: ['.vg', '.vg.json'],
@@ -184,10 +157,10 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
   // Vega-Lite
   {
     mimeType: VEGALITE_MIME_TYPE,
-    renderer,
+    rendererFactory,
     rendererIndex: 0,
     dataType: 'json',
-    widgetFactoryOptions: {
+    documentWidgetFactoryOptions: {
       name: 'Vega-Lite',
       fileExtensions: ['.vl', '.vl.json', 'json'],
       defaultFor: ['.vl', '.vl.json'],

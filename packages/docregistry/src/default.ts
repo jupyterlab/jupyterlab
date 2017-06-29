@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  JSONObject, JSONValue, PromiseDelegate
+  JSONValue, PromiseDelegate
 } from '@phosphor/coreutils';
 
 import {
@@ -34,7 +34,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  RenderMime, MimeModel
+  IRenderMime, RenderMime, MimeModel
 } from '@jupyterlab/rendermime';
 
 import {
@@ -419,11 +419,17 @@ class MimeRenderer extends Widget implements DocumentRegistry.IReadyWidget {
     layout.addWidget(toolbar);
     let context = options.context;
     this.title.label = context.path.split('/').pop();
-    this._rendermime = options.rendermime;
-    this._rendermime.resolver = context;
+    let rendermime = options.rendermime.clone();
+    rendermime.resolver = context;
+
     this._context = context;
     this._mimeType = options.mimeType;
     this._dataType = options.dataType;
+
+    this._renderer = rendermime.createRenderer(this._mimeType, false);
+    layout.addWidget(this._renderer);
+
+    this._mimeModel = new MimeModel({ trusted: false });
 
     context.pathChanged.connect(this._onPathChanged, this);
 
@@ -431,15 +437,16 @@ class MimeRenderer extends Widget implements DocumentRegistry.IReadyWidget {
       if (this.isDisposed) {
         return;
       }
-      this._render();
-      this._ready.resolve(undefined);
-
+      return this._render().then();
+    }).then(() => {
       // Throttle the rendering rate of the widget.
       this._monitor = new ActivityMonitor({
         signal: context.model.contentChanged,
         timeout: options.renderTimeout
       });
       this._monitor.activityStopped.connect(this.update, this);
+
+      this._ready.resolve(undefined);
     });
   }
 
@@ -488,23 +495,15 @@ class MimeRenderer extends Widget implements DocumentRegistry.IReadyWidget {
   /**
    * Render the mime content.
    */
-  private _render(): void {
+  private _render(): Promise<void> {
     let context = this._context;
     let model = context.model;
-    let layout = this.layout as PanelLayout;
-    let data: JSONObject = {};
     if (this._dataType === 'string') {
-      data[this._mimeType] = model.toString();
+      this._mimeModel.data.set(this._mimeType, model.toString());
     } else {
-      data[this._mimeType] = model.toJSON();
+      this._mimeModel.data.set(this._mimeType, model.toJSON());
     }
-    let mimeModel = new MimeModel({ data, trusted: false });
-    let widget = this._rendermime.render(mimeModel);
-    if (layout.widgets.length === 2) {
-      // The toolbar is layout.widgets[0]
-      layout.widgets[1].dispose();
-    }
-    layout.addWidget(widget);
+    return this._renderer.render(this._mimeModel);
   }
 
   /**
@@ -516,7 +515,8 @@ class MimeRenderer extends Widget implements DocumentRegistry.IReadyWidget {
 
   private _context: DocumentRegistry.Context = null;
   private _monitor: ActivityMonitor<any, any> = null;
-  private _rendermime: RenderMime = null;
+  private _renderer: IRenderMime.IRendererWidget;
+  private _mimeModel: IRenderMime.IMimeModel;
   private _mimeType: string;
   private _ready = new PromiseDelegate<void>();
   private _dataType: 'string' | 'json';
