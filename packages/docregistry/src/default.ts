@@ -288,7 +288,7 @@ class Base64ModelFactory extends TextModelFactory {
  * The default implemetation of a widget factory.
  */
 export
-abstract class ABCWidgetFactory<T extends DocumentRegistry.IDocumentWidget<U>, U extends DocumentRegistry.IModel> implements DocumentRegistry.IWidgetFactory<T, U> {
+abstract class ABCWidgetFactory<T extends DocumentRegistry.IReadyWidget, U extends DocumentRegistry.IModel> implements DocumentRegistry.IWidgetFactory<T, U> {
   /**
    * Construct a new `ABCWidgetFactory`.
    */
@@ -406,7 +406,7 @@ abstract class ABCWidgetFactory<T extends DocumentRegistry.IDocumentWidget<U>, U
  * A widget for rendered mimetype.
  */
 export
-class MimeRenderer extends Widget implements DocumentRegistry.IDocumentWidget<DocumentRegistry.IModel> {
+class MimeRenderer extends Widget implements DocumentRegistry.IReadyWidget {
   /**
    * Construct a new markdown widget.
    */

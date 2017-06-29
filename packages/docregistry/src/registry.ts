@@ -10,7 +10,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONValue, Token
+  JSONValue
 } from '@phosphor/coreutils';
 
 import {
@@ -40,15 +40,6 @@ import {
 import {
   IRenderMime
 } from '@jupyterlab/rendermime';
-
-
-/* tslint:disable */
-/**
- * The document registry token.
- */
-export
-const IDocumentRegistry = new Token<IDocumentRegistry>('jupyter.services.document-registry');
-/* tslint:enable */
 
 
 /**
@@ -779,18 +770,13 @@ namespace DocumentRegistry {
    * A widget for a document.
    */
   export
-  interface IDocumentWidget<T extends IModel> extends IRenderMime.IReadyWidget {
-    /**
-     * The context associated with the widget.
-     */
-    context: IContext<T>;
-  }
+  interface IReadyWidget extends IRenderMime.IReadyWidget { }
 
   /**
    * The interface for a widget factory.
    */
   export
-  interface IWidgetFactory<T extends IDocumentWidget<U>, U extends IModel> extends IDisposable, IWidgetFactoryOptions {
+  interface IWidgetFactory<T extends IReadyWidget, U extends IModel> extends IDisposable, IWidgetFactoryOptions {
     /**
      * A signal emitted when a widget is created.
      */
@@ -809,7 +795,7 @@ namespace DocumentRegistry {
    * A type alias for a standard widget factory.
    */
   export
-  type WidgetFactory = IWidgetFactory<IDocumentWidget<IModel>, IModel>;
+  type WidgetFactory = IWidgetFactory<IReadyWidget, IModel>;
 
   /**
    * An interface for a widget extension.

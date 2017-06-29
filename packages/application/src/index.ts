@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
+  Base64ModelFactory, DocumentRegistry, TextModelFactory
+} from '@jupyterlab/docregistry';
+
+import {
   IRenderMime, RenderMime,
   HTMLRenderer, LatexRenderer, ImageRenderer, TextRenderer,
   JavaScriptRenderer, SVGRenderer, MarkdownRenderer, PDFRenderer
@@ -14,6 +18,10 @@ import {
 import {
   Application, IPlugin
 } from '@phosphor/application';
+
+import {
+  createRendermimePlugins
+} from './mimerenderers';
 
 import {
   ApplicationShell
@@ -61,7 +69,28 @@ class JupyterLab extends Application<ApplicationShell> {
       }
     };
     this.rendermime = new RenderMime({ items, linkHandler });
+
+    let registry = this.docregistry = new DocumentRegistry();
+    registry.addModelFactory(new TextModelFactory());
+    registry.addModelFactory(new Base64ModelFactory());
+    registry.addFileType({
+      name: 'Text',
+      extension: '.txt',
+      contentType: 'file',
+      fileFormat: 'text'
+    });
+    registry.addCreator({ name: 'Text File', fileType: 'Text', });
+
+    if (options.mimeRenderers) {
+      let plugins = createRendermimePlugins(options.mimeRenderers);
+      plugins.forEach(plugin => { this.registerPlugin(plugin); });
+    }
   }
+
+  /**
+   * The document registry instance used by the application.
+   */
+  readonly docregistry: DocumentRegistry;
 
   /**
    * The rendermime instance used by the application.
@@ -116,28 +145,6 @@ class JupyterLab extends Application<ApplicationShell> {
     mods.forEach(mod => { this.registerPluginModule(mod); });
   }
 
-  /**
-   * Register a rendermime extension module.
-   */
-  registerMimeModule(mod: IRenderMime.IExtensionModule): void {
-    let data = mod.default;
-    // Handle commonjs exports.
-    if (!mod.hasOwnProperty('__esModule')) {
-      data = mod as any;
-    }
-    if (!Array.isArray(data)) {
-      data = [data];
-    }
-    let rendermime = this.rendermime;
-
-    data.forEach(item => {
-      rendermime.addRenderer({
-        mimeType: item.mimeType,
-        renderer: item.renderer
-      }, item.rendererIndex || 0);
-    });
-  }
-
   private _info: JupyterLab.IInfo;
 }
 
@@ -187,6 +194,11 @@ namespace JupyterLab {
      * The assets directory of the app on the server.
      */
     assetsDir?: string;
+
+    /**
+     * The mime renderer extensions.
+     */
+    mimeRenderers?: IRenderMime.IExtensionModule[];
   }
 
   /**

@@ -28,10 +28,6 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  DocumentRegistry
-} from '@jupyterlab/docregistry';
-
-import {
   ApplicationShell
 } from '.';
 
@@ -68,14 +64,7 @@ interface ILayoutRestorer {
    *
    * @param options - The restoration options.
    */
-  restoreTracker(tracker: InstanceTracker<any>, options: ILayoutRestorer.IRestoreOptions<any>): void;
-
-  /**
-   * Restore the widgets of a particular widget factory.
-   *
-   * @param factory - The factory whose widgets will be restored.
-   */
-  restoreWidgetFactory(factory: DocumentRegistry.IWidgetFactory): void;
+  restore(tracker: InstanceTracker<any>, options: ILayoutRestorer.IRestoreOptions<any>): void;
 }
 
 
@@ -246,7 +235,7 @@ class LayoutRestorer implements ILayoutRestorer {
    *
    * @param options - The restoration options.
    */
-  restoreTracker(tracker: InstanceTracker<Widget>, options: ILayoutRestorer.IRestoreOptions<Widget>): Promise<any> {
+  restore(tracker: InstanceTracker<Widget>, options: ILayoutRestorer.IRestoreOptions<Widget>): Promise<any> {
     if (!this._promises) {
       const warning = 'restore() can only be called before `first` has resolved.';
       console.warn(warning);
@@ -283,60 +272,6 @@ class LayoutRestorer implements ILayoutRestorer {
 
     this._promises.push(promise);
     return promise;
-  }
-
-  /**
-   * Restore the widgets of a particular widget factory.
-   *
-   * @param factory - The factory whose widgets will be restored.
-   */
-  restoreWidgetFactory(factory: DocumentRegistry.IWidgetFactory): void {
-    if (!this._promises) {
-      const warning = 'restore() can only be called before `first` has resolved.';
-      console.warn(warning);
-      return Promise.reject(warning);
-    }
-    let state = this._state;
-
-    // Whenever a new widget is added to the tracker, record its name.
-    factory.widgetCreated.connect((sender, widget) => {
-      let name = `${factory.name}:${widget.context.path}`;
-      let data = {
-        path: widget.context.path,
-        factory: factory.name;
-      };
-      this.add(widget, name);
-      state.save(name, { data });
-
-      // Update the widget name when the path changes.
-      widget.context.pathChanged.connect(() => {
-        let newName = `${factory.name}:${widget.context.path}`;
-        Private.nameProperty.set(widget, newName);
-        this._widgets.set(newName, widget);
-        state.remove(name);
-        data = {
-          path: widget.context.path,
-          factory: factory.name;
-        };
-        state.save(newName, { data });
-        name = newName;
-      }, this);
-    }, this);
-
-    let promises = [state.fetchNamespace(factory.name)];
-    let registry = this._registry;
-
-    return this._first.then(() = {
-      return Promise.all(promises);
-    }).then([saved] => {
-      return Promise.all(saved.map(item => {
-        let args = (item.value as any).data;
-        let command = 'file-operations: open';
-        // Execute the command and if it fails, delete the state restore data.
-        return registry.execute(command, args)
-          .catch(() => { state.remove(item.id); });
-      }));
-    });
   }
 
   /**
