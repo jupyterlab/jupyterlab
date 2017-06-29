@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Generator: Adobe Illustrator 21.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
 <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 192 192" style="enable-background:new 0 0 192 192;" xml:space="preserve">
+	 viewBox="0 0 200 200" style="enable-background:new 0 0 200 200;" xml:space="preserve">
 <style type="text/css">
 	.st0{fill:none;stroke:#FFFFFF;stroke-width:1.4;stroke-miterlimit:10;}
 	.st1{fill:#EF6C00;}
 	.st2{fill:#FFFFFF;}
 </style>
 <title>notebook-01</title>
-<path class="st0" d="M77.9,155.8"/>
-<path class="st0" d="M77.9,29.2"/>
-<path class="st1" d="M175.7,175.7H16.3V16.3h159.3L175.7,175.7L175.7,175.7z"/>
-<polygon class="st2" points="134.5,146.9 95.6,115.9 57.5,146.9 57.5,55.7 134.5,55.7 "/>
+<path class="st0" d="M81.9,159.8"/>
+<path class="st0" d="M81.9,33.2"/>
+<path class="st1" d="M179.6,180H20V20.3h159.5V180H179.6z"/>
+<polygon class="st2" points="140,140 100,110 60,140 60,60 140,60 "/>
 </svg>
