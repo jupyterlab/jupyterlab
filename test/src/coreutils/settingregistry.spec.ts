@@ -42,12 +42,12 @@ describe('@jupyterlab/coreutils', () => {
     const connector = new TestConnector();
     let registry: SettingRegistry;
 
-    beforeEach(() => {
-      return connector.clear().then(() => {
-        connector.schemas = { };
-        registry = new SettingRegistry({ connector });
-      });
+    afterEach(() => {
+      connector.schemas = { };
+      return connector.clear();
     });
+
+    beforeEach(() => { registry = new SettingRegistry({ connector }); });
 
     describe('#constructor()', () => {
 
@@ -251,17 +251,16 @@ describe('@jupyterlab/coreutils', () => {
     let registry: SettingRegistry;
     let settings: Settings;
 
-    beforeEach(() => {
+    afterEach(() => {
       if (settings) {
         settings.dispose();
         settings = null;
       }
-
-      return connector.clear().then(() => {
-        connector.schemas = { };
-        registry = new SettingRegistry({ connector });
-      });
+      connector.schemas = { };
+      return connector.clear();
     });
+
+    beforeEach(() => { registry = new SettingRegistry({ connector }); });
 
     describe('#constructor()', () => {
 
@@ -273,6 +272,22 @@ describe('@jupyterlab/coreutils', () => {
 
         settings = new Settings({ plugin, registry });
         expect(settings).to.be.a(Settings);
+      });
+
+    });
+
+    describe('#changed', () => {
+
+      it('should emit when a plugin changes', done => {
+        const id = 'alpha';
+        const schema = { type: 'object' };
+
+        connector.schemas[id] = schema;
+        registry.load(id).then(s => { settings = s as Settings; })
+          .then(() => {
+            settings.changed.connect(() => { done(); });
+            return settings.set('foo', 'bar');
+          }).catch(done);
       });
 
     });
