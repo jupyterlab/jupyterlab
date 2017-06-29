@@ -81,7 +81,7 @@ function createRendermimePlugin(item: IRenderMime.IExtension): JupyterLabPlugin<
 
       // Handle state restoration.
       restorer.restore(tracker, {
-        command: 'file-operations:open',
+        command: 'docmanager:open',
         args: widget => ({ path: widget.context.path, factory: factoryName }),
         name: widget => widget.context.path
       });
