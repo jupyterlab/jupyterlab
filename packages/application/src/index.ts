@@ -82,8 +82,8 @@ class JupyterLab extends Application<ApplicationShell> {
     });
     registry.addCreator({ name: 'Text File', fileType: 'Text', });
 
-    if (options.mimeRenderers) {
-      let plugins = createRendermimePlugins(options.mimeRenderers);
+    if (options.mimeExtensions) {
+      let plugins = createRendermimePlugins(options.mimeExtensions);
       plugins.forEach(plugin => { this.registerPlugin(plugin); });
     }
   }
@@ -199,7 +199,7 @@ namespace JupyterLab {
     /**
      * The mime renderer extensions.
      */
-    mimeRenderers?: IRenderMime.IExtensionModule[];
+    mimeExtensions?: IRenderMime.IExtensionModule[];
   }
 
   /**
