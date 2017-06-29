@@ -495,6 +495,30 @@ describe('@jupyterlab/coreutils', () => {
 
     });
 
+    describe('#remove()', () => {
+
+      it('should remove a setting item', done => {
+        const id = 'foo';
+        const key = 'bar';
+        const value = 'baz';
+
+        connector.schemas[id] = { type: 'object' };
+        connector.save(id, { [key]: value }).then(() => registry.load(id))
+          .then(s => {
+            const saved = (settings = s as Settings).get(key);
+
+            expect(saved.user).to.be(value);
+            return settings.remove(key);
+          }).then(() => {
+            const saved = settings.get(key);
+
+            expect(saved.composite).to.be(void 0);
+            expect(saved.user).to.be(void 0);
+          }).then(done).catch(done);
+      });
+
+    });
+
   });
 
 });
