@@ -314,7 +314,7 @@ namespace Dialog {
     /**
      * The top level text for the dialog.  Defaults to an empty string.
      */
-    title?: string;
+    title?: HeaderType;
 
     /**
      * The main body element for the dialog or a message to display.
@@ -402,6 +402,12 @@ namespace Dialog {
   type ButtonOptions = Partial<IButton>;
 
   /**
+   * The header input types.
+   */
+  export
+  type HeaderType = HTMLElement | string;
+
+  /**
    * The body input types.
    */
   export
@@ -464,7 +470,7 @@ namespace Dialog {
      *
      * @returns A widget for the dialog header.
      */
-    createHeader(title: string): Widget;
+    createHeader(title: HeaderType): Widget;
 
     /**
      * Create the body of the dialog.
@@ -506,13 +512,16 @@ namespace Dialog {
      *
      * @returns A widget for the dialog header.
      */
-    createHeader(title: string): Widget {
-      let header = new Widget();
+    createHeader(title: HeaderType): Widget {
+      let header: Widget;
+      if (typeof title === 'string') {
+        header = new Widget({ node: document.createElement('span') });
+        header.node.textContent = title;
+      } else {
+        header = new Widget({ node: title });
+      }
       header.addClass('jp-Dialog-header');
-      let titleNode = document.createElement('span');
-      titleNode.textContent = title;
-      titleNode.className = 'jp-Dialog-title';
-      header.node.appendChild(titleNode);
+      Styling.styleNode(header.node);
       return header;
     }
 

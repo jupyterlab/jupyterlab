@@ -14,6 +14,11 @@
 }
 
 
+.jp-ImageJupyterLab-wordmark {
+  background-image: url(images/jupyterlab-wordmark.svg);
+}
+
+
 .jp-ImageNotebook {
   background-image: url(images/notebook.svg);
 }

@@ -217,23 +217,41 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   commands.addCommand(CommandIDs.about, {
     label: `About ${info.name}`,
     execute: () => {
-      let previewMessage = `alpha (v${info.version})`;
-      let logo = h.span({
-        className: `jp-ImageJupyterLab jp-About-logo`
-      });
-      let subtitle = h.span(
-        {className: 'jp-About-subtitle'},
-        previewMessage
-      );
 
-      let body = VirtualDOM.realize(h.div({ className: 'jp-About' },
-        logo,
-        subtitle
+      //Create the header of the about dialog
+      let headerLogo = h.div({className: 'jp-About-header-logo'});
+      let headerWordmark = h.div({className: 'jp-About-header-wordmark'});
+      let release = 'alpha release';
+      let versionNumber = `version: ${info.version}`;
+      let versionInfo = h.span({className: 'jp-About-version-info'},
+        h.span({className: 'jp-About-release'}, release),
+        h.span({className: 'jp-About-version'}, versionNumber)
+      );
+      let title = VirtualDOM.realize(h.span({className: 'jp-About-header'},
+        headerLogo,
+        h.div({className: 'jp-About-header-info'},
+          headerWordmark,
+          versionInfo
+        )
       ));
+
+      //Create the body of the about dialog
+      let jupyterURL = 'https://jupyter.org/about.html';
+      let contributorsURL = 'https://github.com/jupyterlab/jupyterlab/graphs/contributors';
+      let externalLinks = h.span({className: 'jp-About-externalLinks'},
+        h.a({href: contributorsURL, target: '_blank', className: 'jp-Button-flat'}, "CONTRIBUTOR LIST"),
+        h.a({href: jupyterURL, target: '_blank', className: 'jp-Button-flat'}, "ABOUT PROJECT JUPYTER")
+      );
+      let copyright = h.span({className: 'jp-About-copyright'}, "© 2017 Project Jupyter");
+      let body = VirtualDOM.realize(h.div({ className: 'jp-About-body' },
+        externalLinks,
+        copyright
+      ));
+
       showDialog({
-        title: `About ${info.name}`,
+        title,
         body,
-        buttons: [Dialog.okButton()]
+        buttons: [Dialog.createButton({label: 'DISMISS', className: 'jp-About-button jp-mod-reject jp-mod-styled'})]
       });
     }
   });
