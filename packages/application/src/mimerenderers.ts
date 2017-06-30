@@ -57,8 +57,13 @@ function createRendermimePlugin(item: IRenderMime.IExtension): JupyterLabPlugin<
     autoStart: true,
     activate: (app: JupyterLab, restorer: ILayoutRestorer) => {
       // Add the mime renderer.
-      let index = item.rendererIndex || -1;
-      app.rendermime.addFactory(item.rendererFactory, item.mimeType, index);
+      if (item.rank !== undefined) {
+        app.rendermime.addFactory(
+          item.rendererFactory, item.mimeType, item.rank
+        );
+      } else {
+        app.rendermime.addFactory(item.rendererFactory, item.mimeType);
+      }
 
       // Handle the widget factory.
       if (!item.documentWidgetFactoryOptions) {

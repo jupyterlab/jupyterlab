@@ -92,8 +92,8 @@ class OutputModel implements IOutputModel {
    * Construct a new output model.
    */
   constructor(options: IOutputModel.IOptions) {
-    let { trusted, data, metadata } = Private.getBundleOptions(options);
-    this.trusted = trusted;
+    let { data, metadata } = Private.getBundleOptions(options);
+    this.trusted = !!options.trusted;
     this.data = new ObservableJSON({ values: data });
     this.metadata = new ObservableJSON({ values: metadata });
     // Make a copy of the data.
@@ -255,8 +255,7 @@ namespace OutputModel {
   function getBundleOptions(options: IOutputModel.IOptions): MimeModel.IOptions {
     let data = getData(options.value);
     let metadata = getMetadata(options.value);
-    let trusted = !!options.trusted;
-    return { data, trusted, metadata };
+    return { data, metadata };
   }
 
   /**

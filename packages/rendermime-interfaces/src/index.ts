@@ -154,9 +154,9 @@ namespace IRenderMime {
     rendererFactory: IRendererFactory;
 
     /**
-     * The index passed to `RenderMime.addRenderer`.
+     * The rank passed to `RenderMime.addFactory`.
      */
-    rendererIndex?: number;
+    rank?: number;
 
     /**
      * The timeout after user activity to re-render the data.
@@ -204,7 +204,7 @@ namespace IRenderMime {
     /**
      * Render a mime model.
      */
-    render(model: IMimeModel): Promise<void>;
+    renderModel(model: IMimeModel): Promise<void>;
   }
 
   /**

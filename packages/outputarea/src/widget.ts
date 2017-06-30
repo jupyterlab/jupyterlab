@@ -416,7 +416,7 @@ class OutputArea extends Widget {
 
     let mimeType = this.rendermime.preferredMimeType(model, model.trusted);
     let output = this.rendermime.createRenderer(mimeType, model.trusted);
-    output.render(model);
+    output.renderModel(model);
     output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
     panel.addWidget(output);
 

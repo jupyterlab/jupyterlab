@@ -79,7 +79,7 @@ class RenderedVega extends Widget implements IRenderMime.IRendererWidget {
   /**
    * Render Vega/Vega-Lite into this widget's node.
    */
-  render(model: IRenderMime.IMimeModel): Promise<void> {
+  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
 
     let data = model.data.get(this._mimeType) as JSONObject;
 
@@ -145,7 +145,7 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
   {
     mimeType: VEGA_MIME_TYPE,
     rendererFactory,
-    rendererIndex: 0,
+    rank: 0,
     dataType: 'json',
     documentWidgetFactoryOptions: {
       name: 'Vega',
@@ -158,7 +158,7 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
   {
     mimeType: VEGALITE_MIME_TYPE,
     rendererFactory,
-    rendererIndex: 0,
+    rank: 0,
     dataType: 'json',
     documentWidgetFactoryOptions: {
       name: 'Vega-Lite',

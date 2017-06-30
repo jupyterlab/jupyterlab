@@ -80,7 +80,7 @@ class Tooltip extends Widget {
     let mimeType = this._rendermime.preferredMimeType(model, true);
     if (mimeType) {
       this._content = this._rendermime.createRenderer(mimeType, true);
-      this._content.render(model);
+      this._content.renderModel(model);
       (this.layout as PanelLayout).addWidget(this._content);
     }
   }

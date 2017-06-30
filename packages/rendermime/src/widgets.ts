@@ -131,7 +131,7 @@ abstract class RenderedCommon extends Widget implements IRenderMime.IRendererWid
   /**
    * Render a mime model.
    */
-  abstract render(model: IRenderMime.IMimeModel): Promise<void>;
+  abstract renderModel(model: IRenderMime.IMimeModel): Promise<void>;
 }
 
 
@@ -164,12 +164,12 @@ class RenderedHTML extends RenderedHTMLCommon {
   /**
    * Render a mime model.
    */
-  render(model: IRenderMime.IMimeModel): Promise<void> {
+  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     let source = Private.getSource(model, this.mimeType);
     if (!this.trusted) {
       source = this.sanitizer.sanitize(source);
     }
-    Private.appendHtml(this.node, source);
+    Private.setHtml(this.node, source);
     if (this.resolver) {
       return Private.handleUrls(
         this.node, this.resolver, this.linkHandler
@@ -213,7 +213,7 @@ class RenderedMarkdown extends RenderedHTMLCommon {
   /**
    * Render a mime model.
    */
-  render(model: IRenderMime.IMimeModel): Promise<void> {
+  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       let source = Private.getSource(model, this.mimeType);
       let parts = removeMath(source);
@@ -227,7 +227,7 @@ class RenderedMarkdown extends RenderedHTMLCommon {
         if (!this.trusted) {
           content = this.sanitizer.sanitize(content);
         }
-        Private.appendHtml(this.node, content);
+        Private.setHtml(this.node, content);
         Private.headerAnchors(this.node);
         this.fit();
         if (this.resolver) {
@@ -274,7 +274,7 @@ class RenderedLatex extends RenderedCommon {
   /**
    * Render a mime model.
    */
-  render(model: IRenderMime.IMimeModel): Promise<void> {
+  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     let source = Private.getSource(model, this.mimeType);
     this.node.textContent = source;
     if (this.isAttached) {
@@ -310,7 +310,7 @@ class RenderedImage extends RenderedCommon {
   /**
    * Render a mime model.
    */
-  render(model: IRenderMime.IMimeModel): Promise<void> {
+  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     let source = Private.getSource(model, this.mimeType);
     let img = this.node.firstChild as HTMLImageElement;
     img.src = `data:${this.mimeType};base64,${source}`;
@@ -350,10 +350,13 @@ class RenderedText extends RenderedCommon {
   /**
    * Render a mime model.
    */
-  render(model: IRenderMime.IMimeModel): Promise<void> {
+  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     let source = Private.getSource(model, this.mimeType);
     let data = escape_for_html(source);
     let pre = this.node.firstChild as HTMLPreElement;
+    while (pre.firstChild) {
+      pre.removeChild(pre.firstChild);
+    }
     pre.innerHTML = ansi_to_html(data, {use_classes: true});
     return Promise.resolve(void 0);
   }
@@ -379,7 +382,7 @@ class RenderedJavaScript extends RenderedCommon {
   /**
    * Render a mime model.
    */
-  render(model: IRenderMime.IMimeModel): Promise<void> {
+  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     let s = this.node.firstChild as HTMLScriptElement;
     let source = Private.getSource(model, this.mimeType);
     s.textContent = source;
@@ -404,9 +407,9 @@ class RenderedSVG extends RenderedCommon {
   /**
    * Render a mime model.
    */
-  render(model: IRenderMime.IMimeModel): Promise<void> {
+  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     let source = Private.getSource(model, this.mimeType);
-    this.node.innerHTML = source;
+    Private.setHtml(this.node, source);
     let svgElement = this.node.getElementsByTagName('svg')[0];
     if (!svgElement) {
       let msg = 'SVGRender: Error: Failed to create <svg> element';
@@ -449,7 +452,7 @@ class RenderedPDF extends RenderedCommon {
   /**
    * Render a mime model.
    */
-  render(model: IRenderMime.IMimeModel): Promise<void> {
+  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     let source = Private.getSource(model, this.mimeType);
     let a = this.node.firstChild as HTMLAnchorElement;
     a.href = `data:application/pdf;base64,${source}`;
@@ -471,10 +474,14 @@ namespace Private {
   }
 
   /**
-   * Append trusted html to a node.
+   * Set trusted html to a node.
    */
   export
-  function appendHtml(node: HTMLElement, html: string): void {
+  function setHtml(node: HTMLElement, html: string): void {
+    // Remove any existing child nodes.
+    while (node.firstChild) {
+      node.removeChild(node.firstChild);
+    }
     try {
       let range = document.createRange();
       node.appendChild(range.createContextualFragment(html));

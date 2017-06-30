@@ -429,8 +429,6 @@ class MimeRenderer extends Widget implements DocumentRegistry.IReadyWidget {
     this._renderer = rendermime.createRenderer(this._mimeType, false);
     layout.addWidget(this._renderer);
 
-    this._mimeModel = new MimeModel({ trusted: false });
-
     context.pathChanged.connect(this._onPathChanged, this);
 
     this._context.ready.then(() => {
@@ -498,12 +496,13 @@ class MimeRenderer extends Widget implements DocumentRegistry.IReadyWidget {
   private _render(): Promise<void> {
     let context = this._context;
     let model = context.model;
+    let mimeModel = new MimeModel();
     if (this._dataType === 'string') {
-      this._mimeModel.data.set(this._mimeType, model.toString());
+      mimeModel.data.set(this._mimeType, model.toString());
     } else {
-      this._mimeModel.data.set(this._mimeType, model.toJSON());
+      mimeModel.data.set(this._mimeType, model.toJSON());
     }
-    return this._renderer.render(this._mimeModel);
+    return this._renderer.renderModel(mimeModel);
   }
 
   /**
@@ -516,7 +515,6 @@ class MimeRenderer extends Widget implements DocumentRegistry.IReadyWidget {
   private _context: DocumentRegistry.Context = null;
   private _monitor: ActivityMonitor<any, any> = null;
   private _renderer: IRenderMime.IRendererWidget;
-  private _mimeModel: IRenderMime.IMimeModel;
   private _mimeType: string;
   private _ready = new PromiseDelegate<void>();
   private _dataType: 'string' | 'json';

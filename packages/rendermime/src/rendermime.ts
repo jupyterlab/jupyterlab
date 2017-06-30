@@ -75,7 +75,7 @@ class RenderMime {
    * The ordered list of mimeTypes.
    */
   get mimeTypes(): ReadonlyArray<string> {
-    return this._order;
+    return this._mimeTypes;
   }
 
   /**
@@ -114,11 +114,11 @@ class RenderMime {
    *
    * #### Notes
    * The mimeTypes in the model are checked in preference order
-   * until a renderer returns `true` for `.canRender`.
+   * until a renderer returns `true` for `.canCreateRenderer`.
    */
   preferredMimeType(model: IRenderMime.IMimeModel, trusted: boolean): string {
     let sanitizer = this.sanitizer;
-    return find(this._order, mimeType => {
+    return find(this._mimeTypes, mimeType => {
       if (model.data.has(mimeType)) {
         let options = { mimeType, sanitizer, trusted };
         let renderer = this._factories[mimeType];
@@ -147,8 +147,8 @@ class RenderMime {
       sanitizer: this.sanitizer,
       linkHandler: this._handler
     });
-    each(this._order, mimeType => {
-      rendermime.addFactory(this._factories[mimeType], mimeType, -1);
+    each(this._mimeTypes, mimeType => {
+      rendermime.addFactory(this._factories[mimeType], mimeType);
     });
     return rendermime;
   }
@@ -160,28 +160,19 @@ class RenderMime {
    *
    * @param mimeType - The renderer mimeType.
    *
-   * @param index - The optional order index.  Defaults to the last index.
+   * @param rank - The rank of the renderer.  Defaults to 100.
    *
    * #### Notes
-   * Negative indices count from the end, so -1 adds the factory to the end
-   * of the list.
    * The renderer will replace an existing renderer for the given
    * mimeType.
    */
-  addFactory(factory: IRenderMime.IRendererFactory, mimeType: string, index = -1): void {
-    let orig = ArrayExt.removeFirstOf(this._order, mimeType);
-    if (orig !== -1 && orig < index) {
-      index -= 1;
-    }
-    this._factories[mimeType] = factory;
-    if (index < 0) {
-      if (index === -1) {
-        index = this._order.length;
-      } else {
-        index += 1;
-      }
-    }
-    ArrayExt.insert(this._order, index, mimeType);
+  addFactory(factory: IRenderMime.IRendererFactory, mimeType: string, rank = 100): void {
+    let rankItem = { mimeType, rank };
+    let index = ArrayExt.upperBound(
+      this._rankItems, rankItem, Private.itemCmp
+    );
+    ArrayExt.insert(this._rankItems, index, rankItem);
+    ArrayExt.insert(this._mimeTypes, index, mimeType);
   }
 
   /**
@@ -191,7 +182,8 @@ class RenderMime {
    */
   removeFactory(mimeType: string): void {
     delete this._factories[mimeType];
-    ArrayExt.removeFirstOf(this._order, mimeType);
+    let index = ArrayExt.removeFirstOf(this._mimeTypes, mimeType);
+    ArrayExt.removeAt(this._rankItems, index);
   }
 
   /**
@@ -206,7 +198,8 @@ class RenderMime {
   }
 
   private _factories: { [key: string]: IRenderMime.IRendererFactory } = Object.create(null);
-  private _order: string[] = [];
+  private _mimeTypes: string[] = [];
+  private _rankItems: Private.IRankItem[] = [];
   private _resolver: IRenderMime.IResolver | null;
   private _handler: IRenderMime.ILinkHandler | null;
 }
@@ -316,5 +309,35 @@ namespace RenderMime {
         rendermime.addFactory(renderer, mime);
       }
     }
+  }
+}
+
+
+/**
+ * A namespace for module private data.
+ */
+namespace Private {
+  /**
+   * An object which holds a menu and its sort rank.
+   */
+  export
+  interface IRankItem {
+    /**
+     * The mimetype for the item.
+     */
+    mimeType: string;
+
+    /**
+     * The sort rank of the menu.
+     */
+    rank: number;
+  }
+
+  /**
+   * A comparator function for menu rank items.
+   */
+  export
+  function itemCmp(first: IRankItem, second: IRankItem): number {
+    return first.rank - second.rank;
   }
 }

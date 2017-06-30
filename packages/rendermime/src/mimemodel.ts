@@ -19,7 +19,6 @@ class MimeModel implements IRenderMime.IMimeModel {
    * Construct a new mime model.
    */
   constructor(options: MimeModel.IOptions = {}) {
-    this.trusted = !!options.trusted;
     this.data = new MimeModel.Bundle(options.data || {});
     this.metadata = new MimeModel.Bundle(options.metadata || {});
   }
@@ -33,11 +32,6 @@ class MimeModel implements IRenderMime.IMimeModel {
    * The metadata associated with the model.
    */
   readonly metadata: IRenderMime.IBundle;
-
-  /**
-   * Whether the model is trusted.
-   */
-  readonly trusted: boolean;
 }
 
 
@@ -55,11 +49,6 @@ namespace MimeModel {
      * The initial mime data.
      */
     data?: JSONObject;
-
-    /**
-     * Whether the output is trusted.  The default is false.
-     */
-    trusted?: boolean;
 
     /**
      * The initial metadata.

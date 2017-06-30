@@ -190,7 +190,7 @@ class InspectionHandler implements IDisposable, IInspector.IInspectable {
 
       const mimeType = this._rendermime.preferredMimeType(model, trusted);
       let widget = this._rendermime.createRenderer(mimeType, trusted);
-      widget.render(model);
+      widget.renderModel(model);
       update.content = widget;
       this._inspected.emit(update);
     });
