@@ -171,7 +171,7 @@ const JSON_ICON_CLASS = 'jp-JSONIcon';
 /**
  * The class name added to a speadsheet file browser item.
  */
-const SPEADSHEET_ICON_CLASS = 'jp-SpreadsheetIcon';
+const SPREADSHEET_ICON_CLASS = 'jp-SpreadsheetIcon';
 
 /**
  * The class name added to a R Kernel file browser item.
@@ -182,6 +182,11 @@ const RKERNEL_ICON_CLASS = 'jp-RKernelIcon';
  * The class name added to a YAML file browser item.
  */
 const YAML_ICON_CLASS = 'jp-YamlIcon';
+
+/**
+ * The class added for image file browser items.
+ */
+const IMAGE_ICON_CLASS = 'jp-ImageIcon';
 
 /**
  * The class name added to drag state icons to add space between the icon and the file name
@@ -1654,11 +1659,29 @@ namespace DirListing {
         case '.json':
           return JSON_ICON_CLASS;
         case '.csv':
-          return SPEADSHEET_ICON_CLASS;
+          return SPREADSHEET_ICON_CLASS;
+        case '.xls':
+          return SPREADSHEET_ICON_CLASS;
         case '.r':
           return RKERNEL_ICON_CLASS;
         case '.yml':
           return YAML_ICON_CLASS;
+        case '.yaml':
+          return YAML_ICON_CLASS;
+        case '.svg':
+          return IMAGE_ICON_CLASS;
+        case '.tiff':
+          return IMAGE_ICON_CLASS;
+        case '.jpeg':
+          return IMAGE_ICON_CLASS;
+        case '.jpg':
+          return IMAGE_ICON_CLASS;
+        case '.gif':
+          return IMAGE_ICON_CLASS;
+        case '.png':
+          return IMAGE_ICON_CLASS;
+        case '.raw':
+          return IMAGE_ICON_CLASS;
         default:
           return FILE_TYPE_CLASS;
       }

@@ -108,6 +108,11 @@
 }
 
 
+.jp-ImageIcon {
+  background-image: url(icons/jupyter/image.svg);
+}
+
+
 .jp-JSONIcon {
   background-image: url(icons/jupyter/json.svg);
 }
@@ -154,7 +159,7 @@
 
 
 .jp-OpenFolderIcon {
-  background-image: url(icons/md/directory.svg);
+  background-image: url(icons/jupyter/directory.svg);
 }
 
 
