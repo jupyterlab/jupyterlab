@@ -73,7 +73,7 @@ namespace nbformat {
    * A value in a mime bundle.
    */
   export
-  type MimeValue = string | string[] | JSONObject;
+  type MimeValue = string | JSONObject;
 
   /**
    * A mime-type keyed dictionary of data.
@@ -197,7 +197,7 @@ namespace nbformat {
     /**
      * Contents of the cell, represented as an array of lines.
      */
-    source: string | string[];
+    source: string;
 
     /**
      * Cell-level metadata.
@@ -441,7 +441,7 @@ namespace nbformat {
     /**
      * The stream's text output.
      */
-    text: string | string[];
+    text: string;
   }
 
   /**
