@@ -73,8 +73,6 @@ import './imageviewer/widget.spec';
 
 import './inspector/inspector.spec';
 
-import './markdownviewer/widget.spec';
-
 import './notebook/actions.spec';
 import './notebook/celltools.spec';
 import './notebook/default-toolbar.spec';
