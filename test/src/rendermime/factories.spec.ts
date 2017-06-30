@@ -82,7 +82,7 @@ describe('rendermime/factories', () => {
         let model = createModel(mimeType, 'x = 2 ** a');
         let trusted = true;
         let w = f.createRenderer({ mimeType, sanitizer, trusted });
-        return w.render(model).then(() => {
+        return w.renderModel(model).then(() => {
           expect(w.node.innerHTML).to.be('<pre>x = 2 ** a</pre>');
         });
       });
@@ -94,7 +94,7 @@ describe('rendermime/factories', () => {
         let model = createModel(mimeType, source);
         let trusted = true;
         let w = f.createRenderer({ mimeType, sanitizer, trusted });
-        return w.render(model).then(() => {
+        return w.renderModel(model).then(() => {
           expect(w.node.innerHTML).to.be('<pre>There is no text but <span class="ansi-bright-green-fg ansi-red-bg">text</span>.\nWoo.</pre>');
         });
       });
@@ -106,7 +106,7 @@ describe('rendermime/factories', () => {
         let model = createModel(mimeType, source);
         let trusted = true;
         let w = f.createRenderer({ mimeType, sanitizer, trusted });
-        return w.render(model).then(() => {
+        return w.renderModel(model).then(() => {
           expect(w.node.innerHTML).to.be('<pre>There is no text &lt;script&gt;window.x=1&lt;/script&gt; but <span class="ansi-bright-green-fg ansi-red-bg">text</span>.\nWoo.</pre>');
         });
       });
@@ -145,7 +145,7 @@ describe('rendermime/factories', () => {
         let model = createModel(mimeType, source);
         let trusted = true;
         let w = f.createRenderer({ mimeType, sanitizer, trusted });
-        return w.render(model).then(() => {
+        return w.renderModel(model).then(() => {
           expect(w.node.textContent).to.be(source);
         });
       });
@@ -184,7 +184,7 @@ describe('rendermime/factories', () => {
         let model = createModel(mimeType, source);
         let trusted = true;
         let w = f.createRenderer({ mimeType, sanitizer, trusted });
-        return w.render(model).then(() => {
+        return w.renderModel(model).then(() => {
           let node = w.node.firstChild as HTMLAnchorElement;
           expect(node.localName).to.be('a');
           expect(node.target).to.be('_blank');
@@ -227,7 +227,7 @@ describe('rendermime/factories', () => {
         let model = createModel(mimeType, source);
         let trusted = true;
         let w = f.createRenderer({ mimeType, sanitizer, trusted });
-        return w.render(model).then(() => {
+        return w.renderModel(model).then(() => {
           let el = w.node.firstChild as HTMLElement;
           expect(el.localName).to.be('script');
           expect(el.textContent).to.be(source);
@@ -276,7 +276,7 @@ describe('rendermime/factories', () => {
         let model = createModel(mimeType, source);
         let trusted = true;
         let w = f.createRenderer({ mimeType, sanitizer, trusted });
-        return w.render(model).then(() => {
+        return w.renderModel(model).then(() => {
           let svgEl = w.node.getElementsByTagName('svg')[0];
           expect(svgEl).to.be.ok();
         });
@@ -316,7 +316,7 @@ describe('rendermime/factories', () => {
         let model = createModel(mimeType, source);
         let trusted = true;
         let w = f.createRenderer({ mimeType, sanitizer, trusted });
-        return w.render(model).then(() => {
+        return w.renderModel(model).then(() => {
           expect(w.node.innerHTML).to.be(source);
         });
       });
@@ -328,7 +328,7 @@ describe('rendermime/factories', () => {
         let model = createModel(mimeType, source);
         let trusted = true;
         let w = f.createRenderer({ mimeType, sanitizer, trusted });
-        return w.render(model).then(() => {
+        return w.renderModel(model).then(() => {
           Widget.attach(w, document.body);
           let node = document.getElementById('Title-third-level');
           expect(node.localName).to.be('h3');
@@ -348,7 +348,7 @@ describe('rendermime/factories', () => {
         let model = createModel(mimeType, source);
         let trusted = false;
         let w = f.createRenderer({ mimeType, trusted, sanitizer });
-        return w.render(model).then(() => {
+        return w.renderModel(model).then(() => {
           expect(w.node.innerHTML).to.not.contain('script');
         });
       });
@@ -387,7 +387,7 @@ describe('rendermime/factories', () => {
         let model = createModel(mimeType, source);
         let trusted = true;
         let w = f.createRenderer({ mimeType, sanitizer, trusted });
-        return w.render(model).then(() => {
+        return w.renderModel(model).then(() => {
           expect(w.node.innerHTML).to.be('<h1>This is great</h1>');
         });
       });
@@ -399,7 +399,7 @@ describe('rendermime/factories', () => {
         let model = createModel(mimeType, source);
         let trusted = true;
         let w = f.createRenderer({ mimeType, sanitizer, trusted });
-        return w.render(model).then(() => {
+        return w.renderModel(model).then(() => {
           expect((window as any).y).to.be(void 0);
           Widget.attach(w, document.body);
           expect((window as any).y).to.be(3);
@@ -414,7 +414,7 @@ describe('rendermime/factories', () => {
         let model = createModel(mimeType, source);
         let trusted = false;
         let w = f.createRenderer({ mimeType, trusted, sanitizer });
-        return w.render(model).then(() => {
+        return w.renderModel(model).then(() => {
           expect(w.node.innerHTML).to.be('<pre></pre>');
         });
       });
@@ -427,7 +427,7 @@ describe('rendermime/factories', () => {
       let trusted = false;
       let mimeType = 'text/html';
       let w = f.createRenderer({ mimeType, sanitizer, trusted });
-      return w.render(model).then(() => {
+      return w.renderModel(model).then(() => {
         expect(w.node.innerHTML).to.be('<h1>foo </h1>');
       });
     });
@@ -465,7 +465,7 @@ describe('rendermime/factories', () => {
         let w = f.createRenderer({ mimeType, sanitizer, trusted: true });
         let el = w.node.firstChild as HTMLImageElement;
 
-        return w.render(model).then(() => {
+        return w.renderModel(model).then(() => {
           expect(el.src).to.be('data:image/png;base64,' + source);
           expect(el.localName).to.be('img');
           expect(el.innerHTML).to.be('');
@@ -475,7 +475,7 @@ describe('rendermime/factories', () => {
           model = createModel(mimeType, source);
           let trusted = true;
           w = f.createRenderer({ mimeType, sanitizer, trusted });
-          return w.render(model);
+          return w.renderModel(model);
         }).then(() => {
           el = w.node.firstChild as HTMLImageElement;
           expect(el.src).to.be('data:image/gif;base64,' + source);

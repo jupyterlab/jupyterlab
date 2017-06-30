@@ -35,8 +35,8 @@ import {
 const RESOLVER: IRenderMime.IResolver = createFileContext();
 
 
-function createModel(data: JSONObject, trusted=false): IRenderMime.IMimeModel {
-  return new MimeModel({ data, trusted });
+function createModel(data: JSONObject): IRenderMime.IMimeModel {
+  return new MimeModel({ data });
 }
 
 
@@ -106,7 +106,7 @@ describe('rendermime/index', () => {
           'application/json': { 'foo': 1 }
         });
         let w = r.createRenderer('application/json', false);
-        return w.render(model).then(() => {
+        return w.renderModel(model).then(() => {
           expect(w.node.textContent).to.be('{\n  "foo": 1\n}');
         });
       });
@@ -128,7 +128,7 @@ describe('rendermime/index', () => {
           }
         };
         let w = r.createRenderer('text/html', true);
-        w.render(model);
+        w.renderModel(model);
       });
 
       it('should send a link handler', (done) => {
@@ -143,7 +143,7 @@ describe('rendermime/index', () => {
           }
         };
         let w = r.createRenderer('text/html', true);
-        w.render(model);
+        w.renderModel(model);
       });
     });
 

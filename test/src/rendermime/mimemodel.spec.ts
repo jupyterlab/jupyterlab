@@ -28,21 +28,9 @@ describe('rendermime/mimemodel', () => {
       it('should accept arguments', () => {
         let model = new MimeModel({
           data: { 'foo': 1},
-          trusted: true,
           metadata: { 'bar': 'baz' }
         });
         expect(model).to.be.a(MimeModel);
-      });
-
-    });
-
-    describe('#trusted', () => {
-
-      it('should get the trusted state of the model', () => {
-        let model = new MimeModel();
-        expect(model.trusted).to.be(false);
-        model = new MimeModel({ trusted: true });
-        expect(model.trusted).to.be(true);
       });
 
     });
