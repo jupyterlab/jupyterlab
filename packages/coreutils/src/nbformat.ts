@@ -301,7 +301,6 @@ namespace nbformat {
   export
   interface IUnrecognizedCell extends IBaseCell { }
 
-
   /**
    * A cell union type.
    */
