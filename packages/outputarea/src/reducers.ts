@@ -135,7 +135,7 @@ function createMimeData(output: nbformat.IOutput): JSONObject {
     data = normalizeMimeBundle(output.data);
     break;
   case nbformat.isStream(output):
-    data = { [getMimeType(output)]: output.text.join('\n') };
+    data = { [getMimeType(output)]: getStreamText(output) };
     break;
   case nbformat.isError(output):
     data = { [stderr]: formatError(output) };
@@ -182,6 +182,12 @@ function getMimeType(output: nbformat.IStream): string {
   return output.name === 'stdout' ? STDOUT : STDERR;
 }
 
+/**
+ * Get the normalized text for an output stream.
+ */
+function getStreamText({ text }: nbformat.IStream): string {
+  return typeof text === 'string' ? text : text.join('\n');
+}
 
 /**
  * Get the stream type for an output.
@@ -249,7 +255,7 @@ function mergeOutputs(state: OutputState, area: OutputArea, output: nbformat.IOu
   let mimeData = { ...state.mimeBundleTable[lastItem.mimeDataId] };
 
   // Add the new output text to the existing text.
-  mimeData[getMimeType(output)] += output.text.join('\n');
+  mimeData[getMimeType(output)] += getStreamText(output);
 
   // Replace the mime bundle in the table.
   let mimeBundleTable = Table.apply(state.mimeBundleTable,
