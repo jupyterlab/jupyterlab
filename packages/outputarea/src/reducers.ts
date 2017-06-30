@@ -113,11 +113,10 @@ function clearOutputs(state: OutputState, action: ClearOutputsAction): OutputSta
   // Look up the output list id.
   let outputListId = state.outputAreaTable[action.areaId].outputListId;
 
-  // Create the table operation to clear the list.
-  let op = Table.opReplace(outputListId, []);
-
-  // Apply the operation to the table.
-  let outputListTable = Table.apply(state.outputListTable, op);
+  // Clear the output list in the table.
+  let outputListTable = Table.apply(state.outputListTable,
+    Table.opReplace(outputListId, [])
+  );
 
   // Return the updated state.
   return { ...state, outputListTable };
