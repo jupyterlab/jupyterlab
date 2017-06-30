@@ -105,9 +105,9 @@ describe('rendermime/index', () => {
         let model = createModel({
           'application/json': { 'foo': 1 }
         });
-        let widget = r.createRenderer('application/json', false);
-        return widget.render(model).then(() => {
-          expect(widget.node.textContent).to.be('{\n  "foo": 1\n}');
+        let w = r.createRenderer('application/json', false);
+        return w.render(model).then(() => {
+          expect(w.node.textContent).to.be('{\n  "foo": 1\n}');
         });
       });
 
@@ -198,7 +198,7 @@ describe('rendermime/index', () => {
         let factory = new TextRendererFactory();
         r.addFactory(factory, 'text/foo');
         let index = r.mimeTypes.indexOf('text/foo');
-        expect(index).to.be(0);
+        expect(index).to.be(r.mimeTypes.length - 1);
       });
 
       it('should take an optional order index', () => {

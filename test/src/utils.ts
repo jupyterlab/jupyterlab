@@ -154,9 +154,12 @@ namespace Private {
 
   class JSONRenderer extends RenderedHTML {
 
+    mimeType = 'text/html';
+
     render(model: IRenderMime.IMimeModel): Promise<void> {
       let source = model.data.get('application/json');
       model.data.set('text/html', json2html(source));
+      console.log('hello', model.data.get('text/html'));
       return super.render(model);
     }
   }
