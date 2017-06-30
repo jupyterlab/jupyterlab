@@ -109,7 +109,7 @@ class RenderedVega extends Widget implements IRenderMime.IRendererWidget {
  * A mime renderer factory for Vega/Vega-Lite data.
  */
 export
-class VegaRenderer implements IRenderMime.IRendererFactory {
+class VegaRendererFactory implements IRenderMime.IRendererFactory {
   /**
    * The mimeTypes this renderer accepts.
    */
@@ -138,7 +138,7 @@ class VegaRenderer implements IRenderMime.IRendererFactory {
 }
 
 
-const rendererFactory = new VegaRenderer();
+const rendererFactory = new VegaRendererFactory();
 
 const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
   // Vega
