@@ -160,19 +160,27 @@ class RenderMime {
    *
    * @param mimeType - The renderer mimeType.
    *
-   * @param index - The optional order index.
+   * @param index - The optional order index.  Defaults to the last index.
    *
-   * ####Notes
-   * Negative indices count from the end, so -1 refers to the last index.
+   * #### Notes
+   * Negative indices count from the end, so -1 adds the factory to the end
+   * of the list.
    * The renderer will replace an existing renderer for the given
    * mimeType.
    */
-  addFactory(factory: IRenderMime.IRendererFactory, mimeType: string, index = 0): void {
+  addFactory(factory: IRenderMime.IRendererFactory, mimeType: string, index = -1): void {
     let orig = ArrayExt.removeFirstOf(this._order, mimeType);
     if (orig !== -1 && orig < index) {
       index -= 1;
     }
     this._factories[mimeType] = factory;
+    if (index < 0) {
+      if (index === -1) {
+        index = this._order.length;
+      } else {
+        index += 1;
+      }
+    }
     ArrayExt.insert(this._order, index, mimeType);
   }
 
