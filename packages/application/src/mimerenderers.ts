@@ -46,7 +46,6 @@ function createRendermimePlugins(extensions: IRenderMime.IExtensionModule[]): Ju
 }
 
 
-
 /**
  * Create rendermime plugins for rendermime extension modules.
  */
