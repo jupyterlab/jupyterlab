@@ -3,13 +3,15 @@
 <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 22 22" style="enable-background:new 0 0 22 22;" xml:space="preserve">
 <style type="text/css">
-	.st0{fill:#4CAF50;}
+	.st0{fill:#FFFFFF;}
 	.st1{display:none;}
 	.st2{display:inline;fill:none;stroke:#9E9E9E;stroke-width:2.000000e-02;stroke-miterlimit:10;}
 </style>
-<path class="st0" d="M2.2,2.2v17.6h17.6V2.2C19.8,2.2,2.2,2.2,2.2,2.2z M17.6,9.9h-5.5V4.4h5.5V9.9z M9.9,4.4v5.5H4.4V4.4
-	C4.4,4.4,9.9,4.4,9.9,4.4z M4.4,12.1h5.5v5.5H4.4L4.4,12.1z M12.1,17.6v-5.5h5.5v5.5H12.1z"/>
-<g class="st1">
+<g>
+	<path class="st0" d="M2.2,2.2v17.5h17.5l0.1-17.5H2.2z M14.3,4.4c1.2,0,2.2,1,2.2,2.2s-1,2.2-2.2,2.2s-2.2-1-2.2-2.2
+		S13.1,4.4,14.3,4.4z M4.4,17.6l3.3-8.8l3.3,6.6l2.2-3.2l4.4,5.4H4.4z"/>
+</g>
+<g id="grid" class="st1">
 	<line class="st2" x1="11" y1="0" x2="11" y2="22"/>
 	<path class="st2" d="M21.5,11"/>
 	<path class="st2" d="M0.4,11"/>
@@ -52,7 +54,7 @@
 	<line class="st2" x1="4.4" y1="0" x2="4.4" y2="22"/>
 	<line class="st2" x1="22" y1="17.6" x2="0" y2="17.6"/>
 	<line class="st2" x1="22" y1="4.4" x2="0" y2="4.4"/>
-	<rect x="7.9" y="7.9" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -4.557 11.0014)" class="st2" width="6.2" height="6.2"/>
+	<rect x="7.9" y="7.9" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -4.5566 10.999)" class="st2" width="6.2" height="6.2"/>
 	<line class="st2" x1="0" y1="16.5" x2="22" y2="16.5"/>
 	<line class="st2" x1="16.5" y1="22" x2="16.5" y2="0"/>
 	<line class="st2" x1="5.5" y1="22" x2="5.5" y2="0"/>
