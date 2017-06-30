@@ -24,6 +24,11 @@
 }
 
 
+.jp-CircleIcon {
+  background-image: url(icons/md/panorama_fish_eye.svg);
+}
+
+
 .jp-CloseIcon {
   background-image: url(icons/md/close.svg);
 }
@@ -64,8 +69,23 @@
 }
 
 
+.jp-ExpandLessIcon {
+  background-image: url(icons/md/expand-less.svg);
+}
+
+
+.jp-ExpandMoreIcon {
+  background-image: url(icons/md/expand-more.svg);
+}
+
+
 .jp-FileIcon {
-  background-image: url(icons/md/file.svg);
+  background-image: url(icons/jupyter/file.svg);
+}
+
+
+.jp-FilledCircleIcon {
+  background-image: url(icons/md/lens.svg);
 }
 
 
@@ -85,6 +105,11 @@
   min-height: 14px;
   background-size: 14px;
   vertical-align: sub;
+}
+
+
+.jp-JSONIcon {
+  background-image: url(icons/jupyter/json.svg);
 }
 
 
@@ -113,8 +138,18 @@
 }
 
 
+.jp-MarkdownIcon {
+  background-image: url(icons/jupyter/markdown.svg);
+}
+
+
+.jp-MoreHorizIcon {
+  background-image: url(icons/md/more-horiz.svg);
+}
+
+
 .jp-NotebookIcon {
-  background-image: url(icons/md/book.svg);
+  background-image: url(icons/jupyter/book.svg);
 }
 
 
@@ -125,6 +160,16 @@
 
 .jp-PasteIcon {
   background-image: url(icons/md/paste.svg);
+}
+
+
+.jp-PythonIcon {
+  background-image: url(icons/jupyter/python.svg);
+}
+
+
+.jp-RKernelIcon {
+  background-image: url(icons/jupyter/r.svg);
 }
 
 
@@ -143,6 +188,11 @@
 }
 
 
+.jp-SpreadsheetIcon {
+  background-image: url(icons/jupyter/csv.svg);
+}
+
+
 .jp-StopIcon {
   background-image: url(icons/md/stop.svg);
 }
@@ -153,26 +203,6 @@
 }
 
 
-.jp-CircleIcon {
-  background-image: url(icons/md/panorama_fish_eye.svg);
-}
-
-
-.jp-FilledCircleIcon {
-  background-image: url(icons/md/lens.svg);
-}
-
-
-.jp-MoreHorizIcon {
-  background-image: url(icons/md/more-horiz.svg);
-}
-
-
-.jp-ExpandLessIcon {
-  background-image: url(icons/md/expand-less.svg);
-}
-
-
-.jp-ExpandMoreIcon {
-  background-image: url(icons/md/expand-more.svg);
+.jp-YamlIcon {
+  background-image: url(icons/jupyter/yml.svg);
 }

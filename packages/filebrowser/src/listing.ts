@@ -124,7 +124,7 @@ const MODIFIED_ID_CLASS = 'jp-id-modified';
 const FILE_TYPE_CLASS = 'jp-FileIcon';
 
 /**
- * The mime type for a contents drag object.
+ * The mime type for a con tents drag object.
  */
 const CONTENTS_MIME = 'application/x-jupyter-icontents';
 
@@ -141,9 +141,47 @@ const SELECTED_CLASS = 'jp-mod-selected';
 /**
  * The class name added to a material icon content item.
  */
-const FOLDER_MATERIAL_ICON_CLASS = 'jp-OpenFolderIcon';
-const NOTEBOOK_MATERIAL_ICON_CLASS = 'jp-NotebookIcon';
 const MATERIAL_ICON_CLASS = 'jp-MaterialIcon';
+
+/**
+ * The class name added to a directory file browser item.
+ */
+const FOLDER_MATERIAL_ICON_CLASS = 'jp-OpenFolderIcon';
+
+/**
+ * The class name added to a notebook file browser item. 
+ */
+const NOTEBOOK_MATERIAL_ICON_CLASS = 'jp-NotebookIcon';
+
+/**
+ * The class name added to a markdown file browser item.
+ */
+const MARKDOWN_ICON_CLASS = 'jp-MarkdownIcon';
+
+/**
+ * The class name added to a python file browser item.
+ */
+const PYTHON_ICON_CLASS = 'jp-PythonIcon';
+
+/**
+ * The class name added to a JSON file browser item.
+ */
+const JSON_ICON_CLASS = 'jp-JSONIcon';
+
+/**
+ * The class name added to a speadsheet file browser item.
+ */
+const SPEADSHEET_ICON_CLASS = 'jp-SpreadsheetIcon';
+
+/**
+ * The class name added to a R Kernel file browser item.
+ */
+const RKERNEL_ICON_CLASS = 'jp-RKernelIcon';
+
+/**
+ * The class name added to a YAML file browser item.
+ */
+const YAML_ICON_CLASS = 'jp-YamlIcon';
 
 /**
  * The class name added to drag state icons to add space between the icon and the file name
@@ -1606,6 +1644,26 @@ namespace DirListing {
       return node;
     }
 
+    parseFileExtension(path: string): string {
+      var fileExtension = PathExt.extname(path);
+      switch (fileExtension) {
+        case '.md':
+          return MARKDOWN_ICON_CLASS;
+        case '.py':
+          return PYTHON_ICON_CLASS;
+        case '.json':
+          return JSON_ICON_CLASS;
+        case '.csv':
+          return SPEADSHEET_ICON_CLASS;
+        case '.r':
+          return RKERNEL_ICON_CLASS;
+        case '.yml':
+          return YAML_ICON_CLASS;
+        default:
+          return FILE_TYPE_CLASS;
+      }
+    }
+
     /**
      * Update an item node to reflect the current state of a model.
      *
@@ -1625,6 +1683,9 @@ namespace DirListing {
         break;
       case 'notebook':
         icon.classList.add(NOTEBOOK_MATERIAL_ICON_CLASS);
+        break;
+      case 'file':
+        icon.classList.add(this.parseFileExtension(model.path));
         break;
       default:
         icon.classList.add(MATERIAL_ICON_CLASS);
