@@ -147,8 +147,9 @@ class RenderMime {
       sanitizer: this.sanitizer,
       linkHandler: this._handler
     });
-    each(this._mimeTypes, mimeType => {
-      rendermime.addFactory(this._factories[mimeType], mimeType);
+    each(this._rankItems, item => {
+      let { mimeType, rank } = item;
+      rendermime.addFactory(this._factories[mimeType], mimeType, rank);
     });
     return rendermime;
   }
@@ -167,12 +168,19 @@ class RenderMime {
    * mimeType.
    */
   addFactory(factory: IRenderMime.IRendererFactory, mimeType: string, rank = 100): void {
+    // Remove any existing factory.
+    if (mimeType in this._factories) {
+      this.removeFactory(mimeType);
+    }
+
+    // Add the new factory in the correct order.
     let rankItem = { mimeType, rank };
     let index = ArrayExt.upperBound(
       this._rankItems, rankItem, Private.itemCmp
     );
     ArrayExt.insert(this._rankItems, index, rankItem);
     ArrayExt.insert(this._mimeTypes, index, mimeType);
+    this._factories[mimeType] = factory;
   }
 
   /**
@@ -183,7 +191,9 @@ class RenderMime {
   removeFactory(mimeType: string): void {
     delete this._factories[mimeType];
     let index = ArrayExt.removeFirstOf(this._mimeTypes, mimeType);
-    ArrayExt.removeAt(this._rankItems, index);
+    if (index !== -1) {
+      ArrayExt.removeAt(this._rankItems, index);
+    }
   }
 
   /**
