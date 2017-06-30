@@ -38,7 +38,6 @@
     "@jupyterlab/inspector-extension": "^0.7.0",
     "@jupyterlab/launcher": "^0.7.0",
     "@jupyterlab/launcher-extension": "^0.7.1",
-    "@jupyterlab/markdownviewer": "^0.7.0",
     "@jupyterlab/markdownviewer-extension": "^0.7.0",
     "@jupyterlab/notebook": "^0.7.0",
     "@jupyterlab/notebook-extension": "^0.7.0",
