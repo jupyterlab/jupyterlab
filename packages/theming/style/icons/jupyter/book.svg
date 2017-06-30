@@ -4,7 +4,7 @@
 	 viewBox="0 0 22 22" style="enable-background:new 0 0 22 22;" xml:space="preserve">
 <style type="text/css">
 	.st0{fill:none;stroke:#FFFFFF;stroke-width:1.4;stroke-miterlimit:10;}
-	.st1{fill:#FFFFFF;}
+	.st1{fill:#EF6C00;}
 	.st2{display:none;}
 	.st3{display:inline;fill:none;stroke:#9E9E9E;stroke-width:2.000000e-02;stroke-miterlimit:10;}
 </style>
@@ -12,11 +12,11 @@
 <path class="st0" d="M9.1,2.8"/>
 <path class="st0" d="M8.5,19.2"/>
 <path class="st0" d="M8.5,1.8"/>
-<path class="st1" d="M18.7,3.3v15.4H3.3V3.3H18.7 M19.8,2.2H2.2v17.6h17.6l0,0L19.8,2.2L19.8,2.2z"/>
+<path class="st1" d="M18.7,3.3v15.4H3.3V3.3H18.7 M20.2,1.8H1.8v18.3h18.3l0,0L20.2,1.8L20.2,1.8z"/>
 <g>
-	<polygon class="st1" points="16.5,16.5 11,12.1 5.5,16.5 5.5,5.5 16.5,5.5 	"/>
+	<polygon class="st1" points="16.5,16.5 11.1,12.2 5.5,16.5 5.5,5.5 16.5,5.5 	"/>
 </g>
-<g class="st2">
+<g id="grid" class="st2">
 	<line class="st3" x1="11" y1="0" x2="11" y2="22"/>
 	<path class="st3" d="M21.5,11"/>
 	<path class="st3" d="M0.4,11"/>
