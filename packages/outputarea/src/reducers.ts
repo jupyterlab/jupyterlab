@@ -59,12 +59,12 @@ function appendOutput(state: OutputStoreState, action: AppendOutputAction): Outp
   }
 
   // If the output is a display update, update the matching outputs.
-  if (nbformat.isDisplayUpdate(msg)) {
+  if (nbformat.isDisplayUpdate(output)) {
     return Private.mergeDisplayUpdate(state, area, output);
   }
 
   // If the output is a stream, merge it if possible.
-  if (nbformat.isStream(msg)) {
+  if (nbformat.isStream(output)) {
     // Try to merge with the last stream.
     let merged = Private.mergeStreamOutput(state, area, output);
 
@@ -222,6 +222,7 @@ namespace Private {
    *
    * Returns the original state if a merge is not performed.
    */
+  export
   function mergeDisplayUpdate(state: OutputStoreState, area: OutputArea, output: nbformat.IDisplayUpdate): OutputStoreState {
     // Look up the display id for the output.
     let displayId = output.transient.display_id;
@@ -255,7 +256,7 @@ namespace Private {
         }
 
         // Update the data and metadata for the item.
-        item = item.withMutations(() => {
+        item = item.withMutations(item => {
           item.set('data', data);
           item.set('metadata', metadata);
         });
