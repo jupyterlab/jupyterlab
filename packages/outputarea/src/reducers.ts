@@ -58,12 +58,20 @@ function appendOutput(state: OutputStoreState, action: AppendOutputAction): Outp
     return state;
   }
 
-  // If possible, merge the output before appending a new one.
-  let merged = Private.mergeOutputs(state, area, output);
+  // If the output is a display update, update the matching outputs.
+  if (nbformat.isDisplayUpdate(msg)) {
+    return Private.mergeDisplayUpdate(state, area, output);
+  }
 
-  // Return the new state if the output was merged.
-  if (state !== merged) {
-    return merged;
+  // If the output is a stream, merge it if possible.
+  if (nbformat.isStream(msg)) {
+    // Try to merge with the last stream.
+    let merged = Private.mergeStreamOutput(state, area, output);
+
+    // Return the new state if the output was merged.
+    if (state !== merged) {
+      return merged;
+    }
   }
 
   // Create a UUID for the new output item.
@@ -175,49 +183,11 @@ namespace Private {
   }
 
   /**
-   * Merge an output with an existing output area, if possible.
-   *
-   * Returns the original state if no merge was performed.
-   */
-  export
-  function mergeOutputs(state: OutputStoreState, area: OutputArea, output: nbformat.IOutput): OutputStoreState {
-    // Merge a stream output if possible.
-    if (nbformat.isStream(output)) {
-      return mergeStreamOutput(state, area, output);
-    }
-
-    // Update a display item if possible.
-    if (nbformat.isDisplayUpdate(output)) {
-      return mergeDisplayUpdate(state, area, output);
-    }
-
-    // Return the original state.
-    return state;
-  }
-
-  /**
-   * Create an output item for an nbformat output.
-   */
-  export
-  function createOutputItem(output: nbformat.IOutput, trusted: boolean): OutputItem {
-    if (nbformat.isExecuteResult(output)) {
-      return createExecuteResultOutput(output, trusted);
-    }
-    if (nbformat.isDisplayData(output)) {
-      return createDisplayDataOutput(output, trusted);
-    }
-    if (nbformat.isStream(output)) {
-      return createStreamOutput(output, trusted);
-    }
-    if (nbformat.isError(output)) {
-      return createErrorOutput(output, trusted);
-    }
-    throw 'unreachable';
-  }
-
-  /**
    * Merge a stream output into an existing item, if possible.
+   *
+   * Returns the original state if a merge is not performed.
    */
+  export
   function mergeStreamOutput(state: OutputStoreState, area: OutputArea, output: nbformat.IStream): OutputStoreState {
     // Get the last item id for the area.
     let lastId = area.outputItemIds.last();
@@ -248,7 +218,9 @@ namespace Private {
   }
 
   /**
-   * Merge an update display data output into an existing item, if possible.
+   * Merge a display update output into an existing item, if possible.
+   *
+   * Returns the original state if a merge is not performed.
    */
   function mergeDisplayUpdate(state: OutputStoreState, area: OutputArea, output: nbformat.IDisplayUpdate): OutputStoreState {
     // Look up the display id for the output.
@@ -259,26 +231,34 @@ namespace Private {
       return state;
     }
 
-    // Clone the data and metadata for the output.
+    // Clone the output data.
     let data = JSONExt.deepCopy(output.data);
+
+    // Clone the output metadata.
     let metadata = JSONExt.deepCopy(output.metadata);
 
     // Update the matching items in the table.
     let outputItemTable = state.outputItemTable.withMutations(table => {
-
-      // Iterate over the output items in the area.
+      // Iterate over the area's output items.
       area.outputItemIds.forEach(id => {
-
         // Look up the item in the table.
         let item = table.get(id);
 
-        // Skip the item if it is not a match.
+        // Skip items which don't exist.
+        if (!item) {
+          return;
+        }
+
+        // Skip items which should not be updated.
         if (item.type !== 'display_data' || item.displayId !== displayId) {
           return;
         }
 
         // Update the data and metadata for the item.
-        item = item.set('data', data).set('metadata', metadata);
+        item = item.withMutations(() => {
+          item.set('data', data);
+          item.set('metadata', metadata);
+        });
 
         // Set the new item in the table.
         table.set(id, item);
@@ -287,6 +267,26 @@ namespace Private {
 
     // Update the table in the state.
     return state.set('outputItemTable', outputItemTable);
+  }
+
+  /**
+   * Create an output item for an nbformat output.
+   */
+  export
+  function createOutputItem(output: nbformat.IOutput, trusted: boolean): OutputItem {
+    if (nbformat.isExecuteResult(output)) {
+      return createExecuteResultOutput(output, trusted);
+    }
+    if (nbformat.isDisplayData(output)) {
+      return createDisplayDataOutput(output, trusted);
+    }
+    if (nbformat.isStream(output)) {
+      return createStreamOutput(output, trusted);
+    }
+    if (nbformat.isError(output)) {
+      return createErrorOutput(output, trusted);
+    }
+    throw 'unreachable';
   }
 
   /**
