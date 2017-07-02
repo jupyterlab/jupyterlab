@@ -3,11 +3,15 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 import {
-  JSONObject
+  nbformat
+} from '@jupyterlab/coreutils';
+
+import {
+  JSONExt
 } from '@phosphor/coreutils';
 
 import {
-  Table, uuid4
+  uuid4
 } from '@phosphor/datastore';
 
 import {
@@ -15,26 +19,16 @@ import {
 } from './actions';
 
 import {
-  OutputState
+  DisplayDataOutput, ErrorOutput, ExecuteResultOutput, OutputArea, OutputItem,
+  OutputStoreState, StreamOutput
 } from './models';
 
 
 /**
- * The mime type for stdout.
- */
-const STDOUT = 'application/vnd.jupyter.stdout';
-
-/**
- * The mime type for stderr.
- */
-const STDERR = 'application/vnd.jupyter.stderr';
-
-
-/**
- * The root reducer for the output area package.
+ * The root reducer for an output store.
  */
 export
-function outputReducer(state: OutputState, action: OutputAction): OutputState {
+function outputStoreReducer(state: OutputStoreState, action: OutputAction): OutputStoreState {
   switch (action.type) {
   case OutputActionType.APPEND_OUTPUT:
     return appendOutput(state, action);
@@ -49,219 +43,306 @@ function outputReducer(state: OutputState, action: OutputAction): OutputState {
 /**
  * Append an output item to an output area.
  */
-function appendOutput(state: OutputState, action: AppendOutputAction): OutputState {
+function appendOutput(state: OutputStoreState, action: AppendOutputAction): OutputStoreState {
   // Unpack the area id and output.
   let { areaId, output } = action;
 
+  // Clear the outputs if a clear is pending.
+  state = Private.clearOutputsIfNeeded(state, areaId);
+
   // Look up the output area object.
-  let area = state.outputAreaTable[areaId];
+  let area = state.outputAreaTable.get(areaId);
 
-  // Try to merge the output first, if possible.
-  let mergeState = mergeOutputs(state, area, output);
-
-  // Return the new state if the output was merged.
-  if (state !== mergeState) {
-    return mergeState;
+  // Bail early if the area does not exist.
+  if (!area) {
+    return state;
   }
 
-  // Create the mime data for the output.
-  let mimeData = createMimeData(output);
+  // If possible, merge the output before appending a new one.
+  let merged = Private.mergeOutputs(state, area, output);
 
-  // Create the mime metadata for the output.
-  let mimeMetadata = createMimeMetadata(output);
+  // Return the new state if the output was merged.
+  if (state !== merged) {
+    return merged;
+  }
 
-  // Create the uuids needed for the tables.
+  // Create a UUID for the new output item.
   let itemId = uuid4();
-  let mimeDataId = uuid4();
-  let mimeMetadataId = uuid4();
 
-  // Create the output item.
-  let item: OutputItem = {
-    type: output.output_type,
-    trusted: area.trusted,
-    mimeDataId,
-    mimeMetadataId,
-    streamType: getStreamType(output),
-    executionCount: getExecutionCount(output)
-  };
+  // Create the new output item.
+  let item = Private.createOutputItem(output, area.trusted);
 
-  // Add the mime bundles to the table.
-  let mimeBundleTable = Table.apply(state.mimeBundleTable, [
-    Table.opInsert(mimeDataId, mimeData),
-    Table.opInsert(mimeMetadataId, mimeMetadata)
-  ]);
+  // Append the output item id to the output area.
+  area = area.update('outputItemIds', list => list.push(itemId));
 
-  // Add the output item to the table.
-  let outputItemTable = Table.apply(state.outputItemTable,
-    Table.opInsert(itemId, item)
-  );
+  // Update the root tables in the state.
+  return state.withMutations(state => {
+    // Set the updated area in the output area table.
+    state.set('outputAreaTable', state.outputAreaTable.set(areaId, area));
 
-  // Add the item id to the output list.
-  let outputListTable = Table.apply(state.outputListTable,
-    Table.opAppend(area.outputListId, [itemId])
-  );
-
-  // Return the updated state.
-  return { ...state, mimeBundleTable, outputItemTable, outputListTable };
+    // Set the new item in the output item table.
+    state.set('outputItemTable', state.outputItemTable.set(itemId, item));
+  });
 }
 
 
 /**
  * Clear the outputs for an output area.
  */
-function clearOutputs(state: OutputState, action: ClearOutputsAction): OutputState {
-  // Look up the output list id.
-  let outputListId = state.outputAreaTable[action.areaId].outputListId;
+function clearOutputs(state: OutputStoreState, action: ClearOutputsAction): OutputStoreState {
+  // Unpack the action.
+  let { areaId, wait } = action;
 
-  // Clear the output list in the table.
-  let outputListTable = Table.apply(state.outputListTable,
-    Table.opReplace(outputListId, [])
-  );
+  // Look up the output area object.
+  let area = state.outputAreaTable.get(areaId);
 
-  // Return the updated state.
-  return { ...state, outputListTable };
-}
-
-
-/**
- * Create the mime data for an output.
- */
-function createMimeData(output: nbformat.IOutput): JSONObject {
-  let data: JSONObject;
-  switch (true) {
-  case nbformat.isExecuteResult(output):
-  case nbformat.isDisplayUpdate(output):
-  case nbformat.isDisplayData(output):
-    data = normalizeMimeBundle(output.data);
-    break;
-  case nbformat.isStream(output):
-    data = { [getMimeType(output)]: getStreamText(output) };
-    break;
-  case nbformat.isError(output):
-    data = { [stderr]: formatError(output) };
-    break;
-  default:
-    data = {};
-    break;
+  // Bail early if the area does not exist.
+  if (!area) {
+    return state;
   }
-  return data;
-}
 
-
-/**
- * Create the mime metadata for an output.
- */
-function createMimeMetadata(output: nbformat.IOutput): JSONObject {
-  let metadata: JSONObject;
-  switch (true) {
-  case nbformat.isExecuteResult(output):
-  case nbformat.isDisplayData(output):
-  case nbformat.isDisplayUpdate(output):
-    metadata = JSONExt.deepCopy(output.metadata);
-    break;
-  default:
-    metadata = {};
-    break;
+  // If no waiting is needed, clear immediately.
+  if (!wait) {
+    return Private.clearOutputs(state, areaId);
   }
-  return metadata;
+
+  // Otherwise, set the pending clear flag on the area.
+  area = area.set('pendingClear', true);
+
+  // Update the output area table with the new value.
+  return state.set('outputAreaTable', state.outputAreaTable.set(areaId, area));
 }
 
 
 /**
- * Format the error text for an error output.
+ * The namespace for the module implementation details.
  */
-function formatError(output: nbformat.IError): string {
-  return output.traceback.join('\n') || `${output.ename}: ${output.evalue}`;
-}
+namespace Private {
+  /**
+   * Clear the outputs if the `pendingClear` flag is set on the area.
+   *
+   * Returns the original state if no change was made.
+   */
+  export
+  function clearOutputsIfNeeded(state: OutputStoreState, areaId: string): OutputStoreState {
+    // Look up the output area object.
+    let area = state.outputAreaTable.get(areaId);
 
-
-/**
- * Get the mimetype for an output stream.
- */
-function getMimeType(output: nbformat.IStream): string {
-  return output.name === 'stdout' ? STDOUT : STDERR;
-}
-
-/**
- * Get the normalized text for an output stream.
- */
-function getStreamText({ text }: nbformat.IStream): string {
-  return typeof text === 'string' ? text : text.join('\n');
-}
-
-/**
- * Get the stream type for an output.
- */
-function getStreamType(output: nbformat.IOutput): string | null {
-  return nbformat.isStream(output) ? output.name : null;
-}
-
-
-/**
- * Get the execution count for an output.
- */
-function getExecutionCount(output: nbformat.IOutput): nbformat.ExecutionCount {
-  return nbformat.isExecuteResult(output) ? output.execution_count: null;
-}
-
-
-/**
- * Create a normalized copy of a mime bundle.
- *
- * Top-level multiline strings (`string[]`) are joined with `\n`.
- */
-function normalizeMimeBundle(bundle: IMimeBundle): JSONObject {
-  let result: JSONObject = {};
-  for (let key in bundle) {
-    let value = bundle[key];
-    if (Array.isArray(value)) {
-      result[key] = value.join('\n');
-    } else {
-      result[key] = JSONExt.deepCopy(value);
+    // Bail early if the area does not exist or should not be cleared.
+    if (!area || !area.pendingClear) {
+      return state;
     }
+
+    // Clear the outputs.
+    return clearOutputs(state, areaId);
   }
-  return result;
-}
 
+  /**
+   * Clear the outputs for an output area.
+   *
+   * Returns the original state if no change was made.
+   */
+  export
+  function clearOutputs(state: OutputStoreState, areaId: string): OutputStoreState {
+    // Look up the output area object.
+    let area = state.outputAreaTable.get(areaId);
 
-/**
- * Merge an output with an existing output area, if possible.
- *
- * Returns the original state if no merge was performed.
- */
-function mergeOutputs(state: OutputState, area: OutputArea, output: nbformat.IOutput): OutputState {
-  // Bail early if the output is not a stream.
-  if (!nbformat.isStream(output)) {
+    // Bail early if the area does not exist.
+    if (!area) {
+      return state;
+    }
+
+    // Get the list of item ids.
+    let itemIds = area.outputItemIds;
+
+    // Update the output area.
+    area = area.withMutations(area => {
+      // Clear the list of output item ids.
+      area.set('outputItemIds', itemIds.clear());
+
+      // Clear the pending clear flag.
+      area.set('pendingClear', false);
+    });
+
+    // Update the state tables.
+    return state.withMutations(state => {
+      // Delete all cleared output items from the table.
+      state.set('outputItemTable', state.outputItemTable.deleteAll(itemIds));
+
+      // Update the output area table with the new value.
+      state.set('outputAreaTable', state.outputAreaTable.set(areaId, area));
+    });
+  }
+
+  /**
+   * Merge an output with an existing output area, if possible.
+   *
+   * Returns the original state if no merge was performed.
+   */
+  export
+  function mergeOutputs(state: OutputStoreState, area: OutputArea, output: nbformat.IOutput): OutputStoreState {
+    // Merge a stream output if possible.
+    if (nbformat.isStream(output)) {
+      return mergeStreamOutput(state, area, output);
+    }
+
+    // Update a display item if possible.
+    if (nbformat.isDisplayUpdate(output)) {
+      return mergeDisplayUpdate(state, area, output);
+    }
+
+    // Return the original state.
     return state;
   }
 
-  // Look up the output list for the area.
-  let outputList = state.outputListTable[area.outputListId];
-
-  // Bail early if the area has no outputs.
-  if (outputList.length === 0) {
-    return state;
+  /**
+   * Create an output item for an nbformat output.
+   */
+  export
+  function createOutputItem(output: nbformat.IOutput, trusted: boolean): OutputItem {
+    if (nbformat.isExecuteResult(output)) {
+      return createExecuteResultOutput(output, trusted);
+    }
+    if (nbformat.isDisplayData(output)) {
+      return createDisplayDataOutput(output, trusted);
+    }
+    if (nbformat.isStream(output)) {
+      return createStreamOutput(output, trusted);
+    }
+    if (nbformat.isError(output)) {
+      return createErrorOutput(output, trusted);
+    }
+    throw 'unreachable';
   }
 
-  // Look up the last output item for the area.
-  let lastItem = state.outputItemTable[outputList[outputList.length - 1]];
+  /**
+   * Merge a stream output into an existing item, if possible.
+   */
+  function mergeStreamOutput(state: OutputStoreState, area: OutputArea, output: nbformat.IStream): OutputStoreState {
+    // Get the last item id for the area.
+    let lastId = area.outputItemIds.last();
 
-  // Bail if the outputs cannot be merged.
-  if (lastItem.type !== 'stream' || lastItem.streamType !== output.name) {
-    return state;
+    // Bail early if the area is empty.
+    if (!lastId) {
+      return state;
+    }
+
+    // Look up the last output item for the area.
+    let lastItem = state.outputItemTable.get(lastId);
+
+    // Bail early if the item does not exist.
+    if (!lastItem) {
+      return state;
+    }
+
+    // Bail if the outputs cannot be merged.
+    if (lastItem.type !== 'stream' || lastItem.name !== output.name) {
+      return state;
+    }
+
+    // Update the text of the last item.
+    lastItem = lastItem.set('text', lastItem.text + output.text);
+
+    // Set the updated item in the table.
+    return state.set('outputItemTable', state.outputItemTable.set(lastId, lastItem));
   }
 
-  // Shallow copy the mime data for the last stream item.
-  let mimeData = { ...state.mimeBundleTable[lastItem.mimeDataId] };
+  /**
+   * Merge an update display data output into an existing item, if possible.
+   */
+  function mergeDisplayUpdate(state: OutputStoreState, area: OutputArea, output: nbformat.IDisplayUpdate): OutputStoreState {
+    // Look up the display id for the output.
+    let displayId = output.transient.display_id;
 
-  // Add the new output text to the existing text.
-  mimeData[getMimeType(output)] += getStreamText(output);
+    // Bail early if there is no display id.
+    if (!displayId) {
+      return state;
+    }
 
-  // Replace the mime bundle in the table.
-  let mimeBundleTable = Table.apply(state.mimeBundleTable,
-    Table.opReplace(lastItem.mimeDataId, mimeData)
-  );
+    // Clone the data and metadata for the output.
+    let data = JSONExt.deepCopy(output.data);
+    let metadata = JSONExt.deepCopy(output.metadata);
 
-  // Return the updated state.
-  return { ...state, mimeBundleTable };
+    // Update the matching items in the table.
+    let outputItemTable = state.outputItemTable.withMutations(table => {
+
+      // Iterate over the output items in the area.
+      area.outputItemIds.forEach(id => {
+
+        // Look up the item in the table.
+        let item = table.get(id);
+
+        // Skip the item if it is not a match.
+        if (item.type !== 'display_data' || item.displayId !== displayId) {
+          return;
+        }
+
+        // Update the data and metadata for the item.
+        item = item.set('data', data).set('metadata', metadata);
+
+        // Set the new item in the table.
+        table.set(id, item);
+      });
+    });
+
+    // Update the table in the state.
+    return state.set('outputItemTable', outputItemTable);
+  }
+
+  /**
+   * Convert an nbformat execute result output to an output item.
+   */
+  function createExecuteResultOutput(output: nbformat.IExecuteResult, trusted: boolean): ExecuteResultOutput {
+    // Unpack the output.
+    let { data, metadata, execution_count } = output;
+
+    // Return a new execute result output.
+    return new ExecuteResultOutput({
+      trusted,
+      data: JSONExt.deepCopy(data),
+      metadata: JSONExt.deepCopy(metadata),
+      executionCount: execution_count
+    });
+  }
+
+  /**
+   * Convert an nbformat display data output to an output item.
+   */
+  function createDisplayDataOutput(output: nbformat.IDisplayData, trusted: boolean): DisplayDataOutput {
+    // Unpack the output.
+    let { data, metadata, transient } = output;
+
+    // Return a new display data output.
+    return new DisplayDataOutput({
+      trusted,
+      data: JSONExt.deepCopy(data),
+      metadata: JSONExt.deepCopy(metadata),
+      displayId: (transient && transient.display_id) || null
+    });
+  }
+
+  /**
+   * Convert an nbformat stream output to an output item.
+   */
+  function createStreamOutput(output: nbformat.IStream, trusted: boolean): StreamOutput {
+    // Unpack the output.
+    let { name, text } = output;
+
+    // Return a new stream output.
+    return new StreamOutput({ trusted, name, text });
+  }
+
+  /**
+   * Convert an nbformat error output to an output item.
+   */
+  function createErrorOutput(output: nbformat.IError, trusted: boolean): ErrorOutput {
+    // Unpack the output.
+    let { ename, evalue, traceback } = output;
+
+    // Join the multiline traceback into a single string.
+    let tb = traceback.join('\n');
+
+    // Return a new error output.
+    return new ErrorOutput({ trusted, ename, evalue, traceback: tb });
+  }
 }

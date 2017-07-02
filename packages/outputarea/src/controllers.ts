@@ -11,11 +11,15 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  AppendOutputAction
+  ArrayExt
+} from '@phosphor/algorithm';
+
+import {
+  AppendOutputAction, ClearOutputsAction
 } from './actions';
 
 import {
-  OutputArea, OutputStore
+  OutputStore
 } from './models';
 
 
@@ -55,31 +59,34 @@ function execute(code: string, kernel: Kernel.IKernelConnection, outputAreaId: s
   // Return the future.
   return future;
 
-  function getArea(): OutputArea | null {
-    // Fetch the area from the data store.
-    let area = store.state.outputAreaTable[outputAreaId] || null;
-
-    // If the area has been deleted, dispose the future.
-    if (!area) {
-      future.dispose();
-    }
-
-    // Return the area.
-    return area;
-  }
-
   function onIOPub(msg: KernelMessage.IIOPubMessage): void {
+    // Get the message type from the header.
+    let mt = msg.header.msg_type;
 
-  }
-
-  function onReply(msg: KernelMessage.IExecuteReplyMsg): void {
-    // Bail if the output area has been deleted.
-    if (!getArea()) {
+    // Handle the simplest messages first.
+    switch (mt) {
+    case 'error':
+    case 'stream':
+    case 'display_data':
+    case 'execute_result':
+    case 'update_display_data':
+      let output = { output_type: mt, ...msg.content };
+      let action = new AppendOutputAction(outputAreaId, output);
+      store.dispatch(action);
       return;
     }
 
+    // Handle a clear output message.
+    if (KernelMessage.isClearOutputMsg(msg)) {
+      let action = new ClearOutputsAction(outputAreaId, msg.content.wait);
+      store.dispatch(action);
+      return;
+    }
+  }
+
+  function onReply(msg: KernelMessage.IExecuteReplyMsg): void {
     // Ignore `error` and `abort` replies.
-    if (msg.content.status !== 'okay') {
+    if (msg.content.status !== 'ok') {
       return;
     }
 
@@ -92,7 +99,9 @@ function execute(code: string, kernel: Kernel.IKernelConnection, outputAreaId: s
     }
 
     // Find the first page in the payload.
-    let page = payload.find(item => item.source === 'page');
+    let page = ArrayExt.findFirstValue(
+      payload, item => item.source === 'page'
+    );
 
     // Bail if there is no pager output.
     if (!page) {
@@ -111,7 +120,7 @@ function execute(code: string, kernel: Kernel.IKernelConnection, outputAreaId: s
     store.dispatch(action);
   }
 
-  function onStdin(msg: msg: KernelMessage.IStdinMessage): void {
+  function onStdin(msg: KernelMessage.IStdinMessage): void {
     // if (KernelMessage.isInputRequestMsg(msg)) {
     //   this._onInputRequest(msg, value);
     // }
