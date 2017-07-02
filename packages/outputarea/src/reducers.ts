@@ -240,7 +240,7 @@ namespace Private {
 
     // Update the matching items in the table.
     let outputItemTable = state.outputItemTable.withMutations(table => {
-      // Iterate over the area's output items.
+      // Iterate each output item in the area.
       area.outputItemIds.forEach(id => {
         // Look up the item in the table.
         let item = table.get(id);
