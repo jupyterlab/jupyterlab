@@ -355,7 +355,7 @@ namespace nbformat {
   }
 
   /**
-   * Result of executing a code cell.
+   * Result of executing a code cell.l
    */
   export
   interface IExecuteResult extends IBaseOutput {
@@ -399,6 +399,11 @@ namespace nbformat {
      * Cell output metadata.
      */
     metadata: OutputMetadata;
+
+    /**
+     * The transient data for the output.
+     */
+    transient?: { display_id?: string };
   }
 
   /**
@@ -420,6 +425,11 @@ namespace nbformat {
      * Cell output metadata.
      */
     metadata: OutputMetadata;
+
+    /**
+     * The transient data for the output.
+     */
+    transient: { display_id: string };
   }
 
   /**
