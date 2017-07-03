@@ -39,7 +39,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  JSONObject
+  ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
 import {
@@ -486,7 +486,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
   const { commands, shell } = app;
 
   // Get the current widget and activate unless the args specify otherwise.
-  function getCurrent(args: JSONObject): NotebookPanel | null {
+  function getCurrent(args: ReadonlyJSONObject): NotebookPanel | null {
     let widget = tracker.currentWidget;
     let activate = args['activate'] !== false;
     if (activate && widget) {
@@ -966,7 +966,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
       if (!widget) {
         return;
       }
-      let options: JSONObject = {
+      let options: ReadonlyJSONObject = {
         path: widget.context.path,
         preferredLanguage: widget.context.model.defaultKernelLanguage,
         activate: args['activate']

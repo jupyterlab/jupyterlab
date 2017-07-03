@@ -35,7 +35,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONObject
+  ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
 import {
@@ -248,7 +248,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
   palette.addItem({ command, category });
 
   // Get the current widget and activate unless the args specify otherwise.
-  function getCurrent(args: JSONObject): ConsolePanel | null {
+  function getCurrent(args: ReadonlyJSONObject): ConsolePanel | null {
     let widget = tracker.currentWidget;
     let activate = args['activate'] !== false;
     if (activate && widget) {
@@ -371,7 +371,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
 
   command = CommandIDs.inject;
   commands.addCommand(command, {
-    execute: (args: JSONObject) => {
+    execute: args => {
       let path = args['path'];
       tracker.find(widget => {
         if (widget.console.session.path === path) {
