@@ -15,7 +15,8 @@ import {
 } from '@phosphor/datastore';
 
 import {
-  AppendOutputAction, ClearOutputsAction, OutputAction, OutputActionType
+  AppendOutputAction, ClearOutputsAction, OutputAction, OutputActionType,
+  SetOutputDataAction
 } from './actions';
 
 import {
@@ -34,6 +35,8 @@ function outputStoreReducer(state: OutputStoreState, action: OutputAction): Outp
     return appendOutput(state, action);
   case OutputActionType.CLEAR_OUTPUTS:
     return clearOutputs(state, action);
+  case OutputActionType.SET_OUTPUT_DATA:
+    return setOutputData(state, action);
   default:
     return state;
   }
@@ -119,6 +122,42 @@ function clearOutputs(state: OutputStoreState, action: ClearOutputsAction): Outp
 
   // Update the output area table with the new value.
   return state.set('outputAreaTable', state.outputAreaTable.set(areaId, area));
+}
+
+
+/**
+ * Set the data and/or metadata for an output item.
+ */
+function setOutputData(state: OutputStoreState, action: SetOutputDataAction): OutputStoreState {
+  // Unpack the action.
+  let { itemId, data, metadata } = action;
+
+  // Look up the item.
+  let item = state.outputItemTable.get(itemId);
+
+  // Bail if there is nothing to update.
+  if (!item || (!data && !metadata)) {
+    return state;
+  }
+
+  // Bail if the output item cannot be updated.
+  if (item.type !== 'execute_result' && item.type !== 'display_data') {
+    return state;
+  }
+
+  // Update the data and metadata for the item.
+  // https://github.com/Microsoft/TypeScript/issues/16917
+  item = (item as any).withMutations((item: any) => {
+    if (data) {
+      item.set('data', data);
+    }
+    if (metadata) {
+      item.set('metadata', metadata);
+    }
+  });
+
+  // Update the output item table with the new value.
+  return state.set('outputItemTable', state.outputItemTable.set(itemId, item));
 }
 
 
