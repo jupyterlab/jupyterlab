@@ -6,6 +6,10 @@ import {
 } from '@phosphor/coreutils';
 
 import {
+  ISignal, Signal
+} from '@phosphor/signaling';
+
+import {
   IObservableJSON, ObservableJSON, nbformat
 } from '@jupyterlab/coreutils';
 
@@ -23,6 +27,11 @@ import {
  */
 export
 interface IOutputModel extends IRenderMime.IMimeModel {
+  /**
+   * A signal emitted when the output model changes.
+   */
+  readonly changed: ISignal<this, void>;
+
   /**
    * The output type.
    */
@@ -109,6 +118,13 @@ class OutputModel implements IOutputModel {
   }
 
   /**
+   * A signal emitted when the output model changes.
+   */
+  get changed(): ISignal<this, void> {
+    return this._changed;
+  }
+
+  /**
    * The output type.
    */
   readonly type: string;
@@ -129,6 +145,7 @@ class OutputModel implements IOutputModel {
   dispose(): void {
     this._data.dispose();
     this._metadata.dispose();
+    Signal.clearData(this);
   }
 
   /**
@@ -206,8 +223,11 @@ class OutputModel implements IOutputModel {
         observable.set(key, newValue as JSONValue);
       }
     }
+
+    this._changed.emit(void 0);
   }
 
+  private _changed = new Signal<this, void>(this);
   private _raw: JSONObject = {};
   private _rawMetadata: ReadonlyJSONObject;
   private _rawData: ReadonlyJSONObject;
