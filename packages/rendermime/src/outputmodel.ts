@@ -169,7 +169,7 @@ class OutputModel implements IOutputModel {
    * Depending on the implementation of the mime model,
    * this call may or may not have deferred effects,
    */
-  setData(options: IRenderMime.IMimeModel.IUpdateDataOptions): void {
+  setData(options: IRenderMime.IMimeModel.ISetDataOptions): void {
     if (options.data) {
       this._updateObservable(this._data, options.data);
       this._rawData = options.data;

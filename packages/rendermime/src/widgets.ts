@@ -96,7 +96,6 @@ abstract class RenderedCommon extends Widget implements IRenderMime.IRendererWid
   /* Construct a new rendered HTML common widget.*/
   constructor(options: IRenderMime.IRendererOptions) {
     super();
-    this.trusted = options.trusted;
     this.mimeType = options.mimeType;
     this.sanitizer = options.sanitizer;
     this.resolver = options.resolver;
@@ -107,11 +106,6 @@ abstract class RenderedCommon extends Widget implements IRenderMime.IRendererWid
    * The mimetype being rendered.
    */
   readonly mimeType: string;
-
-  /**
-   * Whether the input is trusted.
-   */
-  readonly trusted: boolean;
 
   /**
    * The sanitizer used to sanitize untrusted html inputs.
@@ -166,7 +160,7 @@ class RenderedHTML extends RenderedHTMLCommon {
    */
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     let source = Private.getSource(model, this.mimeType);
-    if (!this.trusted) {
+    if (!model.trusted) {
       source = this.sanitizer.sanitize(source);
     }
     Private.setHtml(this.node, source);
@@ -224,7 +218,7 @@ class RenderedMarkdown extends RenderedHTMLCommon {
           return;
         }
         content = replaceMath(content, parts['math']);
-        if (!this.trusted) {
+        if (!model.trusted) {
           content = this.sanitizer.sanitize(content);
         }
         Private.setHtml(this.node, content);

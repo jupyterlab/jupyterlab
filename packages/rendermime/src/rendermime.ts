@@ -44,22 +44,10 @@ class RenderMime {
     this.sanitizer = options.sanitizer || defaultSanitizer;
     this._resolver = options.resolver || null;
     this._handler = options.linkHandler || null;
-    if (options.useDefaultFactories === false) {
-      return;
-    }
-    let renderers = [
-      new JavaScriptRendererFactory(),
-      new HTMLRendererFactory(),
-      new MarkdownRendererFactory(),
-      new LatexRendererFactory(),
-      new SVGRendererFactory(),
-      new ImageRendererFactory(),
-      new PDFRendererFactory(),
-      new TextRendererFactory()
-    ];
-    for (let renderer of renderers) {
-      for (let mime of renderer.mimeTypes) {
-        this._addFactory(renderer, mime);
+    let factories = options.initialFactories || [];
+    for (let factory of factories) {
+      for (let mime of factory.mimeTypes) {
+        this._addFactory(factory, mime);
       }
     }
   }
@@ -67,22 +55,12 @@ class RenderMime {
   /**
    * The object used to resolve relative urls for the rendermime instance.
    */
-  get resolver(): IRenderMime.IResolver {
-    return this._resolver;
-  }
-  set resolver(value: IRenderMime.IResolver) {
-    this._resolver = value;
-  }
+  readonly resolver: IRenderMime.IResolver;
 
   /**
    * The object used to handle path opening links.
    */
-  get linkHandler(): IRenderMime.ILinkHandler {
-    return this._handler;
-  }
-  set linkHandler(value: IRenderMime.ILinkHandler) {
-    this._handler = value;
-  }
+  readonly linkHandler: IRenderMime.ILinkHandler;
 
   /**
    * The sanitizer used by the rendermime instance.
@@ -99,24 +77,25 @@ class RenderMime {
   /**
    * Create a renderer for a mime model.
    *
-   * @param mimeType - the mime type to render.
+   * @param model - the mime model.
    *
    * #### Notes
    * Creates a renderer widget using the preferred mime type.  See
    * [[preferredMimeType]].
    */
-  createRenderer(mimeType: string, trusted: boolean): IRenderMime.IRendererWidget {
-    let factory = this._factories[mimeType];
-    if (!factory) {
-      throw new Error(`Unregistered mimeType: ${mimeType}`);
+  createRenderer(model: IRenderMime.IMimeModel): IRenderMime.IRendererWidget {
+    let mimeType = this.preferredMimeType(model);
+    if (!mimeType) {
+      throw new Error('Cannot render model');
     }
     let options = {
       mimeType,
-      trusted,
+      trusted: model.trusted,
       resolver: this._resolver,
       sanitizer: this.sanitizer,
       linkHandler: this._handler
     };
+    let factory = this._factories[mimeType];
     if (!factory.canCreateRenderer(options)) {
       throw new Error('Cannot create renderer');
     }
@@ -128,17 +107,15 @@ class RenderMime {
    *
    * @param model - the mime model of interest.
    *
-   * @param trusted - Whether the model is trusted.
-   *
    * #### Notes
    * The mimeTypes in the model are checked in preference order
    * until a renderer returns `true` for `.canCreateRenderer`.
    */
-  preferredMimeType(model: IRenderMime.IMimeModel, trusted: boolean): string {
+  preferredMimeType(model: IRenderMime.IMimeModel): string | undefined {
     let sanitizer = this.sanitizer;
     return find(this._mimeTypes, mimeType => {
       if (mimeType in model.data) {
-        let options = { mimeType, sanitizer, trusted };
+        let options = { mimeType, sanitizer, trusted: model.trusted };
         let renderer = this._factories[mimeType];
         let canRender = false;
         try {
@@ -147,26 +124,23 @@ class RenderMime {
           console.error(
             `Got an error when checking the renderer for the mimeType '${mimeType}'\n`, err);
         }
-        if (canRender) {
-          return true;
-        }
+        return canRender;
       }
+      return false;
     });
   }
 
   /**
    * Clone the rendermime instance with shallow copies of data.
-   *
-   * #### Notes
-   * The resolver is explicitly not cloned in this operation.
    */
-  clone(): RenderMime {
+  clone(options: RenderMime.ICloneOptions = {}): RenderMime {
     let rendermime = new RenderMime({
-      sanitizer: this.sanitizer,
-      linkHandler: this._handler
+      sanitizer: options.sanitizer || this.sanitizer,
+      linkHandler: options.linkHandler || this.linkHandler,
+      resolver: options.resolver || this.resolver
     });
-    each(this._rankItems, item => {
-      let { mimeType, rank } = item;
+    each(this._mimeTypes, mimeType => {
+      let rank = this._ranks[mimeType];
       rendermime.addFactory(this._factories[mimeType], mimeType, rank);
     });
     return rendermime;
@@ -205,7 +179,7 @@ class RenderMime {
    *
    * @returns The renderer for the given mimeType, or undefined if the mimeType is unknown.
    */
-  getFactory(mimeType: string): IRenderMime.IRendererFactory {
+  getFactory(mimeType: string): IRenderMime.IRendererFactory | undefined {
     return this._factories[mimeType];
   }
 
@@ -219,11 +193,11 @@ class RenderMime {
     }
 
     // Add the new factory in the correct order.
-    let rankItem = { mimeType, rank };
+    this._ranks[mimeType] = rank;
     let index = ArrayExt.upperBound(
-      this._rankItems, rankItem, Private.itemCmp
-    );
-    ArrayExt.insert(this._rankItems, index, rankItem);
+      this._mimeTypes, mimeType, (a, b) => {
+        return this._ranks[a] - this._ranks[b];
+    });
     ArrayExt.insert(this._mimeTypes, index, mimeType);
     this._factories[mimeType] = factory;
   }
@@ -235,15 +209,13 @@ class RenderMime {
    */
   private _removeFactory(mimeType: string): void {
     delete this._factories[mimeType];
-    let index = ArrayExt.removeFirstOf(this._mimeTypes, mimeType);
-    if (index !== -1) {
-      ArrayExt.removeAt(this._rankItems, index);
-    }
+    delete this._ranks[mimeType];
+    ArrayExt.removeFirstOf(this._mimeTypes, mimeType);
   }
 
   private _factories: { [key: string]: IRenderMime.IRendererFactory } = Object.create(null);
   private _mimeTypes: string[] = [];
-  private _rankItems: Private.IRankItem[] = [];
+  private _ranks: { [key: string]: number } = Object.create(null);
   private _resolver: IRenderMime.IResolver | null;
   private _handler: IRenderMime.ILinkHandler | null;
 }
@@ -260,9 +232,9 @@ namespace RenderMime {
   export
   interface IOptions {
     /**
-     * Whether to use the default rendermime factories.  Defaults to `true`.
+     * Intial factories to add to the rendermime instance.
      */
-    useDefaultFactories?: boolean;
+    initialFactories?: IRenderMime.IRendererFactory[];
 
     /**
      * The sanitizer used to sanitize untrusted html inputs.
@@ -280,6 +252,44 @@ namespace RenderMime {
 
     /**
      * An optional path handler.
+     */
+    linkHandler?: IRenderMime.ILinkHandler;
+  }
+
+  /**
+   * Get the default factories.
+   */
+  export
+  function getDefaultFactories(): IRenderMime.IRendererFactory[] {
+    return [
+      new JavaScriptRendererFactory(),
+      new HTMLRendererFactory(),
+      new MarkdownRendererFactory(),
+      new LatexRendererFactory(),
+      new SVGRendererFactory(),
+      new ImageRendererFactory(),
+      new PDFRendererFactory(),
+      new TextRendererFactory()
+    ];
+  }
+
+  /**
+   * The options used to clone a rendermime instance.
+   */
+  export
+  interface ICloneOptions {
+    /**
+     * The new sanitizer used to sanitize untrusted html inputs.
+     */
+    sanitizer?: IRenderMime.ISanitizer;
+
+    /**
+     * The new resolver object.
+     */
+    resolver?: IRenderMime.IResolver;
+
+    /**
+     * The new path handler.
      */
     linkHandler?: IRenderMime.ILinkHandler;
   }
@@ -336,35 +346,5 @@ namespace RenderMime {
      * The contents manager used by the resolver.
      */
     contents: Contents.IManager;
-  }
-}
-
-
-/**
- * A namespace for module private data.
- */
-namespace Private {
-  /**
-   * An object which holds a menu and its sort rank.
-   */
-  export
-  interface IRankItem {
-    /**
-     * The mimetype for the item.
-     */
-    mimeType: string;
-
-    /**
-     * The sort rank of the menu.
-     */
-    rank: number;
-  }
-
-  /**
-   * A comparator function for menu rank items.
-   */
-  export
-  function itemCmp(first: IRankItem, second: IRankItem): number {
-    return first.rank - second.rank;
   }
 }

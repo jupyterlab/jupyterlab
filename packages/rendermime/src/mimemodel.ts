@@ -50,7 +50,7 @@ class MimeModel implements IRenderMime.IMimeModel {
    * Depending on the implementation of the mime model,
    * this call may or may not have deferred effects,
    */
-  setData(options: IRenderMime.IMimeModel.IUpdateDataOptions): void {
+  setData(options: IRenderMime.IMimeModel.ISetDataOptions): void {
     this._data = options.data || this._data;
     this._metadata = options.metadata || this._metadata;
   }
