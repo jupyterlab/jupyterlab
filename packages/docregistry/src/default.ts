@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  JSONValue, PromiseDelegate
+  JSONObject, JSONValue, PromiseDelegate
 } from '@phosphor/coreutils';
 
 import {
@@ -496,12 +496,13 @@ class MimeRenderer extends Widget implements DocumentRegistry.IReadyWidget {
   private _render(): Promise<void> {
     let context = this._context;
     let model = context.model;
-    let mimeModel = new MimeModel();
+    let data: JSONObject;
     if (this._dataType === 'string') {
-      mimeModel.data.set(this._mimeType, model.toString());
+      data[this._mimeType] = model.toString();
     } else {
-      mimeModel.data.set(this._mimeType, model.toJSON());
+      data[this._mimeType] = model.toJSON();
     }
+    let mimeModel = new MimeModel({ data });
     return this._renderer.renderModel(mimeModel);
   }
 
