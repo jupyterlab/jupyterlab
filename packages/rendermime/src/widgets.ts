@@ -314,7 +314,7 @@ class RenderedImage extends RenderedCommon {
     let source = Private.getSource(model, this.mimeType);
     let img = this.node.firstChild as HTMLImageElement;
     img.src = `data:${this.mimeType};base64,${source}`;
-    let metadata = model.metadata.get(this.mimeType) as JSONObject;
+    let metadata = model.metadata[this.mimeType] as JSONObject;
     if (metadata) {
       let metaJSON = metadata as JSONObject;
       if (typeof metaJSON['height'] === 'number') {
@@ -470,7 +470,7 @@ namespace Private {
    */
   export
   function getSource(model: IRenderMime.IMimeModel, mimeType: string): string {
-    return String(model.data.get(mimeType));
+    return String(model.data[mimeType]);
   }
 
   /**

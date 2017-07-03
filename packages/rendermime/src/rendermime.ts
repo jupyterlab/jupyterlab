@@ -44,6 +44,24 @@ class RenderMime {
     this.sanitizer = options.sanitizer || defaultSanitizer;
     this._resolver = options.resolver || null;
     this._handler = options.linkHandler || null;
+    if (options.useDefaultFactories === false) {
+      return;
+    }
+    let renderers = [
+      new JavaScriptRendererFactory(),
+      new HTMLRendererFactory(),
+      new MarkdownRendererFactory(),
+      new LatexRendererFactory(),
+      new SVGRendererFactory(),
+      new ImageRendererFactory(),
+      new PDFRendererFactory(),
+      new TextRendererFactory()
+    ];
+    for (let renderer of renderers) {
+      for (let mime of renderer.mimeTypes) {
+        this._addFactory(renderer, mime);
+      }
+    }
   }
 
   /**
@@ -119,7 +137,7 @@ class RenderMime {
   preferredMimeType(model: IRenderMime.IMimeModel, trusted: boolean): string {
     let sanitizer = this.sanitizer;
     return find(this._mimeTypes, mimeType => {
-      if (model.data.has(mimeType)) {
+      if (mimeType in model.data) {
         let options = { mimeType, sanitizer, trusted };
         let renderer = this._factories[mimeType];
         let canRender = false;
@@ -161,16 +179,43 @@ class RenderMime {
    *
    * @param mimeType - The renderer mimeType.
    *
-   * @param rank - The rank of the renderer.  Defaults to 100.
+   * @param rank - The rank of the renderer. Defaults to 100.
    *
    * #### Notes
    * The renderer will replace an existing renderer for the given
    * mimeType.
    */
-  addFactory(factory: IRenderMime.IRendererFactory, mimeType: string, rank = 100): void {
+  addFactory(factory: IRenderMime.IRendererFactory, mimeType: string, rank?: number): void {
+    this._addFactory(factory, mimeType, rank);
+  }
+
+  /**
+   * Remove a renderer factory by mimeType.
+   *
+   * @param mimeType - The mimeType of the factory.
+   */
+  removeFactory(mimeType: string): void {
+    this._removeFactory(mimeType);
+  }
+
+  /**
+   * Get a renderer factory by mimeType.
+   *
+   * @param mimeType - The mimeType of the renderer.
+   *
+   * @returns The renderer for the given mimeType, or undefined if the mimeType is unknown.
+   */
+  getFactory(mimeType: string): IRenderMime.IRendererFactory {
+    return this._factories[mimeType];
+  }
+
+  /**
+   * Add a factory to the rendermime instance.
+   */
+  private _addFactory(factory: IRenderMime.IRendererFactory, mimeType: string, rank = 100): void {
     // Remove any existing factory.
     if (mimeType in this._factories) {
-      this.removeFactory(mimeType);
+      this._removeFactory(mimeType);
     }
 
     // Add the new factory in the correct order.
@@ -188,23 +233,12 @@ class RenderMime {
    *
    * @param mimeType - The mimeType of the factory.
    */
-  removeFactory(mimeType: string): void {
+  private _removeFactory(mimeType: string): void {
     delete this._factories[mimeType];
     let index = ArrayExt.removeFirstOf(this._mimeTypes, mimeType);
     if (index !== -1) {
       ArrayExt.removeAt(this._rankItems, index);
     }
-  }
-
-  /**
-   * Get a renderer factory by mimeType.
-   *
-   * @param mimeType - The mimeType of the renderer.
-   *
-   * @returns The renderer for the given mimeType, or undefined if the mimeType is unknown.
-   */
-  getFactory(mimeType: string): IRenderMime.IRendererFactory {
-    return this._factories[mimeType];
   }
 
   private _factories: { [key: string]: IRenderMime.IRendererFactory } = Object.create(null);
@@ -225,6 +259,11 @@ namespace RenderMime {
    */
   export
   interface IOptions {
+    /**
+     * Whether to use the default rendermime factories.  Defaults to `true`.
+     */
+    useDefaultFactories?: boolean;
+
     /**
      * The sanitizer used to sanitize untrusted html inputs.
      *
@@ -297,28 +336,6 @@ namespace RenderMime {
      * The contents manager used by the resolver.
      */
     contents: Contents.IManager;
-  }
-
-  /**
-   * Add the default renderer factories to a rendermime instance.
-   */
-  export
-  function addDefaultFactories(rendermime: RenderMime): void {
-    let renderers = [
-      new JavaScriptRendererFactory(),
-      new HTMLRendererFactory(),
-      new MarkdownRendererFactory(),
-      new LatexRendererFactory(),
-      new SVGRendererFactory(),
-      new ImageRendererFactory(),
-      new PDFRendererFactory(),
-      new TextRendererFactory()
-    ];
-    for (let renderer of renderers) {
-      for (let mime of renderer.mimeTypes) {
-        rendermime.addFactory(renderer, mime);
-      }
-    }
   }
 }
 

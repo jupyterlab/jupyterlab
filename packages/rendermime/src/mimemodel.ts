@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject, JSONValue
+  ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
 import {
@@ -19,19 +19,46 @@ class MimeModel implements IRenderMime.IMimeModel {
    * Construct a new mime model.
    */
   constructor(options: MimeModel.IOptions = {}) {
-    this.data = new MimeModel.Bundle(options.data || {});
-    this.metadata = new MimeModel.Bundle(options.metadata || {});
+    this.trusted = !!options.trusted;
+    this._data = options.data || {};
+    this._metadata = options.metadata || {};
   }
+
+  /**
+   * Whether the model is trusted.
+   */
+  readonly trusted: boolean;
 
   /**
    * The data associated with the model.
    */
-  readonly data: IRenderMime.IBundle;
+  get data(): ReadonlyJSONObject {
+    return this._data;
+  }
 
   /**
    * The metadata associated with the model.
    */
-  readonly metadata: IRenderMime.IBundle;
+  get metadata(): ReadonlyJSONObject {
+    return this._metadata;
+  }
+
+  /**
+   * Set the data associated with the model.
+   */
+  setData(data: ReadonlyJSONObject): void {
+    this._data = data;
+  }
+
+  /**
+   * Set the metadata associated with the model.
+   */
+  setMetadata(data: ReadonlyJSONObject): void {
+    this._metadata = data;
+  }
+
+  private _data: ReadonlyJSONObject;
+  private _metadata: ReadonlyJSONObject;
 }
 
 
@@ -46,89 +73,18 @@ namespace MimeModel {
   export
   interface IOptions {
     /**
+     * Whether the model is trusted.  Defaults to `false`.
+     */
+    trusted?: boolean;
+
+    /**
      * The initial mime data.
      */
-    data?: JSONObject;
+    data?: ReadonlyJSONObject;
 
     /**
-     * The initial metadata.
+     * The initial mime metadata.
      */
-    metadata?: JSONObject;
-  }
-
-  /**
-   * The default implementation of an ibundle.
-   */
-  export
-  class Bundle implements IRenderMime.IBundle {
-    /**
-     * Create a new bundle.
-     */
-    constructor(values: JSONObject) {
-      this._values = values;
-    }
-
-    /**
-     * Get a value for a given key.
-     *
-     * @param key - the key.
-     *
-     * @returns the value for that key.
-     */
-    get(key: string): JSONValue {
-      return this._values[key];
-    }
-
-    /**
-     * Check whether the bundle has a key.
-     *
-     * @param key - the key to check.
-     *
-     * @returns `true` if the bundle has the key, `false` otherwise.
-     */
-    has(key: string): boolean {
-      return Object.keys(this._values).indexOf(key) !== -1;
-    }
-
-    /**
-     * Set a key-value pair in the bundle.
-     *
-     * @param key - The key to set.
-     *
-     * @param value - The value for the key.
-     *
-     * @returns the old value for the key, or undefined
-     *   if that did not exist.
-     */
-    set(key: string, value: JSONValue): JSONValue {
-      let old = this._values[key];
-      this._values[key] = value;
-      return old;
-    }
-
-    /**
-     * Get a list of the keys in the bundle.
-     *
-     * @returns - a list of keys.
-     */
-    keys(): string[] {
-      return Object.keys(this._values);
-    }
-
-    /**
-     * Remove a key from the bundle.
-     *
-     * @param key - the key to remove.
-     *
-     * @returns the value of the given key,
-     *   or undefined if that does not exist.
-     */
-    delete(key: string): JSONValue {
-      let old = this._values[key];
-      delete this._values[key];
-      return old;
-    }
-
-    private _values: JSONObject;
+    metadata?: ReadonlyJSONObject;
   }
 }
