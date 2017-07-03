@@ -40,7 +40,7 @@ function runCanCreateRenderer(renderer: IRenderMime.IRendererFactory, trusted: b
 }
 
 
-function createModel(mimeType: string, source: JSONValue): IRenderMime.IMimeModel {
+function createModel(mimeType: string, source: JSONValue, trusted = false): IRenderMime.IMimeModel {
   let data: JSONObject = {};
   data[mimeType] = source;
   return new MimeModel({ data });
@@ -396,7 +396,7 @@ describe('rendermime/factories', () => {
         const source = '<script>window.y=3;</script>';
         let f = new HTMLRendererFactory();
         let mimeType = 'text/html';
-        let model = createModel(mimeType, source);
+        let model = createModel(mimeType, source, true);
         let trusted = true;
         let w = f.createRenderer({ mimeType, sanitizer, trusted });
         return w.renderModel(model).then(() => {
