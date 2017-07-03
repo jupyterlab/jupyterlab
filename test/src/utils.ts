@@ -157,9 +157,8 @@ namespace Private {
     mimeType = 'text/html';
 
     renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-      let source = model.data.get('application/json');
-      model.data.set('text/html', json2html(source));
-      console.log('hello', model.data.get('text/html'));
+      let source = model.data['application/json'];
+      model.setData({ 'text/html': json2html(source) });
       return super.renderModel(model);
     }
   }
@@ -176,8 +175,6 @@ namespace Private {
 
   export
   const rendermime = new RenderMime();
-
-  RenderMime.addDefaultFactories(rendermime);
   rendermime.addFactory(new JSONRendererFactory(), 'application/json');
 }
 

@@ -41,7 +41,7 @@ describe('rendermime/mimemodel', () => {
         let model = new MimeModel({
           data: { 'bar': 'baz' }
         });
-        expect(model.data.get('bar')).to.be('baz');
+        expect(model.data['bar']).to.be('baz');
       });
 
     });
@@ -52,7 +52,7 @@ describe('rendermime/mimemodel', () => {
         let model = new MimeModel({
           metadata: { 'bar': 'baz' }
         });
-        expect(model.metadata.get('bar')).to.be('baz');
+        expect(model.metadata['bar']).to.be('baz');
       });
 
     });
