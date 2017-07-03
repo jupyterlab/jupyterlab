@@ -115,7 +115,7 @@ namespace CommandIDs {
   const cut = 'notebook:cut-cell';
 
   export
-  const copy = 'notebook:copy-cel';
+  const copy = 'notebook:copy-cell';
 
   export
   const paste = 'notebook:paste-cell';
