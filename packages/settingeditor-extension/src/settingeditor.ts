@@ -12,7 +12,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  ICON_CLASS_KEY, ICON_LABEL_KEY, ISettingRegistry, ObservableJSON
+  ICON_CLASS_KEY, ICON_LABEL_KEY, ISettingRegistry, IStateDB, ObservableJSON
 } from '@jupyterlab/coreutils';
 
 import {
@@ -161,10 +161,8 @@ class SettingEditor extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     // Allow the message queue (which includes fit requests that might disrupt
-    // setting relative sizes) to clear before setting sizes.
-    requestAnimationFrame(() => {
-      this._panel.setRelativeSizes(this._sizes);
-    });
+    // the update method setting relative sizes) to clear before updating.
+    requestAnimationFrame(() => { this.update(); });
   }
 
   /**
@@ -175,6 +173,13 @@ class SettingEditor extends Widget {
       super.onCloseRequest(msg);
       this.dispose();
     }).catch(() => { /* no op */ });
+  }
+
+  /**
+   * Handle `'update-request'` messages.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    this._panel.setRelativeSizes(this._sizes);
   }
 
   /**
@@ -229,6 +234,72 @@ namespace SettingEditor {
      * The setting registry the editor modifies.
      */
     registry: ISettingRegistry;
+
+    /**
+     * The state database the editor uses to restore itself.
+     */
+    state: IStateDB;
+  }
+}
+
+
+class PersistentSplitPanel extends SplitPanel {
+  /**
+   * Create a persistent split panel.
+   */
+  constructor(options: PersistentSplitPanel.IOptions) {
+    super(options);
+    this._state = options.state;
+  }
+
+  setRelativeSizes(sizes: number[]): void {
+    super.setRelativeSizes(sizes);
+    this._saveState(sizes);
+  }
+
+  /**
+   * Handle `'after-attach'` messages.
+   */
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+    this._fetchState().then(() => { this.update(); });
+  }
+
+  /**
+   * Get the state of the panel.
+   */
+  private _fetchState(): Promise<void> {
+    return Promise.resolve(void 0);
+  }
+
+  /**
+   * Set the state of the panel.
+   */
+  private _saveState(sizes: number[]): void {
+    if (JSON.stringify(this._sizes) === JSON.stringify(sizes)) {
+      return;
+    }
+  }
+
+  private _state: IStateDB;
+  private _sizes: number[];
+}
+
+
+/**
+ * A namespace for `PersistentSplitPanel` statics.
+ */
+export
+namespace PersistentSplitPanel {
+  /**
+   * The instantiation options for a setting editor.
+   */
+  export
+  interface IOptions extends SplitPanel.IOptions {
+    /**
+     * The state database the editor uses to restore itself.
+     */
+    state: IStateDB;
   }
 }
 
