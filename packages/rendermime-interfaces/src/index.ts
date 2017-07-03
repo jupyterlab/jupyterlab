@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONValue
+  ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
 import {
@@ -16,79 +16,41 @@ import {
 export
 namespace IRenderMime {
   /**
-   * An observable model for mime data.
+   * A model for mime data.
    */
   export
   interface IMimeModel {
     /**
+     * Whether the model is trusted.
+     */
+    readonly trusted: boolean;
+
+    /**
      * The data associated with the model.
      */
-    readonly data: IBundle;
+    readonly data: ReadonlyJSONObject;
 
     /**
      * The metadata associated with the model.
      */
-    readonly metadata: IBundle;
-  }
-
-  /**
-   * A bundle for mime data.
-   */
-  export
-  interface IBundle {
-    /**
-     * Get a value for a given key.
-     *
-     * @param key - the key.
-     *
-     * @returns the value for that key.
-     */
-    get(key: string): JSONValue;
+    readonly metadata: ReadonlyJSONObject;
 
     /**
-     * Set a key-value pair in the bundle.
-     *
-     * @param key - The key to set.
-     *
-     * @param value - The value for the key.
-     *
-     * @returns the old value for the key, or undefined
-     *   if that did not exist.
+     * Set the data associated with the model.
      */
-    set(key: string, value: JSONValue): JSONValue;
+    setData(data: ReadonlyJSONObject): void;
 
     /**
-     * Check whether the bundle has a key.
-     *
-     * @param key - the key to check.
-     *
-     * @returns `true` if the bundle has the key, `false` otherwise.
+     * Set the metadata associated with the model.
      */
-    has(key: string): boolean;
-
-    /**
-     * Get a list of the keys in the bundle.
-     *
-     * @returns - a list of keys.
-     */
-    keys(): string[];
-
-    /**
-     * Remove a key from the bundle.
-     *
-     * @param key - the key to remove.
-     *
-     * @returns the value of the given key,
-     *   or undefined if that does not exist.
-     */
-    delete(key: string): JSONValue;
+    setMetadata(data: ReadonlyJSONObject): void;
   }
 
   /**
    * The options used to initialize a document widget factory.
    *
-   * These are options used to open a rendered view of a given file type
-   * using a rendermime factory.
+   * This interface is intended to be used by mime renderer extensions to
+   * declaratively define a document opener that uses its renderer factory.
    */
   export
   interface IDocumentWidgetFactoryOptions {
@@ -182,7 +144,7 @@ namespace IRenderMime {
     iconLabel?: string;
 
     /**
-     * The options used for using the renderer for documents.
+     * The options used to open a document with the renderer factory.
      */
     documentWidgetFactoryOptions?: IDocumentWidgetFactoryOptions;
   }
