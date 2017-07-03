@@ -496,7 +496,7 @@ class MimeRenderer extends Widget implements DocumentRegistry.IReadyWidget {
   private _render(): Promise<void> {
     let context = this._context;
     let model = context.model;
-    let data: JSONObject;
+    let data: JSONObject = {};
     if (this._dataType === 'string') {
       data[this._mimeType] = model.toString();
     } else {
