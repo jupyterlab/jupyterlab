@@ -66,7 +66,8 @@ class JupyterLab extends Application<ApplicationShell> {
         linker.connectNode(node, 'file-operations:open', { path });
       }
     };
-    this.rendermime = new RenderMime({ linkHandler });
+    let initialFactories = RenderMime.getDefaultFactories();
+    this.rendermime = new RenderMime({ initialFactories, linkHandler });
 
     let registry = this.docRegistry = new DocumentRegistry();
     registry.addModelFactory(new TextModelFactory());
