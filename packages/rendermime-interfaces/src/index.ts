@@ -39,10 +39,11 @@ namespace IRenderMime {
      * Set the data associated with the model.
      *
      * #### Notes
-     * Depending on the implementation of the mime model,
-     * this call may or may not have deferred effects,
+     * Calling this function may trigger an asynchronous operation that could
+     * cause the renderer to be rendered with a new model containing the new
+     * data.
      */
-    setData(options: IMimeModel.IUpdateDataOptions): void;
+    setData(options: IMimeModel.ISetDataOptions): void;
   }
 
   /**
@@ -54,7 +55,7 @@ namespace IRenderMime {
      * The options used to update a mime model.
      */
     export
-    interface IUpdateDataOptions {
+    interface ISetDataOptions {
       /**
        * The new data object.
        */
