@@ -95,7 +95,7 @@ function createApp(manager: ServiceManager.IManager): void {
   }, useCapture);
 
   let rendermime = new RenderMime();
-  RenderMime.addDefaultFactories(rendermime);
+
   let opener = {
     open: (widget: Widget) => {
       // Do nothing for sibling widgets for now.

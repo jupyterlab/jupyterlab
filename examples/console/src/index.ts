@@ -70,7 +70,6 @@ function startApp(path: string, manager: ServiceManager.IManager) {
   });
 
   let rendermime = new RenderMime();
-  RenderMime.addDefaultFactories(rendermime);
 
   let editorFactory = editorServices.factoryService.newInlineEditor.bind(
     editorServices.factoryService);
