@@ -173,8 +173,9 @@ namespace Private {
     }
   }
 
+  const initialFactories = RenderMime.getDefaultFactories();
   export
-  const rendermime = new RenderMime();
+  const rendermime = new RenderMime({ initialFactories });
   rendermime.addFactory(new JSONRendererFactory(), 'application/json');
 }
 
