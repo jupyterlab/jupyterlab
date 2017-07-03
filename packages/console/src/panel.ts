@@ -76,10 +76,11 @@ class ConsolePanel extends Panel {
       kernelPreference: options.kernelPreference
     });
 
-    rendermime.resolver = new RenderMime.UrlResolver({
+    let resolver = new RenderMime.UrlResolver({
       session,
       contents: manager.contents
     });
+    rendermime = rendermime.clone({ resolver });
 
     this.console = contentFactory.createConsole({
       rendermime, session, mimeTypeService, contentFactory, modelFactory

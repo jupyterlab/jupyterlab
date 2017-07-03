@@ -185,11 +185,9 @@ class InspectionHandler implements IDisposable, IInspector.IInspectable {
       }
 
       const data = value.data;
-      const trusted = true;
-      const model = new MimeModel({ data });
+      const model = new MimeModel({ data, trusted: true });
 
-      const mimeType = this._rendermime.preferredMimeType(model, trusted);
-      let widget = this._rendermime.createRenderer(mimeType, trusted);
+      let widget = this._rendermime.createRenderer(model);
       widget.renderModel(model);
       update.content = widget;
       this._inspected.emit(update);

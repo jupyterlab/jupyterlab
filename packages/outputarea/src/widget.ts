@@ -414,11 +414,12 @@ class OutputArea extends Widget {
     prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
     panel.addWidget(prompt);
 
-    let mimeType = this.rendermime.preferredMimeType(model, model.trusted);
-    let output = this.rendermime.createRenderer(mimeType, model.trusted);
-    output.renderModel(model);
-    output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
-    panel.addWidget(output);
+    let output = this.rendermime.createRenderer(model);
+    if (output) {
+      output.renderModel(model);
+      output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
+      panel.addWidget(output);
+    }
 
     return panel;
   }

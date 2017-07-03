@@ -419,15 +419,11 @@ class MimeRenderer extends Widget implements DocumentRegistry.IReadyWidget {
     layout.addWidget(toolbar);
     let context = options.context;
     this.title.label = context.path.split('/').pop();
-    let rendermime = options.rendermime.clone();
-    rendermime.resolver = context;
+    this.rendermime = options.rendermime.clone({ resolver: context });
 
     this._context = context;
     this._mimeType = options.mimeType;
     this._dataType = options.dataType;
-
-    this._renderer = rendermime.createRenderer(this._mimeType, false);
-    layout.addWidget(this._renderer);
 
     context.pathChanged.connect(this._onPathChanged, this);
 
@@ -454,6 +450,11 @@ class MimeRenderer extends Widget implements DocumentRegistry.IReadyWidget {
   get context(): DocumentRegistry.Context {
     return this._context;
   }
+
+  /**
+   * The renderime instance associated with the widget.
+   */
+  readonly rendermime: RenderMime;
 
   /**
    * A promise that resolves when the widget is ready.
@@ -503,6 +504,10 @@ class MimeRenderer extends Widget implements DocumentRegistry.IReadyWidget {
       data[this._mimeType] = model.toJSON();
     }
     let mimeModel = new MimeModel({ data });
+    if (!this._renderer) {
+      this._renderer = this.rendermime.createRenderer(mimeModel);
+      (this.layout as PanelLayout).addWidget(this._renderer);
+    }
     return this._renderer.renderModel(mimeModel);
   }
 

@@ -749,10 +749,7 @@ class MarkdownCell extends Cell {
   constructor(options: MarkdownCell.IOptions) {
     super(options);
     this.addClass(MARKDOWN_CELL_CLASS);
-    this._renderer = options.rendermime.createRenderer(
-      'text/markdown', false
-    );
-    this._renderer.addClass(MARKDOWN_OUTPUT_CLASS);
+    this._rendermime = options.rendermime;
 
     // Throttle the rendering rate of the widget.
     this._monitor = new ActivityMonitor({
@@ -842,6 +839,10 @@ class MarkdownCell extends Cell {
     // Do not re-render if the text has not changed.
     if (text !== this._prevText) {
       let mimeModel = new MimeModel({ data: { 'text/markdown': text }});
+      if (!this._renderer) {
+        this._renderer = this._rendermime.createRenderer(mimeModel);
+        this._renderer.addClass(MARKDOWN_OUTPUT_CLASS);
+      }
       this._prevText = text;
       return this._renderer.renderModel(mimeModel);
     }
@@ -850,6 +851,7 @@ class MarkdownCell extends Cell {
 
   private _monitor: ActivityMonitor<any, any> = null;
   private _renderer: IRenderMime.IRendererWidget = null;
+  private _rendermime: RenderMime;
   private _rendered = true;
   private _prevText = '';
   private _ready = new PromiseDelegate<void>();
