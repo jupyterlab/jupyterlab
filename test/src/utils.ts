@@ -168,7 +168,7 @@ namespace Private {
 
     mimeTypes = ['application/json'];
 
-    createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRendererWidget {
+    createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRenderer {
       return new JSONRenderer(options);
     }
   }
