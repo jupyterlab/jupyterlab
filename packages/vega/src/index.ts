@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject
-} from '@phosphor/coreutils';
-
-import {
   Widget
 } from '@phosphor/widgets';
 
@@ -81,7 +77,7 @@ class RenderedVega extends Widget implements IRenderMime.IRendererWidget {
    */
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
 
-    let data = model.data.get(this._mimeType) as JSONObject;
+    let data = model.data[this._mimeType];
 
     let embedSpec = {
       mode: this._mode,
