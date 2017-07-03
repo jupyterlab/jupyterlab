@@ -43,7 +43,7 @@ function runCanCreateRenderer(renderer: IRenderMime.IRendererFactory, trusted: b
 function createModel(mimeType: string, source: JSONValue, trusted = false): IRenderMime.IMimeModel {
   let data: JSONObject = {};
   data[mimeType] = source;
-  return new MimeModel({ data });
+  return new MimeModel({ data, trusted });
 }
 
 const sanitizer = defaultSanitizer;
