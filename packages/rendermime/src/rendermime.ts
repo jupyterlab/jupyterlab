@@ -42,8 +42,8 @@ class RenderMime {
    */
   constructor(options: RenderMime.IOptions = {}) {
     this.sanitizer = options.sanitizer || defaultSanitizer;
-    this._resolver = options.resolver || null;
-    this._handler = options.linkHandler || null;
+    this.resolver = options.resolver || null;
+    this.linkHandler = options.linkHandler || null;
     let factories = options.initialFactories || [];
     for (let factory of factories) {
       for (let mime of factory.mimeTypes) {
@@ -79,23 +79,24 @@ class RenderMime {
    *
    * @param model - the mime model.
    *
+   * @param mimeType - the optional explicit mimeType to use.
+   *
    * #### Notes
-   * Creates a renderer widget using the preferred mime type.  See
-   * [[preferredMimeType]].
+   * If no mimeType is given, the [preferredMimeType] is used.
    */
-  createRenderer(model: IRenderMime.IMimeModel): IRenderMime.IRendererWidget {
-    let mimeType = this.preferredMimeType(model);
-    if (!mimeType) {
+  createRenderer(model: IRenderMime.IMimeModel, mimeType?: string): IRenderMime.IRendererWidget {
+    mimeType = mimeType || this.preferredMimeType(model);
+    let factory = this._factories[mimeType];
+    if (!factory) {
       throw new Error('Cannot render model');
     }
     let options = {
       mimeType,
       trusted: model.trusted,
-      resolver: this._resolver,
+      resolver: this.resolver,
       sanitizer: this.sanitizer,
-      linkHandler: this._handler
+      linkHandler: this.linkHandler
     };
-    let factory = this._factories[mimeType];
     if (!factory.canCreateRenderer(options)) {
       throw new Error('Cannot create renderer');
     }
@@ -216,8 +217,6 @@ class RenderMime {
   private _factories: { [key: string]: IRenderMime.IRendererFactory } = Object.create(null);
   private _mimeTypes: string[] = [];
   private _ranks: { [key: string]: number } = Object.create(null);
-  private _resolver: IRenderMime.IResolver | null;
-  private _handler: IRenderMime.ILinkHandler | null;
 }
 
 
