@@ -158,7 +158,7 @@ namespace Private {
 
     renderModel(model: IRenderMime.IMimeModel): Promise<void> {
       let source = model.data['application/json'];
-      model.setData({ 'text/html': json2html(source) });
+      model.setData({ data: { 'text/html': json2html(source) } });
       return super.renderModel(model);
     }
   }

@@ -45,16 +45,14 @@ class MimeModel implements IRenderMime.IMimeModel {
 
   /**
    * Set the data associated with the model.
+   *
+   * #### Notes
+   * Depending on the implementation of the mime model,
+   * this call may or may not have deferred effects,
    */
-  setData(data: ReadonlyJSONObject): void {
-    this._data = data;
-  }
-
-  /**
-   * Set the metadata associated with the model.
-   */
-  setMetadata(data: ReadonlyJSONObject): void {
-    this._metadata = data;
+  setData(options: IRenderMime.IMimeModel.IUpdateDataOptions): void {
+    this._data = options.data || this._data;
+    this._metadata = options.metadata || this._metadata;
   }
 
   private _data: ReadonlyJSONObject;

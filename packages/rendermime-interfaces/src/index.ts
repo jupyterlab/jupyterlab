@@ -37,13 +37,34 @@ namespace IRenderMime {
 
     /**
      * Set the data associated with the model.
+     *
+     * #### Notes
+     * Depending on the implementation of the mime model,
+     * this call may or may not have deferred effects,
      */
-    setData(data: ReadonlyJSONObject): void;
+    setData(options: IMimeModel.IUpdateDataOptions): void;
+  }
 
+  /**
+   * The namespace for IMimeModel associated interfaces.
+   */
+  export
+  namespace IMimeModel {
     /**
-     * Set the metadata associated with the model.
+     * The options used to update a mime model.
      */
-    setMetadata(data: ReadonlyJSONObject): void;
+    export
+    interface IUpdateDataOptions {
+      /**
+       * The new data object.
+       */
+      data?: ReadonlyJSONObject;
+
+      /**
+       * The new metadata object.
+       */
+      metadata?: ReadonlyJSONObject;
+    }
   }
 
   /**

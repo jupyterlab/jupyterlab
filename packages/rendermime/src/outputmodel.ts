@@ -164,18 +164,21 @@ class OutputModel implements IOutputModel {
 
   /**
    * Set the data associated with the model.
+   *
+   * #### Notes
+   * Depending on the implementation of the mime model,
+   * this call may or may not have deferred effects,
    */
-  setData(data: ReadonlyJSONObject): void {
-    this._updateObservable(this._data, data);
-    this._rawData = data;
-  }
-
-  /**
-   * Set the metadata associated with the model.
-   */
-  setMetadata(data: ReadonlyJSONObject): void {
-    this._updateObservable(this._metadata, data);
-    this._rawMetadata = data;
+  setData(options: IRenderMime.IMimeModel.IUpdateDataOptions): void {
+    if (options.data) {
+      this._updateObservable(this._data, options.data);
+      this._rawData = options.data;
+    }
+    if (options.metadata) {
+      this._updateObservable(this._metadata, options.metadata);
+      this._rawMetadata = options.metadata;
+    }
+    this._changed.emit(void 0);
   }
 
   /**
@@ -223,8 +226,6 @@ class OutputModel implements IOutputModel {
         observable.set(key, newValue as JSONValue);
       }
     }
-
-    this._changed.emit(void 0);
   }
 
   private _changed = new Signal<this, void>(this);
