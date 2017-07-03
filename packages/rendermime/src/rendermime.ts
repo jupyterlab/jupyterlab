@@ -118,14 +118,7 @@ class RenderMime {
       if (mimeType in model.data) {
         let options = { mimeType, sanitizer, trusted: model.trusted };
         let renderer = this._factories[mimeType];
-        let canRender = false;
-        try {
-          canRender = renderer.canCreateRenderer(options);
-        } catch (err) {
-          console.error(
-            `Got an error when checking the renderer for the mimeType '${mimeType}'\n`, err);
-        }
-        return canRender;
+        return renderer.canCreateRenderer(options);
       }
       return false;
     });
