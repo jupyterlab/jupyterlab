@@ -11,7 +11,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  ArrayExt
+  find
 } from '@phosphor/algorithm';
 
 import {
@@ -95,7 +95,7 @@ function execute(options: execute.IOptions): Kernel.IFuture {
     }
 
     // Find the first page in the payload.
-    let page = ArrayExt.findFirstValue(payload, p => p.source === 'page');
+    let page = find(payload, p => p.source === 'page');
 
     // Bail if there is no pager output.
     if (!page) {
