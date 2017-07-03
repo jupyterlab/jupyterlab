@@ -86,6 +86,9 @@ namespace IRenderMime {
 
   /**
    * The options used to initialize a document widget factory.
+   *
+   * These are options used to open a rendered view of a given file type
+   * using a rendermime factory.
    */
   export
   interface IDocumentWidgetFactoryOptions {
