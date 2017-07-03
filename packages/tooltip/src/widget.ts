@@ -220,7 +220,7 @@ class Tooltip extends Widget {
     });
   }
 
-  private _content: IRenderMime.IRendererWidget | null = null;
+  private _content: IRenderMime.IRenderer | null = null;
   private _editor: CodeEditor.IEditor;
   private _rendermime: RenderMime;
 }

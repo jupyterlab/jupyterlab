@@ -92,7 +92,7 @@ const PDF_CLASS = 'jp-RenderedPDF';
  * A widget for displaying any widget whoes representation is rendered HTML.
  */
 export
-abstract class RenderedCommon extends Widget implements IRenderMime.IRendererWidget {
+abstract class RenderedCommon extends Widget implements IRenderMime.IRenderer {
   /* Construct a new rendered HTML common widget.*/
   constructor(options: IRenderMime.IRendererOptions) {
     super();

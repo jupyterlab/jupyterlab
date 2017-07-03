@@ -850,7 +850,7 @@ class MarkdownCell extends Cell {
   }
 
   private _monitor: ActivityMonitor<any, any> = null;
-  private _renderer: IRenderMime.IRendererWidget = null;
+  private _renderer: IRenderMime.IRenderer = null;
   private _rendermime: RenderMime;
   private _rendered = true;
   private _prevText = '';

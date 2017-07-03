@@ -187,7 +187,7 @@ namespace IRenderMime {
    * A widget that provides a ready promise.
    */
   export
-  interface IRendererWidget extends Widget {
+  interface IRenderer extends Widget {
     /**
      * Render a mime model.
      */
@@ -216,7 +216,7 @@ namespace IRenderMime {
      *
      * @param options - The options used to render the data.
      */
-    createRenderer(options: IRendererOptions): IRendererWidget;
+    createRenderer(options: IRendererOptions): IRenderer;
 
     /**
      * Whether the renderer will sanitize the data given the render options.

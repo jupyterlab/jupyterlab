@@ -520,7 +520,7 @@ class MimeRenderer extends Widget implements DocumentRegistry.IReadyWidget {
 
   private _context: DocumentRegistry.Context = null;
   private _monitor: ActivityMonitor<any, any> = null;
-  private _renderer: IRenderMime.IRendererWidget;
+  private _renderer: IRenderMime.IRenderer;
   private _mimeType: string;
   private _ready = new PromiseDelegate<void>();
   private _dataType: 'string' | 'json';

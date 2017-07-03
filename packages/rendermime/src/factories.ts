@@ -33,7 +33,7 @@ class HTMLRendererFactory implements IRenderMime.IRendererFactory {
    *
    * @param options - The options used to render the data.
    */
-  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRendererWidget {
+  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRenderer {
     return new RenderedHTML(options);
   }
 
@@ -68,7 +68,7 @@ class ImageRendererFactory implements IRenderMime.IRendererFactory {
    *
    * @param options - The options used to render the data.
    */
-  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRendererWidget {
+  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRenderer {
     return new RenderedImage(options);
   }
 
@@ -104,7 +104,7 @@ class TextRendererFactory implements IRenderMime.IRendererFactory {
    *
    * @param options - The options used to render the data.
    */
-  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRendererWidget {
+  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRenderer {
     return new RenderedText(options);
   }
 
@@ -142,7 +142,7 @@ class JavaScriptRendererFactory implements IRenderMime.IRendererFactory {
    *
    * @param options - The options used to render the data.
    */
-  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRendererWidget {
+  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRenderer {
     return new RenderedJavaScript(options);
   }
 
@@ -180,7 +180,7 @@ class SVGRendererFactory implements IRenderMime.IRendererFactory {
    *
    * @param options - The options used to render the data.
    */
-  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRendererWidget {
+  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRenderer {
     return new RenderedSVG(options);
   }
 
@@ -218,7 +218,7 @@ class PDFRendererFactory implements IRenderMime.IRendererFactory {
    *
    * @param options - The options used to render the data.
    */
-  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRendererWidget {
+  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRenderer {
     return new RenderedPDF(options);
   }
 
@@ -253,7 +253,7 @@ class LatexRendererFactory implements IRenderMime.IRendererFactory  {
    *
    * @param options - The options used to render the data.
    */
-  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRendererWidget {
+  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRenderer {
     return new RenderedLatex(options);
   }
 
@@ -288,7 +288,7 @@ class MarkdownRendererFactory implements IRenderMime.IRendererFactory {
    *
    * @param options - The options used to render the data.
    */
-  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRendererWidget {
+  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRenderer {
     return new RenderedMarkdown(options);
   }
 

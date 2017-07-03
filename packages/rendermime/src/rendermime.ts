@@ -84,7 +84,7 @@ class RenderMime {
    * #### Notes
    * If no mimeType is given, the [preferredMimeType] is used.
    */
-  createRenderer(model: IRenderMime.IMimeModel, mimeType?: string): IRenderMime.IRendererWidget {
+  createRenderer(model: IRenderMime.IMimeModel, mimeType?: string): IRenderMime.IRenderer {
     mimeType = mimeType || this.preferredMimeType(model);
     let factory = this._factories[mimeType];
     if (!factory) {
