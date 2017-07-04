@@ -6,7 +6,6 @@ import '../style/index.css';
 export * from '@jupyterlab/rendermime-interfaces';
 export * from './latex';
 export * from './mimemodel';
-export * from './outputmodel';
 export * from './rendermime';
 export * from './factories';
 export * from './widgets';

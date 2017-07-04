@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 import {
-  IRenderMime, Rendermime
+  IRenderMime, RenderMime
 } from '@jupyterlab/rendermime';
 
 import {
@@ -71,7 +71,7 @@ class OutputAreaView extends Widget {
   /**
    * The rendermime used for rendering.
    */
-  readonly rendermime: Rendermime;
+  readonly rendermime: RenderMime;
 
   /**
    * Request that the output area be refreshed.
@@ -191,7 +191,7 @@ namespace OutputAreaView {
     /**
      * The rendermime to use for rendering.
      */
-    rendermime: Rendermime;
+    rendermime: RenderMime;
   }
 }
 
@@ -239,7 +239,7 @@ class OutputItemView extends Widget {
   /**
    * The rendermime used for rendering.
    */
-  readonly rendermime: Rendermime;
+  readonly rendermime: RenderMime;
 
   /**
    * Request that the output be refreshed.
@@ -298,7 +298,7 @@ class OutputItemView extends Widget {
     this.node.dataset['trusted'] = `${this._item.trusted}`;
 
     // Create the new mime model.
-    let model: IRendermime.IMimeModel = {
+    let model: IRenderMime.IMimeModel = {
       trusted: this._item.trusted,
       data: Private.getData(this._item),
       metadata: Private.getMetadata(this._item),
@@ -306,7 +306,7 @@ class OutputItemView extends Widget {
     };
 
     // Look up the preferred mime type for the model.
-    let mimeType = this.rendermime.preferredMimetype(model) || '';
+    let mimeType = this.rendermime.preferredMimeType(model) || '';
 
     // Update the existing renderer in-place if possible.
     if (this._renderer && this._mimeType === mimeType) {
@@ -375,7 +375,7 @@ class OutputItemView extends Widget {
 
   private _mimeType = '';
   private _item: OutputItem | null = null;
-  private _renderer: IRendermime.IRenderer | null;
+  private _renderer: IRenderMime.IRenderer | null;
 }
 
 
@@ -402,7 +402,7 @@ namespace OutputItemView {
     /**
      * The rendermime to use for rendering.
      */
-    rendermime: Rendermime;
+    rendermime: RenderMime;
   }
 }
 
