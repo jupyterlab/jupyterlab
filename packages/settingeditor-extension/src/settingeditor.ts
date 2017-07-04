@@ -28,7 +28,7 @@ import {
 } from '@phosphor/virtualdom';
 
 import {
-  PanelLayout, SplitPanel, Widget
+  PanelLayout, SplitPanel as SPanel, Widget
 } from '@phosphor/widgets';
 
 
@@ -105,6 +105,7 @@ class SettingEditor extends Widget {
   constructor(options: SettingEditor.IOptions) {
     super();
     this.addClass(SETTING_EDITOR_CLASS);
+    this.state = options.state;
 
     const editorFactory = options.editorFactory;
     const layout = this.layout = new PanelLayout();
@@ -124,14 +125,26 @@ class SettingEditor extends Widget {
     layout.addWidget(panel);
     panel.addWidget(list);
     panel.addWidget(instructions);
-    panel.setRelativeSizes(this._sizes);
+    panel.setRelativeSizes(this._layout.outer);
+
     list.selected.connect(this._onSelected, this);
+    panel.handleMoved.connect(this._onHandleMoved);
   }
+
+  /**
+   * The state database key for the editor's state management.
+   */
+  key: string;
 
   /**
    * The setting registry modified by the editor.
    */
   readonly registry: ISettingRegistry;
+
+  /**
+   * The state database used to store layout.
+   */
+  readonly state: IStateDB;
 
   /**
    * Dispose of the resources held by the setting editor.
@@ -160,9 +173,13 @@ class SettingEditor extends Widget {
    * Handle `'after-attach'` messages.
    */
   protected onAfterAttach(msg: Message): void {
-    // Allow the message queue (which includes fit requests that might disrupt
-    // the update method setting relative sizes) to clear before updating.
-    requestAnimationFrame(() => { this.update(); });
+    super.onAfterAttach(msg);
+    this._fetchState()
+      .then(() => { this.update(); })
+      .catch(reason => {
+        console.error('Fetching setting editor state failed', reason);
+        this.update();
+      });
   }
 
   /**
@@ -179,7 +196,42 @@ class SettingEditor extends Widget {
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    this._panel.setRelativeSizes(this._sizes);
+    this._panel.setRelativeSizes(this._layout.outer);
+  }
+
+  /**
+   * Get the state of the panel.
+   */
+  private _fetchState(): Promise<void> {
+    const { key, state } = this;
+    const editor = this._editor;
+    const panel = this._panel;
+
+    return state.fetch(key).then(saved => {
+      if (this._saving) {
+        return;
+      }
+
+      if (!saved) {
+        this._layout = { inner: editor.sizes, outer: panel.relativeSizes() };
+        return;
+      }
+
+      this._layout.inner = Array.isArray(saved.inner) ? saved.inner as number[]
+        : editor.sizes;
+      this._layout.outer = Array.isArray(saved.outer) ? saved.outer as number[]
+        : panel.relativeSizes();
+    });
+  }
+
+  /**
+   * Handle layout changes.
+   */
+  private _onHandleMoved(sender: any, plugin: string): void {
+    this._saveState().catch(reason => {
+      console.error('Saving setting editor state failed', reason);
+      this.update();
+    });
   }
 
   /**
@@ -207,11 +259,28 @@ class SettingEditor extends Widget {
       .catch(reason => { console.error('Loading settings failed.', reason); });
   }
 
+  /**
+   * Set the state of the setting editor.
+   */
+  private _saveState(): Promise<void> {
+    const { key, state } = this;
+    const value = this._layout;
+
+    this._saving = true;
+    return state.save(key, value)
+      .then(() => { this._saving = false; })
+      .catch(reason => {
+        this._saving = false;
+        throw reason;
+      });
+  }
+
   private _editor: PluginEditor;
   private _instructions: Widget;
+  private _layout = { inner: [5, 2], outer: [1, 3] };
   private _list: PluginList;
   private _panel: SplitPanel;
-  private _sizes = [1, 3];
+  private _saving = false;
 }
 
 
@@ -231,76 +300,29 @@ namespace SettingEditor {
     editorFactory: CodeEditor.Factory;
 
     /**
+     * The state database key for the editor's state management.
+     */
+    key: string;
+
+    /**
      * The setting registry the editor modifies.
      */
     registry: ISettingRegistry;
 
     /**
-     * The state database the editor uses to restore itself.
+     * The state database used to store layout.
      */
     state: IStateDB;
   }
-}
-
-
-class PersistentSplitPanel extends SplitPanel {
-  /**
-   * Create a persistent split panel.
-   */
-  constructor(options: PersistentSplitPanel.IOptions) {
-    super(options);
-    this._state = options.state;
-  }
-
-  setRelativeSizes(sizes: number[]): void {
-    super.setRelativeSizes(sizes);
-    this._saveState(sizes);
-  }
-
-  /**
-   * Handle `'after-attach'` messages.
-   */
-  protected onAfterAttach(msg: Message): void {
-    super.onAfterAttach(msg);
-    this._fetchState().then(() => { this.update(); });
-  }
-
-  /**
-   * Get the state of the panel.
-   */
-  private _fetchState(): Promise<void> {
-    return Promise.resolve(void 0);
-  }
-
-  /**
-   * Set the state of the panel.
-   */
-  private _saveState(sizes: number[]): void {
-    if (JSON.stringify(this._sizes) === JSON.stringify(sizes)) {
-      return;
-    }
-  }
-
-  private _state: IStateDB;
-  private _sizes: number[];
 }
 
 
 /**
- * A namespace for `PersistentSplitPanel` statics.
+ * A deprecated split panel that will be removed when the phosphor split panel
+ * supports a handle move signal.
  */
-export
-namespace PersistentSplitPanel {
-  /**
-   * The instantiation options for a setting editor.
-   */
-  export
-  interface IOptions extends SplitPanel.IOptions {
-    /**
-     * The state database the editor uses to restore itself.
-     */
-    state: IStateDB;
-  }
+class SplitPanel extends SPanel {
+  readonly handleMoved: ISignal<this, void>;
 }
 
 
@@ -469,8 +491,7 @@ class PluginEditor extends Widget {
     const { editorFactory } = options;
     const collapsible = false;
     const layout = this.layout = new PanelLayout();
-
-    const panel = new SplitPanel({
+    const panel = this._panel = new SplitPanel({
       orientation: 'vertical',
       renderer: SplitPanel.defaultRenderer,
       spacing: 1
@@ -533,6 +554,13 @@ class PluginEditor extends Widget {
   }
 
   /**
+   * Get the relative sizes of the two editor panels.
+   */
+  get sizes(): number[] {
+    return this._panel.relativeSizes();
+  }
+
+  /**
    * If the editor is in a dirty state, confirm that the user wants to leave.
    */
   confirm(): Promise<void> {
@@ -549,6 +577,23 @@ class PluginEditor extends Widget {
         throw new Error('User cancelled.');
       }
     });
+  }
+
+  /**
+   * Dispose of the resources held by the plugin editor.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+
+    super.dispose();
+    this._editor.dispose();
+    this._editor = null;
+    this._fieldset.dispose();
+    this._fieldset = null;
+    this._panel.dispose();
+    this._panel = null;
   }
 
   /**
@@ -601,6 +646,7 @@ class PluginEditor extends Widget {
 
   private _editor: JSONEditor = null;
   private _fieldset: PluginFieldset = null;
+  private _panel: SplitPanel = null;
   private _settings: ISettingRegistry.ISettings | null = null;
   private _sizes = [5, 2];
 }
