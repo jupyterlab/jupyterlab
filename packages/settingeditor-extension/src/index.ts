@@ -60,7 +60,10 @@ const plugin: JupyterLabPlugin<void> = {
           return;
         }
 
-        const editor = new SettingEditor({ editorFactory, registry, state });
+        const key = plugin.id;
+        const editor = new SettingEditor({
+          editorFactory, key, registry, state
+        });
 
         tracker.add(editor);
         editor.id = namespace;

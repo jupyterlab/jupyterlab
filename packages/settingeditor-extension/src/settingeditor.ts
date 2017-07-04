@@ -28,7 +28,7 @@ import {
 } from '@phosphor/virtualdom';
 
 import {
-  PanelLayout, SplitPanel as SPanel, Widget
+  PanelLayout, SplitPanel as SPanel, SplitLayout as SLayout, Widget
 } from '@phosphor/widgets';
 
 
@@ -105,6 +105,7 @@ class SettingEditor extends Widget {
   constructor(options: SettingEditor.IOptions) {
     super();
     this.addClass(SETTING_EDITOR_CLASS);
+    this.key = options.key;
     this.state = options.state;
 
     const editorFactory = options.editorFactory;
@@ -125,16 +126,17 @@ class SettingEditor extends Widget {
     layout.addWidget(panel);
     panel.addWidget(list);
     panel.addWidget(instructions);
-    panel.setRelativeSizes(this._layout.outer);
+    panel.setRelativeSizes(this._dimensions.outer);
 
+    editor.handleMoved.connect(this._onHandleMoved, this);
     list.selected.connect(this._onSelected, this);
-    panel.handleMoved.connect(this._onHandleMoved);
+    panel.handleMoved.connect(this._onHandleMoved, this);
   }
 
   /**
    * The state database key for the editor's state management.
    */
-  key: string;
+  readonly key: string;
 
   /**
    * The setting registry modified by the editor.
@@ -196,7 +198,7 @@ class SettingEditor extends Widget {
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    this._panel.setRelativeSizes(this._layout.outer);
+    this._panel.setRelativeSizes(this._dimensions.outer);
   }
 
   /**
@@ -212,22 +214,28 @@ class SettingEditor extends Widget {
         return;
       }
 
+      const inner = editor.sizes;
+      const outer = panel.relativeSizes();
+
       if (!saved) {
-        this._layout = { inner: editor.sizes, outer: panel.relativeSizes() };
+        this._dimensions = { inner, outer };
         return;
       }
 
-      this._layout.inner = Array.isArray(saved.inner) ? saved.inner as number[]
-        : editor.sizes;
-      this._layout.outer = Array.isArray(saved.outer) ? saved.outer as number[]
-        : panel.relativeSizes();
+      const dimensions = this._dimensions;
+      console.log('saved', saved);
+
+      dimensions.inner = Array.isArray(saved.inner) ? saved.inner as number[]
+        : inner;
+      dimensions.outer = Array.isArray(saved.outer) ? saved.outer as number[]
+        : outer;
     });
   }
 
   /**
    * Handle layout changes.
    */
-  private _onHandleMoved(sender: any, plugin: string): void {
+  private _onHandleMoved(): void {
     this._saveState().catch(reason => {
       console.error('Saving setting editor state failed', reason);
       this.update();
@@ -242,21 +250,19 @@ class SettingEditor extends Widget {
     const instructions = this._instructions;
     const panel = this._panel;
 
-    this.registry.load(plugin)
-      .then(settings => {
-        // Cache the panel relative sizes before modifying its contents.
-        this._sizes = panel.relativeSizes();
-
-        if (instructions.isAttached) {
-          instructions.parent = null;
-        }
-        if (!editor.isAttached) {
-          panel.addWidget(editor);
-        }
-        editor.settings = settings;
-        panel.setRelativeSizes(this._sizes);
-      })
-      .catch(reason => { console.error('Loading settings failed.', reason); });
+    this.registry.load(plugin).then(settings => {
+      if (instructions.isAttached) {
+        instructions.parent = null;
+      }
+      if (!editor.isAttached) {
+        panel.addWidget(editor);
+      }
+      editor.settings = settings;
+      this.update();
+    }).catch(reason => {
+      console.error('Loading settings failed.', reason);
+      this.update();
+    });
   }
 
   /**
@@ -264,7 +270,7 @@ class SettingEditor extends Widget {
    */
   private _saveState(): Promise<void> {
     const { key, state } = this;
-    const value = this._layout;
+    const value = this._dimensions;
 
     this._saving = true;
     return state.save(key, value)
@@ -275,9 +281,9 @@ class SettingEditor extends Widget {
       });
   }
 
+  private _dimensions = { inner: [5, 2], outer: [1, 3] };
   private _editor: PluginEditor;
   private _instructions: Widget;
-  private _layout = { inner: [5, 2], outer: [1, 3] };
   private _list: PluginList;
   private _panel: SplitPanel;
   private _saving = false;
@@ -319,10 +325,42 @@ namespace SettingEditor {
 
 /**
  * A deprecated split panel that will be removed when the phosphor split panel
- * supports a handle move signal.
+ * supports a handle moved signal.
  */
 class SplitPanel extends SPanel {
-  readonly handleMoved: ISignal<this, void>;
+  /**
+   * Emits when the split handle has moved.
+   */
+  readonly handleMoved: ISignal<any, void> = new Signal<any, void>(this);
+
+  constructor(options: SPanel.IOptions) {
+    super({
+      ...options,
+      layout: new SplitLayout({
+        renderer: SPanel.defaultRenderer,
+          orientation: options.orientation,
+          alignment: options.alignment,
+          spacing: options.spacing
+        })
+    });
+  }
+}
+
+
+/**
+ * A deprecated split layout that will be removed when the phosphor split panel
+ * supports a handle moved signal.
+ */
+class SplitLayout extends SLayout {
+  moveHandle(index: number, position: number): void {
+    super.moveHandle(index, position);
+
+    const parent = this.parent as SplitPanel | null;
+
+    if (parent) {
+      (parent.handleMoved as Signal<any, void>).emit(void 0);
+    }
+  }
 }
 
 
@@ -497,6 +535,7 @@ class PluginEditor extends Widget {
       spacing: 1
     });
 
+    this.handleMoved = panel.handleMoved;
     this._editor = new JSONEditor({ collapsible, editorFactory });
     this._fieldset = new PluginFieldset();
 
@@ -505,6 +544,11 @@ class PluginEditor extends Widget {
     panel.addWidget(this._fieldset);
     panel.setRelativeSizes(this._sizes);
   }
+
+  /**
+   * Emits when the split handle has moved.
+   */
+  readonly handleMoved: ISignal<any, void>;
 
   /**
    * The plugin settings being edited.
