@@ -2,11 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ArrayExt, ArrayIterator, IIterator, map, toArray, each
+  ArrayExt, ArrayIterator, IIterator, map, each, toArray
 } from '@phosphor/algorithm';
 
 import {
-  Token, JSONObject
+  Token
 } from '@phosphor/coreutils';
 
 import {
@@ -50,78 +50,16 @@ const ILauncher = new Token<ILauncher>('jupyter.services.launcher');
 
 const h = vdom.h;
 
-// export
-// type PropsType = JSONObject | null;
-
-// export
-// type FunctionalComponent = (props: PropsType, ...children: vdom.h.Child[]) => vdom.VirtualElement;
-
-// export function h(tag: string | FunctionalComponent, ...children: vdom.h.Child[]): vdom.VirtualElement;
-// export function h(tag: string | FunctionalComponent, attrs: vdom.ElementAttrs | PropsType, ...children: vdom.h.Child[]): vdom.VirtualElement;
-// export function h(tag: string | FunctionalComponent): vdom.VirtualElement {
-//   let attrs: vdom.ElementAttrs = {};
-//   let children: vdom.VirtualNode[] = [];
-//   for (let i = 1, n = arguments.length; i < n; ++i) {
-//     let arg = arguments[i];
-//     if (typeof arg === 'string') {
-//       children.push(new vdom.VirtualText(arg));
-//     } else if (arg instanceof vdom.VirtualText) {
-//       children.push(arg);
-//     } else if (arg instanceof vdom.VirtualElement) {
-//       children.push(arg);
-//     } else if (arg instanceof Array) {
-//       extend(children, arg);
-//     } else if (i === 1 && arg && typeof arg === 'object') {
-//       attrs = arg;
-//     }
-//   }
-
-//   let result: any;
-
-//   if (typeof tag === 'function') {
-//     result = tag(attrs, ...children);
-//   } else {
-//     result = new vdom.VirtualElement(tag, attrs, children);
-//   }
-//   return result;
-
-//   function extend(array: vdom.VirtualNode[], values: vdom.h.Child[]): void {
-//     for (let child of values) {
-//       if (typeof child === 'string') {
-//         array.push(new vdom.VirtualText(child));
-//       } else if (child instanceof vdom.VirtualText) {
-//         array.push(child);
-//       } else if (child instanceof vdom.VirtualElement) {
-//         array.push(child);
-//       }
-//     }
-//   }
-// }
 
 /**
- * The class name added to LauncherWidget instances.
+ * The class name added to Launcher instances.
  */
-const LAUNCHER_CLASS = 'jp-LauncherWidget';
+const LAUNCHER_CLASS = 'jp-Launcher';
 
 /**
- * The class name added to LauncherWidget image nodes.
+ * The class name added to Launcher body nodes.
  */
-const IMAGE_CLASS = 'jp-LauncherWidget-image';
-
-/**
- * The class name added to LauncherWidget text nodes.
- */
-const TEXT_CLASS = 'jp-LauncherWidget-text';
-
-/**
- * The class name added to LauncherWidget item nodes.
- */
-const ITEM_CLASS = 'jp-LauncherWidget-item';
-
-/**
- * The class name added to LauncherWidget body nodes.
- */
-const BODY_CLASS = 'jp-LauncherWidget-body';
+const BODY_CLASS = 'jp-Launcher-body';
 
 
 /**
@@ -213,13 +151,18 @@ interface ILauncherItem {
    */
   rank?: number;
 
+  /**
+   * For items that hava kernel associated with them, the URL of the kernel icon.
+   * 
+   * This is not a CSS class, but the URL that points to the icon in the kernel spec.
+   */
   kernelIconUrl?: string;
 }
 
 
 /**
  * LauncherModel keeps track of the path to working directory and has a list of
- * LauncherItems, which the LauncherWidget will render.
+ * LauncherItems, which the Launcher will render.
  */
 export
 class LauncherModel extends VDomModel implements ILauncher {
@@ -268,11 +211,11 @@ class LauncherModel extends VDomModel implements ILauncher {
  * A virtual-DOM-based widget for the Launcher.
  */
 export
-class LauncherWidget extends VDomRenderer<LauncherModel> {
+class Launcher extends VDomRenderer<LauncherModel> {
   /**
    * Construct a new launcher widget.
    */
-  constructor(options: LauncherWidget.IOptions) {
+  constructor(options: Launcher.IOptions) {
     super();
     this.cwd = options.cwd;
     this._callback = options.callback;
@@ -299,12 +242,11 @@ class LauncherWidget extends VDomRenderer<LauncherModel> {
     // First group-by categories
     let categories = Object.create(null);
     each(this.model.items(), (item, index) => {
-      let cat = item.category;
-      if (categories[cat]) {
-        (categories[cat] as Array<ILauncherItem>).push(item)
-      } else {
-        categories[cat] = [];
-      }
+      let cat = item.category || "Other";
+      if (!(cat in categories)) {
+        categories[cat] = []
+      } 
+      categories[cat].push(item);
     });
     // Within each category sort by rank
     for (let cat in categories) {
@@ -315,50 +257,29 @@ class LauncherWidget extends VDomRenderer<LauncherModel> {
     let sections: vdom.VirtualNode[] = [];
     let section: vdom.VirtualNode;
 
-    // Render the notebook category
-    if (categories.Notebook) {
-      section = (
-        <section>
-          <h2>Notebook</h2>
-          {map(categories.Notebook, item => Card((item as ILauncherItem), this, this._callback))}
-        </section>
-      );
-      sections.push(section);
-    }
+    let knownSections = ['Notebook', 'Console', 'Other'];
+    let kernelSections = ['Notebook', 'Console'];
 
-
-
-    let items = map(sorted, item => {
-      let onclick = () => {
-        let callback = item.callback;
-        let value = callback(this.cwd, item.name);
-        Promise.resolve(value).then(widget => {
-          let callback = this._callback;
-          callback(widget);
-          this.dispose();
-        });
-      };
-      let imageClass = `${item.iconClass} ${IMAGE_CLASS}`;
-      let icon;
-      if (item.kernelIconUrl) {
-        icon = <img src={item.kernelIconUrl} onclick={onclick} />
-        // icon = h.img({ src: item.kernelIconUrl, onclick }, item.iconLabel);
-      } else {
-        icon = <div className={imageClass} onclick={onclick}>{item.iconLabel}</div>
-        // icon = h.div({ className: imageClass, onclick }, item.iconLabel);
+    each(knownSections, (cat, index) => {
+      let iconClass = `${(categories[cat][0] as ILauncherItem).iconClass} jp-Launcher-sectionIcon jp-Launcher-icon`;
+      let kernel = kernelSections.indexOf(cat) > -1;
+      if (cat in categories) {
+        section = (
+          <div className="jp-Launcher-section">
+            <div className="jp-Launcher-sectionHeader">
+              {kernel && <div className={iconClass} />}
+              <h2 className="jp-Launcher-sectionTitle">{cat}</h2>
+            </div>
+            <div className="jp-Launcher-cardContainer">
+              {toArray(map(categories[cat], item => Card(kernel, (item as ILauncherItem), this, this._callback)))}
+            </div>
+          </div>
+        );
+        sections.push(section);
       }
-      let title = item.displayName + (item.category ? ' ' + item.category : '');
-      let text = <span className={TEXT_CLASS} onclick={onclick} title={title}>{title}</span>
-      // let text = h.span({className: TEXT_CLASS, onclick, title }, title);
-      // return <div className="">{[icon, text].map((item)=>{item}}</div>;
-      return vdom.h.div({
-        className: ITEM_CLASS,
-      }, [icon, text]);
-    });
+    })
 
-    let children: vdom.VirtualNode[];
-    children = toArray(items);
-    return vdom.h.div({ className: BODY_CLASS  }, children);
+    return vdom.h.div({ className: BODY_CLASS  }, sections);
   }
 
   private _callback: (widget: Widget) => void;
@@ -366,12 +287,12 @@ class LauncherWidget extends VDomRenderer<LauncherModel> {
 
 
 /**
- * The namespace for `LauncherWidget` class statics.
+ * The namespace for `Launcher` class statics.
  */
 export
-namespace LauncherWidget {
+namespace Launcher {
   /**
-   * The options used to create a LauncherWidget.
+   * The options used to create a Launcher.
    */
   export
   interface IOptions {
@@ -426,7 +347,7 @@ namespace Private {
 }
 
 export
-function Card(item: ILauncherItem, launcher: LauncherWidget, launcherCallback: (widget: Widget) => void): vdom.VirtualElement {
+function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcherCallback: (widget: Widget) => void): vdom.VirtualElement {
   let onclick = () => {
     let callback = item.callback as any;
     let value = callback(launcher.cwd, item.name);
@@ -435,27 +356,15 @@ function Card(item: ILauncherItem, launcher: LauncherWidget, launcherCallback: (
       launcher.dispose();
     });
   };
+  let iconClass = `${item.iconClass} jp-LauncherCard-itemIcon jp-Launcher-icon`;
   return (
     <div className="jp-LauncherCard" onclick={onclick}>
-      <div className="jp-LauncherCard-image">
-          {item.kernelIconUrl && <img src="" />}
-          {!item.kernelIconUrl && <div className="jp-SVGIcon" />}
+      <div className="jp-LauncherCard-icon">
+          {(item.kernelIconUrl && kernel) && <img src={item.kernelIconUrl} className="jp-LauncherCard-kernelIcon" />}
+          {(!item.kernelIconUrl && !kernel) && <div className={iconClass} />}
+          {(!item.kernelIconUrl && kernel) && <div className="jp-LauncherCard-noKernelIcon">{item.displayName[0].toUpperCase()}</div>}          
       </div>
       <div className="jp-LauncherCard-label">{item.displayName}</div>
     </div>
   );
 }
-
-// export
-// function Section(props: PropsType, ...children: vdom.h.Child[]): vdom.VirtualElement {
-//   return (
-//     <div className="jp-Section">
-//       <div className="jp-Section-header">
-//       </div>
-//       <div className="jp-Section-activities">
-//       </div>
-//     </div>
-//   );
-// }
-// }
-

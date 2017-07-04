@@ -15,7 +15,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  ILauncher, LauncherModel, LauncherWidget
+  ILauncher, LauncherModel, Launcher
 } from '@jupyterlab/launcher';
 
 import {
@@ -76,7 +76,7 @@ function activate(app: JupyterLab, services: IServiceManager, palette: ICommandP
         shell.addToMainArea(item, { ref: id });
         shell.activateById(item.id);
       };
-      let widget = new LauncherWidget({ cwd, callback });
+      let widget = new Launcher({ cwd, callback });
       widget.model = model;
       widget.id = id;
       widget.title.label = 'Launcher';
@@ -103,8 +103,4 @@ namespace Private {
    */
   export
   let id = 0;
-<<<<<<< HEAD
-=======
-
->>>>>>> More work on launcher.
 }
