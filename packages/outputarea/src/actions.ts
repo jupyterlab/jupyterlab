@@ -46,8 +46,6 @@ class AppendOutputAction extends Action<OutputActionType.APPEND_OUTPUT> {
    * @param areaId - The id of the output area.
    *
    * @param output - The output object to add to the area.
-   *
-   * @param displayId - The display id for the output, if any.
    */
   constructor(
     public readonly areaId: string,
@@ -64,8 +62,6 @@ export
 class ClearOutputsAction extends Action<OutputActionType.CLEAR_OUTPUTS> {
   /**
    * @param areaId - The id of the output area.
-   *
-   * @param output - The output object to add to the area.
    *
    * @param wait - Wait for the next output before clearing.
    */
