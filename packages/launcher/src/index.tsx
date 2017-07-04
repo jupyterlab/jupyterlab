@@ -59,7 +59,7 @@ const LAUNCHER_CLASS = 'jp-Launcher';
 /**
  * The class name added to Launcher body nodes.
  */
-const BODY_CLASS = 'jp-Launcher-body';
+// const BODY_CLASS = 'jp-Launcher-body';
 
 
 /**
@@ -279,7 +279,14 @@ class Launcher extends VDomRenderer<LauncherModel> {
       }
     })
 
-    return vdom.h.div({ className: BODY_CLASS  }, sections);
+    return (
+      <div className="jp-Launcher-body">
+        <div className="jp-Launcher-content">
+        {sections}
+        </div>
+      </div>  
+    );
+      // vdom.h.div({ className: BODY_CLASS  }, sections);
   }
 
   private _callback: (widget: Widget) => void;

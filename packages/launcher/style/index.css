@@ -5,14 +5,11 @@
 
 
 .jp-Launcher {
-  background: var(--md-grey-50);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   margin: 0;
   padding: 0;
-  overflow: auto;
   outline: none;
+  background: var(--md-grey-50);
+  box-sizing: border-box;
 }
 
 
@@ -29,16 +26,82 @@
 
 
 .jp-Launcher-body {
-  padding-bottom: 12px;
-  font-size: var(--jp-ui-font-size1);
-  color: var(--jp-ui-font-color1);
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: auto;
+}
+
+
+.jp-Launcher-content {
+  width: 80%;
+  height: 100%;
   margin-left: auto;
   margin-right: auto;
-  text-align: center;
+  box-sizing: border-box;
+}
+
+.jp-Launcher-section {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+.jp-Launcher-sectionHeader {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  flex-direction: column;
+  box-sizing: border-box;
+}
+
+
+.jp-Launcher-sectionIcon {
+  box-sizing: border-box;
+}
+
+
+.jp-Launcher-sectionTitle {
+  margin-left: 16px;
+  font-size: var(--jp-ui-font-size3);
+  font-weight: normal;
+  color: var(--jp-ui-font-color1);
+  box-sizing: border-box;
+}
+
+.jp-Launcher-cardContainer {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
   flex-wrap: wrap;
+}
+
+
+.jp-LauncherCard {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  width: 80px;
+  height: 80px;
+  margin: 8px;
+  padding: 12px;
+  border: 1px solid var(--md-grey-400);
+  background: var(--jp-layout-color0);
+  box-shadow: 0px 1px 1px 1px rgba(0,0,0,.08);
+  transition: .2s box-shadow;
+}
+
+
+.jp-Launcher-icon {
+  margin: 0;
+  padding: 0;
+  min-height: 68px;
+  min-width: 52px;
+  max-width: 52px;
+  background-size: 52px 68px;
+  background-repeat: no-repeat;
+  cursor: pointer;
 }
 
 
@@ -55,59 +118,17 @@
 }
 
 
-.jp-Launcher-body {
-  display: flex;
-  flex-direction: row;
-  margin-top: 8px;
-  justify-content: center;
-  align-items: center;
-}
 
 
-.jp-Launcher-item {
-  display: flex;
-  flex-direction: column;
-  cursor: pointer;
-  width: 100px;
-  border: 1px solid var(--md-grey-400);
-  background: var(--jp-layout-color0);
-  height: 100px;
-  margin: 8px;
-  box-shadow: 0px 1px 1px 1px rgba(0,0,0,.08);
-  padding: 12px;
-  transition: .2s box-shadow;
-}
 
-.jp-Launcher-item img {
+.jp-Launcher-Card img {
   width: 64px;
   height: 64px;
   margin-left: auto;
   margin-right: auto;
 }
 
-.jp-Launcher-item:hover {
+
+.jp-LauncherCard:hover {
   box-shadow: 0px 2px 4px 1px rgba(0,0,0,.20);
-}
-
-
-.jp-Launcher-icon {
-  display: block;
-  vertical-align: middle;
-  flex: 0 0 auto;
-  margin: 0 auto;
-  min-height: 68px;
-  min-width: 52px;
-  max-width: 52px;
-  background-size: 52px 68px;
-  background-repeat: no-repeat;
-  cursor: pointer;
-}
-
-
-.jp-Launcher-text {
-  flex: 0 0 auto;
-  text-overflow: ellipsis;
-  order: 1;
-  vertical-align: middle;
-  margin: auto;
 }
