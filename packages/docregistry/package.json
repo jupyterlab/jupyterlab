@@ -20,7 +20,7 @@
     "@jupyterlab/rendermime": "^0.7.0",
     "@jupyterlab/services": "^0.46.0",
     "@phosphor/algorithm": "^1.1.1",
-    "@phosphor/coreutils": "^1.1.1",
+    "@phosphor/coreutils": "^1.2.0",
     "@phosphor/disposable": "^1.1.1",
     "@phosphor/messaging": "^1.2.1",
     "@phosphor/signaling": "^1.2.1",

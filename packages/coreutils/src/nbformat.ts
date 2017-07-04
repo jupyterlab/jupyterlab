@@ -70,17 +70,17 @@ namespace nbformat {
   }
 
   /**
-   * A multiline string.
+   * A value in a mime bundle.
    */
   export
-  type MultilineString = string | string[];
+  type MimeValue = string | JSONObject;
 
   /**
    * A mime-type keyed dictionary of data.
    */
   export
-  interface IMimeBundle extends JSONObject {
-    [key: string]: MultilineString | JSONObject;
+  interface IMimeBundle {
+    [key: string]: MimeValue;
   }
 
   /**
@@ -113,7 +113,7 @@ namespace nbformat {
    * @returns Whether the type/value pair are valid.
    */
   export
-  function validateMimeValue(type: string, value: MultilineString | JSONObject): boolean {
+  function validateMimeValue(type: string, value: MimeValue): boolean {
     // Check if "application/json" or "application/foo+json"
     const jsonTest = /^application\/(.*?)+\+json$/;
     const isJSONType = type === 'application/json' || jsonTest.test(type);
@@ -197,7 +197,7 @@ namespace nbformat {
     /**
      * Contents of the cell, represented as an array of lines.
      */
-    source: MultilineString;
+    source: string;
 
     /**
      * Cell-level metadata.
@@ -301,7 +301,6 @@ namespace nbformat {
   export
   interface IUnrecognizedCell extends IBaseCell { }
 
-
   /**
    * A cell union type.
    */
@@ -352,11 +351,11 @@ namespace nbformat {
     /**
      * Type of cell output.
      */
-    output_type: string;
+    output_type: OutputType;
   }
 
   /**
-   * Result of executing a code cell.
+   * Result of executing a code cell.l
    */
   export
   interface IExecuteResult extends IBaseOutput {
@@ -400,6 +399,11 @@ namespace nbformat {
      * Cell output metadata.
      */
     metadata: OutputMetadata;
+
+    /**
+     * The transient data for the output.
+     */
+    transient?: { display_id?: string };
   }
 
   /**
@@ -421,6 +425,11 @@ namespace nbformat {
      * Cell output metadata.
      */
     metadata: OutputMetadata;
+
+    /**
+     * The transient data for the output.
+     */
+    transient: { display_id: string };
   }
 
   /**
@@ -441,7 +450,7 @@ namespace nbformat {
     /**
      * The stream's text output.
      */
-    text: MultilineString;
+    text: string;
   }
 
   /**
@@ -526,5 +535,5 @@ namespace nbformat {
    * An output union type.
    */
   export
-  type IOutput = IUnrecognizedOutput | IExecuteResult | IDisplayData | IStream | IError;
+  type IOutput = IUnrecognizedOutput | IExecuteResult | IDisplayData | IDisplayUpdate | IStream | IError;
 }
