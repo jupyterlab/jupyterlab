@@ -122,7 +122,7 @@ Install the dependencies.  Note that extensions are built against the released
 npm packages, not the development versions.
 
 ```
-npm install --save @jupyterlab/notebook @jupyterlab/apputils @jupyterlab/docregistry @phosphor/disposable
+npm install --save @jupyterlab/notebook @jupyterlab/application @jupyterlab/apputils @jupyterlab/docregistry @phosphor/disposable
 ```
 
 Copy the following to `src/index.ts`:

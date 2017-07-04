@@ -18,10 +18,6 @@ import {
 } from '@jupyterlab/rendermime';
 
 import {
-  IRenderMime
-} from '@jupyterlab/rendermime';
-
-import {
   ServiceManager
 } from '@jupyterlab/services';
 
@@ -80,10 +76,11 @@ class ConsolePanel extends Panel {
       kernelPreference: options.kernelPreference
     });
 
-    rendermime.resolver = new RenderMime.UrlResolver({
+    let resolver = new RenderMime.UrlResolver({
       session,
       contents: manager.contents
     });
+    rendermime = rendermime.clone({ resolver });
 
     this.console = contentFactory.createConsole({
       rendermime, session, mimeTypeService, contentFactory, modelFactory
@@ -188,7 +185,7 @@ namespace ConsolePanel {
     /**
      * The rendermime instance used by the panel.
      */
-    rendermime: IRenderMime;
+    rendermime: RenderMime;
 
     /**
      * The content factory for the panel.

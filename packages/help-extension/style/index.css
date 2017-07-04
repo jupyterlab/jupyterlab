@@ -26,38 +26,97 @@
 }
 
 
-.jp-About {
+.jp-About-body {
+  display: flex;
+  font-family: var(--jp-ui-font-family);
   font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color1);
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  text-align: left;
   flex-direction: column;
-  padding-top: 14px;
-  padding-bottom: 14px;
   width: 100%;
+  min-width: 360px;
+  overflow: visible;
 }
 
 
-.jp-About-logo {
-  flex: 0 0 50px;
-  margin-left: auto;
-  margin-right: auto;
-  width: 100%;
-  background-size: 232px 50px;
+.jp-Dialog .jp-Dialog-content div.jp-About-header-wordmark {
+  flex: 0 0 auto;
+  height: 44px;
+  width: auto;
+  background-image: url(../../theming/style/images/jupyterlab-wordmark.svg);
+  background-size: 196px 50px;
   background-repeat: no-repeat;
-  background-position: center;
-  margin-top: 20px;
+  padding-bottom: 0px;
 }
 
 
-.jp-About-subtitle {
+.jp-About-version-info {
   color: var(--md-grey-600);
   font-size: var(--jp-ui-font-size2);
   width: 200px;
   font-weight: 400;
   letter-spacing: .4px;
   text-align: left;
-  padding-left: 68px;
+  padding-top: 8px;
+  line-height: 1.12;
+}
+
+
+.jp-Dialog .jp-Dialog-content .jp-Dialog-footer .jp-Dialog-button.jp-About-button {
+  margin-right: 0px;
+}
+
+
+.jp-About-release, .jp-About-version {
+  display: block;
+}
+
+
+.jp-About-version {
+  padding-top: 8px;
+}
+
+
+.jp-About-externalLinks {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding-top: 12px;
+  margin-bottom: -15px;
+}
+
+
+.jp-About-externalLinks .jp-Button-flat {
+  color: #F37726;
+}
+
+
+.jp-About-copyright {
+  position: relative;
+  bottom: -48px;
+}
+
+
+.jp-About-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+
+.jp-About-header-info {
+  display: flex;
+  flex-direction: column;
+  margin-left: 16px;
+}
+
+
+.jp-About-header-logo {
+  height: 94px;
+  width: 77px;
+  background-image: url(../../theming/style/icons/jupyter/jupyter.svg);
+  background-repeat: no-repeat;
+  background-size: 58px auto;
+  background-position: center;
 }

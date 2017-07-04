@@ -69,7 +69,9 @@ function startApp(path: string, manager: ServiceManager.IManager) {
     commands.processKeydownEvent(event);
   });
 
-  let rendermime = new RenderMime({ items: RenderMime.getDefaultItems() });
+  let initialFactories = RenderMime.getDefaultFactories();
+  let rendermime = new RenderMime({ initialFactories });
+
   let editorFactory = editorServices.factoryService.newInlineEditor.bind(
     editorServices.factoryService);
   let contentFactory = new ConsolePanel.ContentFactory({ editorFactory });

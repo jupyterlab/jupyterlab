@@ -22,10 +22,6 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IDocumentRegistry
-} from '@jupyterlab/docregistry';
-
-import {
   FileEditor, FileEditorFactory, IEditorTracker
 } from '@jupyterlab/fileeditor';
 
@@ -50,28 +46,28 @@ const FACTORY = 'Editor';
  */
 namespace CommandIDs {
   export
-  const lineNumbers = 'editor:line-numbers';
+  const lineNumbers = 'fileeditor:toggle-line-numbers';
 
   export
-  const lineWrap = 'editor:line-wrap';
+  const lineWrap = 'fileeditor:toggle-line-wrap';
 
   export
-  const changeTabs = 'editor:change-tabs';
+  const changeTabs = 'fileeditor:change-tabs';
 
   export
-  const matchBrackets = 'editor:match-brackets';
+  const matchBrackets = 'fileeditor:toggle-match-brackets';
 
   export
-  const autoClosingBrackets = 'editor:autoclosing-brackets';
+  const autoClosingBrackets = 'fileeditor:toggle-autoclosing-brackets';
 
   export
-  const createConsole = 'editor:create-console';
+  const createConsole = 'fileeditor:create-console';
 
   export
-  const runCode = 'editor:run-code';
+  const runCode = 'fileeditor:run-code';
 
   export
-  const markdownPreview = 'editor:markdown-preview';
+  const markdownPreview = 'fileeditor:markdown-preview';
 };
 
 
@@ -81,11 +77,47 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<IEditorTracker> = {
   activate,
   id: 'jupyter.services.editor-tracker',
-  requires: [IDocumentRegistry, ILayoutRestorer, IEditorServices, ISettingRegistry],
+  requires: [
+    ILayoutRestorer,
+    IEditorServices,
+    ISettingRegistry
+  ],
   optional: [ILauncher],
   provides: IEditorTracker,
   autoStart: true
 };
+
+
+/* tslint:disable */
+/**
+ * The commands plugin setting schema.
+ *
+ * #### Notes
+ * This will eventually reside in its own settings file.
+ */
+const schema = {
+  "jupyter.lab.setting-icon-class": "jp-ImageTextEditor",
+  "jupyter.lab.setting-icon-label": "Editor",
+  "title": "Text Editor",
+  "description": "Text editor settings for all editors.",
+  "properties": {
+    "autoClosingBrackets": {
+      "type": "boolean", "title": "Autoclosing Brackets", "default": true
+    },
+    "lineNumbers": {
+      "type": "boolean", "title": "Line Numbers", "default": true
+    },
+    "lineWrap": {
+      "type": "boolean", "title": "Line Wrap", "default": false
+    },
+    "matchBrackets": {
+      "type": "boolean", "title": "Match Brackets", "default": true
+    }
+  },
+  "type": "object"
+};
+/* tslint:enable */
+
 
 /**
  * Export the plugins as default.
@@ -96,7 +128,7 @@ export default plugin;
 /**
  * Activate the editor tracker plugin.
  */
-function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayoutRestorer, editorServices: IEditorServices, settingRegistry: ISettingRegistry, launcher: ILauncher | null): IEditorTracker {
+function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IEditorServices, settingRegistry: ISettingRegistry, launcher: ILauncher | null): IEditorTracker {
   const id = plugin.id;
   const namespace = 'editor';
   const factory = new FileEditorFactory({
@@ -105,7 +137,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   });
   const { commands, restored } = app;
   const tracker = new InstanceTracker<FileEditor>({ namespace });
-  const hasWidget = () => tracker.currentWidget !== null;
+  const hasWidget = () => !!tracker.currentWidget;
 
   let {
     lineNumbers, lineWrap, matchBrackets, autoClosingBrackets
@@ -113,7 +145,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command: 'file-operations:open',
+    command: 'docmanager:open',
     args: widget => ({ path: widget.context.path, factory: FACTORY }),
     name: widget => widget.context.path
   });
@@ -122,13 +154,13 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
    * Update the setting values.
    */
   function updateSettings(settings: ISettingRegistry.ISettings): void {
-    let cached = settings.get('lineNumbers') as boolean | null;
+    let cached = settings.get('lineNumbers').composite as boolean | null;
     lineNumbers = cached === null ? lineNumbers : !!cached;
-    cached = settings.get('matchBrackets') as boolean | null;
+    cached = settings.get('matchBrackets').composite as boolean | null;
     matchBrackets = cached === null ? matchBrackets : !!cached;
-    cached = settings.get('autoClosingBrackets') as boolean | null;
+    cached = settings.get('autoClosingBrackets').composite as boolean | null;
     autoClosingBrackets = cached === null ? autoClosingBrackets : !!cached;
-    cached = settings.get('lineWrap') as boolean | null;
+    cached = settings.get('lineWrap').composite as boolean | null;
     lineWrap = cached === null ? lineWrap : !!cached;
   }
 
@@ -136,21 +168,22 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
    * Update the settings of the current tracker instances.
    */
   function updateTracker(): void {
-    tracker.forEach(widget => {
-      updateWidget(widget);
-    });
+    tracker.forEach(widget => { updateWidget(widget); });
   }
 
   /**
    * Update the settings of a widget.
    */
   function updateWidget(widget: FileEditor): void {
-    let editor = widget.editor;
+    const editor = widget.editor;
     editor.setOption('lineNumbers', lineNumbers);
     editor.setOption('lineWrap', lineWrap);
     editor.setOption('matchBrackets', matchBrackets);
     editor.setOption('autoClosingBrackets', autoClosingBrackets);
   }
+
+  // Preload the settings schema into the registry. This is deprecated.
+  settingRegistry.preload(id, schema);
 
   // Fetch the initial state of the settings.
   Promise.all([settingRegistry.load(id), restored]).then(([settings]) => {
@@ -170,7 +203,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
     tracker.add(widget);
     updateWidget(widget);
   });
-  registry.addWidgetFactory(factory);
+  app.docRegistry.addWidgetFactory(factory);
 
   // Handle the settings of new widgets.
   tracker.widgetAdded.connect((sender, widget) => {
@@ -251,7 +284,8 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
       tracker.forEach(widget => {
         widget.editor.setOption('autoClosingBrackets', autoClosingBrackets);
       });
-      return settingRegistry.set(id, 'autoClosingBrackets', autoClosingBrackets);
+      return settingRegistry
+        .set(id, 'autoClosingBrackets', autoClosingBrackets);
     },
     label: 'Auto-Closing Brackets',
     isEnabled: hasWidget,
@@ -325,7 +359,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   commands.addCommand(CommandIDs.markdownPreview, {
     execute: () => {
       let path = tracker.currentWidget.context.path;
-      return commands.execute('markdown-preview:open', { path });
+      return commands.execute('markdownviewer:open', { path });
     },
     isVisible: () => {
       let widget = tracker.currentWidget;
@@ -340,10 +374,10 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
       displayName: 'Text Editor',
       iconClass: EDITOR_ICON_CLASS,
       callback: cwd => {
-        return commands.execute('file-operations:new-untitled', {
+        return commands.execute('docmanager:new-untitled', {
           path: cwd, type: 'file'
         }).then(model => {
-          return commands.execute('file-operations:open', {
+          return commands.execute('docmanager:open', {
             path: model.path, factory: FACTORY
           });
         });

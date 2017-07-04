@@ -8,7 +8,5 @@ export * from './latex';
 export * from './mimemodel';
 export * from './outputmodel';
 export * from './rendermime';
-export * from './renderers';
+export * from './factories';
 export * from './widgets';
-
-

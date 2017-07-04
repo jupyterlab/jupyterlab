@@ -43,7 +43,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  IRenderMime
+  RenderMime
 } from '@jupyterlab/rendermime';
 
 import {
@@ -146,7 +146,7 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
   /**
    * The Rendermime instance used by the widget.
    */
-  readonly rendermime: IRenderMime;
+  readonly rendermime: RenderMime;
 
   /**
    * The notebook used by the widget.
@@ -184,7 +184,6 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
     }
     let oldValue = this._context;
     this._context = newValue;
-    this.rendermime.resolver = newValue;
     // Trigger private, protected, and public changes.
     this._onContextChanged(oldValue, newValue);
     this.onContextChanged(oldValue, newValue);
@@ -402,7 +401,7 @@ export namespace NotebookPanel {
     /**
      * The rendermime instance used by the panel.
      */
-    rendermime: IRenderMime;
+    rendermime: RenderMime;
 
     /**
      * The language preference for the model.

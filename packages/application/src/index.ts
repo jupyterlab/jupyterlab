@@ -2,8 +2,24 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  CommandLinker
+} from '@jupyterlab/apputils';
+
+import {
+  Base64ModelFactory, DocumentRegistry, TextModelFactory
+} from '@jupyterlab/docregistry';
+
+import {
+  IRenderMime, RenderMime
+} from '@jupyterlab/rendermime';
+
+import {
   Application, IPlugin
 } from '@phosphor/application';
+
+import {
+  createRendermimePlugins
+} from './mimerenderers';
 
 import {
   ApplicationShell
@@ -42,7 +58,48 @@ class JupyterLab extends Application<ApplicationShell> {
     if (options.devMode) {
       this.shell.addClass('jp-mod-devMode');
     }
+    let linker = new CommandLinker({ commands: this.commands });
+    this.commandLinker = linker;
+
+    let linkHandler = {
+      handleLink: (node: HTMLElement, path: string) => {
+        linker.connectNode(node, 'file-operations:open', { path });
+      }
+    };
+    let initialFactories = RenderMime.getDefaultFactories();
+    this.rendermime = new RenderMime({ initialFactories, linkHandler });
+
+    let registry = this.docRegistry = new DocumentRegistry();
+    registry.addModelFactory(new TextModelFactory());
+    registry.addModelFactory(new Base64ModelFactory());
+    registry.addFileType({
+      name: 'Text',
+      extension: '.txt',
+      contentType: 'file',
+      fileFormat: 'text'
+    });
+    registry.addCreator({ name: 'Text File', fileType: 'Text', });
+
+    if (options.mimeExtensions) {
+      let plugins = createRendermimePlugins(options.mimeExtensions);
+      plugins.forEach(plugin => { this.registerPlugin(plugin); });
+    }
   }
+
+  /**
+   * The document registry instance used by the application.
+   */
+  readonly docRegistry: DocumentRegistry;
+
+  /**
+   * The rendermime instance used by the application.
+   */
+  readonly rendermime: RenderMime;
+
+  /**
+   * The command linker used by the application.
+   */
+  readonly commandLinker: CommandLinker;
 
   /**
    * The information about the application.
@@ -136,6 +193,11 @@ namespace JupyterLab {
      * The assets directory of the app on the server.
      */
     assetsDir?: string;
+
+    /**
+     * The mime renderer extensions.
+     */
+    mimeExtensions?: IRenderMime.IExtensionModule[];
   }
 
   /**

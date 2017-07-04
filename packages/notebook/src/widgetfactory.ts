@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  IRenderMime
+  RenderMime
 } from '@jupyterlab/rendermime';
 
 import {
@@ -46,7 +46,7 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
   /*
    * The rendermime instance.
    */
-  readonly rendermime: IRenderMime;
+  readonly rendermime: RenderMime;
 
   /**
    * The content factory used by the widget factory.
@@ -66,7 +66,7 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
    * the default toolbar items using `ToolbarItems.populateDefaults`.
    */
   protected createNewWidget(context: DocumentRegistry.IContext<INotebookModel>): NotebookPanel {
-    let rendermime = this.rendermime.clone();
+    let rendermime = this.rendermime.clone({ resolver: context });
     let panel = new NotebookPanel({
       rendermime,
       contentFactory: this.contentFactory,
@@ -92,7 +92,7 @@ namespace NotebookWidgetFactory {
      /*
       * A rendermime instance.
       */
-    rendermime: IRenderMime;
+    rendermime: RenderMime;
 
     /**
      * A notebook panel content factory.

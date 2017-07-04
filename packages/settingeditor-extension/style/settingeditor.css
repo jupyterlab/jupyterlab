@@ -5,9 +5,27 @@
 
 #setting-editor.jp-SettingEditor {
   background-color: var(--md-grey-200);
+  border-top: var(--jp-border-width) solid var(--jp-border-color1);
+  margin-top: -1px;
   outline: none;
 }
 
+
+#setting-editor.jp-SettingEditor::before {
+  content: '';
+  display: block;
+  height: var(--jp-toolbar-micro-height);
+  background: var(--jp-toolbar-background);
+  border-bottom: 1px solid var(--jp-toolbar-border-color);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  z-index: 10;
+}
+
+
+#setting-editor.jp-SettingEditor .p-SplitPanel {
+  height: 100%;
+  width: 100%;
+}
 
 #setting-editor.jp-SettingEditor .p-SplitPanel-handle {
   background-color: var(--md-grey-400);
@@ -49,8 +67,8 @@
   list-style-type: none;
   margin: 0;
   padding: 0;
-  min-width: 80px;
-  width: 200px;
+  min-width: 150px;
+  width: 150px;
 }
 
 
@@ -106,6 +124,7 @@
 #setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset {
   border: 1px solid var(--jp-brand-color1);
   margin: 0;
+  overflow-y: auto;
   padding: 0;
 }
 
@@ -118,14 +137,18 @@
 }
 
 
-#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset ul {
+#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset table{
+  border-collapse: collapse;
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
+  width: 100%;
 }
 
+#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset table,
+#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset th,
+#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset td {
+  border: 1px solid var(--md-grey-300);
+}
 
 #setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset li {
   background-color: var(--md-grey-400);
@@ -133,8 +156,4 @@
   display: inline-block;
   margin: 3px;
   padding: 3px;
-}
-
-#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset-key {
-  margin-left: 3px;
 }

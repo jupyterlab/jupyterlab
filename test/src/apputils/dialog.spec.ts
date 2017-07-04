@@ -434,8 +434,6 @@ describe('@jupyterlab/domutils', () => {
           it('should create the header of the dialog', () => {
             let widget = renderer.createHeader('foo');
             expect(widget.hasClass('jp-Dialog-header')).to.equal(true);
-            let node = widget.node.querySelector('.jp-Dialog-title');
-            expect(node.textContent).to.equal('foo');
           });
 
         });

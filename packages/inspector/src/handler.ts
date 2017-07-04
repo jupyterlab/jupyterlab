@@ -26,7 +26,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  MimeModel, IRenderMime
+  MimeModel, RenderMime
 } from '@jupyterlab/rendermime';
 
 import {
@@ -185,10 +185,11 @@ class InspectionHandler implements IDisposable, IInspector.IInspectable {
       }
 
       const data = value.data;
-      const trusted = true;
-      const model = new MimeModel({ data, trusted });
+      const model = new MimeModel({ data, trusted: true });
 
-      update.content =  this._rendermime.render(model);
+      let widget = this._rendermime.createRenderer(model);
+      widget.renderModel(model);
+      update.content = widget;
       this._inspected.emit(update);
     });
   }
@@ -198,7 +199,7 @@ class InspectionHandler implements IDisposable, IInspector.IInspectable {
   private _ephemeralCleared = new Signal<InspectionHandler, void>(this);
   private _inspected = new Signal<this, IInspector.IInspectorUpdate>(this);
   private _pending = 0;
-  private _rendermime: IRenderMime = null;
+  private _rendermime: RenderMime = null;
   private _standby = true;
 }
 
@@ -221,6 +222,6 @@ namespace InspectionHandler {
     /**
      * The mime renderer for the inspection handler.
      */
-    rendermime: IRenderMime;
+    rendermime: RenderMime;
   }
 }

@@ -262,6 +262,16 @@ class LayoutRestorer implements ILayoutRestorer {
       }
     }, this);
 
+    // Whenever a widget is updated, get its new name.
+    tracker.widgetUpdated.connect((sender, widget) => {
+      const widgetName = name(widget);
+      if (widgetName) {
+        let name = `${namespace}:${widgetName}`;
+        Private.nameProperty.set(widget, name);
+        this._widgets.set(name, widget);
+      }
+    });
+
     const first = this._first;
     const promise = tracker.restore({
       args, command, name,

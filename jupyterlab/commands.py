@@ -215,6 +215,16 @@ def disable_extension(extension, app_dir=None, logger=None):
     _toggle_extension(extension, True, app_dir, logger)
 
 
+def check_node():
+    """Check for the existence of node and whether it is the right version.
+    """
+    try:
+        scripts = os.path.abspath(os.path.join(here, '../scripts'))
+        run(['node', 'node-version-check.js'], cwd=scripts)
+    except Exception:
+        raise ValueError('`node` version 5+ is required, see extensions in README')
+
+
 def should_build(app_dir=None, logger=None):
     """Determine whether JupyterLab should be built.
 
@@ -430,6 +440,7 @@ def clean(app_dir=None):
 def build(app_dir=None, name=None, version=None, logger=None):
     """Build the JupyterLab application."""
     # Set up the build directory.
+    check_node()
     logger = logger or logging
     app_dir = get_app_dir(app_dir)
     if app_dir == here:

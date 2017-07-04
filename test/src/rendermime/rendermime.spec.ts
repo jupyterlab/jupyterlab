@@ -20,7 +20,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  TextRenderer
+  TextRendererFactory
 } from '@jupyterlab/rendermime';
 
 import {
@@ -35,20 +35,20 @@ import {
 const RESOLVER: IRenderMime.IResolver = createFileContext();
 
 
-function createModel(data: JSONObject, trusted=false): IRenderMime.IMimeModel {
-  return new MimeModel({ data, trusted });
+function createModel(data: JSONObject): IRenderMime.IMimeModel {
+  return new MimeModel({ data });
 }
 
 
 describe('rendermime/index', () => {
 
-  let r: IRenderMime;
+  let r: RenderMime;
 
   beforeEach(() => {
     r = defaultRenderMime();
   });
 
-  describe('IRenderMime', () => {
+  describe('RenderMime', () => {
 
     describe('#constructor()', () => {
 
@@ -62,8 +62,8 @@ describe('rendermime/index', () => {
 
       it('should be the resolver used by the rendermime', () => {
         expect(r.resolver).to.be(null);
-        r.resolver = RESOLVER;
-        expect(r.resolver).to.be(RESOLVER);
+        let clone = r.clone({ resolver: RESOLVER });
+        expect(clone.resolver).to.be(RESOLVER);
       });
 
     });
@@ -75,121 +75,73 @@ describe('rendermime/index', () => {
         let handler = {
           handleLink: () => { /* no-op */ }
         };
-        r.linkHandler = handler;
-        expect(r.linkHandler).to.be(handler);
+        let clone = r.clone({ linkHandler: handler });
+        expect(clone.linkHandler).to.be(handler);
       });
 
     });
 
-    describe('#mimeTypes()', () => {
+    describe('#createRenderer()', () => {
 
-      it('should get an iterator over the ordered list of mimeTypes', () => {
-        let mimeTypes = r.mimeTypes();
-        expect(toArray(mimeTypes).length).to.be.above(0);
-      });
-
-    });
-
-    describe('#render()', () => {
-
-      it('should render a mimebundle', () => {
+      it('should create a mime renderer', () => {
         let model = createModel({ 'text/plain': 'foo' });
-        let w = r.render(model);
+        let w = r.createRenderer(model);
         expect(w instanceof Widget).to.be(true);
       });
 
-      it('should return a placeholder for an unregistered mime type', () => {
-        let model = createModel({ 'text/fizz': 'buzz' });
-        let value = r.render(model);
-        expect(value).to.be.a(Widget);
-      });
-
-      it('should render with the mimeType of highest precidence', () => {
-        let model = createModel({
-          'text/plain': 'foo',
-          'text/html': '<h1>foo</h1>'
-        }, true);
-        let w = r.render(model);
-        let el = w.node.firstChild as HTMLElement;
-        expect(el.localName).to.be('h1');
-      });
-
-      it('should render the mimeType that is safe', () => {
-        let model = createModel({
-          'text/plain': 'foo',
-          'text/javascript': 'window.x = 1',
-          'image/png': 'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
-        });
-        let w = r.render(model);
-        let el = w.node.firstChild as HTMLElement;
-        expect(el.localName).to.be('img');
-      });
-
-      it('should render the mimeType that is sanitizable', () => {
-        let model = createModel({
-          'text/plain': 'foo',
-          'text/html': '<h1>foo</h1>'
-        });
-        let w = r.render(model);
-        let el = w.node.firstChild as HTMLElement;
-        expect(el.localName).to.be('h1');
-      });
-
-      it('should sanitize html', () => {
-        let model = createModel({
-          'text/html': '<h1>foo <script>window.x=1></scrip></h1>'
-        });
-        let widget = r.render(model);
-        expect(widget.node.innerHTML).to.be('<h1>foo </h1>');
+      it('should raise an error for an unregistered mime type', () => {
+        let model = createModel({ 'text/fizz': 'foo' });
+        expect(() => { r.createRenderer(model); }).to.throwError();
       });
 
       it('should render json data', () => {
         let model = createModel({
           'application/json': { 'foo': 1 }
         });
-        let widget = r.render(model);
-        expect(widget.node.textContent).to.be('{\n  "foo": 1\n}');
-      });
-
-      it('should handle an injection', () => {
-        let model = createModel({ 'test/injector': 'foo' });
-        r.render(model);
-        expect(model.data.get('test/injector')).to.be('foo');
+        let w = r.createRenderer(model);
+        return w.renderModel(model).then(() => {
+          expect(w.node.textContent).to.be('{\n  "foo": 1\n}');
+        });
       });
 
       it('should send a url resolver', (done) => {
         let model = createModel({
           'text/html': '<img src="./foo">foo</img>'
-        }, true);
+        });
         let called = false;
-        r.resolver = {
-          resolveUrl: (path: string) => {
-            called = true;
-            return Promise.resolve(path);
-          },
-          getDownloadUrl: (path: string) => {
-            expect(called).to.be(true);
-            done();
-            return Promise.resolve(path);
+        r = r.clone({
+          resolver: {
+            resolveUrl: (path: string) => {
+              called = true;
+              return Promise.resolve(path);
+            },
+            getDownloadUrl: (path: string) => {
+              expect(called).to.be(true);
+              done();
+              return Promise.resolve(path);
+            }
           }
-        };
-        r.render(model);
+        });
+        let w = r.createRenderer(model);
+        w.renderModel(model);
       });
 
       it('should send a link handler', (done) => {
         let model = createModel({
           'text/html': '<a href="./foo/bar.txt">foo</a>'
-        }, true);
-        r.resolver = RESOLVER;
-        r.linkHandler = {
-          handleLink: (node: HTMLElement, url: string) => {
-            expect(url).to.be('foo/bar.txt');
-            done();
+        });
+        r = r.clone({
+          resolver: RESOLVER,
+          linkHandler:  {
+            handleLink: (node: HTMLElement, url: string) => {
+              expect(url).to.be('foo/bar.txt');
+              done();
+            }
           }
-        };
-        r.render(model);
+        });
+        let w = r.createRenderer(model);
+        w.renderModel(model);
       });
-
     });
 
     describe('#preferredMimeType()', () => {
@@ -229,64 +181,64 @@ describe('rendermime/index', () => {
 
       it('should clone the rendermime instance with shallow copies of data', () => {
         let c = r.clone();
-        expect(toArray(c.mimeTypes())).to.eql(toArray(r.mimeTypes()));
-        let renderer = new TextRenderer();
-        c.addRenderer({ mimeType: 'text/foo', renderer });
+        expect(toArray(c.mimeTypes)).to.eql(r.mimeTypes);
+        let factory = new TextRendererFactory();
+        c.addFactory(factory, 'text/foo');
         expect(r).to.not.be(c);
       });
 
     });
 
-    describe('#addRenderer()', () => {
+    describe('#addFactory()', () => {
 
-      it('should add a renderer by mimeType', () => {
-        let renderer = new TextRenderer();
-        r.addRenderer({ mimeType: 'text/foo', renderer });
-        let index = toArray(r.mimeTypes()).indexOf('text/foo');
-        expect(index).to.be(0);
+      it('should add a factory', () => {
+        let factory = new TextRendererFactory();
+        r.addFactory(factory, 'text/foo');
+        let index = r.mimeTypes.indexOf('text/foo');
+        expect(index).to.be(r.mimeTypes.length - 1);
       });
 
       it('should take an optional order index', () => {
-        let renderer = new TextRenderer();
-        let len = toArray(r.mimeTypes()).length;
-        r.addRenderer({ mimeType: 'text/foo', renderer }, 0);
-        let index = toArray(r.mimeTypes()).indexOf('text/foo');
+        let factory = new TextRendererFactory();
+        let len = r.mimeTypes.length;
+        r.addFactory(factory, 'text/foo', 0);
+        let index = r.mimeTypes.indexOf('text/foo');
         expect(index).to.be(0);
-        expect(toArray(r.mimeTypes()).length).to.be(len + 1);
+        expect(r.mimeTypes.length).to.be(len + 1);
       });
 
     });
 
-    describe('#removeRenderer()', () => {
+    describe('#removeFactory()', () => {
 
-      it('should remove a renderer by mimeType', () => {
-        r.removeRenderer('text/html');
+      it('should remove a factory by mimeType', () => {
+        r.removeFactory('text/html');
         let model = createModel({ 'text/html': '<h1>foo</h1>' });
         expect(r.preferredMimeType(model)).to.be(void 0);
       });
 
       it('should be a no-op if the mimeType is not registered', () => {
-        r.removeRenderer('text/foo');
+        r.removeFactory('text/foo');
       });
 
     });
 
-    describe('#getRenderer()', () => {
+    describe('#getFactory()', () => {
 
-      it('should get a renderer by mimeType', () => {
-        expect(r.getRenderer('text/plain')).to.be.a(TextRenderer);
+      it('should get a factory by mimeType', () => {
+        expect(r.getFactory('text/plain')).to.be.a(TextRendererFactory);
       });
 
       it('should return undefined for missing mimeType', () => {
-        expect(r.getRenderer('hello/world')).to.be(undefined);
+        expect(r.getFactory('hello/world')).to.be(undefined);
       });
 
     });
 
-    describe('#mimeTypes()', () => {
+    describe('#mimeTypes', () => {
 
       it('should get the ordered list of mimeTypes', () => {
-        expect(toArray(r.mimeTypes()).indexOf('text/html')).to.not.be(-1);
+        expect(r.mimeTypes.indexOf('text/html')).to.not.be(-1);
       });
 
     });
