@@ -176,11 +176,16 @@ class SettingEditor extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
-    this._fetchState().then(() => {
-      this._panel.setRelativeSizes(this._dimensions.outer);
-      this._editor.sizes = this._dimensions.inner;
-    }).catch(reason => {
-      console.error('Fetching setting editor state failed', reason);
+
+    // Allow the message queue (which includes fit requests that might disrupt
+    // setting relative sizes) to clear before setting sizes.
+    requestAnimationFrame(() => {
+      this._fetchState().then(() => {
+        this._panel.setRelativeSizes(this._dimensions.outer);
+        this._editor.sizes = this._dimensions.inner;
+      }).catch(reason => {
+        console.error('Fetching setting editor state failed', reason);
+      });
     });
   }
 
@@ -368,14 +373,12 @@ class SplitPanel extends SPanel {
       return;
     }
 
-    window.setTimeout(() => {
-      const layout = this.layout as SplitLayout;
+    const layout = this.layout as SplitLayout;
 
-      if (layout.handleMoved) {
-        (this.handleMoved as Signal<any, void>).emit(void 0);
-      }
-      layout.handleMoved = false;
-    }, 100);
+    if (layout.handleMoved) {
+      (this.handleMoved as Signal<any, void>).emit(void 0);
+    }
+    layout.handleMoved = false;
   }
 }
 
