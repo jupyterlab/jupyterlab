@@ -5,7 +5,7 @@
 
 
 .jp-RenderedVegaCommon .vega-actions {
-  font-size: var(--jp-ui-font-size0);
+  font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color1);
 }
 
@@ -19,4 +19,8 @@
  {
   margin-left: 8px;
   margin-top: 8px;
+}
+
+.jp-MimeRenderer.jp-Document .jp-RenderedVegaCommon {
+  padding: 16px;
 }

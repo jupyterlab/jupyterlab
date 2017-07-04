@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  JSONObject, ReadOnlyJSONObject
+  JSONObject, ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
 import {
@@ -87,13 +87,14 @@ class RenderedVega extends Widget implements IRenderMime.IRenderer {
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
 
     let data = model.data[this._mimeType];
+    let updatedData: JSONObject;
     if (this._mode === 'vega-lite') {
-      data = Private.updateVegaLiteDefaults(data);
+      updatedData = Private.updateVegaLiteDefaults(data as ReadonlyJSONObject);
     }  
 
     let embedSpec = {
       mode: this._mode,
-      spec: data
+      spec: updatedData
     };
 
     return new Promise<void>((resolve, reject) => {
@@ -197,23 +198,23 @@ namespace Private {
    * Apply the default cell config to the spec in place.
    * 
    * #### Notes
-   * This needs to be in-place as the spec contains the data, which may be
-   * very large and shouldn't be copied.
+   * This carefully does a shallow copy to avoid copying the potentially
+   * large data.
    */
   export
-  function updateVegaLiteDefaults(spec: ReadOnlyJSONObject) {
+  function updateVegaLiteDefaults(spec: ReadonlyJSONObject): JSONObject {
     if ( spec.hasOwnProperty('config') ) {
       if ( spec.config.hasOwnProperty('cell') ) {
-        return {...{"config": {...{"cell": {...defaultCellConfig, ...spec.config.cell}}}, ...spec.config}, ...spec}
+        return {
+          ...{"config": {...{"cell": {...defaultCellConfig, ...((spec.config as ReadonlyJSONObject).cell as any)}}}, ...(spec.config as any)},
+          ...spec
+        }
       } else {
-        return {...{"config": {...{"cell": {...defaultCellConfig}}}, ...spec.config}, ...spec}
+        return {...{"config": {...{"cell": {...defaultCellConfig}}}, ...(spec.config as any)}, ...spec}
       }
     } else {
       return {...{"config": {"cell": defaultCellConfig}}, ...spec};
     }
-    // spec['config'] = spec['config'] || {};
-    // let cellObject: ReadOnlyJSONObject = ((spec['config'] as ReadOnlyJSONObject)['cell'] || {}) as ReadOnlyJSONObject;
-    // (spec['config'] as ReadOnlyJSONObject)['cell'] = {...defaultCellConfig, ...cellObject};
   }
 
 }
