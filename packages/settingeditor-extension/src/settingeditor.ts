@@ -372,7 +372,6 @@ class SplitPanel extends SPanel {
       const layout = this.layout as SplitLayout;
 
       if (layout.handleMoved) {
-        console.log('emitting in handleEvent');
         (this.handleMoved as Signal<any, void>).emit(void 0);
       }
       layout.handleMoved = false;
