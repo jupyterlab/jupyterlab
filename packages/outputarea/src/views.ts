@@ -51,6 +51,14 @@ class OutputAreaView extends Widget {
   }
 
   /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose(): void {
+    this._area = null;
+    super.dispose();
+  }
+
+  /**
    * The output store which holds the output area.
    */
   readonly store: OutputStore;
@@ -126,7 +134,9 @@ class OutputAreaView extends Widget {
         view = new OutputItemView({ store, itemId, rendermime });
         view.addClass('jp-OutputAreaView-outputItem');
       }
-      layout.insertWidget(i, view);
+      if (layout.widgets[i] !== view) {
+        layout.insertWidget(i, view);
+      }
     }
 
     // Dispose of any remaining stale item views.

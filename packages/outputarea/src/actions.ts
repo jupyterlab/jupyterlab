@@ -15,7 +15,6 @@ import {
 } from '@phosphor/datastore';
 
 
-
 // TOOD replace this namespace with a string enum once we're on TS 2.4
 export
 namespace OutputActionType {
@@ -87,6 +86,8 @@ class SetOutputDataAction extends Action<OutputActionType.SET_OUTPUT_DATA> {
    * @param itemId - The id of the output item.
    *
    * @param data - The mime data to set for the output item.
+   *
+   * @param metadata - The mime metadata to set for the output item.
    */
   constructor(
     public readonly itemId: string,
