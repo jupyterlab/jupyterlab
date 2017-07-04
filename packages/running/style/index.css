@@ -122,12 +122,12 @@
 
 
 .jp-RunningSessions-itemIcon.jp-mod-notebook {
-  background-image: var(--jp-icon-book);
+  background-image: var(--jp-icon-book-running);
 }
 
 
 .jp-RunningSessions-itemIcon.jp-mod-console {
-  background-image: var(--jp-icon-terminal);
+  background-image: var(--jp-icon-console);
 }
 
 

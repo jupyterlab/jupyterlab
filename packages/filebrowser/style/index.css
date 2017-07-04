@@ -238,8 +238,13 @@
 }
 
 
-.jp-DirListing-item.jp-mod-running.jp-mod-selected .jp-DirListing-itemIcon {
+.jp-DirListing-item.jp-mod-running.jp-mod-selected .jp-DirListing-itemIcon.jp-NotebookIcon {
   color: var(--jp-accent-color3);
+  background-image: var(--jp-icon-book-running-selected);
+}
+
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-NotebookIcon {
   background-image: var(--jp-icon-book-selected);
 }
 
