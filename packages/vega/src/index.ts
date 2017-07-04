@@ -1,5 +1,11 @@
-// Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+import {
+  JSONObject, ReadOnlyJSONObject
+} from '@phosphor/coreutils';
 
 import {
   Widget
@@ -13,6 +19,9 @@ import {
  * Import vega-embed in this manner due to how it is exported.
  */
 import embed = require('vega-embed');
+
+
+import '../style/index.css';
 
 
 /**
@@ -78,6 +87,9 @@ class RenderedVega extends Widget implements IRenderMime.IRenderer {
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
 
     let data = model.data[this._mimeType];
+    if (this._mode === 'vega-lite') {
+      data = Private.updateVegaLiteDefaults(data);
+    }  
 
     let embedSpec = {
       mode: this._mode,
@@ -166,3 +178,42 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
 ];
 
 export default extensions;
+
+
+/**
+ * Namespace for module privates.
+ */
+namespace Private {
+
+  /**
+   * Default cell config for Vega-Lite.
+   */
+  const defaultCellConfig: JSONObject = {
+    "width": 400,
+    "height": 400/1.5
+  }
+
+  /**
+   * Apply the default cell config to the spec in place.
+   * 
+   * #### Notes
+   * This needs to be in-place as the spec contains the data, which may be
+   * very large and shouldn't be copied.
+   */
+  export
+  function updateVegaLiteDefaults(spec: ReadOnlyJSONObject) {
+    if ( spec.hasOwnProperty('config') ) {
+      if ( spec.config.hasOwnProperty('cell') ) {
+        return {...{"config": {...{"cell": {...defaultCellConfig, ...spec.config.cell}}}, ...spec.config}, ...spec}
+      } else {
+        return {...{"config": {...{"cell": {...defaultCellConfig}}}, ...spec.config}, ...spec}
+      }
+    } else {
+      return {...{"config": {"cell": defaultCellConfig}}, ...spec};
+    }
+    // spec['config'] = spec['config'] || {};
+    // let cellObject: ReadOnlyJSONObject = ((spec['config'] as ReadOnlyJSONObject)['cell'] || {}) as ReadOnlyJSONObject;
+    // (spec['config'] as ReadOnlyJSONObject)['cell'] = {...defaultCellConfig, ...cellObject};
+  }
+
+}
