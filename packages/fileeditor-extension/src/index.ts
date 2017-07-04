@@ -22,10 +22,6 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IDocumentRegistry
-} from '@jupyterlab/docregistry';
-
-import {
   FileEditor, FileEditorFactory, IEditorTracker
 } from '@jupyterlab/fileeditor';
 
@@ -82,7 +78,6 @@ const plugin: JupyterLabPlugin<IEditorTracker> = {
   activate,
   id: 'jupyter.services.editor-tracker',
   requires: [
-    IDocumentRegistry,
     ILayoutRestorer,
     IEditorServices,
     ISettingRegistry
@@ -133,7 +128,7 @@ export default plugin;
 /**
  * Activate the editor tracker plugin.
  */
-function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayoutRestorer, editorServices: IEditorServices, settingRegistry: ISettingRegistry, launcher: ILauncher | null): IEditorTracker {
+function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IEditorServices, settingRegistry: ISettingRegistry, launcher: ILauncher | null): IEditorTracker {
   const id = plugin.id;
   const namespace = 'editor';
   const factory = new FileEditorFactory({
@@ -208,7 +203,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
     tracker.add(widget);
     updateWidget(widget);
   });
-  registry.addWidgetFactory(factory);
+  app.docRegistry.addWidgetFactory(factory);
 
   // Handle the settings of new widgets.
   tracker.widgetAdded.connect((sender, widget) => {

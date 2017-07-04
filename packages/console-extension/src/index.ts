@@ -23,10 +23,6 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
-  IRenderMime
-} from '@jupyterlab/rendermime';
-
-import {
   IServiceManager
 } from '@jupyterlab/services';
 
@@ -91,7 +87,6 @@ const trackerPlugin: JupyterLabPlugin<IConsoleTracker> = {
   provides: IConsoleTracker,
   requires: [
     IServiceManager,
-    IRenderMime,
     IMainMenu,
     ICommandPalette,
     ConsolePanel.IContentFactory,
@@ -131,7 +126,7 @@ export default plugins;
 /**
  * Activate the console extension.
  */
-function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): IConsoleTracker {
+function activateConsole(app: JupyterLab, manager: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): IConsoleTracker {
   let { commands, shell } = app;
   let category = 'Console';
   let command: string;
@@ -192,7 +187,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
     return manager.ready.then(() => {
       let panel = new ConsolePanel({
         manager,
-        rendermime: rendermime.clone(),
+        rendermime: app.rendermime.clone(),
         contentFactory,
         mimeTypeService: editorServices.mimeTypeService,
         ...options

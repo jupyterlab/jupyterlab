@@ -18,10 +18,6 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IDocumentRegistry
-} from '@jupyterlab/docregistry';
-
-import {
   ILauncher
 } from '@jupyterlab/launcher';
 
@@ -29,10 +25,6 @@ import {
   CellTools, ICellTools, INotebookTracker, NotebookActions,
   NotebookModelFactory,  NotebookPanel, NotebookTracker, NotebookWidgetFactory
 } from '@jupyterlab/notebook';
-
-import {
-  IRenderMime
-} from '@jupyterlab/rendermime';
 
 import {
   IServiceManager
@@ -251,9 +243,7 @@ const trackerPlugin: JupyterLabPlugin<INotebookTracker> = {
   id: 'jupyter.services.notebook-tracker',
   provides: INotebookTracker,
   requires: [
-    IDocumentRegistry,
     IServiceManager,
-    IRenderMime,
     IMainMenu,
     ICommandPalette,
     NotebookPanel.IContentFactory,
@@ -372,7 +362,7 @@ function activateCellTools(app: JupyterLab, tracker: INotebookTracker, editorSer
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, services: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: NotebookPanel.IContentFactory, editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): INotebookTracker {
+function activateNotebookHandler(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: NotebookPanel.IContentFactory, editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): INotebookTracker {
 
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
@@ -381,7 +371,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     defaultFor: ['.ipynb'],
     preferKernel: true,
     canStartKernel: true,
-    rendermime,
+    rendermime: app.rendermime,
     contentFactory,
     mimeTypeService: editorServices.mimeTypeService
   });
@@ -403,6 +393,7 @@ function activateNotebookHandler(app: JupyterLab, registry: IDocumentRegistry, s
     }
   });
 
+  let registry = app.docRegistry;
   registry.addModelFactory(new NotebookModelFactory({}));
   registry.addWidgetFactory(factory);
   registry.addFileType({

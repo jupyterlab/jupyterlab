@@ -144,6 +144,13 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   }
 
   /**
+   * A signal emitted when a widget is updated.
+   */
+  get widgetUpdated(): ISignal<this, T> {
+    return this._widgetUpdated;
+  }
+
+  /**
    * A namespace for all tracked widgets, (e.g., `notebook`).
    */
   readonly namespace: string;
@@ -347,6 +354,10 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
       let data = this._restore.args(widget);
       state.save(newName, { data });
     }
+
+    if (oldName !== newName) {
+      this._widgetUpdated.emit(widget);
+    }
   }
 
   /**
@@ -410,6 +421,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   private _tracker = new FocusTracker<T>();
   private _currentChanged = new Signal<this, T>(this);
   private _widgetAdded = new Signal<this, T>(this);
+  private _widgetUpdated = new Signal<this, T>(this);
   private _widgets: T[] = [];
   private _currentWidget: T | null = null;
 }

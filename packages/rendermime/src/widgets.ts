@@ -21,7 +21,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  JSONObject, PromiseDelegate
+  JSONObject
 } from '@phosphor/coreutils';
 
 import {
@@ -89,21 +89,55 @@ const PDF_CLASS = 'jp-RenderedPDF';
 
 
 /*
- * A widget for displaying any widget whoes representation is rendered HTML
- * */
+ * A widget for displaying any widget whoes representation is rendered HTML.
+ */
 export
-class RenderedHTMLCommon extends Widget implements IRenderMime.IReadyWidget {
+abstract class RenderedCommon extends Widget implements IRenderMime.IRenderer {
   /* Construct a new rendered HTML common widget.*/
-  constructor(options: IRenderMime.IRenderOptions) {
+  constructor(options: IRenderMime.IRendererOptions) {
     super();
-    this.addClass(HTML_COMMON_CLASS);
+    this.mimeType = options.mimeType;
+    this.sanitizer = options.sanitizer;
+    this.resolver = options.resolver;
+    this.linkHandler = options.linkHandler;
   }
 
   /**
-   * A promise that resolves when the rendered content is ready.
+   * The mimetype being rendered.
    */
-  get ready(): Promise<void> {
-    return Promise.resolve(undefined);
+  readonly mimeType: string;
+
+  /**
+   * The sanitizer used to sanitize untrusted html inputs.
+   */
+  readonly sanitizer: IRenderMime.ISanitizer;
+
+  /**
+   * The link handler.
+   */
+  readonly linkHandler: IRenderMime.ILinkHandler;
+
+  /**
+   * The resolver object.
+   */
+  readonly resolver: IRenderMime.IResolver | null;
+
+  /**
+   * Render a mime model.
+   */
+  abstract renderModel(model: IRenderMime.IMimeModel): Promise<void>;
+}
+
+
+/*
+ * A widget for displaying any widget whoes representation is rendered HTML.
+ * */
+export
+abstract class RenderedHTMLCommon extends RenderedCommon {
+  /* Construct a new rendered HTML common widget.*/
+  constructor(options: IRenderMime.IRendererOptions) {
+    super(options);
+    this.addClass(HTML_COMMON_CLASS);
   }
 }
 
@@ -116,40 +150,41 @@ class RenderedHTML extends RenderedHTMLCommon {
   /**
    * Construct a new html widget.
    */
-  constructor(options: IRenderMime.IRenderOptions) {
+  constructor(options: IRenderMime.IRendererOptions) {
     super(options);
     this.addClass(HTML_CLASS);
-    let source = Private.getSource(options);
-    if (!options.model.trusted) {
-      source = options.sanitizer.sanitize(source);
-    }
-    Private.appendHtml(this.node, source);
-    if (options.resolver) {
-      Private.handleUrls(this.node, options.resolver, options.linkHandler).then(() => {
-        this._ready.resolve(undefined);
-      });
-    } else {
-      this._ready.resolve(undefined);
-    }
   }
 
   /**
-   * A promise that resolves when the rendered content is ready.
+   * Render a mime model.
    */
-  get ready(): Promise<void> {
-    return this._ready.promise;
+  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+    let source = Private.getSource(model, this.mimeType);
+    if (!model.trusted) {
+      source = this.sanitizer.sanitize(source);
+    }
+    Private.setHtml(this.node, source);
+    if (this.resolver) {
+      return Private.handleUrls(
+        this.node, this.resolver, this.linkHandler
+      ).then(() => {
+        if (this.isAttached) {
+          typeset(this.node);
+        }
+      });
+    }
+    if (this.isAttached) {
+      typeset(this.node);
+    }
+    return Promise.resolve(void 0);
   }
 
   /**
    * A message handler invoked on an `'after-attach'` message.
    */
   onAfterAttach(msg: Message): void {
-    this.ready.then(() => {
-      typeset(this.node);
-    });
+    typeset(this.node);
   }
-
-  private _ready = new PromiseDelegate<void>();
 }
 
 
@@ -161,56 +196,59 @@ class RenderedMarkdown extends RenderedHTMLCommon {
   /**
    * Construct a new markdown widget.
    */
-  constructor(options: IRenderMime.IRenderOptions) {
+  constructor(options: IRenderMime.IRendererOptions) {
     super(options);
     this.addClass(MARKDOWN_CLASS);
 
     // Initialize the marked library if necessary.
     Private.initializeMarked();
-
-    let source = Private.getSource(options);
-    let parts = removeMath(source);
-    // Add the markdown content asynchronously.
-    marked(parts['text'], (err: any, content: string) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      content = replaceMath(content, parts['math']);
-      if (!options.model.trusted) {
-        content = options.sanitizer.sanitize(content);
-      }
-      Private.appendHtml(this.node, content);
-      Private.headerAnchors(this.node);
-      this.fit();
-      if (options.resolver) {
-        Private.handleUrls(
-          this.node, options.resolver, options.linkHandler).then(() => {
-            this._ready.resolve(undefined);
-        });
-      } else {
-        this._ready.resolve(undefined);
-      }
-    });
   }
 
   /**
-   * A promise that resolves when the rendered content is ready.
+   * Render a mime model.
    */
-  get ready(): Promise<void> {
-    return this._ready.promise;
+  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      let source = Private.getSource(model, this.mimeType);
+      let parts = removeMath(source);
+      // Add the markdown content asynchronously.
+      marked(parts['text'], (err: any, content: string) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        content = replaceMath(content, parts['math']);
+        if (!model.trusted) {
+          content = this.sanitizer.sanitize(content);
+        }
+        Private.setHtml(this.node, content);
+        Private.headerAnchors(this.node);
+        this.fit();
+        if (this.resolver) {
+          Private.handleUrls(
+            this.node, this.resolver, this.linkHandler
+          ).then(() => {
+            if (this.isAttached) {
+              typeset(this.node);
+            }
+            resolve(void 0);
+          });
+        } else {
+          if (this.isAttached) {
+            typeset(this.node);
+          }
+          resolve(void 0);
+        }
+      });
+    });
   }
 
   /**
    * A message handler invoked on an `'after-attach'` message.
    */
   onAfterAttach(msg: Message): void {
-    this.ready.then(() => {
-      typeset(this.node);
-    });
+    typeset(this.node);
   }
-
-  private _ready = new PromiseDelegate<void>();
 }
 
 
@@ -218,22 +256,25 @@ class RenderedMarkdown extends RenderedHTMLCommon {
  * A widget for displaying LaTeX output.
  */
 export
-class RenderedLatex extends Widget {
+class RenderedLatex extends RenderedCommon {
   /**
    * Construct a new latex widget.
    */
-  constructor(options: IRenderMime.IRenderOptions) {
-    super();
-    let source = Private.getSource(options);
-    this.node.textContent = source;
+  constructor(options: IRenderMime.IRendererOptions) {
+    super(options);
     this.addClass(LATEX_CLASS);
   }
 
   /**
-   * A promise that resolves when the rendered content is ready.
+   * Render a mime model.
    */
-  get ready(): Promise<void> {
-    return Promise.resolve(undefined);
+  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+    let source = Private.getSource(model, this.mimeType);
+    this.node.textContent = source;
+    if (this.isAttached) {
+      typeset(this.node);
+    }
+    return Promise.resolve(void 0);
   }
 
   /**
@@ -249,16 +290,25 @@ class RenderedLatex extends Widget {
  * A widget for displaying rendered images.
  */
 export
-class RenderedImage extends Widget {
+class RenderedImage extends RenderedCommon {
   /**
    * Construct a new rendered image widget.
    */
-  constructor(options: IRenderMime.IRenderOptions) {
-    super();
+  constructor(options: IRenderMime.IRendererOptions) {
+    super(options);
     let img = document.createElement('img');
-    let source = Private.getSource(options);
-    img.src = `data:${options.mimeType};base64,${source}`;
-    let metadata = options.model.metadata.get(options.mimeType) as JSONObject;
+    this.node.appendChild(img);
+    this.addClass(IMAGE_CLASS);
+  }
+
+  /**
+   * Render a mime model.
+   */
+  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+    let source = Private.getSource(model, this.mimeType);
+    let img = this.node.firstChild as HTMLImageElement;
+    img.src = `data:${this.mimeType};base64,${source}`;
+    let metadata = model.metadata[this.mimeType] as JSONObject;
     if (metadata) {
       let metaJSON = metadata as JSONObject;
       if (typeof metaJSON['height'] === 'number') {
@@ -268,15 +318,7 @@ class RenderedImage extends Widget {
         img.width = metaJSON['width'] as number;
       }
     }
-    this.node.appendChild(img);
-    this.addClass(IMAGE_CLASS);
-  }
-
-  /**
-   * A promise that resolves when the rendered content is ready.
-   */
-  get ready(): Promise<void> {
-    return Promise.resolve(undefined);
+    return Promise.resolve(void 0);
   }
 }
 
@@ -285,28 +327,32 @@ class RenderedImage extends Widget {
  * A widget for displaying rendered text.
  */
 export
-class RenderedText extends Widget {
+class RenderedText extends RenderedCommon {
   /**
    * Construct a new rendered text widget.
    */
-  constructor(options: IRenderMime.IRenderOptions) {
-    super();
-    let source = Private.getSource(options);
-    let data = escape_for_html(source);
+  constructor(options: IRenderMime.IRendererOptions) {
+    super(options);
     let pre = document.createElement('pre');
-    pre.innerHTML = ansi_to_html(data, {use_classes: true});
     this.node.appendChild(pre);
     this.addClass(TEXT_CLASS);
-    if (options.mimeType === 'application/vnd.jupyter.stderr') {
+    if (this.mimeType === 'application/vnd.jupyter.stderr') {
       this.addClass(ERROR_CLASS);
     }
   }
 
   /**
-   * A promise that resolves when the rendered content is ready.
+   * Render a mime model.
    */
-  get ready(): Promise<void> {
-    return Promise.resolve(undefined);
+  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+    let source = Private.getSource(model, this.mimeType);
+    let data = escape_for_html(source);
+    let pre = this.node.firstChild as HTMLPreElement;
+    while (pre.firstChild) {
+      pre.removeChild(pre.firstChild);
+    }
+    pre.innerHTML = ansi_to_html(data, {use_classes: true});
+    return Promise.resolve(void 0);
   }
 }
 
@@ -315,25 +361,26 @@ class RenderedText extends Widget {
  * A widget for displaying rendered JavaScript.
  */
 export
-class RenderedJavaScript extends Widget {
+class RenderedJavaScript extends RenderedCommon {
   /**
    * Construct a new rendered JavaScript widget.
    */
-  constructor(options: IRenderMime.IRenderOptions) {
-    super();
+  constructor(options: IRenderMime.IRendererOptions) {
+    super(options);
     let s = document.createElement('script');
     s.type = options.mimeType;
-    let source = Private.getSource(options);
-    s.textContent = source;
     this.node.appendChild(s);
     this.addClass(JAVASCRIPT_CLASS);
   }
 
   /**
-   * A promise that resolves when the rendered content is ready.
+   * Render a mime model.
    */
-  get ready(): Promise<void> {
-    return Promise.resolve(undefined);
+  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+    let s = this.node.firstChild as HTMLScriptElement;
+    let source = Private.getSource(model, this.mimeType);
+    s.textContent = source;
+    return Promise.resolve(void 0);
   }
 }
 
@@ -342,47 +389,40 @@ class RenderedJavaScript extends Widget {
  * A widget for displaying rendered SVG content.
  */
 export
-class RenderedSVG extends Widget {
+class RenderedSVG extends RenderedCommon {
   /**
    * Construct a new rendered SVG widget.
    */
-  constructor(options: IRenderMime.IRenderOptions) {
-    super();
-    let source = Private.getSource(options);
-    this.node.innerHTML = source;
-    let svgElement = this.node.getElementsByTagName('svg')[0];
-    if (!svgElement) {
-      throw new Error('SVGRender: Error: Failed to create <svg> element');
-    }
+  constructor(options: IRenderMime.IRendererOptions) {
+    super(options);
     this.addClass(SVG_CLASS);
-    if (options.resolver) {
-      Private.handleUrls(
-        this.node, options.resolver, options.linkHandler
-      ).then(() => {
-        this._ready.resolve(undefined);
-      });
-    } else {
-      this._ready.resolve(undefined);
-    }
   }
 
   /**
-   * A promise that resolves when the rendered content is ready.
+   * Render a mime model.
    */
-  get ready(): Promise<void> {
-    return this._ready.promise;
+  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+    let source = Private.getSource(model, this.mimeType);
+    Private.setHtml(this.node, source);
+    let svgElement = this.node.getElementsByTagName('svg')[0];
+    if (!svgElement) {
+      let msg = 'SVGRender: Error: Failed to create <svg> element';
+      return Promise.reject(new Error(msg));
+    }
+    if (this.resolver) {
+      return Private.handleUrls(
+        this.node, this.resolver, this.linkHandler
+      );
+    }
+    return Promise.resolve(void 0);
   }
 
   /**
    * A message handler invoked on an `'after-attach'` message.
    */
   onAfterAttach(msg: Message): void {
-    this.ready.then(() => {
-      typeset(this.node);
-    });
+    typeset(this.node);
   }
-
-  private _ready = new PromiseDelegate<void>();
 }
 
 
@@ -390,26 +430,27 @@ class RenderedSVG extends Widget {
  * A widget for displaying rendered PDF content.
  */
 export
-class RenderedPDF extends Widget {
+class RenderedPDF extends RenderedCommon {
   /**
    * Construct a new rendered PDF widget.
    */
-  constructor(options: IRenderMime.IRenderOptions) {
-    super();
-    let source = Private.getSource(options);
+  constructor(options: IRenderMime.IRendererOptions) {
+    super(options);
     let a = document.createElement('a');
     a.target = '_blank';
     a.textContent = 'View PDF';
-    a.href = `data:application/pdf;base64,${source}`;
     this.node.appendChild(a);
     this.addClass(PDF_CLASS);
   }
 
   /**
-   * A promise that resolves when the rendered content is ready.
+   * Render a mime model.
    */
-  get ready(): Promise<void> {
-    return Promise.resolve(undefined);
+  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+    let source = Private.getSource(model, this.mimeType);
+    let a = this.node.firstChild as HTMLAnchorElement;
+    a.href = `data:application/pdf;base64,${source}`;
+    return Promise.resolve(void 0);
   }
 }
 
@@ -422,15 +463,19 @@ namespace Private {
    * Extract the source text from render options.
    */
   export
-  function getSource(options: IRenderMime.IRenderOptions): string {
-    return String(options.model.data.get(options.mimeType));
+  function getSource(model: IRenderMime.IMimeModel, mimeType: string): string {
+    return String(model.data[mimeType]);
   }
 
   /**
-   * Append trusted html to a node.
+   * Set trusted html to a node.
    */
   export
-  function appendHtml(node: HTMLElement, html: string): void {
+  function setHtml(node: HTMLElement, html: string): void {
+    // Remove any existing child nodes.
+    while (node.firstChild) {
+      node.removeChild(node.firstChild);
+    }
     try {
       let range = document.createRange();
       node.appendChild(range.createContextualFragment(html));

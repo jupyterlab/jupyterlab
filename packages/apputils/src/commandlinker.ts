@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  JSONObject, Token
+  JSONObject
 } from '@phosphor/coreutils';
 
 import {
@@ -31,98 +31,12 @@ const COMMAND_ATTR = 'commandlinker-command';
 const ARGS_ATTR = 'commandlinker-args';
 
 
-/* tslint:disable */
-/**
- * The command linker token.
- */
-export
-const ICommandLinker = new Token<ICommandLinker>('jupyter.services.command-linker');
-/* tslint:enable */
-
-
-/**
- * A helper class to generate clickables that execute commands.
- */
-export
-interface ICommandLinker extends IDisposable {
-  /**
-   * Connect a command/argument pair to a given node so that when it is clicked,
-   * the command will execute.
-   *
-   * @param node - The node being connected.
-   *
-   * @param command - The command ID to execute upon click.
-   *
-   * @param args - The arguments with which to invoke the command.
-   *
-   * @returns The same node that was passed in, after it has been connected.
-   *
-   * #### Notes
-   * Only `click` events will execute the command on a connected node. So, there
-   * are two considerations that are relevant:
-   * 1. If a node is connected, the default click action will be prevented.
-   * 2. The `HTMLElement` passed in should be clickable.
-   */
-  connectNode(node: HTMLElement, command: string, args: JSONObject): HTMLElement;
-
-  /**
-   * Disconnect a node that has been connected to execute a command on click.
-   *
-   * @param node - The node being disconnected.
-   *
-   * @returns The same node that was passed in, after it has been disconnected.
-   *
-   * #### Notes
-   * This method is safe to call multiple times and is safe to call on nodes
-   * that were never connected.
-   *
-   * This method can be called on rendered virtual DOM nodes that were populated
-   * using the `populateVNodeDataset` method in order to disconnect them from
-   * executing their command/argument pair.
-   */
-  disconnectNode(node: HTMLElement): HTMLElement;
-
-  /**
-   * Populate the `dataset` attribute within the collection of attributes used
-   * to instantiate a virtual DOM node with the values necessary for its
-   * rendered DOM node to respond to clicks by executing a command/argument
-   * pair.
-   *
-   * @param command - The command ID to execute upon click.
-   *
-   * @param args - The arguments with which to invoke the command.
-   *
-   * @returns A `dataset` collection for use within virtual node attributes.
-   *
-   * #### Notes
-   * The return value can be used on its own as the value for the `dataset`
-   * attribute of a virtual element, or it can be added to an existing `dataset`
-   * as in the example below.
-   *
-   * #### Example
-   * ```typescript
-   * let command = 'some:command-id';
-   * let args = { alpha: 'beta' };
-   * let anchor = h.a({
-   *   className: 'some-class',
-   *   dataset: {
-   *     foo: '1',
-   *     bar: '2',
-   *     ../...linker.populateVNodeDataset(command, args)
-   *   }
-   * }, 'some text');
-   * ```
-   */
-  populateVNodeDataset(command: string, args: JSONObject): ElementDataset;
-}
-
-
 /**
  * A static class that provides helper methods to generate clickable nodes that
  * execute registered commands with pre-populated arguments.
  */
 export
-class CommandLinker implements ICommandLinker {
+class CommandLinker implements IDisposable {
   /**
    * Instantiate a new command linker.
    */
