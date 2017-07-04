@@ -1650,7 +1650,7 @@ namespace DirListing {
     }
 
     parseFileExtension(path: string): string {
-      var fileExtension = PathExt.extname(path);
+      var fileExtension = PathExt.extname(path).toLocaleLowerCase();
       switch (fileExtension) {
         case '.md':
           return MARKDOWN_ICON_CLASS;
