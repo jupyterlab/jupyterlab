@@ -11,75 +11,78 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  AppendOutputAction
+  find
+} from '@phosphor/algorithm';
+
+import {
+  AppendOutputAction, ClearOutputsAction
 } from './actions';
 
 import {
-  OutputArea, OutputStore
+  OutputStore
 } from './models';
 
 
 /**
  * Execute code for an output area.
  *
- * @param code - The code to execute.
- *
- * @param kernel - The kernel to use for execution.
- *
- * @param outputAreaId - The id of the output area.
- *
- * @param store - The output data store to update with execution.
+ * @param options - The execution options.
  *
  * @returns The kernel future for the execution request.
  *
  * #### Notes
- * This function handles the iopub, reply, and stdin messages for
- * the request. The caller should not handle those messages.
+ * This function handles the `IOPub` and `Reply` messages for the
+ * request. The caller should not handle those messages.
  *
- * The caller will typically be responsible for:
+ * The caller is responsible for:
+ *   - Disposing of the future if the output area is deleted.
  *   - Disposing of the future and clearing the output before
  *     executing more code for the same output area.
  *   - Using the `done` promise to perform any cleanup after
  *     the execution is "finished".
+ *   - Handling `Stdin` messages.
  */
 export
-function execute(code: string, kernel: Kernel.IKernelConnection, outputAreaId: string, store: OutputStore): Kernel.IFuture {
+function execute(options: execute.IOptions): Kernel.IFuture {
+  // Unpack the options.
+  const { kernel, content, areaId, store } = options;
+
   // Request execution from the kernel.
-  const future = kernel.requestExecute({ code, stop_on_error: true }, false);
+  const future = kernel.requestExecute(content, false);
 
   // Set up the future handlers.
   future.onIOPub = onIOPub;
   future.onReply = onReply;
-  future.onStdin = onStdin;
 
   // Return the future.
   return future;
 
-  function getArea(): OutputArea | null {
-    // Fetch the area from the data store.
-    let area = store.state.outputAreaTable[outputAreaId] || null;
-
-    // If the area has been deleted, dispose the future.
-    if (!area) {
-      future.dispose();
-    }
-
-    // Return the area.
-    return area;
-  }
-
   function onIOPub(msg: KernelMessage.IIOPubMessage): void {
+    // Get the message type from the header.
+    let mt = msg.header.msg_type;
 
-  }
-
-  function onReply(msg: KernelMessage.IExecuteReplyMsg): void {
-    // Bail if the output area has been deleted.
-    if (!getArea()) {
+    // Handle message which append an output.
+    switch (mt) {
+    case 'error':
+    case 'stream':
+    case 'display_data':
+    case 'execute_result':
+    case 'update_display_data':
+      let output = { output_type: mt, ...msg.content };
+      store.dispatch(new AppendOutputAction(areaId, output));
       return;
     }
 
+    // Handle a clear output message.
+    if (KernelMessage.isClearOutputMsg(msg)) {
+      store.dispatch(new ClearOutputsAction(areaId, msg.content.wait));
+      return;
+    }
+  }
+
+  function onReply(msg: KernelMessage.IExecuteReplyMsg): void {
     // Ignore `error` and `abort` replies.
-    if (msg.content.status !== 'okay') {
+    if (msg.content.status !== 'ok') {
       return;
     }
 
@@ -92,7 +95,7 @@ function execute(code: string, kernel: Kernel.IKernelConnection, outputAreaId: s
     }
 
     // Find the first page in the payload.
-    let page = payload.find(item => item.source === 'page');
+    let page = find(payload, p => p.source === 'page');
 
     // Bail if there is no pager output.
     if (!page) {
@@ -103,17 +106,44 @@ function execute(code: string, kernel: Kernel.IKernelConnection, outputAreaId: s
     let data = page.data as nbformat.IMimeBundle;
 
     // Create the action to add the output.
-    let action = new AppendOutputAction(outputAreaId, {
+    let action = new AppendOutputAction(areaId, {
       output_type: 'display_data', data, metadata: {}
     });
 
     // Dispatch the action to the store.
     store.dispatch(action);
   }
+}
 
-  function onStdin(msg: msg: KernelMessage.IStdinMessage): void {
-    // if (KernelMessage.isInputRequestMsg(msg)) {
-    //   this._onInputRequest(msg, value);
-    // }
+
+/**
+ * The namespace for the `execute` function statics.
+ */
+export
+namespace execute {
+  /**
+   * The options for the `execute` function.
+   */
+  export
+  interface IOptions {
+    /**
+     * The kernel to use for execution.
+     */
+    kernel: Kernel.IKernelConnection;
+
+    /**
+     * The content for the execute request.
+     */
+    content: KernelMessage.IExecuteRequest;
+
+    /**
+     * The output data store to update with execution.
+     */
+    store: OutputStore;
+
+    /**
+     * The id of the output area to update in the store.
+     */
+    areaId: string;
   }
 }

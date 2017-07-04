@@ -18,7 +18,7 @@
     "@jupyterlab/coreutils": "^0.7.0",
     "@jupyterlab/docregistry": "^0.7.0",
     "@phosphor/commands": "^1.2.1",
-    "@phosphor/coreutils": "^1.1.1"
+    "@phosphor/coreutils": "^1.2.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",

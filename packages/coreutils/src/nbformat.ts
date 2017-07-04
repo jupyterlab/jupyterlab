@@ -73,7 +73,7 @@ namespace nbformat {
    * A value in a mime bundle.
    */
   export
-  type MimeValue = string | string[] | JSONObject;
+  type MimeValue = string | JSONObject;
 
   /**
    * A mime-type keyed dictionary of data.
@@ -197,7 +197,7 @@ namespace nbformat {
     /**
      * Contents of the cell, represented as an array of lines.
      */
-    source: string | string[];
+    source: string;
 
     /**
      * Cell-level metadata.
@@ -301,7 +301,6 @@ namespace nbformat {
   export
   interface IUnrecognizedCell extends IBaseCell { }
 
-
   /**
    * A cell union type.
    */
@@ -356,7 +355,7 @@ namespace nbformat {
   }
 
   /**
-   * Result of executing a code cell.
+   * Result of executing a code cell.l
    */
   export
   interface IExecuteResult extends IBaseOutput {
@@ -400,6 +399,11 @@ namespace nbformat {
      * Cell output metadata.
      */
     metadata: OutputMetadata;
+
+    /**
+     * The transient data for the output.
+     */
+    transient?: { display_id?: string };
   }
 
   /**
@@ -421,6 +425,11 @@ namespace nbformat {
      * Cell output metadata.
      */
     metadata: OutputMetadata;
+
+    /**
+     * The transient data for the output.
+     */
+    transient: { display_id: string };
   }
 
   /**
@@ -441,7 +450,7 @@ namespace nbformat {
     /**
      * The stream's text output.
      */
-    text: string | string[];
+    text: string;
   }
 
   /**

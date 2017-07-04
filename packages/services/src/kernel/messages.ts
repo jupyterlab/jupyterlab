@@ -140,16 +140,39 @@ namespace KernelMessage {
   interface IDisplayDataMsg extends IIOPubMessage {
     content: {
       data: nbformat.IMimeBundle,
-      metadata: nbformat.OutputMetadata;
+      metadata: nbformat.OutputMetadata,
+      transient?: { display_id?: string }
     };
   }
 
   /**
-   * Test whether a kernel message is an `'display_data'` message.
+   * Test whether a kernel message is a `'display_data'` message.
    */
   export
   function isDisplayDataMsg(msg: IMessage): msg is IDisplayDataMsg {
     return msg.header.msg_type === 'display_data';
+  }
+
+  /**
+   * A `'display_data'` message on the `'iopub'` channel.
+   *
+   * See [Update Display ata](https://jupyter-client.readthedocs.io/en/latest/messaging.html#update-display-data).
+   */
+  export
+  interface IUpdateDisplayDataMsg extends IIOPubMessage {
+    content: {
+      data: nbformat.IMimeBundle,
+      metadata: nbformat.OutputMetadata,
+      transient: { display_id: string }
+    };
+  }
+
+  /**
+   * Test whether a kernel message is an `'update_display_data'` message.
+   */
+  export
+  function isUpdateDisplayDataMsg(msg: IMessage): msg is IUpdateDisplayDataMsg {
+    return msg.header.msg_type === 'update_display_data';
   }
 
   /**

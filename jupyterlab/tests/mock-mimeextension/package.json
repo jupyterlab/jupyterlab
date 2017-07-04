@@ -2,7 +2,9 @@
   "name": "@jupyterlab/mime-extension-test",
   "version": "0.1.0",
   "private": true,
-  "jupyterlab": { "mimeExtension": true },
+  "jupyterlab": {
+    "mimeExtension": true
+  },
   "dependencies": {
     "@phosphor/widgets": "^1.3.0"
   },
