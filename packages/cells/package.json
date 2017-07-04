@@ -17,7 +17,6 @@
     "@jupyterlab/codeeditor": "^0.7.0",
     "@jupyterlab/codemirror": "^0.7.0",
     "@jupyterlab/coreutils": "^0.7.0",
-    "@jupyterlab/docregistry": "^0.7.0",
     "@jupyterlab/outputarea": "^0.7.0",
     "@jupyterlab/rendermime": "^0.7.0",
     "@jupyterlab/services": "^0.46.0",

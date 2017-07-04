@@ -452,7 +452,7 @@ class MimeRenderer extends Widget implements DocumentRegistry.IReadyWidget {
   }
 
   /**
-   * The renderime instance associated with the widget.
+   * The rendermime instance associated with the widget.
    */
   readonly rendermime: RenderMime;
 

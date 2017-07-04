@@ -147,7 +147,8 @@ class RenderMime {
    *
    * @param mimeType - The renderer mimeType.
    *
-   * @param rank - The rank of the renderer. Defaults to 100.
+   * @param rank - The rank of the renderer. Defaults to 100.  Lower rank
+   *   indicates higher priority for rendering.
    *
    * #### Notes
    * The renderer will replace an existing renderer for the given
