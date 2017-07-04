@@ -278,3 +278,8 @@
 .jp-FileDialog.jp-mod-conflict input {
   color: red;
 }
+
+
+.jp-FileDialog .jp-new-name-title {
+  margin-top: 12px;
+}

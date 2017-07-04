@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 :root {
-  --jp-private-collapser-width: 16px;
+  --jp-private-collapser-width: 12px;
 }
 
 .jp-Collapser {
@@ -44,7 +44,7 @@
   height: 100%;
   background-repeat: no-repeat;
   background-position: -3px 100%;
-  background-size: 20px;
+  background-size: 16px;
 }
 
 
