@@ -166,7 +166,7 @@ const RENDER_TIMEOUT = 1000;
  * A base cell widget.
  */
 export
-class Cell extends Widget implements {
+class Cell extends Widget {
   /**
    * Construct a new base cell widget.
    */
