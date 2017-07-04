@@ -7,7 +7,7 @@
   "dependencies": {
     "@jupyterlab/coreutils": "^0.7.0",
     "@phosphor/algorithm": "^1.1.1",
-    "@phosphor/coreutils": "^1.1.1",
+    "@phosphor/coreutils": "^1.2.0",
     "@phosphor/disposable": "^1.1.1",
     "@phosphor/signaling": "^1.2.1",
     "@types/text-encoding": "0.0.30"
