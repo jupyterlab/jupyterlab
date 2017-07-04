@@ -254,6 +254,40 @@
 }
 
 
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-YamlIcon {
+  background-image: var(--jp-icon-yaml-selected);
+}
+
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-MarkdownIcon {
+  background-image: var(--jp-icon-markdown-selected);
+}
+
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-ImageIcon {
+  background-image: var(--jp-icon-image-selected);
+}
+
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-SpreadsheetIcon {
+  background-image: var(--jp-icon-spreadsheet-selected);
+}
+
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-JSONIcon {
+  background-image: var(--jp-icon-json-selected);
+}
+
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-PythonIcon {
+  background-image: var(--jp-icon-python-selected);
+}
+
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-RKernelIcon {
+  background-image: var(--jp-icon-r-selected);
+}
+
 .jp-DirListing-item.p-mod-drag-image,
 .jp-DirListing-item.jp-mod-selected.p-mod-drag-image {
   font-size: var(--jp-ui-font-size1);
