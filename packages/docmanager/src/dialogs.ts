@@ -36,6 +36,10 @@ const FILE_DIALOG_CLASS = 'jp-FileDialog';
  */
 const FILE_CONFLICT_CLASS = 'jp-mod-conflict';
 
+/**
+ * The class name added for the new name label in the rename dialog
+ */
+const RENAME_NEWNAME_TITLE_CLASS = 'jp-new-name-title';
 
 /**
  * A stripped-down interface for a file container.
@@ -371,6 +375,7 @@ namespace Private {
 
     let nameTitle = document.createElement('label');
     nameTitle.textContent = 'New Name';
+    nameTitle.className = RENAME_NEWNAME_TITLE_CLASS;
     let name = document.createElement('input');
 
     body.appendChild(existingLabel);

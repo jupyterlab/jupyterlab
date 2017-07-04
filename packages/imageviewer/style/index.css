@@ -7,12 +7,26 @@
 .jp-ImageViewer {
   overflow: auto;
 }
+
+
 .jp-ImageViewer > div {
   transform-origin: top left;
 }
+
 
 .jp-ImageViewer img {
   max-width: 100%;
   max-height: 100%;
   margin: auto;
+}
+
+
+.jp-ImageViewer::before {
+    content: '';
+    display: block;
+    height: var(--jp-toolbar-micro-height);
+    background: var(--jp-toolbar-background);
+    border-bottom: 1px solid var(--jp-toolbar-border-color);
+    box-shadow: var(--jp-toolbar-box-shadow);
+    z-index: 10;
 }

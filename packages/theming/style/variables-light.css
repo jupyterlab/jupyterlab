@@ -148,15 +148,15 @@ all of MD as it is not optimized for dense, information rich UIs.
   /* Cell specific styles */
 
   --jp-cell-padding: 5px;
-  --jp-cell-editor-background: #f7f7f7;
-  --jp-cell-editor-border-color: #cfcfcf;
+  --jp-cell-editor-background: var(--md-grey-50);
+  --jp-cell-editor-border-color: var(--md-grey-400);
   --jp-cell-editor-background-edit: var(--jp-ui-layout-color1);
   --jp-cell-editor-border-color-edit: var(--jp-brand-color1);
   --jp-cell-prompt-width: 100px;
-  --jp-cell-prompt-font-family: 'Roboto Mono', monospace;
-  --jp-cell-prompt-letter-spacing: 0px;
+  --jp-cell-prompt-font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --jp-cell-prompt-letter-spacing: 2.4px;
   --jp-cell-prompt-opacity: 1.0;
-  --jp-cell-prompt-opacity-not-active: 0.4;
+  --jp-cell-prompt-opacity-not-active: 0.56;
   --jp-cell-prompt-font-color-not-active: var(--md-grey-700);
   /* A custom blend of MD grey and blue 600
    * See https://meyerweb.com/eric/tools/color-blend/#546E7A:1E88E5:5:hex */
