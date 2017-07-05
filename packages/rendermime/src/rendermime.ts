@@ -215,7 +215,7 @@ namespace RenderMime {
     /**
      * Intial factories to add to the rendermime instance.
      */
-    initialFactories?: IRenderMime.IRendererFactory[];
+    initialFactories?: ReadonlyArray<IRenderMime.IRendererFactory>;
 
     /**
      * The sanitizer used to sanitize untrusted html inputs.

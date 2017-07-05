@@ -102,39 +102,14 @@ class RenderedVega extends Widget implements IRenderMime.IRenderer {
 
 
 /**
- * A mime renderer factory for Vega/Vega-Lite data.
+ * A mime renderer factory for vega data.
  */
 export
-class VegaRendererFactory implements IRenderMime.IRendererFactory {
-  /**
-   * The mimeTypes this renderer accepts.
-   */
-  mimeTypes = [VEGA_MIME_TYPE, VEGALITE_MIME_TYPE];
-
-  /**
-   * Whether the renderer can create a renderer given the render options.
-   */
-  canCreateRenderer(options: IRenderMime.IRendererOptions): boolean {
-    return this.mimeTypes.indexOf(options.mimeType) !== -1;
-  }
-
-  /**
-   * Render the transformed mime bundle.
-   */
-  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRenderer {
-    return new RenderedVega(options);
-  }
-
-  /**
-   * Whether the renderer will sanitize the data given the render options.
-   */
-  wouldSanitize(options: IRenderMime.IRendererOptions): boolean {
-    return false;
-  }
-}
-
-
-const rendererFactory = new VegaRendererFactory();
+const rendererFactory: IRenderMime.IRendererFactory = {
+  safe: true,
+  mimeTypes: ['text/html'],
+  createRenderer: options => new RenderedVega(options)
+};
 
 const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
   // Vega

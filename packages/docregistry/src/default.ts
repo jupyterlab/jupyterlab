@@ -505,7 +505,7 @@ class MimeRenderer extends Widget implements DocumentRegistry.IReadyWidget {
     }
     let mimeModel = new MimeModel({ data });
     if (!this._renderer) {
-      this._renderer = this.rendermime.createRenderer(mimeModel);
+      this._renderer = this.rendermime.createRenderer(this._mimeType);
       (this.layout as PanelLayout).addWidget(this._renderer);
     }
     return this._renderer.renderModel(mimeModel);
