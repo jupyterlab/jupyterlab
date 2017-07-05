@@ -4,8 +4,10 @@
 import expect = require('expect.js');
 
 import {
-  IDataConnector, ISettingRegistry, SettingRegistry, Settings, StateDB
+  DefaultSchemaValidator, IDataConnector, ISettingRegistry, SettingRegistry,
+  Settings, StateDB
 } from '@jupyterlab/coreutils';
+
 
 import {
   JSONObject
@@ -36,6 +38,126 @@ class TestConnector extends StateDB implements IDataConnector<ISettingRegistry.I
 
 
 describe('@jupyterlab/coreutils', () => {
+
+  describe('DefaultSchemaValidator', () => {
+
+    describe('#constructor()', () => {
+
+      it('should create a new schema validator', () => {
+        const validator = new DefaultSchemaValidator();
+
+        expect(validator).to.be.a(DefaultSchemaValidator);
+      });
+
+    });
+
+    describe('#addSchema()', () => {
+
+      it('should add a schema', () => {
+        const validator = new DefaultSchemaValidator();
+        const plugin = 'foo';
+        const schema = { type: 'object' };
+        const errors = validator.addSchema(plugin, schema);
+
+        expect(errors).to.be(null);
+      });
+
+      it('should return errors if adding failed', () => {
+        const validator = new DefaultSchemaValidator();
+        const plugin = 'foo';
+
+        // Coerce a broken schema for testing.
+        const schema = ({ type: 10 } as any) as ISettingRegistry.ISchema;
+        const errors = validator.addSchema(plugin, schema);
+
+        expect(errors).to.not.be(null);
+      });
+
+      it('should be safe to call multiple times', () => {
+        const validator = new DefaultSchemaValidator();
+        const plugin = 'foo';
+        const schema = { type: 'object' };
+
+        let errors = validator.addSchema(plugin, schema);
+
+        expect(errors).to.be(null);
+        errors = validator.addSchema(plugin, schema);
+        expect(errors).to.be(null);
+      });
+
+    });
+
+    describe('#validateData()', () => {
+
+      it('should validate data against a schema', () => {
+        const id = 'foo';
+        const validator = new DefaultSchemaValidator();
+        const schema = {
+          additionalProperties: false,
+          properties: {
+            bar: { type: 'string' }
+          },
+          type: 'object'
+        };
+        const composite = { };
+        const user = { bar: 'baz' };
+        const plugin = { id, data: { composite, user }, schema };
+
+        let errors = validator.addSchema(id, schema);
+
+        expect(errors).to.be(null);
+        errors = validator.validateData(plugin);
+        expect(errors).to.be(null);
+      });
+
+      it('should return errors if the data fails to validate', () => {
+        const id = 'foo';
+        const validator = new DefaultSchemaValidator();
+        const schema = {
+          additionalProperties: false,
+          properties: {
+            bar: { type: 'string' }
+          },
+          type: 'object'
+        };
+        const composite = { };
+        const user = { baz: 'qux' };
+        const plugin = { id, data: { composite, user }, schema };
+
+        let errors = validator.addSchema(id, schema);
+
+        expect(errors).to.be(null);
+        errors = validator.validateData(plugin);
+        expect(errors).to.not.be(null);
+      });
+
+      it('should populate the composite data', () => {
+        const id = 'foo';
+        const validator = new DefaultSchemaValidator();
+        const schema = {
+          additionalProperties: false,
+          properties: {
+            bar: { type: 'string', default: 'baz' }
+          },
+          type: 'object'
+        };
+        const composite = { } as JSONObject;
+        const user = { } as JSONObject;
+        const plugin = { id, data: { composite, user }, schema };
+
+        let errors = validator.addSchema(id, schema);
+
+        expect(errors).to.be(null);
+        expect(plugin.data.composite.bar).to.be(void 0);
+        errors = validator.validateData(plugin);
+        expect(errors).to.be(null);
+        expect(plugin.data.user.bar).to.be(void 0);
+        expect(plugin.data.composite.bar).to.be(schema.properties.bar.default);
+      });
+
+    });
+
+  });
 
   describe('SettingRegistry', () => {
 

@@ -301,6 +301,7 @@ interface ISettingRegistry extends SettingRegistry {}
 /**
  * The default implementation of a schema validator.
  */
+export
 class DefaultSchemaValidator implements ISchemaValidator {
   /**
    * Instantiate a schema validator.
@@ -324,21 +325,30 @@ class DefaultSchemaValidator implements ISchemaValidator {
    * It is safe to call this function multiple times with the same plugin name.
    */
   addSchema(plugin: string, schema: ISettingRegistry.ISchema): ISchemaValidator.IError[] | null {
-    const validate = this._validator.getSchema('main');
-    const valid = validate(schema);
+    const composer = this._composer;
+    const validator = this._validator;
+    const validate = validator.getSchema('main');
 
-    if (valid) {
-      // Remove if schema already exists.
-      this._composer.removeSchema(plugin);
-      this._validator.removeSchema(plugin);
-
-      // Add schema to the validator and composer.
-      this._composer.addSchema(schema, plugin);
-      this._validator.addSchema(schema, plugin);
-      return null;
+    // Validate against the main schema.
+    if (!(validate(schema) as boolean)) {
+      return validate.errors as ISchemaValidator.IError[];
     }
 
-    return validate.errors as ISchemaValidator.IError[];
+    // Validate against the JSON schema meta-schema.
+    if (!(validator.validateSchema(schema) as boolean)) {
+      return validator.errors as ISchemaValidator.IError[];
+    }
+
+    // Remove if schema already exists.
+    composer.removeSchema(plugin);
+    validator.removeSchema(plugin);
+
+    // Add schema to the validator and composer.
+    composer.addSchema(schema, plugin);
+    validator.addSchema(schema, plugin);
+
+    return null;
+
   }
 
   /**
@@ -373,11 +383,13 @@ class DefaultSchemaValidator implements ISchemaValidator {
       return compose.errors as ISchemaValidator.IError[];
     }
 
+    return null;
   }
 
   private _composer = new Ajv({ useDefaults: true });
   private _validator = new Ajv();
 }
+
 
 /**
  * The default concrete implementation of a setting registry.
