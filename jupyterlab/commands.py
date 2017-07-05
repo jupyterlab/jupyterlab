@@ -17,7 +17,7 @@ from subprocess import check_output, CalledProcessError, STDOUT
 import shutil
 import sys
 import tarfile
-from jupyter_core.paths import ENV_JUPYTER_PATH
+from jupyter_core.paths import ENV_JUPYTER_PATH, jupyter_config_path
 from notebook.nbextensions import (
     GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 )
@@ -43,6 +43,16 @@ def get_app_dir(app_dir=None):
     app_dir = app_dir or os.environ.get('JUPYTERLAB_DIR')
     app_dir = app_dir or pjoin(ENV_JUPYTER_PATH[0], 'lab')
     return os.path.realpath(app_dir)
+
+
+def get_user_settings_dir():
+    """Get the configured JupyterLab app directory.
+    """
+    settings_dir = os.environ.get('JUPYTERLAB_SETTINGS_DIR')
+    settings_dir = settings_dir or pjoin(
+        jupyter_config_path()[0], 'lab', 'userSettings'
+    )
+    return os.path.realpath(settings_dir)
 
 
 def run(cmd, **kwargs):
@@ -659,11 +669,13 @@ def _ensure_package(app_dir, name=None, version=None, logger=None):
 
     # Look for mismatched version.
     pkg_path = pjoin(staging, 'package.json')
+    version_updated = False
     if os.path.exists(pkg_path):
         with open(pkg_path) as fid:
             data = json.load(fid)
         if data['jupyterlab'].get('version', '') != __version__:
             shutil.rmtree(staging)
+            version_updated = True
 
     if not os.path.exists(staging):
         os.makedirs(staging)
@@ -707,11 +719,20 @@ def _ensure_package(app_dir, name=None, version=None, logger=None):
     if version:
         data['jupyterlab']['version'] = version
 
-    data['scripts']['build'] = 'webpack'
-
     pkg_path = pjoin(staging, 'package.json')
     with open(pkg_path, 'w') as fid:
         json.dump(data, fid, indent=4)
+
+    # Copy any missing or outdated schema files.
+    schema_local = pjoin(here, 'schemas')
+    schema_app = pjoin(app_dir, 'schemas')
+    if not os.path.exists(schema_app):
+        os.makedirs(schema_app)
+
+    for schema in os.listdir(schema_local):
+        dest = pjoin(schema_app, schema)
+        if version_updated or not os.path.exists(dest):
+            shutil.copy(pjoin(schema_local, schema), dest)
 
 
 def _is_extension(data):

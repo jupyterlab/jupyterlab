@@ -7,7 +7,9 @@ import os
 
 from jupyterlab_launcher import add_handlers, LabConfig
 
-from .commands import get_app_dir, list_extensions, should_build
+from .commands import (
+    get_app_dir, list_extensions, should_build, get_user_settings_dir
+)
 from .settings_handler import settings_path, SettingsHandler
 from ._version import __version__
 
@@ -91,15 +93,16 @@ def load_jupyter_server_extension(nbapp):
 
     add_handlers(web_app, config)
 
+    user_settings_dir = get_user_settings_dir()
+
     if core_mode:
-        schemas_path = os.path.join(here, 'schemas')
-        user_settings_path = ''
+        schemas_dir = os.path.join(here, 'schemas')
+        user_settings_dir = ''
     else:
-        schemas_path = os.path.join(app_dir, 'schemas')
-        user_settings_path = os.path.join(app_dir, 'userSettings')
+        schemas_dir = os.path.join(app_dir, 'schemas')
 
     settings_handler = (settings_path, SettingsHandler, {
-        'schemas_path': schemas_path,
-        'settings_path': user_settings_path
+        'schemas_dir': schemas_dir,
+        'user_settings_dir': user_settings_dir
     })
     web_app.add_handlers(".*$", [settings_handler])
