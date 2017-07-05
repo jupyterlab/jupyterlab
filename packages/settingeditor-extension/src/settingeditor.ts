@@ -126,7 +126,6 @@ class SettingEditor extends Widget {
     layout.addWidget(panel);
     panel.addWidget(list);
     panel.addWidget(instructions);
-    panel.setRelativeSizes(this._dimensions.outer);
 
     editor.handleMoved.connect(this._onHandleMoved, this);
     list.selected.connect(this._onSelected, this);
@@ -180,12 +179,12 @@ class SettingEditor extends Widget {
     // Allow the message queue (which includes fit requests that might disrupt
     // setting relative sizes) to clear before setting sizes.
     requestAnimationFrame(() => {
-      this._fetchState().then(() => {
-        this._panel.setRelativeSizes(this._dimensions.outer);
-        this._editor.sizes = this._dimensions.inner;
-      }).catch(reason => {
-        console.error('Fetching setting editor state failed', reason);
-      });
+      this._fetchState()
+        .then(() => { this._setDimensions(); })
+        .catch(reason => {
+          console.error('Fetching setting editor state failed', reason);
+          this._setDimensions();
+        });
     });
   }
 
@@ -264,7 +263,7 @@ class SettingEditor extends Widget {
         panel.addWidget(editor);
       }
       editor.settings = settings;
-      panel.setRelativeSizes(this._dimensions.outer);
+      this._setDimensions();
     }).catch(reason => {
       console.error('Loading settings failed.', reason);
     });
@@ -284,6 +283,14 @@ class SettingEditor extends Widget {
         this._saving = false;
         throw reason;
       });
+  }
+
+  /**
+   * Set the dimensions of the setting editor.
+   */
+  private _setDimensions(): void {
+    this._panel.setRelativeSizes(this._dimensions.outer);
+    this._editor.sizes = this._dimensions.inner;
   }
 
   private _dimensions = { inner: [5, 2], outer: [1, 3] };
