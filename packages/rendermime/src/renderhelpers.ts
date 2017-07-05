@@ -53,9 +53,11 @@ namespace RenderHelpers {
       node, source, trusted, sanitizer, resolver, linkHandler, shouldTypeset
     } = options;
 
-    // Clear the content if there is no source.
+    // Clear any existing content.
+    node.textContent = '';
+
+    // Bail if there is no source.
     if (!source) {
-      node.textContent = '';
       return Promise.resolve(undefined);
     }
 
@@ -64,8 +66,15 @@ namespace RenderHelpers {
       source = sanitizer.sanitize(source);
     }
 
-    // Set the inner HTML to the source.
-    node.innerHTML = source;
+    // Add the html to the node.
+    try {
+      let range = document.createRange();
+      node.appendChild(range.createContextualFragment(source));
+    } catch (error) {
+      console.warn('Environment does not support Range ' +
+                   'createContextualFragment, falling back on innerHTML');
+      node.innerHTML = source;
+    }
 
     // Patch the urls if a resolver is available.
     let promise: Promise<void>;

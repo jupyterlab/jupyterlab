@@ -77,11 +77,13 @@ class Tooltip extends Widget {
     let model = new MimeModel({
       data: options.bundle
     });
-    this._content = this._rendermime.createRenderer(model);
-    if (this._content) {
-      this._content.renderModel(model);
-      layout.addWidget(this._content);
+    let mimeType = this._rendermime.preferredMimeType(options.bundle, false);
+    if (!mimeType) {
+      return;
     }
+    this._content = this._rendermime.createRenderer(mimeType);
+    this._content.renderModel(model);
+    layout.addWidget(this._content);
   }
 
   /**

@@ -836,7 +836,7 @@ class MarkdownCell extends Cell {
     if (text !== this._prevText) {
       let mimeModel = new MimeModel({ data: { 'text/markdown': text }});
       if (!this._renderer) {
-        this._renderer = this._rendermime.createRenderer(mimeModel);
+        this._renderer = this._rendermime.createRenderer('text/markdown');
         this._renderer.addClass(MARKDOWN_OUTPUT_CLASS);
       }
       this._prevText = text;
