@@ -7,7 +7,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  ArrayExt, find
+  find
 } from '@phosphor/algorithm';
 
 import {
@@ -22,6 +22,10 @@ import {
   IClientSession, ISanitizer, defaultSanitizer
 } from '@jupyterlab/apputils';
 
+import {
+  ReadonlyJSONObject
+} from '@phosphor/coreutils';
+
 
 /**
  * An object which manages mime renderer factories.
@@ -29,6 +33,9 @@ import {
  * This object is used to render mime models using registered mime
  * renderers, selecting the preferred mime renderer to render the
  * model into a widget.
+ *
+ * #### Notes
+ * This class is not intended to be subclassed.
  */
 export
 class RenderMime {
@@ -43,10 +50,10 @@ class RenderMime {
     this.linkHandler = options.linkHandler || null;
     this.sanitizer = options.sanitizer || defaultSanitizer;
 
-    // Initialize the factory map.
+    // Add the initial factories.
     if (options.initialFactories) {
       for (let factory of options.initialFactories) {
-        Private.addToMap(this._factories, factory, 100);
+        this.addFactory(factory);
       }
     }
   }
@@ -70,7 +77,29 @@ class RenderMime {
    * The ordered list of mimeTypes.
    */
   get mimeTypes(): ReadonlyArray<string> {
-    return this._types || (this._types = Private.sortedTypes(this._factories));
+    return this._types || (this._types = Private.sortedTypes(this._ranks));
+  }
+
+  /**
+   * Find the preferred mime type for a mime bundle.
+   *
+   * @param bundle - The bundle of mime data.
+   *
+   * @param safe - Whether to only consider safe factories.
+   *
+   * @returns The preferred mime type from the available factories,
+   *   or `undefined` if the mime type cannot be rendered.
+   */
+  preferredMimeType(bundle: ReadonlyJSONObject, safe: boolean): string | undefined {
+    return find(this.mimeTypes, mt => {
+      if (!(mt in bundle)) {
+        return false;
+      }
+      if (safe && !this._factories[mt].safe) {
+        return false;
+      }
+      return true;
+    });
   }
 
   /**
@@ -97,19 +126,7 @@ class RenderMime {
     };
 
     // Invoke the best factory for the given mime type.
-    return this._factories[mimeType][0].factory.createRenderer(options);
-  }
-
-  /**
-   * Find the preferred mime type for a collection of types.
-   *
-   * @param types - The mime types from which to choose.
-   *
-   * @returns The preferred mime type from the available factories,
-   *   or `undefined` if the mime type cannot be rendered.
-   */
-  preferredMimeType(types: string[]): string | undefined {
-    return find(this.mimeTypes, mt => types.indexOf(mt) !== -1);
+    return this._factories[mimeType].createRenderer(options);
   }
 
   /**
@@ -127,26 +144,24 @@ class RenderMime {
       linkHandler: options.linkHandler || this.linkHandler
     });
 
-    // Update the clone with a copy of the factory map.
-    clone._factories = Private.cloneMap(this._factories);
-
-    // Update the clone with a copy of the sorted types.
-    clone._types = this.mimeTypes.slice();
+    // Clone the internal state.
+    clone._factories = { ...this._factories };
+    clone._ranks = { ...this._ranks };
+    clone._id = this._id;
 
     // Return the cloned object.
     return clone;
   }
 
   /**
-   * Get the renderer factories registered for a mime type.
+   * Get the renderer factory registered for a mime type.
    *
    * @param mimeType - The mime type of interest.
    *
-   * @returns A new array of the factories for the given mime type.
+   * @returns The factory for the mime type, or `undefined`.
    */
-  getFactories(mimeType: string): IRenderMime.IRendererFactory[] {
-    let pairs = this._factories[mimeType];
-    return pairs ? pairs.map(p => p.factory) : [];
+  getFactory(mimeType: string): IRenderMime.IRendererFactory | undefined {
+    return this._factories[mimeType];
   }
 
   /**
@@ -157,36 +172,31 @@ class RenderMime {
    * @param rank - The rank of the renderer. A lower rank indicates
    *   a higher priority for rendering. The default is `100`.
    *
-   *
    * #### Notes
    * The renderer will replace an existing renderer for the given
    * mimeType.
    */
   addFactory(factory: IRenderMime.IRendererFactory, rank = 100): void {
-    Private.addToMap(this._factories, factory, rank);
+    for (let mt of factory.mimeTypes) {
+      this._factories[mt] = factory;
+      this._ranks[mt] = { rank, id: this._id++ };
+    }
     this._types = null;
   }
 
   /**
-   * Remove a specific renderer factory.
-   *
-   * @param factory - The renderer factory of interest.
-   */
-  removeFactory(factory: IRenderMime.IRendererFactory): void {
-    Private.removeFromMap(this._factories, factory);
-    this._types = null;
-  }
-
-  /**
-   * Remove all renderer factories for a mime type.
+   * Remove the factory for a mime type.
    *
    * @param mimeType - The mime type of interest.
    */
-  removeFactories(mimeType: string): void {
+  removeFactory(mimeType: string): void {
     delete this._factories[mimeType];
+    delete this._ranks[mimeType];
     this._types = null;
   }
 
+  private _id = 0;
+  private _ranks: Private.RankMap = {};
   private _types: string[] | null = null;
   private _factories: Private.FactoryMap = {};
 }
@@ -309,76 +319,35 @@ namespace RenderMime {
  */
 namespace Private {
   /**
-   * A pair which holds a rank and renderer factory.
+   * A type alias for a mime rank and tie-breaking id.
    */
   export
-  type FactoryPair = {
-    readonly rank: number;
-    readonly factory: IRenderMime.IRendererFactory;
-  };
+  type RankPair = { readonly id: number, readonly rank: number };
+
+  /**
+   * A type alias for a mapping of mime type -> rank pair.
+   */
+  export
+  type RankMap = { [key: string]: RankPair };
 
   /**
    * A type alias for a mapping of mime type -> ordered factories.
    */
   export
-  type FactoryMap = { [key: string]: FactoryPair[] };
-
-  /**
-   * Add a factory to a factory map.
-   *
-   * This inserts the factory in each bucket according to rank.
-   */
-  export
-  function addToMap(map: FactoryMap, factory: IRenderMime.IRendererFactory, rank: number): void {
-    for (let key of factory.mimeTypes) {
-      let pairs = map[key] || (map[key] = []);
-      let i = ArrayExt.lowerBound(pairs, rank, rankCmp);
-      ArrayExt.insert(pairs, i, { rank, factory });
-    }
-  }
-
-  /**
-   * Remove a factory from a factory map.
-   *
-   * This removes all instances of the factory from the map.
-   *
-   * Empty buckets are also removed.
-   */
-  export
-  function removeFromMap(map: FactoryMap, factory: IRenderMime.IRendererFactory): void {
-    for (let key in map) {
-      let pairs = map[key];
-      ArrayExt.removeAllWhere(pairs, pair => pair.factory === factory);
-      if (pairs.length === 0) {
-        delete map[key];
-      }
-    }
-  }
-
-  /**
-   * Create a deep clone of a factory map.
-   */
-  export
-  function cloneMap(map: FactoryMap): FactoryMap {
-    let clone: FactoryMap = {};
-    for (let key in map) {
-      clone[key] = map[key].slice();
-    }
-    return clone;
-  }
+  type FactoryMap = { [key: string]: IRenderMime.IRendererFactory };
 
   /**
    * Get the mime types in the map, ordered by rank.
    */
   export
-  function sortedTypes(map: FactoryMap): string[] {
-    return Object.keys(map).sort((a, b) => map[a][0].rank - map[b][0].rank);
-  }
-
-  /**
-   * A pair/rank comparison function.
-   */
-  function rankCmp(pair: FactoryPair, rank: number): number {
-    return pair.rank - rank;
+  function sortedTypes(map: RankMap): string[] {
+    return Object.keys(map).sort((a, b) => {
+      let p1 = map[a];
+      let p2 = map[b];
+      if (p1.rank !== p2.rank) {
+        return p1.rank - p2.rank;
+      }
+      return p1.id - p2.id;
+    });
   }
 }
