@@ -24,7 +24,7 @@ describe('defaultSanitizer', () => {
 
     it('should not allow svg tags', () => {
       let svg = '<svg>foo</svg>';
-      expect(defaultSanitizer.sanitize(svg)).to.be('');
+      expect(defaultSanitizer.sanitize(svg)).to.be('foo');
     });
 
     it('should allow img tags and some attributes', () => {
