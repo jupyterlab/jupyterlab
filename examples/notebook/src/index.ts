@@ -37,7 +37,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  RenderMime
+  RenderMime, defaultRendererFactories
 } from '@jupyterlab/rendermime';
 
 
@@ -94,8 +94,9 @@ function createApp(manager: ServiceManager.IManager): void {
     commands.processKeydownEvent(event);
   }, useCapture);
 
-  let initialFactories = RenderMime.getDefaultFactories();
-  let rendermime = new RenderMime({ initialFactories });
+  let rendermime = new RenderMime({
+    initialFactories: defaultRendererFactories
+  });
 
   let opener = {
     open: (widget: Widget) => {
