@@ -180,10 +180,10 @@ class SettingEditor extends Widget {
     // setting relative sizes) to clear before setting sizes.
     requestAnimationFrame(() => {
       this._fetchState()
-        .then(() => { this._setDimensions(); })
+        .then(() => { this._setPresets(); })
         .catch(reason => {
           console.error('Fetching setting editor state failed', reason);
-          this._setDimensions();
+          this._setPresets();
         });
     });
   }
@@ -219,19 +219,23 @@ class SettingEditor extends Widget {
 
       const inner = editor.sizes;
       const outer = panel.relativeSizes();
+      const plugin = editor.settings ? editor.settings.plugin : '';
 
       if (!saved) {
-        this._dimensions = { inner, outer };
+        this._presets = { inner, outer, plugin };
         return;
       }
 
-      const dimensions = this._dimensions;
+      const presets = this._presets;
 
       if (Array.isArray(saved.inner)) {
-        dimensions.inner = saved.inner as number[];
+        presets.inner = saved.inner as number[];
       }
       if (Array.isArray(saved.outer)) {
-        dimensions.outer = saved.outer as number[];
+        presets.outer = saved.outer as number[];
+      }
+      if (typeof saved.plugin === 'string') {
+        presets.plugin = saved.plugin as string;
       }
     });
   }
@@ -240,8 +244,8 @@ class SettingEditor extends Widget {
    * Handle layout changes.
    */
   private _onHandleMoved(): void {
-    this._dimensions.inner = this._editor.sizes;
-    this._dimensions.outer = this._panel.relativeSizes();
+    this._presets.inner = this._editor.sizes;
+    this._presets.outer = this._panel.relativeSizes();
     this._saveState().catch(reason => {
       console.error('Saving setting editor state failed', reason);
     });
@@ -251,22 +255,13 @@ class SettingEditor extends Widget {
    * Handle a new selection in the plugin list.
    */
   private _onSelected(sender: any, plugin: string): void {
-    const editor = this._editor;
-    const instructions = this._instructions;
-    const panel = this._panel;
-
-    this.registry.load(plugin).then(settings => {
-      if (instructions.isAttached) {
-        instructions.parent = null;
-      }
-      if (!editor.isAttached) {
-        panel.addWidget(editor);
-      }
-      editor.settings = settings;
-      this._setDimensions();
-    }).catch(reason => {
-      console.error('Loading settings failed.', reason);
-    });
+    this._presets.plugin = plugin;
+    this._saveState()
+      .then(() => { this._setPresets(); })
+      .catch(reason => {
+        console.error('Saving setting editor state failed', reason);
+        this._setPresets();
+      });
   }
 
   /**
@@ -274,7 +269,7 @@ class SettingEditor extends Widget {
    */
   private _saveState(): Promise<void> {
     const { key, state } = this;
-    const value = this._dimensions;
+    const value = this._presets;
 
     this._saving = true;
     return state.save(key, value)
@@ -286,19 +281,51 @@ class SettingEditor extends Widget {
   }
 
   /**
-   * Set the dimensions of the setting editor.
+   * Set the presets of the setting editor.
    */
-  private _setDimensions(): void {
-    this._panel.setRelativeSizes(this._dimensions.outer);
-    this._editor.sizes = this._dimensions.inner;
+  private _setPresets(): void {
+    const editor = this._editor;
+    const list = this._list;
+    const panel = this._panel;
+    const { inner, outer, plugin } = this._presets;
+
+    panel.setRelativeSizes(outer);
+    editor.sizes = inner;
+
+    if (!plugin) {
+      editor.settings = null;
+      list.selection = '';
+      return;
+    }
+
+    if (editor.settings && editor.settings.plugin === plugin) {
+      return;
+    }
+
+    const instructions = this._instructions;
+
+    this.registry.load(plugin).then(settings => {
+      if (instructions.isAttached) {
+        instructions.parent = null;
+      }
+      if (!editor.isAttached) {
+        panel.addWidget(editor);
+      }
+      editor.settings = settings;
+      list.selection = plugin;
+    }).catch(reason => {
+      console.error('Loading settings failed.', reason);
+      list.selection = this._presets.plugin = '';
+      editor.settings = null;
+    });
   }
 
-  private _dimensions = { inner: [5, 2], outer: [1, 3] };
   private _editor: PluginEditor;
   private _fetching: Promise<void> | null = null;
   private _instructions: Widget;
   private _list: PluginList;
   private _panel: SplitPanel;
+  private _presets = { inner: [5, 2], outer: [1, 3], plugin: '' };
   private _saving = false;
 }
 
@@ -415,6 +442,20 @@ class PluginList extends Widget {
    */
   get selected(): ISignal<this, string> {
     return this._selected;
+  }
+
+  /**
+   * The selection value of the plugin list.
+   */
+  get selection(): string {
+    return this._selection;
+  }
+  set selection(selection: string) {
+    if (this._selection === selection) {
+      return;
+    }
+    this._selection = selection;
+    this.update();
   }
 
   /**
