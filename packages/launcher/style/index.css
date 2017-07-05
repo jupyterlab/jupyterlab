@@ -4,6 +4,22 @@
 |----------------------------------------------------------------------------*/
 
 
+/* Private CSS variables */
+
+
+:root {
+  --jp-private-launcher-top-margin: 16px;
+  --jp-private-launcher-side-margin: 32px;
+  --jp-private-launcher-card-size: 100px;
+  --jp-private-launcher-card-label-height: 25px;
+  --jp-private-launcher-card-icon-height: 75px;
+  --jp-private-launcher-large-icon-size: 52px;
+  --jp-private-launcher-small-icon-size: 32px;
+}
+
+
+/* Launcher */
+
 .jp-Launcher {
   margin: 0;
   padding: 0;
@@ -16,12 +32,12 @@
 .jp-Launcher::before {
   content: '';
   display: block;
-  height: 16px;
+  height: var(--jp-toolbar-micro-height);
   width: 100%;
   background: var(--jp-toolbar-background);
   border-bottom: 1px solid var(--jp-toolbar-border-color);
   box-shadow: var(--jp-toolbar-box-shadow);
-  z-index: 10;
+  z-index: 1;
 }
 
 
@@ -36,14 +52,19 @@
 .jp-Launcher-content {
   width: 80%;
   height: 100%;
-  margin-left: auto;
-  margin-right: auto;
+  margin-top: var(--jp-private-launcher-top-margin);
+  margin-left: var(--jp-private-launcher-side-margin);
+  margin-right: var(--jp-private-launcher-side-margin);
   box-sizing: border-box;
 }
+
+
+/* Launcher section */
 
 .jp-Launcher-section {
   width: 100%;
   box-sizing: border-box;
+  padding-bottom: 12px;
 }
 
 
@@ -55,18 +76,24 @@
 }
 
 
-.jp-Launcher-sectionIcon {
+.jp-Launcher-sectionHeader .jp-Launcher-sectionIcon {
   box-sizing: border-box;
+  margin-right: 12px;
+  height: var(--jp-private-launcher-small-icon-size);
+  width: var(--jp-private-launcher-small-icon-size);
+  background-size: var(--jp-private-launcher-small-icon-size) var(--jp-private-launcher-small-icon-size);
 }
 
 
 .jp-Launcher-sectionTitle {
-  margin-left: 16px;
-  font-size: var(--jp-ui-font-size3);
+  font-size: var(--jp-ui-font-size2);
   font-weight: normal;
   color: var(--jp-ui-font-color1);
   box-sizing: border-box;
 }
+
+
+/* Launcher cards */
 
 .jp-Launcher-cardContainer {
   margin: 0;
@@ -82,10 +109,10 @@
   display: flex;
   flex-direction: column;
   cursor: pointer;
-  width: 80px;
-  height: 80px;
+  width: var(--jp-private-launcher-card-size);
+  height: var(--jp-private-launcher-card-size);
   margin: 8px;
-  padding: 12px;
+  padding: 0px;
   border: 1px solid var(--md-grey-400);
   background: var(--jp-layout-color0);
   box-shadow: 0px 1px 1px 1px rgba(0,0,0,.08);
@@ -93,42 +120,62 @@
 }
 
 
+.jp-LauncherCard:hover {
+  box-shadow: 0px 2px 4px 1px rgba(0,0,0,.20);
+}
+
+
+.jp-LauncherCard-icon {
+  width: 100%;
+  height: var(--jp-private-launcher-card-icon-height);
+  box-sizing: border-box;
+  margin: 0px;
+  padding: 0px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.jp-LauncherCard-noKernelIcon {
+  color: var(--md-blue-grey-500);
+  font-weight: normal;
+  font-size: var(--jp-private-launcher-large-icon-size);
+}
+
+
+.jp-LauncherCard-label {
+  width: 100%;
+  height: var(--jp-private-launcher-card-label-height);
+  line-height: var(--jp-private-launcher-card-label-height);
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color1);
+  box-sizing: border-box;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+
+
+/* Icons, kernel icons */
+
 .jp-Launcher-icon {
-  margin: 0;
-  padding: 0;
-  min-height: 68px;
-  min-width: 52px;
-  max-width: 52px;
-  background-size: 52px 68px;
+  margin: 0px;
+  padding: 0px;
+  height: var(--jp-private-launcher-large-icon-size);
+  width: var(--jp-private-launcher-large-icon-size);
+  background-size: var(--jp-private-launcher-large-icon-size) var(--jp-private-launcher-large-icon-size);
   background-repeat: no-repeat;
   cursor: pointer;
 }
 
 
-.jp-Launcher-logo {
-  flex: 0 0 50px;
-  margin-left: auto;
-  margin-right: auto;
-  width: 100%;
-  background-color: var(--jp-layout-color1);
-  background-size: 232px 50px;
-  background-repeat: no-repeat;
-  background-position: center;
-  margin-top: 20px;
+.jp-Launcher-kernelIcon {
+  width: var(--jp-private-launcher-large-icon-size);
+  height: var(--jp-private-launcher-large-icon-size);
+  margin: 0px;
+  padding: 0px;
 }
 
 
 
 
-
-.jp-Launcher-Card img {
-  width: 64px;
-  height: 64px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-
-.jp-LauncherCard:hover {
-  box-shadow: 0px 2px 4px 1px rgba(0,0,0,.20);
-}

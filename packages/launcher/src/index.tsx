@@ -355,6 +355,7 @@ namespace Private {
 
 export
 function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcherCallback: (widget: Widget) => void): vdom.VirtualElement {
+  // Build the onclick handler.
   let onclick = () => {
     let callback = item.callback as any;
     let value = callback(launcher.cwd, item.name);
@@ -363,12 +364,12 @@ function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcher
       launcher.dispose();
     });
   };
-  let iconClass = `${item.iconClass} jp-LauncherCard-itemIcon jp-Launcher-icon`;
+  // Return the VDOM element.
   return (
-    <div className="jp-LauncherCard" onclick={onclick}>
+    <div className="jp-LauncherCard" title={item.displayName} onclick={onclick}>
       <div className="jp-LauncherCard-icon">
-          {(item.kernelIconUrl && kernel) && <img src={item.kernelIconUrl} className="jp-LauncherCard-kernelIcon" />}
-          {(!item.kernelIconUrl && !kernel) && <div className={iconClass} />}
+          {(item.kernelIconUrl && kernel) && <img src={item.kernelIconUrl} className="jp-Launcher-kernelIcon" />}
+          {(!item.kernelIconUrl && !kernel) && <div className={`${item.iconClass} jp-Launcher-icon`} />}
           {(!item.kernelIconUrl && kernel) && <div className="jp-LauncherCard-noKernelIcon">{item.displayName[0].toUpperCase()}</div>}          
       </div>
       <div className="jp-LauncherCard-label">{item.displayName}</div>
