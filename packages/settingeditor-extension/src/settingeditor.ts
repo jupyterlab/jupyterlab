@@ -28,7 +28,7 @@ import {
 } from '@phosphor/virtualdom';
 
 import {
-  PanelLayout, SplitPanel as SPanel, SplitLayout as SLayout, Widget
+  PanelLayout, SplitPanel as SPanel, Widget
 } from '@phosphor/widgets';
 
 
@@ -365,38 +365,11 @@ namespace SettingEditor {
 }
 
 
-
-/**
- * A deprecated split layout that will be removed when the phosphor split panel
- * supports a handle moved signal.
- */
-class SplitLayout extends SLayout {
-  public handleMoved = false;
-
-  moveHandle(index: number, position: number): void {
-    super.moveHandle(index, position);
-    this.handleMoved = true;
-  }
-}
-
-
 /**
  * A deprecated split panel that will be removed when the phosphor split panel
  * supports a handle moved signal.
  */
 class SplitPanel extends SPanel {
-  constructor(options: SPanel.IOptions) {
-    super({
-      ...options,
-      layout: new SplitLayout({
-        renderer: SPanel.defaultRenderer,
-          orientation: options.orientation,
-          alignment: options.alignment,
-          spacing: options.spacing
-        })
-    });
-  }
-
   /**
    * Emits when the split handle has moved.
    */
@@ -405,16 +378,9 @@ class SplitPanel extends SPanel {
   handleEvent(event: Event): void {
     super.handleEvent(event);
 
-    if (event.type !== 'mouseup') {
-      return;
-    }
-
-    const layout = this.layout as SplitLayout;
-
-    if (layout.handleMoved) {
+    if (event.type === 'mouseup') {
       (this.handleMoved as Signal<any, void>).emit(void 0);
     }
-    layout.handleMoved = false;
   }
 }
 
