@@ -301,6 +301,7 @@ interface ISettingRegistry extends SettingRegistry {}
 /**
  * The default implementation of a schema validator.
  */
+export
 class DefaultSchemaValidator implements ISchemaValidator {
   /**
    * Instantiate a schema validator.
@@ -378,6 +379,7 @@ class DefaultSchemaValidator implements ISchemaValidator {
   private _composer = new Ajv({ useDefaults: true });
   private _validator = new Ajv();
 }
+
 
 /**
  * The default concrete implementation of a setting registry.
