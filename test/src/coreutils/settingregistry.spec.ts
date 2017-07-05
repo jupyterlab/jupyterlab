@@ -4,7 +4,8 @@
 import expect = require('expect.js');
 
 import {
-  IDataConnector, ISettingRegistry, SettingRegistry, Settings, StateDB
+  DefaultSchemaValidator, IDataConnector, ISettingRegistry, SettingRegistry,
+  Settings, StateDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -36,6 +37,20 @@ class TestConnector extends StateDB implements IDataConnector<ISettingRegistry.I
 
 
 describe('@jupyterlab/coreutils', () => {
+
+  describe('DefaultSchemaValidator', () => {
+
+    describe('#constructor()', () => {
+
+      it('should create a new schema validator', () => {
+        const validator = new DefaultSchemaValidator();
+
+        expect(validator).to.be.a(DefaultSchemaValidator);
+      });
+
+    });
+
+  });
 
   describe('SettingRegistry', () => {
 
