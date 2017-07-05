@@ -8,6 +8,7 @@ import {
   Settings, StateDB
 } from '@jupyterlab/coreutils';
 
+
 import {
   JSONObject
 } from '@phosphor/coreutils';
@@ -46,6 +47,30 @@ describe('@jupyterlab/coreutils', () => {
         const validator = new DefaultSchemaValidator();
 
         expect(validator).to.be.a(DefaultSchemaValidator);
+      });
+
+    });
+
+    describe('#addSchema()', () => {
+
+      it('should add a schema', () => {
+        const validator = new DefaultSchemaValidator();
+        const plugin = 'foo';
+        const schema = { type: 'object' };
+        const errors = validator.addSchema(plugin, schema);
+
+        expect(errors).to.be(null);
+      });
+
+      it('should return errors if adding failed', () => {
+        const validator = new DefaultSchemaValidator();
+        const plugin = 'foo';
+
+        // Coerce a broken schema for testing.
+        const schema = ({ type: 10 } as any) as ISettingRegistry.ISchema;
+        const errors = validator.addSchema(plugin, schema);
+
+        expect(errors).to.not.be(null);
       });
 
     });
