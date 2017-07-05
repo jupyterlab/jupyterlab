@@ -34,6 +34,11 @@
 }
 
 
+.jp-CodeConsoleIcon {
+  background-image: url(icons/jupyter/console.svg);
+}
+
+
 .jp-CopyIcon {
   background-image: url(icons/md/copy.svg);
 }
@@ -158,6 +163,11 @@
 }
 
 
+.jp-NotebookRunningIcon {
+  background-image: url(icons/jupyter/book_running.svg);
+}
+
+
 .jp-OpenFolderIcon {
   background-image: url(icons/jupyter/directory.svg);
 }
@@ -203,6 +213,16 @@
 }
 
 
+.jp-TerminalIcon {
+  background-image: url(icons/jupyter/terminal.svg);
+}
+
+
+.jp-TextEditorIcon {
+  background-image: url(icons/jupyter/texteditor.svg);
+}
+
+
 .jp-UploadIcon {
   background-image: url(icons/md/upload.svg);
 }
@@ -210,4 +230,9 @@
 
 .jp-YamlIcon {
   background-image: url(icons/jupyter/yml.svg);
+}
+
+
+.jp-QuestionMarkIcon {
+  background-image: url(icons/jupyter/questionmark.svg);
 }

@@ -32,7 +32,7 @@ body {
 
   /* The caret used for select dropdown styling. */
 
-  --jp-ui-select-caret: url('./images/down_caret.svg');
+  --jp-ui-select-caret: url('./icons/md/down_caret.svg');
 
   /* Icons used in the application. */
 
