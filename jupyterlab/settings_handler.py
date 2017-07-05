@@ -11,22 +11,22 @@ from notebook.base.handlers import APIHandler, json_errors
 
 class SettingsHandler(APIHandler):
 
-    def initialize(self, schemas_path, settings_path):
-        self.schemas_path = schemas_path
-        self.settings_path = settings_path
+    def initialize(self, schemas_dir, settings_dir):
+        self.schemas_dir = schemas_dir
+        self.settings_dir = settings_dir
 
     @json_errors
     @web.authenticated
     def get(self, section_name):
         self.set_header("Content-Type", 'application/json')
-        path = os.path.join(self.schemas_path, section_name + '.json')
+        path = os.path.join(self.schemas_dir, section_name + '.json')
 
         if not os.path.exists(path):
             raise web.HTTPError(404, "Schema not found: %r" % section_name)
         with open(path) as fid:
             schema = json.load(fid)
 
-        path = os.path.join(self.settings_path, section_name + '.json')
+        path = os.path.join(self.settings_dir, section_name + '.json')
         settings = dict()
         if os.path.exists(path):
             with open(path) as fid:
@@ -37,9 +37,20 @@ class SettingsHandler(APIHandler):
     @json_errors
     @web.authenticated
     def put(self, section_name):
+        if not self.settings_dir:
+            raise web.HTTPError(404, "No current settings directory")
+
+        path = os.path.join(self.schemas_dir, section_name + '.json')
+
+        if not os.path.exists(path):
+            raise web.HTTPError(404, "Schema not found for: %r" % section_name)
+
         data = self.get_json_body()  # Will raise 400 if content is not valid JSON
-        print(section_name, data)
-        # TODO: set the appropriate settings for the section name.
+
+        path = os.path.join(self.settings_dir, section_name + '.json')
+        with open(path, 'w') as fid:
+            json.dump(fid, data)
+
         self.set_status(204)
 
 
