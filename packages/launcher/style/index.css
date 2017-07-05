@@ -47,6 +47,8 @@
   height: 100%;
   box-sizing: border-box;
   overflow: auto;
+  display: flex;
+  justify-content: center;
 }
 
 
@@ -76,6 +78,9 @@
   box-sizing: border-box;
   /* This is custom tuned to get the section header to align with the cards */
   padding-left: 5px;
+  border-bottom: 1px solid #E0E0E0;
+  padding-bottom: 0px;
+  margin-bottom: 8px;
 }
 
 
