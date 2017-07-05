@@ -383,6 +383,7 @@ class DefaultSchemaValidator implements ISchemaValidator {
       return compose.errors as ISchemaValidator.IError[];
     }
 
+    return null;
   }
 
   private _composer = new Ajv({ useDefaults: true });

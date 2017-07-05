@@ -87,6 +87,76 @@ describe('@jupyterlab/coreutils', () => {
 
     });
 
+    describe('#validateData()', () => {
+
+      it('should validate data against a schema', () => {
+        const id = 'foo';
+        const validator = new DefaultSchemaValidator();
+        const schema = {
+          additionalProperties: false,
+          properties: {
+            bar: { type: 'string' }
+          },
+          type: 'object'
+        };
+        const composite = { };
+        const user = { bar: 'baz' };
+        const plugin = { id, data: { composite, user }, schema };
+
+        let errors = validator.addSchema(id, schema);
+
+        expect(errors).to.be(null);
+        errors = validator.validateData(plugin);
+        expect(errors).to.be(null);
+      });
+
+      it('should return errors if the data fails to validate', () => {
+        const id = 'foo';
+        const validator = new DefaultSchemaValidator();
+        const schema = {
+          additionalProperties: false,
+          properties: {
+            bar: { type: 'string' }
+          },
+          type: 'object'
+        };
+        const composite = { };
+        const user = { baz: 'qux' };
+        const plugin = { id, data: { composite, user }, schema };
+
+        let errors = validator.addSchema(id, schema);
+
+        expect(errors).to.be(null);
+        errors = validator.validateData(plugin);
+        expect(errors).to.not.be(null);
+      });
+
+      it('should populate the composite data', () => {
+        const id = 'foo';
+        const validator = new DefaultSchemaValidator();
+        const schema = {
+          additionalProperties: false,
+          properties: {
+            bar: { type: 'string', default: 'baz' }
+          },
+          type: 'object'
+        };
+        const composite = { } as JSONObject;
+        const user = { } as JSONObject;
+        const plugin = { id, data: { composite, user }, schema };
+
+        let errors = validator.addSchema(id, schema);
+
+        expect(errors).to.be(null);
+        expect(plugin.data.composite.bar).to.be(void 0);
+        errors = validator.validateData(plugin);
+        expect(errors).to.be(null);
+        expect(plugin.data.user.bar).to.be(void 0);
+        expect(plugin.data.composite.bar).to.be(schema.properties.bar.default);
+      });
+
+    });
+
   });
 
   describe('SettingRegistry', () => {
