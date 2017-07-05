@@ -205,7 +205,12 @@ namespace IRenderMime {
   export
   interface IRendererFactory {
     /**
-     * The mimeTypes this renderer accepts.
+     * Whether the factory can safely handle untrusted data.
+     */
+    readonly safe: boolean;
+
+    /**
+     * The mime types handled by this factory.
      */
     readonly mimeTypes: ReadonlyArray<string>;
 
