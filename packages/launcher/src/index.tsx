@@ -29,6 +29,18 @@ import {
 
 import '../style/index.css';
 
+
+/**
+ * The known categories of launcher items and their default ordering.
+ */
+const KNOWN_CATEGORIES = ['Notebook', 'Console', 'Other'];
+
+/**
+ * These laucher item categories are known to have kernels, so the kernel icons are used.
+ */
+const KERNEL_CATEGORIES = ['Notebook', 'Console'];
+
+
 /**
  * The command IDs used by the launcher plugin.
  */
@@ -257,12 +269,9 @@ class Launcher extends VDomRenderer<LauncherModel> {
     let sections: vdom.VirtualNode[] = [];
     let section: vdom.VirtualNode;
 
-    let knownSections = ['Notebook', 'Console', 'Other'];
-    let kernelSections = ['Notebook', 'Console'];
-
-    each(knownSections, (cat, index) => {
+    each(KNOWN_CATEGORIES, (cat, index) => {
       let iconClass = `${(categories[cat][0] as ILauncherItem).iconClass} jp-Launcher-sectionIcon jp-Launcher-icon`;
-      let kernel = kernelSections.indexOf(cat) > -1;
+      let kernel = KERNEL_CATEGORIES.indexOf(cat) > -1;
       if (cat in categories) {
         section = (
           <div className="jp-Launcher-section">
