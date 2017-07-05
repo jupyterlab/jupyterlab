@@ -6,6 +6,10 @@ import {
 } from '@phosphor/algorithm';
 
 import {
+  CommandRegistry
+} from '@phosphor/commands';
+
+import {
   Message
 } from '@phosphor/messaging';
 
@@ -194,6 +198,44 @@ class Toolbar<T extends Widget> extends Widget {
  */
 export
 namespace Toolbar {
+  /**
+   * Create a toolbar item for a command.
+   */
+  export
+  function toolbarButtonFromCommand(commands: CommandRegistry, id: string): ToolbarButton {
+    let oldClass = commands.className(id)
+    let button = new ToolbarButton({
+      onClick: () => { commands.execute(id); },
+      className: oldClass,
+      tooltip: Private.commandTooltip(commands, id),
+    });
+    // Ensure that we pick up relevant changes to the command:
+    function onChange(sender: CommandRegistry, args: CommandRegistry.ICommandChangedArgs) {
+      if (args.id !== id) {
+        return;  // Not our command
+      }
+      if (args.type === 'removed') {
+        // Dispose of button
+        button.dispose();
+      } else if (args.type === 'changed') {
+        // Update all fields (onClick is already indirected)
+        let newClass = sender.className(id);
+        if (newClass !== oldClass) {
+          button.removeClass(oldClass);
+          button.addClass(newClass);
+          oldClass = newClass;
+        }
+        button.node.title = Private.commandTooltip(commands, id);
+      }
+    }
+    commands.commandChanged.connect(onChange);
+    button.disposed.connect(() => {
+      commands.commandChanged.disconnect(onChange);
+    });
+    return button;
+  }
+
+
   /**
    * Create an interrupt toolbar item.
    */
@@ -390,6 +432,14 @@ namespace Private {
     name: 'name',
     create: () => ''
   });
+
+  /**
+   * ToolbarButton tooltip formatter for a command.
+   */
+  export
+  function commandTooltip(commands: CommandRegistry, id: string): string {
+    return commands.caption(id);
+  }
 
   /**
    * A spacer widget.
