@@ -39,7 +39,7 @@ abstract class RenderedCommon extends Widget implements IRenderMime.IRenderer {
     this.sanitizer = options.sanitizer;
     this.resolver = options.resolver;
     this.linkHandler = options.linkHandler;
-    this.node.dataset['mime-type'] = this.mimeType;
+    this.node.dataset['mimeType'] = this.mimeType;
   }
 
   /**
