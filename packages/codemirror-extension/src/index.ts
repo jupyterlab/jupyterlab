@@ -74,7 +74,7 @@ const schema = {
  */
 export
 const servicesPlugin: JupyterLabPlugin<IEditorServices> = {
-  id: IEditorServices.name,
+  id: 'jupyter.services.codemirror-services',
   provides: IEditorServices,
   activate: (): IEditorServices => editorServices
 };
