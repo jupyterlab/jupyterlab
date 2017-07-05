@@ -6,7 +6,7 @@
 	.st0{display:none;}
 	.st1{display:inline;fill:none;stroke:#9E9E9E;stroke-width:2.000000e-02;stroke-miterlimit:10;}
 	.st2{fill:none;}
-	.st3{fill:#757575;}
+	.st3{fill:#FFFFFF;}
 </style>
 <g class="st0">
 	<line class="st1" x1="11" y1="0" x2="11" y2="22"/>
@@ -51,7 +51,7 @@
 	<line class="st1" x1="4.4" y1="0" x2="4.4" y2="22"/>
 	<line class="st1" x1="22" y1="17.6" x2="0" y2="17.6"/>
 	<line class="st1" x1="22" y1="4.4" x2="0" y2="4.4"/>
-	<rect x="7.9" y="7.9" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -4.5563 11.0003)" class="st1" width="6.2" height="6.2"/>
+	<rect x="7.9" y="7.9" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -4.5566 11)" class="st1" width="6.2" height="6.2"/>
 	<line class="st1" x1="0" y1="16.5" x2="22" y2="16.5"/>
 	<line class="st1" x1="16.5" y1="22" x2="16.5" y2="0"/>
 	<line class="st1" x1="5.5" y1="22" x2="5.5" y2="0"/>
