@@ -8,6 +8,7 @@ import os
 from jupyterlab_launcher import add_handlers, LabConfig
 
 from .commands import get_app_dir, list_extensions, should_build
+from .settings_handler import setting_path, SettingsHandler
 from ._version import __version__
 
 #-----------------------------------------------------------------------------
@@ -89,3 +90,13 @@ def load_jupyter_server_extension(nbapp):
         nbapp.log.info(CORE_NOTE.strip())
 
     add_handlers(web_app, config)
+
+    # TODO: how do we handle this for dev_mode?
+    # TODO: how to we handle core extensions in app_mode?
+    schemas_path = ''
+    settings_path = ''
+    settings_handler = (setting_path, SettingsHandler, {
+        schemas_path: schemas_path,
+        settings_path: settings_path
+    })
+    web_app.add_handlers(".*$", [settings_handler])
