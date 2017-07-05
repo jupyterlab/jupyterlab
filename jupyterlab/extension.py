@@ -91,6 +91,10 @@ def load_jupyter_server_extension(nbapp):
 
     add_handlers(web_app, config)
 
+    # NO persistent settings in dev mode
+    # We need to put the schemas in the `jupyterlab/` directory so we
+    # can use them in the release.
+
     # TODO: how do we handle this for dev_mode?
     # TODO: how to we handle core extensions in app_mode?
     schemas_path = ''

@@ -2,7 +2,7 @@
   "name": "@jupyterlab/application-top",
   "version": "0.8.4",
   "scripts": {
-    "build": "webpack",
+    "build": "node copy-schemas.js && webpack",
     "publish": "node make-release.js"
   },
   "dependencies": {
