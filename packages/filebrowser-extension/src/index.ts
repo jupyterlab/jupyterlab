@@ -372,8 +372,7 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
   app.restored.then(() => {
     if (app.shell.isEmpty('main')) {
       commands.execute('launcher:create', {
-        cwd: mainBrowser.model.path,
-        banner: true
+        cwd: mainBrowser.model.path
       });
     }
   });

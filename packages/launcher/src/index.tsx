@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ArrayExt, ArrayIterator, IIterator, map, toArray
+  ArrayExt, ArrayIterator, IIterator, map, each, toArray
 } from '@phosphor/algorithm';
 
 import {
@@ -21,9 +21,7 @@ import {
   Widget
 } from '@phosphor/widgets';
 
-import {
-  h, VirtualNode
-} from '@phosphor/virtualdom';
+import * as vdom from '@phosphor/virtualdom';
 
 import {
   VDomModel, VDomRenderer
@@ -50,31 +48,18 @@ export
 const ILauncher = new Token<ILauncher>('jupyter.services.launcher');
 /* tslint:enable */
 
+const h = vdom.h;
+
 
 /**
- * The class name added to LauncherWidget instances.
+ * The class name added to Launcher instances.
  */
-const LAUNCHER_CLASS = 'jp-LauncherWidget';
+const LAUNCHER_CLASS = 'jp-Launcher';
 
 /**
- * The class name added to LauncherWidget image nodes.
+ * The class name added to Launcher body nodes.
  */
-const IMAGE_CLASS = 'jp-LauncherWidget-image';
-
-/**
- * The class name added to LauncherWidget text nodes.
- */
-const TEXT_CLASS = 'jp-LauncherWidget-text';
-
-/**
- * The class name added to LauncherWidget item nodes.
- */
-const ITEM_CLASS = 'jp-LauncherWidget-item';
-
-/**
- * The class name added to LauncherWidget body nodes.
- */
-const BODY_CLASS = 'jp-LauncherWidget-body';
+// const BODY_CLASS = 'jp-Launcher-body';
 
 
 /**
@@ -165,12 +150,19 @@ interface ILauncherItem {
    * The default rank is `Infinity`.
    */
   rank?: number;
+
+  /**
+   * For items that hava kernel associated with them, the URL of the kernel icon.
+   * 
+   * This is not a CSS class, but the URL that points to the icon in the kernel spec.
+   */
+  kernelIconUrl?: string;
 }
 
 
 /**
  * LauncherModel keeps track of the path to working directory and has a list of
- * LauncherItems, which the LauncherWidget will render.
+ * LauncherItems, which the Launcher will render.
  */
 export
 class LauncherModel extends VDomModel implements ILauncher {
@@ -219,15 +211,14 @@ class LauncherModel extends VDomModel implements ILauncher {
  * A virtual-DOM-based widget for the Launcher.
  */
 export
-class LauncherWidget extends VDomRenderer<LauncherModel> {
+class Launcher extends VDomRenderer<LauncherModel> {
   /**
    * Construct a new launcher widget.
    */
-  constructor(options: LauncherWidget.IOptions) {
+  constructor(options: Launcher.IOptions) {
     super();
     this.cwd = options.cwd;
     this._callback = options.callback;
-    this._header = options.header;
     this.addClass(LAUNCHER_CLASS);
   }
 
@@ -247,49 +238,68 @@ class LauncherWidget extends VDomRenderer<LauncherModel> {
   /**
    * Render the launcher to virtual DOM nodes.
    */
-  protected render(): VirtualNode | VirtualNode[] {
-    // Create an iterator that yields rendered item nodes.
-    let sorted = toArray(this.model.items()).sort(Private.sortCmp);
-    let items = map(sorted, item => {
-      let onclick = () => {
-        let callback = item.callback;
-        let value = callback(this.cwd, item.name);
-        Promise.resolve(value).then(widget => {
-          let callback = this._callback;
-          callback(widget);
-          this.dispose();
-        });
-      };
-      let imageClass = `${item.iconClass} ${IMAGE_CLASS}`;
-      let icon = h.div({ className: imageClass, onclick }, item.iconLabel);
-      let title = item.displayName + (item.category ? ' ' + item.category : '');
-      let text = h.span({className: TEXT_CLASS, onclick, title }, title);
-      return h.div({
-        className: ITEM_CLASS,
-      }, [icon, text]);
+  protected render(): vdom.VirtualNode | vdom.VirtualNode[] {
+    // First group-by categories
+    let categories = Object.create(null);
+    each(this.model.items(), (item, index) => {
+      let cat = item.category || "Other";
+      if (!(cat in categories)) {
+        categories[cat] = []
+      } 
+      categories[cat].push(item);
     });
-
-    let children: VirtualNode[];
-    if (this._header) {
-      children = [this._header].concat(toArray(items));
-    } else {
-      children = toArray(items);
+    // Within each category sort by rank
+    for (let cat in categories) {
+      categories[cat] = categories[cat].sort(Private.sortCmp);
     }
-    return h.div({ className: BODY_CLASS  }, children);
+
+    // Variable to help create sections
+    let sections: vdom.VirtualNode[] = [];
+    let section: vdom.VirtualNode;
+
+    let knownSections = ['Notebook', 'Console', 'Other'];
+    let kernelSections = ['Notebook', 'Console'];
+
+    each(knownSections, (cat, index) => {
+      let iconClass = `${(categories[cat][0] as ILauncherItem).iconClass} jp-Launcher-sectionIcon jp-Launcher-icon`;
+      let kernel = kernelSections.indexOf(cat) > -1;
+      if (cat in categories) {
+        section = (
+          <div className="jp-Launcher-section">
+            <div className="jp-Launcher-sectionHeader">
+              {kernel && <div className={iconClass} />}
+              <h2 className="jp-Launcher-sectionTitle">{cat}</h2>
+            </div>
+            <div className="jp-Launcher-cardContainer">
+              {toArray(map(categories[cat], item => Card(kernel, (item as ILauncherItem), this, this._callback)))}
+            </div>
+          </div>
+        );
+        sections.push(section);
+      }
+    })
+
+    return (
+      <div className="jp-Launcher-body">
+        <div className="jp-Launcher-content">
+        {sections}
+        </div>
+      </div>  
+    );
+      // vdom.h.div({ className: BODY_CLASS  }, sections);
   }
 
   private _callback: (widget: Widget) => void;
-  private _header: VirtualNode;
 }
 
 
 /**
- * The namespace for `LauncherWidget` class statics.
+ * The namespace for `Launcher` class statics.
  */
 export
-namespace LauncherWidget {
+namespace Launcher {
   /**
-   * The options used to create a LauncherWidget.
+   * The options used to create a Launcher.
    */
   export
   interface IOptions {
@@ -303,10 +313,6 @@ namespace LauncherWidget {
      */
     callback: (widget: Widget) => void;
 
-    /**
-     * An optional header virtual node.
-     */
-    header?: VirtualNode;
   }
 }
 
@@ -342,15 +348,33 @@ namespace Private {
       return r1 < r2 ? -1 : 1;  // Infinity safe
     }
 
-    // Next, compare based on category.
-    let d1 = a.category.localeCompare(b.category);
-    if (d1 !== 0) {
-      return d1;
-    }
-
     // Finally, compare by display name.
     return a.displayName.localeCompare(b.displayName);
   }
 }
 
-
+export
+function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcherCallback: (widget: Widget) => void): vdom.VirtualElement {
+  // Build the onclick handler.
+  let onclick = () => {
+    let callback = item.callback as any;
+    let value = callback(launcher.cwd, item.name);
+    Promise.resolve(value).then(widget => {
+      launcherCallback(widget);
+      launcher.dispose();
+    });
+  };
+  // Add a data attribute for the category
+  let dataset = {category: item.category};
+  // Return the VDOM element.
+  return (
+    <div className="jp-LauncherCard" title={item.displayName} onclick={onclick} dataset={dataset}>
+      <div className="jp-LauncherCard-icon">
+          {(item.kernelIconUrl && kernel) && <img src={item.kernelIconUrl} className="jp-Launcher-kernelIcon" />}
+          {(!item.kernelIconUrl && !kernel) && <div className={`${item.iconClass} jp-Launcher-icon`} />}
+          {(!item.kernelIconUrl && kernel) && <div className="jp-LauncherCard-noKernelIcon">{item.displayName[0].toUpperCase()}</div>}          
+      </div>
+      <div className="jp-LauncherCard-label">{item.displayName}</div>
+    </div>
+  );
+}

@@ -14,6 +14,8 @@ import {
 } from '@jupyterlab/docregistry';
 
 
+import '../style/index.css';
+
 /**
  * The class name for the text editor icon from the default theme.
  */
