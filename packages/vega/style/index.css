@@ -4,14 +4,10 @@
 |----------------------------------------------------------------------------*/
 
 
-.jp-RenderedVegaCommon .vega-actions {
-  font-size: var(--jp-ui-font-size1);
-  color: var(--jp-ui-font-color1);
-}
-
-
 .jp-RenderedVegaCommon .vega-actions a {
   margin-right: 8px;
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color2);
 }
 
 
