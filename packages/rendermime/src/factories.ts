@@ -15,6 +15,7 @@ import * as Renderers
  */
 export
 const htmlRendererFactory: IRenderMime.IRendererFactory = {
+  safe: true,
   mimeTypes: ['text/html'],
   createRenderer: options => new Renderers.RenderedHTML(options)
 };
@@ -25,18 +26,9 @@ const htmlRendererFactory: IRenderMime.IRendererFactory = {
  */
 export
 const imageRendererFactory: IRenderMime.IRendererFactory = {
+  safe: true,
   mimeTypes: ['image/png', 'image/jpeg', 'image/gif'],
   createRenderer: options => new Renderers.RenderedImage(options)
-};
-
-
-/**
- * A mime renderer factory for javascript.
- */
-export
-const javaScriptRendererFactory: IRenderMime.IRendererFactory = {
-  mimeTypes: ['text/javascript', 'application/javascript'],
-  createRenderer: options => new Renderers.RenderedJavaScript(options)
 };
 
 
@@ -45,6 +37,7 @@ const javaScriptRendererFactory: IRenderMime.IRendererFactory = {
  */
 export
 const latexRendererFactory: IRenderMime.IRendererFactory = {
+  safe: true,
   mimeTypes: ['text/latex'],
   createRenderer: options => new Renderers.RenderedLatex(options)
 };
@@ -55,8 +48,31 @@ const latexRendererFactory: IRenderMime.IRendererFactory = {
  */
 export
 const markdownRendererFactory: IRenderMime.IRendererFactory = {
+  safe: true,
   mimeTypes: ['text/markdown'],
   createRenderer: options => new Renderers.RenderedMarkdown(options)
+};
+
+
+/**
+ * A mime renderer factory for text and jupyter console text data.
+ */
+export
+const textRendererFactory: IRenderMime.IRendererFactory = {
+  safe: true,
+  mimeTypes: ['text/plain', 'application/vnd.jupyter.stdout', 'application/vnd.jupyter.stderr'],
+  createRenderer: options => new Renderers.RenderedText(options)
+};
+
+
+/**
+ * A mime renderer factory for javascript.
+ */
+export
+const javaScriptRendererFactory: IRenderMime.IRendererFactory = {
+  safe: false,
+  mimeTypes: ['text/javascript', 'application/javascript'],
+  createRenderer: options => new Renderers.RenderedJavaScript(options)
 };
 
 
@@ -65,6 +81,7 @@ const markdownRendererFactory: IRenderMime.IRendererFactory = {
  */
 export
 const pdfRendererFactory: IRenderMime.IRendererFactory = {
+  safe: false,
   mimeTypes: ['application/pdf'],
   createRenderer: options => new Renderers.RenderedPDF(options)
 };
@@ -75,18 +92,9 @@ const pdfRendererFactory: IRenderMime.IRendererFactory = {
  */
 export
 const svgRendererFactory: IRenderMime.IRendererFactory = {
+  safe: false,
   mimeTypes: ['image/svg+xml'],
   createRenderer: options => new Renderers.RenderedSVG(options)
-};
-
-
-/**
- * A mime renderer factory for text and jupyter console text data.
- */
-export
-const textRendererFactory: IRenderMime.IRendererFactory = {
-  mimeTypes: ['text/plain', 'application/vnd.jupyter.stdout', 'application/vnd.jupyter.stderr'],
-  createRenderer: options => new Renderers.RenderedText(options)
 };
 
 
@@ -95,12 +103,12 @@ const textRendererFactory: IRenderMime.IRendererFactory = {
  */
 export
 const defaultRendererFactories: ReadonlyArray<IRenderMime.IRendererFactory> = [
-  htmlRendererFactory,
-  imageRendererFactory,
   javaScriptRendererFactory,
-  latexRendererFactory,
+  htmlRendererFactory,
   markdownRendererFactory,
-  pdfRendererFactory,
+  latexRendererFactory,
   svgRendererFactory,
+  imageRendererFactory,
+  pdfRendererFactory,
   textRendererFactory
 ];

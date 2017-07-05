@@ -39,7 +39,92 @@ import {
  */
 export
 namespace RenderHelpers {
+  /**
+   * Render HTML into a host node.
+   *
+   * @params options - The options for rendering.
+   *
+   * @returns A promise which resolves when rendering is complete.
+   */
+  export
+  function renderHTML(options: renderHTML.IOptions): Promise<void> {
+    // Unpack the options.
+    let {
+      node, source, trusted, sanitizer, resolver, linkHandler, shouldTypeset
+    } = options;
 
+    // Clear the content if there is no source.
+    if (!source) {
+      node.textContent = '';
+      return Promise.resolve(undefined);
+    }
+
+    // Sanitize the source if it is not trusted.
+    if (!trusted) {
+      source = sanitizer.sanitize(source);
+    }
+
+    // Set the inner HTML to the source.
+    node.innerHTML = source;
+
+    // Patch the urls if a resolver is available.
+    let promise: Promise<void>;
+    if (resolver) {
+      promise = Private.handleUrls(node, resolver, linkHandler);
+    } else {
+      promise = Promise.resolve(undefined);
+    }
+
+    // Return the final rendered promise.
+    return promise.then(() => { if (shouldTypeset) { typeset(node); } });
+  }
+
+  /**
+   * The namespace for the `RenderedHTML` class statics.
+   */
+  export
+  namespace renderHTML {
+    /**
+     * The options for the `renderHTML` function.
+     */
+    export
+    interface IOptions {
+      /**
+       * The node to use as the host of the rendered HTML.
+       */
+      node: HTMLElement;
+
+      /**
+       * The HTML source to render.
+       */
+      source: string;
+
+      /**
+       * Whether the source is trusted.
+       */
+      trusted: boolean;
+
+      /**
+       * The html sanitizer.
+       */
+      sanitizer: ISanitizer;
+
+      /**
+       * An optional url resolver.
+       */
+      resolver: IRenderMime.IResolver | null;
+
+      /**
+       * An optional link handler.
+       */
+      linkHandler: IRenderMime.ILinkHandler | null;
+
+      /**
+       * Whether the node should be typeset.
+       */
+      shouldTypeset: boolean;
+    }
+  }
 
   /**
    * Render Markdown into a host node.
@@ -60,9 +145,6 @@ namespace RenderHelpers {
       node.textContent = '';
       return Promise.resolve(undefined);
     }
-
-    // Initialize the marked library if necessary.
-    Private.initializeMarked();
 
     // Separate math from normal markdown text.
     let parts = removeMath(source);
@@ -531,6 +613,27 @@ namespace RenderHelpers {
  */
 namespace Private {
   /**
+   * Render markdown for the specified content.
+   *
+   * @param content - The string of markdown to render.
+   *
+   * @return A promise which resolves with the rendered content.
+   */
+  export
+  function renderMarked(content: string): Promise<string> {
+    initializeMarked();
+    return new Promise<string>((resolve, reject) => {
+      marked(content, (err: any, content: string) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(content);
+        }
+      });
+    });
+  }
+
+  /**
    * Resolve the relative urls in element `src` and `href` attributes.
    *
    * @param node - The head html element.
@@ -647,7 +750,6 @@ namespace Private {
   /**
    * Support GitHub flavored Markdown, leave sanitizing to external library.
    */
-  export
   function initializeMarked(): void {
     if (markedInitialized) {
       return;
@@ -689,26 +791,6 @@ namespace Private {
           callback(null, code);
         });
       }
-    });
-  }
-
-  /**
-   * Render markdown for the specified content.
-   *
-   * @param content - The string of markdown to render.
-   *
-   * @return A promise which resolves with the rendered content.
-   */
-  export
-  function renderMarked(content: string): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-      marked(content, (err: any, content: string) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(content);
-        }
-      });
     });
   }
 }

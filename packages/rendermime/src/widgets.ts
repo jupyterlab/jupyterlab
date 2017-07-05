@@ -130,7 +130,7 @@ class RenderedHTML extends RenderedHTMLCommon {
    * @returns A promise which resolves when rendering is complete.
    */
   render(model: IRenderMime.IMimeModel): Promise<void> {
-    return RenderedHTML.renderHTML({
+    return RenderHelpers.renderHTML({
       node: this.node,
       source: String(model.data[this.mimeType]),
       trusted: model.trusted,
@@ -146,94 +146,6 @@ class RenderedHTML extends RenderedHTMLCommon {
    */
   onAfterAttach(msg: Message): void {
     typeset(this.node);
-  }
-}
-
-
-/**
- * The namespace for the `RenderedHTML` class statics.
- */
-export
-namespace RenderedHTML {
-  /**
-   * The options for the `render` function.
-   */
-  export
-  interface IRenderOptions {
-    /**
-     * The node to use as the host of the rendered HTML.
-     */
-    node: HTMLElement;
-
-    /**
-     * The HTML source to render.
-     */
-    source: string;
-
-    /**
-     * Whether the source is trusted.
-     */
-    trusted: boolean;
-
-    /**
-     * The html sanitizer.
-     */
-    sanitizer: ISanitizer;
-
-    /**
-     * An optional url resolver.
-     */
-    resolver: IRenderMime.IResolver | null;
-
-    /**
-     * An optional link handler.
-     */
-    linkHandler: IRenderMime.ILinkHandler | null;
-
-    /**
-     * Whether the node should be typeset.
-     */
-    shouldTypeset: boolean;
-  }
-
-  /**
-   * Render HTML into a host node.
-   *
-   * @params options - The options for rendering.
-   *
-   * @returns A promise which resolves when rendering is complete.
-   */
-  export
-  function render(options: renderHTML.IOptions): Promise<void> {
-    // Unpack the options.
-    let {
-      node, source, trusted, sanitizer, resolver, linkHandler, shouldTypeset
-    } = options;
-
-    // Clear the content if there is no source.
-    if (!source) {
-      node.textContent = '';
-      return Promise.resolve(undefined);
-    }
-
-    // Sanitize the source if it is not trusted.
-    if (!trusted) {
-      source = sanitizer.sanitize(source);
-    }
-
-    // Set the inner HTML to the source.
-    node.innerHTML = source;
-
-    // Patch the urls if a resolver is available.
-    let promise: Promise<void>;
-    if (resolver) {
-      promise = Private.handleUrls(node, resolver, linkHandler);
-    } else {
-      promise = Promise.resolve(undefined);
-    }
-
-    // Return the final rendered promise.
-    return promise.then(() => { if (shouldTypeset) { typeset(node); } });
   }
 }
 
@@ -484,31 +396,5 @@ class RenderedPDF extends RenderedCommon {
       node: this.node,
       mimeType: this.mimeType
     });
-  }
-}
-
-
-/**
- * The namespace for module implementation details.
- */
-namespace Private {
-  /**
-   * Test whether two mime models are equivalent.
-   */
-  export
-  function equalModels(a: IRenderMime.IMimeModel, b: IRenderMime.IMimeModel): boolean {
-    if (a === b) {
-      return true;
-    }
-    if (a.trusted !== b.trusted) {
-      return false;
-    }
-    if (a.data !== b.data) {
-      return false;
-    }
-    if (a.metadata !== b.metadata) {
-      return false;
-    }
-    return true;
   }
 }
