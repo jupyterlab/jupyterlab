@@ -1,6 +1,7 @@
-// Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
-
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
 import {
   ReadonlyJSONObject
 } from '@phosphor/coreutils';
@@ -84,7 +85,7 @@ namespace IRenderMime {
      * with '.', like '.png', '.txt', etc.  They may themselves contain a
      * period (e.g. .table.json).
      */
-    readonly fileExtensions: string[];
+    readonly fileExtensions: ReadonlyArray<string>;
 
     /**
      * The name of the widget to display in dialogs.
@@ -102,7 +103,7 @@ namespace IRenderMime {
      *
      * **See also:** [[fileExtensions]].
      */
-    readonly defaultFor?: string[];
+    readonly defaultFor?: ReadonlyArray<string>;
 
     /**
      * Whether the widget factory is read only.
@@ -133,42 +134,42 @@ namespace IRenderMime {
     /**
      * The MIME type for the renderer, which is the output MIME type it will handle.
      */
-    mimeType: string;
+    readonly mimeType: string;
 
     /**
      * A renderer factory to be registered to render the MIME type.
      */
-    rendererFactory: IRendererFactory;
+    readonly rendererFactory: IRendererFactory;
 
     /**
      * The rank passed to `RenderMime.addFactory`.
      */
-    rank?: number;
+    readonly rank?: number;
 
     /**
      * The timeout after user activity to re-render the data.
      */
-    renderTimeout?: number;
+    readonly renderTimeout?: number;
 
     /**
      * Preferred data type from the model.  Defaults to `string`.
      */
-    dataType?: 'string' | 'json';
+    readonly dataType?: 'string' | 'json';
 
     /**
      * The icon class name for the widget.
      */
-    iconClass?: string;
+    readonly iconClass?: string;
 
     /**
      * The icon label for the widget.
      */
-    iconLabel?: string;
+    readonly iconLabel?: string;
 
     /**
      * The options used to open a document with the renderer factory.
      */
-    documentWidgetFactoryOptions?: IDocumentWidgetFactoryOptions;
+    readonly documentWidgetFactoryOptions?: IDocumentWidgetFactoryOptions;
   }
 
   /**
@@ -180,7 +181,7 @@ namespace IRenderMime {
     /**
      * The default export.
      */
-    default: IExtension | IExtension[];
+    readonly default: IExtension | ReadonlyArray<IExtension>;
   }
 
   /**
@@ -190,6 +191,10 @@ namespace IRenderMime {
   interface IRenderer extends Widget {
     /**
      * Render a mime model.
+     *
+     * @param model - The mime model to render.
+     *
+     * @returns A promise which resolves when rendering is complete.
      */
     renderModel(model: IMimeModel): Promise<void>;
   }
@@ -202,28 +207,14 @@ namespace IRenderMime {
     /**
      * The mimeTypes this renderer accepts.
      */
-    readonly mimeTypes: string[];
+    readonly mimeTypes: ReadonlyArray<string>;
 
     /**
-     * Whether the renderer can render given the render options.
-     *
-     * @param options - The options that would be used to render the data.
-     */
-    canCreateRenderer(options: IRendererOptions): boolean;
-
-    /**
-     * Create a renderer the transformed mime data.
+     * Create a renderer which displays the mime data.
      *
      * @param options - The options used to render the data.
      */
     createRenderer(options: IRendererOptions): IRenderer;
-
-    /**
-     * Whether the renderer will sanitize the data given the render options.
-     *
-     * @param options - The options that would be used to render the data.
-     */
-    wouldSanitize(options: IRendererOptions): boolean;
   }
 
   /**
@@ -237,11 +228,6 @@ namespace IRenderMime {
     mimeType: string;
 
     /**
-     * Whether the data is trusted.
-     */
-    trusted: boolean;
-
-    /**
      * The html sanitizer.
      */
     sanitizer: ISanitizer;
@@ -249,12 +235,12 @@ namespace IRenderMime {
     /**
      * An optional url resolver.
      */
-    resolver?: IResolver;
+    resolver: IResolver | null;
 
     /**
      * An optional link handler.
      */
-    linkHandler?: ILinkHandler;
+    linkHandler: ILinkHandler | null;
   }
 
   /**
