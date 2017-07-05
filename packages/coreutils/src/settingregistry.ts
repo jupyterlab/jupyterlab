@@ -329,10 +329,12 @@ class DefaultSchemaValidator implements ISchemaValidator {
     const validator = this._validator;
     const validate = validator.getSchema('main');
 
+    // Validate against the main schema.
     if (!(validate(schema) as boolean)) {
       return validate.errors as ISchemaValidator.IError[];
     }
 
+    // Validate against the JSON schema meta-schema.
     if (!(validator.validateSchema(schema) as boolean)) {
       return validator.errors as ISchemaValidator.IError[];
     }

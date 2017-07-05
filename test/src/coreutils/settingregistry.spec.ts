@@ -73,6 +73,18 @@ describe('@jupyterlab/coreutils', () => {
         expect(errors).to.not.be(null);
       });
 
+      it('should be safe to call multiple times', () => {
+        const validator = new DefaultSchemaValidator();
+        const plugin = 'foo';
+        const schema = { type: 'object' };
+
+        let errors = validator.addSchema(plugin, schema);
+
+        expect(errors).to.be(null);
+        errors = validator.addSchema(plugin, schema);
+        expect(errors).to.be(null);
+      });
+
     });
 
   });
