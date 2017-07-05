@@ -15,6 +15,7 @@
   --jp-private-launcher-card-icon-height: 75px;
   --jp-private-launcher-large-icon-size: 52px;
   --jp-private-launcher-small-icon-size: 32px;
+  --jp-private-launcher-section-margin: 12px;
 }
 
 
@@ -64,7 +65,7 @@
 .jp-Launcher-section {
   width: 100%;
   box-sizing: border-box;
-  padding-bottom: 12px;
+  padding-bottom: var(--jp-private-launcher-section-margin);
 }
 
 
@@ -73,6 +74,8 @@
   flex-direction: row;
   align-items: center;
   box-sizing: border-box;
+  /* This is custom tuned to get the section header to align with the cards */
+  padding-left: 5px;
 }
 
 
@@ -138,9 +141,20 @@
 
 
 .jp-LauncherCard-noKernelIcon {
-  color: var(--md-blue-grey-500);
   font-weight: normal;
   font-size: var(--jp-private-launcher-large-icon-size);
+}
+
+
+.jp-LauncherCard[data-category="Notebook"] .jp-LauncherCard-noKernelIcon {
+  /* This color is copied from the notebook icon. */
+  color: #EF6C00;
+}
+
+
+.jp-LauncherCard[data-category="Console"] .jp-LauncherCard-noKernelIcon {
+  /* This color is copied from the console icon. */
+  color: #0288D1;
 }
 
 

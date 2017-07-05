@@ -364,9 +364,11 @@ function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcher
       launcher.dispose();
     });
   };
+  // Add a data attribute for the category
+  let dataset = {category: item.category};
   // Return the VDOM element.
   return (
-    <div className="jp-LauncherCard" title={item.displayName} onclick={onclick}>
+    <div className="jp-LauncherCard" title={item.displayName} onclick={onclick} dataset={dataset}>
       <div className="jp-LauncherCard-icon">
           {(item.kernelIconUrl && kernel) && <img src={item.kernelIconUrl} className="jp-Launcher-kernelIcon" />}
           {(!item.kernelIconUrl && !kernel) && <div className={`${item.iconClass} jp-Launcher-icon`} />}
