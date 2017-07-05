@@ -26,7 +26,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IRenderMime, MimeModel
+  IRenderMime, RenderMime, MimeModel
 } from '@jupyterlab/rendermime';
 
 
@@ -66,7 +66,7 @@ class Tooltip extends Widget {
   constructor(options: Tooltip.IOptions) {
     super();
 
-    this.layout = new PanelLayout();
+    let layout = this.layout = new PanelLayout();
     this.anchor = options.anchor;
 
     this.addClass(TOOLTIP_CLASS);
@@ -75,12 +75,12 @@ class Tooltip extends Widget {
     this._editor = options.editor;
     this._rendermime = options.rendermime;
     let model = new MimeModel({
-      data: options.bundle,
-      trusted: true
+      data: options.bundle
     });
-    this._content = this._rendermime.render(model);
+    this._content = this._rendermime.createRenderer(model);
     if (this._content) {
-      (this.layout as PanelLayout).addWidget(this._content);
+      this._content.renderModel(model);
+      layout.addWidget(this._content);
     }
   }
 
@@ -220,9 +220,9 @@ class Tooltip extends Widget {
     });
   }
 
-  private _content: Widget | null = null;
+  private _content: IRenderMime.IRenderer | null = null;
   private _editor: CodeEditor.IEditor;
-  private _rendermime: IRenderMime;
+  private _rendermime: RenderMime;
 }
 
 /**
@@ -253,6 +253,6 @@ namespace Tooltip {
     /**
      * The rendermime instance used by the tooltip model.
      */
-    rendermime: IRenderMime;
+    rendermime: RenderMime;
   }
 }

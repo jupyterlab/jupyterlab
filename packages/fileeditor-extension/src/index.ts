@@ -22,10 +22,6 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IDocumentRegistry
-} from '@jupyterlab/docregistry';
-
-import {
   FileEditor, FileEditorFactory, IEditorTracker
 } from '@jupyterlab/fileeditor';
 
@@ -50,28 +46,28 @@ const FACTORY = 'Editor';
  */
 namespace CommandIDs {
   export
-  const lineNumbers = 'editor:line-numbers';
+  const lineNumbers = 'fileeditor:toggle-line-numbers';
 
   export
-  const lineWrap = 'editor:line-wrap';
+  const lineWrap = 'fileeditor:toggle-line-wrap';
 
   export
-  const changeTabs = 'editor:change-tabs';
+  const changeTabs = 'fileeditor:change-tabs';
 
   export
-  const matchBrackets = 'editor:match-brackets';
+  const matchBrackets = 'fileeditor:toggle-match-brackets';
 
   export
-  const autoClosingBrackets = 'editor:autoclosing-brackets';
+  const autoClosingBrackets = 'fileeditor:toggle-autoclosing-brackets';
 
   export
-  const createConsole = 'editor:create-console';
+  const createConsole = 'fileeditor:create-console';
 
   export
-  const runCode = 'editor:run-code';
+  const runCode = 'fileeditor:run-code';
 
   export
-  const markdownPreview = 'editor:markdown-preview';
+  const markdownPreview = 'fileeditor:markdown-preview';
 };
 
 
@@ -82,7 +78,6 @@ const plugin: JupyterLabPlugin<IEditorTracker> = {
   activate,
   id: 'jupyter.services.editor-tracker',
   requires: [
-    IDocumentRegistry,
     ILayoutRestorer,
     IEditorServices,
     ISettingRegistry
@@ -101,7 +96,6 @@ const plugin: JupyterLabPlugin<IEditorTracker> = {
  * This will eventually reside in its own settings file.
  */
 const schema = {
-  "$schema": "http://json-schema.org/draft-06/schema",
   "jupyter.lab.setting-icon-class": "jp-ImageTextEditor",
   "jupyter.lab.setting-icon-label": "Editor",
   "title": "Text Editor",
@@ -119,7 +113,8 @@ const schema = {
     "matchBrackets": {
       "type": "boolean", "title": "Match Brackets", "default": true
     }
-  }
+  },
+  "type": "object"
 };
 /* tslint:enable */
 
@@ -133,7 +128,7 @@ export default plugin;
 /**
  * Activate the editor tracker plugin.
  */
-function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayoutRestorer, editorServices: IEditorServices, settingRegistry: ISettingRegistry, launcher: ILauncher | null): IEditorTracker {
+function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IEditorServices, settingRegistry: ISettingRegistry, launcher: ILauncher | null): IEditorTracker {
   const id = plugin.id;
   const namespace = 'editor';
   const factory = new FileEditorFactory({
@@ -150,7 +145,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command: 'file-operations:open',
+    command: 'docmanager:open',
     args: widget => ({ path: widget.context.path, factory: FACTORY }),
     name: widget => widget.context.path
   });
@@ -208,7 +203,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
     tracker.add(widget);
     updateWidget(widget);
   });
-  registry.addWidgetFactory(factory);
+  app.docRegistry.addWidgetFactory(factory);
 
   // Handle the settings of new widgets.
   tracker.widgetAdded.connect((sender, widget) => {
@@ -364,7 +359,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   commands.addCommand(CommandIDs.markdownPreview, {
     execute: () => {
       let path = tracker.currentWidget.context.path;
-      return commands.execute('markdown-preview:open', { path });
+      return commands.execute('markdownviewer:open', { path });
     },
     isVisible: () => {
       let widget = tracker.currentWidget;
@@ -379,10 +374,10 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
       displayName: 'Text Editor',
       iconClass: EDITOR_ICON_CLASS,
       callback: cwd => {
-        return commands.execute('file-operations:new-untitled', {
+        return commands.execute('docmanager:new-untitled', {
           path: cwd, type: 'file'
         }).then(model => {
-          return commands.execute('file-operations:open', {
+          return commands.execute('docmanager:open', {
             path: model.path, factory: FACTORY
           });
         });

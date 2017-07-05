@@ -85,6 +85,12 @@ Note: If installing using `pip install --user`, you must add the user-level
  `bin` directory to your `PATH` environment variable in order to launch
  `jupyter lab`.
 
+
+## Extensions
+
+The JupyterLab environment can be extended using extensions.  See documentation
+for [users](https://jupyterlab-tutorial.readthedocs.io/en/latest/extensions_user.html) and [developers](https://jupyterlab-tutorial.readthedocs.io/en/latest/extensions_dev.html).
+
 ----
 
 ## Contributing

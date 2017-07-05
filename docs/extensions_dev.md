@@ -36,8 +36,8 @@ The default plugins in the JupyterLab application include:
 - [Console](https://github.com/jupyterlab/jupyterlab/blob/master/packages/console-extension/src/index.ts) - Adds the ability to launch Jupyter Console instances for
 interactive kernel console sessions.
 - [Services](https://github.com/jupyterlab/jupyterlab/blob/master/packages/services-extension/src/index.ts) - An application-specific interface to `@jupyterlab/services`.
-- [RenderMime](https://github.com/jupyterlab/jupyterlab/blob/master/packages/rendermime-extension/src/index.ts) - The registry for adding kernel `display_data` renderers.
-- [Document Registry](https://github.com/jupyterlab/jupyterlab/blob/master/packages/docregistry-extension/src/index.ts) - Used to add functionality around widgets backed by files.
+- [RenderMime](https://github.com/jupyterlab/jupyterlab/blob/master/packages/rendermime/src) - The registry for adding kernel `display_data` renderers.
+- [Document Registry](https://github.com/jupyterlab/jupyterlab/tree/master/packages/docregistry/src) - Used to add functionality around widgets backed by files.
 
 ## Application Object
 The JupyterLab Application object is given to each plugin in

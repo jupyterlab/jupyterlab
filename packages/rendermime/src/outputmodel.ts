@@ -2,8 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONExt, JSONObject, JSONValue
+  JSONExt, JSONObject, JSONValue, ReadonlyJSONObject
 } from '@phosphor/coreutils';
+
+import {
+  ISignal, Signal
+} from '@phosphor/signaling';
 
 import {
   IObservableJSON, ObservableJSON, nbformat
@@ -24,6 +28,11 @@ import {
 export
 interface IOutputModel extends IRenderMime.IMimeModel {
   /**
+   * A signal emitted when the output model changes.
+   */
+  readonly changed: ISignal<this, void>;
+
+  /**
    * The output type.
    */
   readonly type: string;
@@ -34,14 +43,9 @@ interface IOutputModel extends IRenderMime.IMimeModel {
   readonly executionCount: nbformat.ExecutionCount;
 
   /**
-   * The data associated with the model.
+   * Whether the output is trusted.
    */
-  readonly data: IObservableJSON;
-
-  /**
-   * The metadata associated with the model.
-   */
-  readonly metadata: IObservableJSON;
+  trusted: boolean;
 
   /**
    * Dispose of the resources used by the output model.
@@ -87,10 +91,12 @@ class OutputModel implements IOutputModel {
    * Construct a new output model.
    */
   constructor(options: IOutputModel.IOptions) {
-    let { trusted, data, metadata } = Private.getBundleOptions(options);
+    let { data, metadata, trusted } = Private.getBundleOptions(options);
+    this._data = new ObservableJSON({ values: data as JSONObject });
+    this._rawData = data;
+    this._metadata = new ObservableJSON({ values: metadata as JSONObject });
+    this._rawMetadata = metadata;
     this.trusted = trusted;
-    this.data = new ObservableJSON({ values: data });
-    this.metadata = new ObservableJSON({ values: metadata });
     // Make a copy of the data.
     let value = options.value;
     for (let key in value) {
@@ -112,6 +118,13 @@ class OutputModel implements IOutputModel {
   }
 
   /**
+   * A signal emitted when the output model changes.
+   */
+  get changed(): ISignal<this, void> {
+    return this._changed;
+  }
+
+  /**
    * The output type.
    */
   readonly type: string;
@@ -122,16 +135,6 @@ class OutputModel implements IOutputModel {
   readonly executionCount: nbformat.ExecutionCount;
 
   /**
-   * The data associated with the model.
-   */
-  readonly data: IObservableJSON;
-
-  /**
-   * The metadata associated with the model.
-   */
-  readonly metadata: IObservableJSON;
-
-  /**
    * Whether the model is trusted.
    */
   readonly trusted: boolean;
@@ -140,8 +143,42 @@ class OutputModel implements IOutputModel {
    * Dispose of the resources used by the output model.
    */
   dispose(): void {
-    this.data.dispose();
-    this.metadata.dispose();
+    this._data.dispose();
+    this._metadata.dispose();
+    Signal.clearData(this);
+  }
+
+  /**
+   * The data associated with the model.
+   */
+  get data(): ReadonlyJSONObject {
+    return this._rawData;
+  }
+
+  /**
+   * The metadata associated with the model.
+   */
+  get metadata(): ReadonlyJSONObject {
+    return this._rawMetadata;
+  }
+
+  /**
+   * Set the data associated with the model.
+   *
+   * #### Notes
+   * Depending on the implementation of the mime model,
+   * this call may or may not have deferred effects,
+   */
+  setData(options: IRenderMime.IMimeModel.ISetDataOptions): void {
+    if (options.data) {
+      this._updateObservable(this._data, options.data);
+      this._rawData = options.data;
+    }
+    if (options.metadata) {
+      this._updateObservable(this._metadata, options.metadata);
+      this._rawMetadata = options.metadata;
+    }
+    this._changed.emit(void 0);
   }
 
   /**
@@ -156,8 +193,8 @@ class OutputModel implements IOutputModel {
     case 'display_data':
     case 'execute_result':
     case 'update_display_data':
-      output['data'] = this.data.toJSON();
-      output['metadata'] = this.metadata.toJSON();
+      output['data'] = this.data as JSONObject;
+      output['metadata'] = this.metadata as JSONObject;
       break;
     default:
       break;
@@ -167,7 +204,36 @@ class OutputModel implements IOutputModel {
     return output as nbformat.IOutput;
   }
 
+  /**
+   * Update an observable JSON object using a readonly JSON object.
+   */
+  private _updateObservable(observable: IObservableJSON, data: ReadonlyJSONObject) {
+    let oldKeys = observable.keys();
+    let newKeys = Object.keys(data);
+
+    // Handle removed keys.
+    for (let key of oldKeys) {
+      if (newKeys.indexOf(key) === -1) {
+        observable.delete(key);
+      }
+    }
+
+    // Handle changed data.
+    for (let key of newKeys) {
+      let oldValue = observable.get(key);
+      let newValue = data[key];
+      if (oldValue !== newValue) {
+        observable.set(key, newValue as JSONValue);
+      }
+    }
+  }
+
+  private _changed = new Signal<this, void>(this);
   private _raw: JSONObject = {};
+  private _rawMetadata: ReadonlyJSONObject;
+  private _rawData: ReadonlyJSONObject;
+  private _data: IObservableJSON;
+  private _metadata: IObservableJSON;
 }
 
 
@@ -251,7 +317,7 @@ namespace OutputModel {
     let data = getData(options.value);
     let metadata = getMetadata(options.value);
     let trusted = !!options.trusted;
-    return { data, trusted, metadata };
+    return { data, metadata, trusted };
   }
 
   /**

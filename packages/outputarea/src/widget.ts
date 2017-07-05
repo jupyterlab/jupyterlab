@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IOutputModel, IRenderMime
+  IOutputModel, RenderMime
 } from '@jupyterlab/rendermime';
 
 import {
@@ -146,7 +146,7 @@ class OutputArea extends Widget {
   /**
    * Te rendermime instance used by the widget.
    */
-  readonly rendermime: IRenderMime;
+  readonly rendermime: RenderMime;
 
   /**
    * A read-only sequence of the chidren widgets in the output area.
@@ -414,9 +414,12 @@ class OutputArea extends Widget {
     prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
     panel.addWidget(prompt);
 
-    let output = this.rendermime.render(model);
-    output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
-    panel.addWidget(output);
+    let output = this.rendermime.createRenderer(model);
+    if (output) {
+      output.renderModel(model);
+      output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
+      panel.addWidget(output);
+    }
 
     return panel;
   }
@@ -450,7 +453,7 @@ namespace OutputArea {
     /**
      * The rendermime instance used by the widget.
      */
-    rendermime: IRenderMime;
+    rendermime: RenderMime;
   }
 
   /**

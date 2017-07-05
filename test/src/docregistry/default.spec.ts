@@ -638,33 +638,6 @@ describe('docmanager/default', () => {
 
     });
 
-    describe('#onUpdateRequest()', () => {
-
-      it('should update the widget', () => {
-        let widget = new LogRenderer({
-          context,
-          rendermime: RENDERMIME,
-          mimeType: 'text/markdown',
-          renderTimeout: 1000,
-          dataType: 'string'
-        });
-        (context.model.contentChanged as any).emit(void 0);
-        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-
-        let layout = widget.layout as PanelLayout;
-        let oldChild = layout.widgets[1];
-
-        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-
-        let newChild = layout.widgets[1];
-
-        expect(oldChild).to.not.be(newChild);
-        expect(layout.widgets.length).to.be(2);
-        widget.dispose();
-      });
-
-    });
-
   });
 
 });

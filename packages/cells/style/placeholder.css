@@ -31,6 +31,12 @@
   background-position: center;
   background-size: 32px;
   width: 32px;
-  height: 100%;
-  margin-left: 4px;
+  height: 16px;
+  border: 1px solid transparent;
+}
+
+.jp-Placeholder-content .jp-MoreHorizIcon:hover {
+  border: 1px solid var(--md-grey-400);
+  box-shadow: 0px 0px 2px 0px rgba(0,0,0,0.24);
+  background-color: var(--jp-layout-color0);
 }

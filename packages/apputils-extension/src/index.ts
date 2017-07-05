@@ -8,8 +8,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  CommandLinker, ICommandLinker, ICommandPalette,
-  IMainMenu, MainMenu
+  ICommandPalette, IMainMenu, MainMenu
 } from '@jupyterlab/apputils';
 
 import {
@@ -38,18 +37,7 @@ import {
  */
 namespace CommandIDs {
   export
-  const clearStateDB = 'statedb:clear';
-};
-
-
-/**
- * The default commmand linker provider.
- */
-const linkerPlugin: JupyterLabPlugin<ICommandLinker> = {
-  id: 'jupyter.services.command-linker',
-  provides: ICommandLinker,
-  activate: (app: JupyterLab) => new CommandLinker({ commands: app.commands }),
-  autoStart: true
+  const clearStateDB = 'apputils:clear-statedb';
 };
 
 
@@ -138,7 +126,6 @@ const stateDBPlugin: JupyterLabPlugin<IStateDB> = {
  * Export the plugins as default.
  */
 const plugins: JupyterLabPlugin<any>[] = [
-  linkerPlugin,
   mainMenuPlugin,
   palettePlugin,
   settingPlugin,

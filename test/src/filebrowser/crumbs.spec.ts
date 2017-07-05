@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/docmanager';
 
 import {
-  DocumentRegistry, IDocumentRegistry
+  DocumentRegistry
 } from '@jupyterlab/docregistry';
 
 import {
@@ -66,7 +66,7 @@ describe('filebrowser/model', () => {
 
   let manager: IDocumentManager;
   let serviceManager: ServiceManager.IManager;
-  let registry: IDocumentRegistry;
+  let registry: DocumentRegistry;
   let model: FileBrowserModel;
   let crumbs: LogCrumbs;
   let first: string;

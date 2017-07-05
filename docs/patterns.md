@@ -155,3 +155,8 @@ We use Promises for asynchronous function calls, and a shim
 for browsers that do not support them.  When handling a resolved or 
 rejected Promise, make sure to check for the current state (typically
 by checking an `.isDisposed` property) before proceeding.
+
+
+## Command Names
+Commands used in the application command registry should be formatted as follows: `package-name:verb-noun`.  They are typically grouped into a
+`CommandIDs` namespace in the extension that is not exported.

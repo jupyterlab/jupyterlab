@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  JSONObject, JSONValue, PromiseDelegate
+  JSONValue, PromiseDelegate
 } from '@phosphor/coreutils';
 
 import {
@@ -32,7 +32,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  MimeModel, IRenderMime
+  IRenderMime, MimeModel, RenderMime
 } from '@jupyterlab/rendermime';
 
 import {
@@ -166,7 +166,7 @@ const RENDER_TIMEOUT = 1000;
  * A base cell widget.
  */
 export
-class Cell extends Widget implements IRenderMime.IReadyWidget {
+class Cell extends Widget {
   /**
    * Construct a new base cell widget.
    */
@@ -668,7 +668,7 @@ class CodeCell extends Cell {
     this.toggleClass(NO_OUTPUTS_CLASS, force);
   }
 
-  private _rendermime: IRenderMime = null;
+  private _rendermime: RenderMime = null;
   private _outputHidden = false;
   private _outputWrapper: Widget = null;
   private _outputCollapser: OutputCollapser = null;
@@ -695,7 +695,7 @@ namespace CodeCell {
     /**
      * The mime renderer for the cell widget.
      */
-    rendermime: IRenderMime;
+    rendermime: RenderMime;
   }
 
   /**
@@ -757,6 +757,10 @@ class MarkdownCell extends Cell {
         this.update();
       }
     }, this);
+
+    this._updateRenderedInput().then(() => {
+      this._ready.resolve(void 0);
+    });
   }
 
   /**
@@ -801,18 +805,6 @@ class MarkdownCell extends Cell {
     this.inputArea.showEditor();
   }
 
-  /**
-   * Dispose of the resource held by the widget.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    this._renderedInput = null;
-    this._rendermime = null;
-    super.dispose();
-  }
-
   /*
    * Handle `update-request` messages.
    */
@@ -830,44 +822,35 @@ class MarkdownCell extends Cell {
       this.showEditor();
     } else {
       this._updateRenderedInput();
-      this.renderInput(this._renderedInput);
+      this.renderInput(this._renderer);
     }
   }
 
   /**
    * Update the rendered input.
    */
-  private _updateRenderedInput(): void {
+  private _updateRenderedInput(): Promise<void> {
     let model = this.model;
     let text = model && model.value.text || DEFAULT_MARKDOWN_TEXT;
-    let trusted = this.model.trusted;
-    // Do not re-render if the text has not changed and the trusted
-    // has not changed.
-    if (text !== this._prevText || trusted !== this._prevTrusted) {
-      let data: JSONObject = { 'text/markdown': text };
-      let bundle = new MimeModel({ data, trusted });
-      let widget = this._rendermime.render(bundle);
-      if (!this._isReady) {
-        widget.ready.then(() => {
-          this._isReady = true;
-          this._ready.resolve(undefined);
-        });
+    // Do not re-render if the text has not changed.
+    if (text !== this._prevText) {
+      let mimeModel = new MimeModel({ data: { 'text/markdown': text }});
+      if (!this._renderer) {
+        this._renderer = this._rendermime.createRenderer(mimeModel);
+        this._renderer.addClass(MARKDOWN_OUTPUT_CLASS);
       }
-      this._renderedInput = widget || new Widget();
-      this._renderedInput.addClass(MARKDOWN_OUTPUT_CLASS);
+      this._prevText = text;
+      return this._renderer.renderModel(mimeModel);
     }
-    this._prevText = text;
-    this._prevTrusted = trusted;
+    return Promise.resolve(void 0);
   }
 
   private _monitor: ActivityMonitor<any, any> = null;
-  private _rendermime: IRenderMime = null;
-  private _renderedInput: Widget = null;
+  private _renderer: IRenderMime.IRenderer = null;
+  private _rendermime: RenderMime;
   private _rendered = true;
   private _prevText = '';
-  private _prevTrusted = false;
   private _ready = new PromiseDelegate<void>();
-  private _isReady = false;
 }
 
 
@@ -889,7 +872,7 @@ namespace MarkdownCell {
     /**
      * The mime renderer for the cell widget.
      */
-    rendermime: IRenderMime;
+    rendermime: RenderMime;
 
   }
 }

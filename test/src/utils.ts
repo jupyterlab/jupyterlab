@@ -28,7 +28,7 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
-  IRenderMime, RenderMime, TextRenderer, HTMLRenderer
+  IRenderMime, RenderMime, TextRendererFactory, RenderedHTML
 } from '@jupyterlab/rendermime';
 
 
@@ -36,7 +36,7 @@ import {
  * Get a copy of the default rendermime instance.
  */
 export
-function defaultRenderMime(): IRenderMime {
+function defaultRenderMime(): RenderMime {
   return Private.rendermime.clone();
 }
 
@@ -152,47 +152,31 @@ namespace Private {
   const notebookFactory = new NotebookModelFactory({});
 
 
-  class JSONRenderer extends HTMLRenderer {
+  class JSONRenderer extends RenderedHTML {
+
+    mimeType = 'text/html';
+
+    renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+      let source = model.data['application/json'];
+      model.setData({ data: { 'text/html': json2html(source) } });
+      return super.renderModel(model);
+    }
+  }
+
+
+  class JSONRendererFactory extends TextRendererFactory {
 
     mimeTypes = ['application/json'];
 
-
-    get ready(): Promise<void> {
-      return Promise.resolve(undefined);
-    }
-
-    render(options: IRenderMime.IRenderOptions): IRenderMime.IReadyWidget {
-      let source = options.model.data.get(options.mimeType);
-      options.model.data.set(options.mimeType, json2html(source));
-      return super.render(options);
+    createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRenderer {
+      return new JSONRenderer(options);
     }
   }
 
-
-  class InjectionRenderer extends TextRenderer {
-
-    mimeTypes = ['test/injector'];
-
-    get ready(): Promise<void> {
-      return Promise.resolve(undefined);
-    }
-
-    render(options: IRenderMime.IRenderOptions): IRenderMime.IReadyWidget {
-      options.model.data.set('application/json', { 'foo': 1 } );
-      return super.render(options);
-    }
-  }
-
-  let renderers = [
-    new JSONRenderer(),
-    new InjectionRenderer()
-  ];
-  let items = RenderMime.getDefaultItems();
-  for (let renderer of renderers) {
-    items.push({ mimeType: renderer.mimeTypes[0], renderer });
-  }
+  const initialFactories = RenderMime.getDefaultFactories();
   export
-  const rendermime = new RenderMime({ items });
+  const rendermime = new RenderMime({ initialFactories });
+  rendermime.addFactory(new JSONRendererFactory(), 'application/json');
 }
 
 

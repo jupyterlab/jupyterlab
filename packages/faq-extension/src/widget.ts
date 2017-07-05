@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ICommandLinker, VDomModel, VDomRenderer
+  CommandLinker, VDomModel, VDomRenderer
 } from '@jupyterlab/apputils';
 
 import {
@@ -383,7 +383,7 @@ class FaqWidget extends VDomRenderer<FaqModel> {
     this.dispose();
   }
 
-  private _linker: ICommandLinker;
+  private _linker: CommandLinker;
 }
 
 
@@ -400,6 +400,6 @@ namespace FaqWidget {
     /**
      * A command linker instance.
      */
-    linker: ICommandLinker;
+    linker: CommandLinker;
   }
 }

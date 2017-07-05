@@ -10,10 +10,6 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IDocumentRegistry
-} from '@jupyterlab/docregistry';
-
-import {
   ImageViewer, ImageViewerFactory, IImageTracker
 } from '@jupyterlab/imageviewer';
 
@@ -55,7 +51,7 @@ const plugin: JupyterLabPlugin<IImageTracker> = {
   activate,
   id: 'jupyter.extensions.image-handler',
   provides: IImageTracker,
-  requires: [IDocumentRegistry, ICommandPalette, ILayoutRestorer],
+  requires: [ICommandPalette, ILayoutRestorer],
   autoStart: true
 };
 
@@ -69,7 +65,7 @@ export default plugin;
 /**
  * Activate the image widget extension.
  */
-function activate(app: JupyterLab, registry: IDocumentRegistry, palette: ICommandPalette, restorer: ILayoutRestorer): IImageTracker {
+function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRestorer): IImageTracker {
   const namespace = 'image-widget';
   const factory = new ImageViewerFactory({
     name: FACTORY,
@@ -82,12 +78,12 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, palette: IComman
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command: 'file-operations:open',
+    command: 'docmanager:open',
     args: widget => ({ path: widget.context.path, factory: FACTORY }),
     name: widget => widget.context.path
   });
 
-  registry.addWidgetFactory(factory);
+  app.docRegistry.addWidgetFactory(factory);
 
   factory.widgetCreated.connect((sender, widget) => {
     // Notify the instance tracker if restore data needs to update.

@@ -48,6 +48,12 @@
 }
 
 
+.jp-Cell .jp-Collapser .jp-Collapser-icon.jp-ExpandLessIcon {
+  position: relative;
+  bottom: -3px;
+}
+
+
 .jp-Cell.jp-mod-active .jp-Collapser-child .jp-Collapser-icon {
   display: block;
 }

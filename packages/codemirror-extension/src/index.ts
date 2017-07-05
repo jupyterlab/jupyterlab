@@ -57,7 +57,6 @@ namespace CommandIDs {
  * This will eventually reside in its own settings file.
  */
 const schema = {
-  "$schema": "http://json-schema.org/draft-06/schema",
   "jupyter.lab.setting-icon-class": "jp-ImageTextEditor",
   "jupyter.lab.setting-icon-label": "CodeMirror",
   "title": "CodeMirror",
@@ -65,7 +64,8 @@ const schema = {
   "properties": {
     "keyMap": { "type": "string", "title": "Key Map", "default": "default" },
     "theme": { "type": "string", "title": "Theme", "default": "default" }
-  }
+  },
+  "type": "object"
 };
 /* tslint:enable */
 
@@ -270,7 +270,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     let args: JSONObject = {
       insertSpaces: false, size: 4, name: 'Indent with Tab'
     };
-    let command = 'editor:change-tabs';
+    let command = 'fileeditor:change-tabs';
     tabMenu.addItem({ command, args });
     palette.addItem({ command, args, category: 'Editor' });
 
@@ -285,10 +285,10 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     menu.addItem({ type: 'submenu', submenu: modeMenu });
     menu.addItem({ type: 'submenu', submenu: tabMenu });
     menu.addItem({ type: 'separator' });
-    menu.addItem({ command: 'editor:line-numbers' });
-    menu.addItem({ command: 'editor:line-wrap' });
-    menu.addItem({ command: 'editor:match-brackets' });
-    menu.addItem({ command: 'editor:autoclosing-brackets' });
+    menu.addItem({ command: 'fileeditor:toggle-line-numbers' });
+    menu.addItem({ command: 'fileeditor:toggle-line-wrap' });
+    menu.addItem({ command: 'fileeditor:toggle-match-brackets' });
+    menu.addItem({ command: 'fileeditor:toggle-autoclosing-brackets' });
     menu.addItem({ type: 'submenu', submenu: keyMapMenu });
     menu.addItem({ type: 'submenu', submenu: themeMenu });
 

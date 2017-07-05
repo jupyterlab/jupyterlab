@@ -23,10 +23,6 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
-  IRenderMime
-} from '@jupyterlab/rendermime';
-
-import {
   IServiceManager
 } from '@jupyterlab/services';
 
@@ -35,7 +31,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONObject
+  ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
 import {
@@ -78,7 +74,7 @@ namespace CommandIDs {
   const inject = 'console:inject';
 
   export
-  const switchKernel = 'console:switch-kernel';
+  const changeKernel = 'console:change-kernel';
 };
 
 
@@ -91,7 +87,6 @@ const trackerPlugin: JupyterLabPlugin<IConsoleTracker> = {
   provides: IConsoleTracker,
   requires: [
     IServiceManager,
-    IRenderMime,
     IMainMenu,
     ICommandPalette,
     ConsolePanel.IContentFactory,
@@ -131,7 +126,7 @@ export default plugins;
 /**
  * Activate the console extension.
  */
-function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): IConsoleTracker {
+function activateConsole(app: JupyterLab, manager: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): IConsoleTracker {
   let { commands, shell } = app;
   let category = 'Console';
   let command: string;
@@ -176,7 +171,8 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
           name,
           iconClass: 'jp-ImageCodeConsole',
           callback,
-          rank
+          rank,
+          kernelIconUrl: specs.kernelspecs[name].resources["logo-64x64"]
         });
       }
     });
@@ -192,7 +188,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
     return manager.ready.then(() => {
       let panel = new ConsolePanel({
         manager,
-        rendermime: rendermime.clone(),
+        rendermime: app.rendermime.clone(),
         contentFactory,
         mimeTypeService: editorServices.mimeTypeService,
         ...options
@@ -248,7 +244,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
   palette.addItem({ command, category });
 
   // Get the current widget and activate unless the args specify otherwise.
-  function getCurrent(args: JSONObject): ConsolePanel | null {
+  function getCurrent(args: ReadonlyJSONObject): ConsolePanel | null {
     let widget = tracker.currentWidget;
     let activate = args['activate'] !== false;
     if (activate && widget) {
@@ -371,7 +367,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
 
   command = CommandIDs.inject;
   commands.addCommand(command, {
-    execute: (args: JSONObject) => {
+    execute: args => {
       let path = args['path'];
       tracker.find(widget => {
         if (widget.console.session.path === path) {
@@ -386,7 +382,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
     isEnabled: hasWidget
   });
 
-  command = CommandIDs.switchKernel;
+  command = CommandIDs.changeKernel;
   commands.addCommand(command, {
     label: 'Change Kernel',
     execute: args => {
@@ -408,7 +404,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
   menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.interrupt });
   menu.addItem({ command: CommandIDs.restart });
-  menu.addItem({ command: CommandIDs.switchKernel });
+  menu.addItem({ command: CommandIDs.changeKernel });
   menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.closeAndShutdown });
 

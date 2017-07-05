@@ -10,17 +10,11 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IDocumentRegistry
+  MimeRendererFactory, MimeRenderer
 } from '@jupyterlab/docregistry';
 
-import {
-  IRenderMime
-} from '@jupyterlab/rendermime';
 
-import {
-  MarkdownViewer, MarkdownViewerFactory
-} from '@jupyterlab/markdownviewer';
-
+import '../style/index.css';
 
 /**
  * The class name for the text editor icon from the default theme.
@@ -38,7 +32,7 @@ const FACTORY = 'Markdown Preview';
  */
 namespace CommandIDs {
   export
-  const preview = 'markdown-preview:open';
+  const preview = 'markdownviewer:open';
 }
 
 
@@ -48,7 +42,7 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<void> = {
   activate,
   id: 'jupyter.extensions.rendered-markdown',
-  requires: [IDocumentRegistry, IRenderMime, ILayoutRestorer],
+  requires: [ILayoutRestorer],
   autoStart: true
 };
 
@@ -56,21 +50,22 @@ const plugin: JupyterLabPlugin<void> = {
 /**
  * Activate the markdown plugin.
  */
-function activate(app: JupyterLab, registry: IDocumentRegistry, rendermime: IRenderMime, restorer: ILayoutRestorer) {
-    const factory = new MarkdownViewerFactory({
+function activate(app: JupyterLab, restorer: ILayoutRestorer) {
+    const factory = new MimeRendererFactory({
       name: FACTORY,
       fileExtensions: ['.md'],
-      readOnly: true,
-      rendermime
+      mimeType: 'text/markdown',
+      rendermime: app.rendermime
     });
+    app.docRegistry.addWidgetFactory(factory);
 
     const { commands } = app;
     const namespace = 'rendered-markdown';
-    const tracker = new InstanceTracker<MarkdownViewer>({ namespace });
+    const tracker = new InstanceTracker<MimeRenderer>({ namespace });
 
     // Handle state restoration.
     restorer.restore(tracker, {
-      command: 'file-operations:open',
+      command: 'docmanager:open',
       args: widget => ({ path: widget.context.path, factory: FACTORY }),
       name: widget => widget.context.path
     });
@@ -82,8 +77,6 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, rendermime: IRen
       tracker.add(widget);
     });
 
-    registry.addWidgetFactory(factory);
-
     commands.addCommand(CommandIDs.preview, {
       label: 'Markdown Preview',
       execute: (args) => {
@@ -91,7 +84,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, rendermime: IRen
         if (typeof path !== 'string') {
           return;
         }
-        return commands.execute('file-operations:open', {
+        return commands.execute('docmanager:open', {
           path, factory: FACTORY
         });
       }

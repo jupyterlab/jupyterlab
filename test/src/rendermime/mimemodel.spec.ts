@@ -28,21 +28,9 @@ describe('rendermime/mimemodel', () => {
       it('should accept arguments', () => {
         let model = new MimeModel({
           data: { 'foo': 1},
-          trusted: true,
           metadata: { 'bar': 'baz' }
         });
         expect(model).to.be.a(MimeModel);
-      });
-
-    });
-
-    describe('#trusted', () => {
-
-      it('should get the trusted state of the model', () => {
-        let model = new MimeModel();
-        expect(model.trusted).to.be(false);
-        model = new MimeModel({ trusted: true });
-        expect(model.trusted).to.be(true);
       });
 
     });
@@ -53,7 +41,7 @@ describe('rendermime/mimemodel', () => {
         let model = new MimeModel({
           data: { 'bar': 'baz' }
         });
-        expect(model.data.get('bar')).to.be('baz');
+        expect(model.data['bar']).to.be('baz');
       });
 
     });
@@ -64,7 +52,7 @@ describe('rendermime/mimemodel', () => {
         let model = new MimeModel({
           metadata: { 'bar': 'baz' }
         });
-        expect(model.metadata.get('bar')).to.be('baz');
+        expect(model.metadata['bar']).to.be('baz');
       });
 
     });
