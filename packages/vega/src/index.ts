@@ -107,7 +107,7 @@ class RenderedVega extends Widget implements IRenderMime.IRenderer {
 export
 const rendererFactory: IRenderMime.IRendererFactory = {
   safe: true,
-  mimeTypes: ['text/html'],
+  mimeTypes: [VEGA_MIME_TYPE, VEGALITE_MIME_TYPE],
   createRenderer: options => new RenderedVega(options)
 };
 
