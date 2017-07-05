@@ -179,6 +179,8 @@ class SettingEditor extends Widget {
     // Allow the message queue (which includes fit requests that might disrupt
     // setting relative sizes) to clear before setting sizes.
     requestAnimationFrame(() => {
+      // Set the original (default) outer dimensions.
+      this._panel.setRelativeSizes(this._presets.outer);
       this._fetchState()
         .then(() => { this._setPresets(); })
         .catch(reason => {
