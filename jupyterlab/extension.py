@@ -8,7 +8,7 @@ import os
 from jupyterlab_launcher import add_handlers, LabConfig
 
 from .commands import get_app_dir, list_extensions, should_build
-from .settings_handler import setting_path, SettingsHandler
+from .settings_handler import settings_path, SettingsHandler
 from ._version import __version__
 
 #-----------------------------------------------------------------------------
@@ -91,16 +91,15 @@ def load_jupyter_server_extension(nbapp):
 
     add_handlers(web_app, config)
 
-    # NO persistent settings in dev mode
-    # We need to put the schemas in the `jupyterlab/` directory so we
-    # can use them in the release.
+    if core_mode:
+        schemas_path = os.path.join(here, 'schemas')
+        user_settings_path = ''
+    else:
+        schemas_path = os.path.join(app_dir, 'schemas')
+        user_settings_path = os.path.join(app_dir, 'userSettings')
 
-    # TODO: how do we handle this for dev_mode?
-    # TODO: how to we handle core extensions in app_mode?
-    schemas_path = ''
-    settings_path = ''
-    settings_handler = (setting_path, SettingsHandler, {
-        schemas_path: schemas_path,
-        settings_path: settings_path
+    settings_handler = (settings_path, SettingsHandler, {
+        'schemas_path': schemas_path,
+        'settings_path': user_settings_path
     })
     web_app.add_handlers(".*$", [settings_handler])

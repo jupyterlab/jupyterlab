@@ -3,9 +3,10 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 import json
+import os
 from tornado import web
 
-from ...base.handlers import APIHandler, json_errors
+from notebook.base.handlers import APIHandler, json_errors
 
 
 class SettingsHandler(APIHandler):
@@ -18,8 +19,20 @@ class SettingsHandler(APIHandler):
     @web.authenticated
     def get(self, section_name):
         self.set_header("Content-Type", 'application/json')
-        # TODO: get the appropriate schema and settings for the section name.
-        self.finish(json.dumps(dict()))
+        path = os.path.join(self.schemas_path, section_name + '.json')
+
+        if not os.path.exists(path):
+            raise web.HTTPError(404, "Schema not found: %r" % section_name)
+        with open(path) as fid:
+            schema = json.load(fid)
+
+        path = os.path.join(self.settings_path, section_name + '.json')
+        settings = dict()
+        if os.path.exists(path):
+            with open(path) as fid:
+                settings = json.load(fid)
+
+        self.finish(json.dumps(dict(schema=schema, settings=settings)))
 
     @json_errors
     @web.authenticated
@@ -31,4 +44,4 @@ class SettingsHandler(APIHandler):
 
 
 # The path for a labsettings section.
-settings_path = r"/labsettings/(?P<section_name>\w+)"
+settings_path = r"/labsettings/(?P<section_name>[\w.-]+)"
