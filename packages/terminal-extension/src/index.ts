@@ -130,6 +130,8 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
   if (launcher) {
     launcher.add({
       displayName: 'Terminal',
+      category: 'Other',
+      rank: 0,
       iconClass: TERMINAL_ICON_CLASS,
       callback: () => {
         return commands.execute(CommandIDs.createNew);

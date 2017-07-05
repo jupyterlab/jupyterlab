@@ -372,6 +372,8 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
   if (launcher) {
     launcher.add({
       displayName: 'Text Editor',
+      category: 'Other',
+      rank: 1,
       iconClass: EDITOR_ICON_CLASS,
       callback: cwd => {
         return commands.execute('docmanager:new-untitled', {
