@@ -133,11 +133,20 @@ def install_extension(extension, app_dir=None, logger=None):
     shutil.move(pjoin(target, fname), pjoin(app_dir, 'extensions'))
     shutil.rmtree(target)
 
+<<<<<<< HEAD
     # Remove any existing package from staging/node_modules
     target = pjoin(app_dir, 'staging', 'node_modules', data['name'])
     target = target.replace('/', os.sep)
     if os.path.exists(target):
         shutil.rmtree(target)
+=======
+    # Handle any schemas.
+    schema_data = data['jupyterlab'].get('schema_data', dict())
+    for (key, value) in schema_data.items():
+        path = pjoin(app_dir, 'schemas', key + '.json')
+        with open(path, 'w') as fid:
+            fid.write(value)
+>>>>>>> 98eaf4ce4... Handle schema data for installed extensions
 
 
 def link_package(path, app_dir=None, logger=None):
@@ -843,7 +852,19 @@ def _read_package(target):
     """
     tar = tarfile.open(target, "r:gz")
     f = tar.extractfile('package/package.json')
-    return json.loads(f.read().decode('utf8'))
+    data = json.loads(f.read().decode('utf8'))
+    jlab = data.get('jupyterlab', None)
+    if not jlab:
+        return data
+    schemas = jlab.get('schemas', None)
+    if not schemas:
+        return data
+    schema_data = dict()
+    for schema in schemas:
+        f = tar.extractfile('package/' + schema)
+        schema_data[schema] = f.read().decode('utf8')
+    data['jupyterlab']['schema_data'] = schema_data
+    return data
 
 
 def _normalize_path(extension):
