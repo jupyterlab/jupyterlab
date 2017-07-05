@@ -54,7 +54,7 @@ namespace CommandIDs {
 /**
  * The class name for the terminal icon in the default theme.
  */
-const TERMINAL_ICON_CLASS = 'jp-ImageTerminal';
+const TERMINAL_ICON_CLASS = 'jp-TerminalIcon';
 
 
 /**

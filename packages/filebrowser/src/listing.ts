@@ -1650,7 +1650,7 @@ namespace DirListing {
     }
 
     parseFileExtension(path: string): string {
-      var fileExtension = PathExt.extname(path);
+      var fileExtension = PathExt.extname(path).toLocaleLowerCase();
       switch (fileExtension) {
         case '.md':
           return MARKDOWN_ICON_CLASS;
@@ -1764,6 +1764,9 @@ namespace DirListing {
             break;
           case 'notebook':
             iconNode.className = `${MATERIAL_ICON_CLASS} ${NOTEBOOK_MATERIAL_ICON_CLASS} ${DRAG_ICON_CLASS}`;
+            break;
+          case 'file':
+            iconNode.className = `${MATERIAL_ICON_CLASS} ${DRAG_ICON_CLASS} ` + this.parseFileExtension(model.path);
             break;
           default:
             iconNode.className = `${MATERIAL_ICON_CLASS} ${FILE_TYPE_CLASS} ${DRAG_ICON_CLASS}`;

@@ -57,7 +57,7 @@ namespace CommandIDs {
  * This will eventually reside in its own settings file.
  */
 const schema = {
-  "jupyter.lab.setting-icon-class": "jp-ImageTextEditor",
+  "jupyter.lab.setting-icon-class": "jp-TextEditorIcon",
   "jupyter.lab.setting-icon-label": "CodeMirror",
   "title": "CodeMirror",
   "description": "Text editor settings for all CodeMirror editors.",
