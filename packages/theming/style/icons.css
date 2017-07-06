@@ -133,6 +133,11 @@
 }
 
 
+.jp-LauncherIcon {
+  background-image: url(icons/jupyter/launcher.svg);
+}
+
+
 .jp-MainAreaLandscapeIcon {
   background-repeat: no-repeat;
   margin-right: 2px;
