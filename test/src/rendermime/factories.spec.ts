@@ -16,8 +16,9 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  latexRendererFactory, pdfRendererFactory, javaScriptRendererFactory,
-  svgRendererFactory, markdownRendererFactory, textRendererFactory, htmlRendererFactory, imageRendererFactory
+  latexRendererFactory, pdfRendererFactory, svgRendererFactory,
+  markdownRendererFactory, textRendererFactory, htmlRendererFactory,
+  imageRendererFactory
 } from '@jupyterlab/rendermime';
 
 import {
@@ -165,52 +166,6 @@ describe('rendermime/factories', () => {
           expect(node.localName).to.be('a');
           expect(node.target).to.be('_blank');
           expect(node.href).to.be('data:application/pdf;base64,test');
-        });
-      });
-
-    });
-
-  });
-
-  describe('javaScriptRendererFactory', () => {
-
-    describe('#mimeTypes', () => {
-
-      it('should have the text/javascript mimeType', () => {
-        let mimeTypes = ['text/javascript', 'application/javascript'];
-        expect(javaScriptRendererFactory.mimeTypes).to.eql(mimeTypes);
-      });
-
-    });
-
-    describe('#safe', () => {
-
-      it('should not be safe', () => {
-        expect(javaScriptRendererFactory.safe).to.be(false);
-      });
-
-    });
-
-    describe('#createRenderer()', () => {
-
-      it('should create a script tag', () => {
-        let f = javaScriptRendererFactory;
-        let source = 'window.x = 1';
-        let mimeType = 'text/javascript';
-        let model = createModel(mimeType, source, true);
-        let w = f.createRenderer({ mimeType, ...defaultOptions });
-        return w.renderModel(model).then(() => {
-          let el = w.node.firstChild as HTMLElement;
-          expect(el.localName).to.be('script');
-          expect(el.textContent).to.be(source);
-
-          // Ensure script has not been run yet
-          expect((window as any).x).to.be(void 0);
-          // Put it on the DOM
-          Widget.attach(w, document.body);
-          // Should be evaluated now
-          expect((window as any).x).to.be(1);
-          w.dispose();
         });
       });
 
