@@ -33,7 +33,7 @@
   "jupyterlab": {
     "extension": true,
     "schemas": [
-      "schemas/jupyter.services.codemirror-services.json"
+      "schema/jupyter.services.codemirror-commands.json"
     ]
   },
   "repository": {
