@@ -51,12 +51,6 @@
 }
 
 
-.jp-OutputArea-output img.jp-mod-unconfined,
-.jp-OutputArea-output svg.jp-mod-unconfined {
-  max-width: none;
-}
-
-
 /* Hide the gutter in case of
  *  - nested output areas (e.g. in the case of output widgets)
  *  - mirrored output areas

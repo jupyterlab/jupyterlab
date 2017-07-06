@@ -221,7 +221,8 @@ class RenderedImage extends RenderedCommon {
       mimeType: this.mimeType,
       source: String(model.data[this.mimeType]),
       width: metadata && metadata.width as number | undefined,
-      height: metadata && metadata.height as number | undefined
+      height: metadata && metadata.height as number | undefined,
+      unconfined: metadata && metadata.unconfined as boolean | undefined
     });
   }
 }
@@ -321,13 +322,15 @@ class RenderedSVG extends RenderedCommon {
    * @returns A promise which resolves when rendering is complete.
    */
   render(model: IRenderMime.IMimeModel): Promise<void> {
+    let metadata = model.metadata[this.mimeType] as ReadonlyJSONObject;
     return renderers.renderSVG({
       host: this.node,
       source: String(model.data[this.mimeType]),
       trusted: model.trusted,
       resolver: this.resolver,
       linkHandler: this.linkHandler,
-      shouldTypeset: this.isAttached
+      shouldTypeset: this.isAttached,
+      unconfined: metadata && metadata.unconfined as boolean | undefined
     });
   }
 

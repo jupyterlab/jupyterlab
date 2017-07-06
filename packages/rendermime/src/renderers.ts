@@ -142,7 +142,7 @@ namespace renderHTML {
 export
 function renderImage(options: renderImage.IRenderOptions): Promise<void> {
   // Unpack the options.
-  let { host, mimeType, source, width, height } = options;
+  let { host, mimeType, source, width, height, unconfined } = options;
 
   // Clear the content in the host.
   host.textContent = '';
@@ -159,6 +159,10 @@ function renderImage(options: renderImage.IRenderOptions): Promise<void> {
   }
   if (typeof width === 'number') {
     img.width = width;
+  }
+
+  if (unconfined === true) {
+    img.classList.add('jp-mod-unconfined');
   }
 
   // Add the image to the host.
@@ -203,6 +207,11 @@ namespace renderImage {
      * The optional height for the image.
      */
     height?: number;
+
+    /**
+     * Whether the image should be unconfined.
+     */
+    unconfined?: boolean;
   }
 }
 
@@ -320,7 +329,7 @@ function renderMarkdown(options: renderMarkdown.IRenderOptions): Promise<void> {
 
     // Return the rendered promise.
     return promise;
-  }).then(() => { if (shouldTypeset) { typeset(host) } });
+  }).then(() => { if (shouldTypeset) { typeset(host); } });
 }
 
 
@@ -444,7 +453,7 @@ export
 function renderSVG(options: renderSVG.IRenderOptions): Promise<void> {
   // Unpack the options.
   let {
-    host, source, trusted, resolver, linkHandler, shouldTypeset
+    host, source, trusted, resolver, linkHandler, shouldTypeset, unconfined
   } = options;
 
   // Clear the content if there is no source.
@@ -461,6 +470,10 @@ function renderSVG(options: renderSVG.IRenderOptions): Promise<void> {
 
   // Set the inner HTML of the host.
   host.innerHTML = source;
+
+  if (unconfined === true) {
+    host.classList.add('jp-mod-unconfined');
+  }
 
   // TODO
   // what about script tags inside the svg?
@@ -517,6 +530,11 @@ namespace renderSVG {
      * Whether the node should be typeset.
      */
     shouldTypeset: boolean;
+
+    /**
+     * Whether the svg should be unconfined.
+     */
+    unconfined?: boolean;
   }
 }
 
