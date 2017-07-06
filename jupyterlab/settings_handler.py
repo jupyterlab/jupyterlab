@@ -38,7 +38,8 @@ class SettingsHandler(APIHandler):
             with open(path) as fid:
                 settings = json.load(fid)
 
-        self.finish(json.dumps(dict(schema=schema, settings=settings)))
+        resp = dict(id=section_name, data=dict(user=settings), schema=schema)
+        self.finish(json.dumps(resp))
 
     @json_errors
     @web.authenticated
