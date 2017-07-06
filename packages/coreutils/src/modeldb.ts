@@ -339,7 +339,7 @@ class ObservableValue implements IObservableValue {
   }
 
   private _value: JSONValue = null;
-  private _changed = new Signal<ObservableValue, ObservableValue.IChangedArgs>(this);
+  private _changed = new Signal<this, ObservableValue.IChangedArgs>(this);
   private _isDisposed = false;
 }
 
@@ -466,8 +466,8 @@ class ModelDB implements IModelDB {
    * The list can only store objects that are simple
    * JSON Objects and primitives.
    */
-  createList(path: string): IObservableUndoableList<JSONValue> {
-    let vec = new ObservableUndoableList<JSONValue>(
+  createList<T extends JSONValue>(path: string): IObservableUndoableList<T> {
+    let vec = new ObservableUndoableList<T>(
       new ObservableUndoableList.IdentitySerializer());
     this._disposables.add(vec);
     this.set(path, vec);

@@ -306,19 +306,19 @@ namespace ObservableUndoableList {
    * A default, identity serializer.
    */
   export
-  class IdentitySerializer implements ISerializer<JSONValue> {
+  class IdentitySerializer<T extends JSONValue> implements ISerializer<T> {
     /**
      * Identity serialize.
      */
-    toJSON(value: JSONValue): JSONValue {
+    toJSON(value: T): JSONValue {
       return value;
     }
 
     /**
      * Identity deserialize.
      */
-    fromJSON(value: JSONValue): JSONValue {
-      return value;
+    fromJSON(value: JSONValue): T {
+      return value as T;
     }
   }
 }
