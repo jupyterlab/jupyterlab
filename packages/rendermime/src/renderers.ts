@@ -310,9 +310,6 @@ function renderMarkdown(options: renderMarkdown.IRenderOptions): Promise<void> {
     // Apply ids to the header nodes.
     Private.headerAnchors(host);
 
-    // TODO - this was in the old code, but why?
-    // <host owner widget>.fit();
-
     // Patch the urls if a resolver is available.
     let promise: Promise<void>;
     if (resolver) {
@@ -395,7 +392,7 @@ function renderPDF(options: renderPDF.IRenderOptions): Promise<void> {
 
   // Display a message if the source is not trusted.
   if (!trusted) {
-    host.textContent = 'Execute the cell to display PDF.';
+    host.textContent = 'Cannot display an untrusted PDF. Maybe you need to run the cell?';
     return Promise.resolve(undefined);
   }
 
@@ -458,7 +455,7 @@ function renderSVG(options: renderSVG.IRenderOptions): Promise<void> {
 
   // Display a message if the source is not trusted.
   if (!trusted) {
-    host.textContent = 'Execute the cell to display SVG.';
+    host.textContent = 'Cannot display an untrusted SVG. Maybe you need to run the cell?';
     return Promise.resolve(undefined);
   }
 
