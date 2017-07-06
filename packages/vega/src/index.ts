@@ -90,7 +90,9 @@ class RenderedVega extends Widget implements IRenderMime.IRenderer {
     let updatedData: JSONObject;
     if (this._mode === 'vega-lite') {
       updatedData = Private.updateVegaLiteDefaults(data as ReadonlyJSONObject);
-    }  
+    } else {
+      updatedData = data as JSONObject;
+    }
 
     let embedSpec = {
       mode: this._mode,
@@ -158,7 +160,7 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
     dataType: 'json',
     documentWidgetFactoryOptions: {
       name: 'Vega',
-      fileExtensions: ['.vg', '.vg.json', 'json'],
+      fileExtensions: ['.vg', '.vg.json', '.json'],
       defaultFor: ['.vg', '.vg.json'],
       readOnly: true
     }
@@ -171,7 +173,7 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
     dataType: 'json',
     documentWidgetFactoryOptions: {
       name: 'Vega-Lite',
-      fileExtensions: ['.vl', '.vl.json', 'json'],
+      fileExtensions: ['.vl', '.vl.json', '.json'],
       defaultFor: ['.vl', '.vl.json'],
       readOnly: true
     }
