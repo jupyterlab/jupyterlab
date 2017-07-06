@@ -455,9 +455,20 @@ def build(app_dir=None, name=None, version=None, logger=None):
     _ensure_package(app_dir, name=name, version=version, logger=logger)
     staging = pjoin(app_dir, 'staging')
 
-    # Install the linked extensions.
-    for path in _get_linked_packages(app_dir, logger=logger).values():
-        install_extension(path, app_dir)
+    extensions = _get_extensions(app_dir)
+
+    # Install the linked packages.
+    for (name, path) in _get_linked_packages(app_dir, logger=logger).items():
+        # Handle linked extensions.
+        if name in extensions:
+            install_extension(path, app_dir)
+        # Handle linked packages that are not extensions.
+        else:
+            # Remove any existing package from staging/node_modules
+            target = pjoin(app_dir, 'staging', 'node_modules', name)
+            target = target.replace('/', os.sep)
+            if os.path.exists(target):
+                shutil.rmtree(target)
 
     # Make sure packages are installed.
     run(['npm', 'install'], cwd=staging, logger=logger)
@@ -567,6 +578,7 @@ def _test_overlap(spec1, spec2):
         gx(y2, x1, True) and lx(y2, x2, True)
     )
 
+
 def _format_compatibility_errors(name, version, errors):
     """Format a message for compatibility errors.
     """
@@ -674,6 +686,12 @@ def _ensure_package(app_dir, name=None, version=None, logger=None):
             data['jupyterlab']['extensions'].append(key)
         else:
             data['jupyterlab']['mimeExtensions'].append(key)
+
+    # Handle linked packages that are not extensions.
+    for (key, path) in _get_linked_packages(app_dir).items():
+        if key in extensions:
+            continue
+        data['dependencies'][key] = path
 
     for item in _get_uinstalled_core_extensions(app_dir):
         if item in data['jupyterlab']['extensions']:
