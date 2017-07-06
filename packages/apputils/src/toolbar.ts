@@ -200,15 +200,23 @@ export
 namespace Toolbar {
   /**
    * Create a toolbar item for a command.
+   *
+   * Notes:
+   * If the command has an icon label it will be added to the button.
+   * If there is no icon label, and no icon class, the main label will
+   * be added.
    */
   export
-  function toolbarButtonFromCommand(commands: CommandRegistry, id: string): ToolbarButton {
-    let oldClass = commands.className(id);
+  function createFromCommand(commands: CommandRegistry, id: string): ToolbarButton {
+    let oldClass = Private.commandClassName(commands, id);
     let button = new ToolbarButton({
       onClick: () => { commands.execute(id); },
       className: oldClass,
       tooltip: Private.commandTooltip(commands, id),
     });
+
+    Private.setNodeContentFromCommand(button.node, commands, id);
+
     // Ensure that we pick up relevant changes to the command:
     function onChange(sender: CommandRegistry, args: CommandRegistry.ICommandChangedArgs) {
       if (args.id !== id) {
@@ -219,13 +227,14 @@ namespace Toolbar {
         button.dispose();
       } else if (args.type === 'changed') {
         // Update all fields (onClick is already indirected)
-        let newClass = sender.className(id);
+        let newClass = Private.commandClassName(sender, id);
         if (newClass !== oldClass) {
           button.removeClass(oldClass);
           button.addClass(newClass);
           oldClass = newClass;
         }
-        button.node.title = Private.commandTooltip(commands, id);
+        button.node.title = Private.commandTooltip(sender, id);
+        Private.setNodeContentFromCommand(button.node, sender, id);
       }
     }
     commands.commandChanged.connect(onChange, button);
@@ -438,6 +447,37 @@ namespace Private {
   export
   function commandTooltip(commands: CommandRegistry, id: string): string {
     return commands.caption(id);
+  }
+
+  export
+  function commandClassName(commands: CommandRegistry, id: string): string {
+    let name = commands.className(id);
+    // Add the boolean state classes.
+    if (!commands.isEnabled(id)) {
+      name += ' p-mod-disabled';
+    }
+    if (commands.isToggled(id)) {
+      name += ' p-mod-toggled';
+    }
+    if (!commands.isVisible(id)) {
+      name += ' p-mod-hidden';
+    }
+    return name;
+  }
+
+  export
+  function setNodeContentFromCommand(node: HTMLElement, commands: CommandRegistry, id: string): void {
+    let iconClass = commands.iconClass(id);
+    let iconLabel = commands.iconLabel(id);
+    node.innerHTML = '';
+    if (iconClass || iconLabel) {
+      let icon = document.createElement('div');
+      icon.innerText = commands.iconLabel(id);
+      icon.classList.add(...iconClass.split(/\s/));
+      node.appendChild(icon);
+    } else {
+      node.innerText = commands.label(id);
+    }
   }
 
   /**
