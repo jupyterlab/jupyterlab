@@ -7,6 +7,10 @@ import {
 } from '@jupyterlab/rendermime-interfaces';
 
 import {
+  ReadonlyJSONObject
+} from '@phosphor/coreutils';
+
+import {
   Message
 } from '@phosphor/messaging';
 
@@ -211,12 +215,13 @@ class RenderedImage extends RenderedCommon {
    * @returns A promise which resolves when rendering is complete.
    */
   render(model: IRenderMime.IMimeModel): Promise<void> {
+    let metadata = model.metadata[this.mimeType] as ReadonlyJSONObject;
     return renderers.renderImage({
       host: this.node,
       mimeType: this.mimeType,
       source: String(model.data[this.mimeType]),
-      width: model.metadata.width as number | undefined,
-      height: model.metadata.height as number | undefined
+      width: metadata && metadata.width as number | undefined,
+      height: metadata && metadata.height as number | undefined
     });
   }
 }
