@@ -7,10 +7,6 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  find
-} from '@phosphor/algorithm';
-
-import {
   IRenderMime
 } from '@jupyterlab/rendermime-interfaces';
 
@@ -85,21 +81,30 @@ class RenderMime {
    *
    * @param bundle - The bundle of mime data.
    *
-   * @param safe - Whether to only consider safe factories.
+   * @param preferSafe - Whether to prefer a safe factory.
    *
    * @returns The preferred mime type from the available factories,
    *   or `undefined` if the mime type cannot be rendered.
    */
-  preferredMimeType(bundle: ReadonlyJSONObject, safe: boolean): string | undefined {
-    return find(this.mimeTypes, mt => {
-      if (!(mt in bundle)) {
-        return false;
+  preferredMimeType(bundle: ReadonlyJSONObject, preferSafe: boolean): string | undefined {
+    // Try to find a safe factory first, if preferred.
+    if (preferSafe) {
+      for (let mt of this.mimeTypes) {
+        if (mt in bundle && this._factories[mt].safe) {
+          return mt;
+        }
       }
-      if (safe && !this._factories[mt].safe) {
-        return false;
+    }
+
+    // Otherwise, search for the best factory among all factories.
+    for (let mt of this.mimeTypes) {
+      if (mt in bundle) {
+        return mt;
       }
-      return true;
-    });
+    }
+
+    // Otherwise, no matching mime type exists.
+    return undefined;
   }
 
   /**
@@ -117,16 +122,13 @@ class RenderMime {
       throw new Error(`No factory for mime type: '${mimeType}'`);
     }
 
-    // Create the renderer options for the factory.
-    let options = {
+    // Invoke the best factory for the given mime type.
+    return this._factories[mimeType].createRenderer({
       mimeType,
       resolver: this.resolver,
       sanitizer: this.sanitizer,
       linkHandler: this.linkHandler
-    };
-
-    // Invoke the best factory for the given mime type.
-    return this._factories[mimeType].createRenderer(options);
+    });
   }
 
   /**

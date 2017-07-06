@@ -6,7 +6,7 @@ import {
   IRenderMime
 } from '@jupyterlab/rendermime-interfaces';
 
-import * as Renderers
+import * as widgets
   from './widgets';
 
 
@@ -17,7 +17,7 @@ export
 const htmlRendererFactory: IRenderMime.IRendererFactory = {
   safe: true,
   mimeTypes: ['text/html'],
-  createRenderer: options => new Renderers.RenderedHTML(options)
+  createRenderer: options => new widgets.RenderedHTML(options)
 };
 
 
@@ -28,7 +28,7 @@ export
 const imageRendererFactory: IRenderMime.IRendererFactory = {
   safe: true,
   mimeTypes: ['image/png', 'image/jpeg', 'image/gif'],
-  createRenderer: options => new Renderers.RenderedImage(options)
+  createRenderer: options => new widgets.RenderedImage(options)
 };
 
 
@@ -39,7 +39,7 @@ export
 const latexRendererFactory: IRenderMime.IRendererFactory = {
   safe: true,
   mimeTypes: ['text/latex'],
-  createRenderer: options => new Renderers.RenderedLatex(options)
+  createRenderer: options => new widgets.RenderedLatex(options)
 };
 
 
@@ -50,29 +50,7 @@ export
 const markdownRendererFactory: IRenderMime.IRendererFactory = {
   safe: true,
   mimeTypes: ['text/markdown'],
-  createRenderer: options => new Renderers.RenderedMarkdown(options)
-};
-
-
-/**
- * A mime renderer factory for text and jupyter console text data.
- */
-export
-const textRendererFactory: IRenderMime.IRendererFactory = {
-  safe: true,
-  mimeTypes: ['text/plain', 'application/vnd.jupyter.stdout', 'application/vnd.jupyter.stderr'],
-  createRenderer: options => new Renderers.RenderedText(options)
-};
-
-
-/**
- * A mime renderer factory for javascript.
- */
-export
-const javaScriptRendererFactory: IRenderMime.IRendererFactory = {
-  safe: false,
-  mimeTypes: ['text/javascript', 'application/javascript'],
-  createRenderer: options => new Renderers.RenderedJavaScript(options)
+  createRenderer: options => new widgets.RenderedMarkdown(options)
 };
 
 
@@ -83,7 +61,7 @@ export
 const pdfRendererFactory: IRenderMime.IRendererFactory = {
   safe: false,
   mimeTypes: ['application/pdf'],
-  createRenderer: options => new Renderers.RenderedPDF(options)
+  createRenderer: options => new widgets.RenderedPDF(options)
 };
 
 
@@ -94,16 +72,26 @@ export
 const svgRendererFactory: IRenderMime.IRendererFactory = {
   safe: false,
   mimeTypes: ['image/svg+xml'],
-  createRenderer: options => new Renderers.RenderedSVG(options)
+  createRenderer: options => new widgets.RenderedSVG(options)
 };
 
 
 /**
- * The builtin factories provided by the package.
+ * A mime renderer factory for plain and jupyter console text data.
+ */
+export
+const textRendererFactory: IRenderMime.IRendererFactory = {
+  safe: true,
+  mimeTypes: ['text/plain', 'application/vnd.jupyter.stdout', 'application/vnd.jupyter.stderr'],
+  createRenderer: options => new widgets.RenderedText(options)
+};
+
+
+/**
+ * The builtin factories provided by the rendermime package.
  */
 export
 const defaultRendererFactories: ReadonlyArray<IRenderMime.IRendererFactory> = [
-  javaScriptRendererFactory,
   htmlRendererFactory,
   markdownRendererFactory,
   latexRendererFactory,

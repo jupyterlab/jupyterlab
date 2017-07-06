@@ -22,7 +22,7 @@ namespace IRenderMime {
   export
   interface IMimeModel {
     /**
-     * Whether the model is trusted.
+     * Whether the data in the model is trusted.
      */
     readonly trusted: boolean;
 
@@ -40,9 +40,9 @@ namespace IRenderMime {
      * Set the data associated with the model.
      *
      * #### Notes
-     * Calling this function may trigger an asynchronous operation that could
-     * cause the renderer to be rendered with a new model containing the new
-     * data.
+     * Calling this function may trigger an asynchronous operation
+     * that could cause the renderer to be rendered with a new model
+     * containing the new data.
      */
     setData(options: IMimeModel.ISetDataOptions): void;
   }
@@ -72,8 +72,8 @@ namespace IRenderMime {
   /**
    * The options used to initialize a document widget factory.
    *
-   * This interface is intended to be used by mime renderer extensions to
-   * declaratively define a document opener that uses its renderer factory.
+   * This interface is intended to be used by mime renderer extensions
+   * to define a document opener that uses its renderer factory.
    */
   export
   interface IDocumentWidgetFactoryOptions {
@@ -185,7 +185,7 @@ namespace IRenderMime {
   }
 
   /**
-   * A widget that provides a ready promise.
+   * A widget which dislays the contents of a mime model.
    */
   export
   interface IRenderer extends Widget {
@@ -195,6 +195,10 @@ namespace IRenderMime {
      * @param model - The mime model to render.
      *
      * @returns A promise which resolves when rendering is complete.
+     *
+     * #### Notes
+     * This method may be called multiple times during the lifetime
+     * of the widget to update it if and when new data is available.
      */
     renderModel(model: IMimeModel): Promise<void>;
   }
@@ -205,7 +209,14 @@ namespace IRenderMime {
   export
   interface IRendererFactory {
     /**
-     * Whether the factory can safely handle untrusted data.
+     * Whether the factory is a "safe" factory.
+     *
+     * #### Notes
+     * A "safe" factory produces renderer widgets which can render
+     * untrusted model data in a usable way. *All* renderers must
+     * handle untrusted data safely, but some may simply failover
+     * with a "Run cell to view output" message. A "safe" renderer
+     * is an indication that its sanitized output will be useful.
      */
     readonly safe: boolean;
 
