@@ -203,7 +203,7 @@ namespace Toolbar {
    */
   export
   function toolbarButtonFromCommand(commands: CommandRegistry, id: string): ToolbarButton {
-    let oldClass = commands.className(id)
+    let oldClass = commands.className(id);
     let button = new ToolbarButton({
       onClick: () => { commands.execute(id); },
       className: oldClass,
@@ -228,10 +228,7 @@ namespace Toolbar {
         button.node.title = Private.commandTooltip(commands, id);
       }
     }
-    commands.commandChanged.connect(onChange);
-    button.disposed.connect(() => {
-      commands.commandChanged.disconnect(onChange);
-    });
+    commands.commandChanged.connect(onChange, button);
     return button;
   }
 
