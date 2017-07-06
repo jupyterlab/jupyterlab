@@ -323,7 +323,9 @@ class ToolbarButton extends Widget {
     this.addClass(TOOLBAR_BUTTON_CLASS);
     this._onClick = options.onClick;
     if (options.className) {
-      this.addClass(options.className);
+      for (let extra of options.className.split(/\s/)) {
+        this.addClass(extra);
+      }
     }
     this.node.title = options.tooltip || '';
   }
