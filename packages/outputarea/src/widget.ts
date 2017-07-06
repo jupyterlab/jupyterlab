@@ -414,8 +414,11 @@ class OutputArea extends Widget {
     prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
     panel.addWidget(prompt);
 
-    let output = this.rendermime.createRenderer(model);
-    if (output) {
+    let mimeType = this.rendermime.preferredMimeType(
+      model.data, !model.trusted
+    );
+    if (mimeType) {
+      let output = this.rendermime.createRenderer(mimeType);
       output.renderModel(model);
       output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
       panel.addWidget(output);

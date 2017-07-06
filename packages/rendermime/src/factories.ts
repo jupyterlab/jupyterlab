@@ -1,301 +1,102 @@
-// Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
-
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
 import {
   IRenderMime
 } from '@jupyterlab/rendermime-interfaces';
 
-import {
-  RenderedHTML, RenderedMarkdown, RenderedText, RenderedImage,
-  RenderedJavaScript, RenderedSVG, RenderedPDF, RenderedLatex
-} from '.';
+import * as widgets
+  from './widgets';
 
 
 /**
- * A renderer for raw html.
+ * A mime renderer factory for raw html.
  */
 export
-class HTMLRendererFactory implements IRenderMime.IRendererFactory {
-  /**
-   * The mimeTypes this factory accepts.
-   */
-  mimeTypes = ['text/html'];
-
-  /**
-   * Whether the factory can create a renderer given the options.
-   */
-  canCreateRenderer(options: IRenderMime.IRendererOptions): boolean {
-    return this.mimeTypes.indexOf(options.mimeType) !== -1;
-  }
-
-  /**
-   * Create a renderer the transformed mime data.
-   *
-   * @param options - The options used to render the data.
-   */
-  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRenderer {
-    return new RenderedHTML(options);
-  }
-
-  /**
-   * Whether the renderer will sanitize the data given the render options.
-   */
-  wouldSanitize(options: IRenderMime.IRendererOptions): boolean {
-    return !options.trusted;
-  }
-}
+const htmlRendererFactory: IRenderMime.IRendererFactory = {
+  safe: true,
+  mimeTypes: ['text/html'],
+  createRenderer: options => new widgets.RenderedHTML(options)
+};
 
 
 /**
- * A renderer factory for `<img>` data.
+ * A mime renderer factory for images.
  */
 export
-class ImageRendererFactory implements IRenderMime.IRendererFactory {
-  /**
-   * The mimeTypes this factory accepts.
-   */
-  mimeTypes = ['image/png', 'image/jpeg', 'image/gif'];
-
-  /**
-   * Whether the factory can create a renderer given the options.
-   */
-  canCreateRenderer(options: IRenderMime.IRendererOptions): boolean {
-    return this.mimeTypes.indexOf(options.mimeType) !== -1;
-  }
-
-  /**
-   * Create a renderer the transformed mime data.
-   *
-   * @param options - The options used to render the data.
-   */
-  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRenderer {
-    return new RenderedImage(options);
-  }
-
-  /**
-   * Whether the renderer will sanitize the data given the render options.
-   */
-  wouldSanitize(options: IRenderMime.IRendererOptions): boolean {
-    return false;
-  }
-}
+const imageRendererFactory: IRenderMime.IRendererFactory = {
+  safe: true,
+  mimeTypes: ['image/png', 'image/jpeg', 'image/gif'],
+  createRenderer: options => new widgets.RenderedImage(options)
+};
 
 
 /**
- * A renderer factory for plain text and Jupyter console text data.
+ * A mime renderer factory for LaTeX.
  */
 export
-class TextRendererFactory implements IRenderMime.IRendererFactory {
-  /**
-   * The mimeTypes this factory accepts.
-   */
-  mimeTypes = ['text/plain', 'application/vnd.jupyter.stdout',
-               'application/vnd.jupyter.stderr'];
-
-  /**
-   * Whether the factory can create a renderer given the options.
-   */
-  canCreateRenderer(options: IRenderMime.IRendererOptions): boolean {
-    return this.mimeTypes.indexOf(options.mimeType) !== -1;
-  }
-
-  /**
-   * Create a renderer the transformed mime data.
-   *
-   * @param options - The options used to render the data.
-   */
-  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRenderer {
-    return new RenderedText(options);
-  }
-
-  /**
-   * Whether the renderer will sanitize the data given the render options.
-   */
-  wouldSanitize(options: IRenderMime.IRendererOptions): boolean {
-    return false;
-  }
-}
+const latexRendererFactory: IRenderMime.IRendererFactory = {
+  safe: true,
+  mimeTypes: ['text/latex'],
+  createRenderer: options => new widgets.RenderedLatex(options)
+};
 
 
 /**
- * A renderer factory for raw `<script>` data.
+ * A mime renderer factory for Markdown.
  */
 export
-class JavaScriptRendererFactory implements IRenderMime.IRendererFactory {
-  /**
-   * The mimeTypes this factory accepts.
-   */
-  mimeTypes = ['text/javascript', 'application/javascript'];
-
-  /**
-   * Whether the factory can create a renderer given the options.
-   */
-  canCreateRenderer(options: IRenderMime.IRendererOptions): boolean {
-    return (
-      options.trusted &&
-      this.mimeTypes.indexOf(options.mimeType) !== -1
-    );
-  }
-
-  /**
-   * Create a renderer the transformed mime data.
-   *
-   * @param options - The options used to render the data.
-   */
-  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRenderer {
-    return new RenderedJavaScript(options);
-  }
-
-  /**
-   * Whether the renderer will sanitize the data given the render options.
-   */
-  wouldSanitize(options: IRenderMime.IRendererOptions): boolean {
-    return false;
-  }
-}
+const markdownRendererFactory: IRenderMime.IRendererFactory = {
+  safe: true,
+  mimeTypes: ['text/markdown'],
+  createRenderer: options => new widgets.RenderedMarkdown(options)
+};
 
 
 /**
- * A renderer factory for `<svg>` data.
+ * A mime renderer factory for pdf.
  */
 export
-class SVGRendererFactory implements IRenderMime.IRendererFactory {
-  /**
-   * The mimeTypes this factory accepts.
-   */
-  mimeTypes = ['image/svg+xml'];
-
-  /**
-   * Whether the factory can create a renderer given the options.
-   */
-  canCreateRenderer(options: IRenderMime.IRendererOptions): boolean {
-    return (
-      options.trusted &&
-      this.mimeTypes.indexOf(options.mimeType) !== -1
-    );
-  }
-
-  /**
-   * Create a renderer the transformed mime data.
-   *
-   * @param options - The options used to render the data.
-   */
-  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRenderer {
-    return new RenderedSVG(options);
-  }
-
-  /**
-   * Whether the renderer will sanitize the data given the render options.
-   */
-  wouldSanitize(options: IRenderMime.IRendererOptions): boolean {
-    return false;
-  }
-}
+const pdfRendererFactory: IRenderMime.IRendererFactory = {
+  safe: false,
+  mimeTypes: ['application/pdf'],
+  createRenderer: options => new widgets.RenderedPDF(options)
+};
 
 
 /**
- * A renderer factory for PDF data.
+ * A mime renderer factory for svg.
  */
 export
-class PDFRendererFactory implements IRenderMime.IRendererFactory {
-  /**
-   * The mimeTypes this factory accepts.
-   */
-  mimeTypes = ['application/pdf'];
-
-  /**
-   * Whether the factory can create a renderer given the options.
-   */
-  canCreateRenderer(options: IRenderMime.IRendererOptions): boolean {
-    return (
-      options.trusted &&
-      this.mimeTypes.indexOf(options.mimeType) !== -1
-    );
-  }
-
-  /**
-   * Create a renderer the transformed mime data.
-   *
-   * @param options - The options used to render the data.
-   */
-  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRenderer {
-    return new RenderedPDF(options);
-  }
-
-  /**
-   * Whether the renderer will sanitize the data given the render options.
-   */
-  wouldSanitize(options: IRenderMime.IRendererOptions): boolean {
-    return false;
-  }
-}
+const svgRendererFactory: IRenderMime.IRendererFactory = {
+  safe: false,
+  mimeTypes: ['image/svg+xml'],
+  createRenderer: options => new widgets.RenderedSVG(options)
+};
 
 
 /**
- * A renderer factory for LateX data.
+ * A mime renderer factory for plain and jupyter console text data.
  */
 export
-class LatexRendererFactory implements IRenderMime.IRendererFactory  {
-  /**
-   * The mimeTypes this factory accepts.
-   */
-  mimeTypes = ['text/latex'];
-
-  /**
-   * Whether the factory can create a renderer given the options.
-   */
-  canCreateRenderer(options: IRenderMime.IRendererOptions): boolean {
-    return this.mimeTypes.indexOf(options.mimeType) !== -1;
-  }
-
-  /**
-   * Create a renderer the transformed mime data.
-   *
-   * @param options - The options used to render the data.
-   */
-  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRenderer {
-    return new RenderedLatex(options);
-  }
-
-  /**
-   * Whether the renderer will sanitize the data given the render options.
-   */
-  wouldSanitize(options: IRenderMime.IRendererOptions): boolean {
-    return false;
-  }
-}
+const textRendererFactory: IRenderMime.IRendererFactory = {
+  safe: true,
+  mimeTypes: ['text/plain', 'application/vnd.jupyter.stdout', 'application/vnd.jupyter.stderr'],
+  createRenderer: options => new widgets.RenderedText(options)
+};
 
 
 /**
- * A renderer factory for Jupyter Markdown data.
+ * The builtin factories provided by the rendermime package.
  */
 export
-class MarkdownRendererFactory implements IRenderMime.IRendererFactory {
-  /**
-   * The mimeTypes this factory accepts.
-   */
-  mimeTypes = ['text/markdown'];
-
-  /**
-   * Whether the factory can create a renderer given the options.
-   */
-  canCreateRenderer(options: IRenderMime.IRendererOptions): boolean {
-    return this.mimeTypes.indexOf(options.mimeType) !== -1;
-  }
-
-  /**
-   * Create a renderer the transformed mime data.
-   *
-   * @param options - The options used to render the data.
-   */
-  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRenderer {
-    return new RenderedMarkdown(options);
-  }
-
-  /**
-   * Whether the renderer will sanitize the data given the render options.
-   */
-  wouldSanitize(options: IRenderMime.IRendererOptions): boolean {
-    return !options.trusted;
-  }
-}
+const defaultRendererFactories: ReadonlyArray<IRenderMime.IRendererFactory> = [
+  htmlRendererFactory,
+  markdownRendererFactory,
+  latexRendererFactory,
+  svgRendererFactory,
+  imageRendererFactory,
+  pdfRendererFactory,
+  textRendererFactory
+];

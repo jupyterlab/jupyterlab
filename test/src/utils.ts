@@ -28,7 +28,7 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
-  IRenderMime, RenderMime, TextRendererFactory, RenderedHTML
+  IRenderMime, RenderMime, RenderedHTML, defaultRendererFactories
 } from '@jupyterlab/rendermime';
 
 
@@ -163,20 +163,19 @@ namespace Private {
     }
   }
 
-
-  class JSONRendererFactory extends TextRendererFactory {
-
-    mimeTypes = ['application/json'];
-
+  const jsonRendererFactory = {
+    mimeTypes: ['application/json'],
+    safe: true,
     createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRenderer {
       return new JSONRenderer(options);
     }
-  }
+  };
 
-  const initialFactories = RenderMime.getDefaultFactories();
   export
-  const rendermime = new RenderMime({ initialFactories });
-  rendermime.addFactory(new JSONRendererFactory(), 'application/json');
+  const rendermime = new RenderMime({
+    initialFactories: defaultRendererFactories
+  });
+  rendermime.addFactory(jsonRendererFactory, 10);
 }
 
 
