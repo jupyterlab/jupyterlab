@@ -123,6 +123,12 @@ def install_extension(extension, app_dir=None, logger=None):
     shutil.move(pjoin(target, fname), pjoin(app_dir, 'extensions'))
     shutil.rmtree(target)
 
+    # Remove any existing package from staging/node_modules
+    target = pjoin(app_dir, 'staging', 'node_modules', data['name'])
+    target = target.replace('/', os.sep)
+    if os.path.exists(target):
+        shutil.rmtree(target)
+
 
 def link_package(path, app_dir=None, logger=None):
     """Link a package against the JupyterLab build.
@@ -449,12 +455,12 @@ def build(app_dir=None, name=None, version=None, logger=None):
     _ensure_package(app_dir, name=name, version=version, logger=logger)
     staging = pjoin(app_dir, 'staging')
 
-    # Make sure packages are installed.
-    run(['npm', 'install'], cwd=staging, logger=logger)
-
     # Install the linked extensions.
     for path in _get_linked_packages(app_dir, logger=logger).values():
         install_extension(path, app_dir)
+
+    # Make sure packages are installed.
+    run(['npm', 'install'], cwd=staging, logger=logger)
 
     # Build the app.
     run(['npm', 'run', 'build'], cwd=staging, logger=logger)
