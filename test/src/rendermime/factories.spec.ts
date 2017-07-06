@@ -305,19 +305,20 @@ describe('rendermime/factories', () => {
         });
       });
 
-      it('should execute a script tag when attached', () => {
-        const source = '<script>window.y=3;</script>';
-        let f = htmlRendererFactory;
-        let mimeType = 'text/html';
-        let model = createModel(mimeType, source, true);
-        let w = f.createRenderer({ mimeType, ...defaultOptions });
-        return w.renderModel(model).then(() => {
-          expect((window as any).y).to.be(void 0);
-          Widget.attach(w, document.body);
-          expect((window as any).y).to.be(3);
-          w.dispose();
-        });
-      });
+      // TODO we are disabling script execution for now.
+      // it('should execute a script tag when attached', () => {
+      //   const source = '<script>window.y=3;</script>';
+      //   let f = htmlRendererFactory;
+      //   let mimeType = 'text/html';
+      //   let model = createModel(mimeType, source, true);
+      //   let w = f.createRenderer({ mimeType, ...defaultOptions });
+      //   return w.renderModel(model).then(() => {
+      //     expect((window as any).y).to.be(void 0);
+      //     Widget.attach(w, document.body);
+      //     expect((window as any).y).to.be(3);
+      //     w.dispose();
+      //   });
+      // });
 
       it('should sanitize when untrusted', () => {
         const source = '<pre><script>window.y=3;</script></pre>';
@@ -370,9 +371,9 @@ describe('rendermime/factories', () => {
         let mimeType = 'image/png';
         let model = createModel(mimeType, source);
         let w = f.createRenderer({ mimeType, ...defaultOptions  });
-        let el = w.node.firstChild as HTMLImageElement;
 
         return w.renderModel(model).then(() => {
+          let el = w.node.firstChild as HTMLImageElement;
           expect(el.src).to.be('data:image/png;base64,' + source);
           expect(el.localName).to.be('img');
           expect(el.innerHTML).to.be('');
@@ -383,7 +384,7 @@ describe('rendermime/factories', () => {
           w = f.createRenderer({ mimeType, ...defaultOptions });
           return w.renderModel(model);
         }).then(() => {
-          el = w.node.firstChild as HTMLImageElement;
+          let el = w.node.firstChild as HTMLImageElement;
           expect(el.src).to.be('data:image/gif;base64,' + source);
           expect(el.localName).to.be('img');
           expect(el.innerHTML).to.be('');
