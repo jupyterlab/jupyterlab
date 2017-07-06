@@ -23,6 +23,10 @@ import {
 } from '@phosphor/algorithm';
 
 import {
+  ElementExt
+} from '@phosphor/domutils';
+
+import {
   INotebookModel
 } from './model';
 
@@ -220,7 +224,7 @@ namespace NotebookActions {
     // Make the newly inserted cell active.
     widget.activeCellIndex = index;
     widget.deselectAll();
-    Private.handleState(widget, state);
+    Private.handleState(widget, state, true);
   }
 
   /**
@@ -246,7 +250,7 @@ namespace NotebookActions {
     // Make the newly inserted cell active.
     widget.activeCellIndex++;
     widget.deselectAll();
-    Private.handleState(widget, state);
+    Private.handleState(widget, state, true);
   }
 
   /**
@@ -276,7 +280,7 @@ namespace NotebookActions {
       }
     }
     cells.endCompoundOperation();
-    Private.handleState(widget, state);
+    Private.handleState(widget, state, true);
   }
 
   /**
@@ -306,7 +310,7 @@ namespace NotebookActions {
       }
     }
     cells.endCompoundOperation();
-    Private.handleState(widget, state);
+    Private.handleState(widget, state, true);
   }
 
   /**
@@ -469,7 +473,7 @@ namespace NotebookActions {
     let state = Private.getState(widget);
     widget.activeCellIndex -= 1;
     widget.deselectAll();
-    Private.handleState(widget, state);
+    Private.handleState(widget, state, true);
   }
 
   /**
@@ -493,7 +497,7 @@ namespace NotebookActions {
     let state = Private.getState(widget);
     widget.activeCellIndex += 1;
     widget.deselectAll();
-    Private.handleState(widget, state);
+    Private.handleState(widget, state, true);
   }
 
   /**
@@ -530,7 +534,7 @@ namespace NotebookActions {
       widget.select(current);
     }
     widget.activeCellIndex -= 1;
-    Private.handleState(widget, state);
+    Private.handleState(widget, state, true);
   }
 
   /**
@@ -567,7 +571,7 @@ namespace NotebookActions {
       widget.select(current);
     }
     widget.activeCellIndex += 1;
-    Private.handleState(widget, state);
+    Private.handleState(widget, state, true);
   }
 
   /**
@@ -1062,9 +1066,12 @@ namespace Private {
    * Handle the state of a widget after running an action.
    */
   export
-  function handleState(widget: Notebook, state: IState): void {
+  function handleState(widget: Notebook, state: IState, scrollIfNeeded=false): void {
     if (state.wasFocused || widget.mode === 'edit') {
       widget.activate();
+    }
+    if (scrollIfNeeded) {
+      ElementExt.scrollIntoViewIfNeeded(widget.node, widget.activeCell.node);
     }
   }
 

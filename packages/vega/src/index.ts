@@ -1,5 +1,11 @@
-// Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+import {
+  JSONObject, ReadonlyJSONObject
+} from '@phosphor/coreutils';
 
 import {
   Widget
@@ -13,6 +19,9 @@ import {
  * Import vega-embed in this manner due to how it is exported.
  */
 import embed = require('vega-embed');
+
+
+import '../style/index.css';
 
 
 /**
@@ -78,10 +87,16 @@ class RenderedVega extends Widget implements IRenderMime.IRenderer {
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
 
     let data = model.data[this._mimeType];
+    let updatedData: JSONObject;
+    if (this._mode === 'vega-lite') {
+      updatedData = Private.updateVegaLiteDefaults(data as ReadonlyJSONObject);
+    } else {
+      updatedData = data as JSONObject;
+    }
 
     let embedSpec = {
       mode: this._mode,
-      spec: data
+      spec: updatedData
     };
 
     return new Promise<void>((resolve, reject) => {
@@ -102,39 +117,14 @@ class RenderedVega extends Widget implements IRenderMime.IRenderer {
 
 
 /**
- * A mime renderer factory for Vega/Vega-Lite data.
+ * A mime renderer factory for vega data.
  */
 export
-class VegaRendererFactory implements IRenderMime.IRendererFactory {
-  /**
-   * The mimeTypes this renderer accepts.
-   */
-  mimeTypes = [VEGA_MIME_TYPE, VEGALITE_MIME_TYPE];
-
-  /**
-   * Whether the renderer can create a renderer given the render options.
-   */
-  canCreateRenderer(options: IRenderMime.IRendererOptions): boolean {
-    return this.mimeTypes.indexOf(options.mimeType) !== -1;
-  }
-
-  /**
-   * Render the transformed mime bundle.
-   */
-  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRenderer {
-    return new RenderedVega(options);
-  }
-
-  /**
-   * Whether the renderer will sanitize the data given the render options.
-   */
-  wouldSanitize(options: IRenderMime.IRendererOptions): boolean {
-    return false;
-  }
-}
-
-
-const rendererFactory = new VegaRendererFactory();
+const rendererFactory: IRenderMime.IRendererFactory = {
+  safe: true,
+  mimeTypes: [VEGA_MIME_TYPE, VEGALITE_MIME_TYPE],
+  createRenderer: options => new RenderedVega(options)
+};
 
 const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
   // Vega
@@ -145,7 +135,7 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
     dataType: 'json',
     documentWidgetFactoryOptions: {
       name: 'Vega',
-      fileExtensions: ['.vg', '.vg.json', 'json'],
+      fileExtensions: ['.vg', '.vg.json', '.json'],
       defaultFor: ['.vg', '.vg.json'],
       readOnly: true
     }
@@ -158,7 +148,7 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
     dataType: 'json',
     documentWidgetFactoryOptions: {
       name: 'Vega-Lite',
-      fileExtensions: ['.vl', '.vl.json', 'json'],
+      fileExtensions: ['.vl', '.vl.json', '.json'],
       defaultFor: ['.vl', '.vl.json'],
       readOnly: true
     }
@@ -166,3 +156,42 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
 ];
 
 export default extensions;
+
+
+/**
+ * Namespace for module privates.
+ */
+namespace Private {
+
+  /**
+   * Default cell config for Vega-Lite.
+   */
+  const defaultCellConfig: JSONObject = {
+    "width": 400,
+    "height": 400/1.5
+  }
+
+  /**
+   * Apply the default cell config to the spec in place.
+   * 
+   * #### Notes
+   * This carefully does a shallow copy to avoid copying the potentially
+   * large data.
+   */
+  export
+  function updateVegaLiteDefaults(spec: ReadonlyJSONObject): JSONObject {
+    if ( spec.hasOwnProperty('config') ) {
+      if ( spec.config.hasOwnProperty('cell') ) {
+        return {
+          ...{"config": {...{"cell": {...defaultCellConfig, ...((spec.config as ReadonlyJSONObject).cell as any)}}}, ...(spec.config as any)},
+          ...spec
+        }
+      } else {
+        return {...{"config": {...{"cell": {...defaultCellConfig}}}, ...(spec.config as any)}, ...spec}
+      }
+    } else {
+      return {...{"config": {"cell": defaultCellConfig}}, ...spec};
+    }
+  }
+
+}

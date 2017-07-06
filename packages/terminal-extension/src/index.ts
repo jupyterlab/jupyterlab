@@ -54,7 +54,7 @@ namespace CommandIDs {
 /**
  * The class name for the terminal icon in the default theme.
  */
-const TERMINAL_ICON_CLASS = 'jp-ImageTerminal';
+const TERMINAL_ICON_CLASS = 'jp-TerminalIcon';
 
 
 /**
@@ -130,6 +130,8 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
   if (launcher) {
     launcher.add({
       displayName: 'Terminal',
+      category: 'Other',
+      rank: 0,
       iconClass: TERMINAL_ICON_CLASS,
       callback: () => {
         return commands.execute(CommandIDs.createNew);

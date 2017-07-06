@@ -33,7 +33,7 @@ import {
 /**
  * The class name for the text editor icon from the default theme.
  */
-const EDITOR_ICON_CLASS = 'jp-ImageTextEditor';
+const EDITOR_ICON_CLASS = 'jp-TextEditorIcon';
 
 /**
  * The name of the factory that creates editor widgets.
@@ -96,7 +96,7 @@ const plugin: JupyterLabPlugin<IEditorTracker> = {
  * This will eventually reside in its own settings file.
  */
 const schema = {
-  "jupyter.lab.setting-icon-class": "jp-ImageTextEditor",
+  "jupyter.lab.setting-icon-class": "jp-TextEditorIcon",
   "jupyter.lab.setting-icon-label": "Editor",
   "title": "Text Editor",
   "description": "Text editor settings for all editors.",
@@ -372,6 +372,8 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
   if (launcher) {
     launcher.add({
       displayName: 'Text Editor',
+      category: 'Other',
+      rank: 1,
       iconClass: EDITOR_ICON_CLASS,
       callback: cwd => {
         return commands.execute('docmanager:new-untitled', {

@@ -214,7 +214,7 @@ namespace CommandIDs {
 /**
  * The class name for the notebook icon from the default theme.
  */
-const NOTEBOOK_ICON_CLASS = 'jp-ImageNotebook';
+const NOTEBOOK_ICON_CLASS = 'jp-NotebookRunningIcon';
 
 /**
  * The name of the factory that creates notebooks.
@@ -449,9 +449,10 @@ function activateNotebookHandler(app: JupyterLab, services: IServiceManager, mai
           displayName,
           category: 'Notebook',
           name,
-          iconClass: 'jp-ImageNotebook',
+          iconClass: 'jp-NotebookRunningIcon',
           callback,
-          rank
+          rank,
+          kernelIconUrl: specs.kernelspecs[name].resources["logo-64x64"]
         });
       }
     });

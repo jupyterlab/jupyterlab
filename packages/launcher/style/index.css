@@ -4,134 +4,196 @@
 |----------------------------------------------------------------------------*/
 
 
-.jp-LauncherWidget {
-  background: var(--md-grey-50);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 0;
-  padding: 0;
-  overflow: auto;
-  outline: none;
+/* Private CSS variables */
+
+
+:root {
+  --jp-private-launcher-top-margin: 16px;
+  --jp-private-launcher-side-margin: 32px;
+  --jp-private-launcher-card-size: 100px;
+  --jp-private-launcher-card-label-height: 25px;
+  --jp-private-launcher-card-icon-height: 75px;
+  --jp-private-launcher-large-icon-size: 52px;
+  --jp-private-launcher-small-icon-size: 32px;
 }
 
 
-.jp-LauncherWidget::before {
-  content: 'Start a new activity';
+/* Launcher */
+
+.jp-Launcher {
+  margin: 0;
+  padding: 0;
+  outline: none;
+  background: var(--md-grey-50);
+  box-sizing: border-box;
+}
+
+
+.jp-Launcher::before {
+  content: '';
   display: block;
-  height: 60px;
+  height: var(--jp-toolbar-micro-height);
   width: 100%;
   background: var(--jp-toolbar-background);
   border-bottom: 1px solid var(--jp-toolbar-border-color);
   box-shadow: var(--jp-toolbar-box-shadow);
-  z-index: 10;
-  text-align: center;
-  font-size: 24px;
-  padding-top: 36px;
+  z-index: 1;
 }
 
 
-.jp-LauncherWidget-body {
-  padding-bottom: 12px;
-  font-size: var(--jp-ui-font-size1);
-  color: var(--jp-ui-font-color1);
-  margin-left: auto;
-  margin-right: auto;
-  text-align: center;
+.jp-Launcher-body {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: auto;
   display: flex;
+  justify-content: center;
+}
+
+
+.jp-Launcher-content {
+  width: 85%;
+  height: 100%;
+  margin-top: var(--jp-private-launcher-top-margin);
+  margin-left: var(--jp-private-launcher-side-margin);
+  margin-right: var(--jp-private-launcher-side-margin);
+  box-sizing: border-box;
+}
+
+
+/* Launcher section */
+
+.jp-Launcher-section {
+  width: 100%;
+  box-sizing: border-box;
+  padding-bottom: 12px;
+}
+
+
+.jp-Launcher-sectionHeader {
+  display: flex;
+  flex-direction: row;
   align-items: center;
-  flex-direction: column;
+  box-sizing: border-box;
+  /* This is custom tuned to get the section header to align with the cards */
+  margin-left: 5px;
+  border-bottom: 1px solid var(--jp-border-color2);
+  padding-bottom: 0px;
+  margin-bottom: 8px;
+}
+
+
+.jp-Launcher-sectionHeader .jp-Launcher-sectionIcon {
+  box-sizing: border-box;
+  margin-right: 12px;
+  height: var(--jp-private-launcher-small-icon-size);
+  width: var(--jp-private-launcher-small-icon-size);
+  background-size: var(--jp-private-launcher-small-icon-size) var(--jp-private-launcher-small-icon-size);
+}
+
+
+.jp-Launcher-sectionTitle {
+  font-size: var(--jp-ui-font-size2);
+  font-weight: normal;
+  color: var(--jp-ui-font-color1);
+  box-sizing: border-box;
+}
+
+
+/* Launcher cards */
+
+.jp-Launcher-cardContainer {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
   flex-wrap: wrap;
 }
 
 
-.jp-LauncherWidget-logo {
-  flex: 0 0 50px;
-  margin-left: auto;
-  margin-right: auto;
-  width: 100%;
-  background-color: var(--jp-layout-color1);
-  background-size: 232px 50px;
-  background-repeat: no-repeat;
-  background-position: center;
-  margin-top: 20px;
-}
-
-
-.jp-LauncherWidget-subtitle {
-  background-color: var(--jp-layout-color1);
-  font-size: var(--jp-ui-font-size2);
-  width: 100%;
-  margin-top: 4px;
-  font-weight: 300;
-}
-
-
-.jp-LauncherWidget-header {
-  padding-top: 16px;
-  padding-bottom: 4px;
-}
-
-
-.jp-LauncherWidget-body {
+.jp-LauncherCard {
   display: flex;
-  flex-direction: row;
-  margin-top: 8px;
+  flex-direction: column;
+  cursor: pointer;
+  width: var(--jp-private-launcher-card-size);
+  height: var(--jp-private-launcher-card-size);
+  margin: 8px;
+  padding: 0px;
+  border: 1px solid var(--md-grey-400);
+  background: var(--jp-layout-color0);
+  box-shadow: 0px 1px 1px 1px rgba(0,0,0,.08);
+  transition: .2s box-shadow;
+}
+
+
+.jp-LauncherCard:hover {
+  box-shadow: 0px 2px 4px 1px rgba(0,0,0,.20);
+}
+
+
+.jp-LauncherCard-icon {
+  width: 100%;
+  height: var(--jp-private-launcher-card-icon-height);
+  box-sizing: border-box;
+  margin: 0px;
+  padding: 0px;
+  display: flex;
   justify-content: center;
   align-items: center;
 }
 
 
-.jp-LauncherWidget-item {
-  display: flex;
-  flex-direction: column;
-  cursor: pointer;
-  width: 100px;
-  border: 1px solid var(--md-grey-400);
-  background: var(--jp-layout-color0);
-  height: 100px;
-  margin: 8px;
-  box-shadow: 0px 1px 1px 1px rgba(0,0,0,.08);
-  padding: 12px;
-  transition: .2s box-shadow;
+.jp-LauncherCard-noKernelIcon {
+  font-weight: normal;
+  font-size: var(--jp-private-launcher-large-icon-size);
 }
 
 
-.jp-LauncherWidget-item:hover {
-  box-shadow: 0px 2px 4px 1px rgba(0,0,0,.20);
+.jp-LauncherCard[data-category="Notebook"] .jp-LauncherCard-noKernelIcon {
+  /* This color is copied from the notebook icon. */
+  color: #EF6C00;
 }
 
 
-.jp-LauncherWidget-image {
-  display: block;
-  vertical-align: middle;
-  flex: 0 0 auto;
-  margin: 0 auto;
-  min-height: 68px;
-  min-width: 52px;
-  max-width: 52px;
-  background-size: 52px 68px;
-  background-repeat: no-repeat;
-  cursor: pointer;
+.jp-LauncherCard[data-category="Console"] .jp-LauncherCard-noKernelIcon {
+  /* This color is copied from the console icon. */
+  color: #0288D1;
 }
 
 
-.jp-LauncherWidget-text {
-  flex: 0 0 auto;
-  text-overflow: ellipsis;
-  order: 1;
-  vertical-align: middle;
-  margin: auto;
-}
-
-
-.jp-LauncherWidget-tour {
-  margin-top: 14px;
-  height: 14px;
+.jp-LauncherCard-label {
   width: 100%;
-  cursor: pointer;
-  padding-bottom: 14px;
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
-  background-position: top center;
-  background-repeat: no-repeat;
+  height: var(--jp-private-launcher-card-label-height);
+  line-height: var(--jp-private-launcher-card-label-height);
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color1);
+  box-sizing: border-box;
+  text-overflow: ellipsis;
+  text-align: center;
 }
+
+
+/* Icons, kernel icons */
+
+.jp-Launcher-icon {
+  margin: 0px;
+  padding: 0px;
+  height: var(--jp-private-launcher-large-icon-size);
+  width: var(--jp-private-launcher-large-icon-size);
+  background-size: var(--jp-private-launcher-large-icon-size) var(--jp-private-launcher-large-icon-size);
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+
+.jp-Launcher-kernelIcon {
+  width: var(--jp-private-launcher-large-icon-size);
+  height: var(--jp-private-launcher-large-icon-size);
+  margin: 0px;
+  padding: 0px;
+}
+
+
+
+

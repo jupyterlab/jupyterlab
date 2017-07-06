@@ -663,6 +663,7 @@ namespace RunningSessions {
     updateSessionNode(node: HTMLLIElement, model: Session.IModel, kernelName: string): void {
       let icon = DOMUtils.findElement(node, ITEM_ICON_CLASS);
       let name = model.name || model.path.split('/').pop();
+
       if (name.indexOf('.ipynb') !== -1) {
         icon.className = `${ITEM_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
       } else if (model.type.toLowerCase() === 'console') {

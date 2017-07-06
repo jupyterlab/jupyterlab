@@ -14,10 +14,12 @@ import {
 } from '@jupyterlab/docregistry';
 
 
+import '../style/index.css';
+
 /**
  * The class name for the text editor icon from the default theme.
  */
-const TEXTEDITOR_ICON_CLASS = 'jp-ImageTextEditor';
+const TEXTEDITOR_ICON_CLASS = 'jp-TextEditorIcon';
 
 /**
  * The name of the factory that creates markdown widgets.

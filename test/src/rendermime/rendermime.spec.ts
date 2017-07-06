@@ -20,11 +20,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  TextRendererFactory
-} from '@jupyterlab/rendermime';
-
-import {
-  MimeModel, IRenderMime, RenderMime
+  MimeModel, IRenderMime, RenderedText, RenderMime
 } from '@jupyterlab/rendermime';
 
 import {
@@ -38,6 +34,12 @@ const RESOLVER: IRenderMime.IResolver = createFileContext();
 function createModel(data: JSONObject): IRenderMime.IMimeModel {
   return new MimeModel({ data });
 }
+
+const fooFactory: IRenderMime.IRendererFactory  = {
+  mimeTypes: ['text/foo'],
+  safe: true,
+  createRenderer: options => new RenderedText(options)
+};
 
 
 describe('rendermime/index', () => {
@@ -84,21 +86,19 @@ describe('rendermime/index', () => {
     describe('#createRenderer()', () => {
 
       it('should create a mime renderer', () => {
-        let model = createModel({ 'text/plain': 'foo' });
-        let w = r.createRenderer(model);
+        let w = r.createRenderer('text/plain');
         expect(w instanceof Widget).to.be(true);
       });
 
       it('should raise an error for an unregistered mime type', () => {
-        let model = createModel({ 'text/fizz': 'foo' });
-        expect(() => { r.createRenderer(model); }).to.throwError();
+        expect(() => { r.createRenderer('text/fizz'); }).to.throwError();
       });
 
       it('should render json data', () => {
         let model = createModel({
           'application/json': { 'foo': 1 }
         });
-        let w = r.createRenderer(model);
+        let w = r.createRenderer('application/json');
         return w.renderModel(model).then(() => {
           expect(w.node.textContent).to.be('{\n  "foo": 1\n}');
         });
@@ -122,7 +122,7 @@ describe('rendermime/index', () => {
             }
           }
         });
-        let w = r.createRenderer(model);
+        let w = r.createRenderer('text/html');
         w.renderModel(model);
       });
 
@@ -139,7 +139,7 @@ describe('rendermime/index', () => {
             }
           }
         });
-        let w = r.createRenderer(model);
+        let w = r.createRenderer('text/html');
         w.renderModel(model);
       });
     });
@@ -151,12 +151,12 @@ describe('rendermime/index', () => {
           'text/plain': 'foo',
           'text/html': '<h1>foo</h1>'
         });
-        expect(r.preferredMimeType(model)).to.be('text/html');
+        expect(r.preferredMimeType(model.data, false)).to.be('text/html');
       });
 
       it('should return `undefined` if there are no registered mimeTypes', () => {
         let model = createModel({ 'text/fizz': 'buzz' });
-        expect(r.preferredMimeType(model)).to.be(void 0);
+        expect(r.preferredMimeType(model.data, false)).to.be(void 0);
       });
 
       it('should select the mimeType that is safe', () => {
@@ -165,7 +165,7 @@ describe('rendermime/index', () => {
           'text/javascript': 'window.x = 1',
           'image/png': 'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
         });
-        expect(r.preferredMimeType(model)).to.be('image/png');
+        expect(r.preferredMimeType(model.data, true)).to.be('image/png');
       });
 
       it('should render the mimeType that is sanitizable', () => {
@@ -173,7 +173,7 @@ describe('rendermime/index', () => {
           'text/plain': 'foo',
           'text/html': '<h1>foo</h1>'
         });
-        expect(r.preferredMimeType(model)).to.be('text/html');
+        expect(r.preferredMimeType(model.data, true)).to.be('text/html');
       });
     });
 
@@ -182,8 +182,7 @@ describe('rendermime/index', () => {
       it('should clone the rendermime instance with shallow copies of data', () => {
         let c = r.clone();
         expect(toArray(c.mimeTypes)).to.eql(r.mimeTypes);
-        let factory = new TextRendererFactory();
-        c.addFactory(factory, 'text/foo');
+        c.addFactory(fooFactory);
         expect(r).to.not.be(c);
       });
 
@@ -192,16 +191,14 @@ describe('rendermime/index', () => {
     describe('#addFactory()', () => {
 
       it('should add a factory', () => {
-        let factory = new TextRendererFactory();
-        r.addFactory(factory, 'text/foo');
+        r.addFactory(fooFactory);
         let index = r.mimeTypes.indexOf('text/foo');
         expect(index).to.be(r.mimeTypes.length - 1);
       });
 
-      it('should take an optional order index', () => {
-        let factory = new TextRendererFactory();
+      it('should take an optional rank', () => {
         let len = r.mimeTypes.length;
-        r.addFactory(factory, 'text/foo', 0);
+        r.addFactory(fooFactory, 0);
         let index = r.mimeTypes.indexOf('text/foo');
         expect(index).to.be(0);
         expect(r.mimeTypes.length).to.be(len + 1);
@@ -214,7 +211,7 @@ describe('rendermime/index', () => {
       it('should remove a factory by mimeType', () => {
         r.removeFactory('text/html');
         let model = createModel({ 'text/html': '<h1>foo</h1>' });
-        expect(r.preferredMimeType(model)).to.be(void 0);
+        expect(r.preferredMimeType(model.data, true)).to.be(void 0);
       });
 
       it('should be a no-op if the mimeType is not registered', () => {
@@ -226,7 +223,8 @@ describe('rendermime/index', () => {
     describe('#getFactory()', () => {
 
       it('should get a factory by mimeType', () => {
-        expect(r.getFactory('text/plain')).to.be.a(TextRendererFactory);
+        let f = r.getFactory('text/plain');
+        expect(f.mimeTypes).to.contain('text/plain');
       });
 
       it('should return undefined for missing mimeType', () => {

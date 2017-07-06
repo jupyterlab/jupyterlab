@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  IRenderMime, RenderMime
+  IRenderMime, RenderMime, defaultRendererFactories
 } from '@jupyterlab/rendermime';
 
 import {
@@ -66,7 +66,7 @@ class JupyterLab extends Application<ApplicationShell> {
         linker.connectNode(node, 'file-operations:open', { path });
       }
     };
-    let initialFactories = RenderMime.getDefaultFactories();
+    let initialFactories = defaultRendererFactories;
     this.rendermime = new RenderMime({ initialFactories, linkHandler });
 
     let registry = this.docRegistry = new DocumentRegistry();
