@@ -8,6 +8,12 @@ from tornado import web
 
 from notebook.base.handlers import APIHandler, json_errors
 
+try:
+    from jsonschema import ValidationError
+    from jsonschema import Draft4Validator as Validator
+except ImportError:
+    Validator = None
+
 
 class SettingsHandler(APIHandler):
 
@@ -36,7 +42,7 @@ class SettingsHandler(APIHandler):
 
     @json_errors
     @web.authenticated
-    def put(self, section_name):
+    def patch(self, section_name):
         if not self.settings_dir:
             raise web.HTTPError(404, "No current settings directory")
 
@@ -46,6 +52,16 @@ class SettingsHandler(APIHandler):
             raise web.HTTPError(404, "Schema not found for: %r" % section_name)
 
         data = self.get_json_body()  # Will raise 400 if content is not valid JSON
+
+        # Validate the data against the schema.
+        if Validator is not None:
+            with open(path) as fid:
+                schema = json.load(fid)
+            validator = Validator(schema)
+            try:
+                validator.validate(data)
+            except ValidationError as e:
+                raise web.HTTPError(400, str(e))
 
         path = os.path.join(self.settings_dir, section_name + '.json')
         with open(path, 'w') as fid:
