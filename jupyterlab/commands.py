@@ -225,8 +225,7 @@ def check_node():
     """Check for the existence of node and whether it is the right version.
     """
     try:
-        scripts = os.path.abspath(os.path.join(here, '../scripts'))
-        run(['node', 'node-version-check.js'], cwd=scripts)
+        run(['node', 'node-version-check.js'], cwd=here)
     except Exception:
         raise ValueError('`node` version 5+ is required, see extensions in README')
 
