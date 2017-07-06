@@ -396,6 +396,8 @@ margin-top = 14, 14, 14, 14, 8, 8
 
 a.jp-InternalAnchorLink {
   visibility: hidden;
+  margin-left: 8px;
+  color: var(--md-blue-800);
 }
 
 h1:hover .jp-InternalAnchorLink,
@@ -405,4 +407,14 @@ h4:hover .jp-InternalAnchorLink,
 h5:hover .jp-InternalAnchorLink,
 h6:hover .jp-InternalAnchorLink {
   visibility: visible;
+}
+
+
+
+/*-----------------------------------------------------------------------------
+| RenderedPDF
+|----------------------------------------------------------------------------*/
+
+.jp-RenderedPDF {
+  font-size: var(--jp-ui-font-size1);
 }
