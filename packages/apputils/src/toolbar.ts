@@ -449,6 +449,9 @@ namespace Private {
     return commands.caption(id);
   }
 
+  /**
+   * Get the class names for a command based ToolBarButton
+   */
   export
   function commandClassName(commands: CommandRegistry, id: string): string {
     let name = commands.className(id);
@@ -465,6 +468,9 @@ namespace Private {
     return name;
   }
 
+  /**
+   * Fill the node of a command based ToolBarButton.
+   */
   export
   function setNodeContentFromCommand(node: HTMLElement, commands: CommandRegistry, id: string): void {
     let iconClass = commands.iconClass(id);
