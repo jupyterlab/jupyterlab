@@ -378,6 +378,14 @@ margin-top = 14, 14, 14, 14, 8, 8
 }
 
 
+.jp-RenderedHTMLCommon img.jp-mod-unconfined,
+.jp-RenderedImage img.jp-mod-unconfined,
+.jp-RenderedHTMLCommon svg.jp-mod-unconfined,
+.jp-RenderedSVG svg.jp-mod-unconfined {
+  max-width: none;
+}
+
+
 .jp-RenderedHTMLCommon .alert {
   margin-bottom: initial;
 }
