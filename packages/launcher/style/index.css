@@ -15,7 +15,6 @@
   --jp-private-launcher-card-icon-height: 75px;
   --jp-private-launcher-large-icon-size: 52px;
   --jp-private-launcher-small-icon-size: 32px;
-  --jp-private-launcher-section-margin: 12px;
 }
 
 
@@ -67,7 +66,7 @@
 .jp-Launcher-section {
   width: 100%;
   box-sizing: border-box;
-  padding-bottom: var(--jp-private-launcher-section-margin);
+  padding-bottom: 12px;
 }
 
 
@@ -77,10 +76,10 @@
   align-items: center;
   box-sizing: border-box;
   /* This is custom tuned to get the section header to align with the cards */
-  padding-left: 5px;
-  border-bottom: 1px solid #E0E0E0;
+  margin-left: 5px;
+  border-bottom: 1px solid var(--jp-border-color2);
   padding-bottom: 0px;
-  margin-bottom: 9px;
+  margin-bottom: 8px;
 }
 
 
@@ -90,7 +89,6 @@
   height: var(--jp-private-launcher-small-icon-size);
   width: var(--jp-private-launcher-small-icon-size);
   background-size: var(--jp-private-launcher-small-icon-size) var(--jp-private-launcher-small-icon-size);
-  margin-bottom: 15px;
 }
 
 
@@ -99,7 +97,6 @@
   font-weight: normal;
   color: var(--jp-ui-font-color1);
   box-sizing: border-box;
-  margin-bottom:13px;
 }
 
 
@@ -112,7 +109,6 @@
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  margin-bottom:26px;
 }
 
 
