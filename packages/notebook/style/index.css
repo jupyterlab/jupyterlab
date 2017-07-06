@@ -68,6 +68,10 @@
   max-height: 1000px;
 }
 
+.jp-Notebook .jp-Cell:not(.jp-mod-active) .jp-OutputArea {
+  overflow-y: hidden;
+}
+
 
 /*-----------------------------------------------------------------------------
 | Notebook state related styling
