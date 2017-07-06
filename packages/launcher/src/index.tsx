@@ -29,6 +29,29 @@ import {
 
 import '../style/index.css';
 
+
+/**
+ * We have configured the TSX transform to look for the h function in the local module.
+ * */
+const h = vdom.h;
+
+
+/**
+ * The class name added to Launcher instances.
+ */
+const LAUNCHER_CLASS = 'jp-Launcher';
+
+/**
+ * The known categories of launcher items and their default ordering.
+ */
+const KNOWN_CATEGORIES = ['Notebook', 'Console', 'Other'];
+
+/**
+ * These laucher item categories are known to have kernels, so the kernel icons are used.
+ */
+const KERNEL_CATEGORIES = ['Notebook', 'Console'];
+
+
 /**
  * The command IDs used by the launcher plugin.
  */
@@ -47,19 +70,6 @@ namespace CommandIDs {
 export
 const ILauncher = new Token<ILauncher>('jupyter.services.launcher');
 /* tslint:enable */
-
-const h = vdom.h;
-
-
-/**
- * The class name added to Launcher instances.
- */
-const LAUNCHER_CLASS = 'jp-Launcher';
-
-/**
- * The class name added to Launcher body nodes.
- */
-// const BODY_CLASS = 'jp-Launcher-body';
 
 
 /**
@@ -141,10 +151,9 @@ interface ILauncherItem {
   /**
    * The rank for the launcher item.
    *
-   * The rank is used when ordering launcher items
-   * for display. Items are sorted in the following order:
+   * The rank is used when ordering launcher items for display. After grouping into
+   * categories, items are sorted in the following order:
    *   1. Rank (lower is better)
-   *   2. Category (locale order)
    *   3. Display Name (locale order)
    *
    * The default rank is `Infinity`.
@@ -257,12 +266,21 @@ class Launcher extends VDomRenderer<LauncherModel> {
     let sections: vdom.VirtualNode[] = [];
     let section: vdom.VirtualNode;
 
-    let knownSections = ['Notebook', 'Console', 'Other'];
-    let kernelSections = ['Notebook', 'Console'];
+    // Assemble the final ordered list of categories, beginning with KNOWN_CATEGORIES.
+    let orderedCategories: string[] = [];
+    each(KNOWN_CATEGORIES, (cat, index) => {
+      orderedCategories.push(cat);
+    });
+    for (let cat in categories) {
+      if (KNOWN_CATEGORIES.indexOf(cat) === -1) {
+        orderedCategories.push(cat);
+      }
+    }
 
-    each(knownSections, (cat, index) => {
+    // Now create the sections for each category
+    each(orderedCategories, (cat, index) => {
       let iconClass = `${(categories[cat][0] as ILauncherItem).iconClass} jp-Launcher-sectionIcon jp-Launcher-icon`;
-      let kernel = kernelSections.indexOf(cat) > -1;
+      let kernel = KERNEL_CATEGORIES.indexOf(cat) > -1;
       if (cat in categories) {
         section = (
           <div className="jp-Launcher-section">
@@ -279,6 +297,7 @@ class Launcher extends VDomRenderer<LauncherModel> {
       }
     })
 
+    // Wrap the sections in body and content divs.
     return (
       <div className="jp-Launcher-body">
         <div className="jp-Launcher-content">
@@ -286,7 +305,6 @@ class Launcher extends VDomRenderer<LauncherModel> {
         </div>
       </div>  
     );
-      // vdom.h.div({ className: BODY_CLASS  }, sections);
   }
 
   private _callback: (widget: Widget) => void;
