@@ -20,8 +20,8 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  IDataConnector, StateDB
-} from '.';
+  IDataConnector
+} from './interfaces';
 
 
 /**
@@ -399,9 +399,8 @@ class SettingRegistry {
   /**
    * Create a new setting registry.
    */
-  constructor(options: SettingRegistry.IOptions = { }) {
-    const namespace = 'jupyter.db.settings';
-    this._connector = options.connector || new StateDB({ namespace });
+  constructor(options: SettingRegistry.IOptions) {
+    this._connector = options.connector;
     this._validator = options.validator || new DefaultSchemaValidator();
     this._preload = options.preload || (() => { /* no op */ });
   }
@@ -574,7 +573,7 @@ class SettingRegistry {
    * #### Notes
    * Only the `user` data will be saved.
    */
-  upload(raw: ISettingRegistry.IPlugin): Promise<void | ISchemaValidator.IError[]> {
+  upload(raw: ISettingRegistry.IPlugin): Promise<void> {
     const plugins = this._plugins;
     const plugin = raw.id;
     let errors: ISchemaValidator.IError[] | null = null;
@@ -633,7 +632,7 @@ class SettingRegistry {
     this._plugins[plugin.id] = plugin;
   }
 
-  private _connector: IDataConnector<ISettingRegistry.IPlugin, JSONObject> | null = null;
+  private _connector: IDataConnector<ISettingRegistry.IPlugin, JSONObject>;
   private _pluginChanged = new Signal<this, string>(this);
   private _plugins: { [name: string]: ISettingRegistry.IPlugin } = Object.create(null);
   private _preload: (plugin: string, schema: ISettingRegistry.ISchema) => void;
@@ -826,7 +825,7 @@ namespace SettingRegistry {
     /**
      * The data connector used by the setting registry.
      */
-    connector?: IDataConnector<ISettingRegistry.IPlugin, ISettingRegistry.IPlugin>;
+    connector: IDataConnector<ISettingRegistry.IPlugin, JSONObject>;
 
     /**
      * A function that preloads a plugin's schema in the client-side cache.
