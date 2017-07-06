@@ -289,6 +289,11 @@ def should_build(app_dir=None, logger=None):
             path = path.replace('file:', '')
             path = os.path.abspath(pjoin(app_dir, 'staging', path))
 
+        if sys.platform == 'win32':
+            # convert to lowercase except for the drive letter
+            drive, path = os.path.splitdrive(path)
+            path = drive + path.lower()
+
         if path != staging_data['dependencies'][name]:
             return True, 'Installed extensions changed'
 
