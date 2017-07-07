@@ -273,9 +273,9 @@ class BreadCrumbs extends Widget {
 
     // Move all of the items.
     let promises: Promise<any>[] = [];
-    let names = event.mimeData.getData(CONTENTS_MIME) as string[];
-    for (let name of names) {
-      let oldPath = PathExt.join(this._model.path, name);
+    let oldPaths = event.mimeData.getData(CONTENTS_MIME) as string[];
+    for (let oldPath of oldPaths) {
+      let name = PathExt.basename(oldPath);
       let newPath = PathExt.join(path, name);
       promises.push(model.manager.rename(oldPath, newPath).catch(error => {
         if (error.xhr) {
