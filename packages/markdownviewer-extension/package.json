@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/markdownviewer-extension",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "JupyterLab - Markdown Renderer Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -13,11 +13,11 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.8.0",
-    "@jupyterlab/apputils": "^0.8.0",
-    "@jupyterlab/docregistry": "^0.8.0",
+    "@jupyterlab/application": "^0.8.1",
+    "@jupyterlab/apputils": "^0.8.1",
+    "@jupyterlab/docregistry": "^0.8.1",
     "@jupyterlab/markdownviewer": "^0.7.0",
-    "@jupyterlab/rendermime": "^0.8.0"
+    "@jupyterlab/rendermime": "^0.8.1"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
