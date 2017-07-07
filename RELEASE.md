@@ -58,6 +58,11 @@ twine upload dist/*
 
 - Test the `rc` in a clean environment 
 - Make sure the CI builds pass
+  - The build will fail if we publish a new package because by default it is
+    private.  Use `npm access public @jupyterlab/<name>` to make it public.
+  - The build will fail if we forget to include `style/` in the `files:`
+    of a package (it will fail on the `jupyter lab build` command because
+    webpack cannot find the referenced styles to import.
 - Update `jupyterlab/_version.py` with a final version 
 - Make another Python release
 - Get the sha256 hash for conda-forge release:
