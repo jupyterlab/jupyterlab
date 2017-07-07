@@ -1015,8 +1015,10 @@ namespace NotebookActions {
         buttons: [Dialog.okButton()]
       }).then(() => void 0);
     }
+    let body = document.createElement('div');
+    body.innerHTML = TRUST_MESSAGE;
     return showDialog({
-      body: TRUST_MESSAGE,
+      body,
       title: 'Trust this notebook?',
       buttons: [Dialog.cancelButton(), Dialog.warnButton()]
     }).then(result => {
