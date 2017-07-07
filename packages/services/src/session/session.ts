@@ -43,17 +43,17 @@ namespace Session {
     /**
      * A signal emitted when the session is shut down.
      */
-    terminated: ISignal<ISession, void>;
+    terminated: ISignal<this, void>;
 
     /**
      * A signal emitted when the kernel changes.
      */
-    kernelChanged: ISignal<ISession, Kernel.IKernelConnection>;
+    kernelChanged: ISignal<this, Kernel.IKernelConnection>;
 
     /**
      * A signal emitted when the session status changes.
      */
-    statusChanged: ISignal<ISession, Kernel.Status>;
+    statusChanged: ISignal<this, Kernel.Status>;
 
     /**
      * A signal emitted when a session property changes.
@@ -63,12 +63,12 @@ namespace Session {
     /**
      * A signal emitted for iopub kernel messages.
      */
-    iopubMessage: ISignal<ISession, KernelMessage.IIOPubMessage>;
+    iopubMessage: ISignal<this, KernelMessage.IIOPubMessage>;
 
     /**
      * A signal emitted for unhandled kernel message.
      */
-    unhandledMessage: ISignal<ISession, KernelMessage.IMessage>;
+    unhandledMessage: ISignal<this, KernelMessage.IMessage>;
 
     /**
      * Unique id of the session.
@@ -150,7 +150,7 @@ namespace Session {
      * This shuts down the existing kernel and creates a new kernel,
      * keeping the existing session ID and path.
      */
-    changeKernel(options: Kernel.IModel): Promise<Kernel.IKernel>;
+    changeKernel(options: Kernel.IModel): Promise<Kernel.IKernelConnection>;
 
     /**
      * Kill the kernel and shutdown the session.
@@ -354,12 +354,12 @@ namespace Session {
     /**
      * A signal emitted when the kernel specs change.
      */
-    specsChanged: ISignal<IManager, Kernel.ISpecModels>;
+    specsChanged: ISignal<this, Kernel.ISpecModels>;
 
     /**
      * A signal emitted when the running sessions change.
      */
-    runningChanged: ISignal<IManager, IModel[]>;
+    runningChanged: ISignal<this, IModel[]>;
 
     /**
      * The server settings for the manager.
