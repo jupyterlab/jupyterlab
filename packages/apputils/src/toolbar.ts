@@ -208,13 +208,13 @@ namespace Toolbar {
    */
   export
   function createFromCommand(commands: CommandRegistry, id: string): ToolbarButton {
-    let oldClass = Private.commandClassName(commands, id);
     let button = new ToolbarButton({
       onClick: () => { commands.execute(id); },
-      className: oldClass,
+      className: Private.commandClassName(commands, id),
       tooltip: Private.commandTooltip(commands, id),
     });
-
+    let oldClasses = Private.commandClassName(commands, id).split(/\s/);
+    (button.node as HTMLButtonElement).disabled = !commands.isEnabled(id);
     Private.setNodeContentFromCommand(button.node, commands, id);
 
     // Ensure that we pick up relevant changes to the command:
@@ -227,14 +227,22 @@ namespace Toolbar {
         button.dispose();
       } else if (args.type === 'changed') {
         // Update all fields (onClick is already indirected)
-        let newClass = Private.commandClassName(sender, id);
-        if (newClass !== oldClass) {
-          button.removeClass(oldClass);
-          button.addClass(newClass);
-          oldClass = newClass;
+        let newClasses = Private.commandClassName(sender, id).split(/\s/);
+
+        for (let cls of oldClasses) {
+          if (cls && newClasses.indexOf(cls) === -1) {
+            button.removeClass(cls);
+          }
         }
+        for (let cls of newClasses) {
+          if (cls && oldClasses.indexOf(cls) === -1) {
+            button.addClass(cls);
+          }
+        }
+        oldClasses = newClasses;
         button.node.title = Private.commandTooltip(sender, id);
         Private.setNodeContentFromCommand(button.node, sender, id);
+        (button.node as HTMLButtonElement).disabled = !sender.isEnabled(id);
       }
     }
     commands.commandChanged.connect(onChange, button);
@@ -456,9 +464,6 @@ namespace Private {
   function commandClassName(commands: CommandRegistry, id: string): string {
     let name = commands.className(id);
     // Add the boolean state classes.
-    if (!commands.isEnabled(id)) {
-      name += ' p-mod-disabled';
-    }
     if (commands.isToggled(id)) {
       name += ' p-mod-toggled';
     }
@@ -479,7 +484,7 @@ namespace Private {
     if (iconClass || iconLabel) {
       let icon = document.createElement('div');
       icon.innerText = commands.iconLabel(id);
-      icon.classList.add(...iconClass.split(/\s/));
+      icon.className += ` ${iconClass}`;
       node.appendChild(icon);
     } else {
       node.innerText = commands.label(id);

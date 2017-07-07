@@ -179,14 +179,12 @@ describe('@jupyterlab/apputils', () => {
 
       it('should add main class', () => {
         let button = Toolbar.createFromCommand(commands, testLogCommandId);
-        console.log(button.node.className);
         expect(button.hasClass('test-log-class')).to.be(true);
         button.dispose();
       });
 
       it('should add an icon node with icon class and label', () => {
         let button = Toolbar.createFromCommand(commands, testLogCommandId);
-        console.log(button.node);
         let iconNode = button.node.children[0] as HTMLElement;
         expect(iconNode.classList.contains('test-icon-class')).to.be(true);
         expect(iconNode.innerText).to.equal('Test log icon label');
@@ -194,11 +192,32 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should apply state classes', () => {
+        enabled = false;
+        toggled = true;
+        visible = false;
         let button = Toolbar.createFromCommand(commands, testLogCommandId);
-        console.log(button.node.className);
-        expect(button.hasClass('p-mod-disabled')).to.be(true);
+        expect((button.node as HTMLButtonElement).disabled).to.be(true);
         expect(button.hasClass('p-mod-toggled')).to.be(true);
         expect(button.hasClass('p-mod-hidden')).to.be(true);
+        button.dispose();
+      });
+
+      it('should update state classes', () => {
+        enabled = false;
+        toggled = true;
+        visible = false;
+        let button = Toolbar.createFromCommand(commands, testLogCommandId);
+        expect((button.node as HTMLButtonElement).disabled).to.be(true);
+        expect(button.hasClass('p-mod-toggled')).to.be(true);
+        expect(button.hasClass('p-mod-hidden')).to.be(true);
+        enabled = true;
+        visible = true;
+        commands.notifyCommandChanged(testLogCommandId);
+        expect((button.node as HTMLButtonElement).disabled).to.be(false);
+        expect(button.hasClass('p-mod-toggled')).to.be(true);
+        expect(button.hasClass('p-mod-hidden')).to.be(false);
+        enabled = false;
+        visible = false;
         button.dispose();
       });
 
