@@ -717,7 +717,7 @@ namespace Private {
    */
   function handleAttr(node: HTMLElement, name: 'src' | 'href', resolver: IRenderMime.IResolver): Promise<void> {
     let source = node.getAttribute(name);
-    if (!source) {
+    if (!source || URLExt.parse(source).protocol === 'data:') {
       return Promise.resolve(undefined);
     }
     node.setAttribute(name, '');
