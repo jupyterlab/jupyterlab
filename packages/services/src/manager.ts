@@ -199,5 +199,10 @@ namespace ServiceManager {
      * The server settings of the manager.
      */
     readonly serverSettings?: ServerConnection.ISettings;
+
+    /**
+     * The default drive for the contents manager.
+     */
+    readonly defaultDrive?: Contents.IDrive;
   }
 }

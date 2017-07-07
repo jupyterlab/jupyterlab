@@ -79,7 +79,7 @@ class DefaultSession implements Session.ISession {
   /**
    * A signal emitted for a kernel messages.
    */
-  get iopubMessage(): ISignal<this, KernelMessage.IMessage> {
+  get iopubMessage(): ISignal<this, KernelMessage.IIOPubMessage> {
     return this._iopubMessage;
   }
 
@@ -391,7 +391,7 @@ class DefaultSession implements Session.ISession {
   private _updating = false;
   private _kernelChanged = new Signal<this, Kernel.IKernelConnection>(this);
   private _statusChanged = new Signal<this, Kernel.Status>(this);
-  private _iopubMessage = new Signal<this, KernelMessage.IMessage>(this);
+  private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);
 }
@@ -507,8 +507,8 @@ namespace Private {
    * @returns - A promise that resolves with a started session.
    */
   export
-  function createSession(model: Session.IModel, options: Session.IOptions): Promise<DefaultSession> {
-    let settings = options.serverSettings || ServerConnection.makeSettings();
+  function createSession(model: Session.IModel, settings?: ServerConnection.ISettings): Promise<DefaultSession> {
+    settings = settings || ServerConnection.makeSettings();
     return Kernel.connectTo(model.kernel.id, settings).then(kernel => {
       return new DefaultSession({
         path: model.path,
@@ -692,7 +692,7 @@ namespace Private {
       return Promise.reject(new Error('Must specify a path'));
     }
     return startSession(options).then(model => {
-      return createSession(model, options);
+      return createSession(model, options.serverSettings);
     });
   }
 
