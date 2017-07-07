@@ -103,6 +103,6 @@ def load_jupyter_server_extension(nbapp):
 
     settings_handler = (settings_path, SettingsHandler, {
         'schemas_dir': schemas_dir,
-        'user_settings_dir': user_settings_dir
+        'settings_dir': user_settings_dir
     })
     web_app.add_handlers(".*$", [settings_handler])

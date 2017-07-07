@@ -22,7 +22,9 @@ packages.forEach(function(packagePath) {
     return;
   }
   schemas.forEach(function(schemaPath) {
-    var newPath = path.join(basePath, 'jupyterlab');
-    fs.copySync(path.join(packagePath, schemaPath), schemaPath);
+    var file = path.basename(schemaPath);
+    var from = path.join(packagePath, schemaPath)
+    var to = path.join(basePath, 'jupyterlab', 'schemas', file);
+    fs.copySync(from, to);
   });
 });
