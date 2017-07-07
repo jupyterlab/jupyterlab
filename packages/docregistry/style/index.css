@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-MimeRenderer {
+.jp-MimeDocument {
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
   outline: none;
   overflow: hidden;
@@ -13,7 +13,7 @@
 }
 
 
-.jp-MimeRenderer .jp-Toolbar {
+.jp-MimeDocument .jp-Toolbar {
     display: block;
     height: var(--jp-toolbar-micro-height);
     background: var(--jp-toolbar-background);

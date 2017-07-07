@@ -17,6 +17,6 @@
   margin-top: 8px;
 }
 
-.jp-MimeRenderer.jp-Document .jp-RenderedVegaCommon {
+.jp-MimeDocument.jp-Document .jp-RenderedVegaCommon {
   padding: 16px;
 }
