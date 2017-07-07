@@ -289,7 +289,12 @@ def should_build(app_dir=None, logger=None):
             path = path.replace('file:', '')
             path = os.path.abspath(pjoin(app_dir, 'staging', path))
 
-        if path != staging_data['dependencies'][name]:
+        staging_path = staging_data['dependencies'][name]
+        if sys.platform == 'win32':
+            path = path.lower()
+            staging_path = staging_path.lower()
+
+        if path != staging_path:
             return True, 'Installed extensions changed'
 
     return False, ''
