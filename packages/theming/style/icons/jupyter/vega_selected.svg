@@ -8,8 +8,7 @@
 	.st2{fill:none;stroke:#4CAF50;stroke-width:2;stroke-miterlimit:10;}
 	.st3{fill:none;stroke:#FFFFFF;stroke-width:2;stroke-miterlimit:10;}
 	.st4{fill:none;stroke:#FFFFFF;stroke-width:3;stroke-miterlimit:10;}
-	.st5{fill:#FF5CB4;}
-	.st6{fill:#FFFFFF;}
+	.st5{fill:#FFFFFF;}
 </style>
 <g class="st0">
 	<line class="st1" x1="11" y1="0" x2="11" y2="22"/>
@@ -54,7 +53,7 @@
 	<line class="st1" x1="4.4" y1="0" x2="4.4" y2="22"/>
 	<line class="st1" x1="22" y1="17.6" x2="0" y2="17.6"/>
 	<line class="st1" x1="22" y1="4.4" x2="0" y2="4.4"/>
-	<rect x="7.9" y="7.9" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -4.5558 10.9994)" class="st1" width="6.2" height="6.2"/>
+	<rect x="7.9" y="7.9" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -4.5558 11.0001)" class="st1" width="6.2" height="6.2"/>
 	<line class="st1" x1="0" y1="16.5" x2="22" y2="16.5"/>
 	<line class="st1" x1="16.5" y1="22" x2="16.5" y2="0"/>
 	<line class="st1" x1="5.5" y1="22" x2="5.5" y2="0"/>
@@ -85,7 +84,5 @@
 	<polygon class="st5" points="10.6,5.4 12.8,2.2 2.2,2.2 2.2,9.5 6.2,2.9 	"/>
 	<path class="st5" d="M15.8,2.2l-4.4,6.6L7,6.3l-4.8,8v5.5h17.6V2.2H15.8z M8.8,17.6H5.5v-4.4h3.3V17.6z M13.2,17.6H9.8V9.8h3.4
 		V17.6z M17.6,17.6h-3.4V6.5h3.4V17.6z"/>
-	<polygon class="st6" points="0,13.1 2.2,14.3 2.2,14.3 2.2,9.5 	"/>
-	<polygon class="st6" points="16.4,1.2 14.4,-0.2 12.8,2.2 15.8,2.2 	"/>
 </g>
 </svg>
