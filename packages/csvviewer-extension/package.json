@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/csvviewer-extension",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "JupyterLab - CSV Widget Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -12,10 +12,10 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.7.0",
-    "@jupyterlab/apputils": "^0.7.0",
-    "@jupyterlab/csvviewer": "^0.7.1",
-    "@jupyterlab/docregistry": "^0.7.0"
+    "@jupyterlab/application": "^0.8.0",
+    "@jupyterlab/apputils": "^0.8.0",
+    "@jupyterlab/csvviewer": "^0.8.0",
+    "@jupyterlab/docregistry": "^0.8.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
