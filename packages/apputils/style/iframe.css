@@ -9,7 +9,7 @@
 }
 
 
-.jp-IFrame iframe {
+.jp-IFrame > iframe {
   border: none;
 }
 
