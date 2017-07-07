@@ -63,7 +63,7 @@
     "@jupyterlab/theme-light-extension": "^0.7.0",
     "@jupyterlab/tooltip": "^0.7.0",
     "@jupyterlab/tooltip-extension": "^0.7.0",
-    "@jupyterlab/vega": "^0.7.0"
+    "@jupyterlab/vega2-extension": "^0.7.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
