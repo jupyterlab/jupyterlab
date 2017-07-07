@@ -309,7 +309,7 @@ namespace Contents {
      * @returns A promise which resolves with the new checkpoint model when the
      *   checkpoint is created.
      */
-    createCheckpoint(path: string): Promise<IModel>;
+    createCheckpoint(path: string): Promise<ICheckpointModel>;
 
     /**
      * List available checkpoints for a file.
