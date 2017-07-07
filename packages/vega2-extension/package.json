@@ -1,7 +1,7 @@
 {
-  "name": "@jupyterlab/vega",
+  "name": "@jupyterlab/vega2-extension",
   "version": "0.7.0",
-  "description": "JupyterLab - Vega",
+  "description": "JupyterLab - Vega 2 Mime Renderer Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
