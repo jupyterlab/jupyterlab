@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  MimeRendererFactory, MimeRenderer
+  MimeDocumentFactory, MimeDocument
 } from '@jupyterlab/docregistry';
 
 
@@ -51,7 +51,7 @@ const plugin: JupyterLabPlugin<void> = {
  * Activate the markdown plugin.
  */
 function activate(app: JupyterLab, restorer: ILayoutRestorer) {
-    const factory = new MimeRendererFactory({
+    const factory = new MimeDocumentFactory({
       name: FACTORY,
       fileExtensions: ['.md'],
       mimeType: 'text/markdown',
@@ -61,7 +61,7 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer) {
 
     const { commands } = app;
     const namespace = 'rendered-markdown';
-    const tracker = new InstanceTracker<MimeRenderer>({ namespace });
+    const tracker = new InstanceTracker<MimeDocument>({ namespace });
 
     // Handle state restoration.
     restorer.restore(tracker, {

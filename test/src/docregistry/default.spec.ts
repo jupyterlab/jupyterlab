@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  Message, MessageLoop
+  Message
 } from '@phosphor/messaging';
 
 import {
@@ -14,7 +14,7 @@ import {
 import {
   ABCWidgetFactory, Base64ModelFactory, DocumentModel,
   DocumentRegistry, TextModelFactory, Context,
-  MimeRenderer, MimeRendererFactory
+  MimeDocument, MimeDocumentFactory
 } from '@jupyterlab/docregistry';
 
 import {
@@ -25,7 +25,7 @@ import {
 const RENDERMIME = defaultRenderMime();
 
 
-class LogRenderer extends MimeRenderer {
+class LogRenderer extends MimeDocument {
   methods: string[] = [];
 
   protected onAfterAttach(msg: Message): void {
@@ -584,37 +584,37 @@ describe('docmanager/default', () => {
 
   });
 
-  describe('MimeRendererFactory', () => {
+  describe('MimeDocumentFactory', () => {
 
     describe('#createNew()', () => {
 
       it('should require a context parameter', () => {
-        let widgetFactory = new MimeRendererFactory({
+        let widgetFactory = new MimeDocumentFactory({
           name: 'markdown',
           fileExtensions: ['.md'],
           rendermime: RENDERMIME,
           mimeType: 'text/markdown'
         });
-        expect(widgetFactory.createNew(context)).to.be.a(MimeRenderer);
+        expect(widgetFactory.createNew(context)).to.be.a(MimeDocument);
       });
 
     });
 
   });
 
-  describe('MimeRenderer', () => {
+  describe('MimeDocument', () => {
 
     describe('#constructor()', () => {
 
       it('should require options', () => {
-        let widget = new MimeRenderer({
+        let widget = new MimeDocument({
           context,
           rendermime: RENDERMIME,
           mimeType: 'text/markdown',
           renderTimeout: 1000,
           dataType: 'string'
         });
-        expect(widget).to.be.a(MimeRenderer);
+        expect(widget).to.be.a(MimeDocument);
       });
 
     });

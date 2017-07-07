@@ -403,16 +403,16 @@ abstract class ABCWidgetFactory<T extends DocumentRegistry.IReadyWidget, U exten
 
 
 /**
- * A widget for rendered mimetype.
+ * A widget for rendered mimetype document.
  */
 export
-class MimeRenderer extends Widget implements DocumentRegistry.IReadyWidget {
+class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
   /**
    * Construct a new markdown widget.
    */
-  constructor(options: MimeRenderer.IOptions) {
+  constructor(options: MimeDocument.IOptions) {
     super();
-    this.addClass('jp-MimeRenderer');
+    this.addClass('jp-MimeDocument');
     let layout = this.layout = new PanelLayout();
     let toolbar = new Widget();
     toolbar.addClass('jp-Toolbar');
@@ -528,12 +528,12 @@ class MimeRenderer extends Widget implements DocumentRegistry.IReadyWidget {
 
 
 /**
- * The namespace for MimeRenderer class statics.
+ * The namespace for MimeDocument class statics.
  */
 export
-namespace MimeRenderer {
+namespace MimeDocument {
   /**
-   * The options used to initialize a MimeRenderer.
+   * The options used to initialize a MimeDocument.
    */
   export
   interface IOptions {
@@ -566,14 +566,14 @@ namespace MimeRenderer {
 
 
 /**
- * An implementation of a widget factory for a rendered mimetype.
+ * An implementation of a widget factory for a rendered mimetype document.
  */
 export
-class MimeRendererFactory extends ABCWidgetFactory<MimeRenderer, DocumentRegistry.IModel> {
+class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument, DocumentRegistry.IModel> {
   /**
    * Construct a new markdown widget factory.
    */
-  constructor(options: MimeRendererFactory.IOptions) {
+  constructor(options: MimeDocumentFactory.IOptions) {
     super({ ...options, readOnly: true });
     this._rendermime = options.rendermime;
     this._mimeType = options.mimeType;
@@ -586,8 +586,8 @@ class MimeRendererFactory extends ABCWidgetFactory<MimeRenderer, DocumentRegistr
   /**
    * Create a new widget given a context.
    */
-  protected createNewWidget(context: DocumentRegistry.Context): MimeRenderer {
-    let widget = new MimeRenderer({
+  protected createNewWidget(context: DocumentRegistry.Context): MimeDocument {
+    let widget = new MimeDocument({
       context,
       rendermime: this._rendermime.clone(),
       mimeType: this._mimeType,
@@ -609,12 +609,12 @@ class MimeRendererFactory extends ABCWidgetFactory<MimeRenderer, DocumentRegistr
 
 
 /**
- * The namespace for MimeRendererFactory class statics.
+ * The namespace for MimeDocumentFactory class statics.
  */
 export
-namespace MimeRendererFactory {
+namespace MimeDocumentFactory {
   /**
-   * The options used to initialize a MimeRendererFactory.
+   * The options used to initialize a MimeDocumentFactory.
    */
   export
   interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
