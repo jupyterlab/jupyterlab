@@ -39,7 +39,7 @@ for twine setup instructions and for why twine is the recommended method.
 #
 # Publish the npm packages:
 npm run publish  
-# Update jupyterlab/_version.py
+# Update jupyterlab/_version.py with an rc version
 # Prep the static assets for release:
 cd jupyterlab && npm run publish && cd ..
 # Commit and tag and push the tag
@@ -47,6 +47,9 @@ rm -rf dist
 python setup.py sdist
 python setup.py bdist_wheel --universal
 twine upload dist/*
+# Test the rc in a clean environment and make sure the CI builds pass
+# Update jupyterlab/_version.py with a final version and make another Python
+# release
 shasum -a 256 dist/*.tar.gz  # get the sha256 hash for conda-forge install
 ```
 
@@ -55,3 +58,10 @@ Publish on conda-forge
 - Fork https://github.com/conda-forge/jupyterlab-feedstock
 - Create a PR with the version bump
 - Update `recipe/meta.yaml` with the new version and md5 and reset the build number to 0.
+
+Update the cookie cutters
+- Update https://github.com/jupyterlab/extension-cookiecutter-js
+- Update https://github.com/jupyterlab/extension-cookiecutter-ts
+
+Update the extension example in the notebook docs:
+- https://github.com/jupyterlab/jupyterlab/blob/master/docs/notebook.md#adding-a-button-to-the-toolbar
