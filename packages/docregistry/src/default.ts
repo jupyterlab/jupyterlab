@@ -574,7 +574,7 @@ class MimeRendererFactory extends ABCWidgetFactory<MimeRenderer, DocumentRegistr
    * Construct a new markdown widget factory.
    */
   constructor(options: MimeRendererFactory.IOptions) {
-    super({ ...options, readOnly: true });
+    super(Private.createRegistryOptions(options));
     this._rendermime = options.rendermime;
     this._mimeType = options.mimeType;
     this._renderTimeout = options.renderTimeout || 1000;
@@ -647,5 +647,19 @@ namespace MimeRendererFactory {
      * Preferred data type from the model.
      */
     dataType?: 'string' | 'json';
+  }
+}
+
+
+/**
+ * The namespace for the module implementation details.
+ */
+namespace Private {
+  /**
+   * Create the document registry options.
+   */
+  export
+  function createRegistryOptions(options: MimeRendererFactory.IOptions): DocumentRegistry.IWidgetFactoryOptions {
+    return { ...options, readOnly: true } as DocumentRegistry.IWidgetFactoryOptions;
   }
 }
