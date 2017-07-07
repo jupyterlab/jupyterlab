@@ -1,7 +1,7 @@
 {
   "name": "@jupyterlab/all-packages",
   "private": true,
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "JupyterLab - All Packages",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -45,7 +45,7 @@
     "@jupyterlab/inspector-extension": "^0.8.0",
     "@jupyterlab/launcher": "^0.8.0",
     "@jupyterlab/launcher-extension": "^0.8.0",
-    "@jupyterlab/markdownviewer-extension": "^0.8.0",
+    "@jupyterlab/markdownviewer-extension": "^0.8.1",
     "@jupyterlab/notebook": "^0.8.0",
     "@jupyterlab/notebook-extension": "^0.8.0",
     "@jupyterlab/outputarea": "^0.8.0",
@@ -63,7 +63,7 @@
     "@jupyterlab/theme-light-extension": "^0.8.0",
     "@jupyterlab/tooltip": "^0.8.0",
     "@jupyterlab/tooltip-extension": "^0.8.0",
-    "@jupyterlab/vega2-extension": "^0.8.0"
+    "@jupyterlab/vega2-extension": "^0.8.1"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
