@@ -686,7 +686,7 @@ def _ensure_package(app_dir, name=None, version=None, logger=None):
             continue
         data['dependencies'][key] = value['path']
         jlab_data = value['jupyterlab']
-        if jlab_data.get('extension', True):
+        if jlab_data.get('extension', False):
             data['jupyterlab']['extensions'].append(key)
         else:
             data['jupyterlab']['mimeExtensions'].append(key)
