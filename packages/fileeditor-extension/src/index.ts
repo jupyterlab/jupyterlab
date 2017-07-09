@@ -178,11 +178,13 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
 
   commands.addCommand(CommandIDs.lineNumbers, {
     execute: () => {
-      lineNumbers = !lineNumbers;
-      tracker.forEach(widget => {
-        widget.editor.setOption('lineNumbers', lineNumbers);
+      const key = 'lineNumbers';
+      const value = lineNumbers = !lineNumbers;
+
+      updateTracker();
+      return settingRegistry.set(id, key, value).catch((reason: Error) => {
+        console.error(`Failed to set ${id}:${key} - ${reason.message}`);
       });
-      return settingRegistry.set(id, 'lineNumbers', lineNumbers);
     },
     isEnabled: hasWidget,
     isToggled: () => lineNumbers,
@@ -191,11 +193,13 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
 
   commands.addCommand(CommandIDs.lineWrap, {
     execute: () => {
-      lineWrap = !lineWrap;
-      tracker.forEach(widget => {
-        widget.editor.setOption('lineWrap', lineWrap);
+      const key = 'lineWrap';
+      const value = lineWrap = !lineWrap;
+
+      updateTracker();
+      return settingRegistry.set(id, key, value).catch((reason: Error) => {
+        console.error(`Failed to set ${id}:${key} - ${reason.message}`);
       });
-      return settingRegistry.set(id, 'lineWrap', lineWrap);
     },
     isEnabled: hasWidget,
     isToggled: () => lineWrap,

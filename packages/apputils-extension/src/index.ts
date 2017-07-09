@@ -16,7 +16,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  SettingService
+  SettingService, ServerConnection
 } from '@jupyterlab/services';
 
 import {
@@ -42,6 +42,22 @@ namespace CommandIDs {
 
 
 /**
+ * Convert an API `XMLHTTPRequest` error to a simple error.
+ */
+function apiError(xhr: XMLHttpRequest): Error {
+  let message: string;
+
+  try {
+    message = JSON.parse(xhr.response).message;
+  } catch (error) {
+    message = error.message;
+  }
+
+  return new Error(message);
+}
+
+
+/**
  * The data connector used to access plugin settings.
  */
 const connector: IDataConnector<ISettingRegistry.IPlugin, JSONObject> = {
@@ -49,7 +65,9 @@ const connector: IDataConnector<ISettingRegistry.IPlugin, JSONObject> = {
    * Retrieve a saved bundle from the data connector.
    */
   fetch(id: string): Promise<ISettingRegistry.IPlugin> {
-    return SettingService.fetch(id);
+    return SettingService.fetch(id).catch(reason => {
+      throw apiError((reason as ServerConnection.IError).xhr);
+    });
   },
 
   /**
@@ -63,7 +81,9 @@ const connector: IDataConnector<ISettingRegistry.IPlugin, JSONObject> = {
    * Save the user setting data in the data connector.
    */
   save(id: string, user: JSONObject): Promise<void> {
-    return SettingService.save(id, user);
+    return SettingService.save(id, user).catch(reason => {
+      throw apiError((reason as ServerConnection.IError).xhr);
+    });
   }
 };
 

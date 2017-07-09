@@ -162,14 +162,13 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     commands.addCommand(CommandIDs.changeTheme, {
       label: args => args['theme'] as string,
       execute: args => {
-        theme = args['theme'] as string || theme;
-        tracker.forEach(widget => {
-          if (widget.editor instanceof CodeMirrorEditor) {
-            let cm = widget.editor.editor;
-            cm.setOption('theme', theme);
-          }
+        const key = 'theme';
+        const value = theme = args['theme'] as string || theme;
+
+        updateTracker();
+        return settingRegistry.set(id, key, value).catch((reason: Error) => {
+          console.error(`Failed to set ${id}:${key} - ${reason.message}`);
         });
-        return settingRegistry.set(id, 'theme', theme as string);
       },
       isEnabled: hasWidget,
       isToggled: args => args['theme'] === theme
@@ -181,14 +180,13 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
         return title === 'sublime' ? 'Sublime Text' : title;
       },
       execute: args => {
-        keyMap = args['keyMap'] as string || keyMap;
-        tracker.forEach(widget => {
-          if (widget.editor instanceof CodeMirrorEditor) {
-            let cm = widget.editor.editor;
-            cm.setOption('keyMap', keyMap);
-          }
+        const key = 'keyMap';
+        const value = keyMap = args['keyMap'] as string || keyMap;
+
+        updateTracker();
+        return settingRegistry.set(id, key, value).catch((reason: Error) => {
+          console.error(`Failed to set ${id}:${key} - ${reason.message}`);
         });
-        return settingRegistry.set(id, 'keyMap', keyMap as string);
       },
       isEnabled: hasWidget,
       isToggled: args => args['keyMap'] === keyMap
