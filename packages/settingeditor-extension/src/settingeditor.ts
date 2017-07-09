@@ -718,7 +718,15 @@ class PluginEditor extends Widget {
     const editor = this._editor;
     const settings = this._settings;
 
-    settings.save(editor.source.toJSON());
+    settings.save(editor.source.toJSON()).catch(reason => {
+      console.error('Saving setting editor value failed', reason);
+
+      return showDialog({
+        title: 'Your changes were not saved.',
+        body: reason.message,
+        buttons: [Dialog.okButton()]
+      }).then(() => void 0);
+    });
   }
 
   private _editor: JSONEditor = null;

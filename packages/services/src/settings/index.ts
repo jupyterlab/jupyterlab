@@ -41,12 +41,12 @@ namespace SettingService {
     return promise.then(response => {
       const { status } = response.xhr;
 
-      if (status < 200 || status >= 400) {
+      if (!Private.ok(status)) {
         throw ServerConnection.makeError(response);
       }
 
       return response.data;
-    });
+    }).catch(reason => { throw ServerConnection.makeError(reason); });
   }
 
   /**
@@ -67,12 +67,12 @@ namespace SettingService {
     return promise.then(response => {
       const { status } = response.xhr;
 
-      if (status < 200 || status >= 400) {
+      if (!Private.ok(status)) {
         throw ServerConnection.makeError(response);
       }
 
       return void 0;
-    });
+    }).catch(reason => { throw ServerConnection.makeError(reason); });
   }
 }
 
@@ -86,6 +86,14 @@ namespace Private {
    */
   export
   const serverSettings = ServerConnection.makeSettings();
+
+  /**
+   * Checks if an HTTP status is in the 200 range.
+   */
+  export
+  function ok(status: number): boolean {
+    return status >= 200 && status < 300;
+  }
 
   /**
    * Get the url for a plugin's settings.
