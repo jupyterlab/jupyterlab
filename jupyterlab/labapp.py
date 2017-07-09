@@ -73,7 +73,7 @@ class LabPathApp(JupyterApp):
     The application path can be configured using the JUPYTERLAB_DIR environment variable.
     The user settings path can be configured using the JUPYTERLAB_SETTINGS_DIR
         environment variable or it will fall back to
-        `/lab/userSettings` in the default Jupyter configuration directory.
+        `/lab/user-settings` in the default Jupyter configuration directory.
     """
 
     def start(self):
@@ -107,7 +107,7 @@ class LabApp(NotebookApp):
     JupyterLab has three different modes of running:
 
     * Core mode (`--core-mode`): in this mode JupyterLab will run using the JavaScript
-      assets contained in the installed `jupyterlab` Python package. In core mode, no 
+      assets contained in the installed `jupyterlab` Python package. In core mode, no
       extensions are enabled. This is the default in a stable JupyterLab release if you
       have no extensions installed.
     * Dev mode (`--dev-mode`): like core mode, but when the `jupyterlab` Python package

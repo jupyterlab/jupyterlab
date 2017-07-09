@@ -50,7 +50,7 @@ def get_user_settings_dir():
     """
     settings_dir = os.environ.get('JUPYTERLAB_SETTINGS_DIR')
     settings_dir = settings_dir or pjoin(
-        jupyter_config_path()[0], 'lab', 'userSettings'
+        jupyter_config_path()[0], 'lab', 'user-settings'
     )
     return os.path.realpath(settings_dir)
 
