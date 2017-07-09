@@ -12,8 +12,12 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  ISettingRegistry, IStateDB, SettingRegistry, StateDB
+  IDataConnector, ISettingRegistry, IStateDB, SettingRegistry, StateDB
 } from '@jupyterlab/coreutils';
+
+import {
+  SettingService
+} from '@jupyterlab/services';
 
 import {
   JSONObject
@@ -27,10 +31,6 @@ import {
   activatePalette
 } from './palette';
 
-import {
-  SettingClientDataConnector
-} from './settingclientdataconnector';
-
 
 /**
  * The command IDs used by the apputils plugin.
@@ -38,6 +38,33 @@ import {
 namespace CommandIDs {
   export
   const clearStateDB = 'apputils:clear-statedb';
+};
+
+
+/**
+ * The data connector used to access plugin settings.
+ */
+const connector: IDataConnector<ISettingRegistry.IPlugin, JSONObject> = {
+  /**
+   * Retrieve a saved bundle from the data connector.
+   */
+  fetch(id: string): Promise<ISettingRegistry.IPlugin> {
+    return SettingService.fetch(id);
+  },
+
+  /**
+   * Remove a value from the data connector.
+   */
+  remove(): Promise<void> {
+    return Promise.reject('Removing setting resources is not supported.');
+  },
+
+  /**
+   * Save the user setting data in the data connector.
+   */
+  save(id: string, user: JSONObject): Promise<void> {
+    return SettingService.save(id, user);
+  }
 };
 
 
@@ -80,10 +107,7 @@ const palettePlugin: JupyterLabPlugin<ICommandPalette> = {
  */
 const settingPlugin: JupyterLabPlugin<ISettingRegistry> = {
   id: 'jupyter.services.setting-registry',
-  activate: () => new SettingRegistry({
-    connector: new SettingClientDataConnector(),
-    preload: SettingClientDataConnector.preload
-  }),
+  activate: () => new SettingRegistry({ connector }),
   autoStart: true,
   provides: ISettingRegistry
 };

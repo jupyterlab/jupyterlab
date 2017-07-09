@@ -402,7 +402,6 @@ class SettingRegistry {
   constructor(options: SettingRegistry.IOptions) {
     this._connector = options.connector;
     this._validator = options.validator || new DefaultSchemaValidator();
-    this._preload = options.preload || (() => { /* no op */ });
   }
 
   /**
@@ -476,21 +475,6 @@ class SettingRegistry {
   }
 
   /**
-   * Preload the schema for a plugin.
-   *
-   * @param plugin - The plugin ID.
-   *
-   * @param schema - The schema being added.
-   *
-   * #### Notes
-   * This method is deprecated and is only intented for use until there is a
-   * server-side API for storing setting data.
-   */
-  preload(plugin: string, schema: ISettingRegistry.ISchema): void {
-    this._preload(plugin, schema);
-  }
-
-  /**
    * Reload a plugin's settings into the registry even if they already exist.
    *
    * @param plugin - The name of the plugin whose settings are being reloaded.
@@ -504,11 +488,7 @@ class SettingRegistry {
 
     // If the plugin needs to be loaded from the connector, fetch.
     return connector.fetch(plugin).then(data => {
-      if (!data) {
-        const message = `Setting data for ${plugin} does not exist.`;
-        throw [{ keyword: '', message, schemaPath: '' }];
-      }
-
+      // Validate the response from the connector; populate `composite` field.
       this._validate(data);
 
       return new Settings({
@@ -635,7 +615,6 @@ class SettingRegistry {
   private _connector: IDataConnector<ISettingRegistry.IPlugin, JSONObject>;
   private _pluginChanged = new Signal<this, string>(this);
   private _plugins: { [name: string]: ISettingRegistry.IPlugin } = Object.create(null);
-  private _preload: (plugin: string, schema: ISettingRegistry.ISchema) => void;
   private _validator: ISchemaValidator;
 }
 
@@ -822,15 +801,6 @@ namespace SettingRegistry {
      * The data connector used by the setting registry.
      */
     connector: IDataConnector<ISettingRegistry.IPlugin, JSONObject>;
-
-    /**
-     * A function that preloads a plugin's schema in the client-side cache.
-     *
-     * #### Notes
-     * This param is deprecated and is only intented for use until there is a
-     * server-side API for storing setting data.
-     */
-    preload?: (plugin: string, schema: ISettingRegistry.ISchema) => void;
 
     /**
      * The validator used to enforce the settings JSON schema.
