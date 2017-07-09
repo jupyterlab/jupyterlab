@@ -60,7 +60,11 @@ namespace SettingService {
    */
   export
   function save(id: string, user: JSONObject): Promise<void> {
-    const request = { data: user, method: 'PATCH', url: Private.url(id) };
+    const request = {
+      data: JSON.stringify(user),
+      method: 'PATCH',
+      url: Private.url(id)
+    };
     const { serverSettings } = Private;
     const promise = ServerConnection.makeRequest(request, serverSettings);
 
