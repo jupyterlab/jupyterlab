@@ -49,26 +49,6 @@ namespace CommandIDs {
 };
 
 
-/* tslint:disable */
-/**
- * The commands plugin setting schema.
- *
- * #### Notes
- * This will eventually reside in its own settings file.
- */
-const schema = {
-  "jupyter.lab.setting-icon-class": "jp-TextEditorIcon",
-  "jupyter.lab.setting-icon-label": "CodeMirror",
-  "title": "CodeMirror",
-  "description": "Text editor settings for all CodeMirror editors.",
-  "properties": {
-    "keyMap": { "type": "string", "title": "Key Map", "default": "default" },
-    "theme": { "type": "string", "title": "Theme", "default": "default" }
-  },
-  "type": "object"
-};
-/* tslint:enable */
-
 /**
  * The editor services.
  */
@@ -127,9 +107,6 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
       }
     });
   }
-
-  // Preload the settings schema into the registry. This is deprecated.
-  settingRegistry.preload(id, schema);
 
   // Fetch the initial state of the settings.
   Promise.all([settingRegistry.load(id), restored]).then(([settings]) => {
