@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/running-extension",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "JupyterLab - Running Sessions Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -12,7 +12,7 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.8.1",
+    "@jupyterlab/application": "^0.8.2",
     "@jupyterlab/running": "^0.8.1",
     "@jupyterlab/services": "^0.47.0"
   },

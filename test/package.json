@@ -12,7 +12,7 @@
     "watch": "watch \"npm run build:test && npm test\" src --wait 10 --filter=../scripts/watch-filter.js"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.8.1",
+    "@jupyterlab/application": "^0.8.2",
     "@jupyterlab/apputils": "^0.8.1",
     "@jupyterlab/cells": "^0.8.1",
     "@jupyterlab/chatbox": "^0.3.1",
@@ -24,12 +24,12 @@
     "@jupyterlab/csvviewer": "^0.8.1",
     "@jupyterlab/docmanager": "^0.8.1",
     "@jupyterlab/docregistry": "^0.8.1",
-    "@jupyterlab/filebrowser": "^0.8.1",
+    "@jupyterlab/filebrowser": "^0.8.2",
     "@jupyterlab/fileeditor": "^0.8.1",
     "@jupyterlab/imageviewer": "^0.8.1",
     "@jupyterlab/inspector": "^0.8.1",
     "@jupyterlab/markdownviewer": "^0.7.0",
-    "@jupyterlab/notebook": "^0.8.1",
+    "@jupyterlab/notebook": "^0.8.2",
     "@jupyterlab/outputarea": "^0.8.1",
     "@jupyterlab/rendermime": "^0.8.1",
     "@jupyterlab/services": "^0.47.0",
@@ -83,5 +83,5 @@
     "watch": "^1.0.2",
     "webpack": "^2.2.1"
   },
-  "version": "0.8.1"
+  "version": "0.8.2"
 }

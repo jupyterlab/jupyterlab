@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/console-extension",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "JupyterLab - Code Console Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -12,13 +12,13 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.8.1",
+    "@jupyterlab/application": "^0.8.2",
     "@jupyterlab/apputils": "^0.8.1",
     "@jupyterlab/codeeditor": "^0.8.0",
     "@jupyterlab/console": "^0.8.1",
     "@jupyterlab/coreutils": "^0.8.0",
     "@jupyterlab/docregistry": "^0.8.1",
-    "@jupyterlab/filebrowser": "^0.8.1",
+    "@jupyterlab/filebrowser": "^0.8.2",
     "@jupyterlab/launcher": "^0.8.1",
     "@jupyterlab/rendermime": "^0.8.1",
     "@jupyterlab/services": "^0.47.0",
