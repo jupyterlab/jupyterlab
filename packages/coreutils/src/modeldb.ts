@@ -117,7 +117,7 @@ interface ICollaborator extends JSONObject {
    * use in places where the full `displayName` would take
    * too much space.
    */
-  readonly shortName?: string;
+  readonly shortName: string;
 }
 
 
@@ -282,7 +282,7 @@ class ObservableValue implements IObservableValue {
    *
    * @param initialValue: the starting value for the `ObservableValue`.
    */
-  constructor(initialValue?: JSONValue) {
+  constructor(initialValue: JSONValue = {}) {
     this._value = initialValue;
   }
 
@@ -571,11 +571,8 @@ class ModelDB implements IModelDB {
     if (this.isDisposed) {
       return;
     }
-    let db = this._db;
-    this._db = null;
-
     if (this._toDispose) {
-      db.dispose();
+      this._db.dispose();
     }
     this._disposables.dispose();
   }
@@ -591,7 +588,7 @@ class ModelDB implements IModelDB {
   }
 
   private _basePath: string;
-  private _db: ModelDB | ObservableMap<IObservable> = null;
+  private _db: ModelDB | ObservableMap<IObservable>;
   private _toDispose = false;
   private _disposables = new DisposableSet();
 }
