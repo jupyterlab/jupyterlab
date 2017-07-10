@@ -468,7 +468,7 @@ class ModelDB implements IModelDB {
    */
   createList<T extends JSONValue>(path: string): IObservableUndoableList<T> {
     let vec = new ObservableUndoableList<T>(
-      new ObservableUndoableList.IdentitySerializer());
+      new ObservableUndoableList.IdentitySerializer<T>());
     this._disposables.add(vec);
     this.set(path, vec);
     return vec;
