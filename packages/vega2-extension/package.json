@@ -1,0 +1,46 @@
+{
+  "name": "@jupyterlab/vega2-extension",
+  "version": "0.8.1",
+  "description": "JupyterLab - Vega 2 Mime Renderer Extension",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js",
+    "style/*.css"
+  ],
+  "directories": {
+    "lib": "lib/"
+  },
+  "jupyerlab": {
+    "mimeExtension": true
+  },
+  "dependencies": {
+    "@jupyterlab/rendermime-interfaces": "^0.2.0",
+    "@phosphor/coreutils": "^1.2.0",
+    "@phosphor/widgets": "^1.3.0",
+    "d3": "3.5.17",
+    "vega": "^2.6.1",
+    "vega-embed": "^2.2.0",
+    "vega-lite": "^1.0.16"
+  },
+  "devDependencies": {
+    "rimraf": "^2.5.2",
+    "typescript": "~2.4.1"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib",
+    "watch": "tsc -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "author": "Project Jupyter",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "homepage": "https://github.com/jupyterlab/jupyterlab"
+}

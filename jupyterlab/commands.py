@@ -289,7 +289,12 @@ def should_build(app_dir=None, logger=None):
             path = path.replace('file:', '')
             path = os.path.abspath(pjoin(app_dir, 'staging', path))
 
-        if path != staging_data['dependencies'][name]:
+        staging_path = staging_data['dependencies'][name]
+        if sys.platform == 'win32':
+            path = path.lower()
+            staging_path = staging_path.lower()
+
+        if path != staging_path:
             return True, 'Installed extensions changed'
 
     return False, ''
@@ -681,7 +686,7 @@ def _ensure_package(app_dir, name=None, version=None, logger=None):
             continue
         data['dependencies'][key] = value['path']
         jlab_data = value['jupyterlab']
-        if jlab_data.get('extension', True):
+        if jlab_data.get('extension', False):
             data['jupyterlab']['extensions'].append(key)
         else:
             data['jupyterlab']['mimeExtensions'].append(key)

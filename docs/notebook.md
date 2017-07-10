@@ -142,7 +142,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  DocumentRegistry, IDocumentRegistry
+  DocumentRegistry
 } from '@jupyterlab/docregistry';
 
 import {
@@ -156,8 +156,7 @@ import {
 const plugin: JupyterLabPlugin<void> = {
   activate,
   id: 'jupyter.extensions.new-button',
-  autoStart: true,
-  requires: [IDocumentRegistry]
+  autoStart: true
 };
 
 
@@ -193,8 +192,8 @@ class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel
 /**
  * Activate the extension.
  */
-function activate(lab: JupyterLab, registry: IDocumentRegistry) {
-  registry.addWidgetExtension('Notebook', new ButtonExtension());
+function activate(app: JupyterLab) {
+  app.docRegistry.addWidgetExtension('Notebook', new ButtonExtension());
 };
 
 
@@ -208,7 +207,7 @@ Run the following commands:
 
 ```
 npm run build
-jupyter labextension install .
+jupyter labextension link .
 jupyter lab
 ```
 

@@ -8,6 +8,14 @@ import {
 } from '@phosphor/algorithm';
 
 import {
+  CommandRegistry
+} from '@phosphor/commands';
+
+import {
+  ReadonlyJSONObject
+} from '@phosphor/coreutils';
+
+import {
   Message
 } from '@phosphor/messaging';
 
@@ -130,6 +138,122 @@ describe('@jupyterlab/apputils', () => {
         widget.addItem('b', new Widget());
         widget.insertItem(10, 'c', new Widget());
         expect(toArray(widget.names())).to.eql(['a', 'b', 'c']);
+      });
+
+    });
+
+    describe('.createFromCommand', () => {
+
+      let commands = new CommandRegistry();
+      let testLogCommandId = 'test:toolbar-log';
+      let logArgs: ReadonlyJSONObject[] = [];
+      let enabled = false;
+      let toggled = true;
+      let visible = false;
+      commands.addCommand(testLogCommandId, {
+        execute: (args) => { logArgs.push(args); },
+        label: 'Test log command label',
+        caption: 'Test log command caption',
+        usage: 'Test log command usage',
+        iconClass: 'test-icon-class',
+        iconLabel: 'Test log icon label',
+        className: 'test-log-class',
+        isEnabled: (args) => { return enabled; },
+        isToggled: (args) => { return toggled; },
+        isVisible: (args) => { return visible; },
+      });
+
+      it('should create a button', () => {
+        let button = Toolbar.createFromCommand(commands, testLogCommandId);
+        expect(button).to.be.a(ToolbarButton);
+        button.dispose();
+      });
+
+      it('should dispose the button if the action is removed', () => {
+        let id = 'to-be-removed';
+        let cmd = commands.addCommand(id, { execute: () => { return; } });
+        let button = Toolbar.createFromCommand(commands, id);
+        cmd.dispose();
+        expect(button.isDisposed).to.be(true);
+      });
+
+      it('should add main class', () => {
+        let button = Toolbar.createFromCommand(commands, testLogCommandId);
+        expect(button.hasClass('test-log-class')).to.be(true);
+        button.dispose();
+      });
+
+      it('should add an icon node with icon class and label', () => {
+        let button = Toolbar.createFromCommand(commands, testLogCommandId);
+        let iconNode = button.node.children[0] as HTMLElement;
+        expect(iconNode.classList.contains('test-icon-class')).to.be(true);
+        expect(iconNode.innerText).to.equal('Test log icon label');
+        button.dispose();
+      });
+
+      it('should apply state classes', () => {
+        enabled = false;
+        toggled = true;
+        visible = false;
+        let button = Toolbar.createFromCommand(commands, testLogCommandId);
+        expect((button.node as HTMLButtonElement).disabled).to.be(true);
+        expect(button.hasClass('p-mod-toggled')).to.be(true);
+        expect(button.hasClass('p-mod-hidden')).to.be(true);
+        button.dispose();
+      });
+
+      it('should update state classes', () => {
+        enabled = false;
+        toggled = true;
+        visible = false;
+        let button = Toolbar.createFromCommand(commands, testLogCommandId);
+        expect((button.node as HTMLButtonElement).disabled).to.be(true);
+        expect(button.hasClass('p-mod-toggled')).to.be(true);
+        expect(button.hasClass('p-mod-hidden')).to.be(true);
+        enabled = true;
+        visible = true;
+        commands.notifyCommandChanged(testLogCommandId);
+        expect((button.node as HTMLButtonElement).disabled).to.be(false);
+        expect(button.hasClass('p-mod-toggled')).to.be(true);
+        expect(button.hasClass('p-mod-hidden')).to.be(false);
+        enabled = false;
+        visible = false;
+        button.dispose();
+      });
+
+      it('should add use the command label if no icon class/label', () => {
+        let id = 'to-be-removed';
+        let cmd = commands.addCommand(id, {
+          execute: () => { return; },
+          label: 'Label-only button',
+        });
+        let button = Toolbar.createFromCommand(commands, id);
+        expect(button.node.childElementCount).to.be(0);
+        expect(button.node.innerText).to.equal('Label-only button');
+        cmd.dispose();
+      });
+
+      it('should update the node content on command change event', () => {
+        let id = 'to-be-removed';
+        let iconClassValue: string | null = null;
+        let cmd = commands.addCommand(id, {
+          execute: () => { return; },
+          label: 'Label-only button',
+          iconClass: (args) => { return iconClassValue; }
+        });
+        let button = Toolbar.createFromCommand(commands, id);
+        expect(button.node.childElementCount).to.be(0);
+        expect(button.node.innerText).to.equal('Label-only button');
+
+        iconClassValue = 'updated-icon-class';
+        commands.notifyCommandChanged(id);
+
+        expect(button.node.innerText).to.equal('');
+        expect(button.node.childElementCount).to.be(1);
+        let iconNode = button.node.children[0] as HTMLElement;
+        expect(iconNode.classList.contains(iconClassValue)).to.be(true);
+
+        cmd.dispose();
       });
 
     });

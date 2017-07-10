@@ -46,7 +46,7 @@ const OUTPUT_PLACEHOLDER_CLASS = 'jp-OutputPlaceholder';
 
 /**
  * An abstract base class for placeholders
- * 
+ *
  * ### Notes
  * A placeholder is the element that is shown when input/output
  * is hidden.
@@ -56,11 +56,21 @@ abstract class Placeholder extends VDomRenderer<null> {
   /**
    * Construct a new placeholder.
    */
-  constructor() {
+  constructor(callback: (e: Event) => void) {
     super();
     this.addClass(PLACEHOLDER_CLASS);
+    this._callback = callback;
   }
 
+  /**
+   * Handle the click event.
+   */
+  protected handleClick(e: Event): void {
+    let callback = this._callback;
+    callback(e);
+  }
+
+  private _callback: (e: Event) => void;
 }
 
 
@@ -72,8 +82,8 @@ class InputPlaceholder extends Placeholder {
   /**
    * Construct a new input placeholder.
    */
-  constructor() {
-    super();
+  constructor(callback: (e: Event) => void) {
+    super(callback);
     this.addClass(INPUT_PLACEHOLDER_CLASS);
   }
 
@@ -84,7 +94,7 @@ class InputPlaceholder extends Placeholder {
     return [
         <div className={INPUT_PROMPT_CLASS}>
         </div>,
-        <div className={CONTENT_CLASS}>
+        <div className={CONTENT_CLASS} onclick={ (e) => this.handleClick(e) }>
           <div className="jp-MoreHorizIcon" />
         </div>
     ]
@@ -101,8 +111,8 @@ class OutputPlaceholder extends Placeholder {
   /**
    * Construct a new output placeholder.
    */
-  constructor() {
-    super();
+  constructor(callback: (e: Event) => void) {
+    super(callback);
     this.addClass(OUTPUT_PLACEHOLDER_CLASS);
   }
 
@@ -113,7 +123,7 @@ class OutputPlaceholder extends Placeholder {
     return [
         <div className={OUTPUT_PROMPT_CLASS}>
         </div>,
-        <div className={CONTENT_CLASS}>
+        <div className={CONTENT_CLASS} onclick={ (e) => this.handleClick(e) }>
           <div className="jp-MoreHorizIcon" />
         </div>
     ]

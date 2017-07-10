@@ -67,6 +67,15 @@
   box-shadow: var(--jp-toolbar-box-shadow);
 }
 
+.jp-Toolbar-button:disabled {
+  opacity: 0.4;
+}
+
+.jp-Toolbar-button.p-mod-toggled {
+  background-color: var(--jp-toolbar-active-background);
+  box-shadow: inset 0 0px 1px rgba(0, 0, 0, 0.5);
+}
+
 .jp-Toolbar > .jp-Toolbar-item.jp-Toolbar-spacer {
   flex-grow: 1;
   flex-shrink: 1;

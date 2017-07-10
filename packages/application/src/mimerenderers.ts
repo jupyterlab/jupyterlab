@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  MimeRenderer, MimeRendererFactory
+  MimeDocument, MimeDocumentFactory
 } from '@jupyterlab/docregistry';
 
 import {
@@ -70,7 +70,7 @@ function createRendermimePlugin(item: IRenderMime.IExtension): JupyterLabPlugin<
         return;
       }
 
-      let factory = new MimeRendererFactory({
+      let factory = new MimeDocumentFactory({
         mimeType: item.mimeType,
         renderTimeout: item.renderTimeout,
         dataType: item.dataType,
@@ -81,7 +81,7 @@ function createRendermimePlugin(item: IRenderMime.IExtension): JupyterLabPlugin<
 
       const factoryName = factory.name;
       const namespace = `${factoryName}-renderer`;
-      const tracker = new InstanceTracker<MimeRenderer>({ namespace });
+      const tracker = new InstanceTracker<MimeDocument>({ namespace });
 
       // Handle state restoration.
       restorer.restore(tracker, {

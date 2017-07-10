@@ -29,6 +29,7 @@
 }
 
 
+
 .jp-OutputPrompt {
   flex: 0 0 var(--jp-cell-prompt-width);
   color: var(--jp-cell-outprompt-font-color);
@@ -48,12 +49,32 @@
   flex-shrink: 1;
   height: auto;
   overflow-x: auto;
+  user-select: text;
+  -moz-user-select: text;
+  -webkit-user-select: text;
+  -ms-user-select: text;
 }
 
 
-.jp-OutputArea-output img.jp-mod-unconfined,
-.jp-OutputArea-output svg.jp-mod-unconfined {
-  max-width: none;
+/* pre */
+
+.jp-OutputArea-output pre {
+  border: none;
+  margin: 0px;
+  padding: 0px;
+  overflow-x: auto;
+  overflow-y: auto;
+  word-break: break-all;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+
+/* tables */
+
+.jp-OutputArea-output.jp-RenderedHTMLCommon table {
+  margin-left: 0;
+  margin-right: 0;
 }
 
 
