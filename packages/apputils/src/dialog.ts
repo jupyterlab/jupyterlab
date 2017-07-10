@@ -34,7 +34,7 @@ import {
  * @returns A promise that resolves with whether the dialog was accepted.
  */
 export
-function showDialog(options: Dialog.IOptions={}): Promise<Dialog.IButton> {
+function showDialog<T>(options: Dialog.IOptions<T>={}): Promise<Dialog.IResult<T>> {
   let dialog = new Dialog(options);
   return dialog.launch().then(result => {
     dialog.dispose();
@@ -47,13 +47,13 @@ function showDialog(options: Dialog.IOptions={}): Promise<Dialog.IButton> {
  * A modal dialog widget.
  */
 export
-class Dialog extends Widget {
+class Dialog<T> extends Widget {
   /**
    * Create a dialog panel instance.
    *
    * @param options - The dialog setup options.
    */
-  constructor(options: Dialog.IOptions={}) {
+  constructor(options: Dialog.IOptions<T>={}) {
     super();
     this.addClass('jp-Dialog');
     options = Private.handleOptions(options);
@@ -65,9 +65,6 @@ class Dialog extends Widget {
     this._buttonNodes = toArray(map(this._buttons, button => {
       return renderer.createButtonNode(button);
     }));
-    this._primary = (
-      options.primaryElement || this._buttonNodes[this._defaultButton]
-    );
 
     let layout = this.layout = new PanelLayout();
     let content = new Panel();
@@ -80,6 +77,15 @@ class Dialog extends Widget {
     content.addWidget(header);
     content.addWidget(body);
     content.addWidget(footer);
+
+    if (typeof options.primaryElement === 'string') {
+      let els = body.node.querySelectorAll(options.primaryElement) as HTMLElement[];
+      this._primary = (els && els[0]) || this._buttonNodes[this._defaultButton];
+    } else {
+      this._primary = (
+        options.primaryElement || this._buttonNodes[this._defaultButton]
+      );
+    }
   }
 
   /**
@@ -100,12 +106,12 @@ class Dialog extends Widget {
    *
    * @returns a promise that resolves with the button that was selected.
    */
-  launch(): Promise<Dialog.IButton> {
+  launch(): Promise<Dialog.IResult<T>> {
     // Return the existing dialog if already open.
     if (this._promise) {
       return this._promise.promise;
     }
-    this._promise = new PromiseDelegate<Dialog.IButton>();
+    this._promise = new PromiseDelegate<Dialog.IResult<T>>();
     let promise = Promise.all(Private.launchQueue);
     Private.launchQueue.push(this._promise.promise);
     return promise.then(() => {
@@ -131,7 +137,7 @@ class Dialog extends Widget {
     if (index === undefined) {
       index = this._defaultButton;
     }
-    this._resolve(this._buttons[index]);
+    this._resolve({ ...this._buttons[index], value: null });
   }
 
   /**
@@ -144,7 +150,7 @@ class Dialog extends Widget {
     if (!this._promise) {
       return;
     }
-    this._resolve(Dialog.cancelButton());
+    this._resolve({ ...Dialog.cancelButton(), value: null });
   }
 
   /**
@@ -281,7 +287,7 @@ class Dialog extends Widget {
   /**
    * Resolve a button item.
    */
-  private _resolve(item: Dialog.IButton): void {
+  private _resolve(item: Dialog.IResult<T>): void {
     // Prevent loopback.
     let promise = this._promise;
     this._promise = null;
@@ -310,7 +316,7 @@ namespace Dialog {
    * The options used to create a dialog.
    */
   export
-  interface IOptions {
+  interface IOptions<T> {
     /**
      * The top level text for the dialog.  Defaults to an empty string.
      */
@@ -321,10 +327,14 @@ namespace Dialog {
      * Defaults to an empty string.
      *
      * #### Notes
+     * If a widget is given as the body, it will be disposed after the
+     * dialog is resolved.  If the widget has a `getValue()` method,
+     * the method will be called prior to disposal and the value
+     * will be provided as part of the dialog result.
      * A string argument will be used as raw `textContent`.
      * All `input` and `select` nodes will be wrapped and styled.
      */
-    body?: BodyType;
+    body?: BodyType<T>;
 
     /**
      * The host element for the dialog. Defaults to `document.body`.
@@ -343,9 +353,10 @@ namespace Dialog {
 
     /**
      * The primary element that should take focus in the dialog.
-     * Defaults to the default button's element.
+     * Defaults to the default button's element.  Can be given as
+     * as selector string.
      */
-    primaryElement?: HTMLElement;
+    primaryElement?: HTMLElement | string;
 
     /**
      * An optional renderer for dialog items.  Defaults to a shared
@@ -405,13 +416,35 @@ namespace Dialog {
    * The header input types.
    */
   export
-  type HeaderType = HTMLElement | string;
+  type HeaderType = VirtualElement | string;
+
+  /**
+   * The result of a dialog.
+   */
+  export
+  interface IResult<T> extends IButton {
+    /**
+     * The value retrieved from `.getValue()` if given on the widget.
+     */
+    value: T;
+  }
+
+  /**
+   * A widget used as a dialog body.
+   */
+  export
+  interface IBodyWidget<T> extends Widget {
+    /**
+     * Get the serialized value of the widget.
+     */
+    getValue(): T;
+  }
 
   /**
    * The body input types.
    */
   export
-  type BodyType = Widget | HTMLElement | string;
+  type BodyType<T> = Widget | IBodyWidget<T> | VirtualElement | string;
 
   /**
    * Create an accept button.
