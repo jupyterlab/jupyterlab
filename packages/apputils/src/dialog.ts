@@ -422,11 +422,12 @@ namespace Dialog {
    * The result of a dialog.
    */
   export
-  interface IResult<T> extends IButton {
+  interface IResult<T> {
+    button: IButton;
     /**
      * The value retrieved from `.getValue()` if given on the widget.
      */
-    value: T;
+    value: T | null;
   }
 
   /**
@@ -437,14 +438,14 @@ namespace Dialog {
     /**
      * Get the serialized value of the widget.
      */
-    getValue(): T;
+    getValue?(): T;
   }
 
   /**
    * The body input types.
    */
   export
-  type BodyType<T> = Widget | IBodyWidget<T> | VirtualElement | string;
+  type BodyType<T> = IBodyWidget<T> | VirtualElement | string;
 
   /**
    * Create an accept button.
