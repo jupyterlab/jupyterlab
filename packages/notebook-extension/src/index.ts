@@ -65,6 +65,9 @@ namespace CommandIDs {
   const restartRunAll = 'notebook:restart-run-all';
 
   export
+  const reconnectToKernel = 'notebook:reconnect-to-kernel';
+
+  export
   const changeKernel = 'notebook:change-kernel';
 
   export
@@ -947,6 +950,21 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
     },
     isEnabled: hasWidget
   });
+  commands.addCommand(CommandIDs.reconnectToKernel, {
+    label: 'Reconnect To Kernel',
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      let kernel = current.context.session.kernel;
+      if (!kernel) {
+        return;
+      }
+      return kernel.reconnect();
+    },
+    isEnabled: hasWidget
+  });
   commands.addCommand(CommandIDs.createConsole, {
     label: 'Create Console for Notebook',
     execute: args => {
@@ -1140,6 +1158,7 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.editMode,
     CommandIDs.commandMode,
     CommandIDs.changeKernel,
+    CommandIDs.reconnectToKernel,
     CommandIDs.createConsole,
     CommandIDs.closeAndShutdown,
     CommandIDs.trust
