@@ -47,6 +47,9 @@ class SettingsHandler(APIHandler):
         if not self.settings_dir:
             raise web.HTTPError(404, "No current settings directory")
 
+        if not os.path.exists(self.settings_dir):
+            os.makedirs(self.settings_dir)
+
         path = os.path.join(self.schemas_dir, section_name + '.json')
 
         if not os.path.exists(path):
