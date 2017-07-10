@@ -54,7 +54,7 @@ fs.writeFileSync('./package.json', text);
 
 // Update the build script.
 text = JSON.stringify(sortPackageJson(data), null, 2) + '\n';
-data['jupyterlab']['scripts']['build'] = 'webpack'
+data['scripts']['build'] = 'webpack'
 fs.writeFileSync('./package.app.json', text);
 
 // Update our app index file.
