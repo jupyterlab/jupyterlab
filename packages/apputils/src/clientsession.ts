@@ -596,7 +596,7 @@ class ClientSession implements IClientSession {
    */
   private _startSession(model: Kernel.IModel): Promise<Kernel.IKernelConnection> {
     if (this.isDisposed) {
-      return Promise.resolve(void 0);
+      return Promise.reject('Session is disposed.');
     }
     return this.manager.startNew({
       path: this._path,
@@ -604,8 +604,12 @@ class ClientSession implements IClientSession {
       name: this._name,
       kernelName: model ? model.name : null,
       kernelId: model ? model.id : null
-    }).then(session => this._handleNewSession(session))
-    .catch(err => this._handleSessionError(err));
+    }).then(session => {
+      return this._handleNewSession(session);
+    }).catch(err => {
+      this._handleSessionError(err);
+      return this._session.kernel;
+    });
   }
 
   /**

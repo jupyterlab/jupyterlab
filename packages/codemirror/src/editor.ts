@@ -937,6 +937,11 @@ namespace CodeMirrorEditor {
     coverGutterNextToScrollbar?: boolean;
 
     /**
+     * Controls whether drag-and-drop is enabled.
+     */
+    dragDrop?: boolean;
+
+    /**
      * Explicitly set the line separator for the editor.
      * By default (value null), the document will be split on CRLFs as well as
      * lone CRs and LFs, and a single LF will be used as line separator in all
@@ -1006,13 +1011,13 @@ namespace Private {
    */
   export
   function handleConfig(editor: CodeMirror.Editor, config: Partial<CodeMirrorEditor.IConfig>): void {
-    config = {
+    let fullConfig: CodeMirrorEditor.IConfig = {
       ...CodeMirrorEditor.defaultConfig,
       ...config
     };
-    for (let key of Object.keys(config)) {
-      let option = key as keyof CodeMirrorEditor.IConfig;
-      Private.setOption(editor, option, config[option]);
+    let key: keyof CodeMirrorEditor.IConfig;
+    for (key in fullConfig) {
+      Private.setOption(editor, key, fullConfig[key]);
     }
   }
 

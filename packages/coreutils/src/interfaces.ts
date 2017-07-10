@@ -28,7 +28,7 @@ interface IChangedArgs<T> {
  * The description of a general purpose data connector.
  */
 export
-interface IDataConnector<T, U> {
+interface IDataConnector<T, U = T> {
   /**
    * Retrieve a saved bundle from the data connector.
    *
@@ -37,10 +37,11 @@ interface IDataConnector<T, U> {
    * @returns A promise that bears a data payload if available.
    *
    * #### Notes
-   * The promise returned by this method may be rejected if an error occurs in
-   * retrieving the data. Non-existence of an `id` will succeed with `null`.
+   * The promise returned by this method may be rejected if an error
+   * occurs in  retrieving the data. Non-existence of an `id` will
+   * succeed with `undefined`.
    */
-  fetch(id: string): Promise<T | null>;
+  fetch(id: string): Promise<T | undefined>;
 
   /**
    * Remove a value from the data connector.
@@ -60,5 +61,5 @@ interface IDataConnector<T, U> {
    *
    * @returns A promise that is rejected if saving fails and succeeds otherwise.
    */
-  save(id: string, value: U): Promise<T | void>;
+  save(id: string, value: U): Promise<void>;
 }

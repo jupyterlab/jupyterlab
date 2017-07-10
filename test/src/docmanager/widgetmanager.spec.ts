@@ -54,9 +54,9 @@ class LoggingManager extends DocumentWidgetManager {
 
   methods: string[] = [];
 
-  filterMessage(handler: IMessageHandler, msg: Message): boolean {
-    this.methods.push('filterMessage');
-    return super.filterMessage(handler, msg);
+  messageHook(handler: IMessageHandler, msg: Message): boolean {
+    this.methods.push('messageHook');
+    return super.messageHook(handler, msg);
   }
 
   setCaption(widget: Widget): void {
@@ -164,7 +164,7 @@ describe('@jupyterlab/docmanager', () => {
         let widget = new Widget();
         manager.adoptWidget(context, widget);
         MessageLoop.sendMessage(widget, new Message('foo'));
-        expect(manager.methods).to.contain('filterMessage');
+        expect(manager.methods).to.contain('messageHook');
       });
 
       it('should add the document class', () => {
@@ -238,25 +238,25 @@ describe('@jupyterlab/docmanager', () => {
 
     });
 
-    describe('#filterMessage()', () => {
+    describe('#messageHook()', () => {
 
       it('should be called for a message to a tracked widget', () => {
         let widget = new Widget();
         manager.adoptWidget(context, widget);
         MessageLoop.sendMessage(widget, new Message('foo'));
-        expect(manager.methods).to.contain('filterMessage');
+        expect(manager.methods).to.contain('messageHook');
       });
 
       it('should return false for close-request messages', () => {
         let widget = manager.createWidget(widgetFactory, context);
         let msg = new Message('close-request');
-        expect(manager.filterMessage(widget, msg)).to.be(false);
+        expect(manager.messageHook(widget, msg)).to.be(false);
       });
 
       it('should return true for other messages', () => {
         let widget = manager.createWidget(widgetFactory, context);
         let msg = new Message('foo');
-        expect(manager.filterMessage(widget, msg)).to.be(true);
+        expect(manager.messageHook(widget, msg)).to.be(true);
       });
 
     });

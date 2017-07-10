@@ -471,11 +471,11 @@ namespace OutputArea {
     };
 
     if (!session.kernel) {
-      return Promise.resolve(void 0);
+      return Promise.reject('Session has no kernel.');
     }
     let future = session.kernel.requestExecute(content, false);
     output.future = future;
-    return future.done;
+    return future.done as Promise<KernelMessage.IExecuteReplyMsg>;
   }
 
   /**

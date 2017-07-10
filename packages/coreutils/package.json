@@ -27,7 +27,7 @@
     "@types/ajv": "^1.0.0",
     "@types/minimist": "^1.2.0",
     "rimraf": "^2.5.2",
-    "typescript": "~2.3.1"
+    "typescript": "~2.4.1"
   },
   "scripts": {
     "build": "tsc",

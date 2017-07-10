@@ -396,8 +396,8 @@ class DefaultKernel implements Kernel.IKernel {
     };
     let msg = KernelMessage.createShellMessage(options);
     return Private.handleShellMessage(this, msg).then(reply => {
-      this._info = reply.content as KernelMessage.IInfoReply;
-      return reply;
+      this._info = (reply as KernelMessage.IInfoReplyMsg).content;
+      return reply as KernelMessage.IInfoReplyMsg;
     });
   }
 
@@ -418,7 +418,7 @@ class DefaultKernel implements Kernel.IKernel {
       session: this._clientId
     };
     let msg = KernelMessage.createShellMessage(options, content);
-    return Private.handleShellMessage(this, msg);
+    return Private.handleShellMessage(this, msg) as Promise<KernelMessage.ICompleteReplyMsg>;
   }
 
   /**
@@ -438,7 +438,7 @@ class DefaultKernel implements Kernel.IKernel {
       session: this._clientId
     };
     let msg = KernelMessage.createShellMessage(options, content);
-    return Private.handleShellMessage(this, msg);
+    return Private.handleShellMessage(this, msg) as Promise<KernelMessage.IInspectReplyMsg>;
   }
 
   /**
@@ -458,7 +458,7 @@ class DefaultKernel implements Kernel.IKernel {
       session: this._clientId
     };
     let msg = KernelMessage.createShellMessage(options, content);
-    return Private.handleShellMessage(this, msg);
+    return Private.handleShellMessage(this, msg) as Promise<KernelMessage.IHistoryReplyMsg>;
   }
 
   /**
@@ -512,7 +512,7 @@ class DefaultKernel implements Kernel.IKernel {
       session: this._clientId
     };
     let msg = KernelMessage.createShellMessage(options, content);
-    return Private.handleShellMessage(this, msg);
+    return Private.handleShellMessage(this, msg) as Promise<KernelMessage.IIsCompleteReplyMsg>;
   }
 
   /**
@@ -530,7 +530,7 @@ class DefaultKernel implements Kernel.IKernel {
       session: this._clientId
     };
     let msg = KernelMessage.createShellMessage(options, content);
-    return Private.handleShellMessage(this, msg);
+    return Private.handleShellMessage(this, msg) as Promise<KernelMessage.ICommInfoReplyMsg>;
   }
 
   /**
@@ -1512,11 +1512,7 @@ namespace Private {
     } catch (e) {
       return Promise.reject(e);
     }
-    return new Promise<any>((resolve, reject) => {
-      future.onReply = (reply: KernelMessage.IMessage) => {
-        resolve(reply);
-      };
-    });
+    return new Promise(resolve => { future.onReply = resolve; });
   }
 
   /**
