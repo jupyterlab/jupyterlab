@@ -1329,7 +1329,7 @@ class DirListing extends Widget {
     this._selectItem(index, false);
 
     return Private.doRename(nameNode, this._editNode).then(newName => {
-      if (newName === original) {
+      if (!newName || newName === original) {
         this._inRename = false;
         return original;
       }
