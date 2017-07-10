@@ -63,7 +63,7 @@ class JupyterLab extends Application<ApplicationShell> {
 
     let linkHandler = {
       handleLink: (node: HTMLElement, path: string) => {
-        linker.connectNode(node, 'file-operations:open', { path });
+        linker.connectNode(node, 'docmanager:open', { path });
       }
     };
     let initialFactories = defaultRendererFactories;
