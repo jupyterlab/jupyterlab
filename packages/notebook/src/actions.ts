@@ -1097,11 +1097,14 @@ namespace Private {
   function cloneCell(model: INotebookModel, cell: ICellModel): ICellModel {
     switch (cell.type) {
     case 'code':
-      return model.contentFactory.createCodeCell(cell.toJSON());
+      // TODO why isnt modeldb or id passed here?
+      return model.contentFactory.createCodeCell({ cell: cell.toJSON() });
     case 'markdown':
-      return model.contentFactory.createMarkdownCell(cell.toJSON());
+      // TODO why isnt modeldb or id passed here?
+      return model.contentFactory.createMarkdownCell({ cell: cell.toJSON() });
     default:
-      return model.contentFactory.createRawCell(cell.toJSON());
+      // TODO why isnt modeldb or id passed here?
+      return model.contentFactory.createRawCell({ cell: cell.toJSON() });
     }
   }
 
