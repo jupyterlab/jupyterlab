@@ -36,7 +36,20 @@ class SettingsHandler(APIHandler):
         settings = dict()
         if os.path.exists(path):
             with open(path) as fid:
-                settings = json.load(fid)
+                # Attempt to load the settings file.
+                try:
+                    settings = json.load(fid)
+                except Exception as e:
+                    self.log.warn(str(e))
+
+        # Validate the data against the schema.
+        if Validator is not None and len(settings):
+            validator = Validator(schema)
+            try:
+                validator.validate(settings)
+            except ValidationError as e:
+                self.log.warn(str(e))
+                settings = dict()
 
         resp = dict(id=section_name, data=dict(user=settings), schema=schema)
         self.finish(json.dumps(resp))
