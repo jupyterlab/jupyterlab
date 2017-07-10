@@ -166,7 +166,7 @@ class RenameHandler extends Widget {
       primaryElement: this.inputNode,
       buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'RENAME' })]
     }).then(result => {
-      if (!result.accept) {
+      if (!result.accept || !this.inputNode.value) {
         return null;
       }
       let basePath = PathExt.dirname(this._oldPath);
