@@ -69,8 +69,9 @@ class SettingsHandler(APIHandler):
             os.makedirs(self.settings_dir)
 
         path = os.path.join(self.settings_dir, section_name + '.json')
+        
         with open(path, 'w') as fid:
-            json.dump(fid, data)
+            json.dump(data, fid)
 
         self.set_status(204)
 
