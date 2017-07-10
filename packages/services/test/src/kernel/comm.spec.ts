@@ -23,7 +23,6 @@ describe('jupyter.services - Comm', () => {
 
   beforeEach(() => {
     tester = new KernelTester();
-    debugger;
     return Kernel.startNew().then(k => {
       kernel = k;
       return kernel.ready;

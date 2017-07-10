@@ -854,6 +854,7 @@ class DefaultKernel implements Kernel.IKernel {
     case 'starting':
     case 'idle':
     case 'busy':
+    case 'connected':
       this._isReady = true;
       break;
     case 'restarting':
