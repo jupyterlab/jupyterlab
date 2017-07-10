@@ -140,6 +140,8 @@
     "mimeExtensions": [
       "@jupyterlab/vega2-extension"
     ],
+    "name": "JupyterLab",
+    "scripts": {},
     "singletonPackages": [
       "@jupyterlab/application",
       "@jupyterlab/apputils",

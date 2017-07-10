@@ -2,7 +2,7 @@
   "name": "@jupyterlab/application-top",
   "version": "0.8.3",
   "scripts": {
-    "build": "webpack",
+    "build": "node copy-schemas.js && webpack",
     "publish": "node make-release.js"
   },
   "dependencies": {
@@ -142,6 +142,8 @@
     "mimeExtensions": [
       "@jupyterlab/vega2-extension"
     ],
+    "name": "JupyterLab",
+    "scripts": {},
     "singletonPackages": [
       "@jupyterlab/application",
       "@jupyterlab/apputils",
