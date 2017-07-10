@@ -573,7 +573,7 @@ class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument, DocumentRegistr
   /**
    * Construct a new markdown widget factory.
    */
-  constructor(options: MimeRendererFactory.IOptions) {
+  constructor(options: MimeDocumentFactory.IOptions) {
     super(Private.createRegistryOptions(options));
     this._rendermime = options.rendermime;
     this._mimeType = options.mimeType;
@@ -659,7 +659,7 @@ namespace Private {
    * Create the document registry options.
    */
   export
-  function createRegistryOptions(options: MimeRendererFactory.IOptions): DocumentRegistry.IWidgetFactoryOptions {
+  function createRegistryOptions(options: MimeDocumentFactory.IOptions): DocumentRegistry.IWidgetFactoryOptions {
     return { ...options, readOnly: true } as DocumentRegistry.IWidgetFactoryOptions;
   }
 }
