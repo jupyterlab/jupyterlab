@@ -90,4 +90,4 @@ class SettingsHandler(APIHandler):
 
 
 # The path for a lab settings section.
-settings_path = r"/labsettings/(?P<section_name>[\w.-]+)"
+settings_path = r"/lab/api/settings/(?P<section_name>[\w.-]+)"

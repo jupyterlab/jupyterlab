@@ -17,7 +17,7 @@ import {
 /**
  * The url for the lab settings service.
  */
-const SERVICE_SETTINGS_URL = 'labsettings';
+const SERVICE_SETTINGS_URL = 'lab/api/settings';
 
 
 /**
