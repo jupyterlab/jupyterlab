@@ -687,7 +687,7 @@ def _ensure_package(app_dir, name=None, version=None, logger=None):
     if not os.path.exists(staging):
         os.makedirs(staging)
 
-    for fname in ['index.app.js', 'webpack.config.js']:
+    for fname in ['copy-schemas.js', 'index.app.js', 'webpack.config.js']:
         dest = pjoin(staging, fname.replace('.app', ''))
         shutil.copy(pjoin(here, fname), dest)
 
