@@ -778,6 +778,20 @@ describe('kernel', () => {
         });
       });
 
+      it("should emit a `'connected'` status", () => {
+        let called = false;
+        return kernel.ready.then(() => {
+          kernel.statusChanged.connect(() => {
+            if (kernel.status === 'connected') {
+              called = true;
+            }
+          });
+          return kernel.reconnect();
+        }).then(() => {
+          expect(called).to.be(true);
+        });
+      });
+
     });
 
     context('#shutdown()', () => {

@@ -805,7 +805,7 @@ namespace Kernel {
    * The valid Kernel status states.
    */
   export
-  type Status = 'unknown' | 'starting' | 'reconnecting' | 'idle' | 'busy' | 'restarting' | 'dead';
+  type Status = 'unknown' | 'starting' | 'reconnecting' | 'idle' | 'busy' | 'restarting' | 'dead' | 'connected';
 
   /**
    * The kernel model provided by the server.
