@@ -36,10 +36,7 @@ import {
 export
 function showDialog<T>(options: Dialog.IOptions<T>={}): Promise<Dialog.IResult<T>> {
   let dialog = new Dialog(options);
-  return dialog.launch().then(result => {
-    dialog.dispose();
-    return result;
-  });
+  return dialog.launch();
 }
 
 
@@ -71,6 +68,8 @@ class Dialog<T> extends Widget {
     content.addClass('jp-Dialog-content');
     layout.addWidget(content);
 
+    this._body = options.body;
+
     let header = renderer.createHeader(options.title);
     let body = renderer.createBody(options.body);
     let footer = renderer.createFooter(this._buttonNodes);
@@ -78,13 +77,13 @@ class Dialog<T> extends Widget {
     content.addWidget(body);
     content.addWidget(footer);
 
-    if (typeof options.primaryElement === 'string') {
-      let els = body.node.querySelectorAll(options.primaryElement) as HTMLElement[];
-      this._primary = (els && els[0]) || this._buttonNodes[this._defaultButton];
-    } else {
-      this._primary = (
-        options.primaryElement || this._buttonNodes[this._defaultButton]
-      );
+    this._primary = this._buttonNodes[this._defaultButton];
+
+    if (options.primaryElement) {
+      let els = body.node.querySelectorAll(options.primaryElement);
+      if (els) {
+        this._primary = els[0] as HTMLElement;
+      }
     }
   }
 
@@ -116,6 +115,7 @@ class Dialog<T> extends Widget {
     Private.launchQueue.push(this._promise.promise);
     return promise.then(() => {
       Widget.attach(this, this._host);
+      this.dispose();
       return this._promise.promise;
     });
   }
@@ -137,7 +137,7 @@ class Dialog<T> extends Widget {
     if (index === undefined) {
       index = this._defaultButton;
     }
-    this._resolve({ ...this._buttons[index], value: null });
+    this._resolve(this._buttons[index]);
   }
 
   /**
@@ -150,7 +150,7 @@ class Dialog<T> extends Widget {
     if (!this._promise) {
       return;
     }
-    this._resolve({ ...Dialog.cancelButton(), value: null });
+    this._resolve(Dialog.cancelButton());
   }
 
   /**
@@ -287,13 +287,22 @@ class Dialog<T> extends Widget {
   /**
    * Resolve a button item.
    */
-  private _resolve(item: Dialog.IResult<T>): void {
+  private _resolve(button: Dialog.IButton): void {
     // Prevent loopback.
     let promise = this._promise;
     this._promise = null;
     this.close();
     ArrayExt.removeFirstOf(Private.launchQueue, promise.promise);
-    promise.resolve(item);
+    let body = this._body;
+    let value: T | null = null;
+    if (body instanceof Widget && typeof body.getValue === 'function') {
+      value = body.getValue();
+    }
+    promise.resolve({
+      button,
+      accept: button.accept,
+      value
+    });
   }
 
   private _buttonNodes: ReadonlyArray<HTMLElement>;
@@ -301,9 +310,10 @@ class Dialog<T> extends Widget {
   private _original: HTMLElement;
   private _first: HTMLElement;
   private _primary: HTMLElement;
-  private _promise: PromiseDelegate<Dialog.IButton> | null;
+  private _promise: PromiseDelegate<Dialog.IResult<T>>;
   private _defaultButton: number;
   private _host: HTMLElement;
+  private _body: Dialog.BodyType<T>;
 }
 
 
@@ -352,11 +362,10 @@ namespace Dialog {
     defaultButton?: number;
 
     /**
-     * The primary element that should take focus in the dialog.
-     * Defaults to the default button's element.  Can be given as
-     * as selector string.
+     * A selector for the primary element that should take focus in the dialog.
+     * Defaults to the default button's element.
      */
-    primaryElement?: HTMLElement | string;
+    primaryElement?: string;
 
     /**
      * An optional renderer for dialog items.  Defaults to a shared
@@ -423,7 +432,16 @@ namespace Dialog {
    */
   export
   interface IResult<T> {
+    /**
+     * The button that was pressed.
+     */
     button: IButton;
+
+    /**
+     * Whether the dialog was accepted.
+     */
+    accept: boolean;
+
     /**
      * The value retrieved from `.getValue()` if given on the widget.
      */
@@ -513,7 +531,7 @@ namespace Dialog {
      *
      * @returns A widget for the body.
      */
-    createBody(body: BodyType): Widget;
+    createBody(body: BodyType<any>): Widget;
 
     /**
      * Create the footer of the dialog.
@@ -552,7 +570,7 @@ namespace Dialog {
         header = new Widget({ node: document.createElement('span') });
         header.node.textContent = title;
       } else {
-        header = new Widget({ node: title });
+        header = new Widget({ node: VirtualDOM.realize(title) });
       }
       header.addClass('jp-Dialog-header');
       Styling.styleNode(header.node);
@@ -566,7 +584,7 @@ namespace Dialog {
      *
      * @returns A widget for the body.
      */
-    createBody(value: BodyType): Widget {
+    createBody(value: BodyType<any>): Widget {
       let body: Widget;
       if (typeof value === 'string') {
         body = new Widget({ node: document.createElement('span') });
@@ -574,7 +592,7 @@ namespace Dialog {
       } else if (value instanceof Widget) {
         body = value;
       } else {
-        body = new Widget({ node: value });
+        body = new Widget({ node: VirtualDOM.realize(value) });
       }
       body.addClass('jp-Dialog-body');
       Styling.styleNode(body.node);
@@ -704,7 +722,7 @@ namespace Private {
    * The queue for launching dialogs.
    */
   export
-  let launchQueue: Promise<Dialog.IButton>[] = [];
+  let launchQueue: Promise<Dialog.IResult<any>>[] = [];
 
   /**
    * Handle the input options for a dialog.
@@ -714,8 +732,8 @@ namespace Private {
    * @returns A new options object with defaults applied.
    */
   export
-  function handleOptions(options: Dialog.IOptions): Dialog.IOptions {
-    let newOptions: Dialog.IOptions = {};
+  function handleOptions<T>(options: Dialog.IOptions<T>): Dialog.IOptions<T> {
+    let newOptions: Dialog.IOptions<T> = {};
     newOptions.title = options.title || '';
     newOptions.body = options.body || '';
     newOptions.host = options.host || document.body;

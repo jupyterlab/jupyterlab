@@ -26,6 +26,10 @@ import {
 } from '@phosphor/signaling';
 
 import {
+  Widget
+} from '@phosphor/widgets';
+
+import {
   showDialog, Dialog
 } from '.';
 
@@ -661,7 +665,7 @@ class ClientSession implements IClientSession {
     body.textContent = response;
     return showDialog({
       title: 'Error Starting Kernel',
-      body,
+      body: new Widget({ node: body }),
       buttons: [Dialog.okButton()]
     }).then(() => void 0);
   }
@@ -880,7 +884,7 @@ namespace Private {
     let select = Dialog.okButton({ label: 'SELECT' });
     return showDialog({
       title: 'Select Kernel',
-      body,
+      body: new Widget({ node: body }),
       buttons: [Dialog.cancelButton(), select]
     }).then(result => {
       if (!result.accept) {
