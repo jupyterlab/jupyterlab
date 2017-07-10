@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/codemirror-extension",
-  "version": "0.7.0",
+  "version": "0.8.2",
   "description": "JupyterLab - CodeMirror Provider Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -12,17 +12,17 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.7.0",
-    "@jupyterlab/apputils": "^0.7.0",
-    "@jupyterlab/coreutils": "^0.7.0",
-    "@jupyterlab/codeeditor": "^0.7.0",
-    "@jupyterlab/codemirror": "^0.7.0",
-    "@jupyterlab/fileeditor": "^0.7.0",
+    "@jupyterlab/application": "^0.8.2",
+    "@jupyterlab/apputils": "^0.8.1",
+    "@jupyterlab/coreutils": "^0.8.0",
+    "@jupyterlab/codeeditor": "^0.8.0",
+    "@jupyterlab/codemirror": "^0.8.0",
+    "@jupyterlab/fileeditor": "^0.8.1",
     "@phosphor/widgets": "^1.3.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
-    "typescript": "~2.3.1"
+    "typescript": "~2.4.1"
   },
   "scripts": {
     "build": "tsc",

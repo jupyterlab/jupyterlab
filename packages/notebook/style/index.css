@@ -68,6 +68,10 @@
   max-height: 1000px;
 }
 
+.jp-Notebook .jp-Cell:not(.jp-mod-active) .jp-OutputArea {
+  overflow-y: hidden;
+}
+
 
 /*-----------------------------------------------------------------------------
 | Notebook state related styling
@@ -163,7 +167,7 @@
     flex: 1 1 auto;
     z-index: 2;
     font-size: var(--jp-code-font-size);
-    font-family: monospace;
+    font-family: var(--jp-code-font-family);
     line-height: var(--jp-code-line-height);
     padding: var(--jp-code-padding);
     border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
@@ -179,7 +183,7 @@
   color: var(--jp-cell-inprompt-font-color);
   padding: var(--jp-code-padding);
   padding-left: 12px;
-  font-family: 'Roboto Mono', monospace;
+  font-family: var(--jp-cell-prompt-font-family);
   letter-spacing: var(--jp-cell-prompt-letter-spacing);
   line-height: 1.9;
   font-size: var(--jp-code-font-size);

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/outputarea",
-  "version": "0.7.0",
+  "version": "0.8.1",
   "description": "JupyterLab - Notebook Output Area",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -13,9 +13,9 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^0.7.0",
-    "@jupyterlab/rendermime": "^0.7.0",
-    "@jupyterlab/services": "^0.46.0",
+    "@jupyterlab/coreutils": "^0.8.0",
+    "@jupyterlab/rendermime": "^0.8.1",
+    "@jupyterlab/services": "^0.47.0",
     "@phosphor/algorithm": "^1.1.1",
     "@phosphor/coreutils": "^1.2.0",
     "@phosphor/datastore": "^0.6.1",
@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
-    "typescript": "~2.3.1"
+    "typescript": "~2.4.1"
   },
   "scripts": {
     "build": "tsc",

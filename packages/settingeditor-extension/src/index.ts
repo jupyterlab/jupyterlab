@@ -18,7 +18,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  ISettingRegistry
+  ISettingRegistry, IStateDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -39,7 +39,7 @@ namespace CommandIDs {
  * The default setting editor extension.
  */
 const plugin: JupyterLabPlugin<void> = {
-  activate: (app: JupyterLab, restorer: ILayoutRestorer, registry: ISettingRegistry, editorServices: IEditorServices) => {
+  activate: (app: JupyterLab, restorer: ILayoutRestorer, registry: ISettingRegistry, editorServices: IEditorServices, state: IStateDB) => {
     const { commands, shell } = app;
     const namespace = 'setting-editor';
     const factoryService = editorServices.factoryService;
@@ -60,7 +60,10 @@ const plugin: JupyterLabPlugin<void> = {
           return;
         }
 
-        const editor = new SettingEditor({ editorFactory, registry });
+        const key = plugin.id;
+        const editor = new SettingEditor({
+          editorFactory, key, registry, state
+        });
 
         tracker.add(editor);
         editor.id = namespace;
@@ -73,7 +76,7 @@ const plugin: JupyterLabPlugin<void> = {
     });
   },
   id: 'jupyter.extensions.setting-editor',
-  requires: [ILayoutRestorer, ISettingRegistry, IEditorServices],
+  requires: [ILayoutRestorer, ISettingRegistry, IEditorServices, IStateDB],
   autoStart: true
 };
 

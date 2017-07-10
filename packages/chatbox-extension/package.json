@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/chatbox-extension",
-  "version": "0.2.0",
+  "version": "0.3.2",
   "description": "JupyterLab - Chatbox Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -12,16 +12,16 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.7.0",
-    "@jupyterlab/apputils": "^0.7.0",
-    "@jupyterlab/chatbox": "^0.2.0",
-    "@jupyterlab/codeeditor": "^0.7.0",
-    "@jupyterlab/docmanager": "^0.7.0",
-    "@jupyterlab/rendermime": "^0.7.0"
+    "@jupyterlab/application": "^0.8.2",
+    "@jupyterlab/apputils": "^0.8.1",
+    "@jupyterlab/chatbox": "^0.3.1",
+    "@jupyterlab/codeeditor": "^0.8.0",
+    "@jupyterlab/docmanager": "^0.8.1",
+    "@jupyterlab/rendermime": "^0.8.1"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
-    "typescript": "~2.3.1"
+    "typescript": "~2.4.1"
   },
   "scripts": {
     "build": "tsc",

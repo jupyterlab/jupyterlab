@@ -1,11 +1,11 @@
 {
   "name": "@jupyterlab/services",
-  "version": "0.46.0",
+  "version": "0.47.0",
   "description": "Client APIs for the Jupyter services REST APIs",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "dependencies": {
-    "@jupyterlab/coreutils": "^0.7.0",
+    "@jupyterlab/coreutils": "^0.8.0",
     "@phosphor/algorithm": "^1.1.1",
     "@phosphor/coreutils": "^1.2.0",
     "@phosphor/disposable": "^1.1.1",
@@ -22,7 +22,7 @@
     "requirejs": "^2.2.0",
     "rimraf": "^2.5.2",
     "text-encoding": "^0.5.2",
-    "typescript": "~2.3.1",
+    "typescript": "~2.4.1",
     "webpack": "^2.2.1",
     "ws": "^1.1.1",
     "xmlhttprequest": "^1.8.0"

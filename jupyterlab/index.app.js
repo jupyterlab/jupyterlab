@@ -21,6 +21,8 @@ function main() {
     if (version[0] === 'v') {
         version = version.slice(1);
     }
+
+    // Get the disabled extensions.
     var disabled = [];
     try {
         var option = PageConfig.getOption('disabledExtensions');
@@ -29,14 +31,29 @@ function main() {
         // No-op
     }
 
+    // Handle the registered mime extensions.
+    var mimeExtensions = [];
+    {{#each jupyterlab_mime_extensions}}
+    try {
+        if (disabled.indexOf('{{this}}') === -1) {
+            mimeExtensions.push(require('{{this}}'));
+        }
+    } catch (e) {
+        console.error(e);
+    }
+    {{/each}}
+
     lab = new app({
         namespace: namespace,
         name: name,
         version: version,
         devMode: devMode.toLowerCase() === 'true',
         settingsDir: settingsDir,
-        assetsDir: assetsDir
+        assetsDir: assetsDir,
+        mimeExtensions: mimeExtensions
     });
+
+    // Handled the registered standard extensions.
     {{#each jupyterlab_extensions}}
     try {
         if (disabled.indexOf('{{this}}') === -1) {
@@ -46,6 +63,8 @@ function main() {
         console.error(e);
     }
     {{/each}}
+
+    // Handle the ignored plugins.
     var ignorePlugins = [];
     try {
         var option = PageConfig.getOption('ignorePlugins');

@@ -124,9 +124,7 @@ class DocumentWidgetManager implements IDisposable {
   adoptWidget(context: DocumentRegistry.Context, widget: Widget): void {
     let widgets = Private.widgetsProperty.get(context);
     widgets.push(widget);
-    MessageLoop.installMessageHook(widget, (handler: IMessageHandler, msg: Message) => {
-      return this.filterMessage(handler, msg);
-    });
+    MessageLoop.installMessageHook(widget, this);
     widget.addClass(DOCUMENT_CLASS);
     widget.title.closable = true;
     widget.disposed.connect(this._widgetDisposed, this);
@@ -209,12 +207,9 @@ class DocumentWidgetManager implements IDisposable {
    * @returns `false` if the message should be filtered, of `true`
    *   if the message should be dispatched to the handler as normal.
    */
-  protected filterMessage(handler: IMessageHandler, msg: Message): boolean {
+  messageHook(handler: IMessageHandler, msg: Message): boolean {
     switch (msg.type) {
     case 'close-request':
-      if (this._closeGuard) {
-        return true;
-      }
       this.onClose(handler as Widget);
       return false;
     case 'activate-request':
@@ -268,15 +263,12 @@ class DocumentWidgetManager implements IDisposable {
         return true;
       }
       if (result) {
-        this._closeGuard = true;
-        widget.close();
-        this._closeGuard = false;
-        // Dispose of document widgets when they are closed.
         widget.dispose();
       }
       return result;
-    }).catch(() => {
+    }).catch(error => {
       widget.dispose();
+      throw error;
     });
   }
 
@@ -348,7 +340,6 @@ class DocumentWidgetManager implements IDisposable {
     each(widgets, widget => { this.setCaption(widget); });
   }
 
-  private _closeGuard = false;
   private _registry: DocumentRegistry = null;
   private _activateRequested = new Signal<this, string>(this);
 }

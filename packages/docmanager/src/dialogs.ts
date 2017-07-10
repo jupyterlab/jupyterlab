@@ -36,6 +36,10 @@ const FILE_DIALOG_CLASS = 'jp-FileDialog';
  */
 const FILE_CONFLICT_CLASS = 'jp-mod-conflict';
 
+/**
+ * The class name added for the new name label in the rename dialog
+ */
+const RENAME_NEWNAME_TITLE_CLASS = 'jp-new-name-title';
 
 /**
  * A stripped-down interface for a file container.
@@ -57,11 +61,13 @@ interface IFileContainer extends JSONObject {
  * Create a file using a file creator.
  */
 export
-function createFromDialog(container: IFileContainer, manager: IDocumentManager, creatorName: string): Promise<Widget> {
+function createFromDialog(container: IFileContainer, manager: IDocumentManager, creatorName: string): Promise<Widget | null> {
   let handler = new CreateFromHandler(container, manager, creatorName);
-  return manager.services.ready
-    .then(() => handler.populate())
-    .then(() => handler.showDialog());
+  return manager.services.ready.then(() => {
+    return handler.populate();
+  }).then(() => {
+    return handler.showDialog();
+  });
 }
 
 
@@ -69,9 +75,8 @@ function createFromDialog(container: IFileContainer, manager: IDocumentManager, 
  * Rename a file with an optional dialog.
  */
 export
-function renameDialog(manager: IDocumentManager, oldPath: string): Promise<Contents.IModel> {
-  let handler = new RenameHandler(manager, oldPath);
-  return handler.showDialog();
+function renameDialog(manager: IDocumentManager, oldPath: string): Promise<Contents.IModel | null> {
+  return (new RenameHandler(manager, oldPath)).showDialog();
 }
 
 
@@ -79,26 +84,25 @@ function renameDialog(manager: IDocumentManager, oldPath: string): Promise<Conte
  * Rename a file with optional dialog.
  */
 export
-function renameFile(manager: IDocumentManager, oldPath: string, newPath: string): Promise<Contents.IModel> {
+function renameFile(manager: IDocumentManager, oldPath: string, newPath: string): Promise<Contents.IModel | null> {
   return manager.rename(oldPath, newPath).catch(error => {
     if (error.xhr) {
       error.message = `${error.xhr.statusText} ${error.xhr.status}`;
     }
-    let overwriteBtn = Dialog.warnButton({ label: 'OVERWRITE' });
-    if (error.message.indexOf('409') !== -1) {
-      let options = {
-        title: 'Overwrite file?',
-        body: `"${newPath}" already exists, overwrite?`,
-        buttons: [Dialog.cancelButton(), overwriteBtn]
-      };
-      return showDialog(options).then(button => {
-        if (button.accept) {
-          return manager.overwrite(oldPath, newPath);
-        }
-      });
-    } else {
+    if (error.message.indexOf('409') === -1) {
       throw error;
     }
+    let options = {
+      title: 'Overwrite file?',
+      body: `"${newPath}" already exists, overwrite?`,
+      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'OVERWRITE' })]
+    };
+    return showDialog(options).then(button => {
+      if (!button.accept) {
+        return null;
+      }
+      return manager.overwrite(oldPath, newPath);
+    });
   });
 }
 
@@ -155,18 +159,19 @@ class RenameHandler extends Widget {
   /**
    * Show the rename dialog.
    */
-  showDialog(): Promise<Widget> {
+  showDialog(): Promise<Contents.IModel | null> {
     return showDialog({
       title: 'Rename File',
       body: this.node,
       primaryElement: this.inputNode,
       buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'RENAME' })]
     }).then(result => {
-      if (result.accept) {
-        let basePath = PathExt.dirname(this._oldPath);
-        let newPath = PathExt.join(basePath, this.inputNode.value);
-        return renameFile(this._manager, this._oldPath, newPath);
+      if (!result.accept) {
+        return null;
       }
+      let basePath = PathExt.dirname(this._oldPath);
+      let newPath = PathExt.join(basePath, this.inputNode.value);
+      return renameFile(this._manager, this._oldPath, newPath);
     });
   }
 
@@ -233,24 +238,23 @@ class CreateFromHandler extends Widget {
   /**
    * Show the createNew dialog.
    */
-  showDialog(): Promise<Widget> {
+  showDialog(): Promise<Widget | null> {
     return showDialog({
       title: `Create New ${this._creatorName}`,
       body: this.node,
       primaryElement: this.inputNode,
       buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'CREATE' })]
     }).then(result => {
-      if (result.accept) {
-        return this._open().then(widget => {
-          if (!widget) {
-            return this.showDialog();
-          }
-          return widget;
-        });
+      if (!result.accept) {
+        this._manager.deleteFile('/' + this._orig.path);
+        return null;
       }
-
-      this._manager.deleteFile('/' + this._orig.path);
-      return null;
+      return this._open().then(widget => {
+        if (!widget) {
+          return this.showDialog();
+        }
+        return widget;
+      });
     });
   }
 
@@ -371,6 +375,7 @@ namespace Private {
 
     let nameTitle = document.createElement('label');
     nameTitle.textContent = 'New Name';
+    nameTitle.className = RENAME_NEWNAME_TITLE_CLASS;
     let name = document.createElement('input');
 
     body.appendChild(existingLabel);

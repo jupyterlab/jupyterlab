@@ -6,9 +6,9 @@
     "clean": "rimraf build"
   },
   "dependencies": {
-    "@jupyterlab/services": "^0.46.0",
-    "@jupyterlab/terminal": "^0.7.0",
-    "@jupyterlab/theming": "^0.7.0",
+    "@jupyterlab/services": "^0.47.0",
+    "@jupyterlab/terminal": "^0.8.1",
+    "@jupyterlab/theming": "^0.8.1",
     "@phosphor/widgets": "^1.3.0",
     "es6-promise": "^4.1.0",
     "webpack": "^2.2.1"
@@ -19,10 +19,10 @@
     "json-loader": "^0.5.4",
     "rimraf": "^2.5.2",
     "style-loader": "^0.13.1",
-    "typescript": "~2.3.1",
+    "typescript": "~2.4.1",
     "url-loader": "^0.5.7",
     "watch": "^1.0.2",
     "webpack": "^1.13.0"
   },
-  "version": "0.7.0"
+  "version": "0.8.2"
 }

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/completer",
-  "version": "0.7.0",
+  "version": "0.8.1",
   "description": "JupyterLab - Completer",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -13,10 +13,10 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^0.7.0",
-    "@jupyterlab/codeeditor": "^0.7.0",
-    "@jupyterlab/coreutils": "^0.7.0",
-    "@jupyterlab/services": "^0.46.0",
+    "@jupyterlab/apputils": "^0.8.1",
+    "@jupyterlab/codeeditor": "^0.8.0",
+    "@jupyterlab/coreutils": "^0.8.0",
+    "@jupyterlab/services": "^0.47.0",
     "@phosphor/algorithm": "^1.1.1",
     "@phosphor/coreutils": "^1.2.0",
     "@phosphor/disposable": "^1.1.1",
@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
-    "typescript": "~2.3.1"
+    "typescript": "~2.4.1"
   },
   "scripts": {
     "build": "tsc",

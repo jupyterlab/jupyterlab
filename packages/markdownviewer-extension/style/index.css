@@ -1,0 +1,16 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+:root {
+  --jp-private-markdownviewer-padding: 16px;
+}
+
+.jp-Document.jp-MimeDocument .jp-RenderedMarkdown {
+  padding-top: var(--jp-private-markdownviewer-padding);
+  padding-right: var(--jp-private-markdownviewer-padding);
+  padding-bottom: var(--jp-private-markdownviewer-padding);
+  padding-left: var(--jp-private-markdownviewer-padding);
+  overflow: auto;
+}

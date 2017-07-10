@@ -10,7 +10,7 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  each 
+  each
 } from '@phosphor/algorithm';
 
 import {
@@ -309,7 +309,7 @@ namespace Contents {
      * @returns A promise which resolves with the new checkpoint model when the
      *   checkpoint is created.
      */
-    createCheckpoint(path: string): Promise<IModel>;
+    createCheckpoint(path: string): Promise<ICheckpointModel>;
 
     /**
      * List available checkpoints for a file.
@@ -454,7 +454,7 @@ namespace Contents {
      * @returns A promise which resolves with the new checkpoint model when the
      *   checkpoint is created.
      */
-    createCheckpoint(localPath: string): Promise<IModel>;
+    createCheckpoint(localPath: string): Promise<ICheckpointModel>;
 
     /**
      * List available checkpoints for a file.
@@ -585,7 +585,7 @@ class ContentsManager implements Contents.IManager {
           path: this._toGlobalPath(drive, localPath)
         } as Contents.IModel;
       }
-    }); 
+    });
   }
 
   /**

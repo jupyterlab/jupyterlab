@@ -20,6 +20,7 @@ const IStateDB = new Token<IStateDB>('jupyter.services.statedb');
 
 
 /**
+ * An object which holds an id/value pair.
  */
 export
 interface IStateItem {
@@ -39,7 +40,7 @@ interface IStateItem {
  * The description of a state database.
  */
 export
-interface IStateDB extends IDataConnector<JSONObject, JSONObject> {
+interface IStateDB extends IDataConnector<JSONObject> {
   /**
    * The maximum allowed length of the data after it has been serialized.
    */
@@ -49,30 +50,11 @@ interface IStateDB extends IDataConnector<JSONObject, JSONObject> {
    * The namespace prefix for all state database entries.
    *
    * #### Notes
-   * This value should be set at instantiation and will only be used internally
-   * by a state database. That means, for example, that an app could have
-   * multiple, mutually exclusive state databases.
+   * This value should be set at instantiation and will only be used
+   * internally by a state database. That means, for example, that an
+   * app could have multiple, mutually exclusive state databases.
    */
   readonly namespace: string;
-
-  /**
-   * Retrieve a saved bundle from the database.
-   *
-   * @param id - The identifier used to retrieve a data bundle.
-   *
-   * @returns A promise that bears a data payload if available.
-   *
-   * #### Notes
-   * The `id` values of stored items in the state database are formatted:
-   * `'namespace:identifier'`, which is the same convention that command
-   * identifiers in JupyterLab use as well. While this is not a technical
-   * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
-   * using the `fetchNamespace()` method.
-   *
-   * The promise returned by this method may be rejected if an error occurs in
-   * retrieving the data. Non-existence of an `id` will succeed, however.
-   */
-  fetch(id: string): Promise<JSONObject | null>;
 
   /**
    * Retrieve all the saved bundles for a namespace.
@@ -91,35 +73,7 @@ interface IStateDB extends IDataConnector<JSONObject, JSONObject> {
    * This promise will always succeed.
    */
   fetchNamespace(namespace: string): Promise<IStateItem[]>;
-
-  /**
-   * Remove a value from the database.
-   *
-   * @param id - The identifier for the data being removed.
-   *
-   * @returns A promise that is rejected if remove fails and succeeds otherwise.
-   */
-  remove(id: string): Promise<void>;
-
-  /**
-   * Save a value in the database.
-   *
-   * @param id - The identifier for the data being saved.
-   *
-   * @param value - The data being saved.
-   *
-   * @returns A promise that is rejected if saving fails and succeeds otherwise.
-   *
-   * #### Notes
-   * The `id` values of stored items in the state database are formatted:
-   * `'namespace:identifier'`, which is the same convention that command
-   * identifiers in JupyterLab use as well. While this is not a technical
-   * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
-   * using the `fetchNamespace()` method.
-   */
-  save(id: string, value: JSONObject): Promise<void>;
 }
-
 
 
 /**

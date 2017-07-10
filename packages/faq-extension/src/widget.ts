@@ -42,7 +42,7 @@ const SUBHEADER_CLASS = 'jp-FAQ-h2';
 /**
  * The class name added for the question mark icon from default-theme.
  */
-const QUESTIONMARK_ICON_CLASS = 'jp-QuestionMark';
+const QUESTIONMARK_ICON_CLASS = 'jp-QuestionMarkIcon';
 
 /**
  * The class named added the question mark icon.

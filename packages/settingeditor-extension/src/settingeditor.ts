@@ -12,7 +12,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  ICON_CLASS_KEY, ICON_LABEL_KEY, ISettingRegistry, ObservableJSON
+  ICON_CLASS_KEY, ICON_LABEL_KEY, ISettingRegistry, IStateDB, ObservableJSON
 } from '@jupyterlab/coreutils';
 
 import {
@@ -28,7 +28,7 @@ import {
 } from '@phosphor/virtualdom';
 
 import {
-  PanelLayout, SplitPanel, Widget
+  PanelLayout, SplitPanel as SPanel, Widget
 } from '@phosphor/widgets';
 
 
@@ -105,6 +105,8 @@ class SettingEditor extends Widget {
   constructor(options: SettingEditor.IOptions) {
     super();
     this.addClass(SETTING_EDITOR_CLASS);
+    this.key = options.key;
+    this.state = options.state;
 
     const editorFactory = options.editorFactory;
     const layout = this.layout = new PanelLayout();
@@ -124,14 +126,26 @@ class SettingEditor extends Widget {
     layout.addWidget(panel);
     panel.addWidget(list);
     panel.addWidget(instructions);
-    panel.setRelativeSizes(this._sizes);
+
+    editor.handleMoved.connect(this._onHandleMoved, this);
     list.selected.connect(this._onSelected, this);
+    panel.handleMoved.connect(this._onHandleMoved, this);
   }
+
+  /**
+   * The state database key for the editor's state management.
+   */
+  readonly key: string;
 
   /**
    * The setting registry modified by the editor.
    */
   readonly registry: ISettingRegistry;
+
+  /**
+   * The state database used to store layout.
+   */
+  readonly state: IStateDB;
 
   /**
    * Dispose of the resources held by the setting editor.
@@ -160,10 +174,19 @@ class SettingEditor extends Widget {
    * Handle `'after-attach'` messages.
    */
   protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+
     // Allow the message queue (which includes fit requests that might disrupt
     // setting relative sizes) to clear before setting sizes.
     requestAnimationFrame(() => {
-      this._panel.setRelativeSizes(this._sizes);
+      // Set the original (default) outer dimensions.
+      this._panel.setRelativeSizes(this._presets.outer);
+      this._fetchState()
+        .then(() => { this._setPresets(); })
+        .catch(reason => {
+          console.error('Fetching setting editor state failed', reason);
+          this._setPresets();
+        });
     });
   }
 
@@ -178,35 +201,134 @@ class SettingEditor extends Widget {
   }
 
   /**
+   * Get the state of the panel.
+   */
+  private _fetchState(): Promise<void> {
+    if (this._fetching) {
+      return this._fetching;
+    }
+
+    const { key, state } = this;
+    const editor = this._editor;
+    const panel = this._panel;
+
+    return this._fetching = state.fetch(key).then(saved => {
+      this._fetching = null;
+
+      if (this._saving) {
+        return;
+      }
+
+      const inner = editor.sizes;
+      const outer = panel.relativeSizes();
+      const plugin = editor.settings ? editor.settings.plugin : '';
+
+      if (!saved) {
+        this._presets = { inner, outer, plugin };
+        return;
+      }
+
+      const presets = this._presets;
+
+      if (Array.isArray(saved.inner)) {
+        presets.inner = saved.inner as number[];
+      }
+      if (Array.isArray(saved.outer)) {
+        presets.outer = saved.outer as number[];
+      }
+      if (typeof saved.plugin === 'string') {
+        presets.plugin = saved.plugin as string;
+      }
+    });
+  }
+
+  /**
+   * Handle layout changes.
+   */
+  private _onHandleMoved(): void {
+    this._presets.inner = this._editor.sizes;
+    this._presets.outer = this._panel.relativeSizes();
+    this._saveState().catch(reason => {
+      console.error('Saving setting editor state failed', reason);
+    });
+  }
+
+  /**
    * Handle a new selection in the plugin list.
    */
   private _onSelected(sender: any, plugin: string): void {
+    this._presets.plugin = plugin;
+    this._saveState()
+      .then(() => { this._setPresets(); })
+      .catch(reason => {
+        console.error('Saving setting editor state failed', reason);
+        this._setPresets();
+      });
+  }
+
+  /**
+   * Set the state of the setting editor.
+   */
+  private _saveState(): Promise<void> {
+    const { key, state } = this;
+    const value = this._presets;
+
+    this._saving = true;
+    return state.save(key, value)
+      .then(() => { this._saving = false; })
+      .catch(reason => {
+        this._saving = false;
+        throw reason;
+      });
+  }
+
+  /**
+   * Set the presets of the setting editor.
+   */
+  private _setPresets(): void {
     const editor = this._editor;
-    const instructions = this._instructions;
+    const list = this._list;
     const panel = this._panel;
+    const { inner, outer, plugin } = this._presets;
 
-    this.registry.load(plugin)
-      .then(settings => {
-        // Cache the panel relative sizes before modifying its contents.
-        this._sizes = panel.relativeSizes();
+    panel.setRelativeSizes(outer);
+    editor.sizes = inner;
 
-        if (instructions.isAttached) {
-          instructions.parent = null;
-        }
-        if (!editor.isAttached) {
-          panel.addWidget(editor);
-        }
-        editor.settings = settings;
-        panel.setRelativeSizes(this._sizes);
-      })
-      .catch(reason => { console.error('Loading settings failed.', reason); });
+    if (!plugin) {
+      editor.settings = null;
+      list.selection = '';
+      return;
+    }
+
+    if (editor.settings && editor.settings.plugin === plugin) {
+      return;
+    }
+
+    const instructions = this._instructions;
+
+    this.registry.load(plugin).then(settings => {
+      if (instructions.isAttached) {
+        instructions.parent = null;
+      }
+      if (!editor.isAttached) {
+        panel.addWidget(editor);
+      }
+      editor.settings = settings;
+      list.selection = plugin;
+    }).catch(reason => {
+      console.error('Loading settings failed.', reason);
+      list.selection = this._presets.plugin = '';
+      editor.settings = null;
+    });
   }
 
   private _editor: PluginEditor;
+  private _fetching: Promise<void> | null = null;
   private _instructions: Widget;
   private _list: PluginList;
   private _panel: SplitPanel;
-  private _sizes = [1, 3];
+  private _presets = { inner: [5, 2], outer: [1, 3], plugin: '' };
+  private _saving = false;
 }
 
 
@@ -226,9 +348,39 @@ namespace SettingEditor {
     editorFactory: CodeEditor.Factory;
 
     /**
+     * The state database key for the editor's state management.
+     */
+    key: string;
+
+    /**
      * The setting registry the editor modifies.
      */
     registry: ISettingRegistry;
+
+    /**
+     * The state database used to store layout.
+     */
+    state: IStateDB;
+  }
+}
+
+
+/**
+ * A deprecated split panel that will be removed when the phosphor split panel
+ * supports a handle moved signal.
+ */
+class SplitPanel extends SPanel {
+  /**
+   * Emits when the split handle has moved.
+   */
+  readonly handleMoved: ISignal<any, void> = new Signal<any, void>(this);
+
+  handleEvent(event: Event): void {
+    super.handleEvent(event);
+
+    if (event.type === 'mouseup') {
+      (this.handleMoved as Signal<any, void>).emit(void 0);
+    }
   }
 }
 
@@ -258,6 +410,20 @@ class PluginList extends Widget {
    */
   get selected(): ISignal<this, string> {
     return this._selected;
+  }
+
+  /**
+   * The selection value of the plugin list.
+   */
+  get selection(): string {
+    return this._selection;
+  }
+  set selection(selection: string) {
+    if (this._selection === selection) {
+      return;
+    }
+    this._selection = selection;
+    this.update();
   }
 
   /**
@@ -398,21 +564,25 @@ class PluginEditor extends Widget {
     const { editorFactory } = options;
     const collapsible = false;
     const layout = this.layout = new PanelLayout();
-
-    const panel = new SplitPanel({
+    const panel = this._panel = new SplitPanel({
       orientation: 'vertical',
       renderer: SplitPanel.defaultRenderer,
       spacing: 1
     });
 
+    this.handleMoved = panel.handleMoved;
     this._editor = new JSONEditor({ collapsible, editorFactory });
     this._fieldset = new PluginFieldset();
 
     layout.addWidget(panel);
     panel.addWidget(this._editor);
     panel.addWidget(this._fieldset);
-    panel.setRelativeSizes(this._sizes);
   }
+
+  /**
+   * Emits when the split handle has moved.
+   */
+  readonly handleMoved: ISignal<any, void>;
 
   /**
    * The plugin settings being edited.
@@ -449,16 +619,22 @@ class PluginEditor extends Widget {
       this._settings = fieldset.settings = settings;
       this._settings.changed.connect(this._onSettingsChanged, this);
       this._onSettingsChanged();
-      editor.show();
-      fieldset.show();
     } else {
       this._settings = fieldset.settings = null;
       editor.source = null;
-      editor.hide();
-      fieldset.hide();
     }
 
     this.update();
+  }
+
+  /**
+   * Get the relative sizes of the two editor panels.
+   */
+  get sizes(): number[] {
+    return this._panel.relativeSizes();
+  }
+  set sizes(sizes: number[]) {
+    this._panel.setRelativeSizes(sizes);
   }
 
   /**
@@ -478,6 +654,23 @@ class PluginEditor extends Widget {
         throw new Error('User cancelled.');
       }
     });
+  }
+
+  /**
+   * Dispose of the resources held by the plugin editor.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+
+    super.dispose();
+    this._editor.dispose();
+    this._editor = null;
+    this._fieldset.dispose();
+    this._fieldset = null;
+    this._panel.dispose();
+    this._panel = null;
   }
 
   /**
@@ -530,8 +723,8 @@ class PluginEditor extends Widget {
 
   private _editor: JSONEditor = null;
   private _fieldset: PluginFieldset = null;
+  private _panel: SplitPanel = null;
   private _settings: ISettingRegistry.ISettings | null = null;
-  private _sizes = [5, 2];
 }
 
 

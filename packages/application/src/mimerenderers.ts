@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  MimeRenderer, MimeRendererFactory
+  MimeDocument, MimeDocumentFactory
 } from '@jupyterlab/docregistry';
 
 import {
@@ -35,9 +35,9 @@ function createRendermimePlugins(extensions: IRenderMime.IExtensionModule[]): Ju
       data = mod as any;
     }
     if (!Array.isArray(data)) {
-      data = [data];
+      data = [data] as ReadonlyArray<IRenderMime.IExtension>;
     }
-    data.forEach(item => {
+    (data as ReadonlyArray<IRenderMime.IExtension>).forEach(item => {
       let plugin = createRendermimePlugin(item);
       plugins.push(plugin);
     });
@@ -59,10 +59,10 @@ function createRendermimePlugin(item: IRenderMime.IExtension): JupyterLabPlugin<
       // Add the mime renderer.
       if (item.rank !== undefined) {
         app.rendermime.addFactory(
-          item.rendererFactory, item.mimeType, item.rank
+          item.rendererFactory, item.rank
         );
       } else {
-        app.rendermime.addFactory(item.rendererFactory, item.mimeType);
+        app.rendermime.addFactory(item.rendererFactory);
       }
 
       // Handle the widget factory.
@@ -70,7 +70,7 @@ function createRendermimePlugin(item: IRenderMime.IExtension): JupyterLabPlugin<
         return;
       }
 
-      let factory = new MimeRendererFactory({
+      let factory = new MimeDocumentFactory({
         mimeType: item.mimeType,
         renderTimeout: item.renderTimeout,
         dataType: item.dataType,
@@ -81,7 +81,7 @@ function createRendermimePlugin(item: IRenderMime.IExtension): JupyterLabPlugin<
 
       const factoryName = factory.name;
       const namespace = `${factoryName}-renderer`;
-      const tracker = new InstanceTracker<MimeRenderer>({ namespace });
+      const tracker = new InstanceTracker<MimeDocument>({ namespace });
 
       // Handle state restoration.
       restorer.restore(tracker, {

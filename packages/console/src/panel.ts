@@ -43,7 +43,7 @@ import {
  */
 const PANEL_CLASS = 'jp-ConsolePanel';
 
-const CONSOLE_ICON_CLASS = 'jp-ImageCodeConsole';
+const CONSOLE_ICON_CLASS = 'jp-CodeConsoleIcon';
 
 
 /**

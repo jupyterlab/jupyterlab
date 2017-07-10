@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/theme-light-extension",
-  "version": "0.7.0",
+  "version": "0.8.2",
   "description": "JupyterLab - Default Light Theme",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -13,12 +13,12 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.7.0",
-    "@jupyterlab/theming": "^0.7.0"
+    "@jupyterlab/application": "^0.8.2",
+    "@jupyterlab/theming": "^0.8.1"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
-    "typescript": "~2.3.1"
+    "typescript": "~2.4.1"
   },
   "repository": {
     "type": "git",

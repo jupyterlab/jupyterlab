@@ -20,8 +20,8 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  IDataConnector, StateDB
-} from '.';
+  IDataConnector
+} from './interfaces';
 
 
 /**
@@ -301,6 +301,7 @@ interface ISettingRegistry extends SettingRegistry {}
 /**
  * The default implementation of a schema validator.
  */
+export
 class DefaultSchemaValidator implements ISchemaValidator {
   /**
    * Instantiate a schema validator.
@@ -324,21 +325,30 @@ class DefaultSchemaValidator implements ISchemaValidator {
    * It is safe to call this function multiple times with the same plugin name.
    */
   addSchema(plugin: string, schema: ISettingRegistry.ISchema): ISchemaValidator.IError[] | null {
-    const validate = this._validator.getSchema('main');
-    const valid = validate(schema);
+    const composer = this._composer;
+    const validator = this._validator;
+    const validate = validator.getSchema('main');
 
-    if (valid) {
-      // Remove if schema already exists.
-      this._composer.removeSchema(plugin);
-      this._validator.removeSchema(plugin);
-
-      // Add schema to the validator and composer.
-      this._composer.addSchema(schema, plugin);
-      this._validator.addSchema(schema, plugin);
-      return null;
+    // Validate against the main schema.
+    if (!(validate(schema) as boolean)) {
+      return validate.errors as ISchemaValidator.IError[];
     }
 
-    return validate.errors as ISchemaValidator.IError[];
+    // Validate against the JSON schema meta-schema.
+    if (!(validator.validateSchema(schema) as boolean)) {
+      return validator.errors as ISchemaValidator.IError[];
+    }
+
+    // Remove if schema already exists.
+    composer.removeSchema(plugin);
+    validator.removeSchema(plugin);
+
+    // Add schema to the validator and composer.
+    composer.addSchema(schema, plugin);
+    validator.addSchema(schema, plugin);
+
+    return null;
+
   }
 
   /**
@@ -373,11 +383,13 @@ class DefaultSchemaValidator implements ISchemaValidator {
       return compose.errors as ISchemaValidator.IError[];
     }
 
+    return null;
   }
 
   private _composer = new Ajv({ useDefaults: true });
   private _validator = new Ajv();
 }
+
 
 /**
  * The default concrete implementation of a setting registry.
@@ -387,9 +399,8 @@ class SettingRegistry {
   /**
    * Create a new setting registry.
    */
-  constructor(options: SettingRegistry.IOptions = { }) {
-    const namespace = 'jupyter.db.settings';
-    this._connector = options.connector || new StateDB({ namespace });
+  constructor(options: SettingRegistry.IOptions) {
+    this._connector = options.connector;
     this._validator = options.validator || new DefaultSchemaValidator();
     this._preload = options.preload || (() => { /* no op */ });
   }
@@ -562,7 +573,7 @@ class SettingRegistry {
    * #### Notes
    * Only the `user` data will be saved.
    */
-  upload(raw: ISettingRegistry.IPlugin): Promise<void | ISchemaValidator.IError[]> {
+  upload(raw: ISettingRegistry.IPlugin): Promise<void> {
     const plugins = this._plugins;
     const plugin = raw.id;
     let errors: ISchemaValidator.IError[] | null = null;
@@ -621,7 +632,7 @@ class SettingRegistry {
     this._plugins[plugin.id] = plugin;
   }
 
-  private _connector: IDataConnector<ISettingRegistry.IPlugin, JSONObject> | null = null;
+  private _connector: IDataConnector<ISettingRegistry.IPlugin, JSONObject>;
   private _pluginChanged = new Signal<this, string>(this);
   private _plugins: { [name: string]: ISettingRegistry.IPlugin } = Object.create(null);
   private _preload: (plugin: string, schema: ISettingRegistry.ISchema) => void;
@@ -814,7 +825,7 @@ namespace SettingRegistry {
     /**
      * The data connector used by the setting registry.
      */
-    connector?: IDataConnector<ISettingRegistry.IPlugin, ISettingRegistry.IPlugin>;
+    connector: IDataConnector<ISettingRegistry.IPlugin, JSONObject>;
 
     /**
      * A function that preloads a plugin's schema in the client-side cache.

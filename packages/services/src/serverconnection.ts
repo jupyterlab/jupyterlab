@@ -307,7 +307,7 @@ namespace Private {
    */
   export
   function handleRequest(xhr: XMLHttpRequest, request: ServerConnection.IRequest, settings: ServerConnection.ISettings): Promise<ServerConnection.IResponse> {
-    let delegate = new PromiseDelegate();
+    let delegate = new PromiseDelegate<ServerConnection.IResponse>();
 
     xhr.onload = (event: ProgressEvent) => {
       if (xhr.status >= 300) {

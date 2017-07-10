@@ -6,6 +6,10 @@ import {
 } from '@phosphor/algorithm';
 
 import {
+  CommandRegistry
+} from '@phosphor/commands';
+
+import {
   Message
 } from '@phosphor/messaging';
 
@@ -195,6 +199,58 @@ class Toolbar<T extends Widget> extends Widget {
 export
 namespace Toolbar {
   /**
+   * Create a toolbar item for a command.
+   *
+   * Notes:
+   * If the command has an icon label it will be added to the button.
+   * If there is no icon label, and no icon class, the main label will
+   * be added.
+   */
+  export
+  function createFromCommand(commands: CommandRegistry, id: string): ToolbarButton {
+    let button = new ToolbarButton({
+      onClick: () => { commands.execute(id); },
+      className: Private.commandClassName(commands, id),
+      tooltip: Private.commandTooltip(commands, id),
+    });
+    let oldClasses = Private.commandClassName(commands, id).split(/\s/);
+    (button.node as HTMLButtonElement).disabled = !commands.isEnabled(id);
+    Private.setNodeContentFromCommand(button.node, commands, id);
+
+    // Ensure that we pick up relevant changes to the command:
+    function onChange(sender: CommandRegistry, args: CommandRegistry.ICommandChangedArgs) {
+      if (args.id !== id) {
+        return;  // Not our command
+      }
+      if (args.type === 'removed') {
+        // Dispose of button
+        button.dispose();
+      } else if (args.type === 'changed') {
+        // Update all fields (onClick is already indirected)
+        let newClasses = Private.commandClassName(sender, id).split(/\s/);
+
+        for (let cls of oldClasses) {
+          if (cls && newClasses.indexOf(cls) === -1) {
+            button.removeClass(cls);
+          }
+        }
+        for (let cls of newClasses) {
+          if (cls && oldClasses.indexOf(cls) === -1) {
+            button.addClass(cls);
+          }
+        }
+        oldClasses = newClasses;
+        button.node.title = Private.commandTooltip(sender, id);
+        Private.setNodeContentFromCommand(button.node, sender, id);
+        (button.node as HTMLButtonElement).disabled = !sender.isEnabled(id);
+      }
+    }
+    commands.commandChanged.connect(onChange, button);
+    return button;
+  }
+
+
+  /**
    * Create an interrupt toolbar item.
    */
   export
@@ -284,7 +340,9 @@ class ToolbarButton extends Widget {
     this.addClass(TOOLBAR_BUTTON_CLASS);
     this._onClick = options.onClick;
     if (options.className) {
-      this.addClass(options.className);
+      for (let extra of options.className.split(/\s/)) {
+        this.addClass(extra);
+      }
     }
     this.node.title = options.tooltip || '';
   }
@@ -390,6 +448,48 @@ namespace Private {
     name: 'name',
     create: () => ''
   });
+
+  /**
+   * ToolbarButton tooltip formatter for a command.
+   */
+  export
+  function commandTooltip(commands: CommandRegistry, id: string): string {
+    return commands.caption(id);
+  }
+
+  /**
+   * Get the class names for a command based ToolBarButton
+   */
+  export
+  function commandClassName(commands: CommandRegistry, id: string): string {
+    let name = commands.className(id);
+    // Add the boolean state classes.
+    if (commands.isToggled(id)) {
+      name += ' p-mod-toggled';
+    }
+    if (!commands.isVisible(id)) {
+      name += ' p-mod-hidden';
+    }
+    return name;
+  }
+
+  /**
+   * Fill the node of a command based ToolBarButton.
+   */
+  export
+  function setNodeContentFromCommand(node: HTMLElement, commands: CommandRegistry, id: string): void {
+    let iconClass = commands.iconClass(id);
+    let iconLabel = commands.iconLabel(id);
+    node.innerHTML = '';
+    if (iconClass || iconLabel) {
+      let icon = document.createElement('div');
+      icon.innerText = commands.iconLabel(id);
+      icon.className += ` ${iconClass}`;
+      node.appendChild(icon);
+    } else {
+      node.innerText = commands.label(id);
+    }
+  }
 
   /**
    * A spacer widget.

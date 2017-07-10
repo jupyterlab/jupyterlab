@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/launcher-extension",
-  "version": "0.7.1",
+  "version": "0.8.2",
   "description": "JupyterLab - Launcher Page Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -13,16 +13,17 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.7.0",
-    "@jupyterlab/apputils": "^0.7.0",
-    "@jupyterlab/filebrowser": "^0.7.0",
-    "@jupyterlab/launcher": "^0.7.0",
-    "@jupyterlab/services": "^0.46.0",
+    "@jupyterlab/application": "^0.8.2",
+    "@jupyterlab/apputils": "^0.8.1",
+    "@jupyterlab/filebrowser": "^0.8.2",
+    "@jupyterlab/launcher": "^0.8.1",
+    "@jupyterlab/services": "^0.47.0",
+    "@phosphor/coreutils": "^1.2.0",
     "@phosphor/widgets": "^1.3.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
-    "typescript": "~2.3.1"
+    "typescript": "~2.4.1"
   },
   "scripts": {
     "build": "tsc",
