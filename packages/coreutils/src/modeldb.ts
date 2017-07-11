@@ -182,7 +182,7 @@ interface IModelDB extends IDisposable {
    *
    * @returns an `IObservable`.
    */
-  get(path: string): IObservable;
+  get(path: string): IObservable | undefined;
 
   /**
    * Whether the `IModelDB` has an object at this path.
@@ -426,7 +426,7 @@ class ModelDB implements IModelDB {
    *
    * @returns an `IObservable`.
    */
-  get(path: string): IObservable {
+  get(path: string): IObservable | undefined {
     return this._db.get(this._resolvePath(path));
   }
 
@@ -514,8 +514,8 @@ class ModelDB implements IModelDB {
    */
   getValue(path: string): JSONValue {
     let val = this.get(path);
-    if (val.type !== 'Value') {
-        throw Error('Can only call getValue for an ObservableValue');
+    if (!val || val.type !== 'Value') {
+      throw Error('Can only call getValue for an ObservableValue');
     }
     return (val as ObservableValue).get();
   }
@@ -530,8 +530,8 @@ class ModelDB implements IModelDB {
    */
   setValue(path: string, value: JSONValue): void {
     let val = this.get(path);
-    if (val.type !== 'Value') {
-        throw Error('Can only call setValue on an ObservableValue');
+    if (!val || val.type !== 'Value') {
+      throw Error('Can only call setValue on an ObservableValue');
     }
     (val as ObservableValue).set(value);
   }

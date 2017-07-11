@@ -4,7 +4,6 @@
     "noImplicitAny": true,
     "noEmitOnError": true,
     "noUnusedLocals": true,
-    "strictNullChecks": true,
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "ES5",
