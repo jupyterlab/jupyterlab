@@ -80,9 +80,9 @@ class Dialog<T> extends Widget {
     this._primary = this._buttonNodes[this._defaultButton];
 
     if (options.primaryElement) {
-      let els = body.node.querySelectorAll(options.primaryElement);
-      if (els) {
-        this._primary = els[0] as HTMLElement;
+      let el = body.node.querySelector(options.primaryElement);
+      if (el) {
+        this._primary = el as HTMLElement;
       }
     }
   }
