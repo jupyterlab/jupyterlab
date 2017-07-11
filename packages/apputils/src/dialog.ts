@@ -53,7 +53,7 @@ class Dialog<T> extends Widget {
   constructor(options: Dialog.IOptions<T>={}) {
     super();
     this.addClass('jp-Dialog');
-    options = Private.handleOptions(options || {});
+    options = Private.handleOptions(options);
     let renderer = options.renderer;
 
     this._host = options.host;
@@ -722,7 +722,7 @@ namespace Private {
    * @returns A new options object with defaults applied.
    */
   export
-  function handleOptions<T>(options: Dialog.IOptions<T>): Dialog.IOptions<T> {
+  function handleOptions<T>(options: Dialog.IOptions<T>={}): Dialog.IOptions<T> {
     let newOptions: Dialog.IOptions<T> = {};
     newOptions.title = options.title || '';
     newOptions.body = options.body || '';
