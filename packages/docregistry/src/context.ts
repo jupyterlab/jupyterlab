@@ -556,8 +556,7 @@ namespace Private {
      * Get the value for the widget.
      */
     getValue(): string {
-      let input = this.node.querySelector('input') as HTMLInputElement;
-      return input.value;
+      return (this.node as HTMLInputElement).value;
     }
   }
 
