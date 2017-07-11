@@ -570,7 +570,7 @@ function addCommands(app: JupyterLab, services: IServiceManager, tracker: Notebo
         body: `Are you sure you want to close "${fileName}"?`,
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
-        if (result.accept) {
+        if (result.button.accept) {
           return current.context.session.shutdown().then(() => {
             current.dispose();
           });

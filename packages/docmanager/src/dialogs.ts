@@ -58,14 +58,13 @@ interface IFileContainer extends JSONObject {
  */
 export
 function renameDialog(manager: IDocumentManager, oldPath: string): Promise<Contents.IModel | null> {
-  let body = new RenameHandler(oldPath);
   return showDialog({
     title: 'Rename File',
-    body,
-    primaryElement: 'input',
+    body: new RenameHandler(oldPath),
+    focusNodeSelector: 'input',
     buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'RENAME' })]
   }).then(result => {
-    if (!result.accept || !result.value) {
+    if (!result.value) {
       return null;
     }
     let basePath = PathExt.dirname(oldPath);
@@ -92,8 +91,8 @@ function renameFile(manager: IDocumentManager, oldPath: string, newPath: string)
       body: `"${newPath}" already exists, overwrite?`,
       buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'OVERWRITE' })]
     };
-    return showDialog(options).then(button => {
-      if (!button.accept) {
+    return showDialog(options).then(result => {
+      if (!result.button.accept) {
         return Promise.resolve(null);
       }
       return manager.overwrite(oldPath, newPath);

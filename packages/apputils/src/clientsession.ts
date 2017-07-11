@@ -798,7 +798,7 @@ namespace ClientSession {
       if (kernel.isDisposed) {
         return null;
       }
-      if (result.accept) {
+      if (result.button.accept) {
         return kernel.restart().then(() => {
           return kernel;
         });
@@ -871,16 +871,12 @@ namespace Private {
    * Select a kernel for the session.
    */
   export
-  function selectKernel(session: ClientSession): Promise<Kernel.IModel> {
-    let select = Dialog.okButton({ label: 'SELECT' });
+  function selectKernel(session: ClientSession): Promise<Kernel.IModel | null> {
     return showDialog({
       title: 'Select Kernel',
       body: new KernelSelector(session),
-      buttons: [Dialog.cancelButton(), select]
+      buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'SELECT' })]
     }).then(result => {
-      if (!result.accept) {
-        return void 0;
-      }
       return result.value;
     });
   }

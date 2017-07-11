@@ -40,7 +40,7 @@ import {
 
 
 // The message to display to the user when prompting to trust the notebook.
-const TRUST_MESSAGE = h.p([
+const TRUST_MESSAGE = h.p(
   'A trusted Jupyter notebook may execute hidden malicious code when you ',
   'open it.',
   h.br(),
@@ -49,7 +49,7 @@ const TRUST_MESSAGE = h.p([
   'For more information, see the',
   h.a({ href: 'http://ipython.org/ipython-doc/2/notebook/security.html' },
       'Jupyter security documentation'),
-]);
+);
 
 
 /**
@@ -1034,7 +1034,7 @@ namespace NotebookActions {
       title: 'Trust this notebook?',
       buttons: [Dialog.cancelButton(), Dialog.warnButton()]
     }).then(result => {
-      if (result.accept) {
+      if (result.button.accept) {
         for (let i = 0; i < cells.length; i++) {
           let cell = cells.get(i);
           cell.trusted = true;

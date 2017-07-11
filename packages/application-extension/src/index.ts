@@ -50,8 +50,8 @@ const mainPlugin: JupyterLabPlugin<void> = {
     // Temporary build message for manual rebuild.
     let buildMessage = PageConfig.getOption('buildRequired');
     if (buildMessage) {
-      let body = h.div([
-        h.p([
+      let body = h.div(
+        h.p(
           'JupyterLab build is out of date',
           h.br(),
           'Please run',
@@ -59,8 +59,8 @@ const mainPlugin: JupyterLabPlugin<void> = {
           'from',
           h.br(),
           'the command line and relaunch'
-        ])
-      ]);
+        )
+      );
       showDialog({
         title: 'Build Recommended',
         body,
