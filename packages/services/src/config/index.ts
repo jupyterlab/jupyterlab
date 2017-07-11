@@ -160,7 +160,7 @@ class DefaultConfigSection implements IConfigSection {
   }
 
   private _url = 'unknown';
-  private _data: JSONObject = null;
+  private _data: JSONObject;
 }
 
 
@@ -223,8 +223,8 @@ class ConfigWithDefaults {
     return data;
   }
 
-  private _section: IConfigSection = null;
-  private _defaults: JSONObject = null;
+  private _section: IConfigSection;
+  private _defaults: JSONObject;
   private _className = '';
 }
 
