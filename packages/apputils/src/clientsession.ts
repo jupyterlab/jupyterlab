@@ -588,10 +588,15 @@ class ClientSession implements IClientSession {
     if (this.isDisposed) {
       return Promise.resolve(void 0);
     }
-    return Private.selectKernel(this).then(model => {
-      if (this.isDisposed || model === void 0) {
+    return showDialog({
+      title: 'Select Kernel',
+      body: new Private.KernelSelector(this),
+      buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'SELECT' })]
+    }).then(result => {
+      if (this.isDisposed || !result.button.accept) {
         return;
       }
+      let model = result.value;
       if (model === null && this._session) {
         return this.shutdown().then(() => this._kernelChanged.emit(null));
       }
@@ -868,22 +873,9 @@ namespace ClientSession {
  */
 namespace Private {
   /**
-   * Select a kernel for the session.
-   */
-  export
-  function selectKernel(session: ClientSession): Promise<Kernel.IModel | null> {
-    return showDialog({
-      title: 'Select Kernel',
-      body: new KernelSelector(session),
-      buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'SELECT' })]
-    }).then(result => {
-      return result.value;
-    });
-  }
-
-  /**
    * A widget that provides a kernel selection.
    */
+  export
   class KernelSelector extends Widget {
     /**
      * Create a new kernel selector widget.
