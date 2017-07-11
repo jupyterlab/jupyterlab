@@ -231,10 +231,6 @@ class DefaultKernel implements Kernel.IKernel {
     });
     this._displayIdToParentIds.clear();
     this._msgIdToDisplayIds.clear();
-    this._futures = null;
-    this._commPromises = null;
-    this._comms = null;
-    this._targetRegistry = null;
     ArrayExt.removeFirstOf(Private.runningKernels, this);
     Signal.clearData(this);
   }
@@ -261,7 +257,7 @@ class DefaultKernel implements Kernel.IKernel {
     if (this.status === 'dead') {
       throw new Error('Kernel is dead');
     }
-    if (!this._isReady) {
+    if (!this._isReady || !this._ws) {
       this._pendingMessages.push(msg);
     } else {
       this._ws.send(serialize.serialize(msg));
@@ -343,10 +339,10 @@ class DefaultKernel implements Kernel.IKernel {
     this._isReady = false;
     if (this._ws !== null) {
       // Clear the websocket event handlers and the socket itself.
-      this._ws.onopen = null;
-      this._ws.onclose = null;
-      this._ws.onerror = null;
-      this._ws.onmessage = null;
+      this._ws.onopen = this._noOp;
+      this._ws.onclose = this._noOp;
+      this._ws.onerror = this._noOp;
+      this._ws.onmessage = this._noOp;
       this._ws.close();
       this._ws = null;
     }
@@ -550,7 +546,7 @@ class DefaultKernel implements Kernel.IKernel {
       session: this._clientId
     };
     let msg = KernelMessage.createMessage(options, content);
-    if (!this._isReady) {
+    if (!this._isReady || !this._ws) {
       this._pendingMessages.push(msg);
     } else {
       this._ws.send(serialize.serialize(msg));
@@ -619,19 +615,14 @@ class DefaultKernel implements Kernel.IKernel {
    * If a client-side comm already exists, it is returned.
    */
   connectToComm(targetName: string, commId?: string): Kernel.IComm {
-    if (commId === void 0) {
-      commId = uuid();
-    }
-    let comm = this._comms.get(commId);
-    if (!comm) {
-      comm = new CommHandler(
-        targetName,
-        commId,
-        this,
-        () => { this._unregisterComm(commId); }
-      );
-      this._comms.set(commId, comm);
-    }
+    let id = commId || uuid();
+    let comm = this._comms.get(id) || new CommHandler(
+      targetName,
+      id,
+      this,
+      () => { this._unregisterComm(id); }
+    );
+    this._comms.set(id, comm);
     return comm;
   }
 
@@ -813,12 +804,12 @@ class DefaultKernel implements Kernel.IKernel {
    * Handle a websocket close event.
    */
   private _onWSClose(evt: Event) {
-    if (this._wsStopped) {
+    if (this._wsStopped || !this._ws) {
       return;
     }
     // Clear the websocket event handlers and the socket itself.
-    this._ws.onclose = null;
-    this._ws.onerror = null;
+    this._ws.onclose = this._noOp;
+    this._ws.onerror = this._noOp;
     this._ws = null;
 
     if (this._reconnectAttempt < this._reconnectLimit) {
@@ -883,7 +874,7 @@ class DefaultKernel implements Kernel.IKernel {
     // We shift the message off the queue
     // after the message is sent so that if there is an exception,
     // the message is still pending.
-    while (this._pendingMessages.length > 0) {
+    while (this._ws && this._pendingMessages.length > 0) {
       let msg = serialize.serialize(this._pendingMessages[0]);
       this._ws.send(msg);
       this._pendingMessages.shift();
@@ -960,6 +951,9 @@ class DefaultKernel implements Kernel.IKernel {
       promise = Promise.resolve(comm);
     }
     promise.then((comm) => {
+      if (!comm) {
+        return;
+      }
       this._unregisterComm(comm.commId);
       try {
         let onClose = comm.onClose;
@@ -992,6 +986,9 @@ class DefaultKernel implements Kernel.IKernel {
       }
     } else {
       promise.then((comm) => {
+        if (!comm) {
+          return;
+        }
         try {
           let onMsg = comm.onMsg;
           if (onMsg) {
@@ -1000,7 +997,6 @@ class DefaultKernel implements Kernel.IKernel {
         } catch (e) {
           console.error('Exception handling comm msg: ', e, e.stack, msg);
         }
-        return comm;
       });
     }
   }
@@ -1018,24 +1014,25 @@ class DefaultKernel implements Kernel.IKernel {
   private _status: Kernel.Status = 'unknown';
   private _clientId = '';
   private _wsStopped = false;
-  private _ws: WebSocket = null;
+  private _ws: WebSocket | null = null;
   private _username = '';
   private _reconnectLimit = 7;
   private _reconnectAttempt = 0;
   private _isReady = false;
-  private _futures: Map<string, KernelFutureHandler> = null;
-  private _commPromises: Map<string, Promise<Kernel.IComm>> = null;
-  private _comms: Map<string, Kernel.IComm> = null;
+  private _futures: Map<string, KernelFutureHandler>;
+  private _commPromises: Map<string, Promise<Kernel.IComm | undefined>>;
+  private _comms: Map<string, Kernel.IComm>;
   private _targetRegistry: { [key: string]: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => void; } = Object.create(null);
-  private _info: KernelMessage.IInfoReply = null;
+  private _info: KernelMessage.IInfoReply | null = null;
   private _pendingMessages: KernelMessage.IMessage[] = [];
-  private _connectionPromise: PromiseDelegate<void> = null;
-  private _specPromise: Promise<Kernel.ISpecModel> = null;
+  private _connectionPromise: PromiseDelegate<void>;
+  private _specPromise: Promise<Kernel.ISpecModel>;
   private _statusChanged = new Signal<this, Kernel.Status>(this);
   private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _displayIdToParentIds = new Map<string, string[]>();
   private _msgIdToDisplayIds = new Map<string, string[]>();
+  private _noOp = () => { /* no-op */};
 }
 
 
@@ -1116,7 +1113,7 @@ namespace DefaultKernel {
    * when the kernel is started by the server, otherwise the promise is rejected.
    */
   export
-  function startNew(options?: Kernel.IOptions): Promise<Kernel.IKernel> {
+  function startNew(options: Kernel.IOptions): Promise<Kernel.IKernel> {
     return Private.startNew(options);
   }
 
@@ -1276,9 +1273,7 @@ namespace Private {
   function updateRunningKernels(kernels: Kernel.IModel[]): Kernel.IModel[] {
     each(runningKernels, kernel => {
       let updated = find(kernels, model => {
-        if (kernel.id === model.id) {
-          return true;
-        }
+        return kernel.id === model.id;
       });
       // If kernel is no longer running on disk, emit dead signal.
       if (!updated && kernel.status !== 'dead') {
@@ -1293,7 +1288,7 @@ namespace Private {
    * Start a new kernel.
    */
   export
-  function startNew(options: Kernel.IOptions = {}): Promise<Kernel.IKernel> {
+  function startNew(options: Kernel.IOptions): Promise<Kernel.IKernel> {
     let settings = options.serverSettings || ServerConnection.makeSettings();
     let request = {
       url: URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL),
@@ -1523,7 +1518,7 @@ namespace Private {
    * registry, if the global registry is provided.
    */
   export
-  function loadObject(name: string, moduleName: string, registry?: { [key: string]: any }): Promise<any> {
+  function loadObject(name: string, moduleName: string | undefined, registry?: { [key: string]: any }): Promise<any> {
     return new Promise((resolve, reject) => {
       // Try loading the view module using require.js
       if (moduleName) {

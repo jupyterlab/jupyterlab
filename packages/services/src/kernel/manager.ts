@@ -83,7 +83,6 @@ class KernelManager implements Kernel.IManager {
     clearInterval(this._runningTimer);
     clearInterval(this._specsTimer);
     Signal.clearData(this);
-    this._specs = null;
     this._running = [];
   }
 
@@ -158,7 +157,7 @@ class KernelManager implements Kernel.IManager {
    * #### Notes
    * The manager `serverSettings` will be always be used.
    */
-  startNew(options: Kernel.IOptions = {}): Promise<Kernel.IKernel> {
+  startNew(options: Kernel.IOptions): Promise<Kernel.IKernel> {
     let newOptions = { ...options, serverSettings: this.serverSettings };
     return Kernel.startNew(newOptions).then(kernel => {
       this._onStarted(kernel);
@@ -260,7 +259,7 @@ class KernelManager implements Kernel.IManager {
   }
 
   private _running: Kernel.IModel[] = [];
-  private _specs: Kernel.ISpecModels = null;
+  private _specs: Kernel.ISpecModels;
   private _isDisposed = false;
   private _runningTimer = -1;
   private _specsTimer = -1;

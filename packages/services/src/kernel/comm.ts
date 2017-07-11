@@ -104,7 +104,7 @@ class CommHandler extends DisposableDelegate implements Kernel.IComm {
    */
   open(data?: JSONValue, metadata?: JSONObject): Kernel.IFuture {
     if (this.isDisposed || this._kernel.isDisposed) {
-      return;
+      throw 'Cannot open';
     }
     let options: KernelMessage.IOptions = {
       msgType: 'comm_open',
@@ -131,7 +131,7 @@ class CommHandler extends DisposableDelegate implements Kernel.IComm {
    */
   send(data: JSONValue, metadata?: JSONObject, buffers: (ArrayBuffer | ArrayBufferView)[] = [], disposeOnDone: boolean = true): Kernel.IFuture {
     if (this.isDisposed || this._kernel.isDisposed) {
-      return;
+      throw 'Cannot send';
     }
     let options: KernelMessage.IOptions = {
       msgType: 'comm_msg',
@@ -160,7 +160,7 @@ class CommHandler extends DisposableDelegate implements Kernel.IComm {
    */
   close(data?: JSONValue, metadata?: JSONObject): Kernel.IFuture {
     if (this.isDisposed || this._kernel.isDisposed) {
-      return;
+      throw 'Cannot close';
     }
     let options: KernelMessage.IOptions = {
       msgType: 'comm_msg',
@@ -184,22 +184,9 @@ class CommHandler extends DisposableDelegate implements Kernel.IComm {
     return future;
   }
 
-  /**
-   * Dispose of the resources held by the comm.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    this._onClose = null;
-    this._onMsg = null;
-    this._kernel = null;
-    super.dispose();
-  }
-
   private _target = '';
   private _id = '';
-  private _kernel: Kernel.IKernel = null;
-  private _onClose: (msg: KernelMessage.ICommCloseMsg) => void = null;
-  private _onMsg: (msg: KernelMessage.ICommMsgMsg) => void = null;
+  private _kernel: Kernel.IKernel;
+  private _onClose: (msg: KernelMessage.ICommCloseMsg) => void;
+  private _onMsg: (msg: KernelMessage.ICommMsgMsg) => void;
 }
