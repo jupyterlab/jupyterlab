@@ -34,7 +34,7 @@ import {
 } from '../utils';
 
 
-class TestDialog extends Dialog {
+class TestDialog extends Dialog<any> {
   methods: string[] = [];
   events: string[] = [];
 
@@ -56,6 +56,13 @@ class TestDialog extends Dialog {
   protected onCloseRequest(msg: Message): void {
     super.onCloseRequest(msg);
     this.methods.push('onCloseRequest');
+  }
+}
+
+
+class ValueWidget extends Widget {
+  getValue(): string {
+    return 'foo';
   }
 }
 
@@ -83,19 +90,17 @@ describe('@jupyterlab/domutils', () => {
       };
       let promise = showDialog(options).then(result => {
         expect(result.accept).to.equal(false);
+        expect(result.value).to.equal(null);
       });
       dismissDialog();
       return promise;
     });
 
-    it('should accept an html body', () => {
-      let body = document.createElement('div');
-      let input = document.createElement('input');
-      let select = document.createElement('select');
-      body.appendChild(input);
-      body.appendChild(select);
+    it('should accept a virtualdom body', () => {
+      let body = h.div([h.input(), h.select()]);
       let promise = showDialog({ body }).then(result => {
         expect(result.accept).to.equal(true);
+        expect(result.value).to.equal(null);
       });
       acceptDialog();
       return promise;
@@ -105,6 +110,17 @@ describe('@jupyterlab/domutils', () => {
       let body = new Widget();
       let promise = showDialog({ body }).then(result => {
         expect(result.accept).to.equal(true);
+        expect(result.value).to.equal(null);
+      });
+      acceptDialog();
+      return promise;
+    });
+
+    it('should give the value from the widget', () => {
+      let body = new ValueWidget();
+      let promise = showDialog({ body }).then(result => {
+        expect(result.accept).to.equal(true);
+        expect(result.value).to.equal('foo');
       });
       acceptDialog();
       return promise;
@@ -226,7 +242,7 @@ describe('@jupyterlab/domutils', () => {
 
         it('should reject with the default reject item', () => {
           let promise = dialog.launch().then(result => {
-            expect(result.label).to.equal('CANCEL');
+            expect(result.button.label).to.equal('CANCEL');
             expect(result.accept).to.equal(false);
           });
           waitForDialog().then(() => { dialog.reject(); });
@@ -361,10 +377,10 @@ describe('@jupyterlab/domutils', () => {
         });
 
         it('should focus the primary element', () => {
-          let body = document.createElement('input');
-          dialog = new TestDialog({ body, primaryElement: body });
+          let body = h.div([h.input()]);
+          dialog = new TestDialog({ body, primaryElement: 'input' });
           Widget.attach(dialog, document.body);
-          expect(document.activeElement).to.equal(body);
+          expect((document.activeElement as HTMLElement).localName).to.equal('input');
         });
 
       });
@@ -447,9 +463,9 @@ describe('@jupyterlab/domutils', () => {
             expect(node.textContent).to.equal('foo');
           });
 
-          it('should create the body from an element', () => {
+          it('should create the body from a virtual node', () => {
             let vnode = h.div({}, [h.input(), h.select(), h.button()]);
-            let widget = renderer.createBody(VirtualDOM.realize(vnode));
+            let widget = renderer.createBody(vnode);
             let button = widget.node.querySelector('button');
             expect(button.className).to.contain('jp-mod-styled');
             let input = widget.node.querySelector('input');
