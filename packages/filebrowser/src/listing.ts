@@ -1290,8 +1290,7 @@ class DirListing extends Widget {
     this._clipboard.length = 0;
     each(this.selectedItems(), item => {
       if (item.type !== 'directory') {
-        // Store the absolute path of the item.
-        this._clipboard.push('/' + item.path);
+        this._clipboard.push(item.path);
       }
     });
     this.update();
