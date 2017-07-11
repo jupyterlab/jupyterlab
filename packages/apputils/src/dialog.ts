@@ -53,7 +53,7 @@ class Dialog<T> extends Widget {
   constructor(options: Dialog.IOptions<T>={}) {
     super();
     this.addClass('jp-Dialog');
-    options = Private.handleOptions(options);
+    options = Private.handleOptions(options || {});
     let renderer = options.renderer;
 
     this._host = options.host;
@@ -79,8 +79,8 @@ class Dialog<T> extends Widget {
 
     this._primary = this._buttonNodes[this._defaultButton];
 
-    if (options.primaryElement) {
-      let el = body.node.querySelector(options.primaryElement);
+    if (options.focusNodeSelector) {
+      let el = body.node.querySelector(options.focusNodeSelector);
       if (el) {
         this._primary = el as HTMLElement;
       }
@@ -293,15 +293,11 @@ class Dialog<T> extends Widget {
     ArrayExt.removeFirstOf(Private.launchQueue, promise.promise);
     let body = this._body;
     let value: T | null = null;
-    if (body instanceof Widget && typeof body.getValue === 'function') {
+    if (button.accept && body instanceof Widget && typeof body.getValue === 'function') {
       value = body.getValue();
     }
     this.dispose();
-    promise.resolve({
-      button,
-      accept: button.accept,
-      value
-    });
+    promise.resolve({ button, value });
   }
 
   private _buttonNodes: ReadonlyArray<HTMLElement>;
@@ -364,7 +360,7 @@ namespace Dialog {
      * A selector for the primary element that should take focus in the dialog.
      * Defaults to the default button's element.
      */
-    primaryElement?: string;
+    focusNodeSelector?: string;
 
     /**
      * An optional renderer for dialog items.  Defaults to a shared
@@ -435,11 +431,6 @@ namespace Dialog {
      * The button that was pressed.
      */
     button: IButton;
-
-    /**
-     * Whether the dialog was accepted.
-     */
-    accept: boolean;
 
     /**
      * The value retrieved from `.getValue()` if given on the widget.
@@ -741,7 +732,7 @@ namespace Private {
     );
     newOptions.defaultButton = options.defaultButton || newOptions.buttons.length - 1;
     newOptions.renderer = options.renderer || Dialog.defaultRenderer;
-    newOptions.primaryElement = options.primaryElement;
+    newOptions.focusNodeSelector = options.focusNodeSelector;
     return newOptions;
   }
 
