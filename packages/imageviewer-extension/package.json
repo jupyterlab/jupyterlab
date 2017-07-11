@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/imageviewer-extension",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "description": "JupyterLab - Image Widget Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -12,10 +12,10 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.8.2",
-    "@jupyterlab/apputils": "^0.8.1",
-    "@jupyterlab/docregistry": "^0.8.1",
-    "@jupyterlab/imageviewer": "^0.8.1"
+    "@jupyterlab/application": "^0.8.3",
+    "@jupyterlab/apputils": "^0.8.2",
+    "@jupyterlab/docregistry": "^0.8.2",
+    "@jupyterlab/imageviewer": "^0.8.2"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
