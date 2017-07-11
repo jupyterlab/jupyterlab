@@ -491,6 +491,9 @@ class SettingRegistry {
       // Validate the response from the connector; populate `composite` field.
       this._validate(data);
 
+      // Emit that a plugin has changed.
+      this._pluginChanged.emit(plugin);
+
       return new Settings({
         plugin: copy(plugins[plugin]) as ISettingRegistry.IPlugin,
         registry: this
