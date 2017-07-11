@@ -13,6 +13,9 @@ import {
   IStateDB, PageConfig
 } from '@jupyterlab/coreutils';
 
+import {
+  h
+} from '@phosphor/virtualdom';
 
 /**
  * The command IDs used by the application plugin.
@@ -47,12 +50,17 @@ const mainPlugin: JupyterLabPlugin<void> = {
     // Temporary build message for manual rebuild.
     let buildMessage = PageConfig.getOption('buildRequired');
     if (buildMessage) {
-      let body = document.createElement('div');
-      body.innerHTML = (
-        '<p>JupyterLab build is out of date.<br>' +
-        'Please run <code>jupyter lab build</code> from<br>' +
-        'the command line and relaunch.</p>'
-      );
+      let body = h.div([
+        h.p([
+          'JupyterLab build is out of date',
+          h.br(),
+          'Please run',
+          h.code('jupyter lab build'),
+          'from',
+          h.br(),
+          'the command line and relaunch'
+        ])
+      ]);
       showDialog({
         title: 'Build Recommended',
         body,

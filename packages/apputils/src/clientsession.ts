@@ -26,6 +26,10 @@ import {
 } from '@phosphor/signaling';
 
 import {
+  h
+} from '@phosphor/virtualdom';
+
+import {
   Widget
 } from '@phosphor/widgets';
 
@@ -661,11 +665,9 @@ class ClientSession implements IClientSession {
     } catch (err) {
       // no-op
     }
-    let body = document.createElement('pre');
-    body.textContent = response;
     return showDialog({
       title: 'Error Starting Kernel',
-      body: new Widget({ node: body }),
+      body: h.pre(response),
       buttons: [Dialog.okButton()]
     }).then(() => void 0);
   }
@@ -870,6 +872,43 @@ namespace Private {
    */
   export
   function selectKernel(session: ClientSession): Promise<Kernel.IModel> {
+    let select = Dialog.okButton({ label: 'SELECT' });
+    return showDialog({
+      title: 'Select Kernel',
+      body: new KernelSelector(session),
+      buttons: [Dialog.cancelButton(), select]
+    }).then(result => {
+      if (!result.accept) {
+        return void 0;
+      }
+      return result.value;
+    });
+  }
+
+  /**
+   * A widget that provides a kernel selection.
+   */
+  class KernelSelector extends Widget {
+    /**
+     * Create a new kernel selector widget.
+     */
+    constructor(session: ClientSession) {
+      super({ node: createSelectorNode(session) });
+    }
+
+    /**
+     * Get the value of the kernel selector widget.
+     */
+    getValue(): Kernel.IModel {
+      let selector = this.node.querySelector('select') as HTMLSelectElement;
+      return JSON.parse(selector.value) as Kernel.IModel;
+    }
+  }
+
+  /**
+   * Create a node for a kernel selector widget.
+   */
+  function createSelectorNode(session: ClientSession) {
     // Create the dialog body.
     let body = document.createElement('div');
     let text = document.createElement('label');
@@ -880,18 +919,7 @@ namespace Private {
     let selector = document.createElement('select');
     ClientSession.populateKernelSelect(selector, options);
     body.appendChild(selector);
-
-    let select = Dialog.okButton({ label: 'SELECT' });
-    return showDialog({
-      title: 'Select Kernel',
-      body: new Widget({ node: body }),
-      buttons: [Dialog.cancelButton(), select]
-    }).then(result => {
-      if (!result.accept) {
-        return void 0;
-      }
-      return JSON.parse(selector.value) as Kernel.IModel;
-    });
+    return body;
   }
 
   /**

@@ -522,16 +522,14 @@ namespace Private {
    */
   export
   function getSavePath(path: string): Promise<string | undefined> {
-    let input = document.createElement('input');
-    input.value = path;
     let saveBtn = Dialog.okButton({ label: 'SAVE' });
     return showDialog({
       title: 'Save File As..',
-      body: input,
+      body: new SaveWidget(path),
       buttons: [Dialog.cancelButton(), saveBtn]
     }).then(result => {
-      if (result.label === 'SAVE') {
-        return input.value;
+      if (result.button.label === 'SAVE') {
+        return result.value;
       }
       return;
     });
@@ -542,4 +540,33 @@ namespace Private {
    */
   export
   function noOp() { /* no-op */ }
+
+  /*
+   * A widget that gets a file path from a user.
+   */
+  class SaveWidget extends Widget {
+    /**
+     * Construct a new save widget.
+     */
+    constructor(path: string) {
+      super({ node: createSaveNode(path) });
+    }
+
+    /**
+     * Get the value for the widget.
+     */
+    getValue(): string {
+      let input = this.node.querySelector('input') as HTMLInputElement;
+      return input.value;
+    }
+  }
+
+  /**
+   * Create the node for a save widget.
+   */
+  function createSaveNode(path: string): HTMLElement {
+    let input = document.createElement('input');
+    input.value = path;
+    return input;
+  }
 }
