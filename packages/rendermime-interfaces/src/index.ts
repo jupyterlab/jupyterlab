@@ -185,7 +185,7 @@ namespace IRenderMime {
   }
 
   /**
-   * A widget which dislays the contents of a mime model.
+   * A widget which displays the contents of a mime model.
    */
   export
   interface IRenderer extends Widget {
