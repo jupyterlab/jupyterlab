@@ -46,16 +46,6 @@ const SHORTCUTS = [
     keys: ['Accel Shift Enter']
   },
   {
-    command: 'chatbox:post',
-    selector: '.jp-Chatbox-prompt',
-    keys: ['Enter']
-  },
-  {
-    command: 'chatbox:linebreak',
-    selector: '.jp-Chatbox-prompt',
-    keys: ['Ctrl Enter']
-  },
-  {
     command: 'command-palette:activate',
     selector: 'body',
     keys: ['Accel Shift C']
