@@ -103,7 +103,7 @@ class Dialog<T> extends Widget {
   /**
    * Launch the dialog as a modal window.
    *
-   * @returns a promise that resolves with the button that was selected.
+   * @returns a promise that resolves with the result of the dialog.
    */
   launch(): Promise<Dialog.IResult<T>> {
     // Return the existing dialog if already open.
@@ -111,11 +111,10 @@ class Dialog<T> extends Widget {
       return this._promise.promise;
     }
     this._promise = new PromiseDelegate<Dialog.IResult<T>>();
-    let promise = Promise.all(Private.launchQueue);
+    let promises = Promise.all(Private.launchQueue);
     Private.launchQueue.push(this._promise.promise);
-    return promise.then(() => {
+    return promises.then(() => {
       Widget.attach(this, this._host);
-      this.dispose();
       return this._promise.promise;
     });
   }
@@ -291,13 +290,13 @@ class Dialog<T> extends Widget {
     // Prevent loopback.
     let promise = this._promise;
     this._promise = null;
-    this.close();
     ArrayExt.removeFirstOf(Private.launchQueue, promise.promise);
     let body = this._body;
     let value: T | null = null;
     if (body instanceof Widget && typeof body.getValue === 'function') {
       value = body.getValue();
     }
+    this.dispose();
     promise.resolve({
       button,
       accept: button.accept,
