@@ -116,6 +116,9 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
       updateSettings(settings);
       updateTracker();
     });
+  }).catch((reason: Error) => {
+    console.error(reason.message);
+    updateTracker();
   });
 
   /**

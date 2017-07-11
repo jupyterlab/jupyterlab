@@ -159,6 +159,9 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
       updateSettings(settings);
       updateTracker();
     });
+  }).catch((reason: Error) => {
+    console.error(reason.message);
+    updateTracker();
   });
 
   factory.widgetCreated.connect((sender, widget) => {

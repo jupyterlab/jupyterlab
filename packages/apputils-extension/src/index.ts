@@ -44,13 +44,13 @@ namespace CommandIDs {
 /**
  * Convert an API `XMLHTTPRequest` error to a simple error.
  */
-function apiError(xhr: XMLHttpRequest): Error {
+function apiError(id: string, xhr: XMLHttpRequest): Error {
   let message: string;
 
   try {
     message = JSON.parse(xhr.response).message;
   } catch (error) {
-    message = error.message;
+    message = `Error accessing ${id} HTTP ${xhr.status} ${xhr.statusText}`;
   }
 
   return new Error(message);
@@ -66,7 +66,7 @@ const connector: IDataConnector<ISettingRegistry.IPlugin, JSONObject> = {
    */
   fetch(id: string): Promise<ISettingRegistry.IPlugin> {
     return SettingService.fetch(id).catch(reason => {
-      throw apiError((reason as ServerConnection.IError).xhr);
+      throw apiError(id, (reason as ServerConnection.IError).xhr);
     });
   },
 
@@ -82,7 +82,7 @@ const connector: IDataConnector<ISettingRegistry.IPlugin, JSONObject> = {
    */
   save(id: string, user: JSONObject): Promise<void> {
     return SettingService.save(id, user).catch(reason => {
-      throw apiError((reason as ServerConnection.IError).xhr);
+      throw apiError(id, (reason as ServerConnection.IError).xhr);
     });
   }
 };
