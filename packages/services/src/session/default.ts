@@ -48,8 +48,8 @@ class DefaultSession implements Session.ISession {
   constructor(options: Session.IOptions, id: string, kernel: Kernel.IKernel) {
     this._id = id;
     this._path = options.path;
-    this._type = options.type;
-    this._name = options.name;
+    this._type = options.type || 'file';
+    this._name = options.name || '';
     this.serverSettings = options.serverSettings || ServerConnection.makeSettings();
     this._uuid = uuid();
     Private.addRunning(this);
@@ -217,11 +217,8 @@ class DefaultSession implements Session.ISession {
       return;
     }
     this._isDisposed = true;
-    if (this._kernel) {
-      this._kernel.dispose();
-    }
+    this._kernel.dispose();
     Private.removeRunning(this);
-    this._kernel = null;
     Signal.clearData(this);
   }
 
@@ -275,7 +272,7 @@ class DefaultSession implements Session.ISession {
    * This shuts down the existing kernel and creates a new kernel,
    * keeping the existing session ID and session path.
    */
-  changeKernel(options: Kernel.IModel): Promise<Kernel.IKernelConnection> {
+  changeKernel(options: Partial<Kernel.IModel>): Promise<Kernel.IKernelConnection> {
     if (this.isDisposed) {
       return Promise.reject(new Error('Session is disposed'));
     }
@@ -385,7 +382,7 @@ class DefaultSession implements Session.ISession {
   private _path = '';
   private _name = '';
   private _type = '';
-  private _kernel: Kernel.IKernel = null;
+  private _kernel: Kernel.IKernel;
   private _uuid = '';
   private _isDisposed = false;
   private _updating = false;
@@ -479,7 +476,9 @@ namespace Private {
   export
   function removeRunning(session: DefaultSession): void {
     let running = runningSessions.get(session.serverSettings.baseUrl);
-    ArrayExt.removeFirstOf(running, session);
+    if (running) {
+      ArrayExt.removeFirstOf(running, session);
+    }
   }
 
   /**
@@ -582,9 +581,9 @@ namespace Private {
       try {
         validate.validateModel(data);
       } catch (err) {
-        throw ServerConnection.makeError(response, err.message);
+        throw ServerConnection.makeError(response, err.message || String(err));
       }
-      return updateFromServer(data, settings.baseUrl);
+      return updateFromServer(data, settings!.baseUrl);
     }, Private.onSessionError);
   }
 
@@ -635,7 +634,7 @@ namespace Private {
           throw ServerConnection.makeError(response, err.message);
         }
       }
-      return updateRunningSessions(data, settings.baseUrl);
+      return updateRunningSessions(data, settings!.baseUrl);
     }, Private.onSessionError);
   }
 
@@ -668,12 +667,12 @@ namespace Private {
       if (response.xhr.status !== 204) {
         throw ServerConnection.makeError(response);
       }
-      killSessions(id, settings.baseUrl);
+      killSessions(id, settings!.baseUrl);
     }, err => {
       if (err.xhr.status === 404) {
         let response = JSON.parse(err.xhr.responseText) as any;
         console.warn(response['message']);
-        killSessions(id, settings.baseUrl);
+        killSessions(id, settings!.baseUrl);
         return;
       }
       if (err.xhr.status === 410) {
@@ -765,6 +764,7 @@ namespace Private {
           promises.push(session.update(sId));
           return true;
         }
+        return false;
       });
       // If session is no longer running on disk, emit dead signal.
       if (!updated && session.status !== 'dead') {

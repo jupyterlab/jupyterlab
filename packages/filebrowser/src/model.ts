@@ -53,7 +53,17 @@ class FileBrowserModel implements IDisposable {
     this.manager = options.manager;
     this._driveName = options.driveName || '';
     let rootPath = this._driveName ? this._driveName + ':' : '';
-    this._model = { path: rootPath, name: '/', type: 'directory' };
+    this._model = {
+      path: rootPath,
+      name: PathExt.basename(rootPath),
+      type: 'directory',
+      content: undefined,
+      writable: false,
+      created: 'unknown',
+      last_modified: 'unknown',
+      mimetype: 'text/plain',
+      format: 'text'
+    };
     this._state = options.state || null;
 
     const { services } = options.manager;
@@ -326,7 +336,7 @@ class FileBrowserModel implements IDisposable {
 
     return new Promise<Contents.IModel>((resolve, reject) => {
       reader.onload = (event: Event) => {
-        let model: Contents.IModel = {
+        let model: Partial<Contents.IModel> = {
           type: type,
           format,
           name,
@@ -354,6 +364,7 @@ class FileBrowserModel implements IDisposable {
       name: contents.name,
       path: contents.path,
       type: contents.type,
+      content: undefined,
       writable: contents.writable,
       created: contents.created,
       last_modified: contents.last_modified,

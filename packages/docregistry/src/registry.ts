@@ -490,7 +490,7 @@ class DocumentRegistry implements IDisposable {
    *
    * @returns A kernel preference.
    */
-  getKernelPreference(ext: string, widgetName: string, kernel?: Kernel.IModel): IClientSession.IKernelPreference {
+  getKernelPreference(ext: string, widgetName: string, kernel?: Partial<Kernel.IModel>): IClientSession.IKernelPreference {
     ext = Private.normalizeExtension(ext);
     widgetName = widgetName.toLowerCase();
     let widgetFactory = this._widgetFactories[widgetName];

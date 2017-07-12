@@ -113,7 +113,7 @@ class StateDB implements IStateDB {
     let i = window.localStorage.length;
     while (i) {
       let key = window.localStorage.key(--i);
-      if (key.indexOf(prefix) === 0) {
+      if (key && key.indexOf(prefix) === 0) {
         window.localStorage.removeItem(key);
       }
     }
@@ -137,10 +137,14 @@ class StateDB implements IStateDB {
    * The promise returned by this method may be rejected if an error occurs in
    * retrieving the data. Non-existence of an `id` will succeed with `null`.
    */
-  fetch(id: string): Promise<JSONObject | null> {
+  fetch(id: string): Promise<JSONObject | undefined> {
     const key = `${this.namespace}:${id}`;
+    const value = window.localStorage.getItem(key);
+    if (!value) {
+      return Promise.resolve(undefined);
+    }
     try {
-      return Promise.resolve(JSON.parse(window.localStorage.getItem(key)));
+      return Promise.resolve(JSON.parse(value));
     } catch (error) {
       return Promise.reject(error);
     }
@@ -169,11 +173,12 @@ class StateDB implements IStateDB {
     let i = window.localStorage.length;
     while (i) {
       let key = window.localStorage.key(--i);
-      if (key.indexOf(prefix) === 0) {
+      if (key && key.indexOf(prefix) === 0) {
+        let value = window.localStorage.getItem(key);
         try {
           items.push({
             id: key.replace(regex, ''),
-            value: JSON.parse(window.localStorage.getItem(key))
+            value: value ? JSON.parse(value) : undefined
           });
         } catch (error) {
           console.warn(error);

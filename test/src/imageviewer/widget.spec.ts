@@ -51,7 +51,7 @@ class LogImage extends ImageViewer {
 /**
  * The common image model.
  */
-const IMAGE: Contents.IModel = {
+const IMAGE: Partial<Contents.IModel> = {
   path: uuid() + '.png',
   type: 'file',
   mimetype: 'image/png',

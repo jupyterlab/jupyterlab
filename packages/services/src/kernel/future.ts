@@ -136,14 +136,9 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
    * Dispose and unregister the future.
    */
   dispose(): void {
-    this._stdin = null;
-    this._iopub = null;
-    this._reply = null;
-    this._done = null;
-    this._msg = null;
-    if (this._hooks) { this._hooks.dispose(); }
-    this._hooks = null;
-    this._kernel = null;
+    this._stdin = Private.noOp;
+    this._iopub = Private.noOp;
+    this._reply = Private.noOp;
     super.dispose();
   }
 
@@ -217,11 +212,11 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
     this._status |= flag;
   }
 
-  private _msg: KernelMessage.IShellMessage = null;
+  private _msg: KernelMessage.IShellMessage;
   private _status = 0;
-  private _stdin: (msg: KernelMessage.IStdinMessage) => void = null;
-  private _iopub: (msg: KernelMessage.IIOPubMessage) => void = null;
-  private _reply: (msg: KernelMessage.IShellMessage) => void = null;
+  private _stdin: (msg: KernelMessage.IStdinMessage) => void = Private.noOp;
+  private _iopub: (msg: KernelMessage.IIOPubMessage) => void = Private.noOp;
+  private _reply: (msg: KernelMessage.IShellMessage) => void = Private.noOp;
   private _done = new PromiseDelegate<KernelMessage.IShellMessage>();
   private _replyMsg: KernelMessage.IShellMessage;
   private _hooks = new Private.HookList<KernelMessage.IIOPubMessage>();
@@ -231,9 +226,15 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
 
 namespace Private {
   /**
+   * A no-op function.
+   */
+  export
+  const noOp = () => { /* no-op */ };
+
+  /**
    * A polyfill for a function to run code outside of the current execution context.
    */
-  let defer = typeof requestAnimationFrame === "function" ? requestAnimationFrame : setImmediate;
+  let defer = typeof requestAnimationFrame === 'function' ? requestAnimationFrame : setImmediate;
 
   export
   class HookList<T> {
@@ -253,9 +254,6 @@ namespace Private {
      * @param hook - The callback to remove.
      */
     remove(hook: (msg: T) => boolean): void {
-      if (this.isDisposed) {
-        return;
-      }
       let index = this._hooks.indexOf(hook);
       if (index >= 0) {
         this._hooks[index] = null;
@@ -293,20 +291,6 @@ namespace Private {
     }
 
     /**
-     * Test whether the HookList has been disposed.
-     */
-    get isDisposed(): boolean {
-      return (this._hooks === null);
-    }
-
-    /**
-     * Dispose the hook list.
-     */
-    dispose(): void {
-      this._hooks = null;
-    }
-
-    /**
      * Schedule a cleanup of the list, removing any hooks that have been nulled out.
      */
     private _scheduleCompact(): void {
@@ -315,7 +299,7 @@ namespace Private {
         defer(() => {
           this._cleanupScheduled = false;
           this._compact();
-        })
+        });
       }
     }
 
@@ -323,22 +307,19 @@ namespace Private {
      * Compact the list, removing any nulls.
      */
     private _compact(): void {
-      if (this.isDisposed) {
-        return;
-      }
       let numNulls = 0;
       for (let i = 0, len = this._hooks.length; i < len; i++) {
         let hook = this._hooks[i];
         if (this._hooks[i] === null) {
           numNulls++;
         } else {
-          this._hooks[i-numNulls] = hook;
+          this._hooks[i - numNulls] = hook;
         }
       }
       this._hooks.length -= numNulls;
     }
 
-    private _hooks: ((msg: T) => boolean)[] = [];
+    private _hooks: (((msg: T) => boolean) | null)[] = [];
     private _cleanupScheduled: boolean;
   }
 

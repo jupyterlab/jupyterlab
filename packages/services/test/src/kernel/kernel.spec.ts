@@ -968,9 +968,6 @@ describe('kernel', () => {
           stop_on_error: false
         };
         let future = kernel.requestExecute(content);
-        expect(future.onStdin).to.be(null);
-        expect(future.onReply).to.be(null);
-        expect(future.onIOPub).to.be(null);
 
         let options: KernelMessage.IOptions = {
           msgType: 'custom',
@@ -1032,9 +1029,6 @@ describe('kernel', () => {
           stop_on_error: false
         };
         let future = kernel.requestExecute(options, false);
-        expect(future.onStdin).to.be(null);
-        expect(future.onReply).to.be(null);
-        expect(future.onIOPub).to.be(null);
 
         tester.onMessage((msg) => {
           expect(msg.channel).to.be('shell');
@@ -1064,9 +1058,7 @@ describe('kernel', () => {
 
         return future.done.then(() => {
           expect(future.isDisposed).to.be(false);
-          expect(future.onIOPub).to.not.be(null);
           future.dispose();
-          expect(future.onIOPub).to.be(null);
           expect(future.isDisposed).to.be(true);
         });
       });

@@ -73,15 +73,13 @@ class ActivityMonitor<Sender, Args> implements IDisposable {
         sender: this._sender,
         args: this._args
       });
-      this._sender = null;
-      this._args = null;
     }, this._timeout);
   }
 
   private _timer = -1;
   private _timeout = -1;
-  private _sender: Sender = null;
-  private _args: Args = null;
+  private _sender: Sender;
+  private _args: Args;
   private _isDisposed = false;
   private _activityStopped = new Signal<this, ActivityMonitor.IArguments<Sender, Args>>(this);
 }

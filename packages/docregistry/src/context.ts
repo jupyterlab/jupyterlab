@@ -387,7 +387,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       this.session.setPath(newPath);
       this.session.setName(newPath.split('/').pop());
       this._path = newPath;
-      this._updateContentsModel(change.newValue);
+      this._updateContentsModel(change.newValue as Contents.IModel);
       this._pathChanged.emit(this._path);
     }
   }
@@ -411,6 +411,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       path: model.path,
       name: model.name,
       type: model.type,
+      content: undefined,
       writable: model.writable,
       created: model.created,
       last_modified: model.last_modified,

@@ -79,22 +79,22 @@ namespace MarkdownCodeBlocks {
         // Check whether this is a single line code block of the form ```a = 10```.
         const firstIndex = line.indexOf(CODE_BLOCK_MARKER);
         const lastIndex = line.lastIndexOf(CODE_BLOCK_MARKER);
-        const isSingleLine = firstIndex != lastIndex
+        const isSingleLine = firstIndex !== lastIndex;
         if (isSingleLine) {
           currentBlock.code = line.substring(firstIndex + CODE_BLOCK_MARKER.length, lastIndex);
           currentBlock.endLine = lineIndex;
           codeBlocks.push(currentBlock);
           currentBlock = null;
         }
-      } else {
+      } else if (currentBlock) {
         if (lineContainsMarker) {
           // End of block, finish it up.
-          currentBlock.endLine = lineIndex-1;
+          currentBlock.endLine = lineIndex - 1;
           codeBlocks.push(currentBlock);
           currentBlock = null;
         } else {
           // Append the current line.
-          currentBlock.code += line + "\n";
+          currentBlock.code += line + '\n';
         }
       }
     }

@@ -117,7 +117,7 @@ interface ICollaborator extends JSONObject {
    * use in places where the full `displayName` would take
    * too much space.
    */
-  readonly shortName?: string;
+  readonly shortName: string;
 }
 
 
@@ -182,7 +182,7 @@ interface IModelDB extends IDisposable {
    *
    * @returns an `IObservable`.
    */
-  get(path: string): IObservable;
+  get(path: string): IObservable | undefined;
 
   /**
    * Whether the `IModelDB` has an object at this path.
@@ -282,7 +282,7 @@ class ObservableValue implements IObservableValue {
    *
    * @param initialValue: the starting value for the `ObservableValue`.
    */
-  constructor(initialValue?: JSONValue) {
+  constructor(initialValue: JSONValue = null) {
     this._value = initialValue;
   }
 
@@ -398,7 +398,7 @@ class ModelDB implements IModelDB {
    * Whether the database is disposed.
    */
   get isDisposed(): boolean {
-    return this._db === null;
+    return this._isDisposed;
   }
 
   /**
@@ -426,7 +426,7 @@ class ModelDB implements IModelDB {
    *
    * @returns an `IObservable`.
    */
-  get(path: string): IObservable {
+  get(path: string): IObservable | undefined {
     return this._db.get(this._resolvePath(path));
   }
 
@@ -514,8 +514,8 @@ class ModelDB implements IModelDB {
    */
   getValue(path: string): JSONValue {
     let val = this.get(path);
-    if (val.type !== 'Value') {
-        throw Error('Can only call getValue for an ObservableValue');
+    if (!val || val.type !== 'Value') {
+      throw Error('Can only call getValue for an ObservableValue');
     }
     return (val as ObservableValue).get();
   }
@@ -530,8 +530,8 @@ class ModelDB implements IModelDB {
    */
   setValue(path: string, value: JSONValue): void {
     let val = this.get(path);
-    if (val.type !== 'Value') {
-        throw Error('Can only call setValue on an ObservableValue');
+    if (!val || val.type !== 'Value') {
+      throw Error('Can only call setValue on an ObservableValue');
     }
     (val as ObservableValue).set(value);
   }
@@ -571,11 +571,9 @@ class ModelDB implements IModelDB {
     if (this.isDisposed) {
       return;
     }
-    let db = this._db;
-    this._db = null;
-
+    this._isDisposed = true;
     if (this._toDispose) {
-      db.dispose();
+      this._db.dispose();
     }
     this._disposables.dispose();
   }
@@ -591,8 +589,9 @@ class ModelDB implements IModelDB {
   }
 
   private _basePath: string;
-  private _db: ModelDB | ObservableMap<IObservable> = null;
+  private _db: ModelDB | ObservableMap<IObservable>;
   private _toDispose = false;
+  private _isDisposed = false;
   private _disposables = new DisposableSet();
 }
 

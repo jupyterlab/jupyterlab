@@ -22,7 +22,7 @@ describe('@jupyterlab/coreutils', () => {
       it('should accept no arguments', () => {
         let value = new ObservableValue();
         expect(value instanceof ObservableValue).to.be(true);
-        expect(value.get()).to.be(undefined);
+        expect(value.get()).to.be(null);
       });
 
       it('should accept an initial JSON value', () => {
@@ -69,7 +69,7 @@ describe('@jupyterlab/coreutils', () => {
         value.changed.connect((sender, args) => {
           expect(sender).to.be(value);
           expect(args.newValue).to.be('set');
-          expect(args.oldValue).to.be(undefined);
+          expect(args.oldValue).to.be(null);
           called = true;
         });
         value.set('set');

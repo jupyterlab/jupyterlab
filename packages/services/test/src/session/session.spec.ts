@@ -522,22 +522,20 @@ describe('session', () => {
 
       it('should dispose of the resources held by the session', () => {
         session.dispose();
-        expect(session.kernel).to.be(null);
+        expect(session.isDisposed).to.be(true);
       });
 
       it('should be safe to call twice', () => {
         session.dispose();
         expect(session.isDisposed).to.be(true);
-        expect(session.kernel).to.be(null);
         session.dispose();
         expect(session.isDisposed).to.be(true);
-        expect(session.kernel).to.be(null);
       });
 
       it('should be safe to call if the kernel is disposed', () => {
         session.kernel.dispose();
         session.dispose();
-        expect(session.kernel).to.be(null);
+        expect(session.isDisposed).to.be(true);
       });
 
     });

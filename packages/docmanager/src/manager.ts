@@ -214,7 +214,7 @@ class DocumentManager implements IDisposable {
    * This function will return `undefined` if a valid widget factory
    * cannot be found.
    */
-  createNew(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
+  createNew(path: string, widgetName='default', kernel?: Partial<Kernel.IModel>): Widget {
     return this._createOrOpenDocument('create', path, widgetName, kernel);
   }
 
@@ -290,7 +290,7 @@ class DocumentManager implements IDisposable {
    * This function will return `undefined` if a valid widget factory
    * cannot be found.
    */
-  open(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
+  open(path: string, widgetName='default', kernel?: Partial<Kernel.IModel>): Widget {
     return this._createOrOpenDocument('open', path, widgetName, kernel);
   }
 
@@ -310,7 +310,7 @@ class DocumentManager implements IDisposable {
    * This function will return `undefined` if a valid widget factory
    * cannot be found.
    */
-  openOrReveal(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
+  openOrReveal(path: string, widgetName='default', kernel?: Partial<Kernel.IModel>): Widget {
     let widget = this.findWidget(path, widgetName);
     if (widget) {
       this._opener.open(widget);
@@ -430,7 +430,7 @@ class DocumentManager implements IDisposable {
    * The two cases differ in how the document context is handled, but the creation
    * of the widget and launching of the kernel are identical.
    */
-  private _createOrOpenDocument(which: 'open'|'create', path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
+  private _createOrOpenDocument(which: 'open'|'create', path: string, widgetName='default', kernel?: Partial<Kernel.IModel>): Widget {
     let widgetFactory = this._widgetFactoryFor(path, widgetName);
     if (!widgetFactory) {
       return;

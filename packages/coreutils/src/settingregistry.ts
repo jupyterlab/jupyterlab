@@ -636,7 +636,7 @@ class SettingRegistry {
   private _pluginChanged = new Signal<this, string>(this);
   private _plugins: { [name: string]: ISettingRegistry.IPlugin } = Object.create(null);
   private _preload: (plugin: string, schema: ISettingRegistry.ISchema) => void;
-  private _validator: ISchemaValidator | null = null;
+  private _validator: ISchemaValidator;
 }
 
 
@@ -715,10 +715,6 @@ class Settings implements ISettingRegistry.ISettings {
     }
 
     this._isDisposed = true;
-    this._composite = null;
-    this._schema = null;
-    this._user = null;
-
     Signal.clearData(this);
   }
 

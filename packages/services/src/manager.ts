@@ -130,9 +130,9 @@ class ServiceManager implements ServiceManager.IManager {
     return this._readyPromise;
   }
 
-  private _sessionManager: SessionManager = null;
-  private _contentsManager: ContentsManager = null;
-  private _terminalManager: TerminalManager = null;
+  private _sessionManager: SessionManager;
+  private _contentsManager: ContentsManager;
+  private _terminalManager: TerminalManager;
   private _isDisposed = false;
   private _readyPromise: Promise<void>;
   private _specsChanged = new Signal<this, Kernel.ISpecModels>(this);

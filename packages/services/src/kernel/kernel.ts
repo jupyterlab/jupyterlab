@@ -469,8 +469,7 @@ namespace Kernel {
    * when the kernel is started by the server, otherwise the promise is rejected.
    */
   export
-  function startNew(options?: Kernel.IOptions): Promise<IKernel> {
-    options = options || {};
+  function startNew(options: Kernel.IOptions = {}): Promise<IKernel> {
     return DefaultKernel.startNew(options);
   }
 
@@ -818,12 +817,12 @@ namespace Kernel {
     /**
      * Unique identifier of the kernel server session.
      */
-    readonly id?: string;
+    readonly id: string;
 
     /**
      * The name of the kernel.
      */
-    readonly name?: string;
+    readonly name: string;
   }
 
   /**
