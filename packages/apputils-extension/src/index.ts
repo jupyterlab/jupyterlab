@@ -60,8 +60,8 @@ function apiError(id: string, xhr: XMLHttpRequest): Error {
 /**
  * Create a data connector to access plugin settings.
  */
-function newConnector(manager: IServiceManager): IDataConnector<ISettingRegistry.IPlugin, JSONObject> {
-  return {
+function newConnector(manager: IServiceManager): Promise<IDataConnector<ISettingRegistry.IPlugin, JSONObject>> {
+  return manager.ready.then(() => ({
     /**
      * Retrieve a saved bundle from the data connector.
      */
@@ -86,7 +86,7 @@ function newConnector(manager: IServiceManager): IDataConnector<ISettingRegistry
         throw apiError(id, (reason as ServerConnection.IError).xhr);
       });
     }
-  };
+  }));
 }
 
 
@@ -129,9 +129,8 @@ const palettePlugin: JupyterLabPlugin<ICommandPalette> = {
  */
 const settingPlugin: JupyterLabPlugin<ISettingRegistry> = {
   id: 'jupyter.services.setting-registry',
-  activate: (app: JupyterLab, services: IServiceManager) => {
-    return new SettingRegistry({ connector: newConnector(services) });
-  },
+  activate: (app: any, services: IServiceManager) => newConnector(services)
+    .then(connector => new SettingRegistry({ connector })),
   autoStart: true,
   provides: ISettingRegistry,
   requires: [IServiceManager]
