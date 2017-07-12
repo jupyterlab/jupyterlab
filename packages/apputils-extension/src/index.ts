@@ -16,7 +16,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  SettingService, ServerConnection
+  IServiceManager, ServerConnection
 } from '@jupyterlab/services';
 
 import {
@@ -58,34 +58,36 @@ function apiError(id: string, xhr: XMLHttpRequest): Error {
 
 
 /**
- * The data connector used to access plugin settings.
+ * Create a data connector to access plugin settings.
  */
-const connector: IDataConnector<ISettingRegistry.IPlugin, JSONObject> = {
-  /**
-   * Retrieve a saved bundle from the data connector.
-   */
-  fetch(id: string): Promise<ISettingRegistry.IPlugin> {
-    return SettingService.fetch(id).catch(reason => {
-      throw apiError(id, (reason as ServerConnection.IError).xhr);
-    });
-  },
+function newConnector(manager: IServiceManager): IDataConnector<ISettingRegistry.IPlugin, JSONObject> {
+  return {
+    /**
+     * Retrieve a saved bundle from the data connector.
+     */
+    fetch(id: string): Promise<ISettingRegistry.IPlugin> {
+      return manager.settings.fetch(id).catch(reason => {
+        throw apiError(id, (reason as ServerConnection.IError).xhr);
+      });
+    },
 
-  /**
-   * Remove a value from the data connector.
-   */
-  remove(): Promise<void> {
-    return Promise.reject('Removing setting resources is not supported.');
-  },
+    /**
+     * Remove a value from the data connector.
+     */
+    remove(): Promise<void> {
+      return Promise.reject('Removing setting resources is not supported.');
+    },
 
-  /**
-   * Save the user setting data in the data connector.
-   */
-  save(id: string, user: JSONObject): Promise<void> {
-    return SettingService.save(id, user).catch(reason => {
-      throw apiError(id, (reason as ServerConnection.IError).xhr);
-    });
-  }
-};
+    /**
+     * Save the user setting data in the data connector.
+     */
+    save(id: string, user: JSONObject): Promise<void> {
+      return manager.settings.save(id, user).catch(reason => {
+        throw apiError(id, (reason as ServerConnection.IError).xhr);
+      });
+    }
+  };
+}
 
 
 /**
@@ -127,9 +129,12 @@ const palettePlugin: JupyterLabPlugin<ICommandPalette> = {
  */
 const settingPlugin: JupyterLabPlugin<ISettingRegistry> = {
   id: 'jupyter.services.setting-registry',
-  activate: () => new SettingRegistry({ connector }),
+  activate: (app: JupyterLab, services: IServiceManager) => {
+    return new SettingRegistry({ connector: newConnector(services) });
+  },
   autoStart: true,
-  provides: ISettingRegistry
+  provides: ISettingRegistry,
+  requires: [IServiceManager]
 };
 
 
