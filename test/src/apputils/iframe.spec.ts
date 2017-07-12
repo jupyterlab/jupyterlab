@@ -29,7 +29,7 @@ describe('@jupyterlab/domutils', () => {
 
       it('should be the url of the iframe', () => {
         let iframe = new IFrame();
-        expect(iframe.url).to.equal(null);
+        expect(iframe.url).to.equal('');
         iframe.url = 'foo';
         expect(iframe.url).to.equal('foo');
       });
