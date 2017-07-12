@@ -304,7 +304,7 @@ namespace Session {
     /**
      * The path (not including name) to the session.
      */
-    path?: string;
+    path: string;
 
     /**
      * The name of the session.
@@ -489,6 +489,6 @@ namespace Session {
     readonly name: string;
     readonly path: string;
     readonly type: string;
-    readonly kernel?: Kernel.IModel;
+    readonly kernel: Kernel.IModel;
   }
 }
