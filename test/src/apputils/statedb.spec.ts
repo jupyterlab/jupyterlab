@@ -103,7 +103,7 @@ describe('StateDB', () => {
         .catch(done);
     });
 
-    it('should resolve a nonexistent key fetch with null', done => {
+    it('should resolve a nonexistent key fetch with undefined', done => {
       let { localStorage } = window;
       localStorage.clear();
 
@@ -112,7 +112,7 @@ describe('StateDB', () => {
 
       expect(localStorage.length).to.be(0);
       db.fetch(key)
-        .then(fetched => { expect(fetched).to.be(null); })
+        .then(fetched => { expect(fetched).to.be(undefined); })
         .then(done)
         .catch(done);
     });
