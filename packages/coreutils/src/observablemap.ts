@@ -189,7 +189,7 @@ class ObservableMap<T> implements IObservableMap<T> {
    * Whether this map has been disposed.
    */
   get isDisposed(): boolean {
-    return this._map === null;
+    return this._isDisposed;
   }
 
   /**
@@ -318,9 +318,10 @@ class ObservableMap<T> implements IObservableMap<T> {
    * Dispose of the resources held by the map.
    */
   dispose(): void {
-    if (this._map === null) {
+    if (this.isDisposed) {
       return;
     }
+    this._isDisposed = true;
     Signal.clearData(this);
     this._map.clear();
   }
@@ -328,6 +329,7 @@ class ObservableMap<T> implements IObservableMap<T> {
   private _map: Map<string, T> = new Map<string, T>();
   private _itemCmp: (first: T, second: T) => boolean;
   private _changed = new Signal<this, IObservableMap.IChangedArgs<T>>(this);
+  private _isDisposed = false;
 }
 
 

@@ -282,7 +282,7 @@ class ObservableValue implements IObservableValue {
    *
    * @param initialValue: the starting value for the `ObservableValue`.
    */
-  constructor(initialValue: JSONValue = {}) {
+  constructor(initialValue: JSONValue = null) {
     this._value = initialValue;
   }
 
@@ -398,7 +398,7 @@ class ModelDB implements IModelDB {
    * Whether the database is disposed.
    */
   get isDisposed(): boolean {
-    return this._db === null;
+    return this._isDisposed;
   }
 
   /**
@@ -571,6 +571,7 @@ class ModelDB implements IModelDB {
     if (this.isDisposed) {
       return;
     }
+    this._isDisposed = true;
     if (this._toDispose) {
       this._db.dispose();
     }
@@ -590,6 +591,7 @@ class ModelDB implements IModelDB {
   private _basePath: string;
   private _db: ModelDB | ObservableMap<IObservable>;
   private _toDispose = false;
+  private _isDisposed = false;
   private _disposables = new DisposableSet();
 }
 
