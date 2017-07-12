@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/notebook",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "description": "JupyterLab - Notebook",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
