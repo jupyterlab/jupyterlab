@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IStateDB
+  IStateDB, PageConfig, PathExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -442,6 +442,7 @@ function activateNotebookHandler(app: JupyterLab, services: IServiceManager, mai
   if (launcher) {
     services.ready.then(() => {
       let specs = services.specs;
+      let baseUrl = PageConfig.getBaseUrl();
       for (let name in specs.kernelspecs) {
         let displayName = specs.kernelspecs[name].display_name;
         let rank = name === specs.default ? 0 : Infinity;
@@ -452,7 +453,7 @@ function activateNotebookHandler(app: JupyterLab, services: IServiceManager, mai
           iconClass: 'jp-NotebookRunningIcon',
           callback,
           rank,
-          kernelIconUrl: specs.kernelspecs[name].resources["logo-64x64"]
+          kernelIconUrl: baseUrl + PathExt.removeSlash(specs.kernelspecs[name].resources["logo-64x64"])
         });
       }
     });

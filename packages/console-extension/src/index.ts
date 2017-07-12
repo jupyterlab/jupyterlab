@@ -15,6 +15,10 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
+  PageConfig, PathExt
+} from '@jupyterlab/coreutils';
+
+import {
   IConsoleTracker, ConsolePanel
 } from '@jupyterlab/console';
 
@@ -162,6 +166,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, mainMenu: IM
   if (launcher) {
     manager.ready.then(() => {
       let specs = manager.specs;
+      let baseUrl = PageConfig.getBaseUrl();
       for (let name in specs.kernelspecs) {
         let displayName = specs.kernelspecs[name].display_name;
         let rank = name === specs.default ? 0 : Infinity;
@@ -172,7 +177,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, mainMenu: IM
           iconClass: 'jp-CodeConsoleIcon',
           callback,
           rank,
-          kernelIconUrl: specs.kernelspecs[name].resources["logo-64x64"]
+          kernelIconUrl: baseUrl + PathExt.removeSlash(specs.kernelspecs[name].resources["logo-64x64"])
         });
       }
     });
