@@ -168,7 +168,7 @@ class Toolbar<T extends Widget> extends Widget {
   handleEvent(event: Event): void {
     switch (event.type) {
     case 'click':
-      if (!this.node.contains(document.activeElement)) {
+      if (!this.node.contains(document.activeElement) && this.parent) {
         this.parent.activate();
       }
       break;
@@ -336,23 +336,14 @@ class ToolbarButton extends Widget {
   constructor(options: ToolbarButton.IOptions = {}) {
     super({ node: document.createElement('button') });
     Styling.styleNodeByTag(this.node, 'button');
-    options = options || {};
     this.addClass(TOOLBAR_BUTTON_CLASS);
-    this._onClick = options.onClick;
+    this._onClick = options.onClick || Private.noOp;
     if (options.className) {
       for (let extra of options.className.split(/\s/)) {
         this.addClass(extra);
       }
     }
     this.node.title = options.tooltip || '';
-  }
-
-  /**
-   * Dispose of the resources held by the widget.
-   */
-  dispose(): void {
-    this._onClick = null;
-    super.dispose();
   }
 
   /**
@@ -368,7 +359,7 @@ class ToolbarButton extends Widget {
   handleEvent(event: Event): void {
     switch (event.type) {
     case 'click':
-      if (this._onClick && (event as MouseEvent).button === 0) {
+      if ((event as MouseEvent).button === 0) {
         this._onClick();
       }
       break;
@@ -456,6 +447,12 @@ namespace Private {
   function commandTooltip(commands: CommandRegistry, id: string): string {
     return commands.caption(id);
   }
+
+  /**
+   * A no-op function.
+   */
+  export
+  function noOp() { /* no-op */ }
 
   /**
    * Get the class names for a command based ToolBarButton

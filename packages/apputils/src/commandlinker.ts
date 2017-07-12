@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  JSONObject
+  JSONExt, JSONObject
 } from '@phosphor/coreutils';
 
 import {
@@ -49,17 +49,17 @@ class CommandLinker implements IDisposable {
    * Test whether the linker is disposed.
    */
   get isDisposed(): boolean {
-    return this._commands === null;
+    return this._isDisposed;
   }
 
   /**
    * Dispose of the resources held by the linker.
    */
   dispose(): void {
-    if (this._commands === null) {
+    if (this.isDisposed) {
       return;
     }
-    this._commands = null;
+    this._isDisposed = true;
     document.body.removeEventListener('click', this);
   }
 
@@ -180,8 +180,11 @@ class CommandLinker implements IDisposable {
       if (target.hasAttribute(`data-${COMMAND_ATTR}`)) {
         event.preventDefault();
         let command = target.getAttribute(`data-${COMMAND_ATTR}`);
+        if (!command) {
+          return;
+        }
         let argsValue = target.getAttribute(`data-${ARGS_ATTR}`);
-        let args: JSONObject;
+        let args = JSONExt.emptyObject;
         if (argsValue) {
           args = JSON.parse(argsValue);
         }
@@ -192,7 +195,8 @@ class CommandLinker implements IDisposable {
     }
   }
 
-  private _commands: CommandRegistry = null;
+  private _commands: CommandRegistry;
+  private _isDisposed = false;
 }
 
 

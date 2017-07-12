@@ -22,11 +22,11 @@ class IFrame extends Widget {
   /**
    * The url of the IFrame.
    */
-  get url(): string | null {
-    return this.node.querySelector('iframe').getAttribute('src');
+  get url(): string {
+    return this.node.querySelector('iframe')!.getAttribute('src') || '';
   }
-  set url(url: string | null) {
-    this.node.querySelector('iframe').setAttribute('src', url);
+  set url(url: string) {
+    this.node.querySelector('iframe')!.setAttribute('src', url);
   }
 }
 
