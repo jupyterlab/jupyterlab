@@ -22,6 +22,10 @@ import {
 } from './session';
 
 import {
+  Setting, SettingManager
+} from './setting';
+
+import {
   TerminalSession, TerminalManager
 } from './terminal';
 
@@ -42,9 +46,12 @@ class ServiceManager implements ServiceManager.IManager {
     this.serverSettings = (
       options.serverSettings || ServerConnection.makeSettings()
     );
-    this._sessionManager = new SessionManager(options);
+
     this._contentsManager = new ContentsManager(options);
+    this._sessionManager = new SessionManager(options);
+    this._settingManager = new SettingManager(options);
     this._terminalManager = new TerminalManager(options);
+
     this._sessionManager.specsChanged.connect((sender, specs) => {
       this._specsChanged.emit(specs);
     });
@@ -63,7 +70,7 @@ class ServiceManager implements ServiceManager.IManager {
   }
 
   /**
-   * Test whether the terminal manager is disposed.
+   * Test whether the service manager is disposed.
    */
   get isDisposed(): boolean {
     return this._isDisposed;
@@ -103,6 +110,13 @@ class ServiceManager implements ServiceManager.IManager {
   }
 
   /**
+   * Get the setting manager instance.
+   */
+  get settings(): SettingManager {
+    return this._settingManager;
+  }
+
+  /**
    * Get the contents manager instance.
    */
   get contents(): ContentsManager {
@@ -130,8 +144,9 @@ class ServiceManager implements ServiceManager.IManager {
     return this._readyPromise;
   }
 
-  private _sessionManager: SessionManager;
   private _contentsManager: ContentsManager;
+  private _sessionManager: SessionManager;
+  private _settingManager: SettingManager;
   private _terminalManager: TerminalManager;
   private _isDisposed = false;
   private _readyPromise: Promise<void>;
@@ -168,6 +183,11 @@ namespace ServiceManager {
      * The session manager for the manager.
      */
     readonly sessions: Session.IManager;
+
+    /**
+     * The setting manager for the manager.
+     */
+    readonly settings: Setting.IManager;
 
     /**
      * The contents manager for the manager.
