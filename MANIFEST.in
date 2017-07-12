@@ -14,3 +14,4 @@ include jupyterlab/node-version-check.js
 include jupyterlab/released_packages.txt
 
 prune jupyterlab/tests
+prune node_modules

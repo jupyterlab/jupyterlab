@@ -240,7 +240,7 @@ namespace ServerConnection {
  */
 namespace Private {
   export
-  let defaultSettings: ServerConnection.ISettings = null;
+  let defaultSettings: ServerConnection.ISettings;
 
   /**
    * Handle the server connection settings, returning a new value.
