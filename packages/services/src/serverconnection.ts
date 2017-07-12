@@ -49,7 +49,7 @@ namespace ServerConnection {
   function makeSettings(options?: Partial<ISettings>) {
     // Use the singleton default settings if no options are given.
     if (options === void 0) {
-      if (Private.defaultSettings === null) {
+      if (Private.defaultSettings === void 0) {
         Private.defaultSettings = Private.makeSettings();
       }
       return Private.defaultSettings;
