@@ -24,7 +24,7 @@ const SERVICE_SETTINGS_URL = 'lab/api/settings';
  * The static namespace for `SettingManager`.
  */
 export
-class SettingManager implements Setting.IManager {
+class SettingManager {
   /**
    * Create a new setting manager.
    */
@@ -43,7 +43,8 @@ class SettingManager implements Setting.IManager {
    *
    * @param id - The plugin's ID.
    *
-   * @returns A promise that resolves with the plugin settings.
+   * @returns A promise that resolves with the plugin settings or rejects
+   * with a `ServerConnection.IError`.
    */
   fetch(id: string): Promise<ISettingRegistry.IPlugin> {
     const base = this.serverSettings.baseUrl;
@@ -69,7 +70,8 @@ class SettingManager implements Setting.IManager {
    *
    * @param user - The plugin's user setting values.
    *
-   * @returns A promise that resolves when saving is complete.
+   * @returns A promise that resolves when saving is complete or rejects
+   * with a `ServerConnection.IError`.
    */
   save(id: string, user: JSONObject): Promise<void> {
     const base = this.serverSettings.baseUrl;
@@ -121,32 +123,7 @@ namespace Setting {
    * The interface for the setting system manager.
    */
   export
-  interface IManager {
-    /**
-     * Fetch a plugin's settings.
-     *
-     * @param id - The plugin's ID.
-     *
-     * @returns A promise that resolves with the plugin settings.
-     */
-    fetch(id: string): Promise<ISettingRegistry.IPlugin>;
-
-    /**
-     * Save a plugin's settings.
-     *
-     * @param id - The plugin's ID.
-     *
-     * @param user - The plugin's user setting values.
-     *
-     * @returns A promise that resolves when saving is complete.
-     */
-    save(id: string, user: JSONObject): Promise<void>;
-
-    /**
-     * The server settings used to make API requests.
-     */
-    readonly serverSettings: ServerConnection.ISettings;
-  }
+  interface IManager extends SettingManager { }
 }
 
 
