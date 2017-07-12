@@ -11,7 +11,7 @@ import {
 
 import {
   ServerConnection
-} from '..';
+} from '../serverconnection';
 
 
 /**
