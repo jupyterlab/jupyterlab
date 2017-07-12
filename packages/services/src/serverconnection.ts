@@ -313,6 +313,7 @@ namespace Private {
       if (xhr.status >= 300) {
         let message = xhr.statusText || `Invalid Status: ${xhr.status}`;
         delegate.reject({ event, xhr, request, settings, message });
+        return;
       }
       let data = xhr.responseText;
       if (request.dataType === 'json' || request.dataType === undefined) {
