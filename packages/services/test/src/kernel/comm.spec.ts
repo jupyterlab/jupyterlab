@@ -23,7 +23,6 @@ describe('jupyter.services - Comm', () => {
 
   beforeEach(() => {
     tester = new KernelTester();
-    debugger;
     return Kernel.startNew().then(k => {
       kernel = k;
       return kernel.ready;
@@ -384,13 +383,13 @@ describe('jupyter.services - Comm', () => {
       it('should not send subsequent messages', () => {
         let comm = kernel.connectToComm('test');
         comm.close({ foo: 'bar' });
-        expect(comm.send('test')).to.be(void 0);
+        expect(() => { comm.send('test'); }).to.throwError();
       });
 
-      it('should be a no-op if already closed', () => {
+      it('should throw if already closed', () => {
         let comm = kernel.connectToComm('test');
         comm.close({ foo: 'bar' });
-        comm.close();
+        expect(() => { comm.close(); }).to.throwError();
       });
 
       it('should yield a future', (done) => {
