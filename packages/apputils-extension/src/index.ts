@@ -101,7 +101,8 @@ const mainMenuPlugin: JupyterLabPlugin<IMainMenu> = {
     menu.id = 'jp-MainMenu';
 
     let logo = new Widget();
-    logo.node.className = 'jp-MainAreaPortraitIcon jp-JupyterIcon';
+    logo.addClass('jp-MainAreaPortraitIcon');
+    logo.addClass('jp-JupyterIcon');
     logo.id = 'jp-MainLogo';
 
     app.shell.addToTopArea(logo);

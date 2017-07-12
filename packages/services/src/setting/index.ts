@@ -28,7 +28,7 @@ class SettingManager {
   /**
    * Create a new setting manager.
    */
-  constructor(options: SettingManager.IOptions) {
+  constructor(options: SettingManager.IOptions = { }) {
     this.serverSettings = options.serverSettings ||
       ServerConnection.makeSettings();
   }
