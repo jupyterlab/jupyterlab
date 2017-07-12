@@ -47,13 +47,14 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   constructor(options: Context.IOptions<T>) {
     let manager = this._manager = options.manager;
     this._factory = options.factory;
-    this._opener = options.opener;
+    this._opener = options.opener || Private.noOp;
     this._path = options.path;
     let ext = DocumentRegistry.extname(this._path);
     let lang = this._factory.preferredLanguage(ext);
 
-    if (options.modelDBFactory) {
-      this._modelDB = options.modelDBFactory.createNew(this._path.split(':').pop());
+    let dbFactory = options.modelDBFactory;
+    if (dbFactory) {
+      this._modelDB = dbFactory.createNew(this._path.split(':').pop()!);
       this._model = this._factory.createNew(lang, this._modelDB);
     } else {
       this._model = this._factory.createNew(lang);
@@ -137,27 +138,22 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    * Test whether the context is disposed.
    */
   get isDisposed(): boolean {
-    return this._model === null;
+    return this._isDisposed;
   }
 
   /**
    * Dispose of the resources held by the context.
    */
   dispose(): void {
-    if (this._model == null) {
+    if (this.isDisposed) {
       return;
     }
-    let model = this._model;
+    this._isDisposed = true;
     this.session.dispose();
     if (this._modelDB) {
       this._modelDB.dispose();
     }
-    this._model = null;
-    this._manager = null;
-    this._factory = null;
-    this._modelDB = null;
-
-    model.dispose();
+    this._model.dispose();
     this._disposed.emit(void 0);
     Signal.clearData(this);
   }
@@ -249,7 +245,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         return;
       }
       this._path = newPath;
-      this.session.setName(newPath.split('/').pop());
+      this.session.setName(newPath.split('/').pop()!);
       return this.session.setPath(newPath).then(() => this.save());
     });
   }
@@ -382,10 +378,11 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     if (change.type !== 'rename') {
       return;
     }
-    if (change.oldValue.path === this._path) {
-      let newPath = change.newValue.path;
+    let oldPath = change.oldValue && change.oldValue.path;
+    let newPath = change.newValue && change.newValue.path;
+    if (newPath && oldPath === this._path) {
       this.session.setPath(newPath);
-      this.session.setName(newPath.split('/').pop());
+      this.session.setName(PathExt.basename(newPath));
       this._path = newPath;
       this._updateContentsModel(change.newValue as Contents.IModel);
       this._pathChanged.emit(this._path);
@@ -433,7 +430,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     // Add a checkpoint if none exists.
     return this.listCheckpoints().then(checkpoints => {
       if (!this.isDisposed && !checkpoints) {
-        return this.createCheckpoint();
+        return this.createCheckpoint().then(() => { /* no-op */ });
       }
     }).then(() => {
       if (this.isDisposed) {
@@ -455,17 +452,18 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     });
   }
 
-  private _manager: ServiceManager.IManager = null;
-  private _opener: (widget: Widget) => void = null;
-  private _model: T = null;
-  private _modelDB: IModelDB = null;
+  private _manager: ServiceManager.IManager;
+  private _opener: (widget: Widget) => void;
+  private _model: T;
+  private _modelDB: IModelDB;
   private _path = '';
-  private _factory: DocumentRegistry.IModelFactory<T> = null;
-  private _contentsModel: Contents.IModel = null;
+  private _factory: DocumentRegistry.IModelFactory<T>;
+  private _contentsModel: Contents.IModel;
   private _readyPromise: Promise<void>;
   private _populatedPromise = new PromiseDelegate<void>();
   private _isPopulated = false;
   private _isReady = false;
+  private _isDisposed = false;
   private _pathChanged = new Signal<this, string>(this);
   private _fileChanged = new Signal<this, Contents.IModel>(this);
   private _disposed = new Signal<this, void>(this);
@@ -522,7 +520,7 @@ namespace Private {
    * Get a new file path from the user.
    */
   export
-  function getSavePath(path: string): Promise<string> {
+  function getSavePath(path: string): Promise<string | undefined> {
     let input = document.createElement('input');
     input.value = path;
     let saveBtn = Dialog.okButton({ label: 'SAVE' });
@@ -534,6 +532,13 @@ namespace Private {
       if (result.label === 'SAVE') {
         return input.value;
       }
+      return;
     });
   }
+
+  /**
+   * A no-op function.
+   */
+  export
+  function noOp() { /* no-op */ }
 }
