@@ -11,7 +11,6 @@
     "@jupyterlab/apputils": "^0.8.2",
     "@jupyterlab/apputils-extension": "^0.8.3",
     "@jupyterlab/cells": "^0.8.2",
-    "@jupyterlab/chatbox": "^0.3.2",
     "@jupyterlab/chatbox-extension": "^0.3.3",
     "@jupyterlab/codeeditor": "^0.8.1",
     "@jupyterlab/codemirror": "^0.8.1",
@@ -115,7 +114,6 @@
     "extensions": [
       "@jupyterlab/application-extension",
       "@jupyterlab/apputils-extension",
-      "@jupyterlab/chatbox-extension",
       "@jupyterlab/codemirror-extension",
       "@jupyterlab/completer-extension",
       "@jupyterlab/console-extension",

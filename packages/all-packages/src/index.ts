@@ -5,8 +5,6 @@ import "@jupyterlab/application";
 import "@jupyterlab/application-extension";
 import "@jupyterlab/apputils";
 import "@jupyterlab/apputils-extension";
-import "@jupyterlab/chatbox";
-import "@jupyterlab/chatbox-extension";
 import "@jupyterlab/cells";
 import "@jupyterlab/codeeditor";
 import "@jupyterlab/codemirror";
