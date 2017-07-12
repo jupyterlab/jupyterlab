@@ -48,7 +48,5 @@ function validateModel(model: Session.IModel): void {
   validateProperty(model, 'type', 'string');
   validateProperty(model, 'name', 'string');
   validateProperty(model, 'kernel', 'object');
-  if (model.kernel) {
-    validateKernelModel(model.kernel);
-  }
+  validateKernelModel(model.kernel);
 }

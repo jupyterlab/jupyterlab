@@ -330,7 +330,7 @@ describe('jupyter.services - Integration', () => {
 
     it('should create a file by name and delete it', () => {
       let contents = new ContentsManager();
-      let options: Contents.IModel = {
+      let options: Partial<Contents.IModel> = {
         type: 'file', content: '', format: 'text'
       };
       return contents.save('baz.txt', options).then(model0 => {
@@ -340,7 +340,7 @@ describe('jupyter.services - Integration', () => {
 
     it('should exercise the checkpoint API', () => {
       let contents = new ContentsManager();
-      let options: Contents.IModel = {
+      let options: Partial<Contents.IModel> = {
         type: 'file', format: 'text', content: 'foo'
       };
       let checkpoint: Contents.ICheckpointModel;

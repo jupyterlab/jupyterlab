@@ -157,7 +157,7 @@ class KernelManager implements Kernel.IManager {
    * #### Notes
    * The manager `serverSettings` will be always be used.
    */
-  startNew(options: Kernel.IOptions): Promise<Kernel.IKernel> {
+  startNew(options: Kernel.IOptions = {}): Promise<Kernel.IKernel> {
     let newOptions = { ...options, serverSettings: this.serverSettings };
     return Kernel.startNew(newOptions).then(kernel => {
       this._onStarted(kernel);

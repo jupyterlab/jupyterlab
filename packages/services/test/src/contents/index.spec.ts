@@ -314,7 +314,7 @@ describe('contents', () => {
         expect(args.newValue.path).to.be(DEFAULT_FILE.path);
         done();
       });
-      contents.newUntitled({ type: 'file', name: 'test' }).catch(done);
+      contents.newUntitled({ type: 'file', ext: 'test' }).catch(done);
     });
 
     it('should fail for an incorrect model', (done) => {
@@ -995,7 +995,7 @@ describe('drive', () => {
         expect(args.newValue.path).to.be(DEFAULT_FILE.path);
         done();
       });
-      drive.newUntitled({ type: 'file', name: 'test' }).catch(done);
+      drive.newUntitled({ type: 'file', ext: 'test' }).catch(done);
     });
 
     it('should accept server settings', (done) => {

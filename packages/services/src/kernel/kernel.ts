@@ -469,7 +469,7 @@ namespace Kernel {
    * when the kernel is started by the server, otherwise the promise is rejected.
    */
   export
-  function startNew(options: Kernel.IOptions): Promise<IKernel> {
+  function startNew(options: Kernel.IOptions = {}): Promise<IKernel> {
     return DefaultKernel.startNew(options);
   }
 
@@ -521,7 +521,7 @@ namespace Kernel {
     /**
      * The kernel type (e.g. python3).
      */
-    name: string;
+    name?: string;
 
     /**
      * The server settings for the kernel.
