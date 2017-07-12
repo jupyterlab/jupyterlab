@@ -88,13 +88,6 @@ class CommHandler extends DisposableDelegate implements Kernel.IComm {
   }
 
   /**
-   * Test whether the comm has been disposed.
-   */
-  get isDisposed(): boolean {
-    return (this._kernel === null);
-  }
-
-  /**
    * Open a comm with optional data and metadata.
    *
    * #### Notes
@@ -104,7 +97,7 @@ class CommHandler extends DisposableDelegate implements Kernel.IComm {
    */
   open(data?: JSONValue, metadata?: JSONObject): Kernel.IFuture {
     if (this.isDisposed || this._kernel.isDisposed) {
-      throw 'Cannot open';
+      throw new Error('Cannot open');
     }
     let options: KernelMessage.IOptions = {
       msgType: 'comm_open',
@@ -131,7 +124,7 @@ class CommHandler extends DisposableDelegate implements Kernel.IComm {
    */
   send(data: JSONValue, metadata?: JSONObject, buffers: (ArrayBuffer | ArrayBufferView)[] = [], disposeOnDone: boolean = true): Kernel.IFuture {
     if (this.isDisposed || this._kernel.isDisposed) {
-      throw 'Cannot send';
+      throw new Error('Cannot send');
     }
     let options: KernelMessage.IOptions = {
       msgType: 'comm_msg',
@@ -160,7 +153,7 @@ class CommHandler extends DisposableDelegate implements Kernel.IComm {
    */
   close(data?: JSONValue, metadata?: JSONObject): Kernel.IFuture {
     if (this.isDisposed || this._kernel.isDisposed) {
-      throw 'Cannot close';
+      throw new Error('Cannot close');
     }
     let options: KernelMessage.IOptions = {
       msgType: 'comm_msg',

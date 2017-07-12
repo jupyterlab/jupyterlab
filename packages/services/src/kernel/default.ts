@@ -161,7 +161,7 @@ class DefaultKernel implements Kernel.IKernel {
    * Test whether the kernel has been disposed.
    */
   get isDisposed(): boolean {
-    return this._futures === null;
+    return this._isDisposed;
   }
 
   /**
@@ -221,6 +221,7 @@ class DefaultKernel implements Kernel.IKernel {
     if (this.isDisposed) {
       return;
     }
+    this._isDisposed = true;
     this._status = 'dead';
     this._clearSocket();
     this._futures.forEach((future, key) => {
@@ -1013,6 +1014,7 @@ class DefaultKernel implements Kernel.IKernel {
   private _name = '';
   private _status: Kernel.Status = 'unknown';
   private _clientId = '';
+  private _isDisposed = false;
   private _wsStopped = false;
   private _ws: WebSocket | null = null;
   private _username = '';
