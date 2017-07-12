@@ -470,7 +470,6 @@ namespace Kernel {
    */
   export
   function startNew(options: Kernel.IOptions): Promise<IKernel> {
-    options = options || {};
     return DefaultKernel.startNew(options);
   }
 
