@@ -70,9 +70,7 @@ function main() {
     future = kernel.requestExecute({ code: testcode })
   }).then(() => {
     outputArea.future = future
-    return future.done
-  }).then(() => {
-    document.getElementById("outputarea").appendChild(this.outputArea.node)
+    document.getElementById("outputarea").appendChild(outputArea.node)
   })
 }
 
