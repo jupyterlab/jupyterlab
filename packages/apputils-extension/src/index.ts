@@ -60,8 +60,8 @@ function apiError(id: string, xhr: XMLHttpRequest): Error {
 /**
  * Create a data connector to access plugin settings.
  */
-function newConnector(manager: IServiceManager): Promise<IDataConnector<ISettingRegistry.IPlugin, JSONObject>> {
-  return manager.ready.then(() => ({
+function newConnector(manager: IServiceManager): IDataConnector<ISettingRegistry.IPlugin, JSONObject> {
+  return {
     /**
      * Retrieve a saved bundle from the data connector.
      */
@@ -75,7 +75,9 @@ function newConnector(manager: IServiceManager): Promise<IDataConnector<ISetting
      * Remove a value from the data connector.
      */
     remove(): Promise<void> {
-      return Promise.reject('Removing setting resources is not supported.');
+      const message = 'Removing setting resources is not supported.';
+
+      return Promise.reject(new Error(message));
     },
 
     /**
@@ -86,7 +88,7 @@ function newConnector(manager: IServiceManager): Promise<IDataConnector<ISetting
         throw apiError(id, (reason as ServerConnection.IError).xhr);
       });
     }
-  }));
+  };
 }
 
 
@@ -130,8 +132,9 @@ const palettePlugin: JupyterLabPlugin<ICommandPalette> = {
  */
 const settingPlugin: JupyterLabPlugin<ISettingRegistry> = {
   id: 'jupyter.services.setting-registry',
-  activate: (app: any, services: IServiceManager) => newConnector(services)
-    .then(connector => new SettingRegistry({ connector })),
+  activate: (app: JupyterLab, services: IServiceManager): ISettingRegistry => {
+    return new SettingRegistry({ connector: newConnector(services) });
+  },
   autoStart: true,
   provides: ISettingRegistry,
   requires: [IServiceManager]
