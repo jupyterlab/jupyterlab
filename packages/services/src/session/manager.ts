@@ -285,7 +285,7 @@ class SessionManager implements Session.IManager {
 
   private _isDisposed = false;
   private _running: Session.IModel[] = [];
-  private _specs: Kernel.ISpecModels;
+  private _specs: Kernel.ISpecModels | null = null;
   private _runningTimer = -1;
   private _specsTimer = -1;
   private _readyPromise: Promise<void>;
