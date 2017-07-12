@@ -83,11 +83,13 @@ class ServiceManager implements ServiceManager.IManager {
     if (this.isDisposed) {
       return;
     }
+
     this._isDisposed = true;
     Signal.clearData(this);
-    this._sessionManager.dispose();
+
     this._contentsManager.dispose();
     this._sessionManager.dispose();
+    this._terminalManager.dispose();
   }
 
   /**
