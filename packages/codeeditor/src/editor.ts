@@ -99,18 +99,28 @@ namespace CodeEditor {
     /**
      * A class name added to a selection.
      */
-    className?: string;
+    className: string;
 
     /**
      * A display name added to a selection.
      */
-    displayName?: string;
+    displayName: string;
 
     /**
      * A color for UI elements.
      */
-    color?: string;
+    color: string;
   }
+
+  /**
+   * The default selection style.
+   */
+  export
+  const defaultSelectionStyle: ISelectionStyle = {
+    className: '',
+    displayName: '',
+    color: 'black'
+  };
 
   /**
    * A text selection.
@@ -125,7 +135,7 @@ namespace CodeEditor {
     /**
      * The style of this selection.
      */
-    readonly style?: ISelectionStyle;
+    readonly style: ISelectionStyle;
   }
 
   /**
@@ -615,7 +625,7 @@ namespace CodeEditor {
     /**
      * The default selection style for the editor.
      */
-    selectionStyle?: CodeEditor.ISelectionStyle;
+    selectionStyle?: Partial<CodeEditor.ISelectionStyle>;
 
     /**
      * The configuration options for the editor.
