@@ -37,10 +37,10 @@ class CompleterModel implements Completer.IModel {
   /**
    * The original completion request details.
    */
-  get original(): Completer.ITextState {
+  get original(): Completer.ITextState | null {
     return this._original;
   }
-  set original(newValue: Completer.ITextState) {
+  set original(newValue: Completer.ITextState | null) {
     let unchanged = this._original === newValue ||
       this._original && newValue &&
       JSONExt.deepEqual(newValue, this._original);
@@ -56,10 +56,10 @@ class CompleterModel implements Completer.IModel {
   /**
    * The current text change details.
    */
-  get current(): Completer.ITextState {
+  get current(): Completer.ITextState | null {
     return this._current;
   }
-  set current(newValue: Completer.ITextState) {
+  set current(newValue: Completer.ITextState | null) {
     let unchanged = this._current === newValue ||
       this._current && newValue &&
       JSONExt.deepEqual(newValue, this._current);
@@ -67,9 +67,11 @@ class CompleterModel implements Completer.IModel {
       return;
     }
 
+    let original = this._original;
+
     // Original request must always be set before a text change. If it isn't
     // the model fails silently.
-    if (!this.original) {
+    if (!original) {
       return;
     }
 
@@ -80,14 +82,12 @@ class CompleterModel implements Completer.IModel {
       return;
     }
 
-    this._current = newValue;
-    if (!this._current) {
+    let current = this._current = newValue;
+    if (!current) {
       this._stateChanged.emit(void 0);
       return;
     }
 
-    const original = this._original;
-    const current = this._current;
     const originalLine = original.text.split('\n')[original.line];
     const currentLine = current.text.split('\n')[current.line];
 
@@ -112,10 +112,10 @@ class CompleterModel implements Completer.IModel {
   /**
    * The cursor details that the API has used to return matching options.
    */
-  get cursor(): Completer.ICursorSpan {
+  get cursor(): Completer.ICursorSpan | null {
     return this._cursor;
   }
-  set cursor(newValue: Completer.ICursorSpan) {
+  set cursor(newValue: Completer.ICursorSpan | null) {
     // Original request must always be set before a cursor change. If it isn't
     // the model fails silently.
     if (!this.original) {
@@ -209,6 +209,10 @@ class CompleterModel implements Completer.IModel {
     const { column, line } = change;
     const { original } = this;
 
+    if (!original) {
+      return;
+    }
+
     // If a cursor change results in a the cursor being on a different line
     // than the original request, cancel.
     if (line !== original.line) {
@@ -223,10 +227,14 @@ class CompleterModel implements Completer.IModel {
       return;
     }
 
+    let { cursor, current } = this;
+    if (!cursor || !current) {
+      return;
+    }
+
     // If a cursor change results in the cursor being set to a position beyond
     // the end of the area that would be affected by completion, cancel.
-    const { current } = this;
-    const cursorDelta = this._cursor.end - this._cursor.start;
+    const cursorDelta = cursor.end - cursor.start;
     const originalLine = original.text.split('\n')[original.line];
     const currentLine = current.text.split('\n')[current.line];
     const inputDelta = currentLine.length - originalLine.length;
@@ -269,14 +277,14 @@ class CompleterModel implements Completer.IModel {
    *
    * @param patch - The patch string to apply to the original value.
    *
-   * @returns A patched text change or null if original value did not exist.
+   * @returns A patched text change or undefined if original value did not exist.
    */
-  createPatch(patch: string): Completer.IPatch {
+  createPatch(patch: string): Completer.IPatch | undefined {
     let original = this._original;
     let cursor = this._cursor;
 
     if (!original || !cursor) {
-      return null;
+      return undefined;
     }
 
     let prefix = original.text.substring(0, cursor.start);
@@ -340,11 +348,11 @@ class CompleterModel implements Completer.IModel {
     this._subsetMatch = false;
   }
 
-  private _current: Completer.ITextState = null;
-  private _cursor: Completer.ICursorSpan = null;
+  private _current: Completer.ITextState | null = null;
+  private _cursor: Completer.ICursorSpan | null = null;
   private _isDisposed = false;
   private _options: string[] = [];
-  private _original: Completer.ITextState = null;
+  private _original: Completer.ITextState | null = null;
   private _query = '';
   private _subsetMatch = false;
   private _stateChanged = new Signal<this, void>(this);
