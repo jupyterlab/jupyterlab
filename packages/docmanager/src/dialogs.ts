@@ -80,7 +80,7 @@ function renameFile(manager: IDocumentManager, oldPath: string, newPath: string)
     };
     return showDialog(options).then(button => {
       if (!button.accept) {
-        return null;
+        return Promise.resolve(null);
       }
       return manager.overwrite(oldPath, newPath);
     });
@@ -120,14 +120,6 @@ class RenameHandler extends Widget {
     let ext = PathExt.extname(oldPath);
     let value = this.inputNode.value = PathExt.basename(oldPath);
     this.inputNode.setSelectionRange(0, value.length - ext.length);
-  }
-
-  /**
-   * Dispose of the resources used by the widget.
-   */
-  dispose(): void {
-    this._manager = null;
-    super.dispose();
   }
 
   /**
