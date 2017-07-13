@@ -29,7 +29,7 @@
     "@jupyterlab/imageviewer": "^0.8.2",
     "@jupyterlab/inspector": "^0.8.2",
     "@jupyterlab/markdownviewer": "^0.7.0",
-    "@jupyterlab/notebook": "^0.8.3",
+    "@jupyterlab/notebook": "^0.8.4",
     "@jupyterlab/outputarea": "^0.8.2",
     "@jupyterlab/rendermime": "^0.8.2",
     "@jupyterlab/services": "^0.47.1",
