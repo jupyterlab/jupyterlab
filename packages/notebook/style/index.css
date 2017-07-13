@@ -43,7 +43,7 @@
   min-height: 50px;
   outline: none;
   overflow: auto;
-  background: var(--jp-layout-color1);
+  background: var(--md-grey-50);
 }
 
 
@@ -55,7 +55,7 @@
 
 
 .jp-Notebook .jp-Cell {
-  overflow: visible
+  overflow: visible;
 }
 
 
@@ -101,13 +101,17 @@
   color: var(--jp-cell-prompt-font-color-not-active);
 }
 
-.jp-Notebook .jp-Cell.jp-mod-active .jp-Cell-inputCollapser,
-.jp-Notebook .jp-Cell.jp-mod-active .jp-Cell-outputCollapser {
-  border-left: 2px solid var(--jp-brand-color1);
-  border-top: 2px solid var(--jp-brand-color1);
-  border-bottom: 2px solid var(--jp-brand-color1);
+.jp-Notebook .jp-Cell.jp-mod-active .jp-Cell-inputCollapser .jp-Collapser-child,
+.jp-Notebook .jp-Cell.jp-mod-active .jp-Cell-outputCollapser .jp-Collapser-child {
+  border-left: 4px solid var(--jp-brand-color1);
+  transition: .16s border-left;
 }
 
+
+.jp-Notebook .jp-Cell .jp-Cell-inputCollapser:hover .jp-Collapser-child,
+.jp-Notebook .jp-Cell .jp-Cell-outputCollapser:hover .jp-Collapser-child {
+  border-left: 20px solid var(--jp-brand-color1);
+}
 
 /* Command mode */
 
@@ -126,6 +130,13 @@
   border: var(--jp-border-width) solid var(--jp-cell-editor-border-color-edit);
   background: var(--jp-cell-editor-background-edit);
   box-shadow: inset 0 0 2px var(--md-blue-300);
+}
+
+
+/* Active mode */
+
+.jp-Notebook .jp-Cell.jp-mod-active {
+  box-shadow: 0px 1px 4px 1px rgba(0,0,0,.32);
 }
 
 
