@@ -763,7 +763,7 @@ describe('kernel', () => {
         }).catch(done);
       });
 
-      it("should emit a `'reconnecting'` status", (done) => {
+      it('should emit a `"reconnecting"` status', (done) => {
         let called = false;
         kernel.ready.then(() => {
           return kernel.reconnect();
@@ -778,7 +778,7 @@ describe('kernel', () => {
         });
       });
 
-      it("should emit a `'connected'` status", () => {
+      it('should emit a `"connected"` status', () => {
         let called = false;
         return kernel.ready.then(() => {
           kernel.statusChanged.connect(() => {
