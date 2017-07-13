@@ -169,7 +169,7 @@ class BreadCrumbs extends Widget {
   /**
    * Handle the `'click'` event for the widget.
    */
-  private _evtClick(event: MouseEvent) {
+  private _evtClick(event: MouseEvent): void {
     // Do nothing if it's not a left mouse press.
     if (event.button !== 0) {
       return;
@@ -189,7 +189,7 @@ class BreadCrumbs extends Widget {
         event.stopPropagation();
         return;
       }
-      node = node.parentElement;
+      node = node.parentElement as HTMLElement;
     }
   }
 
@@ -294,6 +294,7 @@ class BreadCrumbs extends Widget {
                 if (!model.isDisposed) {
                   return model.manager.rename(oldPath, newPath);
                 }
+                return Promise.reject('Model is disposed') as Promise<any>;
               });
             }
           });
@@ -305,9 +306,9 @@ class BreadCrumbs extends Widget {
     });
   }
 
-  private _model: FileBrowserModel = null;
-  private _crumbs: ReadonlyArray<HTMLElement> = null;
-  private _crumbSeps: ReadonlyArray<HTMLElement> = null;
+  private _model: FileBrowserModel;
+  private _crumbs: ReadonlyArray<HTMLElement>;
+  private _crumbSeps: ReadonlyArray<HTMLElement>;
 }
 
 
@@ -351,14 +352,15 @@ namespace Private {
    */
   export
   function updateCrumbs(breadcrumbs: ReadonlyArray<HTMLElement>, separators: ReadonlyArray<HTMLElement>, path: string) {
-    let node = breadcrumbs[0].parentNode;
+    let node = breadcrumbs[0].parentNode as HTMLElement;
 
     // Remove all but the home node.
-    while (node.firstChild.nextSibling) {
-      node.removeChild(node.firstChild.nextSibling);
+    let firstChild = node.firstChild as HTMLElement;
+    while (firstChild && firstChild.nextSibling) {
+      node.removeChild(firstChild.nextSibling);
     }
 
-    let localPath = path.split(':').pop();
+    let localPath = path.split(':').pop() as string;
     let localParts = localPath.split('/');
     let parts = path.split('/');
     if (parts.length > 2) {
