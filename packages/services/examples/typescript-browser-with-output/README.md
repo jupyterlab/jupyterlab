@@ -1,7 +1,7 @@
 Rendering Kernel Result in Browser
 ==================================
 
-This example demonstrates what is required to render the response recieved
+This example demonstrates what is required to render the response received
 by the services package within a browser.
 
 This example uses typescript.
