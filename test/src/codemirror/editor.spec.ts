@@ -107,7 +107,8 @@ describe('CodeMirrorEditor', () => {
     it('should be settable', () => {
       let style = {
         className: 'foo',
-        displayName: 'bar'
+        displayName: 'bar',
+        color: 'black'
       };
       editor.selectionStyle = style;
       expect(editor.selectionStyle).to.eql(style);
