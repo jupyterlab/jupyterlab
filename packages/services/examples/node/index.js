@@ -12,7 +12,7 @@ var xhr = require('xmlhttprequest');
 
 // Set the request and socket functions.
 var serverSettings = services.ServerConnection.makeSettings({
-  xhrFactory: function () { return new xhr.XMLHttpRequest() },
+  xhrFactory: function () { return new xhr.XMLHttpRequest(); },
   wsFactory: function (url, protocol) { return new ws(url, protocol); }
 });
 
