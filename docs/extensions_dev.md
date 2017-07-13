@@ -1,9 +1,12 @@
 # Extensions Developer Guide
 
-JupyterLab can be extended in two ways via:
+JupyterLab can be extended in three ways via:
 
 - **application plugins (top level):** Application plugins extend the
-  functionality of JupyterLab itself, and **this tutorial focuses on them.**
+  functionality of JupyterLab itself.
+- **mime renderer extension (top level):**  Mime Renderer extensions are 
+  a convenience for creating an extension that can render mime data and
+  potentially render files of a given type. 
 - document widget extensions (lower level): Document widget extensions extend
   the functionality of document widgets added to the application, and we cover
   them in the "Documents" tutorial.
@@ -36,8 +39,6 @@ The default plugins in the JupyterLab application include:
 - [Console](https://github.com/jupyterlab/jupyterlab/blob/master/packages/console-extension/src/index.ts) - Adds the ability to launch Jupyter Console instances for
 interactive kernel console sessions.
 - [Services](https://github.com/jupyterlab/jupyterlab/blob/master/packages/services-extension/src/index.ts) - An application-specific interface to `@jupyterlab/services`.
-- [RenderMime](https://github.com/jupyterlab/jupyterlab/blob/master/packages/rendermime/src) - The registry for adding kernel `display_data` renderers.
-- [Document Registry](https://github.com/jupyterlab/jupyterlab/tree/master/packages/docregistry/src) - Used to add functionality around widgets backed by files.
 
 ## Application Object
 The JupyterLab Application object is given to each plugin in
@@ -140,5 +141,23 @@ local folder path on the user's machine or a provided tarball.  Any
 valid `npm install` specifier can be used in `jupyter labextension install` (e.g. `foo@latest`, `bar@3.0.0.0`, `path/to/folder`, and `path/to/tar.gz`).
 
 
+## Mime Renderer Extensions
+Mime Renderer extensions are a convenience for creating an extension that can 
+render mime data and potentially render files of a given type. 
 
+Mime renderer extensions are more declarative than standard extensions.
+The extension is treated the same from the command line perspective (`install` 
+and `link`), but it does not directly create JupyterLab plugins.  Instead it 
+exports an interface given in the [rendermime-interfaces](http://jupyterlab.github.io/jupyterlab/interfaces/_rendermime_interfaces_src_index_.irendermime.iextension.html) 
+package.
 
+The JupyterLab repo has an example mime renderer extension for [vega2](https://github.com/jupyterlab/jupyterlab/tree/master/packages/vega2-extension).  It
+provides a mime renderer for [vega](https://vega.github.io/vega/) data and 
+registers itself as a document renderer for vega file types.
+
+The `rendermime-interfaces` package is intended to be the only JupyterLab
+package needed to create a mime renderer extension (using the interfaces
+in TypeScript or as a form of documentation if using plain JavaScript).
+
+The only other difference from a standard extension is that has a `jupyterlab`
+key in its `package.json` with `"mimeRenderer": true` metadata.
