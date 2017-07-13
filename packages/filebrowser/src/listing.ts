@@ -1407,10 +1407,14 @@ class DirListing extends Widget {
    * Handle a `fileChanged` signal from the model.
    */
   private _onFileChanged(sender: FileBrowserModel, args: Contents.IChangedArgs) {
-    let name = args.newValue && args.newValue.name;
+    let newValue = args.newValue;
+    if (!newValue) {
+      return;
+    }
+    let name = args.newValue.name;
     if (args.type === 'new' && name) {
       this.selectItemByName(name).then(() => {
-        if (!this.isDisposed && args.newValue === 'directory') {
+        if (!this.isDisposed && newValue.type === 'directory') {
           this._doRename();
         }
       });
