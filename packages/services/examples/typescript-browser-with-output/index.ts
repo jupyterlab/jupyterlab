@@ -8,17 +8,10 @@
 import 'es6-promise';
 
 import { OutputArea, OutputAreaModel } from '@jupyterlab/outputarea';
-
-import {
-  RenderMime, defaultRendererFactories
-} from '@jupyterlab/rendermime';
-
-import {
-  Kernel
-} from '@jupyterlab/services';
+import { RenderMime, defaultRendererFactories } from '@jupyterlab/rendermime';
+import { Kernel } from '@jupyterlab/services';
 
 function main() {
-  let kernel: Kernel.IKernel;
   let renderMime: RenderMime;
   let model: OutputAreaModel;
   let outputAreaOptions: OutputArea.IOptions;
@@ -45,11 +38,9 @@ function main() {
 
   outputArea = new OutputArea(outputAreaOptions);
 
-  Kernel.startNew().then(newKernel => {
-    kernel = newKernel;
-  }).then(() => {
+  Kernel.startNew().then(kernel => {
     outputArea.future = kernel.requestExecute({ code: testcode });
-    document.getElementById("outputarea").appendChild(outputArea.node);
+    document.getElementById('outputarea').appendChild(outputArea.node);
   });
 }
 
