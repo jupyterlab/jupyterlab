@@ -9,8 +9,8 @@ This example uses typescript.
 Steps to build the example:
 
     cd path/to/example
-    yarn
-    yarn build
+    npm install
+    npm run build
     
 Steps to run the example:
 
