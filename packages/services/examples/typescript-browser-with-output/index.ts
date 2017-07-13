@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------
-| Copyright (c) 2014-2015, Jupyter Development Team.
+| Copyright (c) 2014-2017, Jupyter Development Team.
 |
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
@@ -9,29 +9,20 @@ import 'es6-promise';
 
 import { OutputArea, OutputAreaModel } from '@jupyterlab/outputarea';
 
-import { 
+import {
   RenderMime, defaultRendererFactories
 } from '@jupyterlab/rendermime';
 
 import {
-  Kernel, ServerConnection, Session
+  Kernel
 } from '@jupyterlab/services';
 
 function main() {
-  let settings: ServerConnection.ISettings
-  let sessionOptions: Session.IOptions
-  let session: Session.ISession;
-  let kernel: Kernel.IKernel
-
-
-  let renderMimeOptions: RenderMime.IOptions
-  let renderMime: RenderMime
-  let model: OutputAreaModel
-  let outputAreaOptions: OutputArea.IOptions
-  let outputArea: OutputArea
-
-  let promise: Promise<Kernel.IFuture>
-  let future: Kernel.IFuture
+  let kernel: Kernel.IKernel;
+  let renderMime: RenderMime;
+  let model: OutputAreaModel;
+  let outputAreaOptions: OutputArea.IOptions;
+  let outputArea: OutputArea;
 
   let testcode = [
     'import numpy as np',
@@ -42,36 +33,24 @@ function main() {
     'print(x)',
     'print(y)',
     'plt.plot(x, y)'
-  ].join('\n')
+  ].join('\n');
 
-  settings = ServerConnection.makeSettings({})
-  sessionOptions = {
-    kernelName: 'python3',
-    serverSettings: settings
-  };
-
-  model = new OutputAreaModel()
-  renderMime = new RenderMime()
-    
-  for (let factory of defaultRendererFactories) {
-    renderMime.addFactory(factory)
-  }
+  model = new OutputAreaModel();
+  renderMime = new RenderMime({ initialFactories: defaultRendererFactories });
 
   outputAreaOptions = {
     model: model,
     rendermime: renderMime
-  }
+  };
 
-  outputArea = new OutputArea(outputAreaOptions)
-    
-  Kernel.startNew(this.options).then(newKernel => {
-    kernel = newKernel
+  outputArea = new OutputArea(outputAreaOptions);
+
+  Kernel.startNew().then(newKernel => {
+    kernel = newKernel;
   }).then(() => {
-    future = kernel.requestExecute({ code: testcode })
-  }).then(() => {
-    outputArea.future = future
-    document.getElementById("outputarea").appendChild(outputArea.node)
-  })
+    outputArea.future = kernel.requestExecute({ code: testcode });
+    document.getElementById("outputarea").appendChild(outputArea.node);
+  });
 }
 
 window.onload = main;
