@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IStateDB, PageConfig, PathExt
+  IStateDB, PageConfig, URLExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -41,10 +41,6 @@ import {
 import {
   Menu, Widget
 } from '@phosphor/widgets';
-
-import {
-  URLExt
-} from '@jupyterlab/coreutils';
 
 
 
@@ -449,6 +445,11 @@ function activateNotebookHandler(app: JupyterLab, services: IServiceManager, mai
       for (let name in specs.kernelspecs) {
         let displayName = specs.kernelspecs[name].display_name;
         let rank = name === specs.default ? 0 : Infinity;
+        let kernelIconUrl = specs.kernelspecs[name].resources['logo-64x64'];
+        if (kernelIconUrl) {
+          let index = kernelIconUrl.indexOf('kernelspecs');
+          kernelIconUrl = baseUrl + kernelIconUrl.slice(index);
+        }
         launcher.add({
           displayName,
           category: 'Notebook',
@@ -456,7 +457,7 @@ function activateNotebookHandler(app: JupyterLab, services: IServiceManager, mai
           iconClass: 'jp-NotebookRunningIcon',
           callback,
           rank,
-          kernelIconUrl: baseUrl + PathExt.removeSlash(specs.kernelspecs[name].resources["logo-64x64"])
+          kernelIconUrl
         });
       }
     });
