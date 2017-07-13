@@ -120,16 +120,17 @@ Follow the package install instructions first.
 npm install --save xmlhttprequest ws
 ```
 
-Use `XMLHttpRequest` and `WebSocket` in the server settings (in ES6 syntax):
+Use `XMLHttpRequest` and `WebSocket` in the server settings (in ES5 syntax):
 
-```typescript
-import { Kernel, ServerConnection } from '@jupyterlab/services';
-import { XMLHttpRequest } from "xmlhttprequest";
-import { default as WebSocket } from 'ws';
+```javascript
+var services = require('@jupyterlab/services');
+var ws = require('ws');
+var xhr = require('xmlhttprequest');
 
 
-let serverSettings = ServerConnection.makeSettings({
-  xhrFactory: function () { return new xhr.XMLHttpRequest() },
+// Set the request and socket functions.
+var serverSettings = services.ServerConnection.makeSettings({
+  xhrFactory: function () { return new xhr.XMLHttpRequest(); },
   wsFactory: function (url, protocol) { return new ws(url, protocol); }
 });
 Kernel.startNew({ serverSettings }).then(...);
