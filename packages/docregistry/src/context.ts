@@ -115,12 +115,13 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   }
 
   /**
-   * The current contents model associated with the document
+   * The current contents model associated with the document.
    *
    * #### Notes
-   * The model will have an  empty `contents` field.
+   * The contents model will be null until the context is populated.
+   * It will have an  empty `contents` field.
    */
-  get contentsModel(): Contents.IModel {
+  get contentsModel(): Contents.IModel | null {
     return this._contentsModel;
   }
 
@@ -458,7 +459,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   private _modelDB: IModelDB;
   private _path = '';
   private _factory: DocumentRegistry.IModelFactory<T>;
-  private _contentsModel: Contents.IModel;
+  private _contentsModel: Contents.IModel | null = null;
   private _readyPromise: Promise<void>;
   private _populatedPromise = new PromiseDelegate<void>();
   private _isPopulated = false;

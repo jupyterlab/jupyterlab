@@ -58,16 +58,17 @@ class DocumentRegistry implements IDisposable {
    * Get whether the document registry has been disposed.
    */
   get isDisposed(): boolean {
-    return this._widgetFactories === null;
+    return this._isDisposed;
   }
 
   /**
    * Dispose of the resources held by the document registery.
    */
   dispose(): void {
-    if (this._widgetFactories === null) {
+    if (this.isDisposed) {
       return;
     }
+    this._isDisposed = true;
     for (let modelName in this._modelFactories) {
       this._modelFactories[modelName].dispose();
     }
@@ -520,6 +521,7 @@ class DocumentRegistry implements IDisposable {
   private _creators: DocumentRegistry.IFileCreator[] = [];
   private _extenders: { [key: string] : DocumentRegistry.WidgetExtension[] } = Object.create(null);
   private _changed = new Signal<this, DocumentRegistry.IChangedArgs>(this);
+  private _isDisposed = false;
 }
 
 
@@ -649,10 +651,10 @@ namespace DocumentRegistry {
      * The current contents model associated with the document
      *
      * #### Notes
-     * The model will have an empty `contents` field.
-     * It will be `null` until the context is ready.
+     * The contents model will be null until the context is ready.
+     * It will have an  empty `contents` field.
      */
-    readonly contentsModel: Contents.IModel;
+    readonly contentsModel: Contents.IModel | null;
 
     /**
      * Whether the context is ready.
