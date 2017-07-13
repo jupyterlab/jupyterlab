@@ -8,11 +8,17 @@
     "moduleResolution": "node",
     "target": "ES5",
     "outDir": "./lib",
-    "lib": ["ES5", "ES2015.Collection", "ES2015.Promise", "DOM"],
-    "types": ["node", "text-encoding"],
+    "lib": [
+      "ES5",
+      "ES2015.Collection",
+      "ES2015.Promise",
+      "DOM"
+    ],
     "baseUrl": ".",
     "paths": {
-      "@jupyterlab/*": ["../*/src"]
+      "@jupyterlab/*": [
+        "../*/src"
+      ]
     },
     "jsx": "react",
     "jsxFactory": "h"
