@@ -101,7 +101,7 @@ describe('CodeMirrorEditor', () => {
   describe('#selectionStyle', () => {
 
     it('should be the selection style of the editor', () => {
-      expect(editor.selectionStyle).to.eql({});
+      expect(editor.selectionStyle).to.eql(CodeEditor.defaultSelectionStyle);
     });
 
     it('should be settable', () => {
