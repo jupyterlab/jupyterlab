@@ -158,17 +158,6 @@ class FileBrowser extends Widget {
   readonly toolbar: Toolbar<Widget>;
 
   /**
-   * Dispose of the resources held by the file browser.
-   */
-  dispose() {
-    this._crumbs = null;
-    this._listing = null;
-    this._manager = null;
-    this._model = null;
-    super.dispose();
-  }
-
-  /**
    * Create an iterator over the listing's selected items.
    *
    * @returns A new iterator over the listing's selected items.
@@ -264,7 +253,7 @@ class FileBrowser extends Widget {
    *
    * @returns The path to the selected file.
    */
-  pathForClick(event: MouseEvent): string {
+  pathForClick(event: MouseEvent): string | undefined {
     return this._listing.pathForClick(event);
   }
 
@@ -281,10 +270,9 @@ class FileBrowser extends Widget {
     });
   }
 
-  private _crumbs: BreadCrumbs | null = null;
-  private _listing: DirListing | null = null;
-  private _manager: DocumentManager | null = null;
-  private _model: FileBrowserModel | null = null;
+  private _crumbs: BreadCrumbs;
+  private _listing: DirListing;
+  private _manager: DocumentManager;
   private _showingError = false;
 }
 

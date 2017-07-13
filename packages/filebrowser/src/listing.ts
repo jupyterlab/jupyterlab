@@ -277,12 +277,9 @@ class DirListing extends Widget {
    * Dispose of the resources held by the directory listing.
    */
   dispose(): void {
-    this._model = null;
-    this._items = null;
-    this._editNode = null;
-    this._drag = null;
-    this._dragData = null;
-    this._manager = null;
+    this._items.length = 0;
+    this._sortedItems.length = 0;
+    this._clipboard.length = 0;
     super.dispose();
   }
 
@@ -606,12 +603,13 @@ class DirListing extends Widget {
    *
    * @returns The path to the selected file.
    */
-  pathForClick(event: MouseEvent): string {
+  pathForClick(event: MouseEvent): string | undefined {
     let items = this._sortedItems;
     let index = Private.hitTestNodes(this._items, event.clientX, event.clientY);
     if (index !== -1) {
       return items[index].path;
     }
+    return undefined;
   }
 
   /**
@@ -747,7 +745,7 @@ class DirListing extends Widget {
     // Remove any excess item nodes.
     while (nodes.length > items.length) {
       let node = nodes.pop();
-      content.removeChild(node);
+      content.removeChild(node!);
     }
 
     // Add any missing item nodes.
@@ -914,7 +912,7 @@ class DirListing extends Widget {
     event.stopPropagation();
 
     // Bail if we are the one dragging.
-    if (this._drag) {
+    if (this._drag || !this._dragData) {
       return;
     }
 
@@ -1120,7 +1118,7 @@ class DirListing extends Widget {
     const manager = this._manager;
 
     // Handle the items.
-    const promises: Promise<Contents.IModel>[] = [];
+    const promises: Promise<Contents.IModel | null>[] = [];
     const paths = event.mimeData.getData(CONTENTS_MIME) as string[];
     for (let path of paths) {
       let name = PathExt.basename(path);
@@ -1143,7 +1141,7 @@ class DirListing extends Widget {
     let selectedNames = Object.keys(this._selection);
     let source = this._items[index];
     let items = this._sortedItems;
-    let item: Contents.IModel = null;
+    let item: Contents.IModel | undefined;
 
     // If the source node is not selected, use just that node.
     if (!source.classList.contains(SELECTED_CLASS)) {
@@ -1152,6 +1150,10 @@ class DirListing extends Widget {
     } else if (selectedNames.length === 1) {
       let name = selectedNames[0];
       item = find(items, value => value.name === name);
+    }
+
+    if (!item) {
+      return;
     }
 
     // Create the drag image.
@@ -1171,6 +1173,9 @@ class DirListing extends Widget {
     this._drag.mimeData.setData(CONTENTS_MIME, paths);
     if (item && item.type !== 'directory') {
       this._drag.mimeData.setData(FACTORY_MIME, () => {
+        if (!item) {
+          return;
+        }
         let path = item.path;
         let widget = this._manager.findWidget(path);
         if (!widget) {
@@ -1334,7 +1339,7 @@ class DirListing extends Widget {
       }
       if (this.isDisposed) {
         this._inRename = false;
-        return;
+        return Promise.reject('Disposed') as Promise<string>;
       }
 
       const manager = this._manager;
@@ -1348,7 +1353,7 @@ class DirListing extends Widget {
       }).then(() => {
         if (this.isDisposed) {
           this._inRename = false;
-          return;
+          return Promise.reject('Disposed') as Promise<string>;
         }
         this.selectItemByName(newName);
         this._inRename = false;
@@ -1402,9 +1407,14 @@ class DirListing extends Widget {
    * Handle a `fileChanged` signal from the model.
    */
   private _onFileChanged(sender: FileBrowserModel, args: Contents.IChangedArgs) {
-    if (args.type === 'new') {
-      this.selectItemByName(args.newValue.name).then(() => {
-        if (!this.isDisposed && args.newValue === 'directory') {
+    let newValue = args.newValue;
+    if (!newValue) {
+      return;
+    }
+    let name = args.newValue.name;
+    if (args.type === 'new' && name) {
+      this.selectItemByName(name).then(() => {
+        if (!this.isDisposed && newValue.type === 'directory') {
           this._doRename();
         }
       });
@@ -1423,23 +1433,23 @@ class DirListing extends Widget {
     this.selectItemByName(basename);
   }
 
-  private _model: FileBrowserModel = null;
-  private _editNode: HTMLInputElement = null;
+  private _model: FileBrowserModel;
+  private _editNode: HTMLInputElement;
   private _items: HTMLElement[] = [];
   private _sortedItems: Contents.IModel[] = [];
   private _sortState: DirListing.ISortState = { direction: 'ascending', key: 'name' };
-  private _drag: Drag = null;
-  private _dragData: { pressX: number, pressY: number, index: number } = null;
+  private _drag: Drag | null = null;
+  private _dragData: { pressX: number, pressY: number, index: number } | null = null;
   private _selectTimer = -1;
   private _noSelectTimer = -1;
   private _isCut = false;
   private _prevPath = '';
   private _clipboard: string[] = [];
-  private _manager: IDocumentManager = null;
+  private _manager: IDocumentManager;
   private _softSelection = '';
   private _inContext = false;
   private _selection: { [key: string]: boolean; } = Object.create(null);
-  private _renderer: DirListing.IRenderer = null;
+  private _renderer: DirListing.IRenderer;
   private _searchPrefix: string = '';
   private _searchPrefixTimer = -1;
   private _inRename = false;
@@ -1632,7 +1642,7 @@ namespace DirListing {
         name.classList.remove(DESCENDING_CLASS);
         return state;
       }
-      return void 0;
+      return state;
     }
 
     /**

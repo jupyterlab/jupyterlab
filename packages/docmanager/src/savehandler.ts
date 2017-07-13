@@ -36,7 +36,8 @@ class SaveHandler implements IDisposable {
   constructor(options: SaveHandler.IOptions) {
     this._manager = options.manager;
     this._context = options.context;
-    this._minInterval = options.saveInterval * 1000 || 120000;
+    let interval = options.saveInterval || 120;
+    this._minInterval = interval * 1000;
     this._interval = this._minInterval;
     this._warnOnConflict = !this._context.model.modelDB.isCollaborative;
     // Restart the timer when the contents model is updated.
@@ -68,17 +69,17 @@ class SaveHandler implements IDisposable {
    * Get whether the save handler is disposed.
    */
   get isDisposed(): boolean {
-    return this._context === null;
+    return this._isDisposed;
   }
 
   /**
    * Dispose of the resources used by the save handler.
    */
   dispose(): void {
-    if (this._context === null) {
+    if (this.isDisposed) {
       return;
     }
-    this._context = null;
+    this._isDisposed = true;
     clearTimeout(this._autosaveTimer);
     Signal.clearData(this);
   }
@@ -199,10 +200,11 @@ class SaveHandler implements IDisposable {
   private _minInterval = -1;
   private _interval = -1;
   private _warnOnConflict = true;
-  private _context: DocumentRegistry.Context = null;
-  private _manager: ServiceManager.IManager = null;
+  private _context: DocumentRegistry.Context;
+  private _manager: ServiceManager.IManager;
   private _isActive = false;
   private _inDialog = false;
+  private _isDisposed = false;
 }
 
 

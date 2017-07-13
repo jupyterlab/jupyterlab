@@ -201,8 +201,8 @@ describe('@jupyterlab/docmanager', () => {
         expect(manager.contextForWidget(widget)).to.be(context);
       });
 
-      it('should return null if not tracked', () => {
-        expect(manager.contextForWidget(new Widget())).to.be(null);
+      it('should return undefined if not tracked', () => {
+        expect(manager.contextForWidget(new Widget())).to.be(undefined);
       });
 
     });

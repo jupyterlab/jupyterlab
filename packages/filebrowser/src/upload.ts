@@ -87,8 +87,8 @@ class Uploader extends ToolbarButton {
    */
   private _onInputClicked(): void {
     // In order to allow repeated uploads of the same file (with delete in between),
-    // we need to null out the input value to trigger a change event.
-    this._input.value = null;
+    // we need to clear the input value to trigger a change event.
+    this._input.value = '';
   }
 
   /**
@@ -116,7 +116,7 @@ class Uploader extends ToolbarButton {
     };
     return showDialog(options).then(button => {
       if (this.isDisposed || button.accept) {
-        return;
+        return Promise.resolve(void 0);
       }
       return this.model.upload(file, true);
     });

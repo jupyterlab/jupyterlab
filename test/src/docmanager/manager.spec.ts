@@ -277,7 +277,7 @@ describe('@jupyterlab/docmanager', () => {
 
       it('should fail to find the context for the widget', () => {
         widget = new Widget();
-        expect(manager.contextForWidget(widget)).to.be(null);
+        expect(manager.contextForWidget(widget)).to.be(undefined);
       });
 
     });
