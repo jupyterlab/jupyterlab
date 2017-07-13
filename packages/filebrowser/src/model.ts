@@ -455,7 +455,7 @@ class FileBrowserModel implements IDisposable {
   private _state: IStateDB | null = null;
   private _timeoutId = -1;
   private _driveName: string;
-  private _isDisposed = true;
+  private _isDisposed = false;
 }
 
 
