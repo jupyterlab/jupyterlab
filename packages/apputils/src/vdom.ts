@@ -38,7 +38,6 @@ abstract class VDomRenderer<T extends VDomRenderer.IModel | null> extends Widget
    * Set the model and fire changed signals.
    */
   set model(newValue: T | null) {
-    newValue = newValue || null;
     if (this._model === newValue) {
       return;
     }
@@ -47,8 +46,8 @@ abstract class VDomRenderer<T extends VDomRenderer.IModel | null> extends Widget
       this._model.stateChanged.disconnect(this.update, this);
     }
     this._model = newValue;
-    if (this._model) {
-      this._model.stateChanged.connect(this.update, this);
+    if (newValue) {
+      newValue.stateChanged.connect(this.update, this);
     }
     this.update();
     this._modelChanged.emit(void 0);
@@ -81,7 +80,7 @@ abstract class VDomRenderer<T extends VDomRenderer.IModel | null> extends Widget
   }
 
   /* Called after the widget is attached to the DOM
-   * 
+   *
    * Make sure the widget is rendered, even if the model has not changed.
    */
   protected onAfterAttach(msg: Message): void {

@@ -226,7 +226,9 @@ class ApplicationShell extends Widget {
 
     // In case the active widget in the dock panel is *not* the active widget
     // of the application, defer to the application.
-    dock.activateWidget(this.currentWidget);
+    if (this.currentWidget) {
+      dock.activateWidget(this.currentWidget);
+    }
 
     // Set the mode data attribute on the document body.
     document.body.setAttribute(MODE_ATTRIBUTE, mode);
@@ -278,7 +280,9 @@ class ApplicationShell extends Widget {
 
     if (ci < current.titles.length - 1) {
       current.currentIndex += 1;
-      current.currentTitle.owner.activate();
+      if (current.currentTitle) {
+        current.currentTitle.owner.activate();
+      }
       return;
     }
 
@@ -286,7 +290,9 @@ class ApplicationShell extends Widget {
       let nextBar = this._adjacentBar('next');
       if (nextBar) {
         nextBar.currentIndex = 0;
-        nextBar.currentTitle.owner.activate();
+        if (nextBar.currentTitle) {
+          nextBar.currentTitle.owner.activate();
+        }
       }
     }
   }
@@ -307,7 +313,9 @@ class ApplicationShell extends Widget {
 
     if (ci > 0) {
       current.currentIndex -= 1;
-      current.currentTitle.owner.activate();
+      if (current.currentTitle) {
+        current.currentTitle.owner.activate();
+      }
       return;
     }
 
@@ -316,7 +324,9 @@ class ApplicationShell extends Widget {
       if (prevBar) {
         let len = prevBar.titles.length;
         prevBar.currentIndex = len - 1;
-        prevBar.currentTitle.owner.activate();
+        if (prevBar.currentTitle) {
+          prevBar.currentTitle.owner.activate();
+        }
       }
     }
   }
@@ -333,7 +343,7 @@ class ApplicationShell extends Widget {
       return;
     }
     let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
-    this._leftHandler.addWidget(widget, rank);
+    this._leftHandler.addWidget(widget, rank!);
     this._layoutModified.emit(void 0);
   }
 
@@ -355,7 +365,7 @@ class ApplicationShell extends Widget {
 
     let ref: Widget | null = null;
     if (options.ref) {
-      ref = find(dock.widgets(), value => value.id === options.ref);
+      ref = find(dock.widgets(), value => value.id === options.ref!) || null;
     }
 
     dock.addWidget(widget, { mode: 'tab-after', ref });
@@ -374,7 +384,7 @@ class ApplicationShell extends Widget {
       return;
     }
     let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
-    this._rightHandler.addWidget(widget, rank);
+    this._rightHandler.addWidget(widget, rank!);
     this._onLayoutModified();
   }
 
@@ -511,7 +521,7 @@ class ApplicationShell extends Widget {
       case 'top':
         return this._topPanel.children();
       default:
-        break;
+        throw new Error('Invalid area');
     }
   }
 
@@ -767,10 +777,13 @@ namespace Private {
    * Removes widgets that have been disposed from an area config, mutates area.
    */
   export
-  function normalizeAreaConfig(parent: DockPanel, area: DockLayout.AreaConfig): void {
+  function normalizeAreaConfig(parent: DockPanel, area?: DockLayout.AreaConfig | null): void {
+    if (!area) {
+      return;
+    }
     if (area.type === 'tab-area') {
       area.widgets = area.widgets
-        .filter(widget => !widget.isDisposed && widget.parent === parent);
+        .filter(widget => !widget.isDisposed && widget.parent === parent) as Widget[];
       return;
     }
     area.children.forEach(child => { normalizeAreaConfig(parent, child); });
@@ -894,7 +907,7 @@ namespace Private {
     /**
      * Find the widget which owns the given title, or `null`.
      */
-    private _findWidgetByTitle(title: Title<Widget>): Widget {
+    private _findWidgetByTitle(title: Title<Widget>): Widget | null {
       let item = find(this._items, value => value.widget.title === title);
       return item ? item.widget : null;
     }
@@ -902,7 +915,7 @@ namespace Private {
     /**
      * Find the widget with the given id, or `null`.
      */
-    private _findWidgetByID(id: string): Widget {
+    private _findWidgetByID(id: string): Widget | null {
       let item = find(this._items, value => value.widget.id === id);
       return item ? item.widget : null;
     }
@@ -919,8 +932,8 @@ namespace Private {
      * Handle the `currentChanged` signal from the sidebar.
      */
     private _onCurrentChanged(sender: TabBar<Widget>, args: TabBar.ICurrentChangedArgs<Widget>): void {
-      const oldWidget = this._findWidgetByTitle(args.previousTitle);
-      const newWidget = this._findWidgetByTitle(args.currentTitle);
+      const oldWidget = args.previousTitle ? this._findWidgetByTitle(args.previousTitle) : null;
+      const newWidget = args.currentTitle ? this._findWidgetByTitle(args.currentTitle) : null;
       if (oldWidget) {
         oldWidget.hide();
       }

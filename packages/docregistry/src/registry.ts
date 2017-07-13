@@ -58,31 +58,25 @@ class DocumentRegistry implements IDisposable {
    * Get whether the document registry has been disposed.
    */
   get isDisposed(): boolean {
-    return this._widgetFactories === null;
+    return this._isDisposed;
   }
 
   /**
    * Dispose of the resources held by the document registery.
    */
   dispose(): void {
-    if (this._widgetFactories === null) {
+    if (this.isDisposed) {
       return;
     }
-    let widgetFactories = this._widgetFactories;
-    let modelFactories = this._modelFactories;
-    let extenders = this._extenders;
-    this._widgetFactories = null;
-    this._modelFactories = null;
-    this._extenders = null;
-
-    for (let modelName in modelFactories) {
-      modelFactories[modelName].dispose();
+    this._isDisposed = true;
+    for (let modelName in this._modelFactories) {
+      this._modelFactories[modelName].dispose();
     }
-    for (let widgetName in widgetFactories) {
-      widgetFactories[widgetName].dispose();
+    for (let widgetName in this._widgetFactories) {
+      this._widgetFactories[widgetName].dispose();
     }
-    for (let widgetName in extenders) {
-      extenders[widgetName].length = 0;
+    for (let widgetName in this._extenders) {
+      this._extenders[widgetName].length = 0;
     }
 
     this._fileTypes.length = 0;
@@ -109,10 +103,10 @@ class DocumentRegistry implements IDisposable {
     let name = factory.name.toLowerCase();
     if (this._widgetFactories[name]) {
       console.warn(`Duplicate registered factory ${name}`);
-      return new DisposableDelegate(null);
+      return new DisposableDelegate(Private.noOp);
     }
     this._widgetFactories[name] = factory;
-    for (let ext of factory.defaultFor) {
+    for (let ext of factory.defaultFor || []) {
       if (factory.fileExtensions.indexOf(ext) === -1) {
         continue;
       }
@@ -174,7 +168,7 @@ class DocumentRegistry implements IDisposable {
     let name = factory.name.toLowerCase();
     if (this._modelFactories[name]) {
       console.warn(`Duplicate registered factory ${name}`);
-      return new DisposableDelegate(null);
+      return new DisposableDelegate(Private.noOp);
     }
     this._modelFactories[name] = factory;
     this._changed.emit({
@@ -214,19 +208,19 @@ class DocumentRegistry implements IDisposable {
     let index = ArrayExt.firstIndexOf(extenders, extension);
     if (index !== -1) {
       console.warn(`Duplicate registered extension for ${widgetName}`);
-      return new DisposableDelegate(null);
+      return new DisposableDelegate(Private.noOp);
     }
     this._extenders[widgetName].push(extension);
     this._changed.emit({
       type: 'widgetExtension',
-      name: null,
+      name: widgetName,
       change: 'added'
     });
     return new DisposableDelegate(() => {
       ArrayExt.removeFirstOf(this._extenders[widgetName], extension);
       this._changed.emit({
         type: 'widgetExtension',
-        name: null,
+        name: widgetName,
         change: 'removed'
       });
     });
@@ -360,8 +354,13 @@ class DocumentRegistry implements IDisposable {
     // model factories are registered.
     let factoryList: DocumentRegistry.WidgetFactory[] = [];
     factories.forEach(name => {
-      if (this._widgetFactories[name].modelName in this._modelFactories) {
-        factoryList.push(this._widgetFactories[name]);
+      let factory = this._widgetFactories[name];
+      if (!factory) {
+        return;
+      }
+      let modelName = factory.modelName || 'text';
+      if (modelName in this._modelFactories) {
+        factoryList.push(factory);
       }
     });
 
@@ -444,7 +443,7 @@ class DocumentRegistry implements IDisposable {
    *
    * @returns A widget factory instance.
    */
-  getWidgetFactory(widgetName: string): DocumentRegistry.WidgetFactory {
+  getWidgetFactory(widgetName: string): DocumentRegistry.WidgetFactory | undefined {
     return this._widgetFactories[widgetName.toLowerCase()];
   }
 
@@ -455,14 +454,14 @@ class DocumentRegistry implements IDisposable {
    *
    * @returns A model factory instance.
    */
-  getModelFactory(name: string): DocumentRegistry.ModelFactory {
+  getModelFactory(name: string): DocumentRegistry.ModelFactory | undefined {
     return this._modelFactories[name.toLowerCase()];
   }
 
   /**
    * Get a file type by name.
    */
-  getFileType(name: string): DocumentRegistry.IFileType {
+  getFileType(name: string): DocumentRegistry.IFileType | undefined {
     name = name.toLowerCase();
     return find(this._fileTypes, fileType => {
       return fileType.name.toLowerCase() === name;
@@ -472,7 +471,7 @@ class DocumentRegistry implements IDisposable {
   /**
    * Get a creator by name.
    */
-  getCreator(name: string): DocumentRegistry.IFileCreator {
+  getCreator(name: string): DocumentRegistry.IFileCreator | undefined {
     name = name.toLowerCase();
     return find(this._creators, creator => {
       return creator.name.toLowerCase() === name;
@@ -490,14 +489,14 @@ class DocumentRegistry implements IDisposable {
    *
    * @returns A kernel preference.
    */
-  getKernelPreference(ext: string, widgetName: string, kernel?: Partial<Kernel.IModel>): IClientSession.IKernelPreference {
+  getKernelPreference(ext: string, widgetName: string, kernel?: Partial<Kernel.IModel>): IClientSession.IKernelPreference | undefined {
     ext = Private.normalizeExtension(ext);
     widgetName = widgetName.toLowerCase();
     let widgetFactory = this._widgetFactories[widgetName];
     if (!widgetFactory) {
       return void 0;
     }
-    let modelFactory = this.getModelFactory(widgetFactory.modelName);
+    let modelFactory = this.getModelFactory(widgetFactory.modelName || 'text');
     if (!modelFactory) {
       return void 0;
     }
@@ -522,6 +521,7 @@ class DocumentRegistry implements IDisposable {
   private _creators: DocumentRegistry.IFileCreator[] = [];
   private _extenders: { [key: string] : DocumentRegistry.WidgetExtension[] } = Object.create(null);
   private _changed = new Signal<this, DocumentRegistry.IChangedArgs>(this);
+  private _isDisposed = false;
 }
 
 
@@ -651,10 +651,10 @@ namespace DocumentRegistry {
      * The current contents model associated with the document
      *
      * #### Notes
-     * The model will have an empty `contents` field.
-     * It will be `null` until the context is ready.
+     * The contents model will be null until the context is ready.
+     * It will have an  empty `contents` field.
      */
-    readonly contentsModel: Contents.IModel;
+    readonly contentsModel: Contents.IModel | null;
 
     /**
      * Whether the context is ready.
@@ -938,7 +938,7 @@ namespace DocumentRegistry {
     readonly type: 'widgetFactory' | 'modelFactory' | 'widgetExtension' | 'fileCreator' | 'fileType';
 
     /**
-     * The name of the item.
+     * The name of the item or the widget factory being extended.
      */
     readonly name: string;
 
@@ -987,4 +987,10 @@ namespace Private {
     }
     return extension.toLowerCase();
   }
+
+  /**
+   * A no-op function.
+   */
+  export
+  function noOp() { /* no-op */}
 }

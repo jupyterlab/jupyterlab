@@ -81,6 +81,9 @@ namespace Private {
    function onFocus(event: FocusEvent): void {
       let target = event.target as Element;
       let parent = target.parentElement;
+      if (!parent) {
+        return;
+      }
       if (event.type === 'focus') {
         parent.classList.add('jp-mod-focused');
       } else {

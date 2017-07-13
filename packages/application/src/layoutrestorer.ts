@@ -165,12 +165,13 @@ class LayoutRestorer implements ILayoutRestorer {
     this._registry = options.registry;
     this._state = options.state;
     this._first = options.first;
-    this._first.then(() => Promise.all(this._promises)).then(() => {
-      // Release the promises held in memory.
-      this._promises = null;
+    this._first.then(() => {
+      this._firstDone = true;
+      return Promise.all(this._promises);
+    }).then(() => {
+      this._promisesDone = true;
       // Release the tracker set.
       this._trackers.clear();
-      this._trackers = null;
     }).then(() => {
       this._restored.resolve(void 0);
     });
@@ -236,7 +237,7 @@ class LayoutRestorer implements ILayoutRestorer {
    * @param options - The restoration options.
    */
   restore(tracker: InstanceTracker<Widget>, options: ILayoutRestorer.IRestoreOptions<Widget>): Promise<any> {
-    if (!this._promises) {
+    if (this._firstDone) {
       const warning = 'restore() can only be called before `first` has resolved.';
       console.warn(warning);
       return Promise.reject(warning);
@@ -289,7 +290,7 @@ class LayoutRestorer implements ILayoutRestorer {
    */
   save(data: ApplicationShell.ILayout): Promise<void> {
     // If there are promises that are unresolved, bail.
-    if (this._promises) {
+    if (!this._promisesDone) {
       let warning = 'save() was called prematurely.';
       console.warn(warning);
       return Promise.reject(warning);
@@ -312,7 +313,10 @@ class LayoutRestorer implements ILayoutRestorer {
   /**
    * Dehydrate a main area description into a serializable object.
    */
-  private _dehydrateMainArea(area: ApplicationShell.IMainArea): Private.IMainArea {
+  private _dehydrateMainArea(area: ApplicationShell.IMainArea | null): Private.IMainArea | null {
+    if (!area) {
+      return null;
+    }
     return Private.serializeMain(area);
   }
 
@@ -323,14 +327,20 @@ class LayoutRestorer implements ILayoutRestorer {
    * This function consumes data that can become corrupted, so it uses type
    * coercion to guarantee the dehydrated object is safely processed.
    */
-  private _rehydrateMainArea(area: Private.IMainArea): ApplicationShell.IMainArea {
+  private _rehydrateMainArea(area?: Private.IMainArea | null): ApplicationShell.IMainArea | null {
+    if (!area) {
+      return null;
+    }
     return Private.deserializeMain(area, this._widgets);
   }
 
   /**
    * Dehydrate a side area description into a serializable object.
    */
-  private _dehydrateSideArea(area: ApplicationShell.ISideArea): Private.ISideArea {
+  private _dehydrateSideArea(area?: ApplicationShell.ISideArea | null): Private.ISideArea | null {
+    if (!area) {
+      return null;
+    }
     let dehydrated: Private.ISideArea = { collapsed: area.collapsed };
     if (area.currentWidget) {
       let current = Private.nameProperty.get(area.currentWidget);
@@ -353,7 +363,7 @@ class LayoutRestorer implements ILayoutRestorer {
    * This function consumes data that can become corrupted, so it uses type
    * coercion to guarantee the dehydrated object is safely processed.
    */
-  private _rehydrateSideArea(area: Private.ISideArea): ApplicationShell.ISideArea {
+  private _rehydrateSideArea(area?: Private.ISideArea | null): ApplicationShell.ISideArea {
     if (!area) {
       return { collapsed: true, currentWidget: null, widgets: null };
     }
@@ -366,7 +376,11 @@ class LayoutRestorer implements ILayoutRestorer {
       : area.widgets
           .map(name => internal.has(`${name}`) ? internal.get(`${name}`) : null)
           .filter(widget => !!widget);
-    return { collapsed, currentWidget, widgets };
+    return {
+      collapsed,
+      currentWidget: currentWidget!,
+      widgets: widgets as Widget[] | null
+    };
   }
 
   /**
@@ -377,11 +391,13 @@ class LayoutRestorer implements ILayoutRestorer {
     this._widgets.delete(name);
   }
 
-  private _first: Promise<any> = null;
+  private _first: Promise<any>;
+  private _firstDone = false;
+  private _promisesDone = false;
   private _promises: Promise<any>[] = [];
   private _restored = new PromiseDelegate<void>();
-  private _registry: CommandRegistry = null;
-  private _state: IStateDB = null;
+  private _registry: CommandRegistry ;
+  private _state: IStateDB;
   private _trackers = new Set<string>();
   private _widgets = new Map<string, Widget>();
 }
@@ -549,7 +565,7 @@ namespace Private {
   /**
    * Serialize individual areas within the main area.
    */
-  function serializeArea(area: ApplicationShell.AreaConfig): ITabArea | ISplitArea | null {
+  function serializeArea(area: ApplicationShell.AreaConfig | null): ITabArea | ISplitArea | null {
     if (!area || !area.type) {
       return null;
     }
@@ -569,6 +585,7 @@ namespace Private {
       orientation: area.orientation,
       sizes: area.sizes,
       children: area.children.map(serializeArea)
+                  .filter(area => !!area) as (ITabArea | ISplitArea)[]
     };
   }
 
@@ -621,7 +638,7 @@ namespace Private {
         type: 'tab-area',
         currentIndex: currentIndex || 0,
         widgets: widgets && widgets.map(widget => names.get(widget))
-            .filter(widget => !!widget) || []
+            .filter(widget => !!widget) as Widget[] || []
       };
 
       // Make sure the current index is within bounds.
@@ -639,7 +656,7 @@ namespace Private {
       sizes: sizes || [],
       children: children &&
         children.map(child => deserializeArea(child, names))
-           .filter(widget => !!widget) || []
+           .filter(widget => !!widget) as ApplicationShell.AreaConfig[] || []
     };
 
     return hydrated;

@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  ActivityMonitor, IChangedArgs, IModelDB
+  ActivityMonitor, IChangedArgs, IModelDB, PathExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -418,12 +418,12 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
     toolbar.addClass('jp-Toolbar');
     layout.addWidget(toolbar);
     let context = options.context;
-    this.title.label = context.path.split('/').pop();
+    this.title.label = PathExt.basename(context.path);
     this.rendermime = options.rendermime.clone({ resolver: context });
 
     this._context = context;
     this._mimeType = options.mimeType;
-    this._dataType = options.dataType;
+    this._dataType = options.dataType || 'string';
 
     context.pathChanged.connect(this._onPathChanged, this);
 
@@ -470,9 +470,7 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
     if (this.isDisposed) {
       return;
     }
-    if (this._monitor) {
-      this._monitor.dispose();
-    }
+    this._monitor.dispose();
     super.dispose();
   }
 
@@ -515,11 +513,11 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
    * Handle a path change.
    */
   private _onPathChanged(): void {
-    this.title.label = this._context.path.split('/').pop();
+    this.title.label = PathExt.basename(this._context.path);
   }
 
-  private _context: DocumentRegistry.Context = null;
-  private _monitor: ActivityMonitor<any, any> = null;
+  private _context: DocumentRegistry.Context;
+  private _monitor: ActivityMonitor<any, any>;
   private _renderer: IRenderMime.IRenderer;
   private _mimeType: string;
   private _ready = new PromiseDelegate<void>();
@@ -599,7 +597,7 @@ class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument, DocumentRegistr
     return widget;
   }
 
-  private _rendermime: RenderMime = null;
+  private _rendermime: RenderMime;
   private _mimeType: string;
   private _renderTimeout: number;
   private _dataType: 'string' | 'json';
