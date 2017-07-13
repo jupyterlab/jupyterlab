@@ -145,7 +145,7 @@ class DocumentManager implements IDisposable {
    *  Uses the same widget factory and context as the source, or returns
    *  `undefined` if the source widget is not managed by this manager.
    */
-  cloneWidget(widget: Widget): Widget {
+  cloneWidget(widget: Widget): Widget | undefined {
     return this._widgetManager.cloneWidget(widget);
   }
 
@@ -289,7 +289,7 @@ class DocumentManager implements IDisposable {
    * This function will return `undefined` if a valid widget factory
    * cannot be found.
    */
-  open(path: string, widgetName='default', kernel?: Partial<Kernel.IModel>): Widget {
+  open(path: string, widgetName='default', kernel?: Partial<Kernel.IModel>): Widget | undefined {
     return this._createOrOpenDocument('open', path, widgetName, kernel);
   }
 
@@ -309,7 +309,7 @@ class DocumentManager implements IDisposable {
    * This function will return `undefined` if a valid widget factory
    * cannot be found.
    */
-  openOrReveal(path: string, widgetName='default', kernel?: Partial<Kernel.IModel>): Widget {
+  openOrReveal(path: string, widgetName='default', kernel?: Partial<Kernel.IModel>): Widget | undefined {
     let widget = this.findWidget(path, widgetName);
     if (widget) {
       this._opener.open(widget);
@@ -429,14 +429,14 @@ class DocumentManager implements IDisposable {
    * The two cases differ in how the document context is handled, but the creation
    * of the widget and launching of the kernel are identical.
    */
-  private _createOrOpenDocument(which: 'open'|'create', path: string, widgetName='default', kernel?: Partial<Kernel.IModel>): Widget {
+  private _createOrOpenDocument(which: 'open'|'create', path: string, widgetName='default', kernel?: Partial<Kernel.IModel>): Widget | undefined {
     let widgetFactory = this._widgetFactoryFor(path, widgetName);
     if (!widgetFactory) {
-      throw new Error('Could not find widget factory');
+      return undefined;
     }
     let factory = this.registry.getModelFactory(widgetFactory.modelName || 'text');
     if (!factory) {
-      throw new Error('Could not find model factory');
+      return undefined;
     }
 
     // Handle the kernel pereference.

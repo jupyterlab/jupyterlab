@@ -182,14 +182,14 @@ class DocumentWidgetManager implements IDisposable {
    *  Uses the same widget factory and context as the source, or throws
    *  if the source widget is not managed by this manager.
    */
-  cloneWidget(widget: Widget): Widget {
+  cloneWidget(widget: Widget): Widget | undefined {
     let context = Private.contextProperty.get(widget);
     if (!context) {
-      throw new Error('Cannot clone widget');
+      return undefined;
     }
     let factory = Private.factoryProperty.get(widget);
     if (!factory) {
-      throw new Error('Cannot clone widget');
+      return undefined;
     }
     let newWidget = this.createWidget(factory, context);
     this.adoptWidget(context, newWidget);

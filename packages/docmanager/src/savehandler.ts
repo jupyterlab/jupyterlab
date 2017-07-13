@@ -36,7 +36,7 @@ class SaveHandler implements IDisposable {
   constructor(options: SaveHandler.IOptions) {
     this._manager = options.manager;
     this._context = options.context;
-    let interval = options.saveInterval || 1200;
+    let interval = options.saveInterval || 120;
     this._minInterval = interval * 1000;
     this._interval = this._minInterval;
     this._warnOnConflict = !this._context.model.modelDB.isCollaborative;
@@ -69,7 +69,7 @@ class SaveHandler implements IDisposable {
    * Get whether the save handler is disposed.
    */
   get isDisposed(): boolean {
-    return this._isDisposed = false;
+    return this._isDisposed;
   }
 
   /**
