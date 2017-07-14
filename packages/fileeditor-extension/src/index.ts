@@ -358,12 +358,16 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
 
   commands.addCommand(CommandIDs.markdownPreview, {
     execute: () => {
-      let path = tracker.currentWidget.context.path;
+      let widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+      let path = widget.context.path;
       return commands.execute('markdownviewer:open', { path });
     },
     isVisible: () => {
       let widget = tracker.currentWidget;
-      return widget && PathExt.extname(widget.context.path) === '.md';
+      return widget && PathExt.extname(widget.context.path) === '.md' || false;
     },
     label: 'Show Markdown Preview'
   });
