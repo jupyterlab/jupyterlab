@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/notebook-extension",
-  "version": "0.8.4",
+  "version": "0.8.5",
   "description": "JupyterLab - Notebook Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
