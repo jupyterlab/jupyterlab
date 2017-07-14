@@ -112,7 +112,9 @@ class CSVViewer extends Widget implements DocumentRegistry.IReadyWidget {
    * Dispose of the resources used by the widget.
    */
   dispose(): void {
-    this._monitor.dispose();
+    if (this._monitor) {
+      this._monitor.dispose();
+    }
     super.dispose();
   }
 
@@ -157,7 +159,7 @@ class CSVViewer extends Widget implements DocumentRegistry.IReadyWidget {
   private _context: DocumentRegistry.Context;
   private _grid: DataGrid;
   private _toolbar: CSVToolbar;
-  private _monitor: ActivityMonitor<any, any>;
+  private _monitor: ActivityMonitor<any, any> | null = null;
   private _delimiter = ',';
   private _ready = new PromiseDelegate<void>();
 }
