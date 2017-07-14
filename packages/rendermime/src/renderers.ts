@@ -60,7 +60,7 @@ function renderHTML(options: renderHTML.IOptions): Promise<void> {
   host.innerHTML = source;
 
   if (host.getElementsByTagName('script')) {
-    console.warn('JupyterLab does not render inline JavaScript in HTML output');
+    console.warn('JupyterLab does not execute inline JavaScript in HTML output');
   }
 
   // TODO - arbitrary script execution is disabled for now.
