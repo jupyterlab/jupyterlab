@@ -164,4 +164,32 @@ key in its `package.json` with `"mimeRenderer": true` metadata.
 In addition to the file system that is accessed by using the `@jupyterlab/services` package, JupyterLab offers two ways for extensions to store data: a client-side state database that is built on top of `localStorage` and a plugin settings system that allows for default setting values and user overrides.
 
 ### State Database
-The state database can be accessed by importing the `IStateDB` token from `@jupyterlab/coreutils` and adding it to the list of `requires` for a plugin.
+The state database can be accessed by importing `IStateDB` from `@jupyterlab/coreutils` and adding it to the list of `requires` for a plugin:
+```typescript
+const id = 'foo-author.services.foo';
+
+const IFoo = new Token<IFoo>(id);
+
+interface IFoo {}
+
+class Foo implements IFoo {}
+
+const plugin: JupyterLabPlugin<IFoo> = {
+  id,
+  requires: [IStateDB],
+  provides: IFoo,
+  activate: (app: JupyterLab, state: IStateDB): IFoo => {
+    const foo = new Foo();
+    const key = `${id}:some-attribute`;
+
+    // Load the saved plugin state and apply it once the app
+    // has finished restoring its former layout.
+    Promise.all([state.fetch(key), app.restored])
+      .then(([saved]) => { /* Update `foo` with `saved`. */ });
+
+    // Fulfill the plugin contract by returning an `IFoo`.
+    return foo;
+  },
+  autoStart: true
+};
+```
