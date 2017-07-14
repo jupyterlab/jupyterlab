@@ -62,7 +62,7 @@ class Terminal extends Widget {
    *
    * @param options - The terminal configuration options.
    */
-  constructor(options: Terminal.IOptions = {}) {
+  constructor(options: Partial<Terminal.IOptions> = {}) {
     super();
     this.addClass(TERMINAL_CLASS);
 
@@ -73,8 +73,8 @@ class Terminal extends Widget {
 
     // Initialize settings.
     let defaults = Terminal.defaultOptions;
-    this._fontSize = options.fontSize || defaults.fontSize!;
-    this.theme = options.theme || defaults.theme!;
+    this._fontSize = options.fontSize || defaults.fontSize;
+    this.theme = options.theme || defaults.theme;
     this.id = `jp-Terminal-${Private.id++}`;
     this.title.label = 'Terminal';
   }
@@ -357,17 +357,17 @@ namespace Terminal {
     /**
      * The font size of the terminal in pixels.
      */
-    fontSize?: number;
+    fontSize: number;
 
     /**
      * The theme of the terminal.
      */
-    theme?: Theme;
+    theme: Theme;
 
     /**
      * Whether to blink the cursor.  Can only be set at startup.
      */
-    cursorBlink?: boolean;
+    cursorBlink: boolean;
   }
 
   /**
@@ -396,7 +396,7 @@ namespace Private {
    * Get term.js options from ITerminalOptions.
    */
   export
-  function getConfig(options: Terminal.IOptions): Xterm.IOptions {
+  function getConfig(options: Partial<Terminal.IOptions>): Xterm.IOptions {
     let config: Xterm.IOptions = {};
     if (options.cursorBlink !== void 0) {
       config.cursorBlink = options.cursorBlink;
