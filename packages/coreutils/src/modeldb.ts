@@ -71,9 +71,9 @@ interface IObservableValue extends IObservable {
   readonly changed: ISignal<IObservableValue, ObservableValue.IChangedArgs>;
 
   /**
-   * Get the current value.
+   * Get the current value, or `undefined` if it has not been set.
    */
-  get(): JSONValue;
+  get(): JSONValue | undefined;
 
   /**
    * Set the value.
@@ -238,12 +238,12 @@ interface IModelDB extends IDisposable {
   createValue(path: string): IObservableValue;
 
   /**
-   * Get a value at a path. That value must already have
-   * been created using `createValue`.
+   * Get a value at a path, or `undefined if it has not been set
+   * That value must already have been created using `createValue`.
    *
    * @param path: the path for the value.
    */
-  getValue(path: string): JSONValue;
+  getValue(path: string): JSONValue | undefined;
 
   /**
    * Set a value at a path. That value must already have
@@ -308,7 +308,7 @@ class ObservableValue implements IObservableValue {
   }
 
   /**
-   * Get the current value.
+   * Get the current value, or `undefined` if it has not been set.
    */
   get(): JSONValue {
     return this._value;
@@ -357,12 +357,12 @@ namespace ObservableValue {
     /**
      * The old value.
      */
-    oldValue: JSONValue;
+    oldValue: JSONValue | undefined;
 
     /**
      * The new value.
      */
-    newValue: JSONValue;
+    newValue: JSONValue | undefined;
   }
 }
 
@@ -507,12 +507,12 @@ class ModelDB implements IModelDB {
   }
 
   /**
-   * Get a value at a path. That value must already have
-   * been created using `createValue`.
+   * Get a value at a path, or `undefined if it has not been set
+   * That value must already have been created using `createValue`.
    *
    * @param path: the path for the value.
    */
-  getValue(path: string): JSONValue {
+  getValue(path: string): JSONValue | undefined {
     let val = this.get(path);
     if (!val || val.type !== 'Value') {
       throw Error('Can only call getValue for an ObservableValue');
