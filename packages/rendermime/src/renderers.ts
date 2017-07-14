@@ -782,34 +782,35 @@ namespace Private {
       // breaks: true; We can't use GFM breaks as it causes problems with tables
       langPrefix: `cm-s-${CodeMirrorEditor.defaultConfig.theme} language-`,
       highlight: (code, lang, callback) => {
+        let cb = (err: Error | null, code: string) => {
+          if (callback) {
+            callback(err, code);
+          }
+          return code;
+        };
         if (!lang) {
-            // no language, no highlight
-            if (callback) {
-                callback(null, code);
-                return;
-            } else {
-                return code;
-            }
+          // no language, no highlight
+          return cb(null, code);
         }
         Mode.ensure(lang).then(spec => {
           let el = document.createElement('div');
           if (!spec) {
-              console.log(`No CodeMirror mode: ${lang}`);
-              callback(null, code);
-              return;
+            console.log(`No CodeMirror mode: ${lang}`);
+            return cb(null, code);
           }
           try {
             Mode.run(code, spec.mime, el);
-            callback(null, el.innerHTML);
+            return cb(null, el.innerHTML);
           } catch (err) {
             console.log(`Failed to highlight ${lang} code`, err);
-            callback(err, code);
+            return cb(err, code);
           }
         }).catch(err => {
           console.log(`No CodeMirror mode: ${lang}`);
           console.log(`Require CodeMirror mode error: ${err}`);
-          callback(null, code);
+          return cb(null, code);
         });
+        return code;
       }
     });
   }
