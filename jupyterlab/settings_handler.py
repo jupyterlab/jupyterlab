@@ -24,13 +24,19 @@ class SettingsHandler(APIHandler):
     @json_errors
     @web.authenticated
     def get(self, section_name):
-        self.set_header("Content-Type", 'application/json')
-        path = os.path.join(self.schemas_dir, section_name + '.json')
+        self.set_header('Content-Type', "application/json")
+        path = os.path.join(self.schemas_dir, section_name + ".json")
 
         if not os.path.exists(path):
             raise web.HTTPError(404, "Schema not found: %r" % section_name)
         with open(path) as fid:
-            schema = json.load(fid)
+            # Attempt to load the schema file.
+            try:
+                schema = json.load(fid)
+            except Exception as e:
+                name = section_name
+                message = "Failed parsing schema ({}): {}".format(name, str(e))
+                raise web.HTTPError(500, message)
 
         path = os.path.join(self.settings_dir, section_name + '.json')
         settings = dict()
@@ -82,7 +88,7 @@ class SettingsHandler(APIHandler):
             os.makedirs(self.settings_dir)
 
         path = os.path.join(self.settings_dir, section_name + '.json')
-        
+
         with open(path, 'w') as fid:
             json.dump(data, fid)
 
