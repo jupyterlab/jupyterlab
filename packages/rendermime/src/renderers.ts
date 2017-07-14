@@ -310,7 +310,7 @@ function renderMarkdown(options: renderMarkdown.IRenderOptions): Promise<void> {
     host.innerHTML = content;
 
     if (host.getElementsByTagName('script')) {
-      console.warn('JupyterLab does not render inline JavaScript in HTML output');
+      console.warn('JupyterLab does not execute inline JavaScript in HTML output');
     }
 
     // TODO arbitrary script execution is disabled for now.
