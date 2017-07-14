@@ -24,6 +24,7 @@ if (process.argv.length < 3) {
 // Extract the desired git repository and repository name.
 var target = process.argv[2];
 var basePath = path.resolve('.');
+var packageDirName;
 
 var packagePath = '';
 if (target[0] === '.' || target[0] === '/') {
@@ -39,7 +40,7 @@ if (target[0] === '.' || target[0] === '/') {
   fs.copySync(packagePath, newPackagePath);
 } else { 
   // Otherwise treat it as a git reposotory and try to add it.
-  var packageDirName = target.split('/').pop().split('.')[0];
+  packageDirName = target.split('/').pop().split('.')[0];
   var packagePath = path.join(basePath, 'packages', packageDirName);
   // Add the repository as a submodule.
   childProcess.execSync('git submodule add --force '+ target + ' ' + packagePath);
@@ -53,6 +54,12 @@ var allPackagesPath = path.join(basePath, 'packages', 'all-packages', 'package.j
 var allPackages = require(allPackagesPath);
 allPackages.dependencies[package.name] = '~'+String(package.version);
 fs.writeFileSync(allPackagesPath, JSON.stringify(allPackages, null, 2) + '\n');
+
+// Add the extension path to packages/all-packages/tsconfig.json
+var tsconfigPath = path.join(basePath, 'packages', 'all-packages', 'tsconfig.json');
+var tsconfig = require(tsconfigPath);
+tsconfig.compilerOptions.paths[package.name] = [path.join('..', packageDirName, 'src')];
+fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
 
 // Add the extension to packages/all-packages/src/index.ts
 var indexPath = path.join(basePath, 'packages', 'all-packages', 'src', 'index.ts');
