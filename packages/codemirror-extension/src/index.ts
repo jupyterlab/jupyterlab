@@ -192,7 +192,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
             cm.setOption('theme', theme);
           }
         });
-        return settingRegistry.set(id, 'theme', theme);
+        return settingRegistry.set(id, 'theme', theme as string);
       },
       isEnabled: hasWidget,
       isToggled: args => args['theme'] === theme
@@ -211,7 +211,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
             cm.setOption('keyMap', keyMap);
           }
         });
-        return settingRegistry.set(id, 'keyMap', keyMap);
+        return settingRegistry.set(id, 'keyMap', keyMap as string);
       },
       isEnabled: hasWidget,
       isToggled: args => args['keyMap'] === keyMap
@@ -221,8 +221,8 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
       label: args => args['name'] as string,
       execute: args => {
         let mode = args['mode'] as string;
-        if (mode) {
-          let widget = tracker.currentWidget;
+        let widget = tracker.currentWidget;
+        if (mode && widget) {
           let spec = Mode.findByName(mode);
           if (spec) {
             widget.model.mimeType = spec.mime;
@@ -243,7 +243,9 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     });
 
     Mode.getModeInfo().sort((a, b) => {
-      return a.name.localeCompare(b.name);
+      let aName = a.name || '';
+      let bName = b.name || '';
+      return aName.localeCompare(bName);
     }).forEach(spec => {
       modeMenu.addItem({
         command: CommandIDs.changeMode,
