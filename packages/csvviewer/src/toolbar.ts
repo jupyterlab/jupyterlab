@@ -54,7 +54,7 @@ class CSVToolbar extends Widget {
   /**
    * Construct a new csv table widget.
    */
-  constructor(options: CSVToolbar.IOptions = {}) {
+  constructor(options: CSVToolbar.IOptions) {
     super({ node: Private.createNode(options.selected) });
     this.addClass(CSV_TOOLBAR_CLASS);
   }
@@ -70,7 +70,7 @@ class CSVToolbar extends Widget {
    * The delimiter dropdown menu.
    */
   get selectNode(): HTMLSelectElement {
-    return this.node.getElementsByTagName('select')[0];
+    return this.node.getElementsByTagName('select')![0];
   }
 
   /**
@@ -124,7 +124,7 @@ namespace CSVToolbar {
     /**
      * The initially selected delimiter.
      */
-    selected?: string;
+    selected: string;
   }
 }
 
