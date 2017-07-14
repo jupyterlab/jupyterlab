@@ -130,56 +130,52 @@ function activateFactory(app: JupyterLab, docManager: IDocumentManager, state: I
   const { commands } = app;
   const tracker = new InstanceTracker<FileBrowser>({ namespace });
 
-  return {
-    createFileBrowser(id: string, options: IFileBrowserFactory.IOptions = {}): FileBrowser {
-      const model = new FileBrowserModel({
-        manager: docManager,
-        driveName: options.driveName || '',
-        state: options.state === null ? null : options.state || state
-      });
-      const widget = new FileBrowser({
-        id, model, commands: options.commands || commands
-      });
-      const { registry } = docManager;
+  const createFileBrowser = (id: string, options: IFileBrowserFactory.IOptions = {}) => {
+    const model = new FileBrowserModel({
+      manager: docManager,
+      driveName: options.driveName || '',
+      state: options.state === null ? null : options.state || state
+    });
+    const widget = new FileBrowser({
+      id, model, commands: options.commands || commands
+    });
+    const { registry } = docManager;
 
-      // Add a launcher toolbar item.
-      let launcher = new ToolbarButton({
-        className: 'jp-AddIcon',
-        onClick: () => {
-          return commands.execute('launcher:create', {
-            cwd: widget.model.path
-          });
-        }
-      });
-      launcher.addClass('jp-MaterialIcon');
-      widget.toolbar.insertItem(0, 'launch', launcher);
+    // Add a launcher toolbar item.
+    let launcher = new ToolbarButton({
+      className: 'jp-AddIcon',
+      onClick: () => {
+        return commands.execute('launcher:create', {
+          cwd: widget.model.path
+        });
+      }
+    });
+    launcher.addClass('jp-MaterialIcon');
+    widget.toolbar.insertItem(0, 'launch', launcher);
 
-      // Add a context menu handler to the file browser's directory listing.
-      let node = widget.node.getElementsByClassName('jp-DirListing-content')[0];
-      node.addEventListener('contextmenu', (event: MouseEvent) => {
-        event.preventDefault();
-        const path = widget.pathForClick(event) || '';
-        const menu = createContextMenu(path, commands, registry);
-        menu.open(event.clientX, event.clientY);
-      });
+    // Add a context menu handler to the file browser's directory listing.
+    let node = widget.node.getElementsByClassName('jp-DirListing-content')[0];
+    node.addEventListener('contextmenu', (event: MouseEvent) => {
+      event.preventDefault();
+      const path = widget.pathForClick(event) || '';
+      const menu = createContextMenu(path, commands, registry);
+      menu.open(event.clientX, event.clientY);
+    });
 
-      // Track the newly created file browser.
-      tracker.add(widget);
+    // Track the newly created file browser.
+    tracker.add(widget);
 
-      return widget;
-    },
-    tracker
+    return widget;
   };
+  let defaultBrowser = createFileBrowser('filebrowser');
+  return { createFileBrowser, defaultBrowser, tracker };
 }
 
 /**
- * Activate the file browser in the sidebar.
+ * Activate the default file browser in the sidebar.
  */
 function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, docManager: IDocumentManager, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer): void {
-  const { commands } = app;
-  const fbWidget = factory.createFileBrowser('filebrowser', {
-    commands
-  });
+  const fbWidget = factory.defaultBrowser;
 
   // Let the application restorer track the primary file browser (that is
   // automatically created) for restoration of application state (e.g. setting

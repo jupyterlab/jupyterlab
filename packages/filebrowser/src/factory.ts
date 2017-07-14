@@ -60,6 +60,11 @@ interface IFileBrowserFactory {
    * The instance tracker used by the factory to track file browsers.
    */
   readonly tracker: InstanceTracker<FileBrowser>;
+
+  /**
+   * The default file browser for the application.
+   */
+  defaultBrowser: FileBrowser;
 }
 
 
