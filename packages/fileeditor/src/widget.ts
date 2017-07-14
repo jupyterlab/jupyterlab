@@ -59,7 +59,9 @@ class FileEditor extends CodeEditorWrapper implements DocumentRegistry.IReadyWid
         // Setup the selection style for collaborators
         let localCollaborator = modelDB.collaborators.localCollaborator;
         this.editor.uuid = localCollaborator.sessionId;
+
         this.editor.selectionStyle = {
+          ...CodeEditor.defaultSelectionStyle,
           color: localCollaborator.color
         };
 

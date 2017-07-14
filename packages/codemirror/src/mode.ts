@@ -91,8 +91,8 @@ namespace Mode {
     let mimetype = (typeof mode !== 'string') ? mode.mime : modename;
 
     return (
-      CodeMirror.findModeByName(modename) ||
-      CodeMirror.findModeByMIME(mimetype) ||
+      CodeMirror.findModeByName(modename || '') ||
+      CodeMirror.findModeByMIME(mimetype || '') ||
       CodeMirror.findModeByMIME('text/plain')
     );
   }

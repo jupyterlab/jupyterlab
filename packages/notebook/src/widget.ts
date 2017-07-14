@@ -983,6 +983,7 @@ class Notebook extends StaticNotebook {
           let localCollaborator = modelDB.collaborators.localCollaborator;
           cell.editor.uuid = localCollaborator.sessionId;
           cell.editor.selectionStyle = {
+            ...CodeEditor.defaultSelectionStyle,
             color: localCollaborator.color
           };
         }

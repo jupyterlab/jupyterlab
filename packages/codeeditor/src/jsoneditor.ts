@@ -117,7 +117,7 @@ class JSONEditor extends Widget {
    * The title of the editor.
    */
   get editorTitle(): string {
-    return this.titleNode.textContent;
+    return this.titleNode.textContent || '';
   }
   set editorTitle(value: string) {
     this.titleNode.textContent = value;
@@ -320,10 +320,14 @@ class JSONEditor extends Widget {
    */
   private _mergeContent(): void {
     let model = this.editor.model;
-    let current = this._getContent() || { };
-    let old = this._originalValue || { };
+    let current = this._getContent();
+    let old = this._originalValue;
     let user = JSON.parse(model.value.text) as JSONObject;
     let source = this.source;
+    if (!source) {
+      return;
+    }
+
     // If it is in user and has changed from old, set in current.
     for (let key in user) {
       if (!JSONExt.deepEqual(user[key], old[key] || null)) {
@@ -346,14 +350,14 @@ class JSONEditor extends Widget {
   /**
    * Get the metadata from the owner.
    */
-  private _getContent(): JSONObject | undefined {
+  private _getContent(): JSONObject {
     let source = this._source;
     if (!source) {
-      return void 0;
+      return {};
     }
     let content: JSONObject = {};
     for (let key of source.keys()) {
-      content[key] = source.get(key);
+      content[key] = source.get(key) || null;
     }
     return content;
   }
@@ -372,7 +376,7 @@ class JSONEditor extends Widget {
     this._changeGuard = true;
     if (content === void 0) {
       model.value.text = 'No data!';
-      this._originalValue = null;
+      this._originalValue = JSONExt.emptyObject;
     } else {
       let value = JSON.stringify(content, null, 4);
       model.value.text = value;
@@ -387,7 +391,7 @@ class JSONEditor extends Widget {
   private _dataDirty = false;
   private _inputDirty = false;
   private _source: IObservableJSON | null = null;
-  private _originalValue: JSONObject = null;
+  private _originalValue = JSONExt.emptyObject;
   private _changeGuard = false;
 }
 
