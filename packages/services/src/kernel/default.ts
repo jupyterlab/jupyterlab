@@ -669,6 +669,8 @@ class DefaultKernel implements Kernel.IKernel {
     this._reconnectAttempt = 0;
     // Allow the message to get through.
     this._isReady = true;
+    // Update our status to connected.
+    this._updateStatus('connected');
     // Get the kernel info, signaling that the kernel is ready.
     this.requestKernelInfo().then(() => {
       this._connectionPromise.resolve(void 0);
@@ -844,6 +846,7 @@ class DefaultKernel implements Kernel.IKernel {
     case 'starting':
     case 'idle':
     case 'busy':
+    case 'connected':
       this._isReady = true;
       break;
     case 'restarting':
