@@ -202,13 +202,19 @@ class Tooltip extends Widget {
     const cursor = editor.getCursorPosition();
     const end = editor.getOffsetAt(cursor);
     const line = editor.getLine(cursor.line);
+    if (!line) {
+      return;
+    }
     const tokens = line.substring(0, end).split(/\W+/);
     const last = tokens[tokens.length - 1];
     const start = last ? end - last.length : end;
     const position = editor.getPositionAt(start);
+    if (!position) {
+      return;
+    }
     const anchor = editor.getCoordinateForPosition(position) as ClientRect;
     const style = window.getComputedStyle(this.node);
-    const paddingLeft = parseInt(style.paddingLeft, 10) || 0;
+    const paddingLeft = parseInt(style.paddingLeft!, 10) || 0;
 
     // Calculate the geometry of the tooltip.
     HoverBox.setGeometry({
