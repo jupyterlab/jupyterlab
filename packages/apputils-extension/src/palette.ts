@@ -77,7 +77,7 @@ class Palette implements ICommandPalette {
     return new DisposableDelegate(() => this._palette.removeItem(item));
   }
 
-  private _palette: CommandPalette = null;
+  private _palette: CommandPalette;
 }
 
 

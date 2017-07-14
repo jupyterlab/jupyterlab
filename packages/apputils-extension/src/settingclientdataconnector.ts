@@ -31,10 +31,10 @@ class SettingClientDataConnector extends StateDB implements IDataConnector<ISett
   /**
    * Retrieve a saved bundle from the data connector.
    */
-  fetch(id: string): Promise<ISettingRegistry.IPlugin | null> {
+  fetch(id: string): Promise<ISettingRegistry.IPlugin | undefined> {
     return super.fetch(id).then(user => {
       if (!user && !Private.schemas[id]) {
-        return null;
+        return undefined;
       }
 
       user = user || { };
