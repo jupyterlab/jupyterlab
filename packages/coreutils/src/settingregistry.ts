@@ -86,6 +86,11 @@ namespace ISchemaValidator {
   export
   interface IError {
     /**
+     * The path in the data where the error occurred.
+     */
+    dataPath: string;
+
+    /**
      * The keyword whose validation failed.
      */
     keyword: string;
@@ -489,7 +494,19 @@ class SettingRegistry {
     // If the plugin needs to be loaded from the connector, fetch.
     return connector.fetch(plugin).then(data => {
       // Validate the response from the connector; populate `composite` field.
-      this._validate(data);
+      try {
+        this._validate(data);
+      } catch (errors) {
+        const output = [`Validating ${plugin} failed:`];
+        (errors as ISchemaValidator.IError[]).forEach((error, index) => {
+          const { dataPath, schemaPath, keyword, message } = error;
+          output.push(`${index} - schema @ ${schemaPath}, data @ ${dataPath}`);
+          output.push(`\t${keyword} ${message}`);
+        });
+        console.error(output.join('\n'));
+
+        throw new Error(`Failed validating ${plugin}`);
+      }
 
       // Emit that a plugin has changed.
       this._pluginChanged.emit(plugin);
