@@ -73,8 +73,8 @@ class Terminal extends Widget {
 
     // Initialize settings.
     let defaults = Terminal.defaultOptions;
-    this._fontSize = options.fontSize || defaults.fontSize;
-    this.theme = options.theme || defaults.theme;
+    this._fontSize = options.fontSize || defaults.fontSize!;
+    this.theme = options.theme || defaults.theme!;
     this.id = `jp-Terminal-${Private.id++}`;
     this.title.label = 'Terminal';
   }
@@ -82,10 +82,10 @@ class Terminal extends Widget {
   /**
    * The terminal session associated with the widget.
    */
-  get session(): TerminalSession.ISession {
+  get session(): TerminalSession.ISession | null {
     return this._session;
   }
-  set session(value: TerminalSession.ISession) {
+  set session(value: TerminalSession.ISession | null) {
     if (this._session && !this._session.isDisposed) {
       this._session.messageReceived.disconnect(this._onMessage, this);
     }
@@ -93,12 +93,12 @@ class Terminal extends Widget {
     if (!value) {
       return;
     }
-    this._session.ready.then(() => {
-      if (this.isDisposed) {
+    value.ready.then(() => {
+      if (this.isDisposed || value !== this._session) {
         return;
       }
-      this._session.messageReceived.connect(this._onMessage, this);
-      this.title.label = `Terminal ${this._session.name}`;
+      value.messageReceived.connect(this._onMessage, this);
+      this.title.label = `Terminal ${value.name}`;
       this._setSessionSize();
     });
   }
@@ -143,8 +143,6 @@ class Terminal extends Widget {
    */
   dispose(): void {
     this._session = null;
-    this._term = null;
-    this._dummyTerm = null;
     this._box = null;
     super.dispose();
   }
@@ -269,7 +267,9 @@ class Terminal extends Widget {
   private _onMessage(sender: TerminalSession.ISession, msg: TerminalSession.IMessage): void {
     switch (msg.type) {
     case 'stdout':
-      this._term.write(msg.content[0] as string);
+      if (msg.content) {
+        this._term.write(msg.content[0] as string);
+      }
       break;
     case 'disconnect':
       this._term.write('\r\n\r\n[Finished... Term Session]\r\n');
@@ -328,8 +328,8 @@ class Terminal extends Widget {
     }
   }
 
-  private _term: Xterm = null;
-  private _dummyTerm: HTMLElement = null;
+  private _term: Xterm;
+  private _dummyTerm: HTMLElement;
   private _fontSize = -1;
   private _needsSnap = true;
   private _needsResize = true;
@@ -339,8 +339,8 @@ class Terminal extends Widget {
   private _offsetHeight = -1;
   private _sessionSize: [number, number, number, number] = [1, 1, 1, 1];
   private _theme: Terminal.Theme = 'dark';
-  private _box: ElementExt.IBoxSizing = null;
-  private _session: TerminalSession.ISession = null;
+  private _box: ElementExt.IBoxSizing | null = null;
+  private _session: TerminalSession.ISession | null = null;
 }
 
 
@@ -362,7 +362,7 @@ namespace Terminal {
     /**
      * The theme of the terminal.
      */
-    theme?: Theme
+    theme?: Theme;
 
     /**
      * Whether to blink the cursor.  Can only be set at startup.
