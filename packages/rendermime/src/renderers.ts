@@ -59,7 +59,7 @@ function renderHTML(options: renderHTML.IOptions): Promise<void> {
   // Set the inner HTML of the host.
   host.innerHTML = source;
 
-  if (host.getElementsByTagName('script')) {
+  if (host.getElementsByTagName('script').length > 0) {
     console.warn('JupyterLab does not execute inline JavaScript in HTML output');
   }
 
@@ -309,7 +309,7 @@ function renderMarkdown(options: renderMarkdown.IRenderOptions): Promise<void> {
     // Set the inner HTML of the host.
     host.innerHTML = content;
 
-    if (host.getElementsByTagName('script')) {
+    if (host.getElementsByTagName('script').length > 0) {
       console.warn('JupyterLab does not execute inline JavaScript in HTML output');
     }
 
