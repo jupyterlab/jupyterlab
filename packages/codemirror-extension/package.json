@@ -7,7 +7,7 @@
   "files": [
     "lib/*.d.ts",
     "lib/*.js",
-    "schemas/*.json"
+    "schema/*.json"
   ],
   "directories": {
     "lib": "lib/"
