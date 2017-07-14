@@ -494,7 +494,7 @@ namespace Completer {
     /**
      * The semantic parent of the completer widget, its referent editor.
      */
-    editor?: CodeEditor.IEditor;
+    editor?: CodeEditor.IEditor | null;
 
     /**
      * The model for the completer widget.
