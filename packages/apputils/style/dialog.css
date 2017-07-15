@@ -29,7 +29,7 @@
   flex-direction: column;
   margin-left: auto;
   margin-right: auto;
-  background: #FAFAFA;
+  background: var(--jp-layout-color0);
   padding: 24px;
   padding-bottom: 12px;
   min-width: 300px;
@@ -56,7 +56,7 @@
   flex-direction: column;
   flex: 1 1 auto;
   font-size: var(--jp-ui-font-size2);
-  background: #FAFAFA;
+  background: var(--jp-layout-color0);
   overflow: auto;
 }
 
@@ -96,5 +96,5 @@
   padding-bottom: 4px;
   line-height: 1.4;
   font-size: var(--jp-ui-font-size1);
-  color: var(--md-grey-700);
+  color: var(--jp-ui-font-color0);
 }

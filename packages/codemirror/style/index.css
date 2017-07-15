@@ -59,6 +59,7 @@
 
 
 .CodeMirror.jp-mod-readOnly .CodeMirror-cursor {
+  border-left: 1px solid var(--jp-code-cursor-color);
   display: none;
 }
 

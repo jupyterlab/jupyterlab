@@ -67,7 +67,7 @@
   flex: 1 1 auto;
   height: var(--jp-private-filebrowser-button-height);
   line-height: var(--jp-private-filebrowser-button-height);
-  color: var(--jp-ui-font-color1);
+  color: var(--jp-layout-color1);
   font-size: var(--jp-ui-icon-font-size);
   outline: 0;
   margin-bottom: 4px;
@@ -97,8 +97,8 @@
   display: flex;
   flex-direction: row;
   overflow: hidden;
-  border-top: var(--jp-border-width) solid var(--jp-border-color2);
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  border-top: var(--jp-border-width) solid var(--jp-border-color1);
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
 
@@ -120,7 +120,7 @@
 
 .jp-DirListing-headerItem.jp-id-modified {
   flex: 0 0 112px;
-  border-left: var(--jp-border-width) solid var(--jp-border-color2);
+  border-left: var(--jp-border-width) solid var(--jp-border-color1);
   text-align: right;
 }
 
@@ -158,6 +158,7 @@
   padding: 0;
   list-style-type: none;
   overflow: auto;
+  background-color: var(--jp-filebrowser-content-background-color);
 }
 
 

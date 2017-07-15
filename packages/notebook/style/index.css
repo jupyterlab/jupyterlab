@@ -43,7 +43,7 @@
   min-height: 50px;
   outline: none;
   overflow: auto;
-  background: var(--jp-layout-color1);
+  background: var(--jp-layout-color2);
 }
 
 
@@ -125,7 +125,7 @@
 .jp-Notebook.jp-mod-editMode .jp-Cell.jp-mod-active .jp-InputArea-editor {
   border: var(--jp-border-width) solid var(--jp-cell-editor-border-color-edit);
   background: var(--jp-cell-editor-background-edit);
-  box-shadow: inset 0 0 2px var(--md-blue-300);
+  box-shadow: var(--jp-cell-editor-box-shadow);
 }
 
 
@@ -212,15 +212,15 @@
   flex-direction: column;
   min-width: 300px;
   color: var(--jp-ui-font-color1);
-  background: var(--jp-layout-color1);
+  background: var(--jp-layout-color2);
   font-size: var(--jp-ui-font-size1);
 }
 
 
 .jp-ActiveCellTool {
   padding: 12px;
-  border-bottom: 1px solid var(--jp-border-color1);
-  background-color: var(--jp-border-color3);
+  border-bottom: none;
+  background-color: var(--jp-layout-color1);
 }
 
 
@@ -232,13 +232,13 @@
 
 .jp-ActiveCellTool .jp-InputArea-editor {
   flex: 1 1 auto;
-  background-color: white;
-  border-color: var(--jp-border-color1);
+  background-color: var(--jp-cell-editor-background-edit);
+  border-color: var(--jp-cell-editor-border-color-edit);
 }
 
 
 .jp-CellTools-tool:not(:first-child) {
-  border-top: 1px solid var(--md-grey-300);
+  border-top: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
 

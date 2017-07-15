@@ -69,6 +69,7 @@
 
 .jp-About-release, .jp-About-version {
   display: block;
+  color: var(--jp-ui-font-color0);
 }
 
 
@@ -115,7 +116,7 @@
 .jp-About-header-logo {
   height: 94px;
   width: 77px;
-  background-image: url(../../theming/style/icons/jupyter/jupyter.svg);
+  background-image: url(../../theming/style/icons-light/jupyter/jupyter.svg);
   background-repeat: no-repeat;
   background-size: 58px auto;
   background-position: center;

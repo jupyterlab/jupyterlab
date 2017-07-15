@@ -33,16 +33,89 @@ all of MD as it is not optimized for dense, information rich UIs.
 
 :root {
 
+  /* Images
+
+  These images are included with JupyterLab for showing the Project Jupyter logo
+  */
+  --jp-image-jupyter: url('./images/jupyter-white-moons.svg');
+
+
+  /* Icons
+
+  These icons are used throughout JupyterLab.
+  */
+
+  /* The caret used for select dropdown styling. */
+
+  --jp-ui-select-caret: url('./icons-dark/md/down_caret.svg');
+
+  /* Icons used in the application. */
+
+  --jp-icon-add: url('./icons-dark/md/add.svg');
+  --jp-icon-book: url('./icons-dark/jupyter/book.svg');
+  --jp-icon-book-selected: url('./icons-dark/jupyter/book_selected.svg');
+  --jp-icon-book-running: url('./icons-dark/jupyter/book_running.svg');
+  --jp-icon-book-running-selected: url('./icons-dark/jupyter/book_running_selected.svg');
+  --jp-icon-directory: url('./icons-dark/jupyter/directory.svg');
+  --jp-icon-directory-selected: url('./icons-dark/jupyter/directory_selected.svg');
+  --jp-icon-new-directory: url('./icons-dark/md/new-folder.svg');
+  --jp-icon-file-selected: url('./icons-dark/jupyter/file_selected.svg');
+  --jp-icon-yaml: url('./icons-dark/jupyter/yml.svg');
+  --jp-icon-yaml-selected: url('./icons-dark/jupyter/yml_selected.svg');
+  --jp-icon-spreadsheet: url('./icons-dark/jupyter/csv.svg');
+  --jp-icon-spreadsheet-selected: url('./icons-dark/jupyter/csv_selected.svg');
+  --jp-icon-image: url('./icons-dark/jupyter/image.svg');
+  --jp-icon-image-selected: url('./icons-dark/jupyter/image_selected.svg');
+  --jp-icon-json: url('./icons-dark/jupyter/json.svg');
+  --jp-icon-json-selected: url('./icons-dark/jupyter/json_selected.svg');
+  --jp-icon-kernel-running: url('./icons-dark/md/panorama_fish_eye.svg');
+  --jp-icon-markdown: url('./icons-dark/jupyter/markdown.svg');
+  --jp-icon-markdown-selected: url('./icons-dark/jupyter/markdown_selected.svg');
+  --jp-icon-python: url('./icons-dark/jupyter/python.svg');
+  --jp-icon-python-selected: url('./icons-dark/jupyter/python_selected.svg');
+  --jp-icon-r: url('./icons-dark/jupyter/r.svg');
+  --jp-icon-r-selected: url('./icons-dark/jupyter/r_selected.svg');
+  --jp-icon-console: url('./icons-dark/jupyter/console.svg');
+  --jp-icon-terminal: url('./icons-dark/jupyter/terminal.svg');
+  --jp-icon-file: url('./icons-dark/jupyter/file.svg');
+  --jp-icon-refresh: url('./icons-dark/md/refresh.svg');
+  --jp-icon-close: url('./icons-dark/md/close.svg');
+  --jp-inverse-icon-close: url('./icons-dark/md/close-inverse.svg');
+  --jp-icon-circle: url('./icons-dark/md/circle.svg');
+  --jp-inverse-icon-circle: url('./icons-dark/md/circle-inverse.svg');
+  --jp-icon-close-black: url('./icons-dark/md/close-black.svg');
+  --jp-icon-search: url('./icons-dark/md/search.svg');
+  --jp-icon-copy: url('./icons-dark/md/copy.svg');
+  --jp-icon-cut: url('./icons-dark/md/cut.svg');
+  --jp-icon-paste: url('./icons-dark/md/paste.svg');
+  --jp-icon-download: url('./icons-dark/md/download.svg');
+  --jp-icon-edit: url('./icons-dark/md/edit.svg');
+  --jp-icon-ellipses: url('./icons-dark/md/ellipses.svg');
+  --jp-icon-expand-less: url('./icons-dark/md/expand-less.svg');
+  --jp-icon-expand-more: url('./icons-dark/md/expand-more.svg');
+  --jp-icon-home: url('./icons-dark/md/home.svg');
+  --jp-icon-jupyter: url('./icons-dark/jupyter/jupyter.svg');
+  --jp-icon-launcher: url('./icons-dark/jupyter/launcher.svg');
+  --jp-icon-more: url('./icons-dark/md/more-horiz.svg');
+  --jp-icon-run: url('./icons-dark/md/run.svg');
+  --jp-icon-save: url('./icons-dark/md/save.svg');
+  --jp-icon-stop: url('./icons-dark/md/stop.svg');
+  --jp-icon-text-editor: url('./icons-dark/jupyter/texteditor.svg');
+  --jp-icon-upload: url('./icons-dark/md/upload.svg');
+  --jp-icon-question-mark: url('./icons-dark/jupyter/questionmark.svg');
+  --jp-icon-chat: url('./icons-dark/md/chat.svg');
+
+
   /* Borders
 
   The following variables, specify the visual styling of borders in JupyterLab.
    */
 
   --jp-border-width: 1px;
-  --jp-border-color0: var(--md-grey-300);
-  --jp-border-color1: var(--md-grey-500);
-  --jp-border-color2: var(--md-grey-700);
-  --jp-border-color3: var(--md-grey-900);
+  --jp-border-color0: var(--md-grey-900);
+  --jp-border-color1: var(--md-grey-700);
+  --jp-border-color2: var(--md-grey-500);
+  --jp-border-color3: var(--md-grey-300);
 
   /* UI Fonts
 
@@ -63,9 +136,9 @@ all of MD as it is not optimized for dense, information rich UIs.
   */
 
   --jp-ui-font-color0: white;
-  --jp-ui-font-color1: rgba(157,157,157);
-  --jp-ui-font-color2: var(--md-grey-700);
-  --jp-ui-font-color3: var(--md-grey-500);
+  --jp-ui-font-color1: var(--md-grey-300);
+  --jp-ui-font-color2: var(--md-grey-500);
+  --jp-ui-font-color3: var(--md-grey-700);
 
   /* Use these against the brand/accent/warn/error colors.
      These will typically go from light to darker, in both a dark and light theme
@@ -106,10 +179,10 @@ all of MD as it is not optimized for dense, information rich UIs.
   theme these would go from light to dark.
   */
 
-  --jp-layout-color0: black;
-  --jp-layout-color1: white;
-  --jp-layout-color2: rgb(23,23,23);
-  --jp-layout-color3: var(--md-grey-600);
+  --jp-layout-color0: var(--md-grey-700);
+  --jp-layout-color1: var(--md-grey-800);
+  --jp-layout-color2: var(--md-grey-900);
+  --jp-layout-color3: black;
 
   /* Brand/accent */
 
@@ -148,21 +221,46 @@ all of MD as it is not optimized for dense, information rich UIs.
   /* Cell specific styles */
 
   --jp-cell-padding: 5px;
-  --jp-cell-editor-background: #f7f7f7;
-  --jp-cell-editor-border-color: #cfcfcf;
-  --jp-cell-editor-background-edit: var(--jp-ui-layout-color1);
-  --jp-cell-editor-border-color-edit: var(--jp-brand-color1);
+  --jp-cell-editor-background: var(--md-grey-800);
+  --jp-cell-editor-box-shadow: inset 0 0 2px var(--md-blue-300);
+  --jp-cell-editor-border-color: var(--md-grey-600);
+  --jp-cell-editor-background-edit: var(--md-grey-900);
+  --jp-cell-editor-border-color-edit: var(--md-blue-500);
   --jp-cell-prompt-width: 68px;
   --jp-cell-prompt-font-family: 'Roboto Mono', monospace;
   --jp-cell-prompt-letter-spacing: 0px;
   --jp-cell-prompt-opacity: 1.0;
   --jp-cell-prompt-opacity-not-active: 0.4;
-  --jp-cell-inprompt-font-color: var(--md-grey-700);
+  --jp-cell-prompt-font-color-not-active: var(--md-grey-50);
+  --jp-cell-inprompt-font-color: var(--md-grey-50);
   --jp-cell-outprompt-font-color: var(--md-grey-700);
 
   /* Notebook specific styles */
 
+  --jp-code-cursor-color: var(--jp-ui-font-color0);
   --jp-notebook-padding: 10px;
   --jp-notebook-scroll-padding: 100px;
+  --jp-notebook-select-background-color: var(--jp-layout-color1);
+
+ /* Console specific styles */
+
+  --jp-console-background: var(--md-grey-100);
+
+  /* Toolbar specific styles */
+
+  --jp-toolbar-border-color: var(--jp-border-color1);
+  --jp-toolbar-micro-height: 8px;
+  --jp-toolbar-background: var(--jp-layout-color1);
+  --jp-toolbar-box-shadow: 0px 0px 2px 0px rgba(0,0,0,0.24);
+  --jp-toolbar-header-margin: 4px 4px 0px 4px;
+  --jp-toolbar-active-background: var(--md-grey-300);
+
+  /* File browser specific styles */
+
+  --jp-filebrowser-content-background-color: var(--jp-layout-color2);
+
+  /* Input field styles */
+
+  --jp-input-background-color: var(--md-grey-900);
 
 }

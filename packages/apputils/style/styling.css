@@ -54,7 +54,7 @@ button.jp-mod-styled:focus {
   display: flex;
   flex-direction: column;
   padding: 1px;
-  background: white;
+  background-color: white;
   height: 28px;
   box-sizing: border-box;
   margin-bottom: 12px;
