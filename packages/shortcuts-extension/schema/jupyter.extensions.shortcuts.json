@@ -569,7 +569,11 @@
     "shortcut": {
       "properties": {
         "command": { "type": "string" },
-        "keys": { "items": { "type": "string" }, "type": "array" },
+        "keys": {
+          "items": { "type": "string" },
+          "minItems": 1,
+          "type": "array"
+        },
         "selector": { "type": "string" }
       },
       "type": "object"

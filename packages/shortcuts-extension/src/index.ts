@@ -25,6 +25,12 @@ import {
  * The default shortcuts extension.
  *
  * #### Notes
+ * Shortcut values are stored in the setting system. The default values for each
+ * shortcut are preset in the settings schema file of this extension.
+ * Additionally, each shortcut can be individually set by the end user by
+ * modifying its setting (either in the text editor or by modifying its
+ * underlying JSON file).
+ *
  * When setting shortcut selectors, there are two concepts to consider:
  * specificity and matchability. These two interact in sometimes
  * counterintuitive ways. Keyboard events are triggered from an element and
