@@ -167,31 +167,31 @@ namespace Private {
    * Default cell config for Vega-Lite.
    */
   const defaultCellConfig: JSONObject = {
-    "width": 400,
-    "height": 400/1.5
-  }
+    'width': 400,
+    'height': 400 / 1.5
+  };
 
   /**
    * Apply the default cell config to the spec in place.
-   * 
+   *
    * #### Notes
    * This carefully does a shallow copy to avoid copying the potentially
    * large data.
    */
   export
   function updateVegaLiteDefaults(spec: ReadonlyJSONObject): JSONObject {
-    if ( spec.hasOwnProperty('config') ) {
-      if ( spec.config.hasOwnProperty('cell') ) {
-        return {
-          ...{"config": {...{"cell": {...defaultCellConfig, ...((spec.config as ReadonlyJSONObject).cell as any)}}}, ...(spec.config as any)},
-          ...spec
-        }
-      } else {
-        return {...{"config": {...{"cell": {...defaultCellConfig}}}, ...(spec.config as any)}, ...spec}
-      }
+    let config = spec.config as JSONObject;
+    if (!config) {
+      return {...{'config': {'cell': defaultCellConfig}}, ...spec};
+    }
+    let cell = config.cell as JSONObject;
+    if (cell) {
+      return {
+        ...{'config': {...{'cell': {...defaultCellConfig, ...cell}}}, ...config},
+        ...spec
+      };
     } else {
-      return {...{"config": {"cell": defaultCellConfig}}, ...spec};
+      return {...{'config': {...{'cell': {...defaultCellConfig}}}, ...config}, ...spec};
     }
   }
-
 }
