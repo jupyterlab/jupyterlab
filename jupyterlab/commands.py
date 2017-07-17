@@ -81,6 +81,7 @@ def install_extension(extension, app_dir=None, logger=None):
     If link is true, the source directory is linked using `npm link`.
     """
     app_dir = get_app_dir(app_dir)
+    logger = logger or logging
     if app_dir == here:
         raise ValueError('Cannot install extensions in core app')
     extension = _normalize_path(extension)
@@ -96,7 +97,7 @@ def install_extension(extension, app_dir=None, logger=None):
             _write_build_config(config, app_dir, logger=logger)
         return
 
-    _ensure_package(app_dir, logger=logger)
+    _ensure_app_dirs(app_dir, logger)
     target = pjoin(app_dir, 'extensions', 'temp')
     if os.path.exists(target):
         shutil.rmtree(target)
@@ -156,7 +157,7 @@ def link_package(path, app_dir=None, logger=None):
         raise ValueError('Cannot link packages in core app')
 
     path = _normalize_path(path)
-    _ensure_package(app_dir, logger=logger)
+    _ensure_app_dirs(app_dir, logger)
 
     # Verify the package.json data.
     pkg_path = osp.join(path, 'package.json')
@@ -484,7 +485,7 @@ def build(app_dir=None, name=None, version=None, logger=None):
         # Handle linked packages that are not extensions.
         else:
             # Remove any existing package from staging/node_modules
-            target = pjoin(app_dir, 'staging', 'node_modules', name)
+            target = pjoin(staging, 'node_modules', name)
             target = target.replace('/', os.sep)
             if os.path.exists(target):
                 shutil.rmtree(target)
@@ -636,7 +637,7 @@ def _toggle_extension(extension, value, app_dir=None, logger=None):
 def _write_build_config(config, app_dir, logger):
     """Write the build config to the app dir.
     """
-    _ensure_app_dirs(app_dir, logger=logger)
+    _ensure_app_dirs(app_dir, logger)
     target = pjoin(app_dir, 'settings', 'build_config.json')
     with open(target, 'w') as fid:
         json.dump(config, fid, indent=4)
@@ -645,20 +646,20 @@ def _write_build_config(config, app_dir, logger):
 def _write_page_config(config, app_dir, logger):
     """Write the build config to the app dir.
     """
-    _ensure_app_dirs(app_dir, logger=logger)
+    _ensure_app_dirs(app_dir, logger)
     target = pjoin(app_dir, 'settings', 'page_config.json')
     with open(target, 'w') as fid:
         json.dump(config, fid, indent=4)
 
 
-def _ensure_package(app_dir, name=None, version=None, logger=None):
+def _ensure_package(app_dir, logger=None, name=None, version=None):
     """Make sure the build dir is set up.
     """
     logger = logger or logging
-    _ensure_app_dirs(app_dir)
-    staging = pjoin(app_dir, 'staging')
+    _ensure_app_dirs(app_dir, logger)
 
     # Look for mismatched version.
+    staging = pjoin(app_dir, 'staging')
     pkg_path = pjoin(staging, 'package.json')
     version_updated = False
     if os.path.exists(pkg_path):
@@ -667,9 +668,6 @@ def _ensure_package(app_dir, name=None, version=None, logger=None):
         if data['jupyterlab'].get('version', '') != __version__:
             shutil.rmtree(staging)
             version_updated = True
-
-    if not os.path.exists(staging):
-        os.makedirs(staging)
 
     for fname in ['index.app.js', 'webpack.config.js']:
         dest = pjoin(staging, fname.replace('.app', ''))
@@ -687,32 +685,26 @@ def _ensure_package(app_dir, name=None, version=None, logger=None):
 
     # Copy any missing or outdated schema files.
     schema_local = pjoin(here, 'schemas')
-    schema_app = pjoin(app_dir, 'schemas')
-    if not os.path.exists(schema_app):
-        os.makedirs(schema_app)
+    if not os.path.exists(schema_local):
+        os.makedirs(schema_local)
 
     for schema in os.listdir(schema_local):
-        dest = pjoin(schema_app, schema)
+        dest = pjoin(app_dir, 'schemas', schema)
         if version_updated or not os.path.exists(dest):
             shutil.copy(pjoin(schema_local, schema), dest)
 
 
-def _ensure_app_dirs(app_dir):
+def _ensure_app_dirs(app_dir, logger):
     """Ensure that the application directories exist"""
-    if not os.path.exists(pjoin(app_dir, 'extensions')):
-        try:
-            os.makedirs(pjoin(app_dir, 'extensions'))
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                raise
-
-    settings = pjoin(app_dir, 'settings')
-    if not os.path.exists(settings):
-        try:
-            os.makedirs(settings)
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                raise
+    dirs = ['extensions', 'settings', 'schemas', 'staging']
+    for dname in dirs:
+        path = pjoin(app_dir, dname)
+        if not osp.exists(path):
+            try:
+                os.makedirs(path)
+            except OSError as e:
+                if e.errno != errno.EEXIST:
+                    raise
 
 
 def _get_package_template(app_dir, logger):
