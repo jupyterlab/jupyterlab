@@ -736,7 +736,11 @@ class DirListing extends Widget {
     for (let i = 0, n = items.length; i < n; ++i) {
       let node = nodes[i];
       let item = items[i];
-      renderer.updateItemNode(node, item, this._manager.registry);
+      let ext = PathExt.extname(item.path);
+      let ft = find(this._manager.registry.fileTypes(), ft => {
+        return ft.extensions.indexOf(ext) !== -1;
+      });
+      renderer.updateItemNode(node, item, ft);
       if (this._selection[item.name]) {
         node.classList.add(SELECTED_CLASS);
         if (this._isCut && this._model.path === this._prevPath) {
@@ -1126,7 +1130,11 @@ class DirListing extends Widget {
     }
 
     // Create the drag image.
-    let dragImage = this.renderer.createDragImage(source, selectedNames.length, item, this._manager.registry);
+    let ext = PathExt.extname(item.path);
+    let ft = find(this._manager.registry.fileTypes(), ft => {
+      return ft.extensions.indexOf(ext) !== -1;
+    });
+    let dragImage = this.renderer.createDragImage(source, selectedNames.length, item, ft);
 
     // Set up the drag event.
     this._drag = new Drag({
@@ -1506,9 +1514,9 @@ namespace DirListing {
      *
      * @param model - The model object to use for the item state.
      *
-     * @param registry - The document registry used to find icons.
+     * @param fileType - The file type of the item, if applicable.
      */
-    updateItemNode(node: HTMLElement, model: Contents.IModel, registry: DocumentRegistry): void;
+    updateItemNode(node: HTMLElement, model: Contents.IModel, fileType?: DocumentRegistry.IFileType): void;
 
     /**
      * Get the node containing the file name.
@@ -1526,11 +1534,11 @@ namespace DirListing {
      *
      * @param count - The number of items being dragged.
      *
-     * @param registry - The document registry used to find icons.
+     * @param fileType - The file type of the item, if applicable.
      *
      * @returns An element to use as the drag image.
      */
-    createDragImage(node: HTMLElement, count: number, model: Contents.IModel, registry: DocumentRegistry): HTMLElement;
+    createDragImage(node: HTMLElement, count: number, model: Contents.IModel, fileType?: DocumentRegistry.IFileType): HTMLElement;
   }
 
   /**
@@ -1644,9 +1652,10 @@ namespace DirListing {
      *
      * @param model - The model object to use for the item state.
      *
-     * @param registry - The document registry used to find icons.
+     * @param fileType - The file type of the item, if applicable.
+     *
      */
-    updateItemNode(node: HTMLElement, model: Contents.IModel, registry: DocumentRegistry): void {
+    updateItemNode(node: HTMLElement, model: Contents.IModel, fileType?: DocumentRegistry.IFileType): void {
       let icon = DOMUtils.findElement(node, ITEM_ICON_CLASS);
       let text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
       let modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
@@ -1662,7 +1671,7 @@ namespace DirListing {
         icon.classList.add(NOTEBOOK_MATERIAL_ICON_CLASS);
         break;
       case 'file':
-        this.handleFileIcon(icon, model.path, registry);
+        this.handleFileIcon(icon, model.path, fileType);
         break;
       default:
         icon.classList.add(MATERIAL_ICON_CLASS);
@@ -1690,17 +1699,13 @@ namespace DirListing {
     /**
      * Handle the icon for a file.
      */
-    handleFileIcon(icon: HTMLElement, path: string, registry: DocumentRegistry): string {
-      let ext = PathExt.extname(path);
-      let ft = find(registry.fileTypes(), ft => {
-        return ft.extensions.indexOf(ext) !== -1;
-      });
-      if (!ft) {
+    handleFileIcon(icon: HTMLElement, path: string, fileType?: DocumentRegistry.IFileType): string {
+      if (!fileType) {
         icon.className = `${MATERIAL_ICON_CLASS} ${FILE_TYPE_CLASS}`;
         return;
       }
-      icon.textContent = ft.iconLabel || '';
-      icon.className = ft.iconClass || '';
+      icon.textContent = fileType.iconLabel || '';
+      icon.className = fileType.iconClass || '';
     }
 
     /**
@@ -1721,29 +1726,29 @@ namespace DirListing {
      *
      * @param count - The number of items being dragged.
      *
+     * @param fileType - The file type of the item, if applicable.
+     *
      * @returns An element to use as the drag image.
      */
-    createDragImage(node: HTMLElement, count: number, model: Contents.IModel, registry: DocumentRegistry): HTMLElement {
+    createDragImage(node: HTMLElement, count: number, model: Contents.IModel, fileType?: DocumentRegistry.IFileType): HTMLElement {
       let dragImage = node.cloneNode(true) as HTMLElement;
       let modified = DOMUtils.findElement(dragImage, ITEM_MODIFIED_CLASS);
       let iconNode = DOMUtils.findElement(dragImage, ITEM_ICON_CLASS);
       dragImage.removeChild(modified as HTMLElement);
-      if (model) {
-        switch (model.type) {
-          case 'directory':
-            iconNode.className = `${MATERIAL_ICON_CLASS} ${FOLDER_MATERIAL_ICON_CLASS} ${DRAG_ICON_CLASS}`;
-            break;
-          case 'notebook':
-            iconNode.className = `${MATERIAL_ICON_CLASS} ${NOTEBOOK_MATERIAL_ICON_CLASS} ${DRAG_ICON_CLASS}`;
-            break;
-          case 'file':
-            this.handleFileIcon(iconNode, model.path, registry);
-            iconNode.classList.add('DRAG_ICON_CLASS');
-            break;
-          default:
-            iconNode.className = `${MATERIAL_ICON_CLASS} ${FILE_TYPE_CLASS} ${DRAG_ICON_CLASS}`;
-            break;
-        }
+      switch (model.type) {
+        case 'directory':
+          iconNode.className = `${MATERIAL_ICON_CLASS} ${FOLDER_MATERIAL_ICON_CLASS} ${DRAG_ICON_CLASS}`;
+          break;
+        case 'notebook':
+          iconNode.className = `${MATERIAL_ICON_CLASS} ${NOTEBOOK_MATERIAL_ICON_CLASS} ${DRAG_ICON_CLASS}`;
+          break;
+        case 'file':
+          this.handleFileIcon(iconNode, model.path, fileType);
+          iconNode.classList.add('DRAG_ICON_CLASS');
+          break;
+        default:
+          iconNode.className = `${MATERIAL_ICON_CLASS} ${FILE_TYPE_CLASS} ${DRAG_ICON_CLASS}`;
+          break;
       }
       if (count > 1) {
         let nameNode = DOMUtils.findElement(dragImage, ITEM_TEXT_CLASS);
