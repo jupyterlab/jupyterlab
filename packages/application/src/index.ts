@@ -70,15 +70,11 @@ class JupyterLab extends Application<ApplicationShell> {
     this.rendermime = new RenderMime({ initialFactories, linkHandler });
 
     let registry = this.docRegistry = new DocumentRegistry();
+    DocumentRegistry.defaultFileTypes.forEach(ft => {
+      registry.addFileType(ft);
+    });
     registry.addModelFactory(new TextModelFactory());
     registry.addModelFactory(new Base64ModelFactory());
-    registry.addFileType({
-      name: 'Text',
-      extension: '.txt',
-      contentType: 'file',
-      fileFormat: 'text'
-    });
-    registry.addCreator({ name: 'Text File', fileType: 'Text', });
 
     if (options.mimeExtensions) {
       let plugins = createRendermimePlugins(options.mimeExtensions);

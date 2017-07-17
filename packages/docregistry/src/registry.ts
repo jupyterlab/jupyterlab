@@ -870,15 +870,15 @@ namespace DocumentRegistry {
     readonly name: string;
 
     /**
-     * The extension of the file type (e.g. `".txt"`).  Can be a compound
+     * The extensions of the file type (e.g. `".txt"`).  Can be a compound
      * extension (e.g. `".table.json:`).
      */
-    readonly extension: string;
+    readonly extensions: ReadonlyArray<string>;
 
     /**
-     * The optional mimetype of the file type.
+     * The optional mime type of the file type.
      */
-    readonly mimetype?: string;
+    readonly mimeTypes?: ReadonlyArray<string>;
 
     /**
      * The optional icon class to use for the file type.
@@ -962,6 +962,101 @@ namespace DocumentRegistry {
     parts.shift();
     return '.' + parts.join('.');
   }
+
+  /**
+   * The default file types used by the document registry.
+   */
+  export
+  const defaultFileTypes: ReadonlyArray<IFileType> = [
+    {
+      name: 'markdown',
+      extensions: ['.md'],
+      mimeTypes: ['text/markdown'],
+      iconClass: 'jp-MaterialIcon jp-MarkdownIcon',
+    },
+    {
+      name: 'python',
+      extensions: ['.py'],
+      mimeTypes: ['text/x-python'],
+      iconClass: 'jp-MaterialIcon jp-PythonIcon'
+    },
+    {
+      name: 'json',
+      extensions: ['.json'],
+      mimeTypes: ['application/json', 'application/x-json'],
+      iconClass: 'jp-MaterialIcon jp-JSONIcon'
+    },
+    {
+      name: 'csv',
+      extensions: ['.csv'],
+      mimeTypes: ['text/csv'],
+      iconClass: 'jp-MaterialIcon jp-SpreadsheetIcon'
+    },
+    {
+      name: 'xls',
+      extensions: ['.xls'],
+      iconClass: 'jp-MaterialIcon jp-SpreadsheetIcon'
+    },
+    {
+      name: 'r',
+      mimeTypes: ['text/x-rsrc'],
+      extensions: ['.r'],
+      iconClass: 'jp-MaterialIcon jp-RKernelIcon'
+    },
+    {
+      name: 'yaml',
+      mimeTypes: ['text/x-yaml', 'text/yaml'],
+      extensions: ['.yaml', '.yml'],
+      iconClass: 'jp-MaterialIcon jp-YamlIcon'
+    },
+    {
+      name: 'svg',
+      mimeTypes: ['image/svg+xml'],
+      extensions: ['.svg'],
+      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      fileFormat: 'base64'
+    },
+    {
+      name: 'tiff',
+      mimeTypes: ['image/tiff'],
+      extensions: ['.tif', '.tiff'],
+      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      fileFormat: 'base64'
+    },
+    {
+      name: 'jpeg',
+      mimeTypes: ['image/jpeg'],
+      extensions: ['.jpg', '.jpeg'],
+      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      fileFormat: 'base64'
+    },
+    {
+      name: 'gif',
+      mimeTypes: ['image/gif'],
+      extensions: ['.gif'],
+      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      fileFormat: 'base64'
+    },
+    {
+      name: 'png',
+      mimeTypes: ['image/png'],
+      extensions: ['.png'],
+      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      fileFormat: 'base64'
+    },
+    {
+      name: 'raw',
+      extensions: ['.raw'],
+      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      fileFormat: 'base64'
+    },
+    {
+      name: 'text',
+      mimeTypes: ['text/plain'],
+      extensions: ['.txt'],
+      iconClass: 'jp-MaterialIcon jp-FileIcon'
+    }
+  ];
 }
 
 
