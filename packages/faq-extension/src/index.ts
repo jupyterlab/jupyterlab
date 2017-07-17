@@ -54,7 +54,7 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRe
   // Handle state restoration.
   restorer.restore(tracker, {
     command,
-    args: () => null,
+    args: () => {},
     name: () => 'faq'
   });
 
