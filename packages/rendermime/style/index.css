@@ -64,7 +64,8 @@
 .jp-RenderedText pre .ansi-bright-white-bg { background-color: #A1A6B2; }
 
 
-.jp-RenderedText[data-mime-type="application/vnd.jupyter.stderr"] {
+.jp-RenderedText[data-mime-type="application/vnd.jupyter.stderr"],
+.jp-RenderedJavaScript {
   background: #fdd;
 }
 

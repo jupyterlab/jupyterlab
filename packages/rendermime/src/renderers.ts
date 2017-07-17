@@ -59,6 +59,10 @@ function renderHTML(options: renderHTML.IOptions): Promise<void> {
   // Set the inner HTML of the host.
   host.innerHTML = source;
 
+  if (host.getElementsByTagName('script').length > 0) {
+    console.warn('JupyterLab does not execute inline JavaScript in HTML output');
+  }
+
   // TODO - arbitrary script execution is disabled for now.
   // Eval any script tags contained in the HTML. This is not done
   // automatically by the browser when script tags are created by
@@ -304,6 +308,10 @@ function renderMarkdown(options: renderMarkdown.IRenderOptions): Promise<void> {
 
     // Set the inner HTML of the host.
     host.innerHTML = content;
+
+    if (host.getElementsByTagName('script').length > 0) {
+      console.warn('JupyterLab does not execute inline JavaScript in HTML output');
+    }
 
     // TODO arbitrary script execution is disabled for now.
     // Eval any script tags contained in the HTML. This is not done
