@@ -31,10 +31,10 @@
       },
       "type": "object"
     },
-    "command-palette:activate": {
+    "command-palette:toggle": {
       "default": { },
       "properties": {
-        "command": { "default": "command-palette:activate" },
+        "command": { "default": "apputils:toggle-command-palette" },
         "keys": { "default": ["Accel Shift C"] },
         "selector": { "default": "body" }
       },
