@@ -78,6 +78,7 @@ class ForeignHandler implements IDisposable {
     if (this.isDisposed) {
       return;
     }
+    this._isDisposed = true;
     this._cells.clear();
     Signal.clearData(this);
   }
