@@ -254,6 +254,7 @@ def should_build(app_dir=None, logger=None):
 
     Returns a tuple of whether a build is necessary, and an associated message.
     """
+    logger = logger or logging
     app_dir = get_app_dir(app_dir)
 
     # Check for installed extensions
@@ -268,37 +269,34 @@ def should_build(app_dir=None, logger=None):
         return True, 'Installed extensions with no built application'
 
     with open(pkg_path) as fid:
-        data = json.load(fid)
+        static_data = json.load(fid)
 
     # Look for mismatched version.
-    version = data['jupyterlab'].get('version', '')
+    version = static_data['jupyterlab'].get('version', '')
     if LooseVersion(version) != LooseVersion(__version__):
         msg = 'Version mismatch: %s (built), %s (current)'
         return True, msg % (version, __version__)
 
     # Look for mismatched extensions.
-    _ensure_package(app_dir, logger=logger)
+    template_data = _get_package_template(app_dir, logger)
 
-    staging_path = pjoin(app_dir, 'staging', 'package.json')
-    with open(staging_path) as fid:
-        staging_data = json.load(fid)
+    template_exts = template_data['jupyterlab']['extensions']
 
-    staging_exts = staging_data['jupyterlab']['extensions']
-
-    if set(staging_exts) != set(data['jupyterlab']['extensions']):
+    if set(template_exts) != set(static_data['jupyterlab']['extensions']):
         return True, 'Installed extensions changed'
 
-    staging_mime_exts = staging_data['jupyterlab']['mimeExtensions']
+    template_mime_exts = set(template_data['jupyterlab']['mimeExtensions'])
+    staging_mime_exts = set(static_data['jupyterlab']['mimeExtensions'])
 
-    if set(staging_mime_exts) != set(data['jupyterlab']['mimeExtensions']):
+    if template_mime_exts != staging_mime_exts:
         return True, 'Installed extensions changed'
 
-    deps = data.get('dependencies', dict())
+    deps = static_data.get('dependencies', dict())
 
     # Look for mismatched extension paths.
     for name in extensions:
         # Check for dependencies that were rejected as incompatible.
-        if name not in staging_data['dependencies']:
+        if name not in template_data['dependencies']:
             continue
 
         path = deps[name]
@@ -306,12 +304,12 @@ def should_build(app_dir=None, logger=None):
             path = path.replace('file:', '')
             path = os.path.abspath(pjoin(app_dir, 'staging', path))
 
-        staging_path = staging_data['dependencies'][name]
+        template_path = template_data['dependencies'][name]
         if sys.platform == 'win32':
             path = path.lower()
-            staging_path = staging_path.lower()
+            template_path = template_path.lower()
 
-        if path != staging_path:
+        if path != template_path:
             return True, 'Installed extensions changed'
 
     return False, ''
@@ -638,7 +636,7 @@ def _toggle_extension(extension, value, app_dir=None, logger=None):
 def _write_build_config(config, app_dir, logger):
     """Write the build config to the app dir.
     """
-    _ensure_package(app_dir, logger=logger)
+    _ensure_app_dirs(app_dir, logger=logger)
     target = pjoin(app_dir, 'settings', 'build_config.json')
     with open(target, 'w') as fid:
         json.dump(config, fid, indent=4)
@@ -647,7 +645,7 @@ def _write_build_config(config, app_dir, logger):
 def _write_page_config(config, app_dir, logger):
     """Write the build config to the app dir.
     """
-    _ensure_package(app_dir, logger=logger)
+    _ensure_app_dirs(app_dir, logger=logger)
     target = pjoin(app_dir, 'settings', 'page_config.json')
     with open(target, 'w') as fid:
         json.dump(config, fid, indent=4)
@@ -657,21 +655,7 @@ def _ensure_package(app_dir, name=None, version=None, logger=None):
     """Make sure the build dir is set up.
     """
     logger = logger or logging
-    if not os.path.exists(pjoin(app_dir, 'extensions')):
-        try:
-            os.makedirs(pjoin(app_dir, 'extensions'))
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                raise
-
-    settings = pjoin(app_dir, 'settings')
-    if not os.path.exists(settings):
-        try:
-            os.makedirs(settings)
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                raise
-
+    _ensure_app_dirs(app_dir)
     staging = pjoin(app_dir, 'staging')
 
     # Look for mismatched version.
@@ -692,6 +676,47 @@ def _ensure_package(app_dir, name=None, version=None, logger=None):
         shutil.copy(pjoin(here, fname), dest)
 
     # Template the package.json file.
+    data = _get_package_template(app_dir, logger)
+    data['jupyterlab']['name'] = name or 'JupyterLab'
+    if version:
+        data['jupyterlab']['version'] = version
+
+    pkg_path = pjoin(staging, 'package.json')
+    with open(pkg_path, 'w') as fid:
+        json.dump(data, fid, indent=4)
+
+    # Copy any missing or outdated schema files.
+    schema_local = pjoin(here, 'schemas')
+    schema_app = pjoin(app_dir, 'schemas')
+    if not os.path.exists(schema_app):
+        os.makedirs(schema_app)
+
+    for schema in os.listdir(schema_local):
+        dest = pjoin(schema_app, schema)
+        if version_updated or not os.path.exists(dest):
+            shutil.copy(pjoin(schema_local, schema), dest)
+
+
+def _ensure_app_dirs(app_dir):
+    """Ensure that the application directories exist"""
+    if not os.path.exists(pjoin(app_dir, 'extensions')):
+        try:
+            os.makedirs(pjoin(app_dir, 'extensions'))
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+
+    settings = pjoin(app_dir, 'settings')
+    if not os.path.exists(settings):
+        try:
+            os.makedirs(settings)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+
+
+def _get_package_template(app_dir, logger):
+    # Get the template the for package.json file.
     data = _get_core_data()
     extensions = _get_extensions(app_dir)
 
@@ -722,24 +747,7 @@ def _ensure_package(app_dir, name=None, version=None, logger=None):
         else:
             data['jupyterlab']['mimeExtensions'].remove(item)
 
-    data['jupyterlab']['name'] = name or 'JupyterLab'
-    if version:
-        data['jupyterlab']['version'] = version
-
-    pkg_path = pjoin(staging, 'package.json')
-    with open(pkg_path, 'w') as fid:
-        json.dump(data, fid, indent=4)
-
-    # Copy any missing or outdated schema files.
-    schema_local = pjoin(here, 'schemas')
-    schema_app = pjoin(app_dir, 'schemas')
-    if not os.path.exists(schema_app):
-        os.makedirs(schema_app)
-
-    for schema in os.listdir(schema_local):
-        dest = pjoin(schema_app, schema)
-        if version_updated or not os.path.exists(dest):
-            shutil.copy(pjoin(schema_local, schema), dest)
+    return data
 
 
 def _is_extension(data):
