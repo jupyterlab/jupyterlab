@@ -264,7 +264,7 @@ class FaqWidget extends VDomRenderer<FaqModel> {
           'Check out the JupyterLab tour ',
           h.a({
             className: ANCHOR_CLASS,
-            dataset: linker.populateVNodeDataset('about-jupyterlab:open', {})
+            dataset: linker.populateVNodeDataset('about-jupyterlab:open')
           }, 'here')
         )
       ),

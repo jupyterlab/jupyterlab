@@ -81,11 +81,10 @@ class CommandLinker implements IDisposable {
    * 1. If a node is connected, the default click action will be prevented.
    * 2. The `HTMLElement` passed in should be clickable.
    */
-  connectNode(node: HTMLElement, command: string, args: JSONObject): HTMLElement {
-    let argsValue = JSON.stringify(args);
+  connectNode(node: HTMLElement, command: string, args?: JSONObject): HTMLElement {
     node.setAttribute(`data-${COMMAND_ATTR}`, command);
-    if (argsValue) {
-      node.setAttribute(`data-${ARGS_ATTR}`, argsValue);
+    if (args !== void 0) {
+      node.setAttribute(`data-${ARGS_ATTR}`, JSON.stringify(args));
     }
     return node;
   }
@@ -162,7 +161,7 @@ class CommandLinker implements IDisposable {
    * }, 'some text');
    * ```
    */
-  populateVNodeDataset(command: string, args: JSONObject): ElementDataset {
+  populateVNodeDataset(command: string, args?: JSONObject): ElementDataset {
     let dataset = { [COMMAND_ATTR]: command };
     if (args !== void 0) {
       dataset[ARGS_ATTR] = JSON.stringify(args);
