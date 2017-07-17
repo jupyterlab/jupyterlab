@@ -162,7 +162,7 @@ interface ILauncherItem {
 
   /**
    * For items that hava kernel associated with them, the URL of the kernel icon.
-   * 
+   *
    * This is not a CSS class, but the URL that points to the icon in the kernel spec.
    */
   kernelIconUrl?: string;
@@ -254,7 +254,7 @@ class Launcher extends VDomRenderer<LauncherModel> {
       let cat = item.category || "Other";
       if (!(cat in categories)) {
         categories[cat] = []
-      } 
+      }
       categories[cat].push(item);
     });
     // Within each category sort by rank
@@ -303,7 +303,7 @@ class Launcher extends VDomRenderer<LauncherModel> {
         <div className="jp-Launcher-content">
         {sections}
         </div>
-      </div>  
+      </div>
     );
   }
 
@@ -390,9 +390,9 @@ function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcher
       <div className="jp-LauncherCard-icon">
           {(item.kernelIconUrl && kernel) && <img src={item.kernelIconUrl} className="jp-Launcher-kernelIcon" />}
           {(!item.kernelIconUrl && !kernel) && <div className={`${item.iconClass} jp-Launcher-icon`} />}
-          {(!item.kernelIconUrl && kernel) && <div className="jp-LauncherCard-noKernelIcon">{item.displayName[0].toUpperCase()}</div>}          
+          {(!item.kernelIconUrl && kernel) && <div className="jp-LauncherCard-noKernelIcon">{item.displayName[0].toUpperCase()}</div>}
       </div>
-      <div className="jp-LauncherCard-label">{item.displayName}</div>
+      <div className="jp-LauncherCard-label" title={item.displayName}>{item.displayName}</div>
     </div>
   );
 }
