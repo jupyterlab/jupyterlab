@@ -20,7 +20,7 @@ import {
 } from '../utils';
 
 
-describe('terminals', () => {
+describe('terminal', () => {
 
   let tester: TerminalTester;
   let manager: TerminalSession.IManager;

@@ -17,7 +17,7 @@ from subprocess import check_output, CalledProcessError, STDOUT
 import shutil
 import sys
 import tarfile
-from jupyter_core.paths import ENV_JUPYTER_PATH
+from jupyter_core.paths import ENV_JUPYTER_PATH, jupyter_config_path
 from notebook.nbextensions import (
     GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 )
@@ -43,6 +43,16 @@ def get_app_dir(app_dir=None):
     app_dir = app_dir or os.environ.get('JUPYTERLAB_DIR')
     app_dir = app_dir or pjoin(ENV_JUPYTER_PATH[0], 'lab')
     return os.path.realpath(app_dir)
+
+
+def get_user_settings_dir():
+    """Get the configured JupyterLab app directory.
+    """
+    settings_dir = os.environ.get('JUPYTERLAB_SETTINGS_DIR')
+    settings_dir = settings_dir or pjoin(
+        jupyter_config_path()[0], 'lab', 'user-settings'
+    )
+    return os.path.realpath(settings_dir)
 
 
 def run(cmd, **kwargs):
@@ -128,6 +138,13 @@ def install_extension(extension, app_dir=None, logger=None):
     target = target.replace('/', os.sep)
     if os.path.exists(target):
         shutil.rmtree(target)
+
+    # Handle any schemas.
+    schema_data = data['jupyterlab'].get('schema_data', dict())
+    for (key, value) in schema_data.items():
+        path = pjoin(app_dir, 'schemas', key + '.json')
+        with open(path, 'w') as fid:
+            fid.write(value)
 
 
 def link_package(path, app_dir=None, logger=None):
@@ -659,11 +676,13 @@ def _ensure_package(app_dir, name=None, version=None, logger=None):
 
     # Look for mismatched version.
     pkg_path = pjoin(staging, 'package.json')
+    version_updated = False
     if os.path.exists(pkg_path):
         with open(pkg_path) as fid:
             data = json.load(fid)
         if data['jupyterlab'].get('version', '') != __version__:
             shutil.rmtree(staging)
+            version_updated = True
 
     if not os.path.exists(staging):
         os.makedirs(staging)
@@ -707,11 +726,20 @@ def _ensure_package(app_dir, name=None, version=None, logger=None):
     if version:
         data['jupyterlab']['version'] = version
 
-    data['scripts']['build'] = 'webpack'
-
     pkg_path = pjoin(staging, 'package.json')
     with open(pkg_path, 'w') as fid:
         json.dump(data, fid, indent=4)
+
+    # Copy any missing or outdated schema files.
+    schema_local = pjoin(here, 'schemas')
+    schema_app = pjoin(app_dir, 'schemas')
+    if not os.path.exists(schema_app):
+        os.makedirs(schema_app)
+
+    for schema in os.listdir(schema_local):
+        dest = pjoin(schema_app, schema)
+        if version_updated or not os.path.exists(dest):
+            shutil.copy(pjoin(schema_local, schema), dest)
 
 
 def _is_extension(data):
@@ -822,7 +850,19 @@ def _read_package(target):
     """
     tar = tarfile.open(target, "r:gz")
     f = tar.extractfile('package/package.json')
-    return json.loads(f.read().decode('utf8'))
+    data = json.loads(f.read().decode('utf8'))
+    jlab = data.get('jupyterlab', None)
+    if not jlab:
+        return data
+    schemas = jlab.get('schemas', None)
+    if not schemas:
+        return data
+    schema_data = dict()
+    for schema in schemas:
+        f = tar.extractfile('package/' + schema)
+        schema_data[schema] = f.read().decode('utf8')
+    data['jupyterlab']['schema_data'] = schema_data
+    return data
 
 
 def _normalize_path(extension):

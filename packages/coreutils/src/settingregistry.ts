@@ -86,6 +86,11 @@ namespace ISchemaValidator {
   export
   interface IError {
     /**
+     * The path in the data where the error occurred.
+     */
+    dataPath: string;
+
+    /**
      * The keyword whose validation failed.
      */
     keyword: string;
@@ -402,7 +407,6 @@ class SettingRegistry {
   constructor(options: SettingRegistry.IOptions) {
     this._connector = options.connector;
     this._validator = options.validator || new DefaultSchemaValidator();
-    this._preload = options.preload || (() => { /* no op */ });
   }
 
   /**
@@ -476,21 +480,6 @@ class SettingRegistry {
   }
 
   /**
-   * Preload the schema for a plugin.
-   *
-   * @param plugin - The plugin ID.
-   *
-   * @param schema - The schema being added.
-   *
-   * #### Notes
-   * This method is deprecated and is only intented for use until there is a
-   * server-side API for storing setting data.
-   */
-  preload(plugin: string, schema: ISettingRegistry.ISchema): void {
-    this._preload(plugin, schema);
-  }
-
-  /**
    * Reload a plugin's settings into the registry even if they already exist.
    *
    * @param plugin - The name of the plugin whose settings are being reloaded.
@@ -504,12 +493,23 @@ class SettingRegistry {
 
     // If the plugin needs to be loaded from the connector, fetch.
     return connector.fetch(plugin).then(data => {
-      if (!data) {
-        const message = `Setting data for ${plugin} does not exist.`;
-        throw [{ keyword: '', message, schemaPath: '' }];
+      // Validate the response from the connector; populate `composite` field.
+      try {
+        this._validate(data);
+      } catch (errors) {
+        const output = [`Validating ${plugin} failed:`];
+        (errors as ISchemaValidator.IError[]).forEach((error, index) => {
+          const { dataPath, schemaPath, keyword, message } = error;
+          output.push(`${index} - schema @ ${schemaPath}, data @ ${dataPath}`);
+          output.push(`\t${keyword} ${message}`);
+        });
+        console.error(output.join('\n'));
+
+        throw new Error(`Failed validating ${plugin}`);
       }
 
-      this._validate(data);
+      // Emit that a plugin has changed.
+      this._pluginChanged.emit(plugin);
 
       return new Settings({
         plugin: copy(plugins[plugin]) as ISettingRegistry.IPlugin,
@@ -635,7 +635,6 @@ class SettingRegistry {
   private _connector: IDataConnector<ISettingRegistry.IPlugin, JSONObject>;
   private _pluginChanged = new Signal<this, string>(this);
   private _plugins: { [name: string]: ISettingRegistry.IPlugin } = Object.create(null);
-  private _preload: (plugin: string, schema: ISettingRegistry.ISchema) => void;
   private _validator: ISchemaValidator;
 }
 
@@ -822,15 +821,6 @@ namespace SettingRegistry {
      * The data connector used by the setting registry.
      */
     connector: IDataConnector<ISettingRegistry.IPlugin, JSONObject>;
-
-    /**
-     * A function that preloads a plugin's schema in the client-side cache.
-     *
-     * #### Notes
-     * This param is deprecated and is only intented for use until there is a
-     * server-side API for storing setting data.
-     */
-    preload?: (plugin: string, schema: ISettingRegistry.ISchema) => void;
 
     /**
      * The validator used to enforce the settings JSON schema.

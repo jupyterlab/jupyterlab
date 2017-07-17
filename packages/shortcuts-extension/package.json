@@ -6,13 +6,17 @@
   "types": "lib/index.d.ts",
   "files": [
     "lib/*.d.ts",
-    "lib/*.js"
+    "lib/*.js",
+    "schema/*.json"
   ],
   "directories": {
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.8.3"
+    "@jupyterlab/application": "^0.8.3",
+    "@jupyterlab/coreutils": "^0.8.1",
+    "@phosphor/commands": "^1.3.0",
+    "@phosphor/disposable": "^1.1.1"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
@@ -24,7 +28,10 @@
     "watch": "tsc -w"
   },
   "jupyterlab": {
-    "extension": true
+    "extension": true,
+    "schemas": [
+      "schema/jupyter.extensions.shortcuts.json"
+    ]
   },
   "repository": {
     "type": "git",

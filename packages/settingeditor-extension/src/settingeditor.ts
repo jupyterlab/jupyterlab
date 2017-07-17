@@ -181,12 +181,12 @@ class SettingEditor extends Widget {
     requestAnimationFrame(() => {
       // Set the original (default) outer dimensions.
       this._panel.setRelativeSizes(this._presets.outer);
-      this._fetchState()
-        .then(() => { this._setPresets(); })
-        .catch(reason => {
-          console.error('Fetching setting editor state failed', reason);
-          this._setPresets();
-        });
+      this._fetchState().then(() => {
+        this._setPresets();
+      }).catch(reason => {
+        console.error('Fetching setting editor state failed', reason);
+        this._setPresets();
+      });
     });
   }
 
@@ -315,8 +315,8 @@ class SettingEditor extends Widget {
       }
       editor.settings = settings;
       list.selection = plugin;
-    }).catch(reason => {
-      console.error('Loading settings failed.', reason);
+    }).catch((reason: Error) => {
+      console.error(`Loading settings failed: ${reason.message}`);
       list.selection = this._presets.plugin = '';
       editor.settings = null;
     });
@@ -718,7 +718,15 @@ class PluginEditor extends Widget {
     const editor = this._editor;
     const settings = this._settings;
 
-    settings.save(editor.source.toJSON());
+    settings.save(editor.source.toJSON()).catch(reason => {
+      console.error(`Saving setting editor value failed: ${reason.message}`);
+
+      return showDialog({
+        title: 'Your changes were not saved.',
+        body: reason.message,
+        buttons: [Dialog.okButton()]
+      }).then(() => void 0);
+    });
   }
 
   private _editor: JSONEditor = null;

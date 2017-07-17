@@ -51,6 +51,10 @@ data['jupyterlab']['version'] = version;
 updateDependencies(data);
 var text = JSON.stringify(sortPackageJson(data), null, 2) + '\n';
 fs.writeFileSync('./package.json', text);
+
+// Update the build script.
+text = JSON.stringify(sortPackageJson(data), null, 2) + '\n';
+data['scripts']['build'] = 'webpack'
 fs.writeFileSync('./package.app.json', text);
 
 // Update our app index file.
