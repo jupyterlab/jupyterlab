@@ -15,6 +15,7 @@
   "dependencies": {
     "@jupyterlab/application": "^0.8.3",
     "@jupyterlab/apputils": "^0.8.2",
+    "@phosphor/coreutils": "^1.2.0",
     "@phosphor/messaging": "^1.2.1",
     "@phosphor/virtualdom": "^1.1.1"
   },

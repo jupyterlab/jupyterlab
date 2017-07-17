@@ -8,7 +8,7 @@ import {
 } from '@phosphor/commands';
 
 import {
-  JSONObject, PromiseDelegate, Token
+  JSONObject, PromiseDelegate, ReadonlyJSONObject, Token
 } from '@phosphor/coreutils';
 
 import {
@@ -86,7 +86,7 @@ namespace ILayoutRestorer {
     /**
      * A function that returns the args needed to restore an instance.
      */
-    args: (widget: T) => JSONObject;
+    args: (widget: T) => ReadonlyJSONObject;
 
     /**
      * A function that returns a unique persistent name for this instance.
