@@ -512,6 +512,25 @@ class DocumentRegistry implements IDisposable {
     };
   }
 
+  /**
+   * Get the best file type given a contents model.
+   */
+  getFileTypeForModel(model: Contents.IModel): DocumentRegistry.IFileType | undefined {
+    switch (model.type) {
+    case 'directory':
+      return find(this._fileTypes, ft => ft.contentType === 'directory');
+    case 'notebook':
+      return find(this._fileTypes, ft => ft.contentType === 'notebook');
+    case 'file':
+      let ext = PathExt.extname(model.path);
+      let ft = find(this._fileTypes, ft => ft.extensions.indexOf(ext) !== -1);
+      return ft || this.getFileType('text');
+    default:
+      return undefined;
+    }
+  }
+
+
   private _modelFactories: { [key: string]: DocumentRegistry.ModelFactory } = Object.create(null);
   private _widgetFactories: { [key: string]: DocumentRegistry.WidgetFactory } = Object.create(null);
   private _defaultWidgetFactory = '';
@@ -1055,6 +1074,20 @@ namespace DocumentRegistry {
       mimeTypes: ['text/plain'],
       extensions: ['.txt'],
       iconClass: 'jp-MaterialIcon jp-FileIcon'
+    },
+    {
+      name: 'notebook',
+      extensions: ['.ipynb'],
+      contentType: 'notebook',
+      fileFormat: 'json',
+      iconClass: 'jp-MaterialIcon jp-NotebookIcon'
+    },
+    {
+      name: 'directory',
+      extensions: [],
+      mimeTypes: ['text/directory'],
+      contentType: 'directory',
+      iconClass: 'jp-MaterialIcon jp-OpenFolderIcon'
     }
   ];
 }

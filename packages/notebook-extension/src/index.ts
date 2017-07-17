@@ -395,12 +395,6 @@ function activateNotebookHandler(app: JupyterLab, services: IServiceManager, mai
   let registry = app.docRegistry;
   registry.addModelFactory(new NotebookModelFactory({}));
   registry.addWidgetFactory(factory);
-  registry.addFileType({
-    name: 'Notebook',
-    extensions: ['.ipynb'],
-    contentType: 'notebook',
-    fileFormat: 'json'
-  });
   registry.addCreator({
     name: 'Notebook',
     fileType: 'Notebook',
