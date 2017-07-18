@@ -73,6 +73,23 @@
 }
 
 
+.jp-Notebook::-webkit-scrollbar {
+  background-color: var(--jp-scrollbar-background-color);
+  border-left: var(--jp-scrollbar-border);
+}
+
+
+.jp-Notebook::-webkit-scrollbar-thumb {
+  background-color: var(--jp-scrollbar-thumb-color);
+  border-left: var(--jp-scrollbar-border);
+}
+
+
+.jp-Notebook a:-webkit-any-link {
+  color: var(--md-blue-500);
+}
+
+
 /*-----------------------------------------------------------------------------
 | Notebook state related styling
 |
@@ -124,7 +141,6 @@
 
 .jp-Notebook.jp-mod-editMode .jp-Cell.jp-mod-active .jp-InputArea-editor {
   border: var(--jp-border-width) solid var(--jp-cell-editor-border-color-edit);
-  background: var(--jp-cell-editor-background-edit);
   box-shadow: var(--jp-cell-editor-box-shadow);
 }
 

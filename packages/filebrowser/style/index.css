@@ -161,6 +161,19 @@
   background-color: var(--jp-filebrowser-content-background-color);
 }
 
+/* Styling for the file browser content scroll bar */
+.jp-DirListing-content::-webkit-scrollbar {
+  background-color: var(--jp-scrollbar-background-color);
+  border-left: var(--jp-scrollbar-border);
+}
+
+
+.jp-DirListing-content::-webkit-scrollbar-thumb {
+  background-color: var(--jp-scrollbar-thumb-color);
+  border-radius: 0px;
+  border-left: var(--jp-scrollbar-border);
+}
+
 
 .jp-DirListing-item {
   display: flex;
@@ -185,7 +198,7 @@
 
 
 .jp-DirListing-item:hover:not(.jp-mod-selected) {
-  background: var(--jp-layout-color2)
+  background: var(--jp-layout-color1);
 }
 
 

@@ -24,7 +24,7 @@
   margin: 0;
   padding: 0;
   outline: none;
-  background: var(--md-grey-50);
+  background: var(--jp-layout-color2);
   box-sizing: border-box;
 }
 
@@ -48,6 +48,19 @@
   overflow: auto;
   display: flex;
   justify-content: center;
+}
+
+
+.jp-Launcher-body::-webkit-scrollbar {
+  background-color: var(--jp-scrollbar-background-color);
+  border-left: var(--jp-scrollbar-border);
+}
+
+
+.jp-Launcher-body::-webkit-scrollbar-thumb {
+  background-color: var(--jp-scrollbar-thumb-color);
+  border-radius: 0px;
+  border-left: var(--jp-scrollbar-border);
 }
 
 
@@ -120,8 +133,8 @@
   height: var(--jp-private-launcher-card-size);
   margin: 8px;
   padding: 0px;
-  border: 1px solid var(--md-grey-400);
-  background: var(--jp-layout-color0);
+  border: 1px solid var(--jp-border-color1);
+  background: var(--jp-layout-color1);
   box-shadow: 0px 1px 1px 1px rgba(0,0,0,.08);
   transition: .2s box-shadow;
 }

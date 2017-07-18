@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 21.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!-- Generator: Adobe Illustrator 19.2.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
 <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 22 22" style="enable-background:new 0 0 22 22;" xml:space="preserve">
 <style type="text/css">
-	.st0{fill:#0D47A1;}
+	.st0{fill:#2196F3;}
 	.st1{display:none;}
 	.st2{display:inline;fill:none;stroke:#9E9E9E;stroke-width:2.000000e-02;stroke-miterlimit:10;}
 </style>
@@ -69,7 +69,7 @@
 	<line class="st2" x1="4.4" y1="0" x2="4.4" y2="22"/>
 	<line class="st2" x1="22" y1="17.6" x2="0" y2="17.6"/>
 	<line class="st2" x1="22" y1="4.4" x2="0" y2="4.4"/>
-	<rect x="7.9" y="7.9" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -4.5576 10.9998)" class="st2" width="6.2" height="6.2"/>
+	<rect x="7.9" y="7.9" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -4.5566 10.999)" class="st2" width="6.2" height="6.2"/>
 	<line class="st2" x1="0" y1="16.5" x2="22" y2="16.5"/>
 	<line class="st2" x1="16.5" y1="22" x2="16.5" y2="0"/>
 	<line class="st2" x1="5.5" y1="22" x2="5.5" y2="0"/>

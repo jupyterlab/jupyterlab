@@ -46,40 +46,65 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   /* The caret used for select dropdown styling. */
 
-  --jp-ui-select-caret: url('./icons/md/down_caret.svg');
+  --jp-ui-select-caret: url('./icons-dark/md/down_caret.svg');
 
   /* Icons used in the application. */
 
-  --jp-icon-book: url('./icons/jupyter/book.svg');
-  --jp-icon-book-selected: url('./icons/jupyter/book_selected.svg');
-  --jp-icon-book-running: url('./icons/jupyter/book_running.svg');
-  --jp-icon-book-running-selected: url('./icons/jupyter/book_running_selected.svg');
-  --jp-icon-directory-selected: url('./icons/jupyter/directory_selected.svg');
-  --jp-icon-file-selected: url('./icons/jupyter/file_selected.svg');
-  --jp-icon-yaml: url('./icons/jupyter/yml.svg');
-  --jp-icon-yaml-selected: url('./icons/jupyter/yml_selected.svg');
-  --jp-icon-spreadsheet: url('./icons/jupyter/csv.svg');
-  --jp-icon-spreadsheet-selected: url('./icons/jupyter/csv_selected.svg');
-  --jp-icon-image: url('./icons/jupyter/image.svg');
-  --jp-icon-image-selected: url('./icons/jupyter/image_selected.svg');
-  --jp-icon-json: url('./icons/jupyter/json.svg');
-  --jp-icon-json-selected: url('./icons/jupyter/json_selected.svg');
-  --jp-icon-markdown: url('./icons/jupyter/markdown.svg');
-  --jp-icon-markdown-selected: url('./icons/jupyter/markdown_selected.svg');
-  --jp-icon-python: url('./icons/jupyter/python.svg');
-  --jp-icon-python-selected: url('./icons/jupyter/python_selected.svg');
-  --jp-icon-r: url('./icons/jupyter/r.svg');
-  --jp-icon-r-selected: url('./icons/jupyter/r_selected.svg');
-  --jp-icon-console: url('./icons/jupyter/console.svg');
-  --jp-icon-terminal: url('./icons/jupyter/terminal.svg');
-  --jp-icon-file: url('./icons/jupyter/file.svg');
-  --jp-icon-refresh: url('./icons/md/refresh.svg');
-  --jp-icon-close: url('./icons/md/close.svg');
-  --jp-inverse-icon-close: url('./icons/md/close-inverse.svg');
-  --jp-icon-circle: url('./icons/md/circle.svg');
-  --jp-inverse-icon-circle: url('./icons/md/circle-inverse.svg');
-  --jp-icon-close-black: url('./icons/md/close-black.svg');
-  --jp-icon-search: url('./icons/md/search.svg');
+  --jp-icon-add: url('./icons-light/md/add.svg');
+  --jp-icon-book: url('./icons-light/jupyter/book.svg');
+  --jp-icon-book-selected: url('./icons-light/jupyter/book_selected.svg');
+  --jp-icon-book-running: url('./icons-light/jupyter/book_running.svg');
+  --jp-icon-book-running-selected: url('./icons-light/jupyter/book_running_selected.svg');
+  --jp-icon-directory: url('./icons-light/jupyter/directory.svg');
+  --jp-icon-directory-selected: url('./icons-light/jupyter/directory_selected.svg');
+  --jp-icon-new-directory: url('./icons-light/md/new-folder.svg');
+  --jp-icon-file-selected: url('./icons-light/jupyter/file_selected.svg');
+  --jp-icon-yaml: url('./icons-light/jupyter/yml.svg');
+  --jp-icon-yaml-selected: url('./icons-light/jupyter/yml_selected.svg');
+  --jp-icon-spreadsheet: url('./icons-light/jupyter/csv.svg');
+  --jp-icon-spreadsheet-selected: url('./icons-light/jupyter/csv_selected.svg');
+  --jp-icon-image: url('./icons-light/jupyter/image.svg');
+  --jp-icon-image-selected: url('./icons-light/jupyter/image_selected.svg');
+  --jp-icon-json: url('./icons-light/jupyter/json.svg');
+  --jp-icon-json-selected: url('./icons-light/jupyter/json_selected.svg');
+  --jp-icon-kernel-running: url('./icons-light/md/panorama_fish_eye.svg');
+  --jp-icon-markdown: url('./icons-light/jupyter/markdown.svg');
+  --jp-icon-markdown-selected: url('./icons-light/jupyter/markdown_selected.svg');
+  --jp-icon-python: url('./icons-light/jupyter/python.svg');
+  --jp-icon-python-selected: url('./icons-light/jupyter/python_selected.svg');
+  --jp-icon-r: url('./icons-light/jupyter/r.svg');
+  --jp-icon-r-selected: url('./icons-light/jupyter/r_selected.svg');
+  --jp-icon-console: url('./icons-light/jupyter/console.svg');
+  --jp-icon-terminal: url('./icons-light/jupyter/terminal.svg');
+  --jp-icon-file: url('./icons-light/jupyter/file.svg');
+  --jp-icon-refresh: url('./icons-light/md/refresh.svg');
+  --jp-icon-close: url('./icons-light/md/close.svg');
+  --jp-inverse-icon-close: url('./icons-light/md/close-inverse.svg');
+  --jp-icon-circle: url('./icons-light/md/circle.svg');
+  --jp-inverse-icon-circle: url('./icons-light/md/circle-inverse.svg');
+  --jp-icon-close-black: url('./icons-light/md/close-black.svg');
+  --jp-icon-search: url('./icons-light/md/search.svg');
+  --jp-icon-copy: url('./icons-light/md/copy.svg');
+  --jp-icon-cut: url('./icons-light/md/cut.svg');
+  --jp-icon-paste: url('./icons-light/md/paste.svg');
+  --jp-icon-download: url('./icons-light/md/download.svg');
+  --jp-icon-edit: url('./icons-light/md/edit.svg');
+  --jp-icon-ellipses: url('./icons-light/md/ellipses.svg');
+  --jp-icon-expand-less: url('./icons-light/md/expand-less.svg');
+  --jp-icon-expand-more: url('./icons-light/md/expand-more.svg');
+  --jp-icon-home: url('./icons-light/md/home.svg');
+  --jp-icon-jupyter: url('./icons-light/jupyter/jupyter.svg');
+  --jp-icon-launcher: url('./icons-light/jupyter/launcher.svg');
+  --jp-icon-more: url('./icons-light/md/more-horiz.svg');
+  --jp-icon-run: url('./icons-light/md/run.svg');
+  --jp-icon-save: url('./icons-light/md/save.svg');
+  --jp-icon-stop: url('./icons-light/md/stop.svg');
+  --jp-icon-text-editor: url('./icons-light/jupyter/texteditor.svg');
+  --jp-icon-upload: url('./icons-light/md/upload.svg');
+  --jp-icon-question-mark: url('./icons-light/jupyter/questionmark.svg');
+  --jp-icon-chat: url('./icons-light/md/chat.svg');
+  --jp-about-header-logo: url('../../theming/style/icons-light/jupyter/jupyter.svg');
+    --jp-about-header-wordmark: url('../../theming/style/images/jupyterlab-wordmark.svg');
 
 
 
@@ -238,4 +263,35 @@ all of MD as it is not optimized for dense, information rich UIs.
   /* Input field styles */
 
   --jp-input-background-color: var(--jp-layout-color0);
+
+   /* Code mirror specific styles */
+
+  --jp-mirror-editor-pre-color: black;
+  --jp-mirror-editor-gutter-border: 1px solid #ddd;
+  --jp-mirror-editor-gutter-background-color: #f7f7f7;
+  --jp-mirror-editor-keyword-color: #008000;
+  --jp-mirror-editor-atom-color: #88F;
+  --jp-mirror-editor-number-color: #080;
+  --jp-mirror-editor-def-color: #00f;
+  --jp-mirror-editor-variable-color: var(--md-grey-900);
+  --jp-mirror-editor-variable-2-color: var(--md-grey-800);
+  --jp-mirror-editor-variable-3-color: var(--md-grey-700);
+  --jp-mirror-editor-punctuation-color: #05a;
+  --jp-mirror-editor-property-color: #05a;
+  --jp-mirror-editor-operator-color: #AA22FF;
+  --jp-mirror-editor-comment-color: #408080;
+  --jp-mirror-editor-string-color: #BA2121;
+  --jp-mirror-editor-string-2-color: #f50;
+  --jp-mirror-editor-meta-color: #AA22FF;
+  --jp-mirror-editor-qualifier-color: #555;
+  --jp-mirror-editor-builtin-color: #008000;
+  --jp-mirror-editor-bracket-color: #997;
+  --jp-mirror-editor-tag-color: #170;
+  --jp-mirror-editor-attribute-color: #00c;
+  --jp-mirror-editor-header-color: blue;
+  --jp-mirror-editor-quote-color: #090;
+  --jp-mirror-editor-link-color: #00c;
+  --jp-mirror-editor-error-color: #f00;
+  --jp-mirror-editor-hr-color: #999;
+
 }

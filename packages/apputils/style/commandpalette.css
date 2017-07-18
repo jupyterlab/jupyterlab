@@ -149,7 +149,7 @@
 
 
 .p-CommandPalette-item:hover:not(.p-mod-active):not(.p-mod-disabled) {
-  background: #E5E5E5;
+  background: var(--jp-layout-color1);
 }
 
 
@@ -171,6 +171,19 @@
 
 .p-CommandPalette-content {
   background-color: var(--jp-layout-color2);
+}
+
+
+.p-CommandPalette-content::-webkit-scrollbar {
+  background-color: var(--jp-scrollbar-background-color);
+  border-left: var(--jp-scrollbar-border);
+}
+
+
+.p-CommandPalette-content::-webkit-scrollbar-thumb {
+  background-color: var(--jp-scrollbar-thumb-color);
+  border-left: var(--jp-scrollbar-border);
+  border-radius: 0px;
 }
 
 
