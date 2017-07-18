@@ -78,6 +78,11 @@ namespace IRenderMime {
   export
   interface IDocumentWidgetFactoryOptions {
     /**
+     * The name of the widget to display in dialogs.
+     */
+    readonly name: string;
+
+    /**
      * The file extensions the widget can view.
      *
      * #### Notes
@@ -86,11 +91,6 @@ namespace IRenderMime {
      * period (e.g. .table.json).
      */
     readonly fileExtensions: ReadonlyArray<string>;
-
-    /**
-     * The name of the widget to display in dialogs.
-     */
-    readonly name: string;
 
     /**
      * The file extensions for which the factory should be the default.
@@ -104,26 +104,23 @@ namespace IRenderMime {
      * **See also:** [[fileExtensions]].
      */
     readonly defaultFor?: ReadonlyArray<string>;
+  }
+
+  /**
+   * A file type to associate with the renderer.
+   */
+  export
+  interface IFileType {
+    /**
+     * The name of the file type.
+     */
+    readonly name: string;
 
     /**
-     * Whether the widget factory is read only.
+     * The extensions of the file type (e.g. `".txt"`).  Can be a compound
+     * extension (e.g. `".table.json`).
      */
-    readonly readOnly?: boolean;
-
-    /**
-     * The registered name of the model type used to create the widgets.
-     */
-    readonly modelName?: string;
-
-    /**
-     * Whether the widgets prefer having a kernel started.
-     */
-    readonly preferKernel?: boolean;
-
-    /**
-     * Whether the widgets can start a kernel when opened.
-     */
-    readonly canStartKernel?: boolean;
+    readonly extensions: ReadonlyArray<string>;
   }
 
   /**
@@ -170,6 +167,11 @@ namespace IRenderMime {
      * The options used to open a document with the renderer factory.
      */
     readonly documentWidgetFactoryOptions?: IDocumentWidgetFactoryOptions;
+
+    /**
+     * The optional name for a fileType associated with the extension.
+     */
+    readonly fileType?: IFileType;
   }
 
   /**

@@ -133,11 +133,15 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
     rendererFactory,
     rank: 0,
     dataType: 'json',
+    iconClass: 'jp-MaterialIcon jp-VegaIcon',
     documentWidgetFactoryOptions: {
       name: 'Vega',
       fileExtensions: ['.vg', '.vg.json', '.json'],
-      defaultFor: ['.vg', '.vg.json'],
-      readOnly: true
+      defaultFor: ['.vg', '.vg.json']
+    },
+    fileType: {
+      name: 'vega',
+      extensions: ['.vg', '.vg.json']
     }
   },
   // Vega-Lite
@@ -146,11 +150,15 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
     rendererFactory,
     rank: 0,
     dataType: 'json',
+    iconClass: 'jp-MaterialIcon jp-VegaIcon',
     documentWidgetFactoryOptions: {
       name: 'Vega-Lite',
       fileExtensions: ['.vl', '.vl.json', '.json'],
-      defaultFor: ['.vl', '.vl.json'],
-      readOnly: true
+      defaultFor: ['.vl', '.vl.json']
+    },
+    fileType: {
+      name: 'vega-lite',
+      extensions: ['.vl', '.vl.json']
     }
   }
 ];
@@ -173,7 +181,7 @@ namespace Private {
 
   /**
    * Apply the default cell config to the spec in place.
-   * 
+   *
    * #### Notes
    * This carefully does a shallow copy to avoid copying the potentially
    * large data.

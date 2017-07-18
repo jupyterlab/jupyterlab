@@ -75,9 +75,20 @@ function createRendermimePlugin(item: IRenderMime.IExtension): JupyterLabPlugin<
         renderTimeout: item.renderTimeout,
         dataType: item.dataType,
         rendermime: app.rendermime,
+        iconClass: item.iconClass,
+        iconLabel: item.iconLabel,
         ...item.documentWidgetFactoryOptions,
       });
       app.docRegistry.addWidgetFactory(factory);
+
+      if (item.fileType) {
+        app.docRegistry.addFileType({
+          ...item.fileType,
+          mimeTypes: [item.mimeType],
+          iconClass: item.iconClass,
+          iconLabel: item.iconLabel
+        });
+      }
 
       const factoryName = factory.name;
       const namespace = `${factoryName}-renderer`;

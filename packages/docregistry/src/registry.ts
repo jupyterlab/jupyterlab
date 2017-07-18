@@ -246,8 +246,10 @@ class DocumentRegistry implements IDisposable {
    * #### Notes
    * These are used to populate the "Create New" dialog.
    */
-  addFileType(fileType: DocumentRegistry.IFileType): IDisposable {
-    this._fileTypes.push(fileType);
+  addFileType(fileType: Partial<DocumentRegistry.IFileType>): IDisposable {
+    this._fileTypes.push({
+      ...DocumentRegistry.fileTypeDefaults, ...fileType
+    });
     this._changed.emit({
       type: 'fileType',
       name: fileType.name,
@@ -537,9 +539,17 @@ class DocumentRegistry implements IDisposable {
       return find(this._fileTypes, ft => ft.contentType === 'notebook') ||
         DocumentRegistry.defaultNotebookFileType;
     default:
-      let ext = PathExt.extname(model.path || '');
-      let ft = find(this._fileTypes, ft => ft.extensions.indexOf(ext) !== -1);
-      return ft || this.getFileType('text') || DocumentRegistry.defaultTextFileType;
+      // Find the best matching extension.
+      let name = model.name || '';
+      let ext = '.' + name.split('.').slice(1).join('.');
+      while (ext.length > 1) {
+        let ft = find(this._fileTypes, ft => ft.extensions.indexOf(ext) !== -1);
+        if (ft) {
+          return ft;
+        }
+        ext = '.' + ext.split('.').slice(2).join('.');
+      }
+      return this.getFileType('text') || DocumentRegistry.defaultTextFileType;
     }
   }
 
@@ -799,7 +809,27 @@ namespace DocumentRegistry {
    * The options used to initialize a widget factory.
    */
   export
-  interface IWidgetFactoryOptions extends IRenderMime.IDocumentWidgetFactoryOptions {}
+  interface IWidgetFactoryOptions extends IRenderMime.IDocumentWidgetFactoryOptions {
+    /**
+     * Whether the widget factory is read only.
+     */
+    readonly readOnly?: boolean;
+
+    /**
+     * The registered name of the model type used to create the widgets.
+     */
+    readonly modelName?: string;
+
+    /**
+     * Whether the widgets prefer having a kernel started.
+     */
+    readonly preferKernel?: boolean;
+
+    /**
+     * Whether the widgets can start a kernel when opened.
+     */
+    readonly canStartKernel?: boolean;
+  }
 
   /**
    * A widget for a document.
@@ -912,36 +942,50 @@ namespace DocumentRegistry {
     readonly name: string;
 
     /**
-     * The extensions of the file type (e.g. `".txt"`).  Can be a compound
-     * extension (e.g. `".table.json:`).
+     * The extensions of the file type (e.g. `".txt"`).  Can be compound
+     * extensions (e.g. `".table.json`).
      */
     readonly extensions: ReadonlyArray<string>;
 
     /**
-     * The optional mime type of the file type.
+     * The mime types of the file type.
      */
-    readonly mimeTypes?: ReadonlyArray<string>;
+    readonly mimeTypes: ReadonlyArray<string>;
 
     /**
-     * The optional icon class to use for the file type.
+     * The icon class to use for the file type.
      */
-    readonly iconClass?: string;
+    readonly iconClass: string;
 
     /**
-     * The optional icon label to use for the file type.
+     * The icon label to use for the file type.
      */
-    readonly iconLabel?: string;
+    readonly iconLabel: string;
 
     /**
-     * The content type of the new file (defaults to `"file"`).
+     * The content type of the new file.
      */
-    readonly contentType?: Contents.ContentType;
+    readonly contentType: Contents.ContentType;
 
     /**
-     * The format of the new file (default to `"text"`).
+     * The format of the new file.
      */
-    readonly fileFormat?: Contents.FileFormat;
+    readonly fileFormat: Contents.FileFormat;
   }
+
+  /**
+   * The defaults used for a file type.
+   */
+  export
+  const fileTypeDefaults: IFileType = {
+    name: 'default',
+    extensions: [],
+    mimeTypes: [],
+    iconClass: 'jp-MaterialIcon jp-FileIcon',
+    iconLabel: '',
+    contentType: 'file',
+    fileFormat: 'text'
+  };
 
   /**
    * An interface for a "Create New" item.
@@ -1010,10 +1054,10 @@ namespace DocumentRegistry {
    */
   export
   const defaultTextFileType: IFileType = {
+    ...fileTypeDefaults,
     name: 'text',
     mimeTypes: ['text/plain'],
-    extensions: ['.txt'],
-    iconClass: 'jp-MaterialIcon jp-FileIcon'
+    extensions: ['.txt']
   };
 
   /**
@@ -1021,6 +1065,7 @@ namespace DocumentRegistry {
    */
   export
   const defaultNotebookFileType: IFileType = {
+    ...fileTypeDefaults,
     name: 'notebook',
     extensions: ['.ipynb'],
     contentType: 'notebook',
@@ -1033,6 +1078,7 @@ namespace DocumentRegistry {
    */
   export
   const defaultDirectoryFileType: IFileType = {
+    ...fileTypeDefaults,
     name: 'directory',
     extensions: [],
     mimeTypes: ['text/directory'],
@@ -1044,7 +1090,7 @@ namespace DocumentRegistry {
    * The default file types used by the document registry.
    */
   export
-  const defaultFileTypes: ReadonlyArray<IFileType> = [
+  const defaultFileTypes: ReadonlyArray<Partial<IFileType>> = [
     defaultTextFileType,
     defaultNotebookFileType,
     defaultDirectoryFileType,
