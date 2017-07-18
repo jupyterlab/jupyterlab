@@ -209,7 +209,7 @@ describe('docregistry/registry', () => {
       it('should add a file type to the document registry', () => {
         let fileType = { name: 'notebook', extensions: ['.ipynb'] };
         registry.addFileType(fileType);
-        expect(registry.fileTypes().next()).to.be(fileType);
+        expect(registry.fileTypes().next().name).to.be(fileType.name);
       });
 
       it('should be removed from the registry when disposed', () => {
@@ -224,7 +224,7 @@ describe('docregistry/registry', () => {
         registry.addFileType(fileType);
         let disposable = registry.addFileType(fileType);
         disposable.dispose();
-        expect(registry.fileTypes().next()).to.be(fileType);
+        expect(registry.fileTypes().next().name).to.be(fileType.name);
       });
 
     });
@@ -396,9 +396,9 @@ describe('docregistry/registry', () => {
         registry.addFileType(fileTypes[1]);
         registry.addFileType(fileTypes[2]);
         let values = registry.fileTypes();
-        expect(values.next()).to.be(fileTypes[0]);
-        expect(values.next()).to.be(fileTypes[1]);
-        expect(values.next()).to.be(fileTypes[2]);
+        expect(values.next().name).to.be(fileTypes[0].name);
+        expect(values.next().name).to.be(fileTypes[1].name);
+        expect(values.next().name).to.be(fileTypes[2].name);
       });
 
     });
@@ -430,8 +430,8 @@ describe('docregistry/registry', () => {
         ];
         registry.addFileType(fileTypes[0]);
         registry.addFileType(fileTypes[1]);
-        expect(registry.getFileType('notebook')).to.be(fileTypes[0]);
-        expect(registry.getFileType('python')).to.be(fileTypes[1]);
+        expect(registry.getFileType('notebook').name).to.be(fileTypes[0].name);
+        expect(registry.getFileType('python').name).to.be(fileTypes[1].name);
         expect(registry.getFileType('r')).to.be(void 0);
       });
     });
@@ -559,16 +559,27 @@ describe('docregistry/registry', () => {
 
       it('should handle a python file', () => {
         let ft = registry.getFileTypeForModel({
-          path: 'foo.py'
+          name: 'foo.py'
         });
         expect(ft.name).to.be('python');
       });
 
       it('should handle an unknown file', () => {
         let ft = registry.getFileTypeForModel({
-          path: 'foo.bar'
+          name: 'foo.bar'
         });
         expect(ft.name).to.be('text');
+      });
+
+      it('should get the most specific extension', () => {
+        [
+          { name: 'json', extensions: ['.json'] },
+          { name: 'vega', extensions: ['.vg.json'] }
+        ].forEach(ft => {registry.addFileType(ft); });
+        let ft = registry.getFileTypeForModel({
+          name: 'foo.vg.json'
+        });
+        expect(ft.name).to.be('vega');
       });
 
     });
