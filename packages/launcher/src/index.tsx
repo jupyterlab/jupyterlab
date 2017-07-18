@@ -362,7 +362,7 @@ function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcher
     });
   };
   // Add a data attribute for the category
-  let dataset = {category: item.category || 'Other'};
+  let dataset = { category: item.category || 'Other' };
   // Return the VDOM element.
   return (
     <div className='jp-LauncherCard'
