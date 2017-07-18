@@ -119,18 +119,23 @@ class Tooltip extends Widget {
     if (this.isHidden || this.isDisposed) {
       return;
     }
+
+    const { node } = this;
+    const target = event.target as HTMLElement;
+
     switch (event.type) {
     case 'keydown':
-      if (this.node.contains(event.target as HTMLElement)) {
-        if ((event as KeyboardEvent).keyCode === 27) { // Escape key
-          this.dispose();
-        }
+      // If the keydown event is inside the tooltip, allow it to continue unless
+      // it is the escape key.
+      if (node.contains(target) && (event as KeyboardEvent).keyCode !== 27) {
         return;
       }
+
+      // Any other keydown event should dispose of the tooltip.
       this.dispose();
       break;
     case 'mousedown':
-      if (this.node.contains(event.target as HTMLElement)) {
+      if (node.contains(target)) {
         this.activate();
         return;
       }
