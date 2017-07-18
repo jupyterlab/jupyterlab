@@ -247,16 +247,18 @@ class DocumentRegistry implements IDisposable {
    * These are used to populate the "Create New" dialog.
    */
   addFileType(fileType: Partial<DocumentRegistry.IFileType>): IDisposable {
-    this._fileTypes.push({
+    let value: DocumentRegistry.IFileType = {
       ...DocumentRegistry.fileTypeDefaults, ...fileType
-    });
+    };
+    this._fileTypes.push(value);
+
     this._changed.emit({
       type: 'fileType',
-      name: fileType.name,
+      name: value.name,
       change: 'added'
     });
     return new DisposableDelegate(() => {
-      ArrayExt.removeFirstOf(this._fileTypes, fileType);
+      ArrayExt.removeFirstOf(this._fileTypes, value);
       this._changed.emit({
         type: 'fileType',
         name: fileType.name,
