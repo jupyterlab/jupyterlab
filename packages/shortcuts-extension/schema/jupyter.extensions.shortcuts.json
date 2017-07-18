@@ -288,7 +288,9 @@
       "properties": {
         "command": { "default": "notebook:enter-command-mode" },
         "keys": { "default": ["Escape"] },
-        "selector": { "default": ".jp-Notebook.jp-mod-editMode" }
+        "selector": {
+          "default": ".jp-Notebook.jp-mod-editMode:not(.jp-Tooltip-anchor)"
+        }
       },
       "type": "object"
     },
