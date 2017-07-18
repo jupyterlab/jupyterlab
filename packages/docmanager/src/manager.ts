@@ -434,7 +434,8 @@ class DocumentManager implements IDisposable {
     if (!widgetFactory) {
       return undefined;
     }
-    let factory = this.registry.getModelFactory(widgetFactory.modelName || 'text');
+    let modelName = widgetFactory.modelName || 'text';
+    let factory = this.registry.getModelFactory(modelName);
     if (!factory) {
       return undefined;
     }

@@ -48,6 +48,16 @@ import {
 export
 class DocumentRegistry implements IDisposable {
   /**
+   * Construct a new document registry.
+   */
+  constructor(options: DocumentRegistry.IOptions) {
+    if (options.textModelFactory.name !== 'text') {
+      throw new Error('Text model factory must have the name `text`');
+    }
+    this._modelFactories['text'] = options.textModelFactory;
+  }
+
+  /**
    * A signal emitted when the registry has changed.
    */
   get changed(): ISignal<this, DocumentRegistry.IChangedArgs> {
@@ -514,19 +524,22 @@ class DocumentRegistry implements IDisposable {
 
   /**
    * Get the best file type given a contents model.
+   *
+   * @param model - The contents model of interest.
+   *
+   * @returns The best matching file type.
    */
-  getFileTypeForModel(model: Contents.IModel): DocumentRegistry.IFileType | undefined {
+  getFileTypeForModel(model: Contents.IModel): DocumentRegistry.IFileType {
     switch (model.type) {
     case 'directory':
-      return find(this._fileTypes, ft => ft.contentType === 'directory');
+      return find(this._fileTypes, ft => ft.contentType === 'directory') || DocumentRegistry.defaultDirectoryFileType;
     case 'notebook':
-      return find(this._fileTypes, ft => ft.contentType === 'notebook');
-    case 'file':
+      return find(this._fileTypes, ft => ft.contentType === 'notebook') ||
+        DocumentRegistry.defaultNotebookFileType;
+    default:
       let ext = PathExt.extname(model.path);
       let ft = find(this._fileTypes, ft => ft.extensions.indexOf(ext) !== -1);
-      return ft || this.getFileType('text');
-    default:
-      return undefined;
+      return ft || this.getFileType('text') || DocumentRegistry.defaultTextFileType;
     }
   }
 
@@ -549,6 +562,17 @@ class DocumentRegistry implements IDisposable {
  */
 export
 namespace DocumentRegistry {
+  /**
+   * The options used to create a document registry.
+   */
+  export
+  interface IOptions {
+    /**
+     * The text model factory for the registry.
+     */
+    textModelFactory: ModelFactory;
+  }
+
   /**
    * The interface for a document model.
    */
@@ -983,10 +1007,48 @@ namespace DocumentRegistry {
   }
 
   /**
+   * The default text file type used by the document registry.
+   */
+  export
+  const defaultTextFileType: IFileType = {
+    name: 'text',
+    mimeTypes: ['text/plain'],
+    extensions: ['.txt'],
+    iconClass: 'jp-MaterialIcon jp-FileIcon'
+  };
+
+  /**
+   * The default notebook file type used by the document registry.
+   */
+  export
+  const defaultNotebookFileType: IFileType = {
+    name: 'notebook',
+    extensions: ['.ipynb'],
+    contentType: 'notebook',
+    fileFormat: 'json',
+    iconClass: 'jp-MaterialIcon jp-NotebookIcon'
+  };
+
+  /**
+   * The default directory file type used by the document registry.
+   */
+  export
+  const defaultDirectoryFileType: IFileType = {
+    name: 'directory',
+    extensions: [],
+    mimeTypes: ['text/directory'],
+    contentType: 'directory',
+    iconClass: 'jp-MaterialIcon jp-OpenFolderIcon'
+  };
+
+  /**
    * The default file types used by the document registry.
    */
   export
   const defaultFileTypes: ReadonlyArray<IFileType> = [
+    defaultTextFileType,
+    defaultNotebookFileType,
+    defaultDirectoryFileType,
     {
       name: 'markdown',
       extensions: ['.md'],
@@ -1068,26 +1130,6 @@ namespace DocumentRegistry {
       extensions: ['.raw'],
       iconClass: 'jp-MaterialIcon jp-ImageIcon',
       fileFormat: 'base64'
-    },
-    {
-      name: 'text',
-      mimeTypes: ['text/plain'],
-      extensions: ['.txt'],
-      iconClass: 'jp-MaterialIcon jp-FileIcon'
-    },
-    {
-      name: 'notebook',
-      extensions: ['.ipynb'],
-      contentType: 'notebook',
-      fileFormat: 'json',
-      iconClass: 'jp-MaterialIcon jp-NotebookIcon'
-    },
-    {
-      name: 'directory',
-      extensions: [],
-      mimeTypes: ['text/directory'],
-      contentType: 'directory',
-      iconClass: 'jp-MaterialIcon jp-OpenFolderIcon'
     }
   ];
 }

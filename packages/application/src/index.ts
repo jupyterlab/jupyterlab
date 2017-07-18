@@ -69,11 +69,12 @@ class JupyterLab extends Application<ApplicationShell> {
     let initialFactories = defaultRendererFactories;
     this.rendermime = new RenderMime({ initialFactories, linkHandler });
 
-    let registry = this.docRegistry = new DocumentRegistry();
+    let registry = this.docRegistry = new DocumentRegistry({
+      textModelFactory: new TextModelFactory()
+    });
     DocumentRegistry.defaultFileTypes.forEach(ft => {
       registry.addFileType(ft);
     });
-    registry.addModelFactory(new TextModelFactory());
     registry.addModelFactory(new Base64ModelFactory());
 
     if (options.mimeExtensions) {
