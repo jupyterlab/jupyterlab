@@ -347,7 +347,7 @@ abstract class ABCWidgetFactory<T extends DocumentRegistry.IReadyWidget, U exten
   /**
    * The registered name of the model type used to create the widgets.
    */
-  get modelName(): string | undefined {
+  get modelName(): string {
     return this._modelName;
   }
 
