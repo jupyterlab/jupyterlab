@@ -20,7 +20,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  ABCWidgetFactory, DocumentRegistry, TextModelFactory
+  ABCWidgetFactory, Base64ModelFactory, DocumentRegistry, TextModelFactory
 } from '@jupyterlab/docregistry';
 
 
@@ -65,7 +65,9 @@ describe('docregistry/registry', () => {
     let registry: DocumentRegistry;
 
     beforeEach(() => {
-      registry = new DocumentRegistry();
+      registry = new DocumentRegistry({
+        textModelFactory: new TextModelFactory()
+      });
     });
 
     afterEach(() => {
@@ -85,7 +87,7 @@ describe('docregistry/registry', () => {
     describe('#dispose()', () => {
 
       it('should dispose of the resources held by the registry', () => {
-        registry.addFileType({ name: 'notebook', extension: '.ipynb' });
+        registry.addFileType({ name: 'notebook', extensions: ['.ipynb'] });
         registry.dispose();
         expect(registry.isDisposed).to.be(true);
       });
@@ -108,7 +110,6 @@ describe('docregistry/registry', () => {
       });
 
       it('should become the global default if `*` is given as a defaultFor', () => {
-        registry.addModelFactory(new TextModelFactory());
         let factory = new WidgetFactory({
           name: 'global',
           fileExtensions: ['*'],
@@ -119,7 +120,6 @@ describe('docregistry/registry', () => {
       });
 
       it('should override an existing global default', () => {
-        registry.addModelFactory(new TextModelFactory());
         registry.addWidgetFactory(new WidgetFactory({
           name: 'global',
           fileExtensions: ['*'],
@@ -135,7 +135,6 @@ describe('docregistry/registry', () => {
       });
 
       it('should override an existing extension default', () => {
-        registry.addModelFactory(new TextModelFactory());
         registry.addWidgetFactory(createFactory());
         let factory = createFactory();
         registry.addWidgetFactory(factory);
@@ -143,7 +142,6 @@ describe('docregistry/registry', () => {
       });
 
       it('should be removed from the registry when disposed', () => {
-        registry.addModelFactory(new TextModelFactory());
         let factory = createFactory();
         let disposable = registry.addWidgetFactory(factory);
         disposable.dispose();
@@ -155,26 +153,26 @@ describe('docregistry/registry', () => {
     describe('#addModelFactory()', () => {
 
       it('should add the model factory to the registry', () => {
-        let factory = new TextModelFactory();
+        let factory = new Base64ModelFactory();
         registry.addModelFactory(factory);
       });
 
       it('should be a no-op a factory with the given `name` is already registered', () => {
-        let factory = new TextModelFactory();
+        let factory = new Base64ModelFactory();
         registry.addModelFactory(factory);
-        let disposable = registry.addModelFactory(new TextModelFactory());
+        let disposable = registry.addModelFactory(new Base64ModelFactory());
         disposable.dispose();
       });
 
       it('should be a no-op if the same factory is already registered', () => {
-        let factory = new TextModelFactory();
+        let factory = new Base64ModelFactory();
         registry.addModelFactory(factory);
         let disposable = registry.addModelFactory(factory);
         disposable.dispose();
       });
 
       it('should be removed from the registry when disposed', () => {
-        let factory = new TextModelFactory();
+        let factory = new Base64ModelFactory();
         let disposable = registry.addModelFactory(factory);
         disposable.dispose();
       });
@@ -209,20 +207,20 @@ describe('docregistry/registry', () => {
     describe('#addFileType()', () => {
 
       it('should add a file type to the document registry', () => {
-        let fileType = { name: 'notebook', extension: '.ipynb' };
+        let fileType = { name: 'notebook', extensions: ['.ipynb'] };
         registry.addFileType(fileType);
         expect(registry.fileTypes().next()).to.be(fileType);
       });
 
       it('should be removed from the registry when disposed', () => {
-        let fileType = { name: 'notebook', extension: '.ipynb' };
+        let fileType = { name: 'notebook', extensions: ['.ipynb'] };
         let disposable = registry.addFileType(fileType);
         disposable.dispose();
         expect(toArray(registry.fileTypes()).length).to.be(0);
       });
 
       it('should be a no-op if a file type of the same name is registered', () => {
-        let fileType = { name: 'notebook', extension: '.ipynb' };
+        let fileType = { name: 'notebook', extensions: ['.ipynb'] };
         registry.addFileType(fileType);
         let disposable = registry.addFileType(fileType);
         disposable.dispose();
@@ -390,9 +388,9 @@ describe('docregistry/registry', () => {
       it('should get the registered file types', () => {
         expect(toArray(registry.fileTypes()).length).to.be(0);
         let fileTypes = [
-          { name: 'notebook', extension: '.ipynb' },
-          { name: 'python', extension: '.py' },
-          { name: 'table', extension: '.table.json' }
+          { name: 'notebook', extensions: ['.ipynb'] },
+          { name: 'python', extensions: ['.py'] },
+          { name: 'table', extensions: ['.table.json'] }
         ];
         registry.addFileType(fileTypes[0]);
         registry.addFileType(fileTypes[1]);
@@ -427,8 +425,8 @@ describe('docregistry/registry', () => {
 
       it('should get a file type by name', () => {
         let fileTypes = [
-          { name: 'notebook', extension: '.ipynb' },
-          { name: 'python', extension: '.py' }
+          { name: 'notebook', extensions: ['.ipynb'] },
+          { name: 'python', extensions: ['.py'] }
         ];
         registry.addFileType(fileTypes[0]);
         registry.addFileType(fileTypes[1]);
@@ -492,9 +490,9 @@ describe('docregistry/registry', () => {
     describe('#getModelFactory()', () => {
 
       it('should get a registered model factory by name', () => {
-        let mFactory = new TextModelFactory();
+        let mFactory = new Base64ModelFactory();
         registry.addModelFactory(mFactory);
-        expect(registry.getModelFactory('text')).to.be(mFactory);
+        expect(registry.getModelFactory('base64')).to.be(mFactory);
       });
 
     });
@@ -502,7 +500,7 @@ describe('docregistry/registry', () => {
     describe('#getWidgetFactory()', () => {
 
       it('should get a widget factory by name', () => {
-        registry.addModelFactory(new TextModelFactory());
+        registry.addModelFactory(new Base64ModelFactory());
         let factory = createFactory();
         registry.addWidgetFactory(factory);
         let mdFactory = new WidgetFactory({
@@ -533,6 +531,44 @@ describe('docregistry/registry', () => {
         expect(buzz[0]).to.be(foo);
         expect(toArray(buzz).length).to.be(1);
         expect(registry.widgetExtensions('baz').next()).to.be(void 0);
+      });
+
+    });
+
+    describe('#getFileTypeForModel()', () => {
+
+      beforeEach(() => {
+        DocumentRegistry.defaultFileTypes.forEach(ft => {
+          registry.addFileType(ft);
+        });
+      });
+
+      it('should handle a directory', () => {
+        let ft = registry.getFileTypeForModel({
+          type: 'directory'
+        });
+        expect(ft.name).to.be('directory');
+      });
+
+      it('should handle a notebook', () => {
+        let ft = registry.getFileTypeForModel({
+          type: 'notebook'
+        });
+        expect(ft.name).to.be('notebook');
+      });
+
+      it('should handle a python file', () => {
+        let ft = registry.getFileTypeForModel({
+          path: 'foo.py'
+        });
+        expect(ft.name).to.be('python');
+      });
+
+      it('should handle an unknown file', () => {
+        let ft = registry.getFileTypeForModel({
+          path: 'foo.bar'
+        });
+        expect(ft.name).to.be('text');
       });
 
     });
