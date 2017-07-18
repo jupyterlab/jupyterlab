@@ -288,7 +288,9 @@
       "properties": {
         "command": { "default": "notebook:enter-command-mode" },
         "keys": { "default": ["Escape"] },
-        "selector": { "default": ".jp-Notebook.jp-mod-editMode" }
+        "selector": {
+          "default": ".jp-Notebook.jp-mod-editMode"
+        }
       },
       "type": "object"
     },
@@ -541,6 +543,24 @@
         "command": { "default": "settingeditor:open" },
         "keys": { "default": ["Accel ,"] },
         "selector": { "default": "body" }
+      },
+      "type": "object"
+    },
+    "tooltip:dismiss-console": {
+      "default": { },
+      "properties": {
+        "command": { "default": "tooltip:dismiss" },
+        "keys": { "default": ["Escape"] },
+        "selector": { "default": "body.jp-mod-tooltip .jp-CodeConsole" }
+      },
+      "type": "object"
+    },
+    "tooltip:dismiss-notebook": {
+      "default": { },
+      "properties": {
+        "command": { "default": "tooltip:dismiss" },
+        "keys": { "default": ["Escape"] },
+        "selector": { "default": "body.jp-mod-tooltip .jp-Notebook" }
       },
       "type": "object"
     },

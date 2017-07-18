@@ -43,6 +43,9 @@ import {
  */
 namespace CommandIDs {
   export
+  const dismiss = 'tooltip:dismiss';
+
+  export
   const launchConsole = 'tooltip:launch-console';
 
   export
@@ -60,6 +63,17 @@ const service: JupyterLabPlugin<ITooltipManager> = {
   provides: ITooltipManager,
   activate: (app: JupyterLab): ITooltipManager => {
     let tooltip: Tooltip | null = null;
+
+    // Add tooltip dismiss command.
+    app.commands.addCommand(CommandIDs.dismiss, {
+      execute: () => {
+        if (tooltip) {
+          tooltip.dispose();
+          tooltip = null;
+        }
+      }
+    });
+
     return {
       invoke(options: ITooltipManager.IOptions): Promise<void> {
         const detail: 0 | 1 = 0;
@@ -141,7 +155,6 @@ const notebookPlugin: JupyterLabPlugin<void> = {
         }
       }
     });
-
   }
 };
 
