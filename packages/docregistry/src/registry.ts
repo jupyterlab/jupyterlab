@@ -529,7 +529,7 @@ class DocumentRegistry implements IDisposable {
    *
    * @returns The best matching file type.
    */
-  getFileTypeForModel(model: Contents.IModel): DocumentRegistry.IFileType {
+  getFileTypeForModel(model: Partial<Contents.IModel>): DocumentRegistry.IFileType {
     switch (model.type) {
     case 'directory':
       return find(this._fileTypes, ft => ft.contentType === 'directory') || DocumentRegistry.defaultDirectoryFileType;
@@ -537,7 +537,7 @@ class DocumentRegistry implements IDisposable {
       return find(this._fileTypes, ft => ft.contentType === 'notebook') ||
         DocumentRegistry.defaultNotebookFileType;
     default:
-      let ext = PathExt.extname(model.path);
+      let ext = PathExt.extname(model.path || '');
       let ft = find(this._fileTypes, ft => ft.extensions.indexOf(ext) !== -1);
       return ft || this.getFileType('text') || DocumentRegistry.defaultTextFileType;
     }
