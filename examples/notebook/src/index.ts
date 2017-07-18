@@ -33,7 +33,7 @@ import {
 } from '@jupyterlab/docmanager';
 
 import {
-  DocumentRegistry
+  DocumentRegistry, TextModelFactory
 } from '@jupyterlab/docregistry';
 
 import {
@@ -104,7 +104,9 @@ function createApp(manager: ServiceManager.IManager): void {
     }
   };
 
-  let docRegistry = new DocumentRegistry();
+  let docRegistry = new DocumentRegistry({
+    textModelFactory: new TextModelFactory()
+  });
   let docManager = new DocumentManager({
     registry: docRegistry,
     manager,

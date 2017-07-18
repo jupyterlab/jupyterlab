@@ -76,13 +76,14 @@ function createApp(manager: ServiceManager.IManager): void {
     }
   };
 
-  let docRegistry = new DocumentRegistry();
+  let docRegistry = new DocumentRegistry({
+    textModelFactory: new TextModelFactory()
+  });
   let docManager = new DocumentManager({
     registry: docRegistry,
     manager,
     opener
   });
-  let mFactory = new TextModelFactory();
   let editorServices = {
     factoryService: new CodeMirrorEditorFactory(),
     mimeTypeService: new CodeMirrorMimeTypeService()
@@ -98,7 +99,6 @@ function createApp(manager: ServiceManager.IManager): void {
       canStartKernel: true
     }
   });
-  docRegistry.addModelFactory(mFactory);
   docRegistry.addWidgetFactory(wFactory);
 
   let commands = new CommandRegistry();
