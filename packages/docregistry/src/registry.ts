@@ -543,7 +543,6 @@ class DocumentRegistry implements IDisposable {
     }
   }
 
-
   private _modelFactories: { [key: string]: DocumentRegistry.ModelFactory } = Object.create(null);
   private _widgetFactories: { [key: string]: DocumentRegistry.WidgetFactory } = Object.create(null);
   private _defaultWidgetFactory = '';
