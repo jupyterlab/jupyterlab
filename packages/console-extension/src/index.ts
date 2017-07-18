@@ -165,7 +165,10 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, mainMenu: IM
   // Add a launcher item if the launcher is available.
   if (launcher) {
     manager.ready.then(() => {
-      let specs = manager.specs;
+      const specs = manager.specs;
+      if (!specs) {
+        return;
+      }
       let baseUrl = PageConfig.getBaseUrl();
       for (let name in specs.kernelspecs) {
         let displayName = specs.kernelspecs[name].display_name;
@@ -224,9 +227,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, mainMenu: IM
     execute: (args: Partial<ConsolePanel.IOptions>) => {
       let path = args['path'];
       let widget = tracker.find(value => {
-        if (value.console.session.path === path) {
-          return true;
-        }
+        return value.console.session.path === path;
       });
       if (widget) {
         shell.activateById(widget.id);
@@ -238,6 +239,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, mainMenu: IM
           if (model) {
             return createConsole(args);
           }
+          return Promise.reject(`No running console for path: ${path}`);
         });
       }
     },
@@ -354,7 +356,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, mainMenu: IM
   commands.addCommand(command, {
     label: 'Close and Shutdown',
     execute: args => {
-      let current = getCurrent(args);
+      const current = getCurrent(args);
       if (!current) {
         return;
       }
@@ -387,6 +389,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, mainMenu: IM
           widget.console.inject(args['code'] as string);
           return true;
         }
+        return false;
       });
     },
     isEnabled: hasWidget
