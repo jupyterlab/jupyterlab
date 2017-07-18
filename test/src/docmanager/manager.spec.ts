@@ -47,7 +47,7 @@ describe('@jupyterlab/docmanager', () => {
   let services: ServiceManager.IManager;
   let context: DocumentRegistry.Context;
   let widget: Widget;
-  let modelFactory = new TextModelFactory();
+  let textModelFactory = new TextModelFactory();
   let widgetFactory = new WidgetFactory({
     name: 'test',
     fileExtensions: ['.txt'],
@@ -62,8 +62,7 @@ describe('@jupyterlab/docmanager', () => {
   });
 
   beforeEach(() => {
-    let registry = new DocumentRegistry();
-    registry.addModelFactory(modelFactory);
+    let registry = new DocumentRegistry({ textModelFactory });
     registry.addWidgetFactory(widgetFactory);
     manager = new DocumentManager({
       registry,
