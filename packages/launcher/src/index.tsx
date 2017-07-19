@@ -254,6 +254,11 @@ class Launcher extends VDomRenderer<LauncherModel> {
    * Render the launcher to virtual DOM nodes.
    */
   protected render(): vdom.VirtualNode | vdom.VirtualNode[] {
+    // Bail if there is no model.
+    if (!this.model) {
+      return [];
+    }
+
     // First group-by categories
     let categories = Object.create(null);
     each(this.model.items(), (item, index) => {
@@ -357,7 +362,7 @@ function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcher
     });
   };
   // Add a data attribute for the category
-  let dataset = {category: item.category};
+  let dataset = { category: item.category || 'Other' };
   // Return the VDOM element.
   return (
     <div className='jp-LauncherCard'
@@ -409,7 +414,7 @@ namespace Private {
     // First, compare by rank.
     let r1 = a.rank;
     let r2 = b.rank;
-    if (r1 !== r2) {
+    if (r1 !== r2 && r1 !== undefined && r2 !== undefined) {
       return r1 < r2 ? -1 : 1;  // Infinity safe
     }
 

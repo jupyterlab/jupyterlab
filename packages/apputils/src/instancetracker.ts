@@ -14,7 +14,7 @@ import {
 } from '@phosphor/commands';
 
 import {
-  JSONObject
+  ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
 import {
@@ -457,7 +457,7 @@ namespace InstanceTracker {
     /**
      * A function that returns the args needed to restore an instance.
      */
-    args: (widget: T) => JSONObject;
+    args: (widget: T) => ReadonlyJSONObject;
 
     /**
      * A function that returns a unique persistent name for this instance.

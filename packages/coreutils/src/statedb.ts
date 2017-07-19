@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject, Token
+  ReadonlyJSONObject, Token
 } from '@phosphor/coreutils';
 
 import {
@@ -32,7 +32,7 @@ interface IStateItem {
   /**
    * The data value for a state item.
    */
-  value: JSONObject;
+  value: ReadonlyJSONObject;
 }
 
 
@@ -40,7 +40,7 @@ interface IStateItem {
  * The description of a state database.
  */
 export
-interface IStateDB extends IDataConnector<JSONObject> {
+interface IStateDB extends IDataConnector<ReadonlyJSONObject> {
   /**
    * The maximum allowed length of the data after it has been serialized.
    */
@@ -137,7 +137,7 @@ class StateDB implements IStateDB {
    * The promise returned by this method may be rejected if an error occurs in
    * retrieving the data. Non-existence of an `id` will succeed with `null`.
    */
-  fetch(id: string): Promise<JSONObject | undefined> {
+  fetch(id: string): Promise<ReadonlyJSONObject | undefined> {
     const key = `${this.namespace}:${id}`;
     const value = window.localStorage.getItem(key);
     if (!value) {
@@ -217,7 +217,7 @@ class StateDB implements IStateDB {
    * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
    * using the `fetchNamespace()` method.
    */
-  save(id: string, value: JSONObject): Promise<void> {
+  save(id: string, value: ReadonlyJSONObject): Promise<void> {
     try {
       const key = `${this.namespace}:${id}`;
       const serialized = JSON.stringify(value);
