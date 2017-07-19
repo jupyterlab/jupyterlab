@@ -2,15 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Dialog, showDialog
-} from '@jupyterlab/apputils';
-
-import {
   IChangedArgs, IStateDB, PathExt
 } from '@jupyterlab/coreutils';
 
 import {
-  IDocumentManager
+  IDocumentManager, shouldOverwrite
 } from '@jupyterlab/docmanager';
 
 import {
@@ -301,32 +297,18 @@ class FileBrowserModel implements IDisposable {
 
     return this.refresh().then(() => {
       if (this.isDisposed) {
-        return Promise.reject('Disposed') as Promise<Contents.IModel>;
+        return Promise.resolve(false);
       }
       let item = find(this._items, i => i.name === file.name);
       if (item) {
-        return this._maybeOverWrite(file.name);
+        return shouldOverwrite(file.name);
       }
-      return Promise.resolve(void 0);
-    }).then(() => {
-      return this._upload(file);
-    });
-  }
-
-  /**
-   * Ask the user whether to overwrite a file.
-   */
-  private _maybeOverWrite(name: string): Promise<void> {
-    let overwrite = Dialog.warnButton({ label: 'OVERWRITE' });
-    let options = {
-      title: 'Overwrite File?',
-      body: `"${name}" already exists, overwrite?`,
-      buttons: [Dialog.cancelButton(), overwrite]
-    };
-    return showDialog(options).then(button => {
-      if (this.isDisposed || !button.accept) {
-        return Promise.reject('File not overwritten');
+      return Promise.resolve(true);
+    }).then(value => {
+      if (value) {
+        return this._upload(file);
       }
+      return Promise.reject('File not uploaded');
     });
   }
 
