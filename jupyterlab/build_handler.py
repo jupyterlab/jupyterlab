@@ -16,7 +16,7 @@ class BuildHandler(APIHandler):
 
     @web.authenticated
     @gen.coroutine
-    def get(self):
+    def post(self):
         self.log.debug('Starting build')
         try:
             yield gen.maybe_future(self.run_build())
