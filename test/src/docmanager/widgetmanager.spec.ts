@@ -79,11 +79,11 @@ describe('@jupyterlab/docmanager', () => {
   let context: Context<DocumentRegistry.IModel>;
   let widgetFactory = new WidgetFactory({
     name: 'test',
-    fileExtensions: ['.txt']
+    fileTypes: ['text']
   });
   let readOnlyFactory = new WidgetFactory({
     name: 'readonly',
-    fileExtensions: ['.txt'],
+    fileTypes: ['text'],
     readOnly: true
   });
 

@@ -50,7 +50,7 @@ describe('@jupyterlab/docmanager', () => {
   let textModelFactory = new TextModelFactory();
   let widgetFactory = new WidgetFactory({
     name: 'test',
-    fileExtensions: ['.txt'],
+    fileTypes: ['text'],
     canStartKernel: true,
     preferKernel: true
   });
@@ -172,7 +172,7 @@ describe('@jupyterlab/docmanager', () => {
         let widgetFactory2 = new WidgetFactory({
           name: 'test',
           modelName: 'foo',
-          fileExtensions: ['.txt']
+          fileTypes: ['text']
         });
         manager.registry.addWidgetFactory(widgetFactory2);
         return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
@@ -229,7 +229,7 @@ describe('@jupyterlab/docmanager', () => {
         let widgetFactory2 = new WidgetFactory({
           name: 'test',
           modelName: 'foo',
-          fileExtensions: ['.txt']
+          fileTypes: ['text']
         });
         manager.registry.addWidgetFactory(widgetFactory2);
         return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
