@@ -27,7 +27,7 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
-  IServiceManager
+  ServiceManager
 } from '@jupyterlab/services';
 
 import {
@@ -242,7 +242,6 @@ const trackerPlugin: JupyterLabPlugin<INotebookTracker> = {
   id: 'jupyter.services.notebook-tracker',
   provides: INotebookTracker,
   requires: [
-    IServiceManager,
     IMainMenu,
     ICommandPalette,
     NotebookPanel.IContentFactory,
@@ -361,8 +360,8 @@ function activateCellTools(app: JupyterLab, tracker: INotebookTracker, editorSer
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: NotebookPanel.IContentFactory, editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): INotebookTracker {
-
+function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: NotebookPanel.IContentFactory, editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): INotebookTracker {
+  const services = app.serviceManager;
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
     fileTypes: ['notebook'],
@@ -473,7 +472,7 @@ function activateNotebookHandler(app: JupyterLab, services: IServiceManager, mai
 /**
  * Add the notebook commands to the application's command registry.
  */
-function addCommands(app: JupyterLab, services: IServiceManager, tracker: NotebookTracker): void {
+function addCommands(app: JupyterLab, services: ServiceManager, tracker: NotebookTracker): void {
   const { commands, shell } = app;
 
   // Get the current widget and activate unless the args specify otherwise.
