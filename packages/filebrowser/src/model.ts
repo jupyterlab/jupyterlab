@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Dialog, showDialog
+} from '@jupyterlab/apputils';
+
+import {
   IChangedArgs, IStateDB, PathExt
 } from '@jupyterlab/coreutils';
 
@@ -14,7 +18,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  ArrayIterator, each, IIterator, IterableOrArrayLike
+  ArrayIterator, each, find, IIterator, IterableOrArrayLike
 } from '@phosphor/algorithm';
 
 import {
@@ -223,7 +227,7 @@ class FileBrowserModel implements IDisposable {
   /**
    * Download a file.
    *
-   * @param - path - The path of the file to be downloaded.
+   * @param path - The path of the file to be downloaded.
    *
    * @returns A promise which resolves when the file has begun
    *   downloading.
@@ -280,15 +284,13 @@ class FileBrowserModel implements IDisposable {
    *
    * @param file - The `File` object to upload.
    *
-   * @param overwrite - Whether to overwrite an existing file.
-   *
    * @returns A promise containing the new file contents model.
    *
    * #### Notes
    * This will fail to upload files that are too big to be sent in one
    * request to the server.
    */
-  upload(file: File, overwrite?: boolean): Promise<Contents.IModel> {
+  upload(file: File): Promise<Contents.IModel> {
     // Skip large files with a warning.
     if (file.size > this._maxUploadSizeMb * 1024 * 1024) {
       let msg = `Cannot upload file (>${this._maxUploadSizeMb} MB) `;
@@ -297,20 +299,34 @@ class FileBrowserModel implements IDisposable {
       return Promise.reject<Contents.IModel>(new Error(msg));
     }
 
-    if (overwrite) {
-      return this._upload(file);
-    }
-
-    let path = this._model.path;
-    path = path ? path + '/' + file.name : file.name;
-    return this.manager.services.contents.get(path, {}).then(() => {
-      let msg = `"${file.name}" already exists`;
-      throw new Error(msg);
-    }, () => {
+    return this.refresh().then(() => {
       if (this.isDisposed) {
         return Promise.reject('Disposed') as Promise<Contents.IModel>;
       }
+      let item = find(this._items, i => i.name === file.name);
+      if (item) {
+        return this._maybeOverWrite(file.name);
+      }
+      return Promise.resolve(void 0);
+    }).then(() => {
       return this._upload(file);
+    });
+  }
+
+  /**
+   * Ask the user whether to overwrite a file.
+   */
+  private _maybeOverWrite(name: string): Promise<void> {
+    let overwrite = Dialog.warnButton({ label: 'OVERWRITE' });
+    let options = {
+      title: 'Overwrite File?',
+      body: `"${name}" already exists, overwrite?`,
+      buttons: [Dialog.cancelButton(), overwrite]
+    };
+    return showDialog(options).then(button => {
+      if (this.isDisposed || !button.accept) {
+        return Promise.reject('File not overwritten');
+      }
     });
   }
 
@@ -525,7 +541,7 @@ namespace Private {
     if (parts.length === 1) {
       return PathExt.resolve(root, path);
     } else {
-      let resolved = PathExt.resolve(parts[1], path)
+      let resolved = PathExt.resolve(parts[1], path);
       return parts[0] + ':' + resolved;
     }
   }
