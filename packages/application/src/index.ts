@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  Base64ModelFactory, DocumentRegistry, TextModelFactory
+  Base64ModelFactory, DocumentRegistry
 } from '@jupyterlab/docregistry';
 
 import {
@@ -69,9 +69,7 @@ class JupyterLab extends Application<ApplicationShell> {
     let initialFactories = defaultRendererFactories;
     this.rendermime = new RenderMime({ initialFactories, linkHandler });
 
-    let registry = this.docRegistry = new DocumentRegistry({
-      textModelFactory: new TextModelFactory()
-    });
+    let registry = this.docRegistry = new DocumentRegistry();
     DocumentRegistry.defaultFileTypes.forEach(ft => {
       registry.addFileType(ft);
     });

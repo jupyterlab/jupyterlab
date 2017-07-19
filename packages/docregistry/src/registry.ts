@@ -37,6 +37,10 @@ import {
   IChangedArgs as IChangedArgsGeneric, PathExt, IModelDB
 } from '@jupyterlab/coreutils';
 
+import {
+  TextModelFactory
+} from './default';
+
 
 /**
  * The document registry.
@@ -46,11 +50,13 @@ class DocumentRegistry implements IDisposable {
   /**
    * Construct a new document registry.
    */
-  constructor(options: DocumentRegistry.IOptions) {
+  constructor(options: DocumentRegistry.IOptions = {}) {
     if (options.textModelFactory.name !== 'text') {
       throw new Error('Text model factory must have the name `text`');
     }
-    this._modelFactories['text'] = options.textModelFactory;
+    this._modelFactories['text'] = (
+      options.textModelFactory || new TextModelFactory()
+    );
   }
 
   /**
@@ -592,7 +598,7 @@ namespace DocumentRegistry {
     /**
      * The text model factory for the registry.
      */
-    textModelFactory: ModelFactory;
+    textModelFactory?: ModelFactory;
   }
 
   /**
