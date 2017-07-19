@@ -51,12 +51,11 @@ class DocumentRegistry implements IDisposable {
    * Construct a new document registry.
    */
   constructor(options: DocumentRegistry.IOptions = {}) {
-    if (options.textModelFactory.name !== 'text') {
+    let factory = options.textModelFactory;
+    if (factory && factory.name !== 'text') {
       throw new Error('Text model factory must have the name `text`');
     }
-    this._modelFactories['text'] = (
-      options.textModelFactory || new TextModelFactory()
-    );
+    this._modelFactories['text'] = factory || new TextModelFactory();
   }
 
   /**
