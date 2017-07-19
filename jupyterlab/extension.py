@@ -12,6 +12,7 @@ from .commands import (
     get_app_dir, list_extensions, should_build, get_user_settings_dir
 )
 from .settings_handler import settings_path, SettingsHandler
+from .build_handler import build_path, BuildHandler
 from ._version import __version__
 
 #-----------------------------------------------------------------------------
@@ -107,5 +108,10 @@ def load_jupyter_server_extension(nbapp):
         'schemas_dir': schemas_dir,
         'settings_dir': user_settings_dir
     })
-    nbapp.log.error('shemas_dir: %s' % schemas_dir)
-    web_app.add_handlers(".*$", [settings_handler])
+
+    build_url = ujoin(base_url, build_path)
+    build_handler = (build_url, BuildHandler, {
+        'app_dir': app_dir
+    })
+
+    web_app.add_handlers(".*$", [settings_handler, build_handler])
