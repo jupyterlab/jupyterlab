@@ -56,6 +56,14 @@ class DocumentRegistry implements IDisposable {
       throw new Error('Text model factory must have the name `text`');
     }
     this._modelFactories['text'] = factory || new TextModelFactory();
+
+    let fts = options.initialFileTypes || DocumentRegistry.defaultFileTypes;
+    fts.forEach(ft => {
+      let value: DocumentRegistry.IFileType = {
+        ...DocumentRegistry.fileTypeDefaults, ...ft
+      };
+      this._fileTypes.push(value);
+    });
   }
 
   /**
@@ -595,9 +603,16 @@ namespace DocumentRegistry {
   export
   interface IOptions {
     /**
-     * The text model factory for the registry.
+     * The text model factory for the registry.  A default instance will
+     * be used if not given.
      */
     textModelFactory?: ModelFactory;
+
+    /**
+     * The initial file types for the registry.
+     * The [[DocumentRegistry.defaultFileTypes]] will be used if not given.
+     */
+    initialFileTypes?: DocumentRegistry.IFileType[];
   }
 
   /**
