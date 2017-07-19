@@ -32,7 +32,7 @@ import {
 } from '@jupyterlab/docmanager';
 
 import {
-  DocumentRegistry, TextModelFactory
+  DocumentRegistry
 } from '@jupyterlab/docregistry';
 
 import {
@@ -76,9 +76,7 @@ function createApp(manager: ServiceManager.IManager): void {
     }
   };
 
-  let docRegistry = new DocumentRegistry({
-    textModelFactory: new TextModelFactory()
-  });
+  let docRegistry = new DocumentRegistry();
   let docManager = new DocumentManager({
     registry: docRegistry,
     manager,
@@ -93,7 +91,7 @@ function createApp(manager: ServiceManager.IManager): void {
     factoryOptions: {
       name: 'Editor',
       modelName: 'text',
-      fileExtensions: ['*'],
+      fileTypes: ['*'],
       defaultFor: ['*'],
       preferKernel: false,
       canStartKernel: true

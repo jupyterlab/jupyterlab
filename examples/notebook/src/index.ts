@@ -33,7 +33,7 @@ import {
 } from '@jupyterlab/docmanager';
 
 import {
-  DocumentRegistry, TextModelFactory
+  DocumentRegistry
 } from '@jupyterlab/docregistry';
 
 import {
@@ -104,8 +104,9 @@ function createApp(manager: ServiceManager.IManager): void {
     }
   };
 
-  let docRegistry = new DocumentRegistry({
-    textModelFactory: new TextModelFactory()
+  let docRegistry = new DocumentRegistry();
+  DocumentRegistry.defaultFileTypes.forEach(ft => {
+    docRegistry.addFileType(ft);
   });
   let docManager = new DocumentManager({
     registry: docRegistry,
@@ -120,8 +121,8 @@ function createApp(manager: ServiceManager.IManager): void {
   let wFactory = new NotebookWidgetFactory({
     name: 'Notebook',
     modelName: 'notebook',
-    fileExtensions: ['.ipynb'],
-    defaultFor: ['.ipynb'],
+    fileTypes: ['notebook'],
+    defaultFor: ['notebook'],
     preferKernel: true,
     canStartKernel: true,
     rendermime, contentFactory,
