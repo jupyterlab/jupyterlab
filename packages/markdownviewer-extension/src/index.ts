@@ -17,11 +17,6 @@ import {
 import '../style/index.css';
 
 /**
- * The class name for the text editor icon from the default theme.
- */
-const TEXTEDITOR_ICON_CLASS = 'jp-TextEditorIcon';
-
-/**
  * The name of the factory that creates markdown widgets.
  */
 const FACTORY = 'Markdown Preview';
@@ -51,10 +46,11 @@ const plugin: JupyterLabPlugin<void> = {
  * Activate the markdown plugin.
  */
 function activate(app: JupyterLab, restorer: ILayoutRestorer) {
+    const primaryFileType = app.docRegistry.getFileType('markdown');
     const factory = new MimeDocumentFactory({
       name: FACTORY,
+      primaryFileType,
       fileTypes: ['markdown'],
-      registry: app.docRegistry,
       rendermime: app.rendermime
     });
     app.docRegistry.addWidgetFactory(factory);
@@ -71,7 +67,6 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer) {
     });
 
     factory.widgetCreated.connect((sender, widget) => {
-      widget.title.icon = TEXTEDITOR_ICON_CLASS;
       // Notify the instance tracker if restore data needs to update.
       widget.context.pathChanged.connect(() => { tracker.save(widget); });
       tracker.add(widget);

@@ -573,18 +573,18 @@ class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument, DocumentRegistr
    */
   constructor(options: MimeDocumentFactory.IOptions) {
     super(Private.createRegistryOptions(options));
-    this._registry = options.registry;
     this._rendermime = options.rendermime;
     this._renderTimeout = options.renderTimeout || 1000;
     this._dataType = options.dataType || 'string';
+    this._fileType = options.primaryFileType;
   }
 
   /**
    * Create a new widget given a context.
    */
   protected createNewWidget(context: DocumentRegistry.Context): MimeDocument {
-    let ft = this._registry.getFileTypeForModel({ name: context.path });
-    let mimeType = ft.mimeTypes.length > 0 ? ft.mimeTypes[0] : 'text/plain';
+    let ft = this._fileType;
+    let mimeType = ft.mimeTypes.length ? ft.mimeTypes[0] : 'text/plain';
     let widget = new MimeDocument({
       context,
       mimeType,
@@ -601,7 +601,7 @@ class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument, DocumentRegistr
   private _rendermime: RenderMime;
   private _renderTimeout: number;
   private _dataType: 'string' | 'json';
-  private _registry: DocumentRegistry;
+  private _fileType: DocumentRegistry.IFileType;
 }
 
 
@@ -616,9 +616,9 @@ namespace MimeDocumentFactory {
   export
   interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
     /**
-     * The parent document registry.
+     * The primary file type associated with the document.
      */
-    registry: DocumentRegistry;
+    primaryFileType: DocumentRegistry.IFileType;
 
     /**
      * The rendermime instance.

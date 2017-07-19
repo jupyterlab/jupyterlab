@@ -57,10 +57,16 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer): void {
   });
 
   app.docRegistry.addWidgetFactory(factory);
+  let ft = app.docRegistry.getFileType('csv');
   factory.widgetCreated.connect((sender, widget) => {
     // Track the widget.
     tracker.add(widget);
     // Notify the instance tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => { tracker.save(widget); });
+
+    if (ft) {
+      widget.title.iconClass = ft.iconClass;
+      widget.title.iconLabel = ft.iconLabel;
+    }
   });
 }

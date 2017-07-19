@@ -83,6 +83,11 @@ namespace IRenderMime {
     readonly name: string;
 
     /**
+     * The primary file type of the widget.
+     */
+    readonly primaryFileType: string;
+
+    /**
      * The file types the widget can view.
      */
     readonly fileTypes: ReadonlyArray<string>;
@@ -163,7 +168,7 @@ namespace IRenderMime {
     /**
      * The options used to open a document with the renderer factory.
      */
-    readonly documentWidgetFactoryOptions?: IDocumentWidgetFactoryOptions;
+    readonly documentWidgetFactoryOptions?: IDocumentWidgetFactoryOptions |ReadonlyArray<IDocumentWidgetFactoryOptions>;
 
     /**
      * The optional file type associated with the extension.

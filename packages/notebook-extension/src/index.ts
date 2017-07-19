@@ -367,7 +367,7 @@ function activateNotebookHandler(app: JupyterLab, services: IServiceManager, mai
     name: FACTORY,
     fileTypes: ['notebook'],
     modelName: 'notebook',
-    defaultFor: ['.ipynb'],
+    defaultFor: ['notebook'],
     preferKernel: true,
     canStartKernel: true,
     rendermime: app.rendermime,

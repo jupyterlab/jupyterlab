@@ -131,11 +131,18 @@ const extension: IRenderMime.IExtension = {
   rendererFactory,
   rank: 0,
   dataType: 'json',
-  documentWidgetFactoryOptions: {
+  documentWidgetFactoryOptions: [{
     name: 'Vega',
-    fileTypes: ['vega', 'vega-lite', 'json'],
-    defaultFor: ['vega', 'vega-lite']
+    primaryFileType: 'vega',
+    fileTypes: ['vega', 'json'],
+    defaultFor: ['vega']
   },
+  {
+    name: 'Vega Lite',
+    primaryFileType: 'vega-lite',
+    fileTypes: ['vega-lite', 'json'],
+    defaultFor: ['vega-lite']
+  }],
   fileTypes: [{
     mimeTypes: [VEGA_MIME_TYPE],
     name: 'vega',

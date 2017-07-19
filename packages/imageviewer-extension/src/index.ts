@@ -90,6 +90,13 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRe
     // Notify the instance tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => { tracker.save(widget); });
     tracker.add(widget);
+
+    let fts = app.docRegistry.getFileTypesForPath(widget.context.path);
+    if (fts.length > 0) {
+      widget.title.iconClass = fts[0].iconClass;
+      widget.title.iconLabel = fts[0].iconLabel;
+    }
+
   });
 
   addCommands(tracker, app.commands);

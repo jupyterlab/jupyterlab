@@ -70,14 +70,13 @@ function createRendermimePlugin(item: IRenderMime.IExtension): JupyterLabPlugin<
         return;
       }
 
-      let factory = new MimeDocumentFactory({
-        registry: app.docRegistry,
-        renderTimeout: item.renderTimeout,
-        dataType: item.dataType,
-        rendermime: app.rendermime,
-        ...item.documentWidgetFactoryOptions,
-      });
-      app.docRegistry.addWidgetFactory(factory);
+      let registry = app.docRegistry;
+      let options: IRenderMime.IDocumentWidgetFactoryOptions[] = [];
+      if (Array.isArray(item.documentWidgetFactoryOptions)) {
+        options = item.documentWidgetFactoryOptions;
+      } else {
+        options = [item.documentWidgetFactoryOptions as IRenderMime.IDocumentWidgetFactoryOptions];
+      }
 
       if (item.fileTypes) {
         item.fileTypes.forEach(ft => {
@@ -85,21 +84,34 @@ function createRendermimePlugin(item: IRenderMime.IExtension): JupyterLabPlugin<
         });
       }
 
-      const factoryName = factory.name;
-      const namespace = `${factoryName}-renderer`;
-      const tracker = new InstanceTracker<MimeDocument>({ namespace });
+      options.forEach(option => {
+        let factory = new MimeDocumentFactory({
+          renderTimeout: item.renderTimeout,
+          dataType: item.dataType,
+          rendermime: app.rendermime,
+          name: option.name,
+          primaryFileType: registry.getFileType(option.primaryFileType),
+          fileTypes: option.fileTypes,
+          defaultFor: option.defaultFor
+        });
+        registry.addWidgetFactory(factory);
 
-      // Handle state restoration.
-      restorer.restore(tracker, {
-        command: 'docmanager:open',
-        args: widget => ({ path: widget.context.path, factory: factoryName }),
-        name: widget => widget.context.path
-      });
+        const factoryName = factory.name;
+        const namespace = `${factoryName}-renderer`;
+        const tracker = new InstanceTracker<MimeDocument>({ namespace });
 
-      factory.widgetCreated.connect((sender, widget) => {
-        // Notify the instance tracker if restore data needs to update.
-        widget.context.pathChanged.connect(() => { tracker.save(widget); });
-        tracker.add(widget);
+        // Handle state restoration.
+        restorer.restore(tracker, {
+          command: 'docmanager:open',
+          args: widget => ({ path: widget.context.path, factory: factoryName }),
+          name: widget => widget.context.path
+        });
+
+        factory.widgetCreated.connect((sender, widget) => {
+          // Notify the instance tracker if restore data needs to update.
+          widget.context.pathChanged.connect(() => { tracker.save(widget); });
+          tracker.add(widget);
+        });
       });
     }
   };

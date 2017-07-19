@@ -37,10 +37,6 @@ import {
   IChangedArgs as IChangedArgsGeneric, PathExt, IModelDB
 } from '@jupyterlab/coreutils';
 
-import {
-  IRenderMime
-} from '@jupyterlab/rendermime';
-
 
 /**
  * The document registry.
@@ -826,7 +822,22 @@ namespace DocumentRegistry {
    * The options used to initialize a widget factory.
    */
   export
-  interface IWidgetFactoryOptions extends IRenderMime.IDocumentWidgetFactoryOptions {
+  interface IWidgetFactoryOptions {
+    /**
+     * The name of the widget to display in dialogs.
+     */
+    readonly name: string;
+
+    /**
+     * The file types the widget can view.
+     */
+    readonly fileTypes: ReadonlyArray<string>;
+
+    /**
+     * The file types for which the factory should be the default.
+     */
+    readonly defaultFor?: ReadonlyArray<string>;
+
     /**
      * Whether the widget factory is read only.
      */
@@ -952,7 +963,38 @@ namespace DocumentRegistry {
    * An interface for a file type.
    */
   export
-  interface IFileType extends IRenderMime.IFileType {
+  interface IFileType {
+    /**
+     * The name of the file type.
+     */
+    readonly name: string;
+
+    /**
+     * The mime types associated the file type.
+     */
+    readonly mimeTypes: ReadonlyArray<string>;
+
+    /**
+     * The extensions of the file type (e.g. `".txt"`).  Can be a compound
+     * extension (e.g. `".table.json`).
+     */
+    readonly extensions: ReadonlyArray<string>;
+
+    /**
+     * An optional pattern for a file name (e.g. `^Dockerfile$`).
+     */
+    readonly pattern?: string;
+
+    /**
+     * The icon class name for the file type.
+     */
+    readonly iconClass?: string;
+
+    /**
+     * The icon label for the file type.
+     */
+    readonly iconLabel?: string;
+
     /**
      * The content type of the new file.
      */
