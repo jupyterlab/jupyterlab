@@ -538,8 +538,9 @@ class DocumentRegistry implements IDisposable {
         DocumentRegistry.defaultNotebookFileType;
     default:
       // Find the best matching extension.
-      if (model.name) {
-        let fts = this.getFileTypesForPath(model.name);
+      if (model.name || model.path) {
+        let name = model.name || PathExt.basename(model.path);
+        let fts = this.getFileTypesForPath(name);
         if (fts.length > 0) {
           return fts[0];
         }
