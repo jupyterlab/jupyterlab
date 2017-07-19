@@ -20,7 +20,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  ABCWidgetFactory, Base64ModelFactory, DocumentRegistry, TextModelFactory
+  ABCWidgetFactory, Base64ModelFactory, DocumentRegistry
 } from '@jupyterlab/docregistry';
 
 
@@ -66,15 +66,10 @@ describe('docregistry/registry', () => {
     let registry: DocumentRegistry;
 
     beforeEach(() => {
-      registry = new DocumentRegistry({
-        textModelFactory: new TextModelFactory()
-      });
+      registry = new DocumentRegistry();
       registry.addFileType({
         name: 'foobar',
         extensions: ['.foo.bar']
-      });
-      DocumentRegistry.defaultFileTypes.forEach(ft => {
-        registry.addFileType(ft);
       });
     });
 
@@ -215,14 +210,14 @@ describe('docregistry/registry', () => {
     describe('#addFileType()', () => {
 
       it('should add a file type to the document registry', () => {
-        registry = new DocumentRegistry();
+        registry = new DocumentRegistry({ initialFileTypes: [] });
         let fileType = { name: 'notebook', extensions: ['.ipynb'] };
         registry.addFileType(fileType);
         expect(registry.fileTypes().next().name).to.be(fileType.name);
       });
 
       it('should be removed from the registry when disposed', () => {
-        registry = new DocumentRegistry();
+        registry = new DocumentRegistry({ initialFileTypes: [] });
         let fileType = { name: 'notebook', extensions: ['.ipynb'] };
         let disposable = registry.addFileType(fileType);
         disposable.dispose();
@@ -230,7 +225,7 @@ describe('docregistry/registry', () => {
       });
 
       it('should be a no-op if a file type of the same name is registered', () => {
-        registry = new DocumentRegistry();
+        registry = new DocumentRegistry({ initialFileTypes: [] });
         let fileType = { name: 'notebook', extensions: ['.ipynb'] };
         registry.addFileType(fileType);
         let disposable = registry.addFileType(fileType);
@@ -398,7 +393,7 @@ describe('docregistry/registry', () => {
     describe('#fileTypes()', () => {
 
       it('should get the registered file types', () => {
-        registry = new DocumentRegistry();
+        registry = new DocumentRegistry({ initialFileTypes: [] });
         expect(toArray(registry.fileTypes()).length).to.be(0);
         let fileTypes = [
           { name: 'notebook', extensions: ['.ipynb'] },

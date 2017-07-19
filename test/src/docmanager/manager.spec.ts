@@ -64,6 +64,9 @@ describe('@jupyterlab/docmanager', () => {
   beforeEach(() => {
     let registry = new DocumentRegistry({ textModelFactory });
     registry.addWidgetFactory(widgetFactory);
+    DocumentRegistry.defaultFileTypes.forEach(ft => {
+      registry.addFileType(ft);
+    });
     manager = new DocumentManager({
       registry,
       manager: services,
@@ -131,6 +134,7 @@ describe('@jupyterlab/docmanager', () => {
 
       it('should open a file and return the widget used to view it', () => {
         return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
+          debugger;
           widget = manager.open(model.path);
           expect(widget.hasClass('WidgetFactory')).to.be(true);
           return dismissDialog();

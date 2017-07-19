@@ -105,9 +105,6 @@ function createApp(manager: ServiceManager.IManager): void {
   };
 
   let docRegistry = new DocumentRegistry();
-  DocumentRegistry.defaultFileTypes.forEach(ft => {
-    docRegistry.addFileType(ft);
-  });
   let docManager = new DocumentManager({
     registry: docRegistry,
     manager,
