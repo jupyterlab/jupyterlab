@@ -365,7 +365,7 @@ function activateNotebookHandler(app: JupyterLab, services: IServiceManager, mai
 
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
-    fileExtensions: ['.ipynb'],
+    fileTypes: ['notebook'],
     modelName: 'notebook',
     defaultFor: ['.ipynb'],
     preferKernel: true,

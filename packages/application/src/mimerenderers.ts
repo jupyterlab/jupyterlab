@@ -52,7 +52,7 @@ function createRendermimePlugins(extensions: IRenderMime.IExtensionModule[]): Ju
 export
 function createRendermimePlugin(item: IRenderMime.IExtension): JupyterLabPlugin<void> {
   return {
-    id: `jupyter.services.mimerenderer-${item.mimeType}`,
+    id: `jupyter.services.mimerenderer-${item.name}`,
     requires: [ILayoutRestorer],
     autoStart: true,
     activate: (app: JupyterLab, restorer: ILayoutRestorer) => {
@@ -71,22 +71,17 @@ function createRendermimePlugin(item: IRenderMime.IExtension): JupyterLabPlugin<
       }
 
       let factory = new MimeDocumentFactory({
-        mimeType: item.mimeType,
+        registry: app.docRegistry,
         renderTimeout: item.renderTimeout,
         dataType: item.dataType,
         rendermime: app.rendermime,
-        iconClass: item.iconClass,
-        iconLabel: item.iconLabel,
         ...item.documentWidgetFactoryOptions,
       });
       app.docRegistry.addWidgetFactory(factory);
 
-      if (item.fileType) {
-        app.docRegistry.addFileType({
-          ...item.fileType,
-          mimeTypes: [item.mimeType],
-          iconClass: item.iconClass,
-          iconLabel: item.iconLabel
+      if (item.fileTypes) {
+        item.fileTypes.forEach(ft => {
+          app.docRegistry.addFileType(ft);
         });
       }
 

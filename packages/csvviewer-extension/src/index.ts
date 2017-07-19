@@ -43,8 +43,8 @@ export default plugin;
 function activate(app: JupyterLab, restorer: ILayoutRestorer): void {
   const factory = new CSVViewerFactory({
     name: FACTORY,
-    fileExtensions: ['.csv'],
-    defaultFor: ['.csv'],
+    fileTypes: ['csv'],
+    defaultFor: ['csv'],
     readOnly: true
   });
   const tracker = new InstanceTracker<CSVViewer>({ namespace: 'csvviewer' });

@@ -53,8 +53,8 @@ const plugin: JupyterLabPlugin<void> = {
 function activate(app: JupyterLab, restorer: ILayoutRestorer) {
     const factory = new MimeDocumentFactory({
       name: FACTORY,
-      fileExtensions: ['.md'],
-      mimeType: 'text/markdown',
+      fileTypes: ['markdown'],
+      registry: app.docRegistry,
       rendermime: app.rendermime
     });
     app.docRegistry.addWidgetFactory(factory);

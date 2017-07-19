@@ -248,8 +248,7 @@ class DocumentManager implements IDisposable {
    */
   findWidget(path: string, widgetName='default'): Widget | undefined {
     if (widgetName === 'default') {
-      let extname = DocumentRegistry.extname(path);
-      let factory = this.registry.defaultWidgetFactory(extname);
+      let factory = this.registry.defaultWidgetFactory(path);
       if (!factory) {
         return undefined;
       }
@@ -411,8 +410,7 @@ class DocumentManager implements IDisposable {
   private _widgetFactoryFor(path: string, widgetName: string): DocumentRegistry.WidgetFactory | undefined {
     let { registry } = this;
     if (widgetName === 'default') {
-      let extname = DocumentRegistry.extname(path);
-      let factory = registry.defaultWidgetFactory(extname);
+      let factory = registry.defaultWidgetFactory(path);
       if (!factory) {
         return undefined;
       }
@@ -441,9 +439,8 @@ class DocumentManager implements IDisposable {
     }
 
     // Handle the kernel pereference.
-    let ext = DocumentRegistry.extname(path);
     let preference = this.registry.getKernelPreference(
-      ext, widgetFactory.name, kernel
+      path, widgetFactory.name, kernel
     );
 
     let context: Private.IContext | null = null;

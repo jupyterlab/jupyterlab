@@ -83,25 +83,12 @@ namespace IRenderMime {
     readonly name: string;
 
     /**
-     * The file extensions the widget can view.
-     *
-     * #### Notes
-     * Use "*" to denote all files. Specific file extensions must be preceded
-     * with '.', like '.png', '.txt', etc.  They may themselves contain a
-     * period (e.g. .table.json).
+     * The file types the widget can view.
      */
-    readonly fileExtensions: ReadonlyArray<string>;
+    readonly fileTypes: ReadonlyArray<string>;
 
     /**
-     * The file extensions for which the factory should be the default.
-     *
-     * #### Notes
-     * Use "*" to denote all files. Specific file extensions must be preceded
-     * with '.', like '.png', '.txt', etc. Entries in this attribute must also
-     * be included in the fileExtensions attribute.
-     * The default is an empty array.
-     *
-     * **See also:** [[fileExtensions]].
+     * The file types for which the factory should be the default.
      */
     readonly defaultFor?: ReadonlyArray<string>;
   }
@@ -117,10 +104,30 @@ namespace IRenderMime {
     readonly name: string;
 
     /**
+     * The mime types associated the file type.
+     */
+    readonly mimeTypes: ReadonlyArray<string>;
+
+    /**
      * The extensions of the file type (e.g. `".txt"`).  Can be a compound
      * extension (e.g. `".table.json`).
      */
     readonly extensions: ReadonlyArray<string>;
+
+    /**
+     * An optional pattern for a file name (e.g. `^Dockerfile$`).
+     */
+    readonly pattern?: string;
+
+    /**
+     * The icon class name for the file type.
+     */
+    readonly iconClass?: string;
+
+    /**
+     * The icon label for the file type.
+     */
+    readonly iconLabel?: string;
   }
 
   /**
@@ -129,9 +136,9 @@ namespace IRenderMime {
   export
   interface IExtension {
     /**
-     * The MIME type for the renderer, which is the output MIME type it will handle.
+     * The name of the extension.
      */
-    readonly mimeType: string;
+    readonly name: string;
 
     /**
      * A renderer factory to be registered to render the MIME type.
@@ -154,24 +161,14 @@ namespace IRenderMime {
     readonly dataType?: 'string' | 'json';
 
     /**
-     * The icon class name for the widget.
-     */
-    readonly iconClass?: string;
-
-    /**
-     * The icon label for the widget.
-     */
-    readonly iconLabel?: string;
-
-    /**
      * The options used to open a document with the renderer factory.
      */
     readonly documentWidgetFactoryOptions?: IDocumentWidgetFactoryOptions;
 
     /**
-     * The optional name for a fileType associated with the extension.
+     * The optional file type associated with the extension.
      */
-    readonly fileType?: IFileType;
+    readonly fileTypes?: ReadonlyArray<IFileType>;
   }
 
   /**

@@ -126,44 +126,31 @@ const rendererFactory: IRenderMime.IRendererFactory = {
   createRenderer: options => new RenderedVega(options)
 };
 
-const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
-  // Vega
-  {
-    mimeType: VEGA_MIME_TYPE,
-    rendererFactory,
-    rank: 0,
-    dataType: 'json',
-    iconClass: 'jp-MaterialIcon jp-VegaIcon',
-    documentWidgetFactoryOptions: {
-      name: 'Vega',
-      fileExtensions: ['.vg', '.vg.json', '.json'],
-      defaultFor: ['.vg', '.vg.json']
-    },
-    fileType: {
-      name: 'vega',
-      extensions: ['.vg', '.vg.json']
-    }
+const extension: IRenderMime.IExtension = {
+  name: 'vega',
+  rendererFactory,
+  rank: 0,
+  dataType: 'json',
+  documentWidgetFactoryOptions: {
+    name: 'Vega',
+    fileTypes: ['vega', 'vega-lite', 'json'],
+    defaultFor: ['vega', 'vega-lite']
   },
-  // Vega-Lite
-  {
-    mimeType: VEGALITE_MIME_TYPE,
-    rendererFactory,
-    rank: 0,
-    dataType: 'json',
+  fileTypes: [{
+    mimeTypes: [VEGA_MIME_TYPE],
+    name: 'vega',
+    extensions: ['.vg', '.vg.json'],
     iconClass: 'jp-MaterialIcon jp-VegaIcon',
-    documentWidgetFactoryOptions: {
-      name: 'Vega-Lite',
-      fileExtensions: ['.vl', '.vl.json', '.json'],
-      defaultFor: ['.vl', '.vl.json']
-    },
-    fileType: {
-      name: 'vega-lite',
-      extensions: ['.vl', '.vl.json']
-    }
-  }
-];
+  },
+  {
+    mimeTypes: [VEGALITE_MIME_TYPE],
+    name: 'vega-lite',
+    extensions: ['.vl', '.vl.json'],
+    iconClass: 'jp-MaterialIcon jp-VegaIcon',
+  }]
+};
 
-export default extensions;
+export default extension;
 
 
 /**

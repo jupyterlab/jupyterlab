@@ -116,22 +116,22 @@ class DocumentRegistry implements IDisposable {
       return new DisposableDelegate(Private.noOp);
     }
     this._widgetFactories[name] = factory;
-    for (let ext of factory.defaultFor || []) {
-      if (factory.fileExtensions.indexOf(ext) === -1) {
+    for (let ft of factory.defaultFor || []) {
+      if (factory.fileTypes.indexOf(ft) === -1) {
         continue;
       }
-      if (ext === '*') {
+      if (ft === '*') {
         this._defaultWidgetFactory = name;
       } else {
-        this._defaultWidgetFactories[ext] = name;
+        this._defaultWidgetFactories[ft] = name;
       }
     }
-    // For convenience, store a mapping of ext -> name
-    for (let ext of factory.fileExtensions) {
-      if (!this._widgetFactoryExtensions[ext]) {
-        this._widgetFactoryExtensions[ext] = [];
+    // For convenience, store a mapping of file type name -> name
+    for (let ft of factory.fileTypes) {
+      if (!this._widgetFactoryExtensions[ft]) {
+        this._widgetFactoryExtensions[ft] = [];
       }
-      this._widgetFactoryExtensions[ext].push(name);
+      this._widgetFactoryExtensions[ft].push(name);
     }
     this._changed.emit({
       type: 'widgetFactory',
@@ -301,7 +301,7 @@ class DocumentRegistry implements IDisposable {
   /**
    * Get a list of the preferred widget factories.
    *
-   * @param ext - An optional file extension to filter the results.
+   * @param path - The file path to filter the results.
    *
    * @returns A new array of widget factories.
    *
@@ -310,52 +310,37 @@ class DocumentRegistry implements IDisposable {
    * been registered will be returned.
    * The first item is considered the default. The returned iterator
    * has widget factories in the following order:
-   * - extension-specific default factory
+   * - path-specific default factory
    * - global default factory
-   * - all other extension-specific factories
+   * - all other path-specific factories
    * - all other global factories
    */
-  preferredWidgetFactories(ext: string = '*'): DocumentRegistry.WidgetFactory[] {
+  preferredWidgetFactories(path: string): DocumentRegistry.WidgetFactory[] {
     let factories = new Set<string>();
-    ext = Private.normalizeExtension(ext);
-    let last = '.' + ext.split('.').pop();
 
-    // Start with the extension-specific default factory.
-    if (ext.length > 1) {
-      if (ext in this._defaultWidgetFactories) {
-        factories.add(this._defaultWidgetFactories[ext]);
-      }
-    }
+    // Get the ordered matching file types.
+    let fts = this.getFileTypesForPath(PathExt.basename(path));
 
-    // Handle multi-part extension default factories.
-    if (last !== ext) {
-      if (last in this._defaultWidgetFactories) {
-        factories.add(this._defaultWidgetFactories[last]);
+    // Start with the file type default factories.
+    fts.forEach(ft => {
+      if (ft.name in this._defaultWidgetFactories) {
+        factories.add(this._defaultWidgetFactories[ft.name]);
       }
-    }
+    });
 
     // Add the global default factory.
     if (this._defaultWidgetFactory) {
       factories.add(this._defaultWidgetFactory);
     }
 
-    // Add the extension-specific factories in registration order.
-    if (ext.length > 1) {
-      if (ext in this._widgetFactoryExtensions) {
-        each(this._widgetFactoryExtensions[ext], n => {
+    // Add the file type factories in registration order.
+    fts.forEach(ft => {
+      if (ft.name in this._widgetFactoryExtensions) {
+        each(this._widgetFactoryExtensions[ft.name], n => {
           factories.add(n);
         });
       }
-    }
-
-    // Handle multi-part extension-specific factories.
-    if (last !== ext) {
-      if (last in this._widgetFactoryExtensions) {
-        each(this._widgetFactoryExtensions[last], n => {
-          factories.add(n);
-        });
-      }
-    }
+    });
 
     // Add the rest of the global factories, in registration order.
     if ('*' in this._widgetFactoryExtensions) {
@@ -384,15 +369,18 @@ class DocumentRegistry implements IDisposable {
   /**
    * Get the default widget factory for an extension.
    *
-   * @param ext - An optional file extension to filter the results.
+   * @param ext - An optional file path to filter the results.
    *
    * @returns The default widget factory for an extension.
    *
    * #### Notes
    * This is equivalent to the first value in [[preferredWidgetFactories]].
    */
-  defaultWidgetFactory(ext: string = '*'): DocumentRegistry.WidgetFactory {
-    return this.preferredWidgetFactories(ext)[0];
+  defaultWidgetFactory(path?: string): DocumentRegistry.WidgetFactory {
+    if (!path) {
+      return this._widgetFactories[this._defaultWidgetFactory];
+    }
+    return this.preferredWidgetFactories(path)[0];
   }
 
   /**
@@ -495,7 +483,7 @@ class DocumentRegistry implements IDisposable {
   /**
    * Get a kernel preference.
    *
-   * @param ext - The file extension.
+   * @param path - The file path.
    *
    * @param widgetName - The name of the widget factory.
    *
@@ -503,8 +491,7 @@ class DocumentRegistry implements IDisposable {
    *
    * @returns A kernel preference.
    */
-  getKernelPreference(ext: string, widgetName: string, kernel?: Partial<Kernel.IModel>): IClientSession.IKernelPreference | undefined {
-    ext = Private.normalizeExtension(ext);
+  getKernelPreference(path: string, widgetName: string, kernel?: Partial<Kernel.IModel>): IClientSession.IKernelPreference | undefined {
     widgetName = widgetName.toLowerCase();
     let widgetFactory = this._widgetFactories[widgetName];
     if (!widgetFactory) {
@@ -514,7 +501,7 @@ class DocumentRegistry implements IDisposable {
     if (!modelFactory) {
       return void 0;
     }
-    let language = modelFactory.preferredLanguage(ext);
+    let language = modelFactory.preferredLanguage(PathExt.basename(path));
     let name = kernel && kernel.name;
     let id = kernel && kernel.id;
     return {
@@ -542,17 +529,45 @@ class DocumentRegistry implements IDisposable {
         DocumentRegistry.defaultNotebookFileType;
     default:
       // Find the best matching extension.
-      let name = model.name || '';
-      let ext = '.' + name.split('.').slice(1).join('.');
-      while (ext.length > 1) {
-        let ft = find(this._fileTypes, ft => ft.extensions.indexOf(ext) !== -1);
-        if (ft) {
-          return ft;
+      if (model.name) {
+        let fts = this.getFileTypesForPath(model.name);
+        if (fts.length > 0) {
+          return fts[0];
         }
-        ext = '.' + ext.split('.').slice(2).join('.');
       }
       return this.getFileType('text') || DocumentRegistry.defaultTextFileType;
     }
+  }
+
+  /**
+   * Get the file types that match a file name.
+   *
+   * @param path - The path of the file.
+   *
+   * @returns An ordered list of matching file types.
+   */
+  getFileTypesForPath(path: string): DocumentRegistry.IFileType[] {
+    let fts: DocumentRegistry.IFileType[] = [];
+    let name = PathExt.basename(path);
+
+    // Look for a pattern match first.
+    let ft = find(this._fileTypes, ft => {
+      return ft.pattern && ft.pattern.match(name) !== null;
+    });
+    if (ft) {
+      fts.push(ft);
+    }
+
+    // Then look by extension name, starting with the longest
+    let ext = Private.extname(name);
+    while (ext.length > 1) {
+      ft = find(this._fileTypes, ft => ft.extensions.indexOf(ext) !== -1);
+      if (ft) {
+        fts.push(ft);
+      }
+      ext = '.' + ext.split('.').slice(2).join('.');
+    }
+    return fts;
   }
 
   private _modelFactories: { [key: string]: DocumentRegistry.ModelFactory } = Object.create(null);
@@ -916,9 +931,9 @@ namespace DocumentRegistry {
     createNew(languagePreference?: string, modelDB?: IModelDB): T;
 
     /**
-     * Get the preferred kernel language given an extension.
+     * Get the preferred kernel language given a file path.
      */
-    preferredLanguage(ext: string): string;
+    preferredLanguage(path: string): string;
   }
 
   /**
@@ -937,33 +952,7 @@ namespace DocumentRegistry {
    * An interface for a file type.
    */
   export
-  interface IFileType {
-    /**
-     * The name of the file type.
-     */
-    readonly name: string;
-
-    /**
-     * The extensions of the file type (e.g. `".txt"`).  Can be compound
-     * extensions (e.g. `".table.json`).
-     */
-    readonly extensions: ReadonlyArray<string>;
-
-    /**
-     * The mime types of the file type.
-     */
-    readonly mimeTypes: ReadonlyArray<string>;
-
-    /**
-     * The icon class to use for the file type.
-     */
-    readonly iconClass: string;
-
-    /**
-     * The icon label to use for the file type.
-     */
-    readonly iconLabel: string;
-
+  interface IFileType extends IRenderMime.IFileType {
     /**
      * The content type of the new file.
      */
@@ -1034,21 +1023,6 @@ namespace DocumentRegistry {
      * Whether the item was added or removed.
      */
     readonly change: 'added' | 'removed';
-  }
-
-  /**
-   * Get the extension name of a path.
-   *
-   * @param file - string.
-   *
-   * #### Notes
-   * Dotted filenames (e.g. `".table.json"` are allowed.
-   */
-  export
-  function extname(path: string): string {
-    let parts = PathExt.basename(path).split('.');
-    parts.shift();
-    return '.' + parts.join('.');
   }
 
   /**
@@ -1173,6 +1147,20 @@ namespace DocumentRegistry {
       fileFormat: 'base64'
     },
     {
+      name: 'bmp',
+      mimeTypes: ['image/bmp'],
+      extensions: ['.bmp'],
+      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      fileFormat: 'base64'
+    },
+    {
+      name: 'xbm',
+      mimeTypes: ['image/xbm'],
+      extensions: ['.xbm'],
+      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      fileFormat: 'base64'
+    },
+    {
       name: 'raw',
       extensions: ['.raw'],
       iconClass: 'jp-MaterialIcon jp-ImageIcon',
@@ -1205,6 +1193,20 @@ namespace Private {
     return extension.toLowerCase();
   }
 
+  /**
+   * Get the extension name of a path.
+   *
+   * @param file - string.
+   *
+   * #### Notes
+   * Dotted filenames (e.g. `".table.json"` are allowed).
+   */
+  export
+  function extname(path: string): string {
+    let parts = PathExt.basename(path).split('.');
+    parts.shift();
+    return '.' + parts.join('.');
+  }
   /**
    * A no-op function.
    */
