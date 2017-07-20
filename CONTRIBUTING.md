@@ -82,6 +82,8 @@ Notes:
 * At times, it may be necessary to clean your local repo with the command ``git
 clean -fdx``.
 
+* Make sure to do `pip install -e` *before* running `npm install`. Running `npm install` first makes pip stall.
+
 * If `pip` gives a `VersionConflict` error, it usually means that the installed
 version of `jupyterlab_launcher` is out of date. Run `pip install --upgrade
 jupyterlab_launcher` to get the latest version.
