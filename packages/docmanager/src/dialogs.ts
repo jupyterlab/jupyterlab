@@ -106,8 +106,8 @@ function shouldOverwrite(path: string): Promise<boolean> {
     body: `"${path}" already exists, overwrite?`,
     buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'OVERWRITE' })]
   };
-  return showDialog(options).then(button => {
-    return Promise.resolve(button.accept);
+  return showDialog(options).then(result => {
+    return Promise.resolve(result.button.accept);
   });
 }
 
