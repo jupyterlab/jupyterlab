@@ -51,8 +51,7 @@ const mainPlugin: JupyterLabPlugin<void> = {
 
     // Temporary build message for manual rebuild.
     let buildMessage = PageConfig.getOption('buildRequired');
-    buildMessage = 'this is the message\non multiple lines';
-    if (true) {
+    if (buildMessage) {
       let body = h.div(
         h.p(
           'JupyterLab build is suggested:',
@@ -67,13 +66,13 @@ const mainPlugin: JupyterLabPlugin<void> = {
       }).then(result => {
         if (result.button.accept) {
           app.serviceManager.builder.build().then(() => {
-            unloadPrompt = false;
             return showDialog({
               title: 'Build Complete',
               body: 'Build successfully completed, reload page?'
             });
           }).then(result => {
             if (result.button.accept) {
+              unloadPrompt = false;
               location.reload();
             }
           }).catch(err => {
