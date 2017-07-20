@@ -18,7 +18,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  h, VirtualDOM
+  h
 } from '@phosphor/virtualdom';
 
 import {
@@ -227,13 +227,13 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
         h.span({className: 'jp-About-release'}, release),
         h.span({className: 'jp-About-version'}, versionNumber)
       );
-      let title = VirtualDOM.realize(h.span({className: 'jp-About-header'},
+      let title = h.span({className: 'jp-About-header'},
         headerLogo,
         h.div({className: 'jp-About-header-info'},
           headerWordmark,
           versionInfo
         )
-      ));
+      );
 
       //Create the body of the about dialog
       let jupyterURL = 'https://jupyter.org/about.html';
@@ -243,10 +243,10 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
         h.a({href: jupyterURL, target: '_blank', className: 'jp-Button-flat'}, "ABOUT PROJECT JUPYTER")
       );
       let copyright = h.span({className: 'jp-About-copyright'}, "© 2017 Project Jupyter");
-      let body = VirtualDOM.realize(h.div({ className: 'jp-About-body' },
+      let body = h.div({ className: 'jp-About-body' },
         externalLinks,
         copyright
-      ));
+      );
 
       showDialog({
         title,

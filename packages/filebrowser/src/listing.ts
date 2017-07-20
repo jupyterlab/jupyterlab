@@ -442,7 +442,7 @@ class DirListing extends Widget {
         body: message,
         buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'DELETE'})]
       }).then(result => {
-        if (!this.isDisposed && result.accept) {
+        if (!this.isDisposed && result.button.accept) {
           return this._delete(names);
         }
       });

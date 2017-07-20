@@ -36,6 +36,7 @@ const FILE_DIALOG_CLASS = 'jp-FileDialog';
  */
 const RENAME_NEWNAME_TITLE_CLASS = 'jp-new-name-title';
 
+
 /**
  * A stripped-down interface for a file container.
  */
@@ -57,7 +58,19 @@ interface IFileContainer extends JSONObject {
  */
 export
 function renameDialog(manager: IDocumentManager, oldPath: string): Promise<Contents.IModel | null> {
-  return (new RenameHandler(manager, oldPath)).showDialog();
+  return showDialog({
+    title: 'Rename File',
+    body: new RenameHandler(oldPath),
+    focusNodeSelector: 'input',
+    buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'RENAME' })]
+  }).then(result => {
+    if (!result.value) {
+      return null;
+    }
+    let basePath = PathExt.dirname(oldPath);
+    let newPath = PathExt.join(basePath, result.value);
+    return renameFile(manager, oldPath, newPath);
+  });
 }
 
 
@@ -78,8 +91,8 @@ function renameFile(manager: IDocumentManager, oldPath: string, newPath: string)
       body: `"${newPath}" already exists, overwrite?`,
       buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'OVERWRITE' })]
     };
-    return showDialog(options).then(button => {
-      if (!button.accept) {
+    return showDialog(options).then(result => {
+      if (!result.button.accept) {
         return Promise.resolve(null);
       }
       return manager.overwrite(oldPath, newPath);
@@ -112,11 +125,9 @@ class RenameHandler extends Widget {
   /**
    * Construct a new "rename" dialog.
    */
-  constructor(manager: IDocumentManager, oldPath: string) {
+  constructor(oldPath: string) {
     super({ node: Private.createRenameNode(oldPath) });
     this.addClass(FILE_DIALOG_CLASS);
-    this._manager = manager;
-    this._oldPath = oldPath;
     let ext = PathExt.extname(oldPath);
     let value = this.inputNode.value = PathExt.basename(oldPath);
     this.inputNode.setSelectionRange(0, value.length - ext.length);
@@ -130,26 +141,11 @@ class RenameHandler extends Widget {
   }
 
   /**
-   * Show the rename dialog.
+   * Get the value of the widget.
    */
-  showDialog(): Promise<Contents.IModel | null> {
-    return showDialog({
-      title: 'Rename File',
-      body: this.node,
-      primaryElement: this.inputNode,
-      buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'RENAME' })]
-    }).then(result => {
-      if (!result.accept || !this.inputNode.value) {
-        return null;
-      }
-      let basePath = PathExt.dirname(this._oldPath);
-      let newPath = PathExt.join(basePath, this.inputNode.value);
-      return renameFile(this._manager, this._oldPath, newPath);
-    });
+  getValue(): string {
+    return this.inputNode.value;
   }
-
-  private _oldPath: string;
-  private _manager: IDocumentManager;
 }
 
 

@@ -653,7 +653,7 @@ class PluginEditor extends Widget {
       body: 'Do you want to leave without saving?',
       buttons: [Dialog.cancelButton(), Dialog.okButton()]
     }).then(result => {
-      if (!result.accept) {
+      if (!result.button.accept) {
         throw new Error('User cancelled.');
       }
     });

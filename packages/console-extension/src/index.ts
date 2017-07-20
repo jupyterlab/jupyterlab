@@ -365,7 +365,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, mainMenu: IM
         body: `Are you sure you want to close "${current.title.label}"?`,
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
-        if (result.accept) {
+        if (result.button.accept) {
           current.console.session.shutdown().then(() => {
             current.dispose();
           });

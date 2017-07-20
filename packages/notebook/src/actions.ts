@@ -27,6 +27,10 @@ import {
 } from '@phosphor/domutils';
 
 import {
+  h
+} from '@phosphor/virtualdom';
+
+import {
   INotebookModel
 } from './model';
 
@@ -36,7 +40,16 @@ import {
 
 
 // The message to display to the user when prompting to trust the notebook.
-const TRUST_MESSAGE = '<p>A trusted Jupyter notebook may execute hidden malicious code when you open it.<br>Selecting trust will re-render this notebook in a trusted state.<br>For more information, see the <a href="http://ipython.org/ipython-doc/2/notebook/security.html">Jupyter security documentation</a>.</p>';
+const TRUST_MESSAGE = h.p(
+  'A trusted Jupyter notebook may execute hidden malicious code when you ',
+  'open it.',
+  h.br(),
+  'Selecting trust will re-render this notebook in a trusted state.',
+  h.br(),
+  'For more information, see the',
+  h.a({ href: 'http://ipython.org/ipython-doc/2/notebook/security.html' },
+      'Jupyter security documentation'),
+);
 
 
 /**
@@ -1016,14 +1029,12 @@ namespace NotebookActions {
         buttons: [Dialog.okButton()]
       }).then(() => void 0);
     }
-    let body = document.createElement('div');
-    body.innerHTML = TRUST_MESSAGE;
     return showDialog({
-      body,
+      body: TRUST_MESSAGE,
       title: 'Trust this notebook?',
       buttons: [Dialog.cancelButton(), Dialog.warnButton()]
     }).then(result => {
-      if (result.accept) {
+      if (result.button.accept) {
         for (let i = 0; i < cells.length; i++) {
           let cell = cells.get(i);
           cell.trusted = true;

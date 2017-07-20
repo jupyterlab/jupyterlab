@@ -288,8 +288,8 @@ class BreadCrumbs extends Widget {
             body: `"${newPath}" already exists, overwrite?`,
             buttons: [Dialog.cancelButton(), overwrite]
           };
-          return showDialog(options).then(button => {
-            if (!model.isDisposed && button.accept) {
+          return showDialog(options).then(result => {
+            if (!model.isDisposed && result.button.accept) {
               return model.manager.deleteFile(newPath).then(() => {
                 if (!model.isDisposed) {
                   return model.manager.rename(oldPath, newPath);

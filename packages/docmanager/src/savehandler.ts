@@ -171,9 +171,9 @@ class SaveHandler implements IDisposable {
         return;
       }
       this._inDialog = false;
-      if (result.label === 'OVERWRITE') {
+      if (result.button.label === 'OVERWRITE') {
         return this._finishSave();
-      } else if (result.label === 'REVERT') {
+      } else if (result.button.label === 'REVERT') {
         return this._context.revert();
       }
     });
