@@ -54,7 +54,7 @@ class Dialog<T> extends Widget {
     super();
     this.addClass('jp-Dialog');
     let normalized = Private.handleOptions(options);
-    let renderer = options.renderer;
+    let renderer = normalized.renderer;
 
     this._host = normalized.host;
     this._defaultButton = normalized.defaultButton;
@@ -91,10 +91,10 @@ class Dialog<T> extends Widget {
    * Dispose of the resources used by the dialog.
    */
   dispose(): void {
-    if (this._promise) {
-      let promise = this._promise;
+    const promise = this._promise;
+    if (promise) {
       this._promise = null;
-      promise.resolve(void 0);
+      promise.reject(void 0);
       ArrayExt.removeFirstOf(Private.launchQueue, promise.promise);
     }
     super.dispose();
@@ -110,12 +110,12 @@ class Dialog<T> extends Widget {
     if (this._promise) {
       return this._promise.promise;
     }
-    this._promise = new PromiseDelegate<Dialog.IResult<T>>();
+    const promise = this._promise = new PromiseDelegate<Dialog.IResult<T>>();
     let promises = Promise.all(Private.launchQueue);
     Private.launchQueue.push(this._promise.promise);
     return promises.then(() => {
       Widget.attach(this, this._host);
-      return this._promise.promise;
+      return promise.promise;
     });
   }
 
@@ -288,7 +288,11 @@ class Dialog<T> extends Widget {
    */
   private _resolve(button: Dialog.IButton): void {
     // Prevent loopback.
-    let promise = this._promise;
+    const promise = this._promise;
+    if (!promise) {
+      this.dispose();
+      return;
+    }
     this._promise = null;
     ArrayExt.removeFirstOf(Private.launchQueue, promise.promise);
     let body = this._body;
@@ -305,7 +309,7 @@ class Dialog<T> extends Widget {
   private _original: HTMLElement;
   private _first: HTMLElement;
   private _primary: HTMLElement;
-  private _promise: PromiseDelegate<Dialog.IResult<T>>;
+  private _promise: PromiseDelegate<Dialog.IResult<T>> | null;
   private _defaultButton: number;
   private _host: HTMLElement;
   private _body: Dialog.BodyType<T>;
