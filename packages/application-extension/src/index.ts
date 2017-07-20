@@ -68,7 +68,9 @@ const mainPlugin: JupyterLabPlugin<void> = {
           app.serviceManager.builder.build().then(() => {
             return showDialog({
               title: 'Build Complete',
-              body: 'Build successfully completed, reload page?'
+              body: 'Build successfully completed, reload page?',
+              buttons: [Dialog.cancelButton(),
+                        Dialog.warnButton({ label: 'RELOAD' })]
             });
           }).then(result => {
             if (result.button.accept) {
