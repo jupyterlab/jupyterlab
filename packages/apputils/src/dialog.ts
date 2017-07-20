@@ -34,7 +34,7 @@ import {
  * @returns A promise that resolves with whether the dialog was accepted.
  */
 export
-function showDialog<T>(options: Dialog.IOptions<T>={}): Promise<Dialog.IResult<T>> {
+function showDialog<T>(options: Partial<Dialog.IOptions<T>>={}): Promise<Dialog.IResult<T>> {
   let dialog = new Dialog(options);
   return dialog.launch();
 }
@@ -50,15 +50,15 @@ class Dialog<T> extends Widget {
    *
    * @param options - The dialog setup options.
    */
-  constructor(options: Dialog.IOptions<T>={}) {
+  constructor(options: Partial<Dialog.IOptions<T>>={}) {
     super();
     this.addClass('jp-Dialog');
-    options = Private.handleOptions(options);
+    let normalized = Private.handleOptions(options);
     let renderer = options.renderer;
 
-    this._host = options.host;
-    this._defaultButton = options.defaultButton;
-    this._buttons = options.buttons;
+    this._host = normalized.host;
+    this._defaultButton = normalized.defaultButton;
+    this._buttons = normalized.buttons;
     this._buttonNodes = toArray(map(this._buttons, button => {
       return renderer.createButtonNode(button);
     }));
@@ -68,10 +68,10 @@ class Dialog<T> extends Widget {
     content.addClass('jp-Dialog-content');
     layout.addWidget(content);
 
-    this._body = options.body;
+    this._body = normalized.body;
 
-    let header = renderer.createHeader(options.title);
-    let body = renderer.createBody(options.body);
+    let header = renderer.createHeader(normalized.title);
+    let body = renderer.createBody(normalized.body);
     let footer = renderer.createFooter(this._buttonNodes);
     content.addWidget(header);
     content.addWidget(body);
@@ -325,7 +325,7 @@ namespace Dialog {
     /**
      * The top level text for the dialog.  Defaults to an empty string.
      */
-    title?: HeaderType;
+    title: HeaderType;
 
     /**
      * The main body element for the dialog or a message to display.
@@ -339,34 +339,35 @@ namespace Dialog {
      * A string argument will be used as raw `textContent`.
      * All `input` and `select` nodes will be wrapped and styled.
      */
-    body?: BodyType<T>;
+    body: BodyType<T>;
 
     /**
      * The host element for the dialog. Defaults to `document.body`.
      */
-    host?: HTMLElement;
+    host: HTMLElement;
 
     /**
      * The to buttons to display. Defaults to cancel and accept buttons.
      */
-    buttons?: ReadonlyArray<IButton>;
+    buttons: ReadonlyArray<IButton>;
 
     /**
      * The index of the default button.  Defaults to the last button.
      */
-    defaultButton?: number;
+    defaultButton: number;
 
     /**
      * A selector for the primary element that should take focus in the dialog.
-     * Defaults to the default button's element.
+     * Defaults to an empty string, causing the [[defaultButton]] to take
+     * focus.
      */
-    focusNodeSelector?: string;
+    focusNodeSelector: string;
 
     /**
      * An optional renderer for dialog items.  Defaults to a shared
      * default renderer.
      */
-    renderer?: IRenderer;
+    renderer: IRenderer;
   }
 
   /**
@@ -722,18 +723,19 @@ namespace Private {
    * @returns A new options object with defaults applied.
    */
   export
-  function handleOptions<T>(options: Dialog.IOptions<T>={}): Dialog.IOptions<T> {
-    let newOptions: Dialog.IOptions<T> = {};
-    newOptions.title = options.title || '';
-    newOptions.body = options.body || '';
-    newOptions.host = options.host || document.body;
-    newOptions.buttons = (
+  function handleOptions<T>(options: Partial<Dialog.IOptions<T>>={}): Dialog.IOptions<T> {
+    let buttons = (
       options.buttons || [Dialog.cancelButton(), Dialog.okButton()]
     );
-    newOptions.defaultButton = options.defaultButton || newOptions.buttons.length - 1;
-    newOptions.renderer = options.renderer || Dialog.defaultRenderer;
-    newOptions.focusNodeSelector = options.focusNodeSelector;
-    return newOptions;
+    return {
+      title: options.title || '',
+      body: options.body || '',
+      host: options.host || document.body,
+      buttons,
+      defaultButton: options.defaultButton || buttons.length - 1,
+      renderer: options.renderer || Dialog.defaultRenderer,
+      focusNodeSelector: options.focusNodeSelector || ''
+    };
   }
 
   /**
