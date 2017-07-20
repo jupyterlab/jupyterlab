@@ -47,27 +47,42 @@ const mainPlugin: JupyterLabPlugin<void> = {
   activate: (app: JupyterLab, palette: ICommandPalette) => {
     addCommands(app, palette);
 
+    let unloadPrompt = true;
+
     // Temporary build message for manual rebuild.
     let buildMessage = PageConfig.getOption('buildRequired');
-    console.log('hi', buildMessage);
+    buildMessage = 'this is the message\non multiple lines';
     if (true) {
       let body = h.div(
         h.p(
-          'JupyterLab build is out of date',
+          'JupyterLab build is suggested:',
           h.br(),
-          'Please run',
-          h.code('jupyter lab build'),
-          'from',
-          h.br(),
-          'the command line and relaunch'
+          h.pre(buildMessage)
         )
       );
       showDialog({
         title: 'Build Recommended',
         body,
-        buttons: [Dialog.okButton()]
-      }).then(() => {
-        app.serviceManager.builder.build();
+        buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'BUILD' })]
+      }).then(result => {
+        if (result.button.accept) {
+          app.serviceManager.builder.build().then(() => {
+            unloadPrompt = false;
+            return showDialog({
+              title: 'Build Complete',
+              body: 'Build successfully completed, reload page?'
+            });
+          }).then(result => {
+            if (result.button.accept) {
+              location.reload();
+            }
+          }).catch(err => {
+            showDialog({
+              title: 'Build Failed',
+              body: h.div('Error', h.pre(err.message))
+            });
+          });
+        }
       });
     }
 
@@ -80,7 +95,9 @@ const mainPlugin: JupyterLabPlugin<void> = {
     // For more information, see:
     // https://developer.mozilla.org/en/docs/Web/Events/beforeunload
     window.addEventListener('beforeunload', event => {
-      return (event as any).returnValue = message;
+      if (unloadPrompt) {
+        return (event as any).returnValue = message;
+      }
     });
   },
   autoStart: true
