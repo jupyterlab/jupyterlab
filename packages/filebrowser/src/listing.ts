@@ -1373,7 +1373,9 @@ class DirListing extends Widget {
       const newPath = PathExt.join(this._model.path, newName);
       const promise = renameFile(manager, oldPath, newPath);
       return promise.catch(error => {
-        utils.showErrorMessage('Rename Error', error);
+        if (error !== 'File not renamed') {
+          utils.showErrorMessage('Rename Error', error);
+        }
         this._inRename = false;
         return original;
       }).then(() => {
@@ -1381,7 +1383,9 @@ class DirListing extends Widget {
           this._inRename = false;
           return Promise.reject('Disposed') as Promise<string>;
         }
-        this.selectItemByName(newName);
+        if (this._inRename) {
+          this.selectItemByName(newName);
+        }
         this._inRename = false;
         return newName;
       });
