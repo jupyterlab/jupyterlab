@@ -49,7 +49,7 @@ const mainPlugin: JupyterLabPlugin<void> = {
 
     // Temporary build message for manual rebuild.
     let buildMessage = PageConfig.getOption('buildRequired');
-    console.log(buildMessage);
+    console.log('hi', buildMessage);
     if (true) {
       let body = h.div(
         h.p(

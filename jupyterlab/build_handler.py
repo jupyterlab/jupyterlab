@@ -23,6 +23,7 @@ class BuildHandler(APIHandler):
         except Exception as e:
             self.set_status(500)
             msg = str(e)
+            self.log.error(msg)
             self.finish(json.dumps(dict(message=msg)))
             return
         self.log.debug('Build succeeded')
