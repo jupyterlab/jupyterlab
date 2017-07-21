@@ -143,7 +143,9 @@ def install_extension(extension, app_dir=None, logger=None):
     # Handle any schemas.
     schema_data = data['jupyterlab'].get('schema_data', dict())
     for (key, value) in schema_data.items():
-        path = pjoin(app_dir, 'schemas', key + '.json')
+        if not key.endswith('.json'):
+            key += '.json'
+        path = pjoin(app_dir, key)
         with open(path, 'w') as fid:
             fid.write(value)
 
