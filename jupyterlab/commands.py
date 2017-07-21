@@ -530,7 +530,7 @@ def _install_linked_package(staging, name, path, logger):
     if os.path.exists(target):
         shutil.rmtree(target)
 
-    linked = pjoin(staging, 'linked_pacakges')
+    linked = pjoin(staging, 'linked_packages')
 
     target = pjoin(linked, 'temp')
     if os.path.exists(target):
@@ -560,7 +560,7 @@ def _install_linked_package(staging, name, path, logger):
         os.remove(ext_path)
 
     # Move
-    shutil.move(pjoin(target, fname), pjoin(staging, 'linked_pakages'))
+    shutil.move(pjoin(target, fname), linked)
     shutil.rmtree(target)
 
     # Set the dependency in the package.
