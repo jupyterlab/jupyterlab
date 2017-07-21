@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/apputils-extension",
-  "version": "0.8.3",
+  "version": "0.9.0",
   "description": "JupyterLab - Application Utilities Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -12,10 +12,10 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.8.3",
-    "@jupyterlab/apputils": "^0.8.2",
-    "@jupyterlab/coreutils": "^0.8.1",
-    "@jupyterlab/services": "^0.47.1"
+    "@jupyterlab/application": "^0.9.0",
+    "@jupyterlab/apputils": "^0.9.0",
+    "@jupyterlab/coreutils": "^0.9.0",
+    "@jupyterlab/services": "^0.48.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",

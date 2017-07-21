@@ -2,9 +2,9 @@
   "private": true,
   "name": "typescript-browser-with-output",
   "dependencies": {
-    "@jupyterlab/outputarea": "^0.8.2",
-    "@jupyterlab/rendermime": "^0.8.2",
-    "@jupyterlab/services": "^0.47.1",
+    "@jupyterlab/outputarea": "^0.9.0",
+    "@jupyterlab/rendermime": "^0.9.0",
+    "@jupyterlab/services": "^0.48.0",
     "es6-promise": "^4.1.0"
   },
   "scripts": {
@@ -19,5 +19,5 @@
     "typescript": "~2.4.1",
     "webpack": "~2.2.1"
   },
-  "version": "0.4.1"
+  "version": "0.5.0"
 }

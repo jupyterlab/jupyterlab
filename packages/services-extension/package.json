@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/services-extension",
-  "version": "0.8.3",
+  "version": "0.9.0",
   "description": "JupyterLab - Services Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -12,8 +12,8 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.8.3",
-    "@jupyterlab/services": "^0.47.1"
+    "@jupyterlab/application": "^0.9.0",
+    "@jupyterlab/services": "^0.48.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
