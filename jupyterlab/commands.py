@@ -147,6 +147,8 @@ def install_extension(extension, app_dir=None, logger=None):
         with open(path, 'w') as fid:
             fid.write(value)
 
+    return fname
+
 
 def link_package(path, app_dir=None, logger=None):
     """Link a package against the JupyterLab build.
@@ -175,11 +177,12 @@ def link_package(path, app_dir=None, logger=None):
 
     is_extension = _is_extension(data)
     if is_extension:
-        install_extension(path, app_dir)
+        fname = install_extension(path, app_dir)
     else:
         msg = ('*** Note: Linking non-extension package "%s" (lacks ' +
                '`jupyterlab.extension` metadata)')
         logger.info(msg % data['name'])
+        fname = path
 
     core_data = _get_core_data()
     deps = data.get('dependencies', dict())
@@ -193,6 +196,8 @@ def link_package(path, app_dir=None, logger=None):
     config.setdefault('linked_packages', dict())
     config['linked_packages'][data['name']] = path
     _write_build_config(config, app_dir, logger=logger)
+
+    return fname
 
 
 def unlink_package(package, app_dir=None, logger=None):
