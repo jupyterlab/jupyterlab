@@ -78,52 +78,61 @@ namespace IRenderMime {
   export
   interface IDocumentWidgetFactoryOptions {
     /**
-     * The file extensions the widget can view.
-     *
-     * #### Notes
-     * Use "*" to denote all files. Specific file extensions must be preceded
-     * with '.', like '.png', '.txt', etc.  They may themselves contain a
-     * period (e.g. .table.json).
-     */
-    readonly fileExtensions: ReadonlyArray<string>;
-
-    /**
      * The name of the widget to display in dialogs.
      */
     readonly name: string;
 
     /**
-     * The file extensions for which the factory should be the default.
-     *
-     * #### Notes
-     * Use "*" to denote all files. Specific file extensions must be preceded
-     * with '.', like '.png', '.txt', etc. Entries in this attribute must also
-     * be included in the fileExtensions attribute.
-     * The default is an empty array.
-     *
-     * **See also:** [[fileExtensions]].
+     * The primary file type of the widget.
+     */
+    readonly primaryFileType: string;
+
+    /**
+     * The file types the widget can view.
+     */
+    readonly fileTypes: ReadonlyArray<string>;
+
+    /**
+     * The file types for which the factory should be the default.
      */
     readonly defaultFor?: ReadonlyArray<string>;
+  }
+
+  /**
+   * A file type to associate with the renderer.
+   */
+  export
+  interface IFileType {
+    /**
+     * The name of the file type.
+     */
+    readonly name: string;
 
     /**
-     * Whether the widget factory is read only.
+     * The mime types associated the file type.
      */
-    readonly readOnly?: boolean;
+    readonly mimeTypes: ReadonlyArray<string>;
 
     /**
-     * The registered name of the model type used to create the widgets.
+     * The extensions of the file type (e.g. `".txt"`).  Can be a compound
+     * extension (e.g. `".table.json`).
      */
-    readonly modelName?: string;
+    readonly extensions: ReadonlyArray<string>;
 
     /**
-     * Whether the widgets prefer having a kernel started.
+     * An optional pattern for a file name (e.g. `^Dockerfile$`).
      */
-    readonly preferKernel?: boolean;
+    readonly pattern?: string;
 
     /**
-     * Whether the widgets can start a kernel when opened.
+     * The icon class name for the file type.
      */
-    readonly canStartKernel?: boolean;
+    readonly iconClass?: string;
+
+    /**
+     * The icon label for the file type.
+     */
+    readonly iconLabel?: string;
   }
 
   /**
@@ -132,9 +141,9 @@ namespace IRenderMime {
   export
   interface IExtension {
     /**
-     * The MIME type for the renderer, which is the output MIME type it will handle.
+     * The name of the extension.
      */
-    readonly mimeType: string;
+    readonly name: string;
 
     /**
      * A renderer factory to be registered to render the MIME type.
@@ -157,19 +166,14 @@ namespace IRenderMime {
     readonly dataType?: 'string' | 'json';
 
     /**
-     * The icon class name for the widget.
-     */
-    readonly iconClass?: string;
-
-    /**
-     * The icon label for the widget.
-     */
-    readonly iconLabel?: string;
-
-    /**
      * The options used to open a document with the renderer factory.
      */
-    readonly documentWidgetFactoryOptions?: IDocumentWidgetFactoryOptions;
+    readonly documentWidgetFactoryOptions?: IDocumentWidgetFactoryOptions | ReadonlyArray<IDocumentWidgetFactoryOptions>;
+
+    /**
+     * The optional file type associated with the extension.
+     */
+    readonly fileTypes?: ReadonlyArray<IFileType>;
   }
 
   /**

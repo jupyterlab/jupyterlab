@@ -75,15 +75,15 @@ describe('@jupyterlab/docmanager', () => {
 
   let manager: LoggingManager;
   let services: ServiceManager.IManager;
-  let modelFactory = new TextModelFactory();
+  let textModelFactory = new TextModelFactory();
   let context: Context<DocumentRegistry.IModel>;
   let widgetFactory = new WidgetFactory({
     name: 'test',
-    fileExtensions: ['.txt']
+    fileTypes: ['text']
   });
   let readOnlyFactory = new WidgetFactory({
     name: 'readonly',
-    fileExtensions: ['.txt'],
+    fileTypes: ['text'],
     readOnly: true
   });
 
@@ -92,13 +92,12 @@ describe('@jupyterlab/docmanager', () => {
   });
 
   beforeEach(() => {
-    let registry = new DocumentRegistry();
-    registry.addModelFactory(modelFactory);
+    let registry = new DocumentRegistry({ textModelFactory });
     registry.addWidgetFactory(widgetFactory);
     manager = new LoggingManager({ registry });
     context = new Context({
       manager: services,
-      factory: modelFactory,
+      factory: textModelFactory,
       path: uuid()
     });
   });

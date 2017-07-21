@@ -102,7 +102,7 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
   const namespace = 'editor';
   const factory = new FileEditorFactory({
     editorServices,
-    factoryOptions: { name: FACTORY, fileExtensions: ['*'], defaultFor: ['*'] }
+    factoryOptions: { name: FACTORY, fileTypes: ['*'], defaultFor: ['*'] }
   });
   const { commands, restored } = app;
   const tracker = new InstanceTracker<FileEditor>({ namespace });

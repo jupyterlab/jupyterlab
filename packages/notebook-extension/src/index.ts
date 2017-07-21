@@ -365,9 +365,9 @@ function activateNotebookHandler(app: JupyterLab, services: IServiceManager, mai
 
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
-    fileExtensions: ['.ipynb'],
+    fileTypes: ['notebook'],
     modelName: 'notebook',
-    defaultFor: ['.ipynb'],
+    defaultFor: ['notebook'],
     preferKernel: true,
     canStartKernel: true,
     rendermime: app.rendermime,
@@ -395,12 +395,6 @@ function activateNotebookHandler(app: JupyterLab, services: IServiceManager, mai
   let registry = app.docRegistry;
   registry.addModelFactory(new NotebookModelFactory({}));
   registry.addWidgetFactory(factory);
-  registry.addFileType({
-    name: 'Notebook',
-    extension: '.ipynb',
-    contentType: 'notebook',
-    fileFormat: 'json'
-  });
   registry.addCreator({
     name: 'Notebook',
     fileType: 'Notebook',

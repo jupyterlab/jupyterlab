@@ -49,8 +49,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     this._factory = options.factory;
     this._opener = options.opener || Private.noOp;
     this._path = options.path;
-    let ext = DocumentRegistry.extname(this._path);
-    let lang = this._factory.preferredLanguage(ext);
+    let lang = this._factory.preferredLanguage(PathExt.basename(this._path));
 
     let dbFactory = options.modelDBFactory;
     if (dbFactory) {
@@ -63,11 +62,13 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     this._readyPromise = manager.ready.then(() => {
       return this._populatedPromise.promise;
     });
+
+    let ext = PathExt.extname(this._path);
     this.session = new ClientSession({
       manager: manager.sessions,
       path: this._path,
       type: ext === '.ipynb' ? 'notebook' : 'file',
-      name: this._path.split('/').pop(),
+      name: PathExt.basename(this._path),
       kernelPreference: options.kernelPreference || { shouldStart: false }
     });
     this.session.propertyChanged.connect(this._onSessionChanged, this);

@@ -10,6 +10,10 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
+  DocumentRegistry
+} from '@jupyterlab/docregistry';
+
+import {
   IDocumentManager, renameFile
 } from '@jupyterlab/docmanager';
 
@@ -119,11 +123,6 @@ const NAME_ID_CLASS = 'jp-id-name';
 const MODIFIED_ID_CLASS = 'jp-id-modified';
 
 /**
- * The class name added to a file type content item.
- */
-const FILE_TYPE_CLASS = 'jp-FileIcon';
-
-/**
  * The mime type for a con tents drag object.
  */
 const CONTENTS_MIME = 'application/x-jupyter-icontents';
@@ -137,56 +136,6 @@ const DROP_TARGET_CLASS = 'jp-mod-dropTarget';
  * The class name added to selected rows.
  */
 const SELECTED_CLASS = 'jp-mod-selected';
-
-/**
- * The class name added to a material icon content item.
- */
-const MATERIAL_ICON_CLASS = 'jp-MaterialIcon';
-
-/**
- * The class name added to a directory file browser item.
- */
-const FOLDER_MATERIAL_ICON_CLASS = 'jp-OpenFolderIcon';
-
-/**
- * The class name added to a notebook file browser item.
- */
-const NOTEBOOK_MATERIAL_ICON_CLASS = 'jp-NotebookIcon';
-
-/**
- * The class name added to a markdown file browser item.
- */
-const MARKDOWN_ICON_CLASS = 'jp-MarkdownIcon';
-
-/**
- * The class name added to a python file browser item.
- */
-const PYTHON_ICON_CLASS = 'jp-PythonIcon';
-
-/**
- * The class name added to a JSON file browser item.
- */
-const JSON_ICON_CLASS = 'jp-JSONIcon';
-
-/**
- * The class name added to a speadsheet file browser item.
- */
-const SPREADSHEET_ICON_CLASS = 'jp-SpreadsheetIcon';
-
-/**
- * The class name added to a R Kernel file browser item.
- */
-const RKERNEL_ICON_CLASS = 'jp-RKernelIcon';
-
-/**
- * The class name added to a YAML file browser item.
- */
-const YAML_ICON_CLASS = 'jp-YamlIcon';
-
-/**
- * The class added for image file browser items.
- */
-const IMAGE_ICON_CLASS = 'jp-ImageIcon';
 
 /**
  * The class name added to drag state icons to add space between the icon and the file name
@@ -767,7 +716,8 @@ class DirListing extends Widget {
     for (let i = 0, n = items.length; i < n; ++i) {
       let node = nodes[i];
       let item = items[i];
-      renderer.updateItemNode(node, item);
+      let ft = this._manager.registry.getFileTypeForModel(item);
+      renderer.updateItemNode(node, item, ft);
       if (this._selection[item.name]) {
         node.classList.add(SELECTED_CLASS);
         if (this._isCut && this._model.path === this._prevPath) {
@@ -1157,7 +1107,8 @@ class DirListing extends Widget {
     }
 
     // Create the drag image.
-    let dragImage = this.renderer.createDragImage(source, selectedNames.length, item);
+    let ft = this._manager.registry.getFileTypeForModel(item);
+    let dragImage = this.renderer.createDragImage(source, selectedNames.length, ft);
 
     // Set up the drag event.
     this._drag = new Drag({
@@ -1536,8 +1487,10 @@ namespace DirListing {
      * @param node - A node created by [[createItemNode]].
      *
      * @param model - The model object to use for the item state.
+     *
+     * @param fileType - The file type of the item, if applicable.
      */
-    updateItemNode(node: HTMLElement, model: Contents.IModel): void;
+    updateItemNode(node: HTMLElement, model: Contents.IModel, fileType?: DocumentRegistry.IFileType): void;
 
     /**
      * Get the node containing the file name.
@@ -1555,9 +1508,11 @@ namespace DirListing {
      *
      * @param count - The number of items being dragged.
      *
+     * @param fileType - The file type of the item, if applicable.
+     *
      * @returns An element to use as the drag image.
      */
-    createDragImage(node: HTMLElement, count: number, model: Contents.IModel): HTMLElement;
+    createDragImage(node: HTMLElement, count: number, fileType?: DocumentRegistry.IFileType): HTMLElement;
   }
 
   /**
@@ -1664,72 +1619,29 @@ namespace DirListing {
       return node;
     }
 
-    parseFileExtension(path: string): string {
-      var fileExtension = PathExt.extname(path).toLocaleLowerCase();
-      switch (fileExtension) {
-        case '.md':
-          return MARKDOWN_ICON_CLASS;
-        case '.py':
-          return PYTHON_ICON_CLASS;
-        case '.json':
-          return JSON_ICON_CLASS;
-        case '.csv':
-          return SPREADSHEET_ICON_CLASS;
-        case '.xls':
-          return SPREADSHEET_ICON_CLASS;
-        case '.r':
-          return RKERNEL_ICON_CLASS;
-        case '.yml':
-          return YAML_ICON_CLASS;
-        case '.yaml':
-          return YAML_ICON_CLASS;
-        case '.svg':
-          return IMAGE_ICON_CLASS;
-        case '.tiff':
-          return IMAGE_ICON_CLASS;
-        case '.jpeg':
-          return IMAGE_ICON_CLASS;
-        case '.jpg':
-          return IMAGE_ICON_CLASS;
-        case '.gif':
-          return IMAGE_ICON_CLASS;
-        case '.png':
-          return IMAGE_ICON_CLASS;
-        case '.raw':
-          return IMAGE_ICON_CLASS;
-        default:
-          return FILE_TYPE_CLASS;
-      }
-    }
-
     /**
      * Update an item node to reflect the current state of a model.
      *
      * @param node - A node created by [[createItemNode]].
      *
      * @param model - The model object to use for the item state.
+     *
+     * @param fileType - The file type of the item, if applicable.
+     *
      */
-    updateItemNode(node: HTMLElement, model: Contents.IModel): void {
+    updateItemNode(node: HTMLElement, model: Contents.IModel, fileType?: DocumentRegistry.IFileType): void {
       let icon = DOMUtils.findElement(node, ITEM_ICON_CLASS);
       let text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
       let modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
-      icon.className = ITEM_ICON_CLASS + ' ' + MATERIAL_ICON_CLASS;
-      switch (model.type) {
-      case 'directory':
-        icon.classList.add(FOLDER_MATERIAL_ICON_CLASS);
-        break;
-      case 'notebook':
-        icon.classList.add(NOTEBOOK_MATERIAL_ICON_CLASS);
-        break;
-      case 'file':
-        icon.classList.add(this.parseFileExtension(model.path));
-        break;
-      default:
-        icon.classList.add(MATERIAL_ICON_CLASS);
-        icon.classList.add(FILE_TYPE_CLASS);
-        break;
+      if (!fileType) {
+        icon.textContent = '';
+        icon.className = '';
+      } else {
+        icon.textContent = fileType.iconLabel || '';
+        icon.className = fileType.iconClass || '';
       }
+      icon.classList.add(ITEM_ICON_CLASS);
 
       let modText = '';
       let modTitle = '';
@@ -1765,29 +1677,25 @@ namespace DirListing {
      *
      * @param count - The number of items being dragged.
      *
+     * @param fileType - The file type of the item, if applicable.
+     *
      * @returns An element to use as the drag image.
      */
-    createDragImage(node: HTMLElement, count: number, model: Contents.IModel): HTMLElement {
+    createDragImage(node: HTMLElement, count: number, fileType?: DocumentRegistry.IFileType): HTMLElement {
       let dragImage = node.cloneNode(true) as HTMLElement;
       let modified = DOMUtils.findElement(dragImage, ITEM_MODIFIED_CLASS);
-      let iconNode = DOMUtils.findElement(dragImage, ITEM_ICON_CLASS);
+      let icon = DOMUtils.findElement(dragImage, ITEM_ICON_CLASS);
       dragImage.removeChild(modified as HTMLElement);
-      if (model) {
-        switch (model.type) {
-          case 'directory':
-            iconNode.className = `${MATERIAL_ICON_CLASS} ${FOLDER_MATERIAL_ICON_CLASS} ${DRAG_ICON_CLASS}`;
-            break;
-          case 'notebook':
-            iconNode.className = `${MATERIAL_ICON_CLASS} ${NOTEBOOK_MATERIAL_ICON_CLASS} ${DRAG_ICON_CLASS}`;
-            break;
-          case 'file':
-            iconNode.className = `${MATERIAL_ICON_CLASS} ${DRAG_ICON_CLASS} ` + this.parseFileExtension(model.path);
-            break;
-          default:
-            iconNode.className = `${MATERIAL_ICON_CLASS} ${FILE_TYPE_CLASS} ${DRAG_ICON_CLASS}`;
-            break;
-        }
+
+      if (!fileType) {
+        icon.textContent = '';
+        icon.className = '';
+      } else {
+        icon.textContent = fileType.iconLabel || '';
+        icon.className = fileType.iconClass || '';
       }
+      icon.classList.add(DRAG_ICON_CLASS);
+
       if (count > 1) {
         let nameNode = DOMUtils.findElement(dragImage, ITEM_TEXT_CLASS);
         nameNode.textContent = count + ' Items';
