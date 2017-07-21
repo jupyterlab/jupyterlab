@@ -35,6 +35,35 @@ class BuildManager {
   readonly serverSettings: ServerConnection.ISettings;
 
   /**
+   * Get whether the application should be built.
+   */
+  getStatus(): Promise<BuildManager.IStatus> {
+    const base = this.serverSettings.baseUrl;
+    const url = URLExt.join(base, BUILD_SETTINGS_URL);
+    const request = { method: 'GET', url };
+    const { serverSettings } = this;
+    const promise = ServerConnection.makeRequest(request, serverSettings);
+
+    return promise.then(response => {
+      const { status } = response.xhr;
+
+      if (status !== 200) {
+        throw ServerConnection.makeError(response);
+      }
+
+      let data = response.data as BuildManager.IStatus;
+      if (typeof data.needed !== 'boolean') {
+        throw ServerConnection.makeError(response, 'Invalid data');
+      }
+      if (typeof data.message !== 'string') {
+        throw ServerConnection.makeError(response, 'Invalid data');
+      }
+      return data;
+
+    }).catch(reason => { throw ServerConnection.makeError(reason); });
+  }
+
+  /**
    * Build the application.
    */
   build(): Promise<void> {
@@ -70,6 +99,22 @@ namespace BuildManager {
      * The server settings used to make API requests.
      */
     serverSettings?: ServerConnection.ISettings;
+  }
+
+  /**
+   * The build status response from the server.
+   */
+  export
+  interface IStatus {
+    /**
+     * Whether a build is needed.
+     */
+    readonly needed: boolean;
+
+    /**
+     * The message associated with the build status.
+     */
+    readonly message: string;
   }
 }
 

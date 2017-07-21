@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IStateDB, PageConfig
+  IStateDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -48,15 +48,17 @@ const mainPlugin: JupyterLabPlugin<void> = {
     addCommands(app, palette);
 
     let unloadPrompt = true;
+    let builder = app.serviceManager.builder;
 
-    // Temporary build message for manual rebuild.
-    let buildMessage = PageConfig.getOption('buildRequired');
-    if (buildMessage) {
+    builder.getStatus().then(status => {
+      if (!status.needed) {
+        return;
+      }
       let body = h.div(
         h.p(
           'JupyterLab build is suggested:',
           h.br(),
-          h.pre(buildMessage)
+          h.pre(status.message)
         )
       );
       showDialog({
@@ -65,7 +67,7 @@ const mainPlugin: JupyterLabPlugin<void> = {
         buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'BUILD' })]
       }).then(result => {
         if (result.button.accept) {
-          app.serviceManager.builder.build().then(() => {
+          builder.build().then(() => {
             return showDialog({
               title: 'Build Complete',
               body: 'Build successfully completed, reload page?',
@@ -85,7 +87,7 @@ const mainPlugin: JupyterLabPlugin<void> = {
           });
         }
       });
-    }
+    });
 
     const message = 'Are you sure you want to exit JupyterLab?\n' +
                     'Any unsaved changes will be lost.';

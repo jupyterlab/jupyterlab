@@ -6,13 +6,25 @@ import json
 from tornado import gen, web
 
 from notebook.base.handlers import APIHandler
-from .commands import build, clean
+from .commands import build, clean, should_build
 
 
 class BuildHandler(APIHandler):
 
-    def initialize(self, app_dir):
+    def initialize(self, app_dir, core_mode):
         self.app_dir = app_dir
+        self.core_mode = core_mode
+
+    @web.authenticated
+    @gen.coroutine
+    def get(self):
+        if self.core_mode:
+            self.finish(json.dumps(dict(needed=False, message='')))
+            return
+
+        needed, message = should_build(self.app_dir)
+        data = dict(needed=needed, message=message)
+        self.finish(json.dumps(data))
 
     @web.authenticated
     @gen.coroutine

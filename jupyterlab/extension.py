@@ -73,12 +73,6 @@ def load_jupyter_server_extension(nbapp):
     web_app.settings.setdefault('page_config_data', dict())
     web_app.settings['page_config_data']['token'] = nbapp.token
 
-    if not core_mode:
-        build_needed, msg = should_build(app_dir)
-        if build_needed:
-            nbapp.log.warn('Build required: %s' % msg)
-            web_app.settings['page_config_data']['buildRequired'] = msg
-
     if core_mode or fallback:
         config.assets_dir = os.path.join(here, 'build')
         if not os.path.exists(config.assets_dir):
@@ -111,7 +105,8 @@ def load_jupyter_server_extension(nbapp):
 
     build_url = ujoin(base_url, build_path)
     build_handler = (build_url, BuildHandler, {
-        'app_dir': app_dir
+        'app_dir': app_dir,
+        'core_mode': core_mode
     })
 
     web_app.add_handlers(".*$", [settings_handler, build_handler])
