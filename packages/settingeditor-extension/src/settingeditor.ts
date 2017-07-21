@@ -179,11 +179,7 @@ class SettingEditor extends Widget {
     // Allow the message queue (which includes fit requests that might disrupt
     // setting relative sizes) to clear before setting sizes.
     requestAnimationFrame(() => {
-      // Set the original (default) outer dimensions.
-      this._panel.setRelativeSizes(this._presets.outer);
-      this._fetchState().then(() => {
-        this._setPresets();
-      }).catch(reason => {
+      this._fetchState().then(() => { this._setPresets(); }).catch(reason => {
         console.error('Fetching setting editor state failed', reason);
         this._setPresets();
       });
@@ -289,18 +285,17 @@ class SettingEditor extends Widget {
     const editor = this._editor;
     const list = this._list;
     const panel = this._panel;
-    const { inner, outer, plugin } = this._presets;
-
-    panel.setRelativeSizes(outer);
-    editor.sizes = inner;
+    const { plugin } = this._presets;
 
     if (!plugin) {
       editor.settings = null;
       list.selection = '';
+      this._setSizes();
       return;
     }
 
     if (editor.settings && editor.settings.plugin === plugin) {
+      this._setSizes();
       return;
     }
 
@@ -315,11 +310,25 @@ class SettingEditor extends Widget {
       }
       editor.settings = settings;
       list.selection = plugin;
+      this._setSizes();
     }).catch((reason: Error) => {
       console.error(`Loading settings failed: ${reason.message}`);
       list.selection = this._presets.plugin = '';
       editor.settings = null;
+      this._setSizes();
     });
+  }
+
+  /**
+   * Set the layout sizes.
+   */
+  private _setSizes(): void {
+    const { inner, outer } = this._presets;
+    const editor = this._editor;
+    const panel = this._panel;
+
+    editor.sizes = inner;
+    panel.setRelativeSizes(outer);
   }
 
   private _editor: PluginEditor;
