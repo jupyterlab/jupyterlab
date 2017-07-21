@@ -167,7 +167,10 @@ function typeset(node: HTMLElement): void {
     initialized = true;
   }
   if ((window as any).MathJax) {
-    MathJax.Hub.Queue(['Typeset', MathJax.Hub, node]);
+    MathJax.Hub.Queue(
+      ['Typeset', MathJax.Hub, node,
+      ['resetEquationNumbers', MathJax.InputJax.TeX]]
+    );
   }
 }
 
@@ -186,6 +189,7 @@ function init() {
       processEscapes: true,
       processEnvironments: true
     },
+    TeX: { equationNumbers: { autoNumber: 'AMS' } },
     // Center justify equations in code and markdown cells. Elsewhere
     // we use CSS to left justify single line equations in code cells.
     displayAlign: 'center',
