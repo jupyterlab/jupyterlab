@@ -733,6 +733,7 @@ def _ensure_package(app_dir, logger=None, name=None, version=None):
             data = json.load(fid)
         if data['jupyterlab'].get('version', '') != __version__:
             shutil.rmtree(staging)
+            os.makedirs(staging)
             version_updated = True
 
     for fname in ['index.app.js', 'webpack.config.js']:
