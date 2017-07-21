@@ -54,29 +54,25 @@ button.jp-mod-styled:focus {
   display: flex;
   flex-direction: column;
   padding: 1px;
-  background-color: white;
+  background-color: var(--jp-layout-color1);
   height: 28px;
   box-sizing: border-box;
   margin-bottom: 12px;
 }
 
 
-.jp-select-wrapper.jp-mod-focused {
+.jp-select-wrapper.jp-mod-focused select.jp-mod-styled {
   border: var(--jp-border-width) solid var(--md-blue-500);
   box-shadow: inset 0 0 4px var(--md-blue-300);
 }
 
 
-.jp-select-wrapper:hover {
+select.jp-mod-styled:hover {
+  background-color: var(--jp-layout-color1);
   cursor: pointer;
   color: var(--jp-ui-font-color0);
-  background-color: var(--md-grey-200);
+  background-color: var(--jp-ui-select-background-color-hover);
   box-shadow: inset 0 0px 1px rgba(0, 0, 0, 0.5);
-}
-
-
-select.jp-mod-styled:hover {
-  background-color: var(--md-grey-200);
 }
 
 
@@ -85,7 +81,7 @@ select.jp-mod-styled {
   height: 32px;
   width: 100%;
   font-size: var(--jp-ui-font-size2);
-  background: white;
+  background: var(--jp-layout-color2);
   color: var(--jp-ui-font-color0);
   padding-left: 8px;
   padding-right: 8px;
@@ -93,10 +89,15 @@ select.jp-mod-styled {
   background-repeat: no-repeat;
   background-position: right center;
   background-size: 20px;
-  border: none;
+  border: var(--jp-border-width) solid var(--jp-border-color1);
   border-radius: 0px;
   outline: none;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
+}
+
+
+a:-webkit-any-link {
+  color: var(--md-blue-600);
 }

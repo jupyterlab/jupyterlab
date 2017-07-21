@@ -14,7 +14,7 @@
 
 
 .p-DockPanel-widget {
-  background: var(--jp-layout-color2);
+  background: var(--jp-layout-color0);
   border-left: var(--jp-border-width) solid var(--jp-border-color1);
   border-right: var(--jp-border-width) solid var(--jp-border-color1);
   border-bottom: var(--jp-border-width) solid var(--jp-border-color1);

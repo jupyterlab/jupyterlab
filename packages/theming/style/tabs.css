@@ -92,12 +92,12 @@
 /* This is the left tab bar current tab: only 1 exists. */
 .p-TabBar-tab.p-mod-current {
   color: var(--jp-ui-font-color0);
-  background: var(--jp-layout-color0);
+  background: var(--jp-layout-color1);
 }
 
 
 .p-TabBar-tab.p-mod-current:hover {
-  background: var(--jp-layout-color0);
+  background: var(--jp-layout-color1);
 }
 
 

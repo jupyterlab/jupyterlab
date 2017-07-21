@@ -75,8 +75,8 @@
 
 
 .CodeMirror-gutters {
-  border-right: var(--jp-mirror-editor-gutter-border);
-  background-color: var(--jp-mirror-editor-gutter-background-color);
+  border-right: 1px solid var(--jp-border-color1);
+  background-color: var(--jp-layout-color2);
 }
 
 
@@ -94,6 +94,17 @@
   margin-right: -5px;
 }
 
+
+.CodeMirror-focused .CodeMirror-selected {
+  background-color: var(--jp-mirror-editor-selected-focus-state);
+}
+
+
+.CodeMirror-selected {
+  background-color: var(--jp-mirror-editor-selected-state)
+}
+
+
 .jp-CollaboratorCursor-hover {
   position: absolute;
   z-index: 1;
@@ -110,7 +121,8 @@
 }
 
 .CodeMirror-vscrollbar::-webkit-scrollbar, .CodeMirror-hscrollbar::-webkit-scrollbar {
-  background-color: var(--jp-layout-color2);
+  background-color: var(--jp-layout-color0);
+  width: var(--jp-scrollbar-width);
 }
 
 .CodeMirror-vscrollbar::-webkit-scrollbar {
@@ -122,20 +134,16 @@
 }
 
 .CodeMirror-vscrollbar::-webkit-scrollbar-thumb, .CodeMirror-hscrollbar::-webkit-scrollbar-thumb {
-  background-color: var(--jp-layout-color1);
+  background-color: var(--jp-layout-color2);
   border-radius: 0px;
 }
 
-
 .CodeMirror-vscrollbar::-webkit-scrollbar-thumb {
   border-left: 1px solid var(--jp-border-color1);
-  border-right: 1px solid var(--jp-border-color1);
 }
-
 
 .CodeMirror-hscrollbar::-webkit-scrollbar-thumb {
   border-top: 1px solid var(--jp-border-color1);
-  border-bottom: 1px solid var(--jp-border-color1);
 }
 
 

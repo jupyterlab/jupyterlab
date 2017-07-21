@@ -80,7 +80,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-icon-file: url('./icons-dark/jupyter/file.svg');
   --jp-icon-refresh: url('./icons-dark/md/refresh.svg');
   --jp-icon-close: url('./icons-dark/md/close.svg');
-  --jp-inverse-icon-close: url('./icons-dark/md/close-inverse.svg');
+  --jp-icon-inverse-close: url('./icons-dark/md/close-inverse.svg');
   --jp-icon-circle: url('./icons-dark/md/circle.svg');
   --jp-inverse-icon-circle: url('./icons-dark/md/circle-inverse.svg');
   --jp-icon-close-black: url('./icons-dark/md/close-black.svg');
@@ -114,10 +114,10 @@ all of MD as it is not optimized for dense, information rich UIs.
    */
 
   --jp-border-width: 1px;
-  --jp-border-color0: var(--md-grey-900);
-  --jp-border-color1: var(--md-grey-700);
-  --jp-border-color2: var(--md-grey-500);
-  --jp-border-color3: var(--md-grey-300);
+  --jp-border-color0: var(--md-grey-700);
+  --jp-border-color1: var(--md-grey-800);
+  --jp-border-color2: var(--md-grey-900);
+  --jp-border-color3: var(--md-grey-900);
 
   /* UI Fonts
 
@@ -146,10 +146,10 @@ all of MD as it is not optimized for dense, information rich UIs.
      These will typically go from light to darker, in both a dark and light theme
    */
 
-  --jp-inverse-ui-font-color0: rgba(255,255,255,1);
-  --jp-inverse-ui-font-color1: rgba(255,255,255,1.0);
-  --jp-inverse-ui-font-color2: rgba(255,255,255,0.7);
-  --jp-inverse-ui-font-color3: rgba(255,255,255,0.5);
+  --jp-inverse-ui-font-color0: rgba(0,0,0,1.0);
+  --jp-inverse-ui-font-color1: rgba(0,0,0,0.8);
+  --jp-inverse-ui-font-color2: rgba(0,0,0,0.5);
+  --jp-inverse-ui-font-color3: rgba(0,0,0,0.3);
 
   /* Content Fonts
 
@@ -181,10 +181,11 @@ all of MD as it is not optimized for dense, information rich UIs.
   theme these would go from light to dark.
   */
 
-  --jp-layout-color0: var(--md-grey-700);
-  --jp-layout-color1: var(--md-grey-800);
-  --jp-layout-color2: var(--md-grey-900);
-  --jp-layout-color3: #1A1A1A /* A midpoint between --md-grey-900 and black */;
+  --jp-layout-color0: #111111;
+  --jp-layout-color1: var(--md-grey-900);
+  --jp-layout-color2: var(--md-grey-800);
+  --jp-layout-color3: var(--md-grey-700);
+  --jp-layout-color4: var(--md-grey-600); /* A midpoint between --md-grey-900 and black */; 
 
   /* Brand/accent */
 
@@ -220,21 +221,15 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-info-color2: var(--md-cyan-300);
   --jp-info-color3: var(--md-cyan-100);
 
-  /* Window/plugin scroll bar styling */
-
-  --jp-scrollbar-thumb-color: var(--jp-layout-color1);
-  --jp-scrollbar-background-color: var(--jp-layout-color2);
-  --jp-scrollbar-border: 1px solid var(--jp-border-color1);
-
 
   /* Cell specific styles */
 
   --jp-cell-padding: 5px;
-  --jp-cell-editor-background: var(--md-grey-800);
+  --jp-cell-editor-background: var(--jp-layout-color1);
   --jp-cell-editor-box-shadow: inset 0 0 2px var(--md-blue-300);
   --jp-cell-editor-border-color: var(--md-grey-600);
-  --jp-cell-editor-background-edit: var(--md-grey-900);
-  --jp-cell-editor-border-color-edit: var(--md-blue-500);
+  --jp-cell-editor-background-edit: var(--jp-layout-color0);
+  --jp-cell-editor-border-color-edit: var(--jp-brand-color1);
   --jp-cell-prompt-width: 68px;
   --jp-cell-prompt-font-family: 'Roboto Mono', monospace;
   --jp-cell-prompt-letter-spacing: 0px;
@@ -250,10 +245,13 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-notebook-padding: 10px;
   --jp-notebook-scroll-padding: 100px;
   --jp-notebook-select-background-color: var(--jp-layout-color1);
+  --jp-notebook-multiselected-color: rgba(33,150,243,.24);
+  --jp-notebook-error-background-color: rgba(244,67,54,.28);
+  --jp-notebook-tr-hover-background-color: rgba(3,169,244,.2);
 
  /* Console specific styles */
 
-  --jp-console-background: var(--md-grey-100);
+  --jp-console-background: var(--jp-layout-color0);
 
   /* Toolbar specific styles */
 
@@ -262,18 +260,16 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-toolbar-background: var(--jp-layout-color1);
   --jp-toolbar-box-shadow: 0px 0px 2px 0px rgba(0,0,0,0.24);
   --jp-toolbar-header-margin: 4px 4px 0px 4px;
-  --jp-toolbar-active-background: var(--md-grey-300);
-
-  /* File browser specific styles */
-
-  --jp-filebrowser-content-background-color: var(--jp-layout-color2);
+  --jp-toolbar-active-background: var(--jp-layout-color0);
 
   /* Input field styles */
 
-  --jp-input-background-color: var(--md-grey-900);
+  --jp-input-background-color: var(--jp-layout-color0);
 
   /* Code mirror specific styles */
 
+  --jp-mirror-editor-selected-state: var(--jp-layout-color2);
+  --jp-mirror-editor-selected-focus-state: rgba(33,150,243,.24);
   --jp-mirror-editor-pre-color: var(--md-grey-400);
   --jp-mirror-editor-gutter-border: none;
   --jp-mirror-editor-gutter-background-color: var(--jp-layout-color2);
@@ -282,8 +278,8 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-mirror-editor-number-color: var(--md-green-400);
   --jp-mirror-editor-def-color: var(--md-blue-600);
   --jp-mirror-span-variable-color: var(--md-grey-300);
-  --jp-mirror-editor-variable-2-color: var(--md-grey-800);
-  --jp-mirror-editor-variable-3-color: var(--md-grey-700);
+  --jp-mirror-editor-variable-2-color: var(--md-grey-500);
+  --jp-mirror-editor-variable-3-color: var(--md-grey-600);
   --jp-mirror-editor-punctuation-color: var(--md-blue-400);
   --jp-mirror-editor-property-color: var(--md-blue-400);
   --jp-mirror-editor-operator-color: #AA22FF;

@@ -37,7 +37,7 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   These images are included with JupyterLab for showing the Project Jupyter logo
   */
-  --jp-image-jupyter: url('./images/jupyter-white-moons.svg');
+  --jp-image-jupyter: url('./images/jupyter.svg');
 
   /* Icons
 
@@ -46,7 +46,7 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   /* The caret used for select dropdown styling. */
 
-  --jp-ui-select-caret: url('./icons-dark/md/down_caret.svg');
+  --jp-ui-select-caret: url('./icons-light/md/down_caret.svg');
 
   /* Icons used in the application. */
 
@@ -79,7 +79,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-icon-file: url('./icons-light/jupyter/file.svg');
   --jp-icon-refresh: url('./icons-light/md/refresh.svg');
   --jp-icon-close: url('./icons-light/md/close.svg');
-  --jp-inverse-icon-close: url('./icons-light/md/close-inverse.svg');
+  --jp-icon-inverse-close: url('./icons-light/md/close-inverse.svg');
   --jp-icon-circle: url('./icons-light/md/circle.svg');
   --jp-inverse-icon-circle: url('./icons-light/md/circle-inverse.svg');
   --jp-icon-close-black: url('./icons-light/md/close-black.svg');
@@ -104,7 +104,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-icon-question-mark: url('./icons-light/jupyter/questionmark.svg');
   --jp-icon-chat: url('./icons-light/md/chat.svg');
   --jp-about-header-logo: url('../../theming/style/icons-light/jupyter/jupyter.svg');
-    --jp-about-header-wordmark: url('../../theming/style/images/jupyterlab-wordmark.svg');
+  --jp-about-header-wordmark: url('../../theming/style/images/jupyterlab-wordmark.svg');
 
 
 
@@ -114,10 +114,10 @@ all of MD as it is not optimized for dense, information rich UIs.
    */
 
   --jp-border-width: 1px;
-  --jp-border-color0: var(--md-grey-700);
-  --jp-border-color1: var(--md-grey-500);
+  --jp-border-color0: var(--md-grey-400);
+  --jp-border-color1: var(--md-grey-400);
   --jp-border-color2: var(--md-grey-300);
-  --jp-border-color3: var(--md-grey-100);
+  --jp-border-color3: var(--md-grey-200);
 
   /* UI Fonts
 
@@ -185,6 +185,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-layout-color1: white;
   --jp-layout-color2: var(--md-grey-200);
   --jp-layout-color3: var(--md-grey-400);
+  --jp-layout-color4: var(--md-grey-600);
 
   /* Brand/accent */
 
@@ -220,13 +221,19 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-info-color2: var(--md-cyan-300);
   --jp-info-color3: var(--md-cyan-100);
 
+  /* Window/plugin scroll bar styling */
+
+  --jp-scrollbar-thumb-color: var(--jp-layout-color1);
+  --jp-scrollbar-background-color: var(--jp-layout-color2);
+  --jp-scrollbar-border: 1px solid var(--jp-border-color1);
+
   /* Cell specific styles */
 
   --jp-cell-padding: 5px;
   --jp-cell-editor-background: var(--md-grey-50);
   --jp-cell-editor-border-color: var(--md-grey-400);
   --jp-cell-editor-box-shadow: inset 0 0 2px var(--md-blue-300);
-  --jp-cell-editor-background-edit: var(--jp-ui-layout-color1);
+  --jp-cell-editor-background-edit: var(--jp-layout-color1);
   --jp-cell-editor-border-color-edit: var(--jp-brand-color1);
   --jp-cell-prompt-width: 100px;
   --jp-cell-prompt-font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -246,6 +253,9 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-code-cursor-color: var(--jp-ui-font-color0);
   --jp-notebook-padding: 10px;
   --jp-notebook-scroll-padding: 100px;
+  --jp-notebook-multiselected-color: var(--md-blue-50);
+  --jp-notebook-error-background-color: #fdd;
+  --jp-notebook-tr-hover-background-color: var(--md-light-blue-50);
 
   /* Console specific styles */
 
@@ -255,7 +265,7 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   --jp-toolbar-border-color: var(--md-grey-400);
   --jp-toolbar-micro-height: 8px;
-  --jp-toolbar-background: var(--jp-layout-color0);
+  --jp-toolbar-background: var(--jp-layout-color1);
   --jp-toolbar-box-shadow: 0px 0px 2px 0px rgba(0,0,0,0.24);
   --jp-toolbar-header-margin: 4px 4px 0px 4px;
   --jp-toolbar-active-background: var(--md-grey-300);
@@ -266,6 +276,8 @@ all of MD as it is not optimized for dense, information rich UIs.
 
    /* Code mirror specific styles */
 
+  --jp-mirror-editor-selected-state: #d9d9d9;
+  --jp-mirror-editor-selected-focus-state: #d7d4f0;
   --jp-mirror-editor-pre-color: black;
   --jp-mirror-editor-gutter-border: 1px solid #ddd;
   --jp-mirror-editor-gutter-background-color: #f7f7f7;

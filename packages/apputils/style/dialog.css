@@ -29,7 +29,7 @@
   flex-direction: column;
   margin-left: auto;
   margin-right: auto;
-  background: var(--jp-layout-color0);
+  background: var(--jp-layout-color1);
   padding: 24px;
   padding-bottom: 12px;
   min-width: 300px;
@@ -56,7 +56,7 @@
   flex-direction: column;
   flex: 1 1 auto;
   font-size: var(--jp-ui-font-size2);
-  background: var(--jp-layout-color0);
+  background: var(--jp-layout-color1);
   overflow: auto;
 }
 
@@ -81,8 +81,7 @@
 
 
 .jp-Dialog-body > .jp-select-wrapper {
-  width: 252px;
-  border: var(--jp-border-width) solid var(--jp-border-color1);
+  width: 100%;
 }
 
 

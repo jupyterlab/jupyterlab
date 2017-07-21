@@ -158,20 +158,21 @@
   padding: 0;
   list-style-type: none;
   overflow: auto;
-  background-color: var(--jp-filebrowser-content-background-color);
+  background-color: var(--jp-layout-color1);
 }
 
 /* Styling for the file browser content scroll bar */
 .jp-DirListing-content::-webkit-scrollbar {
-  background-color: var(--jp-scrollbar-background-color);
-  border-left: var(--jp-scrollbar-border);
+  background-color: var(--jp-layout-color1);
+  border-left: 1px solid var(--jp-border-color1);
+  width: var(--jp-scrollbar-width);
 }
 
 
 .jp-DirListing-content::-webkit-scrollbar-thumb {
-  background-color: var(--jp-scrollbar-thumb-color);
+  background-color: var(--jp-layout-color2);
   border-radius: 0px;
-  border-left: var(--jp-scrollbar-border);
+  border-left: 1px solid var(--jp-border-color1);
 }
 
 
@@ -198,7 +199,7 @@
 
 
 .jp-DirListing-item:hover:not(.jp-mod-selected) {
-  background: var(--jp-layout-color1);
+  background: var(--jp-layout-color2);
 }
 
 

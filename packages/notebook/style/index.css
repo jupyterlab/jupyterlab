@@ -12,7 +12,6 @@
   --jp-private-notebook-dragImage-width: 304px;
   --jp-private-notebook-dragImage-height: 36px;
   --jp-private-notebook-selected-color: var(--md-blue-400);
-  --jp-private-notebook-multiselected-color: var(--md-blue-50);
   --jp-private-notebook-active-color: var(--md-green-400);
 }
 
@@ -43,7 +42,7 @@
   min-height: 50px;
   outline: none;
   overflow: auto;
-  background: var(--jp-layout-color2);
+  background: var(--jp-layout-color0);
 }
 
 
@@ -74,14 +73,15 @@
 
 
 .jp-Notebook::-webkit-scrollbar {
-  background-color: var(--jp-scrollbar-background-color);
-  border-left: var(--jp-scrollbar-border);
+  background-color: var(--jp-layout-color0);
+  border-left: 1px solid var(--jp-border-color1);
+  width: var(--jp-scrollbar-width);
 }
 
 
 .jp-Notebook::-webkit-scrollbar-thumb {
-  background-color: var(--jp-scrollbar-thumb-color);
-  border-left: var(--jp-scrollbar-border);
+  background-color: var(--jp-layout-color2);
+  border-left: 1px solid var(--jp-border-color1);
 }
 
 
@@ -129,7 +129,7 @@
 /* Command mode */
 
 .jp-Notebook.jp-mod-commandMode .jp-Cell.jp-mod-selected {
-  background: var(--jp-private-notebook-multiselected-color);
+  background: var(--jp-notebook-multiselected-color);
 }
 
 .jp-Notebook.jp-mod-commandMode .jp-Cell.jp-mod-active.jp-mod-selected:not(.jp-mod-multiSelected) {
@@ -142,6 +142,7 @@
 .jp-Notebook.jp-mod-editMode .jp-Cell.jp-mod-active .jp-InputArea-editor {
   border: var(--jp-border-width) solid var(--jp-cell-editor-border-color-edit);
   box-shadow: var(--jp-cell-editor-box-shadow);
+  background-color: var(--jp-layout-color0);
 }
 
 
@@ -228,7 +229,7 @@
   flex-direction: column;
   min-width: 300px;
   color: var(--jp-ui-font-color1);
-  background: var(--jp-layout-color2);
+  background: var(--jp-layout-color1);
   font-size: var(--jp-ui-font-size1);
 }
 
@@ -236,7 +237,7 @@
 .jp-ActiveCellTool {
   padding: 12px;
   border-bottom: none;
-  background-color: var(--jp-layout-color1);
+  background-color: var(--jp-layout-color2);
 }
 
 
@@ -268,18 +269,9 @@
 }
 
 
-.jp-KeySelector .jp-select-wrapper {
-  background: white;
-}
-
-
 .jp-KeySelector select.jp-mod-styled {
   font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color0);
-}
-
-
-.jp-KeySelector .jp-select-wrapper:not(.jp-mod-focused) {
   border: var(--jp-border-width) solid var(--jp-border-color1);
 }
 

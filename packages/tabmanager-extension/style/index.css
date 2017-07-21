@@ -60,7 +60,7 @@
 
 
 #tab-manager .p-TabBar-tab.jp-mod-active {
-  color: var(--jp-inverse-ui-font-color0);
+  color: white;
   background: var(--jp-brand-color1);
 }
 
