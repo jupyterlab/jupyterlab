@@ -921,7 +921,9 @@ def _read_package(target):
     schema_data = dict()
     for schema in schemas:
         f = tar.extractfile('package/' + schema)
-        schema_data[schema] = f.read().decode('utf8')
+        key = schema.split('/')[-1]
+        key = key.replace('.json', '')
+        schema_data[key] = f.read().decode('utf8')
     data['jupyterlab']['schema_data'] = schema_data
     return data
 
