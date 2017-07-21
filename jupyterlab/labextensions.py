@@ -53,16 +53,14 @@ class InstallLabExtensionApp(BaseExtensionApp):
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        paths = [
-            install_extension(arg, self.app_dir, logger=self.log)
-            for arg in self.extra_args
-        ]
+        [install_extension(arg, self.app_dir, logger=self.log)
+         for arg in self.extra_args]
         if self.should_build:
             try:
                 build(self.app_dir, logger=self.log)
             except Exception as e:
-                for path in paths:
-                    os.remove(path)
+                for arg in self.extra_args:
+                    uninstall_extension(arg, self.app_dir, logger=self.log)
                 raise e
 
 
@@ -80,16 +78,14 @@ class LinkLabExtensionApp(BaseExtensionApp):
 
     def start(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        paths = [
-            link_package(arg, self.app_dir, logger=self.log)
-            for arg in self.extra_args
-        ]
+        [link_package(arg, self.app_dir, logger=self.log)
+         for arg in self.extra_args]
         if self.should_build:
             try:
                 build(self.app_dir, logger=self.log)
             except Exception as e:
-                for path in paths:
-                    os.remove(path)
+                for arg in self.extra_args:
+                    unlink_package(arg, self.app_dir, logger=self.log)
                 raise e
 
 
@@ -124,15 +120,6 @@ class ListLabExtensionsApp(BaseExtensionApp):
 
     def start(self):
         list_extensions(self.app_dir, logger=self.log)
-
-
-class ListLinkedLabExtensionsApp(BaseExtensionApp):
-    description = "List the linked packages"
-
-    def start(self):
-        linked = _get_linked_packages(self.app_dir, logger=self.log)
-        for path in linked.values():
-            print(path)
 
 
 class EnableLabExtensionsApp(BaseExtensionApp):
@@ -171,7 +158,6 @@ class LabExtensionApp(JupyterApp):
         list=(ListLabExtensionsApp, "List labextensions"),
         link=(LinkLabExtensionApp, "Link labextension(s)"),
         unlink=(UnlinkLabExtensionApp, "Unlink labextension(s)"),
-        listlinked=(ListLinkedLabExtensionsApp, "List linked extensions"),
         enable=(EnableLabExtensionsApp, "Enable labextension(s)"),
         disable=(DisableLabExtensionsApp, "Disable labextensions(s)")
     )

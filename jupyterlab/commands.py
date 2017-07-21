@@ -104,7 +104,7 @@ def install_extension(extension, app_dir=None, logger=None):
     os.makedirs(target)
 
     # npm pack the extension
-    run(['npm', 'pack', extension], cwd=target, logger=logger)
+    run([get_npm_name(), 'pack', extension], cwd=target, logger=logger)
 
     fname = os.path.basename(glob.glob(pjoin(target, '*.*'))[0])
     data = _read_package(pjoin(target, fname))
@@ -147,8 +147,6 @@ def install_extension(extension, app_dir=None, logger=None):
         with open(path, 'w') as fid:
             fid.write(value)
 
-    return fname
-
 
 def link_package(path, app_dir=None, logger=None):
     """Link a package against the JupyterLab build.
@@ -177,12 +175,11 @@ def link_package(path, app_dir=None, logger=None):
 
     is_extension = _is_extension(data)
     if is_extension:
-        fname = install_extension(path, app_dir)
+        install_extension(path, app_dir)
     else:
         msg = ('*** Note: Linking non-extension package "%s" (lacks ' +
                '`jupyterlab.extension` metadata)')
         logger.info(msg % data['name'])
-        fname = path
 
     core_data = _get_core_data()
     deps = data.get('dependencies', dict())
@@ -196,8 +193,6 @@ def link_package(path, app_dir=None, logger=None):
     config.setdefault('linked_packages', dict())
     config['linked_packages'][data['name']] = path
     _write_build_config(config, app_dir, logger=logger)
-
-    return fname
 
 
 def unlink_package(package, app_dir=None, logger=None):
@@ -242,6 +237,12 @@ def disable_extension(extension, app_dir=None, logger=None):
     """Disable a JupyterLab package.
     """
     _toggle_extension(extension, True, app_dir, logger)
+
+
+def get_npm_name():
+    """Get the appropriate npm executable name.
+    """
+    return 'npm.cmd' if os.name == 'nt' else 'npm'
 
 
 def check_node():
@@ -373,7 +374,7 @@ def list_extensions(app_dir=None, logger=None):
     app_dir = get_app_dir(app_dir)
     extensions = _get_extensions(app_dir)
     disabled = _get_disabled(app_dir)
-    linked = _get_linked_packages(app_dir, logger=logger)
+    all_linked = _get_linked_packages(app_dir, logger=logger)
     app = []
     sys = []
     linked = []
@@ -386,7 +387,7 @@ def list_extensions(app_dir=None, logger=None):
     for (key, value) in extensions.items():
         deps = extensions[key].get('dependencies', dict())
         errors[key] = _validate_compatibility(key, deps, core_data)
-        if key in linked:
+        if key in all_linked:
             linked.append(key)
         if value['path'] == sys_path and sys_path != app_dir:
             sys.append(key)
@@ -398,6 +399,7 @@ def list_extensions(app_dir=None, logger=None):
     if app:
         logger.info('   app dir: %s' % app_dir)
         for item in sorted(app):
+            version = extensions[item]['version']
             extra = ''
             if item in disabled:
                 extra += ' %s' % RED_DISABLED
@@ -407,10 +409,7 @@ def list_extensions(app_dir=None, logger=None):
                 extra += ' %s' % RED_X
             else:
                 extra += ' %s' % GREEN_OK
-            if item in linked:
-                extra += '*'
-            logger.info('        %s%s' % (item, extra))
-            version = extensions[item]['version']
+            logger.info('        %s@%s%s' % (item, version, extra))
             if errors[item]:
                 msg = _format_compatibility_errors(item, version, errors[item])
                 logger.warn(msg + '\n')
@@ -418,6 +417,7 @@ def list_extensions(app_dir=None, logger=None):
     if sys:
         logger.info('   sys dir: %s' % sys_path)
         for item in sorted(sys):
+            version = extensions[item]['version']
             extra = ''
             if item in disabled:
                 extra += ' %s' % RED_DISABLED
@@ -430,14 +430,22 @@ def list_extensions(app_dir=None, logger=None):
                 extra += ' %s' % GREEN_OK
             if item in linked:
                 extra += '*'
-            logger.info('        %s%s' % (item, extra))
-            version = extensions[item]['version']
+            logger.info('        %s@%s%s' % (item, version, extra))
             if errors[item]:
                 msg = _format_compatibility_errors(item, version, errors[item])
                 logger.warn(msg + '\n')
 
     if linked:
-        logger.info('* Denotes linked extensions. Use `jupyter labextension listlinked` to see details')
+        logger.info('   linked extensions:')
+        for item in sorted(linked):
+            logger.info('        %s: %s' % (item, all_linked[item]))
+
+    if len(all_linked) > len(linked):
+        logger.info('   linked packages:')
+        for key in sorted(all_linked.keys()):
+            if (key in linked):
+                continue
+            logger.info('        %s: %s' % (key, all_linked[key]))
 
     # Handle uninstalled and disabled core packages
     uninstalled_core = _get_uinstalled_core_extensions(app_dir)
@@ -482,6 +490,12 @@ def build(app_dir=None, name=None, version=None, logger=None):
 
     extensions = _get_extensions(app_dir)
 
+    # Ensure an empty linked_packages directory
+    linked_packages = pjoin(staging, 'linked_packages')
+    if osp.exists(linked_packages):
+        shutil.rmtree(linked_packages)
+    os.makedirs(linked_packages)
+
     # Install the linked packages.
     for (name, path) in _get_linked_packages(app_dir, logger=logger).items():
         # Handle linked extensions.
@@ -489,23 +503,70 @@ def build(app_dir=None, name=None, version=None, logger=None):
             install_extension(path, app_dir)
         # Handle linked packages that are not extensions.
         else:
-            # Remove any existing package from staging/node_modules
-            target = pjoin(staging, 'node_modules', name)
-            target = target.replace('/', os.sep)
-            if os.path.exists(target):
-                shutil.rmtree(target)
+            _install_linked_package(staging, name, path, logger)
+
+    npm = get_npm_name()
 
     # Make sure packages are installed.
-    run(['npm', 'install'], cwd=staging, logger=logger)
+    run([npm, 'install'], cwd=staging, logger=logger)
 
     # Build the app.
-    run(['npm', 'run', 'build'], cwd=staging, logger=logger)
+    run([npm, 'run', 'build'], cwd=staging, logger=logger)
 
     # Move the app to the static dir.
     static = pjoin(app_dir, 'static')
     if os.path.exists(static):
         shutil.rmtree(static)
     shutil.copytree(pjoin(staging, 'build'), static)
+
+
+def _install_linked_package(staging, name, path, logger):
+    """Install a linked non-extension package using a package tarball
+    to prevent it from being treated as a symlink.
+    """
+    # Remove any existing package from staging/node_modules
+    target = pjoin(staging, 'node_modules', name)
+    target = target.replace('/', os.sep)
+    if os.path.exists(target):
+        shutil.rmtree(target)
+
+    linked = pjoin(staging, 'linked_pacakges')
+
+    target = pjoin(linked, 'temp')
+    if os.path.exists(target):
+        shutil.rmtree(target)
+    os.makedirs(target)
+
+    # npm pack the extension
+    run([get_npm_name(), 'pack', path], cwd=target, logger=logger)
+
+    fname = os.path.basename(glob.glob(pjoin(target, '*.*'))[0])
+    data = _read_package(pjoin(target, fname))
+
+    # Remove the tarball if the package is not compatible.
+    core_data = _get_core_data()
+    deps = data.get('dependencies', dict())
+    errors = _validate_compatibility(path, deps, core_data)
+    if errors:
+        shutil.rmtree(target)
+        msg = _format_compatibility_errors(
+            data['name'], data['version'], errors
+        )
+        raise ValueError(msg)
+
+    # Remove an existing extension tarball.
+    ext_path = pjoin(linked, fname)
+    if os.path.exists(ext_path):
+        os.remove(ext_path)
+
+    # Move
+    shutil.move(pjoin(target, fname), pjoin(staging, 'linked_pakages'))
+    shutil.rmtree(target)
+
+    # Set the dependency in the package.
+    core_data['dependencies'][data['name']] = ext_path
+    with open(pjoin(staging, 'package.json'), 'w') as fid:
+        json.dump(core_data, fid, indent=4)
 
 
 def _get_build_config(app_dir):
@@ -731,12 +792,6 @@ def _get_package_template(app_dir, logger):
             data['jupyterlab']['extensions'].append(key)
         else:
             data['jupyterlab']['mimeExtensions'].append(key)
-
-    # Handle linked packages that are not extensions.
-    for (key, path) in _get_linked_packages(app_dir).items():
-        if key in extensions:
-            continue
-        data['dependencies'][key] = path
 
     for item in _get_uinstalled_core_extensions(app_dir):
         if item in data['jupyterlab']['extensions']:
