@@ -2,7 +2,7 @@
   "name": "@jupyterlab/application-top",
   "version": "0.9.0",
   "scripts": {
-    "build": "node copy-schemas.js && webpack",
+    "build": "webpack",
     "publish": "node make-release.js"
   },
   "dependencies": {
@@ -159,6 +159,6 @@
       "@jupyterlab/tooltip",
       "@phosphor/widgets"
     ],
-    "version": "0.26.0rc0"
+    "version": "0.26.0rc1"
   }
 }
