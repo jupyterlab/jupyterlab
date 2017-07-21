@@ -79,7 +79,6 @@ if [[ $GROUP == cli ]]; then
     jupyter labextension link jupyterlab/tests/mockextension --no-build
     jupyter labextension unlink jupyterlab/tests/mockextension --no-build
     jupyter labextension link jupyterlab/tests/mockextension --no-build
-    jupyter labextension listlinked
     jupyter labextension unlink  @jupyterlab/python-tests --no-build
     jupyter labextension install jupyterlab/tests/mockextension  --no-build
     jupyter labextension list
@@ -99,7 +98,6 @@ if [[ $GROUP == cli ]]; then
     jupyter labextension install -h 
     jupyter labextension uninstall -h 
     jupyter labextension list -h
-    jupyter labextension listlinked -h
     jupyter labextension enable -h
     jupyter labextension disable -h
 fi
