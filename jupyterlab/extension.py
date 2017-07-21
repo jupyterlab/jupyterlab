@@ -95,7 +95,7 @@ def load_jupyter_server_extension(nbapp):
 
     user_settings_dir = get_user_settings_dir()
 
-    if core_mode:
+    if core_mode or fallback:
         schemas_dir = os.path.join(here, 'schemas')
     else:
         schemas_dir = os.path.join(app_dir, 'schemas')
