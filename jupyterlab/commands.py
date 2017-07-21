@@ -143,9 +143,7 @@ def install_extension(extension, app_dir=None, logger=None):
     # Handle any schemas.
     schema_data = data['jupyterlab'].get('schema_data', dict())
     for (key, value) in schema_data.items():
-        if not key.endswith('.json'):
-            key += '.json'
-        path = pjoin(app_dir, key)
+        path = pjoin(app_dir, 'schemas', key + '.json')
         with open(path, 'w') as fid:
             fid.write(value)
 
@@ -923,7 +921,9 @@ def _read_package(target):
     schema_data = dict()
     for schema in schemas:
         f = tar.extractfile('package/' + schema)
-        schema_data[schema] = f.read().decode('utf8')
+        key = schema.split('/')[-1]
+        key = key.replace('.json', '')
+        schema_data[key] = f.read().decode('utf8')
     data['jupyterlab']['schema_data'] = schema_data
     return data
 
