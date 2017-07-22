@@ -6,6 +6,7 @@
 import os
 
 from jupyterlab_launcher import add_handlers, LabConfig
+from notebook.utils import url_path_join as ujoin
 
 from .commands import (
     get_app_dir, list_extensions, should_build, get_user_settings_dir
@@ -100,8 +101,11 @@ def load_jupyter_server_extension(nbapp):
     else:
         schemas_dir = os.path.join(app_dir, 'schemas')
 
-    settings_handler = (settings_path, SettingsHandler, {
+    base_url = web_app.settings['base_url']
+    settings_url = ujoin(base_url, settings_path)
+    settings_handler = (settings_url, SettingsHandler, {
         'schemas_dir': schemas_dir,
         'settings_dir': user_settings_dir
     })
+    nbapp.log.error('shemas_dir: %s' % schemas_dir)
     web_app.add_handlers(".*$", [settings_handler])
