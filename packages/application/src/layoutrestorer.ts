@@ -117,9 +117,9 @@ const KEY = 'layout-restorer:data';
  * #### Notes
  * The lifecycle for state restoration is subtle. The sequence of events is:
  *
- * 1. The layout restorer plugin is instantiated. It installs itself as the
- *    layout database that the application shell can use to `fetch` and `save`
- *    layout restoration data.
+ * 1. The layout restorer plugin is instantiated and makes a `fetch` call to
+ *    the database that stores the layout restoration data. The `fetch` call
+ *    returns a promise that resolves in step 6, below.
  *
  * 2. Other plugins that care about state restoration require the layout
  *    restorer as a dependency.
@@ -147,9 +147,12 @@ const KEY = 'layout-restorer:data';
  * 6. As each instance tracker finishes restoring the widget instances it cares
  *    about, it resolves the promise that was made to the layout restorer
  *    (in step 5). After all of the promises that the restorer is awaiting have
- *    resolved, the restorer then resolves its `restored` promise allowing the
- *    application shell to `fetch` the dehydrated layout state and rehydrate the
- *    saved layout.
+ *    resolved, the restorer then resolves the outstanding `fetch` promise
+ *    (from step 1) and hands off the dehydrated layout state to the application
+ *    shell's `restoreLayout` method and rehydrate the saved layout.
+ *
+ * 7. Once the application shell has finished rehydrating and restoring layout,
+ *    the JupyterLab application's `restored` promise is resolved.
  *
  * Of particular note are steps 5 and 6: since state restoration of plugins
  * is accomplished by executing commands, the command that is used to restore
@@ -165,16 +168,16 @@ class LayoutRestorer implements ILayoutRestorer {
     this._registry = options.registry;
     this._state = options.state;
     this._first = options.first;
-    this._first.then(() => {
-      this._firstDone = true;
-      return Promise.all(this._promises);
-    }).then(() => {
-      this._promisesDone = true;
-      // Release the tracker set.
-      this._trackers.clear();
-    }).then(() => {
-      this._restored.resolve(void 0);
-    });
+    this._first
+      .then(() => { this._firstDone = true; })
+      .then(() => Promise.all(this._promises))
+      .then(() => {
+        this._promisesDone = true;
+
+        // Release the tracker set.
+        this._trackers.clear();
+      })
+      .then(() => { this._restored.resolve(void 0); });
   }
 
   /**
@@ -237,8 +240,9 @@ class LayoutRestorer implements ILayoutRestorer {
    * @param options - The restoration options.
    */
   restore(tracker: InstanceTracker<Widget>, options: ILayoutRestorer.IRestoreOptions<Widget>): Promise<any> {
+    const warning = 'restore() can only be called before `first` has resolved.';
+
     if (this._firstDone) {
-      const warning = 'restore() can only be called before `first` has resolved.';
       console.warn(warning);
       return Promise.reject(warning);
     }
