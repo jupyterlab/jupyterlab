@@ -58,6 +58,16 @@ const PLUGIN_LIST_CLASS = 'jp-PluginList';
 const PLUGIN_ICON_CLASS = 'jp-PluginList-icon';
 
 /**
+ * The class name added to the fieldset table.
+ */
+const FIELDSET_TABLE_CLASS = 'jp-PluginFieldset-table';
+
+/**
+ * The class name for the add icon used to add individual preferences.
+ */
+const FIELDSET_ADD_ICON_CLASS = 'jp-AddIcon';
+
+/**
  * The class name added to selected items.
  */
 const SELECTED_CLASS = 'jp-mod-selected';
@@ -800,7 +810,7 @@ class PluginFieldset extends Widget {
 
     // Populate if possible.
     if (settings) {
-      Private.populateFieldset(this.node, settings.plugin, settings.schema);
+      Private.populateFieldset(this.node, settings);
     }
   }
 
@@ -880,23 +890,27 @@ namespace Private {
    * Populate the fieldset with a specific plugin's metadata.
    */
   export
-  function populateFieldset(node: HTMLElement, id: string, schema: ISettingRegistry.ISchema): void {
+  function populateFieldset(node: HTMLElement, settings: ISettingRegistry.ISettings): void {
+    const { plugin, schema, user } = settings;
     const fields: { [key: string]: VirtualElement } = Object.create(null);
     const properties = schema.properties || { };
-    const title = `(${id}) ${schema.description}`;
-    const label = `Fields - ${schema.title || id}`;
-    const headers = h.tr(
-      h.th('Key'),
-      h.th('Type'),
-      h.th('Default'));
+    const title = `(${plugin}) ${schema.description}`;
+    const label = `Fields - ${schema.title || plugin}`;
+    const headers = h.div(
+      h.div(''),
+      h.div('Key'),
+      h.div('Type'),
+      h.div('Default'));
 
     Object.keys(properties).forEach(key => {
       const field = properties[key];
       const { title, type } = field;
-      fields[key] = h.tr(
-        h.td(h.code({ title }, key)),
-        h.td(h.code(type || '')),
-        h.td('default' in field ? h.code(JSON.stringify(field.default)) : ''));
+
+      fields[key] = h.div(
+        h.div({ className: key in user ? FIELDSET_ADD_ICON_CLASS : undefined }),
+        h.div(h.code({ title }, key)),
+        h.div(h.code(type)),
+        h.div('default' in field ? h.code(JSON.stringify(field.default)) : ''));
     });
 
     const rows: VirtualElement[] = Object.keys(fields)
@@ -904,7 +918,9 @@ namespace Private {
 
     node.appendChild(VirtualDOM.realize(h.legend({ title }, label)));
     if (rows.length) {
-      node.appendChild(VirtualDOM.realize(h.table(headers, rows)));
+      const table = h.div({ className: FIELDSET_TABLE_CLASS }, headers, rows);
+
+      node.appendChild(VirtualDOM.realize(table));
     }
   }
 

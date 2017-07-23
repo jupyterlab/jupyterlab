@@ -136,23 +136,29 @@
 }
 
 
-#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset table{
+#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset-table {
+  display: table;
   border-collapse: collapse;
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
   width: 100%;
 }
 
-#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset table,
-#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset th,
-#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset td {
-  border: 1px solid var(--jp-border-color0);
-}
 
-#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset li {
+#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset-table > div {
+  border: 1px solid var(--jp-border-color0);
   background-color: var(--md-grey-400);
   color: var(--jp-ui-font-color2);
-  display: inline-block;
+  display: table-row;
+  margin: 3px;
+  padding: 3px;
+}
+
+
+#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset-table > div > div {
+  background-color: var(--md-grey-400);
+  color: var(--jp-ui-font-color2);
+  display: table-cell;
   margin: 3px;
   padding: 3px;
 }
