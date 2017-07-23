@@ -148,11 +148,11 @@ const KEY = 'layout-restorer:data';
  *    about, it resolves the promise that was made to the layout restorer
  *    (in step 5). After all of the promises that the restorer is awaiting have
  *    resolved, the restorer then resolves the outstanding `fetch` promise
- *    (from step 1) and hands off the dehydrated layout state to the application
- *    shell's `restoreLayout` method and rehydrate the saved layout.
+ *    (from step 1) and hands off a layout state object to the application
+ *    shell's `restoreLayout` method for restoration.
  *
- * 7. Once the application shell has finished rehydrating and restoring layout,
- *    the JupyterLab application's `restored` promise is resolved.
+ * 7. Once the application shell has finished restoring the layout, the
+ *    JupyterLab application's `restored` promise is resolved.
  *
  * Of particular note are steps 5 and 6: since state restoration of plugins
  * is accomplished by executing commands, the command that is used to restore
