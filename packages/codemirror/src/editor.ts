@@ -783,6 +783,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     if (this._caretHover) {
       window.clearTimeout(this._hoverTimeout);
       document.body.removeChild(this._caretHover);
+      this._caretHover = null;
     }
   }
 
@@ -831,7 +832,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   private _model: CodeEditor.IModel;
   private _editor: CodeMirror.Editor;
   protected selectionMarkers: { [key: string]: CodeMirror.TextMarker[] | undefined } = {};
-  private _caretHover: HTMLElement;
+  private _caretHover: HTMLElement | null;
   private _hoverTimeout: number;
   private _hoverId: string;
   private _keydownHandlers = new Array<CodeEditor.KeydownHandler>();
