@@ -50,15 +50,39 @@ const mainPlugin: JupyterLabPlugin<void> = {
     let unloadPrompt = true;
     let builder = app.serviceManager.builder;
 
-    builder.getStatus().then(status => {
-      if (!status.needed) {
-        return;
-      }
+    let doBuild = () => {
+      return builder.build().then(() => {
+        return showDialog({
+          title: 'Build Complete',
+          body: 'Build successfully completed, reload page?',
+          buttons: [Dialog.cancelButton(),
+                    Dialog.warnButton({ label: 'RELOAD' })]
+        });
+      }).then(result => {
+        if (result.button.accept) {
+          unloadPrompt = false;
+          location.reload();
+        }
+      }).catch(err => {
+        showDialog({
+          title: 'Build Failed',
+          body: h.div('Error', h.pre(err.message))
+        });
+      });
+    };
+
+    builder.getStatus().then(response => {
+      // if (response.status === 'building') {
+      //   return doBuild();
+      // }
+      // if (response.status !== 'needed') {
+      //   return;
+      // }
       let body = h.div(
         h.p(
           'JupyterLab build is suggested:',
           h.br(),
-          h.pre(status.message)
+          h.pre(response.message)
         )
       );
       showDialog({
@@ -67,24 +91,7 @@ const mainPlugin: JupyterLabPlugin<void> = {
         buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'BUILD' })]
       }).then(result => {
         if (result.button.accept) {
-          builder.build().then(() => {
-            return showDialog({
-              title: 'Build Complete',
-              body: 'Build successfully completed, reload page?',
-              buttons: [Dialog.cancelButton(),
-                        Dialog.warnButton({ label: 'RELOAD' })]
-            });
-          }).then(result => {
-            if (result.button.accept) {
-              unloadPrompt = false;
-              location.reload();
-            }
-          }).catch(err => {
-            showDialog({
-              title: 'Build Failed',
-              body: h.div('Error', h.pre(err.message))
-            });
-          });
+          return doBuild();
         }
       });
     });

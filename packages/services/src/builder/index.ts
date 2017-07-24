@@ -52,7 +52,7 @@ class BuildManager {
       }
 
       let data = response.data as BuildManager.IStatus;
-      if (typeof data.needed !== 'boolean') {
+      if (typeof data.status !== 'string') {
         throw ServerConnection.makeError(response, 'Invalid data');
       }
       if (typeof data.message !== 'string') {
@@ -109,7 +109,7 @@ namespace BuildManager {
     /**
      * Whether a build is needed.
      */
-    readonly needed: boolean;
+    readonly status: 'stable' | 'needed' | 'building';
 
     /**
      * The message associated with the build status.
