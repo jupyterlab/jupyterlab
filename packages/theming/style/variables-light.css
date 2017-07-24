@@ -100,6 +100,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-icon-save: url('./icons-light/md/save.svg');
   --jp-icon-stop: url('./icons-light/md/stop.svg');
   --jp-icon-text-editor: url('./icons-light/jupyter/texteditor.svg');
+  --jp-icon-vega: url('./icons-light/jupyter/vega.svg');
   --jp-icon-upload: url('./icons-light/md/upload.svg');
   --jp-icon-question-mark: url('./icons-light/jupyter/questionmark.svg');
   --jp-icon-chat: url('./icons-light/md/chat.svg');
