@@ -8,14 +8,12 @@
   outline: none;
   overflow: hidden;
   margin-top: -1px;
-  display: flex;
-  flex-direction: column;
 }
 
 
 .jp-MimeDocument .jp-Toolbar {
     display: block;
-    height: var(--jp-toolbar-micro-height);
+    min-height: var(--jp-toolbar-micro-height);
     background: var(--jp-toolbar-background);
     border-bottom: 1px solid var(--jp-toolbar-border-color);
     box-shadow: var(--jp-toolbar-box-shadow);
