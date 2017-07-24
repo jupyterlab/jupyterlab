@@ -18,7 +18,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  h, VirtualDOM
+  h
 } from '@phosphor/virtualdom';
 
 import {
@@ -145,8 +145,21 @@ class HelpWidget extends Widget {
     super();
     let layout = this.layout = new PanelLayout();
     let iframe = new IFrame();
-    iframe.url = url;
+    this.url = iframe.url = url;
     layout.addWidget(iframe);
+  }
+
+  /**
+   * The url of the widget.
+   */
+  readonly url: string;
+
+  /**
+   * Handle activate requests for the widget.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this.node.tabIndex = -1;
+    this.node.focus();
   }
 
   /**
@@ -218,7 +231,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     label: `About ${info.name}`,
     execute: () => {
 
-      //Create the header of the about dialog
+      // Create the header of the about dialog
       let headerLogo = h.div({className: 'jp-About-header-logo'});
       let headerWordmark = h.div({className: 'jp-About-header-wordmark'});
       let release = 'alpha release';
@@ -227,26 +240,26 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
         h.span({className: 'jp-About-release'}, release),
         h.span({className: 'jp-About-version'}, versionNumber)
       );
-      let title = VirtualDOM.realize(h.span({className: 'jp-About-header'},
+      let title = h.span({className: 'jp-About-header'},
         headerLogo,
         h.div({className: 'jp-About-header-info'},
           headerWordmark,
           versionInfo
         )
-      ));
+      );
 
-      //Create the body of the about dialog
+      // Create the body of the about dialog
       let jupyterURL = 'https://jupyter.org/about.html';
       let contributorsURL = 'https://github.com/jupyterlab/jupyterlab/graphs/contributors';
       let externalLinks = h.span({className: 'jp-About-externalLinks'},
-        h.a({href: contributorsURL, target: '_blank', className: 'jp-Button-flat'}, "CONTRIBUTOR LIST"),
-        h.a({href: jupyterURL, target: '_blank', className: 'jp-Button-flat'}, "ABOUT PROJECT JUPYTER")
+        h.a({href: contributorsURL, target: '_blank', className: 'jp-Button-flat'}, 'CONTRIBUTOR LIST'),
+        h.a({href: jupyterURL, target: '_blank', className: 'jp-Button-flat'}, 'ABOUT PROJECT JUPYTER')
       );
-      let copyright = h.span({className: 'jp-About-copyright'}, "© 2017 Project Jupyter");
-      let body = VirtualDOM.realize(h.div({ className: 'jp-About-body' },
+      let copyright = h.span({className: 'jp-About-copyright'}, '© 2017 Project Jupyter');
+      let body = h.div({ className: 'jp-About-body' },
         externalLinks,
         copyright
-      ));
+      );
 
       showDialog({
         title,

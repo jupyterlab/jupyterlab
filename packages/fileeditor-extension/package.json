@@ -1,24 +1,25 @@
 {
   "name": "@jupyterlab/fileeditor-extension",
-  "version": "0.8.3",
+  "version": "0.9.0",
   "description": "JupyterLab - Editor Widget Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
     "lib/*.d.ts",
-    "lib/*.js"
+    "lib/*.js",
+    "schema/*.json"
   ],
   "directories": {
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.8.3",
-    "@jupyterlab/apputils": "^0.8.2",
-    "@jupyterlab/codeeditor": "^0.8.1",
-    "@jupyterlab/coreutils": "^0.8.1",
-    "@jupyterlab/docregistry": "^0.8.2",
-    "@jupyterlab/fileeditor": "^0.8.2",
-    "@jupyterlab/launcher": "^0.8.2"
+    "@jupyterlab/application": "^0.9.0",
+    "@jupyterlab/apputils": "^0.9.0",
+    "@jupyterlab/codeeditor": "^0.9.0",
+    "@jupyterlab/coreutils": "^0.9.0",
+    "@jupyterlab/docregistry": "^0.9.0",
+    "@jupyterlab/fileeditor": "^0.9.0",
+    "@jupyterlab/launcher": "^0.9.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
@@ -30,7 +31,10 @@
     "watch": "tsc -w"
   },
   "jupyterlab": {
-    "extension": true
+    "extension": true,
+    "schemas": [
+      "schema/jupyter.services.editor-tracker.json"
+    ]
   },
   "repository": {
     "type": "git",

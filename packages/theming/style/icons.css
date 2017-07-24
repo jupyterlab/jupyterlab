@@ -233,6 +233,11 @@
 }
 
 
+.jp-VegaIcon {
+  background-image: url(icons/jupyter/vega.svg);
+}
+
+
 .jp-QuestionMarkIcon {
   background-image: var(--jp-icon-question-mark);
 }

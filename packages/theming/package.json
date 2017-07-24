@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/theming",
-  "version": "0.8.2",
+  "version": "0.9.0",
   "description": "JupyterLab - Theming",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

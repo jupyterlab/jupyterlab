@@ -1,0 +1,21 @@
+{
+  "jupyter.lab.setting-icon-class": "jp-TextEditorIcon",
+  "jupyter.lab.setting-icon-label": "Editor",
+  "title": "Text Editor",
+  "description": "Text editor settings for all editors.",
+  "properties": {
+    "autoClosingBrackets": {
+      "type": "boolean", "title": "Autoclosing Brackets", "default": true
+    },
+    "lineNumbers": {
+      "type": "boolean", "title": "Line Numbers", "default": true
+    },
+    "lineWrap": {
+      "type": "boolean", "title": "Line Wrap", "default": false
+    },
+    "matchBrackets": {
+      "type": "boolean", "title": "Match Brackets", "default": true
+    }
+  },
+  "type": "object"
+}

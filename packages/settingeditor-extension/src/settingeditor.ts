@@ -181,12 +181,12 @@ class SettingEditor extends Widget {
     requestAnimationFrame(() => {
       // Set the original (default) outer dimensions.
       this._panel.setRelativeSizes(this._presets.outer);
-      this._fetchState()
-        .then(() => { this._setPresets(); })
-        .catch(reason => {
-          console.error('Fetching setting editor state failed', reason);
-          this._setPresets();
-        });
+      this._fetchState().then(() => {
+        this._setPresets();
+      }).catch(reason => {
+        console.error('Fetching setting editor state failed', reason);
+        this._setPresets();
+      });
     });
   }
 
@@ -315,8 +315,8 @@ class SettingEditor extends Widget {
       }
       editor.settings = settings;
       list.selection = plugin;
-    }).catch(reason => {
-      console.error('Loading settings failed.', reason);
+    }).catch((reason: Error) => {
+      console.error(`Loading settings failed: ${reason.message}`);
       list.selection = this._presets.plugin = '';
       editor.settings = null;
     });
@@ -503,13 +503,16 @@ class PluginList extends Widget {
 
     if (!id) {
       while (!id && target !== this.node) {
-        target = target.parentElement;
+        target = target.parentElement as HTMLElement;
         id = target.getAttribute('data-id');
       }
     }
 
     if (id) {
       this._confirm().then(() => {
+        if (!id) {
+          return;
+        }
         this._selection = id;
         this._selected.emit(id);
         this.update();
@@ -517,7 +520,7 @@ class PluginList extends Widget {
     }
   }
 
-  private _confirm: () => Promise<void> | null = null;
+  private _confirm: () => Promise<void>;
   private _selected = new Signal<this, string>(this);
   private _selection = '';
 }
@@ -587,10 +590,10 @@ class PluginEditor extends Widget {
   /**
    * The plugin settings being edited.
    */
-  get settings(): ISettingRegistry.ISettings {
+  get settings(): ISettingRegistry.ISettings | null {
     return this._settings;
   }
-  set settings(settings: ISettingRegistry.ISettings) {
+  set settings(settings: ISettingRegistry.ISettings | null) {
     if (!settings && !this._settings) {
       return;
     }
@@ -650,7 +653,7 @@ class PluginEditor extends Widget {
       body: 'Do you want to leave without saving?',
       buttons: [Dialog.cancelButton(), Dialog.okButton()]
     }).then(result => {
-      if (!result.accept) {
+      if (!result.button.accept) {
         throw new Error('User cancelled.');
       }
     });
@@ -666,11 +669,8 @@ class PluginEditor extends Widget {
 
     super.dispose();
     this._editor.dispose();
-    this._editor = null;
     this._fieldset.dispose();
-    this._fieldset = null;
     this._panel.dispose();
-    this._panel = null;
   }
 
   /**
@@ -705,7 +705,7 @@ class PluginEditor extends Widget {
   private _onSettingsChanged(): void {
     const editor = this._editor;
     const settings = this._settings;
-    const values = settings.user;
+    const values = settings && settings.user || { };
 
     editor.source = new ObservableJSON({ values });
     editor.source.changed.connect(this._onSourceChanged, this);
@@ -715,15 +715,27 @@ class PluginEditor extends Widget {
    * Handle source changes in the underlying editor.
    */
   private _onSourceChanged(): void {
-    const editor = this._editor;
+    const source = this._editor.source;
     const settings = this._settings;
 
-    settings.save(editor.source.toJSON());
+    if (!settings || !source) {
+      return;
+    }
+
+    settings.save(source.toJSON()).catch(reason => {
+      console.error(`Saving setting editor value failed: ${reason.message}`);
+
+      return showDialog({
+        title: 'Your changes were not saved.',
+        body: reason.message,
+        buttons: [Dialog.okButton()]
+      }).then(() => void 0);
+    });
   }
 
-  private _editor: JSONEditor = null;
-  private _fieldset: PluginFieldset = null;
-  private _panel: SplitPanel = null;
+  private _editor: JSONEditor;
+  private _fieldset: PluginFieldset;
+  private _panel: SplitPanel;
   private _settings: ISettingRegistry.ISettings | null = null;
 }
 
@@ -760,10 +772,10 @@ class PluginFieldset extends Widget {
   /**
    * The plugin settings.
    */
-  get settings(): ISettingRegistry.ISettings {
+  get settings(): ISettingRegistry.ISettings | null {
     return this._settings;
   }
-  set settings(settings: ISettingRegistry.ISettings) {
+  set settings(settings: ISettingRegistry.ISettings | null) {
     this._settings = settings;
     this.update();
   }
@@ -874,7 +886,7 @@ namespace Private {
       const { title, type } = field;
       fields[key] = h.tr(
         h.td(h.code({ title }, key)),
-        h.td(h.code(type)),
+        h.td(h.code(type || '')),
         h.td('default' in field ? h.code(JSON.stringify(field.default)) : ''));
     });
 

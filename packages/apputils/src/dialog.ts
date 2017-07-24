@@ -34,12 +34,9 @@ import {
  * @returns A promise that resolves with whether the dialog was accepted.
  */
 export
-function showDialog(options: Dialog.IOptions={}): Promise<Dialog.IButton> {
+function showDialog<T>(options: Partial<Dialog.IOptions<T>>={}): Promise<Dialog.IResult<T>> {
   let dialog = new Dialog(options);
-  return dialog.launch().then(result => {
-    dialog.dispose();
-    return result;
-  });
+  return dialog.launch();
 }
 
 
@@ -47,49 +44,57 @@ function showDialog(options: Dialog.IOptions={}): Promise<Dialog.IButton> {
  * A modal dialog widget.
  */
 export
-class Dialog extends Widget {
+class Dialog<T> extends Widget {
   /**
    * Create a dialog panel instance.
    *
    * @param options - The dialog setup options.
    */
-  constructor(options: Dialog.IOptions={}) {
+  constructor(options: Partial<Dialog.IOptions<T>>={}) {
     super();
     this.addClass('jp-Dialog');
-    options = Private.handleOptions(options);
-    let renderer = options.renderer;
+    let normalized = Private.handleOptions(options);
+    let renderer = normalized.renderer;
 
-    this._host = options.host;
-    this._defaultButton = options.defaultButton;
-    this._buttons = options.buttons;
+    this._host = normalized.host;
+    this._defaultButton = normalized.defaultButton;
+    this._buttons = normalized.buttons;
     this._buttonNodes = toArray(map(this._buttons, button => {
       return renderer.createButtonNode(button);
     }));
-    this._primary = (
-      options.primaryElement || this._buttonNodes[this._defaultButton]
-    );
 
     let layout = this.layout = new PanelLayout();
     let content = new Panel();
     content.addClass('jp-Dialog-content');
     layout.addWidget(content);
 
-    let header = renderer.createHeader(options.title);
-    let body = renderer.createBody(options.body);
+    this._body = normalized.body;
+
+    let header = renderer.createHeader(normalized.title);
+    let body = renderer.createBody(normalized.body);
     let footer = renderer.createFooter(this._buttonNodes);
     content.addWidget(header);
     content.addWidget(body);
     content.addWidget(footer);
+
+    this._primary = this._buttonNodes[this._defaultButton];
+
+    if (options.focusNodeSelector) {
+      let el = body.node.querySelector(options.focusNodeSelector);
+      if (el) {
+        this._primary = el as HTMLElement;
+      }
+    }
   }
 
   /**
    * Dispose of the resources used by the dialog.
    */
   dispose(): void {
-    if (this._promise) {
-      let promise = this._promise;
+    const promise = this._promise;
+    if (promise) {
       this._promise = null;
-      promise.resolve(void 0);
+      promise.reject(void 0);
       ArrayExt.removeFirstOf(Private.launchQueue, promise.promise);
     }
     super.dispose();
@@ -98,19 +103,19 @@ class Dialog extends Widget {
   /**
    * Launch the dialog as a modal window.
    *
-   * @returns a promise that resolves with the button that was selected.
+   * @returns a promise that resolves with the result of the dialog.
    */
-  launch(): Promise<Dialog.IButton> {
+  launch(): Promise<Dialog.IResult<T>> {
     // Return the existing dialog if already open.
     if (this._promise) {
       return this._promise.promise;
     }
-    this._promise = new PromiseDelegate<Dialog.IButton>();
-    let promise = Promise.all(Private.launchQueue);
+    const promise = this._promise = new PromiseDelegate<Dialog.IResult<T>>();
+    let promises = Promise.all(Private.launchQueue);
     Private.launchQueue.push(this._promise.promise);
-    return promise.then(() => {
+    return promises.then(() => {
       Widget.attach(this, this._host);
-      return this._promise.promise;
+      return promise.promise;
     });
   }
 
@@ -281,13 +286,22 @@ class Dialog extends Widget {
   /**
    * Resolve a button item.
    */
-  private _resolve(item: Dialog.IButton): void {
+  private _resolve(button: Dialog.IButton): void {
     // Prevent loopback.
-    let promise = this._promise;
+    const promise = this._promise;
+    if (!promise) {
+      this.dispose();
+      return;
+    }
     this._promise = null;
-    this.close();
     ArrayExt.removeFirstOf(Private.launchQueue, promise.promise);
-    promise.resolve(item);
+    let body = this._body;
+    let value: T | null = null;
+    if (button.accept && body instanceof Widget && typeof body.getValue === 'function') {
+      value = body.getValue();
+    }
+    this.dispose();
+    promise.resolve({ button, value });
   }
 
   private _buttonNodes: ReadonlyArray<HTMLElement>;
@@ -295,9 +309,10 @@ class Dialog extends Widget {
   private _original: HTMLElement;
   private _first: HTMLElement;
   private _primary: HTMLElement;
-  private _promise: PromiseDelegate<Dialog.IButton> | null;
+  private _promise: PromiseDelegate<Dialog.IResult<T>> | null;
   private _defaultButton: number;
   private _host: HTMLElement;
+  private _body: Dialog.BodyType<T>;
 }
 
 
@@ -310,48 +325,53 @@ namespace Dialog {
    * The options used to create a dialog.
    */
   export
-  interface IOptions {
+  interface IOptions<T> {
     /**
      * The top level text for the dialog.  Defaults to an empty string.
      */
-    title?: HeaderType;
+    title: HeaderType;
 
     /**
      * The main body element for the dialog or a message to display.
      * Defaults to an empty string.
      *
      * #### Notes
+     * If a widget is given as the body, it will be disposed after the
+     * dialog is resolved.  If the widget has a `getValue()` method,
+     * the method will be called prior to disposal and the value
+     * will be provided as part of the dialog result.
      * A string argument will be used as raw `textContent`.
      * All `input` and `select` nodes will be wrapped and styled.
      */
-    body?: BodyType;
+    body: BodyType<T>;
 
     /**
      * The host element for the dialog. Defaults to `document.body`.
      */
-    host?: HTMLElement;
+    host: HTMLElement;
 
     /**
      * The to buttons to display. Defaults to cancel and accept buttons.
      */
-    buttons?: ReadonlyArray<IButton>;
+    buttons: ReadonlyArray<IButton>;
 
     /**
      * The index of the default button.  Defaults to the last button.
      */
-    defaultButton?: number;
+    defaultButton: number;
 
     /**
-     * The primary element that should take focus in the dialog.
-     * Defaults to the default button's element.
+     * A selector for the primary element that should take focus in the dialog.
+     * Defaults to an empty string, causing the [[defaultButton]] to take
+     * focus.
      */
-    primaryElement?: HTMLElement;
+    focusNodeSelector: string;
 
     /**
      * An optional renderer for dialog items.  Defaults to a shared
      * default renderer.
      */
-    renderer?: IRenderer;
+    renderer: IRenderer;
   }
 
   /**
@@ -405,13 +425,40 @@ namespace Dialog {
    * The header input types.
    */
   export
-  type HeaderType = HTMLElement | string;
+  type HeaderType = VirtualElement | string;
+
+  /**
+   * The result of a dialog.
+   */
+  export
+  interface IResult<T> {
+    /**
+     * The button that was pressed.
+     */
+    button: IButton;
+
+    /**
+     * The value retrieved from `.getValue()` if given on the widget.
+     */
+    value: T | null;
+  }
+
+  /**
+   * A widget used as a dialog body.
+   */
+  export
+  interface IBodyWidget<T> extends Widget {
+    /**
+     * Get the serialized value of the widget.
+     */
+    getValue?(): T;
+  }
 
   /**
    * The body input types.
    */
   export
-  type BodyType = Widget | HTMLElement | string;
+  type BodyType<T> = IBodyWidget<T> | VirtualElement | string;
 
   /**
    * Create an accept button.
@@ -479,7 +526,7 @@ namespace Dialog {
      *
      * @returns A widget for the body.
      */
-    createBody(body: BodyType): Widget;
+    createBody(body: BodyType<any>): Widget;
 
     /**
      * Create the footer of the dialog.
@@ -518,7 +565,7 @@ namespace Dialog {
         header = new Widget({ node: document.createElement('span') });
         header.node.textContent = title;
       } else {
-        header = new Widget({ node: title });
+        header = new Widget({ node: VirtualDOM.realize(title) });
       }
       header.addClass('jp-Dialog-header');
       Styling.styleNode(header.node);
@@ -532,7 +579,7 @@ namespace Dialog {
      *
      * @returns A widget for the body.
      */
-    createBody(value: BodyType): Widget {
+    createBody(value: BodyType<any>): Widget {
       let body: Widget;
       if (typeof value === 'string') {
         body = new Widget({ node: document.createElement('span') });
@@ -540,7 +587,7 @@ namespace Dialog {
       } else if (value instanceof Widget) {
         body = value;
       } else {
-        body = new Widget({ node: value });
+        body = new Widget({ node: VirtualDOM.realize(value) });
       }
       body.addClass('jp-Dialog-body');
       Styling.styleNode(body.node);
@@ -670,7 +717,7 @@ namespace Private {
    * The queue for launching dialogs.
    */
   export
-  let launchQueue: Promise<Dialog.IButton>[] = [];
+  let launchQueue: Promise<Dialog.IResult<any>>[] = [];
 
   /**
    * Handle the input options for a dialog.
@@ -680,18 +727,19 @@ namespace Private {
    * @returns A new options object with defaults applied.
    */
   export
-  function handleOptions(options: Dialog.IOptions): Dialog.IOptions {
-    let newOptions: Dialog.IOptions = {};
-    newOptions.title = options.title || '';
-    newOptions.body = options.body || '';
-    newOptions.host = options.host || document.body;
-    newOptions.buttons = (
+  function handleOptions<T>(options: Partial<Dialog.IOptions<T>>={}): Dialog.IOptions<T> {
+    let buttons = (
       options.buttons || [Dialog.cancelButton(), Dialog.okButton()]
     );
-    newOptions.defaultButton = options.defaultButton || newOptions.buttons.length - 1;
-    newOptions.renderer = options.renderer || Dialog.defaultRenderer;
-    newOptions.primaryElement = options.primaryElement;
-    return newOptions;
+    return {
+      title: options.title || '',
+      body: options.body || '',
+      host: options.host || document.body,
+      buttons,
+      defaultButton: options.defaultButton || buttons.length - 1,
+      renderer: options.renderer || Dialog.defaultRenderer,
+      focusNodeSelector: options.focusNodeSelector || ''
+    };
   }
 
   /**

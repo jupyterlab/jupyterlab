@@ -415,8 +415,7 @@ function createContextMenu(path: string, commands: CommandRegistry, registry: Do
 
   menu.addItem({ command: CommandIDs.open });
 
-  const ext = DocumentRegistry.extname(path);
-  const factories = registry.preferredWidgetFactories(ext).map(f => f.name);
+  const factories = registry.preferredWidgetFactories(path).map(f => f.name);
   if (path && factories.length > 1) {
     const command =  'docmanager:open';
     const openWith = new Menu({ commands });

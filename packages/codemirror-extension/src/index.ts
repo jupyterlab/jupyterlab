@@ -49,32 +49,12 @@ namespace CommandIDs {
 };
 
 
-/* tslint:disable */
-/**
- * The commands plugin setting schema.
- *
- * #### Notes
- * This will eventually reside in its own settings file.
- */
-const schema = {
-  "jupyter.lab.setting-icon-class": "jp-TextEditorIcon",
-  "jupyter.lab.setting-icon-label": "CodeMirror",
-  "title": "CodeMirror",
-  "description": "Text editor settings for all CodeMirror editors.",
-  "properties": {
-    "keyMap": { "type": "string", "title": "Key Map", "default": "default" },
-    "theme": { "type": "string", "title": "Theme", "default": "default" }
-  },
-  "type": "object"
-};
-/* tslint:enable */
-
 /**
  * The editor services.
  */
 export
 const servicesPlugin: JupyterLabPlugin<IEditorServices> = {
-  id: IEditorServices.name,
+  id: 'jupyter.services.codemirror-services',
   provides: IEditorServices,
   activate: (): IEditorServices => editorServices
 };
@@ -128,9 +108,6 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     });
   }
 
-  // Preload the settings schema into the registry. This is deprecated.
-  settingRegistry.preload(id, schema);
-
   // Fetch the initial state of the settings.
   Promise.all([settingRegistry.load(id), restored]).then(([settings]) => {
     updateSettings(settings);
@@ -139,6 +116,9 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
       updateSettings(settings);
       updateTracker();
     });
+  }).catch((reason: Error) => {
+    console.error(reason.message);
+    updateTracker();
   });
 
   /**
@@ -185,14 +165,13 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     commands.addCommand(CommandIDs.changeTheme, {
       label: args => args['theme'] as string,
       execute: args => {
-        theme = args['theme'] as string || theme;
-        tracker.forEach(widget => {
-          if (widget.editor instanceof CodeMirrorEditor) {
-            let cm = widget.editor.editor;
-            cm.setOption('theme', theme);
-          }
+        const key = 'theme';
+        const value = theme = args['theme'] as string || theme;
+
+        updateTracker();
+        return settingRegistry.set(id, key, value).catch((reason: Error) => {
+          console.error(`Failed to set ${id}:${key} - ${reason.message}`);
         });
-        return settingRegistry.set(id, 'theme', theme);
       },
       isEnabled: hasWidget,
       isToggled: args => args['theme'] === theme
@@ -204,14 +183,13 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
         return title === 'sublime' ? 'Sublime Text' : title;
       },
       execute: args => {
-        keyMap = args['keyMap'] as string || keyMap;
-        tracker.forEach(widget => {
-          if (widget.editor instanceof CodeMirrorEditor) {
-            let cm = widget.editor.editor;
-            cm.setOption('keyMap', keyMap);
-          }
+        const key = 'keyMap';
+        const value = keyMap = args['keyMap'] as string || keyMap;
+
+        updateTracker();
+        return settingRegistry.set(id, key, value).catch((reason: Error) => {
+          console.error(`Failed to set ${id}:${key} - ${reason.message}`);
         });
-        return settingRegistry.set(id, 'keyMap', keyMap);
       },
       isEnabled: hasWidget,
       isToggled: args => args['keyMap'] === keyMap
@@ -221,8 +199,8 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
       label: args => args['name'] as string,
       execute: args => {
         let mode = args['mode'] as string;
-        if (mode) {
-          let widget = tracker.currentWidget;
+        let widget = tracker.currentWidget;
+        if (mode && widget) {
           let spec = Mode.findByName(mode);
           if (spec) {
             widget.model.mimeType = spec.mime;
@@ -243,7 +221,9 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     });
 
     Mode.getModeInfo().sort((a, b) => {
-      return a.name.localeCompare(b.name);
+      let aName = a.name || '';
+      let bName = b.name || '';
+      return aName.localeCompare(bName);
     }).forEach(spec => {
       modeMenu.addItem({
         command: CommandIDs.changeMode,

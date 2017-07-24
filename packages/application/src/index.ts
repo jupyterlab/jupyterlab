@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  Base64ModelFactory, DocumentRegistry, TextModelFactory
+  Base64ModelFactory, DocumentRegistry
 } from '@jupyterlab/docregistry';
 
 import {
@@ -70,15 +70,7 @@ class JupyterLab extends Application<ApplicationShell> {
     this.rendermime = new RenderMime({ initialFactories, linkHandler });
 
     let registry = this.docRegistry = new DocumentRegistry();
-    registry.addModelFactory(new TextModelFactory());
     registry.addModelFactory(new Base64ModelFactory());
-    registry.addFileType({
-      name: 'Text',
-      extension: '.txt',
-      contentType: 'file',
-      fileFormat: 'text'
-    });
-    registry.addCreator({ name: 'Text File', fileType: 'Text', });
 
     if (options.mimeExtensions) {
       let plugins = createRendermimePlugins(options.mimeExtensions);

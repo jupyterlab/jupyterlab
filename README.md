@@ -30,7 +30,7 @@ We have a [roadmap](https://github.com/jupyter/roadmap/blob/master/jupyterlab.md
 
 ## Prerequisites
 
-Jupyter notebook version 4.2 or later. To check the notebook version:
+Jupyter notebook version 4.3 or later. To check the notebook version:
 
 ```bash
 jupyter notebook --version

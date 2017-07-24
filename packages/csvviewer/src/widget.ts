@@ -20,7 +20,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  ActivityMonitor
+  ActivityMonitor, PathExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -68,13 +68,13 @@ class CSVViewer extends Widget implements DocumentRegistry.IReadyWidget {
     let layout = this.layout = new PanelLayout();
 
     this.addClass(CSV_CLASS);
-    this.title.label = context.path.split('/').pop();
+    this.title.label = PathExt.basename(context.path);
 
     this._grid = new DataGrid();
     this._grid.addClass(CSV_GRID_CLASS);
     this._grid.headerVisibility = 'column';
 
-    this._toolbar = new CSVToolbar();
+    this._toolbar = new CSVToolbar({ selected: this._delimiter });
     this._toolbar.delimiterChanged.connect(this._onDelimiterChanged, this);
     this._toolbar.addClass(CSV_VIEWER_CLASS);
     layout.addWidget(this._toolbar);
@@ -112,18 +112,9 @@ class CSVViewer extends Widget implements DocumentRegistry.IReadyWidget {
    * Dispose of the resources used by the widget.
    */
   dispose(): void {
-    if (this._grid === null) {
-      return;
+    if (this._monitor) {
+      this._monitor.dispose();
     }
-    let monitor = this._monitor;
-    this._grid = null;
-    this._toolbar = null;
-    this._monitor = null;
-
-    if (monitor) {
-      monitor.dispose();
-    }
-
     super.dispose();
   }
 
@@ -147,7 +138,7 @@ class CSVViewer extends Widget implements DocumentRegistry.IReadyWidget {
    * Handle a change in path.
    */
   private _onPathChanged(): void {
-    this.title.label = this._context.path.split('/').pop();
+    this.title.label = PathExt.basename(this._context.path);
   }
 
   /**
@@ -165,10 +156,10 @@ class CSVViewer extends Widget implements DocumentRegistry.IReadyWidget {
     this._grid.model = model;
   }
 
-  private _context: DocumentRegistry.Context = null;
-  private _grid: DataGrid = null;
-  private _toolbar: CSVToolbar = null;
-  private _monitor: ActivityMonitor<any, any> = null;
+  private _context: DocumentRegistry.Context;
+  private _grid: DataGrid;
+  private _toolbar: CSVToolbar;
+  private _monitor: ActivityMonitor<any, any> | null = null;
   private _delimiter = ',';
   private _ready = new PromiseDelegate<void>();
 }

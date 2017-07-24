@@ -232,7 +232,7 @@ namespace DefaultTerminalSession {
   /**
    * Start a new terminal session.
    *
-   * @options - The session options to use.
+   * @param options - The session options to use.
    *
    * @returns A promise that resolves with the session instance.
    */

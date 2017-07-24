@@ -68,19 +68,18 @@ class ForeignHandler implements IDisposable {
    * Test whether the handler is disposed.
    */
   get isDisposed(): boolean {
-    return this._cells === null;
+    return this._isDisposed;
   }
 
   /**
    * Dispose the resources held by the handler.
    */
   dispose(): void {
-    if (this._cells === null) {
+    if (this.isDisposed) {
       return;
     }
-    let cells = this._cells;
-    this._cells = null;
-    cells.clear();
+    this._isDisposed = true;
+    this._cells.clear();
     Signal.clearData(this);
   }
 
@@ -97,7 +96,7 @@ class ForeignHandler implements IDisposable {
     }
     let kernel = this.session.kernel;
     if (!kernel) {
-      return;
+      return false;
     }
 
     // Check whether this message came from an external session.
@@ -109,7 +108,7 @@ class ForeignHandler implements IDisposable {
     let msgType = msg.header.msg_type;
     let parentHeader = msg.parent_header as KernelMessage.IHeader;
     let parentMsgId = parentHeader.msg_id as string;
-    let cell: CodeCell;
+    let cell: CodeCell | undefined;
     switch (msgType) {
     case 'execute_input':
       let inputMsg = msg as KernelMessage.IExecuteInputMsg;
@@ -132,14 +131,18 @@ class ForeignHandler implements IDisposable {
       }
       let output = msg.content as nbformat.IOutput;
       cell = this._cells.get(parentMsgId);
-      output.output_type = msgType as nbformat.OutputType;
-      cell.model.outputs.add(output);
+      if (cell) {
+        output.output_type = msgType as nbformat.OutputType;
+        cell.model.outputs.add(output);
+      }
       parent.update();
       return true;
     case 'clear_output':
       let wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
       cell = this._cells.get(parentMsgId);
-      cell.model.outputs.clear(wait);
+      if (cell) {
+        cell.model.outputs.clear(wait);
+      }
       return true;
     default:
       return false;
@@ -158,8 +161,9 @@ class ForeignHandler implements IDisposable {
 
   private _cells = new Map<string, CodeCell>();
   private _enabled = true;
-  private _parent: ForeignHandler.IReceiver = null;
-  private _factory: () => CodeCell = null;
+  private _parent: ForeignHandler.IReceiver;
+  private _factory: () => CodeCell;
+  private _isDisposed = false;
 }
 
 

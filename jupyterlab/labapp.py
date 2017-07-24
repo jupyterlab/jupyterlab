@@ -11,7 +11,7 @@ from traitlets import Bool, Unicode
 
 from ._version import __version__
 from .extension import load_jupyter_server_extension
-from .commands import build, clean, get_app_dir
+from .commands import build, clean, get_app_dir, get_user_settings_dir
 
 
 build_aliases = dict(base_aliases)
@@ -68,13 +68,17 @@ class LabCleanApp(JupyterApp):
 class LabPathApp(JupyterApp):
     version = __version__
     description = """
-    Print the configured path to the JupyterLab application
+    Print the configured paths for the JupyterLab application
 
-    The path can be configured using the JUPYTERLAB_DIR environment variable.
+    The application path can be configured using the JUPYTERLAB_DIR environment variable.
+    The user settings path can be configured using the JUPYTERLAB_SETTINGS_DIR
+        environment variable or it will fall back to
+        `/lab/user-settings` in the default Jupyter configuration directory.
     """
 
     def start(self):
-        print(get_app_dir())
+        print('Application directory:   %s' % get_app_dir())
+        print('User Settings directory: %s' % get_user_settings_dir())
 
 
 lab_aliases = dict(aliases)
@@ -103,7 +107,7 @@ class LabApp(NotebookApp):
     JupyterLab has three different modes of running:
 
     * Core mode (`--core-mode`): in this mode JupyterLab will run using the JavaScript
-      assets contained in the installed `jupyterlab` Python package. In core mode, no 
+      assets contained in the installed `jupyterlab` Python package. In core mode, no
       extensions are enabled. This is the default in a stable JupyterLab release if you
       have no extensions installed.
     * Dev mode (`--dev-mode`): like core mode, but when the `jupyterlab` Python package
@@ -129,7 +133,8 @@ class LabApp(NotebookApp):
     subcommands = dict(
         build=(LabBuildApp, LabBuildApp.description.splitlines()[0]),
         clean=(LabCleanApp, LabCleanApp.description.splitlines()[0]),
-        path=(LabPathApp, LabPathApp.description.splitlines()[0])
+        path=(LabPathApp, LabPathApp.description.splitlines()[0]),
+        paths=(LabPathApp, LabPathApp.description.splitlines()[0])
     )
 
     default_url = Unicode('/lab', config=True,

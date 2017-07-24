@@ -126,36 +126,38 @@ const rendererFactory: IRenderMime.IRendererFactory = {
   createRenderer: options => new RenderedVega(options)
 };
 
-const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
-  // Vega
-  {
-    mimeType: VEGA_MIME_TYPE,
-    rendererFactory,
-    rank: 0,
-    dataType: 'json',
-    documentWidgetFactoryOptions: {
-      name: 'Vega',
-      fileExtensions: ['.vg', '.vg.json', '.json'],
-      defaultFor: ['.vg', '.vg.json'],
-      readOnly: true
-    }
+const extension: IRenderMime.IExtension = {
+  name: 'vega',
+  rendererFactory,
+  rank: 0,
+  dataType: 'json',
+  documentWidgetFactoryOptions: [{
+    name: 'Vega',
+    primaryFileType: 'vega',
+    fileTypes: ['vega', 'json'],
+    defaultFor: ['vega']
   },
-  // Vega-Lite
   {
-    mimeType: VEGALITE_MIME_TYPE,
-    rendererFactory,
-    rank: 0,
-    dataType: 'json',
-    documentWidgetFactoryOptions: {
-      name: 'Vega-Lite',
-      fileExtensions: ['.vl', '.vl.json', '.json'],
-      defaultFor: ['.vl', '.vl.json'],
-      readOnly: true
-    }
-  }
-];
+    name: 'Vega Lite',
+    primaryFileType: 'vega-lite',
+    fileTypes: ['vega-lite', 'json'],
+    defaultFor: ['vega-lite']
+  }],
+  fileTypes: [{
+    mimeTypes: [VEGA_MIME_TYPE],
+    name: 'vega',
+    extensions: ['.vg', '.vg.json'],
+    iconClass: 'jp-MaterialIcon jp-VegaIcon',
+  },
+  {
+    mimeTypes: [VEGALITE_MIME_TYPE],
+    name: 'vega-lite',
+    extensions: ['.vl', '.vl.json'],
+    iconClass: 'jp-MaterialIcon jp-VegaIcon',
+  }]
+};
 
-export default extensions;
+export default extension;
 
 
 /**
@@ -167,31 +169,31 @@ namespace Private {
    * Default cell config for Vega-Lite.
    */
   const defaultCellConfig: JSONObject = {
-    "width": 400,
-    "height": 400/1.5
-  }
+    'width': 400,
+    'height': 400 / 1.5
+  };
 
   /**
    * Apply the default cell config to the spec in place.
-   * 
+   *
    * #### Notes
    * This carefully does a shallow copy to avoid copying the potentially
    * large data.
    */
   export
   function updateVegaLiteDefaults(spec: ReadonlyJSONObject): JSONObject {
-    if ( spec.hasOwnProperty('config') ) {
-      if ( spec.config.hasOwnProperty('cell') ) {
-        return {
-          ...{"config": {...{"cell": {...defaultCellConfig, ...((spec.config as ReadonlyJSONObject).cell as any)}}}, ...(spec.config as any)},
-          ...spec
-        }
-      } else {
-        return {...{"config": {...{"cell": {...defaultCellConfig}}}, ...(spec.config as any)}, ...spec}
-      }
+    let config = spec.config as JSONObject;
+    if (!config) {
+      return {...{'config': {'cell': defaultCellConfig}}, ...spec};
+    }
+    let cell = config.cell as JSONObject;
+    if (cell) {
+      return {
+        ...{'config': {...{'cell': {...defaultCellConfig, ...cell}}}, ...config},
+        ...spec
+      };
     } else {
-      return {...{"config": {"cell": defaultCellConfig}}, ...spec};
+      return {...{'config': {...{'cell': {...defaultCellConfig}}}, ...config}, ...spec};
     }
   }
-
 }

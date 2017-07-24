@@ -88,6 +88,17 @@ const textRendererFactory: IRenderMime.IRendererFactory = {
 
 
 /**
+ * A placeholder factory for deprecated rendered JavaScript.
+ */
+export
+const javaScriptRendererFactory: IRenderMime.IRendererFactory = {
+  safe: false,
+  mimeTypes: ['text/javascript', 'application/javascript'],
+  createRenderer: options => new widgets.RenderedJavaScript(options)
+};
+
+
+/**
  * The builtin factories provided by the rendermime package.
  */
 export
@@ -98,5 +109,6 @@ const defaultRendererFactories: ReadonlyArray<IRenderMime.IRendererFactory> = [
   svgRendererFactory,
   imageRendererFactory,
   pdfRendererFactory,
+  javaScriptRendererFactory,
   textRendererFactory
 ];

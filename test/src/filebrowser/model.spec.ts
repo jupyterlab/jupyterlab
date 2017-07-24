@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  StateDB
+  StateDB, uuid
 } from '@jupyterlab/coreutils';
 
 import {
@@ -12,7 +12,7 @@ import {
 } from '@jupyterlab/docmanager';
 
 import {
-  DocumentRegistry
+  DocumentRegistry, TextModelFactory
 } from '@jupyterlab/docregistry';
 
 import {
@@ -22,6 +22,10 @@ import {
 import {
   FileBrowserModel
 } from '@jupyterlab/filebrowser';
+
+import {
+  acceptDialog, dismissDialog
+} from '../utils';
 
 
 describe('filebrowser/model', () => {
@@ -38,7 +42,9 @@ describe('filebrowser/model', () => {
       open: widget => { /* no op */ }
     };
 
-    registry = new DocumentRegistry();
+    registry = new DocumentRegistry({
+      textModelFactory: new TextModelFactory()
+    });
     serviceManager = new ServiceManager();
     manager = new DocumentManager({
       registry, opener,
@@ -291,47 +297,51 @@ describe('filebrowser/model', () => {
     describe('#upload()', () => {
 
       it('should upload a file object', (done) => {
-        let file = new File(['<p>Hello world!</p>'], 'hello.html',
+        let fname = uuid() + '.html';
+        let file = new File(['<p>Hello world!</p>'], fname,
                             { type: 'text/html' });
         model.upload(file).then(contents => {
-          expect(contents.name).to.be('hello.html');
+          expect(contents.name).to.be(fname);
           done();
         }).catch(done);
       });
 
-      it('should allow overwrite', (done) => {
-        let file = new File(['<p>Hello world!</p>'], 'hello2.html',
+      it('should overwrite', () => {
+        let fname = uuid() + '.html';
+        let file = new File(['<p>Hello world!</p>'], fname,
                             { type: 'text/html' });
-        model.upload(file).then(contents => {
-          expect(contents.name).to.be('hello2.html');
-          return model.upload(file, true);
+        return model.upload(file).then(contents => {
+          expect(contents.name).to.be(fname);
+          acceptDialog();
+          return model.upload(file);
         }).then(contents => {
-          expect(contents.name).to.be('hello2.html');
-          done();
-        }).catch(done);
+          expect(contents.name).to.be(fname);
+        });
       });
 
-      it('should fail without an overwrite if the file exists', (done) => {
-        let file = new File(['<p>Hello world!</p>'], 'hello2.html',
+      it('should not overwrite', () => {
+        let fname = uuid() + '.html';
+        let file = new File(['<p>Hello world!</p>'], fname,
                             { type: 'text/html' });
-        model.upload(file).then(contents => {
-          expect(contents.name).to.be('hello2.html');
+        return model.upload(file).then(contents => {
+          expect(contents.name).to.be(fname);
+          dismissDialog();
           return model.upload(file);
         }).catch(err => {
-          expect(err.message).to.be(`"${file.name}" already exists`);
-          done();
+          expect(err).to.be('File not uploaded');
         });
       });
 
       it('should emit the fileChanged signal', (done) => {
+        let fname = uuid() + '.html';
         model.fileChanged.connect((sender, args) => {
           expect(sender).to.be(model);
           expect(args.type).to.be('save');
           expect(args.oldValue).to.be(null);
-          expect(args.newValue.path).to.be('hello3.html');
+          expect(args.newValue.path).to.be(fname);
           done();
         });
-        let file = new File(['<p>Hello world!</p>'], 'hello3.html',
+        let file = new File(['<p>Hello world!</p>'], fname,
                             { type: 'text/html' });
         model.upload(file).catch(done);
       });

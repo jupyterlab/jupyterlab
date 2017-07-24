@@ -35,7 +35,7 @@ interface IConsoleHistory extends IDisposable {
   /**
    * The current editor used by the history widget.
    */
-  editor: CodeEditor.IEditor;
+  editor: CodeEditor.IEditor | null;
 
   /**
    * The placeholder text that a history session began with.
@@ -105,23 +105,26 @@ class ConsoleHistory implements IConsoleHistory {
   /**
    * The current editor used by the history manager.
    */
-  get editor(): CodeEditor.IEditor {
+  get editor(): CodeEditor.IEditor | null {
     return this._editor;
   }
-  set editor(value: CodeEditor.IEditor) {
+  set editor(value: CodeEditor.IEditor | null) {
     if (this._editor === value) {
       return;
     }
 
-    let editor = this._editor;
-    if (editor) {
-      editor.edgeRequested.disconnect(this.onEdgeRequest, this);
-      editor.model.value.changed.disconnect(this.onTextChange, this);
+    let prev = this._editor;
+    if (prev) {
+      prev.edgeRequested.disconnect(this.onEdgeRequest, this);
+      prev.model.value.changed.disconnect(this.onTextChange, this);
     }
 
-    editor = this._editor = value;
-    editor.edgeRequested.connect(this.onEdgeRequest, this);
-    editor.model.value.changed.connect(this.onTextChange, this);
+    this._editor = value;
+
+    if (value) {
+      value.edgeRequested.connect(this.onEdgeRequest, this);
+      value.model.value.changed.connect(this.onTextChange, this);
+    }
   }
 
   /**
@@ -252,7 +255,7 @@ class ConsoleHistory implements IConsoleHistory {
    * Handle an edge requested signal.
    */
   protected onEdgeRequest(editor: CodeEditor.IEditor, location: CodeEditor.EdgeLocation): void {
-    let model = this._editor.model;
+    let model = editor.model;
     let source = model.value.text;
 
     if (location === 'top') {
@@ -278,7 +281,10 @@ class ConsoleHistory implements IConsoleHistory {
         }
         this._setByHistory = true;
         model.value.text = text;
-        editor.setCursorPosition(editor.getPositionAt(text.length));
+        let pos = editor.getPositionAt(text.length);
+        if (pos) {
+          editor.setCursorPosition(pos);
+        }
       });
     }
   }
@@ -304,7 +310,7 @@ class ConsoleHistory implements IConsoleHistory {
   private _placeholder: string = '';
   private _setByHistory = false;
   private _isDisposed = false;
-  private _editor: CodeEditor.IEditor = null;
+  private _editor: CodeEditor.IEditor | null = null;
 }
 
 

@@ -88,37 +88,6 @@ const plugin: JupyterLabPlugin<IEditorTracker> = {
 };
 
 
-/* tslint:disable */
-/**
- * The commands plugin setting schema.
- *
- * #### Notes
- * This will eventually reside in its own settings file.
- */
-const schema = {
-  "jupyter.lab.setting-icon-class": "jp-TextEditorIcon",
-  "jupyter.lab.setting-icon-label": "Editor",
-  "title": "Text Editor",
-  "description": "Text editor settings for all editors.",
-  "properties": {
-    "autoClosingBrackets": {
-      "type": "boolean", "title": "Autoclosing Brackets", "default": true
-    },
-    "lineNumbers": {
-      "type": "boolean", "title": "Line Numbers", "default": true
-    },
-    "lineWrap": {
-      "type": "boolean", "title": "Line Wrap", "default": false
-    },
-    "matchBrackets": {
-      "type": "boolean", "title": "Match Brackets", "default": true
-    }
-  },
-  "type": "object"
-};
-/* tslint:enable */
-
-
 /**
  * Export the plugins as default.
  */
@@ -133,7 +102,7 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
   const namespace = 'editor';
   const factory = new FileEditorFactory({
     editorServices,
-    factoryOptions: { name: FACTORY, fileExtensions: ['*'], defaultFor: ['*'] }
+    factoryOptions: { name: FACTORY, fileTypes: ['*'], defaultFor: ['*'] }
   });
   const { commands, restored } = app;
   const tracker = new InstanceTracker<FileEditor>({ namespace });
@@ -182,9 +151,6 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
     editor.setOption('autoClosingBrackets', autoClosingBrackets);
   }
 
-  // Preload the settings schema into the registry. This is deprecated.
-  settingRegistry.preload(id, schema);
-
   // Fetch the initial state of the settings.
   Promise.all([settingRegistry.load(id), restored]).then(([settings]) => {
     updateSettings(settings);
@@ -193,6 +159,9 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
       updateSettings(settings);
       updateTracker();
     });
+  }).catch((reason: Error) => {
+    console.error(reason.message);
+    updateTracker();
   });
 
   factory.widgetCreated.connect((sender, widget) => {
@@ -212,11 +181,13 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
 
   commands.addCommand(CommandIDs.lineNumbers, {
     execute: () => {
-      lineNumbers = !lineNumbers;
-      tracker.forEach(widget => {
-        widget.editor.setOption('lineNumbers', lineNumbers);
+      const key = 'lineNumbers';
+      const value = lineNumbers = !lineNumbers;
+
+      updateTracker();
+      return settingRegistry.set(id, key, value).catch((reason: Error) => {
+        console.error(`Failed to set ${id}:${key} - ${reason.message}`);
       });
-      return settingRegistry.set(id, 'lineNumbers', lineNumbers);
     },
     isEnabled: hasWidget,
     isToggled: () => lineNumbers,
@@ -225,11 +196,13 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
 
   commands.addCommand(CommandIDs.lineWrap, {
     execute: () => {
-      lineWrap = !lineWrap;
-      tracker.forEach(widget => {
-        widget.editor.setOption('lineWrap', lineWrap);
+      const key = 'lineWrap';
+      const value = lineWrap = !lineWrap;
+
+      updateTracker();
+      return settingRegistry.set(id, key, value).catch((reason: Error) => {
+        console.error(`Failed to set ${id}:${key} - ${reason.message}`);
       });
-      return settingRegistry.set(id, 'lineWrap', lineWrap);
     },
     isEnabled: hasWidget,
     isToggled: () => lineWrap,
@@ -358,12 +331,16 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
 
   commands.addCommand(CommandIDs.markdownPreview, {
     execute: () => {
-      let path = tracker.currentWidget.context.path;
+      let widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+      let path = widget.context.path;
       return commands.execute('markdownviewer:open', { path });
     },
     isVisible: () => {
       let widget = tracker.currentWidget;
-      return widget && PathExt.extname(widget.context.path) === '.md';
+      return widget && PathExt.extname(widget.context.path) === '.md' || false;
     },
     label: 'Show Markdown Preview'
   });

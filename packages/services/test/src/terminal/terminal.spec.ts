@@ -24,7 +24,7 @@ import {
 } from '../utils';
 
 
-describe('terminals', () => {
+describe('terminal', () => {
 
   let tester: TerminalTester;
   let session: TerminalSession.ISession;

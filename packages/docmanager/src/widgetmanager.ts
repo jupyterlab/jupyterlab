@@ -322,8 +322,8 @@ class DocumentWidgetManager implements IDisposable {
       title: 'Close without saving?',
       body: `File "${fileName}" has unsaved changes, close without saving?`,
       buttons: [Dialog.cancelButton(), Dialog.warnButton()]
-    }).then(value => {
-      return value.accept;
+    }).then(result => {
+      return result.button.accept;
     });
   }
 

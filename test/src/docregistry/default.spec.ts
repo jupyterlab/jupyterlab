@@ -59,12 +59,12 @@ class WidgetFactory extends ABCWidgetFactory<DocumentRegistry.IReadyWidget, Docu
 function createFactory(): WidgetFactory {
   return new WidgetFactory({
     name: 'test',
-    fileExtensions: ['.txt']
+    fileTypes: ['text']
   });
 }
 
 
-describe('docmanager/default', () => {
+describe('docregistry/default', () => {
 
   let context: Context<DocumentRegistry.IModel>;
 
@@ -78,14 +78,14 @@ describe('docmanager/default', () => {
 
   describe('ABCWidgetFactory', () => {
 
-    describe('#fileExtensions', () => {
+    describe('#fileTypes', () => {
 
       it('should be the value passed in', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileExtensions: ['.txt'],
+          fileTypes: ['text'],
         });
-        expect(factory.fileExtensions).to.eql(['.txt']);
+        expect(factory.fileTypes).to.eql(['text']);
       });
 
     });
@@ -95,7 +95,7 @@ describe('docmanager/default', () => {
       it('should be the value passed in', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileExtensions: ['.txt'],
+          fileTypes: ['text'],
         });
         expect(factory.name).to.be('test');
       });
@@ -107,7 +107,7 @@ describe('docmanager/default', () => {
       it('should default to an empty array', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileExtensions: ['.txt'],
+          fileTypes: ['text'],
         });
         expect(factory.defaultFor).to.eql([]);
       });
@@ -115,10 +115,10 @@ describe('docmanager/default', () => {
       it('should be the value passed in', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileExtensions: ['.txt'],
-          defaultFor: ['.md']
+          fileTypes: ['text'],
+          defaultFor: ['text']
         });
-        expect(factory.defaultFor).to.eql(['.md']);
+        expect(factory.defaultFor).to.eql(['text']);
       });
 
     });
@@ -128,7 +128,7 @@ describe('docmanager/default', () => {
       it('should default to false', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileExtensions: ['.txt'],
+          fileTypes: ['text'],
         });
         expect(factory.readOnly).to.be(false);
       });
@@ -136,7 +136,7 @@ describe('docmanager/default', () => {
       it('should be the value passed in', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileExtensions: ['.txt'],
+          fileTypes: ['text'],
           readOnly: true
         });
         expect(factory.readOnly).to.be(true);
@@ -149,7 +149,7 @@ describe('docmanager/default', () => {
       it('should default to `text`', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileExtensions: ['.txt'],
+          fileTypes: ['text'],
         });
         expect(factory.modelName).to.be('text');
       });
@@ -157,7 +157,7 @@ describe('docmanager/default', () => {
       it('should be the value passed in', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileExtensions: ['.txt'],
+          fileTypes: ['text'],
           modelName: 'notebook'
         });
         expect(factory.modelName).to.be('notebook');
@@ -169,7 +169,7 @@ describe('docmanager/default', () => {
       it('should default to false', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileExtensions: ['.txt'],
+          fileTypes: ['text'],
         });
         expect(factory.preferKernel).to.be(false);
       });
@@ -177,7 +177,7 @@ describe('docmanager/default', () => {
       it('should be the value passed in', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileExtensions: ['.txt'],
+          fileTypes: ['text'],
           preferKernel: true
         });
         expect(factory.preferKernel).to.be(true);
@@ -190,7 +190,7 @@ describe('docmanager/default', () => {
       it('should default to false', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileExtensions: ['.txt'],
+          fileTypes: ['text'],
         });
         expect(factory.canStartKernel).to.be(false);
       });
@@ -198,7 +198,7 @@ describe('docmanager/default', () => {
       it('should be the value passed in', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileExtensions: ['.txt'],
+          fileTypes: ['text'],
           canStartKernel: true
         });
         expect(factory.canStartKernel).to.be(true);
@@ -591,9 +591,9 @@ describe('docmanager/default', () => {
       it('should require a context parameter', () => {
         let widgetFactory = new MimeDocumentFactory({
           name: 'markdown',
-          fileExtensions: ['.md'],
+          fileTypes: ['markdown'],
           rendermime: RENDERMIME,
-          mimeType: 'text/markdown'
+          primaryFileType: DocumentRegistry.defaultTextFileType
         });
         expect(widgetFactory.createNew(context)).to.be.a(MimeDocument);
       });

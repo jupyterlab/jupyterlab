@@ -49,8 +49,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     this._factory = options.factory;
     this._opener = options.opener || Private.noOp;
     this._path = options.path;
-    let ext = DocumentRegistry.extname(this._path);
-    let lang = this._factory.preferredLanguage(ext);
+    let lang = this._factory.preferredLanguage(PathExt.basename(this._path));
 
     let dbFactory = options.modelDBFactory;
     if (dbFactory) {
@@ -63,11 +62,13 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     this._readyPromise = manager.ready.then(() => {
       return this._populatedPromise.promise;
     });
+
+    let ext = PathExt.extname(this._path);
     this.session = new ClientSession({
       manager: manager.sessions,
       path: this._path,
       type: ext === '.ipynb' ? 'notebook' : 'file',
-      name: this._path.split('/').pop(),
+      name: PathExt.basename(this._path),
       kernelPreference: options.kernelPreference || { shouldStart: false }
     });
     this.session.propertyChanged.connect(this._onSessionChanged, this);
@@ -522,16 +523,14 @@ namespace Private {
    */
   export
   function getSavePath(path: string): Promise<string | undefined> {
-    let input = document.createElement('input');
-    input.value = path;
     let saveBtn = Dialog.okButton({ label: 'SAVE' });
     return showDialog({
       title: 'Save File As..',
-      body: input,
+      body: new SaveWidget(path),
       buttons: [Dialog.cancelButton(), saveBtn]
     }).then(result => {
-      if (result.label === 'SAVE') {
-        return input.value;
+      if (result.button.label === 'SAVE') {
+        return result.value;
       }
       return;
     });
@@ -542,4 +541,32 @@ namespace Private {
    */
   export
   function noOp() { /* no-op */ }
+
+  /*
+   * A widget that gets a file path from a user.
+   */
+  class SaveWidget extends Widget {
+    /**
+     * Construct a new save widget.
+     */
+    constructor(path: string) {
+      super({ node: createSaveNode(path) });
+    }
+
+    /**
+     * Get the value for the widget.
+     */
+    getValue(): string {
+      return (this.node as HTMLInputElement).value;
+    }
+  }
+
+  /**
+   * Create the node for a save widget.
+   */
+  function createSaveNode(path: string): HTMLElement {
+    let input = document.createElement('input');
+    input.value = path;
+    return input;
+  }
 }

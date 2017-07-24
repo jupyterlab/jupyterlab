@@ -198,8 +198,8 @@ describe('ImageViewerFactory', () => {
       let factory = new ImageViewerFactory({
         name: 'Image',
         modelName: 'base64',
-        fileExtensions: ['.png'],
-        defaultFor: ['.png']
+        fileTypes: ['png'],
+        defaultFor: ['png']
       });
       let context = createFileContext(IMAGE.path);
       expect(factory.createNew(context)).to.be.an(ImageViewer);

@@ -141,9 +141,9 @@ class RenderMime {
   clone(options: RenderMime.ICloneOptions = {}): RenderMime {
     // Create the clone.
     let clone = new RenderMime({
-      resolver: options.resolver || this.resolver,
-      sanitizer: options.sanitizer || this.sanitizer,
-      linkHandler: options.linkHandler || this.linkHandler
+      resolver: options.resolver || this.resolver || undefined,
+      sanitizer: options.sanitizer || this.sanitizer || undefined,
+      linkHandler: options.linkHandler || this.linkHandler || undefined
     });
 
     // Clone the internal state.

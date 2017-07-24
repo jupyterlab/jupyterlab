@@ -12,8 +12,12 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  ISettingRegistry, IStateDB, SettingRegistry, StateDB
+  IDataConnector, ISettingRegistry, IStateDB, SettingRegistry, StateDB
 } from '@jupyterlab/coreutils';
+
+import {
+  IServiceManager, ServerConnection
+} from '@jupyterlab/services';
 
 import {
   JSONObject
@@ -27,10 +31,6 @@ import {
   activatePalette
 } from './palette';
 
-import {
-  SettingClientDataConnector
-} from './settingclientdataconnector';
-
 
 /**
  * The command IDs used by the apputils plugin.
@@ -39,6 +39,57 @@ namespace CommandIDs {
   export
   const clearStateDB = 'apputils:clear-statedb';
 };
+
+
+/**
+ * Convert an API `XMLHTTPRequest` error to a simple error.
+ */
+function apiError(id: string, xhr: XMLHttpRequest): Error {
+  let message: string;
+
+  try {
+    message = JSON.parse(xhr.response).message;
+  } catch (error) {
+    message = `Error accessing ${id} HTTP ${xhr.status} ${xhr.statusText}`;
+  }
+
+  return new Error(message);
+}
+
+
+/**
+ * Create a data connector to access plugin settings.
+ */
+function newConnector(manager: IServiceManager): IDataConnector<ISettingRegistry.IPlugin, JSONObject> {
+  return {
+    /**
+     * Retrieve a saved bundle from the data connector.
+     */
+    fetch(id: string): Promise<ISettingRegistry.IPlugin> {
+      return manager.settings.fetch(id).catch(reason => {
+        throw apiError(id, (reason as ServerConnection.IError).xhr);
+      });
+    },
+
+    /**
+     * Remove a value from the data connector.
+     */
+    remove(): Promise<void> {
+      const message = 'Removing setting resources is not supported.';
+
+      return Promise.reject(new Error(message));
+    },
+
+    /**
+     * Save the user setting data in the data connector.
+     */
+    save(id: string, user: JSONObject): Promise<void> {
+      return manager.settings.save(id, user).catch(reason => {
+        throw apiError(id, (reason as ServerConnection.IError).xhr);
+      });
+    }
+  };
+}
 
 
 /**
@@ -52,7 +103,8 @@ const mainMenuPlugin: JupyterLabPlugin<IMainMenu> = {
     menu.id = 'jp-MainMenu';
 
     let logo = new Widget();
-    logo.node.className = 'jp-MainAreaPortraitIcon jp-JupyterIcon';
+    logo.addClass('jp-MainAreaPortraitIcon');
+    logo.addClass('jp-JupyterIcon');
     logo.id = 'jp-MainLogo';
 
     app.shell.addToTopArea(logo);
@@ -80,12 +132,12 @@ const palettePlugin: JupyterLabPlugin<ICommandPalette> = {
  */
 const settingPlugin: JupyterLabPlugin<ISettingRegistry> = {
   id: 'jupyter.services.setting-registry',
-  activate: () => new SettingRegistry({
-    connector: new SettingClientDataConnector(),
-    preload: SettingClientDataConnector.preload
-  }),
+  activate: (app: JupyterLab, services: IServiceManager): ISettingRegistry => {
+    return new SettingRegistry({ connector: newConnector(services) });
+  },
   autoStart: true,
-  provides: ISettingRegistry
+  provides: ISettingRegistry,
+  requires: [IServiceManager]
 };
 
 

@@ -45,7 +45,7 @@ You can also use the installer from the [Node.js](https://nodejs.org) website.
 
 ## Installing JupyterLab
 
-JupyterLab requires Jupyter Notebook version 4.2 or later.
+JupyterLab requires Jupyter Notebook version 4.3 or later.
 
 If you use ``conda``, you can install it as:
 
@@ -81,6 +81,8 @@ Notes:
 
 * At times, it may be necessary to clean your local repo with the command ``git
 clean -fdx``.
+
+* Make sure to do `pip install -e` *before* running `npm install`. Running `npm install` first makes pip stall.
 
 * If `pip` gives a `VersionConflict` error, it usually means that the installed
 version of `jupyterlab_launcher` is out of date. Run `pip install --upgrade
@@ -146,7 +148,7 @@ build tool.  The npm package source files are in the `packages/` subdirectory.
 **Prerequisites**
 
 - [node](http://nodejs.org/) (preferably version 5 or later)
-- Jupyter notebook server version 4.2 or later (to run examples)
+- Jupyter notebook server version 4.3 or later (to run examples)
 
 ```bash
 npm install --save jupyterlab
@@ -172,7 +174,7 @@ npm run build:packages
 
 The Jupyter server extension source files are in the `jupyterlab/`
 subdirectory. To use this extension, make sure the Jupyter notebook server
-version 4.2 or later is installed.
+version 4.3 or later is installed.
 
 ### Build the JupyterLab server extension
 

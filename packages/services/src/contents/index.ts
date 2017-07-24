@@ -936,8 +936,8 @@ class Drive implements Contents.IDrive {
       }
       try {
          validate.validateContentsModel(response.data);
-       } catch (err) {
-         throw ServerConnection.makeError(response, err.message);
+       } catch (error) {
+         throw ServerConnection.makeError(response, error.message);
        }
       return response.data;
     });
@@ -988,8 +988,8 @@ class Drive implements Contents.IDrive {
       let data = response.data as Contents.IModel;
       try {
         validate.validateContentsModel(data);
-      } catch (err) {
-        throw ServerConnection.makeError(response, err.message);
+      } catch (error) {
+        throw ServerConnection.makeError(response, error.message);
       }
       this._fileChanged.emit({
         type: 'new',
@@ -1065,8 +1065,8 @@ class Drive implements Contents.IDrive {
       let data = response.data as Contents.IModel;
       try {
         validate.validateContentsModel(data);
-      } catch (err) {
-        throw ServerConnection.makeError(response, err.message);
+      } catch (error) {
+        throw ServerConnection.makeError(response, error.message);
       }
       this._fileChanged.emit({
         type: 'rename',
@@ -1107,8 +1107,8 @@ class Drive implements Contents.IDrive {
       let data = response.data as Contents.IModel;
       try {
         validate.validateContentsModel(data);
-      } catch (err) {
-        throw ServerConnection.makeError(response, err.message);
+      } catch (error) {
+        throw ServerConnection.makeError(response, error.message);
       }
       this._fileChanged.emit({
         type: 'save',
@@ -1147,8 +1147,8 @@ class Drive implements Contents.IDrive {
       let data = response.data as Contents.IModel;
       try {
         validate.validateContentsModel(data);
-      } catch (err) {
-        throw ServerConnection.makeError(response, err.message);
+      } catch (error) {
+        throw ServerConnection.makeError(response, error.message);
       }
       this._fileChanged.emit({
         type: 'new',
@@ -1182,8 +1182,8 @@ class Drive implements Contents.IDrive {
       let data = response.data as Contents.ICheckpointModel;
       try {
         validate.validateCheckpointModel(data);
-      } catch (err) {
-        throw ServerConnection.makeError(response, err.message);
+      } catch (error) {
+        throw ServerConnection.makeError(response, error.message);
       }
       return data;
     });
@@ -1215,9 +1215,9 @@ class Drive implements Contents.IDrive {
       }
       for (let i = 0; i < response.data.length; i++) {
         try {
-        validate.validateCheckpointModel(response.data[i]);
-        } catch (err) {
-          throw ServerConnection.makeError(response, err.message);
+          validate.validateCheckpointModel(response.data[i]);
+        } catch (error) {
+          throw ServerConnection.makeError(response, error.message);
         }
       }
       return response.data;
@@ -1279,8 +1279,7 @@ class Drive implements Contents.IDrive {
   private _getUrl(...args: string[]): string {
     let parts = args.map(path => URLExt.encodeParts(path));
     let baseUrl = this.serverSettings.baseUrl;
-    return URLExt.join(baseUrl, this._apiEndpoint,
-                       ...parts);
+    return URLExt.join(baseUrl, this._apiEndpoint, ...parts);
   }
 
   private _apiEndpoint: string;
@@ -1361,13 +1360,16 @@ namespace Private {
    */
   export
   function normalize(path: string): string {
-    let parts = path.split(':');
+    const parts = path.split(':');
+
     if (parts.length === 1) {
       return PathExt.normalize(path);
-    } else if (parts.length === 2) {
-      return parts[0] + ':' + PathExt.normalize(parts[1]);
-    } else {
-      throw Error('Malformed path: '+path);
     }
+
+    if (parts.length === 2) {
+      return parts[0] + ':' + PathExt.normalize(parts[1]);
+    }
+
+    throw new Error('Malformed path: ' + path);
   }
 }

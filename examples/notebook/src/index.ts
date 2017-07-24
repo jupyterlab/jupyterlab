@@ -118,8 +118,8 @@ function createApp(manager: ServiceManager.IManager): void {
   let wFactory = new NotebookWidgetFactory({
     name: 'Notebook',
     modelName: 'notebook',
-    fileExtensions: ['.ipynb'],
-    defaultFor: ['.ipynb'],
+    fileTypes: ['notebook'],
+    defaultFor: ['notebook'],
     preferKernel: true,
     canStartKernel: true,
     rendermime, contentFactory,

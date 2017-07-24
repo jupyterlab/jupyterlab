@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/faq-extension",
-  "version": "0.8.3",
+  "version": "0.9.0",
   "description": "JupyterLab - FAQ Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -13,8 +13,9 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.8.3",
-    "@jupyterlab/apputils": "^0.8.2",
+    "@jupyterlab/application": "^0.9.0",
+    "@jupyterlab/apputils": "^0.9.0",
+    "@phosphor/coreutils": "^1.2.0",
     "@phosphor/messaging": "^1.2.1",
     "@phosphor/virtualdom": "^1.1.1"
   },
