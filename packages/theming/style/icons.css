@@ -234,7 +234,7 @@
 
 
 .jp-VegaIcon {
-  background-image: url(icons/jupyter/vega.svg);
+  background-image: var(--jp-icon-vega);
 }
 
 
