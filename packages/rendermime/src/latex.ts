@@ -189,7 +189,6 @@ function init() {
       processEscapes: true,
       processEnvironments: true
     },
-    TeX: { equationNumbers: { autoNumber: 'AMS' } },
     // Center justify equations in code and markdown cells. Elsewhere
     // we use CSS to left justify single line equations in code cells.
     displayAlign: 'center',
