@@ -37,10 +37,10 @@ require(['jquery', '@jupyterlab/services'], function ($, services) {
         console.log('Got execute reply');
       };
 
-      future.onDone = function () {
+      future.done.then(function () {
         console.log('Future is fulfilled');
         $('#output').append($('<pre>').text('Done!'));
-      };
+      });
     });
   });
 });
