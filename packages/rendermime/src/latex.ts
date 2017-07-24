@@ -167,7 +167,10 @@ function typeset(node: HTMLElement): void {
     initialized = true;
   }
   if ((window as any).MathJax) {
-    MathJax.Hub.Queue(['Typeset', MathJax.Hub, node]);
+    MathJax.Hub.Queue(
+      ['Typeset', MathJax.Hub, node,
+      ['resetEquationNumbers', MathJax.InputJax.TeX]]
+    );
   }
 }
 
