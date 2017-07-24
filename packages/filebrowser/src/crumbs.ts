@@ -22,12 +22,16 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  Dialog, DOMUtils, showDialog
+  DOMUtils
 } from '@jupyterlab/apputils';
 
 import {
   PathExt
 } from '@jupyterlab/coreutils';
+
+import {
+  renameFile
+} from '@jupyterlab/docmanager';
 
 import {
   FileBrowserModel
@@ -270,6 +274,7 @@ class BreadCrumbs extends Widget {
 
     const path = BREAD_CRUMB_PATHS[index];
     const model = this._model;
+    const manager = model.manager;
 
     // Move all of the items.
     let promises: Promise<any>[] = [];
@@ -277,29 +282,7 @@ class BreadCrumbs extends Widget {
     for (let oldPath of oldPaths) {
       let name = PathExt.basename(oldPath);
       let newPath = PathExt.join(path, name);
-      promises.push(model.manager.rename(oldPath, newPath).catch(error => {
-        if (error.xhr) {
-          error.message = `${error.xhr.status}: error.statusText`;
-        }
-        if (error.message.indexOf('409') !== -1) {
-          let overwrite = Dialog.warnButton({ label: 'OVERWRITE' });
-          let options = {
-            title: 'Overwrite file?',
-            body: `"${newPath}" already exists, overwrite?`,
-            buttons: [Dialog.cancelButton(), overwrite]
-          };
-          return showDialog(options).then(result => {
-            if (!model.isDisposed && result.button.accept) {
-              return model.manager.deleteFile(newPath).then(() => {
-                if (!model.isDisposed) {
-                  return model.manager.rename(oldPath, newPath);
-                }
-                return Promise.reject('Model is disposed') as Promise<any>;
-              });
-            }
-          });
-        }
-      }));
+      promises.push(renameFile(manager, oldPath, newPath));
     }
     Promise.all(promises).catch(err => {
       utils.showErrorMessage('Move Error', err);

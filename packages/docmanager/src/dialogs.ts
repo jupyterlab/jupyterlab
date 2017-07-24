@@ -86,17 +86,28 @@ function renameFile(manager: IDocumentManager, oldPath: string, newPath: string)
     if (error.message.indexOf('409') === -1) {
       throw error;
     }
-    let options = {
-      title: 'Overwrite file?',
-      body: `"${newPath}" already exists, overwrite?`,
-      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'OVERWRITE' })]
-    };
-    return showDialog(options).then(result => {
-      if (!result.button.accept) {
-        return Promise.resolve(null);
+    return shouldOverwrite(newPath).then(value => {
+      if (value) {
+        return manager.overwrite(oldPath, newPath);
       }
-      return manager.overwrite(oldPath, newPath);
+      return Promise.reject('File not renamed');
     });
+  });
+}
+
+
+/**
+ * Ask the user whether to overwrite a file.
+ */
+export
+function shouldOverwrite(path: string): Promise<boolean> {
+  let options = {
+    title: 'Overwrite file?',
+    body: `"${path}" already exists, overwrite?`,
+    buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'OVERWRITE' })]
+  };
+  return showDialog(options).then(result => {
+    return Promise.resolve(result.button.accept);
   });
 }
 

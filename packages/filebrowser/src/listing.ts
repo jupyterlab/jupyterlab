@@ -618,6 +618,13 @@ class DirListing extends Widget {
     case 'contextmenu':
       this._evtContextMenu(event as MouseEvent);
       break;
+    case 'dragenter':
+    case 'dragover':
+      event.preventDefault();
+      break;
+    case 'drop':
+      this._evtNativeDrop(event as DragEvent);
+      break;
     case 'scroll':
       this._evtScroll(event as MouseEvent);
       break;
@@ -650,6 +657,9 @@ class DirListing extends Widget {
     node.addEventListener('click', this);
     node.addEventListener('dblclick', this);
     node.addEventListener('contextmenu', this);
+    content.addEventListener('dragenter', this);
+    content.addEventListener('dragover', this);
+    content.addEventListener('drop', this);
     content.addEventListener('scroll', this);
     content.addEventListener('p-dragenter', this);
     content.addEventListener('p-dragleave', this);
@@ -670,6 +680,9 @@ class DirListing extends Widget {
     node.removeEventListener('dblclick', this);
     node.removeEventListener('contextmenu', this);
     content.removeEventListener('scroll', this);
+    content.removeEventListener('dragover', this);
+    content.removeEventListener('dragover', this);
+    content.removeEventListener('drop', this);
     content.removeEventListener('p-dragenter', this);
     content.removeEventListener('p-dragleave', this);
     content.removeEventListener('p-dragover', this);
@@ -985,6 +998,19 @@ class DirListing extends Widget {
     }
   }
 
+  /**
+   * Handle the `drop` event for the widget.
+   */
+  private _evtNativeDrop(event: DragEvent): void {
+    let files = event.dataTransfer.files;
+    if (files.length === 0) {
+      return;
+    }
+    event.preventDefault();
+    for (let i = 0; i < files.length; i++) {
+      this._model.upload(files[i]);
+    }
+  }
 
   /**
    * Handle the `'p-dragenter'` event for the widget.
@@ -1298,7 +1324,9 @@ class DirListing extends Widget {
       const newPath = PathExt.join(this._model.path, newName);
       const promise = renameFile(manager, oldPath, newPath);
       return promise.catch(error => {
-        utils.showErrorMessage('Rename Error', error);
+        if (error !== 'File not renamed') {
+          utils.showErrorMessage('Rename Error', error);
+        }
         this._inRename = false;
         return original;
       }).then(() => {
@@ -1306,7 +1334,9 @@ class DirListing extends Widget {
           this._inRename = false;
           return Promise.reject('Disposed') as Promise<string>;
         }
-        this.selectItemByName(newName);
+        if (this._inRename) {
+          this.selectItemByName(newName);
+        }
         this._inRename = false;
         return newName;
       });
