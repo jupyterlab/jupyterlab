@@ -6,12 +6,11 @@
 .jp-MimeDocument {
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
   outline: none;
-  overflow: hidden;
   margin-top: -1px;
 }
 
 
-.jp-MimeDocument .jp-Toolbar {
+.jp-MimeDocument > .jp-Toolbar {
     display: block;
     min-height: var(--jp-toolbar-micro-height);
     background: var(--jp-toolbar-background);
