@@ -33,6 +33,16 @@ import {
 
 
 /**
+ * The ratio panes in the plugin editor.
+ */
+const DEFAULT_INNER = [5, 2];
+
+/**
+ * The ratio panes in the setting editor.
+ */
+const DEFAULT_OUTER = [1, 3];
+
+/**
  * The class name added to all setting editors.
  */
 const SETTING_EDITOR_CLASS = 'jp-SettingEditor';
@@ -216,7 +226,6 @@ class SettingEditor extends Widget {
 
     const { key, state } = this;
     const editor = this._editor;
-    const panel = this._panel;
 
     return this._fetching = state.fetch(key).then(saved => {
       this._fetching = null;
@@ -225,8 +234,8 @@ class SettingEditor extends Widget {
         return;
       }
 
-      const inner = editor.sizes;
-      const outer = panel.relativeSizes();
+      const inner = DEFAULT_INNER;
+      const outer = DEFAULT_OUTER;
       const plugin = editor.settings ? editor.settings.plugin : '';
 
       if (!saved) {
@@ -346,7 +355,7 @@ class SettingEditor extends Widget {
   private _instructions: Widget;
   private _list: PluginList;
   private _panel: SplitPanel;
-  private _presets = { inner: [5, 2], outer: [1, 3], plugin: '' };
+  private _presets = { inner: DEFAULT_INNER, outer: DEFAULT_OUTER, plugin: '' };
   private _saving = false;
 }
 
