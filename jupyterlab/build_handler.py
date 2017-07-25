@@ -41,10 +41,10 @@ class Builder(object):
     @gen.coroutine
     def cancel(self):
         if not self._future:
-            return False
+            yield False
         self._should_abort = True
         result = yield self._future
-        return not result
+        yield not result
 
     @gen.coroutine
     def _run_build(self, app_dir):
