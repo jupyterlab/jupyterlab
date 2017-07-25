@@ -72,12 +72,12 @@ const mainPlugin: JupyterLabPlugin<void> = {
     };
 
     builder.getStatus().then(response => {
-      // if (response.status === 'building') {
-      //   return doBuild();
-      // }
-      // if (response.status !== 'needed') {
-      //   return;
-      // }
+      if (response.status === 'building') {
+        return doBuild();
+      }
+      if (response.status !== 'needed') {
+        return;
+      }
       let body = h.div(
         h.p(
           'JupyterLab build is suggested:',
