@@ -12,7 +12,7 @@ from .commands import (
     get_app_dir, list_extensions, should_build, get_user_settings_dir
 )
 from .settings_handler import settings_path, SettingsHandler
-from .build_handler import build_path, BuildHandler
+from .build_handler import build_path, Builder, BuildHandler
 from ._version import __version__
 
 #-----------------------------------------------------------------------------
@@ -104,9 +104,11 @@ def load_jupyter_server_extension(nbapp):
     })
 
     build_url = ujoin(base_url, build_path)
+    builder = Builder(nbapp.log)
     build_handler = (build_url, BuildHandler, {
         'app_dir': app_dir,
-        'core_mode': core_mode
+        'core_mode': core_mode,
+        'builder': builder
     })
 
     web_app.add_handlers(".*$", [settings_handler, build_handler])
