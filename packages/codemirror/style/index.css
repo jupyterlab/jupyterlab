@@ -30,9 +30,14 @@
 
 
 .CodeMirror pre {
+  color: var(--jp-mirror-editor-pre-color);
   padding: 0;
   border: 0;
   border-radius: 0;
+}
+
+.jp-OutputArea-output pre {
+  color: var(--jp-mirror-editor-pre-color);
 }
 
 
@@ -58,8 +63,20 @@
 }
 
 
+.CodeMirror-cursor {
+  border-left: 1px solid var(--jp-code-cursor-color);
+}
+
+
 .CodeMirror.jp-mod-readOnly .CodeMirror-cursor {
+  border-left: 1px solid var(--jp-code-cursor-color);
   display: none;
+}
+
+
+.CodeMirror-gutters {
+  border-right: 1px solid var(--jp-border-color1);
+  background-color: var(--jp-layout-color2);
 }
 
 
@@ -77,6 +94,17 @@
   margin-right: -5px;
 }
 
+
+.CodeMirror-focused .CodeMirror-selected {
+  background-color: var(--jp-mirror-editor-selected-focus-state);
+}
+
+
+.CodeMirror-selected {
+  background-color: var(--jp-mirror-editor-selected-state)
+}
+
+
 .jp-CollaboratorCursor-hover {
   position: absolute;
   z-index: 1;
@@ -92,6 +120,32 @@
   white-space: nowrap;
 }
 
+.CodeMirror-vscrollbar::-webkit-scrollbar, .CodeMirror-hscrollbar::-webkit-scrollbar {
+  background-color: var(--jp-layout-color0);
+  width: var(--jp-scrollbar-width);
+}
+
+.CodeMirror-vscrollbar::-webkit-scrollbar {
+  border-left: 1px solid var(--jp-border-color1);
+}
+
+.CodeMirror-hscrollbar::-webkit-scrollbar {
+  border-top: 1px solid var(--jp-border-color1);
+}
+
+.CodeMirror-vscrollbar::-webkit-scrollbar-thumb, .CodeMirror-hscrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--jp-layout-color2);
+  border-radius: 0px;
+}
+
+.CodeMirror-vscrollbar::-webkit-scrollbar-thumb {
+  border-left: 1px solid var(--jp-border-color1);
+}
+
+.CodeMirror-hscrollbar::-webkit-scrollbar-thumb {
+  border-top: 1px solid var(--jp-border-color1);
+}
+
 
 
 /*
@@ -102,29 +156,29 @@
 */
 
 
-.cm-s-jupyter span.cm-keyword      { color: #008000; font-weight: bold; }
-.cm-s-jupyter span.cm-atom         { color: #88F; }
-.cm-s-jupyter span.cm-number       { color: #080; }
-.cm-s-jupyter span.cm-def          { color: #00f; }
-.cm-s-jupyter span.cm-variable     { color: var(--md-grey-900) }
-.cm-s-jupyter span.cm-variable-2   { color: var(--md-grey-800) }
-.cm-s-jupyter span.cm-variable-3   { color: var(--md-grey-700) }
-.cm-s-jupyter span.cm-punctuation  { color: #05a; }
-.cm-s-jupyter span.cm-property     { color: #05a; }
-.cm-s-jupyter span.cm-operator     { color: #AA22FF; font-weight: bold; }
-.cm-s-jupyter span.cm-comment      { color: #408080; font-style: italic; }
-.cm-s-jupyter span.cm-string       { color: #BA2121; }
-.cm-s-jupyter span.cm-string-2     { color: #f50; }
-.cm-s-jupyter span.cm-meta         { color: #AA22FF; }
-.cm-s-jupyter span.cm-qualifier    { color: #555; }
-.cm-s-jupyter span.cm-builtin      { color: #008000; }
-.cm-s-jupyter span.cm-bracket      { color: #997; }
-.cm-s-jupyter span.cm-tag          { color: #170; }
-.cm-s-jupyter span.cm-attribute    { color: #00c; }
-.cm-s-jupyter span.cm-header       { color: blue; }
-.cm-s-jupyter span.cm-quote        { color: #090; }
-.cm-s-jupyter span.cm-link         { color: #00c; }
-.cm-s-jupyter span.cm-error        { color: #f00; }
+.cm-s-jupyter span.cm-keyword      { color: var(--jp-mirror-editor-keyword-color); font-weight: bold; }
+.cm-s-jupyter span.cm-atom         { color: var(--jp-mirror-editor-atom-color); }
+.cm-s-jupyter span.cm-number       { color: var(--jp-mirror-editor-number-color); }
+.cm-s-jupyter span.cm-def          { color: var(--jp-mirror-editor-def-color); }
+.cm-s-jupyter span.cm-variable     { color: var(--jp-mirror-editor-variable-color) }
+.cm-s-jupyter span.cm-variable-2   { color: var(--jp-mirror-editor-variable-2-color) }
+.cm-s-jupyter span.cm-variable-3   { color: var(--jp-mirror-editor-variable-3-color) }
+.cm-s-jupyter span.cm-punctuation  { color: var(--jp-mirror-editor-punctuation-color); }
+.cm-s-jupyter span.cm-property     { color: var(--jp-mirror-editor-property-color); }
+.cm-s-jupyter span.cm-operator     { color: var(--jp-mirror-editor-operator-color); font-weight: bold; }
+.cm-s-jupyter span.cm-comment      { color: var(--jp-mirror-editor-comment-color); font-style: italic; }
+.cm-s-jupyter span.cm-string       { color: var(--jp-mirror-editor-string-color); }
+.cm-s-jupyter span.cm-string-2     { color: var(--jp-mirror-editor-string-2-color); }
+.cm-s-jupyter span.cm-meta         { color: var(--jp-mirror-editor-meta-color); }
+.cm-s-jupyter span.cm-qualifier    { color: var(--jp-mirror-editor-qualifier-color); }
+.cm-s-jupyter span.cm-builtin      { color: var(--jp-mirror-editor-builtin-color); }
+.cm-s-jupyter span.cm-bracket      { color: var(--jp-mirror-editor-bracket-color); }
+.cm-s-jupyter span.cm-tag          { color: var(--jp-mirror-editor-tag-color); }
+.cm-s-jupyter span.cm-attribute    { color: var(--jp-mirror-editor-attribute-color); }
+.cm-s-jupyter span.cm-header       { color: var(--jp-mirror-editor-header-color); }
+.cm-s-jupyter span.cm-quote        { color: var(--jp-mirror-editor-quote-color); }
+.cm-s-jupyter span.cm-link         { color: var(--jp-mirror-editor-link-color); }
+.cm-s-jupyter span.cm-error        { color: var(--jp-mirror-editor-error-color); }
 .cm-s-jupyter span.cm-hr           { color: #999; }
 
 .cm-s-jupyter span.cm-tab {

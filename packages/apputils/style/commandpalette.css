@@ -30,7 +30,7 @@
 
 .p-CommandPalette-search {
   padding: 8px;
-  background-color: var(--jp-border-color3);
+  background-color: var(--jp-layout-color2);
   border-bottom: 1px solid var(--jp-border-color1);
 }
 
@@ -38,7 +38,7 @@
   overflow: overlay;
   padding: 0px 8px;
   border: 1px solid var(--jp-border-color1);
-  background-color: white;
+  background-color: var(--jp-input-background-color);
   height: 30px;
 }
 
@@ -107,7 +107,7 @@
   font-weight: 600;
   cursor: pointer;
   text-transform: uppercase;
-  border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
+  border-bottom: solid var(--jp-border-width) var(--jp-border-color1);
   letter-spacing: 1px;
 }
 
@@ -139,21 +139,22 @@
 
 
 .p-CommandPalette-item.p-mod-disabled {
-  color: var(--jp-ui-font-color3);
+  color: var(--jp-ui-font-color2);
 }
 
 
 .p-CommandPalette-item.p-mod-active {
-  background: #e0e0e0;
+  background: var(--jp-layout-color3);
 }
 
 
 .p-CommandPalette-item:hover:not(.p-mod-active):not(.p-mod-disabled) {
-  background: #E5E5E5;
+  background: var(--jp-layout-color2);
 }
 
 
 .p-CommandPalette-itemLabel > mark {
+  color: var(--jp-ui-font-color0);
   background-color: transparent;
   font-weight: bold;
 }
@@ -167,6 +168,26 @@
 .p-CommandPalette-itemCaption {
   display: none;
 }
+
+
+.p-CommandPalette-content {
+  background-color: var(--jp-layout-color1);
+}
+
+
+.p-CommandPalette-content::-webkit-scrollbar {
+  background-color: var(--jp-layout-color1);
+  border-left: 1px solid var(--jp-border-color1);
+  width: var(--jp-scrollbar-width);
+}
+
+
+.p-CommandPalette-content::-webkit-scrollbar-thumb {
+  background-color: var(--jp-layout-color2);
+  border-left: 1px solid var(--jp-border-color1);
+  border-radius: 0px;
+}
+
 
 .p-CommandPalette-content:empty:after {
     content: "No results";

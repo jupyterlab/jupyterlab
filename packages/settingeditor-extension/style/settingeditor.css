@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 #setting-editor.jp-SettingEditor {
-  background-color: var(--md-grey-200);
+  background-color: var(--jp-layout-color0);
   border-top: var(--jp-border-width) solid var(--jp-border-color1);
   margin-top: -1px;
   outline: none;
@@ -28,7 +28,7 @@
 }
 
 #setting-editor.jp-SettingEditor .p-SplitPanel-handle {
-  background-color: var(--md-grey-400);
+  background-color: var(--jp-border-color1);
 }
 
 
@@ -61,7 +61,7 @@
 
 
 #setting-editor.jp-SettingEditor ul.jp-PluginList {
-  background-color: var(--jp-layout-color0);
+  background-color: var(--jp-layout-color1);
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
   list-style-type: none;
@@ -82,13 +82,12 @@
 
 
 #setting-editor.jp-SettingEditor ul.jp-PluginList li:hover {
-  border: 1px solid var(--md-grey-300);
-  background-color: var(--md-grey-200);
+  background-color: var(--jp-layout-color2);
 }
 
 
 #setting-editor.jp-SettingEditor ul.jp-PluginList li.jp-mod-selected {
-  background-color: var(--md-grey-200);
+  background-color: var(--jp-brand-color1);
 }
 
 
@@ -147,7 +146,7 @@
 #setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset table,
 #setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset th,
 #setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset td {
-  border: 1px solid var(--md-grey-300);
+  border: 1px solid var(--jp-border-color0);
 }
 
 #setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset li {

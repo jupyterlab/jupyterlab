@@ -12,10 +12,11 @@
 <path class="st0" d="M9.1,2.8"/>
 <path class="st0" d="M8.5,19.2"/>
 <path class="st0" d="M8.5,1.8"/>
+<path class="st1" d="M18.7,3.3v15.4H3.3V3.3H18.7 M20.2,1.8H1.8v18.3h18.3l0,0L20.2,1.8L20.2,1.8z"/>
 <g>
-	<path class="st1" d="M2.2,2.2v17.6h17.6V2.2H2.2z M16.5,16.5L11,12.1l-5.5,4.4v-11h11V16.5z"/>
+	<polygon class="st1" points="16.5,16.5 11.1,12.2 5.5,16.5 5.5,5.5 16.5,5.5 	"/>
 </g>
-<g class="st2">
+<g id="grid" class="st2">
 	<line class="st3" x1="11" y1="0" x2="11" y2="22"/>
 	<path class="st3" d="M21.5,11"/>
 	<path class="st3" d="M0.4,11"/>
@@ -58,7 +59,7 @@
 	<line class="st3" x1="4.4" y1="0" x2="4.4" y2="22"/>
 	<line class="st3" x1="22" y1="17.6" x2="0" y2="17.6"/>
 	<line class="st3" x1="22" y1="4.4" x2="0" y2="4.4"/>
-	<rect x="7.9" y="7.9" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -4.5536 10.999)" class="st3" width="6.2" height="6.2"/>
+	<rect x="7.9" y="7.9" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -4.5549 11.0015)" class="st3" width="6.2" height="6.2"/>
 	<line class="st3" x1="0" y1="16.5" x2="22" y2="16.5"/>
 	<line class="st3" x1="16.5" y1="22" x2="16.5" y2="0"/>
 	<line class="st3" x1="5.5" y1="22" x2="5.5" y2="0"/>

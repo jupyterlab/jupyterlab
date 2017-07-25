@@ -62,6 +62,7 @@
 
 
 .jp-FAQ-question {
+  color: var(--jp-ui-font-color0);
   list-style-type: none;
   padding: 4px 16px;
   margin-left: -16px;

@@ -64,9 +64,8 @@
 .jp-RenderedText pre .ansi-bright-white-bg { background-color: #A1A6B2; }
 
 
-.jp-RenderedText[data-mime-type="application/vnd.jupyter.stderr"],
-.jp-RenderedJavaScript {
-  background: #fdd;
+.jp-RenderedText[data-mime-type="application/vnd.jupyter.stderr"] {
+  background: var(--jp-notebook-error-background-color);
 }
 
 
@@ -292,7 +291,7 @@ margin-top = 14, 14, 14, 14, 8, 8
 
 
 .jp-RenderedHTMLCommon table {
-  border: none;
+  border: 1px solid var(--jp-border-color1);
   border-collapse: collapse;
   border-spacing: 0;
   color: var(--jp-ui-font-color1);
@@ -328,17 +327,23 @@ margin-top = 14, 14, 14, 14, 8, 8
 
 
 .jp-RenderedHTMLCommon th {
+  background-color: var(--jp-layout-color2);
   font-weight: bold;
 }
 
 
 .jp-RenderedHTMLCommon tbody tr:nth-child(odd) {
-  background: var(--md-grey-100);
+  background: var(--jp-layout-color0);
+}
+
+
+.jp-RenderedHTMLCommon tbody tr:nth-child(even) {
+  background: var(--jp-layout-color1);
 }
 
 
 .jp-RenderedHTMLCommon tbody tr:hover {
-  background: var(--md-light-blue-50);
+  background: var(--jp-notebook-tr-hover-background-color);
 }
 
 

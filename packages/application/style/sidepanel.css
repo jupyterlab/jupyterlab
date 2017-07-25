@@ -29,7 +29,7 @@
 
 
 .jp-SideBar.p-TabBar.jp-mod-left {
-  border-right: var(--jp-border-width) solid var(--jp-border-color1);
+  border-right: var(--jp-border-width) solid var(--jp-border-color0);
 }
 
 
@@ -86,7 +86,7 @@
 
 
 .jp-SideBar.jp-mod-left .p-TabBar-tab {
-  border-left: var(--jp-border-width) solid var(--jp-border-color1);
+  border-left: var(--jp-border-width) solid var(--jp-border-color0);
 }
 
 
