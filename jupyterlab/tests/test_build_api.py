@@ -47,6 +47,10 @@ class BuildAPITest(LabTestBase):
         t1 = threading.Thread(target=build_thread)
         t1.start()
 
-        time.sleep(1)
+        while 1:
+            resp = self.build_api.getStatus().json()
+            if resp['status'] == 'building':
+                break
+
         resp = self.build_api.clear()
         assert resp.status_code == 204
