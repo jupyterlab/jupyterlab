@@ -82,6 +82,26 @@ class BuildManager {
 
     }).catch(reason => { throw ServerConnection.makeError(reason); });
   }
+
+  /**
+   * Cancel an active build.
+   */
+  cancel(): Promise<void> {
+    const base = this.serverSettings.baseUrl;
+    const url = URLExt.join(base, BUILD_SETTINGS_URL);
+    const request = { method: 'DELETE', url };
+    const { serverSettings } = this;
+    const promise = ServerConnection.makeRequest(request, serverSettings);
+
+    return promise.then(response => {
+      const { status } = response.xhr;
+
+      if (status !== 204) {
+        throw ServerConnection.makeError(response);
+      }
+
+    }).catch(reason => { throw ServerConnection.makeError(reason); });
+  }
 }
 
 

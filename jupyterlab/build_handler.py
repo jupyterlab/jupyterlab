@@ -4,29 +4,19 @@
 # Distributed under the terms of the Modified BSD License.
 import json
 from tornado import gen, web
-from tornado.ioloop import IOLoop
-
-from multiprocessing.pool import ThreadPool
 
 from notebook.base.handlers import APIHandler
-from .commands import build, clean, should_build
-
-
-_workers = ThreadPool(1)
-
-
-def run_background(func, future, args=(), kwds={}):
-    def _callback(result):
-        IOLoop.instance().add_callback(lambda: future.set_result((result)))
-    _workers.apply_async(func, args, kwds, _callback)
+from .commands import build_async, clean, should_build
 
 
 class BuildHandler(APIHandler):
 
+    build_future = None
+    should_abort = False
+
     def initialize(self, app_dir, core_mode):
         self.app_dir = app_dir
         self.core_mode = core_mode
-        self.build_future = None
 
     @web.authenticated
     @gen.coroutine
@@ -34,7 +24,7 @@ class BuildHandler(APIHandler):
         if self.core_mode:
             self.finish(json.dumps(dict(status='stable', message='')))
             return
-        if self.build_future:
+        if BuildHandler.build_future:
             self.finish(json.dumps(dict(status='building', message='')))
             return
 
@@ -46,29 +36,46 @@ class BuildHandler(APIHandler):
 
     @web.authenticated
     @gen.coroutine
+    def delete(self):
+        if BuildHandler.build_future is None:
+            raise web.HTTPError(500, 'No build in progress')
+
+        self.log.warn('stopping')
+        BuildHandler.should_abort = True
+        yield BuildHandler.build_future
+        self.set_status(204)
+
+    @web.authenticated
+    @gen.coroutine
     def post(self):
         self.log.debug('Starting build')
-        if not self.build_future:
-            future = self.build_future = gen.Future()
-            run_background(self.run_build, future, args=(future,))
+        BuildHandler.should_abort = False
+        if not BuildHandler.build_future:
+            BuildHandler.build_future = future = gen.Future()
+            try:
+                yield self.run_build()
+                future.set_result(None)
+            except Exception as e:
+                future.set_exception(e)
         try:
-            yield self.build_future
+            yield BuildHandler.build_future
         except Exception as e:
             raise web.HTTPError(500, str(e))
-        self.build_future = None
+        BuildHandler.build_future = None
         self.log.debug('Build succeeded')
         self.set_status(200)
 
-    def run_build(self, future):
+    @gen.coroutine
+    def run_build(self):
         try:
-            build(self.app_dir, logger=self.log)
+            yield build_async(self.app_dir, logger=self.log, abort_callback=self.abort_callback)
         except Exception as e:
-            try:
-                self.log.warn('Build failed, running a clean and rebuild')
-                clean(self.app_dir)
-                build(self.app_dir, logger=self.log)
-            except Exception as e:
-                future.set_exception(e)
+            self.log.warn('Build failed, running a clean and rebuild')
+            clean(self.app_dir)
+            yield build_async(self.app_dir, logger=self.log, abort_callback=self.abort_callback)
+
+    def abort_callback(self):
+        return BuildHandler.should_abort
 
 
 # The path for lab build.
