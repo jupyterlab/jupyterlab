@@ -1676,8 +1676,8 @@ namespace DirListing {
       let modText = '';
       let modTitle = '';
       if (model.last_modified) {
-        modText = Time.formatHuman(model.last_modified);
-        modTitle = Time.format(model.last_modified);
+        modText = Time.formatHuman(new Date(model.last_modified));
+        modTitle = Time.format(new Date(model.last_modified));
       }
 
       // If an item is being edited currently, its text node is unavailable.
