@@ -2,29 +2,13 @@
 import threading
 import time
 
-from notebook.utils import url_path_join
-from jupyterlab.tests.utils import LabTestBase
+from jupyterlab.tests.utils import LabTestBase, APITester
 from notebook.tests.launchnotebook import assert_http_error
 
 
-class BuildAPI(object):
+class BuildAPITester(APITester):
     """Wrapper for build REST API requests"""
-
-    def __init__(self, request):
-        self.request = request
-
-    def _req(self, verb, path, body=None):
-        response = self.request(verb,
-                url_path_join('lab/api/build', path), data=body)
-
-        if 400 <= response.status_code < 600:
-            try:
-                response.reason = response.json()['message']
-            except Exception:
-                pass
-        response.raise_for_status()
-
-        return response
+    url = 'lab/api/build'
 
     def getStatus(self):
         return self._req('GET', '')
@@ -40,7 +24,7 @@ class BuildAPITest(LabTestBase):
     """Test the build web service API"""
 
     def setUp(self):
-        self.build_api = BuildAPI(self.request)
+        self.build_api = BuildAPITester(self.request)
 
     def test_get_status(self):
         """Make sure there are no kernels running at the start"""
