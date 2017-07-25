@@ -41,7 +41,8 @@ class BuildAPITest(LabTestBase):
             self.build_api.clear()
 
         def build_thread():
-            self.build_api.build()
+            with assert_http_error(500):
+                self.build_api.build()
 
         t1 = threading.Thread(target=build_thread)
         t1.start()
