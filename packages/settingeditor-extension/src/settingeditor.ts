@@ -73,6 +73,26 @@ const PLUGIN_ICON_CLASS = 'jp-PluginList-icon';
 const FIELDSET_TABLE_CLASS = 'jp-PluginFieldset-table';
 
 /**
+ * The class name added to the fieldset header.
+ */
+const FIELDSET_HEADER_CLASS = 'jp-PluginFieldset-header';
+
+/**
+ * The class name added to the fieldset table rows.
+ */
+const FIELDSET_ROW_CLASS = 'jp-PluginFieldset-row';
+
+/**
+ * The class name added to the fieldset table cells.
+ */
+const FIELDSET_CELL_CLASS = 'jp-PluginFieldset-cell';
+
+/**
+ * The class name added to fieldset buttons.
+ */
+const FIELDSET_BUTTON_CLASS = 'jp-PluginFieldset-button';
+
+/**
  * The class name for the add icon used to add individual preferences.
  */
 const FIELDSET_ADD_ICON_CLASS = 'jp-AddIcon';
@@ -918,21 +938,23 @@ namespace Private {
     const properties = schema.properties || { };
     const title = `(${plugin}) ${schema.description}`;
     const label = `Fields - ${schema.title || plugin}`;
-    const headers = h.div(
-      h.div(''),
-      h.div('Key'),
-      h.div('Type'),
-      h.div('Default'));
+    const addClass = `${FIELDSET_BUTTON_CLASS} ${FIELDSET_ADD_ICON_CLASS}`;
+    const mainCellClass = `${FIELDSET_CELL_CLASS} jp-mod-main`;
+    const headers = h.div({ className: FIELDSET_ROW_CLASS },
+      h.div({ className: FIELDSET_HEADER_CLASS }, ''),
+      h.div({ className: FIELDSET_HEADER_CLASS }, 'Key'),
+      h.div({ className: FIELDSET_HEADER_CLASS }, 'Type'));
 
     Object.keys(properties).forEach(key => {
       const field = properties[key];
       const { title, type } = field;
+      const exists = key in user;
 
-      fields[key] = h.div(
-        h.div({ className: key in user ? FIELDSET_ADD_ICON_CLASS : undefined }),
-        h.div(h.code({ title }, key)),
-        h.div(h.code(type)),
-        h.div('default' in field ? h.code(JSON.stringify(field.default)) : ''));
+      fields[key] = h.div({ className: FIELDSET_ROW_CLASS },
+        h.div({ className: FIELDSET_CELL_CLASS }, exists ?
+          h.div({ className: addClass }) : undefined),
+        h.div({ className: mainCellClass }, h.code({ title }, key)),
+        h.div({ className: FIELDSET_CELL_CLASS }, h.code(type)));
     });
 
     const rows: VirtualElement[] = Object.keys(fields)
