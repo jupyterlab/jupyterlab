@@ -16,6 +16,10 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
+  JSONObject, JSONValue
+} from '@phosphor/coreutils';
+
+import {
   Message
 } from '@phosphor/messaging';
 
@@ -966,6 +970,45 @@ namespace Private {
 
       node.appendChild(VirtualDOM.realize(table));
     }
+  }
+
+  /**
+   * Create a fully extrapolated default value for a key in a plugin schema.
+   */
+  function reifyDefault(schema: ISettingRegistry.ISchema, key?: string): JSONValue {
+    const { properties } = schema;
+
+    if (schema.type !== 'object') {
+      return 'default' in schema ? schema.default : '';
+    }
+
+    if (!properties) {
+      return 'default' in schema ? schema.default : undefined;
+    }
+
+    const property = key ? properties[key] : schema;
+
+    if (property.type !== 'object') {
+      return 'default' in property ? property.default : '';
+    }
+
+    const result: JSONObject = property.default || { };
+
+    if (!property.properties) {
+      return result;
+    }
+
+    Object.keys(property.properties).forEach(prop => {
+      if ('default' in property.properties[prop]) {
+        const value = reifyDefault(property.properties[prop]);
+
+        if (value !== undefined) {
+          result[prop] = value;
+        }
+      }
+    });
+
+    return result;
   }
 
   /**
