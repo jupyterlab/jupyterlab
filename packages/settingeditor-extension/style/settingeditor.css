@@ -3,6 +3,20 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+
+:root {
+  --jp-private-settingeditor-add-width: 15px;
+  --jp-private-settingeditor-key-width: 150px;
+  --jp-private-settingeditor-type-width: 75px;
+  --jp-private-settingeditor-value-width: calc(
+    100% -
+    var(--jp-private-settingeditor-add-width) -
+    var(--jp-private-settingeditor-key-width) -
+    var(--jp-private-settingeditor-type-width)
+  );
+}
+
+
 #setting-editor {
   background-color: var(--jp-layout-color0);
   border-top: var(--jp-border-width) solid var(--jp-border-color1);
@@ -139,10 +153,12 @@
 
 
 #setting-editor .jp-PluginEditor table.jp-PluginFieldset-table {
+  table-layout: fixed;
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
   padding: 2px;
   width: calc(100% - 4px);
+  overflow: hidden;
 }
 
 
@@ -159,9 +175,34 @@
 }
 
 
-#setting-editor .jp-PluginEditor .jp-PluginFieldset-value {
-  width: 100%;
-  max-width: 100%;
+#setting-editor .jp-PluginEditor .jp-PluginFieldset-table th.jp-PluginFieldset-add {
+  width: var(--jp-private-settingeditor-add-width);
+}
+
+
+#setting-editor .jp-PluginEditor .jp-PluginFieldset-table th.jp-PluginFieldset-key {
+  width: var(--jp-private-settingeditor-key-width);
+}
+
+
+#setting-editor .jp-PluginEditor .jp-PluginFieldset-table th.jp-PluginFieldset-value {
+  width: var(--jp-private-settingeditor-value-width);
+}
+
+
+#setting-editor .jp-PluginEditor .jp-PluginFieldset-table th.jp-PluginFieldset-type {
+  width: var(--jp-private-settingeditor-type-width);
+}
+
+
+#setting-editor .jp-PluginEditor td.jp-PluginFieldset-key {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+
+#setting-editor .jp-PluginEditor td.jp-PluginFieldset-value {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;

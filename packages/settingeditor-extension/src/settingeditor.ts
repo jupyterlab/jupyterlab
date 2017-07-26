@@ -77,6 +77,11 @@ const PLUGIN_ICON_CLASS = 'jp-PluginList-icon';
 const FIELDSET_TABLE_CLASS = 'jp-PluginFieldset-table';
 
 /**
+ * The class name added to the fieldset table add button cells.
+ */
+const FIELDSET_ADD_CLASS = 'jp-PluginFieldset-add';
+
+/**
  * The class name added to the fieldset table key cells.
  */
 const FIELDSET_KEY_CLASS = 'jp-PluginFieldset-key';
@@ -85,6 +90,11 @@ const FIELDSET_KEY_CLASS = 'jp-PluginFieldset-key';
  * The class name added to the fieldset table default value cells.
  */
 const FIELDSET_VALUE_CLASS = 'jp-PluginFieldset-value';
+
+/**
+ * The class name added to the fieldset table type cells.
+ */
+const FIELDSET_TYPE_CLASS = 'jp-PluginFieldset-type';
 
 /**
  * The class name added to fieldset buttons.
@@ -939,10 +949,10 @@ namespace Private {
     const label = `Fields - ${schema.title || plugin}`;
     const addClass = `${FIELDSET_BUTTON_CLASS} ${FIELDSET_ADD_ICON_CLASS}`;
     const headers = h.tr(
-      h.th(''),
-      h.th('Key'),
-      h.th('Default'),
-      h.th('Type'));
+      h.th({ className: FIELDSET_ADD_CLASS }, ''),
+      h.th({ className: FIELDSET_KEY_CLASS }, 'Key'),
+      h.th({ className: FIELDSET_VALUE_CLASS }, 'Default'),
+      h.th({ className: FIELDSET_TYPE_CLASS }, 'Type'));
 
     Object.keys(properties).forEach(key => {
       const field = properties[key];
@@ -954,8 +964,8 @@ namespace Private {
 
       fields[key] = h.tr(
         h.td(exists ? undefined : h.div({ className: addClass })),
-        h.td({ className: FIELDSET_KEY_CLASS, title: field.title },
-          h.code({ title: field.title }, key)),
+        h.td({ className: FIELDSET_KEY_CLASS, title: field.title || key },
+          h.code({ title: field.title || key }, key)),
         h.td({ className: FIELDSET_VALUE_CLASS, title: valueTitle },
           h.code({ title: valueTitle }, value)),
         h.td(h.code(type)));
