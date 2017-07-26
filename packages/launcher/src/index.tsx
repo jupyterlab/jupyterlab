@@ -377,7 +377,7 @@ namespace Launcher {
 function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcherCallback: (widget: Widget) => void): vdom.VirtualElement {
   // Build the onclick handler.
   let onclick = () => {
-    // If the an item has already been launched,
+    // If an item has already been launched,
     // don't try to launch another.
     if (launcher.pending === true) {
       return;
