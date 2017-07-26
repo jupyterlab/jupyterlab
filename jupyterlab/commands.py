@@ -563,11 +563,6 @@ def _install_linked_package(staging, name, path, logger):
     shutil.move(pjoin(target, fname), linked)
     shutil.rmtree(target)
 
-    # Set the dependency in the package.
-    core_data['dependencies'][data['name']] = ext_path
-    with open(pjoin(staging, 'package.json'), 'w') as fid:
-        json.dump(core_data, fid, indent=4)
-
 
 def _get_build_config(app_dir):
     """Get the build config data for the given app dir
@@ -779,6 +774,7 @@ def _get_package_template(app_dir, logger):
     data = _get_core_data()
     extensions = _get_extensions(app_dir)
 
+    # Handle extensions
     for (key, value) in extensions.items():
         # Reject incompatible extensions with a message.
         deps = value.get('dependencies', dict())
@@ -794,6 +790,14 @@ def _get_package_template(app_dir, logger):
         else:
             data['jupyterlab']['mimeExtensions'].append(key)
 
+    # Handle linked packages.
+    linked = _get_linked_packages(app_dir, logger)
+    for (key, path) in linked.items():
+        if key in extensions:
+            continue
+        data['dependencies'][key] = path
+
+    # Handle uninstalled core extensions.
     for item in _get_uinstalled_core_extensions(app_dir):
         if item in data['jupyterlab']['extensions']:
             data['jupyterlab']['extensions'].remove(item)
