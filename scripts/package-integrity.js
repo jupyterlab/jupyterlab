@@ -61,7 +61,7 @@ function validate(dname) {
 
     // Extract all of the imports from the TypeScript files.
     filenames.forEach(fileName => {
-        let sourceFile = ts.createSourceFile(fileName, readFileSync(fileName).toString(), ts.ScriptTarget.ES6, /*setParentNodes */ true);
+        var sourceFile = ts.createSourceFile(fileName, readFileSync(fileName).toString(), ts.ScriptTarget.ES6, /*setParentNodes */ true);
         imports = imports.concat(getImports(sourceFile));
     });
     var names = Array.from(new Set(imports)).sort();
