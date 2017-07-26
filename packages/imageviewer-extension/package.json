@@ -14,8 +14,8 @@
   "dependencies": {
     "@jupyterlab/application": "^0.9.0",
     "@jupyterlab/apputils": "^0.9.0",
-    "@jupyterlab/docregistry": "^0.9.0",
-    "@jupyterlab/imageviewer": "^0.9.0"
+    "@jupyterlab/imageviewer": "^0.9.0",
+    "@phosphor/commands": "^1.4.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",

@@ -9,12 +9,12 @@
     "@phosphor/algorithm": "^1.1.1",
     "@phosphor/coreutils": "^1.2.0",
     "@phosphor/disposable": "^1.1.1",
-    "@phosphor/signaling": "^1.2.1",
-    "@types/text-encoding": "0.0.30"
+    "@phosphor/signaling": "^1.2.1"
   },
   "devDependencies": {
     "@types/expect.js": "^0.3.29",
     "@types/mocha": "^2.2.32",
+    "@types/text-encoding": "0.0.30",
     "@types/ws": "0.0.39",
     "expect.js": "^0.3.1",
     "istanbul": "^0.3.18",

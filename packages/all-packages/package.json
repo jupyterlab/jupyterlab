@@ -18,7 +18,6 @@
     "@jupyterlab/apputils": "^0.9.0",
     "@jupyterlab/apputils-extension": "^0.9.0",
     "@jupyterlab/cells": "^0.9.0",
-    "@jupyterlab/chatbox-extension": "^0.3.3",
     "@jupyterlab/codeeditor": "^0.9.0",
     "@jupyterlab/codemirror": "^0.9.0",
     "@jupyterlab/codemirror-extension": "^0.9.0",
