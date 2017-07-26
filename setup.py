@@ -112,7 +112,7 @@ install_requires = setuptools_args['install_requires'] = [
 
 extras_require = setuptools_args['extras_require'] = {
     'test:python_version == "2.7"': ['mock'],
-    'test': ['pytest'],
+    'test': ['pytest', 'requests'],
     'docs': [
         'sphinx',
         'recommonmark',
