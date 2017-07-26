@@ -19,9 +19,10 @@ class Builder(object):
 
     @gen.coroutine
     def build(self, app_dir):
-        if not self._future:
+        if not self.building:
             self._should_abort = False
             self._future = future = gen.Future()
+            self.building = True
             try:
                 yield self._run_build(app_dir)
                 future.set_result(True)
@@ -29,22 +30,22 @@ class Builder(object):
                 if str(e) == 'Aborted':
                     future.set_result(False)
                 future.set_exception(e)
+            finally:
+                self.building = False
         try:
-            result = yield self._future
-            if not result:
-                raise ValueError('Aborted')
+            yield self._future
+            if not self._future.result():
+                raise ValueError('Build aborted')
         except Exception as e:
-            raise web.HTTPError(500, str(e))
-        finally:
-            self._future = None
+            raise e
 
     @gen.coroutine
     def cancel(self):
-        if not self._future:
-            yield False
+        if not self.building:
+            raise gen.Return(False)
         self._should_abort = True
-        result = yield self._future
-        yield not result
+        yield self._future
+        raise gen.Return(not self._future.result())
 
     @gen.coroutine
     def _run_build(self, app_dir):
@@ -98,9 +99,10 @@ class BuildHandler(APIHandler):
     @gen.coroutine
     def post(self):
         self.log.debug('Starting build')
-        result = yield self.builder.build(self.app_dir)
-        if result == 'aborted':
-            raise web.HTTPError(500, 'Build aborted')
+        try:
+            yield self.builder.build(self.app_dir)
+        except Exception as e:
+            raise web.HTTPError(500, str(e))
 
         self.log.debug('Build succeeded')
         self.set_status(200)
