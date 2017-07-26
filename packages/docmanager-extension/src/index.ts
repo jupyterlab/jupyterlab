@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/docmanager';
 
 import {
-  Contents, Kernel, IServiceManager
+  Contents, Kernel
 } from '@jupyterlab/services';
 
 
@@ -60,8 +60,9 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<IDocumentManager> = {
   id: 'jupyter.services.document-manager',
   provides: IDocumentManager,
-  requires: [IServiceManager, ICommandPalette, IMainMenu],
-  activate: (app: JupyterLab, manager: IServiceManager, palette: ICommandPalette, mainMenu: IMainMenu): IDocumentManager => {
+  requires: [ICommandPalette, IMainMenu],
+  activate: (app: JupyterLab, palette: ICommandPalette, mainMenu: IMainMenu): IDocumentManager => {
+    const manager = app.serviceManager;
     const opener: DocumentManager.IWidgetOpener = {
       open: widget => {
         if (!widget.id) {

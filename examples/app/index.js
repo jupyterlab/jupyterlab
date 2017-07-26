@@ -26,7 +26,6 @@ var mods = [
   require('@jupyterlab/markdownviewer-extension'),
   require('@jupyterlab/notebook-extension'),
   require('@jupyterlab/running-extension'),
-  require('@jupyterlab/services-extension'),
   require('@jupyterlab/settingeditor-extension'),
   require('@jupyterlab/shortcuts-extension'),
   require('@jupyterlab/tabmanager-extension'),

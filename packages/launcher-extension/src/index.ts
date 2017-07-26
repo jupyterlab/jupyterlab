@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IServiceManager
-} from '@jupyterlab/services';
-
-import {
   JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
@@ -45,7 +41,6 @@ const plugin: JupyterLabPlugin<ILauncher> = {
   activate,
   id: 'jupyter.services.launcher',
   requires: [
-    IServiceManager,
     ICommandPalette
   ],
   provides: ILauncher,
@@ -62,7 +57,7 @@ export default plugin;
 /**
  * Activate the launcher.
  */
-function activate(app: JupyterLab, services: IServiceManager, palette: ICommandPalette): ILauncher {
+function activate(app: JupyterLab, palette: ICommandPalette): ILauncher {
   const { commands, shell } = app;
 
   let model = new LauncherModel();

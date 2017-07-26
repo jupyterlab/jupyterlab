@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
-  IServiceManager
+  ServiceManager
 } from '@jupyterlab/services';
 
 import {
@@ -65,7 +65,7 @@ const plugin: JupyterLabPlugin<ITerminalTracker> = {
   id: 'jupyter.extensions.terminal',
   provides: ITerminalTracker,
   requires: [
-    IServiceManager, IMainMenu, ICommandPalette, ILayoutRestorer
+    IMainMenu, ICommandPalette, ILayoutRestorer
   ],
   optional: [ILauncher],
   autoStart: true
@@ -81,14 +81,14 @@ export default plugin;
 /**
  * Activate the terminal plugin.
  */
-function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer, launcher: ILauncher | null): ITerminalTracker {
-  const { commands } = app;
+function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer, launcher: ILauncher | null): ITerminalTracker {
+  const { commands, serviceManager } = app;
   const category = 'Terminal';
   const namespace = 'terminal';
   const tracker = new InstanceTracker<Terminal>({ namespace });
 
   // Bail if there are no terminals available.
-  if (!services.terminals.isAvailable()) {
+  if (!serviceManager.terminals.isAvailable()) {
     console.log('Disabling terminals plugin because they are not available on the server');
     return tracker;
   }
@@ -107,7 +107,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
     }
   });
 
-  addCommands(app, services, tracker);
+  addCommands(app, serviceManager, tracker);
 
   // Add command palette and menu items.
   let menu = new Menu({ commands });
@@ -149,7 +149,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
  * Add the commands for the terminal.
  */
 export
-function addCommands(app: JupyterLab, services: IServiceManager, tracker: InstanceTracker<Terminal>) {
+function addCommands(app: JupyterLab, services: ServiceManager, tracker: InstanceTracker<Terminal>) {
   let { commands, shell } = app;
 
   /**

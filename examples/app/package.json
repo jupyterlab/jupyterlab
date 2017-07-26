@@ -24,7 +24,6 @@
     "@jupyterlab/markdownviewer-extension": "^0.9.0",
     "@jupyterlab/notebook-extension": "^0.9.0",
     "@jupyterlab/running-extension": "^0.9.0",
-    "@jupyterlab/services-extension": "^0.9.0",
     "@jupyterlab/settingeditor-extension": "^0.4.0",
     "@jupyterlab/shortcuts-extension": "^0.9.0",
     "@jupyterlab/tabmanager-extension": "^0.9.0",

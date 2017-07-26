@@ -7,6 +7,7 @@ from __future__ import print_function
 
 import os
 import sys
+from tornado.ioloop import IOLoop
 
 from jupyter_core.application import JupyterApp, base_flags, base_aliases
 

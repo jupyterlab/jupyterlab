@@ -11,9 +11,12 @@ import logging
 import pipes
 import os
 import glob
+from functools import partial
 from os import path as osp
 from os.path import join as pjoin
-from subprocess import check_output, CalledProcessError, STDOUT
+from tornado import gen
+from tornado.ioloop import IOLoop
+from subprocess import CalledProcessError, Popen, STDOUT
 import shutil
 import sys
 import tarfile
@@ -55,16 +58,26 @@ def get_user_settings_dir():
     return os.path.realpath(settings_dir)
 
 
+@gen.coroutine
 def run(cmd, **kwargs):
     """Run a command in the given working directory.
     """
     logger = kwargs.pop('logger', logging) or logging
+    abort_callback = kwargs.pop('abort_callback', None)
     logger.info('> ' + list2cmdline(cmd))
     kwargs.setdefault('shell', sys.platform == 'win32')
     kwargs.setdefault('env', os.environ)
     kwargs.setdefault('stderr', STDOUT)
+    yield gen.moment  # Sync up to the iterator
     try:
-        return check_output(cmd, **kwargs)
+        proc = Popen(cmd, **kwargs)
+        # Poll the process once per second until finished.
+        while 1:
+            yield gen.sleep(1)
+            if proc.poll() is not None:
+                break
+            if abort_callback and abort_callback():
+                raise ValueError('Aborted')
     except CalledProcessError as error:
         output = error.output.decode('utf-8')
         logger.info(output)
@@ -72,6 +85,21 @@ def run(cmd, **kwargs):
 
 
 def install_extension(extension, app_dir=None, logger=None):
+    """Install an extension package into JupyterLab.
+
+    Follows the semantics of https://docs.npmjs.com/cli/install.
+
+    The extension is first validated.
+
+    If link is true, the source directory is linked using `npm link`.
+    """
+    func = partial(install_extension_async, extension, app_dir=app_dir,
+                   logger=logger)
+    return IOLoop.instance().run_sync(func)
+
+
+@gen.coroutine
+def install_extension_async(extension, app_dir=None, logger=None, abort_callback=None):
     """Install an extension package into JupyterLab.
 
     Follows the semantics of https://docs.npmjs.com/cli/install.
@@ -104,7 +132,7 @@ def install_extension(extension, app_dir=None, logger=None):
     os.makedirs(target)
 
     # npm pack the extension
-    run([get_npm_name(), 'pack', extension], cwd=target, logger=logger)
+    yield run([get_npm_name(), 'pack', extension], cwd=target, logger=logger, abort_callback=abort_callback)
 
     fname = os.path.basename(glob.glob(pjoin(target, '*.*'))[0])
     data = _read_package(pjoin(target, fname))
@@ -149,6 +177,13 @@ def install_extension(extension, app_dir=None, logger=None):
 
 
 def link_package(path, app_dir=None, logger=None):
+    """Link a package against the JupyterLab build."""
+    func = partial(link_package_async, path, app_dir=app_dir, logger=logger)
+    return IOLoop.instance().run_sync(func)
+
+
+@gen.coroutine
+def link_package_async(path, app_dir=None, logger=None, abort_callback=None):
     """Link a package against the JupyterLab build.
     """
     logger = logger or logging
@@ -175,7 +210,7 @@ def link_package(path, app_dir=None, logger=None):
 
     is_extension = _is_extension(data)
     if is_extension:
-        install_extension(path, app_dir)
+        yield install_extension_async(path, app_dir, abort_callback=abort_callback)
     else:
         msg = ('*** Note: Linking non-extension package "%s" (lacks ' +
                '`jupyterlab.extension` metadata)')
@@ -245,12 +280,13 @@ def get_npm_name():
     return 'npm.cmd' if os.name == 'nt' else 'npm'
 
 
+@gen.coroutine
 def check_node():
     """Check for the existence of node and whether it is the right version.
     """
     try:
-        run(['node', 'node-version-check.js'], cwd=here)
-    except Exception:
+        yield run(['node', 'node-version-check.js'], cwd=here)
+    except Exception as e:
         raise ValueError('`node` version 5+ is required, see extensions in README')
 
 
@@ -477,11 +513,23 @@ def clean(app_dir=None):
 
 
 def build(app_dir=None, name=None, version=None, logger=None):
-    """Build the JupyterLab application."""
+    """Build the JupyterLab application.
+    """
+    func = partial(build_async, app_dir=app_dir, name=name, version=version,
+                   logger=logger)
+    return IOLoop.instance().run_sync(func)
+
+
+@gen.coroutine
+def build_async(app_dir=None, name=None, version=None, logger=None, abort_callback=None):
+    """Build the JupyterLab application.
+    """
     # Set up the build directory.
-    check_node()
     logger = logger or logging
     app_dir = get_app_dir(app_dir)
+
+    # Set up the build directory.
+    yield check_node()
     if app_dir == here:
         raise ValueError('Cannot build extensions in the core app')
 
@@ -500,27 +548,28 @@ def build(app_dir=None, name=None, version=None, logger=None):
     for (name, path) in _get_linked_packages(app_dir, logger=logger).items():
         # Handle linked extensions.
         if name in extensions:
-            install_extension(path, app_dir)
+            yield install_extension_async(path, app_dir, abort_callback=abort_callback)
         # Handle linked packages that are not extensions.
         else:
-            _install_linked_package(staging, name, path, logger)
+            yield _install_linked_package(staging, name, path, logger, abort_callback=abort_callback)
 
     npm = get_npm_name()
 
     # Make sure packages are installed.
-    run([npm, 'install'], cwd=staging, logger=logger)
+    yield run([npm, 'install'], cwd=staging, logger=logger, abort_callback=abort_callback)
 
     # Build the app.
-    run([npm, 'run', 'build'], cwd=staging, logger=logger)
+    yield run([npm, 'run', 'build'], cwd=staging, logger=logger, abort_callback= abort_callback)
 
     # Move the app to the static dir.
     static = pjoin(app_dir, 'static')
     if os.path.exists(static):
         shutil.rmtree(static)
-    shutil.copytree(pjoin(staging, 'build'), static)
+    shutil.copytree(pjoin(app_dir, 'staging', 'build'), static)
 
 
-def _install_linked_package(staging, name, path, logger):
+@gen.coroutine
+def _install_linked_package(staging, name, path, logger, abort_callback=None):
     """Install a linked non-extension package using a package tarball
     to prevent it from being treated as a symlink.
     """
@@ -538,7 +587,7 @@ def _install_linked_package(staging, name, path, logger):
     os.makedirs(target)
 
     # npm pack the extension
-    run([get_npm_name(), 'pack', path], cwd=target, logger=logger)
+    yield run([get_npm_name(), 'pack', path], cwd=target, logger=logger, abort_callback=abort_callback)
 
     fname = os.path.basename(glob.glob(pjoin(target, '*.*'))[0])
     data = _read_package(pjoin(target, fname))

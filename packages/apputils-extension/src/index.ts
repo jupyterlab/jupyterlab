@@ -16,7 +16,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IServiceManager, ServerConnection
+  ServiceManager, ServerConnection
 } from '@jupyterlab/services';
 
 import {
@@ -60,7 +60,7 @@ function apiError(id: string, xhr: XMLHttpRequest): Error {
 /**
  * Create a data connector to access plugin settings.
  */
-function newConnector(manager: IServiceManager): IDataConnector<ISettingRegistry.IPlugin, JSONObject> {
+function newConnector(manager: ServiceManager): IDataConnector<ISettingRegistry.IPlugin, JSONObject> {
   return {
     /**
      * Retrieve a saved bundle from the data connector.
@@ -132,12 +132,11 @@ const palettePlugin: JupyterLabPlugin<ICommandPalette> = {
  */
 const settingPlugin: JupyterLabPlugin<ISettingRegistry> = {
   id: 'jupyter.services.setting-registry',
-  activate: (app: JupyterLab, services: IServiceManager): ISettingRegistry => {
-    return new SettingRegistry({ connector: newConnector(services) });
+  activate: (app: JupyterLab): ISettingRegistry => {
+    return new SettingRegistry({ connector: newConnector(app.serviceManager) });
   },
   autoStart: true,
-  provides: ISettingRegistry,
-  requires: [IServiceManager]
+  provides: ISettingRegistry
 };
 
 

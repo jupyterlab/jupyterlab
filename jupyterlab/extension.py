@@ -12,6 +12,7 @@ from .commands import (
     get_app_dir, list_extensions, should_build, get_user_settings_dir
 )
 from .settings_handler import settings_path, SettingsHandler
+from .build_handler import build_path, Builder, BuildHandler
 from ._version import __version__
 
 #-----------------------------------------------------------------------------
@@ -72,12 +73,6 @@ def load_jupyter_server_extension(nbapp):
     web_app.settings.setdefault('page_config_data', dict())
     web_app.settings['page_config_data']['token'] = nbapp.token
 
-    if not core_mode:
-        build_needed, msg = should_build(app_dir)
-        if build_needed:
-            nbapp.log.warn('Build required: %s' % msg)
-            web_app.settings['page_config_data']['buildRequired'] = msg
-
     if core_mode or fallback:
         config.assets_dir = os.path.join(here, 'build')
         if not os.path.exists(config.assets_dir):
@@ -107,5 +102,9 @@ def load_jupyter_server_extension(nbapp):
         'schemas_dir': schemas_dir,
         'settings_dir': user_settings_dir
     })
-    nbapp.log.error('shemas_dir: %s' % schemas_dir)
-    web_app.add_handlers(".*$", [settings_handler])
+
+    build_url = ujoin(base_url, build_path)
+    builder = Builder(nbapp.log, core_mode, app_dir)
+    build_handler = (build_url, BuildHandler, {'builder': builder})
+
+    web_app.add_handlers(".*$", [settings_handler, build_handler])

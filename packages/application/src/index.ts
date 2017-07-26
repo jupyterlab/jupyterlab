@@ -14,6 +14,10 @@ import {
 } from '@jupyterlab/rendermime';
 
 import {
+  ServiceManager
+} from '@jupyterlab/services';
+
+import {
   Application, IPlugin
 } from '@phosphor/application';
 
@@ -58,6 +62,9 @@ class JupyterLab extends Application<ApplicationShell> {
     if (options.devMode) {
       this.shell.addClass('jp-mod-devMode');
     }
+
+    this.serviceManager = new ServiceManager();
+
     let linker = new CommandLinker({ commands: this.commands });
     this.commandLinker = linker;
 
@@ -92,6 +99,11 @@ class JupyterLab extends Application<ApplicationShell> {
    * The command linker used by the application.
    */
   readonly commandLinker: CommandLinker;
+
+  /**
+   * The service manager used by the application.
+   */
+  readonly serviceManager: ServiceManager;
 
   /**
    * The information about the application.
