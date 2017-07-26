@@ -142,6 +142,11 @@ class SettingEditor extends Widget {
     const editor = this._editor = new PluginEditor({ editorFactory });
     const confirm = () => editor.confirm();
     const list = this._list = new PluginList({ confirm, registry });
+    const when = options.when;
+
+    if (when) {
+      this._when = Array.isArray(when) ? Promise.all(when) : when;
+    }
 
     layout.addWidget(panel);
     panel.addWidget(list);
@@ -226,8 +231,9 @@ class SettingEditor extends Widget {
 
     const { key, state } = this;
     const editor = this._editor;
+    const promises = [state.fetch(key), this._when];
 
-    return this._fetching = state.fetch(key).then(saved => {
+    return this._fetching = Promise.all(promises).then(([saved]) => {
       this._fetching = null;
 
       if (this._saving) {
@@ -357,6 +363,7 @@ class SettingEditor extends Widget {
   private _panel: SplitPanel;
   private _presets = { inner: DEFAULT_INNER, outer: DEFAULT_OUTER, plugin: '' };
   private _saving = false;
+  private _when: Promise<any>;
 }
 
 
@@ -389,6 +396,11 @@ namespace SettingEditor {
      * The state database used to store layout.
      */
     state: IStateDB;
+
+    /**
+     * The point after which the editor should restore its state.
+     */
+    when?: Promise<any> | Array<Promise<any>>;
   }
 }
 
