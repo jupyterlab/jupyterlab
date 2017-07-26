@@ -1106,6 +1106,7 @@ namespace DocumentRegistry {
   const defaultNotebookFileType: IFileType = {
     ...fileTypeDefaults,
     name: 'notebook',
+    mimeTypes: ['application/x-ipynb+json'],
     extensions: ['.ipynb'],
     contentType: 'notebook',
     fileFormat: 'json',
