@@ -42,10 +42,11 @@ class Builder(object):
     @gen.coroutine
     def cancel(self):
         if not self.building:
-            raise gen.Return(False)
+            raise ValueError('No current build')
         self._should_abort = True
         yield self._future
-        raise gen.Return(not self._future.result())
+        if self._future.result():
+            raise ValueError('Build not aborted')
 
     @gen.coroutine
     def _run_build(self, app_dir):
@@ -90,9 +91,10 @@ class BuildHandler(APIHandler):
     @gen.coroutine
     def delete(self):
         self.log.warn('Canceling build')
-        result = yield self.builder.cancel()
-        if not result:
-            raise web.HTTPError(500, 'Build not aborted')
+        try:
+            yield self.builder.cancel()
+        except Exception as e:
+            raise web.HTTPError(500, str(e))
         self.set_status(204)
 
     @web.authenticated
