@@ -103,14 +103,23 @@ class FileBrowser extends Widget {
     this._manager = model.manager;
     this._crumbs = new BreadCrumbs({ model });
     this.toolbar = new Toolbar<Widget>();
+
+    let directoryPending = false;
     let newFolder = new ToolbarButton({
       className: 'jp-newFolderIcon',
       onClick: () => {
+        if (directoryPending === true) {
+          return;
+        }
+        directoryPending = true;
         this._manager.newUntitled({
           path: model.path,
           type: 'directory'
         }).then(model => {
           this._listing.selectItemByName(model.name);
+          directoryPending = false;
+        }).catch(err => {
+          directoryPending = false;
         });
       },
       tooltip: 'New Folder'
