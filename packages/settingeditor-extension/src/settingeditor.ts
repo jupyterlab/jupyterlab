@@ -77,6 +77,11 @@ const PLUGIN_ICON_CLASS = 'jp-PluginList-icon';
 const FIELDSET_TABLE_CLASS = 'jp-PluginFieldset-table';
 
 /**
+ * The class name added to the fieldset table key cells.
+ */
+const FIELDSET_KEY_CLASS = 'jp-PluginFieldset-key';
+
+/**
  * The class name added to the fieldset table default value cells.
  */
 const FIELDSET_VALUE_CLASS = 'jp-PluginFieldset-value';
@@ -941,15 +946,18 @@ namespace Private {
 
     Object.keys(properties).forEach(key => {
       const field = properties[key];
-      const { title, type } = field;
+      const { type } = field;
       const exists = key in user;
-      const value = JSON.stringify(reifyDefault(schema, key)) || '';
-      const valueClass = FIELDSET_VALUE_CLASS;
+      const reified = reifyDefault(schema, key);
+      const value = JSON.stringify(reified) || '';
+      const valueTitle = JSON.stringify(reified, null, 4);
 
       fields[key] = h.tr(
         h.td(exists ? undefined : h.div({ className: addClass })),
-        h.td(h.code({ title }, key)),
-        h.td({ className: valueClass }, h.code({ title: value }, value)),
+        h.td({ className: FIELDSET_KEY_CLASS, title: field.title },
+          h.code({ title: field.title }, key)),
+        h.td({ className: FIELDSET_VALUE_CLASS, title: valueTitle },
+          h.code({ title: valueTitle }, value)),
         h.td(h.code(type)));
     });
 
@@ -968,37 +976,31 @@ namespace Private {
    * Create a fully extrapolated default value for a key in a plugin schema.
    */
   function reifyDefault(schema: ISettingRegistry.ISchema, key?: string): JSONValue | undefined {
-    let { properties } = schema;
-
-    if (schema.type !== 'object') {
-      return 'default' in schema ? schema.default : undefined;
+    if (schema.type !== 'object' || !schema.properties) {
+      return schema.default;
     }
 
-    if (!properties) {
-      return 'default' in schema ? schema.default : undefined;
-    }
-
-    const property = key ? properties[key] : schema;
+    const property = key ? schema.properties[key] : schema;
 
     if (property.type !== 'object') {
       return 'default' in property ? property.default : '';
     }
 
+    const properties = property.properties;
     const result: JSONObject = property.default || { };
 
-    properties = property.properties;
     if (!properties) {
       return result;
     }
 
     for (let prop in properties) {
-      if (!('default' in properties[prop])) {
-        continue;
-      }
+      if ('default' in properties[prop]) {
+        const reified = reifyDefault(properties[prop]);
 
-      const reified = reifyDefault(properties[prop]);
+        if (reified === undefined) {
+          continue;
+        }
 
-      if (reified !== undefined) {
         result[prop] = reified;
       }
     }
