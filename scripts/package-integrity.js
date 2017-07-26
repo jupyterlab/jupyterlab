@@ -111,6 +111,7 @@ lernaConfig.packages.forEach(function(spec) {
     });
 });
 
+// Handle any errors.
 if (Object.keys(errors).length > 0) {
     console.log('Package integrity failures:')
     console.log(JSON.stringify(errors, null, 2));
