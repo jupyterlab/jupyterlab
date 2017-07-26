@@ -14,17 +14,30 @@ class Builder(object):
     _future = None
     _should_abort = False
 
-    def __init__(self, log):
+    def __init__(self, log, core_mode, app_dir):
         self.log = log
+        self.core_mode = core_mode
+        self.app_dir = app_dir
+
+    def get_status(self):
+        if self.core_mode:
+            return dict(status='stable', message='')
+        if self.building:
+            return dict(status='building', message='')
+
+        needed, message = should_build(self.app_dir)
+        status = 'needed' if needed else 'stable'
+
+        return dict(status=status, message=message)
 
     @gen.coroutine
-    def build(self, app_dir):
+    def build(self):
         if not self.building:
             self._should_abort = False
             self._future = future = gen.Future()
             self.building = True
             try:
-                yield self._run_build(app_dir)
+                yield self._run_build()
                 future.set_result(True)
             except Exception as e:
                 if str(e) == 'Aborted':
@@ -49,16 +62,18 @@ class Builder(object):
             raise ValueError('Build not aborted')
 
     @gen.coroutine
-    def _run_build(self, app_dir):
+    def _run_build(self):
+        app_dir = self.app_dir
+        log = self.log
         callback = self._abort_callback
         try:
-            yield build_async(app_dir, logger=self.log, abort_callback=callback)
+            yield build_async(app_dir, logger=log, abort_callback=callback)
         except Exception as e:
             if str(e) == 'Aborted':
                 raise e
             self.log.warn('Build failed, running a clean and rebuild')
-            clean(self.app_dir)
-            yield build_async(app_dir, logger=self.log, abort_callback=callback)
+            clean(app_dir)
+            yield build_async(app_dir, logger=log, abort_callback=callback)
 
     def _abort_callback(self):
         return self._should_abort
@@ -66,25 +81,13 @@ class Builder(object):
 
 class BuildHandler(APIHandler):
 
-    def initialize(self, app_dir, core_mode, builder):
-        self.app_dir = app_dir
-        self.core_mode = core_mode
+    def initialize(self, builder):
         self.builder = builder
 
     @web.authenticated
     @gen.coroutine
     def get(self):
-        if self.core_mode:
-            self.finish(json.dumps(dict(status='stable', message='')))
-            return
-        if self.builder.building:
-            self.finish(json.dumps(dict(status='building', message='')))
-            return
-
-        needed, message = should_build(self.app_dir)
-        status = 'needed' if needed else 'stable'
-
-        data = dict(status=status, message=message)
+        data = self.builder.get_status()
         self.finish(json.dumps(data))
 
     @web.authenticated
@@ -102,7 +105,7 @@ class BuildHandler(APIHandler):
     def post(self):
         self.log.debug('Starting build')
         try:
-            yield self.builder.build(self.app_dir)
+            yield self.builder.build()
         except Exception as e:
             raise web.HTTPError(500, str(e))
 

@@ -104,11 +104,7 @@ def load_jupyter_server_extension(nbapp):
     })
 
     build_url = ujoin(base_url, build_path)
-    builder = Builder(nbapp.log)
-    build_handler = (build_url, BuildHandler, {
-        'app_dir': app_dir,
-        'core_mode': core_mode,
-        'builder': builder
-    })
+    builder = Builder(nbapp.log, core_mode, app_dir)
+    build_handler = (build_url, BuildHandler, {'builder': builder})
 
     web_app.add_handlers(".*$", [settings_handler, build_handler])
