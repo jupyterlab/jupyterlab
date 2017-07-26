@@ -80,7 +80,13 @@ class BuildManager {
         throw ServerConnection.makeError(response);
       }
 
-    }).catch(reason => { throw ServerConnection.makeError(reason); });
+    }).catch(reason => {
+      let message = 'Build failed, please run `jupyter lab build` on the server for full output';
+      if (reason.xhr.status === 400) {
+        message = 'Build aborted';
+      }
+      throw ServerConnection.makeError(reason, message);
+    });
   }
 
   /**

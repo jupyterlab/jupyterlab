@@ -11,8 +11,9 @@ from .commands import build_async, clean, should_build
 
 class Builder(object):
     building = False
+    canceled = False
+    _canceling = False
     _future = None
-    _should_abort = False
 
     def __init__(self, log, core_mode, app_dir):
         self.log = log
@@ -32,8 +33,10 @@ class Builder(object):
 
     @gen.coroutine
     def build(self):
+        if self._canceling:
+            raise ValueError('Cancel in progress')
         if not self.building:
-            self._should_abort = False
+            self.canceled = False
             self._future = future = gen.Future()
             self.building = True
             try:
@@ -42,13 +45,12 @@ class Builder(object):
             except Exception as e:
                 if str(e) == 'Aborted':
                     future.set_result(False)
-                future.set_exception(e)
+                else:
+                    future.set_exception(e)
             finally:
                 self.building = False
         try:
             yield self._future
-            if not self._future.result():
-                raise ValueError('Build aborted')
         except Exception as e:
             raise e
 
@@ -56,10 +58,10 @@ class Builder(object):
     def cancel(self):
         if not self.building:
             raise ValueError('No current build')
-        self._should_abort = True
+        self._canceling = True
         yield self._future
-        if self._future.result():
-            raise ValueError('Build not aborted')
+        self._canceling = False
+        self.canceled = True
 
     @gen.coroutine
     def _run_build(self):
@@ -76,7 +78,7 @@ class Builder(object):
             yield build_async(app_dir, logger=log, abort_callback=callback)
 
     def _abort_callback(self):
-        return self._should_abort
+        return self._canceling
 
 
 class BuildHandler(APIHandler):
@@ -108,6 +110,9 @@ class BuildHandler(APIHandler):
             yield self.builder.build()
         except Exception as e:
             raise web.HTTPError(500, str(e))
+
+        if self.builder.canceled:
+            raise web.HTTPError(400, 'Build canceled')
 
         self.log.debug('Build succeeded')
         self.set_status(200)

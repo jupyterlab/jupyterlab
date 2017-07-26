@@ -66,7 +66,7 @@ const mainPlugin: JupyterLabPlugin<void> = {
       }).catch(err => {
         showDialog({
           title: 'Build Failed',
-          body: h.div('Error', h.pre(err.message))
+          body: h.pre(err.message)
         });
       });
     };
