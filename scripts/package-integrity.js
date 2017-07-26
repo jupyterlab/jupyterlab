@@ -10,11 +10,8 @@ var childProcess = require('child_process');
 var path = require('path');
 
 
-// Pattern for ignored files.
-var IGNORE = '\\.spec|\\./|\\.\\.|^\\.$';
-
-// Global packages.
-var GLOBALS = [];
+// Packages to ignore
+var IGNORE = ['..', '.'];
 
 
 /**
@@ -78,7 +75,7 @@ function validate(dname) {
 
     var problems = [];
     names.forEach(function(name) {
-        if (name.match(IGNORE) || GLOBALS.indexOf(name) !== -1) {
+        if (IGNORE.indexOf(name) !== -1) {
             return;
         }
         if (!deps[name]) {
@@ -86,7 +83,7 @@ function validate(dname) {
         }
     });
     Object.keys(deps).forEach(function(name) {
-        if (name.match(IGNORE) || GLOBALS.indexOf(name) !== -1) {
+        if (IGNORE.indexOf(name) !== -1) {
             return;
         }
         if (names.indexOf(name) === -1) {
