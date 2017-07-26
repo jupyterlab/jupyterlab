@@ -138,8 +138,7 @@
 }
 
 
-#setting-editor .jp-PluginEditor .jp-PluginFieldset-table {
-  display: table;
+#setting-editor .jp-PluginEditor table.jp-PluginFieldset-table {
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
   padding: 2px;
@@ -147,27 +146,25 @@
 }
 
 
-#setting-editor .jp-PluginEditor .jp-PluginFieldset-header {
-  display: table-cell;
+#setting-editor .jp-PluginEditor .jp-PluginFieldset-table tr {
+  color: var(--jp-ui-font-color2);
+  height: 16px;
+  overflow: hidden;
+}
+
+
+#setting-editor .jp-PluginEditor .jp-PluginFieldset-table th {
   background-color: var(--md-grey-400);
   font-weight: bold;
 }
 
 
-#setting-editor .jp-PluginEditor .jp-PluginFieldset-row {
-  display: table-row;
-  color: var(--jp-ui-font-color2);
-  height: 16px;
-}
-
-
-#setting-editor .jp-PluginEditor .jp-PluginFieldset-cell {
-  display: table-cell;
-}
-
-
-#setting-editor .jp-PluginEditor .jp-PluginFieldset-cell.jp-mod-main {
+#setting-editor .jp-PluginEditor .jp-PluginFieldset-value {
   width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 
