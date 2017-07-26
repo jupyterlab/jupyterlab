@@ -844,6 +844,7 @@ class PluginFieldset extends Widget {
  */
 namespace Private {
   /**
+   * Create the instructions text node.
    */
   export
   function createInstructionsNode(): HTMLElement {
