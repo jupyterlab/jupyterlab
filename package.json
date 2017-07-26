@@ -15,6 +15,7 @@
     "clean:tests": "lerna run clean --scope \"@jupyterlab/test-*\"",
     "coverage": "lerna run coverage --stream",
     "docs": "lerna run docs",
+    "get:dependency": "node scripts/get-dependency.js",
     "integrity": "node scripts/package-integrity.js",
     "publish": "npm update && npm install && npm run clean && npm run build && lerna publish -m \"Publish\"",
     "test": "cd test && npm test",
