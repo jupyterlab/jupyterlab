@@ -943,12 +943,11 @@ namespace Private {
       const field = properties[key];
       const { title, type } = field;
       const exists = key in user;
-      const value = JSON.stringify(reifyDefault(schema, key));
+      const value = JSON.stringify(reifyDefault(schema, key)) || '';
       const valueClass = FIELDSET_VALUE_CLASS;
 
-
       fields[key] = h.tr(
-        h.td(exists ? h.div({ className: addClass }) : undefined),
+        h.td(exists ? undefined : h.div({ className: addClass })),
         h.td(h.code({ title }, key)),
         h.td({ className: valueClass }, h.code({ title: value }, value)),
         h.td(h.code(type)));
@@ -968,11 +967,11 @@ namespace Private {
   /**
    * Create a fully extrapolated default value for a key in a plugin schema.
    */
-  function reifyDefault(schema: ISettingRegistry.ISchema, key?: string): JSONValue {
-    const { properties } = schema;
+  function reifyDefault(schema: ISettingRegistry.ISchema, key?: string): JSONValue | undefined {
+    let { properties } = schema;
 
     if (schema.type !== 'object') {
-      return 'default' in schema ? schema.default : '';
+      return 'default' in schema ? schema.default : undefined;
     }
 
     if (!properties) {
@@ -987,19 +986,22 @@ namespace Private {
 
     const result: JSONObject = property.default || { };
 
-    if (!property.properties) {
+    properties = property.properties;
+    if (!properties) {
       return result;
     }
 
-    Object.keys(property.properties).forEach(prop => {
-      if ('default' in property.properties[prop]) {
-        const value = reifyDefault(property.properties[prop]);
-
-        if (value !== undefined) {
-          result[prop] = value;
-        }
+    for (let prop in properties) {
+      if (!('default' in properties[prop])) {
+        continue;
       }
-    });
+
+      const reified = reifyDefault(properties[prop]);
+
+      if (reified !== undefined) {
+        result[prop] = reified;
+      }
+    }
 
     return result;
   }
