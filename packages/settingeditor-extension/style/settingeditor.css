@@ -98,7 +98,7 @@
 
 #setting-editor ul.jp-PluginList li:hover {
   background-color: var(--jp-layout-color2);
-  border: 1px solid var(--md-grey-300);
+  border: 1px solid var(--jp-border-color2);
 }
 
 
@@ -170,7 +170,7 @@
 
 
 #setting-editor .jp-PluginEditor th {
-  background-color: var(--md-grey-400);
+  background-color: var(--jp-layout-color3);
   font-weight: bold;
 }
 
