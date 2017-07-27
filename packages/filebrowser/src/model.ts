@@ -268,7 +268,7 @@ class FileBrowserModel implements IDisposable {
 
       const path = cwd['path'] as string;
       const localPath = path.split(':').pop();
-      return manager.services.contents.get(path)
+      return manager.services.contents.get(path, { content: false })
         .then(() => this.cd(localPath))
         .catch(() => state.remove(key));
     }).catch(() => state.remove(key))

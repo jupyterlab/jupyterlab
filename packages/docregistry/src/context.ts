@@ -462,7 +462,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   private _maybeSave(options: Partial<Contents.IModel>): Promise<Contents.IModel> {
     let path = this._path;
     // Make sure the file has not changed on disk.
-    let promise = this._manager.contents.get(path);
+    let promise = this._manager.contents.get(path, { content: false });
     return promise.then(model => {
       if (this.isDisposed) {
         return Promise.reject('Disposed');

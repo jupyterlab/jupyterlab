@@ -159,7 +159,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
         : args['path'] as string;
       const factory = args['factory'] as string || void 0;
       const kernel = args['kernel'] as Kernel.IModel || void 0;
-      return docManager.services.contents.get(path)
+      return docManager.services.contents.get(path, { content: false })
         .then(() => docManager.openOrReveal(path, factory, kernel));
     },
     icon: args => args['icon'] as string || '',
