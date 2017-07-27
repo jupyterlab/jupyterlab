@@ -112,23 +112,25 @@ describe('docregistry/savehandler', () => {
 
     describe('#start()', () => {
 
-    //   it('should start the save handler', () => {
-    //     handler.start();
-    //     expect(handler.isActive).to.be(true);
-    //   });
+      it('should start the save handler', () => {
+        handler.start();
+        expect(handler.isActive).to.be(true);
+      });
 
-    //   it('should trigger a save', (done) => {
-    //     context.fileChanged.connect(() => {
-    //       done();
-    //     });
-    //     context.model.fromString('bar');
-    //     expect(handler.isActive).to.be(false);
-    //     handler.saveInterval = 1;
-    //     handler.start();
-    //   });
+      it('should trigger a save', (done) => {
+        context.fileChanged.connect(() => {
+          done();
+        });
+        context.model.fromString('bar');
+        expect(handler.isActive).to.be(false);
+        handler.saveInterval = 1;
+        handler.start();
+      });
 
       it('should continue to save', (done) => {
         let called = 0;
+        // Lower the duration multiplier.
+        (handler as any)._multiplier = 1;
         console.log('\n\n\n***continue to save')
         context.fileChanged.connect(() => {
           console.log('***called', called);

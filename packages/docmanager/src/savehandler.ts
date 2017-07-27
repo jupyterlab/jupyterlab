@@ -199,7 +199,7 @@ class SaveHandler implements IDisposable {
       }
       let duration = new Date().getTime() - start;
       // New save interval: higher of 10x save duration or min interval.
-      this._interval = Math.max(10 * duration, this._minInterval);
+      this._interval = Math.max(this._multiplier * duration, this._minInterval);
       // Restart the update to pick up the new interval.
       this._setTimer();
     });
@@ -214,6 +214,7 @@ class SaveHandler implements IDisposable {
   private _isActive = false;
   private _inDialog = false;
   private _isDisposed = false;
+  private _multiplier = 10;
 }
 
 
