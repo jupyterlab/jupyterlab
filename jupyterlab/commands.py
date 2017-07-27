@@ -840,7 +840,7 @@ def _get_package_template(app_dir, logger):
                 continue
             if ext is True:
                 ext = ''
-            data['jupyterlab'][item][key] = jlab_data[item]
+            data['jupyterlab'][item][key] = ext
 
     # Handle linked packages.
     linked = _get_linked_packages(app_dir, logger)
