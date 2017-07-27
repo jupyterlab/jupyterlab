@@ -72,7 +72,8 @@ An Extension is a valid [npm package](https://docs.npmjs.com/getting-started/wha
   - Exports one or more JupyterLab plugins as the default export in its
     main file.
   - Has a `jupyterlab` key in its `package.json` which has
-    `"extension": true` metadata.
+    `"extension"` metadata.  The value can be `true` to use the main module
+    of the package, or a string path to a specific module (e.g. `"lib/foo"`).
 
 While authoring the extension, you can use the command:
 
@@ -152,7 +153,9 @@ package needed to create a mime renderer extension (using the interfaces
 in TypeScript or as a form of documentation if using plain JavaScript).
 
 The only other difference from a standard extension is that has a `jupyterlab`
-key in its `package.json` with `"mimeRenderer": true` metadata.
+key in its `package.json` with `"mimeRenderer"` metadata.  The value can be 
+`true` to use the main module of the package, or a string path to a specific 
+module (e.g. `"lib/foo"`).
 
 ## Storing Extension Data
 In addition to the file system that is accessed by using the `@jupyterlab/services` package, JupyterLab offers two ways for extensions to store data: a client-side state database that is built on top of `localStorage` and a plugin settings system that allows for default setting values and user overrides.

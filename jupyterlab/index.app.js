@@ -35,8 +35,8 @@ function main() {
     var mimeExtensions = [];
     {{#each jupyterlab_mime_extensions}}
     try {
-        if (disabled.indexOf('{{this}}') === -1) {
-            mimeExtensions.push(require('{{this}}'));
+        if (disabled.indexOf('{{@key}}') === -1) {
+            mimeExtensions.push(require('{{@key}}/{{this}}'));
         }
     } catch (e) {
         console.error(e);
@@ -56,8 +56,8 @@ function main() {
     // Handled the registered standard extensions.
     {{#each jupyterlab_extensions}}
     try {
-        if (disabled.indexOf('{{this}}') === -1) {
-            lab.registerPluginModule(require('{{this}}'));
+        if (disabled.indexOf('{{@key}}') === -1) {
+            lab.registerPluginModule(require('{{@key}}/{{this}}'));
         }
     } catch (e) {
         console.error(e);
