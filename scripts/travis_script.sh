@@ -20,7 +20,7 @@ if [[ $GROUP == tests ]]; then
     # py.test
     # npm run clean
     # npm run build:src
-    # npm run build:test
+    npm run build:test
     npm test
     npm run test:services || npm run test:services
 
