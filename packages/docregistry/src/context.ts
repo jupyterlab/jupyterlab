@@ -234,7 +234,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     }).catch(err => {
       showDialog({
         title: 'File Save Error',
-        body: err.xhr.responseText,
+        body: err.xhr ? err.xhr.responseText : String(err),
         buttons: [Dialog.okButton()]
       });
     });
@@ -467,9 +467,15 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       if (this.isDisposed) {
         return Promise.reject('Disposed');
       }
+      // We want to check last_modified (disk) > last_modified (client)
+      // (our last save)
+      // In some cases the filesystem reports an inconsistent time,
+      // so we allow 0.5 seconds difference before complaining.
       let modified = this.contentsModel && this.contentsModel.last_modified;
-      if (model.last_modified !== modified) {
-        return this._timeConflict(modified, model, options);
+      let tClient = new Date(modified);
+      let tDisk = new Date(model.last_modified);
+      if (modified && (tDisk.getTime() - tClient.getTime()) > 500) {  // 500 ms
+        return this._timeConflict(tClient, model, options);
       }
       return this._manager.contents.save(path, options);
     }, (err) => {
@@ -480,12 +486,11 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   /**
    * Handle a time conflict.
    */
-  private _timeConflict(local: string, model: Contents.IModel, options: Partial<Contents.IModel>): Promise<Contents.IModel> {
-    let localTime = new Date(local);
-    let remoteTime = new Date(model.last_modified);
-    console.warn(`Last saving peformed ${localTime} ` +
+  private _timeConflict(tClient: Date, model: Contents.IModel, options: Partial<Contents.IModel>): Promise<Contents.IModel> {
+    let tDisk = new Date(model.last_modified);
+    console.warn(`Last saving peformed ${tClient} ` +
                  `while the current file seem to have been saved ` +
-                 `${remoteTime}`);
+                 `${tDisk}`);
     let body = `The file has changed on disk since the last time we ` +
                `opened or saved it. ` +
                `Do you want to overwrite the file on disk with the version ` +
