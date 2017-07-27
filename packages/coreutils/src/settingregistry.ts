@@ -254,6 +254,24 @@ namespace ISettingRegistry {
     readonly user: JSONObject;
 
     /**
+     * Calculate the default value of a setting by iterating through the schema.
+     *
+     * @param key - The name of the setting whose default value is calculated.
+     *
+     * @returns A calculated default JSON value for a specific setting.
+     */
+    default(key: string): JSONValue;
+
+    /**
+     * Get an individual setting.
+     *
+     * @param key - The name of the setting being retrieved.
+     *
+     * @returns The setting value.
+     */
+    get(key: string): { composite: JSONValue, user: JSONValue };
+
+    /**
      * Remove a single setting.
      *
      * @param key - The name of the setting being removed.
@@ -264,15 +282,6 @@ namespace ISettingRegistry {
      * This function is asynchronous because it writes to the setting registry.
      */
     remove(key: string): Promise<void>;
-
-    /**
-     * Get an individual setting.
-     *
-     * @param key - The name of the setting being retrieved.
-     *
-     * @returns The setting value.
-     */
-    get(key: string): { composite: JSONValue, user: JSONValue };
 
     /**
      * Save all of the plugin's user settings at once.
@@ -706,6 +715,17 @@ class Settings implements ISettingRegistry.ISettings {
   readonly registry: SettingRegistry;
 
   /**
+   * Calculate the default value of a setting by iterating through the schema.
+   *
+   * @param key - The name of the setting whose default value is calculated.
+   *
+   * @returns A calculated default JSON value for a specific setting.
+   */
+  default(key: string): JSONValue {
+    return Private.reifyDefault(this.schema, key);
+  }
+
+  /**
    * Dispose of the plugin settings resources.
    */
   dispose(): void {
@@ -875,4 +895,43 @@ namespace Private {
     }
   };
   /* tslint:enable */
+
+  /**
+   * Create a fully extrapolated default value for a root key in a schema.
+   */
+  export
+  function reifyDefault(schema: ISettingRegistry.ISchema, root?: string): JSONValue | undefined {
+    // If the root level is not an object or is not further defined downward
+    // return its default value, which may be `undefined`.
+    if (schema.type !== 'object' || !schema.properties) {
+      return schema.default;
+    }
+
+    const property = root ? schema.properties[root] : schema;
+
+    // If the property is not an object or is not further defined downward
+    // return its default value, which may be `undefined`.
+    if (property.type !== 'object' || !property.properties) {
+      return property.default;
+    }
+
+    const properties = property.properties;
+    const result: JSONObject = property.default || { };
+
+    // Iterate through the schema and populate the default values for each
+    // property that is defined in the schema.
+    for (let prop in properties) {
+      if ('default' in properties[prop]) {
+        const reified = reifyDefault(properties[prop]);
+
+        if (reified === undefined) {
+          continue;
+        }
+
+        result[prop] = reified;
+      }
+    }
+
+    return result;
+  }
 }

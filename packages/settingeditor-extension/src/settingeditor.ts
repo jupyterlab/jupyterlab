@@ -16,10 +16,6 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  JSONObject, JSONValue
-} from '@phosphor/coreutils';
-
-import {
   Message
 } from '@phosphor/messaging';
 
@@ -958,9 +954,9 @@ namespace Private {
       const field = properties[key];
       const { type } = field;
       const exists = key in user;
-      const reified = reifyDefault(schema, key);
-      const value = JSON.stringify(reified) || '';
-      const valueTitle = JSON.stringify(reified, null, 4);
+      const defaultValue = settings.default(key);
+      const value = JSON.stringify(defaultValue) || '';
+      const valueTitle = JSON.stringify(defaultValue, null, 4);
 
       fields[key] = h.tr(
         h.td({ className: FIELDSET_ADD_CLASS },
@@ -981,44 +977,6 @@ namespace Private {
 
       node.appendChild(VirtualDOM.realize(table));
     }
-  }
-
-  /**
-   * Create a fully extrapolated default value for a root key in a schema.
-   */
-  function reifyDefault(schema: ISettingRegistry.ISchema, root?: string): JSONValue | undefined {
-    // If the root level is not an object or is not further defined downward
-    // return its default value, which may be `undefined`.
-    if (schema.type !== 'object' || !schema.properties) {
-      return schema.default;
-    }
-
-    const property = root ? schema.properties[root] : schema;
-
-    // If the property is not an object or is not further defined downward
-    // return its default value, which may be `undefined`.
-    if (property.type !== 'object' || !property.properties) {
-      return property.default;
-    }
-
-    const properties = property.properties;
-    const result: JSONObject = property.default || { };
-
-    // Iterate through the schema and populate the default values for each
-    // property that is defined in the schema.
-    for (let prop in properties) {
-      if ('default' in properties[prop]) {
-        const reified = reifyDefault(properties[prop]);
-
-        if (reified === undefined) {
-          continue;
-        }
-
-        result[prop] = reified;
-      }
-    }
-
-    return result;
   }
 
   /**
