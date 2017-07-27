@@ -83,6 +83,8 @@ def run(cmd, **kwargs):
         output = error.output.decode('utf-8')
         logger.info(output)
         raise error
+    finally:
+        proc.terminate()
 
 
 def install_extension(extension, app_dir=None, logger=None):
