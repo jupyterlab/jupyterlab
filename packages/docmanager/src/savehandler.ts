@@ -104,10 +104,8 @@ class SaveHandler implements IDisposable {
    * Set the timer.
    */
   private _setTimer(): void {
-    console.log('**in settimer', this._interval)
     clearTimeout(this._autosaveTimer);
     if (!this._isActive) {
-      console.log('***not active')
       return;
     }
     this._autosaveTimer = window.setTimeout(() => {
@@ -124,16 +122,13 @@ class SaveHandler implements IDisposable {
     // Trigger the next update.
     this._setTimer();
 
-    console.log('***in _save')
     if (!context) {
-      console.log('***no context')
       return;
     }
 
     // Bail if the model is not dirty or it is read only, or the dialog
     // is already showing.
     if (!context.model.dirty || context.model.readOnly || this._inDialog) {
-      console.log('***bailing')
       return;
     }
 
@@ -156,7 +151,6 @@ class SaveHandler implements IDisposable {
    * Handle a time conflict.
    */
   private _timeConflict(modified: string): Promise<void> {
-    console.log('***in time conflict')
     let localTime = new Date(this._context.contentsModel.last_modified);
     let remoteTime = new Date(modified);
     console.warn(`Last saving peformed ${localTime} ` +
@@ -189,12 +183,9 @@ class SaveHandler implements IDisposable {
    * Perform the save, adjusting the save interval as necessary.
    */
   private _finishSave(): Promise<void> {
-    console.log('**in finish save')
     let start = new Date().getTime();
     return this._context.save().then(() => {
-      console.log('**saved in context')
       if (this.isDisposed) {
-        console.log('***bail dispose')
         return;
       }
       let duration = new Date().getTime() - start;

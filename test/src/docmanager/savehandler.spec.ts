@@ -131,9 +131,7 @@ describe('docregistry/savehandler', () => {
         let called = 0;
         // Lower the duration multiplier.
         (handler as any)._multiplier = 1;
-        console.log('\n\n\n***continue to save')
         context.fileChanged.connect(() => {
-          console.log('***called', called);
           if (called === 0) {
             context.model.fromString('bar');
             called++;
