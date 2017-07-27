@@ -83,7 +83,8 @@ def run(cmd, **kwargs):
         logger.info(output)
         raise error
     finally:
-        proc.terminate()
+        if not proc.returncode:
+            proc.terminate()
 
 
 def install_extension(extension, app_dir=None, logger=None):
