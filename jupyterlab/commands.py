@@ -16,7 +16,7 @@ from os import path as osp
 from os.path import join as pjoin
 from tornado import gen
 from tornado.ioloop import IOLoop
-from subprocess import CalledProcessError, Popen, STDOUT
+from subprocess import CalledProcessError, Popen, STDOUT, DEVNULL
 import shutil
 import sys
 import tarfile
@@ -68,6 +68,7 @@ def run(cmd, **kwargs):
     kwargs.setdefault('shell', sys.platform == 'win32')
     kwargs.setdefault('env', os.environ)
     kwargs.setdefault('stderr', STDOUT)
+    kwargs.setdefault('stdin', DEVNULL)
     yield gen.moment  # Sync up to the iterator
     try:
         proc = Popen(cmd, **kwargs)
