@@ -834,16 +834,13 @@ def _get_package_template(app_dir, logger):
             continue
         data['dependencies'][key] = value['path']
         jlab_data = value['jupyterlab']
-        if jlab_data.get('extension', False):
-            ext = jlab_data['extension']
+        for item in ['extension', 'mimeExtension']:
+            ext = jlab_data.get(item, False)
+            if not ext:
+                continue
             if ext is True:
                 ext = ''
-            data['jupyterlab']['extensions'][key] = jlab_data['extension']
-        else:
-            ext = jlab_data['mimeExtension']
-            if ext is True:
-                ext = ''
-            data['jupyterlab']['mimeExtensions'][key] = ext
+            data['jupyterlab'][item][key] = jlab_data[item]
 
     # Handle linked packages.
     linked = _get_linked_packages(app_dir, logger)
