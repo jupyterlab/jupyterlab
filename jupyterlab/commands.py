@@ -899,12 +899,7 @@ def _get_core_extensions():
     """Get the core extensions.
     """
     data = _get_core_data()['jupyterlab']
-<<<<<<< HEAD
     return list(data['extensions']) + list(data['mimeExtensions'])
-=======
-    data['extensions'].update(data['mimeExtensions'])
-    return data
->>>>>>> 74b079a17... Enable extensions to specify a module path
 
 
 def _get_extensions(app_dir):
