@@ -5,7 +5,8 @@
 
 
 :root {
-  --jp-private-settingeditor-add-width: 15px;
+  --jp-private-settingeditor-row-height: 16px;
+  --jp-private-settingeditor-add-width: 16px;
   --jp-private-settingeditor-key-width: 150px;
   --jp-private-settingeditor-type-width: 75px;
   --jp-private-settingeditor-value-width: calc(
@@ -164,14 +165,22 @@
 
 #setting-editor .jp-PluginEditor tr {
   color: var(--jp-ui-font-color2);
-  height: 16px;
+  height: var( --jp-private-settingeditor-row-height);
   overflow: hidden;
 }
 
 
 #setting-editor .jp-PluginEditor th {
   background-color: var(--jp-layout-color3);
+  border: 1px solid transparent;
   font-weight: bold;
+  height: var( --jp-private-settingeditor-row-height);
+}
+
+
+#setting-editor .jp-PluginEditor td {
+  border: 1px solid transparent;
+  height: var( --jp-private-settingeditor-row-height);
 }
 
 
@@ -196,7 +205,6 @@
 
 
 #setting-editor .jp-PluginEditor td.jp-PluginFieldset-add {
-  border: 1px solid transparent;
   cursor: pointer;
   text-align: center;
 }
@@ -235,4 +243,5 @@
   border-radius: 8px;
   width: 8px;
   height: 8px;
+  margin: 3px 0 0 1px;
 }

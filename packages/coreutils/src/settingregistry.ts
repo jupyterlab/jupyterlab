@@ -260,7 +260,7 @@ namespace ISettingRegistry {
      *
      * @returns A calculated default JSON value for a specific setting.
      */
-    default(key: string): JSONValue;
+    default(key: string): JSONValue | undefined;
 
     /**
      * Get an individual setting.
@@ -721,7 +721,7 @@ class Settings implements ISettingRegistry.ISettings {
    *
    * @returns A calculated default JSON value for a specific setting.
    */
-  default(key: string): JSONValue {
+  default(key: string): JSONValue | undefined {
     return Private.reifyDefault(this.schema, key);
   }
 
