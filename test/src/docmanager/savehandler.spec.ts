@@ -148,6 +148,8 @@ describe('docregistry/savehandler', () => {
       });
 
       it('should overwrite the file on disk', (done) => {
+        // Lower the duration multiplier.
+        (handler as any)._multiplier = 1;
         context.model.fromString('foo');
         context.save().then(() => {
           setTimeout(() => {
@@ -169,6 +171,8 @@ describe('docregistry/savehandler', () => {
       });
 
       it('should revert to the file on disk', (done) => {
+        // Lower the duration multiplier.
+        (handler as any)._multiplier = 1;
         context.model.fromString('foo');
         context.save().then(() => {
           context.fileChanged.connect(() => {
@@ -205,6 +209,7 @@ describe('docregistry/savehandler', () => {
         handler.start();
         expect(handler.isActive).to.be(true);
         handler.stop();
+        expect(handler.isActive).to.be(false);
       });
 
     });
