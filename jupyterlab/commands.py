@@ -836,10 +836,13 @@ def _get_package_template(app_dir, logger):
             continue
         data['dependencies'][key] = value['path']
         jlab_data = value['jupyterlab']
-        if jlab_data.get('extension', False):
-            data['jupyterlab']['extensions'].append(key)
-        else:
-            data['jupyterlab']['mimeExtensions'].append(key)
+        for item in ['extension', 'mimeExtension']:
+            ext = jlab_data.get(item, False)
+            if not ext:
+                continue
+            if ext is True:
+                ext = ''
+            data['jupyterlab'][item + 's'][key] = ext
 
     # Handle linked packages.
     linked = _get_linked_packages(app_dir, logger)
@@ -851,9 +854,9 @@ def _get_package_template(app_dir, logger):
     # Handle uninstalled core extensions.
     for item in _get_uinstalled_core_extensions(app_dir):
         if item in data['jupyterlab']['extensions']:
-            data['jupyterlab']['extensions'].remove(item)
+            data['jupyterlab']['extensions'].pop(item)
         else:
-            data['jupyterlab']['mimeExtensions'].remove(item)
+            data['jupyterlab']['mimeExtensions'].pop(item)
 
     return data
 
@@ -896,7 +899,7 @@ def _get_core_extensions():
     """Get the core extensions.
     """
     data = _get_core_data()['jupyterlab']
-    return data['extensions'] + data['mimeExtensions']
+    return list(data['extensions']) + list(data['mimeExtensions'])
 
 
 def _get_extensions(app_dir):
