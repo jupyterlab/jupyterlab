@@ -2,7 +2,7 @@ language: node_js
 node_js:
 - '5'
 dist: trusty
-sudo: false
+sudo: true
 addons:
   firefox: latest
 cache:
