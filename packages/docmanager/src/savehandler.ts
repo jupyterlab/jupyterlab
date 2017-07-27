@@ -104,8 +104,10 @@ class SaveHandler implements IDisposable {
    * Set the timer.
    */
   private _setTimer(): void {
+    console.log('**in settimer')
     clearTimeout(this._autosaveTimer);
     if (!this._isActive) {
+      console.log('***not active')
       return;
     }
     this._autosaveTimer = window.setTimeout(() => {
@@ -190,7 +192,9 @@ class SaveHandler implements IDisposable {
     console.log('**in finish save')
     let start = new Date().getTime();
     return this._context.save().then(() => {
+      console.log('**saved in context')
       if (this.isDisposed) {
+        console.log('***bail dispose')
         return;
       }
       let duration = new Date().getTime() - start;
