@@ -14,8 +14,7 @@
   "dependencies": {
     "@jupyterlab/application": "^0.9.0",
     "@jupyterlab/apputils": "^0.9.0",
-    "@jupyterlab/csvviewer": "^0.9.0",
-    "@jupyterlab/docregistry": "^0.9.0"
+    "@jupyterlab/csvviewer": "^0.9.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",

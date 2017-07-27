@@ -10,6 +10,7 @@ sh -e /etc/init.d/xvfb start || true
 export PATH="$HOME/miniconda/bin:$PATH"
 
 
+npm run integrity
 npm run build:examples
 
 
