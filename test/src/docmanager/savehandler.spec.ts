@@ -130,6 +130,7 @@ describe('docregistry/savehandler', () => {
       it('should continue to save', (done) => {
         let called = 0;
         context.fileChanged.connect(() => {
+          console.log('***called', called);
           if (called === 0) {
             context.model.fromString('bar');
             called++;
