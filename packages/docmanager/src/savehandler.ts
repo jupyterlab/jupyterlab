@@ -104,7 +104,7 @@ class SaveHandler implements IDisposable {
    * Set the timer.
    */
   private _setTimer(): void {
-    console.log('**in settimer')
+    console.log('**in settimer', this._interval)
     clearTimeout(this._autosaveTimer);
     if (!this._isActive) {
       console.log('***not active')
