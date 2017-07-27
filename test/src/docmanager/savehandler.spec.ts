@@ -52,83 +52,84 @@ describe('docregistry/savehandler', () => {
 
   describe('SaveHandler', () => {
 
-    describe('#constructor()', () => {
+    // describe('#constructor()', () => {
 
-      it('should create a new save handler', () => {
-        expect(handler).to.be.a(SaveHandler);
-      });
+    //   it('should create a new save handler', () => {
+    //     expect(handler).to.be.a(SaveHandler);
+    //   });
 
-    });
+    // });
 
-    describe('#saveInterval()', () => {
+    // describe('#saveInterval()', () => {
 
-      it('should be the save interval of the handler', () => {
-        expect(handler.saveInterval).to.be(120);
-      });
+    //   it('should be the save interval of the handler', () => {
+    //     expect(handler.saveInterval).to.be(120);
+    //   });
 
-      it('should be set-able', () => {
-        handler.saveInterval = 200;
-        expect(handler.saveInterval).to.be(200);
-      });
+    //   it('should be set-able', () => {
+    //     handler.saveInterval = 200;
+    //     expect(handler.saveInterval).to.be(200);
+    //   });
 
-    });
+    // });
 
-    describe('#isActive', () => {
+    // describe('#isActive', () => {
 
-      it('should test whether the handler is active', () => {
-        expect(handler.isActive).to.be(false);
-        handler.start();
-        expect(handler.isActive).to.be(true);
-      });
+    //   it('should test whether the handler is active', () => {
+    //     expect(handler.isActive).to.be(false);
+    //     handler.start();
+    //     expect(handler.isActive).to.be(true);
+    //   });
 
-    });
+    // });
 
-    describe('#isDisposed', () => {
+    // describe('#isDisposed', () => {
 
-      it('should test whether the handler is disposed', () => {
-        expect(handler.isDisposed).to.be(false);
-        handler.dispose();
-        expect(handler.isDisposed).to.be(true);
-      });
+    //   it('should test whether the handler is disposed', () => {
+    //     expect(handler.isDisposed).to.be(false);
+    //     handler.dispose();
+    //     expect(handler.isDisposed).to.be(true);
+    //   });
 
-      it('should be true after the context is disposed', () => {
-        context.dispose();
-        expect(handler.isDisposed).to.be(true);
-      });
+    //   it('should be true after the context is disposed', () => {
+    //     context.dispose();
+    //     expect(handler.isDisposed).to.be(true);
+    //   });
 
-    });
+    // });
 
-    describe('#dispose()', () => {
+    // describe('#dispose()', () => {
 
-      it('should dispose of the resources used by the handler', () => {
-        expect(handler.isDisposed).to.be(false);
-        handler.dispose();
-        expect(handler.isDisposed).to.be(true);
-        handler.dispose();
-        expect(handler.isDisposed).to.be(true);
-      });
+    //   it('should dispose of the resources used by the handler', () => {
+    //     expect(handler.isDisposed).to.be(false);
+    //     handler.dispose();
+    //     expect(handler.isDisposed).to.be(true);
+    //     handler.dispose();
+    //     expect(handler.isDisposed).to.be(true);
+    //   });
 
-    });
+    // });
 
-    describe('#start()', () => {
+    // describe('#start()', () => {
 
-      it('should start the save handler', () => {
-        handler.start();
-        expect(handler.isActive).to.be(true);
-      });
+    //   it('should start the save handler', () => {
+    //     handler.start();
+    //     expect(handler.isActive).to.be(true);
+    //   });
 
-      it('should trigger a save', (done) => {
-        context.fileChanged.connect(() => {
-          done();
-        });
-        context.model.fromString('bar');
-        expect(handler.isActive).to.be(false);
-        handler.saveInterval = 1;
-        handler.start();
-      });
+    //   it('should trigger a save', (done) => {
+    //     context.fileChanged.connect(() => {
+    //       done();
+    //     });
+    //     context.model.fromString('bar');
+    //     expect(handler.isActive).to.be(false);
+    //     handler.saveInterval = 1;
+    //     handler.start();
+    //   });
 
       it('should continue to save', (done) => {
         let called = 0;
+        console.log('***continue to save')
         context.fileChanged.connect(() => {
           console.log('***called', called);
           if (called === 0) {
@@ -144,67 +145,67 @@ describe('docregistry/savehandler', () => {
         handler.start();
       });
 
-      it('should overwrite the file on disk', (done) => {
-        context.model.fromString('foo');
-        context.save().then(() => {
-          setTimeout(() => {
-            manager.contents.save(context.path, {
-              type: factory.contentType,
-              format: factory.fileFormat,
-              content: 'bar'
-            }).catch(done);
-            handler.saveInterval = 1;
-            handler.start();
-            context.model.fromString('baz');
-            context.fileChanged.connect(() => {
-              expect(context.model.toString()).to.be('baz');
-              done();
-            });
-          }, 1500);  // The server has a one second resolution for saves.
-        }).catch(done);
-        acceptDialog().catch(done);
-      });
+    //   it('should overwrite the file on disk', (done) => {
+    //     context.model.fromString('foo');
+    //     context.save().then(() => {
+    //       setTimeout(() => {
+    //         manager.contents.save(context.path, {
+    //           type: factory.contentType,
+    //           format: factory.fileFormat,
+    //           content: 'bar'
+    //         }).catch(done);
+    //         handler.saveInterval = 1;
+    //         handler.start();
+    //         context.model.fromString('baz');
+    //         context.fileChanged.connect(() => {
+    //           expect(context.model.toString()).to.be('baz');
+    //           done();
+    //         });
+    //       }, 1500);  // The server has a one second resolution for saves.
+    //     }).catch(done);
+    //     acceptDialog().catch(done);
+    //   });
 
-      it('should revert to the file on disk', (done) => {
-        context.model.fromString('foo');
-        context.save().then(() => {
-          context.fileChanged.connect(() => {
-            expect(context.model.toString()).to.be('bar');
-            done();
-          });
-          setTimeout(() => {
-            manager.contents.save(context.path, {
-              type: factory.contentType,
-              format: factory.fileFormat,
-              content: 'bar'
-            }).catch(done);
-            handler.saveInterval = 1;
-            handler.start();
-            context.model.fromString('baz');
-          }, 1500);  // The server has a one second resolution for saves.
-        }).catch(done);
-        waitForDialog().then(() => {
-          let dialog = document.body.getElementsByClassName('jp-Dialog')[0];
-          let buttons = dialog.getElementsByTagName('button');
-          for (let i = 0; i < buttons.length; i++) {
-            if (buttons[i].textContent === 'REVERT') {
-              buttons[i].click();
-            }
-          }
-        });
-      });
+    //   it('should revert to the file on disk', (done) => {
+    //     context.model.fromString('foo');
+    //     context.save().then(() => {
+    //       context.fileChanged.connect(() => {
+    //         expect(context.model.toString()).to.be('bar');
+    //         done();
+    //       });
+    //       setTimeout(() => {
+    //         manager.contents.save(context.path, {
+    //           type: factory.contentType,
+    //           format: factory.fileFormat,
+    //           content: 'bar'
+    //         }).catch(done);
+    //         handler.saveInterval = 1;
+    //         handler.start();
+    //         context.model.fromString('baz');
+    //       }, 1500);  // The server has a one second resolution for saves.
+    //     }).catch(done);
+    //     waitForDialog().then(() => {
+    //       let dialog = document.body.getElementsByClassName('jp-Dialog')[0];
+    //       let buttons = dialog.getElementsByTagName('button');
+    //       for (let i = 0; i < buttons.length; i++) {
+    //         if (buttons[i].textContent === 'REVERT') {
+    //           buttons[i].click();
+    //         }
+    //       }
+    //     });
+    //   });
 
-    });
+    // });
 
-    describe('#stop()', () => {
+    // describe('#stop()', () => {
 
-      it('should stop the save timer', () => {
-        handler.start();
-        expect(handler.isActive).to.be(true);
-        handler.stop();
-      });
+    //   it('should stop the save timer', () => {
+    //     handler.start();
+    //     expect(handler.isActive).to.be(true);
+    //     handler.stop();
+    //   });
 
-    });
+    // });
 
   });
 
