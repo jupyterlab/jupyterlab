@@ -907,28 +907,27 @@ namespace Private {
       return schema.default;
     }
 
-    const property = root ? schema.properties[root] : schema;
+    // If the property is at the root level, traverse its schema.
+    schema = root ? schema.properties[root] : schema;
 
     // If the property is not an object or is not further defined downward
     // return its default value, which may be `undefined`.
-    if (property.type !== 'object' || !property.properties) {
-      return property.default;
+    if (schema.type !== 'object' || !schema.properties || !schema.default) {
+      return schema.default;
     }
 
-    const properties = property.properties;
-    const result: JSONObject = property.default || { };
+    const properties = schema.properties;
+    const result: JSONObject = schema.default;
 
-    // Iterate through the schema and populate the default values for each
-    // property that is defined in the schema.
-    for (let prop in properties) {
-      if ('default' in properties[prop]) {
-        const reified = reifyDefault(properties[prop]);
+    // Iterate through the schema's properties and populate the default values
+    // for each property definition.
+    for (let property in properties) {
+      if ('default' in properties[property]) {
+        const reified = reifyDefault(properties[property]);
 
-        if (reified === undefined) {
-          continue;
+        if (reified !== undefined) {
+          result[property] = reified;
         }
-
-        result[prop] = reified;
       }
     }
 

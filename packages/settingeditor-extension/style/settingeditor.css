@@ -9,12 +9,6 @@
   --jp-private-settingeditor-add-width: 16px;
   --jp-private-settingeditor-key-width: 150px;
   --jp-private-settingeditor-type-width: 75px;
-  --jp-private-settingeditor-value-width: calc(
-    100% -
-    var(--jp-private-settingeditor-add-width) -
-    var(--jp-private-settingeditor-key-width) -
-    var(--jp-private-settingeditor-type-width)
-  );
 }
 
 
@@ -191,11 +185,6 @@
 
 #setting-editor .jp-PluginEditor th.jp-PluginFieldset-key {
   width: var(--jp-private-settingeditor-key-width);
-}
-
-
-#setting-editor .jp-PluginEditor th.jp-PluginFieldset-value {
-  width: var(--jp-private-settingeditor-value-width);
 }
 
 
