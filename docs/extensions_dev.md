@@ -38,7 +38,6 @@ The default plugins in the JupyterLab application include:
 - [Editor](https://github.com/jupyterlab/jupyterlab/blob/master/packages/fileeditor-extension/src/index.ts) - Add a widget factory for displaying editable source files.
 - [Console](https://github.com/jupyterlab/jupyterlab/blob/master/packages/console-extension/src/index.ts) - Adds the ability to launch Jupyter Console instances for
 interactive kernel console sessions.
-- [Services](https://github.com/jupyterlab/jupyterlab/blob/master/packages/services-extension/src/index.ts) - An application-specific interface to `@jupyterlab/services`.
 
 ## Application Object
 The JupyterLab Application object is given to each plugin in
