@@ -835,7 +835,7 @@ def _get_package_template(app_dir, logger):
         data['dependencies'][key] = value['path']
         jlab_data = value['jupyterlab']
         if jlab_data.get('extension', False):
-            ext = jlab_data[key]
+            ext = jlab_data['extension']
             if ext is True:
                 ext = ''
             data['jupyterlab']['extensions'][key] = jlab_data['extension']
