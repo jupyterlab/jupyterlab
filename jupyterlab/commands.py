@@ -897,8 +897,7 @@ def _get_core_extensions():
     """Get the core extensions.
     """
     data = _get_core_data()['jupyterlab']
-    data['extensions'].update(data['mimeExtensions'])
-    return data
+    return list(data['extensions']) + list(data['mimeExtensions'])
 
 
 def _get_extensions(app_dir):
