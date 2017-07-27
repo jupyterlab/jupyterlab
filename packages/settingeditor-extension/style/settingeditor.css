@@ -162,36 +162,48 @@
 }
 
 
-#setting-editor .jp-PluginEditor .jp-PluginFieldset-table tr {
+#setting-editor .jp-PluginEditor tr {
   color: var(--jp-ui-font-color2);
   height: 16px;
   overflow: hidden;
 }
 
 
-#setting-editor .jp-PluginEditor .jp-PluginFieldset-table th {
+#setting-editor .jp-PluginEditor th {
   background-color: var(--md-grey-400);
   font-weight: bold;
 }
 
 
-#setting-editor .jp-PluginEditor .jp-PluginFieldset-table th.jp-PluginFieldset-add {
+#setting-editor .jp-PluginEditor th.jp-PluginFieldset-add {
   width: var(--jp-private-settingeditor-add-width);
 }
 
 
-#setting-editor .jp-PluginEditor .jp-PluginFieldset-table th.jp-PluginFieldset-key {
+#setting-editor .jp-PluginEditor th.jp-PluginFieldset-key {
   width: var(--jp-private-settingeditor-key-width);
 }
 
 
-#setting-editor .jp-PluginEditor .jp-PluginFieldset-table th.jp-PluginFieldset-value {
+#setting-editor .jp-PluginEditor th.jp-PluginFieldset-value {
   width: var(--jp-private-settingeditor-value-width);
 }
 
 
-#setting-editor .jp-PluginEditor .jp-PluginFieldset-table th.jp-PluginFieldset-type {
+#setting-editor .jp-PluginEditor th.jp-PluginFieldset-type {
   width: var(--jp-private-settingeditor-type-width);
+}
+
+
+#setting-editor .jp-PluginEditor td.jp-PluginFieldset-add {
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-align: center;
+}
+
+
+#setting-editor .jp-PluginEditor td.jp-PluginFieldset-add:hover {
+  border: 1px solid var(--jp-toolbar-border-color);
 }
 
 
@@ -209,16 +221,18 @@
 }
 
 
+#setting-editor .jp-PluginEditor td.jp-PluginFieldset-type {
+  text-align: right;
+}
+
+
 #setting-editor .jp-PluginEditor .jp-PluginFieldset-button {
+  display: inline-block;
   background-position: center;
   background-repeat: no-repeat;
   background-size: 8px;
   border: 1px solid var(--jp-layout-color3);
   border-radius: 8px;
-  cursor: pointer;
   width: 8px;
   height: 8px;
-  position: relative;
-  top: 1px;
-  right: 1px;
 }

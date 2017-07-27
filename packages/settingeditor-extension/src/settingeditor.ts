@@ -963,12 +963,13 @@ namespace Private {
       const valueTitle = JSON.stringify(reified, null, 4);
 
       fields[key] = h.tr(
-        h.td(exists ? undefined : h.div({ className: addClass })),
+        h.td({ className: FIELDSET_ADD_CLASS },
+          exists ? undefined : h.div({ className: addClass })),
         h.td({ className: FIELDSET_KEY_CLASS, title: field.title || key },
           h.code({ title: field.title || key }, key)),
         h.td({ className: FIELDSET_VALUE_CLASS, title: valueTitle },
           h.code({ title: valueTitle }, value)),
-        h.td(h.code(type)));
+        h.td({ className: FIELDSET_TYPE_CLASS }, type));
     });
 
     const rows: VirtualElement[] = Object.keys(fields)
@@ -983,26 +984,28 @@ namespace Private {
   }
 
   /**
-   * Create a fully extrapolated default value for a key in a plugin schema.
+   * Create a fully extrapolated default value for a root key in a schema.
    */
-  function reifyDefault(schema: ISettingRegistry.ISchema, key?: string): JSONValue | undefined {
+  function reifyDefault(schema: ISettingRegistry.ISchema, root?: string): JSONValue | undefined {
+    // If the root level is not an object or is not further defined downward
+    // return its default value, which may be `undefined`.
     if (schema.type !== 'object' || !schema.properties) {
       return schema.default;
     }
 
-    const property = key ? schema.properties[key] : schema;
+    const property = root ? schema.properties[root] : schema;
 
-    if (property.type !== 'object') {
-      return 'default' in property ? property.default : '';
+    // If the property is not an object or is not further defined downward
+    // return its default value, which may be `undefined`.
+    if (property.type !== 'object' || !property.properties) {
+      return property.default;
     }
 
     const properties = property.properties;
     const result: JSONObject = property.default || { };
 
-    if (!properties) {
-      return result;
-    }
-
+    // Iterate through the schema and populate the default values for each
+    // property that is defined in the schema.
     for (let prop in properties) {
       if ('default' in properties[prop]) {
         const reified = reifyDefault(properties[prop]);
