@@ -199,7 +199,7 @@
 }
 
 
-#setting-editor .jp-PluginEditor td.jp-PluginFieldset-add:hover {
+#setting-editor .jp-PluginEditor td.jp-PluginFieldset-add.jp-mod-active:hover {
   border: 1px solid var(--jp-toolbar-border-color);
 }
 
@@ -232,5 +232,5 @@
   border-radius: 8px;
   width: 8px;
   height: 8px;
-  margin: 3px 0 0 1px;
+  margin-top: 3px;
 }

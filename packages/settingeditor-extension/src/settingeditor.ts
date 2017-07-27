@@ -103,6 +103,11 @@ const FIELDSET_BUTTON_CLASS = 'jp-PluginFieldset-button';
 const FIELDSET_ADD_ICON_CLASS = 'jp-AddIcon';
 
 /**
+ * The class name added to active items.
+ */
+const ACTIVE_CLASS = 'jp-mod-active';
+
+/**
  * The class name added to selected items.
  */
 const SELECTED_CLASS = 'jp-mod-selected';
@@ -943,40 +948,41 @@ namespace Private {
     const properties = schema.properties || { };
     const title = `(${plugin}) ${schema.description}`;
     const label = `Fields - ${schema.title || plugin}`;
-    const addClass = `${FIELDSET_BUTTON_CLASS} ${FIELDSET_ADD_ICON_CLASS}`;
     const headers = h.tr(
       h.th({ className: FIELDSET_ADD_CLASS }, ''),
       h.th({ className: FIELDSET_KEY_CLASS }, 'Key'),
       h.th({ className: FIELDSET_VALUE_CLASS }, 'Default'),
       h.th({ className: FIELDSET_TYPE_CLASS }, 'Type'));
 
-    Object.keys(properties).forEach(key => {
-      const field = properties[key];
+    Object.keys(properties).forEach(property => {
+      const field = properties[property];
       const { type } = field;
-      const exists = key in user;
-      const defaultValue = settings.default(key);
+      const exists = property in user;
+      const defaultValue = settings.default(property);
       const value = JSON.stringify(defaultValue) || '';
       const valueTitle = JSON.stringify(defaultValue, null, 4);
+      const addClass = exists ? FIELDSET_ADD_CLASS
+        : `${FIELDSET_ADD_CLASS} ${ACTIVE_CLASS}`;
+      const addButton = h.div({
+        className: `${FIELDSET_BUTTON_CLASS} ${FIELDSET_ADD_ICON_CLASS}`
+      });
 
-      fields[key] = h.tr(
-        h.td({ className: FIELDSET_ADD_CLASS },
-          exists ? undefined : h.div({ className: addClass })),
-        h.td({ className: FIELDSET_KEY_CLASS, title: field.title || key },
-          h.code({ title: field.title || key }, key)),
+      fields[property] = h.tr(
+        h.td({ className: addClass }, exists ? undefined : addButton),
+        h.td({ className: FIELDSET_KEY_CLASS, title: field.title || property },
+          h.code({ title: field.title || property }, property)),
         h.td({ className: FIELDSET_VALUE_CLASS, title: valueTitle },
           h.code({ title: valueTitle }, value)),
         h.td({ className: FIELDSET_TYPE_CLASS }, type));
     });
 
     const rows: VirtualElement[] = Object.keys(fields)
-      .sort((a, b) => a.localeCompare(b)).map(key => fields[key]);
+      .sort((a, b) => a.localeCompare(b)).map(property => fields[property]);
 
     node.appendChild(VirtualDOM.realize(h.legend({ title }, label)));
-    if (rows.length) {
-      const table = h.table({ className: FIELDSET_TABLE_CLASS }, headers, rows);
-
-      node.appendChild(VirtualDOM.realize(table));
-    }
+    node.appendChild(VirtualDOM.realize(h.table({
+      className: FIELDSET_TABLE_CLASS
+    }, headers, rows.length ? rows : undefined)));
   }
 
   /**
