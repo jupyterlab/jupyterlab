@@ -83,7 +83,7 @@ def run(cmd, **kwargs):
         logger.info(output)
         raise error
     finally:
-        if not proc.returncode:
+        if proc.returncode is None:
             proc.terminate()
 
 
