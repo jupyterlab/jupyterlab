@@ -152,7 +152,7 @@ class CellModel extends CodeEditor.Model implements ICellModel {
     delete cell.metadata['trusted'];
 
     if (Array.isArray(cell.source)) {
-      this.value.text = (cell.source as string[]).join('\n');
+      this.value.text = (cell.source as string[]).join('');
     } else {
       this.value.text = cell.source as string;
     }
