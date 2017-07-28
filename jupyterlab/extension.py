@@ -72,6 +72,7 @@ def load_jupyter_server_extension(nbapp):
 
     web_app.settings.setdefault('page_config_data', dict())
     web_app.settings['page_config_data']['token'] = nbapp.token
+    web_app.settings['page_config_data']['appTheme'] = '@jupyterlab/theme-light-extension'
 
     if core_mode or fallback:
         config.assets_dir = os.path.join(here, 'build')

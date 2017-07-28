@@ -8,6 +8,10 @@ var schemaDir = path.resolve('./schemas');
 fs.removeSync(schemaDir);
 fs.ensureDirSync(schemaDir);
 
+var corePackage = require('./package.json');
+var extensions = {};
+var mimeExtensions = {};
+
 var basePath = path.resolve('..');
 var packages = glob.sync(path.join(basePath, 'packages/*'));
 packages.forEach(function(packagePath) {
@@ -17,7 +21,31 @@ packages.forEach(function(packagePath) {
   } catch (e) {
     return;
   }
-  var schemas = data['jupyterlab'] && data['jupyterlab']['schemas'];
+  var jlab = data['jupyterlab'];
+  if (!jlab) {
+    return;
+  }
+
+  // // Handle extensions.
+  // if (jlab['extension']) {
+  //   var ext = jlab['extension'];
+  //   if (ext === true) {
+  //     ext = '';
+  //   }
+  //   extensions[data['name']] = ext;
+  // }
+
+  // // Handle mime extensions.
+  //   if (jlab['extension']) {
+  //   var ext = jlab['extension'];
+  //   if (ext === true) {
+  //     ext = '';
+  //   }
+  //   extensions[data['name']] = ext;
+  // }
+
+  // Handle schemas.
+  var schemas = jlab['schemas'];
   if (!schemas) {
     return;
   }
@@ -28,3 +56,6 @@ packages.forEach(function(packagePath) {
     fs.copySync(from, to);
   });
 });
+
+// corePackage['jupyterlab']['extensions'] = extensions;
+// copyPackage['jupyterlab']['mimeExtensions'] = mimeExtensions;

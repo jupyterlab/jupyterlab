@@ -132,11 +132,14 @@
       "@jupyterlab/shortcuts-extension": "",
       "@jupyterlab/tabmanager-extension": "",
       "@jupyterlab/terminal-extension": "",
-      "@jupyterlab/theme-light-extension": "",
       "@jupyterlab/tooltip-extension": ""
     },
     "mimeExtensions": {
       "@jupyterlab/vega2-extension": ""
+    },
+    "themeExtensions": {
+      "@jupyterlab/theme-light-extension": "",
+      "@jupyterlab/theme-dark-extension": ""
     },
     "name": "JupyterLab",
     "singletonPackages": [

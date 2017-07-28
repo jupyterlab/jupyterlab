@@ -17,6 +17,7 @@ function main() {
     var devMode = PageConfig.getOption('devMode') || 'false';
     var settingsDir = PageConfig.getOption('settingsDir') || '';
     var assetsDir = PageConfig.getOption('assetsDir') || '';
+    var theme = PageConfig.getOption('appTheme');
 
     if (version[0] === 'v') {
         version = version.slice(1);
@@ -29,6 +30,19 @@ function main() {
         disabled = JSON.parse(option);
     } catch (e) {
         // No-op
+    }
+
+    // Load the theme.
+    var gotTheme = false;
+    {{#each jupyterlab_theme_extensions}}
+    if ('{{@key}}' === theme) {
+        require('{{@key}}/{{this}}');
+        gotTheme = true;
+    }
+    {{/each}}
+    if (!gotTheme) {
+        console.error('No theme named ' + theme);
+        require('@jupyterlab/theme-light-extension');
     }
 
     // Handle the registered mime extensions.
