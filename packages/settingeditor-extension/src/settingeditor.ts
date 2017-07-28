@@ -840,6 +840,13 @@ class PluginFieldset extends Widget {
   }
 
   /**
+   * A signal emitted a property is added by user action.
+   */
+  get propertyAdded(): ISignal<this, string> {
+    return this._propertyAdded;
+  }
+
+  /**
    * The plugin settings.
    */
   get settings(): ISettingRegistry.ISettings | null {
@@ -905,10 +912,21 @@ class PluginFieldset extends Widget {
    * @param event - The DOM event sent to the widget
    */
   private _evtClick(event: MouseEvent): void {
+    const attribute = 'data-property';
+    const root = this.node;
     let target = event.target as HTMLElement;
-    console.log('clicked', target);
+
+    while (target && target.parentElement !== root) {
+      if (target.hasAttribute(attribute)) {
+        event.preventDefault();
+        this._propertyAdded.emit(target.getAttribute(attribute));
+        return;
+      }
+      target = target.parentElement;
+    }
   }
 
+  private _propertyAdded = new Signal<any, string>(this);
   private _settings: ISettingRegistry.ISettings | null = null;
 }
 
@@ -1005,14 +1023,16 @@ namespace Private {
       const defaultValue = settings.default(property);
       const value = JSON.stringify(defaultValue) || '';
       const valueTitle = JSON.stringify(defaultValue, null, 4);
-      const addClass = exists ? FIELDSET_ADD_CLASS
-        : `${FIELDSET_ADD_CLASS} ${ACTIVE_CLASS}`;
-      const addButton = h.div({
-        className: `${FIELDSET_BUTTON_CLASS} ${FIELDSET_ADD_ICON_CLASS}`
-      });
+      const buttonCell = exists ? h.td({ className: FIELDSET_ADD_CLASS })
+        : h.td({
+            className: `${FIELDSET_ADD_CLASS} ${ACTIVE_CLASS}`,
+            dataset: { property }
+          }, h.div({
+            className: `${FIELDSET_BUTTON_CLASS} ${FIELDSET_ADD_ICON_CLASS}`
+          }));
 
       fields[property] = h.tr(
-        h.td({ className: addClass }, exists ? undefined : addButton),
+        buttonCell,
         h.td({ className: FIELDSET_KEY_CLASS, title: field.title || property },
           h.code({ title: field.title || property }, property)),
         h.td({ className: FIELDSET_VALUE_CLASS, title: valueTitle },
