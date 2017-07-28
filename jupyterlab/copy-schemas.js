@@ -9,8 +9,9 @@ fs.removeSync(schemaDir);
 fs.ensureDirSync(schemaDir);
 
 var corePackage = require('./package.json');
-var extensions = {};
-var mimeExtensions = {};
+corePackage.jupyterlab.extensions = {};
+corePackage.jupyterlab.mimeExtensions = {};
+corePackage.jupyterlab.themeExtensions = {};
 
 var basePath = path.resolve('..');
 var packages = glob.sync(path.join(basePath, 'packages/*'));
@@ -26,23 +27,18 @@ packages.forEach(function(packagePath) {
     return;
   }
 
-  // // Handle extensions.
-  // if (jlab['extension']) {
-  //   var ext = jlab['extension'];
-  //   if (ext === true) {
-  //     ext = '';
-  //   }
-  //   extensions[data['name']] = ext;
-  // }
+  // Handle extensions.
+  ['extension', 'mimeExtension', 'themeExtension'].forEach(function(item) {
+    var ext = jlab[item];
+    if (ext === true) {
+      ext = ''
+    }
+    if (typeof ext !== 'string') {
+      return;
+    }
+    corePackage.jupyterlab[item + 's'][data['name']] = ext;
 
-  // // Handle mime extensions.
-  //   if (jlab['extension']) {
-  //   var ext = jlab['extension'];
-  //   if (ext === true) {
-  //     ext = '';
-  //   }
-  //   extensions[data['name']] = ext;
-  // }
+  });
 
   // Handle schemas.
   var schemas = jlab['schemas'];
@@ -57,5 +53,7 @@ packages.forEach(function(packagePath) {
   });
 });
 
-// corePackage['jupyterlab']['extensions'] = extensions;
-// copyPackage['jupyterlab']['mimeExtensions'] = mimeExtensions;
+
+// Write the package.json back to disk.
+var text = JSON.stringify(sortPackageJson(corePackage), null, 2) + '\n';
+fs.writeFileSync('./package.json', text);
