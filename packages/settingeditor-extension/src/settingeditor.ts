@@ -646,6 +646,7 @@ class PluginEditor extends Widget {
     this.handleMoved = panel.handleMoved;
     this._editor = new JSONEditor({ collapsible, editorFactory });
     this._fieldset = new PluginFieldset();
+    this._fieldset.propertyAdded.connect(this._onPropertyAdded, this);
 
     layout.addWidget(panel);
     panel.addWidget(this._editor);
@@ -770,6 +771,29 @@ class PluginEditor extends Widget {
   }
 
   /**
+   * Handle a property add signal.
+   */
+  private _onPropertyAdded(sender: any, property: string): void {
+    const settings = this._settings;
+
+    settings.save({ ...settings.user, [property]: settings.default(property) })
+      .catch(this._onSaveError);
+  }
+
+  /**
+   * Handle save errors.
+   */
+  private _onSaveError(reason: any): void {
+    console.error(`Saving setting editor value failed: ${reason.message}`);
+
+    showDialog({
+      title: 'Your changes were not saved.',
+      body: reason.message,
+      buttons: [Dialog.okButton()]
+    });
+  }
+
+  /**
    * Handle updates to the settings.
    */
   private _onSettingsChanged(): void {
@@ -792,15 +816,7 @@ class PluginEditor extends Widget {
       return;
     }
 
-    settings.save(source.toJSON()).catch(reason => {
-      console.error(`Saving setting editor value failed: ${reason.message}`);
-
-      return showDialog({
-        title: 'Your changes were not saved.',
-        body: reason.message,
-        buttons: [Dialog.okButton()]
-      }).then(() => void 0);
-    });
+    settings.save(source.toJSON()).catch(this._onSaveError);
   }
 
   private _editor: JSONEditor;
@@ -853,7 +869,12 @@ class PluginFieldset extends Widget {
     return this._settings;
   }
   set settings(settings: ISettingRegistry.ISettings | null) {
+    if (this._settings) {
+      this._settings.changed.disconnect(this._onSettingsChanged, this);
+    }
+
     this._settings = settings;
+    this._settings.changed.connect(this._onSettingsChanged, this);
     this.update();
   }
 
@@ -924,6 +945,13 @@ class PluginFieldset extends Widget {
       }
       target = target.parentElement;
     }
+  }
+
+  /**
+   * Handle setting changes.
+   */
+  private _onSettingsChanged(): void {
+    this.update();
   }
 
   private _propertyAdded = new Signal<any, string>(this);
