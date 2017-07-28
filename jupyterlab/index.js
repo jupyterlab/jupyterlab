@@ -73,6 +73,22 @@ function main() {
         // No-op
     }
     lab.start({ "ignorePlugins": ignorePlugins });
+
+    // Handle a selenium test.
+    var seleniumTest = PageConfig.getOption('seleniumTest');
+    if (seleniumTest.toLowerCase() === 'true') {
+        var caught_errors = []
+        window.onerror = function(msg, url, line, col, error) {
+           caught_errors.push(String(error));
+        };
+        lab.restored.then(() => {
+            var el = document.createElement('div');
+            el.id = 'seleniumResult';
+            el.textContent = JSON.stringify(caught_errors);
+            document.body.appendChild(el);
+        });
+    }
+
 }
 
 window.onload = main;
