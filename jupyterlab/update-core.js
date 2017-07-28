@@ -22,10 +22,13 @@ packages.forEach(function(packagePath) {
   } catch (e) {
     return;
   }
-  var jlab = data['jupyterlab'];
+  var jlab = data.jupyterlab;
   if (!jlab) {
     return;
   }
+
+  // Make sure it is included as a dependency.
+  corePackage.dependencies[data.name] = '^' + String(data.version);
 
   // Handle extensions.
   ['extension', 'mimeExtension', 'themeExtension'].forEach(function(item) {
@@ -36,8 +39,7 @@ packages.forEach(function(packagePath) {
     if (typeof ext !== 'string') {
       return;
     }
-    corePackage.jupyterlab[item + 's'][data['name']] = ext;
-
+    corePackage.jupyterlab[item + 's'][data.name] = ext;
   });
 
   // Handle schemas.
