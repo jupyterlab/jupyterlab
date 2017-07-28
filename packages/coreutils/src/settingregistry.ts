@@ -901,34 +901,20 @@ namespace Private {
    */
   export
   function reifyDefault(schema: ISettingRegistry.ISchema, root?: string): JSONValue | undefined {
-    // If the root level is not an object or is not further defined downward
-    // return its default value, which may be `undefined`.
-    if (schema.type !== 'object' || !schema.properties) {
-      return schema.default && JSONExt.deepCopy(schema.default);
-    }
-
     // If the property is at the root level, traverse its schema.
     schema = root ? schema.properties[root] : schema;
 
-    // If the property is not an object or is not further defined downward
-    // return its default value, which may be `undefined`.
-    if (schema.type !== 'object' || !schema.properties || !schema.default) {
-      return schema.default && JSONExt.deepCopy(schema.default);
+    // If the property has no default or is a primitive, return.
+    if (!('default' in schema) || schema.type !== 'object') {
+      return schema.default;
     }
 
-    const properties = schema.properties;
-    const result: JSONObject = JSONExt.deepCopy(schema.default);
+    // Make a copy of the default value to populate.
+    const result = JSONExt.deepCopy(schema.default);
 
-    // Iterate through the schema's properties and populate the default values
-    // for each property definition.
-    for (let property in properties) {
-      if ('default' in properties[property]) {
-        const reified = reifyDefault(properties[property]);
-
-        if (reified !== undefined) {
-          result[property] = reified;
-        }
-      }
+    // Iterate through and populate each child property.
+    for (let property in schema.properties || { }) {
+      result[property] = reifyDefault(schema.properties[property]);
     }
 
     return result;
