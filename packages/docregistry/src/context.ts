@@ -479,7 +479,9 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       }
       return this._manager.contents.save(path, options);
     }, (err) => {
-      return this._manager.contents.save(path, options);
+      if (err.xhr.status == 404) {
+        return this._manager.contents.save(path, options);
+      }
     });
   }
 
