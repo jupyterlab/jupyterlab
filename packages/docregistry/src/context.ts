@@ -489,10 +489,10 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   private _timeConflict(tClient: Date, model: Contents.IModel, options: Partial<Contents.IModel>): Promise<Contents.IModel> {
     let tDisk = new Date(model.last_modified);
     console.warn(`Last saving peformed ${tClient} ` +
-                 `while the current file seem to have been saved ` +
+                 `while the current file seems to have been saved ` +
                  `${tDisk}`);
-    let body = `The file has changed on disk since the last time we ` +
-               `opened or saved it. ` +
+    let body = `The file has changed on disk since the last time it ` +
+               `ws opened or saved. ` +
                `Do you want to overwrite the file on disk with the version ` +
                ` open here, or load the version on disk (revert)?`;
     let revertBtn = Dialog.okButton({ label: 'REVERT' });
