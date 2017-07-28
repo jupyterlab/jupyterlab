@@ -904,7 +904,7 @@ namespace Private {
     // If the root level is not an object or is not further defined downward
     // return its default value, which may be `undefined`.
     if (schema.type !== 'object' || !schema.properties) {
-      return schema.default;
+      return schema.default && JSONExt.deepCopy(schema.default);
     }
 
     // If the property is at the root level, traverse its schema.
@@ -913,11 +913,11 @@ namespace Private {
     // If the property is not an object or is not further defined downward
     // return its default value, which may be `undefined`.
     if (schema.type !== 'object' || !schema.properties || !schema.default) {
-      return schema.default;
+      return schema.default && JSONExt.deepCopy(schema.default);
     }
 
     const properties = schema.properties;
-    const result: JSONObject = schema.default;
+    const result: JSONObject = JSONExt.deepCopy(schema.default);
 
     // Iterate through the schema's properties and populate the default values
     // for each property definition.
