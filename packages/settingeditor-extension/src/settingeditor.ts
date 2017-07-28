@@ -503,7 +503,7 @@ class PluginList extends Widget {
    *
    * #### Notes
    * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the dock panel's node. It should
+   * called in response to events on the plugin list's node. It should
    * not be called directly by user code.
    */
   handleEvent(event: Event): void {
@@ -563,7 +563,7 @@ class PluginList extends Widget {
    *
    * @param event - The DOM event sent to the widget
    */
-  protected _evtClick(event: MouseEvent): void {
+  private _evtClick(event: MouseEvent): void {
     let target = event.target as HTMLElement;
     let id = target.getAttribute('data-id');
 
@@ -851,6 +851,40 @@ class PluginFieldset extends Widget {
   }
 
   /**
+   * Handle the DOM events for the plugin fieldset class.
+   *
+   * @param event - The DOM event sent to the class.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the fieldset's DOM node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+    case 'click':
+      this._evtClick(event as MouseEvent);
+      break;
+    default:
+      return;
+    }
+  }
+
+  /**
+   * Handle `'after-attach'` messages.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this.node.addEventListener('click', this);
+  }
+
+  /**
+   * Handle `before-detach` messages for the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this.node.removeEventListener('click', this);
+  }
+
+  /**
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
@@ -863,6 +897,16 @@ class PluginFieldset extends Widget {
     if (settings) {
       Private.populateFieldset(this.node, settings);
     }
+  }
+
+  /**
+   * Handle the `'click'` event for the plugin fieldset.
+   *
+   * @param event - The DOM event sent to the widget
+   */
+  private _evtClick(event: MouseEvent): void {
+    let target = event.target as HTMLElement;
+    console.log('clicked', target);
   }
 
   private _settings: ISettingRegistry.ISettings | null = null;
@@ -944,7 +988,7 @@ namespace Private {
   export
   function populateFieldset(node: HTMLElement, settings: ISettingRegistry.ISettings): void {
     const { plugin, schema, user } = settings;
-    const fields: { [key: string]: VirtualElement } = Object.create(null);
+    const fields: { [property: string]: VirtualElement } = Object.create(null);
     const properties = schema.properties || { };
     const title = `(${plugin}) ${schema.description}`;
     const label = `Fields - ${schema.title || plugin}`;
