@@ -12,6 +12,7 @@ var corePackage = require('./package.json');
 corePackage.jupyterlab.extensions = {};
 corePackage.jupyterlab.mimeExtensions = {};
 corePackage.jupyterlab.themeExtensions = {};
+corePackage.dependencies = {};
 
 var basePath = path.resolve('..');
 var packages = glob.sync(path.join(basePath, 'packages/*'));
@@ -29,6 +30,12 @@ packages.forEach(function(packagePath) {
 
   // Make sure it is included as a dependency.
   corePackage.dependencies[data.name] = '^' + String(data.version);
+
+  // Add its dependencies to the core dependencies.
+  var deps = data.dependencies || [];
+  for (var dep in deps) {
+    corePackage.dependencies[dep] = deps[dep];
+  }
 
   // Handle extensions.
   ['extension', 'mimeExtension', 'themeExtension'].forEach(function(item) {
