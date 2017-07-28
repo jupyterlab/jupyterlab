@@ -646,7 +646,6 @@ class PluginEditor extends Widget {
     this.handleMoved = panel.handleMoved;
     this._editor = new JSONEditor({ collapsible, editorFactory });
     this._fieldset = new PluginFieldset();
-    this._fieldset.propertyAdded.connect(this._onPropertyAdded, this);
 
     layout.addWidget(panel);
     panel.addWidget(this._editor);
@@ -771,29 +770,6 @@ class PluginEditor extends Widget {
   }
 
   /**
-   * Handle a property add signal.
-   */
-  private _onPropertyAdded(sender: any, property: string): void {
-    const settings = this._settings;
-
-    settings.save({ ...settings.user, [property]: settings.default(property) })
-      .catch(this._onSaveError);
-  }
-
-  /**
-   * Handle save errors.
-   */
-  private _onSaveError(reason: any): void {
-    console.error(`Saving setting editor value failed: ${reason.message}`);
-
-    showDialog({
-      title: 'Your changes were not saved.',
-      body: reason.message,
-      buttons: [Dialog.okButton()]
-    });
-  }
-
-  /**
    * Handle updates to the settings.
    */
   private _onSettingsChanged(): void {
@@ -816,7 +792,7 @@ class PluginEditor extends Widget {
       return;
     }
 
-    settings.save(source.toJSON()).catch(this._onSaveError);
+    settings.save(source.toJSON()).catch(Private.onSaveError);
   }
 
   private _editor: JSONEditor;
@@ -853,13 +829,6 @@ class PluginFieldset extends Widget {
   constructor() {
     super({ node: document.createElement('fieldset') });
     this.addClass(PLUGIN_FIELDSET_CLASS);
-  }
-
-  /**
-   * A signal emitted a property is added by user action.
-   */
-  get propertyAdded(): ISignal<this, string> {
-    return this._propertyAdded;
   }
 
   /**
@@ -940,11 +909,21 @@ class PluginFieldset extends Widget {
     while (target && target.parentElement !== root) {
       if (target.hasAttribute(attribute)) {
         event.preventDefault();
-        this._propertyAdded.emit(target.getAttribute(attribute));
+        this._onPropertyAdded(target.getAttribute(attribute));
         return;
       }
       target = target.parentElement;
     }
+  }
+
+  /**
+   * Handle a property addition.
+   */
+  private _onPropertyAdded(property: string): void {
+    const settings = this._settings;
+
+    settings.save({ ...settings.user, [property]: settings.default(property) })
+      .catch(Private.onSaveError);
   }
 
   /**
@@ -954,7 +933,6 @@ class PluginFieldset extends Widget {
     this.update();
   }
 
-  private _propertyAdded = new Signal<any, string>(this);
   private _settings: ISettingRegistry.ISettings | null = null;
 }
 
@@ -1026,6 +1004,20 @@ namespace Private {
     }
 
     return typeof hint === 'string' ? hint : '';
+  }
+
+  /**
+   * Handle save errors.
+   */
+  export
+  function onSaveError(reason: any): void {
+    console.error(`Saving setting editor value failed: ${reason.message}`);
+
+    showDialog({
+      title: 'Your changes were not saved.',
+      body: reason.message,
+      buttons: [Dialog.okButton()]
+    });
   }
 
   /**
