@@ -907,9 +907,12 @@ class PluginFieldset extends Widget {
     let target = event.target as HTMLElement;
 
     while (target && target.parentElement !== root) {
-      if (target.hasAttribute(attribute)) {
+      const active = target.classList.contains(ACTIVE_CLASS);
+
+      if (active && target.hasAttribute(attribute)) {
         event.preventDefault();
         this._onPropertyAdded(target.getAttribute(attribute));
+        target.classList.remove(ACTIVE_CLASS);
         return;
       }
       target = target.parentElement;
