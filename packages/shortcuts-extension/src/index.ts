@@ -14,7 +14,7 @@ import {
 } from '@phosphor/commands';
 
 import {
-  JSONValue
+  JSONObject, JSONValue
 } from '@phosphor/coreutils';
 
 import {
@@ -57,9 +57,9 @@ const plugin: JupyterLabPlugin<void> = {
     const { commands } = app;
 
     settingReqistry.load(plugin.id).then(settings => {
-      Private.loadShortcuts(commands, settings);
+      Private.loadShortcuts(commands, settings.composite);
       settings.changed.connect(() => {
-        Private.loadShortcuts(commands, settings);
+        Private.loadShortcuts(commands, settings.composite);
       });
     }).catch((reason: Error) => {
       console.error('Loading shortcut settings failed.', reason.message);
@@ -88,15 +88,11 @@ namespace Private {
    * Load the keyboard shortcuts from settings.
    */
   export
-  function loadShortcuts(commands: CommandRegistry, settings: ISettingRegistry.ISettings): void {
+  function loadShortcuts(commands: CommandRegistry, composite: JSONObject): void {
     if (disposables) {
       disposables.dispose();
     }
-
-    const { composite } = settings;
-    const keys = Object.keys(composite);
-
-    disposables = keys.reduce((acc, val): DisposableSet => {
+    disposables = Object.keys(composite).reduce((acc, val): DisposableSet => {
       const options = normalizeOptions(composite[val]);
 
       if (options) {
