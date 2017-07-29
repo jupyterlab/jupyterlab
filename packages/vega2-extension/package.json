@@ -12,7 +12,7 @@
   "directories": {
     "lib": "lib/"
   },
-  "jupyerlab": {
+  "jupyterlab": {
     "mimeExtension": true
   },
   "dependencies": {
