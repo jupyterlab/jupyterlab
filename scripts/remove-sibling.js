@@ -52,13 +52,3 @@ var indexEntries = indexEntries.filter(function(e) {
   return e.indexOf(package.name) === -1;
 });
 fs.writeFileSync(indexPath, indexEntries.join('\n'));
-
-// Remove the extension from jupyterlab/package.json
-var jupyterlabPackagePath = path.join(basePath, 'jupyterlab', 'package.json');
-var jupyterlabPackage = require(jupyterlabPackagePath);
-jupyterlabPackage.dependencies[package.name] = undefined;
-let extensions = jupyterlabPackage.jupyterlab.extensions.filter(function(e) {
-  return e.indexOf(package.name) === -1;
-});
-jupyterlabPackage.jupyterlab.extensions = extensions;
-fs.writeFileSync(jupyterlabPackagePath, JSON.stringify(jupyterlabPackage, null, 2) + '\n');
