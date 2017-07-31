@@ -320,7 +320,7 @@ class JSONEditor extends Widget {
    */
   private _mergeContent(): void {
     let model = this.editor.model;
-    let current = this._getContent();
+    let current = this._source ? this._source.toJSON() : { };
     let old = this._originalValue;
     let user = JSON.parse(model.value.text) as JSONObject;
     let source = this.source;
@@ -348,21 +348,6 @@ class JSONEditor extends Widget {
   }
 
   /**
-   * Get the metadata from the owner.
-   */
-  private _getContent(): JSONObject {
-    let source = this._source;
-    if (!source) {
-      return {};
-    }
-    let content: JSONObject = {};
-    for (let key of source.keys()) {
-      content[key] = source.get(key) || null;
-    }
-    return content;
-  }
-
-  /**
    * Set the value given the owner contents.
    */
   private _setValue(): void {
@@ -372,7 +357,7 @@ class JSONEditor extends Widget {
     this.commitButtonNode.hidden = true;
     this.removeClass(ERROR_CLASS);
     let model = this.editor.model;
-    let content = this._getContent();
+    let content = this._source ? this._source.toJSON() : { };
     this._changeGuard = true;
     if (content === void 0) {
       model.value.text = 'No data!';
