@@ -200,7 +200,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    */
   save(): Promise<void> {
     let model = this._model;
-    let path = this._path;
     if (model.readOnly) {
       return Promise.reject(new Error('Read only'));
     }
@@ -218,7 +217,10 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     };
 
     return this._manager.ready.then(() => {
-      return this._manager.contents.save(path, options);
+      if (!model.modelDB.isCollaborative) {
+        return this._maybeSave(options);
+      }
+      return this._manager.contents.save(this._path, options);
     }).then(value => {
       if (this.isDisposed) {
         return;
@@ -232,7 +234,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     }).catch(err => {
       showDialog({
         title: 'File Save Error',
-        body: err.xhr.responseText,
+        body: err.xhr ? err.xhr.responseText : String(err),
         buttons: [Dialog.okButton()]
       });
     });
@@ -451,6 +453,65 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     }).then(() => {
       this._isReady = true;
       this._populatedPromise.resolve(void 0);
+    });
+  }
+
+  /**
+   * Save a file, dealing with conflicts.
+   */
+  private _maybeSave(options: Partial<Contents.IModel>): Promise<Contents.IModel> {
+    let path = this._path;
+    // Make sure the file has not changed on disk.
+    let promise = this._manager.contents.get(path, { content: false });
+    return promise.then(model => {
+      if (this.isDisposed) {
+        return Promise.reject('Disposed');
+      }
+      // We want to check last_modified (disk) > last_modified (client)
+      // (our last save)
+      // In some cases the filesystem reports an inconsistent time,
+      // so we allow 0.5 seconds difference before complaining.
+      let modified = this.contentsModel && this.contentsModel.last_modified;
+      let tClient = new Date(modified);
+      let tDisk = new Date(model.last_modified);
+      if (modified && (tDisk.getTime() - tClient.getTime()) > 500) {  // 500 ms
+        return this._timeConflict(tClient, model, options);
+      }
+      return this._manager.contents.save(path, options);
+    }, (err) => {
+      if (err.xhr.status === 404) {
+        return this._manager.contents.save(path, options);
+      }
+      throw err;
+    });
+  }
+
+  /**
+   * Handle a time conflict.
+   */
+  private _timeConflict(tClient: Date, model: Contents.IModel, options: Partial<Contents.IModel>): Promise<Contents.IModel> {
+    let tDisk = new Date(model.last_modified);
+    console.warn(`Last saving peformed ${tClient} ` +
+                 `while the current file seems to have been saved ` +
+                 `${tDisk}`);
+    let body = `The file has changed on disk since the last time it ` +
+               `ws opened or saved. ` +
+               `Do you want to overwrite the file on disk with the version ` +
+               ` open here, or load the version on disk (revert)?`;
+    let revertBtn = Dialog.okButton({ label: 'REVERT' });
+    let overwriteBtn = Dialog.warnButton({ label: 'OVERWRITE' });
+    return showDialog({
+      title: 'File Changed', body,
+      buttons: [Dialog.cancelButton(), revertBtn, overwriteBtn]
+    }).then(result => {
+      if (this.isDisposed) {
+        return Promise.reject('Disposed');
+      }
+      if (result.button.label === 'OVERWRITE') {
+        return this._manager.contents.save(this._path, options);
+      } else if (result.button.label === 'REVERT') {
+        return this.revert().then(() => { return model; });
+      }
     });
   }
 
