@@ -65,7 +65,7 @@ class ObservableJSON extends ObservableMap<JSONValue> {
       const value = this.get(key);
 
       if (value !== undefined) {
-        out[key] = JSONExt.isPrimitive(value) ? value : JSONExt.deepCopy(value);
+        out[key] = JSONExt.deepCopy(value);
       }
     }
     return out;
