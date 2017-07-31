@@ -902,7 +902,7 @@ namespace Private {
   export
   function reifyDefault(schema: ISettingRegistry.ISchema, root?: string): JSONValue | undefined {
     // If the property is at the root level, traverse its schema.
-    schema = root ? schema.properties[root] : schema;
+    schema = (root ? schema.properties[root] : schema) || { };
 
     // If the property has no default or is a primitive, return.
     if (!('default' in schema) || schema.type !== 'object') {
