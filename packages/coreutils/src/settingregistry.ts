@@ -254,6 +254,24 @@ namespace ISettingRegistry {
     readonly user: JSONObject;
 
     /**
+     * Calculate the default value of a setting by iterating through the schema.
+     *
+     * @param key - The name of the setting whose default value is calculated.
+     *
+     * @returns A calculated default JSON value for a specific setting.
+     */
+    default(key: string): JSONValue | undefined;
+
+    /**
+     * Get an individual setting.
+     *
+     * @param key - The name of the setting being retrieved.
+     *
+     * @returns The setting value.
+     */
+    get(key: string): { composite: JSONValue, user: JSONValue };
+
+    /**
      * Remove a single setting.
      *
      * @param key - The name of the setting being removed.
@@ -264,15 +282,6 @@ namespace ISettingRegistry {
      * This function is asynchronous because it writes to the setting registry.
      */
     remove(key: string): Promise<void>;
-
-    /**
-     * Get an individual setting.
-     *
-     * @param key - The name of the setting being retrieved.
-     *
-     * @returns The setting value.
-     */
-    get(key: string): { composite: JSONValue, user: JSONValue };
 
     /**
      * Save all of the plugin's user settings at once.
@@ -706,6 +715,17 @@ class Settings implements ISettingRegistry.ISettings {
   readonly registry: SettingRegistry;
 
   /**
+   * Calculate the default value of a setting by iterating through the schema.
+   *
+   * @param key - The name of the setting whose default value is calculated.
+   *
+   * @returns A calculated default JSON value for a specific setting.
+   */
+  default(key: string): JSONValue | undefined {
+    return Private.reifyDefault(this.schema, key);
+  }
+
+  /**
    * Dispose of the plugin settings resources.
    */
   dispose(): void {
@@ -875,4 +895,28 @@ namespace Private {
     }
   };
   /* tslint:enable */
+
+  /**
+   * Create a fully extrapolated default value for a root key in a schema.
+   */
+  export
+  function reifyDefault(schema: ISettingRegistry.ISchema, root?: string): JSONValue | undefined {
+    // If the property is at the root level, traverse its schema.
+    schema = (root ? schema.properties[root] : schema) || { };
+
+    // If the property has no default or is a primitive, return.
+    if (!('default' in schema) || schema.type !== 'object') {
+      return schema.default;
+    }
+
+    // Make a copy of the default value to populate.
+    const result = JSONExt.deepCopy(schema.default);
+
+    // Iterate through and populate each child property.
+    for (let property in schema.properties || { }) {
+      result[property] = reifyDefault(schema.properties[property]);
+    }
+
+    return result;
+  }
 }

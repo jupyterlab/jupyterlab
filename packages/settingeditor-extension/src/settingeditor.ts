@@ -33,6 +33,16 @@ import {
 
 
 /**
+ * The ratio panes in the plugin editor.
+ */
+const DEFAULT_INNER = [5, 2];
+
+/**
+ * The ratio panes in the setting editor.
+ */
+const DEFAULT_OUTER = [1, 3];
+
+/**
  * The class name added to all setting editors.
  */
 const SETTING_EDITOR_CLASS = 'jp-SettingEditor';
@@ -56,6 +66,46 @@ const PLUGIN_LIST_CLASS = 'jp-PluginList';
  * The class name added to all plugin list icons.
  */
 const PLUGIN_ICON_CLASS = 'jp-PluginList-icon';
+
+/**
+ * The class name added to the fieldset table.
+ */
+const FIELDSET_TABLE_CLASS = 'jp-PluginFieldset-table';
+
+/**
+ * The class name added to the fieldset table add button cells.
+ */
+const FIELDSET_ADD_CLASS = 'jp-PluginFieldset-add';
+
+/**
+ * The class name added to the fieldset table key cells.
+ */
+const FIELDSET_KEY_CLASS = 'jp-PluginFieldset-key';
+
+/**
+ * The class name added to the fieldset table default value cells.
+ */
+const FIELDSET_VALUE_CLASS = 'jp-PluginFieldset-value';
+
+/**
+ * The class name added to the fieldset table type cells.
+ */
+const FIELDSET_TYPE_CLASS = 'jp-PluginFieldset-type';
+
+/**
+ * The class name added to fieldset buttons.
+ */
+const FIELDSET_BUTTON_CLASS = 'jp-PluginFieldset-button';
+
+/**
+ * The class name for the add icon used to add individual preferences.
+ */
+const FIELDSET_ADD_ICON_CLASS = 'jp-AddIcon';
+
+/**
+ * The class name added to active items.
+ */
+const ACTIVE_CLASS = 'jp-mod-active';
 
 /**
  * The class name added to selected items.
@@ -122,6 +172,11 @@ class SettingEditor extends Widget {
     const editor = this._editor = new PluginEditor({ editorFactory });
     const confirm = () => editor.confirm();
     const list = this._list = new PluginList({ confirm, registry });
+    const when = options.when;
+
+    if (when) {
+      this._when = Array.isArray(when) ? Promise.all(when) : when;
+    }
 
     layout.addWidget(panel);
     panel.addWidget(list);
@@ -179,11 +234,7 @@ class SettingEditor extends Widget {
     // Allow the message queue (which includes fit requests that might disrupt
     // setting relative sizes) to clear before setting sizes.
     requestAnimationFrame(() => {
-      // Set the original (default) outer dimensions.
-      this._panel.setRelativeSizes(this._presets.outer);
-      this._fetchState().then(() => {
-        this._setPresets();
-      }).catch(reason => {
+      this._fetchState().then(() => { this._setPresets(); }).catch(reason => {
         console.error('Fetching setting editor state failed', reason);
         this._setPresets();
       });
@@ -210,17 +261,17 @@ class SettingEditor extends Widget {
 
     const { key, state } = this;
     const editor = this._editor;
-    const panel = this._panel;
+    const promises = [state.fetch(key), this._when];
 
-    return this._fetching = state.fetch(key).then(saved => {
+    return this._fetching = Promise.all(promises).then(([saved]) => {
       this._fetching = null;
 
       if (this._saving) {
         return;
       }
 
-      const inner = editor.sizes;
-      const outer = panel.relativeSizes();
+      const inner = DEFAULT_INNER;
+      const outer = DEFAULT_OUTER;
       const plugin = editor.settings ? editor.settings.plugin : '';
 
       if (!saved) {
@@ -289,18 +340,17 @@ class SettingEditor extends Widget {
     const editor = this._editor;
     const list = this._list;
     const panel = this._panel;
-    const { inner, outer, plugin } = this._presets;
-
-    panel.setRelativeSizes(outer);
-    editor.sizes = inner;
+    const { plugin } = this._presets;
 
     if (!plugin) {
       editor.settings = null;
       list.selection = '';
+      this._setSizes();
       return;
     }
 
     if (editor.settings && editor.settings.plugin === plugin) {
+      this._setSizes();
       return;
     }
 
@@ -315,11 +365,25 @@ class SettingEditor extends Widget {
       }
       editor.settings = settings;
       list.selection = plugin;
+      this._setSizes();
     }).catch((reason: Error) => {
       console.error(`Loading settings failed: ${reason.message}`);
       list.selection = this._presets.plugin = '';
       editor.settings = null;
+      this._setSizes();
     });
+  }
+
+  /**
+   * Set the layout sizes.
+   */
+  private _setSizes(): void {
+    const { inner, outer } = this._presets;
+    const editor = this._editor;
+    const panel = this._panel;
+
+    editor.sizes = inner;
+    panel.setRelativeSizes(outer);
   }
 
   private _editor: PluginEditor;
@@ -327,8 +391,9 @@ class SettingEditor extends Widget {
   private _instructions: Widget;
   private _list: PluginList;
   private _panel: SplitPanel;
-  private _presets = { inner: [5, 2], outer: [1, 3], plugin: '' };
+  private _presets = { inner: DEFAULT_INNER, outer: DEFAULT_OUTER, plugin: '' };
   private _saving = false;
+  private _when: Promise<any>;
 }
 
 
@@ -361,6 +426,11 @@ namespace SettingEditor {
      * The state database used to store layout.
      */
     state: IStateDB;
+
+    /**
+     * The point after which the editor should restore its state.
+     */
+    when?: Promise<any> | Array<Promise<any>>;
   }
 }
 
@@ -433,7 +503,7 @@ class PluginList extends Widget {
    *
    * #### Notes
    * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the dock panel's node. It should
+   * called in response to events on the plugin list's node. It should
    * not be called directly by user code.
    */
   handleEvent(event: Event): void {
@@ -493,7 +563,7 @@ class PluginList extends Widget {
    *
    * @param event - The DOM event sent to the widget
    */
-  protected _evtClick(event: MouseEvent): void {
+  private _evtClick(event: MouseEvent): void {
     let target = event.target as HTMLElement;
     let id = target.getAttribute('data-id');
 
@@ -722,15 +792,7 @@ class PluginEditor extends Widget {
       return;
     }
 
-    settings.save(source.toJSON()).catch(reason => {
-      console.error(`Saving setting editor value failed: ${reason.message}`);
-
-      return showDialog({
-        title: 'Your changes were not saved.',
-        body: reason.message,
-        buttons: [Dialog.okButton()]
-      }).then(() => void 0);
-    });
+    settings.save(source.toJSON()).catch(Private.onSaveError);
   }
 
   private _editor: JSONEditor;
@@ -776,8 +838,47 @@ class PluginFieldset extends Widget {
     return this._settings;
   }
   set settings(settings: ISettingRegistry.ISettings | null) {
+    if (this._settings) {
+      this._settings.changed.disconnect(this._onSettingsChanged, this);
+    }
+
     this._settings = settings;
+    this._settings.changed.connect(this._onSettingsChanged, this);
     this.update();
+  }
+
+  /**
+   * Handle the DOM events for the plugin fieldset class.
+   *
+   * @param event - The DOM event sent to the class.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the fieldset's DOM node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+    case 'click':
+      this._evtClick(event as MouseEvent);
+      break;
+    default:
+      return;
+    }
+  }
+
+  /**
+   * Handle `'after-attach'` messages.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this.node.addEventListener('click', this);
+  }
+
+  /**
+   * Handle `before-detach` messages for the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this.node.removeEventListener('click', this);
   }
 
   /**
@@ -791,8 +892,48 @@ class PluginFieldset extends Widget {
 
     // Populate if possible.
     if (settings) {
-      Private.populateFieldset(this.node, settings.plugin, settings.schema);
+      Private.populateFieldset(this.node, settings);
     }
+  }
+
+  /**
+   * Handle the `'click'` event for the plugin fieldset.
+   *
+   * @param event - The DOM event sent to the widget
+   */
+  private _evtClick(event: MouseEvent): void {
+    const attribute = 'data-property';
+    const root = this.node;
+    let target = event.target as HTMLElement;
+
+    while (target && target.parentElement !== root) {
+      const active = target.classList.contains(ACTIVE_CLASS);
+
+      if (active && target.hasAttribute(attribute)) {
+        event.preventDefault();
+        this._onPropertyAdded(target.getAttribute(attribute));
+        target.classList.remove(ACTIVE_CLASS);
+        return;
+      }
+      target = target.parentElement;
+    }
+  }
+
+  /**
+   * Handle a property addition.
+   */
+  private _onPropertyAdded(property: string): void {
+    const settings = this._settings;
+
+    settings.save({ ...settings.user, [property]: settings.default(property) })
+      .catch(Private.onSaveError);
+  }
+
+  /**
+   * Handle setting changes.
+   */
+  private _onSettingsChanged(): void {
+    this.update();
   }
 
   private _settings: ISettingRegistry.ISettings | null = null;
@@ -804,6 +945,7 @@ class PluginFieldset extends Widget {
  */
 namespace Private {
   /**
+   * Create the instructions text node.
    */
   export
   function createInstructionsNode(): HTMLElement {
@@ -868,35 +1010,66 @@ namespace Private {
   }
 
   /**
+   * Handle save errors.
+   */
+  export
+  function onSaveError(reason: any): void {
+    console.error(`Saving setting editor value failed: ${reason.message}`);
+
+    showDialog({
+      title: 'Your changes were not saved.',
+      body: reason.message,
+      buttons: [Dialog.okButton()]
+    });
+  }
+
+  /**
    * Populate the fieldset with a specific plugin's metadata.
    */
   export
-  function populateFieldset(node: HTMLElement, id: string, schema: ISettingRegistry.ISchema): void {
-    const fields: { [key: string]: VirtualElement } = Object.create(null);
+  function populateFieldset(node: HTMLElement, settings: ISettingRegistry.ISettings): void {
+    const { plugin, schema, user } = settings;
+    const fields: { [property: string]: VirtualElement } = Object.create(null);
     const properties = schema.properties || { };
-    const title = `(${id}) ${schema.description}`;
-    const label = `Fields - ${schema.title || id}`;
+    const title = `(${plugin}) ${schema.description}`;
+    const label = `Fields - ${schema.title || plugin}`;
     const headers = h.tr(
-      h.th('Key'),
-      h.th('Type'),
-      h.th('Default'));
+      h.th({ className: FIELDSET_ADD_CLASS }, ''),
+      h.th({ className: FIELDSET_KEY_CLASS }, 'Key'),
+      h.th({ className: FIELDSET_VALUE_CLASS }, 'Default'),
+      h.th({ className: FIELDSET_TYPE_CLASS }, 'Type'));
 
-    Object.keys(properties).forEach(key => {
-      const field = properties[key];
-      const { title, type } = field;
-      fields[key] = h.tr(
-        h.td(h.code({ title }, key)),
-        h.td(h.code(type || '')),
-        h.td('default' in field ? h.code(JSON.stringify(field.default)) : ''));
+    Object.keys(properties).forEach(property => {
+      const field = properties[property];
+      const { type } = field;
+      const exists = property in user;
+      const defaultValue = settings.default(property);
+      const value = JSON.stringify(defaultValue) || '';
+      const valueTitle = JSON.stringify(defaultValue, null, 4);
+      const buttonCell = exists ? h.td({ className: FIELDSET_ADD_CLASS })
+        : h.td({
+            className: `${FIELDSET_ADD_CLASS} ${ACTIVE_CLASS}`,
+            dataset: { property }
+          }, h.div({
+            className: `${FIELDSET_BUTTON_CLASS} ${FIELDSET_ADD_ICON_CLASS}`
+          }));
+
+      fields[property] = h.tr(
+        buttonCell,
+        h.td({ className: FIELDSET_KEY_CLASS, title: field.title || property },
+          h.code({ title: field.title || property }, property)),
+        h.td({ className: FIELDSET_VALUE_CLASS, title: valueTitle },
+          h.code({ title: valueTitle }, value)),
+        h.td({ className: FIELDSET_TYPE_CLASS }, type));
     });
 
     const rows: VirtualElement[] = Object.keys(fields)
-      .sort((a, b) => a.localeCompare(b)).map(key => fields[key]);
+      .sort((a, b) => a.localeCompare(b)).map(property => fields[property]);
 
     node.appendChild(VirtualDOM.realize(h.legend({ title }, label)));
-    if (rows.length) {
-      node.appendChild(VirtualDOM.realize(h.table(headers, rows)));
-    }
+    node.appendChild(VirtualDOM.realize(h.table({
+      className: FIELDSET_TABLE_CLASS
+    }, headers, rows.length ? rows : undefined)));
   }
 
   /**

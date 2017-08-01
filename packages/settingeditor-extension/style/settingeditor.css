@@ -3,7 +3,16 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-#setting-editor.jp-SettingEditor {
+
+:root {
+  --jp-private-settingeditor-row-height: 16px;
+  --jp-private-settingeditor-add-width: 16px;
+  --jp-private-settingeditor-key-width: 150px;
+  --jp-private-settingeditor-type-width: 75px;
+}
+
+
+#setting-editor {
   background-color: var(--jp-layout-color0);
   border-top: var(--jp-border-width) solid var(--jp-border-color1);
   margin-top: -1px;
@@ -11,7 +20,7 @@
 }
 
 
-#setting-editor.jp-SettingEditor::before {
+#setting-editor::before {
   content: '';
   display: block;
   height: var(--jp-toolbar-micro-height);
@@ -22,22 +31,23 @@
 }
 
 
-#setting-editor.jp-SettingEditor .p-SplitPanel {
+#setting-editor .p-SplitPanel {
   height: 100%;
   width: 100%;
 }
 
-#setting-editor.jp-SettingEditor .p-SplitPanel-handle {
+
+#setting-editor .p-SplitPanel-handle {
   background-color: var(--jp-border-color1);
 }
 
 
-#setting-editor.jp-SettingEditor .jp-SettingEditorInstructions {
+#setting-editor .jp-SettingEditorInstructions {
   text-align: center;
 }
 
 
-#setting-editor.jp-SettingEditor .jp-SettingEditorInstructions-icon {
+#setting-editor .jp-SettingEditorInstructions-icon {
   display: inline-block;
   background-size: 60px;
   width: 60px;
@@ -47,7 +57,7 @@
 }
 
 
-#setting-editor.jp-SettingEditor .jp-SettingEditorInstructions-title {
+#setting-editor .jp-SettingEditorInstructions-title {
   font-size: 32px;
   font-weight: 200;
   line-height: 78px;
@@ -55,12 +65,12 @@
 }
 
 
-#setting-editor.jp-SettingEditor .jp-SettingEditorInstructions-text {
+#setting-editor .jp-SettingEditorInstructions-text {
   font-size: var(--jp-ui-font-size2);
 }
 
 
-#setting-editor.jp-SettingEditor ul.jp-PluginList {
+#setting-editor ul.jp-PluginList {
   background-color: var(--jp-layout-color1);
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
@@ -72,7 +82,7 @@
 }
 
 
-#setting-editor.jp-SettingEditor ul.jp-PluginList li {
+#setting-editor ul.jp-PluginList li {
   border: 1px solid transparent;
   overflow: hidden;
   padding: 2px 0 5px 5px;
@@ -81,17 +91,18 @@
 }
 
 
-#setting-editor.jp-SettingEditor ul.jp-PluginList li:hover {
+#setting-editor ul.jp-PluginList li:hover {
   background-color: var(--jp-layout-color2);
+  border: 1px solid var(--jp-border-color2);
 }
 
 
-#setting-editor.jp-SettingEditor ul.jp-PluginList li.jp-mod-selected {
+#setting-editor ul.jp-PluginList li.jp-mod-selected {
   background-color: var(--jp-brand-color1);
 }
 
 
-#setting-editor.jp-SettingEditor .jp-PluginList-icon {
+#setting-editor .jp-PluginList-icon {
   display: inline-block;
   height: 20px;
   width: 20px;
@@ -101,26 +112,27 @@
 }
 
 
-#setting-editor.jp-SettingEditor .jp-PluginEditor {
+#setting-editor .jp-PluginEditor {
   padding: 10px;
 }
 
 
-#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-JSONEditor-host {
+#setting-editor .jp-PluginEditor .jp-JSONEditor-host {
   height: 100%;
   margin-left: 0;
   margin-right: 0;
+  overflow: auto;
 }
 
 
-#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-JSONEditor-header {
+#setting-editor .jp-PluginEditor .jp-JSONEditor-header {
   position: absolute;
   right: 0;
   z-index: 9999;
 }
 
 
-#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset {
+#setting-editor .jp-PluginEditor .jp-PluginFieldset {
   border: 1px solid var(--jp-brand-color1);
   margin: 0;
   overflow-y: auto;
@@ -128,7 +140,7 @@
 }
 
 
-#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset legend {
+#setting-editor .jp-PluginEditor .jp-PluginFieldset legend {
   color: var(--jp-brand-color1);
   font-size: 70%;
   font-weight: bold;
@@ -136,23 +148,90 @@
 }
 
 
-#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset table{
-  border-collapse: collapse;
+#setting-editor .jp-PluginEditor table.jp-PluginFieldset-table {
+  table-layout: fixed;
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
-  width: 100%;
+  padding: 2px;
+  width: calc(100% - 4px);
+  overflow: hidden;
 }
 
-#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset table,
-#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset th,
-#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset td {
-  border: 1px solid var(--jp-border-color0);
-}
 
-#setting-editor.jp-SettingEditor .jp-PluginEditor .jp-PluginFieldset li {
-  background-color: var(--md-grey-400);
+#setting-editor .jp-PluginEditor tr {
   color: var(--jp-ui-font-color2);
+  height: var( --jp-private-settingeditor-row-height);
+  overflow: hidden;
+}
+
+
+#setting-editor .jp-PluginEditor th {
+  background-color: var(--jp-layout-color3);
+  border: 1px solid transparent;
+  font-weight: bold;
+  height: var( --jp-private-settingeditor-row-height);
+}
+
+
+#setting-editor .jp-PluginEditor td {
+  border: 1px solid transparent;
+  height: var( --jp-private-settingeditor-row-height);
+}
+
+
+#setting-editor .jp-PluginEditor th.jp-PluginFieldset-add {
+  width: var(--jp-private-settingeditor-add-width);
+}
+
+
+#setting-editor .jp-PluginEditor th.jp-PluginFieldset-key {
+  width: var(--jp-private-settingeditor-key-width);
+}
+
+
+#setting-editor .jp-PluginEditor th.jp-PluginFieldset-type {
+  width: var(--jp-private-settingeditor-type-width);
+}
+
+
+#setting-editor .jp-PluginEditor td.jp-PluginFieldset-add {
+  cursor: pointer;
+  text-align: center;
+}
+
+
+#setting-editor .jp-PluginEditor td.jp-PluginFieldset-add.jp-mod-active:hover {
+  border: 1px solid var(--jp-toolbar-border-color);
+}
+
+
+#setting-editor .jp-PluginEditor td.jp-PluginFieldset-key {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+
+#setting-editor .jp-PluginEditor td.jp-PluginFieldset-value {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+
+#setting-editor .jp-PluginEditor td.jp-PluginFieldset-type {
+  text-align: right;
+}
+
+
+#setting-editor .jp-PluginEditor .jp-PluginFieldset-button {
   display: inline-block;
-  margin: 3px;
-  padding: 3px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 8px;
+  border: 1px solid var(--jp-layout-color3);
+  border-radius: 8px;
+  width: 8px;
+  height: 8px;
+  margin-top: 3px;
 }

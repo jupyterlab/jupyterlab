@@ -543,6 +543,65 @@ describe('@jupyterlab/coreutils', () => {
 
     });
 
+    describe('#default()', () => {
+
+      it('should return a fully extrapolated schema default', done => {
+        const id = 'omicron';
+        const defaults = {
+          foo: 'one',
+          bar: 100,
+          baz: {
+            qux: 'two',
+            quux: 'three',
+            quuz: {
+              corge: { grault: 200 }
+            }
+          }
+        };
+
+        connector.schemas[id] = {
+          type: 'object',
+          properties: {
+            foo: { type: 'string', default: defaults.foo },
+            bar: { type: 'number', default: defaults.bar },
+            baz: {
+              type: 'object',
+              default: { },
+              properties: {
+                qux: { type: 'string', default: defaults.baz.qux },
+                quux: { type: 'string', default: defaults.baz.quux },
+                quuz: {
+                  type: 'object',
+                  default: { },
+                  properties: {
+                    corge: {
+                      type: 'object',
+                      default: { },
+                      properties: {
+                        grault: {
+                          type: 'number',
+                          default: defaults.baz.quuz.corge.grault
+                        }
+                      }
+                    },
+                  }
+                },
+              }
+            },
+            'nonexistent-default': { type: 'string' }
+          }
+        };
+        registry.load(id).then(settings => {
+          expect(settings.default('nonexistent-key')).to.be(undefined);
+          expect(settings.default('foo')).to.be(defaults.foo);
+          expect(settings.default('bar')).to.be(defaults.bar);
+          expect(settings.default('baz')).to.eql(defaults.baz);
+          expect(settings.default('nonexistent-default')).to.be(undefined);
+        }).then(done).catch(done);
+      });
+
+    });
+
     describe('#get()', () => {
 
       it('should get a setting item', done => {

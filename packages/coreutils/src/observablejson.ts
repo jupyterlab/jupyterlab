@@ -58,16 +58,14 @@ class ObservableJSON extends ObservableMap<JSONValue> {
    * Serialize the model to JSON.
    */
   toJSON(): JSONObject {
-    let out: JSONObject = Object.create(null);
-    for (let key of this.keys()) {
-      let value = this.get(key);
-      if (!value) {
-        continue;
-      }
-      if (JSONExt.isPrimitive(value)) {
-        out[key] = value;
-      } else {
-        out[key] = JSON.parse(JSON.stringify(value));
+    const out: JSONObject = Object.create(null);
+    const keys = this.keys();
+
+    for (let key of keys) {
+      const value = this.get(key);
+
+      if (value !== undefined) {
+        out[key] = JSONExt.deepCopy(value);
       }
     }
     return out;
