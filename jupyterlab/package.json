@@ -101,8 +101,7 @@
       "@jupyterlab/vega2-extension": ""
     },
     "themeExtensions": {
-      "@jupyterlab/theme-dark-extension": "",
-      "@jupyterlab/theme-light-extension": ""
+      "@jupyterlab/theme-light-extension": "index.css"
     },
     "name": "JupyterLab",
     "singletonPackages": [

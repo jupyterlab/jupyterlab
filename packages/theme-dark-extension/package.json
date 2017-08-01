@@ -10,8 +10,9 @@
     "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "jupyterlab": {
-    "themeExtension": true
+    "themeCSS": "style/index.css"
   },
+  "files": ["style/*.css"],
   "author": "Project Jupyter",
   "license": "BSD-3-Clause",
   "bugs": {

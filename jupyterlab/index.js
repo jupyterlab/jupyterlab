@@ -10,6 +10,7 @@ require('@jupyterlab/theming/style/index.css');
 
 var app = require('@jupyterlab/application').JupyterLab;
 
+
 function main() {
     var version = PageConfig.getOption('appVersion') || 'unknown';
     var name = PageConfig.getOption('appName') || 'JupyterLab';
@@ -17,7 +18,6 @@ function main() {
     var devMode = PageConfig.getOption('devMode') || 'false';
     var settingsDir = PageConfig.getOption('settingsDir') || '';
     var assetsDir = PageConfig.getOption('assetsDir') || '';
-    var theme = PageConfig.getOption('appTheme');
 
     if (version[0] === 'v') {
         version = version.slice(1);
@@ -30,19 +30,6 @@ function main() {
         disabled = JSON.parse(option);
     } catch (e) {
         // No-op
-    }
-
-    // Load the theme.
-    var gotTheme = false;
-    {{#each jupyterlab_theme_extensions}}
-    if ('{{@key}}' === theme) {
-        require('{{@key}}/{{this}}');
-        gotTheme = true;
-    }
-    {{/each}}
-    if (!gotTheme) {
-        console.error('No theme named ' + theme);
-        require('@jupyterlab/theme-light-extension');
     }
 
     // Handle the registered mime extensions.
@@ -66,6 +53,25 @@ function main() {
         assetsDir: assetsDir,
         mimeExtensions: mimeExtensions
     });
+
+    var loader = function(theme) {
+        return require('!css-loader!' + theme).toString();
+    }
+
+    // Add the theme manager extension.
+    lab.registerPlugin({
+      id: 'jupyter.extensions.theme-manager',
+      autoStart: true,
+      activate: function(app) {
+        // Load the theme CSS as strings.
+        var themeCSS = {};
+        themeCSS['@jupyterlab/theme-light-extension'] = require('!css-loader!@jupyterlab/theming/style/variables-light.css').toString();
+        var style = document.createElement('style');
+        style.innerHTML = themeCSS['@jupyterlab/theme-light-extension']
+        document.body.appendChild(style);
+        //return new ThemeManager({ settingRegistry, themeCSS });
+      }
+    })
 
     // Handled the registered standard extensions.
     {{#each jupyterlab_extensions}}
