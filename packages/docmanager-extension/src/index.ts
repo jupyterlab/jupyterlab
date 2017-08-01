@@ -10,12 +10,24 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
+  IChangedArgs
+} from '@jupyterlab/coreutils';
+
+import {
   renameDialog, DocumentManager, IDocumentManager, showErrorMessage
 } from '@jupyterlab/docmanager';
 
 import {
+  DocumentRegistry
+} from '@jupyterlab/docregistry';
+
+import {
   Contents, Kernel
 } from '@jupyterlab/services';
+
+import {
+  IDisposable
+} from '@phosphor/disposable';
 
 
 /**
@@ -63,6 +75,7 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
   requires: [ICommandPalette, IMainMenu],
   activate: (app: JupyterLab, palette: ICommandPalette, mainMenu: IMainMenu): IDocumentManager => {
     const manager = app.serviceManager;
+    const contexts = new WeakSet<DocumentRegistry.Context>();
     const opener: DocumentManager.IWidgetOpener = {
       open: widget => {
         if (!widget.id) {
@@ -76,6 +89,13 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
           app.shell.addToMainArea(widget);
         }
         app.shell.activateById(widget.id);
+
+        // Handle dirty state for open documents.
+        let context = docManager.contextForWidget(widget);
+        if (!contexts.has(context)) {
+          handleContext(app, context);
+          contexts.add(context);
+        }
       }
     };
     const registry = app.docRegistry;
@@ -240,6 +260,37 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     CommandIDs.close,
     CommandIDs.closeAllFiles
   ].forEach(command => { palette.addItem({ command, category }); });
+}
+
+
+/**
+ * Handle dirty state for a context.
+ */
+function handleContext(app: JupyterLab, context: DocumentRegistry.Context): void {
+  let disposable: IDisposable | null = null;
+  let onStateChanged = (sender: any, args: IChangedArgs<any>) => {
+    if (args.name === 'dirty') {
+      if (args.newValue === true) {
+        if (!disposable) {
+          disposable = app.setDirty();
+        }
+      } else if (disposable) {
+        disposable.dispose();
+        disposable = null;
+      }
+    }
+  };
+  context.ready.then(() => {
+    context.model.stateChanged.connect(onStateChanged);
+    if (context.model.dirty) {
+      disposable = app.setDirty();
+    }
+  });
+  context.disposed.connect(() => {
+    if (disposable) {
+      disposable.dispose();
+    }
+  });
 }
 
 

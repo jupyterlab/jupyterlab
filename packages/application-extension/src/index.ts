@@ -47,7 +47,6 @@ const mainPlugin: JupyterLabPlugin<void> = {
   activate: (app: JupyterLab, palette: ICommandPalette) => {
     addCommands(app, palette);
 
-    let unloadPrompt = true;
     let builder = app.serviceManager.builder;
 
     let doBuild = () => {
@@ -60,7 +59,6 @@ const mainPlugin: JupyterLabPlugin<void> = {
         });
       }).then(result => {
         if (result.button.accept) {
-          unloadPrompt = false;
           location.reload();
         }
       }).catch(err => {
@@ -105,7 +103,7 @@ const mainPlugin: JupyterLabPlugin<void> = {
     // For more information, see:
     // https://developer.mozilla.org/en/docs/Web/Events/beforeunload
     window.addEventListener('beforeunload', event => {
-      if (unloadPrompt) {
+      if (app.isDirty) {
         return (event as any).returnValue = message;
       }
     });

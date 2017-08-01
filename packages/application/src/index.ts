@@ -22,6 +22,10 @@ import {
 } from '@phosphor/application';
 
 import {
+  DisposableDelegate, IDisposable
+} from '@phosphor/disposable';
+
+import {
   createRendermimePlugins
 } from './mimerenderers';
 
@@ -106,6 +110,13 @@ class JupyterLab extends Application<ApplicationShell> {
   readonly serviceManager: ServiceManager;
 
   /**
+   * Whether the application is dirty.
+   */
+  get isDirty(): boolean {
+    return this._dirtyCount > 0;
+  }
+
+  /**
    * The information about the application.
    */
   get info(): JupyterLab.IInfo {
@@ -120,6 +131,18 @@ class JupyterLab extends Application<ApplicationShell> {
    */
   get restored(): Promise<ApplicationShell.ILayout> {
     return this.shell.restored;
+  }
+
+  /**
+   * Set the application state to dirty.
+   *
+   * @returns A disposable used to clear the dirty state for the caller.
+   */
+  setDirty(): IDisposable {
+    this._dirtyCount++;
+    return new DisposableDelegate(() => {
+      this._dirtyCount = Math.max(0, this._dirtyCount - 1);
+    });
   }
 
   /**
@@ -149,6 +172,7 @@ class JupyterLab extends Application<ApplicationShell> {
   }
 
   private _info: JupyterLab.IInfo;
+  private _dirtyCount = 0;
 }
 
 
