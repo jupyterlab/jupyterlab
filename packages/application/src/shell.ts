@@ -532,6 +532,13 @@ class ApplicationShell extends Widget {
     document.body.setAttribute(MODE_ATTRIBUTE, this.mode);
   }
 
+  /**
+   * Handle `fit` messages for the application shell.
+   */
+  protected onFitRequest(msg: Message) {
+    this._dockPanel.fit();
+  }
+
   /*
    * Return the tab bar adjacent to the current TabBar or `null`.
    */

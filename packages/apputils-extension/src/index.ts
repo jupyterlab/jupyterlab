@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, IMainMenu, MainMenu
+  ICommandPalette, IMainMenu, MainMenu, IThemeManager, ThemeManager
 } from '@jupyterlab/apputils';
 
 import {
@@ -140,6 +140,24 @@ const settingPlugin: JupyterLabPlugin<ISettingRegistry> = {
 };
 
 
+
+/**
+ * The default theme manager provider.
+ */
+const themePlugin: JupyterLabPlugin<IThemeManager> = {
+  id: 'jupyter.services.theme-manger',
+  requires: [ISettingRegistry],
+  activate: (app: JupyterLab, settingRegistry: ISettingRegistry): IThemeManager => {
+    let baseUrl = app.serviceManager.serverSettings.baseUrl;
+    let host = app.shell;
+    return new ThemeManager({ baseUrl,  settingRegistry, host });
+  },
+  autoStart: true,
+  provides: IThemeManager
+};
+
+
+
 /**
  * The default state database for storing application state.
  */
@@ -180,7 +198,8 @@ const plugins: JupyterLabPlugin<any>[] = [
   mainMenuPlugin,
   palettePlugin,
   settingPlugin,
-  stateDBPlugin
+  stateDBPlugin,
+  themePlugin
 ];
 export default plugins;
 

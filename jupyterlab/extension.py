@@ -8,6 +8,9 @@ import os
 from jupyterlab_launcher import add_handlers, LabConfig
 from notebook.utils import url_path_join as ujoin
 
+from notebook.base.handlers import FileFindHandler
+
+
 from .commands import (
     get_app_dir, list_extensions, should_build, get_user_settings_dir
 )
@@ -104,8 +107,14 @@ def load_jupyter_server_extension(nbapp):
         'settings_dir': user_settings_dir
     })
 
+    nbapp.log.error(base_url)
+    nbapp.log.error(here)
+    theme_handler = (base_url + r"lab/api/themes/(.*)", FileFindHandler, {
+        'path': os.path.join(here, 'themes')
+    })
+
     build_url = ujoin(base_url, build_path)
     builder = Builder(nbapp.log, core_mode, app_dir)
     build_handler = (build_url, BuildHandler, {'builder': builder})
 
-    web_app.add_handlers(".*$", [settings_handler, build_handler])
+    web_app.add_handlers(".*$", [settings_handler, build_handler, theme_handler])

@@ -54,25 +54,6 @@ function main() {
         mimeExtensions: mimeExtensions
     });
 
-    var loader = function(theme) {
-        return require('!css-loader!' + theme).toString();
-    }
-
-    // Add the theme manager extension.
-    lab.registerPlugin({
-      id: 'jupyter.extensions.theme-manager',
-      autoStart: true,
-      activate: function(app) {
-        // Load the theme CSS as strings.
-        var themeCSS = {};
-        themeCSS['@jupyterlab/theme-light-extension'] = require('!css-loader!@jupyterlab/theming/style/variables-light.css').toString();
-        var style = document.createElement('style');
-        style.innerHTML = themeCSS['@jupyterlab/theme-light-extension']
-        document.body.appendChild(style);
-        //return new ThemeManager({ settingRegistry, themeCSS });
-      }
-    })
-
     // Handled the registered standard extensions.
     {{#each jupyterlab_extensions}}
     try {
