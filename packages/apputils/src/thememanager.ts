@@ -2,12 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  SettingRegistry
+  ISettingRegistry
 } from '@jupyterlab/coreutils';
-
-import {
-  ArrayExt
-} from '@phosphor/algorithm';
 
 import {
   Token
@@ -51,6 +47,10 @@ class ThemeManager {
     this._baseUrl = options.baseUrl;
     this._registry = options.settingRegistry;
     this._host = options.host;
+    this._registry.load('jupyter.services.theme-manager').then(settings => {
+      settings.changed.connect(this._onSettingsChanged, this);
+      this.setTheme(settings.composite['theme'] as string);
+    });
   }
 
   /**
@@ -64,15 +64,25 @@ class ThemeManager {
    * The names of the registered themes.
    */
   get themes(): ReadonlyArray<string> {
-    return this._themes.map(theme => theme.name);
+    return Object.keys(this._themes);
   }
 
   /**
    * Set the current theme.
    */
   setTheme(name: string): Promise<void> {
-    console.log(this._registry);
-    return Promise.resolve(void 0);
+    if (name === this._theme) {
+      return;
+    }
+    let theme = this._themes[name];
+    if (!theme) {
+      return;
+    }
+    return theme.load().then(paths => {
+      paths.forEach(path => {
+        this._loadFile(path);
+      });
+    });
   }
 
   /**
@@ -83,17 +93,9 @@ class ThemeManager {
    * @returns A disposable that can be used to unregister the theme.
    */
   register(theme: ThemeManager.ITheme): IDisposable {
-    this._themes.push(theme);
-    if (theme.name === 'JupyterLab Light') {
-      theme.load().then(paths => {
-        paths.forEach(path => {
-          this._loadFile(path);
-        });
-      });
-    }
-
+    this._themes[theme.name] = theme;
     return new DisposableDelegate(() => {
-      ArrayExt.removeFirstOf(this._themes, theme);
+      delete this._themes[theme.name];
     });
   }
 
@@ -115,10 +117,14 @@ class ThemeManager {
     return Promise.resolve(void 0);
   }
 
+  private _onSettingsChanged(sender: ISettingRegistry.ISettings): void {
+    this.setTheme(sender.composite['theme'] as string);
+  }
+
   private _baseUrl: string;
-  private _registry: SettingRegistry;
+  private _registry: ISettingRegistry;
   private _theme: string;
-  private _themes: ThemeManager.ITheme[] = [];
+  private _themes: { [key: string]: ThemeManager.ITheme } = {};
   private _links: HTMLLinkElement[] = [];
   private _host: Widget;
 }
@@ -142,7 +148,7 @@ namespace ThemeManager {
     /**
      * The settings registry.
      */
-    settingRegistry: SettingRegistry;
+    settingRegistry: ISettingRegistry;
 
     /**
      * The host widget for the theme manager.

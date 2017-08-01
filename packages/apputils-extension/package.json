@@ -30,7 +30,10 @@
     "watch": "tsc -w"
   },
   "jupyterlab": {
-    "extension": true
+    "extension": true,
+    "schemas": [
+      "schema/jupyter.services.theme-manager.json"
+    ]
   },
   "repository": {
     "type": "git",
