@@ -141,8 +141,7 @@ class JupyterLab extends Application<ApplicationShell> {
   setDirty(): IDisposable {
     this._dirtyCount++;
     return new DisposableDelegate(() => {
-      this._dirtyCount--;
-      this._dirtyCount = Math.min(0, this._dirtyCount);
+      this._dirtyCount = Math.max(0, this._dirtyCount - 1);
     });
   }
 
