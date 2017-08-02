@@ -16,8 +16,8 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "0.9.0",
-    "@jupyterlab/apputils": "0.9.0"
+    "@jupyterlab/application": "^0.9.0",
+    "@jupyterlab/apputils": "^0.9.0"
   },
   "repository": {
     "type": "git",
