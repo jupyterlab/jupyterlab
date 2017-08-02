@@ -234,8 +234,13 @@ class SettingEditor extends Widget {
     // Allow the message queue (which includes fit requests that might disrupt
     // setting relative sizes) to clear before setting sizes.
     requestAnimationFrame(() => {
-      this._fetchState().then(() => { this._setPresets(); }).catch(reason => {
+      this._panel.hide();
+      this._fetchState().then(() => {
+        this._panel.show();
+        this._setPresets();
+      }).catch(reason => {
         console.error('Fetching setting editor state failed', reason);
+        this._panel.show();
         this._setPresets();
       });
     });
