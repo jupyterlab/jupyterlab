@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ISettingRegistry, URLExt
+  ISettingRegistry, PageConfig, URLExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -113,8 +113,8 @@ class ThemeManager {
     let link = document.createElement('link');
     link.rel = 'stylesheet';
     link.type = 'text/css';
-    // TODO: Construct path from pageconfig.
-    link.href = URLExt.join('./lab/api/themes', path);
+    let baseUrl = PageConfig.getOption('themePath');
+    link.href = URLExt.join(baseUrl, path);
     let promise = new PromiseDelegate<void>();
     link.onload = () => {
       promise.resolve(void 0);

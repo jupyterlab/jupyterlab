@@ -75,7 +75,7 @@ def load_jupyter_server_extension(nbapp):
 
     web_app.settings.setdefault('page_config_data', dict())
     web_app.settings['page_config_data']['token'] = nbapp.token
-    web_app.settings['page_config_data']['appTheme'] = '@jupyterlab/theme-light-extension'
+    web_app.settings['page_config_data']['themePath'] = './lab/api/themes'
 
     if core_mode or fallback:
         config.assets_dir = os.path.join(here, 'build')
@@ -107,8 +107,6 @@ def load_jupyter_server_extension(nbapp):
         'settings_dir': user_settings_dir
     })
 
-    nbapp.log.error(base_url)
-    nbapp.log.error(here)
     theme_handler = (base_url + r"lab/api/themes/(.*)", FileFindHandler, {
         'path': os.path.join(here, 'themes')
     })
