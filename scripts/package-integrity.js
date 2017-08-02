@@ -11,7 +11,7 @@ var path = require('path');
 
 
 // Packages to ignore
-var IGNORE = ['..', '.'];
+var IGNORE = ['..', '.', 'd3', 'vega', 'vega-lite'];
 
 
 /**
