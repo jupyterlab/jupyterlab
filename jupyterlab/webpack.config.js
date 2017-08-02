@@ -18,7 +18,6 @@ var template = Handlebars.compile(source);
 var data = {
   jupyterlab_extensions: package_data.jupyterlab.extensions,
   jupyterlab_mime_extensions: package_data.jupyterlab.mimeExtensions,
-  jupyterlab_theme_extensions: package_data.jupyterlab.themeExtensions
 };
 var result = template(data);
 
