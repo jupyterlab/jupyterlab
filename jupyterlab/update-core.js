@@ -28,7 +28,7 @@ packages.forEach(function(packagePath) {
     return;
   }
 
-  if (data.private === 'true') {
+  if (data.private === true) {
     return;
   }
 
