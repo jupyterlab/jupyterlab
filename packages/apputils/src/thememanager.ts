@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  Token
+  PromiseDelegate, Token
 } from '@phosphor/coreutils';
 
 import {
@@ -45,19 +45,26 @@ class ThemeManager {
    */
   constructor(options: ThemeManager.IOptions) {
     this._baseUrl = options.baseUrl;
-    this._registry = options.settingRegistry;
+    let registry = options.settingRegistry;
     this._host = options.host;
-    this._registry.load('jupyter.services.theme-manager').then(settings => {
-      settings.changed.connect(this._onSettingsChanged, this);
-      this.setTheme(settings.composite['theme'] as string);
+    let id = 'jupyter.services.theme-manager';
+    this.ready = registry.load(id).then(settings => {
+      this._settings = settings;
+      this._settings.changed.connect(this._onSettingsChanged, this);
+      this._onSettingsChanged(this._settings);
     });
   }
 
   /**
+   * A promise that resolves when the theme manager is ready.
+   */
+  readonly ready: Promise<void>;
+
+  /**
    * Get the name of the current theme.
    */
-  get theme(): string {
-    return this._theme;
+  get theme(): string | null {
+    return this._loadedTheme;
   }
 
   /**
@@ -71,17 +78,8 @@ class ThemeManager {
    * Set the current theme.
    */
   setTheme(name: string): Promise<void> {
-    if (name === this._theme) {
-      return;
-    }
-    let theme = this._themes[name];
-    if (!theme) {
-      return;
-    }
-    return theme.load().then(paths => {
-      paths.forEach(path => {
-        this._loadFile(path);
-      });
+    return this.ready.then(() => {
+      this._settings.set('theme', name);
     });
   }
 
@@ -93,9 +91,16 @@ class ThemeManager {
    * @returns A disposable that can be used to unregister the theme.
    */
   register(theme: ThemeManager.ITheme): IDisposable {
-    this._themes[theme.name] = theme;
+    let name = theme.name;
+    if (this._themes[name]) {
+      throw new Error(`Theme already registered for ${name}`);
+    }
+    this._themes[name] = theme;
+    if (theme.name === this._pendingTheme) {
+      this._loadTheme();
+    }
     return new DisposableDelegate(() => {
-      delete this._themes[theme.name];
+      delete this._themes[name];
     });
   }
 
@@ -104,29 +109,74 @@ class ThemeManager {
    *
    * @param path - The path of the file to load.
    */
-  private _loadFile(path: string): Promise<void> {
+  loadCSS(path: string): Promise<void> {
     let link = document.createElement('link');
     link.rel = 'stylesheet';
     link.type = 'text/css';
     link.href = path;
+    let promise = new PromiseDelegate<void>();
     link.onload = () => {
-        this._host.fit();
+      promise.resolve(void 0);
     };
     document.body.appendChild(link);
     this._links.push(link);
-    return Promise.resolve(void 0);
+    return promise.promise;
   }
 
+  /**
+   * Handle a change to the settings.
+   */
   private _onSettingsChanged(sender: ISettingRegistry.ISettings): void {
-    this.setTheme(sender.composite['theme'] as string);
+    this._pendingTheme = sender.composite['theme'] as string;
+    if (this._loadPromise) {
+      return;
+    }
+    this._loadTheme();
+  }
+
+  /**
+   * Load the theme.
+   */
+  private _loadTheme(): void {
+    let newTheme = this._themes[this._pendingTheme];
+    if (!newTheme) {
+      return;
+    }
+    if (this._pendingTheme === this._loadedTheme) {
+      return;
+    }
+    let oldPromise = Promise.resolve(void 0);
+    let oldTheme = this._themes[this._loadedTheme];
+    if (oldTheme) {
+      oldPromise = oldTheme.unload();
+    }
+    this._pendingTheme = '';
+    this._loadPromise = oldPromise.then(() => {
+      this._links.forEach(link => {
+        if (link.parentElement) {
+          link.parentElement.removeChild(link);
+        }
+      });
+      this._links.length = 0;
+      return newTheme.load();
+    }).then(() => {
+      this._host.fit();
+      this._loadPromise = null;
+      this._loadedTheme = newTheme.name;
+      if (this._pendingTheme) {
+        this._loadTheme();
+      }
+    });
   }
 
   private _baseUrl: string;
-  private _registry: ISettingRegistry;
-  private _theme: string;
   private _themes: { [key: string]: ThemeManager.ITheme } = {};
   private _links: HTMLLinkElement[] = [];
   private _host: Widget;
+  private _settings: ISettingRegistry.ISettings;
+  private _pendingTheme = '';
+  private _loadedTheme: string | null = null;
+  private _loadPromise: Promise<void> | null = null;
 }
 
 
@@ -169,15 +219,14 @@ namespace ThemeManager {
     /**
      * Load the theme.
      *
-     * @returns A promise that resolves with the paths of the CSS
-     * files to load.
+     * @returns A promise that resolves when the theme has loaded.
      */
-    load(): Promise<ReadonlyArray<string>>;
+    load(): Promise<void>;
 
     /**
      * Unload the theme.
      *
-     * @returns A promise that resolves when the theme is unloaded.
+     * @returns A promise that resolves when the theme has unloaded.
      */
     unload(): Promise<void>;
   }
