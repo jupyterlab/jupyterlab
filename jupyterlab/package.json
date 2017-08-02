@@ -119,7 +119,6 @@
       "@jupyterlab/tooltip",
       "@phosphor/widgets"
     ],
-    "version": "0.26.4",
-    "themeExtensions": {}
+    "version": "0.26.4"
   }
 }

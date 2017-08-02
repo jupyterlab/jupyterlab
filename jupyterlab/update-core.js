@@ -15,7 +15,6 @@ fs.ensureDirSync(themesDir);
 var corePackage = require('./package.json');
 corePackage.jupyterlab.extensions = {};
 corePackage.jupyterlab.mimeExtensions = {};
-corePackage.jupyterlab.themeExtensions = {};
 corePackage.dependencies = {};
 
 var basePath = path.resolve('..');
