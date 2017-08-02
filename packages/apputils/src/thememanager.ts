@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ISettingRegistry
+  ISettingRegistry, URLExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -113,7 +113,8 @@ class ThemeManager {
     let link = document.createElement('link');
     link.rel = 'stylesheet';
     link.type = 'text/css';
-    link.href = path;
+    // TODO: Construct path from pageconfig.
+    link.href = URLExt.join('./lab/api/themes', path);
     let promise = new PromiseDelegate<void>();
     link.onload = () => {
       promise.resolve(void 0);
@@ -160,13 +161,24 @@ class ThemeManager {
       this._links.length = 0;
       return newTheme.load();
     }).then(() => {
-      this._host.fit();
-      this._loadPromise = null;
       this._loadedTheme = newTheme.name;
-      if (this._pendingTheme) {
-        this._loadTheme();
-      }
+      this._finishLoad();
+    }).catch(error => {
+      console.error(error);
+      this._finishLoad();
     });
+  }
+
+  /**
+   * Handle a load finished.
+   */
+  private _finishLoad(): void {
+    this._host.fit();
+    this._loadPromise = null;
+
+    if (this._pendingTheme) {
+      this._loadTheme();
+    }
   }
 
   private _baseUrl: string;

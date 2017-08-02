@@ -8,6 +8,10 @@ var schemaDir = path.resolve('./schemas');
 fs.removeSync(schemaDir);
 fs.ensureDirSync(schemaDir);
 
+var themesDir = path.resolve('./themes');
+fs.removeSync(themesDir);
+fs.ensureDirSync(themesDir);
+
 var corePackage = require('./package.json');
 corePackage.jupyterlab.extensions = {};
 corePackage.jupyterlab.mimeExtensions = {};
@@ -38,7 +42,7 @@ packages.forEach(function(packagePath) {
   }
 
   // Handle extensions.
-  ['extension', 'mimeExtension', 'themeExtension'].forEach(function(item) {
+  ['extension', 'mimeExtension'].forEach(function(item) {
     var ext = jlab[item];
     if (ext === true) {
       ext = ''
@@ -50,16 +54,23 @@ packages.forEach(function(packagePath) {
   });
 
   // Handle schemas.
-  var schemas = jlab['schemas'];
-  if (!schemas) {
-    return;
-  }
+  var schemas = jlab['schemas'] || [];
   schemas.forEach(function(schemaPath) {
     var file = path.basename(schemaPath);
     var from = path.join(packagePath, schemaPath)
     var to = path.join(basePath, 'jupyterlab', 'schemas', file);
     fs.copySync(from, to);
   });
+
+  // Handle theme assets.
+  var themes = jlab['themeAssets'];
+  if (themes) {
+    var name = data['name'].replace('@', '');
+    name = name.replace('/', '-');
+    var from = path.join(packagePath, themes);
+    var to = path.join(basePath, 'jupyterlab', 'themes', name);
+    fs.copySync(from, to);
+  }
 });
 
 

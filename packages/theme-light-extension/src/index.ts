@@ -17,7 +17,7 @@ const plugin: JupyterLabPlugin<void> = {
     manager.register({
       name: 'JupyterLab Light',
       load: function() {
-        return manager.loadCSS('./lab/api/themes/jupyterlab-theme-light-extension/style/index.css');
+        return manager.loadCSS('jupyterlab-theme-light-extension/index.css');
       },
       unload: function() {
         return Promise.resolve(void 0);

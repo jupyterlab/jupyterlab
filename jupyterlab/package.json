@@ -94,14 +94,13 @@
       "@jupyterlab/shortcuts-extension": "",
       "@jupyterlab/tabmanager-extension": "",
       "@jupyterlab/terminal-extension": "",
-      "@jupyterlab/theme-dark-extension": "lib/index.js",
-      "@jupyterlab/theme-light-extension": "lib/index.js",
+      "@jupyterlab/theme-dark-extension": "",
+      "@jupyterlab/theme-light-extension": "",
       "@jupyterlab/tooltip-extension": ""
     },
     "mimeExtensions": {
       "@jupyterlab/vega2-extension": ""
     },
-    "themeExtensions": {},
     "name": "JupyterLab",
     "singletonPackages": [
       "@jupyterlab/application",
@@ -120,6 +119,7 @@
       "@jupyterlab/tooltip",
       "@phosphor/widgets"
     ],
-    "version": "0.26.4"
+    "version": "0.26.4",
+    "themeExtensions": {}
   }
 }

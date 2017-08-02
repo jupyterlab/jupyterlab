@@ -1,5 +1,6 @@
 recursive-include jupyterlab/build *
 recursive-include jupyterlab/schemas *
+recursive-include jupyterlab/themes *
 
 include package.json
 include LICENSE
