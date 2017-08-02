@@ -1007,6 +1007,3 @@ def _normalize_path(extension):
     if osp.exists(extension):
         extension = osp.abspath(extension)
     return extension
-
-if __name__ == '__main__':
-    _copy_tar_files('jupyterlab/jupyterlab-theme-dark-extension-0.9.0.tgz', 'style', '')
