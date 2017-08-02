@@ -30,9 +30,7 @@
   },
   "jupyterlab": {
     "extension": true,
-    "schemas": [
-      "schema/jupyter.extensions.shortcuts.json"
-    ]
+    "schemaDir": "schema"
   },
   "repository": {
     "type": "git",

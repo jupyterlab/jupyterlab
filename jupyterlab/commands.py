@@ -156,6 +156,19 @@ def install_extension_async(extension, app_dir=None, logger=None, abort_callback
         )
         raise ValueError(msg)
 
+    # Handle any schemas.
+    schemaDir = data['jupyterlab'].get('schemaDir', None)
+    if schemaDir:
+        dest = pjoin(app_dir, 'schemas')
+        _copy_tar_files(fname, schemaDir, dest)
+
+    # Handle a theme.
+    themeDir = data['jupyterlab'].get('themeDir', None)
+    if themeDir:
+        normedName = data['name'].replace('@', '').replace('/', '')
+        dest = pjoin(app_dir, 'themes', normedName)
+        _copy_tar_files(fname, themeDir, dest)
+
     # Remove an existing extension tarball.
     ext_path = pjoin(app_dir, 'extensions', fname)
     if os.path.exists(ext_path):
@@ -169,13 +182,6 @@ def install_extension_async(extension, app_dir=None, logger=None, abort_callback
     target = target.replace('/', os.sep)
     if os.path.exists(target):
         shutil.rmtree(target)
-
-    # Handle any schemas.
-    schema_data = data['jupyterlab'].get('schema_data', dict())
-    for (key, value) in schema_data.items():
-        path = pjoin(app_dir, 'schemas', key + '.json')
-        with open(path, 'w') as fid:
-            fid.write(value)
 
 
 def link_package(path, app_dir=None, logger=None):
@@ -796,20 +802,25 @@ def _ensure_package(app_dir, logger=None, name=None, version=None):
     with open(pkg_path, 'w') as fid:
         json.dump(data, fid, indent=4)
 
-    # Copy any missing or outdated schema files.
-    schema_local = pjoin(here, 'schemas')
-    if not os.path.exists(schema_local):
-        os.makedirs(schema_local)
+    # Copy any missing or outdated schema or theme items.
+    for item in ['schemas', 'themes']:
+        local = pjoin(here, item)
+        if not os.path.exists(local):
+            os.makedirs(local)
 
-    for schema in os.listdir(schema_local):
-        dest = pjoin(app_dir, 'schemas', schema)
-        if version_updated or not os.path.exists(dest):
-            shutil.copy(pjoin(schema_local, schema), dest)
+        for item_path in os.listdir(local):
+            src = pjoin(local, item_path)
+            dest = pjoin(app_dir, item, item_path)
+            if version_updated or not os.path.exists(dest):
+                if os.path.isdir(src):
+                    shutil.copytree(src, dest)
+                else:
+                    shutil.copy(src, dest)
 
 
 def _ensure_app_dirs(app_dir, logger):
     """Ensure that the application directories exist"""
-    dirs = ['extensions', 'settings', 'schemas', 'staging']
+    dirs = ['extensions', 'settings', 'schemas', 'themes', 'staging']
     for dname in dirs:
         path = pjoin(app_dir, dname)
         if not osp.exists(path):
@@ -970,20 +981,23 @@ def _read_package(target):
     tar = tarfile.open(target, "r:gz")
     f = tar.extractfile('package/package.json')
     data = json.loads(f.read().decode('utf8'))
-    jlab = data.get('jupyterlab', None)
-    if not jlab:
-        return data
-    schemas = jlab.get('schemas', None)
-    if not schemas:
-        return data
-    schema_data = dict()
-    for schema in schemas:
-        f = tar.extractfile('package/' + schema)
-        key = schema.split('/')[-1]
-        key = key.replace('.json', '')
-        schema_data[key] = f.read().decode('utf8')
-    data['jupyterlab']['schema_data'] = schema_data
+    tar.close()
     return data
+
+
+def _copy_tar_files(fname, source, dest):
+    """Copy the files from a target path to the destination.
+    """
+    tar = tarfile.open(fname, "r:gz")
+    subdir_and_files = [
+        tarinfo for tarinfo in tar.getmembers()
+        if tarinfo.name.startswith('package/' + source)
+    ]
+    offset = len('package/' + source + '/')
+    for member in subdir_and_files:
+        member.path = member.path[offset:]
+    tar.extractall(path=dest, members=subdir_and_files)
+    tar.close()
 
 
 def _normalize_path(extension):
@@ -993,3 +1007,6 @@ def _normalize_path(extension):
     if osp.exists(extension):
         extension = osp.abspath(extension)
     return extension
+
+if __name__ == '__main__':
+    _copy_tar_files('jupyterlab/jupyterlab-theme-dark-extension-0.9.0.tgz', 'style', '')

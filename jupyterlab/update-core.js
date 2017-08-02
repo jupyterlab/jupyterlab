@@ -53,20 +53,23 @@ packages.forEach(function(packagePath) {
   });
 
   // Handle schemas.
-  var schemas = jlab['schemas'] || [];
-  schemas.forEach(function(schemaPath) {
-    var file = path.basename(schemaPath);
-    var from = path.join(packagePath, schemaPath)
-    var to = path.join(basePath, 'jupyterlab', 'schemas', file);
-    fs.copySync(from, to);
-  });
+  var schemaDir = jlab['schemaDir'];
+  if (schemaDir) {
+    schemaDir = path.join(packagePath, schemaDir);
+    var schemas = glob.sync(path.join(schemaDir, '*'));
+    schemas.forEach(function(schemaPath) {
+      var file = path.basename(schemaPath);
+      var to = path.join(basePath, 'jupyterlab', 'schemas', file);
+      fs.copySync(schemaPath, to);
+    });
+  }
 
-  // Handle theme assets.
-  var themes = jlab['themeAssets'];
-  if (themes) {
+  // Handle themes.
+  var themeDir = jlab['themeDir'];
+  if (themeDir) {
     var name = data['name'].replace('@', '');
     name = name.replace('/', '-');
-    var from = path.join(packagePath, themes);
+    var from = path.join(packagePath, themeDir);
     var to = path.join(basePath, 'jupyterlab', 'themes', name);
     fs.copySync(from, to);
   }

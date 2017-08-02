@@ -25,7 +25,7 @@
   },
   "jupyterlab": {
     "extension": true,
-    "themeAssets": "style"
+    "themeDir": "style"
   },
   "author": "Project Jupyter",
   "license": "BSD-3-Clause",
