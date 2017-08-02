@@ -4,10 +4,6 @@ var glob = require('glob');
 var path = require('path');
 var sortPackageJson = require('sort-package-json');
 
-
-var IGNORE = ['@jupyterlab/all-packages'];
-
-
 var schemaDir = path.resolve('./schemas');
 fs.removeSync(schemaDir);
 fs.ensureDirSync(schemaDir);
@@ -32,7 +28,7 @@ packages.forEach(function(packagePath) {
     return;
   }
 
-  if (IGNORE.indexOf(data.name) !== -1) {
+  if (data.private === 'true') {
     return;
   }
 
