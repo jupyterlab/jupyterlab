@@ -4,6 +4,10 @@ var glob = require('glob');
 var path = require('path');
 var sortPackageJson = require('sort-package-json');
 
+
+var IGNORE = ['@jupyterlab/all-packages'];
+
+
 var schemaDir = path.resolve('./schemas');
 fs.removeSync(schemaDir);
 fs.ensureDirSync(schemaDir);
@@ -20,19 +24,25 @@ corePackage.dependencies = {};
 var basePath = path.resolve('..');
 var packages = glob.sync(path.join(basePath, 'packages/*'));
 packages.forEach(function(packagePath) {
+
    var dataPath = path.join(packagePath, 'package.json');
    try {
     var data = require(dataPath);
   } catch (e) {
     return;
   }
-  var jlab = data.jupyterlab;
-  if (!jlab) {
+
+  if (IGNORE.indexOf(data.name) !== -1) {
     return;
   }
 
   // Make sure it is included as a dependency.
   corePackage.dependencies[data.name] = '^' + String(data.version);
+
+  var jlab = data.jupyterlab;
+  if (!jlab) {
+    return;
+  }
 
   // Add its dependencies to the core dependencies.
   var deps = data.dependencies || [];
