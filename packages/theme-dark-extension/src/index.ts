@@ -11,13 +11,13 @@ import {
 
 
 const plugin: JupyterLabPlugin<void> = {
-  id: 'theme-light-extension',
+  id: 'theme-dark-extension',
   requires: [IThemeManager],
   activate: function(app: JupyterLab, manager: IThemeManager) {
     manager.register({
-      name: 'JupyterLab Light',
+      name: 'JupyterLab Dark',
       load: function() {
-        return manager.loadCSS('./lab/api/themes/jupyterlab-theme-light-extension/style/index.css');
+        return manager.loadCSS('./lab/api/themes/jupyterlab-theme-dark-extension/style/index.css');
       },
       unload: function() {
         return Promise.resolve(void 0);

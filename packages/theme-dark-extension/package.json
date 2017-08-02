@@ -3,14 +3,15 @@
   "version": "0.9.0",
   "description": "JupyterLab - Default Dark Theme",
   "dependencies": {
-    "@jupyterlab/theming": "^0.9.0"
+    "@jupyterlab/application": "0.9.0",
+    "@jupyterlab/apputils": "0.9.0"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "jupyterlab": {
-    "themeCSS": "style/index.css"
+    "extension": "lib/index.js"
   },
   "files": ["style/*.css"],
   "author": "Project Jupyter",

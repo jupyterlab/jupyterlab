@@ -47,7 +47,6 @@
     "@jupyterlab/terminal-extension": "^0.9.0",
     "@jupyterlab/theme-dark-extension": "^0.9.0",
     "@jupyterlab/theme-light-extension": "^0.9.0",
-    "@jupyterlab/theming": "^0.9.0",
     "@jupyterlab/tooltip": "^0.9.0",
     "@jupyterlab/tooltip-extension": "^0.9.0",
     "@jupyterlab/vega2-extension": "^0.9.0",
@@ -95,6 +94,7 @@
       "@jupyterlab/shortcuts-extension": "",
       "@jupyterlab/tabmanager-extension": "",
       "@jupyterlab/terminal-extension": "",
+      "@jupyterlab/theme-dark-extension": "lib/index.js",
       "@jupyterlab/theme-light-extension": "lib/index.js",
       "@jupyterlab/tooltip-extension": ""
     },
