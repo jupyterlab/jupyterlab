@@ -160,16 +160,31 @@ module (e.g. `"lib/foo"`).
 ## Themes
 A theme is a JupyterLab extension that uses a `ThemeManager` and can be 
 loaded and unloaded dynamically.  The package must include all static assets 
-that are referenced by `url()` in its CSS files.  The `url()` paths used by a 
-locally sourced theme must start with the path `'./lab/api/themes/<foo>/', 
-where `foo` is the normalized name of the package.  Scoped packages of the 
-form `@org/name` are normalized to `org-name`.  Other package names are not 
-affected.  The path to the theme assets is specified `package.json` under the 
-`"jupyterlab"` key as `"themeDir"`. See the [JupyterLab Light Theme](https://github.com/jupyterlab/jupyterlab/tree/master/packages/theme-light-extension) 
-for an example.  
+that are referenced by `url()` in its CSS files.  The `url()` paths in a CSS
+file served by the Jupyter server must start with the path 
+`'./lab/api/themes/<foo>/', where `foo` is the normalized name of the 
+package.  Scoped packages of the form `@org/name` are normalized to 
+`org-name`.  Other package names are not affected.  The path to the theme 
+assets is specified `package.json` under the `"jupyterlab"` key as 
+`"themeDir"`. See the [JupyterLab Light Theme](https://github.com/jupyterlab/jupyterlab/tree/master/packages/theme-light-extension) 
+for an example.  Ensure that the theme files are included in the
+`"files"` metadata in package.json.
+
+
+## Extension Settings
+An extension can specify user settings using a JSON Schema.  The schema
+definition should be in a file that is the id of the specific JupyterLab
+application plugin, e.g. `'jupyterlab.services.theme-manager.json'`.  The 
+schema(s) for an extension are placed in a directory specified in 
+`package.json` under the "jupyterlab" key as "schemaDir".  Ensure that the 
+schema files are included in the `"files"` metadata in package.json.
+See the (fileeditor-extension)[https://github.com/jupyterlab/jupyterlab/tree/master/packages/fileeditor-extension] for an example of a extension that
+uses settings.
+
 
 ## Storing Extension Data
 In addition to the file system that is accessed by using the `@jupyterlab/services` package, JupyterLab offers two ways for extensions to store data: a client-side state database that is built on top of `localStorage` and a plugin settings system that allows for default setting values and user overrides.
+
 
 ### State Database
 The state database can be accessed by importing `IStateDB` from `@jupyterlab/coreutils` and adding it to the list of `requires` for a plugin:
