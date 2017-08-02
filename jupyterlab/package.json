@@ -6,7 +6,6 @@
     "publish": "node make-release.js"
   },
   "dependencies": {
-    "@jupyterlab/all-packages": "^0.9.0",
     "@jupyterlab/application": "^0.9.0",
     "@jupyterlab/application-extension": "^0.9.0",
     "@jupyterlab/apputils": "^0.9.0",
@@ -89,8 +88,10 @@
       "@jupyterlab/console-extension": "",
       "@jupyterlab/csvviewer-extension": "",
       "@jupyterlab/docmanager-extension": "",
+      "@jupyterlab/faq-extension": "",
       "@jupyterlab/filebrowser-extension": "",
       "@jupyterlab/fileeditor-extension": "",
+      "@jupyterlab/help-extension": "",
       "@jupyterlab/imageviewer-extension": "",
       "@jupyterlab/inspector-extension": "",
       "@jupyterlab/launcher-extension": "",
