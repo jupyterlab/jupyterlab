@@ -73,9 +73,12 @@ def load_jupyter_server_extension(nbapp):
     installed = list_extensions(app_dir)
     fallback = not installed and not os.path.exists(config.assets_dir)
 
+    base_url = web_app.settings['base_url']
+
+    theme_url = ujoin(base_url, 'lab/api/themes')
     web_app.settings.setdefault('page_config_data', dict())
     web_app.settings['page_config_data']['token'] = nbapp.token
-    web_app.settings['page_config_data']['themePath'] = './lab/api/themes'
+    web_app.settings['page_config_data']['themePath'] = theme_url
 
     if core_mode or fallback:
         config.assets_dir = os.path.join(here, 'build')
@@ -100,14 +103,13 @@ def load_jupyter_server_extension(nbapp):
     else:
         schemas_dir = os.path.join(app_dir, 'schemas')
 
-    base_url = web_app.settings['base_url']
     settings_url = ujoin(base_url, settings_path)
     settings_handler = (settings_url, SettingsHandler, {
         'schemas_dir': schemas_dir,
         'settings_dir': user_settings_dir
     })
 
-    theme_handler = (base_url + r"lab/api/themes/(.*)", FileFindHandler, {
+    theme_handler = (ujoin(theme_url, "(.*)"), FileFindHandler, {
         'path': os.path.join(here, 'themes')
     })
 
