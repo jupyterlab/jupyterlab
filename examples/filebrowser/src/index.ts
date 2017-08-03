@@ -2,6 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import 'es6-promise/auto';  // polyfill Promise on IE
+import '@jupyterlab/theme-light-extension/style/embed.css';
+import '../index.css';
 
 import {
   each
@@ -43,9 +45,7 @@ import {
   FileEditorFactory
 } from '@jupyterlab/fileeditor';
 
-import '../index.css';
-import '@jupyterlab/theming/style/index.css';
-import '@jupyterlab/theming/style/variables-light.css';
+
 
 
 

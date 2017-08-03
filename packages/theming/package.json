@@ -15,7 +15,9 @@
   "directories": {
     "lib": "lib/"
   },
-  "dependencies": {},
+  "dependencies": {
+    "font-awesome": "^4.6.3"
+  },
   "devDependencies": {
     "rimraf": "^2.5.2",
     "typescript": "~2.4.1"

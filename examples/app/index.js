@@ -4,9 +4,7 @@
 // ES6 Promise polyfill
 require('es6-promise/auto');
 
-require('font-awesome/css/font-awesome.min.css');
 // Load the core theming before any other package.
-require('@jupyterlab/theming/style/index.css');
 require('@jupyterlab/theme-light-extension/style/embed.css');
 
 var JupyterLab = require('@jupyterlab/application').JupyterLab;
