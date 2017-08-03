@@ -24,12 +24,16 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  h, VirtualDOM, VirtualElement
+  h, VirtualDOM
 } from '@phosphor/virtualdom';
 
 import {
   PanelLayout, SplitPanel as SPanel, Widget
 } from '@phosphor/widgets';
+
+import {
+  TableEditor
+} from './tableeditor';
 
 
 /**
@@ -53,11 +57,6 @@ const SETTING_EDITOR_CLASS = 'jp-SettingEditor';
 const PLUGIN_EDITOR_CLASS = 'jp-PluginEditor';
 
 /**
- * The class name added to all plugin fieldsets.
- */
-const PLUGIN_FIELDSET_CLASS = 'jp-PluginFieldset';
-
-/**
  * The class name added to all plugin lists.
  */
 const PLUGIN_LIST_CLASS = 'jp-PluginList';
@@ -66,46 +65,6 @@ const PLUGIN_LIST_CLASS = 'jp-PluginList';
  * The class name added to all plugin list icons.
  */
 const PLUGIN_ICON_CLASS = 'jp-PluginList-icon';
-
-/**
- * The class name added to the fieldset table.
- */
-const FIELDSET_TABLE_CLASS = 'jp-PluginFieldset-table';
-
-/**
- * The class name added to the fieldset table add button cells.
- */
-const FIELDSET_ADD_CLASS = 'jp-PluginFieldset-add';
-
-/**
- * The class name added to the fieldset table key cells.
- */
-const FIELDSET_KEY_CLASS = 'jp-PluginFieldset-key';
-
-/**
- * The class name added to the fieldset table default value cells.
- */
-const FIELDSET_VALUE_CLASS = 'jp-PluginFieldset-value';
-
-/**
- * The class name added to the fieldset table type cells.
- */
-const FIELDSET_TYPE_CLASS = 'jp-PluginFieldset-type';
-
-/**
- * The class name added to fieldset buttons.
- */
-const FIELDSET_BUTTON_CLASS = 'jp-PluginFieldset-button';
-
-/**
- * The class name for the add icon used to add individual preferences.
- */
-const FIELDSET_ADD_ICON_CLASS = 'jp-AddIcon';
-
-/**
- * The class name added to active items.
- */
-const ACTIVE_CLASS = 'jp-mod-active';
 
 /**
  * The class name added to selected items.
@@ -650,7 +609,7 @@ class PluginEditor extends Widget {
 
     this.handleMoved = panel.handleMoved;
     this._editor = new JSONEditor({ collapsible, editorFactory });
-    this._fieldset = new PluginFieldset();
+    this._fieldset = new TableEditor({ onSaveError: Private.onSaveError });
 
     layout.addWidget(panel);
     panel.addWidget(this._editor);
@@ -801,7 +760,7 @@ class PluginEditor extends Widget {
   }
 
   private _editor: JSONEditor;
-  private _fieldset: PluginFieldset;
+  private _fieldset: TableEditor;
   private _panel: SplitPanel;
   private _settings: ISettingRegistry.ISettings | null = null;
 }
@@ -821,127 +780,6 @@ namespace PluginEditor {
      */
     editorFactory: CodeEditor.Factory;
   }
-}
-
-
-/**
- * An individual plugin settings fieldset.
- */
-class PluginFieldset extends Widget {
-  /**
-   * Create a new plugin fieldset.
-   */
-  constructor() {
-    super({ node: document.createElement('fieldset') });
-    this.addClass(PLUGIN_FIELDSET_CLASS);
-  }
-
-  /**
-   * The plugin settings.
-   */
-  get settings(): ISettingRegistry.ISettings | null {
-    return this._settings;
-  }
-  set settings(settings: ISettingRegistry.ISettings | null) {
-    if (this._settings) {
-      this._settings.changed.disconnect(this._onSettingsChanged, this);
-    }
-
-    this._settings = settings;
-    this._settings.changed.connect(this._onSettingsChanged, this);
-    this.update();
-  }
-
-  /**
-   * Handle the DOM events for the plugin fieldset class.
-   *
-   * @param event - The DOM event sent to the class.
-   *
-   * #### Notes
-   * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the fieldset's DOM node. It should
-   * not be called directly by user code.
-   */
-  handleEvent(event: Event): void {
-    switch (event.type) {
-    case 'click':
-      this._evtClick(event as MouseEvent);
-      break;
-    default:
-      return;
-    }
-  }
-
-  /**
-   * Handle `'after-attach'` messages.
-   */
-  protected onAfterAttach(msg: Message): void {
-    this.node.addEventListener('click', this);
-  }
-
-  /**
-   * Handle `before-detach` messages for the widget.
-   */
-  protected onBeforeDetach(msg: Message): void {
-    this.node.removeEventListener('click', this);
-  }
-
-  /**
-   * Handle `'update-request'` messages.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    const settings = this._settings;
-
-    // Empty the node.
-    this.node.textContent = '';
-
-    // Populate if possible.
-    if (settings) {
-      Private.populateFieldset(this.node, settings);
-    }
-  }
-
-  /**
-   * Handle the `'click'` event for the plugin fieldset.
-   *
-   * @param event - The DOM event sent to the widget
-   */
-  private _evtClick(event: MouseEvent): void {
-    const attribute = 'data-property';
-    const root = this.node;
-    let target = event.target as HTMLElement;
-
-    while (target && target.parentElement !== root) {
-      const active = target.classList.contains(ACTIVE_CLASS);
-
-      if (active && target.hasAttribute(attribute)) {
-        event.preventDefault();
-        this._onPropertyAdded(target.getAttribute(attribute));
-        target.classList.remove(ACTIVE_CLASS);
-        return;
-      }
-      target = target.parentElement;
-    }
-  }
-
-  /**
-   * Handle a property addition.
-   */
-  private _onPropertyAdded(property: string): void {
-    const settings = this._settings;
-
-    settings.save({ ...settings.user, [property]: settings.default(property) })
-      .catch(Private.onSaveError);
-  }
-
-  /**
-   * Handle setting changes.
-   */
-  private _onSettingsChanged(): void {
-    this.update();
-  }
-
-  private _settings: ISettingRegistry.ISettings | null = null;
 }
 
 
@@ -1026,55 +864,6 @@ namespace Private {
       body: reason.message,
       buttons: [Dialog.okButton()]
     });
-  }
-
-  /**
-   * Populate the fieldset with a specific plugin's metadata.
-   */
-  export
-  function populateFieldset(node: HTMLElement, settings: ISettingRegistry.ISettings): void {
-    const { plugin, schema, user } = settings;
-    const fields: { [property: string]: VirtualElement } = Object.create(null);
-    const properties = schema.properties || { };
-    const title = `(${plugin}) ${schema.description}`;
-    const label = `Fields - ${schema.title || plugin}`;
-    const headers = h.tr(
-      h.th({ className: FIELDSET_ADD_CLASS }, ''),
-      h.th({ className: FIELDSET_KEY_CLASS }, 'Key'),
-      h.th({ className: FIELDSET_VALUE_CLASS }, 'Default'),
-      h.th({ className: FIELDSET_TYPE_CLASS }, 'Type'));
-
-    Object.keys(properties).forEach(property => {
-      const field = properties[property];
-      const { type } = field;
-      const exists = property in user;
-      const defaultValue = settings.default(property);
-      const value = JSON.stringify(defaultValue) || '';
-      const valueTitle = JSON.stringify(defaultValue, null, 4);
-      const buttonCell = exists ? h.td({ className: FIELDSET_ADD_CLASS })
-        : h.td({
-            className: `${FIELDSET_ADD_CLASS} ${ACTIVE_CLASS}`,
-            dataset: { property }
-          }, h.div({
-            className: `${FIELDSET_BUTTON_CLASS} ${FIELDSET_ADD_ICON_CLASS}`
-          }));
-
-      fields[property] = h.tr(
-        buttonCell,
-        h.td({ className: FIELDSET_KEY_CLASS, title: field.title || property },
-          h.code({ title: field.title || property }, property)),
-        h.td({ className: FIELDSET_VALUE_CLASS, title: valueTitle },
-          h.code({ title: valueTitle }, value)),
-        h.td({ className: FIELDSET_TYPE_CLASS }, type));
-    });
-
-    const rows: VirtualElement[] = Object.keys(fields)
-      .sort((a, b) => a.localeCompare(b)).map(property => fields[property]);
-
-    node.appendChild(VirtualDOM.realize(h.legend({ title }, label)));
-    node.appendChild(VirtualDOM.realize(h.table({
-      className: FIELDSET_TABLE_CLASS
-    }, headers, rows.length ? rows : undefined)));
   }
 
   /**

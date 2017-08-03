@@ -5,6 +5,7 @@
 
 
 :root {
+  --jp-private-settingeditor-legend-height: 16px;
   --jp-private-settingeditor-row-height: 16px;
   --jp-private-settingeditor-add-width: 16px;
   --jp-private-settingeditor-key-width: 150px;
@@ -132,23 +133,31 @@
 }
 
 
-#setting-editor .jp-PluginEditor .jp-PluginFieldset {
+#setting-editor .jp-TableEditor {
   border: 1px solid var(--jp-brand-color1);
   margin: 0;
-  overflow-y: auto;
   padding: 0;
 }
 
 
-#setting-editor .jp-PluginEditor .jp-PluginFieldset legend {
+#setting-editor .jp-TableEditor legend {
   color: var(--jp-brand-color1);
   font-size: 70%;
   font-weight: bold;
   margin-left: 15px;
+  height: var(--jp-private-settingeditor-legend-height);
 }
 
 
-#setting-editor .jp-PluginEditor table.jp-PluginFieldset-table {
+#setting-editor .jp-TableEditor-wrapper {
+  position: absolute;
+  top: var(--jp-private-settingeditor-legend-height);
+  bottom: 0;
+  overflow-y: auto;
+}
+
+
+#setting-editor .jp-TableEditor table {
   table-layout: fixed;
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
@@ -158,14 +167,14 @@
 }
 
 
-#setting-editor .jp-PluginEditor tr {
+#setting-editor .jp-TableEditor tr {
   color: var(--jp-ui-font-color2);
   height: var( --jp-private-settingeditor-row-height);
   overflow: hidden;
 }
 
 
-#setting-editor .jp-PluginEditor th {
+#setting-editor .jp-TableEditor th {
   background-color: var(--jp-layout-color3);
   border: 1px solid transparent;
   font-weight: bold;
@@ -173,58 +182,58 @@
 }
 
 
-#setting-editor .jp-PluginEditor td {
+#setting-editor .jp-TableEditor td {
   border: 1px solid transparent;
   height: var( --jp-private-settingeditor-row-height);
 }
 
 
-#setting-editor .jp-PluginEditor th.jp-PluginFieldset-add {
+#setting-editor .jp-TableEditor th.jp-TableEditor-add {
   width: var(--jp-private-settingeditor-add-width);
 }
 
 
-#setting-editor .jp-PluginEditor th.jp-PluginFieldset-key {
+#setting-editor .jp-TableEditor th.jp-TableEditor-key {
   width: var(--jp-private-settingeditor-key-width);
 }
 
 
-#setting-editor .jp-PluginEditor th.jp-PluginFieldset-type {
+#setting-editor .jp-TableEditor th.jp-TableEditor-type {
   width: var(--jp-private-settingeditor-type-width);
 }
 
 
-#setting-editor .jp-PluginEditor td.jp-PluginFieldset-add {
+#setting-editor .jp-TableEditor td.jp-TableEditor-add {
   cursor: pointer;
   text-align: center;
 }
 
 
-#setting-editor .jp-PluginEditor td.jp-PluginFieldset-add.jp-mod-active:hover {
+#setting-editor .jp-TableEditor td.jp-TableEditor-add.jp-mod-active:hover {
   border: 1px solid var(--jp-toolbar-border-color);
 }
 
 
-#setting-editor .jp-PluginEditor td.jp-PluginFieldset-key {
+#setting-editor .jp-TableEditor td.jp-TableEditor-key {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
 
-#setting-editor .jp-PluginEditor td.jp-PluginFieldset-value {
+#setting-editor .jp-TableEditor td.jp-TableEditor-value {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
 
-#setting-editor .jp-PluginEditor td.jp-PluginFieldset-type {
+#setting-editor .jp-TableEditor td.jp-TableEditor-type {
   text-align: right;
 }
 
 
-#setting-editor .jp-PluginEditor .jp-PluginFieldset-button {
+#setting-editor .jp-TableEditor .jp-TableEditor-button {
   display: inline-block;
   background-position: center;
   background-repeat: no-repeat;
