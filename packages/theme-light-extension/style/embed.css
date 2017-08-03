@@ -13,6 +13,8 @@
   These images are included with JupyterLab for showing the Project Jupyter logo
   */
   --jp-image-jupyter: url('./images/jupyter.svg');
+  --jp-image-jupyterlab: url('./images/jupyterlab.svg');
+  --jp-image-jupyterlab-workmark: url('./images/jupyterlab-wordmark.svg');
 
   /* Icons
 

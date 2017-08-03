@@ -5,7 +5,7 @@
 
 
 .jp-ImageJupyterLab {
-  background-image: url(images/jupyterlab.svg);
+  background-image: var(--jp-image-jupyterlab);
 }
 
 
