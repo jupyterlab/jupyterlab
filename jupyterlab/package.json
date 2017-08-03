@@ -52,6 +52,7 @@
     "@jupyterlab/terminal-extension": "^0.9.0",
     "@jupyterlab/theme-dark-extension": "^0.9.0",
     "@jupyterlab/theme-light-extension": "^0.9.0",
+    "@jupyterlab/theming": "^0.9.0",
     "@jupyterlab/tooltip": "^0.9.0",
     "@jupyterlab/tooltip-extension": "^0.9.0",
     "@jupyterlab/vega2-extension": "^0.9.0",
@@ -64,6 +65,7 @@
     "@phosphor/virtualdom": "^1.1.1",
     "@phosphor/widgets": "^1.3.0",
     "d3": "^3.5.17",
+    "font-awesome": "^4.7.0",
     "vega": "^2.6.1",
     "vega-embed": "^2.2.0",
     "vega-lite": "^1.0.16"
