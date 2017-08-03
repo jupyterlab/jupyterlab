@@ -48,6 +48,9 @@ class ThemeManager {
     let registry = options.settingRegistry;
     this._host = options.host;
     let id = 'jupyter.services.theme-manager';
+    options.when.then(() => {
+      this._sealed = true;
+    });
     this.ready = Promise.all([registry.load(id), options.when]).then(([settings]) => {
       this._settings = settings;
       this._settings.changed.connect(this._onSettingsChanged, this);
@@ -91,6 +94,9 @@ class ThemeManager {
    * @returns A disposable that can be used to unregister the theme.
    */
   register(theme: ThemeManager.ITheme): IDisposable {
+    if (this._sealed) {
+      throw new Error('Cannot register themes after startup');
+    }
     let name = theme.name;
     if (this._themes[name]) {
       throw new Error(`Theme already registered for ${name}`);
@@ -146,11 +152,11 @@ class ThemeManager {
     let theme = settings.composite['theme'] as string;
     if (!this._themes[theme]) {
       let old = theme;
-      theme = settings.default('theme');
+      theme = settings.default('theme') as string;
       if (!this._themes[theme]) {
         return Promise.reject('No default theme to load');
       }
-      console.warn(`Could not find theme ${old}, loading default theme ${theme}`);
+      console.warn(`Could not find theme "${old}", loading default theme "${theme}"`);
     }
     this._pendingTheme = theme;
     return this._loadTheme();
@@ -204,6 +210,7 @@ class ThemeManager {
   private _pendingTheme = '';
   private _loadedTheme: string | null = null;
   private _loadPromise: Promise<void> | null = null;
+  private _sealed = false;
 }
 
 
