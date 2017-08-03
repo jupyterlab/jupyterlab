@@ -164,11 +164,13 @@ that are referenced by `url()` in its CSS files.  The `url()` paths in a CSS
 file served by the Jupyter server must start with the path 
 `'./lab/api/themes/<foo>/', where `foo` is the normalized name of the 
 package.  Scoped packages of the form `@org/name` are normalized to 
-`org-name`.  Other package names are not affected.  The path to the theme 
-assets is specified `package.json` under the `"jupyterlab"` key as 
-`"themeDir"`. See the [JupyterLab Light Theme](https://github.com/jupyterlab/jupyterlab/tree/master/packages/theme-light-extension) 
+`org-name`.  Other package names are not affected.  Note that `'@import'` paths are still given as relative paths, e.g. (`'@import './foo.css';`).  
+The path to the theme  assets is specified `package.json` under the 
+`"jupyterlab"` key as `"themeDir"`. See the [JupyterLab Light Theme](https://github.com/jupyterlab/jupyterlab/tree/master/packages/theme-light-extension) 
 for an example.  Ensure that the theme files are included in the
-`"files"` metadata in package.json.
+`"files"` metadata in package.json.  A theme can optionally specify
+an `embed.css` file that can be consumed outside of a JupyterLab application.
+See the JupyterLab Light Theme for an example.
 
 
 ## Extension Settings
