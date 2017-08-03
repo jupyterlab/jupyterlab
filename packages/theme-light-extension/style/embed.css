@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-@import '~@jupyterlab/theming/style/index.css';
+@import '~@jupyterlab/application/style/index.css';
 @import './variables.css';
 
 :root {
