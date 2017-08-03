@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "jupyterlab-example-terminal",
+  "name": "@jupyterlab/example-terminal",
   "scripts": {
     "build": "tsc --project src && webpack --config webpack.conf.js",
     "clean": "rimraf build"
