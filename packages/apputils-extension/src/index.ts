@@ -150,7 +150,8 @@ const themePlugin: JupyterLabPlugin<IThemeManager> = {
   activate: (app: JupyterLab, settingRegistry: ISettingRegistry): IThemeManager => {
     let baseUrl = app.serviceManager.serverSettings.baseUrl;
     let host = app.shell;
-    return new ThemeManager({ baseUrl,  settingRegistry, host });
+    let when = app.started;
+    return new ThemeManager({ baseUrl,  settingRegistry, host, when });
   },
   autoStart: true,
   provides: IThemeManager

@@ -48,10 +48,10 @@ class ThemeManager {
     let registry = options.settingRegistry;
     this._host = options.host;
     let id = 'jupyter.services.theme-manager';
-    this.ready = registry.load(id).then(settings => {
+    this.ready = Promise.all([registry.load(id), options.when]).then(([settings]) => {
       this._settings = settings;
       this._settings.changed.connect(this._onSettingsChanged, this);
-      this._onSettingsChanged(this._settings);
+      return this._handleSettings();
     });
   }
 
@@ -96,9 +96,6 @@ class ThemeManager {
       throw new Error(`Theme already registered for ${name}`);
     }
     this._themes[name] = theme;
-    if (theme.name === this._pendingTheme) {
-      this._loadTheme();
-    }
     return new DisposableDelegate(() => {
       delete this._themes[name];
     });
@@ -129,6 +126,12 @@ class ThemeManager {
    */
   private _onSettingsChanged(sender: ISettingRegistry.ISettings): void {
     this._pendingTheme = sender.composite['theme'] as string;
+    if (!this._themes[this._pendingTheme]) {
+      return;
+    }
+    if (this._pendingTheme === this._loadedTheme) {
+      return;
+    }
     if (this._loadPromise) {
       return;
     }
@@ -136,16 +139,28 @@ class ThemeManager {
   }
 
   /**
+   * Handle the current settings.
+   */
+  private _handleSettings(): Promise<void> {
+    let settings = this._settings;
+    let theme = settings.composite['theme'] as string;
+    if (!this._themes[theme]) {
+      let old = theme;
+      theme = settings.default('theme');
+      if (!this._themes[theme]) {
+        return Promise.reject('No default theme to load');
+      }
+      console.warn(`Could not find theme ${old}, loading default theme ${theme}`);
+    }
+    this._pendingTheme = theme;
+    return this._loadTheme();
+  }
+
+  /**
    * Load the theme.
    */
-  private _loadTheme(): void {
+  private _loadTheme(): Promise<void> {
     let newTheme = this._themes[this._pendingTheme];
-    if (!newTheme) {
-      return;
-    }
-    if (this._pendingTheme === this._loadedTheme) {
-      return;
-    }
     let oldPromise = Promise.resolve(void 0);
     let oldTheme = this._themes[this._loadedTheme];
     if (oldTheme) {
@@ -165,8 +180,8 @@ class ThemeManager {
       this._finishLoad();
     }).catch(error => {
       console.error(error);
-      this._finishLoad();
     });
+    return this._loadPromise;
   }
 
   /**
@@ -216,6 +231,11 @@ namespace ThemeManager {
      * The host widget for the theme manager.
      */
     host: Widget;
+
+    /**
+     * A promise for when all themes should have been registered.
+     */
+    when: Promise<void>;
   }
 
   /**
