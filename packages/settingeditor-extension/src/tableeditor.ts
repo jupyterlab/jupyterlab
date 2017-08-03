@@ -26,11 +26,6 @@ import {
 const TABLE_EDITOR_CLASS = 'jp-TableEditor';
 
 /**
- * The class name added to the table editor's main table.
- */
-const TABLE_EDITOR_MAIN_CLASS = 'jp-TableEditor-table';
-
-/**
  * The class name added to the table add button cells.
  */
 const TABLE_EDITOR_ADD_CLASS = 'jp-TableEditor-add';
@@ -262,9 +257,8 @@ namespace Private {
       .sort((a, b) => a.localeCompare(b)).map(property => fields[property]);
 
     node.appendChild(VirtualDOM.realize(h.legend({ title }, label)));
-    node.appendChild(VirtualDOM.realize(h.table({
-      className: TABLE_EDITOR_MAIN_CLASS
-    }, headers, rows.length ? rows : undefined)));
+    node.appendChild(VirtualDOM.realize(h.table(headers,
+      rows.length ? rows : undefined)));
   }
 }
 
