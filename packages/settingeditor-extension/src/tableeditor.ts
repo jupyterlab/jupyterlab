@@ -26,6 +26,11 @@ import {
 const TABLE_EDITOR_CLASS = 'jp-TableEditor';
 
 /**
+ * The class name added to the table wrapper to handle overflow.
+ */
+const TABLE_EDITOR_WRAPPER_CLASS = 'jp-TableEditor-wrapper';
+
+/**
  * The class name added to the table add button cells.
  */
 const TABLE_EDITOR_ADD_CLASS = 'jp-TableEditor-add';
@@ -136,7 +141,7 @@ class TableEditor extends Widget {
 
     // Populate if possible.
     if (settings) {
-      Private.populateFieldset(this.node, settings);
+      Private.populateTable(this.node, settings);
     }
   }
 
@@ -212,7 +217,7 @@ namespace Private {
    * Populate the fieldset with a specific plugin's metadata.
    */
   export
-  function populateFieldset(node: HTMLElement, settings: ISettingRegistry.ISettings): void {
+  function populateTable(node: HTMLElement, settings: ISettingRegistry.ISettings): void {
     const { plugin, schema, user } = settings;
     const fields: { [property: string]: VirtualElement } = Object.create(null);
     const properties = schema.properties || { };
@@ -255,10 +260,11 @@ namespace Private {
 
     const rows: VirtualElement[] = Object.keys(fields)
       .sort((a, b) => a.localeCompare(b)).map(property => fields[property]);
+    const wrapper = h.div({ className: TABLE_EDITOR_WRAPPER_CLASS },
+      h.table(headers, rows.length ? rows : undefined));
 
     node.appendChild(VirtualDOM.realize(h.legend({ title }, label)));
-    node.appendChild(VirtualDOM.realize(h.table(headers,
-      rows.length ? rows : undefined)));
+    node.appendChild(VirtualDOM.realize(wrapper));
   }
 }
 
