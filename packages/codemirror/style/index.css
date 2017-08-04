@@ -86,6 +86,7 @@
 
 
 .CodeMirror-dialog {
+  font-size: var(--jp-code-font-size);
   background-color: var(--jp-layout-color0);
 }
 
