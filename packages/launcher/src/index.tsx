@@ -301,7 +301,7 @@ class Launcher extends VDomRenderer<LauncherModel> {
 
     // Now create the sections for each category
     each(orderedCategories, (cat, index) => {
-      let iconClass = '${(categories[cat][0] as ILauncherItem).iconClass} ' +
+      let iconClass = `${(categories[cat][0] as ILauncherItem).iconClass} ` +
         'jp-Launcher-sectionIcon jp-Launcher-icon';
       let kernel = KERNEL_CATEGORIES.indexOf(cat) > -1;
       if (cat in categories) {
