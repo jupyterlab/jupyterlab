@@ -1,4 +1,5 @@
-
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
 
 import {
   JupyterLab, JupyterLabPlugin
@@ -9,9 +10,11 @@ import {
 } from '@jupyterlab/apputils';
 
 
-
+/**
+ * A plugin for the Jupyter Dark Theme.
+ */
 const plugin: JupyterLabPlugin<void> = {
-  id: 'theme-dark-extension',
+  id: 'jupyter.themes.dark',
   requires: [IThemeManager],
   activate: function(app: JupyterLab, manager: IThemeManager) {
     manager.register({
