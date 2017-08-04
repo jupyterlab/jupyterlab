@@ -897,6 +897,35 @@ namespace Private {
   /* tslint:enable */
 
   /**
+   * Returns an annotated (JSON with comments) version of a schema's defaults.
+   */
+  export
+  function annotatedDefaults(schema: ISettingRegistry.ISchema): string {
+    const keys = Object.keys(schema.properties);
+
+    return keys.reduce((acc, val) => `${acc}\n\n${docstring(schema, val)}`, '');
+  }
+
+  /**
+   * Return a commented version of a documentation string.
+   */
+  function comment(documentation: string): string {
+    return documentation.split('\n').join('\n\/\/ ');
+  }
+
+  /**
+   * Returns a documentation string for a specific schema property.
+   */
+  function docstring(schema: ISettingRegistry.ISchema, property: string): string {
+    const documentation = schema.properties[property].description;
+    const reified = reifyDefault(schema, property);
+    const example = reified === undefined ? ''
+      : `\n\n"${property}: "` + JSON.stringify(reified, null, 2);
+
+    return comment(documentation + example);
+  }
+
+  /**
    * Create a fully extrapolated default value for a root key in a schema.
    */
   export

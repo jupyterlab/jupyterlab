@@ -5,10 +5,10 @@
 
 
 :root {
-  --jp-private-settingeditor-legend-height: 16px;
-  --jp-private-settingeditor-row-height: 16px;
   --jp-private-settingeditor-add-width: 16px;
   --jp-private-settingeditor-key-width: 150px;
+  --jp-private-settingeditor-legend-height: 16px;
+  --jp-private-settingeditor-row-height: 16px;
   --jp-private-settingeditor-type-width: 75px;
 }
 
