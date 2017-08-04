@@ -22,6 +22,10 @@ import {
   ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
+import {
+  MimeModel
+} from './mimemodel';
+
 
 /**
  * An object which manages mime renderer factories.
@@ -129,6 +133,17 @@ class RenderMime {
       sanitizer: this.sanitizer,
       linkHandler: this.linkHandler
     });
+  }
+
+  /**
+   * Create a new mime model.  This is a convenience method.
+   *
+   * @options - The options used to create the model.
+   *
+   * @returns A new mime model.
+   */
+  createModel(options: MimeModel.IOptions = {}): MimeModel {
+    return new MimeModel(options);
   }
 
   /**
