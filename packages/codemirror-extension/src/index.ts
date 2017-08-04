@@ -209,7 +209,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
           return;
         }
         let editor = widget.editor as CodeMirrorEditor;
-        editor.editor.execCommand('find');
+        editor.execCommand('find');
       },
       isEnabled: hasWidget
     });
@@ -222,7 +222,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
           return;
         }
         let editor = widget.editor as CodeMirrorEditor;
-        editor.editor.execCommand('replace');
+        editor.execCommand('replace');
       },
       isEnabled: hasWidget
     });

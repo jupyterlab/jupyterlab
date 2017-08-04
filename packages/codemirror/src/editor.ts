@@ -475,6 +475,15 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
+   * Execute a codemirror command on the editor.
+   *
+   * @param command - The name of the command to execute.
+   */
+  execCommand(command: string): void {
+    this._editor.execCommand(command);
+  }
+
+  /**
    * Handle keydown events from the editor.
    */
   protected onKeydown(event: KeyboardEvent): boolean {
