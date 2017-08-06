@@ -937,8 +937,8 @@ namespace Private {
    */
   export
   function annotatedDefaults(schema: ISettingRegistry.ISchema, plugin: string): string {
-    const keys = Object.keys(schema.properties);
     const { description, title } = schema;
+    const keys = Object.keys(schema.properties);
 
     return [
       '{',
@@ -964,21 +964,20 @@ namespace Private {
    * Returns a documentation string for a specific schema property.
    */
   function docstring(schema: ISettingRegistry.ISchema, key: string): string {
-    const property = schema.properties[key];
-    const { description, title } = property;
+    const { description, title } = schema.properties[key];
     const reified = reifyDefault(schema, key);
     const defaults = reified === undefined ? ''
-      : `"${key}": ` + JSON.stringify(reified, null, 2);
+      : `Default value:\n\n"${key}": ` + JSON.stringify(reified, null, 2);
 
     return [
       indent(comment(`${title || untitled} (${key})`)),
       indent(comment(description || nondescript)),
-      indent(comment(defaults ? 'Default value:\n\n' + defaults : undefaulted))
+      indent(comment(defaults || undefaulted))
     ].join('\n');
   }
 
   /**
-   * Indent every line in a string.
+   * Returns a string with every line indented.
    */
   function indent(source: string | undefined): string {
     const spaces = '  ';
