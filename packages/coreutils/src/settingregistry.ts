@@ -254,6 +254,11 @@ namespace ISettingRegistry {
     readonly user: JSONObject;
 
     /**
+     * Return the defaults in a commented JSON format.
+     */
+    annotatedDefaults(): string;
+
+    /**
      * Calculate the default value of a setting by iterating through the schema.
      *
      * @param key - The name of the setting whose default value is calculated.
@@ -715,6 +720,13 @@ class Settings implements ISettingRegistry.ISettings {
   readonly registry: SettingRegistry;
 
   /**
+   * Return the defaults in a commented JSON format.
+   */
+  annotatedDefaults(): string {
+    return Private.annotatedDefaults(this._schema, this.plugin);
+  }
+
+  /**
    * Calculate the default value of a setting by iterating through the schema.
    *
    * @param key - The name of the setting whose default value is calculated.
@@ -897,32 +909,81 @@ namespace Private {
   /* tslint:enable */
 
   /**
+   * The line added to separate the schema header from keys.
+   *
+   * #### Notes
+   * The complete line should be 80 characters long:
+   * (2 x " ") + (2 x "/") + (75 x "*") + (1 x " ") = 80
+   */
+  const line = '***************************************************************************';
+
+  /**
+   * Replacement text for schema properties missing a `description` field.
+   */
+  const nondescript = '[empty description field in schema]';
+
+  /**
+   * Replacement text for schema properties missing a `default` field.
+   */
+  const undefaulted = '[no default value in schema]';
+
+  /**
+   * Replacement text for schema properties missing a `title` field.
+   */
+  const untitled = '[empty title field in schema]';
+
+  /**
    * Returns an annotated (JSON with comments) version of a schema's defaults.
    */
   export
-  function annotatedDefaults(schema: ISettingRegistry.ISchema): string {
+  function annotatedDefaults(schema: ISettingRegistry.ISchema, plugin: string): string {
     const keys = Object.keys(schema.properties);
+    const { description, title } = schema;
 
-    return keys.reduce((acc, val) => `${acc}\n\n${docstring(schema, val)}`, '');
+    return [
+      '{',
+      indent(comment(`${title || untitled} (${plugin})`)),
+      indent(comment(description || nondescript)),
+      indent(comment(line)),
+      '',
+      keys.map(key => docstring(schema, key)).join('\n\n\n'),
+      '}'
+    ].join('\n');
   }
 
   /**
-   * Return a commented version of a documentation string.
+   * Returns a commented version of a documentation string.
    */
-  function comment(documentation: string): string {
-    return documentation.split('\n').join('\n\/\/ ');
+  function comment(source: string | undefined): string {
+    const prefix = '\/\/ ';
+
+    return source ? prefix + source.split('\n').join(`\n${prefix}`) : '';
   }
 
   /**
    * Returns a documentation string for a specific schema property.
    */
-  function docstring(schema: ISettingRegistry.ISchema, property: string): string {
-    const documentation = schema.properties[property].description;
-    const reified = reifyDefault(schema, property);
-    const example = reified === undefined ? ''
-      : `\n\n"${property}: "` + JSON.stringify(reified, null, 2);
+  function docstring(schema: ISettingRegistry.ISchema, key: string): string {
+    const property = schema.properties[key];
+    const { description, title } = property;
+    const reified = reifyDefault(schema, key);
+    const defaults = reified === undefined ? ''
+      : `"${key}": ` + JSON.stringify(reified, null, 2);
 
-    return comment(documentation + example);
+    return [
+      indent(comment(`${title || untitled} (${key})`)),
+      indent(comment(description || nondescript)),
+      indent(comment(defaults ? 'Default value:\n\n' + defaults : undefaulted))
+    ].join('\n');
+  }
+
+  /**
+   * Indent every line in a string.
+   */
+  function indent(source: string | undefined): string {
+    const spaces = '  ';
+
+    return source ? spaces + source.split('\n').join(`\n${spaces}`) : '';
   }
 
   /**
