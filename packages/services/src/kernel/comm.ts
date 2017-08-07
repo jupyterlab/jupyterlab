@@ -95,7 +95,7 @@ class CommHandler extends DisposableDelegate implements Kernel.IComm {
    *
    * **See also:** [[ICommOpen]]
    */
-  open(data?: JSONValue, metadata?: JSONObject): Kernel.IFuture {
+  open(data?: JSONValue, metadata?: JSONObject, buffers: (ArrayBuffer | ArrayBufferView)[] = []): Kernel.IFuture {
     if (this.isDisposed || this._kernel.isDisposed) {
       throw new Error('Cannot open');
     }
@@ -110,7 +110,7 @@ class CommHandler extends DisposableDelegate implements Kernel.IComm {
       target_name: this._target,
       data: data || {}
     };
-    let msg = KernelMessage.createShellMessage(options, content, metadata);
+    let msg = KernelMessage.createShellMessage(options, content, metadata, buffers);
     return this._kernel.sendShellMessage(msg, false, true);
   }
 
@@ -151,7 +151,7 @@ class CommHandler extends DisposableDelegate implements Kernel.IComm {
    *
    * **See also:** [[ICommClose]], [[onClose]]
    */
-  close(data?: JSONValue, metadata?: JSONObject): Kernel.IFuture {
+  close(data?: JSONValue, metadata?: JSONObject, buffers: (ArrayBuffer | ArrayBufferView)[] = []): Kernel.IFuture {
     if (this.isDisposed || this._kernel.isDisposed) {
       throw new Error('Cannot close');
     }
@@ -165,12 +165,12 @@ class CommHandler extends DisposableDelegate implements Kernel.IComm {
       comm_id: this._id,
       data: data || {}
     };
-    let msg = KernelMessage.createShellMessage(options, content, metadata);
+    let msg = KernelMessage.createShellMessage(options, content, metadata, buffers);
     let future = this._kernel.sendShellMessage(msg, false, true);
     options.channel = 'iopub';
-    let ioMsg = KernelMessage.createMessage(options, content, metadata);
     let onClose = this._onClose;
     if (onClose) {
+      let ioMsg = KernelMessage.createMessage(options, content, metadata, buffers);
       onClose(ioMsg as KernelMessage.ICommCloseMsg);
     }
     this.dispose();
