@@ -920,17 +920,17 @@ namespace Private {
   /**
    * Replacement text for schema properties missing a `description` field.
    */
-  const nondescript = '[empty description field in schema]';
+  const nondescript = '[missing schema `description`]';
 
   /**
    * Replacement text for schema properties missing a `default` field.
    */
-  const undefaulted = '[no default value in schema]';
+  const undefaulted = '[missing schema `default`]';
 
   /**
    * Replacement text for schema properties missing a `title` field.
    */
-  const untitled = '[empty title field in schema]';
+  const untitled = '[missing schema `title`]';
 
   /**
    * Returns an annotated (JSON with comments) version of a schema's defaults.
@@ -942,22 +942,13 @@ namespace Private {
 
     return [
       '{',
-      indent(comment(`${title || untitled} (${plugin})`)),
-      indent(comment(description || nondescript)),
-      indent(comment(line)),
+      prefix('  \/\/ ', `${title || untitled} (${plugin})`),
+      prefix('  \/\/ ', description || nondescript),
+      prefix('  \/\/ ', line),
       '',
       keys.map(key => docstring(schema, key)).join('\n\n\n'),
       '}'
     ].join('\n');
-  }
-
-  /**
-   * Returns a commented version of a documentation string.
-   */
-  function comment(source: string | undefined): string {
-    const prefix = '\/\/ ';
-
-    return source ? prefix + source.split('\n').join(`\n${prefix}`) : '';
   }
 
   /**
@@ -970,19 +961,17 @@ namespace Private {
       : `Default value:\n\n"${key}": ` + JSON.stringify(reified, null, 2);
 
     return [
-      indent(comment(`${title || untitled} (${key})`)),
-      indent(comment(description || nondescript)),
-      indent(comment(defaults || undefaulted))
+      prefix('  \/\/ ', `${title || untitled} (${key})`),
+      prefix('  \/\/ ', description || nondescript),
+      prefix('  \/\/ ', defaults || undefaulted)
     ].join('\n');
   }
 
   /**
-   * Returns a string with every line indented.
+   * Returns a documentation string with a prefix added on every line.
    */
-  function indent(source: string | undefined): string {
-    const spaces = '  ';
-
-    return source ? spaces + source.split('\n').join(`\n${spaces}`) : '';
+  function prefix(prefix: string, source: string): string {
+    return prefix + source.split('\n').join(`\n${prefix}`);
   }
 
   /**
