@@ -14,7 +14,7 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  Widget
+  PanelLayout, Widget
 } from '@phosphor/widgets';
 
 import '../style/index.css';
@@ -73,18 +73,26 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRe
 
   let createWidget = () => {
     let renderer = rendermime.createRenderer('text/markdown');
-    renderer.id = 'faq';
-    renderer.addClass('jp-FAQ');
-    renderer.title.label = 'FAQ';
-    renderer.title.closable = true;
-    renderer.node.tabIndex = -1;
-
     const model = rendermime.createModel({
       data: { 'text/markdown': SOURCE }
     });
     renderer.renderModel(model);
+    renderer.addClass('jp-FAQ-content');
 
-    return renderer;
+    let parent = new Widget();
+    parent.id = 'faq';
+    parent.addClass('jp-FAQ');
+    parent.title.label = 'FAQ';
+    parent.title.closable = true;
+    parent.node.tabIndex = -1;
+    let toolbar = new Widget();
+    toolbar.addClass('jp-FAQ-toolbar');
+
+    let layout = parent.layout = new PanelLayout();
+    layout.addWidget(toolbar);
+    layout.addWidget(renderer);
+
+    return parent;
   };
 
   let widget = createWidget();
