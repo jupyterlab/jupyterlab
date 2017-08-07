@@ -762,7 +762,7 @@ namespace Kernel {
      * #### Notes
      * This sends a `comm_open` message to the server.
      */
-    open(data?: JSONValue, metadata?: JSONObject): IFuture;
+    open(data?: JSONValue, metadata?: JSONObject, buffers?: (ArrayBuffer | ArrayBufferView)[]): IFuture;
 
     /**
      * Send a `comm_msg` message to the kernel.
@@ -797,7 +797,7 @@ namespace Kernel {
      *
      * This is a no-op if the comm is already closed.
      */
-    close(data?: JSONValue, metadata?: JSONObject): IFuture;
+    close(data?: JSONValue, metadata?: JSONObject, buffers?: (ArrayBuffer | ArrayBufferView)[]): IFuture;
   }
 
   /**
