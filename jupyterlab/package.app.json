@@ -96,7 +96,7 @@
     "vega": "^2.6.1",
     "vega-embed": "^2.2.0",
     "vega-lite": "^1.0.16",
-    "xterm": "^2.8.0"
+    "xterm": "~2.8.0"
   },
   "devDependencies": {
     "css-loader": "^0.27.3",
@@ -159,6 +159,6 @@
       "@jupyterlab/tooltip",
       "@phosphor/widgets"
     ],
-    "version": "0.26.4"
+    "version": "0.26.5"
   }
 }
