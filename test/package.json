@@ -59,7 +59,6 @@
     "concurrently": "^3.4.0",
     "css-loader": "^0.27.3",
     "file-loader": "^0.10.1",
-    "font-awesome": "^4.6.3",
     "fs-extra": "^2.1.2",
     "istanbul-instrumenter-loader": "^2.0.0",
     "json-loader": "^0.5.4",

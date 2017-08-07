@@ -30,8 +30,7 @@
     "@jupyterlab/terminal-extension": "^0.9.0",
     "@jupyterlab/theme-light-extension": "^0.9.0",
     "@jupyterlab/tooltip-extension": "^0.9.0",
-    "es6-promise": "^4.1.0",
-    "font-awesome": "^4.6.3"
+    "es6-promise": "^4.1.0"
   },
   "devDependencies": {
     "file-loader": "^0.10.1",

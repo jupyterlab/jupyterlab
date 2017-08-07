@@ -30,7 +30,8 @@
     "watch": "tsc -w"
   },
   "jupyterlab": {
-    "extension": true
+    "extension": true,
+    "schemaDir": "schema"
   },
   "repository": {
     "type": "git",

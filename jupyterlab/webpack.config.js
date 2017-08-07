@@ -17,7 +17,7 @@ var source = fs.readFileSync('index.js').toString();
 var template = Handlebars.compile(source);
 var data = {
   jupyterlab_extensions: package_data.jupyterlab.extensions,
-  jupyterlab_mime_extensions: package_data.jupyterlab.mimeExtensions
+  jupyterlab_mime_extensions: package_data.jupyterlab.mimeExtensions,
 };
 var result = template(data);
 

@@ -11,7 +11,7 @@ var path = require('path');
 
 
 // Packages to ignore
-var IGNORE = ['..', '.'];
+var IGNORE = ['..', '.', 'd3', 'vega', 'vega-lite', 'font-awesome'];
 
 
 /**
@@ -34,9 +34,6 @@ function getImports(sourceFile) {
     }
     return imports;
 }
-
-
-var dname = '../packages/all-packages';
 
 
 /**
@@ -83,6 +80,12 @@ function validate(dname) {
         }
     });
     Object.keys(deps).forEach(function(name) {
+        if (versions[name]) {
+            var desired = '^' + versions[name];
+            if (deps[name] !== desired) {
+                problems.push('Bad core version: ' + name + ' should be ' + desired);
+            }
+        }
         if (IGNORE.indexOf(name) !== -1) {
             return;
         }
@@ -96,6 +99,20 @@ function validate(dname) {
 // Find all of the packages.
 var basePath = path.resolve('.');
 var lernaConfig = require(path.join(basePath, 'lerna.json'));
+
+// Gather the versions of each package.
+var versions = {};
+lernaConfig.packages.forEach(function(spec) {
+    var dirs = glob.sync(path.join(basePath, spec));
+    dirs.forEach(function(dname) {
+        try {
+            var pkg = require(path.resolve(dname) + '/package.json');
+            versions[pkg['name']] = pkg['version'];
+        } catch (e) {
+            return;
+        }
+    });
+});
 
 var errors = {};
 

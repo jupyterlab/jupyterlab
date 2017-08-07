@@ -2,6 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import 'es6-promise/auto';  // polyfill Promise on IE
+import '@jupyterlab/theme-light-extension/style/embed.css';
+import '../index.css';
 
 import {
   CommandRegistry
@@ -27,9 +29,6 @@ import {
   RenderMime, defaultRendererFactories
 } from '@jupyterlab/rendermime';
 
-import '@jupyterlab/theming/style/index.css';
-import '@jupyterlab/theming/style/variables-light.css';
-import '../index.css';
 
 let TITLE = 'Console';
 

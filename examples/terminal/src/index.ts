@@ -2,6 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import 'es6-promise/auto';  // polyfill Promise on IE
+import '@jupyterlab/theme-light-extension/style/embed.css';
+import '../index.css';
+
 
 import {
   DockPanel, Widget
@@ -15,20 +18,10 @@ import {
   Terminal
 } from '@jupyterlab/terminal';
 
-import '@jupyterlab/theming/style/index.css';
-import '@jupyterlab/theming/style/variables-light.css';
-import '../index.css';
-
 
 function main(): void {
-  let term1 = new Terminal({
-    background: 'black',
-    color: 'white'
-  });
-  let term2 = new Terminal({
-    background: 'white',
-    color: 'black'
-  });
+  let term1 = new Terminal({ theme: 'light' });
+  let term2 = new Terminal({ theme: 'dark' });
 
   TerminalSession.startNew().then(session => { term1.session = session; });
   TerminalSession.startNew().then(session => { term2.session = session; });

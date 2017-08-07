@@ -15,5 +15,6 @@ export * from './instancetracker';
 export * from './mainmenu';
 export * from './sanitizer';
 export * from './styling';
+export * from './thememanager';
 export * from './toolbar';
 export * from './vdom';
