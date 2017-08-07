@@ -568,9 +568,9 @@ class ContentsManager implements Contents.IManager {
     if (!drive) {
       return Promise.reject(`No valid drive for path: ${path}`);
     }
-    return drive.get(localPath, options).then( contentsModel => {
+    return drive.get(localPath, options).then(contentsModel => {
       let listing: Contents.IModel[] = [];
-      if (contentsModel.type === 'directory') {
+      if (contentsModel.type === 'directory' && contentsModel.content) {
         each(contentsModel.content, (item: Contents.IModel) => {
           listing.push({
             ...item,
