@@ -19,7 +19,7 @@
     "@phosphor/domutils": "^1.1.1",
     "@phosphor/messaging": "^1.2.1",
     "@phosphor/widgets": "^1.3.0",
-    "xterm": "^2.8.0"
+    "xterm": "~2.8.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
