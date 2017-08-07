@@ -130,6 +130,6 @@
       "@jupyterlab/tooltip",
       "@phosphor/widgets"
     ],
-    "version": "0.26.4"
+    "version": "0.26.5"
   }
 }
