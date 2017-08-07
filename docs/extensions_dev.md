@@ -15,10 +15,6 @@ A JupyterLab application is comprised of:
 - A core Application object
 - Plugins
 
-A full example of an application is contained [here](https://github.com/jupyterlab/jupyterlab/tree/master/examples/app).
-Looking at the `index.js` file, you can see the extensions
-used in the tutorial example.
-
 ## Plugins
 A plugin adds a core functionality to the application:
 - A plugin can require other plugins for operation.
