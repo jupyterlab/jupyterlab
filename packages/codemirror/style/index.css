@@ -84,13 +84,6 @@
   margin-left: calc(-1 * var(--jp-code-padding));
 }
 
-
-.CodeMirror-dialog {
-  font-size: var(--jp-code-font-size);
-  background-color: var(--jp-layout-color0);
-}
-
-
 .jp-CollaboratorCursor {
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
@@ -193,4 +186,3 @@
   background-position: right;
   background-repeat: no-repeat;
 }
-
