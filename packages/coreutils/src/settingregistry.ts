@@ -913,7 +913,7 @@ namespace Private {
    *
    * #### Notes
    * The complete line should be 80 characters long:
-   * (2 x " ") + (2 x "/") + (75 x "*") + (1 x " ") = 80
+   * (2 x " ") + (2 x "/") + (1 x " ") + (75 x "*") = 80
    */
   const line = '***************************************************************************';
 
@@ -942,13 +942,20 @@ namespace Private {
 
     return [
       '{',
-      prefix('  \/\/ ', `${title || untitled} (${plugin})`),
-      prefix('  \/\/ ', description || nondescript),
-      prefix('  \/\/ ', line),
+      comment(`${title || untitled} (${plugin})`),
+      comment(description || nondescript),
+      comment(line),
       '',
       keys.map(key => docstring(schema, key)).join('\n\n\n'),
       '}'
     ].join('\n');
+  }
+
+  /**
+   * Returns a documentation string with a comment prefix added on every line.
+   */
+  function comment(source: string, prefix = '  \/\/ '): string {
+    return prefix + source.split('\n').join(`\n${prefix}`);
   }
 
   /**
@@ -961,17 +968,10 @@ namespace Private {
       : `Default value:\n\n"${key}": ` + JSON.stringify(reified, null, 2);
 
     return [
-      prefix('  \/\/ ', `${title || untitled} (${key})`),
-      prefix('  \/\/ ', description || nondescript),
-      prefix('  \/\/ ', defaults || undefaulted)
+      comment(`${title || untitled} (${key})`),
+      comment(description || nondescript),
+      comment(defaults || undefaulted)
     ].join('\n');
-  }
-
-  /**
-   * Returns a documentation string with a prefix added on every line.
-   */
-  function prefix(prefix: string, source: string): string {
-    return prefix + source.split('\n').join(`\n${prefix}`);
   }
 
   /**
