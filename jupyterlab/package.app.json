@@ -158,7 +158,6 @@
       "@jupyterlab/terminal",
       "@jupyterlab/tooltip",
       "@phosphor/widgets"
-    ],
-    "version": "0.26.5"
+    ]
   }
 }

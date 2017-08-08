@@ -82,6 +82,7 @@ def load_jupyter_server_extension(nbapp):
 
     if core_mode or fallback:
         config.assets_dir = os.path.join(here, 'build')
+        config.version = __version__
         if not os.path.exists(config.assets_dir):
             msg = 'Static assets not built, please see CONTRIBUTING.md'
             nbapp.log.error(msg)
