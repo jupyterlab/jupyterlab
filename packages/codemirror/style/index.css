@@ -120,33 +120,6 @@
   white-space: nowrap;
 }
 
-.CodeMirror-vscrollbar::-webkit-scrollbar, .CodeMirror-hscrollbar::-webkit-scrollbar {
-  background-color: var(--jp-layout-color0);
-  width: var(--jp-scrollbar-width);
-}
-
-.CodeMirror-vscrollbar::-webkit-scrollbar {
-  border-left: 1px solid var(--jp-border-color1);
-}
-
-.CodeMirror-hscrollbar::-webkit-scrollbar {
-  border-top: 1px solid var(--jp-border-color1);
-}
-
-.CodeMirror-vscrollbar::-webkit-scrollbar-thumb, .CodeMirror-hscrollbar::-webkit-scrollbar-thumb {
-  background-color: var(--jp-layout-color2);
-  border-radius: 0px;
-}
-
-.CodeMirror-vscrollbar::-webkit-scrollbar-thumb {
-  border-left: 1px solid var(--jp-border-color1);
-}
-
-.CodeMirror-hscrollbar::-webkit-scrollbar-thumb {
-  border-top: 1px solid var(--jp-border-color1);
-}
-
-
 
 /*
   Here is our jupyter theme for CodeMirror syntax highlighting
