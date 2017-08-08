@@ -1,6 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+// Local CSS must be loaded prior to loading other libs.
+import '../style/index.css';
+
 import {
   CommandLinker
 } from '@jupyterlab/apputils';
@@ -36,7 +39,6 @@ import {
 export { ApplicationShell } from './shell';
 export { ILayoutRestorer, LayoutRestorer } from './layoutrestorer';
 
-import '../style/index.css';
 
 /**
  * The type for all JupyterLab plugins.
