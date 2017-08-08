@@ -774,6 +774,7 @@ def _ensure_package(app_dir, logger=None, name=None, version=None):
     """Make sure the build dir is set up.
     """
     logger = logger or logging
+    version = version or __version__
     _ensure_app_dirs(app_dir, logger)
 
     # Look for mismatched version.
@@ -783,7 +784,7 @@ def _ensure_package(app_dir, logger=None, name=None, version=None):
     if os.path.exists(pkg_path):
         with open(pkg_path) as fid:
             data = json.load(fid)
-        if data['jupyterlab'].get('version', '') != __version__:
+        if data['jupyterlab'].get('version', '') != version:
             shutil.rmtree(staging)
             os.makedirs(staging)
             version_updated = True
@@ -795,8 +796,7 @@ def _ensure_package(app_dir, logger=None, name=None, version=None):
     # Template the package.json file.
     data = _get_package_template(app_dir, logger)
     data['jupyterlab']['name'] = name or 'JupyterLab'
-    #version = version or __version__
-    data['jupyterlab']['version'] = '0.1.0'
+    data['jupyterlab']['version'] = version
 
     pkg_path = pjoin(staging, 'package.json')
     with open(pkg_path, 'w') as fid:
