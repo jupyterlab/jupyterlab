@@ -225,6 +225,10 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
       let bName = b.name || '';
       return aName.localeCompare(bName);
     }).forEach(spec => {
+      // Avoid mode name with a curse word.
+      if (spec.mode.indexOf('brainf') === 0) {
+        return;
+      }
       modeMenu.addItem({
         command: CommandIDs.changeMode,
         args: {...spec}
