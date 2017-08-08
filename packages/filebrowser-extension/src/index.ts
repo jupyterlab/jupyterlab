@@ -292,8 +292,11 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
       }
 
       each(widget.selectedItems(), item => {
-        let path = item.path;
-        commands.execute('docmanager:open', { path });
+        if (item.type === 'directory') {
+          widget.model.cd(item.path);
+        } else {
+          commands.execute('docmanager:open', { path: item.path });
+        }
       });
     },
     iconClass: 'jp-MaterialIcon jp-OpenFolderIcon',
