@@ -85,7 +85,7 @@ namespace IRenderMime {
     /**
      * The name of the document model type.
      */
-    readonly modelName: string;
+    readonly modelName?: string;
 
     /**
      * The primary file type of the widget.
@@ -142,7 +142,7 @@ namespace IRenderMime {
     /**
      * The file format for the file type ('text', 'base64', or 'json').
      */
-    readonly fileFormat: string;
+    readonly fileFormat?: string;
   }
 
   /**
