@@ -133,12 +133,14 @@ const extension: IRenderMime.IExtension = {
   dataType: 'json',
   documentWidgetFactoryOptions: [{
     name: 'Vega',
+    modelName: 'text',
     primaryFileType: 'vega',
     fileTypes: ['vega', 'json'],
     defaultFor: ['vega']
   },
   {
     name: 'Vega Lite',
+    modelName: 'text',
     primaryFileType: 'vega-lite',
     fileTypes: ['vega-lite', 'json'],
     defaultFor: ['vega-lite']
@@ -146,12 +148,14 @@ const extension: IRenderMime.IExtension = {
   fileTypes: [{
     mimeTypes: [VEGA_MIME_TYPE],
     name: 'vega',
+    fileFormat: 'text',
     extensions: ['.vg', '.vg.json'],
     iconClass: 'jp-MaterialIcon jp-VegaIcon',
   },
   {
     mimeTypes: [VEGALITE_MIME_TYPE],
     name: 'vega-lite',
+    fileFormat: 'text',
     extensions: ['.vl', '.vl.json'],
     iconClass: 'jp-MaterialIcon jp-VegaIcon',
   }]

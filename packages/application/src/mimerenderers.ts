@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  MimeDocument, MimeDocumentFactory
+  MimeDocument, MimeDocumentFactory, DocumentRegistry
 } from '@jupyterlab/docregistry';
 
 import {
@@ -80,7 +80,7 @@ function createRendermimePlugin(item: IRenderMime.IExtension): JupyterLabPlugin<
 
       if (item.fileTypes) {
         item.fileTypes.forEach(ft => {
-          app.docRegistry.addFileType(ft);
+          app.docRegistry.addFileType(ft as DocumentRegistry.IFileType);
         });
       }
 
@@ -89,6 +89,7 @@ function createRendermimePlugin(item: IRenderMime.IExtension): JupyterLabPlugin<
           renderTimeout: item.renderTimeout,
           dataType: item.dataType,
           rendermime: app.rendermime,
+          modelName: option.modelName,
           name: option.name,
           primaryFileType: registry.getFileType(option.primaryFileType),
           fileTypes: option.fileTypes,

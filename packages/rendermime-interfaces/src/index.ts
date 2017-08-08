@@ -83,6 +83,11 @@ namespace IRenderMime {
     readonly name: string;
 
     /**
+     * The name of the document model type.
+     */
+    readonly modelName?: string;
+
+    /**
      * The primary file type of the widget.
      */
     readonly primaryFileType: string;
@@ -133,6 +138,11 @@ namespace IRenderMime {
      * The icon label for the file type.
      */
     readonly iconLabel?: string;
+
+    /**
+     * The file format for the file type ('text', 'base64', or 'json').
+     */
+    readonly fileFormat?: string;
   }
 
   /**
