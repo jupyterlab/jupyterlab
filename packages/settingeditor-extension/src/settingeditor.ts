@@ -52,6 +52,11 @@ const DEFAULT_OUTER = [1, 3];
 const SETTING_EDITOR_CLASS = 'jp-SettingEditor';
 
 /**
+ * The class name added to the top level split panel of the setting editor.
+ */
+const SETTING_EDITOR_MAIN_PANEL_CLASS = 'jp-SettingEditor-main';
+
+/**
  * The class name added to all plugin editors.
  */
 const PLUGIN_EDITOR_CLASS = 'jp-PluginEditor';
@@ -137,6 +142,7 @@ class SettingEditor extends Widget {
       this._when = Array.isArray(when) ? Promise.all(when) : when;
     }
 
+    panel.addClass(SETTING_EDITOR_MAIN_PANEL_CLASS);
     layout.addWidget(panel);
     panel.addWidget(list);
     panel.addWidget(instructions);

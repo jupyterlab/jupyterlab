@@ -32,9 +32,21 @@
 }
 
 
-#setting-editor .p-SplitPanel {
-  height: 100%;
-  width: 100%;
+#setting-editor > .p-Widget {
+  position: absolute;
+  top: var(--jp-toolbar-micro-height);
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+
+#setting-editor .jp-SettingEditor-main .p-SplitPanel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
 }
 
 
@@ -80,6 +92,7 @@
   padding: 0;
   min-width: 150px;
   width: 150px;
+  overflow-y: auto;
 }
 
 
