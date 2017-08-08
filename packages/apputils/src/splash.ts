@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IDisposable
+} from '@phosphor/disposable';
+
+import {
   Token
 } from '@phosphor/coreutils';
 
@@ -22,12 +26,8 @@ export
 interface ISplashScreen {
   /**
    * Show the application splash screen.
+   *
+   * @returns A disposable used to clear the splash screen.
    */
-  show(): void;
-
-
-  /**
-   * Hide the application splash screen.
-   */
-  hide(): void;
+  show(): IDisposable;
 }

@@ -25,6 +25,10 @@ import {
 } from '@phosphor/coreutils';
 
 import {
+  DisposableDelegate, IDisposable
+} from '@phosphor/disposable';
+
+import {
   Widget
 } from '@phosphor/widgets';
 
@@ -155,11 +159,11 @@ const themePlugin: JupyterLabPlugin<IThemeManager> = {
     let host = app.shell;
     let when = app.started;
     let manager = new ThemeManager({ baseUrl,  settingRegistry, host, when });
-    splash.show();
+    let disposable = splash.show();
     manager.ready.then(() => {
-      splash.hide();
+      disposable.dispose();
     }, () => {
-      splash.hide();
+      disposable.dispose();
     });
     return manager;
   },
@@ -178,10 +182,7 @@ const splashPlugin: JupyterLabPlugin<ISplashScreen> = {
   activate: () => {
     return {
       show: () => {
-        Private.showSplash();
-      },
-      hide: () => {
-        Private.hideSplash();
+        return Private.showSplash();
       }
     };
   }
@@ -255,26 +256,21 @@ namespace Private {
    * Show the splash element.
    */
   export
-  function showSplash(): void {
+  function showSplash(): IDisposable {
     if (!splash) {
       splash = document.createElement('div');
       splash.id = 'jupyterlab-splash';
       let child = document.createElement('div');
       splash.appendChild(child);
-      document.body.appendChild(splash);
     }
+    document.body.appendChild(splash);
     splashCount++;
-  }
-
-  /**
-   * Hide the splash element.
-   */
-  export
-  function hideSplash(): void {
-    splashCount = Math.max(splashCount - 1, 0);
-    if (splashCount === 0 && splash) {
-      document.body.removeChild(splash);
-    }
+    return new DisposableDelegate(() => {
+      splashCount = Math.max(splashCount - 1, 0);
+      if (splashCount === 0 && splash) {
+        document.body.removeChild(splash);
+      }
+    });
   }
 }
 
