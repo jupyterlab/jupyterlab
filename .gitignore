@@ -3,8 +3,6 @@ build
 dist
 lib
 jupyterlab/build
-jupyterlab/schemas
-jupyterlab/themes
 
 node_modules
 .cache
