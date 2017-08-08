@@ -98,8 +98,9 @@ namespace Mode {
     return (
       CodeMirror.findModeByName(modename || '') ||
       CodeMirror.findModeByMIME(mimetype || '') ||
-      CodeMirror.findModeByExt(ext) ||
-      CodeMirror.findModeByMIME(IEditorMimeTypeService.defaultMimeType)
+      findByExtension(ext) ||
+      CodeMirror.findModeByMIME(IEditorMimeTypeService.defaultMimeType) ||
+      CodeMirror.findModeByMIME('text/plain')
     );
   }
 
@@ -131,7 +132,15 @@ namespace Mode {
    * Find a codemirror mode by extension.
    */
   export
-  function findByExtension(name: string): ISpec {
-    return CodeMirror.findModeByExtension(name);
+  function findByExtension(ext: string | string[]): ISpec {
+    if (typeof ext === 'string') {
+      return CodeMirror.findModeByExtension(name);
+    }
+    for (let i = 0; i < ext.length; i++) {
+      let mode = CodeMirror.findModeByExtension(ext[i]);
+      if (mode) {
+        return mode;
+      }
+    }
   }
 }

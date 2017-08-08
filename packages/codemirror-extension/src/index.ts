@@ -198,10 +198,10 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     commands.addCommand(CommandIDs.changeMode, {
       label: args => args['name'] as string,
       execute: args => {
-        let mode = args['mode'] as string;
+        let name = args['name'] as string;
         let widget = tracker.currentWidget;
-        if (mode && widget) {
-          let spec = Mode.findByName(mode);
+        if (name && widget) {
+          let spec = Mode.findByName(name);
           if (spec) {
             widget.model.mimeType = spec.mime;
           }
