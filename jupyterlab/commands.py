@@ -813,6 +813,8 @@ def _ensure_package(app_dir, logger=None, name=None, version=None):
             dest = pjoin(app_dir, item, item_path)
             if version_updated or not os.path.exists(dest):
                 if os.path.isdir(src):
+                    if os.path.exists(dest):
+                        shutil.rmtree(dest)
                     shutil.copytree(src, dest)
                 else:
                     shutil.copy(src, dest)
