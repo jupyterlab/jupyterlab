@@ -75,6 +75,9 @@ function renderHTML(options: renderHTML.IOptions): Promise<void> {
   //   Private.evalInnerHTMLScriptTags(host);
   // }
 
+  // Handle default behavior of nodes.
+  Private.handleDefaults(host);
+
   // Patch the urls if a resolver is available.
   let promise: Promise<void>;
   if (resolver) {
@@ -323,6 +326,9 @@ function renderMarkdown(options: renderMarkdown.IRenderOptions): Promise<void> {
     //   // TODO really want to run scripts?
     //   Private.evalInnerHTMLScriptTags(host);
     // }
+
+    // Handle default behavior of nodes.
+    Private.handleDefaults(host);
 
     // Apply ids to the header nodes.
     Private.headerAnchors(host);
@@ -662,6 +668,23 @@ namespace Private {
   }
 
   /**
+   * Handle the default behavior of nodes.
+   */
+  export
+  function handleDefaults(node: HTMLElement): void {
+    // Handle anchor elements.
+    let anchors = node.getElementsByTagName('a');
+    for (let i = 0; i < anchors.length; i++) {
+      let path = anchors[i].href;
+      if (URLExt.isLocal(path)) {
+        anchors[i].target = '_self';
+      } else {
+        anchors[i].target = '_blank';
+      }
+    }
+  }
+
+  /**
    * Resolve the relative urls in element `src` and `href` attributes.
    *
    * @param node - The head html element.
@@ -683,7 +706,7 @@ namespace Private {
       promises.push(handleAttr(nodes[i] as HTMLElement, 'src', resolver));
     }
 
-    // Handle achor elements.
+    // Handle anchor elements.
     let anchors = node.getElementsByTagName('a');
     for (let i = 0; i < anchors.length; i++) {
       promises.push(handleAnchor(anchors[i], resolver, linkHandler));
@@ -740,7 +763,6 @@ namespace Private {
    * Handle an anchor node.
    */
   function handleAnchor(anchor: HTMLAnchorElement, resolver: IRenderMime.IResolver, linkHandler: IRenderMime.ILinkHandler | null): Promise<void> {
-    anchor.target = '_blank';
     // Get the link path without the location prepended.
     // (e.g. "./foo.md#Header 1" vs "http://localhost:8888/foo.md#Header 1")
     let href = anchor.getAttribute('href');

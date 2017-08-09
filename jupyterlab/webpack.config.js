@@ -42,6 +42,7 @@ module.exports = {
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },
       { test: /\.json$/, use: 'json-loader' },
       { test: /\.html$/, use: 'file-loader' },
+      { test: /\.md$/, use: 'raw-loader' },
       { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
       { test: /\.js.map$/, use: 'file-loader' },
       { test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/, use: 'url-loader?limit=10000&mimetype=application/font-woff' },
