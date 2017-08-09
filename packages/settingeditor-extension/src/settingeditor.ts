@@ -490,8 +490,8 @@ class PluginList extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'click':
-      this._evtClick(event as MouseEvent);
+    case 'mousedown':
+      this._evtMousedown(event as MouseEvent);
       break;
     default:
       break;
@@ -511,7 +511,7 @@ class PluginList extends Widget {
    * Handle `'after-attach'` messages.
    */
   protected onAfterAttach(msg: Message): void {
-    this.node.addEventListener('click', this);
+    this.node.addEventListener('mousedown', this);
     this.update();
   }
 
@@ -519,7 +519,7 @@ class PluginList extends Widget {
    * Handle `before-detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    this.node.removeEventListener('click', this);
+    this.node.removeEventListener('mousedown', this);
   }
 
   /**
@@ -546,22 +546,23 @@ class PluginList extends Widget {
   }
 
   /**
-   * Handle the `'click'` event for the plugin list.
+   * Handle the `'mousedown'` event for the plugin list.
    *
    * @param event - The DOM event sent to the widget
    */
-  private _evtClick(event: MouseEvent): void {
+  private _evtMousedown(event: MouseEvent): void {
+    event.preventDefault();
+
     let target = event.target as HTMLElement;
     let id = target.getAttribute('data-id');
-    let editor = target.getAttribute('data-editor');
 
     if (id === this._selection) {
       return;
     }
 
+    const editor = target.getAttribute('data-editor');
+
     if (editor) {
-      event.preventDefault();
-      event.stopPropagation();
       this._editor = editor as 'raw' | 'table';
       this.update();
       return;
