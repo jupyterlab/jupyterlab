@@ -81,6 +81,13 @@ class TableEditor extends Widget {
   }
 
   /**
+   * Tests whether the settings have been modified and need saving.
+   */
+  get isDirty(): boolean {
+    return false; // TODO: remove placeholder.
+  }
+
+  /**
    * The plugin settings.
    */
   get settings(): ISettingRegistry.ISettings | null {

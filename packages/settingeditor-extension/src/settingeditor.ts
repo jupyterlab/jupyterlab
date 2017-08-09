@@ -628,6 +628,13 @@ class PluginEditor extends Widget {
   readonly handleMoved: ISignal<any, void>;
 
   /**
+   * Tests whether the settings have been modified and need saving.
+   */
+  get isDirty(): boolean {
+    return this._rawEditor.isDirty || this._tableEditor.isDirty;
+  }
+
+  /**
    * The plugin settings being edited.
    */
   get settings(): ISettingRegistry.ISettings | null {
@@ -684,7 +691,7 @@ class PluginEditor extends Widget {
    * If the editor is in a dirty state, confirm that the user wants to leave.
    */
   confirm(): Promise<void> {
-    if (this.isHidden || !this.isAttached || !this._rawEditor.isDirty) {
+    if (this.isHidden || !this.isAttached || !this.isDirty) {
       return Promise.resolve(void 0);
     }
 
