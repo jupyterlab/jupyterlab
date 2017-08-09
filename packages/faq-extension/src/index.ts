@@ -111,20 +111,23 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRe
     name: () => 'faq'
   });
 
-  let content = rendermime.createRenderer('text/markdown');
-  const model = rendermime.createModel({
-    data: { 'text/markdown': SOURCE }
-  });
-  content.renderModel(model);
-  content.addClass('jp-FAQ-content');
+  let createWidget = () => {
+    let content = rendermime.createRenderer('text/markdown');
+    const model = rendermime.createModel({
+      data: { 'text/markdown': SOURCE }
+    });
+    content.renderModel(model);
+    content.addClass('jp-FAQ-content');
+    return new FAQWidget(content);
+  };
 
-  let widget = new FAQWidget(content);
+  let widget: FAQWidget;
 
   commands.addCommand(command, {
     label: 'Open FAQ',
     execute: () => {
-      if (widget.isDisposed) {
-        widget = new FAQWidget(content);
+      if (!widget || widget.isDisposed) {
+        widget = createWidget();
       }
       if (!tracker.has(widget)) {
         tracker.add(widget);
