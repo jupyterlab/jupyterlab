@@ -24,7 +24,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  h, VirtualDOM
+  ElementAttrs, h, VirtualDOM
 } from '@phosphor/virtualdom';
 
 import {
@@ -527,7 +527,7 @@ class PluginList extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     const plugins = Private.sortPlugins(this.registry.plugins);
-    const switcher = Private.createSwitcher();
+    const switcher = Private.createSwitcher(this._editor);
     const list = document.createElement('ul');
 
     this.node.textContent = '';
@@ -553,8 +553,17 @@ class PluginList extends Widget {
   private _evtClick(event: MouseEvent): void {
     let target = event.target as HTMLElement;
     let id = target.getAttribute('data-id');
+    let editor = target.getAttribute('data-editor');
 
     if (id === this._selection) {
+      return;
+    }
+
+    if (editor) {
+      event.preventDefault();
+      event.stopPropagation();
+      this._editor = editor as 'raw' | 'table';
+      this.update();
       return;
     }
 
@@ -578,6 +587,7 @@ class PluginList extends Widget {
   }
 
   private _confirm: () => Promise<void>;
+  private _editor: 'raw' | 'table' = 'raw';
   private _scrollTop = 0;
   private _selected = new Signal<this, string>(this);
   private _selection = '';
@@ -852,12 +862,23 @@ namespace Private {
    * Create the plugin list editor switcher.
    */
   export
-  function createSwitcher(): HTMLElement {
-    const switcher = document.createElement('div');
+  function createSwitcher(current: 'raw' | 'table'): HTMLElement {
+    let raw: ElementAttrs;
+    let table: ElementAttrs = { dataset: { editor: 'table' } };
 
-    switcher.classList.add(PLUGIN_LIST_SWITCHER_CLASS);
+    if (current === 'raw') {
+      raw = { dataset: { editor: 'raw' }, disabled: 'disabled' };
+      table = { dataset: { editor: 'table' } };
+    } else {
+      raw = { dataset: { editor: 'raw' } };
+      table = { dataset: { editor: 'table' }, disabled: 'disabled' };
+    }
 
-    return switcher;
+    return VirtualDOM.realize(
+      h.div({ className: PLUGIN_LIST_SWITCHER_CLASS },
+        h.button(raw, 'Raw View'),
+        h.button(table, 'Table View'))
+    );
   }
 
   /**
