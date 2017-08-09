@@ -12,8 +12,11 @@ This includes:
 import io
 import json
 import os
+import glob
 import pipes
 import sys
+import shutil
+import os.path as osp
 from os.path import join as pjoin
 
 from distutils import log
@@ -33,8 +36,8 @@ else:
 name = 'jupyterlab'
 
 
-here = os.path.dirname(os.path.abspath(__file__))
-is_repo = os.path.exists(pjoin(here, '.git'))
+here = osp.dirname(osp.abspath(__file__))
+is_repo = osp.exists(pjoin(here, '.git'))
 
 version_ns = {}
 with io.open(pjoin(here, name, '_version.py'), encoding="utf8") as f:
@@ -58,7 +61,7 @@ def find_packages():
     """
     packages = []
     for dir, subdirs, files in os.walk('jupyterlab'):
-        package = dir.replace(os.path.sep, '.')
+        package = dir.replace(osp.sep, '.')
         if '__init__.py' not in files:
             # not a package
             continue
@@ -81,13 +84,40 @@ def find_package_data():
     }
 
 
+def ensure_core_data(command):
+    """decorator for building minified js/css prior to another command"""
+    class DecoratedCommand(command):
+
+        def run(self):
+            coredeps = self.distribution.get_command_obj('coredeps')
+            if not is_repo and all(osp.exists(t) for t in coredeps.targets):
+                # build_py or build_ext, nothing to do
+                command.run(self)
+                return
+
+            try:
+                self.distribution.run_command('coredeps')
+            except Exception as e:
+                missing = [t for t in coredeps.targets if not osp.exists(t)]
+                if missing:
+                    log.warn('file check failed')
+                    if missing:
+                        log.error('missing files: %s' % missing)
+                    raise e
+                else:
+                    log.warn('core deps check failed (not a problem)')
+                    log.warn(str(e))
+            command.run(self)
+    return DecoratedCommand
+
+
 def js_prerelease(command, strict=False):
     """decorator for building minified js/css prior to another command"""
     class DecoratedCommand(command):
 
         def run(self):
             jsdeps = self.distribution.get_command_obj('jsdeps')
-            if not is_repo and all(os.path.exists(t) for t in jsdeps.targets):
+            if not is_repo and all(osp.exists(t) for t in jsdeps.targets):
                 # sdist, nothing to do
                 command.run(self)
                 return
@@ -95,7 +125,7 @@ def js_prerelease(command, strict=False):
             try:
                 self.distribution.run_command('jsdeps')
             except Exception as e:
-                missing = [t for t in jsdeps.targets if not os.path.exists(t)]
+                missing = [t for t in jsdeps.targets if not osp.exists(t)]
                 if strict or missing:
                     log.warn('js check failed')
                     if missing:
@@ -114,15 +144,16 @@ def update_package_data(distribution):
     build_py.finalize_options()
 
 
-class CheckAssets(Command):
-    description = 'check for required assets'
+class CoreDeps(Command):
+    description = 'ensure required core assets'
 
     user_options = []
 
-    # Representative files that should exist after a successful build
+    # Representative files that should exist after a successful core setup
     targets = [
-        pjoin(here, 'jupyterlab', 'build', 'release_data.json'),
-        pjoin(here, 'jupyterlab', 'build', 'main.bundle.js'),
+        pjoin(here, 'jupyterlab', 'schemas', 'jupyter.extensions.shortcuts.json'),
+        pjoin(here, 'jupyterlab', 'themes', 'jupyterlab-theme-light-extension',
+            'images', 'jupyterlab.svg')
     ]
 
     def initialize_options(self):
@@ -132,8 +163,67 @@ class CheckAssets(Command):
         pass
 
     def run(self):
+        # Handle schemas.
+        schema = pjoin(here, 'jupyterlab', 'schemas')
+        if osp.exists(schema):
+            shutil.rmtree(schema)
+        os.makedirs(schema)
+
+        packages = glob.glob(pjoin(here, 'packages', '**', 'package.json'))
+        for pkg in packages:
+            with open(pkg) as fid:
+                data = json.load(fid)
+            if 'jupyterlab' not in data:
+                continue
+            schemaDir = data['jupyterlab'].get('schemaDir', '')
+            if schemaDir:
+                parentDir = osp.dirname(pkg)
+                files = glob.glob(pjoin(parentDir, schemaDir, '*.json'))
+                for file in files:
+                    shutil.copy(file, schema)
+
+        # Handle themes
+        themes = pjoin(here, 'jupyterlab', 'themes')
+        if osp.exists(themes):
+            shutil.rmtree(themes)
+        os.makedirs(themes)
+
+        packages = glob.glob(pjoin(here, 'packages', '**', 'package.json'))
+        for pkg in packages:
+            with open(pkg) as fid:
+                data = json.load(fid)
+            if 'jupyterlab' not in data:
+                continue
+            themeDir = data['jupyterlab'].get('themeDir', '')
+            if themeDir:
+                name = data['name'].replace('@', '').replace('/', '-')
+                src = pjoin(osp.dirname(pkg), themeDir)
+                shutil.copytree(src, pjoin(themes, name))
+
+        # update package data in case this created new files
+        update_package_data(self.distribution)
+
+
+class CheckAssets(Command):
+    description = 'check for required assets'
+
+    user_options = []
+
+    # Representative files that should exist after a successful build
+    targets = [
+        pjoin(here, 'jupyterlab', 'build', 'release_data.json'),
+        pjoin(here, 'jupyterlab', 'build', 'main.bundle.js'),
+    ] + CoreDeps.targets
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
         for t in self.targets:
-            if not os.path.exists(t):
+            if not osp.exists(t):
                 msg = 'Missing file: %s' % t
                 raise ValueError(msg)
 
@@ -145,7 +235,6 @@ class CheckAssets(Command):
                 LooseVersion(version_ns['__version__'])):
             msg = 'Release assets version mismatch, please run npm publish'
             raise ValueError(msg)
-
 
         # update package data in case this created new files
         update_package_data(self.distribution)
