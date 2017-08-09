@@ -9,6 +9,7 @@
   --jp-private-settingeditor-key-width: 150px;
   --jp-private-settingeditor-legend-height: 16px;
   --jp-private-settingeditor-row-height: 16px;
+  --jp-private-settingeditor-switcher-height: 32px;
   --jp-private-settingeditor-type-width: 75px;
 }
 
@@ -74,20 +75,39 @@
 }
 
 
-#setting-editor ul.jp-PluginList {
+#setting-editor .jp-PluginList {
+  min-width: 150px;
+  width: 150px;
+}
+
+
+#setting-editor .jp-PluginList-switcher {
+  background: red;
+  height: var(--jp-private-settingeditor-switcher-height);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+
+#setting-editor .jp-PluginList ul {
   background-color: var(--jp-layout-color1);
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
   list-style-type: none;
   margin: 0;
   padding: 0;
-  min-width: 150px;
-  width: 150px;
   overflow-y: auto;
+  position: absolute;
+  top: var(--jp-private-settingeditor-switcher-height);
+  bottom: 0;
+  left: 0;
+  right: 0;
 }
 
 
-#setting-editor ul.jp-PluginList li {
+#setting-editor .jp-PluginList li {
   border: 1px solid transparent;
   overflow: hidden;
   padding: 2px 0 5px 5px;
@@ -96,13 +116,13 @@
 }
 
 
-#setting-editor ul.jp-PluginList li:hover {
+#setting-editor .jp-PluginList li:hover {
   background-color: var(--jp-layout-color2);
   border: 1px solid var(--jp-border-color2);
 }
 
 
-#setting-editor ul.jp-PluginList li.jp-mod-selected {
+#setting-editor .jp-PluginList li.jp-mod-selected {
   background-color: var(--jp-brand-color1);
   color: white;
 }

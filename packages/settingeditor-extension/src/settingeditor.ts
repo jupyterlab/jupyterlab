@@ -67,6 +67,11 @@ const PLUGIN_EDITOR_CLASS = 'jp-PluginEditor';
 const PLUGIN_LIST_CLASS = 'jp-PluginList';
 
 /**
+ * The class name added to the plugin list's editor switcher.
+ */
+const PLUGIN_LIST_SWITCHER_CLASS = 'jp-PluginList-switcher';
+
+/**
  * The class name added to all plugin list icons.
  */
 const PLUGIN_ICON_CLASS = 'jp-PluginList-icon';
@@ -433,7 +438,7 @@ class PluginList extends Widget {
    * Create a new plugin list.
    */
   constructor(options: PluginList.IOptions) {
-    super({ node: document.createElement('ul') });
+    super();
     this.registry = options.registry;
     this.addClass(PLUGIN_LIST_CLASS);
     this._confirm = options.confirm;
@@ -444,6 +449,13 @@ class PluginList extends Widget {
    * The setting registry.
    */
   readonly registry: ISettingRegistry;
+
+  /**
+   * The selection value of the plugin list.
+   */
+  get scrollTop(): number {
+    return this.node.querySelector('ul').scrollTop;
+  }
 
   /**
    * A signal emitted when a selection is made from the plugin list.
@@ -515,8 +527,12 @@ class PluginList extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     const plugins = Private.sortPlugins(this.registry.plugins);
+    const switcher = Private.createSwitcher();
+    const list = document.createElement('ul');
 
     this.node.textContent = '';
+    this.node.appendChild(switcher);
+    this.node.appendChild(list);
     plugins.forEach(plugin => {
       const item = Private.createListItem(this.registry, plugin);
 
@@ -524,8 +540,9 @@ class PluginList extends Widget {
         item.classList.add(SELECTED_CLASS);
       }
 
-      this.node.appendChild(item);
+      list.appendChild(item);
     });
+    list.scrollTop = this._scrollTop;
   }
 
   /**
@@ -548,19 +565,20 @@ class PluginList extends Widget {
       }
     }
 
-    if (id) {
-      this._confirm().then(() => {
-        if (!id) {
-          return;
-        }
-        this._selection = id;
-        this._selected.emit(id);
-        this.update();
-      }).catch(() => { /* no op */ });
+    if (!id) {
+      return;
     }
+
+    this._confirm().then(() => {
+      this._scrollTop = this.scrollTop;
+      this._selection = id;
+      this._selected.emit(id);
+      this.update();
+    }).catch(() => { /* no op */ });
   }
 
   private _confirm: () => Promise<void>;
+  private _scrollTop = 0;
   private _selected = new Signal<this, string>(this);
   private _selection = '';
 }
@@ -828,6 +846,18 @@ namespace Private {
         h.span({ className: iconClass, title: iconLabel }),
         h.span(title))
     ) as HTMLLIElement;
+  }
+
+  /**
+   * Create the plugin list editor switcher.
+   */
+  export
+  function createSwitcher(): HTMLElement {
+    const switcher = document.createElement('div');
+
+    switcher.classList.add(PLUGIN_LIST_SWITCHER_CLASS);
+
+    return switcher;
   }
 
   /**
