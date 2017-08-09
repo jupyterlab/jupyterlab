@@ -614,12 +614,12 @@ class PluginEditor extends Widget {
     });
 
     this.handleMoved = panel.handleMoved;
-    this._editor = new JSONEditor({ collapsible, editorFactory });
-    this._fieldset = new TableEditor({ onSaveError: Private.onSaveError });
+    this._rawEditor = new JSONEditor({ collapsible, editorFactory });
+    this._tableEditor = new TableEditor({ onSaveError: Private.onSaveError });
 
     layout.addWidget(panel);
-    panel.addWidget(this._editor);
-    panel.addWidget(this._fieldset);
+    panel.addWidget(this._rawEditor);
+    panel.addWidget(this._tableEditor);
   }
 
   /**
@@ -645,12 +645,12 @@ class PluginEditor extends Widget {
       return;
     }
 
-    const fieldset = this._fieldset;
-    const editor = this._editor;
+    const table = this._tableEditor;
+    const raw = this._rawEditor;
 
     // Disconnect old source change handler.
-    if (editor.source) {
-      editor.source.changed.disconnect(this._onSourceChanged, this);
+    if (raw.source) {
+      raw.source.changed.disconnect(this._onSourceChanged, this);
     }
 
     // Disconnect old settings change handler.
@@ -659,12 +659,12 @@ class PluginEditor extends Widget {
     }
 
     if (settings) {
-      this._settings = fieldset.settings = settings;
+      this._settings = table.settings = settings;
       this._settings.changed.connect(this._onSettingsChanged, this);
       this._onSettingsChanged();
     } else {
-      this._settings = fieldset.settings = null;
-      editor.source = null;
+      this._settings = table.settings = null;
+      raw.source = null;
     }
 
     this.update();
@@ -684,7 +684,7 @@ class PluginEditor extends Widget {
    * If the editor is in a dirty state, confirm that the user wants to leave.
    */
   confirm(): Promise<void> {
-    if (this.isHidden || !this.isAttached || !this._editor.isDirty) {
+    if (this.isHidden || !this.isAttached || !this._rawEditor.isDirty) {
       return Promise.resolve(void 0);
     }
 
@@ -708,8 +708,8 @@ class PluginEditor extends Widget {
     }
 
     super.dispose();
-    this._editor.dispose();
-    this._fieldset.dispose();
+    this._rawEditor.dispose();
+    this._tableEditor.dispose();
     this._panel.dispose();
   }
 
@@ -724,38 +724,38 @@ class PluginEditor extends Widget {
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    const json = this._editor;
-    const fieldset = this._fieldset;
+    const json = this._rawEditor;
+    const table = this._tableEditor;
     const settings = this._settings;
 
     if (settings) {
       json.show();
-      fieldset.show();
+      table.show();
       json.editor.refresh();
       return;
     }
 
     json.hide();
-    fieldset.hide();
+    table.hide();
   }
 
   /**
    * Handle updates to the settings.
    */
   private _onSettingsChanged(): void {
-    const editor = this._editor;
+    const raw = this._rawEditor;
     const settings = this._settings;
     const values = settings && settings.user || { };
 
-    editor.source = new ObservableJSON({ values });
-    editor.source.changed.connect(this._onSourceChanged, this);
+    raw.source = new ObservableJSON({ values });
+    raw.source.changed.connect(this._onSourceChanged, this);
   }
 
   /**
    * Handle source changes in the underlying editor.
    */
   private _onSourceChanged(): void {
-    const source = this._editor.source;
+    const source = this._rawEditor.source;
     const settings = this._settings;
 
     if (!settings || !source) {
@@ -765,8 +765,8 @@ class PluginEditor extends Widget {
     settings.save(source.toJSON()).catch(Private.onSaveError);
   }
 
-  private _editor: JSONEditor;
-  private _fieldset: TableEditor;
+  private _rawEditor: JSONEditor;
+  private _tableEditor: TableEditor;
   private _panel: SplitPanel;
   private _settings: ISettingRegistry.ISettings | null = null;
 }
