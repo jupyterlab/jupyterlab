@@ -8,7 +8,8 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, IMainMenu, MainMenu, IThemeManager, ThemeManager
+  ICommandPalette, IMainMenu, MainMenu, IThemeManager, ThemeManager,
+  ISplashScreen
 } from '@jupyterlab/apputils';
 
 import {
@@ -24,12 +25,18 @@ import {
 } from '@phosphor/coreutils';
 
 import {
+  DisposableDelegate, IDisposable
+} from '@phosphor/disposable';
+
+import {
   Widget
 } from '@phosphor/widgets';
 
 import {
   activatePalette
 } from './palette';
+
+import '../style/index.css';
 
 
 /**
@@ -146,15 +153,39 @@ const settingPlugin: JupyterLabPlugin<ISettingRegistry> = {
  */
 const themePlugin: JupyterLabPlugin<IThemeManager> = {
   id: 'jupyter.services.theme-manger',
-  requires: [ISettingRegistry],
-  activate: (app: JupyterLab, settingRegistry: ISettingRegistry): IThemeManager => {
+  requires: [ISettingRegistry, ISplashScreen],
+  activate: (app: JupyterLab, settingRegistry: ISettingRegistry, splash: ISplashScreen): IThemeManager => {
     let baseUrl = app.serviceManager.serverSettings.baseUrl;
     let host = app.shell;
     let when = app.started;
-    return new ThemeManager({ baseUrl,  settingRegistry, host, when });
+    let manager = new ThemeManager({ baseUrl,  settingRegistry, host, when });
+    let disposable = splash.show();
+    manager.ready.then(() => {
+      disposable.dispose();
+    }, () => {
+      disposable.dispose();
+    });
+    return manager;
   },
   autoStart: true,
   provides: IThemeManager
+};
+
+
+/**
+ * The default splash screen provider.
+ */
+const splashPlugin: JupyterLabPlugin<ISplashScreen> = {
+  id: 'jupyter.services.splash-screen',
+  autoStart: true,
+  provides: ISplashScreen,
+  activate: () => {
+    return {
+      show: () => {
+        return Private.showSplash();
+      }
+    };
+  }
 };
 
 
@@ -200,7 +231,46 @@ const plugins: JupyterLabPlugin<any>[] = [
   palettePlugin,
   settingPlugin,
   stateDBPlugin,
+  splashPlugin,
   themePlugin
 ];
 export default plugins;
+
+
+
+/**
+ * The namespace for module private data.
+ */
+namespace Private {
+  /**
+   * The splash element.
+   */
+  let splash: HTMLElement | null;
+
+  /**
+   * The splash screen counter.
+   */
+  let splashCount = 0;
+
+  /**
+   * Show the splash element.
+   */
+  export
+  function showSplash(): IDisposable {
+    if (!splash) {
+      splash = document.createElement('div');
+      splash.id = 'jupyterlab-splash';
+      let child = document.createElement('div');
+      splash.appendChild(child);
+    }
+    document.body.appendChild(splash);
+    splashCount++;
+    return new DisposableDelegate(() => {
+      splashCount = Math.max(splashCount - 1, 0);
+      if (splashCount === 0 && splash) {
+        document.body.removeChild(splash);
+      }
+    });
+  }
+}
 
