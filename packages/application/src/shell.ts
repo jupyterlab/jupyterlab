@@ -975,12 +975,18 @@ namespace Private {
    * A message hook that adds and removes the .jp-Activity class to widgets in the dock panel.
    */
   export
-  var activityClassHook = (handler: IMessageHandler, msg: Message): boolean => {
-    if (msg.type === 'child-added') {
-      (msg as Widget.ChildMessage).child.addClass(ACTIVITY_CLASS)
-    } else if (msg.type === 'child-removed') {
-      (msg as Widget.ChildMessage).child.removeClass(ACTIVITY_CLASS)
+  function activityClassHook(handler: IMessageHandler, msg: Message): boolean {
+    switch (msg.type) {
+      case 'child-added':
+        (msg as Widget.ChildMessage).child.addClass(ACTIVITY_CLASS);
+        break;
+      case 'child-removed':
+        (msg as Widget.ChildMessage).child.removeClass(ACTIVITY_CLASS);
+        break;
+      default:
+        break;
     }
+
     return true;
   }
 
