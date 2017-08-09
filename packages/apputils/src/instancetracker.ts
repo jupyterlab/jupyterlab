@@ -22,10 +22,6 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  IMessageHandler, Message, MessageLoop
-} from '@phosphor/messaging';
-
-import {
   AttachedProperty
 } from '@phosphor/properties';
 
@@ -126,7 +122,6 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    */
   constructor(options: InstanceTracker.IOptions) {
     this.namespace = options.namespace;
-    this._disposeOnDetach = options.disposeOnDetach === true;
     this._tracker.currentChanged.connect(this._onCurrentChanged, this);
   }
 
@@ -197,11 +192,6 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
 
     if (injected) {
       return promise;
-    }
-
-    // Handle closing the widget.
-    if (this._disposeOnDetach) {
-      MessageLoop.installMessageHook(widget, this);
     }
 
     widget.disposed.connect(this._onWidgetDisposed, this);
@@ -370,23 +360,6 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   }
 
   /**
-   * Intercept a message sent to a message handler.
-   *
-   * @param handler - The target handler of the message.
-   *
-   * @param msg - The message to be sent to the handler.
-   *
-   * @returns `true` if the message should continue to be processed
-   *   as normal, or `false` if processing should cease immediately.
-   */
-  messageHook(handler: IMessageHandler, msg: Message): boolean {
-    if (msg.type === 'after-detach') {
-      (handler as Widget).dispose();
-    }
-    return true;
-  }
-
-  /**
    * Handle the current change event.
    *
    * #### Notes
@@ -408,7 +381,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   }
 
   /**
-   * Handle a widget disposal.
+   * Clean up after disposed widgets.
    */
   private _onWidgetDisposed(widget: T): void {
     let injected = Private.injectedProperty.get(widget);
@@ -451,7 +424,6 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   private _widgets: T[] = [];
   private _currentWidget: T | null = null;
   private _isDisposed = false;
-  private _disposeOnDetach = false;
 }
 
 
@@ -470,11 +442,6 @@ namespace InstanceTracker {
      * A namespace for all tracked widgets, (e.g., `notebook`).
      */
     namespace: string;
-
-    /**
-     * Whether to dispose of widgets when they are detached.
-     */
-    disposeOnDetach?: boolean;
   }
 
   /**

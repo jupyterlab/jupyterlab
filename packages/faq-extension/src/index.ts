@@ -80,7 +80,14 @@ class FAQWidget extends Widget {
   }
 
   /**
-   * Handle `activate-requests events for the widget.
+   * Handle `close-request` events for the widget.
+   */
+  onCloseRequest(message: Message): void {
+    this.dispose();
+  }
+
+  /**
+   * Handle `activate-request` events for the widget.
    */
   onActivateRequest(message: Message): void {
     this.node.focus();
@@ -95,10 +102,7 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRe
   const category = 'Help';
   const command = CommandIDs.open;
   const { commands, shell, rendermime } = app;
-  const tracker = new InstanceTracker<Widget>({
-    namespace: 'faq',
-    disposeOnDetach: true
-  });
+  const tracker = new InstanceTracker<Widget>({ namespace: 'faq' });
 
   // Handle state restoration.
   restorer.restore(tracker, {
