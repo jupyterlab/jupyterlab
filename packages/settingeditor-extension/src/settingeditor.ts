@@ -28,7 +28,7 @@ import {
 } from '@phosphor/virtualdom';
 
 import {
-  PanelLayout, SplitPanel as SPanel, Widget
+  PanelLayout, SplitPanel as SPanel, Widget, StackedLayout
 } from '@phosphor/widgets';
 
 import {
@@ -297,7 +297,7 @@ class SettingEditor extends Widget {
     this._saving = true;
     return state.save(key, value)
       .then(() => { this._saving = false; })
-      .catch(reason => {
+      .catch((reason: any) => {
         this._saving = false;
         throw reason;
       });
@@ -606,7 +606,7 @@ class PluginEditor extends Widget {
 
     const { editorFactory } = options;
     const collapsible = false;
-    const layout = this.layout = new PanelLayout();
+    const layout = this.layout = new StackedLayout();
     const panel = this._panel = new SplitPanel({
       orientation: 'vertical',
       renderer: SplitPanel.defaultRenderer,

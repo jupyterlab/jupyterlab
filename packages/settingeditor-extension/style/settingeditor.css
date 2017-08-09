@@ -41,15 +41,6 @@
 }
 
 
-#setting-editor .jp-SettingEditor-main .p-SplitPanel {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-}
-
-
 #setting-editor .p-SplitPanel-handle {
   background-color: var(--jp-border-color2);
 }
