@@ -23,7 +23,7 @@ import {
 
 import {
   SplitPanel
-} from './settingeditor';
+} from './splitpanel';
 
 
 /**
