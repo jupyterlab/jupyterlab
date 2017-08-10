@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
+  each
+} from '@phosphor/algorithm';
+
+import {
   PromiseDelegate, Token
 } from '@phosphor/coreutils';
 
@@ -194,12 +198,20 @@ class ThemeManager {
    * Handle a load finished.
    */
   private _finishLoad(): void {
-    this._host.fit();
+    this._fitAll(this._host);
     this._loadPromise = null;
 
     if (this._pendingTheme) {
       this._loadTheme();
     }
+  }
+
+  /**
+   * Fit all of a widget's children, recursively.
+   */
+  private _fitAll(widget: Widget): void {
+    each(widget.children(), widget => { this._fitAll(widget); });
+    widget.fit();
   }
 
   private _baseUrl: string;
