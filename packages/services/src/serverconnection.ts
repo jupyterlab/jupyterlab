@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  JSONValue, PromiseDelegate
+  PromiseDelegate
 } from '@phosphor/coreutils';
 
 
