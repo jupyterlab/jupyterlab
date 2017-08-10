@@ -267,11 +267,6 @@ namespace Private {
    */
   export
   function populateRequest(xhr: XMLHttpRequest, request: ServerConnection.IRequest, settings: ServerConnection.ISettings): void {
-    if (request.contentType !== void 0) {
-      xhr.setRequestHeader('Content-Type', request.contentType);
-    } else if (request.data) {
-      xhr.setRequestHeader('Content-Type', 'application/json');
-    }
 
     xhr.timeout = settings.timeout;
     if (settings.withCredentials) {
