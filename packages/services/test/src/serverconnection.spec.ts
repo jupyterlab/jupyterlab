@@ -62,7 +62,7 @@ describe('@jupyterlab/services', () => {
         MockXMLHttpRequest.onRequest = request => {
           expect(request.method).to.be('POST');
           expect(request.password).to.be('password');
-          expect(Object.keys(request.requestHeaders)).to.eql(['Content-Type', 'foo']);
+          expect(Object.keys(request.requestHeaders)).to.eql(['foo']);
           let url = request.url;
           expect(url.indexOf('hello?')).to.be(-1);
           expect(url.indexOf('hello')).to.be(0);
