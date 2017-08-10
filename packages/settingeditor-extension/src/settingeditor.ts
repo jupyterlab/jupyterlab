@@ -414,6 +414,7 @@ namespace SettingEditor {
  * A deprecated split panel that will be removed when the phosphor split panel
  * supports a handle moved signal.
  */
+export
 class SplitPanel extends SPanel {
   /**
    * Emits when the split handle has moved.
