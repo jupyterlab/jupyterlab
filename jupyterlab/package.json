@@ -2,7 +2,7 @@
   "name": "@jupyterlab/application-top",
   "version": "0.9.0",
   "scripts": {
-    "build": "webpack",
+    "build": "node update-core.js && webpack",
     "publish": "node make-release.js"
   },
   "dependencies": {
