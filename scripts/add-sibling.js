@@ -68,3 +68,6 @@ var indexPath = path.join(basePath, 'packages', 'all-packages', 'src', 'index.ts
 var index = fs.readFileSync(indexPath, 'utf8');
 index = index + 'import "' + package.name + '";\n';
 fs.writeFileSync(indexPath, index);
+
+// Update the core jupyterlab build dependencies.
+childProcess.execSync('npm run update:core');
