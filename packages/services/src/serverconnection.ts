@@ -100,7 +100,7 @@ namespace ServerConnection {
     /**
      * The request data.
      */
-    data?: JSONValue;
+    data?: any;
 
     /**
      * Whether to cache the response. Defaults to `false`.
