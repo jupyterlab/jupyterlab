@@ -69,7 +69,9 @@ class PluginEditor extends Widget {
   /**
    * A signal that emits when editor layout state changes and needs to be saved.
    */
-  readonly stateChanged: ISignal<any, void>;
+  get stateChanged(): ISignal<this, void> {
+    return this._stateChanged;
+  }
 
   /**
    * Tests whether the settings have been modified and need saving.
@@ -173,6 +175,7 @@ class PluginEditor extends Widget {
   private _rawEditor: RawEditor;
   private _tableEditor: TableEditor;
   private _settings: ISettingRegistry.ISettings | null = null;
+  private _stateChanged = new Signal<this, void>(this);
 }
 
 

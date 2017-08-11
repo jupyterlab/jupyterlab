@@ -270,6 +270,14 @@ class SettingEditor extends Widget {
   }
 
   /**
+   * Set the layout sizes.
+   */
+  private _setLayout(): void {
+    this._editor.state = this._state.container;
+    this._panel.setRelativeSizes(this._state.sizes);
+  }
+
+  /**
    * Set the presets of the setting editor.
    */
   private _setState(): void {
@@ -281,12 +289,12 @@ class SettingEditor extends Widget {
     if (!plugin) {
       editor.settings = null;
       list.selection = '';
-      this._setSizes();
+      this._setLayout();
       return;
     }
 
     if (editor.settings && editor.settings.plugin === plugin) {
-      this._setSizes();
+      this._setLayout();
       return;
     }
 
@@ -301,25 +309,13 @@ class SettingEditor extends Widget {
       }
       editor.settings = settings;
       list.selection = plugin;
-      this._setSizes();
+      this._setLayout();
     }).catch((reason: Error) => {
       console.error(`Loading settings failed: ${reason.message}`);
       list.selection = this._state.container.plugin = '';
       editor.settings = null;
-      this._setSizes();
+      this._setLayout();
     });
-  }
-
-  /**
-   * Set the layout sizes.
-   */
-  private _setSizes(): void {
-    const { inner, outer } = this._presets;
-    const editor = this._editor;
-    const panel = this._panel;
-
-    editor.sizes = inner;
-    panel.setRelativeSizes(outer);
   }
 
   private _editor: PluginEditor;
