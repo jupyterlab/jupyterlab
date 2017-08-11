@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
+  each
+} from '@phosphor/algorithm';
+
+import {
   PromiseDelegate, Token
 } from '@phosphor/coreutils';
 
@@ -194,7 +198,7 @@ class ThemeManager {
    * Handle a load finished.
    */
   private _finishLoad(): void {
-    this._host.fit();
+    Private.fitAll(this._host);
     this._loadPromise = null;
 
     if (this._pendingTheme) {
@@ -268,5 +272,20 @@ namespace ThemeManager {
      * @returns A promise that resolves when the theme has unloaded.
      */
     unload(): Promise<void>;
+  }
+}
+
+
+/**
+ * A namespace for module private data.
+ */
+namespace Private {
+  /**
+   * Fit a widget and all of its children, recursively.
+   */
+  export
+  function fitAll(widget: Widget): void {
+    each(widget.children(), fitAll);
+    widget.fit();
   }
 }
