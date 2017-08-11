@@ -725,7 +725,7 @@ namespace Private {
     let optionNodes: VirtualNode[] = [];
     for (let label in options.optionsMap) {
       let value = JSON.stringify(options.optionsMap[label]);
-      optionNodes.push(h.option({ label, value }));
+      optionNodes.push(h.option({ value }, label));
     }
     let node = VirtualDOM.realize(
       h.div({},
