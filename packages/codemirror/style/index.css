@@ -25,6 +25,7 @@
   font-size: var(--jp-code-font-size);
   font-family: var(--jp-code-font-family);
   height: auto;
+  background: transparent;
   /* Changed to auto to autogrow */
 }
 

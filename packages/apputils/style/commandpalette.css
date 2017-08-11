@@ -31,13 +31,13 @@
 .p-CommandPalette-search {
   padding: 8px;
   background-color: var(--jp-layout-color2);
-  border-bottom: 1px solid var(--jp-border-color1);
+  border-bottom: 1px solid var(--jp-border-color0);
 }
 
 .p-CommandPalette-wrapper {
   overflow: overlay;
   padding: 0px 8px;
-  border: 1px solid var(--jp-border-color1);
+  border: 1px solid var(--jp-border-color0);
   background-color: var(--jp-input-background-color);
   height: 30px;
 }
@@ -107,7 +107,7 @@
   font-weight: 600;
   cursor: pointer;
   text-transform: uppercase;
-  border-bottom: solid var(--jp-border-width) var(--jp-border-color1);
+  border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
   letter-spacing: 1px;
 }
 
@@ -139,7 +139,7 @@
 
 
 .p-CommandPalette-item.p-mod-disabled {
-  color: var(--jp-ui-font-color2);
+  color: var(--jp-ui-font-color3);
 }
 
 
@@ -177,14 +177,14 @@
 
 .p-CommandPalette-content::-webkit-scrollbar {
   background-color: var(--jp-layout-color1);
-  border-left: 1px solid var(--jp-border-color1);
+  border-left: 1px solid var(--jp-border-color2);
   width: var(--jp-scrollbar-width);
 }
 
 
 .p-CommandPalette-content::-webkit-scrollbar-thumb {
   background-color: var(--jp-layout-color2);
-  border-left: 1px solid var(--jp-border-color1);
+  border-left: 1px solid var(--jp-border-color2);
   border-radius: 0px;
 }
 
