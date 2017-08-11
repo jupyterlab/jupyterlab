@@ -97,9 +97,10 @@ class TableEditor extends Widget {
     if (this._settings) {
       this._settings.changed.disconnect(this._onSettingsChanged, this);
     }
-
     this._settings = settings;
-    this._settings.changed.connect(this._onSettingsChanged, this);
+    if (this._settings) {
+      this._settings.changed.connect(this._onSettingsChanged, this);
+    }
     this.update();
   }
 
