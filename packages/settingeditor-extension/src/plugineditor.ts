@@ -87,7 +87,10 @@ class PluginEditor extends Widget {
     return this._settings;
   }
   set settings(settings: ISettingRegistry.ISettings | null) {
-    this._rawEditor.settings = this._tableEditor.settings = settings;
+    const raw = this._rawEditor;
+    const table = this._tableEditor;
+
+    this._settings = raw.settings = table.settings = settings;
   }
 
   /**
