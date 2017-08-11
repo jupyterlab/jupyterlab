@@ -215,8 +215,8 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
         }
         let mime = widget.model.mimeType;
         let spec = Mode.findByMIME(mime);
-        let mode = spec && spec.mode;
-        return args['mode'] === mode;
+        let name = spec && spec.name;
+        return args['name'] === name;
       }
     });
 
