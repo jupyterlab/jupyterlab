@@ -343,6 +343,7 @@ class DefaultSession implements Session.ISession {
       url: Private.getSessionUrl(settings.baseUrl, this._id),
       method: 'PATCH',
       data,
+      contentType: 'application/json',
       cache: false
     };
     return ServerConnection.makeRequest(request, settings).then(response => {
@@ -712,7 +713,8 @@ namespace Private {
       url: URLExt.join(settings.baseUrl, SESSION_SERVICE_URL),
       method: 'POST',
       cache: false,
-      data: JSON.stringify(model)
+      data: JSON.stringify(model),
+      contentType: 'application/json'
     };
     return ServerConnection.makeRequest(request, settings).then(response => {
       if (response.xhr.status !== 201) {

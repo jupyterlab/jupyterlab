@@ -1299,6 +1299,7 @@ namespace Private {
       url: URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL),
       method: 'POST',
       data: JSON.stringify({ name: options.name }),
+      contentType: 'application/json',
       cache: false
     };
     return ServerConnection.makeRequest(request, settings).then(response => {

@@ -69,7 +69,7 @@ class BuildManager {
   build(): Promise<void> {
     const base = this.serverSettings.baseUrl;
     const url = URLExt.join(base, BUILD_SETTINGS_URL);
-    const request = { method: 'POST', url };
+    const request = { method: 'POST', url, contentType: 'application/json' };
     const { serverSettings } = this;
     const promise = ServerConnection.makeRequest(request, serverSettings);
 

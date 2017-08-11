@@ -980,6 +980,7 @@ class Drive implements Contents.IDrive {
       url: this._getUrl(options.path || ''),
       method: 'POST',
       data,
+      contentType: 'application/json'
     };
     return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
       if (response.xhr.status !== 201) {
