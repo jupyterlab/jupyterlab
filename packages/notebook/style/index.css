@@ -74,14 +74,14 @@
 
 .jp-Notebook::-webkit-scrollbar {
   background-color: var(--jp-layout-color0);
-  border-left: 1px solid var(--jp-border-color1);
+  border-left: 1px solid var(--jp-border-color2);
   width: var(--jp-scrollbar-width);
 }
 
 
 .jp-Notebook::-webkit-scrollbar-thumb {
   background-color: var(--jp-layout-color2);
-  border-left: 1px solid var(--jp-border-color1);
+  border-left: 1px solid var(--jp-border-color2);
 }
 
 

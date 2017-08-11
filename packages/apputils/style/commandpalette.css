@@ -32,6 +32,8 @@
   padding: 8px;
   background-color: var(--jp-layout-color2);
   border-bottom: 1px solid var(--jp-border-color0);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  z-index: 2;
 }
 
 .p-CommandPalette-wrapper {
@@ -185,6 +187,8 @@
 .p-CommandPalette-content::-webkit-scrollbar-thumb {
   background-color: var(--jp-layout-color2);
   border-left: 1px solid var(--jp-border-color2);
+  padding-left: 1px;
+  padding-right: 1px;
   border-radius: 0px;
 }
 

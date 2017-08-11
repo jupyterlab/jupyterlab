@@ -98,7 +98,9 @@
   flex-direction: row;
   overflow: hidden;
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  z-index: 2;
 }
 
 
