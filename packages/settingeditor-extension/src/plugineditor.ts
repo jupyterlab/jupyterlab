@@ -45,6 +45,7 @@ const PLUGIN_EDITOR_CLASS = 'jp-PluginEditor';
 /**
  * An individual plugin settings editor.
  */
+export
 class PluginEditor extends Widget {
   /**
    * Create a new plugin editor.

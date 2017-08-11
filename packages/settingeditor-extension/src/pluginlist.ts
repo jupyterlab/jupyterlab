@@ -48,6 +48,7 @@ const SELECTED_CLASS = 'jp-mod-selected';
 /**
  * A list of plugins with editable settings.
  */
+export
 class PluginList extends Widget {
   /**
    * Create a new plugin list.
@@ -213,6 +214,7 @@ class PluginList extends Widget {
 /**
  * A namespace for `PluginList` statics.
  */
+export
 namespace PluginList {
   /**
    * The instantiation options for a plugin list.
