@@ -198,20 +198,12 @@ class ThemeManager {
    * Handle a load finished.
    */
   private _finishLoad(): void {
-    this._fitAll(this._host);
+    Private.fitAll(this._host);
     this._loadPromise = null;
 
     if (this._pendingTheme) {
       this._loadTheme();
     }
-  }
-
-  /**
-   * Fit a widget and all of its children, recursively.
-   */
-  private _fitAll(widget: Widget): void {
-    each(widget.children(), widget => { this._fitAll(widget); });
-    widget.fit();
   }
 
   private _baseUrl: string;
@@ -280,5 +272,20 @@ namespace ThemeManager {
      * @returns A promise that resolves when the theme has unloaded.
      */
     unload(): Promise<void>;
+  }
+}
+
+
+/**
+ * A namespace for module private data.
+ */
+namespace Private {
+  /**
+   * Fit a widget and all of its children, recursively.
+   */
+  export
+  function fitAll(widget: Widget): void {
+    each(widget.children(), fitAll);
+    widget.fit();
   }
 }
