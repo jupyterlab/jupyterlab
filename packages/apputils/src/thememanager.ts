@@ -207,7 +207,7 @@ class ThemeManager {
   }
 
   /**
-   * Fit all of a widget's children, recursively.
+   * Fit a widget and all of its children, recursively.
    */
   private _fitAll(widget: Widget): void {
     each(widget.children(), widget => { this._fitAll(widget); });
