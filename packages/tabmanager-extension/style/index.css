@@ -19,7 +19,7 @@
 |----------------------------------------------------------------------------*/
 
 #tab-manager {
-  background: var(--jp-layout-color0);
+  background: var(--jp-layout-color1);
   overflow: visible;
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
@@ -60,7 +60,7 @@
 
 
 #tab-manager .p-TabBar-tab.jp-mod-active {
-  color: var(--jp-inverse-ui-font-color0);
+  color: white;
   background: var(--jp-brand-color1);
 }
 

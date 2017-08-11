@@ -2,6 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import 'es6-promise/auto';  // polyfill Promise on IE
+import '@jupyterlab/theme-light-extension/style/embed.css';
+import '../index.css';
 
 import {
   CommandRegistry
@@ -24,12 +26,9 @@ import {
 } from '@jupyterlab/console';
 
 import {
-  RenderMime
+  RenderMime, defaultRendererFactories
 } from '@jupyterlab/rendermime';
 
-import '@jupyterlab/theming/style/index.css';
-import '@jupyterlab/theming/style/variables-light.css';
-import '../index.css';
 
 let TITLE = 'Console';
 
@@ -69,7 +68,10 @@ function startApp(path: string, manager: ServiceManager.IManager) {
     commands.processKeydownEvent(event);
   });
 
-  let rendermime = new RenderMime({ items: RenderMime.getDefaultItems() });
+  let rendermime = new RenderMime({
+    initialFactories: defaultRendererFactories
+  });
+
   let editorFactory = editorServices.factoryService.newInlineEditor.bind(
     editorServices.factoryService);
   let contentFactory = new ConsolePanel.ContentFactory({ editorFactory });

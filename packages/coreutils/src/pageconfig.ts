@@ -80,7 +80,22 @@ namespace PageConfig {
         configData[key] = String(configData[key]).split('&#39;').join('"');
       }
     }
-    return configData[name] || '';
+    return configData![name] || '';
+  }
+
+  /**
+   * Set global configuration data for the Jupyter application.
+   *
+   * @param name - The name of the configuration option.
+   * @param value - The value to set the option to.
+   *
+   * @returns The last config value or an empty string if it doesn't exist.
+   */
+  export
+  function setOption(name: string, value: string): string {
+    let last = getOption(name);
+    configData![name] = value;
+    return last;
   }
 
   /**

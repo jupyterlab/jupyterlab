@@ -51,7 +51,7 @@ class LogImage extends ImageViewer {
 /**
  * The common image model.
  */
-const IMAGE: Contents.IModel = {
+const IMAGE: Partial<Contents.IModel> = {
   path: uuid() + '.png',
   type: 'file',
   mimetype: 'image/png',
@@ -165,15 +165,13 @@ describe('ImageViewer', () => {
 
   describe('#onUpdateRequest()', () => {
 
-    it('should add the image', (done) => {
+    it('should render the image', () => {
       let img: HTMLImageElement = widget.node.querySelector('img');
-      expect(img.src).to.be('');
-      context.ready.then(() => {
+      return widget.ready.then(() => {
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
         expect(img.src).to.contain(IMAGE.content);
-        done();
-      }).catch(done);
+      });
     });
 
   });
@@ -200,8 +198,8 @@ describe('ImageViewerFactory', () => {
       let factory = new ImageViewerFactory({
         name: 'Image',
         modelName: 'base64',
-        fileExtensions: ['.png'],
-        defaultFor: ['.png']
+        fileTypes: ['png'],
+        defaultFor: ['png']
       });
       let context = createFileContext(IMAGE.path);
       expect(factory.createNew(context)).to.be.an(ImageViewer);

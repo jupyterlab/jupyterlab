@@ -10,7 +10,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  Token
+  JSONValue
 } from '@phosphor/coreutils';
 
 import {
@@ -37,20 +37,9 @@ import {
   IChangedArgs as IChangedArgsGeneric, PathExt, IModelDB
 } from '@jupyterlab/coreutils';
 
-/* tslint:disable */
-/**
- * The document registry token.
- */
-export
-const IDocumentRegistry = new Token<IDocumentRegistry>('jupyter.services.document-registry');
-/* tslint:enable */
-
-
-/**
- * The interface for a document registry.
- */
-export
-interface IDocumentRegistry extends DocumentRegistry {}
+import {
+  TextModelFactory
+} from './default';
 
 
 /**
@@ -58,6 +47,25 @@ interface IDocumentRegistry extends DocumentRegistry {}
  */
 export
 class DocumentRegistry implements IDisposable {
+  /**
+   * Construct a new document registry.
+   */
+  constructor(options: DocumentRegistry.IOptions = {}) {
+    let factory = options.textModelFactory;
+    if (factory && factory.name !== 'text') {
+      throw new Error('Text model factory must have the name `text`');
+    }
+    this._modelFactories['text'] = factory || new TextModelFactory();
+
+    let fts = options.initialFileTypes || DocumentRegistry.defaultFileTypes;
+    fts.forEach(ft => {
+      let value: DocumentRegistry.IFileType = {
+        ...DocumentRegistry.fileTypeDefaults, ...ft
+      };
+      this._fileTypes.push(value);
+    });
+  }
+
   /**
    * A signal emitted when the registry has changed.
    */
@@ -69,31 +77,25 @@ class DocumentRegistry implements IDisposable {
    * Get whether the document registry has been disposed.
    */
   get isDisposed(): boolean {
-    return this._widgetFactories === null;
+    return this._isDisposed;
   }
 
   /**
    * Dispose of the resources held by the document registery.
    */
   dispose(): void {
-    if (this._widgetFactories === null) {
+    if (this.isDisposed) {
       return;
     }
-    let widgetFactories = this._widgetFactories;
-    let modelFactories = this._modelFactories;
-    let extenders = this._extenders;
-    this._widgetFactories = null;
-    this._modelFactories = null;
-    this._extenders = null;
-
-    for (let modelName in modelFactories) {
-      modelFactories[modelName].dispose();
+    this._isDisposed = true;
+    for (let modelName in this._modelFactories) {
+      this._modelFactories[modelName].dispose();
     }
-    for (let widgetName in widgetFactories) {
-      widgetFactories[widgetName].dispose();
+    for (let widgetName in this._widgetFactories) {
+      this._widgetFactories[widgetName].dispose();
     }
-    for (let widgetName in extenders) {
-      extenders[widgetName].length = 0;
+    for (let widgetName in this._extenders) {
+      this._extenders[widgetName].length = 0;
     }
 
     this._fileTypes.length = 0;
@@ -120,25 +122,25 @@ class DocumentRegistry implements IDisposable {
     let name = factory.name.toLowerCase();
     if (this._widgetFactories[name]) {
       console.warn(`Duplicate registered factory ${name}`);
-      return new DisposableDelegate(null);
+      return new DisposableDelegate(Private.noOp);
     }
     this._widgetFactories[name] = factory;
-    for (let ext of factory.defaultFor) {
-      if (factory.fileExtensions.indexOf(ext) === -1) {
+    for (let ft of factory.defaultFor || []) {
+      if (factory.fileTypes.indexOf(ft) === -1) {
         continue;
       }
-      if (ext === '*') {
+      if (ft === '*') {
         this._defaultWidgetFactory = name;
       } else {
-        this._defaultWidgetFactories[ext] = name;
+        this._defaultWidgetFactories[ft] = name;
       }
     }
-    // For convenience, store a mapping of ext -> name
-    for (let ext of factory.fileExtensions) {
-      if (!this._widgetFactoryExtensions[ext]) {
-        this._widgetFactoryExtensions[ext] = [];
+    // For convenience, store a mapping of file type name -> name
+    for (let ft of factory.fileTypes) {
+      if (!this._widgetFactoryExtensions[ft]) {
+        this._widgetFactoryExtensions[ft] = [];
       }
-      this._widgetFactoryExtensions[ext].push(name);
+      this._widgetFactoryExtensions[ft].push(name);
     }
     this._changed.emit({
       type: 'widgetFactory',
@@ -185,7 +187,7 @@ class DocumentRegistry implements IDisposable {
     let name = factory.name.toLowerCase();
     if (this._modelFactories[name]) {
       console.warn(`Duplicate registered factory ${name}`);
-      return new DisposableDelegate(null);
+      return new DisposableDelegate(Private.noOp);
     }
     this._modelFactories[name] = factory;
     this._changed.emit({
@@ -225,19 +227,19 @@ class DocumentRegistry implements IDisposable {
     let index = ArrayExt.firstIndexOf(extenders, extension);
     if (index !== -1) {
       console.warn(`Duplicate registered extension for ${widgetName}`);
-      return new DisposableDelegate(null);
+      return new DisposableDelegate(Private.noOp);
     }
     this._extenders[widgetName].push(extension);
     this._changed.emit({
       type: 'widgetExtension',
-      name: null,
+      name: widgetName,
       change: 'added'
     });
     return new DisposableDelegate(() => {
       ArrayExt.removeFirstOf(this._extenders[widgetName], extension);
       this._changed.emit({
         type: 'widgetExtension',
-        name: null,
+        name: widgetName,
         change: 'removed'
       });
     });
@@ -253,15 +255,19 @@ class DocumentRegistry implements IDisposable {
    * #### Notes
    * These are used to populate the "Create New" dialog.
    */
-  addFileType(fileType: DocumentRegistry.IFileType): IDisposable {
-    this._fileTypes.push(fileType);
+  addFileType(fileType: Partial<DocumentRegistry.IFileType>): IDisposable {
+    let value: DocumentRegistry.IFileType = {
+      ...DocumentRegistry.fileTypeDefaults, ...fileType
+    };
+    this._fileTypes.push(value);
+
     this._changed.emit({
       type: 'fileType',
-      name: fileType.name,
+      name: value.name,
       change: 'added'
     });
     return new DisposableDelegate(() => {
-      ArrayExt.removeFirstOf(this._fileTypes, fileType);
+      ArrayExt.removeFirstOf(this._fileTypes, value);
       this._changed.emit({
         type: 'fileType',
         name: fileType.name,
@@ -304,7 +310,7 @@ class DocumentRegistry implements IDisposable {
   /**
    * Get a list of the preferred widget factories.
    *
-   * @param ext - An optional file extension to filter the results.
+   * @param path - The file path to filter the results.
    *
    * @returns A new array of widget factories.
    *
@@ -313,52 +319,37 @@ class DocumentRegistry implements IDisposable {
    * been registered will be returned.
    * The first item is considered the default. The returned iterator
    * has widget factories in the following order:
-   * - extension-specific default factory
+   * - path-specific default factory
    * - global default factory
-   * - all other extension-specific factories
+   * - all other path-specific factories
    * - all other global factories
    */
-  preferredWidgetFactories(ext: string = '*'): DocumentRegistry.WidgetFactory[] {
+  preferredWidgetFactories(path: string): DocumentRegistry.WidgetFactory[] {
     let factories = new Set<string>();
-    ext = Private.normalizeExtension(ext);
-    let last = '.' + ext.split('.').pop();
 
-    // Start with the extension-specific default factory.
-    if (ext.length > 1) {
-      if (ext in this._defaultWidgetFactories) {
-        factories.add(this._defaultWidgetFactories[ext]);
-      }
-    }
+    // Get the ordered matching file types.
+    let fts = this.getFileTypesForPath(PathExt.basename(path));
 
-    // Handle multi-part extension default factories.
-    if (last !== ext) {
-      if (last in this._defaultWidgetFactories) {
-        factories.add(this._defaultWidgetFactories[last]);
+    // Start with the file type default factories.
+    fts.forEach(ft => {
+      if (ft.name in this._defaultWidgetFactories) {
+        factories.add(this._defaultWidgetFactories[ft.name]);
       }
-    }
+    });
 
     // Add the global default factory.
     if (this._defaultWidgetFactory) {
       factories.add(this._defaultWidgetFactory);
     }
 
-    // Add the extension-specific factories in registration order.
-    if (ext.length > 1) {
-      if (ext in this._widgetFactoryExtensions) {
-        each(this._widgetFactoryExtensions[ext], n => {
+    // Add the file type factories in registration order.
+    fts.forEach(ft => {
+      if (ft.name in this._widgetFactoryExtensions) {
+        each(this._widgetFactoryExtensions[ft.name], n => {
           factories.add(n);
         });
       }
-    }
-
-    // Handle multi-part extension-specific factories.
-    if (last !== ext) {
-      if (last in this._widgetFactoryExtensions) {
-        each(this._widgetFactoryExtensions[last], n => {
-          factories.add(n);
-        });
-      }
-    }
+    });
 
     // Add the rest of the global factories, in registration order.
     if ('*' in this._widgetFactoryExtensions) {
@@ -371,8 +362,13 @@ class DocumentRegistry implements IDisposable {
     // model factories are registered.
     let factoryList: DocumentRegistry.WidgetFactory[] = [];
     factories.forEach(name => {
-      if (this._widgetFactories[name].modelName in this._modelFactories) {
-        factoryList.push(this._widgetFactories[name]);
+      let factory = this._widgetFactories[name];
+      if (!factory) {
+        return;
+      }
+      let modelName = factory.modelName || 'text';
+      if (modelName in this._modelFactories) {
+        factoryList.push(factory);
       }
     });
 
@@ -382,15 +378,18 @@ class DocumentRegistry implements IDisposable {
   /**
    * Get the default widget factory for an extension.
    *
-   * @param ext - An optional file extension to filter the results.
+   * @param ext - An optional file path to filter the results.
    *
    * @returns The default widget factory for an extension.
    *
    * #### Notes
    * This is equivalent to the first value in [[preferredWidgetFactories]].
    */
-  defaultWidgetFactory(ext: string = '*'): DocumentRegistry.WidgetFactory {
-    return this.preferredWidgetFactories(ext)[0];
+  defaultWidgetFactory(path?: string): DocumentRegistry.WidgetFactory {
+    if (!path) {
+      return this._widgetFactories[this._defaultWidgetFactory];
+    }
+    return this.preferredWidgetFactories(path)[0];
   }
 
   /**
@@ -455,7 +454,7 @@ class DocumentRegistry implements IDisposable {
    *
    * @returns A widget factory instance.
    */
-  getWidgetFactory(widgetName: string): DocumentRegistry.WidgetFactory {
+  getWidgetFactory(widgetName: string): DocumentRegistry.WidgetFactory | undefined {
     return this._widgetFactories[widgetName.toLowerCase()];
   }
 
@@ -466,14 +465,14 @@ class DocumentRegistry implements IDisposable {
    *
    * @returns A model factory instance.
    */
-  getModelFactory(name: string): DocumentRegistry.ModelFactory {
+  getModelFactory(name: string): DocumentRegistry.ModelFactory | undefined {
     return this._modelFactories[name.toLowerCase()];
   }
 
   /**
    * Get a file type by name.
    */
-  getFileType(name: string): DocumentRegistry.IFileType {
+  getFileType(name: string): DocumentRegistry.IFileType | undefined {
     name = name.toLowerCase();
     return find(this._fileTypes, fileType => {
       return fileType.name.toLowerCase() === name;
@@ -483,7 +482,7 @@ class DocumentRegistry implements IDisposable {
   /**
    * Get a creator by name.
    */
-  getCreator(name: string): DocumentRegistry.IFileCreator {
+  getCreator(name: string): DocumentRegistry.IFileCreator | undefined {
     name = name.toLowerCase();
     return find(this._creators, creator => {
       return creator.name.toLowerCase() === name;
@@ -493,7 +492,7 @@ class DocumentRegistry implements IDisposable {
   /**
    * Get a kernel preference.
    *
-   * @param ext - The file extension.
+   * @param path - The file path.
    *
    * @param widgetName - The name of the widget factory.
    *
@@ -501,18 +500,17 @@ class DocumentRegistry implements IDisposable {
    *
    * @returns A kernel preference.
    */
-  getKernelPreference(ext: string, widgetName: string, kernel?: Kernel.IModel): IClientSession.IKernelPreference {
-    ext = Private.normalizeExtension(ext);
+  getKernelPreference(path: string, widgetName: string, kernel?: Partial<Kernel.IModel>): IClientSession.IKernelPreference | undefined {
     widgetName = widgetName.toLowerCase();
     let widgetFactory = this._widgetFactories[widgetName];
     if (!widgetFactory) {
       return void 0;
     }
-    let modelFactory = this.getModelFactory(widgetFactory.modelName);
+    let modelFactory = this.getModelFactory(widgetFactory.modelName || 'text');
     if (!modelFactory) {
       return void 0;
     }
-    let language = modelFactory.preferredLanguage(ext);
+    let language = modelFactory.preferredLanguage(PathExt.basename(path));
     let name = kernel && kernel.name;
     let id = kernel && kernel.id;
     return {
@@ -524,6 +522,64 @@ class DocumentRegistry implements IDisposable {
     };
   }
 
+  /**
+   * Get the best file type given a contents model.
+   *
+   * @param model - The contents model of interest.
+   *
+   * @returns The best matching file type.
+   */
+  getFileTypeForModel(model: Partial<Contents.IModel>): DocumentRegistry.IFileType {
+    switch (model.type) {
+    case 'directory':
+      return find(this._fileTypes, ft => ft.contentType === 'directory') || DocumentRegistry.defaultDirectoryFileType;
+    case 'notebook':
+      return find(this._fileTypes, ft => ft.contentType === 'notebook') ||
+        DocumentRegistry.defaultNotebookFileType;
+    default:
+      // Find the best matching extension.
+      if (model.name || model.path) {
+        let name = model.name || PathExt.basename(model.path);
+        let fts = this.getFileTypesForPath(name);
+        if (fts.length > 0) {
+          return fts[0];
+        }
+      }
+      return this.getFileType('text') || DocumentRegistry.defaultTextFileType;
+    }
+  }
+
+  /**
+   * Get the file types that match a file name.
+   *
+   * @param path - The path of the file.
+   *
+   * @returns An ordered list of matching file types.
+   */
+  getFileTypesForPath(path: string): DocumentRegistry.IFileType[] {
+    let fts: DocumentRegistry.IFileType[] = [];
+    let name = PathExt.basename(path);
+
+    // Look for a pattern match first.
+    let ft = find(this._fileTypes, ft => {
+      return ft.pattern && ft.pattern.match(name) !== null;
+    });
+    if (ft) {
+      fts.push(ft);
+    }
+
+    // Then look by extension name, starting with the longest
+    let ext = Private.extname(name);
+    while (ext.length > 1) {
+      ft = find(this._fileTypes, ft => ft.extensions.indexOf(ext) !== -1);
+      if (ft) {
+        fts.push(ft);
+      }
+      ext = '.' + ext.split('.').slice(2).join('.');
+    }
+    return fts;
+  }
+
   private _modelFactories: { [key: string]: DocumentRegistry.ModelFactory } = Object.create(null);
   private _widgetFactories: { [key: string]: DocumentRegistry.WidgetFactory } = Object.create(null);
   private _defaultWidgetFactory = '';
@@ -533,6 +589,7 @@ class DocumentRegistry implements IDisposable {
   private _creators: DocumentRegistry.IFileCreator[] = [];
   private _extenders: { [key: string] : DocumentRegistry.WidgetExtension[] } = Object.create(null);
   private _changed = new Signal<this, DocumentRegistry.IChangedArgs>(this);
+  private _isDisposed = false;
 }
 
 
@@ -541,6 +598,24 @@ class DocumentRegistry implements IDisposable {
  */
 export
 namespace DocumentRegistry {
+  /**
+   * The options used to create a document registry.
+   */
+  export
+  interface IOptions {
+    /**
+     * The text model factory for the registry.  A default instance will
+     * be used if not given.
+     */
+    textModelFactory?: ModelFactory;
+
+    /**
+     * The initial file types for the registry.
+     * The [[DocumentRegistry.defaultFileTypes]] will be used if not given.
+     */
+    initialFileTypes?: DocumentRegistry.IFileType[];
+  }
+
   /**
    * The interface for a document model.
    */
@@ -606,7 +681,7 @@ namespace DocumentRegistry {
     /**
      * Serialize the model to JSON.
      */
-    toJSON(): any;
+    toJSON(): JSONValue;
 
     /**
      * Deserialize the model from JSON.
@@ -662,10 +737,10 @@ namespace DocumentRegistry {
      * The current contents model associated with the document
      *
      * #### Notes
-     * The model will have an empty `contents` field.
-     * It will be `null` until the context is ready.
+     * The contents model will be null until the context is ready.
+     * It will have an  empty `contents` field.
      */
-    readonly contentsModel: Contents.IModel;
+    readonly contentsModel: Contents.IModel | null;
 
     /**
      * Whether the context is ready.
@@ -770,32 +845,19 @@ namespace DocumentRegistry {
   export
   interface IWidgetFactoryOptions {
     /**
-     * The file extensions the widget can view.
-     *
-     * #### Notes
-     * Use "*" to denote all files. Specific file extensions must be preceded
-     * with '.', like '.png', '.txt', etc.  They may themselves contain a
-     * period (e.g. .table.json).
-     */
-    readonly fileExtensions: string[];
-
-    /**
      * The name of the widget to display in dialogs.
      */
     readonly name: string;
 
     /**
-     * The file extensions for which the factory should be the default.
-     *
-     * #### Notes
-     * Use "*" to denote all files. Specific file extensions must be preceded
-     * with '.', like '.png', '.txt', etc. Entries in this attribute must also
-     * be included in the fileExtensions attribute.
-     * The default is an empty array.
-     *
-     * **See also:** [[fileExtensions]].
+     * The file types the widget can view.
      */
-    readonly defaultFor?: string[];
+    readonly fileTypes: ReadonlyArray<string>;
+
+    /**
+     * The file types for which the factory should be the default.
+     */
+    readonly defaultFor?: ReadonlyArray<string>;
 
     /**
      * Whether the widget factory is read only.
@@ -819,10 +881,21 @@ namespace DocumentRegistry {
   }
 
   /**
+   * A widget for a document.
+   */
+  export
+  interface IReadyWidget extends Widget {
+    /**
+     * A promise that resolves when the widget is ready.
+     */
+    readonly ready: Promise<void>;
+  }
+
+  /**
    * The interface for a widget factory.
    */
   export
-  interface IWidgetFactory<T extends Widget, U extends IModel> extends IDisposable, IWidgetFactoryOptions {
+  interface IWidgetFactory<T extends IReadyWidget, U extends IModel> extends IDisposable, IWidgetFactoryOptions {
     /**
      * A signal emitted when a widget is created.
      */
@@ -841,7 +914,7 @@ namespace DocumentRegistry {
    * A type alias for a standard widget factory.
    */
   export
-  type WidgetFactory = IWidgetFactory<Widget, IModel>;
+  type WidgetFactory = IWidgetFactory<IReadyWidget, IModel>;
 
   /**
    * An interface for a widget extension.
@@ -890,9 +963,9 @@ namespace DocumentRegistry {
     createNew(languagePreference?: string, modelDB?: IModelDB): T;
 
     /**
-     * Get the preferred kernel language given an extension.
+     * Get the preferred kernel language given a file path.
      */
-    preferredLanguage(ext: string): string;
+    preferredLanguage(path: string): string;
   }
 
   /**
@@ -918,36 +991,55 @@ namespace DocumentRegistry {
     readonly name: string;
 
     /**
-     * The extension of the file type (e.g. `".txt"`).  Can be a compound
-     * extension (e.g. `".table.json:`).
+     * The mime types associated the file type.
      */
-    readonly extension: string;
+    readonly mimeTypes: ReadonlyArray<string>;
 
     /**
-     * The optional mimetype of the file type.
+     * The extensions of the file type (e.g. `".txt"`).  Can be a compound
+     * extension (e.g. `".table.json`).
      */
-    readonly mimetype?: string;
+    readonly extensions: ReadonlyArray<string>;
 
     /**
-     * The optional icon class to use for the file type.
+     * An optional pattern for a file name (e.g. `^Dockerfile$`).
+     */
+    readonly pattern?: string;
+
+    /**
+     * The icon class name for the file type.
      */
     readonly iconClass?: string;
 
     /**
-     * The optional icon label to use for the file type.
+     * The icon label for the file type.
      */
     readonly iconLabel?: string;
 
     /**
-     * The content type of the new file (defaults to `"file"`).
+     * The content type of the new file.
      */
-    readonly contentType?: Contents.ContentType;
+    readonly contentType: Contents.ContentType;
 
     /**
-     * The format of the new file (default to `"text"`).
+     * The format of the new file.
      */
-    readonly fileFormat?: Contents.FileFormat;
+    readonly fileFormat: Contents.FileFormat;
   }
+
+  /**
+   * The defaults used for a file type.
+   */
+  export
+  const fileTypeDefaults: IFileType = {
+    name: 'default',
+    extensions: [],
+    mimeTypes: [],
+    iconClass: 'jp-MaterialIcon jp-FileIcon',
+    iconLabel: '',
+    contentType: 'file',
+    fileFormat: 'text'
+  };
 
   /**
    * An interface for a "Create New" item.
@@ -986,7 +1078,7 @@ namespace DocumentRegistry {
     readonly type: 'widgetFactory' | 'modelFactory' | 'widgetExtension' | 'fileCreator' | 'fileType';
 
     /**
-     * The name of the item.
+     * The name of the item or the widget factory being extended.
      */
     readonly name: string;
 
@@ -997,19 +1089,148 @@ namespace DocumentRegistry {
   }
 
   /**
-   * Get the extension name of a path.
-   *
-   * @param file - string.
-   *
-   * #### Notes
-   * Dotted filenames (e.g. `".table.json"` are allowed.
+   * The default text file type used by the document registry.
    */
   export
-  function extname(path: string): string {
-    let parts = PathExt.basename(path).split('.');
-    parts.shift();
-    return '.' + parts.join('.');
-  }
+  const defaultTextFileType: IFileType = {
+    ...fileTypeDefaults,
+    name: 'text',
+    mimeTypes: ['text/plain'],
+    extensions: ['.txt']
+  };
+
+  /**
+   * The default notebook file type used by the document registry.
+   */
+  export
+  const defaultNotebookFileType: IFileType = {
+    ...fileTypeDefaults,
+    name: 'notebook',
+    mimeTypes: ['application/x-ipynb+json'],
+    extensions: ['.ipynb'],
+    contentType: 'notebook',
+    fileFormat: 'json',
+    iconClass: 'jp-MaterialIcon jp-NotebookIcon'
+  };
+
+  /**
+   * The default directory file type used by the document registry.
+   */
+  export
+  const defaultDirectoryFileType: IFileType = {
+    ...fileTypeDefaults,
+    name: 'directory',
+    extensions: [],
+    mimeTypes: ['text/directory'],
+    contentType: 'directory',
+    iconClass: 'jp-MaterialIcon jp-OpenFolderIcon'
+  };
+
+  /**
+   * The default file types used by the document registry.
+   */
+  export
+  const defaultFileTypes: ReadonlyArray<Partial<IFileType>> = [
+    defaultTextFileType,
+    defaultNotebookFileType,
+    defaultDirectoryFileType,
+    {
+      name: 'markdown',
+      extensions: ['.md'],
+      mimeTypes: ['text/markdown'],
+      iconClass: 'jp-MaterialIcon jp-MarkdownIcon',
+    },
+    {
+      name: 'python',
+      extensions: ['.py'],
+      mimeTypes: ['text/x-python'],
+      iconClass: 'jp-MaterialIcon jp-PythonIcon'
+    },
+    {
+      name: 'json',
+      extensions: ['.json'],
+      mimeTypes: ['application/json', 'application/x-json'],
+      iconClass: 'jp-MaterialIcon jp-JSONIcon'
+    },
+    {
+      name: 'csv',
+      extensions: ['.csv'],
+      mimeTypes: ['text/csv'],
+      iconClass: 'jp-MaterialIcon jp-SpreadsheetIcon'
+    },
+    {
+      name: 'xls',
+      extensions: ['.xls'],
+      iconClass: 'jp-MaterialIcon jp-SpreadsheetIcon'
+    },
+    {
+      name: 'r',
+      mimeTypes: ['text/x-rsrc'],
+      extensions: ['.r'],
+      iconClass: 'jp-MaterialIcon jp-RKernelIcon'
+    },
+    {
+      name: 'yaml',
+      mimeTypes: ['text/x-yaml', 'text/yaml'],
+      extensions: ['.yaml', '.yml'],
+      iconClass: 'jp-MaterialIcon jp-YamlIcon'
+    },
+    {
+      name: 'svg',
+      mimeTypes: ['image/svg+xml'],
+      extensions: ['.svg'],
+      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      fileFormat: 'base64'
+    },
+    {
+      name: 'tiff',
+      mimeTypes: ['image/tiff'],
+      extensions: ['.tif', '.tiff'],
+      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      fileFormat: 'base64'
+    },
+    {
+      name: 'jpeg',
+      mimeTypes: ['image/jpeg'],
+      extensions: ['.jpg', '.jpeg'],
+      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      fileFormat: 'base64'
+    },
+    {
+      name: 'gif',
+      mimeTypes: ['image/gif'],
+      extensions: ['.gif'],
+      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      fileFormat: 'base64'
+    },
+    {
+      name: 'png',
+      mimeTypes: ['image/png'],
+      extensions: ['.png'],
+      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      fileFormat: 'base64'
+    },
+    {
+      name: 'bmp',
+      mimeTypes: ['image/bmp'],
+      extensions: ['.bmp'],
+      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      fileFormat: 'base64'
+    },
+    {
+      name: 'xbm',
+      mimeTypes: ['image/xbm'],
+      extensions: ['.xbm'],
+      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      fileFormat: 'base64'
+    },
+    {
+      name: 'raw',
+      extensions: ['.raw'],
+      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      fileFormat: 'base64'
+    }
+  ];
 }
 
 
@@ -1035,4 +1256,24 @@ namespace Private {
     }
     return extension.toLowerCase();
   }
+
+  /**
+   * Get the extension name of a path.
+   *
+   * @param file - string.
+   *
+   * #### Notes
+   * Dotted filenames (e.g. `".table.json"` are allowed).
+   */
+  export
+  function extname(path: string): string {
+    let parts = PathExt.basename(path).split('.');
+    parts.shift();
+    return '.' + parts.join('.');
+  }
+  /**
+   * A no-op function.
+   */
+  export
+  function noOp() { /* no-op */}
 }

@@ -10,10 +10,6 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IDocumentRegistry
-} from '@jupyterlab/docregistry';
-
-import {
   ImageViewer, ImageViewerFactory, IImageTracker
 } from '@jupyterlab/imageviewer';
 
@@ -38,10 +34,11 @@ namespace CommandIDs {
 
 
 /**
- * The list of file extensions for images.
+ * The list of file types for images.
  */
-const EXTENSIONS = ['.png', '.gif', '.jpeg', '.jpg', '.svg', '.bmp', '.ico',
-  '.xbm', '.tiff', '.tif'];
+const FILE_TYPES = [
+  'png', 'gif', 'jpeg', 'svg', 'bmp', 'ico', 'xbm', 'tiff'
+];
 
 /**
  * The name of the factory that creates image widgets.
@@ -55,7 +52,7 @@ const plugin: JupyterLabPlugin<IImageTracker> = {
   activate,
   id: 'jupyter.extensions.image-handler',
   provides: IImageTracker,
-  requires: [IDocumentRegistry, ICommandPalette, ILayoutRestorer],
+  requires: [ICommandPalette, ILayoutRestorer],
   autoStart: true
 };
 
@@ -69,30 +66,37 @@ export default plugin;
 /**
  * Activate the image widget extension.
  */
-function activate(app: JupyterLab, registry: IDocumentRegistry, palette: ICommandPalette, restorer: ILayoutRestorer): IImageTracker {
+function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRestorer): IImageTracker {
   const namespace = 'image-widget';
   const factory = new ImageViewerFactory({
     name: FACTORY,
     modelName: 'base64',
-    fileExtensions: EXTENSIONS,
-    defaultFor: EXTENSIONS,
+    fileTypes: FILE_TYPES,
+    defaultFor: FILE_TYPES,
     readOnly: true
   });
   const tracker = new InstanceTracker<ImageViewer>({ namespace });
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command: 'file-operations:open',
+    command: 'docmanager:open',
     args: widget => ({ path: widget.context.path, factory: FACTORY }),
     name: widget => widget.context.path
   });
 
-  registry.addWidgetFactory(factory);
+  app.docRegistry.addWidgetFactory(factory);
 
   factory.widgetCreated.connect((sender, widget) => {
     // Notify the instance tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => { tracker.save(widget); });
     tracker.add(widget);
+
+    let fts = app.docRegistry.getFileTypesForPath(widget.context.path);
+    if (fts.length > 0) {
+      widget.title.iconClass = fts[0].iconClass;
+      widget.title.iconLabel = fts[0].iconLabel;
+    }
+
   });
 
   addCommands(tracker, app.commands);

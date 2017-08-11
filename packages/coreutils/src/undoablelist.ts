@@ -106,15 +106,6 @@ class ObservableUndoableList<T> extends ObservableList<T> implements IObservable
   }
 
   /**
-   * Dispose of the resources held by the model.
-   */
-  dispose(): void {
-    this._serializer = null;
-    this._stack = null;
-    super.dispose();
-  }
-
-  /**
    * Begin a compound operation.
    *
    * @param isUndoAble - Whether the operation is undoable.
@@ -294,7 +285,7 @@ class ObservableUndoableList<T> extends ObservableList<T> implements IObservable
   private _madeCompoundChange = false;
   private _index = -1;
   private _stack: IObservableList.IChangedArgs<JSONValue>[][] = [];
-  private _serializer: ISerializer<T> = null;
+  private _serializer: ISerializer<T>;
 }
 
 /**
@@ -306,19 +297,19 @@ namespace ObservableUndoableList {
    * A default, identity serializer.
    */
   export
-  class IdentitySerializer implements ISerializer<JSONValue> {
+  class IdentitySerializer<T extends JSONValue> implements ISerializer<T> {
     /**
      * Identity serialize.
      */
-    toJSON(value: JSONValue): JSONValue {
+    toJSON(value: T): JSONValue {
       return value;
     }
 
     /**
      * Identity deserialize.
      */
-    fromJSON(value: JSONValue): JSONValue {
-      return value;
+    fromJSON(value: JSONValue): T {
+      return value as T;
     }
   }
 }

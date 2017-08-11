@@ -32,10 +32,18 @@ import {
 } from '../utils';
 
 
-class WidgetFactory extends ABCWidgetFactory<Widget, DocumentRegistry.IModel> {
 
-  protected createNewWidget(context: DocumentRegistry.Context): Widget {
-    let widget = new Widget();
+class DocWidget extends Widget implements DocumentRegistry.IReadyWidget {
+  get ready(): Promise<void> {
+    return Promise.resolve(undefined);
+  }
+}
+
+
+class WidgetFactory extends ABCWidgetFactory<DocumentRegistry.IReadyWidget, DocumentRegistry.IModel> {
+
+  protected createNewWidget(context: DocumentRegistry.Context): DocumentRegistry.IReadyWidget {
+    let widget = new DocWidget();
     widget.addClass('WidgetFactory');
     return widget;
   }
@@ -46,9 +54,9 @@ class LoggingManager extends DocumentWidgetManager {
 
   methods: string[] = [];
 
-  filterMessage(handler: IMessageHandler, msg: Message): boolean {
-    this.methods.push('filterMessage');
-    return super.filterMessage(handler, msg);
+  messageHook(handler: IMessageHandler, msg: Message): boolean {
+    this.methods.push('messageHook');
+    return super.messageHook(handler, msg);
   }
 
   setCaption(widget: Widget): void {
@@ -67,15 +75,15 @@ describe('@jupyterlab/docmanager', () => {
 
   let manager: LoggingManager;
   let services: ServiceManager.IManager;
-  let modelFactory = new TextModelFactory();
+  let textModelFactory = new TextModelFactory();
   let context: Context<DocumentRegistry.IModel>;
   let widgetFactory = new WidgetFactory({
     name: 'test',
-    fileExtensions: ['.txt']
+    fileTypes: ['text']
   });
   let readOnlyFactory = new WidgetFactory({
     name: 'readonly',
-    fileExtensions: ['.txt'],
+    fileTypes: ['text'],
     readOnly: true
   });
 
@@ -84,13 +92,12 @@ describe('@jupyterlab/docmanager', () => {
   });
 
   beforeEach(() => {
-    let registry = new DocumentRegistry();
-    registry.addModelFactory(modelFactory);
+    let registry = new DocumentRegistry({ textModelFactory });
     registry.addWidgetFactory(widgetFactory);
     manager = new LoggingManager({ registry });
     context = new Context({
       manager: services,
-      factory: modelFactory,
+      factory: textModelFactory,
       path: uuid()
     });
   });
@@ -156,7 +163,7 @@ describe('@jupyterlab/docmanager', () => {
         let widget = new Widget();
         manager.adoptWidget(context, widget);
         MessageLoop.sendMessage(widget, new Message('foo'));
-        expect(manager.methods).to.contain('filterMessage');
+        expect(manager.methods).to.contain('messageHook');
       });
 
       it('should add the document class', () => {
@@ -193,8 +200,8 @@ describe('@jupyterlab/docmanager', () => {
         expect(manager.contextForWidget(widget)).to.be(context);
       });
 
-      it('should return null if not tracked', () => {
-        expect(manager.contextForWidget(new Widget())).to.be(null);
+      it('should return undefined if not tracked', () => {
+        expect(manager.contextForWidget(new Widget())).to.be(undefined);
       });
 
     });
@@ -230,25 +237,25 @@ describe('@jupyterlab/docmanager', () => {
 
     });
 
-    describe('#filterMessage()', () => {
+    describe('#messageHook()', () => {
 
       it('should be called for a message to a tracked widget', () => {
         let widget = new Widget();
         manager.adoptWidget(context, widget);
         MessageLoop.sendMessage(widget, new Message('foo'));
-        expect(manager.methods).to.contain('filterMessage');
+        expect(manager.methods).to.contain('messageHook');
       });
 
       it('should return false for close-request messages', () => {
         let widget = manager.createWidget(widgetFactory, context);
         let msg = new Message('close-request');
-        expect(manager.filterMessage(widget, msg)).to.be(false);
+        expect(manager.messageHook(widget, msg)).to.be(false);
       });
 
       it('should return true for other messages', () => {
         let widget = manager.createWidget(widgetFactory, context);
         let msg = new Message('foo');
-        expect(manager.filterMessage(widget, msg)).to.be(true);
+        expect(manager.messageHook(widget, msg)).to.be(true);
       });
 
     });

@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ServiceManager, Session, TerminalSession
-} from '@jupyterlab/services';
-
-import {
   Message
 } from '@phosphor/messaging';
 
@@ -24,6 +20,14 @@ import {
 import {
   DOMUtils
 } from '@jupyterlab/apputils';
+
+import {
+  PathExt
+} from '@jupyterlab/coreutils';
+
+import {
+  ServiceManager, Session, TerminalSession
+} from '@jupyterlab/services';
 
 import '../style/index.css';
 
@@ -182,17 +186,6 @@ class RunningSessions extends Widget {
   }
 
   /**
-   * Dispose of the resources used by the widget.
-   */
-  dispose(): void {
-    this._manager = null;
-    this._runningSessions = null;
-    this._runningTerminals = null;
-    this._renderer = null;
-    super.dispose();
-  }
-
-  /**
    * Refresh the widget.
    */
   refresh(): Promise<void> {
@@ -243,9 +236,9 @@ class RunningSessions extends Widget {
   protected onUpdateRequest(msg: Message): void {
     // Fetch common variables.
     let termSection = DOMUtils.findElement(this.node, TERMINALS_CLASS);
-    let termList = DOMUtils.findElement(termSection, LIST_CLASS);
+    let termList = DOMUtils.findElement(termSection, LIST_CLASS) as HTMLElement;
     let sessionSection = DOMUtils.findElement(this.node, SESSIONS_CLASS);
-    let sessionList = DOMUtils.findElement(sessionSection, LIST_CLASS);
+    let sessionList = DOMUtils.findElement(sessionSection, LIST_CLASS) as HTMLLIElement;
     let renderer = this._renderer;
     let specs = this._manager.specs;
 
@@ -254,10 +247,10 @@ class RunningSessions extends Widget {
 
     // Remove any excess item nodes.
     while (termList.children.length > this._runningTerminals.length) {
-      termList.removeChild(termList.firstChild);
+      termList.removeChild(termList.firstChild!);
     }
     while (sessionList.children.length > this._runningSessions.length) {
-      sessionList.removeChild(sessionList.firstChild);
+      sessionList.removeChild(sessionList.firstChild!);
     }
 
     // Add any missing item nodes.
@@ -347,7 +340,7 @@ class RunningSessions extends Widget {
     // Strip out non-file backed sessions.
     this._runningSessions = [];
     for (let session of models) {
-      let name = session.name || session.path.split('/').pop();
+      let name = session.name || PathExt.basename(session.path);
       if (name.indexOf('.') !== -1 || session.name) {
         this._runningSessions.push(session);
       }
@@ -363,8 +356,8 @@ class RunningSessions extends Widget {
     this.update();
   }
 
-  private _manager: ServiceManager.IManager = null;
-  private _renderer: RunningSessions.IRenderer = null;
+  private _manager: ServiceManager.IManager;
+  private _renderer: RunningSessions.IRenderer;
   private _runningSessions: Session.IModel[] = [];
   private _runningTerminals: TerminalSession.IModel[] = [];
   private _refreshId = -1;
@@ -662,7 +655,8 @@ namespace RunningSessions {
      */
     updateSessionNode(node: HTMLLIElement, model: Session.IModel, kernelName: string): void {
       let icon = DOMUtils.findElement(node, ITEM_ICON_CLASS);
-      let name = model.name || model.path.split('/').pop();
+      let name = model.name || PathExt.basename(model.path);
+
       if (name.indexOf('.ipynb') !== -1) {
         icon.className = `${ITEM_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
       } else if (model.type.toLowerCase() === 'console') {

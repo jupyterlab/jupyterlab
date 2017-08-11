@@ -23,6 +23,14 @@ import {
 } from '@phosphor/algorithm';
 
 import {
+  ElementExt
+} from '@phosphor/domutils';
+
+import {
+  h
+} from '@phosphor/virtualdom';
+
+import {
   INotebookModel
 } from './model';
 
@@ -32,7 +40,16 @@ import {
 
 
 // The message to display to the user when prompting to trust the notebook.
-const TRUST_MESSAGE = '<p>A trusted Jupyter notebook may execute hidden malicious code when you open it.<br>Selecting trust will re-render this notebook in a trusted state.<br>For more information, see the <a href="http://ipython.org/ipython-doc/2/notebook/security.html">Jupyter security documentation</a>.</p>';
+const TRUST_MESSAGE = h.p(
+  'A trusted Jupyter notebook may execute hidden malicious code when you ',
+  'open it.',
+  h.br(),
+  'Selecting trust will re-render this notebook in a trusted state.',
+  h.br(),
+  'For more information, see the',
+  h.a({ href: 'http://ipython.org/ipython-doc/2/notebook/security.html' },
+      'Jupyter security documentation'),
+);
 
 
 /**
@@ -220,7 +237,7 @@ namespace NotebookActions {
     // Make the newly inserted cell active.
     widget.activeCellIndex = index;
     widget.deselectAll();
-    Private.handleState(widget, state);
+    Private.handleState(widget, state, true);
   }
 
   /**
@@ -246,7 +263,7 @@ namespace NotebookActions {
     // Make the newly inserted cell active.
     widget.activeCellIndex++;
     widget.deselectAll();
-    Private.handleState(widget, state);
+    Private.handleState(widget, state, true);
   }
 
   /**
@@ -276,7 +293,7 @@ namespace NotebookActions {
       }
     }
     cells.endCompoundOperation();
-    Private.handleState(widget, state);
+    Private.handleState(widget, state, true);
   }
 
   /**
@@ -306,7 +323,7 @@ namespace NotebookActions {
       }
     }
     cells.endCompoundOperation();
-    Private.handleState(widget, state);
+    Private.handleState(widget, state, true);
   }
 
   /**
@@ -340,7 +357,7 @@ namespace NotebookActions {
    * @param session - The optional client session object.
    *
    * #### Notes
-   * The last selected cell will be activated.
+   * The last selected cell will be activated, but not scrolled into view.
    * The existing selection will be cleared.
    * An execution error will prevent the remaining code cells from executing.
    * All markdown cells will be rendered.
@@ -352,7 +369,7 @@ namespace NotebookActions {
     }
     let state = Private.getState(widget);
     let promise = Private.runSelected(widget, session);
-    Private.handleRunState(widget, state);
+    Private.handleRunState(widget, state, false);
     return promise;
   }
 
@@ -365,7 +382,7 @@ namespace NotebookActions {
    *
    * #### Notes
    * The existing selection will be cleared.
-   * The cell after the last selected cell will be activated.
+   * The cell after the last selected cell will be activated and scrolled into view.
    * An execution error will prevent the remaining code cells from executing.
    * All markdown cells will be rendered.
    * If the last selected cell is the last cell, a new code cell
@@ -387,7 +404,7 @@ namespace NotebookActions {
     } else {
       widget.activeCellIndex++;
     }
-    Private.handleRunState(widget, state);
+    Private.handleRunState(widget, state, true);
     return promise;
   }
 
@@ -404,6 +421,7 @@ namespace NotebookActions {
    * The widget mode will be set to `'edit'` after running.
    * The existing selection will be cleared.
    * The cell insert can be undone.
+   * The new cell will be scrolled into view.
    */
   export
   function runAndInsert(widget: Notebook, session?: IClientSession): Promise<boolean> {
@@ -417,7 +435,7 @@ namespace NotebookActions {
     model.cells.insert(widget.activeCellIndex + 1, cell);
     widget.activeCellIndex++;
     widget.mode = 'edit';
-    Private.handleRunState(widget, state);
+    Private.handleRunState(widget, state, true);
     return promise;
   }
 
@@ -432,7 +450,7 @@ namespace NotebookActions {
    * The existing selection will be cleared.
    * An execution error will prevent the remaining code cells from executing.
    * All markdown cells will be rendered.
-   * The last cell in the notebook will be activated.
+   * The last cell in the notebook will be activated and scrolled into view.
    */
   export
   function runAll(widget: Notebook, session?: IClientSession): Promise<boolean> {
@@ -444,7 +462,7 @@ namespace NotebookActions {
       widget.select(child);
     });
     let promise = Private.runSelected(widget, session);
-    Private.handleRunState(widget, state);
+    Private.handleRunState(widget, state, true);
     return promise;
   }
 
@@ -469,7 +487,7 @@ namespace NotebookActions {
     let state = Private.getState(widget);
     widget.activeCellIndex -= 1;
     widget.deselectAll();
-    Private.handleState(widget, state);
+    Private.handleState(widget, state, true);
   }
 
   /**
@@ -493,7 +511,7 @@ namespace NotebookActions {
     let state = Private.getState(widget);
     widget.activeCellIndex += 1;
     widget.deselectAll();
-    Private.handleState(widget, state);
+    Private.handleState(widget, state, true);
   }
 
   /**
@@ -530,7 +548,7 @@ namespace NotebookActions {
       widget.select(current);
     }
     widget.activeCellIndex -= 1;
-    Private.handleState(widget, state);
+    Private.handleState(widget, state, true);
   }
 
   /**
@@ -567,7 +585,7 @@ namespace NotebookActions {
       widget.select(current);
     }
     widget.activeCellIndex += 1;
-    Private.handleState(widget, state);
+    Private.handleState(widget, state, true);
   }
 
   /**
@@ -702,10 +720,10 @@ namespace NotebookActions {
       return;
     }
     let state = Private.getState(widget);
-    let lineNumbers = widget.activeCell.editor.lineNumbers;
+    let lineNumbers = widget.activeCell.editor.getOption('lineNumbers');
     each(widget.widgets, child => {
       if (widget.isSelected(child)) {
-        child.editor.lineNumbers = !lineNumbers;
+        child.editor.setOption('lineNumbers', !lineNumbers);
       }
     });
     Private.handleState(widget, state);
@@ -726,9 +744,9 @@ namespace NotebookActions {
       return;
     }
     let state = Private.getState(widget);
-    let lineNumbers = widget.activeCell.editor.lineNumbers;
+    let lineNumbers = widget.activeCell.editor.getOption('lineNumbers');
     each(widget.widgets, child => {
-      child.editor.lineNumbers = !lineNumbers;
+      child.editor.setOption('lineNumbers', !lineNumbers);
     });
     Private.handleState(widget, state);
   }
@@ -1016,7 +1034,7 @@ namespace NotebookActions {
       title: 'Trust this notebook?',
       buttons: [Dialog.cancelButton(), Dialog.warnButton()]
     }).then(result => {
-      if (result.accept) {
+      if (result.button.accept) {
         for (let i = 0; i < cells.length; i++) {
           let cell = cells.get(i);
           cell.trusted = true;
@@ -1062,9 +1080,12 @@ namespace Private {
    * Handle the state of a widget after running an action.
    */
   export
-  function handleState(widget: Notebook, state: IState): void {
+  function handleState(widget: Notebook, state: IState, scrollIfNeeded=false): void {
     if (state.wasFocused || widget.mode === 'edit') {
       widget.activate();
+    }
+    if (scrollIfNeeded) {
+      ElementExt.scrollIntoViewIfNeeded(widget.node, widget.activeCell.node);
     }
   }
 
@@ -1072,13 +1093,15 @@ namespace Private {
    * Handle the state of a widget after running a run action.
    */
   export
-  function handleRunState(widget: Notebook, state: IState): void {
+  function handleRunState(widget: Notebook, state: IState, scroll = false): void {
     if (state.wasFocused || widget.mode === 'edit') {
       widget.activate();
     }
-    // Scroll to the top of the previous active cell output.
-    let er = state.activeCell.inputArea.node.getBoundingClientRect();
-    widget.scrollToPosition(er.bottom);
+    if (scroll) {
+      // Scroll to the top of the previous active cell output.
+      let er = state.activeCell.inputArea.node.getBoundingClientRect();
+      widget.scrollToPosition(er.bottom);
+    }
   }
 
   /**
@@ -1088,11 +1111,14 @@ namespace Private {
   function cloneCell(model: INotebookModel, cell: ICellModel): ICellModel {
     switch (cell.type) {
     case 'code':
-      return model.contentFactory.createCodeCell(cell.toJSON());
+      // TODO why isnt modeldb or id passed here?
+      return model.contentFactory.createCodeCell({ cell: cell.toJSON() });
     case 'markdown':
-      return model.contentFactory.createMarkdownCell(cell.toJSON());
+      // TODO why isnt modeldb or id passed here?
+      return model.contentFactory.createMarkdownCell({ cell: cell.toJSON() });
     default:
-      return model.contentFactory.createRawCell(cell.toJSON());
+      // TODO why isnt modeldb or id passed here?
+      return model.contentFactory.createRawCell({ cell: cell.toJSON() });
     }
   }
 

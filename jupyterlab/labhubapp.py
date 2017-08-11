@@ -14,6 +14,7 @@ else:
                 settings['page_config_data'] = {}
             settings['page_config_data']['hub_prefix'] = self.hub_prefix
             settings['page_config_data']['hub_host'] = self.hub_host
+            settings['page_config_data']['hub_user'] = self.user
 
 
 def main(argv=None):

@@ -39,9 +39,6 @@ import {
  */
 namespace CommandIDs {
   export
-  const matchBrackets = 'codemirror:match-brackets';
-
-  export
   const changeKeyMap = 'codemirror:change-keymap';
 
   export
@@ -49,9 +46,6 @@ namespace CommandIDs {
 
   export
   const changeMode = 'codemirror:change-mode';
-
-  export
-  const changeTabs = 'codemirror:change-tabs';
 };
 
 
@@ -60,7 +54,7 @@ namespace CommandIDs {
  */
 export
 const servicesPlugin: JupyterLabPlugin<IEditorServices> = {
-  id: IEditorServices.name,
+  id: 'jupyter.services.codemirror-services',
   provides: IEditorServices,
   activate: (): IEditorServices => editorServices
 };
@@ -91,28 +85,14 @@ export default plugins;
 function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB, settingRegistry: ISettingRegistry): void {
   const { commands, restored } = app;
   const { id } = commandsPlugin;
-  let theme: string = CodeMirrorEditor.DEFAULT_THEME;
-  let keyMap: string = 'default';
-  let matchBrackets = false;
-
-  // Annotate the plugin settings.
-  settingRegistry.annotate(id, '', {
-    iconClass: 'jp-ImageTextEditor',
-    iconLabel: 'CodeMirror',
-    label: 'CodeMirror'
-  });
-  settingRegistry.annotate(id, 'keyMap', { label: 'Key Map' });
-  settingRegistry.annotate(id, 'matchBrackets', { label: 'Match Brackets' });
-  settingRegistry.annotate(id, 'theme', { label: 'Theme' });
+  let { theme, keyMap } = CodeMirrorEditor.defaultConfig;
 
   /**
    * Update the setting values.
    */
   function updateSettings(settings: ISettingRegistry.ISettings): void {
-    const cached = settings.get('matchBrackets') as boolean | null;
-    matchBrackets = cached === null ? false : !!cached;
-    keyMap = settings.get('keyMap') as string | null || keyMap;
-    theme = settings.get('theme') as string | null || theme;
+    keyMap = settings.get('keyMap').composite as string | null || keyMap;
+    theme = settings.get('theme').composite as string | null || theme;
   }
 
   /**
@@ -124,7 +104,6 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
         let cm = widget.editor.editor;
         cm.setOption('keyMap', keyMap);
         cm.setOption('theme', theme);
-        cm.setOption('matchBrackets', matchBrackets);
       }
     });
   }
@@ -137,6 +116,9 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
       updateSettings(settings);
       updateTracker();
     });
+  }).catch((reason: Error) => {
+    console.error(reason.message);
+    updateTracker();
   });
 
   /**
@@ -147,14 +129,13 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
       let cm = widget.editor.editor;
       cm.setOption('keyMap', keyMap);
       cm.setOption('theme', theme);
-      cm.setOption('matchBrackets', matchBrackets);
     }
   });
 
   // Update the command registry when the codemirror state changes.
   tracker.currentChanged.connect(() => {
     if (tracker.size <= 1) {
-      commands.notifyCommandChanged(CommandIDs.matchBrackets);
+      commands.notifyCommandChanged(CommandIDs.changeKeyMap);
     }
   });
 
@@ -184,14 +165,13 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     commands.addCommand(CommandIDs.changeTheme, {
       label: args => args['theme'] as string,
       execute: args => {
-        theme = args['theme'] as string || CodeMirrorEditor.DEFAULT_THEME;
-        tracker.forEach(widget => {
-          if (widget.editor instanceof CodeMirrorEditor) {
-            let cm = widget.editor.editor;
-            cm.setOption('theme', theme);
-          }
+        const key = 'theme';
+        const value = theme = args['theme'] as string || theme;
+
+        updateTracker();
+        return settingRegistry.set(id, key, value).catch((reason: Error) => {
+          console.error(`Failed to set ${id}:${key} - ${reason.message}`);
         });
-        return settingRegistry.set(id, 'theme', theme);
       },
       isEnabled: hasWidget,
       isToggled: args => args['theme'] === theme
@@ -203,14 +183,13 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
         return title === 'sublime' ? 'Sublime Text' : title;
       },
       execute: args => {
-        keyMap = args['keyMap'] as string || 'default';
-        tracker.forEach(widget => {
-          if (widget.editor instanceof CodeMirrorEditor) {
-            let cm = widget.editor.editor;
-            cm.setOption('keyMap', keyMap);
-          }
+        const key = 'keyMap';
+        const value = keyMap = args['keyMap'] as string || keyMap;
+
+        updateTracker();
+        return settingRegistry.set(id, key, value).catch((reason: Error) => {
+          console.error(`Failed to set ${id}:${key} - ${reason.message}`);
         });
-        return settingRegistry.set(id, 'keyMap', keyMap);
       },
       isEnabled: hasWidget,
       isToggled: args => args['keyMap'] === keyMap
@@ -220,8 +199,8 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
       label: args => args['name'] as string,
       execute: args => {
         let mode = args['mode'] as string;
-        if (mode) {
-          let widget = tracker.currentWidget;
+        let widget = tracker.currentWidget;
+        if (mode && widget) {
           let spec = Mode.findByName(mode);
           if (spec) {
             widget.model.mimeType = spec.mime;
@@ -241,53 +220,10 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
       }
     });
 
-    commands.addCommand(CommandIDs.changeTabs, {
-      label: args => args['name'] as string,
-      execute: args => {
-        let widget = tracker.currentWidget;
-        if (!widget) {
-          return;
-        }
-        let editor = widget.editor as CodeMirrorEditor;
-        let size = args['size'] as number || 4;
-        let tabs = !!args['tabs'];
-        editor.editor.setOption('indentWithTabs', tabs);
-        editor.editor.setOption('indentUnit', size);
-      },
-      isEnabled: hasWidget,
-      isToggled: args => {
-        let widget = tracker.currentWidget;
-        if (!widget) {
-          return false;
-        }
-        let tabs = !!args['tabs'];
-        let size = args['size'] as number || 4;
-        let editor = widget.editor as CodeMirrorEditor;
-        if (editor.editor.getOption('indentWithTabs') !== tabs) {
-          return false;
-        }
-        return editor.editor.getOption('indentUnit') === size;
-      }
-    });
-
-    let args: JSONObject = { tabs: true, size: 4, name: 'Indent with Tab' };
-    tabMenu.addItem({ command: CommandIDs.changeTabs, args });
-    palette.addItem({
-      command: CommandIDs.changeTabs, args, category: 'Editor'
-    });
-
-    for (let size of [1, 2, 4, 8]) {
-      let args: JSONObject = {
-        tabs: false, size, name: `Spaces: ${size} `
-      };
-      tabMenu.addItem({ command: CommandIDs.changeTabs, args });
-      palette.addItem({
-        command: CommandIDs.changeTabs, args, category: 'Editor'
-      });
-    }
-
     Mode.getModeInfo().sort((a, b) => {
-      return a.name.localeCompare(b.name);
+      let aName = a.name || '';
+      let bName = b.name || '';
+      return aName.localeCompare(bName);
     }).forEach(spec => {
       modeMenu.addItem({
         command: CommandIDs.changeMode,
@@ -311,12 +247,28 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
       });
     });
 
+    let args: JSONObject = {
+      insertSpaces: false, size: 4, name: 'Indent with Tab'
+    };
+    let command = 'fileeditor:change-tabs';
+    tabMenu.addItem({ command, args });
+    palette.addItem({ command, args, category: 'Editor' });
+
+    for (let size of [1, 2, 4, 8]) {
+      let args: JSONObject = {
+        insertSpaces: true, size, name: `Spaces: ${size} `
+      };
+      tabMenu.addItem({ command, args });
+      palette.addItem({ command, args, category: 'Editor' });
+    }
+
     menu.addItem({ type: 'submenu', submenu: modeMenu });
     menu.addItem({ type: 'submenu', submenu: tabMenu });
     menu.addItem({ type: 'separator' });
-    menu.addItem({ command: 'editor:line-numbers' });
-    menu.addItem({ command: 'editor:word-wrap' });
-    menu.addItem({ command: CommandIDs.matchBrackets });
+    menu.addItem({ command: 'fileeditor:toggle-line-numbers' });
+    menu.addItem({ command: 'fileeditor:toggle-line-wrap' });
+    menu.addItem({ command: 'fileeditor:toggle-match-brackets' });
+    menu.addItem({ command: 'fileeditor:toggle-autoclosing-brackets' });
     menu.addItem({ type: 'submenu', submenu: keyMapMenu });
     menu.addItem({ type: 'submenu', submenu: themeMenu });
 
@@ -325,27 +277,11 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
 
   mainMenu.addMenu(createMenu(), { rank: 30 });
 
-  commands.addCommand(CommandIDs.matchBrackets, {
-    execute: () => {
-      matchBrackets = !matchBrackets;
-      tracker.forEach(widget => {
-        const editor = widget.editor;
-        if (editor instanceof CodeMirrorEditor) {
-          const cm = editor.editor;
-          cm.setOption('matchBrackets', matchBrackets);
-        }
-      });
-      return settingRegistry.set(id, 'matchBrackets', matchBrackets);
-    },
-    label: 'Match Brackets',
-    isEnabled: hasWidget,
-    isToggled: () => matchBrackets
-  });
-
   [
     'editor:line-numbers',
     'editor:line-wrap',
-    CommandIDs.matchBrackets,
+    'editor:match-brackets',
+    'editor-autoclosing-brackets',
     'editor:create-console',
     'editor:run-code'
   ].forEach(command => palette.addItem({ command, category: 'Editor' }));

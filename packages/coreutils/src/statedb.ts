@@ -2,11 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject, Token
+  ReadonlyJSONObject, Token
 } from '@phosphor/coreutils';
 
 import {
-  IDatastore
+  IDataConnector
 } from '.';
 
 
@@ -20,6 +20,7 @@ const IStateDB = new Token<IStateDB>('jupyter.services.statedb');
 
 
 /**
+ * An object which holds an id/value pair.
  */
 export
 interface IStateItem {
@@ -31,7 +32,7 @@ interface IStateItem {
   /**
    * The data value for a state item.
    */
-  value: JSONObject;
+  value: ReadonlyJSONObject;
 }
 
 
@@ -39,7 +40,7 @@ interface IStateItem {
  * The description of a state database.
  */
 export
-interface IStateDB extends IDatastore<JSONObject, JSONObject> {
+interface IStateDB extends IDataConnector<ReadonlyJSONObject> {
   /**
    * The maximum allowed length of the data after it has been serialized.
    */
@@ -49,30 +50,11 @@ interface IStateDB extends IDatastore<JSONObject, JSONObject> {
    * The namespace prefix for all state database entries.
    *
    * #### Notes
-   * This value should be set at instantiation and will only be used internally
-   * by a state database. That means, for example, that an app could have
-   * multiple, mutually exclusive state databases.
+   * This value should be set at instantiation and will only be used
+   * internally by a state database. That means, for example, that an
+   * app could have multiple, mutually exclusive state databases.
    */
   readonly namespace: string;
-
-  /**
-   * Retrieve a saved bundle from the database.
-   *
-   * @param id - The identifier used to retrieve a data bundle.
-   *
-   * @returns A promise that bears a data payload if available.
-   *
-   * #### Notes
-   * The `id` values of stored items in the state database are formatted:
-   * `'namespace:identifier'`, which is the same convention that command
-   * identifiers in JupyterLab use as well. While this is not a technical
-   * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
-   * using the `fetchNamespace()` method.
-   *
-   * The promise returned by this method may be rejected if an error occurs in
-   * retrieving the data. Non-existence of an `id` will succeed, however.
-   */
-  fetch(id: string): Promise<JSONObject | null>;
 
   /**
    * Retrieve all the saved bundles for a namespace.
@@ -91,35 +73,7 @@ interface IStateDB extends IDatastore<JSONObject, JSONObject> {
    * This promise will always succeed.
    */
   fetchNamespace(namespace: string): Promise<IStateItem[]>;
-
-  /**
-   * Remove a value from the database.
-   *
-   * @param id - The identifier for the data being removed.
-   *
-   * @returns A promise that is rejected if remove fails and succeeds otherwise.
-   */
-  remove(id: string): Promise<void>;
-
-  /**
-   * Save a value in the database.
-   *
-   * @param id - The identifier for the data being saved.
-   *
-   * @param value - The data being saved.
-   *
-   * @returns A promise that is rejected if saving fails and succeeds otherwise.
-   *
-   * #### Notes
-   * The `id` values of stored items in the state database are formatted:
-   * `'namespace:identifier'`, which is the same convention that command
-   * identifiers in JupyterLab use as well. While this is not a technical
-   * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
-   * using the `fetchNamespace()` method.
-   */
-  save(id: string, value: JSONObject): Promise<void>;
 }
-
 
 
 /**
@@ -159,7 +113,7 @@ class StateDB implements IStateDB {
     let i = window.localStorage.length;
     while (i) {
       let key = window.localStorage.key(--i);
-      if (key.indexOf(prefix) === 0) {
+      if (key && key.indexOf(prefix) === 0) {
         window.localStorage.removeItem(key);
       }
     }
@@ -183,10 +137,14 @@ class StateDB implements IStateDB {
    * The promise returned by this method may be rejected if an error occurs in
    * retrieving the data. Non-existence of an `id` will succeed with `null`.
    */
-  fetch(id: string): Promise<JSONObject | null> {
+  fetch(id: string): Promise<ReadonlyJSONObject | undefined> {
     const key = `${this.namespace}:${id}`;
+    const value = window.localStorage.getItem(key);
+    if (!value) {
+      return Promise.resolve(undefined);
+    }
     try {
-      return Promise.resolve(JSON.parse(window.localStorage.getItem(key)));
+      return Promise.resolve(JSON.parse(value));
     } catch (error) {
       return Promise.reject(error);
     }
@@ -215,11 +173,12 @@ class StateDB implements IStateDB {
     let i = window.localStorage.length;
     while (i) {
       let key = window.localStorage.key(--i);
-      if (key.indexOf(prefix) === 0) {
+      if (key && key.indexOf(prefix) === 0) {
+        let value = window.localStorage.getItem(key);
         try {
           items.push({
             id: key.replace(regex, ''),
-            value: JSON.parse(window.localStorage.getItem(key))
+            value: value ? JSON.parse(value) : undefined
           });
         } catch (error) {
           console.warn(error);
@@ -258,7 +217,7 @@ class StateDB implements IStateDB {
    * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
    * using the `fetchNamespace()` method.
    */
-  save(id: string, value: JSONObject): Promise<void> {
+  save(id: string, value: ReadonlyJSONObject): Promise<void> {
     try {
       const key = `${this.namespace}:${id}`;
       const serialized = JSON.stringify(value);

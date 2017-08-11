@@ -6,16 +6,16 @@ import {
 } from 'chai';
 
 import {
+  VDomModel, VDomRenderer
+} from '@jupyterlab/apputils';
+
+import {
   h, VirtualNode
 } from '@phosphor/virtualdom';
 
 import {
   Widget
-} from '@phosphor/widgets'
-
-import {
-  VDomModel, VDomRenderer
-} from '@jupyterlab/apputils';
+} from '@phosphor/widgets';
 
 
 class TestModel extends VDomModel {
@@ -39,7 +39,7 @@ class TestWidget extends VDomRenderer<TestModel> {
 
 class TestWidgetNoModel extends VDomRenderer<null> {
   protected render(): VirtualNode {
-    return h.span("No model!");
+    return h.span('No model!');
   }
 }
 
@@ -136,9 +136,9 @@ describe('@jupyterlab/domutils', () => {
           expect(span.textContent).to.equal('No model!');
           done();
         });
-      })
+      });
 
-    })
+    });
 
   });
 

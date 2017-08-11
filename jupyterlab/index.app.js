@@ -21,6 +21,8 @@ function main() {
     if (version[0] === 'v') {
         version = version.slice(1);
     }
+
+    // Get the disabled extensions.
     var disabled = [];
     try {
         var option = PageConfig.getOption('disabledExtensions');
@@ -29,23 +31,40 @@ function main() {
         // No-op
     }
 
+    // Handle the registered mime extensions.
+    var mimeExtensions = [];
+    {{#each jupyterlab_mime_extensions}}
+    try {
+        if (disabled.indexOf('{{@key}}') === -1) {
+            mimeExtensions.push(require('{{@key}}/{{this}}'));
+        }
+    } catch (e) {
+        console.error(e);
+    }
+    {{/each}}
+
     lab = new app({
         namespace: namespace,
         name: name,
         version: version,
         devMode: devMode.toLowerCase() === 'true',
         settingsDir: settingsDir,
-        assetsDir: assetsDir
+        assetsDir: assetsDir,
+        mimeExtensions: mimeExtensions
     });
+
+    // Handled the registered standard extensions.
     {{#each jupyterlab_extensions}}
     try {
-        if (disabled.indexOf('{{this}}') === -1) {
-            lab.registerPluginModule(require('{{this}}'));
+        if (disabled.indexOf('{{@key}}') === -1) {
+            lab.registerPluginModule(require('{{@key}}/{{this}}'));
         }
     } catch (e) {
         console.error(e);
     }
     {{/each}}
+
+    // Handle the ignored plugins.
     var ignorePlugins = [];
     try {
         var option = PageConfig.getOption('ignorePlugins');
@@ -54,6 +73,21 @@ function main() {
         // No-op
     }
     lab.start({ "ignorePlugins": ignorePlugins });
+
+    // Handle a selenium test.
+    var seleniumTest = PageConfig.getOption('seleniumTest');
+    if (seleniumTest.toLowerCase() === 'true') {
+        var caught_errors = []
+        window.onerror = function(msg, url, line, col, error) {
+           caught_errors.push(String(error));
+        };
+        lab.restored.then(() => {
+            var el = document.createElement('div');
+            el.id = 'seleniumResult';
+            el.textContent = JSON.stringify(caught_errors);
+            document.body.appendChild(el);
+        });
+    }
 }
 
 window.onload = main;

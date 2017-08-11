@@ -38,7 +38,12 @@ for (var i = 0; i < packageConfig.length; i++) {
 function handlePackage(packagePath) {
   // Read in the package.json.
   var packagePath = path.join(packagePath, 'package.json');
-  var package = require(packagePath);
+  try {
+    var package = require(packagePath);
+  } catch (e) {
+    console.log('skipping', packagePath);
+    return
+  }
   if (!package.scripts || !package.scripts.clean) {
     return;
   }

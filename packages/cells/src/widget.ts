@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  JSONObject, JSONValue
+  JSONValue, PromiseDelegate
 } from '@phosphor/coreutils';
 
 import {
@@ -32,7 +32,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  MimeModel, RenderMime
+  IRenderMime, MimeModel, RenderMime
 } from '@jupyterlab/rendermime';
 
 import {
@@ -195,8 +195,10 @@ class Cell extends Widget {
     inputWrapper.addWidget(input);
     (this.layout as PanelLayout).addWidget(inputWrapper);
 
-    this._inputPlaceholder = new InputPlaceholder();
-  
+    this._inputPlaceholder = new InputPlaceholder(() => {
+      this.inputHidden = !this.inputHidden;
+    });
+
     // Footer
     let footer = this._footer = this.contentFactory.createCellFooter();
     footer.addClass(CELL_FOOTER_CLASS);
@@ -262,6 +264,13 @@ class Cell extends Widget {
   }
 
   /**
+   * A promise that resolves when the widget renders for the first time.
+   */
+  get ready(): Promise<void> {
+    return Promise.resolve(undefined);
+  }
+
+  /**
    * Set the prompt for the widget.
    */
   setPrompt(value: string): void {
@@ -292,7 +301,7 @@ class Cell extends Widget {
 
   /**
    * Handle the input being hidden.
-   * 
+   *
    * #### Notes
    * This is called by the `inputHidden` setter so that subclasses
    * can perform actions upon the input being hidden without accessing
@@ -342,7 +351,7 @@ class Cell extends Widget {
       return;
     }
     // Handle read only state.
-    this.editor.readOnly = this._readOnly;
+    this.editor.setOption('readOnly', this._readOnly);
     this.toggleClass(READONLY_CLASS, this._readOnly);
   }
 
@@ -511,7 +520,7 @@ class CodeCell extends Cell {
     let model = this.model;
 
     // Code cells should not wrap lines.
-    this.editor.wordWrap = false;
+    this.editor.setOption('lineWrap', false);
 
     // Insert the output before the cell footer.
     let outputWrapper = this._outputWrapper = new Panel();
@@ -535,7 +544,9 @@ class CodeCell extends Cell {
     outputWrapper.addWidget(output);
     (this.layout as PanelLayout).insertWidget(2, outputWrapper);
 
-    this._outputPlaceholder = new OutputPlaceholder();
+    this._outputPlaceholder = new OutputPlaceholder(() => {
+      this.outputHidden = !this.outputHidden;
+    });
 
     // Modify state
     this.setPrompt(`${model.executionCount || ''}`);
@@ -584,7 +595,7 @@ class CodeCell extends Cell {
 
   /**
    * Handle the input being hidden.
-   * 
+   *
    * #### Notes
    * This method is called by the case cell implementation and is
    * subclasses here so the code cell can watch to see when input
@@ -739,7 +750,6 @@ class MarkdownCell extends Cell {
     super(options);
     this.addClass(MARKDOWN_CELL_CLASS);
     this._rendermime = options.rendermime;
-    this.editor.wordWrap = true;
 
     // Throttle the rendering rate of the widget.
     this._monitor = new ActivityMonitor({
@@ -751,12 +761,23 @@ class MarkdownCell extends Cell {
         this.update();
       }
     }, this);
+
+    this._updateRenderedInput().then(() => {
+      this._ready.resolve(void 0);
+    });
   }
 
   /**
    * The model used by the widget.
    */
   readonly model: IMarkdownCellModel;
+
+  /**
+   * A promise that resolves when the widget renders for the first time.
+   */
+  get ready(): Promise<void> {
+    return this._ready.promise;
+  }
 
   /**
    * Whether the cell is rendered.
@@ -788,18 +809,6 @@ class MarkdownCell extends Cell {
     this.inputArea.showEditor();
   }
 
-  /**
-   * Dispose of the resource held by the widget.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    this._renderedInput = null;
-    this._rendermime = null;
-    super.dispose();
-  }
-
   /*
    * Handle `update-request` messages.
    */
@@ -817,36 +826,35 @@ class MarkdownCell extends Cell {
       this.showEditor();
     } else {
       this._updateRenderedInput();
-      this.renderInput(this._renderedInput);
+      this.renderInput(this._renderer);
     }
   }
 
   /**
    * Update the rendered input.
    */
-  private _updateRenderedInput(): void {
+  private _updateRenderedInput(): Promise<void> {
     let model = this.model;
     let text = model && model.value.text || DEFAULT_MARKDOWN_TEXT;
-    let trusted = this.model.trusted;
-    // Do not re-render if the text has not changed and the trusted
-    // has not changed.
-    if (text !== this._prevText || trusted !== this._prevTrusted) {
-      let data: JSONObject = { 'text/markdown': text };
-      let bundle = new MimeModel({ data, trusted });
-      let widget = this._rendermime.render(bundle);
-      this._renderedInput = widget || new Widget();
-      this._renderedInput.addClass(MARKDOWN_OUTPUT_CLASS);
+    // Do not re-render if the text has not changed.
+    if (text !== this._prevText) {
+      let mimeModel = new MimeModel({ data: { 'text/markdown': text }});
+      if (!this._renderer) {
+        this._renderer = this._rendermime.createRenderer('text/markdown');
+        this._renderer.addClass(MARKDOWN_OUTPUT_CLASS);
+      }
+      this._prevText = text;
+      return this._renderer.renderModel(mimeModel);
     }
-    this._prevText = text;
-    this._prevTrusted = trusted;
+    return Promise.resolve(void 0);
   }
 
   private _monitor: ActivityMonitor<any, any> = null;
-  private _rendermime: RenderMime = null;
-  private _renderedInput: Widget = null;
+  private _renderer: IRenderMime.IRenderer = null;
+  private _rendermime: RenderMime;
   private _rendered = true;
   private _prevText = '';
-  private _prevTrusted = false;
+  private _ready = new PromiseDelegate<void>();
 }
 
 

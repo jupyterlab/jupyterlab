@@ -14,6 +14,10 @@ import {
 } from '@phosphor/messaging';
 
 import {
+  Signal
+} from '@phosphor/signaling';
+
+import {
   Text
 } from '@jupyterlab/coreutils';
 
@@ -50,26 +54,24 @@ class CompletionHandler implements IDisposable {
    * Construct a new completion handler for a widget.
    */
   constructor(options: CompletionHandler.IOptions) {
-    this._completer = options.completer;
-    this._completer.selected.connect(this.onCompletionSelected, this);
-    this._completer.visibilityChanged.connect(this.onVisibilityChanged, this);
+    this.completer = options.completer;
+    this.completer.selected.connect(this.onCompletionSelected, this);
+    this.completer.visibilityChanged.connect(this.onVisibilityChanged, this);
     this.session = options.session;
   }
 
   /**
    * The completer widget managed by the handler.
    */
-  get completer(): Completer {
-    return this._completer;
-  }
+  readonly completer: Completer;
 
   /**
    * The editor used by the completion handler.
    */
-  get editor(): CodeEditor.IEditor {
+  get editor(): CodeEditor.IEditor | null {
     return this._editor;
   }
-  set editor(newValue: CodeEditor.IEditor) {
+  set editor(newValue: CodeEditor.IEditor | null) {
     if (newValue === this._editor) {
       return;
     }
@@ -85,10 +87,8 @@ class CompletionHandler implements IDisposable {
     }
 
     // Reset completer state.
-    if (this._completer) {
-      this._completer.reset();
-      this._completer.editor = newValue;
-    }
+    this.completer.reset();
+    this.completer.editor = newValue;
 
     // Update the editor and signal connections.
     editor = this._editor = newValue;
@@ -111,17 +111,18 @@ class CompletionHandler implements IDisposable {
    * Get whether the completion handler is disposed.
    */
   get isDisposed(): boolean {
-    return this._completer === null;
+    return this._isDisposed;
   }
 
   /**
    * Dispose of the resources used by the handler.
    */
   dispose(): void {
-    this._completer = null;
-
-    // Use public accessor to disconnect from editor signals.
-    this.editor = null;
+    if (this.isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    Signal.clearData(this);
   }
 
   /**
@@ -147,8 +148,7 @@ class CompletionHandler implements IDisposable {
   /**
    * Get the state of the text editor at the given position.
    */
-  protected getState(position: CodeEditor.IPosition): Completer.ITextState {
-    const editor = this.editor;
+  protected getState(editor: CodeEditor.IEditor, position: CodeEditor.IPosition): Completer.ITextState {
     return {
       text: editor.model.value.text,
       lineHeight: editor.lineHeight,
@@ -170,7 +170,7 @@ class CompletionHandler implements IDisposable {
     if (!editor) {
       return Promise.reject(new Error('No active editor'));
     }
-    
+
     const code = editor.model.value.text;
     const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), code);
     let content: KernelMessage.ICompleteRequest = {
@@ -178,7 +178,7 @@ class CompletionHandler implements IDisposable {
       cursor_pos: offset
     };
     let pending = ++this._pending;
-    let request = this.getState(position);
+    let request = this.getState(editor, position);
 
     return this.session.kernel.requestComplete(content).then(msg => {
       if (this.isDisposed) {
@@ -213,7 +213,9 @@ class CompletionHandler implements IDisposable {
     editor.model.value.text = text;
 
     let position = editor.getPositionAt(offset);
-    editor.setCursorPosition(position);
+    if (position) {
+      editor.setCursorPosition(position);
+    }
   }
 
   /**
@@ -221,17 +223,19 @@ class CompletionHandler implements IDisposable {
    */
   protected onInvokeRequest(msg: Message): void {
     // If there is neither a kernel nor a completer model, bail.
-    if (!this.session.kernel || !this._completer.model) {
+    if (!this.session.kernel || !this.completer.model) {
       return;
     }
 
     // If a completer session is already active, bail.
-    if (this._completer.model.original) {
+    if (this.completer.model.original) {
       return;
     }
 
     let editor = this._editor;
-    this.makeRequest(editor.getCursorPosition());
+    if (editor) {
+      this.makeRequest(editor.getCursorPosition());
+    }
   }
 
   /**
@@ -242,7 +246,7 @@ class CompletionHandler implements IDisposable {
    * @param reply - The API response returned for a completion request.
    */
   protected onReply(state: Completer.ITextState, reply: KernelMessage.ICompleteReplyMsg): void {
-    const model = this._completer.model;
+    const model = this.completer.model;
     if (!model) {
       return;
     }
@@ -292,8 +296,13 @@ class CompletionHandler implements IDisposable {
    *    even though the completer is not available.
    */
   protected onSelectionsChanged(): void {
-    const model = this._completer.model;
+    const model = this.completer.model;
     const editor = this._editor;
+
+    if (!model || !editor) {
+      return;
+    }
+
     const host = editor.host;
 
     // If there is no model, return.
@@ -305,6 +314,10 @@ class CompletionHandler implements IDisposable {
 
     const position = editor.getCursorPosition();
     const line = editor.getLine(position.line);
+    if (!line) {
+      return;
+    }
+
     const { start, end } = editor.getSelection();
 
     // If there is a text selection, return.
@@ -330,27 +343,30 @@ class CompletionHandler implements IDisposable {
     }
 
     // Dispatch the cursor change.
-    model.handleCursorChange(this.getState(editor.getCursorPosition()));
+    model.handleCursorChange(this.getState(editor, editor.getCursorPosition()));
   }
 
   /**
    * Handle a text changed signal from an editor.
    */
   protected onTextChanged(): void {
-    const model = this._completer.model;
+    const model = this.completer.model;
     if (!model || !this._enabled) {
       return;
     }
 
     // If there is a text selection, no completion is allowed.
     const editor = this.editor;
+    if (!editor) {
+      return;
+    }
     const { start, end } = editor.getSelection();
     if (start.column !== end.column || start.line !== end.line) {
       return;
     }
 
     // Dispatch the text change.
-    model.handleTextChange(this.getState(editor.getCursorPosition()));
+    model.handleTextChange(this.getState(editor, editor.getCursorPosition()));
   }
 
   /**
@@ -374,8 +390,8 @@ class CompletionHandler implements IDisposable {
 
   private _editor: CodeEditor.IEditor | null = null;
   private _enabled = false;
-  private _completer: Completer | null = null;
   private _pending = 0;
+  private _isDisposed = false;
 }
 
 

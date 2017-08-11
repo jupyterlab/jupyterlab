@@ -10,22 +10,11 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IDocumentRegistry
+  MimeDocumentFactory, MimeDocument
 } from '@jupyterlab/docregistry';
 
-import {
-  IRenderMime
-} from '@jupyterlab/rendermime';
 
-import {
-  MarkdownViewer, MarkdownViewerFactory
-} from '@jupyterlab/markdownviewer';
-
-
-/**
- * The class name for the text editor icon from the default theme.
- */
-const TEXTEDITOR_ICON_CLASS = 'jp-ImageTextEditor';
+import '../style/index.css';
 
 /**
  * The name of the factory that creates markdown widgets.
@@ -38,7 +27,7 @@ const FACTORY = 'Markdown Preview';
  */
 namespace CommandIDs {
   export
-  const preview = 'markdown-preview:open';
+  const preview = 'markdownviewer:open';
 }
 
 
@@ -48,7 +37,7 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<void> = {
   activate,
   id: 'jupyter.extensions.rendered-markdown',
-  requires: [IDocumentRegistry, IRenderMime, ILayoutRestorer],
+  requires: [ILayoutRestorer],
   autoStart: true
 };
 
@@ -56,33 +45,32 @@ const plugin: JupyterLabPlugin<void> = {
 /**
  * Activate the markdown plugin.
  */
-function activate(app: JupyterLab, registry: IDocumentRegistry, rendermime: IRenderMime, restorer: ILayoutRestorer) {
-    const factory = new MarkdownViewerFactory({
+function activate(app: JupyterLab, restorer: ILayoutRestorer) {
+    const primaryFileType = app.docRegistry.getFileType('markdown');
+    const factory = new MimeDocumentFactory({
       name: FACTORY,
-      fileExtensions: ['.md'],
-      readOnly: true,
-      rendermime
+      primaryFileType,
+      fileTypes: ['markdown'],
+      rendermime: app.rendermime
     });
+    app.docRegistry.addWidgetFactory(factory);
 
     const { commands } = app;
     const namespace = 'rendered-markdown';
-    const tracker = new InstanceTracker<MarkdownViewer>({ namespace });
+    const tracker = new InstanceTracker<MimeDocument>({ namespace });
 
     // Handle state restoration.
     restorer.restore(tracker, {
-      command: 'file-operations:open',
+      command: 'docmanager:open',
       args: widget => ({ path: widget.context.path, factory: FACTORY }),
       name: widget => widget.context.path
     });
 
     factory.widgetCreated.connect((sender, widget) => {
-      widget.title.icon = TEXTEDITOR_ICON_CLASS;
       // Notify the instance tracker if restore data needs to update.
       widget.context.pathChanged.connect(() => { tracker.save(widget); });
       tracker.add(widget);
     });
-
-    registry.addWidgetFactory(factory);
 
     commands.addCommand(CommandIDs.preview, {
       label: 'Markdown Preview',
@@ -91,7 +79,7 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, rendermime: IRen
         if (typeof path !== 'string') {
           return;
         }
-        return commands.execute('file-operations:open', {
+        return commands.execute('docmanager:open', {
           path, factory: FACTORY
         });
       }

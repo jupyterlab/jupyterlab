@@ -12,7 +12,6 @@
   --jp-private-notebook-dragImage-width: 304px;
   --jp-private-notebook-dragImage-height: 36px;
   --jp-private-notebook-selected-color: var(--md-blue-400);
-  --jp-private-notebook-multiselected-color: var(--md-blue-50);
   --jp-private-notebook-active-color: var(--md-green-400);
 }
 
@@ -43,7 +42,7 @@
   min-height: 50px;
   outline: none;
   overflow: auto;
-  background: var(--jp-layout-color1);
+  background: var(--jp-layout-color0);
 }
 
 
@@ -66,6 +65,28 @@
 
 .jp-Notebook .jp-Cell .jp-OutputArea {
   max-height: 1000px;
+}
+
+.jp-Notebook .jp-Cell:not(.jp-mod-active) .jp-OutputArea {
+  overflow-y: hidden;
+}
+
+
+.jp-Notebook::-webkit-scrollbar {
+  background-color: var(--jp-layout-color0);
+  border-left: 1px solid var(--jp-border-color1);
+  width: var(--jp-scrollbar-width);
+}
+
+
+.jp-Notebook::-webkit-scrollbar-thumb {
+  background-color: var(--jp-layout-color2);
+  border-left: 1px solid var(--jp-border-color1);
+}
+
+
+.jp-Notebook a:-webkit-any-link {
+  color: var(--md-blue-500);
 }
 
 
@@ -108,7 +129,7 @@
 /* Command mode */
 
 .jp-Notebook.jp-mod-commandMode .jp-Cell.jp-mod-selected {
-  background: var(--jp-private-notebook-multiselected-color);
+  background: var(--jp-notebook-multiselected-color);
 }
 
 .jp-Notebook.jp-mod-commandMode .jp-Cell.jp-mod-active.jp-mod-selected:not(.jp-mod-multiSelected) {
@@ -120,8 +141,8 @@
 
 .jp-Notebook.jp-mod-editMode .jp-Cell.jp-mod-active .jp-InputArea-editor {
   border: var(--jp-border-width) solid var(--jp-cell-editor-border-color-edit);
-  background: var(--jp-cell-editor-background-edit);
-  box-shadow: inset 0 0 2px var(--md-blue-300);
+  box-shadow: var(--jp-cell-editor-box-shadow);
+  background-color: var(--jp-layout-color0);
 }
 
 
@@ -163,7 +184,7 @@
     flex: 1 1 auto;
     z-index: 2;
     font-size: var(--jp-code-font-size);
-    font-family: monospace;
+    font-family: var(--jp-code-font-family);
     line-height: var(--jp-code-line-height);
     padding: var(--jp-code-padding);
     border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
@@ -179,7 +200,7 @@
   color: var(--jp-cell-inprompt-font-color);
   padding: var(--jp-code-padding);
   padding-left: 12px;
-  font-family: 'Roboto Mono', monospace;
+  font-family: var(--jp-cell-prompt-font-family);
   letter-spacing: var(--jp-cell-prompt-letter-spacing);
   line-height: 1.9;
   font-size: var(--jp-code-font-size);
@@ -190,7 +211,7 @@
   z-index: -1;
   position: absolute;
   height: 32px;
-  width: 276px;
+  width: 300px;
   top: 8px;
   left: 8px;
   background: #EEEEEE;
@@ -215,8 +236,8 @@
 
 .jp-ActiveCellTool {
   padding: 12px;
-  border-bottom: 1px solid var(--jp-border-color1);
-  background-color: var(--jp-border-color3);
+  border-bottom: none;
+  background-color: var(--jp-layout-color2);
 }
 
 
@@ -228,13 +249,13 @@
 
 .jp-ActiveCellTool .jp-InputArea-editor {
   flex: 1 1 auto;
-  background-color: white;
-  border-color: var(--jp-border-color1);
+  background-color: var(--jp-cell-editor-background-edit);
+  border-color: var(--jp-cell-editor-border-color-edit);
 }
 
 
 .jp-CellTools-tool:not(:first-child) {
-  border-top: 1px solid var(--md-grey-300);
+  border-top: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
 
@@ -248,18 +269,9 @@
 }
 
 
-.jp-KeySelector .jp-select-wrapper {
-  background: white;
-}
-
-
 .jp-KeySelector select.jp-mod-styled {
   font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color0);
-}
-
-
-.jp-KeySelector .jp-select-wrapper:not(.jp-mod-focused) {
   border: var(--jp-border-width) solid var(--jp-border-color1);
 }
 

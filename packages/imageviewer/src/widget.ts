@@ -2,8 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  PathExt
+} from '@jupyterlab/coreutils';
+
+import {
   ABCWidgetFactory, DocumentRegistry
 } from '@jupyterlab/docregistry';
+
+import {
+  PromiseDelegate
+} from '@phosphor/coreutils';
 
 import {
   Message
@@ -24,13 +32,13 @@ const IMAGE_CLASS = 'jp-ImageViewer';
  * A widget for images.
  */
 export
-class ImageViewer extends Widget {
+class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
   /**
    * Construct a new image widget.
    */
   constructor(context: DocumentRegistry.Context) {
     super({ node: Private.createNode() });
-    this._context = context;
+    this.context = context;
     this.node.tabIndex = -1;
     this.addClass(IMAGE_CLASS);
 
@@ -38,17 +46,26 @@ class ImageViewer extends Widget {
     context.pathChanged.connect(this._onTitleChanged, this);
 
     context.ready.then(() => {
-      this.update();
+      if (this.isDisposed) {
+        return;
+      }
+      this._render();
       context.model.contentChanged.connect(this.update, this);
       context.fileChanged.connect(this.update, this);
+      this._ready.resolve(void 0);
     });
   }
 
   /**
    * The image widget's context.
    */
-  get context(): DocumentRegistry.Context {
-    return this._context;
+  readonly context: DocumentRegistry.Context;
+
+  /**
+   * A promise that resolves when the image viewer is ready.
+   */
+  get ready(): Promise<void> {
+    return this._ready.promise;
   }
 
   /**
@@ -69,25 +86,13 @@ class ImageViewer extends Widget {
   }
 
   /**
-   * Dispose of the resources used by the widget.
-   */
-  dispose(): void {
-    this._context = null;
-    super.dispose();
-  }
-
-  /**
    * Handle `update-request` messages for the widget.
    */
   protected onUpdateRequest(msg: Message): void {
-    let context = this._context;
-    if (this.isDisposed || !context.isReady) {
+    if (this.isDisposed || !this.context.isReady) {
       return;
     }
-    let cm = context.contentsModel;
-    let content = context.model.toString();
-    let src = `data:${cm.mimetype};${cm.format},${content}`;
-    this.node.querySelector('img').setAttribute('src', src);
+    this._render();
   }
 
   /**
@@ -101,11 +106,26 @@ class ImageViewer extends Widget {
    * Handle a change to the title.
    */
   private _onTitleChanged(): void {
-    this.title.label = this._context.path.split('/').pop();
+    this.title.label = PathExt.basename(this.context.path);
   }
 
-  private _context: DocumentRegistry.Context;
+  /**
+   * Render the widget content.
+   */
+  private _render(): void {
+    let context = this.context;
+    let cm = context.contentsModel;
+    if (!cm) {
+      return;
+    }
+    let content = context.model.toString();
+    let src = `data:${cm.mimetype};${cm.format},${content}`;
+    let node = this.node.querySelector('img') as HTMLImageElement;
+    node.setAttribute('src', src);
+  }
+
   private _scale = 1;
+  private _ready = new PromiseDelegate<void>();
 }
 
 

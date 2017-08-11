@@ -67,7 +67,7 @@
   flex: 1 1 auto;
   height: var(--jp-private-filebrowser-button-height);
   line-height: var(--jp-private-filebrowser-button-height);
-  color: var(--jp-ui-font-color1);
+  color: var(--jp-layout-color1);
   font-size: var(--jp-ui-icon-font-size);
   outline: 0;
   margin-bottom: 4px;
@@ -97,8 +97,8 @@
   display: flex;
   flex-direction: row;
   overflow: hidden;
-  border-top: var(--jp-border-width) solid var(--jp-border-color2);
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  border-top: var(--jp-border-width) solid var(--jp-border-color1);
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
 
@@ -120,7 +120,7 @@
 
 .jp-DirListing-headerItem.jp-id-modified {
   flex: 0 0 112px;
-  border-left: var(--jp-border-width) solid var(--jp-border-color2);
+  border-left: var(--jp-border-width) solid var(--jp-border-color1);
   text-align: right;
 }
 
@@ -158,6 +158,21 @@
   padding: 0;
   list-style-type: none;
   overflow: auto;
+  background-color: var(--jp-layout-color1);
+}
+
+/* Styling for the file browser content scroll bar */
+.jp-DirListing-content::-webkit-scrollbar {
+  background-color: var(--jp-layout-color1);
+  border-left: 1px solid var(--jp-border-color1);
+  width: var(--jp-scrollbar-width);
+}
+
+
+.jp-DirListing-content::-webkit-scrollbar-thumb {
+  background-color: var(--jp-layout-color2);
+  border-radius: 0px;
+  border-left: 1px solid var(--jp-border-color1);
 }
 
 
@@ -184,7 +199,7 @@
 
 
 .jp-DirListing-item:hover:not(.jp-mod-selected) {
-  background: var(--jp-layout-color2)
+  background: var(--jp-layout-color2);
 }
 
 
@@ -238,8 +253,13 @@
 }
 
 
-.jp-DirListing-item.jp-mod-running.jp-mod-selected .jp-DirListing-itemIcon {
+.jp-DirListing-item.jp-mod-running.jp-mod-selected .jp-DirListing-itemIcon.jp-NotebookIcon {
   color: var(--jp-accent-color3);
+  background-image: var(--jp-icon-book-running-selected);
+}
+
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-NotebookIcon {
   background-image: var(--jp-icon-book-selected);
 }
 
@@ -253,6 +273,40 @@
   background-image: var(--jp-icon-file-selected);
 }
 
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-YamlIcon {
+  background-image: var(--jp-icon-yaml-selected);
+}
+
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-MarkdownIcon {
+  background-image: var(--jp-icon-markdown-selected);
+}
+
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-ImageIcon {
+  background-image: var(--jp-icon-image-selected);
+}
+
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-SpreadsheetIcon {
+  background-image: var(--jp-icon-spreadsheet-selected);
+}
+
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-JSONIcon {
+  background-image: var(--jp-icon-json-selected);
+}
+
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-PythonIcon {
+  background-image: var(--jp-icon-python-selected);
+}
+
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-RKernelIcon {
+  background-image: var(--jp-icon-r-selected);
+}
 
 .jp-DirListing-item.p-mod-drag-image,
 .jp-DirListing-item.jp-mod-selected.p-mod-drag-image {
@@ -277,4 +331,9 @@
 
 .jp-FileDialog.jp-mod-conflict input {
   color: red;
+}
+
+
+.jp-FileDialog .jp-new-name-title {
+  margin-top: 12px;
 }

@@ -763,7 +763,7 @@ describe('kernel', () => {
         }).catch(done);
       });
 
-      it("should emit a `'reconnecting'` status", (done) => {
+      it('should emit a `"reconnecting"` status', (done) => {
         let called = false;
         kernel.ready.then(() => {
           return kernel.reconnect();
@@ -775,6 +775,20 @@ describe('kernel', () => {
           if (kernel.status === 'reconnecting') {
             called = true;
           }
+        });
+      });
+
+      it('should emit a `"connected"` status', () => {
+        let called = false;
+        return kernel.ready.then(() => {
+          kernel.statusChanged.connect(() => {
+            if (kernel.status === 'connected') {
+              called = true;
+            }
+          });
+          return kernel.reconnect();
+        }).then(() => {
+          expect(called).to.be(true);
         });
       });
 
@@ -968,9 +982,6 @@ describe('kernel', () => {
           stop_on_error: false
         };
         let future = kernel.requestExecute(content);
-        expect(future.onStdin).to.be(null);
-        expect(future.onReply).to.be(null);
-        expect(future.onIOPub).to.be(null);
 
         let options: KernelMessage.IOptions = {
           msgType: 'custom',
@@ -1032,9 +1043,6 @@ describe('kernel', () => {
           stop_on_error: false
         };
         let future = kernel.requestExecute(options, false);
-        expect(future.onStdin).to.be(null);
-        expect(future.onReply).to.be(null);
-        expect(future.onIOPub).to.be(null);
 
         tester.onMessage((msg) => {
           expect(msg.channel).to.be('shell');
@@ -1064,9 +1072,7 @@ describe('kernel', () => {
 
         return future.done.then(() => {
           expect(future.isDisposed).to.be(false);
-          expect(future.onIOPub).to.not.be(null);
           future.dispose();
-          expect(future.onIOPub).to.be(null);
           expect(future.isDisposed).to.be(true);
         });
       });

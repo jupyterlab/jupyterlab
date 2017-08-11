@@ -14,16 +14,12 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IEditorServices
+  CodeEditor, IEditorServices
 } from '@jupyterlab/codeeditor';
 
 import {
    MarkdownCodeBlocks, PathExt
 } from '@jupyterlab/coreutils';
-
-import {
-  IDocumentRegistry
-} from '@jupyterlab/docregistry';
 
 import {
   FileEditor, FileEditorFactory, IEditorTracker
@@ -37,7 +33,7 @@ import {
 /**
  * The class name for the text editor icon from the default theme.
  */
-const EDITOR_ICON_CLASS = 'jp-ImageTextEditor';
+const EDITOR_ICON_CLASS = 'jp-TextEditorIcon';
 
 /**
  * The name of the factory that creates editor widgets.
@@ -50,19 +46,28 @@ const FACTORY = 'Editor';
  */
 namespace CommandIDs {
   export
-  const lineNumbers = 'editor:line-numbers';
+  const lineNumbers = 'fileeditor:toggle-line-numbers';
 
   export
-  const wordWrap = 'editor:word-wrap';
+  const lineWrap = 'fileeditor:toggle-line-wrap';
 
   export
-  const createConsole = 'editor:create-console';
+  const changeTabs = 'fileeditor:change-tabs';
 
   export
-  const runCode = 'editor:run-code';
+  const matchBrackets = 'fileeditor:toggle-match-brackets';
 
   export
-  const markdownPreview = 'editor:markdown-preview';
+  const autoClosingBrackets = 'fileeditor:toggle-autoclosing-brackets';
+
+  export
+  const createConsole = 'fileeditor:create-console';
+
+  export
+  const runCode = 'fileeditor:run-code';
+
+  export
+  const markdownPreview = 'fileeditor:markdown-preview';
 };
 
 
@@ -72,11 +77,16 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<IEditorTracker> = {
   activate,
   id: 'jupyter.services.editor-tracker',
-  requires: [IDocumentRegistry, ILayoutRestorer, IEditorServices, ISettingRegistry],
+  requires: [
+    ILayoutRestorer,
+    IEditorServices,
+    ISettingRegistry
+  ],
   optional: [ILauncher],
   provides: IEditorTracker,
   autoStart: true
 };
+
 
 /**
  * Export the plugins as default.
@@ -87,23 +97,24 @@ export default plugin;
 /**
  * Activate the editor tracker plugin.
  */
-function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayoutRestorer, editorServices: IEditorServices, settingRegistry: ISettingRegistry, launcher: ILauncher | null): IEditorTracker {
+function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IEditorServices, settingRegistry: ISettingRegistry, launcher: ILauncher | null): IEditorTracker {
   const id = plugin.id;
   const namespace = 'editor';
   const factory = new FileEditorFactory({
     editorServices,
-    factoryOptions: { name: FACTORY, fileExtensions: ['*'], defaultFor: ['*'] }
+    factoryOptions: { name: FACTORY, fileTypes: ['*'], defaultFor: ['*'] }
   });
   const { commands, restored } = app;
   const tracker = new InstanceTracker<FileEditor>({ namespace });
-  const hasWidget = () => tracker.currentWidget !== null;
+  const hasWidget = () => !!tracker.currentWidget;
 
-  let lineNumbers = true;
-  let wordWrap = true;
+  let {
+    lineNumbers, lineWrap, matchBrackets, autoClosingBrackets
+  } = CodeEditor.defaultConfig;
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command: 'file-operations:open',
+    command: 'docmanager:open',
     args: widget => ({ path: widget.context.path, factory: FACTORY }),
     name: widget => widget.context.path
   });
@@ -112,20 +123,32 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
    * Update the setting values.
    */
   function updateSettings(settings: ISettingRegistry.ISettings): void {
-    let cached = settings.get('lineNumbers') as boolean | null;
-    lineNumbers = cached === null ? false : !!cached;
-    cached = settings.get('wordWrap') as boolean | null;
-    wordWrap = cached === null ? false : !!cached;
+    let cached = settings.get('lineNumbers').composite as boolean | null;
+    lineNumbers = cached === null ? lineNumbers : !!cached;
+    cached = settings.get('matchBrackets').composite as boolean | null;
+    matchBrackets = cached === null ? matchBrackets : !!cached;
+    cached = settings.get('autoClosingBrackets').composite as boolean | null;
+    autoClosingBrackets = cached === null ? autoClosingBrackets : !!cached;
+    cached = settings.get('lineWrap').composite as boolean | null;
+    lineWrap = cached === null ? lineWrap : !!cached;
   }
 
   /**
    * Update the settings of the current tracker instances.
    */
   function updateTracker(): void {
-    tracker.forEach(widget => {
-      widget.editor.lineNumbers = lineNumbers;
-      widget.editor.wordWrap = wordWrap;
-    });
+    tracker.forEach(widget => { updateWidget(widget); });
+  }
+
+  /**
+   * Update the settings of a widget.
+   */
+  function updateWidget(widget: FileEditor): void {
+    const editor = widget.editor;
+    editor.setOption('lineNumbers', lineNumbers);
+    editor.setOption('lineWrap', lineWrap);
+    editor.setOption('matchBrackets', matchBrackets);
+    editor.setOption('autoClosingBrackets', autoClosingBrackets);
   }
 
   // Fetch the initial state of the settings.
@@ -136,6 +159,9 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
       updateSettings(settings);
       updateTracker();
     });
+  }).catch((reason: Error) => {
+    console.error(reason.message);
+    updateTracker();
   });
 
   factory.widgetCreated.connect((sender, widget) => {
@@ -144,38 +170,99 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
     // Notify the instance tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => { tracker.save(widget); });
     tracker.add(widget);
-    widget.editor.lineNumbers = lineNumbers;
-    widget.editor.wordWrap = wordWrap;
+    updateWidget(widget);
   });
-  registry.addWidgetFactory(factory);
+  app.docRegistry.addWidgetFactory(factory);
 
   // Handle the settings of new widgets.
   tracker.widgetAdded.connect((sender, widget) => {
-    const editor = widget.editor;
-    editor.lineNumbers = lineNumbers;
-    editor.wordWrap = wordWrap;
+    updateWidget(widget);
   });
 
   commands.addCommand(CommandIDs.lineNumbers, {
     execute: () => {
-      lineNumbers = !lineNumbers;
-      tracker.forEach(widget => { widget.editor.lineNumbers = lineNumbers; });
-      return settingRegistry.set(id, 'lineNumbers', lineNumbers);
+      const key = 'lineNumbers';
+      const value = lineNumbers = !lineNumbers;
+
+      updateTracker();
+      return settingRegistry.set(id, key, value).catch((reason: Error) => {
+        console.error(`Failed to set ${id}:${key} - ${reason.message}`);
+      });
     },
     isEnabled: hasWidget,
     isToggled: () => lineNumbers,
     label: 'Line Numbers'
   });
 
-  commands.addCommand(CommandIDs.wordWrap, {
+  commands.addCommand(CommandIDs.lineWrap, {
     execute: () => {
-      wordWrap = !wordWrap;
-      tracker.forEach(widget => { widget.editor.wordWrap = wordWrap; });
-      return settingRegistry.set(id, 'wordWrap', wordWrap);
+      const key = 'lineWrap';
+      const value = lineWrap = !lineWrap;
+
+      updateTracker();
+      return settingRegistry.set(id, key, value).catch((reason: Error) => {
+        console.error(`Failed to set ${id}:${key} - ${reason.message}`);
+      });
     },
     isEnabled: hasWidget,
-    isToggled: () => wordWrap,
+    isToggled: () => lineWrap,
     label: 'Word Wrap'
+  });
+
+  commands.addCommand(CommandIDs.changeTabs, {
+    label: args => args['name'] as string,
+    execute: args => {
+      let widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+      let editor = widget.editor;
+      let size = args['size'] as number || 4;
+      let insertSpaces = !!args['insertSpaces'];
+      editor.setOption('insertSpaces', insertSpaces);
+      editor.setOption('tabSize', size);
+    },
+    isEnabled: hasWidget,
+    isToggled: args => {
+      let widget = tracker.currentWidget;
+      if (!widget) {
+        return false;
+      }
+      let insertSpaces = !!args['insertSpaces'];
+      let size = args['size'] as number || 4;
+      let editor = widget.editor;
+      if (editor.getOption('insertSpaces') !== insertSpaces) {
+        return false;
+      }
+      return editor.getOption('tabSize') === size;
+    }
+  });
+
+  commands.addCommand(CommandIDs.matchBrackets, {
+    execute: () => {
+      matchBrackets = !matchBrackets;
+      tracker.forEach(widget => {
+        widget.editor.setOption('matchBrackets', matchBrackets);
+      });
+      return settingRegistry.set(id, 'matchBrackets', matchBrackets);
+    },
+    label: 'Match Brackets',
+    isEnabled: hasWidget,
+    isToggled: () => matchBrackets
+  });
+
+  commands.addCommand(CommandIDs.autoClosingBrackets, {
+    execute: () => {
+      autoClosingBrackets = !autoClosingBrackets;
+      tracker.forEach(widget => {
+        widget.editor.setOption('autoClosingBrackets', autoClosingBrackets);
+      });
+      return settingRegistry
+        .set(id, 'autoClosingBrackets', autoClosingBrackets);
+    },
+    label: 'Auto-Closing Brackets',
+    isEnabled: hasWidget,
+    isToggled: () => autoClosingBrackets
   });
 
   commands.addCommand(CommandIDs.createConsole, {
@@ -244,12 +331,16 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
 
   commands.addCommand(CommandIDs.markdownPreview, {
     execute: () => {
-      let path = tracker.currentWidget.context.path;
-      return commands.execute('markdown-preview:open', { path });
+      let widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+      let path = widget.context.path;
+      return commands.execute('markdownviewer:open', { path });
     },
     isVisible: () => {
       let widget = tracker.currentWidget;
-      return widget && PathExt.extname(widget.context.path) === '.md';
+      return widget && PathExt.extname(widget.context.path) === '.md' || false;
     },
     label: 'Show Markdown Preview'
   });
@@ -258,12 +349,14 @@ function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayou
   if (launcher) {
     launcher.add({
       displayName: 'Text Editor',
+      category: 'Other',
+      rank: 1,
       iconClass: EDITOR_ICON_CLASS,
       callback: cwd => {
-        return commands.execute('file-operations:new-untitled', {
+        return commands.execute('docmanager:new-untitled', {
           path: cwd, type: 'file'
         }).then(model => {
-          return commands.execute('file-operations:open', {
+          return commands.execute('docmanager:open', {
             path: model.path, factory: FACTORY
           });
         });

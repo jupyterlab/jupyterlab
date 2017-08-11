@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IChangedArgs
+  IChangedArgs, PathExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -12,6 +12,10 @@ import {
 import {
   CodeEditor, IEditorServices, IEditorMimeTypeService, CodeEditorWrapper
 } from '@jupyterlab/codeeditor';
+
+import {
+  PromiseDelegate
+} from '@phosphor/coreutils';
 
 
 /**
@@ -29,7 +33,7 @@ const EDITOR_CLASS = 'jp-FileEditor';
  * A document widget for editors.
  */
 export
-class FileEditor extends CodeEditorWrapper {
+class FileEditor extends CodeEditorWrapper implements DocumentRegistry.IReadyWidget {
   /**
    * Construct a new editor widget.
    */
@@ -52,14 +56,21 @@ class FileEditor extends CodeEditorWrapper {
     if (context.model.modelDB.isCollaborative) {
       let modelDB = context.model.modelDB;
       modelDB.connected.then(() => {
+        let collaborators = modelDB.collaborators;
+        if (!collaborators) {
+          return;
+        }
+
         // Setup the selection style for collaborators
-        let localCollaborator = modelDB.collaborators.localCollaborator;
+        let localCollaborator = collaborators.localCollaborator;
         this.editor.uuid = localCollaborator.sessionId;
+
         this.editor.selectionStyle = {
+          ...CodeEditor.defaultSelectionStyle,
           color: localCollaborator.color
         };
 
-        modelDB.collaborators.changed.connect(this._onCollaboratorsChanged, this);
+        collaborators.changed.connect(this._onCollaboratorsChanged, this);
         // Trigger an initial onCollaboratorsChanged event.
         this._onCollaboratorsChanged();
       });
@@ -71,6 +82,13 @@ class FileEditor extends CodeEditorWrapper {
    */
   get context(): DocumentRegistry.Context {
     return this._context;
+  }
+
+  /**
+   * A promise that resolves when the file editor is ready.
+   */
+  get ready(): Promise<void> {
+    return this._ready.promise;
   }
 
   /**
@@ -94,6 +112,9 @@ class FileEditor extends CodeEditorWrapper {
     // Wire signal connections.
     contextModel.stateChanged.connect(this._onModelStateChanged, this);
     contextModel.contentChanged.connect(this._onContentChanged, this);
+
+    // Resolve the ready promise.
+    this._ready.resolve(undefined);
   }
 
   /**
@@ -137,7 +158,7 @@ class FileEditor extends CodeEditorWrapper {
     const path = this._context.path;
 
     editor.model.mimeType = this._mimeTypeService.getMimeTypeByFilePath(path);
-    this.title.label = path.split(':').pop().split('/').pop();
+    this.title.label = PathExt.basename(path.split(':').pop()!);
   }
 
   /**
@@ -147,8 +168,12 @@ class FileEditor extends CodeEditorWrapper {
   private _onCollaboratorsChanged(): void {
     // If there are selections corresponding to non-collaborators,
     // they are stale and should be removed.
+    let collaborators = this._context.model.modelDB.collaborators;
+    if (!collaborators) {
+      return;
+    }
     for (let key of this.editor.model.selections.keys()) {
-      if (!this._context.model.modelDB.collaborators.has(key)) {
+      if (!collaborators.has(key)) {
         this.editor.model.selections.delete(key);
       }
     }
@@ -156,6 +181,7 @@ class FileEditor extends CodeEditorWrapper {
 
   protected _context: DocumentRegistry.Context;
   private _mimeTypeService: IEditorMimeTypeService;
+  private _ready = new PromiseDelegate<void>();
 }
 
 
@@ -207,9 +233,6 @@ class FileEditorFactory extends ABCWidgetFactory<FileEditor, DocumentRegistry.IC
     let func = this._services.factoryService.newDocumentEditor.bind(
       this._services.factoryService);
     let factory: CodeEditor.Factory = options => {
-      options.lineNumbers = true;
-      options.readOnly = false;
-      options.wordWrap = true;
       return func(options);
     };
     return new FileEditor({

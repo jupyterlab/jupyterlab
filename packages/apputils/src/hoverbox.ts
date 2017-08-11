@@ -79,12 +79,13 @@ namespace HoverBox {
 
     /**
      * If space is available both above and below the anchor, denote which
-     * location is privileged.
+     * location is privileged. Use forceBelow and forceAbove to mandate where
+     * hover box should render relative to anchor.
      *
      * #### Notes
      * The default value is `'below'`.
      */
-    privilege?: 'above' | 'below';
+    privilege?: 'above' | 'below' | 'forceBelow' | 'forceAbove';
   }
 
 
@@ -121,15 +122,22 @@ namespace HoverBox {
     const innerHeight = window.innerHeight;
     const spaceAbove = anchor.top;
     const spaceBelow = innerHeight - anchor.bottom;
-    const marginTop = parseInt(style.marginTop, 10) || 0;
-    const minHeight = parseInt(style.minHeight, 10) || options.minHeight;
+    const marginTop = parseInt(style.marginTop!, 10) || 0;
+    const minHeight = parseInt(style.minHeight!, 10) || options.minHeight;
 
-    let maxHeight = parseInt(style.maxHeight, 10) || options.maxHeight;
+    let maxHeight = parseInt(style.maxHeight!, 10) || options.maxHeight;
 
     // Determine whether to render above or below; check privilege.
-    const renderBelow = options.privilege === 'above' ?
-      spaceAbove < maxHeight && spaceAbove < spaceBelow
-        : spaceBelow >= maxHeight || spaceBelow >= spaceAbove;
+    let renderBelow = true;
+    if (options.privilege === 'forceAbove') {
+      renderBelow = false;
+    } else if (options.privilege === 'forceBelow') {
+      renderBelow = true;
+    } else {
+      renderBelow = options.privilege === 'above' ?
+        spaceAbove < maxHeight && spaceAbove < spaceBelow
+          : spaceBelow >= maxHeight || spaceBelow >= spaceAbove;
+    }
 
     if (renderBelow) {
       maxHeight = Math.min(spaceBelow - marginTop, maxHeight);

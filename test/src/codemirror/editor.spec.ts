@@ -47,7 +47,7 @@ describe('CodeMirrorEditor', () => {
     host.style.height = '200px';
     document.body.appendChild(host);
     model = new CodeEditor.Model();
-    editor = new LogFileEditor({ host, model }, {});
+    editor = new LogFileEditor({ host, model });
   });
 
   afterEach(() => {
@@ -101,13 +101,14 @@ describe('CodeMirrorEditor', () => {
   describe('#selectionStyle', () => {
 
     it('should be the selection style of the editor', () => {
-      expect(editor.selectionStyle).to.eql({});
+      expect(editor.selectionStyle).to.eql(CodeEditor.defaultSelectionStyle);
     });
 
     it('should be settable', () => {
       let style = {
         className: 'foo',
-        displayName: 'bar'
+        displayName: 'bar',
+        color: 'black'
       };
       editor.selectionStyle = style;
       expect(editor.selectionStyle).to.eql(style);
@@ -143,41 +144,37 @@ describe('CodeMirrorEditor', () => {
 
   });
 
-  describe('#lineNumbers', () => {
+  describe('#getOption()', () => {
 
     it('should get whether line numbers should be shown', () => {
-      expect(editor.lineNumbers).to.be(false);
+      expect(editor.getOption('lineNumbers')).to.be(false);
     });
 
-    it('should set whether line numbers should be shown', () => {
-      editor.lineNumbers = true;
-      expect(editor.lineNumbers).to.be(true);
+    it('should get whether horizontally scrolling should be used', () => {
+      expect(editor.getOption('lineWrap')).to.be(true);
+    });
+
+    it('should get whether the editor is readonly', () => {
+      expect(editor.getOption('readOnly')).to.be(false);
     });
 
   });
 
-  describe('#wordWrap', () => {
+  describe('#setOption()', () => {
 
-    it('should get whether horizontally scrolling should be used', () => {
-      expect(editor.wordWrap).to.be(true);
+    it('should set whether line numbers should be shown', () => {
+      editor.setOption('lineNumbers', true);
+      expect(editor.getOption('lineNumbers')).to.be(true);
     });
 
     it('should set whether horizontally scrolling should be used', () => {
-      editor.wordWrap = false;
-      expect(editor.wordWrap).to.be(false);
-    });
-
-  });
-
-  describe('#readOnly', () => {
-
-    it('should get whether the editor is readonly', () => {
-      expect(editor.readOnly).to.be(false);
+      editor.setOption('lineWrap', false);
+      expect(editor.getOption('lineWrap')).to.be(false);
     });
 
     it('should set whether the editor is readonly', () => {
-      editor.readOnly = true;
-      expect(editor.readOnly).to.be(true);
+      editor.setOption('readOnly', true);
+      expect(editor.getOption('readOnly')).to.be(true);
     });
 
   });

@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IRenderMime, RenderMime
+  RenderMime
 } from '@jupyterlab/rendermime';
 
 import {
@@ -43,7 +43,7 @@ import {
  */
 const PANEL_CLASS = 'jp-ConsolePanel';
 
-const CONSOLE_ICON_CLASS = 'jp-ImageCodeConsole';
+const CONSOLE_ICON_CLASS = 'jp-CodeConsoleIcon';
 
 
 /**
@@ -76,10 +76,11 @@ class ConsolePanel extends Panel {
       kernelPreference: options.kernelPreference
     });
 
-    rendermime.resolver = new RenderMime.UrlResolver({
+    let resolver = new RenderMime.UrlResolver({
       session,
       contents: manager.contents
     });
+    rendermime = rendermime.clone({ resolver });
 
     this.console = contentFactory.createConsole({
       rendermime, session, mimeTypeService, contentFactory, modelFactory
@@ -89,7 +90,6 @@ class ConsolePanel extends Panel {
     session.ready.then(() => {
       this._connected = new Date();
       this._updateTitle();
-      this.console.promptCell.editor.focus();
     });
 
     this._manager = manager;
@@ -132,13 +132,20 @@ class ConsolePanel extends Panel {
    */
   protected onAfterAttach(msg: Message): void {
     this._session.initialize();
+    let prompt = this.console.promptCell;
+    if (prompt) {
+      prompt.editor.focus();
+    }
   }
 
   /**
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this.console.promptCell.editor.focus();
+    let prompt = this.console.promptCell;
+    if (prompt) {
+      prompt.editor.focus();
+    }
   }
 
   /**
@@ -165,8 +172,8 @@ class ConsolePanel extends Panel {
   }
 
   private _manager: ServiceManager.IManager;
-  private _executed: Date = null;
-  private _connected: Date = null;
+  private _executed: Date | null = null;
+  private _connected: Date | null = null;
   private _session: ClientSession;
 }
 
@@ -184,7 +191,7 @@ namespace ConsolePanel {
     /**
      * The rendermime instance used by the panel.
      */
-    rendermime: IRenderMime;
+    rendermime: RenderMime;
 
     /**
      * The content factory for the panel.

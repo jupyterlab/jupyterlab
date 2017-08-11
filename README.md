@@ -30,7 +30,7 @@ We have a [roadmap](https://github.com/jupyter/roadmap/blob/master/jupyterlab.md
 
 ## Prerequisites
 
-Jupyter notebook version 4.2 or later. To check the notebook version:
+Jupyter notebook version 4.3 or later. To check the notebook version:
 
 ```bash
 jupyter notebook --version
@@ -84,6 +84,12 @@ Instructions on how to install the project from the git sources are available in
 Note: If installing using `pip install --user`, you must add the user-level
  `bin` directory to your `PATH` environment variable in order to launch
  `jupyter lab`.
+
+
+## Extensions
+
+The JupyterLab environment can be extended using extensions.  See documentation
+for [users](https://jupyterlab-tutorial.readthedocs.io/en/latest/extensions_user.html) and [developers](https://jupyterlab-tutorial.readthedocs.io/en/latest/extensions_dev.html).
 
 ----
 

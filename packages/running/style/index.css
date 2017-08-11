@@ -80,7 +80,7 @@
   padding: 4px 12px;
   font-weight: 600;
   text-transform: uppercase;
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
   letter-spacing: 1px;
 }
 
@@ -122,12 +122,12 @@
 
 
 .jp-RunningSessions-itemIcon.jp-mod-notebook {
-  background-image: var(--jp-icon-book);
+  background-image: var(--jp-icon-book-running);
 }
 
 
 .jp-RunningSessions-itemIcon.jp-mod-console {
-  background-image: var(--jp-icon-terminal);
+  background-image: var(--jp-icon-console);
 }
 
 
@@ -156,7 +156,7 @@
 
 
 .jp-RunningSessions-itemLabel:hover {
-  background-color: rgba(153,153,153,.1);
+  background-color: var(--jp-layout-color2);
 }
 
 

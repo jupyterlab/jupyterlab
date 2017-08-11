@@ -5,11 +5,32 @@ import {
   JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
+import {
+  ISettingRegistry
+} from '@jupyterlab/coreutils';
+
+import {
+  CommandRegistry
+} from '@phosphor/commands';
+
+import {
+  JSONObject, JSONValue
+} from '@phosphor/coreutils';
+
+import {
+  DisposableSet, IDisposable
+} from '@phosphor/disposable';
 
 /**
- * The list of default application shortcuts.
+ * The default shortcuts extension.
  *
  * #### Notes
+ * Shortcut values are stored in the setting system. The default values for each
+ * shortcut are preset in the settings schema file of this extension.
+ * Additionally, each shortcut can be individually set by the end user by
+ * modifying its setting (either in the text editor or by modifying its
+ * underlying JSON file).
+ *
  * When setting shortcut selectors, there are two concepts to consider:
  * specificity and matchability. These two interact in sometimes
  * counterintuitive ways. Keyboard events are triggered from an element and
@@ -29,342 +50,20 @@ import {
  * (`'*'`) selector. For almost any use case where a global keyboard shortcut is
  * required, using the `'body'` selector is more appropriate.
  */
-const SHORTCUTS = [
-  {
-    command: 'main-jupyterlab:activate-next-tab',
-    selector: 'body',
-    keys: ['Ctrl Shift ]']
-  },
-  {
-    command: 'main-jupyterlab:activate-previous-tab',
-    selector: 'body',
-    keys: ['Ctrl Shift [']
-  },
-  {
-    command: 'main-jupyterlab:toggle-mode',
-    selector: 'body',
-    keys: ['Accel Shift Enter']
-  },
-  {
-    command: 'chatbox:post',
-    selector: '.jp-Chatbox-prompt',
-    keys: ['Enter']
-  },
-  {
-    command: 'chatbox:linebreak',
-    selector: '.jp-Chatbox-prompt',
-    keys: ['Ctrl Enter']
-  },
-  {
-    command: 'command-palette:activate',
-    selector: 'body',
-    keys: ['Accel Shift P']
-  },
-  {
-    command: 'completer:invoke-console',
-    selector: '.jp-CodeConsole-promptCell .jp-mod-completer-enabled',
-    keys: ['Tab']
-  },
-  {
-    command: 'completer:invoke-notebook',
-    selector: '.jp-Notebook.jp-mod-editMode .jp-mod-completer-enabled',
-    keys: ['Tab']
-  },
-  {
-    command: 'console:linebreak',
-    selector: '.jp-CodeConsole-promptCell',
-    keys: ['Ctrl Enter']
-  },
-  {
-    command: 'console:run',
-    selector: '.jp-CodeConsole-promptCell',
-    keys: ['Enter']
-  },
-  {
-    command: 'editor:run-code',
-    selector: '.jp-FileEditor',
-    keys: ['Shift Enter']
-  },
-  {
-    command: 'console:run-forced',
-    selector: '.jp-CodeConsole-promptCell',
-    keys: ['Shift Enter']
-  },
-  {
-    command: 'filebrowser-main:toggle',
-    selector: 'body',
-    keys: ['Accel Shift F']
-  },
-  {
-    command: 'file-operations:create-launcher',
-    selector: 'body',
-    keys: ['Accel Shift L']
-  },
-  {
-    command: 'file-operations:save',
-    selector: 'body',
-    keys: ['Accel S']
-  },
-  {
-    command: 'file-operations:close',
-    selector: '.jp-Activity',
-    keys: ['Ctrl Q']
-  },
-  {
-    command: 'file-operations:close-all-files',
-    selector: 'body',
-    keys: ['Ctrl Shift Q']
-  },
-  {
-    command: 'help-jupyterlab:toggle',
-    selector: 'body',
-    keys: ['Accel Shift H']
-  },
-  {
-    command: 'imageviewer:reset-zoom',
-    selector: '.jp-ImageViewer',
-    keys: ['0']
-  },
-  {
-    command: 'imageviewer:zoom-in',
-    selector: '.jp-ImageViewer',
-    keys: ['=']
-  },
-  {
-    command: 'imageviewer:zoom-out',
-    selector: '.jp-ImageViewer',
-    keys: ['-']
-  },
-  {
-    command: 'inspector:open',
-    selector: 'body',
-    keys: ['Accel I']
-  },
-  {
-    command: 'notebook-cells:run-and-advance',
-    selector: '.jp-Notebook:focus',
-    keys: ['Shift Enter']
-  },
-  {
-    command: 'notebook-cells:run-and-insert',
-    selector: '.jp-Notebook:focus',
-    keys: ['Alt Enter']
-  },
-  {
-    command: 'notebook-cells:run',
-    selector: '.jp-Notebook:focus',
-    keys: ['Ctrl Enter']
-  },
-  {
-    command: 'notebook-cells:run-and-advance',
-    selector: '.jp-Notebook.jp-mod-editMode',
-    keys: ['Shift Enter']
-  },
-  {
-    command: 'notebook-cells:run-and-insert',
-    selector: '.jp-Notebook.jp-mod-editMode',
-    keys: ['Alt Enter']
-  },
-  {
-    command: 'notebook-cells:run',
-    selector: '.jp-Notebook.jp-mod-editMode',
-    keys: ['Ctrl Enter']
-  },
-  {
-    command: 'notebook:interrupt-kernel',
-    selector: '.jp-Notebook:focus',
-    keys: ['I', 'I']
-  },
-  {
-    command: 'notebook:restart-kernel',
-    selector: '.jp-Notebook:focus',
-    keys: ['0', '0']
-  },
-  {
-    command: 'notebook-cells:to-code',
-    selector: '.jp-Notebook:focus',
-    keys: ['Y']
-  },
-  {
-    command: 'notebook-cells:to-markdown',
-    selector: '.jp-Notebook:focus',
-    keys: ['M']
-  },
-  {
-    command: 'notebook-cells:to-raw',
-    selector: '.jp-Notebook:focus',
-    keys: ['R']
-  },
-  {
-    command: 'notebook-cells:delete',
-    selector: '.jp-Notebook:focus',
-    keys: ['D', 'D'],
-  },
-  {
-    command: 'notebook-cells:split',
-    selector: '.jp-Notebook.jp-mod-editMode',
-    keys: ['Ctrl Shift -'],
-  },
-  {
-    command: 'notebook-cells:merge',
-    selector: '.jp-Notebook:focus',
-    keys: ['Shift M'],
-  },
-  {
-    command: 'notebook-cells:select-above',
-    selector: '.jp-Notebook:focus',
-    keys: ['ArrowUp'],
-  },
-  {
-    command: 'notebook-cells:select-above',
-    selector: '.jp-Notebook:focus',
-    keys: ['K'],
-  },
-  {
-    command: 'notebook-cells:select-below',
-    selector: '.jp-Notebook:focus',
-    keys: ['ArrowDown'],
-  },
-  {
-    command: 'notebook-cells:select-below',
-    selector: '.jp-Notebook:focus',
-    keys: ['J'],
-  },
-  {
-    command: 'notebook-cells:extend-above',
-    selector: '.jp-Notebook:focus',
-    keys: ['Shift ArrowUp'],
-  },
-  {
-    command: 'notebook-cells:extend-above',
-    selector: '.jp-Notebook:focus',
-    keys: ['Shift K'],
-  },
-  {
-    command: 'notebook-cells:extend-below',
-    selector: '.jp-Notebook:focus',
-    keys: ['Shift ArrowDown'],
-  },
-  {
-    command: 'notebook-cells:extend-below',
-    selector: '.jp-Notebook:focus',
-    keys: ['Shift J'],
-  },
-  {
-    command: 'notebook-cells:undo',
-    selector: '.jp-Notebook:focus',
-    keys: ['Z'],
-  },
-  {
-    command: 'notebook-cells:redo',
-    selector: '.jp-Notebook:focus',
-    keys: ['Shift Z'],
-  },
-  {
-    command: 'notebook-cells:cut',
-    selector: '.jp-Notebook:focus',
-    keys: ['X']
-  },
-  {
-    command: 'notebook-cells:copy',
-    selector: '.jp-Notebook:focus',
-    keys: ['C']
-  },
-  {
-    command: 'notebook-cells:paste',
-    selector: '.jp-Notebook:focus',
-    keys: ['V']
-  },
-  {
-    command: 'notebook-cells:insert-above',
-    selector: '.jp-Notebook:focus',
-    keys: ['A']
-  },
-  {
-    command: 'notebook-cells:insert-below',
-    selector: '.jp-Notebook:focus',
-    keys: ['B']
-  },
-  {
-    command: 'notebook-cells:toggle-line-numbers',
-    selector: '.jp-Notebook:focus',
-    keys: ['L']
-  },
-  {
-    command: 'notebook-cells:toggle-all-line-numbers',
-    selector: '.jp-Notebook:focus',
-    keys: ['Shift L']
-  },
-  {
-    command: 'notebook-cells:markdown-header1',
-    selector: '.jp-Notebook:focus',
-    keys: ['1']
-  },
-  {
-    command: 'notebook-cells:markdown-header2',
-    selector: '.jp-Notebook:focus',
-    keys: ['2']
-  },
-  {
-    command: 'notebook-cells:markdown-header3',
-    selector: '.jp-Notebook:focus',
-    keys: ['3']
-  },
-  {
-    command: 'notebook-cells:markdown-header4',
-    selector: '.jp-Notebook:focus',
-    keys: ['4']
-  },
-  {
-    command: 'notebook-cells:markdown-header5',
-    selector: '.jp-Notebook:focus',
-    keys: ['5']
-  },
-  {
-    command: 'notebook-cells:markdown-header6',
-    selector: '.jp-Notebook:focus',
-    keys: ['6']
-  },
-  {
-    command: 'notebook:edit-mode',
-    selector: '.jp-Notebook:focus',
-    keys: ['Enter']
-  },
-  {
-    command: 'notebook:command-mode',
-    selector: '.jp-Notebook.jp-mod-editMode',
-    keys: ['Escape']
-  },
-  {
-    command: 'notebook:command-mode',
-    selector: '.jp-Notebook.jp-mod-editMode',
-    keys: ['Ctrl M']
-  },
-  {
-    command: 'setting-editor:open',
-    selector: 'body',
-    keys: ['Accel ,']
-  },
-  {
-    command: 'tooltip:launch-notebook',
-    selector: '.jp-Notebook.jp-mod-editMode .jp-InputArea-editor:not(.jp-mod-has-primary-selection)',
-    keys: ['Shift Tab']
-  },
-  {
-    command: 'tooltip:launch-console',
-    selector: '.jp-CodeConsole-promptCell .jp-InputArea-editor:not(.jp-mod-has-primary-selection)',
-    keys: ['Shift Tab']
-  }
-];
-
-
-/**
- * The default shortcuts extension.
- */
 const plugin: JupyterLabPlugin<void> = {
   id: 'jupyter.extensions.shortcuts',
-  activate: (app: JupyterLab): void => {
-    SHORTCUTS.forEach(shortcut => { app.commands.addKeyBinding(shortcut); });
+  requires: [ISettingRegistry],
+  activate: (app: JupyterLab, settingReqistry: ISettingRegistry): void => {
+    const { commands } = app;
+
+    settingReqistry.load(plugin.id).then(settings => {
+      Private.loadShortcuts(commands, settings.composite);
+      settings.changed.connect(() => {
+        Private.loadShortcuts(commands, settings.composite);
+      });
+    }).catch((reason: Error) => {
+      console.error('Loading shortcut settings failed.', reason.message);
+    });
   },
   autoStart: true
 };
@@ -374,3 +73,50 @@ const plugin: JupyterLabPlugin<void> = {
  * Export the plugin as default.
  */
 export default plugin;
+
+
+/**
+ * A namespace for private module data.
+ */
+namespace Private {
+  /**
+   * The internal collection of currently loaded shortcuts.
+   */
+  let disposables: IDisposable;
+
+  /**
+   * Load the keyboard shortcuts from settings.
+   */
+  export
+  function loadShortcuts(commands: CommandRegistry, composite: JSONObject): void {
+    if (disposables) {
+      disposables.dispose();
+    }
+    disposables = Object.keys(composite).reduce((acc, val): DisposableSet => {
+      const options = normalizeOptions(composite[val]);
+
+      if (options) {
+        acc.add(commands.addKeyBinding(options));
+      }
+
+      return acc;
+    }, new DisposableSet());
+  }
+
+  /**
+   * Normalize potential keyboard shortcut options.
+   */
+  function normalizeOptions(value: JSONValue | Partial<CommandRegistry.IKeyBindingOptions>): CommandRegistry.IKeyBindingOptions | undefined {
+    if (!value || typeof value !== 'object') {
+      return undefined;
+    }
+
+    const { isArray } = Array;
+    const valid = 'command' in value &&
+      'keys' in value &&
+      'selector' in value &&
+      isArray((value as Partial<CommandRegistry.IKeyBindingOptions>).keys);
+
+    return valid ? value as CommandRegistry.IKeyBindingOptions : undefined;
+  }
+}

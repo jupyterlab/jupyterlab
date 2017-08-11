@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/docmanager';
 
 import {
-  DocumentRegistry, IDocumentRegistry
+  DocumentRegistry, TextModelFactory
 } from '@jupyterlab/docregistry';
 
 import {
@@ -66,7 +66,7 @@ describe('filebrowser/model', () => {
 
   let manager: IDocumentManager;
   let serviceManager: ServiceManager.IManager;
-  let registry: IDocumentRegistry;
+  let registry: DocumentRegistry;
   let model: FileBrowserModel;
   let crumbs: LogCrumbs;
   let first: string;
@@ -79,7 +79,9 @@ describe('filebrowser/model', () => {
       open: widget => { /* no op */ }
     };
 
-    registry = new DocumentRegistry();
+    registry = new DocumentRegistry({
+      textModelFactory: new TextModelFactory()
+    });
     serviceManager = new ServiceManager();
     manager = new DocumentManager({
       registry, opener,

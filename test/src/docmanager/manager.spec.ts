@@ -24,10 +24,17 @@ import {
 } from '../utils';
 
 
-class WidgetFactory extends ABCWidgetFactory<Widget, DocumentRegistry.IModel> {
+class DocWidget extends Widget implements DocumentRegistry.IReadyWidget {
+  get ready(): Promise<void> {
+    return Promise.resolve(undefined);
+  }
+}
 
-  protected createNewWidget(context: DocumentRegistry.Context): Widget {
-    let widget = new Widget();
+
+class WidgetFactory extends ABCWidgetFactory<DocumentRegistry.IReadyWidget, DocumentRegistry.IModel> {
+
+  protected createNewWidget(context: DocumentRegistry.Context): DocumentRegistry.IReadyWidget {
+    let widget = new DocWidget();
     widget.addClass('WidgetFactory');
     return widget;
   }
@@ -40,10 +47,10 @@ describe('@jupyterlab/docmanager', () => {
   let services: ServiceManager.IManager;
   let context: DocumentRegistry.Context;
   let widget: Widget;
-  let modelFactory = new TextModelFactory();
+  let textModelFactory = new TextModelFactory();
   let widgetFactory = new WidgetFactory({
     name: 'test',
-    fileExtensions: ['.txt'],
+    fileTypes: ['text'],
     canStartKernel: true,
     preferKernel: true
   });
@@ -55,9 +62,11 @@ describe('@jupyterlab/docmanager', () => {
   });
 
   beforeEach(() => {
-    let registry = new DocumentRegistry();
-    registry.addModelFactory(modelFactory);
+    let registry = new DocumentRegistry({ textModelFactory });
     registry.addWidgetFactory(widgetFactory);
+    DocumentRegistry.defaultFileTypes.forEach(ft => {
+      registry.addFileType(ft);
+    });
     manager = new DocumentManager({
       registry,
       manager: services,
@@ -166,7 +175,7 @@ describe('@jupyterlab/docmanager', () => {
         let widgetFactory2 = new WidgetFactory({
           name: 'test',
           modelName: 'foo',
-          fileExtensions: ['.txt']
+          fileTypes: ['text']
         });
         manager.registry.addWidgetFactory(widgetFactory2);
         return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
@@ -223,7 +232,7 @@ describe('@jupyterlab/docmanager', () => {
         let widgetFactory2 = new WidgetFactory({
           name: 'test',
           modelName: 'foo',
-          fileExtensions: ['.txt']
+          fileTypes: ['text']
         });
         manager.registry.addWidgetFactory(widgetFactory2);
         return services.contents.newUntitled({ type: 'file', ext: '.txt'}).then(model => {
@@ -270,7 +279,7 @@ describe('@jupyterlab/docmanager', () => {
 
       it('should fail to find the context for the widget', () => {
         widget = new Widget();
-        expect(manager.contextForWidget(widget)).to.be(null);
+        expect(manager.contextForWidget(widget)).to.be(undefined);
       });
 
     });

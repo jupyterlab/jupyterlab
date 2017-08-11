@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Dialog, ToolbarButton, showDialog
+  ToolbarButton
 } from '@jupyterlab/apputils';
 
 import {
@@ -76,7 +76,7 @@ class Uploader extends ToolbarButton {
    */
   private _onInputChanged(): void {
     let files = Array.prototype.slice.call(this._input.files) as File[];
-    let pending = files.map(file => this._uploadFile(file));
+    let pending = files.map(file => this.model.upload(file));
     Promise.all(pending).catch(error => {
       utils.showErrorMessage('Upload Error', error);
     });
@@ -87,39 +87,8 @@ class Uploader extends ToolbarButton {
    */
   private _onInputClicked(): void {
     // In order to allow repeated uploads of the same file (with delete in between),
-    // we need to null out the input value to trigger a change event.
-    this._input.value = null;
-  }
-
-  /**
-   * Upload a file to the server.
-   */
-  private _uploadFile(file: File): Promise<any> {
-    return this.model.upload(file).catch(error => {
-      let exists = error.message.indexOf('already exists') !== -1;
-      if (exists) {
-        return this._uploadFileOverride(file);
-      }
-      throw error;
-    });
-  }
-
-  /**
-   * Upload a file to the server checking for override.
-   */
-  private _uploadFileOverride(file: File): Promise<any> {
-    let overwrite = Dialog.warnButton({ label: 'OVERWRITE' });
-    let options = {
-      title: 'Overwrite File?',
-      body: `"${file.name}" already exists, overwrite?`,
-      buttons: [Dialog.cancelButton(), overwrite]
-    };
-    return showDialog(options).then(button => {
-      if (this.isDisposed || button.accept) {
-        return;
-      }
-      return this.model.upload(file, true);
-    });
+    // we need to clear the input value to trigger a change event.
+    this._input.value = '';
   }
 
   private _input = Private.createUploadInput();

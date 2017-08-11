@@ -15,7 +15,10 @@ fs.copySync('./package.json', './build/package.json');
 // Create the entry point file.
 var source = fs.readFileSync('index.js').toString();
 var template = Handlebars.compile(source);
-var data = { jupyterlab_extensions: package_data.jupyterlab.extensions };
+var data = {
+  jupyterlab_extensions: package_data.jupyterlab.extensions,
+  jupyterlab_mime_extensions: package_data.jupyterlab.mimeExtensions,
+};
 var result = template(data);
 
 fs.writeFileSync(path.resolve(buildDir, 'index.out.js'), result);
@@ -39,6 +42,7 @@ module.exports = {
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },
       { test: /\.json$/, use: 'json-loader' },
       { test: /\.html$/, use: 'file-loader' },
+      { test: /\.md$/, use: 'raw-loader' },
       { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
       { test: /\.js.map$/, use: 'file-loader' },
       { test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/, use: 'url-loader?limit=10000&mimetype=application/font-woff' },

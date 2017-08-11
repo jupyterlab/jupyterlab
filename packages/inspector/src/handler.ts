@@ -76,10 +76,10 @@ class InspectionHandler implements IDisposable, IInspector.IInspectable {
   /**
    * The editor widget used by the inspection handler.
    */
-  get editor(): CodeEditor.IEditor {
+  get editor(): CodeEditor.IEditor | null {
     return this._editor;
   }
-  set editor(newValue: CodeEditor.IEditor) {
+  set editor(newValue: CodeEditor.IEditor | null) {
     if (newValue === this._editor) {
       return;
     }
@@ -116,18 +116,17 @@ class InspectionHandler implements IDisposable, IInspector.IInspectable {
    * This is a read-only property.
    */
   get isDisposed(): boolean {
-    return this._editor === null;
+    return this._isDisposed;
   }
 
   /**
    * Dispose of the resources used by the handler.
    */
   dispose(): void {
-    if (this._editor === null) {
+    if (this.isDisposed) {
       return;
     }
-    this._editor = null;
-    this._rendermime = null;
+    this._isDisposed = true;
     this._disposed.emit(void 0);
     Signal.clearData(this);
   }
@@ -145,6 +144,9 @@ class InspectionHandler implements IDisposable, IInspector.IInspectable {
     }
 
     const editor = this.editor;
+    if (!editor) {
+      return;
+    }
     const code = editor.model.value.text;
     const position = editor.getCursorPosition();
     const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), code);
@@ -185,21 +187,28 @@ class InspectionHandler implements IDisposable, IInspector.IInspectable {
       }
 
       const data = value.data;
-      const trusted = true;
-      const model = new MimeModel({ data, trusted });
 
-      update.content =  this._rendermime.render(model);
+      let mimeType = this._rendermime.preferredMimeType(data, true);
+      if (mimeType) {
+        let widget = this._rendermime.createRenderer(mimeType);
+        const model = new MimeModel({ data });
+        widget.renderModel(model);
+        update.content = widget;
+      } else {
+        update.content = null;
+      }
       this._inspected.emit(update);
     });
   }
 
   private _disposed = new Signal<this, void>(this);
-  private _editor: CodeEditor.IEditor = null;
+  private _editor: CodeEditor.IEditor | null = null;
   private _ephemeralCleared = new Signal<InspectionHandler, void>(this);
   private _inspected = new Signal<this, IInspector.IInspectorUpdate>(this);
   private _pending = 0;
-  private _rendermime: RenderMime = null;
+  private _rendermime: RenderMime;
   private _standby = true;
+  private _isDisposed = false;
 }
 
 

@@ -30,12 +30,11 @@ class CodeEditorWrapper extends Widget {
    */
   constructor(options: CodeEditorWrapper.IOptions) {
     super();
-    const editor = this._editor = options.factory({
+    const editor = this.editor = options.factory({
       host: this.node,
       model: options.model,
       uuid: options.uuid,
-      wordWrap: options.wordWrap,
-      readOnly: options.readOnly,
+      config: options.config,
       selectionStyle: options.selectionStyle
     });
     editor.model.selections.changed.connect(this._onSelectionsChanged, this);
@@ -44,15 +43,13 @@ class CodeEditorWrapper extends Widget {
   /**
    * Get the editor wrapped by the widget.
    */
-  get editor(): CodeEditor.IEditor {
-    return this._editor;
-  }
+  readonly editor: CodeEditor.IEditor;
 
   /**
    * Get the model used by the widget.
    */
   get model(): CodeEditor.IModel {
-    return this._editor.model;
+    return this.editor.model;
   }
 
   /**
@@ -63,15 +60,14 @@ class CodeEditorWrapper extends Widget {
       return;
     }
     super.dispose();
-    this._editor.dispose();
-    this._editor = null;
+    this.editor.dispose();
   }
 
   /**
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this._editor.focus();
+    this.editor.focus();
   }
 
   /**
@@ -80,7 +76,7 @@ class CodeEditorWrapper extends Widget {
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     if (this.isVisible) {
-      this._editor.refresh();
+      this.editor.refresh();
     }
   }
 
@@ -88,7 +84,7 @@ class CodeEditorWrapper extends Widget {
    * A message handler invoked on an `'after-show'` message.
    */
   protected onAfterShow(msg: Message): void {
-    this._editor.refresh();
+    this.editor.refresh();
   }
 
   /**
@@ -96,9 +92,9 @@ class CodeEditorWrapper extends Widget {
    */
   protected onResize(msg: Widget.ResizeMessage): void {
     if (msg.width >= 0 && msg.height >= 0) {
-      this._editor.setSize(msg);
+      this.editor.setSize(msg);
     } else {
-      this._editor.resizeToFit();
+      this.editor.resizeToFit();
     }
   }
 
@@ -106,7 +102,7 @@ class CodeEditorWrapper extends Widget {
    * Handle a change in model selections.
    */
   private _onSelectionsChanged(): void {
-    const { start, end } = this._editor.getSelection();
+    const { start, end } = this.editor.getSelection();
 
     if (start.column !== end.column || start.line !== end.line) {
       this.addClass(HAS_SELECTION_CLASS);
@@ -114,8 +110,6 @@ class CodeEditorWrapper extends Widget {
       this.removeClass(HAS_SELECTION_CLASS);
     }
   }
-
-  private _editor: CodeEditor.IEditor = null;
 }
 
 
@@ -149,19 +143,9 @@ namespace CodeEditorWrapper {
     uuid?: string;
 
     /**
-     * Whether line numbers should be displayed. Defaults to `false`.
+     * The configuration options for the editor.
      */
-    lineNumbers?: boolean;
-
-    /**
-     * Set to false for horizontal scrolling. Defaults to `true`.
-     */
-    wordWrap?: boolean;
-
-    /**
-     * Whether the editor is read-only. Defaults to `false`.
-     */
-    readOnly?: boolean;
+    config?: Partial<CodeEditor.IConfig>;
 
    /**
     * The default selection style for the editor.

@@ -80,18 +80,18 @@ class Completer extends Widget {
   constructor(options: Completer.IOptions) {
     super({ node: document.createElement('ul') });
     this._renderer = options.renderer || Completer.defaultRenderer;
-    this.model = options.model;
-    this._editor = options.editor;
+    this.model = options.model || null;
+    this.editor = options.editor || null;
     this.addClass(COMPLETER_CLASS);
   }
 
   /**
    * The editor used by the completion widget.
    */
-  get editor(): CodeEditor.IEditor {
+  get editor(): CodeEditor.IEditor | null {
     return this._editor;
   }
-  set editor(newValue: CodeEditor.IEditor) {
+  set editor(newValue: CodeEditor.IEditor | null) {
     this._editor = newValue;
   }
 
@@ -116,10 +116,10 @@ class Completer extends Widget {
   /**
    * The model used by the completer widget.
    */
-  get model(): Completer.IModel {
+  get model(): Completer.IModel | null {
     return this._model;
   }
-  set model(model: Completer.IModel) {
+  set model(model: Completer.IModel | null) {
     if (!model && !this._model || model === this._model) {
       return;
     }
@@ -188,7 +188,7 @@ class Completer extends Widget {
       this.reset();
       return;
     }
-    this._selected.emit(active.getAttribute('data-value'));
+    this._selected.emit(active.getAttribute('data-value') as string);
     this.reset();
   }
 
@@ -264,7 +264,7 @@ class Completer extends Widget {
 
     // Populate the completer items.
     for (let item of items) {
-      let li = this._renderer.createItemNode(item);
+      let li = this._renderer.createItemNode(item!);
       // Set the raw, un-marked up value as a data attribute.
       li.setAttribute('data-value', item.raw);
       node.appendChild(li);
@@ -275,7 +275,7 @@ class Completer extends Widget {
 
     // If this is the first time the current completer session has loaded,
     // populate any initial subset match.
-    if (this._model.subsetMatch) {
+    if (this._model && this._model.subsetMatch) {
       let populated = this._populateSubset();
       this.model.subsetMatch = false;
       if (populated) {
@@ -332,9 +332,13 @@ class Completer extends Widget {
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
-        this._model.subsetMatch = true;
+        let model = this._model;
+        if (!model) {
+          return;
+        }
+        model.subsetMatch = true;
         let populated = this._populateSubset();
-        this.model.subsetMatch = false;
+        model.subsetMatch = false;
         if (populated) {
           return;
         }
@@ -378,7 +382,7 @@ class Completer extends Widget {
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
-        this._selected.emit(target.getAttribute('data-value'));
+        this._selected.emit(target.getAttribute('data-value') as string);
         this.reset();
         return;
       }
@@ -391,7 +395,7 @@ class Completer extends Widget {
         return;
       }
 
-      target = target.parentElement;
+      target = target.parentElement as HTMLElement;
     }
     this.reset();
   }
@@ -422,6 +426,9 @@ class Completer extends Widget {
   private _populateSubset(): boolean {
     let items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
     let subset = Private.commonSubset(Private.itemValues(items));
+    if (!this.model) {
+      return false;
+    }
     let query = this.model.query;
     if (subset && subset !== query && subset.indexOf(query) === 0) {
       this.model.query = subset;
@@ -436,6 +443,11 @@ class Completer extends Widget {
    */
   private _setGeometry(): void {
     const model = this._model;
+    const editor = this._editor;
+
+    if (!editor) {
+      return;
+    }
 
     // This is an overly defensive test: `cursor` will always exist if
     // `original` exists, except in contrived tests. But since it is possible
@@ -444,12 +456,11 @@ class Completer extends Widget {
       return;
     }
 
-    const editor = this._editor;
-    const position = editor.getPositionAt(model.cursor.start);
+    const position = editor.getPositionAt(model.cursor.start) as CodeEditor.IPosition;
     const anchor = editor.getCoordinateForPosition(position) as ClientRect;
     const style = window.getComputedStyle(this.node);
-    const borderLeft = parseInt(style.borderLeftWidth, 10) || 0;
-    const paddingLeft = parseInt(style.paddingLeft, 10) || 0;
+    const borderLeft = parseInt(style.borderLeftWidth!, 10) || 0;
+    const paddingLeft = parseInt(style.paddingLeft!, 10) || 0;
 
     // Calculate the geometry of the completer.
     HoverBox.setGeometry({
@@ -483,7 +494,7 @@ namespace Completer {
     /**
      * The semantic parent of the completer widget, its referent editor.
      */
-    editor: CodeEditor.IEditor;
+    editor?: CodeEditor.IEditor | null;
 
     /**
      * The model for the completer widget.
@@ -541,12 +552,12 @@ namespace Completer {
     /**
      * The current text state details.
      */
-    current: ITextState;
+    current: ITextState | null;
 
     /**
      * The cursor details that the API has used to return matching options.
      */
-    cursor: ICursorSpan;
+    cursor: ICursorSpan | null;
 
     /**
      * A flag that is true when the model value was modified by a subset match.
@@ -556,7 +567,7 @@ namespace Completer {
     /**
      * The original completer request details.
      */
-    original: ITextState;
+    original: ITextState | null;
 
     /**
      * The query against which items are filtered.
@@ -591,7 +602,7 @@ namespace Completer {
     /**
      * Create a resolved patch between the original state and a patch string.
      */
-    createPatch(patch: string): IPatch;
+    createPatch(patch: string): IPatch | undefined;
 
     /**
      * Reset the state of the model and emit a state change signal.
@@ -725,7 +736,7 @@ namespace Private {
   function itemValues(items: NodeList): string[] {
     let values: string[] = [];
     for (let i = 0, len = items.length; i < len; i++) {
-      values.push((items[i] as HTMLElement).getAttribute('data-value'));
+      values.push((items[i] as HTMLElement).getAttribute('data-value') as string);
     }
     return values;
   }

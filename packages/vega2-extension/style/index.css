@@ -1,0 +1,22 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+.jp-RenderedVegaCommon .vega-actions a {
+  margin-right: 8px;
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color2);
+}
+
+
+.jp-BaseVegaWidget .jp-RenderedVegaCommon
+ {
+  margin-left: 8px;
+  margin-top: 8px;
+}
+
+.jp-MimeDocument.jp-Document .jp-RenderedVegaCommon {
+  padding: 16px;
+}

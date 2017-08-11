@@ -161,7 +161,7 @@ class CellTools extends Widget {
    * Handle a change to the active cell.
    */
   private _onActiveCellChanged(): void {
-    if (this._prevActive) {
+    if (this._prevActive && !this._prevActive.isDisposed) {
       this._prevActive.metadata.changed.disconnect(this._onMetadataChanged, this);
     }
     let activeCell = this._tracker.activeCell;
@@ -337,7 +337,7 @@ namespace CellTools {
       for (let i = 0; i < count; i++) {
         layout.widgets[0].dispose();
       }
-      if (this._cellModel) {
+      if (this._cellModel && !this._cellModel.isDisposed) {
         this._cellModel.value.changed.disconnect(this._onValueChanged, this);
         this._cellModel.mimeTypeChanged.disconnect(this._onMimeTypeChanged, this);
       }
@@ -363,7 +363,7 @@ namespace CellTools {
       let editorWidget = new CodeEditorWrapper({ model, factory });
       editorWidget.addClass('jp-InputArea-editor');
       editorWidget.addClass('jp-InputArea-editor');
-      editorWidget.editor.readOnly = true;
+      editorWidget.editor.setOption('readOnly', true);
       layout.addWidget(prompt);
       layout.addWidget(editorWidget);
     }
@@ -655,7 +655,7 @@ namespace CellTools {
       },
       setter: (cell, value) => {
         let data = cell.model.metadata.get('slideshow') || Object.create(null);
-        data['slide_type'] = value;
+        data = { ...data, 'slide_type': value };
         cell.model.metadata.set('slideshow', data);
       }
     };
@@ -725,7 +725,7 @@ namespace Private {
     let optionNodes: VirtualNode[] = [];
     for (let label in options.optionsMap) {
       let value = JSON.stringify(options.optionsMap[label]);
-      optionNodes.push(h.option({ label, value }));
+      optionNodes.push(h.option({ value }, label));
     }
     let node = VirtualDOM.realize(
       h.div({},

@@ -26,7 +26,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IRenderMime, MimeModel
+  IRenderMime, RenderMime, MimeModel
 } from '@jupyterlab/rendermime';
 
 
@@ -36,9 +36,9 @@ import {
 const TOOLTIP_CLASS = 'jp-Tooltip';
 
 /**
- * The class added to widgets that have spawned a tooltip and anchor it.
+ * The class added to the body when a tooltip exists on the page.
  */
-const ANCHOR_CLASS = 'jp-Tooltip-anchor';
+const BODY_CLASS = 'jp-mod-tooltip';
 
 /**
  * The minimum height of a tooltip widget.
@@ -66,22 +66,23 @@ class Tooltip extends Widget {
   constructor(options: Tooltip.IOptions) {
     super();
 
-    this.layout = new PanelLayout();
+    const layout = this.layout = new PanelLayout();
+    const model = new MimeModel({ data: options.bundle });
+
     this.anchor = options.anchor;
-
     this.addClass(TOOLTIP_CLASS);
-    this.anchor.addClass(ANCHOR_CLASS);
-
     this._editor = options.editor;
     this._rendermime = options.rendermime;
-    let model = new MimeModel({
-      data: options.bundle,
-      trusted: true
-    });
-    this._content = this._rendermime.render(model);
-    if (this._content) {
-      (this.layout as PanelLayout).addWidget(this._content);
+
+    const mimeType = this._rendermime.preferredMimeType(options.bundle, false);
+
+    if (!mimeType) {
+      return;
     }
+
+    this._content = this._rendermime.createRenderer(mimeType);
+    this._content.renderModel(model);
+    layout.addWidget(this._content);
   }
 
   /**
@@ -93,9 +94,6 @@ class Tooltip extends Widget {
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
-    if (this.anchor && !this.anchor.isDisposed) {
-      this.anchor.removeClass(ANCHOR_CLASS);
-    }
     if (this._content) {
       this._content.dispose();
       this._content = null;
@@ -117,18 +115,19 @@ class Tooltip extends Widget {
     if (this.isHidden || this.isDisposed) {
       return;
     }
+
+    const { node } = this;
+    const target = event.target as HTMLElement;
+
     switch (event.type) {
     case 'keydown':
-      if (this.node.contains(event.target as HTMLElement)) {
-        if ((event as KeyboardEvent).keyCode === 27) { // Escape key
-          this.dispose();
-        }
+      if (node.contains(target)) {
         return;
       }
       this.dispose();
       break;
     case 'mousedown':
-      if (this.node.contains(event.target as HTMLElement)) {
+      if (node.contains(target)) {
         this.activate();
         return;
       }
@@ -154,6 +153,7 @@ class Tooltip extends Widget {
    * Handle `'after-attach'` messages.
    */
   protected onAfterAttach(msg: Message): void {
+    document.body.classList.add(BODY_CLASS);
     document.addEventListener('keydown', this, USE_CAPTURE);
     document.addEventListener('mousedown', this, USE_CAPTURE);
     this.anchor.node.addEventListener('scroll', this, USE_CAPTURE);
@@ -164,6 +164,7 @@ class Tooltip extends Widget {
    * Handle `before-detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
+    document.body.classList.remove(BODY_CLASS);
     document.removeEventListener('keydown', this, USE_CAPTURE);
     document.removeEventListener('mousedown', this, USE_CAPTURE);
     this.anchor.node.removeEventListener('scroll', this, USE_CAPTURE);
@@ -200,13 +201,19 @@ class Tooltip extends Widget {
     const cursor = editor.getCursorPosition();
     const end = editor.getOffsetAt(cursor);
     const line = editor.getLine(cursor.line);
+    if (!line) {
+      return;
+    }
     const tokens = line.substring(0, end).split(/\W+/);
     const last = tokens[tokens.length - 1];
     const start = last ? end - last.length : end;
     const position = editor.getPositionAt(start);
+    if (!position) {
+      return;
+    }
     const anchor = editor.getCoordinateForPosition(position) as ClientRect;
     const style = window.getComputedStyle(this.node);
-    const paddingLeft = parseInt(style.paddingLeft, 10) || 0;
+    const paddingLeft = parseInt(style.paddingLeft!, 10) || 0;
 
     // Calculate the geometry of the tooltip.
     HoverBox.setGeometry({
@@ -220,9 +227,9 @@ class Tooltip extends Widget {
     });
   }
 
-  private _content: Widget | null = null;
+  private _content: IRenderMime.IRenderer | null = null;
   private _editor: CodeEditor.IEditor;
-  private _rendermime: IRenderMime;
+  private _rendermime: RenderMime;
 }
 
 /**
@@ -253,6 +260,6 @@ namespace Tooltip {
     /**
      * The rendermime instance used by the tooltip model.
      */
-    rendermime: IRenderMime;
+    rendermime: RenderMime;
   }
 }

@@ -64,8 +64,8 @@
 .jp-RenderedText pre .ansi-bright-white-bg { background-color: #A1A6B2; }
 
 
-.jp-RenderedText.jp-mod-error {
-  background: #fdd;
+.jp-RenderedText[data-mime-type="application/vnd.jupyter.stderr"] {
+  background: var(--jp-notebook-error-background-color);
 }
 
 
@@ -100,17 +100,6 @@
 
 .jp-RenderedHTMLCommon em {
   font-style: italic;
-}
-
-
-.jp-RenderedHTMLCommon img.jp-mod-unconfined {
-  max-width: none;
-}
-
-
-.jp-RenderedHTMLCommon img {
-  max-width: 100%;
-  height: auto;
 }
 
 
@@ -302,7 +291,7 @@ margin-top = 14, 14, 14, 14, 8, 8
 
 
 .jp-RenderedHTMLCommon table {
-  border: none;
+  border: 1px solid var(--jp-border-color1);
   border-collapse: collapse;
   border-spacing: 0;
   color: var(--jp-ui-font-color1);
@@ -338,17 +327,23 @@ margin-top = 14, 14, 14, 14, 8, 8
 
 
 .jp-RenderedHTMLCommon th {
+  background-color: var(--jp-layout-color2);
   font-weight: bold;
 }
 
 
 .jp-RenderedHTMLCommon tbody tr:nth-child(odd) {
-  background: var(--md-grey-100);
+  background: var(--jp-layout-color0);
+}
+
+
+.jp-RenderedHTMLCommon tbody tr:nth-child(even) {
+  background: var(--jp-layout-color1);
 }
 
 
 .jp-RenderedHTMLCommon tbody tr:hover {
-  background: var(--md-light-blue-50);
+  background: var(--jp-notebook-tr-hover-background-color);
 }
 
 
@@ -381,16 +376,21 @@ margin-top = 14, 14, 14, 14, 8, 8
 
 
 .jp-RenderedHTMLCommon img,
-.jp-RenderedHTMLCommon svg {
+.jp-RenderedImage img,
+.jp-RenderedHTMLCommon svg,
+.jp-RenderedSVG svg {
   max-width: 100%;
   height: auto;
 }
 
 
-.jp-RenderedHTMLCommon img.unconfined,
-.jp-RenderedHTMLCommon svg.unconfined {
+.jp-RenderedHTMLCommon img.jp-mod-unconfined,
+.jp-RenderedImage img.jp-mod-unconfined,
+.jp-RenderedHTMLCommon svg.jp-mod-unconfined,
+.jp-RenderedSVG svg.jp-mod-unconfined {
   max-width: none;
 }
+
 
 .jp-RenderedHTMLCommon .alert {
   margin-bottom: initial;
@@ -410,6 +410,8 @@ margin-top = 14, 14, 14, 14, 8, 8
 
 a.jp-InternalAnchorLink {
   visibility: hidden;
+  margin-left: 8px;
+  color: var(--md-blue-800);
 }
 
 h1:hover .jp-InternalAnchorLink,
@@ -419,4 +421,14 @@ h4:hover .jp-InternalAnchorLink,
 h5:hover .jp-InternalAnchorLink,
 h6:hover .jp-InternalAnchorLink {
   visibility: visible;
+}
+
+
+
+/*-----------------------------------------------------------------------------
+| RenderedPDF
+|----------------------------------------------------------------------------*/
+
+.jp-RenderedPDF {
+  font-size: var(--jp-ui-font-size1);
 }

@@ -20,7 +20,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IRenderMime
+  RenderMime
 } from '@jupyterlab/rendermime';
 
 import {
@@ -181,7 +181,7 @@ class CodeConsole extends Widget {
   /**
    * The rendermime instance used by the console.
    */
-  readonly rendermime: IRenderMime;
+  readonly rendermime: RenderMime;
 
   /**
    * The client session used by the console.
@@ -239,25 +239,12 @@ class CodeConsole extends Widget {
    */
   dispose() {
     // Do nothing if already disposed.
-    if (this._foreignHandler === null) {
+    if (this.isDisposed) {
       return;
     }
-
-    let cells = this._cells;
-    let history = this._history;
-    let foreignHandler = this._foreignHandler;
-
-    this._banner = null;
-    this._cells = null;
-    this._content = null;
-    this._input = null;
-    this._mimeTypeService = null;
-    this._foreignHandler = null;
-    this._history = null;
-
-    cells.clear();
-    history.dispose();
-    foreignHandler.dispose();
+    this._cells.clear();
+    this._history.dispose();
+    this._foreignHandler.dispose();
 
     super.dispose();
   }
@@ -277,7 +264,10 @@ class CodeConsole extends Widget {
       return Promise.resolve(void 0);
     }
 
-    let promptCell = this.promptCell;
+    const promptCell = this.promptCell;
+    if (!promptCell) {
+      return Promise.reject('Cannot execute without a prompt cell');
+    }
     promptCell.model.trusted = true;
 
     if (force) {
@@ -318,6 +308,9 @@ class CodeConsole extends Widget {
    */
   insertLinebreak(): void {
     let promptCell = this.promptCell;
+    if (!promptCell) {
+      return;
+    }
     let model = promptCell.model;
     let editor = promptCell.editor;
     // Insert the line break at the cursor position, and move cursor forward.
@@ -325,8 +318,10 @@ class CodeConsole extends Widget {
     let offset = editor.getOffsetAt(pos);
     let text = model.value.text;
     model.value.text = text.substr(0, offset) + '\n' + text.substr(offset);
-    pos = editor.getPositionAt(offset + 1);
-    editor.setCursorPosition(pos);
+    pos = editor.getPositionAt(offset + 1) as CodeEditor.IPosition;
+    if (pos) {
+      editor.setCursorPosition(pos);
+    }
   }
 
   /**
@@ -339,6 +334,9 @@ class CodeConsole extends Widget {
     let output = map(layout.widgets, widget => {
       return (widget as CodeCell).model.toJSON() as nbformat.ICodeCell;
     });
+    if (!promptCell) {
+      return toArray(output);
+    }
     // Serialize prompt cell and return.
     return toArray(output).concat(promptCell.model.toJSON() as nbformat.ICodeCell);
   }
@@ -390,7 +388,10 @@ class CodeConsole extends Widget {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this.promptCell.editor.focus();
+    let editor = this.promptCell && this.promptCell.editor;
+    if (editor) {
+      editor.focus();
+    }
     this.update();
   }
 
@@ -441,7 +442,10 @@ class CodeConsole extends Widget {
    * Handle the `'keydown'` event for the widget.
    */
   private _evtKeyDown(event: KeyboardEvent): void {
-    let editor = this.promptCell.editor;
+    let editor = this.promptCell && this.promptCell.editor;
+    if (!editor) {
+      return;
+    }
     if (event.keyCode === 13 && !editor.hasFocus()) {
       event.preventDefault();
       editor.focus();
@@ -544,12 +548,20 @@ class CodeConsole extends Widget {
    * Test whether we should execute the prompt cell.
    */
   private _shouldExecute(timeout: number): Promise<boolean> {
-    let promptCell = this.promptCell;
+    const promptCell = this.promptCell;
+    if (!promptCell) {
+      return Promise.resolve(false);
+    }
     let model = promptCell.model;
     let code = model.value.text + '\n';
     return new Promise<boolean>((resolve, reject) => {
       let timer = setTimeout(() => { resolve(true); }, timeout);
-      this.session.kernel.requestIsComplete({ code }).then(isComplete => {
+      let kernel = this.session.kernel;
+      if (!kernel) {
+        resolve(false);
+        return;
+      }
+      kernel.requestIsComplete({ code }).then(isComplete => {
         clearTimeout(timer);
         if (this.isDisposed) {
           resolve(false);
@@ -561,7 +573,9 @@ class CodeConsole extends Widget {
         model.value.text = code + isComplete.content.indent;
         let editor = promptCell.editor;
         let pos = editor.getPositionAt(model.value.text.length);
-        editor.setCursorPosition(pos);
+        if (pos) {
+          editor.setCursorPosition(pos);
+        }
         resolve(false);
       }).catch(() => { resolve(true); });
     });
@@ -585,22 +599,22 @@ class CodeConsole extends Widget {
       return;
     }
     kernel.ready.then(() => {
-      if (this.isDisposed) {
+      if (this.isDisposed || !kernel || !kernel.info) {
         return;
       }
       this._handleInfo(kernel.info);
     });
   }
 
-  private _banner: RawCell = null;
-  private _cells: IObservableList<Cell> = null;
-  private _content: Panel = null;
+  private _banner: RawCell;
+  private _cells: IObservableList<Cell>;
+  private _content: Panel;
   private _executed = new Signal<this, Date>(this);
-  private _foreignHandler: ForeignHandler =  null;
-  private _history: IConsoleHistory = null;
-  private _input: Panel = null;
+  private _foreignHandler: ForeignHandler;
+  private _history: IConsoleHistory ;
+  private _input: Panel;
   private _mimetype = 'text/x-ipython';
-  private _mimeTypeService: IEditorMimeTypeService = null;
+  private _mimeTypeService: IEditorMimeTypeService;
   private _promptCellCreated = new Signal<this, CodeCell>(this);
 }
 
@@ -628,7 +642,7 @@ namespace CodeConsole {
     /**
      * The mime renderer for the console widget.
      */
-    rendermime: IRenderMime;
+    rendermime: RenderMime;
 
     /**
      * The client session for the console widget.

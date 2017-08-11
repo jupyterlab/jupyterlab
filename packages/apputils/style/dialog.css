@@ -29,7 +29,7 @@
   flex-direction: column;
   margin-left: auto;
   margin-right: auto;
-  background: #FAFAFA;
+  background: var(--jp-layout-color1);
   padding: 24px;
   padding-bottom: 12px;
   min-width: 300px;
@@ -56,7 +56,7 @@
   flex-direction: column;
   flex: 1 1 auto;
   font-size: var(--jp-ui-font-size2);
-  background: #FAFAFA;
+  background: var(--jp-layout-color1);
   overflow: auto;
 }
 
@@ -80,31 +80,8 @@
 }
 
 
-button.jp-mod-styled.jp-mod-accept {
-  background: var(--jp-brand-color1);
-  color: var(--jp-inverse-ui-font-color0);
-  border: 1px solid var(--jp-brand-color1);
-}
-
-
-button.jp-mod-styled.jp-mod-reject {
-  background: var(--md-grey-500);
-  margin-right: 12px;
-  border: 1px solid var(--md-grey-500);
-  color: var(--jp-inverse-ui-font-color0);
-}
-
-
-button.jp-mod-styled.jp-mod-warn {
-  background: var(--jp-error-color1);
-  color: var(--jp-inverse-ui-font-color0);
-  border: 1px solid var(--jp-error-color1);
-}
-
-
 .jp-Dialog-body > .jp-select-wrapper {
-  width: 252px;
-  border: var(--jp-border-width) solid var(--jp-border-color1);
+  width: 100%;
 }
 
 
@@ -118,5 +95,5 @@ button.jp-mod-styled.jp-mod-warn {
   padding-bottom: 4px;
   line-height: 1.4;
   font-size: var(--jp-ui-font-size1);
-  color: var(--md-grey-700);
+  color: var(--jp-ui-font-color0);
 }

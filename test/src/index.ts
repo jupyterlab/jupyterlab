@@ -46,6 +46,7 @@ import './coreutils/observablestring.spec';
 import './coreutils/observablelist.spec';
 import './coreutils/pageconfig.spec';
 import './coreutils/path.spec';
+import './coreutils/settingregistry.spec';
 import './coreutils/time.spec';
 import './coreutils/undoablelist.spec';
 import './coreutils/url.spec';
@@ -72,8 +73,6 @@ import './imageviewer/widget.spec';
 
 import './inspector/inspector.spec';
 
-import './markdownviewer/widget.spec';
-
 import './notebook/actions.spec';
 import './notebook/celltools.spec';
 import './notebook/default-toolbar.spec';
@@ -87,9 +86,8 @@ import './notebook/widgetfactory.spec';
 import './outputarea/model.spec';
 import './outputarea/widget.spec';
 
-import './renderers/latex.spec';
-import './renderers/renderers.spec';
-
+import './rendermime/latex.spec';
+import './rendermime/factories.spec';
 import './rendermime/mimemodel.spec';
 import './rendermime/outputmodel.spec';
 import './rendermime/rendermime.spec';

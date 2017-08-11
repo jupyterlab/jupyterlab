@@ -22,12 +22,16 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  Dialog, DOMUtils, showDialog
+  DOMUtils
 } from '@jupyterlab/apputils';
 
 import {
   PathExt
 } from '@jupyterlab/coreutils';
+
+import {
+  renameFile
+} from '@jupyterlab/docmanager';
 
 import {
   FileBrowserModel
@@ -169,7 +173,7 @@ class BreadCrumbs extends Widget {
   /**
    * Handle the `'click'` event for the widget.
    */
-  private _evtClick(event: MouseEvent) {
+  private _evtClick(event: MouseEvent): void {
     // Do nothing if it's not a left mouse press.
     if (event.button !== 0) {
       return;
@@ -189,7 +193,7 @@ class BreadCrumbs extends Widget {
         event.stopPropagation();
         return;
       }
-      node = node.parentElement;
+      node = node.parentElement as HTMLElement;
     }
   }
 
@@ -270,44 +274,24 @@ class BreadCrumbs extends Widget {
 
     const path = BREAD_CRUMB_PATHS[index];
     const model = this._model;
+    const manager = model.manager;
 
     // Move all of the items.
     let promises: Promise<any>[] = [];
-    let names = event.mimeData.getData(CONTENTS_MIME) as string[];
-    for (let name of names) {
-      let oldPath = PathExt.join(this._model.path, name);
+    let oldPaths = event.mimeData.getData(CONTENTS_MIME) as string[];
+    for (let oldPath of oldPaths) {
+      let name = PathExt.basename(oldPath);
       let newPath = PathExt.join(path, name);
-      promises.push(model.manager.rename(oldPath, newPath).catch(error => {
-        if (error.xhr) {
-          error.message = `${error.xhr.status}: error.statusText`;
-        }
-        if (error.message.indexOf('409') !== -1) {
-          let overwrite = Dialog.warnButton({ label: 'OVERWRITE' });
-          let options = {
-            title: 'Overwrite file?',
-            body: `"${newPath}" already exists, overwrite?`,
-            buttons: [Dialog.cancelButton(), overwrite]
-          };
-          return showDialog(options).then(button => {
-            if (!model.isDisposed && button.accept) {
-              return model.manager.deleteFile(newPath).then(() => {
-                if (!model.isDisposed) {
-                  return model.manager.rename(oldPath, newPath);
-                }
-              });
-            }
-          });
-        }
-      }));
+      promises.push(renameFile(manager, oldPath, newPath));
     }
     Promise.all(promises).catch(err => {
       utils.showErrorMessage('Move Error', err);
     });
   }
 
-  private _model: FileBrowserModel = null;
-  private _crumbs: ReadonlyArray<HTMLElement> = null;
-  private _crumbSeps: ReadonlyArray<HTMLElement> = null;
+  private _model: FileBrowserModel;
+  private _crumbs: ReadonlyArray<HTMLElement>;
+  private _crumbSeps: ReadonlyArray<HTMLElement>;
 }
 
 
@@ -351,14 +335,15 @@ namespace Private {
    */
   export
   function updateCrumbs(breadcrumbs: ReadonlyArray<HTMLElement>, separators: ReadonlyArray<HTMLElement>, path: string) {
-    let node = breadcrumbs[0].parentNode;
+    let node = breadcrumbs[0].parentNode as HTMLElement;
 
     // Remove all but the home node.
-    while (node.firstChild.nextSibling) {
-      node.removeChild(node.firstChild.nextSibling);
+    let firstChild = node.firstChild as HTMLElement;
+    while (firstChild && firstChild.nextSibling) {
+      node.removeChild(firstChild.nextSibling);
     }
 
-    let localPath = path.split(':').pop();
+    let localPath = path.split(':').pop() as string;
     let localParts = localPath.split('/');
     let parts = path.split('/');
     if (parts.length > 2) {

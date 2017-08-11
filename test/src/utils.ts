@@ -12,10 +12,6 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
   ClientSession
 } from '@jupyterlab/apputils';
 
@@ -32,7 +28,7 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
-  RenderMime, TextRenderer, HTMLRenderer
+  IRenderMime, RenderMime, RenderedHTML, defaultRendererFactories
 } from '@jupyterlab/rendermime';
 
 
@@ -156,38 +152,30 @@ namespace Private {
   const notebookFactory = new NotebookModelFactory({});
 
 
-  class JSONRenderer extends HTMLRenderer {
+  class JSONRenderer extends RenderedHTML {
 
-    mimeTypes = ['application/json'];
+    mimeType = 'text/html';
 
-    render(options: RenderMime.IRenderOptions): Widget {
-      let source = options.model.data.get(options.mimeType);
-      options.model.data.set(options.mimeType, json2html(source));
-      return super.render(options);
+    renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+      let source = model.data['application/json'];
+      model.setData({ data: { 'text/html': json2html(source) } });
+      return super.renderModel(model);
     }
   }
 
-
-  class InjectionRenderer extends TextRenderer {
-
-    mimeTypes = ['test/injector'];
-
-    render(options: RenderMime.IRenderOptions): Widget {
-      options.model.data.set('application/json', { 'foo': 1 } );
-      return super.render(options);
+  const jsonRendererFactory = {
+    mimeTypes: ['application/json'],
+    safe: true,
+    createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRenderer {
+      return new JSONRenderer(options);
     }
-  }
+  };
 
-  let renderers = [
-    new JSONRenderer(),
-    new InjectionRenderer()
-  ];
-  let items = RenderMime.getDefaultItems();
-  for (let renderer of renderers) {
-    items.push({ mimeType: renderer.mimeTypes[0], renderer });
-  }
   export
-  const rendermime = new RenderMime({ items });
+  const rendermime = new RenderMime({
+    initialFactories: defaultRendererFactories
+  });
+  rendermime.addFactory(jsonRendererFactory, 10);
 }
 
 

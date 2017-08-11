@@ -28,8 +28,9 @@
 
 
 /* select wrapper */
-.jp-Toolbar-item.jp-Notebook-toolbarCellType .jp-select-wrapper {
+.jp-Toolbar-item.jp-Notebook-toolbarCellType > .jp-select-wrapper {
   height: 100%;
+  background-color: var(--jp-notebook-select-background-color);
 }
 
 
@@ -47,4 +48,5 @@
   border: none;
   border-radius: 0;
   outline: none;
+  background-color: transparent;
 }

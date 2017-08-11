@@ -6,10 +6,6 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  IServiceManager
-} from '@jupyterlab/services';
-
-import {
   RunningSessions
 } from '@jupyterlab/running';
 
@@ -20,7 +16,7 @@ import {
 const plugin: JupyterLabPlugin<void> = {
   activate,
   id: 'jupyter.extensions.running-sessions',
-  requires: [IServiceManager, ILayoutRestorer],
+  requires: [ILayoutRestorer],
   autoStart: true
 };
 
@@ -34,8 +30,8 @@ export default plugin;
 /**
  * Activate the running plugin.
  */
-function activate(app: JupyterLab, services: IServiceManager, restorer: ILayoutRestorer): void {
-  let running = new RunningSessions({ manager: services });
+function activate(app: JupyterLab, restorer: ILayoutRestorer): void {
+  let running = new RunningSessions({ manager: app.serviceManager });
   running.id = 'jp-running-sessions';
   running.title.label = 'Running';
 
@@ -49,7 +45,7 @@ function activate(app: JupyterLab, services: IServiceManager, restorer: ILayoutR
     if (model.type.toLowerCase() === 'console') {
       app.commands.execute('console:open', { path });
     } else {
-      app.commands.execute('file-operations:open', { path });
+      app.commands.execute('docmanager:open', { path });
     }
   });
 

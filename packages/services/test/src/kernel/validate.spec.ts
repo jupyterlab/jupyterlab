@@ -109,11 +109,6 @@ describe('kernel/validate', () => {
       validateModel(id);
     });
 
-    it('should fail on missing data', () => {
-      expect(() => validateModel({ name: 'foo' })).to.throwError();
-      expect(() => validateModel({ id: 'foo' })).to.throwError();
-    });
-
   });
 
   describe('#validateSpecModel', () => {

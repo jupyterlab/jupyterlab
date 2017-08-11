@@ -99,18 +99,28 @@ namespace CodeEditor {
     /**
      * A class name added to a selection.
      */
-    className?: string;
+    className: string;
 
     /**
      * A display name added to a selection.
      */
-    displayName?: string;
+    displayName: string;
 
     /**
      * A color for UI elements.
      */
-    color?: string;
+    color: string;
   }
+
+  /**
+   * The default selection style.
+   */
+  export
+  const defaultSelectionStyle: ISelectionStyle = {
+    className: '',
+    displayName: '',
+    color: 'black'
+  };
 
   /**
    * A text selection.
@@ -125,7 +135,7 @@ namespace CodeEditor {
     /**
      * The style of this selection.
      */
-    readonly style?: ISelectionStyle;
+    readonly style: ISelectionStyle;
   }
 
   /**
@@ -367,21 +377,6 @@ namespace CodeEditor {
     selectionStyle: CodeEditor.ISelectionStyle;
 
     /**
-     * Whether line numbers should be displayed. Defaults to false.
-     */
-    lineNumbers: boolean;
-
-    /**
-     * Set to false for horizontal scrolling. Defaults to true.
-     */
-    wordWrap: boolean;
-
-    /**
-     * Whether the editor is read-only.  Defaults to false.
-     */
-    readOnly: boolean;
-
-    /**
      * The DOM node that hosts the editor.
      */
     readonly host: HTMLElement;
@@ -406,6 +401,16 @@ namespace CodeEditor {
      * Get the number of lines in the eidtor.
      */
     readonly lineCount: number;
+
+    /**
+     * Get a config option for the editor.
+     */
+    getOption<K extends keyof IConfig>(option: K): IConfig[K];
+
+    /**
+     * Set a config option for the editor.
+     */
+    setOption<K extends keyof IConfig>(option: K, value: IConfig[K]): void;
 
     /**
      * Returns the content for the given line number.
@@ -472,7 +477,7 @@ namespace CodeEditor {
 
     /**
      * Repaint the editor.
-     * 
+     *
      * #### Notes
      * A repainted editor should fit to its host node.
      */
@@ -543,6 +548,61 @@ namespace CodeEditor {
   type Factory = (options: IOptions) => CodeEditor.IEditor;
 
   /**
+   * The configuration options for an editor.
+   */
+  export
+  interface IConfig {
+    /**
+     * Whether line numbers should be displayed.
+     */
+    lineNumbers: boolean;
+
+    /**
+     * Set to false for horizontal scrolling.
+     */
+    lineWrap: boolean;
+
+    /**
+     * Whether the editor is read-only.
+     */
+    readOnly: boolean;
+
+    /**
+     * The number of spaces a tab is equal to.
+     */
+    tabSize: number;
+
+    /**
+     * Whether to insert spaces when pressing Tab.
+     */
+    insertSpaces: boolean;
+
+    /**
+     * Whether to highlight matching brackets when one of them is selected.
+     */
+    matchBrackets: boolean;
+
+    /**
+     * Whether to automatically close brackets after opening them.
+     */
+    autoClosingBrackets: boolean;
+  }
+
+  /**
+   * The default configuration options for an editor.
+   */
+  export
+  let defaultConfig: IConfig = {
+    lineNumbers: false,
+    lineWrap: true,
+    readOnly: false,
+    tabSize: 4,
+    insertSpaces: true,
+    matchBrackets: true,
+    autoClosingBrackets: true
+  };
+
+  /**
    * The options used to initialize an editor.
    */
   export
@@ -563,24 +623,14 @@ namespace CodeEditor {
     uuid?: string;
 
     /**
-     * Whether line numbers should be displayed. Defaults to `false`.
+     * The default selection style for the editor.
      */
-    lineNumbers?: boolean;
+    selectionStyle?: Partial<CodeEditor.ISelectionStyle>;
 
     /**
-     * Set to false for horizontal scrolling. Defaults to `true`.
+     * The configuration options for the editor.
      */
-    wordWrap?: boolean;
-
-    /**
-     * Whether the editor is read-only. Defaults to `false`.
-     */
-    readOnly?: boolean;
-
-   /**
-    * The default selection style for the editor.
-    */
-    selectionStyle?: CodeEditor.ISelectionStyle;
+    config?: Partial<IConfig>;
   }
 
   export

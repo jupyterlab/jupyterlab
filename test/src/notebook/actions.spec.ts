@@ -52,6 +52,7 @@ describe('@jupyterlab/notebook', () => {
     before(() => {
       return createClientSession().then(s => {
         session = s;
+        return session.initialize();
       });
     });
 
@@ -468,66 +469,62 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#run()', () => {
 
-      beforeEach(() => {
-        return session.initialize();
-      });
-
-      it('should run the selected cells', function (done) {
+      it('should run the selected cells', function () {
         let next = widget.widgets[1] as MarkdownCell;
         widget.select(next);
         let cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
         next.rendered = false;
-        NotebookActions.run(widget, session).then(result => {
+        return NotebookActions.run(widget, session).then(result => {
           expect(result).to.be(true);
           expect(cell.model.outputs.length).to.be.above(0);
           expect(next.rendered).to.be(true);
-        }).then(done, done);
+        });
       });
 
-      it('should be a no-op if there is no model', (done) => {
+      it('should be a no-op if there is no model', () => {
         widget.model = null;
-        NotebookActions.run(widget, session).then(result => {
+        return NotebookActions.run(widget, session).then(result => {
           expect(result).to.be(false);
-        }).then(done, done);
+        });
       });
 
-      it('should activate the last selected cell', (done) => {
+      it('should activate the last selected cell', () => {
         let other = widget.widgets[2];
         widget.select(other);
         other.model.value.text = 'a = 1';
-        NotebookActions.run(widget, session).then(result => {
+        return NotebookActions.run(widget, session).then(result => {
           expect(result).to.be(true);
           expect(widget.activeCell).to.be(other);
-        }).then(done, done);
+        });
       });
 
-      it('should clear the selection', (done) => {
+      it('should clear the selection', () => {
         let next = widget.widgets[1];
         widget.select(next);
-        NotebookActions.run(widget, session).then(result => {
+        return NotebookActions.run(widget, session).then(result => {
           expect(result).to.be(true);
           expect(widget.isSelected(widget.widgets[0])).to.be(false);
-        }).then(done, done);
+        });
       });
 
-      it('should change to command mode', (done) => {
+      it('should change to command mode', () => {
         widget.mode = 'edit';
-        NotebookActions.run(widget, session).then(result => {
+        return NotebookActions.run(widget, session).then(result => {
           expect(result).to.be(true);
           expect(widget.mode).to.be('command');
-        }).then(done, done);
+        });
       });
 
-      it('should handle no session', (done) => {
-        NotebookActions.run(widget, null).then(result => {
+      it('should handle no session', () => {
+        return NotebookActions.run(widget, null).then(result => {
           expect(result).to.be(true);
           let cell = widget.activeCell as CodeCell;
           expect(cell.model.executionCount).to.be(null);
-        }).then(done, done);
+        });
       });
 
-      it('should stop executing code cells on an error', (done) => {
+      it('should stop executing code cells on an error', () => {
         let cell = widget.model.contentFactory.createCodeCell({});
         cell.value.text = ERROR_INPUT;
         widget.model.cells.insert(2, cell);
@@ -535,206 +532,198 @@ describe('@jupyterlab/notebook', () => {
         cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.push(cell);
         widget.select(widget.widgets[widget.widgets.length - 1]);
-        NotebookActions.run(widget, session).then(result => {
+        return NotebookActions.run(widget, session).then(result => {
           expect(result).to.be(false);
           expect(cell.executionCount).to.be(null);
-        }).then(done, done);
+        });
       });
 
-      it('should render all markdown cells on an error', (done) => {
+      it('should render all markdown cells on an error', () => {
         let cell = widget.model.contentFactory.createMarkdownCell({});
         widget.model.cells.push(cell);
         let child = widget.widgets[widget.widgets.length - 1] as MarkdownCell;
         child.rendered = false;
         widget.select(child);
         widget.activeCell.model.value.text = ERROR_INPUT;
-        NotebookActions.run(widget, session).then(result => {
+        return NotebookActions.run(widget, session).then(result => {
           expect(result).to.be(false);
           expect(child.rendered).to.be(true);
-        }).then(done, done);
+        });
       });
 
     });
 
     describe('#runAndAdvance()', () => {
 
-      beforeEach(() => {
-        return session;
-      });
-
-      it('should run the selected cells ', (done) => {
+      it('should run the selected cells ', () => {
         let next = widget.widgets[1] as MarkdownCell;
         widget.select(next);
         let cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
         next.rendered = false;
-        NotebookActions.runAndAdvance(widget, session).then(result => {
+        return NotebookActions.runAndAdvance(widget, session).then(result => {
           expect(result).to.be(true);
           expect(cell.model.outputs.length).to.be.above(0);
           expect(next.rendered).to.be(true);
-        }).then(done, done);
+        });
       });
 
-      it('should be a no-op if there is no model', (done) => {
+      it('should be a no-op if there is no model', () => {
         widget.model = null;
-        NotebookActions.runAndAdvance(widget, session).then(result => {
+        return NotebookActions.runAndAdvance(widget, session).then(result => {
           expect(result).to.be(false);
-        }).then(done, done);
+        });
       });
 
-      it('should clear the existing selection', (done) => {
+      it('should clear the existing selection', () => {
         let next = widget.widgets[2];
         widget.select(next);
-        NotebookActions.runAndAdvance(widget, session).then(result => {
+        return NotebookActions.runAndAdvance(widget, session).then(result => {
           expect(result).to.be(false);
           expect(widget.isSelected(widget.widgets[0])).to.be(false);
-        }).then(done, done);
+        });
       });
 
-      it('should change to command mode', (done) => {
+      it('should change to command mode', () => {
         widget.mode = 'edit';
-        NotebookActions.runAndAdvance(widget, session).then(result => {
+        return NotebookActions.runAndAdvance(widget, session).then(result => {
           expect(result).to.be(true);
           expect(widget.mode).to.be('command');
-        }).then(done, done);
+        });
       });
 
-      it('should activate the cell after the last selected cell', (done) => {
+      it('should activate the cell after the last selected cell', () => {
         let next = widget.widgets[3] as MarkdownCell;
         widget.select(next);
-        NotebookActions.runAndAdvance(widget, session).then(result => {
+        return NotebookActions.runAndAdvance(widget, session).then(result => {
           expect(result).to.be(true);
           expect(widget.activeCellIndex).to.be(4);
-        }).then(done, done);
+        });
       });
 
-      it('should create a new code cell in edit mode if necessary', (done) => {
+      it('should create a new code cell in edit mode if necessary', () => {
         let count = widget.widgets.length;
         widget.activeCellIndex = count - 1;
-        NotebookActions.runAndAdvance(widget, session).then(result => {
+        return NotebookActions.runAndAdvance(widget, session).then(result => {
           expect(result).to.be(true);
           expect(widget.widgets.length).to.be(count + 1);
           expect(widget.activeCell).to.be.a(CodeCell);
           expect(widget.mode).to.be('edit');
-        }).then(done, done);
+        });
       });
 
-      it('should allow an undo of the new cell', (done) => {
+      it('should allow an undo of the new cell', () => {
         let count = widget.widgets.length;
         widget.activeCellIndex = count - 1;
-        NotebookActions.runAndAdvance(widget, session).then(result => {
+        return NotebookActions.runAndAdvance(widget, session).then(result => {
           expect(result).to.be(true);
           NotebookActions.undo(widget);
           expect(widget.widgets.length).to.be(count);
-        }).then(done, done);
+        });
       });
 
-      it('should stop executing code cells on an error', (done) => {
+      it('should stop executing code cells on an error', () => {
         widget.activeCell.model.value.text = ERROR_INPUT;
         let cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.push(cell);
         widget.select(widget.widgets[widget.widgets.length - 1]);
-        NotebookActions.runAndAdvance(widget, session).then(result => {
+        return NotebookActions.runAndAdvance(widget, session).then(result => {
           expect(result).to.be(false);
           expect(cell.executionCount).to.be(null);
-        }).then(done, done);
+        });
       });
 
-      it('should render all markdown cells on an error', (done) => {
+      it('should render all markdown cells on an error', () => {
         widget.activeCell.model.value.text = ERROR_INPUT;
         let cell = widget.widgets[1] as MarkdownCell;
         cell.rendered = false;
         widget.select(cell);
-        NotebookActions.runAndAdvance(widget, session).then(result => {
+        return NotebookActions.runAndAdvance(widget, session).then(result => {
           expect(result).to.be(false);
           expect(cell.rendered).to.be(true);
           expect(widget.activeCellIndex).to.be(2);
-        }).then(done, done);
+        });
       });
 
     });
 
     describe('#runAndInsert()', () => {
 
-      beforeEach(() => {
-        return session.initialize();
-      });
-
-      it('should run the selected cells ', (done) => {
+      it('should run the selected cells ', () => {
         let next = widget.widgets[1] as MarkdownCell;
         widget.select(next);
         let cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
         next.rendered = false;
-        NotebookActions.runAndInsert(widget, session).then(result => {
+        return NotebookActions.runAndInsert(widget, session).then(result => {
           expect(result).to.be(true);
           expect(cell.model.outputs.length).to.be.above(0);
           expect(next.rendered).to.be(true);
-        }).then(done, done);
+        });
       });
 
-      it('should be a no-op if there is no model', (done) => {
+      it('should be a no-op if there is no model', () => {
         widget.model = null;
-        NotebookActions.runAndInsert(widget, session).then(result => {
+        return NotebookActions.runAndInsert(widget, session).then(result => {
           expect(result).to.be(false);
-        }).then(done, done);
+        });
       });
 
-      it('should clear the existing selection', (done) => {
+      it('should clear the existing selection', () => {
         let next = widget.widgets[1];
         widget.select(next);
-        NotebookActions.runAndInsert(widget, session).then(result => {
+        return NotebookActions.runAndInsert(widget, session).then(result => {
           expect(result).to.be(true);
           expect(widget.isSelected(widget.widgets[0])).to.be(false);
-        }).then(done, done);
+        });
       });
 
-      it('should insert a new code cell in edit mode after the last selected cell', (done) => {
+      it('should insert a new code cell in edit mode after the last selected cell', () => {
         let next = widget.widgets[2];
         widget.select(next);
         next.model.value.text = 'a = 1';
         let count = widget.widgets.length;
-        NotebookActions.runAndInsert(widget, session).then(result => {
+        return NotebookActions.runAndInsert(widget, session).then(result => {
           expect(result).to.be(true);
           expect(widget.activeCell).to.be.a(CodeCell);
           expect(widget.mode).to.be('edit');
           expect(widget.widgets.length).to.be(count + 1);
-        }).then(done, done);
+        });
       });
 
-      it('should allow an undo of the cell insert', (done) => {
+      it('should allow an undo of the cell insert', () => {
         let next = widget.widgets[2];
         widget.select(next);
         next.model.value.text = 'a = 1';
         let count = widget.widgets.length;
-        NotebookActions.runAndInsert(widget, session).then(result => {
+        return NotebookActions.runAndInsert(widget, session).then(result => {
           expect(result).to.be(true);
           NotebookActions.undo(widget);
           expect(widget.widgets.length).to.be(count);
-        }).then(done, done);
+        });
       });
 
-      it('should stop executing code cells on an error', (done) => {
+      it('should stop executing code cells on an error', () => {
         widget.activeCell.model.value.text = ERROR_INPUT;
         let cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.push(cell);
         widget.select(widget.widgets[widget.widgets.length - 1]);
-        NotebookActions.runAndInsert(widget, session).then(result => {
+        return NotebookActions.runAndInsert(widget, session).then(result => {
           expect(result).to.be(false);
           expect(cell.executionCount).to.be(null);
-        }).then(done, done);
+        });
       });
 
-      it('should render all markdown cells on an error', (done) => {
+      it('should render all markdown cells on an error', () => {
         widget.activeCell.model.value.text = ERROR_INPUT;
         let cell = widget.widgets[1] as MarkdownCell;
         cell.rendered = false;
         widget.select(cell);
-        NotebookActions.runAndInsert(widget, session).then(result => {
+        return NotebookActions.runAndInsert(widget, session).then(result => {
           expect(result).to.be(false);
           expect(cell.rendered).to.be(true);
           expect(widget.activeCellIndex).to.be(2);
-        }).then(done, done);
+        });
       });
 
     });
@@ -744,76 +733,74 @@ describe('@jupyterlab/notebook', () => {
       beforeEach(() => {
         // Make sure all cells have valid code.
         widget.widgets[2].model.value.text = 'a = 1';
-
-        return session.initialize();
       });
 
-      it('should run all of the cells in the notebok', (done) => {
+      it('should run all of the cells in the notebok', () => {
         let next = widget.widgets[1] as MarkdownCell;
         let cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
         next.rendered = false;
-        NotebookActions.runAll(widget, session).then(result => {
+        return NotebookActions.runAll(widget, session).then(result => {
           expect(result).to.be(true);
           expect(cell.model.outputs.length).to.be.above(0);
           expect(next.rendered).to.be(true);
-        }).then(done, done);
+        });
       });
 
-      it('should be a no-op if there is no model', (done) => {
+      it('should be a no-op if there is no model', () => {
         widget.model = null;
-        NotebookActions.runAll(widget, session).then(result => {
+        return NotebookActions.runAll(widget, session).then(result => {
           expect(result).to.be(false);
-        }).then(done, done);
+        });
       });
 
-      it('should change to command mode', (done) => {
+      it('should change to command mode', () => {
         widget.mode = 'edit';
-        NotebookActions.runAll(widget, session).then(result => {
+        return NotebookActions.runAll(widget, session).then(result => {
           expect(result).to.be(true);
           expect(widget.mode).to.be('command');
-        }).then(done, done);
+        });
       });
 
-      it('should clear the existing selection', (done) => {
+      it('should clear the existing selection', () => {
         let next = widget.widgets[2];
         widget.select(next);
-        NotebookActions.runAll(widget, session).then(result => {
+        return NotebookActions.runAll(widget, session).then(result => {
           expect(result).to.be(true);
           expect(widget.isSelected(widget.widgets[2])).to.be(false);
-        }).then(done, done);
+        });
       });
 
-      it('should activate the last cell', (done) => {
-        NotebookActions.runAll(widget, session).then(result => {
+      it('should activate the last cell', () => {
+        return NotebookActions.runAll(widget, session).then(result => {
           expect(widget.activeCellIndex).to.be(widget.widgets.length - 1);
-        }).then(done, done);
+        });
       });
 
-      it('should stop executing code cells on an error', (done) => {
+      it('should stop executing code cells on an error', () => {
         widget.activeCell.model.value.text = ERROR_INPUT;
         let cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.push(cell);
-        NotebookActions.runAll(widget, session).then(result => {
+        return NotebookActions.runAll(widget, session).then(result => {
           expect(result).to.be(false);
           expect(cell.executionCount).to.be(null);
           expect(widget.activeCellIndex).to.be(widget.widgets.length - 1);
-        }).then(done, done);
+        });
       });
 
-      it('should render all markdown cells on an error', (done) => {
+      it('should render all markdown cells on an error', () => {
         widget.activeCell.model.value.text = ERROR_INPUT;
         let cell = widget.widgets[1] as MarkdownCell;
         cell.rendered = false;
-        NotebookActions.runAll(widget, session).then(result => {
+        return NotebookActions.runAll(widget, session).then(result => {
           expect(result).to.be(false);
           expect(cell.rendered).to.be(true);
-        }).then(done, done);
+        });
       });
 
     });
 
-    describe('#selectAbove()', () => {
+    describe('#selectAbove(`)', () => {
 
       it('should select the cell above the active cell', () => {
         widget.activeCellIndex = 1;
@@ -1234,19 +1221,19 @@ describe('@jupyterlab/notebook', () => {
     describe('#toggleLineNumbers()', () => {
 
       it('should toggle line numbers on the selected cells', () => {
-        let state = widget.activeCell.editor.lineNumbers;
+        let state = widget.activeCell.editor.getOption('lineNumbers');
         NotebookActions.toggleLineNumbers(widget);
-        expect(widget.activeCell.editor.lineNumbers).to.be(!state);
+        expect(widget.activeCell.editor.getOption('lineNumbers')).to.be(!state);
       });
 
       it('should be based on the state of the active cell', () => {
-        let state = widget.activeCell.editor.lineNumbers;
+        let state = widget.activeCell.editor.getOption('lineNumbers');
         let next = widget.widgets[1];
-        next.editor.lineNumbers = !state;
+        next.editor.setOption('lineNumbers', !state);
         widget.select(next);
         NotebookActions.toggleLineNumbers(widget);
-        expect(widget.widgets[0].editor.lineNumbers).to.be(!state);
-        expect(widget.widgets[1].editor.lineNumbers).to.be(!state);
+        expect(widget.widgets[0].editor.getOption('lineNumbers')).to.be(!state);
+        expect(widget.widgets[1].editor.getOption('lineNumbers')).to.be(!state);
       });
 
       it('should preserve the widget mode', () => {
@@ -1268,21 +1255,23 @@ describe('@jupyterlab/notebook', () => {
     describe('#toggleAllLineNumbers()', () => {
 
       it('should toggle line numbers on all cells', () => {
-        let state = widget.activeCell.editor.lineNumbers;
+        let state = widget.activeCell.editor.getOption('lineNumbers');
         NotebookActions.toggleAllLineNumbers(widget);
         for (let i = 0; i < widget.widgets.length; i++) {
-          expect(widget.widgets[i].editor.lineNumbers).to.be(!state);
+          let lineNumbers = widget.widgets[i].editor.getOption('lineNumbers');
+          expect(lineNumbers).to.be(!state);
         }
       });
 
       it('should be based on the state of the active cell', () => {
-        let state = widget.activeCell.editor.lineNumbers;
+        let state = widget.activeCell.editor.getOption('lineNumbers');
         for (let i = 1; i < widget.widgets.length; i++) {
-          widget.widgets[i].editor.lineNumbers = !state;
+          widget.widgets[i].editor.setOption('lineNumbers', !state);
         }
         NotebookActions.toggleAllLineNumbers(widget);
         for (let i = 0; i < widget.widgets.length; i++) {
-          expect(widget.widgets[i].editor.lineNumbers).to.be(!state);
+          let lineNumbers = widget.widgets[i].editor.getOption('lineNumbers');
+          expect(lineNumbers).to.be(!state);
         }
       });
 

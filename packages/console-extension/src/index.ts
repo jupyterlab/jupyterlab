@@ -15,6 +15,10 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
+  PageConfig
+} from '@jupyterlab/coreutils';
+
+import {
   IConsoleTracker, ConsolePanel
 } from '@jupyterlab/console';
 
@@ -23,19 +27,11 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
-  IRenderMime
-} from '@jupyterlab/rendermime';
-
-import {
-  IServiceManager
-} from '@jupyterlab/services';
-
-import {
   find
 } from '@phosphor/algorithm';
 
 import {
-  JSONObject
+  ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
 import {
@@ -78,7 +74,7 @@ namespace CommandIDs {
   const inject = 'console:inject';
 
   export
-  const switchKernel = 'console:switch-kernel';
+  const changeKernel = 'console:change-kernel';
 };
 
 
@@ -90,8 +86,6 @@ const trackerPlugin: JupyterLabPlugin<IConsoleTracker> = {
   id: 'jupyter.services.console-tracker',
   provides: IConsoleTracker,
   requires: [
-    IServiceManager,
-    IRenderMime,
     IMainMenu,
     ICommandPalette,
     ConsolePanel.IContentFactory,
@@ -131,7 +125,8 @@ export default plugins;
 /**
  * Activate the console extension.
  */
-function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: IRenderMime, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): IConsoleTracker {
+function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): IConsoleTracker {
+  let manager = app.serviceManager;
   let { commands, shell } = app;
   let category = 'Console';
   let command: string;
@@ -166,17 +161,27 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
   // Add a launcher item if the launcher is available.
   if (launcher) {
     manager.ready.then(() => {
-      let specs = manager.specs;
+      const specs = manager.specs;
+      if (!specs) {
+        return;
+      }
+      let baseUrl = PageConfig.getBaseUrl();
       for (let name in specs.kernelspecs) {
         let displayName = specs.kernelspecs[name].display_name;
         let rank = name === specs.default ? 0 : Infinity;
+        let kernelIconUrl = specs.kernelspecs[name].resources['logo-64x64'];
+        if (kernelIconUrl) {
+          let index = kernelIconUrl.indexOf('kernelspecs');
+          kernelIconUrl = baseUrl + kernelIconUrl.slice(index);
+        }
         launcher.add({
           displayName,
           category: 'Console',
           name,
-          iconClass: 'jp-ImageCodeConsole',
+          iconClass: 'jp-CodeConsoleIcon',
           callback,
-          rank
+          rank,
+          kernelIconUrl
         });
       }
     });
@@ -192,7 +197,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
     return manager.ready.then(() => {
       let panel = new ConsolePanel({
         manager,
-        rendermime: rendermime.clone(),
+        rendermime: app.rendermime.clone(),
         contentFactory,
         mimeTypeService: editorServices.mimeTypeService,
         ...options
@@ -218,9 +223,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
     execute: (args: Partial<ConsolePanel.IOptions>) => {
       let path = args['path'];
       let widget = tracker.find(value => {
-        if (value.console.session.path === path) {
-          return true;
-        }
+        return value.console.session.path === path;
       });
       if (widget) {
         shell.activateById(widget.id);
@@ -232,6 +235,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
           if (model) {
             return createConsole(args);
           }
+          return Promise.reject(`No running console for path: ${path}`);
         });
       }
     },
@@ -248,7 +252,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
   palette.addItem({ command, category });
 
   // Get the current widget and activate unless the args specify otherwise.
-  function getCurrent(args: JSONObject): ConsolePanel | null {
+  function getCurrent(args: ReadonlyJSONObject): ConsolePanel | null {
     let widget = tracker.currentWidget;
     let activate = args['activate'] !== false;
     if (activate && widget) {
@@ -348,7 +352,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
   commands.addCommand(command, {
     label: 'Close and Shutdown',
     execute: args => {
-      let current = getCurrent(args);
+      const current = getCurrent(args);
       if (!current) {
         return;
       }
@@ -357,7 +361,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
         body: `Are you sure you want to close "${current.title.label}"?`,
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
-        if (result.accept) {
+        if (result.button.accept) {
           current.console.session.shutdown().then(() => {
             current.dispose();
           });
@@ -371,7 +375,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
 
   command = CommandIDs.inject;
   commands.addCommand(command, {
-    execute: (args: JSONObject) => {
+    execute: args => {
       let path = args['path'];
       tracker.find(widget => {
         if (widget.console.session.path === path) {
@@ -381,12 +385,13 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
           widget.console.inject(args['code'] as string);
           return true;
         }
+        return false;
       });
     },
     isEnabled: hasWidget
   });
 
-  command = CommandIDs.switchKernel;
+  command = CommandIDs.changeKernel;
   commands.addCommand(command, {
     label: 'Change Kernel',
     execute: args => {
@@ -408,7 +413,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, rendermime: 
   menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.interrupt });
   menu.addItem({ command: CommandIDs.restart });
-  menu.addItem({ command: CommandIDs.switchKernel });
+  menu.addItem({ command: CommandIDs.changeKernel });
   menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.closeAndShutdown });
 

@@ -414,9 +414,15 @@ class OutputArea extends Widget {
     prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
     panel.addWidget(prompt);
 
-    let output = this.rendermime.render(model);
-    output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
-    panel.addWidget(output);
+    let mimeType = this.rendermime.preferredMimeType(
+      model.data, !model.trusted
+    );
+    if (mimeType) {
+      let output = this.rendermime.createRenderer(mimeType);
+      output.renderModel(model);
+      output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
+      panel.addWidget(output);
+    }
 
     return panel;
   }
@@ -465,11 +471,11 @@ namespace OutputArea {
     };
 
     if (!session.kernel) {
-      return Promise.resolve(void 0);
+      return Promise.reject('Session has no kernel.');
     }
     let future = session.kernel.requestExecute(content, false);
     output.future = future;
-    return future.done;
+    return future.done as Promise<KernelMessage.IExecuteReplyMsg>;
   }
 
   /**

@@ -54,12 +54,12 @@ describe('cells/model', () => {
       it('should accept a base cell argument with a multiline source', () => {
         let cell: nbformat.IRawCell = {
           cell_type: 'raw',
-          source: ['foo', 'bar', 'baz'],
+          source: ['foo\n', 'bar\n', 'baz'],
           metadata: { trusted: false }
         };
         let model = new CellModel({ cell });
         expect(model).to.be.a(CellModel);
-        expect(model.value.text).to.equal((cell.source as string[]).join('\n'));
+        expect(model.value.text).to.equal((cell.source as string[]).join(''));
       });
 
     });
@@ -216,11 +216,11 @@ describe('cells/model', () => {
       it('should always return a string source', () => {
         let cell: nbformat.IRawCell = {
           cell_type: 'raw',
-          source: ['foo', 'bar', 'baz'],
+          source: ['foo\n', 'bar\n', 'baz'],
           metadata: { trusted: false }
         };
         let model = new TestModel({ cell });
-        cell.source = (cell.source as string[]).join('\n');
+        cell.source = (cell.source as string[]).join('');
         expect(model.toJSON()).to.not.equal(cell);
         expect(model.toJSON()).to.eql(cell);
       });

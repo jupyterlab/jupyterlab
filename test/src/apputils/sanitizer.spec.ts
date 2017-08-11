@@ -12,11 +12,6 @@ describe('defaultSanitizer', () => {
 
   describe('#sanitize()', () => {
 
-    it('should allow svg tags', () => {
-      let svg = '<svg>foo</svg>';
-      expect(defaultSanitizer.sanitize(svg)).to.be(svg);
-    });
-
     it('should allow h1 tags', () => {
       let h1 = '<h1>foo</h1>';
       expect(defaultSanitizer.sanitize(h1)).to.be(h1);
@@ -25,6 +20,11 @@ describe('defaultSanitizer', () => {
     it('should allow h2 tags', () => {
       let h2 = '<h2>foo</h2>';
       expect(defaultSanitizer.sanitize(h2)).to.be(h2);
+    });
+
+    it('should not allow svg tags', () => {
+      let svg = '<svg>foo</svg>';
+      expect(defaultSanitizer.sanitize(svg)).to.be('foo');
     });
 
     it('should allow img tags and some attributes', () => {

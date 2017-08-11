@@ -103,14 +103,23 @@ class FileBrowser extends Widget {
     this._manager = model.manager;
     this._crumbs = new BreadCrumbs({ model });
     this.toolbar = new Toolbar<Widget>();
+
+    let directoryPending = false;
     let newFolder = new ToolbarButton({
       className: 'jp-newFolderIcon',
       onClick: () => {
+        if (directoryPending === true) {
+          return;
+        }
+        directoryPending = true;
         this._manager.newUntitled({
           path: model.path,
           type: 'directory'
         }).then(model => {
           this._listing.selectItemByName(model.name);
+          directoryPending = false;
+        }).catch(err => {
+          directoryPending = false;
         });
       },
       tooltip: 'New Folder'
@@ -156,17 +165,6 @@ class FileBrowser extends Widget {
    * The toolbar used by the file browser.
    */
   readonly toolbar: Toolbar<Widget>;
-
-  /**
-   * Dispose of the resources held by the file browser.
-   */
-  dispose() {
-    this._crumbs = null;
-    this._listing = null;
-    this._manager = null;
-    this._model = null;
-    super.dispose();
-  }
 
   /**
    * Create an iterator over the listing's selected items.
@@ -264,7 +262,7 @@ class FileBrowser extends Widget {
    *
    * @returns The path to the selected file.
    */
-  pathForClick(event: MouseEvent): string {
+  pathForClick(event: MouseEvent): string | undefined {
     return this._listing.pathForClick(event);
   }
 
@@ -281,10 +279,9 @@ class FileBrowser extends Widget {
     });
   }
 
-  private _crumbs: BreadCrumbs | null = null;
-  private _listing: DirListing | null = null;
-  private _manager: DocumentManager | null = null;
-  private _model: FileBrowserModel | null = null;
+  private _crumbs: BreadCrumbs;
+  private _listing: DirListing;
+  private _manager: DocumentManager;
   private _showingError = false;
 }
 

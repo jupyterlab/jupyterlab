@@ -3,13 +3,17 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+@import url('~@phosphor/widgets/style/index.css');
 
-/*-----------------------------------------------------------------------------
-| General
-|----------------------------------------------------------------------------*/
+
+.p-Widget.p-mod-hidden {
+  display: none !important;
+}
 
 
 body {
+  font-family: var(--jp-ui-font-family);
+  background: var(--jp-layout-color3);
   margin: 0;
   padding: 0;
   overflow: hidden;
@@ -36,18 +40,21 @@ body {
 
 
 #jp-top-panel {
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color0);
   background: var(--jp-layout-color1);
   display: flex;
   min-height: var(--jp-private-menubar-height);
 }
 
 
-
-/*-----------------------------------------------------------------------------
-| Import children style files
-|----------------------------------------------------------------------------*/
-
+/* Sibling imports */
+@import './datagrid.css';
+@import './dockpanel.css';
+@import './images.css';
+@import './icons.css';
+@import './materialcolors.css';
+@import './menus.css';
+@import './scrollbar.css';
+@import './tabs.css';
+@import './buttons.css';
 @import './sidepanel.css';
-
-

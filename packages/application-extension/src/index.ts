@@ -10,28 +10,31 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IStateDB, PageConfig
+  IStateDB
 } from '@jupyterlab/coreutils';
 
+import {
+  h
+} from '@phosphor/virtualdom';
 
 /**
  * The command IDs used by the application plugin.
  */
 namespace CommandIDs {
   export
-  const activateNextTab: string = 'main-jupyterlab:activate-next-tab';
+  const activateNextTab: string = 'application:activate-next-tab';
 
   export
-  const activatePreviousTab: string = 'main-jupyterlab:activate-previous-tab';
+  const activatePreviousTab: string = 'application:activate-previous-tab';
 
   export
-  const closeAll: string = 'main-jupyterlab:close-all';
+  const closeAll: string = 'application:close-all';
 
   export
-  const setMode: string = 'main-jupyterlab:set-mode';
+  const setMode: string = 'application:set-mode';
 
   export
-  const toggleMode: string = 'main-jupyterlab:toggle-mode';
+  const toggleMode: string = 'application:toggle-mode';
 };
 
 
@@ -44,21 +47,52 @@ const mainPlugin: JupyterLabPlugin<void> = {
   activate: (app: JupyterLab, palette: ICommandPalette) => {
     addCommands(app, palette);
 
-    // Temporary build message for manual rebuild.
-    let buildMessage = PageConfig.getOption('buildRequired');
-    if (buildMessage) {
-      let body = document.createElement('div');
-      body.innerHTML = (
-        '<p>JupyterLab build is out of date.<br>' +
-        'Please run <code>jupyter lab build</code> from<br>' +
-        'the command line and relaunch.</p>'
+    let builder = app.serviceManager.builder;
+
+    let doBuild = () => {
+      return builder.build().then(() => {
+        return showDialog({
+          title: 'Build Complete',
+          body: 'Build successfully completed, reload page?',
+          buttons: [Dialog.cancelButton(),
+                    Dialog.warnButton({ label: 'RELOAD' })]
+        });
+      }).then(result => {
+        if (result.button.accept) {
+          location.reload();
+        }
+      }).catch(err => {
+        showDialog({
+          title: 'Build Failed',
+          body: h.pre(err.message)
+        });
+      });
+    };
+
+    builder.getStatus().then(response => {
+      if (response.status === 'building') {
+        return doBuild();
+      }
+      if (response.status !== 'needed') {
+        return;
+      }
+      let body = h.div(
+        h.p(
+          'JupyterLab build is suggested:',
+          h.br(),
+          h.pre(response.message)
+        )
       );
       showDialog({
         title: 'Build Recommended',
         body,
-        buttons: [Dialog.okButton()]
+        buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'BUILD' })]
+      }).then(result => {
+        if (result.button.accept) {
+          return doBuild();
+        }
       });
-    }
+    });
 
     const message = 'Are you sure you want to exit JupyterLab?\n' +
                     'Any unsaved changes will be lost.';
@@ -69,7 +103,9 @@ const mainPlugin: JupyterLabPlugin<void> = {
     // For more information, see:
     // https://developer.mozilla.org/en/docs/Web/Events/beforeunload
     window.addEventListener('beforeunload', event => {
-      return (event as any).returnValue = message;
+      if (app.isDirty) {
+        return (event as any).returnValue = message;
+      }
     });
   },
   autoStart: true

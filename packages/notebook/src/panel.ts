@@ -11,7 +11,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  Token
+  PromiseDelegate, Token
 } from '@phosphor/coreutils';
 
 import {
@@ -78,7 +78,7 @@ const DIRTY_CLASS = 'jp-mod-dirty';
  * kernel on the context.
  */
 export
-class NotebookPanel extends Widget {
+class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
   /**
    * Construct a new notebook panel.
    */
@@ -132,6 +132,13 @@ class NotebookPanel extends Widget {
   }
 
   /**
+   * A promise that resolves when the notebook panel is ready.
+   */
+  get ready(): Promise<void> {
+    return this._ready.promise;
+  }
+
+  /**
    * The factory used by the widget.
    */
   readonly contentFactory: NotebookPanel.IContentFactory;
@@ -177,11 +184,22 @@ class NotebookPanel extends Widget {
     }
     let oldValue = this._context;
     this._context = newValue;
-    this.rendermime.resolver = newValue;
     // Trigger private, protected, and public changes.
     this._onContextChanged(oldValue, newValue);
     this.onContextChanged(oldValue, newValue);
     this._contextChanged.emit(void 0);
+
+    if (!oldValue) {
+      newValue.ready.then(() => {
+        if (this.notebook.widgets.length === 1) {
+          let model = this.notebook.widgets[0].model;
+          if (model.type === 'code' && model.value.text === '') {
+            this.notebook.mode = 'edit';
+          }
+        }
+        this._ready.resolve(undefined);
+      });
+    }
   }
 
   /**
@@ -367,6 +385,7 @@ class NotebookPanel extends Widget {
   private _context: DocumentRegistry.IContext<INotebookModel> = null;
   private _activated = new Signal<this, void>(this);
   private _contextChanged = new Signal<this, void>(this);
+  private _ready = new PromiseDelegate<void>();
 }
 
 

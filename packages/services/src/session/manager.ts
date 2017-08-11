@@ -36,7 +36,7 @@ class SessionManager implements Session.IManager {
    *
    * @param options - The default options for each session.
    */
-  constructor(options: Session.IOptions = {}) {
+  constructor(options: SessionManager.IOptions = {}) {
     this.serverSettings = (
       options.serverSettings || ServerConnection.makeSettings()
     );
@@ -285,10 +285,29 @@ class SessionManager implements Session.IManager {
 
   private _isDisposed = false;
   private _running: Session.IModel[] = [];
-  private _specs: Kernel.ISpecModels = null;
+  private _specs: Kernel.ISpecModels | null = null;
   private _runningTimer = -1;
   private _specsTimer = -1;
   private _readyPromise: Promise<void>;
   private _specsChanged = new Signal<this, Kernel.ISpecModels>(this);
   private _runningChanged = new Signal<this, Session.IModel[]>(this);
+}
+
+
+
+/**
+ * The namespace for `SessionManager` class statics.
+ */
+export
+namespace SessionManager {
+  /**
+   * The options used to initialize a SessionManager.
+   */
+  export
+  interface IOptions {
+    /**
+     * The server settings for the manager.
+     */
+    serverSettings?: ServerConnection.ISettings;
+  }
 }

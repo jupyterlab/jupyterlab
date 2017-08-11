@@ -14,7 +14,7 @@ import {
 } from '@phosphor/commands';
 
 import {
-  JSONObject
+  ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
 import {
@@ -45,7 +45,7 @@ interface IInstanceTracker<T extends Widget> extends IDisposable {
    * #### Notes
    * If the last widget being tracked is disposed, `null` will be emitted.
    */
-  readonly currentChanged: ISignal<this, T>;
+  readonly currentChanged: ISignal<this, T | null>;
 
   /**
    * A signal emitted when a widget is added.
@@ -63,7 +63,7 @@ interface IInstanceTracker<T extends Widget> extends IDisposable {
    * It is the most recently focused widget, or the most recently added
    * widget if no widget has taken focus.
    */
-  readonly currentWidget: T;
+  readonly currentWidget: T | null;
 
   /**
    * The number of widgets held by the tracker.
@@ -128,7 +128,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   /**
    * A signal emitted when the current widget changes.
    */
-  get currentChanged(): ISignal<this, T> {
+  get currentChanged(): ISignal<this, T | null> {
     return this._currentChanged;
   }
 
@@ -144,6 +144,13 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   }
 
   /**
+   * A signal emitted when a widget is updated.
+   */
+  get widgetUpdated(): ISignal<this, T> {
+    return this._widgetUpdated;
+  }
+
+  /**
    * A namespace for all tracked widgets, (e.g., `notebook`).
    */
   readonly namespace: string;
@@ -155,7 +162,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * It is the most recently focused widget, or the most recently added
    * widget if no widget has taken focus.
    */
-  get currentWidget(): T | null{
+  get currentWidget(): T | null {
     return this._currentWidget;
   }
 
@@ -220,20 +227,19 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * Test whether the tracker is disposed.
    */
   get isDisposed(): boolean {
-    return this._tracker === null;
+    return this._isDisposed;
   }
 
   /**
    * Dispose of the resources held by the tracker.
    */
   dispose(): void {
-    if (this._tracker === null) {
+    if (this.isDisposed) {
       return;
     }
-    let tracker = this._tracker;
-    this._tracker = null;
+    this._isDisposed = true;
     Signal.clearData(this);
-    tracker.dispose();
+    this._tracker.dispose();
   }
 
   /**
@@ -244,7 +250,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * #### Notes
    * If no widget is found, the value returned is `undefined`.
    */
-  find(fn: (widget: T) => boolean): T {
+  find(fn: (widget: T) => boolean): T | undefined {
     return find(this._tracker.widgets, fn);
   }
 
@@ -334,7 +340,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     let { state } = this._restore;
     let widgetName = this._restore.name(widget);
     let oldName = Private.nameProperty.get(widget);
-    let newName = widgetName ? `${this.namespace}:${widgetName}` : null;
+    let newName = widgetName ? `${this.namespace}:${widgetName}` : '';
 
     if (oldName && oldName !== newName) {
       state.remove(oldName);
@@ -347,6 +353,10 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
       let data = this._restore.args(widget);
       state.save(newName, { data });
     }
+
+    if (oldName !== newName) {
+      this._widgetUpdated.emit(widget);
+    }
   }
 
   /**
@@ -355,7 +365,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * #### Notes
    * The default implementation is a no-op.
    */
-  protected onCurrentChanged(value: T): void { /* no-op */ }
+  protected onCurrentChanged(value: T | null): void { /* no-op */ }
 
   /**
    * Handle the current change signal from the internal focus tracker.
@@ -406,12 +416,14 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     }
   }
 
-  private _restore: InstanceTracker.IRestoreOptions<T> = null;
+  private _restore: InstanceTracker.IRestoreOptions<T> | null = null;
   private _tracker = new FocusTracker<T>();
-  private _currentChanged = new Signal<this, T>(this);
+  private _currentChanged = new Signal<this, T | null>(this);
   private _widgetAdded = new Signal<this, T>(this);
+  private _widgetUpdated = new Signal<this, T>(this);
   private _widgets: T[] = [];
   private _currentWidget: T | null = null;
+  private _isDisposed = false;
 }
 
 
@@ -445,7 +457,7 @@ namespace InstanceTracker {
     /**
      * A function that returns the args needed to restore an instance.
      */
-    args: (widget: T) => JSONObject;
+    args: (widget: T) => ReadonlyJSONObject;
 
     /**
      * A function that returns a unique persistent name for this instance.

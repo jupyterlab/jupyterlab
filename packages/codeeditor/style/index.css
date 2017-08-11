@@ -15,9 +15,9 @@
 
 .jp-JSONEditor-host {
   flex: 1 1 auto;
-  border: var(--jp-border-width) solid #cfcfcf;
+  border: var(--jp-border-width) solid var(--jp-border-color1);
   border-radius: 0px;
-  background: #f7f7f7;
+  background: var(--jp-layout-color2);
   min-height: 50px;
   margin-left: 12px;
   margin-right: 12px;

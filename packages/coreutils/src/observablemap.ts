@@ -44,7 +44,7 @@ interface IObservableMap<T> extends IDisposable, IObservable {
    * @returns the old value for the key, or undefined
    *   if that did not exist.
    */
-  set(key: string, value: T): T;
+  set(key: string, value: T): T | undefined;
 
   /**
    * Get a value for a given key.
@@ -53,7 +53,7 @@ interface IObservableMap<T> extends IDisposable, IObservable {
    *
    * @returns the value for that key.
    */
-  get(key: string): T;
+  get(key: string): T | undefined;
 
   /**
    * Check whether the map has a key.
@@ -86,7 +86,7 @@ interface IObservableMap<T> extends IDisposable, IObservable {
    * @returns the value of the given key,
    *   or undefined if that does not exist.
    */
-  delete(key: string): T;
+  delete(key: string): T | undefined;
 
   /**
    * Set the ObservableMap to an empty map.
@@ -143,12 +143,12 @@ namespace IObservableMap {
     /**
      * The old value of the change.
      */
-    oldValue: T;
+    oldValue: T | undefined;
 
     /**
      * The new value of the change.
      */
-    newValue: T;
+    newValue: T | undefined;
   }
 }
 
@@ -189,7 +189,7 @@ class ObservableMap<T> implements IObservableMap<T> {
    * Whether this map has been disposed.
    */
   get isDisposed(): boolean {
-    return this._map === null;
+    return this._isDisposed;
   }
 
   /**
@@ -214,7 +214,7 @@ class ObservableMap<T> implements IObservableMap<T> {
    * #### Notes
    * This is a no-op if the value does not change.
    */
-  set(key: string, value: T): T {
+  set(key: string, value: T): T | undefined {
     let oldVal = this._map.get(key);
     if (value === undefined) {
       throw Error('Cannot set an undefined value, use remove');
@@ -222,7 +222,7 @@ class ObservableMap<T> implements IObservableMap<T> {
     // Bail if the value does not change.
     let itemCmp = this._itemCmp;
     if (oldVal !== undefined && itemCmp(oldVal, value)) {
-      return;
+      return oldVal;
     }
     this._map.set(key, value);
     this._changed.emit({
@@ -241,7 +241,7 @@ class ObservableMap<T> implements IObservableMap<T> {
    *
    * @returns the value for that key.
    */
-  get(key: string): T {
+  get(key: string): T | undefined {
     return this._map.get(key);
   }
 
@@ -291,7 +291,7 @@ class ObservableMap<T> implements IObservableMap<T> {
    * @returns the value of the given key,
    *   or undefined if that does not exist.
    */
-  delete(key: string): T {
+  delete(key: string): T | undefined {
     let oldVal = this._map.get(key);
     this._map.delete(key);
     this._changed.emit({
@@ -318,17 +318,18 @@ class ObservableMap<T> implements IObservableMap<T> {
    * Dispose of the resources held by the map.
    */
   dispose(): void {
-    if (this._map === null) {
+    if (this.isDisposed) {
       return;
     }
+    this._isDisposed = true;
     Signal.clearData(this);
     this._map.clear();
-    this._map = null;
   }
 
   private _map: Map<string, T> = new Map<string, T>();
   private _itemCmp: (first: T, second: T) => boolean;
   private _changed = new Signal<this, IObservableMap.IChangedArgs<T>>(this);
+  private _isDisposed = false;
 }
 
 

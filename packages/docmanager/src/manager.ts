@@ -87,7 +87,7 @@ class DocumentManager implements IDisposable {
     this.services = options.manager;
 
     this._opener = options.opener;
-    this._modelDBFactory = options.modelDBFactory;
+    this._modelDBFactory = options.modelDBFactory || null;
 
     let widgetManager = new DocumentWidgetManager({ registry: this.registry });
     widgetManager.activateRequested.connect(this._onActivateRequested, this);
@@ -115,24 +115,22 @@ class DocumentManager implements IDisposable {
    * Get whether the document manager has been disposed.
    */
   get isDisposed(): boolean {
-    return this._widgetManager === null;
+    return this._isDisposed;
   }
 
   /**
    * Dispose of the resources held by the document manager.
    */
   dispose(): void {
-    if (this._widgetManager === null) {
+    if (this.isDisposed) {
       return;
     }
-
-    let widgetManager = this._widgetManager;
-    this._widgetManager = null;
+    this._isDisposed = true;
     Signal.clearData(this);
     each(toArray(this._contexts), context => {
-      widgetManager.closeWidgets(context);
+      this._widgetManager.closeWidgets(context);
     });
-    widgetManager.dispose();
+    this._widgetManager.dispose();
     this._contexts.length = 0;
   }
 
@@ -147,7 +145,7 @@ class DocumentManager implements IDisposable {
    *  Uses the same widget factory and context as the source, or returns
    *  `undefined` if the source widget is not managed by this manager.
    */
-  cloneWidget(widget: Widget): Widget {
+  cloneWidget(widget: Widget): Widget | undefined {
     return this._widgetManager.cloneWidget(widget);
   }
 
@@ -182,7 +180,7 @@ class DocumentManager implements IDisposable {
    *
    * @returns The context associated with the widget, or `undefined`.
    */
-  contextForWidget(widget: Widget): DocumentRegistry.Context {
+  contextForWidget(widget: Widget): DocumentRegistry.Context | undefined {
     return this._widgetManager.contextForWidget(widget);
   }
 
@@ -214,7 +212,7 @@ class DocumentManager implements IDisposable {
    * This function will return `undefined` if a valid widget factory
    * cannot be found.
    */
-  createNew(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
+  createNew(path: string, widgetName='default', kernel?: Partial<Kernel.IModel>): Widget {
     return this._createOrOpenDocument('create', path, widgetName, kernel);
   }
 
@@ -248,12 +246,11 @@ class DocumentManager implements IDisposable {
    * This can be used to use an existing widget instead of opening
    * a new widget.
    */
-  findWidget(path: string, widgetName='default'): Widget {
+  findWidget(path: string, widgetName='default'): Widget | undefined {
     if (widgetName === 'default') {
-      let extname = DocumentRegistry.extname(path);
-      let factory = this.registry.defaultWidgetFactory(extname);
+      let factory = this.registry.defaultWidgetFactory(path);
       if (!factory) {
-        return;
+        return undefined;
       }
       widgetName = factory.name;
     }
@@ -261,6 +258,7 @@ class DocumentManager implements IDisposable {
     if (context) {
       return this._widgetManager.findWidget(context, widgetName);
     }
+    return undefined;
   }
 
   /**
@@ -290,7 +288,7 @@ class DocumentManager implements IDisposable {
    * This function will return `undefined` if a valid widget factory
    * cannot be found.
    */
-  open(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
+  open(path: string, widgetName='default', kernel?: Partial<Kernel.IModel>): Widget | undefined {
     return this._createOrOpenDocument('open', path, widgetName, kernel);
   }
 
@@ -310,7 +308,7 @@ class DocumentManager implements IDisposable {
    * This function will return `undefined` if a valid widget factory
    * cannot be found.
    */
-  openOrReveal(path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
+  openOrReveal(path: string, widgetName='default', kernel?: Partial<Kernel.IModel>): Widget | undefined {
     let widget = this.findWidget(path, widgetName);
     if (widget) {
       this._opener.open(widget);
@@ -356,7 +354,7 @@ class DocumentManager implements IDisposable {
   /**
    * Find a context for a given path and factory name.
    */
-  private _findContext(path: string, factoryName: string): Private.IContext {
+  private _findContext(path: string, factoryName: string): Private.IContext | undefined {
     return find(this._contexts, context => {
       return context.factoryName === factoryName && context.path === path;
     });
@@ -365,7 +363,7 @@ class DocumentManager implements IDisposable {
   /**
    * Get a context for a given path.
    */
-  private _contextForPath(path: string): Private.IContext {
+  private _contextForPath(path: string): Private.IContext | undefined {
     return find(this._contexts, context => context.path === path);
   }
 
@@ -377,7 +375,7 @@ class DocumentManager implements IDisposable {
       this._widgetManager.adoptWidget(context, widget);
       this._opener.open(widget);
     };
-    let modelDBFactory = this.services.contents.getModelDBFactory(path) || null;
+    let modelDBFactory = this.services.contents.getModelDBFactory(path) || undefined;
     let context = new Context({
       opener: adopter,
       manager: this.services,
@@ -409,13 +407,12 @@ class DocumentManager implements IDisposable {
   /**
    * Get the widget factory for a given widget name.
    */
-  private _widgetFactoryFor(path: string, widgetName: string): DocumentRegistry.WidgetFactory {
+  private _widgetFactoryFor(path: string, widgetName: string): DocumentRegistry.WidgetFactory | undefined {
     let { registry } = this;
     if (widgetName === 'default') {
-      let extname = DocumentRegistry.extname(path);
-      let factory = registry.defaultWidgetFactory(extname);
+      let factory = registry.defaultWidgetFactory(path);
       if (!factory) {
-        return;
+        return undefined;
       }
       widgetName = factory.name;
     }
@@ -430,28 +427,28 @@ class DocumentManager implements IDisposable {
    * The two cases differ in how the document context is handled, but the creation
    * of the widget and launching of the kernel are identical.
    */
-  private _createOrOpenDocument(which: 'open'|'create', path: string, widgetName='default', kernel?: Kernel.IModel): Widget {
+  private _createOrOpenDocument(which: 'open'|'create', path: string, widgetName='default', kernel?: Partial<Kernel.IModel>): Widget | undefined {
     let widgetFactory = this._widgetFactoryFor(path, widgetName);
     if (!widgetFactory) {
-      return;
+      return undefined;
     }
-    let factory = this.registry.getModelFactory(widgetFactory.modelName);
+    let modelName = widgetFactory.modelName || 'text';
+    let factory = this.registry.getModelFactory(modelName);
     if (!factory) {
-      return;
+      return undefined;
     }
 
     // Handle the kernel pereference.
-    let ext = DocumentRegistry.extname(path);
     let preference = this.registry.getKernelPreference(
-      ext, widgetFactory.name, kernel
+      path, widgetFactory.name, kernel
     );
 
-    let context: Private.IContext = null;
+    let context: Private.IContext | null = null;
 
     // Handle the load-from-disk case
     if (which === 'open') {
       // Use an existing context if available.
-      context = this._findContext(path, factory.name);
+      context = this._findContext(path, factory.name) || null;
       if (!context) {
         context = this._createContext(path, factory, preference);
         // Populate the model, either from disk or a
@@ -464,7 +461,7 @@ class DocumentManager implements IDisposable {
       context.save();
     }
 
-    let widget = this._widgetManager.createWidget(widgetFactory, context);
+    let widget = this._widgetManager.createWidget(widgetFactory, context!);
     this._opener.open(widget);
     return widget;
   }
@@ -478,9 +475,10 @@ class DocumentManager implements IDisposable {
 
   private _activateRequested = new Signal<this, string>(this);
   private _contexts: Private.IContext[] = [];
-  private _modelDBFactory: ModelDB.IFactory = null;
-  private _opener: DocumentManager.IWidgetOpener = null;
-  private _widgetManager: DocumentWidgetManager = null;
+  private _modelDBFactory: ModelDB.IFactory | null = null;
+  private _opener: DocumentManager.IWidgetOpener;
+  private _widgetManager: DocumentWidgetManager;
+  private _isDisposed = false;
 }
 
 
@@ -536,9 +534,9 @@ namespace Private {
    * An attached property for a context save handler.
    */
   export
-  const saveHandlerProperty = new AttachedProperty<DocumentRegistry.Context, SaveHandler>({
+  const saveHandlerProperty = new AttachedProperty<DocumentRegistry.Context, SaveHandler | undefined>({
     name: 'saveHandler',
-    create: () => null
+    create: () => undefined
   });
 
   /**

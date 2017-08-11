@@ -7,6 +7,7 @@ from __future__ import print_function
 
 import os
 import sys
+from tornado.ioloop import IOLoop
 
 from jupyter_core.application import JupyterApp, base_flags, base_aliases
 
@@ -56,7 +57,12 @@ class InstallLabExtensionApp(BaseExtensionApp):
         [install_extension(arg, self.app_dir, logger=self.log)
          for arg in self.extra_args]
         if self.should_build:
-            build(self.app_dir, logger=self.log)
+            try:
+                build(self.app_dir, logger=self.log)
+            except Exception as e:
+                for arg in self.extra_args:
+                    uninstall_extension(arg, self.app_dir, logger=self.log)
+                raise e
 
 
 class LinkLabExtensionApp(BaseExtensionApp):
@@ -76,7 +82,12 @@ class LinkLabExtensionApp(BaseExtensionApp):
         [link_package(arg, self.app_dir, logger=self.log)
          for arg in self.extra_args]
         if self.should_build:
-            build(self.app_dir, logger=self.log)
+            try:
+                build(self.app_dir, logger=self.log)
+            except Exception as e:
+                for arg in self.extra_args:
+                    unlink_package(arg, self.app_dir, logger=self.log)
+                raise e
 
 
 class UnlinkLabExtensionApp(BaseExtensionApp):
@@ -110,15 +121,6 @@ class ListLabExtensionsApp(BaseExtensionApp):
 
     def start(self):
         list_extensions(self.app_dir, logger=self.log)
-
-
-class ListLinkedLabExtensionsApp(BaseExtensionApp):
-    description = "List the linked packages"
-
-    def start(self):
-        linked = _get_linked_packages(self.app_dir, logger=self.log)
-        for path in linked.values():
-            print(path)
 
 
 class EnableLabExtensionsApp(BaseExtensionApp):
@@ -157,7 +159,6 @@ class LabExtensionApp(JupyterApp):
         list=(ListLabExtensionsApp, "List labextensions"),
         link=(LinkLabExtensionApp, "Link labextension(s)"),
         unlink=(UnlinkLabExtensionApp, "Unlink labextension(s)"),
-        listlinked=(ListLinkedLabExtensionsApp, "List linked extensions"),
         enable=(EnableLabExtensionsApp, "Enable labextension(s)"),
         disable=(DisableLabExtensionsApp, "Disable labextensions(s)")
     )

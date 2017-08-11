@@ -4,23 +4,54 @@
 import expect = require('expect.js');
 
 import {
-  Widget
+  Message
+} from '@phosphor/messaging';
+
+import {
+  PanelLayout, Widget
 } from '@phosphor/widgets';
 
 import {
   ABCWidgetFactory, Base64ModelFactory, DocumentModel,
-  DocumentRegistry, TextModelFactory, Context
+  DocumentRegistry, TextModelFactory, Context,
+  MimeDocument, MimeDocumentFactory
 } from '@jupyterlab/docregistry';
 
 import {
-  createFileContext
+  createFileContext, defaultRenderMime
 } from '../utils';
 
 
-class WidgetFactory extends ABCWidgetFactory<Widget, DocumentRegistry.IModel> {
+const RENDERMIME = defaultRenderMime();
 
-  createNewWidget(context: DocumentRegistry.Context): Widget {
-    return new Widget();
+
+class LogRenderer extends MimeDocument {
+  methods: string[] = [];
+
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+    this.methods.push('onAfterAttach');
+  }
+
+  protected onUpdateRequest(msg: Message): void {
+    super.onUpdateRequest(msg);
+    this.methods.push('onUpdateRequest');
+  }
+}
+
+
+class DocWidget extends Widget implements DocumentRegistry.IReadyWidget {
+  get ready(): Promise<void> {
+    return Promise.resolve(undefined);
+  }
+}
+
+
+class WidgetFactory extends ABCWidgetFactory<DocumentRegistry.IReadyWidget, DocumentRegistry.IModel> {
+  protected createNewWidget(context: DocumentRegistry.Context): DocumentRegistry.IReadyWidget {
+    let widget = new DocWidget();
+    widget.addClass('WidgetFactory');
+    return widget;
   }
 }
 
@@ -28,12 +59,12 @@ class WidgetFactory extends ABCWidgetFactory<Widget, DocumentRegistry.IModel> {
 function createFactory(): WidgetFactory {
   return new WidgetFactory({
     name: 'test',
-    fileExtensions: ['.txt']
+    fileTypes: ['text']
   });
 }
 
 
-describe('docmanager/default', () => {
+describe('docregistry/default', () => {
 
   let context: Context<DocumentRegistry.IModel>;
 
@@ -47,14 +78,14 @@ describe('docmanager/default', () => {
 
   describe('ABCWidgetFactory', () => {
 
-    describe('#fileExtensions', () => {
+    describe('#fileTypes', () => {
 
       it('should be the value passed in', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileExtensions: ['.txt'],
+          fileTypes: ['text'],
         });
-        expect(factory.fileExtensions).to.eql(['.txt']);
+        expect(factory.fileTypes).to.eql(['text']);
       });
 
     });
@@ -64,7 +95,7 @@ describe('docmanager/default', () => {
       it('should be the value passed in', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileExtensions: ['.txt'],
+          fileTypes: ['text'],
         });
         expect(factory.name).to.be('test');
       });
@@ -76,7 +107,7 @@ describe('docmanager/default', () => {
       it('should default to an empty array', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileExtensions: ['.txt'],
+          fileTypes: ['text'],
         });
         expect(factory.defaultFor).to.eql([]);
       });
@@ -84,10 +115,10 @@ describe('docmanager/default', () => {
       it('should be the value passed in', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileExtensions: ['.txt'],
-          defaultFor: ['.md']
+          fileTypes: ['text'],
+          defaultFor: ['text']
         });
-        expect(factory.defaultFor).to.eql(['.md']);
+        expect(factory.defaultFor).to.eql(['text']);
       });
 
     });
@@ -97,7 +128,7 @@ describe('docmanager/default', () => {
       it('should default to false', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileExtensions: ['.txt'],
+          fileTypes: ['text'],
         });
         expect(factory.readOnly).to.be(false);
       });
@@ -105,7 +136,7 @@ describe('docmanager/default', () => {
       it('should be the value passed in', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileExtensions: ['.txt'],
+          fileTypes: ['text'],
           readOnly: true
         });
         expect(factory.readOnly).to.be(true);
@@ -118,7 +149,7 @@ describe('docmanager/default', () => {
       it('should default to `text`', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileExtensions: ['.txt'],
+          fileTypes: ['text'],
         });
         expect(factory.modelName).to.be('text');
       });
@@ -126,7 +157,7 @@ describe('docmanager/default', () => {
       it('should be the value passed in', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileExtensions: ['.txt'],
+          fileTypes: ['text'],
           modelName: 'notebook'
         });
         expect(factory.modelName).to.be('notebook');
@@ -138,7 +169,7 @@ describe('docmanager/default', () => {
       it('should default to false', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileExtensions: ['.txt'],
+          fileTypes: ['text'],
         });
         expect(factory.preferKernel).to.be(false);
       });
@@ -146,7 +177,7 @@ describe('docmanager/default', () => {
       it('should be the value passed in', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileExtensions: ['.txt'],
+          fileTypes: ['text'],
           preferKernel: true
         });
         expect(factory.preferKernel).to.be(true);
@@ -159,7 +190,7 @@ describe('docmanager/default', () => {
       it('should default to false', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileExtensions: ['.txt'],
+          fileTypes: ['text'],
         });
         expect(factory.canStartKernel).to.be(false);
       });
@@ -167,7 +198,7 @@ describe('docmanager/default', () => {
       it('should be the value passed in', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileExtensions: ['.txt'],
+          fileTypes: ['text'],
           canStartKernel: true
         });
         expect(factory.canStartKernel).to.be(true);
@@ -448,7 +479,9 @@ describe('docmanager/default', () => {
 
       it('should serialize the model to JSON', () => {
         let model = new DocumentModel();
-        expect(model.toJSON()).to.be('""');
+        let data = { 'foo': 1 };
+        model.fromJSON(data);
+        expect(model.toJSON()).to.eql(data);
       });
 
     });
@@ -457,8 +490,9 @@ describe('docmanager/default', () => {
 
       it('should deserialize the model from JSON', () => {
         let model = new DocumentModel();
-        model.fromJSON('"foo"');
-        expect(model.toString()).to.be('foo');
+        let data = null;
+        model.fromJSON(data);
+        expect(model.toString()).to.be('null');
       });
 
     });
@@ -550,4 +584,61 @@ describe('docmanager/default', () => {
 
   });
 
+  describe('MimeDocumentFactory', () => {
+
+    describe('#createNew()', () => {
+
+      it('should require a context parameter', () => {
+        let widgetFactory = new MimeDocumentFactory({
+          name: 'markdown',
+          fileTypes: ['markdown'],
+          rendermime: RENDERMIME,
+          primaryFileType: DocumentRegistry.defaultTextFileType
+        });
+        expect(widgetFactory.createNew(context)).to.be.a(MimeDocument);
+      });
+
+    });
+
+  });
+
+  describe('MimeDocument', () => {
+
+    describe('#constructor()', () => {
+
+      it('should require options', () => {
+        let widget = new MimeDocument({
+          context,
+          rendermime: RENDERMIME,
+          mimeType: 'text/markdown',
+          renderTimeout: 1000,
+          dataType: 'string'
+        });
+        expect(widget).to.be.a(MimeDocument);
+      });
+
+    });
+
+    describe('#ready', () => {
+
+      it('should resolve when the widget is ready', () => {
+        let widget = new LogRenderer({
+          context,
+          rendermime: RENDERMIME,
+          mimeType: 'text/markdown',
+          renderTimeout: 1000,
+          dataType: 'string'
+        });
+        context.save();
+        return widget.ready.then(() => {
+          let layout = widget.layout as PanelLayout;
+          expect(layout.widgets.length).to.be(2);
+        });
+      });
+
+    });
+
+  });
+
 });
+

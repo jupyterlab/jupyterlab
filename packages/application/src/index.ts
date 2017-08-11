@@ -1,9 +1,36 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+// Local CSS must be loaded prior to loading other libs.
+import '../style/index.css';
+
+import {
+  CommandLinker
+} from '@jupyterlab/apputils';
+
+import {
+  Base64ModelFactory, DocumentRegistry
+} from '@jupyterlab/docregistry';
+
+import {
+  IRenderMime, RenderMime, defaultRendererFactories
+} from '@jupyterlab/rendermime';
+
+import {
+  ServiceManager
+} from '@jupyterlab/services';
+
 import {
   Application, IPlugin
 } from '@phosphor/application';
+
+import {
+  DisposableDelegate, IDisposable
+} from '@phosphor/disposable';
+
+import {
+  createRendermimePlugins
+} from './mimerenderers';
 
 import {
   ApplicationShell
@@ -12,7 +39,6 @@ import {
 export { ApplicationShell } from './shell';
 export { ILayoutRestorer, LayoutRestorer } from './layoutrestorer';
 
-import '../style/index.css';
 
 /**
  * The type for all JupyterLab plugins.
@@ -42,6 +68,54 @@ class JupyterLab extends Application<ApplicationShell> {
     if (options.devMode) {
       this.shell.addClass('jp-mod-devMode');
     }
+
+    this.serviceManager = new ServiceManager();
+
+    let linker = new CommandLinker({ commands: this.commands });
+    this.commandLinker = linker;
+
+    let linkHandler = {
+      handleLink: (node: HTMLElement, path: string) => {
+        linker.connectNode(node, 'docmanager:open', { path });
+      }
+    };
+    let initialFactories = defaultRendererFactories;
+    this.rendermime = new RenderMime({ initialFactories, linkHandler });
+
+    let registry = this.docRegistry = new DocumentRegistry();
+    registry.addModelFactory(new Base64ModelFactory());
+
+    if (options.mimeExtensions) {
+      let plugins = createRendermimePlugins(options.mimeExtensions);
+      plugins.forEach(plugin => { this.registerPlugin(plugin); });
+    }
+  }
+
+  /**
+   * The document registry instance used by the application.
+   */
+  readonly docRegistry: DocumentRegistry;
+
+  /**
+   * The rendermime instance used by the application.
+   */
+  readonly rendermime: RenderMime;
+
+  /**
+   * The command linker used by the application.
+   */
+  readonly commandLinker: CommandLinker;
+
+  /**
+   * The service manager used by the application.
+   */
+  readonly serviceManager: ServiceManager;
+
+  /**
+   * Whether the application is dirty.
+   */
+  get isDirty(): boolean {
+    return this._dirtyCount > 0;
   }
 
   /**
@@ -59,6 +133,18 @@ class JupyterLab extends Application<ApplicationShell> {
    */
   get restored(): Promise<ApplicationShell.ILayout> {
     return this.shell.restored;
+  }
+
+  /**
+   * Set the application state to dirty.
+   *
+   * @returns A disposable used to clear the dirty state for the caller.
+   */
+  setDirty(): IDisposable {
+    this._dirtyCount++;
+    return new DisposableDelegate(() => {
+      this._dirtyCount = Math.max(0, this._dirtyCount - 1);
+    });
   }
 
   /**
@@ -88,6 +174,7 @@ class JupyterLab extends Application<ApplicationShell> {
   }
 
   private _info: JupyterLab.IInfo;
+  private _dirtyCount = 0;
 }
 
 
@@ -136,6 +223,11 @@ namespace JupyterLab {
      * The assets directory of the app on the server.
      */
     assetsDir?: string;
+
+    /**
+     * The mime renderer extensions.
+     */
+    mimeExtensions?: IRenderMime.IExtensionModule[];
   }
 
   /**

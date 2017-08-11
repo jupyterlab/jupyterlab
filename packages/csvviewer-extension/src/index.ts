@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ILayoutRestorer,JupyterLab, JupyterLabPlugin
+  ILayoutRestorer, JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -12,10 +12,6 @@ import {
 import {
   CSVViewer, CSVViewerFactory
 } from '@jupyterlab/csvviewer';
-
-import {
-  IDocumentRegistry
-} from '@jupyterlab/docregistry';
 
 
 /**
@@ -30,7 +26,7 @@ const FACTORY = 'Table';
 const plugin: JupyterLabPlugin<void> = {
   activate,
   id: 'jupyter.extensions.csv-handler',
-  requires: [IDocumentRegistry, ILayoutRestorer],
+  requires: [ILayoutRestorer],
   autoStart: true
 };
 
@@ -44,27 +40,33 @@ export default plugin;
 /**
  * Activate the table widget extension.
  */
-function activate(app: JupyterLab, registry: IDocumentRegistry, restorer: ILayoutRestorer): void {
+function activate(app: JupyterLab, restorer: ILayoutRestorer): void {
   const factory = new CSVViewerFactory({
     name: FACTORY,
-    fileExtensions: ['.csv'],
-    defaultFor: ['.csv'],
+    fileTypes: ['csv'],
+    defaultFor: ['csv'],
     readOnly: true
   });
   const tracker = new InstanceTracker<CSVViewer>({ namespace: 'csvviewer' });
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command: 'file-operations:open',
+    command: 'docmanager:open',
     args: widget => ({ path: widget.context.path, factory: FACTORY }),
     name: widget => widget.context.path
   });
 
-  registry.addWidgetFactory(factory);
+  app.docRegistry.addWidgetFactory(factory);
+  let ft = app.docRegistry.getFileType('csv');
   factory.widgetCreated.connect((sender, widget) => {
     // Track the widget.
     tracker.add(widget);
     // Notify the instance tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => { tracker.save(widget); });
+
+    if (ft) {
+      widget.title.iconClass = ft.iconClass;
+      widget.title.iconLabel = ft.iconLabel;
+    }
   });
 }

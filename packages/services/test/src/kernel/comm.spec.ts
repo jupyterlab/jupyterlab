@@ -23,7 +23,6 @@ describe('jupyter.services - Comm', () => {
 
   beforeEach(() => {
     tester = new KernelTester();
-    debugger;
     return Kernel.startNew().then(k => {
       kernel = k;
       return kernel.ready;
@@ -301,9 +300,14 @@ describe('jupyter.services - Comm', () => {
         let comm = kernel.connectToComm('test');
         tester.onMessage((msg: KernelMessage.ICommOpenMsg) => {
           expect(msg.content.data).to.eql({ foo: 'bar' });
+          let decoder = new TextDecoder('utf8');
+          let item = msg.buffers[0] as DataView;
+          expect(decoder.decode(item)).to.be('hello');
           done();
         });
-        comm.open({ foo: 'bar' }, { fizz: 'buzz' });
+        let encoder = new TextEncoder('utf8');
+        let data = encoder.encode('hello');
+        comm.open({ foo: 'bar' }, { fizz: 'buzz' }, [data, data.buffer]);
       });
 
       it('should yield a future', (done) => {
@@ -367,9 +371,14 @@ describe('jupyter.services - Comm', () => {
         let comm = kernel.connectToComm('test');
         tester.onMessage((msg: KernelMessage.ICommCloseMsg) => {
           expect(msg.content.data).to.eql({ foo: 'bar' });
+          let decoder = new TextDecoder('utf8');
+          let item = msg.buffers[0] as DataView;
+          expect(decoder.decode(item)).to.be('hello');
           done();
         });
-        comm.close({ foo: 'bar' }, { });
+        let encoder = new TextEncoder('utf8');
+        let data = encoder.encode('hello');
+        comm.close({ foo: 'bar' }, { }, [data, data.buffer]);
       });
 
       it('should trigger an onClose', (done) => {
@@ -384,13 +393,13 @@ describe('jupyter.services - Comm', () => {
       it('should not send subsequent messages', () => {
         let comm = kernel.connectToComm('test');
         comm.close({ foo: 'bar' });
-        expect(comm.send('test')).to.be(void 0);
+        expect(() => { comm.send('test'); }).to.throwError();
       });
 
-      it('should be a no-op if already closed', () => {
+      it('should throw if already closed', () => {
         let comm = kernel.connectToComm('test');
         comm.close({ foo: 'bar' });
-        comm.close();
+        expect(() => { comm.close(); }).to.throwError();
       });
 
       it('should yield a future', (done) => {

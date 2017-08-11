@@ -1,42 +1,29 @@
-// Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
-
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
 import {
-  JSONObject
+  ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
 import {
-  IObservableJSON, ObservableJSON
-} from '@jupyterlab/coreutils';
-
-import {
-  RenderMime
-} from './rendermime';
+  IRenderMime
+} from '@jupyterlab/rendermime-interfaces';
 
 
 /**
  * The default mime model implementation.
  */
 export
-class MimeModel implements RenderMime.IMimeModel {
+class MimeModel implements IRenderMime.IMimeModel {
   /**
    * Construct a new mime model.
    */
   constructor(options: MimeModel.IOptions = {}) {
     this.trusted = !!options.trusted;
-    this.data = new ObservableJSON({ values: options.data });
-    this.metadata = new ObservableJSON({ values: options.metadata });
+    this._data = options.data || {};
+    this._metadata = options.metadata || {};
   }
-
-  /**
-   * The data associated with the model.
-   */
-  readonly data: IObservableJSON;
-
-  /**
-   * The metadata associated with the model.
-   */
-  readonly metadata: IObservableJSON;
 
   /**
    * Whether the model is trusted.
@@ -44,30 +31,33 @@ class MimeModel implements RenderMime.IMimeModel {
   readonly trusted: boolean;
 
   /**
-   * Test whether the model is disposed.
+   * The data associated with the model.
    */
-  get isDisposed(): boolean {
-    return this.data.isDisposed;
+  get data(): ReadonlyJSONObject {
+    return this._data;
   }
 
   /**
-   * Dispose of the resources used by the mime model.
+   * The metadata associated with the model.
    */
-  dispose(): void {
-    this.data.dispose();
-    this.metadata.dispose();
+  get metadata(): ReadonlyJSONObject {
+    return this._metadata;
   }
 
   /**
-   * Serialize the model as JSON data.
+   * Set the data associated with the model.
+   *
+   * #### Notes
+   * Depending on the implementation of the mime model,
+   * this call may or may not have deferred effects,
    */
-  toJSON(): JSONObject {
-    return {
-      trusted: this.trusted,
-      data: this.data.toJSON(),
-      metadata: this.metadata.toJSON()
-    };
+  setData(options: IRenderMime.IMimeModel.ISetDataOptions): void {
+    this._data = options.data || this._data;
+    this._metadata = options.metadata || this._metadata;
   }
+
+  private _data: ReadonlyJSONObject;
+  private _metadata: ReadonlyJSONObject;
 }
 
 
@@ -82,19 +72,18 @@ namespace MimeModel {
   export
   interface IOptions {
     /**
-     * The initial mime data.
-     */
-    data?: JSONObject;
-
-    /**
-     * Whether the output is trusted.  The default is false.
+     * Whether the model is trusted.  Defaults to `false`.
      */
     trusted?: boolean;
 
     /**
-     * The initial metadata.
+     * The initial mime data.
      */
-    metadata?: JSONObject;
+    data?: ReadonlyJSONObject;
+
+    /**
+     * The initial mime metadata.
+     */
+    metadata?: ReadonlyJSONObject;
   }
 }
-

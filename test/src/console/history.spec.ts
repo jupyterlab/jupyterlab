@@ -199,7 +199,7 @@ describe('console/history', () => {
         expect(history.methods).to.not.contain('onTextChange');
         let model = new CodeEditor.Model();
         let host = document.createElement('div');
-        let editor = new CodeMirrorEditor({ model, host }, {});
+        let editor = new CodeMirrorEditor({ model, host });
         history.editor = editor;
         model.value.text = 'foo';
         expect(history.methods).to.contain('onTextChange');
@@ -214,7 +214,7 @@ describe('console/history', () => {
         expect(history.methods).to.not.contain('onEdgeRequest');
         let host = document.createElement('div');
         let model = new CodeEditor.Model();
-        let editor = new CodeMirrorEditor({ model, host }, {});
+        let editor = new CodeMirrorEditor({ model, host });
         history.editor = editor;
         history.push('foo');
         editor.model.value.changed.connect(() => {

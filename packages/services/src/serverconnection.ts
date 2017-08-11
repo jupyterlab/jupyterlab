@@ -49,7 +49,7 @@ namespace ServerConnection {
   function makeSettings(options?: Partial<ISettings>) {
     // Use the singleton default settings if no options are given.
     if (options === void 0) {
-      if (Private.defaultSettings === null) {
+      if (Private.defaultSettings === void 0) {
         Private.defaultSettings = Private.makeSettings();
       }
       return Private.defaultSettings;
@@ -240,7 +240,7 @@ namespace ServerConnection {
  */
 namespace Private {
   export
-  let defaultSettings: ServerConnection.ISettings = null;
+  let defaultSettings: ServerConnection.ISettings;
 
   /**
    * Handle the server connection settings, returning a new value.
@@ -307,12 +307,13 @@ namespace Private {
    */
   export
   function handleRequest(xhr: XMLHttpRequest, request: ServerConnection.IRequest, settings: ServerConnection.ISettings): Promise<ServerConnection.IResponse> {
-    let delegate = new PromiseDelegate();
+    let delegate = new PromiseDelegate<ServerConnection.IResponse>();
 
     xhr.onload = (event: ProgressEvent) => {
       if (xhr.status >= 300) {
         let message = xhr.statusText || `Invalid Status: ${xhr.status}`;
         delegate.reject({ event, xhr, request, settings, message });
+        return;
       }
       let data = xhr.responseText;
       if (request.dataType === 'json' || request.dataType === undefined) {

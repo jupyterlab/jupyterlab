@@ -71,7 +71,7 @@ interface IObservableList<T> extends IDisposable {
    * #### Undefined Behavior
    * An `index` which is non-integral or out of range.
    */
-  get(index: number): T;
+  get(index: number): T | undefined;
 
   /**
    * Insert a value into the list at a specific index.
@@ -181,7 +181,7 @@ interface IObservableList<T> extends IDisposable {
    * #### Undefined Behavior
    * An `index` which is non-integral.
    */
-  remove(index: number): T;
+  remove(index: number): T | undefined;
 
   /**
    * Remove a range of items from the list.
@@ -389,7 +389,7 @@ class ObservableList<T> implements IObservableList<T> {
    * #### Undefined Behavior
    * An `index` which is non-integral or out of range.
    */
-  get(index: number): T {
+  get(index: number): T | undefined {
     return this._array[index];
   }
 
@@ -412,7 +412,7 @@ class ObservableList<T> implements IObservableList<T> {
   set(index: number, value: T): void {
     let oldValue = this._array[index];
     if (value === undefined) {
-      value = null;
+      throw new Error('Cannot set an undefined item');
     }
     // Bail if the value does not change.
     let itemCmp = this._itemCmp;
@@ -524,8 +524,11 @@ class ObservableList<T> implements IObservableList<T> {
    * #### Undefined Behavior
    * An `index` which is non-integral.
    */
-  remove(index: number): T {
+  remove(index: number): T | undefined {
     let value = ArrayExt.removeAt(this._array, index);
+    if (value === undefined) {
+      return;
+    }
     this._changed.emit({
       type: 'remove',
       oldIndex: index,

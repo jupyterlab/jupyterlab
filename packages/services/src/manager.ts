@@ -10,6 +10,10 @@ import {
 } from '@phosphor/signaling';
 
 import {
+  Builder, BuildManager
+} from './builder';
+
+import {
   Contents, ContentsManager
 } from './contents';
 
@@ -20,6 +24,10 @@ import {
 import {
   Session, SessionManager
 } from './session';
+
+import {
+  Setting, SettingManager
+} from './setting';
 
 import {
   TerminalSession, TerminalManager
@@ -42,17 +50,22 @@ class ServiceManager implements ServiceManager.IManager {
     this.serverSettings = (
       options.serverSettings || ServerConnection.makeSettings()
     );
-    this._sessionManager = new SessionManager(options);
-    this._contentsManager = new ContentsManager(options);
-    this._terminalManager = new TerminalManager(options);
-    this._sessionManager.specsChanged.connect((sender, specs) => {
+
+    this.contents = new ContentsManager(options);
+    this.sessions = new SessionManager(options);
+    this.settings = new SettingManager(options);
+    this.terminals = new TerminalManager(options);
+    this.builder = new BuildManager(options);
+
+    this.sessions.specsChanged.connect((sender, specs) => {
       this._specsChanged.emit(specs);
     });
-    this._readyPromise = this._sessionManager.ready.then(() => {
-      if (this._terminalManager.isAvailable()) {
-        return this._terminalManager.ready;
+    this._readyPromise = this.sessions.ready.then(() => {
+      if (this.terminals.isAvailable()) {
+        return this.terminals.ready;
       }
     });
+    this._readyPromise.then(() => { this._isReady = true; });
   }
 
   /**
@@ -63,7 +76,7 @@ class ServiceManager implements ServiceManager.IManager {
   }
 
   /**
-   * Test whether the terminal manager is disposed.
+   * Test whether the service manager is disposed.
    */
   get isDisposed(): boolean {
     return this._isDisposed;
@@ -76,18 +89,20 @@ class ServiceManager implements ServiceManager.IManager {
     if (this.isDisposed) {
       return;
     }
+
     this._isDisposed = true;
     Signal.clearData(this);
-    this._sessionManager.dispose();
-    this._contentsManager.dispose();
-    this._sessionManager.dispose();
+
+    this.contents.dispose();
+    this.sessions.dispose();
+    this.terminals.dispose();
   }
 
   /**
    * The kernel spec models.
    */
   get specs(): Kernel.ISpecModels | null {
-    return this._sessionManager.specs;
+    return this.sessions.specs;
   }
 
   /**
@@ -98,29 +113,33 @@ class ServiceManager implements ServiceManager.IManager {
   /**
    * Get the session manager instance.
    */
-  get sessions(): SessionManager {
-    return this._sessionManager;
-  }
+  readonly sessions: SessionManager;
+
+  /**
+   * Get the setting manager instance.
+   */
+  readonly settings: SettingManager;
+
+  /**
+   * The builder for the manager.
+   */
+  readonly builder: BuildManager;
 
   /**
    * Get the contents manager instance.
    */
-  get contents(): ContentsManager {
-    return this._contentsManager;
-  }
+  readonly contents: ContentsManager;
 
   /**
    * Get the terminal manager instance.
    */
-  get terminals(): TerminalManager {
-    return this._terminalManager;
-  }
+  readonly terminals: TerminalManager;
 
   /**
    * Test whether the manager is ready.
    */
   get isReady(): boolean {
-    return this._sessionManager.isReady || this._terminalManager.isReady;
+    return this._isReady;
   }
 
   /**
@@ -130,12 +149,10 @@ class ServiceManager implements ServiceManager.IManager {
     return this._readyPromise;
   }
 
-  private _sessionManager: SessionManager = null;
-  private _contentsManager: ContentsManager = null;
-  private _terminalManager: TerminalManager = null;
   private _isDisposed = false;
   private _readyPromise: Promise<void>;
   private _specsChanged = new Signal<this, Kernel.ISpecModels>(this);
+  private _isReady = false;
 }
 
 
@@ -170,6 +187,16 @@ namespace ServiceManager {
     readonly sessions: Session.IManager;
 
     /**
+     * The setting manager for the manager.
+     */
+    readonly settings: Setting.IManager;
+
+    /**
+     * The builder for the manager.
+     */
+    readonly builder: Builder.IManager;
+
+    /**
      * The contents manager for the manager.
      */
     readonly contents: Contents.IManager;
@@ -199,5 +226,10 @@ namespace ServiceManager {
      * The server settings of the manager.
      */
     readonly serverSettings?: ServerConnection.ISettings;
+
+    /**
+     * The default drive for the contents manager.
+     */
+    readonly defaultDrive?: Contents.IDrive;
   }
 }

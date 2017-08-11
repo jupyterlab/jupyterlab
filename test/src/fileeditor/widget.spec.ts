@@ -127,7 +127,7 @@ describe('fileeditor', () => {
       },
       factoryOptions: {
         name: 'editor',
-        fileExtensions: ['*'],
+        fileTypes: ['*'],
         defaultFor: ['*']
       }
     });

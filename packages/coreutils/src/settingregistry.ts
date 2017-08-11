@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as Ajv from 'ajv';
+
 import {
   find
 } from '@phosphor/algorithm';
@@ -18,19 +20,92 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  IDatastore, StateDB
-} from '.';
+  IDataConnector
+} from './interfaces';
 
 
 /**
- * The default level that is used when level is unspecified in a request.
+ * The key in the schema for setting editor icon class hints.
  */
-const LEVEL: ISettingRegistry.Level = 'user';
+export
+const ICON_CLASS_KEY ='jupyter.lab.setting-icon-class';
+
+/**
+ * The key in the schema for setting editor icon label hints.
+ */
+export
+const ICON_LABEL_KEY = 'jupyter.lab.setting-icon-label';
 
 /**
  * An alias for the JSON deep copy function.
  */
 const copy = JSONExt.deepCopy;
+
+
+/**
+ * An implementation of a schema validator.
+ */
+export
+interface ISchemaValidator {
+  /**
+   * Add a schema to the validator.
+   *
+   * @param plugin - The plugin ID.
+   *
+   * @param schema - The schema being added.
+   *
+   * @return A list of errors if the schema fails to validate or `null` if there
+   * are no errors.
+   *
+   * #### Notes
+   * It is safe to call this function multiple times with the same plugin name.
+   */
+  addSchema(plugin: string, schema: ISettingRegistry.ISchema): ISchemaValidator.IError[] | null;
+
+  /**
+   * Validate a plugin's schema and user data; populate the `composite` data.
+   *
+   * @param plugin - The plugin being validated. Its `composite` data will be
+   * populated by reference.
+   *
+   * @return A list of errors if either the schema or data fail to validate or
+   * `null` if there are no errors.
+   */
+  validateData(plugin: ISettingRegistry.IPlugin): ISchemaValidator.IError[] | null;
+}
+
+
+/**
+ * A namespace for schema validator interfaces.
+ */
+export
+namespace ISchemaValidator {
+  /**
+   * A schema validation error definition.
+   */
+  export
+  interface IError {
+    /**
+     * The path in the data where the error occurred.
+     */
+    dataPath: string;
+
+    /**
+     * The keyword whose validation failed.
+     */
+    keyword: string;
+
+    /**
+     * The error message.
+     */
+    message: string;
+
+    /**
+     * The path in the schema where the error occurred.
+     */
+    schemaPath: string;
+  }
+}
 
 
 /* tslint:disable */
@@ -48,43 +123,6 @@ const ISettingRegistry = new Token<ISettingRegistry>('jupyter.services.settings'
 export
 namespace ISettingRegistry {
   /**
-   * The setting level: user or system.
-   */
-  export
-  type Level = 'system' | 'user';
-
-  /**
-   * An annotation for a specific setting or a plugin.
-   */
-  export
-  interface IAnnotation extends JSONObject {
-    /**
-     * The caption for the setting.
-     */
-    caption?: string;
-
-    /**
-     * The extra class name for the setting.
-     */
-    className?: string;
-
-    /**
-     * The icon class for the setting.
-     */
-    iconClass?: string;
-
-    /**
-     * The icon label for the setting.
-     */
-    iconLabel?: string;
-
-    /**
-     * The label for the setting.
-     */
-    label?: string;
-  }
-
-  /**
    * The settings for a specific plugin.
    */
   export
@@ -97,25 +135,92 @@ namespace ISettingRegistry {
     /**
      * The collection of values for a specified setting.
      */
-    data: ISettingBundle | null;
+    data: ISettingBundle;
+
+    /**
+     * The JSON schema for the plugin.
+     */
+    schema: ISchema;
   }
 
   /**
-   * The annotations for a plugin.
+   * A schema type that is a minimal subset of the formal JSON Schema along with
+   * optional JupyterLab rendering hints.
    */
   export
-  interface IPluginAnnotations extends JSONObject {
-    annotation: IAnnotation;
-    keys?: { [key: string]: IAnnotation };
+  interface ISchema extends JSONObject {
+    /**
+     * The JupyterLab icon class hint for a plugin can be overridden by user
+     * settings. It can also be root level and therefore "private".
+     */
+    'jupyter.lab.setting-icon-class'?: string;
+
+    /**
+     * The JupyterLab icon label hint for a plugin can be overridden by user
+     * settings. It can also be root level and therefore "private".
+     */
+    'jupyter.lab.setting-icon-label'?: string;
+
+    /**
+     * The default value, if any.
+     */
+    default?: any;
+
+    /**
+     * The schema description.
+     */
+    description?: string;
+
+    /**
+     * The schema's child properties.
+     */
+    properties?: {
+      /**
+       * The JupyterLab icon class hint for a plugin can be overridden by user
+       * settings. It can also be root level and therefore "private".
+       */
+      'jupyter.lab.setting-icon-class'?: ISchema;
+
+      /**
+       * The JupyterLab icon label hint for a plugin can be overridden by user
+       * settings. It can also be root level and therefore "private".
+       */
+      'jupyter.lab.setting-icon-label'?: ISchema;
+
+      /**
+       * Arbitrary setting keys can be added.
+       */
+      [key: string]: ISchema;
+    };
+
+    /**
+     * The title of the schema.
+     */
+    title?: string;
+
+    /**
+     * The type or types of the data.
+     */
+    type?: string | string[];
   }
 
   /**
-   * The collection of user and system preferences for a plugin.
+   * The setting values for a plugin.
    */
   export
   interface ISettingBundle extends JSONObject {
-    system?: { [key: string]: JSONValue };
-    user?: { [key: string]: JSONValue };
+    /**
+     * A composite of the user setting values and the plugin schema defaults.
+     *
+     * #### Notes
+     * The `composite` values will always be a superset of the `user` values.
+     */
+    composite: JSONObject;
+
+    /**
+     * The user setting values.
+     */
+    user: JSONObject;
   }
 
   /**
@@ -124,14 +229,14 @@ namespace ISettingRegistry {
   export
   interface ISettings extends IDisposable {
     /**
-     * The annotation hints for a plugin.
-     */
-    readonly annotations: IPluginAnnotations | null;
-
-    /**
      * A signal that emits when the plugin's settings have changed.
      */
     readonly changed: ISignal<this, void>;
+
+    /**
+     * Get the composite of user settings and extension defaults.
+     */
+    readonly composite: JSONObject;
 
     /*
      * The plugin name.
@@ -139,9 +244,32 @@ namespace ISettingRegistry {
     readonly plugin: string;
 
     /**
-     * Get the raw plugin settings.
+     * Get the plugin settings schema.
      */
-    readonly raw: IPlugin;
+    readonly schema: ISettingRegistry.ISchema;
+
+    /**
+     * Get the user settings.
+     */
+    readonly user: JSONObject;
+
+    /**
+     * Calculate the default value of a setting by iterating through the schema.
+     *
+     * @param key - The name of the setting whose default value is calculated.
+     *
+     * @returns A calculated default JSON value for a specific setting.
+     */
+    default(key: string): JSONValue | undefined;
+
+    /**
+     * Get an individual setting.
+     *
+     * @param key - The name of the setting being retrieved.
+     *
+     * @returns The setting value.
+     */
+    get(key: string): { composite: JSONValue, user: JSONValue };
 
     /**
      * Remove a single setting.
@@ -156,24 +284,9 @@ namespace ISettingRegistry {
     remove(key: string): Promise<void>;
 
     /**
-     * Get an individual setting.
-     *
-     * @param key - The name of the setting being retrieved.
-     *
-     * @param level - The setting level. Defaults to `user`.
-     *
-     * @returns The setting value.
-     *
-     * #### Notes
-     * This method returns synchronously because it uses a cached copy of the
-     * plugin settings that is synchronized with the registry.
+     * Save all of the plugin's user settings at once.
      */
-    get(key: string, level?: Level): JSONValue;
-
-    /**
-     * Save all of the plugin's settings at once.
-     */
-    save(raw: IPlugin): Promise<void>;
+    save(user: JSONObject): Promise<void>;
 
     /**
      * Set a single setting.
@@ -200,6 +313,99 @@ interface ISettingRegistry extends SettingRegistry {}
 
 
 /**
+ * The default implementation of a schema validator.
+ */
+export
+class DefaultSchemaValidator implements ISchemaValidator {
+  /**
+   * Instantiate a schema validator.
+   */
+  constructor() {
+    this._composer.addSchema(Private.SCHEMA, 'main');
+    this._validator.addSchema(Private.SCHEMA, 'main');
+  }
+
+  /**
+   * Add a schema to the validator.
+   *
+   * @param plugin - The plugin ID.
+   *
+   * @param schema - The schema being added.
+   *
+   * @return A list of errors if the schema fails to validate or `null` if there
+   * are no errors.
+   *
+   * #### Notes
+   * It is safe to call this function multiple times with the same plugin name.
+   */
+  addSchema(plugin: string, schema: ISettingRegistry.ISchema): ISchemaValidator.IError[] | null {
+    const composer = this._composer;
+    const validator = this._validator;
+    const validate = validator.getSchema('main');
+
+    // Validate against the main schema.
+    if (!(validate(schema) as boolean)) {
+      return validate.errors as ISchemaValidator.IError[];
+    }
+
+    // Validate against the JSON schema meta-schema.
+    if (!(validator.validateSchema(schema) as boolean)) {
+      return validator.errors as ISchemaValidator.IError[];
+    }
+
+    // Remove if schema already exists.
+    composer.removeSchema(plugin);
+    validator.removeSchema(plugin);
+
+    // Add schema to the validator and composer.
+    composer.addSchema(schema, plugin);
+    validator.addSchema(schema, plugin);
+
+    return null;
+
+  }
+
+  /**
+   * Validate a plugin's schema and user data; populate the `composite` data.
+   *
+   * @param plugin - The plugin being validated. Its `composite` data will be
+   * populated by reference.
+   *
+   * @return A list of errors if either the schema or data fail to validate or
+   * `null` if there are no errors.
+   */
+  validateData(plugin: ISettingRegistry.IPlugin): ISchemaValidator.IError[] | null {
+    const validate = this._validator.getSchema(plugin.id);
+    const compose = this._composer.getSchema(plugin.id);
+
+    if (!validate || !compose) {
+      const errors = this.addSchema(plugin.id, plugin.schema);
+
+      if (errors) {
+        return errors;
+      }
+    }
+
+    if (!validate(plugin.data.user)) {
+      return validate.errors as ISchemaValidator.IError[];
+    }
+
+    // Copy the user data before validating (and merging defaults).
+    plugin.data.composite = copy(plugin.data.user);
+
+    if (!compose(plugin.data.composite)) {
+      return compose.errors as ISchemaValidator.IError[];
+    }
+
+    return null;
+  }
+
+  private _composer = new Ajv({ useDefaults: true });
+  private _validator = new Ajv();
+}
+
+
+/**
  * The default concrete implementation of a setting registry.
  */
 export
@@ -207,21 +413,15 @@ class SettingRegistry {
   /**
    * Create a new setting registry.
    */
-  constructor(options: SettingRegistry.IOptions = { datastore: null }) {
-    const namespace = 'jupyter.db.settings';
-    this._datastore = options.datastore || new StateDB({ namespace });
+  constructor(options: SettingRegistry.IOptions) {
+    this._connector = options.connector;
+    this._validator = options.validator || new DefaultSchemaValidator();
   }
 
   /**
-   * Returns a map of annotation hints for plugins in the registry.
+   * The schema of the setting registry.
    */
-  get annotations(): { [plugin: string]: ISettingRegistry.IPluginAnnotations } {
-    const annotations = this._annotations;
-
-    return copy(annotations) as {
-      [plugin: string]: ISettingRegistry.IPluginAnnotations
-    };
-  }
+  readonly schema = Private.SCHEMA;
 
   /**
    * A signal that emits the name of a plugin when its settings change.
@@ -241,51 +441,28 @@ class SettingRegistry {
   }
 
   /**
-   * Annotate a plugin or a setting item for places where it might be displayed.
-   *
-   * @param plugin - The name of the plugin whose setting is being annotated.
-   *
-   * @param key - The name of the key being annotated. If `null` or empty, the
-   * annotation will be applied at the plugin level.
-   *
-   * @param annotation - The annotation describing a plugin or a setting.
-   */
-  annotate(plugin: string, key: string, annotation: ISettingRegistry.IAnnotation): void {
-    if (!this._annotations[plugin]) {
-      this._annotations[plugin] = { annotation: null, keys: { } };
-    }
-
-    if (key) {
-      this._annotations[plugin].keys[key] = annotation;
-    } else {
-      this._annotations[plugin].annotation = annotation;
-    }
-
-    this._pluginChanged.emit(plugin);
-  }
-
-  /**
    * Get an individual setting.
    *
    * @param plugin - The name of the plugin whose settings are being retrieved.
    *
    * @param key - The name of the setting being retrieved.
    *
-   * @param level - The setting level. Defaults to `user`.
-   *
    * @returns A promise that resolves when the setting is retrieved.
    */
-  get(plugin: string, key: string, level: ISettingRegistry.Level = LEVEL): Promise<JSONValue> {
+  get(plugin: string, key: string): Promise<{ composite: JSONValue, user: JSONValue }> {
     const plugins = this._plugins;
 
     if (plugin in plugins) {
-      const bundle = plugins[plugin] && plugins[plugin].data;
-      const value = bundle && bundle[level] && bundle[level][key] || null;
+      const { composite, user } = plugins[plugin].data;
+      const result = {
+        composite: key in composite ? copy(composite[key]) : void 0,
+        user: key in user ? copy(user[key]) : void 0
+      };
 
-      return Promise.resolve(copy(value));
+      return Promise.resolve(result);
     }
 
-    return this.load(plugin).then(() => this.get(plugin, key, level));
+    return this.load(plugin).then(() => this.get(plugin, key));
   }
 
   /**
@@ -293,7 +470,8 @@ class SettingRegistry {
    *
    * @param plugin - The name of the plugin whose settings are being loaded.
    *
-   * @returns A promise that resolves with a plugin settings object.
+   * @returns A promise that resolves with a plugin settings object or rejects
+   * if the plugin is not found.
    */
   load(plugin: string): Promise<ISettingRegistry.ISettings> {
     const plugins = this._plugins;
@@ -301,14 +479,12 @@ class SettingRegistry {
 
     // If the plugin exists, resolve.
     if (plugin in plugins) {
-      const annotations = this._annotations[plugin] || null;
-      const content = plugins[plugin];
-      const settings = new Settings({ annotations, content, plugin, registry });
+      const settings = new Settings({ plugin: plugins[plugin], registry });
 
       return Promise.resolve(settings);
     }
 
-    // If the plugin needs to be loaded from the datastore, fetch.
+    // If the plugin needs to be loaded from the data connector, fetch.
     return this.reload(plugin);
   }
 
@@ -317,24 +493,35 @@ class SettingRegistry {
    *
    * @param plugin - The name of the plugin whose settings are being reloaded.
    *
-   * @returns A promise that resolves with a plugin settings object.
+   * @returns A promise that resolves with a plugin settings object or rejects
+   * with a list of `ISchemaValidator.IError` objects if it fails.
    */
   reload(plugin: string): Promise<ISettingRegistry.ISettings> {
-    const datastore = this._datastore;
+    const connector = this._connector;
     const plugins = this._plugins;
 
-    // If the plugin needs to be loaded from the datastore, fetch.
-    return datastore.fetch(plugin).then(result => {
-      // Set the local copy.
-      plugins[plugin] = result || { id: plugin, data: { } };
+    // If the plugin needs to be loaded from the connector, fetch.
+    return connector.fetch(plugin).then(data => {
+      // Validate the response from the connector; populate `composite` field.
+      try {
+        this._validate(data);
+      } catch (errors) {
+        const output = [`Validating ${plugin} failed:`];
+        (errors as ISchemaValidator.IError[]).forEach((error, index) => {
+          const { dataPath, schemaPath, keyword, message } = error;
+          output.push(`${index} - schema @ ${schemaPath}, data @ ${dataPath}`);
+          output.push(`\t${keyword} ${message}`);
+        });
+        console.error(output.join('\n'));
 
-      // Copy over any annotations that may be available.
-      const annotations = copy(this._annotations[plugin]);
+        throw new Error(`Failed validating ${plugin}`);
+      }
+
+      // Emit that a plugin has changed.
+      this._pluginChanged.emit(plugin);
 
       return new Settings({
-        annotations: annotations as ISettingRegistry.IPluginAnnotations,
-        content: copy(plugins[plugin]) as ISettingRegistry.IPlugin,
-        plugin,
+        plugin: copy(plugins[plugin]) as ISettingRegistry.IPlugin,
         registry: this
       });
     });
@@ -356,14 +543,7 @@ class SettingRegistry {
       return Promise.resolve(void 0);
     }
 
-    const bundle =  plugins[plugin].data;
-    const level = 'user';
-
-    if (!bundle[level]) {
-      return Promise.resolve(void 0);
-    }
-
-    delete bundle[level][key];
+    delete plugins[plugin].data.user[key];
 
     return this._save(plugin);
   }
@@ -387,13 +567,7 @@ class SettingRegistry {
       return this.load(plugin).then(() => this.set(plugin, key, value));
     }
 
-    const bundle = plugins[plugin].data;
-    const level = 'user';
-
-    if (!bundle[level]) {
-      bundle[level] = Object.create(null);
-    }
-    bundle[level][key] = value;
+    plugins[plugin].data.user[key] = value;
 
     return this._save(plugin);
   }
@@ -406,11 +580,25 @@ class SettingRegistry {
    * @returns A promise that resolves when the settings have been saved.
    *
    * #### Notes
-   * Only the `user` level data will be saved.
+   * Only the `user` data will be saved.
    */
   upload(raw: ISettingRegistry.IPlugin): Promise<void> {
-    this._plugins[raw.id] = copy(raw) as ISettingRegistry.IPlugin;
-    return this._save(raw.id);
+    const plugins = this._plugins;
+    const plugin = raw.id;
+    let errors: ISchemaValidator.IError[] | null = null;
+
+    // Validate the user data and create the composite data.
+    raw.data.user = raw.data.user || { };
+    delete raw.data.composite;
+    errors = this._validator.validateData(raw);
+    if (errors) {
+      return Promise.reject(errors);
+    }
+
+    // Set the local copy.
+    plugins[plugin] = raw;
+
+    return this._save(plugin);
   }
 
   /**
@@ -423,38 +611,62 @@ class SettingRegistry {
       return Promise.reject(`${plugin} does not exist in setting registry.`);
     }
 
-    return this._datastore.save(plugin, plugins[plugin])
+    this._validate(plugins[plugin]);
+
+    return this._connector.save(plugin, plugins[plugin].data.user)
       .then(() => { this._pluginChanged.emit(plugin); });
   }
 
-  private _annotations: { [plugin: string]: ISettingRegistry.IPluginAnnotations } = Object.create(null);
-  private _datastore: IDatastore<ISettingRegistry.IPlugin, ISettingRegistry.IPlugin> | null = null;
+  /**
+   * Validate a plugin's data and schema, compose the `composite` data.
+   */
+  private _validate(plugin: ISettingRegistry.IPlugin): void {
+    let errors: ISchemaValidator.IError[] | null = null;
+
+    // Add the schema to the registry.
+    errors = this._validator.addSchema(plugin.id, plugin.schema);
+    if (errors) {
+      throw errors;
+    }
+
+    // Validate the user data and create the composite data.
+    plugin.data.user = plugin.data.user || { };
+    delete plugin.data.composite;
+    errors = this._validator.validateData(plugin);
+    if (errors) {
+      throw errors;
+    }
+
+    // Set the local copy.
+    this._plugins[plugin.id] = plugin;
+  }
+
+  private _connector: IDataConnector<ISettingRegistry.IPlugin, JSONObject>;
   private _pluginChanged = new Signal<this, string>(this);
   private _plugins: { [name: string]: ISettingRegistry.IPlugin } = Object.create(null);
+  private _validator: ISchemaValidator;
 }
 
 
 /**
  * A manager for a specific plugin's settings.
  */
+export
 class Settings implements ISettingRegistry.ISettings {
   /**
    * Instantiate a new plugin settings manager.
    */
   constructor(options: Settings.IOptions) {
-    this._annotations = options.annotations;
-    this._content = options.content;
-    this.plugin = options.plugin;
+    const { plugin } = options;
+
+    this.plugin = plugin.id;
     this.registry = options.registry;
 
-    this.registry.pluginChanged.connect(this._onPluginChanged, this);
-  }
+    this._composite = plugin.data.composite || { };
+    this._schema = plugin.schema || { type: 'object' };
+    this._user = plugin.data.user || { };
 
-  /**
-   * The annotation hints for the plugin.
-   */
-  get annotations(): ISettingRegistry.IPluginAnnotations {
-    return this._annotations;
+    this.registry.pluginChanged.connect(this._onPluginChanged, this);
   }
 
   /**
@@ -465,6 +677,13 @@ class Settings implements ISettingRegistry.ISettings {
   }
 
   /**
+   * Get the composite of user settings and extension defaults.
+   */
+  get composite(): JSONObject {
+    return this._composite;
+  }
+
+  /**
    * Test whether the plugin settings manager disposed.
    */
   get isDisposed(): boolean {
@@ -472,16 +691,23 @@ class Settings implements ISettingRegistry.ISettings {
   }
 
   /**
+   * Get the plugin settings schema.
+   */
+  get schema(): ISettingRegistry.ISchema {
+    return this._schema;
+  }
+
+  /**
+   * Get the user settings.
+   */
+  get user(): JSONObject {
+    return this._user;
+  }
+
+  /*
    * The plugin name.
    */
   readonly plugin: string;
-
-  /**
-   * Get the raw plugin settings.
-   */
-  get raw(): ISettingRegistry.IPlugin {
-    return copy(this._content) as ISettingRegistry.IPlugin;
-  }
 
   /**
    * The system registry instance used by the settings manager.
@@ -489,15 +715,14 @@ class Settings implements ISettingRegistry.ISettings {
   readonly registry: SettingRegistry;
 
   /**
-   * Annotate a plugin or a setting item for places where it might be displayed.
+   * Calculate the default value of a setting by iterating through the schema.
    *
-   * @param key - The name of the key being annotated. If `null` or empty, the
-   * annotation will be applied at the plugin level.
+   * @param key - The name of the setting whose default value is calculated.
    *
-   * @param annotation - The annotation describing a plugin or a setting.
+   * @returns A calculated default JSON value for a specific setting.
    */
-  annotate(key: string, annotation: ISettingRegistry.IAnnotation): void {
-    this.registry.annotate(this.plugin, key, annotation);
+  default(key: string): JSONValue | undefined {
+    return Private.reifyDefault(this.schema, key);
   }
 
   /**
@@ -509,7 +734,6 @@ class Settings implements ISettingRegistry.ISettings {
     }
 
     this._isDisposed = true;
-    this._content = null;
     Signal.clearData(this);
   }
 
@@ -518,18 +742,19 @@ class Settings implements ISettingRegistry.ISettings {
    *
    * @param key - The name of the setting being retrieved.
    *
-   * @param level - The setting level. Defaults to `user`.
-   *
    * @returns The setting value.
    *
    * #### Notes
    * This method returns synchronously because it uses a cached copy of the
    * plugin settings that is synchronized with the registry.
    */
-  get(key: string, level: ISettingRegistry.Level = LEVEL): JSONValue {
-    const { data } = this._content;
+  get(key: string): { composite: JSONValue, user: JSONValue } {
+    const { composite, user } = this;
 
-    return data[level] && data[level][key];
+    return {
+      composite: key in composite ? copy(composite[key]) : void 0,
+      user: key in user ? copy(user[key]) : void 0
+    };
   }
 
   /**
@@ -547,10 +772,14 @@ class Settings implements ISettingRegistry.ISettings {
   }
 
   /**
-   * Save all of the plugin's settings at once.
+   * Save all of the plugin's user settings at once.
    */
-  save(raw: ISettingRegistry.IPlugin): Promise<void> {
-    return this.registry.upload(raw);
+  save(user: JSONObject): Promise<void> {
+    return this.registry.upload({
+      id: this.plugin,
+      data: { composite: this._composite, user },
+      schema: this._schema
+    });
   }
 
   /**
@@ -574,15 +803,27 @@ class Settings implements ISettingRegistry.ISettings {
    */
   private _onPluginChanged(sender: any, plugin: string): void {
     if (plugin === this.plugin) {
-      this._content = find(this.registry.plugins, p => p.id === plugin);
+      const found = find(this.registry.plugins, p => p.id === plugin);
+
+      if (!found) {
+        return;
+      }
+
+      const { composite, user } = found.data;
+      const schema = found.schema;
+
+      this._composite = composite || { };
+      this._schema = schema || { type: 'object' };
+      this._user = user || { };
       this._changed.emit(void 0);
     }
   }
 
-  private _annotations: ISettingRegistry.IPluginAnnotations | null = null;
   private _changed = new Signal<this, void>(this);
-  private _content: ISettingRegistry.IPlugin | null = null;
+  private _composite: JSONObject = Object.create(null);
   private _isDisposed = false;
+  private _schema: ISettingRegistry.ISchema = Object.create(null);
+  private _user: JSONObject = Object.create(null);
 }
 
 
@@ -597,9 +838,14 @@ namespace SettingRegistry {
   export
   interface IOptions {
     /**
-     * The datastore used by the setting registry.
+     * The data connector used by the setting registry.
      */
-    datastore: IDatastore<ISettingRegistry.IPlugin, ISettingRegistry.IPlugin>;
+    connector: IDataConnector<ISettingRegistry.IPlugin, JSONObject>;
+
+    /**
+     * The validator used to enforce the settings JSON schema.
+     */
+    validator?: ISchemaValidator;
   }
 }
 
@@ -607,6 +853,7 @@ namespace SettingRegistry {
 /**
  * A namespace for `Settings` statics.
  */
+export
 namespace Settings {
   /**
    * The instantiation options for a `Settings` object.
@@ -614,23 +861,62 @@ namespace Settings {
   export
   interface IOptions {
     /**
-     * The annotation hints for a plugin.
-     */
-    annotations: ISettingRegistry.IPluginAnnotations | null;
-
-    /**
      * The setting values for a plugin.
      */
-    content: ISettingRegistry.IPlugin;
-
-    /**
-     * The plugin that the settings object references.
-     */
-    plugin: string;
+    plugin: ISettingRegistry.IPlugin;
 
     /**
      * The system registry instance used by the settings manager.
      */
     registry: SettingRegistry;
+  }
+}
+
+
+/**
+ * A namespace for private module data.
+ */
+export
+namespace Private {
+  /* tslint:disable */
+  /**
+   * The schema for settings.
+   */
+  export
+  const SCHEMA: ISettingRegistry.ISchema = {
+    "$schema": "http://json-schema.org/draft-06/schema",
+    "title": "Jupyter Settings/Preferences Schema",
+    "description": "Jupyter settings/preferences schema v0.1.0",
+    "type": "object",
+    "additionalProperties": true,
+    "properties": {
+      [ICON_CLASS_KEY]: { "type": "string", "default": "jp-FileIcon" },
+      [ICON_LABEL_KEY]: { "type": "string", "default": "Plugin" }
+    }
+  };
+  /* tslint:enable */
+
+  /**
+   * Create a fully extrapolated default value for a root key in a schema.
+   */
+  export
+  function reifyDefault(schema: ISettingRegistry.ISchema, root?: string): JSONValue | undefined {
+    // If the property is at the root level, traverse its schema.
+    schema = (root ? schema.properties[root] : schema) || { };
+
+    // If the property has no default or is a primitive, return.
+    if (!('default' in schema) || schema.type !== 'object') {
+      return schema.default;
+    }
+
+    // Make a copy of the default value to populate.
+    const result = JSONExt.deepCopy(schema.default);
+
+    // Iterate through and populate each child property.
+    for (let property in schema.properties || { }) {
+      result[property] = reifyDefault(schema.properties[property]);
+    }
+
+    return result;
   }
 }

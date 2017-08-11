@@ -1,6 +1,7 @@
-// Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
-
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
 // Some magic for deferring mathematical expressions to MathJax
 // by hiding them from the Markdown parser.
 // Some of the code here is adapted with permission from Davide Cervone
@@ -31,10 +32,10 @@ declare var MathJax: any;
 export
 function removeMath(text: string): { text: string, math: string[] } {
   let math: string[] = []; // stores math strings for later
-  let start: number;
-  let end: string;
-  let last: number;
-  let braces: number;
+  let start: number | null = null;
+  let end: string | null = null;
+  let last: number | null = null;
+  let braces: number = 0;
   let deTilde: (text: string) => string;
 
   if (!initialized) {
@@ -69,7 +70,7 @@ function removeMath(text: string): { text: string, math: string[] } {
       //
       blocks[i] = '@@' + math.length + '@@';
       math.push(block);
-    } else if (start) {
+    } else if (start !== null) {
       //
       //  If we are in math, look for the end delimiter,
       //    but don't go past double line breaks, and
@@ -85,7 +86,7 @@ function removeMath(text: string): { text: string, math: string[] } {
           last   = null;
         }
       } else if (block.match(/\n.*\n/)) {
-        if (last) {
+        if (last !== null) {
           i = last;
           blocks = processMath(start, i, deTilde, math, blocks);
         }
@@ -118,7 +119,7 @@ function removeMath(text: string): { text: string, math: string[] } {
       }
     }
   }
-  if (last) {
+  if (start !== null && last !== null) {
     blocks = processMath(start, last, deTilde, math, blocks);
     start = null;
     end = null;
@@ -166,7 +167,10 @@ function typeset(node: HTMLElement): void {
     initialized = true;
   }
   if ((window as any).MathJax) {
-    MathJax.Hub.Queue(['Typeset', MathJax.Hub, node]);
+    MathJax.Hub.Queue(
+      ['Typeset', MathJax.Hub, node,
+      ['resetEquationNumbers', MathJax.InputJax.TeX]]
+    );
   }
 }
 

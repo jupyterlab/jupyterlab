@@ -4,6 +4,10 @@
 import * as dsv from 'd3-dsv';
 
 import {
+  PromiseDelegate
+} from '@phosphor/coreutils';
+
+import {
   DataGrid, JSONModel
 } from '@phosphor/datagrid';
 
@@ -12,15 +16,11 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  PanelLayout
+  PanelLayout, Widget
 } from '@phosphor/widgets';
 
 import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
-  ActivityMonitor
+  ActivityMonitor, PathExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -57,7 +57,7 @@ const RENDER_TIMEOUT = 1000;
  * A viewer for CSV tables.
  */
 export
-class CSVViewer extends Widget {
+class CSVViewer extends Widget implements DocumentRegistry.IReadyWidget {
   /**
    * Construct a new CSV viewer.
    */
@@ -68,25 +68,30 @@ class CSVViewer extends Widget {
     let layout = this.layout = new PanelLayout();
 
     this.addClass(CSV_CLASS);
-    this.title.label = context.path.split('/').pop();
+    this.title.label = PathExt.basename(context.path);
 
     this._grid = new DataGrid();
     this._grid.addClass(CSV_GRID_CLASS);
     this._grid.headerVisibility = 'column';
 
-    this._toolbar = new CSVToolbar();
+    this._toolbar = new CSVToolbar({ selected: this._delimiter });
     this._toolbar.delimiterChanged.connect(this._onDelimiterChanged, this);
     this._toolbar.addClass(CSV_VIEWER_CLASS);
     layout.addWidget(this._toolbar);
     layout.addWidget(this._grid);
 
     context.pathChanged.connect(this._onPathChanged, this);
-    // Throttle the rendering rate of the widget.
-    this._monitor = new ActivityMonitor({
-      signal: context.model.contentChanged,
-      timeout: RENDER_TIMEOUT
+
+    this._context.ready.then(() => {
+      this._updateGrid();
+      this._ready.resolve(undefined);
+      // Throttle the rendering rate of the widget.
+      this._monitor = new ActivityMonitor({
+        signal: context.model.contentChanged,
+        timeout: RENDER_TIMEOUT
+      });
+      this._monitor.activityStopped.connect(this._updateGrid, this);
     });
-    this._monitor.activityStopped.connect(this._updateGrid, this);
   }
 
   /**
@@ -97,23 +102,19 @@ class CSVViewer extends Widget {
   }
 
   /**
+   * A promise that resolves when the csv viewer is ready.
+   */
+  get ready() {
+    return this._ready.promise;
+  }
+
+  /**
    * Dispose of the resources used by the widget.
    */
   dispose(): void {
-    if (this._grid === null) {
-      return;
+    if (this._monitor) {
+      this._monitor.dispose();
     }
-    let grid = this._grid;
-    let toolbar = this._toolbar;
-    let monitor = this._monitor;
-    this._grid = null;
-    this._toolbar = null;
-    this._monitor = null;
-
-    grid.dispose();
-    toolbar.dispose();
-    monitor.dispose();
-
     super.dispose();
   }
 
@@ -137,7 +138,7 @@ class CSVViewer extends Widget {
    * Handle a change in path.
    */
   private _onPathChanged(): void {
-    this.title.label = this._context.path.split('/').pop();
+    this.title.label = PathExt.basename(this._context.path);
   }
 
   /**
@@ -155,11 +156,12 @@ class CSVViewer extends Widget {
     this._grid.model = model;
   }
 
-  private _context: DocumentRegistry.Context = null;
-  private _grid: DataGrid = null;
-  private _toolbar: CSVToolbar = null;
-  private _monitor: ActivityMonitor<any, any> = null;
+  private _context: DocumentRegistry.Context;
+  private _grid: DataGrid;
+  private _toolbar: CSVToolbar;
+  private _monitor: ActivityMonitor<any, any> | null = null;
   private _delimiter = ',';
+  private _ready = new PromiseDelegate<void>();
 }
 
 

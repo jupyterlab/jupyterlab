@@ -377,8 +377,8 @@ class OutputAreaModel implements IOutputAreaModel {
   private _createItem(options: IOutputModel.IOptions): IOutputModel {
     let factory = this.contentFactory;
     let item = factory.createOutputModel(options);
-    item.data.changed.connect(this._onGenericChange, this);
-    item.metadata.changed.connect(this._onGenericChange, this);
+    item.changed.connect(this._onGenericChange, this);
+    item.changed.connect(this._onGenericChange, this);
     return item;
   }
 

@@ -77,7 +77,7 @@ describe('outputarea/model', () => {
           called = true;
         });
         let output = model.get(0);
-        output.data.set('foo', 1);
+        output.setData({ ...output.data });
         expect(called).to.be(true);
       });
 

@@ -113,10 +113,8 @@ li > jp-FAQ-answer {
 }
 
 
-.jp-FAQ-a {
-    text-decoration: none;
-    cursor: pointer;
-    color: var(--jp-brand-color1);
+.jp-FAQ-toolbar {
+  min-height: var(--jp-toolbar-micro-height);
 }
 
 

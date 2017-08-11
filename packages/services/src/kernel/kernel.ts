@@ -469,8 +469,7 @@ namespace Kernel {
    * when the kernel is started by the server, otherwise the promise is rejected.
    */
   export
-  function startNew(options?: Kernel.IOptions): Promise<IKernel> {
-    options = options || {};
+  function startNew(options: Kernel.IOptions = {}): Promise<IKernel> {
     return DefaultKernel.startNew(options);
   }
 
@@ -763,7 +762,7 @@ namespace Kernel {
      * #### Notes
      * This sends a `comm_open` message to the server.
      */
-    open(data?: JSONValue, metadata?: JSONObject): IFuture;
+    open(data?: JSONValue, metadata?: JSONObject, buffers?: (ArrayBuffer | ArrayBufferView)[]): IFuture;
 
     /**
      * Send a `comm_msg` message to the kernel.
@@ -798,14 +797,14 @@ namespace Kernel {
      *
      * This is a no-op if the comm is already closed.
      */
-    close(data?: JSONValue, metadata?: JSONObject): IFuture;
+    close(data?: JSONValue, metadata?: JSONObject, buffers?: (ArrayBuffer | ArrayBufferView)[]): IFuture;
   }
 
   /**
    * The valid Kernel status states.
    */
   export
-  type Status = 'unknown' | 'starting' | 'reconnecting' | 'idle' | 'busy' | 'restarting' | 'dead';
+  type Status = 'unknown' | 'starting' | 'reconnecting' | 'idle' | 'busy' | 'restarting' | 'dead' | 'connected';
 
   /**
    * The kernel model provided by the server.
@@ -818,12 +817,12 @@ namespace Kernel {
     /**
      * Unique identifier of the kernel server session.
      */
-    readonly id?: string;
+    readonly id: string;
 
     /**
      * The name of the kernel.
      */
-    readonly name?: string;
+    readonly name: string;
   }
 
   /**

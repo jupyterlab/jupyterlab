@@ -2,6 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import 'es6-promise/auto';  // polyfill Promise on IE
+import '@jupyterlab/theme-light-extension/style/embed.css';
+import '../index.css';
 
 import {
   CommandRegistry
@@ -37,13 +39,8 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  RenderMime
+  RenderMime, defaultRendererFactories
 } from '@jupyterlab/rendermime';
-
-
-import '@jupyterlab/theming/style/index.css';
-import '@jupyterlab/theming/style/variables-light.css';
-import '../index.css';
 
 
 let NOTEBOOK = 'test.ipynb';
@@ -94,7 +91,10 @@ function createApp(manager: ServiceManager.IManager): void {
     commands.processKeydownEvent(event);
   }, useCapture);
 
-  let rendermime = new RenderMime({ items: RenderMime.getDefaultItems() });
+  let rendermime = new RenderMime({
+    initialFactories: defaultRendererFactories
+  });
+
   let opener = {
     open: (widget: Widget) => {
       // Do nothing for sibling widgets for now.
@@ -115,8 +115,8 @@ function createApp(manager: ServiceManager.IManager): void {
   let wFactory = new NotebookWidgetFactory({
     name: 'Notebook',
     modelName: 'notebook',
-    fileExtensions: ['.ipynb'],
-    defaultFor: ['.ipynb'],
+    fileTypes: ['notebook'],
+    defaultFor: ['notebook'],
     preferKernel: true,
     canStartKernel: true,
     rendermime, contentFactory,

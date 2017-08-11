@@ -71,6 +71,10 @@
   padding-top: var(--jp-code-padding);
 }
 
+.jp-Cell:not(.jp-mod-noOutputs) .jp-Cell-outputCollapser {
+  min-height: 20px;
+}
+
 
 
 /*-----------------------------------------------------------------------------

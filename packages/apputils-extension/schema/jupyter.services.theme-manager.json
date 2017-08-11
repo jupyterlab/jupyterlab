@@ -1,0 +1,10 @@
+{
+  "title": "Theme",
+  "description": "Theme manager settings.",
+  "properties": {
+    "theme": {
+      "type": "string", "title": "Selected Theme", "default": "JupyterLab Light"
+    }
+  },
+  "type": "object"
+}

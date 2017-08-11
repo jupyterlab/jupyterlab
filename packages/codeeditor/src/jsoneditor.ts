@@ -94,7 +94,7 @@ class JSONEditor extends Widget {
     model.value.changed.connect(this._onValueChanged, this);
     this.model = model;
     this.editor = options.editorFactory({ host, model });
-    this.editor.readOnly = true;
+    this.editor.setOption('readOnly', true);
     this.collapsible = !!options.collapsible;
   }
 
@@ -117,7 +117,7 @@ class JSONEditor extends Widget {
    * The title of the editor.
    */
   get editorTitle(): string {
-    return this.titleNode.textContent;
+    return this.titleNode.textContent || '';
   }
   set editorTitle(value: string) {
     this.titleNode.textContent = value;
@@ -179,7 +179,7 @@ class JSONEditor extends Widget {
       this._source.changed.disconnect(this._onSourceChanged, this);
     }
     this._source = value;
-    this.editor.readOnly = !value;
+    this.editor.setOption('readOnly', value === null);
     if (value) {
       value.changed.connect(this._onSourceChanged, this);
     }
@@ -320,13 +320,17 @@ class JSONEditor extends Widget {
    */
   private _mergeContent(): void {
     let model = this.editor.model;
-    let current = this._getContent() || {};
+    let current = this._source ? this._source.toJSON() : { };
     let old = this._originalValue;
     let user = JSON.parse(model.value.text) as JSONObject;
     let source = this.source;
+    if (!source) {
+      return;
+    }
+
     // If it is in user and has changed from old, set in current.
     for (let key in user) {
-      if (!JSONExt.deepEqual(user[key], old[key])) {
+      if (!JSONExt.deepEqual(user[key], old[key] || null)) {
         current[key] = user[key];
       }
     }
@@ -344,21 +348,6 @@ class JSONEditor extends Widget {
   }
 
   /**
-   * Get the metadata from the owner.
-   */
-  private _getContent(): JSONObject | undefined {
-    let source = this._source;
-    if (!source) {
-      return void 0;
-    }
-    let content: JSONObject = {};
-    for (let key of source.keys()) {
-      content[key] = source.get(key);
-    }
-    return content;
-  }
-
-  /**
    * Set the value given the owner contents.
    */
   private _setValue(): void {
@@ -368,11 +357,11 @@ class JSONEditor extends Widget {
     this.commitButtonNode.hidden = true;
     this.removeClass(ERROR_CLASS);
     let model = this.editor.model;
-    let content = this._getContent();
+    let content = this._source ? this._source.toJSON() : { };
     this._changeGuard = true;
     if (content === void 0) {
       model.value.text = 'No data!';
-      this._originalValue = null;
+      this._originalValue = JSONExt.emptyObject;
     } else {
       let value = JSON.stringify(content, null, 4);
       model.value.text = value;
@@ -387,7 +376,7 @@ class JSONEditor extends Widget {
   private _dataDirty = false;
   private _inputDirty = false;
   private _source: IObservableJSON | null = null;
-  private _originalValue: JSONObject = null;
+  private _originalValue = JSONExt.emptyObject;
   private _changeGuard = false;
 }
 
