@@ -910,12 +910,8 @@ namespace Private {
 
   /**
    * The line added to separate the schema header from keys.
-   *
-   * #### Notes
-   * The complete line should be 80 characters long:
-   * (2 x " ") + (2 x "/") + (1 x " ") + (75 x "*") = 80
    */
-  const line = '***************************************************************************';
+  const line = '****************************************';
 
   /**
    * Replacement text for schema properties missing a `description` field.
