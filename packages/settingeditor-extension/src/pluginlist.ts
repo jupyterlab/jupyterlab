@@ -67,17 +67,32 @@ class PluginList extends Widget {
   readonly registry: ISettingRegistry;
 
   /**
+   * A signal emitted when a list user interaction happens.
+   */
+  get changed(): ISignal<this, void> {
+    return this._changed;
+  }
+
+  /**
+   * The editor type currently selected.
+   */
+  get editor(): 'raw' | 'table' {
+    return this._editor;
+  }
+  set editor(editor: 'raw' | 'table') {
+    if (this._editor === editor) {
+      return;
+    }
+
+    this._editor = editor;
+    this.update();
+  }
+
+  /**
    * The selection value of the plugin list.
    */
   get scrollTop(): number {
     return this.node.querySelector('ul').scrollTop;
-  }
-
-  /**
-   * A signal emitted when a selection is made from the plugin list.
-   */
-  get selected(): ISignal<this, string> {
-    return this._selected;
   }
 
   /**
@@ -112,15 +127,6 @@ class PluginList extends Widget {
     default:
       break;
     }
-  }
-
-  /**
-   * Reset the list selection.
-   */
-  reset(): void {
-    this._selection = '';
-    this._selected.emit('');
-    this.update();
   }
 
   /**
@@ -180,6 +186,7 @@ class PluginList extends Widget {
 
     if (editor) {
       this._editor = editor as 'raw' | 'table';
+      this._changed.emit(undefined);
       this.update();
       return;
     }
@@ -198,15 +205,15 @@ class PluginList extends Widget {
     this._confirm().then(() => {
       this._scrollTop = this.scrollTop;
       this._selection = id;
-      this._selected.emit(id);
+      this._changed.emit(undefined);
       this.update();
     }).catch(() => { /* no op */ });
   }
 
+  private _changed = new Signal<this, void>(this);
   private _confirm: () => Promise<void>;
   private _editor: 'raw' | 'table' = 'raw';
   private _scrollTop = 0;
-  private _selected = new Signal<this, string>(this);
   private _selection = '';
 }
 
