@@ -171,13 +171,12 @@ class PluginEditor extends Widget {
     const settings = this._settings;
 
     if (!settings) {
-      raw.hide();
-      table.hide();
       this.hide();
       return;
     }
 
     this.show();
+    (editor === 'raw' ? table : raw).hide();
     (editor === 'raw' ? raw : table).show();
   }
 

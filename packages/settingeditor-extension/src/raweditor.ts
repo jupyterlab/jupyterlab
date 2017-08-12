@@ -14,14 +14,6 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  ISignal
-} from '@phosphor/signaling';
-
-import {
-  PanelLayout, Widget
-} from '@phosphor/widgets';
-
-import {
   SplitPanel
 } from './splitpanel';
 
@@ -30,36 +22,27 @@ import {
  * A raw JSON settings editor.
  */
 export
-class RawEditor extends Widget {
+class RawEditor extends SplitPanel {
   /**
    * Create a new plugin editor.
    */
   constructor(options: RawEditor.IOptions) {
-    super();
-
-    const layout = this.layout = new PanelLayout();
-    const { editorFactory } = options;
-    const collapsible = false;
-    const panel = this._panel = new SplitPanel({
+    super({
       orientation: 'horizontal',
       renderer: SplitPanel.defaultRenderer,
       spacing: 1
     });
 
-    this.handleMoved = panel.handleMoved;
+    const { editorFactory } = options;
+    const collapsible = false;
+
     this._onSaveError = options.onSaveError;
     this._defaults = new JSONEditor({ collapsible, editorFactory });
     this._user = new JSONEditor({ collapsible, editorFactory });
 
-    layout.addWidget(panel);
-    panel.addWidget(this._defaults);
-    panel.addWidget(this._user);
+    this.addWidget(this._defaults);
+    this.addWidget(this._user);
   }
-
-  /**
-   * Emits when the split handle has moved.
-   */
-  readonly handleMoved: ISignal<any, void>;
 
   /**
    * Tests whether the settings have been modified and need saving.
@@ -114,10 +97,10 @@ class RawEditor extends Widget {
    * Get the relative sizes of the two editor panels.
    */
   get sizes(): number[] {
-    return this._panel.relativeSizes();
+    return this.relativeSizes();
   }
   set sizes(sizes: number[]) {
-    this._panel.setRelativeSizes(sizes);
+    this.setRelativeSizes(sizes);
   }
 
   /**
@@ -130,7 +113,6 @@ class RawEditor extends Widget {
 
     super.dispose();
     this._defaults.dispose();
-    this._panel.dispose();
     this._user.dispose();
   }
 
@@ -185,7 +167,6 @@ class RawEditor extends Widget {
 
   private _defaults: JSONEditor;
   private _onSaveError: (reason: any) => void;
-  private _panel: SplitPanel;
   private _settings: ISettingRegistry.ISettings | null = null;
   private _user: JSONEditor;
 }

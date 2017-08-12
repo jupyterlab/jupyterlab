@@ -48,7 +48,7 @@ const DEFAULT_LAYOUT: SettingEditor.ILayoutState = {
   container: {
     editor: 'raw',
     plugin: '',
-    sizes: [5, 2]
+    sizes: [1, 1]
   }
 };
 
