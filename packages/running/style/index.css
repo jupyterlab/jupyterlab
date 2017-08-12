@@ -80,7 +80,7 @@
   padding: 4px 12px;
   font-weight: 600;
   text-transform: uppercase;
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   letter-spacing: 1px;
 }
 

@@ -25,6 +25,7 @@
   font-size: var(--jp-code-font-size);
   font-family: var(--jp-code-font-family);
   height: auto;
+  background: transparent;
   /* Changed to auto to autogrow */
 }
 
@@ -75,7 +76,7 @@
 
 
 .CodeMirror-gutters {
-  border-right: 1px solid var(--jp-border-color1);
+  border-right: 1px solid var(--jp-border-color2);
   background-color: var(--jp-layout-color2);
 }
 
@@ -126,11 +127,11 @@
 }
 
 .CodeMirror-vscrollbar::-webkit-scrollbar {
-  border-left: 1px solid var(--jp-border-color1);
+  border-left: 1px solid var(--jp-border-color2);
 }
 
 .CodeMirror-hscrollbar::-webkit-scrollbar {
-  border-top: 1px solid var(--jp-border-color1);
+  border-top: 1px solid var(--jp-border-color2);
 }
 
 .CodeMirror-vscrollbar::-webkit-scrollbar-thumb, .CodeMirror-hscrollbar::-webkit-scrollbar-thumb {
@@ -139,11 +140,11 @@
 }
 
 .CodeMirror-vscrollbar::-webkit-scrollbar-thumb {
-  border-left: 1px solid var(--jp-border-color1);
+  border-left: 1px solid var(--jp-border-color2);
 }
 
 .CodeMirror-hscrollbar::-webkit-scrollbar-thumb {
-  border-top: 1px solid var(--jp-border-color1);
+  border-top: 1px solid var(--jp-border-color2);
 }
 
 

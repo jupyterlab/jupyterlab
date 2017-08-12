@@ -148,9 +148,9 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   /* Window/plugin scroll bar styling */
 
-  --jp-scrollbar-thumb-color: var(--jp-layout-color1);
-  --jp-scrollbar-background-color: var(--jp-layout-color2);
-  --jp-scrollbar-border: 1px solid var(--jp-border-color1);
+  --jp-scrollbar-thumb-color: var(--jp-layout-color2);
+  --jp-scrollbar-background-color: var(--jp-layout-color0);
+  --jp-scrollbar-border: 1px solid var(--jp-border-color2);
 
   /* Cell specific styles */
 
@@ -188,7 +188,7 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   /* Toolbar specific styles */
 
-  --jp-toolbar-border-color: var(--md-grey-400);
+  --jp-toolbar-border-color: var(--jp-border-color1);
   --jp-toolbar-micro-height: 8px;
   --jp-toolbar-background: var(--jp-layout-color1);
   --jp-toolbar-box-shadow: 0px 0px 2px 0px rgba(0,0,0,0.24);
