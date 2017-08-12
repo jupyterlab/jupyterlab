@@ -916,29 +916,30 @@ namespace Private {
   /**
    * Replacement text for schema properties missing a `description` field.
    */
-  const nondescript = '[missing schema `description`]';
+  const nondescript = '[missing schema description]';
 
   /**
    * Replacement text for schema properties missing a `default` field.
    */
-  const undefaulted = '[missing schema `default`]';
+  const undefaulted = '[missing schema default]';
 
   /**
    * Replacement text for schema properties missing a `title` field.
    */
-  const untitled = '[missing schema `title`]';
+  const untitled = '[missing schema title]';
 
   /**
    * Returns an annotated (JSON with comments) version of a schema's defaults.
    */
   export
   function annotatedDefaults(schema: ISettingRegistry.ISchema, plugin: string): string {
-    const { description, title } = schema;
-    const keys = Object.keys(schema.properties);
+    const { description, properties, title } = schema;
+    const keys = Object.keys(properties).sort((a, b) => a.localeCompare(b));
 
     return [
       '{',
-      comment(`${title || untitled} (${plugin})`),
+      comment(`${title || untitled}`),
+      comment(plugin),
       comment(description || nondescript),
       comment(line),
       '',
@@ -964,7 +965,8 @@ namespace Private {
       : `Default value:\n\n"${key}": ` + JSON.stringify(reified, null, 2);
 
     return [
-      comment(`${title || untitled} (${key})`),
+      comment(`${title || untitled}`),
+      comment(key),
       comment(description || nondescript),
       comment(defaults || undefaulted)
     ].join('\n');
