@@ -12,6 +12,10 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
+  JSONExt
+} from '@phosphor/coreutils';
+
+import {
   Message
 } from '@phosphor/messaging';
 
@@ -67,13 +71,6 @@ class PluginEditor extends Widget {
   }
 
   /**
-   * A signal that emits when editor layout state changes and needs to be saved.
-   */
-  get stateChanged(): ISignal<this, void> {
-    return this._stateChanged;
-  }
-
-  /**
    * Tests whether the settings have been modified and need saving.
    */
   get isDirty(): boolean {
@@ -87,10 +84,15 @@ class PluginEditor extends Widget {
     return this._settings;
   }
   set settings(settings: ISettingRegistry.ISettings | null) {
+    if (this._settings === settings) {
+      return;
+    }
+
     const raw = this._rawEditor;
     const table = this._tableEditor;
 
     this._settings = raw.settings = table.settings = settings;
+    this.update();
   }
 
   /**
@@ -104,8 +106,20 @@ class PluginEditor extends Widget {
     return { editor, plugin, sizes };
   }
   set state(state: SettingEditor.IPluginLayout) {
+    if (JSONExt.deepEqual(this.state, state)) {
+      return;
+    }
+
     this._editor = state.editor;
     this._rawEditor.sizes = state.sizes;
+    this.update();
+  }
+
+  /**
+   * A signal that emits when editor layout state changes and needs to be saved.
+   */
+  get stateChanged(): ISignal<this, void> {
+    return this._stateChanged;
   }
 
   /**
