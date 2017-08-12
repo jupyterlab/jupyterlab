@@ -135,8 +135,8 @@ class SettingEditor extends Widget {
     panel.addWidget(instructions);
 
     editor.stateChanged.connect(this._onStateChanged, this);
+    list.changed.connect(this._onStateChanged, this);
     panel.handleMoved.connect(this._onStateChanged, this);
-    list.selected.connect(this._onSelected, this);
   }
 
   /**
@@ -231,26 +231,19 @@ class SettingEditor extends Widget {
   }
 
   /**
-   * Handle a new selection in the plugin list.
+   * Handle root level layout state changes.
    */
-  private _onSelected(sender: any, plugin: string): void {
-    this._state.container.plugin = plugin;
+  private _onStateChanged(): void {
+    this._state.sizes = this._panel.relativeSizes();
+    this._state.container = this._editor.state;
+    this._state.container.editor = this._list.editor;
+    this._state.container.plugin = this._list.selection;
     this._saveState()
       .then(() => { this._setState(); })
       .catch(reason => {
         console.error('Saving setting editor state failed', reason);
         this._setState();
       });
-  }
-
-  /**
-   * Handle root level layout state changes.
-   */
-  private _onStateChanged(): void {
-    this._state.sizes = this._panel.relativeSizes();
-    this._saveState().catch(reason => {
-      console.error('Saving setting editor state failed', reason);
-    });
   }
 
   /**
@@ -284,23 +277,23 @@ class SettingEditor extends Widget {
     const editor = this._editor;
     const list = this._list;
     const panel = this._panel;
-    const { plugin } = this._state.container;
+    const { container } = this._state;
 
-    if (!plugin) {
+    if (!container.plugin) {
       editor.settings = null;
       list.selection = '';
       this._setLayout();
       return;
     }
 
-    if (editor.settings && editor.settings.plugin === plugin) {
+    if (editor.settings && editor.settings.plugin === container.plugin) {
       this._setLayout();
       return;
     }
 
     const instructions = this._instructions;
 
-    this.registry.load(plugin).then(settings => {
+    this.registry.load(container.plugin).then(settings => {
       if (instructions.isAttached) {
         instructions.parent = null;
       }
@@ -308,7 +301,8 @@ class SettingEditor extends Widget {
         panel.addWidget(editor);
       }
       editor.settings = settings;
-      list.selection = plugin;
+      list.editor = container.editor;
+      list.selection = container.plugin;
       this._setLayout();
     }).catch((reason: Error) => {
       console.error(`Loading settings failed: ${reason.message}`);
