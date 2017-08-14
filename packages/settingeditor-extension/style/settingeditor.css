@@ -156,6 +156,7 @@
 
 
 #setting-editor .jp-PluginEditor .jp-JSONEditor-host {
+  background-color: var(--jp-layout-color1);
   height: 100%;
   margin-left: 0;
   margin-right: 0;

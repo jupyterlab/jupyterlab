@@ -909,11 +909,6 @@ namespace Private {
   /* tslint:enable */
 
   /**
-   * The line added to separate the schema header from keys.
-   */
-  const line = '****************************************';
-
-  /**
    * Replacement text for schema properties missing a `description` field.
    */
   const nondescript = '[missing schema description]';
@@ -938,21 +933,14 @@ namespace Private {
 
     return [
       '{',
-      comment(`${title || untitled}`),
-      comment(plugin),
-      comment(description || nondescript),
-      comment(line),
+      prefix(`${title || untitled}`),
+      prefix(plugin),
+      prefix(description || nondescript),
+      prefix(line((description || nondescript).length)),
       '',
-      keys.map(key => docstring(schema, key)).join('\n\n\n'),
+      keys.map(key => docstring(schema, key)).join('\n\n'),
       '}'
     ].join('\n');
-  }
-
-  /**
-   * Returns a documentation string with a comment prefix added on every line.
-   */
-  function comment(source: string, prefix = '  \/\/ '): string {
-    return prefix + source.split('\n').join(`\n${prefix}`);
   }
 
   /**
@@ -961,15 +949,28 @@ namespace Private {
   function docstring(schema: ISettingRegistry.ISchema, key: string): string {
     const { description, title } = schema.properties[key];
     const reified = reifyDefault(schema, key);
-    const defaults = reified === undefined ? ''
-      : `Default value:\n\n"${key}": ` + JSON.stringify(reified, null, 2);
+    const defaults = reified === undefined ? prefix(`"${key}": ${undefaulted}`)
+      : prefix(`"${key}": ${JSON.stringify(reified, null, 2)}`, '  ');
 
     return [
-      comment(`${title || untitled}`),
-      comment(key),
-      comment(description || nondescript),
-      comment(defaults || undefaulted)
+      prefix(`${title || untitled}`),
+      prefix(description || nondescript),
+      defaults
     ].join('\n');
+  }
+
+  /**
+   * Returns a line of a specified length.
+   */
+  function line(length: number, ch = '*'): string {
+    return (new Array(length + 1)).join(ch);
+  }
+
+  /**
+   * Returns a documentation string with a comment prefix added on every line.
+   */
+  function prefix(source: string, pre = '  \/\/ '): string {
+    return pre + source.split('\n').join(`\n${pre}`);
   }
 
   /**
