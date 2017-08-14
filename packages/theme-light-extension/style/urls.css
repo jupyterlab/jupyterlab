@@ -89,6 +89,7 @@
   --jp-icon-caretdown: url('./lab/api/themes/jupyterlab-theme-light-extension/icons/md/caretdown.svg');
   --jp-icon-caretleft: url('./lab/api/themes/jupyterlab-theme-light-extension/icons/md/caretleft.svg');
   --jp-icon-caretright: url('./lab/api/themes/jupyterlab-theme-light-extension/icons/md/caretright.svg');
+  --jp-icon-undo: url('./lab/api/themes/jupyterlab-theme-light-extension/icons/md/undo.svg');
   --jp-about-header-logo: url('./lab/api/themes/jupyterlab-theme-light-extension/icons/jupyter/jupyter.svg');
   --jp-about-header-wordmark: url('./lab/api/themes/jupyterlab-theme-light-extension/images/jupyterlab-wordmark.svg');
 }
