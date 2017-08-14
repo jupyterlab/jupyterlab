@@ -7,8 +7,109 @@
 .jp-FAQ {
   font-family: var(--jp-ui-font-family);
   outline: none;
-  display: flex;
-  flex-direction: column;
+  overflow-y: auto;
+}
+
+#faq-header {
+  margin: 40px auto 40px auto;
+  text-align: center;
+  max-width: 84%;
+}
+
+
+.jp-FAQ-content {
+  margin: 0 auto 70px auto;
+  display: block;
+  width: 84%;
+  max-width: 700px;
+}
+
+
+.jp-FAQ-h1 {
+  font-size: 26px;
+  font-weight: 400;
+  color: var(--jp-ui-font-color0);
+}
+
+
+.jp-FAQ-h2 {
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--jp-ui-font-color0);
+  margin: 28px 0 0 0;
+  margin-bottom: 8px;
+}
+
+
+.jp-FAQ-ul {
+  margin: 0 0 0 0;
+  padding: 0;
+}
+
+
+.jp-FAQ-question:target {
+  animation: highlight 0.9s cubic-bezier(0.15, 0.08, 0.54, 0.85);
+}
+
+
+@keyframes highlight {
+    0%   {background-color: transparent;}
+    50%  {background-color: var(--md-blue-100);}
+    100% {background-color: transparent;}
+}
+
+
+.jp-FAQ-question {
+  list-style-type: none;
+  padding: 4px 0px;
+  display: inline-block;
+  font-weight: 500;
+}
+
+
+.jp-FAQ-question > a {
+  font-size: 16px;
+  color: var(--md-blue-700);
+  font-weight: 400;
+  line-height: 150%;
+  list-style-type: none;
+  margin: 28px 0 0 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+
+.jp-FAQ-answer{
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--jp-ui-font-color0);
+  line-height: 160%;
+  border-left: 2px solid var(--md-blue-500);
+  padding-left: 24px;
+  list-style-type: none;
+  margin: 12px 0 24px 20px;
+}
+
+
+.jp-FAQ-toc {
+  display: block;
+}
+
+
+.jp-FAQ-toc:focus{
+  color: var(--md-blue-500);
+}
+
+
+li > jp-FAQ-answer {
+  text-decoration: none;
+}
+
+
+.jp-FAQ-title {
+  color: var(--jp-ui-font-color0);
+  display: block;
+  text-align: center;
 }
 
 
@@ -19,7 +120,10 @@
 }
 
 
-.jp-FAQ-content {
-  overflow-y: auto;
-  padding: 12px;
+.jp-QuestionMark.jp-FAQ-QuestionMark {
+  display: block;
+  height: 49px;
+  width: 49px;
+  margin: auto;
+  margin-bottom: 8px;
 }
