@@ -226,11 +226,6 @@
 }
 
 
-#setting-editor .jp-TableEditor th.jp-TableEditor-add {
-  width: var(--jp-private-settingeditor-add-width);
-}
-
-
 #setting-editor .jp-TableEditor th.jp-TableEditor-key {
   width: var(--jp-private-settingeditor-key-width);
 }
@@ -268,17 +263,4 @@
 
 #setting-editor .jp-TableEditor td.jp-TableEditor-type {
   text-align: right;
-}
-
-
-#setting-editor .jp-TableEditor .jp-TableEditor-button {
-  display: inline-block;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 8px;
-  border: 1px solid var(--jp-layout-color3);
-  border-radius: 8px;
-  width: 8px;
-  height: 8px;
-  margin-top: 3px;
 }
