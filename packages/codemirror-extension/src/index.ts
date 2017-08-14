@@ -46,6 +46,12 @@ namespace CommandIDs {
 
   export
   const changeMode = 'codemirror:change-mode';
+
+  export
+  const find = 'codemirror:find';
+
+  export
+  const findAndReplace = 'codemirror:find-and-replace';
 };
 
 
@@ -195,6 +201,32 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
       isToggled: args => args['keyMap'] === keyMap
     });
 
+    commands.addCommand(CommandIDs.find, {
+      label: 'Find',
+      execute: () => {
+        let widget = tracker.currentWidget;
+        if (!widget) {
+          return;
+        }
+        let editor = widget.editor as CodeMirrorEditor;
+        editor.execCommand('find');
+      },
+      isEnabled: hasWidget
+    });
+
+    commands.addCommand(CommandIDs.findAndReplace, {
+      label: 'Find & Replace',
+      execute: () => {
+        let widget = tracker.currentWidget;
+        if (!widget) {
+          return;
+        }
+        let editor = widget.editor as CodeMirrorEditor;
+        editor.execCommand('replace');
+      },
+      isEnabled: hasWidget
+    });
+
     commands.addCommand(CommandIDs.changeMode, {
       label: args => args['name'] as string,
       execute: args => {
@@ -264,6 +296,8 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
 
     menu.addItem({ type: 'submenu', submenu: modeMenu });
     menu.addItem({ type: 'submenu', submenu: tabMenu });
+    menu.addItem({ command: CommandIDs.find });
+    menu.addItem({ command: CommandIDs.findAndReplace });
     menu.addItem({ type: 'separator' });
     menu.addItem({ command: 'fileeditor:toggle-line-numbers' });
     menu.addItem({ command: 'fileeditor:toggle-line-wrap' });

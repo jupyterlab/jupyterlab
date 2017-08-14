@@ -437,6 +437,11 @@ declare module CodeMirror {
         triggerOnKeyDown(event: Event): void;
         triggerOnKeyPress(event: Event): void;
         triggerOnKeyUp(event: Event): void;
+
+        /**
+         * Execute a command on the editor.
+         */
+        execCommand(command: string): any;
     }
 
     interface EditorFromTextArea extends Editor {

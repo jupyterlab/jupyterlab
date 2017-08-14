@@ -35,6 +35,8 @@ import {
 import 'codemirror/addon/edit/matchbrackets.js';
 import 'codemirror/addon/edit/closebrackets.js';
 import 'codemirror/addon/comment/comment.js';
+import 'codemirror/addon/search/searchcursor';
+import 'codemirror/addon/search/search';
 import 'codemirror/keymap/emacs.js';
 import 'codemirror/keymap/sublime.js';
 import 'codemirror/keymap/vim.js';
@@ -470,6 +472,15 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   setSelections(selections: CodeEditor.IRange[]): void {
     const cmSelections = this._toCodeMirrorSelections(selections);
     this.doc.setSelections(cmSelections, 0);
+  }
+
+  /**
+   * Execute a codemirror command on the editor.
+   *
+   * @param command - The name of the command to execute.
+   */
+  execCommand(command: string): void {
+    this._editor.execCommand(command);
   }
 
   /**
