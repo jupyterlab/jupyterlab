@@ -148,14 +148,21 @@
   border-top: var(--jp-border-width) solid var(--jp-layout-color2);
 }
 
-.p-Menu-itemIcon::before,
-.p-Menu-itemSubmenuIcon::before {
-  font-family: FontAwesome;
+.p-Menu-itemIcon,
+.p-Menu-itemSubmenuIcon {
+  background-size: 16px;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 
-.p-Menu-item.p-mod-toggled > .p-Menu-itemIcon::before {
-  content: '\f00c';
+.p-Menu-item.p-mod-toggled > .p-Menu-itemIcon {
+  background-image: var(--jp-icon-checkmark);
+}
+
+
+.p-Menu-item.p-mod-toggled.p-mod-disabled > .p-Menu-itemIcon {
+  background-image: var(--jp-icon-checkmark-disabled);
 }
 
 
