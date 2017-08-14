@@ -129,7 +129,7 @@
 
 
 .p-Menu-itemSubmenuIcon {
-  width: 16px;
+  width: 18px;
   padding: 0px 4px 0px 0px;
 }
 
@@ -166,7 +166,9 @@
 }
 
 
-.p-Menu-item[data-type='submenu'] > .p-Menu-itemSubmenuIcon::before {
-  content: '\f0da';
-
+.p-Menu-item[data-type='submenu'] > .p-Menu-itemSubmenuIcon {
+  background-image: var(--jp-icon-caretright);
+  background-size: 18px;
+  background-repeat: no-repeat;
+  background-position: left;
 }

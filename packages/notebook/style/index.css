@@ -72,19 +72,6 @@
 }
 
 
-.jp-Notebook::-webkit-scrollbar {
-  background-color: var(--jp-layout-color0);
-  border-left: 1px solid var(--jp-border-color2);
-  width: var(--jp-scrollbar-width);
-}
-
-
-.jp-Notebook::-webkit-scrollbar-thumb {
-  background-color: var(--jp-layout-color2);
-  border-left: 1px solid var(--jp-border-color2);
-}
-
-
 .jp-Notebook a:-webkit-any-link {
   color: var(--md-blue-500);
 }
@@ -214,7 +201,7 @@
   width: 300px;
   top: 8px;
   left: 8px;
-  background: #EEEEEE;
+  background: var(--jp-layout-color2);
   border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
   box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.12);
 }
@@ -236,8 +223,9 @@
 
 .jp-ActiveCellTool {
   padding: 12px;
-  border-bottom: none;
+  border-bottom: 1px solid var(--jp-border-color1);
   background-color: var(--jp-layout-color2);
+  box-shadow: var(--jp-toolbar-box-shadow);
 }
 
 
@@ -255,7 +243,7 @@
 
 
 .jp-CellTools-tool:not(:first-child) {
-  border-top: var(--jp-border-width) solid var(--jp-border-color1);
+  border-top: var(--jp-border-width) solid var(--jp-border-color2);
 }
 
 

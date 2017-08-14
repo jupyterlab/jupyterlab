@@ -4,6 +4,21 @@
 |----------------------------------------------------------------------------*/
 
 
+::-webkit-scrollbar {
+  background: transparent;
+}
+
+
+::-webkit-scrollbar-track {
+  border-left: var(--jp-layout-color1);
+}
+
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--jp-layout-color2);
+}
+
+
 .p-ScrollBar[data-orientation='horizontal'] {
   min-height: 16px;
   max-height: 16px;

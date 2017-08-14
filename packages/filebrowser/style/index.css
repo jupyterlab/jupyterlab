@@ -172,8 +172,8 @@
 }
 
 /* Styling for the file browser content scroll bar */
-.jp-DirListing-content::-webkit-scrollbar {
-  background-color: var(--jp-layout-color1);
+/* .jp-DirListing-content::-webkit-scrollbar {
+  background-color: transparent;
   border-left: 1px solid var(--jp-border-color2);
   width: var(--jp-scrollbar-width);
 }
@@ -183,7 +183,7 @@
   background-color: var(--jp-layout-color2);
   border-radius: 0px;
   border-left: 1px solid var(--jp-border-color2);
-}
+} */
 
 
 .jp-DirListing-item {
