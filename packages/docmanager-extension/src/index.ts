@@ -53,6 +53,9 @@ namespace CommandIDs {
   const open = 'docmanager:open';
 
   export
+  const clone = 'docmanager:clone';
+
+  export
   const restoreCheckpoint = 'docmanager:restore-checkpoint';
 
   export
@@ -102,7 +105,7 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
     const docManager = new DocumentManager({ registry, manager, opener });
 
     // Register the file operations commands.
-    addCommands(app, docManager, palette);
+    addCommands(app, docManager, palette, opener);
 
     return docManager;
   }
@@ -118,7 +121,7 @@ export default plugin;
 /**
  * Add the file operations commands to the application's command registry.
  */
-function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICommandPalette): void {
+function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICommandPalette, opener: DocumentManager.IWidgetOpener): void {
   const { commands } = app;
   const category = 'File Operations';
   const isEnabled = () => {
@@ -247,10 +250,39 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     label: 'Rename'
   });
 
+  commands.addCommand(CommandIDs.clone, {
+    isVisible: () => {
+      const widget = app.shell.currentWidget;
+      if (!widget) {
+        return;
+      }
+      // Find the context for the widget.
+      let context = docManager.contextForWidget(widget);
+      return context !== null;
+    },
+    execute: () => {
+      const widget = app.shell.currentWidget;
+      if (!widget) {
+        return;
+      }
+      // Clone the widget.
+      let child = docManager.cloneWidget(widget);
+      if (child) {
+        opener.open(child);
+      }
+    },
+    label: 'Clone'
+  });
+
   app.contextMenu.addItem({
     command: CommandIDs.rename,
     selector: '[data-type="document-title"]',
     rank: 1
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.clone,
+    selector: '[data-type="document-title"]',
+    rank: 2
   });
 
   [

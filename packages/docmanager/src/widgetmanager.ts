@@ -193,7 +193,7 @@ class DocumentWidgetManager implements IDisposable {
     }
     let newWidget = this.createWidget(factory, context);
     this.adoptWidget(context, newWidget);
-    return widget;
+    return newWidget;
   }
 
   /**
