@@ -128,6 +128,7 @@ def install_extension_async(extension, app_dir=None, logger=None, abort_callback
         return
 
     _ensure_app_dirs(app_dir, logger)
+    
     target = pjoin(app_dir, 'extensions', 'temp')
     if os.path.exists(target):
         shutil.rmtree(target)
@@ -155,6 +156,13 @@ def install_extension_async(extension, app_dir=None, logger=None, abort_callback
             data['name'], data['version'], errors
         )
         raise ValueError(msg)
+
+    # Check for existing extension of the same name.
+    extensions = _get_extensions(app_dir)
+    if data['name'] in extensions:
+        path = extensions[data['name']]['path']
+        if osp.exists(path):
+            os.remove(path)
 
     # Handle any schemas.
     schemaDir = data['jupyterlab'].get('schemaDir', None)
