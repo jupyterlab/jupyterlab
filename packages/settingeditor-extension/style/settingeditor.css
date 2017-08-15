@@ -238,17 +238,6 @@
 }
 
 
-#setting-editor .jp-SettingsTableEditor td.jp-SettingsTableEditor-add {
-  cursor: pointer;
-  text-align: center;
-}
-
-
-#setting-editor .jp-SettingsTableEditor td.jp-SettingsTableEditor-add.jp-mod-active:hover {
-  border: 1px solid var(--jp-toolbar-border-color);
-}
-
-
 #setting-editor .jp-SettingsTableEditor td.jp-SettingsTableEditor-key {
   overflow: hidden;
   white-space: nowrap;
