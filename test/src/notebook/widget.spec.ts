@@ -838,14 +838,6 @@ describe('notebook/widget', () => {
           expect(widget.activeCellIndex).to.be(1);
         });
 
-        it('should be a no-op if the model is read only', () => {
-          let child = widget.widgets[1];
-          widget.model.readOnly = true;
-          simulate(child.node, 'mousedown');
-          expect(widget.events).to.contain('mousedown');
-          expect(widget.activeCellIndex).to.be(0);
-        });
-
         it('should be a no-op if not not a cell', () => {
           simulate(widget.node, 'mousedown');
           expect(widget.events).to.contain('mousedown');
@@ -876,16 +868,6 @@ describe('notebook/widget', () => {
           simulate(child.node, 'dblclick');
           expect(widget.mode).to.be('command');
           expect(child.rendered).to.be(false);
-        });
-
-        it('should be a no-op if the model is read only', () => {
-          let cell = widget.model.contentFactory.createMarkdownCell({});
-          widget.model.cells.push(cell);
-          widget.model.readOnly = true;
-          let child = widget.widgets[widget.widgets.length - 1] as MarkdownCell;
-          expect(child.rendered).to.be(true);
-          simulate(child.node, 'dblclick');
-          expect(child.rendered).to.be(true);
         });
 
       });

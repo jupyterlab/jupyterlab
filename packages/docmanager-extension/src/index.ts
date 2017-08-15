@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, IMainMenu
+  showDialog, Dialog, ICommandPalette, IMainMenu
 } from '@jupyterlab/apputils';
 
 import {
@@ -194,6 +194,9 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     execute: () => {
       if (isEnabled()) {
         let context = docManager.contextForWidget(app.shell.currentWidget);
+        if (context.model.readOnly) {
+          return context.revert();
+        }
         return context.restoreCheckpoint().then(() => context.revert());
       }
     }
@@ -206,6 +209,13 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     execute: () => {
       if (isEnabled()) {
         let context = docManager.contextForWidget(app.shell.currentWidget);
+        if (context.model.readOnly) {
+          return showDialog({
+            title: 'Cannot Save',
+            body: 'Document is read-only',
+            buttons: [Dialog.okButton()]
+          });
+        }
         return context.save().then(() => context.createCheckpoint());
       }
     }

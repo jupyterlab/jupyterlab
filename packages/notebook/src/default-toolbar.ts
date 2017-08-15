@@ -14,7 +14,7 @@ import {
 } from './actions';
 
 import {
-  Styling, Toolbar, ToolbarButton
+  showDialog, Dialog, Styling, Toolbar, ToolbarButton
 } from '@jupyterlab/apputils';
 
 import {
@@ -84,6 +84,13 @@ namespace ToolbarItems {
     return new ToolbarButton({
       className: TOOLBAR_SAVE_CLASS,
       onClick: () => {
+        if (panel.context.model.readOnly) {
+          return showDialog({
+            title: 'Cannot Save',
+            body: 'Document is read-only',
+            buttons: [Dialog.okButton()]
+          });
+        }
         panel.context.save().then(() => {
           if (!panel.isDisposed) {
             return panel.context.createCheckpoint();

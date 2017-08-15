@@ -232,9 +232,18 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         return this._populate();
       }
     }).catch(err => {
+      let body = '';
+      // Check for a more specific error message.
+      if (err.xhr) {
+        try {
+          body = JSON.parse(err.xhr.response).message;
+        } catch (e) {
+          body = err.xhr.responseText;
+        }
+      }
       showDialog({
         title: 'File Save Error',
-        body: err.xhr ? err.xhr.responseText : String(err),
+        body: body || String(err),
         buttons: [Dialog.okButton()]
       });
     });
@@ -421,6 +430,9 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     };
     let mod = this._contentsModel ? this._contentsModel.last_modified : null;
     this._contentsModel = newModel;
+    if (!newModel.writable) {
+      this._model.readOnly = true;
+    }
     if (!mod || newModel.last_modified !== mod) {
       this._fileChanged.emit(newModel);
     }
@@ -431,12 +443,22 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    */
   private _populate(): Promise<void> {
     this._isPopulated = true;
-    // Add a checkpoint if none exists.
-    return this.listCheckpoints().then(checkpoints => {
-      if (!this.isDisposed && !checkpoints) {
-        return this.createCheckpoint().then(() => { /* no-op */ });
-      }
-    }).then(() => {
+
+    // Add a checkpoint if none exists and the file is not read only.
+    let promise = Promise.resolve(void 0);
+    if (!this._model.readOnly) {
+      promise = this.listCheckpoints().then(checkpoints => {
+        if (!this.isDisposed && !checkpoints && !this._model.readOnly) {
+          return this.createCheckpoint().then(() => { /* no-op */ });
+        }
+      }).catch(err => {
+        // Handle a read-only folder.
+        if (err.message !== 'Forbidden') {
+          throw err;
+        }
+      });
+    }
+    return promise.then(() => {
       if (this.isDisposed) {
         return;
       }

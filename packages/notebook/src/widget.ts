@@ -851,7 +851,7 @@ class Notebook extends StaticNotebook {
    * not be called directly by user code.
    */
   handleEvent(event: Event): void {
-    if (!this.model || this.model.readOnly) {
+    if (!this.model) {
       return;
     }
     switch (event.type) {
@@ -1419,7 +1419,7 @@ class Notebook extends StaticNotebook {
    */
   private _evtDblClick(event: MouseEvent): void {
     let model = this.model;
-    if (!model || model.readOnly) {
+    if (!model) {
       return;
     }
     let target = event.target as HTMLElement;
