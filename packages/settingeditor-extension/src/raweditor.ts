@@ -14,12 +14,36 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  Widget
+  h, VirtualDOM
+} from '@phosphor/virtualdom';
+
+import {
+  BoxLayout, Widget
 } from '@phosphor/widgets';
 
 import {
   SplitPanel
 } from './splitpanel';
+
+/**
+ * A class name added to all raw editors.
+ */
+const RAW_EDITOR_CLASS = 'jp-SettingsRawEditor';
+
+/**
+ * A class name added to the banner of editors in the raw settings editor.
+ */
+const BANNER_CLASS = 'jp-SettingsRawEditor-banner';
+
+/**
+ * The banner text for the default editor.
+ */
+const DEFAULT_TITLE = 'System Defaults';
+
+/**
+ * The banner text for the user settings editor.
+ */
+const USER_TITLE = 'User Overrides';
 
 
 /**
@@ -40,23 +64,23 @@ class RawEditor extends SplitPanel {
     const { editorFactory } = options;
     const collapsible = false;
 
-    this._onSaveError = options.onSaveError;
-    this._user = new JSONEditor({ collapsible, editorFactory });
-
     // Create read-only defaults editor.
-    this._defaults = new CodeEditorWrapper({
+    const defaults = this._defaults = new CodeEditorWrapper({
       model: new CodeEditor.Model(),
       factory: editorFactory
-    }) as CodeEditorWrapper;
-
-    const defaults = this._defaults as CodeEditorWrapper;
+    });
 
     defaults.editor.model.value.text = '';
     defaults.editor.model.mimeType = 'text/javascript';
     defaults.editor.setOption('readOnly', true);
 
-    this.addWidget(this._defaults);
-    this.addWidget(this._user);
+    // Create read-write user settings editor.
+    const user = this._user = new JSONEditor({ collapsible, editorFactory });
+
+    this.addClass(RAW_EDITOR_CLASS);
+    this._onSaveError = options.onSaveError;
+    this.addWidget(Private.addBanner(defaults, DEFAULT_TITLE, BANNER_CLASS));
+    this.addWidget(Private.addBanner(user, USER_TITLE, BANNER_CLASS));
   }
 
   /**
@@ -84,7 +108,7 @@ class RawEditor extends SplitPanel {
       return;
     }
 
-    const defaults = this._defaults as CodeEditorWrapper;
+    const defaults = this._defaults;
     const user = this._user;
 
     // Disconnect old source change handler.
@@ -144,7 +168,7 @@ class RawEditor extends SplitPanel {
    */
   protected onUpdateRequest(msg: Message): void {
     const settings = this._settings;
-    const defaults = this._defaults as CodeEditorWrapper;
+    const defaults = this._defaults;
     const user = this._user;
 
     if (settings) {
@@ -158,7 +182,7 @@ class RawEditor extends SplitPanel {
    */
   private _onSettingsChanged(): void {
     const settings = this._settings;
-    const defaults = this._defaults as CodeEditorWrapper;
+    const defaults = this._defaults;
     const user = this._user;
     const values = settings && settings.user || { };
 
@@ -181,7 +205,7 @@ class RawEditor extends SplitPanel {
     settings.save(source.toJSON()).catch(this._onSaveError);
   }
 
-  private _defaults: Widget;
+  private _defaults: CodeEditorWrapper;
   private _onSaveError: (reason: any) => void;
   private _settings: ISettingRegistry.ISettings | null = null;
   private _user: JSONEditor;
@@ -207,5 +231,28 @@ namespace RawEditor {
      * A function the raw editor calls on save errors.
      */
     onSaveError: (reason: any) => void;
+  }
+}
+
+
+/**
+ * A namespace for private module data.
+ */
+namespace Private {
+  /**
+   * Returns a wrapper widget to hold an editor and its banner.
+   */
+  export
+  function addBanner(editor: Widget, bannerText: string, bannerClass: string): Widget {
+    const widget = new Widget();
+    const layout = widget.layout = new BoxLayout({ spacing: 0 });
+    const banner = new Widget({
+      node: VirtualDOM.realize(h.div({ className: bannerClass }, bannerText))
+    });
+
+    layout.addWidget(banner);
+    layout.addWidget(editor);
+
+    return widget;
   }
 }
