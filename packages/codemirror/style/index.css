@@ -25,6 +25,7 @@
   font-size: var(--jp-code-font-size);
   font-family: var(--jp-code-font-family);
   height: auto;
+  background: transparent;
   /* Changed to auto to autogrow */
 }
 
@@ -75,7 +76,7 @@
 
 
 .CodeMirror-gutters {
-  border-right: 1px solid var(--jp-border-color1);
+  border-right: 1px solid var(--jp-border-color2);
   background-color: var(--jp-layout-color2);
 }
 
@@ -120,6 +121,33 @@
   white-space: nowrap;
 }
 
+.CodeMirror-vscrollbar::-webkit-scrollbar, .CodeMirror-hscrollbar::-webkit-scrollbar {
+  background-color: var(--jp-layout-color0);
+  width: var(--jp-scrollbar-width);
+}
+
+.CodeMirror-vscrollbar::-webkit-scrollbar {
+  border-left: 1px solid var(--jp-border-color2);
+}
+
+.CodeMirror-hscrollbar::-webkit-scrollbar {
+  border-top: 1px solid var(--jp-border-color2);
+}
+
+.CodeMirror-vscrollbar::-webkit-scrollbar-thumb, .CodeMirror-hscrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--jp-layout-color2);
+  border-radius: 0px;
+}
+
+.CodeMirror-vscrollbar::-webkit-scrollbar-thumb {
+  border-left: 1px solid var(--jp-border-color2);
+}
+
+.CodeMirror-hscrollbar::-webkit-scrollbar-thumb {
+  border-top: 1px solid var(--jp-border-color2);
+}
+
+
 
 /*
   Here is our jupyter theme for CodeMirror syntax highlighting
@@ -159,4 +187,3 @@
   background-position: right;
   background-repeat: no-repeat;
 }
-
