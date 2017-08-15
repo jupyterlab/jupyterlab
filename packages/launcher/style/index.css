@@ -51,19 +51,6 @@
 }
 
 
-.jp-Launcher-body::-webkit-scrollbar {
-  background-color: var(--jp-scrollbar-background-color);
-  border-left: var(--jp-scrollbar-border);
-}
-
-
-.jp-Launcher-body::-webkit-scrollbar-thumb {
-  background-color: var(--jp-scrollbar-thumb-color);
-  border-radius: 0px;
-  border-left: var(--jp-scrollbar-border);
-}
-
-
 .jp-Launcher-content {
   width: 85%;
   height: 100%;

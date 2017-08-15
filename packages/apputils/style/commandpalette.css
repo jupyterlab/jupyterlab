@@ -177,22 +177,6 @@
 }
 
 
-.p-CommandPalette-content::-webkit-scrollbar {
-  background-color: var(--jp-layout-color1);
-  border-left: 1px solid var(--jp-border-color2);
-  width: var(--jp-scrollbar-width);
-}
-
-
-.p-CommandPalette-content::-webkit-scrollbar-thumb {
-  background-color: var(--jp-layout-color2);
-  border-left: 1px solid var(--jp-border-color2);
-  padding-left: 1px;
-  padding-right: 1px;
-  border-radius: 0px;
-}
-
-
 .p-CommandPalette-content:empty:after {
     content: "No results";
     margin: auto;

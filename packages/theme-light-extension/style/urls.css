@@ -83,6 +83,13 @@
   --jp-icon-upload: url('./lab/api/themes/jupyterlab-theme-light-extension/icons/md/upload.svg');
   --jp-icon-question-mark: url('./lab/api/themes/jupyterlab-theme-light-extension/icons/jupyter/questionmark.svg');
   --jp-icon-chat: url('./lab/api/themes/jupyterlab-theme-light-extension/icons/md/chat.svg');
+  --jp-icon-checkmark: url('./lab/api/themes/jupyterlab-theme-light-extension/icons/md/checkmark.svg');
+  --jp-icon-checkmark-disabled: url('./lab/api/themes/jupyterlab-theme-light-extension/icons/md/checkmark-disabled.svg');
+  --jp-icon-caretup: url('./lab/api/themes/jupyterlab-theme-light-extension/icons/md/caretup.svg');
+  --jp-icon-caretdown: url('./lab/api/themes/jupyterlab-theme-light-extension/icons/md/caretdown.svg');
+  --jp-icon-caretleft: url('./lab/api/themes/jupyterlab-theme-light-extension/icons/md/caretleft.svg');
+  --jp-icon-caretright: url('./lab/api/themes/jupyterlab-theme-light-extension/icons/md/caretright.svg');
+  --jp-icon-undo: url('./lab/api/themes/jupyterlab-theme-light-extension/icons/md/undo.svg');
   --jp-about-header-logo: url('./lab/api/themes/jupyterlab-theme-light-extension/icons/jupyter/jupyter.svg');
   --jp-about-header-wordmark: url('./lab/api/themes/jupyterlab-theme-light-extension/images/jupyterlab-wordmark.svg');
 }

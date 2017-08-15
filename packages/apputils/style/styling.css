@@ -87,8 +87,8 @@ select.jp-mod-styled {
   padding-right: 8px;
   background-image: var(--jp-ui-select-caret);
   background-repeat: no-repeat;
-  background-position: right center;
-  background-size: 20px;
+  background-position: 99% center;
+  background-size: 18px;
   border: var(--jp-border-width) solid var(--jp-border-color1);
   border-radius: 0px;
   outline: none;
