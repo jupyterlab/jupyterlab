@@ -86,6 +86,13 @@
   --jp-icon-upload: url('./icons/md/upload.svg');
   --jp-icon-question-mark: url('./icons/jupyter/questionmark.svg');
   --jp-icon-chat: url('./icons/md/chat.svg');
+  --jp-icon-checkmark: url('./icons/md/checkmark.svg');
+  --jp-icon-checkmark-disabled: url('./icons/md/checkmark-disabled.svg');
+  --jp-icon-caretup: url('./icons/md/caretup.svg');
+  --jp-icon-caretdown: url('./icons/md/caretdown.svg');
+  --jp-icon-caretleft: url('./icons/md/caretleft.svg');
+  --jp-icon-caretright: url('./icons/md/caretright.svg');
+  --jp-icon-undo: url('./icons/md/undo.svg');
   --jp-about-header-logo: url('./icons/jupyter/jupyter.svg');
   --jp-about-header-wordmark: url('./images/jupyterlab-wordmark.svg');
 }
