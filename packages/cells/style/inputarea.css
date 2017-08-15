@@ -22,9 +22,9 @@
 
 
 .jp-InputArea-editor {
-  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
+  border: var(--jp-border-width) solid var(--jp-input-border-color);
   border-radius: 0px;
-  background: var(--jp-cell-editor-background);
+  background: var(--jp-input-background-color);
 }
 
 

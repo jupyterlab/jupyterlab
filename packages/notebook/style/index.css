@@ -127,8 +127,8 @@
 /* Edit mode */
 
 .jp-Notebook.jp-mod-editMode .jp-Cell.jp-mod-active .jp-InputArea-editor {
-  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color-edit);
-  box-shadow: var(--jp-cell-editor-box-shadow);
+  border: var(--jp-border-width) solid var(--jp-input-border-color-active);
+  box-shadow: var(--jp-input-box-shadow);
   background-color: var(--jp-layout-color0);
 }
 
@@ -156,7 +156,7 @@
   flex-direction: row;
   width: var(--jp-private-notebook-dragImage-width);
   height: var(--jp-private-notebook-dragImage-height);
-  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
+  border: var(--jp-border-width) solid var(--jp-input-border-color);
   background: var(--jp-layout-color1);
   overflow: visible;
 }
@@ -174,8 +174,8 @@
     font-family: var(--jp-code-font-family);
     line-height: var(--jp-code-line-height);
     padding: var(--jp-code-padding);
-    border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
-    background: var(--jp-cell-editor-background);
+    border: var(--jp-border-width) solid var(--jp-input-border-color);
+    background: var(--jp-input-background-color);
     color: var(--jp-content-font-color3);
     text-align: left;
     margin: 4px 4px 4px 0px;
@@ -202,7 +202,7 @@
   top: 8px;
   left: 8px;
   background: var(--jp-layout-color2);
-  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
+  border: var(--jp-border-width) solid var(--jp-input-border-color);
   box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.12);
 }
 
@@ -237,8 +237,8 @@
 
 .jp-ActiveCellTool .jp-InputArea-editor {
   flex: 1 1 auto;
-  background-color: var(--jp-cell-editor-background-edit);
-  border-color: var(--jp-cell-editor-border-color-edit);
+  background-color: var(--jp-layout-color0);
+  border-color: var(--jp-input-border-color-active);
 }
 
 
