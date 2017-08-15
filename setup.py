@@ -28,27 +28,30 @@ from distutils import log
 import json
 import os
 from glob import glob
+
+# BEFORE importing distutils, remove MANIFEST. distutils doesn't properly
+# update it when the contents of directories change.
+if os.path.exists('MANIFEST'): os.remove('MANIFEST')
+
 from distutils.command.build_ext import build_ext
+from distutils.command.build_py import build_py
 from setuptools.command.sdist import sdist
 from setuptools import setup
 from setuptools.command.bdist_egg import bdist_egg
 
 
 # Our own imports
-
 from setupbase import (
     bdist_egg_disabled,
+    ensure_core_data,
     find_packages,
     find_package_data,
     js_prerelease,
     CheckAssets,
+    CoreDeps,
     version_ns,
     name
 )
-
-# BEFORE importing distutils, remove MANIFEST. distutils doesn't properly
-# update it when the contents of directories change.
-if os.path.exists('MANIFEST'): os.remove('MANIFEST')
 
 
 here = os.path.dirname(os.path.abspath(__file__))
@@ -89,10 +92,12 @@ setup_args = dict(
 
 
 cmdclass = dict(
-    build_ext = build_ext,
+    build_py = ensure_core_data(build_py),
+    build_ext = ensure_core_data(build_ext),
     sdist  = js_prerelease(sdist, strict=True),
     bdist_egg = bdist_egg if 'bdist_egg' in sys.argv else bdist_egg_disabled,
-    jsdeps = CheckAssets
+    jsdeps = CheckAssets,
+    coredeps = CoreDeps,
 )
 try:
     from wheel.bdist_wheel import bdist_wheel

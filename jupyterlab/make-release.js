@@ -10,15 +10,8 @@ var cwd = path.resolve('..');
 var version = childProcess.execSync('python setup.py --version', { cwd: cwd });
 version = version.toString().trim();
 
-// Update our package.json files.
+// Update the package.app.json file.
 var data = require('./package.json');
-data['jupyterlab']['version'] = version;
-
-// Update our package.json files.
-var text = JSON.stringify(sortPackageJson(data), null, 2) + '\n';
-fs.writeFileSync('./package.json', text);
-
-// Update the build script.
 data['scripts']['build'] = 'webpack'
 text = JSON.stringify(sortPackageJson(data), null, 2) + '\n';
 fs.writeFileSync('./package.app.json', text);
