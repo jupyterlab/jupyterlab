@@ -1,6 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import {
+  IEditorMimeTypeService
+} from '@jupyterlab/codeeditor';
+
 import * as CodeMirror
   from 'codemirror';
 
@@ -89,10 +93,13 @@ namespace Mode {
     let modename = (typeof mode === 'string') ? mode :
         mode.mode || mode.name;
     let mimetype = (typeof mode !== 'string') ? mode.mime : modename;
+    let ext = (typeof mode !== 'string') ? mode.ext : [];
 
     return (
       CodeMirror.findModeByName(modename || '') ||
       CodeMirror.findModeByMIME(mimetype || '') ||
+      findByExtension(ext) ||
+      CodeMirror.findModeByMIME(IEditorMimeTypeService.defaultMimeType) ||
       CodeMirror.findModeByMIME('text/plain')
     );
   }
@@ -109,8 +116,8 @@ namespace Mode {
    * Find a codemirror mode by name.
    */
   export
-  function findByName(mime: string): ISpec {
-    return CodeMirror.findModeByName(mime);
+  function findByName(name: string): ISpec {
+    return CodeMirror.findModeByName(name);
   }
 
   /**
@@ -125,7 +132,15 @@ namespace Mode {
    * Find a codemirror mode by extension.
    */
   export
-  function findByExtension(name: string): ISpec {
-    return CodeMirror.findModeByExtension(name);
+  function findByExtension(ext: string | string[]): ISpec {
+    if (typeof ext === 'string') {
+      return CodeMirror.findModeByExtension(name);
+    }
+    for (let i = 0; i < ext.length; i++) {
+      let mode = CodeMirror.findModeByExtension(ext[i]);
+      if (mode) {
+        return mode;
+      }
+    }
   }
 }

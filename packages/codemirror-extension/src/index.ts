@@ -230,10 +230,10 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     commands.addCommand(CommandIDs.changeMode, {
       label: args => args['name'] as string,
       execute: args => {
-        let mode = args['mode'] as string;
+        let name = args['name'] as string;
         let widget = tracker.currentWidget;
-        if (mode && widget) {
-          let spec = Mode.findByName(mode);
+        if (name && widget) {
+          let spec = Mode.findByName(name);
           if (spec) {
             widget.model.mimeType = spec.mime;
           }
@@ -247,8 +247,8 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
         }
         let mime = widget.model.mimeType;
         let spec = Mode.findByMIME(mime);
-        let mode = spec && spec.mode;
-        return args['mode'] === mode;
+        let name = spec && spec.name;
+        return args['name'] === name;
       }
     });
 
@@ -257,6 +257,10 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
       let bName = b.name || '';
       return aName.localeCompare(bName);
     }).forEach(spec => {
+      // Avoid mode name with a curse word.
+      if (spec.mode.indexOf('brainf') === 0) {
+        return;
+      }
       modeMenu.addItem({
         command: CommandIDs.changeMode,
         args: {...spec}
