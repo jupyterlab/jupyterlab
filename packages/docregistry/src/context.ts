@@ -452,11 +452,10 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
           return this.createCheckpoint().then(() => { /* no-op */ });
         }
       }).catch(err => {
-        // Handle a read-only
-        if (err.message === 'Forbidden') {
-          return [];
+        // Handle a read-only folder.
+        if (err.message !== 'Forbidden') {
+          throw err;
         }
-        throw err;
       });
     }
     return promise.then(() => {
