@@ -23,27 +23,27 @@ import {
 /**
  * The class name added to all table editors.
  */
-const TABLE_EDITOR_CLASS = 'jp-TableEditor';
+const TABLE_EDITOR_CLASS = 'jp-SettingsTableEditor';
 
 /**
  * The class name added to the table wrapper to handle overflow.
  */
-const TABLE_EDITOR_WRAPPER_CLASS = 'jp-TableEditor-wrapper';
+const TABLE_EDITOR_WRAPPER_CLASS = 'jp-SettingsTableEditor-wrapper';
 
 /**
  * The class name added to the table key cells.
  */
-const TABLE_EDITOR_KEY_CLASS = 'jp-TableEditor-key';
+const TABLE_EDITOR_KEY_CLASS = 'jp-SettingsTableEditor-key';
 
 /**
  * The class name added to the table default value cells.
  */
-const TABLE_EDITOR_VALUE_CLASS = 'jp-TableEditor-value';
+const TABLE_EDITOR_VALUE_CLASS = 'jp-SettingsTableEditor-value';
 
 /**
  * The class name added to the table type cells.
  */
-const TABLE_EDITOR_TYPE_CLASS = 'jp-TableEditor-type';
+const TABLE_EDITOR_TYPE_CLASS = 'jp-SettingsTableEditor-type';
 
 
 /**
