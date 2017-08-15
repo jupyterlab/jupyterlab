@@ -78,6 +78,7 @@
     "json-loader": "^0.5.4",
     "sort-package-json": "^1.7.0",
     "style-loader": "^0.13.1",
+    "raw-loader": "^0.5.1",
     "url-loader": "^0.5.7",
     "webpack": "^2.2.1"
   },
