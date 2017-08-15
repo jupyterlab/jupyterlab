@@ -182,19 +182,14 @@ class SettingEditor extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
-
-    // Allow the message queue (which includes fit requests that might disrupt
-    // setting relative sizes) to clear before setting sizes.
-    requestAnimationFrame(() => {
-      this._panel.hide();
-      this._fetchState().then(() => {
-        this._panel.show();
-        this._setState();
-      }).catch(reason => {
-        console.error('Fetching setting editor state failed', reason);
-        this._panel.show();
-        this._setState();
-      });
+    this._panel.hide();
+    this._fetchState().then(() => {
+      this._panel.show();
+      this._setState();
+    }).catch(reason => {
+      console.error('Fetching setting editor state failed', reason);
+      this._panel.show();
+      this._setState();
     });
   }
 
@@ -266,8 +261,15 @@ class SettingEditor extends Widget {
    * Set the layout sizes.
    */
   private _setLayout(): void {
-    this._editor.state = this._state.container;
-    this._panel.setRelativeSizes(this._state.sizes);
+    const editor = this._editor;
+    const panel = this._panel;
+    const state = this._state;
+
+    editor.state = state.container;
+
+    // Allow the message queue (which includes fit requests that might disrupt
+    // setting relative sizes) to clear before setting sizes.
+    requestAnimationFrame(() => { panel.setRelativeSizes(state.sizes); });
   }
 
   /**
