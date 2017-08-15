@@ -271,7 +271,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
         opener.open(child);
       }
     },
-    label: 'Clone'
+    label: 'New View into File'
   });
 
   app.contextMenu.addItem({
@@ -289,6 +289,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     CommandIDs.save,
     CommandIDs.restoreCheckpoint,
     CommandIDs.saveAs,
+    CommandIDs.clone,
     CommandIDs.close,
     CommandIDs.closeAllFiles
   ].forEach(command => { palette.addItem({ command, category }); });
