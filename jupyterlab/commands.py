@@ -157,11 +157,12 @@ def install_extension_async(extension, app_dir=None, logger=None, abort_callback
         )
         raise ValueError(msg)
 
-    # Check for existing extension of the same name.
+    # Check for existing app extension of the same name.
     extensions = _get_extensions(app_dir)
     if data['name'] in extensions:
-        path = extensions[data['name']]['path']
-        if osp.exists(path):
+        other = extensions[data['name']]
+        path = other['path']
+        if osp.exists(path) and other['location'] == 'app':
             os.remove(path)
 
     # Handle any schemas.
@@ -930,13 +931,16 @@ def _get_extensions(app_dir):
 
     # Get system level packages
     sys_path = pjoin(get_app_dir(), 'extensions')
+    app_path = pjoin(app_dir, 'extensions')
     for target in glob.glob(pjoin(sys_path, '*.tgz')):
+        location = 'app' if app_path == sys_path else 'system'
         data = _read_package(target)
         deps = data.get('dependencies', dict())
         extensions[data['name']] = dict(path=os.path.realpath(target),
                                         version=data['version'],
                                         jupyterlab=data['jupyterlab'],
-                                        dependencies=deps)
+                                        dependencies=deps,
+                                        location=location)
 
     # Look in app_dir if different
     app_path = pjoin(app_dir, 'extensions')
@@ -949,7 +953,8 @@ def _get_extensions(app_dir):
         extensions[data['name']] = dict(path=os.path.realpath(target),
                                         version=data['version'],
                                         jupyterlab=data['jupyterlab'],
-                                        dependencies=deps)
+                                        dependencies=deps,
+                                        location='app')
 
     return extensions
 
