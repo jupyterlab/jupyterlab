@@ -16,6 +16,7 @@ namespace Styling {
   export
   function styleNode(node: HTMLElement, className=''): void {
     styleNodeByTag(node, 'select', className);
+    styleNodeByTag(node, 'textarea', className);
     styleNodeByTag(node, 'input', className);
     styleNodeByTag(node, 'button', className);
   }
