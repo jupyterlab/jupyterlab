@@ -720,12 +720,27 @@ def _test_overlap(spec1, spec2):
 def _format_compatibility_errors(name, version, errors):
     """Format a message for compatibility errors.
     """
+    msgs = []
+    l0 = 10
+    l1 = 10
+    for error in errors:
+        pkg, jlab, ext = error
+        jlab = str(Range(jlab, True))
+        ext = str(Range(ext, True))
+        msgs.append((pkg, jlab, ext))
+        l0 = max(l0, len(pkg) + 1)
+        l1 = max(l1, len(jlab) + 1)
+
     msg = '\n"%s@%s" is not compatible with the current JupyterLab'
     msg = msg % (name, version)
-    msg += '\nConflicting Dependencies:'
-    msg += '\nRequired\tActual\tPackage'
-    for error in errors:
-        msg += '\n%s  \t%s\t%s' % (error[1], error[2], error[0])
+    msg += '\nConflicting Dependencies:\n'
+    msg += 'JupyterLab'.ljust(l0)
+    msg += 'Extension'.ljust(l1)
+    msg += 'Package\n'
+
+    for (pkg, jlab, ext) in msgs:
+        msg += jlab.ljust(l0) + ext.ljust(l1) + pkg + '\n'
+
     return msg
 
 
