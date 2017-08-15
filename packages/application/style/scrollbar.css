@@ -5,16 +5,33 @@
 
 
 ::-webkit-scrollbar {
-  background: transparent;
+  background: var(--jp-layout-color0);
 }
 
 
-::-webkit-scrollbar-track {
-  border-left: var(--jp-layout-color1);
+.jp-SidePanel ::-webkit-scrollbar {
+  background-color: transparent;
 }
 
 
-::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-track:vertical {
+  border-left: 1px solid var(--jp-border-color2);
+}
+
+
+::-webkit-scrollbar-thumb:vertical {
+  border-left: 1px solid var(--jp-border-color2);
+  background-color: var(--jp-layout-color2);
+}
+
+
+::-webkit-scrollbar-track:horizontal {
+  border-top: 1px solid var(--jp-border-color2);
+}
+
+
+::-webkit-scrollbar-thumb:horizontal {
+  border-top: 1px solid var(--jp-border-color2);
   background-color: var(--jp-layout-color2);
 }
 

@@ -21,5 +21,21 @@
 
 .jp-FAQ-content {
   overflow-y: auto;
-  padding: 12px;
+  padding: 16px 32px;
+}
+
+
+.jp-FAQ-content h2 {
+  font-size: 20px;
+  font-weight: 500;
+}
+
+
+.jp-FAQ-content h3 {
+  font-weight: 500;
+}
+
+
+.jp-FAQ-content a {
+  color: var(--jp-brand-color1);
 }
