@@ -25,21 +25,32 @@
   font-size: var(--jp-code-font-size);
   font-family: var(--jp-code-font-family);
   height: auto;
-  background: transparent;
   /* Changed to auto to autogrow */
 }
 
 
 .CodeMirror pre {
-  color: var(--jp-mirror-editor-pre-color);
   padding: 0;
   border: 0;
   border-radius: 0;
 }
 
+
+.CodeMirror.cm-s-jupyter {
+  background: var(--jp-layout-color0);
+}
+
+
+.CodeMirror.cm-s-jupyter pre {
+  color: var(--jp-mirror-editor-pre-color);
+}
+
+
 .jp-OutputArea-output pre {
   color: var(--jp-mirror-editor-pre-color);
 }
+
+
 
 
 /* This causes https://github.com/jupyter/jupyterlab/issues/522 */
