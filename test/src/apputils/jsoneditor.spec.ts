@@ -393,7 +393,7 @@ describe('apputils', () => {
         simulate(editor.editorHostNode, 'blur');
         simulate(editor.revertButtonNode, 'click');
         simulate(editor.commitButtonNode, 'click');
-        expect(editor.events).to.eql(['blur', 'click', 'click']);
+        expect(editor.events).to.eql(['focus', 'blur', 'click', 'click']);
       });
 
     });
