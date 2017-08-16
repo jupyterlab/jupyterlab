@@ -19,7 +19,7 @@
   padding: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.25);
+  background: var(--jp-dialog-background);
   color: var(--jp-ui-font-color1);
 }
 

@@ -9,6 +9,11 @@
 }
 
 
+.p-Panel ::-webkit-scrollbar {
+  background: transparent;
+}
+
+
 .jp-SidePanel ::-webkit-scrollbar {
   background-color: transparent;
 }
