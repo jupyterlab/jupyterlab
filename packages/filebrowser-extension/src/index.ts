@@ -197,6 +197,18 @@ function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, docM
     }
   });
 
+  // Create a launcher if there are no open items.
+  app.restored.then(() => {
+    if (app.shell.isEmpty('main')) {
+      // Make sure the model is restored.
+      fbWidget.model.restored.then(() => {
+        app.commands.execute('launcher:create', {
+          cwd: fbWidget.model.path
+        });
+      });
+    }
+  });
+
   let menu = createMenu(app);
 
   mainMenu.addMenu(menu, { rank: 1 });
@@ -363,15 +375,6 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
     execute: () => {
       return commands.execute('launcher:create', {
         cwd: mainBrowser.model.path,
-      });
-    }
-  });
-
-  // Create a launcher with a banner if there are no open items.
-  app.restored.then(() => {
-    if (app.shell.isEmpty('main')) {
-      commands.execute('launcher:create', {
-        cwd: mainBrowser.model.path
       });
     }
   });
