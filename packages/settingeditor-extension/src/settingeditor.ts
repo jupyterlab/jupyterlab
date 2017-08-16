@@ -4,47 +4,53 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  Dialog, showDialog
-} from '@jupyterlab/apputils';
-
-import {
-  CodeEditor, JSONEditor
+  CodeEditor
 } from '@jupyterlab/codeeditor';
 
 import {
-  ICON_CLASS_KEY, ICON_LABEL_KEY, ISettingRegistry, IStateDB, ObservableJSON
+  ISettingRegistry, IStateDB
 } from '@jupyterlab/coreutils';
+
+import {
+  JSONExt, JSONObject, JSONValue
+} from '@phosphor/coreutils';
 
 import {
   Message
 } from '@phosphor/messaging';
 
 import {
-  ISignal, Signal
-} from '@phosphor/signaling';
-
-import {
   h, VirtualDOM
 } from '@phosphor/virtualdom';
 
 import {
-  PanelLayout, SplitPanel as SPanel, Widget
+  PanelLayout, Widget
 } from '@phosphor/widgets';
 
 import {
-  TableEditor
-} from './tableeditor';
+  PluginEditor
+} from './plugineditor';
 
+import {
+  PluginList
+} from './pluginlist';
 
-/**
- * The ratio panes in the plugin editor.
- */
-const DEFAULT_INNER = [5, 2];
+import {
+  SplitPanel
+} from './splitpanel';
+
 
 /**
  * The ratio panes in the setting editor.
  */
-const DEFAULT_OUTER = [1, 3];
+const DEFAULT_LAYOUT: SettingEditor.ILayoutState = {
+  sizes: [1, 3],
+  container: {
+    editor: 'raw',
+    plugin: '',
+    sizes: [1, 1]
+  }
+};
 
 /**
  * The class name added to all setting editors.
@@ -52,24 +58,9 @@ const DEFAULT_OUTER = [1, 3];
 const SETTING_EDITOR_CLASS = 'jp-SettingEditor';
 
 /**
- * The class name added to all plugin editors.
+ * The class name added to the top level split panel of the setting editor.
  */
-const PLUGIN_EDITOR_CLASS = 'jp-PluginEditor';
-
-/**
- * The class name added to all plugin lists.
- */
-const PLUGIN_LIST_CLASS = 'jp-PluginList';
-
-/**
- * The class name added to all plugin list icons.
- */
-const PLUGIN_ICON_CLASS = 'jp-PluginList-icon';
-
-/**
- * The class name added to selected items.
- */
-const SELECTED_CLASS = 'jp-mod-selected';
+const SETTING_EDITOR_MAIN_PANEL_CLASS = 'jp-SettingEditor-main';
 
 /**
  * The class name added to the instructions widget.
@@ -102,6 +93,7 @@ const INSTRUCTIONS_TITLE = 'Settings';
 const INSTRUCTIONS_TEXT = `
 Select a plugin from the list to view and edit its preferences.
 `;
+
 
 /**
  * An interface for modifying and saving application settings.
@@ -137,13 +129,14 @@ class SettingEditor extends Widget {
       this._when = Array.isArray(when) ? Promise.all(when) : when;
     }
 
+    panel.addClass(SETTING_EDITOR_MAIN_PANEL_CLASS);
     layout.addWidget(panel);
     panel.addWidget(list);
     panel.addWidget(instructions);
 
-    editor.handleMoved.connect(this._onHandleMoved, this);
-    list.selected.connect(this._onSelected, this);
-    panel.handleMoved.connect(this._onHandleMoved, this);
+    editor.stateChanged.connect(this._onStateChanged, this);
+    list.changed.connect(this._onStateChanged, this);
+    panel.handleMoved.connect(this._onStateChanged, this);
   }
 
   /**
@@ -189,19 +182,14 @@ class SettingEditor extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
-
-    // Allow the message queue (which includes fit requests that might disrupt
-    // setting relative sizes) to clear before setting sizes.
-    requestAnimationFrame(() => {
-      this._panel.hide();
-      this._fetchState().then(() => {
-        this._panel.show();
-        this._setPresets();
-      }).catch(reason => {
-        console.error('Fetching setting editor state failed', reason);
-        this._panel.show();
-        this._setPresets();
-      });
+    this._panel.hide();
+    this._fetchState().then(() => {
+      this._panel.show();
+      this._setState();
+    }).catch(reason => {
+      console.error('Fetching setting editor state failed', reason);
+      this._panel.show();
+      this._setState();
     });
   }
 
@@ -224,7 +212,6 @@ class SettingEditor extends Widget {
     }
 
     const { key, state } = this;
-    const editor = this._editor;
     const promises = [state.fetch(key), this._when];
 
     return this._fetching = Promise.all(promises).then(([saved]) => {
@@ -234,50 +221,23 @@ class SettingEditor extends Widget {
         return;
       }
 
-      const inner = DEFAULT_INNER;
-      const outer = DEFAULT_OUTER;
-      const plugin = editor.settings ? editor.settings.plugin : '';
-
-      if (!saved) {
-        this._presets = { inner, outer, plugin };
-        return;
-      }
-
-      const presets = this._presets;
-
-      if (Array.isArray(saved.inner)) {
-        presets.inner = saved.inner as number[];
-      }
-      if (Array.isArray(saved.outer)) {
-        presets.outer = saved.outer as number[];
-      }
-      if (typeof saved.plugin === 'string') {
-        presets.plugin = saved.plugin as string;
-      }
+      this._state = Private.normalizeState(saved, this._state);
     });
   }
 
   /**
-   * Handle layout changes.
+   * Handle root level layout state changes.
    */
-  private _onHandleMoved(): void {
-    this._presets.inner = this._editor.sizes;
-    this._presets.outer = this._panel.relativeSizes();
-    this._saveState().catch(reason => {
-      console.error('Saving setting editor state failed', reason);
-    });
-  }
-
-  /**
-   * Handle a new selection in the plugin list.
-   */
-  private _onSelected(sender: any, plugin: string): void {
-    this._presets.plugin = plugin;
+  private _onStateChanged(): void {
+    this._state.sizes = this._panel.relativeSizes();
+    this._state.container = this._editor.state;
+    this._state.container.editor = this._list.editor;
+    this._state.container.plugin = this._list.selection;
     this._saveState()
-      .then(() => { this._setPresets(); })
+      .then(() => { this._setState(); })
       .catch(reason => {
         console.error('Saving setting editor state failed', reason);
-        this._setPresets();
+        this._setState();
       });
   }
 
@@ -286,41 +246,56 @@ class SettingEditor extends Widget {
    */
   private _saveState(): Promise<void> {
     const { key, state } = this;
-    const value = this._presets;
+    const value = this._state;
 
     this._saving = true;
     return state.save(key, value)
       .then(() => { this._saving = false; })
-      .catch(reason => {
+      .catch((reason: any) => {
         this._saving = false;
         throw reason;
       });
   }
 
   /**
+   * Set the layout sizes.
+   */
+  private _setLayout(): void {
+    const editor = this._editor;
+    const panel = this._panel;
+    const state = this._state;
+
+    editor.state = state.container;
+
+    // Allow the message queue (which includes fit requests that might disrupt
+    // setting relative sizes) to clear before setting sizes.
+    requestAnimationFrame(() => { panel.setRelativeSizes(state.sizes); });
+  }
+
+  /**
    * Set the presets of the setting editor.
    */
-  private _setPresets(): void {
+  private _setState(): void {
     const editor = this._editor;
     const list = this._list;
     const panel = this._panel;
-    const { plugin } = this._presets;
+    const { container } = this._state;
 
-    if (!plugin) {
+    if (!container.plugin) {
       editor.settings = null;
       list.selection = '';
-      this._setSizes();
+      this._setLayout();
       return;
     }
 
-    if (editor.settings && editor.settings.plugin === plugin) {
-      this._setSizes();
+    if (editor.settings && editor.settings.plugin === container.plugin) {
+      this._setLayout();
       return;
     }
 
     const instructions = this._instructions;
 
-    this.registry.load(plugin).then(settings => {
+    this.registry.load(container.plugin).then(settings => {
       if (instructions.isAttached) {
         instructions.parent = null;
       }
@@ -328,26 +303,15 @@ class SettingEditor extends Widget {
         panel.addWidget(editor);
       }
       editor.settings = settings;
-      list.selection = plugin;
-      this._setSizes();
+      list.editor = container.editor;
+      list.selection = container.plugin;
+      this._setLayout();
     }).catch((reason: Error) => {
       console.error(`Loading settings failed: ${reason.message}`);
-      list.selection = this._presets.plugin = '';
+      list.selection = this._state.container.plugin = '';
       editor.settings = null;
-      this._setSizes();
+      this._setLayout();
     });
-  }
-
-  /**
-   * Set the layout sizes.
-   */
-  private _setSizes(): void {
-    const { inner, outer } = this._presets;
-    const editor = this._editor;
-    const panel = this._panel;
-
-    editor.sizes = inner;
-    panel.setRelativeSizes(outer);
   }
 
   private _editor: PluginEditor;
@@ -355,8 +319,8 @@ class SettingEditor extends Widget {
   private _instructions: Widget;
   private _list: PluginList;
   private _panel: SplitPanel;
-  private _presets = { inner: DEFAULT_INNER, outer: DEFAULT_OUTER, plugin: '' };
   private _saving = false;
+  private _state: SettingEditor.ILayoutState = JSONExt.deepCopy(DEFAULT_LAYOUT);
   private _when: Promise<any>;
 }
 
@@ -396,389 +360,36 @@ namespace SettingEditor {
      */
     when?: Promise<any> | Array<Promise<any>>;
   }
-}
-
-
-/**
- * A deprecated split panel that will be removed when the phosphor split panel
- * supports a handle moved signal.
- */
-class SplitPanel extends SPanel {
-  /**
-   * Emits when the split handle has moved.
-   */
-  readonly handleMoved: ISignal<any, void> = new Signal<any, void>(this);
-
-  handleEvent(event: Event): void {
-    super.handleEvent(event);
-
-    if (event.type === 'mouseup') {
-      (this.handleMoved as Signal<any, void>).emit(void 0);
-    }
-  }
-}
-
-
-/**
- * A list of plugins with editable settings.
- */
-class PluginList extends Widget {
-  /**
-   * Create a new plugin list.
-   */
-  constructor(options: PluginList.IOptions) {
-    super({ node: document.createElement('ul') });
-    this.registry = options.registry;
-    this.addClass(PLUGIN_LIST_CLASS);
-    this._confirm = options.confirm;
-    this.registry.pluginChanged.connect(() => { this.update(); }, this);
-  }
 
   /**
-   * The setting registry.
-   */
-  readonly registry: ISettingRegistry;
-
-  /**
-   * A signal emitted when a selection is made from the plugin list.
-   */
-  get selected(): ISignal<this, string> {
-    return this._selected;
-  }
-
-  /**
-   * The selection value of the plugin list.
-   */
-  get selection(): string {
-    return this._selection;
-  }
-  set selection(selection: string) {
-    if (this._selection === selection) {
-      return;
-    }
-    this._selection = selection;
-    this.update();
-  }
-
-  /**
-   * Handle the DOM events for the widget.
-   *
-   * @param event - The DOM event sent to the widget.
-   *
-   * #### Notes
-   * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the plugin list's node. It should
-   * not be called directly by user code.
-   */
-  handleEvent(event: Event): void {
-    switch (event.type) {
-    case 'click':
-      this._evtClick(event as MouseEvent);
-      break;
-    default:
-      break;
-    }
-  }
-
-  /**
-   * Reset the list selection.
-   */
-  reset(): void {
-    this._selection = '';
-    this._selected.emit('');
-    this.update();
-  }
-
-  /**
-   * Handle `'after-attach'` messages.
-   */
-  protected onAfterAttach(msg: Message): void {
-    this.node.addEventListener('click', this);
-    this.update();
-  }
-
-  /**
-   * Handle `before-detach` messages for the widget.
-   */
-  protected onBeforeDetach(msg: Message): void {
-    this.node.removeEventListener('click', this);
-  }
-
-  /**
-   * Handle `'update-request'` messages.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    const plugins = Private.sortPlugins(this.registry.plugins);
-
-    this.node.textContent = '';
-    plugins.forEach(plugin => {
-      const item = Private.createListItem(this.registry, plugin);
-
-      if (plugin.id === this._selection) {
-        item.classList.add(SELECTED_CLASS);
-      }
-
-      this.node.appendChild(item);
-    });
-  }
-
-  /**
-   * Handle the `'click'` event for the plugin list.
-   *
-   * @param event - The DOM event sent to the widget
-   */
-  private _evtClick(event: MouseEvent): void {
-    let target = event.target as HTMLElement;
-    let id = target.getAttribute('data-id');
-
-    if (id === this._selection) {
-      return;
-    }
-
-    if (!id) {
-      while (!id && target !== this.node) {
-        target = target.parentElement as HTMLElement;
-        id = target.getAttribute('data-id');
-      }
-    }
-
-    if (id) {
-      this._confirm().then(() => {
-        if (!id) {
-          return;
-        }
-        this._selection = id;
-        this._selected.emit(id);
-        this.update();
-      }).catch(() => { /* no op */ });
-    }
-  }
-
-  private _confirm: () => Promise<void>;
-  private _selected = new Signal<this, string>(this);
-  private _selection = '';
-}
-
-
-/**
- * A namespace for `PluginList` statics.
- */
-namespace PluginList {
-  /**
-   * The instantiation options for a plugin list.
+   * The layout state for the setting editor.
    */
   export
-  interface IOptions {
+  interface ILayoutState extends JSONObject {
     /**
-     * A function that allows for asynchronously confirming a selection.
-     *
-     * #### Notest
-     * If the promise returned by the function resolves, then the selection will
-     * succeed and emit an event. If the promise rejects, the selection is not
-     * made.
+     * The layout state for a plugin editor container.
      */
-    confirm: () => Promise<void>;
+    container: IPluginLayout;
 
     /**
-     * The setting registry for the plugin list.
+     * The relative sizes of the plugin list and plugin editor.
      */
-    registry: ISettingRegistry;
-  }
-}
-
-
-/**
- * An individual plugin settings editor.
- */
-class PluginEditor extends Widget {
-  /**
-   * Create a new plugin editor.
-   */
-  constructor(options: PluginEditor.IOptions) {
-    super();
-    this.addClass(PLUGIN_EDITOR_CLASS);
-
-    const { editorFactory } = options;
-    const collapsible = false;
-    const layout = this.layout = new PanelLayout();
-    const panel = this._panel = new SplitPanel({
-      orientation: 'vertical',
-      renderer: SplitPanel.defaultRenderer,
-      spacing: 1
-    });
-
-    this.handleMoved = panel.handleMoved;
-    this._editor = new JSONEditor({ collapsible, editorFactory });
-    this._fieldset = new TableEditor({ onSaveError: Private.onSaveError });
-
-    layout.addWidget(panel);
-    panel.addWidget(this._editor);
-    panel.addWidget(this._fieldset);
+    sizes: number[];
   }
 
   /**
-   * Emits when the split handle has moved.
-   */
-  readonly handleMoved: ISignal<any, void>;
-
-  /**
-   * The plugin settings being edited.
-   */
-  get settings(): ISettingRegistry.ISettings | null {
-    return this._settings;
-  }
-  set settings(settings: ISettingRegistry.ISettings | null) {
-    if (!settings && !this._settings) {
-      return;
-    }
-
-    const samePlugin = (settings && this._settings) &&
-      settings.plugin === this._settings.plugin;
-
-    if (samePlugin) {
-      return;
-    }
-
-    const fieldset = this._fieldset;
-    const editor = this._editor;
-
-    // Disconnect old source change handler.
-    if (editor.source) {
-      editor.source.changed.disconnect(this._onSourceChanged, this);
-    }
-
-    // Disconnect old settings change handler.
-    if (this._settings) {
-      this._settings.changed.disconnect(this._onSettingsChanged, this);
-    }
-
-    if (settings) {
-      this._settings = fieldset.settings = settings;
-      this._settings.changed.connect(this._onSettingsChanged, this);
-      this._onSettingsChanged();
-    } else {
-      this._settings = fieldset.settings = null;
-      editor.source = null;
-    }
-
-    this.update();
-  }
-
-  /**
-   * Get the relative sizes of the two editor panels.
-   */
-  get sizes(): number[] {
-    return this._panel.relativeSizes();
-  }
-  set sizes(sizes: number[]) {
-    this._panel.setRelativeSizes(sizes);
-  }
-
-  /**
-   * If the editor is in a dirty state, confirm that the user wants to leave.
-   */
-  confirm(): Promise<void> {
-    if (this.isHidden || !this.isAttached || !this._editor.isDirty) {
-      return Promise.resolve(void 0);
-    }
-
-    return showDialog({
-      title: 'You have unsaved changes.',
-      body: 'Do you want to leave without saving?',
-      buttons: [Dialog.cancelButton(), Dialog.okButton()]
-    }).then(result => {
-      if (!result.button.accept) {
-        throw new Error('User cancelled.');
-      }
-    });
-  }
-
-  /**
-   * Dispose of the resources held by the plugin editor.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-
-    super.dispose();
-    this._editor.dispose();
-    this._fieldset.dispose();
-    this._panel.dispose();
-  }
-
-  /**
-   * Handle `after-attach` messages.
-   */
-  protected onAfterAttach(msg: Message): void {
-    this.update();
-  }
-
-  /**
-   * Handle `'update-request'` messages.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    const json = this._editor;
-    const fieldset = this._fieldset;
-    const settings = this._settings;
-
-    if (settings) {
-      json.show();
-      fieldset.show();
-      json.editor.refresh();
-      return;
-    }
-
-    json.hide();
-    fieldset.hide();
-  }
-
-  /**
-   * Handle updates to the settings.
-   */
-  private _onSettingsChanged(): void {
-    const editor = this._editor;
-    const settings = this._settings;
-    const values = settings && settings.user || { };
-
-    editor.source = new ObservableJSON({ values });
-    editor.source.changed.connect(this._onSourceChanged, this);
-  }
-
-  /**
-   * Handle source changes in the underlying editor.
-   */
-  private _onSourceChanged(): void {
-    const source = this._editor.source;
-    const settings = this._settings;
-
-    if (!settings || !source) {
-      return;
-    }
-
-    settings.save(source.toJSON()).catch(Private.onSaveError);
-  }
-
-  private _editor: JSONEditor;
-  private _fieldset: TableEditor;
-  private _panel: SplitPanel;
-  private _settings: ISettingRegistry.ISettings | null = null;
-}
-
-
-/**
- * A namespace for `PluginEditor` statics.
- */
-namespace PluginEditor {
-  /**
-   * The instantiation options for a plugin editor.
+   * The layout information that is stored and restored from the state database.
    */
   export
-  interface IOptions {
+  interface IPluginLayout extends JSONObject {
     /**
-     * The editor factory used by the plugin editor.
+     * The current plugin being displayed.
      */
-    editorFactory: CodeEditor.Factory;
+    plugin: string;
+
+    editor: 'raw' | 'table';
+
+    sizes: number[];
   }
 }
 
@@ -799,80 +410,38 @@ namespace Private {
       h.span({ className: INSTRUCTIONS_TEXT_CLASS }, INSTRUCTIONS_TEXT)));
   }
 
-  /**
-   * Create a plugin list item.
-   */
   export
-  function createListItem(registry: ISettingRegistry, plugin: ISettingRegistry.IPlugin): HTMLLIElement {
-    const icon = getHint(ICON_CLASS_KEY, registry, plugin);
-    const iconClass = `${PLUGIN_ICON_CLASS}${icon ? ' ' + icon : ''}`;
-    const iconLabel = getHint(ICON_LABEL_KEY, registry, plugin);
-    const title = plugin.schema.title || plugin.id;
-    const caption = `(${plugin.id}) ${plugin.schema.description}`;
-
-    return VirtualDOM.realize(
-      h.li({ dataset: { id: plugin.id }, title: caption },
-        h.span({ className: iconClass, title: iconLabel }),
-        h.span(title))
-    ) as HTMLLIElement;
-  }
-
-  /**
-   * Check the plugin for a rendering hint's value.
-   *
-   * #### Notes
-   * The order of priority for overridden hints is as follows, from most
-   * important to least:
-   * 1. Data set by the end user in a settings file.
-   * 2. Data set by the plugin author as a schema default.
-   * 3. Data set by the plugin author as a top-level key of the schema.
-   */
-  function getHint(key: string, registry: ISettingRegistry, plugin: ISettingRegistry.IPlugin): string {
-    // First, give priorty to checking if the hint exists in the user data.
-    let hint = plugin.data.user[key];
-
-    // Second, check to see if the hint exists in composite data, which folds
-    // in default values from the schema.
-    if (!hint) {
-      hint = plugin.data.composite[key];
+  function normalizeState(saved: JSONObject | null, current: SettingEditor.ILayoutState): SettingEditor.ILayoutState {
+    if (!saved) {
+      return JSONExt.deepCopy(DEFAULT_LAYOUT);
     }
 
-    // Third, check to see if the plugin schema has defined the hint.
-    if (!hint) {
-      hint = plugin.schema[key];
+    if (!('sizes' in saved) || !numberArray(saved.sizes)) {
+      saved.sizes = JSONExt.deepCopy(DEFAULT_LAYOUT.sizes);
+    }
+    if (!('container' in saved)) {
+      saved.container = JSONExt.deepCopy(DEFAULT_LAYOUT.container);
+      return saved as SettingEditor.ILayoutState;
     }
 
-    // Finally, use the defaults from the registry schema.
-    if (!hint) {
-      const properties = registry.schema.properties;
+    const container = ('container' in saved) &&
+      saved.container &&
+      typeof saved.container === 'object' ? saved.container as JSONObject
+        : { };
 
-      hint = properties && properties[key] && properties[key].default;
-    }
+    saved.container = {
+      editor: container.editor === 'raw' || container.editor === 'table' ?
+        container.editor : DEFAULT_LAYOUT.container.editor,
+      plugin: typeof container.plugin === 'string' ? container.plugin
+        : DEFAULT_LAYOUT.container.plugin,
+      sizes: numberArray(container.sizes) ? container.sizes
+        : JSONExt.deepCopy(DEFAULT_LAYOUT.container.sizes)
+    };
 
-    return typeof hint === 'string' ? hint : '';
+    return saved as SettingEditor.ILayoutState;
   }
 
-  /**
-   * Handle save errors.
-   */
-  export
-  function onSaveError(reason: any): void {
-    console.error(`Saving setting editor value failed: ${reason.message}`);
-
-    showDialog({
-      title: 'Your changes were not saved.',
-      body: reason.message,
-      buttons: [Dialog.okButton()]
-    });
-  }
-
-  /**
-   * Sort a list of plugins by ID.
-   */
-  export
-  function sortPlugins(plugins: ISettingRegistry.IPlugin[]): ISettingRegistry.IPlugin[] {
-    return plugins.sort((a, b) => {
-      return (a.schema.title || a.id).localeCompare(b.schema.title || b.id);
-    });
+  function numberArray(value: JSONValue): boolean {
+    return Array.isArray(value) && value.every(x => typeof x === 'number');
   }
 }

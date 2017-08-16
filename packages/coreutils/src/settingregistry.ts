@@ -254,6 +254,11 @@ namespace ISettingRegistry {
     readonly user: JSONObject;
 
     /**
+     * Return the defaults in a commented JSON format.
+     */
+    annotatedDefaults(): string;
+
+    /**
      * Calculate the default value of a setting by iterating through the schema.
      *
      * @param key - The name of the setting whose default value is calculated.
@@ -715,6 +720,13 @@ class Settings implements ISettingRegistry.ISettings {
   readonly registry: SettingRegistry;
 
   /**
+   * Return the defaults in a commented JSON format.
+   */
+  annotatedDefaults(): string {
+    return Private.annotatedDefaults(this._schema, this.plugin);
+  }
+
+  /**
    * Calculate the default value of a setting by iterating through the schema.
    *
    * @param key - The name of the setting whose default value is calculated.
@@ -895,6 +907,71 @@ namespace Private {
     }
   };
   /* tslint:enable */
+
+  /**
+   * Replacement text for schema properties missing a `description` field.
+   */
+  const nondescript = '[missing schema description]';
+
+  /**
+   * Replacement text for schema properties missing a `default` field.
+   */
+  const undefaulted = '[missing schema default]';
+
+  /**
+   * Replacement text for schema properties missing a `title` field.
+   */
+  const untitled = '[missing schema title]';
+
+  /**
+   * Returns an annotated (JSON with comments) version of a schema's defaults.
+   */
+  export
+  function annotatedDefaults(schema: ISettingRegistry.ISchema, plugin: string): string {
+    const { description, properties, title } = schema;
+    const keys = Object.keys(properties).sort((a, b) => a.localeCompare(b));
+
+    return [
+      '{',
+      prefix(`${title || untitled}`),
+      prefix(plugin),
+      prefix(description || nondescript),
+      prefix(line((description || nondescript).length)),
+      '',
+      keys.map(key => docstring(schema, key)).join('\n\n'),
+      '}'
+    ].join('\n');
+  }
+
+  /**
+   * Returns a documentation string for a specific schema property.
+   */
+  function docstring(schema: ISettingRegistry.ISchema, key: string): string {
+    const { description, title } = schema.properties[key];
+    const reified = reifyDefault(schema, key);
+    const defaults = reified === undefined ? prefix(`"${key}": ${undefaulted}`)
+      : prefix(`"${key}": ${JSON.stringify(reified, null, 2)}`, '  ');
+
+    return [
+      prefix(`${title || untitled}`),
+      prefix(description || nondescript),
+      defaults
+    ].join('\n');
+  }
+
+  /**
+   * Returns a line of a specified length.
+   */
+  function line(length: number, ch = '*'): string {
+    return (new Array(length + 1)).join(ch);
+  }
+
+  /**
+   * Returns a documentation string with a comment prefix added on every line.
+   */
+  function prefix(source: string, pre = '  \/\/ '): string {
+    return pre + source.split('\n').join(`\n${pre}`);
+  }
 
   /**
    * Create a fully extrapolated default value for a root key in a schema.
