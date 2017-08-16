@@ -77,6 +77,7 @@ def load_jupyter_server_extension(nbapp):
 
     theme_url = ujoin(base_url, 'lab/api/themes')
     web_app.settings.setdefault('page_config_data', dict())
+    web_app.settings['page_config_data']['buildAvailable'] = True
     web_app.settings['page_config_data']['token'] = nbapp.token
     web_app.settings['page_config_data']['themePath'] = theme_url
 
