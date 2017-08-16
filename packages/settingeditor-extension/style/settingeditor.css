@@ -84,17 +84,32 @@
 #setting-editor .jp-PluginList-switcher {
   height: var(--jp-private-settingeditor-switcher-height);
   position: absolute;
-  top: 0;
+  top: 1px;
   left: 0;
   right: 0;
 }
 
 
 #setting-editor .jp-PluginList-switcher button {
+  background: var(--jp-layout-color2);
+  color: var(--jp-ui-font-color2);
+  border: 0;
+  border-bottom: 1px solid var(--jp-ui-font-color3);
   margin: 0;
   padding: 0;
   height: var(--jp-private-settingeditor-switcher-height);
   width: 50%;
+}
+
+
+#setting-editor .jp-PluginList-switcher button:first-child {
+  border-right: 1px solid var(--jp-ui-font-color3);
+}
+
+
+#setting-editor .jp-PluginList-switcher button:disabled {
+  background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color0);
 }
 
 
