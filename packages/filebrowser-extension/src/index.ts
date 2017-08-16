@@ -392,6 +392,7 @@ function createMenu(app: JupyterLab): Menu {
     'docmanager:save-as',
     'docmanager:rename',
     'docmanager:restore-checkpoint',
+    'docmanager:clone',
     'docmanager:close',
     'docmanager:close-all-files'
   ].forEach(command => { menu.addItem({ command }); });
