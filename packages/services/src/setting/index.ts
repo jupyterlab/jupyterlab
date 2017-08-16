@@ -77,6 +77,7 @@ class SettingManager {
     const base = this.serverSettings.baseUrl;
     const request = {
       data: JSON.stringify(user),
+      contentType: 'application/json',
       method: 'PATCH',
       url: Private.url(base, id)
     };

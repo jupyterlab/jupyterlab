@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  JSONValue, PromiseDelegate
+  PromiseDelegate
 } from '@phosphor/coreutils';
 
 
@@ -93,14 +93,14 @@ namespace ServerConnection {
     dataType?: string;
 
     /**
-     * The outgoing content type, used to set the `Content-Type` header.  Defaults to `'application/json'` when there is sent data.
+     * The outgoing content type, used to set the `Content-Type` header.
      */
     contentType?: string;
 
     /**
      * The request data.
      */
-    data?: JSONValue;
+    data?: Blob | BufferSource | FormData | URLSearchParams | ReadableStream | string;
 
     /**
      * Whether to cache the response. Defaults to `false`.
@@ -269,8 +269,6 @@ namespace Private {
   function populateRequest(xhr: XMLHttpRequest, request: ServerConnection.IRequest, settings: ServerConnection.ISettings): void {
     if (request.contentType !== void 0) {
       xhr.setRequestHeader('Content-Type', request.contentType);
-    } else if (request.data) {
-      xhr.setRequestHeader('Content-Type', 'application/json');
     }
 
     xhr.timeout = settings.timeout;
