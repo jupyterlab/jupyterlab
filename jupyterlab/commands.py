@@ -128,6 +128,7 @@ def install_extension_async(extension, app_dir=None, logger=None, abort_callback
         return
 
     _ensure_app_dirs(app_dir, logger)
+    
     target = pjoin(app_dir, 'extensions', 'temp')
     if os.path.exists(target):
         shutil.rmtree(target)
@@ -155,6 +156,14 @@ def install_extension_async(extension, app_dir=None, logger=None, abort_callback
             data['name'], data['version'], errors
         )
         raise ValueError(msg)
+
+    # Check for existing app extension of the same name.
+    extensions = _get_extensions(app_dir)
+    if data['name'] in extensions:
+        other = extensions[data['name']]
+        path = other['path']
+        if osp.exists(path) and other['location'] == 'app':
+            os.remove(path)
 
     # Handle any schemas.
     schemaDir = data['jupyterlab'].get('schemaDir', None)
@@ -937,13 +946,16 @@ def _get_extensions(app_dir):
 
     # Get system level packages
     sys_path = pjoin(get_app_dir(), 'extensions')
+    app_path = pjoin(app_dir, 'extensions')
     for target in glob.glob(pjoin(sys_path, '*.tgz')):
+        location = 'app' if app_path == sys_path else 'system'
         data = _read_package(target)
         deps = data.get('dependencies', dict())
         extensions[data['name']] = dict(path=os.path.realpath(target),
                                         version=data['version'],
                                         jupyterlab=data['jupyterlab'],
-                                        dependencies=deps)
+                                        dependencies=deps,
+                                        location=location)
 
     # Look in app_dir if different
     app_path = pjoin(app_dir, 'extensions')
@@ -956,7 +968,8 @@ def _get_extensions(app_dir):
         extensions[data['name']] = dict(path=os.path.realpath(target),
                                         version=data['version'],
                                         jupyterlab=data['jupyterlab'],
-                                        dependencies=deps)
+                                        dependencies=deps,
+                                        location='app')
 
     return extensions
 
