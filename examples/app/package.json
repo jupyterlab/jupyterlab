@@ -34,10 +34,10 @@
   },
   "devDependencies": {
     "file-loader": "^0.10.1",
-    "fs-extra": "^4.0.1",
-    "glob": "7.1.2",
+    "fs-extra": "^2.1.2",
+    "glob": "^7.1.2",
     "rimraf": "^2.5.2",
-    "read-package-data": "^5.1.6",
+    "read-package-tree": "^5.1.6",
     "style-loader": "^0.13.1",
     "raw-loader": "^0.5.1",
     "url-loader": "^0.5.7",
