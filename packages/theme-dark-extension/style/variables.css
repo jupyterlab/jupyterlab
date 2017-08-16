@@ -174,7 +174,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-notebook-tr-hover-background-color: rgba(3,169,244,.2);
 
   /* Dialog specific styles */
-  --jp-dialog-background: rgba(0,0,0,.8);
+  --jp-dialog-background: rgba(0,0,0,.6);
 
   /* Console specific styles */
 
