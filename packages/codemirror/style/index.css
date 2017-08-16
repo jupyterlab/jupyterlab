@@ -51,8 +51,6 @@
 }
 
 
-
-
 /* This causes https://github.com/jupyter/jupyterlab/issues/522 */
 /* May not cause it not because we changed it! */
 .CodeMirror-lines {
