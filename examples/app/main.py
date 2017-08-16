@@ -23,7 +23,8 @@ class ExampleHandler(IPythonHandler):
         """Get the main page for the application's interface."""
         return self.write(self.render_template("index.html",
             static=self.static_url, base_url=self.base_url,
-            terminals_available=self.settings['terminals_available']))
+            terminals_available=self.settings['terminals_available'],
+            page_config=self.settings['page_config_data']))
 
     def get_template(self, name):
         loader = FileSystemLoader(os.getcwd())
@@ -38,10 +39,14 @@ class ExampleApp(NotebookApp):
         """initialize tornado webapp and httpserver.
         """
         super(ExampleApp, self).init_webapp()
-        base_url = self.web_app.settings['base_url']
+        wsettings = self.web_app.settings
+        base_url = wsettings['base_url']
         settings_path = ujoin(
             base_url, default_settings_path + '(?P<section_name>[\w.-]+)'
         )
+
+        wsettings.setdefault('page_config_data', dict())
+        wsettings['page_config_data']['token'] = self.token
 
         default_handlers = [
             (ujoin(base_url, '/example?'), ExampleHandler),

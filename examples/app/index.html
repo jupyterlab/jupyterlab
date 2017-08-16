@@ -6,6 +6,9 @@
 </head>
 <body>
   <script id='jupyter-config-data' type="application/json">{ 
+  {% for key, value in page_config.items() -%}
+  "{{ key }}": "{{ value }}",
+  {% endfor -%}
   "baseUrl": "{{base_url}}",
   "wsUrl": "{{ws_url}}",
   "terminalsAvailable": "{{terminals_available}}"

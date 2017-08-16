@@ -37,7 +37,11 @@ var mods = [
 
 
 window.onload = function() {
-  var lab = new JupyterLab({ namespace: 'lab-example' });
+  var lab = new JupyterLab({
+    name: 'JupyterLab Example',
+    namespace: 'lab-example',
+    version: require('./package.json').version
+  });
   lab.registerPluginModules(mods);
   lab.start();
 }
