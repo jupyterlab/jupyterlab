@@ -226,6 +226,7 @@
   border-bottom: 1px solid var(--jp-border-color1);
   background-color: var(--jp-layout-color2);
   box-shadow: var(--jp-toolbar-box-shadow);
+  border-top: none !important;
 }
 
 
@@ -243,7 +244,7 @@
 }
 
 
-.jp-CellTools-tool:not(:first-child) {
+.jp-CellTools-tool:not(:nth-child(2)) {
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
 }
 
