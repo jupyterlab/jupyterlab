@@ -24,7 +24,7 @@ button.jp-mod-styled {
 
 
 input.jp-mod-styled {
-  background: white;
+  background: var(--jp-input-background-color);
   height: 28px;
   box-sizing: border-box;
   border: var(--jp-border-width) solid var(--jp-border-color1);
