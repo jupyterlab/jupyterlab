@@ -3,6 +3,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+.jp-Notebook .jp-Cell .jp-OutputArea .jp-PDFViewer {
+  min-height: 500px;
+}
+
 /*
 When drag events occur, `p-mod-override-cursor` is added to the body.
 This reuses the same CSS selector logic as jp-IFrame to prevent embedded
