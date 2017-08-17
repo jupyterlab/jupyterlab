@@ -378,7 +378,7 @@ namespace Terminal {
     cursorBlink: boolean;
 
     /**
-     * Initial command.
+     * An optional command to run when the session starts.
      */
     initialCommand: string;
   }
