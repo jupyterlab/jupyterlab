@@ -239,6 +239,7 @@
   flex: 1 1 auto;
   background-color: var(--jp-layout-color0);
   border-color: var(--jp-input-border-color-active);
+  box-shadow: var(--jp-input-box-shadow);
 }
 
 
