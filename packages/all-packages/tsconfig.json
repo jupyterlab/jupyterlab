@@ -18,9 +18,6 @@
     "paths": {
       "@jupyterlab/*": [
         "../*/src"
-      ],
-      "@jupyterlab/pdf-extension": [
-        "../pdf-extension/src"
       ]
     },
     "jsx": "react",
