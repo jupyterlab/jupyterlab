@@ -1034,7 +1034,7 @@ namespace Private {
   }
 
   /**
-   * Delete spaces to the previous tab stob in a codemirror editor.
+   * Indent or insert a tab as appropriate.
    */
   export
   function indentMoreOrinsertTab(cm: CodeMirror.Editor): void {
