@@ -93,6 +93,7 @@
   --jp-icon-caretleft: url('./icons/md/caretleft.svg');
   --jp-icon-caretright: url('./icons/md/caretright.svg');
   --jp-icon-undo: url('./icons/md/undo.svg');
+  --jp-icon-settings: url('./icons/jupyter/settings.svg');
   --jp-about-header-logo: url('./icons/jupyter/jupyter.svg');
   --jp-about-header-wordmark: url('./images/jupyterlab-wordmark.svg');
 }

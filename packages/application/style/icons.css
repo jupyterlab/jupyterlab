@@ -203,6 +203,11 @@
 }
 
 
+.jp-SettingsIcon {
+  background-image: var(--jp-icon-settings);
+}
+
+
 .jp-SpreadsheetIcon {
   background-image: var(--jp-icon-spreadsheet);
 }

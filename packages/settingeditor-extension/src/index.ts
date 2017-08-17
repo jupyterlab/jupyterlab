@@ -69,6 +69,7 @@ const plugin: JupyterLabPlugin<void> = {
         tracker.add(editor);
         editor.id = namespace;
         editor.title.label = 'Settings';
+        editor.title.iconClass = 'jp-MaterialIcon jp-SettingsIcon';
         editor.title.closable = true;
         shell.addToMainArea(editor);
         shell.activateById(editor.id);
