@@ -583,6 +583,53 @@ describe('docregistry/registry', () => {
         expect(ft.name).to.be('vega');
       });
 
+      it('should be case insensitive', () => {
+        let ft = registry.getFileTypeForModel({
+          name: 'foo.PY'
+        });
+        expect(ft.name).to.be('python');
+      });
+
+    });
+
+    describe('#getFileTypesForPath()', () => {
+
+      beforeEach(() => {
+        DocumentRegistry.defaultFileTypes.forEach(ft => {
+          registry.addFileType(ft);
+        });
+      });
+
+      it('should handle a notebook', () => {
+        let ft = registry.getFileTypesForPath('foo/bar/baz.ipynb');
+        expect(ft[0].name).to.be('notebook');
+      });
+
+      it('should handle a python file', () => {
+        let ft = registry.getFileTypesForPath('foo/bar/baz.py');
+        expect(ft[0].name).to.be('python');
+      });
+
+      it('should return an empty list for an unknown file', () => {
+        let ft = registry.getFileTypesForPath('foo/bar/baz.weird');
+        expect(ft.length).to.be(0);
+      });
+
+      it('should get the most specific extension first', () => {
+        [
+          { name: 'json', extensions: ['.json'] },
+          { name: 'vega', extensions: ['.vg.json'] }
+        ].forEach(ft => {registry.addFileType(ft); });
+        let ft = registry.getFileTypesForPath('foo/bar/baz.vg.json');
+        expect(ft[0].name).to.be('vega');
+        expect(ft[1].name).to.be('json');
+      });
+
+      it('should be case insensitive', () => {
+        let ft = registry.getFileTypesForPath('foo/bar/baz.PY');
+        expect(ft[0].name).to.be('python');
+      });
+
     });
 
   });
