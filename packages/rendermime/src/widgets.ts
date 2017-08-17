@@ -272,34 +272,6 @@ class RenderedMarkdown extends RenderedHTMLCommon {
 
 
 /**
- * A widget for displaying rendered PDF content.
- */
-export
-class RenderedPDF extends RenderedCommon {
-  /**
-   * Construct a new rendered PDF widget.
-   *
-   * @param options - The options for initializing the widget.
-   */
-  constructor(options: IRenderMime.IRendererOptions) {
-    super(options);
-    this.addClass('jp-RenderedPDF');
-  }
-
-  /**
-   * Render a mime model.
-   */
-  render(model: IRenderMime.IMimeModel): Promise<void> {
-    return renderers.renderPDF({
-      host: this.node,
-      source: String(model.data[this.mimeType]),
-      trusted: model.trusted
-    });
-  }
-}
-
-
-/**
  * A widget for displaying SVG content.
  */
 export

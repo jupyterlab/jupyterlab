@@ -394,68 +394,6 @@ namespace renderMarkdown {
   }
 }
 
-
-/**
- * Render a PDF into a host node.
- *
- * @params options - The options for rendering.
- *
- * @returns A promise which resolves when rendering is complete.
- */
-export
-function renderPDF(options: renderPDF.IRenderOptions): Promise<void> {
-  // Unpack the options.
-  let { host, source, trusted } = options;
-
-  // Clear the content if there is no source.
-  if (!source) {
-    host.textContent = '';
-    return Promise.resolve(undefined);
-  }
-
-  // Display a message if the source is not trusted.
-  if (!trusted) {
-    host.textContent = 'Cannot display an untrusted PDF. Maybe you need to run the cell?';
-    return Promise.resolve(undefined);
-  }
-
-  // Update the host with the display content.
-  let href = `data:application/pdf;base64,${source}`;
-  host.innerHTML = `<a target="_blank" href="${href}">View PDF</a>`;
-
-  // Return the final rendered promise.
-  return Promise.resolve(undefined);
-}
-
-
-/**
- * The namespace for the `renderPDF` function statics.
- */
-export
-namespace renderPDF {
-  /**
-   * The options for the `renderPDF` function.
-   */
-  export
-  interface IRenderOptions {
-    /**
-     * The host node for the rendered PDF.
-     */
-    host: HTMLElement;
-
-    /**
-     * The base64 encoded source for the PDF.
-     */
-    source: string;
-
-    /**
-     * Whether the source is trusted.
-     */
-    trusted: boolean;
-  }
-}
-
-
 /**
  * Render SVG into a host node.
  *
