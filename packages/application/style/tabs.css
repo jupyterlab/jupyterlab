@@ -178,7 +178,7 @@
 
 .p-DockPanel-tabBar .p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon:hover {
   background-size: 16px;
-  background-image: var(--jp-icon-close-black);
+  background-image: var(--jp-icon-close-circle);
 }
 
 .p-TabBar-tab.p-mod-drag-image {

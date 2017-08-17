@@ -60,8 +60,9 @@
   --jp-icon-close: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/close.svg');
   --jp-icon-inverse-close: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/close-inverse.svg');
   --jp-icon-circle: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/circle.svg');
-  --jp-inverse-icon-circle: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/circle-inverse.svg');
-  --jp-icon-close-black: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/close-black.svg');
+  --jp-icon-inverse-circle: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/circle-inverse.svg');
+  --jp-icon-close-circle: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/close-circle.svg');
+  --jp-icon-inverse-close-circle: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/close-circle-inverse.svg');
   --jp-icon-search: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/search.svg');
   --jp-icon-copy: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/copy.svg');
   --jp-icon-cut: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/cut.svg');

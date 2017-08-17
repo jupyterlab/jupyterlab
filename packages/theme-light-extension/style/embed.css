@@ -63,8 +63,9 @@
   --jp-icon-close: url('./icons/md/close.svg');
   --jp-icon-inverse-close: url('./icons/md/close-inverse.svg');
   --jp-icon-circle: url('./icons/md/circle.svg');
-  --jp-inverse-icon-circle: url('./icons/md/circle-inverse.svg');
-  --jp-icon-close-black: url('./icons/md/close-black.svg');
+  --jp-icon-inverse-circle: url('./icons/md/circle-inverse.svg');
+  --jp-icon-close-circle: url('./icons/md/close-circle.svg');
+  --jp-icon-inverse-close-circle: url('./icons/md/close-circle-inverse.svg');
   --jp-icon-search: url('./icons/md/search.svg');
   --jp-icon-copy: url('./icons/md/copy.svg');
   --jp-icon-cut: url('./icons/md/cut.svg');
