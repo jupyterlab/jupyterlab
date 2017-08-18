@@ -38,10 +38,25 @@ class RenderedPDF extends Widget implements IRenderMime.IRenderer {
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     let data = model.data[MIME_TYPE] as string;
     const blob = Private.b64toBlob(data, MIME_TYPE);
-    let objectUrl = URL.createObjectURL(blob);
-    this.node.querySelector('embed').setAttribute('src', objectUrl);
+    if (this._objectUrl !== '') {
+      URL.revokeObjectURL(this._objectUrl);
+    }
+    this._objectUrl = URL.createObjectURL(blob);
+    this.node.querySelector('embed').setAttribute('src', this._objectUrl);
     return Promise.resolve(void 0);
   }
+
+  /**
+   * Dispose of the resources held by the pdf widget.
+   */
+  dispose() {
+    if (this._objectUrl !== '') {
+      URL.revokeObjectURL(this._objectUrl);
+    }
+    super.dispose();
+  }
+
+  private _objectUrl = '';
 }
 
 
