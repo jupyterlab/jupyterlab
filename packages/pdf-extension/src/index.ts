@@ -37,10 +37,16 @@ class RenderedPDF extends Widget implements IRenderMime.IRenderer {
    */
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     let data = model.data[MIME_TYPE] as string;
-    const blob = Private.b64toBlob(data, MIME_TYPE);
-    if (this._objectUrl !== '') {
-      URL.revokeObjectURL(this._objectUrl);
+    // If there is no data, do nothing.
+    if (!data) {
+      return Promise.resolve(void 0);
     }
+    const blob = Private.b64toBlob(data, MIME_TYPE);
+    // Make a good-faith effort to release references
+    // to any previous object urls.
+    try {
+      URL.revokeObjectURL(this._objectUrl);
+    } catch(err) { /* no-op */ }
     this._objectUrl = URL.createObjectURL(blob);
     this.node.querySelector('embed').setAttribute('src', this._objectUrl);
     return Promise.resolve(void 0);
@@ -50,9 +56,9 @@ class RenderedPDF extends Widget implements IRenderMime.IRenderer {
    * Dispose of the resources held by the pdf widget.
    */
   dispose() {
-    if (this._objectUrl !== '') {
+    try {
       URL.revokeObjectURL(this._objectUrl);
-    }
+    } catch(err) { /* no-op */ }
     super.dispose();
   }
 
