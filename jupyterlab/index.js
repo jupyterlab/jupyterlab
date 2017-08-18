@@ -79,7 +79,7 @@ function main() {
         window.onerror = function(msg, url, line, col, error) {
            caught_errors.push(String(error));
         };
-        lab.restored.then(() => {
+        lab.restored.then(function() {
             var el = document.createElement('div');
             el.id = 'seleniumResult';
             el.textContent = JSON.stringify(caught_errors);
