@@ -42,13 +42,17 @@ class RenderedPDF extends Widget implements IRenderMime.IRenderer {
       return Promise.resolve(void 0);
     }
     const blob = Private.b64toBlob(data, MIME_TYPE);
-    // Make a good-faith effort to release references
-    // to any previous object urls.
-    try {
-      URL.revokeObjectURL(this._objectUrl);
-    } catch(err) { /* no-op */ }
+
+    let oldUrl = this._objectUrl;
     this._objectUrl = URL.createObjectURL(blob);
     this.node.querySelector('embed').setAttribute('src', this._objectUrl);
+
+    // Release reference to any previous object url.
+    if (oldUrl) {
+      try {
+        URL.revokeObjectURL(oldUrl);
+      } catch(err) { /* no-op */ }
+    }
     return Promise.resolve(void 0);
   }
 
