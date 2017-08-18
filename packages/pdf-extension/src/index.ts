@@ -37,8 +37,9 @@ class RenderedPDF extends Widget implements IRenderMime.IRenderer {
    */
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     let data = model.data[MIME_TYPE] as string;
-    let src = `data:${MIME_TYPE};base64,${data}`;
-    this.node.querySelector('embed').setAttribute('src', src);
+    const blob = Private.b64toBlob(data, MIME_TYPE);
+    let objectUrl = URL.createObjectURL(blob);
+    this.node.querySelector('embed').setAttribute('src', objectUrl);
     return Promise.resolve(void 0);
   }
 }
@@ -96,5 +97,38 @@ namespace Private {
     pdf.setAttribute('type', MIME_TYPE);
     node.appendChild(pdf);
     return node;
+  }
+
+  /**
+   * Convert a base64 encoded string to a Blob object.
+   * Modified from a snippet found here:
+   * https://stackoverflow.com/questions/16245767/creating-a-blob-from-a-base64-string-in-javascript
+   *
+   * @param b64Data - The base64 encoded data.
+   *
+   * @param contentType - The mime type of the data.
+   *
+   * @param sliceSize - The size to chunk the data into for processing.
+   *
+   * @returns a Blob for the data.
+   */
+  export
+  function b64toBlob(b64Data: string, contentType: string = '', sliceSize: number = 512): Blob {
+    const byteCharacters = atob(b64Data);
+    let byteArrays: Uint8Array[] = [];
+
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+      let slice = byteCharacters.slice(offset, offset + sliceSize);
+
+      let byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+      let byteArray = new Uint8Array(byteNumbers);
+      byteArrays.push(byteArray);
+    }
+
+    var blob = new Blob(byteArrays, {type: contentType});
+    return blob;
   }
 }
