@@ -63,6 +63,18 @@ describe('defaultSanitizer', () => {
       expect(defaultSanitizer.sanitize(div)).to.be(div);
     });
 
+    it('should allow video tags with some attributes', () => {
+      let video = '<video src="my/video.mp4" height="42" width="42"' +
+                  ' autoplay controls loop muted></video>';
+      expect(defaultSanitizer.sanitize(video)).to.be(video);
+    });
+
+    it('should allow audio tags with some attributes', () => {
+      let audio = '<audio src="my/audio.ogg autoplay loop ' +
+                  'controls muted"></audio>';
+      expect(defaultSanitizer.sanitize(audio)).to.be(audio);
+    });
+
   });
 
 });
