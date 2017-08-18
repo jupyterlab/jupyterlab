@@ -260,8 +260,40 @@ namespace Private {
     if (!splash) {
       splash = document.createElement('div');
       splash.id = 'jupyterlab-splash';
-      let child = document.createElement('div');
-      splash.appendChild(child);
+
+      let galaxy = document.createElement('div');
+      galaxy.id = 'galaxy';
+      splash.appendChild(galaxy);
+
+      let mainLogo = document.createElement('div');
+      mainLogo.id = 'main-logo';
+
+      let planet = document.createElement('div');
+      let planet2 = document.createElement('div');
+      let planet3 = document.createElement('div');
+      planet.className = 'planet';
+      planet2.className = 'planet';
+      planet3.className = 'planet';
+
+      let moon1 = document.createElement('div');
+      moon1.id = 'moon1';
+      moon1.className = 'moon orbit';
+      moon1.appendChild(planet);
+
+      let moon2 = document.createElement('div');
+      moon2.id = 'moon2';
+      moon2.className = 'moon orbit';
+      moon2.appendChild(planet2);
+
+      let moon3 = document.createElement('div');
+      moon3.id = 'moon3';
+      moon3.className = 'moon orbit';
+      moon3.appendChild(planet3);
+
+      galaxy.appendChild(mainLogo);
+      galaxy.appendChild(moon1);
+      galaxy.appendChild(moon2);
+      galaxy.appendChild(moon3);
     }
     document.body.appendChild(splash);
     splashCount++;
