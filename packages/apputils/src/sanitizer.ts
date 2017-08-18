@@ -25,7 +25,7 @@ class Sanitizer implements ISanitizer {
 
   private _options: sanitize.IOptions = {
     allowedTags: sanitize.defaults.allowedTags
-      .concat('h1', 'h2', 'img', 'span'),
+      .concat('h1', 'h2', 'img', 'span', 'audio', 'video'),
     allowedAttributes: {
       // Allow the "rel" attribute for <a> tags.
       'a': sanitize.defaults.allowedAttributes['a'].concat('rel'),
@@ -34,7 +34,12 @@ class Sanitizer implements ISanitizer {
       // Allow "class" attribute for <code> tags.
       'code': ['class'],
       // Allow "class" attribute for <span> tags.
-      'span': ['class']
+      'span': ['class'],
+      // Allow the "src" attribute for <audio> tags.
+      'audio': ['src', 'autoplay', 'loop', 'muted', 'controls'],
+      // Allow the "src" attribute for <video> tags.
+      'video': ['src', 'height', 'width', 'autoplay',
+                'loop', 'muted', 'controls']
     },
     transformTags: {
       // Set the "rel" attribute for <a> tags to "nofollow".
