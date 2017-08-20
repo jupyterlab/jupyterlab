@@ -149,6 +149,8 @@ const consolePlugin: JupyterLabPlugin<void> = {
         manager.source = source;
       }
     });
+
+    app.contextMenu.addItem({command: CommandIDs.open, selector: '.jp-CodeConsole'});
   }
 };
 
@@ -199,6 +201,8 @@ const notebookPlugin: JupyterLabPlugin<void> = {
         manager.source = source;
       }
     });
+
+    app.contextMenu.addItem({command: CommandIDs.open, selector: '.jp-NotebookPanel'});
   }
 };
 
