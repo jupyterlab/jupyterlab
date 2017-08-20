@@ -5,12 +5,12 @@
 
 
 ::-webkit-scrollbar {
-  background: var(--jp-layout-color0);
+  background: transparent;
 }
 
 
-.jp-SidePanel ::-webkit-scrollbar {
-  background-color: transparent;
+.p-DockPanel ::-webkit-scrollbar {
+  background: var(--jp-layout-color0);
 }
 
 

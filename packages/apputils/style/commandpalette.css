@@ -31,7 +31,7 @@
 .p-CommandPalette-search {
   padding: 8px;
   background-color: var(--jp-layout-color2);
-  border-bottom: 1px solid var(--jp-border-color0);
+  border-bottom: 1px solid var(--jp-border-color1);
   box-shadow: var(--jp-toolbar-box-shadow);
   z-index: 2;
 }
@@ -40,7 +40,7 @@
   overflow: overlay;
   padding: 0px 8px;
   border: 1px solid var(--jp-border-color0);
-  background-color: var(--jp-input-background-color);
+  background-color: var(--jp-input-background-color-active);
   height: 30px;
 }
 

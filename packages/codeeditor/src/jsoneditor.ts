@@ -32,6 +32,11 @@ import {
 const JSONEDITOR_CLASS = 'jp-JSONEditor';
 
 /**
+ * The class name added to a focused JSONEditor instance.
+ */
+const FOCUSED_CLASS = 'jp-mod-focused';
+
+/**
  * The class name added when the Metadata editor contains invalid JSON.
  */
 const ERROR_CLASS = 'jp-mod-error';
@@ -211,6 +216,8 @@ class JSONEditor extends Widget {
       case 'click':
         this._evtClick(event as MouseEvent);
         break;
+      case 'focus':
+        this._toggleFocused();
       default:
         break;
     }
@@ -222,6 +229,7 @@ class JSONEditor extends Widget {
   protected onAfterAttach(msg: Message): void {
     let node = this.editorHostNode;
     node.addEventListener('blur', this, true);
+    node.addEventListener('focus', this, true);
     this.revertButtonNode.hidden = true;
     this.commitButtonNode.hidden = true;
     this.headerNode.addEventListener('click', this);
@@ -270,6 +278,18 @@ class JSONEditor extends Widget {
     this.commitButtonNode.hidden = !valid || !this._inputDirty;
   }
 
+
+  private _toggleFocused(): void {
+    let node = this.editorHostNode;
+    let codeMirror = node.getElementsByClassName('CodeMirror-wrap');
+    let focused = !codeMirror[0].classList.contains('CodeMirror-focused');
+    if (focused) {
+      node.classList.add(FOCUSED_CLASS);
+    } else {
+      node.classList.remove(FOCUSED_CLASS);
+    }
+  }
+
   /**
    * Handle blur events for the text area.
    */
@@ -278,6 +298,7 @@ class JSONEditor extends Widget {
     if (!this._inputDirty && this._dataDirty) {
       this._setValue();
     }
+    this._toggleFocused();
   }
 
   /**

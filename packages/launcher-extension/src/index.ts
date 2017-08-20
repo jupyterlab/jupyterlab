@@ -75,6 +75,7 @@ function activate(app: JupyterLab, palette: ICommandPalette): ILauncher {
       widget.model = model;
       widget.id = id;
       widget.title.label = 'Launcher';
+      widget.title.iconClass = 'jp-LauncherIcon';
       widget.title.closable = true;
       shell.addToMainArea(widget);
       if (args['activate'] !== false) {

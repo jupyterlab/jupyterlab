@@ -144,7 +144,7 @@
 }
 
 
-.p-DockPanel-tabBar .p-TabBar-tab .p-TabBar-tabIcon {
+.p-DockPanel-tabBar .p-TabBar-tab .p-TabBar-tabIcon, .p-TabBar-tab.p-mod-drag-image .p-TabBar-tabIcon {
   width: 14px;
   background-position: left center;
   background-repeat: no-repeat;
@@ -178,7 +178,7 @@
 
 .p-DockPanel-tabBar .p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon:hover {
   background-size: 16px;
-  background-image: var(--jp-icon-close-black);
+  background-image: var(--jp-icon-close-circle);
 }
 
 .p-TabBar-tab.p-mod-drag-image {
@@ -194,3 +194,10 @@
   padding: 0px 10px;
   transform: translateX(-40%) translateY(-58%);
 }
+
+
+
+
+/* .p-TabBar-tab.p-mod-drag-image .p-TabBar-tabLabel {
+  margin-left: 4px;
+} */

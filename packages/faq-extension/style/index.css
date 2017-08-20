@@ -16,6 +16,7 @@
   min-height: var(--jp-toolbar-micro-height);
   border-bottom: var(--jp-border-width) solid var(--jp-toolbar-border-color);
   box-shadow: var(--jp-toolbar-box-shadow);
+  background-color: var(--jp-layout-color1);
 }
 
 
