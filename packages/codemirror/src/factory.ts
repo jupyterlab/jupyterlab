@@ -25,7 +25,7 @@ class CodeMirrorEditorFactory implements IEditorFactoryService {
         'Cmd-Right': 'goLineRight',
         'End': 'goLineRight',
         'Cmd-Left': 'goLineLeft',
-        'Tab': 'indentMore',
+        'Tab': 'indentMoreOrinsertTab',
         'Shift-Tab': 'indentLess',
         'Cmd-Alt-[': 'indentAuto',
         'Ctrl-Alt-[': 'indentAuto',
@@ -37,7 +37,7 @@ class CodeMirrorEditorFactory implements IEditorFactoryService {
     this.documentCodeMirrorConfig = {
       ...CodeMirrorEditor.defaultConfig,
       extraKeys: {
-        'Tab': 'indentMore',
+        'Tab': 'indentMoreOrinsertTab',
         'Shift-Enter': () => { /* no-op */ }
       },
       lineNumbers: true,

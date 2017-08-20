@@ -1034,6 +1034,29 @@ namespace Private {
   }
 
   /**
+   * Indent or insert a tab as appropriate.
+   */
+  export
+  function indentMoreOrinsertTab(cm: CodeMirror.Editor): void {
+    let doc = cm.getDoc();
+    let from = doc.getCursor('from');
+    let to = doc.getCursor('to');
+    let sel = !posEq(from, to);
+    if (sel) {
+      CodeMirror.commands['indentMore'](cm);
+      return;
+    }
+    // Check for start of line.
+    let line = doc.getLine(from.line);
+    let before = line.slice(0, from.ch);
+    if (/^\s*$/.test(before)) {
+      CodeMirror.commands['indentMore'](cm);
+    } else {
+      CodeMirror.commands['insertSoftTab'](cm);
+    }
+  }
+
+  /**
    * Delete spaces to the previous tab stob in a codemirror editor.
    */
   export
@@ -1061,7 +1084,7 @@ namespace Private {
     } else {
       CodeMirror.commands['delCharBefore'](cm);
     }
-  };
+  }
 
   /**
    * Test whether two CodeMirror positions are equal.
@@ -1132,5 +1155,13 @@ namespace Private {
  */
 CodeMirrorEditor.addCommand(
   'delSpaceToPrevTabStop', Private.delSpaceToPrevTabStop
+);
+
+
+/**
+ * Add a CodeMirror command to indent or insert a tab as appropriate.
+ */
+CodeMirrorEditor.addCommand(
+  'indentMoreOrinsertTab', Private.indentMoreOrinsertTab
 );
 
