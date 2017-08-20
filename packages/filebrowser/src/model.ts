@@ -18,6 +18,10 @@ import {
 } from '@phosphor/algorithm';
 
 import {
+  PromiseDelegate
+} from '@phosphor/coreutils';
+
+import {
   IDisposable
 } from '@phosphor/disposable';
 
@@ -84,6 +88,13 @@ class FileBrowserModel implements IDisposable {
    */
   get connectionFailure(): ISignal<this, Error> {
     return this._connectionFailure;
+  }
+
+  /**
+   * A promise that resolves when the model is first restored.
+   */
+  get restored(): Promise<void> {
+    return this._restored.promise;
   }
 
   /**
@@ -263,6 +274,7 @@ class FileBrowserModel implements IDisposable {
     const ready = manager.services.ready;
     return Promise.all([state.fetch(key), ready]).then(([cwd]) => {
       if (!cwd) {
+        this._restored.resolve(void 0);
         return;
       }
 
@@ -272,7 +284,10 @@ class FileBrowserModel implements IDisposable {
         .then(() => this.cd(localPath))
         .catch(() => state.remove(key));
     }).catch(() => state.remove(key))
-      .then(() => { this._key = key; }); // Set key after restoration is done.
+      .then(() => {
+        this._key = key;
+        this._restored.resolve(void 0);
+      }); // Set key after restoration is done.
   }
 
   /**
@@ -454,6 +469,7 @@ class FileBrowserModel implements IDisposable {
   private _timeoutId = -1;
   private _driveName: string;
   private _isDisposed = false;
+  private _restored = new PromiseDelegate<void>();
 }
 
 
