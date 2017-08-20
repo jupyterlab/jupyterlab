@@ -463,7 +463,7 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
   app.contextMenu.addItem({command: CommandIDs.redo, selector: '.jp-Notebook', rank: 2});
   app.contextMenu.addItem({ type: 'separator', selector: '.jp-Notebook', rank: 0 });
   app.contextMenu.addItem({command: CommandIDs.createConsole, selector: '.jp-Notebook', rank: 3});
-
+    app.contextMenu.addItem({command: CommandIDs.clearAllOutputs, selector: '.jp-Notebook', rank: 3});
   return tracker;
 }
 
