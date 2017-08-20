@@ -170,8 +170,12 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-notebook-scroll-padding: 100px;
   --jp-notebook-select-background-color: var(--jp-layout-color1);
   --jp-notebook-multiselected-color: rgba(33,150,243,.24);
-  --jp-notebook-error-background-color: rgba(244,67,54,.28);
-  --jp-notebook-tr-hover-background-color: rgba(3,169,244,.2);
+  --jp-rendermime-error-background: rgba(244,67,54,.28);
+
+  /* Rendermime styles */
+
+  --jp-rendermime-row-background: var(--md-grey-900);
+  --jp-rendermime-row-hover-background: rgba(3,169,244,.2);
 
   /* Dialog specific styles */
   --jp-dialog-background: rgba(0,0,0,.6);

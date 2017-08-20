@@ -66,7 +66,7 @@
 
 
 .jp-RenderedText[data-mime-type="application/vnd.jupyter.stderr"] {
-  background: var(--jp-notebook-error-background-color);
+  background: var(--jp-rendermime-error-background);
 }
 
 
@@ -292,7 +292,6 @@ margin-top = 14, 14, 14, 14, 8, 8
 
 
 .jp-RenderedHTMLCommon table {
-  border: 1px solid var(--jp-border-color1);
   border-collapse: collapse;
   border-spacing: 0;
   color: var(--jp-ui-font-color1);
@@ -328,7 +327,6 @@ margin-top = 14, 14, 14, 14, 8, 8
 
 
 .jp-RenderedHTMLCommon th {
-  background-color: var(--jp-layout-color2);
   font-weight: bold;
 }
 
@@ -339,12 +337,12 @@ margin-top = 14, 14, 14, 14, 8, 8
 
 
 .jp-RenderedHTMLCommon tbody tr:nth-child(even) {
-  background: var(--jp-layout-color1);
+  background: var(  --jp-rendermime-row-background);
 }
 
 
 .jp-RenderedHTMLCommon tbody tr:hover {
-  background: var(--jp-notebook-tr-hover-background-color);
+  background: var( --jp-rendermime-row-hover-background);
 }
 
 
