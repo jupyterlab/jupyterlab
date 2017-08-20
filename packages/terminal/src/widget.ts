@@ -74,6 +74,7 @@ class Terminal extends Widget {
     // Initialize settings.
     let defaults = Terminal.defaultOptions;
     this._fontSize = options.fontSize || defaults.fontSize;
+    this._initialCommand = options.initialCommand || defaults.initialCommand;
     this.theme = options.theme || defaults.theme;
     this.id = `jp-Terminal-${Private.id++}`;
     this.title.label = 'Terminal';
@@ -100,6 +101,12 @@ class Terminal extends Widget {
       value.messageReceived.connect(this._onMessage, this);
       this.title.label = `Terminal ${value.name}`;
       this._setSessionSize();
+      if (this._initialCommand) {
+        this._session.send({
+          type: 'stdin',
+          content: [this._initialCommand + '\n']
+        });
+      }
     });
   }
 
@@ -341,6 +348,7 @@ class Terminal extends Widget {
   private _theme: Terminal.Theme = 'dark';
   private _box: ElementExt.IBoxSizing | null = null;
   private _session: TerminalSession.ISession | null = null;
+  private _initialCommand: string;
 }
 
 
@@ -368,6 +376,11 @@ namespace Terminal {
      * Whether to blink the cursor.  Can only be set at startup.
      */
     cursorBlink: boolean;
+
+    /**
+     * An optional command to run when the session starts.
+     */
+    initialCommand: string;
   }
 
   /**
@@ -377,7 +390,8 @@ namespace Terminal {
   const defaultOptions: IOptions = {
     theme: 'dark',
     fontSize: 13,
-    cursorBlink: true
+    cursorBlink: true,
+    initialCommand: ''
   };
 
   /**

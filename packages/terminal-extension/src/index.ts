@@ -164,8 +164,9 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
     label: 'New Terminal',
     caption: 'Start a new terminal session',
     execute: args => {
-      let name = args ? args['name'] as string : '';
-      let term = new Terminal();
+      let name = args['name'] as string;
+      let initialCommand = args['initialCommand'] as string;
+      let term = new Terminal({ initialCommand });
       term.title.closable = true;
       term.title.icon = TERMINAL_ICON_CLASS;
       term.title.label = '...';
