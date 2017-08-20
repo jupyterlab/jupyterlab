@@ -615,9 +615,6 @@ class DirListing extends Widget {
     case 'dblclick':
       this._evtDblClick(event as MouseEvent);
       break;
-    case 'contextmenu':
-      this._evtContextMenu(event as MouseEvent);
-      break;
     case 'dragenter':
     case 'dragover':
       event.preventDefault();
@@ -656,7 +653,6 @@ class DirListing extends Widget {
     node.addEventListener('keydown', this);
     node.addEventListener('click', this);
     node.addEventListener('dblclick', this);
-    node.addEventListener('contextmenu', this);
     content.addEventListener('dragenter', this);
     content.addEventListener('dragover', this);
     content.addEventListener('drop', this);
@@ -678,7 +674,6 @@ class DirListing extends Widget {
     node.removeEventListener('keydown', this);
     node.removeEventListener('click', this);
     node.removeEventListener('dblclick', this);
-    node.removeEventListener('contextmenu', this);
     content.removeEventListener('scroll', this);
     content.removeEventListener('dragover', this);
     content.removeEventListener('dragover', this);
@@ -789,13 +784,6 @@ class DirListing extends Widget {
   }
 
   /**
-   * Handle the `'contextmenu'` event for the widget.
-   */
-  private _evtContextMenu(event: MouseEvent): void {
-    this._inContext = true;
-  }
-
-  /**
    * Handle the `'mousedown'` event for the widget.
    */
   private _evtMousedown(event: MouseEvent): void {
@@ -817,11 +805,9 @@ class DirListing extends Widget {
 
     // Check for clearing a context menu.
     let newContext = (IS_MAC && event.ctrlKey) || (event.button === 2);
-    if (this._inContext && !newContext) {
-      this._inContext = false;
+    if (newContext) {
       return;
     }
-    this._inContext = false;
 
     let index = Private.hitTestNodes(this._items, event.clientX, event.clientY);
     if (index === -1) {
@@ -1428,7 +1414,6 @@ class DirListing extends Widget {
   private _clipboard: string[] = [];
   private _manager: IDocumentManager;
   private _softSelection = '';
-  private _inContext = false;
   private _selection: { [key: string]: boolean; } = Object.create(null);
   private _renderer: DirListing.IRenderer;
   private _searchPrefix: string = '';
