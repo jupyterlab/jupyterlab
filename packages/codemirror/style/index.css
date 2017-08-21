@@ -42,7 +42,7 @@
 
 
 .CodeMirror.cm-s-jupyter pre {
-  color: var(--jp-code-font-color);
+  color: var(--jp-content-font-color1);
 }
 
 
