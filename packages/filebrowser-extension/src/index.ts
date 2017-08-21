@@ -198,7 +198,7 @@ function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, docM
   });
 
   // Create a launcher if there are no open items.
-  app.restored.then(() => {
+  app.shell.layoutModified.connect(() => {
     if (app.shell.isEmpty('main')) {
       // Make sure the model is restored.
       fbWidget.model.restored.then(() => {
