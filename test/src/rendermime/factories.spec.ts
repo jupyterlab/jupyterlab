@@ -16,7 +16,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  latexRendererFactory, pdfRendererFactory, svgRendererFactory,
+  latexRendererFactory, svgRendererFactory,
   markdownRendererFactory, textRendererFactory, htmlRendererFactory,
   imageRendererFactory
 } from '@jupyterlab/rendermime';
@@ -128,44 +128,6 @@ describe('rendermime/factories', () => {
         let w = f.createRenderer({ mimeType, ...defaultOptions });
         return w.renderModel(model).then(() => {
           expect(w.node.textContent).to.be(source);
-        });
-      });
-
-    });
-
-  });
-
-  describe('pdfRendererFactory', () => {
-
-    describe('#mimeTypes', () => {
-
-      it('should have the application/pdf mimeType', () => {
-        expect(pdfRendererFactory.mimeTypes).to.eql(['application/pdf']);
-      });
-
-    });
-
-    describe('#safe', () => {
-
-      it('should be unsafe', () => {
-        expect(pdfRendererFactory.safe).to.be(false);
-      });
-
-    });
-
-    describe('#createRenderer()', () => {
-
-      it('should render the correct HTML', () => {
-        let source = 'test';
-        let f = pdfRendererFactory;
-        let mimeType = 'application/pdf';
-        let model = createModel(mimeType, source, true);
-        let w = f.createRenderer({ mimeType, ...defaultOptions });
-        return w.renderModel(model).then(() => {
-          let node = w.node.firstChild as HTMLAnchorElement;
-          expect(node.localName).to.be('a');
-          expect(node.target).to.be('_blank');
-          expect(node.href).to.be('data:application/pdf;base64,test');
         });
       });
 

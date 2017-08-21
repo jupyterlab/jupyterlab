@@ -40,6 +40,7 @@
     "@jupyterlab/notebook": "^0.9.0",
     "@jupyterlab/notebook-extension": "^0.9.0",
     "@jupyterlab/outputarea": "^0.9.0",
+    "@jupyterlab/pdf-extension": "^0.1.0",
     "@jupyterlab/rendermime": "^0.9.0",
     "@jupyterlab/rendermime-interfaces": "^0.3.0",
     "@jupyterlab/running": "^0.9.0",
@@ -111,6 +112,7 @@
       "@jupyterlab/tooltip-extension": ""
     },
     "mimeExtensions": {
+      "@jupyterlab/pdf-extension": "",
       "@jupyterlab/vega2-extension": ""
     },
     "name": "JupyterLab",

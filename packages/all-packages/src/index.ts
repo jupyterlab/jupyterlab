@@ -49,3 +49,4 @@ import "@jupyterlab/theme-light-extension";
 import "@jupyterlab/tooltip";
 import "@jupyterlab/tooltip-extension";
 import "@jupyterlab/vega2-extension";
+import "@jupyterlab/pdf-extension";
