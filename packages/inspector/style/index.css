@@ -83,11 +83,12 @@
 
 
 .jp-InspectorItem {
+  display: flex;
   border: none;
 }
 
+
 .jp-InspectorItem-content {
-  height: 100%;
   overflow: auto;
   padding: 8px;
 }
