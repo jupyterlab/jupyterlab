@@ -15,12 +15,6 @@
 }
 
 
-.jp-Tooltip > .jp-RenderedText,
-.jp-Tooltip > .jp-RenderedText > pre {
-  overflow: visible;
-}
-
-
 .jp-Tooltip:focus {
   outline: 0;
 }
