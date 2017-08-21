@@ -41,7 +41,7 @@
 }
 
 
-.CodeMirror.cm-s-jupyter pre {
+.CodeMirror.cm-s-jupyter {
   color: var(--jp-mirror-editor-pre-color);
 }
 
