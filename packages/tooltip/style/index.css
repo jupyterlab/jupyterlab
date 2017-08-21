@@ -11,13 +11,12 @@
   max-width: 650px;
   z-index: 10001;
   padding: 4px;
-  overflow: auto;
+  display: flex;
 }
 
 
-.jp-Tooltip > .jp-RenderedText,
-.jp-Tooltip > .jp-RenderedText > pre {
-  overflow: visible;
+.jp-Tooltip-content {
+  overflow: auto;
 }
 
 

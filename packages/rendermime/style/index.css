@@ -23,9 +23,8 @@
   border: none;
   margin: 0px;
   padding: 0px;
-  overflow-x: auto;
-  overflow-y: auto;
 }
+
 
 /* ansi_up creates classed spans for console foregrounds and backgrounds. */
 .jp-RenderedText pre .ansi-black-fg { color: #3E424D; }

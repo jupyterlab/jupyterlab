@@ -36,6 +36,11 @@ import {
 const TOOLTIP_CLASS = 'jp-Tooltip';
 
 /**
+ * The class name added to the tooltip content.
+ */
+const CONTENT_CLASS = 'jp-Tooltip-content';
+
+/**
  * The class added to the body when a tooltip exists on the page.
  */
 const BODY_CLASS = 'jp-mod-tooltip';
@@ -82,6 +87,7 @@ class Tooltip extends Widget {
 
     this._content = this._rendermime.createRenderer(mimeType);
     this._content.renderModel(model);
+    this._content.addClass(CONTENT_CLASS);
     layout.addWidget(this._content);
   }
 
