@@ -97,7 +97,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-code-line-height: 1.307;
   --jp-code-padding: 5px;
   --jp-code-font-family: monospace;
-
+  --jp-code-font-color: black;
 
   /* Layout
 
@@ -169,7 +169,6 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   /* Notebook specific styles */
 
-  --jp-code-cursor-color: var(--jp-ui-font-color0);
   --jp-notebook-padding: 10px;
   --jp-notebook-scroll-padding: 100px;
   --jp-notebook-multiselected-color: var(--md-blue-50);
@@ -206,13 +205,14 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-input-border-color: var(--jp-border-color1);
   --jp-input-border-color-active: var(--jp-brand-color1);
 
-   /* Code mirror specific styles */
+  /* General editor styles */
 
-  --jp-mirror-editor-selected-state: #d9d9d9;
-  --jp-mirror-editor-selected-focus-state: #d7d4f0;
-  --jp-mirror-editor-pre-color: black;
-  --jp-mirror-editor-gutter-border: 1px solid #ddd;
-  --jp-mirror-editor-gutter-background-color: #f7f7f7;
+  --jp-editor-selected-background: #d9d9d9
+  --jp-editor-selected-focused-background: #d7d4f0;
+  --jp-editor-cursor-color: var(--jp-ui-font-color0);
+
+  /* Code mirror specific styles */
+
   --jp-mirror-editor-keyword-color: #008000;
   --jp-mirror-editor-atom-color: #88F;
   --jp-mirror-editor-number-color: #080;

@@ -42,12 +42,7 @@
 
 
 .CodeMirror.cm-s-jupyter pre {
-  color: var(--jp-mirror-editor-pre-color);
-}
-
-
-.jp-OutputArea-output pre {
-  color: var(--jp-mirror-editor-pre-color);
+  color: var(--jp-code-font-color);
 }
 
 
@@ -74,12 +69,12 @@
 
 
 .CodeMirror-cursor {
-  border-left: 1px solid var(--jp-code-cursor-color);
+  border-left: 1px solid var(--jp-editor-cursor-color);
 }
 
 
 .CodeMirror.jp-mod-readOnly .CodeMirror-cursor {
-  border-left: 1px solid var(--jp-code-cursor-color);
+  border-left: 1px solid var(--jp-editor-cursor-color);
   display: none;
 }
 
@@ -106,12 +101,12 @@
 
 
 .CodeMirror-focused .CodeMirror-selected {
-  background-color: var(--jp-mirror-editor-selected-focus-state);
+  background-color: var(--jp-editor-selected-focused-background);
 }
 
 
 .CodeMirror-selected {
-  background-color: var(--jp-mirror-editor-selected-state)
+  background-color: var(--jp-editor-selected-background)
 }
 
 
