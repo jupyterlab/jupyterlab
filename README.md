@@ -1,8 +1,9 @@
-**[Prerequisites](#prerequisites)** |
 **[Installation](#installation)** |
+**[Documentation](#documentation)** |
 **[Contributing](#contributing)** |
 **[License](#license)** |
-**[Getting help](#getting-help)**
+**[Team](#team)** |
+**[Getting help](#getting-help)** |
 
 
 # [JupyterLab](http://jupyterlab.github.io/jupyterlab/)
@@ -13,22 +14,59 @@
 [![Documentation Status](https://readthedocs.org/projects/jupyterlab-tutorial/badge/?version=latest)](https://jupyterlab-tutorial.readthedocs.io/en/latest/?badge=latest)
 [![Google Group](https://img.shields.io/badge/-Google%20Group-lightgrey.svg)](https://groups.google.com/forum/#!forum/jupyter)
 
-An extensible computational environment for Jupyter.
+An extensible environment for interactive and reproducible computing, based on the 
+Jupyter Notebook and Architecture.
 
-**JupyterLab is a very early developer preview, and is not suitable for
-general usage yet. Features and implementation are subject to change.**
+JupyterLab is the next generation user interface for Project Jupyter. It offers all the
+familiar building blocks of the classic Jupyter Notebook (notebook, terminal, text editor,
+file browser, rich outputs, etc.) in a flexible and powerful user inteface that can be
+extended through third party extensions that access our public APIs. Eventually, JupyterLab
+will replace the classic Jupyter Notebook.
 
-With JupyterLab, you can create a computational environment for Jupyter that
-meets your workflow needs. Here's a quick preview of JupyterLab (link to 
-YouTube):
+**JupyterLab is approaching its beta release in mid 2017. During our pre-beta series of releases, we encourage users and developers to try out JupyterLab and give us feedback.
+For users, the upcoming beta will be suitable for general usage.  For developers, our
+APIs will continue to change significantly up until the 1.0 release.**
 
-[![JupyterLab Demo](https://img.youtube.com/vi/sf8PuLcijuA/0.jpg)](https://www.youtube.com/watch?v=sf8PuLcijuA)
-
-We have a [roadmap](https://github.com/jupyter/roadmap/blob/master/jupyterlab.md) of planned development.
+For a good overview of JupyterLab, please see [this link](https://channel9.msdn.com/Events/PyData/Seattle2017/BRK11) to a recent talk we gave about JupyterLab at PyData Seattle (2017).
 
 ----
 
-## Prerequisites
+## Getting started
+
+### Installation
+
+If you use ``conda``, you can install as:
+
+```bash
+conda install -c conda-forge jupyterlab
+```
+
+If you use ``pip``, you can install it as:
+
+```bash
+pip install jupyterlab
+jupyter serverextension enable --py jupyterlab --sys-prefix
+```
+
+Instructions on how to install the project from the git sources are available in our [contributor documentation](CONTRIBUTING.md).
+
+Note: If installing using `pip install --user`, you must add the user-level
+ `bin` directory to your `PATH` environment variable in order to launch
+ `jupyter lab`.
+
+### Running
+
+Start up JupyterLab using:
+
+```bash
+jupyter lab
+```
+
+JupyterLab will open automatically in your browser. You may also access
+JupyterLab by entering the notebook server's URL (`http://localhost:8888`) in
+the browser.
+
+### Prerequisites
 
 Jupyter notebook version 4.3 or later. To check the notebook version:
 
@@ -36,7 +74,7 @@ Jupyter notebook version 4.3 or later. To check the notebook version:
 jupyter notebook --version
 ```
 
-### Supported Runtimes
+### Supported runtimes
 
 The runtime versions which are currently *known to work*:
 
@@ -54,60 +92,56 @@ A tool like [postcss](http://postcss.org/) can be used to convert the CSS files 
 
 ----
 
-## Installation
+## Documentation
 
-If you use ``conda``, you can install as:
-
-```bash
-conda install -c conda-forge jupyterlab
-```
-
-If you use ``pip``, you can install it as:
-
-```bash
-pip install jupyterlab
-jupyter serverextension enable --py jupyterlab --sys-prefix
-```
-
-Start up JupyterLab:
-
-```bash
-jupyter lab
-```
-
-JupyterLab will open automatically in your browser. You may also access
-JupyterLab by entering the notebook server's URL (`http://localhost:8888`) in
-the browser.
-
-Instructions on how to install the project from the git sources are available in our [contributor documentation](CONTRIBUTING.md).
-
-Note: If installing using `pip install --user`, you must add the user-level
- `bin` directory to your `PATH` environment variable in order to launch
- `jupyter lab`.
-
-
-## Extensions
-
-The JupyterLab environment can be extended using extensions.  See documentation
-for [users](https://jupyterlab-tutorial.readthedocs.io/en/latest/extensions_user.html) and [developers](https://jupyterlab-tutorial.readthedocs.io/en/latest/extensions_dev.html).
+Read our documentation on [ReadTheDocs](http://jupyterlab-tutorial.readthedocs.io/en/latest/).
 
 ----
 
-## Contributing
+## Development
+
+### Contributing
 
 If you would like to contribute to the project, please read our [contributor documentation](CONTRIBUTING.md).
 
-----
+JupyterLab follows the official [Jupyter Code of Conduct](https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md).
 
-## License
+### Extensions
+
+JupyterLab can be extended using extensions that are [npm](https://www.npmjs.com/) packages
+and use our public APIs. See our documentation
+for [users](https://jupyterlab-tutorial.readthedocs.io/en/latest/extensions_user.html) and [developers](https://jupyterlab-tutorial.readthedocs.io/en/latest/extensions_dev.html).
+
+### License
+
 We use a shared copyright model that enables all contributors to maintain the
-copyright on their contributions.
+copyright on their contributions. All code is licensed under the terms of the revised BSD license.
 
-All code is licensed under the terms of the revised BSD license.
+### Team
+
+JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by an open community of contributors. The following individuals have made significant contributions to JupyterLab (listed in alphabetical order, with affiliation, and main areas of contribution):
+
+* Chris Colbert, Continuum Analytics (co-creator, application/low-level architecture,
+  technical leadership, vision, phosphor.js)
+* Afshin Darian, Continuum Analytics (co-creator, settings, inspector, completer,
+  prolific contributions throughout the code base).
+* Brian Granger, Cal Poly (co-creator, strategy, vision, management, UI/UX design,
+  architecture).
+* Jason Grout, Bloomberg (co-creator, vision, general development).
+* Cameron Oelsen, Cal Poly (UI/UX design).
+* Fernando Perez, UC Berkeley (co-creator, vision).
+* Ian Rose, UC Berkeley (Real-time collaboration, document architecture).
+* Steven Silvester, Continuum Analytics (co-creator, release management, packaging,
+  prolific contributions throughout the code base).
+
+This list is provided to help provide context about who we are and how our team functions.
+This team is accompanied by a much larger group of contributors to JupyterLab and Project Jupyter as a whole. If you would like to be listed here, please submit a pull request with
+your information.
 
 ----
 
 ## Getting help
+
 We encourage you to ask questions on the [mailing list](https://groups.google.com/forum/#!forum/jupyter),
 and you may participate in development discussions or get live help on [Gitter](https://gitter.im/jupyterlab/jupyterlab).
 
