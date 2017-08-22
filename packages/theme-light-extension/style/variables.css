@@ -152,17 +152,17 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   /* Cell specific styles */
 
-  --jp-cell-editor-background: var(--md-grey-50);		
-  --jp-cell-editor-border-color: var(--md-grey-400);		
-  --jp-cell-editor-box-shadow: inset 0 0 2px var(--md-blue-300);		
+  --jp-cell-editor-background: var(--md-grey-100);	
+  --jp-cell-editor-border-color: var(--md-grey-300);
+  --jp-cell-editor-box-shadow: inset 0 0 2px var(--md-blue-300);
   --jp-cell-editor-background-active: var(--jp-layout-color0);
   --jp-cell-editor-border-color-active: var(--jp-brand-color1);
   --jp-cell-padding: 5px;
   --jp-cell-prompt-width: 100px;
-  --jp-cell-prompt-font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --jp-cell-prompt-letter-spacing: 2.4px;
+  --jp-cell-prompt-font-family: 'Roboto Mono', monospace;
+  --jp-cell-prompt-letter-spacing: 0px;
   --jp-cell-prompt-opacity: 1.0;
-  --jp-cell-prompt-opacity-not-active: 0.56;
+  --jp-cell-prompt-opacity-not-active: 0.5;
   --jp-cell-prompt-font-color-not-active: var(--md-grey-700);
   /* A custom blend of MD grey and blue 600
    * See https://meyerweb.com/eric/tools/color-blend/#546E7A:1E88E5:5:hex */
@@ -211,7 +211,7 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   /* General editor styles */
 
-  --jp-editor-selected-background: #d9d9d9
+  --jp-editor-selected-background: #d9d9d9;
   --jp-editor-selected-focused-background: #d7d4f0;
   --jp-editor-cursor-color: var(--jp-ui-font-color0);
 
