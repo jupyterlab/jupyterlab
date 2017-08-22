@@ -134,7 +134,7 @@
 }
 
 /* In the notebook, we want this styling to be handled by its container */
-.jp-Notebook .CodeMirror.cm-s-jupyter {
+.jp-CodeConsole .CodeMirror.cm-s-jupyter, .jp-Notebook .CodeMirror.cm-s-jupyter {
   background: transparent;
 }
 

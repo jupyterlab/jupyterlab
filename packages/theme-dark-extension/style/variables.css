@@ -179,7 +179,7 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   /* Console specific styles */
 
-  --jp-console-background: var(--jp-layout-color0);
+  --jp-console-background: var(--jp-layout-color1);
 
   /* Toolbar specific styles */
 
