@@ -242,4 +242,8 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-mirror-editor-error-color: #f00;
   --jp-mirror-editor-hr-color: #999;
 
+  /* Vega extension styles */
+
+  --jp-vega-background: white;
+
 }

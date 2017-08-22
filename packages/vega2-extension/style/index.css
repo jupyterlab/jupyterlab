@@ -17,6 +17,12 @@
   margin-top: 8px;
 }
 
+
 .jp-MimeDocument.jp-Document .jp-RenderedVegaCommon {
   padding: 16px;
+}
+
+
+.vega canvas {
+  background: var(--jp-vega-background);
 }
