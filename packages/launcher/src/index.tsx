@@ -326,7 +326,10 @@ class Launcher extends VDomRenderer<LauncherModel> {
     return (
       <div className='jp-Launcher-body'>
         <div className='jp-Launcher-content'>
-        {sections}
+          <div className='jp-Launcher-cwd'>
+            <h3>{this.cwd}</h3>
+          </div>
+          {sections}
         </div>
       </div>
     );

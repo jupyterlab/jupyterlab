@@ -51,6 +51,14 @@
 }
 
 
+.jp-Launcher-cwd h3 {
+  font-size: var(--jp-ui-font-size2);
+  font-weight: normal;
+  color: var(--jp-ui-font-color1);
+  margin: 1em 0px;
+}
+
+
 .jp-Launcher-content {
   width: 85%;
   height: 100%;
