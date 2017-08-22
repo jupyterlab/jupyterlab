@@ -69,30 +69,32 @@ const mainPlugin: JupyterLabPlugin<void> = {
       });
     };
 
-    builder.getStatus().then(response => {
-      if (response.status === 'building') {
-        return doBuild();
-      }
-      if (response.status !== 'needed') {
-        return;
-      }
-      let body = h.div(
-        h.p(
-          'JupyterLab build is suggested:',
-          h.br(),
-          h.pre(response.message)
-        )
-      );
-      showDialog({
-        title: 'Build Recommended',
-        body,
-        buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'BUILD' })]
-      }).then(result => {
-        if (result.button.accept) {
+    if (builder.isAvailable) {
+      builder.getStatus().then(response => {
+        if (response.status === 'building') {
           return doBuild();
         }
+        if (response.status !== 'needed') {
+          return;
+        }
+        let body = h.div(
+          h.p(
+            'JupyterLab build is suggested:',
+            h.br(),
+            h.pre(response.message)
+          )
+        );
+        showDialog({
+          title: 'Build Recommended',
+          body,
+          buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'BUILD' })]
+        }).then(result => {
+          if (result.button.accept) {
+            return doBuild();
+          }
+        });
       });
-    });
+    }
 
     const message = 'Are you sure you want to exit JupyterLab?\n' +
                     'Any unsaved changes will be lost.';

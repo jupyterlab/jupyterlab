@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  URLExt
+  PageConfig, URLExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -33,6 +33,13 @@ class BuildManager {
    * The server settings used to make API requests.
    */
   readonly serverSettings: ServerConnection.ISettings;
+
+  /**
+   * Test whether the build service is available.
+   */
+  get isAvailable(): boolean {
+    return PageConfig.getOption('buildAvailable').toLowerCase() === 'true';
+  }
 
   /**
    * Get whether the application should be built.
