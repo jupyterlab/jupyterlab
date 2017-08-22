@@ -54,7 +54,7 @@
 
 
 .jp-Notebook .jp-Cell {
-  overflow: visible
+  overflow: visible;
 }
 
 
@@ -105,13 +105,15 @@
   color: var(--jp-cell-prompt-font-color-not-active);
 }
 
-.jp-Notebook .jp-Cell.jp-mod-active .jp-Cell-inputCollapser,
-.jp-Notebook .jp-Cell.jp-mod-active .jp-Cell-outputCollapser {
-  border-left: 2px solid var(--jp-brand-color1);
-  border-top: 2px solid var(--jp-brand-color1);
-  border-bottom: 2px solid var(--jp-brand-color1);
+.jp-Notebook .jp-Cell.jp-mod-active .jp-Cell-inputCollapser .jp-Collapser-child,
+.jp-Notebook .jp-Cell.jp-mod-active .jp-Cell-outputCollapser .jp-Collapser-child {
+  border-left: 4px solid var(--jp-brand-color1);
 }
 
+.jp-Notebook .jp-Cell .jp-Cell-inputCollapser:hover .jp-Collapser-child,
+.jp-Notebook .jp-Cell .jp-Cell-outputCollapser:hover .jp-Collapser-child {
+  border-left: 20px solid var(--jp-brand-color1);
+}
 
 /* Command mode */
 
