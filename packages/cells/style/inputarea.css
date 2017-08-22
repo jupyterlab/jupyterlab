@@ -22,9 +22,10 @@
 
 
 .jp-InputArea-editor {
-  border: var(--jp-border-width) solid var(--jp-input-border-color);
+  /* This is the non-active, default styling */
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
   border-radius: 0px;
-  background: var(--jp-input-background-color);
+  background: var(--jp-cell-editor-background);
 }
 
 

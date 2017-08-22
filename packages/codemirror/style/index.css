@@ -36,21 +36,6 @@
 }
 
 
-.CodeMirror.cm-s-jupyter {
-  background: var(--jp-layout-color0);
-}
-
-
-.CodeMirror.cm-s-jupyter pre {
-  color: var(--jp-mirror-editor-pre-color);
-}
-
-
-.jp-OutputArea-output pre {
-  color: var(--jp-mirror-editor-pre-color);
-}
-
-
 /* This causes https://github.com/jupyter/jupyterlab/issues/522 */
 /* May not cause it not because we changed it! */
 .CodeMirror-lines {
@@ -74,12 +59,11 @@
 
 
 .CodeMirror-cursor {
-  border-left: 1px solid var(--jp-code-cursor-color);
+  border-left: 1px solid var(--jp-editor-cursor-color);
 }
 
 
 .CodeMirror.jp-mod-readOnly .CodeMirror-cursor {
-  border-left: 1px solid var(--jp-code-cursor-color);
   display: none;
 }
 
@@ -106,12 +90,12 @@
 
 
 .CodeMirror-focused .CodeMirror-selected {
-  background-color: var(--jp-mirror-editor-selected-focus-state);
+  background-color: var(--jp-editor-selected-focused-background);
 }
 
 
 .CodeMirror-selected {
-  background-color: var(--jp-mirror-editor-selected-state)
+  background-color: var(--jp-editor-selected-background)
 }
 
 
@@ -131,13 +115,28 @@
 }
 
 
-/*
-  Here is our jupyter theme for CodeMirror syntax highlighting
-  This is used in our marked.js syntax highlighting and CodeMirror itself
-  The string "jupyter" is set in ../codemirror/widget.DEFAULT_CODEMIRROR_THEME
-  This came from the classic notebook, which came form highlight.js/GitHub
-*/
+/**
+ * Here is our jupyter theme for CodeMirror syntax highlighting
+ * This is used in our marked.js syntax highlighting and CodeMirror itself
+ * The string "jupyter" is set in ../codemirror/widget.DEFAULT_CODEMIRROR_THEME
+ * This came from the classic notebook, which came form highlight.js/GitHub
+ */
 
+
+/**
+ * CodeMirror themes are handling the background/color in this way. This works
+ * fine for CodeMirror editors outside the notebook, but the notebook styles
+ * these things differently.
+ */
+.CodeMirror.cm-s-jupyter {
+  background: var(--jp-layout-color0);
+  color: var(--jp-content-font-color1);
+}
+
+/* In the notebook, we want this styling to be handled by its container */
+.jp-CodeConsole .CodeMirror.cm-s-jupyter, .jp-Notebook .CodeMirror.cm-s-jupyter {
+  background: transparent;
+}
 
 .cm-s-jupyter span.cm-keyword      { color: var(--jp-mirror-editor-keyword-color); font-weight: bold; }
 .cm-s-jupyter span.cm-atom         { color: var(--jp-mirror-editor-atom-color); }

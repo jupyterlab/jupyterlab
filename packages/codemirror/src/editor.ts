@@ -89,6 +89,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   constructor(options: CodeMirrorEditor.IOptions) {
     let host = this.host = options.host;
     host.classList.add(EDITOR_CLASS);
+    host.classList.add('jp-Editor');
     host.addEventListener('focus', this, true);
     host.addEventListener('scroll', this, true);
 

@@ -98,7 +98,6 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-code-padding: 5px;
   --jp-code-font-family: monospace;
 
-
   /* Layout
 
   The following are the main layout colors use in JupyterLab. In a light
@@ -145,27 +144,25 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-info-color2: var(--md-cyan-300);
   --jp-info-color3: var(--md-cyan-100);
 
-
   /* Cell specific styles */
 
-  --jp-cell-padding: 5px;
   --jp-cell-editor-background: var(--jp-layout-color1);
+  --jp-cell-editor-border-color: var(--md-grey-700);
   --jp-cell-editor-box-shadow: inset 0 0 2px var(--md-blue-300);
-  --jp-cell-editor-border-color: var(--md-grey-600);
-  --jp-cell-editor-background-edit: var(--jp-layout-color0);
-  --jp-cell-editor-border-color-edit: var(--jp-brand-color1);
-  --jp-cell-prompt-width: 68px;
+  --jp-cell-editor-background-active: var(--jp-layout-color0);
+  --jp-cell-editor-border-color-active: var(--jp-brand-color1);
+  --jp-cell-padding: 5px;
+  --jp-cell-prompt-width: 100px;
   --jp-cell-prompt-font-family: 'Roboto Mono', monospace;
   --jp-cell-prompt-letter-spacing: 0px;
   --jp-cell-prompt-opacity: 1.0;
-  --jp-cell-prompt-opacity-not-active: 0.4;
-  --jp-cell-prompt-font-color-not-active: var(--md-grey-50);
+  --jp-cell-prompt-opacity-not-active: 0.5;
+  --jp-cell-prompt-font-color-not-active: var(--md-grey-300);
   --jp-cell-inprompt-font-color: var(--md-grey-50);
-  --jp-cell-outprompt-font-color: var(--md-grey-700);
+  --jp-cell-outprompt-font-color: var(--md-grey-50);
 
   /* Notebook specific styles */
 
-  --jp-code-cursor-color: var(--jp-ui-font-color0);
   --jp-notebook-padding: 10px;
   --jp-notebook-scroll-padding: 100px;
   --jp-notebook-select-background-color: var(--jp-layout-color1);
@@ -182,7 +179,7 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   /* Console specific styles */
 
-  --jp-console-background: var(--jp-layout-color0);
+  --jp-console-background: var(--jp-layout-color1);
 
   /* Toolbar specific styles */
 
@@ -202,18 +199,19 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-input-border-color: var(--jp-border-color1);
   --jp-input-border-color-active: var(--jp-brand-color1);
 
-  /* Code mirror specific styles */
+  /* General editor styles */
 
-  --jp-mirror-editor-selected-state: var(--jp-layout-color2);
-  --jp-mirror-editor-selected-focus-state: rgba(33,150,243,.24);
-  --jp-mirror-editor-pre-color: var(--md-grey-400);
-  --jp-mirror-editor-gutter-border: none;
-  --jp-mirror-editor-gutter-background-color: var(--jp-layout-color2);
+  --jp-editor-selected-background: var(--jp-layout-color2);
+  --jp-editor-selected-focused-background: rgba(33,150,243,.24);
+  --jp-editor-cursor-color: var(--jp-ui-font-color0);
+
+  /* Code mirror specific styles */
+ 
   --jp-mirror-editor-keyword-color: var(--md-green-500);
   --jp-mirror-editor-atom-color: var(--md-blue-300);
   --jp-mirror-editor-number-color: var(--md-green-400);
   --jp-mirror-editor-def-color: var(--md-blue-600);
-  --jp-mirror-span-variable-color: var(--md-grey-300);
+  --jp-mirror-editor-variable-color: var(--md-grey-300);
   --jp-mirror-editor-variable-2-color: var(--md-grey-500);
   --jp-mirror-editor-variable-3-color: var(--md-grey-600);
   --jp-mirror-editor-punctuation-color: var(--md-blue-400);

@@ -19,7 +19,7 @@
 
 .jp-RenderedText pre,
 .jp-RenderedHTMLCommon pre {
-  color: var(--jp-ui-font-color0);
+  color: var(--jp-content-font-color1);
   border: none;
   margin: 0px;
   padding: 0px;

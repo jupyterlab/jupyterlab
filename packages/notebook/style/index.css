@@ -127,9 +127,9 @@
 /* Edit mode */
 
 .jp-Notebook.jp-mod-editMode .jp-Cell.jp-mod-active .jp-InputArea-editor {
-  border: var(--jp-border-width) solid var(--jp-input-border-color-active);
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color-active);
   box-shadow: var(--jp-input-box-shadow);
-  background-color: var(--jp-layout-color0);
+  background-color: var(--jp-cell-editor-background-active);
 }
 
 
@@ -156,8 +156,8 @@
   flex-direction: row;
   width: var(--jp-private-notebook-dragImage-width);
   height: var(--jp-private-notebook-dragImage-height);
-  border: var(--jp-border-width) solid var(--jp-input-border-color);
-  background: var(--jp-layout-color1);
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
+  background: var(--jp-cell-editor-background);
   overflow: visible;
 }
 
@@ -174,8 +174,8 @@
     font-family: var(--jp-code-font-family);
     line-height: var(--jp-code-line-height);
     padding: var(--jp-code-padding);
-    border: var(--jp-border-width) solid var(--jp-input-border-color);
-    background: var(--jp-input-background-color);
+    border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
+    background: var(--jp-cell-editor-background-color);
     color: var(--jp-content-font-color3);
     text-align: left;
     margin: 4px 4px 4px 0px;
@@ -238,9 +238,9 @@
 
 .jp-ActiveCellTool .jp-InputArea-editor {
   flex: 1 1 auto;
-  background-color: var(--jp-layout-color0);
-  border-color: var(--jp-input-border-color-active);
-  box-shadow: var(--jp-input-box-shadow);
+  background-color: var(--jp-cell-editor-background-active);
+  border-color: var(--jp-cell-editor-border-color-active);
+  box-shadow: var(--jp-cell-editor-box-shadow);
 }
 
 
