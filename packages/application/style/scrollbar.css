@@ -4,38 +4,6 @@
 |----------------------------------------------------------------------------*/
 
 
-::-webkit-scrollbar {
-  background: transparent;
-}
-
-
-.p-DockPanel ::-webkit-scrollbar {
-  background: var(--jp-layout-color0);
-}
-
-
-::-webkit-scrollbar-track:vertical {
-  border-left: 1px solid var(--jp-border-color2);
-}
-
-
-::-webkit-scrollbar-thumb:vertical {
-  border-left: 1px solid var(--jp-border-color2);
-  background-color: var(--jp-layout-color2);
-}
-
-
-::-webkit-scrollbar-track:horizontal {
-  border-top: 1px solid var(--jp-border-color2);
-}
-
-
-::-webkit-scrollbar-thumb:horizontal {
-  border-top: 1px solid var(--jp-border-color2);
-  background-color: var(--jp-layout-color2);
-}
-
-
 .p-ScrollBar[data-orientation='horizontal'] {
   min-height: 16px;
   max-height: 16px;
