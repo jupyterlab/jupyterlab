@@ -119,7 +119,9 @@ copyright on their contributions. All code is licensed under the terms of the re
 
 ### Team
 
-JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by an open community of contributors. The following individuals have made significant contributions to JupyterLab (listed in alphabetical order, with affiliation, and main areas of contribution):
+JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by an open community of contributors. JupyterLab's current maintainers are as follows:
+
+(listed in alphabetical order, with affiliation, and main areas of contribution)
 
 * Chris Colbert, Continuum Analytics (co-creator, application/low-level architecture,
   technical leadership, vision, phosphor.js)
