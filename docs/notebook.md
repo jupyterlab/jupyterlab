@@ -206,6 +206,7 @@ export default plugin;
 Run the following commands:
 
 ```
+npm install
 npm run build
 jupyter labextension link .
 jupyter lab
