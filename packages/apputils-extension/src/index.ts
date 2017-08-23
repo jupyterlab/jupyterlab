@@ -161,7 +161,9 @@ const themePlugin: JupyterLabPlugin<IThemeManager> = {
     let manager = new ThemeManager({ baseUrl,  settingRegistry, host, when });
     let disposable = splash.show();
     manager.ready.then(() => {
-      disposable.dispose();
+      setTimeout(() => {
+        disposable.dispose();
+      }, 2500);
     }, () => {
       disposable.dispose();
     });

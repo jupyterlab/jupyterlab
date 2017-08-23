@@ -14,6 +14,7 @@
   background-repeat: no-repeat;
   background-size: cover;
   background-color: white;
+  animation: .5s fade-out 2s forwards;
 }
 
 #galaxy {
@@ -23,7 +24,7 @@
 }
 
 #main-logo {
-  background-image: var(--jp-image-jupyter-favicon);
+  background-image: url('./images/jupyter-favicon.svg');
   background-repeat: no-repeat;
   background-size: 100px;
   position: absolute;
@@ -31,6 +32,7 @@
   width: 100%;
   height: 100%;
   z-index: 1;
+  animation: 1.5s fade-in linear forwards;
 }
 
 .planet {
@@ -149,5 +151,23 @@ bottom: 0;
   }
   100% {
       transform: rotateZ(720deg);
+  }
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
   }
 }
