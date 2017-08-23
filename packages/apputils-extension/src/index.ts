@@ -297,12 +297,16 @@ namespace Private {
       galaxy.appendChild(moon2);
       galaxy.appendChild(moon3);
     }
+    splash.classList.remove('splash-fade');
     document.body.appendChild(splash);
     splashCount++;
     return new DisposableDelegate(() => {
       splashCount = Math.max(splashCount - 1, 0);
       if (splashCount === 0 && splash) {
-        document.body.removeChild(splash);
+        splash.classList.add('splash-fade');
+        setTimeout(() => {
+          document.body.removeChild(splash);
+        }, 500);
       }
     });
   }

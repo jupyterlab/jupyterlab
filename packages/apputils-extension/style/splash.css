@@ -14,8 +14,13 @@
   background-repeat: no-repeat;
   background-size: cover;
   background-color: white;
-  animation: .5s fade-out 2s forwards;
 }
+
+
+.splash-fade {
+  animation: .5s fade-out forwards;
+}
+
 
 #galaxy {
   position: relative;
