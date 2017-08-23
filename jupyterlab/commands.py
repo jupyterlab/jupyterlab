@@ -168,14 +168,14 @@ def install_extension_async(extension, app_dir=None, logger=None, abort_callback
     # Handle any schemas.
     schemaDir = data['jupyterlab'].get('schemaDir', None)
     if schemaDir:
-        dest = pjoin(app_dir, 'schemas')
+        dest = pjoin(app_dir, 'staging', 'schemas')
         _copy_tar_files(fname, schemaDir, dest)
 
     # Handle a theme.
     themeDir = data['jupyterlab'].get('themeDir', None)
     if themeDir:
         normedName = data['name'].replace('@', '').replace('/', '')
-        dest = pjoin(app_dir, 'themes', normedName)
+        dest = pjoin(app_dir, 'staging', 'themes', normedName)
         _copy_tar_files(fname, themeDir, dest)
 
     # Remove an existing extension tarball.
