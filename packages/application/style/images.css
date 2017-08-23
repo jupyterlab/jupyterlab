@@ -14,6 +14,11 @@
 }
 
 
+.jp-ImageJupyter-favicon {
+  background-image: var(--jp-image-jupyter-favicon);
+}
+
+
 .jp-JupyterIcon {
   background-image: var(--jp-image-jupyter);
   background-size: 16px;
