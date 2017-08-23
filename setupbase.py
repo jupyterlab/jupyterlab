@@ -77,10 +77,15 @@ def find_package_data():
     """
     Find package_data.
     """
+    theme_dirs = []
+    for dir, subdirs, files in os.walk(pjoin('jupyterlab', 'themes')):
+        slice_len = len('jupyterlab' + os.sep)
+        theme_dirs.append(pjoin(dir[slice_len:], '*'))
+
     return {
-        'jupyterlab': ['build/*', 'schemas/*', 'themes/**/*', 'index.app.js',
+        'jupyterlab': ['build/*', 'schemas/*', 'index.app.js',
                        'webpack.config.js', 'package.app.json',
-                       'released_packages.txt', 'node-version-check.js']
+                       'released_packages.txt', 'node-version-check.js'] + theme_dirs
     }
 
 
