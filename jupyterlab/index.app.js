@@ -5,10 +5,8 @@ __webpack_public_path__ = PageConfig.getOption('publicUrl');
 
 // This needs to come after __webpack_public_path__ is set.
 require('font-awesome/css/font-awesome.min.css');
-// Load the core theming before any other package.
-require('@jupyterlab/theming/style/index.css');
-
 var app = require('@jupyterlab/application').JupyterLab;
+
 
 function main() {
     var version = PageConfig.getOption('appVersion') || 'unknown';
@@ -81,13 +79,14 @@ function main() {
         window.onerror = function(msg, url, line, col, error) {
            caught_errors.push(String(error));
         };
-        lab.restored.then(() => {
+        lab.restored.then(function() {
             var el = document.createElement('div');
             el.id = 'seleniumResult';
             el.textContent = JSON.stringify(caught_errors);
             document.body.appendChild(el);
         });
     }
+
 }
 
 window.onload = main;
