@@ -8,7 +8,7 @@
   "dependencies": {
     "@jupyterlab/application": "^0.10.0",
     "@jupyterlab/application-extension": "^0.10.0",
-    "@jupyterlab/apputils-extension": "^0.10.1",
+    "@jupyterlab/apputils-extension": "^0.10.2",
     "@jupyterlab/codemirror-extension": "^0.10.0",
     "@jupyterlab/completer-extension": "^0.10.0",
     "@jupyterlab/console-extension": "^0.10.0",
@@ -44,5 +44,5 @@
     "watch": "^1.0.2",
     "webpack": "^2.2.1"
   },
-  "version": "0.11.1"
+  "version": "0.11.2"
 }
