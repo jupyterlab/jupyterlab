@@ -1,11 +1,11 @@
 {
   "name": "@jupyterlab/services",
-  "version": "0.48.0",
+  "version": "0.49.0",
   "description": "Client APIs for the Jupyter services REST APIs",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "dependencies": {
-    "@jupyterlab/coreutils": "^0.9.0",
+    "@jupyterlab/coreutils": "^0.10.0",
     "@phosphor/algorithm": "^1.1.1",
     "@phosphor/coreutils": "^1.2.0",
     "@phosphor/disposable": "^1.1.1",

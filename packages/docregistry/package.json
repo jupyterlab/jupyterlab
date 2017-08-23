@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/docregistry",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "JupyterLab - Document Registry",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -13,12 +13,12 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^0.9.0",
-    "@jupyterlab/codeeditor": "^0.9.0",
-    "@jupyterlab/codemirror": "^0.9.0",
-    "@jupyterlab/coreutils": "^0.9.0",
-    "@jupyterlab/rendermime": "^0.9.0",
-    "@jupyterlab/services": "^0.48.0",
+    "@jupyterlab/apputils": "^0.10.0",
+    "@jupyterlab/codeeditor": "^0.10.0",
+    "@jupyterlab/codemirror": "^0.10.0",
+    "@jupyterlab/coreutils": "^0.10.0",
+    "@jupyterlab/rendermime": "^0.10.0",
+    "@jupyterlab/services": "^0.49.0",
     "@phosphor/algorithm": "^1.1.1",
     "@phosphor/coreutils": "^1.2.0",
     "@phosphor/disposable": "^1.1.1",

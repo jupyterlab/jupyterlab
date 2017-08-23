@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/fileeditor-extension",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "JupyterLab - Editor Widget Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -13,12 +13,12 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.9.0",
-    "@jupyterlab/apputils": "^0.9.0",
-    "@jupyterlab/codeeditor": "^0.9.0",
-    "@jupyterlab/coreutils": "^0.9.0",
-    "@jupyterlab/fileeditor": "^0.9.0",
-    "@jupyterlab/launcher": "^0.9.0"
+    "@jupyterlab/application": "^0.10.0",
+    "@jupyterlab/apputils": "^0.10.0",
+    "@jupyterlab/codeeditor": "^0.10.0",
+    "@jupyterlab/coreutils": "^0.10.0",
+    "@jupyterlab/fileeditor": "^0.10.0",
+    "@jupyterlab/launcher": "^0.10.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
