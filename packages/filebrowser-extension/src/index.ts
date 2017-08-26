@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, IMainMenu, InstanceTracker, ToolbarButton
+  ICommandPalette, InstanceTracker, ToolbarButton
 } from '@jupyterlab/apputils';
 
 import {
@@ -92,7 +92,6 @@ const fileBrowserPlugin: JupyterLabPlugin<void> = {
   requires: [
     IFileBrowserFactory,
     IDocumentManager,
-    IMainMenu,
     ICommandPalette,
     ILayoutRestorer
   ],
@@ -174,7 +173,7 @@ function activateFactory(app: JupyterLab, docManager: IDocumentManager, state: I
 /**
  * Activate the default file browser in the sidebar.
  */
-function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, docManager: IDocumentManager, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer): void {
+function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, docManager: IDocumentManager, palette: ICommandPalette, restorer: ILayoutRestorer): void {
   const fbWidget = factory.defaultBrowser;
 
   // Let the application restorer track the primary file browser (that is
@@ -209,9 +208,6 @@ function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, docM
     }
   });
 
-  let menu = createMenu(app);
-
-  mainMenu.addMenu(menu, { rank: 1 });
 }
 
 
