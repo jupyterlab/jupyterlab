@@ -130,7 +130,7 @@ const namespace = 'filebrowser';
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [factoryPlugin, fileBrowserPlugin];
+const plugins: JupyterLabPlugin<any>[] = [factoryPlugin, fileBrowserPlugin, fileBrowserMenuPlugin];
 export default plugins;
 
 
