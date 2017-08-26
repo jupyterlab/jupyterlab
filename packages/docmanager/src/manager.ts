@@ -232,7 +232,11 @@ class DocumentManager implements IDisposable {
       return this.services.contents.delete(path);
     })
     .then(() => {
-      return this.closeFile(path);
+      let context = this._contextForPath(path);
+      if (context) {
+        return this._widgetManager.deleteWidgets(context);
+      }
+      return Promise.resolve(void 0);
     });
   }
 
