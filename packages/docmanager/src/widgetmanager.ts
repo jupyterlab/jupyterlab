@@ -209,6 +209,19 @@ class DocumentWidgetManager implements IDisposable {
   }
 
   /**
+   * Dispose of the widgets associated with a given context
+   * regardless of the widget's dirty state.
+   *
+   * @param context - The document context object.
+   */
+  deleteWidgets(context: DocumentRegistry.Context): Promise<void> {
+    let widgets = Private.widgetsProperty.get(context);
+    return Promise.all(
+      toArray(map(widgets, widget => this.onDelete(widget)))
+    ).then(() => undefined);
+  }
+
+  /**
    * Filter a message sent to a message handler.
    *
    * @param handler - The target handler of the message.
@@ -290,6 +303,16 @@ class DocumentWidgetManager implements IDisposable {
       widget.dispose();
       throw error;
     });
+  }
+
+  /**
+   * Dispose of widget regardless of widget's dirty state.
+   *
+   * @param widget - The target widget.
+   */
+  protected onDelete(widget: Widget): Promise<void> {
+    widget.dispose();
+    return Promise.resolve(void 0);
   }
 
   /**
