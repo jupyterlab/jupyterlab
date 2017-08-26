@@ -37,7 +37,7 @@ Note: You'll need to run the second command for each new terminal window you ope
 
 Now use cookiecutter to create a new project for your extension.
 
-```
+```bash
 cookiecutter https://github.com/jupyterlab/extension-cookiecutter-ts
 ```
 
@@ -50,21 +50,35 @@ extension_name [jupyterlab_myextension]: jupyterlab_button
 project_short_description [A JupyterLab extension.]: A button. In JupyterLab.
 ```
 
----
-
-TODO: notes from here down while I doc for myself first
-
 ## Build and link the extension for development
 
-```
+Your new extension project already has enough code in it to see it working in your JupyterLab dev environment. Run the following commands to install its dependencies and link it into the JupyterLab environment.
+
+```bash
 npm install
 jupyter labextension link .
 ```
 
+Now rebuild your JupyterLab frontend with the extension included. Re-run this command any time the source of your extension changes.
+
+```bash
+jupyter lab build
+```
+
+Note: The build steps may show errors around `node-gyp` and `canvas` that look scary but are actually harmless.
+
 ## Try it
 
-Open the browser, open the dev tools,
+In a second terminal, start a JupyterLab instance.
 
+```bash
+source activate jupyterlab-ext
+jupyter lab
+```
+
+Once the JupyterLab interface appears, open the browser developer tools panel and look in the console. You should see a message saying that your extension has been loaded.
+
+Congrats! You're setup to hack on your extension. Now let's make the extension do something a little more interesting.
 
 ## Questions / Thoughts
 
