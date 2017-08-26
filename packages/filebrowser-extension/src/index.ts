@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, InstanceTracker, ToolbarButton
+  ICommandPalette, IMainMenu, InstanceTracker, ToolbarButton
 } from '@jupyterlab/apputils';
 
 import {
@@ -110,6 +110,18 @@ const factoryPlugin: JupyterLabPlugin<IFileBrowserFactory> = {
 };
 
 /**
+ * The default file browser menu extension.
+ */
+const fileBrowserMenuPlugin: JupyterLabPlugin<void> = {
+  activate: activateFileBrowserMenu,
+  id: 'jupyter.extensions.filebrowsermenu',
+  requires: [
+    IMainMenu,
+  ],
+  autoStart: true
+};
+
+/**
  * The file browser namespace token.
  */
 const namespace = 'filebrowser';
@@ -207,7 +219,16 @@ function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, docM
       });
     }
   });
+}
 
+
+/**
+ * Activate the default file browser menu in the main menu.
+ */
+function activateFileBrowserMenu(app: JupyterLab, mainMenu: IMainMenu): void {
+  let menu = createMenu(app);
+
+  mainMenu.addMenu(menu, { rank: 1 });
 }
 
 

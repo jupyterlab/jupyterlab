@@ -27,7 +27,6 @@
     "@jupyterlab/faq-extension": "^0.10.0",
     "@jupyterlab/filebrowser": "^0.10.0",
     "@jupyterlab/filebrowser-extension": "^0.10.0",
-    "@jupyterlab/menu-filebrowser-extension": "^0.10.0",
     "@jupyterlab/fileeditor": "^0.10.0",
     "@jupyterlab/fileeditor-extension": "^0.10.0",
     "@jupyterlab/help-extension": "^0.10.0",
