@@ -230,6 +230,9 @@ class DocumentManager implements IDisposable {
   deleteFile(path: string): Promise<void> {
     return this.services.sessions.stopIfNeeded(path).then(() => {
       return this.services.contents.delete(path);
+    })
+    .then(() => {
+      return this.closeFile(path);
     });
   }
 
