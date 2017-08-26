@@ -1,0 +1,1 @@
+# @jupyterlab/docmanager

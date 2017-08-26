@@ -1,0 +1,1 @@
+# @jupyterlab/settingeditor-extension
