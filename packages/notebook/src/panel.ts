@@ -455,6 +455,6 @@ export namespace NotebookPanel {
    * The notebook renderer token.
    */
   export
-  const IContentFactory = new Token<IContentFactory>('jupyter.services.notebook.content-factory');
+  const IContentFactory = new Token<IContentFactory>('@jupyterlab/notebook:IContentFactory');
   /* tslint:enable */
 }

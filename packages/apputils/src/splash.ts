@@ -15,7 +15,7 @@ import {
  * The main menu token.
  */
 export
-const ISplashScreen = new Token<ISplashScreen>('jupyter.services.splash-screen');
+const ISplashScreen = new Token<ISplashScreen>('@jupyterlab/apputils:ISplashScreen');
 /* tslint:enable */
 
 

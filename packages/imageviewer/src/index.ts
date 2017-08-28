@@ -30,5 +30,5 @@ interface IImageTracker extends IInstanceTracker<ImageViewer> {}
  * The editor tracker token.
  */
 export
-const IImageTracker = new Token<IImageTracker>('jupyter.services.image-tracker');
+const IImageTracker = new Token<IImageTracker>('@jupyterlab/imageviewer:IImageTracker');
 /* tslint:enable */

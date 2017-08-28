@@ -30,5 +30,5 @@ interface IEditorTracker extends IInstanceTracker<FileEditor> {}
  * The editor tracker token.
  */
 export
-const IEditorTracker = new Token<IEditorTracker>('jupyter.services.editor-tracker');
+const IEditorTracker = new Token<IEditorTracker>('@jupyterlab/fileeditor:IEditorTracker');
 /* tslint:enable */

@@ -19,7 +19,7 @@ import {
  * The console tracker token.
  */
 export
-const IConsoleTracker = new Token<IConsoleTracker>('jupyter.services.consoles');
+const IConsoleTracker = new Token<IConsoleTracker>('@jupyterlab/console:IConsoleTracker');
 /* tslint:enable */
 
 

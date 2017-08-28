@@ -30,7 +30,7 @@ export * from './widget';
  * The completion manager token.
  */
 export
-const ICompletionManager = new Token<ICompletionManager>('jupyter.services.completer');
+const ICompletionManager = new Token<ICompletionManager>('@jupyterlab/completer:ICompletionManager');
 /* tslint:enable */
 
 

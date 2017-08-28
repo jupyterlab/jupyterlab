@@ -73,7 +73,7 @@ const KEYSELECTOR_CLASS = 'jp-KeySelector';
  * The main menu token.
  */
 export
-const ICellTools = new Token<ICellTools>('jupyter.services.cell-tools');
+const ICellTools = new Token<ICellTools>('@jupyterlab/notebook:ICellTools');
 /* tslint:enable */
 
 

@@ -28,7 +28,7 @@ import {
  * The theme manager token.
  */
 export
-const IThemeManager = new Token<IThemeManager>('jupyter.services.theme-manager');
+const IThemeManager = new Token<IThemeManager>('@jupyterlab/apputils:IThemeManager');
 /* tslint:enable */
 
 

@@ -29,5 +29,5 @@ interface ITerminalTracker extends IInstanceTracker<Terminal> {}
  * The editor tracker token.
  */
 export
-const ITerminalTracker = new Token<ITerminalTracker>('jupyter.services.terminal-tracker');
+const ITerminalTracker = new Token<ITerminalTracker>('@jupyterlab/terminal:ITerminalTracker');
 /* tslint:enable */

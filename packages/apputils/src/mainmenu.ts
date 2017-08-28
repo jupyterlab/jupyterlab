@@ -19,7 +19,7 @@ import {
  * The main menu token.
  */
 export
-const IMainMenu = new Token<IMainMenu>('jupyter.services.main-menu');
+const IMainMenu = new Token<IMainMenu>('@jupyterlab/apputils:IMainMenu');
 /* tslint:enable */
 
 
