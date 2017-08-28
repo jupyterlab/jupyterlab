@@ -36,8 +36,9 @@ The default plugins in the JupyterLab application include:
 interactive kernel console sessions.
 
 A dependency graph for the core JupyterLab plugins
-(along with links to their source) is shown here:
-![dependencies](dependency-graph.svg)
+(along with links to their source) is shown here.
+For simplicity, redundant dependencies are omitted:
+<iframe src="./_images/dependency-graph.svg" style="width: 100%; height: 600px; border: 0;"></iframe>
 
 ## Application Object
 The JupyterLab Application object is given to each plugin in

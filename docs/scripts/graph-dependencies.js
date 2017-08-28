@@ -8,7 +8,8 @@ var baseUrl = 'https://github.com/jupyterlab/jupyterlab/tree/master/packages';
 var packages = glob.sync(path.join(basePath, 'packages/*'));
 
 // Begin the graph specification
-var text = 'digraph G {\n';
+var text = 'digraph Dependencies {\n';
+text += 'label="Simplified JupyterLab dependency graph";\n';
 text += 'ratio = 0.6;\n';
 text += 'rankdir=LR;\n';
 
@@ -40,11 +41,10 @@ packages.forEach(function(packagePath) {
   }
 
   // Construct a URL to the package on GitHub.
-  var Url = path.join(baseUrl, path.basename(packagePath));
-  
+  var url = baseUrl + '/' + path.basename(packagePath);
   // Remove the '@jupyterlab' part of the name.
   var name = '"'+data.name.split('/')[1] +'"';
-  text += name + '[URL="' + Url + '"];\n';
+  text += name + '[URL="' + url + '" target="_blank"];\n';
 
   var deps = data.dependencies || [];
   for (var dep in deps) {
@@ -60,4 +60,6 @@ packages.forEach(function(packagePath) {
 text += '}\n';
 fs.writeFileSync('./dependencies.gv', text);
 childProcess.execSync('cat dependencies.gv | tred | dot -Tsvg -o dependency-graph.svg')
+var svg = fs.readFileSync('dependency-graph.svg', 'utf8');
+fs.writeFileSync('dependency-graph.svg', svg.replace(/(width|height)="[^"]+pt"/g, ''));
 fs.unlink('./dependencies.gv');
