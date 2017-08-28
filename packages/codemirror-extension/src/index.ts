@@ -52,7 +52,7 @@ namespace CommandIDs {
 
   export
   const findAndReplace = 'codemirror:find-and-replace';
-};
+}
 
 
 /**

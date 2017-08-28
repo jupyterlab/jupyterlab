@@ -45,7 +45,7 @@ import '../style/index.css';
 namespace CommandIDs {
   export
   const clearStateDB = 'apputils:clear-statedb';
-};
+}
 
 
 /**

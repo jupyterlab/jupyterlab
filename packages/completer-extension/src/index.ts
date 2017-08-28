@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
   JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
@@ -20,6 +16,10 @@ import {
 import {
   INotebookTracker
 } from '@jupyterlab/notebook';
+
+import {
+  Widget
+} from '@phosphor/widgets';
 
 
 

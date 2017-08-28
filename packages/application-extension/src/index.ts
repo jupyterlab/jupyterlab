@@ -35,7 +35,7 @@ namespace CommandIDs {
 
   export
   const toggleMode: string = 'application:toggle-mode';
-};
+}
 
 
 /**
