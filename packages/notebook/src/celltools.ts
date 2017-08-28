@@ -81,7 +81,7 @@ const ICellTools = new Token<ICellTools>('@jupyterlab/notebook:ICellTools');
  * The interface for cell metadata tools.
  */
 export
-interface ICellTools extends CellTools {};
+interface ICellTools extends CellTools {}
 
 
 /**

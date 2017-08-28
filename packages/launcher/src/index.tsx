@@ -63,7 +63,7 @@ export
 namespace CommandIDs {
   export
   const show: string = 'launcher:show';
-};
+}
 
 
 

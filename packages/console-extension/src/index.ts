@@ -6,8 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, IMainMenu, InstanceTracker,
-  showDialog
+  Dialog, ICommandPalette, IMainMenu, InstanceTracker, showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -15,12 +14,12 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  PageConfig
-} from '@jupyterlab/coreutils';
+  ConsolePanel, IConsoleTracker
+} from '@jupyterlab/console';
 
 import {
-  IConsoleTracker, ConsolePanel
-} from '@jupyterlab/console';
+  PageConfig
+} from '@jupyterlab/coreutils';
 
 import {
   ILauncher
@@ -75,7 +74,7 @@ namespace CommandIDs {
 
   export
   const changeKernel = 'console:change-kernel';
-};
+}
 
 
 /**

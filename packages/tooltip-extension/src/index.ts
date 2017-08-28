@@ -50,7 +50,7 @@ namespace CommandIDs {
 
   export
   const launchNotebook = 'tooltip:launch-notebook';
-};
+}
 
 
 

@@ -32,7 +32,7 @@ import {
 namespace CommandIDs {
   export
   const open = 'inspector:open';
-};
+}
 
 
 /**

@@ -195,8 +195,6 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [
-  mainPlugin,
-  layoutPlugin
-];
+const plugins: JupyterLabPlugin<any>[] = [ mainPlugin, layoutPlugin ];
+
 export default plugins;
