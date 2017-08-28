@@ -25,7 +25,7 @@ All source code is written in [TypeScript](http://www.typescriptlang.org/Handboo
 
 ### Installing Node.js and npm
 
-Building the JupyterLab from its GitHub source code requires Node.js version 
+Building the JupyterLab from its GitHub source code requires Node.js version
 6+ and Node's package manager, ``npm``.
 
 If you use ``conda``, you can get them with:
@@ -90,6 +90,10 @@ jupyterlab_launcher` to get the latest version.
 
 * To install JupyterLab in isolation for a single conda/virtual environment, you can add the `--sys-prefix` flag to the extension activation above; this will tie the installation to the `sys.prefix` location of your environment, without writing anything in your user-wide settings area (which are visible to all your envs):
 
+* You can run `npm run build:main:prod` to build more accurate sourcemaps that show the original
+  Typescript code when debugging. However, it takes a bit longer to build the sources, so is used only to build for production
+  by default.
+
 ```
 jupyter serverextension enable --py --sys-prefix jupyterlab
 ```
@@ -102,7 +106,7 @@ Start JupyterLab in development mode:
 jupyter lab --dev-mode
 ```
 
-Development mode ensures that you are running the JavaScript assets that are 
+Development mode ensures that you are running the JavaScript assets that are
 built in the dev-installed Python package.  When running from source in development
 mode, the page will have a red stripe at the top to indicate it is an unreleased version.
 
@@ -206,4 +210,3 @@ https://jupyterlab-tutorial.readthedocs.io/en/latest/index.html.
 
 - The npm modules are fully compatible with Node/Babel/ES6/ES5. Simply
 omit the type declarations when using a language other than TypeScript.
-

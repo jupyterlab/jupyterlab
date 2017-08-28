@@ -19,8 +19,8 @@ fs.writeFileSync('./package.app.json', text);
 // Update our app index file.
 fs.copySync('./index.js', './index.app.js')
 
-// Run a standard build.
-childProcess.execSync('npm run build');
+// Run a standard build with Typescript source maps working.
+childProcess.execSync('npm run build:prod');
 
 // Add  the release metadata.
 var release_data = { version: version };

@@ -3,6 +3,7 @@
   "version": "0.10.2",
   "scripts": {
     "build": "webpack",
+    "build:prod": "webpack --devtool source-map",
     "publish": "node make-release.js"
   },
   "dependencies": {
@@ -80,6 +81,7 @@
     "json-loader": "^0.5.4",
     "raw-loader": "^0.5.1",
     "sort-package-json": "^1.7.0",
+    "source-map-loader": "0.2.1",
     "style-loader": "^0.13.1",
     "url-loader": "^0.5.7",
     "webpack": "^2.2.1"
