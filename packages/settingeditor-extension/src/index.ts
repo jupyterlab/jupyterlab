@@ -32,13 +32,14 @@ import {
 namespace CommandIDs {
   export
   const open = 'settingeditor:open';
-};
+}
 
 
 /**
  * The default setting editor extension.
  */
 const plugin: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/settingeditor-extension:plugin',
   activate: (app: JupyterLab, restorer: ILayoutRestorer, registry: ISettingRegistry, editorServices: IEditorServices, state: IStateDB) => {
     const { commands, shell } = app;
     const namespace = 'setting-editor';
@@ -54,7 +55,6 @@ const plugin: JupyterLabPlugin<void> = {
     });
 
     commands.addCommand(CommandIDs.open, {
-      id: '@jupyterlab/settingeditor-extension:plugin',
       execute: () => {
         if (tracker.currentWidget) {
           shell.activateById(tracker.currentWidget.id);
