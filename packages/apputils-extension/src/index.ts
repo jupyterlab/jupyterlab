@@ -103,7 +103,7 @@ function newConnector(manager: ServiceManager): IDataConnector<ISettingRegistry.
  * A service providing an interface to the main menu.
  */
 const mainMenuPlugin: JupyterLabPlugin<IMainMenu> = {
-  id: 'jupyter.services.main-menu',
+  id: '@jupyterlab/apputils-extension:mainMenuPlugin',
   provides: IMainMenu,
   activate: (app: JupyterLab): IMainMenu => {
     let menu = new MainMenu();
@@ -127,7 +127,7 @@ const mainMenuPlugin: JupyterLabPlugin<IMainMenu> = {
  */
 const palettePlugin: JupyterLabPlugin<ICommandPalette> = {
   activate: activatePalette,
-  id: 'jupyter.services.commandpalette',
+  id: '@jupyterlab/apputils-extension:palettePlugin',
   provides: ICommandPalette,
   requires: [ILayoutRestorer],
   autoStart: true
@@ -138,7 +138,7 @@ const palettePlugin: JupyterLabPlugin<ICommandPalette> = {
  * The default setting registry provider.
  */
 const settingPlugin: JupyterLabPlugin<ISettingRegistry> = {
-  id: 'jupyter.services.setting-registry',
+  id: '@jupyterlab/apputils-extension:settingPlugin',
   activate: (app: JupyterLab): ISettingRegistry => {
     return new SettingRegistry({ connector: newConnector(app.serviceManager) });
   },
@@ -152,7 +152,7 @@ const settingPlugin: JupyterLabPlugin<ISettingRegistry> = {
  * The default theme manager provider.
  */
 const themePlugin: JupyterLabPlugin<IThemeManager> = {
-  id: 'jupyter.services.theme-manger',
+  id: '@jupyterlab/apputils-extension:themePlugin',
   requires: [ISettingRegistry, ISplashScreen],
   activate: (app: JupyterLab, settingRegistry: ISettingRegistry, splash: ISplashScreen): IThemeManager => {
     let baseUrl = app.serviceManager.serverSettings.baseUrl;
@@ -178,7 +178,7 @@ const themePlugin: JupyterLabPlugin<IThemeManager> = {
  * The default splash screen provider.
  */
 const splashPlugin: JupyterLabPlugin<ISplashScreen> = {
-  id: 'jupyter.services.splash-screen',
+  id: '@jupyterlab/apputils-extension:splashPlugin',
   autoStart: true,
   provides: ISplashScreen,
   activate: () => {
@@ -196,7 +196,7 @@ const splashPlugin: JupyterLabPlugin<ISplashScreen> = {
  * The default state database for storing application state.
  */
 const stateDBPlugin: JupyterLabPlugin<IStateDB> = {
-  id: 'jupyter.services.statedb',
+  id: '@jupyterlab/apputils-extension:stateDBPlugin',
   autoStart: true,
   provides: IStateDB,
   activate: (app: JupyterLab) => {

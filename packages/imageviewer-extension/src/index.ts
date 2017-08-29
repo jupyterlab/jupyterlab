@@ -50,7 +50,7 @@ const FACTORY = 'Image';
  */
 const plugin: JupyterLabPlugin<IImageTracker> = {
   activate,
-  id: 'jupyter.extensions.image-handler',
+  id: '@jupyterlab/imageviewer-extension:plugin',
   provides: IImageTracker,
   requires: [ICommandPalette, ILayoutRestorer],
   autoStart: true

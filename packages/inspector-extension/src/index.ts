@@ -106,7 +106,7 @@ const corePlugin: JupyterLabPlugin<IInspector> = {
  * An extension that registers consoles for inspection.
  */
 const consolePlugin: JupyterLabPlugin<void> = {
-  id: 'jupyter.extensions.console-inspector',
+  id: '@jupyterlab/inspector-extension:consolePlugin',
   requires: [IInspector, IConsoleTracker],
   autoStart: true,
   activate: (app: JupyterLab, manager: IInspector, consoles: IConsoleTracker): void => {
@@ -158,7 +158,7 @@ const consolePlugin: JupyterLabPlugin<void> = {
  * An extension that registers notebooks for inspection.
  */
 const notebookPlugin: JupyterLabPlugin<void> = {
-  id: 'jupyter.extensions.notebook-inspector',
+  id: '@jupyterlab/inspector-extension:notebookPlugin',
   requires: [IInspector, INotebookTracker],
   autoStart: true,
   activate: (app: JupyterLab, manager: IInspector, notebooks: INotebookTracker): void => {

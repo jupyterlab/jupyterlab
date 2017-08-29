@@ -51,7 +51,7 @@ namespace CommandIDs {
  * A service providing code completion for editors.
  */
 const service: JupyterLabPlugin<ICompletionManager> = {
-  id: 'jupyter.services.completer',
+  id: '@jupyterlab/completer-extension:service',
   autoStart: true,
   provides: ICompletionManager,
   activate: (app: JupyterLab): ICompletionManager => {
@@ -124,7 +124,7 @@ const service: JupyterLabPlugin<ICompletionManager> = {
  * An extension that registers consoles for code completion.
  */
 const consolePlugin: JupyterLabPlugin<void> = {
-  id: 'jupyter.extensions.console-completer',
+  id: '@jupyterlab/completer-extension:consolePlugin',
   requires: [ICompletionManager, IConsoleTracker],
   autoStart: true,
   activate: (app: JupyterLab, manager: ICompletionManager, consoles: IConsoleTracker): void => {
@@ -147,10 +147,10 @@ const consolePlugin: JupyterLabPlugin<void> = {
     app.commands.addCommand(CommandIDs.invokeConsole, {
       execute: () => {
         const id = consoles.currentWidget && consoles.currentWidget.id;
-        if (!id) {
-          return;
+
+        if (id) {
+          return app.commands.execute(CommandIDs.invoke, { id });
         }
-        return app.commands.execute(CommandIDs.invoke, { id });
       }
     });
 
@@ -158,10 +158,10 @@ const consolePlugin: JupyterLabPlugin<void> = {
     app.commands.addCommand(CommandIDs.selectConsole, {
       execute: () => {
         const id = consoles.currentWidget && consoles.currentWidget.id;
-        if (!id) {
-          return;
+
+        if (id) {
+          return app.commands.execute(CommandIDs.select, { id });
         }
-        return app.commands.execute(CommandIDs.select, { id });
       }
     });
 
@@ -178,7 +178,7 @@ const consolePlugin: JupyterLabPlugin<void> = {
  * An extension that registers notebooks for code completion.
  */
 const notebookPlugin: JupyterLabPlugin<void> = {
-  id: 'jupyter.extensions.notebook-completer',
+  id: '@jupyterlab/completer-extension:notebookPlugin',
   requires: [ICompletionManager, INotebookTracker],
   autoStart: true,
   activate: (app: JupyterLab, manager: ICompletionManager, notebooks: INotebookTracker): void => {
@@ -210,10 +210,10 @@ const notebookPlugin: JupyterLabPlugin<void> = {
     app.commands.addCommand(CommandIDs.selectNotebook, {
       execute: () => {
         const id = notebooks.currentWidget && notebooks.currentWidget.id;
-        if (!id) {
-          return;
+
+        if (id) {
+          return app.commands.execute(CommandIDs.select, { id });
         }
-        return app.commands.execute(CommandIDs.select, { id });
       }
     });
 

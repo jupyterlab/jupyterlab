@@ -42,7 +42,7 @@ namespace CommandIDs {
  * The main extension.
  */
 const mainPlugin: JupyterLabPlugin<void> = {
-  id: 'jupyter.extensions.main',
+  id: '@jupyterlab/application-extension:mainPlugin',
   requires: [ICommandPalette],
   activate: (app: JupyterLab, palette: ICommandPalette) => {
     addCommands(app, palette);
@@ -118,7 +118,7 @@ const mainPlugin: JupyterLabPlugin<void> = {
  * The default layout restorer provider.
  */
 const layoutPlugin: JupyterLabPlugin<ILayoutRestorer> = {
-  id: 'jupyter.services.layout-restorer',
+  id: '@jupyterlab/application-extension:layoutPlugin',
   requires: [IStateDB],
   activate: (app: JupyterLab, state: IStateDB) => {
     const first = app.started;

@@ -153,9 +153,9 @@ import {
 /**
  * The plugin registration information.
  */
-const plugin: JupyterLabPlugin<void> = {
+const buttonPlugin: JupyterLabPlugin<void> = {
   activate,
-  id: 'jupyter.extensions.new-button',
+  id: 'my-extension-name:buttonPlugin',
   autoStart: true
 };
 

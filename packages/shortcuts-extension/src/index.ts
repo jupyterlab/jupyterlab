@@ -51,7 +51,7 @@ import {
  * required, using the `'body'` selector is more appropriate.
  */
 const plugin: JupyterLabPlugin<void> = {
-  id: 'jupyter.extensions.shortcuts',
+  id: '@jupyterlab/shortcuts-extension:plugin',
   requires: [ISettingRegistry],
   activate: (app: JupyterLab, settingReqistry: ISettingRegistry): void => {
     const { commands } = app;

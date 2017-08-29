@@ -239,7 +239,7 @@ const EXPORT_TO_FORMATS = [
  */
 export
 const trackerPlugin: JupyterLabPlugin<INotebookTracker> = {
-  id: 'jupyter.services.notebook-tracker',
+  id: '@jupyterlab/notebook-extension:trackerPlugin',
   provides: INotebookTracker,
   requires: [
     IMainMenu,
@@ -259,7 +259,7 @@ const trackerPlugin: JupyterLabPlugin<INotebookTracker> = {
  */
 export
 const contentFactoryPlugin: JupyterLabPlugin<NotebookPanel.IContentFactory> = {
-  id: 'jupyter.services.notebook-renderer',
+  id: '@jupyterlab/notebook-extension:contentFactoryPlugin',
   provides: NotebookPanel.IContentFactory,
   requires: [IEditorServices],
   autoStart: true,
@@ -276,7 +276,7 @@ const contentFactoryPlugin: JupyterLabPlugin<NotebookPanel.IContentFactory> = {
 const cellToolsPlugin: JupyterLabPlugin<ICellTools> = {
   activate: activateCellTools,
   provides: ICellTools,
-  id: 'jupyter.extensions.cell-tools',
+  id: '@jupyterlab/notebook-extension:cellToolsPlugin',
   autoStart: true,
   requires: [INotebookTracker, IEditorServices, IStateDB]
 };

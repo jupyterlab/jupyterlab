@@ -38,7 +38,7 @@ namespace CommandIDs {
  */
 const plugin: JupyterLabPlugin<void> = {
   activate,
-  id: 'jupyter.extensions.faq',
+  id: '@jupyterlab/faq-extension:plugin',
   requires: [ICommandPalette, ILayoutRestorer],
   autoStart: true
 };

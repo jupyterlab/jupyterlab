@@ -5,7 +5,6 @@ import {
   JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
-
 import {
   ICommandPalette
 } from '@jupyterlab/apputils';
@@ -39,7 +38,7 @@ namespace CommandIDs {
  */
 const plugin: JupyterLabPlugin<ILauncher> = {
   activate,
-  id: 'jupyter.services.launcher',
+  id: '@jupyterlab/launcher-extension:plugin',
   requires: [ICommandPalette],
   provides: ILauncher,
   autoStart: true

@@ -58,7 +58,7 @@ namespace CommandIDs {
  * The main tooltip service.
  */
 const service: JupyterLabPlugin<ITooltipManager> = {
-  id: 'jupyter.services.tooltip',
+  id: '@jupyterlab/tooltip-extension:service',
   autoStart: true,
   provides: ITooltipManager,
   activate: (app: JupyterLab): ITooltipManager => {
@@ -98,7 +98,7 @@ const service: JupyterLabPlugin<ITooltipManager> = {
  * The console tooltip plugin.
  */
 const consolePlugin: JupyterLabPlugin<void> = {
-  id: 'jupyter.extensions.tooltip-console',
+  id: '@jupyterlab/tooltip-extension:consolePlugin',
   autoStart: true,
   requires: [ITooltipManager, IConsoleTracker],
   activate: (app: JupyterLab, manager: ITooltipManager, consoles: IConsoleTracker): void => {
@@ -131,7 +131,7 @@ const consolePlugin: JupyterLabPlugin<void> = {
  * The notebook tooltip plugin.
  */
 const notebookPlugin: JupyterLabPlugin<void> = {
-  id: 'jupyter.extensions.tooltip-notebook',
+  id: '@jupyterlab/tooltip-extension:notebookPlugin',
   autoStart: true,
   requires: [ITooltipManager, INotebookTracker],
   activate: (app: JupyterLab, manager: ITooltipManager, notebooks: INotebookTracker): void => {

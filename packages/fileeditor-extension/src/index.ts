@@ -76,7 +76,7 @@ namespace CommandIDs {
  */
 const plugin: JupyterLabPlugin<IEditorTracker> = {
   activate,
-  id: 'jupyter.services.editor-tracker',
+  id: '@jupyterlab/fileeditor-extension:plugin',
   requires: [
     ILayoutRestorer,
     IEditorServices,

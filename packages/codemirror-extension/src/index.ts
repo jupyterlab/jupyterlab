@@ -60,7 +60,7 @@ namespace CommandIDs {
  */
 export
 const servicesPlugin: JupyterLabPlugin<IEditorServices> = {
-  id: 'jupyter.services.codemirror-services',
+  id: '@jupyterlab/codemirror-extension:servicesPlugin',
   provides: IEditorServices,
   activate: (): IEditorServices => editorServices
 };
@@ -71,7 +71,7 @@ const servicesPlugin: JupyterLabPlugin<IEditorServices> = {
  */
 export
 const commandsPlugin: JupyterLabPlugin<void> = {
-  id: 'jupyter.services.codemirror-commands',
+  id: '@jupyterlab/codemirror-extension:commandsPlugin',
   requires: [IEditorTracker, IMainMenu, ICommandPalette, IStateDB, ISettingRegistry],
   activate: activateEditorCommands,
   autoStart: true

@@ -92,7 +92,7 @@ namespace CommandIDs {
  */
 const fileBrowserPlugin: JupyterLabPlugin<void> = {
   activate: activateFileBrowser,
-  id: 'jupyter.extensions.filebrowser',
+  id: '@jupyterlab/filebrowser-extension:fileBrowserPlugin',
   requires: [
     IFileBrowserFactory,
     IDocumentManager,
@@ -107,7 +107,7 @@ const fileBrowserPlugin: JupyterLabPlugin<void> = {
  */
 const factoryPlugin: JupyterLabPlugin<IFileBrowserFactory> = {
   activate: activateFactory,
-  id: 'jupyter.services.filebrowser',
+  id: '@jupyterlab/filebrowser-extension:factoryPlugin',
   provides: IFileBrowserFactory,
   requires: [IDocumentManager, IStateDB],
   autoStart: true

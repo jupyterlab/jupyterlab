@@ -36,7 +36,7 @@ namespace CommandIDs {
  */
 const plugin: JupyterLabPlugin<void> = {
   activate,
-  id: 'jupyter.extensions.rendered-markdown',
+  id: '@jupyterlab/markdownviewer-extension:plugin',
   requires: [ILayoutRestorer],
   autoStart: true
 };

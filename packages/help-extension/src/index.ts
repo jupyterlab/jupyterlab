@@ -125,7 +125,7 @@ RESOURCES.sort((a: any, b: any) => {
  */
 const plugin: JupyterLabPlugin<void> = {
   activate,
-  id: 'jupyter.extensions.help-handler',
+  id: '@jupyterlab/help-extension:plugin',
   requires: [IMainMenu, ICommandPalette, ILayoutRestorer],
   autoStart: true
 };

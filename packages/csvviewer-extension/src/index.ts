@@ -25,7 +25,7 @@ const FACTORY = 'Table';
  */
 const plugin: JupyterLabPlugin<void> = {
   activate,
-  id: 'jupyter.extensions.csv-handler',
+  id: '@jupyterlab/csvviewer-extension:plugin',
   requires: [ILayoutRestorer],
   autoStart: true
 };

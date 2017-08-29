@@ -73,7 +73,7 @@ namespace CommandIDs {
  * The default document manager provider.
  */
 const plugin: JupyterLabPlugin<IDocumentManager> = {
-  id: 'jupyter.services.document-manager',
+  id: '@jupyterlab/docmanager-extension:plugin',
   provides: IDocumentManager,
   requires: [ICommandPalette, IMainMenu],
   activate: (app: JupyterLab, palette: ICommandPalette, mainMenu: IMainMenu): IDocumentManager => {

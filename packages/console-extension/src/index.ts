@@ -82,7 +82,7 @@ namespace CommandIDs {
  */
 export
 const trackerPlugin: JupyterLabPlugin<IConsoleTracker> = {
-  id: 'jupyter.services.console-tracker',
+  id: '@jupyterlab/console-extension:trackerPlugin',
   provides: IConsoleTracker,
   requires: [
     IMainMenu,
@@ -102,7 +102,7 @@ const trackerPlugin: JupyterLabPlugin<IConsoleTracker> = {
  */
 export
 const contentFactoryPlugin: JupyterLabPlugin<ConsolePanel.IContentFactory> = {
-  id: 'jupyter.services.console-renderer',
+  id: '@jupyterlab/console-extension:contentFactoryPlugin',
   provides: ConsolePanel.IContentFactory,
   requires: [IEditorServices],
   autoStart: true,

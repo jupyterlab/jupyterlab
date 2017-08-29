@@ -54,6 +54,7 @@ const plugin: JupyterLabPlugin<void> = {
     });
 
     commands.addCommand(CommandIDs.open, {
+      id: '@jupyterlab/settingeditor-extension:plugin',
       execute: () => {
         if (tracker.currentWidget) {
           shell.activateById(tracker.currentWidget.id);
@@ -77,7 +78,6 @@ const plugin: JupyterLabPlugin<void> = {
       label: 'Settings'
     });
   },
-  id: 'jupyter.extensions.setting-editor',
   requires: [ILayoutRestorer, ISettingRegistry, IEditorServices, IStateDB],
   autoStart: true
 };
