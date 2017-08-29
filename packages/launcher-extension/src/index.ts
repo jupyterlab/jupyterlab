@@ -31,7 +31,7 @@ import '../style/index.css';
 namespace CommandIDs {
   export
   const create = 'launcher:create';
-};
+}
 
 
 /**
@@ -40,9 +40,7 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<ILauncher> = {
   activate,
   id: 'jupyter.services.launcher',
-  requires: [
-    ICommandPalette
-  ],
+  requires: [ICommandPalette],
   provides: ILauncher,
   autoStart: true
 };
@@ -59,8 +57,7 @@ export default plugin;
  */
 function activate(app: JupyterLab, palette: ICommandPalette): ILauncher {
   const { commands, shell } = app;
-
-  let model = new LauncherModel();
+  const model = new LauncherModel();
 
   commands.addCommand(CommandIDs.create, {
     label: 'New Launcher',

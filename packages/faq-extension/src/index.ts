@@ -30,7 +30,7 @@ import '../style/index.css';
 namespace CommandIDs {
   export
   const open: string = 'faq-jupyterlab:open';
-};
+}
 
 
 /**
@@ -50,10 +50,12 @@ const plugin: JupyterLabPlugin<void> = {
 export default plugin;
 
 
+/* tslint:disable */
 /**
  * The faq page source.
  */
 const SOURCE = require('../faq.md');
+/* tslint:enable */
 
 
 /**

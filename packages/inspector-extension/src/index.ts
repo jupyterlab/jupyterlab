@@ -38,8 +38,8 @@ namespace CommandIDs {
 /**
  * A service providing code introspection.
  */
-const service: JupyterLabPlugin<IInspector> = {
-  id: 'jupyter.services.inspector',
+const corePlugin: JupyterLabPlugin<IInspector> = {
+  id: '@jupyterlab/inspector-extension:corePlugin',
   requires: [ICommandPalette, ILayoutRestorer],
   provides: IInspector,
   autoStart: true,
@@ -210,7 +210,7 @@ const notebookPlugin: JupyterLabPlugin<void> = {
  * Export the plugins as default.
  */
 const plugins: JupyterLabPlugin<any>[] = [
-  service, consolePlugin, notebookPlugin
+  corePlugin, consolePlugin, notebookPlugin
 ];
 export default plugins;
 

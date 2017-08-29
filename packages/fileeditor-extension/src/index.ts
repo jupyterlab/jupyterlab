@@ -68,7 +68,7 @@ namespace CommandIDs {
 
   export
   const markdownPreview = 'fileeditor:markdown-preview';
-};
+}
 
 
 /**

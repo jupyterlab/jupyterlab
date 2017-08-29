@@ -84,7 +84,7 @@ namespace CommandIDs {
 
   export
   const createLauncher = 'filebrowser:create-main-launcher'; // For main browser only.
-};
+}
 
 
 /**
