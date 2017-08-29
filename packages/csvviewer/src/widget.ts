@@ -209,9 +209,9 @@ namespace Private {
   function parse(text: string, delimiter: string): [string[], dsv.DSVRowString[]] {
     let columns: string[] = [];
     let rowFn: RowFn | null = null;
-    let rows = dsv.dsvFormat(delimiter).parseRows(text, (r, i) => {
-      if (rowFn) return rowFn(r);
-      columns = uniquifyColumns(r);
+    let rows = dsv.dsvFormat(delimiter).parseRows(text, row => {
+      if (rowFn) return rowFn(row);
+      columns = uniquifyColumns(row);
       rowFn = makeRowFn(columns);
     });
     return [columns, rows];
