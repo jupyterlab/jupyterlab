@@ -272,8 +272,8 @@ class BreadCrumbs extends Widget {
       return;
     }
 
-    const path = BREAD_CRUMB_PATHS[index];
     const model = this._model;
+    const path = PathExt.resolve(model.path, BREAD_CRUMB_PATHS[index]);
     const manager = model.manager;
 
     // Move all of the items.
