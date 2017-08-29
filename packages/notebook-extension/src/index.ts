@@ -929,6 +929,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     label: 'Toggle All Line Numbers',
     execute: args => {
       const current = getCurrent(args);
+
       if (current) {
         return NotebookActions.toggleAllLineNumbers(current.notebook);
       }
