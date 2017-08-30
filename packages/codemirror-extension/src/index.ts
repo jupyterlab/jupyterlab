@@ -58,9 +58,8 @@ namespace CommandIDs {
 /**
  * The editor services.
  */
-export
-const servicesPlugin: JupyterLabPlugin<IEditorServices> = {
-  id: '@jupyterlab/codemirror-extension:servicesPlugin',
+const services: JupyterLabPlugin<IEditorServices> = {
+  id: '@jupyterlab/codemirror-extension:services',
   provides: IEditorServices,
   activate: (): IEditorServices => editorServices
 };
@@ -69,10 +68,15 @@ const servicesPlugin: JupyterLabPlugin<IEditorServices> = {
 /**
  * The editor commands.
  */
-export
-const commandsPlugin: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/codemirror-extension:commandsPlugin',
-  requires: [IEditorTracker, IMainMenu, ICommandPalette, IStateDB, ISettingRegistry],
+const commands: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/codemirror-extension:commands',
+  requires: [
+    IEditorTracker,
+    IMainMenu,
+    ICommandPalette,
+    IStateDB,
+    ISettingRegistry
+  ],
   activate: activateEditorCommands,
   autoStart: true
 };
@@ -81,16 +85,20 @@ const commandsPlugin: JupyterLabPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [commandsPlugin, servicesPlugin];
+const plugins: JupyterLabPlugin<any>[] = [commands, services];
 export default plugins;
 
+
+/**
+ * The plugin ID used as the key in the setting registry.
+ */
+const id = commands.id;
 
 /**
  * Set up the editor widget menu and commands.
  */
 function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB, settingRegistry: ISettingRegistry): void {
   const { commands, restored } = app;
-  const { id } = commandsPlugin;
   let { theme, keyMap } = CodeMirrorEditor.defaultConfig;
 
   /**

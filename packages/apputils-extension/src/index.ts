@@ -102,8 +102,8 @@ function newConnector(manager: ServiceManager): IDataConnector<ISettingRegistry.
 /**
  * A service providing an interface to the main menu.
  */
-const mainMenuPlugin: JupyterLabPlugin<IMainMenu> = {
-  id: '@jupyterlab/apputils-extension:mainMenuPlugin',
+const menu: JupyterLabPlugin<IMainMenu> = {
+  id: '@jupyterlab/apputils-extension:menu',
   provides: IMainMenu,
   activate: (app: JupyterLab): IMainMenu => {
     let menu = new MainMenu();
@@ -125,9 +125,9 @@ const mainMenuPlugin: JupyterLabPlugin<IMainMenu> = {
 /**
  * The default commmand palette extension.
  */
-const palettePlugin: JupyterLabPlugin<ICommandPalette> = {
+const palette: JupyterLabPlugin<ICommandPalette> = {
   activate: activatePalette,
-  id: '@jupyterlab/apputils-extension:palettePlugin',
+  id: '@jupyterlab/apputils-extension:palette',
   provides: ICommandPalette,
   requires: [ILayoutRestorer],
   autoStart: true
@@ -137,8 +137,8 @@ const palettePlugin: JupyterLabPlugin<ICommandPalette> = {
 /**
  * The default setting registry provider.
  */
-const settingPlugin: JupyterLabPlugin<ISettingRegistry> = {
-  id: '@jupyterlab/apputils-extension:settingPlugin',
+const settings: JupyterLabPlugin<ISettingRegistry> = {
+  id: '@jupyterlab/apputils-extension:settings',
   activate: (app: JupyterLab): ISettingRegistry => {
     return new SettingRegistry({ connector: newConnector(app.serviceManager) });
   },
@@ -147,26 +147,22 @@ const settingPlugin: JupyterLabPlugin<ISettingRegistry> = {
 };
 
 
-
 /**
  * The default theme manager provider.
  */
-const themePlugin: JupyterLabPlugin<IThemeManager> = {
-  id: '@jupyterlab/apputils-extension:themePlugin',
+const themes: JupyterLabPlugin<IThemeManager> = {
+  id: '@jupyterlab/apputils-extension:themes',
   requires: [ISettingRegistry, ISplashScreen],
   activate: (app: JupyterLab, settingRegistry: ISettingRegistry, splash: ISplashScreen): IThemeManager => {
-    let baseUrl = app.serviceManager.serverSettings.baseUrl;
-    let host = app.shell;
-    let when = app.started;
-    let manager = new ThemeManager({ baseUrl,  settingRegistry, host, when });
-    let disposable = splash.show();
-    manager.ready.then(() => {
-      setTimeout(() => {
-        disposable.dispose();
-      }, 2500);
-    }, () => {
-      disposable.dispose();
-    });
+    const baseUrl = app.serviceManager.serverSettings.baseUrl;
+    const host = app.shell;
+    const when = app.started;
+    const manager = new ThemeManager({ baseUrl, host, settingRegistry, when });
+    const disposable = splash.show();
+    const dispose = () => { disposable.dispose(); };
+
+    manager.ready.then(() => { setTimeout(dispose, 2500); }, dispose);
+
     return manager;
   },
   autoStart: true,
@@ -177,8 +173,8 @@ const themePlugin: JupyterLabPlugin<IThemeManager> = {
 /**
  * The default splash screen provider.
  */
-const splashPlugin: JupyterLabPlugin<ISplashScreen> = {
-  id: '@jupyterlab/apputils-extension:splashPlugin',
+const splash: JupyterLabPlugin<ISplashScreen> = {
+  id: '@jupyterlab/apputils-extension:splash',
   autoStart: true,
   provides: ISplashScreen,
   activate: () => {
@@ -191,12 +187,11 @@ const splashPlugin: JupyterLabPlugin<ISplashScreen> = {
 };
 
 
-
 /**
  * The default state database for storing application state.
  */
-const stateDBPlugin: JupyterLabPlugin<IStateDB> = {
-  id: '@jupyterlab/apputils-extension:stateDBPlugin',
+const state: JupyterLabPlugin<IStateDB> = {
+  id: '@jupyterlab/apputils-extension:state',
   autoStart: true,
   provides: IStateDB,
   activate: (app: JupyterLab) => {
@@ -229,12 +224,7 @@ const stateDBPlugin: JupyterLabPlugin<IStateDB> = {
  * Export the plugins as default.
  */
 const plugins: JupyterLabPlugin<any>[] = [
-  mainMenuPlugin,
-  palettePlugin,
-  settingPlugin,
-  stateDBPlugin,
-  splashPlugin,
-  themePlugin
+  menu, palette, settings, state, splash, themes
 ];
 export default plugins;
 

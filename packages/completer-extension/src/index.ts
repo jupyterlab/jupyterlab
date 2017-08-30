@@ -48,10 +48,10 @@ namespace CommandIDs {
 
 
 /**
- * A service providing code completion for editors.
+ * A plugin providing code completion for editors.
  */
-const service: JupyterLabPlugin<ICompletionManager> = {
-  id: '@jupyterlab/completer-extension:service',
+const manager: JupyterLabPlugin<ICompletionManager> = {
+  id: '@jupyterlab/completer-extension:manager',
   autoStart: true,
   provides: ICompletionManager,
   activate: (app: JupyterLab): ICompletionManager => {
@@ -123,8 +123,8 @@ const service: JupyterLabPlugin<ICompletionManager> = {
 /**
  * An extension that registers consoles for code completion.
  */
-const consolePlugin: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/completer-extension:consolePlugin',
+const consoles: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/completer-extension:consoles',
   requires: [ICompletionManager, IConsoleTracker],
   autoStart: true,
   activate: (app: JupyterLab, manager: ICompletionManager, consoles: IConsoleTracker): void => {
@@ -177,8 +177,8 @@ const consolePlugin: JupyterLabPlugin<void> = {
 /**
  * An extension that registers notebooks for code completion.
  */
-const notebookPlugin: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/completer-extension:notebookPlugin',
+const notebooks: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/completer-extension:notebooks',
   requires: [ICompletionManager, INotebookTracker],
   autoStart: true,
   activate: (app: JupyterLab, manager: ICompletionManager, notebooks: INotebookTracker): void => {
@@ -229,7 +229,5 @@ const notebookPlugin: JupyterLabPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [
-  service, consolePlugin, notebookPlugin
-];
+const plugins: JupyterLabPlugin<any>[] = [manager, consoles, notebooks];
 export default plugins;

@@ -237,9 +237,8 @@ const EXPORT_TO_FORMATS = [
 /**
  * The notebook widget tracker provider.
  */
-export
-const trackerPlugin: JupyterLabPlugin<INotebookTracker> = {
-  id: '@jupyterlab/notebook-extension:trackerPlugin',
+const tracker: JupyterLabPlugin<INotebookTracker> = {
+  id: '@jupyterlab/notebook-extension:tracker',
   provides: INotebookTracker,
   requires: [
     IMainMenu,
@@ -257,9 +256,8 @@ const trackerPlugin: JupyterLabPlugin<INotebookTracker> = {
 /**
  * The notebook cell factory provider.
  */
-export
-const contentFactoryPlugin: JupyterLabPlugin<NotebookPanel.IContentFactory> = {
-  id: '@jupyterlab/notebook-extension:contentFactoryPlugin',
+const factory: JupyterLabPlugin<NotebookPanel.IContentFactory> = {
+  id: '@jupyterlab/notebook-extension:factory',
   provides: NotebookPanel.IContentFactory,
   requires: [IEditorServices],
   autoStart: true,
@@ -273,10 +271,10 @@ const contentFactoryPlugin: JupyterLabPlugin<NotebookPanel.IContentFactory> = {
 /**
  * The cell tools extension.
  */
-const cellToolsPlugin: JupyterLabPlugin<ICellTools> = {
+const tools: JupyterLabPlugin<ICellTools> = {
   activate: activateCellTools,
   provides: ICellTools,
-  id: '@jupyterlab/notebook-extension:cellToolsPlugin',
+  id: '@jupyterlab/notebook-extension:tools',
   autoStart: true,
   requires: [INotebookTracker, IEditorServices, IStateDB]
 };
@@ -285,7 +283,7 @@ const cellToolsPlugin: JupyterLabPlugin<ICellTools> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [contentFactoryPlugin, trackerPlugin, cellToolsPlugin];
+const plugins: JupyterLabPlugin<any>[] = [factory, tracker, tools];
 export default plugins;
 
 

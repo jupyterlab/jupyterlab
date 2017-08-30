@@ -90,9 +90,9 @@ namespace CommandIDs {
 /**
  * The default file browser extension.
  */
-const fileBrowserPlugin: JupyterLabPlugin<void> = {
-  activate: activateFileBrowser,
-  id: '@jupyterlab/filebrowser-extension:fileBrowserPlugin',
+const browser: JupyterLabPlugin<void> = {
+  activate: activateBrowser,
+  id: '@jupyterlab/filebrowser-extension:browser',
   requires: [
     IFileBrowserFactory,
     IDocumentManager,
@@ -105,9 +105,9 @@ const fileBrowserPlugin: JupyterLabPlugin<void> = {
 /**
  * The default file browser factory provider.
  */
-const factoryPlugin: JupyterLabPlugin<IFileBrowserFactory> = {
+const factory: JupyterLabPlugin<IFileBrowserFactory> = {
   activate: activateFactory,
-  id: '@jupyterlab/filebrowser-extension:factoryPlugin',
+  id: '@jupyterlab/filebrowser-extension:factory',
   provides: IFileBrowserFactory,
   requires: [IDocumentManager, IStateDB],
   autoStart: true
@@ -116,12 +116,10 @@ const factoryPlugin: JupyterLabPlugin<IFileBrowserFactory> = {
 /**
  * The default file browser menu extension.
  */
-const fileBrowserMenuPlugin: JupyterLabPlugin<void> = {
-  activate: activateFileBrowserMenu,
+const menu: JupyterLabPlugin<void> = {
+  activate: activateMenu,
   id: 'jupyter.extensions.filebrowsermenu',
-  requires: [
-    IMainMenu,
-  ],
+  requires: [IMainMenu],
   autoStart: true
 };
 
@@ -130,11 +128,10 @@ const fileBrowserMenuPlugin: JupyterLabPlugin<void> = {
  */
 const namespace = 'filebrowser';
 
-
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [factoryPlugin, fileBrowserPlugin, fileBrowserMenuPlugin];
+const plugins: JupyterLabPlugin<any>[] = [factory, browser, menu];
 export default plugins;
 
 
@@ -144,8 +141,7 @@ export default plugins;
 function activateFactory(app: JupyterLab, docManager: IDocumentManager, state: IStateDB): IFileBrowserFactory {
   const { commands } = app;
   const tracker = new InstanceTracker<FileBrowser>({ namespace });
-
-  const createFileBrowser = (id: string, options: IFileBrowserFactory.IOptions = {}) => {
+  const createFileBrowser = (id: string, options: IFileBrowserFactory.IOptions = { }) => {
     const model = new FileBrowserModel({
       manager: docManager,
       driveName: options.driveName || '',
@@ -180,14 +176,16 @@ function activateFactory(app: JupyterLab, docManager: IDocumentManager, state: I
 
     return widget;
   };
-  let defaultBrowser = createFileBrowser('filebrowser');
+  const defaultBrowser = createFileBrowser('filebrowser');
+
   return { createFileBrowser, defaultBrowser, tracker };
 }
+
 
 /**
  * Activate the default file browser in the sidebar.
  */
-function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, docManager: IDocumentManager, palette: ICommandPalette, restorer: ILayoutRestorer): void {
+function activateBrowser(app: JupyterLab, factory: IFileBrowserFactory, docManager: IDocumentManager, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer): void {
   const fbWidget = factory.defaultBrowser;
 
   // Let the application restorer track the primary file browser (that is
@@ -228,7 +226,7 @@ function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, docM
 /**
  * Activate the default file browser menu in the main menu.
  */
-function activateFileBrowserMenu(app: JupyterLab, mainMenu: IMainMenu): void {
+function activateMenu(app: JupyterLab, mainMenu: IMainMenu): void {
   let menu = createMenu(app);
 
   mainMenu.addMenu(menu, { rank: 1 });

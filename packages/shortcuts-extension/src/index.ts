@@ -29,7 +29,7 @@ import {
  * shortcut are preset in the settings schema file of this extension.
  * Additionally, each shortcut can be individually set by the end user by
  * modifying its setting (either in the text editor or by modifying its
- * underlying JSON file).
+ * underlying JSON schema file).
  *
  * When setting shortcut selectors, there are two concepts to consider:
  * specificity and matchability. These two interact in sometimes
