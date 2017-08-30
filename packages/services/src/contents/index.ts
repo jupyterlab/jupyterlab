@@ -1098,7 +1098,8 @@ class Drive implements Contents.IDrive {
       url: this._getUrl(localPath),
       method: 'PUT',
       cache: false,
-      data: JSON.stringify(options)
+      data: JSON.stringify(options),
+      contentType: 'application/json'
     };
     return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
       // will return 200 for an existing file and 201 for a new file
@@ -1139,7 +1140,8 @@ class Drive implements Contents.IDrive {
     let request = {
       url: this._getUrl(toDir),
       method: 'POST',
-      data: JSON.stringify({ copy_from: fromFile })
+      data: JSON.stringify({ copy_from: fromFile }),
+      contentType: 'application/json'
     };
     return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
       if (response.xhr.status !== 201) {
