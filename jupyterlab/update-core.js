@@ -4,9 +4,9 @@ var glob = require('glob');
 var path = require('path');
 var sortPackageJson = require('sort-package-json');
 
-var schemaDir = path.resolve('./schemas');
-fs.removeSync(schemaDir);
-fs.ensureDirSync(schemaDir);
+var labSchemas = path.resolve('./schemas');
+fs.removeSync(labSchemas);
+fs.ensureDirSync(labSchemas);
 
 var themesDir = path.resolve('./themes');
 fs.removeSync(themesDir);
