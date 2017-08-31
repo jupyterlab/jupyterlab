@@ -10,15 +10,11 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  ISettingRegistry
-} from '@jupyterlab/coreutils';
-
-import {
   CodeEditor, IEditorServices
 } from '@jupyterlab/codeeditor';
 
 import {
-   MarkdownCodeBlocks, PathExt
+  ISettingRegistry, MarkdownCodeBlocks, PathExt
 } from '@jupyterlab/coreutils';
 
 import {
