@@ -118,7 +118,7 @@ const factory: JupyterLabPlugin<IFileBrowserFactory> = {
  */
 const menu: JupyterLabPlugin<void> = {
   activate: activateMenu,
-  id: 'jupyter.extensions.filebrowsermenu',
+  id: '@jupyterlab/filebrowser-extension:menu',
   requires: [IMainMenu],
   autoStart: true
 };
@@ -429,7 +429,7 @@ function createMenu(app: JupyterLab): Menu {
  * This function generates temporary commands with an incremented name. These
  * commands are disposed when the menu itself is disposed.
  */
-function createContextMenu(path: string, commands: CommandRegistry, registry: DocumentRegistry):  Menu {
+function createContextMenu(path: string, commands: CommandRegistry, registry: DocumentRegistry): Menu {
   const menu = new Menu({ commands });
 
   menu.addItem({ command: CommandIDs.open });
