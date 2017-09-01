@@ -316,6 +316,15 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
             break;
           }
         }
+      } else {
+        // no selection, submit whole line and advance
+        code = editor.getLine(selection.start.line);
+        const cursor = editor.getCursorPosition();
+        if (cursor.line + 1 == editor.lineCount) {
+          let text = editor.model.value.text;
+          editor.model.value.text = text + '\n';
+        }
+        editor.setCursorPosition({ line: cursor.line + 1, column: cursor.column });
       }
 
       const activate = false;
