@@ -487,7 +487,9 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
    * Handle an `update-request` message to the widget.
    */
   protected onUpdateRequest(msg: Message): void {
-    this._render();
+    if (this._context.isReady) {
+      this._render();
+    }
   }
 
   /**
