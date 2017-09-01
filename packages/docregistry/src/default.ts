@@ -141,7 +141,7 @@ class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeMo
    * Serialize the model to JSON.
    */
   toJSON(): JSONValue {
-    return JSON.parse(this.value.text);
+    return JSON.parse(this.value.text || 'null');
   }
 
   /**
