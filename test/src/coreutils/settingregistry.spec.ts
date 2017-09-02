@@ -21,12 +21,12 @@ class TestConnector extends StateDB implements IDataConnector<ISettingRegistry.I
   }
 
   fetch(id: string): Promise<ISettingRegistry.IPlugin | null> {
-    return super.fetch(id).then(user => {
-      if (!user && !this.schemas[id]) {
+    return super.fetch(id).then(data => {
+      if (!data && !this.schemas[id]) {
         return null;
       }
 
-      user = user || { };
+      let user = data as JSONObject || { };
 
       const schema = this.schemas[id] || { type: 'object' };
       const result = { data: { composite: { }, user }, id, schema };
@@ -539,6 +539,65 @@ describe('@jupyterlab/coreutils', () => {
         expect(settings.isDisposed).to.be(false);
         settings.dispose();
         expect(settings.isDisposed).to.be(true);
+      });
+
+    });
+
+    describe('#default()', () => {
+
+      it('should return a fully extrapolated schema default', done => {
+        const id = 'omicron';
+        const defaults = {
+          foo: 'one',
+          bar: 100,
+          baz: {
+            qux: 'two',
+            quux: 'three',
+            quuz: {
+              corge: { grault: 200 }
+            }
+          }
+        };
+
+        connector.schemas[id] = {
+          type: 'object',
+          properties: {
+            foo: { type: 'string', default: defaults.foo },
+            bar: { type: 'number', default: defaults.bar },
+            baz: {
+              type: 'object',
+              default: { },
+              properties: {
+                qux: { type: 'string', default: defaults.baz.qux },
+                quux: { type: 'string', default: defaults.baz.quux },
+                quuz: {
+                  type: 'object',
+                  default: { },
+                  properties: {
+                    corge: {
+                      type: 'object',
+                      default: { },
+                      properties: {
+                        grault: {
+                          type: 'number',
+                          default: defaults.baz.quuz.corge.grault
+                        }
+                      }
+                    },
+                  }
+                },
+              }
+            },
+            'nonexistent-default': { type: 'string' }
+          }
+        };
+        registry.load(id).then(settings => {
+          expect(settings.default('nonexistent-key')).to.be(undefined);
+          expect(settings.default('foo')).to.be(defaults.foo);
+          expect(settings.default('bar')).to.be(defaults.bar);
+          expect(settings.default('baz')).to.eql(defaults.baz);
+          expect(settings.default('nonexistent-default')).to.be(undefined);
+        }).then(done).catch(done);
       });
 
     });

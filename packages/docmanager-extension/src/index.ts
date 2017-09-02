@@ -6,16 +6,28 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, IMainMenu
+  showDialog, Dialog, ICommandPalette, IMainMenu
 } from '@jupyterlab/apputils';
+
+import {
+  IChangedArgs
+} from '@jupyterlab/coreutils';
 
 import {
   renameDialog, DocumentManager, IDocumentManager, showErrorMessage
 } from '@jupyterlab/docmanager';
 
 import {
-  Contents, Kernel, IServiceManager
+  DocumentRegistry
+} from '@jupyterlab/docregistry';
+
+import {
+  Contents, Kernel
 } from '@jupyterlab/services';
+
+import {
+  IDisposable
+} from '@phosphor/disposable';
 
 
 /**
@@ -41,6 +53,9 @@ namespace CommandIDs {
   const open = 'docmanager:open';
 
   export
+  const clone = 'docmanager:clone';
+
+  export
   const restoreCheckpoint = 'docmanager:restore-checkpoint';
 
   export
@@ -60,8 +75,10 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<IDocumentManager> = {
   id: 'jupyter.services.document-manager',
   provides: IDocumentManager,
-  requires: [IServiceManager, ICommandPalette, IMainMenu],
-  activate: (app: JupyterLab, manager: IServiceManager, palette: ICommandPalette, mainMenu: IMainMenu): IDocumentManager => {
+  requires: [ICommandPalette, IMainMenu],
+  activate: (app: JupyterLab, palette: ICommandPalette, mainMenu: IMainMenu): IDocumentManager => {
+    const manager = app.serviceManager;
+    const contexts = new WeakSet<DocumentRegistry.Context>();
     const opener: DocumentManager.IWidgetOpener = {
       open: widget => {
         if (!widget.id) {
@@ -75,13 +92,20 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
           app.shell.addToMainArea(widget);
         }
         app.shell.activateById(widget.id);
+
+        // Handle dirty state for open documents.
+        let context = docManager.contextForWidget(widget);
+        if (!contexts.has(context)) {
+          handleContext(app, context);
+          contexts.add(context);
+        }
       }
     };
     const registry = app.docRegistry;
     const docManager = new DocumentManager({ registry, manager, opener });
 
     // Register the file operations commands.
-    addCommands(app, docManager, palette);
+    addCommands(app, docManager, palette, opener);
 
     return docManager;
   }
@@ -97,7 +121,7 @@ export default plugin;
 /**
  * Add the file operations commands to the application's command registry.
  */
-function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICommandPalette): void {
+function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICommandPalette, opener: DocumentManager.IWidgetOpener): void {
   const { commands } = app;
   const category = 'File Operations';
   const isEnabled = () => {
@@ -158,7 +182,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
         : args['path'] as string;
       const factory = args['factory'] as string || void 0;
       const kernel = args['kernel'] as Kernel.IModel || void 0;
-      return docManager.services.contents.get(path)
+      return docManager.services.contents.get(path, { content: false })
         .then(() => docManager.openOrReveal(path, factory, kernel));
     },
     icon: args => args['icon'] as string || '',
@@ -173,6 +197,9 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     execute: () => {
       if (isEnabled()) {
         let context = docManager.contextForWidget(app.shell.currentWidget);
+        if (context.model.readOnly) {
+          return context.revert();
+        }
         return context.restoreCheckpoint().then(() => context.revert());
       }
     }
@@ -185,6 +212,13 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     execute: () => {
       if (isEnabled()) {
         let context = docManager.contextForWidget(app.shell.currentWidget);
+        if (context.model.readOnly) {
+          return showDialog({
+            title: 'Cannot Save',
+            body: 'Document is read-only',
+            buttons: [Dialog.okButton()]
+          });
+        }
         return context.save().then(() => context.createCheckpoint());
       }
     }
@@ -226,19 +260,80 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     label: 'Rename'
   });
 
+  commands.addCommand(CommandIDs.clone, {
+    isVisible: () => {
+      const widget = app.shell.currentWidget;
+      if (!widget) {
+        return;
+      }
+      // Find the context for the widget.
+      let context = docManager.contextForWidget(widget);
+      return context !== null;
+    },
+    execute: () => {
+      const widget = app.shell.currentWidget;
+      if (!widget) {
+        return;
+      }
+      // Clone the widget.
+      let child = docManager.cloneWidget(widget);
+      if (child) {
+        opener.open(child);
+      }
+    },
+    label: 'New View into File'
+  });
+
   app.contextMenu.addItem({
     command: CommandIDs.rename,
     selector: '[data-type="document-title"]',
     rank: 1
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.clone,
+    selector: '[data-type="document-title"]',
+    rank: 2
   });
 
   [
     CommandIDs.save,
     CommandIDs.restoreCheckpoint,
     CommandIDs.saveAs,
+    CommandIDs.clone,
     CommandIDs.close,
     CommandIDs.closeAllFiles
   ].forEach(command => { palette.addItem({ command, category }); });
+}
+
+
+/**
+ * Handle dirty state for a context.
+ */
+function handleContext(app: JupyterLab, context: DocumentRegistry.Context): void {
+  let disposable: IDisposable | null = null;
+  let onStateChanged = (sender: any, args: IChangedArgs<any>) => {
+    if (args.name === 'dirty') {
+      if (args.newValue === true) {
+        if (!disposable) {
+          disposable = app.setDirty();
+        }
+      } else if (disposable) {
+        disposable.dispose();
+        disposable = null;
+      }
+    }
+  };
+  context.ready.then(() => {
+    context.model.stateChanged.connect(onStateChanged);
+    if (context.model.dirty) {
+      disposable = app.setDirty();
+    }
+  });
+  context.disposed.connect(() => {
+    if (disposable) {
+      disposable.dispose();
+    }
+  });
 }
 
 

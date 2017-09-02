@@ -25,38 +25,25 @@ class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
    * If a mime type cannot be found returns the defaul mime type `text/plain`, never `null`.
    */
   getMimeTypeByLanguage(info: nbformat.ILanguageInfoMetadata): string {
-    let mode: Mode.ISpec;
-    if (info.codemirror_mode) {
-      mode = Mode.findBest(info.codemirror_mode as any);
-      if (mode) {
-        return mode.mime;
-      }
-    }
-    mode = Mode.findByMIME(info.mimetype || '');
-    if (mode) {
-      return info.mimetype!;
-    }
     let ext = info.file_extension || '';
-    ext = ext.split('.').slice(-1)[0];
-    mode = Mode.findByExtension(ext || '');
-    if (mode) {
-      return mode.mime;
-    }
-    mode = Mode.findByName(info.name || '');
-    return mode ? mode.mime : IEditorMimeTypeService.defaultMimeType;
+    return Mode.findBest(info.codemirror_mode as any || {
+      mimetype: info.mimetype,
+      name: info.name,
+      ext: [ext.split('.').slice(-1)[0]]
+    }).mime;
   }
 
   /**
    * Returns a mime type for the given file path.
    *
    * #### Notes
-   * If a mime type cannot be found returns the defaul mime type `text/plain`, never `null`.
+   * If a mime type cannot be found returns the default mime type `text/plain`, never `null`.
    */
   getMimeTypeByFilePath(path: string): string {
     if (PathExt.extname(path) === '.ipy') {
       return 'text/x-python';
     }
-    const mode = Mode.findByFileName(path);
-    return mode ? mode.mime : IEditorMimeTypeService.defaultMimeType;
+    let mode = Mode.findByFileName(path) || Mode.findBest('');
+    return mode.mime;
   }
 }

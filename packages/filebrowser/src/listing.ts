@@ -10,6 +10,10 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
+  DocumentRegistry
+} from '@jupyterlab/docregistry';
+
+import {
   IDocumentManager, renameFile
 } from '@jupyterlab/docmanager';
 
@@ -119,11 +123,6 @@ const NAME_ID_CLASS = 'jp-id-name';
 const MODIFIED_ID_CLASS = 'jp-id-modified';
 
 /**
- * The class name added to a file type content item.
- */
-const FILE_TYPE_CLASS = 'jp-FileIcon';
-
-/**
  * The mime type for a con tents drag object.
  */
 const CONTENTS_MIME = 'application/x-jupyter-icontents';
@@ -137,56 +136,6 @@ const DROP_TARGET_CLASS = 'jp-mod-dropTarget';
  * The class name added to selected rows.
  */
 const SELECTED_CLASS = 'jp-mod-selected';
-
-/**
- * The class name added to a material icon content item.
- */
-const MATERIAL_ICON_CLASS = 'jp-MaterialIcon';
-
-/**
- * The class name added to a directory file browser item.
- */
-const FOLDER_MATERIAL_ICON_CLASS = 'jp-OpenFolderIcon';
-
-/**
- * The class name added to a notebook file browser item.
- */
-const NOTEBOOK_MATERIAL_ICON_CLASS = 'jp-NotebookIcon';
-
-/**
- * The class name added to a markdown file browser item.
- */
-const MARKDOWN_ICON_CLASS = 'jp-MarkdownIcon';
-
-/**
- * The class name added to a python file browser item.
- */
-const PYTHON_ICON_CLASS = 'jp-PythonIcon';
-
-/**
- * The class name added to a JSON file browser item.
- */
-const JSON_ICON_CLASS = 'jp-JSONIcon';
-
-/**
- * The class name added to a speadsheet file browser item.
- */
-const SPREADSHEET_ICON_CLASS = 'jp-SpreadsheetIcon';
-
-/**
- * The class name added to a R Kernel file browser item.
- */
-const RKERNEL_ICON_CLASS = 'jp-RKernelIcon';
-
-/**
- * The class name added to a YAML file browser item.
- */
-const YAML_ICON_CLASS = 'jp-YamlIcon';
-
-/**
- * The class added for image file browser items.
- */
-const IMAGE_ICON_CLASS = 'jp-ImageIcon';
 
 /**
  * The class name added to drag state icons to add space between the icon and the file name
@@ -277,12 +226,9 @@ class DirListing extends Widget {
    * Dispose of the resources held by the directory listing.
    */
   dispose(): void {
-    this._model = null;
-    this._items = null;
-    this._editNode = null;
-    this._drag = null;
-    this._dragData = null;
-    this._manager = null;
+    this._items.length = 0;
+    this._sortedItems.length = 0;
+    this._clipboard.length = 0;
     super.dispose();
   }
 
@@ -445,7 +391,7 @@ class DirListing extends Widget {
         body: message,
         buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'DELETE'})]
       }).then(result => {
-        if (!this.isDisposed && result.accept) {
+        if (!this.isDisposed && result.button.accept) {
           return this._delete(names);
         }
       });
@@ -606,12 +552,13 @@ class DirListing extends Widget {
    *
    * @returns The path to the selected file.
    */
-  pathForClick(event: MouseEvent): string {
+  pathForClick(event: MouseEvent): string | undefined {
     let items = this._sortedItems;
     let index = Private.hitTestNodes(this._items, event.clientX, event.clientY);
     if (index !== -1) {
       return items[index].path;
     }
+    return undefined;
   }
 
   /**
@@ -668,8 +615,12 @@ class DirListing extends Widget {
     case 'dblclick':
       this._evtDblClick(event as MouseEvent);
       break;
-    case 'contextmenu':
-      this._evtContextMenu(event as MouseEvent);
+    case 'dragenter':
+    case 'dragover':
+      event.preventDefault();
+      break;
+    case 'drop':
+      this._evtNativeDrop(event as DragEvent);
       break;
     case 'scroll':
       this._evtScroll(event as MouseEvent);
@@ -702,7 +653,9 @@ class DirListing extends Widget {
     node.addEventListener('keydown', this);
     node.addEventListener('click', this);
     node.addEventListener('dblclick', this);
-    node.addEventListener('contextmenu', this);
+    content.addEventListener('dragenter', this);
+    content.addEventListener('dragover', this);
+    content.addEventListener('drop', this);
     content.addEventListener('scroll', this);
     content.addEventListener('p-dragenter', this);
     content.addEventListener('p-dragleave', this);
@@ -721,8 +674,10 @@ class DirListing extends Widget {
     node.removeEventListener('keydown', this);
     node.removeEventListener('click', this);
     node.removeEventListener('dblclick', this);
-    node.removeEventListener('contextmenu', this);
     content.removeEventListener('scroll', this);
+    content.removeEventListener('dragover', this);
+    content.removeEventListener('dragover', this);
+    content.removeEventListener('drop', this);
     content.removeEventListener('p-dragenter', this);
     content.removeEventListener('p-dragleave', this);
     content.removeEventListener('p-dragover', this);
@@ -747,7 +702,7 @@ class DirListing extends Widget {
     // Remove any excess item nodes.
     while (nodes.length > items.length) {
       let node = nodes.pop();
-      content.removeChild(node);
+      content.removeChild(node!);
     }
 
     // Add any missing item nodes.
@@ -769,7 +724,8 @@ class DirListing extends Widget {
     for (let i = 0, n = items.length; i < n; ++i) {
       let node = nodes[i];
       let item = items[i];
-      renderer.updateItemNode(node, item);
+      let ft = this._manager.registry.getFileTypeForModel(item);
+      renderer.updateItemNode(node, item, ft);
       if (this._selection[item.name]) {
         node.classList.add(SELECTED_CLASS);
         if (this._isCut && this._model.path === this._prevPath) {
@@ -828,13 +784,6 @@ class DirListing extends Widget {
   }
 
   /**
-   * Handle the `'contextmenu'` event for the widget.
-   */
-  private _evtContextMenu(event: MouseEvent): void {
-    this._inContext = true;
-  }
-
-  /**
    * Handle the `'mousedown'` event for the widget.
    */
   private _evtMousedown(event: MouseEvent): void {
@@ -856,11 +805,9 @@ class DirListing extends Widget {
 
     // Check for clearing a context menu.
     let newContext = (IS_MAC && event.ctrlKey) || (event.button === 2);
-    if (this._inContext && !newContext) {
-      this._inContext = false;
+    if (newContext) {
       return;
     }
-    this._inContext = false;
 
     let index = Private.hitTestNodes(this._items, event.clientX, event.clientY);
     if (index === -1) {
@@ -914,7 +861,7 @@ class DirListing extends Widget {
     event.stopPropagation();
 
     // Bail if we are the one dragging.
-    if (this._drag) {
+    if (this._drag || !this._dragData) {
       return;
     }
 
@@ -1037,6 +984,19 @@ class DirListing extends Widget {
     }
   }
 
+  /**
+   * Handle the `drop` event for the widget.
+   */
+  private _evtNativeDrop(event: DragEvent): void {
+    let files = event.dataTransfer.files;
+    if (files.length === 0) {
+      return;
+    }
+    event.preventDefault();
+    for (let i = 0; i < files.length; i++) {
+      this._model.upload(files[i]);
+    }
+  }
 
   /**
    * Handle the `'p-dragenter'` event for the widget.
@@ -1120,7 +1080,7 @@ class DirListing extends Widget {
     const manager = this._manager;
 
     // Handle the items.
-    const promises: Promise<Contents.IModel>[] = [];
+    const promises: Promise<Contents.IModel | null>[] = [];
     const paths = event.mimeData.getData(CONTENTS_MIME) as string[];
     for (let path of paths) {
       let name = PathExt.basename(path);
@@ -1143,7 +1103,7 @@ class DirListing extends Widget {
     let selectedNames = Object.keys(this._selection);
     let source = this._items[index];
     let items = this._sortedItems;
-    let item: Contents.IModel = null;
+    let item: Contents.IModel | undefined;
 
     // If the source node is not selected, use just that node.
     if (!source.classList.contains(SELECTED_CLASS)) {
@@ -1154,8 +1114,13 @@ class DirListing extends Widget {
       item = find(items, value => value.name === name);
     }
 
+    if (!item) {
+      return;
+    }
+
     // Create the drag image.
-    let dragImage = this.renderer.createDragImage(source, selectedNames.length, item);
+    let ft = this._manager.registry.getFileTypeForModel(item);
+    let dragImage = this.renderer.createDragImage(source, selectedNames.length, ft);
 
     // Set up the drag event.
     this._drag = new Drag({
@@ -1171,6 +1136,9 @@ class DirListing extends Widget {
     this._drag.mimeData.setData(CONTENTS_MIME, paths);
     if (item && item.type !== 'directory') {
       this._drag.mimeData.setData(FACTORY_MIME, () => {
+        if (!item) {
+          return;
+        }
         let path = item.path;
         let widget = this._manager.findWidget(path);
         if (!widget) {
@@ -1334,7 +1302,7 @@ class DirListing extends Widget {
       }
       if (this.isDisposed) {
         this._inRename = false;
-        return;
+        return Promise.reject('Disposed') as Promise<string>;
       }
 
       const manager = this._manager;
@@ -1342,15 +1310,19 @@ class DirListing extends Widget {
       const newPath = PathExt.join(this._model.path, newName);
       const promise = renameFile(manager, oldPath, newPath);
       return promise.catch(error => {
-        utils.showErrorMessage('Rename Error', error);
+        if (error !== 'File not renamed') {
+          utils.showErrorMessage('Rename Error', error);
+        }
         this._inRename = false;
         return original;
       }).then(() => {
         if (this.isDisposed) {
           this._inRename = false;
-          return;
+          return Promise.reject('Disposed') as Promise<string>;
         }
-        this.selectItemByName(newName);
+        if (this._inRename) {
+          this.selectItemByName(newName);
+        }
         this._inRename = false;
         return newName;
       });
@@ -1402,9 +1374,14 @@ class DirListing extends Widget {
    * Handle a `fileChanged` signal from the model.
    */
   private _onFileChanged(sender: FileBrowserModel, args: Contents.IChangedArgs) {
-    if (args.type === 'new') {
-      this.selectItemByName(args.newValue.name).then(() => {
-        if (!this.isDisposed && args.newValue === 'directory') {
+    let newValue = args.newValue;
+    if (!newValue) {
+      return;
+    }
+    let name = args.newValue.name;
+    if (args.type === 'new' && name) {
+      this.selectItemByName(name).then(() => {
+        if (!this.isDisposed && newValue.type === 'directory') {
           this._doRename();
         }
       });
@@ -1423,23 +1400,22 @@ class DirListing extends Widget {
     this.selectItemByName(basename);
   }
 
-  private _model: FileBrowserModel = null;
-  private _editNode: HTMLInputElement = null;
+  private _model: FileBrowserModel;
+  private _editNode: HTMLInputElement;
   private _items: HTMLElement[] = [];
   private _sortedItems: Contents.IModel[] = [];
   private _sortState: DirListing.ISortState = { direction: 'ascending', key: 'name' };
-  private _drag: Drag = null;
-  private _dragData: { pressX: number, pressY: number, index: number } = null;
+  private _drag: Drag | null = null;
+  private _dragData: { pressX: number, pressY: number, index: number } | null = null;
   private _selectTimer = -1;
   private _noSelectTimer = -1;
   private _isCut = false;
   private _prevPath = '';
   private _clipboard: string[] = [];
-  private _manager: IDocumentManager = null;
+  private _manager: IDocumentManager;
   private _softSelection = '';
-  private _inContext = false;
   private _selection: { [key: string]: boolean; } = Object.create(null);
-  private _renderer: DirListing.IRenderer = null;
+  private _renderer: DirListing.IRenderer;
   private _searchPrefix: string = '';
   private _searchPrefixTimer = -1;
   private _inRename = false;
@@ -1526,8 +1502,10 @@ namespace DirListing {
      * @param node - A node created by [[createItemNode]].
      *
      * @param model - The model object to use for the item state.
+     *
+     * @param fileType - The file type of the item, if applicable.
      */
-    updateItemNode(node: HTMLElement, model: Contents.IModel): void;
+    updateItemNode(node: HTMLElement, model: Contents.IModel, fileType?: DocumentRegistry.IFileType): void;
 
     /**
      * Get the node containing the file name.
@@ -1545,9 +1523,11 @@ namespace DirListing {
      *
      * @param count - The number of items being dragged.
      *
+     * @param fileType - The file type of the item, if applicable.
+     *
      * @returns An element to use as the drag image.
      */
-    createDragImage(node: HTMLElement, count: number, model: Contents.IModel): HTMLElement;
+    createDragImage(node: HTMLElement, count: number, fileType?: DocumentRegistry.IFileType): HTMLElement;
   }
 
   /**
@@ -1632,7 +1612,7 @@ namespace DirListing {
         name.classList.remove(DESCENDING_CLASS);
         return state;
       }
-      return void 0;
+      return state;
     }
 
     /**
@@ -1654,78 +1634,35 @@ namespace DirListing {
       return node;
     }
 
-    parseFileExtension(path: string): string {
-      var fileExtension = PathExt.extname(path).toLocaleLowerCase();
-      switch (fileExtension) {
-        case '.md':
-          return MARKDOWN_ICON_CLASS;
-        case '.py':
-          return PYTHON_ICON_CLASS;
-        case '.json':
-          return JSON_ICON_CLASS;
-        case '.csv':
-          return SPREADSHEET_ICON_CLASS;
-        case '.xls':
-          return SPREADSHEET_ICON_CLASS;
-        case '.r':
-          return RKERNEL_ICON_CLASS;
-        case '.yml':
-          return YAML_ICON_CLASS;
-        case '.yaml':
-          return YAML_ICON_CLASS;
-        case '.svg':
-          return IMAGE_ICON_CLASS;
-        case '.tiff':
-          return IMAGE_ICON_CLASS;
-        case '.jpeg':
-          return IMAGE_ICON_CLASS;
-        case '.jpg':
-          return IMAGE_ICON_CLASS;
-        case '.gif':
-          return IMAGE_ICON_CLASS;
-        case '.png':
-          return IMAGE_ICON_CLASS;
-        case '.raw':
-          return IMAGE_ICON_CLASS;
-        default:
-          return FILE_TYPE_CLASS;
-      }
-    }
-
     /**
      * Update an item node to reflect the current state of a model.
      *
      * @param node - A node created by [[createItemNode]].
      *
      * @param model - The model object to use for the item state.
+     *
+     * @param fileType - The file type of the item, if applicable.
+     *
      */
-    updateItemNode(node: HTMLElement, model: Contents.IModel): void {
+    updateItemNode(node: HTMLElement, model: Contents.IModel, fileType?: DocumentRegistry.IFileType): void {
       let icon = DOMUtils.findElement(node, ITEM_ICON_CLASS);
       let text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
       let modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
-      icon.className = ITEM_ICON_CLASS + ' ' + MATERIAL_ICON_CLASS;
-      switch (model.type) {
-      case 'directory':
-        icon.classList.add(FOLDER_MATERIAL_ICON_CLASS);
-        break;
-      case 'notebook':
-        icon.classList.add(NOTEBOOK_MATERIAL_ICON_CLASS);
-        break;
-      case 'file':
-        icon.classList.add(this.parseFileExtension(model.path));
-        break;
-      default:
-        icon.classList.add(MATERIAL_ICON_CLASS);
-        icon.classList.add(FILE_TYPE_CLASS);
-        break;
+      if (!fileType) {
+        icon.textContent = '';
+        icon.className = '';
+      } else {
+        icon.textContent = fileType.iconLabel || '';
+        icon.className = fileType.iconClass || '';
       }
+      icon.classList.add(ITEM_ICON_CLASS);
 
       let modText = '';
       let modTitle = '';
       if (model.last_modified) {
-        modText = Time.formatHuman(model.last_modified);
-        modTitle = Time.format(model.last_modified);
+        modText = Time.formatHuman(new Date(model.last_modified));
+        modTitle = Time.format(new Date(model.last_modified));
       }
 
       // If an item is being edited currently, its text node is unavailable.
@@ -1755,29 +1692,25 @@ namespace DirListing {
      *
      * @param count - The number of items being dragged.
      *
+     * @param fileType - The file type of the item, if applicable.
+     *
      * @returns An element to use as the drag image.
      */
-    createDragImage(node: HTMLElement, count: number, model: Contents.IModel): HTMLElement {
+    createDragImage(node: HTMLElement, count: number, fileType?: DocumentRegistry.IFileType): HTMLElement {
       let dragImage = node.cloneNode(true) as HTMLElement;
       let modified = DOMUtils.findElement(dragImage, ITEM_MODIFIED_CLASS);
-      let iconNode = DOMUtils.findElement(dragImage, ITEM_ICON_CLASS);
+      let icon = DOMUtils.findElement(dragImage, ITEM_ICON_CLASS);
       dragImage.removeChild(modified as HTMLElement);
-      if (model) {
-        switch (model.type) {
-          case 'directory':
-            iconNode.className = `${MATERIAL_ICON_CLASS} ${FOLDER_MATERIAL_ICON_CLASS} ${DRAG_ICON_CLASS}`;
-            break;
-          case 'notebook':
-            iconNode.className = `${MATERIAL_ICON_CLASS} ${NOTEBOOK_MATERIAL_ICON_CLASS} ${DRAG_ICON_CLASS}`;
-            break;
-          case 'file':
-            iconNode.className = `${MATERIAL_ICON_CLASS} ${DRAG_ICON_CLASS} ` + this.parseFileExtension(model.path);
-            break;
-          default:
-            iconNode.className = `${MATERIAL_ICON_CLASS} ${FILE_TYPE_CLASS} ${DRAG_ICON_CLASS}`;
-            break;
-        }
+
+      if (!fileType) {
+        icon.textContent = '';
+        icon.className = '';
+      } else {
+        icon.textContent = fileType.iconLabel || '';
+        icon.className = fileType.iconClass || '';
       }
+      icon.classList.add(DRAG_ICON_CLASS);
+
       if (count > 1) {
         let nameNode = DOMUtils.findElement(dragImage, ITEM_TEXT_CLASS);
         nameNode.textContent = count + ' Items';

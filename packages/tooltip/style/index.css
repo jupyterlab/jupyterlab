@@ -11,6 +11,11 @@
   max-width: 650px;
   z-index: 10001;
   padding: 4px;
+  display: flex;
+}
+
+
+.jp-Tooltip-content {
   overflow: auto;
 }
 

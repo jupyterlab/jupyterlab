@@ -7,7 +7,7 @@ module.exports = function (config) {
     frameworks: ['mocha'],
     client: {
       mocha: {
-        timeout : 5000, // 5 seconds - upped from 2 seconds
+        timeout : 10000, // 10 seconds - upped from 2 seconds
         retries: 3 // Allow for slow server on CI.
       }
     },
@@ -28,6 +28,7 @@ module.exports = function (config) {
       json: 'coverage/remapped.json',
       html: 'coverage/html'
     },
+    browserNoActivityTimeout: 31000, // 31 seconds - upped from 10 seconds
     port: 9876,
     colors: true,
     singleRun: true,

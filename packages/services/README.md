@@ -120,17 +120,18 @@ Follow the package install instructions first.
 npm install --save xmlhttprequest ws
 ```
 
-Use `XMLHttpRequest` and `WebSocket` in the server settings (in ES6 syntax):
+Use `XMLHttpRequest` and `WebSocket` in the server settings (in ES5 syntax):
 
-```typescript
-import { Kernel, ServerConnection } from '@jupyterlab/services';
-import { XMLHttpRequest } from "xmlhttprequest";
-import { default as WebSocket } from 'ws';
+```javascript
+var services = require('@jupyterlab/services');
+var ws = require('ws');
+var xhr = require('xmlhttprequest');
 
 
-let serverSettings = ServerConnection.makeSettings({
-  xml: XMLHttpRequest,
-  webSocket: WebSocket
+// Set the request and socket functions.
+var serverSettings = services.ServerConnection.makeSettings({
+  xhrFactory: function () { return new xhr.XMLHttpRequest(); },
+  wsFactory: function (url, protocol) { return new ws(url, protocol); }
 });
 Kernel.startNew({ serverSettings }).then(...);
 ```
@@ -154,7 +155,7 @@ import {
 } from '@jupyterlab/services';
 
 
-/ Get a list of available kernels and connect to one.
+// Get a list of available kernels and connect to one.
 Kernel.listRunning().then(kernelModels => {
   Kernel.connectTo(kernelModels[0].id).then((kernel) => {
     console.log(kernel.name);
@@ -173,9 +174,9 @@ Kernel.getSpecs().then(kernelSpecs => {
   Kernel.startNew(options).then(kernel => {
     // Execute and handle replies.
     let future = kernel.requestExecute({ code: 'a = 1' } );
-    future.onDone = () => {
+    future.done.then(() => {
       console.log('Future is fulfilled');
-    };
+    });
     future.onIOPub = (msg) => {
       console.log(msg.content);  // Print rich output data.
     };
@@ -235,12 +236,12 @@ let options = {
 Session.startNew(options).then(session => {
   // Execute and handle replies on the kernel.
   let future = session.kernel.requestExecute({ code: 'a = 1' });
-  future.onDone = () => {
+  future.done.then(() => {
     console.log('Future is fulfilled');
-  };
+  });
 
   // Rename the session.
-  session.rename('/local/bar.ipynb').then(() => {
+  session.setPath('/local/bar.ipynb').then(() => {
     console.log('Session renamed to', session.path);
   });
 
@@ -261,6 +262,10 @@ Session.startNew(options).then(session => {
 **Comm**
 
 ```typescript
+
+import {
+  Kernel
+} from '@jupyterlab/services';
 
 // Create a comm from the server side.
 //

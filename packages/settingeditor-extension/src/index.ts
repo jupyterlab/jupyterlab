@@ -61,13 +61,15 @@ const plugin: JupyterLabPlugin<void> = {
         }
 
         const key = plugin.id;
+        const when = app.restored;
         const editor = new SettingEditor({
-          editorFactory, key, registry, state
+          editorFactory, key, registry, state, when
         });
 
         tracker.add(editor);
         editor.id = namespace;
         editor.title.label = 'Settings';
+        editor.title.iconClass = 'jp-SettingsIcon';
         editor.title.closable = true;
         shell.addToMainArea(editor);
         shell.activateById(editor.id);

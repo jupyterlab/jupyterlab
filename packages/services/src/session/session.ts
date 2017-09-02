@@ -150,7 +150,7 @@ namespace Session {
      * This shuts down the existing kernel and creates a new kernel,
      * keeping the existing session ID and path.
      */
-    changeKernel(options: Kernel.IModel): Promise<Kernel.IKernelConnection>;
+    changeKernel(options: Partial<Kernel.IModel>): Promise<Kernel.IKernelConnection>;
 
     /**
      * Kill the kernel and shutdown the session.
@@ -304,7 +304,7 @@ namespace Session {
     /**
      * The path (not including name) to the session.
      */
-    path?: string;
+    path: string;
 
     /**
      * The name of the session.
@@ -489,6 +489,6 @@ namespace Session {
     readonly name: string;
     readonly path: string;
     readonly type: string;
-    readonly kernel?: Kernel.IModel;
+    readonly kernel: Kernel.IModel;
   }
 }

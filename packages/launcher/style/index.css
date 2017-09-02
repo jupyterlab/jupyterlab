@@ -24,7 +24,7 @@
   margin: 0;
   padding: 0;
   outline: none;
-  background: var(--md-grey-50);
+  background: var(--jp-layout-color0);
   box-sizing: border-box;
 }
 
@@ -48,6 +48,14 @@
   overflow: auto;
   display: flex;
   justify-content: center;
+}
+
+
+.jp-Launcher-cwd h3 {
+  font-size: var(--jp-ui-font-size2);
+  font-weight: normal;
+  color: var(--jp-ui-font-color1);
+  margin: 1em 0px;
 }
 
 
@@ -120,8 +128,8 @@
   height: var(--jp-private-launcher-card-size);
   margin: 8px;
   padding: 0px;
-  border: 1px solid var(--md-grey-400);
-  background: var(--jp-layout-color0);
+  border: 1px solid var(--jp-border-color1);
+  background: var(--jp-layout-color1);
   box-shadow: 0px 1px 1px 1px rgba(0,0,0,.08);
   transition: .2s box-shadow;
 }
@@ -169,6 +177,8 @@
   font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color1);
   box-sizing: border-box;
+  overflow: hidden;
+  white-space: nowrap;
   text-overflow: ellipsis;
   text-align: center;
 }

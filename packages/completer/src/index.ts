@@ -61,7 +61,7 @@ namespace ICompletionManager {
     /**
      * The host editor for the completer.
      */
-    editor: CodeEditor.IEditor;
+    editor: CodeEditor.IEditor | null;
 
     /**
      * The session used by the completer to make API requests.

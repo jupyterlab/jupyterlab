@@ -87,7 +87,7 @@ interface IInspector {
   /**
    * The source of events the inspector listens for.
    */
-  source: IInspector.IInspectable;
+  source: IInspector.IInspectable | null;
 }
 
 
@@ -168,7 +168,7 @@ namespace IInspector {
     /**
      * The content being sent to the inspector for display.
      */
-    content: Widget;
+    content: Widget | null;
 
     /**
      * The type of the inspector being updated.
@@ -194,10 +194,10 @@ class InspectorPanel extends TabPanel implements IInspector {
   /**
    * The source of events the inspector panel listens for.
    */
-  get source(): IInspector.IInspectable {
+  get source(): IInspector.IInspectable | null {
     return this._source;
   }
-  set source(source: IInspector.IInspectable) {
+  set source(source: IInspector.IInspectable | null) {
     if (this._source === source) {
       return;
     }
@@ -210,9 +210,7 @@ class InspectorPanel extends TabPanel implements IInspector {
     }
 
     // Clear the inspector child items (but maintain history) if necessary.
-    if (this._items) {
-      Object.keys(this._items).forEach(i => this._items[i].content = null);
-    }
+    Object.keys(this._items).forEach(i => this._items[i].content = null);
 
     this._source = source;
 
@@ -270,18 +268,14 @@ class InspectorPanel extends TabPanel implements IInspector {
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
-    if (this._items == null) {
+    if (this.isDisposed) {
       return;
     }
-    let items = this._items;
-    this._items = null;
     this.source = null;
+    let items = this._items;
 
     // Dispose the inspector child items.
-    if (items) {
-      Object.keys(items).forEach(i => { items[i].dispose(); });
-    }
-
+    Object.keys(items).forEach(i => { items[i].dispose(); });
     super.dispose();
   }
 
@@ -329,16 +323,16 @@ class InspectorPanel extends TabPanel implements IInspector {
 
     // If the inspector was emptied, show the next best ranked inspector.
     let lowest = Infinity;
-    widget = null;
+    let newWidget: Widget | null = null;
     for (let type in items) {
       let inspector = this._items[type];
       if (inspector.rank < lowest && inspector.content) {
         lowest = inspector.rank;
-        widget = inspector;
+        newWidget = inspector;
       }
     }
-    if (widget) {
-      this.currentWidget = widget;
+    if (newWidget) {
+      this.currentWidget = newWidget;
     }
   }
 
@@ -350,7 +344,7 @@ class InspectorPanel extends TabPanel implements IInspector {
   }
 
   private _items: { [type: string]: InspectorItem } = Object.create(null);
-  private _source: IInspector.IInspectable = null;
+  private _source: IInspector.IInspectable | null = null;
 }
 
 
@@ -372,10 +366,10 @@ class InspectorItem extends Widget {
   /**
    * The text of the inspector.
    */
-  get content(): Widget {
+  get content(): Widget | null {
     return this._content;
   }
-  set content(newValue: Widget) {
+  set content(newValue: Widget | null) {
     if (newValue === this._content) {
       return;
     }
@@ -387,9 +381,9 @@ class InspectorItem extends Widget {
       }
     }
     this._content = newValue;
-    if (this._content) {
-      this._content.addClass(CONTENT_CLASS);
-      (this.layout as PanelLayout).addWidget(this._content);
+    if (newValue) {
+      newValue.addClass(CONTENT_CLASS);
+      (this.layout as PanelLayout).addWidget(newValue);
       if (this.remembers) {
         this._history.push(newValue);
         this._index++;
@@ -407,10 +401,9 @@ class InspectorItem extends Widget {
     if (newValue === this._remembers) {
       return;
     }
-    this._clear();
     this._remembers = newValue;
-    if (!this._remembers) {
-      this._history = null;
+    if (!newValue) {
+      this._clear();
     }
     this.update();
   }
@@ -429,18 +422,11 @@ class InspectorItem extends Widget {
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
-    if (this._toolbar === null) {
+    if (this.isDisposed) {
       return;
     }
-    let toolbar = this._toolbar;
-    let history = this._history;
-    this._toolbar = null;
-    this._history = null;
-
-    if (history) {
-      history.forEach(widget => widget.dispose());
-    }
-    toolbar.dispose();
+    this._history.forEach(widget => widget.dispose());
+    this._toolbar.dispose();
     super.dispose();
   }
 
@@ -457,9 +443,7 @@ class InspectorItem extends Widget {
    * Clear history.
    */
   private _clear(): void {
-    if (this._history) {
-      this._history.forEach(widget => widget.dispose());
-    }
+    this._history.forEach(widget => widget.dispose());
     this._history = [];
     this._index = -1;
   }
@@ -519,10 +503,10 @@ class InspectorItem extends Widget {
     this._content.show();
   }
 
-  private _content: Widget = null;
-  private _history: Widget[] = null;
+  private _content: Widget | null = null;
+  private _history: Widget[] = [];
   private _index: number = -1;
   private _rank: number = Infinity;
   private _remembers: boolean = false;
-  private _toolbar: Toolbar<Widget> = null;
+  private _toolbar: Toolbar<Widget>;
 }

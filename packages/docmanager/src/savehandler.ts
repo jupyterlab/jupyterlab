@@ -14,10 +14,6 @@ import {
 } from '@phosphor/signaling';
 
 import {
-Dialog, showDialog
-} from '@jupyterlab/apputils';
-
-import {
   DocumentRegistry
 } from '@jupyterlab/docregistry';
 
@@ -36,9 +32,9 @@ class SaveHandler implements IDisposable {
   constructor(options: SaveHandler.IOptions) {
     this._manager = options.manager;
     this._context = options.context;
-    this._minInterval = options.saveInterval * 1000 || 120000;
+    let interval = options.saveInterval || 120;
+    this._minInterval = interval * 1000;
     this._interval = this._minInterval;
-    this._warnOnConflict = !this._context.model.modelDB.isCollaborative;
     // Restart the timer when the contents model is updated.
     this._context.fileChanged.connect(this._setTimer, this);
     this._context.disposed.connect(this.dispose, this);
@@ -68,17 +64,17 @@ class SaveHandler implements IDisposable {
    * Get whether the save handler is disposed.
    */
   get isDisposed(): boolean {
-    return this._context === null;
+    return this._isDisposed;
   }
 
   /**
    * Dispose of the resources used by the save handler.
    */
   dispose(): void {
-    if (this._context === null) {
+    if (this.isDisposed) {
       return;
     }
-    this._context = null;
+    this._isDisposed = true;
     clearTimeout(this._autosaveTimer);
     Signal.clearData(this);
   }
@@ -131,78 +127,30 @@ class SaveHandler implements IDisposable {
       return;
     }
 
-    // Make sure the file has not changed on disk.
-    let promise = this._manager.contents.get(context.path);
-    promise.then(model => {
-      if (!this.isDisposed && context.contentsModel && this._warnOnConflict
-          && model.last_modified !== context.contentsModel.last_modified) {
-        return this._timeConflict(model.last_modified);
-      }
-      return this._finishSave();
-    }, (err) => {
-      return this._finishSave();
-    }).catch(err => {
-      console.error('Error in Auto-Save', err.message);
-    });
-  }
-
-  /**
-   * Handle a time conflict.
-   */
-  private _timeConflict(modified: string): Promise<void> {
-    let localTime = new Date(this._context.contentsModel.last_modified);
-    let remoteTime = new Date(modified);
-    console.warn(`Last saving peformed ${localTime} ` +
-                 `while the current file seem to have been saved ` +
-                 `${remoteTime}`);
-    let body = `The file has changed on disk since the last time we ` +
-               `opened or saved it. ` +
-               `Do you want to overwrite the file on disk with the version ` +
-               ` open here, or load the version on disk (revert)?`;
-    this._inDialog = true;
-    let revertBtn = Dialog.okButton({ label: 'REVERT' });
-    let overwriteBtn = Dialog.warnButton({ label: 'OVERWRITE' });
-    return showDialog({
-      title: 'File Changed', body,
-      buttons: [Dialog.cancelButton(), revertBtn, overwriteBtn]
-    }).then(result => {
-      if (this.isDisposed) {
-        return;
-      }
-      this._inDialog = false;
-      if (result.label === 'OVERWRITE') {
-        return this._finishSave();
-      } else if (result.label === 'REVERT') {
-        return this._context.revert();
-      }
-    });
-  }
-
-  /**
-   * Perform the save, adjusting the save interval as necessary.
-   */
-  private _finishSave(): Promise<void> {
     let start = new Date().getTime();
-    return this._context.save().then(() => {
+    context.save().then(() => {
       if (this.isDisposed) {
         return;
       }
       let duration = new Date().getTime() - start;
       // New save interval: higher of 10x save duration or min interval.
-      this._interval = Math.max(10 * duration, this._minInterval);
+      this._interval = Math.max(this._multiplier * duration, this._minInterval);
       // Restart the update to pick up the new interval.
       this._setTimer();
+    }).catch(err => {
+      console.error('Error in Auto-Save', err.message);
     });
   }
 
   private _autosaveTimer = -1;
   private _minInterval = -1;
   private _interval = -1;
-  private _warnOnConflict = true;
-  private _context: DocumentRegistry.Context = null;
-  private _manager: ServiceManager.IManager = null;
+  private _context: DocumentRegistry.Context;
+  private _manager: ServiceManager.IManager;
   private _isActive = false;
   private _inDialog = false;
+  private _isDisposed = false;
+  private _multiplier = 10;
 }
 
 

@@ -1,0 +1,179 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) 2014-2016, Jupyter Development Team.
+|
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+#jupyterlab-splash {
+  z-index: 10;
+  position: absolute;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  background-position: center 40%;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-color: white;
+}
+
+
+.splash-fade {
+  animation: .5s fade-out forwards;
+}
+
+
+#galaxy {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+#main-logo {
+  background-image: url('./images/jupyter-favicon.svg');
+  background-repeat: no-repeat;
+  background-size: 100px;
+  position: absolute;
+  background-position: center;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  animation: 1.5s fade-in linear forwards;
+}
+
+.planet {
+  background-repeat: no-repeat;
+  background-size: cover;
+  animation-iteration-count: infinite;
+  animation-name: orbit;
+}
+
+#moon1.orbit {
+  opacity: 1;
+  animation: orbit 2s ease;
+  width: 200px;
+  height: 140px;
+  margin-top: -53px;
+  margin-left: -54px;
+}
+
+#moon2.orbit {
+  opacity: 1;
+  animation: orbit 2s ease;
+  width: 132px;
+  height: 180px;
+  margin-top: -66px;
+  margin-left: -85px;
+}
+
+#moon3.orbit {
+  opacity: 1;
+  display: flex;
+  align-items: flex-end;
+  animation: orbit 2s ease;
+  width: 220px;
+  height: 166px;
+  margin-top: -96px;
+  margin-left: -50px;
+}
+
+#moon1 .planet {
+  background-color: #6F7070;
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+}
+
+#moon2 .planet {
+  background-color: #767677;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  float: right;
+}
+
+#moon3 .planet {
+  background-color: #989798;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+}
+
+.orbit {
+  animation-iteration-count: 1;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 50%;
+}
+
+.dot1, .dot2 {
+width: 60%;
+height: 60%;
+display: inline-block;
+position: absolute;
+top: 0;
+background-color: #333;
+border-radius: 100%;
+
+-webkit-animation: sk-bounce 2.0s infinite ease-in-out;
+animation: sk-bounce 2.0s infinite ease-in-out;
+}
+
+.dot2 {
+top: auto;
+bottom: 0;
+}
+
+
+@-webkit-keyframes sk-bounce {
+  0%, 100% { -webkit-transform: scale(0.0) }
+  50% { -webkit-transform: scale(1.0) }
+}
+
+
+@keyframes sk-bounce {
+  0%, 100% { 
+    transform: scale(0.0);
+    -webkit-transform: scale(0.0);
+  } 50% { 
+    transform: scale(1.0);
+    -webkit-transform: scale(1.0);
+  }
+}
+
+
+@keyframes orbit {
+  0% {
+      transform: rotateZ(0deg);
+  }
+  100% {
+      transform: rotateZ(-720deg);
+  }
+}
+
+@keyframes orbit2 {
+  0% {
+      transform: rotateZ(0deg);
+  }
+  100% {
+      transform: rotateZ(720deg);
+  }
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

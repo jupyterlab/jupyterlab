@@ -38,7 +38,7 @@ const contentFactory = createNotebookPanelFactory();
 function createFactory(): NotebookWidgetFactory {
   return new NotebookWidgetFactory({
     name: 'notebook',
-    fileExtensions: ['.ipynb'],
+    fileTypes: ['notebook'],
     rendermime,
     contentFactory,
     mimeTypeService

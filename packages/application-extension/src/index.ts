@@ -10,9 +10,12 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IStateDB, PageConfig
+  IStateDB
 } from '@jupyterlab/coreutils';
 
+import {
+  h
+} from '@phosphor/virtualdom';
 
 /**
  * The command IDs used by the application plugin.
@@ -44,19 +47,52 @@ const mainPlugin: JupyterLabPlugin<void> = {
   activate: (app: JupyterLab, palette: ICommandPalette) => {
     addCommands(app, palette);
 
-    // Temporary build message for manual rebuild.
-    let buildMessage = PageConfig.getOption('buildRequired');
-    if (buildMessage) {
-      let body = document.createElement('div');
-      body.innerHTML = (
-        '<p>JupyterLab build is out of date.<br>' +
-        'Please run <code>jupyter lab build</code> from<br>' +
-        'the command line and relaunch.</p>'
-      );
-      showDialog({
-        title: 'Build Recommended',
-        body,
-        buttons: [Dialog.okButton()]
+    let builder = app.serviceManager.builder;
+
+    let doBuild = () => {
+      return builder.build().then(() => {
+        return showDialog({
+          title: 'Build Complete',
+          body: 'Build successfully completed, reload page?',
+          buttons: [Dialog.cancelButton(),
+                    Dialog.warnButton({ label: 'RELOAD' })]
+        });
+      }).then(result => {
+        if (result.button.accept) {
+          location.reload();
+        }
+      }).catch(err => {
+        showDialog({
+          title: 'Build Failed',
+          body: h.pre(err.message)
+        });
+      });
+    };
+
+    if (builder.isAvailable) {
+      builder.getStatus().then(response => {
+        if (response.status === 'building') {
+          return doBuild();
+        }
+        if (response.status !== 'needed') {
+          return;
+        }
+        let body = h.div(
+          h.p(
+            'JupyterLab build is suggested:',
+            h.br(),
+            h.pre(response.message)
+          )
+        );
+        showDialog({
+          title: 'Build Recommended',
+          body,
+          buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'BUILD' })]
+        }).then(result => {
+          if (result.button.accept) {
+            return doBuild();
+          }
+        });
       });
     }
 
@@ -69,7 +105,9 @@ const mainPlugin: JupyterLabPlugin<void> = {
     // For more information, see:
     // https://developer.mozilla.org/en/docs/Web/Events/beforeunload
     window.addEventListener('beforeunload', event => {
-      return (event as any).returnValue = message;
+      if (app.isDirty) {
+        return (event as any).returnValue = message;
+      }
     });
   },
   autoStart: true

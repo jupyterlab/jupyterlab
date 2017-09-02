@@ -28,6 +28,9 @@ mkdir ~/.jupyter
 
 # Install and enable the server extension
 pip install -v -e ".[test]"
+# Make sure the schema and theme files exist
+test -e jupyterlab/schemas/jupyter.extensions.shortcuts.json
+test -e jupyterlab/themes/jupyterlab-theme-light-extension/images/jupyterlab.svg
 npm install
 npm run build:main
 jupyter serverextension enable --py jupyterlab

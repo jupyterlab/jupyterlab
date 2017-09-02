@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  MimeDocument, MimeDocumentFactory
+  MimeDocument, MimeDocumentFactory, DocumentRegistry
 } from '@jupyterlab/docregistry';
 
 import {
@@ -52,7 +52,7 @@ function createRendermimePlugins(extensions: IRenderMime.IExtensionModule[]): Ju
 export
 function createRendermimePlugin(item: IRenderMime.IExtension): JupyterLabPlugin<void> {
   return {
-    id: `jupyter.services.mimerenderer-${item.mimeType}`,
+    id: `jupyter.services.mimerenderer-${item.name}`,
     requires: [ILayoutRestorer],
     autoStart: true,
     activate: (app: JupyterLab, restorer: ILayoutRestorer) => {
@@ -70,30 +70,49 @@ function createRendermimePlugin(item: IRenderMime.IExtension): JupyterLabPlugin<
         return;
       }
 
-      let factory = new MimeDocumentFactory({
-        mimeType: item.mimeType,
-        renderTimeout: item.renderTimeout,
-        dataType: item.dataType,
-        rendermime: app.rendermime,
-        ...item.documentWidgetFactoryOptions,
-      });
-      app.docRegistry.addWidgetFactory(factory);
+      let registry = app.docRegistry;
+      let options: IRenderMime.IDocumentWidgetFactoryOptions[] = [];
+      if (Array.isArray(item.documentWidgetFactoryOptions)) {
+        options = item.documentWidgetFactoryOptions;
+      } else {
+        options = [item.documentWidgetFactoryOptions as IRenderMime.IDocumentWidgetFactoryOptions];
+      }
 
-      const factoryName = factory.name;
-      const namespace = `${factoryName}-renderer`;
-      const tracker = new InstanceTracker<MimeDocument>({ namespace });
+      if (item.fileTypes) {
+        item.fileTypes.forEach(ft => {
+          app.docRegistry.addFileType(ft as DocumentRegistry.IFileType);
+        });
+      }
 
-      // Handle state restoration.
-      restorer.restore(tracker, {
-        command: 'docmanager:open',
-        args: widget => ({ path: widget.context.path, factory: factoryName }),
-        name: widget => widget.context.path
-      });
+      options.forEach(option => {
+        let factory = new MimeDocumentFactory({
+          renderTimeout: item.renderTimeout,
+          dataType: item.dataType,
+          rendermime: app.rendermime,
+          modelName: option.modelName,
+          name: option.name,
+          primaryFileType: registry.getFileType(option.primaryFileType),
+          fileTypes: option.fileTypes,
+          defaultFor: option.defaultFor
+        });
+        registry.addWidgetFactory(factory);
 
-      factory.widgetCreated.connect((sender, widget) => {
-        // Notify the instance tracker if restore data needs to update.
-        widget.context.pathChanged.connect(() => { tracker.save(widget); });
-        tracker.add(widget);
+        const factoryName = factory.name;
+        const namespace = `${factoryName}-renderer`;
+        const tracker = new InstanceTracker<MimeDocument>({ namespace });
+
+        // Handle state restoration.
+        restorer.restore(tracker, {
+          command: 'docmanager:open',
+          args: widget => ({ path: widget.context.path, factory: factoryName }),
+          name: widget => widget.context.path
+        });
+
+        factory.widgetCreated.connect((sender, widget) => {
+          // Notify the instance tracker if restore data needs to update.
+          widget.context.pathChanged.connect(() => { tracker.save(widget); });
+          tracker.add(widget);
+        });
       });
     }
   };

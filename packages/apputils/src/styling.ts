@@ -16,6 +16,7 @@ namespace Styling {
   export
   function styleNode(node: HTMLElement, className=''): void {
     styleNodeByTag(node, 'select', className);
+    styleNodeByTag(node, 'textarea', className);
     styleNodeByTag(node, 'input', className);
     styleNodeByTag(node, 'button', className);
   }
@@ -81,6 +82,9 @@ namespace Private {
    function onFocus(event: FocusEvent): void {
       let target = event.target as Element;
       let parent = target.parentElement;
+      if (!parent) {
+        return;
+      }
       if (event.type === 'focus') {
         parent.classList.add('jp-mod-focused');
       } else {

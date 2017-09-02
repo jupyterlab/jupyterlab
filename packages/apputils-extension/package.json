@@ -1,20 +1,27 @@
 {
   "name": "@jupyterlab/apputils-extension",
-  "version": "0.8.3",
+  "version": "0.10.2",
   "description": "JupyterLab - Application Utilities Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
     "lib/*.d.ts",
-    "lib/*.js"
+    "lib/*.js",
+    "style/*.css",
+    "style/images/*.svg"
   ],
   "directories": {
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.8.3",
-    "@jupyterlab/apputils": "^0.8.2",
-    "@jupyterlab/coreutils": "^0.8.1"
+    "es6-promise": "^4.1.0",
+    "@jupyterlab/application": "^0.10.0",
+    "@jupyterlab/apputils": "^0.10.0",
+    "@jupyterlab/coreutils": "^0.10.0",
+    "@jupyterlab/services": "^0.49.0",
+    "@phosphor/coreutils": "^1.2.0",
+    "@phosphor/disposable": "^1.1.1",
+    "@phosphor/widgets": "^1.3.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
@@ -26,7 +33,8 @@
     "watch": "tsc -w"
   },
   "jupyterlab": {
-    "extension": true
+    "extension": true,
+    "schemaDir": "schema"
   },
   "repository": {
     "type": "git",

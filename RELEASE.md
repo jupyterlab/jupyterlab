@@ -83,3 +83,7 @@ shasum -a 256 dist/*.tar.gz
 
 ### Update the extension examples
 - https://github.com/jupyterlab/jupyterlab/blob/master/docs/notebook.md#adding-a-button-to-the-toolbar
+
+### Set master back to dev version
+- Update `jupyterlab/_version.py` with a `dev` version
+- Commit and push the version update.

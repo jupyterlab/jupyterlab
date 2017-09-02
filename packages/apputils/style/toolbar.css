@@ -33,11 +33,11 @@
   display: inline-block;
   height: 24px;
   width: 32px;
-  background-color: white;
+  background-color: var(--jp-layout-color1);
   background-repeat: no-repeat;
   background-position: center;
   background-size: 16px;
-  border: 1px solid var(--jp-layout-color0);
+  border: 1px solid var(--jp-layout-color1);
 }
 
 
@@ -54,8 +54,8 @@
 
 
 .jp-Toolbar-button:hover {
-  border: 1px solid #BDBDBD;
-  background-color: var(--jp-layout-color0);
+  border: 1px solid var(--jp-border-color1);
+  background-color: var(--jp-layout-color1);
   box-shadow: 0px 0px 2px 0px rgba(0,0,0,0.24);
 
 }

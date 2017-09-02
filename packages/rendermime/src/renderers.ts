@@ -59,6 +59,10 @@ function renderHTML(options: renderHTML.IOptions): Promise<void> {
   // Set the inner HTML of the host.
   host.innerHTML = source;
 
+  if (host.getElementsByTagName('script').length > 0) {
+    console.warn('JupyterLab does not execute inline JavaScript in HTML output');
+  }
+
   // TODO - arbitrary script execution is disabled for now.
   // Eval any script tags contained in the HTML. This is not done
   // automatically by the browser when script tags are created by
@@ -70,6 +74,9 @@ function renderHTML(options: renderHTML.IOptions): Promise<void> {
   //   // is really no difference between this and a JS mime renderer.
   //   Private.evalInnerHTMLScriptTags(host);
   // }
+
+  // Handle default behavior of nodes.
+  Private.handleDefaults(host);
 
   // Patch the urls if a resolver is available.
   let promise: Promise<void>;
@@ -305,6 +312,10 @@ function renderMarkdown(options: renderMarkdown.IRenderOptions): Promise<void> {
     // Set the inner HTML of the host.
     host.innerHTML = content;
 
+    if (host.getElementsByTagName('script').length > 0) {
+      console.warn('JupyterLab does not execute inline JavaScript in HTML output');
+    }
+
     // TODO arbitrary script execution is disabled for now.
     // Eval any script tags contained in the HTML. This is not done
     // automatically by the browser when script tags are created by
@@ -315,6 +326,9 @@ function renderMarkdown(options: renderMarkdown.IRenderOptions): Promise<void> {
     //   // TODO really want to run scripts?
     //   Private.evalInnerHTMLScriptTags(host);
     // }
+
+    // Handle default behavior of nodes.
+    Private.handleDefaults(host);
 
     // Apply ids to the header nodes.
     Private.headerAnchors(host);
@@ -379,68 +393,6 @@ namespace renderMarkdown {
     shouldTypeset: boolean;
   }
 }
-
-
-/**
- * Render a PDF into a host node.
- *
- * @params options - The options for rendering.
- *
- * @returns A promise which resolves when rendering is complete.
- */
-export
-function renderPDF(options: renderPDF.IRenderOptions): Promise<void> {
-  // Unpack the options.
-  let { host, source, trusted } = options;
-
-  // Clear the content if there is no source.
-  if (!source) {
-    host.textContent = '';
-    return Promise.resolve(undefined);
-  }
-
-  // Display a message if the source is not trusted.
-  if (!trusted) {
-    host.textContent = 'Cannot display an untrusted PDF. Maybe you need to run the cell?';
-    return Promise.resolve(undefined);
-  }
-
-  // Update the host with the display content.
-  let href = `data:application/pdf;base64,${source}`;
-  host.innerHTML = `<a target="_blank" href="${href}">View PDF</a>`;
-
-  // Return the final rendered promise.
-  return Promise.resolve(undefined);
-}
-
-
-/**
- * The namespace for the `renderPDF` function statics.
- */
-export
-namespace renderPDF {
-  /**
-   * The options for the `renderPDF` function.
-   */
-  export
-  interface IRenderOptions {
-    /**
-     * The host node for the rendered PDF.
-     */
-    host: HTMLElement;
-
-    /**
-     * The base64 encoded source for the PDF.
-     */
-    source: string;
-
-    /**
-     * Whether the source is trusted.
-     */
-    trusted: boolean;
-  }
-}
-
 
 /**
  * Render SVG into a host node.
@@ -654,6 +606,23 @@ namespace Private {
   }
 
   /**
+   * Handle the default behavior of nodes.
+   */
+  export
+  function handleDefaults(node: HTMLElement): void {
+    // Handle anchor elements.
+    let anchors = node.getElementsByTagName('a');
+    for (let i = 0; i < anchors.length; i++) {
+      let path = anchors[i].href;
+      if (URLExt.isLocal(path)) {
+        anchors[i].target = '_self';
+      } else {
+        anchors[i].target = '_blank';
+      }
+    }
+  }
+
+  /**
    * Resolve the relative urls in element `src` and `href` attributes.
    *
    * @param node - The head html element.
@@ -675,7 +644,7 @@ namespace Private {
       promises.push(handleAttr(nodes[i] as HTMLElement, 'src', resolver));
     }
 
-    // Handle achor elements.
+    // Handle anchor elements.
     let anchors = node.getElementsByTagName('a');
     for (let i = 0; i < anchors.length; i++) {
       promises.push(handleAnchor(anchors[i], resolver, linkHandler));
@@ -732,7 +701,6 @@ namespace Private {
    * Handle an anchor node.
    */
   function handleAnchor(anchor: HTMLAnchorElement, resolver: IRenderMime.IResolver, linkHandler: IRenderMime.ILinkHandler | null): Promise<void> {
-    anchor.target = '_blank';
     // Get the link path without the location prepended.
     // (e.g. "./foo.md#Header 1" vs "http://localhost:8888/foo.md#Header 1")
     let href = anchor.getAttribute('href');
@@ -782,34 +750,35 @@ namespace Private {
       // breaks: true; We can't use GFM breaks as it causes problems with tables
       langPrefix: `cm-s-${CodeMirrorEditor.defaultConfig.theme} language-`,
       highlight: (code, lang, callback) => {
+        let cb = (err: Error | null, code: string) => {
+          if (callback) {
+            callback(err, code);
+          }
+          return code;
+        };
         if (!lang) {
-            // no language, no highlight
-            if (callback) {
-                callback(null, code);
-                return;
-            } else {
-                return code;
-            }
+          // no language, no highlight
+          return cb(null, code);
         }
         Mode.ensure(lang).then(spec => {
           let el = document.createElement('div');
           if (!spec) {
-              console.log(`No CodeMirror mode: ${lang}`);
-              callback(null, code);
-              return;
+            console.log(`No CodeMirror mode: ${lang}`);
+            return cb(null, code);
           }
           try {
             Mode.run(code, spec.mime, el);
-            callback(null, el.innerHTML);
+            return cb(null, el.innerHTML);
           } catch (err) {
             console.log(`Failed to highlight ${lang} code`, err);
-            callback(err, code);
+            return cb(err, code);
           }
         }).catch(err => {
           console.log(`No CodeMirror mode: ${lang}`);
           console.log(`Require CodeMirror mode error: ${err}`);
-          callback(null, code);
+          return cb(null, code);
         });
+        return code;
       }
     });
   }

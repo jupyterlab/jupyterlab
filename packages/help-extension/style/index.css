@@ -7,6 +7,7 @@
 .jp-Help {
   min-width: 480px;
   background: white;
+  outline: none;
 }
 
 
@@ -43,7 +44,7 @@
   flex: 0 0 auto;
   height: 44px;
   width: auto;
-  background-image: url(../../theming/style/images/jupyterlab-wordmark.svg);
+  background-image: var(--jp-about-header-wordmark);
   background-size: 196px 50px;
   background-repeat: no-repeat;
   padding-bottom: 0px;
@@ -69,6 +70,7 @@
 
 .jp-About-release, .jp-About-version {
   display: block;
+  color: var(--jp-ui-font-color0);
 }
 
 
@@ -115,7 +117,7 @@
 .jp-About-header-logo {
   height: 94px;
   width: 77px;
-  background-image: url(../../theming/style/icons/jupyter/jupyter.svg);
+  background-image: var(--jp-about-header-logo);
   background-repeat: no-repeat;
   background-size: 58px auto;
   background-position: center;

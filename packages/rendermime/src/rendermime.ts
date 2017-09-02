@@ -22,6 +22,10 @@ import {
   ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
+import {
+  MimeModel
+} from './mimemodel';
+
 
 /**
  * An object which manages mime renderer factories.
@@ -132,6 +136,17 @@ class RenderMime {
   }
 
   /**
+   * Create a new mime model.  This is a convenience method.
+   *
+   * @options - The options used to create the model.
+   *
+   * @returns A new mime model.
+   */
+  createModel(options: MimeModel.IOptions = {}): MimeModel {
+    return new MimeModel(options);
+  }
+
+  /**
    * Create a clone of this rendermime instance.
    *
    * @param options - The options for configuring the clone.
@@ -141,9 +156,9 @@ class RenderMime {
   clone(options: RenderMime.ICloneOptions = {}): RenderMime {
     // Create the clone.
     let clone = new RenderMime({
-      resolver: options.resolver || this.resolver,
-      sanitizer: options.sanitizer || this.sanitizer,
-      linkHandler: options.linkHandler || this.linkHandler
+      resolver: options.resolver || this.resolver || undefined,
+      sanitizer: options.sanitizer || this.sanitizer || undefined,
+      linkHandler: options.linkHandler || this.linkHandler || undefined
     });
 
     // Clone the internal state.

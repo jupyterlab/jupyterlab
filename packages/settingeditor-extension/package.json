@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/settingeditor-extension",
-  "version": "0.3.3",
+  "version": "0.5.0",
   "description": "JupyterLab - Setting Editor Extension",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -13,10 +13,11 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.8.3",
-    "@jupyterlab/apputils": "^0.8.2",
-    "@jupyterlab/codeeditor": "^0.8.1",
-    "@jupyterlab/coreutils": "^0.8.1",
+    "@jupyterlab/application": "^0.10.0",
+    "@jupyterlab/apputils": "^0.10.0",
+    "@jupyterlab/codeeditor": "^0.10.0",
+    "@jupyterlab/coreutils": "^0.10.0",
+    "@phosphor/coreutils": "^1.2.0",
     "@phosphor/messaging": "^1.2.1",
     "@phosphor/signaling": "^1.2.1",
     "@phosphor/virtualdom": "^1.1.1",

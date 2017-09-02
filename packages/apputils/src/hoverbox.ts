@@ -122,10 +122,10 @@ namespace HoverBox {
     const innerHeight = window.innerHeight;
     const spaceAbove = anchor.top;
     const spaceBelow = innerHeight - anchor.bottom;
-    const marginTop = parseInt(style.marginTop, 10) || 0;
-    const minHeight = parseInt(style.minHeight, 10) || options.minHeight;
+    const marginTop = parseInt(style.marginTop!, 10) || 0;
+    const minHeight = parseInt(style.minHeight!, 10) || options.minHeight;
 
-    let maxHeight = parseInt(style.maxHeight, 10) || options.maxHeight;
+    let maxHeight = parseInt(style.maxHeight!, 10) || options.maxHeight;
 
     // Determine whether to render above or below; check privilege.
     let renderBelow = true;

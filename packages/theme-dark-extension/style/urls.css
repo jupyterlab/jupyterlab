@@ -1,0 +1,98 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+:root {
+
+  /* Images
+
+  These images are included with JupyterLab for showing the Project Jupyter logo
+  */
+  --jp-image-jupyter: url('./lab/api/themes/jupyterlab-theme-dark-extension/images/jupyter-white-moons.svg');
+  --jp-image-jupyterlab: url('./lab/api/themes/jupyterlab-theme-dark-extension/images/jupyterlab.svg');
+  --jp-image-jupyterlab-workmark: url('./lab/api/themes/jupyterlab-theme-dark-extension/images/jupyterlab-wordmark.svg');
+  --jp-image-jupyter-favicon: url('./lab/api/themes/jupyterlab-theme-dark-extension/images/jupyter-favicon.svg');
+  --jp-image-caretleft: url('./lab/api/themes/jupyterlab-theme-dark-extension/images/caretleft.png');
+  --jp-image-caretright: url('./lab/api/themes/jupyterlab-theme-dark-extension/images/caretright.png');
+  --jp-image-caretup: url('./lab/api/themes/jupyterlab-theme-dark-extension/images/caretup.png');
+  --jp-image-caretdown: url('./lab/api/themes/jupyterlab-theme-dark-extension/images/caretdown.png');
+
+
+  /* Icons
+
+  These icons are used throughout JupyterLab.
+  */
+
+  /* The caret used for select dropdown styling. */
+
+  --jp-ui-select-caret: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/down_caret.svg');
+
+  /* Icons used in the application. */
+
+  --jp-icon-add: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/add.svg');
+  --jp-icon-book: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/book.svg');
+  --jp-icon-book-selected: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/book_selected.svg');
+  --jp-icon-book-running: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/book_running.svg');
+  --jp-icon-book-running-selected: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/book_running_selected.svg');
+  --jp-icon-directory: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/directory.svg');
+  --jp-icon-directory-selected: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/directory_selected.svg');
+  --jp-icon-new-directory: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/new-folder.svg');
+  --jp-icon-file-selected: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/file_selected.svg');
+  --jp-icon-yaml: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/yml.svg');
+  --jp-icon-yaml-selected: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/yml_selected.svg');
+  --jp-icon-spreadsheet: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/csv.svg');
+  --jp-icon-spreadsheet-selected: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/csv_selected.svg');
+  --jp-icon-image: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/image.svg');
+  --jp-icon-image-selected: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/image_selected.svg');
+  --jp-icon-json: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/json.svg');
+  --jp-icon-json-selected: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/json_selected.svg');
+  --jp-icon-kernel-running: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/panorama_fish_eye.svg');
+  --jp-icon-markdown: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/markdown.svg');
+  --jp-icon-markdown-selected: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/markdown_selected.svg');
+  --jp-icon-python: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/python.svg');
+  --jp-icon-python-selected: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/python_selected.svg');
+  --jp-icon-r: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/r.svg');
+  --jp-icon-r-selected: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/r_selected.svg');
+  --jp-icon-console: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/console.svg');
+  --jp-icon-terminal: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/terminal.svg');
+  --jp-icon-file: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/file.svg');
+  --jp-icon-refresh: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/refresh.svg');
+  --jp-icon-close: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/close.svg');
+  --jp-icon-inverse-close: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/close-inverse.svg');
+  --jp-icon-circle: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/circle.svg');
+  --jp-icon-inverse-circle: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/circle-inverse.svg');
+  --jp-icon-close-circle: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/close-circle.svg');
+  --jp-icon-inverse-close-circle: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/close-circle-inverse.svg');
+  --jp-icon-search: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/search.svg');
+  --jp-icon-copy: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/copy.svg');
+  --jp-icon-cut: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/cut.svg');
+  --jp-icon-paste: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/paste.svg');
+  --jp-icon-download: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/download.svg');
+  --jp-icon-edit: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/edit.svg');
+  --jp-icon-ellipses: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/ellipses.svg');
+  --jp-icon-expand-less: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/expand-less.svg');
+  --jp-icon-expand-more: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/expand-more.svg');
+  --jp-icon-home: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/home.svg');
+  --jp-icon-jupyter: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/jupyter.svg');
+  --jp-icon-launcher: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/launcher.svg');
+  --jp-icon-more: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/more-horiz.svg');
+  --jp-icon-run: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/run.svg');
+  --jp-icon-save: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/save.svg');
+  --jp-icon-stop: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/stop.svg');
+  --jp-icon-text-editor: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/texteditor.svg');
+  --jp-icon-upload: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/upload.svg');
+  --jp-icon-question-mark: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/questionmark.svg');
+  --jp-icon-chat: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/chat.svg');
+  --jp-icon-checkmark: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/checkmark.svg');
+  --jp-icon-checkmark-disabled: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/checkmark-disabled.svg');
+  --jp-icon-caretup: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/caretup.svg');
+  --jp-icon-caretdown: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/caretdown.svg');
+  --jp-icon-caretleft: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/caretleft.svg');
+  --jp-icon-caretright: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/caretright.svg');
+  --jp-icon-undo: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/md/undo.svg');
+  --jp-icon-settings: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/settings.svg');
+  --jp-about-header-logo: url('./lab/api/themes/jupyterlab-theme-dark-extension/icons/jupyter/jupyter.svg');
+  --jp-about-header-logo: url('/lab/api/themes/jupyterlab-theme-dark-extension/images/jupyter-white-moons.svg');
+  --jp-about-header-wordmark: url('/lab/api/themes/jupyterlab-theme-dark-extension/images/jupyterlab-wordmark-inverse.svg');
+}

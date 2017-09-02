@@ -15,9 +15,9 @@
 
 .jp-JSONEditor-host {
   flex: 1 1 auto;
-  border: var(--jp-border-width) solid #cfcfcf;
+  border: var(--jp-border-width) solid var(--jp-input-border-color);
   border-radius: 0px;
-  background: #f7f7f7;
+  background: var(--jp-input-background-color);
   min-height: 50px;
   margin-left: 12px;
   margin-right: 12px;
@@ -43,38 +43,45 @@
 }
 
 
-.jp-JSONEditor-commitButton::before {
-  font-family: FontAwesome;
-  content: '\f00c'; /* check */
-  padding-left: 4px;
+.jp-JSONEditor-commitButton, .jp-JSONEditor-revertButton, .jp-JSONEditor-collapser.jp-mod-collapse-enabled {
+  height: 16px;
+  width: 16px;
+  background-size: 18px;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 
-.jp-JSONEditor-revertButton::before {
-  font-family: FontAwesome;
-  content: '\f0e2'; /* undo */
+.jp-JSONEditor-commitButton {
+  background-image: var(--jp-icon-checkmark);
+  margin-left: 8px;
 }
 
 
-.jp-JSONEditor-collapser {
-  flex: 1 1 auto;
+.jp-JSONEditor-revertButton {
+  background-image: var(--jp-icon-undo);
 }
 
 
-.jp-JSONEditor-collapser.jp-mod-collapse-enabled::before {
-  padding-left: 6px;
-  font-family: FontAwesome;
-  content: '\f0d8'; /* caret-up */
+.jp-JSONEditor-collapser.jp-mod-collapse-enabled {
+  margin-left: 6px;
+  background-image: var(--jp-icon-caretup);
 }
 
 
-.jp-JSONEditor-collapser.jp-mod-collapse-enabled.jp-mod-collapsed::before {
-  padding-left: 6px;
-  font-family: FontAwesome;
-  content: '\f0d7'; /* caret-down */
+.jp-JSONEditor-collapser.jp-mod-collapse-enabled.jp-mod-collapsed {
+  margin-left: 6px;
+  background-image: var(--jp-icon-caretdown);
 }
 
 
 .jp-JSONEditor-host.jp-mod-collapsed {
   display: none;
+}
+
+
+.jp-JSONEditor-host.jp-mod-focused {
+  background-color: var(--jp-input-background-color-active);
+  border: 1px solid var(--jp-input-border-color-active);
+  box-shadow: var(--jp-input-box-shadow);
 }

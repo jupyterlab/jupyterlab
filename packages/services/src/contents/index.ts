@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  JSONExt, JSONObject
+  JSONObject
 } from '@phosphor/coreutils';
 
 import {
@@ -56,7 +56,7 @@ namespace Contents {
      * #### Notes
      *  Equivalent to the last part of the `path` field.
      */
-    readonly name?: string;
+    readonly name: string;
 
     /**
      * The full file path.
@@ -64,27 +64,27 @@ namespace Contents {
      * #### Notes
      * It will *not* start with `/`, and it will be `/`-delimited.
      */
-    readonly path?: string;
+    readonly path: string;
 
     /**
      * The type of file.
      */
-    readonly type?: ContentType;
+    readonly type: ContentType;
 
     /**
      * Whether the requester has permission to edit the file.
      */
-    readonly writable?: boolean;
+    readonly writable: boolean;
 
     /**
      * File creation timestamp.
      */
-    readonly created?: string;
+    readonly created: string;
 
     /**
      * Last modified timestamp.
      */
-    readonly last_modified?: string;
+    readonly last_modified: string;
 
     /**
      * Specify the mime-type of file contents.
@@ -92,12 +92,12 @@ namespace Contents {
      * #### Notes
      * Only non-`null` when `content` is present and `type` is `"file"`.
      */
-    readonly mimetype?: string;
+    readonly mimetype: string;
 
     /**
      * The optional file content.
      */
-    readonly content?: any;
+    readonly content: any;
 
     /**
      * The format of the file `content`.
@@ -105,7 +105,7 @@ namespace Contents {
      * #### Notes
      * Only relevant for type: 'file'
      */
-    readonly format?: FileFormat;
+    readonly format: FileFormat;
   }
 
   /**
@@ -125,7 +125,7 @@ namespace Contents {
    * The options used to fetch a file.
    */
   export
-  interface IFetchOptions extends JSONObject {
+  interface IFetchOptions {
     /**
      * The override file type for the request.
      */
@@ -148,7 +148,7 @@ namespace Contents {
    * The options used to create a file.
    */
   export
-  interface ICreateOptions extends JSONObject {
+  interface ICreateOptions {
     /**
      * The directory in which to create the file.
      */
@@ -197,12 +197,12 @@ namespace Contents {
     /**
      * The new contents.
      */
-    oldValue: IModel | null;
+    oldValue: Partial<IModel> | null;
 
     /**
      * The old contents.
      */
-    newValue: IModel | null;
+    newValue: Partial<IModel> | null;
   }
 
   /**
@@ -225,7 +225,7 @@ namespace Contents {
      * relevant backend. Returns `null` if the backend
      * does not provide one.
      */
-    getModelDBFactory(path: string): ModelDB.IFactory;
+    getModelDBFactory(path: string): ModelDB.IFactory | null;
 
     /**
      * Get a file or directory.
@@ -287,7 +287,7 @@ namespace Contents {
      * @returns A promise which resolves with the file content model when the
      *   file is saved.
      */
-    save(path: string, options?: IModel): Promise<IModel>;
+    save(path: string, options?: Partial<IModel>): Promise<IModel>;
 
     /**
      * Copy a file into a given directory.
@@ -432,7 +432,7 @@ namespace Contents {
      * @returns A promise which resolves with the file content model when the
      *   file is saved.
      */
-    save(localPath: string, options?: IModel): Promise<IModel>;
+    save(localPath: string, options?: Partial<IModel>): Promise<IModel>;
 
     /**
      * Copy a file into a given directory.
@@ -549,9 +549,9 @@ class ContentsManager implements Contents.IManager {
    * relevant backend. Returns `null` if the backend
    * does not provide one.
    */
-  getModelDBFactory(path: string): ModelDB.IFactory {
-    let [drive,] = this._driveForPath(path);
-    return drive.modelDBFactory || null;
+  getModelDBFactory(path: string): ModelDB.IFactory | null {
+    let [drive, ] = this._driveForPath(path);
+    return drive && drive.modelDBFactory || null;
   }
 
   /**
@@ -565,9 +565,12 @@ class ContentsManager implements Contents.IManager {
    */
   get(path: string, options?: Contents.IFetchOptions): Promise<Contents.IModel> {
     let [drive, localPath] = this._driveForPath(path);
-    return drive.get(localPath, options).then( contentsModel => {
+    if (!drive) {
+      return Promise.reject(`No valid drive for path: ${path}`);
+    }
+    return drive.get(localPath, options).then(contentsModel => {
       let listing: Contents.IModel[] = [];
-      if (contentsModel.type === 'directory') {
+      if (contentsModel.type === 'directory' && contentsModel.content) {
         each(contentsModel.content, (item: Contents.IModel) => {
           listing.push({
             ...item,
@@ -613,6 +616,9 @@ class ContentsManager implements Contents.IManager {
     if (options.path) {
       let globalPath = Private.normalize(options.path);
       let [drive, localPath] = this._driveForPath(globalPath);
+      if (!drive) {
+        return Promise.reject(`No valid drive for path: ${globalPath}`);
+      }
       return drive.newUntitled({ ...options, path: localPath }).then( contentsModel => {
         return {
           ...contentsModel,
@@ -673,7 +679,7 @@ class ContentsManager implements Contents.IManager {
    * #### Notes
    * Ensure that `model.content` is populated for the file.
    */
-  save(path: string, options: Contents.IModel = {}): Promise<Contents.IModel> {
+  save(path: string, options: Partial<Contents.IModel> = {}): Promise<Contents.IModel> {
     let [drive, localPath] = this._driveForPath(path);
     return drive.save(localPath, { ...options, path: localPath }).then(contentsModel => {
       return { ...contentsModel, path: Private.normalize(path) } as Contents.IModel;
@@ -814,15 +820,15 @@ class ContentsManager implements Contents.IManager {
     if (sender === this._defaultDrive) {
       this._fileChanged.emit(args);
     } else {
-      let newValue: Contents.IModel = null;
-      let oldValue: Contents.IModel = null;
-      if (args.newValue) {
+      let newValue: Partial<Contents.IModel> | null = null;
+      let oldValue: Partial<Contents.IModel> | null = null;
+      if (args.newValue && args.newValue.path) {
         newValue = {
           ...args.newValue,
           path: this._toGlobalPath(sender, args.newValue.path)
         };
       }
-      if (args.oldValue) {
+      if (args.oldValue && args.oldValue.path) {
         oldValue = {
           ...args.oldValue,
           path: this._toGlobalPath(sender, args.oldValue.path)
@@ -838,7 +844,7 @@ class ContentsManager implements Contents.IManager {
 
   private _isDisposed = false;
   private _additionalDrives = new Map<string, Contents.IDrive>();
-  private _defaultDrive: Contents.IDrive = null;
+  private _defaultDrive: Contents.IDrive;
   private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
 }
 
@@ -914,8 +920,8 @@ class Drive implements Contents.IDrive {
       if (options.type === 'notebook') {
         delete options['format'];
       }
-      let params: any = JSONExt.deepCopy(options);
-      params.content = options.content ? '1' : '0';
+      let content = options.content ? '1' : '0';
+      let params: JSONObject = { ...options, content };
       url += URLExt.objectToQueryString(params);
     }
 
@@ -930,8 +936,8 @@ class Drive implements Contents.IDrive {
       }
       try {
          validate.validateContentsModel(response.data);
-       } catch (err) {
-         throw ServerConnection.makeError(response, err.message);
+       } catch (error) {
+         throw ServerConnection.makeError(response, error.message);
        }
       return response.data;
     });
@@ -974,6 +980,7 @@ class Drive implements Contents.IDrive {
       url: this._getUrl(options.path || ''),
       method: 'POST',
       data,
+      contentType: 'application/json'
     };
     return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
       if (response.xhr.status !== 201) {
@@ -982,8 +989,8 @@ class Drive implements Contents.IDrive {
       let data = response.data as Contents.IModel;
       try {
         validate.validateContentsModel(data);
-      } catch (err) {
-        throw ServerConnection.makeError(response, err.message);
+      } catch (error) {
+        throw ServerConnection.makeError(response, error.message);
       }
       this._fileChanged.emit({
         type: 'new',
@@ -1059,8 +1066,8 @@ class Drive implements Contents.IDrive {
       let data = response.data as Contents.IModel;
       try {
         validate.validateContentsModel(data);
-      } catch (err) {
-        throw ServerConnection.makeError(response, err.message);
+      } catch (error) {
+        throw ServerConnection.makeError(response, error.message);
       }
       this._fileChanged.emit({
         type: 'rename',
@@ -1086,7 +1093,7 @@ class Drive implements Contents.IDrive {
    *
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents) and validates the response model.
    */
-  save(localPath: string, options: Contents.IModel = {}): Promise<Contents.IModel> {
+  save(localPath: string, options: Partial<Contents.IModel> = {}): Promise<Contents.IModel> {
     let request = {
       url: this._getUrl(localPath),
       method: 'PUT',
@@ -1101,8 +1108,8 @@ class Drive implements Contents.IDrive {
       let data = response.data as Contents.IModel;
       try {
         validate.validateContentsModel(data);
-      } catch (err) {
-        throw ServerConnection.makeError(response, err.message);
+      } catch (error) {
+        throw ServerConnection.makeError(response, error.message);
       }
       this._fileChanged.emit({
         type: 'save',
@@ -1141,8 +1148,8 @@ class Drive implements Contents.IDrive {
       let data = response.data as Contents.IModel;
       try {
         validate.validateContentsModel(data);
-      } catch (err) {
-        throw ServerConnection.makeError(response, err.message);
+      } catch (error) {
+        throw ServerConnection.makeError(response, error.message);
       }
       this._fileChanged.emit({
         type: 'new',
@@ -1176,8 +1183,8 @@ class Drive implements Contents.IDrive {
       let data = response.data as Contents.ICheckpointModel;
       try {
         validate.validateCheckpointModel(data);
-      } catch (err) {
-        throw ServerConnection.makeError(response, err.message);
+      } catch (error) {
+        throw ServerConnection.makeError(response, error.message);
       }
       return data;
     });
@@ -1209,9 +1216,9 @@ class Drive implements Contents.IDrive {
       }
       for (let i = 0; i < response.data.length; i++) {
         try {
-        validate.validateCheckpointModel(response.data[i]);
-        } catch (err) {
-          throw ServerConnection.makeError(response, err.message);
+          validate.validateCheckpointModel(response.data[i]);
+        } catch (error) {
+          throw ServerConnection.makeError(response, error.message);
         }
       }
       return response.data;
@@ -1273,8 +1280,7 @@ class Drive implements Contents.IDrive {
   private _getUrl(...args: string[]): string {
     let parts = args.map(path => URLExt.encodeParts(path));
     let baseUrl = this.serverSettings.baseUrl;
-    return URLExt.join(baseUrl, this._apiEndpoint,
-                       ...parts);
+    return URLExt.join(baseUrl, this._apiEndpoint, ...parts);
   }
 
   private _apiEndpoint: string;
@@ -1355,13 +1361,16 @@ namespace Private {
    */
   export
   function normalize(path: string): string {
-    let parts = path.split(':');
+    const parts = path.split(':');
+
     if (parts.length === 1) {
       return PathExt.normalize(path);
-    } else if (parts.length === 2) {
-      return parts[0] + ':' + PathExt.normalize(parts[1]);
-    } else {
-      throw Error('Malformed path: '+path);
     }
+
+    if (parts.length === 2) {
+      return parts[0] + ':' + PathExt.normalize(parts[1]);
+    }
+
+    throw new Error('Malformed path: ' + path);
   }
 }

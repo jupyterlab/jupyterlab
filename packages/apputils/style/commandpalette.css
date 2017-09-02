@@ -30,15 +30,17 @@
 
 .p-CommandPalette-search {
   padding: 8px;
-  background-color: var(--jp-border-color3);
+  background-color: var(--jp-layout-color2);
   border-bottom: 1px solid var(--jp-border-color1);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  z-index: 2;
 }
 
 .p-CommandPalette-wrapper {
   overflow: overlay;
   padding: 0px 8px;
-  border: 1px solid var(--jp-border-color1);
-  background-color: white;
+  border: 1px solid var(--jp-border-color0);
+  background-color: var(--jp-input-background-color-active);
   height: 30px;
 }
 
@@ -144,16 +146,17 @@
 
 
 .p-CommandPalette-item.p-mod-active {
-  background: #e0e0e0;
+  background: var(--jp-layout-color3);
 }
 
 
 .p-CommandPalette-item:hover:not(.p-mod-active):not(.p-mod-disabled) {
-  background: #E5E5E5;
+  background: var(--jp-layout-color2);
 }
 
 
 .p-CommandPalette-itemLabel > mark {
+  color: var(--jp-ui-font-color0);
   background-color: transparent;
   font-weight: bold;
 }
@@ -167,6 +170,12 @@
 .p-CommandPalette-itemCaption {
   display: none;
 }
+
+
+.p-CommandPalette-content {
+  background-color: var(--jp-layout-color1);
+}
+
 
 .p-CommandPalette-content:empty:after {
     content: "No results";

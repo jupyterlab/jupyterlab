@@ -80,9 +80,9 @@ namespace PageConfig {
         configData[key] = String(configData[key]).split('&#39;').join('"');
       }
     }
-    return configData[name] || '';
+    return configData![name] || '';
   }
-  
+
   /**
    * Set global configuration data for the Jupyter application.
    *
@@ -94,7 +94,7 @@ namespace PageConfig {
   export
   function setOption(name: string, value: string): string {
     let last = getOption(name);
-    configData[name] = value;
+    configData![name] = value;
     return last;
   }
 

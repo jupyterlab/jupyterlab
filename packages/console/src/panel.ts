@@ -90,7 +90,6 @@ class ConsolePanel extends Panel {
     session.ready.then(() => {
       this._connected = new Date();
       this._updateTitle();
-      this.console.promptCell.editor.focus();
     });
 
     this._manager = manager;
@@ -133,13 +132,20 @@ class ConsolePanel extends Panel {
    */
   protected onAfterAttach(msg: Message): void {
     this._session.initialize();
+    let prompt = this.console.promptCell;
+    if (prompt) {
+      prompt.editor.focus();
+    }
   }
 
   /**
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this.console.promptCell.editor.focus();
+    let prompt = this.console.promptCell;
+    if (prompt) {
+      prompt.editor.focus();
+    }
   }
 
   /**
@@ -166,8 +172,8 @@ class ConsolePanel extends Panel {
   }
 
   private _manager: ServiceManager.IManager;
-  private _executed: Date = null;
-  private _connected: Date = null;
+  private _executed: Date | null = null;
+  private _connected: Date | null = null;
   private _session: ClientSession;
 }
 

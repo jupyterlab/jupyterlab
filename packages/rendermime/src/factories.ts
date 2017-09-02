@@ -55,17 +55,6 @@ const markdownRendererFactory: IRenderMime.IRendererFactory = {
 
 
 /**
- * A mime renderer factory for pdf.
- */
-export
-const pdfRendererFactory: IRenderMime.IRendererFactory = {
-  safe: false,
-  mimeTypes: ['application/pdf'],
-  createRenderer: options => new widgets.RenderedPDF(options)
-};
-
-
-/**
  * A mime renderer factory for svg.
  */
 export
@@ -88,6 +77,17 @@ const textRendererFactory: IRenderMime.IRendererFactory = {
 
 
 /**
+ * A placeholder factory for deprecated rendered JavaScript.
+ */
+export
+const javaScriptRendererFactory: IRenderMime.IRendererFactory = {
+  safe: false,
+  mimeTypes: ['text/javascript', 'application/javascript'],
+  createRenderer: options => new widgets.RenderedJavaScript(options)
+};
+
+
+/**
  * The builtin factories provided by the rendermime package.
  */
 export
@@ -97,6 +97,6 @@ const defaultRendererFactories: ReadonlyArray<IRenderMime.IRendererFactory> = [
   latexRendererFactory,
   svgRendererFactory,
   imageRendererFactory,
-  pdfRendererFactory,
+  javaScriptRendererFactory,
   textRendererFactory
 ];

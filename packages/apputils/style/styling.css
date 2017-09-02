@@ -24,7 +24,7 @@ button.jp-mod-styled {
 
 
 input.jp-mod-styled {
-  background: white;
+  background: var(--jp-input-background-color);
   height: 28px;
   box-sizing: border-box;
   border: var(--jp-border-width) solid var(--jp-border-color1);
@@ -54,29 +54,26 @@ button.jp-mod-styled:focus {
   display: flex;
   flex-direction: column;
   padding: 1px;
-  background: white;
+  background-color: var(--jp-layout-color1);
   height: 28px;
   box-sizing: border-box;
   margin-bottom: 12px;
 }
 
 
-.jp-select-wrapper.jp-mod-focused {
-  border: var(--jp-border-width) solid var(--md-blue-500);
-  box-shadow: inset 0 0 4px var(--md-blue-300);
-}
-
-
-.jp-select-wrapper:hover {
-  cursor: pointer;
-  color: var(--jp-ui-font-color0);
-  background-color: var(--md-grey-200);
-  box-shadow: inset 0 0px 1px rgba(0, 0, 0, 0.5);
+.jp-select-wrapper.jp-mod-focused select.jp-mod-styled {
+  border: var(--jp-border-width) solid var(--jp-input-border-color-active);
+  box-shadow: var(--jp-input-box-shadow);
+  background-color: var(--jp-input-background-color-active);
 }
 
 
 select.jp-mod-styled:hover {
-  background-color: var(--md-grey-200);
+  background-color: var(--jp-layout-color1);
+  cursor: pointer;
+  color: var(--jp-ui-font-color0);
+  background-color: var(--jp-input-background-color-hover);
+  box-shadow: inset 0 0px 1px rgba(0, 0, 0, 0.5);
 }
 
 
@@ -85,18 +82,23 @@ select.jp-mod-styled {
   height: 32px;
   width: 100%;
   font-size: var(--jp-ui-font-size2);
-  background: white;
+  background: var(--jp-input-background-color);
   color: var(--jp-ui-font-color0);
   padding-left: 8px;
   padding-right: 8px;
   background-image: var(--jp-ui-select-caret);
   background-repeat: no-repeat;
-  background-position: right center;
-  background-size: 20px;
-  border: none;
+  background-position: 99% center;
+  background-size: 18px;
+  border: var(--jp-border-width) solid var(--jp-input-border-color);
   border-radius: 0px;
   outline: none;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
+}
+
+
+a:-webkit-any-link {
+  color: var(--md-blue-600);
 }

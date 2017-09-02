@@ -2,6 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import 'es6-promise/auto';  // polyfill Promise on IE
+import '@jupyterlab/theme-light-extension/style/embed.css';
+import '../index.css';
 
 import {
   each
@@ -32,7 +34,7 @@ import {
 } from '@jupyterlab/docmanager';
 
 import {
-  DocumentRegistry, TextModelFactory
+  DocumentRegistry
 } from '@jupyterlab/docregistry';
 
 import {
@@ -43,9 +45,7 @@ import {
   FileEditorFactory
 } from '@jupyterlab/fileeditor';
 
-import '../index.css';
-import '@jupyterlab/theming/style/index.css';
-import '@jupyterlab/theming/style/variables-light.css';
+
 
 
 
@@ -82,7 +82,6 @@ function createApp(manager: ServiceManager.IManager): void {
     manager,
     opener
   });
-  let mFactory = new TextModelFactory();
   let editorServices = {
     factoryService: new CodeMirrorEditorFactory(),
     mimeTypeService: new CodeMirrorMimeTypeService()
@@ -92,13 +91,12 @@ function createApp(manager: ServiceManager.IManager): void {
     factoryOptions: {
       name: 'Editor',
       modelName: 'text',
-      fileExtensions: ['*'],
+      fileTypes: ['*'],
       defaultFor: ['*'],
       preferKernel: false,
       canStartKernel: true
     }
   });
-  docRegistry.addModelFactory(mFactory);
   docRegistry.addWidgetFactory(wFactory);
 
   let commands = new CommandRegistry();

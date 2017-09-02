@@ -1,20 +1,24 @@
 {
   "name": "@jupyterlab/theme-dark-extension",
-  "version": "0.8.3",
+  "version": "0.10.0",
   "description": "JupyterLab - Default Dark Theme",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
     "lib/*.d.ts",
     "lib/*.js",
-    "style/*.css"
+    "style/*.css",
+    "style/images/*.*",
+    "style/icons/*.*",
+    "style/icons/**/*.*"
   ],
   "directories": {
     "lib": "lib/"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.8.3",
-    "@jupyterlab/theming": "^0.8.2"
+    "@jupyterlab/application": "^0.10.0",
+    "@jupyterlab/apputils": "^0.10.0",
+    "font-awesome": "^4.7.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
@@ -25,7 +29,8 @@
     "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "jupyterlab": {
-    "extension": true
+    "extension": true,
+    "themeDir": "style"
   },
   "author": "Project Jupyter",
   "license": "BSD-3-Clause",

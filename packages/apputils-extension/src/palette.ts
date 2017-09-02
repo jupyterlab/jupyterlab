@@ -26,13 +26,13 @@ import {
  */
 namespace CommandIDs {
   export
-  const activate = 'command-palette:activate';
+  const activate = 'apputils:activate-command-palette';
 
   export
-  const hide = 'command-palette:hide';
+  const hide = 'apputils:hide-command-palette';
 
   export
-  const toggle = 'command-palette:toggle';
+  const toggle = 'apputils:toggle-command-palette';
 };
 
 
@@ -77,7 +77,7 @@ class Palette implements ICommandPalette {
     return new DisposableDelegate(() => this._palette.removeItem(item));
   }
 
-  private _palette: CommandPalette = null;
+  private _palette: CommandPalette;
 }
 
 

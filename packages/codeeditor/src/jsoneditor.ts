@@ -32,6 +32,11 @@ import {
 const JSONEDITOR_CLASS = 'jp-JSONEditor';
 
 /**
+ * The class name added to a focused JSONEditor instance.
+ */
+const FOCUSED_CLASS = 'jp-mod-focused';
+
+/**
  * The class name added when the Metadata editor contains invalid JSON.
  */
 const ERROR_CLASS = 'jp-mod-error';
@@ -117,7 +122,7 @@ class JSONEditor extends Widget {
    * The title of the editor.
    */
   get editorTitle(): string {
-    return this.titleNode.textContent;
+    return this.titleNode.textContent || '';
   }
   set editorTitle(value: string) {
     this.titleNode.textContent = value;
@@ -211,6 +216,8 @@ class JSONEditor extends Widget {
       case 'click':
         this._evtClick(event as MouseEvent);
         break;
+      case 'focus':
+        this._toggleFocused();
       default:
         break;
     }
@@ -222,6 +229,7 @@ class JSONEditor extends Widget {
   protected onAfterAttach(msg: Message): void {
     let node = this.editorHostNode;
     node.addEventListener('blur', this, true);
+    node.addEventListener('focus', this, true);
     this.revertButtonNode.hidden = true;
     this.commitButtonNode.hidden = true;
     this.headerNode.addEventListener('click', this);
@@ -270,6 +278,18 @@ class JSONEditor extends Widget {
     this.commitButtonNode.hidden = !valid || !this._inputDirty;
   }
 
+
+  private _toggleFocused(): void {
+    let node = this.editorHostNode;
+    let codeMirror = node.getElementsByClassName('CodeMirror-wrap');
+    let focused = !codeMirror[0].classList.contains('CodeMirror-focused');
+    if (focused) {
+      node.classList.add(FOCUSED_CLASS);
+    } else {
+      node.classList.remove(FOCUSED_CLASS);
+    }
+  }
+
   /**
    * Handle blur events for the text area.
    */
@@ -278,6 +298,7 @@ class JSONEditor extends Widget {
     if (!this._inputDirty && this._dataDirty) {
       this._setValue();
     }
+    this._toggleFocused();
   }
 
   /**
@@ -320,10 +341,14 @@ class JSONEditor extends Widget {
    */
   private _mergeContent(): void {
     let model = this.editor.model;
-    let current = this._getContent() || { };
-    let old = this._originalValue || { };
+    let current = this._source ? this._source.toJSON() : { };
+    let old = this._originalValue;
     let user = JSON.parse(model.value.text) as JSONObject;
     let source = this.source;
+    if (!source) {
+      return;
+    }
+
     // If it is in user and has changed from old, set in current.
     for (let key in user) {
       if (!JSONExt.deepEqual(user[key], old[key] || null)) {
@@ -344,21 +369,6 @@ class JSONEditor extends Widget {
   }
 
   /**
-   * Get the metadata from the owner.
-   */
-  private _getContent(): JSONObject | undefined {
-    let source = this._source;
-    if (!source) {
-      return void 0;
-    }
-    let content: JSONObject = {};
-    for (let key of source.keys()) {
-      content[key] = source.get(key);
-    }
-    return content;
-  }
-
-  /**
    * Set the value given the owner contents.
    */
   private _setValue(): void {
@@ -368,11 +378,11 @@ class JSONEditor extends Widget {
     this.commitButtonNode.hidden = true;
     this.removeClass(ERROR_CLASS);
     let model = this.editor.model;
-    let content = this._getContent();
+    let content = this._source ? this._source.toJSON() : { };
     this._changeGuard = true;
     if (content === void 0) {
       model.value.text = 'No data!';
-      this._originalValue = null;
+      this._originalValue = JSONExt.emptyObject;
     } else {
       let value = JSON.stringify(content, null, 4);
       model.value.text = value;
@@ -387,7 +397,7 @@ class JSONEditor extends Widget {
   private _dataDirty = false;
   private _inputDirty = false;
   private _source: IObservableJSON | null = null;
-  private _originalValue: JSONObject = null;
+  private _originalValue = JSONExt.emptyObject;
   private _changeGuard = false;
 }
 

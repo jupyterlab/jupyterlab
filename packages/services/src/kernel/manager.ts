@@ -83,7 +83,6 @@ class KernelManager implements Kernel.IManager {
     clearInterval(this._runningTimer);
     clearInterval(this._specsTimer);
     Signal.clearData(this);
-    this._specs = null;
     this._running = [];
   }
 
@@ -260,7 +259,7 @@ class KernelManager implements Kernel.IManager {
   }
 
   private _running: Kernel.IModel[] = [];
-  private _specs: Kernel.ISpecModels = null;
+  private _specs: Kernel.ISpecModels | null = null;
   private _isDisposed = false;
   private _runningTimer = -1;
   private _specsTimer = -1;

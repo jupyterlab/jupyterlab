@@ -1,31 +1,41 @@
 {
   "name": "@jupyterlab/theme-light-extension",
-  "version": "0.8.3",
-  "description": "JupyterLab - Default Light Theme",
+  "version": "0.10.0",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
     "lib/*.d.ts",
     "lib/*.js",
-    "style/*.css"
+    "style/*.css",
+    "style/images/*.*",
+    "style/icons/*.*",
+    "style/icons/**/*.*"
   ],
   "directories": {
     "lib": "lib/"
   },
+  "description": "JupyterLab - Default Light Theme",
   "dependencies": {
-    "@jupyterlab/application": "^0.8.3",
-    "@jupyterlab/theming": "^0.8.2"
+    "@jupyterlab/application": "^0.10.0",
+    "@jupyterlab/apputils": "^0.10.0",
+    "font-awesome": "^4.7.0"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
     "typescript": "~2.4.1"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib",
+    "watch": "tsc -w"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "jupyterlab": {
-    "extension": true
+    "extension": true,
+    "themeDir": "style"
   },
   "author": "Project Jupyter",
   "license": "BSD-3-Clause",

@@ -1,20 +1,20 @@
 {
   "name": "@jupyterlab/services",
-  "version": "0.47.1",
+  "version": "0.49.0",
   "description": "Client APIs for the Jupyter services REST APIs",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "dependencies": {
-    "@jupyterlab/coreutils": "^0.8.1",
+    "@jupyterlab/coreutils": "^0.10.0",
     "@phosphor/algorithm": "^1.1.1",
     "@phosphor/coreutils": "^1.2.0",
     "@phosphor/disposable": "^1.1.1",
-    "@phosphor/signaling": "^1.2.1",
-    "@types/text-encoding": "0.0.30"
+    "@phosphor/signaling": "^1.2.1"
   },
   "devDependencies": {
     "@types/expect.js": "^0.3.29",
     "@types/mocha": "^2.2.32",
+    "@types/text-encoding": "0.0.30",
     "@types/ws": "0.0.39",
     "expect.js": "^0.3.1",
     "istanbul": "^0.3.18",
@@ -32,6 +32,7 @@
     "build:src": "tsc --project src",
     "build:test": "tsc --project test/src",
     "build": "npm run build:src",
+    "prepublishOnly": "npm run build:src && webpack",
     "test:coverage": "istanbul cover --dir test/coverage _mocha -- --retries 3 test/build/**/*.spec.js test/build/*.spec.js --jupyter-config-data=./test/config.json",
     "test:integration": "cd test && python integration_test.py",
     "test:devtool": "devtool node_modules/.bin/_mocha -qc test/build/**/*.spec.js test/build/*.spec.js --jupyter-config-data=./test/config.json --timeout=50000",

@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  JSONObject
+  JSONExt, JSONObject
 } from '@phosphor/coreutils';
 
 import {
@@ -49,17 +49,17 @@ class CommandLinker implements IDisposable {
    * Test whether the linker is disposed.
    */
   get isDisposed(): boolean {
-    return this._commands === null;
+    return this._isDisposed;
   }
 
   /**
    * Dispose of the resources held by the linker.
    */
   dispose(): void {
-    if (this._commands === null) {
+    if (this.isDisposed) {
       return;
     }
-    this._commands = null;
+    this._isDisposed = true;
     document.body.removeEventListener('click', this);
   }
 
@@ -81,11 +81,10 @@ class CommandLinker implements IDisposable {
    * 1. If a node is connected, the default click action will be prevented.
    * 2. The `HTMLElement` passed in should be clickable.
    */
-  connectNode(node: HTMLElement, command: string, args: JSONObject): HTMLElement {
-    let argsValue = JSON.stringify(args);
+  connectNode(node: HTMLElement, command: string, args?: JSONObject): HTMLElement {
     node.setAttribute(`data-${COMMAND_ATTR}`, command);
-    if (argsValue) {
-      node.setAttribute(`data-${ARGS_ATTR}`, argsValue);
+    if (args !== void 0) {
+      node.setAttribute(`data-${ARGS_ATTR}`, JSON.stringify(args));
     }
     return node;
   }
@@ -162,7 +161,7 @@ class CommandLinker implements IDisposable {
    * }, 'some text');
    * ```
    */
-  populateVNodeDataset(command: string, args: JSONObject): ElementDataset {
+  populateVNodeDataset(command: string, args?: JSONObject): ElementDataset {
     let dataset = { [COMMAND_ATTR]: command };
     if (args !== void 0) {
       dataset[ARGS_ATTR] = JSON.stringify(args);
@@ -180,8 +179,11 @@ class CommandLinker implements IDisposable {
       if (target.hasAttribute(`data-${COMMAND_ATTR}`)) {
         event.preventDefault();
         let command = target.getAttribute(`data-${COMMAND_ATTR}`);
+        if (!command) {
+          return;
+        }
         let argsValue = target.getAttribute(`data-${ARGS_ATTR}`);
-        let args: JSONObject;
+        let args = JSONExt.emptyObject;
         if (argsValue) {
           args = JSON.parse(argsValue);
         }
@@ -192,7 +194,8 @@ class CommandLinker implements IDisposable {
     }
   }
 
-  private _commands: CommandRegistry = null;
+  private _commands: CommandRegistry;
+  private _isDisposed = false;
 }
 
 

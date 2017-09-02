@@ -67,7 +67,7 @@
   flex: 1 1 auto;
   height: var(--jp-private-filebrowser-button-height);
   line-height: var(--jp-private-filebrowser-button-height);
-  color: var(--jp-ui-font-color1);
+  color: var(--jp-layout-color1);
   font-size: var(--jp-ui-icon-font-size);
   outline: 0;
   margin-bottom: 4px;
@@ -98,7 +98,9 @@
   flex-direction: row;
   overflow: hidden;
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  z-index: 2;
 }
 
 
@@ -130,24 +132,32 @@
 }
 
 
-.jp-DirListing-headerItem.jp-mod-selected .jp-DirListing-headerItemIcon:before {
-  font-family: FontAwesome;
-  content: "\f0d8";
+.jp-DirListing-headerItemIcon {
+  height: 16px;
+  width: 16px;
+  background-size: 18px;
+  background-image: 18px;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 
-.jp-DirListing-headerItem.jp-mod-selected.jp-mod-descending .jp-DirListing-headerItemIcon:before {
-  font-family: FontAwesome;
-  content: "\f0d7";
+.jp-DirListing-headerItem.jp-mod-selected .jp-DirListing-headerItemIcon {
+  background-image: var(--jp-icon-caretup);
 }
 
 
-.jp-DirListing-headerItem.jp-mod-selected.jp-id-name .jp-DirListing-headerItemIcon:before {
+.jp-DirListing-headerItem.jp-mod-selected.jp-mod-descending .jp-DirListing-headerItemIcon {
+  background-image: var(--jp-icon-caretdown);
+}
+
+
+.jp-DirListing-headerItem.jp-mod-selected.jp-id-name .jp-DirListing-headerItemIcon {
   float: right;
 }
 
 
-.jp-DirListing-headerItem.jp-mod-selected.jp-id-modified .jp-DirListing-headerItemIcon:before {
+.jp-DirListing-headerItem.jp-mod-selected.jp-id-modified .jp-DirListing-headerItemIcon {
   float: left;
 }
 
@@ -158,6 +168,7 @@
   padding: 0;
   list-style-type: none;
   overflow: auto;
+  background-color: var(--jp-layout-color1);
 }
 
 
@@ -184,14 +195,12 @@
 
 
 .jp-DirListing-item:hover:not(.jp-mod-selected) {
-  background: var(--jp-layout-color2)
+  background: var(--jp-layout-color2);
 }
 
 
 .jp-DirListing-itemIcon {
   flex: 0 0 20px;
-  font-family: FontAwesome;
-  font-size: 14px;
   margin-right: 4px;
 }
 
@@ -215,21 +224,6 @@
   flex: 1 0 64px;
   outline: none;
   border: none;
-}
-
-
-.jp-type-folder.jp-DirListing-itemIcon:before {
-  content: "\f114";
-}
-
-
-.jp-type-file.jp-DirListing-itemIcon:before {
-  content: "\f016";
-}
-
-
-.jp-type-notebook.jp-DirListing-itemIcon:before {
-  content: "\f02d";
 }
 
 

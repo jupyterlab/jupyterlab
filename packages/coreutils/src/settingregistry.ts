@@ -86,6 +86,11 @@ namespace ISchemaValidator {
   export
   interface IError {
     /**
+     * The path in the data where the error occurred.
+     */
+    dataPath: string;
+
+    /**
      * The keyword whose validation failed.
      */
     keyword: string;
@@ -249,6 +254,29 @@ namespace ISettingRegistry {
     readonly user: JSONObject;
 
     /**
+     * Return the defaults in a commented JSON format.
+     */
+    annotatedDefaults(): string;
+
+    /**
+     * Calculate the default value of a setting by iterating through the schema.
+     *
+     * @param key - The name of the setting whose default value is calculated.
+     *
+     * @returns A calculated default JSON value for a specific setting.
+     */
+    default(key: string): JSONValue | undefined;
+
+    /**
+     * Get an individual setting.
+     *
+     * @param key - The name of the setting being retrieved.
+     *
+     * @returns The setting value.
+     */
+    get(key: string): { composite: JSONValue, user: JSONValue };
+
+    /**
      * Remove a single setting.
      *
      * @param key - The name of the setting being removed.
@@ -259,15 +287,6 @@ namespace ISettingRegistry {
      * This function is asynchronous because it writes to the setting registry.
      */
     remove(key: string): Promise<void>;
-
-    /**
-     * Get an individual setting.
-     *
-     * @param key - The name of the setting being retrieved.
-     *
-     * @returns The setting value.
-     */
-    get(key: string): { composite: JSONValue, user: JSONValue };
 
     /**
      * Save all of the plugin's user settings at once.
@@ -402,7 +421,6 @@ class SettingRegistry {
   constructor(options: SettingRegistry.IOptions) {
     this._connector = options.connector;
     this._validator = options.validator || new DefaultSchemaValidator();
-    this._preload = options.preload || (() => { /* no op */ });
   }
 
   /**
@@ -476,21 +494,6 @@ class SettingRegistry {
   }
 
   /**
-   * Preload the schema for a plugin.
-   *
-   * @param plugin - The plugin ID.
-   *
-   * @param schema - The schema being added.
-   *
-   * #### Notes
-   * This method is deprecated and is only intented for use until there is a
-   * server-side API for storing setting data.
-   */
-  preload(plugin: string, schema: ISettingRegistry.ISchema): void {
-    this._preload(plugin, schema);
-  }
-
-  /**
    * Reload a plugin's settings into the registry even if they already exist.
    *
    * @param plugin - The name of the plugin whose settings are being reloaded.
@@ -504,12 +507,23 @@ class SettingRegistry {
 
     // If the plugin needs to be loaded from the connector, fetch.
     return connector.fetch(plugin).then(data => {
-      if (!data) {
-        const message = `Setting data for ${plugin} does not exist.`;
-        throw [{ keyword: '', message, schemaPath: '' }];
+      // Validate the response from the connector; populate `composite` field.
+      try {
+        this._validate(data);
+      } catch (errors) {
+        const output = [`Validating ${plugin} failed:`];
+        (errors as ISchemaValidator.IError[]).forEach((error, index) => {
+          const { dataPath, schemaPath, keyword, message } = error;
+          output.push(`${index} - schema @ ${schemaPath}, data @ ${dataPath}`);
+          output.push(`\t${keyword} ${message}`);
+        });
+        console.error(output.join('\n'));
+
+        throw new Error(`Failed validating ${plugin}`);
       }
 
-      this._validate(data);
+      // Emit that a plugin has changed.
+      this._pluginChanged.emit(plugin);
 
       return new Settings({
         plugin: copy(plugins[plugin]) as ISettingRegistry.IPlugin,
@@ -635,8 +649,7 @@ class SettingRegistry {
   private _connector: IDataConnector<ISettingRegistry.IPlugin, JSONObject>;
   private _pluginChanged = new Signal<this, string>(this);
   private _plugins: { [name: string]: ISettingRegistry.IPlugin } = Object.create(null);
-  private _preload: (plugin: string, schema: ISettingRegistry.ISchema) => void;
-  private _validator: ISchemaValidator | null = null;
+  private _validator: ISchemaValidator;
 }
 
 
@@ -707,6 +720,24 @@ class Settings implements ISettingRegistry.ISettings {
   readonly registry: SettingRegistry;
 
   /**
+   * Return the defaults in a commented JSON format.
+   */
+  annotatedDefaults(): string {
+    return Private.annotatedDefaults(this._schema, this.plugin);
+  }
+
+  /**
+   * Calculate the default value of a setting by iterating through the schema.
+   *
+   * @param key - The name of the setting whose default value is calculated.
+   *
+   * @returns A calculated default JSON value for a specific setting.
+   */
+  default(key: string): JSONValue | undefined {
+    return Private.reifyDefault(this.schema, key);
+  }
+
+  /**
    * Dispose of the plugin settings resources.
    */
   dispose(): void {
@@ -715,10 +746,6 @@ class Settings implements ISettingRegistry.ISettings {
     }
 
     this._isDisposed = true;
-    this._composite = null;
-    this._schema = null;
-    this._user = null;
-
     Signal.clearData(this);
   }
 
@@ -828,15 +855,6 @@ namespace SettingRegistry {
     connector: IDataConnector<ISettingRegistry.IPlugin, JSONObject>;
 
     /**
-     * A function that preloads a plugin's schema in the client-side cache.
-     *
-     * #### Notes
-     * This param is deprecated and is only intented for use until there is a
-     * server-side API for storing setting data.
-     */
-    preload?: (plugin: string, schema: ISettingRegistry.ISchema) => void;
-
-    /**
      * The validator used to enforce the settings JSON schema.
      */
     validator?: ISchemaValidator;
@@ -889,4 +907,93 @@ namespace Private {
     }
   };
   /* tslint:enable */
+
+  /**
+   * Replacement text for schema properties missing a `description` field.
+   */
+  const nondescript = '[missing schema description]';
+
+  /**
+   * Replacement text for schema properties missing a `default` field.
+   */
+  const undefaulted = '[missing schema default]';
+
+  /**
+   * Replacement text for schema properties missing a `title` field.
+   */
+  const untitled = '[missing schema title]';
+
+  /**
+   * Returns an annotated (JSON with comments) version of a schema's defaults.
+   */
+  export
+  function annotatedDefaults(schema: ISettingRegistry.ISchema, plugin: string): string {
+    const { description, properties, title } = schema;
+    const keys = Object.keys(properties).sort((a, b) => a.localeCompare(b));
+
+    return [
+      '{',
+      prefix(`${title || untitled}`),
+      prefix(plugin),
+      prefix(description || nondescript),
+      prefix(line((description || nondescript).length)),
+      '',
+      keys.map(key => docstring(schema, key)).join('\n\n'),
+      '}'
+    ].join('\n');
+  }
+
+  /**
+   * Returns a documentation string for a specific schema property.
+   */
+  function docstring(schema: ISettingRegistry.ISchema, key: string): string {
+    const { description, title } = schema.properties[key];
+    const reified = reifyDefault(schema, key);
+    const defaults = reified === undefined ? prefix(`"${key}": ${undefaulted}`)
+      : prefix(`"${key}": ${JSON.stringify(reified, null, 2)}`, '  ');
+
+    return [
+      prefix(`${title || untitled}`),
+      prefix(description || nondescript),
+      defaults
+    ].join('\n');
+  }
+
+  /**
+   * Returns a line of a specified length.
+   */
+  function line(length: number, ch = '*'): string {
+    return (new Array(length + 1)).join(ch);
+  }
+
+  /**
+   * Returns a documentation string with a comment prefix added on every line.
+   */
+  function prefix(source: string, pre = '  \/\/ '): string {
+    return pre + source.split('\n').join(`\n${pre}`);
+  }
+
+  /**
+   * Create a fully extrapolated default value for a root key in a schema.
+   */
+  export
+  function reifyDefault(schema: ISettingRegistry.ISchema, root?: string): JSONValue | undefined {
+    // If the property is at the root level, traverse its schema.
+    schema = (root ? schema.properties[root] : schema) || { };
+
+    // If the property has no default or is a primitive, return.
+    if (!('default' in schema) || schema.type !== 'object') {
+      return schema.default;
+    }
+
+    // Make a copy of the default value to populate.
+    const result = JSONExt.deepCopy(schema.default);
+
+    // Iterate through and populate each child property.
+    for (let property in schema.properties || { }) {
+      result[property] = reifyDefault(schema.properties[property]);
+    }
+
+    return result;
+  }
 }

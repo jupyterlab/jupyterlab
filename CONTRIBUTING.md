@@ -25,7 +25,7 @@ All source code is written in [TypeScript](http://www.typescriptlang.org/Handboo
 
 ### Installing Node.js and npm
 
-Building the JupyterLab from its GitHub source code requires Node.js version 
+Building the JupyterLab from its GitHub source code requires Node.js version
 6+ and Node's package manager, ``npm``.
 
 If you use ``conda``, you can get them with:
@@ -45,7 +45,7 @@ You can also use the installer from the [Node.js](https://nodejs.org) website.
 
 ## Installing JupyterLab
 
-JupyterLab requires Jupyter Notebook version 4.2 or later.
+JupyterLab requires Jupyter Notebook version 4.3 or later.
 
 If you use ``conda``, you can install it as:
 
@@ -82,11 +82,17 @@ Notes:
 * At times, it may be necessary to clean your local repo with the command ``git
 clean -fdx``.
 
+* Make sure to do `pip install -e` *before* running `npm install`. Running `npm install` first makes pip stall.
+
 * If `pip` gives a `VersionConflict` error, it usually means that the installed
 version of `jupyterlab_launcher` is out of date. Run `pip install --upgrade
 jupyterlab_launcher` to get the latest version.
 
 * To install JupyterLab in isolation for a single conda/virtual environment, you can add the `--sys-prefix` flag to the extension activation above; this will tie the installation to the `sys.prefix` location of your environment, without writing anything in your user-wide settings area (which are visible to all your envs):
+
+* You can run `npm run build:main:prod` to build more accurate sourcemaps that show the original
+  Typescript code when debugging. However, it takes a bit longer to build the sources, so is used only to build for production
+  by default.
 
 ```
 jupyter serverextension enable --py --sys-prefix jupyterlab
@@ -100,7 +106,7 @@ Start JupyterLab in development mode:
 jupyter lab --dev-mode
 ```
 
-Development mode ensures that you are running the JavaScript assets that are 
+Development mode ensures that you are running the JavaScript assets that are
 built in the dev-installed Python package.  When running from source in development
 mode, the page will have a red stripe at the top to indicate it is an unreleased version.
 
@@ -146,7 +152,7 @@ build tool.  The npm package source files are in the `packages/` subdirectory.
 **Prerequisites**
 
 - [node](http://nodejs.org/) (preferably version 5 or later)
-- Jupyter notebook server version 4.2 or later (to run examples)
+- Jupyter notebook server version 4.3 or later (to run examples)
 
 ```bash
 npm install --save jupyterlab
@@ -172,7 +178,7 @@ npm run build:packages
 
 The Jupyter server extension source files are in the `jupyterlab/`
 subdirectory. To use this extension, make sure the Jupyter notebook server
-version 4.2 or later is installed.
+version 4.3 or later is installed.
 
 ### Build the JupyterLab server extension
 
@@ -204,4 +210,3 @@ https://jupyterlab-tutorial.readthedocs.io/en/latest/index.html.
 
 - The npm modules are fully compatible with Node/Babel/ES6/ES5. Simply
 omit the type declarations when using a language other than TypeScript.
-

@@ -19,7 +19,7 @@
 |----------------------------------------------------------------------------*/
 
 #tab-manager {
-  background: var(--jp-layout-color0);
+  background: var(--jp-layout-color1);
   overflow: visible;
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
@@ -60,7 +60,7 @@
 
 
 #tab-manager .p-TabBar-tab.jp-mod-active {
-  color: var(--jp-inverse-ui-font-color0);
+  color: white;
   background: var(--jp-brand-color1);
 }
 
@@ -109,15 +109,20 @@
 
 #tab-manager .p-TabBar-tab.p-mod-closable.jp-mod-dirty.jp-mod-active > .p-TabBar-tabCloseIcon {
   background-size: 10px;
-  background-image: var(--jp-inverse-icon-circle);
+  background-image: var(--jp-icon-inverse-circle);
 }
 
 
 #tab-manager .p-TabBar-tab.p-mod-closable.jp-mod-active > .p-TabBar-tabCloseIcon {
-  background-image: var(--jp-inverse-icon-close);
+  background-image: var(--jp-icon-inverse-close);
 }
 
 #tab-manager .p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon:hover {
   background-size: 16px;
-  background-image: var(--jp-icon-close-black);
+  background-image: var(--jp-icon-close-circle);
+}
+
+#tab-manager .p-TabBar-tab.p-mod-closable.jp-mod-active > .p-TabBar-tabCloseIcon:hover {
+  background-size: 16px;
+  background-image: var(--jp-icon-inverse-close-circle);
 }

@@ -19,7 +19,7 @@
   padding: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.25);
+  background: var(--jp-dialog-background);
   color: var(--jp-ui-font-color1);
 }
 
@@ -29,7 +29,7 @@
   flex-direction: column;
   margin-left: auto;
   margin-right: auto;
-  background: #FAFAFA;
+  background: var(--jp-layout-color1);
   padding: 24px;
   padding-bottom: 12px;
   min-width: 300px;
@@ -56,7 +56,7 @@
   flex-direction: column;
   flex: 1 1 auto;
   font-size: var(--jp-ui-font-size2);
-  background: #FAFAFA;
+  background: var(--jp-layout-color1);
   overflow: auto;
 }
 
@@ -81,8 +81,7 @@
 
 
 .jp-Dialog-body > .jp-select-wrapper {
-  width: 252px;
-  border: var(--jp-border-width) solid var(--jp-border-color1);
+  width: 100%;
 }
 
 
@@ -96,5 +95,5 @@
   padding-bottom: 4px;
   line-height: 1.4;
   font-size: var(--jp-ui-font-size1);
-  color: var(--md-grey-700);
+  color: var(--jp-ui-font-color0);
 }

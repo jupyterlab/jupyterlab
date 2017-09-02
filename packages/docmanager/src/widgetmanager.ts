@@ -37,6 +37,10 @@ import {
   DocumentRegistry
 } from '@jupyterlab/docregistry';
 
+import {
+  Contents
+} from '@jupyterlab/services';
+
 
 /**
  * The class name added to document widgets.
@@ -67,17 +71,17 @@ class DocumentWidgetManager implements IDisposable {
    * Test whether the document widget manager is disposed.
    */
   get isDisposed(): boolean {
-    return this._registry === null;
+    return this._isDisposed;
   }
 
   /**
    * Dispose of the resources used by the widget manager.
    */
   dispose(): void {
-    if (this._registry == null) {
+    if (this.isDisposed) {
       return;
     }
-    this._registry = null;
+    this._isDisposed = true;
     Signal.disconnectReceiver(this);
   }
 
@@ -142,13 +146,17 @@ class DocumentWidgetManager implements IDisposable {
    * This can be used to use an existing widget instead of opening
    * a new widget.
    */
-  findWidget(context: DocumentRegistry.Context, widgetName: string): Widget {
+  findWidget(context: DocumentRegistry.Context, widgetName: string): Widget | undefined {
     let widgets = Private.widgetsProperty.get(context);
+    if (!widgets) {
+      return undefined;
+    }
     return find(widgets, widget => {
-      let name = Private.factoryProperty.get(widget).name;
-      if (name === widgetName) {
-        return true;
+      let factory = Private.factoryProperty.get(widget);
+      if (!factory) {
+        return false;
       }
+      return factory.name === widgetName;
     });
   }
 
@@ -159,8 +167,8 @@ class DocumentWidgetManager implements IDisposable {
    *
    * @returns The context associated with the widget, or `undefined`.
    */
-  contextForWidget(widget: Widget): DocumentRegistry.Context {
-    return !widget ? void 0 : Private.contextProperty.get(widget);
+  contextForWidget(widget: Widget): DocumentRegistry.Context | undefined {
+    return Private.contextProperty.get(widget);
   }
 
   /**
@@ -171,18 +179,21 @@ class DocumentWidgetManager implements IDisposable {
    * @returns A new widget or `undefined`.
    *
    * #### Notes
-   *  Uses the same widget factory and context as the source, or returns
-   *  `undefined` if the source widget is not managed by this manager.
+   *  Uses the same widget factory and context as the source, or throws
+   *  if the source widget is not managed by this manager.
    */
-  cloneWidget(widget: Widget): Widget {
+  cloneWidget(widget: Widget): Widget | undefined {
     let context = Private.contextProperty.get(widget);
     if (!context) {
-      return;
+      return undefined;
     }
     let factory = Private.factoryProperty.get(widget);
+    if (!factory) {
+      return undefined;
+    }
     let newWidget = this.createWidget(factory, context);
     this.adoptWidget(context, newWidget);
-    return widget;
+    return newWidget;
   }
 
   /**
@@ -194,6 +205,19 @@ class DocumentWidgetManager implements IDisposable {
     let widgets = Private.widgetsProperty.get(context);
     return Promise.all(
       toArray(map(widgets, widget => this.onClose(widget)))
+    ).then(() => undefined);
+  }
+
+  /**
+   * Dispose of the widgets associated with a given context
+   * regardless of the widget's dirty state.
+   *
+   * @param context - The document context object.
+   */
+  deleteWidgets(context: DocumentRegistry.Context): Promise<void> {
+    let widgets = Private.widgetsProperty.get(context);
+    return Promise.all(
+      toArray(map(widgets, widget => this.onDelete(widget)))
     ).then(() => undefined);
   }
 
@@ -214,7 +238,9 @@ class DocumentWidgetManager implements IDisposable {
       return false;
     case 'activate-request':
       let context = this.contextForWidget(handler as Widget);
-      this._activateRequested.emit(context.path);
+      if (context) {
+        this._activateRequested.emit(context.path);
+      }
       break;
     default:
       break;
@@ -229,23 +255,30 @@ class DocumentWidgetManager implements IDisposable {
    */
   protected setCaption(widget: Widget): void {
     let context = Private.contextProperty.get(widget);
+    if (!context) {
+      return;
+    }
     let model = context.contentsModel;
     if (!model) {
       widget.title.caption = '';
       return;
     }
-    context.listCheckpoints().then(checkpoints => {
+    context.listCheckpoints().then((checkpoints: Contents.ICheckpointModel[]) => {
       if (widget.isDisposed) {
         return;
       }
       let last = checkpoints[checkpoints.length - 1];
       let checkpoint = last ? Time.format(last.last_modified) : 'None';
-      widget.title.caption = (
-        `Name: ${model.name}\n` +
-        `Path: ${model.path}\n` +
-        `Last Saved: ${Time.format(model.last_modified)}\n` +
-        `Last Checkpoint: ${checkpoint}`
-      );
+      let caption = `Name: ${model.name}\nPath: ${model.path}\n`;
+      if (context.model.readOnly) {
+        caption += 'Read-only';
+      } else {
+        caption += (
+          `Last Saved: ${Time.format(model.last_modified)}\n` +
+          `Last Checkpoint: ${checkpoint}`
+        );
+      }
+      widget.title.caption = caption;
     });
   }
 
@@ -273,6 +306,16 @@ class DocumentWidgetManager implements IDisposable {
   }
 
   /**
+   * Dispose of widget regardless of widget's dirty state.
+   *
+   * @param widget - The target widget.
+   */
+  protected onDelete(widget: Widget): Promise<void> {
+    widget.dispose();
+    return Promise.resolve(void 0);
+  }
+
+  /**
    * Ask the user whether to close an unsaved file.
    */
   private _maybeClose(widget: Widget): Promise<boolean> {
@@ -282,12 +325,21 @@ class DocumentWidgetManager implements IDisposable {
       return Promise.resolve(true);
     }
     let widgets = Private.widgetsProperty.get(context);
+    if (!widgets) {
+      return Promise.resolve(true);
+    }
     // Filter by whether the factories are read only.
     widgets = toArray(filter(widgets, widget => {
       let factory = Private.factoryProperty.get(widget);
+      if (!factory) {
+        return false;
+      }
       return factory.readOnly === false;
     }));
     let factory = Private.factoryProperty.get(widget);
+    if (!factory) {
+      return Promise.resolve(true);
+    }
     let model = context.model;
     if (!model.dirty || widgets.length > 1 || factory.readOnly) {
       return Promise.resolve(true);
@@ -297,8 +349,8 @@ class DocumentWidgetManager implements IDisposable {
       title: 'Close without saving?',
       body: `File "${fileName}" has unsaved changes, close without saving?`,
       buttons: [Dialog.cancelButton(), Dialog.warnButton()]
-    }).then(value => {
-      return value.accept;
+    }).then(result => {
+      return result.button.accept;
     });
   }
 
@@ -307,8 +359,14 @@ class DocumentWidgetManager implements IDisposable {
    */
   private _widgetDisposed(widget: Widget): void {
     let context = Private.contextProperty.get(widget);
+    if (!context) {
+      return;
+    }
     let widgets = Private.widgetsProperty.get(context);
-     // Remove the widget.
+    if (!widgets) {
+      return;
+    }
+    // Remove the widget.
     ArrayExt.removeFirstOf(widgets, widget);
     // Dispose of the context if this is the last widget using it.
     if (!widgets.length) {
@@ -340,8 +398,9 @@ class DocumentWidgetManager implements IDisposable {
     each(widgets, widget => { this.setCaption(widget); });
   }
 
-  private _registry: DocumentRegistry = null;
+  private _registry: DocumentRegistry;
   private _activateRequested = new Signal<this, string>(this);
+  private _isDisposed = false;
 }
 
 
@@ -371,18 +430,18 @@ namespace Private {
    * A private attached property for a widget context.
    */
   export
-  const contextProperty = new AttachedProperty<Widget, DocumentRegistry.Context>({
+  const contextProperty = new AttachedProperty<Widget, DocumentRegistry.Context | undefined>({
     name: 'context',
-    create: () => null
+    create: () => undefined
   });
 
   /**
    * A private attached property for a widget factory.
    */
   export
-  const factoryProperty = new AttachedProperty<Widget, DocumentRegistry.WidgetFactory> ({
+  const factoryProperty = new AttachedProperty<Widget, DocumentRegistry.WidgetFactory | undefined> ({
     name: 'factory',
-    create: () => null
+    create: () => undefined
   });
 
   /**

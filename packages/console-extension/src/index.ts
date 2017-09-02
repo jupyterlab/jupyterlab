@@ -15,7 +15,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  PageConfig, PathExt
+  PageConfig
 } from '@jupyterlab/coreutils';
 
 import {
@@ -25,10 +25,6 @@ import {
 import {
   ILauncher
 } from '@jupyterlab/launcher';
-
-import {
-  IServiceManager
-} from '@jupyterlab/services';
 
 import {
   find
@@ -90,7 +86,6 @@ const trackerPlugin: JupyterLabPlugin<IConsoleTracker> = {
   id: 'jupyter.services.console-tracker',
   provides: IConsoleTracker,
   requires: [
-    IServiceManager,
     IMainMenu,
     ICommandPalette,
     ConsolePanel.IContentFactory,
@@ -130,7 +125,8 @@ export default plugins;
 /**
  * Activate the console extension.
  */
-function activateConsole(app: JupyterLab, manager: IServiceManager, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): IConsoleTracker {
+function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): IConsoleTracker {
+  let manager = app.serviceManager;
   let { commands, shell } = app;
   let category = 'Console';
   let command: string;
@@ -165,11 +161,19 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, mainMenu: IM
   // Add a launcher item if the launcher is available.
   if (launcher) {
     manager.ready.then(() => {
-      let specs = manager.specs;
+      const specs = manager.specs;
+      if (!specs) {
+        return;
+      }
       let baseUrl = PageConfig.getBaseUrl();
       for (let name in specs.kernelspecs) {
         let displayName = specs.kernelspecs[name].display_name;
         let rank = name === specs.default ? 0 : Infinity;
+        let kernelIconUrl = specs.kernelspecs[name].resources['logo-64x64'];
+        if (kernelIconUrl) {
+          let index = kernelIconUrl.indexOf('kernelspecs');
+          kernelIconUrl = baseUrl + kernelIconUrl.slice(index);
+        }
         launcher.add({
           displayName,
           category: 'Console',
@@ -177,7 +181,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, mainMenu: IM
           iconClass: 'jp-CodeConsoleIcon',
           callback,
           rank,
-          kernelIconUrl: baseUrl + PathExt.removeSlash(specs.kernelspecs[name].resources["logo-64x64"])
+          kernelIconUrl
         });
       }
     });
@@ -219,9 +223,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, mainMenu: IM
     execute: (args: Partial<ConsolePanel.IOptions>) => {
       let path = args['path'];
       let widget = tracker.find(value => {
-        if (value.console.session.path === path) {
-          return true;
-        }
+        return value.console.session.path === path;
       });
       if (widget) {
         shell.activateById(widget.id);
@@ -233,6 +235,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, mainMenu: IM
           if (model) {
             return createConsole(args);
           }
+          return Promise.reject(`No running console for path: ${path}`);
         });
       }
     },
@@ -349,7 +352,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, mainMenu: IM
   commands.addCommand(command, {
     label: 'Close and Shutdown',
     execute: args => {
-      let current = getCurrent(args);
+      const current = getCurrent(args);
       if (!current) {
         return;
       }
@@ -358,7 +361,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, mainMenu: IM
         body: `Are you sure you want to close "${current.title.label}"?`,
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
-        if (result.accept) {
+        if (result.button.accept) {
           current.console.session.shutdown().then(() => {
             current.dispose();
           });
@@ -382,6 +385,7 @@ function activateConsole(app: JupyterLab, manager: IServiceManager, mainMenu: IM
           widget.console.inject(args['code'] as string);
           return true;
         }
+        return false;
       });
     },
     isEnabled: hasWidget

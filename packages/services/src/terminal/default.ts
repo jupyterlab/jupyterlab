@@ -112,7 +112,6 @@ class DefaultTerminalSession implements TerminalSession.ISession {
       this._ws = null;
     }
     delete Private.running[this._url];
-    this._readyPromise = null;
     Signal.clearData(this);
   }
 
@@ -120,19 +119,21 @@ class DefaultTerminalSession implements TerminalSession.ISession {
    * Send a message to the terminal session.
    */
   send(message: TerminalSession.IMessage): void {
-    if (this._isDisposed) {
+    if (this._isDisposed || !message.content) {
       return;
     }
 
     let msg: JSONPrimitive[] = [message.type];
     msg.push(...message.content);
     let value = JSON.stringify(msg);
-    if (this._isReady) {
+    if (this._isReady && this._ws) {
       this._ws.send(value);
       return;
     }
     this.ready.then(() => {
-      this._ws.send(value);
+      if (this._ws) {
+        this._ws.send(value);
+      }
     });
   }
 
@@ -185,6 +186,9 @@ class DefaultTerminalSession implements TerminalSession.ISession {
     };
 
     return new Promise<void>((resolve, reject) => {
+      if (!this._ws) {
+        return;
+      }
       this._ws.onopen = (event: MessageEvent) => {
         if (this._isDisposed) {
           return;
@@ -203,7 +207,7 @@ class DefaultTerminalSession implements TerminalSession.ISession {
 
   private _name: string;
   private _url: string;
-  private _ws: WebSocket = null;
+  private _ws: WebSocket | null = null;
   private _isDisposed = false;
   private _readyPromise: Promise<void>;
   private _isReady = false;
@@ -228,7 +232,7 @@ namespace DefaultTerminalSession {
   /**
    * Start a new terminal session.
    *
-   * @options - The session options to use.
+   * @param options - The session options to use.
    *
    * @returns A promise that resolves with the session instance.
    */
@@ -357,17 +361,16 @@ namespace DefaultTerminalSession {
         throw ServerConnection.makeError(response);
       }
       Private.killTerminal(url);
-    }, err => {
+    }).catch(err => {
       if (err.xhr.status === 404) {
         let response = JSON.parse(err.xhr.responseText) as any;
         console.warn(response['message']);
         Private.killTerminal(url);
         return;
       }
-      return Promise.reject(err);
+      return Promise.reject(err) as Promise<void>;
     });
   }
-
 }
 
 

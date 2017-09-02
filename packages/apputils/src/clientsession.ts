@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  uuid
+  PathExt, uuid
 } from '@jupyterlab/coreutils';
 
 import {
@@ -24,6 +24,14 @@ import {
 import {
   ISignal, Signal
 } from '@phosphor/signaling';
+
+import {
+  h
+} from '@phosphor/virtualdom';
+
+import {
+  Widget
+} from '@phosphor/widgets';
 
 import {
   showDialog, Dialog
@@ -268,7 +276,7 @@ class ClientSession implements IClientSession {
   /**
    * The current kernel of the session.
    */
-  get kernel(): Kernel.IKernelConnection {
+  get kernel(): Kernel.IKernelConnection | null {
     return this._session ? this._session.kernel : null;
   }
 
@@ -340,10 +348,11 @@ class ClientSession implements IClientSession {
     if (!kernel) {
       return 'No Kernel!';
     }
-    if (!this.manager.isReady) {
+    let specs = this.manager.specs;
+    if (!specs  ) {
       return 'Unknown!';
     }
-    let spec = this.manager.specs.kernelspecs[kernel.name];
+    let spec = specs.kernelspecs[kernel.name];
     return spec ? spec.display_name : kernel.name;
   }
 
@@ -372,10 +381,10 @@ class ClientSession implements IClientSession {
   /**
    * Change the current kernel associated with the document.
    */
-  changeKernel(options: Kernel.IModel): Promise<Kernel.IKernelConnection> {
+  changeKernel(options: Partial<Kernel.IModel>): Promise<Kernel.IKernelConnection> {
     return this.ready.then(() => {
       if (this.isDisposed) {
-        return;
+        return Promise.reject('Disposed');
       }
       return this._changeKernel(options);
     });
@@ -387,7 +396,7 @@ class ClientSession implements IClientSession {
   selectKernel(): Promise<void> {
     return this.ready.then(() => {
       if (this.isDisposed) {
-        return;
+        return Promise.reject('Disposed');
       }
       return this._selectKernel();
     });
@@ -399,14 +408,12 @@ class ClientSession implements IClientSession {
    * @returns A promise that resolves when the session is shut down.
    */
   shutdown(): Promise<void> {
-    if (this.isDisposed || !this._session) {
+    const session = this._session;
+    if (this.isDisposed || !session) {
       return Promise.resolve(void 0);
     }
-    let session = this._session;
     this._session = null;
-    if (session) {
-      return session.shutdown();
-    }
+    return session.shutdown();
   }
 
   /**
@@ -423,7 +430,7 @@ class ClientSession implements IClientSession {
   restart(): Promise<Kernel.IKernelConnection | null> {
     return this.ready.then(() => {
       if (this.isDisposed) {
-        return;
+        return Promise.reject(void 0);
       }
       let kernel = this.kernel;
       if (!kernel) {
@@ -431,7 +438,7 @@ class ClientSession implements IClientSession {
           return this.changeKernel({ name: this._prevKernelName });
         }
         // Bail if there is no previous kernel to start.
-        return;
+        return Promise.reject('No kernel to restart');
       }
       return ClientSession.restartKernel(kernel);
     });
@@ -561,9 +568,9 @@ class ClientSession implements IClientSession {
   /**
    * Change the kernel.
    */
-  private _changeKernel(options: Kernel.IModel): Promise<Kernel.IKernelConnection> {
+  private _changeKernel(options: Partial<Kernel.IModel>): Promise<Kernel.IKernelConnection> {
     if (this.isDisposed) {
-      return Promise.resolve(void 0);
+      return Promise.reject('Disposed');
     }
     let session = this._session;
     if (session) {
@@ -580,21 +587,28 @@ class ClientSession implements IClientSession {
     if (this.isDisposed) {
       return Promise.resolve(void 0);
     }
-    return Private.selectKernel(this).then(model => {
-      if (this.isDisposed || model === void 0) {
+    return showDialog({
+      title: 'Select Kernel',
+      body: new Private.KernelSelector(this),
+      buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'SELECT' })]
+    }).then(result => {
+      if (this.isDisposed || !result.button.accept) {
         return;
       }
+      let model = result.value;
       if (model === null && this._session) {
         return this.shutdown().then(() => this._kernelChanged.emit(null));
       }
-      return this._changeKernel(model).then(() => void 0);
+      if (model) {
+        return this._changeKernel(model).then(() => void 0);
+      }
     }).then(() => void 0);
   }
 
   /**
    * Start a session and set up its signals.
    */
-  private _startSession(model: Kernel.IModel): Promise<Kernel.IKernelConnection> {
+  private _startSession(model: Partial<Kernel.IModel>): Promise<Kernel.IKernelConnection> {
     if (this.isDisposed) {
       return Promise.reject('Session is disposed.');
     }
@@ -602,13 +616,13 @@ class ClientSession implements IClientSession {
       path: this._path,
       type: this._type,
       name: this._name,
-      kernelName: model ? model.name : null,
-      kernelId: model ? model.id : null
+      kernelName: model ? model.name : undefined,
+      kernelId: model ? model.id : undefined
     }).then(session => {
       return this._handleNewSession(session);
     }).catch(err => {
       this._handleSessionError(err);
-      return this._session.kernel;
+      return Promise.reject(err);
     });
   }
 
@@ -617,7 +631,7 @@ class ClientSession implements IClientSession {
    */
   private _handleNewSession(session: Session.ISession): Kernel.IKernelConnection {
     if (this.isDisposed) {
-      return null;
+      throw Error('Disposed');
     }
     if (this._session) {
       this._session.dispose();
@@ -657,11 +671,9 @@ class ClientSession implements IClientSession {
     } catch (err) {
       // no-op
     }
-    let body = document.createElement('pre');
-    body.textContent = response;
     return showDialog({
       title: 'Error Starting Kernel',
-      body,
+      body: h.pre(response),
       buttons: [Dialog.okButton()]
     }).then(() => void 0);
   }
@@ -790,9 +802,9 @@ namespace ClientSession {
       buttons: [Dialog.cancelButton(), restartBtn]
     }).then(result => {
       if (kernel.isDisposed) {
-        return null;
+        return Promise.resolve(null);
       }
-      if (result.accept) {
+      if (result.button.accept) {
         return kernel.restart().then(() => {
           return kernel;
         });
@@ -809,7 +821,7 @@ namespace ClientSession {
     /**
      * The Kernel specs.
      */
-    specs: Kernel.ISpecModels;
+    specs: Kernel.ISpecModels | null;
 
     /**
      * The kernel preference.
@@ -862,10 +874,30 @@ namespace ClientSession {
  */
 namespace Private {
   /**
-   * Select a kernel for the session.
+   * A widget that provides a kernel selection.
    */
   export
-  function selectKernel(session: ClientSession): Promise<Kernel.IModel> {
+  class KernelSelector extends Widget {
+    /**
+     * Create a new kernel selector widget.
+     */
+    constructor(session: ClientSession) {
+      super({ node: createSelectorNode(session) });
+    }
+
+    /**
+     * Get the value of the kernel selector widget.
+     */
+    getValue(): Kernel.IModel {
+      let selector = this.node.querySelector('select') as HTMLSelectElement;
+      return JSON.parse(selector.value) as Kernel.IModel;
+    }
+  }
+
+  /**
+   * Create a node for a kernel selector widget.
+   */
+  function createSelectorNode(session: ClientSession) {
     // Create the dialog body.
     let body = document.createElement('div');
     let text = document.createElement('label');
@@ -876,18 +908,7 @@ namespace Private {
     let selector = document.createElement('select');
     ClientSession.populateKernelSelect(selector, options);
     body.appendChild(selector);
-
-    let select = Dialog.okButton({ label: 'SELECT' });
-    return showDialog({
-      title: 'Select Kernel',
-      body,
-      buttons: [Dialog.cancelButton(), select]
-    }).then(result => {
-      if (!result.accept) {
-        return void 0;
-      }
-      return JSON.parse(selector.value) as Kernel.IModel;
-    });
+    return body;
   }
 
   /**
@@ -897,7 +918,7 @@ namespace Private {
   function getDefaultKernel(options: ClientSession.IKernelSearch): string | null {
     let { specs, preference } = options;
     let { name, language, shouldStart, canStart } = preference;
-    if (shouldStart === false || canStart === false) {
+    if (!specs || shouldStart === false || canStart === false) {
       return null;
     }
 
@@ -950,7 +971,7 @@ namespace Private {
     let { preference, sessions, specs } = options;
     let { name, id, language, canStart, shouldStart } = preference;
 
-    if (canStart === false) {
+    if (!specs || canStart === false) {
       node.appendChild(optionForNone());
       node.value = 'null';
       node.disabled = true;
@@ -1122,7 +1143,7 @@ namespace Private {
    */
   function optionForSession(session: Session.IModel, displayName: string, maxLength: number): HTMLOptionElement {
     let option = document.createElement('option');
-    let sessionName = session.name || session.path.split('/').pop();
+    let sessionName = session.name || PathExt.basename(session.path);
     if (sessionName.length > maxLength) {
       sessionName = sessionName.slice(0, maxLength - 3) + '...';
     }

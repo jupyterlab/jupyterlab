@@ -22,7 +22,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  PanelLayout, Widget
+  BoxLayout, Widget
 } from '@phosphor/widgets';
 
 import {
@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  ActivityMonitor, IChangedArgs, IModelDB
+  ActivityMonitor, IChangedArgs, IModelDB, PathExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -237,10 +237,10 @@ class TextModelFactory implements DocumentRegistry.CodeModelFactory {
   }
 
   /**
-   * Get the preferred kernel language given an extension.
+   * Get the preferred kernel language given a file path.
    */
-  preferredLanguage(ext: string): string {
-    let mode = Mode.findByExtension(ext.slice(1));
+  preferredLanguage(path: string): string {
+    let mode = Mode.findByFileName(path);
     return mode && mode.mode;
   }
 
@@ -296,7 +296,7 @@ abstract class ABCWidgetFactory<T extends DocumentRegistry.IReadyWidget, U exten
     this._name = options.name;
     this._readOnly = options.readOnly === undefined ? false : options.readOnly;
     this._defaultFor = options.defaultFor ? options.defaultFor.slice() : [];
-    this._fileExtensions = options.fileExtensions.slice();
+    this._fileTypes = options.fileTypes.slice();
     this._modelName = options.modelName || 'text';
     this._preferKernel = !!options.preferKernel;
     this._canStartKernel = !!options.canStartKernel;
@@ -338,10 +338,10 @@ abstract class ABCWidgetFactory<T extends DocumentRegistry.IReadyWidget, U exten
   }
 
   /**
-   * The file extensions the widget can view.
+   * The file types the widget can view.
    */
-  get fileExtensions(): string[] {
-    return this._fileExtensions.slice();
+  get fileTypes(): string[] {
+    return this._fileTypes.slice();
   }
 
   /**
@@ -352,7 +352,7 @@ abstract class ABCWidgetFactory<T extends DocumentRegistry.IReadyWidget, U exten
   }
 
   /**
-   * The file extensions for which the factory should be the default.
+   * The file types for which the factory should be the default.
    */
   get defaultFor(): string[] {
     return this._defaultFor.slice();
@@ -395,7 +395,7 @@ abstract class ABCWidgetFactory<T extends DocumentRegistry.IReadyWidget, U exten
   private _canStartKernel: boolean;
   private _preferKernel: boolean;
   private _modelName: string;
-  private _fileExtensions: string[];
+  private _fileTypes: string[];
   private _defaultFor: string[];
   private _widgetCreated = new Signal<DocumentRegistry.IWidgetFactory<T, U>, T>(this);
 }
@@ -413,17 +413,18 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
   constructor(options: MimeDocument.IOptions) {
     super();
     this.addClass('jp-MimeDocument');
-    let layout = this.layout = new PanelLayout();
+    let layout = this.layout = new BoxLayout();
     let toolbar = new Widget();
     toolbar.addClass('jp-Toolbar');
     layout.addWidget(toolbar);
+    BoxLayout.setStretch(toolbar, 0);
     let context = options.context;
-    this.title.label = context.path.split('/').pop();
+    this.title.label = PathExt.basename(context.path);
     this.rendermime = options.rendermime.clone({ resolver: context });
 
     this._context = context;
     this._mimeType = options.mimeType;
-    this._dataType = options.dataType;
+    this._dataType = options.dataType || 'string';
 
     context.pathChanged.connect(this._onPathChanged, this);
 
@@ -470,9 +471,7 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
     if (this.isDisposed) {
       return;
     }
-    if (this._monitor) {
-      this._monitor.dispose();
-    }
+    this._monitor.dispose();
     super.dispose();
   }
 
@@ -506,7 +505,8 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
     let mimeModel = new MimeModel({ data });
     if (!this._renderer) {
       this._renderer = this.rendermime.createRenderer(this._mimeType);
-      (this.layout as PanelLayout).addWidget(this._renderer);
+      (this.layout as BoxLayout).addWidget(this._renderer);
+      BoxLayout.setStretch(this._renderer, 1);
     }
     return this._renderer.renderModel(mimeModel);
   }
@@ -515,11 +515,11 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
    * Handle a path change.
    */
   private _onPathChanged(): void {
-    this.title.label = this._context.path.split('/').pop();
+    this.title.label = PathExt.basename(this._context.path);
   }
 
-  private _context: DocumentRegistry.Context = null;
-  private _monitor: ActivityMonitor<any, any> = null;
+  private _context: DocumentRegistry.Context;
+  private _monitor: ActivityMonitor<any, any>;
   private _renderer: IRenderMime.IRenderer;
   private _mimeType: string;
   private _ready = new PromiseDelegate<void>();
@@ -576,35 +576,34 @@ class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument, DocumentRegistr
   constructor(options: MimeDocumentFactory.IOptions) {
     super(Private.createRegistryOptions(options));
     this._rendermime = options.rendermime;
-    this._mimeType = options.mimeType;
     this._renderTimeout = options.renderTimeout || 1000;
     this._dataType = options.dataType || 'string';
-    this._iconClass = options.iconClass || '';
-    this._iconLabel = options.iconLabel || '';
+    this._fileType = options.primaryFileType;
   }
 
   /**
    * Create a new widget given a context.
    */
   protected createNewWidget(context: DocumentRegistry.Context): MimeDocument {
+    let ft = this._fileType;
+    let mimeType = ft.mimeTypes.length ? ft.mimeTypes[0] : 'text/plain';
     let widget = new MimeDocument({
       context,
+      mimeType,
       rendermime: this._rendermime.clone(),
-      mimeType: this._mimeType,
       renderTimeout: this._renderTimeout,
       dataType: this._dataType,
     });
-    widget.title.iconClass = this._iconClass;
-    widget.title.iconLabel = this._iconLabel;
+
+    widget.title.iconClass = ft.iconClass;
+    widget.title.iconLabel = ft.iconLabel;
     return widget;
   }
 
-  private _rendermime: RenderMime = null;
-  private _mimeType: string;
+  private _rendermime: RenderMime;
   private _renderTimeout: number;
   private _dataType: 'string' | 'json';
-  private _iconLabel: string;
-  private _iconClass: string;
+  private _fileType: DocumentRegistry.IFileType;
 }
 
 
@@ -619,29 +618,19 @@ namespace MimeDocumentFactory {
   export
   interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
     /**
+     * The primary file type associated with the document.
+     */
+    primaryFileType: DocumentRegistry.IFileType;
+
+    /**
      * The rendermime instance.
      */
     rendermime: RenderMime;
 
     /**
-     * The mime type.
-     */
-    mimeType: string;
-
-    /**
      * The render timeout.
      */
     renderTimeout?: number;
-
-    /**
-     * The icon class name for the widget.
-     */
-    iconClass?: string;
-
-    /**
-     * The icon label for the widget.
-     */
-    iconLabel?: string;
 
     /**
      * Preferred data type from the model.

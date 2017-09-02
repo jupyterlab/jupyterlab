@@ -38,6 +38,12 @@ var allPackages = require(allPackagesPath);
 allPackages.dependencies[package.name] = undefined;
 fs.writeFileSync(allPackagesPath, JSON.stringify(allPackages, null, 2) + '\n');
 
+// Remove the extension path from packages/all-packages/tsconfig.json
+var tsconfigPath = path.join(basePath, 'packages', 'all-packages', 'tsconfig.json');
+var tsconfig = require(tsconfigPath);
+tsconfig.compilerOptions.paths[package.name] = undefined;
+fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
+
 // Remove the extension from packages/all-packages/src/index.ts
 var indexPath = path.join(basePath, 'packages', 'all-packages', 'src', 'index.ts');
 var index = fs.readFileSync(indexPath, 'utf8');
@@ -46,13 +52,3 @@ var indexEntries = indexEntries.filter(function(e) {
   return e.indexOf(package.name) === -1;
 });
 fs.writeFileSync(indexPath, indexEntries.join('\n'));
-
-// Remove the extension from jupyterlab/package.json
-var jupyterlabPackagePath = path.join(basePath, 'jupyterlab', 'package.json');
-var jupyterlabPackage = require(jupyterlabPackagePath);
-jupyterlabPackage.dependencies[package.name] = undefined;
-let extensions = jupyterlabPackage.jupyterlab.extensions.filter(function(e) {
-  return e.indexOf(package.name) === -1;
-});
-jupyterlabPackage.jupyterlab.extensions = extensions;
-fs.writeFileSync(jupyterlabPackagePath, JSON.stringify(jupyterlabPackage, null, 2) + '\n');

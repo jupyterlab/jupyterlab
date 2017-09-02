@@ -1,9 +1,12 @@
 # Extensions Developer Guide
 
-JupyterLab can be extended in two ways via:
+JupyterLab can be extended in three ways via:
 
 - **application plugins (top level):** Application plugins extend the
-  functionality of JupyterLab itself, and **this tutorial focuses on them.**
+  functionality of JupyterLab itself.
+- **mime renderer extension (top level):**  Mime Renderer extensions are
+  a convenience for creating an extension that can render mime data and
+  potentially render files of a given type.
 - document widget extensions (lower level): Document widget extensions extend
   the functionality of document widgets added to the application, and we cover
   them in the "Documents" tutorial.
@@ -11,10 +14,6 @@ JupyterLab can be extended in two ways via:
 A JupyterLab application is comprised of:
 - A core Application object
 - Plugins
-
-A full example of an application is contained [here](https://github.com/jupyterlab/jupyterlab/tree/master/examples/app).
-Looking at the `index.js` file, you can see the extensions
-used in the tutorial example.
 
 ## Plugins
 A plugin adds a core functionality to the application:
@@ -35,9 +34,10 @@ The default plugins in the JupyterLab application include:
 - [Editor](https://github.com/jupyterlab/jupyterlab/blob/master/packages/fileeditor-extension/src/index.ts) - Add a widget factory for displaying editable source files.
 - [Console](https://github.com/jupyterlab/jupyterlab/blob/master/packages/console-extension/src/index.ts) - Adds the ability to launch Jupyter Console instances for
 interactive kernel console sessions.
-- [Services](https://github.com/jupyterlab/jupyterlab/blob/master/packages/services-extension/src/index.ts) - An application-specific interface to `@jupyterlab/services`.
-- [RenderMime](https://github.com/jupyterlab/jupyterlab/blob/master/packages/rendermime/src) - The registry for adding kernel `display_data` renderers.
-- [Document Registry](https://github.com/jupyterlab/jupyterlab/tree/master/packages/docregistry/src) - Used to add functionality around widgets backed by files.
+
+A dependency graph for the core JupyterLab plugins
+(along with links to their source) is shown here:
+![dependencies](dependency-graph.svg)
 
 ## Application Object
 The JupyterLab Application object is given to each plugin in
@@ -67,13 +67,13 @@ information like resize events to flow through the widget hierarchy in
 the application.  **Phosphor signals** are a *one-to-many* interaction that allow
 listeners to react to changes in an observed object.
 
-
 ## Extension Authoring
 An Extension is a valid [npm package](https://docs.npmjs.com/getting-started/what-is-npm) that meets the following criteria:
   - Exports one or more JupyterLab plugins as the default export in its
     main file.
   - Has a `jupyterlab` key in its `package.json` which has
-    `"extension": true` metadata.
+    `"extension"` metadata.  The value can be `true` to use the main module
+    of the package, or a string path to a specific module (e.g. `"lib/foo"`).
 
 While authoring the extension, you can use the command:
 
@@ -84,13 +84,8 @@ jupyter labextension link <path>
 This causes the builder to re-install the source folder before building
 the application files.  You can re-build at any time using `jupyter lab build` and it will reinstall these packages.  You can also link other npm packages
 that you are working on simultaneously; they will be re-installed but not
-considered as extensions if they lack the metadata.
-
-You can see the list of linked extensions using:
-
-```
-jupyter labextension listlinked
-```
+considered as extensions if they lack the metadata.  Linked extensions and 
+packages are included in `jupyter labextension list`.
 
 You can also use `jupyter labextension install <path>`, but that will
 only copy the current contents of the source folder.
@@ -139,6 +134,93 @@ provide a script that runs `jupyter labextension install` against a
 local folder path on the user's machine or a provided tarball.  Any
 valid `npm install` specifier can be used in `jupyter labextension install` (e.g. `foo@latest`, `bar@3.0.0.0`, `path/to/folder`, and `path/to/tar.gz`).
 
+## Mime Renderer Extensions
+Mime Renderer extensions are a convenience for creating an extension that can
+render mime data and potentially render files of a given type.
+
+Mime renderer extensions are more declarative than standard extensions.
+The extension is treated the same from the command line perspective (`install`
+and `link`), but it does not directly create JupyterLab plugins.  Instead it
+exports an interface given in the [rendermime-interfaces](http://jupyterlab.github.io/jupyterlab/interfaces/_rendermime_interfaces_src_index_.irendermime.iextension.html)
+package.
+
+The JupyterLab repo has an example mime renderer extension for [vega2](https://github.com/jupyterlab/jupyterlab/tree/master/packages/vega2-extension).  It
+provides a mime renderer for [vega](https://vega.github.io/vega/) data and
+registers itself as a document renderer for vega file types.
+
+The `rendermime-interfaces` package is intended to be the only JupyterLab
+package needed to create a mime renderer extension (using the interfaces
+in TypeScript or as a form of documentation if using plain JavaScript).
+
+The only other difference from a standard extension is that has a `jupyterlab`
+key in its `package.json` with `"mimeRenderer"` metadata.  The value can be 
+`true` to use the main module of the package, or a string path to a specific 
+module (e.g. `"lib/foo"`).
+
+## Themes
+A theme is a JupyterLab extension that uses a `ThemeManager` and can be 
+loaded and unloaded dynamically.  The package must include all static assets 
+that are referenced by `url()` in its CSS files.  The `url()` paths in a CSS
+file served by the Jupyter server must start with the path 
+`'./lab/api/themes/<foo>/', where `foo` is the normalized name of the 
+package.  Scoped packages of the form `@org/name` are normalized to 
+`org-name`.  Other package names are not affected.  Note that `'@import'` paths are still given as relative paths, e.g. (`'@import './foo.css';`).  
+The path to the theme  assets is specified `package.json` under the 
+`"jupyterlab"` key as `"themeDir"`. See the [JupyterLab Light Theme](https://github.com/jupyterlab/jupyterlab/tree/master/packages/theme-light-extension) 
+for an example.  Ensure that the theme files are included in the
+`"files"` metadata in package.json.  A theme can optionally specify
+an `embed.css` file that can be consumed outside of a JupyterLab application.
+See the JupyterLab Light Theme for an example.
+
+## Standard (General-Purpose) Extensions
+See the example,
+[How to Extend the Notebook Plugin](https://github.com/jupyterlab/jupyterlab/blob/master/docs/notebook.md#how-to-extend-the-notebook-plugin). Notice that the mime
+renderer and themes extensions above use a limited, simplified interface to
+JupyterLab's extension system. Modifying the notebook plugin requires the full,
+general-purpose interface to the extension system.
+
+## Extension Settings
+An extension can specify user settings using a JSON Schema.  The schema
+definition should be in a file that is the id of the specific JupyterLab
+application plugin, e.g. `'jupyterlab.services.theme-manager.json'`.  The 
+schema(s) for an extension are placed in a directory specified in 
+`package.json` under the "jupyterlab" key as "schemaDir".  Ensure that the 
+schema files are included in the `"files"` metadata in package.json.
+See the (fileeditor-extension)[https://github.com/jupyterlab/jupyterlab/tree/master/packages/fileeditor-extension] for an example of a extension that
+uses settings.
 
 
+## Storing Extension Data
+In addition to the file system that is accessed by using the `@jupyterlab/services` package, JupyterLab offers two ways for extensions to store data: a client-side state database that is built on top of `localStorage` and a plugin settings system that allows for default setting values and user overrides.
 
+
+### State Database
+The state database can be accessed by importing `IStateDB` from `@jupyterlab/coreutils` and adding it to the list of `requires` for a plugin:
+```typescript
+const id = 'foo-author.services.foo';
+
+const IFoo = new Token<IFoo>(id);
+
+interface IFoo {}
+
+class Foo implements IFoo {}
+
+const plugin: JupyterLabPlugin<IFoo> = {
+  id,
+  requires: [IStateDB],
+  provides: IFoo,
+  activate: (app: JupyterLab, state: IStateDB): IFoo => {
+    const foo = new Foo();
+    const key = `${id}:some-attribute`;
+
+    // Load the saved plugin state and apply it once the app
+    // has finished restoring its former layout.
+    Promise.all([state.fetch(key), app.restored])
+      .then(([saved]) => { /* Update `foo` with `saved`. */ });
+
+    // Fulfill the plugin contract by returning an `IFoo`.
+    return foo;
+  },
+  autoStart: true
+};
+```

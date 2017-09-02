@@ -34,10 +34,11 @@ namespace CommandIDs {
 
 
 /**
- * The list of file extensions for images.
+ * The list of file types for images.
  */
-const EXTENSIONS = ['.png', '.gif', '.jpeg', '.jpg', '.svg', '.bmp', '.ico',
-  '.xbm', '.tiff', '.tif'];
+const FILE_TYPES = [
+  'png', 'gif', 'jpeg', 'svg', 'bmp', 'ico', 'xbm', 'tiff'
+];
 
 /**
  * The name of the factory that creates image widgets.
@@ -70,8 +71,8 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRe
   const factory = new ImageViewerFactory({
     name: FACTORY,
     modelName: 'base64',
-    fileExtensions: EXTENSIONS,
-    defaultFor: EXTENSIONS,
+    fileTypes: FILE_TYPES,
+    defaultFor: FILE_TYPES,
     readOnly: true
   });
   const tracker = new InstanceTracker<ImageViewer>({ namespace });
@@ -89,6 +90,13 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRe
     // Notify the instance tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => { tracker.save(widget); });
     tracker.add(widget);
+
+    let fts = app.docRegistry.getFileTypesForPath(widget.context.path);
+    if (fts.length > 0) {
+      widget.title.iconClass = fts[0].iconClass;
+      widget.title.iconLabel = fts[0].iconLabel;
+    }
+
   });
 
   addCommands(tracker, app.commands);

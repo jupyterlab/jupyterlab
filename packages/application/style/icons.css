@@ -1,0 +1,248 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-MaterialIcon {
+  min-width: 16px;
+  min-height: 16px;
+  background-size: 16px;
+  display: inline-block;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+
+.jp-AddIcon {
+  background-image: var(--jp-icon-add);
+}
+
+
+.jp-ChatIcon {
+  background-image: var(--jp-icon-chat);
+}
+
+
+.jp-CircleIcon {
+  background-image: var(--jp-icon-kernel-running);
+}
+
+
+.jp-CloseIcon {
+  background-image: var(--jp-icon-close);
+}
+
+
+.jp-CodeConsoleIcon {
+  background-image: var(--jp-icon-console);
+}
+
+
+.jp-CopyIcon {
+  background-image: var(--jp-icon-copy);
+}
+
+
+.jp-CutIcon {
+  background-image: var(--jp-icon-cut);
+}
+
+
+.jp-DownCaretIcon {
+  background-image: var(--jp-ui-select-caret);
+}
+
+
+.jp-DownloadIcon {
+  background-image: var(--jp-icon-download);
+}
+
+
+.jp-DragIcon {
+  margin-right: 4px;
+}
+
+
+.jp-EditIcon {
+  background-image: var(--jp-icon-edit);
+}
+
+
+.jp-EllipsesIcon {
+  background-image: var(--jp-icon-ellipses);
+}
+
+
+.jp-ExpandLessIcon {
+  background-image: var(--jp-icon-expand-less);
+}
+
+
+.jp-ExpandMoreIcon {
+  background-image: var(--jp-icon-expand-more);
+}
+
+
+.jp-FileIcon {
+  background-image: var(--jp-icon-file);
+}
+
+
+.jp-FilledCircleIcon {
+  background-image: var(--jp-icon-circle);
+}
+
+
+.jp-newFolderIcon {
+  background-image: var(--jp-icon-new-directory);
+}
+
+
+.jp-HomeIcon {
+  background-image: var(--jp-icon-home);
+  min-width: 14px;
+  min-height: 14px;
+  background-size: 14px;
+  vertical-align: sub;
+}
+
+
+.jp-ImageIcon {
+  background-image: var(--jp-icon-image);
+}
+
+
+.jp-JSONIcon {
+  background-image: var(--jp-icon-json);
+}
+
+
+.jp-JupyterIcon {
+  background-image: var(--jp-image-jupyter);
+  background-size: 16px;
+  margin: 2px;
+  margin-left: 8px;
+  margin-right: 0px;
+  padding-right: 0px;
+}
+
+
+.jp-LauncherIcon {
+  background-image: var(--jp-icon-launcher);
+}
+
+
+.jp-MainAreaLandscapeIcon {
+  background-repeat: no-repeat;
+  margin-right: 2px;
+  width: 22px;
+}
+
+
+.jp-MainAreaPortraitIcon {
+  background-position: 0 2px;
+  background-repeat: no-repeat;
+  margin-right: 2px;
+  width: 20px;
+}
+
+
+.jp-MarkdownIcon {
+  background-image: var(--jp-icon-markdown);
+}
+
+
+.jp-MoreHorizIcon {
+  background-image: var(--jp-icon-more);
+}
+
+
+.jp-NotebookIcon {
+  background-image: var(--jp-icon-book);
+}
+
+
+.jp-NotebookRunningIcon {
+  background-image: var(--jp-icon-book-running);
+}
+
+
+.jp-OpenFolderIcon {
+  background-image: var(--jp-icon-directory);
+}
+
+
+.jp-PasteIcon {
+  background-image: var(--jp-icon-paste);
+}
+
+
+.jp-PythonIcon {
+  background-image: var(--jp-icon-python);
+}
+
+
+.jp-RKernelIcon {
+  background-image: var(--jp-icon-r);
+}
+
+
+.jp-RefreshIcon {
+  background-image: var(--jp-icon-refresh);
+}
+
+
+.jp-RunIcon {
+  background-image: var(--jp-icon-run);
+}
+
+
+.jp-SaveIcon {
+  background-image: var(--jp-icon-save);
+}
+
+
+.jp-SettingsIcon {
+  background-image: var(--jp-icon-settings);
+}
+
+
+.jp-SpreadsheetIcon {
+  background-image: var(--jp-icon-spreadsheet);
+}
+
+
+.jp-StopIcon {
+  background-image: var(--jp-icon-stop);
+}
+
+
+.jp-TerminalIcon {
+  background-image: var(--jp-icon-terminal);
+}
+
+
+.jp-TextEditorIcon {
+  background-image: var(--jp-icon-text-editor);
+}
+
+
+.jp-UploadIcon {
+  background-image: var(--jp-icon-upload);
+}
+
+
+.jp-YamlIcon {
+  background-image: var(--jp-icon-yaml);
+}
+
+
+.jp-VegaIcon {
+  background-image: var(--jp-icon-vega);
+}
+
+
+.jp-QuestionMarkIcon {
+  background-image: var(--jp-icon-question-mark);
+}

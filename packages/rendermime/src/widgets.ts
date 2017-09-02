@@ -272,34 +272,6 @@ class RenderedMarkdown extends RenderedHTMLCommon {
 
 
 /**
- * A widget for displaying rendered PDF content.
- */
-export
-class RenderedPDF extends RenderedCommon {
-  /**
-   * Construct a new rendered PDF widget.
-   *
-   * @param options - The options for initializing the widget.
-   */
-  constructor(options: IRenderMime.IRendererOptions) {
-    super(options);
-    this.addClass('jp-RenderedPDF');
-  }
-
-  /**
-   * Render a mime model.
-   */
-  render(model: IRenderMime.IMimeModel): Promise<void> {
-    return renderers.renderPDF({
-      host: this.node,
-      source: String(model.data[this.mimeType]),
-      trusted: model.trusted
-    });
-  }
-}
-
-
-/**
  * A widget for displaying SVG content.
  */
 export
@@ -369,6 +341,37 @@ class RenderedText extends RenderedCommon {
     return renderers.renderText({
       host: this.node,
       source: String(model.data[this.mimeType])
+    });
+  }
+}
+
+
+/**
+ * A widget for displaying deprecated JavaScript output.
+ */
+export
+class RenderedJavaScript extends RenderedCommon {
+  /**
+   * Construct a new rendered text widget.
+   *
+   * @param options - The options for initializing the widget.
+   */
+  constructor(options: IRenderMime.IRendererOptions) {
+    super(options);
+    this.addClass('jp-RenderedJavaScript');
+  }
+
+  /**
+   * Render a mime model.
+   *
+   * @param model - The mime model to render.
+   *
+   * @returns A promise which resolves when rendering is complete.
+   */
+  render(model: IRenderMime.IMimeModel): Promise<void> {
+    return renderers.renderText({
+      host: this.node,
+      source: 'JavaScript output is disabled in JupyterLab'
     });
   }
 }

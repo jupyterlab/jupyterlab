@@ -156,7 +156,7 @@
 
 
 .jp-RunningSessions-itemLabel:hover {
-  background-color: rgba(153,153,153,.1);
+  background-color: var(--jp-layout-color2);
 }
 
 

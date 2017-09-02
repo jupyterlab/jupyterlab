@@ -1,12 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-var JupyterLab = require('@jupyterlab/application').JupyterLab;
-
 // ES6 Promise polyfill
 require('es6-promise/auto');
 
-require('font-awesome/css/font-awesome.min.css');
+// Load the core theming before any other package.
+require('@jupyterlab/theme-light-extension/style/embed.css');
+
+var JupyterLab = require('@jupyterlab/application').JupyterLab;
+
 
 var mods = [
   require('@jupyterlab/application-extension'),
@@ -26,18 +28,20 @@ var mods = [
   require('@jupyterlab/markdownviewer-extension'),
   require('@jupyterlab/notebook-extension'),
   require('@jupyterlab/running-extension'),
-  require('@jupyterlab/services-extension'),
   require('@jupyterlab/settingeditor-extension'),
   require('@jupyterlab/shortcuts-extension'),
   require('@jupyterlab/tabmanager-extension'),
   require('@jupyterlab/terminal-extension'),
-  require('@jupyterlab/theme-light-extension'),
   require('@jupyterlab/tooltip-extension')
 ];
 
 
 window.onload = function() {
-  var lab = new JupyterLab({ namespace: 'lab-example' });
+  var lab = new JupyterLab({
+    name: 'JupyterLab Example',
+    namespace: 'lab-example',
+    version: require('./package.json').version
+  });
   lab.registerPluginModules(mods);
   lab.start();
 }
