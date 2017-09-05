@@ -26,6 +26,10 @@ import {
   MimeModel
 } from './mimemodel';
 
+import {
+  MathJaxTypesetter
+} from './latex';
+
 
 /**
  * An object which manages mime renderer factories.
@@ -48,6 +52,7 @@ class RenderMime {
     // Parse the options.
     this.resolver = options.resolver || null;
     this.linkHandler = options.linkHandler || null;
+    this._latexTypesetter = new MathJaxTypesetter();
     this.sanitizer = options.sanitizer || defaultSanitizer;
 
     // Add the initial factories.
@@ -72,6 +77,16 @@ class RenderMime {
    * The object used to handle path opening links.
    */
   readonly linkHandler: IRenderMime.ILinkHandler | null;
+
+  /**
+   * The LaTeX typesetter for the rendermime.
+   */
+  get latexTypesetter(): IRenderMime.ILatexTypesetter {
+    return this._latexTypesetter;
+  }
+  set latexTypesetter(typesetter: IRenderMime.ILatexTypesetter) {
+    this._latexTypesetter = typesetter;
+  }
 
   /**
    * The ordered list of mimeTypes.
@@ -131,7 +146,8 @@ class RenderMime {
       mimeType,
       resolver: this.resolver,
       sanitizer: this.sanitizer,
-      linkHandler: this.linkHandler
+      linkHandler: this.linkHandler,
+      latexTypesetter: this.latexTypesetter
     });
   }
 
@@ -216,6 +232,7 @@ class RenderMime {
   private _ranks: Private.RankMap = {};
   private _types: string[] | null = null;
   private _factories: Private.FactoryMap = {};
+  private _latexTypesetter: IRenderMime.ILatexTypesetter;
 }
 
 

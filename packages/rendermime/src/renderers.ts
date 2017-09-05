@@ -26,7 +26,7 @@ import {
 } from '@jupyterlab/rendermime-interfaces';
 
 import {
-  typeset, removeMath, replaceMath
+  removeMath, replaceMath
 } from './latex';
 
 
@@ -41,7 +41,8 @@ export
 function renderHTML(options: renderHTML.IOptions): Promise<void> {
   // Unpack the options.
   let {
-    host, source, trusted, sanitizer, resolver, linkHandler, shouldTypeset
+    host, source, trusted, sanitizer, resolver, linkHandler,
+    shouldTypeset, latexTypesetter
   } = options;
 
   // Bail early if the source is empty.
@@ -87,7 +88,9 @@ function renderHTML(options: renderHTML.IOptions): Promise<void> {
   }
 
   // Return the final rendered promise.
-  return promise.then(() => { if (shouldTypeset) { typeset(host); } });
+  return promise.then(() => {
+    if (shouldTypeset) { latexTypesetter.typeset(host); }
+  });
 }
 
 
@@ -135,6 +138,11 @@ namespace renderHTML {
      * Whether the node should be typeset.
      */
     shouldTypeset: boolean;
+
+    /**
+     * The Latex typesetter for the application.
+     */
+    latexTypesetter: IRenderMime.ILatexTypesetter;
   }
 }
 
@@ -233,14 +241,14 @@ namespace renderImage {
 export
 function renderLatex(options: renderLatex.IRenderOptions): Promise<void> {
   // Unpack the options.
-  let { host, source, shouldTypeset } = options;
+  let { host, source, shouldTypeset, latexTypesetter } = options;
 
   // Set the source on the node.
   host.textContent = source;
 
   // Typeset the node if needed.
   if (shouldTypeset) {
-    typeset(host);
+    latexTypesetter.typeset(host);
   }
 
   // Return the rendered promise.
@@ -272,6 +280,11 @@ namespace renderLatex {
      * Whether the node should be typeset.
      */
     shouldTypeset: boolean;
+
+    /**
+     * The Latex typesetter for the application.
+     */
+    latexTypesetter: IRenderMime.ILatexTypesetter;
   }
 }
 
@@ -287,7 +300,8 @@ export
 function renderMarkdown(options: renderMarkdown.IRenderOptions): Promise<void> {
   // Unpack the options.
   let {
-    host, source, trusted, sanitizer, resolver, linkHandler, shouldTypeset
+    host, source, trusted, sanitizer, resolver, linkHandler,
+    latexTypesetter, shouldTypeset
   } = options;
 
   // Clear the content if there is no source.
@@ -343,7 +357,7 @@ function renderMarkdown(options: renderMarkdown.IRenderOptions): Promise<void> {
 
     // Return the rendered promise.
     return promise;
-  }).then(() => { if (shouldTypeset) { typeset(host); } });
+  }).then(() => { if (shouldTypeset) { latexTypesetter.typeset(host); } });
 }
 
 
@@ -391,6 +405,11 @@ namespace renderMarkdown {
      * Whether the node should be typeset.
      */
     shouldTypeset: boolean;
+
+    /**
+     * The Latex typesetter for the application.
+     */
+    latexTypesetter: IRenderMime.ILatexTypesetter;
   }
 }
 
@@ -405,7 +424,8 @@ export
 function renderSVG(options: renderSVG.IRenderOptions): Promise<void> {
   // Unpack the options.
   let {
-    host, source, trusted, resolver, linkHandler, shouldTypeset, unconfined
+    host, source, trusted, resolver, linkHandler,
+    shouldTypeset, latexTypesetter, unconfined
   } = options;
 
   // Clear the content if there is no source.
@@ -439,7 +459,9 @@ function renderSVG(options: renderSVG.IRenderOptions): Promise<void> {
   }
 
   // Return the final rendered promise.
-  return promise.then(() => { if (shouldTypeset) { typeset(host); } });
+  return promise.then(() => {
+    if (shouldTypeset) { latexTypesetter.typeset(host); }
+  });
 }
 
 
@@ -487,6 +509,11 @@ namespace renderSVG {
      * Whether the svg should be unconfined.
      */
     unconfined?: boolean;
+
+    /**
+     * The Latex typesetter for the application.
+     */
+    latexTypesetter: IRenderMime.ILatexTypesetter;
   }
 }
 

@@ -271,6 +271,11 @@ namespace IRenderMime {
      * An optional link handler.
      */
     linkHandler: ILinkHandler | null;
+
+    /**
+     * The LaTeX typesetter.
+     */
+    latexTypesetter: ILatexTypesetter;
   }
 
   /**
@@ -309,5 +314,13 @@ namespace IRenderMime {
      * Get the download url of a given absolute server path.
      */
     getDownloadUrl(path: string): Promise<string>;
+  }
+
+  /**
+   * The interface for a LaTeX typesetter.
+   */
+  export
+  interface ILatexTypesetter {
+    typeset(element: HTMLElement): void;
   }
 }

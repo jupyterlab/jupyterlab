@@ -18,10 +18,6 @@ import {
   Widget
 } from '@phosphor/widgets';
 
-import {
-  typeset
-} from './latex';
-
 import * as renderers
   from './renderers';
 
@@ -42,6 +38,7 @@ abstract class RenderedCommon extends Widget implements IRenderMime.IRenderer {
     this.sanitizer = options.sanitizer;
     this.resolver = options.resolver;
     this.linkHandler = options.linkHandler;
+    this.latexTypesetter = options.latexTypesetter;
     this.node.dataset['mimeType'] = this.mimeType;
   }
 
@@ -64,6 +61,11 @@ abstract class RenderedCommon extends Widget implements IRenderMime.IRenderer {
    * The link handler.
    */
   readonly linkHandler: IRenderMime.ILinkHandler | null;
+
+  /**
+   * The latexTypesetter.
+   */
+  readonly latexTypesetter: IRenderMime.ILatexTypesetter;
 
   /**
    * Render a mime model.
@@ -140,7 +142,8 @@ class RenderedHTML extends RenderedHTMLCommon {
       resolver: this.resolver,
       sanitizer: this.sanitizer,
       linkHandler: this.linkHandler,
-      shouldTypeset: this.isAttached
+      shouldTypeset: this.isAttached,
+      latexTypesetter: this.latexTypesetter
     });
   }
 
@@ -148,7 +151,7 @@ class RenderedHTML extends RenderedHTMLCommon {
    * A message handler invoked on an `'after-attach'` message.
    */
   onAfterAttach(msg: Message): void {
-    typeset(this.node);
+    this.latexTypesetter.typeset(this.node);
   }
 }
 
@@ -179,7 +182,8 @@ class RenderedLatex extends RenderedCommon {
     return renderers.renderLatex({
       host: this.node,
       source: String(model.data[this.mimeType]),
-      shouldTypeset: this.isAttached
+      shouldTypeset: this.isAttached,
+      latexTypesetter: this.latexTypesetter
     });
   }
 
@@ -187,7 +191,7 @@ class RenderedLatex extends RenderedCommon {
    * A message handler invoked on an `'after-attach'` message.
    */
   onAfterAttach(msg: Message): void {
-    typeset(this.node);
+    this.latexTypesetter.typeset(this.node);
   }
 }
 
@@ -258,7 +262,8 @@ class RenderedMarkdown extends RenderedHTMLCommon {
       resolver: this.resolver,
       sanitizer: this.sanitizer,
       linkHandler: this.linkHandler,
-      shouldTypeset: this.isAttached
+      shouldTypeset: this.isAttached,
+      latexTypesetter: this.latexTypesetter,
     });
   }
 
@@ -266,7 +271,7 @@ class RenderedMarkdown extends RenderedHTMLCommon {
    * A message handler invoked on an `'after-attach'` message.
    */
   onAfterAttach(msg: Message): void {
-    typeset(this.node);
+    this.latexTypesetter.typeset(this.node);
   }
 }
 
@@ -302,7 +307,8 @@ class RenderedSVG extends RenderedCommon {
       resolver: this.resolver,
       linkHandler: this.linkHandler,
       shouldTypeset: this.isAttached,
-      unconfined: metadata && metadata.unconfined as boolean | undefined
+      unconfined: metadata && metadata.unconfined as boolean | undefined,
+      latexTypesetter: this.latexTypesetter
     });
   }
 
@@ -310,7 +316,7 @@ class RenderedSVG extends RenderedCommon {
    * A message handler invoked on an `'after-attach'` message.
    */
   onAfterAttach(msg: Message): void {
-    typeset(this.node);
+    this.latexTypesetter.typeset(this.node);
   }
 }
 
