@@ -862,7 +862,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     window.clearTimeout(this._checkTimer);
     this._checkTimer = window.setTimeout(() => {
       let doc = this._editor.getDoc();
-      if (doc.getValue() === this._model.value.text) {
+      if (doc.getValue() !== this._model.value.text) {
         this._handleSyncError();
       }
     }, 3000);
