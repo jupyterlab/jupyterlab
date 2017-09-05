@@ -861,7 +861,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   private _scheduleCheck(): void {
     window.clearTimeout(this._checkTimer);
     this._checkTimer = window.setTimeout(() => {
-      let doc =this._editor.getDoc();
+      let doc = this._editor.getDoc();
       if (doc.getValue() === this._model.value.text) {
         this._handleSyncError();
       }
