@@ -1842,9 +1842,9 @@ namespace Private {
 
         // Compare by display name.
         if (state.direction === 'descending') {
-          return b.name.localeCompare(a.name);
+          return b.name.localeCompare(a.name, navigator.language, { numeric: true });
         }
-        return a.name.localeCompare(b.name);
+        return a.name.localeCompare(b.name, navigator.language, { numeric: true });
       });
     }
 
