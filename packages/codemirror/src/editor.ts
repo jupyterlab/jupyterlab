@@ -21,6 +21,10 @@ import {
 } from '@phosphor/signaling';
 
 import {
+  showDialog
+} from '@jupyterlab/apputils';
+
+import {
   CodeEditor
 } from '@jupyterlab/codeeditor';
 
@@ -141,12 +145,8 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       if (change.origin === 'setValue' && this.hasFocus()) {
         this.refresh();
       }
-      if (this._model.value.text !== editor.getDoc().getValue()) {
-        console.error('Uh oh, the string model is out of sync: ', {
-          model: this._model.value.text,
-          view: editor.getDoc().getValue()
-        });
-      }
+      this._lastChange = change;
+      this._scheduleCheck();
     });
 
     // Manually refresh on paste to make sure editor is properly sized.
@@ -855,6 +855,42 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     return caret;
   }
 
+  /**
+   * Schedule an editor integrity check.
+   */
+  private _scheduleCheck(): void {
+    window.clearTimeout(this._checkTimer);
+    window.setTimeout(() => {
+      let doc =this._editor.getDoc();
+      if (doc.getValue() === this._model.value.text) {
+        this._handleSyncError();
+      }
+    }, 3000);
+  }
+
+  /**
+   * Handle an out of sync editor.
+   */
+  private _handleSyncError(): void {
+    let editor = this._editor;
+    let doc = editor.getDoc();
+
+    showDialog({
+      title: 'Code Editor out of Sync',
+      body: 'Please open your browser JavaScript console for bug report instructions'
+    });
+    console.log('Please paste the following to https://github.com/jupyterlab/jupyterlab/issues/2951');
+    console.log(JSON.stringify({
+      model: this._model.value.text,
+      view: doc.getValue(),
+      selections: this.getSelections(),
+      cursor: this.getCursorPosition(),
+      lineSep: editor.getOption('lineSeparator'),
+      mode: editor.getOption('mode'),
+      change: this._lastChange
+    }));
+  }
+
   private _model: CodeEditor.IModel;
   private _editor: CodeMirror.Editor;
   protected selectionMarkers: { [key: string]: CodeMirror.TextMarker[] | undefined } = {};
@@ -867,6 +903,8 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   private _uuid = '';
   private _needsRefresh = false;
   private _isDisposed = false;
+  private _checkTimer = -1;
+  private _lastChange: CodeMirror.EditorChange;
 }
 
 
