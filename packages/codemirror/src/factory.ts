@@ -38,6 +38,7 @@ class CodeMirrorEditorFactory implements IEditorFactoryService {
       ...CodeMirrorEditor.defaultConfig,
       extraKeys: {
         'Tab': 'indentMoreOrinsertTab',
+        'Shift-Tab': 'indentLess',
         'Shift-Enter': () => { /* no-op */ }
       },
       lineNumbers: true,
