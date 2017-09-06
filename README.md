@@ -78,9 +78,9 @@ jupyter notebook --version
 
 The runtime versions which are currently *known to work*:
 
-- Firefox 49+
-- Chrome 39+
-- Safari 10+
+- Firefox Latest
+- Chrome Latest
+- Safari Latest
 
 Earlier browser versions may also work, but come with no guarantees.
 
