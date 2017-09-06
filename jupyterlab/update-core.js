@@ -65,7 +65,7 @@ packages.forEach(function(packagePath) {
     var schemas = glob.sync(path.join(schemaDir, '*'));
     var prefix = data['name'].replace(/@/g, '').replace(/\//g, '-');
     schemas.forEach(function(schemaPath) {
-      var file = prefix + '$' + path.basename(schemaPath);
+      var file = prefix + '-' + path.basename(schemaPath);
       var to = path.join(basePath, 'jupyterlab', 'schemas', file);
       fs.copySync(schemaPath, to);
     });

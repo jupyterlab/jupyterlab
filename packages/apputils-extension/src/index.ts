@@ -74,10 +74,10 @@ function newConnector(manager: ServiceManager): IDataConnector<ISettingRegistry.
      */
     fetch(id: string): Promise<ISettingRegistry.IPlugin> {
       // Strip characters removed from the schema file name at build time.
-      const key = id.replace(/@/g, '').replace(/\//g, '-');
+      const key = id.replace(/@/g, '').replace(/\/|\:/g, '-');
 
       return manager.settings.fetch(key).catch(reason => {
-        throw apiError(id, (reason as ServerConnection.IError).xhr);
+        throw apiError(key, (reason as ServerConnection.IError).xhr);
       });
     },
 
@@ -95,10 +95,10 @@ function newConnector(manager: ServiceManager): IDataConnector<ISettingRegistry.
      */
     save(id: string, user: JSONObject): Promise<void> {
       // Strip characters removed from the schema file name at build time.
-      const key = id.replace(/@/g, '').replace(/\//g, '-');
+      const key = id.replace(/@/g, '').replace(/\/|\:/g, '-');
 
       return manager.settings.save(key, user).catch(reason => {
-        throw apiError(id, (reason as ServerConnection.IError).xhr);
+        throw apiError(key, (reason as ServerConnection.IError).xhr);
       });
     }
   };
