@@ -282,7 +282,7 @@ namespace renderLatex {
     shouldTypeset: boolean;
 
     /**
-     * The Latex typesetter for the application.
+     * The LaTeX typesetter for the application.
      */
     latexTypesetter: IRenderMime.ILatexTypesetter;
   }
