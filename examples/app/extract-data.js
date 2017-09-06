@@ -45,8 +45,7 @@ function extractNode(data) {
   // Handle themes.
   var themeDir = jlab['themeDir'];
   if (themeDir) {
-    var name = data.package.name.replace('@', '');
-    name = name.replace('/', '-');
+    var name = data.package.name.replace(/\@/g, '').replace(/\//g, '-');
     var from = path.join(data.realpath, themeDir);
     var to = path.join('themes', name);
     fs.copySync(from, to);
