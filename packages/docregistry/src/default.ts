@@ -141,7 +141,7 @@ class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeMo
    * Serialize the model to JSON.
    */
   toJSON(): JSONValue {
-    return JSON.parse(this.value.text);
+    return JSON.parse(this.value.text || 'null');
   }
 
   /**
@@ -487,7 +487,9 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
    * Handle an `update-request` message to the widget.
    */
   protected onUpdateRequest(msg: Message): void {
-    this._render();
+    if (this._context.isReady) {
+      this._render();
+    }
   }
 
   /**
