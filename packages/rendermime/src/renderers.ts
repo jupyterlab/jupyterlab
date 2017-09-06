@@ -140,7 +140,7 @@ namespace renderHTML {
     shouldTypeset: boolean;
 
     /**
-     * The Latex typesetter for the application.
+     * The LaTeX typesetter for the application.
      */
     latexTypesetter: IRenderMime.ILatexTypesetter;
   }
@@ -407,7 +407,7 @@ namespace renderMarkdown {
     shouldTypeset: boolean;
 
     /**
-     * The Latex typesetter for the application.
+     * The LaTeX typesetter for the application.
      */
     latexTypesetter: IRenderMime.ILatexTypesetter;
   }
@@ -511,7 +511,7 @@ namespace renderSVG {
     unconfined?: boolean;
 
     /**
-     * The Latex typesetter for the application.
+     * The LaTeX typesetter for the application.
      */
     latexTypesetter: IRenderMime.ILatexTypesetter;
   }

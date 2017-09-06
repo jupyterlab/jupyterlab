@@ -162,7 +162,7 @@ class RenderedHTML extends RenderedHTMLCommon {
 export
 class RenderedLatex extends RenderedCommon {
   /**
-   * Construct a new rendered Latex widget.
+   * Construct a new rendered LaTeX widget.
    *
    * @param options - The options for initializing the widget.
    */

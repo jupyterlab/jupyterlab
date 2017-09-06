@@ -29,13 +29,6 @@ declare var MathJax: any;
 export
 class MathJaxTypesetter implements IRenderMime.ILatexTypesetter {
   /**
-   * Construct the typesetter.
-   */
-  constructor() {
-    this._init();
-  }
-
-  /**
    * Typeset the math in a node.
    */
   typeset(node: HTMLElement): void {
