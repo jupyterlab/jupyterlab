@@ -118,6 +118,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     doc.setValue(model.value.text);
     this._onMimeTypeChanged();
     this._onCursorActivity();
+    this._timer = window.setInterval(() => { this._checkSync(); }, 3000);
 
     // Connect to changes.
     model.value.changed.connect(this._onValueChanged, this);
@@ -146,7 +147,6 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
         this.refresh();
       }
       this._lastChange = change;
-      this._scheduleCheck();
     });
 
     // Manually refresh on paste to make sure editor is properly sized.
@@ -248,6 +248,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     this.host.removeEventListener('blur', this, true);
     this.host.removeEventListener('scroll', this, true);
     this._keydownHandlers.length = 0;
+    window.clearTimeout(this._timer);
     Signal.clearData(this);
   }
 
@@ -856,24 +857,19 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
-   * Schedule an editor integrity check.
+   * Check for an out of sync editor.
    */
-  private _scheduleCheck(): void {
-    window.clearTimeout(this._checkTimer);
-    this._checkTimer = window.setTimeout(() => {
-      let doc = this._editor.getDoc();
-      if (doc.getValue() !== this._model.value.text) {
-        this._handleSyncError();
-      }
-    }, 3000);
-  }
-
-  /**
-   * Handle an out of sync editor.
-   */
-  private _handleSyncError(): void {
+  private _checkSync(): void {
+    let change = this._lastChange;
+    if (!change) {
+      return;
+    }
+    this._lastChange = null;
     let editor = this._editor;
     let doc = editor.getDoc();
+    if (doc.getValue() === this._model.value.text) {
+      return;
+    }
 
     showDialog({
       title: 'Code Editor out of Sync',
@@ -887,7 +883,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       cursor: this.getCursorPosition(),
       lineSep: editor.getOption('lineSeparator'),
       mode: editor.getOption('mode'),
-      change: this._lastChange
+      change
     }));
   }
 
@@ -903,8 +899,8 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   private _uuid = '';
   private _needsRefresh = false;
   private _isDisposed = false;
-  private _checkTimer = -1;
-  private _lastChange: CodeMirror.EditorChange;
+  private _lastChange: CodeMirror.EditorChange | null = null;
+  private _timer = -1;
 }
 
 
