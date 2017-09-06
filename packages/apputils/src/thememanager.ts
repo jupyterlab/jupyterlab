@@ -48,18 +48,19 @@ class ThemeManager {
    * Construct a new theme manager.
    */
   constructor(options: ThemeManager.IOptions) {
+    const key = options.key;
+    const registry = options.settingRegistry;
+
     this._baseUrl = options.baseUrl;
-    let registry = options.settingRegistry;
     this._host = options.host;
-    let id = 'jupyter.services.theme-manager';
-    options.when.then(() => {
-      this._sealed = true;
-    });
-    this.ready = Promise.all([registry.load(id), options.when]).then(([settings]) => {
-      this._settings = settings;
-      this._settings.changed.connect(this._onSettingsChanged, this);
-      return this._handleSettings();
-    });
+    options.when.then(() => { this._sealed = true; });
+    this.ready = Promise.all([registry.load(key), options.when])
+      .then(([settings]) => {
+        this._settings = settings;
+        this._settings.changed.connect(this._onSettingsChanged, this);
+
+        return this._handleSettings();
+      });
   }
 
   /**
@@ -101,14 +102,15 @@ class ThemeManager {
     if (this._sealed) {
       throw new Error('Cannot register themes after startup');
     }
-    let name = theme.name;
+
+    const name = theme.name;
+
     if (this._themes[name]) {
       throw new Error(`Theme already registered for ${name}`);
     }
     this._themes[name] = theme;
-    return new DisposableDelegate(() => {
-      delete this._themes[name];
-    });
+
+    return new DisposableDelegate(() => { delete this._themes[name]; });
   }
 
   /**
@@ -232,6 +234,11 @@ namespace ThemeManager {
      * The base url for the theme manager.
      */
     baseUrl: string;
+
+    /**
+     * The setting registry key that holds theme setting data.
+     */
+    key: string;
 
     /**
      * The settings registry.
