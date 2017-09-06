@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, IMainMenu, InstanceTracker, ToolbarButton
+  IMainMenu, InstanceTracker, ToolbarButton
 } from '@jupyterlab/apputils';
 
 import {
@@ -93,12 +93,7 @@ namespace CommandIDs {
 const browser: JupyterLabPlugin<void> = {
   activate: activateBrowser,
   id: '@jupyterlab/filebrowser-extension:browser',
-  requires: [
-    IFileBrowserFactory,
-    IDocumentManager,
-    ICommandPalette,
-    ILayoutRestorer
-  ],
+  requires: [IFileBrowserFactory, ILayoutRestorer],
   autoStart: true
 };
 
@@ -109,8 +104,7 @@ const factory: JupyterLabPlugin<IFileBrowserFactory> = {
   activate: activateFactory,
   id: '@jupyterlab/filebrowser-extension:factory',
   provides: IFileBrowserFactory,
-  requires: [IDocumentManager, IStateDB],
-  autoStart: true
+  requires: [IDocumentManager, IStateDB]
 };
 
 /**
@@ -185,8 +179,9 @@ function activateFactory(app: JupyterLab, docManager: IDocumentManager, state: I
 /**
  * Activate the default file browser in the sidebar.
  */
-function activateBrowser(app: JupyterLab, factory: IFileBrowserFactory, docManager: IDocumentManager, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer): void {
-  const fbWidget = factory.defaultBrowser;
+function activateBrowser(app: JupyterLab, factory: IFileBrowserFactory, restorer: ILayoutRestorer): void {
+  const browser = factory.defaultBrowser;
+  const { commands, shell } = app;
 
   // Let the application restorer track the primary file browser (that is
   // automatically created) for restoration of application state (e.g. setting
@@ -194,21 +189,22 @@ function activateBrowser(app: JupyterLab, factory: IFileBrowserFactory, docManag
   //
   // All other file browsers created by using the factory function are
   // responsible for their own restoration behavior, if any.
-  restorer.add(fbWidget, namespace);
+  restorer.add(browser, namespace);
 
-  addCommands(app, factory.tracker, fbWidget);
+  addCommands(app, factory.tracker, browser);
 
-  fbWidget.title.label = 'Files';
-  app.shell.addToLeftArea(fbWidget, { rank: 100 });
+  browser.title.label = 'Files';
+  shell.addToLeftArea(browser, { rank: 100 });
 
   // If the layout is a fresh session without saved data, open file browser.
   app.restored.then(layout => {
     if (layout.fresh) {
-      app.commands.execute(CommandIDs.showBrowser, void 0);
+      commands.execute(CommandIDs.showBrowser, void 0);
     }
   });
 
   // Create a launcher if there are no open items.
+<<<<<<< HEAD
   app.restored.then(() => { 
     const maybeCreate = () => {
       if (app.shell.isEmpty('main')) {
@@ -220,6 +216,20 @@ function activateBrowser(app: JupyterLab, factory: IFileBrowserFactory, docManag
     }
     maybeCreate();
     app.shell.layoutModified.connect(maybeCreate);
+=======
+  app.shell.layoutModified.connect(() => {
+    if (app.shell.isEmpty('main')) {
+      // Make sure the model is restored.
+      browser.model.restored.then(() => {
+        createLauncher(app.commands, browser);
+      });
+    }
+
+    // Wait until the model is restored, then create a launcher.
+    browser.model.restored.then(() => {
+      commands.execute('launcher:create', { cwd: browser.model.path });
+    });
+>>>>>>> Fix file browser extension.
   });
 }
 
