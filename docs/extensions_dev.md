@@ -181,13 +181,25 @@ general-purpose interface to the extension system.
 
 ## Extension Settings
 An extension can specify user settings using a JSON Schema.  The schema
-definition should be in a file that is the id of the specific JupyterLab
-application plugin, e.g. `'jupyterlab.services.theme-manager.json'`.  The
-schema(s) for an extension are placed in a directory specified in
-`package.json` under the "jupyterlab" key as "schemaDir".  Ensure that the
-schema files are included in the `"files"` metadata in package.json.
-See the (fileeditor-extension)[https://github.com/jupyterlab/jupyterlab/tree/master/packages/fileeditor-extension] for an example of a extension that
-uses settings.
+definition should be in a file that resides in the `schemaDir` directory that is
+specified in the `package.json` file of the extension. The actual file name
+should use is the part that follows the package name of extension. So for
+example, the JupyterLab `apputils-extension` package hosts several plugins:
+
+* `'@jupyterlab/apputils-extension:menu'`
+* `'@jupyterlab/apputils-extension:palette'`
+* `'@jupyterlab/apputils-extension:settings'`
+* `'@jupyterlab/apputils-extension:themes'`
+
+And in the `package.json` for `@jupyterlab/apputils-extension`, the `schemaDir`
+field is a directory called `schema`. Since the `themes` plugin requires a JSON
+schema, its schema file location is: `schema/themes.json`. The plugin's name is
+used to automatically associate it with its settings file, so this naming
+convention is important. Ensure that the schema files are included in the
+`"files"` metadata in `package.json`.
+
+See the (fileeditor-extension)[https://github.com/jupyterlab/jupyterlab/tree/master/packages/fileeditor-extension]
+for another example of an extension that uses settings.
 
 
 ## Storing Extension Data
