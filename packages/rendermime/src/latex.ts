@@ -44,7 +44,7 @@ class MathJaxTypesetter implements IRenderMime.ILatexTypesetter {
   }
 
   /**
-   * Initialize latex handling.
+   * Initialize MathJax.
    */
   private _init(): void {
     if (!(window as any).MathJax) {
