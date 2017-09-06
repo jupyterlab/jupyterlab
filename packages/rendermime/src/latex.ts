@@ -30,6 +30,11 @@ export
 class MathJaxTypesetter implements IRenderMime.ILatexTypesetter {
   /**
    * Typeset the math in a node.
+   *
+   * #### Notes
+   * MathJax schedules the typesetting asynchronously,
+   * but there are not currently any callbacks or Promises
+   * firing when it is done.
    */
   typeset(node: HTMLElement): void {
     if (!this._initialized) {

@@ -80,6 +80,10 @@ class RenderMime {
 
   /**
    * The LaTeX typesetter for the rendermime.
+   *
+   * #### Notes
+   * This is settable so that extension authors may provide
+   * alternative implementations of the `IRenderMime.ILatexTypesetter`.
    */
   get latexTypesetter(): IRenderMime.ILatexTypesetter {
     return this._latexTypesetter;
