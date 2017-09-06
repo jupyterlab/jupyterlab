@@ -20,7 +20,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  MimeModel, IRenderMime, RenderedText, RenderMime
+  MimeModel, IRenderMime, RenderedText, RenderMime, MathJaxTypesetter
 } from '@jupyterlab/rendermime';
 
 import {
@@ -79,6 +79,25 @@ describe('rendermime/index', () => {
         };
         let clone = r.clone({ linkHandler: handler });
         expect(clone.linkHandler).to.be(handler);
+      });
+
+    });
+
+    describe('#latexTypesetter', () => {
+
+      it('should be the MathJax typesetter by default', () => {
+        expect(r.latexTypesetter instanceof MathJaxTypesetter).to.be(true);
+      });
+
+      it('should be settable and clonable', () => {
+        let typesetter1 = new MathJaxTypesetter();
+        r.latexTypesetter = typesetter1;
+        expect(r.latexTypesetter).to.be(typesetter1);
+        let clone1 = r.clone();
+        expect(clone1.latexTypesetter).to.be(typesetter1);
+        let typesetter2 = new MathJaxTypesetter();
+        let clone2 = r.clone({ latexTypesetter: typesetter2 });
+        expect(clone2.latexTypesetter).to.be(typesetter2);
       });
 
     });
