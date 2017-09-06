@@ -156,7 +156,7 @@ class CoreDeps(Command):
 
     # Representative files that should exist after a successful core setup
     targets = [
-        pjoin(here, 'jupyterlab', 'schemas', 'jupyter.extensions.shortcuts.json'),
+        pjoin(here, 'jupyterlab', 'schemas', 'jupyterlab-shortcuts-extension$plugin.json'),
         pjoin(here, 'jupyterlab', 'themes', 'jupyterlab-theme-light-extension',
             'images', 'jupyterlab.svg')
     ]
