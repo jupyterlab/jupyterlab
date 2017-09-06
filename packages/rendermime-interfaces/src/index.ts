@@ -321,6 +321,12 @@ namespace IRenderMime {
    */
   export
   interface ILatexTypesetter {
+    /**
+     * Typeset a DOM element.
+     *
+     * @param element - the DOM element to typeset. The typesetting may
+     *   happen synchronously or asynchronously.
+     */
     typeset(element: HTMLElement): void;
   }
 }
