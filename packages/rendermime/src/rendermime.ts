@@ -52,7 +52,7 @@ class RenderMime {
     // Parse the options.
     this.resolver = options.resolver || null;
     this.linkHandler = options.linkHandler || null;
-    this._latexTypesetter = new MathJaxTypesetter();
+    this._latexTypesetter = options.latexTypesetter || new MathJaxTypesetter();
     this.sanitizer = options.sanitizer || defaultSanitizer;
 
     // Add the initial factories.
@@ -174,7 +174,8 @@ class RenderMime {
     let clone = new RenderMime({
       resolver: options.resolver || this.resolver || undefined,
       sanitizer: options.sanitizer || this.sanitizer || undefined,
-      linkHandler: options.linkHandler || this.linkHandler || undefined
+      linkHandler: options.linkHandler || this.linkHandler || undefined,
+      latexTypesetter: options.latexTypesetter || this.latexTypesetter
     });
 
     // Clone the internal state.
@@ -269,6 +270,11 @@ namespace RenderMime {
      * An optional path handler.
      */
     linkHandler?: IRenderMime.ILinkHandler;
+
+    /**
+     * An optional LaTeX typesetter.
+     */
+    latexTypesetter?: IRenderMime.ILatexTypesetter;
   }
 
   /**
@@ -290,6 +296,11 @@ namespace RenderMime {
      * The new path handler.
      */
     linkHandler?: IRenderMime.ILinkHandler;
+
+    /**
+     * The new LaTeX typesetter.
+     */
+    latexTypesetter?: IRenderMime.ILatexTypesetter;
   }
 
   /**
