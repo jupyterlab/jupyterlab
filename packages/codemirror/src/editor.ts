@@ -716,13 +716,6 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
        doc.replaceRange('', from, to);
        break;
      case 'set':
-       // Detect the line endings in the text and update
-       // the editor accordingly.
-       if (args.value.indexOf('\r\n') !== -1) {
-          this.editor.setOption('lineSeparator', '\r\n');
-       } else {
-          this.editor.setOption('lineSeparator', '\n');
-       }
        doc.setValue(args.value);
        break;
      default:
