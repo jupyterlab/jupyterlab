@@ -1,10 +1,21 @@
-# Zero to Extension
+# Let's Make an xkcd JupyterLab Extension
 
-Welcome! The goal of this document is to walk you through setting up a development environment for writing a JupyterLab extension to iteratively improving a basic panel extension. This tutorial assumes you have nothing setup on a Linux or OSX machine for JupyterLab development: no conda environment, no NodeJS, no JupyterLab code, no JupyterLab extension cookicutter, etc. It'll describe all of the steps you need to follow to go from this state to the extension depicted below.
+JupyterLab extensions add features to the user experience. This page describes how to create one type of extension, an *application plugin*, that:
+
+* Adds a "Random [xkcd](https://xkcd.com) comic" command to the *command palette* sidebar
+* Fetches the comic image and metadata when activated
+* Shows the image and metadata in a tab panel
+
+By working through this tutorial, you'll learn:
+
+* How to setup an extension development environment from scratch on a Linux or OSX machine
+* How to start an extension project from [jupyterlab/extension-cookiecutter-ts](https://github.com/jupyterlab/extension-cookiecutter-ts)
+* How to iteratively code, build, and load your extension in JupyterLab
+* How to release your extension for others to enjoy
 
 TODO: screenshot of the finished thing here
 
-Ready? Let's go!
+Sound like fun? Excellent. Here we go!
 
 ## Install conda using miniconda
 
