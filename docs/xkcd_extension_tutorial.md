@@ -138,7 +138,7 @@ af7ae505a9eed503f8b8e6982036873e.woff2  77.2 kB          [emitted]
 
 ## See the initial extension in action
 
-The initial extension code logs a message to JavaScript console in your browser when JupyterLab loads. Check that it's working properly before starting to modify it.
+The initial extension code logs a message to JavaScript console in your browser when JupyterLab loads. You should check that the extension is working properly before modifying it.
 
 Open a second terminal. Run these commands to activate the `jupyterlab-ext` environment and to start a JupyterLab instance.
 
@@ -147,7 +147,7 @@ source ~/miniconda/bin/activate jupyterlab-ext
 jupyter lab
 ```
 
-Your browser JupyterLab should appear momentarily in your default web browser. Open the JavaScript console in the JupyterLab tab by following the instructions for your browser:
+JupyterLab should appear momentarily in your default web browser. Open the JavaScript console in the JupyterLab tab by following the instructions for your browser:
 
 * [Accessing the DevTools in Google Chrome](https://developer.chrome.com/devtools#access)
 * [Opening the Web Console in Firefox](https://developer.mozilla.org/en-US/docs/Tools/Web_Console/Opening_the_Web_Console)
@@ -160,8 +160,21 @@ Run the following commands in your `jupyterlab_xkcd` folder to initialize it as 
 
 ```bash
 git init
+git add .
 git commit -m 'Seed xckd project from cookiecutter'
 ```
+
+Note: This step is not technically necessary, but it is good practice to track changes in version control system in case you need to rollback to an earlier version or want to collaborate with others. For example, you can compare your work throughout this tutorial with the commits in a reference version of `jupyterlab_xkcd` on GitHub at https://github.com/parente/jupyterlab_xkcd.
+
+## Add command to show the xckd panel
+
+## Show a single comic in the panel
+
+## Center the comic and add attribution
+
+## Show a new comic each time the command runs
+
+## Restore panel state when the browser refreshes
 
 ## TODO: Questions / Thoughts
 
