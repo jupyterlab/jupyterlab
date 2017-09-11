@@ -69,9 +69,11 @@
 
 
 .jp-CodeConsole-content .jp-InputArea-editor.jp-InputArea-editor {
-  background: transparent;
-  border-color: transparent;
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color-active);
+  box-shadow: var(--jp-input-box-shadow);
+  background-color: var(--jp-cell-editor-background-active);
 }
+
 
 .jp-CodeConsole-input .jp-CodeConsole-prompt .jp-InputArea {
   height: 100%;
@@ -81,4 +83,11 @@
 
 .jp-CodeConsole-content .jp-CodeConsole-banner .jp-Cell-prompt {
   display: none;
+}
+
+
+.jp-CodeConsole-promptCell .jp-InputArea-editor.jp-mod-focused {
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color-active);
+  box-shadow: var(--jp-input-box-shadow);
+  background-color: var(--jp-cell-editor-background-active);
 }
