@@ -289,8 +289,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         // as dirty.
         if (content.indexOf('\r') !== -1) {
           dirty = true;
-          content = content.replace(/\r\n/g, '\n');
-          content = content.replace(/\r/g, '\n');
+          content = content.replace(/\r\n|\r/g, '\n');
         }
         model.fromString(content);
       }
