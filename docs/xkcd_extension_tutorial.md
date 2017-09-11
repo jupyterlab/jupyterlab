@@ -154,6 +154,8 @@ JupyterLab should appear momentarily in your default web browser. Open the JavaS
 
 You should see a message that says `JupyterLab extension jupyterlab_xkcd is activated!` in the console. If you do, congrats, you're ready to start modifying the the extension! If not, go back, make sure you didn't miss a step, and [reach out](https://github.com/jupyterlab/jupyterlab#getting-help) if you're stuck.
 
+Note: Leave the terminal running the `jupyter lab` command open. You don't need to restart the JupyterLab server in order to test your extension code changes as you work through this tutorial.
+
 ## Commit what you have to git
 
 Run the following commands in your `jupyterlab_xkcd` folder to initialize it as a git repository and commit the current code.
@@ -167,6 +169,48 @@ git commit -m 'Seed xckd project from cookiecutter'
 Note: This step is not technically necessary, but it is good practice to track changes in version control system in case you need to rollback to an earlier version or want to collaborate with others. For example, you can compare your work throughout this tutorial with the commits in a reference version of `jupyterlab_xkcd` on GitHub at https://github.com/parente/jupyterlab_xkcd.
 
 ## Add command to show the xckd panel
+
+The *command palette* is the primary view of all commands available to you in JupyterLab. For your first addition,yYou're going to add a *Random xkcd* command to the palette and get it to show an *xkcd* tab panel when invoked.
+
+Fire up your favorite text editor and open the `src/index.ts` file in your extension project. Add the following import at the top of the file to get a reference to the command palette interface.
+
+```typescript
+import {
+  ICommandPalette
+} from '@jupyterlab/apputils';
+```
+
+Locate the `extension` object of type `JupyterLabPlugin`. Change the definition so that it reads like so:
+
+```typescript
+/**
+ * Initialization data for the jupyterlab_xkcd extension.
+ */
+const extension: JupyterLabPlugin<void> = {
+  id: 'jupyterlab_xkcd',
+  autoStart: true,
+  requires: [ICommandPalette],
+  activate: (app, palette: ICommandPalette) => {
+    console.log('JupyterLab extension jupyterlab_xkcd is activated!');
+    console.log('ICommandPalette:', palette);
+  }
+};
+```
+
+The `requires` attribute states that your plugin needs an object that implements the `ICommandPalette` interface when it starts. JupyterLab will bind pass an instance of `ICommandPalette` as the second parameter of `activate` in order to satisfy this requirement. Defining `palette: ICommandPalette` makes this instance available to your code in that function. The second `console.log` line exists only so that you can immediately check that your changes work.
+
+Run the following to rebuild your extension.
+
+```bash
+jupyter lab build
+```
+
+When the build completes, return to the browser tab that opened when you started JupyterLab. Refresh it and look in the console. You should see the same activation message as before, plus the new message about the ICommandPalette instance you just added.
+
+```
+JupyterLab extension jupyterlab_xkcd is activated!
+ICommandPalette: Palette {_palette: CommandPalette}
+```
 
 ## Show a single comic in the panel
 
