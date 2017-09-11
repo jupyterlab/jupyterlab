@@ -474,6 +474,7 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
     if (this._monitor) {
       this._monitor.dispose();
     }
+    this._monitor = null;
     super.dispose();
   }
 
