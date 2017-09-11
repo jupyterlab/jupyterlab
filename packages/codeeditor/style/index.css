@@ -17,10 +17,11 @@
   flex: 1 1 auto;
   border: var(--jp-border-width) solid var(--jp-input-border-color);
   border-radius: 0px;
-  background: var(--jp-input-background-color);
+  background: var(--jp-layout-color0);
   min-height: 50px;
   margin-left: 12px;
   margin-right: 12px;
+  padding: 1px;
 }
 
 

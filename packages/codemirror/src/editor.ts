@@ -91,6 +91,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     host.classList.add(EDITOR_CLASS);
     host.classList.add('jp-Editor');
     host.addEventListener('focus', this, true);
+    host.addEventListener('blur', this, true);
     host.addEventListener('scroll', this, true);
 
     this._uuid = options.uuid || uuid();
@@ -243,6 +244,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     }
     this._isDisposed = true;
     this.host.removeEventListener('focus', this, true);
+    this.host.removeEventListener('blur', this, true);
     this.host.removeEventListener('scroll', this, true);
     this._keydownHandlers.length = 0;
     Signal.clearData(this);
@@ -761,6 +763,8 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     case 'focus':
       this._evtFocus(event as FocusEvent);
       break;
+    case 'blur':
+      this._evtBlur(event as FocusEvent);
     case 'scroll':
       this._evtScroll();
       break;
@@ -776,6 +780,14 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     if (this._needsRefresh) {
       this.refresh();
     }
+    this.host.classList.add('jp-mod-focused');
+  }
+
+  /**
+   * Handle `blur` events for the editor.
+   */
+  private _evtBlur(event: FocusEvent): void {
+    this.host.classList.remove('jp-mod-focused');
   }
 
   /**
