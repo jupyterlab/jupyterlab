@@ -765,6 +765,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       break;
     case 'blur':
       this._evtBlur(event as FocusEvent);
+      break;
     case 'scroll':
       this._evtScroll();
       break;

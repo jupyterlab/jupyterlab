@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  generate
+  generate, simulate
 } from 'simulate-event';
 
 import {
@@ -314,6 +314,41 @@ describe('CodeMirrorEditor', () => {
       expect(editor.hasFocus()).to.be(false);
       editor.focus();
       expect(editor.hasFocus()).to.be(true);
+    });
+
+  });
+
+  describe('#blur()', () => {
+
+    it('should blur the editor', () => {
+      editor.focus();
+      expect(host.contains(document.activeElement)).to.be(true);
+      editor.blur();
+      expect(host.contains(document.activeElement)).to.be(false);
+    });
+
+  });
+
+  describe('#handleEvent', () => {
+
+    context('focus', () => {
+
+      it('should add the focus class to the host', () => {
+        simulate(editor.editor.getInputField(), 'focus');
+        expect(host.classList.contains('jp-mod-focused')).to.be(true);
+      });
+
+    });
+
+    context('blur', () => {
+
+      it('should remove the focus class from the host', () => {
+        simulate(editor.editor.getInputField(), 'focus');
+        expect(host.classList.contains('jp-mod-focused')).to.be(true);
+        simulate(editor.editor.getInputField(), 'blur');
+        expect(host.classList.contains('jp-mod-focused')).to.be(false);
+      });
+
     });
 
   });
