@@ -14,7 +14,7 @@ By working through this tutorial, you'll learn:
 * How to version control your work with git
 * How to release your extension for others to enjoy (TODO: maybe?)
 
-![xkcd extension screenshot](xkcd_tutorial.png)
+![Completed xkcd extension screenshot](xkcd_tutorial_complete.png)
 
 Sound like fun? Excellent. Here we go!
 
@@ -205,11 +205,63 @@ Run the following to rebuild your extension.
 jupyter lab build
 ```
 
-When the build completes, return to the browser tab that opened when you started JupyterLab. Refresh it and look in the console. You should see the same activation message as before, plus the new message about the ICommandPalette instance you just added.
+When the build completes, return to the browser tab that opened when you started JupyterLab. Refresh it and look in the console. You should see the same activation message as before, plus the new message about the ICommandPalette instance you just added. If you don't, check the output of the build command for errors and correct your code.
 
 ```
 JupyterLab extension jupyterlab_xkcd is activated!
 ICommandPalette: Palette {_palette: CommandPalette}
+```
+
+Now return to your editor. Add the following additional import to the top of the file.
+
+```typescript
+import {
+  Widget
+} from '@phosphor/widgets';
+```
+
+Then modify the `activate` function again so that it has the following code:
+
+```typescript
+  activate: (app, palette: ICommandPalette) => {
+    console.log('JupyterLab extension jupyterlab_xkcd is activated!');
+
+    // Create a single widget
+    let widget: Widget = new Widget();
+    widget.id = 'xkcd-jupyterlab';
+    widget.title.label = 'xkcd.com';
+    widget.title.closable = true;
+
+    // Add an application command
+    const command: string = 'xkcd:open';
+    app.commands.addCommand(command, {
+      label: 'Random xkcd comic',
+      execute: () => {
+        if(!widget.isAttached) {
+          // Attach the widget to the main area if it's not there
+          app.shell.addToMainArea(widget);
+        }
+        // Activate the widget
+        app.shell.activateById(widget.id);
+      }
+    });
+
+    // Add the command to the palette.
+    palette.addItem({command, category: 'Tutorial'});
+  }
+```
+
+The first new block of code creates a `Widget` instance, assigns it a unique ID, gives it a label that will appear as its tab title, and makes the tab closable by the user. The second block of code add a new command labeled *Random xkcd comic* to JupyterLab. When the comm and executes, it attaches the widget to the main display area if it is not already present and then makes it the active tab. The last new line of code adds the command to the command palette in a section called *Tutorial*.
+
+Build your extension again (i.e., `jupyter lab build`) and refresh the browser tab. Open the command palette on the left side and type *xkcd*. Your *Random xkcd comic* command should appear. Click it or select it with the keyboard and press *Enter*. You should see a new, blank panel appear with the tab title *xkcd.com*. Click the *x* on the tab to close it and activate the command again. The tab should reappear. Finally, click one of the launcher tabs so that the *xkcd.com* panel is still open but no longer active. Now run the *Random xkcd comic* command one more time. The single *xkcd.com* tab should come to the foreground.
+
+![Empty xkcd extension panel](xkcd_tutorial_empty.png)
+
+If your widget is not behaving, compare your code with https://github.com/parente/jupyterlab_xkcd/blob/964f63d8017709ad08a3cb96161a0371f860dc45/src/index.ts. Once you've got everything working properly, git commit your changes and carry on.
+
+```bash
+git add .
+git commit -m 'Show xkcd panel on command`
 ```
 
 ## Show a single comic in the panel
