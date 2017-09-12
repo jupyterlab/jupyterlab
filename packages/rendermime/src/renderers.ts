@@ -721,6 +721,10 @@ namespace Private {
       return resolver.getDownloadUrl(path);
     }).then(url => {
       node.setAttribute(name, url);
+    }).catch(err => {
+      // If there was an error getting the url,
+      // just make it an empty link.
+      node.setAttribute(name, '');
     });
   }
 
@@ -757,6 +761,10 @@ namespace Private {
     }).then(url => {
       // Set the visible anchor.
       anchor.href = url + hash;
+    }).catch(err => {
+      // If there was an error getting the url,
+      // just make it an empty link.
+      anchor.href = '';
     });
   }
 
