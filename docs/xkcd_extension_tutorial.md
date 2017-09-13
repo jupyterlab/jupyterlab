@@ -168,7 +168,7 @@ git commit -m 'Seed xckd project from cookiecutter'
 
 Note: This step is not technically necessary, but it is good practice to track changes in version control system in case you need to rollback to an earlier version or want to collaborate with others. For example, you can compare your work throughout this tutorial with the commits in a reference version of `jupyterlab_xkcd` on GitHub at https://github.com/parente/jupyterlab_xkcd.
 
-## Add command to show the xckd panel
+## Add a command to show the xckd panel
 
 The *command palette* is the primary view of all commands available to you in JupyterLab. For your first addition,yYou're going to add a *Random xkcd* command to the palette and get it to show an *xkcd* tab panel when invoked.
 
@@ -261,10 +261,49 @@ If your widget is not behaving, compare your code with https://github.com/parent
 
 ```bash
 git add .
-git commit -m 'Show xkcd panel on command`
+git commit -m 'Show xkcd panel on command'
 ```
 
 ## Show a single comic in the panel
+
+You've got an empty panel. It's time to add a comic to it. Go back to your code editor. Add the following new import near the top of the file:
+
+```typescript
+import {
+  ServerConnection
+} from '@jupyterlab/services';
+```
+
+Now return to the `activate()` function. Add the following code below the lines that create a `Widget` instance and above the lines that define the command.
+
+```typescript
+    // Add an image element to the panel
+    let img = document.createElement('img');
+    widget.node.appendChild(img);
+
+    // Fetch info about a random comic
+    let settings = ServerConnection.makeSettings();
+    ServerConnection.makeRequest({url: 'http://xkcd-imgs.herokuapp.com/'}, settings).then(response => {
+      img.src = response.data.url;
+      img.alt = response.data.title;
+      img.title = response.data.title;
+    });
+```
+
+The first two lines create a new HTML `<img>` element and add it to the widget DOM node. The next lines make a request to http://xkcd-imgs.herokuapp.com/, a hosted version of https://github.com/hemanth/xkcd-imgs-heroku, and set the source, alternate text, and title attributes of the image based on the response.
+
+Rebuild your extension (`jupyter lab build`), refresh your browser tab, and run the *Random xkcd comic* command again. You should now see a comic in the xkcd.com panel when it opens.
+
+![Empty xkcd extension panel](xkcd_tutorial_single.png)
+
+Note that the comic is not centered in the panel nor does the panel scroll if the comic is larger than the panel area. Also note that the comic does not change no matter how many times you close and reopen the tab. You'll address both of these problems in the next two sections repsectively.
+
+But first, make another git commit.
+
+```bash
+git add .
+git commit -m 'Show a comic in the panel'
+```
 
 ## Center the comic and add attribution
 
@@ -274,6 +313,6 @@ git commit -m 'Show xkcd panel on command`
 
 ## TODO: Questions / Thoughts
 
-* Don't want to maintain the dev setup steps here if they're also in the contributing doc and extesnion pages and ... but it's also hard as a newbie to trace through all of them. Solve this later I guess.
+* Don't want to maintain the dev setup steps here if they're also in the contributing doc and extension pages and ... but it's also hard as a newbie to trace through all of them. Solve this later I guess.
 * Knowing how to package an extension for release is another useful tidbit this tutorial might cover, but perhaps that should be separate.
 * Windows? These steps will probably work on a Windows system as well. But in the interest of brevity, only going to doc the shell commands to run.
