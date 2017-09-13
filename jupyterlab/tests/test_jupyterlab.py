@@ -310,6 +310,7 @@ class TestExtension(TestCase):
         stderr = sys.stderr
         sys.stderr = self.devnull
         app.initialize()
+        app.core_mode = True
         sys.stderr = stderr
         load_jupyter_server_extension(app)
 
