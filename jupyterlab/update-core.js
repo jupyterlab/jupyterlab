@@ -12,7 +12,7 @@ var sortPackageJson = require('sort-package-json');
 var corePackage = require('./package.json');
 corePackage.jupyterlab.extensions = {};
 corePackage.jupyterlab.mimeExtensions = {};
-corePackage.jupyterlab.version = version;
+corePackage.jupyterlab.version = 'test';
 corePackage.dependencies = {};
 
 var basePath = path.resolve('..');
