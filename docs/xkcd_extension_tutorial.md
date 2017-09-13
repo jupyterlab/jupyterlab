@@ -296,9 +296,9 @@ Rebuild your extension (`jupyter lab build`), refresh your browser tab, and run 
 
 ![Empty xkcd extension panel](xkcd_tutorial_single.png)
 
-Note that the comic is not centered in the panel nor does the panel scroll if the comic is larger than the panel area. Also note that the comic does not change no matter how many times you close and reopen the tab. You'll address both of these problems in the next two sections repsectively.
+Note that the comic is not centered in the panel nor does the panel scroll if the comic is larger than the panel area. Also note that the comic does not change no matter how many times you close and reopen the tab. You'll address both of these problems in the next two sections respectively.
 
-But first, make another git commit.
+If you don't see a comic at all, compare your code with https://github.com/parente/jupyterlab_xkcd/blob/aa21b88b5efa635639658eb7387d332759781f45/src/index.ts. When it's working, make another git commit.
 
 ```bash
 git add .
