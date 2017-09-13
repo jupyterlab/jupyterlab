@@ -23,6 +23,9 @@ class BuildAPITester(APITester):
 class BuildAPITest(LabTestBase):
     """Test the build web service API"""
 
+    def test_nothing(self):
+        pass
+
     # def setUp(self):
     #     self.build_api = BuildAPITester(self.request)
 
