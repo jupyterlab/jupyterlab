@@ -90,10 +90,67 @@ def find_package_data():
     return {
         'jupyterlab': ['build/*', 'index.app.js',
                        'webpack.config.js', 'package.app.json',
-                       'released_packages.txt', 'node-version-check.js'] + theme_dirs + schema_dirs
+                       'released_packages.txt', 'node-version-check.js'
+                       ] + theme_dirs + schema_dirs
     }
 
 
+def find_data_files():
+    """
+    Find data_files.
+    """
+    files = []
+    static_files = os.listdir(pjoin('jupyterlab', 'build'))
+    files.append(('share/jupyter/lab/static',
+        ['jupyterlab/build/%s' % f for f in static_files]))
+
+    for dir, subdirs, fnames in os.walk(pjoin('jupyterlab', 'schemas')):
+        dir = dir.replace(os.sep, '/')
+        schema_files = []
+        for fname in fnames:
+            schema_files.append('%s/%s' % (dir, fname))
+        slice_len = len('jupyterlab/')
+        files.append(('share/jupyter/lab/%s' % dir[slice_len:], schema_files))
+
+    for dir, subdirs, fnames in os.walk(pjoin('jupyterlab', 'themes')):
+        dir = dir.replace(os.sep, '/')
+        themes_files = []
+        for fname in fnames:
+            themes_files.append('%s/%s' % (dir, fname))
+        slice_len = len('jupyterlab/')
+        files.append(('share/jupyter/lab/%s' % dir[slice_len:], themes_files))
+
+    return files
+
+
+def ensure_core_data(command):
+    """decorator for building minified js/css prior to another command"""
+    class DecoratedCommand(command):
+
+        def run(self):
+            coredeps = self.distribution.get_command_obj('coredeps')
+            if not is_repo and all(osp.exists(t) for t in coredeps.targets):
+                # build_py or build_ext, nothing to do
+                command.run(self)
+                return
+
+            try:
+                self.distribution.run_command('coredeps')
+            except Exception as e:
+                missing = [t for t in coredeps.targets if not osp.exists(t)]
+                if missing:
+                    log.warn('file check failed')
+                    if missing:
+                        log.error('missing files: %s' % missing)
+                    raise e
+                else:
+                    log.warn('core deps check failed (not a problem)')
+                    log.warn(str(e))
+            command.run(self)
+    return DecoratedCommand
+
+
+>>>>>>> fcfcecec0... Remove fallback mode by creating an app directory on install
 def js_prerelease(command, strict=False):
     """decorator for building minified js/css prior to another command"""
     class DecoratedCommand(command):

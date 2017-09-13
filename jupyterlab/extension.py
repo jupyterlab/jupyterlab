@@ -68,16 +68,11 @@ def load_jupyter_server_extension(nbapp):
         core_mode = True
         config.settings_dir = ''
 
-    # Run core mode if explicit or there is no static dir and no
-    # installed extensions.
-    installed = list_extensions(app_dir)
-    fallback = not installed and not os.path.exists(config.assets_dir)
-
     web_app.settings.setdefault('page_config_data', dict())
     web_app.settings['page_config_data']['buildAvailable'] = True
     web_app.settings['page_config_data']['token'] = nbapp.token
 
-    if core_mode or fallback:
+    if core_mode:
         config.assets_dir = os.path.join(here, 'build')
         config.version = __version__
         if not os.path.exists(config.assets_dir):
@@ -86,13 +81,16 @@ def load_jupyter_server_extension(nbapp):
         else:
             sentinel = os.path.join(here, 'build', 'release_data.json')
             config.dev_mode = not os.path.exists(sentinel)
+    elif not os.path.exists(config.assets_dir):
+        msg = 'JupyterLab assets dir does not exist: %s' % config.assets_dir
+        raise ValueError(msg + '\nYou may need to run `jupyter lab build`')
 
     if config.dev_mode:
         nbapp.log.info(DEV_NOTE_NPM)
-    elif core_mode or fallback:
+    elif core_mode:
         nbapp.log.info(CORE_NOTE.strip())
 
-    if core_mode or fallback:
+    if core_mode:
         schemas_dir = os.path.join(here, 'schemas')
         config.themes_dir = os.path.join(here, 'themes')
     else:
@@ -101,7 +99,6 @@ def load_jupyter_server_extension(nbapp):
 
     config.schemas_dir = schemas_dir
     config.user_settings_dir = get_user_settings_dir()
-    
 
     add_handlers(web_app, config)
 
