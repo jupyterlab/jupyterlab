@@ -4,9 +4,15 @@ var glob = require('glob');
 var path = require('path');
 var sortPackageJson = require('sort-package-json');
 
+// Get the current version of JupyterLab
+var cwd = path.resolve('..');
+var version = childProcess.execSync('python setup.py --version', { cwd: cwd });
+version = version.toString().trim();
+
 var corePackage = require('./package.json');
 corePackage.jupyterlab.extensions = {};
 corePackage.jupyterlab.mimeExtensions = {};
+corePackage.jupyterlab.version = version;
 corePackage.dependencies = {};
 
 var basePath = path.resolve('..');

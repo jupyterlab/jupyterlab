@@ -4,6 +4,8 @@ var glob = require('glob');
 var path = require('path');
 var sortPackageJson = require('sort-package-json');
 
+// Update the core.
+require('./update-core');
 
 // Get the current version of JupyterLab
 var cwd = path.resolve('..');
