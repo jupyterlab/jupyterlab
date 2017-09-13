@@ -23,14 +23,14 @@ class BuildAPITester(APITester):
 class BuildAPITest(LabTestBase):
     """Test the build web service API"""
 
-    def setUp(self):
-        self.build_api = BuildAPITester(self.request)
+    # def setUp(self):
+    #     self.build_api = BuildAPITester(self.request)
 
-    def test_get_status(self):
-        """Make sure there are no kernels running at the start"""
-        resp = self.build_api.getStatus().json()
-        assert 'status' in resp
-        assert 'message' in resp
+    # def test_get_status(self):
+    #     """Make sure there are no kernels running at the start"""
+    #     resp = self.build_api.getStatus().json()
+    #     assert 'status' in resp
+    #     assert 'message' in resp
 
     # def test_build(self):
     #     resp = self.build_api.build()
