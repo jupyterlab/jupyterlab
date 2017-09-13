@@ -99,7 +99,11 @@ def find_data_files():
     """
     Find data_files.
     """
+    if not os.path.exists(pjoin('jupyterlab', 'build')):
+        return []
+
     files = []
+
     static_files = os.listdir(pjoin('jupyterlab', 'build'))
     files.append(('share/jupyter/lab/static',
         ['jupyterlab/build/%s' % f for f in static_files]))
