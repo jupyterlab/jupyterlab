@@ -2,7 +2,6 @@
 import threading
 import time
 
-from unittest import TestCase
 from jupyterlab.tests.utils import LabTestBase, APITester
 from notebook.tests.launchnotebook import assert_http_error
 
@@ -21,40 +20,37 @@ class BuildAPITester(APITester):
         return self._req('DELETE', '')
 
 
-class BuildAPITest(TestCase):
+class BuildAPITest(LabTestBase):
     """Test the build web service API"""
 
-    def test_nothing(self):
-        pass
+    def setUp(self):
+        self.build_api = BuildAPITester(self.request)
 
-    # def setUp(self):
-    #     self.build_api = BuildAPITester(self.request)
+    def test_get_status(self):
+        """Make sure there are no kernels running at the start"""
+        resp = self.build_api.getStatus().json()
+        assert 'status' in resp
+        assert 'message' in resp
 
-    # def test_get_status(self):
-    #     """Make sure there are no kernels running at the start"""
-    #     resp = self.build_api.getStatus().json()
-    #     assert 'status' in resp
-    #     assert 'message' in resp
+    def test_build(self):
+        resp = self.build_api.build()
+        assert resp.status_code == 200
 
-    # def test_build(self):
-    #     resp = self.build_api.build()
-    #     assert resp.status_code == 200
+    def test_clear(self):
+        with assert_http_error(500):
+            self.build_api.clear()
 
-    # def test_clear(self):
-    #     with assert_http_error(500):
-    #         self.build_api.clear()
+        def build_thread():
+            with assert_http_error(500):
+                self.build_api.build()
 
-    #     def build_thread():
-    #         with assert_http_error(500):
-    #             self.build_api.build()
+        t1 = threading.Thread(target=build_thread)
+        t1.start()
 
-    #     t1 = threading.Thread(target=build_thread)
-    #     t1.start()
+        while 1:
+            resp = self.build_api.getStatus().json()
+            if resp['status'] == 'building':
+                break
 
-    #     while 1:
-    #         resp = self.build_api.getStatus().json()
-    #         if resp['status'] == 'building':
-    #             break
-
-    #     resp = self.build_api.clear()
-    #     assert resp.status_code == 204
+        resp = self.build_api.clear()
+        assert resp.status_code == 204

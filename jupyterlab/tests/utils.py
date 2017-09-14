@@ -88,6 +88,7 @@ class LabTestBase(NotebookTestBase):
             app.initialize(argv=[])
             app.log.propagate = True
             app.log.handlers = []
+            app.core_mode = True
             loop = IOLoop.current()
             loop.add_callback(started.set)
             try:
