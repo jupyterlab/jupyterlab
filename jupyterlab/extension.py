@@ -52,6 +52,7 @@ def load_jupyter_server_extension(nbapp):
     web_app = nbapp.web_app
     config = LabConfig()
 
+    config.name = 'JupyterLab'
     config.assets_dir = os.path.join(app_dir, 'static')
     config.settings_dir = os.path.join(app_dir, 'settings')
     config.page_title = 'JupyterLab Alpha Preview'
@@ -81,9 +82,6 @@ def load_jupyter_server_extension(nbapp):
         else:
             sentinel = os.path.join(here, 'build', 'release_data.json')
             config.dev_mode = not os.path.exists(sentinel)
-    elif not os.path.exists(config.assets_dir):
-        msg = 'JupyterLab assets dir does not exist: %s' % config.assets_dir
-        raise ValueError(msg + '\nYou may need to run `jupyter lab build`')
 
     if config.dev_mode:
         nbapp.log.info(DEV_NOTE_NPM)
