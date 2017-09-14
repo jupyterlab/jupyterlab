@@ -78,7 +78,7 @@ const RESOURCES = [
   },
   {
     text: 'IPython Reference',
-    url: 'http://ipython.readthedocs.io/en/stable/'
+    url: 'https://ipython.readthedocs.io/en/stable/'
   },
   {
     text: 'Numpy Reference',
@@ -94,7 +94,7 @@ const RESOURCES = [
   },
   {
     text: 'Matplotlib Reference',
-    url: 'http://matplotlib.org/contents.html?v=20160707164940'
+    url: 'https://matplotlib.org/contents.html?v=20160707164940'
   },
   {
     text: 'SymPy Reference',
@@ -102,7 +102,7 @@ const RESOURCES = [
   },
   {
     text: 'Pandas Reference',
-    url: 'http://pandas.pydata.org/pandas-docs/stable/?v=20160707164940'
+    url: 'https://pandas.pydata.org/pandas-docs/stable/?v=20160707164940'
   },
   {
     text: 'Markdown Reference',
