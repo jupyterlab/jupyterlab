@@ -471,7 +471,10 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
     if (this.isDisposed) {
       return;
     }
-    this._monitor.dispose();
+    if (this._monitor) {
+      this._monitor.dispose();
+    }
+    this._monitor = null;
     super.dispose();
   }
 
@@ -521,7 +524,7 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
   }
 
   private _context: DocumentRegistry.Context;
-  private _monitor: ActivityMonitor<any, any>;
+  private _monitor: ActivityMonitor<any, any> | null;
   private _renderer: IRenderMime.IRenderer;
   private _mimeType: string;
   private _ready = new PromiseDelegate<void>();
