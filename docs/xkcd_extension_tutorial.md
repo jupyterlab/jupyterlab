@@ -8,11 +8,12 @@ JupyterLab extensions add features to the user experience. This page describes h
 
 By working through this tutorial, you'll learn:
 
-* How to setup an extension development environment from scratch on a Linux or OSX machine (TODO: footnote for Windows users)
+* How to setup an extension development environment from scratch on a Linux or OSX machine.
+    * Windows users: You'll need to modify the commands slightly.
 * How to start an extension project from [jupyterlab/extension-cookiecutter-ts](https://github.com/jupyterlab/extension-cookiecutter-ts)
 * How to iteratively code, build, and load your extension in JupyterLab
 * How to version control your work with git
-* How to release your extension for others to enjoy (TODO: maybe?)
+* How to release your extension for others to enjoy
 
 ![Completed xkcd extension screenshot](xkcd_tutorial_complete.png)
 
@@ -296,7 +297,7 @@ Rebuild your extension (`jupyter lab build`), refresh your browser tab, and run 
 
 ![Empty xkcd extension panel](xkcd_tutorial_single.png)
 
-Note that the comic is not centered in the panel nor does the panel scroll if the comic is larger than the panel area. Also note that the comic does not change no matter how many times you close and reopen the tab. You'll address both of these problems in the next two sections respectively.
+Note that the comic is not centered in the panel nor does the panel scroll if the comic is larger than the panel area. Also note that the comic does not update no matter how many times you close and reopen the panel. You'll address both of these problems in the upcoming sections.
 
 If you don't see a comic at all, compare your code with https://github.com/parente/jupyterlab_xkcd/blob/aa21b88b5efa635639658eb7387d332759781f45/src/index.ts. When it's working, make another git commit.
 
@@ -307,12 +308,85 @@ git commit -m 'Show a comic in the panel'
 
 ## Center the comic and add attribution
 
+Create a `style` subfolder in the root of your extension project directory. Then create and open a `style/index.css` file for editing. Add the following lines to it.
+
+```css
+.jp-xkcdWidget {
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+}
+
+.jp-xkcdCartoon {
+    margin: auto;
+}
+
+.jp-xkcdAttribution {
+    margin: 20px auto;
+}
+```
+
+The first rule stacks content vertically within the widget panel and lets the panel scroll when the content overflows. The other rules center the cartoon and attribution badge horizontally and space them out vertically.
+
+Return to the `index.ts` file. Add the following import to the top of the file.
+
+```typescript
+import '../style/index.css';
+```
+
+Now modify the the `activate` function to apply the CSS classes and add the attribution badge markup. The beginning of the function should read like the following:
+
+```typescript
+  activate: (app, palette: ICommandPalette) => {
+    console.log('JupyterLab extension jupyterlab_xkcd is activated!');
+
+    // Create a single widget
+    let widget: Widget = new Widget();
+    widget.id = 'xkcd-jupyterlab';
+    widget.title.label = 'xkcd.com';
+    widget.title.closable = true;
+    widget.addClass('jp-xkcdWidget'); // new line
+
+    // Add an image element to the panel
+    let img = document.createElement('img');
+    img.className = 'jp-xkcdCartoon'; // new line
+    widget.node.appendChild(img);
+
+    // New: add an attribution badge
+    img.insertAdjacentHTML('afterend',
+      `<div class="jp-xkcdAttribution">
+        <a href="https://creativecommons.org/licenses/by-nc/2.5/" class="jp-xkcdAttribution" target="_blank">
+          <img src="https://licensebuttons.net/l/by-nc/2.5/80x15.png" />
+        </a>
+      </div>`
+    );
+
+    // Keep all the remaining ServerConnection and command lines the same
+    // as before from here down ...
+```
+
+Finally, open the `package.json` file in the root of your project. Locate the `files` attribute and add a `"style/*"` entry to it:
+
+```json
+  "files": [
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "style/*"
+  ],
+```
+
+This addition tells webpack to include your stylesheet in its build of the frontend web assets, making it available for the `import` statement in you added to `index.ts`.
+
+Build your extension (`jupyter lab build`) and refresh your JupyterLab browser tab. Invoke the *Random xkcd comic* command and confirm the comic is centered with an attribution badge below it. Resize the browser window or the panel so that the comic is larger than the available area. Make sure you can scroll the panel over the entire area of the comic.
+
+If anything is misbehaving, compare your code with the reference project at this commit: https://github.com/parente/jupyterlab_xkcd/tree/b52d0457de350c054f35653af3a324d1057ffe5d When everything is working as expected, make another commit.
+
+```bash
+git add .
+git commit -m 'Add styling, attribution'
+```
+
 ## Show a new comic each time the command runs
 
 ## Restore panel state when the browser refreshes
 
-## TODO: Questions / Thoughts
-
-* Don't want to maintain the dev setup steps here if they're also in the contributing doc and extension pages and ... but it's also hard as a newbie to trace through all of them. Solve this later I guess.
-* Knowing how to package an extension for release is another useful tidbit this tutorial might cover, but perhaps that should be separate.
-* Windows? These steps will probably work on a Windows system as well. But in the interest of brevity, only going to doc the shell commands to run.
+## 
