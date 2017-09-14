@@ -275,7 +275,7 @@ import {
 } from '@jupyterlab/services';
 ```
 
-Now return to the `activate()` function. Add the following code below the lines that create a `Widget` instance and above the lines that define the command.
+Now return to the `activate` function. Add the following code below the lines that create a `Widget` instance and above the lines that define the command.
 
 ```typescript
     // Add an image element to the panel
@@ -374,7 +374,7 @@ Finally, open the `package.json` file in the root of your project. Locate the `f
   ],
 ```
 
-This addition tells webpack to include your stylesheet in its build of the frontend web assets, making it available for the `import` statement in you added to `index.ts`.
+This addition tells [webpack](https://webpack.js.org/) to include your stylesheet in its build of the frontend web assets, making it available for the `import` statement in you added to `index.ts`.
 
 Build your extension (`jupyter lab build`) and refresh your JupyterLab browser tab. Invoke the *Random xkcd comic* command and confirm the comic is centered with an attribution badge below it. Resize the browser window or the panel so that the comic is larger than the available area. Make sure you can scroll the panel over the entire area of the comic.
 
@@ -387,6 +387,112 @@ git commit -m 'Add styling, attribution'
 
 ## Show a new comic each time the command runs
 
+The `activate` function has grown quite long, and there's still more functionality to add. You should refactor the code into two separate parts:
+
+1. An `XkcdWidget` that encapsulate the xkcd panel elements, configuration, and soon-to-be-added update behavior
+2. An `activate` function that adds the widget instance to the UI and decide when the comic should refresh
+
+Start by refactoring the widget code into the new `XkcdWidget` class. Add the class just below the import statements in the `index.ts` file.
+
+```typescript
+class XkcdWidget extends Widget {
+  settings: ServerConnection.ISettings;
+  img: HTMLImageElement;
+
+  constructor() {
+    super();
+    this.settings = ServerConnection.makeSettings();
+
+    this.id = 'xkcd-jupyterlab';
+    this.title.label = 'xkcd.com';
+    this.title.closable = true;
+    this.addClass('jp-xkcdWidget');
+
+    this.img = document.createElement('img');
+    this.img.className = 'jp-xkcdCartoon';
+    this.node.appendChild(this.img);
+
+    this.img.insertAdjacentHTML('afterend',
+      `<div class="jp-xkcdAttribution">
+        <a href="https://creativecommons.org/licenses/by-nc/2.5/" class="jp-xkcdAttribution" target="_blank">
+          <img src="https://licensebuttons.net/l/by-nc/2.5/80x15.png" />
+        </a>
+      </div>`
+    );
+  }
+
+  showImage(): void {
+    ServerConnection.makeRequest({url: 'http://xkcd-imgs.herokuapp.com/'}, this.settings).then(response => {
+      this.img.src = response.data.url;
+      this.img.alt = response.data.title;
+      this.img.title = response.data.title;
+    });
+  }
+};
+```
+
+You've written all of the code before. All you've done is restructure it to use instance variables and move the comic request to its own function.
+
+Next move the remaining logic in `activate` to a new, top-level function just below the `XkcdWidget` class definition. Modify the code to create a widget when one does not exist in the main JupyterLab area or to refresh the comic in the exist widget when the command runs again. The code for the `activate` function should read as follows after these changes:
+
+```typescript
+function activate(app: JupyterLab, palette: ICommandPalette) {
+  console.log('JupyterLab extension jupyterlab_xkcd is activated!');
+
+  // Create a single widget
+  let widget: XkcdWidget = new XkcdWidget();
+
+  // Add an application command
+  const command: string = 'xkcd:open';
+  app.commands.addCommand(command, {
+    label: 'Random xkcd comic',
+    execute: () => {
+      if(!widget.isAttached) {
+        // Attach the widget to the main area if it's not there
+        app.shell.addToMainArea(widget);
+      }
+      // Refresh the comic in the widget
+      widget.showImage();
+      // Activate the widget
+      app.shell.activateById(widget.id);
+    }
+  });
+
+  // Add the command to the palette.
+  palette.addItem({ command, category: 'Tutorial' });
+};
+```
+
+Modify the import statement for `@jupyterlab/application` at the top of the file so that the `JupyterLab` type is known for the `app` parameter to the function.
+
+```typescript
+import {
+  JupyterLab, JupyterLabPlugin
+} from '@jupyterlab/application';
+```
+
+Remove the `activate` function definition from the `JupyterLabPlugin` object and refer instead to the top-level function like so:
+
+```typescript
+const extension: JupyterLabPlugin<void> = {
+  id: 'jupyterlab_xkcd',
+  autoStart: true,
+  requires: [ICommandPalette],
+  activate: activate
+};
+```
+
+Make sure you retain the `export default extension;` line in the file. Now build the extension again and refresh the JupyterLab browser tab. Run the *Random xkcd comic* command more than once without closing the panel. The comic should update each time you execute the command. Close the panel, run the command, and it should both reappear and show a new comic.
+
+If anything is amiss, compare your code with https://github.com/parente/jupyterlab_xkcd/blob/d7a7207efc526a096bd307d9fbafc686b763cbd9/src/index.ts to debug. Once it's working properly, commit it.
+
+```bash
+git add .
+git commit -m 'Refactor, refresh comic'
+```
+
 ## Restore panel state when the browser refreshes
 
-## 
+## Publish the extension to npmjs.org
+
+## Ideas for further learning
