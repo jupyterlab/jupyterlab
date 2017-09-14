@@ -85,10 +85,10 @@ class LabTestBase(NotebookTestBase):
             # needs to be redone after initialize, which reconfigures logging
             app.log.propagate = True
             app.log.handlers = []
+            app.core_mode = True
             app.initialize(argv=[])
             app.log.propagate = True
-            app.log.handlers = []
-            app.core_mode = True
+            app.log.handlers = ()
             loop = IOLoop.current()
             loop.add_callback(started.set)
             try:
