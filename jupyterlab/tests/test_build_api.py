@@ -2,6 +2,7 @@
 import threading
 import time
 
+from unittest import TestCase
 from jupyterlab.tests.utils import LabTestBase, APITester
 from notebook.tests.launchnotebook import assert_http_error
 
@@ -20,7 +21,7 @@ class BuildAPITester(APITester):
         return self._req('DELETE', '')
 
 
-class BuildAPITest(LabTestBase):
+class BuildAPITest(TestCase):
     """Test the build web service API"""
 
     def test_nothing(self):
