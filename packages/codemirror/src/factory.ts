@@ -42,6 +42,7 @@ class CodeMirrorEditorFactory implements IEditorFactoryService {
         'Shift-Enter': () => { /* no-op */ }
       },
       lineNumbers: true,
+      scrollPastEnd: true,
       ...defaults
     };
   }
