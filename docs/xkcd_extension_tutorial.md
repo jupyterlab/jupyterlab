@@ -378,6 +378,8 @@ This addition tells [webpack](https://webpack.js.org/) to include your styleshee
 
 Build your extension (`jupyter lab build`) and refresh your JupyterLab browser tab. Invoke the *Random xkcd comic* command and confirm the comic is centered with an attribution badge below it. Resize the browser window or the panel so that the comic is larger than the available area. Make sure you can scroll the panel over the entire area of the comic.
 
+![Styled xkcd panel with attribution](xkcd_tutorial_complete.png)
+
 If anything is misbehaving, compare your code with the reference project at this commit: https://github.com/parente/jupyterlab_xkcd/tree/b52d0457de350c054f35653af3a324d1057ffe5d When everything is working as expected, make another commit.
 
 ```bash
@@ -492,6 +494,113 @@ git commit -m 'Refactor, refresh comic'
 ```
 
 ## Restore panel state when the browser refreshes
+
+You may notice that every time you refresh your browser tab, the xkcd panel disappears, even if it was open before you refreshed. Other open panels, like notebooks, terminals, and text editors, all reappear and return to where you left them in the panel layout. You can make your extension behave this way too.
+
+Update the imports at the top of your `index.ts` file so that the entire list of import statements looks like the following:
+
+```typescript
+import {
+  Widget
+} from '@phosphor/widgets';
+
+import {
+  JSONExt // new
+} from '@phosphor/coreutils';
+
+import {
+  JupyterLab, JupyterLabPlugin, ILayoutRestorer // new
+} from '@jupyterlab/application';
+
+import {
+  ICommandPalette, InstanceTracker // new
+} from '@jupyterlab/apputils';
+
+import {
+  ServerConnection
+} from '@jupyterlab/services';
+
+import '../style/index.css';
+```
+
+Declare a third, new parameter in the `activate` function definition of type `ILayoutRestorer`.
+
+```typescript
+function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRestorer) {
+```
+
+Then rewrite the body of `activate` function so that it:
+
+1. Declares a widget variable, but does not create an instance immediately
+2. Constructs an `InstanceTracker` and tells the `ILayoutRestorer` to use it to save/restore panel state
+3. Creates, tracks, shows, and refreshes the widget panel appropriately
+
+
+```typescript
+function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRestorer) {
+  console.log('JupyterLab extension jupyterlab_xkcd is activated!');
+
+  // Declare a widget variable
+  let widget: XkcdWidget;
+
+  // Add an application command
+  const command: string = 'xkcd:open';
+  app.commands.addCommand(command, {
+    label: 'Random xkcd comic',
+    execute: () => {
+      if(!widget) {
+        // Create a new widget if one does not exist
+        widget = new XkcdWidget();
+        widget.showImage();
+      }
+      if(!tracker.has(widget)) {
+        // Track the state of the widget for later restoration
+        tracker.add(widget);
+      }
+      if(!widget.isAttached) {
+        // Attach the widget to the main area if it's not there
+        app.shell.addToMainArea(widget);
+      } else {
+        // Refresh the comic in the widget
+        widget.showImage();
+      }
+      // Activate the widget
+      app.shell.activateById(widget.id);
+    }
+  });
+
+  // Add the command to the palette.
+  palette.addItem({ command, category: 'Tutorial' });
+
+  // Track and restore the widget state
+  let tracker = new InstanceTracker<Widget>({ namespace: 'xkcd' });
+  restorer.restore(tracker, {
+    command,
+    args: () => JSONExt.emptyObject,
+    name: () => 'xkcd'
+  });
+};
+```
+
+Finally, add the `ILayoutRestorer` interface to the `JupyterLabPlugin` definition. This addition passes the global `LayoutRestorer` to the third parameter of the `activate`.
+
+```typescript
+const extension: JupyterLabPlugin<void> = {
+  id: 'jupyterlab_xkcd',
+  autoStart: true,
+  requires: [ICommandPalette, ILayoutRestorer],
+  activate: activate
+};
+```
+
+Rebuild your extension one last time and refresh your browser tab. Execute the *Random xkcd comic` command and validate that the panel appears with a comic in it. Refresh the browser tab again. You should see an xkcd panel appear immediately without running the command. Close the panel and refresh the browser tab. You should not see an xkcd tab after the refresh.
+
+Refer to https://github.com/parente/jupyterlab_xkcd/commit/e76ddd23a7f2cff964d3e1cd52f95c270bab6876 if your extension is behaving. Make a commit when the state of your extension persists across browser refreshes.
+
+```bash
+git add .
+git commit -m 'Restore panel state'
+```
 
 ## Publish the extension to npmjs.org
 
