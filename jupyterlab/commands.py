@@ -806,8 +806,11 @@ def _ensure_package(app_dir, logger=None, name=None, version=None):
 
     # Template the package.json file.
     data = _get_package_template(app_dir, logger)
-    data['jupyterlab']['name'] = name or 'JupyterLab'
-    data['jupyterlab']['version'] = version
+    if version:
+        data['jupyterlab']['version'] = version
+
+    if name:
+        data['jupyterlab']['name'] = name
 
     pkg_path = pjoin(staging, 'package.json')
     with open(pkg_path, 'w') as fid:
