@@ -315,6 +315,9 @@ class CompletionHandler implements IDisposable {
     const position = editor.getCursorPosition();
     const line = editor.getLine(position.line);
     if (!line) {
+      this._enabled = false;
+      model.reset(true);
+      host.classList.remove(COMPLETER_ENABLED_CLASS);
       return;
     }
 
