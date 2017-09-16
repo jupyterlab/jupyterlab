@@ -26,6 +26,10 @@ import {
 } from '@jupyterlab/filebrowser';
 
 import {
+  Launcher
+} from '@jupyterlab/launcher';
+
+import {
   each
 } from '@phosphor/algorithm';
 
@@ -156,9 +160,7 @@ function activateFactory(app: JupyterLab, docManager: IDocumentManager, state: I
     let launcher = new ToolbarButton({
       className: 'jp-AddIcon',
       onClick: () => {
-        return commands.execute('launcher:create', {
-          cwd: widget.model.path
-        });
+        return createLauncher(commands, widget);
       }
     });
     launcher.addClass('jp-MaterialIcon');
@@ -213,9 +215,7 @@ function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, docM
     if (app.shell.isEmpty('main')) {
       // Make sure the model is restored.
       fbWidget.model.restored.then(() => {
-        app.commands.execute('launcher:create', {
-          cwd: fbWidget.model.path
-        });
+        createLauncher(app.commands, fbWidget);
       });
     }
   });
@@ -390,9 +390,7 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
   commands.addCommand(CommandIDs.createLauncher, {
     label: 'New...',
     execute: () => {
-      return commands.execute('launcher:create', {
-        cwd: mainBrowser.model.path,
-      });
+      return createLauncher(commands, mainBrowser);
     }
   });
 }
@@ -456,4 +454,18 @@ function createContextMenu(path: string, commands: CommandRegistry, registry: Do
   menu.addItem({ command: CommandIDs.shutdown });
 
   return menu;
+}
+
+
+/**
+ * Create a launcher for a given filebrowser widget.
+ */
+function createLauncher(commands: CommandRegistry, widget: FileBrowser): Promise<void> {
+  return commands.execute('launcher:create', {
+    cwd: widget.model.path
+  }).then((launcher: Launcher) => {
+    widget.model.pathChanged.connect(() => {
+      launcher.cwd = widget.model.path;
+    }, launcher);
+  });
 }

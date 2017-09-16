@@ -280,13 +280,21 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       if (this.isDisposed) {
         return;
       }
+      let dirty = false;
       if (contents.format === 'json') {
         model.fromJSON(contents.content);
       } else {
-        model.fromString(contents.content);
+        let content = contents.content;
+        // Convert line endings if necessary, marking the file
+        // as dirty.
+        if (content.indexOf('\r') !== -1) {
+          dirty = true;
+          content = content.replace(/\r\n|\r/g, '\n');
+        }
+        model.fromString(content);
       }
       this._updateContentsModel(contents);
-      model.dirty = false;
+      model.dirty = dirty;
       if (!this._isPopulated) {
         return this._populate();
       }

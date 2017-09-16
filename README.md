@@ -11,7 +11,7 @@
 [![Greenkeeper badge](https://badges.greenkeeper.io/jupyterlab/jupyterlab.svg)](https://greenkeeper.io/)
 
 [![Build Status](https://travis-ci.org/jupyterlab/jupyterlab.svg?branch=master)](https://travis-ci.org/jupyterlab/jupyterlab)
-[![Documentation Status](https://readthedocs.org/projects/jupyterlab-tutorial/badge/?version=latest)](https://jupyterlab-tutorial.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/jupyterlab/badge/?version=latest)](https://jupyterlab.readthedocs.io/en/latest/?badge=latest)
 [![Google Group](https://img.shields.io/badge/-Google%20Group-lightgrey.svg)](https://groups.google.com/forum/#!forum/jupyter)
 
 An extensible environment for interactive and reproducible computing, based on the 
@@ -78,9 +78,9 @@ jupyter notebook --version
 
 The runtime versions which are currently *known to work*:
 
-- Firefox 49+
-- Chrome 39+
-- Safari 10+
+- Firefox Latest
+- Chrome Latest
+- Safari Latest
 
 Earlier browser versions may also work, but come with no guarantees.
 

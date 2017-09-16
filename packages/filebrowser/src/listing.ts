@@ -320,6 +320,7 @@ class DirListing extends Widget {
   cut(): void {
     this._isCut = true;
     this._copy();
+    this.update();
   }
 
   /**
@@ -687,9 +688,22 @@ class DirListing extends Widget {
   }
 
   /**
+   * A message handler invoked on an `'after-show'` message.
+   */
+  protected onAfterShow(msg: Message): void {
+    if (this._isDirty) {
+      // Update the sorted items.
+      this.sort(this.sortState);
+      this.update();
+    }
+  }
+
+  /**
    * A handler invoked on an `'update-request'` message.
    */
   protected onUpdateRequest(msg: Message): void {
+    this._isDirty = false;
+
     // Fetch common variables.
     let items = this._sortedItems;
     let nodes = this._items;
@@ -1261,7 +1275,6 @@ class DirListing extends Widget {
         this._clipboard.push(item.path);
       }
     });
-    this.update();
   }
 
   /**
@@ -1356,8 +1369,12 @@ class DirListing extends Widget {
         this._selection[name] = true;
       }
     });
-    // Update the sorted items.
-    this.sort(this.sortState);
+    if (this.isVisible) {
+      // Update the sorted items.
+      this.sort(this.sortState);
+    } else {
+      this._isDirty = true;
+    }
   }
 
   /**
@@ -1419,6 +1436,7 @@ class DirListing extends Widget {
   private _searchPrefix: string = '';
   private _searchPrefixTimer = -1;
   private _inRename = false;
+  private _isDirty = false;
 }
 
 

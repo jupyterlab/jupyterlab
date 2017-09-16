@@ -232,7 +232,7 @@ class Launcher extends VDomRenderer<LauncherModel> {
    */
   constructor(options: Launcher.IOptions) {
     super();
-    this.cwd = options.cwd;
+    this._cwd = options.cwd;
     this._callback = options.callback;
     this.addClass(LAUNCHER_CLASS);
   }
@@ -240,7 +240,13 @@ class Launcher extends VDomRenderer<LauncherModel> {
   /**
    * The cwd of the launcher.
    */
-  readonly cwd: string;
+  get cwd(): string {
+    return this._cwd;
+  }
+  set cwd(value: string) {
+    this._cwd = value;
+    this.update();
+  }
 
   /**
    * Whether there is a pending item being launched.
@@ -337,6 +343,7 @@ class Launcher extends VDomRenderer<LauncherModel> {
 
   private _callback: (widget: Widget) => void;
   private _pending = false;
+  private _cwd = '';
 }
 
 
@@ -359,7 +366,6 @@ namespace Launcher {
      * The callback used when an item is launched.
      */
     callback: (widget: Widget) => void;
-
   }
 }
 

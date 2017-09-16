@@ -81,6 +81,7 @@ function activate(app: JupyterLab, palette: ICommandPalette): ILauncher {
       if (args['activate'] !== false) {
         shell.activateById(widget.id);
       }
+      return widget;
     }
   });
 

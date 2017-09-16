@@ -94,20 +94,20 @@
       },
       "type": "object"
     },
-    "docmanager:create-launcher": {
-      "default": { },
-      "properties": {
-        "command": { "default": "docmanager:create-launcher" },
-        "keys": { "default": ["Accel Shift L"] },
-        "selector": { "default": "body" }
-      },
-      "type": "object"
-    },
     "docmanager:save": {
       "default": { },
       "properties": {
         "command": { "default": "docmanager:save" },
         "keys": { "default": ["Accel S"] },
+        "selector": { "default": "body" }
+      },
+      "type": "object"
+    },
+    "filebrowser:create-main-launcher": {
+      "default": { },
+      "properties": {
+        "command": { "default": "filebrowser:create-main-launcher" },
+        "keys": { "default": ["Accel Shift L"] },
         "selector": { "default": "body" }
       },
       "type": "object"

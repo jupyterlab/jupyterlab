@@ -141,7 +141,7 @@ class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeMo
    * Serialize the model to JSON.
    */
   toJSON(): JSONValue {
-    return JSON.parse(this.value.text);
+    return JSON.parse(this.value.text || 'null');
   }
 
   /**
@@ -471,7 +471,10 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
     if (this.isDisposed) {
       return;
     }
-    this._monitor.dispose();
+    if (this._monitor) {
+      this._monitor.dispose();
+    }
+    this._monitor = null;
     super.dispose();
   }
 
@@ -487,7 +490,9 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
    * Handle an `update-request` message to the widget.
    */
   protected onUpdateRequest(msg: Message): void {
-    this._render();
+    if (this._context.isReady) {
+      this._render();
+    }
   }
 
   /**
@@ -519,7 +524,7 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
   }
 
   private _context: DocumentRegistry.Context;
-  private _monitor: ActivityMonitor<any, any>;
+  private _monitor: ActivityMonitor<any, any> | null;
   private _renderer: IRenderMime.IRenderer;
   private _mimeType: string;
   private _ready = new PromiseDelegate<void>();

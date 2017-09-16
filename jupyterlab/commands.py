@@ -574,7 +574,7 @@ def build_async(app_dir=None, name=None, version=None, logger=None, abort_callba
     npm = get_npm_name()
 
     # Make sure packages are installed.
-    yield run([npm, 'install'], cwd=staging, logger=logger, abort_callback=abort_callback)
+    yield run([npm, 'install', '--no-optional'], cwd=staging, logger=logger, abort_callback=abort_callback)
 
     # Build the app.
     yield run([npm, 'run', 'build'], cwd=staging, logger=logger, abort_callback= abort_callback)
