@@ -171,7 +171,7 @@ Note: This step is not technically necessary, but it is good practice to track c
 
 ## Add a command to show the xckd panel
 
-The *command palette* is the primary view of all commands available to you in JupyterLab. For your first addition,yYou're going to add a *Random xkcd* command to the palette and get it to show an *xkcd* tab panel when invoked.
+The *command palette* is the primary view of all commands available to you in JupyterLab. For your first addition, you're going to add a *Random xkcd comic* command to the palette and get it to show an *xkcd* tab panel when invoked.
 
 Fire up your favorite text editor and open the `src/index.ts` file in your extension project. Add the following import at the top of the file to get a reference to the command palette interface.
 
@@ -391,7 +391,7 @@ git commit -m 'Add styling, attribution'
 
 The `activate` function has grown quite long, and there's still more functionality to add. You should refactor the code into two separate parts:
 
-1. An `XkcdWidget` that encapsulate the xkcd panel elements, configuration, and soon-to-be-added update behavior
+1. An `XkcdWidget` that encapsulates the xkcd panel elements, configuration, and soon-to-be-added update behavior
 2. An `activate` function that adds the widget instance to the UI and decide when the comic should refresh
 
 Start by refactoring the widget code into the new `XkcdWidget` class. Add the class just below the import statements in the `index.ts` file.
@@ -595,13 +595,59 @@ const extension: JupyterLabPlugin<void> = {
 
 Rebuild your extension one last time and refresh your browser tab. Execute the *Random xkcd comic` command and validate that the panel appears with a comic in it. Refresh the browser tab again. You should see an xkcd panel appear immediately without running the command. Close the panel and refresh the browser tab. You should not see an xkcd tab after the refresh.
 
-Refer to https://github.com/parente/jupyterlab_xkcd/commit/e76ddd23a7f2cff964d3e1cd52f95c270bab6876 if your extension is misbehaving. Make a commit when the state of your extension persists across browser refreshes.
+Refer to https://github.com/parente/jupyterlab_xkcd/commit/e76ddd23a7f2cff964d3e1cd52f95c270bab6876 if your extension is misbehaving. Make a commit when the state of your extension persists properly.
 
 ```bash
 git add .
 git commit -m 'Restore panel state'
 ```
 
+Congrats! You've implemented all of the behaviors laid out at the start of this tutorial. Now how about sharing it with the world?
+
 ## Publish the extension to npmjs.org
 
+npm is both a JavaScript package manager and the de facto registry for JavaScript software. You can [sign up for an account on the npmjs.com site](https://www.npmjs.com/signup) or create an account from the command line by running `npm adduser` and entering values when prompted. Create an account now if you do not already have one. If you already have an account, login by running `npm login` and answering the prompts.
+
+Next, open the project `package.json` file in your text editor. Prefix the `name` field value with `@your-npm-username>/` so that the entire field reads `"name": "@your-npm-username/jupyterlab_xkcd"` where you've replaced the string `your-npm-username` with your real username. Consider adding the homepage, repository, license, and [other supported package.json](https://docs.npmjs.com/files/package.json) fields while you have the file open. Then open the `README.md` file and adjust the command in the *Installation* section so that it includes the full, username-prefixed package name you just included in the `package.json` file. For example:
+
+```bash
+jupyter labextension install @parente/jupyterlab_xkcd
+```
+
+Return to your terminal window and make one more git commit:
+
+```bash
+git add .
+git commit -m 'Prepare to publish package'
+```
+
+Now run the following command to publish your package:
+
+```bash
+npm publish --access=public
+```
+
+Check that your package appears on the npm website. You can either search for it from the homepage or visit https://www.npmjs.com/package/@your-username/jupyterlab_xkcd directly. If it doesn't appear, make sure you've updated the package name properly in the `package.json` and run the npm command correctly.
+
+![Extension page on npmjs.com](xkcd_tutorial_npm.png)
+
+You can now try installing your extension as a user would. Open a new terminal and run the following commands, again substituting your npm username where appropriate:
+
+```bash
+conda create -n jupyterlab-xkcd jupyterlab nodejs
+source activate jupyterlab-xkcd
+jupyter labextension install @your-npm-username/jupyterlab_xkcd
+jupyter lab
+```
+
+You should see a fresh JupyterLab browser tab appear. When it does, execute the *Random xkcd comic* command to prove that your extension works when installed from npm.
+
 ## Ideas for further learning
+
+You've completed the tutorial. Nicely done! If you want to keep learning, here are some suggestions about what to try next:
+
+* Assign a hotkey to the *Random xkcd comic* command.
+* Make the image a link to the comic on https://xkcd.com.
+* Push your extension git repository to GitHub.
+* Give users the ability to pin comics in separate, permanent panels.
+* Learn how to write [other kinds of extensions](extensions_dev.html).
