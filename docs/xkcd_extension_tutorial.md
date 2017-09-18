@@ -595,7 +595,7 @@ const extension: JupyterLabPlugin<void> = {
 
 Rebuild your extension one last time and refresh your browser tab. Execute the *Random xkcd comic` command and validate that the panel appears with a comic in it. Refresh the browser tab again. You should see an xkcd panel appear immediately without running the command. Close the panel and refresh the browser tab. You should not see an xkcd tab after the refresh.
 
-Refer to the [05-05-restore-panel-state tag](https://github.com/parente/jupyterlab_xkcd/tree/05-restore-panel-state) if your extension is misbehaving. Make a commit when the state of your extension persists properly.
+Refer to the [05-restore-panel-state tag](https://github.com/parente/jupyterlab_xkcd/tree/05-restore-panel-state) if your extension is misbehaving. Make a commit when the state of your extension persists properly.
 
 ```bash
 git add .
