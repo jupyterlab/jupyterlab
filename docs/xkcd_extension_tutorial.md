@@ -284,10 +284,10 @@ Now return to the `activate` function. Add the following code below the lines th
 
     // Fetch info about a random comic
     let settings = ServerConnection.makeSettings();
-    ServerConnection.makeRequest({url: 'http://xkcd-imgs.herokuapp.com/'}, settings).then(response => {
-      img.src = response.data.url;
+    ServerConnection.makeRequest({url: 'https:////egszlpbmle.execute-api.us-east-1.amazonaws.com/prod'}, settings).then(response => {
+      img.src = response.data.img;
       img.alt = response.data.title;
-      img.title = response.data.title;
+      img.title = response.data.alt;
     });
 ```
 
@@ -424,10 +424,10 @@ class XkcdWidget extends Widget {
   }
 
   showImage(): void {
-    ServerConnection.makeRequest({url: 'http://xkcd-imgs.herokuapp.com/'}, this.settings).then(response => {
-      this.img.src = response.data.url;
+    ServerConnection.makeRequest({url: 'https://egszlpbmle.execute-api.us-east-1.amazonaws.com/prod'}, this.settings).then(response => {
+      this.img.src = response.data.img;
       this.img.alt = response.data.title;
-      this.img.title = response.data.title;
+      this.img.title = response.data.alt;
     });
   }
 };
