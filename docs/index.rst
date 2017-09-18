@@ -29,7 +29,7 @@ Contents:
    adding_content.md
    examples.md
    terminology.md
-   zero_to_extension.md
+   xkcd_extension_tutorial.md
 
 Indices and tables
 ==================
