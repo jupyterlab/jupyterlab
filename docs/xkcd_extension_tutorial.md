@@ -258,7 +258,7 @@ Build your extension again (i.e., `jupyter lab build`) and refresh the browser t
 
 ![Empty xkcd extension panel](xkcd_tutorial_empty.png)
 
-If your widget is not behaving, compare your code with https://github.com/parente/jupyterlab_xkcd/blob/964f63d8017709ad08a3cb96161a0371f860dc45/src/index.ts. Once you've got everything working properly, git commit your changes and carry on.
+If your widget is not behaving, compare your code with the reference project state at the [01-show-a-panel tag](https://github.com/parente/jupyterlab_xkcd/tree/01-show-a-panel). Once you've got everything working properly, git commit your changes and carry on.
 
 ```bash
 git add .
@@ -291,7 +291,7 @@ Now return to the `activate` function. Add the following code below the lines th
     });
 ```
 
-The first two lines create a new HTML `<img>` element and add it to the widget DOM node. The next lines make a request to http://xkcd-imgs.herokuapp.com/, a hosted version of https://github.com/hemanth/xkcd-imgs-heroku, and set the source, alternate text, and title attributes of the image based on the response.
+The first two lines create a new HTML `<img>` element and add it to the widget DOM node. The next lines make a request to an API that returns information about a random xkcd comic, and set the image source, alternate text, and title attributes based on the response.
 
 Rebuild your extension (`jupyter lab build`), refresh your browser tab, and run the *Random xkcd comic* command again. You should now see a comic in the xkcd.com panel when it opens.
 
@@ -299,7 +299,7 @@ Rebuild your extension (`jupyter lab build`), refresh your browser tab, and run 
 
 Note that the comic is not centered in the panel nor does the panel scroll if the comic is larger than the panel area. Also note that the comic does not update no matter how many times you close and reopen the panel. You'll address both of these problems in the upcoming sections.
 
-If you don't see a comic at all, compare your code with https://github.com/parente/jupyterlab_xkcd/blob/aa21b88b5efa635639658eb7387d332759781f45/src/index.ts. When it's working, make another git commit.
+If you don't see a comic at all, compare your code with the [02-show-a-comic tag](https://github.com/parente/jupyterlab_xkcd/tree/02-show-a-comic) in the reference project. When it's working, make another git commit.
 
 ```bash
 git add .
@@ -380,7 +380,7 @@ Build your extension (`jupyter lab build`) and refresh your JupyterLab browser t
 
 ![Styled xkcd panel with attribution](xkcd_tutorial_complete.png)
 
-If anything is misbehaving, compare your code with the reference project at this commit: https://github.com/parente/jupyterlab_xkcd/tree/b52d0457de350c054f35653af3a324d1057ffe5d When everything is working as expected, make another commit.
+If anything is misbehaving, compare your code with the reference project [03-style-and-attribute tag](https://github.com/parente/jupyterlab_xkcd/tree/03-style-and-attribute). When everything is working as expected, make another commit.
 
 ```bash
 git add .
@@ -486,7 +486,7 @@ const extension: JupyterLabPlugin<void> = {
 
 Make sure you retain the `export default extension;` line in the file. Now build the extension again and refresh the JupyterLab browser tab. Run the *Random xkcd comic* command more than once without closing the panel. The comic should update each time you execute the command. Close the panel, run the command, and it should both reappear and show a new comic.
 
-If anything is amiss, compare your code with https://github.com/parente/jupyterlab_xkcd/blob/d7a7207efc526a096bd307d9fbafc686b763cbd9/src/index.ts to debug. Once it's working properly, commit it.
+If anything is amiss, compare your code with the [04-refactor-and-refresh tag](https://github.com/parente/jupyterlab_xkcd/tree/04-refactor-and-refresh) to debug. Once it's working properly, commit it.
 
 ```bash
 git add .
@@ -595,7 +595,7 @@ const extension: JupyterLabPlugin<void> = {
 
 Rebuild your extension one last time and refresh your browser tab. Execute the *Random xkcd comic` command and validate that the panel appears with a comic in it. Refresh the browser tab again. You should see an xkcd panel appear immediately without running the command. Close the panel and refresh the browser tab. You should not see an xkcd tab after the refresh.
 
-Refer to https://github.com/parente/jupyterlab_xkcd/commit/e76ddd23a7f2cff964d3e1cd52f95c270bab6876 if your extension is misbehaving. Make a commit when the state of your extension persists properly.
+Refer to the [05-05-restore-panel-state tag](https://github.com/parente/jupyterlab_xkcd/tree/05-restore-panel-state) if your extension is misbehaving. Make a commit when the state of your extension persists properly.
 
 ```bash
 git add .
@@ -627,7 +627,7 @@ Now run the following command to publish your package:
 npm publish --access=public
 ```
 
-Check that your package appears on the npm website. You can either search for it from the homepage or visit https://www.npmjs.com/package/@your-username/jupyterlab_xkcd directly. If it doesn't appear, make sure you've updated the package name properly in the `package.json` and run the npm command correctly.
+Check that your package appears on the npm website. You can either search for it from the homepage or visit https://www.npmjs.com/package/@your-username/jupyterlab_xkcd directly. If it doesn't appear, make sure you've updated the package name properly in the `package.json` and run the npm command correctly. Compare your work with the state of the reference project at the [06-prepare-to-publish tag](https://github.com/parente/jupyterlab_xkcd/tree/06-prepare-to-publish) for further debugging.
 
 ![Extension page on npmjs.com](xkcd_tutorial_npm.png)
 
