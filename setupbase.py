@@ -82,10 +82,15 @@ def find_package_data():
         slice_len = len('jupyterlab' + os.sep)
         theme_dirs.append(pjoin(dir[slice_len:], '*'))
 
+    schema_dirs = []
+    for dir, subdirs, files in os.walk(pjoin('jupyterlab', 'schemas')):
+        slice_len = len('jupyterlab' + os.sep)
+        schema_dirs.append(pjoin(dir[slice_len:], '*'))
+
     return {
         'jupyterlab': ['build/*', 'schemas/*', 'index.app.js',
                        'webpack.config.js', 'package.app.json',
-                       'released_packages.txt', 'node-version-check.js'] + theme_dirs
+                       'released_packages.txt', 'node-version-check.js'] + theme_dirs + schema_dirs
     }
 
 
@@ -156,7 +161,7 @@ class CoreDeps(Command):
 
     # Representative files that should exist after a successful core setup
     targets = [
-        pjoin(here, 'jupyterlab', 'schemas', 'jupyterlab-shortcuts-extension$plugin.json'),
+        pjoin(here, 'jupyterlab', 'schemas', '@jupyterlab', 'shortcuts-extension', 'plugin.json'),
         pjoin(here, 'jupyterlab', 'themes', 'jupyterlab-theme-light-extension',
             'images', 'jupyterlab.svg')
     ]
