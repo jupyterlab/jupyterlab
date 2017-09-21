@@ -171,7 +171,7 @@ git add .
 git commit -m 'Seed xkcd project from cookiecutter'
 ```
 
-Note: This step is not technically necessary, but it is good practice to track changes in version control system in case you need to rollback to an earlier version or want to collaborate with others. For example, you can compare your work throughout this tutorial with the commits in a reference version of `jupyterlab_xkcd` on GitHub at https://github.com/parente/jupyterlab_xkcd.
+Note: This step is not technically necessary, but it is good practice to track changes in version control system in case you need to rollback to an earlier version or want to collaborate with others. For example, you can compare your work throughout this tutorial with the commits in a reference version of `jupyterlab_xkcd` on GitHub at https://github.com/jupyterlab/jupyterlab_xkcd.
 
 ## Add an xkcd widget
 
@@ -264,7 +264,7 @@ Build your extension again (i.e., `jupyter lab build`) and refresh the browser t
 
 ![Empty xkcd extension panel](xkcd_tutorial_empty.png)
 
-If your widget is not behaving, compare your code with the reference project state at the [01-show-a-panel tag](https://github.com/parente/jupyterlab_xkcd/tree/01-show-a-panel). Once you've got everything working properly, git commit your changes and carry on.
+If your widget is not behaving, compare your code with the reference project state at the [01-show-a-panel tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/01-show-a-panel). Once you've got everything working properly, git commit your changes and carry on.
 
 ```bash
 git add .
@@ -305,7 +305,7 @@ Rebuild your extension (`jupyter lab build`), refresh your browser tab, and run 
 
 Note that the comic is not centered in the panel nor does the panel scroll if the comic is larger than the panel area. Also note that the comic does not update no matter how many times you close and reopen the panel. You'll address both of these problems in the upcoming sections.
 
-If you don't see a comic at all, compare your code with the [02-show-a-comic tag](https://github.com/parente/jupyterlab_xkcd/tree/02-show-a-comic) in the reference project. When it's working, make another git commit.
+If you don't see a comic at all, compare your code with the [02-show-a-comic tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/02-show-a-comic) in the reference project. When it's working, make another git commit.
 
 ```bash
 git add .
@@ -388,7 +388,7 @@ Build your extension (`jupyter lab build`) and refresh your JupyterLab browser t
 
 ![Styled xkcd panel with attribution](xkcd_tutorial_complete.png)
 
-If anything is misbehaving, compare your code with the reference project [03-style-and-attribute tag](https://github.com/parente/jupyterlab_xkcd/tree/03-style-and-attribute). When everything is working as expected, make another commit.
+If anything is misbehaving, compare your code with the reference project [03-style-and-attribute tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/03-style-and-attribute). When everything is working as expected, make another commit.
 
 ```bash
 git add .
@@ -494,7 +494,7 @@ const extension: JupyterLabPlugin<void> = {
 
 Make sure you retain the `export default extension;` line in the file. Now build the extension again and refresh the JupyterLab browser tab. Run the *Random xkcd comic* command more than once without closing the panel. The comic should update each time you execute the command. Close the panel, run the command, and it should both reappear and show a new comic.
 
-If anything is amiss, compare your code with the [04-refactor-and-refresh tag](https://github.com/parente/jupyterlab_xkcd/tree/04-refactor-and-refresh) to debug. Once it's working properly, commit it.
+If anything is amiss, compare your code with the [04-refactor-and-refresh tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/04-refactor-and-refresh) to debug. Once it's working properly, commit it.
 
 ```bash
 git add .
@@ -603,7 +603,7 @@ const extension: JupyterLabPlugin<void> = {
 
 Rebuild your extension one last time and refresh your browser tab. Execute the *Random xkcd comic` command and validate that the panel appears with a comic in it. Refresh the browser tab again. You should see an xkcd panel appear immediately without running the command. Close the panel and refresh the browser tab. You should not see an xkcd tab after the refresh.
 
-Refer to the [05-restore-panel-state tag](https://github.com/parente/jupyterlab_xkcd/tree/05-restore-panel-state) if your extension is misbehaving. Make a commit when the state of your extension persists properly.
+Refer to the [05-restore-panel-state tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/05-restore-panel-state) if your extension is misbehaving. Make a commit when the state of your extension persists properly.
 
 ```bash
 git add .
@@ -616,10 +616,10 @@ Congrats! You've implemented all of the behaviors laid out at the start of this 
 
 npm is both a JavaScript package manager and the de facto registry for JavaScript software. You can [sign up for an account on the npmjs.com site](https://www.npmjs.com/signup) or create an account from the command line by running `npm adduser` and entering values when prompted. Create an account now if you do not already have one. If you already have an account, login by running `npm login` and answering the prompts.
 
-Next, open the project `package.json` file in your text editor. Prefix the `name` field value with `@your-npm-username>/` so that the entire field reads `"name": "@your-npm-username/jupyterlab_xkcd"` where you've replaced the string `your-npm-username` with your real username. Consider adding the homepage, repository, license, and [other supported package.json](https://docs.npmjs.com/files/package.json) fields while you have the file open. Then open the `README.md` file and adjust the command in the *Installation* section so that it includes the full, username-prefixed package name you just included in the `package.json` file. For example:
+Next, open the project `package.json` file in your text editor. Prefix the `name` field value with `@your-npm-username>/` so that the entire field reads `"name": "@your-npm-username/xkcd-extension"` where you've replaced the string `your-npm-username` with your real username. Consider adding the homepage, repository, license, and [other supported package.json](https://docs.npmjs.com/files/package.json) fields while you have the file open. Then open the `README.md` file and adjust the command in the *Installation* section so that it includes the full, username-prefixed package name you just included in the `package.json` file. For example:
 
 ```bash
-jupyter labextension install @parente/jupyterlab_xkcd
+jupyter labextension install @your-npm-username/xkcd-extension
 ```
 
 Return to your terminal window and make one more git commit:
@@ -635,7 +635,7 @@ Now run the following command to publish your package:
 npm publish --access=public
 ```
 
-Check that your package appears on the npm website. You can either search for it from the homepage or visit https://www.npmjs.com/package/@your-username/jupyterlab_xkcd directly. If it doesn't appear, make sure you've updated the package name properly in the `package.json` and run the npm command correctly. Compare your work with the state of the reference project at the [06-prepare-to-publish tag](https://github.com/parente/jupyterlab_xkcd/tree/06-prepare-to-publish) for further debugging.
+Check that your package appears on the npm website. You can either search for it from the homepage or visit https://www.npmjs.com/package/@your-username/jupyterlab_xkcd directly. If it doesn't appear, make sure you've updated the package name properly in the `package.json` and run the npm command correctly. Compare your work with the state of the reference project at the [06-prepare-to-publish tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/06-prepare-to-publish) for further debugging.
 
 ![Extension page on npmjs.com](xkcd_tutorial_npm.png)
 
@@ -644,7 +644,7 @@ You can now try installing your extension as a user would. Open a new terminal a
 ```bash
 conda create -n jupyterlab-xkcd jupyterlab nodejs
 source activate jupyterlab-xkcd
-jupyter labextension install @your-npm-username/jupyterlab_xkcd
+jupyter labextension install @your-npm-username/xkcd-extension
 jupyter lab
 ```
 
