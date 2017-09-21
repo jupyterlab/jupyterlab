@@ -169,7 +169,7 @@ def install_extension_async(extension, app_dir=None, logger=None, abort_callback
     # Handle any schemas.
     schemaDir = data['jupyterlab'].get('schemaDir', None)
     if schemaDir:
-        dest = pjoin(app_dir, 'schemas')
+        dest = pjoin(app_dir, 'schemas', data['name'].replace('/', os.sep))
         _copy_tar_files(pjoin(target, fname), schemaDir, dest)
 
     # Handle a theme.
@@ -552,6 +552,7 @@ def build_async(app_dir=None, name=None, version=None, logger=None, abort_callba
         raise ValueError('Cannot build extensions in the core app')
 
     _ensure_package(app_dir, name=name, version=version, logger=logger)
+    return
     staging = pjoin(app_dir, 'staging')
 
     extensions = _get_extensions(app_dir)
@@ -827,22 +828,33 @@ def _ensure_package(app_dir, logger=None, name=None, version=None):
     with open(pkg_path, 'w') as fid:
         json.dump(data, fid, indent=4)
 
-    # Copy any missing or outdated schema or theme items.
-    for item in ['schemas', 'themes']:
-        local = pjoin(here, item)
-        if not os.path.exists(local):
-            os.makedirs(local)
+    # Copy any missing or outdated schema items.
+    local = pjoin(here, 'schemas')
+    if not os.path.exists(local):
+        os.makedirs(local)
 
-        for item_path in os.listdir(local):
-            src = pjoin(local, item_path)
-            dest = pjoin(app_dir, item, item_path)
-            if version_updated or not os.path.exists(dest):
-                if os.path.isdir(src):
-                    if os.path.exists(dest):
-                        shutil.rmtree(dest)
-                    shutil.copytree(src, dest)
-                else:
-                    shutil.copy(src, dest)
+    for name in data['jupyterlab']['extensions']:
+        src = pjoin(local, name.replace('/', os.sep))
+        if not os.path.exists(src):
+            continue
+        dest = pjoin(local, name.replace('/', os.sep))
+        if version_updated or not os.path.exists(dest):
+            if os.path.exists(dest):
+                shutil.rmtree(dest)
+            shutil.copytree(src, dest)
+
+    # Copy any missing or outdated theme items.
+    local = pjoin(here, 'themes')
+    if not os.path.exists(local):
+        os.makedirs(local)
+
+    for item_path in os.listdir(local):
+        src = pjoin(local, item_path)
+        dest = pjoin(app_dir, 'themes', item_path)
+        if version_updated or not os.path.exists(dest):
+            if os.path.exists(dest):
+                shutil.rmtree(dest)
+            shutil.copytree(src, dest)
 
 
 def _ensure_app_dirs(app_dir, logger):
