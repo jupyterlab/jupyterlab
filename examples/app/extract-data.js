@@ -32,7 +32,6 @@ function extractNode(data) {
   // Handle schemas.
   var schemaDir = jlab['schemaDir'];
   if (schemaDir) {
-    debugger;
     schemaDir = path.join(data.realpath, schemaDir);
     var schemas = glob.sync(path.join(schemaDir, '*'));
     schemas.forEach(function(schemaPath) {
