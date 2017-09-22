@@ -315,6 +315,9 @@ class CompletionHandler implements IDisposable {
     const position = editor.getCursorPosition();
     const line = editor.getLine(position.line);
     if (!line) {
+      this._enabled = false;
+      model.reset(true);
+      host.classList.remove(COMPLETER_ENABLED_CLASS);
       return;
     }
 
@@ -328,8 +331,8 @@ class CompletionHandler implements IDisposable {
       return;
     }
 
-    // If the entire line is white space, return.
-    if (line.match(/^\W*$/)) {
+    // If the part of the line before the cursor is white space, return.
+    if (line.slice(0, position.column).match(/^\W*$/)) {
       this._enabled = false;
       model.reset(true);
       host.classList.remove(COMPLETER_ENABLED_CLASS);
