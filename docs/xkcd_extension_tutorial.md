@@ -105,8 +105,6 @@ Now rebuild your JupyterLab web frontend with the extension included.
 jupyter lab build
 ```
 
-Note: The build steps may show errors about `node-gyp` and `canvas` that look scary but are harmless.
-
 If all goes well, the last bunch of messages you should see in your terminal should look something like the following:
 
 ```
@@ -204,7 +202,7 @@ const extension: JupyterLabPlugin<void> = {
 };
 ```
 
-The `requires` attribute states that your plugin needs an object that implements the `ICommandPalette` interface when it starts. JupyterLab will bind pass an instance of `ICommandPalette` as the second parameter of `activate` in order to satisfy this requirement. Defining `palette: ICommandPalette` makes this instance available to your code in that function. The second `console.log` line exists only so that you can immediately check that your changes work.
+The `requires` attribute states that your plugin needs an object that implements the `ICommandPalette` interface when it starts. JupyterLab will pass an instance of `ICommandPalette` as the second parameter of `activate` in order to satisfy this requirement. Defining `palette: ICommandPalette` makes this instance available to your code in that function. The second `console.log` line exists only so that you can immediately check that your changes work.
 
 Run the following to rebuild your extension.
 
