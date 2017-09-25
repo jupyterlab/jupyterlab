@@ -373,7 +373,7 @@ Now modify the the `activate` function to apply the CSS classes and add the attr
 
 Finally, open the `package.json` file in the root of your project. Locate the `files` attribute and add a `"style/*"` entry to it:
 
-```json
+```
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
     "style/*"
@@ -599,7 +599,7 @@ const extension: JupyterLabPlugin<void> = {
 };
 ```
 
-Rebuild your extension one last time and refresh your browser tab. Execute the *Random xkcd comic` command and validate that the panel appears with a comic in it. Refresh the browser tab again. You should see an xkcd panel appear immediately without running the command. Close the panel and refresh the browser tab. You should not see an xkcd tab after the refresh.
+Rebuild your extension one last time and refresh your browser tab. Execute the *Random xkcd comic* command and validate that the panel appears with a comic in it. Refresh the browser tab again. You should see an xkcd panel appear immediately without running the command. Close the panel and refresh the browser tab. You should not see an xkcd tab after the refresh.
 
 Refer to the [05-restore-panel-state tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/05-restore-panel-state) if your extension is misbehaving. Make a commit when the state of your extension persists properly.
 
@@ -633,7 +633,7 @@ Now run the following command to publish your package:
 npm publish --access=public
 ```
 
-Check that your package appears on the npm website. You can either search for it from the homepage or visit https://www.npmjs.com/package/@your-username/jupyterlab_xkcd directly. If it doesn't appear, make sure you've updated the package name properly in the `package.json` and run the npm command correctly. Compare your work with the state of the reference project at the [06-prepare-to-publish tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/06-prepare-to-publish) for further debugging.
+Check that your package appears on the npm website. You can either search for it from the homepage or visit `https://www.npmjs.com/package/@your-username/jupyterlab_xkcd` directly. If it doesn't appear, make sure you've updated the package name properly in the `package.json` and run the npm command correctly. Compare your work with the state of the reference project at the [06-prepare-to-publish tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/06-prepare-to-publish) for further debugging.
 
 ![Extension page on npmjs.com](xkcd_tutorial_npm.png)
 
@@ -656,4 +656,4 @@ You've completed the tutorial. Nicely done! If you want to keep learning, here a
 * Make the image a link to the comic on https://xkcd.com.
 * Push your extension git repository to GitHub.
 * Give users the ability to pin comics in separate, permanent panels.
-* Learn how to write [other kinds of extensions](extensions_dev.html).
+* Learn how to write [other kinds of extensions](./extensions_dev.md).
