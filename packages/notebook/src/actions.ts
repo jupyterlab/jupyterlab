@@ -47,7 +47,7 @@ const TRUST_MESSAGE = h.p(
   'Selecting trust will re-render this notebook in a trusted state.',
   h.br(),
   'For more information, see the',
-  h.a({ href: 'http://ipython.org/ipython-doc/2/notebook/security.html' },
+  h.a({ href: 'http://jupyter-notebook.readthedocs.io/en/stable/security.html' },
       'Jupyter security documentation'),
 );
 
