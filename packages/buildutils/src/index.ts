@@ -3,6 +3,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import {
+  JSONObject, ReadonlyJSONObject
+} from '@phosphor/coreutils';
+
 
 export
 namespace Build {
@@ -14,6 +18,11 @@ namespace Build {
      * The input directory that contains a package's assets.
      */
     input: string;
+
+    /**
+     * The package data for the JupyterLab application, composed at build time.
+     */
+    jupyterlab: JSONObject;
 
     /**
      * The name of the plugin.
@@ -32,6 +41,11 @@ namespace Build {
      * The default value is `false`.
      */
     overwrite?: boolean;
+
+    /**
+     * The package data for the plugin being processed.
+     */
+    package: ReadonlyJSONObject;
   }
 
   /**
