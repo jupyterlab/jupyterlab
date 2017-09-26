@@ -52,12 +52,6 @@ namespace CommandIDs {
 
 
 /**
- * The class name for the terminal icon in the default theme.
- */
-const TERMINAL_ICON_CLASS = 'jp-TerminalIcon';
-
-
-/**
  * The default terminal extension.
  */
 const plugin: JupyterLabPlugin<ITerminalTracker> = {
@@ -132,14 +126,14 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
       displayName: 'Terminal',
       category: 'Other',
       rank: 0,
-      iconClass: TERMINAL_ICON_CLASS,
+      iconClass: 'jp-TerminalIcon',
       callback: () => {
         return commands.execute(CommandIDs.createNew);
       }
     });
   }
 
-  app.contextMenu.addItem({command: CommandIDs.refresh, selector: '.jp-Terminal', rank: 1});
+  app.contextMenu.addItem({command: CommandIDs.refresh, selector: '.jp-Terminal-title', rank: 1});
 
   return tracker;
 }
@@ -168,8 +162,9 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
       let initialCommand = args['initialCommand'] as string;
       let term = new Terminal({ initialCommand });
       term.title.closable = true;
-      term.title.icon = TERMINAL_ICON_CLASS;
+      term.title.icon = 'jp-TerminalIcon';
       term.title.label = '...';
+      term.title.className = 'jp-Terminal-title';
       shell.addToMainArea(term);
 
       let promise = name ?
