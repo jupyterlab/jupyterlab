@@ -259,7 +259,10 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       }
       this._path = newPath;
       this.session.setName(newPath.split('/').pop()!);
-      return this.session.setPath(newPath).then(() => this.save());
+      return this.session.setPath(newPath).then(() => {
+        this.model.readOnly = false;
+        this.save()
+      });
     });
   }
 
