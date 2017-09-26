@@ -328,8 +328,8 @@ namespace Private {
       delegate.reject({ xhr, event, request, settings, message: 'Aborted' });
     };
 
-    xhr.onerror = (event: ErrorEvent) => {
-      delegate.reject({ xhr, event, request, settings, message: event.message });
+    xhr.onerror = (event?: ErrorEvent) => {
+      delegate.reject({ xhr, event, request, settings, message: event ? event.message : 'Errored' });
     };
 
     xhr.ontimeout = (event: ProgressEvent) => {
