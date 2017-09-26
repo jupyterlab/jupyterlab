@@ -220,6 +220,24 @@ describe('session', () => {
       expectFailure(sessionPromise, done, msg);
     });
 
+    it('should handle a deprecated response model', (done) => {
+      let sessionModel = createSessionModel();
+      let data = {
+        id: '', kernel: { name: '', id: '' }, notebook: { path: '' }
+      };
+      tester.onRequest = request => {
+        if (request.method === 'POST') {
+          tester.respond(201, sessionModel);
+        } else {
+          tester.respond(200, data);
+        }
+      };
+      let options = createSessionOptions(sessionModel);
+      let sessionPromise = Session.startNew(options);
+      let msg = `Session failed to start: No running kernel with id: ${sessionModel.kernel.id}`;
+      expectFailure(sessionPromise, done, msg);
+    });
+
     it('should fail if the kernel is not running', (done) => {
       let sessionModel = createSessionModel();
       tester.onRequest = request => {

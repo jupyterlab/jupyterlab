@@ -27,6 +27,17 @@ describe('session/validate', () => {
       validateModel(model);
     });
 
+    it('should pass a deprecated model', () => {
+      let model = {
+        id: 'foo',
+        kernel: { name: 'foo', id: '123'},
+        notebook: {
+          path: 'bar'
+        }
+      };
+      validateModel(model);
+    });
+
     it('should fail on missing data', () => {
       let model: any = {
         id: 'foo',

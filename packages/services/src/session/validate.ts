@@ -42,11 +42,19 @@ function validateProperty(object: any, name: string, typeName?: string): void {
  * Validate an `Session.IModel` object.
  */
 export
-function validateModel(model: Session.IModel): void {
+function validateModel(data: any): Session.IModel {
+  let model = {
+    id: data.id,
+    path: data.notebook ? data.notebook.path : data.path,
+    type: data.notebook ? 'notebook' : data.type,
+    name: data.notebook ? '' : data.name,
+    kernel: data.kernel
+  };
   validateProperty(model, 'id', 'string');
-  validateProperty(model, 'path', 'string');
   validateProperty(model, 'type', 'string');
   validateProperty(model, 'name', 'string');
+  validateProperty(model, 'path', 'string');
   validateProperty(model, 'kernel', 'object');
   validateKernelModel(model.kernel);
+  return model;
 }
