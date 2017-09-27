@@ -254,12 +254,16 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       if (this.isDisposed || !newPath) {
         return;
       }
+      if (newPath === this._path) {
+        return this.save();
+      }
       this._path = newPath;
       return this.session.setPath(newPath).then(() => {
         this.session.setName(newPath.split('/').pop()!);
         return this.save();
       }).then(() => {
         this._pathChanged.emit(this._path);
+        return this._maybeCheckpoint(true);
       });
     });
   }
@@ -454,22 +458,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     this._isPopulated = true;
 
     // Add a checkpoint if none exists and the file is writable.
-    let promise = Promise.resolve(void 0);
-    let writable = this._contentsModel && this._contentsModel.writable;
-    if (writable) {
-      promise = this.listCheckpoints().then(checkpoints => {
-        writable = this._contentsModel && this._contentsModel.writable;
-        if (!this.isDisposed && !checkpoints && writable) {
-          return this.createCheckpoint().then(() => { /* no-op */ });
-        }
-      }).catch(err => {
-        // Handle a read-only folder.
-        if (err.message !== 'Forbidden') {
-          throw err;
-        }
-      });
-    }
-    return promise.then(() => {
+    return this._maybeCheckpoint(false).then(() => {
       if (this.isDisposed) {
         return;
       }
@@ -516,6 +505,33 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         return this._manager.contents.save(path, options);
       }
       throw err;
+    });
+  }
+
+  /**
+   * Add a checkpoint the file is writable.
+   */
+  private _maybeCheckpoint(force: boolean): Promise<void> {
+    let writable = this._contentsModel && this._contentsModel.writable;
+    let promise = Promise.resolve(void 0);
+    if (!writable) {
+      return promise;
+    }
+    if (force) {
+      promise = this.createCheckpoint();
+    } else {
+      promise = this.listCheckpoints().then(checkpoints => {
+        writable = this._contentsModel && this._contentsModel.writable;
+        if (!this.isDisposed && !checkpoints.length && writable) {
+          return this.createCheckpoint().then(() => { /* no-op */ });
+        }
+      });
+    }
+    return promise.catch(err => {
+      // Handle a read-only folder.
+      if (err.message !== 'Forbidden') {
+        throw err;
+      }
     });
   }
 

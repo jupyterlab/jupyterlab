@@ -226,12 +226,12 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
 
   commands.addCommand(CommandIDs.saveAs, {
     label: 'Save As...',
-    caption: 'Save with new path and create checkpoint',
+    caption: 'Save with new path',
     isEnabled,
     execute: () => {
       if (isEnabled()) {
         let context = docManager.contextForWidget(app.shell.currentWidget);
-        return context.saveAs().then(() => context.createCheckpoint());
+        return context.saveAs();
       }
     }
   });
