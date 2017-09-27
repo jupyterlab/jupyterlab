@@ -223,20 +223,19 @@ describe('docregistry/context', () => {
 
     describe('#saveAs()', () => {
 
-      it('should save the document to a different path chosen by the user', (done) => {
+      it('should save the document to a different path chosen by the user', () => {
         waitForDialog().then(() => {
           let dialog = document.body.getElementsByClassName('jp-Dialog')[0];
           let input = dialog.getElementsByTagName('input')[0];
           input.value = 'bar';
           acceptDialog();
         });
-        context.saveAs().then(() => {
+        return context.saveAs().then(() => {
           expect(context.path).to.be('bar');
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should bring up a conflict dialog', (done) => {
+      it('should bring up a conflict dialog', () => {
         let newPath = uuid() + '.txt';
         waitForDialog().then(() => {
           let dialog = document.body.getElementsByClassName('jp-Dialog')[0];
@@ -251,15 +250,14 @@ describe('docregistry/context', () => {
         let options: Partial<Contents.IModel> = {
           format: 'text', type: 'file', content: ''
         };
-        manager.contents.save(newPath, options).then(() => {
-          context.saveAs().then(() => {
-            expect(context.path).to.be(newPath);
-            done();
-          }).catch(done);
+        return manager.contents.save(newPath, options).then(() => {
+          return context.saveAs();
+        }).then(() => {
+          expect(context.path).to.be(newPath);
         });
       });
 
-      it('should keep the file if overwrite is aborted', (done) => {
+      it('should keep the file if overwrite is aborted', () => {
         let oldPath = context.path;
         let newPath = uuid() + '.txt';
         waitForDialog().then(() => {
@@ -275,25 +273,23 @@ describe('docregistry/context', () => {
         let options: Partial<Contents.IModel> = {
           format: 'text', type: 'file', content: ''
         };
-        manager.contents.save(newPath, options).then(() => {
-          context.saveAs().then(() => {
-            expect(context.path).to.be(oldPath);
-            done();
-          }).catch(done);
+        return manager.contents.save(newPath, options).then(() => {
+          return context.saveAs();
+        }).then(() => {
+          expect(context.path).to.be(oldPath);
         });
       });
 
-      it('should just save if the file name does not change', (done) => {
+      it('should just save if the file name does not change', () => {
         acceptDialog();
         let path = context.path;
         let options: Partial<Contents.IModel> = {
           format: 'text', type: 'file', content: ''
         };
-        manager.contents.save(path, options).then(() => {
-          context.saveAs().then(() => {
-            expect(context.path).to.be(path);
-            done();
-          }).catch(done);
+        return manager.contents.save(path, options).then(() => {
+          return context.saveAs();
+        }).then(() => {
+          expect(context.path).to.be(path);
         });
       });
 
