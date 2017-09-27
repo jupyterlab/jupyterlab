@@ -200,9 +200,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    */
   save(): Promise<void> {
     let model = this._model;
-    if (model.readOnly) {
-      return Promise.reject(new Error('Read only'));
-    }
     let content: JSONValue;
     if (this._factory.fileFormat === 'json') {
       content = model.toJSON();
@@ -258,10 +255,11 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         return;
       }
       this._path = newPath;
-      this.session.setName(newPath.split('/').pop()!);
       return this.session.setPath(newPath).then(() => {
-        this.model.readOnly = false;
-        this.save()
+        this.session.setName(newPath.split('/').pop()!);
+        return this.save();
+      }).then(() => {
+        this._pathChanged.emit(this._path);
       });
     });
   }
@@ -416,7 +414,10 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   /**
    * Handle a change to a session property.
    */
-  private _onSessionChanged() {
+  private _onSessionChanged(sender: IClientSession, type: string): void {
+    if (type !== 'path') {
+      return;
+    }
     let path = this.session.path;
     if (path !== this._path) {
       this._path = path;
@@ -441,9 +442,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     };
     let mod = this._contentsModel ? this._contentsModel.last_modified : null;
     this._contentsModel = newModel;
-    if (!newModel.writable) {
-      this._model.readOnly = true;
-    }
     if (!mod || newModel.last_modified !== mod) {
       this._fileChanged.emit(newModel);
     }
@@ -455,11 +453,13 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   private _populate(): Promise<void> {
     this._isPopulated = true;
 
-    // Add a checkpoint if none exists and the file is not read only.
+    // Add a checkpoint if none exists and the file is writable.
     let promise = Promise.resolve(void 0);
-    if (!this._model.readOnly) {
+    let writable = this._contentsModel && this._contentsModel.writable;
+    if (writable) {
       promise = this.listCheckpoints().then(checkpoints => {
-        if (!this.isDisposed && !checkpoints && !this._model.readOnly) {
+        writable = this._contentsModel && this._contentsModel.writable;
+        if (!this.isDisposed && !checkpoints && writable) {
           return this.createCheckpoint().then(() => { /* no-op */ });
         }
       }).catch(err => {
