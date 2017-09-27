@@ -51,7 +51,7 @@ describe('docregistry/context', () => {
     describe('#constructor()', () => {
 
       it('should create a new context', () => {
-        context = new Context({ manager, factory, path: 'bar' });
+        context = new Context({ manager, factory, path: uuid() + '.txt' });
         expect(context).to.be.a(Context);
       });
 
@@ -224,14 +224,15 @@ describe('docregistry/context', () => {
     describe('#saveAs()', () => {
 
       it('should save the document to a different path chosen by the user', () => {
+        let newPath = uuid() + '.txt';
         waitForDialog().then(() => {
           let dialog = document.body.getElementsByClassName('jp-Dialog')[0];
           let input = dialog.getElementsByTagName('input')[0];
-          input.value = 'bar';
+          input.value = newPath;
           acceptDialog();
         });
         return context.saveAs().then(() => {
-          expect(context.path).to.be('bar');
+          expect(context.path).to.be(newPath);
         });
       });
 
