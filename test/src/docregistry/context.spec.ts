@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  uuid
+} from '@jupyterlab/coreutils';
+
+import {
   Contents, ServiceManager
 } from '@jupyterlab/services';
 
@@ -16,7 +20,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  waitForDialog, acceptDialog
+  waitForDialog, acceptDialog, dismissDialog
 } from '../utils';
 
 
@@ -35,7 +39,7 @@ describe('docregistry/context', () => {
     let context: Context<DocumentRegistry.IModel>;
 
     beforeEach(() => {
-      context = new Context({ manager, factory, path: 'foo' });
+      context = new Context({ manager, factory, path: uuid() + '.txt' });
     });
 
     afterEach(() => {
@@ -71,9 +75,10 @@ describe('docregistry/context', () => {
     describe('#fileChanged', () => {
 
       it('should be emitted when the file is saved', (done) => {
+        let path = context.path;
         context.fileChanged.connect((sender, args) => {
           expect(sender).to.be(context);
-          expect(args.name).to.be('foo');
+          expect(args.path).to.be(path);
           done();
         });
         context.save();
@@ -145,7 +150,7 @@ describe('docregistry/context', () => {
     describe('#path', () => {
 
       it('should be the current path for the context', () => {
-        expect(context.path).to.be('foo');
+        expect(typeof context.path).to.be('string');
       });
 
     });
@@ -157,8 +162,9 @@ describe('docregistry/context', () => {
       });
 
       it('should be set after poulation', (done) => {
+        let path = context.path;
         context.ready.then(() => {
-          expect(context.contentsModel.name).to.be('foo');
+          expect(context.contentsModel.path).to.be(path);
           done();
         });
         context.save().catch(done);
@@ -230,6 +236,67 @@ describe('docregistry/context', () => {
         }).catch(done);
       });
 
+      it('should bring up a conflict dialog', (done) => {
+        let newPath = uuid() + '.txt';
+        waitForDialog().then(() => {
+          let dialog = document.body.getElementsByClassName('jp-Dialog')[0];
+          let input = dialog.getElementsByTagName('input')[0];
+          input.value = newPath;
+          return acceptDialog();
+        }).then(() => {
+          return waitForDialog();
+        }).then(() => {
+          acceptDialog();
+        });
+        let options: Partial<Contents.IModel> = {
+          format: 'text', type: 'file', content: ''
+        };
+        manager.contents.save(newPath, options).then(() => {
+          context.saveAs().then(() => {
+            expect(context.path).to.be(newPath);
+            done();
+          }).catch(done);
+        });
+      });
+
+      it('should keep the file if overwrite is aborted', (done) => {
+        let oldPath = context.path;
+        let newPath = uuid() + '.txt';
+        waitForDialog().then(() => {
+          let dialog = document.body.getElementsByClassName('jp-Dialog')[0];
+          let input = dialog.getElementsByTagName('input')[0];
+          input.value = newPath;
+          return acceptDialog();
+        }).then(() => {
+          return waitForDialog();
+        }).then(() => {
+          dismissDialog();
+        });
+        let options: Partial<Contents.IModel> = {
+          format: 'text', type: 'file', content: ''
+        };
+        manager.contents.save(newPath, options).then(() => {
+          context.saveAs().then(() => {
+            expect(context.path).to.be(oldPath);
+            done();
+          }).catch(done);
+        });
+      });
+
+      it('should just save if the file name does not change', (done) => {
+        acceptDialog();
+        let path = context.path;
+        let options: Partial<Contents.IModel> = {
+          format: 'text', type: 'file', content: ''
+        };
+        manager.contents.save(path, options).then(() => {
+          context.saveAs().then(() => {
+            expect(context.path).to.be(path);
+            done();
+          }).catch(done);
+        });
+      });
+
     });
 
     describe('#revert()', () => {
@@ -252,37 +319,39 @@ describe('docregistry/context', () => {
 
     describe('#createCheckpoint()', () => {
 
-      it('should create a checkpoint for the file', (done) => {
-        context.createCheckpoint().then(model => {
+      it('should create a checkpoint for the file', () => {
+        return context.save().then(() => {
+          return context.createCheckpoint();
+        }).then(model => {
           expect(model.id).to.be.ok();
           expect(model.last_modified).to.be.ok();
-          done();
-        }).catch(done);
+        });
       });
 
     });
 
     describe('#deleteCheckpoint()', () => {
 
-      it('should delete the given checkpoint', (done) => {
-        context.createCheckpoint().then(model => {
+      it('should delete the given checkpoint', () => {
+        return context.save().then(() => {
+          return context.createCheckpoint();
+        }).then(model => {
           return context.deleteCheckpoint(model.id);
         }).then(() => {
           return context.listCheckpoints();
         }).then(models => {
           expect(models.length).to.be(0);
-          done();
-        }).catch(done);
+        });
       });
 
     });
 
     describe('#restoreCheckpoint()', () => {
 
-      it('should restore the value to the last checkpoint value', (done) => {
+      it('should restore the value to the last checkpoint value', () => {
         context.model.fromString('bar');
         let id = '';
-        context.save().then(() => {
+        return context.save().then(() => {
           return context.createCheckpoint();
         }).then(model => {
           context.model.fromString('foo');
@@ -294,27 +363,28 @@ describe('docregistry/context', () => {
           return context.revert();
         }).then(() => {
           expect(context.model.toString()).to.be('bar');
-          done();
-        }).catch(done);
+        });
       });
 
     });
 
     describe('#listCheckpoints()', () => {
 
-      it('should list the checkpoints for the file', (done) => {
+      it('should list the checkpoints for the file', () => {
         let id = '';
-        context.createCheckpoint().then(model => {
-          id = model.id;
-          return context.listCheckpoints();
-        }).then(models => {
-          for (let model of models) {
-            if (model.id === id) {
-              done();
-              return;
+        return context.save().then(() => {
+          context.createCheckpoint().then(model => {
+            id = model.id;
+            return context.listCheckpoints();
+          }).then(models => {
+            for (let model of models) {
+              if (model.id === id) {
+                return;
+              }
             }
-          }
-        }).catch(done);
+            throw new Error('Model not found');
+          });
+        });
       });
 
     });
