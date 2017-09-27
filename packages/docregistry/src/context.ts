@@ -257,13 +257,16 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       if (newPath === this._path) {
         return this.save();
       }
-      this._path = newPath;
-      return this.session.setPath(newPath).then(() => {
-        this.session.setName(newPath.split('/').pop()!);
-        return this.save();
+      // Make sure the path does not exist.
+      return this._manager.ready.then(() => {
+        return this._manager.contents.get(newPath);
       }).then(() => {
-        this._pathChanged.emit(this._path);
-        return this._maybeCheckpoint(true);
+        return this._maybeOverWrite(newPath);
+      }).catch(err => {
+        if (err.xhr.status !== 404) {
+          throw err;
+        }
+        return this._finishSaveAs(newPath);
       });
     });
   }
@@ -561,6 +564,41 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       } else if (result.button.label === 'REVERT') {
         return this.revert().then(() => { return model; });
       }
+    });
+  }
+
+  /**
+   * Handle a time conflict.
+   */
+  private _maybeOverWrite(path: string): Promise<void> {
+    let body = `"${path}" already exists. Do you want to replace it?`;
+    let overwriteBtn = Dialog.warnButton({ label: 'OVERWRITE' });
+    return showDialog({
+      title: 'File Overwrite?', body,
+      buttons: [Dialog.cancelButton(), overwriteBtn]
+    }).then(result => {
+      if (this.isDisposed) {
+        return Promise.reject('Disposed');
+      }
+      if (result.button.label === 'OVERWRITE') {
+        return this._manager.contents.delete(path).then(() => {
+          this._finishSaveAs(path);
+        });
+      }
+    });
+  }
+
+  /**
+   * Finish a saveAs operation given a new path.
+   */
+  private _finishSaveAs(newPath: string): Promise<void> {
+    this._path = newPath;
+    return this.session.setPath(newPath).then(() => {
+      this.session.setName(newPath.split('/').pop()!);
+      return this.save();
+    }).then(() => {
+      this._pathChanged.emit(this._path);
+      return this._maybeCheckpoint(true);
     });
   }
 
