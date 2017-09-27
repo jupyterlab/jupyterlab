@@ -43,6 +43,7 @@ describe('docregistry/savehandler', () => {
   beforeEach(() => {
     context = new Context({ manager, factory, path: uuid() + '.txt' });
     handler = new SaveHandler({ context, manager });
+    return context.save();
   });
 
   afterEach(() => {
