@@ -29,6 +29,7 @@ Contents:
    adding_content.md
    examples.md
    terminology.md
+   xkcd_extension_tutorial.md
 
 Indices and tables
 ==================
