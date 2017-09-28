@@ -74,7 +74,7 @@ const HELP_CLASS = 'jp-Help';
 const RESOURCES = [
   {
     text: 'Jupyterlab Reference',
-    url: 'http://jupyterlab.readthedocs.io/en/stable/'
+    url: 'https://jupyterlab.readthedocs.io/en/stable/'
   },
   {
     text: 'Notebook Reference',
