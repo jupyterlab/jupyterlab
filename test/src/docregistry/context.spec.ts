@@ -81,7 +81,7 @@ describe('docregistry/context', () => {
           expect(args.path).to.be(path);
           done();
         });
-        context.save();
+        context.save().catch(done);
       });
 
     });
@@ -203,9 +203,9 @@ describe('docregistry/context', () => {
 
     describe('#save()', () => {
 
-      it('should save the contents of the file to disk', (done) => {
+      it('should save the contents of the file to disk', () => {
         context.model.fromString('foo');
-        context.save().then(() => {
+        return context.save().then(() => {
           let opts: Contents.IFetchOptions = {
             format: factory.fileFormat,
             type: factory.contentType,
@@ -214,8 +214,7 @@ describe('docregistry/context', () => {
           return manager.contents.get(context.path, opts);
         }).then(model => {
           expect(model.content).to.be('foo');
-          done();
-        }).catch(done);
+        });
       });
 
     });
@@ -291,8 +290,8 @@ describe('docregistry/context', () => {
 
     describe('#revert()', () => {
 
-      it('should revert the contents of the file to the disk', (done) => {
-        manager.contents.save(context.path, {
+      it('should revert the contents of the file to the disk', () => {
+        return manager.contents.save(context.path, {
           type: factory.contentType,
           format: factory.fileFormat,
           content: 'foo'
@@ -301,8 +300,7 @@ describe('docregistry/context', () => {
           return context.revert();
         }).then(() => {
           expect(context.model.toString()).to.be('foo');
-          done();
-        }).catch(done);
+        });
       });
 
     });
@@ -381,38 +379,35 @@ describe('docregistry/context', () => {
 
     describe('#resolveUrl()', () => {
 
-      it('should resolve a relative url to a correct server path', (done) => {
-        context.resolveUrl('./foo').then(path => {
+      it('should resolve a relative url to a correct server path', () => {
+        return context.resolveUrl('./foo').then(path => {
           expect(path).to.be('foo');
-        }).then(done, done);
+        });
       });
 
-      it('should ignore urls that have a protocol', (done) => {
-        context.resolveUrl('http://foo').then(path => {
+      it('should ignore urls that have a protocol', () => {
+        return context.resolveUrl('http://foo').then(path => {
           expect(path).to.be('http://foo');
-          done();
-        }).catch(done);
+        });
       });
 
     });
 
     describe('#getDownloadUrl()', () => {
 
-      it('should resolve an absolute server url to a download url', (done) => {
+      it('should resolve an absolute server url to a download url', () => {
         let contextPromise = context.getDownloadUrl('foo');
         let contentsPromise = manager.contents.getDownloadUrl('foo');
-        Promise.all([contextPromise, contentsPromise])
+        return Promise.all([contextPromise, contentsPromise])
         .then(values => {
           expect(values[0]).to.be(values[1]);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should ignore urls that have a protocol', (done) => {
-        context.getDownloadUrl('http://foo').then(path => {
+      it('should ignore urls that have a protocol', () => {
+        return context.getDownloadUrl('http://foo').then(path => {
           expect(path).to.be('http://foo');
-          done();
-        }).catch(done);
+        });
       });
 
     });
