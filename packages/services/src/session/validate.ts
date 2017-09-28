@@ -43,12 +43,21 @@ function validateProperty(object: any, name: string, typeName?: string): void {
  */
 export
 function validateModel(data: any): Session.IModel {
+  // Support legacy session model.
+  let path = data.path;
+  let name = data.name;
+  let type = data.type;
+  if (path === undefined && data.notebook !== undefined) {
+    path = data.notebook.path;
+    type = 'notebook';
+    name = '';
+  }
   let model = {
     id: data.id,
-    path: data.notebook ? data.notebook.path : data.path,
-    type: data.notebook ? 'notebook' : data.type,
-    name: data.notebook ? '' : data.name,
-    kernel: data.kernel
+    kernel: data.kernel,
+    name,
+    path,
+    type
   };
   validateProperty(model, 'id', 'string');
   validateProperty(model, 'type', 'string');
