@@ -29,6 +29,7 @@ Contents:
    adding_content.md
    examples.md
    terminology.md
+   faq.md
 
 Indices and tables
 ==================
