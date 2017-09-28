@@ -224,20 +224,22 @@ describe('docregistry/context', () => {
     describe('#saveAs()', () => {
 
       it('should save the document to a different path chosen by the user', () => {
-        let newPath = uuid() + '.txt';
+        const newPath = uuid() + '.txt';
         waitForDialog().then(() => {
           let dialog = document.body.getElementsByClassName('jp-Dialog')[0];
           let input = dialog.getElementsByTagName('input')[0];
           input.value = newPath;
           acceptDialog();
         });
-        return context.saveAs().then(() => {
+        return context.save().then(() => {
+          return context.saveAs();
+        }).then(() => {
           expect(context.path).to.be(newPath);
         });
       });
 
       it('should bring up a conflict dialog', () => {
-        let newPath = uuid() + '.txt';
+        const newPath = uuid() + '.txt';
         waitForDialog().then(() => {
           let dialog = document.body.getElementsByClassName('jp-Dialog')[0];
           let input = dialog.getElementsByTagName('input')[0];
@@ -248,10 +250,7 @@ describe('docregistry/context', () => {
         }).then(() => {
           acceptDialog();
         });
-        let options: Partial<Contents.IModel> = {
-          format: 'text', type: 'file', content: ''
-        };
-        return manager.contents.save(newPath, options).then(() => {
+        return context.save().then(() => {
           return context.saveAs();
         }).then(() => {
           expect(context.path).to.be(newPath);
@@ -271,10 +270,7 @@ describe('docregistry/context', () => {
         }).then(() => {
           dismissDialog();
         });
-        let options: Partial<Contents.IModel> = {
-          format: 'text', type: 'file', content: ''
-        };
-        return manager.contents.save(newPath, options).then(() => {
+        return context.save().then(() => {
           return context.saveAs();
         }).then(() => {
           expect(context.path).to.be(oldPath);
@@ -284,10 +280,7 @@ describe('docregistry/context', () => {
       it('should just save if the file name does not change', () => {
         acceptDialog();
         let path = context.path;
-        let options: Partial<Contents.IModel> = {
-          format: 'text', type: 'file', content: ''
-        };
-        return manager.contents.save(path, options).then(() => {
+        return context.save().then(() => {
           return context.saveAs();
         }).then(() => {
           expect(context.path).to.be(path);
