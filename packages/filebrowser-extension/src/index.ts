@@ -211,16 +211,19 @@ function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, docM
   });
 
   // Create a launcher if there are no open items.
-  app.shell.layoutModified.connect(() => {
-    if (app.shell.isEmpty('main')) {
-      // Make sure the model is restored.
-      fbWidget.model.restored.then(() => {
-        createLauncher(app.commands, fbWidget);
-      });
+  app.restored.then(() => { 
+    const maybeCreate = () => {
+      if (app.shell.isEmpty('main')) {
+        // Make sure the model is restored.
+        fbWidget.model.restored.then(() => {
+          createLauncher(app.commands, fbWidget);
+        });
+      }
     }
+    maybeCreate();
+    app.shell.layoutModified.connect(maybeCreate);
   });
 }
-
 
 /**
  * Activate the default file browser menu in the main menu.
