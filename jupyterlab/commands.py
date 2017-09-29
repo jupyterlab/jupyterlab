@@ -166,19 +166,6 @@ def install_extension_async(extension, app_dir=None, logger=None, abort_callback
         if osp.exists(path) and other['location'] == 'app':
             os.remove(path)
 
-    # Handle any schemas.
-    schemaDir = data['jupyterlab'].get('schemaDir', None)
-    if schemaDir:
-        dest = pjoin(app_dir, 'schemas', data['name'].replace('/', os.sep))
-        _copy_tar_files(pjoin(target, fname), schemaDir, dest)
-
-    # Handle a theme.
-    themeDir = data['jupyterlab'].get('themeDir', None)
-    if themeDir:
-        normedName = data['name'].replace('@', '').replace('/', '')
-        dest = pjoin(app_dir, 'themes', normedName)
-        _copy_tar_files(pjoin(target, fname), themeDir, dest)
-
     # Remove an existing extension tarball.
     ext_path = pjoin(app_dir, 'extensions', fname)
     if os.path.exists(ext_path):
@@ -806,16 +793,15 @@ def _ensure_package(app_dir, logger=None, name=None, version=None):
     # Look for mismatched version.
     staging = pjoin(app_dir, 'staging')
     pkg_path = pjoin(staging, 'package.json')
-    version_updated = False
+
     if os.path.exists(pkg_path):
         with open(pkg_path) as fid:
             data = json.load(fid)
         if data['jupyterlab'].get('version', '') != version:
             shutil.rmtree(staging)
             os.makedirs(staging)
-            version_updated = True
 
-    for fname in ['index.app.js', 'webpack.config.js']:
+    for fname in ['index.app.js', 'webpack.config.js', 'update-app.js']:
         dest = pjoin(staging, fname.replace('.app', ''))
         shutil.copy(pjoin(here, fname), dest)
 
@@ -828,38 +814,9 @@ def _ensure_package(app_dir, logger=None, name=None, version=None):
     with open(pkg_path, 'w') as fid:
         json.dump(data, fid, indent=4)
 
-    # Copy any missing or outdated schema items.
-    local = pjoin(here, 'schemas')
-    if not os.path.exists(local):
-        os.makedirs(local)
-
-    for name in data['jupyterlab']['extensions']:
-        src = pjoin(local, name.replace('/', os.sep))
-        if not os.path.exists(src):
-            continue
-        dest = pjoin(local, name.replace('/', os.sep))
-        if version_updated or not os.path.exists(dest):
-            if os.path.exists(dest):
-                shutil.rmtree(dest)
-            shutil.copytree(src, dest)
-
-    # Copy any missing or outdated theme items.
-    local = pjoin(here, 'themes')
-    if not os.path.exists(local):
-        os.makedirs(local)
-
-    for item_path in os.listdir(local):
-        src = pjoin(local, item_path)
-        dest = pjoin(app_dir, 'themes', item_path)
-        if version_updated or not os.path.exists(dest):
-            if os.path.exists(dest):
-                shutil.rmtree(dest)
-            shutil.copytree(src, dest)
-
-
 def _ensure_app_dirs(app_dir, logger):
     """Ensure that the application directories exist"""
-    dirs = ['extensions', 'settings', 'schemas', 'themes', 'staging']
+    dirs = ['extensions', 'settings', 'staging']
     for dname in dirs:
         path = pjoin(app_dir, dname)
         if not osp.exists(path):

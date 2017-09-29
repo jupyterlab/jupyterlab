@@ -89,7 +89,7 @@ def find_package_data():
 
     return {
         'jupyterlab': ['build/*', 'schemas/*', 'index.app.js',
-                       'webpack.config.js', 'package.app.json',
+                       'webpack.config.js', 'package.app.json', 'update-app.js',
                        'released_packages.txt', 'node-version-check.js'] + theme_dirs + schema_dirs
     }
 

@@ -2,7 +2,7 @@
   "name": "@jupyterlab/application-top",
   "version": "0.10.2",
   "scripts": {
-    "build": "webpack",
+    "build": "webpack && node update-app.js",
     "build:prod": "webpack --devtool source-map",
     "publish": "node make-release.js"
   },
@@ -11,6 +11,7 @@
     "@jupyterlab/application-extension": "^0.10.0",
     "@jupyterlab/apputils": "^0.10.0",
     "@jupyterlab/apputils-extension": "^0.10.2",
+    "@jupyterlab/buildutils": "^0.1.0",
     "@jupyterlab/cells": "^0.10.0",
     "@jupyterlab/codeeditor": "^0.10.0",
     "@jupyterlab/codemirror": "^0.10.0",

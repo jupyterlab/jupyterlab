@@ -12,7 +12,7 @@ version = version.toString().trim();
 
 // Update the package.app.json file.
 var data = require('./package.json');
-data['scripts']['build'] = 'webpack'
+data['scripts']['build'] = 'webpack && node update-app.js'
 text = JSON.stringify(sortPackageJson(data), null, 2) + '\n';
 fs.writeFileSync('./package.app.json', text);
 

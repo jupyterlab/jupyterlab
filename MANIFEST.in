@@ -13,6 +13,7 @@ include jupyterlab/package.app.json
 include jupyterlab/webpack.config.js
 include jupyterlab/index.app.js
 include jupyterlab/node-version-check.js
+include jupyterlab/update-app.js
 include jupyterlab/released_packages.txt
 
 prune jupyterlab/tests
