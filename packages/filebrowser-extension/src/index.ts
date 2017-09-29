@@ -204,19 +204,6 @@ function activateBrowser(app: JupyterLab, factory: IFileBrowserFactory, restorer
   });
 
   // Create a launcher if there are no open items.
-<<<<<<< HEAD
-  app.restored.then(() => { 
-    const maybeCreate = () => {
-      if (app.shell.isEmpty('main')) {
-        // Make sure the model is restored.
-        fbWidget.model.restored.then(() => {
-          createLauncher(app.commands, fbWidget);
-        });
-      }
-    }
-    maybeCreate();
-    app.shell.layoutModified.connect(maybeCreate);
-=======
   app.shell.layoutModified.connect(() => {
     if (app.shell.isEmpty('main')) {
       // Make sure the model is restored.
@@ -229,7 +216,6 @@ function activateBrowser(app: JupyterLab, factory: IFileBrowserFactory, restorer
     browser.model.restored.then(() => {
       commands.execute('launcher:create', { cwd: browser.model.path });
     });
->>>>>>> Fix file browser extension.
   });
 }
 
