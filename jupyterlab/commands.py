@@ -813,6 +813,19 @@ def _ensure_package(app_dir, logger=None, name=None, version=None):
     with open(pkg_path, 'w') as fid:
         json.dump(data, fid, indent=4)
 
+    # Shim shortcuts and theme schemas until the 0.28 release.
+    if 'rc' in __version__:
+        raise ValueError('Remove this before final release')
+
+    base = os.path.realpath(pjoin(here, '..', 'packages'))
+    src = pjoin(base, 'shortcuts-extension', 'schema', 'plugin.json')
+    dest = pjoin(app_dir, 'schemas', 'jupyter.extensions.shortcuts.json')
+    shutil.copy(src, dest)
+
+    src = pjoin(base, 'apputils-extension', 'schema', 'themes.json')
+    dest = pjoin(app_dir, 'schemas', 'jupyter.services.theme-manager.json')
+    shutil.copy(src, dest)
+
 def _ensure_app_dirs(app_dir, logger):
     """Ensure that the application directories exist"""
     dirs = ['extensions', 'settings', 'staging']
