@@ -43,12 +43,10 @@ from setuptools.command.bdist_egg import bdist_egg
 # Our own imports
 from setupbase import (
     bdist_egg_disabled,
-    ensure_core_data,
     find_packages,
     find_package_data,
     js_prerelease,
     CheckAssets,
-    CoreDeps,
     version_ns,
     name
 )
@@ -92,12 +90,11 @@ setup_args = dict(
 
 
 cmdclass = dict(
-    build_py = ensure_core_data(build_py),
-    build_ext = ensure_core_data(build_ext),
+    build_py = build_py,
+    build_ext = build_ext,
     sdist  = js_prerelease(sdist, strict=True),
     bdist_egg = bdist_egg if 'bdist_egg' in sys.argv else bdist_egg_disabled,
     jsdeps = CheckAssets,
-    coredeps = CoreDeps,
 )
 try:
     from wheel.bdist_wheel import bdist_wheel

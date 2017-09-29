@@ -539,7 +539,6 @@ def build_async(app_dir=None, name=None, version=None, logger=None, abort_callba
         raise ValueError('Cannot build extensions in the core app')
 
     _ensure_package(app_dir, name=name, version=version, logger=logger)
-    return
     staging = pjoin(app_dir, 'staging')
 
     extensions = _get_extensions(app_dir)
