@@ -153,7 +153,7 @@ package needed to create a mime renderer extension (using the interfaces
 in TypeScript or as a form of documentation if using plain JavaScript).
 
 The only other difference from a standard extension is that has a `jupyterlab`
-key in its `package.json` with `"mimeRenderer"` metadata.  The value can be
+key in its `package.json` with `"mimeExtension"` metadata.  The value can be
 `true` to use the main module of the package, or a string path to a specific
 module (e.g. `"lib/foo"`).
 
