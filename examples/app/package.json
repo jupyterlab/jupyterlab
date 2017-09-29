@@ -9,6 +9,7 @@
     "@jupyterlab/application": "^0.10.0",
     "@jupyterlab/application-extension": "^0.10.0",
     "@jupyterlab/apputils-extension": "^0.10.2",
+    "@jupyterlab/buildutils": "^0.1.0",
     "@jupyterlab/codemirror-extension": "^0.10.0",
     "@jupyterlab/completer-extension": "^0.10.0",
     "@jupyterlab/console-extension": "^0.10.0",

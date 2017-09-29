@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  VirtualNode
+  VirtualNode, h
 } from '@phosphor/virtualdom';
 
 import {

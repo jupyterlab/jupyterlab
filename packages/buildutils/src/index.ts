@@ -7,21 +7,22 @@ import * as fs from 'fs-extra';
 import * as glob from 'glob';
 import * as path from 'path';
 
+/**
+ *  A namespace for JupyterLab build utilities.
+ */
 export
 namespace Build {
   /**
+   * The options used to ensure a root package has the appropriate
+   * assets for its JupyterLab extension packages.
    */
   export
   interface IEnsureOptions {
     /**
-     * The package data for the extensions being processed.
+     * The input directory that contains the root package's assets.
+     * Defaults to the current directory.
      */
-    module: IModule;
-
-    /**
-     * The input directory that contains a package's assets.
-     */
-    input: string;
+    input?: string;
 
     /**
      * The output directory where the build assets should reside.
@@ -29,12 +30,9 @@ namespace Build {
     output: string;
 
     /**
-     * Whether the current assets should be overwritten if they already exist.
-     *
-     * #### Notes
-     * The default value is `false`.
+     * The names of the packages to ensure.
      */
-    overwrite?: boolean;
+    packageNames: ReadonlyArray<string>;
   }
 
   /**
@@ -99,45 +97,77 @@ namespace Build {
   }
 
   /**
-   * Ensures that the assets of a plugin are populated for a build.
+   * Ensures that the assets of plugin packages are populated for a build.
    */
   export
   function ensureAssets(options: IEnsureOptions): void {
-    const { module, input, output, overwrite } = options;
-    const { name } = module;
-    const extension = normalizeExtension(module);
-    const { schemaDir, themeDir } = extension;
+    let { input, output, packageNames } = options;
+    input = input || '.';
 
-    // Handle schemas.
-    if (schemaDir) {
-      const schemas = glob.sync(path.join(path.join(input, schemaDir), '*'));
-      const destination = path.join(output, 'schemas', name);
+    packageNames.forEach(function(name) {
+      const packageDir = fs.realpathSync(path.join(input, 'node_modules', name));
+      const packageData = require(path.join(packageDir, 'package.json'));
+      const extension = normalizeExtension(packageData);
+      const { schemaDir, themeDir } = extension;
 
-      // Make sure the schema directory exists.
-      if (overwrite) {
-        fs.rmdirSync(destination);
+      // Handle schemas.
+      if (schemaDir) {
+        const schemas = glob.sync(path.join(path.join(packageDir, schemaDir), '*'));
+        const destination = path.join(output, 'schemas', name);
+
+        // Remove the existing directory if necessary.
+        if (fs.existsSync(destination)) {
+          try {
+            const oldPackageData = require(path.join(destination, 'package.json'));
+            if (oldPackageData.version === packageData.version) {
+              fs.removeSync(destination);
+            }
+          } catch (e) {
+            fs.removeSync(destination);
+          }
+        }
+
+        // Make sure the schema directory exists.
+        fs.mkdirpSync(destination);
+
+        // Copy schemas.
+        schemas.forEach(schema => {
+          const file = path.basename(schema);
+          if (file === 'package.json') {
+            throw new Error('Cannot use name "package.json" for schema file');
+          }
+          fs.copySync(schema, path.join(destination, file));
+        });
+
+        // Write the package.json file for future comparison.
+        fs.copySync(path.join(packageDir, 'package.json'), path.join(destination, 'package.json'));
       }
-      fs.mkdirpSync(destination);
 
-      // Copy schemas.
-      schemas.forEach(schema => {
-        const file = path.basename(schema);
+      // Handle themes.
+      if (themeDir) {
+        const theme = name.replace(/@/g, '').replace(/\//g, '-');
+        const from = path.join(packageDir, themeDir);
+        const destination = path.join(output, 'themes', theme);
 
-        fs.copySync(schema, path.join(destination, file));
-      });
-    }
+        // Remove the existing directory if necessary.
+        if (fs.existsSync(destination)) {
+          try {
+            const oldPackageData = require(path.join(destination, 'package.json'));
+            if (oldPackageData.version === packageData.version) {
+              fs.removeSync(destination);
+            }
+          } catch (e) {
+            fs.removeSync(destination);
+          }
+        }
 
-    // Handle themes.
-    if (themeDir) {
-      const theme = name.replace(/@/g, '').replace(/\//g, '-');
-      const from = path.join(input, themeDir);
-      const destination = path.join(output, 'themes', theme);
+        // Copy the theme folder.
+        fs.copySync(from, destination);
 
-      if (overwrite) {
-        fs.rmdirSync(destination);
+        // Write the package.json file for future comparison.
+        fs.copySync(path.join(packageDir, 'package.json'), path.join(destination, 'package.json'));
       }
-      fs.copySync(from, destination);
-    }
+    });
   }
 
   /**
