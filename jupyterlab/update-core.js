@@ -3,14 +3,7 @@ var fs = require('fs-extra');
 var glob = require('glob');
 var path = require('path');
 var sortPackageJson = require('sort-package-json');
-
-var labSchemas = path.resolve('./schemas');
-fs.removeSync(labSchemas);
-fs.ensureDirSync(labSchemas);
-
-var themesDir = path.resolve('./themes');
-fs.removeSync(themesDir);
-fs.ensureDirSync(themesDir);
+var Build = require('@jupyterlab/buildutils').Build;
 
 var corePackage = require('./package.json');
 corePackage.jupyterlab.extensions = {};
@@ -57,30 +50,12 @@ packages.forEach(function(packagePath) {
     }
     corePackage.jupyterlab[item + 's'][data.name] = ext;
   });
-
-  // Handle schemas.
-  var schemaDir = jlab['schemaDir'];
-  if (schemaDir) {
-    schemaDir = path.join(packagePath, schemaDir);
-    var schemas = glob.sync(path.join(schemaDir, '*'));
-    var prefix = data['name'].replace(/@/g, '').replace(/\//g, '-');
-    schemas.forEach(function(schemaPath) {
-      var file = prefix + '-' + path.basename(schemaPath);
-      var to = path.join(basePath, 'jupyterlab', 'schemas', file);
-      fs.copySync(schemaPath, to);
-    });
-  }
-
-  // Handle themes.
-  var themeDir = jlab['themeDir'];
-  if (themeDir) {
-    var name = data['name'].replace(/@/g, '').replace(/\//g, '-');
-    var from = path.join(packagePath, themeDir);
-    var to = path.join(basePath, 'jupyterlab', 'themes', name);
-    fs.copySync(from, to);
-  }
 });
 
+Build.ensureAssets({
+  packageNames: Object.keys(corePackage.jupyterlab.extensions),
+  output: '.'
+});
 
 // Write the package.json back to disk.
 var text = JSON.stringify(sortPackageJson(corePackage), null, 2) + '\n';
