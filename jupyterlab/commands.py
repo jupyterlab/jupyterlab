@@ -826,9 +826,17 @@ def _ensure_package(app_dir, logger=None, name=None, version=None):
     dest = pjoin(app_dir, 'schemas', 'jupyter.services.theme-manager.json')
     shutil.copy(src, dest)
 
+    src = pjoin(base, 'codemirror-extension', 'schema', 'commands.json')
+    dest = pjoin(app_dir, 'schemas', 'jupyter.services.codemirror-commands.json')
+    shutil.copy(src, dest)
+
+    src = pjoin(base, 'fileeditor-extension', 'schema', 'plugin.json')
+    dest = pjoin(app_dir, 'schemas', 'jupyter.services.editor-tracker.json')
+    shutil.copy(src, dest)
+
 def _ensure_app_dirs(app_dir, logger):
     """Ensure that the application directories exist"""
-    dirs = ['extensions', 'settings', 'staging']
+    dirs = ['extensions', 'settings', 'staging', 'schemas', 'themes']
     for dname in dirs:
         path = pjoin(app_dir, dname)
         if not osp.exists(path):
