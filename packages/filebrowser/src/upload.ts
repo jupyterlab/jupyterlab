@@ -2,15 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ToolbarButton
+  ToolbarButton, showErrorMessage
 } from '@jupyterlab/apputils';
 
 import {
   FileBrowserModel
 } from './model';
-
-import * as utils
-  from './utils';
 
 
 /**
@@ -78,7 +75,7 @@ class Uploader extends ToolbarButton {
     let files = Array.prototype.slice.call(this._input.files) as File[];
     let pending = files.map(file => this.model.upload(file));
     Promise.all(pending).catch(error => {
-      utils.showErrorMessage('Upload Error', error);
+      showErrorMessage('Upload Error', error);
     });
   }
 

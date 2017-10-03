@@ -113,23 +113,6 @@ function shouldOverwrite(path: string): Promise<boolean> {
 
 
 /**
- * An error message dialog to upon document manager errors.
- */
-export
-function showErrorMessage(title: string, error: Error): Promise<void> {
-  console.error(error);
-  let options = {
-    title: title,
-    body: error.message || `File ${title}`,
-    buttons: [Dialog.okButton()],
-    okText: 'DISMISS'
-  };
-  return showDialog(options).then(() => { /* no-op */ });
-}
-
-
-
-/**
  * A widget used to rename a file.
  */
 class RenameHandler extends Widget {
