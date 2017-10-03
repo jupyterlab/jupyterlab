@@ -1,0 +1,32 @@
+{
+  "name": "@jupyterlab/bidi",
+  "version": "0.1.0",
+  "description": "JupyterLab - Bidi Utilities",
+  "author": "bdl",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "keywords": [
+    "jupyter",
+    "jupyterlab"
+  ],
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js"
+  ],  
+  "directories": {
+    "lib": "lib/"
+  },  
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib",
+    "prepublish": "npm run build",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "@jupyterlab/application": "^0.10.0"
+  },
+  "devDependencies": {
+    "rimraf": "^2.6.1",
+    "typescript": "~2.4.0"
+  }
+}

@@ -12,6 +12,8 @@
     "@jupyterlab/application-extension": "^0.10.0",
     "@jupyterlab/apputils": "^0.10.0",
     "@jupyterlab/apputils-extension": "^0.10.2",
+    "@jupyterlab/bidi": "^0.1.0",
+    "@jupyterlab/bidi-extension": "^0.1.0",
     "@jupyterlab/cells": "^0.10.0",
     "@jupyterlab/codeeditor": "^0.10.0",
     "@jupyterlab/codemirror": "^0.10.0",
@@ -91,6 +93,7 @@
     "extensions": {
       "@jupyterlab/application-extension": "",
       "@jupyterlab/apputils-extension": "",
+      "@jupyterlab/bidi-extension": "",
       "@jupyterlab/codemirror-extension": "",
       "@jupyterlab/completer-extension": "",
       "@jupyterlab/console-extension": "",
@@ -122,6 +125,7 @@
     "singletonPackages": [
       "@jupyterlab/application",
       "@jupyterlab/apputils",
+      "@jupyterlab/bidi",
       "@jupyterlab/console",
       "@jupyterlab/coreutils",
       "@jupyterlab/docmanager",

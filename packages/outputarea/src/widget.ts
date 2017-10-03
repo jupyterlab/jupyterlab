@@ -41,6 +41,10 @@ import {
   IOutputAreaModel
 } from './model';
 
+// use absolute path since bidi package is not registered in npm org 
+import {
+    bidiSTT
+} from 'C:\\Users\\IBM_ADMIN\\Workspaces\\Neon_JupyterLab\\jupyterlab\\packages\\bidi';
 
 /**
  * The class name added to an output area widget.
@@ -421,6 +425,7 @@ class OutputArea extends Widget {
       let output = this.rendermime.createRenderer(mimeType);
       output.renderModel(model);
       output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
+      output.node.innerText = bidiSTT.filePath(output.node.innerText, [], false, false, 'en', false);
       panel.addWidget(output);
     }
 
