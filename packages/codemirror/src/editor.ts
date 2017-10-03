@@ -35,7 +35,7 @@ import {
 import 'codemirror/addon/edit/matchbrackets.js';
 import 'codemirror/addon/edit/closebrackets.js';
 import 'codemirror/addon/comment/comment.js';
-import 'codemirror/addon/scroll/scrollpastend.js'
+import 'codemirror/addon/scroll/scrollpastend.js';
 import 'codemirror/addon/search/searchcursor';
 import 'codemirror/addon/search/search';
 import 'codemirror/keymap/emacs.js';
