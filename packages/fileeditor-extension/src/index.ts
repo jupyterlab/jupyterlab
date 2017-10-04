@@ -285,7 +285,7 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
 
   commands.addCommand(CommandIDs.runCode, {
     execute: () => {
-      // This will run the current selection or the entire ```fenced``` code block.
+      // Run the appropriate code, taking into account a ```fenced``` code block.
       const widget = tracker.currentWidget;
 
       if (!widget) {
@@ -313,10 +313,10 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
         for (let block of blocks) {
           if (block.startLine <= start.line && start.line <= block.endLine) {
             code = block.code;
+            selected = true;
             break;
           }
         }
-        selected = blocks.length > 0;
       }
 
       if (!selected) {
