@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  showDialog, Dialog, ICommandPalette, IMainMenu
+  showDialog, showErrorMessage, Dialog, ICommandPalette, IMainMenu
 } from '@jupyterlab/apputils';
 
 import {
@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  renameDialog, DocumentManager, IDocumentManager, showErrorMessage
+  renameDialog, DocumentManager, IDocumentManager
 } from '@jupyterlab/docmanager';
 
 import {

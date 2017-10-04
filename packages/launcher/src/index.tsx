@@ -24,7 +24,7 @@ import {
 import * as vdom from '@phosphor/virtualdom';
 
 import {
-  VDomModel, VDomRenderer
+  showErrorMessage, VDomModel, VDomRenderer
 } from '@jupyterlab/apputils';
 
 import '../style/index.css';
@@ -399,7 +399,7 @@ function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcher
       launcher.dispose();
     }).catch(err => {
       launcher.pending = false;
-      throw err;
+      showErrorMessage('Launcher Error', err);
     });
   };
   // Add a data attribute for the category

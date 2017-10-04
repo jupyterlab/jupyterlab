@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Toolbar, ToolbarButton
+  showErrorMessage, Toolbar, ToolbarButton
 } from '@jupyterlab/apputils';
 
 import {
@@ -40,10 +40,6 @@ import {
 import {
   Uploader
 } from './upload';
-
-import {
-  showErrorMessage
-} from './utils';
 
 
 /**

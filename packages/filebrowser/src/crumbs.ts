@@ -22,7 +22,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  DOMUtils
+  DOMUtils, showErrorMessage
 } from '@jupyterlab/apputils';
 
 import {
@@ -36,9 +36,6 @@ import {
 import {
   FileBrowserModel
 } from './model';
-
-import * as utils
-  from './utils';
 
 
 /**
@@ -185,7 +182,7 @@ class BreadCrumbs extends Widget {
       if (node.classList.contains(BREADCRUMB_ITEM_CLASS)) {
         let index = ArrayExt.findFirstIndex(this._crumbs, value => value === node);
         this._model.cd(BREAD_CRUMB_PATHS[index]).catch(error =>
-          utils.showErrorMessage('Open Error', error)
+          showErrorMessage('Open Error', error)
         );
 
         // Stop the event propagation.
@@ -285,7 +282,7 @@ class BreadCrumbs extends Widget {
       promises.push(renameFile(manager, oldPath, newPath));
     }
     Promise.all(promises).catch(err => {
-      utils.showErrorMessage('Move Error', err);
+      showErrorMessage('Move Error', err);
     });
   }
 
