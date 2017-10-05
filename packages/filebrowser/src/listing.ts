@@ -1660,14 +1660,13 @@ namespace DirListing {
       let text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
       let modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
-      if (!fileType) {
-        icon.textContent = '';
-        icon.className = '';
-      } else {
+      if (fileType) {
         icon.textContent = fileType.iconLabel || '';
-        icon.className = fileType.iconClass || '';
+        icon.className = `${ITEM_ICON_CLASS} ${fileType.iconClass || ''}`;
+      } else {
+        icon.textContent = '';
+        icon.className = ITEM_ICON_CLASS;
       }
-      icon.classList.add(ITEM_ICON_CLASS);
 
       let modText = '';
       let modTitle = '';
