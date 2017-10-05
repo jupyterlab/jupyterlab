@@ -516,10 +516,11 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
     }
     let mimeModel = new MimeModel({ data });
     return this._renderer.renderModel(mimeModel).then(() => {
+      // Handle a render after an activation.
       if (this.node === document.activeElement) {
         MessageLoop.sendMessage(this._renderer, Widget.Msg.ActivateRequest);
       }
-    })
+    });
   }
 
   /**
