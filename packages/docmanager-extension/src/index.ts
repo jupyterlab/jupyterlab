@@ -90,11 +90,11 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
         };
         if (!widget.isAttached) {
           app.shell.addToMainArea(widget);
+
+          // Add a loading spinner, and remove it when the widget is ready.
           let spinner = new Spinner();
           widget.node.appendChild(spinner.node);
-          setTimeout(() => {
-            widget.node.removeChild(spinner.node);
-          }, 1000000);
+          widget.ready.then(() => { widget.node.removeChild(spinner.node); });
         }
         app.shell.activateById(widget.id);
 
