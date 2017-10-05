@@ -515,7 +515,11 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
       data[this._mimeType] = model.toJSON();
     }
     let mimeModel = new MimeModel({ data });
-    return this._renderer.renderModel(mimeModel);
+    return this._renderer.renderModel(mimeModel).then(() => {
+      if (this.node === document.activeElement) {
+        MessageLoop.sendMessage(this._renderer, Widget.Msg.ActivateRequest);
+      }
+    })
   }
 
   /**
