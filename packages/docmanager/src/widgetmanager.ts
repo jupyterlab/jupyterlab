@@ -125,7 +125,7 @@ class DocumentWidgetManager implements IDisposable {
    *
    * @param widget - The widget to adopt.
    */
-  adoptWidget(context: DocumentRegistry.Context, widget: Widget): void {
+  adoptWidget(context: DocumentRegistry.Context, widget: DocumentRegistry.IReadyWidget): void {
     let widgets = Private.widgetsProperty.get(context);
     widgets.push(widget);
     MessageLoop.installMessageHook(widget, this);
@@ -146,7 +146,7 @@ class DocumentWidgetManager implements IDisposable {
    * This can be used to use an existing widget instead of opening
    * a new widget.
    */
-  findWidget(context: DocumentRegistry.Context, widgetName: string): Widget | undefined {
+  findWidget(context: DocumentRegistry.Context, widgetName: string): DocumentRegistry.IReadyWidget | undefined {
     let widgets = Private.widgetsProperty.get(context);
     if (!widgets) {
       return undefined;
@@ -182,7 +182,7 @@ class DocumentWidgetManager implements IDisposable {
    *  Uses the same widget factory and context as the source, or throws
    *  if the source widget is not managed by this manager.
    */
-  cloneWidget(widget: Widget): Widget | undefined {
+  cloneWidget(widget: Widget): DocumentRegistry.IReadyWidget | undefined {
     let context = Private.contextProperty.get(widget);
     if (!context) {
       return undefined;
@@ -448,7 +448,7 @@ namespace Private {
    * A private attached property for the widgets associated with a context.
    */
   export
-  const widgetsProperty = new AttachedProperty<DocumentRegistry.Context, Widget[]>({
+  const widgetsProperty = new AttachedProperty<DocumentRegistry.Context, DocumentRegistry.IReadyWidget[]>({
     name: 'widgets',
     create: () => []
   });

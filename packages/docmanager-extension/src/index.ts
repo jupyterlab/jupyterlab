@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  showDialog, showErrorMessage, Dialog, ICommandPalette, IMainMenu
+  showDialog, showErrorMessage, Spinner, Dialog, ICommandPalette, IMainMenu
 } from '@jupyterlab/apputils';
 
 import {
@@ -90,6 +90,11 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
         };
         if (!widget.isAttached) {
           app.shell.addToMainArea(widget);
+          let spinner = new Spinner();
+          widget.node.appendChild(spinner.node);
+          setTimeout(() => {
+            widget.node.removeChild(spinner.node);
+          }, 1000);
         }
         app.shell.activateById(widget.id);
 
