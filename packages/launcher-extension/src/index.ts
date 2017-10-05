@@ -78,13 +78,18 @@ function activate(app: JupyterLab, palette: ICommandPalette): ILauncher {
       launcher.title.label = 'Launcher';
       launcher.title.iconClass = 'jp-LauncherIcon';
 
-      // If there is only a launcher open, remove its close icon.
-      launcher.title.closable = toArray(shell.widgets('main')).length > 1;
+      // If there are any other widgets open, remove the launcher close icon.
+      launcher.title.closable = !!toArray(shell.widgets('main')).length;
 
       shell.addToMainArea(launcher);
       if (args['activate'] !== false) {
         shell.activateById(launcher.id);
       }
+
+      shell.layoutModified.connect(() => {
+        // If there is only a launcher open, remove the close icon.
+        launcher.title.closable = toArray(shell.widgets('main')).length > 1;
+      }, launcher);
 
       return launcher;
     }

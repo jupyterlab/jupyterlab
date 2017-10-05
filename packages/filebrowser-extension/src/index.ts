@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
-  each, toArray
+  each
 } from '@phosphor/algorithm';
 
 import {
@@ -205,22 +205,11 @@ function activateBrowser(app: JupyterLab, factory: IFileBrowserFactory, restorer
 
   Promise.all([app.restored, browser.model.restored]).then(() => {
     const { model } = browser;
-    let launcher: Launcher | null;
 
     function maybeCreate() {
-      if (launcher) {
-        launcher.title.closable = toArray(shell.widgets('main')).length > 1;
-      }
-
       // Create a launcher if there are no open items.
       if (app.shell.isEmpty('main')) {
-        model.restored
-          .then(() => createLauncher(commands, browser))
-          .then(widget => {
-            launcher = widget;
-            launcher.disposed.connect(() => { launcher = null; });
-            launcher.title.closable = toArray(shell.widgets('main')).length > 1;
-          });
+        model.restored.then(() => createLauncher(commands, browser));
       }
     }
 
