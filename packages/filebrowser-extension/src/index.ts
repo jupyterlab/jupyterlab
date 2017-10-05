@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
-  each
+  each, toArray
 } from '@phosphor/algorithm';
 
 import {
@@ -203,19 +203,31 @@ function activateBrowser(app: JupyterLab, factory: IFileBrowserFactory, restorer
     }
   });
 
-  // Create a launcher if there are no open items.
-  app.shell.layoutModified.connect(() => {
-    if (app.shell.isEmpty('main')) {
-      // Make sure the model is restored.
-      browser.model.restored.then(() => {
-        createLauncher(app.commands, browser);
-      });
+  Promise.all([app.restored, browser.model.restored]).then(() => {
+    const { model } = browser;
+    let launcher: Launcher | null;
+
+    function maybeCreate() {
+      if (launcher) {
+        launcher.title.closable = toArray(shell.widgets('main')).length > 1;
+      }
+
+      // Create a launcher if there are no open items.
+      if (app.shell.isEmpty('main')) {
+        model.restored
+          .then(() => createLauncher(commands, browser))
+          .then(widget => {
+            launcher = widget;
+            launcher.disposed.connect(() => { launcher = null; });
+            launcher.title.closable = toArray(shell.widgets('main')).length > 1;
+          });
+      }
     }
 
-    // Wait until the model is restored, then create a launcher.
-    browser.model.restored.then(() => {
-      commands.execute('launcher:create', { cwd: browser.model.path });
-    });
+    // When layout is modified, create a launcher if there are no open items.
+    shell.layoutModified.connect(() => { maybeCreate(); });
+
+    maybeCreate();
   });
 }
 
@@ -232,7 +244,7 @@ function activateMenu(app: JupyterLab, mainMenu: IMainMenu): void {
 /**
  * Add the main file browser commands to the application's command registry.
  */
-function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mainBrowser: FileBrowser): void {
+function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, browser: FileBrowser): void {
   const { commands } = app;
 
   commands.addCommand(CommandIDs.del, {
@@ -304,7 +316,7 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
 
   commands.addCommand(CommandIDs.hideBrowser, {
     execute: () => {
-      if (!mainBrowser.isHidden) {
+      if (!browser.isHidden) {
         app.shell.collapseLeft();
       }
     }
@@ -358,7 +370,7 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
   });
 
   commands.addCommand(CommandIDs.showBrowser, {
-    execute: () => { app.shell.activateById(mainBrowser.id); }
+    execute: () => { app.shell.activateById(browser.id); }
   });
 
   commands.addCommand(CommandIDs.shutdown, {
@@ -376,7 +388,7 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
 
   commands.addCommand(CommandIDs.toggleBrowser, {
     execute: () => {
-      if (mainBrowser.isHidden) {
+      if (browser.isHidden) {
         return commands.execute(CommandIDs.showBrowser, void 0);
       } else {
         return commands.execute(CommandIDs.hideBrowser, void 0);
@@ -386,9 +398,7 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
 
   commands.addCommand(CommandIDs.createLauncher, {
     label: 'New...',
-    execute: () => {
-      return createLauncher(commands, mainBrowser);
-    }
+    execute: () => createLauncher(commands, browser)
   });
 }
 
@@ -457,12 +467,12 @@ function createContextMenu(path: string, commands: CommandRegistry, registry: Do
 /**
  * Create a launcher for a given filebrowser widget.
  */
-function createLauncher(commands: CommandRegistry, widget: FileBrowser): Promise<void> {
-  return commands.execute('launcher:create', {
-    cwd: widget.model.path
-  }).then((launcher: Launcher) => {
-    widget.model.pathChanged.connect(() => {
-      launcher.cwd = widget.model.path;
-    }, launcher);
-  });
+function createLauncher(commands: CommandRegistry, browser: FileBrowser): Promise<Launcher> {
+  const { model } = browser;
+
+  return commands.execute('launcher:create', { cwd: model.path })
+    .then((launcher: Launcher) => {
+      model.pathChanged.connect(() => { launcher.cwd = model.path; }, launcher);
+      return launcher;
+    });
 }
