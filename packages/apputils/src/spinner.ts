@@ -22,7 +22,6 @@ class Spinner extends Widget {
     this.addClass('jp-Spinner');
     let content = document.createElement('div');
     content.className = 'jp-SpinnerContent';
-    content.textContent = 'Loading, yo';
     this.node.appendChild(content);
   }
 }

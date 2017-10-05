@@ -94,7 +94,7 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
           widget.node.appendChild(spinner.node);
           setTimeout(() => {
             widget.node.removeChild(spinner.node);
-          }, 1000);
+          }, 1000000);
         }
         app.shell.activateById(widget.id);
 
