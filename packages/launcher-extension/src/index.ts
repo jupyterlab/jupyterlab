@@ -5,7 +5,6 @@ import {
   JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
-
 import {
   ICommandPalette
 } from '@jupyterlab/apputils';
@@ -13,6 +12,10 @@ import {
 import {
   ILauncher, LauncherModel, Launcher
 } from '@jupyterlab/launcher';
+
+import {
+  toArray
+} from '@phosphor/algorithm';
 
 import {
   JSONObject
@@ -31,7 +34,7 @@ import '../style/index.css';
 namespace CommandIDs {
   export
   const create = 'launcher:create';
-};
+}
 
 
 /**
@@ -39,10 +42,8 @@ namespace CommandIDs {
  */
 const plugin: JupyterLabPlugin<ILauncher> = {
   activate,
-  id: 'jupyter.services.launcher',
-  requires: [
-    ICommandPalette
-  ],
+  id: '@jupyterlab/launcher-extension:plugin',
+  requires: [ICommandPalette],
   provides: ILauncher,
   autoStart: true
 };
@@ -59,29 +60,38 @@ export default plugin;
  */
 function activate(app: JupyterLab, palette: ICommandPalette): ILauncher {
   const { commands, shell } = app;
-
-  let model = new LauncherModel();
+  const model = new LauncherModel();
 
   commands.addCommand(CommandIDs.create, {
     label: 'New Launcher',
     execute: (args: JSONObject) => {
-      let cwd = args['cwd'] ? String(args['cwd']) : '';
-      let id = `launcher-${Private.id++}`;
-      let callback = (item: Widget) => {
+      const cwd = args['cwd'] ? String(args['cwd']) : '';
+      const id = `launcher-${Private.id++}`;
+      const callback = (item: Widget) => {
         shell.addToMainArea(item, { ref: id });
         shell.activateById(item.id);
       };
-      let widget = new Launcher({ cwd, callback });
-      widget.model = model;
-      widget.id = id;
-      widget.title.label = 'Launcher';
-      widget.title.iconClass = 'jp-LauncherIcon';
-      widget.title.closable = true;
-      shell.addToMainArea(widget);
+      const launcher = new Launcher({ cwd, callback });
+
+      launcher.model = model;
+      launcher.id = id;
+      launcher.title.label = 'Launcher';
+      launcher.title.iconClass = 'jp-LauncherIcon';
+
+      // If there are any other widgets open, remove the launcher close icon.
+      launcher.title.closable = !!toArray(shell.widgets('main')).length;
+
+      shell.addToMainArea(launcher);
       if (args['activate'] !== false) {
-        shell.activateById(widget.id);
+        shell.activateById(launcher.id);
       }
-      return widget;
+
+      shell.layoutModified.connect(() => {
+        // If there is only a launcher open, remove the close icon.
+        launcher.title.closable = toArray(shell.widgets('main')).length > 1;
+      }, launcher);
+
+      return launcher;
     }
   });
 

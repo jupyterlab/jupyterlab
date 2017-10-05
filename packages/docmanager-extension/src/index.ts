@@ -35,6 +35,9 @@ import {
  */
 namespace CommandIDs {
   export
+  const clone = 'docmanager:clone';
+
+  export
   const close = 'docmanager:close';
 
   export
@@ -53,7 +56,7 @@ namespace CommandIDs {
   const open = 'docmanager:open';
 
   export
-  const clone = 'docmanager:clone';
+  const rename = 'docmanager:rename';
 
   export
   const restoreCheckpoint = 'docmanager:restore-checkpoint';
@@ -63,17 +66,14 @@ namespace CommandIDs {
 
   export
   const saveAs = 'docmanager:save-as';
-
-  export
-  const rename = 'docmanager:rename';
-};
+}
 
 
 /**
  * The default document manager provider.
  */
 const plugin: JupyterLabPlugin<IDocumentManager> = {
-  id: 'jupyter.services.document-manager',
+  id: '@jupyterlab/docmanager-extension:plugin',
   provides: IDocumentManager,
   requires: [ICommandPalette, IMainMenu],
   activate: (app: JupyterLab, palette: ICommandPalette, mainMenu: IMainMenu): IDocumentManager => {

@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  h, VirtualNode
+  VirtualNode, h
 } from '@phosphor/virtualdom';
 
 import {
@@ -44,7 +44,7 @@ const MOD_COLLAPSED_CLASS = 'jp-mod-collapsed';
 
 /**
  * Abstract collapser base class.
- * 
+ *
  * ### Notes
  * A collapser is a visible div to the left of a cell's
  * input/output that a user can click on to collapse the

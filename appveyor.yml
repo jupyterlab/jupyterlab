@@ -38,6 +38,7 @@ install:
   - 'pip install --upgrade -e ".[test]"'
   - 'npm install'
   - 'npm run build:main'
+  - 'jupyter lab build'
 
 build: off
 

@@ -15,7 +15,7 @@ import {
 
 import {
   JupyterLab, JupyterLabPlugin
-} from '.';
+} from './index';
 
 import {
   ILayoutRestorer
@@ -27,21 +27,22 @@ import {
  */
 export
 function createRendermimePlugins(extensions: IRenderMime.IExtensionModule[]): JupyterLabPlugin<void>[] {
-  let plugins: JupyterLabPlugin<void>[] = [];
+  const plugins: JupyterLabPlugin<void>[] = [];
+
   extensions.forEach(mod => {
     let data = mod.default;
-    // Handle commonjs exports.
+
+    // Handle CommonJS exports.
     if (!mod.hasOwnProperty('__esModule')) {
       data = mod as any;
     }
     if (!Array.isArray(data)) {
       data = [data] as ReadonlyArray<IRenderMime.IExtension>;
     }
-    (data as ReadonlyArray<IRenderMime.IExtension>).forEach(item => {
-      let plugin = createRendermimePlugin(item);
-      plugins.push(plugin);
-    });
+    (data as ReadonlyArray<IRenderMime.IExtension>)
+      .forEach(item => { plugins.push(createRendermimePlugin(item)); });
   });
+
   return plugins;
 }
 
@@ -52,7 +53,7 @@ function createRendermimePlugins(extensions: IRenderMime.IExtensionModule[]): Ju
 export
 function createRendermimePlugin(item: IRenderMime.IExtension): JupyterLabPlugin<void> {
   return {
-    id: `jupyter.services.mimerenderer-${item.name}`,
+    id: `@jupyterlab/application:mimerenderer-${item.name}`,
     requires: [ILayoutRestorer],
     autoStart: true,
     activate: (app: JupyterLab, restorer: ILayoutRestorer) => {

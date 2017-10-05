@@ -9,6 +9,7 @@
     "@jupyterlab/application": "^0.10.0",
     "@jupyterlab/application-extension": "^0.10.0",
     "@jupyterlab/apputils-extension": "^0.10.2",
+    "@jupyterlab/buildutils": "^0.1.0",
     "@jupyterlab/codemirror-extension": "^0.10.0",
     "@jupyterlab/completer-extension": "^0.10.0",
     "@jupyterlab/console-extension": "^0.10.0",
@@ -35,7 +36,7 @@
   "devDependencies": {
     "css-loader": "^0.28.5",
     "file-loader": "^0.10.1",
-    "fs-extra": "^2.1.2",
+    "fs-extra": "^4.0.2",
     "glob": "^7.1.2",
     "rimraf": "^2.5.2",
     "read-package-tree": "^5.1.6",

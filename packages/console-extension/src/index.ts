@@ -6,8 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, IMainMenu, InstanceTracker,
-  showDialog
+  Dialog, ICommandPalette, IMainMenu, InstanceTracker, showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -15,12 +14,12 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  PageConfig
-} from '@jupyterlab/coreutils';
+  ConsolePanel, IConsoleTracker
+} from '@jupyterlab/console';
 
 import {
-  IConsoleTracker, ConsolePanel
-} from '@jupyterlab/console';
+  PageConfig
+} from '@jupyterlab/coreutils';
 
 import {
   ILauncher
@@ -75,15 +74,14 @@ namespace CommandIDs {
 
   export
   const changeKernel = 'console:change-kernel';
-};
+}
 
 
 /**
  * The console widget tracker provider.
  */
-export
-const trackerPlugin: JupyterLabPlugin<IConsoleTracker> = {
-  id: 'jupyter.services.console-tracker',
+const tracker: JupyterLabPlugin<IConsoleTracker> = {
+  id: '@jupyterlab/console-extension:tracker',
   provides: IConsoleTracker,
   requires: [
     IMainMenu,
@@ -101,15 +99,14 @@ const trackerPlugin: JupyterLabPlugin<IConsoleTracker> = {
 /**
  * The console widget content factory.
  */
-export
-const contentFactoryPlugin: JupyterLabPlugin<ConsolePanel.IContentFactory> = {
-  id: 'jupyter.services.console-renderer',
+const factory: JupyterLabPlugin<ConsolePanel.IContentFactory> = {
+  id: '@jupyterlab/console-extension:factory',
   provides: ConsolePanel.IContentFactory,
   requires: [IEditorServices],
   autoStart: true,
   activate: (app: JupyterLab, editorServices: IEditorServices) => {
-    let editorFactory = editorServices.factoryService.newInlineEditor.bind(
-      editorServices.factoryService);
+    const editorFactory = editorServices.factoryService.newInlineEditor
+      .bind(editorServices.factoryService);
     return new ConsolePanel.ContentFactory({ editorFactory });
   }
 };
@@ -118,7 +115,7 @@ const contentFactoryPlugin: JupyterLabPlugin<ConsolePanel.IContentFactory> = {
 /**
  * Export the plugins as the default.
  */
-const plugins: JupyterLabPlugin<any>[] = [contentFactoryPlugin, trackerPlugin];
+const plugins: JupyterLabPlugin<any>[] = [factory, tracker];
 export default plugins;
 
 

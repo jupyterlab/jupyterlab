@@ -15,7 +15,7 @@ import {
  * The default state database token.
  */
 export
-const IStateDB = new Token<IStateDB>('jupyter.services.statedb');
+const IStateDB = new Token<IStateDB>('@jupyterlab/coreutils:IStateDB');
 /* tslint:enable */
 
 

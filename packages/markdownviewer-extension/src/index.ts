@@ -36,7 +36,7 @@ namespace CommandIDs {
  */
 const plugin: JupyterLabPlugin<void> = {
   activate,
-  id: 'jupyter.extensions.rendered-markdown',
+  id: '@jupyterlab/markdownviewer-extension:plugin',
   requires: [ILayoutRestorer],
   autoStart: true
 };
@@ -53,11 +53,11 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer) {
       fileTypes: ['markdown'],
       rendermime: app.rendermime
     });
-    app.docRegistry.addWidgetFactory(factory);
-
     const { commands } = app;
     const namespace = 'rendered-markdown';
     const tracker = new InstanceTracker<MimeDocument>({ namespace });
+
+    app.docRegistry.addWidgetFactory(factory);
 
     // Handle state restoration.
     restorer.restore(tracker, {

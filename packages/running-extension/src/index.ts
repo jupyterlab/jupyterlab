@@ -15,7 +15,7 @@ import {
  */
 const plugin: JupyterLabPlugin<void> = {
   activate,
-  id: 'jupyter.extensions.running-sessions',
+  id: '@jupyterlab/running-extension:plugin',
   requires: [ILayoutRestorer],
   autoStart: true
 };

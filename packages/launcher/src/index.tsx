@@ -63,7 +63,7 @@ export
 namespace CommandIDs {
   export
   const show: string = 'launcher:show';
-};
+}
 
 
 
@@ -72,7 +72,7 @@ namespace CommandIDs {
  * The launcher token.
  */
 export
-const ILauncher = new Token<ILauncher>('jupyter.services.launcher');
+const ILauncher = new Token<ILauncher>('@jupyterlab/launcher:ILauncher');
 /* tslint:enable */
 
 

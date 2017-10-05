@@ -6,14 +6,13 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IEditorMimeTypeService, CodeEditor
-} from '@jupyterlab/codeeditor';
+  Cell, CellModel, CodeCell, CodeCellModel, ICodeCellModel, IRawCellModel,
+  RawCell, RawCellModel
+} from '@jupyterlab/cells';
 
 import {
-  Cell, CodeCell, RawCell,
-  ICodeCellModel, IRawCellModel, CellModel,
-  RawCellModel, CodeCellModel
-} from '@jupyterlab/cells';
+  IEditorMimeTypeService, CodeEditor
+} from '@jupyterlab/codeeditor';
 
 import {
   nbformat, IObservableList, ObservableList
@@ -143,7 +142,7 @@ class CodeConsole extends Widget {
     this._foreignHandler = new ForeignHandler({
       session: this.session,
       parent: this,
-      cellFactory: () => this._createCodeCell(),
+      cellFactory: () => this._createCodeCell()
     });
 
     this._history = new ConsoleHistory({

@@ -34,3 +34,4 @@ test -e jupyterlab/themes/jupyterlab-theme-light-extension/images/jupyterlab.svg
 npm install
 npm run build:main
 jupyter serverextension enable --py jupyterlab
+jupyter lab build

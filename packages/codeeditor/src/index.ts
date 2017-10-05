@@ -27,7 +27,7 @@ export * from './mimetype';
  * Code editor services token.
  */
 export
-const IEditorServices = new Token<IEditorServices>('jupyter.services.editorservices');
+const IEditorServices = new Token<IEditorServices>('@jupyterlab/codeeditor:IEditorServices');
 /* tslint:enable */
 
 

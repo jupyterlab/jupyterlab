@@ -38,7 +38,7 @@ import {
  * The layout restorer token.
  */
 export
-const ILayoutRestorer = new Token<ILayoutRestorer>('jupyter.services.layout-restorer');
+const ILayoutRestorer = new Token<ILayoutRestorer>('@jupyterlab/application:ILayoutRestorer');
 /* tslint:enable */
 
 

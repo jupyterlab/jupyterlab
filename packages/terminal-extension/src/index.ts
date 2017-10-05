@@ -47,8 +47,7 @@ namespace CommandIDs {
 
   export
   const toggleTheme = 'terminal:toggle-theme';
-};
-
+}
 
 
 /**
@@ -62,7 +61,7 @@ const TERMINAL_ICON_CLASS = 'jp-TerminalIcon';
  */
 const plugin: JupyterLabPlugin<ITerminalTracker> = {
   activate,
-  id: 'jupyter.extensions.terminal',
+  id: '@jupyterlab/terminal-extension:plugin',
   provides: ITerminalTracker,
   requires: [
     IMainMenu, ICommandPalette, ILayoutRestorer
@@ -110,7 +109,8 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   addCommands(app, serviceManager, tracker);
 
   // Add command palette and menu items.
-  let menu = new Menu({ commands });
+  const menu = new Menu({ commands });
+
   menu.title.label = category;
   [
     CommandIDs.createNew,

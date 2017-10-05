@@ -10,15 +10,11 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  ISettingRegistry
-} from '@jupyterlab/coreutils';
-
-import {
   CodeEditor, IEditorServices
 } from '@jupyterlab/codeeditor';
 
 import {
-   MarkdownCodeBlocks, PathExt
+  ISettingRegistry, MarkdownCodeBlocks, PathExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -68,7 +64,7 @@ namespace CommandIDs {
 
   export
   const markdownPreview = 'fileeditor:markdown-preview';
-};
+}
 
 
 /**
@@ -76,12 +72,8 @@ namespace CommandIDs {
  */
 const plugin: JupyterLabPlugin<IEditorTracker> = {
   activate,
-  id: 'jupyter.services.editor-tracker',
-  requires: [
-    ILayoutRestorer,
-    IEditorServices,
-    ISettingRegistry
-  ],
+  id: '@jupyterlab/fileeditor-extension:plugin',
+  requires: [ILayoutRestorer, IEditorServices, ISettingRegistry],
   optional: [ILauncher],
   provides: IEditorTracker,
   autoStart: true

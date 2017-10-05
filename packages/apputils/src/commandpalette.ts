@@ -21,7 +21,7 @@ import {
  * The command palette token.
  */
 export
-const ICommandPalette = new Token<ICommandPalette>('jupyter.services.commandpalette');
+const ICommandPalette = new Token<ICommandPalette>('@jupyterlab/apputils:ICommandPalette');
 /* tslint:enable */
 
 

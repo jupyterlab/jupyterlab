@@ -56,7 +56,7 @@ import {
  * The document registry token.
  */
 export
-const IDocumentManager = new Token<IDocumentManager>('jupyter.services.document-manager');
+const IDocumentManager = new Token<IDocumentManager>('@jupyterlab/docmanager:IDocumentManager');
 /* tslint:enable */
 
 

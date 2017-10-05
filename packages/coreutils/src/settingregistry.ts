@@ -113,7 +113,7 @@ namespace ISchemaValidator {
  * The setting registry token.
  */
 export
-const ISettingRegistry = new Token<ISettingRegistry>('jupyter.services.settings');
+const ISettingRegistry = new Token<ISettingRegistry>('@jupyterlab/coreutils:ISettingRegistry');
 /* tslint:enable */
 
 
@@ -514,6 +514,7 @@ class SettingRegistry {
         const output = [`Validating ${plugin} failed:`];
         (errors as ISchemaValidator.IError[]).forEach((error, index) => {
           const { dataPath, schemaPath, keyword, message } = error;
+
           output.push(`${index} - schema @ ${schemaPath}, data @ ${dataPath}`);
           output.push(`\t${keyword} ${message}`);
         });

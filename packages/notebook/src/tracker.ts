@@ -55,7 +55,7 @@ interface INotebookTracker extends IInstanceTracker<NotebookPanel> {
  * The notebook tracker token.
  */
 export
-const INotebookTracker = new Token<INotebookTracker>('jupyter.services.notebooks');
+const INotebookTracker = new Token<INotebookTracker>('@jupyterlab/notebook:INotebookTracker');
 /* tslint:enable */
 
 

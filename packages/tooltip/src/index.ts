@@ -31,7 +31,7 @@ export * from './widget';
  * The tooltip manager token.
  */
 export
-const ITooltipManager = new Token<ITooltipManager>('jupyter.services.tooltip');
+const ITooltipManager = new Token<ITooltipManager>('@jupyterlab/tooltip:ITooltipManager');
 /* tslint:enable */
 
 

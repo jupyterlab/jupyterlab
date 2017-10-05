@@ -50,15 +50,15 @@ namespace CommandIDs {
 
   export
   const launchNotebook = 'tooltip:launch-notebook';
-};
+}
 
 
 
 /**
- * The main tooltip service.
+ * The main tooltip manager plugin.
  */
-const service: JupyterLabPlugin<ITooltipManager> = {
-  id: 'jupyter.services.tooltip',
+const manager: JupyterLabPlugin<ITooltipManager> = {
+  id: '@jupyterlab/tooltip-extension:manager',
   autoStart: true,
   provides: ITooltipManager,
   activate: (app: JupyterLab): ITooltipManager => {
@@ -97,8 +97,8 @@ const service: JupyterLabPlugin<ITooltipManager> = {
 /**
  * The console tooltip plugin.
  */
-const consolePlugin: JupyterLabPlugin<void> = {
-  id: 'jupyter.extensions.tooltip-console',
+const consoles: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/tooltip-extension:consoles',
   autoStart: true,
   requires: [ITooltipManager, IConsoleTracker],
   activate: (app: JupyterLab, manager: ITooltipManager, consoles: IConsoleTracker): void => {
@@ -130,8 +130,8 @@ const consolePlugin: JupyterLabPlugin<void> = {
 /**
  * The notebook tooltip plugin.
  */
-const notebookPlugin: JupyterLabPlugin<void> = {
-  id: 'jupyter.extensions.tooltip-notebook',
+const notebooks: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/tooltip-extension:notebooks',
   autoStart: true,
   requires: [ITooltipManager, INotebookTracker],
   activate: (app: JupyterLab, manager: ITooltipManager, notebooks: INotebookTracker): void => {
@@ -162,9 +162,7 @@ const notebookPlugin: JupyterLabPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [
-  service, consolePlugin, notebookPlugin
-];
+const plugins: JupyterLabPlugin<any>[] = [manager, consoles, notebooks];
 export default plugins;
 
 

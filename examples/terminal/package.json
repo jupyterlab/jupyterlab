@@ -13,7 +13,7 @@
     "es6-promise": "^4.1.0"
   },
   "devDependencies": {
-    "css-loader": "^0.27.3",
+    "css-loader": "^0.28.5",
     "file-loader": "^0.10.1",
     "json-loader": "^0.5.4",
     "rimraf": "^2.5.2",

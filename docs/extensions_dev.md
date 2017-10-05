@@ -84,7 +84,7 @@ jupyter labextension link <path>
 This causes the builder to re-install the source folder before building
 the application files.  You can re-build at any time using `jupyter lab build` and it will reinstall these packages.  You can also link other npm packages
 that you are working on simultaneously; they will be re-installed but not
-considered as extensions if they lack the metadata.  Linked extensions and 
+considered as extensions if they lack the metadata.  Linked extensions and
 packages are included in `jupyter labextension list`.
 
 You can also use `jupyter labextension install <path>`, but that will
@@ -153,20 +153,20 @@ package needed to create a mime renderer extension (using the interfaces
 in TypeScript or as a form of documentation if using plain JavaScript).
 
 The only other difference from a standard extension is that has a `jupyterlab`
-key in its `package.json` with `"mimeRenderer"` metadata.  The value can be 
-`true` to use the main module of the package, or a string path to a specific 
+key in its `package.json` with `"mimeExtension"` metadata.  The value can be
+`true` to use the main module of the package, or a string path to a specific
 module (e.g. `"lib/foo"`).
 
 ## Themes
-A theme is a JupyterLab extension that uses a `ThemeManager` and can be 
-loaded and unloaded dynamically.  The package must include all static assets 
+A theme is a JupyterLab extension that uses a `ThemeManager` and can be
+loaded and unloaded dynamically.  The package must include all static assets
 that are referenced by `url()` in its CSS files.  The `url()` paths in a CSS
-file served by the Jupyter server must start with the path 
-`'./lab/api/themes/<foo>/'`, where `foo` is the normalized name of the 
-package.  Scoped packages of the form `@org/name` are normalized to 
-`org-name`.  Other package names are not affected.  Note that `'@import'` paths are still given as relative paths, e.g. (`'@import './foo.css';`).  
-The path to the theme  assets is specified `package.json` under the 
-`"jupyterlab"` key as `"themeDir"`. See the [JupyterLab Light Theme](https://github.com/jupyterlab/jupyterlab/tree/master/packages/theme-light-extension) 
+file served by the Jupyter server must start with the path
+`'./lab/api/themes/<foo>/'`, where `foo` is the normalized name of the
+package.  Scoped packages of the form `@org/name` are normalized to
+`org-name`.  Other package names are not affected.  Note that `'@import'` paths are still given as relative paths, e.g. (`'@import './foo.css';`).
+The path to the theme  assets is specified `package.json` under the
+`"jupyterlab"` key as `"themeDir"`. See the [JupyterLab Light Theme](https://github.com/jupyterlab/jupyterlab/tree/master/packages/theme-light-extension)
 for an example.  Ensure that the theme files are included in the
 `"files"` metadata in package.json.  A theme can optionally specify
 an `embed.css` file that can be consumed outside of a JupyterLab application.
@@ -181,13 +181,25 @@ general-purpose interface to the extension system.
 
 ## Extension Settings
 An extension can specify user settings using a JSON Schema.  The schema
-definition should be in a file that is the id of the specific JupyterLab
-application plugin, e.g. `'jupyterlab.services.theme-manager.json'`.  The 
-schema(s) for an extension are placed in a directory specified in 
-`package.json` under the "jupyterlab" key as "schemaDir".  Ensure that the 
-schema files are included in the `"files"` metadata in package.json.
-See the (fileeditor-extension)[https://github.com/jupyterlab/jupyterlab/tree/master/packages/fileeditor-extension] for an example of a extension that
-uses settings.
+definition should be in a file that resides in the `schemaDir` directory that is
+specified in the `package.json` file of the extension. The actual file name
+should use is the part that follows the package name of extension. So for
+example, the JupyterLab `apputils-extension` package hosts several plugins:
+
+* `'@jupyterlab/apputils-extension:menu'`
+* `'@jupyterlab/apputils-extension:palette'`
+* `'@jupyterlab/apputils-extension:settings'`
+* `'@jupyterlab/apputils-extension:themes'`
+
+And in the `package.json` for `@jupyterlab/apputils-extension`, the `schemaDir`
+field is a directory called `schema`. Since the `themes` plugin requires a JSON
+schema, its schema file location is: `schema/themes.json`. The plugin's name is
+used to automatically associate it with its settings file, so this naming
+convention is important. Ensure that the schema files are included in the
+`"files"` metadata in `package.json`.
+
+See the (fileeditor-extension)[https://github.com/jupyterlab/jupyterlab/tree/master/packages/fileeditor-extension]
+for another example of an extension that uses settings.
 
 
 ## Storing Extension Data
@@ -197,7 +209,7 @@ In addition to the file system that is accessed by using the `@jupyterlab/servic
 ### State Database
 The state database can be accessed by importing `IStateDB` from `@jupyterlab/coreutils` and adding it to the list of `requires` for a plugin:
 ```typescript
-const id = 'foo-author.services.foo';
+const id = 'foo-extension:IFoo';
 
 const IFoo = new Token<IFoo>(id);
 

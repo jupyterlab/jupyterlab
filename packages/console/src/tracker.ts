@@ -2,12 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Token
-} from '@phosphor/coreutils';
-
-import {
   IInstanceTracker
 } from '@jupyterlab/apputils';
+
+import {
+  Token
+} from '@phosphor/coreutils';
 
 import {
   ConsolePanel
@@ -19,7 +19,7 @@ import {
  * The console tracker token.
  */
 export
-const IConsoleTracker = new Token<IConsoleTracker>('jupyter.services.consoles');
+const IConsoleTracker = new Token<IConsoleTracker>('@jupyterlab/console:IConsoleTracker');
 /* tslint:enable */
 
 

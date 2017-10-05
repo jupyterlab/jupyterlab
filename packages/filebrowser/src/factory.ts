@@ -27,7 +27,7 @@ import {
  * The path tracker token.
  */
 export
-const IFileBrowserFactory = new Token<IFileBrowserFactory>('jupyter.services.file-browser');
+const IFileBrowserFactory = new Token<IFileBrowserFactory>('@jupyterlab/filebrowser:IFileBrowserFactory');
 /* tslint:enable */
 
 
