@@ -428,7 +428,7 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
     this._dataType = options.dataType || 'string';
 
     this._renderer = this.rendermime.createRenderer(this._mimeType);
-    (this.layout as BoxLayout).addWidget(this._renderer);
+    layout.addWidget(this._renderer);
     BoxLayout.setStretch(this._renderer, 1);
 
     context.pathChanged.connect(this._onPathChanged, this);
