@@ -12,7 +12,7 @@
     "clean": "rimraf build"
   },
   "devDependencies": {
-    "css-loader": "^0.27.3",
+    "css-loader": "^0.28.5",
     "rimraf": "^2.5.2",
     "style-loader": "^0.13.1",
     "tslint": "~4.5.0",

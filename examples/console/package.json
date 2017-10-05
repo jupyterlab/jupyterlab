@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "@types/codemirror": "0.0.46",
-    "css-loader": "^0.27.3",
+    "css-loader": "^0.28.5",
     "file-loader": "^0.10.1",
     "rimraf": "^2.5.2",
     "style-loader": "^0.13.1",
