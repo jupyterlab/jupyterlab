@@ -145,9 +145,8 @@ namespace Build {
 
       // Handle themes.
       if (themeDir) {
-        const theme = name.replace(/@/g, '').replace(/\//g, '-');
         const from = path.join(packageDir, themeDir);
-        const destination = path.join(output, 'themes', theme);
+        const destination = path.join(output, 'themes', name);
 
         // Remove the existing directory if necessary.
         if (fs.existsSync(destination)) {
@@ -160,6 +159,9 @@ namespace Build {
             fs.removeSync(destination);
           }
         }
+
+        // Make sure the theme directory exists.
+        fs.mkdirpSync(destination);
 
         // Copy the theme folder.
         fs.copySync(from, destination);

@@ -20,7 +20,7 @@ const plugin: JupyterLabPlugin<void> = {
     manager.register({
       name: 'JupyterLab Dark',
       load: function() {
-        return manager.loadCSS('jupyterlab-theme-dark-extension/index.css');
+        return manager.loadCSS('@jupyterlab/theme-dark-extension/index.css');
       },
       unload: function() {
         return Promise.resolve(void 0);
