@@ -54,6 +54,11 @@ Note: If installing using `pip install --user`, you must add the user-level
  `bin` directory to your `PATH` environment variable in order to launch
  `jupyter lab`.
 
+ Note: If installing from source and not using the
+ development installation (`pip install -e .`), you
+ must run `jupyter lab build` after the install to
+ get a working application directory.
+
 ### Running
 
 Start up JupyterLab using:
