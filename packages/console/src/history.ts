@@ -165,7 +165,7 @@ class ConsoleHistory implements IConsoleHistory {
       this._placeholder = placeholder;
       // Filter the history with the placeholder string.
       this.setFilter(placeholder);
-      this._cursor = this._filtered.length;
+      this._cursor = this._filtered.length - 1;
     }
 
     --this._cursor;
@@ -325,6 +325,8 @@ class ConsoleHistory implements IConsoleHistory {
         this._filtered.push(last = current);
       }
     }
+
+    this._filtered.push(filterStr);
   }
 
   private _cursor = 0;
