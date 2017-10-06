@@ -160,20 +160,20 @@ describe('@jupyterlab/docmanager', () => {
     describe('#adoptWidget()', () => {
 
       it('should install a message hook', () => {
-        let widget = new Widget();
+        let widget = new DocWidget();
         manager.adoptWidget(context, widget);
         MessageLoop.sendMessage(widget, new Message('foo'));
         expect(manager.methods).to.contain('messageHook');
       });
 
       it('should add the document class', () => {
-        let widget = new Widget();
+        let widget = new DocWidget();
         manager.adoptWidget(context, widget);
         expect(widget.hasClass('jp-Document')).to.be(true);
       });
 
       it('should be retrievable', () => {
-        let widget = new Widget();
+        let widget = new DocWidget();
         manager.adoptWidget(context, widget);
         expect(manager.contextForWidget(widget)).to.be(context);
       });
@@ -240,7 +240,7 @@ describe('@jupyterlab/docmanager', () => {
     describe('#messageHook()', () => {
 
       it('should be called for a message to a tracked widget', () => {
-        let widget = new Widget();
+        let widget = new DocWidget();
         manager.adoptWidget(context, widget);
         MessageLoop.sendMessage(widget, new Message('foo'));
         expect(manager.methods).to.contain('messageHook');
