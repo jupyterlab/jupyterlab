@@ -226,7 +226,15 @@ class FileBrowserModel implements IDisposable {
       this._refreshed.emit(void 0);
     }).catch(error => {
       this._pendingPath = null;
-      this._connectionFailure.emit(error);
+      if (error.message === 'Not Found') {
+        let path = this._model.path;
+        error.message = `Directory not found: "${path}"`;
+        this._connectionFailure.emit(error);
+        let parent = PathExt.dirname(path);
+        if (parent !== path) {
+          this.cd('..');
+        }
+      }
     });
     return this._pending;
   }
