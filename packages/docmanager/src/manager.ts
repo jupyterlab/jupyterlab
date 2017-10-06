@@ -145,7 +145,7 @@ class DocumentManager implements IDisposable {
    *  Uses the same widget factory and context as the source, or returns
    *  `undefined` if the source widget is not managed by this manager.
    */
-  cloneWidget(widget: Widget): Widget | undefined {
+  cloneWidget(widget: Widget): DocumentRegistry.IReadyWidget | undefined {
     return this._widgetManager.cloneWidget(widget);
   }
 
@@ -253,7 +253,7 @@ class DocumentManager implements IDisposable {
    * This can be used to use an existing widget instead of opening
    * a new widget.
    */
-  findWidget(path: string, widgetName='default'): Widget | undefined {
+  findWidget(path: string, widgetName='default'): DocumentRegistry.IReadyWidget | undefined {
     if (widgetName === 'default') {
       let factory = this.registry.defaultWidgetFactory(path);
       if (!factory) {
@@ -295,7 +295,7 @@ class DocumentManager implements IDisposable {
    * This function will return `undefined` if a valid widget factory
    * cannot be found.
    */
-  open(path: string, widgetName='default', kernel?: Partial<Kernel.IModel>): Widget | undefined {
+  open(path: string, widgetName='default', kernel?: Partial<Kernel.IModel>): DocumentRegistry.IReadyWidget | undefined {
     return this._createOrOpenDocument('open', path, widgetName, kernel);
   }
 
@@ -315,7 +315,7 @@ class DocumentManager implements IDisposable {
    * This function will return `undefined` if a valid widget factory
    * cannot be found.
    */
-  openOrReveal(path: string, widgetName='default', kernel?: Partial<Kernel.IModel>): Widget | undefined {
+  openOrReveal(path: string, widgetName='default', kernel?: Partial<Kernel.IModel>): DocumentRegistry.IReadyWidget | undefined {
     let widget = this.findWidget(path, widgetName);
     if (widget) {
       this._opener.open(widget);
@@ -378,7 +378,7 @@ class DocumentManager implements IDisposable {
    * Create a context from a path and a model factory.
    */
   private _createContext(path: string, factory: DocumentRegistry.ModelFactory, kernelPreference: IClientSession.IKernelPreference): Private.IContext {
-    let adopter = (widget: Widget) => {
+    let adopter = (widget: DocumentRegistry.IReadyWidget) => {
       this._widgetManager.adoptWidget(context, widget);
       this._opener.open(widget);
     };
@@ -434,7 +434,7 @@ class DocumentManager implements IDisposable {
    * The two cases differ in how the document context is handled, but the creation
    * of the widget and launching of the kernel are identical.
    */
-  private _createOrOpenDocument(which: 'open'|'create', path: string, widgetName='default', kernel?: Partial<Kernel.IModel>): Widget | undefined {
+  private _createOrOpenDocument(which: 'open'|'create', path: string, widgetName='default', kernel?: Partial<Kernel.IModel>): DocumentRegistry.IReadyWidget | undefined {
     let widgetFactory = this._widgetFactoryFor(path, widgetName);
     if (!widgetFactory) {
       return undefined;
@@ -528,7 +528,7 @@ namespace DocumentManager {
     /**
      * Open the given widget.
      */
-    open(widget: Widget): void;
+    open(widget: DocumentRegistry.IReadyWidget): void;
   }
 }
 
