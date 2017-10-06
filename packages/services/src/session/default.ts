@@ -351,13 +351,13 @@ class DefaultSession implements Session.ISession {
       if (response.xhr.status !== 200) {
         throw ServerConnection.makeError(response);
       }
-      let value = response.data as Session.IModel;
+      let value = response.data;
       try {
-        validate.validateModel(value);
+        let model = validate.validateModel(value);
+        return Private.updateFromServer(model, settings.baseUrl);
       } catch (err) {
         throw ServerConnection.makeError(response, err.message);
       }
-      return Private.updateFromServer(value, settings.baseUrl);
     }, error => {
       this._updating = false;
       return Private.onSessionError(error);
