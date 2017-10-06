@@ -163,10 +163,14 @@ class ConsoleHistory implements IConsoleHistory {
     if (!this._hasSession) {
       this._hasSession = true;
       this._placeholder = placeholder;
+      // Filter the history with the placeholder string.
+      this.setFilter(placeholder);
+      this._cursor = this._filtered.length;
     }
 
-    let content = this._history[--this._cursor];
+    --this._cursor;
     this._cursor = Math.max(0, this._cursor);
+    let content = this._filtered[this._cursor];
     return Promise.resolve(content);
   }
 
@@ -183,10 +187,14 @@ class ConsoleHistory implements IConsoleHistory {
     if (!this._hasSession) {
       this._hasSession = true;
       this._placeholder = placeholder;
+      // Filter the history with the placeholder string.
+      this.setFilter(placeholder);
+      this._cursor = this._filtered.length;
     }
 
-    let content = this._history[++this._cursor];
-    this._cursor = Math.min(this._history.length, this._cursor);
+    ++this._cursor;
+    this._cursor = Math.min(this._filtered.length - 1, this._cursor);
+    let content = this._filtered[this._cursor];
     return Promise.resolve(content);
   }
 
@@ -304,6 +312,21 @@ class ConsoleHistory implements IConsoleHistory {
     });
   }
 
+  protected setFilter(filterStr: string = ""): void {
+    // Apply the new filter and remove contiguous duplicates.
+    this._filtered.length = 0;
+    
+    let last = '';
+    let current = '';
+
+    for (let i = 0; i < this._history.length; i++) {
+      current = this._history[i];
+      if (current !== last && filterStr == current.slice(0, filterStr.length)) {
+        this._filtered.push(last = current);
+      }
+    }
+  }
+
   private _cursor = 0;
   private _hasSession = false;
   private _history: string[] = [];
@@ -311,6 +334,7 @@ class ConsoleHistory implements IConsoleHistory {
   private _setByHistory = false;
   private _isDisposed = false;
   private _editor: CodeEditor.IEditor | null = null;
+  private _filtered: string[] = [];
 }
 
 
