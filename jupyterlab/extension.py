@@ -94,12 +94,14 @@ def load_jupyter_server_extension(nbapp):
 
     if core_mode or fallback:
         schemas_dir = os.path.join(here, 'schemas')
+        config.themes_dir = os.path.join(here, 'themes')
     else:
         schemas_dir = os.path.join(app_dir, 'schemas')
+        config.themes_dir = os.path.join(app_dir, 'themes')
 
     config.schemas_dir = schemas_dir
     config.user_settings_dir = get_user_settings_dir()
-    config.themes_dir = os.path.join(here, 'themes')
+    
 
     add_handlers(web_app, config)
 
