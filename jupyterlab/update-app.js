@@ -13,22 +13,20 @@ Build.ensureAssets({
 // Hacks to be removed in 0.28 final release.
 var path = require('path');
 var fs = require('fs-extra');
+var glob = require('glob');
 
-var base = path.join('.', 'node_modules', '@jupyterlab');
-var schemas = path.join('..', 'schemas');
-
-var src = path.join(base, 'shortcuts-extension', 'schema', 'plugin.json')
-var dest = path.join(schemas, 'jupyter.extensions.shortcuts.json')
-fs.copySync(src, dest)
-
-src = path.join(base, 'apputils-extension', 'schema', 'themes.json')
-dest = path.join(schemas, 'jupyter.services.theme-manager.json')
-fs.copySync(src, dest)
-
-src = path.join(base, 'codemirror-extension', 'schema', 'commands.json')
-dest = path.join(schemas, 'jupyter.services.codemirror-commands.json')
-fs.copySync(src, dest)
-
-src = path.join(base, 'fileeditor-extension', 'schema', 'plugin.json')
-dest = path.join(schemas, 'jupyter.services.editor-tracker.json')
-fs.copySync(src, dest)
+Object.keys(data.jupyterlab.extensions).map(function(name) {
+  packageData = require(name + '/package.json');
+  if (packageData.jupyterlab === undefined) {
+    return;
+  }
+  var schemaDir = packageData.jupyterlab.schemaDir;
+  if (schemaDir === undefined) {
+    return;
+  }
+  var files = glob.sync(path.join('.', 'node_modules', name, schemaDir));
+  files.forEach(function(filePath) {
+    var name = path.basename(filePath);
+    fs.copySync(filePath, path.join('..', 'schemas', name));
+  });
+});
