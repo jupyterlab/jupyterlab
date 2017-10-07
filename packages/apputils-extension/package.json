@@ -8,7 +8,8 @@
     "lib/*.d.ts",
     "lib/*.js",
     "style/*.css",
-    "style/images/*.svg"
+    "style/images/*.svg",
+    "schema/*.json"
   ],
   "directories": {
     "lib": "lib/"
