@@ -312,7 +312,13 @@ class ConsoleHistory implements IConsoleHistory {
     });
   }
 
-  protected setFilter(filterStr: string = ""): void {
+  /**
+   * Set the filter data.
+   *
+   * @param filterStr - The string to use when filtering the data.
+  */
+  protected setFilter(filterStr: string = ''): void {
+    
     // Apply the new filter and remove contiguous duplicates.
     this._filtered.length = 0;
     
