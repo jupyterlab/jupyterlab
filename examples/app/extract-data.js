@@ -6,6 +6,6 @@ var names = Object.keys(data.dependencies).filter(function(name) {
   return packageData.jupyterlab !== undefined;
 });
 Build.ensureAssets({
-  packageNames: names,
+  packageDirectories: names,
   output: './build'
 });

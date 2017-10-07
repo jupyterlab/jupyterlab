@@ -32,7 +32,7 @@ namespace Build {
     /**
      * The names of the packages to ensure.
      */
-    packageNames: ReadonlyArray<string>;
+    packageDirectories: ReadonlyArray<string>;
   }
 
   /**
@@ -101,19 +101,19 @@ namespace Build {
    */
   export
   function ensureAssets(options: IEnsureOptions): void {
-    let { input, output, packageNames } = options;
+    let { input, output, packageDirectories } = options;
     input = input || '.';
 
-    packageNames.forEach(function(name) {
-      const packageDir = fs.realpathSync(path.join(input, 'node_modules', name));
+    packageDirectories.forEach(function(packageDir) {
       const packageData = require(path.join(packageDir, 'package.json'));
+      const packageName = packageData.name;
       const extension = normalizeExtension(packageData);
       const { schemaDir, themeDir } = extension;
 
       // Handle schemas.
       if (schemaDir) {
         const schemas = glob.sync(path.join(path.join(packageDir, schemaDir), '*'));
-        const destination = path.join(output, 'schemas', name);
+        const destination = path.join(output, 'schemas', packageName);
 
         // Remove the existing directory if necessary.
         if (fs.existsSync(destination)) {
@@ -146,7 +146,7 @@ namespace Build {
       // Handle themes.
       if (themeDir) {
         const from = path.join(packageDir, themeDir);
-        const destination = path.join(output, 'themes', name);
+        const destination = path.join(output, 'themes', packageName);
 
         // Remove the existing directory if necessary.
         if (fs.existsSync(destination)) {
