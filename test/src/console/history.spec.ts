@@ -132,11 +132,10 @@ describe('console/history', () => {
 
     describe('#back()', () => {
 
-      it('should return void promise if no history exists', (done) => {
+      it('should return an empty string if no history exists', () => {
         let history = new ConsoleHistory({ session });
-        history.back('').then(result => {
-          expect(result).to.be(void 0);
-          done();
+        return history.back('').then(result => {
+          expect(result).to.be('');
         });
       });
 
@@ -155,11 +154,10 @@ describe('console/history', () => {
 
     describe('#forward()', () => {
 
-      it('should return void promise if no history exists', (done) => {
+      it('should return an emptry string if no history exists', () => {
         let history = new ConsoleHistory({ session });
-        history.forward('').then(result => {
-          expect(result).to.be(void 0);
-          done();
+        return history.forward('').then(result => {
+          expect(result).to.be('');
         });
       });
 
