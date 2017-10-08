@@ -6,6 +6,6 @@ let names = Object.keys(data.jupyterlab.extensions).filter(function(name) {
   return packageData.jupyterlab !== undefined;
 });
 Build.ensureAssets({
-  packageNames: names,
+  packageDirectories: names,
   output: '..'
 });

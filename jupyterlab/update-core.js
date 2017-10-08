@@ -10,6 +10,8 @@ corePackage.jupyterlab.extensions = {};
 corePackage.jupyterlab.mimeExtensions = {};
 corePackage.dependencies = {};
 
+var packageDirectories = [];
+
 var basePath = path.resolve('..');
 var packages = glob.sync(path.join(basePath, 'packages/*'));
 packages.forEach(function(packagePath) {
@@ -49,11 +51,12 @@ packages.forEach(function(packagePath) {
       return;
     }
     corePackage.jupyterlab[item + 's'][data.name] = ext;
+    packageDirectories.push(packagePath);
   });
 });
 
 Build.ensureAssets({
-  packageNames: Object.keys(corePackage.jupyterlab.extensions),
+  packageDirectories: packageDirectories,
   output: '.'
 });
 
