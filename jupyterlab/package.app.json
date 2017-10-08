@@ -120,6 +120,7 @@
       "@jupyterlab/vega2-extension": ""
     },
     "name": "JupyterLab",
+    "outputDir": "..",
     "singletonPackages": [
       "@jupyterlab/application",
       "@jupyterlab/apputils",

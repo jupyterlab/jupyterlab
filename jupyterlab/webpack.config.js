@@ -4,6 +4,7 @@ var fs = require('fs-extra');
 var Handlebars = require('handlebars');
 var crypto = require('crypto');
 var package_data = require('./package.json');
+var Build = require('@jupyterlab/buildutils').Build;
 
 // Ensure a clear build directory.
 var buildDir = './build';
@@ -23,6 +24,14 @@ var result = template(data);
 
 fs.writeFileSync(path.resolve(buildDir, 'index.out.js'), result);
 
+// Handle the extensions.
+Build.ensureAssets({
+  packageNames: [
+    Object.keys(package_data.jupyterlab.mimeExtensions) +
+    Object.keys(package_data.jupyterlab.extensions)
+  ],
+  output: package_data.jupyterlab.outputDir
+});
 
 // Create the hash
 var hash = crypto.createHash('md5');

@@ -3,7 +3,6 @@ var fs = require('fs-extra');
 var glob = require('glob');
 var path = require('path');
 var sortPackageJson = require('sort-package-json');
-var Build = require('@jupyterlab/buildutils').Build;
 
 var corePackage = require('./package.json');
 corePackage.jupyterlab.extensions = {};
@@ -50,11 +49,6 @@ packages.forEach(function(packagePath) {
     }
     corePackage.jupyterlab[item + 's'][data.name] = ext;
   });
-});
-
-Build.ensureAssets({
-  packageNames: Object.keys(corePackage.jupyterlab.extensions),
-  output: '.'
 });
 
 // Write the package.json back to disk.
