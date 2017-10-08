@@ -52,7 +52,7 @@ function showErrorMessage(title: string, error: any): Promise<void> {
   console.error(error);
   let options = {
     title: title,
-    body: error.message || String(error),
+    body: error.message || title,
     buttons: [Dialog.okButton()],
     okText: 'DISMISS'
   };
