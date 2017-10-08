@@ -13,32 +13,30 @@ fs.ensureDirSync(buildDir);
 
 fs.copySync('./package.json', './build/package.json');
 
+// Handle the extensions.
+var extensions = package_data.jupyterlab.extensions;
+var mimeExtensions = package_data.jupyterlab.mimeExtensions;
+Build.ensureAssets({
+  packageNames: Object.keys(mimeExtensions).concat(Object.keys(extensions)),
+  output: package_data.jupyterlab.outputDir
+});
+
 // Create the entry point file.
 var source = fs.readFileSync('index.js').toString();
 var template = Handlebars.compile(source);
 var data = {
-  jupyterlab_extensions: package_data.jupyterlab.extensions,
-  jupyterlab_mime_extensions: package_data.jupyterlab.mimeExtensions,
+  jupyterlab_extensions: extensions,
+  jupyterlab_mime_extensions: mimeExtensions,
 };
 var result = template(data);
 
 fs.writeFileSync(path.resolve(buildDir, 'index.out.js'), result);
-
-// Handle the extensions.
-Build.ensureAssets({
-  packageNames: [
-    Object.keys(package_data.jupyterlab.mimeExtensions) +
-    Object.keys(package_data.jupyterlab.extensions)
-  ],
-  output: package_data.jupyterlab.outputDir
-});
 
 // Create the hash
 var hash = crypto.createHash('md5');
 hash.update(fs.readFileSync('./package.json'));
 var digest = hash.digest('hex');
 fs.writeFileSync(path.resolve(buildDir, 'hash.md5'), digest);
-
 
 module.exports = {
   entry:  path.resolve(buildDir, 'index.out.js'),

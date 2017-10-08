@@ -800,7 +800,7 @@ def _ensure_package(app_dir, logger=None, name=None, version=None):
             shutil.rmtree(staging)
             os.makedirs(staging)
 
-    for fname in ['index.app.js', 'webpack.config.js', 'update-app.js']:
+    for fname in ['index.app.js', 'webpack.config.js']:
         dest = pjoin(staging, fname.replace('.app', ''))
         shutil.copy(pjoin(here, fname), dest)
 
