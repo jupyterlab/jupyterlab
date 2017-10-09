@@ -4,23 +4,20 @@ var glob = require('glob');
 var path = require('path');
 var sortPackageJson = require('sort-package-json');
 
-// Update the core.
-require('./update-core');
+// Run a production build with Typescript source maps.
+childProcess.execSync('npm run build:prod', {stdio:[0,1,2]});
 
 // Update the package.app.json file.
 var data = require('./package.json');
-data['scripts']['build'] = 'webpack'
+data['scripts'] = { 'build': 'webpack' };
 data['jupyterlab']['outputDir'] = '..';
 text = JSON.stringify(sortPackageJson(data), null, 2) + '\n';
 fs.writeFileSync('./package.app.json', text);
 
 // Update our app index file.
-fs.copySync('./index.js', './index.app.js')
-
-// Run a standard build with Typescript source maps working.
-childProcess.execSync('npm run build:prod');
+fs.copySync('./index.js', './index.app.js');
 
 // Add  the release metadata.
-var release_data = { version: version };
+var release_data = { version: data.jupyterlab.version };
 text = JSON.stringify(release_data, null, 2) + '\n';
 fs.writeFileSync('./build/release_data.json', text);
