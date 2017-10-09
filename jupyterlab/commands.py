@@ -129,7 +129,7 @@ def install_extension_async(extension, app_dir=None, logger=None, abort_callback
         return
 
     _ensure_app_dirs(app_dir, logger)
-    
+
     target = pjoin(app_dir, 'extensions', 'temp')
     if os.path.exists(target):
         shutil.rmtree(target)
@@ -745,23 +745,11 @@ def _toggle_extension(extension, value, app_dir=None, logger=None):
     """Enable or disable a lab extension.
     """
     app_dir = get_app_dir(app_dir)
-    config = _get_page_config(app_dir)
     extensions = _get_extensions(app_dir)
     core_extensions = _get_core_extensions()
 
     if extension not in extensions and extension not in core_extensions:
         raise ValueError('Extension %s is not installed' % extension)
-    disabled = config.get('disabledExtensions', [])
-    if value and extension not in disabled:
-        disabled.append(extension)
-    if not value and extension in disabled:
-        disabled.remove(extension)
-
-    # Prune extensions that are not installed.
-    disabled = [ext for ext in disabled
-                if (ext in extensions or ext in core_extensions)]
-    config['disabledExtensions'] = disabled
-    _write_page_config(config, app_dir, logger=logger)
 
 
 def _write_build_config(config, app_dir, logger):
