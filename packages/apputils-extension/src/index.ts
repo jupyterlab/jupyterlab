@@ -169,7 +169,7 @@ const themes: JupyterLabPlugin<IThemeManager> = {
     const disposable = splash.show();
     const dispose = () => { disposable.dispose(); };
 
-    manager.ready.then(() => { setTimeout(dispose, 2500); }, dispose);
+    manager.ready.then(dispose, dispose);
 
     return manager;
   },
