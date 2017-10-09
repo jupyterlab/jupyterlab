@@ -51,21 +51,27 @@ namespace PageConfig {
 
     // Use script tag if available.
     if (typeof document !== 'undefined') {
-      let el = document.getElementById('jupyter-config-data');
+      const el = document.getElementById('jupyter-config-data');
+
       if (el) {
-        configData = JSON.parse(el.textContent || '') as { [key: string]: string };
+        configData = JSON.parse(el.textContent || '') as {
+          [key: string]: string
+        };
         found = true;
       }
     }
     // Otherwise use CLI if given.
     if (!found && typeof process !== 'undefined') {
       try {
-        let cli = minimist(process.argv.slice(2));
+        const cli = minimist(process.argv.slice(2));
         if ('jupyter-config-data' in cli) {
-          let path: any = require('path');
-          let fullPath = path.resolve(cli['jupyter-config-data']);
+          const path: any = require('path');
+          const fullPath = path.resolve(cli['jupyter-config-data']);
+
+          /* tslint:disable */
           // Force Webpack to ignore this require.
           configData = eval('require')(fullPath) as { [key: string]: string };
+          /* tslint:enable */
         }
       } catch (e) {
         console.error(e);
@@ -93,7 +99,8 @@ namespace PageConfig {
    */
   export
   function setOption(name: string, value: string): string {
-    let last = getOption(name);
+    const last = getOption(name);
+
     configData![name] = value;
     return last;
   }
