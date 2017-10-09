@@ -4,26 +4,25 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 from __future__ import print_function
-from distutils.version import LooseVersion
 import errno
+import glob
 import json
 import logging
 import pipes
 import os
-import glob
-from functools import partial
-from os import path as osp
-from os.path import join as pjoin
-from tornado import gen
-from tornado.ioloop import IOLoop
-from subprocess import CalledProcessError, Popen, STDOUT
+import re
 import shutil
 import sys
 import tarfile
+from distutils.version import LooseVersion
+from functools import partial
 from jupyter_core.paths import ENV_JUPYTER_PATH, jupyter_config_path
-from notebook.nbextensions import (
-    GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
-)
+from notebook.nbextensions import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
+from os import path as osp
+from os.path import join as pjoin
+from subprocess import CalledProcessError, Popen, STDOUT
+from tornado import gen
+from tornado.ioloop import IOLoop
 
 from .semver import Range, gte, lt, lte, gt
 from ._version import __version__
@@ -440,9 +439,10 @@ def list_extensions(app_dir=None, logger=None):
     if app:
         logger.info('   app dir: %s' % app_dir)
         for item in sorted(app):
+            logger.info(item)
             version = extensions[item]['version']
             extra = ''
-            if item in disabled:
+            if is_disabled(item, disabled):
                 extra += ' %s' % RED_DISABLED
             else:
                 extra += ' %s' % GREEN_ENABLED
@@ -450,7 +450,7 @@ def list_extensions(app_dir=None, logger=None):
                 extra += ' %s' % RED_X
             else:
                 extra += ' %s' % GREEN_OK
-            logger.info('        %s@%s%s' % (item, version, extra))
+            logger.info('        %s v%s%s' % (item, version, extra))
             if errors[item]:
                 msg = _format_compatibility_errors(item, version, errors[item])
                 logger.warn(msg + '\n')
@@ -471,7 +471,7 @@ def list_extensions(app_dir=None, logger=None):
                 extra += ' %s' % GREEN_OK
             if item in linked:
                 extra += '*'
-            logger.info('        %s@%s%s' % (item, version, extra))
+            logger.info('        %s v%s%s' % (item, version, extra))
             if errors[item]:
                 msg = _format_compatibility_errors(item, version, errors[item])
                 logger.warn(msg + '\n')
@@ -524,6 +524,13 @@ def build(app_dir=None, name=None, version=None, logger=None):
                    logger=logger)
     return IOLoop.instance().run_sync(func)
 
+def is_disabled(name, disabled=[]):
+    for pattern in disabled:
+        if name == pattern:
+            return True
+        if re.compile(pattern).match(name) != None:
+            return True
+    return False
 
 @gen.coroutine
 def build_async(app_dir=None, name=None, version=None, logger=None, abort_callback=None):
