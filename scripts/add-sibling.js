@@ -47,6 +47,11 @@ if (target[0] === '.' || target[0] === '/') {
   childProcess.execSync('git submodule add --force '+ target + ' ' + packagePath);
 }
 
+// Remove any existing node_modules in the extension.
+if (fs.existsSync(path.join(packagePath, 'node_modules'))) {
+  fs.removeSync(path.join(packagePath, 'node_modules'));
+}
+
 // Get the package.json of the extension.
 var package = require(path.join(packagePath, 'package.json'));
 
@@ -70,4 +75,7 @@ index = index + 'import "' + package.name + '";\n';
 fs.writeFileSync(indexPath, index);
 
 // Update the core jupyterlab build dependencies.
-childProcess.execSync('npm run update:core');
+childProcess.execSync('npm run update:core', {stdio:[0,1,2]});
+
+// Update the lerna symlinks.
+childProcess.execSync('npm install', {stdio:[0,1,2]});
