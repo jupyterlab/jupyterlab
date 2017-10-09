@@ -44,7 +44,7 @@ if (target[0] === '.' || target[0] === '/') {
   packageDirName = target.split('/').pop().split('.')[0];
   var packagePath = path.join(basePath, 'packages', packageDirName);
   // Add the repository as a submodule.
-  childProcess.execSync('git submodule add --force '+ target + ' ' + packagePath);
+  childProcess.execSync('git clone '+ target + ' ' + packagePath);
 }
 
 // Remove any existing node_modules in the extension.
@@ -78,4 +78,4 @@ fs.writeFileSync(indexPath, index);
 childProcess.execSync('npm run update:core', {stdio:[0,1,2]});
 
 // Update the lerna symlinks.
-childProcess.execSync('npm install', {stdio:[0,1,2]});
+childProcess.execSync('npm install --no-optional', {stdio:[0,1,2]});
