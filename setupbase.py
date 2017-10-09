@@ -154,7 +154,6 @@ def ensure_core_data(command):
     return DecoratedCommand
 
 
->>>>>>> fcfcecec0... Remove fallback mode by creating an app directory on install
 def js_prerelease(command, strict=False):
     """decorator for building minified js/css prior to another command"""
     class DecoratedCommand(command):
