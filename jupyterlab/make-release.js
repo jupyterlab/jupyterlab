@@ -7,17 +7,8 @@ var sortPackageJson = require('sort-package-json');
 // Update the core.
 require('./update-core');
 
-// Get the current version of JupyterLab
-var cwd = path.resolve('..');
-var version = childProcess.execSync('python setup.py --version', { cwd: cwd });
-
-// Update the package.json file.
-var data = require('./package.json');
-data['jupyterlab']['version'] = version.toString().trim();
-text = JSON.stringify(sortPackageJson(data), null, 2) + '\n';
-fs.writeFileSync('./package.json', text);
-
 // Update the package.app.json file.
+var data = require('./package.json');
 data['scripts']['build'] = 'webpack'
 data['jupyterlab']['outputDir'] = '..';
 text = JSON.stringify(sortPackageJson(data), null, 2) + '\n';
