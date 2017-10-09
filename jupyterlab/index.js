@@ -33,7 +33,11 @@ function main() {
     var mimeExtensions = [];
     {{#each jupyterlab_mime_extensions}}
     try {
-        if (disabled.indexOf('{{@key}}') === -1) {
+        var enabled = !disabled.some(function(pattern) {
+            return pattern.raw === '{{@key}}' || pattern.test('{{@key}}')
+        });
+
+        if (enabled) {
             mimeExtensions.push(require('{{@key}}/{{this}}'));
         }
     } catch (e) {
@@ -54,7 +58,11 @@ function main() {
     // Handled the registered standard extensions.
     {{#each jupyterlab_extensions}}
     try {
-        if (disabled.indexOf('{{@key}}') === -1) {
+        var enabled = !disabled.some(function(pattern) {
+            return pattern.raw === '{{@key}}' || pattern.test('{{@key}}')
+        });
+
+        if (enabled) {
             lab.registerPluginModule(require('{{@key}}/{{this}}'));
         }
     } catch (e) {
@@ -70,7 +78,7 @@ function main() {
     } catch (e) {
         // No-op
     }
-    lab.start({ "ignorePlugins": ignorePlugins });
+    lab.start({ 'ignorePlugins': ignorePlugins });
 
     // Handle a selenium test.
     var seleniumTest = PageConfig.getOption('seleniumTest');
