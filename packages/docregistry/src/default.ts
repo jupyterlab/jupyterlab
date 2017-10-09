@@ -487,6 +487,10 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
+    if (!this._hasRendered) {
+      this.node.focus();
+      return;
+    }
     MessageLoop.sendMessage(this._renderer, Widget.Msg.ActivateRequest);
     if (!this.node.contains(document.activeElement)) {
       this.node.focus();
@@ -516,10 +520,11 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
     }
     let mimeModel = new MimeModel({ data });
     return this._renderer.renderModel(mimeModel).then(() => {
-      // Handle a render after an activation.
-      if (this.node === document.activeElement) {
+      // Handle the first render after an activation.
+      if (!this._hasRendered && this.node === document.activeElement) {
         MessageLoop.sendMessage(this._renderer, Widget.Msg.ActivateRequest);
       }
+      this._hasRendered = true;
     });
   }
 
@@ -536,6 +541,7 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
   private _mimeType: string;
   private _ready = new PromiseDelegate<void>();
   private _dataType: 'string' | 'json';
+  private _hasRendered = false;
 }
 
 
