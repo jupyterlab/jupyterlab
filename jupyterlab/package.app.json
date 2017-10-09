@@ -4,7 +4,8 @@
   "scripts": {
     "build": "webpack",
     "build:prod": "webpack --devtool source-map",
-    "publish": "node make-release.js"
+    "publish": "node make-release.js",
+    "watch": "webpack --watch"
   },
   "dependencies": {
     "@jupyterlab/application": "^0.10.0",

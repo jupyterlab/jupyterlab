@@ -60,6 +60,12 @@ module.exports = {
       { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, use: 'url-loader?limit=10000&mimetype=image/svg+xml' }
     ],
   },
+  resolve: {
+    alias: package_data.jupyterlab.linkedPackages
+  },
+  watchOptions: {
+    ignored: /node_modules/
+  },
   node: {
     fs: 'empty'
   },
