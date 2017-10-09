@@ -127,33 +127,6 @@ def find_data_files():
     return files
 
 
-def ensure_core_data(command):
-    """decorator for building minified js/css prior to another command"""
-    class DecoratedCommand(command):
-
-        def run(self):
-            coredeps = self.distribution.get_command_obj('coredeps')
-            if not is_repo and all(osp.exists(t) for t in coredeps.targets):
-                # build_py or build_ext, nothing to do
-                command.run(self)
-                return
-
-            try:
-                self.distribution.run_command('coredeps')
-            except Exception as e:
-                missing = [t for t in coredeps.targets if not osp.exists(t)]
-                if missing:
-                    log.warn('file check failed')
-                    if missing:
-                        log.error('missing files: %s' % missing)
-                    raise e
-                else:
-                    log.warn('core deps check failed (not a problem)')
-                    log.warn(str(e))
-            command.run(self)
-    return DecoratedCommand
-
-
 def js_prerelease(command, strict=False):
     """decorator for building minified js/css prior to another command"""
     class DecoratedCommand(command):
@@ -185,6 +158,7 @@ def update_package_data(distribution):
     """update build_py options to get package_data changes"""
     build_py = distribution.get_command_obj('build_py')
     build_py.finalize_options()
+
 
 class CheckAssets(Command):
     description = 'check for required assets'
