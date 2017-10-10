@@ -19,7 +19,7 @@
     "@jupyterlab/codemirror": "^0.10.0",
     "@jupyterlab/completer": "^0.10.0",
     "@jupyterlab/console": "^0.10.0",
-    "@jupyterlab/coreutils": "^0.10.0",
+    "@jupyterlab/coreutils": "^0.10.1",
     "@jupyterlab/csvviewer": "^0.10.0",
     "@jupyterlab/docmanager": "^0.10.0",
     "@jupyterlab/docregistry": "^0.10.0",

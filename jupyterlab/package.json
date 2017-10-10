@@ -21,7 +21,7 @@
     "@jupyterlab/completer-extension": "^0.10.0",
     "@jupyterlab/console": "^0.10.0",
     "@jupyterlab/console-extension": "^0.10.0",
-    "@jupyterlab/coreutils": "^0.10.0",
+    "@jupyterlab/coreutils": "^0.10.1",
     "@jupyterlab/csvviewer": "^0.10.0",
     "@jupyterlab/csvviewer-extension": "^0.10.0",
     "@jupyterlab/docmanager": "^0.10.0",

@@ -16,7 +16,7 @@
     "@jupyterlab/application": "^0.10.0",
     "@jupyterlab/apputils": "^0.10.0",
     "@jupyterlab/codeeditor": "^0.10.0",
-    "@jupyterlab/coreutils": "^0.10.0",
+    "@jupyterlab/coreutils": "^0.10.1",
     "@phosphor/coreutils": "^1.2.0",
     "@phosphor/messaging": "^1.2.1",
     "@phosphor/signaling": "^1.2.1",

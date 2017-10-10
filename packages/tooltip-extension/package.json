@@ -15,7 +15,7 @@
     "@jupyterlab/application": "^0.10.0",
     "@jupyterlab/codeeditor": "^0.10.0",
     "@jupyterlab/console": "^0.10.0",
-    "@jupyterlab/coreutils": "^0.10.0",
+    "@jupyterlab/coreutils": "^0.10.1",
     "@jupyterlab/notebook": "^0.10.0",
     "@jupyterlab/services": "^0.49.0",
     "@jupyterlab/tooltip": "^0.10.0",
