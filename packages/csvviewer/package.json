@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@jupyterlab/apputils": "^0.10.0",
-    "@jupyterlab/coreutils": "^0.10.0",
+    "@jupyterlab/coreutils": "^0.10.1",
     "@jupyterlab/docregistry": "^0.10.0",
     "@phosphor/algorithm": "^1.1.1",
     "@phosphor/coreutils": "^1.2.0",
