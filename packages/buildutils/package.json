@@ -12,8 +12,8 @@
     "lib": "lib/"
   },
   "dependencies": {
-    "fs-extra": "^4.0.2",
-    "glob": "^7.1.2"
+    "fs-extra": "~4.0.2",
+    "glob": "~7.1.2"
   },
   "devDependencies": {
     "@types/fs-extra": "^4.0.2",
