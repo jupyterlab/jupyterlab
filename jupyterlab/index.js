@@ -24,7 +24,9 @@ function main() {
     var disabled = [];
     try {
         var option = PageConfig.getOption('disabledExtensions');
-        disabled = JSON.parse(option);
+        disabled = JSON.parse(option).map(function(pattern) {
+            return { raw: pattern, rule: new RegExp(pattern) };
+        });
     } catch (e) {
         // No-op
     }
