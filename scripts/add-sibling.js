@@ -78,4 +78,4 @@ fs.writeFileSync(indexPath, index);
 childProcess.execSync('npm run update:core', {stdio:[0,1,2]});
 
 // Update the lerna symlinks.
-childProcess.execSync('npm install --no-optional', {stdio:[0,1,2]});
+childProcess.execSync('npm install', {stdio:[0,1,2]});
