@@ -31,7 +31,7 @@ packages.forEach(function(packagePath) {
   }
 
   // Make sure it is included as a dependency.
-  corePackage.dependencies[data.name] = '~' + String(data.version);
+  corePackage.dependencies[data.name] = '^' + String(data.version);
 
   var jlab = data.jupyterlab;
   if (!jlab) {
