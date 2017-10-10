@@ -90,6 +90,15 @@ packages are included in `jupyter labextension list`.
 You can also use `jupyter labextension install <path>`, but that will
 only copy the current contents of the source folder.
 
+When using linked packages, you can run the command
+
+```
+jupyter lab --watch
+```
+
+This will cause the application to incrementally rebuild when one of the
+linked packages changes.
+
 Note that the application is built against **released** versions of the
 core JupyterLab extensions.  If your extension depends on JupyterLab
 packages, it should be compatible with the dependencies in the
