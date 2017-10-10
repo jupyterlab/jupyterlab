@@ -31,14 +31,32 @@ function main() {
         // No-op
     }
 
+    // Get the deferred extensions.
+    var deferredExtensions = [];
+    var ignorePlugins = [];
+    try {
+        var option = PageConfig.getOption('deferredExtensions');
+        deferredExtensions = JSON.parse(option).map(function(pattern) {
+            return { raw: pattern, rule: new RegExp(pattern) };
+        });
+    } catch (e) {
+        // No-op
+    }
+
     // Handle the registered mime extensions.
     var mimeExtensions = [];
     {{#each jupyterlab_mime_extensions}}
     try {
+        var deferred = !deferredExtensions.some(function(pattern) {
+            return pattern.raw === '{{@key}}' || pattern.rule.test('{{@key}}')
+        });
         var enabled = !disabled.some(function(pattern) {
-            return pattern.raw === '{{@key}}' || pattern.test('{{@key}}')
+            return pattern.raw === '{{@key}}' || pattern.rule.test('{{@key}}')
         });
 
+        if (deferred) {
+            ignorePlugins.push('{{key}}');
+        }
         if (enabled) {
             mimeExtensions.push(require('{{@key}}/{{this}}'));
         }
@@ -60,10 +78,16 @@ function main() {
     // Handled the registered standard extensions.
     {{#each jupyterlab_extensions}}
     try {
+        var deferred = !deferredExtensions.some(function(pattern) {
+            return pattern.raw === '{{@key}}' || pattern.rule.test('{{@key}}')
+        });
         var enabled = !disabled.some(function(pattern) {
-            return pattern.raw === '{{@key}}' || pattern.test('{{@key}}')
+            return pattern.raw === '{{@key}}' || pattern.rule.test('{{@key}}')
         });
 
+        if (deferred) {
+            ignorePlugins.push('{{key}}');
+        }
         if (enabled) {
             lab.registerPluginModule(require('{{@key}}/{{this}}'));
         }
@@ -72,15 +96,7 @@ function main() {
     }
     {{/each}}
 
-    // Handle the ignored plugins.
-    var ignorePlugins = [];
-    try {
-        var option = PageConfig.getOption('ignorePlugins');
-        ignorePlugins = JSON.parse(option);
-    } catch (e) {
-        // No-op
-    }
-    lab.start({ 'ignorePlugins': ignorePlugins });
+    lab.start({ ignorePlugins: ignorePlugins });
 
     // Handle a selenium test.
     var seleniumTest = PageConfig.getOption('seleniumTest');
