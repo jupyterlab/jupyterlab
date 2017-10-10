@@ -81,7 +81,7 @@ function validate(dname) {
     });
     Object.keys(deps).forEach(function(name) {
         if (versions[name]) {
-            var desired = '^' + versions[name];
+            var desired = '~' + versions[name];
             if (deps[name] !== desired) {
                 problems.push('Bad core version: ' + name + ' should be ' + desired);
             }
