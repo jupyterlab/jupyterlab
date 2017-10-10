@@ -21,11 +21,6 @@ if (!fs.existsSync(packagePath)) {
   process.exit(1);
 }
 
-// Extract the package info.
-var data = require(path.join(packagePath, 'package.json'));
-var name = data.name;
-var version = data.version;
-
 
 /**
  * Run a command with terminal output.
@@ -41,7 +36,15 @@ function run(cmd, options) {
 console.log('Patching', target, '...');
 run('npm run build:packages');
 run('npm version patch', { cwd: packagePath });
+
+// Extract the new package info.
+var data = require(path.join(packagePath, 'package.json'));
+var name = data.name;
+var version = data.version;
+
 run('npm publish', { cwd: packagePath});
-run('npm run update:dependency ' + name + '^' + version);
+run('npm run update:dependency ' + name + ' ^' + version);
 run('git commit -a -m "Release ' + name + '@' + version + '"');
 run('git tag ' + name + '@' + version);
+
+console.log('Finished!')
