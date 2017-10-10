@@ -92,8 +92,9 @@ shasum -a 256 dist/*.tar.gz
 ## Making a patch release of a JavaScript Package
 - Create a branch based on the last Python release if one does not exist.
 - Create a PR against that branch with the changes.
-- Run the following script to make a patch release, where `foo` is the 
-folder in `/packages`:
+- Merge the PR.
+- Run the following script from the branch to make a patch release, 
+where `foo` is the folder in `/packages`:
 
 ```bash
 node scripts/patch-release.js <foo>
