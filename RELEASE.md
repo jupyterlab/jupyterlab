@@ -87,3 +87,16 @@ shasum -a 256 dist/*.tar.gz
 ### Set master back to dev version
 - Update `jupyterlab/_version.py` with a `dev` version
 - Commit and push the version update.
+
+
+## Making a patch release of a JavaScript Package
+- Create a branch based on the last Python release if one does not exist.
+- Create a PR against that branch with the changes.
+- Run the following script to make a patch release, where `foo` is the 
+folder in `/packages`:
+
+```bash
+node scripts/patch-release.js <foo>
+```
+
+- Push the resulting commit and tag.
