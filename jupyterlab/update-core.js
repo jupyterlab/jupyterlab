@@ -13,6 +13,7 @@ var corePackage = require('./package.json');
 corePackage.jupyterlab.extensions = {};
 corePackage.jupyterlab.mimeExtensions = {};
 corePackage.jupyterlab.version = version;
+corePackage.jupyterlab.linkedPackages = {};
 corePackage.dependencies = {};
 
 var basePath = path.resolve('..');
@@ -30,8 +31,9 @@ packages.forEach(function(packagePath) {
     return;
   }
 
-  // Make sure it is included as a dependency.
+  // Make sure it is included as a dependency and a linked package.
   corePackage.dependencies[data.name] = '^' + String(data.version);
+  corePackage.jupyterlab.linkedPackages[data.name] = packagePath;
 
   var jlab = data.jupyterlab;
   if (!jlab) {

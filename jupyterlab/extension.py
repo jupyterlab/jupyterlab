@@ -103,8 +103,11 @@ def load_jupyter_server_extension(nbapp):
     config.user_settings_dir = get_user_settings_dir()
     
     if watch_mode:
-        config.assets_dir = os.path.join(app_dir, 'staging', 'build')
-        watch(os.path.join(app_dir, 'staging'))
+        if core_mode:
+            watch(here)
+        else:
+            config.assets_dir = os.path.join(app_dir, 'staging', 'build')
+            watch(os.path.join(app_dir, 'staging'))
 
     add_handlers(web_app, config)
 
