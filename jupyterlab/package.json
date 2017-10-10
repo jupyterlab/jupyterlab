@@ -137,6 +137,7 @@
       "@jupyterlab/terminal",
       "@jupyterlab/tooltip",
       "@phosphor/widgets"
-    ]
+    ],
+    "version": "0.28.0.dev0"
   }
 }

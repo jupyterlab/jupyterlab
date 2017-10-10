@@ -90,8 +90,41 @@ def find_package_data():
     return {
         'jupyterlab': ['build/*', 'index.app.js',
                        'webpack.config.js', 'package.app.json',
-                       'released_packages.txt', 'node-version-check.js'] + theme_dirs + schema_dirs
+                       'released_packages.txt', 'node-version-check.js'
+                       ] + theme_dirs + schema_dirs
     }
+
+
+def find_data_files():
+    """
+    Find data_files.
+    """
+    if not os.path.exists(pjoin('jupyterlab', 'build')):
+        return []
+
+    files = []
+
+    static_files = os.listdir(pjoin('jupyterlab', 'build'))
+    files.append(('share/jupyter/lab/static',
+        ['jupyterlab/build/%s' % f for f in static_files]))
+
+    for dir, subdirs, fnames in os.walk(pjoin('jupyterlab', 'schemas')):
+        dir = dir.replace(os.sep, '/')
+        schema_files = []
+        for fname in fnames:
+            schema_files.append('%s/%s' % (dir, fname))
+        slice_len = len('jupyterlab/')
+        files.append(('share/jupyter/lab/%s' % dir[slice_len:], schema_files))
+
+    for dir, subdirs, fnames in os.walk(pjoin('jupyterlab', 'themes')):
+        dir = dir.replace(os.sep, '/')
+        themes_files = []
+        for fname in fnames:
+            themes_files.append('%s/%s' % (dir, fname))
+        slice_len = len('jupyterlab/')
+        files.append(('share/jupyter/lab/%s' % dir[slice_len:], themes_files))
+
+    return files
 
 
 def js_prerelease(command, strict=False):
@@ -125,6 +158,7 @@ def update_package_data(distribution):
     """update build_py options to get package_data changes"""
     build_py = distribution.get_command_obj('build_py')
     build_py.finalize_options()
+
 
 class CheckAssets(Command):
     description = 'check for required assets'

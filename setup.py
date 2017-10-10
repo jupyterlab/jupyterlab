@@ -45,6 +45,7 @@ from setupbase import (
     bdist_egg_disabled,
     find_packages,
     find_package_data,
+    find_data_files,
     js_prerelease,
     CheckAssets,
     version_ns,
@@ -67,6 +68,8 @@ setup_args = dict(
     scripts          = glob(pjoin('scripts', '*')),
     packages         = find_packages(),
     package_data     = find_package_data(),
+    data_files       = find_data_files(),
+    include_package_data = True,
     author           = 'Jupyter Development Team',
     author_email     = 'jupyter@googlegroups.com',
     url              = 'http://jupyter.org',
@@ -109,7 +112,7 @@ setup_args['cmdclass'] = cmdclass
 setuptools_args = {}
 install_requires = setuptools_args['install_requires'] = [
     'notebook>=4.3.1',
-    'jupyterlab_launcher>=0.5.0'
+    'jupyterlab_launcher>=0.5.2'
 ]
 
 extras_require = setuptools_args['extras_require'] = {
