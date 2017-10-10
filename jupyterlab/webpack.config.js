@@ -14,11 +14,12 @@ fs.ensureDirSync(buildDir);
 fs.copySync('./package.json', './build/package.json');
 
 // Handle the extensions.
-var extensions = package_data.jupyterlab.extensions;
-var mimeExtensions = package_data.jupyterlab.mimeExtensions;
+var jlab = package_data.jupyterlab;
+var extensions = jlab.extensions;
+var mimeExtensions = jlab.mimeExtensions;
 Build.ensureAssets({
   packageNames: Object.keys(mimeExtensions).concat(Object.keys(extensions)),
-  output: package_data.jupyterlab.outputDir
+  output: jlab.outputDir
 });
 
 // Create the entry point file.
@@ -40,9 +41,8 @@ fs.writeFileSync(path.resolve(buildDir, 'hash.md5'), digest);
 
 // Handle linked packages.
 var linkedPackages = {};
-Object.keys(package_data.jupyterlab.linkedPackages).forEach(function (name) {
-  let raw = package_data.jupyterlab.linkedPackages[name];
-  linkedPackages[name] = fs.realpathSync(raw);
+Object.keys(jlab.linkedPackages).forEach(function (name) {
+  linkedPackages[name] = fs.realpathSync(jlab.linkedPackages[name]);
 });
 
 module.exports = {
