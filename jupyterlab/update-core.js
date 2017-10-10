@@ -33,7 +33,8 @@ packages.forEach(function(packagePath) {
 
   // Make sure it is included as a dependency and a linked package.
   corePackage.dependencies[data.name] = '^' + String(data.version);
-  corePackage.jupyterlab.linkedPackages[data.name] = packagePath;
+  var relativePath = '../packages/' + path.basename(packagePath);
+  corePackage.jupyterlab.linkedPackages[data.name] = relativePath;
 
   var jlab = data.jupyterlab;
   if (!jlab) {

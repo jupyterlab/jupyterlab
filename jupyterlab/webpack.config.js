@@ -38,6 +38,13 @@ hash.update(fs.readFileSync('./package.json'));
 var digest = hash.digest('hex');
 fs.writeFileSync(path.resolve(buildDir, 'hash.md5'), digest);
 
+// Handle linked packages.
+var linkedPackages = {};
+Object.keys(package_data.jupyterlab.linkedPackages).forEach(function (name) {
+  let raw = package_data.jupyterlab.linkedPackages[name];
+  linkedPackages[name] = fs.realpathSync(raw);
+});
+
 module.exports = {
   entry:  path.resolve(buildDir, 'index.out.js'),
   output: {
@@ -61,7 +68,7 @@ module.exports = {
     ],
   },
   resolve: {
-    alias: package_data.jupyterlab.linkedPackages
+    alias: linkedPackages
   },
   watchOptions: {
     ignored: /node_modules/
