@@ -10,11 +10,11 @@ import {
 } from '@phosphor/commands';
 
 import {
-  SplitPanel, Widget
+  BoxPanel, Widget
 } from '@phosphor/widgets';
 
 import {
-  ClientSession
+  ClientSession, Toolbar
 } from '@jupyterlab/apputils';
 
 import {
@@ -68,15 +68,24 @@ function main(): void {
   // Hide the widget when it first loads.
   completer.hide();
 
-  let panel = new SplitPanel();
+  const toolbar = new Toolbar();
+  toolbar.addItem('spacer', Toolbar.createSpacerItem());
+  toolbar.addItem('interrupt', Toolbar.createInterruptButton(session));
+  toolbar.addItem('restart', Toolbar.createRestartButton(session));
+  toolbar.addItem('name', Toolbar.createKernelNameItem(session));
+  toolbar.addItem('status', Toolbar.createKernelStatusItem(session));
+
+  let panel = new BoxPanel();
   panel.id = 'main';
-  panel.orientation = 'horizontal';
+  panel.direction = 'top-to-bottom';
   panel.spacing = 0;
   panel.addWidget(completer);
+  panel.addWidget(toolbar);
   panel.addWidget(cellWidget);
   Widget.attach(panel, document.body);
 
-  SplitPanel.setStretch(cellWidget, 1);
+  BoxPanel.setStretch(toolbar, 0);
+  BoxPanel.setStretch(cellWidget, 1);
   window.onresize = () => panel.update();
 
   commands.addCommand('invoke:completer', {

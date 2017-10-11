@@ -17,9 +17,15 @@ body {
   left: 4px;
   right: 4px;
   bottom: 4px;
+  border-bottom: 1px solid #E0E0E0;
 }
 
 
-.jp-NotebookPanel {
-  border-bottom: 1px solid #E0E0E0;
+.jp-Cell .jp-OutputArea {
+    max-height: calc(100vh - 100px);
+}
+
+
+.jp-Toolbar {
+    min-height: var(--jp-private-toolbar-height);
 }
