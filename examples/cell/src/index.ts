@@ -36,7 +36,7 @@ import {
 
 function main(): void {
   let manager = new SessionManager();
-  let session = new ClientSession({ manager });
+  let session = new ClientSession({ manager, name: 'Example' });
   session.initialize().then(() => { console.log('initialized'); });
 
   // Initialize the command registry with the bindings.
@@ -96,6 +96,8 @@ function main(): void {
     keys: ['Shift Enter'],
     command: 'run:cell'
   });
+
+  cellWidget.activate();
 }
 
 window.onload = main;
