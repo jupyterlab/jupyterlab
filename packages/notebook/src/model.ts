@@ -69,9 +69,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     let factory = (
       options.contentFactory || NotebookModel.defaultContentFactory
     );
-    let cellDB = this.modelDB.view('cells');
-    factory.modelDB = cellDB;
-    this.contentFactory = factory;
+    this.contentFactory = factory.clone(this.modelDB.view('cells'));
     this._cells = new CellList(this.modelDB, this.contentFactory);
     // Add an initial code cell by default.
     if (!this._cells.length) {
@@ -329,7 +327,7 @@ namespace NotebookModel {
     contentFactory?: IContentFactory;
 
     /**
-     * An optional modelDB for storing notebook data.
+     * A modelDB for storing notebook data.
      */
     modelDB?: IModelDB;
   }
@@ -344,6 +342,9 @@ namespace NotebookModel {
      */
     readonly codeCellContentFactory: CodeCellModel.IContentFactory;
 
+    /**
+     * The IModelDB in which to put data for the notebook model.
+     */
     modelDB: IModelDB;
 
     /**
@@ -375,6 +376,11 @@ namespace NotebookModel {
      *   new cell will be intialized with the data from the source.
      */
     createRawCell(options: CellModel.IOptions): IRawCellModel;
+
+    /**
+     * Clone the content factory with a new IModelDB.
+     */
+    clone(modelDB: IModelDB): IContentFactory;
   }
 
   /**
@@ -389,7 +395,7 @@ namespace NotebookModel {
       this.codeCellContentFactory = (options.codeCellContentFactory ||
         CodeCellModel.defaultContentFactory
       );
-      this._modelDB = options.modelDB || null;
+      this.modelDB = options.modelDB;
     }
 
     /**
@@ -397,13 +403,10 @@ namespace NotebookModel {
      */
     readonly codeCellContentFactory: CodeCellModel.IContentFactory;
 
-    get modelDB(): IModelDB {
-      return this._modelDB;
-    }
-
-    set modelDB(db: IModelDB) {
-      this._modelDB = db;
-    }
+    /**
+     * The IModelDB in which to put the notebook data.
+     */
+    readonly modelDB: IModelDB;
 
     /**
      * Create a new code cell.
@@ -419,11 +422,11 @@ namespace NotebookModel {
       if (options.contentFactory) {
         options.contentFactory = this.codeCellContentFactory;
       }
-      if (this._modelDB) {
+      if (this.modelDB) {
         if (!options.id) {
           options.id = uuid();
         }
-        options.modelDB = this._modelDB.view(options.id);
+        options.modelDB = this.modelDB.view(options.id);
       }
       return new CodeCellModel(options);
     }
@@ -437,11 +440,11 @@ namespace NotebookModel {
      *   new cell will be intialized with the data from the source.
      */
     createMarkdownCell(options: CellModel.IOptions): IMarkdownCellModel {
-      if (this._modelDB) {
+      if (this.modelDB) {
         if (!options.id) {
           options.id = uuid();
         }
-        options.modelDB = this._modelDB.view(options.id);
+        options.modelDB = this.modelDB.view(options.id);
       }
       return new MarkdownCellModel(options);
     }
@@ -455,16 +458,24 @@ namespace NotebookModel {
      *   new cell will be intialized with the data from the source.
      */
     createRawCell(options: CellModel.IOptions): IRawCellModel {
-      if (this._modelDB) {
+      if (this.modelDB) {
         if (!options.id) {
           options.id = uuid();
         }
-        options.modelDB = this._modelDB.view(options.id);
+        options.modelDB = this.modelDB.view(options.id);
       }
      return new RawCellModel(options);
     }
 
-    private _modelDB: IModelDB;
+    /**
+     * Clone the content factory with a new IModelDB.
+     */
+    clone(modelDB: IModelDB): ContentFactory {
+      return new ContentFactory({
+        modelDB: modelDB,
+        codeCellContentFactory: this.codeCellContentFactory
+      });
+    }
   }
 
   /**
