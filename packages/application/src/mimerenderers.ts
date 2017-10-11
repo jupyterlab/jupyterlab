@@ -53,7 +53,7 @@ function createRendermimePlugins(extensions: IRenderMime.IExtensionModule[]): Ju
 export
 function createRendermimePlugin(item: IRenderMime.IExtension): JupyterLabPlugin<void> {
   return {
-    id: `@jupyterlab/application:mimerenderer-${item.name}`,
+    id: item.id,
     requires: [ILayoutRestorer],
     autoStart: true,
     activate: (app: JupyterLab, restorer: ILayoutRestorer) => {
