@@ -47,4 +47,4 @@ run('npm run update:dependency ' + name + ' ^' + version);
 run('git commit -a -m "Release ' + name + '@' + version + '"');
 run('git tag ' + name + '@' + version);
 
-console.log('Finished!')
+console.log('\n\nFinished, make sure to push the commit and the tag.')

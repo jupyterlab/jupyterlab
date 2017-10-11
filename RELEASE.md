@@ -94,10 +94,10 @@ shasum -a 256 dist/*.tar.gz
 - Create a PR against that branch with the changes.
 - Merge the PR.
 - Run the following script from the branch to make a patch release, 
-where `foo` is the folder in `/packages`:
+where the package is in `/packages/packageFolder`:
 
 ```bash
-node scripts/patch-release.js <foo>
+node scripts/patch-release.js packageFolder
 ```
 
 - Push the resulting commit and tag.
