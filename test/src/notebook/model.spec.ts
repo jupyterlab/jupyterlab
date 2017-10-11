@@ -12,7 +12,7 @@ import {
 } from '@jupyterlab/cells';
 
 import {
-  nbformat
+  nbformat, ModelDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -50,7 +50,8 @@ describe('notebook/notebook/model', () => {
       it('should accept an optional factory', () => {
         let contentFactory = new NotebookModel.ContentFactory({});
         let model = new NotebookModel({ contentFactory });
-        expect(model.contentFactory).to.be(contentFactory);
+        expect(model.contentFactory.codeCellContentFactory)
+        .to.be(contentFactory.codeCellContentFactory);
       });
 
     });
@@ -177,7 +178,8 @@ describe('notebook/notebook/model', () => {
 
       it('should be the cell model factory used by the model', () => {
         let model = new NotebookModel();
-        expect(model.contentFactory).to.be(NotebookModel.defaultContentFactory);
+        expect(model.contentFactory.codeCellContentFactory)
+        .to.be(NotebookModel.defaultContentFactory.codeCellContentFactory);
       });
 
     });
@@ -445,6 +447,29 @@ describe('notebook/notebook/model', () => {
           let cell = orig.toJSON();
           let newCell = factory.createMarkdownCell({ cell });
           expect(newCell.value.text).to.be('foo');
+        });
+
+      });
+
+      describe('#modelDB', () => {
+
+        it('should be undefined by default', () => {
+          expect(factory.modelDB).to.be(undefined);
+        });
+
+      });
+
+      describe('#clone()', () => {
+
+        it('should create a new content factory with a new IModelDB', () => {
+          let modelDB = new ModelDB();
+          let factory = new NotebookModel.ContentFactory({ modelDB });
+          expect(factory.modelDB).to.be(modelDB);
+          let newModelDB = new ModelDB();
+          let newFactory = factory.clone(newModelDB);
+          expect(newFactory.modelDB).to.be(newModelDB);
+          expect(newFactory.codeCellContentFactory)
+          .to.be(factory.codeCellContentFactory);
         });
 
       });
