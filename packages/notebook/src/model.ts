@@ -406,7 +406,7 @@ namespace NotebookModel {
     /**
      * The IModelDB in which to put the notebook data.
      */
-    readonly modelDB: IModelDB;
+    readonly modelDB: IModelDB | undefined;
 
     /**
      * Create a new code cell.
