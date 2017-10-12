@@ -2,14 +2,30 @@
   "name": "@jupyterlab/tooltip-extension",
   "version": "0.11.0",
   "description": "JupyterLab - Tooltip Extension",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
   "files": [
     "lib/*.d.ts",
+    "lib/*.js.map",
     "lib/*.js"
   ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "directories": {
     "lib": "lib/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib",
+    "watch": "tsc -w"
   },
   "dependencies": {
     "@jupyterlab/application": "^0.11.0",
@@ -26,22 +42,7 @@
     "rimraf": "^2.5.2",
     "typescript": "~2.4.1"
   },
-  "scripts": {
-    "build": "tsc",
-    "clean": "rimraf lib",
-    "watch": "tsc -w"
-  },
   "jupyterlab": {
     "extension": true
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jupyterlab/jupyterlab.git"
-  },
-  "author": "Project Jupyter",
-  "license": "BSD-3-Clause",
-  "bugs": {
-    "url": "https://github.com/jupyterlab/jupyterlab/issues"
-  },
-  "homepage": "https://github.com/jupyterlab/jupyterlab"
+  }
 }
