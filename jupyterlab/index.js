@@ -13,9 +13,11 @@ function main() {
     var disabled = [];
     try {
         var option = PageConfig.getOption('disabledExtensions');
-        disabled = JSON.parse(option).map(function(pattern) {
-            return { raw: pattern, rule: new RegExp(pattern) };
-        });
+        if (option) {
+            disabled = JSON.parse(option).map(function(pattern) {
+                return { raw: pattern, rule: new RegExp(pattern) };
+            });
+        }
     } catch (error) {
         console.warn('Unable to parse disabled extensions.', error);
     }
@@ -25,9 +27,11 @@ function main() {
     var ignorePlugins = [];
     try {
         var option = PageConfig.getOption('deferredExtensions');
-        deferredExtensions = JSON.parse(option).map(function(pattern) {
-            return { raw: pattern, rule: new RegExp(pattern) };
-        });
+        if (option) {
+            deferredExtensions = JSON.parse(option).map(function(pattern) {
+                return { raw: pattern, rule: new RegExp(pattern) };
+            });
+        }
     } catch (error) {
         console.warn('Unable to parse deferred extensions.', error);
     }
