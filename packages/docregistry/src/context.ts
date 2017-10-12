@@ -263,7 +263,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       }).then(() => {
         return this._maybeOverWrite(newPath);
       }).catch(err => {
-        if (err.xhr.status !== 404) {
+        if (!err.xhr || err.xhr.status !== 404) {
           throw err;
         }
         return this._finishSaveAs(newPath);
@@ -504,7 +504,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       }
       return this._manager.contents.save(path, options);
     }, (err) => {
-      if (err.xhr.status === 404) {
+      if (!err.xhr || err.xhr.status === 404) {
         return this._manager.contents.save(path, options);
       }
       throw err;
@@ -532,7 +532,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     }
     return promise.catch(err => {
       // Handle a read-only folder.
-      if (err.message !== 'Forbidden') {
+      if (!err.xhr || err.xhr.status !== 403) {
         throw err;
       }
     });
