@@ -121,9 +121,10 @@ class SaveHandler implements IDisposable {
       return;
     }
 
-    // Bail if the model is not dirty or it is read only, or the dialog
+    // Bail if the model is not dirty or the file is not writable, or the dialog
     // is already showing.
-    if (!context.model.dirty || context.model.readOnly || this._inDialog) {
+    let writable = context.contentsModel && context.contentsModel.writable;
+    if (!writable || !context.model.dirty || this._inDialog) {
       return;
     }
 
