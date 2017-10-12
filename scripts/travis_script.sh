@@ -73,6 +73,15 @@ if [[ $GROUP == cli ]]; then
     python -m jupyterlab.selenium_check 
     jupyter labextension list
 
+    # Make sure we can non-dev install.
+    conda env create -n test_install notebook
+    source activate test_install
+    pip install .
+    jupyter lab build
+    pip install selenium
+    python -m jupyterlab.selenium_check
+    source deactivate
+
     # Test the cli apps.
     jupyter lab clean
     jupyter lab build
