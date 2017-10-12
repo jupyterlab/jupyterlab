@@ -45,7 +45,9 @@ class MathJaxTypesetter implements IRenderMime.ILatexTypesetter {
       try {
         MathJax.Hub.Queue(
           ['Require', MathJax.Ajax, '[MathJax]/extensions/TeX/AMSmath.js'],
-           function() { MathJax.InputJax.TeX.resetEquationNumbers(); }
+          () => {
+            MathJax.InputJax.TeX.resetEquationNumbers();
+          }
         );
       } catch (e) {
         console.error('Error queueing resetEquationNumbers:', e);
