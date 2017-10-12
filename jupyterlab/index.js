@@ -64,8 +64,15 @@ function main() {
         }
         if (!isDisabled('{{@key}}')) {
             var module = require('{{@key}}/{{this}}');
-            if (Array.isArray(module.default)) {
-                module.default.forEach(function(plugin) {
+            var extension = module.default;
+
+            // Handle CommonJS exports.
+            if (!module.hasOwnProperty('__esModule')) {
+              extension = module;
+            }
+
+            if (Array.isArray(extension)) {
+                extension.forEach(function(plugin) {
                     if (isDeferred(plugin.id)) {
                         ignorePlugins.push(plugin.id);
                     }
@@ -74,7 +81,7 @@ function main() {
                     }
                 });
             } else {
-                mimeExtensions.push(module);
+                mimeExtensions.push(extension);
             }
         }
     } catch (e) {
@@ -100,8 +107,15 @@ function main() {
         }
         if (!isDisabled('{{@key}}')) {
             var module = require('{{@key}}/{{this}}');
-            if (Array.isArray(module.default)) {
-                module.default.forEach(function(plugin) {
+            var extension = module.default;
+
+            // Handle CommonJS exports.
+            if (!module.hasOwnProperty('__esModule')) {
+              extension = module;
+            }
+
+            if (Array.isArray(extension)) {
+                extension.forEach(function(plugin) {
                     if (isDeferred(plugin.id)) {
                         ignorePlugins.push(plugin.id);
                     }
@@ -110,7 +124,7 @@ function main() {
                     }
                 });
             } else {
-                lab.registerPluginModule(module);
+                lab.registerPluginModule(extension);
             }
         }
     } catch (e) {

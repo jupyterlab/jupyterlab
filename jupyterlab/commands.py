@@ -753,6 +753,7 @@ def _toggle_extension(extension, value, app_dir=None, logger=None):
     """
     app_dir = get_app_dir(app_dir)
     extensions = _get_extensions(app_dir)
+    config = _get_build_config(app_dir)
     disabled = config.get('disabledExtensions', [])
     if value and extension not in disabled:
         disabled.append(extension)
