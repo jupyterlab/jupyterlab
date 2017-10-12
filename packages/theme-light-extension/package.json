@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/theme-light-extension",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
@@ -16,8 +16,8 @@
   },
   "description": "JupyterLab - Default Light Theme",
   "dependencies": {
-    "@jupyterlab/application": "^0.10.0",
-    "@jupyterlab/apputils": "^0.10.0",
+    "@jupyterlab/application": "^0.11.0",
+    "@jupyterlab/apputils": "^0.11.0",
     "font-awesome": "^4.7.0"
   },
   "devDependencies": {
