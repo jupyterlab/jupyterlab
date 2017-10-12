@@ -10,11 +10,13 @@ var app = require('@jupyterlab/application').JupyterLab;
 
 function main() {
     // Get the disabled extensions.
-    var disabled = [];
+    var disabled = { patterns: [], matches: [] };
+    var disabledExtensions = [];
     try {
         var option = PageConfig.getOption('disabledExtensions');
         if (option) {
-            disabled = JSON.parse(option).map(function(pattern) {
+            disabledExtensions = JSON.parse(option).map(function(pattern) {
+                disabled.patterns.push(pattern);
                 return { raw: pattern, rule: new RegExp(pattern) };
             });
         }
@@ -23,12 +25,14 @@ function main() {
     }
 
     // Get the deferred extensions.
+    var deferred = { patterns: [], matches: [] };
     var deferredExtensions = [];
     var ignorePlugins = [];
     try {
         var option = PageConfig.getOption('deferredExtensions');
         if (option) {
             deferredExtensions = JSON.parse(option).map(function(pattern) {
+                deferred.patterns.push(pattern);
                 return { raw: pattern, rule: new RegExp(pattern) };
             });
         }
@@ -43,7 +47,7 @@ function main() {
     }
 
     function isDisabled(value) {
-        return disabled.some(function(pattern) {
+        return disabledExtensions.some(function(pattern) {
             return pattern.raw === value || pattern.rule.test(value)
         });
     }
@@ -54,6 +58,7 @@ function main() {
     var devMode = PageConfig.getOption('devMode') || 'false';
     var settingsDir = PageConfig.getOption('settingsDir') || '';
     var assetsDir = PageConfig.getOption('assetsDir') || '';
+    var register = [];
 
     if (version[0] === 'v') {
         version = version.slice(1);
@@ -64,9 +69,12 @@ function main() {
     {{#each jupyterlab_mime_extensions}}
     try {
         if (isDeferred('{{key}}')) {
+            deferred.matches.push('{{key}}');
             ignorePlugins.push('{{key}}');
         }
-        if (!isDisabled('{{@key}}')) {
+        if (isDisabled('{{@key}}')) {
+            disabled.matches.push('{{@key}}');
+        } else {
             var module = require('{{@key}}/{{this}}');
             var extension = module.default;
 
@@ -78,14 +86,56 @@ function main() {
             if (Array.isArray(extension)) {
                 extension.forEach(function(plugin) {
                     if (isDeferred(plugin.id)) {
+                        deferred.matches.push(plugin.id);
                         ignorePlugins.push(plugin.id);
                     }
-                    if (!isDisabled(plugin.id)) {
-                        mimeExtensions.push(plugin);
+                    if (isDisabled(plugin.id)) {
+                        disabled.matches.push(plugin.id);
+                        return;
                     }
+                    mimeExtensions.push(plugin);
                 });
             } else {
                 mimeExtensions.push(extension);
+            }
+        }
+    } catch (e) {
+        console.error(e);
+    }
+    {{/each}}
+
+    // Handled the registered standard extensions.
+    {{#each jupyterlab_extensions}}
+    try {
+        if (isDeferred('{{key}}')) {
+            deferred.matches.push('{{key}}');
+            ignorePlugins.push('{{key}}');
+        }
+        if (isDisabled('{{@key}}')) {
+            disabled.matches.push('{{@key}}');
+        } else {
+            var module = require('{{@key}}/{{this}}');
+            var extension = module.default;
+
+            // Handle CommonJS exports.
+            if (!module.hasOwnProperty('__esModule')) {
+              extension = module;
+            }
+
+            if (Array.isArray(extension)) {
+                extension.forEach(function(plugin) {
+                    if (isDeferred(plugin.id)) {
+                        deferred.matches.push(plugin.id);
+                        ignorePlugins.push(plugin.id);
+                    }
+                    if (isDisabled(plugin.id)) {
+                        disabled.matches.push(plugin.id);
+                        return;
+                    }
+                    register.push(plugin);
+                });
+            } else {
+                register.push(extension);
             }
         }
     } catch (e) {
@@ -100,42 +150,11 @@ function main() {
         devMode: devMode.toLowerCase() === 'true',
         settingsDir: settingsDir,
         assetsDir: assetsDir,
-        mimeExtensions: mimeExtensions
+        mimeExtensions: mimeExtensions,
+        disabled: disabled,
+        deferred: deferred
     });
-
-    // Handled the registered standard extensions.
-    {{#each jupyterlab_extensions}}
-    try {
-        if (isDeferred('{{key}}')) {
-            ignorePlugins.push('{{key}}');
-        }
-        if (!isDisabled('{{@key}}')) {
-            var module = require('{{@key}}/{{this}}');
-            var extension = module.default;
-
-            // Handle CommonJS exports.
-            if (!module.hasOwnProperty('__esModule')) {
-              extension = module;
-            }
-
-            if (Array.isArray(extension)) {
-                extension.forEach(function(plugin) {
-                    if (isDeferred(plugin.id)) {
-                        ignorePlugins.push(plugin.id);
-                    }
-                    if (!isDisabled(plugin.id)) {
-                        lab.registerPluginModule(plugin);
-                    }
-                });
-            } else {
-                lab.registerPluginModule(extension);
-            }
-        }
-    } catch (e) {
-        console.error(e);
-    }
-    {{/each}}
-
+    register.forEach(function(item) { lab.registerPluginModule(item); });
     lab.start({ ignorePlugins: ignorePlugins });
 
     // Handle a selenium test.
