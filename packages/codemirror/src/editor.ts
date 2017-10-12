@@ -248,7 +248,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     this.host.removeEventListener('blur', this, true);
     this.host.removeEventListener('scroll', this, true);
     this._keydownHandlers.length = 0;
-    window.clearTimeout(this._timer);
+    window.clearInterval(this._timer);
     Signal.clearData(this);
   }
 
