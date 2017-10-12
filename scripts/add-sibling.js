@@ -58,7 +58,7 @@ var package = require(path.join(packagePath, 'package.json'));
 // Add the extension to packages/all-packages/package.json
 var allPackagesPath = path.join(basePath, 'packages', 'all-packages', 'package.json');
 var allPackages = require(allPackagesPath);
-allPackages.dependencies[package.name] = '^'+String(package.version);
+allPackages.dependencies[package.name] = '~'+String(package.version);
 var text = JSON.stringify(sortPackageJson(allPackages), null, 2) + '\n';
 fs.writeFileSync(allPackagesPath, text);
 
@@ -78,4 +78,4 @@ fs.writeFileSync(indexPath, index);
 childProcess.execSync('npm run update:core', {stdio:[0,1,2]});
 
 // Update the lerna symlinks.
-childProcess.execSync('npm install --no-optional', {stdio:[0,1,2]});
+childProcess.execSync('npm install', {stdio:[0,1,2]});
