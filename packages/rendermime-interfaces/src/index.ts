@@ -151,9 +151,14 @@ namespace IRenderMime {
   export
   interface IExtension {
     /**
-     * The name of the extension.
+     * The ID of the extension.
+     *
+     * #### Notes
+     * The convention for extension IDs in JupyterLab is the full NPM package
+     * name followed by a colon and a unique string token, e.g.
+     * `'@jupyterlab/apputils-extension:settings'` or `'foo-extension:bar'`.
      */
-    readonly name: string;
+    readonly id: string;
 
     /**
      * A renderer factory to be registered to render the MIME type.

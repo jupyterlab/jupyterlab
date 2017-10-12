@@ -22,8 +22,8 @@ brew install node
 
 ### Installing Extensions
 
-The base JupyterLab application comes with core set of extensions, which 
-provide the Notebook, Terminal, Text Editor, etc.  New extensions can be 
+The base JupyterLab application comes with core set of extensions, which
+provide the Notebook, Terminal, Text Editor, etc.  New extensions can be
 installed into the application using the command:
 
 ```
@@ -46,7 +46,7 @@ jupyter labextension uninstall <bar>
 ```
 
 Where `<bar>` is the name of the extension, as printed in the extension
-list.  Core extensions can also be uninstalled this way (and can later be 
+list.  Core extensions can also be uninstalled this way (and can later be
 re-installed).
 
 Extensions can be disabled by running the command:
@@ -55,7 +55,7 @@ Extensions can be disabled by running the command:
 jupyter labextension disable <foo>
 ```
 
-Where `<foo>` is the name of the extension.  This will prevent the 
+Where `<foo>` is the name of the extension.  This will prevent the
 extension from loading on the front end, but does not require a rebuild.
 The extension can be re-enabled using the command:
 
@@ -71,12 +71,12 @@ Core plugins can also be disabled (and then re-enabled).
 The JupyterLab application directory (where the application assets are
 built and the settings reside) can be overridden using `--app-dir` in
 any of the JupyterLab commands, or by setting the `JUPYTERLAB_DIR` environment
-variable.  If not specified, it will default to 
-`<sys-prefix/share/jupyter/lab`, where `sys-prefix` is the 
+variable.  If not specified, it will default to
+`<sys-prefix/share/jupyter/lab`, where `sys-prefix` is the
 site-specific directory prefix of the current Python environment.  You can
-query the current application path using `jupyter lab path`.  
+query the current application path using `jupyter lab path`.
 
-To create the app directory without installing any extensions, run `jupyter lab build`.  
+To create the app directory without installing any extensions, run `jupyter lab build`.
 The `install` and `link` commands already run the build, so it typically
 does not need to be called directly.
 
@@ -90,8 +90,27 @@ Building consists of:
 
 The `settings` directory contains `page_config.json` and `build_config.json`
 files.
+
+### `page_config.json`
+
 The `page_config.json` data is used to provide config data to the application
-environment.  For example, the `ignoredPlugins` data is used to ignore registered plugins by the name of the token they provide.
+environment.
+
+Two important fields in the `page_config.json` file allow control of which plugins load:
+
+1. `disabledExtensions` for extensions that should not load at all.
+2. `deferredExtensions` for extensions that do not load until they are required
+by something, irrespective of whether they set `autostart` to `true`.
+
+The values for each are an array of strings. The following sequence of checks are performed against the patterns in `disabledExtensions` and `deferredExtensions`.
+
+* If an identical string match occurs between a config value and a package name (*e.g.*, `"@jupyterlab/apputils-extension"`), then the entire package is disabled (or deferred).
+* If the string value is compiled as a regular expression and tests positive against a package name (*e.g.*, `"disabledExtensions": ["@jupyterlab/apputils*$"]`), then the entire package is disabled (or deferred).
+* If an identical string match occurs between a config value and an individual plugin ID within a larger package (*e.g.*, `"disabledExtensions": ["@jupyterlab/apputils-extension:settings"]`), then that specific plugin is disabled (or deferred).
+* If the string value is compiled as a regular expression and tests positive against an individual plugin ID within a larger package (*e.g.*, `"disabledExtensions": ["^@jupyterlab/apputils-extension:set.*$"]`), then that specific plugin is disabled (or deferred).
+
+### `build_config.json`
+
 The `build_config.json` file is used to track the folders that have been
 added using `jupyter labextension link <folder>`, as well as core extensions
 that have been explicitly uninstalled.  e.g.
@@ -120,9 +139,9 @@ if called again.  If the `sys-prefix` version cannot be uninstalled, its
 plugins can still be ignored using `ignoredPackages` metadata in `settings`.
 
 The `static` folder contains the assets that will be loaded by the JuptyerLab
-application.  The `staging` folder is used to create the build and then 
+application.  The `staging` folder is used to create the build and then
 populate the `static` folder.
 
-Running `jupyter lab` will attempt to run the `static` assets in the 
+Running `jupyter lab` will attempt to run the `static` assets in the
 application folder if they exist.  You can run `jupyter lab --core-mode`
 to load the core JupyterLab application instead.
