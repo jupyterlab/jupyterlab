@@ -93,6 +93,10 @@ lab_flags['dev-mode'] = (
     {'LabApp': {'core_mode': True}},
     "Start the app in dev mode for running from source."
 )
+lab_flags['watch'] = (
+    {'LabApp': {'watch': True}},
+    "Start the app in watch mode."
+)
 
 
 class LabApp(NotebookApp):
@@ -150,6 +154,9 @@ class LabApp(NotebookApp):
         The `--dev-mode` flag is an alias to this to be used when the Python package
         itself is installed in development mode (`pip install -e .`).
         """)
+
+    watch = Bool(False, config=True,
+        help="Whether to serve the app in watch mode")
 
     def init_server_extensions(self):
         """Load any extensions specified by config.

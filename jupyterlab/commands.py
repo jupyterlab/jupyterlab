@@ -86,6 +86,12 @@ def run(cmd, **kwargs):
             proc.wait()
 
 
+def watch(cwd):
+    """Run watch mode in a given directory"""
+    loop = IOLoop.instance()
+    loop.add_callback(run, [get_npm_name(), 'run', 'watch'], cwd=cwd)
+
+
 def install_extension(extension, app_dir=None, logger=None):
     """Install an extension package into JupyterLab.
 
@@ -806,11 +812,14 @@ def _ensure_package(app_dir, logger=None, name=None, version=None):
 
     # Template the package.json file.
     data = _get_package_template(app_dir, logger)
+
     if version:
         data['jupyterlab']['version'] = version
 
     if name:
         data['jupyterlab']['name'] = name
+
+    data['jupyterlab']['linkedPackages'] = _get_linked_packages(app_dir)
 
     pkg_path = pjoin(staging, 'package.json')
     with open(pkg_path, 'w') as fid:

@@ -7,12 +7,11 @@ import os
 
 from jupyterlab_launcher import add_handlers, LabConfig
 from notebook.utils import url_path_join as ujoin
-
 from notebook.base.handlers import FileFindHandler
-
+from tornado.ioloop import IOLoop
 
 from .commands import (
-    get_app_dir, list_extensions, should_build, get_user_settings_dir
+    get_app_dir, list_extensions, should_build, get_user_settings_dir, watch
 )
 
 from .build_handler import build_path, Builder, BuildHandler
@@ -64,6 +63,11 @@ def load_jupyter_server_extension(nbapp):
     if hasattr(nbapp, 'core_mode'):
         core_mode = nbapp.core_mode
 
+    # Check for watch.
+    watch_mode = False
+    if hasattr(nbapp, 'watch'):
+        watch_mode = nbapp.watch
+
     # Check for an app dir that is local.
     if app_dir == here or app_dir == os.path.join(here, 'build'):
         core_mode = True
@@ -97,6 +101,13 @@ def load_jupyter_server_extension(nbapp):
 
     config.schemas_dir = schemas_dir
     config.user_settings_dir = get_user_settings_dir()
+    
+    if watch_mode:
+        if core_mode:
+            watch(here)
+        else:
+            config.assets_dir = os.path.join(app_dir, 'staging', 'build')
+            watch(os.path.join(app_dir, 'staging'))
 
     add_handlers(web_app, config)
 

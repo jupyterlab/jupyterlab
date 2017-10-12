@@ -14,11 +14,12 @@ fs.ensureDirSync(buildDir);
 fs.copySync('./package.json', './build/package.json');
 
 // Handle the extensions.
-var extensions = package_data.jupyterlab.extensions;
-var mimeExtensions = package_data.jupyterlab.mimeExtensions;
+var jlab = package_data.jupyterlab;
+var extensions = jlab.extensions;
+var mimeExtensions = jlab.mimeExtensions;
 Build.ensureAssets({
   packageNames: Object.keys(mimeExtensions).concat(Object.keys(extensions)),
-  output: package_data.jupyterlab.outputDir
+  output: jlab.outputDir
 });
 
 // Create the entry point file.
@@ -37,6 +38,12 @@ var hash = crypto.createHash('md5');
 hash.update(fs.readFileSync('./package.json'));
 var digest = hash.digest('hex');
 fs.writeFileSync(path.resolve(buildDir, 'hash.md5'), digest);
+
+// Handle linked packages.
+var linkedPackages = {};
+Object.keys(jlab.linkedPackages).forEach(function (name) {
+  linkedPackages[name] = fs.realpathSync(jlab.linkedPackages[name]);
+});
 
 module.exports = {
   entry:  path.resolve(buildDir, 'index.out.js'),
@@ -59,6 +66,12 @@ module.exports = {
       { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, use: 'file-loader' },
       { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, use: 'url-loader?limit=10000&mimetype=image/svg+xml' }
     ],
+  },
+  resolve: {
+    alias: linkedPackages
+  },
+  watchOptions: {
+    ignored: /node_modules/
   },
   node: {
     fs: 'empty'
