@@ -57,7 +57,9 @@ module.exports = {
       { test: /\.json$/, use: 'json-loader' },
       { test: /\.html$/, use: 'file-loader' },
       { test: /\.md$/, use: 'raw-loader' },
-      { test: /\.js$/, use: ['source-map-loader'], enforce: 'pre', exclude: /vega-lite/},
+      { test: /\.js$/, use: ['source-map-loader'], enforce: 'pre',
+        exclude: path.join(process.cwd(), 'node_modules')
+      },
       { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
       { test: /\.js.map$/, use: 'file-loader' },
       { test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/, use: 'url-loader?limit=10000&mimetype=application/font-woff' },
