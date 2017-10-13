@@ -67,6 +67,7 @@ def run(cmd, **kwargs):
     kwargs.setdefault('shell', sys.platform == 'win32')
     kwargs.setdefault('env', os.environ)
     kwargs.setdefault('stderr', STDOUT)
+    proc = None
     yield gen.moment  # Sync up to the iterator
     try:
         proc = Popen(cmd, **kwargs)
