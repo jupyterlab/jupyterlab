@@ -133,7 +133,7 @@ JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by
   technical leadership, vision, phosphor.js)
 * Afshin Darian, Continuum Analytics (co-creator, settings, inspector, completer,
   prolific contributions throughout the code base).
-* Jessica Forde, UC Berkeley (demo, documentation)
+* Jessica Forde, Project Jupyter (demo, documentation)
 * Brian Granger, Cal Poly (co-creator, strategy, vision, management, UI/UX design,
   architecture).
 * Jason Grout, Bloomberg (co-creator, vision, general development).
