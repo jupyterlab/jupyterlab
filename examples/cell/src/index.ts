@@ -6,28 +6,16 @@ import '@jupyterlab/theme-light-extension/style/embed.css';
 import '../index.css';
 
 import {
-  CommandRegistry
-} from '@phosphor/commands';
-
-import {
-  BoxPanel, Widget
-} from '@phosphor/widgets';
-
-import {
   ClientSession, Toolbar
 } from '@jupyterlab/apputils';
 
 import {
-  CodeMirrorMimeTypeService
-} from '@jupyterlab/codemirror';
-
-import {
-  SessionManager
-} from '@jupyterlab/services';
-
-import {
   CodeCellModel, CodeCell
 } from '@jupyterlab/cells';
+
+import {
+  CodeMirrorMimeTypeService
+} from '@jupyterlab/codemirror';
 
 import {
   CompleterModel, Completer, CompletionHandler
@@ -37,21 +25,23 @@ import {
   RenderMime, defaultRendererFactories
 } from '@jupyterlab/rendermime';
 
+import {
+  SessionManager
+} from '@jupyterlab/services';
+
+import {
+  CommandRegistry
+} from '@phosphor/commands';
+
+import {
+  BoxPanel, Widget
+} from '@phosphor/widgets';
+
 
 function main(): void {
   let manager = new SessionManager();
   let session = new ClientSession({ manager, name: 'Example' });
   let mimeService = new CodeMirrorMimeTypeService();
-
-  // Handle the mimeType for the current kernel.
-  session.kernelChanged.connect(() => {
-    session.kernel.ready.then(() => {
-      let lang = session.kernel.info.language_info;
-      let mimeType = mimeService.getMimeTypeByLanguage(lang);
-      cellWidget.model.mimeType = mimeType;
-    });
-  });
-  session.initialize();
 
   // Initialize the command registry with the bindings.
   let commands = new CommandRegistry();
@@ -80,6 +70,7 @@ function main(): void {
     command: 'run:cell'
   });
 
+  // Create the cell widget with a default rendermime instance.
   let rendermime = new RenderMime({
     initialFactories: defaultRendererFactories
   });
@@ -89,6 +80,16 @@ function main(): void {
     model: new CodeCellModel({})
   });
 
+  // Handle the mimeType for the current kernel.
+  session.kernelChanged.connect(() => {
+    session.kernel.ready.then(() => {
+      let lang = session.kernel.info.language_info;
+      let mimeType = mimeService.getMimeTypeByLanguage(lang);
+      cellWidget.model.mimeType = mimeType;
+    });
+  });
+
+  // Set up a completer.
   const editor = cellWidget.editor;
   const model = new CompleterModel();
   const completer = new Completer({ editor, model });
@@ -100,6 +101,7 @@ function main(): void {
   // Hide the widget when it first loads.
   completer.hide();
 
+  // Create a toolbar for the cell.
   const toolbar = new Toolbar();
   toolbar.addItem('spacer', Toolbar.createSpacerItem());
   toolbar.addItem('interrupt', Toolbar.createInterruptButton(session));
@@ -107,6 +109,7 @@ function main(): void {
   toolbar.addItem('name', Toolbar.createKernelNameItem(session));
   toolbar.addItem('status', Toolbar.createKernelStatusItem(session));
 
+  // Lay out the widgets.
   let panel = new BoxPanel();
   panel.id = 'main';
   panel.direction = 'top-to-bottom';
@@ -114,13 +117,14 @@ function main(): void {
   panel.addWidget(completer);
   panel.addWidget(toolbar);
   panel.addWidget(cellWidget);
-  Widget.attach(panel, document.body);
-
   BoxPanel.setStretch(toolbar, 0);
   BoxPanel.setStretch(cellWidget, 1);
-  window.onresize = () => panel.update();
+  Widget.attach(panel, document.body);
 
+  // Handle widget state.
+  window.onresize = () => panel.update();
   cellWidget.activate();
+  session.initialize();
 }
 
 window.onload = main;
