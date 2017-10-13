@@ -62,6 +62,24 @@ function main(): void {
     commands.processKeydownEvent(event);
   }, useCapture);
 
+  commands.addCommand('invoke:completer', {
+    execute: () => { handler.invoke(); }
+  });
+  commands.addCommand('run:cell', {
+    execute: () => CodeCell.execute(cellWidget, session)
+  });
+
+  commands.addKeyBinding({
+    selector: '.jp-InputArea-editor.jp-mod-completer-enabled',
+    keys: ['Tab'],
+    command: 'invoke:completer'
+  });
+  commands.addKeyBinding({
+    selector: '.jp-InputArea-editor',
+    keys: ['Shift Enter'],
+    command: 'run:cell'
+  });
+
   let rendermime = new RenderMime({
     initialFactories: defaultRendererFactories
   });
@@ -101,24 +119,6 @@ function main(): void {
   BoxPanel.setStretch(toolbar, 0);
   BoxPanel.setStretch(cellWidget, 1);
   window.onresize = () => panel.update();
-
-  commands.addCommand('invoke:completer', {
-    execute: () => { handler.invoke(); }
-  });
-  commands.addCommand('run:cell', {
-    execute: () => CodeCell.execute(cellWidget, session)
-  });
-
-  commands.addKeyBinding({
-    selector: '.jp-InputArea-editor.jp-mod-completer-enabled',
-    keys: ['Tab'],
-    command: 'invoke:completer'
-  });
-  commands.addKeyBinding({
-    selector: '.jp-InputArea-editor',
-    keys: ['Shift Enter'],
-    command: 'run:cell'
-  });
 
   cellWidget.activate();
 }
