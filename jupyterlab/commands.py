@@ -180,8 +180,8 @@ def install_extension_async(extension, app_dir=None, logger=None, abort_callback
     shutil.move(pjoin(target, fname), pjoin(app_dir, 'extensions'))
     shutil.rmtree(target)
 
-    # Remove any existing package from staging/node_modules
-    target = pjoin(app_dir, 'staging', 'node_modules', data['name'])
+    # Clear staging/node_modules
+    target = pjoin(app_dir, 'staging', 'node_modules')
     target = target.replace('/', os.sep)
     if os.path.exists(target):
         shutil.rmtree(target)
