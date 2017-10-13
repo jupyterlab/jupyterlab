@@ -139,7 +139,7 @@
       "@jupyterlab/tooltip",
       "@phosphor/widgets"
     ],
-    "version": "0.28.0rc1",
+    "version": "0.28.0rc2",
     "linkedPackages": {
       "@jupyterlab/application": "../packages/application",
       "@jupyterlab/application-extension": "../packages/application-extension",
