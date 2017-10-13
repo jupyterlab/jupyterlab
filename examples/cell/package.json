@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "@jupyterlab/apputils": "^0.10.0",
+    "@jupyterlab/codemirror": "^0.10.0",
     "@jupyterlab/completer": "^0.10.0",
     "@jupyterlab/cells": "^0.10.0",
     "@jupyterlab/rendermime": "^0.10.0",

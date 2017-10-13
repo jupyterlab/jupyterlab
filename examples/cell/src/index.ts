@@ -18,6 +18,10 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
+  CodeMirrorMimeTypeService
+} from '@jupyterlab/codemirror';
+
+import {
   SessionManager
 } from '@jupyterlab/services';
 
@@ -37,7 +41,17 @@ import {
 function main(): void {
   let manager = new SessionManager();
   let session = new ClientSession({ manager, name: 'Example' });
-  session.initialize().then(() => { console.log('initialized'); });
+  let mimeService = new CodeMirrorMimeTypeService();
+
+  // Handle the mimeType for the current kernel.
+  session.kernelChanged.connect(() => {
+    session.kernel.ready.then(() => {
+      let lang = session.kernel.info.language_info;
+      let mimeType = mimeService.getMimeTypeByLanguage(lang);
+      cellWidget.model.mimeType = mimeType;
+    });
+  });
+  session.initialize();
 
   // Initialize the command registry with the bindings.
   let commands = new CommandRegistry();
