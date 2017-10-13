@@ -171,7 +171,8 @@ class CheckAssets(Command):
         pjoin(here, 'jupyterlab', 'build', 'main.bundle.js'),
         pjoin(here, 'jupyterlab', 'schemas', '@jupyterlab',
             'shortcuts-extension', 'plugin.json'),
-        pjoin(here, 'jupyterlab', 'themes', 'jupyterlab-theme-light-extension',
+        pjoin(here, 'jupyterlab', 'themes', '@jupyterlab',
+            'theme-light-extension',
             'images', 'jupyterlab.svg')
     ]
 
