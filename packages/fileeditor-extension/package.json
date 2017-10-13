@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/fileeditor-extension",
-  "version": "0.11.0",
+  "version": "0.11.1",
   "description": "JupyterLab - Editor Widget Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -29,12 +29,12 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.11.0",
-    "@jupyterlab/apputils": "^0.11.0",
-    "@jupyterlab/codeeditor": "^0.11.0",
-    "@jupyterlab/coreutils": "^0.11.0",
-    "@jupyterlab/fileeditor": "^0.11.0",
-    "@jupyterlab/launcher": "^0.11.0"
+    "@jupyterlab/application": "^0.11.1",
+    "@jupyterlab/apputils": "^0.11.1",
+    "@jupyterlab/codeeditor": "^0.11.1",
+    "@jupyterlab/coreutils": "^0.11.1",
+    "@jupyterlab/fileeditor": "^0.11.1",
+    "@jupyterlab/launcher": "^0.11.1"
   },
   "devDependencies": {
     "rimraf": "^2.5.2",

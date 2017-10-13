@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/services",
-  "version": "0.50.0",
+  "version": "0.50.1",
   "description": "Client APIs for the Jupyter services REST APIs",
   "keywords": [
     "jupyter",
@@ -41,7 +41,7 @@
     "test:integration": "cd test && python integration_test.py"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^0.11.0",
+    "@jupyterlab/coreutils": "^0.11.1",
     "@phosphor/algorithm": "^1.1.1",
     "@phosphor/coreutils": "^1.2.0",
     "@phosphor/disposable": "^1.1.1",
