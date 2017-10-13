@@ -2,7 +2,7 @@
   "private": true,
   "name": "browser-example",
   "dependencies": {
-    "@jupyterlab/services": "^0.50.1",
+    "@jupyterlab/services": "0.50.2",
     "es6-promise": "^4.1.0"
   },
   "scripts": {

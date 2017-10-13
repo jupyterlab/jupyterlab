@@ -31,7 +31,7 @@
   "dependencies": {
     "@jupyterlab/apputils": "^0.11.1",
     "@jupyterlab/coreutils": "^0.11.1",
-    "@jupyterlab/services": "^0.50.1",
+    "@jupyterlab/services": "0.50.2",
     "@phosphor/domutils": "^1.1.1",
     "@phosphor/messaging": "^1.2.1",
     "@phosphor/signaling": "^1.2.1",
