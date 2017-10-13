@@ -3,7 +3,6 @@ import json
 
 from jupyterlab.tests.utils import LabTestBase, APITester
 from notebook.tests.launchnotebook import assert_http_error
-from jupyterlab import __version__
 
 
 class SettingsAPI(APITester):
@@ -25,11 +24,7 @@ class SettingsAPITest(LabTestBase):
         self.settings_api = SettingsAPI(self.request)
 
     def test_get(self):
-        id = '@jupyterlab/apputils-extension:shortcuts'
-        id = id.replace('@', '').replace('/', '').replace(':', '-')
-        if 'rc' in __version__:
-            raise ValueError('Remove this before final release')
-        id = 'jupyter.extensions.shortcuts'
+        id = '@jupyterlab/apputils-extension:themes'
         data = self.settings_api.get(id).json()
         assert data['id'] == id
         assert len(data['schema'])
@@ -40,9 +35,7 @@ class SettingsAPITest(LabTestBase):
             self.settings_api.get('foo')
 
     def test_patch(self):
-        id = '@jupyterlab/apputils-extension:shortcuts'
-        id = id.replace('@', '').replace('/', '').replace(':', '-')
-        id = 'jupyter.extensions.shortcuts'
+        id = '@jupyterlab/apputils-extension:themes'
         resp = self.settings_api.patch(id, dict())
         assert resp.status_code == 204
 
@@ -52,8 +45,6 @@ class SettingsAPITest(LabTestBase):
 
     def test_patch_bad_data(self):
         id = '@jupyterlab/codemirror-extension:commands'
-        id = id.replace('@', '').replace('/', '').replace(':', '-')
-        id = 'jupyter.services.codemirror-commands'
         data = dict(keyMap=10)
         with assert_http_error(400):
             self.settings_api.patch(id, data)
