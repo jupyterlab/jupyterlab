@@ -49,7 +49,7 @@
     "@jupyterlab/rendermime-interfaces": "^0.4.1",
     "@jupyterlab/running": "^0.11.1",
     "@jupyterlab/running-extension": "^0.11.1",
-    "@jupyterlab/services": "0.50.2",
+    "@jupyterlab/services": "^0.50.2",
     "@jupyterlab/settingeditor-extension": "^0.6.1",
     "@jupyterlab/shortcuts-extension": "^0.11.1",
     "@jupyterlab/tabmanager-extension": "^0.11.1",
