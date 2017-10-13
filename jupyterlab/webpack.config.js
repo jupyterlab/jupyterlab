@@ -68,7 +68,9 @@ module.exports = {
     ],
   },
   resolve: {
-    alias: linkedPackages
+    alias: linkedPackages,
+    modules: [path.resolve(__dirname, './node_modules'),
+              path.resolve(__dirname, '../node_modules')]
   },
   watchOptions: {
     ignored: /node_modules/
