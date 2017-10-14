@@ -55,7 +55,7 @@ if [[ $GROUP == coverage_and_docs ]]; then
 
     # Verify tutorial docs build
     pushd docs
-    conda env create -n test_docs -f environment.yml
+    conda create -n test_docs -f environment.yml
     source activate test_docs
     make html
     source deactivate
@@ -74,7 +74,7 @@ if [[ $GROUP == cli ]]; then
     jupyter labextension list
 
     # Make sure we can non-dev install.
-    conda env create -n test_install notebook
+    conda create -n test_install notebook
     source activate test_install
     pip install .
     jupyter lab build
