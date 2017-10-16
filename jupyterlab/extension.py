@@ -11,7 +11,8 @@ from notebook.base.handlers import FileFindHandler
 from tornado.ioloop import IOLoop
 
 from .commands import (
-    get_app_dir, list_extensions, should_build, get_user_settings_dir, watch
+    get_app_dir, list_extensions, should_build, get_user_settings_dir, watch,
+    build
 )
 
 from .build_handler import build_path, Builder, BuildHandler
@@ -101,13 +102,14 @@ def load_jupyter_server_extension(nbapp):
 
     config.schemas_dir = schemas_dir
     config.user_settings_dir = get_user_settings_dir()
-    
+
     if watch_mode:
         if core_mode:
-            watch(here)
+            watch(here, nbapp.log)
         else:
             config.assets_dir = os.path.join(app_dir, 'staging', 'build')
-            watch(os.path.join(app_dir, 'staging'))
+            build(app_dir=app_dir, logger=nbapp.log)
+            watch(os.path.join(app_dir, 'staging'), nbapp.log)
 
     add_handlers(web_app, config)
 

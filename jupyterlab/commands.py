@@ -87,10 +87,11 @@ def run(cmd, **kwargs):
             proc.wait()
 
 
-def watch(cwd):
+def watch(cwd, logger=None):
     """Run watch mode in a given directory"""
     loop = IOLoop.instance()
-    loop.add_callback(run, [get_npm_name(), 'run', 'watch'], cwd=cwd)
+    loop.add_callback(run, [get_npm_name(), 'run', 'watch'], cwd=cwd,
+        logger=logger)
 
 
 def install_extension(extension, app_dir=None, logger=None):
