@@ -198,7 +198,7 @@ jupyter lab --dev-mode --watch
 
 and refresh the browser.  You can open another terminal and run
 
-```bach
+```bash
 npm run watch
 ```
 

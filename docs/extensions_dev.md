@@ -99,7 +99,7 @@ jupyter lab --watch
 This will cause the application to incrementally rebuild when one of the
 linked packages changes.  You can open another terminal and run
 
-```bach
+```bash
 npm run watch
 ```
 
