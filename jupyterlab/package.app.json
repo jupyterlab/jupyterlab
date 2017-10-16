@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "build": "webpack",
+    "build:prod": "node update-core.js && webpack --devtool source-map",
     "clean": "rimraf build",
+    "publish": "node make-release.js",
     "watch": "webpack --watch"
   },
   "dependencies": {
@@ -139,7 +141,7 @@
       "@jupyterlab/tooltip",
       "@phosphor/widgets"
     ],
-    "version": "0.28.0rc2",
+    "version": "0.28.0rc3",
     "linkedPackages": {}
   }
 }
