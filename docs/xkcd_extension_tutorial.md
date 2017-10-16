@@ -398,6 +398,7 @@ Start by refactoring the widget code into the new `XkcdWidget` class. Add the fo
 import {
   Message
 } from '@phosphor/messaging';
+```
 
 Then add the class just below the import statements in the `index.ts` file.
 
