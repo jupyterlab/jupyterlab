@@ -26,9 +26,7 @@
     "test:ie": "lerna run test:ie --concurrency 1 --stream",
     "update:dependency": "node scripts/update-dependency.js",
     "update:core": "cd jupyterlab && node update-core.js",
-    "watch:packages": "watch \"npm run build:packages\" ./packages/** --wait 10 --filter=scripts/watch-filter.js --ignoreDotFiles",
-    "watch": "watch \"npm run build\" ./packages/** --wait 10 --filter=scripts/watch-filter.js --ignoreDotFiles",
-    "watch:main": "npm run watch",
+    "watch": "watch \"npm run build:packages\" ./packages/** --wait 10 --filter=scripts/watch-filter.js --ignoreDotFiles",
     "addsibling": "node scripts/add-sibling.js",
     "removesibling": "node scripts/remove-sibling.js"
   },

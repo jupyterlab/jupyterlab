@@ -9,7 +9,8 @@ childProcess.execSync('npm run build:prod', {stdio:[0,1,2]});
 
 // Update the package.app.json file.
 var data = require('./package.json');
-data['scripts'] = { 'build': 'webpack', 'watch': 'webpack --watch' };
+data['scripts']['build'] = 'webpack'
+data['scripts']['watch'] = 'webpack --watch'
 data['jupyterlab']['outputDir'] = '..';
 data['jupyterlab']['linkedPackages'] = {};
 text = JSON.stringify(sortPackageJson(data), null, 2) + '\n';

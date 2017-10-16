@@ -87,10 +87,11 @@ def run(cmd, **kwargs):
             proc.wait()
 
 
-def watch(cwd):
+def watch(cwd, logger=None):
     """Run watch mode in a given directory"""
     loop = IOLoop.instance()
-    loop.add_callback(run, [get_npm_name(), 'run', 'watch'], cwd=cwd)
+    loop.add_callback(run, [get_npm_name(), 'run', 'watch'], cwd=cwd,
+        logger=logger)
 
 
 def install_extension(extension, app_dir=None, logger=None):
@@ -578,6 +579,7 @@ def build_async(app_dir=None, name=None, version=None, logger=None, abort_callba
     yield run([npm, 'install', '--no-optional'], cwd=staging, logger=logger, abort_callback=abort_callback)
 
     # Build the app.
+    yield run([npm, 'run', 'clean'], cwd=staging, logger=logger, abort_callback= abort_callback)
     yield run([npm, 'run', 'build'], cwd=staging, logger=logger, abort_callback= abort_callback)
 
     # Move the app to the static dir.

@@ -47,7 +47,7 @@ You can also use the installer from the [Node.js](https://nodejs.org) website.
 
 JupyterLab requires Jupyter Notebook version 4.3 or later.
 
-If you use ``conda``, you can install it as:
+If you use ``conda``, you can install notebook using:
 
 ```bash
 conda install notebook
@@ -59,7 +59,7 @@ You may also want to install `nb_conda_kernels` to have a kernel option for diff
 conda install nb_conda_kernels
 ```
 
-If you use `pip` you can install it as:
+If you use `pip` you can install notebook using:
 
 ```bash
 pip install notebook
@@ -196,7 +196,15 @@ To have the system build after each source file change, run:
 jupyter lab --dev-mode --watch
 ```
 
-and refresh the browser.
+and refresh the browser.  You can open another terminal and run
+
+```bash
+npm run watch
+```
+
+to automatically recompile the TypeScript files while editing.  Note that
+only the compiled JavaScript files (and the CSS files) are watched by the 
+WebPack process.  
 
 ## Notes
 

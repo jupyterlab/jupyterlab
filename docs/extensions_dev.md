@@ -97,7 +97,15 @@ jupyter lab --watch
 ```
 
 This will cause the application to incrementally rebuild when one of the
-linked packages changes.
+linked packages changes.  You can open another terminal and run
+
+```bash
+npm run watch
+```
+
+to automatically recompile the TypeScript files while editing.  Note that
+only the compiled JavaScript files (and the CSS files) are watched by the 
+WebPack process.  
 
 Note that the application is built against **released** versions of the
 core JupyterLab extensions.  If your extension depends on JupyterLab

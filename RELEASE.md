@@ -84,6 +84,24 @@ shasum -a 256 dist/*.tar.gz
 ### Update the extension examples
 - https://github.com/jupyterlab/jupyterlab/blob/master/docs/notebook.md#adding-a-button-to-the-toolbar
 
+### Update the xkcd tutorial
+- Create a new empty branch in the xkcd repo.
+
+```bash
+git checkout --orphan NEWBRANCH
+git rm -rf .
+```
+
+- Create a new PR in JupyterLab.
+- Run through the tutorial in the PR, making commits and updating
+the tutorial as appropriate.
+- Prefix the new tags with the branch name, e.g. `0.28-01-show-a-panel`
+- For the publish section of the readme, use the `LICENSE` and `README`
+files from the previous branch, as well as the `package.json` fields up to 
+`license`.
+- Push the branch and set it as the default branch for the tutorial repo.
+- Submit the PR to JupyterLab
+
 ### Set master back to dev version
 - Update `jupyterlab/_version.py` with a `dev` version
 - Commit and push the version update.
