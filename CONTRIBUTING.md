@@ -47,7 +47,7 @@ You can also use the installer from the [Node.js](https://nodejs.org) website.
 
 JupyterLab requires Jupyter Notebook version 4.3 or later.
 
-If you use ``conda``, you can install notebook as:
+If you use ``conda``, you can install notebook using:
 
 ```bash
 conda install notebook
@@ -59,7 +59,7 @@ You may also want to install `nb_conda_kernels` to have a kernel option for diff
 conda install nb_conda_kernels
 ```
 
-If you use `pip` you can install it as:
+If you use `pip` you can install notebook using:
 
 ```bash
 pip install notebook
