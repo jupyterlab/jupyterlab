@@ -579,6 +579,7 @@ def build_async(app_dir=None, name=None, version=None, logger=None, abort_callba
     yield run([npm, 'install', '--no-optional'], cwd=staging, logger=logger, abort_callback=abort_callback)
 
     # Build the app.
+    yield run([npm, 'run', 'clean'], cwd=staging, logger=logger, abort_callback= abort_callback)
     yield run([npm, 'run', 'build'], cwd=staging, logger=logger, abort_callback= abort_callback)
 
     # Move the app to the static dir.
