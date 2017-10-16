@@ -55,7 +55,7 @@ if [[ $GROUP == coverage_and_docs ]]; then
 
     # Verify tutorial docs build
     pushd docs
-    conda create -n test_docs -f environment.yml
+    conda env create -n test_docs -f environment.yml
     source activate test_docs
     make html
     source deactivate
