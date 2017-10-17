@@ -215,7 +215,12 @@ class custom_egg_info(egg_info):
     """Prune node_modules folders from egg_info to avoid symlink recursion
     """
     def run(self):
-        folders = glob.glob(pjoin(here, 'packages', '**', 'node_modules'))
+        folders = []
+        for dir, subdirs, files in os.walk(here):
+            if 'node_modules' in subdirs:
+                folders.append(pjoin(dir, 'node_modules'))
+                subdirs.remove('node_modules')
         for folder in folders:
             shutil.rmtree(folder)
+        return egg_info.run(self)
         return egg_info.run(self)
