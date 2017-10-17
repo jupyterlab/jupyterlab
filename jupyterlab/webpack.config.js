@@ -44,6 +44,13 @@ Object.keys(jlab.linkedPackages).forEach(function (name) {
   linkedPackages[name] = fs.realpathSync(jlab.linkedPackages[name]);
 });
 
+// The valid module paths.
+var modules = [
+  path.resolve(__dirname, './node_modules'),
+  path.resolve(__dirname, '../node_modules')
+];
+
+
 module.exports = {
   entry:  path.resolve(buildDir, 'index.out.js'),
   output: {
@@ -70,8 +77,10 @@ module.exports = {
   },
   resolve: {
     alias: linkedPackages,
-    modules: [path.resolve(__dirname, './node_modules'),
-              path.resolve(__dirname, '../node_modules')]
+    modules: modules
+  },
+  resolveLoader: {
+    modules: modules
   },
   watchOptions: {
     ignored: /node_modules/
