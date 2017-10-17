@@ -22,6 +22,7 @@ from os.path import join as pjoin
 from distutils import log
 from distutils.cmd import Command
 from distutils.version import LooseVersion
+from setuptools.command.egg_info import egg_info
 from setuptools.command.bdist_egg import bdist_egg
 from subprocess import check_call
 
@@ -208,3 +209,13 @@ class bdist_egg_disabled(bdist_egg):
     """
     def run(self):
         sys.exit("Aborting implicit building of eggs. Use `pip install .` to install from source.")
+
+
+class custom_egg_info(egg_info):
+    """Prune node_modules folders from egg_info to avoid symlink recursion
+    """
+    def run(self):
+        folders = glob.glob(pjoin(here, 'packages', '**', 'node_modules'))
+        for folder in folders:
+            shutil.rmtree(folder)
+        return egg_info.run(self)
