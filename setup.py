@@ -49,7 +49,8 @@ from setupbase import (
     js_prerelease,
     CheckAssets,
     version_ns,
-    name
+    name,
+    custom_egg_info
 )
 
 
@@ -98,6 +99,7 @@ cmdclass = dict(
     sdist  = js_prerelease(sdist, strict=True),
     bdist_egg = bdist_egg if 'bdist_egg' in sys.argv else bdist_egg_disabled,
     jsdeps = CheckAssets,
+    egg_info = custom_egg_info
 )
 try:
     from wheel.bdist_wheel import bdist_wheel
