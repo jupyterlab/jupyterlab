@@ -16,7 +16,9 @@ import sys
 import tarfile
 from distutils.version import LooseVersion
 from functools import partial
-from jupyter_core.paths import ENV_JUPYTER_PATH, jupyter_config_path
+from jupyter_core.paths import (
+    ENV_JUPYTER_PATH, SYSTEM_JUPYTER_PATH, jupyter_config_path
+)
 from notebook.nbextensions import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 from os import path as osp
 from os.path import join as pjoin
@@ -43,7 +45,10 @@ def get_app_dir(app_dir=None):
     """Get the configured JupyterLab app directory.
     """
     app_dir = app_dir or os.environ.get('JUPYTERLAB_DIR')
-    app_dir = app_dir or pjoin(ENV_JUPYTER_PATH[0], 'lab')
+    default_path = ENV_JUPYTER_PATH[0]
+    if default_path == '/usr/share/jupyter':
+        default_path = '/usr/local/share/jupyter'
+    app_dir = app_dir or pjoin(default_path, 'lab')
     return os.path.realpath(app_dir)
 
 
