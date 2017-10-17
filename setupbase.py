@@ -223,4 +223,3 @@ class custom_egg_info(egg_info):
         for folder in folders:
             shutil.rmtree(folder)
         return egg_info.run(self)
-        return egg_info.run(self)
