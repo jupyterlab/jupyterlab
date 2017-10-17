@@ -60,13 +60,14 @@ describe('docregistry/context', () => {
     describe('#pathChanged', () => {
 
       it('should be emitted when the path changes', (done) => {
+        let newPath = uuid() + '.txt';
         context.pathChanged.connect((sender, args) => {
           expect(sender).to.be(context);
-          expect(args).to.be('foo');
+          expect(args).to.be(newPath);
           done();
         });
         context.save().then(() => {
-          return manager.contents.rename(context.path, 'foo');
+          return manager.contents.rename(context.path, newPath);
         }).catch(done);
       });
 
@@ -245,11 +246,15 @@ describe('docregistry/context', () => {
           input.value = newPath;
           return acceptDialog();
         }).then(() => {
-          return waitForDialog();
-        }).then(() => {
-          acceptDialog();
+          return acceptDialog();
         });
-        return context.save().then(() => {
+        return manager.contents.save(newPath, {
+          type: factory.contentType,
+          format: factory.fileFormat,
+          content: 'foo'
+        }).then(() => {
+          return context.save();
+        }).then(() => {
           return context.saveAs();
         }).then(() => {
           expect(context.path).to.be(newPath);
@@ -265,11 +270,15 @@ describe('docregistry/context', () => {
           input.value = newPath;
           return acceptDialog();
         }).then(() => {
-          return waitForDialog();
-        }).then(() => {
-          dismissDialog();
+          return dismissDialog();
         });
-        return context.save().then(() => {
+        return manager.contents.save(newPath, {
+          type: factory.contentType,
+          format: factory.fileFormat,
+          content: 'foo'
+        }).then(() => {
+          return context.save();
+        }).then(() => {
           return context.saveAs();
         }).then(() => {
           expect(context.path).to.be(oldPath);
@@ -419,7 +428,7 @@ describe('docregistry/context', () => {
         let opener = (widget: Widget) => {
           called = true;
         };
-        context = new Context({ manager, factory, path: 'foo', opener });
+        context = new Context({ manager, factory, path: uuid() + '.txt', opener });
         context.addSibling(new Widget());
         expect(called).to.be(true);
       });

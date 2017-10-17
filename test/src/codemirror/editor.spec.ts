@@ -44,7 +44,6 @@ describe('CodeMirrorEditor', () => {
 
   beforeEach(() => {
     host = document.createElement('div');
-    host.style.height = '200px';
     document.body.appendChild(host);
     model = new CodeEditor.Model();
     editor = new LogFileEditor({ host, model });
@@ -431,9 +430,11 @@ describe('CodeMirrorEditor', () => {
 
     it('should get the window coordinates given a cursor position', () => {
       model.value.text = TEXT;
-      let pos = { line: 10, column: 1 };
-      let coord = editor.getCoordinateForPosition(pos);
-      expect(editor.getPositionForCoordinate(coord)).to.eql(pos);
+      let newPos = editor.getPositionForCoordinate({
+        top: 70, left: 40, bottom: 0, right: 0, height: 10, width: 10
+      });
+      expect(newPos.line).to.be(3);
+      expect(newPos.column).to.be(5);
     });
 
   });
