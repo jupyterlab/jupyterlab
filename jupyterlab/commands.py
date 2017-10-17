@@ -16,9 +16,7 @@ import sys
 import tarfile
 from distutils.version import LooseVersion
 from functools import partial
-from jupyter_core.paths import (
-    ENV_JUPYTER_PATH, SYSTEM_JUPYTER_PATH, jupyter_config_path
-)
+from jupyter_core.paths import ENV_JUPYTER_PATH, jupyter_config_path
 from notebook.nbextensions import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 from os import path as osp
 from os.path import join as pjoin
