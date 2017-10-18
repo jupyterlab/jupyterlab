@@ -60,7 +60,7 @@ def get_app_dir(app_dir=None):
 
     # Otherwise use the sys prefix.
     else:
-        app_dir = pjoin(sys.prefix, 'jupyter', 'share', 'lab')
+        app_dir = pjoin(sys.prefix, 'share', 'jupyter', 'lab')
 
     return os.path.realpath(app_dir)
 
