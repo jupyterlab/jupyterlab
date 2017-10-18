@@ -83,9 +83,10 @@ class TestExtension(TestCase):
         p = patch.dict('os.environ', {
             'JUPYTER_CONFIG_DIR': self.config_dir,
             'JUPYTER_DATA_DIR': self.data_dir,
+            'JUPYTERLAB_DIR': pjoin(self.data_dir, 'lab')
         })
         self.patches.append(p)
-        for mod in (paths, commands):
+        for mod in (paths):
             if hasattr(mod, 'ENV_JUPYTER_PATH'):
                 p = patch.object(mod, 'ENV_JUPYTER_PATH', [self.data_dir])
                 self.patches.append(p)
@@ -105,7 +106,6 @@ class TestExtension(TestCase):
         # verify our patches
         self.assertEqual(paths.ENV_CONFIG_PATH, [self.config_dir])
         self.assertEqual(paths.ENV_JUPYTER_PATH, [self.data_dir])
-        self.assertEqual(commands.ENV_JUPYTER_PATH, [self.data_dir])
         self.assertEqual(commands.get_app_dir(), os.path.realpath(pjoin(self.data_dir, 'lab')))
 
         self.app_dir = commands.get_app_dir()
