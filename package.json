@@ -12,6 +12,7 @@
     "clean": "node scripts/clean-packages.js examples packages",
     "clean:examples": "node scripts/clean-packages.js examples",
     "clean:main": "cd jupyterlab && npm run clean",
+    "clean:slate": "git clean -dfx && npm install && npm run build",
     "clean:src": "node scripts/clean-packages.js packages",
     "clean:tests": "lerna run clean --scope \"@jupyterlab/test-*\"",
     "coverage": "lerna run coverage --stream",
