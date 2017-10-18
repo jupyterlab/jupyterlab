@@ -1,3 +1,7 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
 
 import {
   Dialog, showDialog
@@ -53,6 +57,8 @@ export
 class PluginEditor extends Widget {
   /**
    * Create a new plugin editor.
+   *
+   * @param options - The plugin editor instantiation options.
    */
   constructor(options: PluginEditor.IOptions) {
     super();
