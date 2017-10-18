@@ -86,7 +86,7 @@ class TestExtension(TestCase):
             'JUPYTERLAB_DIR': pjoin(self.data_dir, 'lab')
         })
         self.patches.append(p)
-        for mod in (paths):
+        for mod in [paths]:
             if hasattr(mod, 'ENV_JUPYTER_PATH'):
                 p = patch.object(mod, 'ENV_JUPYTER_PATH', [self.data_dir])
                 self.patches.append(p)
