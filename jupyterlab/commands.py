@@ -12,11 +12,12 @@ import pipes
 import os
 import re
 import shutil
+import site
 import sys
 import tarfile
 from distutils.version import LooseVersion
 from functools import partial
-from jupyter_core.paths import ENV_JUPYTER_PATH, jupyter_config_path
+from jupyter_core.paths import jupyter_config_path
 from notebook.nbextensions import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 from os import path as osp
 from os.path import join as pjoin
@@ -42,11 +43,25 @@ logging.basicConfig(format='%(message)s', level=logging.INFO)
 def get_app_dir(app_dir=None):
     """Get the configured JupyterLab app directory.
     """
+    # Default to the override environment variable.
     app_dir = app_dir or os.environ.get('JUPYTERLAB_DIR')
-    default_path = ENV_JUPYTER_PATH[0]
-    if default_path == '/usr/share/jupyter':
-        default_path = '/usr/local/share/jupyter'
-    app_dir = app_dir or pjoin(default_path, 'lab')
+    if app_dir:
+        return os.path.realpath(app_dir)
+
+    # Use the default locations for data_files.
+
+    # Check for a user level install.
+    if here.startswith(site.getuserbase()):
+        app_dir = pjoin(site.getuserbase(), 'share', 'jupyter', 'lab')
+
+    # Check for a Posix system level install.
+    elif sys.prefix == '/usr':
+        app_dir = '/usr/local/share/jupyter/lab'
+
+    # Otherwise use the sys prefix.
+    else:
+        app_dir = pjoin(sys.prefix, 'jupyter', 'share', 'lab')
+
     return os.path.realpath(app_dir)
 
 
