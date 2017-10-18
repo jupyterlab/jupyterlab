@@ -163,7 +163,11 @@ def install_extension_async(extension, app_dir=None, logger=None, abort_callback
     # npm pack the extension
     yield run([get_npm_name(), 'pack', extension], cwd=target, logger=logger, abort_callback=abort_callback)
 
-    fname = os.path.basename(glob.glob(pjoin(target, '*.*'))[0])
+    fnames = glob.glob(pjoin(target, '*.*'))
+    if not fnames:
+        raise ValueError('Invalid extension')
+
+    fname = os.path.basename(fnames[0])
     data = _read_package(pjoin(target, fname))
 
     # Remove the tarball if the package is not an extension.
