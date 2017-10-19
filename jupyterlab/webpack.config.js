@@ -4,7 +4,6 @@ var fs = require('fs-extra');
 var Handlebars = require('handlebars');
 var crypto = require('crypto');
 var package_data = require('./package.json');
-var watch = require('watch');
 var Build = require('@jupyterlab/buildutils').Build;
 
 // Ensure a clear build directory.
@@ -34,56 +33,39 @@ var result = template(data);
 fs.writeFileSync(path.resolve(buildDir, 'index.out.js'), result);
 
 
-/**
- * Watch a package for changes and copy them to the local node_modules.
- */
-function watchPackage(packagePath) {
-  packagePath = fs.realpathSync(packagePath);
-  var data = require(path.join(packagePath, 'package.json'));
-
-  try {
-    var targetBase = require.resolve(path.join(data.name, 'package.json'));
-  } catch (err) {
-    console.error(err);
-    return;
-  }
-  targetBase = fs.realpathSync(path.dirname(targetBase));
-
-  if (targetBase === packagePath) {
-    return;
-  }
-
-  var options = {
-    "ignoreDotFiles": true,
-    "interval": 0.5,
-    "filter": function(f, stat) {
-      return f.split(path.sep).indexOf('node_modules') === -1;
-    }
-  }
-
-  watch.watchTree(packagePath, options, function (f, curr, prev) {
-    if (typeof f !== 'object' && curr !== null) {
-      var target = path.join(targetBase, f.slice(packagePath.length));
-      if (curr.nlink !== 0) {
-        try {
-          console.log('copying', target);
-          fs.copySync(f, target);
-        } catch (err) {
-          console.error(err);
-        }
-      }
-    }
+// Handle watch mode for the linked packages.
+var localLinked = {};
+var watchedPaths = [];
+if (process.argv.indexOf('--watch') !== -1) {
+  Object.keys(jlab.linkedPackages).forEach(function (name) {
+    var localPath = require.resolve(path.join(name, 'package.json'));
+    localLinked[name] = path.dirname(localPath);
   });
 }
 
 
-// Handle watch mode for the linked packages.
-var localPaths = [];
-if (process.argv.indexOf('--watch') !== -1) {
-  Object.keys(jlab.linkedPackages).forEach(function (name) {
-    watchPackage(jlab.linkedPackages[name]);
-    var localPath = require.resolve(path.join(name, 'package.json'));
-    localPaths.push(path.dirname(localPath));
+/**
+ * Watch a linked file if it is a file that has not been seen.
+ */
+function maybeWatch(localPath, name) {
+  var stats = fs.statSync(localPath);
+  if (!stats.isFile(localPath) || watchedPaths.indexOf(localPath) !== -1) {
+    return;
+  }
+  watchedPaths.push(localPath);
+  var rootPath = localLinked[name];
+  var rest = localPath.slice(rootPath.length);
+  var source = path.join(jlab.linkedPackages[name], rest);
+  fs.watchFile(source, { "interval": 500 }, function(curr) {
+    if (!curr || curr.nlink === 0) {
+      return;
+    }
+    try {
+      console.log('updating', path.join(name, rest));
+      fs.copySync(source, localPath);
+    } catch (err) {
+      console.error(err);
+    }
   });
 }
 
@@ -120,14 +102,17 @@ module.exports = {
     ],
   },
   watchOptions: {
-    ignored: function(search) {
+    ignored: function(localPath) {
       // Limit the watched files to those in our local linked package dirs.
       var ignore = true;
-      localPaths.forEach(function(localPath) {
-        if (search.slice(0, localPath.length) === localPath) {
-          var rest = search.slice(localPath.length);
+      Object.keys(localLinked).forEach(function (name) {
+        var rootPath = localLinked[name];
+        if (localPath.slice(0, rootPath.length) === rootPath) {
+          var stats = fs.statSync(localPath);
+          var rest = source.slice(rootPath.length);
           if (rest.indexOf('node_modules') === -1) {
             ignore = false;
+            maybeWatch(localPath, name);
           }
         }
       });
