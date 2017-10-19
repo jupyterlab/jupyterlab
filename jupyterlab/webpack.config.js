@@ -45,7 +45,7 @@ if (process.argv.indexOf('--watch') !== -1) {
 
 
 /**
- * Watch a linked file if it is a file that has not been seen.
+ * Watch a local path if it is a file that has not been seen.
  */
 function maybeWatch(localPath, name) {
   var stats = fs.statSync(localPath);
