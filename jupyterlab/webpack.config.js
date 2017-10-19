@@ -38,18 +38,6 @@ hash.update(fs.readFileSync('./package.json'));
 var digest = hash.digest('hex');
 fs.writeFileSync(path.resolve(buildDir, 'hash.md5'), digest);
 
-// Handle linked packages.
-var linkedPackages = {};
-Object.keys(jlab.linkedPackages).forEach(function (name) {
-  linkedPackages[name] = fs.realpathSync(jlab.linkedPackages[name]);
-});
-
-// The valid module paths.
-var modules = [
-  path.resolve(__dirname, './node_modules'),
-  path.resolve(__dirname, '../node_modules')
-];
-
 
 module.exports = {
   entry:  path.resolve(buildDir, 'index.out.js'),
@@ -74,13 +62,6 @@ module.exports = {
       { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, use: 'file-loader' },
       { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, use: 'url-loader?limit=10000&mimetype=image/svg+xml' }
     ],
-  },
-  resolve: {
-    alias: linkedPackages,
-    modules: modules
-  },
-  resolveLoader: {
-    modules: modules
   },
   watchOptions: {
     ignored: /node_modules/
