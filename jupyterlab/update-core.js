@@ -34,15 +34,15 @@ packages.forEach(function(packagePath) {
   // Make sure it is included as a dependency.
   corePackage.dependencies[data.name] = '^' + String(data.version);
 
-  var jlab = data.jupyterlab;
-  if (!jlab) {
-    return;
-  }
-
   // Add its dependencies to the core dependencies.
   var deps = data.dependencies || [];
   for (var dep in deps) {
     corePackage.dependencies[dep] = deps[dep];
+  }
+
+  var jlab = data.jupyterlab;
+  if (!jlab) {
+    return;
   }
 
   // Handle extensions.
