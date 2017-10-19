@@ -61,6 +61,7 @@
     "@jupyterlab/tooltip": "^0.11.1",
     "@jupyterlab/tooltip-extension": "^0.11.1",
     "@jupyterlab/vega2-extension": "^0.11.1",
+    "@phosphor/coreutils": "^1.2.0",
     "@phosphor/widgets": "^1.3.0"
   },
   "devDependencies": {
@@ -126,6 +127,7 @@
       "@jupyterlab/services",
       "@jupyterlab/terminal",
       "@jupyterlab/tooltip",
+      "@phosphor/coreutils",
       "@phosphor/widgets"
     ],
     "version": "0.29.0.dev0",
