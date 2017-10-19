@@ -10,9 +10,6 @@ include package.json
 include setupbase.py
 
 include jupyterlab/package.app.json
-include jupyterlab/webpack.config.js
-include jupyterlab/index.app.js
-include jupyterlab/node-version-check.js
-include jupyterlab/released_packages.txt
+include jupyterlab/*.js
 
 prune jupyterlab/tests

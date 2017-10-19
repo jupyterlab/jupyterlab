@@ -4,6 +4,7 @@ var fs = require('fs-extra');
 var Handlebars = require('handlebars');
 var crypto = require('crypto');
 var package_data = require('./package.json');
+var watch = require('watch');
 var Build = require('@jupyterlab/buildutils').Build;
 
 // Ensure a clear build directory.
@@ -31,6 +32,61 @@ var data = {
 var result = template(data);
 
 fs.writeFileSync(path.resolve(buildDir, 'index.out.js'), result);
+
+
+/**
+ * Watch a package for changes and copy them to the local node_modules.
+ */
+function watchPackage(packagePath) {
+  packagePath = fs.realpathSync(packagePath);
+  var data = require(path.join(packagePath, 'package.json'));
+
+  try {
+    var targetBase = require.resolve(path.join(data.name, 'package.json'));
+  } catch (err) {
+    console.error(err);
+    return;
+  }
+  targetBase = fs.realpathSync(path.dirname(targetBase));
+
+  if (targetBase === packagePath) {
+    return;
+  }
+
+  var options = {
+    "ignoreDotFiles": true,
+    "interval": 0.5,
+    "filter": function(f, stat) {
+      return f.split(path.sep).indexOf('node_modules') === -1;
+    }
+  }
+
+  watch.watchTree(packagePath, options, function (f, curr, prev) {
+    if (typeof f !== 'object' && curr !== null) {
+      var target = path.join(targetBase, f.slice(packagePath.length));
+      if (curr.nlink !== 0) {
+        try {
+          console.log('copying', target);
+          fs.copySync(f, target);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }
+  });
+}
+
+
+// Handle watch mode for the linked packages.
+var localPaths = [];
+if (process.argv.indexOf('--watch') !== -1) {
+  Object.keys(jlab.linkedPackages).forEach(function (name) {
+    watchPackage(jlab.linkedPackages[name]);
+    var localPath = require.resolve(path.join(name, 'package.json'));
+    localPaths.push(path.dirname(localPath));
+  });
+}
+
 
 // Create the hash
 var hash = crypto.createHash('md5');
@@ -64,7 +120,19 @@ module.exports = {
     ],
   },
   watchOptions: {
-    ignored: /node_modules/
+    ignored: function(search) {
+      // Limit the watched files to those in our local linked package dirs.
+      var ignore = true;
+      localPaths.forEach(function(localPath) {
+        if (search.slice(0, localPath.length) === localPath) {
+          var rest = search.slice(localPath.length);
+          if (rest.indexOf('node_modules') === -1) {
+            ignore = false;
+          }
+        }
+      });
+      return ignore;
+    }
   },
   node: {
     fs: 'empty'

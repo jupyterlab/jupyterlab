@@ -89,6 +89,7 @@
     "source-map-loader": "0.2.1",
     "style-loader": "^0.13.1",
     "url-loader": "^0.5.7",
+    "watch": "~1.0.2",
     "webpack": "^2.2.1"
   },
   "jupyterlab": {
@@ -142,7 +143,6 @@
       "@phosphor/widgets"
     ],
     "version": "0.29.0.dev0",
-    "linkedPackages": {
-    }
+    "linkedPackages": {}
   }
 }
