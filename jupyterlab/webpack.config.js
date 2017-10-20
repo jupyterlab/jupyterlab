@@ -35,7 +35,7 @@ fs.writeFileSync(path.resolve(buildDir, 'index.out.js'), result);
 
 // Handle watch mode for the linked packages.
 var localLinked = {};
-var watchedPaths = [];
+var seenPaths = [];
 if (process.argv.indexOf('--watch') !== -1) {
   Object.keys(jlab.linkedPackages).forEach(function (name) {
     var localPath = require.resolve(path.join(name, 'package.json'));
@@ -45,17 +45,20 @@ if (process.argv.indexOf('--watch') !== -1) {
 
 
 /**
- * Watch a local path if it is a file that has not been seen.
+ * Sync a local path to a linked package path if appropriate.
  */
-function maybeWatch(localPath, name) {
+function mabyeSync(localPath, name) {
   var stats = fs.statSync(localPath);
-  if (!stats.isFile(localPath) || watchedPaths.indexOf(localPath) !== -1) {
+  if (!stats.isFile(localPath) || seenPaths.indexOf(localPath) !== -1) {
     return;
   }
-  watchedPaths.push(localPath);
+  seenPaths.push(localPath);
   var rootPath = localLinked[name];
   var rest = localPath.slice(rootPath.length);
-  var source = path.join(jlab.linkedPackages[name], rest);
+  var source = fs.realpathSync(path.join(jlab.linkedPackages[name], rest));
+  if (source === localPath) {
+    return;
+  }
   fs.watchFile(source, { "interval": 500 }, function(curr) {
     if (!curr || curr.nlink === 0) {
       return;
@@ -107,12 +110,12 @@ module.exports = {
       var ignore = true;
       Object.keys(localLinked).forEach(function (name) {
         var rootPath = localLinked[name];
-        if (localPath.slice(0, rootPath.length) === rootPath) {
-          var stats = fs.statSync(localPath);
-          var rest = source.slice(rootPath.length);
+        var contained = localPath.indexOf(rootPath + path.sep) !== -1;
+        if (localPath === rootPath || contained) {
+          var rest = localPath.slice(rootPath.length);
           if (rest.indexOf('node_modules') === -1) {
             ignore = false;
-            maybeWatch(localPath, name);
+            mabyeSync(localPath, name);
           }
         }
       });

@@ -34,9 +34,11 @@ packages.forEach(function(packagePath) {
 
   // Make sure it is included as a dependency.
   corePackage.dependencies[data.name] = '^' + String(data.version);
+  var relativePath = '../packages/' + path.basename(packagePath);
+  corePackage.jupyterlab.linkedPackages[data.name] = relativePath;
 
   // Add its dependencies to the core dependencies if they are in the
-  // singletonpackages.
+  // singleton packages.
   var deps = data.dependencies || [];
   for (var dep in deps) {
     if (singletonPackages.indexOf(dep) !== -1) {
