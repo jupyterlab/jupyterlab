@@ -106,22 +106,19 @@ module.exports = {
       }
       // Limit the watched files to those in our local linked package dirs.
       var ignore = true;
-      var found = false;
-      Object.keys(localLinked).forEach(function (name) {
+      Object.keys(localLinked).some(function (name) {
         // Bail if already found.
-        if (found) {
-          return;
-        }
         var rootPath = localLinked[name];
         var contained = localPath.indexOf(rootPath + path.sep) !== -1;
-        if (localPath === rootPath || contained) {
-          found = true;
-          var rest = localPath.slice(rootPath.length);
-          if (rest.indexOf('node_modules') === -1) {
-            ignore = false;
-            maybeSync(localPath, name, rest);
-          }
+        if (localPath !== rootPath && !contained) {
+          return false;
         }
+        var rest = localPath.slice(rootPath.length);
+        if (rest.indexOf('node_modules') === -1) {
+          ignore = false;
+          maybeSync(localPath, name, rest);
+        }
+        return true;
       });
       ignoreCache.set(localPath, ignore);
       return ignore;
