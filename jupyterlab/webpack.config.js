@@ -33,28 +33,23 @@ var result = template(data);
 fs.writeFileSync(path.resolve(buildDir, 'index.out.js'), result);
 
 
-// Handle watch mode for the linked packages.
+// Set up variables for watch mode.
 var localLinked = {};
-var seenPaths = [];
-if (process.argv.indexOf('--watch') !== -1) {
-  Object.keys(jlab.linkedPackages).forEach(function (name) {
-    var localPath = require.resolve(path.join(name, 'package.json'));
-    localLinked[name] = path.dirname(localPath);
-  });
-}
+var ignoreCache = new Map();
+Object.keys(jlab.linkedPackages).forEach(function (name) {
+  var localPath = require.resolve(path.join(name, 'package.json'));
+  localLinked[name] = path.dirname(localPath);
+});
 
 
 /**
- * Sync a local path to a linked package path if appropriate.
+ * Sync a local path to a linked package path if they are files and differ.
  */
-function mabyeSync(localPath, name) {
+function mabyeSync(localPath, name, rest) {
   var stats = fs.statSync(localPath);
-  if (!stats.isFile(localPath) || seenPaths.indexOf(localPath) !== -1) {
+  if (!stats.isFile(localPath)) {
     return;
   }
-  seenPaths.push(localPath);
-  var rootPath = localLinked[name];
-  var rest = localPath.slice(rootPath.length);
   var source = fs.realpathSync(path.join(jlab.linkedPackages[name], rest));
   if (source === localPath) {
     return;
@@ -106,6 +101,9 @@ module.exports = {
   },
   watchOptions: {
     ignored: function(localPath) {
+      if (ignoreCache.has(localPath)) {
+        return ignoreCache.get(localPath);
+      }
       // Limit the watched files to those in our local linked package dirs.
       var ignore = true;
       Object.keys(localLinked).forEach(function (name) {
@@ -115,10 +113,11 @@ module.exports = {
           var rest = localPath.slice(rootPath.length);
           if (rest.indexOf('node_modules') === -1) {
             ignore = false;
-            mabyeSync(localPath, name);
+            mabyeSync(localPath, name, rest);
           }
         }
       });
+      ignoreCache.set(localPath, ignore);
       return ignore;
     }
   },
