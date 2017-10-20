@@ -32,23 +32,47 @@ var result = template(data);
 
 fs.writeFileSync(path.resolve(buildDir, 'index.out.js'), result);
 
+
+// Set up variables for watch mode.
+var localLinked = {};
+var ignoreCache = new Map();
+Object.keys(jlab.linkedPackages).forEach(function (name) {
+  var localPath = require.resolve(path.join(name, 'package.json'));
+  localLinked[name] = path.dirname(localPath);
+});
+
+
+/**
+ * Sync a local path to a linked package path if they are files and differ.
+ */
+function maybeSync(localPath, name, rest) {
+  var stats = fs.statSync(localPath);
+  if (!stats.isFile(localPath)) {
+    return;
+  }
+  var source = fs.realpathSync(path.join(jlab.linkedPackages[name], rest));
+  if (source === localPath) {
+    return;
+  }
+  fs.watchFile(source, { 'interval': 500 }, function(curr) {
+    if (!curr || curr.nlink === 0) {
+      return;
+    }
+    try {
+      console.log('updating', path.join(name, rest));
+      fs.copySync(source, localPath);
+    } catch (err) {
+      console.error(err);
+    }
+  });
+}
+
+
 // Create the hash
 var hash = crypto.createHash('md5');
 hash.update(fs.readFileSync('./package.json'));
 var digest = hash.digest('hex');
 fs.writeFileSync(path.resolve(buildDir, 'hash.md5'), digest);
-
-// Handle linked packages.
-var linkedPackages = {};
-Object.keys(jlab.linkedPackages).forEach(function (name) {
-  linkedPackages[name] = fs.realpathSync(jlab.linkedPackages[name]);
-});
-
-// The valid module paths.
-var modules = [
-  path.resolve(__dirname, './node_modules'),
-  path.resolve(__dirname, '../node_modules')
-];
 
 
 module.exports = {
@@ -75,15 +99,30 @@ module.exports = {
       { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, use: 'url-loader?limit=10000&mimetype=image/svg+xml' }
     ],
   },
-  resolve: {
-    alias: linkedPackages,
-    modules: modules
-  },
-  resolveLoader: {
-    modules: modules
-  },
   watchOptions: {
-    ignored: /node_modules/
+    ignored: function(localPath) {
+      if (ignoreCache.has(localPath)) {
+        return ignoreCache.get(localPath);
+      }
+      // Limit the watched files to those in our local linked package dirs.
+      var ignore = true;
+      Object.keys(localLinked).some(function (name) {
+        // Bail if already found.
+        var rootPath = localLinked[name];
+        var contained = localPath.indexOf(rootPath + path.sep) !== -1;
+        if (localPath !== rootPath && !contained) {
+          return false;
+        }
+        var rest = localPath.slice(rootPath.length);
+        if (rest.indexOf('node_modules') === -1) {
+          ignore = false;
+          maybeSync(localPath, name, rest);
+        }
+        return true;
+      });
+      ignoreCache.set(localPath, ignore);
+      return ignore;
+    }
   },
   node: {
     fs: 'empty'

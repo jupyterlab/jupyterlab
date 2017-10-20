@@ -16,6 +16,7 @@ corePackage.jupyterlab.version = version;
 corePackage.jupyterlab.linkedPackages = {};
 corePackage.dependencies = {};
 
+var singletonPackages = corePackage.jupyterlab.singletonPackages;
 var basePath = path.resolve('..');
 var packages = glob.sync(path.join(basePath, 'packages/*'));
 packages.forEach(function(packagePath) {
@@ -31,20 +32,23 @@ packages.forEach(function(packagePath) {
     return;
   }
 
-  // Make sure it is included as a dependency and a linked package.
+  // Make sure it is included as a dependency.
   corePackage.dependencies[data.name] = '^' + String(data.version);
   var relativePath = '../packages/' + path.basename(packagePath);
   corePackage.jupyterlab.linkedPackages[data.name] = relativePath;
 
+  // Add its dependencies to the core dependencies if they are in the
+  // singleton packages.
+  var deps = data.dependencies || [];
+  for (var dep in deps) {
+    if (singletonPackages.indexOf(dep) !== -1) {
+      corePackage.dependencies[dep] = deps[dep];
+    }
+  }
+
   var jlab = data.jupyterlab;
   if (!jlab) {
     return;
-  }
-
-  // Add its dependencies to the core dependencies.
-  var deps = data.dependencies || [];
-  for (var dep in deps) {
-    corePackage.dependencies[dep] = deps[dep];
   }
 
   // Handle extensions.
