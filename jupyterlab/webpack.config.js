@@ -45,7 +45,7 @@ Object.keys(jlab.linkedPackages).forEach(function (name) {
 /**
  * Sync a local path to a linked package path if they are files and differ.
  */
-function mabyeSync(localPath, name, rest) {
+function maybeSync(localPath, name, rest) {
   var stats = fs.statSync(localPath);
   if (!stats.isFile(localPath)) {
     return;
@@ -54,7 +54,7 @@ function mabyeSync(localPath, name, rest) {
   if (source === localPath) {
     return;
   }
-  fs.watchFile(source, { "interval": 500 }, function(curr) {
+  fs.watchFile(source, { 'interval': 500 }, function(curr) {
     if (!curr || curr.nlink === 0) {
       return;
     }
@@ -113,7 +113,7 @@ module.exports = {
           var rest = localPath.slice(rootPath.length);
           if (rest.indexOf('node_modules') === -1) {
             ignore = false;
-            mabyeSync(localPath, name, rest);
+            maybeSync(localPath, name, rest);
           }
         }
       });
