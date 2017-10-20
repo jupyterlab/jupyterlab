@@ -27,8 +27,6 @@ class CodeMirrorEditorFactory implements IEditorFactoryService {
         'Cmd-Left': 'goLineLeft',
         'Tab': 'indentMoreOrinsertTab',
         'Shift-Tab': 'indentLess',
-        'Cmd-Alt-[': 'indentAuto',
-        'Ctrl-Alt-[': 'indentAuto',
         'Cmd-/': 'toggleComment',
         'Ctrl-/': 'toggleComment',
       },
