@@ -20,7 +20,7 @@ depend on CSS variables dfined in a main theme package.
 ## CSS variables
 
 We are using native CSS variables in JupyterLab. This is to enable dynamic theming
-of built-in and third party plugins. As of Septmeber 2016, CSS variables are
+of built-in and third party plugins. As of September 2016, CSS variables are
 supported in the latest stable versions of all popular browsers, except for IE/Edge.
 If a JupyterLab deployment needs to support these browsers, a server side CSS
 preprocessor such as Myth or cssnext may be used.
