@@ -107,6 +107,9 @@ module.exports = {
       // Limit the watched files to those in our local linked package dirs.
       var ignore = true;
       Object.keys(localLinked).forEach(function (name) {
+        if (!ignore) {
+          return;
+        }
         var rootPath = localLinked[name];
         var contained = localPath.indexOf(rootPath + path.sep) !== -1;
         if (localPath === rootPath || contained) {
