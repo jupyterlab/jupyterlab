@@ -54,7 +54,7 @@ The difference between public and private variables is simple:
 
 JupyterLab includes a default set of CSS variables in the file:
 
-`packages/default-theme/style/variables.css`
+`packages/theme-assets/style/variables.css`
 
 To ensure consistent design in JupyterLab, all built-in and third party
 extensions should use these variables in their styles if at all possible.
