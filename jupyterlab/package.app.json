@@ -61,6 +61,7 @@
     "@jupyterlab/theme-light-extension": "^0.11.1",
     "@jupyterlab/tooltip": "^0.11.1",
     "@jupyterlab/tooltip-extension": "^0.11.1",
+    "@jupyterlab/vdom-extension": "^0.11.0",
     "@jupyterlab/vega2-extension": "^0.11.1",
     "@phosphor/coreutils": "^1.2.0",
     "@phosphor/widgets": "^1.3.0"
@@ -110,6 +111,7 @@
     "mimeExtensions": {
       "@jupyterlab/json-extension": "",
       "@jupyterlab/pdf-extension": "",
+      "@jupyterlab/vdom-extension": "",
       "@jupyterlab/vega2-extension": ""
     },
     "name": "JupyterLab",

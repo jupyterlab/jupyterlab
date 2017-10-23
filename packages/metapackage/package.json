@@ -82,6 +82,7 @@
     "@jupyterlab/theme-light-extension": "^0.11.1",
     "@jupyterlab/tooltip": "^0.11.1",
     "@jupyterlab/tooltip-extension": "^0.11.1",
+    "@jupyterlab/vdom-extension": "^0.11.0",
     "@jupyterlab/vega2-extension": "^0.11.1"
   },
   "devDependencies": {
