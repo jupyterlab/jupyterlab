@@ -16,7 +16,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  RenderMime
+  RenderMimeRegistry
 } from '@jupyterlab/rendermime';
 
 import {
@@ -269,7 +269,7 @@ namespace PluginEditor {
     /**
      * The optional MIME renderer to use for rendering debug messages.
      */
-    rendermime?: RenderMime;
+    rendermime?: RenderMimeRegistry;
   }
 }
 

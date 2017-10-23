@@ -10,6 +10,10 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
+  IRenderMimeRegistry
+} from '@jupyterlab/rendermime';
+
+import {
   JSONExt
 } from '@phosphor/coreutils';
 
@@ -39,7 +43,7 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<void> = {
   activate,
   id: '@jupyterlab/faq-extension:plugin',
-  requires: [ICommandPalette, ILayoutRestorer],
+  requires: [ICommandPalette, ILayoutRestorer, IRenderMimeRegistry],
   autoStart: true
 };
 
@@ -100,10 +104,10 @@ class FAQWidget extends Widget {
 /**
  * Activate the FAQ plugin.
  */
-function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRestorer): void {
+function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRestorer, rendermime: IRenderMimeRegistry): void {
   const category = 'Help';
   const command = CommandIDs.open;
-  const { commands, shell, rendermime } = app;
+  const { commands, shell } = app;
   const tracker = new InstanceTracker<Widget>({ namespace: 'faq' });
 
   // Handle state restoration.

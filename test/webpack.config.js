@@ -1,11 +1,10 @@
-var path = require('path');
 
 module.exports = {
   entry: ['@phosphor/widgets/style/index.css', './build/index.js'],
   output: {
-    path: __dirname + "/build",
-    filename: "bundle.js",
-    publicPath: "./build/"
+    path: __dirname + '/build',
+    filename: 'bundle.js',
+    publicPath: './build/'
   },
   bail: true,
   devtool: 'inline-source-map',
@@ -19,4 +18,4 @@ module.exports = {
       { test: /\.js.map$/, loader: 'file-loader' },
     ]
   }
-}
+};

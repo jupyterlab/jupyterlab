@@ -32,7 +32,8 @@
   "dependencies": {
     "@jupyterlab/application": "^0.13.1",
     "@jupyterlab/apputils": "^0.13.1",
-    "@jupyterlab/docregistry": "^0.13.0"
+    "@jupyterlab/docregistry": "^0.13.0",
+    "@jupyterlab/rendermime": "^0.13.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

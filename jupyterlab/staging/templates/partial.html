@@ -1,0 +1,10 @@
+  <script id="jupyter-config-data" type="application/json">{
+    {% for key, value in page_config.items() -%}
+    "{{ key }}": "{{ value }}",
+    {% endfor -%}
+    "baseUrl": "{{ base_url }}",
+    "wsUrl": "{{ ws_url }}",
+    "publicUrl": "{{ public_url }}"
+  }</script>
+
+  {% block favicon %}<link rel="shortcut icon" type="image/x-icon" href="{{ base_url }}static/base/images/favicon.ico">{% endblock %}

@@ -11,7 +11,8 @@ import sys
 # Our own imports
 from setupbase import (
     create_cmdclass, ensure_python, find_packages, get_version,
-    command_for_func, combine_commands, install_npm, HERE, run
+    command_for_func, combine_commands, install_npm, HERE, run,
+    skip_npm
 )
 
 from setuptools import setup
@@ -54,14 +55,16 @@ def check_assets():
         'themes/@jupyterlab/theme-light-extension/images/jupyterlab.svg'
     ]
 
+    if 'develop' in sys.argv:
+        if skip_npm:
+            return
+        run(npm, cwd=HERE)
+ 
     for t in targets:
         if not os.path.exists(pjoin(HERE, NAME, t)):
             msg = ('Missing file: %s, `build:prod` script did not complete '
                    'successfully' % t)
             raise ValueError(msg)
-
-    if 'develop' in sys.argv:
-        run(npm, cwd=HERE)
 
     if 'sdist' not in sys.argv and 'bdist_wheel' not in sys.argv:
         return
@@ -114,7 +117,7 @@ setup_args = dict(
 
 setup_args['install_requires'] = [
     'notebook>=4.3.1',
-    'jupyterlab_launcher>=0.6.0,<0.7.0',
+    'jupyterlab_launcher>=0.7.0,<0.8.0',
     'ipython_genutils',
     'futures;python_version<"3.0"',
     'subprocess32;python_version<"3.0"'

@@ -77,6 +77,7 @@ export
 const rendererFactory: IRenderMime.IRendererFactory = {
   safe: false,
   mimeTypes: [MIME_TYPE],
+  defaultRank: 75,
   createRenderer: options => new RenderedPDF()
 };
 
@@ -85,7 +86,6 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
   {
     id: '@jupyterlab/pdf-extension:factory',
     rendererFactory,
-    rank: 0,
     dataType: 'string',
     fileTypes: [{
       name: 'PDF',

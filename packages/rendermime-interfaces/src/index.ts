@@ -166,7 +166,8 @@ namespace IRenderMime {
     readonly rendererFactory: IRendererFactory;
 
     /**
-     * The rank passed to `RenderMime.addFactory`.
+     * The rank passed to `RenderMime.addFactory`.  If not given,
+     * defaults to the `defaultRank` of the factory.
      */
     readonly rank?: number;
 
@@ -245,6 +246,11 @@ namespace IRenderMime {
     readonly mimeTypes: ReadonlyArray<string>;
 
     /**
+     * The default rank of the factory.  If not given, defaults to 100.
+     */
+    readonly defaultRank?: number;
+
+    /**
      * Create a renderer which displays the mime data.
      *
      * @param options - The options used to render the data.
@@ -280,7 +286,7 @@ namespace IRenderMime {
     /**
      * The LaTeX typesetter.
      */
-    latexTypesetter: ILatexTypesetter;
+    latexTypesetter: ILatexTypesetter | null;
   }
 
   /**

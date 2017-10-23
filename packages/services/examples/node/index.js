@@ -12,8 +12,9 @@ var services = require('@jupyterlab/services');
 var options = {
   kernelName: 'python',
   path: 'foo.ipynb'
-}
+};
 
+/* eslint-disable no-console */
 console.log('Starting session...');
 var session;
 services.Session.startNew(options).then(function(s) {
@@ -25,8 +26,8 @@ services.Session.startNew(options).then(function(s) {
   // Execute and handle replies on the kernel.
   var future = session.kernel.requestExecute({ code: 'a = 1' });
   future.onReply = function(reply) {
-    console.log('Got execute reply');
-  }
+    console.log('Got execute reply', reply);
+  };
   return future.done;
 }).then(function() {
   console.log('Future is fulfilled');
@@ -38,4 +39,4 @@ services.Session.startNew(options).then(function(s) {
 }).catch(function(err) {
   console.error(err);
   process.exit(1);
-})
+});

@@ -10,10 +10,6 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  MimeModel, RenderMime
-} from '@jupyterlab/rendermime';
-
-import {
   ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
@@ -25,6 +21,9 @@ import {
   ISignal, Signal
 } from '@phosphor/signaling';
 
+import {
+  MimeModel, RenderMimeRegistry
+} from '@jupyterlab/rendermime';
 
 import {
   IInspector
@@ -182,7 +181,7 @@ class InspectionHandler implements IDisposable, IInspector.IInspectable {
   private _inspected = new Signal<this, IInspector.IInspectorUpdate>(this);
   private _isDisposed = false;
   private _pending = 0;
-  private _rendermime: RenderMime;
+  private _rendermime: RenderMimeRegistry;
   private _standby = true;
 }
 
@@ -210,7 +209,7 @@ namespace InspectionHandler {
     /**
      * The mime renderer for the inspection handler.
      */
-    rendermime: RenderMime;
+    rendermime: RenderMimeRegistry;
   }
 
   /**

@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IOutputModel, RenderMime
+  IOutputModel, RenderMimeRegistry
 } from '@jupyterlab/rendermime';
 
 import {
@@ -146,7 +146,7 @@ class OutputArea extends Widget {
   /**
    * Te rendermime instance used by the widget.
    */
-  readonly rendermime: RenderMime;
+  readonly rendermime: RenderMimeRegistry;
 
   /**
    * A read-only sequence of the chidren widgets in the output area.
@@ -456,7 +456,7 @@ namespace OutputArea {
     /**
      * The rendermime instance used by the widget.
      */
-    rendermime: RenderMime;
+    rendermime: RenderMimeRegistry;
   }
 
   /**

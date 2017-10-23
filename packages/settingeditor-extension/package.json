@@ -34,6 +34,7 @@
     "@jupyterlab/apputils": "^0.13.1",
     "@jupyterlab/codeeditor": "^0.13.0",
     "@jupyterlab/coreutils": "^0.13.0",
+    "@jupyterlab/rendermime": "^0.13.0",
     "@jupyterlab/settingeditor": "^0.2.0"
   },
   "devDependencies": {

@@ -12,7 +12,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  RenderMime
+  RenderMimeRegistry
 } from '@jupyterlab/rendermime';
 
 import {
@@ -455,7 +455,7 @@ namespace SettingEditor {
     /**
      * The optional MIME renderer to use for rendering debug messages.
      */
-    rendermime?: RenderMime;
+    rendermime?: RenderMimeRegistry;
 
     /**
      * The state database used to store layout.

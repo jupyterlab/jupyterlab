@@ -17,6 +17,7 @@ export
 const htmlRendererFactory: IRenderMime.IRendererFactory = {
   safe: true,
   mimeTypes: ['text/html'],
+  defaultRank: 50,
   createRenderer: options => new widgets.RenderedHTML(options)
 };
 
@@ -28,6 +29,7 @@ export
 const imageRendererFactory: IRenderMime.IRendererFactory = {
   safe: true,
   mimeTypes: ['image/png', 'image/jpeg', 'image/gif'],
+  defaultRank: 90,
   createRenderer: options => new widgets.RenderedImage(options)
 };
 
@@ -39,6 +41,7 @@ export
 const latexRendererFactory: IRenderMime.IRendererFactory = {
   safe: true,
   mimeTypes: ['text/latex'],
+  defaultRank: 70,
   createRenderer: options => new widgets.RenderedLatex(options)
 };
 
@@ -50,6 +53,7 @@ export
 const markdownRendererFactory: IRenderMime.IRendererFactory = {
   safe: true,
   mimeTypes: ['text/markdown'],
+  defaultRank: 60,
   createRenderer: options => new widgets.RenderedMarkdown(options)
 };
 
@@ -61,6 +65,7 @@ export
 const svgRendererFactory: IRenderMime.IRendererFactory = {
   safe: false,
   mimeTypes: ['image/svg+xml'],
+  defaultRank: 80,
   createRenderer: options => new widgets.RenderedSVG(options)
 };
 
@@ -72,6 +77,7 @@ export
 const textRendererFactory: IRenderMime.IRendererFactory = {
   safe: true,
   mimeTypes: ['text/plain', 'application/vnd.jupyter.stdout', 'application/vnd.jupyter.stderr'],
+  defaultRank: 120,
   createRenderer: options => new widgets.RenderedText(options)
 };
 
@@ -83,15 +89,16 @@ export
 const javaScriptRendererFactory: IRenderMime.IRendererFactory = {
   safe: false,
   mimeTypes: ['text/javascript', 'application/javascript'],
+  defaultRank: 110,
   createRenderer: options => new widgets.RenderedJavaScript(options)
 };
 
 
 /**
- * The builtin factories provided by the rendermime package.
+ * The standard factories provided by the rendermime package.
  */
 export
-const defaultRendererFactories: ReadonlyArray<IRenderMime.IRendererFactory> = [
+const standardRendererFactories: ReadonlyArray<IRenderMime.IRendererFactory> = [
   htmlRendererFactory,
   markdownRendererFactory,
   latexRendererFactory,

@@ -8,6 +8,7 @@ import * as path from 'path';
 import * as utils from './utils';
 
 // Ensure the repo is in a stable state.
+utils.run('jlpm run build:utils');
 utils.run('jlpm integrity');
 
 // Get the dev mode package.json file.
@@ -24,10 +25,11 @@ data['jupyterlab']['linkedPackages'] = {};
 let staging = './jupyterlab/staging';
 utils.writePackageData(path.join(staging, 'package.json'), data);
 
-// Update our index file and webpack file.
+// Update our staging files.
 fs.copySync('./dev_mode/index.js', './jupyterlab/staging/index.js');
 fs.copySync('./dev_mode/webpack.config.js',
             './jupyterlab/staging/webpack.config.js');
+fs.copySync('./dev_mode/templates', './jupyterlab/staging/templates');
 
 
 // Create a new yarn.lock file to ensure it is correct.

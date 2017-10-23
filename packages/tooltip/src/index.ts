@@ -18,7 +18,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  RenderMime
+  RenderMimeRegistry
 } from '@jupyterlab/rendermime';
 
 import '../style/index.css';
@@ -75,6 +75,6 @@ namespace ITooltipManager {
     /**
      * The renderer the tooltip uses to render API responses.
      */
-    readonly rendermime: RenderMime;
+    readonly rendermime: RenderMimeRegistry;
   }
 }

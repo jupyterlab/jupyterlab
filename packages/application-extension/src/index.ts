@@ -17,6 +17,7 @@ import {
   h
 } from '@phosphor/virtualdom';
 
+
 /**
  * The command IDs used by the application plugin.
  */

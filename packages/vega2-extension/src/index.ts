@@ -123,13 +123,13 @@ export
 const rendererFactory: IRenderMime.IRendererFactory = {
   safe: true,
   mimeTypes: [VEGA_MIME_TYPE, VEGALITE_MIME_TYPE],
+  defaultRank: 60,
   createRenderer: options => new RenderedVega(options)
 };
 
 const extension: IRenderMime.IExtension = {
   id: '@jupyterlab/vega2-extension:factory',
   rendererFactory,
-  rank: 0,
   dataType: 'json',
   documentWidgetFactoryOptions: [{
     name: 'Vega',

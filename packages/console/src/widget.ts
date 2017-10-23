@@ -23,7 +23,7 @@ import {
 } from '@jupyterlab/observables';
 
 import {
-  RenderMime
+  RenderMimeRegistry
 } from '@jupyterlab/rendermime';
 
 import {
@@ -197,7 +197,7 @@ class CodeConsole extends Widget {
   /**
    * The rendermime instance used by the console.
    */
-  readonly rendermime: RenderMime;
+  readonly rendermime: RenderMimeRegistry;
 
   /**
    * The client session used by the console.
@@ -664,7 +664,7 @@ namespace CodeConsole {
     /**
      * The mime renderer for the console widget.
      */
-    rendermime: RenderMime;
+    rendermime: RenderMimeRegistry;
 
     /**
      * The client session for the console widget.

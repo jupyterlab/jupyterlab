@@ -12,7 +12,7 @@ import {
 } from '@jupyterlab/inspector';
 
 import {
-  RenderMime, defaultRendererFactories
+  RenderMimeRegistry, standardRendererFactories
 } from '@jupyterlab/rendermime';
 
 import {
@@ -28,13 +28,13 @@ import {
  * Create a raw editor inspector.
  */
 export
-function createInspector(editor: RawEditor, rendermime?: RenderMime): InspectorPanel {
+function createInspector(editor: RawEditor, rendermime?: RenderMimeRegistry): InspectorPanel {
   const connector = new InspectorConnector(editor);
   const inspector = new InspectorPanel();
   const handler = new InspectionHandler({
     connector,
-    rendermime: rendermime || new RenderMime({
-      initialFactories: defaultRendererFactories
+    rendermime: rendermime || new RenderMimeRegistry({
+      initialFactories: standardRendererFactories
     })
   });
 

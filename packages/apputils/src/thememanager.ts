@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ISettingRegistry, PageConfig, URLExt
+  ISettingRegistry, URLExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -48,9 +48,11 @@ class ThemeManager {
    * Construct a new theme manager.
    */
   constructor(options: ThemeManager.IOptions) {
-    const { key, when } = options;
+    const { key, when, url } = options;
     const registry = options.settingRegistry;
     const promises = Promise.all([registry.load(key), when]);
+
+    this._baseUrl = url;
 
     when.then(() => { this._sealed = true; });
 
@@ -120,9 +122,8 @@ class ThemeManager {
    */
   loadCSS(path: string): Promise<void> {
     const link = document.createElement('link');
-    const baseUrl = PageConfig.getOption('themePath');
     const delegate = new PromiseDelegate<void>();
-    let href = URLExt.join(baseUrl, path);
+    let href = URLExt.join(this._baseUrl, path);
 
     if (!URLExt.isLocal(path)) {
       href = path;
@@ -217,6 +218,7 @@ class ThemeManager {
     }
   }
 
+  private _baseUrl: string;
   private _themes: { [key: string]: ThemeManager.ITheme } = {};
   private _links: HTMLLinkElement[] = [];
   private _host: Widget;
@@ -242,6 +244,11 @@ namespace ThemeManager {
      * The setting registry key that holds theme setting data.
      */
     key: string;
+
+    /**
+     * The url for local theme loading.
+     */
+    url: string;
 
     /**
      * The settings registry.

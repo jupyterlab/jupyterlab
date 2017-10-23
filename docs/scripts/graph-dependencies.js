@@ -42,7 +42,7 @@ packages.forEach(function(packagePath) {
 
   // Construct a URL to the package on GitHub.
   var Url = url.resolve(baseUrl, 'packages/'+path.basename(packagePath));
-  
+
   // Remove the '@jupyterlab' part of the name.
   var name = '"'+data.name.split('/')[1] +'"';
   text += name + '[URL="' + Url + '"];\n';
@@ -60,5 +60,5 @@ packages.forEach(function(packagePath) {
 
 text += '}\n';
 fs.writeFileSync('./dependencies.gv', text);
-childProcess.execSync('cat dependencies.gv | tred | dot -Tsvg -o dependency-graph.svg')
+childProcess.execSync('cat dependencies.gv | tred | dot -Tsvg -o dependency-graph.svg');
 fs.unlink('./dependencies.gv');

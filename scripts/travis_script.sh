@@ -75,6 +75,12 @@ fi
 
 
 if [[ $GROUP == integrity ]]; then
+    # Run the integrity script first
+    jlpm run integrity
+
+    # Lint our JavaScript files.
+    ./node_modules/.bin/eslint .
+
     # Build the packages individually.
     jlpm run build:src
 

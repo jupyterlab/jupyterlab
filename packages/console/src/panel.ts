@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  RenderMime
+  RenderMimeRegistry
 } from '@jupyterlab/rendermime';
 
 import {
@@ -76,7 +76,7 @@ class ConsolePanel extends Panel {
       kernelPreference: options.kernelPreference
     });
 
-    let resolver = new RenderMime.UrlResolver({
+    let resolver = new RenderMimeRegistry.UrlResolver({
       session,
       contents: manager.contents
     });
@@ -189,7 +189,7 @@ namespace ConsolePanel {
     /**
      * The rendermime instance used by the panel.
      */
-    rendermime: RenderMime;
+    rendermime: RenderMimeRegistry;
 
     /**
      * The content factory for the panel.

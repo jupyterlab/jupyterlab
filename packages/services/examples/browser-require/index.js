@@ -8,13 +8,14 @@ require(['jquery', '@jupyterlab/services'], function ($, services) {
   };
 
   // start a single kernel for the page
+  /* eslint-disable no-console */
   startNewKernel(kernelOptions).then(function (kernel) {
     console.log('Kernel started:', kernel);
     kernel.requestKernelInfo().then(function (reply) {
       var content = reply.content;
       $('#kernel-info').text(content.banner);
       console.log('Kernel info:', content);
-    })
+    });
     $('#run').click(function () {
       var code = $('#cell').val();
       console.log('Executing:', code);
@@ -34,7 +35,7 @@ require(['jquery', '@jupyterlab/services'], function ($, services) {
       };
 
       future.onReply = function (reply) {
-        console.log('Got execute reply');
+        console.log('Got execute reply', reply);
       };
 
       future.done.then(function () {

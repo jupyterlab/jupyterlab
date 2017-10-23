@@ -7,7 +7,7 @@ module.exports = {
     publicPath: './example/'
   },
   node: {
-    fs: "empty"
+    fs: 'empty'
   },
   bail: true,
   devtool: 'cheap-source-map',
@@ -26,4 +26,4 @@ module.exports = {
       { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, use: 'url-loader?limit=10000&mimetype=image/svg+xml' }
     ],
   }
-}
+};

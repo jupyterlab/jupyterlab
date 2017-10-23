@@ -13,6 +13,9 @@ import {
   MimeDocumentFactory, MimeDocument
 } from '@jupyterlab/docregistry';
 
+import {
+  IRenderMimeRegistry
+} from '@jupyterlab/rendermime';
 
 import '../style/index.css';
 
@@ -37,7 +40,7 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<void> = {
   activate,
   id: '@jupyterlab/markdownviewer-extension:plugin',
-  requires: [ILayoutRestorer],
+  requires: [ILayoutRestorer, IRenderMimeRegistry],
   autoStart: true
 };
 
@@ -45,13 +48,13 @@ const plugin: JupyterLabPlugin<void> = {
 /**
  * Activate the markdown plugin.
  */
-function activate(app: JupyterLab, restorer: ILayoutRestorer) {
+function activate(app: JupyterLab, restorer: ILayoutRestorer, rendermime: IRenderMimeRegistry) {
     const primaryFileType = app.docRegistry.getFileType('markdown');
     const factory = new MimeDocumentFactory({
       name: FACTORY,
       primaryFileType,
       fileTypes: ['markdown'],
-      rendermime: app.rendermime
+      rendermime
     });
     const { commands } = app;
     const namespace = 'rendered-markdown';

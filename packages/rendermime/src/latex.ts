@@ -9,88 +9,11 @@
 // Other minor modifications are also due to StackExchange and are used with
 // permission.
 
-import {
-  IRenderMime
-} from '@jupyterlab/rendermime-interfaces';
-
 const inline = '$'; // the inline math delimiter
 
 // MATHSPLIT contains the pattern for math delimiters and special symbols
 // needed for searching for math in the text input.
 const MATHSPLIT = /(\$\$?|\\(?:begin|end)\{[a-z]*\*?\}|\\[{}$]|[{}]|(?:\n\s*)+|@@\d+@@|\\\\(?:\(|\)|\[|\]))/i;
-
-
-// Stub for window MathJax.
-declare var MathJax: any;
-
-/**
- * The MathJax Typesetter.
- */
-export
-class MathJaxTypesetter implements IRenderMime.ILatexTypesetter {
-  /**
-   * Typeset the math in a node.
-   *
-   * #### Notes
-   * MathJax schedules the typesetting asynchronously,
-   * but there are not currently any callbacks or Promises
-   * firing when it is done.
-   */
-  typeset(node: HTMLElement): void {
-    if (!this._initialized) {
-      this._init();
-    }
-    if ((window as any).MathJax) {
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, node]);
-      try {
-        MathJax.Hub.Queue(
-          ['Require', MathJax.Ajax, '[MathJax]/extensions/TeX/AMSmath.js'],
-          () => {
-            MathJax.InputJax.TeX.resetEquationNumbers();
-          }
-        );
-      } catch (e) {
-        console.error('Error queueing resetEquationNumbers:', e);
-      }
-    }
-  }
-
-  /**
-   * Initialize MathJax.
-   */
-  private _init(): void {
-    if (!(window as any).MathJax) {
-      return;
-    }
-    MathJax.Hub.Config({
-      tex2jax: {
-        inlineMath: [ ['$', '$'], ['\\(', '\\)'] ],
-        displayMath: [ ['$$', '$$'], ['\\[', '\\]'] ],
-        processEscapes: true,
-        processEnvironments: true
-      },
-      // Center justify equations in code and markdown cells. Elsewhere
-      // we use CSS to left justify single line equations in code cells.
-      displayAlign: 'center',
-      CommonHTML: {
-         linebreaks: { automatic: true }
-       },
-      'HTML-CSS': {
-          availableFonts: [],
-          imageFont: null,
-          preferredFont: null,
-          webFont: 'STIX-Web',
-          styles: {'.MathJax_Display': {'margin': 0}},
-          linebreaks: { automatic: true }
-      },
-      skipStartupTypeset: true
-    });
-    MathJax.Hub.Configured();
-    this._initialized = true;
-  }
-
-  private _initialized = false;
-}
 
 
 /**
