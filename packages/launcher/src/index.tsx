@@ -266,10 +266,18 @@ class Launcher extends VDomRenderer<LauncherModel> {
       return null;
     }
 
+    // Ensure unique entries.
+    let keys = new Set();
+
     // First group-by categories
     let categories = Object.create(null);
     each(this.model.items(), (item, index) => {
       let cat = item.category || 'Other';
+      let key = JSON.stringify(item, Object.keys(item).sort());
+      if (keys.has(key)) {
+        return;
+      }
+      keys.add(key);
       if (!(cat in categories)) {
         categories[cat] = [];
       }
@@ -309,8 +317,8 @@ class Launcher extends VDomRenderer<LauncherModel> {
               <h2 className='jp-Launcher-sectionTitle'>{cat}</h2>
             </div>
             <div className='jp-Launcher-cardContainer'>
-              {toArray(map(categories[cat], (item: ILauncherItem, index) => {
-                return Card(kernel, item, this, this._callback, index);
+              {toArray(map(categories[cat], (item: ILauncherItem) => {
+                return Card(kernel, item, this, this._callback);
               }))}
             </div>
           </div>
@@ -376,7 +384,7 @@ namespace Launcher {
  *
  * @returns a vdom `VirtualElement` for the launcher card.
  */
-function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcherCallback: (widget: Widget) => void, index: number): React.ReactElement<any> {
+function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcherCallback: (widget: Widget) => void): React.ReactElement<any> {
   // Build the onclick handler.
   let onclick = () => {
     // If an item has already been launched,
@@ -395,13 +403,16 @@ function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcher
       showErrorMessage('Launcher Error', err);
     });
   };
+
+  let key = JSON.stringify(item, Object.keys(item).sort());
+
   // Return the VDOM element.
   return (
     <div className='jp-LauncherCard'
       title={item.displayName}
       onClick={onclick}
       data-category={item.category || 'Other'}
-      key={index}>
+      key={key}>
       <div className='jp-LauncherCard-icon'>
           {(item.kernelIconUrl && kernel) &&
             <img src={item.kernelIconUrl} className='jp-Launcher-kernelIcon' />}
