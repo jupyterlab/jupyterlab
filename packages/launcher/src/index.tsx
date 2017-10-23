@@ -297,20 +297,20 @@ class Launcher extends VDomRenderer<LauncherModel> {
     }
 
     // Now create the sections for each category
-    each(orderedCategories, (cat, index) => {
+    each(orderedCategories, cat => {
       let iconClass = `${(categories[cat][0] as ILauncherItem).iconClass} ` +
         'jp-Launcher-sectionIcon jp-Launcher-icon';
       let kernel = KERNEL_CATEGORIES.indexOf(cat) > -1;
       if (cat in categories) {
         section = (
-          <div className='jp-Launcher-section' key={index}>
+          <div className='jp-Launcher-section' key={cat}>
             <div className='jp-Launcher-sectionHeader'>
               {kernel && <div className={iconClass} />}
               <h2 className='jp-Launcher-sectionTitle'>{cat}</h2>
             </div>
             <div className='jp-Launcher-cardContainer'>
-              {toArray(map(categories[cat], (item: ILauncherItem, i) => {
-                return Card(kernel, item, this, this._callback, i);
+              {toArray(map(categories[cat], (item: ILauncherItem, index) => {
+                return Card(kernel, item, this, this._callback, index);
               }))}
             </div>
           </div>
