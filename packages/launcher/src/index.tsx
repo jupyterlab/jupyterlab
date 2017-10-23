@@ -303,14 +303,14 @@ class Launcher extends VDomRenderer<LauncherModel> {
       let kernel = KERNEL_CATEGORIES.indexOf(cat) > -1;
       if (cat in categories) {
         section = (
-          <div className='jp-Launcher-section'>
+          <div className='jp-Launcher-section' key={index}>
             <div className='jp-Launcher-sectionHeader'>
               {kernel && <div className={iconClass} />}
               <h2 className='jp-Launcher-sectionTitle'>{cat}</h2>
             </div>
             <div className='jp-Launcher-cardContainer'>
-              {toArray(map(categories[cat], (item: ILauncherItem) => {
-                return Card(kernel, item, this, this._callback);
+              {toArray(map(categories[cat], (item: ILauncherItem, i) => {
+                return Card(kernel, item, this, this._callback, i);
               }))}
             </div>
           </div>
@@ -372,9 +372,11 @@ namespace Launcher {
  *
  * @param launcherCallback - a callback to call after an item has been launched.
  *
+ * @param index - The index of the card.
+ *
  * @returns a vdom `VirtualElement` for the launcher card.
  */
-function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcherCallback: (widget: Widget) => void): React.ReactElement<any> {
+function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcherCallback: (widget: Widget) => void, index: number): React.ReactElement<any> {
   // Build the onclick handler.
   let onclick = () => {
     // If an item has already been launched,
@@ -398,7 +400,8 @@ function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcher
     <div className='jp-LauncherCard'
       title={item.displayName}
       onClick={onclick}
-      data-category={item.category || 'Other'}>
+      data-category={item.category || 'Other'}
+      key={index}>
       <div className='jp-LauncherCard-icon'>
           {(item.kernelIconUrl && kernel) &&
             <img src={item.kernelIconUrl} className='jp-Launcher-kernelIcon' />}
