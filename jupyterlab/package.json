@@ -32,6 +32,7 @@
     "@jupyterlab/filebrowser-extension": "^0.11.1",
     "@jupyterlab/fileeditor": "^0.11.1",
     "@jupyterlab/fileeditor-extension": "^0.11.1",
+    "@jupyterlab/geojson-extension": "^0.11.0",
     "@jupyterlab/help-extension": "^0.11.1",
     "@jupyterlab/imageviewer": "^0.11.1",
     "@jupyterlab/imageviewer-extension": "^0.11.1",
@@ -108,6 +109,7 @@
       "@jupyterlab/tooltip-extension": ""
     },
     "mimeExtensions": {
+      "@jupyterlab/geojson-extension": "",
       "@jupyterlab/json-extension": "",
       "@jupyterlab/pdf-extension": "",
       "@jupyterlab/vdom-extension": "",
@@ -159,6 +161,7 @@
       "@jupyterlab/filebrowser-extension": "../packages/filebrowser-extension",
       "@jupyterlab/fileeditor": "../packages/fileeditor",
       "@jupyterlab/fileeditor-extension": "../packages/fileeditor-extension",
+      "@jupyterlab/geojson-extension": "../packages/geojson-extension",
       "@jupyterlab/help-extension": "../packages/help-extension",
       "@jupyterlab/imageviewer": "../packages/imageviewer",
       "@jupyterlab/imageviewer-extension": "../packages/imageviewer-extension",

@@ -1,0 +1,32 @@
+/**
+  Copyright (c) Jupyter Development Team.
+  Distributed under the terms of the Modified BSD License.
+*/
+
+/* Add CSS variables to :root */
+:root {
+  --jp-icon-geojson: url('./geojson.svg');
+}
+
+/* Base styles */
+.jp-RenderedGeoJSON.leaflet-container {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Document styles */
+.jp-MimeDocument .jp-RenderedGeoJSON {
+  
+}
+
+/* Document styles */
+.jp-OutputArea .jp-RenderedGeoJSON {
+  height: 360px;
+}
+
+/* Document icon */
+.jp-GeoJSONIcon {
+  background-image: var(--jp-icon-geojson);
+}
