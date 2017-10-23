@@ -68,14 +68,16 @@ pip install notebook
 Fork the JupyterLab [repository](https://github.com/jupyterlab/jupyterlab).
 
 Once you have installed the dependencies mentioned above, use the following
-steps::
+steps:
 
-    git clone https://github.com/<your-github-username>/jupyterlab.git
-    cd jupyterlab
-    pip install -e . # will take a long time to build everything
-    npm install
-    npm run build:main
-    jupyter serverextension enable --py jupyterlab
+```bash
+git clone https://github.com/<your-github-username>/jupyterlab.git
+cd jupyterlab
+pip install -e . # will take a long time to build everything
+npm install
+npm run build:main
+jupyter serverextension enable --py jupyterlab
+```
 
 Notes:
 
