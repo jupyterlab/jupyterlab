@@ -95,7 +95,7 @@ abstract class VDomRenderer<T extends VDomRenderer.IModel | null> extends Widget
    * Subclasses should define this method and use the current model state
    * to create a virtual node or nodes to render.
    */
-  protected abstract render(): React.ReactElement<any>;
+  protected abstract render(): React.ReactElement<any> | null;
 
   private _model: T | null;
   private _modelChanged = new Signal<this, void>(this);
