@@ -21,22 +21,13 @@ import {
   Widget
 } from '@phosphor/widgets';
 
-import * as vdom from '@phosphor/virtualdom';
+import * as React from 'react';
 
 import {
   showErrorMessage, VDomModel, VDomRenderer
 } from '@jupyterlab/apputils';
 
 import '../style/index.css';
-
-
-/* tslint:disable */
-/**
- * We have configured the TSX transform to look for the h function in the local
- * module.
- */
-const h = vdom.h;
-/* tslint:enable */
 
 
 /**
@@ -269,10 +260,10 @@ class Launcher extends VDomRenderer<LauncherModel> {
   /**
    * Render the launcher to virtual DOM nodes.
    */
-  protected render(): vdom.VirtualNode | vdom.VirtualNode[] {
+  protected render(): React.ReactElement<any> {
     // Bail if there is no model.
     if (!this.model) {
-      return [];
+      return null;
     }
 
     // First group-by categories
@@ -290,8 +281,8 @@ class Launcher extends VDomRenderer<LauncherModel> {
     }
 
     // Variable to help create sections
-    let sections: vdom.VirtualNode[] = [];
-    let section: vdom.VirtualNode;
+    let sections: React.ReactElement<any>[] = [];
+    let section: React.ReactElement<any>;
 
     // Assemble the final ordered list of categories, beginning with
     // KNOWN_CATEGORIES.
@@ -383,7 +374,7 @@ namespace Launcher {
  *
  * @returns a vdom `VirtualElement` for the launcher card.
  */
-function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcherCallback: (widget: Widget) => void): vdom.VirtualElement {
+function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcherCallback: (widget: Widget) => void): React.ReactElement<any> {
   // Build the onclick handler.
   let onclick = () => {
     // If an item has already been launched,
@@ -402,14 +393,12 @@ function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcher
       showErrorMessage('Launcher Error', err);
     });
   };
-  // Add a data attribute for the category
-  let dataset = { category: item.category || 'Other' };
   // Return the VDOM element.
   return (
     <div className='jp-LauncherCard'
       title={item.displayName}
-      onclick={onclick}
-      dataset={dataset}>
+      onClick={onclick}
+      data-category={item.category || 'Other'}>
       <div className='jp-LauncherCard-icon'>
           {(item.kernelIconUrl && kernel) &&
             <img src={item.kernelIconUrl} className='jp-Launcher-kernelIcon' />}
