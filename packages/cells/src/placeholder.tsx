@@ -87,16 +87,14 @@ class InputPlaceholder extends Placeholder {
   /**
    * Render the input placeholder using the virtual DOM.
    */
-  protected render(): React.ReactElement<any> {
-    return (
-       <div>
+  protected render(): React.ReactElement<any>[] {
+    return [
         <div className={INPUT_PROMPT_CLASS}>
-        </div>
+        </div>,
         <div className={CONTENT_CLASS} onClick={ (e) => this.handleClick(e) }>
           <div className="jp-MoreHorizIcon" />
         </div>
-      </div>
-    );
+    ];
   }
 
 }
@@ -118,16 +116,14 @@ class OutputPlaceholder extends Placeholder {
   /**
    * Render the output placeholder using the virtual DOM.
    */
-  protected render(): React.ReactElement<any> {
-    return (
-      <div>
+  protected render(): React.ReactElement<any>[] {
+    return [
         <div className={OUTPUT_PROMPT_CLASS}>
-        </div>
+        </div>,
         <div className={CONTENT_CLASS} onClick={ (e) => this.handleClick(e) }>
           <div className="jp-MoreHorizIcon" />
         </div>
-      </div>
-    );
+    ];
   }
 
 }

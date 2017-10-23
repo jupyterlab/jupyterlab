@@ -75,7 +75,12 @@ abstract class VDomRenderer<T extends VDomRenderer.IModel | null> extends Widget
    * VDOM based rendering by calling the this.render() method.
    */
   protected onUpdateRequest(msg: Message): void {
-    ReactDOM.render(this.render(), this.node);
+    let vnode = this.render();
+    if (Array.isArray(vnode)) {
+      ReactDOM.render(vnode, this.node);
+    } else {
+      ReactDOM.render<any>(vnode, this.node);
+    }
   }
 
   /* Called after the widget is attached to the DOM
@@ -95,7 +100,7 @@ abstract class VDomRenderer<T extends VDomRenderer.IModel | null> extends Widget
    * Subclasses should define this method and use the current model state
    * to create a virtual node or nodes to render.
    */
-  protected abstract render(): React.ReactElement<any> | null;
+  protected abstract render(): Array<React.ReactElement<any>> | React.ReactElement<any> | null;
 
   private _model: T | null;
   private _modelChanged = new Signal<this, void>(this);

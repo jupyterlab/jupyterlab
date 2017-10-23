@@ -44,7 +44,7 @@
     "chai": "^3.5.0",
     "expect.js": "^0.3.1",
     "json-to-html": "^0.1.2",
-    "react": "^15.6.2",
+    "react": "~16.0.0",
     "simulate-event": "^1.4.0"
   },
   "devDependencies": {
@@ -55,7 +55,7 @@
     "@types/mathjax": "0.0.31",
     "@types/mocha": "^2.2.32",
     "@types/node": "^8.0.31",
-    "@types/react": "^15.6.2",
+    "@types/react": "~16.0.18",
     "@types/sanitize-html": "^1.13.31",
     "@types/semver": "^5.3.31",
     "concurrently": "^3.4.0",
