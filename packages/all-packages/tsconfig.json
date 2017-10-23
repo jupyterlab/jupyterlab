@@ -21,7 +21,6 @@
       ]
     },
     "jsx": "react",
-    "jsxFactory": "h",
     "inlineSources": true,
     "sourceMap": true
   }

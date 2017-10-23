@@ -14,12 +14,12 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  VirtualDOM, VirtualNode
-} from '@phosphor/virtualdom';
-
-import {
   Widget
 } from '@phosphor/widgets';
+
+import * as React from 'react';
+
+import * as ReactDOM from 'react-dom';
 
 
 /**
@@ -76,7 +76,15 @@ abstract class VDomRenderer<T extends VDomRenderer.IModel | null> extends Widget
    */
   protected onUpdateRequest(msg: Message): void {
     let vnode = this.render();
-    VirtualDOM.render(vnode, this.node);
+    if (vnode instanceof React.Component) {
+      let el = vnode.render();
+      if (el) {
+        ReactDOM.render(el, this.node);
+      }
+    } else {
+      ReactDOM.render(vnode, this.node);
+    }
+
   }
 
   /* Called after the widget is attached to the DOM
@@ -88,7 +96,7 @@ abstract class VDomRenderer<T extends VDomRenderer.IModel | null> extends Widget
   }
 
   /**
-   * Render the content of this widget using the virtial DOM.
+   * Render the content of this widget using the virtual DOM.
    *
    * This method will be called anytime the widget needs to be rendered,
    * which includes layout triggered rendering and all model changes.
@@ -96,7 +104,7 @@ abstract class VDomRenderer<T extends VDomRenderer.IModel | null> extends Widget
    * Subclasses should define this method and use the current model state
    * to create a virtual node or nodes to render.
    */
-  protected abstract render(): VirtualNode | ReadonlyArray<VirtualNode>;
+  protected abstract render(): React.Component<any> | React.ReactElement<any>;
 
   private _model: T | null;
   private _modelChanged = new Signal<this, void>(this);
