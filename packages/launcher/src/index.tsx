@@ -380,8 +380,6 @@ namespace Launcher {
  *
  * @param launcherCallback - a callback to call after an item has been launched.
  *
- * @param index - The index of the card.
- *
  * @returns a vdom `VirtualElement` for the launcher card.
  */
 function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcherCallback: (widget: Widget) => void): React.ReactElement<any> {
