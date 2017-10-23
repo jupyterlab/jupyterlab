@@ -76,15 +76,7 @@ abstract class VDomRenderer<T extends VDomRenderer.IModel | null> extends Widget
    */
   protected onUpdateRequest(msg: Message): void {
     let vnode = this.render();
-    if (vnode instanceof React.Component) {
-      let el = vnode.render();
-      if (el) {
-        ReactDOM.render(el, this.node);
-      }
-    } else {
-      ReactDOM.render(vnode, this.node);
-    }
-
+    ReactDOM.render(vnode, this.node);
   }
 
   /* Called after the widget is attached to the DOM
@@ -104,7 +96,7 @@ abstract class VDomRenderer<T extends VDomRenderer.IModel | null> extends Widget
    * Subclasses should define this method and use the current model state
    * to create a virtual node or nodes to render.
    */
-  protected abstract render(): React.Component<any> | React.ReactElement<any>;
+  protected abstract render(): React.ReactElement<any>;
 
   private _model: T | null;
   private _modelChanged = new Signal<this, void>(this);

@@ -68,7 +68,7 @@ abstract class Collapser extends VDomRenderer<null> {
   /**
    * Render the collapser with the virtual DOM.
    */
-  protected render(): React.Component<any> | React.ReactElement<any> {
+  protected render(): React.ReactElement<any> {
     let childClass = COLLAPSER_CHILD_CLASS;
     if (this.collapsed) {
       childClass += ` ${MOD_COLLAPSED_CLASS}`;

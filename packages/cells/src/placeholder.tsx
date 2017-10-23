@@ -87,7 +87,7 @@ class InputPlaceholder extends Placeholder {
   /**
    * Render the input placeholder using the virtual DOM.
    */
-  protected render(): React.Component<any> | React.ReactElement<any> {
+  protected render(): React.ReactElement<any> {
     return (
        <div>
         <div className={INPUT_PROMPT_CLASS}>
@@ -118,7 +118,7 @@ class OutputPlaceholder extends Placeholder {
   /**
    * Render the output placeholder using the virtual DOM.
    */
-  protected render(): React.Component<any> | React.ReactElement<any> {
+  protected render(): React.ReactElement<any> {
     return (
       <div>
         <div className={OUTPUT_PROMPT_CLASS}>
