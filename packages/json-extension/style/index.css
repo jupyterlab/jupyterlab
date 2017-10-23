@@ -1,0 +1,36 @@
+/**
+  Copyright (c) Jupyter Development Team.
+  Distributed under the terms of the Modified BSD License.
+*/
+
+/* Add CSS variables to :root */
+:root {
+  /*--jp-private-json-variable: 16px;*/
+}
+
+/* Base styles */
+.jp-RenderedJSON {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Patch for default ul.CodeMirror styles */
+.jp-RenderedJSON ul.CodeMirror {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+/* Document styles */
+.jp-MimeDocument .jp-RenderedJSON {
+  padding: 5px;
+  padding-top: 0;
+  overflow-y: auto;
+}
+
+/* Output styles */
+.jp-OutputArea .jp-RenderedJSON {
+  
+}
