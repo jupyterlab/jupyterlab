@@ -215,6 +215,8 @@ class custom_egg_info(egg_info):
 
     def run(self):
         folders = ['examples', 'packages', 'test', 'node_modules']
+        if not os.path.exists(pjoin(here, 'node_modules')):
+            folders.remove('node_modules')
         tempdir = tempfile.mkdtemp()
         for folder in folders:
             shutil.move(pjoin(here, folder), tempdir)
