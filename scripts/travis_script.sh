@@ -87,9 +87,9 @@ if [[ $GROUP == cli ]]; then
     source activate test_install2
     pushd ~
     if [[ -z $TRAVIS_PULL_REQUEST_SLUG ]]; then
-        pip install -v -v -v git+git://github.com/$TRAVIS_REPO_SLUG.git@$TRAVIS_COMMIT;
+        pip install git+git://github.com/$TRAVIS_REPO_SLUG.git@$TRAVIS_COMMIT;
     else
-        pip install -v -v -v git+git://github.com/$TRAVIS_PULL_REQUEST_SLUG.git@$TRAVIS_COMMIT;  
+        pip install git+git://github.com/$TRAVIS_PULL_REQUEST_SLUG.git@$TRAVIS_COMMIT;  
     fi
 
     jupyter lab build
