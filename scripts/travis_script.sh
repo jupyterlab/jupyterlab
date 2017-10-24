@@ -86,10 +86,10 @@ if [[ $GROUP == cli ]]; then
     conda create -n test_install2 notebook
     source activate test_install2
     pushd ~
-    if [[ -z $TRAVIS_PULL_REQUEST_SLUG ]]; then
+    if [[ -z $TRAVIS_PULL_REQUEST_SHA ]]; then
         pip install git+git://github.com/$TRAVIS_REPO_SLUG.git@$TRAVIS_COMMIT;
     else
-        pip install git+git://github.com/$TRAVIS_PULL_REQUEST_SLUG.git@$TRAVIS_COMMIT;  
+        pip install git+git://github.com/jupyterlab/jupyterlab.git@$TRAVIS_PULL_REQUEST_SHA;  
     fi
 
     jupyter lab build
