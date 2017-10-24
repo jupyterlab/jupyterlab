@@ -85,12 +85,13 @@ if [[ $GROUP == cli ]]; then
     # Make sure we can install from the git checkout
     conda create -n test_install2 notebook
     source activate test_install2
-    cd
+    pushd ~
     pip install -v -v -v git+git://github.com/$TRAVIS_REPO_SLUG.git@$TRAVIS_COMMIT
     jupyter lab build
     pip install selenium
     python -m jupyterlab.selenium_check
     source deactivate
+    popd
 
     # Test the cli apps.
     jupyter lab clean
