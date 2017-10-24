@@ -5,8 +5,8 @@
   "scripts": {
     "build": "webpack",
     "build:prod": "node update-core.js && webpack --devtool source-map",
+    "build:static": "node make-release.js",
     "clean": "rimraf build",
-    "publish": "node make-release.js",
     "watch": "webpack --watch"
   },
   "dependencies": {
@@ -17,7 +17,7 @@
     "@jupyterlab/buildutils": "^0.1.2",
     "@jupyterlab/cells": "^0.11.1",
     "@jupyterlab/codeeditor": "^0.11.1",
-    "@jupyterlab/codemirror": "^0.11.1",
+    "@jupyterlab/codemirror": "^0.11.2",
     "@jupyterlab/codemirror-extension": "^0.11.1",
     "@jupyterlab/completer": "^0.11.1",
     "@jupyterlab/completer-extension": "^0.11.1",
@@ -130,7 +130,7 @@
       "@phosphor/coreutils",
       "@phosphor/widgets"
     ],
-    "version": "0.28.5",
+    "version": "0.28.6",
     "linkedPackages": {}
   }
 }
