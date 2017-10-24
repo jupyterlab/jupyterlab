@@ -74,7 +74,7 @@ if [[ $GROUP == cli ]]; then
     jupyter labextension list
 
     # Make sure we can non-dev install.
-    conda create -n test_install notebook
+    conda create -n test_install notebook python=3.5
     source activate test_install
     pip install .
     jupyter lab build
@@ -83,13 +83,13 @@ if [[ $GROUP == cli ]]; then
     source deactivate
 
     # Make sure we can install from the git checkout
-    conda create -n test_install2 notebook
+    conda create -n test_install2 notebook python=3.5
     source activate test_install2
     pushd ~
     if [[ -z $TRAVIS_PULL_REQUEST_SLUG ]]; then
         pip install git+git://github.com/$TRAVIS_REPO_SLUG.git@$TRAVIS_COMMIT;
     else
-        pip install git+git://github.com/TRAVIS_PULL_REQUEST_SLUG.git@$TRAVIS_PULL_REQUEST_BRANCH;  
+        pip install git+git://github.com/$TRAVIS_PULL_REQUEST_SLUG.git@$TRAVIS_PULL_REQUEST_BRANCH;  
     fi
 
     jupyter lab build
