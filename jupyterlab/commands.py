@@ -204,12 +204,6 @@ def install_extension_async(extension, app_dir=None, logger=None, abort_callback
     shutil.move(pjoin(target, fname), pjoin(app_dir, 'extensions'))
     shutil.rmtree(target)
 
-    # Clear staging/node_modules
-    target = pjoin(app_dir, 'staging', 'node_modules')
-    target = target.replace('/', os.sep)
-    if os.path.exists(target):
-        shutil.rmtree(target)
-
 
 def link_package(path, app_dir=None, logger=None):
     """Link a package against the JupyterLab build."""
@@ -599,7 +593,7 @@ def build_async(app_dir=None, name=None, version=None, logger=None, abort_callba
     npm = get_npm_name()
 
     # Make sure packages are installed.
-    yield run([npm, 'install', '--no-optional'], cwd=staging, logger=logger, abort_callback=abort_callback)
+    yield run([npm, 'install'], cwd=staging, logger=logger, abort_callback=abort_callback)
 
     # Build the app.
     yield run([npm, 'run', 'clean'], cwd=staging, logger=logger, abort_callback= abort_callback)
@@ -832,7 +826,7 @@ def _ensure_package(app_dir, logger=None, name=None, version=None):
             shutil.rmtree(staging)
             os.makedirs(staging)
 
-    for fname in ['index.app.js', 'webpack.config.js']:
+    for fname in ['index.app.js', 'webpack.config.js', '.npmrc']:
         dest = pjoin(staging, fname.replace('.app', ''))
         shutil.copy(pjoin(here, fname), dest)
 

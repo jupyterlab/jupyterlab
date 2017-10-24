@@ -89,7 +89,7 @@ def find_package_data():
         schema_dirs.append(pjoin(dir[slice_len:], '*'))
 
     return {
-        'jupyterlab': ['build/*', '*.js', 'package.app.json'
+        'jupyterlab': ['build/*', '*.js', 'package.app.json', '.npmrc',
                        ] + theme_dirs + schema_dirs
     }
 
