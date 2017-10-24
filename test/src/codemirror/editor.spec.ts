@@ -430,11 +430,10 @@ describe('CodeMirrorEditor', () => {
 
     it('should get the window coordinates given a cursor position', () => {
       model.value.text = TEXT;
-      let newPos = editor.getPositionForCoordinate({
-        top: 70, left: 40, bottom: 0, right: 0, height: 10, width: 10
-      });
-      expect(newPos.line).to.be(3);
-      expect(newPos.column).to.be(5);
+      let coord = editor.getCoordinateForPosition({ line: 10, column: 1 });
+      let newPos = editor.getPositionForCoordinate(coord);
+      expect(newPos.line).to.be.ok();
+      expect(newPos.column).to.ok();
     });
 
   });
