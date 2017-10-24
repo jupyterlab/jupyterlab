@@ -5,6 +5,7 @@
 # Distributed under the terms of the Modified BSD License.
 from __future__ import print_function
 
+import json
 import os
 import sys
 from tornado.ioloop import IOLoop
@@ -13,7 +14,6 @@ from jupyter_core.application import JupyterApp, base_flags, base_aliases
 
 from traitlets import Bool, Unicode
 
-from ._version import __version__
 from .commands import (
     install_extension, uninstall_extension, list_extensions,
     enable_extension, disable_extension,
@@ -31,8 +31,14 @@ aliases = dict(base_aliases)
 aliases['app-dir'] = 'BaseExtensionApp.app_dir'
 
 
+here = os.path.dirname(__file__)
+with open(os.path.join(here, 'package.app.json')) as fid:
+    data = json.load(fid)
+VERSION = data['jupyterlab']['version']
+
+
 class BaseExtensionApp(JupyterApp):
-    version = __version__
+    version = VERSION
     flags = flags
     aliases = aliases
 
@@ -149,7 +155,7 @@ jupyter labextension uninstall <extension name>  # uninstall a labextension
 class LabExtensionApp(JupyterApp):
     """Base jupyter labextension command entry point"""
     name = "jupyter labextension"
-    version = __version__
+    version = VERSION
     description = "Work with JupyterLab extensions"
     examples = _examples
 
