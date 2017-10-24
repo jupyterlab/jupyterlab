@@ -10,71 +10,41 @@ sh -e /etc/init.d/xvfb start || true
 export PATH="$HOME/miniconda/bin:$PATH"
 
 
-npm run integrity
-npm run build:examples
-
-
 if [[ $GROUP == tests ]]; then
 
     # Run the JS and python tests
     py.test
-    npm run clean
-    npm run build:src
     npm run build:test
     npm test
     npm run test:services || npm run test:services
 
-    # Make sure we have CSS that can be converted with postcss
-    npm install -g postcss-cli
-    postcss packages/**/style/*.css --dir /tmp
-
-    # Run the publish script in jupyterlab
-    cd jupyterlab
-    npm run publish
-
-    if [ ! -f ./build/release_data.json ]; then
-        echo "npm publish in jupyterlab unsucessful!"
-    fi
 fi
 
 
-if [[ $GROUP == coverage_and_docs ]]; then
+if [[ $GROUP == coverage ]]; then
+
     # Run the coverage and python tests.
     py.test
-    npm run build
     npm run build:test
     npm run coverage
+    npm run clean
 
-    # Run the link check
-    pip install -q pytest-check-links
-    py.test --check-links -k .md .
-
-    # Build the api docs
-    npm run docs
-    cp jupyter_plugins.png docs
-
-    # Verify tutorial docs build
-    pushd docs
-    conda env create -n test_docs -f environment.yml
-    source activate test_docs
-    make html
-    source deactivate
-    popd
 fi
 
 
-if [[ $GROUP == cli ]]; then
+if [[ $GROUP == other ]]; then
+
     # Make sure we can successfully load the core app.
     pip install selenium
     python -m jupyterlab.selenium_check --core-mode
 
-    # Make sure we can build and run the app.
+    # Make sure we can run the built app.
     jupyter lab build
     python -m jupyterlab.selenium_check 
     jupyter labextension list
 
     # Make sure we can non-dev install.
-    conda create -n test_install notebook
+    conda create -n test_install notebook python=3.5
     source activate test_install
     pip install .
     jupyter lab build
@@ -110,4 +80,38 @@ if [[ $GROUP == cli ]]; then
     jupyter labextension list -h
     jupyter labextension enable -h
     jupyter labextension disable -h
+
+    # Run the package integrity check
+    npm run integrity
+
+    # Make sure the examples build
+    npm run build:examples
+
+    # Run the link check
+    pip install -q pytest-check-links
+    py.test --check-links -k .md .
+
+    # Build the api docs
+    npm run docs
+    cp jupyter_plugins.png docs
+
+    # Verify tutorial docs build
+    pushd docs
+    conda env create -n test_docs -f environment.yml
+    source activate test_docs
+    make html
+    source deactivate
+    popd
+
+    # Make sure we have CSS that can be converted with postcss
+    npm install -g postcss-cli
+    postcss packages/**/style/*.css --dir /tmp
+
+    # Make sure we can make release assets
+    npm run build:static
+    if [ ! -f ./build/release_data.json ]; then
+        echo "npm publish in jupyterlab unsucessful!"
+    fi
+    python setup.py sdist
+    python setup.py bdist_wheel --universal
 fi

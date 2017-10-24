@@ -12,10 +12,10 @@ This includes:
 import io
 import json
 import os
-import glob
 import pipes
 import sys
 import shutil
+import tempfile
 import os.path as osp
 from os.path import join as pjoin
 
@@ -210,14 +210,18 @@ class bdist_egg_disabled(bdist_egg):
 
 
 class custom_egg_info(egg_info):
-    """Prune node_modules folders from egg_info to avoid symlink recursion
+    """Prune JavaScript folders from egg_info to avoid locking up pip.
     """
+
     def run(self):
-        folders = []
-        for dir, subdirs, files in os.walk(here):
-            if 'node_modules' in subdirs:
-                folders.append(pjoin(dir, 'node_modules'))
-                subdirs.remove('node_modules')
+        folders = ['examples', 'packages', 'test', 'node_modules']
+        if not os.path.exists(pjoin(here, 'node_modules')):
+            folders.remove('node_modules')
+        tempdir = tempfile.mkdtemp()
         for folder in folders:
-            shutil.rmtree(folder)
-        return egg_info.run(self)
+            shutil.move(pjoin(here, folder), tempdir)
+        value = egg_info.run(self)
+        for folder in folders:
+            shutil.move(pjoin(tempdir, folder), here)
+        shutil.rmtree(tempdir)
+        return value

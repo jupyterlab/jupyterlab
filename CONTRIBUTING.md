@@ -73,18 +73,17 @@ steps:
 ```bash
 git clone https://github.com/<your-github-username>/jupyterlab.git
 cd jupyterlab
-pip install -e . # will take a long time to build everything
+pip install -e .
 npm install
-npm run build:main
+npm run build  # Build the dev mode assets
+jupyter lab build  # Build the app dir assets
 jupyter serverextension enable --py jupyterlab
 ```
 
 Notes:
 
-* At times, it may be necessary to clean your local repo with the command ``git
-clean -fdx``.
-
-* Make sure to do `pip install -e` *before* running `npm install`. Running `npm install` first makes pip stall.
+* At times, it may be necessary to clean your local repo with the command `npm run clean:slate`.  This will clean the repository, and re-install and 
+rebuild.  If using a local install, you will need to re-run `pip install -e .`
 
 * If `pip` gives a `VersionConflict` error, it usually means that the installed
 version of `jupyterlab_launcher` is out of date. Run `pip install --upgrade

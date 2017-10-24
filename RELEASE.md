@@ -8,18 +8,6 @@ This document guides a contributor through creating a release of JupyterLab.
 Review ``CONTRIBUTING.md``. Make sure all the tools needed to generate the
 built JavaScript files are properly installed.
 
-## Clean the repository
-
-You can remove all non-tracked files with:
-
-```bash
-git clean -xfdi
-```
-
-This would ask you for confirmation before removing all untracked files. Make
-sure the ``dist/`` folder is clean and avoid stale build from
-previous attempts.
-
 ## Create the release
 
 We publish the npm packages, a Python source package, and a Python universal binary wheel.  We also publish a conda package on conda-forge (see below).
@@ -43,7 +31,7 @@ npm run publish
 - Prep the static assets for release:
 
 ```bash
-cd jupyterlab && npm run publish && cd ..
+npm run build:static
 ```
 
 - Commit and tag and push the tag

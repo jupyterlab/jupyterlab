@@ -6,11 +6,11 @@ set -x
 
 npm update
 
-if [[ $GROUP == tests || $GROUP == cli ]]; then
+if [[ $GROUP == tests || $GROUP == other ]]; then
     wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
 fi
 
-if [[ $GROUP == coverage_and_docs ]]; then
+if [[ $GROUP == coverage ]]; then
     wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
 fi
 
@@ -32,6 +32,5 @@ pip install -v -e ".[test]"
 test -e jupyterlab/schemas/jupyter.extensions.shortcuts.json
 test -e jupyterlab/themes/jupyterlab-theme-light-extension/images/jupyterlab.svg
 npm install
-npm run build:main
+npm run build
 jupyter serverextension enable --py jupyterlab
-jupyter lab build

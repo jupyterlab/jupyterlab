@@ -49,19 +49,17 @@ def get_app_dir(app_dir=None):
         return os.path.realpath(app_dir)
 
     # Use the default locations for data_files.
+    app_dir = pjoin(sys.prefix, 'share', 'jupyter', 'lab')
 
     # Check for a user level install.
     if hasattr(site, 'getuserbase') and here.startswith(site.getuserbase()):
         app_dir = pjoin(site.getuserbase(), 'share', 'jupyter', 'lab')
 
     # Check for a system install in '/usr/local/share'.
-    elif (sys.prefix == '/usr' and
+    elif (sys.prefix.startswith('/usr') and not
+          os.path.exists(app_dir) and
           os.path.exists('/usr/local/share/jupyter/lab')):
         app_dir = '/usr/local/share/jupyter/lab'
-
-    # Otherwise use the sys prefix.
-    else:
-        app_dir = pjoin(sys.prefix, 'share', 'jupyter', 'lab')
 
     return os.path.realpath(app_dir)
 
