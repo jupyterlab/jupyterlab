@@ -28,13 +28,14 @@ if [[ $GROUP == tests ]]; then
     npm install -g postcss-cli
     postcss packages/**/style/*.css --dir /tmp
 
-    # Run the publish script in jupyterlab
-    cd jupyterlab
-    npm run publish
-
+    # Make sure we can make release assets
+    npm run build:static
     if [ ! -f ./build/release_data.json ]; then
         echo "npm publish in jupyterlab unsucessful!"
     fi
+    python setup.py sdist
+    python setup.py bdist_wheel --universal
+
 fi
 
 
