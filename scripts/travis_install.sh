@@ -32,4 +32,5 @@ pip install -v -e ".[test]"
 test -e jupyterlab/schemas/jupyter.extensions.shortcuts.json
 test -e jupyterlab/themes/jupyterlab-theme-light-extension/images/jupyterlab.svg
 npm install
+npm run build
 jupyter serverextension enable --py jupyterlab

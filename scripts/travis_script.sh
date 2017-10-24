@@ -14,7 +14,6 @@ if [[ $GROUP == tests ]]; then
 
     # Run the JS and python tests
     py.test
-    npm run build
     npm run build:test
     npm test
     npm run test:services || npm run test:services
@@ -26,7 +25,6 @@ if [[ $GROUP == coverage ]]; then
 
     # Run the coverage and python tests.
     py.test
-    npm run build
     npm run build:test
     npm run coverage
     npm run clean
