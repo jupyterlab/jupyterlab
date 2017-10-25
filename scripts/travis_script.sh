@@ -112,6 +112,5 @@ if [[ $GROUP == other ]]; then
     if [ ! -f ./build/release_data.json ]; then
         echo "npm publish in jupyterlab unsucessful!"
     fi
-    python setup.py sdist
     python setup.py bdist_wheel --universal
 fi
