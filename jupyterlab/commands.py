@@ -152,6 +152,11 @@ def install_extension_async(extension, app_dir=None, logger=None, abort_callback
             _write_build_config(config, app_dir, logger=logger)
         return
 
+    # Run npm install if needed
+    if not os.path.exists(pjoin(extension, 'node_modules')):
+        yield run([get_npm_name(), 'install'], cwd=extension, logger=logger,
+                  abort_callback=abort_callback)
+
     _ensure_app_dirs(app_dir, logger)
 
     target = pjoin(app_dir, 'extensions', 'temp')
@@ -160,7 +165,8 @@ def install_extension_async(extension, app_dir=None, logger=None, abort_callback
     os.makedirs(target)
 
     # npm pack the extension
-    yield run([get_npm_name(), 'pack', extension], cwd=target, logger=logger, abort_callback=abort_callback)
+    yield run([get_npm_name(), 'pack', extension], cwd=target, logger=logger,
+              abort_callback=abort_callback)
 
     fnames = glob.glob(pjoin(target, '*.*'))
     if not fnames:
