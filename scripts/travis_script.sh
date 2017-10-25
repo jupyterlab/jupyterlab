@@ -87,9 +87,9 @@ if [[ $GROUP == other ]]; then
     # Make sure the examples build
     npm run build:examples
 
-    # Run the link check
+    # Run the link check - allow for a link to fail once
     pip install -q pytest-check-links
-    travis_retry py.test --check-links -k .md .
+    py.test --check-links -k .md . || py.test --check-links -k .md . 
 
     # Build the api docs
     npm run docs
