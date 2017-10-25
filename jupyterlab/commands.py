@@ -153,7 +153,8 @@ def install_extension_async(extension, app_dir=None, logger=None, abort_callback
         return
 
     # Run npm install if needed
-    if not os.path.exists(pjoin(extension, 'node_modules')):
+    if (os.path.exists(extension) and
+            not os.path.exists(pjoin(extension, 'node_modules'))):
         yield run([get_npm_name(), 'install'], cwd=extension, logger=logger,
                   abort_callback=abort_callback)
 
