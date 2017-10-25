@@ -124,6 +124,7 @@
       "@jupyterlab/launcher",
       "@jupyterlab/notebook",
       "@jupyterlab/rendermime",
+      "@jupyterlab/rendermime-interfaces",
       "@jupyterlab/services",
       "@jupyterlab/terminal",
       "@jupyterlab/tooltip",
