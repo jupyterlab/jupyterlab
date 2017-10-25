@@ -1,6 +1,7 @@
 {
   "name": "@jupyterlab/application-top",
   "version": "0.10.2",
+  "private": true,
   "scripts": {
     "build": "node update-core.js && webpack",
     "publish": "node make-release.js"
@@ -84,7 +85,6 @@
     "url-loader": "^0.5.7",
     "webpack": "^2.2.1"
   },
-  "private": true,
   "jupyterlab": {
     "extensions": {
       "@jupyterlab/application-extension": "",

@@ -112,7 +112,7 @@ setup_args['cmdclass'] = cmdclass
 setuptools_args = {}
 install_requires = setuptools_args['install_requires'] = [
     'notebook>=4.3.1',
-    'jupyterlab_launcher>=0.4.0'
+    'jupyterlab_launcher>=0.4.0,<0.6.0'
 ]
 
 extras_require = setuptools_args['extras_require'] = {
