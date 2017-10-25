@@ -131,7 +131,7 @@
       "@phosphor/coreutils",
       "@phosphor/widgets"
     ],
-    "version": "0.28.9",
+    "version": "0.28.10",
     "linkedPackages": {}
   }
 }
