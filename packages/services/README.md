@@ -3,7 +3,7 @@ JupyterLab Services
 
 Javascript client for the Jupyter services REST APIs
 
-[API Docs](http://jupyterlab.github.io/services/)
+[API Docs](http://jupyterlab.github.io/jupyterlab/)
 
 [REST API Docs](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml)
 
@@ -16,7 +16,7 @@ Package Install
 
 **Prerequisites**
 - [node](http://nodejs.org/)
-- [python](https://www.continuum.io/downloads)
+- [python](https://www.anaconda.com/download)
 
 ```bash
 npm install --save @jupyterlab/services
@@ -30,11 +30,11 @@ Source Build
 **Prerequisites**
 - [git](http://git-scm.com/)
 - [node 0.12+](http://nodejs.org/)
-- [python](https://www.continuum.io/downloads)
+- [python](https://www.anaconda.com/download)
 
 ```bash
-git clone https://github.com/jupyterlab/services.git
-cd services
+git clone https://github.com/jupyterlab/jupyterlab.git
+cd packages/services
 npm install
 npm run build
 conda install notebook  # notebook 4.3+ required
