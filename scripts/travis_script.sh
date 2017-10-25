@@ -89,7 +89,7 @@ if [[ $GROUP == other ]]; then
 
     # Run the link check
     pip install -q pytest-check-links
-    py.test --check-links -k .md .
+    travis_retry py.test --check-links -k .md .
 
     # Build the api docs
     npm run docs
