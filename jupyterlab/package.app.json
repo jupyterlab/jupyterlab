@@ -124,13 +124,14 @@
       "@jupyterlab/launcher",
       "@jupyterlab/notebook",
       "@jupyterlab/rendermime",
+      "@jupyterlab/rendermime-interfaces",
       "@jupyterlab/services",
       "@jupyterlab/terminal",
       "@jupyterlab/tooltip",
       "@phosphor/coreutils",
       "@phosphor/widgets"
     ],
-    "version": "0.28.8",
+    "version": "0.28.9",
     "linkedPackages": {}
   }
 }
