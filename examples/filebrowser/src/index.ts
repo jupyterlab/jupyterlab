@@ -142,6 +142,7 @@ function createApp(manager: ServiceManager.IManager): void {
     }
   });
 
+  // Add commands.
   commands.addCommand('file-open', {
     label: 'Open',
     icon: 'fa fa-folder-open-o',
@@ -233,6 +234,7 @@ function createApp(manager: ServiceManager.IManager): void {
     commands.processKeydownEvent(event);
   });
 
+  // Create a context menu.
   let menu = new Menu({ commands });
   menu.addItem({ command: 'file-open' });
   menu.addItem({ command: 'file-rename' });
@@ -255,9 +257,11 @@ function createApp(manager: ServiceManager.IManager): void {
     menu.open(x, y);
   });
 
+  // Attach the panel to the DOM.
   Widget.attach(panel, document.body);
 
-  window.onresize = () => panel.update();
+  // Handle resize events.
+  window.addEventListener('resize', () => { panel.update(); });
 }
 
 
@@ -285,4 +289,4 @@ function dialogDemo(): void {
 }
 
 
-window.onload = main;
+window.addEventListener('load', main);

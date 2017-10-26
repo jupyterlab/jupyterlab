@@ -105,10 +105,12 @@ function main(): void {
   panel.addWidget(cellWidget);
   BoxPanel.setStretch(toolbar, 0);
   BoxPanel.setStretch(cellWidget, 1);
+
+  // Attach the panel to the DOM.
   Widget.attach(panel, document.body);
 
   // Handle widget state.
-  window.addEventListener('resize', () => panel.update());
+  window.addEventListener('resize', () => { panel.update(); });
   cellWidget.activate();
 
   // Add the commands.

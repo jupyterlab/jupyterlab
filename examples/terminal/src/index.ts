@@ -31,12 +31,14 @@ function main(): void {
   let dock = new DockPanel();
   dock.addWidget(term1);
   dock.addWidget(term2, { mode: 'tab-before' });
-
-  Widget.attach(dock, document.body);
   dock.id = 'main';
 
-  window.onresize = () => dock.fit();
+  // Attach the widget to the dom.
+  Widget.attach(dock, document.body);
+
+  // Handle resize events.
+  window.addEventListener('resize', () => { dock.fit(); });
 }
 
 
-window.onload = main;
+window.addEventListener('load', main);

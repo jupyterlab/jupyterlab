@@ -92,16 +92,20 @@ function startApp(path: string, manager: ServiceManager.IManager) {
   panel.spacing = 0;
   SplitPanel.setStretch(palette, 0);
   SplitPanel.setStretch(consolePanel, 1);
-  Widget.attach(panel, document.body);
   panel.addWidget(palette);
   panel.addWidget(consolePanel);
-  window.onresize = () => { panel.update(); };
+
+  // Attach the panel to the DOM.
+  Widget.attach(panel, document.body);
+
+  // Handle resize events.
+  window.addEventListener('resize', () => { panel.update(); });
 
   let selector = '.jp-ConsolePanel';
   let category = 'Console';
   let command: string;
 
-
+  // Add the commands.
   command = 'console:clear';
   commands.addCommand(command, {
     label: 'Clear',
@@ -134,4 +138,4 @@ function startApp(path: string, manager: ServiceManager.IManager) {
   commands.addKeyBinding({ command,  selector,  keys: ['Ctrl Enter'] });
 }
 
-window.onload = main;
+window.addEventListener('load', main);
