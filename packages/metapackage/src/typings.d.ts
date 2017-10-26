@@ -6,4 +6,5 @@
 /// <reference path="../../coreutils/typings/url-parse/url-parse.d.ts"/>
 /// <reference path="../../rendermime/typings/ansi_up/ansi_up.d.ts"/>
 /// <reference path="../../terminal/typings/xterm/xterm.d.ts"/>
+/// <reference path="../../vdom-extension/src/transform-vdom.d.ts"/>
 /// <reference path="../../vega2-extension/typings/vega-embed/vega-embed.d.ts"/>
