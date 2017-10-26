@@ -1020,7 +1020,12 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const nb = current.notebook;
       const newCell = nb.activeCell.clone();
 
-      let p = new Panel();
+      const CellPanel = class extends Panel {
+        protected onCloseRequest(msg: Message): void {
+          this.dispose();
+        }
+      };
+      const p = new CellPanel();
       p.id = `Cell-${uuid()}`;
       p.title.closable = true;
       if (current.title.label) {
