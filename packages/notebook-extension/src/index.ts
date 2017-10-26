@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IStateDB, PageConfig, URLExt
+  IStateDB, PageConfig, URLExt, uuid
 } from '@jupyterlab/coreutils';
 
 import {
@@ -1021,7 +1021,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const newCell = nb.activeCell.clone();
 
       let p = new Panel();
-      p.id = `Cell-${Math.random()}`;
+      p.id = `Cell-${uuid()}`;
       p.title.closable = true;
       if (current.title.label) {
         p.title.label = `Cell (${current.title.label})`;
