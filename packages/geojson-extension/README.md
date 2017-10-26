@@ -61,32 +61,6 @@ layer_options={
 
 To render a `.geojson` or `.geo.json` file, simply open it:
 
-## Install
-
-```bash
-jupyter labextension install @jupyterlab/geojson-extension
-```
-
 ## Development
 
-```bash
-# Clone the repo to your local environment
-git clone https://github.com/jupyterlab/jupyter-renderers.git
-cd jupyter-renderers
-# Install dependencies
-npm install
-# Build Typescript source
-npm run build
-# Link your development version of the extension with JupyterLab
-jupyter labextension link packages/geojson-extension
-# Rebuild Typescript source after making changes
-npm run build
-# Rebuild JupyterLab after making any changes
-jupyter lab build
-```
-
-## Uninstall
-
-```bash
-jupyter labextension uninstall @jupyterlab/geojson-extension
-```
+See the [JupyterLab Contributor Documentation](https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md).
