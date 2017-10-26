@@ -1028,11 +1028,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const p = new CellPanel();
       p.id = `Cell-${uuid()}`;
       p.title.closable = true;
-      if (current.title.label) {
-        p.title.label = `Cell (${current.title.label})`;
-      } else {
-        p.title.label = 'Cell';
-      }
+      p.title.label = current.title.label ? `Cell: ${current.title.label}` : 'Cell';
       p.addWidget(newCell);
       shell.addToMainArea(p);
     },
