@@ -10,12 +10,10 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  h, VirtualNode
-} from '@phosphor/virtualdom';
-
-import {
   Widget
 } from '@phosphor/widgets';
+
+import * as React from 'react';
 
 
 class TestModel extends VDomModel {
@@ -32,14 +30,14 @@ class TestModel extends VDomModel {
 }
 
 class TestWidget extends VDomRenderer<TestModel> {
-  protected render(): VirtualNode {
-    return h.span(this.model.value);
+  protected render(): React.ReactElement<any> {
+    return React.createElement('span', null, this.model.value);
   }
 }
 
 class TestWidgetNoModel extends VDomRenderer<null> {
-  protected render(): VirtualNode {
-    return h.span('No model!');
+  protected render(): React.ReactElement<any> {
+    return React.createElement('span', null, 'No model!');
   }
 }
 
