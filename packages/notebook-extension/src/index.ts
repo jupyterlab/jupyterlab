@@ -39,7 +39,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  Menu, Widget
+  Menu, Panel, Widget
 } from '@phosphor/widgets';
 
 
@@ -68,6 +68,9 @@ namespace CommandIDs {
 
   export
   const createConsole = 'notebook:create-console';
+
+  export
+  const createCellView = 'notebook:create-cell-view';
 
   export
   const clearAllOutputs = 'notebook:clear-all-cell-outputs';
@@ -461,6 +464,10 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
   });
   app.contextMenu.addItem({
     command: CommandIDs.split,
+    selector: '.jp-Notebook .jp-Cell'
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.createCellView,
     selector: '.jp-Notebook .jp-Cell'
   });
   app.contextMenu.addItem({
@@ -1003,6 +1010,25 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       if (kernel) {
         return kernel.reconnect();
       }
+    },
+    isEnabled: hasWidget
+  });
+  commands.addCommand(CommandIDs.createCellView, {
+    label: 'Create New View for Cell',
+    execute: args => {
+      const current = getCurrent(args);
+      let nb = current.notebook;
+      let index = nb.activeCellIndex;
+      let cellwidget = nb.widgets[index];
+
+      let p = new Panel();
+      p.id = `Cell-${Math.random()}`;
+      p.title.closable = true;
+      p.title.label = 'Cell';
+
+      let newCell = nb.createCell(cellwidget.model);
+      p.addWidget(newCell);
+      shell.addToMainArea(p);
     },
     isEnabled: hasWidget
   });

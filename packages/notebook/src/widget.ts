@@ -398,6 +398,13 @@ class StaticNotebook extends Widget {
    * Create a cell widget and insert into the notebook.
    */
   private _insertCell(index: number, cell: ICellModel): void {
+    let widget  = this.createCell(cell);
+    let layout = this.layout as PanelLayout;
+    layout.insertWidget(index, widget);
+    this.onCellInserted(index, widget);
+  }
+
+  createCell(cell: ICellModel): Cell {
     let widget: Cell;
     switch (cell.type) {
     case 'code':
@@ -411,9 +418,7 @@ class StaticNotebook extends Widget {
       widget = this._createRawCell(cell as IRawCellModel);
     }
     widget.addClass(NB_CELL_CLASS);
-    let layout = this.layout as PanelLayout;
-    layout.insertWidget(index, widget);
-    this.onCellInserted(index, widget);
+    return widget;
   }
 
   /**
