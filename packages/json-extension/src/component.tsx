@@ -63,7 +63,9 @@ export class Component extends React.Component<IProps, IState> {
         <input
           ref={ref => this.input = ref}
           onChange={event => {
-            if (this.timer) clearTimeout(this.timer);
+            if (this.timer) {
+              window.clearTimeout(this.timer);
+            }
             const filter = event.target.value;
             this.timer = window.setTimeout(
               () => {
@@ -110,8 +112,12 @@ export class Component extends React.Component<IProps, IState> {
           labelRenderer={([label, type]) => {
             let className = 'cm-variable';
             // if (type === 'root') className = 'cm-variable-2';
-            if (type === 'array') className = 'cm-variable-2';
-            if (type === 'object') className = 'cm-variable-3';
+            if (type === 'array') {
+              className = 'cm-variable-2';
+            }
+            if (type === 'object') {
+              className = 'cm-variable-3';
+            }
             return (
               <span className={className}>
                 <Highlight
@@ -125,8 +131,12 @@ export class Component extends React.Component<IProps, IState> {
           }}
           valueRenderer={raw => {
             let className = 'cm-string';
-            if (typeof raw === 'number') className = 'cm-number';
-            if (raw === 'true' || raw === 'false') className = 'cm-keyword';
+            if (typeof raw === 'number') {
+              className = 'cm-number';
+            }
+            if (raw === 'true' || raw === 'false') {
+              className = 'cm-keyword';
+            }
             return (
               <span className={className}>
                 <Highlight
@@ -187,8 +197,9 @@ function filterObject(data: JSONValue, query: string): JSONValue {
   if (data && typeof data === 'object') {
     return Object.keys(data).reduce((result: JSONObject, key: string) => {
       let item = data[key];
-      if (key.includes(query) || objectIncludes(item, query))
+      if (key.includes(query) || objectIncludes(item, query)) {
         result[key] = filterObject(item, query);
+      }
       return result;
     }, {});
   }
@@ -199,12 +210,13 @@ function filterPaths(data: JSONValue, query: string, parent: JSONArray = ['root'
   if (Array.isArray(data)) {
     return data.reduce(
       (result: JSONArray, item: JSONValue, index: number) => {
-        if (item && typeof item === 'object' && objectIncludes(item, query))
+        if (item && typeof item === 'object' && objectIncludes(item, query)) {
           return [
             ...result,
             [index, ...parent].join(','),
             ...filterPaths(item, query, [index, ...parent])
           ];
+        }
         return result;
       },
       []
@@ -217,12 +229,13 @@ function filterPaths(data: JSONValue, query: string, parent: JSONArray = ['root'
         item &&
         typeof item === 'object' &&
         (key.includes(query) || objectIncludes(item, query))
-      )
+      ) {
         return [
           ...result,
           [key, ...parent].join(','),
           ...filterPaths(item, query, [key, ...parent])
         ];
+      }
       return result;
     }, []);
   }
