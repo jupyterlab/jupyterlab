@@ -71,6 +71,10 @@ function main(): void {
     });
   });
 
+  // Start the default kernel.
+  session.kernelPreference = { autoStartDefault: true };
+  session.initialize();
+
   // Set up a completer.
   const editor = cellWidget.editor;
   const model = new CompleterModel();
@@ -106,11 +110,6 @@ function main(): void {
   // Handle widget state.
   window.addEventListener('resize', () => panel.update());
   cellWidget.activate();
-
-  manager.ready.then(() => {
-    session.kernelPreference = { name: manager.specs.default };
-    session.initialize();
-  });
 
   // Add the commands.
   commands.addCommand('invoke:completer', {
