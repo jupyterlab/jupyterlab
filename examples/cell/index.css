@@ -21,11 +21,27 @@ body {
 }
 
 
-.jp-Cell .jp-OutputArea {
-    max-height: calc(100vh - 100px);
+.jp-Toolbar {
+    min-height: 27px;
 }
 
 
-.jp-Toolbar {
-    min-height: var(--jp-private-toolbar-height);
+.jp-CodeCell {
+  display: flex;
+  flex-direction: column;
+}
+
+
+.jp-Cell-inputWrapper {
+  flex: 0 0 auto;
+}
+
+
+.jp-Cell-outputWrapper {
+  flex: 1 1 auto;
+}
+
+
+.jp-OutputArea {
+  overflow: visible;
 }
