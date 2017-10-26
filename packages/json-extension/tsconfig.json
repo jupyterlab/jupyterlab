@@ -8,7 +8,7 @@
     "moduleResolution": "node",
     "target": "ES5",
     "outDir": "./lib",
-    "lib": ["ES5", "DOM", "ES2015.Core", "ES2015.Collection", "ES2015.Promise"],
+    "lib": ["ES5", "ES2015.Core", "ES2015.Promise", "ES2015.Collection", "DOM"],
     "jsx": "react",
     "types": []
   },

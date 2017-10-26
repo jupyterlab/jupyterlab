@@ -10,6 +10,7 @@
     "outDir": "./lib",
     "lib": [
       "ES5",
+      "ES2015.Core",
       "ES2015.Collection",
       "ES2015.Promise",
       "DOM"
