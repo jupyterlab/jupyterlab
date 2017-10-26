@@ -211,6 +211,11 @@ namespace IClientSession {
      * Whether a kernel can be started.
      */
     readonly canStart?: boolean;
+
+    /**
+     * Whether to auto-start the default kernel if no matching kernel is found.
+     */
+    readonly autoStartDefault?: boolean;
   }
 }
 
@@ -382,7 +387,7 @@ class ClientSession implements IClientSession {
    * Change the current kernel associated with the document.
    */
   changeKernel(options: Partial<Kernel.IModel>): Promise<Kernel.IKernelConnection> {
-    return this.ready.then(() => {
+    return this.initialize().then(() => {
       if (this.isDisposed) {
         return Promise.reject('Disposed');
       }
@@ -394,7 +399,7 @@ class ClientSession implements IClientSession {
    * Select a kernel for the session.
    */
   selectKernel(): Promise<void> {
-    return this.ready.then(() => {
+    return this.initialize().then(() => {
       if (this.isDisposed) {
         return Promise.reject('Disposed');
       }
@@ -428,7 +433,7 @@ class ClientSession implements IClientSession {
    * If no kernel has been started, this is a no-op.
    */
   restart(): Promise<Kernel.IKernelConnection | null> {
-    return this.ready.then(() => {
+    return this.initialize().then(() => {
       if (this.isDisposed) {
         return Promise.reject(void 0);
       }
@@ -509,7 +514,7 @@ class ClientSession implements IClientSession {
    * Otherwise we ask the user to select a kernel.
    */
   initialize(): Promise<void> {
-    if (this._initializing) {
+    if (this._initializing || this._isReady) {
       return this._ready.promise;
     }
     this._initializing = true;
@@ -917,13 +922,17 @@ namespace Private {
   export
   function getDefaultKernel(options: ClientSession.IKernelSearch): string | null {
     let { specs, preference } = options;
-    let { name, language, shouldStart, canStart } = preference;
+    let {
+      name, language, shouldStart, canStart, autoStartDefault
+    } = preference;
     if (!specs || shouldStart === false || canStart === false) {
       return null;
     }
 
+    let defaultName = autoStartDefault ? specs.default : null;
+
     if (!name && !language) {
-      return null;
+      return defaultName;
     }
 
     // Look for an exact match of a spec name.
@@ -935,7 +944,7 @@ namespace Private {
 
     // Bail if there is no language.
     if (!language) {
-      return null;
+      return defaultName;
     }
 
     // Check for a single kernel matching the language.
@@ -955,7 +964,7 @@ namespace Private {
     }
 
     // No matches found.
-    return null;
+    return defaultName;
   }
 
   /**
