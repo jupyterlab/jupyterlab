@@ -124,7 +124,11 @@ function main(): void {
   // Handle widget state.
   window.onresize = () => panel.update();
   cellWidget.activate();
-  session.initialize();
+
+  manager.ready.then(() => {
+    session.kernelPreference = { name: manager.specs.default };
+    session.initialize();
+  });
 }
 
 window.onload = main;
