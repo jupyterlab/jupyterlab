@@ -1018,16 +1018,11 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     execute: args => {
       const current = getCurrent(args);
       let nb = current.notebook;
-      let index = nb.activeCellIndex;
-      let cellwidget = nb.widgets[index];
-
       let p = new Panel();
       p.id = `Cell-${Math.random()}`;
       p.title.closable = true;
       p.title.label = 'Cell';
-
-      let newCell = nb.createCell(cellwidget.model);
-      p.addWidget(newCell);
+      p.addWidget(nb.activeCell.clone());
       shell.addToMainArea(p);
     },
     isEnabled: hasWidget

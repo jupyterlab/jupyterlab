@@ -312,6 +312,17 @@ class Cell extends Widget {
   }
 
   /**
+   * Clone the cell, using the same model.
+   */
+  clone() {
+    let constructor = this.constructor as typeof Cell;
+    return new constructor({
+      model: this.model,
+      contentFactory: this.contentFactory
+    });
+  }
+
+  /**
    * Dispose of the resources held by the widget.
    */
   dispose() {
@@ -610,6 +621,18 @@ class CodeCell extends Cell {
   }
 
   /**
+   * Clone the cell, using the same model.
+   */
+  clone() {
+    let constructor = this.constructor as typeof CodeCell;
+    return new constructor({
+      model: this.model,
+      contentFactory: this.contentFactory,
+      rendermime: this._rendermime
+    });
+  }
+
+  /**
    * Dispose of the resources used by the widget.
    */
   dispose(): void {
@@ -847,6 +870,18 @@ class MarkdownCell extends Cell {
       return this._renderer.renderModel(mimeModel);
     }
     return Promise.resolve(void 0);
+  }
+
+  /**
+   * Clone the cell, using the same model.
+   */
+  clone() {
+    let constructor = this.constructor as typeof MarkdownCell;
+    return new constructor({
+      model: this.model,
+      contentFactory: this.contentFactory,
+      rendermime: this._rendermime
+    });
   }
 
   private _monitor: ActivityMonitor<any, any> = null;
