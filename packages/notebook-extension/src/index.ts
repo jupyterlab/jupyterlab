@@ -1017,12 +1017,18 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     label: 'Create New View for Cell',
     execute: args => {
       const current = getCurrent(args);
-      let nb = current.notebook;
+      const nb = current.notebook;
+      const newCell = nb.activeCell.clone();
+
       let p = new Panel();
       p.id = `Cell-${Math.random()}`;
       p.title.closable = true;
-      p.title.label = 'Cell';
-      p.addWidget(nb.activeCell.clone());
+      if (current.title.label) {
+        p.title.label = `Cell (${current.title.label})`;
+      } else {
+        p.title.label = 'Cell';
+      }
+      p.addWidget(newCell);
       shell.addToMainArea(p);
     },
     isEnabled: hasWidget
