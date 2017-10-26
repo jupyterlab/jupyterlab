@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  showErrorMessage, VDomModel, VDomRenderer
+} from '@jupyterlab/apputils';
+
+import {
   ArrayExt, ArrayIterator, IIterator, map, each, toArray
 } from '@phosphor/algorithm';
 
@@ -18,14 +22,14 @@ import {
 } from '@phosphor/messaging';
 
 import {
+  AttachedProperty
+} from '@phosphor/properties';
+
+import {
   Widget
 } from '@phosphor/widgets';
 
 import * as React from 'react';
-
-import {
-  showErrorMessage, VDomModel, VDomRenderer
-} from '@jupyterlab/apputils';
 
 import '../style/index.css';
 
@@ -266,18 +270,10 @@ class Launcher extends VDomRenderer<LauncherModel> {
       return null;
     }
 
-    // Ensure unique entries.
-    let keys = new Set();
-
     // First group-by categories
     let categories = Object.create(null);
     each(this.model.items(), (item, index) => {
       let cat = item.category || 'Other';
-      let key = JSON.stringify(item, Object.keys(item).sort());
-      if (keys.has(key)) {
-        return;
-      }
-      keys.add(key);
       if (!(cat in categories)) {
         categories[cat] = [];
       }
@@ -402,15 +398,13 @@ function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcher
     });
   };
 
-  let key = JSON.stringify(item, Object.keys(item).sort());
-
   // Return the VDOM element.
   return (
     <div className='jp-LauncherCard'
       title={item.displayName}
       onClick={onclick}
       data-category={item.category || 'Other'}
-      key={key}>
+      key={Private.keyProperty.get(item)}>
       <div className='jp-LauncherCard-icon'>
           {(item.kernelIconUrl && kernel) &&
             <img src={item.kernelIconUrl} className='jp-Launcher-kernelIcon' />}
@@ -433,6 +427,20 @@ function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcher
  * The namespace for module private data.
  */
 namespace Private {
+  /**
+   * An incrementing counter for keys.
+   */
+  let id = 0;
+
+  /**
+   * An attached property for an item's key.
+   */
+  export
+  const keyProperty = new AttachedProperty<ILauncherItem, number>({
+    name: 'key',
+    create: () => id++
+  });
+
   /**
    * Create an item given item options.
    */
