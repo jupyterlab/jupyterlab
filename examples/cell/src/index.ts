@@ -52,24 +52,6 @@ function main(): void {
     commands.processKeydownEvent(event);
   }, useCapture);
 
-  commands.addCommand('invoke:completer', {
-    execute: () => { handler.invoke(); }
-  });
-  commands.addCommand('run:cell', {
-    execute: () => CodeCell.execute(cellWidget, session)
-  });
-
-  commands.addKeyBinding({
-    selector: '.jp-InputArea-editor.jp-mod-completer-enabled',
-    keys: ['Tab'],
-    command: 'invoke:completer'
-  });
-  commands.addKeyBinding({
-    selector: '.jp-InputArea-editor',
-    keys: ['Shift Enter'],
-    command: 'run:cell'
-  });
-
   // Create the cell widget with a default rendermime instance.
   let rendermime = new RenderMime({
     initialFactories: defaultRendererFactories
@@ -122,13 +104,33 @@ function main(): void {
   Widget.attach(panel, document.body);
 
   // Handle widget state.
-  window.onresize = () => panel.update();
+  window.addEventListener('resize', () => panel.update());
   cellWidget.activate();
 
   manager.ready.then(() => {
     session.kernelPreference = { name: manager.specs.default };
     session.initialize();
   });
+
+  // Add the commands.
+  commands.addCommand('invoke:completer', {
+    execute: () => { handler.invoke(); }
+  });
+  commands.addCommand('run:cell', {
+    execute: () => CodeCell.execute(cellWidget, session)
+  });
+
+  commands.addKeyBinding({
+    selector: '.jp-InputArea-editor.jp-mod-completer-enabled',
+    keys: ['Tab'],
+    command: 'invoke:completer'
+  });
+  commands.addKeyBinding({
+    selector: '.jp-InputArea-editor',
+    keys: ['Shift Enter'],
+    command: 'run:cell'
+  });
 }
 
-window.onload = main;
+window.addEventListener('load', main);
+
