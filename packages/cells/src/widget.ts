@@ -936,6 +936,17 @@ class RawCell extends Cell {
   }
 
   /**
+   * Clone the cell, using the same model.
+   */
+  clone(): RawCell {
+    let constructor = this.constructor as typeof RawCell;
+    return new constructor({
+      model: this.model,
+      contentFactory: this.contentFactory
+    });
+  }
+
+  /**
    * The model used by the widget.
    */
   readonly model: IRawCellModel;
