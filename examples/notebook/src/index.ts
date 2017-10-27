@@ -149,14 +149,18 @@ function createApp(manager: ServiceManager.IManager): void {
   panel.orientation = 'horizontal';
   panel.spacing = 0;
   SplitPanel.setStretch(palette, 0);
+  SplitPanel.setStretch(nbWidget, 1);
   panel.addWidget(completer);
   panel.addWidget(palette);
   panel.addWidget(nbWidget);
+
+  // Attach the panel to the DOM.
   Widget.attach(panel, document.body);
 
-  SplitPanel.setStretch(nbWidget, 1);
-  window.onresize = () => panel.update();
+  // Handle resize events.
+  window.addEventListener('resize', () => { panel.update(); });
 
+  // Add commands.
   commands.addCommand(cmdIds.invoke, {
     label: 'Completer: Invoke',
     execute: () => handler.invoke()
@@ -365,4 +369,4 @@ function createApp(manager: ServiceManager.IManager): void {
   bindings.map(binding => commands.addKeyBinding(binding));
 }
 
-window.onload = main;
+window.addEventListener('load', main);

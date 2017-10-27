@@ -36,7 +36,7 @@ var mods = [
 ];
 
 
-window.onload = function() {
+window.addEventListener('load', function() {
   var lab = new JupyterLab({
     name: 'JupyterLab Example',
     namespace: 'lab-example',
@@ -44,4 +44,4 @@ window.onload = function() {
   });
   lab.registerPluginModules(mods);
   lab.start();
-}
+});

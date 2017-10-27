@@ -20,6 +20,7 @@
   "devDependencies": {
     "css-loader": "^0.28.5",
     "file-loader": "^0.10.1",
+    "raw-loader": "^0.5.1",
     "rimraf": "^2.5.2",
     "style-loader": "^0.13.1",
     "typescript": "~2.4.1",

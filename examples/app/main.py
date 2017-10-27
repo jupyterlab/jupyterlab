@@ -9,9 +9,7 @@ from notebook.base.handlers import IPythonHandler, FileFindHandler
 from notebook.utils import url_path_join as ujoin
 from notebook.notebookapp import NotebookApp
 from traitlets import Unicode
-from jupyterlab_launcher.handlers import (
-    default_settings_path, default_themes_path, SettingsHandler
-)
+from jupyterlab_launcher.handlers import default_settings_path, SettingsHandler
 
 HERE = os.path.dirname(__file__)
 
@@ -42,7 +40,7 @@ class ExampleApp(NotebookApp):
         wsettings = self.web_app.settings
         base_url = wsettings['base_url']
         settings_path = ujoin(
-            base_url, default_settings_path + '(?P<section_name>[\w.-]+)'
+            base_url, default_settings_path + '(?P<section_name>.+)'
         )
 
         wsettings.setdefault('page_config_data', dict())
@@ -53,7 +51,7 @@ class ExampleApp(NotebookApp):
             (ujoin(base_url, '/example/(.*)'), FileFindHandler,
                 {'path': 'build'}),
             ((settings_path, SettingsHandler, {
-                'schemas_dir': os.path.join(HERE, 'schemas'),
+                'schemas_dir': os.path.join(HERE, 'build', 'schemas'),
                 'settings_dir': ''
                 })
             )
