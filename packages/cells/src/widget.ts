@@ -314,7 +314,7 @@ class Cell extends Widget {
   /**
    * Clone the cell, using the same model.
    */
-  clone() {
+  clone(): Cell {
     let constructor = this.constructor as typeof Cell;
     return new constructor({
       model: this.model,
@@ -623,7 +623,7 @@ class CodeCell extends Cell {
   /**
    * Clone the cell, using the same model.
    */
-  clone() {
+  clone(): CodeCell {
     let constructor = this.constructor as typeof CodeCell;
     return new constructor({
       model: this.model,
@@ -875,7 +875,7 @@ class MarkdownCell extends Cell {
   /**
    * Clone the cell, using the same model.
    */
-  clone() {
+  clone(): MarkdownCell {
     let constructor = this.constructor as typeof MarkdownCell;
     return new constructor({
       model: this.model,
@@ -933,6 +933,17 @@ class RawCell extends Cell {
   constructor(options: Cell.IOptions) {
     super(options);
     this.addClass(RAW_CELL_CLASS);
+  }
+
+  /**
+   * Clone the cell, using the same model.
+   */
+  clone(): RawCell {
+    let constructor = this.constructor as typeof RawCell;
+    return new constructor({
+      model: this.model,
+      contentFactory: this.contentFactory
+    });
   }
 
   /**
