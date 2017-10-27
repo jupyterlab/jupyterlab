@@ -98,6 +98,9 @@ class CodeEditorWrapper extends Widget {
     }
   }
 
+  /**
+   * A message handler invoked on an `'update-request'` message.
+   */
   protected onUpdateRequest(msg: Message): void {
       this.editor.refresh();
   }
