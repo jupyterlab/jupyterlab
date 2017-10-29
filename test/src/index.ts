@@ -11,7 +11,6 @@ import './apputils/commandlinker.spec';
 import './apputils/dialog.spec';
 import './apputils/iframe.spec';
 import './apputils/instancetracker.spec';
-import './apputils/jsoneditor.spec';
 import './apputils/sanitizer.spec';
 import './apputils/statedb.spec';
 import './apputils/styling.spec';
@@ -23,6 +22,7 @@ import './cells/model.spec';
 import './cells/widget.spec';
 
 import './codeeditor/editor.spec';
+import './codeeditor/jsoneditor.spec';
 import './codeeditor/widget.spec';
 
 import './codemirror/editor.spec';
