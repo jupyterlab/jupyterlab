@@ -17,9 +17,13 @@ import {
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
-import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
+import {
+  ConsolePanel, IConsoleTracker, CodeConsole
+} from '@jupyterlab/console';
 
-import { ISettingRegistry, PageConfig } from '@jupyterlab/coreutils';
+import {
+  PageConfig, ISettingRegistry
+} from '@jupyterlab/coreutils';
 
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
@@ -143,9 +147,16 @@ async function activateConsole(
   const manager = app.serviceManager;
   const { commands, shell } = app;
   const category = 'Console';
+  const id = plugins[1].id;
+  let command: string;
+  let menu = new Menu({ commands });
 
   // Create an instance tracker for all console panels.
   const tracker = new InstanceTracker<ConsolePanel>({ namespace: 'console' });
+
+  let {
+    fileBacking
+  } = CodeConsole.defaultConfig;
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -156,6 +167,25 @@ async function activateConsole(
     }),
     name: panel => panel.console.session.path,
     when: manager.ready
+  });
+
+  /**
+   * Update the setting values.
+   */
+  function updateSettings(settings: ISettingRegistry.ISettings): void {
+    let cached = settings.get('fileBacking').composite as boolean | null;
+    fileBacking = cached === null ? fileBacking : !!cached;
+    CodeConsole.setOption('fileBacking', fileBacking);
+  }
+
+  // Fetch the initial state of the settings.
+  Promise.all([settingRegistry.load(id), shell]).then(([settings]) => {
+    updateSettings(settings);
+    settings.changed.connect(() => {
+      updateSettings(settings);
+    });
+  }).catch((reason: Error) => {
+    console.error(reason.message);
   });
 
   // Update the command registry when the console state changes.

@@ -116,8 +116,7 @@ export class ConsolePanel extends Panel {
     if (loadFile) {
       // We're now ready to load the console document.
       this.console.fromStore();
-    } else {
-      // In case of new console we want an empty file saved.
+    } else if (CodeConsole.getOption('fileBacking')) {
       this.console.save();
     }
 

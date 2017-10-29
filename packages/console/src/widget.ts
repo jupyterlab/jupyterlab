@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IClientSession, showDialog, Dialog
+  IClientSession
 } from '@jupyterlab/apputils';
 
 import {
@@ -248,7 +248,9 @@ export class CodeConsole extends Widget {
    * When cells' contents change, save the console document.
    */
   private _onCellChanged(sender: ICellModel, args: void): void {
+    if (Private.fileBacking) {
      this.save();
+    }
   }
 
   /**
@@ -639,11 +641,6 @@ export class CodeConsole extends Widget {
        this._loadedFromFile = true;
      }).catch(err => {
        this._loadedFromFile = false;
-       showDialog({
-         title: 'File Load Error',
-         body: err.xhr.responseText,
-         buttons: [Dialog.okButton()]
-       });
      });
    }
 
@@ -1038,7 +1035,51 @@ export namespace CodeConsole {
   /**
    * The default `ModelFactory` instance.
    */
-  export const defaultModelFactory = new ModelFactory({});
+  export
+  const defaultModelFactory = new ModelFactory({});
+
+  /**
+   * The configuration options for a console.
+   */
+  export
+  interface IConfig {
+    /**
+     * Whether line numbers should be displayed.
+     */
+    fileBacking: boolean;
+  }
+
+  /**
+   * The default configuration options for a console.
+   */
+  export
+  let defaultConfig: IConfig = {
+    fileBacking: false
+  };
+
+  /**
+   * Get a config option for all consoles.
+   */
+  export
+  function getOption<K extends keyof CodeConsole.IConfig>(option: K): CodeConsole.IConfig[K] {
+    switch (option) {
+      case 'fileBacking':
+      default:
+        return Private.fileBacking;
+    }
+  }
+
+  /**
+   * Set a config option for all consoles.
+   */
+  export
+  function setOption<K extends keyof CodeConsole.IConfig>(option: K, value: CodeConsole.IConfig[K]): void {
+    switch (option) {
+      case 'fileBacking':
+      default:
+        Private.fileBacking = value;
+    }
+  }
 }
 
 /**
@@ -1053,4 +1094,10 @@ namespace Private {
   export function scrollToBottom(node: HTMLElement): void {
     node.scrollTop = node.scrollHeight - node.clientHeight;
   }
+
+  /**
+   * Flag for file-backing consoles.
+   */
+  export
+  let fileBacking = false;
 }

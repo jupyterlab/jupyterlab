@@ -35,8 +35,13 @@
       "type": "string",
       "enum": ["notebook", "terminal"],
       "default": "notebook"
-    }
+    },
+    "fileBacking": {
+      "type": "boolean", "title": "Back consoles by files", "default": false
+  }
   },
   "additionalProperties": false,
-  "type": "object"
+  "type": "object",
+  "jupyter.lab.setting-icon-class": "jp-CodeConsoleIcon",
+  "jupyter.lab.setting-icon-label": "Console"
 }
