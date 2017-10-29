@@ -18,6 +18,8 @@ import {
   RawCell
 } from '@jupyterlab/cells';
 
+import { ServiceManager } from '@jupyterlab/services';
+
 import {
   createClientSession,
   framePromise,
@@ -55,10 +57,21 @@ class TestConsole extends CodeConsole {
   }
 }
 
+let manager = new ServiceManager();
+
+before(() => {
+  return manager.ready;
+});
+
 const contentFactory = createConsoleFactory();
 
 describe('console/widget', () => {
   describe('CodeConsole', () => {
+    let manager: ServiceManager.IManager;
+    before(() => {
+      manager = new ServiceManager();
+      return manager.ready;
+    });
     let widget: TestConsole;
 
     beforeEach(async () => {
@@ -67,7 +80,8 @@ describe('console/widget', () => {
         contentFactory,
         rendermime,
         session,
-        mimeTypeService
+        mimeTypeService,
+        manager
       });
     });
 

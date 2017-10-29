@@ -17,9 +17,13 @@ import {
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
-import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
+import {
+  ConsolePanel,
+  IConsoleTracker,
+  CodeConsole
+} from '@jupyterlab/console';
 
-import { ISettingRegistry, PageConfig } from '@jupyterlab/coreutils';
+import { PageConfig, ISettingRegistry } from '@jupyterlab/coreutils';
 
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
@@ -36,7 +40,7 @@ import {
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import { find } from '@phosphor/algorithm';
+import { find, each } from '@phosphor/algorithm';
 
 import { ReadonlyJSONObject } from '@phosphor/coreutils';
 
@@ -71,6 +75,8 @@ namespace CommandIDs {
   export const inject = 'console:inject';
 
   export const changeKernel = 'console:change-kernel';
+
+  export const exportNotebook = 'console:export-notebook';
 
   export const enterToExecute = 'console:enter-to-execute';
 
@@ -142,6 +148,8 @@ async function activateConsole(
   // Create an instance tracker for all console panels.
   const tracker = new InstanceTracker<ConsolePanel>({ namespace: 'console' });
 
+  let { fileBacking } = CodeConsole.defaultConfig;
+
   // Handle state restoration.
   restorer.restore(tracker, {
     command: CommandIDs.open,
@@ -151,6 +159,24 @@ async function activateConsole(
     }),
     name: panel => panel.console.session.path,
     when: manager.ready
+  });
+
+  // Update the command registry when the console state changes.
+  tracker.currentChanged.connect(() => {
+    if (tracker.size <= 1) {
+      commands.notifyCommandChanged(CommandIDs.interrupt);
+    }
+  });
+
+  // Update console count to reflect number of running consoles.
+  manager.ready.then(() => {
+    let count = 1;
+    each(manager.sessions.running(), model => {
+      if (model.type === 'console') {
+        count += 1;
+      }
+    });
+    ConsolePanel.setConsoleCount(count);
   });
 
   // Add a launcher item if the launcher is available.
@@ -254,6 +280,10 @@ async function activateConsole(
   const pluginId = '@jupyterlab/console-extension:tracker';
   let interactionMode: string;
   async function updateSettings() {
+    let cached = (await settingRegistry.get(pluginId, 'fileBacking'))
+      .composite as boolean | null;
+    fileBacking = cached === null ? fileBacking : !!cached;
+    CodeConsole.setOption('fileBacking', fileBacking);
     interactionMode = (await settingRegistry.get(pluginId, 'interactionMode'))
       .composite as string;
     tracker.forEach(panel => {
@@ -305,6 +335,11 @@ async function activateConsole(
             return item.path === path;
           });
           if (model) {
+            // The name in args is not the name of the console,
+            // which is what ConsolePanel expects.
+            if (!args.name || !args.name.length) {
+              args.name = model.name;
+            }
             return createConsole(args);
           }
           return Promise.reject(`No running kernel session for path: ${path}`);
@@ -474,6 +509,74 @@ async function activateConsole(
     isEnabled
   });
 
+  commands.addCommand(CommandIDs.exportNotebook, {
+    label: 'Export to Notebook',
+    execute: args => {
+      const current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      let dir = current.session.path.substring(0, current.session.path.lastIndexOf('/'));
+      return current.console.manager.contents.newUntitled({type: 'notebook', path: dir}).then(data => {
+        if (!data) {
+          return;
+        }
+        return current.console.save(data.path).then(() => {
+          return commands.execute('docmanager:open', {
+            path: data.path, factory: 'Notebook',
+            kernel: { name }
+          });
+        });
+      });
+    },
+    isEnabled
+  });
+
+  let _exportNotebook = (current: ConsolePanel) => {
+    if (!current) {
+      return;
+    }
+    let dir = current.session.path.substring(
+      0,
+      current.session.path.lastIndexOf('/')
+    );
+    return current.console.manager.contents
+      .newUntitled({ type: 'notebook', path: dir })
+      .then(data => {
+        if (!data) {
+          return;
+        }
+        return current.console.save(data.path).then(() => {
+          return commands.execute('docmanager:open', {
+            path: data.path,
+            factory: 'Notebook',
+            kernel: { name }
+          });
+        });
+      });
+  };
+
+  let exportNotebook = (args: ReadonlyJSONObject) => {
+    const current = getCurrent(args);
+    return _exportNotebook(current);
+  };
+
+  commands.addCommand(CommandIDs.exportNotebook, {
+    label: 'Export Console to Notebook',
+    execute: exportNotebook,
+    isEnabled
+  });
+
+  mainMenu.fileMenu.addGroup(
+    [
+      {
+        type: 'command',
+        command: CommandIDs.exportNotebook
+      } as Menu.IItemOptions
+    ],
+    11
+  );
+
   // Add command palette items
   [
     CommandIDs.create,
@@ -484,7 +587,8 @@ async function activateConsole(
     CommandIDs.restart,
     CommandIDs.interrupt,
     CommandIDs.changeKernel,
-    CommandIDs.closeAndShutdown
+    CommandIDs.closeAndShutdown,
+    CommandIDs.exportNotebook
   ].forEach(command => {
     palette.addItem({ command, category, args: { isPalette: true } });
   });

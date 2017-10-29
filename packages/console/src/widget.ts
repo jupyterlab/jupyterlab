@@ -13,18 +13,29 @@ import {
   isCodeCellModel,
   IRawCellModel,
   RawCell,
-  RawCellModel
+  RawCellModel,
+  ICellModel
 } from '@jupyterlab/cells';
 
 import { IEditorMimeTypeService, CodeEditor } from '@jupyterlab/codeeditor';
 
 import { nbformat } from '@jupyterlab/coreutils';
 
-import { IObservableList, ObservableList } from '@jupyterlab/observables';
+import {
+  IObservableList,
+  ObservableList,
+  ObservableJSON,
+  IObservableJSON
+} from '@jupyterlab/observables';
 
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import { KernelMessage } from '@jupyterlab/services';
+import {
+  KernelMessage,
+  ServiceManager,
+  Contents,
+  Kernel
+} from '@jupyterlab/services';
 
 import { each } from '@phosphor/algorithm';
 
@@ -119,6 +130,7 @@ export class CodeConsole extends Widget {
     this.modelFactory = options.modelFactory || CodeConsole.defaultModelFactory;
     this.rendermime = options.rendermime;
     this.session = options.session;
+    this.manager = options.manager;
     this._mimeTypeService = options.mimeTypeService;
 
     // Add top-level CSS classes.
@@ -142,6 +154,7 @@ export class CodeConsole extends Widget {
       this._onKernelStatusChanged,
       this
     );
+    this._metadata = new ObservableJSON();
   }
 
   /**
@@ -177,6 +190,11 @@ export class CodeConsole extends Widget {
    * The client session used by the console.
    */
   readonly session: IClientSession;
+
+  /**
+   * The service manager used by the console to save documents.
+   */
+  readonly manager: ServiceManager.IManager;
 
   /**
    * The list of content cells in the console.
@@ -222,6 +240,10 @@ export class CodeConsole extends Widget {
       this._onCellDisposed,
       this
     );
+    cell.model.contentChanged.connect(
+      this._onCellChanged,
+      this
+    );
     this.update();
   }
 
@@ -248,6 +270,15 @@ export class CodeConsole extends Widget {
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
     this._content.addWidget(banner);
+  }
+
+  /**
+   * When cells' contents change, save the console document.
+   */
+  private _onCellChanged(sender: ICellModel, args: void): void {
+    if (Private.fileBacking) {
+      this.save();
+    }
   }
 
   /**
@@ -285,6 +316,8 @@ export class CodeConsole extends Widget {
     this._msgIdCells = null;
     this._msgIds = null;
     this._history.dispose();
+    // this._foreignHandler.dispose();
+    this._metadata.dispose();
 
     super.dispose();
   }
@@ -374,13 +407,10 @@ export class CodeConsole extends Widget {
    * This only serializes the code cells and the prompt cell if it exists, and
    * skips any old banner cells.
    */
-  serialize(): nbformat.ICodeCell[] {
-    const cells: nbformat.ICodeCell[] = [];
+  serialize(): nbformat.ICell[] {
+    const cells: nbformat.ICell[] = [];
     each(this._cells, cell => {
-      let model = cell.model;
-      if (isCodeCellModel(model)) {
-        cells.push(model.toJSON());
-      }
+      cells.push(cell.model.toJSON());
     });
 
     if (this.promptCell) {
@@ -688,6 +718,110 @@ export class CodeConsole extends Widget {
   }
 
   /**
+   * Make sure we have the required metadata fields.
+   */
+  private _ensureMetadata(): void {
+    let metadata = this._metadata;
+    if (!metadata.has('language_info')) {
+      metadata.set('language_info', { name: '' });
+    }
+    if (!metadata.has('kernelspec')) {
+      metadata.set('kernelspec', { name: '', display_name: '' });
+    }
+  }
+
+  /**
+   * Serialize the model to JSON.
+   */
+  toJSON(): nbformat.INotebookContent {
+    let cells: nbformat.ICell[] = [];
+    for (let i = 0; i < this.cells.length; i++) {
+      let cell = this.cells.get(i);
+      cells.push(cell.model.toJSON());
+    }
+
+    this._ensureMetadata();
+    let metadata = Object.create(null) as nbformat.INotebookMetadata;
+    for (let key of this._metadata.keys()) {
+      metadata[key] = JSON.parse(JSON.stringify(this._metadata.get(key)));
+    }
+
+    return {
+      metadata,
+      nbformat_minor: nbformat.MINOR_VERSION,
+      nbformat: nbformat.MAJOR_VERSION,
+      cells
+    };
+  }
+
+  /**
+   * Save console document to specified path or generated path.
+   */
+  save(path: string = null): Promise<void> {
+    let options = {
+      type: 'file' as Contents.ContentType,
+      format: 'text' as Contents.FileFormat,
+      content: JSON.stringify(this.toJSON())
+    };
+    path = path || this.session.path;
+    return this.manager.ready.then(() => {
+      this.manager.contents.save(path, options);
+    });
+  }
+
+  /**
+   * Load console document from store.
+   */
+  fromStore(): Promise<void> {
+    let opts: Contents.IFetchOptions = {
+      format: 'text' as Contents.FileFormat,
+      type: 'file' as Contents.ContentType,
+      content: true
+    };
+    let path = this.session.path;
+    return this.manager.ready
+      .then(() => {
+        return this.manager.contents.get(path, opts);
+      })
+      .then(contents => {
+        if (this.isDisposed) {
+          return;
+        }
+        let content = contents.content;
+        // Convert line endings if necessary, marking the file
+        // as dirty.
+        if (content.indexOf('\r') !== -1) {
+          content = content.replace(/\r\n|\r/g, '\n');
+        }
+        this.fromJSON(JSON.parse(content));
+        this._loadedFromFile = true;
+      })
+      .catch(err => {
+        this._loadedFromFile = false;
+      });
+  }
+
+  /**
+   * Deserialize the model from JSON.
+   */
+  fromJSON(value: nbformat.INotebookContent): void {
+    let i = 1;
+    for (let cell of value.cells) {
+      let codeCell: nbformat.ICodeCell = cell as nbformat.ICodeCell;
+      let newCell: CodeCell = this.createCodeCell();
+      let source = (newCell.model.value.text = cell.source.toString());
+      newCell.model.outputs.fromJSON(codeCell.outputs);
+
+      if (source && source.length) {
+        newCell.setPrompt(i.toString());
+        i++;
+      }
+
+      this.addCell(newCell);
+    }
+  }
+
+  /**
    * Update the console based on the kernel info.
    */
   private _handleInfo(info: KernelMessage.IInfoReply): void {
@@ -697,6 +831,31 @@ export class CodeConsole extends Widget {
     if (this.promptCell) {
       this.promptCell.model.mimeType = this._mimetype;
     }
+
+    this._updateLanguage(info.language_info);
+  }
+
+  /**
+   * Update the kernel language.
+   */
+  private _updateLanguage(language: KernelMessage.ILanguageInfo): void {
+    this._metadata.set('language_info', language);
+  }
+
+  /**
+   * Update the kernel spec.
+   */
+  private _updateSpec(kernel: Kernel.IKernelConnection): void {
+    kernel.getSpec().then(spec => {
+      if (this.isDisposed) {
+        return;
+      }
+      this._metadata.set('kernelspec', {
+        name: kernel.name,
+        display_name: spec.display_name,
+        language: spec.language
+      });
+    });
   }
 
   /**
@@ -774,7 +933,16 @@ export class CodeConsole extends Widget {
    * Handle a change to the kernel.
    */
   private _onKernelChanged(): void {
-    this.clear();
+    // On the first kernel change, we don't want to clear the cells loaded from file.
+    if (this._loadedFromFile) {
+      this._loadedFromFile = false;
+    } else {
+      this.clear();
+    }
+    let kernel = this.session.kernel;
+    if (!kernel) {
+      return;
+    }
     if (this._banner) {
       this._banner.dispose();
       this._banner = null;
@@ -799,6 +967,7 @@ export class CodeConsole extends Widget {
             return;
           }
           this._handleInfo(this.session.kernel.info);
+          this._updateSpec(this.session.kernel);
         })
         .catch(err => {
           console.error('could not get kernel info');
@@ -822,6 +991,8 @@ export class CodeConsole extends Widget {
   private _dragData: { pressX: number; pressY: number; index: number } = null;
   private _drag: Drag = null;
   private _focusedCell: Cell = null;
+  private _loadedFromFile = false;
+  private _metadata: IObservableJSON;
 }
 
 /**
@@ -851,6 +1022,11 @@ export namespace CodeConsole {
      * The client session for the console widget.
      */
     session: IClientSession;
+
+    /**
+     * The service manager for the console widget.
+     */
+    manager: ServiceManager.IManager;
 
     /**
      * The service used to look up mime types.
@@ -1013,6 +1189,50 @@ export namespace CodeConsole {
    * The default `ModelFactory` instance.
    */
   export const defaultModelFactory = new ModelFactory({});
+
+  /**
+   * The configuration options for a console.
+   */
+  export interface IConfig {
+    /**
+     * Whether line numbers should be displayed.
+     */
+    fileBacking: boolean;
+  }
+
+  /**
+   * The default configuration options for a console.
+   */
+  export let defaultConfig: IConfig = {
+    fileBacking: false
+  };
+
+  /**
+   * Get a config option for all consoles.
+   */
+  export function getOption<K extends keyof CodeConsole.IConfig>(
+    option: K
+  ): CodeConsole.IConfig[K] {
+    switch (option) {
+      case 'fileBacking':
+      default:
+        return Private.fileBacking;
+    }
+  }
+
+  /**
+   * Set a config option for all consoles.
+   */
+  export function setOption<K extends keyof CodeConsole.IConfig>(
+    option: K,
+    value: CodeConsole.IConfig[K]
+  ): void {
+    switch (option) {
+      case 'fileBacking':
+      default:
+        Private.fileBacking = value;
+    }
+  }
 }
 
 /**
@@ -1027,4 +1247,9 @@ namespace Private {
   export function scrollToBottom(node: HTMLElement): void {
     node.scrollTop = node.scrollHeight - node.clientHeight;
   }
+
+  /**
+   * Flag for file-backing consoles.
+   */
+  export let fileBacking = false;
 }
