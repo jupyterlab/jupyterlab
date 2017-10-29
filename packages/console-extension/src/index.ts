@@ -26,6 +26,10 @@ import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 
 import {
+  find, each
+} from '@phosphor/algorithm';
+
+import {
   IEditMenu,
   IFileMenu,
   IHelpMenu,
@@ -70,6 +74,8 @@ namespace CommandIDs {
 
   export const toggleShowAllActivity =
     'console:toggle-show-all-kernel-activity';
+
+  export const exportNotebook = 'console:export-notebook';
 
   export const enterToExecute = 'console:enter-to-execute';
 
@@ -150,6 +156,29 @@ async function activateConsole(
     }),
     name: panel => panel.console.session.path,
     when: manager.ready
+  });
+
+  // Update the command registry when the console state changes.
+  tracker.currentChanged.connect(() => {
+    if (tracker.size <= 1) {
+      commands.notifyCommandChanged(CommandIDs.interrupt);
+    }
+  });
+
+  // The launcher callback.
+  let callback = (cwd: string, name: string) => {
+    return createConsole({ basePath: cwd, kernelPreference: { name } });
+  };
+
+  // Update console count to reflect number of running consoles.
+  manager.ready.then(() => {
+    let count = 1;
+    each(manager.sessions.running(), model => {
+      if (model.type === 'console') {
+        count += 1;
+      }
+    });
+    ConsolePanel.setConsoleCount(count);
   });
 
   // Add a launcher item if the launcher is available.
@@ -292,6 +321,11 @@ async function activateConsole(
             return item.path === path;
           });
           if (model) {
+            // The name in args is not the name of the console,
+            // which is what ConsolePanel expects.
+            if (!args.name || !args.name.length) {
+              args.name = model.name;
+            }
             return createConsole(args);
           }
           return Promise.reject(`No running kernel session for path: ${path}`);
@@ -623,6 +657,51 @@ async function activateConsole(
     command: CommandIDs.toggleShowAllActivity,
     selector: '.jp-CodeConsole'
   });
+  palette.addItem({ command, category });
+
+  command = CommandIDs.exportNotebook;
+  commands.addCommand(command, {
+    label: 'Export to Notebook',
+    execute: args => {
+      const current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      let dir = current.session.path.substring(0, current.session.path.lastIndexOf('/'));
+      return current.console.manager.contents.newUntitled({type: 'notebook', path: dir}).then(data => {
+        if (!data) {
+          return;
+        }
+        return current.console.save(data.path).then(() => {
+          return commands.execute('docmanager:open', {
+            path: data.path, factory: 'Notebook',
+            kernel: { name }
+          });
+        });
+      });
+    },
+    isEnabled: hasWidget
+  });
+  palette.addItem({ command, category });
+
+  menu.addItem({ command: CommandIDs.run });
+  menu.addItem({ command: CommandIDs.runForced });
+  menu.addItem({ command: CommandIDs.linebreak });
+  menu.addItem({ type: 'separator' });
+  menu.addItem({ command: CommandIDs.clear });
+  menu.addItem({ type: 'separator' });
+  menu.addItem({ command: CommandIDs.interrupt });
+  menu.addItem({ command: CommandIDs.restart });
+  menu.addItem({ command: CommandIDs.changeKernel });
+  menu.addItem({ type: 'separator' });
+  menu.addItem({ command: CommandIDs.closeAndShutdown });
+  menu.addItem({ type: 'separator' });
+  menu.addItem({ command: CommandIDs.exportNotebook });
+
+  mainMenu.addMenu(menu, {rank: 50});
+
+  app.contextMenu.addItem({command: CommandIDs.clear, selector: '.jp-CodeConsole'});
+  app.contextMenu.addItem({command: CommandIDs.restart, selector: '.jp-CodeConsole'});
 
   return tracker;
 }
