@@ -54,7 +54,7 @@ def get_app_dir(app_dir=None):
     # Check for a user level install.
     userbase = getattr(site, 'userbase', '')
     if here.startswith(userbase) and not app_dir.startswith(userbase):
-        app_dir = pjoin(site.getuserbase(), 'share', 'jupyter', 'lab')
+        app_dir = pjoin(userbase, 'share', 'jupyter', 'lab')
 
     # Check for a system install in '/usr/local/share'.
     elif (sys.prefix.startswith('/usr') and not
