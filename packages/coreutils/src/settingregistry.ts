@@ -390,8 +390,13 @@ class DefaultSchemaValidator implements ISchemaValidator {
     const validate = this._validator.getSchema(plugin.id);
     const compose = this._composer.getSchema(plugin.id);
 
-    console.log('json type is: ', typeof json);
-    console.log('plugin', plugin);
+    // Parse the raw comments into a user map.
+    const strip = true;
+    const user = (json.parse(plugin.raw, null, strip) || { }) as JSONObject;
+
+    // Set the parsed user data and create empty composite to populate during
+    // schema validation.
+    plugin.data = { composite: { }, user };
 
     if (!validate || !compose) {
       const errors = this.addSchema(plugin.id, plugin.schema);
@@ -521,7 +526,6 @@ class SettingRegistry {
       try {
         this._validate(data);
       } catch (errors) {
-        console.log('errors', errors);
         const output = [`Validating ${plugin} failed:`];
         (errors as ISchemaValidator.IError[]).forEach((error, index) => {
           const { dataPath, schemaPath, keyword, message } = error;
