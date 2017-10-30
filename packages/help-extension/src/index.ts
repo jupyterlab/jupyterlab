@@ -6,12 +6,16 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, IFrame, IMainMenu, InstanceTracker, showDialog
+  Dialog, ICommandPalette, IFrame, InstanceTracker, showDialog
 } from '@jupyterlab/apputils';
 
 import {
   PageConfig, URLExt
 } from '@jupyterlab/coreutils';
+
+import {
+  IMainMenu
+} from '@jupyterlab/mainmenu';
 
 import {
   Message

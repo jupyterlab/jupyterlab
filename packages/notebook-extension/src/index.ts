@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, IMainMenu, showDialog
+  Dialog, ICommandPalette, showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -20,6 +20,10 @@ import {
 import {
   ILauncher
 } from '@jupyterlab/launcher';
+
+import {
+  IMainMenu
+} from '@jupyterlab/mainmenu';
 
 import {
   CellTools, ICellTools, INotebookTracker, NotebookActions,

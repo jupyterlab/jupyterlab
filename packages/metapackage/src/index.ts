@@ -32,6 +32,7 @@ import "@jupyterlab/inspector-extension";
 import "@jupyterlab/json-extension";
 import "@jupyterlab/launcher";
 import "@jupyterlab/launcher-extension";
+import "@jupyterlab/mainmenu";
 import "@jupyterlab/markdownviewer-extension";
 import "@jupyterlab/notebook";
 import "@jupyterlab/notebook-extension";

@@ -8,13 +8,17 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, IMainMenu, MainMenu, IThemeManager, ThemeManager,
+  ICommandPalette, IThemeManager, ThemeManager,
   ISplashScreen
 } from '@jupyterlab/apputils';
 
 import {
   DataConnector, ISettingRegistry, IStateDB, SettingRegistry, StateDB
 } from '@jupyterlab/coreutils';
+
+import {
+  IMainMenu, MainMenu
+} from '@jupyterlab/mainmenu';
 
 import {
   ServiceManager, ServerConnection

@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  showDialog, showErrorMessage, Spinner, Dialog, ICommandPalette, IMainMenu
+  showDialog, showErrorMessage, Spinner, Dialog, ICommandPalette
 } from '@jupyterlab/apputils';
 
 import {
@@ -75,8 +75,8 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<IDocumentManager> = {
   id: '@jupyterlab/docmanager-extension:plugin',
   provides: IDocumentManager,
-  requires: [ICommandPalette, IMainMenu],
-  activate: (app: JupyterLab, palette: ICommandPalette, mainMenu: IMainMenu): IDocumentManager => {
+  requires: [ICommandPalette],
+  activate: (app: JupyterLab, palette: ICommandPalette): IDocumentManager => {
     const manager = app.serviceManager;
     const contexts = new WeakSet<DocumentRegistry.Context>();
     const opener: DocumentManager.IWidgetOpener = {

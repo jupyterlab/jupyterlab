@@ -32,6 +32,7 @@
     "@jupyterlab/application": "^0.12.0",
     "@jupyterlab/apputils": "^0.12.4",
     "@jupyterlab/launcher": "^0.12.0",
+    "@jupyterlab/mainmenu": "^0.1.0",
     "@jupyterlab/services": "^0.51.0",
     "@jupyterlab/terminal": "^0.12.0",
     "@phosphor/widgets": "^1.5.0"

@@ -14,8 +14,12 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, IMainMenu
+  ICommandPalette
 } from '@jupyterlab/apputils';
+
+import {
+  IMainMenu
+} from '@jupyterlab/mainmenu';
 
 import {
   IEditorServices

@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  IMainMenu, InstanceTracker, ToolbarButton
+  InstanceTracker, ToolbarButton
 } from '@jupyterlab/apputils';
 
 import {
@@ -28,6 +28,10 @@ import {
 import {
   Launcher
 } from '@jupyterlab/launcher';
+
+import {
+  IMainMenu
+} from '@jupyterlab/mainmenu';
 
 import {
   each

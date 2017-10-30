@@ -32,6 +32,36 @@ interface IMainMenu {
    * Add a new menu to the main menu bar.
    */
   addMenu(menu: Menu, options?: IMainMenu.IAddOptions): void;
+
+  /**
+   * The application "File" menu.
+   */
+  //readonly fileMenu: Menu;
+
+  /**
+   * The application "Edit" menu.
+   */
+  //readonly editMenu: Menu;
+
+  /**
+   * The application "View" menu.
+   */
+  //readonly viewMenu: Menu;
+
+  /**
+   * The application "Help" menu.
+   */
+  //readonly helpMenu: Menu;
+
+  /**
+   * The application "Kernel" menu.
+   */
+  //readonly kernelMenu: Menu;
+
+  /**
+   * The application "Run" menu.
+   */
+  //readonly runMenu: Menu;
 }
 
 

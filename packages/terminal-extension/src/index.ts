@@ -6,12 +6,16 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, IMainMenu, InstanceTracker
+  ICommandPalette, InstanceTracker
 } from '@jupyterlab/apputils';
 
 import {
   ILauncher
 } from '@jupyterlab/launcher';
+
+import {
+  IMainMenu
+} from '@jupyterlab/mainmenu';
 
 import {
   ServiceManager

@@ -63,6 +63,7 @@
     "@jupyterlab/json-extension": "^0.12.0",
     "@jupyterlab/launcher": "^0.12.0",
     "@jupyterlab/launcher-extension": "^0.12.0",
+    "@jupyterlab/mainmenu": "^0.1.0",
     "@jupyterlab/markdownviewer-extension": "^0.12.0",
     "@jupyterlab/notebook": "^0.12.0",
     "@jupyterlab/notebook-extension": "^0.12.0",
