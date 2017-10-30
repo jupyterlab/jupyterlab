@@ -3,6 +3,8 @@
 
 import * as Ajv from 'ajv';
 
+import * as json from 'comment-json';
+
 import {
   find
 } from '@phosphor/algorithm';
@@ -136,6 +138,11 @@ namespace ISettingRegistry {
      * The collection of values for a specified setting.
      */
     data: ISettingBundle;
+
+    /**
+     * The raw user settings data as a string containing JSON with comments.
+     */
+    raw: string;
 
     /**
      * The JSON schema for the plugin.
@@ -291,7 +298,7 @@ namespace ISettingRegistry {
     /**
      * Save all of the plugin's user settings at once.
      */
-    save(user: JSONObject): Promise<void>;
+    save(raw: string): Promise<void>;
 
     /**
      * Set a single setting.
@@ -371,7 +378,7 @@ class DefaultSchemaValidator implements ISchemaValidator {
   }
 
   /**
-   * Validate a plugin's schema and user data; populate the `composite` data.
+   * Validate a plugin's schema, user, and raw data; populate the `composite`.
    *
    * @param plugin - The plugin being validated. Its `composite` data will be
    * populated by reference.
@@ -382,6 +389,9 @@ class DefaultSchemaValidator implements ISchemaValidator {
   validateData(plugin: ISettingRegistry.IPlugin): ISchemaValidator.IError[] | null {
     const validate = this._validator.getSchema(plugin.id);
     const compose = this._composer.getSchema(plugin.id);
+
+    console.log('json type is: ', typeof json);
+    console.log('plugin', plugin);
 
     if (!validate || !compose) {
       const errors = this.addSchema(plugin.id, plugin.schema);
@@ -511,6 +521,7 @@ class SettingRegistry {
       try {
         this._validate(data);
       } catch (errors) {
+        console.log('errors', errors);
         const output = [`Validating ${plugin} failed:`];
         (errors as ISchemaValidator.IError[]).forEach((error, index) => {
           const { dataPath, schemaPath, keyword, message } = error;
@@ -636,8 +647,7 @@ class SettingRegistry {
     }
 
     // Validate the user data and create the composite data.
-    plugin.data.user = plugin.data.user || { };
-    delete plugin.data.composite;
+    plugin.data = { } as ISettingRegistry.ISettingBundle;
     errors = this._validator.validateData(plugin);
     if (errors) {
       throw errors;
@@ -787,10 +797,11 @@ class Settings implements ISettingRegistry.ISettings {
   /**
    * Save all of the plugin's user settings at once.
    */
-  save(user: JSONObject): Promise<void> {
+  save(raw: string): Promise<void> {
     return this.registry.upload({
       id: this.plugin,
-      data: { composite: this._composite, user },
+      data: undefined,
+      raw: raw,
       schema: this._schema
     });
   }
