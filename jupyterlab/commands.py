@@ -339,8 +339,6 @@ def should_build(app_dir=None, logger=None):
     with open(pkg_path) as fid:
         static_data = json.load(fid)
 
-    core_data = _get_core_data()
-
     # Look for mismatched version.
     static_version = static_data['jupyterlab'].get('version', '')
     core_version = static_data['jupyterlab']['version']
@@ -694,6 +692,10 @@ def _get_core_data():
     """
     with open(pjoin(here, 'package.app.json')) as fid:
         return json.load(fid)
+
+
+# Provide the application version.
+app_version = _get_core_data()['jupyterlab']['version']
 
 
 def _test_overlap(spec1, spec2):
