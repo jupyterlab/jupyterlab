@@ -93,7 +93,7 @@ class CodeEditorWrapper extends Widget {
   protected onResize(msg: Widget.ResizeMessage): void {
     if (msg.width >= 0 && msg.height >= 0) {
       this.editor.setSize(msg);
-    } else {
+    } else if (this.isVisible) {
       this.editor.resizeToFit();
     }
   }
@@ -102,7 +102,7 @@ class CodeEditorWrapper extends Widget {
    * A message handler invoked on an `'update-request'` message.
    */
   protected onUpdateRequest(msg: Message): void {
-      this.editor.refresh();
+    this.editor.refresh();
   }
 
   /**
