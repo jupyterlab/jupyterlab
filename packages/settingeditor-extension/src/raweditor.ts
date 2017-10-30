@@ -202,7 +202,7 @@ class RawEditor extends SplitPanel {
       return;
     }
 
-    settings.save(source.toJSON()).catch(this._onSaveError);
+    settings.save(JSON.stringify(source.toJSON())).catch(this._onSaveError);
   }
 
   private _defaults: CodeEditorWrapper;
