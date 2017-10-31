@@ -15,6 +15,8 @@
 
 
 #setting-editor {
+  min-width: 360px;
+  min-height: 240px;
   background-color: var(--jp-layout-color0);
   border-top: var(--jp-border-width) solid var(--jp-border-color1);
   margin-top: -1px;
@@ -76,8 +78,8 @@
 
 
 #setting-editor .jp-PluginList {
-  min-width: 150px;
-  width: 150px;
+  min-width: 120px;
+  width: 120px;
 }
 
 

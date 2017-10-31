@@ -9,6 +9,8 @@
   outline: none;
   display: flex;
   flex-direction: column;
+  min-width: 240px;
+  min-height: 120px;
 }
 
 

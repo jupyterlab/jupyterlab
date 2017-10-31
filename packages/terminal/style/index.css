@@ -12,8 +12,8 @@
 
 
 .jp-Terminal {
-  min-width: 200px;
-  min-height: 200px;
+  min-width: 240px;
+  min-height: 120px;
   padding: 8px;
   margin: 0;
 }
