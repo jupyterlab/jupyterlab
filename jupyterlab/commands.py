@@ -107,15 +107,10 @@ def run(cmd, **kwargs):
 
 def ensure_dev_build(logger=None):
     """Ensure that the dev build assets are there"""
-    cmd = [get_npm_name(), 'run', 'build:packages']
+    cmd = [get_npm_name(), 'run', 'build']
     func = partial(run, cmd, cwd=os.path.dirname(here), logger=logger)
     loop = IOLoop.instance()
     loop.instance().run_sync(func)
-    if os.path.exists(os.path.join(here, 'build')):
-        return
-    cmd = [get_npm_name(), 'run', 'build']
-    func = partial(run, cmd, cwd=here, logger=logger)
-    loop.instance().run_sync(cmd, kwargs=dict(cwd=here, logger=logger))
 
 
 def watch(cwd, logger=None):
