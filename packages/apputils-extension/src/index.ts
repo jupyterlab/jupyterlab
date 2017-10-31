@@ -17,10 +17,6 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IMainMenu, MainMenu
-} from '@jupyterlab/mainmenu';
-
-import {
   ServiceManager, ServerConnection
 } from '@jupyterlab/services';
 
@@ -31,10 +27,6 @@ import {
 import {
   DisposableDelegate, IDisposable
 } from '@phosphor/disposable';
-
-import {
-  Widget
-} from '@phosphor/widgets';
 
 import {
   activatePalette
@@ -104,29 +96,6 @@ class SettingsConnector extends DataConnector<ISettingRegistry.IPlugin, string> 
 
   private _manager: ServiceManager;
 }
-
-
-/**
- * A service providing an interface to the main menu.
- */
-const menu: JupyterLabPlugin<IMainMenu> = {
-  id: '@jupyterlab/apputils-extension:menu',
-  provides: IMainMenu,
-  activate: (app: JupyterLab): IMainMenu => {
-    let menu = new MainMenu();
-    menu.id = 'jp-MainMenu';
-
-    let logo = new Widget();
-    logo.addClass('jp-MainAreaPortraitIcon');
-    logo.addClass('jp-JupyterIcon');
-    logo.id = 'jp-MainLogo';
-
-    app.shell.addToTopArea(logo);
-    app.shell.addToTopArea(menu);
-
-    return menu;
-  }
-};
 
 
 /**
@@ -235,7 +204,7 @@ const state: JupyterLabPlugin<IStateDB> = {
  * Export the plugins as default.
  */
 const plugins: JupyterLabPlugin<any>[] = [
-  menu, palette, settings, state, splash, themes
+  palette, settings, state, splash, themes
 ];
 export default plugins;
 

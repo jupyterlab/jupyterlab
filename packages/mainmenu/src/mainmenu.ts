@@ -6,12 +6,20 @@ import {
 } from '@phosphor/algorithm';
 
 import {
+  CommandRegistry
+} from '@phosphor/commands';
+
+import {
   Token
 } from '@phosphor/coreutils';
 
 import {
   Menu, MenuBar
 } from '@phosphor/widgets';
+
+import {
+  FileMenu
+} from './menus';
 
 
 /* tslint:disable */
@@ -36,7 +44,7 @@ interface IMainMenu {
   /**
    * The application "File" menu.
    */
-  //readonly fileMenu: Menu;
+  readonly fileMenu: FileMenu;
 
   /**
    * The application "Edit" menu.
@@ -88,6 +96,20 @@ namespace IMainMenu {
  */
 export
 class MainMenu extends MenuBar implements IMainMenu {
+  /**
+   * Construct the main menu bar.
+   */
+  constructor(commands: CommandRegistry) {
+    super();
+    this.fileMenu = new FileMenu({ commands });
+    this.addMenu(this.fileMenu, { rank: 0 });
+  }
+
+  /**
+   * The application "File" menu.
+   */
+  readonly fileMenu: FileMenu;
+
   /**
    * Add a new menu to the main menu bar.
    */

@@ -1,3 +1,3 @@
-# @jupyterlab/mainmenu-extension
+# @jupyterlab/mainmenu
 
-A JupyterLab extension which provides the application menubar and extensions for it.
+A JupyterLab extension which provides the application menubar.

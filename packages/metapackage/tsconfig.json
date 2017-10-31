@@ -19,6 +19,9 @@
     "paths": {
       "@jupyterlab/*": [
         "../*/src"
+      ],
+      "@jupyterlab/mainmenu-extension": [
+        "../mainmenu-extension/src"
       ]
     },
     "jsx": "react",

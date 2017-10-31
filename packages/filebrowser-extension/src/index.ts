@@ -30,10 +30,6 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
-  IMainMenu
-} from '@jupyterlab/mainmenu';
-
-import {
   each
 } from '@phosphor/algorithm';
 
@@ -112,16 +108,6 @@ const factory: JupyterLabPlugin<IFileBrowserFactory> = {
 };
 
 /**
- * The default file browser menu extension.
- */
-const menu: JupyterLabPlugin<void> = {
-  activate: activateMenu,
-  id: '@jupyterlab/filebrowser-extension:menu',
-  requires: [IMainMenu],
-  autoStart: true
-};
-
-/**
  * The file browser namespace token.
  */
 const namespace = 'filebrowser';
@@ -129,7 +115,7 @@ const namespace = 'filebrowser';
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [factory, browser, menu];
+const plugins: JupyterLabPlugin<any>[] = [factory, browser];
 export default plugins;
 
 
@@ -222,15 +208,6 @@ function activateBrowser(app: JupyterLab, factory: IFileBrowserFactory, restorer
 
     maybeCreate();
   });
-}
-
-/**
- * Activate the default file browser menu in the main menu.
- */
-function activateMenu(app: JupyterLab, mainMenu: IMainMenu): void {
-  let menu = createMenu(app);
-
-  mainMenu.addMenu(menu, { rank: 1 });
 }
 
 
@@ -393,31 +370,6 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, bro
     label: 'New...',
     execute: () => createLauncher(commands, browser)
   });
-}
-
-
-/**
- * Create a top level menu for the file browser.
- */
-function createMenu(app: JupyterLab): Menu {
-  const { commands } = app;
-  const menu = new Menu({ commands });
-
-  menu.title.label = 'File';
-  [
-    CommandIDs.createLauncher,
-    'docmanager:save',
-    'docmanager:save-as',
-    'docmanager:rename',
-    'docmanager:restore-checkpoint',
-    'docmanager:clone',
-    'docmanager:close',
-    'docmanager:close-all-files'
-  ].forEach(command => { menu.addItem({ command }); });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ command: 'settingeditor:open' });
-
-  return menu;
 }
 
 
