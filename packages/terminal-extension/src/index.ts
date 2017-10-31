@@ -130,6 +130,9 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   });
   mainMenu.addMenu(menu, {rank: 40});
 
+  // Add terminal creation to the file menu.
+  mainMenu.fileMenu.newMenu.addItem({ command: CommandIDs.createNew });
+
   // Add a launcher item if the launcher is available.
   if (launcher) {
     launcher.add({

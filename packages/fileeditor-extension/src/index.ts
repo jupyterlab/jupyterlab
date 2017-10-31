@@ -18,12 +18,20 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
+  IFileBrowserFactory
+} from '@jupyterlab/filebrowser';
+
+import {
   FileEditor, FileEditorFactory, IEditorTracker
 } from '@jupyterlab/fileeditor';
 
 import {
   ILauncher
 } from '@jupyterlab/launcher';
+
+import {
+  IMainMenu
+} from '@jupyterlab/mainmenu';
 
 
 /**
@@ -41,6 +49,9 @@ const FACTORY = 'Editor';
  * The command IDs used by the fileeditor plugin.
  */
 namespace CommandIDs {
+  export
+  const createNew = 'fileeditor:create-new';
+
   export
   const lineNumbers = 'fileeditor:toggle-line-numbers';
 
@@ -73,7 +84,7 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<IEditorTracker> = {
   activate,
   id: '@jupyterlab/fileeditor-extension:plugin',
-  requires: [ILayoutRestorer, IEditorServices, ISettingRegistry],
+  requires: [IEditorServices, IFileBrowserFactory, ILayoutRestorer, IMainMenu, ISettingRegistry],
   optional: [ILauncher],
   provides: IEditorTracker,
   autoStart: true
@@ -89,7 +100,7 @@ export default plugin;
 /**
  * Activate the editor tracker plugin.
  */
-function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IEditorServices, settingRegistry: ISettingRegistry, launcher: ILauncher | null): IEditorTracker {
+function activate(app: JupyterLab, editorServices: IEditorServices, browserFactory: IFileBrowserFactory, restorer: ILayoutRestorer, menu: IMainMenu, settingRegistry: ISettingRegistry, launcher: ILauncher | null): IEditorTracker {
   const id = plugin.id;
   const namespace = 'editor';
   const factory = new FileEditorFactory({
@@ -349,24 +360,42 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
     label: 'Show Markdown Preview'
   });
 
+  // Function to create a new untitled text file, given
+  // the current working directory.
+  const createNew = (cwd: string) => {
+    return commands.execute('docmanager:new-untitled', {
+      path: cwd, type: 'file'
+    }).then(model => {
+      return commands.execute('docmanager:open', {
+        path: model.path, factory: FACTORY
+      });
+    });
+  }
+
   // Add a launcher item if the launcher is available.
+  commands.addCommand(CommandIDs.createNew, {
+    label: 'New File',
+    caption: 'Create a new text file',
+    execute: () => {
+      let cwd = browserFactory.defaultBrowser.model.path;
+      return createNew(cwd);
+    }
+  });
+
   if (launcher) {
     launcher.add({
       displayName: 'Text Editor',
       category: 'Other',
       rank: 1,
       iconClass: EDITOR_ICON_CLASS,
-      callback: cwd => {
-        return commands.execute('docmanager:new-untitled', {
-          path: cwd, type: 'file'
-        }).then(model => {
-          return commands.execute('docmanager:open', {
-            path: model.path, factory: FACTORY
-          });
-        });
-      }
+      callback: createNew
     });
   }
+
+  // Add new text file creation to the file menu.
+  menu.fileMenu.newMenu.addItem({ command: CommandIDs.createNew });
+
+
 
   app.contextMenu.addItem({
     command: CommandIDs.createConsole, selector: '.jp-FileEditor'

@@ -18,6 +18,7 @@ class FileMenu extends Menu {
 
     // Create the "New" submenu.
     this.newMenu = new Menu(options);
+    this.newMenu.title.label = 'New';
     this.addItem({
       type: 'submenu',
       submenu: this.newMenu
