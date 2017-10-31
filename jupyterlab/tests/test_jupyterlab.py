@@ -27,7 +27,7 @@ from jupyterlab.extension import (
 )
 from jupyterlab.commands import (
     install_extension, uninstall_extension, list_extensions,
-    build, link_package, unlink_package, should_build,
+    build, link_package, unlink_package, check_build,
     disable_extension, enable_extension, _get_extensions,
     _get_linked_packages, _ensure_package, _get_disabled,
     _test_overlap
@@ -331,14 +331,14 @@ class TestExtension(TestCase):
         disabled = _get_disabled(app_dir)
         assert '@jupyterlab/python-tests' not in disabled
 
-    def test_should_build(self):
-        assert not should_build()[0]
+    def test_check_build(self):
+        assert not check_build()[0]
         install_extension(self.source_dir)
-        assert should_build()[0]
+        assert check_build()[0]
         build()
-        assert not should_build()[0]
+        assert not check_build()[0]
         uninstall_extension('@jupyterlab/python-tests')
-        assert should_build()[0]
+        assert check_build()[0]
 
     def test_compatibility(self):
         assert _test_overlap('^0.6.0', '^0.6.1')
