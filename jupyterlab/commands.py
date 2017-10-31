@@ -222,7 +222,8 @@ def install_extension_async(extension, app_dir=None, logger=None, abort_callback
     # Remove any existing package from staging/node_modules to force
     # npm to re-install it from the tarball.
     target = pjoin(app_dir, 'staging', 'node_modules', data['name'])
-    shutil.rmtree(target)
+    if os.path.exists(target):
+        shutil.rmtree(target)
 
 
 def link_package(path, app_dir=None, logger=None):
