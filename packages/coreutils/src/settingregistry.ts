@@ -621,13 +621,6 @@ class SettingRegistry {
     // Set the local copy.
     plugins[plugin].raw = raw;
 
-    // Validate the user data and create the composite data.
-    const errors = this._validator.validateData(plugins[plugin]);
-
-    if (errors) {
-      return Promise.reject(errors);
-    }
-
     return this._save(plugin);
   }
 
