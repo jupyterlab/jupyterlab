@@ -6,7 +6,7 @@ import json
 from tornado import gen, web
 
 from notebook.base.handlers import APIHandler
-from .commands import build_async, clean, should_build
+from .commands import build_async, clean, build_check_async
 
 
 class Builder(object):
@@ -20,16 +20,18 @@ class Builder(object):
         self.core_mode = core_mode
         self.app_dir = app_dir
 
+    @gen.coroutine
     def get_status(self):
         if self.core_mode:
-            return dict(status='stable', message='')
+            yield dict(status='stable', message='')
         if self.building:
-            return dict(status='building', message='')
+            yield dict(status='building', message='')
 
-        needed, message = should_build(self.app_dir)
+        needed, message = yield build_check_async(self.app_dir)
+
         status = 'needed' if needed else 'stable'
 
-        return dict(status=status, message=message)
+        raise gen.Return(dict(status=status, message=message))
 
     @gen.coroutine
     def build(self):
@@ -89,7 +91,7 @@ class BuildHandler(APIHandler):
     @web.authenticated
     @gen.coroutine
     def get(self):
-        data = self.builder.get_status()
+        data = yield self.builder.get_status()
         self.finish(json.dumps(data))
 
     @web.authenticated

@@ -9,7 +9,7 @@ from jupyterlab_launcher import add_handlers, LabConfig
 from notebook.utils import url_path_join as ujoin
 
 from .commands import (
-    get_app_dir, should_build, get_user_settings_dir, watch,
+    get_app_dir, build_check, get_user_settings_dir, watch,
     build, ensure_dev_build
 )
 
@@ -107,7 +107,8 @@ def load_jupyter_server_extension(nbapp):
             watch(os.path.dirname(here), nbapp.log)
         else:
             config.assets_dir = os.path.join(app_dir, 'staging', 'build')
-            build(app_dir=app_dir, logger=nbapp.log)
+            if build_check(app_dir=app_dir, logger=nbapp.log)[0]:
+                build(app_dir=app_dir, logger=nbapp.log, skip_linked=True)
             watch(os.path.join(app_dir, 'staging'), nbapp.log)
 
     add_handlers(web_app, config)

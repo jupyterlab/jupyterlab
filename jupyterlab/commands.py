@@ -6,6 +6,7 @@
 from __future__ import print_function
 import errno
 import glob
+import hashlib
 import json
 import logging
 import pipes
@@ -15,13 +16,14 @@ import shutil
 import site
 import sys
 import tarfile
+import tempfile
 from distutils.version import LooseVersion
 from functools import partial
 from jupyter_core.paths import jupyter_config_path
 from notebook.nbextensions import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 from os import path as osp
 from os.path import join as pjoin
-from subprocess import CalledProcessError, Popen, STDOUT
+from subprocess import CalledProcessError, Popen, STDOUT, call
 from tornado import gen
 from tornado.ioloop import IOLoop
 
@@ -341,26 +343,33 @@ def check_node():
         raise ValueError('`node` version 5+ is required, see extensions in README')
 
 
-def should_build(app_dir=None, logger=None):
+def build_check(app_dir=None, logger=None):
     """Determine whether JupyterLab should be built.
 
-    Note: Linked packages should be updated by manually building.
+    Returns a dictionary with information about the build.
+    """
+    func = partial(build_check_async, app_dir=app_dir, logger=logger)
+    return IOLoop.instance().run_sync(func)
 
-    Returns a tuple of whether a build is necessary, and an associated message.
+
+@gen.coroutine
+def build_check_async(app_dir=None, logger=None):
+    """Determine whether JupyterLab should be built.
+
+    Returns a tuple of whether a build is recommend and the message.
     """
     logger = logger or logging
     app_dir = get_app_dir(app_dir)
 
     # Check for installed extensions
     extensions = _get_extensions(app_dir)
+    linked = _get_linked_packages(app_dir=app_dir)
 
-    # No linked and no extensions and no built version.
-    if not extensions and not os.path.exists(pjoin(app_dir, 'static')):
-        return False, ''
-
+    # Check for no application.
     pkg_path = pjoin(app_dir, 'static', 'package.json')
     if not os.path.exists(pkg_path):
-        return True, 'Installed extensions with no built application'
+        raise gen.Return((True,
+            'Installed extensions with no built application'))
 
     with open(pkg_path) as fid:
         static_data = json.load(fid)
@@ -370,7 +379,7 @@ def should_build(app_dir=None, logger=None):
     core_version = static_data['jupyterlab']['version']
     if LooseVersion(static_version) != LooseVersion(core_version):
         msg = 'Version mismatch: %s (built), %s (current)'
-        return True, msg % (static_version, core_version)
+        raise gen.Return((True, msg % (static_version, core_version)))
 
     # Look for mismatched extensions.
     template_data = _get_package_template(app_dir, logger)
@@ -378,18 +387,20 @@ def should_build(app_dir=None, logger=None):
     template_exts = template_data['jupyterlab']['extensions']
 
     if set(template_exts) != set(static_data['jupyterlab']['extensions']):
-        return True, 'Installed extensions changed'
+        raise gen.Return((True, 'Installed extensions changed'))
 
     template_mime_exts = set(template_data['jupyterlab']['mimeExtensions'])
     staging_mime_exts = set(static_data['jupyterlab']['mimeExtensions'])
 
     if template_mime_exts != staging_mime_exts:
-        return True, 'Installed extensions changed'
+        raise gen.Return((True, 'Installed extensions changed'))
 
     deps = static_data.get('dependencies', dict())
 
     # Look for mismatched extension paths.
-    for name in extensions:
+    names = set(extensions)
+    names.update(linked)
+    for name in names:
         # Check for dependencies that were rejected as incompatible.
         if name not in template_data['dependencies']:
             continue
@@ -405,9 +416,31 @@ def should_build(app_dir=None, logger=None):
             template_path = template_path.lower()
 
         if path != template_path:
-            return True, 'Installed extensions changed'
+            if name in extensions:
+                raise gen.Return((True, 'Installed extensions changed'))
+            raise gen.Return((True, 'Linked package changed'))
 
-    return False, ''
+    # Look for linked packages that have changed.
+    for (name, path) in linked.items():
+        normed_name = name.replace('@', '').replace('/', '-')
+        if name in extensions:
+            root = pjoin(app_dir, 'extensions')
+        else:
+            root = pjoin(app_dir, 'staging', 'linked_packages')
+        path0 = glob.glob(pjoin(root, '%s*.tgz' % normed_name))[0]
+        existing = _tarsum(path0)
+
+        tempdir = tempfile.mkdtemp()
+        cmd = [get_npm_name(), 'pack', linked[name]]
+        yield run(cmd, cwd=tempdir, logger=logger)
+
+        path1 = glob.glob(pjoin(tempdir, '*.tgz'))[0]
+        current = _tarsum(path1)
+
+        if current != existing:
+            raise gen.Return((True, 'Linked package changed content'))
+
+    raise gen.Return((False, ''))
 
 
 def validate_compatibility(extension, app_dir=None, logger=None):
@@ -565,11 +598,11 @@ def clean(app_dir=None):
             shutil.rmtree(target)
 
 
-def build(app_dir=None, name=None, version=None, logger=None):
+def build(app_dir=None, name=None, version=None, logger=None, skip_linked=False):
     """Build the JupyterLab application.
     """
     func = partial(build_async, app_dir=app_dir, name=name, version=version,
-                   logger=logger)
+                   logger=logger, skip_linked=skip_linked)
     return IOLoop.instance().run_sync(func)
 
 def is_disabled(name, disabled=[]):
@@ -581,7 +614,7 @@ def is_disabled(name, disabled=[]):
     return False
 
 @gen.coroutine
-def build_async(app_dir=None, name=None, version=None, logger=None, abort_callback=None):
+def build_async(app_dir=None, name=None, version=None, logger=None, abort_callback=None, skip_linked=False):
     """Build the JupyterLab application.
     """
     # Set up the build directory.
@@ -607,10 +640,10 @@ def build_async(app_dir=None, name=None, version=None, logger=None, abort_callba
     # Install the linked packages.
     for (name, path) in _get_linked_packages(app_dir, logger=logger).items():
         # Handle linked extensions.
-        if name in extensions:
+        if name in extensions and not skip_linked:
             yield install_extension_async(path, app_dir, abort_callback=abort_callback)
         # Handle linked packages that are not extensions.
-        else:
+        elif name not in extensions:
             yield _install_linked_package(staging, name, path, logger, abort_callback=abort_callback)
 
     npm = get_npm_name()
@@ -1067,3 +1100,22 @@ def _normalize_path(extension):
     if osp.exists(extension):
         extension = osp.abspath(extension)
     return extension
+
+
+def _tarsum(input_file):
+    """
+    Compute the recursive sha sum of a tar file.
+    """
+    tar = tarfile.open(input_file, "r:gz")
+    chunk_size = 100 * 1024
+
+    for member in tar:
+        if not member.isfile():
+            continue
+        f = tar.extractfile(member)
+        h = hashlib.new("sha256")
+        data = f.read(chunk_size)
+        while data:
+            h.update(data)
+            data = f.read(chunk_size)
+        return h.hexdigest()
