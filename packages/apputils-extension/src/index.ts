@@ -67,7 +67,7 @@ function apiError(id: string, xhr: XMLHttpRequest): Error {
 /**
  * Create a data connector to access plugin settings.
  */
-function newConnector(manager: ServiceManager): IDataConnector<ISettingRegistry.IPlugin, JSONObject> {
+function newConnector(manager: ServiceManager): IDataConnector<ISettingRegistry.IPlugin, string> {
   return {
     /**
      * Retrieve a saved bundle from the data connector.
@@ -95,8 +95,8 @@ function newConnector(manager: ServiceManager): IDataConnector<ISettingRegistry.
     /**
      * Save the user setting data in the data connector.
      */
-    save(id: string, user: JSONObject): Promise<void> {
-      return manager.settings.save(id, user).catch(reason => {
+    save(id: string, raw: string): Promise<void> {
+      return manager.settings.save(id, raw).catch(reason => {
         throw apiError(id, (reason as ServerConnection.IError).xhr);
       });
     }

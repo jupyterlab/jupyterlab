@@ -634,7 +634,7 @@ class SettingRegistry {
 
     this._validate(plugins[plugin]);
 
-    return this._connector.save(plugin, plugins[plugin].data.user)
+    return this._connector.save(plugin, plugins[plugin].raw)
       .then(() => { this._pluginChanged.emit(plugin); });
   }
 
@@ -661,7 +661,7 @@ class SettingRegistry {
     this._plugins[plugin.id] = plugin;
   }
 
-  private _connector: IDataConnector<ISettingRegistry.IPlugin, JSONObject>;
+  private _connector: IDataConnector<ISettingRegistry.IPlugin, string>;
   private _pluginChanged = new Signal<this, string>(this);
   private _plugins: { [name: string]: ISettingRegistry.IPlugin } = Object.create(null);
   private _validator: ISchemaValidator;
@@ -868,7 +868,7 @@ namespace SettingRegistry {
     /**
      * The data connector used by the setting registry.
      */
-    connector: IDataConnector<ISettingRegistry.IPlugin, JSONObject>;
+    connector: IDataConnector<ISettingRegistry.IPlugin, string>;
 
     /**
      * The validator used to enforce the settings JSON schema.
