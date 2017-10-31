@@ -52,8 +52,9 @@ def get_app_dir(app_dir=None):
     app_dir = pjoin(sys.prefix, 'share', 'jupyter', 'lab')
 
     # Check for a user level install.
-    if hasattr(site, 'getuserbase') and here.startswith(site.getuserbase()):
-        app_dir = pjoin(site.getuserbase(), 'share', 'jupyter', 'lab')
+    userbase = getattr(site, 'userbase', '')
+    if here.startswith(userbase) and not app_dir.startswith(userbase):
+        app_dir = pjoin(userbase, 'share', 'jupyter', 'lab')
 
     # Check for a system install in '/usr/local/share'.
     elif (sys.prefix.startswith('/usr') and not
@@ -154,6 +155,7 @@ def install_extension_async(extension, app_dir=None, logger=None, abort_callback
 
     # Run npm install if needed
     if (os.path.exists(extension) and
+            os.path.isdir(extension) and
             not os.path.exists(pjoin(extension, 'node_modules'))):
         yield run([get_npm_name(), 'install'], cwd=extension, logger=logger,
                   abort_callback=abort_callback)
@@ -208,6 +210,12 @@ def install_extension_async(extension, app_dir=None, logger=None, abort_callback
 
     shutil.move(pjoin(target, fname), pjoin(app_dir, 'extensions'))
     shutil.rmtree(target)
+
+    # Remove any existing package from staging/node_modules to force
+    # npm to re-install it from the tarball.
+    target = pjoin(app_dir, 'staging', 'node_modules', data['name'])
+    if os.path.exists(target):
+        shutil.rmtree(target)
 
 
 def link_package(path, app_dir=None, logger=None):
@@ -901,6 +909,8 @@ def _get_package_template(app_dir, logger):
             data['jupyterlab']['extensions'].pop(item)
         else:
             data['jupyterlab']['mimeExtensions'].pop(item)
+        # Remove from dependencies as well.
+        data['dependencies'].pop(item)
 
     return data
 
