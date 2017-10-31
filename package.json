@@ -28,12 +28,15 @@
     "test:ie": "lerna run test:ie --concurrency 1 --stream",
     "update:dependency": "node scripts/update-dependency.js",
     "update:core": "cd jupyterlab && node update-core.js",
-    "watch": "cd packages/all-packages && npm run watch",
+    "watch:main": "cd jupyterlab && npm run watch",
+    "watch:packages": "cd packages/all-packages && npm run watch",
+    "watch": "run-p watch:*",
     "addsibling": "node scripts/add-sibling.js",
     "removesibling": "node scripts/remove-sibling.js"
   },
   "dependencies": {},
   "devDependencies": {
-    "lerna": "^2.4.0"
+    "lerna": "^2.4.0",
+    "npm-run-all": "~4.1.1"
   }
 }

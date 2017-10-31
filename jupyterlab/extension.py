@@ -7,12 +7,10 @@ import os
 
 from jupyterlab_launcher import add_handlers, LabConfig
 from notebook.utils import url_path_join as ujoin
-from notebook.base.handlers import FileFindHandler
-from tornado.ioloop import IOLoop
 
 from .commands import (
-    get_app_dir, list_extensions, should_build, get_user_settings_dir, watch,
-    build
+    get_app_dir, should_build, get_user_settings_dir, watch,
+    build, ensure_dev_build
 )
 
 from .build_handler import build_path, Builder, BuildHandler
@@ -105,7 +103,7 @@ def load_jupyter_server_extension(nbapp):
 
     if watch_mode:
         if config.dev_mode:
-            watch(here, nbapp.log)
+            ensure_dev_build(nbapp.log)
             watch(os.path.dirname(here), nbapp.log)
         else:
             config.assets_dir = os.path.join(app_dir, 'staging', 'build')
