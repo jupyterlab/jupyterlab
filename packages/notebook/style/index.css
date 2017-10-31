@@ -34,12 +34,14 @@
   height: 100%;
 }
 
+.jp-NotebookPanel.jp-Document {
+  min-width: 240px;
+  min-height: 120px;
+}
 
 .jp-Notebook {
   flex: 1 1 auto;
   padding: var(--jp-notebook-padding);
-  min-width: 50px;
-  min-height: 50px;
   outline: none;
   overflow: auto;
   background: var(--jp-layout-color0);
