@@ -9,7 +9,7 @@
     "test:debug": "python run-test.py  --browsers=Chrome --singleRun=false --debug=true karma.conf.js",
     "test:firefox": "python run-test.py --browsers=Firefox karma.conf.js",
     "test:ie": "python run-test.py  --browsers=IE karma.conf.js",
-    "watch": "watch \"npm run build:test && npm test\" src --wait 10 --filter=../scripts/watch-filter.js"
+    "watch": "concurrently \"tsc -w\" \"webpack --watch\""
   },
   "dependencies": {
     "@jupyterlab/application": "^0.11.1",
@@ -77,6 +77,7 @@
     "raw-loader": "^0.5.1",
     "rimraf": "^2.5.2",
     "style-loader": "^0.13.1",
+    "tsc-watch": "~1.0.8",
     "typescript": "~2.4.1",
     "url-loader": "^0.5.7",
     "watch": "^1.0.2",
