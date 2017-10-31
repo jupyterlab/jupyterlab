@@ -17,7 +17,7 @@
     "@jupyterlab/buildutils": "^0.1.2",
     "@jupyterlab/cells": "^0.11.1",
     "@jupyterlab/codeeditor": "^0.11.1",
-    "@jupyterlab/codemirror": "^0.11.2",
+    "@jupyterlab/codemirror": "^0.11.3",
     "@jupyterlab/codemirror-extension": "^0.11.1",
     "@jupyterlab/completer": "^0.11.1",
     "@jupyterlab/completer-extension": "^0.11.1",
@@ -131,7 +131,7 @@
       "@phosphor/coreutils",
       "@phosphor/widgets"
     ],
-    "version": "0.28.11",
+    "version": "0.28.12",
     "linkedPackages": {}
   }
 }
