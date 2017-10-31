@@ -27,7 +27,7 @@
     "build": "tsc && node build.js",
     "clean": "rimraf lib",
     "docs": "typedoc --mode modules --module commonjs --excludeNotExported --target es5 --moduleResolution node --name JupyterLab --out ../../docs/api .",
-    "watch": "watch \"npm run build\" .. --wait 10 --filter=../../scripts/watch-filter.js"
+    "watch": "tsc-watch --onSuccess \"node build.js\""
   },
   "dependencies": {
     "@jupyterlab/application": "^0.11.1",
@@ -83,6 +83,7 @@
   },
   "devDependencies": {
     "rimraf": "^2.5.2",
+    "tsc-watch": "~1.0.8",
     "typedoc": "^0.7.1",
     "typescript": "~2.4.1"
   }
