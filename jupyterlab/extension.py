@@ -73,8 +73,8 @@ def load_jupyter_server_extension(nbapp):
         config.settings_dir = ''
 
     page_config = web_app.settings.setdefault('page_config_data', dict())
-    page_config['buildAvailable'] = not config.dev_mode
-    page_config['buildCheck'] = not config.dev_mode
+    page_config['buildAvailable'] = not core_mode
+    page_config['buildCheck'] = not core_mode
     page_config['token'] = nbapp.token
 
     if core_mode:

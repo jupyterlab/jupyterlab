@@ -23,9 +23,9 @@ class Builder(object):
     @gen.coroutine
     def get_status(self):
         if self.core_mode:
-            yield dict(status='stable', message='')
+            raise gen.Return(dict(status='stable', message=''))
         if self.building:
-            yield dict(status='building', message='')
+            raise gen.Return(dict(status='building', message=''))
 
         needed, message = yield build_check_async(self.app_dir)
 
