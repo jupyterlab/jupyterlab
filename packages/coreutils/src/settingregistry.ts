@@ -404,20 +404,19 @@ class DefaultSchemaValidator implements ISchemaValidator {
     const strip = true;
     const user = (json.parse(plugin.raw, null, strip) || { }) as JSONObject;
 
-    // Set the parsed user data and create empty composite to populate during
-    // schema validation.
-    plugin.data = { composite: { }, user };
-
-    if (!validate(plugin.data.user)) {
+    if (!validate(user)) {
       return validate.errors as ISchemaValidator.IError[];
     }
 
-    // Copy the user data before validating (and merging defaults).
-    plugin.data.composite = copy(plugin.data.user);
+    // Copy the user data before merging defaults into composite map.
+    const composite = copy(user);
 
-    if (!compose(plugin.data.composite)) {
+    if (!compose(composite)) {
       return compose.errors as ISchemaValidator.IError[];
     }
+
+    // Update the local copies of composite and user data.
+    plugin.data = { composite, user };
 
     return null;
   }
@@ -664,7 +663,6 @@ class SettingRegistry {
     }
 
     // Validate the user data and create the composite data.
-    plugin.data = { } as ISettingRegistry.ISettingBundle;
     errors = this._validator.validateData(plugin);
     if (errors) {
       throw errors;
