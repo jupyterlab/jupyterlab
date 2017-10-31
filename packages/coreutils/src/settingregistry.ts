@@ -477,8 +477,8 @@ class SettingRegistry {
     if (plugin in plugins) {
       const { composite, user } = plugins[plugin].data;
       const result = {
-        composite: key in composite ? copy(composite[key]) : void 0,
-        user: key in user ? copy(user[key]) : void 0
+        composite: key in composite ? copy(composite[key]) : undefined,
+        user: key in user ? copy(user[key]) : undefined
       };
 
       return Promise.resolve(result);
@@ -563,7 +563,7 @@ class SettingRegistry {
     const plugins = this._plugins;
 
     if (!(plugin in plugins)) {
-      return Promise.resolve(void 0);
+      return Promise.resolve(undefined);
     }
 
     const raw = json.parse(plugins[plugin].raw);
@@ -796,8 +796,8 @@ class Settings implements ISettingRegistry.ISettings {
     const { composite, user } = this;
 
     return {
-      composite: key in composite ? copy(composite[key]) : void 0,
-      user: key in user ? copy(user[key]) : void 0
+      composite: key in composite ? copy(composite[key]) : undefined,
+      user: key in user ? copy(user[key]) : undefined
     };
   }
 
@@ -855,7 +855,7 @@ class Settings implements ISettingRegistry.ISettings {
       this._composite = composite || { };
       this._schema = schema || { type: 'object' };
       this._user = user || { };
-      this._changed.emit(void 0);
+      this._changed.emit(undefined);
     }
   }
 

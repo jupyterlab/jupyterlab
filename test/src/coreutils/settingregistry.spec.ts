@@ -230,7 +230,7 @@ describe('@jupyterlab/coreutils', () => {
         const value = 'baz';
 
         connector.schemas[id] = { type: 'object' };
-        connector.save(id, { [key]: value })
+        connector.save(id, JSON.stringify({ [key]: value }))
           .then(() => registry.load(id))
           .then(() => registry.get(id, key))
           .then(saved => { expect(saved.user).to.be(value); })
@@ -243,7 +243,7 @@ describe('@jupyterlab/coreutils', () => {
         const value = 'gamma';
 
         connector.schemas[id] = { type: 'object' };
-        connector.save(id, { [key]: value })
+        connector.save(id, JSON.stringify({ [key]: value }))
           .then(() => registry.get(id, key))
           .then(saved => { expect(saved.composite).to.be(value); })
           .then(done).catch(done);
@@ -279,7 +279,7 @@ describe('@jupyterlab/coreutils', () => {
           }
         };
 
-        connector.save(id, { [key]: value })
+        connector.save(id, JSON.stringify({ [key]: value }))
           .then(() => registry.get(id, key))
           .then(saved => {
             expect(saved.composite).to.be(value);
@@ -624,7 +624,8 @@ describe('@jupyterlab/coreutils', () => {
         const value = 'baz';
 
         connector.schemas[id] = { type: 'object' };
-        connector.save(id, { [key]: value }).then(() => registry.load(id))
+        connector.save(id, JSON.stringify({ [key]: value }))
+          .then(() => registry.load(id))
           .then(s => {
             const saved = (settings = s as Settings).get(key);
 
@@ -662,7 +663,7 @@ describe('@jupyterlab/coreutils', () => {
           }
         };
 
-        connector.save(id, { [key]: value })
+        connector.save(id, JSON.stringify({ [key]: value }))
           .then(() => registry.load(id))
           .then(s => {
             const saved = (settings = s as Settings).get(key);
@@ -698,7 +699,8 @@ describe('@jupyterlab/coreutils', () => {
         const value = 'baz';
 
         connector.schemas[id] = { type: 'object' };
-        connector.save(id, { [key]: value }).then(() => registry.load(id))
+        connector.save(id, JSON.stringify({ [key]: value }))
+          .then(() => registry.load(id))
           .then(s => {
             const saved = (settings = s as Settings).get(key);
 
