@@ -6,7 +6,7 @@
     "clean": "rimraf build"
   },
   "dependencies": {
-    "@jupyterlab/codemirror": "^0.11.2",
+    "@jupyterlab/codemirror": "^0.11.3",
     "@jupyterlab/completer": "^0.11.1",
     "@jupyterlab/docmanager": "^0.11.1",
     "@jupyterlab/docregistry": "^0.11.1",
