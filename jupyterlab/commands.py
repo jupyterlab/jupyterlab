@@ -222,6 +222,7 @@ def install_extension_async(extension, app_dir=None, logger=None, abort_callback
     # Remove any existing package from staging/node_modules to force
     # npm to re-install it from the tarball.
     target = pjoin(app_dir, 'staging', 'node_modules', data['name'])
+    shutil.rmtree(target)
 
 
 def link_package(path, app_dir=None, logger=None):
@@ -416,6 +417,7 @@ def build_check_async(app_dir=None, logger=None):
             raise gen.Return((True, 'Linked package changed'))
 
     # Look for linked packages that have changed.
+    changed = False
     for (name, path) in linked.items():
         normed_name = name.replace('@', '').replace('/', '-')
         if name in extensions:
@@ -433,7 +435,13 @@ def build_check_async(app_dir=None, logger=None):
         current = _tarsum(path1)
 
         if current != existing:
-            raise gen.Return((True, 'Linked package changed content'))
+            changed = True
+            shutil.mv(path1, pjoin(app_dir, 'extensions'))
+
+        shutil.rmtree(tempdir)
+
+    if changed:
+        raise gen.Return((True, 'Linked package changed content'))
 
     raise gen.Return((False, ''))
 
@@ -637,6 +645,10 @@ def build_async(app_dir=None, name=None, version=None, logger=None, abort_callba
         # Handle linked extensions.
         if name in extensions and not skip_linked:
             yield install_extension_async(path, app_dir, abort_callback=abort_callback)
+        elif name in extensions:
+            # Remove the existing package from staging/node_modules to force
+            # npm to re-install it from the tarball.
+            shutil.rmtree(pjoin(app_dir, 'staging', 'node_modules', name))
         # Handle linked packages that are not extensions.
         elif name not in extensions:
             yield _install_linked_package(staging, name, path, logger, abort_callback=abort_callback)
