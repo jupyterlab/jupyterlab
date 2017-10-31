@@ -6,8 +6,7 @@ sudo: required
 addons:
   firefox: latest
 cache:
-  directories:
-    - $HOME/.npm
+  yarn: true
 env:
   matrix:
     - GROUP=tests

@@ -1,5 +1,5 @@
 {
-  "name": "@jupyterlab/mime-extension-test",
+  "name": "@jupyterlab/mock-mime-extension",
   "version": "0.2.1",
   "private": true,
   "dependencies": {

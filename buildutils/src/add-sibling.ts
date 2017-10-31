@@ -58,7 +58,7 @@ fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
 
 // Update the core jupyterlab build dependencies.
 try {
-  utils.run('npm run integrity');
+  utils.run('jlpm run integrity');
 } catch (e) {
   if (!process.env.TRAVIS_BRANCH) {
     console.error(e);

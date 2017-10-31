@@ -78,19 +78,15 @@ An Extension is a valid [npm package](https://docs.npmjs.com/getting-started/wha
 While authoring the extension, you can use the command:
 
 ```
-jupyter labextension link <path>
+jupyter labextension install <path>
 ```
 
 This causes the builder to re-install the source folder before building
-the application files.  You can re-build at any time using `jupyter lab build` and it will reinstall these packages.  You can also link other npm packages
-that you are working on simultaneously; they will be re-installed but not
-considered as extensions if they lack the metadata.  Linked extensions and
-packages are included in `jupyter labextension list`.
+the application files.  You can re-build at any time using `jupyter lab build` and it will reinstall these packages.  You can also link other local npm packages that you are working on simultaneously using 
+`jupyter labextension link`; they will be re-installed but not
+considered as extensions.  Local extensions and linked packages are included in `jupyter labextension list`.
 
-You can also use `jupyter labextension install <path>`, but that will
-only copy the current contents of the source folder.
-
-When using linked packages, you can run the command
+When using local extensions and linked packages, you can run the command
 
 ```
 jupyter lab --watch
@@ -107,6 +103,9 @@ to automatically recompile the TypeScript files while editing.  Note that
 only the compiled JavaScript files (and the CSS files) are watched by the 
 WebPack process.  
 
+The is also a `jupyter lab --fast-watch` that allows you to skip the
+initial build if the app is already built.  
+
 Note that the application is built against **released** versions of the
 core JupyterLab extensions.  If your extension depends on JupyterLab
 packages, it should be compatible with the dependencies in the
@@ -116,7 +115,7 @@ have to graft it into the source tree of JupyterLab itself.
 This may be done using the command
 
 ```
-npm run add:sibling <path-or-url> && npm install
+jlpm run add:sibling <path-or-url> && npm install
 ```
 
 in the JupyterLab root directory, where `<path-or-url>` refers either to an
@@ -125,7 +124,8 @@ repository for an extension npm package. This operation may be subsequently
 reversed by running
 
 ```
-npm run remove:package <extension-dir-name>
+jlpm run remove:package <extension-dir-name>
+=======
 ```
 
 This will remove the package metadata from the source tree, but wil **not**
@@ -156,8 +156,8 @@ Mime Renderer extensions are a convenience for creating an extension that can
 render mime data and potentially render files of a given type.
 
 Mime renderer extensions are more declarative than standard extensions.
-The extension is treated the same from the command line perspective (`install`
-and `link`), but it does not directly create JupyterLab plugins.  Instead it
+The extension is treated the same from the command line perspective (`jupyter labextension install`
+), but it does not directly create JupyterLab plugins.  Instead it
 exports an interface given in the [rendermime-interfaces](http://jupyterlab.github.io/jupyterlab/interfaces/_rendermime_interfaces_src_index_.irendermime.iextension.html)
 package.
 

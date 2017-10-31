@@ -2,15 +2,15 @@ var webpack = require('webpack');
 var path = require('path');
 var fs = require('fs-extra');
 var Handlebars = require('handlebars');
-var crypto = require('crypto');
-var package_data = require('./package.json');
 var Build = require('@jupyterlab/buildutils').Build;
+var package_data = require('./package.json');
 
 // Ensure a clear build directory.
-var buildDir = './build';
+var buildDir = path.resolve('./build');
+if (fs.existsSync(buildDir)) {
+  fs.removeSync(buildDir);
+}
 fs.ensureDirSync(buildDir);
-
-fs.copySync('./package.json', './build/package.json');
 
 // Handle the extensions.
 var jlab = package_data.jupyterlab;
@@ -30,7 +30,8 @@ var data = {
 };
 var result = template(data);
 
-fs.writeFileSync(path.resolve(buildDir, 'index.out.js'), result);
+fs.writeFileSync(path.join(buildDir, 'index.out.js'), result);
+fs.copySync('./package.json', path.join(buildDir, 'package.json'));
 
 
 // Set up variables for watch mode.
@@ -51,7 +52,7 @@ function maybeSync(localPath, name, rest) {
     return;
   }
   var source = fs.realpathSync(path.join(jlab.linkedPackages[name], rest));
-  if (source === localPath) {
+  if (source === fs.realpathSync(localPath)) {
     return;
   }
   fs.watchFile(source, { 'interval': 500 }, function(curr) {
@@ -68,11 +69,31 @@ function maybeSync(localPath, name, rest) {
 }
 
 
-// Create the hash
-var hash = crypto.createHash('md5');
-hash.update(fs.readFileSync('./package.json'));
-var digest = hash.digest('hex');
-fs.writeFileSync(path.resolve(buildDir, 'hash.md5'), digest);
+/**
+ * A WebPack Plugin that copies the assets to the static directory.
+ */
+function JupyterLabPlugin(options) {
+  _first = true;
+}
+
+JupyterLabPlugin.prototype.apply = function(compiler) {
+
+  compiler.plugin('after-emit', function(compilation, callback) {
+    var staticDir = jlab.staticDir;
+    if (!staticDir) {
+      callback();
+      return;
+    }
+    // Ensure a clean static directory on the first emit.
+    if (this._first && fs.existsSync(staticDir)) {
+      fs.removeSync(staticDir);
+    }
+    this._first = false;
+    fs.copySync(buildDir, staticDir);
+    callback();
+  }.bind(this));
+};
+
 
 
 module.exports = {
@@ -101,6 +122,7 @@ module.exports = {
   },
   watchOptions: {
     ignored: function(localPath) {
+      localPath = path.resolve(localPath);
       if (ignoreCache.has(localPath)) {
         return ignoreCache.get(localPath);
       }
@@ -128,5 +150,6 @@ module.exports = {
     fs: 'empty'
   },
   bail: true,
-  devtool: 'cheap-source-map'
+  devtool: 'cheap-source-map',
+  plugins: [ new JupyterLabPlugin({}) ]
 }

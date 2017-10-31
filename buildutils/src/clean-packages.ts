@@ -11,8 +11,8 @@ import { readJSONFile } from './utils';
 
 // Get all of the packages.
 let basePath = path.resolve('.');
-let lernaConfig = readJSONFile(path.join(basePath, 'lerna.json'));
-let packageConfig = lernaConfig.packages;
+let baseConfig = readJSONFile(path.join(basePath, 'package.json'));
+let packageConfig = baseConfig.workspaces;
 let skipSource = process.argv.indexOf('packages') === -1;
 let skipExamples = process.argv.indexOf('examples') === -1;
 

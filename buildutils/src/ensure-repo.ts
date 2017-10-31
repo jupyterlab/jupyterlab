@@ -178,7 +178,8 @@ function ensureJupyterlab(): string[] {
 /**
  * Ensure the repo integrity.
  */
-function ensureIntegrity(): void {
+export
+function ensureIntegrity(): boolean {
   let messages: { [key: string]: string[] } = {};
 
   // Pick up all the package versions.
@@ -188,6 +189,7 @@ function ensureIntegrity(): void {
     try {
       data = utils.readJSONFile(path.join(pkgPath, 'package.json'));
     } catch (e) {
+      console.error(e);
       return;
     }
 
@@ -242,15 +244,20 @@ function ensureIntegrity(): void {
   if (Object.keys(messages).length > 0) {
     console.log(JSON.stringify(messages, null, 2));
     if (process.env.TRAVIS_BRANCH || process.env.APPVEYOR) {
-      console.log('\n\nPlease run `npm run integrity` locally and commit the changes');
+      console.log('\n\nPlease run `jlpm run integrity` locally and commit the changes');
       process.exit(1);
     }
-    utils.run('npm install');
+    utils.run('jlpm install');
     console.log('\n\nPlease commit the changes by running:');
     console.log('git commit -a -m "Package integrity updates"');
-  } else {
-    console.log('Repo integrity verified!');
+    return false;
   }
+
+  console.log('Repo integrity verified!');
+  return true;
 }
 
-ensureIntegrity();
+
+if (require.main === module) {
+  ensureIntegrity();
+}

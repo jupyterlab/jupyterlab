@@ -2,63 +2,28 @@
 # Distributed under the terms of the Modified BSD License.
 
 from __future__ import print_function, absolute_import
-
-import atexit
 import json
-import shutil
-import subprocess
-import sys
-import tempfile
-from multiprocessing.pool import ThreadPool
+import os
+from jupyterlab.process import which
+from jupyterlab.process_app import ProcessApp
+
+HERE = os.path.dirname(os.path.realpath(__file__))
 
 
-from tornado import ioloop
-from notebook.notebookapp import NotebookApp
-from traitlets import Bool, Unicode
+class NodeApp(ProcessApp):
 
-root_dir = tempfile.mkdtemp(prefix='mock_contents')
-atexit.register(lambda: shutil.rmtree(root_dir, True))
+    def get_command(self):
+        """Get the command and kwargs to run.
+        """
+        # Run the node script with command arguments.
+        config = dict(baseUrl=self.connection_url, token=self.token)
 
+        with open('config.json', 'w') as fid:
+            json.dump(config, fid)
 
-def run_task(func, args=(), kwds={}):
-    """Run a task in a thread and exit with the return code."""
-    loop = ioloop.IOLoop.instance()
-    worker = ThreadPool(1)
-
-    def callback(result):
-        loop.add_callback(lambda: sys.exit(result))
-
-    def start():
-        worker.apply_async(func, args, kwds, callback)
-
-    loop.call_later(1, start)
-
-
-class TestApp(NotebookApp):
-
-    open_browser = Bool(False)
-    notebook_dir = Unicode(root_dir)
-
-    def start(self):
-        run_task(run_node, args=(self.connection_url, self.token))
-        super(TestApp, self).start()
-
-
-def run_node(base_url, token):
-    # Run the node script with command arguments.
-    node_command = ['node', 'index.js', '--jupyter-config-data=./config.json']
-
-    config = dict(baseUrl=base_url)
-    if token:
-        config['token'] = token
-
-    with open('config.json', 'w') as fid:
-        json.dump(config, fid)
-
-    print('*' * 60)
-    print(' '.join(node_command))
-    return subprocess.check_call(node_command)
+        cmd = [which('node'), 'index.js', '--jupyter-config-data=./config.json']
+        return cmd, dict(cwd=HERE)
 
 
 if __name__ == '__main__':
-    TestApp.launch_instance()
+    NodeApp.launch_instance()

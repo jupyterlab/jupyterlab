@@ -3,11 +3,9 @@
 As an example: Add a leaflet viewer plugin for geoJSON files.
 
 - Go to npm: search for [leaflet](https://www.npmjs.com/package/leaflet) (success!).
-- Go to `jupyterlab` top level source directory: `npm install --save leaflet`.  This adds the file to the `dependencies` in `package.json`.
-- Install the `tsd` node package globally, in order to fetch typings
-files: `npm install -g tsd`.
-- Try to install the typings files from the top level source directory:
-`tsd install leaflet`. (success!)
+- Go to `jupyterlab` top level source directory: `jlpm add leaflet`.  This adds the file to the `dependencies` in `package.json`.
+- Next we see if there is a typing declaration for leaflet: 
+`jlpm add --dev @types/leaflet`.  Success!
 - If there are no typings, we must create our own.  An example typings file that exports functions is [ansi_up](https://github.com/jupyterlab/jupyterlab/blob/master/packages/rendermime/typings/ansi_up/ansi_up.d.ts).  An example with a class is [xterm](https://github.com/jupyterlab/jupyterlab/blob/master/packages/terminal/typings/xterm/xterm.d.ts).
 - Add a reference to the new library in `src/typings.d.ts`.
 - Create a folder in `src` for the plugin.
@@ -20,5 +18,5 @@ files (see [Documents](documents.md)).
 to the application.  In this case registering the widget factory using
 the document registry.
 
-- Run `npm run build` from `jupyterlab/jupyterlab`
+- Run `jlpm run build` from `jupyterlab/jupyterlab`
 - Run `jupyter lab` and verify changes.

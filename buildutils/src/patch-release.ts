@@ -27,16 +27,16 @@ if (!fs.existsSync(packagePath)) {
 
 // Perform the patch operations.
 console.log('Patching', target, '...');
-utils.run('npm run build:packages');
-utils.run('npm version patch', { cwd: packagePath });
-utils.run('npm publish', { cwd: packagePath});
+utils.run('jlpm run build:packages');
+utils.run('jlpm version patch', { cwd: packagePath });
+utils.run('jlpm publish', { cwd: packagePath});
 
 // Extract the new package info.
 let data = utils.readJSONFile(path.join(packagePath, 'package.json'));
 let name = data.name;
 let version = data.version;
 
-utils.run('npm run integrity');
+utils.run('jlpm run integrity');
 utils.run('git commit -a -m "Release ' + name + '@' + version + '"');
 utils.run('git tag ' + name + '@' + version);
 

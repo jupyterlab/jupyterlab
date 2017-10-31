@@ -12,7 +12,7 @@ from traitlets import Bool, Unicode
 from ._version import __version__
 from .extension import load_jupyter_server_extension
 from .commands import (
-    build, clean, get_app_dir, get_user_settings_dir, app_version
+    build, clean, get_app_dir, get_user_settings_dir, get_app_version
 )
 
 
@@ -23,6 +23,7 @@ build_aliases['version'] = 'LabBuildApp.version'
 
 
 version = __version__
+app_version = get_app_version()
 if version != app_version:
     version = '%s (dev), %s (app)' % (__version__, app_version)
 

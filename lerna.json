@@ -1,16 +1,7 @@
 {
   "lerna": "2.4.0",
-  "packages": [
-    "jupyterlab",
-    "jupyterlab/tests/mock-mimeextension",
-    "examples/*",
-    "packages/*",
-    "packages/services/examples/node",
-    "packages/services/examples/browser",
-    "packages/services/examples/typescript-browser-with-output",
-    "buildutils",
-    "buildutils/template",
-    "test"
-  ],
-  "version": "independent"
+  "version": "independent",
+  "npmClient": "jlpm",
+  "registry": "https://registry.npmjs.org/",
+  "useWorkspaces": true
 }

@@ -5,6 +5,7 @@ var names = Object.keys(data.dependencies).filter(function(name) {
   packageData = require(name + '/package.json');
   return packageData.jupyterlab !== undefined;
 });
+
 Build.ensureAssets({
   packageNames: names,
   output: './build'

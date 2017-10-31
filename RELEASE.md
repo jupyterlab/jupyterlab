@@ -22,7 +22,7 @@ major release, to prevent consumers that are using the `^` semver
 requirement from getting a conflict.
 
 ```bash
-npm run publish
+jlpm run publish
 ```
 
 ### Publish the Python package
@@ -31,7 +31,7 @@ npm run publish
 - Prep the static assets for release:
 
 ```bash
-npm run build:static
+jlpm run build:static
 ```
 
 - Commit and tag and push the tag
@@ -117,7 +117,7 @@ shasum -a 256 dist/*.tar.gz
 - Run the following script, where the package is in `/packages/package-folder-name`:
 
 ```bash
-npm run patch:release package-folder-name
+jlpm run patch:release package-folder-name
 ```
 
 - Push the resulting commit and tag.

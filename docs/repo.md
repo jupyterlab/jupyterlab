@@ -15,10 +15,11 @@ See the [Contributing Guidelines](https://github.com/jupyterlab/jupyterlab/blob/
 ### NPM package: `src/`, `lib/`, `typings/`, `buildutils/`
 
 * `src/`: the source typescript files.
-    - `npm run build` builds the source files into javascript files in `lib/`.
-    - `npm run clean` deletes the `lib/` directory.
+    - `jlpm run build` builds the source files into javascript files in `lib/`.
+    - `jlpm run clean` deletes the `lib/` directory.
 * `typings/`: type definitions for external libraries that typescript needs.
 * `buildutils/`: Utilities for managing the repo
+>>>>>>> 75b8171af... Fix clean:slate script and update docs
 
 ### Examples: `examples/`
 
@@ -49,6 +50,6 @@ rebuild the npm package and server extension every time you check out or merge
 
 ### Documentation: `docs/`
 
-After building the docs (`npm run docs`), `docs/index.html` is the entry
+After building the docs (`jlpm run docs`), `docs/index.html` is the entry
 point to the documentation.
 

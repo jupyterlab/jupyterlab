@@ -115,6 +115,7 @@
     },
     "name": "JupyterLab",
     "outputDir": "..",
+    "staticDir": "../static",
     "singletonPackages": [
       "@jupyterlab/application",
       "@jupyterlab/apputils",

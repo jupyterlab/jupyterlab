@@ -88,7 +88,6 @@
   },
   "devDependencies": {
     "fs-extra": "~4.0.2",
-    "npm-run-all": "~4.1.1",
     "rimraf": "~2.6.2",
     "typedoc": "~0.7.2",
     "typescript": "~2.4.2",

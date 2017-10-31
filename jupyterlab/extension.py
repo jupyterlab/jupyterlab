@@ -3,18 +3,6 @@
 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
-import os
-
-from jupyterlab_launcher import add_handlers, LabConfig
-from notebook.utils import url_path_join as ujoin
-
-from .commands import (
-    get_app_dir, build_check, get_user_settings_dir, watch,
-    build, ensure_dev_build
-)
-
-from .build_handler import build_path, Builder, BuildHandler
-from ._version import __version__
 
 #-----------------------------------------------------------------------------
 # Module globals
@@ -23,7 +11,8 @@ from ._version import __version__
 DEV_NOTE_NPM = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
 
-    jupyter lab --dev-mode --watch
+    jlpm run --dev-mode watch
+
 
 to have the system incrementally watch and build JupyterLab for you, as you
 make changes.
@@ -38,13 +27,25 @@ Running the core application with no additional extensions or settings
 def load_jupyter_server_extension(nbapp):
     """Load the JupyterLab server extension.
     """
+    # Delay imports to speed up jlpmapp
+    import os
+    from jupyterlab_launcher import add_handlers, LabConfig
+    from notebook.utils import url_path_join as ujoin
+    from tornado.ioloop import IOLoop
+    from .build_handler import build_path, Builder, BuildHandler
+    from .commands import (
+        get_app_dir, get_user_settings_dir, watch, watch_dev
+    )
+    from ._version import __version__
+
     # Print messages.
     here = os.path.dirname(__file__)
     nbapp.log.info('JupyterLab alpha preview extension loaded from %s' % here)
 
-    app_dir = get_app_dir()
     if hasattr(nbapp, 'app_dir'):
-        app_dir = get_app_dir(nbapp.app_dir)
+        app_dir = nbapp.app_dir or get_app_dir()
+    else:
+        app_dir = get_app_dir()
 
     web_app = nbapp.web_app
     config = LabConfig()
@@ -79,7 +80,7 @@ def load_jupyter_server_extension(nbapp):
     if core_mode:
         config.assets_dir = os.path.join(here, 'build')
         config.version = __version__
-        if not os.path.exists(config.assets_dir):
+        if not os.path.exists(config.assets_dir) and not watch_mode:
             msg = 'Static assets not built, please see CONTRIBUTING.md'
             nbapp.log.error(msg)
         else:
@@ -102,13 +103,12 @@ def load_jupyter_server_extension(nbapp):
     config.user_settings_dir = get_user_settings_dir()
 
     if watch_mode:
+        # Set the ioloop in case the watch fails.
+        nbapp.ioloop = IOLoop.current()
         if config.dev_mode:
-            ensure_dev_build(nbapp.log)
-            watch(os.path.dirname(here), nbapp.log)
+            watch_dev(nbapp.log)
         else:
-            config.assets_dir = os.path.join(app_dir, 'staging', 'build')
-            build(app_dir=app_dir, logger=nbapp.log, command='build')
-            watch(os.path.join(app_dir, 'staging'), nbapp.log)
+            watch(app_dir, nbapp.log)
             page_config['buildAvailable'] = False
 
     add_handlers(web_app, config)
