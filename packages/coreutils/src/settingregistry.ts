@@ -390,21 +390,23 @@ class DefaultSchemaValidator implements ISchemaValidator {
     const validate = this._validator.getSchema(plugin.id);
     const compose = this._composer.getSchema(plugin.id);
 
-    // Parse the raw comments into a user map.
-    const strip = true;
-    const user = (json.parse(plugin.raw, null, strip) || { }) as JSONObject;
-
-    // Set the parsed user data and create empty composite to populate during
-    // schema validation.
-    plugin.data = { composite: { }, user };
-
     if (!validate || !compose) {
       const errors = this.addSchema(plugin.id, plugin.schema);
 
       if (errors) {
         return errors;
       }
+
+      return this.validateData(plugin);
     }
+
+    // Parse the raw commented JSON into a user map.
+    const strip = true;
+    const user = (json.parse(plugin.raw, null, strip) || { }) as JSONObject;
+
+    // Set the parsed user data and create empty composite to populate during
+    // schema validation.
+    plugin.data = { composite: { }, user };
 
     if (!validate(plugin.data.user)) {
       return validate.errors as ISchemaValidator.IError[];
