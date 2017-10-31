@@ -72,7 +72,7 @@
     "handlebars": "^4.0.6",
     "json-loader": "^0.5.4",
     "raw-loader": "^0.5.1",
-    "rimraf": "^2.6.1",
+    "rimraf": "^2.5.2",
     "sort-package-json": "^1.7.0",
     "source-map-loader": "0.2.1",
     "style-loader": "^0.13.1",
