@@ -25,7 +25,12 @@ for (var j = 0; j < files.length; j++) {
     process.exit(0);
   }
 
-  var deps = package.dependencies || [];
+  var deps = package.dependencies || {};
+  if (package.devDependencies) {
+    for (var key of Object.keys(package.devDependencies)) {
+      deps[key] = package.devDependencies[key];
+    }
+  }
   if (deps[name]) {
     console.log(deps[name]);
     process.exit(0);
