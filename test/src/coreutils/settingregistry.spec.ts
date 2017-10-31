@@ -29,8 +29,8 @@ class TestConnector extends StateDB implements IDataConnector<ISettingRegistry.I
       const schema = this.schemas[id] || { type: 'object' };
       const composite = { };
       const user = { };
-      const raw = '{ }';
-      const result = { data: { composite, user }, id, raw, schema };
+      const raw = JSON.stringify(data) || '{ }';
+      const result = { id, data: { composite, user }, raw, schema };
 
       return result;
     });
