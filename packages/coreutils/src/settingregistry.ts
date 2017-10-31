@@ -566,7 +566,12 @@ class SettingRegistry {
       return Promise.resolve(void 0);
     }
 
-    delete plugins[plugin].data.user[key];
+    const raw = json.parse(plugins[plugin].raw);
+
+    // Delete both the value and any associated comment.
+    delete raw[key];
+    delete raw[`// ${key}`];
+    plugins[plugin].raw = json.stringify(raw);
 
     return this._save(plugin);
   }
