@@ -418,7 +418,6 @@ def build_check_async(app_dir=None, logger=None):
             raise gen.Return((True, 'Linked package changed'))
 
     # Look for linked packages that have changed.
-    changed = False
     for (name, path) in linked.items():
         normed_name = name.replace('@', '').replace('/', '-')
         if name in extensions:
@@ -436,13 +435,7 @@ def build_check_async(app_dir=None, logger=None):
         current = _tarsum(path1)
 
         if current != existing:
-            changed = True
-            shutil.mv(path1, pjoin(app_dir, 'extensions'))
-
-        shutil.rmtree(tempdir)
-
-    if changed:
-        raise gen.Return((True, 'Linked package changed content'))
+            raise gen.Return((True, 'Linked package changed content'))
 
     raise gen.Return((False, ''))
 
@@ -602,11 +595,11 @@ def clean(app_dir=None):
             shutil.rmtree(target)
 
 
-def build(app_dir=None, name=None, version=None, logger=None, skip_linked=False):
+def build(app_dir=None, name=None, version=None, logger=None):
     """Build the JupyterLab application.
     """
     func = partial(build_async, app_dir=app_dir, name=name, version=version,
-                   logger=logger, skip_linked=skip_linked)
+                   logger=logger)
     return IOLoop.instance().run_sync(func)
 
 def is_disabled(name, disabled=[]):
@@ -618,7 +611,7 @@ def is_disabled(name, disabled=[]):
     return False
 
 @gen.coroutine
-def build_async(app_dir=None, name=None, version=None, logger=None, abort_callback=None, skip_linked=False):
+def build_async(app_dir=None, name=None, version=None, logger=None, abort_callback=None):
     """Build the JupyterLab application.
     """
     # Set up the build directory.
@@ -644,12 +637,8 @@ def build_async(app_dir=None, name=None, version=None, logger=None, abort_callba
     # Install the linked packages.
     for (name, path) in _get_linked_packages(app_dir, logger=logger).items():
         # Handle linked extensions.
-        if name in extensions and not skip_linked:
+        if name in extensions:
             yield install_extension_async(path, app_dir, abort_callback=abort_callback)
-        elif name in extensions:
-            # Remove the existing package from staging/node_modules to force
-            # npm to re-install it from the tarball.
-            shutil.rmtree(pjoin(app_dir, 'staging', 'node_modules', name))
         # Handle linked packages that are not extensions.
         elif name not in extensions:
             yield _install_linked_package(staging, name, path, logger, abort_callback=abort_callback)

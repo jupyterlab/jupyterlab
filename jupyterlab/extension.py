@@ -109,7 +109,7 @@ def load_jupyter_server_extension(nbapp):
         else:
             config.assets_dir = os.path.join(app_dir, 'staging', 'build')
             if build_check(app_dir=app_dir, logger=nbapp.log)[0]:
-                build(app_dir=app_dir, logger=nbapp.log, skip_linked=True)
+                build(app_dir=app_dir, logger=nbapp.log)
             watch(os.path.join(app_dir, 'staging'), nbapp.log)
             page_config['buildAvailable'] = False
 
