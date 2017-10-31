@@ -81,10 +81,8 @@
     "raw-loader": "^0.5.1",
     "rimraf": "^2.5.2",
     "style-loader": "^0.13.1",
-    "tsc-watch": "~1.0.8",
     "typescript": "~2.4.1",
     "url-loader": "^0.5.7",
-    "watch": "^1.0.2",
     "webpack": "^2.2.1"
   },
   "version": "0.11.1"
