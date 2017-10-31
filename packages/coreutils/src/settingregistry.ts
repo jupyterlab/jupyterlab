@@ -390,6 +390,7 @@ class DefaultSchemaValidator implements ISchemaValidator {
     const validate = this._validator.getSchema(plugin.id);
     const compose = this._composer.getSchema(plugin.id);
 
+    // If the schemas do not exist, add them to the validator and continue.
     if (!validate || !compose) {
       const errors = this.addSchema(plugin.id, plugin.schema);
 
