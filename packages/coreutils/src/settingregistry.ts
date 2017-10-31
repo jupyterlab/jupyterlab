@@ -588,7 +588,9 @@ class SettingRegistry {
       return this.load(plugin).then(() => this.set(plugin, key, value));
     }
 
-    plugins[plugin].data.user[key] = value;
+    const raw = json.parse(plugins[plugin].raw);
+
+    plugins[plugin].raw = json.stringify({ ...raw, [key]: value });
 
     return this._save(plugin);
   }
@@ -596,28 +598,28 @@ class SettingRegistry {
   /**
    * Upload a plugin's settings.
    *
+   * @param plugin - The name of the plugin whose settings are being set.
+   *
    * @param raw - The raw plugin settings being uploaded.
    *
    * @returns A promise that resolves when the settings have been saved.
-   *
-   * #### Notes
-   * Only the `user` data will be saved.
    */
-  upload(raw: ISettingRegistry.IPlugin): Promise<void> {
+  upload(plugin: string, raw: string): Promise<void> {
     const plugins = this._plugins;
-    const plugin = raw.id;
-    let errors: ISchemaValidator.IError[] | null = null;
 
-    // Validate the user data and create the composite data.
-    raw.data.user = raw.data.user || { };
-    delete raw.data.composite;
-    errors = this._validator.validateData(raw);
-    if (errors) {
-      return Promise.reject(errors);
+    if (!(plugin in plugins)) {
+      return this.load(plugin).then(() => this.upload(plugin, raw));
     }
 
     // Set the local copy.
-    plugins[plugin] = raw;
+    plugins[plugin].raw = raw;
+
+    // Validate the user data and create the composite data.
+    const errors = this._validator.validateData(plugins[plugin]);
+
+    if (errors) {
+      return Promise.reject(errors);
+    }
 
     return this._save(plugin);
   }
@@ -629,10 +631,19 @@ class SettingRegistry {
     const plugins = this._plugins;
 
     if (!(plugin in plugins)) {
-      return Promise.reject(`${plugin} does not exist in setting registry.`);
+      const message = `${plugin} does not exist in setting registry.`;
+
+      return Promise.reject(new Error(message));
     }
 
-    this._validate(plugins[plugin]);
+    try {
+      this._validate(plugins[plugin]);
+    } catch (errors) {
+      const message = `${plugin} failed to validate; check console for errors.`;
+
+      console.warn(`${plugin} validation errors:`, errors);
+      return Promise.reject(new Error(message));
+    }
 
     return this._connector.save(plugin, plugins[plugin].raw)
       .then(() => { this._pluginChanged.emit(plugin); });
@@ -802,12 +813,7 @@ class Settings implements ISettingRegistry.ISettings {
    * Save all of the plugin's user settings at once.
    */
   save(raw: string): Promise<void> {
-    return this.registry.upload({
-      id: this.plugin,
-      data: undefined,
-      raw: raw,
-      schema: this._schema
-    });
+    return this.registry.upload(this.plugin, raw);
   }
 
   /**
