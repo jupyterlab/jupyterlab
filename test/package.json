@@ -3,13 +3,16 @@
   "name": "@jupyterlab/test-all",
   "scripts": {
     "build:test": "tsc && webpack",
+    "clean": "rimraf build",
     "coverage": "webpack --config webpack-cov.conf.js && python run-test.py karma-cov.conf.js",
     "test": "npm run test:firefox",
     "test:chrome": "python run-test.py --browsers=Chrome karma.conf.js",
     "test:debug": "python run-test.py  --browsers=Chrome --singleRun=false --debug=true karma.conf.js",
     "test:firefox": "python run-test.py --browsers=Firefox karma.conf.js",
     "test:ie": "python run-test.py  --browsers=IE karma.conf.js",
-    "watch": "concurrently \"tsc -w\" \"webpack --watch\""
+    "watch:webpack": "webpack --watch",
+    "watch:ts": "tsc -w",
+    "watch": "tsc && run-p watch:"
   },
   "dependencies": {
     "@jupyterlab/application": "^0.11.1",
@@ -58,7 +61,6 @@
     "@types/react": "~16.0.18",
     "@types/sanitize-html": "^1.13.31",
     "@types/semver": "^5.3.31",
-    "concurrently": "^3.4.0",
     "css-loader": "^0.28.5",
     "file-loader": "^0.10.1",
     "fs-extra": "~4.0.2",
@@ -74,6 +76,7 @@
     "karma-remap-coverage": "^0.1.1",
     "karma-sourcemap-loader": "^0.3.7",
     "mocha": "^3.2.0",
+    "npm-run-all": "~4.1.1",
     "raw-loader": "^0.5.1",
     "rimraf": "^2.5.2",
     "style-loader": "^0.13.1",

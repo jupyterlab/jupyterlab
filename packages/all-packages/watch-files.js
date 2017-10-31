@@ -6,12 +6,20 @@ var watch = require('watch');
 
 fs.ensureDirSync('lib');
 
-watch.watchTree('lib', function (f, curr, prev) {
-    if (curr && curr.nlink > 0) {
-        var name = path.basename(f);
-        var package = f.split(path.sep)[1];
-        var target = path.join('..', package, 'lib', name);
-        target = path.resolve(target);
-        fs.copySync(f, target);
-    }
+
+function handleChanged(f, curr, prev) {
+    var name = path.basename(f);
+    var package = f.split(path.sep)[1];
+    var target = path.join('..', package, 'lib', name);
+    target = path.resolve(target);
+    fs.copySync(f, target);
+}
+
+watch.createMonitor('lib', function (monitor) {
+    monitor.on("created", function (f, curr, prev) {
+        watch.createMonitor(f, function (submonitor) {
+            submonitor.on("changed", handleChanged);
+        });
+    });
+    monitor.on("changed", handleChanged);
 })
