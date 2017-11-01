@@ -215,13 +215,15 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
 
   // Populate the Help menu.
   const helpMenu = mainMenu.helpMenu;
-  helpMenu.addItem({ command: CommandIDs.about });
-  helpMenu.addItem({ command: 'faq-jupyterlab:open' });
-  helpMenu.addItem({ command: CommandIDs.launchClassic });
-  helpMenu.addItem({ type: 'separator' });
-  RESOURCES.forEach(args => {
-    helpMenu.addItem({ args, command: CommandIDs.open });
-  });
+  const labGroup = [
+    CommandIDs.about,
+    'faq-jupyterlab:open',
+    CommandIDs.launchClassic
+  ].map(command => { return { command }; });
+  helpMenu.addGroup(labGroup, 0);
+  const resourcesGroup =
+    RESOURCES.map(args => { return { args, command: CommandIDs.open }; });
+  helpMenu.addGroup(resourcesGroup, 10);
 
   commands.addCommand(CommandIDs.about, {
     label: `About ${info.name}`,

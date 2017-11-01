@@ -32,7 +32,7 @@ class JupyterLabMenu extends Menu implements IMainMenu.IJupyterLabMenu {
    * plugin.
    */
   addGroup(items: Menu.IItemOptions[], rank?: number): void {
-    const rankGroup = { items, rank: rank || 100 };
+    const rankGroup = { items, rank: rank === undefined ? 100 : rank };
 
     // Insert the plugin group into the list of groups.
     const groupIndex = ArrayExt.upperBound(this._groups, rankGroup, Private.itemCmp);
@@ -48,7 +48,7 @@ class JupyterLabMenu extends Menu implements IMainMenu.IJupyterLabMenu {
       }
     }
     // Insert a separator if there are previous entries.
-    if (this.startIndex > 0) {
+    if (insertIndex > 0) {
       this.insertItem(insertIndex++, { type: 'separator' });
     }
     // Insert the group.
