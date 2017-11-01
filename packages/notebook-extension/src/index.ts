@@ -17,6 +17,10 @@ import {
   IStateDB, PageConfig, URLExt, uuid
 } from '@jupyterlab/coreutils';
 
+import  {
+  IFileBrowserFactory
+} from '@jupyterlab/filebrowser';
+
 import {
   ILauncher
 } from '@jupyterlab/launcher';
@@ -52,6 +56,9 @@ import {
  * The command IDs used by the notebook plugin.
  */
 namespace CommandIDs {
+  export
+  const createNew = 'notebook:create-new';
+
   export
   const interrupt = 'notebook:interrupt-kernel';
 
@@ -254,7 +261,7 @@ const tracker: JupyterLabPlugin<INotebookTracker> = {
     IEditorServices,
     ILayoutRestorer
   ],
-  optional: [ILauncher],
+  optional: [IFileBrowserFactory, ILauncher],
   activate: activateNotebookHandler,
   autoStart: true
 };
@@ -365,7 +372,7 @@ function activateCellTools(app: JupyterLab, tracker: INotebookTracker, editorSer
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: NotebookPanel.IContentFactory, editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): INotebookTracker {
+function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: NotebookPanel.IContentFactory, editorServices: IEditorServices, restorer: ILayoutRestorer, browserFactory: IFileBrowserFactory | null, launcher: ILauncher | null): INotebookTracker {
   const services = app.serviceManager;
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
@@ -419,16 +426,30 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
   mainMenu.addMenu(createMenu(app), { rank: 20 });
 
   // The launcher callback.
-  let callback = (cwd: string, name: string) => {
+  const createNew = (cwd: string, kernelName?: string) => {
     return commands.execute(
       'docmanager:new-untitled', { path: cwd, type: 'notebook' }
     ).then(model => {
       return commands.execute('docmanager:open', {
         path: model.path, factory: FACTORY,
-        kernel: { name }
+        kernel: { name: kernelName }
       });
     });
   };
+
+  // Add a command for creating a new notebook in the File Menu.
+  commands.addCommand(CommandIDs.createNew, {
+    label: 'New Notebook',
+    caption: 'Create a new notebook',
+    execute: () => {
+      let cwd = browserFactory ?
+        browserFactory.defaultBrowser.model.path : '';
+      return createNew(cwd);
+    }
+  });
+
+  // Add new notebook creation to the file menu.
+  mainMenu.fileMenu.newMenu.addItem({ command: CommandIDs.createNew });
 
   // Add a launcher item if the launcher is available.
   if (launcher) {
@@ -449,7 +470,7 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
           category: 'Notebook',
           name,
           iconClass: 'jp-NotebookRunningIcon',
-          callback,
+          callback: createNew,
           rank,
           kernelIconUrl
         });
