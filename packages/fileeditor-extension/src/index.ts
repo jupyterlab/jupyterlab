@@ -372,7 +372,7 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
     });
   }
 
-  // Add a launcher item if the launcher is available.
+  // Add a command for creating a new text file.
   commands.addCommand(CommandIDs.createNew, {
     label: 'New File',
     caption: 'Create a new text file',
@@ -382,6 +382,7 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
     }
   });
 
+  // Add a launcher item if the launcher is available.
   if (launcher) {
     launcher.add({
       displayName: 'Text Editor',
