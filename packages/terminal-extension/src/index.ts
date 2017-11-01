@@ -112,10 +112,16 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
 
   addCommands(app, serviceManager, tracker);
 
-  // Add command palette and menu items.
-  const menu = new Menu({ commands });
+  // Add some commands to the application view menu.
+  const viewGroup: Menu.IItemOptions[] = [
+    CommandIDs.refresh,
+    CommandIDs.increaseFont,
+    CommandIDs.decreaseFont,
+    CommandIDs.toggleTheme
+  ].map( command => { return { type: 'command' as Menu.ItemType, command }; } );
+  mainMenu.viewMenu.addGroup(viewGroup);
 
-  menu.title.label = category;
+  // Add command palette items.
   [
     CommandIDs.createNew,
     CommandIDs.refresh,
@@ -124,11 +130,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     CommandIDs.toggleTheme
   ].forEach(command => {
     palette.addItem({ command, category });
-    if (command !== CommandIDs.createNew) {
-      menu.addItem({ command });
-    }
   });
-  mainMenu.addMenu(menu, {rank: 40});
 
   // Add terminal creation to the file menu.
   mainMenu.fileMenu.newMenu.addItem({ command: CommandIDs.createNew });
