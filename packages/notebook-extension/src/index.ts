@@ -329,7 +329,7 @@ function activateCellTools(app: JupyterLab, tracker: INotebookTracker, editorSer
 
   // Wait until the application has finished restoring before rendering.
   Promise.all([state.fetch(id), app.restored]).then(([args]) => {
-    const open = (args && args['open'] as boolean) || false;
+    const open = !!(args && (args as ReadonlyJSONObject)['open'] as boolean);
 
     // After initial restoration, check if the cell tools should render.
     if (tracker.size) {

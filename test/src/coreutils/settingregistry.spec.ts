@@ -21,7 +21,7 @@ class TestConnector extends StateDB implements IDataConnector<ISettingRegistry.I
   }
 
   fetch(id: string): Promise<ISettingRegistry.IPlugin | null> {
-    return super.fetch(id).then(data => {
+    return super.fetch(id).then((data: string) => {
       if (!data && !this.schemas[id]) {
         return null;
       }
@@ -29,15 +29,11 @@ class TestConnector extends StateDB implements IDataConnector<ISettingRegistry.I
       const schema = this.schemas[id] || { type: 'object' };
       const composite = { };
       const user = { };
-      const raw = JSON.stringify(data) || '{ }';
+      const raw = data || '{ }';
       const result = { id, data: { composite, user }, raw, schema };
 
       return result;
     });
-  }
-
-  save(id: string, raw: any): Promise<void> {
-    return super.save(id, JSON.parse(raw as string));
   }
 }
 
