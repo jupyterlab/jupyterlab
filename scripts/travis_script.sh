@@ -56,7 +56,7 @@ if [[ $GROUP == other ]]; then
     jupyter lab clean
     jupyter lab build
     jupyter lab path
-    push jupyterlab/tests/mock_packages
+    pushd jupyterlab/tests/mock_packages
     jupyter labextension link extension --no-build
     jupyter labextension unlink extension --no-build
     jupyter labextension link extension --no-build
