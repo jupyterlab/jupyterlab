@@ -34,6 +34,7 @@ class TestApp(LabApp):
 
     open_browser = Bool(False)
     base_url = '/foo/'
+    ip = '127.0.0.1'
     flags = test_flags
     aliases = test_aliases
 
