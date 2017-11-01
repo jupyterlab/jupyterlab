@@ -26,8 +26,6 @@ from tornado import gen
 from tornado.ioloop import IOLoop
 
 from .semver import Range, gte, lt, lte, gt
-from ._version import __version__
-
 
 if sys.platform == 'win32':
     from subprocess import list2cmdline
@@ -355,10 +353,11 @@ def should_build(app_dir=None, logger=None):
         static_data = json.load(fid)
 
     # Look for mismatched version.
-    version = static_data['jupyterlab'].get('version', '')
-    if LooseVersion(version) != LooseVersion(__version__):
+    static_version = static_data['jupyterlab'].get('version', '')
+    core_version = static_data['jupyterlab']['version']
+    if LooseVersion(static_version) != LooseVersion(core_version):
         msg = 'Version mismatch: %s (built), %s (current)'
-        return True, msg % (version, __version__)
+        return True, msg % (static_version, core_version)
 
     # Look for mismatched extensions.
     template_data = _get_package_template(app_dir, logger)
@@ -470,7 +469,7 @@ def list_extensions(app_dir=None, logger=None):
             continue
         app.append(key)
 
-    logger.info('JupyterLab v%s' % __version__)
+    logger.info('JupyterLab v%s' % core_data['jupyterlab']['version'])
     logger.info('Known labextensions:')
     if app:
         logger.info('   app dir: %s' % app_dir)
@@ -708,6 +707,10 @@ def _get_core_data():
         return json.load(fid)
 
 
+# Provide the application version.
+app_version = _get_core_data()['jupyterlab']['version']
+
+
 def _test_overlap(spec1, spec2):
     """Test whether two version specs overlap.
 
@@ -823,7 +826,6 @@ def _ensure_package(app_dir, logger=None, name=None, version=None):
     """Make sure the build dir is set up.
     """
     logger = logger or logging
-    version = version or __version__
     _ensure_app_dirs(app_dir, logger)
 
     # Look for mismatched version.
