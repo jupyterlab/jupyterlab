@@ -222,8 +222,6 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   RESOURCES.forEach(args => {
     helpMenu.addItem({ args, command: CommandIDs.open });
   });
-  helpMenu.addItem({ type: 'separator' });
-  helpMenu.addItem({ command: 'apputils:clear-statedb' });
 
   commands.addCommand(CommandIDs.about, {
     label: `About ${info.name}`,
