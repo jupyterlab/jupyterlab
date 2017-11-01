@@ -30,7 +30,7 @@ install:
   - npm update
   # Ensure python and python scripts are from right version:
   - 'SET "PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"'
-  - 'conda install nodejs pip'
+  - 'conda install -y nodejs pip'
   # Install our package:
   - 'pip install --upgrade -e ".[test]"'
   - 'npm install'
