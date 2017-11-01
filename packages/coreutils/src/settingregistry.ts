@@ -521,6 +521,7 @@ class SettingRegistry {
   reload(plugin: string): Promise<ISettingRegistry.ISettings> {
     const connector = this._connector;
     const plugins = this._plugins;
+    const registry = this;
 
     // If the plugin needs to be loaded from the connector, fetch.
     return connector.fetch(plugin).then(data => {
@@ -529,6 +530,7 @@ class SettingRegistry {
         this._validate(data);
       } catch (errors) {
         const output = [`Validating ${plugin} failed:`];
+
         (errors as ISchemaValidator.IError[]).forEach((error, index) => {
           const { dataPath, schemaPath, keyword, message } = error;
 
@@ -543,10 +545,7 @@ class SettingRegistry {
       // Emit that a plugin has changed.
       this._pluginChanged.emit(plugin);
 
-      return new Settings({
-        plugin: copy(plugins[plugin]) as ISettingRegistry.IPlugin,
-        registry: this
-      });
+      return new Settings({ plugin: plugins[plugin], registry });
     });
   }
 
@@ -693,6 +692,7 @@ class Settings implements ISettingRegistry.ISettings {
     this.registry = options.registry;
 
     this._composite = plugin.data.composite || { };
+    this._raw = plugin.raw || '{ }';
     this._schema = plugin.schema || { type: 'object' };
     this._user = plugin.data.user || { };
 
@@ -725,6 +725,13 @@ class Settings implements ISettingRegistry.ISettings {
    */
   get schema(): ISettingRegistry.ISchema {
     return this._schema;
+  }
+
+  /**
+   * Get the plugin settings raw text value.
+   */
+  get raw(): string {
+    return this._raw;
   }
 
   /**
@@ -843,9 +850,10 @@ class Settings implements ISettingRegistry.ISettings {
       }
 
       const { composite, user } = found.data;
-      const schema = found.schema;
+      const { raw, schema } = found;
 
       this._composite = composite || { };
+      this._raw = raw;
       this._schema = schema || { type: 'object' };
       this._user = user || { };
       this._changed.emit(undefined);
@@ -855,6 +863,7 @@ class Settings implements ISettingRegistry.ISettings {
   private _changed = new Signal<this, void>(this);
   private _composite: JSONObject = Object.create(null);
   private _isDisposed = false;
+  private _raw = '{ }';
   private _schema: ISettingRegistry.ISchema = Object.create(null);
   private _user: JSONObject = Object.create(null);
 }
