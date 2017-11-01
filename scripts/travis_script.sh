@@ -56,17 +56,19 @@ if [[ $GROUP == other ]]; then
     jupyter lab clean
     jupyter lab build
     jupyter lab path
-    jupyter labextension link jupyterlab/tests/mockextension --no-build
-    jupyter labextension unlink jupyterlab/tests/mockextension --no-build
-    jupyter labextension link jupyterlab/tests/mockextension --no-build
+    push jupyterlab/tests/mock_packages
+    jupyter labextension link extension --no-build
+    jupyter labextension unlink extension --no-build
+    jupyter labextension link extension --no-build
     jupyter labextension unlink  @jupyterlab/python-tests --no-build
-    jupyter labextension install jupyterlab/tests/mockextension  --no-build
+    jupyter labextension install extension  --no-build
     jupyter labextension list
     jupyter labextension disable @jupyterlab/python-tests
     jupyter labextension enable @jupyterlab/python-tests
     jupyter labextension disable @jupyterlab/notebook-extension
     jupyter labextension uninstall @jupyterlab/python-tests --no-build
     jupyter labextension uninstall @jupyterlab/notebook-extension --no-build
+    popd
 
     # Make sure we can call help on all the cli apps.
     jupyter lab -h 
