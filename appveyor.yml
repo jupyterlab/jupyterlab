@@ -4,7 +4,7 @@ skip_branch_with_pr: true
 # environment variables
 environment:
   matrix:
-    - PYTHON: "C:\Miniconda35-x64"
+    - PYTHON: C:\\Miniconda35-x64
 
 # build cache to preserve files/folders between builds
 cache:
