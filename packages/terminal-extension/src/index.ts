@@ -25,10 +25,6 @@ import {
   Terminal, ITerminalTracker
 } from '@jupyterlab/terminal';
 
-import {
-  Menu
-} from '@phosphor/widgets';
-
 
 /**
  * The command IDs used by the terminal plugin.
@@ -113,12 +109,12 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   addCommands(app, serviceManager, tracker);
 
   // Add some commands to the application view menu.
-  const viewGroup: Menu.IItemOptions[] = [
+  const viewGroup = [
     CommandIDs.refresh,
     CommandIDs.increaseFont,
     CommandIDs.decreaseFont,
     CommandIDs.toggleTheme
-  ].map( command => { return { type: 'command' as Menu.ItemType, command }; } );
+  ].map(command => { return { command }; });
   mainMenu.viewMenu.addGroup(viewGroup);
 
   // Add command palette items.
