@@ -22,6 +22,10 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
+  IFileBrowserFactory
+} from '@jupyterlab/filebrowser';
+
+import {
   ILauncher
 } from '@jupyterlab/launcher';
 
@@ -92,7 +96,8 @@ const tracker: JupyterLabPlugin<IConsoleTracker> = {
     ICommandPalette,
     ConsolePanel.IContentFactory,
     IEditorServices,
-    ILayoutRestorer
+    ILayoutRestorer,
+    IFileBrowserFactory
   ],
   optional: [ILauncher],
   activate: activateConsole,
@@ -126,7 +131,7 @@ export default plugins;
 /**
  * Activate the console extension.
  */
-function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): IConsoleTracker {
+function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer, browserFactory: IFileBrowserFactory, launcher: ILauncher | null): IConsoleTracker {
   const manager = app.serviceManager;
   const { commands, shell } = app;
   const category = 'Console';
@@ -243,9 +248,9 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
 
   command = CommandIDs.create;
   commands.addCommand(command, {
-    label: 'Start New Console',
+    label: 'New Console',
     execute: (args: Partial<ConsolePanel.IOptions>) => {
-      let basePath = args.basePath || '.';
+      let basePath = args.basePath || browserFactory.defaultBrowser.model.path;
       return createConsole({ basePath, ...args });
     }
   });
@@ -405,6 +410,10 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
   });
   palette.addItem({ command, category });
 
+  // Add a console creator to the File menu
+  mainMenu.fileMenu.newMenu.addItem({ command: CommandIDs.create });
+
+  // Add the console menu.
   menu.addItem({ command: CommandIDs.run });
   menu.addItem({ command: CommandIDs.runForced });
   menu.addItem({ command: CommandIDs.linebreak });
