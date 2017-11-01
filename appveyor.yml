@@ -3,8 +3,12 @@ skip_branch_with_pr: true
 
 # environment variables
 environment:
+  nodejs_version: "6.9"
   matrix:
-    - PYTHON: C:\\Miniconda35-x64
+    - PYTHON: "C:\\Python35-x64"
+      PYTHON_VERSION: "3.5.x"
+      PYTHON_MAJOR: 3
+      PYTHON_ARCH: "64"
 
 # build cache to preserve files/folders between builds
 cache:
@@ -30,7 +34,6 @@ install:
   - npm update
   # Ensure python and python scripts are from right version:
   - 'SET "PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"'
-  - 'conda install -y nodejs pip'
   # Install our package:
   - 'pip install --upgrade -e ".[test]"'
   - 'npm install'
