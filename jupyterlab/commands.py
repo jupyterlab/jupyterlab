@@ -144,6 +144,7 @@ def install_extension_async(extension, app_dir=None, logger=None, abort_callback
 
     If link is true, the source directory is linked using `npm link`.
     """
+    yield check_node()
     app_dir = get_app_dir(app_dir)
     logger = logger or logging
     if app_dir == here:
