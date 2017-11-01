@@ -84,8 +84,8 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<IEditorTracker> = {
   activate,
   id: '@jupyterlab/fileeditor-extension:plugin',
-  requires: [IEditorServices, IFileBrowserFactory, ILayoutRestorer, IMainMenu, ISettingRegistry],
-  optional: [ILauncher],
+  requires: [IEditorServices, IFileBrowserFactory, ILayoutRestorer, ISettingRegistry],
+  optional: [ILauncher, IMainMenu],
   provides: IEditorTracker,
   autoStart: true
 };
@@ -100,7 +100,7 @@ export default plugin;
 /**
  * Activate the editor tracker plugin.
  */
-function activate(app: JupyterLab, editorServices: IEditorServices, browserFactory: IFileBrowserFactory, restorer: ILayoutRestorer, menu: IMainMenu, settingRegistry: ISettingRegistry, launcher: ILauncher | null): IEditorTracker {
+function activate(app: JupyterLab, editorServices: IEditorServices, browserFactory: IFileBrowserFactory, restorer: ILayoutRestorer, settingRegistry: ISettingRegistry, launcher: ILauncher | null, menu: IMainMenu | null): IEditorTracker {
   const id = plugin.id;
   const namespace = 'editor';
   const factory = new FileEditorFactory({
@@ -393,7 +393,9 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
   }
 
   // Add new text file creation to the file menu.
-  menu.fileMenu.newMenu.addItem({ command: CommandIDs.createNew });
+  if (menu) {
+    menu.fileMenu.newMenu.addItem({ command: CommandIDs.createNew });
+  }
 
 
 
