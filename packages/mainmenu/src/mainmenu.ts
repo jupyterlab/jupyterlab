@@ -18,7 +18,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  FileMenu
+  EditMenu, FileMenu, HelpMenu, KernelMenu, RunMenu, ViewMenu
 } from './menus';
 
 
@@ -44,7 +44,7 @@ interface IMainMenu {
   /**
    * The application "File" menu.
    */
-  readonly fileMenu: FileMenu;
+  readonly fileMenu: IMainMenu.IFileMenu;
 
   /**
    * The application "Edit" menu.
@@ -59,7 +59,7 @@ interface IMainMenu {
   /**
    * The application "Help" menu.
    */
-  //readonly helpMenu: Menu;
+  readonly helpMenu: IMainMenu.IHelpMenu;
 
   /**
    * The application "Kernel" menu.
@@ -88,7 +88,71 @@ namespace IMainMenu {
      */
     rank?: number;
   }
+
+  /**
+   * A common interface for extensible JupyterLab application menus.
+   *
+   * Plugins are still free to define their own menus in any way
+   * they like. However, JupyterLab defines a few top-level
+   * application menus that may be extended by plugins as well,
+   * such as "Edit" and "View"
+   */
+  export
+  interface IJupyterLabMenu extends Menu {
+    /**
+     * Add a group of menu items specific to a particular
+     * plugin.
+     */
+    addGroup(items: Menu.IItemOptions[], options: IAddOptions): void;
+  }
+
+  /**
+   * An interface for a File menu.
+   */
+  export
+  interface IFileMenu extends Menu {
+    /**
+     * A submenu for creating new files/launching new activities.
+     */
+    readonly newMenu: Menu;
+  }
+
+  /**
+   * An interface for an Edit menu.
+   */
+  export
+  interface IEditMenu extends IJupyterLabMenu {
+  }
+
+  /**
+   * An interface for a View menu.
+   */
+  export
+  interface IViewMenu extends IJupyterLabMenu {
+  }
+
+  /**
+   * An interface for a Help menu.
+   */
+  export
+  interface IHelpMenu extends IJupyterLabMenu {
+  }
+
+  /**
+   * An interface for a Kernel menu.
+   */
+  export
+  interface IKernelMenu extends IJupyterLabMenu {
+  }
+
+  /**
+   * An interface for a Run menu.
+   */
+  export
+  interface IRunMenu extends IJupyterLabMenu {
+  }
 }
+
 
 
 /**
@@ -101,14 +165,51 @@ class MainMenu extends MenuBar implements IMainMenu {
    */
   constructor(commands: CommandRegistry) {
     super();
+    this.editMenu = new EditMenu({ commands });
     this.fileMenu = new FileMenu({ commands });
+    this.helpMenu = new HelpMenu({ commands });
+    this.kernelMenu = new KernelMenu({ commands });
+    this.runMenu = new RunMenu({ commands });
+    this.viewMenu = new ViewMenu({ commands });
+
     this.addMenu(this.fileMenu, { rank: 0 });
+    this.addMenu(this.editMenu, { rank: 1 });
+    this.addMenu(this.runMenu, { rank: 2 });
+    this.addMenu(this.kernelMenu, { rank: 3 });
+    this.addMenu(this.viewMenu, { rank: 4 });
+    this.addMenu(this.helpMenu, { rank: 1000 });
   }
+
+  /**
+   * The application "Edit" menu.
+   */
+  readonly editMenu: EditMenu;
 
   /**
    * The application "File" menu.
    */
   readonly fileMenu: FileMenu;
+
+  /**
+   * The application "Help" menu.
+   */
+  readonly helpMenu: HelpMenu;
+
+  /**
+   * The application "Kernel" menu.
+   */
+  readonly kernelMenu: KernelMenu;
+
+  /**
+   * The application "Run" menu.
+   */
+  readonly runMenu: RunMenu;
+
+  /**
+   * The application "View" menu.
+   */
+  readonly viewMenu: ViewMenu;
+
 
   /**
    * Add a new menu to the main menu bar.

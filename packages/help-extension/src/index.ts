@@ -26,7 +26,7 @@ import {
 } from '@phosphor/virtualdom';
 
 import {
-  Menu, PanelLayout, Widget
+  PanelLayout, Widget
 } from '@phosphor/widgets';
 
 import '../style/index.css';
@@ -190,7 +190,6 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   let counter = 0;
   const category = 'Help';
   const namespace = 'help-doc';
-  const menu = createMenu();
   const { commands, shell, info} = app;
   const tracker = new InstanceTracker<HelpWidget>({ namespace });
 
@@ -214,26 +213,17 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     return iframe;
   }
 
-  /**
-   * Create a menu for the help plugin.
-   */
-  function createMenu(): Menu {
-    let { commands } = app;
-    let menu = new Menu({ commands });
-    menu.title.label = category;
-
-    menu.addItem({ command: CommandIDs.about });
-    menu.addItem({ command: 'faq-jupyterlab:open' });
-    menu.addItem({ command: CommandIDs.launchClassic });
-    menu.addItem({ type: 'separator' });
-    RESOURCES.forEach(args => {
-      menu.addItem({ args, command: CommandIDs.open });
-    });
-    menu.addItem({ type: 'separator' });
-    menu.addItem({ command: 'apputils:clear-statedb' });
-
-    return menu;
-  }
+  // Populate the Help menu.
+  const helpMenu = mainMenu.helpMenu;
+  helpMenu.addItem({ command: CommandIDs.about });
+  helpMenu.addItem({ command: 'faq-jupyterlab:open' });
+  helpMenu.addItem({ command: CommandIDs.launchClassic });
+  helpMenu.addItem({ type: 'separator' });
+  RESOURCES.forEach(args => {
+    helpMenu.addItem({ args, command: CommandIDs.open });
+  });
+  helpMenu.addItem({ type: 'separator' });
+  helpMenu.addItem({ command: 'apputils:clear-statedb' });
 
   commands.addCommand(CommandIDs.about, {
     label: `About ${info.name}`,
@@ -307,5 +297,4 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   palette.addItem({ command: 'apputils:clear-statedb', category });
   palette.addItem({ command: CommandIDs.launchClassic, category });
 
-  mainMenu.addMenu(menu);
 }
