@@ -30,9 +30,9 @@ install:
   - npm update
   # Ensure python and python scripts are from right version:
   - 'SET "PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"'
+  - 'conda install nodejs pip'
   # Install our package:
   - 'pip install --upgrade -e ".[test]"'
-  - 'conda install nodejs'
   - 'npm install'
   - 'npm run build:main'
   - 'jupyter lab build'
