@@ -49,12 +49,12 @@ interface IMainMenu {
   /**
    * The application "Edit" menu.
    */
-  //readonly editMenu: Menu;
+  readonly editMenu: IMainMenu.IEditMenu;
 
   /**
    * The application "View" menu.
    */
-  //readonly viewMenu: Menu;
+  readonly viewMenu: IMainMenu.IViewMenu;
 
   /**
    * The application "Help" menu.
@@ -64,12 +64,12 @@ interface IMainMenu {
   /**
    * The application "Kernel" menu.
    */
-  //readonly kernelMenu: Menu;
+  readonly kernelMenu: IMainMenu.IKernelMenu;
 
   /**
    * The application "Run" menu.
    */
-  //readonly runMenu: Menu;
+  readonly runMenu: IMainMenu.IRunMenu;
 }
 
 
@@ -103,7 +103,7 @@ namespace IMainMenu {
      * Add a group of menu items specific to a particular
      * plugin.
      */
-    addGroup(items: Menu.IItemOptions[], options: IAddOptions): void;
+    addGroup(items: Menu.IItemOptions[], rank?: number): void;
   }
 
   /**
@@ -227,6 +227,9 @@ class MainMenu extends MenuBar implements IMainMenu {
     menu.disposed.connect(this._onMenuDisposed, this);
 
     ArrayExt.insert(this._items, index, rankItem);
+    /**
+     * Create a new menu.
+     */
     this.insertMenu(index, menu);
   }
 

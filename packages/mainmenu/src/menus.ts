@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ArrayExt
+} from '@phosphor/algorithm';
+
+import {
   Menu
 } from '@phosphor/widgets';
 
@@ -16,11 +20,51 @@ import {
 export
 class JupyterLabMenu extends Menu implements IMainMenu.IJupyterLabMenu {
   /**
+   * Create a new menu.
+   */
+  constructor(options: Menu.IOptions) {
+    super(options);
+    this.startIndex = 0;
+  }
+
+  /**
    * Add a group of menu items specific to a particular
    * plugin.
    */
-  addGroup(items: Menu.IItemOptions[], options: IMainMenu.IAddOptions): void {
+  addGroup(items: Menu.IItemOptions[], rank?: number): void {
+    const rankGroup = { items, rank: rank || 100 };
+
+    // Insert the plugin group into the list of groups.
+    const groupIndex = ArrayExt.upperBound(this._groups, rankGroup, Private.itemCmp);
+    ArrayExt.insert(this._groups, groupIndex, rankGroup);
+
+    // Determine the index of the menu at which to insert the group.
+    let insertIndex = this.startIndex;
+    for (let i = 0; i < groupIndex; ++i) {
+      if (this._groups.length > 0) {
+        // Increase the insert index by one extra in order
+        // to include the separator.
+        insertIndex += this._groups.length + 1;
+      }
+    }
+    // Insert a separator if there are previous entries.
+    if (this.startIndex > 0) {
+      this.insertItem(insertIndex++, { type: 'separator' });
+    }
+    // Insert the group.
+    for (let item of items) {
+      this.insertItem(insertIndex++, item);
+    }
   }
+
+  /**
+   * The menu index at which plugin groups begin to be inserted.
+   * A menu may define a few initial items, and then all additional
+   * plugin groups will be inserted at `startIndex`.
+   */
+  protected startIndex: number;
+
+  private _groups: Private.IRankGroup[] = [];
 }
 
 
@@ -129,3 +173,33 @@ class ViewMenu extends JupyterLabMenu implements IMainMenu.IViewMenu {
     this.title.label = 'View';
   }
 }
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * An object which holds a menu and its sort rank.
+   */
+  export
+  interface IRankGroup {
+    /**
+     * A menu grouping.
+     */
+    items: Menu.IItemOptions[];
+
+    /**
+     * The sort rank of the group.
+     */
+    rank: number;
+  }
+
+  /**
+   * A comparator function for menu rank items.
+   */
+  export
+  function itemCmp(first: IRankGroup, second: IRankGroup): number {
+    return first.rank - second.rank;
+  }
+}
+
