@@ -399,11 +399,6 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
   let registry = app.docRegistry;
   registry.addModelFactory(new NotebookModelFactory({}));
   registry.addWidgetFactory(factory);
-  registry.addCreator({
-    name: 'Notebook',
-    fileType: 'Notebook',
-    widgetName: 'Notebook'
-  });
 
   addCommands(app, services, tracker);
   populatePalette(palette);
