@@ -353,7 +353,7 @@ class TestExtension(TestCase):
         pkg_path = pjoin(self.mock_extension, 'package.json')
         with open(pkg_path) as fid:
             data = json.load(fid)
-        with open(pkg_path) as fid:
+        with open(pkg_path, 'rb') as fid:
             orig = fid.read()
         data['foo'] = 'bar'
         with open(pkg_path, 'w') as fid:
@@ -361,7 +361,7 @@ class TestExtension(TestCase):
         assert build_check()[0]
         assert build_check()[0]
 
-        with open(pkg_path, 'w') as fid:
+        with open(pkg_path, 'wb') as fid:
             fid.write(orig)
         assert not build_check()[0]
 
@@ -369,7 +369,7 @@ class TestExtension(TestCase):
         pkg_path = pjoin(self.mock_package, 'package.json')
         with open(pkg_path) as fid:
             data = json.load(fid)
-        with open(pkg_path) as fid:
+        with open(pkg_path, 'rb') as fid:
             orig = fid.read()
         data['foo'] = 'bar'
         with open(pkg_path, 'w') as fid:
@@ -377,7 +377,7 @@ class TestExtension(TestCase):
         assert build_check()[0]
         assert build_check()[0]
 
-        with open(pkg_path, 'w') as fid:
+        with open(pkg_path, 'wb') as fid:
             fid.write(orig)
         assert not build_check()[0]
 
