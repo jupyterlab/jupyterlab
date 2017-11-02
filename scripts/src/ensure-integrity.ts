@@ -234,6 +234,13 @@ function ensureIntegrity(): void {
     }
   }
 
+  // Handle the top level package.
+  let corePath: string = path.resolve('.', 'package.json');
+  let coreData: any = require(corePath);
+  if (utils.ensurePackageData(coreData, corePath)) {
+    messages['top'] = ['Update package'];
+  }
+
   // Handle the all-packages metapackage.
   let pkgMessages = ensureAllPackages();
   if (pkgMessages.length > 0) {
