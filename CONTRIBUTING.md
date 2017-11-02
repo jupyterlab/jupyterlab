@@ -197,6 +197,25 @@ To have the system build after each source file change, run:
 jupyter lab --dev-mode --watch
 ```
 
+
+## Helper Scripts
+
+There are a series of helper scripts for maintaining the repository.
+To get a suggested version for a library use `npm run get:dependency foo`.
+To update the version of a library across the repo us `npm run update:dependency foo@^x.x`.
+To remove an unwanted dependency use `npm run remove:dependency foo`.
+
+The key helper script is `npm run integrity`, which ensures the integrity of 
+the packages in the repo. It will:
+
+- Ensure the core package version dependencies match everywhere.
+- Ensure imported packages match dependencies.
+- Ensure a consistent version of all packages.
+- Manage the all-packages meta package.
+
+The `packages/all-packages` metapackage is used to build all of the TypeScript 
+in the repository at once, instead of 50+ individual builds.
+
 ## Notes
 
 - By default, the application will load from the JupyterLab staging directory (default is `<sys-prefix>/share/jupyter/lab/build`.  If you wish to run

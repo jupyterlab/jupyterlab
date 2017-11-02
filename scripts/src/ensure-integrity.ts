@@ -2,7 +2,8 @@
  * Ensure the integrity of the packages in the repo.
  *
  * Ensure the core package version dependencies match everywhere.
- * Ensure imports match dependencies for TypeScript packages.
+ * Ensure imported packages match dependencies.
+ * Ensure a consistent version of all packages.
  * Manage the all-packages meta package.
  */
 import path = require('path');
