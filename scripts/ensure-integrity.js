@@ -184,21 +184,21 @@ function ensureAllPackages() {
  * Extract the module imports from a TypeScript source file.
  */
 function getImports(sourceFile) {
-    var imports = [];
-    handleNode(sourceFile);
+  var imports = [];
+  handleNode(sourceFile);
 
-    function handleNode(node) {
-        switch (node.kind) {
-            case ts.SyntaxKind.ImportDeclaration:
-                imports.push(node.moduleSpecifier.text);
-                break;
-            case ts.SyntaxKind.ImportEqualsDeclaration:
-                imports.push(node.moduleReference.expression.text);
-                break;
-        }
-        ts.forEachChild(node, handleNode);
+  function handleNode(node) {
+    switch (node.kind) {
+      case ts.SyntaxKind.ImportDeclaration:
+        imports.push(node.moduleSpecifier.text);
+        break;
+      case ts.SyntaxKind.ImportEqualsDeclaration:
+        imports.push(node.moduleReference.expression.text);
+        break;
     }
-    return imports;
+    ts.forEachChild(node, handleNode);
+  }
+  return imports;
 }
 
 
