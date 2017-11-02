@@ -141,17 +141,6 @@ function ensureAllPackages() {
       allPackageData.dependencies[name] = '^' + data.version;
     }
 
-    // Ensure it is in tsconfig.
-    var compilerPaths = tsconfig.compilerOptions.paths;
-    var target = path.join('..', path.basename(name), 'src');
-    if (!(name in compilerPaths)) {
-      // All of the jupyterlab paths are already mapped.
-      if (name.indexOf('@jupyterlab/') !== 0) {
-        valid = false;
-        compilerPaths[name] = target;
-      }
-    }
-
     // Ensure it is in index.ts
     if (index.indexOf(name) === -1) {
       valid = false;
@@ -163,12 +152,9 @@ function ensureAllPackages() {
     }
   });
 
-  // Update the files if necessary.
-  if (problems.length > 0) {
-    writePackageData(allPackageData, allPackageJson);
-    fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
-    fs.writeFileSync(indexPath, lines.join('\n'));
-  }
+  // Write the files.
+  writePackageData(allPackageData, allPackageJson);
+  fs.writeFileSync(indexPath, lines.join('\n'));
 
   return problems;
 }

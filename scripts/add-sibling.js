@@ -52,27 +52,11 @@ if (fs.existsSync(path.join(packagePath, 'node_modules'))) {
   fs.removeSync(path.join(packagePath, 'node_modules'));
 }
 
-// Get the package.json of the extension.
-var package = require(path.join(packagePath, 'package.json'));
-
-// Add the extension to packages/all-packages/package.json
-var allPackagesPath = path.join(basePath, 'packages', 'all-packages', 'package.json');
-var allPackages = require(allPackagesPath);
-allPackages.dependencies[package.name] = '~'+String(package.version);
-var text = JSON.stringify(sortPackageJson(allPackages), null, 2) + '\n';
-fs.writeFileSync(allPackagesPath, text);
-
 // Add the extension path to packages/all-packages/tsconfig.json
 var tsconfigPath = path.join(basePath, 'packages', 'all-packages', 'tsconfig.json');
 var tsconfig = require(tsconfigPath);
 tsconfig.compilerOptions.paths[package.name] = [path.join('..', packageDirName, 'src')];
 fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
-
-// Add the extension to packages/all-packages/src/index.ts
-var indexPath = path.join(basePath, 'packages', 'all-packages', 'src', 'index.ts');
-var index = fs.readFileSync(indexPath, 'utf8');
-index = index + 'import "' + package.name + '";\n';
-fs.writeFileSync(indexPath, index);
 
 // Update the core jupyterlab build dependencies.
 childProcess.execSync('npm run update:core', {stdio:[0,1,2]});

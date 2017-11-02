@@ -32,7 +32,7 @@ for (var j = 0; j < files.length; j++) {
     }
   }
   if (deps[name]) {
-    console.log(deps[name]);
+    console.log('    ' + '"' + name + '": "' + deps[name] + '"');
     process.exit(0);
   }
 }
@@ -41,4 +41,4 @@ console.log('** Package not yet included!');
 
 var cmd = 'npm view ' + name + ' version';
 var specifier = childProcess.execSync(cmd);
-console.log('~' + String(specifier).trim());
+console.log('    ' + '"' + name + '": "' + '~' + String(specifier).trim() + '"');

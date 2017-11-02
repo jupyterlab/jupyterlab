@@ -27,7 +27,7 @@
     "test:firefox": "lerna run test:firefox --stream",
     "test:ie": "lerna run test:ie --concurrency 1 --stream",
     "update:dependency": "node scripts/update-dependency.js",
-    "update:core": "cd jupyterlab && node update-core.js",
+    "update:core": "npm run integrity && cd jupyterlab && node update-core.js",
     "watch:main": "cd jupyterlab && npm run watch",
     "watch:packages": "cd packages/all-packages && npm run watch",
     "watch": "run-p watch:*",
