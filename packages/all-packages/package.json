@@ -69,6 +69,7 @@
     "@jupyterlab/outputarea": "^0.11.1",
     "@jupyterlab/pdf-extension": "^0.3.1",
     "@jupyterlab/rendermime": "^0.11.1",
+    "@jupyterlab/rendermime-interfaces": "^0.4.1",
     "@jupyterlab/running": "^0.11.1",
     "@jupyterlab/running-extension": "^0.11.1",
     "@jupyterlab/services": "^0.50.2",
