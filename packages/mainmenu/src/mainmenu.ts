@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab
-} from '@jupyterlab/application';
-
-import {
   IInstanceTracker
 } from '@jupyterlab/apputils';
 
@@ -16,6 +12,10 @@ import {
 import {
   ArrayExt
 } from '@phosphor/algorithm';
+
+import {
+  CommandRegistry
+} from '@phosphor/commands';
 
 import {
   Token
@@ -151,7 +151,24 @@ namespace IMainMenu {
    */
   export
   interface IKernelMenu extends IJupyterLabMenu {
+    /**
+     * Add an IKernelUser to the Kernel menu.
+     *
+     * @param user - An IKernelUser.
+     */
     addUser<T extends Widget>(user: IKernelMenu.IKernelUser<T>): void;
+
+    /**
+     * Given a widget, see if it belongs to
+     * any of the IKernelUsers registered with
+     * the kernel menu.
+     *
+     * @param widget: a widget.
+     *
+     * @returns an IKernelUser, if any of the registered users own
+     *   the widget, otherwise undefined.
+     */
+    findUser(widget: Widget | null): IKernelMenu.IKernelUser<Widget> | undefined;
   }
 
   /**
@@ -207,13 +224,12 @@ class MainMenu extends MenuBar implements IMainMenu {
   /**
    * Construct the main menu bar.
    */
-  constructor(app: JupyterLab) {
+  constructor(commands: CommandRegistry) {
     super();
-    const commands = app.commands;
     this.editMenu = new EditMenu({ commands });
     this.fileMenu = new FileMenu({ commands });
     this.helpMenu = new HelpMenu({ commands });
-    this.kernelMenu = new KernelMenu(app, { commands });
+    this.kernelMenu = new KernelMenu({ commands });
     this.runMenu = new RunMenu({ commands });
     this.viewMenu = new ViewMenu({ commands });
 
