@@ -11,7 +11,7 @@
     "build:src": "lerna run build --scope \"@jupyterlab/!(test-|example-)*\"",
     "build:static": "cd jupyterlab && npm run build:static",
     "build:test": "lerna run build:test",
-    "clean": "node scripts/clean-packages.js examples packages",
+    "clean": "node scripts/lib/clean-packages.js examples packages",
     "clean:examples": "node scripts/lib/clean-packages.js examples",
     "clean:main": "cd jupyterlab && npm run clean",
     "clean:slate": "git clean -dfx && npm install && npm run build",
