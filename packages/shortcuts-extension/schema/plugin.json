@@ -175,6 +175,24 @@
       },
       "type": "object"
     },
+    "kernel:interrupt": {
+      "default": { },
+      "properties": {
+        "command": { "default": "kernel:interrupt" },
+        "keys": { "default": ["I", "I"] },
+        "selector": { "default": ".jp-KernelUser:focus" }
+      },
+      "type": "object"
+    },
+    "kernel:restart": {
+      "default": { },
+      "properties": {
+        "command": { "default": "kernel:restart" },
+        "keys": { "default": ["0", "0"] },
+        "selector": { "default": ".jp-KernelUser:focus" }
+      },
+      "type": "object"
+    },
     "notebook:change-cell-to-code": {
       "default": { },
       "properties": {
@@ -366,15 +384,6 @@
       },
       "type": "object"
     },
-    "notebook:interrupt-kernel": {
-      "default": { },
-      "properties": {
-        "command": { "default": "notebook:interrupt-kernel" },
-        "keys": { "default": ["I", "I"] },
-        "selector": { "default": ".jp-Notebook:focus" }
-      },
-      "type": "object"
-    },
     "notebook:merge-cells": {
       "default": { },
       "properties": {
@@ -434,15 +443,6 @@
       "properties": {
         "command": { "default": "notebook:redo-cell-action" },
         "keys": { "default": ["Shift Z"] },
-        "selector": { "default": ".jp-Notebook:focus" }
-      },
-      "type": "object"
-    },
-    "notebook:restart-kernel": {
-      "default": { },
-      "properties": {
-        "command": { "default": "notebook:restart-kernel" },
-        "keys": { "default": ["0", "0"] },
         "selector": { "default": ".jp-Notebook:focus" }
       },
       "type": "object"
