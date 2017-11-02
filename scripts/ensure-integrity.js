@@ -59,7 +59,9 @@ function ensurePackage(pkgName) {
   filenames = filenames.concat(glob.sync(path.join(dname, 'src/**/*.ts*')));
 
   if (filenames.length == 0) {
-    writePackageData(data, path.join(dname, 'package.json'));
+    if (ensurePackageData(data, path.join(dname, 'package.json'))) {
+      problems.push('Package data changed');
+    }
     return problems;
   }
 
@@ -105,7 +107,9 @@ function ensurePackage(pkgName) {
     }
   });
 
-  writePackageData(data, path.join(dname, 'package.json'));
+  if (ensurePackageData(data, path.join(dname, 'package.json'))) {
+    problems.push('Package data changed');
+  }
   return problems;
 }
 
@@ -153,8 +157,14 @@ function ensureAllPackages() {
   });
 
   // Write the files.
-  writePackageData(allPackageData, allPackageJson);
-  fs.writeFileSync(indexPath, lines.join('\n'));
+  if (ensurePackageData(allPackageData, allPackageJson)) {
+    problems.push('Package data changed');
+  }
+  var newIndex = lines.join('\n');
+  if (newIndex != index) {
+    problems.push('Index changed');
+    fs.writeFileSync(indexPath, lines.join('\n'));
+  }
 
   return problems;
 }
@@ -185,9 +195,14 @@ function getImports(sourceFile) {
 /**
  * Write package data using sort-package-json.
  */
-function writePackageData(data, pkgJsonPath) {
+function ensurePackageData(data, pkgJsonPath) {
   var text = JSON.stringify(sortPackageJson(data), null, 2) + '\n';
-  fs.writeFileSync(pkgJsonPath, text);
+  var orig = fs.readFileSync(pkgJsonPath).toString();
+  if (text !== orig) {
+    fs.writeFileSync(pkgJsonPath, text);
+    return true;
+  }
+  return false;
 }
 
 

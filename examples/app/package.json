@@ -1,6 +1,7 @@
 {
-  "private": true,
   "name": "@jupyterlab/example-app",
+  "version": "0.12.1",
+  "private": true,
   "scripts": {
     "build": "node extract-data && webpack",
     "clean": "rimraf build"
@@ -45,6 +46,5 @@
     "url-loader": "^0.5.7",
     "watch": "^1.0.2",
     "webpack": "^2.2.1"
-  },
-  "version": "0.12.1"
+  }
 }
