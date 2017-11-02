@@ -19,7 +19,7 @@
     "coverage": "lerna run coverage --stream",
     "docs": "lerna run docs",
     "get:dependency": "node scripts/get-dependency.js",
-    "integrity": "node scripts/package-integrity.js",
+    "integrity": "node scripts/ensure-integrity.js",
     "publish": "npm run clean:slate && lerna publish --force-publish=* -m \"Publish\"",
     "test": "cd test && npm test",
     "test:services": "cd packages/services && npm test && npm run test:integration && cd examples/node && python main.py",

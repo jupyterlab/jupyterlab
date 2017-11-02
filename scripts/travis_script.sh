@@ -109,6 +109,12 @@ if [[ $GROUP == other ]]; then
     npm install -g postcss-cli
     postcss packages/**/style/*.css --dir /tmp
 
+    # Make sure we can add and remove a sibling package.
+    npm run addsibling jupyterlab/tests/mockextension
+    npm run build
+    npm run removesibling mockextension
+    npm run build
+
     # Make sure we can make release assets
     npm run build:static
     if [ ! -f ./build/release_data.json ]; then
