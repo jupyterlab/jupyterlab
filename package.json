@@ -22,6 +22,7 @@
     "install": "lerna bootstrap --hoist",
     "integrity": "node scripts/ensure-integrity.js",
     "publish": "npm run clean:slate && lerna publish --force-publish=* -m \"Publish\"",
+    "remove:dependency": "node scripts/remove-dependency.js",
     "removesibling": "node scripts/remove-sibling.js",
     "test": "cd test && npm test",
     "test:chrome": "lerna run test:chrome --stream",

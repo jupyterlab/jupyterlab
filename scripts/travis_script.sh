@@ -115,6 +115,11 @@ if [[ $GROUP == other ]]; then
     npm run removesibling mockextension
     npm run build
 
+    # Test dependency cli tools
+    npm run get:dependency mocha
+    npm run update:dependency mocha
+    npm run remove:dependency mocha
+
     # Make sure we can make release assets
     npm run build:static
     if [ ! -f ./build/release_data.json ]; then

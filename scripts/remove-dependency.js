@@ -8,21 +8,13 @@ var sortPackageJson = require('sort-package-json');
 
 // Make sure we have required command line arguments.
 if (process.argv.length !== 3) {
-  var msg = '** Must supply an update specifier\n';
+  var msg = '** Must supply a library name\n';
   process.stderr.write(msg);
   process.exit(1);
 }
 
-// Extract the desired library target and specifier.
-var parts = process.argv[2].split('@');
 
-// Translate @latest to a concrete version.
-if (parts.length == 1 || parts[1] == 'latest') {
-  var cmd = 'npm view ' + target + ' version';
-  parts.push('~' + String(childProcess.execSync(cmd)).trim());
-}
-var name = parts[0];
-var specifier = parts[1];
+var name = process.argv[2];
 
 // Get all of the packages.
 var basePath = path.resolve('.');
@@ -54,10 +46,10 @@ function handlePackage(packagePath) {
   }
 
   // Update dependencies as appropriate.
-  if (target in data['dependencies']) {
-    data['dependencies'][target] = specifier;
-  } else if (target in data['devDependencies']) {
-    data['devDependencies'][target] = specifier;
+  if (name in data['dependencies']) {
+    delete data['dependencies'][name];
+  } else if (name in data['devDependencies']) {
+    delete data['devDependencies'][name];
   }
 
   // Write the file back to disk.
