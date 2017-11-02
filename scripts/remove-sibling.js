@@ -10,7 +10,7 @@
 
 var fs = require('fs-extra');
 var path = require('path');
-var childProcess = require('child_process');
+var utils = require('./utils');
 
 // Make sure we have required command line arguments.
 if (process.argv.length < 3) {
@@ -40,4 +40,4 @@ fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
 fs.removeSync(path.dirname(packagePath));
 
 // Update the core jupyterlab build dependencies.
-childProcess.execSync('npm run update:core', {stdio:[0,1,2]});
+utils.run('npm run update:core');

@@ -21,17 +21,6 @@ if (!fs.existsSync(packagePath)) {
   process.exit(1);
 }
 
-
-/**
- * Run a command with terminal output.
- */
-function run(cmd, options) {
-  options = options || {};
-  options['stdio'] = [1,2,3];
-  console.log('>', cmd);
-  childProcess.execSync(cmd, options);
-}
-
 // Perform the patch operations.
 console.log('Patching', target, '...');
 run('npm run build:packages');

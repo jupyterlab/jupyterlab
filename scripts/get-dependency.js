@@ -1,7 +1,8 @@
 // Get the appropriate dependency for a package.
-var childProcess = require('child_process');
 var path = require('path');
 var glob = require('glob');
+var utils = require('./utils');
+var childProcess = require('child_process');
 
 var allDeps = [];
 var allDevDeps = [];
@@ -26,16 +27,14 @@ function getDependency(name) {
     // ignore
   }
 
-  var basePath = path.resolve('.');
-  var files = glob.sync(path.join(basePath, 'packages', '*'));
-  for (var j = 0; j < files.length; j++) {
+  utils.getCorePaths().forEach(function (pkgRoot) {
   // Read in the package.json.
-    var packagePath = path.join(files[j], 'package.json');
+    var packagePath = path.join(pkgRoot, 'package.json');
     try {
       var package = require(packagePath);
     } catch (e) {
       console.log('Skipping package ' + packagePath);
-      continue;
+      return;
     }
 
     if (package.name === name) {
@@ -50,7 +49,7 @@ function getDependency(name) {
     if (devDeps[name]) {
       allDevDeps.push(package.name);
     }
-  }
+  });
 
   if (!version) {
     var cmd = 'npm view ' + name + ' version';

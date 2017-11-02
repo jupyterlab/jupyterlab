@@ -5,13 +5,12 @@
  * Ensure imports match dependencies for TypeScript packages.
  * Manage the all-packages meta package.
  */
-var childProcess = require('child_process');
 var path = require('path');
 var glob = require('glob');
-var sortPackageJson = require('sort-package-json');
 var ts = require("typescript");
 var fs = require('fs-extra');
 var getDependency = require('./get-dependency');
+var utils = require('./utils');
 
 
 // Data to ignore.
@@ -29,8 +28,6 @@ var UNUSED = {
 var pkgData = {};
 var pkgPaths = {};
 var pkgNames = {};
-var basePath = path.resolve('.');
-var localPackages = glob.sync(path.join(basePath, 'packages', '*'));
 var seenDeps = {};
 
 
@@ -69,7 +66,7 @@ function ensurePackage(pkgName) {
   filenames = filenames.concat(glob.sync(path.join(dname, 'src/**/*.ts*')));
 
   if (filenames.length == 0) {
-    if (ensurePackageData(data, path.join(dname, 'package.json'))) {
+    if (utils.ensurePackageData(data, path.join(dname, 'package.json'))) {
       messages.push('Package data changed');
     }
     return messages;
@@ -121,7 +118,7 @@ function ensurePackage(pkgName) {
     }
   });
 
-  if (ensurePackageData(data, path.join(dname, 'package.json'))) {
+  if (utils.ensurePackageData(data, path.join(dname, 'package.json'))) {
     messages.push('Package data changed');
   }
   return messages;
@@ -144,7 +141,7 @@ function ensureAllPackages() {
   var lines = index.split('\n').slice(0, 3);
   var messages = [];
 
-  localPackages.forEach(function (pkgPath) {
+  utils.getCorePaths().forEach(function (pkgPath) {
     if (pkgPath === allPackagesPath) {
       return;
     }
@@ -170,7 +167,7 @@ function ensureAllPackages() {
   });
 
   // Write the files.
-  if (ensurePackageData(allPackageData, allPackageJson)) {
+  if (utils.ensurePackageData(allPackageData, allPackageJson)) {
     messages.push('Package data changed');
   }
   var newIndex = lines.join('\n');
@@ -205,19 +202,6 @@ function getImports(sourceFile) {
 }
 
 
-/**
- * Write package data using sort-package-json.
- */
-function ensurePackageData(data, pkgJsonPath) {
-  var text = JSON.stringify(sortPackageJson(data), null, 2) + '\n';
-  var orig = fs.readFileSync(pkgJsonPath).toString();
-  if (text !== orig) {
-    fs.writeFileSync(pkgJsonPath, text);
-    return true;
-  }
-  return false;
-}
-
 
 /**
  * Ensure the repo integrity.
@@ -225,15 +209,8 @@ function ensurePackageData(data, pkgJsonPath) {
 function ensureIntegrity() {
   var messages = {};
 
-  // Look in all of the packages.
-  var lernaConfig = require(path.join(basePath, 'lerna.json'));
-  var paths = [];
-  for (let spec of lernaConfig.packages) {
-    paths = paths.concat(glob.sync(path.join(basePath, spec)));
-  }
-
   // Pick up all the package versions.
-  paths.forEach(function(pkgPath) {
+  utils.getLernaPaths().forEach(function(pkgPath) {
     pkgPath = path.resolve(pkgPath);
     // Read in the package.json.
     try {

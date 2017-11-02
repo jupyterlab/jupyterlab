@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 var fs = require('fs-extra');
 var path = require('path');
-var childProcess = require('child_process');
-var sortPackageJson = require('sort-package-json');
+var utils = require('./utils');
 
 /**
  * Add an extension to the source tree of JupyterLab.
@@ -59,7 +58,7 @@ tsconfig.compilerOptions.paths[package.name] = [path.join('..', packageDirName, 
 fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
 
 // Update the core jupyterlab build dependencies.
-childProcess.execSync('npm run update:core', {stdio:[0,1,2]});
+utils.run('npm run update:core');
 
 // Update the lerna symlinks.
-childProcess.execSync('npm install', {stdio:[0,1,2]});
+utils.run('npm install');
