@@ -50,7 +50,7 @@ function getDependency(name) {
   return version;
 }
 
-exports = getDependency;
+module.exports = getDependency;
 
 if (require.main === module) {
   // Make sure we have required command line arguments.
