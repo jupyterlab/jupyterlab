@@ -205,7 +205,6 @@ function ensureIntegrity() {
 
   // Pick up all the package versions.
   utils.getLernaPaths().forEach(function(pkgPath) {
-    pkgPath = path.resolve(pkgPath);
     // Read in the package.json.
     try {
       var package = require(path.join(pkgPath, 'package.json'));
