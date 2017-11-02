@@ -42,6 +42,13 @@ class BuildManager {
   }
 
   /**
+   * Test whether to check build status automatically.
+   */
+  get shouldCheck(): boolean {
+    return PageConfig.getOption('buildCheck').toLowerCase() === 'true';
+  }
+
+  /**
    * Get whether the application should be built.
    */
   getStatus(): Promise<BuildManager.IStatus> {

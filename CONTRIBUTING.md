@@ -197,16 +197,6 @@ To have the system build after each source file change, run:
 jupyter lab --dev-mode --watch
 ```
 
-and refresh the browser.  You can open another terminal and run
-
-```bash
-npm run watch
-```
-
-to automatically recompile the TypeScript files while editing.  Note that
-only the compiled JavaScript files (and the CSS files) are watched by the 
-WebPack process.  
-
 ## Notes
 
 - By default, the application will load from the JupyterLab staging directory (default is `<sys-prefix>/share/jupyter/lab/build`.  If you wish to run

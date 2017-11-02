@@ -69,7 +69,7 @@ const main: JupyterLabPlugin<void> = {
       });
     };
 
-    if (builder.isAvailable) {
+    if (builder.isAvailable && builder.shouldCheck) {
       builder.getStatus().then(response => {
         if (response.status === 'building') {
           return doBuild();
