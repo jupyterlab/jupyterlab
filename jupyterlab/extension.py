@@ -23,10 +23,9 @@ from ._version import __version__
 DEV_NOTE_NPM = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
 
-    npm run watch
+    jupyter lab --dev-mode --watch
 
-from the JupyterLab repo directory in another terminal window to have the
-system incrementally watch and build JupyterLab's TypeScript for you, as you
+to have the system incrementally watch and build JupyterLab for you, as you
 make changes.
 """
 
@@ -87,7 +86,7 @@ def load_jupyter_server_extension(nbapp):
             sentinel = os.path.join(here, 'build', 'release_data.json')
             config.dev_mode = not os.path.exists(sentinel)
 
-    if config.dev_mode:
+    if config.dev_mode and not watch_mode:
         nbapp.log.info(DEV_NOTE_NPM)
     elif core_mode:
         nbapp.log.info(CORE_NOTE.strip())
