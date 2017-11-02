@@ -23,7 +23,6 @@
     "@types/fs-extra": "~4.0.3",
     "@types/glob": "~5.0.33",
     "@types/node": "~8.0.47",
-    "rimraf": "~2.6.2",
-    "typescript": "~2.4.2"
+    "rimraf": "~2.6.2"
   }
 }
