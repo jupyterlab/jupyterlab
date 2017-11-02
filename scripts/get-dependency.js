@@ -11,10 +11,13 @@ var allDevDeps = [];
  * Get the appropriate dependency for a given package name.
  */
 function getDependency(name) {
-  // Look in all of the packages.
-  var basePath = path.resolve('.');
-  var files = glob.sync(path.join(basePath, 'packages/*'));
   var version = null;
+
+  try {
+    version = '~' + require(path.join(name, 'package.json')).version;
+  } catch (e) {
+    // ignore
+  }
 
   for (var j = 0; j < files.length; j++) {
   // Read in the package.json.
@@ -27,18 +30,16 @@ function getDependency(name) {
     }
 
     if (package.name === name) {
-      version = package.version;
+      version = '^' + package.version;
     }
 
     var deps = package.dependencies || {};
     var devDeps = package.devDependencies || {};
     if (deps[name]) {
       allDeps.push(package.name);
-      version = deps[name];
     }
     if (devDeps[name]) {
       allDevDeps.push(package.name);
-      version = devDeps[name];
     }
   }
 

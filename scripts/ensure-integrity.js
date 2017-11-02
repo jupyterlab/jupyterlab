@@ -31,6 +31,7 @@ var pkgPaths = {};
 var pkgNames = {};
 var basePath = path.resolve('.');
 var localPackages = glob.sync(path.join(basePath, 'packages', '*'));
+var seenDeps = {};
 
 
 /**
@@ -40,17 +41,23 @@ function ensurePackage(pkgName) {
   var dname = pkgPaths[pkgName];
   var data = pkgData[pkgName];
   var deps = data.dependencies;
+  var devDeps = data.devDependencies;
   var messages = [];
 
-  // Verify local dependencies are correct.
+  // Verify dependencies are consistent.
   Object.keys(deps).forEach(function(name) {
-    if (pkgData[name]) {
-      var desired = '^' + pkgData[name].version;
-      if (deps[name] !== desired) {
-        messages.push('Invalid core version: ' + name);
-      }
-      data.dependencies[name] = '^' + pkgData[name].version;
+    if (!(name in seenDeps)) {
+      seenDeps[name] = getDependency(name);
     }
+    deps[name] = seenDeps[name];
+  });
+
+  // Verify devDependencies are consistent.
+  Object.keys(devDeps).forEach(function(name) {
+    if (!(name in seenDeps)) {
+      seenDeps[name] = getDependency(name);
+    }
+    devDeps[name] = seenDeps[name];
   });
 
   if (pkgName == '@jupyterlab/all-packages') {
@@ -96,7 +103,10 @@ function ensurePackage(pkgName) {
     }
     if (!deps[name]) {
       messages.push('Missing dependency: ' + name);
-      deps[name] = getDependency(name);
+      if (!(name in seenDeps)) {
+        seenDeps[name] = getDependency(name);
+      }
+      deps[name] = seenDeps[name];
     }
   });
 
