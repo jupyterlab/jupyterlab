@@ -10,7 +10,7 @@ var path = require('path');
 var glob = require('glob');
 var sortPackageJson = require('sort-package-json');
 var ts = require("typescript");
-var fs = require('fs');
+var fs = require('fs-extra');
 
 // Data to ignore.
 var MISSING = {
@@ -251,5 +251,9 @@ function ensureIntegrity() {
     console.log('Repo integrity verified!');
   }
 }
+
+
+// TODO: hoist dependencies and devDependencies to top level.
+// make sure there are no deps in devDependencies
 
 ensureIntegrity();
