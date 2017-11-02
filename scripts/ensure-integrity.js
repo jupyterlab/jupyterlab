@@ -220,27 +220,6 @@ function ensurePackageData(data, pkgJsonPath) {
 
 
 /**
- * Ensure the top level package.
- */
-function ensureTop() {
-  // Hoist dependencies and devDependencies to top level.
-  var localPath = path.join(basePath, 'package.json');
-  var localData = require(localPath);
-  localPackages.forEach(function (pkgPath) {
-    var name = pkgNames[pkgPath];
-    var data = pkgData[name];
-    var devDeps = data.devDependencies || {};
-    Object.keys(devDeps).forEach(function (name) {
-      localData.devDependencies[name] = devDeps[name];
-    });
-  });
-  if (ensurePackageData(localData, localPath)) {
-    return 'updated';
-  }
-}
-
-
-/**
  * Ensure the repo integrity.
  */
 function ensureIntegrity() {
@@ -267,12 +246,6 @@ function ensureIntegrity() {
     pkgPaths[package.name] = pkgPath;
     pkgNames[pkgPath] = package.name;
   });
-
-  // Handle the top level package.
-  var topMessage = ensureTop();
-  if (topMessage) {
-    messages['top'] = topMessage;
-  }
 
   // Validate each package.
   for (let name in pkgData) {

@@ -78,6 +78,7 @@
     "typescript": "~2.4.2",
     "webpack": "~2.7.0",
     "ws": "~1.1.4",
-    "xmlhttprequest": "~1.8.0"
+    "xmlhttprequest": "~1.8.0",
+    "lerna": "^2.4.0"
   }
 }
