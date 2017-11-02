@@ -413,16 +413,25 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
   // Add a console creator to the File menu
   mainMenu.fileMenu.newMenu.addItem({ command: CommandIDs.create });
 
+  // Add a kernel user to the Kernel menu
+  mainMenu.kernelMenu.addUser<ConsolePanel>({
+    tracker,
+    interruptKernel: current => {
+      let kernel = current.console.session.kernel;
+      if (kernel) {
+        return kernel.interrupt();
+      }
+    },
+    restartKernel: current => current.console.session.restart(),
+    changeKernel: current => current.console.session.selectKernel()
+  });
+
   // Add the console menu.
   menu.addItem({ command: CommandIDs.run });
   menu.addItem({ command: CommandIDs.runForced });
   menu.addItem({ command: CommandIDs.linebreak });
   menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.clear });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ command: CommandIDs.interrupt });
-  menu.addItem({ command: CommandIDs.restart });
-  menu.addItem({ command: CommandIDs.changeKernel });
   menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.closeAndShutdown });
 
