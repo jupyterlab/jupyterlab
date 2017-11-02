@@ -43,7 +43,7 @@ var data = require(path.join(packagePath, 'package.json'));
 var name = data.name;
 var version = data.version;
 
-run('npm run update:dependency ' + name + ' ^' + version);
+run('npm run integrity');
 run('git commit -a -m "Release ' + name + '@' + version + '"');
 run('git tag ' + name + '@' + version);
 

@@ -3,25 +3,26 @@ var fs = require('fs');
 var path = require('path');
 var glob = require('glob');
 var childProcess = require('child_process');
+var sortPackageJson = require('sort-package-json');
+
 
 // Make sure we have required command line arguments.
-if (process.argv.length < 4) {
-    var msg = '** Must supply a target library and separate version specifier\n';
-    process.stderr.write(msg);
-    process.exit(1);
+if (process.argv.length !== 3) {
+  var msg = '** Must supply an update specifier\n';
+  process.stderr.write(msg);
+  process.exit(1);
 }
 
 // Extract the desired library target and specifier.
-var target = process.argv[2];
-var specifier = process.argv[3];
+var parts = process.argv[2].split('@');
 
 // Translate @latest to a concrete version.
-if (specifier === '@latest') {
+if (parts.length == 1 || parts[1] == 'latest') {
   var cmd = 'npm view ' + target + ' version';
-  var specifier = childProcess.execSync(cmd);
-  specifier = '~' + String(specifier).trim();
+  parts.push('~' + String(childProcess.execSync(cmd)).trim());
 }
-
+var name = parts[0];
+var specifier = parts[1];
 
 // Get all of the packages.
 var basePath = path.resolve('.');
@@ -60,5 +61,6 @@ function handlePackage(packagePath) {
   }
 
   // Write the file back to disk.
-  fs.writeFileSync(packagePath, JSON.stringify(package, null, 2) + '\n');
+  var text = JSON.stringify(sortPackageJson(data), null, 2) + '\n';
+  fs.writeFileSync(packagePath, text);
 }
