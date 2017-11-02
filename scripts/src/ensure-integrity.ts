@@ -47,6 +47,9 @@ function ensurePackage(pkgName: string): string[] {
     if (!(name in seenDeps)) {
       seenDeps[name] = getDependency.getDependency(name);
     }
+    if (deps[name] !== seenDeps[name]) {
+      messages.push('Updated package: ' + name);
+    }
     deps[name] = seenDeps[name];
   });
 
@@ -54,6 +57,9 @@ function ensurePackage(pkgName: string): string[] {
   Object.keys(devDeps).forEach(name => {
     if (!(name in seenDeps)) {
       seenDeps[name] = getDependency.getDependency(name);
+    }
+    if (deps[name] !== seenDeps[name]) {
+      messages.push('Updated package: ' + name);
     }
     devDeps[name] = seenDeps[name];
   });
@@ -64,8 +70,8 @@ function ensurePackage(pkgName: string): string[] {
   filenames = filenames.concat(glob.sync(path.join(dname, 'src/**/*.ts*')));
 
   if (filenames.length === 0) {
-    if (utils.ensurePackageData(data, path.join(dname, 'package.json'))) {
-      messages.push('Package data changed');
+    if (messages.length > 0) {
+      utils.ensurePackageData(data, path.join(dname, 'package.json'));
     }
     return messages;
   }
@@ -116,8 +122,8 @@ function ensurePackage(pkgName: string): string[] {
     }
   });
 
-  if (utils.ensurePackageData(data, path.join(dname, 'package.json'))) {
-    messages.push('Package data changed');
+  if (messages.length > 0) {
+    utils.ensurePackageData(data, path.join(dname, 'package.json'));
   }
   return messages;
 }
@@ -192,8 +198,8 @@ function ensureAllPackages(): string[] {
   });
 
   // Write the files.
-  if (utils.ensurePackageData(allPackageData, allPackageJson)) {
-    messages.push('Package data changed');
+  if (messages.length > 0) {
+    utils.ensurePackageData(allPackageData, allPackageJson);
   }
   let newIndex = lines.join('\n');
   if (newIndex !== index) {
@@ -237,9 +243,7 @@ function ensureIntegrity(): void {
   // Handle the top level package.
   let corePath: string = path.resolve('.', 'package.json');
   let coreData: any = require(corePath);
-  if (utils.ensurePackageData(coreData, corePath)) {
-    messages['top'] = ['Update package'];
-  }
+  utils.ensurePackageData(coreData, corePath);
 
   // Handle the all-packages metapackage.
   let pkgMessages = ensureAllPackages();
