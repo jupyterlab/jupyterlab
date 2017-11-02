@@ -6,9 +6,9 @@ var childProcess = require('child_process');
 
 // Make sure we have required command line arguments.
 if (process.argv.length < 3) {
-    var msg = '** Must supply a target package';
-    process.stderr.write(msg);
-    process.exit(1);
+  var msg = '** Must supply a target package';
+  process.stderr.write(msg);
+  process.exit(1);
 }
 
 // Extract the desired package target.
