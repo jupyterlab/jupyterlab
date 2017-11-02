@@ -31,7 +31,7 @@ import {
 
 import {
   DocumentRegistry
-} from '.';
+} from './registry';
 
 
 /**

@@ -22,8 +22,12 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IClientSession, Styling
-} from '.';
+  IClientSession
+} from './clientsession';
+
+import {
+  Styling
+} from './styling';
 
 
 /**

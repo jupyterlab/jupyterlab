@@ -7,7 +7,7 @@ import {
 
 import {
   IDataConnector
-} from '.';
+} from './interfaces';
 
 
 /* tslint:disable */
@@ -111,13 +111,16 @@ class StateDB implements IStateDB {
   clear(): Promise<void> {
     const prefix = `${this.namespace}:`;
     let i = window.localStorage.length;
+
     while (i) {
       let key = window.localStorage.key(--i);
+
       if (key && key.indexOf(prefix) === 0) {
         window.localStorage.removeItem(key);
       }
     }
-    return Promise.resolve(void 0);
+
+    return Promise.resolve(undefined);
   }
 
   /**
@@ -140,9 +143,11 @@ class StateDB implements IStateDB {
   fetch(id: string): Promise<ReadonlyJSONValue | undefined> {
     const key = `${this.namespace}:${id}`;
     const value = window.localStorage.getItem(key);
+
     if (!value) {
       return Promise.resolve(undefined);
     }
+
     try {
       const envelope = JSON.parse(value) as Private.Envelope;
 
@@ -173,10 +178,13 @@ class StateDB implements IStateDB {
     const regex = new RegExp(`^${this.namespace}\:`);
     let items: IStateItem[] = [];
     let i = window.localStorage.length;
+
     while (i) {
       let key = window.localStorage.key(--i);
+
       if (key && key.indexOf(prefix) === 0) {
         let value = window.localStorage.getItem(key);
+
         try {
           items.push({
             id: key.replace(regex, ''),
@@ -188,6 +196,7 @@ class StateDB implements IStateDB {
         }
       }
     }
+
     return Promise.resolve(items);
   }
 
@@ -200,7 +209,8 @@ class StateDB implements IStateDB {
    */
   remove(id: string): Promise<void> {
     window.localStorage.removeItem(`${this.namespace}:${id}`);
-    return Promise.resolve(void 0);
+
+    return Promise.resolve(undefined);
   }
 
   /**
@@ -226,11 +236,14 @@ class StateDB implements IStateDB {
       const serialized = JSON.stringify(envelope);
       const length = serialized.length;
       const max = this.maxLength;
+
       if (length > max) {
         throw new Error(`Data length (${length}) exceeds maximum (${max})`);
       }
+
       window.localStorage.setItem(key, serialized);
-      return Promise.resolve(void 0);
+
+      return Promise.resolve(undefined);
     } catch (error) {
       return Promise.reject(error);
     }
