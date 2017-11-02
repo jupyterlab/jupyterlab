@@ -451,6 +451,20 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
   // Add new notebook creation to the file menu.
   mainMenu.fileMenu.newMenu.addItem({ command: CommandIDs.createNew });
 
+  // Add a kernel user to the Kernel menu
+  mainMenu.kernelMenu.addUser<NotebookPanel>({
+    tracker,
+    interruptKernel: current => {
+      let kernel = current.session.kernel;
+      if (kernel) {
+        return kernel.interrupt();
+      }
+      return Promise.resolve(void 0);
+    },
+    restartKernel: current => current.session.restart(),
+    changeKernel: current => current.session.selectKernel()
+  });
+
   // Add a launcher item if the launcher is available.
   if (launcher) {
     services.ready.then(() => {
@@ -1338,9 +1352,6 @@ function createMenu(app: JupyterLab): Menu {
   menu.addItem({ command: CommandIDs.clearAllOutputs });
   menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.runAll });
-  menu.addItem({ command: CommandIDs.interrupt });
-  menu.addItem({ command: CommandIDs.restart });
-  menu.addItem({ command: CommandIDs.changeKernel });
   menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.createConsole });
   menu.addItem({ type: 'separator' });

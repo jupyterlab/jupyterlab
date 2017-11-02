@@ -421,6 +421,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
       if (kernel) {
         return kernel.interrupt();
       }
+      return Promise.resolve(void 0);
     },
     restartKernel: current => current.console.session.restart(),
     changeKernel: current => current.console.session.selectKernel()
