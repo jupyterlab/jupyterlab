@@ -2,17 +2,36 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  JupyterLab
+} from '@jupyterlab/application';
+
+import {
   ArrayExt
 } from '@phosphor/algorithm';
 
 import {
-  Menu
+  Menu, Widget
 } from '@phosphor/widgets';
 
 import {
   IMainMenu
 } from './mainmenu';
 
+
+/**
+ * A namespace for command IDs of semantic extension points.
+ */
+export
+namespace CommandIDs {
+  export
+  const interruptKernel = 'kernel:interrupt';
+
+  export
+  const restartKernel = 'kernel:restart';
+
+  export
+  const changeKernel = 'kernel:change';
+}
 
 /**
  * An extensible menu for JupyterLab application menus.
@@ -155,11 +174,70 @@ class KernelMenu extends JupyterLabMenu implements IMainMenu.IKernelMenu {
   /**
    * Construct the kernel menu.
    */
-  constructor(options: Menu.IOptions) {
+  constructor(app: JupyterLab, options: Menu.IOptions) {
     super(options);
     this.title.label = 'Kernel';
+
+    const commands = app.commands;
+
+    commands.addCommand(CommandIDs.interruptKernel, {
+      label: 'Interrupt Kernel',
+      isEnabled: () => {
+        const user = this._findUser(app.shell.currentWidget);
+        return !!user && !!user.interruptKernel;
+      },
+      execute: () => {
+        const widget = app.shell.currentWidget;
+        const user = this._findUser(widget);
+        return user!.interruptKernel(widget);
+      }
+    });
+
+    commands.addCommand(CommandIDs.restartKernel, {
+      label: 'Restart Kernel',
+      isEnabled: () => {
+        const user = this._findUser(app.shell.currentWidget);
+        return !!user && !!user.restartKernel;
+      },
+      execute: () => {
+        const widget = app.shell.currentWidget;
+        const user = this._findUser(widget);
+        return user!.restartKernel(widget);
+      }
+    });
+
+    commands.addCommand(CommandIDs.changeKernel, {
+      label: 'Change Kernel',
+      isEnabled: () => {
+        const user = this._findUser(app.shell.currentWidget);
+        return !!user && !!user.changeKernel;
+      },
+      execute: () => {
+        const widget = app.shell.currentWidget;
+        const user = this._findUser(widget);
+        return user!.changeKernel(widget);
+      }
+    });
+
+    this.addItem({ command: CommandIDs.interruptKernel });
+    this.addItem({ command: CommandIDs.restartKernel });
+    this.addItem({ command: CommandIDs.changeKernel });
   }
+
+  addUser<T extends Widget>(user: IMainMenu.IKernelMenu.IKernelUser<T>) {
+    this._users.push(user);
+  }
+
+  private _findUser(widget: Widget | null): IMainMenu.IKernelMenu.IKernelUser<Widget> | undefined {
+    if (!widget) {
+      return undefined;
+    }
+    return ArrayExt.findFirstValue(this._users, el => el.tracker.has(widget))
+  }
+
+  private _users: IMainMenu.IKernelMenu.IKernelUser<Widget>[] = [];
 }
+
 /**
  * An extensible View menu for the application.
  */

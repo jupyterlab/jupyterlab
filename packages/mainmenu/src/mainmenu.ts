@@ -2,19 +2,27 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ArrayExt
-} from '@phosphor/algorithm';
+  JupyterLab
+} from '@jupyterlab/application';
 
 import {
-  CommandRegistry
-} from '@phosphor/commands';
+  IInstanceTracker
+} from '@jupyterlab/apputils';
+
+import {
+  Kernel
+} from '@jupyterlab/services';
+
+import {
+  ArrayExt
+} from '@phosphor/algorithm';
 
 import {
   Token
 } from '@phosphor/coreutils';
 
 import {
-  Menu, MenuBar
+  Menu, MenuBar, Widget
 } from '@phosphor/widgets';
 
 import {
@@ -143,7 +151,43 @@ namespace IMainMenu {
    */
   export
   interface IKernelMenu extends IJupyterLabMenu {
+    addUser<T extends Widget>(user: IKernelMenu.IKernelUser<T>): void;
   }
+
+  /**
+   * Namespace for IKernelMenu
+   */
+  export
+  namespace IKernelMenu {
+    /**
+     * Interface for a Kernel user to register itself
+     * with the IKernelMenu's semantic extension points.
+     */
+    export
+    interface IKernelUser<T extends Widget> {
+      /**
+       * A widget tracker for identifying the appropriate
+       * kernel user.
+       */
+      tracker: IInstanceTracker<T>;
+
+      /**
+       * A function to interrupt the kernel.
+       */
+      interruptKernel?: (widget: T) => Promise<void>;
+
+      /**
+       * A function to restart the kernel.
+       */
+      restartKernel?: (widget: T) => Promise<Kernel.IKernelConnection>;
+
+      /**
+       * A function to change the kernel.
+       */
+      changeKernel?: (widget: T) => Promise<void>;
+    }
+  }
+
 
   /**
    * An interface for a Run menu.
@@ -163,12 +207,13 @@ class MainMenu extends MenuBar implements IMainMenu {
   /**
    * Construct the main menu bar.
    */
-  constructor(commands: CommandRegistry) {
+  constructor(app: JupyterLab) {
     super();
+    const commands = app.commands;
     this.editMenu = new EditMenu({ commands });
     this.fileMenu = new FileMenu({ commands });
     this.helpMenu = new HelpMenu({ commands });
-    this.kernelMenu = new KernelMenu({ commands });
+    this.kernelMenu = new KernelMenu(app, { commands });
     this.runMenu = new RunMenu({ commands });
     this.viewMenu = new ViewMenu({ commands });
 

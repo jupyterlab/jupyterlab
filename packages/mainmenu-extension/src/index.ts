@@ -21,8 +21,7 @@ const menu: JupyterLabPlugin<IMainMenu> = {
   id: '@jupyterlab/apputils-extension:menu',
   provides: IMainMenu,
   activate: (app: JupyterLab): IMainMenu => {
-    const { commands } = app;
-    let menu = new MainMenu(commands);
+    let menu = new MainMenu(app);
     menu.id = 'jp-MainMenu';
 
     let logo = new Widget();
