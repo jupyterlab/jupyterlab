@@ -11,10 +11,10 @@
     "test:debug": "python run-test.py  --browsers=Chrome --singleRun=false --debug=true karma.conf.js",
     "test:firefox": "python run-test.py --browsers=Firefox karma.conf.js",
     "test:ie": "python run-test.py  --browsers=IE karma.conf.js",
-    "watch:webpack": "webpack --watch",
+    "watch": "npm run clean && tsc && run-p watch:*",
     "watch:test": "node watch-test.js",
     "watch:ts": "tsc -w",
-    "watch": "npm run clean && tsc && run-p watch:*"
+    "watch:webpack": "webpack --watch"
   },
   "dependencies": {
     "@jupyterlab/application": "^0.11.1",

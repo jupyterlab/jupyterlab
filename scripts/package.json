@@ -1,7 +1,7 @@
 {
   "name": "@jupyterlab/scripts",
-  "private": true,
   "version": "0.1.0",
+  "private": true,
   "description": "JupyterLab - Scripts",
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
@@ -11,9 +11,13 @@
     "watch": "tsc -w"
   },
   "dependencies": {
+    "child_process": "~1.0.2",
+    "fs": "~0.0.1-security",
     "fs-extra": "~4.0.2",
     "glob": "~7.1.2",
-    "sort-package-json": "~1.7.1"
+    "path": "~0.12.7",
+    "sort-package-json": "~1.7.1",
+    "typescript": "~2.4.2"
   },
   "devDependencies": {
     "@types/fs-extra": "~4.0.3",
