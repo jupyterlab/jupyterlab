@@ -30,6 +30,7 @@ var pkgData = {};
 var pkgPaths = {};
 var pkgNames = {};
 var basePath = path.resolve('.');
+var localPackages = glob.sync(path.join(basePath, 'packages', '*'));
 
 
 /**
@@ -121,7 +122,6 @@ function ensurePackage(pkgName) {
  * Ensure the all-packages package.
  */
 function ensureAllPackages() {
-  var localPackages = glob.sync(path.join(basePath, 'packages', '*'));
   var allPackagesPath = path.join(basePath, 'packages', 'all-packages');
   var allPackageJson = path.join(allPackagesPath, 'package.json');
   var allPackageData = require(allPackageJson);
@@ -216,17 +216,16 @@ function ensureTop() {
   // Hoist dependencies and devDependencies to top level.
   var localPath = path.join(basePath, 'package.json');
   var localData = require(localPath);
-  var localPackages = glob.sync(path.join(basePath, 'packages', '*'));
   localPackages.forEach(function (pkgPath) {
     var name = pkgNames[pkgPath];
     var data = pkgData[name];
-    var devDeps = data.dependencies || {};
+    var devDeps = data.devDependencies || {};
     Object.keys(devDeps).forEach(function (name) {
-      localData.devDependencies[name] = deps[name];
+      localData.devDependencies[name] = devDeps[name];
     });
-    if (ensurePackageData(localData, localPath)) {
-      return 'updated';
-    }
+  });
+  if (ensurePackageData(localData, localPath)) {
+    return 'updated';
   }
 }
 
@@ -236,12 +235,6 @@ function ensureTop() {
  */
 function ensureIntegrity() {
   var messages = {};
-
-  // Handle the top level package.
-  var topMessage = ensureTop();
-  if (topMessage) {
-    messages['top'] = topMessage;
-  }
 
   // Look in all of the packages.
   var lernaConfig = require(path.join(basePath, 'lerna.json'));
@@ -264,6 +257,12 @@ function ensureIntegrity() {
     pkgPaths[package.name] = pkgPath;
     pkgNames[pkgPath] = package.name;
   });
+
+  // Handle the top level package.
+  var topMessage = ensureTop();
+  if (topMessage) {
+    messages['top'] = topMessage;
+  }
 
   // Validate each package.
   for (let name in pkgData) {
