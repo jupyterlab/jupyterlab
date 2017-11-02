@@ -12,7 +12,6 @@
   },
   "dependencies": {
     "child_process": "~1.0.2",
-    "fs": "~0.0.1-security",
     "fs-extra": "~4.0.2",
     "glob": "~7.1.2",
     "path": "~0.12.7",

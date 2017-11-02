@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import fs = require('fs');
+import fs = require('fs-extra');
 import path = require('path');
 import utils = require('./utils');
 
