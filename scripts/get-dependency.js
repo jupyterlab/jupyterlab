@@ -3,42 +3,64 @@ var childProcess = require('child_process');
 var path = require('path');
 var glob = require('glob');
 
-var name = process.argv[2];
+var allDeps = [];
+var allDevDeps = [];
 
 
-// Look in all of the packages.
-var basePath = path.resolve('.');
-var files = glob.sync(path.join(basePath, 'packages/*'));
+/**
+ * Get the appropriate dependency for a given package name.
+ */
+function getDependency(name) {
+  // Look in all of the packages.
+  var basePath = path.resolve('.');
+  var files = glob.sync(path.join(basePath, 'packages/*'));
+  var version = null;
 
-for (var j = 0; j < files.length; j++) {
-// Read in the package.json.
-  var packagePath = path.join(files[j], 'package.json');
-  try {
-    var package = require(packagePath);
-  } catch (e) {
-    console.log('Skipping package ' + packagePath);
-    continue;
-  }
+  for (var j = 0; j < files.length; j++) {
+  // Read in the package.json.
+    var packagePath = path.join(files[j], 'package.json');
+    try {
+      var package = require(packagePath);
+    } catch (e) {
+      console.log('Skipping package ' + packagePath);
+      continue;
+    }
 
-  if (package.name === name) {
-    console.log(package.version);
-    process.exit(0);
-  }
+    if (package.name === name) {
+      version = package.version;
+    }
 
-  var deps = package.dependencies || {};
-  if (package.devDependencies) {
-    for (var key of Object.keys(package.devDependencies)) {
-      deps[key] = package.devDependencies[key];
+    var deps = package.dependencies || {};
+    var devDeps = package.devDependencies || {};
+    if (deps[name]) {
+      allDeps.push(package.name);
+      version = deps[name];
+    }
+    if (devDeps[name]) {
+      allDevDeps.push(package.name);
+      version = devDeps[name];
     }
   }
-  if (deps[name]) {
-    console.log('    ' + '"' + name + '": "' + deps[name] + '"');
-    process.exit(0);
+
+  if (!version) {
+    var cmd = 'npm view ' + name + ' version';
+    version = '~' + String(childProcess.execSync(cmd)).trim();
   }
+
+  return version;
 }
 
-console.log('** Package not yet included!');
+exports = getDependency;
 
-var cmd = 'npm view ' + name + ' version';
-var specifier = childProcess.execSync(cmd);
-console.log('    ' + '"' + name + '": "' + '~' + String(specifier).trim() + '"');
+if (require.main === module) {
+  // Make sure we have required command line arguments.
+  if (process.argv.length < 3) {
+      var msg = '** Must supply a target library name\n';
+      process.stderr.write(msg);
+      process.exit(1);
+  }
+  var version = getDependency(process.argv[2]);
+  console.log('deps: ', allDeps);
+  console.log('devDeps:', allDevDeps);
+  console.log('\n    ' + '"' + name + '": "' + version + '"');
+}

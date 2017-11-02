@@ -24,11 +24,11 @@ var target = process.argv[2];
 var basePath = path.resolve('.');
 
 // Get the package.json of the extension.
-var packagePath = path.join(basePath, 'packages', target);
+var packagePath = path.join(basePath, 'packages', target, 'package.json');
 if (!fs.existsSync(packagePath)) {
-    packagePath = require.resolve(target);
+    packagePath = require.resolve(path.join(target, 'package.json'));
 }
-var package = require(path.join(packagePath, 'package.json'));
+var package = require(packagePath);
 
 // Remove the extension path from packages/all-packages/tsconfig.json
 var tsconfigPath = path.join(basePath, 'packages', 'all-packages', 'tsconfig.json');
@@ -37,7 +37,7 @@ tsconfig.compilerOptions.paths[package.name] = undefined;
 fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
 
 // Remove the package from the local tree.
-fs.removeSync(packagePath);
+fs.removeSync(path.dirname(packagePath));
 
 // Update the core jupyterlab build dependencies.
 childProcess.execSync('npm run update:core', {stdio:[0,1,2]});

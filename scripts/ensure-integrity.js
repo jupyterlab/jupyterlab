@@ -11,6 +11,8 @@ var glob = require('glob');
 var sortPackageJson = require('sort-package-json');
 var ts = require("typescript");
 var fs = require('fs-extra');
+var getDependency = require('./get-dependency');
+
 
 // Data to ignore.
 var MISSING = {
@@ -37,21 +39,21 @@ function ensurePackage(pkgName) {
   var dname = pkgPaths[pkgName];
   var data = pkgData[pkgName];
   var deps = data.dependencies;
-  var problems = [];
+  var messages = [];
 
   // Verify local dependencies are correct.
   Object.keys(deps).forEach(function(name) {
     if (pkgData[name]) {
       var desired = '^' + pkgData[name].version;
       if (deps[name] !== desired) {
-        problems.push('Invalid core version: ' + name);
+        messages.push('Invalid core version: ' + name);
       }
       data.dependencies[name] = '^' + pkgData[name].version;
     }
   });
 
   if (pkgName == '@jupyterlab/all-packages') {
-    problems = problems.concat(ensureAllPackages());
+    messages = messages.concat(ensureAllPackages());
   }
 
   // For TypeScript files, verify imports match dependencies.
@@ -60,9 +62,9 @@ function ensurePackage(pkgName) {
 
   if (filenames.length == 0) {
     if (ensurePackageData(data, path.join(dname, 'package.json'))) {
-      problems.push('Package data changed');
+      messages.push('Package data changed');
     }
-    return problems;
+    return messages;
   }
 
   var imports = [];
@@ -92,7 +94,8 @@ function ensurePackage(pkgName) {
       return;
     }
     if (!deps[name]) {
-      problems.push('Missing dependency: ' + name);
+      messages.push('Missing dependency: ' + name);
+      deps[name] = getDependency(name);
     }
   });
 
@@ -102,15 +105,15 @@ function ensurePackage(pkgName) {
       return;
     }
     if (names.indexOf(name) === -1) {
-      problems.push('Unused dependency: ' + name);
+      messages.push('Unused dependency: ' + name);
       delete data.dependencies[name]
     }
   });
 
   if (ensurePackageData(data, path.join(dname, 'package.json'))) {
-    problems.push('Package data changed');
+    messages.push('Package data changed');
   }
-  return problems;
+  return messages;
 }
 
 
@@ -129,7 +132,7 @@ function ensureAllPackages() {
   var indexPath = path.join(basePath, 'packages', 'all-packages', 'src', 'index.ts');
   var index = fs.readFileSync(indexPath, 'utf8');
   var lines = index.split('\n').slice(0, 3);
-  var problems = [];
+  var messages = [];
 
   localPackages.forEach(function (pkgPath) {
     if (pkgPath === allPackagesPath) {
@@ -152,21 +155,21 @@ function ensureAllPackages() {
     lines.push('import "' + name + '";\n');
 
     if (!valid) {
-      problems.push('Updated: ' + name);
+      messages.push('Updated: ' + name);
     }
   });
 
   // Write the files.
   if (ensurePackageData(allPackageData, allPackageJson)) {
-    problems.push('Package data changed');
+    messages.push('Package data changed');
   }
   var newIndex = lines.join('\n');
   if (newIndex != index) {
-    problems.push('Index changed');
+    messages.push('Index changed');
     fs.writeFileSync(indexPath, lines.join('\n'));
   }
 
-  return problems;
+  return messages;
 }
 
 
@@ -207,10 +210,38 @@ function ensurePackageData(data, pkgJsonPath) {
 
 
 /**
+ * Ensure the top level package.
+ */
+function ensureTop() {
+  // Hoist dependencies and devDependencies to top level.
+  var localPath = path.join(basePath, 'package.json');
+  var localData = require(localPath);
+  var localPackages = glob.sync(path.join(basePath, 'packages', '*'));
+  localPackages.forEach(function (pkgPath) {
+    var name = pkgNames[pkgPath];
+    var data = pkgData[name];
+    var devDeps = data.dependencies || {};
+    Object.keys(devDeps).forEach(function (name) {
+      localData.devDependencies[name] = deps[name];
+    });
+    if (ensurePackageData(localData, localPath)) {
+      return 'updated';
+    }
+  }
+}
+
+
+/**
  * Ensure the repo integrity.
  */
 function ensureIntegrity() {
-  var errors = {};
+  var messages = {};
+
+  // Handle the top level package.
+  var topMessage = ensureTop();
+  if (topMessage) {
+    messages['top'] = topMessage;
+  }
 
   // Look in all of the packages.
   var lernaConfig = require(path.join(basePath, 'lerna.json'));
@@ -236,24 +267,25 @@ function ensureIntegrity() {
 
   // Validate each package.
   for (let name in pkgData) {
-    var problems = ensurePackage(name);
-    if (problems.length > 0) {
-      errors[name] = problems;
+    var pkgMessages = ensurePackage(name);
+    if (pkgMessages.length > 0) {
+      messages[name] = pkgMessages;
     }
   };
 
-  // Handle any errors.
-  if (Object.keys(errors).length > 0) {
-    console.log('Repo integrity report:')
-    console.log(JSON.stringify(errors, null, 2));
+  // Handle any messages.
+  if (Object.keys(messages).length > 0) {
+    console.log(JSON.stringify(messages, null, 2));
+    if (process.env.TRAVIS_BRANCH) {
+      console.log('\n\nPlease run `npm run integrity` locally and commit the changes');
+    } else {
+      console.log('\n\nPlease commit the changes by running:');
+      console.log('git commit -a -m "Package integrity updates"')
+    }
     process.exit(1);
   } else {
     console.log('Repo integrity verified!');
   }
 }
-
-
-// TODO: hoist dependencies and devDependencies to top level.
-// make sure there are no deps in devDependencies
 
 ensureIntegrity();

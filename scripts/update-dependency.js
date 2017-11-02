@@ -6,7 +6,7 @@ var childProcess = require('child_process');
 
 // Make sure we have required command line arguments.
 if (process.argv.length < 4) {
-    var msg = '** Must supply a target library and separate version specifier';
+    var msg = '** Must supply a target library and separate version specifier\n';
     process.stderr.write(msg);
     process.exit(1);
 }
