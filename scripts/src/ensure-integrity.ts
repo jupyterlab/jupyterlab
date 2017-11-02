@@ -5,112 +5,113 @@
  * Ensure imports match dependencies for TypeScript packages.
  * Manage the all-packages meta package.
  */
-var path = require('path');
-var glob = require('glob');
-var ts = require("typescript");
-var fs = require('fs-extra');
-var getDependency = require('./get-dependency');
-var utils = require('./utils');
+import path = require('path');
+import glob = require('glob');
+import ts = require('typescript');
+import fs = require('fs-extra');
+import getDependency = require('./get-dependency');
+import utils = require('./utils');
 
 
 // Data to ignore.
-var MISSING = {
-  "@jupyterlab/buildutils": ["path"]
-}
+let MISSING: { [key: string]: string[] } = {
+  '@jupyterlab/buildutils': ['path']
+};
 
-var UNUSED = {
-  "@jupyterlab/apputils-extension": ["es6-promise"],
-  "@jupyterlab/theme-dark-extension": ["font-awesome"],
-  "@jupyterlab/theme-light-extension": ["font-awesome"],
-  "@jupyterlab/vega2-extension": ["d3","vega","vega-lite"]
-}
+let UNUSED: { [key: string]: string[] } = {
+  '@jupyterlab/apputils-extension': ['es6-promise'],
+  '@jupyterlab/theme-dark-extension': ['font-awesome'],
+  '@jupyterlab/theme-light-extension': ['font-awesome'],
+  '@jupyterlab/vega2-extension': ['d3', 'vega', 'vega-lite']
+};
 
-var pkgData = {};
-var pkgPaths = {};
-var pkgNames = {};
-var seenDeps = {};
+let pkgData: { [key: string]: any } = {};
+let pkgPaths: { [key: string]: string } = {};
+let pkgNames: { [key: string]: string } = {};
+let seenDeps: { [key: string]: string } = {};
 
 
 /**
  * Ensure the integrity of a package.
  */
-function ensurePackage(pkgName) {
-  var dname = pkgPaths[pkgName];
-  var data = pkgData[pkgName];
-  var deps = data.dependencies;
-  var devDeps = data.devDependencies;
-  var messages = [];
+function ensurePackage(pkgName: string): string[] {
+  let dname = pkgPaths[pkgName];
+  let data = pkgData[pkgName];
+  let deps: { [key: string]: string } = data.dependencies;
+  let devDeps: { [key: string]: string } = data.devDependencies;
+  let messages: string[] = [];
 
   // Verify dependencies are consistent.
-  Object.keys(deps).forEach(function(name) {
+  Object.keys(deps).forEach(name => {
     if (!(name in seenDeps)) {
-      seenDeps[name] = getDependency(name);
+      seenDeps[name] = getDependency.getDependency(name);
     }
     deps[name] = seenDeps[name];
   });
 
   // Verify devDependencies are consistent.
-  Object.keys(devDeps).forEach(function(name) {
+  Object.keys(devDeps).forEach(name => {
     if (!(name in seenDeps)) {
-      seenDeps[name] = getDependency(name);
+      seenDeps[name] = getDependency.getDependency(name);
     }
     devDeps[name] = seenDeps[name];
   });
 
   // For TypeScript files, verify imports match dependencies.
+  let filenames: string[] = [];
   filenames = glob.sync(path.join(dname, 'src/*.ts*'));
   filenames = filenames.concat(glob.sync(path.join(dname, 'src/**/*.ts*')));
 
-  if (filenames.length == 0) {
+  if (filenames.length === 0) {
     if (utils.ensurePackageData(data, path.join(dname, 'package.json'))) {
       messages.push('Package data changed');
     }
     return messages;
   }
 
-  var imports = [];
+  let imports: string[] = [];
 
   // Extract all of the imports from the TypeScript files.
   filenames.forEach(fileName => {
-    var sourceFile = ts.createSourceFile(fileName,
-        fs.readFileSync(fileName).toString(), ts.ScriptTarget.ES6,
+    let sourceFile = ts.createSourceFile(fileName,
+        fs.readFileSync(fileName).toString(), (ts.ScriptTarget as any).ES6,
         /*setParentNodes */ true);
     imports = imports.concat(getImports(sourceFile));
   });
-  var names = Array.from(new Set(imports)).sort();
+  let names: string[] = Array.from(new Set(imports)).sort();
   names = names.map(function(name) {
-    var parts = name.split('/');
+    let parts = name.split('/');
     if (name.indexOf('@') === 0) {
       return parts[0] + '/' + parts[1];
     }
     return parts[0];
-  })
+  });
 
   // Look for imports with no dependencies.
-  names.forEach(function(name) {
+  names.forEach(name => {
     if (MISSING[pkgName] && MISSING[pkgName].indexOf(name) !== -1) {
       return;
     }
-    if (name == '.' || name == '..') {
+    if (name === '.' || name === '..') {
       return;
     }
     if (!deps[name]) {
       messages.push('Missing dependency: ' + name);
       if (!(name in seenDeps)) {
-        seenDeps[name] = getDependency(name);
+        seenDeps[name] = getDependency.getDependency(name);
       }
       deps[name] = seenDeps[name];
     }
   });
 
   // Look for unused packages
-  Object.keys(deps).forEach(function(name) {
+  Object.keys(deps).forEach(name => {
     if (UNUSED[pkgName] && UNUSED[pkgName].indexOf(name) !== -1) {
       return;
     }
     if (names.indexOf(name) === -1) {
       messages.push('Unused dependency: ' + name);
-      delete data.dependencies[name]
+      delete data.dependencies[name];
     }
   });
 
@@ -123,12 +124,16 @@ function ensurePackage(pkgName) {
 
 /**
  * Extract the module imports from a TypeScript source file.
+ *
+ * @param sourceFile - The path to the source file.
+ *
+ * @returns An array of package names.
  */
-function getImports(sourceFile) {
-  var imports = [];
+function getImports(sourceFile: ts.SourceFile): string[] {
+  let imports: string[] = [];
   handleNode(sourceFile);
 
-  function handleNode(node) {
+  function handleNode(node: any): void {
     switch (node.kind) {
       case ts.SyntaxKind.ImportDeclaration:
         imports.push(node.moduleSpecifier.text);
@@ -136,6 +141,8 @@ function getImports(sourceFile) {
       case ts.SyntaxKind.ImportEqualsDeclaration:
         imports.push(node.moduleReference.expression.text);
         break;
+      default:
+        // no-op
     }
     ts.forEachChild(node, handleNode);
   }
@@ -145,26 +152,26 @@ function getImports(sourceFile) {
 
 /**
  * Ensure the all-packages package.
+ *
+ * @returns An array of messages for changes.
  */
-function ensureAllPackages() {
-  var basePath = path.resolve('.');
-  var allPackagesPath = path.join(basePath, 'packages', 'all-packages');
-  var allPackageJson = path.join(allPackagesPath, 'package.json');
-  var allPackageData = require(allPackageJson);
-  var tsconfigPath = path.join(allPackagesPath, 'tsconfig.json');
-  var tsconfig = require(tsconfigPath);
-  var indexPath = path.join(allPackagesPath, 'src', 'index.ts');
-  var index = fs.readFileSync(indexPath, 'utf8');
-  var lines = index.split('\n').slice(0, 3);
-  var messages = [];
+function ensureAllPackages(): string[] {
+  let basePath = path.resolve('.');
+  let allPackagesPath = path.join(basePath, 'packages', 'all-packages');
+  let allPackageJson = path.join(allPackagesPath, 'package.json');
+  let allPackageData = require(allPackageJson);
+  let indexPath = path.join(allPackagesPath, 'src', 'index.ts');
+  let index = fs.readFileSync(indexPath, 'utf8');
+  let lines = index.split('\n').slice(0, 3);
+  let messages: string[] = [];
 
-  utils.getCorePaths().forEach(function (pkgPath) {
+  utils.getCorePaths().forEach(pkgPath => {
     if (pkgPath === allPackagesPath) {
       return;
     }
-    var name = pkgNames[pkgPath];
-    var data = pkgData[name];
-    var valid = true;
+    let name = pkgNames[pkgPath];
+    let data = pkgData[name];
+    let valid = true;
 
     // Ensure it is a dependency.
     if (!allPackageData.dependencies[name]) {
@@ -187,8 +194,8 @@ function ensureAllPackages() {
   if (utils.ensurePackageData(allPackageData, allPackageJson)) {
     messages.push('Package data changed');
   }
-  var newIndex = lines.join('\n');
-  if (newIndex != index) {
+  let newIndex = lines.join('\n');
+  if (newIndex !== index) {
     messages.push('Index changed');
     fs.writeFileSync(indexPath, lines.join('\n'));
   }
@@ -200,35 +207,36 @@ function ensureAllPackages() {
 /**
  * Ensure the repo integrity.
  */
-function ensureIntegrity() {
-  var messages = {};
+function ensureIntegrity(): void {
+  let messages: { [key: string]: string[] } = {};
 
   // Pick up all the package versions.
-  utils.getLernaPaths().forEach(function(pkgPath) {
+  utils.getLernaPaths().forEach(pkgPath => {
     // Read in the package.json.
+    let data: any;
     try {
-      var package = require(path.join(pkgPath, 'package.json'));
+      data = require(path.join(pkgPath, 'package.json'));
     } catch (e) {
       return;
     }
 
-    pkgData[package.name] = package;
-    pkgPaths[package.name] = pkgPath;
-    pkgNames[pkgPath] = package.name;
+    pkgData[data.name] = data;
+    pkgPaths[data.name] = pkgPath;
+    pkgNames[pkgPath] = data.name;
   });
 
   // Validate each package.
   for (let name in pkgData) {
-    var pkgMessages = ensurePackage(name);
+    let pkgMessages = ensurePackage(name);
     if (pkgMessages.length > 0) {
       messages[name] = pkgMessages;
     }
-  };
+  }
 
   // Handle the all-packages metapackage.
-  var pkgMessages = ensureAllPackages();
+  let pkgMessages = ensureAllPackages();
   if (pkgMessages.length > 0) {
-    var allName ='@jupyterlab/all-packages';
+    let allName ='@jupyterlab/all-packages';
     if (!messages[allName]) {
       messages[allName] = [];
     }
@@ -242,7 +250,7 @@ function ensureIntegrity() {
       console.log('\n\nPlease run `npm run integrity` locally and commit the changes');
     } else {
       console.log('\n\nPlease commit the changes by running:');
-      console.log('git commit -a -m "Package integrity updates"')
+      console.log('git commit -a -m "Package integrity updates"');
     }
     process.exit(1);
   } else {

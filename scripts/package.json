@@ -1,0 +1,25 @@
+{
+  "name": "@jupyterlab/scripts",
+  "private": true,
+  "version": "0.1.0",
+  "description": "JupyterLab - Scripts",
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "fs-extra": "~4.0.2",
+    "glob": "~7.1.2",
+    "sort-package-json": "~1.7.1"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "~4.0.3",
+    "@types/glob": "~5.0.33",
+    "@types/node": "~8.0.47",
+    "rimraf": "~2.6.2",
+    "typescript": "~2.4.2"
+  }
+}
