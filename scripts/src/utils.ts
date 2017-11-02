@@ -19,6 +19,7 @@ function getLernaPaths(): string[] {
   return paths;
 }
 
+
 /**
  * Get all of the core package paths.
  */
@@ -41,7 +42,8 @@ function getCorePaths(): string[] {
 export
 function ensurePackageData(data: any, pkgJsonPath: string): boolean {
   let text = JSON.stringify(sortPackageJson(data), null, 2) + '\n';
-  let orig = fs.readFileSync(pkgJsonPath, 'utf8').toString();
+  let origData = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8').toString());
+  let orig = JSON.stringify(sortPackageJson(origData), null, 2) + '\n';
   if (text !== orig) {
     fs.writeFileSync(pkgJsonPath, text, 'utf8');
     return true;
