@@ -5,7 +5,7 @@ var glob = require('glob');
 
 var allDeps = [];
 var allDevDeps = [];
-
+var hatVersions = [/@phosphor\/*/]
 
 /**
  * Get the appropriate dependency for a given package name.
@@ -14,11 +14,20 @@ function getDependency(name) {
   var version = null;
 
   try {
-    version = '~' + require(path.join(name, 'package.json')).version;
+    var data = require(path.join(name, 'package.json'));
+    var spec = '~';
+    for (var hat of hatVersions) {
+      if (hat.test(data.name)) {
+        spec = '^'
+      }
+    }
+    version = spec + data.version;
   } catch (e) {
     // ignore
   }
 
+  var basePath = path.resolve('.');
+  var files = glob.sync(path.join(basePath, 'packages', '*'));
   for (var j = 0; j < files.length; j++) {
   // Read in the package.json.
     var packagePath = path.join(files[j], 'package.json');
