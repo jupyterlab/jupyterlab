@@ -8,11 +8,11 @@
   },
   "dependencies": {
     "@jupyterlab/services": "^0.50.2",
-    "requirejs": "^2.2.0",
-    "ws": "^1.1.1",
-    "xmlhttprequest": "^1.8.0"
+    "requirejs": "~2.3.5",
+    "ws": "~1.1.4",
+    "xmlhttprequest": "~1.8.0"
   },
   "devDependencies": {
-    "rimraf": "^2.5.2"
+    "rimraf": "~2.6.2"
   }
 }

@@ -32,10 +32,10 @@
     "glob": "~7.1.2"
   },
   "devDependencies": {
-    "@types/fs-extra": "^4.0.2",
-    "@types/glob": "^5.0.32",
-    "@types/node": "^8.0.31",
-    "rimraf": "^2.5.2",
-    "typescript": "~2.4.1"
+    "@types/fs-extra": "~4.0.3",
+    "@types/glob": "~5.0.33",
+    "@types/node": "~8.0.47",
+    "rimraf": "~2.6.2",
+    "typescript": "~2.4.2"
   }
 }

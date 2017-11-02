@@ -33,11 +33,11 @@
     "@jupyterlab/console": "^0.11.1",
     "@jupyterlab/inspector": "^0.11.1",
     "@jupyterlab/notebook": "^0.11.1",
-    "@phosphor/disposable": "^1.1.1"
+    "@phosphor/disposable": "^1.1.2"
   },
   "devDependencies": {
-    "rimraf": "^2.5.2",
-    "typescript": "~2.4.1"
+    "rimraf": "~2.6.2",
+    "typescript": "~2.4.2"
   },
   "jupyterlab": {
     "extension": true
