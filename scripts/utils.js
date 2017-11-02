@@ -12,7 +12,7 @@ function getLernaPaths() {
   var basePath = path.resolve('.');
   var lernaConfig = require(path.join(basePath, 'lerna.json'));
   var paths = [];
-  for (var config in lernaConfig.packages) {
+  for (var config of lernaConfig.packages) {
     paths = paths.concat(glob.sync(path.join(basePath, config)));
   }
   return paths;

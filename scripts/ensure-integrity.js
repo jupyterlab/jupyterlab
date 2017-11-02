@@ -57,10 +57,6 @@ function ensurePackage(pkgName) {
     devDeps[name] = seenDeps[name];
   });
 
-  if (pkgName == '@jupyterlab/all-packages') {
-    messages = messages.concat(ensureAllPackages());
-  }
-
   // For TypeScript files, verify imports match dependencies.
   filenames = glob.sync(path.join(dname, 'src/*.ts*'));
   filenames = filenames.concat(glob.sync(path.join(dname, 'src/**/*.ts*')));
@@ -126,17 +122,38 @@ function ensurePackage(pkgName) {
 
 
 /**
+ * Extract the module imports from a TypeScript source file.
+ */
+function getImports(sourceFile) {
+  var imports = [];
+  handleNode(sourceFile);
+
+  function handleNode(node) {
+    switch (node.kind) {
+      case ts.SyntaxKind.ImportDeclaration:
+        imports.push(node.moduleSpecifier.text);
+        break;
+      case ts.SyntaxKind.ImportEqualsDeclaration:
+        imports.push(node.moduleReference.expression.text);
+        break;
+    }
+    ts.forEachChild(node, handleNode);
+  }
+  return imports;
+}
+
+
+/**
  * Ensure the all-packages package.
  */
 function ensureAllPackages() {
+  var basePath = path.resolve('.');
   var allPackagesPath = path.join(basePath, 'packages', 'all-packages');
   var allPackageJson = path.join(allPackagesPath, 'package.json');
   var allPackageData = require(allPackageJson);
-  var tsconfigPath = path.join(
-    basePath, 'packages', 'all-packages', 'tsconfig.json'
-  );
+  var tsconfigPath = path.join(allPackagesPath, 'tsconfig.json');
   var tsconfig = require(tsconfigPath);
-  var indexPath = path.join(basePath, 'packages', 'all-packages', 'src', 'index.ts');
+  var indexPath = path.join(allPackagesPath, 'src', 'index.ts');
   var index = fs.readFileSync(indexPath, 'utf8');
   var lines = index.split('\n').slice(0, 3);
   var messages = [];
@@ -181,29 +198,6 @@ function ensureAllPackages() {
 
 
 /**
- * Extract the module imports from a TypeScript source file.
- */
-function getImports(sourceFile) {
-  var imports = [];
-  handleNode(sourceFile);
-
-  function handleNode(node) {
-    switch (node.kind) {
-      case ts.SyntaxKind.ImportDeclaration:
-        imports.push(node.moduleSpecifier.text);
-        break;
-      case ts.SyntaxKind.ImportEqualsDeclaration:
-        imports.push(node.moduleReference.expression.text);
-        break;
-    }
-    ts.forEachChild(node, handleNode);
-  }
-  return imports;
-}
-
-
-
-/**
  * Ensure the repo integrity.
  */
 function ensureIntegrity() {
@@ -231,6 +225,16 @@ function ensureIntegrity() {
       messages[name] = pkgMessages;
     }
   };
+
+  // Handle the all-packages metapackage.
+  var pkgMessages = ensureAllPackages();
+  if (pkgMessages.length > 0) {
+    var allName ='@jupyterlab/all-packages';
+    if (!messages[allName]) {
+      messages[allName] = [];
+    }
+    messages[allName] = messages[allName].concat(pkgMessages);
+  }
 
   // Handle any messages.
   if (Object.keys(messages).length > 0) {
