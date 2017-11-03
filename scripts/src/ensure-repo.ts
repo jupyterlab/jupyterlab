@@ -6,13 +6,11 @@
  * Ensure a consistent version of all packages.
  * Manage the all-packages meta package.
  */
-import childProcess = require('child_process');
-import path = require('path');
-import glob = require('glob');
-import ts = require('typescript');
-import fs = require('fs-extra');
-import getDependency = require('./get-dependency');
-import utils = require('./utils');
+import * as childProcess from 'child_process';
+import * as path from 'path';
+import * as fs from 'fs-extra';
+import * as utils from './utils';
+import { ensurePackage } from './ensure-package';
 
 
 // Data to ignore.
@@ -30,132 +28,7 @@ let UNUSED: { [key: string]: string[] } = {
 let pkgData: { [key: string]: any } = {};
 let pkgPaths: { [key: string]: string } = {};
 let pkgNames: { [key: string]: string } = {};
-let seenDeps: { [key: string]: string } = {};
-
-
-/**
- * Ensure the integrity of a package.
- */
-function ensurePackage(pkgName: string): string[] {
-  let dname = pkgPaths[pkgName];
-  let data = pkgData[pkgName];
-  let deps: { [key: string]: string } = data.dependencies;
-  let devDeps: { [key: string]: string } = data.devDependencies;
-  let messages: string[] = [];
-
-  // Verify dependencies are consistent.
-  Object.keys(deps).forEach(name => {
-    if (!(name in seenDeps)) {
-      seenDeps[name] = getDependency.getDependency(name);
-    }
-    if (deps[name] !== seenDeps[name]) {
-      messages.push('Updated dependency: ' + name + '@' + seenDeps[name]);
-    }
-    deps[name] = seenDeps[name];
-  });
-
-  // Verify devDependencies are consistent.
-  Object.keys(devDeps).forEach(name => {
-    if (!(name in seenDeps)) {
-      seenDeps[name] = getDependency.getDependency(name);
-    }
-    if (devDeps[name] !== seenDeps[name]) {
-      messages.push('Updated devDependency: ' + name + '@' + seenDeps[name]);
-    }
-    devDeps[name] = seenDeps[name];
-  });
-
-  // For TypeScript files, verify imports match dependencies.
-  let filenames: string[] = [];
-  filenames = glob.sync(path.join(dname, 'src/*.ts*'));
-  filenames = filenames.concat(glob.sync(path.join(dname, 'src/**/*.ts*')));
-
-  if (filenames.length === 0) {
-    if (utils.ensurePackageData(data, path.join(dname, 'package.json'))) {
-      messages.push('Update package.json');
-    }
-    return messages;
-  }
-
-  let imports: string[] = [];
-
-  // Extract all of the imports from the TypeScript files.
-  filenames.forEach(fileName => {
-    let sourceFile = ts.createSourceFile(fileName,
-        fs.readFileSync(fileName).toString(), (ts.ScriptTarget as any).ES6,
-        /*setParentNodes */ true);
-    imports = imports.concat(getImports(sourceFile));
-  });
-  let names: string[] = Array.from(new Set(imports)).sort();
-  names = names.map(function(name) {
-    let parts = name.split('/');
-    if (name.indexOf('@') === 0) {
-      return parts[0] + '/' + parts[1];
-    }
-    return parts[0];
-  });
-
-  // Look for imports with no dependencies.
-  names.forEach(name => {
-    if (MISSING[pkgName] && MISSING[pkgName].indexOf(name) !== -1) {
-      return;
-    }
-    if (name === '.' || name === '..') {
-      return;
-    }
-    if (!deps[name]) {
-      messages.push('Missing dependency: ' + name);
-      if (!(name in seenDeps)) {
-        seenDeps[name] = getDependency.getDependency(name);
-      }
-      deps[name] = seenDeps[name];
-    }
-  });
-
-  // Look for unused packages
-  Object.keys(deps).forEach(name => {
-    if (UNUSED[pkgName] && UNUSED[pkgName].indexOf(name) !== -1) {
-      return;
-    }
-    if (names.indexOf(name) === -1) {
-      messages.push('Unused dependency: ' + name);
-      delete data.dependencies[name];
-    }
-  });
-
-  if (utils.ensurePackageData(data, path.join(dname, 'package.json'))) {
-    messages.push('Update package.json');
-  }
-  return messages;
-}
-
-
-/**
- * Extract the module imports from a TypeScript source file.
- *
- * @param sourceFile - The path to the source file.
- *
- * @returns An array of package names.
- */
-function getImports(sourceFile: ts.SourceFile): string[] {
-  let imports: string[] = [];
-  handleNode(sourceFile);
-
-  function handleNode(node: any): void {
-    switch (node.kind) {
-      case ts.SyntaxKind.ImportDeclaration:
-        imports.push(node.moduleSpecifier.text);
-        break;
-      case ts.SyntaxKind.ImportEqualsDeclaration:
-        imports.push(node.moduleReference.expression.text);
-        break;
-      default:
-        // no-op
-    }
-    ts.forEachChild(node, handleNode);
-  }
-  return imports;
-}
+let depCache: { [key: string]: string } = {};
 
 
 /**
@@ -306,7 +179,14 @@ function ensureIntegrity(): void {
 
   // Validate each package.
   for (let name in pkgData) {
-    let pkgMessages = ensurePackage(name);
+    let options = {
+      pkgPath: pkgPaths[name],
+      data: pkgData[name],
+      depCache,
+      missing: MISSING[name],
+      unused: UNUSED[name]
+    };
+    let pkgMessages = ensurePackage(options);
     if (pkgMessages.length > 0) {
       messages[name] = pkgMessages;
     }

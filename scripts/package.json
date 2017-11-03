@@ -1,10 +1,27 @@
 {
-  "name": "@jupyterlab/scripts",
-  "version": "0.1.0",
-  "private": true,
-  "description": "JupyterLab - Scripts",
+  "name": "@jupyterlab/buildutils",
+  "version": "0.1.2",
+  "description": "JupyterLab - Build Utilities",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js.map",
+    "lib/*.js"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
   "scripts": {
     "build": "tsc",
     "clean": "rimraf lib",
