@@ -35,7 +35,10 @@ class JupyterLabMenu extends Menu implements IMainMenu.IJupyterLabMenu {
 
     // Insert the plugin group into the list of groups.
     const groupIndex = ArrayExt.upperBound(this._groups, rankGroup, Private.itemCmp);
-    ArrayExt.insert(this._groups, groupIndex, rankGroup);
+
+    // Determine whether we need separators before or after the group.
+    let shouldPrependSeparator = groupIndex > 0;
+    let shouldAppendSeparator = groupIndex === 0 && this._groups.length > 0;
 
     // Determine the index of the menu at which to insert the group.
     let insertIndex = this.startIndex;
@@ -43,17 +46,24 @@ class JupyterLabMenu extends Menu implements IMainMenu.IJupyterLabMenu {
       if (this._groups.length > 0) {
         // Increase the insert index by one extra in order
         // to include the separator.
-        insertIndex += this._groups.length + 1;
+        insertIndex += this._groups[i].items.length + 1;
       }
     }
-    // Insert a separator if there are previous entries.
-    if (insertIndex > 0) {
+
+    // Insert a separator if necessary.
+    if (shouldPrependSeparator) {
       this.insertItem(insertIndex++, { type: 'separator' });
     }
     // Insert the group.
     for (let item of items) {
       this.insertItem(insertIndex++, item);
     }
+    // Insert a separator if necessary.
+    if (shouldAppendSeparator) {
+      this.insertItem(insertIndex++, { type: 'separator' });
+    }
+
+    ArrayExt.insert(this._groups, groupIndex, rankGroup);
   }
 
   /**
