@@ -2,9 +2,8 @@ name: lab_tutorial
 channels:
   - conda-forge
 dependencies:
-- nodejs
 - python=3.5
-- sphinx>=1.4, !=1.5.4
+- sphinx>=1.6
 - sphinx_rtd_theme
 - pip:
   - jupyter_alabaster_theme
