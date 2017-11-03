@@ -50,6 +50,7 @@ function ensureAllPackages(): string[] {
   let index = fs.readFileSync(indexPath, 'utf8');
   let lines = index.split('\n').slice(0, 3);
   let messages: string[] = [];
+  let seen: { [key: string]: boolean } = {};
 
   utils.getCorePaths().forEach(pkgPath => {
     if (pkgPath === allPackagesPath) {
@@ -59,6 +60,7 @@ function ensureAllPackages(): string[] {
     if (!name) {
       return;
     }
+    seen[name] = true;
     let data = pkgData[name];
     let valid = true;
 
@@ -76,6 +78,14 @@ function ensureAllPackages(): string[] {
 
     if (!valid) {
       messages.push('Updated: ' + name);
+    }
+  });
+
+  // Make sure there are no extra deps.
+  Object.keys(allPackageData.dependencies).forEach(name => {
+    if (!(name in seen)) {
+      messages.push('Removing dependency: ', name);
+      delete allPackageData.dependencies[name];
     }
   });
 

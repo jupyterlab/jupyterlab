@@ -88,7 +88,7 @@ function ensurePackage(options: IEnsurePackageOptions): string[] {
       return;
     }
     if (!deps[name]) {
-      messages.push('Missing dependency: ' + name);
+      messages.push('Adding dependency: ' + name);
       if (!(name in seenDeps)) {
         seenDeps[name] = getDependency(name);
       }
@@ -102,7 +102,7 @@ function ensurePackage(options: IEnsurePackageOptions): string[] {
       return;
     }
     if (names.indexOf(name) === -1) {
-      messages.push('Unused dependency: ' + name);
+      messages.push('Removing dependency: ' + name);
       delete data.dependencies[name];
     }
   });
