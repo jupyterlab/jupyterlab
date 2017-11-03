@@ -465,6 +465,15 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
     changeKernel: current => current.session.selectKernel()
   });
 
+  // Add some commands to the application view menu.
+  const viewGroup = [
+    CommandIDs.hideAllCode,
+    CommandIDs.showAllCode,
+    CommandIDs.hideAllOutputs,
+    CommandIDs.showAllOutputs
+  ].map(command => { return { command }; });
+  mainMenu.viewMenu.addGroup(viewGroup);
+
   // Add a launcher item if the launcher is available.
   if (launcher) {
     services.ready.then(() => {
@@ -1345,12 +1354,7 @@ function createMenu(app: JupyterLab): Menu {
   menu.addItem({ command: CommandIDs.split });
   menu.addItem({ command: CommandIDs.merge });
   menu.addItem({ type: 'separator' });
-  menu.addItem({ command: CommandIDs.hideAllCode });
-  menu.addItem({ command: CommandIDs.showAllCode });
-  menu.addItem({ command: CommandIDs.hideAllOutputs });
-  menu.addItem({ command: CommandIDs.showAllOutputs });
   menu.addItem({ command: CommandIDs.clearAllOutputs });
-  menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.runAll });
   menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.createConsole });
