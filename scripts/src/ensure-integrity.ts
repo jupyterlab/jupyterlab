@@ -49,7 +49,7 @@ function ensurePackage(pkgName: string): string[] {
       seenDeps[name] = getDependency.getDependency(name);
     }
     if (deps[name] !== seenDeps[name]) {
-      messages.push('Updated dependency: ' + name);
+      messages.push('Updated dependency: ' + name + '@' + seenDeps[name]);
     }
     deps[name] = seenDeps[name];
   });
@@ -60,7 +60,7 @@ function ensurePackage(pkgName: string): string[] {
       seenDeps[name] = getDependency.getDependency(name);
     }
     if (devDeps[name] !== seenDeps[name]) {
-      messages.push('Updated devDependency: ' + name);
+      messages.push('Updated devDependency: ' + name + '@' + seenDeps[name]);
     }
     devDeps[name] = seenDeps[name];
   });

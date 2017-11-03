@@ -1,11 +1,11 @@
 // Get the appropriate dependency for a package.
-import path = require('path');
-import utils = require('./utils');
-import childProcess = require('child_process');
+// import path = require('path');
+// import utils = require('./utils');
+// import childProcess = require('child_process');
 
 let allDeps: string[] = [];
 let allDevDeps: string[] = [];
-let hatVersions: ReadonlyArray<string | RegExp> = [/@phosphor\/*/];
+let versions: { [key: string]: number } = {};
 
 
 /**
@@ -17,52 +17,61 @@ let hatVersions: ReadonlyArray<string | RegExp> = [/@phosphor\/*/];
  */
 export
 function getDependency(name: string): string {
-  let version = null;
+  // let version = '';
+  allDeps = [];
+  allDevDeps = [];
+  versions = {};
+  return '1.0;'
 
-  try {
-    let data = require(path.join(name, 'package.json'));
-    let spec = '~';
-    for (let hat of hatVersions) {
-      if (RegExp(hat).test(data.name)) {
-        spec = '^';
-      }
-    }
-    version = spec + data.version;
-  } catch (e) {
-    // ignore
-  }
+  // utils.getLernaPaths().forEach(pkgRoot => {
+  // // Read in the package.json.
+  //   let packagePath = path.join(pkgRoot, 'package.json');
+  //   let data: any;
+  //   try {
+  //     data = require(packagePath);
+  //   } catch (e) {
+  //     return;
+  //   }
 
-  utils.getCorePaths().forEach(pkgRoot => {
-  // Read in the package.json.
-    let packagePath = path.join(pkgRoot, 'package.json');
-    let data: any;
-    try {
-      data = require(packagePath);
-    } catch (e) {
-      console.log('Skipping package ' + packagePath);
-      return;
-    }
+  //   if (data.name === name) {
+  //     version = '^' + data.version;
+  //     return;
+  //   }
 
-    if (data.name === name) {
-      version = '^' + data.version;
-    }
+  //   let deps = data.dependencies || {};
+  //   let devDeps = data.devDependencies || {};
+  //   if (deps[name]) {
+  //     allDeps.push(data.name);
+  //     if (deps[name] in versions) {
+  //       versions[deps[name]]++;
+  //     } else {
+  //       versions[deps[name]] = 1;
+  //     }
+  //   }
+  //   if (devDeps[name]) {
+  //     allDevDeps.push(data.name);
+  //     if (devDeps[name] in versions) {
+  //       versions[devDeps[name]]++;
+  //     } else {
+  //       versions[devDeps[name]] = 1;
+  //     }
+  //   }
+  // });
 
-    let deps = data.dependencies || {};
-    let devDeps = data.devDependencies || {};
-    if (deps[name]) {
-      allDeps.push(data.name);
-    }
-    if (devDeps[name]) {
-      allDevDeps.push(data.name);
-    }
-  });
+  // if (version) {
+  //   return version;
+  // }
 
-  if (!version) {
-    let cmd = 'npm view ' + name + ' version';
-    version = '~' + String(childProcess.execSync(cmd)).trim();
-  }
+  // if (Object.keys(versions).length > 0) {
+  //   // Get the most common version.
+  //   version = Object.keys(versions)
+  //     .reduce((a, b) => { return versions[a] > versions[b] ? a : b; });
+  // } else {
+  //   let cmd = 'npm view ' + name + ' version';
+  //   version = '~' + String(childProcess.execSync(cmd)).trim();
+  // }
 
-  return version;
+  // return version;
 }
 
 if (require.main === module) {
