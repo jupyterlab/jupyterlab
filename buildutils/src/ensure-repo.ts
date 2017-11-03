@@ -43,17 +43,17 @@ let depCache: { [key: string]: string } = {};
  */
 function ensureMetaPackage(): string[] {
   let basePath = path.resolve('.');
-  let MetaPackagePath = path.join(basePath, 'packages', 'metapackage');
-  let allPackageJson = path.join(MetaPackagePath, 'package.json');
-  let allPackageData = utils.readJSONFile(allPackageJson);
-  let indexPath = path.join(MetaPackagePath, 'src', 'index.ts');
-  let index = fs.readFileSync(indexPath, 'utf8');
+  let metaPackagePath = path.join(basePath, 'packages', 'metapackage');
+  let metaPackageJson = path.join(metaPackagePath, 'package.json');
+  let metaPackageData = utils.readJSONFile(metaPackageJson);
+  let indexPath = path.join(metaPackagePath, 'src', 'index.ts');
+  let index = fs.readFileSync(indexPath, 'utf8').split('\r\n').join('\n');
   let lines = index.split('\n').slice(0, 3);
   let messages: string[] = [];
   let seen: { [key: string]: boolean } = {};
 
   utils.getCorePaths().forEach(pkgPath => {
-    if (pkgPath === MetaPackagePath) {
+    if (path.resolve(pkgPath) === path.resolve(metaPackagePath)) {
       return;
     }
     let name = pkgNames[pkgPath];
@@ -65,9 +65,9 @@ function ensureMetaPackage(): string[] {
     let valid = true;
 
     // Ensure it is a dependency.
-    if (!allPackageData.dependencies[name]) {
+    if (!metaPackageData.dependencies[name]) {
       valid = false;
-      allPackageData.dependencies[name] = '^' + data.version;
+      metaPackageData.dependencies[name] = '^' + data.version;
     }
 
     // Ensure it is in index.ts
@@ -82,16 +82,16 @@ function ensureMetaPackage(): string[] {
   });
 
   // Make sure there are no extra deps.
-  Object.keys(allPackageData.dependencies).forEach(name => {
+  Object.keys(metaPackageData.dependencies).forEach(name => {
     if (!(name in seen)) {
       messages.push(`Removing dependency: ${name}`);
-      delete allPackageData.dependencies[name];
+      delete metaPackageData.dependencies[name];
     }
   });
 
   // Write the files.
   if (messages.length > 0) {
-    utils.ensurePackageData(allPackageData, allPackageJson);
+    utils.ensurePackageData(metaPackageData, metaPackageJson);
   }
   let newIndex = lines.join('\n');
   if (newIndex !== index) {
@@ -137,7 +137,7 @@ function ensureJupyterlab(): string[] {
 
     // Make sure it is included as a dependency.
     corePackage.dependencies[data.name] = '^' + String(data.version);
-    let relativePath = path.join('..', 'packages', path.basename(pkgPath));
+    let relativePath = `../packages/${path.basename(pkgPath)}`;
     corePackage.jupyterlab.linkedPackages[data.name] = relativePath;
     // Add its dependencies to the core dependencies if they are in the
     // singleton packages.
@@ -240,7 +240,7 @@ function ensureIntegrity(): void {
   // Handle any messages.
   if (Object.keys(messages).length > 0) {
     console.log(JSON.stringify(messages, null, 2));
-    if (process.env.TRAVIS_BRANCH) {
+    if (process.env.TRAVIS_BRANCH || process.env.APPVEYOR) {
       console.log('\n\nPlease run `npm run integrity` locally and commit the changes');
       process.exit(1);
     }
