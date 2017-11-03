@@ -58,7 +58,14 @@ tsconfig.compilerOptions.paths[data.name] = [path.join('..', packageDirName, 'sr
 fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
 
 // Update the core jupyterlab build dependencies.
-utils.run('npm run integrity');
+try {
+  utils.run('npm run integrity');
+} catch (e) {
+  if (!process.env.TRAVIS_BRANCH) {
+    console.error(e);
+    process.exit(1);
+  }
+}
 
 // // Update the lerna symlinks.
 console.log('> npm install');
