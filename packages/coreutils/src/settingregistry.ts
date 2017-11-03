@@ -367,8 +367,20 @@ class DefaultSchemaValidator implements ISchemaValidator {
     }
 
     // Parse the raw commented JSON into a user map.
-    const strip = true;
-    const user = (json.parse(plugin.raw, null, strip) || { }) as JSONObject;
+    let user: JSONObject;
+    try {
+      const strip = true;
+
+      user = json.parse(plugin.raw, null, strip) as JSONObject;
+    } catch (error) {
+      const { column, description } = error;
+      const line = error.lineNumber;
+
+      return [{
+        dataPath: '', keyword: '', schemaPath: '',
+        message: `Parse error: ${description} (line ${line} column ${column})`
+      }];
+    }
 
     if (!validate(user)) {
       return validate.errors as ISchemaValidator.IError[];
@@ -850,9 +862,11 @@ class Settings implements ISettingRegistry.ISettings {
   validate(raw: string): ISchemaValidator.IError[] | null {
     const data = { composite: { }, user: { } };
     const id = this.plugin;
+    const passthrough = false;
     const schema = this._schema;
+    const validator = this.registry.validator;
 
-    return this.registry.validator.validateData({ data, id, raw, schema });
+    return validator.validateData({ data, id, raw, schema }, passthrough);
   }
 
   /**
