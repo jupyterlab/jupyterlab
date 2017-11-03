@@ -116,7 +116,7 @@ have to graft it into the source tree of JupyterLab itself.
 This may be done using the command
 
 ```
-npm run addsibling <path-or-url> && npm install
+npm run add:sibling <path-or-url> && npm install
 ```
 
 in the JupyterLab root directory, where `<path-or-url>` refers either to an
@@ -125,7 +125,7 @@ repository for an extension npm package. This operation may be subsequently
 reversed by running
 
 ```
-npm run removesibling <extension-dir-name>
+npm run remove:package <extension-dir-name>
 ```
 
 This will remove the package metadata from the source tree, but wil **not**

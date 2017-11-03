@@ -65,6 +65,3 @@ try {
     process.exit(1);
   }
 }
-
-// // Update the lerna symlinks.
-utils.run('npm install');

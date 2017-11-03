@@ -110,9 +110,9 @@ if [[ $GROUP == other ]]; then
     postcss packages/**/style/*.css --dir /tmp
 
     # Make sure we can add and remove a sibling package.
-    npm run addsibling jupyterlab/tests/mock_packages/extension
+    npm run add:sibling jupyterlab/tests/mock_packages/extension
     npm run build
-    npm run removesibling extension
+    npm run remove:package extension
     npm run build
     npm run integrity
 

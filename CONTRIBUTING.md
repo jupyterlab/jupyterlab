@@ -220,6 +220,9 @@ The integrity script also allows you to automatically add a dependency for
 a package by importing from it in the TypeScript file, and then running:
 `npm run integrity && npm install` from the repo root.
 
+We also have scripts for creating and removing packages in `packages/`, 
+`npm run create:package` and `npm run remove:package <foo>`.
+
 
 ## Notes
 

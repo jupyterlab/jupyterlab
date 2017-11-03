@@ -33,7 +33,7 @@ function ensurePackage(options: IEnsurePackageOptions): string[] {
       seenDeps[name] = getDependency(name);
     }
     if (deps[name] !== seenDeps[name]) {
-      messages.push('Updated dependency: ' + name + '@' + seenDeps[name]);
+      messages.push(`Updated dependency: ${name}@${seenDeps[name]}`);
     }
     deps[name] = seenDeps[name];
   });
@@ -44,7 +44,7 @@ function ensurePackage(options: IEnsurePackageOptions): string[] {
       seenDeps[name] = getDependency(name);
     }
     if (devDeps[name] !== seenDeps[name]) {
-      messages.push('Updated devDependency: ' + name + '@' + seenDeps[name]);
+      messages.push(`Updated devDependency: ${name}@${seenDeps[name]}`);
     }
     devDeps[name] = seenDeps[name];
   });
@@ -56,7 +56,7 @@ function ensurePackage(options: IEnsurePackageOptions): string[] {
 
   if (filenames.length === 0) {
     if (utils.ensurePackageData(data, path.join(pkgPath, 'package.json'))) {
-      messages.push('Update package.json');
+      messages.push('Updated package.json');
     }
     return messages;
   }
@@ -88,11 +88,11 @@ function ensurePackage(options: IEnsurePackageOptions): string[] {
       return;
     }
     if (!deps[name]) {
-      messages.push('Adding dependency: ' + name);
       if (!(name in seenDeps)) {
         seenDeps[name] = getDependency(name);
       }
       deps[name] = seenDeps[name];
+      messages.push(`Added dependency: ${name}@${seenDeps[name]}`);
     }
   });
 
@@ -102,13 +102,14 @@ function ensurePackage(options: IEnsurePackageOptions): string[] {
       return;
     }
     if (names.indexOf(name) === -1) {
-      messages.push('Removing dependency: ' + name);
+      let version = data.dependencies[name];
       delete data.dependencies[name];
+      messages.push(`Removed dependency: ${name}@${version}`);
     }
   });
 
   if (utils.ensurePackageData(data, path.join(pkgPath, 'package.json'))) {
-    messages.push('Update package.json');
+    messages.push('Updated package.json');
   }
   return messages;
 }

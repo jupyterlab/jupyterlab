@@ -11,7 +11,10 @@
   "files": [
     "lib/*.d.ts",
     "lib/*.js.map",
-    "lib/*.js"
+    "lib/*.js",
+    "template/package.json",
+    "template/tsconfig.json",
+    "template/src/index.ts"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -31,6 +34,7 @@
     "child_process": "~1.0.2",
     "fs-extra": "~4.0.2",
     "glob": "~7.1.2",
+    "inquirer": "~3.3.0",
     "path": "~0.12.7",
     "sort-package-json": "~1.7.1",
     "typescript": "~2.4.2"
@@ -38,6 +42,7 @@
   "devDependencies": {
     "@types/fs-extra": "~4.0.3",
     "@types/glob": "~5.0.33",
+    "@types/inquirer": "~0.0.35",
     "@types/node": "~8.0.47",
     "rimraf": "~2.6.2"
   }

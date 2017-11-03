@@ -74,17 +74,17 @@ function ensureAllPackages(): string[] {
     if (index.indexOf(name) === -1) {
       valid = false;
     }
-    lines.push('import "' + name + '";');
+    lines.push(`import "${name}";`);
 
     if (!valid) {
-      messages.push('Updated: ' + name);
+      messages.push(`Updated: ${name}`);
     }
   });
 
   // Make sure there are no extra deps.
   Object.keys(allPackageData.dependencies).forEach(name => {
     if (!(name in seen)) {
-      messages.push('Removing dependency: ', name);
+      messages.push(`Removing dependency: ${name}`);
       delete allPackageData.dependencies[name];
     }
   });
@@ -211,7 +211,7 @@ function ensureIntegrity(): void {
   }
 
   // Handle the top level package.
-  let corePath: string = path.resolve('.', 'package.json');
+  let corePath = path.resolve('.', 'package.json');
   let coreData: any = utils.readJSONFile(corePath);
   if (utils.ensurePackageData(coreData, corePath)) {
     messages['top'] = ['Update package.json'];
@@ -242,13 +242,11 @@ function ensureIntegrity(): void {
     console.log(JSON.stringify(messages, null, 2));
     if (process.env.TRAVIS_BRANCH) {
       console.log('\n\nPlease run `npm run integrity` locally and commit the changes');
-    } else {
-      console.log('\n\nPlease commit the changes by running:');
-      console.log('git commit -a -m "Package integrity updates"');
-    }
-    if (process.env.TRAVIS_BRANCH) {
       process.exit(1);
     }
+    utils.run('npm install');
+    console.log('\n\nPlease commit the changes by running:');
+    console.log('git commit -a -m "Package integrity updates"');
   } else {
     console.log('Repo integrity verified!');
   }

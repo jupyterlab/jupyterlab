@@ -69,7 +69,7 @@ function getDependency(name: string): string {
     version = Object.keys(versions)
       .reduce((a, b) => { return versions[a] > versions[b] ? a : b; });
   } else {
-    let cmd = 'npm view ' + name + ' version';
+    let cmd = `npm view ${name} version`;
     version = '~' + String(childProcess.execSync(cmd)).trim();
   }
 
@@ -85,7 +85,7 @@ if (require.main === module) {
   }
   let name = process.argv[2];
   let version = getDependency(name);
-  console.log('deps: ', allDeps);
-  console.log('devDeps:', allDevDeps);
-  console.log('\n    ' + '"' + name + '": "' + version + '"');
+  console.log('dependency of: ', allDeps);
+  console.log('devDependency of:', allDevDeps);
+  console.log(`\n    "${name}": "${version}"`);
 }

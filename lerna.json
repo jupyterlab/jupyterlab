@@ -9,6 +9,7 @@
     "packages/services/examples/browser",
     "packages/services/examples/typescript-browser-with-output",
     "buildutils",
+    "buildutils/template",
     "test"
   ],
   "version": "independent"
