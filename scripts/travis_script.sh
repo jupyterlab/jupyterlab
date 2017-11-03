@@ -115,10 +115,13 @@ if [[ $GROUP == other ]]; then
     npm run removesibling extension
     npm run build
 
-    # Test dependency cli tools
+    # Test cli tools
     npm run get:dependency mocha
     npm run update:dependency mocha
     npm run remove:dependency mocha
+    npm run get:dependency @jupyterlab/buildutils
+    npm run get:dependency typescript
+    npm run get:dependency react-native 
 
     # Make sure we can make release assets
     npm run build:static

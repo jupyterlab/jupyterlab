@@ -13,7 +13,6 @@
     "@jupyterlab/application-extension": "^0.11.1",
     "@jupyterlab/apputils": "^0.11.1",
     "@jupyterlab/apputils-extension": "^0.11.1",
-    "@jupyterlab/buildutils": "^0.1.2",
     "@jupyterlab/cells": "^0.11.1",
     "@jupyterlab/codeeditor": "^0.11.1",
     "@jupyterlab/codemirror": "^0.11.3",
@@ -64,6 +63,7 @@
     "@phosphor/widgets": "^1.5.0"
   },
   "devDependencies": {
+    "@jupyterlab/buildutils": "^0.1.2",
     "css-loader": "~0.28.7",
     "file-loader": "~0.10.1",
     "fs-extra": "~4.0.2",
@@ -136,7 +136,6 @@
       "@jupyterlab/application-extension": "../packagesapplication-extension",
       "@jupyterlab/apputils": "../packagesapputils",
       "@jupyterlab/apputils-extension": "../packagesapputils-extension",
-      "@jupyterlab/buildutils": "../packagesbuildutils",
       "@jupyterlab/cells": "../packagescells",
       "@jupyterlab/codeeditor": "../packagescodeeditor",
       "@jupyterlab/codemirror": "../packagescodemirror",

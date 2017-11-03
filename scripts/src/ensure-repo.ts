@@ -51,6 +51,9 @@ function ensureAllPackages(): string[] {
       return;
     }
     let name = pkgNames[pkgPath];
+    if (!name) {
+      return;
+    }
     let data = pkgData[name];
     let valid = true;
 

@@ -9,8 +9,6 @@ import "@jupyterlab/apputils";
 
 import "@jupyterlab/apputils-extension";
 
-import "@jupyterlab/buildutils";
-
 import "@jupyterlab/cells";
 
 import "@jupyterlab/codeeditor";

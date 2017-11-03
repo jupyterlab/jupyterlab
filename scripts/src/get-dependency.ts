@@ -78,7 +78,8 @@ if (require.main === module) {
       process.stderr.write(msg);
       process.exit(1);
   }
-  let version = getDependency(process.argv[2]);
+  let name = process.argv[2];
+  let version = getDependency(name);
   console.log('deps: ', allDeps);
   console.log('devDeps:', allDevDeps);
   console.log('\n    ' + '"' + name + '": "' + version + '"');
