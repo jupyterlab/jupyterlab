@@ -45,7 +45,7 @@ function ensureAllPackages(): string[] {
   let basePath = path.resolve('.');
   let allPackagesPath = path.join(basePath, 'packages', 'all-packages');
   let allPackageJson = path.join(allPackagesPath, 'package.json');
-  let allPackageData = require(allPackageJson);
+  let allPackageData = utils.readJSONFile(allPackageJson);
   let indexPath = path.join(allPackagesPath, 'src', 'index.ts');
   let index = fs.readFileSync(indexPath, 'utf8');
   let lines = index.split('\n').slice(0, 3);
@@ -113,7 +113,7 @@ function ensureJupyterlab(): string[] {
 
   let basePath = path.resolve('.');
   let corePath = path.join(basePath, 'jupyterlab', 'package.json');
-  let corePackage = require(corePath);
+  let corePackage = utils.readJSONFile(corePath);
 
   corePackage.jupyterlab.extensions = {};
   corePackage.jupyterlab.mimeExtensions = {};
@@ -127,7 +127,7 @@ function ensureJupyterlab(): string[] {
     let dataPath = path.join(pkgPath, 'package.json');
     let data: any;
     try {
-       data = require(dataPath);
+       data = utils.readJSONFile(dataPath);
     } catch (e) {
       return;
     }
@@ -185,7 +185,7 @@ function ensureIntegrity(): void {
     // Read in the package.json.
     let data: any;
     try {
-      data = require(path.join(pkgPath, 'package.json'));
+      data = utils.readJSONFile(path.join(pkgPath, 'package.json'));
     } catch (e) {
       return;
     }
@@ -212,7 +212,7 @@ function ensureIntegrity(): void {
 
   // Handle the top level package.
   let corePath: string = path.resolve('.', 'package.json');
-  let coreData: any = require(corePath);
+  let coreData: any = utils.readJSONFile(corePath);
   if (utils.ensurePackageData(coreData, corePath)) {
     messages['top'] = ['Update package.json'];
   }

@@ -12,7 +12,7 @@ utils.run('npm run integrity');
 utils.run('npm run build:prod', { cwd: path.resolve('.', 'jupyterlab')});
 
 // Update the package.app.json file.
-let data = require('./package.json');
+let data = utils.readJSONFile('./package.json');
 data['scripts']['build'] = 'webpack';
 data['scripts']['watch'] = 'webpack --watch';
 data['jupyterlab']['outputDir'] = '..';

@@ -6,11 +6,12 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as glob from 'glob';
+import { readJSONFile } from './utils';
 
 
 // Get all of the packages.
 let basePath = path.resolve('.');
-let lernaConfig = require(path.join(basePath, 'lerna.json'));
+let lernaConfig = readJSONFile(path.join(basePath, 'lerna.json'));
 let packageConfig = lernaConfig.packages;
 let skipSource = process.argv.indexOf('packages') === -1;
 let skipExamples = process.argv.indexOf('examples') === -1;

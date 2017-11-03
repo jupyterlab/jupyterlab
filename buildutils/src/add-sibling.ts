@@ -48,11 +48,11 @@ if (fs.existsSync(path.join(packagePath, 'node_modules'))) {
 }
 
 // Get the package.json of the extension.
-let data = require(path.join(packagePath, 'package.json'));
+let data = utils.readJSONFile(path.join(packagePath, 'package.json'));
 
 // Add the extension path to packages/all-packages/tsconfig.json
 let tsconfigPath = path.join(basePath, 'packages', 'all-packages', 'tsconfig.json');
-let tsconfig = require(tsconfigPath);
+let tsconfig = utils.readJSONFile(tsconfigPath);
 tsconfig.compilerOptions.paths[data.name] = [path.join('..', packageDirName, 'src')];
 fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
 

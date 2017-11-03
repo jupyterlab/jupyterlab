@@ -30,7 +30,7 @@ function getDependency(name: string): string {
     let packagePath = path.join(pkgRoot, 'package.json');
     let data: any;
     try {
-      data = require(packagePath);
+      data = utils.readJSONFile(packagePath);
     } catch (e) {
       return;
     }

@@ -18,7 +18,7 @@ if (process.argv.length !== 3) {
 let name = process.argv[2];
 
 // Handle the packages
-utils.getLernaPaths().forEach(function (pkgPath) {
+utils.getLernaPaths().forEach(pkgPath => {
   handlePackage(pkgPath);
 });
 handlePackage(path.resolve('.'));
@@ -32,7 +32,7 @@ function handlePackage(packagePath: string): void {
   packagePath = path.join(packagePath, 'package.json');
   let data: any;
   try {
-    data = require(packagePath);
+    data = utils.readJSONFile(packagePath);
   } catch (e) {
     console.log('Skipping package ' + packagePath);
     return;

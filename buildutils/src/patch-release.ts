@@ -32,7 +32,7 @@ utils.run('npm version patch', { cwd: packagePath });
 utils.run('npm publish', { cwd: packagePath});
 
 // Extract the new package info.
-let data = require(path.join(packagePath, 'package.json'));
+let data = utils.readJSONFile(path.join(packagePath, 'package.json'));
 let name = data.name;
 let version = data.version;
 

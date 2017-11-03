@@ -50,6 +50,16 @@ function ensurePackageData(data: any, pkgJsonPath: string): boolean {
   return false;
 }
 
+
+/**
+ * Read a package.json file.
+ */
+export
+function readJSONFile(filePath: string): any {
+  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+}
+
+
 /**
  * Run a command with terminal output.
  *

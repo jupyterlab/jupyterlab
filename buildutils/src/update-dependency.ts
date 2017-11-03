@@ -43,7 +43,7 @@ function handlePackage(packagePath: string): void {
   packagePath = path.join(packagePath, 'package.json');
   let data: any;
   try {
-    data = require(packagePath);
+    data = utils.readJSONFile(packagePath);
   } catch (e) {
     console.log('Skipping package ' + packagePath);
     return;
