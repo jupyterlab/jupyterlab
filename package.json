@@ -21,7 +21,7 @@
     "docs": "lerna run docs",
     "get:dependency": "node scripts/lib/get-dependency.js",
     "install": "lerna bootstrap --hoist && npm run build:scripts",
-    "integrity": "node scripts/lib/update-packages.js",
+    "integrity": "node scripts/lib/ensure-integrity.js",
     "patch:release": "node scripts/lib/patch-release.js",
     "publish": "npm run clean:slate && lerna publish --force-publish=* -m \"Publish\"",
     "remove:dependency": "node scripts/lib/remove-dependency.js",
