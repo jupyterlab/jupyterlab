@@ -216,6 +216,11 @@ the packages in the repo. It will:
 The `packages/all-packages` metapackage is used to build all of the TypeScript 
 in the repository at once, instead of 50+ individual builds.
 
+The integrity script also allows you to automatically add a dependency for
+a package by importing from it in the TypeScript file, and then running:
+`npm run integrity && npm install` from the repo root.
+
+
 ## Notes
 
 - By default, the application will load from the JupyterLab staging directory (default is `<sys-prefix>/share/jupyter/lab/build`.  If you wish to run
