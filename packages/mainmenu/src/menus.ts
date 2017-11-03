@@ -24,7 +24,6 @@ class JupyterLabMenu extends Menu implements IMainMenu.IJupyterLabMenu {
    */
   constructor(options: Menu.IOptions) {
     super(options);
-    this.startIndex = 0;
   }
 
   /**
@@ -62,9 +61,15 @@ class JupyterLabMenu extends Menu implements IMainMenu.IJupyterLabMenu {
    * A menu may define a few initial items, and then all additional
    * plugin groups will be inserted at `startIndex`.
    */
-  protected startIndex: number;
+  get startIndex(): number {
+    return this._startIndex;
+  }
+  set startIndex(value: number) {
+    this._startIndex = value;
+  }
 
   private _groups: Private.IRankGroup[] = [];
+  private _startIndex = 0;
 }
 
 
@@ -85,23 +90,10 @@ class FileMenu extends Menu implements IMainMenu.IFileMenu {
       type: 'submenu',
       submenu: this.newMenu
     });
-
-    // Create the rest of the  top-level File menu
-    [
-      'docmanager:save',
-      'docmanager:save-as',
-      'docmanager:rename',
-      'docmanager:restore-checkpoint',
-      'docmanager:clone',
-      'docmanager:close',
-      'docmanager:close-all-files'
-    ].forEach(command => { this.addItem({ command }); });
-    this.addItem({ type: 'separator' });
-    this.addItem({ command: 'settingeditor:open' });
   }
 
   /**
-   * The New submenu
+   * The New submenu.
    */
   readonly newMenu: Menu;
 }

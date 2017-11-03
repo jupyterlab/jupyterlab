@@ -45,6 +45,7 @@ const menu: JupyterLabPlugin<IMainMenu> = {
     logo.id = 'jp-MainLogo';
 
     // Create the application menus.
+    createFileMenu(app, menu.fileMenu);
     createKernelMenu(app, menu.kernelMenu);
 
     app.shell.addToTopArea(logo);
@@ -54,6 +55,27 @@ const menu: JupyterLabPlugin<IMainMenu> = {
   }
 };
 
+/**
+ * Create the basic `File` menu.
+ */
+function createFileMenu(app: JupyterLab, menu: IMainMenu.IFileMenu): void {
+  // Create the top-level File menu
+  [
+    'docmanager:save',
+    'docmanager:save-as',
+    'docmanager:rename',
+    'docmanager:restore-checkpoint',
+    'docmanager:clone',
+    'docmanager:close',
+    'docmanager:close-all-files'
+  ].forEach(command => { menu.addItem({ command }); });
+  menu.addItem({ type: 'separator' });
+  menu.addItem({ command: 'settingeditor:open' });
+}
+
+/**
+ * Create the basic `Kernel` menu.
+ */
 function createKernelMenu(app: JupyterLab, menu: IMainMenu.IKernelMenu): void {
   const commands = menu.commands;
 
@@ -105,11 +127,15 @@ function createKernelMenu(app: JupyterLab, menu: IMainMenu.IKernelMenu): void {
     }
   });
 
-  menu.addItem({ command: CommandIDs.interruptKernel });
-  menu.addItem({ command: CommandIDs.restartKernel });
-  menu.addItem({ command: CommandIDs.changeKernel });
+  let items = [
+    CommandIDs.interruptKernel,
+    CommandIDs.restartKernel,
+    CommandIDs.changeKernel
+  ];
+  items.forEach( command => {
+    menu.addItem({ command });
+    menu.startIndex++;
+  });
 }
-
-
 
 export default menu;
