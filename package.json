@@ -9,7 +9,7 @@
     "build:packages": "cd packages/all-packages && npm run build",
     "build:scripts": "cd scripts && npm run build",
     "build:src": "lerna run build --scope \"@jupyterlab/!(test-|example-)*\"",
-    "build:static": "cd jupyterlab && npm run build:static",
+    "build:static": "node scripts/lib/make-release.js",
     "build:test": "lerna run build:test",
     "clean": "node scripts/lib/clean-packages.js examples packages",
     "clean:examples": "node scripts/lib/clean-packages.js examples",

@@ -5,7 +5,6 @@
   "scripts": {
     "build": "webpack",
     "build:prod": "webpack --devtool source-map",
-    "build:static": "node make-release.js",
     "clean": "rimraf build",
     "watch": "webpack --watch"
   },
