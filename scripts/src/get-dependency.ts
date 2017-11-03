@@ -5,8 +5,6 @@ import childProcess = require('child_process');
 
 let allDeps: string[] = [];
 let allDevDeps: string[] = [];
-let versions: { [key: string]: number } = {};
-
 
 /**
  * Get the appropriate dependency for a given package name.
@@ -18,9 +16,9 @@ let versions: { [key: string]: number } = {};
 export
 function getDependency(name: string): string {
   let version = '';
+  let versions: { [key: string]: number } = {};
   allDeps = [];
   allDevDeps = [];
-  versions = {};
 
   utils.getLernaPaths().forEach(pkgRoot => {
   // Read in the package.json.
