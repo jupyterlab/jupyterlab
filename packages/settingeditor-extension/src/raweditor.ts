@@ -2,11 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  CodeEditor, CodeEditorWrapper, JSONEditor
+  CodeEditor, CodeEditorWrapper
 } from '@jupyterlab/codeeditor';
 
 import {
-  ISettingRegistry, ObservableJSON
+  ISettingRegistry
 } from '@jupyterlab/coreutils';
 
 import {
@@ -62,7 +62,6 @@ class RawEditor extends SplitPanel {
     });
 
     const { editorFactory } = options;
-    const collapsible = false;
 
     // Create read-only defaults editor.
     const defaults = this._defaults = new CodeEditorWrapper({
@@ -75,7 +74,13 @@ class RawEditor extends SplitPanel {
     defaults.editor.setOption('readOnly', true);
 
     // Create read-write user settings editor.
-    const user = this._user = new JSONEditor({ collapsible, editorFactory });
+    const user = this._user = new CodeEditorWrapper({
+      model: new CodeEditor.Model(),
+      factory: editorFactory
+    });
+
+    user.editor.model.mimeType = 'text/javascript';
+    user.editor.model.value.changed.connect(this._onSourceChanged, this);
 
     this.addClass(RAW_EDITOR_CLASS);
     this._onSaveError = options.onSaveError;
@@ -87,7 +92,8 @@ class RawEditor extends SplitPanel {
    * Tests whether the settings have been modified and need saving.
    */
   get isDirty(): boolean {
-    return this._user.isDirty;
+    console.log('raw editor `isDirty` is not implemented.');
+    return false;
   }
 
   /**
@@ -111,11 +117,6 @@ class RawEditor extends SplitPanel {
     const defaults = this._defaults;
     const user = this._user;
 
-    // Disconnect old source change handler.
-    if (user.source) {
-      user.source.changed.disconnect(this._onSourceChanged, this);
-    }
-
     // Disconnect old settings change handler.
     if (this._settings) {
       this._settings.changed.disconnect(this._onSettingsChanged, this);
@@ -126,8 +127,9 @@ class RawEditor extends SplitPanel {
       this._settings.changed.connect(this._onSettingsChanged, this);
       this._onSettingsChanged();
     } else {
-      this._settings = user.source = null;
+      this._settings = null;
       defaults.editor.model.value.text = '';
+      user.editor.model.value.text = '';
     }
 
     this.update();
@@ -184,31 +186,29 @@ class RawEditor extends SplitPanel {
     const settings = this._settings;
     const defaults = this._defaults;
     const user = this._user;
-    const values = settings && settings.user || { };
 
     defaults.editor.model.value.text = settings.annotatedDefaults();
-    user.source = new ObservableJSON({ values });
-    user.source.changed.connect(this._onSourceChanged, this);
+    user.editor.model.value.text = settings.raw;
   }
 
   /**
    * Handle source changes in the underlying editor.
    */
   private _onSourceChanged(): void {
-    const source = this._user.source;
+    const raw = this._user.editor.model.value.text;
     const settings = this._settings;
 
-    if (!settings || !source) {
+    if (!raw || !settings) {
       return;
     }
 
-    settings.save(JSON.stringify(source.toJSON())).catch(this._onSaveError);
+    settings.save(raw).catch(this._onSaveError);
   }
 
   private _defaults: CodeEditorWrapper;
   private _onSaveError: (reason: any) => void;
   private _settings: ISettingRegistry.ISettings | null = null;
-  private _user: JSONEditor;
+  private _user: CodeEditorWrapper;
 }
 
 
