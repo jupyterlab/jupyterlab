@@ -70,10 +70,13 @@ interface ISchemaValidator {
    * @param plugin - The plugin being validated. Its `composite` data will be
    * populated by reference.
    *
+   * @param populate - Whether plugin data should be populated, defaults to
+   * `true`.
+   *
    * @return A list of errors if either the schema or data fail to validate or
    * `null` if there are no errors.
    */
-  validateData(plugin: ISettingRegistry.IPlugin): ISchemaValidator.IError[] | null;
+  validateData(plugin: ISettingRegistry.IPlugin, populate?: boolean): ISchemaValidator.IError[] | null;
 }
 
 
@@ -378,15 +381,18 @@ class DefaultSchemaValidator implements ISchemaValidator {
   }
 
   /**
-   * Validate a plugin's schema, user, and raw data; populate the `composite`.
+   * Validate a plugin's schema and user data; populate the `composite` data.
    *
    * @param plugin - The plugin being validated. Its `composite` data will be
    * populated by reference.
    *
+   * @param populate - Whether plugin data should be populated, defaults to
+   * `true`.
+   *
    * @return A list of errors if either the schema or data fail to validate or
    * `null` if there are no errors.
    */
-  validateData(plugin: ISettingRegistry.IPlugin): ISchemaValidator.IError[] | null {
+  validateData(plugin: ISettingRegistry.IPlugin, populate?: boolean): ISchemaValidator.IError[] | null {
     const validate = this._validator.getSchema(plugin.id);
     const compose = this._composer.getSchema(plugin.id);
 
@@ -416,8 +422,9 @@ class DefaultSchemaValidator implements ISchemaValidator {
       return compose.errors as ISchemaValidator.IError[];
     }
 
-    // Update the local copies of composite and user data.
-    plugin.data = { composite, user };
+    if (populate === undefined ? true : populate) {
+      plugin.data = { composite, user };
+    }
 
     return null;
   }
