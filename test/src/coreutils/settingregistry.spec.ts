@@ -52,42 +52,6 @@ describe('@jupyterlab/coreutils', () => {
 
     });
 
-    describe('#addSchema()', () => {
-
-      it('should add a schema', () => {
-        const validator = new DefaultSchemaValidator();
-        const plugin = 'foo';
-        const schema = { type: 'object' };
-        const errors = validator.addSchema(plugin, schema);
-
-        expect(errors).to.be(null);
-      });
-
-      it('should return errors if adding failed', () => {
-        const validator = new DefaultSchemaValidator();
-        const plugin = 'foo';
-
-        // Coerce a broken schema for testing.
-        const schema = ({ type: 10 } as any) as ISettingRegistry.ISchema;
-        const errors = validator.addSchema(plugin, schema);
-
-        expect(errors).to.not.be(null);
-      });
-
-      it('should be safe to call multiple times', () => {
-        const validator = new DefaultSchemaValidator();
-        const plugin = 'foo';
-        const schema = { type: 'object' };
-
-        let errors = validator.addSchema(plugin, schema);
-
-        expect(errors).to.be(null);
-        errors = validator.addSchema(plugin, schema);
-        expect(errors).to.be(null);
-      });
-
-    });
-
     describe('#validateData()', () => {
 
       it('should validate data against a schema', () => {
@@ -104,11 +68,8 @@ describe('@jupyterlab/coreutils', () => {
         const user = { };
         const raw = '{ "bar": "baz" }';
         const plugin = { id, data: { composite, user }, raw, schema };
+        const errors = validator.validateData(plugin);
 
-        let errors = validator.addSchema(id, schema);
-
-        expect(errors).to.be(null);
-        errors = validator.validateData(plugin);
         expect(errors).to.be(null);
       });
 
@@ -126,11 +87,8 @@ describe('@jupyterlab/coreutils', () => {
         const user = { };
         const raw = '{ "baz": "qux" }';
         const plugin = { id, data: { composite, user }, raw, schema };
+        const errors = validator.validateData(plugin);
 
-        let errors = validator.addSchema(id, schema);
-
-        expect(errors).to.be(null);
-        errors = validator.validateData(plugin);
         expect(errors).to.not.be(null);
       });
 
@@ -148,14 +106,10 @@ describe('@jupyterlab/coreutils', () => {
         const user = { } as JSONObject;
         const raw = '{ }';
         const plugin = { id, data: { composite, user }, raw, schema };
-
-        let errors = validator.addSchema(id, schema);
+        const errors = validator.validateData(plugin);
 
         expect(errors).to.be(null);
-        expect(plugin.data.composite.bar).to.be(void 0);
-        errors = validator.validateData(plugin);
-        expect(errors).to.be(null);
-        expect(plugin.data.user.bar).to.be(void 0);
+        expect(plugin.data.user.bar).to.be(undefined);
         expect(plugin.data.composite.bar).to.be(schema.properties.bar.default);
       });
 
