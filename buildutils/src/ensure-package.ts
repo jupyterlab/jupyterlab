@@ -20,8 +20,8 @@ import * as utils from './utils';
 export
 function ensurePackage(options: IEnsurePackageOptions): string[] {
   let { data, pkgPath } = options;
-  let deps: { [key: string]: string } = data.dependencies;
-  let devDeps: { [key: string]: string } = data.devDependencies;
+  let deps: { [key: string]: string } = data.dependencies || {};
+  let devDeps: { [key: string]: string } = data.devDependencies || {};
   let seenDeps = options.depCache || {};
   let missing = options.missing || [];
   let unused = options.unused || [];
