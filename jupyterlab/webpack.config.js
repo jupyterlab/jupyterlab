@@ -8,6 +8,9 @@ var Build = require('@jupyterlab/buildutils').Build;
 
 // Ensure a clear build directory.
 var buildDir = './build';
+if (fs.existsSync(buildDir)) {
+  fs.removeSync(buildDir);
+}
 fs.ensureDirSync(buildDir);
 
 fs.copySync('./package.json', './build/package.json');

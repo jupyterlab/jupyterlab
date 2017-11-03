@@ -6,6 +6,7 @@
  * Ensure a consistent version of all packages.
  * Manage the all-packages meta package.
  */
+import childProcess = require('child_process');
 import path = require('path');
 import glob = require('glob');
 import ts = require('typescript');
@@ -48,7 +49,7 @@ function ensurePackage(pkgName: string): string[] {
       seenDeps[name] = getDependency.getDependency(name);
     }
     if (deps[name] !== seenDeps[name]) {
-      messages.push('Updated package: ' + name);
+      messages.push('Updated dependency: ' + name);
     }
     deps[name] = seenDeps[name];
   });
@@ -58,8 +59,8 @@ function ensurePackage(pkgName: string): string[] {
     if (!(name in seenDeps)) {
       seenDeps[name] = getDependency.getDependency(name);
     }
-    if (deps[name] !== seenDeps[name]) {
-      messages.push('Updated package: ' + name);
+    if (devDeps[name] !== seenDeps[name]) {
+      messages.push('Updated devDependency: ' + name);
     }
     devDeps[name] = seenDeps[name];
   });
@@ -212,6 +213,77 @@ function ensureAllPackages(): string[] {
 
 
 /**
+ * Ensure the jupyterlab application package.
+ */
+function ensureJupyterlab(): string[] {
+  // Get the current version of JupyterLab
+  let cmd = 'python setup.py --version';
+  let version = String(childProcess.execSync(cmd)).trim();
+
+  let basePath = path.resolve('.');
+  let corePath = path.join(basePath, 'jupyterlab', 'package.json');
+  let corePackage = require(corePath);
+
+  corePackage.jupyterlab.extensions = {};
+  corePackage.jupyterlab.mimeExtensions = {};
+  corePackage.jupyterlab.version = version;
+  corePackage.jupyterlab.linkedPackages = {};
+  corePackage.dependencies = {};
+
+  let singletonPackages = corePackage.jupyterlab.singletonPackages;
+
+  utils.getCorePaths().forEach(pkgPath => {
+    let dataPath = path.join(pkgPath, 'package.json');
+    let data: any;
+    try {
+       data = require(dataPath);
+    } catch (e) {
+      return;
+    }
+    if (data.private === true) {
+      return;
+    }
+
+    // Make sure it is included as a dependency.
+    corePackage.dependencies[data.name] = '^' + String(data.version);
+    let relativePath = path.join('..', 'packages' + path.basename(pkgPath));
+    corePackage.jupyterlab.linkedPackages[data.name] = relativePath;
+    // Add its dependencies to the core dependencies if they are in the
+    // singleton packages.
+    let deps = data.dependencies || {};
+    for (let dep in deps) {
+      if (singletonPackages.indexOf(dep) !== -1) {
+        corePackage.dependencies[dep] = deps[dep];
+      }
+    }
+
+    let jlab = data.jupyterlab;
+    if (!jlab) {
+      return;
+    }
+
+    // Handle extensions.
+    ['extension', 'mimeExtension'].forEach(item => {
+      let ext = jlab[item];
+      if (ext === true) {
+        ext = '';
+      }
+      if (typeof ext !== 'string') {
+        return;
+      }
+      corePackage.jupyterlab[item + 's'][data.name] = ext;
+    });
+  });
+
+  // Write the package.json back to disk.
+  if (utils.ensurePackageData(corePackage, corePath)) {
+    return ['Updated core'];
+  }
+  return [];
+}
+
+
+/**
  * Ensure the repo integrity.
  */
 function ensureIntegrity(): void {
@@ -244,17 +316,27 @@ function ensureIntegrity(): void {
   let corePath: string = path.resolve('.', 'package.json');
   let coreData: any = require(corePath);
   if (utils.ensurePackageData(coreData, corePath)) {
-    messages['baz'] = 'buzz'
+    messages['baz'] = ['buzz'];
   }
 
   // Handle the all-packages metapackage.
   let pkgMessages = ensureAllPackages();
   if (pkgMessages.length > 0) {
-    let allName ='@jupyterlab/all-packages';
-    if (!messages[allName]) {
-      messages[allName] = [];
+    let pkgName ='@jupyterlab/all-packages';
+    if (!messages[pkgName]) {
+      messages[pkgName] = [];
     }
-    messages[allName] = messages[allName].concat(pkgMessages);
+    messages[pkgName] = messages[pkgName].concat(pkgMessages);
+  }
+
+  // Handle the JupyterLab application top package.
+  pkgMessages = ensureJupyterlab();
+  if (pkgMessages.length > 0) {
+    let pkgName = '@jupyterlab/application-top';
+    if (!messages[pkgName]) {
+      messages[pkgName] = [];
+    }
+    messages[pkgName] = messages[pkgName].concat(pkgMessages);
   }
 
   // Handle any messages.
@@ -266,7 +348,9 @@ function ensureIntegrity(): void {
       console.log('\n\nPlease commit the changes by running:');
       console.log('git commit -a -m "Package integrity updates"');
     }
-    process.exit(1);
+    if (process.env.TRAVIS_BRANCH) {
+      process.exit(1);
+    }
   } else {
     console.log('Repo integrity verified!');
   }
