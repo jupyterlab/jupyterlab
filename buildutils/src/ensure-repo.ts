@@ -72,7 +72,7 @@ function ensureAllPackages(): string[] {
     if (index.indexOf(name) === -1) {
       valid = false;
     }
-    lines.push('import "' + name + '";\n');
+    lines.push('import "' + name + '";');
 
     if (!valid) {
       messages.push('Updated: ' + name);
