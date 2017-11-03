@@ -11,7 +11,8 @@ if (process.argv.length !== 3) {
 }
 
 // Extract the desired library target and specifier.
-let parts = process.argv[2].split('@');
+let parts = process.argv[2].slice(1).split('@');
+parts[0] = process.argv[2][0] + parts[0];
 
 // Translate @latest to a concrete version.
 if (parts.length === 1 || parts[1] === 'latest') {

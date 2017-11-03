@@ -32,8 +32,8 @@
     "glob": "~7.1.2"
   },
   "devDependencies": {
-    "@types/fs-extra": "1.0;",
-    "@types/glob": "1.0;",
+    "@types/fs-extra": "~4.0.3",
+    "@types/glob": "~5.0.33",
     "@types/node": "~8.0.47",
     "rimraf": "~2.6.2",
     "typescript": "~2.4.2"

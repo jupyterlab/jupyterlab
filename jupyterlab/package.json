@@ -72,7 +72,7 @@
     "json-loader": "~0.5.7",
     "raw-loader": "~0.5.1",
     "rimraf": "~2.6.2",
-    "sort-package-json": "1.0;",
+    "sort-package-json": "~1.7.1",
     "source-map-loader": "~0.2.1",
     "style-loader": "~0.13.2",
     "url-loader": "~0.5.9",

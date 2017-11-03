@@ -11,16 +11,16 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "child_process": "1.0;",
+    "child_process": "~1.0.2",
     "fs-extra": "~4.0.2",
     "glob": "~7.1.2",
-    "path": "1.0;",
-    "sort-package-json": "1.0;",
+    "path": "~0.12.7",
+    "sort-package-json": "~1.7.1",
     "typescript": "~2.4.2"
   },
   "devDependencies": {
-    "@types/fs-extra": "1.0;",
-    "@types/glob": "1.0;",
+    "@types/fs-extra": "~4.0.3",
+    "@types/glob": "~5.0.33",
     "@types/node": "~8.0.47",
     "rimraf": "~2.6.2"
   }
