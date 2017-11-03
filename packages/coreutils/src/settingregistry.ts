@@ -306,6 +306,15 @@ namespace ISettingRegistry {
      * This function is asynchronous because it writes to the setting registry.
      */
     set(key: string, value: JSONValue): Promise<void>;
+
+    /**
+     * Validates raw settings with comments.
+     *
+     * @param raw - The JSON with comments string being validated.
+     *
+     * @returns A list of errors or `null` if valid.
+     */
+    validate(raw: string): ISchemaValidator.IError[] | null;
   }
 }
 
@@ -433,13 +442,18 @@ class SettingRegistry {
    */
   constructor(options: SettingRegistry.IOptions) {
     this._connector = options.connector;
-    this._validator = options.validator || new DefaultSchemaValidator();
+    this.validator = options.validator || new DefaultSchemaValidator();
   }
 
   /**
    * The schema of the setting registry.
    */
   readonly schema = Private.SCHEMA;
+
+  /**
+   * The schema validator used by the setting registry.
+   */
+  readonly validator: ISchemaValidator;
 
   /**
    * A signal that emits the name of a plugin when its settings change.
@@ -649,7 +663,7 @@ class SettingRegistry {
    */
   private _validate(plugin: ISettingRegistry.IPlugin): void {
     // Validate the user data and create the composite data.
-    const errors = this._validator.validateData(plugin);
+    const errors = this.validator.validateData(plugin);
 
     if (errors) {
       throw errors;
@@ -662,7 +676,6 @@ class SettingRegistry {
   private _connector: IDataConnector<ISettingRegistry.IPlugin, string>;
   private _pluginChanged = new Signal<this, string>(this);
   private _plugins: { [name: string]: ISettingRegistry.IPlugin } = Object.create(null);
-  private _validator: ISchemaValidator;
 }
 
 
@@ -825,6 +838,21 @@ class Settings implements ISettingRegistry.ISettings {
    */
   set(key: string, value: JSONValue): Promise<void> {
     return this.registry.set(this.plugin, key, value);
+  }
+
+  /**
+   * Validates raw settings with comments.
+   *
+   * @param raw - The JSON with comments string being validated.
+   *
+   * @returns A list of errors or `null` if valid.
+   */
+  validate(raw: string): ISchemaValidator.IError[] | null {
+    const data = { composite: { }, user: { } };
+    const id = this.plugin;
+    const schema = this._schema;
+
+    return this.registry.validator.validateData({ data, id, raw, schema });
   }
 
   /**
