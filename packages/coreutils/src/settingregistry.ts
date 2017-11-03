@@ -239,6 +239,11 @@ namespace ISettingRegistry {
     readonly plugin: string;
 
     /**
+     * The plugin settings raw text value.
+     */
+    readonly raw: string;
+
+    /**
      * Get the plugin settings schema.
      */
     readonly schema: ISettingRegistry.ISchema;
