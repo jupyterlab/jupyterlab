@@ -4,6 +4,6 @@ channels:
 dependencies:
 - python==3.5
 - pip:
-  - sphinx<=1.6
+  - sphinx==1.5.4
   - recommonmark==0.4.0
   - jupyter_alabaster_theme
