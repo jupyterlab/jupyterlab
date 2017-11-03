@@ -57,6 +57,9 @@ project = 'JupyterLab Tutorial'
 copyright = '2017, Project Jupyter'
 author = 'Project Jupyter'
 
+# TODO determine if this should be the current repo or recommonmark's repo
+github_doc_root = 'https://github.com/rtfd/recommonmark/tree/master/docs/'
+
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
@@ -345,8 +348,17 @@ texinfo_documents = [
 # texinfo_no_detailmenu = False
 
 # See http://recommonmark.readthedocs.io/en/latest/auto_structify.html
+# def setup(app):
+#     app.add_config_value('recommonmark_config', {
+#         'enable_auto_doc_ref': True
+#     }, True)
+#     app.add_transform(AutoStructify)
+
 def setup(app):
     app.add_config_value('recommonmark_config', {
-        'enable_auto_doc_ref': True
+        'url_resolver': lambda url: github_doc_root + url,
+        'auto_toc_tree_section': 'Contents',
+        'enable_eval_rst': True,
+        'enable_auto_doc_ref': True,
     }, True)
     app.add_transform(AutoStructify)
