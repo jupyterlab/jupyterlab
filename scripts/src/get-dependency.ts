@@ -1,7 +1,7 @@
 // Get the appropriate dependency for a package.
-// import path = require('path');
-// import utils = require('./utils');
-// import childProcess = require('child_process');
+import path = require('path');
+import utils = require('./utils');
+import childProcess = require('child_process');
 
 let allDeps: string[] = [];
 let allDevDeps: string[] = [];
@@ -17,61 +17,60 @@ let versions: { [key: string]: number } = {};
  */
 export
 function getDependency(name: string): string {
-  // let version = '';
+  let version = '';
   allDeps = [];
   allDevDeps = [];
   versions = {};
-  return '1.0;'
 
-  // utils.getLernaPaths().forEach(pkgRoot => {
-  // // Read in the package.json.
-  //   let packagePath = path.join(pkgRoot, 'package.json');
-  //   let data: any;
-  //   try {
-  //     data = require(packagePath);
-  //   } catch (e) {
-  //     return;
-  //   }
+  utils.getLernaPaths().forEach(pkgRoot => {
+  // Read in the package.json.
+    let packagePath = path.join(pkgRoot, 'package.json');
+    let data: any;
+    try {
+      data = require(packagePath);
+    } catch (e) {
+      return;
+    }
 
-  //   if (data.name === name) {
-  //     version = '^' + data.version;
-  //     return;
-  //   }
+    if (data.name === name) {
+      version = '^' + data.version;
+      return;
+    }
 
-  //   let deps = data.dependencies || {};
-  //   let devDeps = data.devDependencies || {};
-  //   if (deps[name]) {
-  //     allDeps.push(data.name);
-  //     if (deps[name] in versions) {
-  //       versions[deps[name]]++;
-  //     } else {
-  //       versions[deps[name]] = 1;
-  //     }
-  //   }
-  //   if (devDeps[name]) {
-  //     allDevDeps.push(data.name);
-  //     if (devDeps[name] in versions) {
-  //       versions[devDeps[name]]++;
-  //     } else {
-  //       versions[devDeps[name]] = 1;
-  //     }
-  //   }
-  // });
+    let deps = data.dependencies || {};
+    let devDeps = data.devDependencies || {};
+    if (deps[name]) {
+      allDeps.push(data.name);
+      if (deps[name] in versions) {
+        versions[deps[name]]++;
+      } else {
+        versions[deps[name]] = 1;
+      }
+    }
+    if (devDeps[name]) {
+      allDevDeps.push(data.name);
+      if (devDeps[name] in versions) {
+        versions[devDeps[name]]++;
+      } else {
+        versions[devDeps[name]] = 1;
+      }
+    }
+  });
 
-  // if (version) {
-  //   return version;
-  // }
+  if (version) {
+    return version;
+  }
 
-  // if (Object.keys(versions).length > 0) {
-  //   // Get the most common version.
-  //   version = Object.keys(versions)
-  //     .reduce((a, b) => { return versions[a] > versions[b] ? a : b; });
-  // } else {
-  //   let cmd = 'npm view ' + name + ' version';
-  //   version = '~' + String(childProcess.execSync(cmd)).trim();
-  // }
+  if (Object.keys(versions).length > 0) {
+    // Get the most common version.
+    version = Object.keys(versions)
+      .reduce((a, b) => { return versions[a] > versions[b] ? a : b; });
+  } else {
+    let cmd = 'npm view ' + name + ' version';
+    version = '~' + String(childProcess.execSync(cmd)).trim();
+  }
 
-  // return version;
+  return version;
 }
 
 if (require.main === module) {

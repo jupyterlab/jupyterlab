@@ -72,7 +72,7 @@ function ensurePackage(pkgName: string): string[] {
 
   if (filenames.length === 0) {
     if (utils.ensurePackageData(data, path.join(dname, 'package.json'))) {
-      messages.push('foo');
+      messages.push('Update package.json');
     }
     return messages;
   }
@@ -124,7 +124,7 @@ function ensurePackage(pkgName: string): string[] {
   });
 
   if (utils.ensurePackageData(data, path.join(dname, 'package.json'))) {
-    messages.push('bar');
+    messages.push('Update package.json');
   }
   return messages;
 }
@@ -316,7 +316,7 @@ function ensureIntegrity(): void {
   let corePath: string = path.resolve('.', 'package.json');
   let coreData: any = require(corePath);
   if (utils.ensurePackageData(coreData, corePath)) {
-    messages['baz'] = ['buzz'];
+    messages['top'] = ['Update package.json'];
   }
 
   // Handle the all-packages metapackage.
