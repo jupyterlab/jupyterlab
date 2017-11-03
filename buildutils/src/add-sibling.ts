@@ -29,25 +29,17 @@ if (process.argv.length < 3) {
 // Extract the desired git repository and repository name.
 let target = process.argv[2];
 let basePath = path.resolve('.');
-let packageDirName;
+let packageDirName = path.basename(target);
 
-let packagePath = '';
-if (target[0] === '.' || target[0] === '/') {
-  // If the target starts with a '.' or a '/', treat it as a local path.
-  packagePath = path.resolve(target);
-  // Possibly remove a trailing slash.
-  if (packagePath[packagePath.length - 1] === '/') {
-    packagePath = packagePath.slice(0, -1);
-  }
-  packageDirName = packagePath.split('/').pop();
-  // Copy the package directory contents to the sibling package.
+let packagePath = path.resolve(target);
+if (fs.existsSync(packagePath)) {
+    // Copy the package directory contents to the sibling package.
   let newPackagePath = path.join(basePath, 'packages', packageDirName);
   fs.copySync(packagePath, newPackagePath);
 } else {
   // Otherwise treat it as a git reposotory and try to add it.
   packageDirName = target.split('/').pop().split('.')[0];
   let packagePath = path.join(basePath, 'packages', packageDirName);
-  // Add the repository as a submodule.
   childProcess.execSync('git clone ' + target + ' ' + packagePath);
 }
 
@@ -66,7 +58,8 @@ tsconfig.compilerOptions.paths[data.name] = [path.join('..', packageDirName, 'sr
 fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
 
 // Update the core jupyterlab build dependencies.
-utils.run('npm run update:core');
+utils.run('npm run integrity');
 
-// Update the lerna symlinks.
-utils.run('npm install');
+// // Update the lerna symlinks.
+console.log('> npm install');
+childProcess.execSync('npm install');
