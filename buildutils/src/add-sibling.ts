@@ -1,8 +1,12 @@
-#!/usr/bin/env node
-import fs = require('fs-extra');
-import path = require('path');
-import utils = require('./utils');
-import childProcess = require('child_process');
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+import * as fs from 'fs-extra';
+import * as path from 'path';
+import * as utils from './utils';
+import * as childProcess from 'child_process';
 
 /**
  * Add an extension to the source tree of JupyterLab.

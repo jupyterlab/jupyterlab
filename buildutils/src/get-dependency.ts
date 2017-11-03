@@ -1,10 +1,15 @@
-// Get the appropriate dependency for a package.
-import path = require('path');
-import utils = require('./utils');
-import childProcess = require('child_process');
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+import * as path from 'path';
+import * as utils from './utils';
+import * as childProcess from 'child_process';
 
 let allDeps: string[] = [];
 let allDevDeps: string[] = [];
+
 
 /**
  * Get the appropriate dependency for a given package name.

@@ -1,7 +1,11 @@
-#!/usr/bin/env node
-import fs = require('fs-extra');
-import path = require('path');
-import utils = require('./utils');
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+import * as fs from 'fs-extra';
+import * as path from 'path';
+import * as utils from './utils';
 
 
 // Make sure we have required command line arguments.

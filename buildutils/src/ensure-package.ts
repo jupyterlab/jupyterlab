@@ -1,11 +1,8 @@
-/**
- * Ensure the integrity of the packages in the repo.
- *
- * Ensure the core package version dependencies match everywhere.
- * Ensure imported packages match dependencies.
- * Ensure a consistent version of all packages.
- * Manage the all-packages meta package.
- */
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
 import * as fs from 'fs-extra';
 import * as glob from 'glob';
 import * as path from 'path';
@@ -15,6 +12,10 @@ import * as utils from './utils';
 
 /**
  * Ensure the integrity of a package.
+ *
+ * @param options - The options used to ensure the package.
+ *
+ * @returns A list of changes that were made to ensure the package.
  */
 export
 function ensurePackage(options: IEnsurePackageOptions): string[] {

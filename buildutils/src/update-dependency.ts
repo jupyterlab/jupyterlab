@@ -1,6 +1,11 @@
-import path = require('path');
-import childProcess = require('child_process');
-import utils = require('./utils');
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+import * as path from 'path';
+import * as childProcess from 'child_process';
+import * as utils from './utils';
 
 
 // Make sure we have required command line arguments.

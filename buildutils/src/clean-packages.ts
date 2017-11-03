@@ -1,7 +1,11 @@
-#!/usr/bin/env node
-import fs = require('fs-extra');
-import path = require('path');
-import glob = require('glob');
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+import * as fs from 'fs-extra';
+import * as path from 'path';
+import * as glob from 'glob';
 
 
 // Get all of the packages.

@@ -1,5 +1,10 @@
-import fs = require('fs-extra');
-import utils = require('./utils');
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+import * as fs from 'fs-extra';
+import * as utils from './utils';
 
 // Run a production build with Typescript source maps.
 utils.run('npm run build:prod');
