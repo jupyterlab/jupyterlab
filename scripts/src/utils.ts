@@ -42,8 +42,7 @@ function getCorePaths(): string[] {
 export
 function ensurePackageData(data: any, pkgJsonPath: string): boolean {
   let text = JSON.stringify(sortPackageJson(data), null, 2) + '\n';
-  let origData = require(pkgJsonPath);
-  let orig = JSON.stringify(sortPackageJson(origData), null, 2) + '\n';
+  let orig = fs.readFileSync(pkgJsonPath, 'utf8');
   if (text !== orig) {
     fs.writeFileSync(pkgJsonPath, text, 'utf8');
     return true;
