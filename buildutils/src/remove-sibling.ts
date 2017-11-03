@@ -44,4 +44,11 @@ fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
 fs.removeSync(path.dirname(packagePath));
 
 // Update the core jupyterlab build dependencies.
-utils.run('npm run integrity');
+try {
+  utils.run('npm run integrity');
+} catch (e) {
+  if (!process.env.TRAVIS_BRANCH) {
+    console.error(e);
+    process.exit(1);
+  }
+}

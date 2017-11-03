@@ -114,6 +114,7 @@ if [[ $GROUP == other ]]; then
     npm run build
     npm run removesibling extension
     npm run build
+    npm run integrity
 
     # Test cli tools
     npm run get:dependency mocha
