@@ -112,15 +112,6 @@ namespace IMainMenu {
      * plugin.
      */
     addGroup(items: Menu.IItemOptions[], rank?: number): void;
-
-    /**
-     * The menu index at which groups will start
-     * being added to the menu. The intention is
-     * for menus to be able to add certain top-level
-     * application items, and then plugin groups
-     * can start being added after those.
-     */
-    startIndex: number;
   }
 
   /**

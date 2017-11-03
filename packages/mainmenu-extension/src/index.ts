@@ -10,7 +10,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IMainMenu, MainMenu
+  IMainMenu, MainMenu, FileMenu, KernelMenu
 } from '@jupyterlab/mainmenu';
 
 
@@ -58,7 +58,7 @@ const menu: JupyterLabPlugin<IMainMenu> = {
 /**
  * Create the basic `File` menu.
  */
-function createFileMenu(app: JupyterLab, menu: IMainMenu.IFileMenu): void {
+function createFileMenu(app: JupyterLab, menu: FileMenu): void {
   // Create the top-level File menu
   [
     'docmanager:save',
@@ -76,7 +76,7 @@ function createFileMenu(app: JupyterLab, menu: IMainMenu.IFileMenu): void {
 /**
  * Create the basic `Kernel` menu.
  */
-function createKernelMenu(app: JupyterLab, menu: IMainMenu.IKernelMenu): void {
+function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
   const commands = menu.commands;
 
   commands.addCommand(CommandIDs.interruptKernel, {
