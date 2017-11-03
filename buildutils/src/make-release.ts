@@ -7,9 +7,14 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as utils from './utils';
 
-// Run a production build with Typescript source maps.
+// Ensure package integrity.
 utils.run('npm run integrity');
-utils.run('npm run build:prod', { cwd: path.resolve('.', 'jupyterlab')});
+
+// Change to the jupyterlab dir.
+process.chdir(path.join('.', 'jupyterlab'));
+
+// Run a production build with Typescript source maps.
+utils.run('npm run build:prod');
 
 // Update the package.app.json file.
 let data = utils.readJSONFile('./package.json');
