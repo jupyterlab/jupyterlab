@@ -7,6 +7,7 @@ import * as fs from 'fs-extra';
 import * as utils from './utils';
 
 // Run a production build with Typescript source maps.
+utils.run('npm run integrity');
 utils.run('npm run build:prod');
 
 // Update the package.app.json file.
