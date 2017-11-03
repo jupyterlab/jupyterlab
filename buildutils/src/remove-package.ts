@@ -32,11 +32,11 @@ let packagePath = path.join(basePath, 'packages', target, 'package.json');
 if (!fs.existsSync(packagePath)) {
     packagePath = require.resolve(path.join(target, 'package.json'));
 }
-let data = require(packagePath);
+let data = utils.readJSONFile(packagePath);
 
-// Remove the extension path from packages/all-packages/tsconfig.json
-let tsconfigPath = path.join(basePath, 'packages', 'all-packages', 'tsconfig.json');
-let tsconfig = require(tsconfigPath);
+// Remove the extension path from packages/metapackage/tsconfig.json
+let tsconfigPath = path.join(basePath, 'packages', 'metapackage', 'tsconfig.json');
+let tsconfig = utils.readJSONFile(tsconfigPath);
 tsconfig.compilerOptions.paths[data.name] = undefined;
 fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
 

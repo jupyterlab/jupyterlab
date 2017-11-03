@@ -211,9 +211,9 @@ the packages in the repo. It will:
 - Ensure the core package version dependencies match everywhere.
 - Ensure imported packages match dependencies.
 - Ensure a consistent version of all packages.
-- Manage the all-packages meta package.
+- Manage the meta package.
 
-The `packages/all-packages` metapackage is used to build all of the TypeScript 
+The `packages/metapackage` package is used to build all of the TypeScript 
 in the repository at once, instead of 50+ individual builds.
 
 The integrity script also allows you to automatically add a dependency for

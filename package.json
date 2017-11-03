@@ -6,7 +6,7 @@
     "build:examples": "lerna run build --scope \"@jupyterlab/example-*\"",
     "build:main": "npm run build",
     "build:main:prod": "npm run build:packages && cd jupyterlab && npm run build:prod",
-    "build:packages": "cd packages/all-packages && npm run build",
+    "build:packages": "cd packages/metapackage && npm run build",
     "build:src": "lerna run build --scope \"@jupyterlab/!(test-|example-)*\"",
     "build:static": "node buildutils/lib/make-release.js",
     "build:test": "lerna run build:test",
@@ -35,7 +35,7 @@
     "update:dependency": "node buildutils/lib/update-dependency.js",
     "watch": "run-p watch:*",
     "watch:main": "cd jupyterlab && npm run watch",
-    "watch:packages": "cd packages/all-packages && npm run watch"
+    "watch:packages": "cd packages/metapackage && npm run watch"
   },
   "dependencies": {},
   "devDependencies": {

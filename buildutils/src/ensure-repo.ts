@@ -9,7 +9,7 @@
  * Ensure the core package version dependencies match everywhere.
  * Ensure imported packages match dependencies.
  * Ensure a consistent version of all packages.
- * Manage the all-packages meta package.
+ * Manage the metapackage meta package.
  */
 import * as childProcess from 'child_process';
 import * as path from 'path';
@@ -37,23 +37,23 @@ let depCache: { [key: string]: string } = {};
 
 
 /**
- * Ensure the all-packages package.
+ * Ensure the metapackage package.
  *
  * @returns An array of messages for changes.
  */
-function ensureAllPackages(): string[] {
+function ensureMetaPackage(): string[] {
   let basePath = path.resolve('.');
-  let allPackagesPath = path.join(basePath, 'packages', 'all-packages');
-  let allPackageJson = path.join(allPackagesPath, 'package.json');
+  let MetaPackagePath = path.join(basePath, 'packages', 'metapackage');
+  let allPackageJson = path.join(MetaPackagePath, 'package.json');
   let allPackageData = utils.readJSONFile(allPackageJson);
-  let indexPath = path.join(allPackagesPath, 'src', 'index.ts');
+  let indexPath = path.join(MetaPackagePath, 'src', 'index.ts');
   let index = fs.readFileSync(indexPath, 'utf8');
   let lines = index.split('\n').slice(0, 3);
   let messages: string[] = [];
   let seen: { [key: string]: boolean } = {};
 
   utils.getCorePaths().forEach(pkgPath => {
-    if (pkgPath === allPackagesPath) {
+    if (pkgPath === MetaPackagePath) {
       return;
     }
     let name = pkgNames[pkgPath];
@@ -217,10 +217,10 @@ function ensureIntegrity(): void {
     messages['top'] = ['Update package.json'];
   }
 
-  // Handle the all-packages metapackage.
-  let pkgMessages = ensureAllPackages();
+  // Handle the metapackage metapackage.
+  let pkgMessages = ensureMetaPackage();
   if (pkgMessages.length > 0) {
-    let pkgName ='@jupyterlab/all-packages';
+    let pkgName ='@jupyterlab/metapackage';
     if (!messages[pkgName]) {
       messages[pkgName] = [];
     }
