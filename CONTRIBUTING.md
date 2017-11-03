@@ -221,7 +221,7 @@ a package by importing from it in the TypeScript file, and then running:
 `npm run integrity && npm install` from the repo root.
 
 We also have scripts for creating and removing packages in `packages/`, 
-`npm run create:package` and `npm run remove:package <foo>`.
+`npm run create:package` and `npm run remove:package`.
 
 
 ## Notes
