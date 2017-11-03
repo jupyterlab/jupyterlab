@@ -50,21 +50,6 @@ const copy = JSONExt.deepCopy;
 export
 interface ISchemaValidator {
   /**
-   * Add a schema to the validator.
-   *
-   * @param plugin - The plugin ID.
-   *
-   * @param schema - The schema being added.
-   *
-   * @return A list of errors if the schema fails to validate or `null` if there
-   * are no errors.
-   *
-   * #### Notes
-   * It is safe to call this function multiple times with the same plugin name.
-   */
-  addSchema(plugin: string, schema: ISettingRegistry.ISchema): ISchemaValidator.IError[] | null;
-
-  /**
    * Validate a plugin's schema and user data; populate the `composite` data.
    *
    * @param plugin - The plugin being validated. Its `composite` data will be
@@ -341,46 +326,6 @@ class DefaultSchemaValidator implements ISchemaValidator {
   }
 
   /**
-   * Add a schema to the validator.
-   *
-   * @param plugin - The plugin ID.
-   *
-   * @param schema - The schema being added.
-   *
-   * @return A list of errors if the schema fails to validate or `null` if there
-   * are no errors.
-   *
-   * #### Notes
-   * It is safe to call this function multiple times with the same plugin name.
-   */
-  addSchema(plugin: string, schema: ISettingRegistry.ISchema): ISchemaValidator.IError[] | null {
-    const composer = this._composer;
-    const validator = this._validator;
-    const validate = validator.getSchema('main');
-
-    // Validate against the main schema.
-    if (!(validate(schema) as boolean)) {
-      return validate.errors as ISchemaValidator.IError[];
-    }
-
-    // Validate against the JSON schema meta-schema.
-    if (!(validator.validateSchema(schema) as boolean)) {
-      return validator.errors as ISchemaValidator.IError[];
-    }
-
-    // Remove if schema already exists.
-    composer.removeSchema(plugin);
-    validator.removeSchema(plugin);
-
-    // Add schema to the validator and composer.
-    composer.addSchema(schema, plugin);
-    validator.addSchema(schema, plugin);
-
-    return null;
-
-  }
-
-  /**
    * Validate a plugin's schema and user data; populate the `composite` data.
    *
    * @param plugin - The plugin being validated. Its `composite` data will be
@@ -398,7 +343,7 @@ class DefaultSchemaValidator implements ISchemaValidator {
 
     // If the schemas do not exist, add them to the validator and continue.
     if (!validate || !compose) {
-      const errors = this.addSchema(plugin.id, plugin.schema);
+      const errors = this._addSchema(plugin.id, plugin.schema);
 
       if (errors) {
         return errors;
@@ -425,6 +370,45 @@ class DefaultSchemaValidator implements ISchemaValidator {
     if (populate === undefined ? true : populate) {
       plugin.data = { composite, user };
     }
+
+    return null;
+  }
+
+  /**
+   * Add a schema to the validator.
+   *
+   * @param plugin - The plugin ID.
+   *
+   * @param schema - The schema being added.
+   *
+   * @return A list of errors if the schema fails to validate or `null` if there
+   * are no errors.
+   *
+   * #### Notes
+   * It is safe to call this function multiple times with the same plugin name.
+   */
+  private _addSchema(plugin: string, schema: ISettingRegistry.ISchema): ISchemaValidator.IError[] | null {
+    const composer = this._composer;
+    const validator = this._validator;
+    const validate = validator.getSchema('main');
+
+    // Validate against the main schema.
+    if (!(validate(schema) as boolean)) {
+      return validate.errors as ISchemaValidator.IError[];
+    }
+
+    // Validate against the JSON schema meta-schema.
+    if (!(validator.validateSchema(schema) as boolean)) {
+      return validator.errors as ISchemaValidator.IError[];
+    }
+
+    // Remove if schema already exists.
+    composer.removeSchema(plugin);
+    validator.removeSchema(plugin);
+
+    // Add schema to the validator and composer.
+    composer.addSchema(schema, plugin);
+    validator.addSchema(schema, plugin);
 
     return null;
   }
@@ -659,16 +643,9 @@ class SettingRegistry {
    * Validate a plugin's data and schema, compose the `composite` data.
    */
   private _validate(plugin: ISettingRegistry.IPlugin): void {
-    let errors: ISchemaValidator.IError[] | null = null;
-
-    // Add the schema to the registry.
-    errors = this._validator.addSchema(plugin.id, plugin.schema);
-    if (errors) {
-      throw errors;
-    }
-
     // Validate the user data and create the composite data.
-    errors = this._validator.validateData(plugin);
+    const errors = this._validator.validateData(plugin);
+
     if (errors) {
       throw errors;
     }
