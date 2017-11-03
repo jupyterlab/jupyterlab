@@ -474,6 +474,20 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
   ].map(command => { return { command }; });
   mainMenu.viewMenu.addGroup(viewGroup);
 
+  // Add commands to the application edit menu.
+  const editGroup = [
+    CommandIDs.undo,
+    CommandIDs.redo,
+    CommandIDs.cut,
+    CommandIDs.copy,
+    CommandIDs.paste,
+    CommandIDs.deleteCell,
+    CommandIDs.split,
+    CommandIDs.merge,
+    CommandIDs.clearAllOutputs
+  ].map(command => { return { command }; });
+  mainMenu.editMenu.addGroup(editGroup);
+
   // Add a launcher item if the launcher is available.
   if (launcher) {
     services.ready.then(() => {
@@ -1251,7 +1265,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     },
     isEnabled: hasWidget
   });
-  }
+}
 
 
 /**
@@ -1343,18 +1357,6 @@ function createMenu(app: JupyterLab): Menu {
     exportTo.addItem({ command: CommandIDs.exportToFormat, args: exportToFormat });
   });
 
-  menu.addItem({ command: CommandIDs.undo });
-  menu.addItem({ command: CommandIDs.redo });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ command: CommandIDs.cut });
-  menu.addItem({ command: CommandIDs.copy });
-  menu.addItem({ command: CommandIDs.paste });
-  menu.addItem({ command: CommandIDs.deleteCell });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ command: CommandIDs.split });
-  menu.addItem({ command: CommandIDs.merge });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ command: CommandIDs.clearAllOutputs });
   menu.addItem({ command: CommandIDs.runAll });
   menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.createConsole });
