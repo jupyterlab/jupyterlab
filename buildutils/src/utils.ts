@@ -58,7 +58,7 @@ function ensurePackageData(data: any, pkgJsonPath: string): boolean {
 export
 function run(cmd: string, options: childProcess.ExecSyncOptions = {}): void {
   options = options || {};
-  options['stdio'] = [1, 2, 3];
+  options['stdio'] = [0, 1, 2];
   console.log('>', cmd);
   childProcess.execSync(cmd, options);
 }

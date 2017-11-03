@@ -4,14 +4,15 @@
 |----------------------------------------------------------------------------*/
 
 import * as fs from 'fs-extra';
+import * as path from 'path';
 import * as utils from './utils';
 
 // Run a production build with Typescript source maps.
 utils.run('npm run integrity');
-utils.run('npm run build:prod');
+utils.run('npm run build:prod', { cwd: path.resolve('.', 'jupyterlab')});
 
 // Update the package.app.json file.
-let data= require('./package.json');
+let data = require('./package.json');
 data['scripts']['build'] = 'webpack';
 data['scripts']['watch'] = 'webpack --watch';
 data['jupyterlab']['outputDir'] = '..';

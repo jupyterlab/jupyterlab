@@ -6,7 +6,6 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as utils from './utils';
-import * as childProcess from 'child_process';
 
 /**
  * Add an extension to the source tree of JupyterLab.
@@ -40,7 +39,7 @@ if (fs.existsSync(packagePath)) {
   // Otherwise treat it as a git reposotory and try to add it.
   packageDirName = target.split('/').pop().split('.')[0];
   let packagePath = path.join(basePath, 'packages', packageDirName);
-  childProcess.execSync('git clone ' + target + ' ' + packagePath);
+  utils.run('git clone ' + target + ' ' + packagePath);
 }
 
 // Remove any existing node_modules in the extension.
@@ -68,5 +67,4 @@ try {
 }
 
 // // Update the lerna symlinks.
-console.log('> npm install');
-childProcess.execSync('npm install');
+utils.run('npm install');
