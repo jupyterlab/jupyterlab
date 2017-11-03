@@ -198,14 +198,14 @@ jupyter lab --dev-mode --watch
 ```
 
 
-## Helper Scripts
+## Build Utilities
 
-There are a series of helper scripts for maintaining the repository.
+There are a series of build utilities for maintaining the repository.
 To get a suggested version for a library use `npm run get:dependency foo`.
 To update the version of a library across the repo us `npm run update:dependency foo@^x.x`.
 To remove an unwanted dependency use `npm run remove:dependency foo`.
 
-The key helper script is `npm run integrity`, which ensures the integrity of 
+The key utility is `npm run integrity`, which ensures the integrity of 
 the packages in the repo. It will:
 
 - Ensure the core package version dependencies match everywhere.

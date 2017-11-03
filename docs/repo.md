@@ -12,13 +12,13 @@ See the [Contributing Guidelines](https://github.com/jupyterlab/jupyterlab/blob/
 
 ## Directories
 
-### NPM package: `src/`, `lib/`, `typings/`, `scripts/`
+### NPM package: `src/`, `lib/`, `typings/`, `buildutils`
 
 * `src/`: the source typescript files.
     - `npm run build` builds the source files into javascript files in `lib/`.
     - `npm run clean` deletes the `lib/` directory.
 * `typings/`: type definitions for external libraries that typescript needs.
-* `scripts/`: various scripts that the npm commands invoke.
+* `buildutils/`: Utilities for managing the repo
 
 ### Examples: `examples/`
 
