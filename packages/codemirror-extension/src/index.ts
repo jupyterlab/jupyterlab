@@ -326,14 +326,4 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
   }
 
   mainMenu.addMenu(createMenu(), { rank: 30 });
-
-  [
-    'editor:line-numbers',
-    'editor:line-wrap',
-    'editor:match-brackets',
-    'editor-autoclosing-brackets',
-    'editor:create-console',
-    'editor:run-code'
-  ].forEach(command => palette.addItem({ command, category: 'Editor' }));
-
 }
