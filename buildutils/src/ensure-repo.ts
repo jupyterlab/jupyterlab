@@ -122,7 +122,7 @@ function ensureJupyterlab(): string[] {
 
     // Make sure it is included as a dependency.
     corePackage.dependencies[data.name] = '^' + String(data.version);
-    let relativePath = path.join('..', 'packages' + path.basename(pkgPath));
+    let relativePath = path.join('..', 'packages', path.basename(pkgPath));
     corePackage.jupyterlab.linkedPackages[data.name] = relativePath;
     // Add its dependencies to the core dependencies if they are in the
     // singleton packages.

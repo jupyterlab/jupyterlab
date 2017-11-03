@@ -12,7 +12,7 @@ See the [Contributing Guidelines](https://github.com/jupyterlab/jupyterlab/blob/
 
 ## Directories
 
-### NPM package: `src/`, `lib/`, `typings/`, `buildutils`
+### NPM package: `src/`, `lib/`, `typings/`, `buildutils/`
 
 * `src/`: the source typescript files.
     - `npm run build` builds the source files into javascript files in `lib/`.
