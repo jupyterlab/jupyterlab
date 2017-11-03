@@ -70,8 +70,8 @@ function ensurePackage(pkgName: string): string[] {
   filenames = filenames.concat(glob.sync(path.join(dname, 'src/**/*.ts*')));
 
   if (filenames.length === 0) {
-    if (messages.length > 0) {
-      utils.ensurePackageData(data, path.join(dname, 'package.json'));
+    if (utils.ensurePackageData(data, path.join(dname, 'package.json'))) {
+      messages.push('foo');
     }
     return messages;
   }
@@ -122,8 +122,8 @@ function ensurePackage(pkgName: string): string[] {
     }
   });
 
-  if (messages.length > 0) {
-    utils.ensurePackageData(data, path.join(dname, 'package.json'));
+  if (utils.ensurePackageData(data, path.join(dname, 'package.json'))) {
+    messages.push('bar');
   }
   return messages;
 }
@@ -243,7 +243,9 @@ function ensureIntegrity(): void {
   // Handle the top level package.
   let corePath: string = path.resolve('.', 'package.json');
   let coreData: any = require(corePath);
-  utils.ensurePackageData(coreData, corePath);
+  if (utils.ensurePackageData(coreData, corePath)) {
+    messages['baz'] = 'buzz'
+  }
 
   // Handle the all-packages metapackage.
   let pkgMessages = ensureAllPackages();
