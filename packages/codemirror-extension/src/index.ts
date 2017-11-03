@@ -214,7 +214,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     });
 
     commands.addCommand(CommandIDs.find, {
-      label: 'Find',
+      label: 'Find...',
       execute: () => {
         let widget = tracker.currentWidget;
         if (!widget) {
@@ -227,7 +227,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     });
 
     commands.addCommand(CommandIDs.findAndReplace, {
-      label: 'Find & Replace',
+      label: 'Find & Replace...',
       execute: () => {
         let widget = tracker.currentWidget;
         if (!widget) {
@@ -312,8 +312,6 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
 
     menu.addItem({ type: 'submenu', submenu: modeMenu });
     menu.addItem({ type: 'submenu', submenu: tabMenu });
-    menu.addItem({ command: CommandIDs.find });
-    menu.addItem({ command: CommandIDs.findAndReplace });
     menu.addItem({ type: 'separator' });
     menu.addItem({ command: 'fileeditor:toggle-line-numbers' });
     menu.addItem({ command: 'fileeditor:toggle-line-wrap' });
@@ -326,4 +324,11 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
   }
 
   mainMenu.addMenu(createMenu(), { rank: 30 });
+
+
+  const editGroup = [
+    CommandIDs.find,
+    CommandIDs.findAndReplace
+  ].map(command => { return { command }; });
+  mainMenu.editMenu.addGroup(editGroup);
 }
