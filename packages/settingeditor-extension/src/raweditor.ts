@@ -80,7 +80,7 @@ class RawEditor extends SplitPanel {
     });
 
     user.editor.model.mimeType = 'text/javascript';
-    user.editor.model.value.changed.connect(this._onSourceChanged, this);
+    user.editor.model.value.changed.connect(this._onTextChanged, this);
 
     this.addClass(RAW_EDITOR_CLASS);
     this._onSaveError = options.onSaveError;
@@ -192,9 +192,9 @@ class RawEditor extends SplitPanel {
   }
 
   /**
-   * Handle source changes in the underlying editor.
+   * Handle text changes in the underlying editor.
    */
-  private _onSourceChanged(): void {
+  private _onTextChanged(): void {
     const raw = this._user.editor.model.value.text;
     const settings = this._settings;
 
@@ -202,7 +202,7 @@ class RawEditor extends SplitPanel {
       return;
     }
 
-    settings.save(raw).catch(this._onSaveError);
+    console.log('text is valid?', settings.validate(raw));
   }
 
   private _defaults: CodeEditorWrapper;
