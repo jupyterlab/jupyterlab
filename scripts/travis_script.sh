@@ -34,6 +34,9 @@ fi
 
 if [[ $GROUP == other ]]; then
 
+    # Run the package integrity check
+    npm run integrity
+
     # Make sure we can successfully load the core app.
     pip install selenium
     python -m jupyterlab.selenium_check --core-mode
@@ -82,9 +85,6 @@ if [[ $GROUP == other ]]; then
     jupyter labextension list -h
     jupyter labextension enable -h
     jupyter labextension disable -h
-
-    # Run the package integrity check
-    npm run integrity
 
     # Make sure the examples build
     npm run build:examples
