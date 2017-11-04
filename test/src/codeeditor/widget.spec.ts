@@ -209,7 +209,7 @@ describe('CodeEditorWrapper', () => {
   describe('#onResize()', () => {
 
     it('should set the size of the editor', () => {
-      let msg = new Widget.ResizeMessage(10, 10);
+      let msg = new Widget.ResizeMessage(20, 20);
       let editor = widget.editor as LogEditor;
       MessageLoop.sendMessage(widget, msg);
       expect(editor.methods).to.contain('setSize');

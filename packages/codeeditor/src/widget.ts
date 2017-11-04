@@ -91,8 +91,14 @@ class CodeEditorWrapper extends Widget {
    * A message handler invoked on a `'resize'` message.
    */
   protected onResize(msg: Widget.ResizeMessage): void {
-    if (msg.width >= 0 && msg.height >= 0) {
-      this.editor.setSize(msg);
+    if (msg.width >= 2 && msg.height >= 11) {
+
+      // A margin needs to be added to account for ::before and border.
+      // Without this the overflow scroll bars are cut off.
+      let newSize = new Widget.ResizeMessage(
+        msg.width - 2, msg.height - 11);
+
+      this.editor.setSize(newSize);
     } else if (this.isVisible) {
       this.editor.resizeToFit();
     }

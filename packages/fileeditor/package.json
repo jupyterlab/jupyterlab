@@ -33,7 +33,8 @@
     "@jupyterlab/codeeditor": "^0.12.0",
     "@jupyterlab/coreutils": "^0.12.0",
     "@jupyterlab/docregistry": "^0.12.0",
-    "@phosphor/coreutils": "^1.3.0"
+    "@phosphor/coreutils": "^1.3.0",
+    "@phosphor/widgets": "^1.5.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

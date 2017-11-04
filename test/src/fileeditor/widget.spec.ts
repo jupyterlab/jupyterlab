@@ -20,11 +20,11 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  FileEditor, FileEditorFactory
+  FileEditor, FileEditorCodeWrapper, FileEditorFactory
 } from '@jupyterlab/fileeditor';
 
 
-describe('fileeditor', () => {
+describe('fileeditorcodewrapper', () => {
 
   let factoryService = new CodeMirrorEditorFactory();
   let modelFactory = new TextModelFactory();
@@ -36,6 +36,59 @@ describe('fileeditor', () => {
     manager = new ServiceManager();
     manager.ready.then(done, done);
   });
+
+  describe('FileEditorCodeWrapper', () => {
+
+    let widget: FileEditorCodeWrapper;
+
+    beforeEach(() => {
+      let path = uuid() + '.py';
+      context = new Context({ manager, factory: modelFactory, path });
+      widget = new FileEditorCodeWrapper({
+        factory: options => factoryService.newDocumentEditor(options),
+        mimeTypeService,
+        context
+      });
+    });
+
+    afterEach(() => {
+      widget.dispose();
+    });
+
+    describe('#constructor()', () => {
+
+      it('should create an editor wrapper widget', () => {
+        expect(widget).to.be.an(FileEditorCodeWrapper);
+      });
+
+      it('should update the editor text when the model changes', (done) => {
+        context.save().catch(done);
+        context.ready.then(() => {
+          widget.context.model.fromString('foo');
+          expect(widget.editor.model.value.text).to.be('foo');
+        }).then(done, done);
+      });
+
+      it('should add the dirty class when the model is dirty', (done) => {
+        context.save().catch(done);
+        context.ready.then(() => {
+          context.model.fromString('bar');
+          expect(widget.title.className).to.contain('jp-mod-dirty');
+        }).then(done, done);
+      });
+
+    });
+
+    describe('#context', () => {
+
+      it('should be the context used by the widget', () => {
+        expect(widget.context).to.be(context);
+      });
+
+    });
+
+  });
+
 
   describe('FileEditor', () => {
 
@@ -87,14 +140,6 @@ describe('fileeditor', () => {
         expect(widget.title.label).to.be(context.path);
       });
 
-      it('should add the dirty class when the model is dirty', (done) => {
-        context.save().catch(done);
-        context.ready.then(() => {
-          context.model.fromString('bar');
-          expect(widget.title.className).to.contain('jp-mod-dirty');
-        }).then(done, done);
-      });
-
       it('should update the title when the path changes', (done) => {
         let path = uuid() + '.jl';
         context.pathChanged.connect((sender, args) => {
@@ -117,6 +162,7 @@ describe('fileeditor', () => {
     });
 
   });
+
 
   describe('FileEditorFactory', () => {
 
