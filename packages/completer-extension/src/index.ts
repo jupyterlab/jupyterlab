@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
   JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
@@ -20,6 +16,10 @@ import {
 import {
   INotebookTracker
 } from '@jupyterlab/notebook';
+
+import {
+  Widget
+} from '@phosphor/widgets';
 
 
 
@@ -48,10 +48,10 @@ namespace CommandIDs {
 
 
 /**
- * A service providing code completion for editors.
+ * A plugin providing code completion for editors.
  */
-const service: JupyterLabPlugin<ICompletionManager> = {
-  id: 'jupyter.services.completer',
+const manager: JupyterLabPlugin<ICompletionManager> = {
+  id: '@jupyterlab/completer-extension:manager',
   autoStart: true,
   provides: ICompletionManager,
   activate: (app: JupyterLab): ICompletionManager => {
@@ -123,8 +123,8 @@ const service: JupyterLabPlugin<ICompletionManager> = {
 /**
  * An extension that registers consoles for code completion.
  */
-const consolePlugin: JupyterLabPlugin<void> = {
-  id: 'jupyter.extensions.console-completer',
+const consoles: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/completer-extension:consoles',
   requires: [ICompletionManager, IConsoleTracker],
   autoStart: true,
   activate: (app: JupyterLab, manager: ICompletionManager, consoles: IConsoleTracker): void => {
@@ -147,10 +147,10 @@ const consolePlugin: JupyterLabPlugin<void> = {
     app.commands.addCommand(CommandIDs.invokeConsole, {
       execute: () => {
         const id = consoles.currentWidget && consoles.currentWidget.id;
-        if (!id) {
-          return;
+
+        if (id) {
+          return app.commands.execute(CommandIDs.invoke, { id });
         }
-        return app.commands.execute(CommandIDs.invoke, { id });
       }
     });
 
@@ -158,10 +158,10 @@ const consolePlugin: JupyterLabPlugin<void> = {
     app.commands.addCommand(CommandIDs.selectConsole, {
       execute: () => {
         const id = consoles.currentWidget && consoles.currentWidget.id;
-        if (!id) {
-          return;
+
+        if (id) {
+          return app.commands.execute(CommandIDs.select, { id });
         }
-        return app.commands.execute(CommandIDs.select, { id });
       }
     });
 
@@ -177,8 +177,8 @@ const consolePlugin: JupyterLabPlugin<void> = {
 /**
  * An extension that registers notebooks for code completion.
  */
-const notebookPlugin: JupyterLabPlugin<void> = {
-  id: 'jupyter.extensions.notebook-completer',
+const notebooks: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/completer-extension:notebooks',
   requires: [ICompletionManager, INotebookTracker],
   autoStart: true,
   activate: (app: JupyterLab, manager: ICompletionManager, notebooks: INotebookTracker): void => {
@@ -210,10 +210,10 @@ const notebookPlugin: JupyterLabPlugin<void> = {
     app.commands.addCommand(CommandIDs.selectNotebook, {
       execute: () => {
         const id = notebooks.currentWidget && notebooks.currentWidget.id;
-        if (!id) {
-          return;
+
+        if (id) {
+          return app.commands.execute(CommandIDs.select, { id });
         }
-        return app.commands.execute(CommandIDs.select, { id });
       }
     });
 
@@ -229,7 +229,5 @@ const notebookPlugin: JupyterLabPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [
-  service, consolePlugin, notebookPlugin
-];
+const plugins: JupyterLabPlugin<any>[] = [manager, consoles, notebooks];
 export default plugins;

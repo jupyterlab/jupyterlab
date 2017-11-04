@@ -6,6 +6,7 @@
 import glob
 import json
 import os
+import shutil
 import sys
 from os.path import join as pjoin
 from unittest import TestCase
@@ -27,7 +28,7 @@ from jupyterlab.extension import (
 )
 from jupyterlab.commands import (
     install_extension, uninstall_extension, list_extensions,
-    build, link_package, unlink_package, should_build,
+    build, link_package, unlink_package, build_check,
     disable_extension, enable_extension, _get_extensions,
     _get_linked_packages, _ensure_package, _get_disabled,
     _test_overlap
@@ -72,20 +73,24 @@ class TestExtension(TestCase):
                 d.cleanup()
 
         self.test_dir = self.tempdir()
+
         self.data_dir = pjoin(self.test_dir, 'data')
         self.config_dir = pjoin(self.test_dir, 'config')
-        self.source_dir = pjoin(here, 'mockextension')
-        self.incompat_dir = pjoin(here, 'mockextension-incompat')
-        self.mock_package = pjoin(here, 'mockpackage')
-        self.mime_renderer_dir = pjoin(here, 'mock-mimeextension')
+
+        # Copy in the mock packages.
+        for name in ['extension', 'incompat', 'package', 'mimeextension']:
+            src = pjoin(here, 'mock_packages', name)
+            shutil.copytree(src, pjoin(self.test_dir, name))
+            setattr(self, 'mock_' + name, pjoin(self.test_dir, name))
 
         self.patches = []
         p = patch.dict('os.environ', {
             'JUPYTER_CONFIG_DIR': self.config_dir,
             'JUPYTER_DATA_DIR': self.data_dir,
+            'JUPYTERLAB_DIR': pjoin(self.data_dir, 'lab')
         })
         self.patches.append(p)
-        for mod in (paths, commands):
+        for mod in [paths]:
             if hasattr(mod, 'ENV_JUPYTER_PATH'):
                 p = patch.object(mod, 'ENV_JUPYTER_PATH', [self.data_dir])
                 self.patches.append(p)
@@ -105,7 +110,6 @@ class TestExtension(TestCase):
         # verify our patches
         self.assertEqual(paths.ENV_CONFIG_PATH, [self.config_dir])
         self.assertEqual(paths.ENV_JUPYTER_PATH, [self.data_dir])
-        self.assertEqual(commands.ENV_JUPYTER_PATH, [self.data_dir])
         self.assertEqual(commands.get_app_dir(), os.path.realpath(pjoin(self.data_dir, 'lab')))
 
         self.app_dir = commands.get_app_dir()
@@ -115,20 +119,20 @@ class TestExtension(TestCase):
             sys.modules.pop(modulename)
 
     def test_install_extension(self):
-        install_extension(self.source_dir)
+        install_extension(self.mock_extension)
         path = pjoin(self.app_dir, 'extensions', '*python-tests*.tgz')
         assert glob.glob(path)
         assert '@jupyterlab/python-tests' in _get_extensions(self.app_dir)
 
     def test_install_twice(self):
-        install_extension(self.source_dir)
+        install_extension(self.mock_extension)
         path = pjoin(commands.get_app_dir(), 'extensions', '*python-tests*.tgz')
-        install_extension(self.source_dir)
+        install_extension(self.mock_extension)
         assert glob.glob(path)
         assert '@jupyterlab/python-tests' in _get_extensions(self.app_dir)
 
     def test_install_mime_renderer(self):
-        install_extension(self.mime_renderer_dir)
+        install_extension(self.mock_mimeextension)
         assert '@jupyterlab/mime-extension-test' in _get_extensions(self.app_dir)
 
         uninstall_extension('@jupyterlab/mime-extension-test')
@@ -136,7 +140,7 @@ class TestExtension(TestCase):
 
     def test_install_incompatible(self):
         with pytest.raises(ValueError) as excinfo:
-            install_extension(self.incompat_dir)
+            install_extension(self.mock_incompat)
         assert 'Conflicting Dependencies' in str(excinfo.value)
 
     def test_install_failed(self):
@@ -148,7 +152,7 @@ class TestExtension(TestCase):
         assert not data['name'] in _get_extensions(self.app_dir)
 
     def test_uninstall_extension(self):
-        install_extension(self.source_dir)
+        install_extension(self.mock_extension)
         uninstall_extension('@jupyterlab/python-tests')
         path = pjoin(self.app_dir, 'extensions', '*python_tests*.tgz')
         assert not glob.glob(path)
@@ -171,13 +175,13 @@ class TestExtension(TestCase):
         assert '@jupyterlab/console-extension' in extensions
 
     def test_link_extension(self):
-        link_package(self.source_dir)
+        link_package(self.mock_extension)
         linked = _get_linked_packages().keys()
         assert '@jupyterlab/python-tests' in linked
         assert '@jupyterlab/python-tests' in _get_extensions(self.app_dir)
 
     def test_link_mime_renderer(self):
-        link_package(self.mime_renderer_dir)
+        link_package(self.mock_mimeextension)
         linked = _get_linked_packages().keys()
         assert '@jupyterlab/mime-extension-test' in linked
         assert '@jupyterlab/mime-extension-test' in _get_extensions(self.app_dir)
@@ -201,11 +205,11 @@ class TestExtension(TestCase):
 
     def test_link_incompatible(self):
         with pytest.raises(ValueError) as excinfo:
-            install_extension(self.incompat_dir)
+            install_extension(self.mock_incompat)
         assert 'Conflicting Dependencies' in str(excinfo.value)
 
     def test_unlink_package(self):
-        target = self.source_dir
+        target = self.mock_extension
         link_package(target)
         unlink_package(target)
         linked = _get_linked_packages().keys()
@@ -213,13 +217,13 @@ class TestExtension(TestCase):
         assert '@jupyterlab/python-tests' not in _get_extensions(self.app_dir)
 
     def test_list_extensions(self):
-        install_extension(self.source_dir)
+        install_extension(self.mock_extension)
         list_extensions()
 
     def test_app_dir(self):
         app_dir = self.tempdir()
 
-        install_extension(self.source_dir, app_dir)
+        install_extension(self.mock_extension, app_dir)
         path = pjoin(app_dir, 'extensions', '*python-tests*.tgz')
         assert glob.glob(path)
         assert '@jupyterlab/python-tests' in _get_extensions(app_dir)
@@ -229,11 +233,11 @@ class TestExtension(TestCase):
         assert not glob.glob(path)
         assert '@jupyterlab/python-tests' not in _get_extensions(app_dir)
 
-        link_package(self.source_dir, app_dir)
+        link_package(self.mock_extension, app_dir)
         linked = _get_linked_packages(app_dir).keys()
         assert '@jupyterlab/python-tests' in linked
 
-        unlink_package(self.source_dir, app_dir)
+        unlink_package(self.mock_extension, app_dir)
         linked = _get_linked_packages(app_dir).keys()
         assert '@jupyterlab/python-tests' not in linked
 
@@ -242,7 +246,7 @@ class TestExtension(TestCase):
         if os.path.exists(self.app_dir):
             os.removedirs(self.app_dir)
 
-        install_extension(self.source_dir)
+        install_extension(self.mock_extension)
         path = pjoin(app_dir, 'extensions', '*python-tests*.tgz')
         assert not glob.glob(path)
         assert '@jupyterlab/python-tests' in _get_extensions(app_dir)
@@ -253,14 +257,14 @@ class TestExtension(TestCase):
         if os.path.exists(sys_dir):
             os.removedirs(sys_dir)
 
-        install_extension(self.source_dir)
+        install_extension(self.mock_extension)
         sys_path = pjoin(sys_dir, 'extensions', '*python-tests*.tgz')
         assert glob.glob(sys_path)
         app_path = pjoin(app_dir, 'extensions', '*python-tests*.tgz')
         assert not glob.glob(app_path)
         assert '@jupyterlab/python-tests' in _get_extensions(app_dir)
 
-        install_extension(self.source_dir, app_dir)
+        install_extension(self.mock_extension, app_dir)
         assert glob.glob(app_path)
         assert '@jupyterlab/python-tests' in _get_extensions(app_dir)
 
@@ -275,7 +279,7 @@ class TestExtension(TestCase):
         assert '@jupyterlab/python-tests' not in _get_extensions(app_dir)
 
     def test_build(self):
-        install_extension(self.source_dir)
+        install_extension(self.mock_extension)
         build()
         # check staging directory.
         entry = pjoin(self.app_dir, 'staging', 'build', 'index.out.js')
@@ -290,7 +294,7 @@ class TestExtension(TestCase):
         assert '@jupyterlab/python-tests' in data
 
     def test_build_custom(self):
-        install_extension(self.source_dir)
+        install_extension(self.mock_extension)
         build(name='foo', version='1.0')
 
         # check static directory.
@@ -315,7 +319,7 @@ class TestExtension(TestCase):
 
     def test_disable_extension(self):
         app_dir = self.tempdir()
-        install_extension(self.source_dir, app_dir)
+        install_extension(self.mock_extension, app_dir)
         disable_extension('@jupyterlab/python-tests', app_dir)
         disabled = _get_disabled(app_dir)
         assert '@jupyterlab/python-tests' in disabled
@@ -325,20 +329,57 @@ class TestExtension(TestCase):
 
     def test_enable_extension(self):
         app_dir = self.tempdir()
-        install_extension(self.source_dir, app_dir)
+        install_extension(self.mock_extension, app_dir)
         disable_extension('@jupyterlab/python-tests', app_dir)
         enable_extension('@jupyterlab/python-tests', app_dir)
         disabled = _get_disabled(app_dir)
         assert '@jupyterlab/python-tests' not in disabled
 
-    def test_should_build(self):
-        assert not should_build()[0]
-        install_extension(self.source_dir)
-        assert should_build()[0]
+    def test_build_check(self):
+        # Do the initial build.
+        assert build_check()[0]
+        link_package(self.mock_extension)
+        link_package(self.mock_package)
         build()
-        assert not should_build()[0]
-        uninstall_extension('@jupyterlab/python-tests')
-        assert should_build()[0]
+        assert not build_check()[0]
+
+        # Check installed extensions.
+        install_extension(self.mock_mimeextension)
+        assert build_check()[0]
+        uninstall_extension('@jupyterlab/mime-extension-test')
+        assert not build_check()[0]
+
+        # Check linked extensions.
+        pkg_path = pjoin(self.mock_extension, 'package.json')
+        with open(pkg_path) as fid:
+            data = json.load(fid)
+        with open(pkg_path, 'rb') as fid:
+            orig = fid.read()
+        data['foo'] = 'bar'
+        with open(pkg_path, 'w') as fid:
+            json.dump(data, fid)
+        assert build_check()[0]
+        assert build_check()[0]
+
+        with open(pkg_path, 'wb') as fid:
+            fid.write(orig)
+        assert not build_check()[0]
+
+        # Check linked packages.
+        pkg_path = pjoin(self.mock_package, 'package.json')
+        with open(pkg_path) as fid:
+            data = json.load(fid)
+        with open(pkg_path, 'rb') as fid:
+            orig = fid.read()
+        data['foo'] = 'bar'
+        with open(pkg_path, 'w') as fid:
+            json.dump(data, fid)
+        assert build_check()[0]
+        assert build_check()[0]
+
+        with open(pkg_path, 'wb') as fid:
+            fid.write(orig)
+        assert not build_check()[0]
 
     def test_compatibility(self):
         assert _test_overlap('^0.6.0', '^0.6.1')

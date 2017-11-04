@@ -33,7 +33,8 @@ test_aliases['app-dir'] = 'TestApp.app_dir'
 class TestApp(LabApp):
 
     open_browser = Bool(False)
-    base_url = '/foo'
+    base_url = '/foo/'
+    ip = '127.0.0.1'
     flags = test_flags
     aliases = test_aliases
 
@@ -70,10 +71,11 @@ def run_selenium(url, log, callback):
     log.info('Starting Firefox Driver')
     driver = webdriver.Firefox()
 
-    log.info('Navigating to page:', url)
+    log.info('Navigating to page: %s' % url)
     driver.get(url)
 
     # Start a poll loop.
+    log.info('Waiting for application to start...')
     t0 = time.time()
     while time.time() - t0 < 20:
         try:
@@ -88,7 +90,7 @@ def run_selenium(url, log, callback):
 
     if not el:
         driver.quit()
-        log.error('Application did not restore properly')
+        log.error('Application did not start properly')
         callback(1)
         return
 
@@ -100,10 +102,11 @@ def run_selenium(url, log, callback):
 
     if errors:
         for error in errors:
-            log.error(error)
+            log.error(str(error))
         callback(1)
         return
 
+    log.info('Selenium test complete')
     callback(0)
 
 

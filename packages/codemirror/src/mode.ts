@@ -24,6 +24,10 @@ import 'codemirror/mode/clike/clike';
 import 'codemirror/mode/shell/shell';
 import 'codemirror/mode/sql/sql';
 
+import {
+  PathExt
+} from '@jupyterlab/coreutils';
+
 // Stub for the require function.
 declare var require: any;
 
@@ -125,7 +129,8 @@ namespace Mode {
    */
   export
   function findByFileName(name: string): ISpec {
-    return CodeMirror.findModeByFileName(name);
+    let basename = PathExt.basename(name);
+    return CodeMirror.findModeByFileName(basename);
   }
 
   /**

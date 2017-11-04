@@ -4,6 +4,14 @@
 import * as dsv from 'd3-dsv';
 
 import {
+  ActivityMonitor, PathExt
+} from '@jupyterlab/coreutils';
+
+import {
+  ABCWidgetFactory, DocumentRegistry
+} from '@jupyterlab/docregistry';
+
+import {
   PromiseDelegate
 } from '@phosphor/coreutils';
 
@@ -18,14 +26,6 @@ import {
 import {
   PanelLayout, Widget
 } from '@phosphor/widgets';
-
-import {
-  ActivityMonitor, PathExt
-} from '@jupyterlab/coreutils';
-
-import {
-  ABCWidgetFactory, DocumentRegistry
-} from '@jupyterlab/docregistry';
 
 import {
   CSVToolbar

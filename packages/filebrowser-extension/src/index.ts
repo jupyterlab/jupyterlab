@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, IMainMenu, InstanceTracker, ToolbarButton
+  IMainMenu, InstanceTracker, ToolbarButton
 } from '@jupyterlab/apputils';
 
 import {
@@ -84,44 +84,36 @@ namespace CommandIDs {
 
   export
   const createLauncher = 'filebrowser:create-main-launcher'; // For main browser only.
-};
+}
 
 
 /**
  * The default file browser extension.
  */
-const fileBrowserPlugin: JupyterLabPlugin<void> = {
-  activate: activateFileBrowser,
-  id: 'jupyter.extensions.filebrowser',
-  requires: [
-    IFileBrowserFactory,
-    IDocumentManager,
-    ICommandPalette,
-    ILayoutRestorer
-  ],
+const browser: JupyterLabPlugin<void> = {
+  activate: activateBrowser,
+  id: '@jupyterlab/filebrowser-extension:browser',
+  requires: [IFileBrowserFactory, ILayoutRestorer],
   autoStart: true
 };
 
 /**
  * The default file browser factory provider.
  */
-const factoryPlugin: JupyterLabPlugin<IFileBrowserFactory> = {
+const factory: JupyterLabPlugin<IFileBrowserFactory> = {
   activate: activateFactory,
-  id: 'jupyter.services.filebrowser',
+  id: '@jupyterlab/filebrowser-extension:factory',
   provides: IFileBrowserFactory,
-  requires: [IDocumentManager, IStateDB],
-  autoStart: true
+  requires: [IDocumentManager, IStateDB]
 };
 
 /**
  * The default file browser menu extension.
  */
-const fileBrowserMenuPlugin: JupyterLabPlugin<void> = {
-  activate: activateFileBrowserMenu,
-  id: 'jupyter.extensions.filebrowsermenu',
-  requires: [
-    IMainMenu,
-  ],
+const menu: JupyterLabPlugin<void> = {
+  activate: activateMenu,
+  id: '@jupyterlab/filebrowser-extension:menu',
+  requires: [IMainMenu],
   autoStart: true
 };
 
@@ -130,11 +122,10 @@ const fileBrowserMenuPlugin: JupyterLabPlugin<void> = {
  */
 const namespace = 'filebrowser';
 
-
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [factoryPlugin, fileBrowserPlugin, fileBrowserMenuPlugin];
+const plugins: JupyterLabPlugin<any>[] = [factory, browser, menu];
 export default plugins;
 
 
@@ -144,8 +135,7 @@ export default plugins;
 function activateFactory(app: JupyterLab, docManager: IDocumentManager, state: IStateDB): IFileBrowserFactory {
   const { commands } = app;
   const tracker = new InstanceTracker<FileBrowser>({ namespace });
-
-  const createFileBrowser = (id: string, options: IFileBrowserFactory.IOptions = {}) => {
+  const createFileBrowser = (id: string, options: IFileBrowserFactory.IOptions = { }) => {
     const model = new FileBrowserModel({
       manager: docManager,
       driveName: options.driveName || '',
@@ -180,15 +170,18 @@ function activateFactory(app: JupyterLab, docManager: IDocumentManager, state: I
 
     return widget;
   };
-  let defaultBrowser = createFileBrowser('filebrowser');
+  const defaultBrowser = createFileBrowser('filebrowser');
+
   return { createFileBrowser, defaultBrowser, tracker };
 }
+
 
 /**
  * Activate the default file browser in the sidebar.
  */
-function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, docManager: IDocumentManager, palette: ICommandPalette, restorer: ILayoutRestorer): void {
-  const fbWidget = factory.defaultBrowser;
+function activateBrowser(app: JupyterLab, factory: IFileBrowserFactory, restorer: ILayoutRestorer): void {
+  const browser = factory.defaultBrowser;
+  const { commands, shell } = app;
 
   // Let the application restorer track the primary file browser (that is
   // automatically created) for restoration of application state (e.g. setting
@@ -196,36 +189,41 @@ function activateFileBrowser(app: JupyterLab, factory: IFileBrowserFactory, docM
   //
   // All other file browsers created by using the factory function are
   // responsible for their own restoration behavior, if any.
-  restorer.add(fbWidget, namespace);
+  restorer.add(browser, namespace);
 
-  addCommands(app, factory.tracker, fbWidget);
+  addCommands(app, factory.tracker, browser);
 
-  fbWidget.title.label = 'Files';
-  app.shell.addToLeftArea(fbWidget, { rank: 100 });
+  browser.title.label = 'Files';
+  shell.addToLeftArea(browser, { rank: 100 });
 
   // If the layout is a fresh session without saved data, open file browser.
   app.restored.then(layout => {
     if (layout.fresh) {
-      app.commands.execute(CommandIDs.showBrowser, void 0);
+      commands.execute(CommandIDs.showBrowser, void 0);
     }
   });
 
-  // Create a launcher if there are no open items.
-  app.shell.layoutModified.connect(() => {
-    if (app.shell.isEmpty('main')) {
-      // Make sure the model is restored.
-      fbWidget.model.restored.then(() => {
-        createLauncher(app.commands, fbWidget);
-      });
+  Promise.all([app.restored, browser.model.restored]).then(() => {
+    const { model } = browser;
+
+    function maybeCreate() {
+      // Create a launcher if there are no open items.
+      if (app.shell.isEmpty('main')) {
+        model.restored.then(() => createLauncher(commands, browser));
+      }
     }
+
+    // When layout is modified, create a launcher if there are no open items.
+    shell.layoutModified.connect(() => { maybeCreate(); });
+
+    maybeCreate();
   });
 }
-
 
 /**
  * Activate the default file browser menu in the main menu.
  */
-function activateFileBrowserMenu(app: JupyterLab, mainMenu: IMainMenu): void {
+function activateMenu(app: JupyterLab, mainMenu: IMainMenu): void {
   let menu = createMenu(app);
 
   mainMenu.addMenu(menu, { rank: 1 });
@@ -235,7 +233,7 @@ function activateFileBrowserMenu(app: JupyterLab, mainMenu: IMainMenu): void {
 /**
  * Add the main file browser commands to the application's command registry.
  */
-function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mainBrowser: FileBrowser): void {
+function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, browser: FileBrowser): void {
   const { commands } = app;
 
   commands.addCommand(CommandIDs.del, {
@@ -307,7 +305,7 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
 
   commands.addCommand(CommandIDs.hideBrowser, {
     execute: () => {
-      if (!mainBrowser.isHidden) {
+      if (!browser.isHidden) {
         app.shell.collapseLeft();
       }
     }
@@ -361,7 +359,7 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
   });
 
   commands.addCommand(CommandIDs.showBrowser, {
-    execute: () => { app.shell.activateById(mainBrowser.id); }
+    execute: () => { app.shell.activateById(browser.id); }
   });
 
   commands.addCommand(CommandIDs.shutdown, {
@@ -379,7 +377,7 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
 
   commands.addCommand(CommandIDs.toggleBrowser, {
     execute: () => {
-      if (mainBrowser.isHidden) {
+      if (browser.isHidden) {
         return commands.execute(CommandIDs.showBrowser, void 0);
       } else {
         return commands.execute(CommandIDs.hideBrowser, void 0);
@@ -389,9 +387,7 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, mai
 
   commands.addCommand(CommandIDs.createLauncher, {
     label: 'New...',
-    execute: () => {
-      return createLauncher(commands, mainBrowser);
-    }
+    execute: () => createLauncher(commands, browser)
   });
 }
 
@@ -428,7 +424,7 @@ function createMenu(app: JupyterLab): Menu {
  * This function generates temporary commands with an incremented name. These
  * commands are disposed when the menu itself is disposed.
  */
-function createContextMenu(path: string, commands: CommandRegistry, registry: DocumentRegistry):  Menu {
+function createContextMenu(path: string, commands: CommandRegistry, registry: DocumentRegistry): Menu {
   const menu = new Menu({ commands });
 
   menu.addItem({ command: CommandIDs.open });
@@ -460,12 +456,12 @@ function createContextMenu(path: string, commands: CommandRegistry, registry: Do
 /**
  * Create a launcher for a given filebrowser widget.
  */
-function createLauncher(commands: CommandRegistry, widget: FileBrowser): Promise<void> {
-  return commands.execute('launcher:create', {
-    cwd: widget.model.path
-  }).then((launcher: Launcher) => {
-    widget.model.pathChanged.connect(() => {
-      launcher.cwd = widget.model.path;
-    }, launcher);
-  });
+function createLauncher(commands: CommandRegistry, browser: FileBrowser): Promise<Launcher> {
+  const { model } = browser;
+
+  return commands.execute('launcher:create', { cwd: model.path })
+    .then((launcher: Launcher) => {
+      model.pathChanged.connect(() => { launcher.cwd = model.path; }, launcher);
+      return launcher;
+    });
 }

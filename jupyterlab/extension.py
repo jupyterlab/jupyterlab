@@ -8,11 +8,9 @@ import os
 from jupyterlab_launcher import add_handlers, LabConfig
 from notebook.utils import url_path_join as ujoin
 
-from notebook.base.handlers import FileFindHandler
-
-
 from .commands import (
-    get_app_dir, list_extensions, should_build, get_user_settings_dir
+    get_app_dir, build_check, get_user_settings_dir, watch,
+    build, ensure_dev_build
 )
 
 from .build_handler import build_path, Builder, BuildHandler
@@ -25,10 +23,9 @@ from ._version import __version__
 DEV_NOTE_NPM = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
 
-    npm run watch
+    jupyter lab --dev-mode --watch
 
-from the JupyterLab repo directory in another terminal window to have the
-system incrementally watch and build JupyterLab's TypeScript for you, as you
+to have the system incrementally watch and build JupyterLab for you, as you
 make changes.
 """
 
@@ -52,6 +49,7 @@ def load_jupyter_server_extension(nbapp):
     web_app = nbapp.web_app
     config = LabConfig()
 
+    config.name = 'JupyterLab'
     config.assets_dir = os.path.join(app_dir, 'static')
     config.settings_dir = os.path.join(app_dir, 'settings')
     config.page_title = 'JupyterLab Alpha Preview'
@@ -63,21 +61,22 @@ def load_jupyter_server_extension(nbapp):
     if hasattr(nbapp, 'core_mode'):
         core_mode = nbapp.core_mode
 
+    # Check for watch.
+    watch_mode = False
+    if hasattr(nbapp, 'watch'):
+        watch_mode = nbapp.watch
+
     # Check for an app dir that is local.
     if app_dir == here or app_dir == os.path.join(here, 'build'):
         core_mode = True
         config.settings_dir = ''
 
-    # Run core mode if explicit or there is no static dir and no
-    # installed extensions.
-    installed = list_extensions(app_dir)
-    fallback = not installed and not os.path.exists(config.assets_dir)
+    page_config = web_app.settings.setdefault('page_config_data', dict())
+    page_config['buildAvailable'] = not core_mode
+    page_config['buildCheck'] = not core_mode
+    page_config['token'] = nbapp.token
 
-    web_app.settings.setdefault('page_config_data', dict())
-    web_app.settings['page_config_data']['buildAvailable'] = True
-    web_app.settings['page_config_data']['token'] = nbapp.token
-
-    if core_mode or fallback:
+    if core_mode:
         config.assets_dir = os.path.join(here, 'build')
         config.version = __version__
         if not os.path.exists(config.assets_dir):
@@ -87,19 +86,31 @@ def load_jupyter_server_extension(nbapp):
             sentinel = os.path.join(here, 'build', 'release_data.json')
             config.dev_mode = not os.path.exists(sentinel)
 
-    if config.dev_mode:
+    if config.dev_mode and not watch_mode:
         nbapp.log.info(DEV_NOTE_NPM)
-    elif core_mode or fallback:
+    elif core_mode:
         nbapp.log.info(CORE_NOTE.strip())
 
-    if core_mode or fallback:
+    if core_mode:
         schemas_dir = os.path.join(here, 'schemas')
+        config.themes_dir = os.path.join(here, 'themes')
     else:
         schemas_dir = os.path.join(app_dir, 'schemas')
+        config.themes_dir = os.path.join(app_dir, 'themes')
 
     config.schemas_dir = schemas_dir
     config.user_settings_dir = get_user_settings_dir()
-    config.themes_dir = os.path.join(here, 'themes')
+
+    if watch_mode:
+        if config.dev_mode:
+            ensure_dev_build(nbapp.log)
+            watch(os.path.dirname(here), nbapp.log)
+        else:
+            config.assets_dir = os.path.join(app_dir, 'staging', 'build')
+            if build_check(app_dir=app_dir, logger=nbapp.log)[0]:
+                build(app_dir=app_dir, logger=nbapp.log)
+            watch(os.path.join(app_dir, 'staging'), nbapp.log)
+            page_config['buildAvailable'] = False
 
     add_handlers(web_app, config)
 

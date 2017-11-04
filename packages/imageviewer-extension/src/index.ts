@@ -23,14 +23,14 @@ import {
  */
 namespace CommandIDs {
   export
+  const resetZoom = 'imageviewer:reset-zoom';
+
+  export
   const zoomIn = 'imageviewer:zoom-in';
 
   export
   const zoomOut = 'imageviewer:zoom-out';
-
-  export
-  const resetZoom = 'imageviewer:reset-zoom';
-};
+}
 
 
 /**
@@ -50,7 +50,7 @@ const FACTORY = 'Image';
  */
 const plugin: JupyterLabPlugin<IImageTracker> = {
   activate,
-  id: 'jupyter.extensions.image-handler',
+  id: '@jupyterlab/imageviewer-extension:plugin',
   provides: IImageTracker,
   requires: [ICommandPalette, ILayoutRestorer],
   autoStart: true
@@ -91,17 +91,18 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRe
     widget.context.pathChanged.connect(() => { tracker.save(widget); });
     tracker.add(widget);
 
-    let fts = app.docRegistry.getFileTypesForPath(widget.context.path);
-    if (fts.length > 0) {
-      widget.title.iconClass = fts[0].iconClass;
-      widget.title.iconLabel = fts[0].iconLabel;
-    }
+    const types = app.docRegistry.getFileTypesForPath(widget.context.path);
 
+    if (types.length > 0) {
+      widget.title.iconClass = types[0].iconClass;
+      widget.title.iconLabel = types[0].iconLabel;
+    }
   });
 
   addCommands(tracker, app.commands);
 
-  let category = 'Image Viewer';
+  const category = 'Image Viewer';
+
   [CommandIDs.zoomIn, CommandIDs.zoomOut, CommandIDs.resetZoom]
     .forEach(command => { palette.addItem({ command, category }); });
 
@@ -148,35 +149,27 @@ function addCommands(tracker: IImageTracker, commands: CommandRegistry) {
   });
 
   function zoomIn(): void {
-    let widget = tracker.currentWidget;
-    if (!widget) {
-      return;
-    }
-    if (widget.scale > 1) {
-      widget.scale += .5;
-    } else {
-      widget.scale *= 2;
+    const widget = tracker.currentWidget;
+
+    if (widget) {
+      widget.scale = widget.scale > 1 ? widget.scale + 0.5 : widget.scale * 2;
     }
   }
 
   function zoomOut(): void {
-    let widget = tracker.currentWidget;
-    if (!widget) {
-      return;
-    }
-    if (widget.scale > 1) {
-      widget.scale -= .5;
-    } else {
-      widget.scale /= 2;
+    const widget = tracker.currentWidget;
+
+    if (widget) {
+      widget.scale = widget.scale > 1 ? widget.scale - 0.5 : widget.scale / 2;
     }
   }
 
   function resetZoom(): void {
-    let widget = tracker.currentWidget;
-    if (!widget) {
-      return;
+    const widget = tracker.currentWidget;
+
+    if (widget) {
+      widget.scale = 1;
     }
-    widget.scale = 1;
   }
 }
 

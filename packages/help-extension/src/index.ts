@@ -73,6 +73,10 @@ const HELP_CLASS = 'jp-Help';
 
 const RESOURCES = [
   {
+    text: 'JupyterLab Reference',
+    url: 'https://jupyterlab.readthedocs.io/en/stable/'
+  },
+  {
     text: 'Notebook Reference',
     url: 'https://jupyter-notebook.readthedocs.io/en/latest/'
   },
@@ -121,7 +125,7 @@ RESOURCES.sort((a: any, b: any) => {
  */
 const plugin: JupyterLabPlugin<void> = {
   activate,
-  id: 'jupyter.extensions.help-handler',
+  id: '@jupyterlab/help-extension:plugin',
   requires: [IMainMenu, ICommandPalette, ILayoutRestorer],
   autoStart: true
 };

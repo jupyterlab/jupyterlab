@@ -4,19 +4,19 @@ var glob = require('glob');
 var path = require('path');
 var sortPackageJson = require('sort-package-json');
 
-var schemaDir = path.resolve('./schemas');
-fs.removeSync(schemaDir);
-fs.ensureDirSync(schemaDir);
-
-var themesDir = path.resolve('./themes');
-fs.removeSync(themesDir);
-fs.ensureDirSync(themesDir);
+// Get the current version of JupyterLab
+var cwd = path.resolve('..');
+var version = childProcess.execSync('python setup.py --version', { cwd: cwd });
+version = version.toString().trim();
 
 var corePackage = require('./package.json');
 corePackage.jupyterlab.extensions = {};
 corePackage.jupyterlab.mimeExtensions = {};
+corePackage.jupyterlab.version = version;
+corePackage.jupyterlab.linkedPackages = {};
 corePackage.dependencies = {};
 
+var singletonPackages = corePackage.jupyterlab.singletonPackages;
 var basePath = path.resolve('..');
 var packages = glob.sync(path.join(basePath, 'packages/*'));
 packages.forEach(function(packagePath) {
@@ -34,16 +34,21 @@ packages.forEach(function(packagePath) {
 
   // Make sure it is included as a dependency.
   corePackage.dependencies[data.name] = '^' + String(data.version);
+  var relativePath = '../packages/' + path.basename(packagePath);
+  corePackage.jupyterlab.linkedPackages[data.name] = relativePath;
+
+  // Add its dependencies to the core dependencies if they are in the
+  // singleton packages.
+  var deps = data.dependencies || [];
+  for (var dep in deps) {
+    if (singletonPackages.indexOf(dep) !== -1) {
+      corePackage.dependencies[dep] = deps[dep];
+    }
+  }
 
   var jlab = data.jupyterlab;
   if (!jlab) {
     return;
-  }
-
-  // Add its dependencies to the core dependencies.
-  var deps = data.dependencies || [];
-  for (var dep in deps) {
-    corePackage.dependencies[dep] = deps[dep];
   }
 
   // Handle extensions.
@@ -57,30 +62,7 @@ packages.forEach(function(packagePath) {
     }
     corePackage.jupyterlab[item + 's'][data.name] = ext;
   });
-
-  // Handle schemas.
-  var schemaDir = jlab['schemaDir'];
-  if (schemaDir) {
-    schemaDir = path.join(packagePath, schemaDir);
-    var schemas = glob.sync(path.join(schemaDir, '*'));
-    schemas.forEach(function(schemaPath) {
-      var file = path.basename(schemaPath);
-      var to = path.join(basePath, 'jupyterlab', 'schemas', file);
-      fs.copySync(schemaPath, to);
-    });
-  }
-
-  // Handle themes.
-  var themeDir = jlab['themeDir'];
-  if (themeDir) {
-    var name = data['name'].replace('@', '');
-    name = name.replace('/', '-');
-    var from = path.join(packagePath, themeDir);
-    var to = path.join(basePath, 'jupyterlab', 'themes', name);
-    fs.copySync(from, to);
-  }
 });
-
 
 // Write the package.json back to disk.
 var text = JSON.stringify(sortPackageJson(corePackage), null, 2) + '\n';

@@ -66,7 +66,7 @@ const FORWARD_CLASS = 'jp-InspectorItem-forward';
  * The inspector panel token.
  */
 export
-const IInspector = new Token<IInspector>('jupyter.services.inspector');
+const IInspector = new Token<IInspector>('@jupyterlab/inspector:IInspector');
 /* tslint:enable */
 
 

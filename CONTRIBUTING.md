@@ -47,7 +47,7 @@ You can also use the installer from the [Node.js](https://nodejs.org) website.
 
 JupyterLab requires Jupyter Notebook version 4.3 or later.
 
-If you use ``conda``, you can install it as:
+If you use ``conda``, you can install notebook using:
 
 ```bash
 conda install notebook
@@ -59,7 +59,7 @@ You may also want to install `nb_conda_kernels` to have a kernel option for diff
 conda install nb_conda_kernels
 ```
 
-If you use `pip` you can install it as:
+If you use `pip` you can install notebook using:
 
 ```bash
 pip install notebook
@@ -68,21 +68,22 @@ pip install notebook
 Fork the JupyterLab [repository](https://github.com/jupyterlab/jupyterlab).
 
 Once you have installed the dependencies mentioned above, use the following
-steps::
+steps:
 
-    git clone https://github.com/<your-github-username>/jupyterlab.git
-    cd jupyterlab
-    pip install -e . # will take a long time to build everything
-    npm install
-    npm run build:main
-    jupyter serverextension enable --py jupyterlab
+```bash
+git clone https://github.com/<your-github-username>/jupyterlab.git
+cd jupyterlab
+pip install -e .
+npm install
+npm run build  # Build the dev mode assets
+jupyter lab build  # Build the app dir assets
+jupyter serverextension enable --py jupyterlab
+```
 
 Notes:
 
-* At times, it may be necessary to clean your local repo with the command ``git
-clean -fdx``.
-
-* Make sure to do `pip install -e` *before* running `npm install`. Running `npm install` first makes pip stall.
+* At times, it may be necessary to clean your local repo with the command `npm run clean:slate`.  This will clean the repository, and re-install and 
+rebuild.  If using a local install, you will need to re-run `pip install -e .`
 
 * If `pip` gives a `VersionConflict` error, it usually means that the installed
 version of `jupyterlab_launcher` is out of date. Run `pip install --upgrade
@@ -193,10 +194,8 @@ to build the changes and then refresh your browser to see the changes.
 To have the system build after each source file change, run:
 
 ```bash
-npm run watch
+jupyter lab --dev-mode --watch
 ```
-
-and refresh the browser.
 
 ## Notes
 

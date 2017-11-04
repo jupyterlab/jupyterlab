@@ -7,9 +7,7 @@ import {
   VDomRenderer
 } from '@jupyterlab/apputils';
 
-import {
-  h, VirtualNode
-} from '@phosphor/virtualdom';
+import * as React from 'react';
 
 import {
   Cell, CodeCell
@@ -44,7 +42,7 @@ const MOD_COLLAPSED_CLASS = 'jp-mod-collapsed';
 
 /**
  * Abstract collapser base class.
- * 
+ *
  * ### Notes
  * A collapser is a visible div to the left of a cell's
  * input/output that a user can click on to collapse the
@@ -70,13 +68,13 @@ abstract class Collapser extends VDomRenderer<null> {
   /**
    * Render the collapser with the virtual DOM.
    */
-  protected render(): VirtualNode | ReadonlyArray<VirtualNode> {
+  protected render(): React.ReactElement<any> {
     let childClass = COLLAPSER_CHILD_CLASS;
     if (this.collapsed) {
       childClass += ` ${MOD_COLLAPSED_CLASS}`;
     }
     return (
-      <div className={childClass}  onclick={ (e) => this.handleClick(e) } >
+      <div className={childClass}  onClick={ (e) => this.handleClick(e) } >
       </div>
     );
   }
@@ -84,7 +82,7 @@ abstract class Collapser extends VDomRenderer<null> {
   /**
    * Handle the click event.
    */
-  protected abstract handleClick(e: Event): void;
+  protected abstract handleClick(e: React.MouseEvent<HTMLDivElement>): void;
 
 }
 
@@ -116,7 +114,7 @@ class InputCollapser extends Collapser {
   /**
    * Handle a click event for the user to collapse the cell's input.
    */
-  protected handleClick(e: Event): void {
+  protected handleClick(e: React.MouseEvent<HTMLDivElement>): void {
     let cell = this.parent.parent as Cell;
     if (cell) {
       cell.inputHidden = !cell.inputHidden;
@@ -155,7 +153,7 @@ class OutputCollapser extends Collapser {
   /**
    * Handle a click event for the user to collapse the cell's output.
    */
-  protected handleClick(e: Event): void {
+  protected handleClick(e: React.MouseEvent<HTMLDivElement>): void {
     let cell = this.parent.parent as CodeCell;
     if (cell) {
       cell.outputHidden = !cell.outputHidden;

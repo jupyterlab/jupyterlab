@@ -21,6 +21,10 @@ import {
 } from '@phosphor/signaling';
 
 import {
+  showDialog
+} from '@jupyterlab/apputils';
+
+import {
   CodeEditor
 } from '@jupyterlab/codeeditor';
 
@@ -35,6 +39,7 @@ import {
 import 'codemirror/addon/edit/matchbrackets.js';
 import 'codemirror/addon/edit/closebrackets.js';
 import 'codemirror/addon/comment/comment.js';
+import 'codemirror/addon/scroll/scrollpastend.js';
 import 'codemirror/addon/search/searchcursor';
 import 'codemirror/addon/search/search';
 import 'codemirror/keymap/emacs.js';
@@ -91,6 +96,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     host.classList.add(EDITOR_CLASS);
     host.classList.add('jp-Editor');
     host.addEventListener('focus', this, true);
+    host.addEventListener('blur', this, true);
     host.addEventListener('scroll', this, true);
 
     this._uuid = options.uuid || uuid();
@@ -112,6 +118,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     doc.setValue(model.value.text);
     this._onMimeTypeChanged();
     this._onCursorActivity();
+    this._timer = window.setInterval(() => { this._checkSync(); }, 3000);
 
     // Connect to changes.
     model.value.changed.connect(this._onValueChanged, this);
@@ -139,12 +146,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
       if (change.origin === 'setValue' && this.hasFocus()) {
         this.refresh();
       }
-      if (this._model.value.text !== editor.getDoc().getValue()) {
-        console.error('Uh oh, the string model is out of sync: ', {
-          model: this._model.value.text,
-          view: editor.getDoc().getValue()
-        });
-      }
+      this._lastChange = change;
     });
 
     // Manually refresh on paste to make sure editor is properly sized.
@@ -243,8 +245,10 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     }
     this._isDisposed = true;
     this.host.removeEventListener('focus', this, true);
+    this.host.removeEventListener('blur', this, true);
     this.host.removeEventListener('scroll', this, true);
     this._keydownHandlers.length = 0;
+    window.clearInterval(this._timer);
     Signal.clearData(this);
   }
 
@@ -761,6 +765,9 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     case 'focus':
       this._evtFocus(event as FocusEvent);
       break;
+    case 'blur':
+      this._evtBlur(event as FocusEvent);
+      break;
     case 'scroll':
       this._evtScroll();
       break;
@@ -776,6 +783,14 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     if (this._needsRefresh) {
       this.refresh();
     }
+    this.host.classList.add('jp-mod-focused');
+  }
+
+  /**
+   * Handle `blur` events for the editor.
+   */
+  private _evtBlur(event: FocusEvent): void {
+    this.host.classList.remove('jp-mod-focused');
   }
 
   /**
@@ -841,6 +856,37 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     return caret;
   }
 
+  /**
+   * Check for an out of sync editor.
+   */
+  private _checkSync(): void {
+    let change = this._lastChange;
+    if (!change) {
+      return;
+    }
+    this._lastChange = null;
+    let editor = this._editor;
+    let doc = editor.getDoc();
+    if (doc.getValue() === this._model.value.text) {
+      return;
+    }
+
+    showDialog({
+      title: 'Code Editor out of Sync',
+      body: 'Please open your browser JavaScript console for bug report instructions'
+    });
+    console.log('Please paste the following to https://github.com/jupyterlab/jupyterlab/issues/2951');
+    console.log(JSON.stringify({
+      model: this._model.value.text,
+      view: doc.getValue(),
+      selections: this.getSelections(),
+      cursor: this.getCursorPosition(),
+      lineSep: editor.getOption('lineSeparator'),
+      mode: editor.getOption('mode'),
+      change
+    }));
+  }
+
   private _model: CodeEditor.IModel;
   private _editor: CodeMirror.Editor;
   protected selectionMarkers: { [key: string]: CodeMirror.TextMarker[] | undefined } = {};
@@ -853,6 +899,8 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   private _uuid = '';
   private _needsRefresh = false;
   private _isDisposed = false;
+  private _lastChange: CodeMirror.EditorChange | null = null;
+  private _timer = -1;
 }
 
 
@@ -977,6 +1025,11 @@ namespace CodeMirrorEditor {
      * selection will copy or cut the whole lines that have cursors on them.
      */
     lineWiseCopyCut?: boolean;
+
+    /**
+     * Whether to scroll past the end of the buffer.
+     */
+    scrollPastEnd?: boolean;
   }
 
   /**
@@ -999,6 +1052,7 @@ namespace CodeMirrorEditor {
     lineSeparator: null,
     scrollbarStyle: 'native',
     lineWiseCopyCut: true,
+    scrollPastEnd: false
   };
 
   /**

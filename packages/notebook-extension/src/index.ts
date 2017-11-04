@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IStateDB, PageConfig, URLExt
+  IStateDB, PageConfig, URLExt, uuid
 } from '@jupyterlab/coreutils';
 
 import {
@@ -39,7 +39,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  Menu, Widget
+  Menu, Panel, Widget
 } from '@phosphor/widgets';
 
 
@@ -68,6 +68,9 @@ namespace CommandIDs {
 
   export
   const createConsole = 'notebook:create-console';
+
+  export
+  const createCellView = 'notebook:create-cell-view';
 
   export
   const clearAllOutputs = 'notebook:clear-all-cell-outputs';
@@ -207,7 +210,7 @@ namespace CommandIDs {
   export
   const showAllOutputs = 'notebook:show-all-cell-outputs';
 
-};
+}
 
 
 /**
@@ -237,9 +240,8 @@ const EXPORT_TO_FORMATS = [
 /**
  * The notebook widget tracker provider.
  */
-export
-const trackerPlugin: JupyterLabPlugin<INotebookTracker> = {
-  id: 'jupyter.services.notebook-tracker',
+const tracker: JupyterLabPlugin<INotebookTracker> = {
+  id: '@jupyterlab/notebook-extension:tracker',
   provides: INotebookTracker,
   requires: [
     IMainMenu,
@@ -257,9 +259,8 @@ const trackerPlugin: JupyterLabPlugin<INotebookTracker> = {
 /**
  * The notebook cell factory provider.
  */
-export
-const contentFactoryPlugin: JupyterLabPlugin<NotebookPanel.IContentFactory> = {
-  id: 'jupyter.services.notebook-renderer',
+const factory: JupyterLabPlugin<NotebookPanel.IContentFactory> = {
+  id: '@jupyterlab/notebook-extension:factory',
   provides: NotebookPanel.IContentFactory,
   requires: [IEditorServices],
   autoStart: true,
@@ -273,10 +274,10 @@ const contentFactoryPlugin: JupyterLabPlugin<NotebookPanel.IContentFactory> = {
 /**
  * The cell tools extension.
  */
-const cellToolsPlugin: JupyterLabPlugin<ICellTools> = {
+const tools: JupyterLabPlugin<ICellTools> = {
   activate: activateCellTools,
   provides: ICellTools,
-  id: 'jupyter.extensions.cell-tools',
+  id: '@jupyterlab/notebook-extension:tools',
   autoStart: true,
   requires: [INotebookTracker, IEditorServices, IStateDB]
 };
@@ -285,7 +286,7 @@ const cellToolsPlugin: JupyterLabPlugin<ICellTools> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [contentFactoryPlugin, trackerPlugin, cellToolsPlugin];
+const plugins: JupyterLabPlugin<any>[] = [factory, tracker, tools];
 export default plugins;
 
 
@@ -433,8 +434,9 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
   // Add a launcher item if the launcher is available.
   if (launcher) {
     services.ready.then(() => {
-      let specs = services.specs;
-      let baseUrl = PageConfig.getBaseUrl();
+      const specs = services.specs;
+      const baseUrl = PageConfig.getBaseUrl();
+
       for (let name in specs.kernelspecs) {
         let displayName = specs.kernelspecs[name].display_name;
         let rank = name === specs.default ? 0 : Infinity;
@@ -456,14 +458,49 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
     });
   }
 
-  app.contextMenu.addItem({command: CommandIDs.clearOutputs, selector: '.jp-Notebook .jp-Cell'});
-  app.contextMenu.addItem({command: CommandIDs.split, selector: '.jp-Notebook .jp-Cell'});
-  app.contextMenu.addItem({ type: 'separator', selector: '.jp-Notebook', rank: 0 });
-  app.contextMenu.addItem({command: CommandIDs.undo, selector: '.jp-Notebook', rank: 1});
-  app.contextMenu.addItem({command: CommandIDs.redo, selector: '.jp-Notebook', rank: 2});
-  app.contextMenu.addItem({ type: 'separator', selector: '.jp-Notebook', rank: 0 });
-  app.contextMenu.addItem({command: CommandIDs.createConsole, selector: '.jp-Notebook', rank: 3});
-    app.contextMenu.addItem({command: CommandIDs.clearAllOutputs, selector: '.jp-Notebook', rank: 3});
+  app.contextMenu.addItem({
+    command: CommandIDs.clearOutputs,
+    selector: '.jp-Notebook .jp-Cell'
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.split,
+    selector: '.jp-Notebook .jp-Cell'
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.createCellView,
+    selector: '.jp-Notebook .jp-Cell'
+  });
+  app.contextMenu.addItem({
+    type: 'separator',
+    selector: '.jp-Notebook',
+    rank: 0
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.undo,
+    selector: '.jp-Notebook',
+    rank: 1
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.redo,
+    selector: '.jp-Notebook',
+    rank: 2
+  });
+  app.contextMenu.addItem({
+    type: 'separator',
+    selector: '.jp-Notebook',
+    rank: 0
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.createConsole,
+    selector: '.jp-Notebook',
+    rank: 3
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.clearAllOutputs,
+    selector: '.jp-Notebook',
+    rank: 3
+  });
+
   return tracker;
 }
 
@@ -477,11 +514,13 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
 
   // Get the current widget and activate unless the args specify otherwise.
   function getCurrent(args: ReadonlyJSONObject): NotebookPanel | null {
-    let widget = tracker.currentWidget;
-    let activate = args['activate'] !== false;
+    const widget = tracker.currentWidget;
+    const activate = args['activate'] !== false;
+
     if (activate && widget) {
       shell.activateById(widget.id);
     }
+
     return widget;
   }
 
@@ -495,80 +534,85 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.runAndAdvance, {
     label: 'Run Cell(s) and Select Below',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        const { context, notebook } = current;
+
+        return NotebookActions.runAndAdvance(notebook, context.session);
       }
-      let content = current.notebook;
-      return NotebookActions.runAndAdvance(content, current.context.session);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.run, {
     label: 'Run Cell(s)',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        const { context, notebook } = current;
+
+        return NotebookActions.run(notebook, context.session);
       }
-      return NotebookActions.run(current.notebook, current.context.session);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.runAndInsert, {
     label: 'Run Cell(s) and Insert Below',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        const { context, notebook } = current;
+
+        return NotebookActions.runAndInsert(notebook, context.session);
       }
-      return NotebookActions.runAndInsert(
-        current.notebook, current.context.session
-      );
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.runAll, {
     label: 'Run All Cells',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        const { context, notebook } = current;
+
+        return NotebookActions.runAll(notebook, context.session);
       }
-      return NotebookActions.runAll(current.notebook, current.context.session);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.restart, {
     label: 'Restart Kernel',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return current.session.restart();
       }
-      current.session.restart();
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.closeAndShutdown, {
     label: 'Close and Shutdown',
     execute: args => {
-      let current = getCurrent(args);
+      const current = getCurrent(args);
+
       if (!current) {
         return;
       }
-      let fileName = current.title.label;
+
+      const fileName = current.title.label;
+
       return showDialog({
         title: 'Shutdown the notebook?',
         body: `Are you sure you want to close "${fileName}"?`,
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
         if (result.button.accept) {
-          return current.context.session.shutdown().then(() => {
-            current.dispose();
-          });
-        } else {
-          return;
+          return current.context.session.shutdown()
+            .then(() => { current.dispose(); });
         }
       });
     },
@@ -577,104 +621,111 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.trust, {
     label: 'Trust Notebook',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        const { context, notebook } = current;
+
+        return NotebookActions.trust(notebook).then(() => context.save());
       }
-      return NotebookActions.trust(current.notebook).then(() => {
-        return current.context.save();
-      });
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.exportToFormat, {
     label: args => {
-        let formatLabel = (args['label']) as string;
+        const formatLabel = (args['label']) as string;
+
         return (args['isPalette'] ? 'Export To ' : '') + formatLabel;
     },
     execute: args => {
-      let current = getCurrent(args);
+      const current = getCurrent(args);
+
       if (!current) {
         return;
       }
 
-      let notebookPath = URLExt.encodeParts(current.context.path);
-      let url = URLExt.join(
+      const notebookPath = URLExt.encodeParts(current.context.path);
+      const url = URLExt.join(
         services.serverSettings.baseUrl,
         'nbconvert',
         (args['format']) as string,
         notebookPath
       ) + '?download=true';
+      const child = window.open('', '_blank');
+      const { context } = current;
 
-      let w = window.open('', '_blank');
-      if (current.context.model.dirty && !current.context.model.readOnly) {
-        return current.context.save().then(() => {
-          w.location.assign(url);
-        });
-      } else {
-        return new Promise((resolve, reject) => {
-          w.location.assign(url);
-        });
+      if (context.model.dirty && !context.model.readOnly) {
+        return context.save().then(() => { child.location.assign(url); });
       }
+
+      return new Promise<void>((resolve) => {
+        child.location.assign(url);
+        resolve(undefined);
+      });
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.restartClear, {
     label: 'Restart Kernel & Clear Outputs',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        const { notebook, session } = current;
+
+        return session.restart()
+          .then(() => { NotebookActions.clearAllOutputs(notebook); });
       }
-      return current.session.restart().then(() => {
-        NotebookActions.clearAllOutputs(current.notebook);
-      });
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.restartRunAll, {
     label: 'Restart Kernel & Run All',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        const { context, notebook, session } = current;
+
+        return session.restart()
+          .then(() => { NotebookActions.runAll(notebook, context.session); });
       }
-      return current.session.restart().then(() => {
-        NotebookActions.runAll(current.notebook, current.context.session);
-      });
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.clearAllOutputs, {
     label: 'Clear All Outputs',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.clearAllOutputs(current.notebook);
       }
-      return NotebookActions.clearAllOutputs(current.notebook);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.clearOutputs, {
     label: 'Clear Output(s)',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.clearOutputs(current.notebook);
       }
-      return NotebookActions.clearOutputs(current.notebook);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.interrupt, {
     label: 'Interrupt Kernel',
     execute: args => {
-      let current = getCurrent(args);
+      const current = getCurrent(args);
+
       if (!current) {
         return;
       }
-      let kernel = current.context.session.kernel;
+
+      const kernel = current.context.session.kernel;
+
       if (kernel) {
         return kernel.interrupt();
       }
@@ -684,298 +735,321 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.toCode, {
     label: 'Change to Code Cell Type',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.changeCellType(current.notebook, 'code');
       }
-      return NotebookActions.changeCellType(current.notebook, 'code');
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.toMarkdown, {
     label: 'Change to Markdown Cell Type',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.changeCellType(current.notebook, 'markdown');
       }
-      return NotebookActions.changeCellType(current.notebook, 'markdown');
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.toRaw, {
     label: 'Change to Raw Cell Type',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.changeCellType(current.notebook, 'raw');
       }
-      return NotebookActions.changeCellType(current.notebook, 'raw');
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.cut, {
     label: 'Cut Cell(s)',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.cut(current.notebook);
       }
-      return NotebookActions.cut(current.notebook);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.copy, {
     label: 'Copy Cell(s)',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.copy(current.notebook);
       }
-      return NotebookActions.copy(current.notebook);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.paste, {
     label: 'Paste Cell(s) Below',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.paste(current.notebook);
       }
-      return NotebookActions.paste(current.notebook);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.deleteCell, {
     label: 'Delete Cell(s)',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.deleteCells(current.notebook);
       }
-      return NotebookActions.deleteCells(current.notebook);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.split, {
     label: 'Split Cell',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.splitCell(current.notebook);
       }
-      return NotebookActions.splitCell(current.notebook);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.merge, {
     label: 'Merge Selected Cell(s)',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.mergeCells(current.notebook);
       }
-      return NotebookActions.mergeCells(current.notebook);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.insertAbove, {
     label: 'Insert Cell Above',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.insertAbove(current.notebook);
       }
-      return NotebookActions.insertAbove(current.notebook);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.insertBelow, {
     label: 'Insert Cell Below',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.insertBelow(current.notebook);
       }
-      return NotebookActions.insertBelow(current.notebook);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.selectAbove, {
     label: 'Select Cell Above',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.selectAbove(current.notebook);
       }
-      return NotebookActions.selectAbove(current.notebook);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.selectBelow, {
     label: 'Select Cell Below',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.selectBelow(current.notebook);
       }
-      return NotebookActions.selectBelow(current.notebook);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.extendAbove, {
     label: 'Extend Selection Above',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.extendSelectionAbove(current.notebook);
       }
-      return NotebookActions.extendSelectionAbove(current.notebook);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.extendBelow, {
     label: 'Extend Selection Below',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.extendSelectionBelow(current.notebook);
       }
-      return NotebookActions.extendSelectionBelow(current.notebook);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.moveUp, {
     label: 'Move Cell(s) Up',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.moveUp(current.notebook);
       }
-      return NotebookActions.moveUp(current.notebook);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.moveDown, {
     label: 'Move Cell(s) Down',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.moveDown(current.notebook);
       }
-      return NotebookActions.moveDown(current.notebook);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.toggleLines, {
     label: 'Toggle Line Numbers',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.toggleLineNumbers(current.notebook);
       }
-      return NotebookActions.toggleLineNumbers(current.notebook);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.toggleAllLines, {
     label: 'Toggle All Line Numbers',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.toggleAllLineNumbers(current.notebook);
       }
-      return NotebookActions.toggleAllLineNumbers(current.notebook);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.commandMode, {
     label: 'Enter Command Mode',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        current.notebook.mode = 'command';
       }
-      return current.notebook.mode = 'command';
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.editMode, {
     label: 'Enter Edit Mode',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        current.notebook.mode = 'edit';
       }
-      current.notebook.mode = 'edit';
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.undo, {
     label: 'Undo Cell Operation',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.undo(current.notebook);
       }
-      return NotebookActions.undo(current.notebook);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.redo, {
     label: 'Redo Cell Operation',
     execute: args => {
-      let current = getCurrent(args);
+      const current = getCurrent(args);
+
       if (!current) {
-        return;
+        return NotebookActions.redo(current.notebook);
       }
-      return NotebookActions.redo(current.notebook);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.changeKernel, {
     label: 'Change Kernel',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return current.context.session.selectKernel();
       }
-      return current.context.session.selectKernel();
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.reconnectToKernel, {
     label: 'Reconnect To Kernel',
     execute: args => {
-      let current = getCurrent(args);
+      const current = getCurrent(args);
+
       if (!current) {
         return;
       }
-      let kernel = current.context.session.kernel;
-      if (!kernel) {
-        return;
+
+      const kernel = current.context.session.kernel;
+
+      if (kernel) {
+        return kernel.reconnect();
       }
-      return kernel.reconnect();
+    },
+    isEnabled: hasWidget
+  });
+  commands.addCommand(CommandIDs.createCellView, {
+    label: 'Create New View for Cell',
+    execute: args => {
+      const current = getCurrent(args);
+      const nb = current.notebook;
+      const newCell = nb.activeCell.clone();
+
+      const CellPanel = class extends Panel {
+        protected onCloseRequest(msg: Message): void {
+          this.dispose();
+        }
+      };
+      const p = new CellPanel();
+      p.id = `Cell-${uuid()}`;
+      p.title.closable = true;
+      p.title.label = current.title.label ? `Cell: ${current.title.label}` : 'Cell';
+      p.addWidget(newCell);
+      shell.addToMainArea(p);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.createConsole, {
     label: 'Create Console for Notebook',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
+      const current = getCurrent(args);
+      const widget = tracker.currentWidget;
+
+      if (!current || !widget) {
         return;
       }
-      let widget = tracker.currentWidget;
-      if (!widget) {
-        return;
-      }
-      let options: ReadonlyJSONObject = {
+
+      const options: ReadonlyJSONObject = {
         path: widget.context.path,
         preferredLanguage: widget.context.model.defaultKernelLanguage,
         activate: args['activate']
       };
+
       return commands.execute('console:create', options);
     },
     isEnabled: hasWidget
@@ -983,154 +1057,154 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.markdown1, {
     label: 'Change to Heading 1',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.setMarkdownHeader(current.notebook, 1);
       }
-      return NotebookActions.setMarkdownHeader(current.notebook, 1);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.markdown2, {
     label: 'Change to Heading 2',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.setMarkdownHeader(current.notebook, 2);
       }
-      return NotebookActions.setMarkdownHeader(current.notebook, 2);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.markdown3, {
     label: 'Change to Heading 3',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.setMarkdownHeader(current.notebook, 3);
       }
-      return NotebookActions.setMarkdownHeader(current.notebook, 3);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.markdown4, {
     label: 'Change to Heading 4',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.setMarkdownHeader(current.notebook, 4);
       }
-      return NotebookActions.setMarkdownHeader(current.notebook, 4);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.markdown5, {
     label: 'Change to Heading 5',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.setMarkdownHeader(current.notebook, 5);
       }
-      return NotebookActions.setMarkdownHeader(current.notebook, 5);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.markdown6, {
     label: 'Change to Heading 6',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.setMarkdownHeader(current.notebook, 6);
       }
-      return NotebookActions.setMarkdownHeader(current.notebook, 6);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.hideCode, {
     label: 'Hide Code',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.hideCode(current.notebook);
       }
-      return NotebookActions.hideCode(current.notebook);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.showCode, {
     label: 'Show Code',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.showCode(current.notebook);
       }
-      return NotebookActions.showCode(current.notebook);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.hideAllCode, {
     label: 'Hide All Code',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.hideAllCode(current.notebook);
       }
-      return NotebookActions.hideAllCode(current.notebook);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.showAllCode, {
     label: 'Show All Code',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.showAllCode(current.notebook);
       }
-      return NotebookActions.showAllCode(current.notebook);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.hideOutput, {
     label: 'Hide Output',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.hideOutput(current.notebook);
       }
-      return NotebookActions.hideOutput(current.notebook);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.showOutput, {
     label: 'Show Output',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.showOutput(current.notebook);
       }
-      return NotebookActions.showOutput(current.notebook);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.hideAllOutputs, {
     label: 'Hide All Outputs',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.hideAllOutputs(current.notebook);
       }
-      return NotebookActions.hideAllOutputs(current.notebook);
     },
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.showAllOutputs, {
     label: 'Show All Outputs',
     execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.showAllOutputs(current.notebook);
       }
-      return NotebookActions.showAllOutputs(current.notebook);
     },
     isEnabled: hasWidget
   });
@@ -1221,7 +1295,7 @@ function createMenu(app: JupyterLab): Menu {
   settings.title.label = 'Settings';
   settings.addItem({ command: CommandIDs.toggleAllLines });
 
-  exportTo.title.label = "Export to ...";
+  exportTo.title.label = 'Export to ...';
   EXPORT_TO_FORMATS.forEach(exportToFormat => {
     exportTo.addItem({ command: CommandIDs.exportToFormat, args: exportToFormat });
   });

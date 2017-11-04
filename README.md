@@ -13,6 +13,8 @@
 [![Build Status](https://travis-ci.org/jupyterlab/jupyterlab.svg?branch=master)](https://travis-ci.org/jupyterlab/jupyterlab)
 [![Documentation Status](https://readthedocs.org/projects/jupyterlab/badge/?version=latest)](https://jupyterlab.readthedocs.io/en/latest/?badge=latest)
 [![Google Group](https://img.shields.io/badge/-Google%20Group-lightgrey.svg)](https://groups.google.com/forum/#!forum/jupyter)
+[![Join the Gitter Chat](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/jupyterlab/jupyterlab)
+
 
 An extensible environment for interactive and reproducible computing, based on the 
 Jupyter Notebook and Architecture.
@@ -23,7 +25,7 @@ file browser, rich outputs, etc.) in a flexible and powerful user inteface that 
 extended through third party extensions that access our public APIs. Eventually, JupyterLab
 will replace the classic Jupyter Notebook.
 
-**JupyterLab is approaching its beta release in mid 2017. During our pre-beta series of releases, we encourage users and developers to try out JupyterLab and give us feedback.
+**JupyterLab is approaching its beta release in 2017. During our pre-beta series of releases, we encourage users and developers to try out JupyterLab and give us feedback.
 For users, the upcoming beta will be suitable for general usage.  For developers, our
 APIs will continue to change significantly up until the 1.0 release.**
 
@@ -53,6 +55,18 @@ Instructions on how to install the project from the git sources are available in
 Note: If installing using `pip install --user`, you must add the user-level
  `bin` directory to your `PATH` environment variable in order to launch
  `jupyter lab`.
+
+Note: JupyterLab can be installed from a git checkout using `pip`.  Note
+that you will have to build the application after installing to get the static 
+assets.  `pip` will warn you that the static assets are not included when 
+installing, and it will fail to build a cached wheel if it decides to try 
+and make one.  Example:
+
+```bash
+pip install git+git://github.com/jupyterlab/jupyterlab.git
+jupyter lab build   # Requires nodejs
+jupyter serverextension enable --py jupyterlab --sys-prefix
+```
 
 ### Running
 
@@ -127,6 +141,7 @@ JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by
   technical leadership, vision, phosphor.js)
 * Afshin Darian, Continuum Analytics (co-creator, settings, inspector, completer,
   prolific contributions throughout the code base).
+* Jessica Forde, Project Jupyter (demo, documentation)
 * Brian Granger, Cal Poly (co-creator, strategy, vision, management, UI/UX design,
   architecture).
 * Jason Grout, Bloomberg (co-creator, vision, general development).

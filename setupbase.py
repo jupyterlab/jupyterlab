@@ -12,16 +12,17 @@ This includes:
 import io
 import json
 import os
-import glob
 import pipes
 import sys
 import shutil
+import tempfile
 import os.path as osp
 from os.path import join as pjoin
 
 from distutils import log
 from distutils.cmd import Command
 from distutils.version import LooseVersion
+from setuptools.command.egg_info import egg_info
 from setuptools.command.bdist_egg import bdist_egg
 from subprocess import check_call
 
@@ -82,38 +83,47 @@ def find_package_data():
         slice_len = len('jupyterlab' + os.sep)
         theme_dirs.append(pjoin(dir[slice_len:], '*'))
 
+    schema_dirs = []
+    for dir, subdirs, files in os.walk(pjoin('jupyterlab', 'schemas')):
+        slice_len = len('jupyterlab' + os.sep)
+        schema_dirs.append(pjoin(dir[slice_len:], '*'))
+
     return {
-        'jupyterlab': ['build/*', 'schemas/*', 'index.app.js',
-                       'webpack.config.js', 'package.app.json',
-                       'released_packages.txt', 'node-version-check.js'] + theme_dirs
+        'jupyterlab': ['build/*', '*.js', 'package.app.json', '.npmrc',
+                       ] + theme_dirs + schema_dirs
     }
 
 
-def ensure_core_data(command):
-    """decorator for building minified js/css prior to another command"""
-    class DecoratedCommand(command):
+def find_data_files():
+    """
+    Find data_files.
+    """
+    if not os.path.exists(pjoin('jupyterlab', 'build')):
+        return []
 
-        def run(self):
-            coredeps = self.distribution.get_command_obj('coredeps')
-            if not is_repo and all(osp.exists(t) for t in coredeps.targets):
-                # build_py or build_ext, nothing to do
-                command.run(self)
-                return
+    files = []
 
-            try:
-                self.distribution.run_command('coredeps')
-            except Exception as e:
-                missing = [t for t in coredeps.targets if not osp.exists(t)]
-                if missing:
-                    log.warn('file check failed')
-                    if missing:
-                        log.error('missing files: %s' % missing)
-                    raise e
-                else:
-                    log.warn('core deps check failed (not a problem)')
-                    log.warn(str(e))
-            command.run(self)
-    return DecoratedCommand
+    static_files = os.listdir(pjoin('jupyterlab', 'build'))
+    files.append(('share/jupyter/lab/static',
+        ['jupyterlab/build/%s' % f for f in static_files]))
+
+    for dir, subdirs, fnames in os.walk(pjoin('jupyterlab', 'schemas')):
+        dir = dir.replace(os.sep, '/')
+        schema_files = []
+        for fname in fnames:
+            schema_files.append('%s/%s' % (dir, fname))
+        slice_len = len('jupyterlab/')
+        files.append(('share/jupyter/lab/%s' % dir[slice_len:], schema_files))
+
+    for dir, subdirs, fnames in os.walk(pjoin('jupyterlab', 'themes')):
+        dir = dir.replace(os.sep, '/')
+        themes_files = []
+        for fname in fnames:
+            themes_files.append('%s/%s' % (dir, fname))
+        slice_len = len('jupyterlab/')
+        files.append(('share/jupyter/lab/%s' % dir[slice_len:], themes_files))
+
+    return files
 
 
 def js_prerelease(command, strict=False):
@@ -149,66 +159,6 @@ def update_package_data(distribution):
     build_py.finalize_options()
 
 
-class CoreDeps(Command):
-    description = 'ensure required core assets'
-
-    user_options = []
-
-    # Representative files that should exist after a successful core setup
-    targets = [
-        pjoin(here, 'jupyterlab', 'schemas', 'jupyter.extensions.shortcuts.json'),
-        pjoin(here, 'jupyterlab', 'themes', 'jupyterlab-theme-light-extension',
-            'images', 'jupyterlab.svg')
-    ]
-
-    def initialize_options(self):
-        pass
-
-    def finalize_options(self):
-        pass
-
-    def run(self):
-        # Handle schemas.
-        schema = pjoin(here, 'jupyterlab', 'schemas')
-        if osp.exists(schema):
-            shutil.rmtree(schema)
-        os.makedirs(schema)
-
-        packages = glob.glob(pjoin(here, 'packages', '**', 'package.json'))
-        for pkg in packages:
-            with open(pkg) as fid:
-                data = json.load(fid)
-            if 'jupyterlab' not in data:
-                continue
-            schemaDir = data['jupyterlab'].get('schemaDir', '')
-            if schemaDir:
-                parentDir = osp.dirname(pkg)
-                files = glob.glob(pjoin(parentDir, schemaDir, '*.json'))
-                for file in files:
-                    shutil.copy(file, schema)
-
-        # Handle themes
-        themes = pjoin(here, 'jupyterlab', 'themes')
-        if osp.exists(themes):
-            shutil.rmtree(themes)
-        os.makedirs(themes)
-
-        packages = glob.glob(pjoin(here, 'packages', '**', 'package.json'))
-        for pkg in packages:
-            with open(pkg) as fid:
-                data = json.load(fid)
-            if 'jupyterlab' not in data:
-                continue
-            themeDir = data['jupyterlab'].get('themeDir', '')
-            if themeDir:
-                name = data['name'].replace('@', '').replace('/', '-')
-                src = pjoin(osp.dirname(pkg), themeDir)
-                shutil.copytree(src, pjoin(themes, name))
-
-        # update package data in case this created new files
-        update_package_data(self.distribution)
-
-
 class CheckAssets(Command):
     description = 'check for required assets'
 
@@ -218,7 +168,12 @@ class CheckAssets(Command):
     targets = [
         pjoin(here, 'jupyterlab', 'build', 'release_data.json'),
         pjoin(here, 'jupyterlab', 'build', 'main.bundle.js'),
-    ] + CoreDeps.targets
+        pjoin(here, 'jupyterlab', 'schemas', '@jupyterlab',
+            'shortcuts-extension', 'plugin.json'),
+        pjoin(here, 'jupyterlab', 'themes', '@jupyterlab',
+            'theme-light-extension',
+            'images', 'jupyterlab.svg')
+    ]
 
     def initialize_options(self):
         pass
@@ -252,3 +207,20 @@ class bdist_egg_disabled(bdist_egg):
     """
     def run(self):
         sys.exit("Aborting implicit building of eggs. Use `pip install .` to install from source.")
+
+
+class custom_egg_info(egg_info):
+    """Prune JavaScript folders from egg_info to avoid locking up pip.
+    """
+
+    def run(self):
+        folders = ['examples', 'packages', 'test', 'node_modules']
+        folders = [f for f in folders if os.path.exists(pjoin(here, f))]
+        tempdir = tempfile.mkdtemp()
+        for folder in folders:
+            shutil.move(pjoin(here, folder), tempdir)
+        value = egg_info.run(self)
+        for folder in folders:
+            shutil.move(pjoin(tempdir, folder), here)
+        shutil.rmtree(tempdir)
+        return value

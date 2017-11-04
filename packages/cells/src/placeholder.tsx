@@ -3,10 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-
-import {
-  h, VirtualNode
-} from '@phosphor/virtualdom';
+import * as React from 'react';
 
 import {
   VDomRenderer
@@ -56,7 +53,7 @@ abstract class Placeholder extends VDomRenderer<null> {
   /**
    * Construct a new placeholder.
    */
-  constructor(callback: (e: Event) => void) {
+  constructor(callback: (e: React.MouseEvent<HTMLDivElement>) => void) {
     super();
     this.addClass(PLACEHOLDER_CLASS);
     this._callback = callback;
@@ -65,12 +62,12 @@ abstract class Placeholder extends VDomRenderer<null> {
   /**
    * Handle the click event.
    */
-  protected handleClick(e: Event): void {
+  protected handleClick(e: React.MouseEvent<HTMLDivElement>): void {
     let callback = this._callback;
     callback(e);
   }
 
-  private _callback: (e: Event) => void;
+  private _callback: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 
@@ -82,7 +79,7 @@ class InputPlaceholder extends Placeholder {
   /**
    * Construct a new input placeholder.
    */
-  constructor(callback: (e: Event) => void) {
+  constructor(callback: (e: React.MouseEvent<HTMLDivElement>) => void) {
     super(callback);
     this.addClass(INPUT_PLACEHOLDER_CLASS);
   }
@@ -90,14 +87,14 @@ class InputPlaceholder extends Placeholder {
   /**
    * Render the input placeholder using the virtual DOM.
    */
-  protected render(): VirtualNode | ReadonlyArray<VirtualNode> {
+  protected render(): React.ReactElement<any>[] {
     return [
         <div className={INPUT_PROMPT_CLASS}>
         </div>,
-        <div className={CONTENT_CLASS} onclick={ (e) => this.handleClick(e) }>
+        <div className={CONTENT_CLASS} onClick={ (e) => this.handleClick(e) }>
           <div className="jp-MoreHorizIcon" />
         </div>
-    ]
+    ];
   }
 
 }
@@ -111,7 +108,7 @@ class OutputPlaceholder extends Placeholder {
   /**
    * Construct a new output placeholder.
    */
-  constructor(callback: (e: Event) => void) {
+  constructor(callback: (e: React.MouseEvent<HTMLDivElement>) => void) {
     super(callback);
     this.addClass(OUTPUT_PLACEHOLDER_CLASS);
   }
@@ -119,14 +116,14 @@ class OutputPlaceholder extends Placeholder {
   /**
    * Render the output placeholder using the virtual DOM.
    */
-  protected render(): VirtualNode | ReadonlyArray<VirtualNode> {
+  protected render(): React.ReactElement<any>[] {
     return [
         <div className={OUTPUT_PROMPT_CLASS}>
         </div>,
-        <div className={CONTENT_CLASS} onclick={ (e) => this.handleClick(e) }>
+        <div className={CONTENT_CLASS} onClick={ (e) => this.handleClick(e) }>
           <div className="jp-MoreHorizIcon" />
         </div>
-    ]
+    ];
   }
 
 }

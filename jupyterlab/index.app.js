@@ -9,32 +9,134 @@ var app = require('@jupyterlab/application').JupyterLab;
 
 
 function main() {
+    // Get the disabled extensions.
+    var disabled = { patterns: [], matches: [] };
+    var disabledExtensions = [];
+    try {
+        var option = PageConfig.getOption('disabledExtensions');
+        if (option) {
+            disabledExtensions = JSON.parse(option).map(function(pattern) {
+                disabled.patterns.push(pattern);
+                return { raw: pattern, rule: new RegExp(pattern) };
+            });
+        }
+    } catch (error) {
+        console.warn('Unable to parse disabled extensions.', error);
+    }
+
+    // Get the deferred extensions.
+    var deferred = { patterns: [], matches: [] };
+    var deferredExtensions = [];
+    var ignorePlugins = [];
+    try {
+        var option = PageConfig.getOption('deferredExtensions');
+        if (option) {
+            deferredExtensions = JSON.parse(option).map(function(pattern) {
+                deferred.patterns.push(pattern);
+                return { raw: pattern, rule: new RegExp(pattern) };
+            });
+        }
+    } catch (error) {
+        console.warn('Unable to parse deferred extensions.', error);
+    }
+
+    function isDeferred(value) {
+        return deferredExtensions.some(function(pattern) {
+            return pattern.raw === value || pattern.rule.test(value)
+        })
+    }
+
+    function isDisabled(value) {
+        return disabledExtensions.some(function(pattern) {
+            return pattern.raw === value || pattern.rule.test(value)
+        });
+    }
+
     var version = PageConfig.getOption('appVersion') || 'unknown';
     var name = PageConfig.getOption('appName') || 'JupyterLab';
     var namespace = PageConfig.getOption('appNamespace') || 'jupyterlab';
     var devMode = PageConfig.getOption('devMode') || 'false';
     var settingsDir = PageConfig.getOption('settingsDir') || '';
     var assetsDir = PageConfig.getOption('assetsDir') || '';
+    var register = [];
 
     if (version[0] === 'v') {
         version = version.slice(1);
-    }
-
-    // Get the disabled extensions.
-    var disabled = [];
-    try {
-        var option = PageConfig.getOption('disabledExtensions');
-        disabled = JSON.parse(option);
-    } catch (e) {
-        // No-op
     }
 
     // Handle the registered mime extensions.
     var mimeExtensions = [];
     {{#each jupyterlab_mime_extensions}}
     try {
-        if (disabled.indexOf('{{@key}}') === -1) {
-            mimeExtensions.push(require('{{@key}}/{{this}}'));
+        if (isDeferred('{{key}}')) {
+            deferred.matches.push('{{key}}');
+            ignorePlugins.push('{{key}}');
+        }
+        if (isDisabled('{{@key}}')) {
+            disabled.matches.push('{{@key}}');
+        } else {
+            var module = require('{{@key}}/{{this}}');
+            var extension = module.default;
+
+            // Handle CommonJS exports.
+            if (!module.hasOwnProperty('__esModule')) {
+              extension = module;
+            }
+
+            if (Array.isArray(extension)) {
+                extension.forEach(function(plugin) {
+                    if (isDeferred(plugin.id)) {
+                        deferred.matches.push(plugin.id);
+                        ignorePlugins.push(plugin.id);
+                    }
+                    if (isDisabled(plugin.id)) {
+                        disabled.matches.push(plugin.id);
+                        return;
+                    }
+                    mimeExtensions.push(plugin);
+                });
+            } else {
+                mimeExtensions.push(extension);
+            }
+        }
+    } catch (e) {
+        console.error(e);
+    }
+    {{/each}}
+
+    // Handled the registered standard extensions.
+    {{#each jupyterlab_extensions}}
+    try {
+        if (isDeferred('{{key}}')) {
+            deferred.matches.push('{{key}}');
+            ignorePlugins.push('{{key}}');
+        }
+        if (isDisabled('{{@key}}')) {
+            disabled.matches.push('{{@key}}');
+        } else {
+            var module = require('{{@key}}/{{this}}');
+            var extension = module.default;
+
+            // Handle CommonJS exports.
+            if (!module.hasOwnProperty('__esModule')) {
+              extension = module;
+            }
+
+            if (Array.isArray(extension)) {
+                extension.forEach(function(plugin) {
+                    if (isDeferred(plugin.id)) {
+                        deferred.matches.push(plugin.id);
+                        ignorePlugins.push(plugin.id);
+                    }
+                    if (isDisabled(plugin.id)) {
+                        disabled.matches.push(plugin.id);
+                        return;
+                    }
+                    register.push(plugin);
+                });
+            } else {
+                register.push(extension);
+            }
         }
     } catch (e) {
         console.error(e);
@@ -48,29 +150,12 @@ function main() {
         devMode: devMode.toLowerCase() === 'true',
         settingsDir: settingsDir,
         assetsDir: assetsDir,
-        mimeExtensions: mimeExtensions
+        mimeExtensions: mimeExtensions,
+        disabled: disabled,
+        deferred: deferred
     });
-
-    // Handled the registered standard extensions.
-    {{#each jupyterlab_extensions}}
-    try {
-        if (disabled.indexOf('{{@key}}') === -1) {
-            lab.registerPluginModule(require('{{@key}}/{{this}}'));
-        }
-    } catch (e) {
-        console.error(e);
-    }
-    {{/each}}
-
-    // Handle the ignored plugins.
-    var ignorePlugins = [];
-    try {
-        var option = PageConfig.getOption('ignorePlugins');
-        ignorePlugins = JSON.parse(option);
-    } catch (e) {
-        // No-op
-    }
-    lab.start({ "ignorePlugins": ignorePlugins });
+    register.forEach(function(item) { lab.registerPluginModule(item); });
+    lab.start({ ignorePlugins: ignorePlugins });
 
     // Handle a selenium test.
     var seleniumTest = PageConfig.getOption('seleniumTest');
@@ -89,4 +174,4 @@ function main() {
 
 }
 
-window.onload = main;
+window.addEventListener('load', main);

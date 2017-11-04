@@ -44,6 +44,16 @@ class LogEditor extends JSONEditor {
     this.methods.push('onAfterAttach');
   }
 
+  protected onAfterShow(msg: Message): void {
+    super.onAfterShow(msg);
+    this.methods.push('onAfterShow');
+  }
+
+  protected onUpdateRequest(msg: Message): void {
+    super.onUpdateRequest(msg);
+    this.methods.push('onUpdateRequest');
+  }
+
   protected onBeforeDetach(msg: Message): void {
     super.onBeforeDetach(msg);
     this.methods.push('onBeforeDetach');
@@ -393,7 +403,21 @@ describe('apputils', () => {
         simulate(editor.editorHostNode, 'blur');
         simulate(editor.revertButtonNode, 'click');
         simulate(editor.commitButtonNode, 'click');
-        expect(editor.events).to.eql(['focus', 'blur', 'click', 'click']);
+        expect(editor.events).to.eql(['blur', 'click', 'click']);
+      });
+
+    });
+
+    describe('#onAfterShow()', () => {
+
+      it('should update the editor', done => {
+        editor.hide();
+        Widget.attach(editor, document.body);
+        editor.show();
+        requestAnimationFrame(() => {
+          expect(editor.methods).to.contain('onUpdateRequest');
+          done();
+        });
       });
 
     });

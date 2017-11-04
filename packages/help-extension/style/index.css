@@ -5,7 +5,8 @@
 
 
 .jp-Help {
-  min-width: 480px;
+  min-width: 240px;
+  min-height: 240px;
   background: white;
   outline: none;
 }

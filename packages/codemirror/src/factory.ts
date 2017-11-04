@@ -27,8 +27,6 @@ class CodeMirrorEditorFactory implements IEditorFactoryService {
         'Cmd-Left': 'goLineLeft',
         'Tab': 'indentMoreOrinsertTab',
         'Shift-Tab': 'indentLess',
-        'Cmd-Alt-[': 'indentAuto',
-        'Ctrl-Alt-[': 'indentAuto',
         'Cmd-/': 'toggleComment',
         'Ctrl-/': 'toggleComment',
       },
@@ -42,6 +40,7 @@ class CodeMirrorEditorFactory implements IEditorFactoryService {
         'Shift-Enter': () => { /* no-op */ }
       },
       lineNumbers: true,
+      scrollPastEnd: true,
       ...defaults
     };
   }
@@ -50,6 +49,7 @@ class CodeMirrorEditorFactory implements IEditorFactoryService {
    * Create a new editor for inline code.
    */
   newInlineEditor(options: CodeEditor.IOptions): CodeEditor.IEditor {
+    options.host.dataset.type = 'inline';
     return new CodeMirrorEditor({
       ...options,
       config: { ...this.inlineCodeMirrorConfig, ...options.config || {} }
@@ -60,6 +60,7 @@ class CodeMirrorEditorFactory implements IEditorFactoryService {
    * Create a new editor for a full document.
    */
   newDocumentEditor(options: CodeEditor.IOptions): CodeEditor.IEditor {
+    options.host.dataset.type = 'document';
     return new CodeMirrorEditor({
       ...options,
       config: { ...this.documentCodeMirrorConfig, ...options.config || {} }

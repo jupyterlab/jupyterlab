@@ -312,6 +312,17 @@ class Cell extends Widget {
   }
 
   /**
+   * Clone the cell, using the same model.
+   */
+  clone(): Cell {
+    let constructor = this.constructor as typeof Cell;
+    return new constructor({
+      model: this.model,
+      contentFactory: this.contentFactory
+    });
+  }
+
+  /**
    * Dispose of the resources held by the widget.
    */
   dispose() {
@@ -610,6 +621,18 @@ class CodeCell extends Cell {
   }
 
   /**
+   * Clone the cell, using the same model.
+   */
+  clone(): CodeCell {
+    let constructor = this.constructor as typeof CodeCell;
+    return new constructor({
+      model: this.model,
+      contentFactory: this.contentFactory,
+      rendermime: this._rendermime
+    });
+  }
+
+  /**
    * Dispose of the resources used by the widget.
    */
   dispose(): void {
@@ -849,6 +872,18 @@ class MarkdownCell extends Cell {
     return Promise.resolve(void 0);
   }
 
+  /**
+   * Clone the cell, using the same model.
+   */
+  clone(): MarkdownCell {
+    let constructor = this.constructor as typeof MarkdownCell;
+    return new constructor({
+      model: this.model,
+      contentFactory: this.contentFactory,
+      rendermime: this._rendermime
+    });
+  }
+
   private _monitor: ActivityMonitor<any, any> = null;
   private _renderer: IRenderMime.IRenderer = null;
   private _rendermime: RenderMime;
@@ -898,6 +933,17 @@ class RawCell extends Cell {
   constructor(options: Cell.IOptions) {
     super(options);
     this.addClass(RAW_CELL_CLASS);
+  }
+
+  /**
+   * Clone the cell, using the same model.
+   */
+  clone(): RawCell {
+    let constructor = this.constructor as typeof RawCell;
+    return new constructor({
+      model: this.model,
+      contentFactory: this.contentFactory
+    });
   }
 
   /**

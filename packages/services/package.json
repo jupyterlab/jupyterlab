@@ -1,11 +1,48 @@
 {
   "name": "@jupyterlab/services",
-  "version": "0.49.0",
+  "version": "0.50.2",
   "description": "Client APIs for the Jupyter services REST APIs",
+  "keywords": [
+    "jupyter",
+    "notebook",
+    "services"
+  ],
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "files": [
+    "lib/**/*.js",
+    "lib/*.js.map",
+    "lib/**/*.d.ts",
+    "lib/**/*.js.map",
+    "lib/*.js",
+    "lib/*.d.ts",
+    "dist/*.js",
+    "dist/**/*.js"
+  ],
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab"
+  },
+  "scripts": {
+    "build": "npm run build:src",
+    "build:src": "tsc --project src",
+    "build:test": "tsc --project test/src",
+    "clean": "rimraf docs && rimraf lib && rimraf test/build && rimraf test/coverage",
+    "prepublishOnly": "npm run build:src && webpack",
+    "test": "mocha --retries 3 test/build/**/*.spec.js test/build/*.spec.js --jupyter-config-data=./test/config.json",
+    "test:coverage": "istanbul cover --dir test/coverage _mocha -- --retries 3 test/build/**/*.spec.js test/build/*.spec.js --jupyter-config-data=./test/config.json",
+    "test:debug": "mocha test/build/**/*.spec.js test/build/*.spec.js  --jupyter-config-data=./test/config.json --debug-brk",
+    "test:devtool": "devtool node_modules/.bin/_mocha -qc test/build/**/*.spec.js test/build/*.spec.js --jupyter-config-data=./test/config.json --timeout=50000",
+    "test:integration": "cd test && python integration_test.py"
+  },
   "dependencies": {
-    "@jupyterlab/coreutils": "^0.10.0",
+    "@jupyterlab/coreutils": "^0.11.1",
     "@phosphor/algorithm": "^1.1.1",
     "@phosphor/coreutils": "^1.2.0",
     "@phosphor/disposable": "^1.1.1",
@@ -26,40 +63,5 @@
     "webpack": "^2.2.1",
     "ws": "^1.1.1",
     "xmlhttprequest": "^1.8.0"
-  },
-  "scripts": {
-    "clean": "rimraf docs && rimraf lib && rimraf test/build && rimraf test/coverage",
-    "build:src": "tsc --project src",
-    "build:test": "tsc --project test/src",
-    "build": "npm run build:src",
-    "prepublishOnly": "npm run build:src && webpack",
-    "test:coverage": "istanbul cover --dir test/coverage _mocha -- --retries 3 test/build/**/*.spec.js test/build/*.spec.js --jupyter-config-data=./test/config.json",
-    "test:integration": "cd test && python integration_test.py",
-    "test:devtool": "devtool node_modules/.bin/_mocha -qc test/build/**/*.spec.js test/build/*.spec.js --jupyter-config-data=./test/config.json --timeout=50000",
-    "test:debug": "mocha test/build/**/*.spec.js test/build/*.spec.js  --jupyter-config-data=./test/config.json --debug-brk",
-    "test": "mocha --retries 3 test/build/**/*.spec.js test/build/*.spec.js --jupyter-config-data=./test/config.json"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jupyterlab/jupyterlab"
-  },
-  "keywords": [
-    "jupyter",
-    "services",
-    "notebook"
-  ],
-  "files": [
-    "lib/**/*.js",
-    "lib/**/*.d.ts",
-    "lib/*.js",
-    "lib/*.d.ts",
-    "dist/*.js",
-    "dist/**/*.js"
-  ],
-  "author": "Project Jupyter",
-  "license": "BSD-3-Clause",
-  "bugs": {
-    "url": "https://github.com/jupyterlab/jupyterlab/issues"
-  },
-  "homepage": "https://github.com/jupyterlab/jupyterlab"
+  }
 }

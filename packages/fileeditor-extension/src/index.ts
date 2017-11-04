@@ -10,15 +10,11 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  ISettingRegistry
-} from '@jupyterlab/coreutils';
-
-import {
   CodeEditor, IEditorServices
 } from '@jupyterlab/codeeditor';
 
 import {
-   MarkdownCodeBlocks, PathExt
+  ISettingRegistry, MarkdownCodeBlocks, PathExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -68,7 +64,7 @@ namespace CommandIDs {
 
   export
   const markdownPreview = 'fileeditor:markdown-preview';
-};
+}
 
 
 /**
@@ -76,12 +72,8 @@ namespace CommandIDs {
  */
 const plugin: JupyterLabPlugin<IEditorTracker> = {
   activate,
-  id: 'jupyter.services.editor-tracker',
-  requires: [
-    ILayoutRestorer,
-    IEditorServices,
-    ISettingRegistry
-  ],
+  id: '@jupyterlab/fileeditor-extension:plugin',
+  requires: [ILayoutRestorer, IEditorServices, ISettingRegistry],
   optional: [ILauncher],
   provides: IEditorTracker,
   autoStart: true
@@ -285,7 +277,7 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
 
   commands.addCommand(CommandIDs.runCode, {
     execute: () => {
-      // This will run the current selection or the entire ```fenced``` code block.
+      // Run the appropriate code, taking into account a ```fenced``` code block.
       const widget = tracker.currentWidget;
 
       if (!widget) {
@@ -298,7 +290,7 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
       const extension = PathExt.extname(path);
       const selection = editor.getSelection();
       const { start, end } = selection;
-      const selected = start.column !== end.column || start.line !== end.line;
+      let selected = start.column !== end.column || start.line !== end.line;
 
       if (selected) {
         // Get the selected code from the editor.
@@ -313,14 +305,17 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
         for (let block of blocks) {
           if (block.startLine <= start.line && start.line <= block.endLine) {
             code = block.code;
+            selected = true;
             break;
           }
         }
-      } else {
+      }
+
+      if (!selected) {
         // no selection, submit whole line and advance
         code = editor.getLine(selection.start.line);
         const cursor = editor.getCursorPosition();
-        if (cursor.line + 1 == editor.lineCount) {
+        if (cursor.line + 1 === editor.lineCount) {
           let text = editor.model.value.text;
           editor.model.value.text = text + '\n';
         }

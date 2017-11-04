@@ -44,7 +44,12 @@ if (target[0] === '.' || target[0] === '/') {
   packageDirName = target.split('/').pop().split('.')[0];
   var packagePath = path.join(basePath, 'packages', packageDirName);
   // Add the repository as a submodule.
-  childProcess.execSync('git submodule add --force '+ target + ' ' + packagePath);
+  childProcess.execSync('git clone '+ target + ' ' + packagePath);
+}
+
+// Remove any existing node_modules in the extension.
+if (fs.existsSync(path.join(packagePath, 'node_modules'))) {
+  fs.removeSync(path.join(packagePath, 'node_modules'));
 }
 
 // Get the package.json of the extension.
@@ -53,7 +58,7 @@ var package = require(path.join(packagePath, 'package.json'));
 // Add the extension to packages/all-packages/package.json
 var allPackagesPath = path.join(basePath, 'packages', 'all-packages', 'package.json');
 var allPackages = require(allPackagesPath);
-allPackages.dependencies[package.name] = '^'+String(package.version);
+allPackages.dependencies[package.name] = '~'+String(package.version);
 var text = JSON.stringify(sortPackageJson(allPackages), null, 2) + '\n';
 fs.writeFileSync(allPackagesPath, text);
 
@@ -70,4 +75,7 @@ index = index + 'import "' + package.name + '";\n';
 fs.writeFileSync(indexPath, index);
 
 // Update the core jupyterlab build dependencies.
-childProcess.execSync('npm run update:core');
+childProcess.execSync('npm run update:core', {stdio:[0,1,2]});
+
+// Update the lerna symlinks.
+childProcess.execSync('npm install', {stdio:[0,1,2]});

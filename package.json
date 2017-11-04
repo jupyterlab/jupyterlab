@@ -8,17 +8,19 @@
     "build:main": "npm run build",
     "build:main:prod": "npm run build:packages && cd jupyterlab && npm run build:prod",
     "build:src": "lerna run build --scope \"@jupyterlab/!(test-|example-)*\"",
+    "build:static": "cd jupyterlab && npm run build:static",
     "build:test": "lerna run build:test",
     "clean": "node scripts/clean-packages.js examples packages",
     "clean:examples": "node scripts/clean-packages.js examples",
     "clean:main": "cd jupyterlab && npm run clean",
+    "clean:slate": "git clean -dfx && npm install && npm run build",
     "clean:src": "node scripts/clean-packages.js packages",
     "clean:tests": "lerna run clean --scope \"@jupyterlab/test-*\"",
     "coverage": "lerna run coverage --stream",
     "docs": "lerna run docs",
     "get:dependency": "node scripts/get-dependency.js",
     "integrity": "node scripts/package-integrity.js",
-    "publish": "npm update && npm install && npm run clean && npm run build:packages && lerna publish -m \"Publish\"",
+    "publish": "npm run clean:slate && lerna publish --force-publish=* -m \"Publish\"",
     "test": "cd test && npm test",
     "test:services": "cd packages/services && npm test && npm run test:integration && cd examples/node && python main.py",
     "test:chrome": "lerna run test:chrome --stream",
@@ -26,14 +28,15 @@
     "test:ie": "lerna run test:ie --concurrency 1 --stream",
     "update:dependency": "node scripts/update-dependency.js",
     "update:core": "cd jupyterlab && node update-core.js",
-    "watch:packages": "watch \"npm run build:packages\" ./packages/** --wait 10 --filter=scripts/watch-filter.js --ignoreDotFiles",
-    "watch": "watch \"npm run build\" ./packages/** --wait 10 --filter=scripts/watch-filter.js --ignoreDotFiles",
-    "watch:main": "npm run watch",
+    "watch:main": "cd jupyterlab && npm run watch",
+    "watch:packages": "cd packages/all-packages && npm run watch",
+    "watch": "run-p watch:*",
     "addsibling": "node scripts/add-sibling.js",
     "removesibling": "node scripts/remove-sibling.js"
   },
   "dependencies": {},
   "devDependencies": {
-    "lerna": "2.0.0-beta.38"
+    "lerna": "^2.4.0",
+    "npm-run-all": "~4.1.1"
   }
 }

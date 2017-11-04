@@ -11,7 +11,9 @@ from traitlets import Bool, Unicode
 
 from ._version import __version__
 from .extension import load_jupyter_server_extension
-from .commands import build, clean, get_app_dir, get_user_settings_dir
+from .commands import (
+    build, clean, get_app_dir, get_user_settings_dir, app_version
+)
 
 
 build_aliases = dict(base_aliases)
@@ -20,8 +22,13 @@ build_aliases['name'] = 'LabBuildApp.name'
 build_aliases['version'] = 'LabBuildApp.version'
 
 
+version = __version__
+if version != app_version:
+    version = '%s (dev), %s (app)' % (__version__, app_version)
+
+
 class LabBuildApp(JupyterApp):
-    version = __version__
+    version = version
     description = """
     Build the JupyterLab application
 
@@ -49,7 +56,7 @@ clean_aliases['app-dir'] = 'LabCleanApp.app_dir'
 
 
 class LabCleanApp(JupyterApp):
-    version = __version__
+    version = version
     description = """
     Clean the JupyterLab application
 
@@ -66,7 +73,7 @@ class LabCleanApp(JupyterApp):
 
 
 class LabPathApp(JupyterApp):
-    version = __version__
+    version = version
     description = """
     Print the configured paths for the JupyterLab application
 
@@ -93,10 +100,14 @@ lab_flags['dev-mode'] = (
     {'LabApp': {'core_mode': True}},
     "Start the app in dev mode for running from source."
 )
+lab_flags['watch'] = (
+    {'LabApp': {'watch': True}},
+    "Start the app in watch mode."
+)
 
 
 class LabApp(NotebookApp):
-    version = __version__
+    version = version
 
     description = """
     JupyterLab - An extensible computational environment for Jupyter.
@@ -150,6 +161,9 @@ class LabApp(NotebookApp):
         The `--dev-mode` flag is an alias to this to be used when the Python package
         itself is installed in development mode (`pip install -e .`).
         """)
+
+    watch = Bool(False, config=True,
+        help="Whether to serve the app in watch mode")
 
     def init_server_extensions(self):
         """Load any extensions specified by config.

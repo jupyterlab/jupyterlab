@@ -43,14 +43,14 @@ from setuptools.command.bdist_egg import bdist_egg
 # Our own imports
 from setupbase import (
     bdist_egg_disabled,
-    ensure_core_data,
     find_packages,
     find_package_data,
+    find_data_files,
     js_prerelease,
     CheckAssets,
-    CoreDeps,
     version_ns,
-    name
+    name,
+    custom_egg_info
 )
 
 
@@ -69,6 +69,8 @@ setup_args = dict(
     scripts          = glob(pjoin('scripts', '*')),
     packages         = find_packages(),
     package_data     = find_package_data(),
+    data_files       = find_data_files(),
+    include_package_data = True,
     author           = 'Jupyter Development Team',
     author_email     = 'jupyter@googlegroups.com',
     url              = 'http://jupyter.org',
@@ -92,12 +94,12 @@ setup_args = dict(
 
 
 cmdclass = dict(
-    build_py = ensure_core_data(build_py),
-    build_ext = ensure_core_data(build_ext),
+    build_py = build_py,
+    build_ext = build_ext,
     sdist  = js_prerelease(sdist, strict=True),
     bdist_egg = bdist_egg if 'bdist_egg' in sys.argv else bdist_egg_disabled,
     jsdeps = CheckAssets,
-    coredeps = CoreDeps,
+    egg_info = custom_egg_info
 )
 try:
     from wheel.bdist_wheel import bdist_wheel
@@ -112,7 +114,7 @@ setup_args['cmdclass'] = cmdclass
 setuptools_args = {}
 install_requires = setuptools_args['install_requires'] = [
     'notebook>=4.3.1',
-    'jupyterlab_launcher>=0.4.0'
+    'jupyterlab_launcher>=0.5.2,<0.6.0'
 ]
 
 extras_require = setuptools_args['extras_require'] = {

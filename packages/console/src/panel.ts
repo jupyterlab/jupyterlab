@@ -281,7 +281,7 @@ namespace ConsolePanel {
    * The console renderer token.
    */
   export
-  const IContentFactory = new Token<IContentFactory>('jupyter.services.console.content-factory');
+  const IContentFactory = new Token<IContentFactory>('@jupyterlab/console:IContentFactory');
   /* tslint:enable */
 }
 

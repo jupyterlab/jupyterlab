@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  showErrorMessage, VDomModel, VDomRenderer
+} from '@jupyterlab/apputils';
+
+import {
   ArrayExt, ArrayIterator, IIterator, map, each, toArray
 } from '@phosphor/algorithm';
 
@@ -18,25 +22,16 @@ import {
 } from '@phosphor/messaging';
 
 import {
+  AttachedProperty
+} from '@phosphor/properties';
+
+import {
   Widget
 } from '@phosphor/widgets';
 
-import * as vdom from '@phosphor/virtualdom';
-
-import {
-  VDomModel, VDomRenderer
-} from '@jupyterlab/apputils';
+import * as React from 'react';
 
 import '../style/index.css';
-
-
-/* tslint:disable */
-/**
- * We have configured the TSX transform to look for the h function in the local
- * module.
- */
-const h = vdom.h;
-/* tslint:enable */
 
 
 /**
@@ -63,7 +58,7 @@ export
 namespace CommandIDs {
   export
   const show: string = 'launcher:show';
-};
+}
 
 
 
@@ -72,7 +67,7 @@ namespace CommandIDs {
  * The launcher token.
  */
 export
-const ILauncher = new Token<ILauncher>('jupyter.services.launcher');
+const ILauncher = new Token<ILauncher>('@jupyterlab/launcher:ILauncher');
 /* tslint:enable */
 
 
@@ -269,10 +264,10 @@ class Launcher extends VDomRenderer<LauncherModel> {
   /**
    * Render the launcher to virtual DOM nodes.
    */
-  protected render(): vdom.VirtualNode | vdom.VirtualNode[] {
+  protected render(): React.ReactElement<any> {
     // Bail if there is no model.
     if (!this.model) {
-      return [];
+      return null;
     }
 
     // First group-by categories
@@ -290,8 +285,8 @@ class Launcher extends VDomRenderer<LauncherModel> {
     }
 
     // Variable to help create sections
-    let sections: vdom.VirtualNode[] = [];
-    let section: vdom.VirtualNode;
+    let sections: React.ReactElement<any>[] = [];
+    let section: React.ReactElement<any>;
 
     // Assemble the final ordered list of categories, beginning with
     // KNOWN_CATEGORIES.
@@ -306,13 +301,13 @@ class Launcher extends VDomRenderer<LauncherModel> {
     }
 
     // Now create the sections for each category
-    each(orderedCategories, (cat, index) => {
+    each(orderedCategories, cat => {
       let iconClass = `${(categories[cat][0] as ILauncherItem).iconClass} ` +
         'jp-Launcher-sectionIcon jp-Launcher-icon';
       let kernel = KERNEL_CATEGORIES.indexOf(cat) > -1;
       if (cat in categories) {
         section = (
-          <div className='jp-Launcher-section'>
+          <div className='jp-Launcher-section' key={cat}>
             <div className='jp-Launcher-sectionHeader'>
               {kernel && <div className={iconClass} />}
               <h2 className='jp-Launcher-sectionTitle'>{cat}</h2>
@@ -383,7 +378,7 @@ namespace Launcher {
  *
  * @returns a vdom `VirtualElement` for the launcher card.
  */
-function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcherCallback: (widget: Widget) => void): vdom.VirtualElement {
+function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcherCallback: (widget: Widget) => void): React.ReactElement<any> {
   // Build the onclick handler.
   let onclick = () => {
     // If an item has already been launched,
@@ -399,17 +394,17 @@ function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcher
       launcher.dispose();
     }).catch(err => {
       launcher.pending = false;
-      throw err;
+      showErrorMessage('Launcher Error', err);
     });
   };
-  // Add a data attribute for the category
-  let dataset = { category: item.category || 'Other' };
+
   // Return the VDOM element.
   return (
     <div className='jp-LauncherCard'
       title={item.displayName}
-      onclick={onclick}
-      dataset={dataset}>
+      onClick={onclick}
+      data-category={item.category || 'Other'}
+      key={Private.keyProperty.get(item)}>
       <div className='jp-LauncherCard-icon'>
           {(item.kernelIconUrl && kernel) &&
             <img src={item.kernelIconUrl} className='jp-Launcher-kernelIcon' />}
@@ -432,6 +427,20 @@ function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcher
  * The namespace for module private data.
  */
 namespace Private {
+  /**
+   * An incrementing counter for keys.
+   */
+  let id = 0;
+
+  /**
+   * An attached property for an item's key.
+   */
+  export
+  const keyProperty = new AttachedProperty<ILauncherItem, number>({
+    name: 'key',
+    create: () => id++
+  });
+
   /**
    * Create an item given item options.
    */

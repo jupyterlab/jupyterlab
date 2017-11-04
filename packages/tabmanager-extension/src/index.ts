@@ -19,7 +19,7 @@ import '../style/index.css';
  * The default tab manager extension.
  */
 const plugin: JupyterLabPlugin<void> = {
-  id: 'jupyter.extensions.tab-manager',
+  id: '@jupyterlab/tabmanager-extension:plugin',
   activate: (app: JupyterLab, restorer: ILayoutRestorer): void => {
     const { shell } = app;
     const tabs = new TabBar<Widget>({ orientation: 'vertical' });

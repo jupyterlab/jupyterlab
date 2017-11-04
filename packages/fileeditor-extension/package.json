@@ -1,46 +1,47 @@
 {
   "name": "@jupyterlab/fileeditor-extension",
-  "version": "0.10.0",
+  "version": "0.11.1",
   "description": "JupyterLab - Editor Widget Extension",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
   "files": [
     "lib/*.d.ts",
+    "lib/*.js.map",
     "lib/*.js",
     "schema/*.json"
   ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "directories": {
     "lib": "lib/"
   },
-  "dependencies": {
-    "@jupyterlab/application": "^0.10.0",
-    "@jupyterlab/apputils": "^0.10.0",
-    "@jupyterlab/codeeditor": "^0.10.0",
-    "@jupyterlab/coreutils": "^0.10.0",
-    "@jupyterlab/fileeditor": "^0.10.0",
-    "@jupyterlab/launcher": "^0.10.0"
-  },
-  "devDependencies": {
-    "rimraf": "^2.5.2",
-    "typescript": "~2.4.1"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
     "build": "tsc",
     "clean": "rimraf lib",
     "watch": "tsc -w"
   },
+  "dependencies": {
+    "@jupyterlab/application": "^0.11.1",
+    "@jupyterlab/apputils": "^0.11.1",
+    "@jupyterlab/codeeditor": "^0.11.1",
+    "@jupyterlab/coreutils": "^0.11.1",
+    "@jupyterlab/fileeditor": "^0.11.1",
+    "@jupyterlab/launcher": "^0.11.1"
+  },
+  "devDependencies": {
+    "rimraf": "^2.5.2",
+    "typescript": "~2.4.1"
+  },
   "jupyterlab": {
     "extension": true,
     "schemaDir": "schema"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jupyterlab/jupyterlab.git"
-  },
-  "author": "Project Jupyter",
-  "license": "BSD-3-Clause",
-  "bugs": {
-    "url": "https://github.com/jupyterlab/jupyterlab/issues"
-  },
-  "homepage": "https://github.com/jupyterlab/jupyterlab"
+  }
 }

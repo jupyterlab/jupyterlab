@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  uuid
+} from '@jupyterlab/coreutils';
+
+import {
   Contents, ServiceManager
 } from '@jupyterlab/services';
 
@@ -16,7 +20,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  waitForDialog, acceptDialog
+  waitForDialog, acceptDialog, dismissDialog
 } from '../utils';
 
 
@@ -35,7 +39,7 @@ describe('docregistry/context', () => {
     let context: Context<DocumentRegistry.IModel>;
 
     beforeEach(() => {
-      context = new Context({ manager, factory, path: 'foo' });
+      context = new Context({ manager, factory, path: uuid() + '.txt' });
     });
 
     afterEach(() => {
@@ -47,7 +51,7 @@ describe('docregistry/context', () => {
     describe('#constructor()', () => {
 
       it('should create a new context', () => {
-        context = new Context({ manager, factory, path: 'bar' });
+        context = new Context({ manager, factory, path: uuid() + '.txt' });
         expect(context).to.be.a(Context);
       });
 
@@ -56,13 +60,14 @@ describe('docregistry/context', () => {
     describe('#pathChanged', () => {
 
       it('should be emitted when the path changes', (done) => {
+        let newPath = uuid() + '.txt';
         context.pathChanged.connect((sender, args) => {
           expect(sender).to.be(context);
-          expect(args).to.be('foo');
+          expect(args).to.be(newPath);
           done();
         });
         context.save().then(() => {
-          return manager.contents.rename(context.path, 'foo');
+          return manager.contents.rename(context.path, newPath);
         }).catch(done);
       });
 
@@ -71,12 +76,13 @@ describe('docregistry/context', () => {
     describe('#fileChanged', () => {
 
       it('should be emitted when the file is saved', (done) => {
+        let path = context.path;
         context.fileChanged.connect((sender, args) => {
           expect(sender).to.be(context);
-          expect(args.name).to.be('foo');
+          expect(args.path).to.be(path);
           done();
         });
-        context.save();
+        context.save().catch(done);
       });
 
     });
@@ -145,7 +151,7 @@ describe('docregistry/context', () => {
     describe('#path', () => {
 
       it('should be the current path for the context', () => {
-        expect(context.path).to.be('foo');
+        expect(typeof context.path).to.be('string');
       });
 
     });
@@ -157,8 +163,9 @@ describe('docregistry/context', () => {
       });
 
       it('should be set after poulation', (done) => {
+        let path = context.path;
         context.ready.then(() => {
-          expect(context.contentsModel.name).to.be('foo');
+          expect(context.contentsModel.path).to.be(path);
           done();
         });
         context.save().catch(done);
@@ -197,9 +204,9 @@ describe('docregistry/context', () => {
 
     describe('#save()', () => {
 
-      it('should save the contents of the file to disk', (done) => {
+      it('should save the contents of the file to disk', () => {
         context.model.fromString('foo');
-        context.save().then(() => {
+        return context.save().then(() => {
           let opts: Contents.IFetchOptions = {
             format: factory.fileFormat,
             type: factory.contentType,
@@ -208,8 +215,7 @@ describe('docregistry/context', () => {
           return manager.contents.get(context.path, opts);
         }).then(model => {
           expect(model.content).to.be('foo');
-          done();
-        }).catch(done);
+        });
       });
 
     });
@@ -217,25 +223,84 @@ describe('docregistry/context', () => {
 
     describe('#saveAs()', () => {
 
-      it('should save the document to a different path chosen by the user', (done) => {
+      it('should save the document to a different path chosen by the user', () => {
+        const newPath = uuid() + '.txt';
         waitForDialog().then(() => {
           let dialog = document.body.getElementsByClassName('jp-Dialog')[0];
           let input = dialog.getElementsByTagName('input')[0];
-          input.value = 'bar';
+          input.value = newPath;
           acceptDialog();
         });
-        context.saveAs().then(() => {
-          expect(context.path).to.be('bar');
-          done();
-        }).catch(done);
+        return context.save().then(() => {
+          return context.saveAs();
+        }).then(() => {
+          expect(context.path).to.be(newPath);
+        });
+      });
+
+      it('should bring up a conflict dialog', () => {
+        const newPath = uuid() + '.txt';
+        waitForDialog().then(() => {
+          let dialog = document.body.getElementsByClassName('jp-Dialog')[0];
+          let input = dialog.getElementsByTagName('input')[0];
+          input.value = newPath;
+          return acceptDialog();
+        }).then(() => {
+          return acceptDialog();
+        });
+        return manager.contents.save(newPath, {
+          type: factory.contentType,
+          format: factory.fileFormat,
+          content: 'foo'
+        }).then(() => {
+          return context.save();
+        }).then(() => {
+          return context.saveAs();
+        }).then(() => {
+          expect(context.path).to.be(newPath);
+        });
+      });
+
+      it('should keep the file if overwrite is aborted', () => {
+        let oldPath = context.path;
+        let newPath = uuid() + '.txt';
+        waitForDialog().then(() => {
+          let dialog = document.body.getElementsByClassName('jp-Dialog')[0];
+          let input = dialog.getElementsByTagName('input')[0];
+          input.value = newPath;
+          return acceptDialog();
+        }).then(() => {
+          return dismissDialog();
+        });
+        return manager.contents.save(newPath, {
+          type: factory.contentType,
+          format: factory.fileFormat,
+          content: 'foo'
+        }).then(() => {
+          return context.save();
+        }).then(() => {
+          return context.saveAs();
+        }).then(() => {
+          expect(context.path).to.be(oldPath);
+        });
+      });
+
+      it('should just save if the file name does not change', () => {
+        acceptDialog();
+        let path = context.path;
+        return context.save().then(() => {
+          return context.saveAs();
+        }).then(() => {
+          expect(context.path).to.be(path);
+        });
       });
 
     });
 
     describe('#revert()', () => {
 
-      it('should revert the contents of the file to the disk', (done) => {
-        manager.contents.save(context.path, {
+      it('should revert the contents of the file to the disk', () => {
+        return manager.contents.save(context.path, {
           type: factory.contentType,
           format: factory.fileFormat,
           content: 'foo'
@@ -244,45 +309,46 @@ describe('docregistry/context', () => {
           return context.revert();
         }).then(() => {
           expect(context.model.toString()).to.be('foo');
-          done();
-        }).catch(done);
+        });
       });
 
     });
 
     describe('#createCheckpoint()', () => {
 
-      it('should create a checkpoint for the file', (done) => {
-        context.createCheckpoint().then(model => {
+      it('should create a checkpoint for the file', () => {
+        return context.save().then(() => {
+          return context.createCheckpoint();
+        }).then(model => {
           expect(model.id).to.be.ok();
           expect(model.last_modified).to.be.ok();
-          done();
-        }).catch(done);
+        });
       });
 
     });
 
     describe('#deleteCheckpoint()', () => {
 
-      it('should delete the given checkpoint', (done) => {
-        context.createCheckpoint().then(model => {
+      it('should delete the given checkpoint', () => {
+        return context.save().then(() => {
+          return context.createCheckpoint();
+        }).then(model => {
           return context.deleteCheckpoint(model.id);
         }).then(() => {
           return context.listCheckpoints();
         }).then(models => {
           expect(models.length).to.be(0);
-          done();
-        }).catch(done);
+        });
       });
 
     });
 
     describe('#restoreCheckpoint()', () => {
 
-      it('should restore the value to the last checkpoint value', (done) => {
+      it('should restore the value to the last checkpoint value', () => {
         context.model.fromString('bar');
         let id = '';
-        context.save().then(() => {
+        return context.save().then(() => {
           return context.createCheckpoint();
         }).then(model => {
           context.model.fromString('foo');
@@ -294,65 +360,63 @@ describe('docregistry/context', () => {
           return context.revert();
         }).then(() => {
           expect(context.model.toString()).to.be('bar');
-          done();
-        }).catch(done);
+        });
       });
 
     });
 
     describe('#listCheckpoints()', () => {
 
-      it('should list the checkpoints for the file', (done) => {
+      it('should list the checkpoints for the file', () => {
         let id = '';
-        context.createCheckpoint().then(model => {
-          id = model.id;
-          return context.listCheckpoints();
-        }).then(models => {
-          for (let model of models) {
-            if (model.id === id) {
-              done();
-              return;
+        return context.save().then(() => {
+          context.createCheckpoint().then(model => {
+            id = model.id;
+            return context.listCheckpoints();
+          }).then(models => {
+            for (let model of models) {
+              if (model.id === id) {
+                return;
+              }
             }
-          }
-        }).catch(done);
+            throw new Error('Model not found');
+          });
+        });
       });
 
     });
 
     describe('#resolveUrl()', () => {
 
-      it('should resolve a relative url to a correct server path', (done) => {
-        context.resolveUrl('./foo').then(path => {
+      it('should resolve a relative url to a correct server path', () => {
+        return context.resolveUrl('./foo').then(path => {
           expect(path).to.be('foo');
-        }).then(done, done);
+        });
       });
 
-      it('should ignore urls that have a protocol', (done) => {
-        context.resolveUrl('http://foo').then(path => {
+      it('should ignore urls that have a protocol', () => {
+        return context.resolveUrl('http://foo').then(path => {
           expect(path).to.be('http://foo');
-          done();
-        }).catch(done);
+        });
       });
 
     });
 
     describe('#getDownloadUrl()', () => {
 
-      it('should resolve an absolute server url to a download url', (done) => {
+      it('should resolve an absolute server url to a download url', () => {
         let contextPromise = context.getDownloadUrl('foo');
         let contentsPromise = manager.contents.getDownloadUrl('foo');
-        Promise.all([contextPromise, contentsPromise])
+        return Promise.all([contextPromise, contentsPromise])
         .then(values => {
           expect(values[0]).to.be(values[1]);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should ignore urls that have a protocol', (done) => {
-        context.getDownloadUrl('http://foo').then(path => {
+      it('should ignore urls that have a protocol', () => {
+        return context.getDownloadUrl('http://foo').then(path => {
           expect(path).to.be('http://foo');
-          done();
-        }).catch(done);
+        });
       });
 
     });
@@ -364,7 +428,7 @@ describe('docregistry/context', () => {
         let opener = (widget: Widget) => {
           called = true;
         };
-        context = new Context({ manager, factory, path: 'foo', opener });
+        context = new Context({ manager, factory, path: uuid() + '.txt', opener });
         context.addSibling(new Widget());
         expect(called).to.be(true);
       });

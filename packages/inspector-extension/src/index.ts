@@ -32,14 +32,14 @@ import {
 namespace CommandIDs {
   export
   const open = 'inspector:open';
-};
+}
 
 
 /**
  * A service providing code introspection.
  */
-const service: JupyterLabPlugin<IInspector> = {
-  id: 'jupyter.services.inspector',
+const inspector: JupyterLabPlugin<IInspector> = {
+  id: '@jupyterlab/inspector-extension:inspector',
   requires: [ICommandPalette, ILayoutRestorer],
   provides: IInspector,
   autoStart: true,
@@ -105,8 +105,8 @@ const service: JupyterLabPlugin<IInspector> = {
 /**
  * An extension that registers consoles for inspection.
  */
-const consolePlugin: JupyterLabPlugin<void> = {
-  id: 'jupyter.extensions.console-inspector',
+const consoles: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/inspector-extension:consoles',
   requires: [IInspector, IConsoleTracker],
   autoStart: true,
   activate: (app: JupyterLab, manager: IInspector, consoles: IConsoleTracker): void => {
@@ -157,8 +157,8 @@ const consolePlugin: JupyterLabPlugin<void> = {
 /**
  * An extension that registers notebooks for inspection.
  */
-const notebookPlugin: JupyterLabPlugin<void> = {
-  id: 'jupyter.extensions.notebook-inspector',
+const notebooks: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/inspector-extension:notebooks',
   requires: [IInspector, INotebookTracker],
   autoStart: true,
   activate: (app: JupyterLab, manager: IInspector, notebooks: INotebookTracker): void => {
@@ -209,9 +209,7 @@ const notebookPlugin: JupyterLabPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [
-  service, consolePlugin, notebookPlugin
-];
+const plugins: JupyterLabPlugin<any>[] = [inspector, consoles, notebooks];
 export default plugins;
 
 

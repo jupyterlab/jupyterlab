@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Dialog, DOMUtils, showDialog
+  Dialog, DOMUtils, showDialog, showErrorMessage
 } from '@jupyterlab/apputils';
 
 import {
@@ -48,13 +48,6 @@ import {
 import {
   FileBrowserModel
 } from './model';
-
-import * as utils
-  from './utils';
-
-import {
-  showErrorMessage
-} from './utils';
 
 
 /**
@@ -366,7 +359,7 @@ class DirListing extends Widget {
     return Promise.all(promises).then(() => {
       return undefined;
     }).catch(error => {
-      utils.showErrorMessage('Paste Error', error);
+      showErrorMessage('Paste Error', error);
     });
   }
 
@@ -418,7 +411,7 @@ class DirListing extends Widget {
     return Promise.all(promises).then(() => {
       return undefined;
     }).catch(error => {
-      utils.showErrorMessage('Duplicate file', error);
+      showErrorMessage('Duplicate file', error);
     });
   }
 
@@ -452,7 +445,7 @@ class DirListing extends Widget {
     return Promise.all(promises).then(() => {
       return undefined;
     }).catch(error => {
-      utils.showErrorMessage('Shutdown kernel', error);
+      showErrorMessage('Shutdown kernel', error);
     });
   }
 
@@ -1106,7 +1099,7 @@ class DirListing extends Widget {
       promises.push(renameFile(manager, path, newPath));
     }
     Promise.all(promises).catch(error => {
-      utils.showErrorMessage('Move Error', error);
+      showErrorMessage('Move Error', error);
     });
   }
 
@@ -1286,7 +1279,7 @@ class DirListing extends Widget {
     for (let name of names) {
       let newPath = PathExt.join(basePath, name);
       let promise = this._model.manager.deleteFile(newPath).catch(err => {
-        utils.showErrorMessage('Delete Failed', err);
+        showErrorMessage('Delete Failed', err);
       });
       promises.push(promise);
     }
@@ -1324,7 +1317,7 @@ class DirListing extends Widget {
       const promise = renameFile(manager, oldPath, newPath);
       return promise.catch(error => {
         if (error !== 'File not renamed') {
-          utils.showErrorMessage('Rename Error', error);
+          showErrorMessage('Rename Error', error);
         }
         this._inRename = false;
         return original;
@@ -1667,14 +1660,13 @@ namespace DirListing {
       let text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
       let modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
-      if (!fileType) {
-        icon.textContent = '';
-        icon.className = '';
-      } else {
+      if (fileType) {
         icon.textContent = fileType.iconLabel || '';
-        icon.className = fileType.iconClass || '';
+        icon.className = `${ITEM_ICON_CLASS} ${fileType.iconClass || ''}`;
+      } else {
+        icon.textContent = '';
+        icon.className = ITEM_ICON_CLASS;
       }
-      icon.classList.add(ITEM_ICON_CLASS);
 
       let modText = '';
       let modTitle = '';

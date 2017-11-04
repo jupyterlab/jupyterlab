@@ -200,9 +200,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    */
   save(): Promise<void> {
     let model = this._model;
-    if (model.readOnly) {
-      return Promise.reject(new Error('Read only'));
-    }
     let content: JSONValue;
     if (this._factory.fileFormat === 'json') {
       content = model.toJSON();
@@ -257,9 +254,20 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       if (this.isDisposed || !newPath) {
         return;
       }
-      this._path = newPath;
-      this.session.setName(newPath.split('/').pop()!);
-      return this.session.setPath(newPath).then(() => this.save());
+      if (newPath === this._path) {
+        return this.save();
+      }
+      // Make sure the path does not exist.
+      return this._manager.ready.then(() => {
+        return this._manager.contents.get(newPath);
+      }).then(() => {
+        return this._maybeOverWrite(newPath);
+      }).catch(err => {
+        if (!err.xhr || err.xhr.status !== 404) {
+          throw err;
+        }
+        return this._finishSaveAs(newPath);
+      });
     });
   }
 
@@ -413,7 +421,10 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   /**
    * Handle a change to a session property.
    */
-  private _onSessionChanged() {
+  private _onSessionChanged(sender: IClientSession, type: string): void {
+    if (type !== 'path') {
+      return;
+    }
     let path = this.session.path;
     if (path !== this._path) {
       this._path = path;
@@ -438,9 +449,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     };
     let mod = this._contentsModel ? this._contentsModel.last_modified : null;
     this._contentsModel = newModel;
-    if (!newModel.writable) {
-      this._model.readOnly = true;
-    }
     if (!mod || newModel.last_modified !== mod) {
       this._fileChanged.emit(newModel);
     }
@@ -452,21 +460,8 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   private _populate(): Promise<void> {
     this._isPopulated = true;
 
-    // Add a checkpoint if none exists and the file is not read only.
-    let promise = Promise.resolve(void 0);
-    if (!this._model.readOnly) {
-      promise = this.listCheckpoints().then(checkpoints => {
-        if (!this.isDisposed && !checkpoints && !this._model.readOnly) {
-          return this.createCheckpoint().then(() => { /* no-op */ });
-        }
-      }).catch(err => {
-        // Handle a read-only folder.
-        if (err.message !== 'Forbidden') {
-          throw err;
-        }
-      });
-    }
-    return promise.then(() => {
+    // Add a checkpoint if none exists and the file is writable.
+    return this._maybeCheckpoint(false).then(() => {
       if (this.isDisposed) {
         return;
       }
@@ -509,10 +504,37 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       }
       return this._manager.contents.save(path, options);
     }, (err) => {
-      if (err.xhr.status === 404) {
+      if (err.xhr && err.xhr.status === 404) {
         return this._manager.contents.save(path, options);
       }
       throw err;
+    });
+  }
+
+  /**
+   * Add a checkpoint the file is writable.
+   */
+  private _maybeCheckpoint(force: boolean): Promise<void> {
+    let writable = this._contentsModel && this._contentsModel.writable;
+    let promise = Promise.resolve(void 0);
+    if (!writable) {
+      return promise;
+    }
+    if (force) {
+      promise = this.createCheckpoint();
+    } else {
+      promise = this.listCheckpoints().then(checkpoints => {
+        writable = this._contentsModel && this._contentsModel.writable;
+        if (!this.isDisposed && !checkpoints.length && writable) {
+          return this.createCheckpoint().then(() => { /* no-op */ });
+        }
+      });
+    }
+    return promise.catch(err => {
+      // Handle a read-only folder.
+      if (!err.xhr || err.xhr.status !== 403) {
+        throw err;
+      }
     });
   }
 
@@ -542,6 +564,41 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       } else if (result.button.label === 'REVERT') {
         return this.revert().then(() => { return model; });
       }
+    });
+  }
+
+  /**
+   * Handle a time conflict.
+   */
+  private _maybeOverWrite(path: string): Promise<void> {
+    let body = `"${path}" already exists. Do you want to replace it?`;
+    let overwriteBtn = Dialog.warnButton({ label: 'OVERWRITE' });
+    return showDialog({
+      title: 'File Overwrite?', body,
+      buttons: [Dialog.cancelButton(), overwriteBtn]
+    }).then(result => {
+      if (this.isDisposed) {
+        return Promise.reject('Disposed');
+      }
+      if (result.button.label === 'OVERWRITE') {
+        return this._manager.contents.delete(path).then(() => {
+          this._finishSaveAs(path);
+        });
+      }
+    });
+  }
+
+  /**
+   * Finish a saveAs operation given a new path.
+   */
+  private _finishSaveAs(newPath: string): Promise<void> {
+    this._path = newPath;
+    return this.session.setPath(newPath).then(() => {
+      this.session.setName(newPath.split('/').pop()!);
+      return this.save();
+    }).then(() => {
+      this._pathChanged.emit(this._path);
+      return this._maybeCheckpoint(true);
     });
   }
 

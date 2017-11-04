@@ -178,24 +178,30 @@ describe('CodeEditorWrapper', () => {
 
   describe('#onAfterAttach()', () => {
 
-    it('should refresh the editor', () => {
+    it('should refresh the editor', (done) => {
       Widget.attach(widget, document.body);
       let editor = widget.editor as LogEditor;
-      expect(editor.methods).to.contain('refresh');
+      requestAnimationFrame(() => {
+        expect(editor.methods).to.contain('refresh');
+        done();
+      });
     });
 
   });
 
   describe('#onAfterShow()', () => {
 
-    it('should refresh the editor', () => {
+    it('should refresh the editor', (done) => {
       widget.hide();
       Widget.attach(widget, document.body);
       let editor = widget.editor as LogEditor;
       expect(editor.methods).to.not.contain('refresh');
       widget.show();
       expect(widget.methods).to.contain('onAfterShow');
-      expect(editor.methods).to.contain('refresh');
+      requestAnimationFrame(() => {
+        expect(editor.methods).to.contain('refresh');
+        done();
+      });
     });
 
   });

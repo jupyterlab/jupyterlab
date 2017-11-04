@@ -76,7 +76,7 @@ class CodeEditorWrapper extends Widget {
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     if (this.isVisible) {
-      this.editor.refresh();
+      this.update();
     }
   }
 
@@ -84,7 +84,7 @@ class CodeEditorWrapper extends Widget {
    * A message handler invoked on an `'after-show'` message.
    */
   protected onAfterShow(msg: Message): void {
-    this.editor.refresh();
+    this.update();
   }
 
   /**
@@ -93,9 +93,16 @@ class CodeEditorWrapper extends Widget {
   protected onResize(msg: Widget.ResizeMessage): void {
     if (msg.width >= 0 && msg.height >= 0) {
       this.editor.setSize(msg);
-    } else {
+    } else if (this.isVisible) {
       this.editor.resizeToFit();
     }
+  }
+
+  /**
+   * A message handler invoked on an `'update-request'` message.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    this.editor.refresh();
   }
 
   /**

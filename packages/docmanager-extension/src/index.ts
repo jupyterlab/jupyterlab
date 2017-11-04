@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  showDialog, Dialog, ICommandPalette, IMainMenu
+  showDialog, showErrorMessage, Spinner, Dialog, ICommandPalette, IMainMenu
 } from '@jupyterlab/apputils';
 
 import {
@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  renameDialog, DocumentManager, IDocumentManager, showErrorMessage
+  renameDialog, DocumentManager, IDocumentManager
 } from '@jupyterlab/docmanager';
 
 import {
@@ -35,6 +35,9 @@ import {
  */
 namespace CommandIDs {
   export
+  const clone = 'docmanager:clone';
+
+  export
   const close = 'docmanager:close';
 
   export
@@ -53,7 +56,7 @@ namespace CommandIDs {
   const open = 'docmanager:open';
 
   export
-  const clone = 'docmanager:clone';
+  const rename = 'docmanager:rename';
 
   export
   const restoreCheckpoint = 'docmanager:restore-checkpoint';
@@ -63,17 +66,14 @@ namespace CommandIDs {
 
   export
   const saveAs = 'docmanager:save-as';
-
-  export
-  const rename = 'docmanager:rename';
-};
+}
 
 
 /**
  * The default document manager provider.
  */
 const plugin: JupyterLabPlugin<IDocumentManager> = {
-  id: 'jupyter.services.document-manager',
+  id: '@jupyterlab/docmanager-extension:plugin',
   provides: IDocumentManager,
   requires: [ICommandPalette, IMainMenu],
   activate: (app: JupyterLab, palette: ICommandPalette, mainMenu: IMainMenu): IDocumentManager => {
@@ -90,6 +90,11 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
         };
         if (!widget.isAttached) {
           app.shell.addToMainArea(widget);
+
+          // Add a loading spinner, and remove it when the widget is ready.
+          let spinner = new Spinner();
+          widget.node.appendChild(spinner.node);
+          widget.ready.then(() => { widget.node.removeChild(spinner.node); });
         }
         app.shell.activateById(widget.id);
 
@@ -226,12 +231,12 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
 
   commands.addCommand(CommandIDs.saveAs, {
     label: 'Save As...',
-    caption: 'Save with new path and create checkpoint',
+    caption: 'Save with new path',
     isEnabled,
     execute: () => {
       if (isEnabled()) {
         let context = docManager.contextForWidget(app.shell.currentWidget);
-        return context.saveAs().then(() => context.createCheckpoint());
+        return context.saveAs();
       }
     }
   });

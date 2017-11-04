@@ -14,7 +14,7 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  Message
+  Message, MessageLoop
 } from '@phosphor/messaging';
 
 import {
@@ -413,6 +413,7 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
   constructor(options: MimeDocument.IOptions) {
     super();
     this.addClass('jp-MimeDocument');
+    this.node.tabIndex = -1;
     let layout = this.layout = new BoxLayout();
     let toolbar = new Widget();
     toolbar.addClass('jp-Toolbar');
@@ -425,6 +426,10 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
     this._context = context;
     this._mimeType = options.mimeType;
     this._dataType = options.dataType || 'string';
+
+    this._renderer = this.rendermime.createRenderer(this._mimeType);
+    layout.addWidget(this._renderer);
+    BoxLayout.setStretch(this._renderer, 1);
 
     context.pathChanged.connect(this._onPathChanged, this);
 
@@ -482,8 +487,14 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this.node.tabIndex = -1;
-    this.node.focus();
+    if (!this._hasRendered) {
+      this.node.focus();
+      return;
+    }
+    MessageLoop.sendMessage(this._renderer, Widget.Msg.ActivateRequest);
+    if (!this.node.contains(document.activeElement)) {
+      this.node.focus();
+    }
   }
 
   /**
@@ -508,12 +519,13 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
       data[this._mimeType] = model.toJSON();
     }
     let mimeModel = new MimeModel({ data });
-    if (!this._renderer) {
-      this._renderer = this.rendermime.createRenderer(this._mimeType);
-      (this.layout as BoxLayout).addWidget(this._renderer);
-      BoxLayout.setStretch(this._renderer, 1);
-    }
-    return this._renderer.renderModel(mimeModel);
+    return this._renderer.renderModel(mimeModel).then(() => {
+      // Handle the first render after an activation.
+      if (!this._hasRendered && this.node === document.activeElement) {
+        MessageLoop.sendMessage(this._renderer, Widget.Msg.ActivateRequest);
+      }
+      this._hasRendered = true;
+    });
   }
 
   /**
@@ -529,6 +541,7 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
   private _mimeType: string;
   private _ready = new PromiseDelegate<void>();
   private _dataType: 'string' | 'json';
+  private _hasRendered = false;
 }
 
 

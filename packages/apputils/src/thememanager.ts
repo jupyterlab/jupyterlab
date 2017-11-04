@@ -28,7 +28,7 @@ import {
  * The theme manager token.
  */
 export
-const IThemeManager = new Token<IThemeManager>('jupyter.services.theme-manager');
+const IThemeManager = new Token<IThemeManager>('@jupyterlab/apputils:IThemeManager');
 /* tslint:enable */
 
 
@@ -48,16 +48,18 @@ class ThemeManager {
    * Construct a new theme manager.
    */
   constructor(options: ThemeManager.IOptions) {
+    const { key, when } = options;
+    const registry = options.settingRegistry;
+    const promises = Promise.all([registry.load(key), when]);
+
+    when.then(() => { this._sealed = true; });
+
     this._baseUrl = options.baseUrl;
-    let registry = options.settingRegistry;
     this._host = options.host;
-    let id = 'jupyter.services.theme-manager';
-    options.when.then(() => {
-      this._sealed = true;
-    });
-    this.ready = Promise.all([registry.load(id), options.when]).then(([settings]) => {
+    this.ready = promises.then(([settings]) => {
       this._settings = settings;
       this._settings.changed.connect(this._onSettingsChanged, this);
+
       return this._handleSettings();
     });
   }
@@ -85,9 +87,7 @@ class ThemeManager {
    * Set the current theme.
    */
   setTheme(name: string): Promise<void> {
-    return this.ready.then(() => {
-      this._settings.set('theme', name);
-    });
+    return this.ready.then(() => this._settings.set('theme', name));
   }
 
   /**
@@ -101,14 +101,15 @@ class ThemeManager {
     if (this._sealed) {
       throw new Error('Cannot register themes after startup');
     }
-    let name = theme.name;
+
+    const name = theme.name;
+
     if (this._themes[name]) {
       throw new Error(`Theme already registered for ${name}`);
     }
     this._themes[name] = theme;
-    return new DisposableDelegate(() => {
-      delete this._themes[name];
-    });
+
+    return new DisposableDelegate(() => { delete this._themes[name]; });
   }
 
   /**
@@ -117,18 +118,18 @@ class ThemeManager {
    * @param path - The path of the file to load.
    */
   loadCSS(path: string): Promise<void> {
-    let link = document.createElement('link');
+    const link = document.createElement('link');
+    const baseUrl = PageConfig.getOption('themePath');
+    const delegate = new PromiseDelegate<void>();
+
     link.rel = 'stylesheet';
     link.type = 'text/css';
-    let baseUrl = PageConfig.getOption('themePath');
     link.href = URLExt.join(baseUrl, path);
-    let promise = new PromiseDelegate<void>();
-    link.onload = () => {
-      promise.resolve(void 0);
-    };
+    link.onload = () => { delegate.resolve(void 0); };
     document.body.appendChild(link);
     this._links.push(link);
-    return promise.promise;
+
+    return delegate.promise;
   }
 
   /**
@@ -152,17 +153,20 @@ class ThemeManager {
    * Handle the current settings.
    */
   private _handleSettings(): Promise<void> {
-    let settings = this._settings;
+    const settings = this._settings;
     let theme = settings.composite['theme'] as string;
+
     if (!this._themes[theme]) {
-      let old = theme;
+      const old = theme;
+
       theme = settings.default('theme') as string;
       if (!this._themes[theme]) {
         return Promise.reject('No default theme to load');
       }
-      console.warn(`Could not find theme "${old}", loading default theme "${theme}"`);
+      console.warn(`Could not find theme "${old}", loading default "${theme}"`);
     }
     this._pendingTheme = theme;
+
     return this._loadTheme();
   }
 
@@ -232,6 +236,11 @@ namespace ThemeManager {
      * The base url for the theme manager.
      */
     baseUrl: string;
+
+    /**
+     * The setting registry key that holds theme setting data.
+     */
+    key: string;
 
     /**
      * The settings registry.

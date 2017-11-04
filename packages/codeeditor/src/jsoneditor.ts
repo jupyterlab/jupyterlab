@@ -32,11 +32,6 @@ import {
 const JSONEDITOR_CLASS = 'jp-JSONEditor';
 
 /**
- * The class name added to a focused JSONEditor instance.
- */
-const FOCUSED_CLASS = 'jp-mod-focused';
-
-/**
  * The class name added when the Metadata editor contains invalid JSON.
  */
 const ERROR_CLASS = 'jp-mod-error';
@@ -216,8 +211,6 @@ class JSONEditor extends Widget {
       case 'click':
         this._evtClick(event as MouseEvent);
         break;
-      case 'focus':
-        this._toggleFocused();
       default:
         break;
     }
@@ -229,10 +222,27 @@ class JSONEditor extends Widget {
   protected onAfterAttach(msg: Message): void {
     let node = this.editorHostNode;
     node.addEventListener('blur', this, true);
-    node.addEventListener('focus', this, true);
+    node.addEventListener('click', this, true);
     this.revertButtonNode.hidden = true;
     this.commitButtonNode.hidden = true;
     this.headerNode.addEventListener('click', this);
+    if (this.isVisible) {
+      this.update();
+    }
+  }
+
+  /**
+   * Handle `after-show` messages for the widget.
+   */
+  protected onAfterShow(msg: Message): void {
+    this.update();
+  }
+
+  /**
+   * Handle `update-request` messages for the widget.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    this.editor.refresh();
   }
 
   /**
@@ -241,6 +251,7 @@ class JSONEditor extends Widget {
   protected onBeforeDetach(msg: Message): void {
     let node = this.editorHostNode;
     node.removeEventListener('blur', this, true);
+    node.removeEventListener('click', this, true);
     this.headerNode.removeEventListener('click', this);
   }
 
@@ -278,18 +289,6 @@ class JSONEditor extends Widget {
     this.commitButtonNode.hidden = !valid || !this._inputDirty;
   }
 
-
-  private _toggleFocused(): void {
-    let node = this.editorHostNode;
-    let codeMirror = node.getElementsByClassName('CodeMirror-wrap');
-    let focused = !codeMirror[0].classList.contains('CodeMirror-focused');
-    if (focused) {
-      node.classList.add(FOCUSED_CLASS);
-    } else {
-      node.classList.remove(FOCUSED_CLASS);
-    }
-  }
-
   /**
    * Handle blur events for the text area.
    */
@@ -298,7 +297,6 @@ class JSONEditor extends Widget {
     if (!this._inputDirty && this._dataDirty) {
       this._setValue();
     }
-    this._toggleFocused();
   }
 
   /**
@@ -330,6 +328,9 @@ class JSONEditor extends Widget {
           this.editorHostNode.classList.add(COLLAPSED_CLASS);
         }
       }
+      break;
+    case this.editorHostNode:
+      this.editor.focus();
       break;
     default:
       break;
@@ -387,6 +388,10 @@ class JSONEditor extends Widget {
       let value = JSON.stringify(content, null, 4);
       model.value.text = value;
       this._originalValue = content;
+      // Move the cursor to within the brace.
+      if (value.length > 1 && value[0] === '{') {
+        this.editor.setCursorPosition({ line: 0, column: 1 });
+      }
     }
     this.editor.refresh();
     this._changeGuard = false;

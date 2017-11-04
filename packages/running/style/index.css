@@ -148,7 +148,6 @@
   padding-left: 4px;
   text-overflow: ellipsis;
   overflow: hidden;
-  direction: rtl;
   white-space: nowrap;
   border-radius: 2px;
   transition: background-color 0.1s ease;

@@ -1,0 +1,41 @@
+{
+  "name": "@jupyterlab/buildutils",
+  "version": "0.1.2",
+  "description": "JupyterLab - Build Utilities",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js.map",
+    "lib/*.js"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "fs-extra": "~4.0.2",
+    "glob": "~7.1.2"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^4.0.2",
+    "@types/glob": "^5.0.32",
+    "@types/node": "^8.0.31",
+    "rimraf": "^2.5.2",
+    "typescript": "~2.4.1"
+  }
+}

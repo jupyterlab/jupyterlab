@@ -39,6 +39,25 @@ function showDialog<T>(options: Partial<Dialog.IOptions<T>>={}): Promise<Dialog.
   return dialog.launch();
 }
 
+/**
+ * Show an error message dialog.
+ *
+ * @param title - The title of the dialog box.
+ *
+ * @param error - the error to show in the dialog body (either a string
+ *   or an object with a string `message` property).
+ */
+export
+function showErrorMessage(title: string, error: any): Promise<void> {
+  console.error(error);
+  let options = {
+    title: title,
+    body: error.message || title,
+    buttons: [Dialog.okButton()],
+    okText: 'DISMISS'
+  };
+  return showDialog(options).then(() => { /* no-op */ });
+}
 
 /**
  * A modal dialog widget.
