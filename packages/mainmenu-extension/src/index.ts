@@ -10,7 +10,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IMainMenu, MainMenu, FileMenu, KernelMenu
+  IMainMenu, MainMenu, FileMenu, KernelMenu, ViewMenu
 } from '@jupyterlab/mainmenu';
 
 
@@ -27,6 +27,15 @@ namespace CommandIDs {
 
   export
   const changeKernel = 'kernel:change';
+
+  export
+  const wordWrap = 'editor:word-wrap';
+
+  export
+  const lineNumbering = 'editor:line-numbering';
+
+  export
+  const matchBrackets = 'editor:match-brackets';
 }
 
 /**
@@ -47,6 +56,7 @@ const menu: JupyterLabPlugin<IMainMenu> = {
     // Create the application menus.
     createFileMenu(app, menu.fileMenu);
     createKernelMenu(app, menu.kernelMenu);
+    createViewMenu(app, menu.viewMenu);
 
     app.shell.addToTopArea(logo);
     app.shell.addToTopArea(menu);
@@ -131,6 +141,38 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
     CommandIDs.interruptKernel,
     CommandIDs.restartKernel,
     CommandIDs.changeKernel
+  ];
+  items.forEach( command => {
+    menu.addItem({ command });
+    menu.startIndex++;
+  });
+}
+
+/**
+ * Create the basic `View` menu.
+ */
+function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
+  const commands = menu.commands;
+
+  commands.addCommand(CommandIDs.lineNumbering, {
+    isEnabled: () => {
+      const viewer = menu.findEditorViewer(app.shell.currentWidget);
+      return !!user && !!viewer.toggleLineNumbers;
+    },
+    execute: () => {
+      const widget = app.shell.currentWidget;
+      const viewer = menu.findEditorViewer(widget);
+      if (!viewer) {
+        return Promise.resolve(void 0);
+      }
+      return viewer.toggleLineNumbers(widget);
+    }
+  });
+
+  let items = [
+    CommandIDs.lineNumbering,
+    CommandIDs.matchBrackets,
+    CommandIDs.wordWrap
   ];
   items.forEach( command => {
     menu.addItem({ command });

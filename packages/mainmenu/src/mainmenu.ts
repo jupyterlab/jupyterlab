@@ -115,10 +115,25 @@ namespace IMainMenu {
   }
 
   /**
+   * A base interface for a consumer of one of the menu
+   * semantic extension points. The IMenuExtender gives
+   * an instance tracker which is checked when the menu
+   * is deciding which IMenuExtender to delegate to upon
+   * selection of the menu item.
+   */
+  export
+  interface IMenuExtender<T extends Widget> {
+    /**
+     * A widget tracker for identifying the appropriate extender.
+     */
+    tracker: IInstanceTracker<T>;
+  }
+
+  /**
    * An interface for a File menu.
    */
   export
-  interface IFileMenu extends Menu {
+  interface IFileMenu extends IJupyterLabMenu {
     /**
      * A submenu for creating new files/launching new activities.
      */
@@ -137,6 +152,40 @@ namespace IMainMenu {
    */
   export
   interface IViewMenu extends IJupyterLabMenu {
+    /**
+     * Add an IKernelUser to the Kernel menu.
+     *
+     * @param user - An IKernelUser.
+     */
+    addEditorViewer<T extends Widget>(user: IViewMenu.IEditorViewer<T>): void;
+  }
+
+  /**
+   * Namespace for IViewMenu.
+   */
+  export
+  namespace IViewMenu {
+    /**
+     * Interface for a text editor viewer to register
+     * itself with the text editor extension points.
+     */
+    export
+    interface IEditorViewer<T extends Widget> extends IMenuExtender<T> {
+      /**
+       * Whether to show line numbers in the editor.
+       */
+      toggleLineNumbers?: (widget: T) => void;
+
+      /**
+       * Whether to word-wrap the editor.
+       */
+      toggleWordWrap?: (widget: T) => void;
+
+      /**
+       * Whether to match brackets in the editor.
+       */
+      toggleMatchBrackets?: (widget: T) => void;
+    }
   }
 
   /**
@@ -181,13 +230,7 @@ namespace IMainMenu {
      * with the IKernelMenu's semantic extension points.
      */
     export
-    interface IKernelUser<T extends Widget> {
-      /**
-       * A widget tracker for identifying the appropriate
-       * kernel user.
-       */
-      tracker: IInstanceTracker<T>;
-
+    interface IKernelUser<T extends Widget> extends IMenuExtender<T> {
       /**
        * A function to interrupt the kernel.
        */

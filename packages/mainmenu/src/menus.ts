@@ -87,7 +87,7 @@ class JupyterLabMenu extends Menu implements IMainMenu.IJupyterLabMenu {
  * An extensible FileMenu for the application.
  */
 export
-class FileMenu extends Menu implements IMainMenu.IFileMenu {
+class FileMenu extends JupyterLabMenu implements IMainMenu.IFileMenu {
   constructor(options: Menu.IOptions) {
     super(options);
 
@@ -162,15 +162,25 @@ class KernelMenu extends JupyterLabMenu implements IMainMenu.IKernelMenu {
     this.title.label = 'Kernel';
   }
 
-  addUser<T extends Widget>(user: IMainMenu.IKernelMenu.IKernelUser<T>) {
+  /**
+   * Add a new KernelUser to the menu.
+   *
+   * @param user - the user to add.
+   */
+  addUser<T extends Widget>(user: IMainMenu.IKernelMenu.IKernelUser<T>): void {
     this._users.push(user);
   }
 
+  /**
+   * Find a kernel user for a given widget.
+   *
+   * @param widget - A widget to check.
+   *
+   * @returns an IKernelUser if any of the registered users own the widget.
+   *   Otherwise it returns undefined.
+   */
   findUser(widget: Widget | null): IMainMenu.IKernelMenu.IKernelUser<Widget> | undefined {
-    if (!widget) {
-      return undefined;
-    }
-    return ArrayExt.findFirstValue(this._users, el => el.tracker.has(widget))
+    return Private.findExtender<Widget>(widget, this._users);
   }
 
   private _users: IMainMenu.IKernelMenu.IKernelUser<Widget>[] = [];
@@ -188,6 +198,29 @@ class ViewMenu extends JupyterLabMenu implements IMainMenu.IViewMenu {
     super(options);
     this.title.label = 'View';
   }
+
+  /**
+   * Add a new KernelUser to the menu.
+   *
+   * @param user - the user to add.
+   */
+  addEditorViewer<T extends Widget>(editorViewer: IMainMenu.IViewMenu.IEditorViewer<T>): void {
+    this._editorViewers.push(editorViewer);
+  }
+
+  /**
+   * Find a kernel user for a given widget.
+   *
+   * @param widget - A widget to check.
+   *
+   * @returns an IKernelUser if any of the registered users own the widget.
+   *   Otherwise it returns undefined.
+   */
+  findEditorViewer(widget: Widget | null): IMainMenu.IViewMenu.IEditorViewer<Widget> | undefined {
+    return Private.findExtender<Widget>(widget, this._editorViewers);
+  }
+
+  private _editorViewers: IMainMenu.IViewMenu.IEditorViewer<Widget>[] = [];
 }
 
 /**
@@ -219,3 +252,16 @@ namespace Private {
   }
 }
 
+
+/**
+ * A private namespace for Menu utilities.
+ */
+namespace Private {
+  export
+  function findExtender<T extends Widget>(widget: T | null, extenders: IMainMenu.IMenuExtender<T>[]): IMainMenu.IMenuExtender<T> | undefined {
+    if (!widget) {
+      return undefined;
+    }
+    return ArrayExt.findFirstValue(extenders, el => el.tracker.has(widget))
+  }
+}
