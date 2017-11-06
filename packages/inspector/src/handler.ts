@@ -31,7 +31,7 @@ import {
 
 import {
   IInspector
-} from './';
+} from './inspector';
 
 
 /**
@@ -144,9 +144,11 @@ class InspectionHandler implements IDisposable, IInspector.IInspectable {
     }
 
     const editor = this.editor;
+
     if (!editor) {
       return;
     }
+
     const code = editor.model.value.text;
     const position = editor.getCursorPosition();
     const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), code);
