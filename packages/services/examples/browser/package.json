@@ -1,17 +1,17 @@
 {
-  "private": true,
   "name": "browser-example",
-  "dependencies": {
-    "@jupyterlab/services": "^0.50.2",
-    "es6-promise": "^4.1.0"
-  },
+  "version": "0.7.1",
+  "private": true,
   "scripts": {
     "build": "tsc && webpack",
     "clean": "rimraf build"
   },
-  "devDependencies": {
-    "rimraf": "^2.5.2",
-    "webpack": "^2.2.1"
+  "dependencies": {
+    "@jupyterlab/services": "^0.50.2",
+    "es6-promise": "~4.1.1"
   },
-  "version": "0.7.1"
+  "devDependencies": {
+    "rimraf": "~2.6.2",
+    "webpack": "~2.7.0"
+  }
 }

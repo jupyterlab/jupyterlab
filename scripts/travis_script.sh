@@ -34,6 +34,9 @@ fi
 
 if [[ $GROUP == other ]]; then
 
+    # Run the package integrity check
+    npm run integrity
+
     # Make sure we can successfully load the core app.
     pip install selenium
     python -m jupyterlab.selenium_check --core-mode
@@ -83,9 +86,6 @@ if [[ $GROUP == other ]]; then
     jupyter labextension enable -h
     jupyter labextension disable -h
 
-    # Run the package integrity check
-    npm run integrity
-
     # Make sure the examples build
     npm run build:examples
 
@@ -108,6 +108,21 @@ if [[ $GROUP == other ]]; then
     # Make sure we have CSS that can be converted with postcss
     npm install -g postcss-cli
     postcss packages/**/style/*.css --dir /tmp
+
+    # Make sure we can add and remove a sibling package.
+    npm run add:sibling jupyterlab/tests/mock_packages/extension
+    npm run build
+    npm run remove:package extension
+    npm run build
+    npm run integrity
+
+    # Test cli tools
+    npm run get:dependency mocha
+    npm run update:dependency mocha
+    npm run remove:dependency mocha
+    npm run get:dependency @jupyterlab/buildutils
+    npm run get:dependency typescript
+    npm run get:dependency react-native 
 
     # Make sure we can make release assets
     npm run build:static
