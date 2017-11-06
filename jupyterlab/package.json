@@ -131,7 +131,7 @@
       "@phosphor/coreutils",
       "@phosphor/widgets"
     ],
-    "version": "0.28.12",
+    "version": "0.28.13",
     "linkedPackages": {
       "@jupyterlab/application": "../packages/application",
       "@jupyterlab/application-extension": "../packages/application-extension",
