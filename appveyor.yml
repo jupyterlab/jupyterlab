@@ -48,3 +48,4 @@ test_script:
   - 'npm run build'
   - 'npm run build:test'
   - 'npm test || npm test || npm test'
+  - 'npm run integrity'

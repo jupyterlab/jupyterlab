@@ -43,25 +43,25 @@
   },
   "dependencies": {
     "@jupyterlab/coreutils": "^0.11.1",
-    "@phosphor/algorithm": "^1.1.1",
-    "@phosphor/coreutils": "^1.2.0",
-    "@phosphor/disposable": "^1.1.1",
-    "@phosphor/signaling": "^1.2.1"
+    "@phosphor/algorithm": "^1.1.2",
+    "@phosphor/coreutils": "^1.3.0",
+    "@phosphor/disposable": "^1.1.2",
+    "@phosphor/signaling": "^1.2.2"
   },
   "devDependencies": {
-    "@types/expect.js": "^0.3.29",
-    "@types/mocha": "^2.2.32",
-    "@types/text-encoding": "0.0.30",
-    "@types/ws": "0.0.39",
-    "expect.js": "^0.3.1",
-    "istanbul": "^0.3.18",
-    "mocha": "^3.2.0",
-    "requirejs": "^2.2.0",
-    "rimraf": "^2.5.2",
-    "text-encoding": "^0.5.2",
-    "typescript": "~2.4.1",
-    "webpack": "^2.2.1",
-    "ws": "^1.1.1",
-    "xmlhttprequest": "^1.8.0"
+    "@types/expect.js": "~0.3.29",
+    "@types/mocha": "~2.2.44",
+    "@types/text-encoding": "~0.0.30",
+    "@types/ws": "~0.0.39",
+    "expect.js": "~0.3.1",
+    "istanbul": "~0.3.22",
+    "mocha": "~3.5.3",
+    "requirejs": "~2.3.5",
+    "rimraf": "~2.6.2",
+    "text-encoding": "~0.5.5",
+    "typescript": "~2.4.2",
+    "webpack": "~2.7.0",
+    "ws": "~1.1.4",
+    "xmlhttprequest": "~1.8.0"
   }
 }

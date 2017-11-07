@@ -29,11 +29,11 @@
   "dependencies": {
     "@jupyterlab/application": "^0.11.1",
     "@jupyterlab/apputils": "^0.11.1",
-    "font-awesome": "^4.7.0"
+    "font-awesome": "~4.7.0"
   },
   "devDependencies": {
-    "rimraf": "^2.5.2",
-    "typescript": "~2.4.1"
+    "rimraf": "~2.6.2",
+    "typescript": "~2.4.2"
   },
   "jupyterlab": {
     "extension": true,

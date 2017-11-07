@@ -52,7 +52,10 @@ def get_app_dir(app_dir=None):
     app_dir = pjoin(sys.prefix, 'share', 'jupyter', 'lab')
 
     # Check for a user level install.
-    userbase = getattr(site, 'userbase', '')
+    # Ensure that USER_BASE is defined
+    if hasattr(site, 'getuserbase'):
+        site.getuserbase()
+    userbase = getattr(site, 'USER_BASE', None)
     if here.startswith(userbase) and not app_dir.startswith(userbase):
         app_dir = pjoin(userbase, 'share', 'jupyter', 'lab')
 

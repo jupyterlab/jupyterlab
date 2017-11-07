@@ -197,6 +197,33 @@ To have the system build after each source file change, run:
 jupyter lab --dev-mode --watch
 ```
 
+
+## Build Utilities
+
+There are a series of build utilities for maintaining the repository.
+To get a suggested version for a library use `npm run get:dependency foo`.
+To update the version of a library across the repo use `npm run update:dependency foo@^x.x`.
+To remove an unwanted dependency use `npm run remove:dependency foo`.
+
+The key utility is `npm run integrity`, which ensures the integrity of 
+the packages in the repo. It will:
+
+- Ensure the core package version dependencies match everywhere.
+- Ensure imported packages match dependencies.
+- Ensure a consistent version of all packages.
+- Manage the meta package.
+
+The `packages/metapackage` package is used to build all of the TypeScript 
+in the repository at once, instead of 50+ individual builds.
+
+The integrity script also allows you to automatically add a dependency for
+a package by importing from it in the TypeScript file, and then running:
+`npm run integrity && npm install` from the repo root.
+
+We also have scripts for creating and removing packages in `packages/`, 
+`npm run create:package` and `npm run remove:package`.
+
+
 ## Notes
 
 - By default, the application will load from the JupyterLab staging directory (default is `<sys-prefix>/share/jupyter/lab/build`.  If you wish to run

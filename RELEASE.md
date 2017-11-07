@@ -91,7 +91,8 @@ files from the previous branch, as well as the `package.json` fields up to
 - Submit the PR to JupyterLab
 
 ### Set master back to dev version
-- Update `jupyterlab/_version.py` with a `dev` version
+- Create a branch for the release and push to github.
+- Update `jupyterlab/_version.py` with a `dev` version.
 - Commit and push the version update.
 
 
@@ -103,7 +104,7 @@ files from the previous branch, as well as the `package.json` fields up to
 where the package is in `/packages/packageFolder`:
 
 ```bash
-node scripts/patch-release.js packageFolder
+npm run patch:release packageFolder
 ```
 
 - Push the resulting commit and tag.

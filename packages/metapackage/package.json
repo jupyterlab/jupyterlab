@@ -1,5 +1,5 @@
 {
-  "name": "@jupyterlab/all-packages",
+  "name": "@jupyterlab/metapackage",
   "version": "0.11.1",
   "private": true,
   "description": "JupyterLab - All Packages",
@@ -27,16 +27,15 @@
     "build": "tsc && node build.js",
     "clean": "rimraf lib",
     "docs": "typedoc --mode modules --module commonjs --excludeNotExported --target es5 --moduleResolution node --name JupyterLab --out ../../docs/api .",
-    "watch:tsc": "tsc -w",
+    "watch": "npm run clean && run-p watch:*",
     "watch:files": "node watch-files.js",
-    "watch": "npm run clean && run-p watch:*"
+    "watch:tsc": "tsc -w"
   },
   "dependencies": {
     "@jupyterlab/application": "^0.11.1",
     "@jupyterlab/application-extension": "^0.11.1",
     "@jupyterlab/apputils": "^0.11.1",
     "@jupyterlab/apputils-extension": "^0.11.1",
-    "@jupyterlab/buildutils": "^0.1.2",
     "@jupyterlab/cells": "^0.11.1",
     "@jupyterlab/codeeditor": "^0.11.1",
     "@jupyterlab/codemirror": "^0.11.3",
@@ -69,6 +68,7 @@
     "@jupyterlab/outputarea": "^0.11.1",
     "@jupyterlab/pdf-extension": "^0.3.1",
     "@jupyterlab/rendermime": "^0.11.1",
+    "@jupyterlab/rendermime-interfaces": "^0.4.1",
     "@jupyterlab/running": "^0.11.1",
     "@jupyterlab/running-extension": "^0.11.1",
     "@jupyterlab/services": "^0.50.2",
@@ -86,9 +86,9 @@
   "devDependencies": {
     "fs-extra": "~4.0.2",
     "npm-run-all": "~4.1.1",
-    "rimraf": "^2.5.2",
-    "typedoc": "^0.7.1",
-    "typescript": "~2.4.1",
-    "watch": "^1.0.2"
+    "rimraf": "~2.6.2",
+    "typedoc": "~0.7.2",
+    "typescript": "~2.4.2",
+    "watch": "~1.0.2"
   }
 }

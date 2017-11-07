@@ -188,3 +188,6 @@ class LabApp(NotebookApp):
 #-----------------------------------------------------------------------------
 
 main = launch_new_instance = LabApp.launch_instance
+
+if __name__ == '__main__':
+    main()
