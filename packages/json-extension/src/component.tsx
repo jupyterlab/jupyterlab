@@ -16,7 +16,8 @@ import {
 /**
  * The properties for the JSON tree component.
  */
-export interface IProps {
+export
+interface IProps {
   data: JSONValue;
   metadata?: JSONObject;
   theme?: string;
@@ -26,15 +27,17 @@ export interface IProps {
 /**
  * The state of the JSON tree component.
  */
-export interface IState {
+export
+interface IState {
   filter?: string;
 }
 
 
 /**
- * A component that renders JSON data as a collapsable tree.
+ * A component that renders JSON data as a collapsible tree.
  */
-export class Component extends React.Component<IProps, IState> {
+export
+class Component extends React.Component<IProps, IState> {
   state = { filter: '' };
   input: Element = null;
   timer: number = 0;
