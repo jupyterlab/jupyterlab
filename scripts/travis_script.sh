@@ -91,7 +91,7 @@ if [[ $GROUP == other ]]; then
 
     # Run the link check - allow for a link to fail once
     pip install -q pytest-check-links
-    py.test --check-links -k .md . || py.test --check-links -k .md . 
+    py.test --check-links -k .md . || py.test --check-links -k .md --lf .
 
     # Build the api docs
     npm run docs
