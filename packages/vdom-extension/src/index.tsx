@@ -35,6 +35,9 @@ export
 const MIME_TYPE = 'application/vdom.v1+json';
 
 
+/**
+ * A renderer for declarative virtual DOM content.
+ */
 export
 class RenderedVDOM extends Widget implements IRenderMime.IRenderer {
   /**

@@ -12,16 +12,28 @@ import {
   JSONArray
 } from '@phosphor/coreutils';
 
+
+/**
+ * The properties for the JSON tree component.
+ */
 export interface IProps {
   data: JSONValue;
   metadata?: JSONObject;
   theme?: string;
 }
 
+
+/**
+ * The state of the JSON tree component.
+ */
 export interface IState {
   filter?: string;
 }
 
+
+/**
+ * A component that renders JSON data as a collapsable tree.
+ */
 export class Component extends React.Component<IProps, IState> {
   state = { filter: '' };
   input: Element = null;
@@ -85,8 +97,8 @@ export class Component extends React.Component<IProps, IState> {
             fontSize: 13,
             padding: '4px 2px'
           }}
-          type="text"
-          placeholder="Filter..."
+          type='text'
+          placeholder='Filter...'
         />
         <JSONTree
           data={data}

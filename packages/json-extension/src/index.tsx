@@ -32,6 +32,9 @@ export
 const MIME_TYPE = 'application/json';
 
 
+/**
+ * A renderer for JSON data.
+ */
 export
 class RenderedJSON extends Widget implements IRenderMime.IRenderer {
   /**
