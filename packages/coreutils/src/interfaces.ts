@@ -37,9 +37,8 @@ interface IDataConnector<T, U = T, V = string> {
    * @returns A promise that bears a data payload if available.
    *
    * #### Notes
-   * The promise returned by this method may be rejected if an error
-   * occurs in  retrieving the data. Non-existence of an `id` will
-   * succeed with `undefined`.
+   * The promise returned by this method may be rejected if an error occurs in
+   * retrieving the data. Nonexistence of an `id` will succeed with `undefined`.
    */
   fetch(id: V): Promise<T | undefined>;
 
