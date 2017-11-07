@@ -60,6 +60,7 @@
     "@jupyterlab/imageviewer-extension": "^0.11.1",
     "@jupyterlab/inspector": "^0.11.1",
     "@jupyterlab/inspector-extension": "^0.11.1",
+    "@jupyterlab/json-extension": "^0.11.0",
     "@jupyterlab/launcher": "^0.11.1",
     "@jupyterlab/launcher-extension": "^0.11.1",
     "@jupyterlab/markdownviewer-extension": "^0.11.1",
@@ -81,6 +82,7 @@
     "@jupyterlab/theme-light-extension": "^0.11.1",
     "@jupyterlab/tooltip": "^0.11.1",
     "@jupyterlab/tooltip-extension": "^0.11.1",
+    "@jupyterlab/vdom-extension": "^0.11.0",
     "@jupyterlab/vega2-extension": "^0.11.1"
   },
   "devDependencies": {
