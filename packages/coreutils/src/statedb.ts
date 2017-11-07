@@ -186,9 +186,11 @@ class StateDB implements IStateDB {
         let value = window.localStorage.getItem(key);
 
         try {
+          let envelope = JSON.parse(value) as Private.Envelope;
+
           items.push({
             id: key.replace(regex, ''),
-            value: value ? JSON.parse(value) : undefined
+            value: envelope ? envelope.v : undefined
           });
         } catch (error) {
           console.warn(error);
