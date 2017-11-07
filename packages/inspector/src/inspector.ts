@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Toolbar, ToolbarButton
+} from '@jupyterlab/apputils';
+
+import {
   Token
 } from '@phosphor/coreutils';
 
@@ -18,16 +22,8 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  PanelLayout, TabPanel
+  PanelLayout, TabPanel, Widget
 } from '@phosphor/widgets';
-
-import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
-  Toolbar, ToolbarButton
-} from '@jupyterlab/apputils';
 
 
 /**

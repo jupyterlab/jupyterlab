@@ -2,32 +2,29 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
- KernelMessage
-} from '@jupyterlab/services';
+  CodeEditor
+} from '@jupyterlab/codeeditor';
+
+import {
+  IDataConnector, Text
+} from '@jupyterlab/coreutils';
+
+import {
+  MimeModel, RenderMime
+} from '@jupyterlab/rendermime';
+
+import {
+  ReadonlyJSONObject
+} from '@phosphor/coreutils';
 
 import {
   IDisposable
 } from '@phosphor/disposable';
 
 import {
-  Text
-} from '@jupyterlab/coreutils';
-
-import {
   ISignal, Signal
 } from '@phosphor/signaling';
 
-import {
-  IClientSession
-} from '@jupyterlab/apputils';
-
-import {
-  CodeEditor
-} from '@jupyterlab/codeeditor';
-
-import {
-  MimeModel, RenderMime
-} from '@jupyterlab/rendermime';
 
 import {
   IInspector
@@ -43,7 +40,7 @@ class InspectionHandler implements IDisposable, IInspector.IInspectable {
    * Construct a new inspection handler for a widget.
    */
   constructor(options: InspectionHandler.IOptions) {
-    this.session = options.session;
+    this._connector = options.connector;
     this._rendermime = options.rendermime;
   }
 
@@ -67,11 +64,6 @@ class InspectionHandler implements IDisposable, IInspector.IInspectable {
   get inspected(): ISignal<InspectionHandler, IInspector.IInspectorUpdate> {
     return this._inspected;
   }
-
-  /**
-   * The client session used by the inspection handler.
-   */
-  readonly session: IClientSession;
 
   /**
    * The editor widget used by the inspection handler.
@@ -149,68 +141,56 @@ class InspectionHandler implements IDisposable, IInspector.IInspectable {
       return;
     }
 
-    const code = editor.model.value.text;
+    const text = editor.model.value.text;
     const position = editor.getCursorPosition();
-    const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), code);
-    let update: IInspector.IInspectorUpdate = { content: null, type: 'hints' };
+    const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), text);
+    const update: IInspector.IInspectorUpdate = {
+      content: null,
+      type: 'hints'
+    };
 
     // Clear hints if the new text value is empty or kernel is unavailable.
-    if (!code || !this.session.kernel) {
+    if (!text) {
       this._inspected.emit(update);
       return;
     }
 
-    const contents: KernelMessage.IInspectRequest = {
-      code,
-      cursor_pos: offset,
-      detail_level: 0
-    };
     const pending = ++this._pending;
 
-    this.session.kernel.requestInspect(contents).then(msg => {
-      let value = msg.content;
-
-      // If handler has been disposed, bail.
-      if (this.isDisposed) {
+    this._connector.fetch({ offset, text }).then(reply => {
+      // If handler has been disposed or a newer request is pending, bail.
+      if (this.isDisposed || pending !== this._pending) {
         this._inspected.emit(update);
         return;
       }
 
-      // If a newer text change has created a pending request, bail.
-      if (pending !== this._pending) {
-        this._inspected.emit(update);
-        return;
-      }
+      const { data } = reply;
+      const mimeType = this._rendermime.preferredMimeType(data, true);
 
-      // Hint request failures or negative results fail silently.
-      if (value.status !== 'ok' || !value.found) {
-        this._inspected.emit(update);
-        return;
-      }
-
-      const data = value.data;
-
-      let mimeType = this._rendermime.preferredMimeType(data, true);
       if (mimeType) {
-        let widget = this._rendermime.createRenderer(mimeType);
+        const widget = this._rendermime.createRenderer(mimeType);
         const model = new MimeModel({ data });
+
         widget.renderModel(model);
         update.content = widget;
-      } else {
-        update.content = null;
       }
+
+      this._inspected.emit(update);
+    }).catch(reason => {
+      // Since almost all failures are benign, fail silently.
       this._inspected.emit(update);
     });
   }
 
+  private _connector: IDataConnector<InspectionHandler.IReply, void, InspectionHandler.IRequest>;
   private _disposed = new Signal<this, void>(this);
   private _editor: CodeEditor.IEditor | null = null;
   private _ephemeralCleared = new Signal<InspectionHandler, void>(this);
   private _inspected = new Signal<this, IInspector.IInspectorUpdate>(this);
+  private _isDisposed = false;
   private _pending = 0;
   private _rendermime: RenderMime;
   private _standby = true;
-  private _isDisposed = false;
 }
 
 
@@ -225,13 +205,45 @@ namespace InspectionHandler {
   export
   interface IOptions {
     /**
-     * The client session for the inspection handler.
+     * The connector used to make inspection requests.
      */
-    session: IClientSession;
+    connector: IDataConnector<IReply, void, IRequest>;
 
     /**
      * The mime renderer for the inspection handler.
      */
     rendermime: RenderMime;
+  }
+
+  /**
+   * A reply to an inspection request.
+   */
+  export
+  interface IReply {
+    /**
+     * The MIME bundle data returned from an inspection request.
+     */
+    data: ReadonlyJSONObject;
+
+    /**
+     * Any metadata that accompanies the MIME bundle returning from a request.
+     */
+    metadata: ReadonlyJSONObject;
+  }
+
+  /**
+   * The details of an inspection request.
+   */
+  export
+  interface IRequest {
+    /**
+     * The cursor offset position within the text being inspected.
+     */
+    offset: number;
+
+    /**
+     * The text being inspected.
+     */
+    text: string;
   }
 }
