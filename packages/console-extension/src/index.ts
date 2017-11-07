@@ -123,11 +123,10 @@ export default plugins;
  * Activate the console extension.
  */
 function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): IConsoleTracker {
-  let manager = app.serviceManager;
-  let { commands, shell } = app;
-  let category = 'Console';
-  let command: string;
-  let menu = new Menu({ commands });
+  const manager = app.serviceManager;
+  const { commands, shell } = app;
+  const category = 'Console';
+  const menu = new Menu({ commands });
 
   // Create an instance tracker for all console panels.
   const tracker = new InstanceTracker<ConsolePanel>({ namespace: 'console' });
@@ -215,7 +214,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     return tracker.currentWidget !== null;
   }
 
-  command = CommandIDs.open;
+  let command = CommandIDs.open;
   commands.addCommand(command, {
     execute: (args: Partial<ConsolePanel.IOptions>) => {
       let path = args['path'];

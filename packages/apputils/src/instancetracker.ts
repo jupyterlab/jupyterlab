@@ -318,7 +318,8 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
 
     return Promise.all(promises).then(([saved]) => {
       return Promise.all(saved.map(item => {
-        let args = (item.value as any).data;
+        const args = (item.value as any).data;
+
         // Execute the command and if it fails, delete the state restore data.
         return registry.execute(command, args)
           .catch(() => { state.remove(item.id); });
