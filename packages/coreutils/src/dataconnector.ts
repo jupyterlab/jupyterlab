@@ -33,7 +33,7 @@ abstract class DataConnector<T, U = T, V = string> implements IDataConnector<T, 
    * @returns A promise that is rejected if remove fails and succeeds otherwise.
    *
    * #### Notes
-   * This method will always reject, subclasses should reimplement it if they
+   * This method will always reject; subclasses should reimplement it if they
    * support a back-end that can remove resources.
    */
   remove(id: V): Promise<void> {
@@ -50,7 +50,7 @@ abstract class DataConnector<T, U = T, V = string> implements IDataConnector<T, 
    * @returns A promise that is rejected if saving fails and succeeds otherwise.
    *
    * #### Notes
-   * This method will always reject, subclasses should reimplement it if they
+   * This method will always reject; subclasses should reimplement it if they
    * support a back-end that can save resources.
    */
   save(id: V, value: U): Promise<void> {
