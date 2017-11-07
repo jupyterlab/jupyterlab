@@ -10,7 +10,7 @@ import {
  * An abstract class that adheres to the data connector interface.
  */
 export
-abstract class DataConnector<T, U = T> implements IDataConnector<T, U> {
+abstract class DataConnector<T, U = T, V = string> implements IDataConnector<T, U, V> {
   /**
    * Retrieve an item from the data connector.
    *
@@ -23,10 +23,10 @@ abstract class DataConnector<T, U = T> implements IDataConnector<T, U> {
    * occurs in  retrieving the data. Non-existence of an `id` will
    * succeed with `undefined`.
    */
-  abstract fetch(id: string): Promise<T | undefined>;
+  abstract fetch(id: V): Promise<T | undefined>;
 
   /**
-   * Remove a value from the data connector.
+   * Remove a value using the data connector.
    *
    * @param id - The identifier for the data being removed.
    *
@@ -36,8 +36,8 @@ abstract class DataConnector<T, U = T> implements IDataConnector<T, U> {
    * This method will always reject, subclasses should reimplement it if they
    * support a back-end that can remove resources.
    */
-  remove(): Promise<void> {
-    return Promise.reject(new Error('Removing \has not been implemented.'));
+  remove(id: V): Promise<void> {
+    return Promise.reject(new Error('Removing has not been implemented.'));
   }
 
   /**
@@ -53,7 +53,7 @@ abstract class DataConnector<T, U = T> implements IDataConnector<T, U> {
    * This method will always reject, subclasses should reimplement it if they
    * support a back-end that can save resources.
    */
-  save(id: string, value: U): Promise<void> {
-    return Promise.reject(new Error('Saving  has not been implemented.'));
+  save(id: V, value: U): Promise<void> {
+    return Promise.reject(new Error('Saving has not been implemented.'));
   }
 }

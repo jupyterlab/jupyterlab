@@ -28,11 +28,11 @@ interface IChangedArgs<T> {
  * The description of a general purpose data connector.
  */
 export
-interface IDataConnector<T, U = T> {
+interface IDataConnector<T, U = T, V = string> {
   /**
-   * Retrieve a saved bundle from the data connector.
+   * Retrieve an item from the data connector.
    *
-   * @param id - The identifier used to retrieve a data bundle.
+   * @param id - The identifier used to retrieve an item.
    *
    * @returns A promise that bears a data payload if available.
    *
@@ -41,19 +41,19 @@ interface IDataConnector<T, U = T> {
    * occurs in  retrieving the data. Non-existence of an `id` will
    * succeed with `undefined`.
    */
-  fetch(id: string): Promise<T | undefined>;
+  fetch(id: V): Promise<T | undefined>;
 
   /**
-   * Remove a value from the data connector.
+   * Remove a value using the data connector.
    *
    * @param id - The identifier for the data being removed.
    *
    * @returns A promise that is rejected if remove fails and succeeds otherwise.
    */
-  remove(id: string): Promise<void>;
+  remove(id: V): Promise<void>;
 
   /**
-   * Save a value in the data connector.
+   * Save a value using the data connector.
    *
    * @param id - The identifier for the data being saved.
    *
@@ -61,5 +61,5 @@ interface IDataConnector<T, U = T> {
    *
    * @returns A promise that is rejected if saving fails and succeeds otherwise.
    */
-  save(id: string, value: U): Promise<void>;
+  save(id: V, value: U): Promise<void>;
 }
