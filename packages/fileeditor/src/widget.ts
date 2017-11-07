@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  BoxLayout, Widget
+} from '@phosphor/widgets';
+
+import {
   IChangedArgs, PathExt
 } from '@jupyterlab/coreutils';
 
@@ -29,11 +33,8 @@ const DIRTY_CLASS = 'jp-mod-dirty';
 const EDITOR_CLASS = 'jp-FileEditor';
 
 
-/**
- * A document widget for editors.
- */
 export
-class FileEditor extends CodeEditorWrapper implements DocumentRegistry.IReadyWidget {
+class FileEditorInner extends CodeEditorWrapper implements DocumentRegistry.IReadyWidget {
   /**
    * Construct a new editor widget.
    */
@@ -47,11 +48,9 @@ class FileEditor extends CodeEditorWrapper implements DocumentRegistry.IReadyWid
     const editor = this.editor;
 
     this.addClass(EDITOR_CLASS);
-    this._mimeTypeService = options.mimeTypeService;
+
     editor.model.value.text = context.model.toString();
-    context.pathChanged.connect(this._onPathChanged, this);
     context.ready.then(() => { this._onContextReady(); });
-    this._onPathChanged();
 
     if (context.model.modelDB.isCollaborative) {
       let modelDB = context.model.modelDB;
@@ -151,17 +150,6 @@ class FileEditor extends CodeEditorWrapper implements DocumentRegistry.IReadyWid
   }
 
   /**
-   * Handle a change to the path.
-   */
-  private _onPathChanged(): void {
-    const editor = this.editor;
-    const path = this._context.path;
-
-    editor.model.mimeType = this._mimeTypeService.getMimeTypeByFilePath(path);
-    this.title.label = PathExt.basename(path.split(':').pop()!);
-  }
-
-  /**
    * Handle a change to the collaborators on the model
    * by updating UI elements associated with them.
    */
@@ -180,8 +168,72 @@ class FileEditor extends CodeEditorWrapper implements DocumentRegistry.IReadyWid
   }
 
   protected _context: DocumentRegistry.Context;
-  private _mimeTypeService: IEditorMimeTypeService;
   private _ready = new PromiseDelegate<void>();
+}
+
+
+/**
+ * A document widget for editors.
+ */
+export
+class FileEditor extends Widget implements DocumentRegistry.IReadyWidget {
+  /**
+   * Construct a new editor widget.
+   */
+  constructor(options: FileEditor.IOptions) {
+    super();
+
+    const context = this._context = options.context;
+    this._mimeTypeService = options.mimeTypeService;
+
+    let editorWidget = this.editorWidget = new FileEditorInner(options);
+    this.editor = editorWidget.editor;
+    this.model = editorWidget.model;
+
+    context.pathChanged.connect(this._onPathChanged, this);
+    this._onPathChanged();
+
+
+    let layout = this.layout = new BoxLayout();
+    let toolbar = new Widget();
+    toolbar.addClass('jp-Toolbar');
+
+    layout.addWidget(toolbar);
+    BoxLayout.setStretch(toolbar, 0);
+    layout.addWidget(editorWidget);
+    BoxLayout.setStretch(editorWidget, 1);
+  }
+
+  /**
+   * Get the context for the editor widget.
+   */
+  get context(): DocumentRegistry.Context {
+    return this.editorWidget.context;
+  }
+
+  /**
+   * A promise that resolves when the file editor is ready.
+   */
+  get ready(): Promise<void> {
+    return this.editorWidget.ready;
+  }
+
+  /**
+   * Handle a change to the path.
+   */
+  private _onPathChanged(): void {
+    const editor = this.editor;
+    const path = this._context.path;
+
+    editor.model.mimeType = this._mimeTypeService.getMimeTypeByFilePath(path);
+    this.title.label = PathExt.basename(path.split(':').pop()!);
+  }
+
+  private editorWidget: FileEditorInner;
+  public model: CodeEditor.IModel;
+  public editor: CodeEditor.IEditor;
+  protected _context: DocumentRegistry.Context;
+  private _mimeTypeService: IEditorMimeTypeService;
 }
 
 
