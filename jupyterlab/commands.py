@@ -839,8 +839,7 @@ def _toggle_extension(extension, value, app_dir=None, logger=None):
     """Enable or disable a lab extension.
     """
     app_dir = get_app_dir(app_dir)
-    extensions = _get_extensions(app_dir)
-    config = _get_build_config(app_dir)
+    config = _get_page_config(app_dir)
     disabled = config.get('disabledExtensions', [])
     if value and extension not in disabled:
         disabled.append(extension)
@@ -848,7 +847,6 @@ def _toggle_extension(extension, value, app_dir=None, logger=None):
         disabled.remove(extension)
     config['disabledExtensions'] = disabled
     _write_page_config(config, app_dir, logger=logger)
-
 
 
 def _write_build_config(config, app_dir, logger):
