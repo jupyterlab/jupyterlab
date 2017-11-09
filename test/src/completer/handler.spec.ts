@@ -4,14 +4,6 @@
 import expect = require('expect.js');
 
 import {
-  toArray
-} from '@phosphor/algorithm';
-
-import {
-  KernelMessage
-} from '@jupyterlab/services';
-
-import {
   IClientSession
 } from '@jupyterlab/apputils';
 
