@@ -34,7 +34,7 @@ const EDITOR_CLASS = 'jp-FileEditor';
 
 
 export
-class FileEditorInner extends CodeEditorWrapper implements DocumentRegistry.IReadyWidget {
+class FileEditorCodeWrapper extends CodeEditorWrapper {
   /**
    * Construct a new editor widget.
    */
@@ -186,7 +186,7 @@ class FileEditor extends Widget implements DocumentRegistry.IReadyWidget {
     const context = this._context = options.context;
     this._mimeTypeService = options.mimeTypeService;
 
-    let editorWidget = this.editorWidget = new FileEditorInner(options);
+    let editorWidget = this.editorWidget = new FileEditorCodeWrapper(options);
     this.editor = editorWidget.editor;
     this.model = editorWidget.model;
 
@@ -229,7 +229,7 @@ class FileEditor extends Widget implements DocumentRegistry.IReadyWidget {
     this.title.label = PathExt.basename(path.split(':').pop()!);
   }
 
-  private editorWidget: FileEditorInner;
+  private editorWidget: FileEditorCodeWrapper;
   public model: CodeEditor.IModel;
   public editor: CodeEditor.IEditor;
   protected _context: DocumentRegistry.Context;
