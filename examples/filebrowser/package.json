@@ -7,7 +7,7 @@
     "clean": "rimraf build"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^0.12.1",
+    "@jupyterlab/apputils": "^0.12.2",
     "@jupyterlab/codemirror": "^0.12.0",
     "@jupyterlab/docmanager": "^0.12.0",
     "@jupyterlab/docregistry": "^0.12.0",
