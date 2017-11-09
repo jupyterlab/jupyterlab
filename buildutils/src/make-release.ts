@@ -20,6 +20,7 @@ utils.run('npm run build:prod');
 let data = utils.readJSONFile('./package.json');
 data['scripts']['build'] = 'webpack';
 data['scripts']['watch'] = 'webpack --watch';
+data['scripts']['build:prod'] = "webpack --define process.env.NODE_ENV=\"'production'\"";
 data['jupyterlab']['outputDir'] = '..';
 data['jupyterlab']['linkedPackages'] = {};
 utils.ensurePackageData(data, './package.app.json');
