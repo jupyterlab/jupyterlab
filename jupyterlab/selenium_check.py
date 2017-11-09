@@ -3,15 +3,14 @@
 from __future__ import print_function, absolute_import
 
 from hashlib import sha256
-from io import StringIO
 import json
 import os
 import platform
-import stat
 import sys
 import tarfile
 import time
 import threading
+import zipfile
 
 from tornado import ioloop
 from tornado.httpclient import HTTPClient
@@ -30,10 +29,10 @@ GECKO_SHA = dict(
     Darwin='d914e96aa88d5950c65aa2b5d6ca0976e15bbbe20d788dde3bf3906b633bd675',
     Windows='b1c180842aa127686b93b4bf8570790c26a13dcb4c703a073404e0918de42090'
 )
-GECKO_URL_NAME = dict(
-    Linux='linux64',
-    Darwin='macos',
-    Windows='win64'
+GECKO_TAR_NAME = dict(
+    Linux='linux64.tar.gz',
+    Darwin='macos.tar.gz',
+    Windows='win64.zip'
 )
 
 
@@ -50,10 +49,10 @@ def ensure_geckodriver(log):
         return
 
     sha = GECKO_SHA[system]
-    name = GECKO_URL_NAME[system]
+    name = GECKO_TAR_NAME[system]
 
     url = ('https://github.com/mozilla/geckodriver/releases/'
-           'download/v%s/geckodriver-v%s-%s.tar.gz'
+           'download/v%s/geckodriver-v%s-%s'
            % (GECKO_VERSION, GECKO_VERSION, name))
 
     log.info('Downloading geckodriver v(%s) from: %s' % (GECKO_VERSION, url))
@@ -71,7 +70,10 @@ def ensure_geckodriver(log):
 
     log.info('Writing %s...', GECKO_PATH)
 
-    fid = tarfile.open(mode='r|gz', fileobj=response.buffer)
+    if system == 'Windows':
+        fid = zipfile.ZipFile(response.buffer)
+    else:
+        fid = tarfile.open(mode='r|gz', fileobj=response.buffer)
     fid.extractall(here)
     fid.close()
 
@@ -130,7 +132,10 @@ def run_selenium(url, log, callback):
         return
 
     log.info('Starting Firefox Driver')
-    driver = webdriver.Firefox(executable_path=GECKO_PATH)
+    executable = GECKO_PATH
+    if os.name == 'nt':
+        executable += '.exe'
+    driver = webdriver.Firefox(executable_path=executable)
 
     log.info('Navigating to page: %s' % url)
     driver.get(url)
