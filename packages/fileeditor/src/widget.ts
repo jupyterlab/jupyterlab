@@ -33,6 +33,9 @@ const DIRTY_CLASS = 'jp-mod-dirty';
 const EDITOR_CLASS = 'jp-FileEditor';
 
 
+/**
+ * A code editor wrapper for the file editor.
+ */
 export
 class FileEditorCodeWrapper extends CodeEditorWrapper {
   /**
