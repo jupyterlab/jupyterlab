@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "webpack",
-    "build:prod": "node update-core.js && webpack --devtool source-map",
+    "build:prod": "webpack --define process.env.NODE_ENV=\"'production'\"",
     "build:static": "node make-release.js",
     "clean": "rimraf build",
     "watch": "webpack --watch"

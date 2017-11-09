@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "rimraf build && webpack",
-    "build:prod": "rimraf build && webpack --devtool source-map",
+    "build:prod": "rimraf build && webpack --define process.env.NODE_ENV=\"'production'\" --devtool source-map",
     "clean": "rimraf build",
     "watch": "webpack --watch"
   },

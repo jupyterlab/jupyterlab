@@ -599,11 +599,11 @@ def clean(app_dir=None):
             shutil.rmtree(target)
 
 
-def build(app_dir=None, name=None, version=None, logger=None):
+def build(app_dir=None, name=None, version=None, logger=None, command='build:prod'):
     """Build the JupyterLab application.
     """
     func = partial(build_async, app_dir=app_dir, name=name, version=version,
-                   logger=logger)
+                   logger=logger, command=command)
     return IOLoop.instance().run_sync(func)
 
 def is_disabled(name, disabled=[]):
@@ -615,7 +615,7 @@ def is_disabled(name, disabled=[]):
     return False
 
 @gen.coroutine
-def build_async(app_dir=None, name=None, version=None, logger=None, abort_callback=None):
+def build_async(app_dir=None, name=None, version=None, logger=None, abort_callback=None, command='build:prod'):
     """Build the JupyterLab application.
     """
     # Set up the build directory.
@@ -654,7 +654,7 @@ def build_async(app_dir=None, name=None, version=None, logger=None, abort_callba
 
     # Build the app.
     yield run([npm, 'run', 'clean'], cwd=staging, logger=logger, abort_callback= abort_callback)
-    yield run([npm, 'run', 'build'], cwd=staging, logger=logger, abort_callback= abort_callback)
+    yield run([npm, 'run', command], cwd=staging, logger=logger, abort_callback= abort_callback)
 
     # Move the app to the static dir.
     static = pjoin(app_dir, 'static')
