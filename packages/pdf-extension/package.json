@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/pdf-extension",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "JupyterLab - PDF Viewer",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -29,7 +29,7 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/rendermime-interfaces": "^0.4.1",
+    "@jupyterlab/rendermime-interfaces": "^0.4.2",
     "@phosphor/widgets": "^1.5.0"
   },
   "devDependencies": {

@@ -1,15 +1,15 @@
 {
   "name": "typescript-browser-with-output",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "private": true,
   "scripts": {
     "build": "tsc && webpack",
     "clean": "rimraf build"
   },
   "dependencies": {
-    "@jupyterlab/outputarea": "^0.11.1",
-    "@jupyterlab/rendermime": "^0.11.1",
-    "@jupyterlab/services": "^0.50.2",
+    "@jupyterlab/outputarea": "^0.12.0",
+    "@jupyterlab/rendermime": "^0.12.0",
+    "@jupyterlab/services": "^0.51.0",
     "es6-promise": "~4.1.1"
   },
   "devDependencies": {
