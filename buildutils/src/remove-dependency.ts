@@ -39,10 +39,9 @@ function handlePackage(packagePath: string): void {
   }
 
   // Update dependencies as appropriate.
-  if (name in data['dependencies']) {
-    delete data['dependencies'][name];
-  } else if (name in data['devDependencies']) {
-    delete data['devDependencies'][name];
+  for (let dtype in ['dependencies', 'devDependencies']) {
+    let deps = data[dtype] || {};
+    delete deps[name];
   }
 
   // Write the file back to disk.
