@@ -50,10 +50,11 @@ function handlePackage(packagePath: string): void {
   }
 
   // Update dependencies as appropriate.
-  if (name in data['dependencies']) {
-    data['dependencies'][name] = specifier;
-  } else if (name in data['devDependencies']) {
-    data['devDependencies'][name] = specifier;
+  for (let dtype in ['dependencies', 'devDependencies']) {
+    let deps = data[dtype] || {};
+    if (name in deps) {
+      deps[dtype] = specifier;
+    }
   }
 
   // Write the file back to disk.
