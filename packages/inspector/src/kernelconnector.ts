@@ -26,7 +26,7 @@ class KernelConnector extends DataConnector<InspectionHandler.IReply, void, Insp
   /**
    * Create a new kernel connector for inspection requests.
    *
-   * @param session - The client session used to make API requests.
+   * @param options - The instatiation options for the kernel connector.
    */
   constructor(options: KernelConnector.IOptions) {
     super();

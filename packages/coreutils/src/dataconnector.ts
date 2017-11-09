@@ -8,6 +8,12 @@ import {
 
 /**
  * An abstract class that adheres to the data connector interface.
+ *
+ * #### Notes
+ * The only abstract method in this class is the `fetch` method, which must be
+ * reimplemented by all subclasses. The `remove` and `save` methods have a
+ * default implementation that returns a promise that will always reject. This
+ * class is a convenience superclass for connectors that only need to `fetch`.
  */
 export
 abstract class DataConnector<T, U = T, V = string> implements IDataConnector<T, U, V> {
