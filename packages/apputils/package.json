@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/apputils",
-  "version": "0.12.2",
+  "version": "0.12.3",
   "description": "JupyterLab - Application Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
