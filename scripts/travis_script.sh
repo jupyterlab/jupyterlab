@@ -40,7 +40,6 @@ if [[ $GROUP == other ]]; then
     npm run integrity
 
     # Make sure we can successfully load the core app.
-    pip install selenium
     python -m jupyterlab.selenium_check --core-mode
 
     # Make sure we can run the built app.

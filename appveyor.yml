@@ -50,3 +50,4 @@ test_script:
   - 'npm run build'
   - 'npm run build:test'
   - 'npm test || npm test || npm test'
+  - 'python -m jupyterlab.selenium_check'
