@@ -75,8 +75,8 @@
     "@jupyterlab/tabmanager-extension": "^0.11.1",
     "@jupyterlab/terminal": "^0.11.1",
     "@jupyterlab/terminal-extension": "^0.11.1",
-    "@jupyterlab/theme-dark-extension": "^0.11.1",
-    "@jupyterlab/theme-light-extension": "^0.11.1",
+    "@jupyterlab/theme-dark-extension": "^0.11.3",
+    "@jupyterlab/theme-light-extension": "^0.11.3",
     "@jupyterlab/tooltip": "^0.11.1",
     "@jupyterlab/tooltip-extension": "^0.11.1",
     "@jupyterlab/vega2-extension": "^0.11.1"
