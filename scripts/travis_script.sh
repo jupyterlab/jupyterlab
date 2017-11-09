@@ -9,6 +9,8 @@ sh -e /etc/init.d/xvfb start || true
 
 export PATH="$HOME/miniconda/bin:$PATH"
 
+# Run integrity first we we see the message.
+npm run integrity
 
 if [[ $GROUP == tests ]]; then
 

@@ -44,8 +44,9 @@ build: off
 
 # to run your custom scripts instead of automatic tests
 test_script:
+  # Run integrity first we we see the message.
+  - 'npm run integrity'
   - 'py.test'
   - 'npm run build'
   - 'npm run build:test'
   - 'npm test || npm test || npm test'
-  - 'npm run integrity'
