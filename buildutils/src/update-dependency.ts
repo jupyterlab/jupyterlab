@@ -49,11 +49,14 @@ function handlePackage(packagePath: string): void {
     return;
   }
 
+  let deps = data['dependencies'] || {};
+  let devDeps = data['devDependencies'] || {};
+
   // Update dependencies as appropriate.
-  if (name in data['dependencies']) {
-    data['dependencies'][name] = specifier;
-  } else if (name in data['devDependencies']) {
-    data['devDependencies'][name] = specifier;
+  if (name in deps) {
+    deps[name] = specifier;
+  } else if (name in devDeps) {
+    devDeps[name] = specifier;
   }
 
   // Write the file back to disk.

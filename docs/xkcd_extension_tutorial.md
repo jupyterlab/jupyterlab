@@ -265,7 +265,7 @@ Build your extension again using `npm run build` (unless you are using
 
 ![Empty xkcd extension panel](xkcd_tutorial_empty.png)
 
-If your widget is not behaving, compare your code with the reference project state at the [01-show-a-panel tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.28-01-show-a-panel). Once you've got everything working properly, git commit your changes and carry on.
+If your widget is not behaving, compare your code with the reference project state at the [01-show-a-panel tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.29-01-show-a-panel). Once you've got everything working properly, git commit your changes and carry on.
 
 ```bash
 git add .
@@ -306,7 +306,7 @@ Rebuild your extension if necessary (`npm run build`), refresh your browser tab,
 
 Note that the comic is not centered in the panel nor does the panel scroll if the comic is larger than the panel area. Also note that the comic does not update no matter how many times you close and reopen the panel. You'll address both of these problems in the upcoming sections.
 
-If you don't see a comic at all, compare your code with the [02-show-a-comic tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.28-02-show-a-comic) in the reference project. When it's working, make another git commit.
+If you don't see a comic at all, compare your code with the [02-show-a-comic tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.29-02-show-a-comic) in the reference project. When it's working, make another git commit.
 
 ```bash
 git add .
@@ -378,7 +378,7 @@ sure you can scroll the panel over the entire area of the comic.
 
 ![Styled xkcd panel with attribution](xkcd_tutorial_complete.png)
 
-If anything is misbehaving, compare your code with the reference project [03-style-and-attribute tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.28-03-style-and-attribute). When everything is working as expected, make another commit.
+If anything is misbehaving, compare your code with the reference project [03-style-and-attribute tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.29-03-style-and-attribute). When everything is working as expected, make another commit.
 
 ```bash
 git add .
@@ -511,7 +511,7 @@ const extension: JupyterLabPlugin<void> = {
 
 Make sure you retain the `export default extension;` line in the file. Now build the extension again and refresh the JupyterLab browser tab. Run the *Random xkcd comic* command more than once without closing the panel. The comic should update each time you execute the command. Close the panel, run the command, and it should both reappear and show a new comic.
 
-If anything is amiss, compare your code with the [04-refactor-and-refresh tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.28-04-refactor-and-refresh) to debug. Once it's working properly, commit it.
+If anything is amiss, compare your code with the [04-refactor-and-refresh tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.29-04-refactor-and-refresh) to debug. Once it's working properly, commit it.
 
 ```bash
 git add .
@@ -624,7 +624,7 @@ const extension: JupyterLabPlugin<void> = {
 
 Rebuild your extension one last time and refresh your browser tab. Execute the *Random xkcd comic* command and validate that the panel appears with a comic in it. Refresh the browser tab again. You should see an xkcd panel appear immediately without running the command. Close the panel and refresh the browser tab. You should not see an xkcd tab after the refresh.
 
-Refer to the [05-restore-panel-state tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.28-05-restore-panel-state) if your extension is misbehaving. Make a commit when the state of your extension persists properly.
+Refer to the [05-restore-panel-state tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.29-05-restore-panel-state) if your extension is misbehaving. Make a commit when the state of your extension persists properly.
 
 ```bash
 git add .
@@ -656,7 +656,7 @@ Now run the following command to publish your package:
 npm publish --access=public
 ```
 
-Check that your package appears on the npm website. You can either search for it from the homepage or visit `https://www.npmjs.com/package/@your-username/jupyterlab_xkcd` directly. If it doesn't appear, make sure you've updated the package name properly in the `package.json` and run the npm command correctly. Compare your work with the state of the reference project at the [06-prepare-to-publish tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.28-06-prepare-to-publish) for further debugging.
+Check that your package appears on the npm website. You can either search for it from the homepage or visit `https://www.npmjs.com/package/@your-username/jupyterlab_xkcd` directly. If it doesn't appear, make sure you've updated the package name properly in the `package.json` and run the npm command correctly. Compare your work with the state of the reference project at the [06-prepare-to-publish tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.29-06-prepare-to-publish) for further debugging.
 
 ![Extension page on npmjs.com](xkcd_tutorial_npm.png)
 
