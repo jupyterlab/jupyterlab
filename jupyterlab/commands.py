@@ -599,11 +599,11 @@ def clean(app_dir=None):
             shutil.rmtree(target)
 
 
-def build(app_dir=None, name=None, version=None, logger=None):
+def build(app_dir=None, name=None, version=None, logger=None, command='build:prod'):
     """Build the JupyterLab application.
     """
     func = partial(build_async, app_dir=app_dir, name=name, version=version,
-                   logger=logger)
+                   logger=logger, command=command)
     return IOLoop.instance().run_sync(func)
 
 def is_disabled(name, disabled=[]):
@@ -615,7 +615,7 @@ def is_disabled(name, disabled=[]):
     return False
 
 @gen.coroutine
-def build_async(app_dir=None, name=None, version=None, logger=None, abort_callback=None):
+def build_async(app_dir=None, name=None, version=None, logger=None, abort_callback=None, command='build:prod'):
     """Build the JupyterLab application.
     """
     # Set up the build directory.
@@ -654,7 +654,7 @@ def build_async(app_dir=None, name=None, version=None, logger=None, abort_callba
 
     # Build the app.
     yield run([npm, 'run', 'clean'], cwd=staging, logger=logger, abort_callback= abort_callback)
-    yield run([npm, 'run', 'build'], cwd=staging, logger=logger, abort_callback= abort_callback)
+    yield run([npm, 'run', command], cwd=staging, logger=logger, abort_callback= abort_callback)
 
     # Move the app to the static dir.
     static = pjoin(app_dir, 'static')
@@ -839,8 +839,7 @@ def _toggle_extension(extension, value, app_dir=None, logger=None):
     """Enable or disable a lab extension.
     """
     app_dir = get_app_dir(app_dir)
-    extensions = _get_extensions(app_dir)
-    config = _get_build_config(app_dir)
+    config = _get_page_config(app_dir)
     disabled = config.get('disabledExtensions', [])
     if value and extension not in disabled:
         disabled.append(extension)
@@ -848,7 +847,6 @@ def _toggle_extension(extension, value, app_dir=None, logger=None):
         disabled.remove(extension)
     config['disabledExtensions'] = disabled
     _write_page_config(config, app_dir, logger=logger)
-
 
 
 def _write_build_config(config, app_dir, logger):

@@ -1,17 +1,17 @@
 {
   "name": "@jupyterlab/example-console",
-  "version": "0.11.1",
+  "version": "0.12.0",
   "private": true,
   "scripts": {
     "build": "tsc && webpack",
     "clean": "rimraf build"
   },
   "dependencies": {
-    "@jupyterlab/codemirror": "^0.11.3",
-    "@jupyterlab/console": "^0.11.1",
-    "@jupyterlab/rendermime": "^0.11.1",
-    "@jupyterlab/services": "^0.50.2",
-    "@jupyterlab/theme-light-extension": "^0.11.1",
+    "@jupyterlab/codemirror": "^0.12.0",
+    "@jupyterlab/console": "^0.12.0",
+    "@jupyterlab/rendermime": "^0.12.0",
+    "@jupyterlab/services": "^0.51.0",
+    "@jupyterlab/theme-light-extension": "^0.11.2",
     "@phosphor/commands": "^1.4.0",
     "@phosphor/widgets": "^1.5.0",
     "es6-promise": "~4.1.1"

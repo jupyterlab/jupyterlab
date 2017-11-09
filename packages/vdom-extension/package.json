@@ -1,0 +1,46 @@
+{
+  "name": "@jupyterlab/vdom-extension",
+  "version": "0.12.0",
+  "description": "JupyterLab - VDOM Renderer",
+  "homepage": "https://github.com/jupyterlab/jupyter-renderers",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyter-renderers/issues"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js",
+    "style/*"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyter-renderers.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "@jupyterlab/rendermime-interfaces": "^0.4.2",
+    "@nteract/transform-vdom": "^1.1.1",
+    "@phosphor/widgets": "^1.5.0",
+    "react": "~16.0.0",
+    "react-dom": "~16.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "~16.0.19",
+    "@types/react-dom": "~16.0.2",
+    "rimraf": "~2.6.2",
+    "typescript": "~2.4.2"
+  },
+  "jupyterlab": {
+    "mimeExtension": true
+  }
+}
