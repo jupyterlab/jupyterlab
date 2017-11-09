@@ -326,6 +326,7 @@ class TestExtension(TestCase):
         disable_extension('@jupyterlab/notebook-extension', app_dir)
         disabled = _get_disabled(app_dir)
         assert '@jupyterlab/notebook-extension' in disabled
+        assert '@jupyterlab/python-tests' in disabled
 
     def test_enable_extension(self):
         app_dir = self.tempdir()
