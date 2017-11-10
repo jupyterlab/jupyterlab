@@ -11,7 +11,7 @@ import {
 
 import {
   ConsolePanel
-} from './';
+} from './panel';
 
 
 /* tslint:disable */

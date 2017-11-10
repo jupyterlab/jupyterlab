@@ -3,8 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import '../style/settingeditor.css';
-
 import {
   ILayoutRestorer, JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
@@ -22,8 +20,8 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  SettingEditor
-} from './settingeditor';
+  ISettingEditorTracker, SettingEditor
+} from '@jupyterlab/settingeditor';
 
 
 /**
@@ -38,7 +36,7 @@ namespace CommandIDs {
 /**
  * The default setting editor extension.
  */
-const plugin: JupyterLabPlugin<void> = {
+const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
   id: '@jupyterlab/settingeditor-extension:plugin',
   activate: (app: JupyterLab, restorer: ILayoutRestorer, registry: ISettingRegistry, editorServices: IEditorServices, state: IStateDB) => {
     const { commands, shell } = app;
@@ -77,9 +75,12 @@ const plugin: JupyterLabPlugin<void> = {
       },
       label: 'Settings'
     });
+
+    return tracker;
   },
   requires: [ILayoutRestorer, ISettingRegistry, IEditorServices, IStateDB],
-  autoStart: true
+  autoStart: true,
+  provides: ISettingEditorTracker
 };
 
 export default plugin;
