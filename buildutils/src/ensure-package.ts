@@ -103,8 +103,7 @@ function ensurePackage(options: IEnsurePackageOptions): string[] {
     }
     if (names.indexOf(name) === -1) {
       let version = data.dependencies[name];
-      delete data.dependencies[name];
-      messages.push(`Removed dependency: ${name}@${version}`);
+      messages.push(`Unused dependency: ${name}@${version}: remove or add to list of known unused dependencies for this package`);
     }
   });
 

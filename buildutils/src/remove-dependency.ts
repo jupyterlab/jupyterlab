@@ -39,7 +39,7 @@ function handlePackage(packagePath: string): void {
   }
 
   // Update dependencies as appropriate.
-  for (let dtype in ['dependencies', 'devDependencies']) {
+  for (let dtype of ['dependencies', 'devDependencies']) {
     let deps = data[dtype] || {};
     delete deps[name];
   }
