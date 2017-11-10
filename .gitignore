@@ -5,6 +5,7 @@ lib
 jupyterlab/build
 jupyterlab/schemas
 jupyterlab/themes
+jupyterlab/geckodriver
 
 node_modules
 .cache
