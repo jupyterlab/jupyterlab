@@ -24,6 +24,10 @@ from .labapp import LabApp
 here = os.path.dirname(__file__)
 GECKO_PATH = os.path.join(here, 'geckodriver')
 GECKO_VERSION = '0.19.1'
+
+# Note: These were obtained by downloading the files from
+# https://github.com/mozilla/geckodriver/releases
+# and computing the sha using `shasum -a 256`
 GECKO_SHA = dict(
     Linux='7f55c4c89695fd1e6f8fc7372345acc1e2dbaa4a8003cee4bd282eed88145937',
     Darwin='d914e96aa88d5950c65aa2b5d6ca0976e15bbbe20d788dde3bf3906b633bd675',
