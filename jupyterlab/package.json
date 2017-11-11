@@ -6,6 +6,7 @@
     "build": "rimraf build && webpack",
     "build:prod": "rimraf build && webpack --define process.env.NODE_ENV=\"'production'\" --devtool source-map",
     "clean": "rimraf build",
+    "prepublishOnly": "npm run build",
     "watch": "webpack --watch"
   },
   "dependencies": {
