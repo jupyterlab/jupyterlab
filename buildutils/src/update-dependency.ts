@@ -60,3 +60,6 @@ function handlePackage(packagePath: string): void {
   // Write the file back to disk.
   utils.writePackageData(packagePath, data);
 }
+
+// Install to pick up the new package version.
+utils.run('npm install');

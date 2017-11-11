@@ -70,7 +70,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       options.contentFactory || NotebookModel.defaultContentFactory
     );
     this.contentFactory = factory.clone(this.modelDB.view('cells'));
-    this._cells = new CellList(this.modelDB, this.contentFactory);
+    this._cells = new CellList(this.contentFactory);
     // Add an initial code cell by default.
     if (!this._cells.length) {
       this._cells.push(factory.createCodeCell({}));

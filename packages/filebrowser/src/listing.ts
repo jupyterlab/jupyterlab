@@ -1760,11 +1760,10 @@ namespace Private {
   /**
    * Handle editing text on a node.
    *
-   * @returns Boolean indicating whether the name changed.
+   * @returns A promise that resolves with the new name.
    */
   export
   function doRename(text: HTMLElement, edit: HTMLInputElement): Promise<string> {
-    let changed = true;
     let parent = text.parentElement as HTMLElement;
     parent.replaceChild(edit, text);
     edit.focus();
@@ -1790,7 +1789,6 @@ namespace Private {
         case 27:  // Escape
           event.stopPropagation();
           event.preventDefault();
-          changed = false;
           edit.blur();
           break;
         case 38:  // Up arrow

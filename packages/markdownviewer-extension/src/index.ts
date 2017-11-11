@@ -20,7 +20,7 @@ import '../style/index.css';
  * The name of the factory that creates markdown widgets.
  */
 const FACTORY = 'Markdown Preview';
-
+console.log('hi hi hi')
 
 /**
  * The command IDs used by the document manager plugin.

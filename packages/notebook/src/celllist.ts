@@ -11,7 +11,7 @@ import {
 
 import {
   IObservableMap, ObservableMap, IObservableList,
-  IObservableUndoableList, IModelDB
+  IObservableUndoableList
 } from '@jupyterlab/coreutils';
 
 import {
@@ -31,10 +31,9 @@ class CellList implements IObservableUndoableList<ICellModel> {
   /**
    * Construct the cell list.
    */
-  constructor(modelDB: IModelDB, factory: NotebookModel.IContentFactory) {
-    this._modelDB = modelDB;
+  constructor(factory: NotebookModel.IContentFactory) {
     this._factory = factory;
-    this._cellOrder = modelDB.createList<string>('cellOrder');
+    this._cellOrder = factory.modelDB.createList<string>('cellOrder');
     this._cellMap = new ObservableMap<ICellModel>();
 
     this._cellOrder.changed.connect(this._onOrderChanged, this);
@@ -504,6 +503,5 @@ class CellList implements IObservableUndoableList<ICellModel> {
   private _cellOrder: IObservableUndoableList<string> = null;
   private _cellMap: IObservableMap<ICellModel> = null;
   private _changed = new Signal<this, IObservableList.IChangedArgs<ICellModel>>(this);
-  private _modelDB: IModelDB = null;
   private _factory: NotebookModel.IContentFactory = null;
 }

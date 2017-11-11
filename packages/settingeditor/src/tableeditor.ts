@@ -58,6 +58,7 @@ class TableEditor extends Widget {
     super({ node: document.createElement('fieldset') });
     this.addClass(TABLE_EDITOR_CLASS);
     this._onSaveError = options.onSaveError;
+    console.debug('unused onSaveError', this._onSaveError);
   }
 
   /**

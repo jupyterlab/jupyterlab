@@ -173,6 +173,9 @@ class Component extends React.Component<IProps, IState> {
   }
 }
 
+/**
+ * The theme colors used by the component.
+ */
 const theme = {
   scheme: 'jupyter',
   base00: '#fff',
@@ -193,34 +196,32 @@ const theme = {
   base0F: '#00f'
 };
 
+
+/**
+ * Test whether a JSON value includes a query string.
+ *
+ * @param data - The source data.
+ *
+ * @param query - The search query.
+ *
+ * @returns Whether the query was found.
+ */
 function objectIncludes(data: JSONValue, query: string): boolean {
   return JSON.stringify(data).includes(query);
 }
 
-function filterObject(data: JSONValue, query: string): JSONValue {
-  if (Array.isArray(data)) {
-    return data.reduce(
-      (result: JSONArray, item: JSONValue) => {
-        if (objectIncludes(item, query)) {
-          return [...result, filterObject(item, query)];
-        }
-        return result;
-      },
-      []
-    );
-  }
-  if (data && typeof data === 'object') {
-    return Object.keys(data).reduce((result: JSONObject, key: string) => {
-      let item = data[key];
-      if (key.includes(query) || objectIncludes(item, query)) {
-        result[key] = filterObject(item, query);
-      }
-      return result;
-    }, {});
-  }
-  return data;
-}
 
+/**
+ * Filter paths in a JSON value.
+ *
+ * @param data - The source data.
+ *
+ * @param query - The search query.
+ *
+ * @param parent - The path to the parent node in the tree.
+ *
+ * @returns An array of matching objects.
+ */
 function filterPaths(data: JSONValue, query: string, parent: JSONArray = ['root']): JSONArray {
   if (Array.isArray(data)) {
     return data.reduce(
