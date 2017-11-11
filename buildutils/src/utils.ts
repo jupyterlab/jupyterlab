@@ -16,7 +16,9 @@ function getLernaPaths(): string[] {
   for (let config of lernaConfig.packages) {
     paths = paths.concat(glob.sync(path.join(basePath, config)));
   }
-  return paths;
+  return paths.filter(pkgPath => {
+    return fs.existsSync(path.join(pkgPath, 'package.json'));
+  });
 }
 
 
@@ -40,7 +42,7 @@ function getCorePaths(): string[] {
  * @returns Whether the file has changed.
  */
 export
-function ensurePackageData(data: any, pkgJsonPath: string): boolean {
+function writePackageData(pkgJsonPath: string, data: any): boolean {
   let text = JSON.stringify(sortPackageJson(data), null, 2) + '\n';
   let orig = fs.readFileSync(pkgJsonPath, 'utf8').split('\r\n').join('\n');
   if (text !== orig) {
