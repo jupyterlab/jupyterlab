@@ -24,7 +24,7 @@
     "install": "lerna bootstrap --hoist && npm run build:utils",
     "integrity": "node buildutils/lib/ensure-repo.js",
     "patch:release": "node buildutils/lib/patch-release.js",
-    "publish": "npm run clean:slate && lerna publish --force-publish=* -m \"Publish\"",
+    "publish": "git clean -dfx && npm install && lerna publish --force-publish=* -m \"Publish\"",
     "remove:dependency": "node buildutils/lib/remove-dependency.js",
     "remove:package": "node buildutils/lib/remove-package.js",
     "test": "cd test && npm test",
