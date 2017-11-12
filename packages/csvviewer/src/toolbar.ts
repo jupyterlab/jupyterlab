@@ -25,6 +25,7 @@ import {
 /**
  * The supported parsing delimiters.
  */
+export
 const DELIMITERS = [',', ';', '\t'];
 
 /**
@@ -71,6 +72,21 @@ class CSVToolbar extends Widget {
    */
   get selectNode(): HTMLSelectElement {
     return this.node.getElementsByTagName('select')![0];
+  }
+
+  /**
+   * Use the given delimiter in the toolbar.
+   *
+   * @param delim - The delimiter to use.
+   *
+   * #### Notes
+   * If the delimiter given is not supported, it silently fails.
+   */
+  selectValue(delim: string) {
+    if (DELIMITERS.indexOf(delim) != -1) {
+      this.node.getElementsByTagName('select').value = delim;
+      this._delimiterChanged.emit(this.selectNode.value);
+    }
   }
 
   /**
