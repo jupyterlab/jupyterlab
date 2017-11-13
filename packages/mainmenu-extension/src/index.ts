@@ -41,7 +41,7 @@ namespace CommandIDs {
 /**
  * A service providing an interface to the main menu.
  */
-const menu: JupyterLabPlugin<IMainMenu> = {
+const menuPlugin: JupyterLabPlugin<IMainMenu> = {
   id: '@jupyterlab/apputils-extension:menu',
   provides: IMainMenu,
   activate: (app: JupyterLab): IMainMenu => {
@@ -157,7 +157,7 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
   commands.addCommand(CommandIDs.lineNumbering, {
     isEnabled: () => {
       const viewer = menu.findEditorViewer(app.shell.currentWidget);
-      return !!user && !!viewer.toggleLineNumbers;
+      return !!viewer && !!viewer.toggleLineNumbers;
     },
     execute: () => {
       const widget = app.shell.currentWidget;
@@ -166,6 +166,36 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
         return Promise.resolve(void 0);
       }
       return viewer.toggleLineNumbers(widget);
+    }
+  });
+
+  commands.addCommand(CommandIDs.matchBrackets, {
+    isEnabled: () => {
+      const viewer = menu.findEditorViewer(app.shell.currentWidget);
+      return !!viewer && !!viewer.toggleMatchBrackets;
+    },
+    execute: () => {
+      const widget = app.shell.currentWidget;
+      const viewer = menu.findEditorViewer(widget);
+      if (!viewer) {
+        return Promise.resolve(void 0);
+      }
+      return viewer.toggleMatchBrackets(widget);
+    }
+  });
+
+  commands.addCommand(CommandIDs.wordWrap, {
+    isEnabled: () => {
+      const viewer = menu.findEditorViewer(app.shell.currentWidget);
+      return !!viewer && !!viewer.toggleWordWrap;
+    },
+    execute: () => {
+      const widget = app.shell.currentWidget;
+      const viewer = menu.findEditorViewer(widget);
+      if (!viewer) {
+        return Promise.resolve(void 0);
+      }
+      return viewer.toggleWordWrap(widget);
     }
   });
 
@@ -180,4 +210,4 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
   });
 }
 
-export default menu;
+export default menuPlugin;
