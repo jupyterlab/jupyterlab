@@ -313,9 +313,6 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     menu.addItem({ type: 'submenu', submenu: modeMenu });
     menu.addItem({ type: 'submenu', submenu: tabMenu });
     menu.addItem({ type: 'separator' });
-    menu.addItem({ command: 'fileeditor:toggle-line-numbers' });
-    menu.addItem({ command: 'fileeditor:toggle-line-wrap' });
-    menu.addItem({ command: 'fileeditor:toggle-match-brackets' });
     menu.addItem({ command: 'fileeditor:toggle-autoclosing-brackets' });
     menu.addItem({ type: 'submenu', submenu: keyMapMenu });
     menu.addItem({ type: 'submenu', submenu: themeMenu });

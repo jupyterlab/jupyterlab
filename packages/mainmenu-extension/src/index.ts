@@ -155,6 +155,7 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
   const commands = menu.commands;
 
   commands.addCommand(CommandIDs.lineNumbering, {
+    label: 'Line Numbers',
     isEnabled: () => {
       const viewer = menu.findEditorViewer(app.shell.currentWidget);
       return !!viewer && !!viewer.toggleLineNumbers;
@@ -170,6 +171,7 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
   });
 
   commands.addCommand(CommandIDs.matchBrackets, {
+    label: 'Match Brackets',
     isEnabled: () => {
       const viewer = menu.findEditorViewer(app.shell.currentWidget);
       return !!viewer && !!viewer.toggleMatchBrackets;
@@ -185,6 +187,7 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
   });
 
   commands.addCommand(CommandIDs.wordWrap, {
+    label: 'Word Wrap',
     isEnabled: () => {
       const viewer = menu.findEditorViewer(app.shell.currentWidget);
       return !!viewer && !!viewer.toggleWordWrap;

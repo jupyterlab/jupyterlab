@@ -393,12 +393,27 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
     });
   }
 
-  // Add new text file creation to the file menu.
   if (menu) {
+    // Add new text file creation to the file menu.
     menu.fileMenu.newMenu.addItem({ command: CommandIDs.createNew });
+
+    // Add editor view options.
+    menu.viewMenu.addEditorViewer<FileEditor>({
+      tracker,
+      toggleLineNumbers: widget => {
+        const lineNumbers = !widget.editor.getOption('lineNumbers');
+        widget.editor.setOption('lineNumbers', lineNumbers);
+      },
+      toggleWordWrap: widget => {
+        const wordWrap = !widget.editor.getOption('lineWrap');
+        widget.editor.setOption('lineWrap', wordWrap);
+      },
+      toggleMatchBrackets: widget => {
+        const matchBrackets = !widget.editor.getOption('matchBrackets');
+        widget.editor.setOption('matchBrackets', matchBrackets);
+      }
+    });
   }
-
-
 
   app.contextMenu.addItem({
     command: CommandIDs.createConsole, selector: '.jp-FileEditor'
