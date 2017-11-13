@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/console';
 
 import {
-  IInspector, InspectorPanel, InspectionHandler, KernelConnector
+  IInspector, InspectionHandler, InspectorPanel, KernelConnector
 } from '@jupyterlab/inspector';
 
 import {
@@ -151,7 +151,10 @@ const consoles: JupyterLabPlugin<void> = {
       }
     });
 
-    app.contextMenu.addItem({command: CommandIDs.open, selector: '.jp-CodeConsole'});
+    app.contextMenu.addItem({
+      command: CommandIDs.open,
+      selector: '.jp-CodeConsole'
+    });
   }
 };
 
@@ -204,7 +207,10 @@ const notebooks: JupyterLabPlugin<void> = {
       }
     });
 
-    app.contextMenu.addItem({command: CommandIDs.open, selector: '.jp-NotebookPanel'});
+    app.contextMenu.addItem({
+      command: CommandIDs.open,
+      selector: '.jp-NotebookPanel'
+    });
   }
 };
 

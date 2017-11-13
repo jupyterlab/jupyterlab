@@ -16,8 +16,16 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  ISettingRegistry, IStateDB
+  ISettingRegistry, IStateDB, DataConnector
 } from '@jupyterlab/coreutils';
+
+import {
+  IInspector, InspectionHandler
+} from '@jupyterlab/inspector';
+
+import {
+  RenderMime, defaultRendererFactories
+} from '@jupyterlab/rendermime';
 
 import {
   ISettingEditorTracker, SettingEditor
@@ -33,17 +41,26 @@ namespace CommandIDs {
 }
 
 
+class InspectionConnector extends DataConnector<InspectionHandler.IReply, void, InspectionHandler.IRequest> {
+  fetch(request: InspectionHandler.IRequest): Promise<InspectionHandler.IReply> {
+    return Promise.reject('inspection connector fetch is not implemented');
+  }
+}
+
 /**
  * The default setting editor extension.
  */
 const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
   id: '@jupyterlab/settingeditor-extension:plugin',
-  activate: (app: JupyterLab, restorer: ILayoutRestorer, registry: ISettingRegistry, editorServices: IEditorServices, state: IStateDB) => {
+  activate: (app: JupyterLab, restorer: ILayoutRestorer, registry: ISettingRegistry, editorServices: IEditorServices, state: IStateDB, inspector: IInspector) => {
     const { commands, shell } = app;
     const namespace = 'setting-editor';
     const factoryService = editorServices.factoryService;
     const editorFactory = factoryService.newInlineEditor.bind(factoryService);
     const tracker = new InstanceTracker<SettingEditor>({ namespace });
+
+    let handler: InspectionHandler;
+    let editor: SettingEditor;
 
     // Handle state restoration.
     restorer.restore(tracker, {
@@ -61,7 +78,8 @@ const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
 
         const key = plugin.id;
         const when = app.restored;
-        const editor = new SettingEditor({
+
+        editor = new SettingEditor({
           editorFactory, key, registry, state, when
         });
 
@@ -76,9 +94,48 @@ const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
       label: 'Settings'
     });
 
+    // Create an inspection handler for each setting editor that is created.
+    if (inspector) {
+      const rendermime = new RenderMime({
+        initialFactories: defaultRendererFactories
+      });
+
+      tracker.widgetAdded.connect((sender, parent) => {
+        const connector = new InspectionConnector();
+
+        handler = new InspectionHandler({ connector, rendermime });
+        handler.editor = undefined;
+
+        // Listen for parent disposal.
+        parent.disposed.connect(() => {
+          if (handler) {
+            handler.dispose();
+            handler = null;
+          }
+          if (editor) {
+            editor = null;
+          }
+        });
+      });
+
+      // Keep track of setting editors and set inspector source.
+      app.shell.currentChanged.connect((sender, args) => {
+        const widget = args.newValue;
+        if (!widget || !tracker.has(widget)) {
+          return;
+        }
+
+        if (handler) {
+          inspector.source = handler;
+        }
+      });
+
+    }
+
     return tracker;
   },
   requires: [ILayoutRestorer, ISettingRegistry, IEditorServices, IStateDB],
+  optional: [IInspector],
   autoStart: true,
   provides: ISettingEditorTracker
 };
