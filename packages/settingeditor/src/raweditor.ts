@@ -92,8 +92,7 @@ class RawEditor extends SplitPanel {
    * Tests whether the settings have been modified and need saving.
    */
   get isDirty(): boolean {
-    console.log('raw editor `isDirty` is not implemented.');
-    return false;
+    return this._user.editor.model.value.text !== this._settings.raw;
   }
 
   /**
