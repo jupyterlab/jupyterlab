@@ -706,7 +706,7 @@ namespace NotebookActions {
   }
 
   /**
-   * Toggle line numbers on the selected cell(s).
+   * Toggle match-brackets of all cells.
    *
    * @param widget - The target notebook widget.
    *
@@ -715,16 +715,14 @@ namespace NotebookActions {
    * The `mode` of the widget will be preserved.
    */
   export
-  function toggleLineNumbers(widget: Notebook): void {
+  function toggleAllMatchBrackets(widget: Notebook): void {
     if (!widget.model || !widget.activeCell) {
       return;
     }
     let state = Private.getState(widget);
-    let lineNumbers = widget.activeCell.editor.getOption('lineNumbers');
+    let matchBrackets = widget.activeCell.editor.getOption('matchBrackets');
     each(widget.widgets, child => {
-      if (widget.isSelected(child)) {
-        child.editor.setOption('lineNumbers', !lineNumbers);
-      }
+      child.editor.setOption('matchBrackets', !matchBrackets);
     });
     Private.handleState(widget, state);
   }

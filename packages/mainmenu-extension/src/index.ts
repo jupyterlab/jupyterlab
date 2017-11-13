@@ -163,7 +163,9 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
     isToggled: () => {
       const widget = app.shell.currentWidget;
       const viewer = menu.findEditorViewer(widget);
-      return !!viewer && !!viewer.lineNumbersToggled(widget);
+      return !!viewer &&
+             !!viewer.lineNumbersToggled &&
+             !!viewer.lineNumbersToggled(widget);
     },
     execute: () => {
       const widget = app.shell.currentWidget;
@@ -184,7 +186,9 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
     isToggled: () => {
       const widget = app.shell.currentWidget;
       const viewer = menu.findEditorViewer(widget);
-      return !!viewer && !!viewer.matchBracketsToggled(widget);
+      return !!viewer &&
+             !!viewer.matchBracketsToggled &&
+             !!viewer.matchBracketsToggled(widget);
     },
     execute: () => {
       const widget = app.shell.currentWidget;
@@ -205,7 +209,9 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
     isToggled: () => {
       const widget = app.shell.currentWidget;
       const viewer = menu.findEditorViewer(widget);
-      return !!viewer && !!viewer.wordWrapToggled(widget);
+      return !!viewer &&
+             !!viewer.wordWrapToggled &&
+             !!viewer.wordWrapToggled(widget);
     },
     execute: () => {
       const widget = app.shell.currentWidget;

@@ -168,9 +168,6 @@ namespace CommandIDs {
   const commandMode = 'notebook:enter-command-mode';
 
   export
-  const toggleLines = 'notebook:toggle-cell-line-numbers';
-
-  export
   const toggleAllLines = 'notebook:toggle-all-cell-line-numbers';
 
   export
@@ -473,6 +470,21 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
     CommandIDs.showAllOutputs
   ].map(command => { return { command }; });
   mainMenu.viewMenu.addGroup(viewGroup);
+
+  // Add an IEditorViewer to the application view menu
+  mainMenu.viewMenu.addEditorViewer<NotebookPanel>({
+    tracker,
+    toggleLineNumbers: widget => {
+      NotebookActions.toggleAllLineNumbers(widget.notebook);
+    },
+    toggleMatchBrackets: widget => {
+      NotebookActions.toggleAllMatchBrackets(widget.notebook);
+    },
+    lineNumbersToggled: widget =>
+      widget.notebook.activeCell.editor.getOption('lineNumbers'),
+    matchBracketsToggled: widget =>
+      widget.notebook.activeCell.editor.getOption('matchBrackets'),
+  });
 
   // Add commands to the application edit menu.
   const editGroup = [
@@ -976,17 +988,6 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     },
     isEnabled: hasWidget
   });
-  commands.addCommand(CommandIDs.toggleLines, {
-    label: 'Toggle Line Numbers',
-    execute: args => {
-      const current = getCurrent(args);
-
-      if (current) {
-        return NotebookActions.toggleLineNumbers(current.notebook);
-      }
-    },
-    isEnabled: hasWidget
-  });
   commands.addCommand(CommandIDs.toggleAllLines, {
     label: 'Toggle All Line Numbers',
     execute: args => {
@@ -1318,7 +1319,6 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.extendBelow,
     CommandIDs.moveDown,
     CommandIDs.moveUp,
-    CommandIDs.toggleLines,
     CommandIDs.undo,
     CommandIDs.redo,
     CommandIDs.markdown1,
@@ -1349,8 +1349,6 @@ function createMenu(app: JupyterLab): Menu {
   let exportTo = new Menu({ commands } );
 
   menu.title.label = 'Notebook';
-  settings.title.label = 'Settings';
-  settings.addItem({ command: CommandIDs.toggleAllLines });
 
   exportTo.title.label = 'Export to ...';
   EXPORT_TO_FORMATS.forEach(exportToFormat => {
