@@ -810,17 +810,17 @@ class DirListing extends Widget {
       }
     }
 
-    // Check for clearing a context menu.
-    let newContext = (IS_MAC && event.ctrlKey) || (event.button === 2);
-    if (newContext) {
-      return;
-    }
-
     let index = Private.hitTestNodes(this._items, event.clientX, event.clientY);
     if (index === -1) {
       return;
     }
     this._handleFileSelect(event);
+
+    // Check for clearing a context menu.
+    let newContext = (IS_MAC && event.ctrlKey) || (event.button === 2);
+    if (newContext) {
+      return;
+    }
 
     // Left mouse press for drag start.
     if (event.button === 0) {
