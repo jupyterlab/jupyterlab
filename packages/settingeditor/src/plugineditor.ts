@@ -102,6 +102,13 @@ class PluginEditor extends Widget {
   }
 
   /**
+   * The inspectable raw editor source.
+   */
+  get source(): CodeEditor.IEditor {
+    return this._rawEditor.source;
+  }
+
+  /**
    * The plugin editor layout state.
    */
   get state(): SettingEditor.IPluginLayout {

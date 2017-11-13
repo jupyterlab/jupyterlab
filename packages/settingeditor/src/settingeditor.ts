@@ -155,6 +155,13 @@ class SettingEditor extends Widget {
   readonly state: IStateDB;
 
   /**
+   * The inspectable raw user editor source.
+   */
+  get source(): CodeEditor.IEditor {
+    return this._editor.source;
+  }
+
+  /**
    * Dispose of the resources held by the setting editor.
    */
   dispose(): void {

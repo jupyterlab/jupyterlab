@@ -145,6 +145,13 @@ class RawEditor extends SplitPanel {
   }
 
   /**
+   * The inspectable source editor for user input.
+   */
+  get source(): CodeEditor.IEditor {
+    return this._user.editor;
+  }
+
+  /**
    * Dispose of the resources held by the raw editor.
    */
   dispose(): void {

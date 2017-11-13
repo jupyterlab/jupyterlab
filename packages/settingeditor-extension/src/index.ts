@@ -104,7 +104,7 @@ const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
         const connector = new InspectionConnector();
 
         handler = new InspectionHandler({ connector, rendermime });
-        handler.editor = undefined;
+        handler.editor = parent.source;
 
         // Listen for parent disposal.
         parent.disposed.connect(() => {
