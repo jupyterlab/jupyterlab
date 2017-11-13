@@ -206,7 +206,7 @@ class InspectorPanel extends TabPanel implements IInspector {
     }
 
     // Clear the inspector child items (but maintain history) if necessary.
-    Object.keys(this._items).forEach(i => this._items[i].content = null);
+    Object.keys(this._items).forEach(i => { this._items[i].content = null; });
 
     this._source = source;
 
