@@ -160,6 +160,11 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
       const viewer = menu.findEditorViewer(app.shell.currentWidget);
       return !!viewer && !!viewer.toggleLineNumbers;
     },
+    isToggled: () => {
+      const widget = app.shell.currentWidget;
+      const viewer = menu.findEditorViewer(widget);
+      return !!viewer && !!viewer.lineNumbersToggled(widget);
+    },
     execute: () => {
       const widget = app.shell.currentWidget;
       const viewer = menu.findEditorViewer(widget);
@@ -176,6 +181,11 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
       const viewer = menu.findEditorViewer(app.shell.currentWidget);
       return !!viewer && !!viewer.toggleMatchBrackets;
     },
+    isToggled: () => {
+      const widget = app.shell.currentWidget;
+      const viewer = menu.findEditorViewer(widget);
+      return !!viewer && !!viewer.matchBracketsToggled(widget);
+    },
     execute: () => {
       const widget = app.shell.currentWidget;
       const viewer = menu.findEditorViewer(widget);
@@ -191,6 +201,11 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
     isEnabled: () => {
       const viewer = menu.findEditorViewer(app.shell.currentWidget);
       return !!viewer && !!viewer.toggleWordWrap;
+    },
+    isToggled: () => {
+      const widget = app.shell.currentWidget;
+      const viewer = menu.findEditorViewer(widget);
+      return !!viewer && !!viewer.wordWrapToggled(widget);
     },
     execute: () => {
       const widget = app.shell.currentWidget;
@@ -211,6 +226,8 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
     menu.addItem({ command });
     menu.startIndex++;
   });
+  menu.addItem({ type: 'separator' });
+  menu.startIndex++;
 }
 
 export default menuPlugin;

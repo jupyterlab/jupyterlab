@@ -411,7 +411,10 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
       toggleMatchBrackets: widget => {
         const matchBrackets = !widget.editor.getOption('matchBrackets');
         widget.editor.setOption('matchBrackets', matchBrackets);
-      }
+      },
+      lineNumbersToggled: widget => widget.editor.getOption('lineNumbers'),
+      wordWrapToggled: widget => widget.editor.getOption('lineWrap'),
+      matchBracketsToggled: widget => widget.editor.getOption('matchBrackets')
     });
   }
 
