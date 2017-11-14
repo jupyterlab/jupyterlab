@@ -26,6 +26,10 @@ flags['no-build'] = (
     {'BaseExtensionApp': {'should_build': False}},
     "Defer building the app after the action."
 )
+flags['clean'] = (
+    {'BaseExtensionApp': {'should_clean': True}},
+    "Cleanup intermediate files after the action."
+)
 
 aliases = dict(base_aliases)
 aliases['app-dir'] = 'BaseExtensionApp.app_dir'
@@ -48,6 +52,9 @@ class BaseExtensionApp(JupyterApp):
     should_build = Bool(False, config=True,
         help="Whether to build the app after the action")
 
+    should_clean = Bool(False, config=True,
+        help="Whether temporary files should be cleaned up after building jupyterlab")
+
     def _log_format_default(self):
         """A default format for messages"""
         return "%(message)s"
@@ -64,7 +71,7 @@ class InstallLabExtensionApp(BaseExtensionApp):
          for arg in self.extra_args]
         if self.should_build:
             try:
-                build(self.app_dir, logger=self.log)
+                build(self.app_dir, clean_staging=self.should_clean, logger=self.log)
             except Exception as e:
                 for arg in self.extra_args:
                     uninstall_extension(arg, self.app_dir, logger=self.log)
@@ -89,7 +96,7 @@ class LinkLabExtensionApp(BaseExtensionApp):
          for arg in self.extra_args]
         if self.should_build:
             try:
-                build(self.app_dir, logger=self.log)
+                build(self.app_dir, clean_staging=self.should_clean, logger=self.log)
             except Exception as e:
                 for arg in self.extra_args:
                     unlink_package(arg, self.app_dir, logger=self.log)
@@ -106,7 +113,7 @@ class UnlinkLabExtensionApp(BaseExtensionApp):
         ans = any([unlink_package(arg, self.app_dir, logger=self.log)
                    for arg in self.extra_args])
         if ans and self.should_build:
-            build(self.app_dir, logger=self.log)
+            build(self.app_dir, clean_staging=self.should_clean, logger=self.log)
 
 
 class UninstallLabExtensionApp(BaseExtensionApp):
@@ -119,7 +126,7 @@ class UninstallLabExtensionApp(BaseExtensionApp):
         ans = any([uninstall_extension(arg, self.app_dir, logger=self.log)
                    for arg in self.extra_args])
         if ans and self.should_build:
-            build(self.app_dir, logger=self.log)
+            build(self.app_dir, clean_staging=self.should_clean, logger=self.log)
 
 
 class ListLabExtensionsApp(BaseExtensionApp):
@@ -166,7 +173,7 @@ class LabExtensionApp(JupyterApp):
         link=(LinkLabExtensionApp, "Link labextension(s)"),
         unlink=(UnlinkLabExtensionApp, "Unlink labextension(s)"),
         enable=(EnableLabExtensionsApp, "Enable labextension(s)"),
-        disable=(DisableLabExtensionsApp, "Disable labextensions(s)")
+        disable=(DisableLabExtensionsApp, "Disable labextension(s)"),
     )
 
     def start(self):
