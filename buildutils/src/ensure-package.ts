@@ -55,7 +55,7 @@ function ensurePackage(options: IEnsurePackageOptions): string[] {
   filenames = filenames.concat(glob.sync(path.join(pkgPath, 'src/**/*.ts*')));
 
   if (filenames.length === 0) {
-    if (utils.ensurePackageData(data, path.join(pkgPath, 'package.json'))) {
+    if (utils.writePackageData(path.join(pkgPath, 'package.json'), data)) {
       messages.push('Updated package.json');
     }
     return messages;
@@ -107,7 +107,7 @@ function ensurePackage(options: IEnsurePackageOptions): string[] {
     }
   });
 
-  if (utils.ensurePackageData(data, path.join(pkgPath, 'package.json'))) {
+  if (utils.writePackageData(path.join(pkgPath, 'package.json'), data)) {
     messages.push('Updated package.json');
   }
   return messages;

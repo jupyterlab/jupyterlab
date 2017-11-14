@@ -34,7 +34,7 @@
     "build:src": "tsc --project src",
     "build:test": "tsc --project test/src",
     "clean": "rimraf docs && rimraf lib && rimraf test/build && rimraf test/coverage",
-    "prepublishOnly": "npm run build:src && webpack",
+    "prepublishOnly": "npm run build",
     "test": "mocha --retries 3 test/build/**/*.spec.js test/build/*.spec.js --jupyter-config-data=./test/config.json",
     "test:coverage": "istanbul cover --dir test/coverage _mocha -- --retries 3 test/build/**/*.spec.js test/build/*.spec.js --jupyter-config-data=./test/config.json",
     "test:debug": "mocha test/build/**/*.spec.js test/build/*.spec.js  --jupyter-config-data=./test/config.json --debug-brk",

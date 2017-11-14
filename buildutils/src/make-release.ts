@@ -23,7 +23,7 @@ data['scripts']['watch'] = 'webpack --watch';
 data['scripts']['build:prod'] = "webpack --define process.env.NODE_ENV=\"'production'\"";
 data['jupyterlab']['outputDir'] = '..';
 data['jupyterlab']['linkedPackages'] = {};
-utils.ensurePackageData(data, './package.app.json');
+utils.writePackageData('./package.app.json', data);
 
 // Update our app index file.
 fs.copySync('./index.js', './index.app.js');

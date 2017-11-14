@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "build": "tsc --project src && webpack --config webpack.conf.js",
-    "clean": "rimraf build"
+    "clean": "rimraf build",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@jupyterlab/services": "^0.51.0",

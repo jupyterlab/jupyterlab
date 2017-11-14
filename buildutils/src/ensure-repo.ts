@@ -92,7 +92,7 @@ function ensureMetaPackage(): string[] {
 
   // Write the files.
   if (messages.length > 0) {
-    utils.ensurePackageData(metaPackageData, metaPackageJson);
+    utils.writePackageData(metaPackageJson, metaPackageData);
   }
   let newIndex = lines.join('\n');
   if (newIndex !== index) {
@@ -168,7 +168,7 @@ function ensureJupyterlab(): string[] {
   });
 
   // Write the package.json back to disk.
-  if (utils.ensurePackageData(corePackage, corePath)) {
+  if (utils.writePackageData(corePath, corePackage)) {
     return ['Updated core'];
   }
   return [];
@@ -214,7 +214,7 @@ function ensureIntegrity(): void {
   // Handle the top level package.
   let corePath = path.resolve('.', 'package.json');
   let coreData: any = utils.readJSONFile(corePath);
-  if (utils.ensurePackageData(coreData, corePath)) {
+  if (utils.writePackageData(corePath, coreData)) {
     messages['top'] = ['Update package.json'];
   }
 

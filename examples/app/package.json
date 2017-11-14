@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "build": "node extract-data && webpack",
-    "clean": "rimraf build"
+    "clean": "rimraf build",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@jupyterlab/application": "^0.12.0",

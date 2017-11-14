@@ -36,6 +36,6 @@ inquirer.prompt(questions).then(answers => {
   }
   data.name = name;
   data.description = description;
-  utils.ensurePackageData(data, jsonPath);
+  utils.writePackageData(jsonPath, data);
   utils.run('npm run integrity');
 });

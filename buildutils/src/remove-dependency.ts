@@ -45,5 +45,5 @@ function handlePackage(packagePath: string): void {
   }
 
   // Write the file back to disk.
-  utils.ensurePackageData(data, packagePath);
+  utils.writePackageData(packagePath, data);
 }
