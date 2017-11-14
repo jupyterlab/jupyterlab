@@ -599,11 +599,12 @@ def clean(app_dir=None):
             shutil.rmtree(target)
 
 
-def build(app_dir=None, name=None, version=None, logger=None, command='build:prod'):
+def build(app_dir=None, name=None, version=None, logger=None, command='build:prod',
+          clean_staging=False):
     """Build the JupyterLab application.
     """
     func = partial(build_async, app_dir=app_dir, name=name, version=version,
-                   logger=logger, command=command)
+                   logger=logger, command=command, clean_staging=clean_staging)
     return IOLoop.instance().run_sync(func)
 
 def is_disabled(name, disabled=[]):
@@ -615,7 +616,9 @@ def is_disabled(name, disabled=[]):
     return False
 
 @gen.coroutine
-def build_async(app_dir=None, name=None, version=None, logger=None, abort_callback=None, command='build:prod'):
+def build_async(app_dir=None, name=None, version=None, logger=None,
+                abort_callback=None, command='build:prod',
+                clean_staging=False):
     """Build the JupyterLab application.
     """
     # Set up the build directory.
@@ -661,6 +664,11 @@ def build_async(app_dir=None, name=None, version=None, logger=None, abort_callba
     if os.path.exists(static):
         shutil.rmtree(static)
     shutil.copytree(pjoin(app_dir, 'staging', 'build'), static)
+    if clean_staging:
+        staging = pjoin(app_dir, 'staging')
+        if logger:
+            logger.info("Cleaning %s", staging)
+        shutil.rmtree(staging)
 
 
 @gen.coroutine
