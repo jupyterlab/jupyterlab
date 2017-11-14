@@ -8,8 +8,12 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  ISettingRegistry, IStateDB
+  DataConnector, IDataConnector, ISettingRegistry, IStateDB
 } from '@jupyterlab/coreutils';
+
+import {
+  InspectionHandler
+} from '@jupyterlab/inspector';
 
 import {
   JSONExt, JSONObject, JSONValue
@@ -95,6 +99,12 @@ Select a plugin from the list to view and edit its preferences.
 `;
 
 
+class InspectorConnector extends DataConnector<InspectionHandler.IReply, void, InspectionHandler.IRequest> {
+  fetch(request: InspectionHandler.IRequest): Promise<InspectionHandler.IReply> {
+    return Promise.reject('sorry');
+  }
+}
+
 /**
  * An interface for modifying and saving application settings.
  */
@@ -106,6 +116,7 @@ class SettingEditor extends Widget {
   constructor(options: SettingEditor.IOptions) {
     super();
     this.addClass(SETTING_EDITOR_CLASS);
+    this.connector = new InspectorConnector();
     this.key = options.key;
     this.state = options.state;
 
@@ -138,6 +149,8 @@ class SettingEditor extends Widget {
     list.changed.connect(this._onStateChanged, this);
     panel.handleMoved.connect(this._onStateChanged, this);
   }
+
+  readonly connector: IDataConnector<InspectionHandler.IReply, void, InspectionHandler.IRequest>;
 
   /**
    * The state database key for the editor's state management.
