@@ -377,8 +377,8 @@ class DefaultSchemaValidator implements ISchemaValidator {
       const line = error.lineNumber;
 
       return [{
-        dataPath: '', keyword: '', schemaPath: '',
-        message: `Parse error: ${description} (line ${line} column ${column})`
+        dataPath: '', keyword: 'parse', schemaPath: '',
+        message: `${description} (line ${line} column ${column})`
       }];
     }
 
@@ -862,11 +862,10 @@ class Settings implements ISettingRegistry.ISettings {
   validate(raw: string): ISchemaValidator.IError[] | null {
     const data = { composite: { }, user: { } };
     const id = this.plugin;
-    const passthrough = false;
     const schema = this._schema;
     const validator = this.registry.validator;
 
-    return validator.validateData({ data, id, raw, schema }, passthrough);
+    return validator.validateData({ data, id, raw, schema }, false);
   }
 
   /**

@@ -108,22 +108,28 @@ class InspectorConnector extends DataConnector<InspectionHandler.IReply, void, I
     this._editor = editor;
   }
 
+  /**
+   * Fetch inspection requests.
+   */
   fetch(request: InspectionHandler.IRequest): Promise<InspectionHandler.IReply> {
     return new Promise<InspectionHandler.IReply>(resolve => {
       // Debounce requests at a rate of 100ms.
       const current = this._current = window.setTimeout(() => {
         if (current !== this._current) {
           resolve(null);
-        } else {
-          const validated = this._validate(request.text);
-          const bundle = {
-            'text/html': validated ?
-              validated.map(out => `<p><pre>${out.message}</pre></p>`).join('')
-                : ''
-          };
-
-          resolve({ data: bundle, metadata: { } });
+          return;
         }
+
+        const errors = this._validate(request.text);
+
+        if (!errors) {
+          resolve(null);
+          return;
+        }
+
+        const bundle = { 'text/html': Private.render(errors) };
+
+        resolve({ data: bundle, metadata: { } });
       }, 100);
     });
   }
@@ -477,6 +483,9 @@ namespace Private {
       h.span({ className: INSTRUCTIONS_TEXT_CLASS }, INSTRUCTIONS_TEXT)));
   }
 
+  /**
+   * Return a normalized restored layout state that defaults to the presets.
+   */
   export
   function normalizeState(saved: JSONObject | null, current: SettingEditor.ILayoutState): SettingEditor.ILayoutState {
     if (!saved) {
@@ -508,7 +517,18 @@ namespace Private {
     return saved as SettingEditor.ILayoutState;
   }
 
+  /**
+   * Tests whether an array consists exclusively of numbers.
+   */
   function numberArray(value: JSONValue): boolean {
     return Array.isArray(value) && value.every(x => typeof x === 'number');
+  }
+
+  /**
+   * Render validation errors as an HTML string.
+   */
+  export
+  function render(errors: ISchemaValidator.IError[]): string {
+    return errors.map(error => `<p><pre>${error.message}</pre></p>`).join('');
   }
 }
