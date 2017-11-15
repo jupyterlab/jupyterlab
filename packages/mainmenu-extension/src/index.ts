@@ -10,7 +10,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IMainMenu, MainMenu, FileMenu, KernelMenu, ViewMenu
+  IMainMenu, MainMenu, FileMenu, KernelMenu, ViewMenu, RunMenu
 } from '@jupyterlab/mainmenu';
 
 
@@ -36,6 +36,18 @@ namespace CommandIDs {
 
   export
   const matchBrackets = 'editor:match-brackets';
+
+  export
+  const run = 'run:run';
+
+  export
+  const runAll = 'run:run-all';
+
+  export
+  const runAbove = 'run:run-above';
+
+  export
+  const runBelow = 'run:run-below';
 }
 
 /**
@@ -56,6 +68,7 @@ const menuPlugin: JupyterLabPlugin<IMainMenu> = {
     // Create the application menus.
     createFileMenu(app, menu.fileMenu);
     createKernelMenu(app, menu.kernelMenu);
+    createRunMenu(app, menu.runMenu);
     createViewMenu(app, menu.viewMenu);
 
     app.shell.addToTopArea(logo);
@@ -236,4 +249,82 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
   menu.startIndex++;
 }
 
+function createRunMenu(app: JupyterLab, menu: RunMenu): void {
+  const commands = menu.commands;
+
+  commands.addCommand(CommandIDs.run, {
+    label: 'Run',
+    isEnabled: () => {
+      const runner = menu.findRunner(app.shell.currentWidget);
+      return !!runner && !!runner.run;
+    },
+    execute: () => {
+      const widget = app.shell.currentWidget;
+      const runner = menu.findRunner(widget);
+      if (!runner) {
+        return Promise.resolve(void 0);
+      }
+      return runner.run(widget);
+    }
+  });
+
+  commands.addCommand(CommandIDs.runAll, {
+    label: 'Run All',
+    isEnabled: () => {
+      const runner = menu.findRunner(app.shell.currentWidget);
+      return !!runner && !!runner.runAll;
+    },
+    execute: () => {
+      const widget = app.shell.currentWidget;
+      const runner = menu.findRunner(widget);
+      if (!runner) {
+        return Promise.resolve(void 0);
+      }
+      return runner.runAll(widget);
+    }
+  });
+
+  commands.addCommand(CommandIDs.runAbove, {
+    label: 'Run Above',
+    isEnabled: () => {
+      const runner = menu.findRunner(app.shell.currentWidget);
+      return !!runner && !!runner.runAbove;
+    },
+    execute: () => {
+      const widget = app.shell.currentWidget;
+      const runner = menu.findRunner(widget);
+      if (!runner) {
+        return Promise.resolve(void 0);
+      }
+      return runner.runAbove(widget);
+    }
+  });
+
+  commands.addCommand(CommandIDs.runBelow, {
+    label: 'Run Below',
+    isEnabled: () => {
+      const runner = menu.findRunner(app.shell.currentWidget);
+      return !!runner && !!runner.runBelow;
+    },
+    execute: () => {
+      const widget = app.shell.currentWidget;
+      const runner = menu.findRunner(widget);
+      if (!runner) {
+        return Promise.resolve(void 0);
+      }
+      return runner.runBelow(widget);
+    }
+  });
+
+  let items = [
+    CommandIDs.run,
+    CommandIDs.runAll,
+    CommandIDs.runAbove,
+    CommandIDs.runBelow,
+  ];
+  items.forEach( command => {
+    menu.addItem({ command });
+    menu.startIndex++;
+  });
+}
 export default menuPlugin;
