@@ -2,14 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IInstanceTracker
-} from '@jupyterlab/apputils';
-
-import {
-  Kernel
-} from '@jupyterlab/services';
-
-import {
   ArrayExt
 } from '@phosphor/algorithm';
 
@@ -22,12 +14,33 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  Menu, MenuBar, Widget
+  Menu, MenuBar
 } from '@phosphor/widgets';
 
 import {
-  EditMenu, FileMenu, HelpMenu, KernelMenu, RunMenu, ViewMenu
-} from './menus';
+  IFileMenu, FileMenu
+} from './file';
+
+import {
+  IEditMenu, EditMenu
+} from './edit';
+
+import {
+  IHelpMenu, HelpMenu
+} from './help';
+
+import {
+  IKernelMenu, KernelMenu
+} from './kernel';
+
+import {
+  IRunMenu, RunMenu
+} from './run';
+
+import {
+  IViewMenu, ViewMenu
+} from './view';
+
 
 
 /* tslint:disable */
@@ -52,32 +65,32 @@ interface IMainMenu {
   /**
    * The application "File" menu.
    */
-  readonly fileMenu: IMainMenu.IFileMenu;
+  readonly fileMenu: IFileMenu;
 
   /**
    * The application "Edit" menu.
    */
-  readonly editMenu: IMainMenu.IEditMenu;
+  readonly editMenu: IEditMenu;
 
   /**
    * The application "View" menu.
    */
-  readonly viewMenu: IMainMenu.IViewMenu;
+  readonly viewMenu: IViewMenu;
 
   /**
    * The application "Help" menu.
    */
-  readonly helpMenu: IMainMenu.IHelpMenu;
+  readonly helpMenu: IHelpMenu;
 
   /**
    * The application "Kernel" menu.
    */
-  readonly kernelMenu: IMainMenu.IKernelMenu;
+  readonly kernelMenu: IKernelMenu;
 
   /**
    * The application "Run" menu.
    */
-  readonly runMenu: IMainMenu.IRunMenu;
+  readonly runMenu: IRunMenu;
 }
 
 
@@ -97,180 +110,7 @@ namespace IMainMenu {
     rank?: number;
   }
 
-  /**
-   * A common interface for extensible JupyterLab application menus.
-   *
-   * Plugins are still free to define their own menus in any way
-   * they like. However, JupyterLab defines a few top-level
-   * application menus that may be extended by plugins as well,
-   * such as "Edit" and "View"
-   */
-  export
-  interface IJupyterLabMenu extends Menu {
-    /**
-     * Add a group of menu items specific to a particular
-     * plugin.
-     */
-    addGroup(items: Menu.IItemOptions[], rank?: number): void;
-  }
-
-  /**
-   * A base interface for a consumer of one of the menu
-   * semantic extension points. The IMenuExtender gives
-   * an instance tracker which is checked when the menu
-   * is deciding which IMenuExtender to delegate to upon
-   * selection of the menu item.
-   */
-  export
-  interface IMenuExtender<T extends Widget> {
-    /**
-     * A widget tracker for identifying the appropriate extender.
-     */
-    tracker: IInstanceTracker<T>;
-  }
-
-  /**
-   * An interface for a File menu.
-   */
-  export
-  interface IFileMenu extends IJupyterLabMenu {
-    /**
-     * A submenu for creating new files/launching new activities.
-     */
-    readonly newMenu: Menu;
-  }
-
-  /**
-   * An interface for an Edit menu.
-   */
-  export
-  interface IEditMenu extends IJupyterLabMenu {
-  }
-
-  /**
-   * An interface for a View menu.
-   */
-  export
-  interface IViewMenu extends IJupyterLabMenu {
-    /**
-     * Add an IKernelUser to the Kernel menu.
-     *
-     * @param user - An IKernelUser.
-     */
-    addEditorViewer<T extends Widget>(user: IViewMenu.IEditorViewer<T>): void;
-  }
-
-  /**
-   * Namespace for IViewMenu.
-   */
-  export
-  namespace IViewMenu {
-    /**
-     * Interface for a text editor viewer to register
-     * itself with the text editor extension points.
-     */
-    export
-    interface IEditorViewer<T extends Widget> extends IMenuExtender<T> {
-      /**
-       * Whether to show line numbers in the editor.
-       */
-      toggleLineNumbers?: (widget: T) => void;
-
-      /**
-       * Whether to word-wrap the editor.
-       */
-      toggleWordWrap?: (widget: T) => void;
-
-      /**
-       * Whether to match brackets in the editor.
-       */
-      toggleMatchBrackets?: (widget: T) => void;
-
-      /**
-       * Whether line numbers are toggled.
-       */
-      lineNumbersToggled?: (widget: T) => boolean;
-      /**
-       * Whether word wrap is toggled.
-       */
-      wordWrapToggled?: (widget: T) => boolean;
-      /**
-       * Whether match brackets is toggled.
-       */
-      matchBracketsToggled?: (widget: T) => boolean;
-    }
-  }
-
-  /**
-   * An interface for a Help menu.
-   */
-  export
-  interface IHelpMenu extends IJupyterLabMenu {
-  }
-
-  /**
-   * An interface for a Kernel menu.
-   */
-  export
-  interface IKernelMenu extends IJupyterLabMenu {
-    /**
-     * Add an IKernelUser to the Kernel menu.
-     *
-     * @param user - An IKernelUser.
-     */
-    addUser<T extends Widget>(user: IKernelMenu.IKernelUser<T>): void;
-
-    /**
-     * Given a widget, see if it belongs to
-     * any of the IKernelUsers registered with
-     * the kernel menu.
-     *
-     * @param widget: a widget.
-     *
-     * @returns an IKernelUser, if any of the registered users own
-     *   the widget, otherwise undefined.
-     */
-    findUser(widget: Widget | null): IKernelMenu.IKernelUser<Widget> | undefined;
-  }
-
-  /**
-   * Namespace for IKernelMenu
-   */
-  export
-  namespace IKernelMenu {
-    /**
-     * Interface for a Kernel user to register itself
-     * with the IKernelMenu's semantic extension points.
-     */
-    export
-    interface IKernelUser<T extends Widget> extends IMenuExtender<T> {
-      /**
-       * A function to interrupt the kernel.
-       */
-      interruptKernel?: (widget: T) => Promise<void>;
-
-      /**
-       * A function to restart the kernel.
-       */
-      restartKernel?: (widget: T) => Promise<Kernel.IKernelConnection>;
-
-      /**
-       * A function to change the kernel.
-       */
-      changeKernel?: (widget: T) => Promise<void>;
-    }
-  }
-
-
-  /**
-   * An interface for a Run menu.
-   */
-  export
-  interface IRunMenu extends IJupyterLabMenu {
-  }
 }
-
-
 
 /**
  * The main menu class.  It is intended to be used as a singleton.
