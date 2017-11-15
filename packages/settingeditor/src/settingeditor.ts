@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  DataConnector, IDataConnector, ISettingRegistry, IStateDB
+  DataConnector, IDataConnector, ISchemaValidator, ISettingRegistry, IStateDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -99,11 +99,48 @@ Select a plugin from the list to view and edit its preferences.
 `;
 
 
+/**
+ * The data connector used to populate a code inspector.
+ */
 class InspectorConnector extends DataConnector<InspectionHandler.IReply, void, InspectionHandler.IRequest> {
-  fetch(request: InspectionHandler.IRequest): Promise<InspectionHandler.IReply> {
-    console.log('request looks like this', request);
-    return Promise.reject('sorry');
+  constructor(editor: SettingEditor) {
+    super();
+    this._editor = editor;
   }
+
+  fetch(request: InspectionHandler.IRequest): Promise<InspectionHandler.IReply> {
+    return new Promise<InspectionHandler.IReply>(resolve => {
+      // Debounce requests at a rate of 100ms.
+      const current = this._current = window.setTimeout(() => {
+        if (current !== this._current) {
+          resolve(null);
+        } else {
+          const validated = this._validate(request.text);
+          const bundle = {
+            'text/html': validated ?
+              validated.map(out => `<p><pre>${out.message}</pre></p>`).join('')
+                : ''
+          };
+
+          resolve({ data: bundle, metadata: { } });
+        }
+      }, 100);
+    });
+  }
+
+  private _validate(raw: string): ISchemaValidator.IError[] | null {
+    const editor = this._editor;
+    const data = { composite: { }, user: { } };
+    const id = editor.settings.plugin;
+    const passthrough = true;
+    const schema = editor.settings.schema;
+    const validator = editor.registry.validator;
+
+    return validator.validateData({ data, id, raw, schema }, passthrough);
+  }
+
+  private _current = 0;
+  private _editor: SettingEditor;
 }
 
 /**
@@ -117,7 +154,6 @@ class SettingEditor extends Widget {
   constructor(options: SettingEditor.IOptions) {
     super();
     this.addClass(SETTING_EDITOR_CLASS);
-    this.connector = new InspectorConnector();
     this.key = options.key;
     this.state = options.state;
 
@@ -151,8 +187,6 @@ class SettingEditor extends Widget {
     panel.handleMoved.connect(this._onStateChanged, this);
   }
 
-  readonly connector: IDataConnector<InspectionHandler.IReply, void, InspectionHandler.IRequest>;
-
   /**
    * The state database key for the editor's state management.
    */
@@ -169,11 +203,23 @@ class SettingEditor extends Widget {
   readonly state: IStateDB;
 
   /**
-   * The inspectable raw user editor source.
+   * The currently loaded settings.
+   */
+  get settings(): ISettingRegistry.ISettings {
+    return this._editor.settings;
+  }
+
+  /**
+   * The inspectable raw user editor source for the currently loaded settings.
    */
   get source(): CodeEditor.IEditor {
     return this._editor.source;
   }
+
+  /**
+   * A data connector for populating an inspector.
+   */
+  readonly connector: IDataConnector<InspectionHandler.IReply, void, InspectionHandler.IRequest> = new InspectorConnector(this);
 
   /**
    * Dispose of the resources held by the setting editor.
