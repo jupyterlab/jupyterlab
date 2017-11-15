@@ -16,7 +16,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  ISettingRegistry, IStateDB, DataConnector
+  ISettingRegistry, IStateDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -40,12 +40,6 @@ namespace CommandIDs {
   const open = 'settingeditor:open';
 }
 
-
-class InspectionConnector extends DataConnector<InspectionHandler.IReply, void, InspectionHandler.IRequest> {
-  fetch(request: InspectionHandler.IRequest): Promise<InspectionHandler.IReply> {
-    return Promise.reject('inspection connector fetch is not implemented');
-  }
-}
 
 /**
  * The default setting editor extension.
@@ -101,7 +95,7 @@ const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
       });
 
       tracker.widgetAdded.connect((sender, parent) => {
-        const connector = new InspectionConnector();
+        const connector = parent.connector;
 
         handler = new InspectionHandler({ connector, rendermime });
         handler.editor = parent.source;

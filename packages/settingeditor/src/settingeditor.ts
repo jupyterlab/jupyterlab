@@ -101,6 +101,7 @@ Select a plugin from the list to view and edit its preferences.
 
 class InspectorConnector extends DataConnector<InspectionHandler.IReply, void, InspectionHandler.IRequest> {
   fetch(request: InspectionHandler.IRequest): Promise<InspectionHandler.IReply> {
+    console.log('request looks like this', request);
     return Promise.reject('sorry');
   }
 }
