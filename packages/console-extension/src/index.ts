@@ -427,6 +427,12 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     changeKernel: current => current.console.session.selectKernel()
   });
 
+  // Add a code runner to the Run menu.
+  mainMenu.runMenu.addRunner<ConsolePanel>({
+    tracker,
+    run: current => current.console.execute(true)
+  });
+
   // Add the console menu.
   menu.addItem({ command: CommandIDs.run });
   menu.addItem({ command: CommandIDs.runForced });

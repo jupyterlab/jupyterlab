@@ -486,6 +486,21 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
       widget.notebook.activeCell.editor.getOption('matchBrackets'),
   });
 
+  // Add an ICodeRunner to the application run menu
+  mainMenu.runMenu.addRunner<NotebookPanel>({
+    tracker,
+    run: current => {
+      const { context, notebook } = current;
+      return NotebookActions.runAndAdvance(notebook, context.session)
+      .then(() => void 0);
+    },
+    runAll: current => {
+      const { context, notebook } = current;
+      return NotebookActions.runAll(notebook, context.session)
+      .then(() => void 0);
+    }
+  });
+
   // Add commands to the application edit menu.
   const editGroup = [
     CommandIDs.undo,
