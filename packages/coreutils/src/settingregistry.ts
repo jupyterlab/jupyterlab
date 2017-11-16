@@ -10,7 +10,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONExt, JSONObject, JSONValue, Token
+  JSONExt, JSONObject, JSONValue, ReadonlyJSONObject, Token
 } from '@phosphor/coreutils';
 
 import {
@@ -89,6 +89,11 @@ namespace ISchemaValidator {
      * The error message.
      */
     message: string;
+
+    /**
+     * Optional parameter metadata that might be included in an error.
+     */
+    params?: ReadonlyJSONObject;
 
     /**
      * The path in the schema where the error occurred.
@@ -373,6 +378,13 @@ class DefaultSchemaValidator implements ISchemaValidator {
 
       user = json.parse(plugin.raw, null, strip) as JSONObject;
     } catch (error) {
+      if (error instanceof SyntaxError) {
+        return [{
+          dataPath: '', keyword: 'syntax', schemaPath: '',
+          message: error.message
+        }];
+      }
+
       const { column, description } = error;
       const line = error.lineNumber;
 

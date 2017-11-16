@@ -16,7 +16,7 @@ import {
 } from '@jupyterlab/inspector';
 
 import {
-  JSONExt, JSONObject, JSONValue
+  JSONExt, JSONObject, JSONValue, ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
 import {
@@ -127,9 +127,7 @@ class InspectorConnector extends DataConnector<InspectionHandler.IReply, void, I
           return;
         }
 
-        const bundle = { 'text/html': Private.render(errors) };
-
-        resolve({ data: bundle, metadata: { } });
+        resolve({ data: Private.render(errors), metadata: { } });
       }, 100);
     });
   }
@@ -138,11 +136,10 @@ class InspectorConnector extends DataConnector<InspectionHandler.IReply, void, I
     const editor = this._editor;
     const data = { composite: { }, user: { } };
     const id = editor.settings.plugin;
-    const passthrough = true;
     const schema = editor.settings.schema;
     const validator = editor.registry.validator;
 
-    return validator.validateData({ data, id, raw, schema }, passthrough);
+    return validator.validateData({ data, id, raw, schema }, false);
   }
 
   private _current = 0;
@@ -528,7 +525,25 @@ namespace Private {
    * Render validation errors as an HTML string.
    */
   export
-  function render(errors: ISchemaValidator.IError[]): string {
-    return errors.map(error => `<p><pre>${error.message}</pre></p>`).join('');
+  function render(errors: ISchemaValidator.IError[]): ReadonlyJSONObject {
+    return { 'text/markdown': errors.map(renderError).join('') };
+  }
+
+  /**
+   * Render an individual validation error.
+   */
+  function renderError(error: ISchemaValidator.IError): string {
+    switch (error.keyword) {
+      case 'additionalProperties':
+        return `**\`[additional property error]\`**
+          \`${error.params.additionalProperty}\` is not a valid property`;
+      case 'syntax':
+        return `**\`[syntax error]\`** *${error.message}*`;
+      case 'type':
+        return `**\`[type error]\`**
+          \`${error.dataPath}\` ${error.message}`;
+      default:
+        return `**\`[error]\`** *${error.message}*`;
+    }
   }
 }
