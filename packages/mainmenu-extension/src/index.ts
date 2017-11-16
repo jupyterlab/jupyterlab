@@ -10,8 +10,8 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IMainMenu, IMenuExtender, IRunMenu, IViewMenu, IKernelMenu,
-  MainMenu, FileMenu, JupyterLabMenu, KernelMenu, ViewMenu, RunMenu
+  IMainMenu, IMenuExtender,
+  MainMenu, FileMenu, KernelMenu, ViewMenu, RunMenu
 } from '@jupyterlab/mainmenu';
 
 
@@ -105,26 +105,20 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
 
   commands.addCommand(CommandIDs.interruptKernel, {
     label: 'Interrupt Kernel',
-    isEnabled: Private.delegateEnabled<KernelMenu, IKernelMenu.IKernelUser<Widget>>
-             (app, menu, 'findUser', 'interruptKernel'),
-    execute: Private.delegateExecute<KernelMenu, IKernelMenu.IKernelUser<Widget>>
-             (app, menu, 'findUser', 'interruptKernel')
+    isEnabled: Private.delegateEnabled(app, menu.findUser, 'interruptKernel'),
+    execute: Private.delegateExecute(app, menu.findUser, 'interruptKernel')
   });
 
   commands.addCommand(CommandIDs.restartKernel, {
     label: 'Restart Kernel',
-    isEnabled: Private.delegateEnabled<KernelMenu, IKernelMenu.IKernelUser<Widget>>
-             (app, menu, 'findUser', 'restartKernel'),
-    execute: Private.delegateExecute<KernelMenu, IKernelMenu.IKernelUser<Widget>>
-             (app, menu, 'findUser', 'restartKernel')
+    isEnabled: Private.delegateEnabled(app, menu.findUser, 'restartKernel'),
+    execute: Private.delegateExecute(app, menu.findUser, 'restartKernel')
   });
 
   commands.addCommand(CommandIDs.changeKernel, {
     label: 'Change Kernel',
-    isEnabled: Private.delegateEnabled<KernelMenu, IKernelMenu.IKernelUser<Widget>>
-             (app, menu, 'findUser', 'changeKernel'),
-    execute: Private.delegateExecute<KernelMenu, IKernelMenu.IKernelUser<Widget>>
-             (app, menu, 'findUser', 'changeKernel')
+    isEnabled: Private.delegateEnabled(app, menu.findUser, 'changeKernel'),
+    execute: Private.delegateExecute(app, menu.findUser, 'changeKernel')
   });
 
   let items = [
@@ -146,32 +140,32 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
 
   commands.addCommand(CommandIDs.lineNumbering, {
     label: 'Line Numbers',
-    isEnabled: Private.delegateEnabled<ViewMenu, IViewMenu.IEditorViewer<Widget>>
-             (app, menu, 'findEditorViewer', 'toggleLineNumbers'),
-    isToggled: Private.delegateToggled<ViewMenu, IViewMenu.IEditorViewer<Widget>>
-             (app, menu, 'findEditorViewer', 'lineNumbersToggled'),
-    execute: Private.delegateExecute<ViewMenu, IViewMenu.IEditorViewer<Widget>>
-             (app, menu, 'findEditorViewer', 'toggleLineNumbers')
+    isEnabled: Private.delegateEnabled
+             (app, menu.findEditorViewer, 'toggleLineNumbers'),
+    isToggled: Private.delegateToggled
+             (app, menu.findEditorViewer, 'lineNumbersToggled'),
+    execute: Private.delegateExecute
+             (app, menu.findEditorViewer, 'toggleLineNumbers')
   });
 
   commands.addCommand(CommandIDs.matchBrackets, {
     label: 'Match Brackets',
-    isEnabled: Private.delegateEnabled<ViewMenu, IViewMenu.IEditorViewer<Widget>>
-             (app, menu, 'findEditorViewer', 'toggleMatchBrackets'),
-    isToggled: Private.delegateToggled<ViewMenu, IViewMenu.IEditorViewer<Widget>>
-             (app, menu, 'findEditorViewer', 'matchBracketsToggled'),
-    execute: Private.delegateExecute<ViewMenu, IViewMenu.IEditorViewer<Widget>>
-             (app, menu, 'findEditorViewer', 'toggleMatchBrackets')
+    isEnabled: Private.delegateEnabled
+             (app, menu.findEditorViewer, 'toggleMatchBrackets'),
+    isToggled: Private.delegateToggled
+             (app, menu.findEditorViewer, 'matchBracketsToggled'),
+    execute: Private.delegateExecute
+             (app, menu.findEditorViewer, 'toggleMatchBrackets')
   });
 
   commands.addCommand(CommandIDs.wordWrap, {
     label: 'Word Wrap',
-    isEnabled: Private.delegateEnabled<ViewMenu, IViewMenu.IEditorViewer<Widget>>
-             (app, menu, 'findEditorViewer', 'toggleWordWrap'),
-    isToggled: Private.delegateToggled<ViewMenu, IViewMenu.IEditorViewer<Widget>>
-             (app, menu, 'findEditorViewer', 'wordWrapToggled'),
-    execute: Private.delegateExecute<ViewMenu, IViewMenu.IEditorViewer<Widget>>
-             (app, menu, 'findEditorViewer', 'toggleWordWrap')
+    isEnabled: Private.delegateEnabled
+               (app, menu.findEditorViewer, 'toggleWordWrap'),
+    isToggled: Private.delegateToggled
+               (app, menu.findEditorViewer, 'wordWrapToggled'),
+    execute: Private.delegateExecute
+               (app, menu.findEditorViewer, 'toggleWordWrap')
   });
 
   let items = [
@@ -192,34 +186,26 @@ function createRunMenu(app: JupyterLab, menu: RunMenu): void {
 
   commands.addCommand(CommandIDs.run, {
     label: 'Run',
-    isEnabled: Private.delegateEnabled<RunMenu, IRunMenu.ICodeRunner<Widget>>
-             (app, menu, 'findRunner', 'run'),
-    execute: Private.delegateExecute<RunMenu, IRunMenu.ICodeRunner<Widget>>
-             (app, menu, 'findRunner', 'run')
+    isEnabled: Private.delegateEnabled(app, menu.findRunner, 'run'),
+    execute: Private.delegateExecute(app, menu.findRunner, 'run')
   });
 
   commands.addCommand(CommandIDs.runAll, {
     label: 'Run All',
-    isEnabled: Private.delegateEnabled<RunMenu, IRunMenu.ICodeRunner<Widget>>
-             (app, menu, 'findRunner', 'runAll'),
-    execute: Private.delegateExecute<RunMenu, IRunMenu.ICodeRunner<Widget>>
-             (app, menu, 'findRunner', 'runAll')
+    isEnabled: Private.delegateEnabled(app, menu.findRunner, 'runAll'),
+    execute: Private.delegateExecute(app, menu.findRunner, 'runAll')
   });
 
   commands.addCommand(CommandIDs.runAbove, {
     label: 'Run Above',
-    isEnabled: Private.delegateEnabled<RunMenu, IRunMenu.ICodeRunner<Widget>>
-             (app, menu, 'findRunner', 'runAbove'),
-    execute: Private.delegateExecute<RunMenu, IRunMenu.ICodeRunner<Widget>>
-             (app, menu, 'findRunner', 'runAbove')
+    isEnabled: Private.delegateEnabled(app, menu.findRunner, 'runAbove'),
+    execute: Private.delegateExecute(app, menu.findRunner, 'runAbove')
   });
 
   commands.addCommand(CommandIDs.runBelow, {
     label: 'Run Below',
-    isEnabled: Private.delegateEnabled<RunMenu, IRunMenu.ICodeRunner<Widget>>
-             (app, menu, 'findRunner', 'runBelow'),
-    execute: Private.delegateExecute<RunMenu, IRunMenu.ICodeRunner<Widget>>
-             (app, menu, 'findRunner', 'runBelow')
+    isEnabled: Private.delegateEnabled(app, menu.findRunner, 'runBelow'),
+    execute: Private.delegateExecute(app, menu.findRunner, 'runBelow')
   });
 
   let items = [
@@ -244,10 +230,10 @@ namespace Private {
    * to an IMenuExtender.
    */
   export
-  function delegateExecute<M extends JupyterLabMenu, E extends IMenuExtender<Widget>>(app: JupyterLab, menu: M, finder: keyof M, executor: keyof E): () => Promise<any> {
+  function delegateExecute<E extends IMenuExtender<Widget>>(app: JupyterLab, finder: (w: Widget) => E, executor: keyof E): () => Promise<any> {
     return () => {
       let widget = app.shell.currentWidget;
-      const extender = menu[finder](widget);
+      const extender = finder(widget);
       if (!extender) {
         return Promise.resolve(void 0);
       }
@@ -260,10 +246,10 @@ namespace Private {
    * to an IMenuExtender.
    */
   export
-  function delegateEnabled<M extends JupyterLabMenu, E extends IMenuExtender<Widget>>(app: JupyterLab, menu: M, finder: keyof M, executor: keyof E): () => boolean {
+  function delegateEnabled<E extends IMenuExtender<Widget>>(app: JupyterLab, finder: (w: Widget) => E, executor: keyof E): () => boolean {
     return () => {
       let widget = app.shell.currentWidget;
-      const extender = menu[finder](widget);
+      const extender = finder(widget);
       return !!extender && !!extender[executor];
     };
   }
@@ -273,10 +259,10 @@ namespace Private {
    * for an IMenuExtender.
    */
   export
-  function delegateToggled<M extends JupyterLabMenu, E extends IMenuExtender<Widget>>(app: JupyterLab, menu: M, finder: keyof M, toggled: keyof E): () => boolean {
+  function delegateToggled<E extends IMenuExtender<Widget>>(app: JupyterLab, finder: (w: Widget) => E, toggled: keyof E): () => boolean {
     return () => {
       let widget = app.shell.currentWidget;
-      const extender = menu[finder](widget);
+      const extender = finder(widget);
       return !!extender && !!extender[toggled] && !!extender[toggled](widget);
     };
   }
