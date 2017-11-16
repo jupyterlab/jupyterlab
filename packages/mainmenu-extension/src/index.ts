@@ -103,22 +103,25 @@ function createFileMenu(app: JupyterLab, menu: FileMenu): void {
 function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
   const commands = menu.commands;
 
+  let findUser = (widget: Widget) => {
+    return menu.findUser(widget);
+  };
   commands.addCommand(CommandIDs.interruptKernel, {
     label: 'Interrupt Kernel',
-    isEnabled: Private.delegateEnabled(app, menu.findUser, 'interruptKernel'),
-    execute: Private.delegateExecute(app, menu.findUser, 'interruptKernel')
+    isEnabled: Private.delegateEnabled(app, findUser, 'interruptKernel'),
+    execute: Private.delegateExecute(app, findUser, 'interruptKernel')
   });
 
   commands.addCommand(CommandIDs.restartKernel, {
     label: 'Restart Kernel',
-    isEnabled: Private.delegateEnabled(app, menu.findUser, 'restartKernel'),
-    execute: Private.delegateExecute(app, menu.findUser, 'restartKernel')
+    isEnabled: Private.delegateEnabled(app, findUser, 'restartKernel'),
+    execute: Private.delegateExecute(app, findUser, 'restartKernel')
   });
 
   commands.addCommand(CommandIDs.changeKernel, {
     label: 'Change Kernel',
-    isEnabled: Private.delegateEnabled(app, menu.findUser, 'changeKernel'),
-    execute: Private.delegateExecute(app, menu.findUser, 'changeKernel')
+    isEnabled: Private.delegateEnabled(app, findUser, 'changeKernel'),
+    execute: Private.delegateExecute(app, findUser, 'changeKernel')
   });
 
   let items = [
@@ -138,34 +141,37 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
 function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
   const commands = menu.commands;
 
+  let findEditorViewer = (widget: Widget) => {
+    return menu.findEditorViewer(widget);
+  };
   commands.addCommand(CommandIDs.lineNumbering, {
     label: 'Line Numbers',
     isEnabled: Private.delegateEnabled
-             (app, menu.findEditorViewer, 'toggleLineNumbers'),
+             (app, findEditorViewer, 'toggleLineNumbers'),
     isToggled: Private.delegateToggled
-             (app, menu.findEditorViewer, 'lineNumbersToggled'),
+             (app, findEditorViewer, 'lineNumbersToggled'),
     execute: Private.delegateExecute
-             (app, menu.findEditorViewer, 'toggleLineNumbers')
+             (app, findEditorViewer, 'toggleLineNumbers')
   });
 
   commands.addCommand(CommandIDs.matchBrackets, {
     label: 'Match Brackets',
     isEnabled: Private.delegateEnabled
-             (app, menu.findEditorViewer, 'toggleMatchBrackets'),
+             (app, findEditorViewer, 'toggleMatchBrackets'),
     isToggled: Private.delegateToggled
-             (app, menu.findEditorViewer, 'matchBracketsToggled'),
+             (app, findEditorViewer, 'matchBracketsToggled'),
     execute: Private.delegateExecute
-             (app, menu.findEditorViewer, 'toggleMatchBrackets')
+             (app, findEditorViewer, 'toggleMatchBrackets')
   });
 
   commands.addCommand(CommandIDs.wordWrap, {
     label: 'Word Wrap',
     isEnabled: Private.delegateEnabled
-               (app, menu.findEditorViewer, 'toggleWordWrap'),
+               (app, findEditorViewer, 'toggleWordWrap'),
     isToggled: Private.delegateToggled
-               (app, menu.findEditorViewer, 'wordWrapToggled'),
+               (app, findEditorViewer, 'wordWrapToggled'),
     execute: Private.delegateExecute
-               (app, menu.findEditorViewer, 'toggleWordWrap')
+               (app, findEditorViewer, 'toggleWordWrap')
   });
 
   let items = [
@@ -184,28 +190,31 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
 function createRunMenu(app: JupyterLab, menu: RunMenu): void {
   const commands = menu.commands;
 
+  let findRunner = (widget: Widget) => {
+    return menu.findRunner(widget);
+  };
   commands.addCommand(CommandIDs.run, {
     label: 'Run',
-    isEnabled: Private.delegateEnabled(app, menu.findRunner, 'run'),
-    execute: Private.delegateExecute(app, menu.findRunner, 'run')
+    isEnabled: Private.delegateEnabled(app, findRunner, 'run'),
+    execute: Private.delegateExecute(app, findRunner, 'run')
   });
 
   commands.addCommand(CommandIDs.runAll, {
     label: 'Run All',
-    isEnabled: Private.delegateEnabled(app, menu.findRunner, 'runAll'),
-    execute: Private.delegateExecute(app, menu.findRunner, 'runAll')
+    isEnabled: Private.delegateEnabled(app, findRunner, 'runAll'),
+    execute: Private.delegateExecute(app, findRunner, 'runAll')
   });
 
   commands.addCommand(CommandIDs.runAbove, {
     label: 'Run Above',
-    isEnabled: Private.delegateEnabled(app, menu.findRunner, 'runAbove'),
-    execute: Private.delegateExecute(app, menu.findRunner, 'runAbove')
+    isEnabled: Private.delegateEnabled(app, findRunner, 'runAbove'),
+    execute: Private.delegateExecute(app, findRunner, 'runAbove')
   });
 
   commands.addCommand(CommandIDs.runBelow, {
     label: 'Run Below',
-    isEnabled: Private.delegateEnabled(app, menu.findRunner, 'runBelow'),
-    execute: Private.delegateExecute(app, menu.findRunner, 'runBelow')
+    isEnabled: Private.delegateEnabled(app, findRunner, 'runBelow'),
+    execute: Private.delegateExecute(app, findRunner, 'runBelow')
   });
 
   let items = [
