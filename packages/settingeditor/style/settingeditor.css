@@ -178,16 +178,20 @@
 }
 
 
-#setting-editor .jp-SettingsRawEditor .jp-JSONEditor-host {
-  background-color: var(--jp-layout-color1);
-  overflow: auto;
-}
-
-
 #setting-editor .jp-SettingsRawEditor .jp-JSONEditor-header {
   position: absolute;
   right: 0;
   z-index: 9999;
+}
+
+
+#setting-editor .jp-SettingsRawEditor .jp-SettingsRawEditor-user {
+  border: 1px solid transparent;
+}
+
+
+#setting-editor .jp-SettingsRawEditor .jp-SettingsRawEditor-user.jp-mod-error {
+  border: 1px solid red;
 }
 
 

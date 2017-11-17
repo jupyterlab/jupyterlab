@@ -35,6 +35,17 @@ const RAW_EDITOR_CLASS = 'jp-SettingsRawEditor';
  */
 const BANNER_CLASS = 'jp-SettingsRawEditor-banner';
 
+
+/**
+ * A class name added to the user settings editor.
+ */
+const USER_CLASS = 'jp-SettingsRawEditor-user';
+
+/**
+ * A class name added to the user editor when there are validation errors.
+ */
+const ERROR_CLASS = 'jp-mod-error';
+
 /**
  * The banner text for the default editor.
  */
@@ -76,9 +87,11 @@ class RawEditor extends SplitPanel {
     // Create read-write user settings editor.
     const user = this._user = new CodeEditorWrapper({
       model: new CodeEditor.Model(),
-      factory: editorFactory
+      factory: editorFactory,
+      config: { lineNumbers: true }
     });
 
+    user.addClass(USER_CLASS);
     user.editor.model.mimeType = 'text/javascript';
     user.editor.model.value.changed.connect(this._onTextChanged, this);
 
@@ -204,11 +217,17 @@ class RawEditor extends SplitPanel {
     const raw = this._user.editor.model.value.text;
     const settings = this._settings;
 
-    if (!raw || !settings) {
+    if (!raw || !settings || settings.raw === raw) {
       return;
     }
 
-    console.log('text is valid?', settings.validate(raw));
+    const errors = settings.validate(raw);
+
+    if (errors) {
+      this._user.addClass(ERROR_CLASS);
+    } else {
+      this._user.removeClass(ERROR_CLASS);
+    }
   }
 
   private _defaults: CodeEditorWrapper;

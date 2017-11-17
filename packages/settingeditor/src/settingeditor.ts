@@ -116,15 +116,13 @@ class InspectorConnector extends DataConnector<InspectionHandler.IReply, void, I
       // Debounce requests at a rate of 100ms.
       const current = this._current = window.setTimeout(() => {
         if (current !== this._current) {
-          resolve(null);
-          return;
+          return resolve(null);
         }
 
         const errors = this._validate(request.text);
 
         if (!errors) {
-          resolve(null);
-          return;
+          return resolve(null);
         }
 
         resolve({ data: Private.render(errors), metadata: { } });
@@ -530,7 +528,7 @@ namespace Private {
   }
 
   /**
-   * Render an individual validation error.
+   * Render an individual validation error as a markdown string.
    */
   function renderError(error: ISchemaValidator.IError): string {
     switch (error.keyword) {
