@@ -113,7 +113,7 @@ shasum -a 256 dist/*.tar.gz
 
 ## Making a patch release of a JavaScript package
 - Backport the change to the previous release branch
-- Make a new PR against master
+- Make a new PR against the previous branch
 - Run the following script, where the package is in `/packages/package-folder-name`:
 
 ```bash
@@ -121,5 +121,5 @@ npm run patch:release package-folder-name
 ```
 
 - Push the resulting commit and tag.
-- Backport the release update to the previous release branch
 - Create a new Python release on the previous branch
+- Cherry pick the patch commit to the master branch
