@@ -34,7 +34,7 @@ class MathJax3Typesetter implements IRenderMime.ILatexTypesetter {
   constructor() {
     // initialize mathjax with with a DOM document (e.g., browser, jsdom); other documents are possible
     this._html = MathJax.document(window.document, {
-      InputJax: new TeX({}),
+      InputJax: new TeX({inlineMath: [['$', '$'], ['\\(', '\\)'] ]}),
       OutputJax: new CHTML()
     });
     }
