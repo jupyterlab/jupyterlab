@@ -9,15 +9,19 @@ import {
   IRenderMime
 } from '@jupyterlab/rendermime-interfaces';
 
-import '../style/index.css';
-
 // the MathJax core
-import  {MathJax} from "mathjax3/mathjax3/mathjax.js";
+import {
+  MathJax
+} from 'mathjax3/mathjax3/mathjax';
 // TeX input
-import {TeX} from 'mathjax3/mathjax3/input/tex.js';
+import {
+TeX
+} from 'mathjax3/mathjax3/input/tex';
 
 // HTML output
-import {CHTML} from "mathjax3/mathjax3/output/chtml.js";
+import {
+  CHTML
+} from 'mathjax3/mathjax3/output/chtml';
 
 // handler for HTML documents
 import {HTMLHandler} from "mathjax3/mathjax3/handlers/html/HTMLHandler.js";
@@ -33,9 +37,11 @@ class MathJax3Typesetter implements IRenderMime.ILatexTypesetter {
 
   constructor() {
     // initialize mathjax with with a DOM document (e.g., browser, jsdom); other documents are possible
+    const chtml = new CHTML();
+    chtml.nodes.document = window.document;
     this._html = MathJax.document(window.document, {
       InputJax: new TeX({inlineMath: [['$', '$'], ['\\(', '\\)'] ]}),
-      OutputJax: new CHTML()
+      OutputJax: chtml
     });
     }
 
@@ -43,7 +49,7 @@ class MathJax3Typesetter implements IRenderMime.ILatexTypesetter {
    * Typeset the math in a node.
    */
   typeset(node: HTMLElement): void {
-    this._html.findMath()
+    this._html.findMath({ elements: [node] })
     .compile()
     .getMetrics()
     .typeset()

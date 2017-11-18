@@ -7,7 +7,7 @@ This extension substitutes the MathJax renderer with the MathJax 3 (alpha) rende
 
 ## Prerequisites
 
-* JupyterLab ^0.28.0
+* JupyterLab ^0.29.0
 * Node.js >= 5
 
 ## Install
