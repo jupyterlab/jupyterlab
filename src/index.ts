@@ -13,6 +13,7 @@ import {
 import {
   MathJax
 } from 'mathjax3/mathjax3/mathjax';
+
 // TeX input
 import {
 TeX
@@ -35,23 +36,28 @@ MathJax.handlers.register(new HTMLHandler());
 export
 class MathJax3Typesetter implements IRenderMime.ILatexTypesetter {
 
+  constructor() {
+    const chtml = new CHTML();
+    const tex = new TeX({inlineMath: [['$', '$'], ['\\(', '\\)'] ]});
+    chtml.nodes.document = window.document;
+    this._html = MathJax.document(window.document, {
+      InputJax: tex,
+      OutputJax: chtml
+    });
+  }
+
   /**
    * Typeset the math in a node.
    */
   typeset(node: HTMLElement): void {
-    const chtml = new CHTML();
-    const tex = new TeX({inlineMath: [['$', '$'], ['\\(', '\\)'] ]});
-    chtml.nodes.document = window.document;
-    const html = MathJax.document(window.document, {
-      InputJax: tex,
-      OutputJax: chtml
-    });
-    html.findMath({elements: [node]})
+    this._html.clear()
+    .findMath({elements: [node]})
     .compile()
     .getMetrics()
     .typeset()
     .updateDocument();
   }
+  private _html: any;
 }
 
 /**
