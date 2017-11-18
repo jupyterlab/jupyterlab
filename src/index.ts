@@ -49,6 +49,17 @@ class MathJax3Typesetter implements IRenderMime.ILatexTypesetter {
    * Typeset the math in a node.
    */
   typeset(node: HTMLElement): void {
+    // Note: these functions set fields
+    // that indicate they have already been run,
+    // which prevents them from being rerun.
+    // I am not sure if this is intended behavior,
+    // but setting those fields to false forces
+    // the rerender.
+    this._html.processed.findMath = false;
+    this._html.processed.compile = false;
+    this._html.processed.getMetrics = false;
+    this._html.processed.typeset = false;
+    this._html.processed.updateDocument = false;
     this._html.findMath({ elements: [node] })
     .compile()
     .getMetrics()
