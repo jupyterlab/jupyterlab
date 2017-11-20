@@ -28,6 +28,7 @@ var options = {
 var session;
 
 
+console.log('Starting session...');
 services.Session.startNew(options).then(function(s) {
   // Rename the session.
   session = s;

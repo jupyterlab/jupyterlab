@@ -12,39 +12,46 @@ export PATH="$HOME/miniconda/bin:$PATH"
 # Run integrity first we we see the message.
 npm run integrity
 
+# Build the packages.
+npm run build:packages
+
+
 if [[ $GROUP == tests ]]; then
 
     # Run the JS and python tests
-    py.test
-    npm run build:test
-    npm test
-    npm run test:services || npm run test:services
+    py.test -v
+    jlpm run build:test
+    jlpm test
+    jlpm run test:services || jlpm run test:services
 
 fi
 
 
 if [[ $GROUP == coverage ]]; then
 
+    # Make sure the examples build
+    jlpm run build:examples
+
     # Run the coverage and python tests.
-    py.test
-    npm run build:test
-    npm run coverage
-    npm run clean
+    py.test -v
+    jlpm run build:test
+    jlpm run coverage
+    jlpm run clean
 
 fi
 
 
 if [[ $GROUP == other ]]; then
 
-    # Run the package integrity check
-    npm run integrity
+    # Build the core assets.
+    jlpm run build
 
     # Make sure we can successfully load the core app.
     python -m jupyterlab.selenium_check --core-mode
 
     # Make sure we can run the built app.
-    jupyter lab build
-    python -m jupyterlab.selenium_check 
+    jupyter labextension install ./jupyterlab/tests/mock_packages/extension
+    python -m jupyterlab.selenium_check
     jupyter labextension list
 
     # Make sure we can non-dev install.
@@ -64,38 +71,42 @@ if [[ $GROUP == other ]]; then
     jupyter labextension link extension --no-build
     jupyter labextension unlink extension --no-build
     jupyter labextension link extension --no-build
-    jupyter labextension unlink  @jupyterlab/python-tests --no-build
+    jupyter labextension unlink  @jupyterlab/mock-extension --no-build
     jupyter labextension install extension  --no-build
     jupyter labextension list
-    jupyter labextension disable @jupyterlab/python-tests
-    jupyter labextension enable @jupyterlab/python-tests
+    jupyter labextension disable @jupyterlab/mock-extension
+    jupyter labextension enable @jupyterlab/mock-extension
     jupyter labextension disable @jupyterlab/notebook-extension
-    jupyter labextension uninstall @jupyterlab/python-tests --no-build
+    jupyter labextension uninstall @jupyterlab/mock-extension --no-build
     jupyter labextension uninstall @jupyterlab/notebook-extension --no-build
     popd
 
     # Make sure we can call help on all the cli apps.
-    jupyter lab -h 
-    jupyter lab build -h 
+    jupyter lab -h
+    jupyter lab build -h
     jupyter lab clean -h
-    jupyter lab path -h 
+    jupyter lab path -h
     jupyter labextension link -h
     jupyter labextension unlink -h
-    jupyter labextension install -h 
-    jupyter labextension uninstall -h 
+    jupyter labextension install -h
+    jupyter labextension uninstall -h
     jupyter labextension list -h
     jupyter labextension enable -h
     jupyter labextension disable -h
 
     # Make sure the examples build
-    npm run build:examples
+    jlpm run build:examples
+
+    # Run the services node example.
+    pushd packages/services/examples/node
+    python main.py
+    popd
 
     # Run the link check - allow for a link to fail once
-    pip install -q pytest-check-links
     py.test --check-links -k .md . || py.test --check-links -k .md --lf .
 
     # Build the api docs
-    npm run docs
+    jlpm run docs
     cp jupyter_plugins.png docs
 
     # Verify tutorial docs build
@@ -126,8 +137,8 @@ if [[ $GROUP == other ]]; then
     npm run get:dependency react-native 
 
     # Make sure we can make release assets
-    npm run build:static
+    jlpm run build:static
     if [ ! -f ./build/release_data.json ]; then
-        echo "npm publish in jupyterlab unsucessful!"
+        echo "jlpm publish in jupyterlab unsucessful!"
     fi
 fi

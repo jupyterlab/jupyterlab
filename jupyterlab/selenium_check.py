@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, absolute_import
 
+from concurrent.futures import ThreadPoolExecutor
 from hashlib import sha256
 import json
 import os
@@ -9,11 +10,10 @@ import platform
 import sys
 import tarfile
 import time
-import threading
 import zipfile
 
-from tornado import ioloop
 from tornado.httpclient import HTTPClient
+from tornado.ioloop import IOLoop
 from notebook.notebookapp import flags, aliases
 from traitlets import Bool, Unicode
 
@@ -86,16 +86,16 @@ def ensure_geckodriver(log):
 
 test_flags = dict(flags)
 test_flags['core-mode'] = (
-    {'TestApp': {'core_mode': True}},
+    {'SeleniumApp': {'core_mode': True}},
     "Start the app in core mode."
 )
 
 
 test_aliases = dict(aliases)
-test_aliases['app-dir'] = 'TestApp.app_dir'
+test_aliases['app-dir'] = 'SeleniumApp.app_dir'
 
 
-class TestApp(LabApp):
+class SeleniumApp(LabApp):
 
     open_browser = Bool(False)
     base_url = '/foo/'
@@ -113,27 +113,26 @@ class TestApp(LabApp):
         web_app = self.web_app
         web_app.settings.setdefault('page_config_data', dict())
         web_app.settings['page_config_data']['seleniumTest'] = True
+        web_app.settings['page_config_data']['buildAvailable'] = False
 
-        self.io_loop = ioloop.IOLoop.current()
-        self.io_loop.call_later(1, self._run_selenium)
-        super(TestApp, self).start()
+        pool = ThreadPoolExecutor()
+        future = pool.submit(run_selenium, self.display_url, self.log)
+        IOLoop.current().add_future(future, self._selenium_finished)
+        super(SeleniumApp, self).start()
 
-    def _run_selenium(self):
-        # This must be done in a thread to allow the selenium driver
-        # to connect to the server.
-        thread = threading.Thread(target=run_selenium,
-            args=(self.display_url, self.log, self._selenium_finished))
-        thread.start()
-
-    def _selenium_finished(self, result):
-        self.io_loop.add_callback(lambda: sys.exit(result))
+    def _selenium_finished(self, future):
+        try:
+            sys.exit(future.result())
+        except Exception as e:
+            self.log.error(str(e))
+            sys.exit(1)
 
 
-def run_selenium(url, log, callback):
-    """Run the selenium test and call the callback with the exit code.exit
+def run_selenium(url, log):
+    """Run the selenium test and return an exit code.
     """
     if not ensure_geckodriver(log):
-        return
+        return 1
 
     log.info('Starting Firefox Driver')
     executable = GECKO_PATH
@@ -147,6 +146,7 @@ def run_selenium(url, log, callback):
     # Start a poll loop.
     log.info('Waiting for application to start...')
     t0 = time.time()
+    el = None
     while time.time() - t0 < 20:
         try:
             el = driver.find_element_by_id('seleniumResult')
@@ -161,8 +161,7 @@ def run_selenium(url, log, callback):
     if not el:
         driver.quit()
         log.error('Application did not start properly')
-        callback(1)
-        return
+        return 1
 
     errors = json.loads(el.get_attribute('textContent'))
     driver.quit()
@@ -173,12 +172,11 @@ def run_selenium(url, log, callback):
     if errors:
         for error in errors:
             log.error(str(error))
-        callback(1)
-        return
+        return 1
 
     log.info('Selenium test complete')
-    callback(0)
+    return 0
 
 
 if __name__ == '__main__':
-    TestApp.launch_instance()
+    SeleniumApp.launch_instance()

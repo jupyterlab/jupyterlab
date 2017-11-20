@@ -164,6 +164,9 @@ function main() {
         window.onerror = function(msg, url, line, col, error) {
            caught_errors.push(String(error));
         };
+        console.error = function(message) {
+            caught_errors.push(String(message));
+        }
         lab.restored.then(function() {
             var el = document.createElement('div');
             el.id = 'seleniumResult';

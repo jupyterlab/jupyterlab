@@ -8,7 +8,6 @@ from __future__ import print_function
 import json
 import os
 import sys
-from tornado.ioloop import IOLoop
 
 from jupyter_core.application import JupyterApp, base_flags, base_aliases
 
@@ -17,7 +16,7 @@ from traitlets import Bool, Unicode
 from .commands import (
     install_extension, uninstall_extension, list_extensions,
     enable_extension, disable_extension,
-    link_package, unlink_package, build, _get_linked_packages
+    link_package, unlink_package, build
 )
 
 
@@ -80,10 +79,9 @@ class InstallLabExtensionApp(BaseExtensionApp):
 
 class LinkLabExtensionApp(BaseExtensionApp):
     description = """
-    Link labextension(s) or packages.
+    Link local npm packages that are not lab extensions.
 
-    Links a package to the JupyterLab build process.  If the package is
-    an extension, it will also be installed as an extension.  A linked
+    Links a package to the JupyterLab build process. A linked
     package is manually re-installed from its source location when
     `jupyter lab build` is run.
     """
@@ -104,7 +102,7 @@ class LinkLabExtensionApp(BaseExtensionApp):
 
 
 class UnlinkLabExtensionApp(BaseExtensionApp):
-    description = "Unlink labextension(s) or packages by name or path"
+    description = "Unlink packages by name or path"
     should_build = Bool(True, config=True,
         help="Whether to build the app after the action")
 

@@ -38,6 +38,8 @@ class LabTestBase(NotebookTestBase):
         data_dir = cls.data_dir = tmp('data')
         config_dir = cls.config_dir = tmp('config')
         runtime_dir = cls.runtime_dir = tmp('runtime')
+        lab_dir = cls.lab_dir = tmp('lab')
+        lab_settings = cls.lab_settings = tmp('labsettings')
         cls.notebook_dir = tmp('notebooks')
         cls.env_patch = patch.dict('os.environ', {
             'HOME': cls.home_dir,
@@ -47,6 +49,8 @@ class LabTestBase(NotebookTestBase):
             'JUPYTER_CONFIG_DIR': config_dir,
             'JUPYTER_DATA_DIR': data_dir,
             'JUPYTER_RUNTIME_DIR': runtime_dir,
+            'JUPYTERLAB_DIR': lab_dir,
+            'JUPYTERLAB_SETTINGS_DIR': lab_settings
         })
         cls.env_patch.start()
         cls.path_patch = patch.multiple(

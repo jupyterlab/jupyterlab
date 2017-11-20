@@ -11,9 +11,9 @@ import sortPackageJson = require('sort-package-json');
 export
 function getLernaPaths(): string[] {
   let basePath = path.resolve('.');
-  let lernaConfig = require(path.join(basePath, 'lerna.json'));
+  let baseConfig = require(path.join(basePath, 'package.json'));
   let paths: string[] = [];
-  for (let config of lernaConfig.packages) {
+  for (let config of baseConfig.workspaces) {
     paths = paths.concat(glob.sync(path.join(basePath, config)));
   }
   return paths.filter(pkgPath => {

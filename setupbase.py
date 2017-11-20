@@ -62,6 +62,8 @@ def find_packages():
     """
     packages = []
     for dir, subdirs, files in os.walk('jupyterlab'):
+        if 'node_modules' in subdirs:
+            subdirs.remove('node_modules')
         package = dir.replace(osp.sep, '.')
         if '__init__.py' not in files:
             # not a package
@@ -89,7 +91,8 @@ def find_package_data():
         schema_dirs.append(pjoin(dir[slice_len:], '*'))
 
     return {
-        'jupyterlab': ['build/*', '*.js', 'package.app.json', '.npmrc',
+        'jupyterlab': ['build/*', '*.js', 'package.app.json',
+                       'yarn.lock', 'yarn.app.lock', '.yarnrc'
                        ] + theme_dirs + schema_dirs
     }
 

@@ -26,9 +26,9 @@ All source code is written in [TypeScript](http://www.typescriptlang.org/Handboo
 ### Installing Node.js and npm
 
 Building the JupyterLab from its GitHub source code requires Node.js version
-6+ and Node's package manager, ``npm``.
+4+.
 
-If you use ``conda``, you can get them with:
+If you use ``conda``, you can get it with:
 
 ```bash
 conda install -c conda-forge nodejs
@@ -74,16 +74,22 @@ steps:
 git clone https://github.com/<your-github-username>/jupyterlab.git
 cd jupyterlab
 pip install -e .
-npm install
-npm run build  # Build the dev mode assets
+jlpm install
+jlpm run build  # Build the dev mode assets
 jupyter lab build  # Build the app dir assets
 jupyter serverextension enable --py jupyterlab
 ```
 
 Notes:
 
-* At times, it may be necessary to clean your local repo with the command `npm run clean:slate`.  This will clean the repository, and re-install and 
-rebuild.  If using a local install, you will need to re-run `pip install -e .`
+* The `jlpm` command is a JupyterLab-provided, locked version of the [yarn](https://yarnpkg.com/en/).  If you have `yarn` installed already, you can use
+the `yarn` command when developing, and it will use the local version of `yarn`
+ in `jupyterlab/yarn.js` when run in the repository or a built application
+ directory.
+
+* At times, it may be necessary to clean your local repo with the command `npm run clean:slate`.  This will clean the repository, and re-install and
+rebuild.  Note that we use `npm` in this one instance because the `jlpm`
+command may not be available at the time.
 
 * If `pip` gives a `VersionConflict` error, it usually means that the installed
 version of `jupyterlab_launcher` is out of date. Run `pip install --upgrade
@@ -91,7 +97,7 @@ jupyterlab_launcher` to get the latest version.
 
 * To install JupyterLab in isolation for a single conda/virtual environment, you can add the `--sys-prefix` flag to the extension activation above; this will tie the installation to the `sys.prefix` location of your environment, without writing anything in your user-wide settings area (which are visible to all your envs):
 
-* You can run `npm run build:main:prod` to build more accurate sourcemaps that show the original
+* You can run `jlpm run build:main:prod` to build more accurate sourcemaps that show the original
   Typescript code when debugging. However, it takes a bit longer to build the sources, so is used only to build for production
   by default.
 
@@ -114,8 +120,8 @@ mode, the page will have a red stripe at the top to indicate it is an unreleased
 ### Build and run the tests
 
 ```bash
-npm run build:test
-npm test
+jlpm run build:test
+jplm test
 ```
 
 ### Build and run the stand-alone examples
@@ -123,7 +129,7 @@ npm test
 To install and build the examples in the `examples` directory:
 
 ```bash
-npm run build:examples
+jlpm run build:examples
 ```
 
 To run a specific example, change to the example's directory (i.e.
@@ -164,15 +170,16 @@ npm install --save jupyterlab
 ```bash
 git clone https://github.com/jupyterlab/jupyterlab.git
 cd jupyterlab
-npm install
-npm run build:packages
+pip install -e .
+jlpm install
+jlpm run build:packages
 ```
 
 **Rebuild**
 
 ```bash
-npm run clean
-npm run build:packages
+jlpm run clean
+jlpm run build:packages
 ```
 
 ## The Jupyter Server Extension
@@ -186,7 +193,7 @@ version 4.3 or later is installed.
 When you make a change to JupyterLab npm package source files, run:
 
 ```bash
-npm run build
+jlpm run build
 ```
 
 to build the changes and then refresh your browser to see the changes.
@@ -197,6 +204,9 @@ To have the system build after each source file change, run:
 jupyter lab --dev-mode --watch
 ```
 
+You can also run `jupyter lab --dev-mode --fast-watch` to skip
+the initial build if the assets are already built.  
+
 
 ## Build Utilities
 
@@ -205,7 +215,7 @@ To get a suggested version for a library use `npm run get:dependency foo`.
 To update the version of a library across the repo use `npm run update:dependency foo@^x.x`.
 To remove an unwanted dependency use `npm run remove:dependency foo`.
 
-The key utility is `npm run integrity`, which ensures the integrity of 
+The key utility is `npm run integrity`, which ensures the integrity of
 the packages in the repo. It will:
 
 - Ensure the core package version dependencies match everywhere.
@@ -213,14 +223,14 @@ the packages in the repo. It will:
 - Ensure a consistent version of all packages.
 - Manage the meta package.
 
-The `packages/metapackage` package is used to build all of the TypeScript 
+The `packages/metapackage` package is used to build all of the TypeScript
 in the repository at once, instead of 50+ individual builds.
 
 The integrity script also allows you to automatically add a dependency for
 a package by importing from it in the TypeScript file, and then running:
 `npm run integrity && npm install` from the repo root.
 
-We also have scripts for creating and removing packages in `packages/`, 
+We also have scripts for creating and removing packages in `packages/`,
 `npm run create:package` and `npm run remove:package`.
 
 

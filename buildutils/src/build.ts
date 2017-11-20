@@ -19,12 +19,6 @@ namespace Build {
   export
   interface IEnsureOptions {
     /**
-     * The input directory that contains the root package's assets.
-     * Defaults to the current directory.
-     */
-    input?: string;
-
-    /**
      * The output directory where the build assets should reside.
      */
     output: string;
@@ -101,12 +95,12 @@ namespace Build {
    */
   export
   function ensureAssets(options: IEnsureOptions): void {
-    let { input, output, packageNames } = options;
-    input = input || '.';
+    let { output, packageNames } = options;
 
     packageNames.forEach(function(name) {
-      const packageDir = fs.realpathSync(path.join(input, 'node_modules', name));
-      const packageData = require(path.join(packageDir, 'package.json'));
+      const packageDataPath = require.resolve(path.join(name, 'package.json'));
+      const packageDir = path.dirname(packageDataPath);
+      const packageData = require(packageDataPath);
       const extension = normalizeExtension(packageData);
       const { schemaDir, themeDir } = extension;
 

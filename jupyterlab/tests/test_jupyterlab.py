@@ -23,14 +23,11 @@ from notebook.notebookapp import NotebookApp
 from jupyter_core import paths
 
 from jupyterlab import commands
-from jupyterlab.extension import (
-    load_jupyter_server_extension
-)
+from jupyterlab.extension import load_jupyter_server_extension
 from jupyterlab.commands import (
     install_extension, uninstall_extension, list_extensions,
     build, link_package, unlink_package, build_check,
-    disable_extension, enable_extension, _get_extensions,
-    _get_linked_packages, _ensure_package, _get_disabled,
+    disable_extension, enable_extension, get_app_info,
     _test_overlap
 )
 
@@ -64,7 +61,6 @@ class TestExtension(TestCase):
         # Any TemporaryDirectory objects appended to this list will be cleaned
         # up at the end of the test run.
         self.tempdirs = []
-        self._mock_extensions = []
         self.devnull = open(os.devnull, 'w')
 
         @self.addCleanup
@@ -76,12 +72,29 @@ class TestExtension(TestCase):
 
         self.data_dir = pjoin(self.test_dir, 'data')
         self.config_dir = pjoin(self.test_dir, 'config')
+        self.pkg_names = dict()
 
         # Copy in the mock packages.
         for name in ['extension', 'incompat', 'package', 'mimeextension']:
             src = pjoin(here, 'mock_packages', name)
-            shutil.copytree(src, pjoin(self.test_dir, name))
-            setattr(self, 'mock_' + name, pjoin(self.test_dir, name))
+ 
+            def ignore(dname, files):
+                if 'node_modules' in dname:
+                    files = []
+                if 'node_modules' in files:
+                    files.remove('node_modules')
+                return dname, files
+
+            dest = pjoin(self.test_dir, name)
+            shutil.copytree(src, dest, ignore=ignore)
+
+            # Make a node modules folder so npm install is not called.
+            os.makedirs(pjoin(dest, 'node_modules'))
+
+            setattr(self, 'mock_' + name, dest)
+            with open(pjoin(dest, 'package.json')) as fid:
+                data = json.load(fid)
+            self.pkg_names[name] = data['name']
 
         self.patches = []
         p = patch.dict('os.environ', {
@@ -110,33 +123,35 @@ class TestExtension(TestCase):
         # verify our patches
         self.assertEqual(paths.ENV_CONFIG_PATH, [self.config_dir])
         self.assertEqual(paths.ENV_JUPYTER_PATH, [self.data_dir])
-        self.assertEqual(commands.get_app_dir(), os.path.realpath(pjoin(self.data_dir, 'lab')))
+        self.assertEqual(
+            commands.get_app_dir(),
+            os.path.realpath(pjoin(self.data_dir, 'lab'))
+        )
 
         self.app_dir = commands.get_app_dir()
 
-    def tearDown(self):
-        for modulename in self._mock_extensions:
-            sys.modules.pop(modulename)
-
     def test_install_extension(self):
         install_extension(self.mock_extension)
-        path = pjoin(self.app_dir, 'extensions', '*python-tests*.tgz')
+        path = pjoin(self.app_dir, 'extensions', '*.tgz')
         assert glob.glob(path)
-        assert '@jupyterlab/python-tests' in _get_extensions(self.app_dir)
+        extensions = get_app_info(self.app_dir)['extensions']
+        assert self.pkg_names['extension'] in extensions
 
     def test_install_twice(self):
         install_extension(self.mock_extension)
-        path = pjoin(commands.get_app_dir(), 'extensions', '*python-tests*.tgz')
+        path = pjoin(commands.get_app_dir(), 'extensions', '*.tgz')
         install_extension(self.mock_extension)
         assert glob.glob(path)
-        assert '@jupyterlab/python-tests' in _get_extensions(self.app_dir)
+        extensions = get_app_info(self.app_dir)['extensions']
+        assert self.pkg_names['extension'] in extensions
 
     def test_install_mime_renderer(self):
         install_extension(self.mock_mimeextension)
-        assert '@jupyterlab/mime-extension-test' in _get_extensions(self.app_dir)
+        name = self.pkg_names['mimeextension']
+        assert name in get_app_info(self.app_dir)['extensions']
 
-        uninstall_extension('@jupyterlab/mime-extension-test')
-        assert '@jupyterlab/mime-extension-test' not in _get_extensions(self.app_dir)
+        uninstall_extension(name)
+        assert name not in get_app_info(self.app_dir)['extensions']
 
     def test_install_incompatible(self):
         with pytest.raises(ValueError) as excinfo:
@@ -149,72 +164,64 @@ class TestExtension(TestCase):
             install_extension(path)
         with open(pjoin(path, 'package.json')) as fid:
             data = json.load(fid)
-        assert not data['name'] in _get_extensions(self.app_dir)
+        extensions = get_app_info(self.app_dir)['extensions']
+        assert not data['name'] in extensions
 
     def test_uninstall_extension(self):
         install_extension(self.mock_extension)
-        uninstall_extension('@jupyterlab/python-tests')
-        path = pjoin(self.app_dir, 'extensions', '*python_tests*.tgz')
+        uninstall_extension(self.pkg_names['extension'])
+        path = pjoin(self.app_dir, 'extensions', '*.tgz')
         assert not glob.glob(path)
-        assert '@jupyterlab/python-tests' not in _get_extensions(self.app_dir)
+        extensions = get_app_info(self.app_dir)['extensions']
+        assert self.pkg_names['extension'] not in extensions
 
     def test_uninstall_core_extension(self):
         uninstall_extension('@jupyterlab/console-extension')
         app_dir = self.app_dir
-        _ensure_package(app_dir)
+        build(app_dir)
         with open(pjoin(app_dir, 'staging', 'package.json')) as fid:
             data = json.load(fid)
         extensions = data['jupyterlab']['extensions']
         assert '@jupyterlab/console-extension' not in extensions
 
         install_extension('@jupyterlab/console-extension')
-        _ensure_package(app_dir)
+        build(app_dir)
         with open(pjoin(app_dir, 'staging', 'package.json')) as fid:
             data = json.load(fid)
         extensions = data['jupyterlab']['extensions']
         assert '@jupyterlab/console-extension' in extensions
 
     def test_link_extension(self):
-        link_package(self.mock_extension)
-        linked = _get_linked_packages().keys()
-        assert '@jupyterlab/python-tests' in linked
-        assert '@jupyterlab/python-tests' in _get_extensions(self.app_dir)
-
-    def test_link_mime_renderer(self):
-        link_package(self.mock_mimeextension)
-        linked = _get_linked_packages().keys()
-        assert '@jupyterlab/mime-extension-test' in linked
-        assert '@jupyterlab/mime-extension-test' in _get_extensions(self.app_dir)
-
-        unlink_package('@jupyterlab/mime-extension-test')
-        linked = _get_linked_packages().keys()
-        assert '@jupyterlab/mime-extension-test' not in linked
-        assert '@jupyterlab/mime-extension-test' not in _get_extensions(self.app_dir)
+        path = self.mock_extension
+        name = self.pkg_names['extension']
+        link_package(path)
+        app_dir = self.app_dir
+        linked = get_app_info(app_dir)['linked_packages']
+        assert name not in linked
+        assert name in get_app_info(app_dir)['extensions']
+        unlink_package(path)
+        linked = get_app_info(app_dir)['linked_packages']
+        assert name not in linked
+        assert name not in get_app_info(app_dir)['extensions']
 
     def test_link_package(self):
         path = self.mock_package
+        name = self.pkg_names['package']
         link_package(path)
-        linked = _get_linked_packages().keys()
-        with open(pjoin(path, 'package.json')) as fid:
-            data = json.load(fid)
-        assert data['name'] in linked
-        assert not data['name'] in _get_extensions(self.app_dir)
+        app_dir = self.app_dir
+        linked = get_app_info(app_dir)['linked_packages']
+        assert name in linked
+        assert name not in get_app_info(app_dir)['extensions']
         unlink_package(path)
-        linked = _get_linked_packages().keys()
-        assert not data['name'] in linked
-
-    def test_link_incompatible(self):
-        with pytest.raises(ValueError) as excinfo:
-            install_extension(self.mock_incompat)
-        assert 'Conflicting Dependencies' in str(excinfo.value)
+        linked = get_app_info(app_dir)['linked_packages']
+        assert name not in linked
 
     def test_unlink_package(self):
-        target = self.mock_extension
+        target = self.mock_package
         link_package(target)
         unlink_package(target)
-        linked = _get_linked_packages().keys()
-        assert '@jupyterlab/python-tests' not in linked
-        assert '@jupyterlab/python-tests' not in _get_extensions(self.app_dir)
+        linked = get_app_info(self.app_dir)['linked_packages']
+        assert self.pkg_names['package'] not in linked
 
     def test_list_extensions(self):
         install_extension(self.mock_extension)
@@ -224,22 +231,24 @@ class TestExtension(TestCase):
         app_dir = self.tempdir()
 
         install_extension(self.mock_extension, app_dir)
-        path = pjoin(app_dir, 'extensions', '*python-tests*.tgz')
+        path = pjoin(app_dir, 'extensions', '*.tgz')
         assert glob.glob(path)
-        assert '@jupyterlab/python-tests' in _get_extensions(app_dir)
+        extensions = get_app_info(app_dir)['extensions']
+        assert self.pkg_names['extension'] in extensions
 
-        uninstall_extension('@jupyterlab/python-tests', app_dir)
-        path = pjoin(app_dir, 'extensions', '*python-tests*.tgz')
+        uninstall_extension(self.pkg_names['extension'], app_dir)
+        path = pjoin(app_dir, 'extensions', '*.tgz')
         assert not glob.glob(path)
-        assert '@jupyterlab/python-tests' not in _get_extensions(app_dir)
+        extensions = get_app_info(app_dir)['extensions']
+        assert self.pkg_names['extension'] not in extensions
 
-        link_package(self.mock_extension, app_dir)
-        linked = _get_linked_packages(app_dir).keys()
-        assert '@jupyterlab/python-tests' in linked
+        link_package(self.mock_package, app_dir)
+        linked = get_app_info(app_dir)['linked_packages']
+        assert self.pkg_names['package'] in linked
 
-        unlink_package(self.mock_extension, app_dir)
-        linked = _get_linked_packages(app_dir).keys()
-        assert '@jupyterlab/python-tests' not in linked
+        unlink_package(self.mock_package, app_dir)
+        linked = get_app_info(app_dir)['linked_packages']
+        assert self.pkg_names['package'] not in linked
 
     def test_app_dir_use_sys_prefix(self):
         app_dir = self.tempdir()
@@ -247,9 +256,10 @@ class TestExtension(TestCase):
             os.removedirs(self.app_dir)
 
         install_extension(self.mock_extension)
-        path = pjoin(app_dir, 'extensions', '*python-tests*.tgz')
+        path = pjoin(app_dir, 'extensions', '*.tgz')
         assert not glob.glob(path)
-        assert '@jupyterlab/python-tests' in _get_extensions(app_dir)
+        extensions = get_app_info(app_dir)['extensions']
+        assert self.pkg_names['extension'] in extensions
 
     def test_app_dir_shadowing(self):
         app_dir = self.tempdir()
@@ -258,25 +268,29 @@ class TestExtension(TestCase):
             os.removedirs(sys_dir)
 
         install_extension(self.mock_extension)
-        sys_path = pjoin(sys_dir, 'extensions', '*python-tests*.tgz')
+        sys_path = pjoin(sys_dir, 'extensions', '*.tgz')
         assert glob.glob(sys_path)
-        app_path = pjoin(app_dir, 'extensions', '*python-tests*.tgz')
+        app_path = pjoin(app_dir, 'extensions', '*.tgz')
         assert not glob.glob(app_path)
-        assert '@jupyterlab/python-tests' in _get_extensions(app_dir)
+        extensions = get_app_info(app_dir)['extensions']
+        assert self.pkg_names['extension'] in extensions
 
         install_extension(self.mock_extension, app_dir)
         assert glob.glob(app_path)
-        assert '@jupyterlab/python-tests' in _get_extensions(app_dir)
+        extensions = get_app_info(app_dir)['extensions']
+        assert self.pkg_names['extension'] in extensions
 
-        uninstall_extension('@jupyterlab/python-tests', app_dir)
+        uninstall_extension(self.pkg_names['extension'], app_dir)
         assert not glob.glob(app_path)
         assert glob.glob(sys_path)
-        assert '@jupyterlab/python-tests' in _get_extensions(app_dir)
+        extensions = get_app_info(app_dir)['extensions']
+        assert self.pkg_names['extension'] in extensions
 
-        uninstall_extension('@jupyterlab/python-tests', app_dir)
+        uninstall_extension(self.pkg_names['extension'], app_dir)
         assert not glob.glob(app_path)
         assert not glob.glob(sys_path)
-        assert '@jupyterlab/python-tests' not in _get_extensions(app_dir)
+        extensions = get_app_info(app_dir)['extensions']
+        assert self.pkg_names['extension'] not in extensions
 
     def test_build(self):
         install_extension(self.mock_extension)
@@ -285,13 +299,13 @@ class TestExtension(TestCase):
         entry = pjoin(self.app_dir, 'staging', 'build', 'index.out.js')
         with open(entry) as fid:
             data = fid.read()
-        assert '@jupyterlab/python-tests' in data
+        assert self.pkg_names['extension'] in data
 
         # check static directory.
         entry = pjoin(self.app_dir, 'static', 'index.out.js')
         with open(entry) as fid:
             data = fid.read()
-        assert '@jupyterlab/python-tests' in data
+        assert self.pkg_names['extension'] in data
 
     def test_build_custom(self):
         install_extension(self.mock_extension)
@@ -301,7 +315,7 @@ class TestExtension(TestCase):
         entry = pjoin(self.app_dir, 'static', 'index.out.js')
         with open(entry) as fid:
             data = fid.read()
-        assert '@jupyterlab/python-tests' in data
+        assert self.pkg_names['extension'] in data
 
         pkg = pjoin(self.app_dir, 'static', 'package.json')
         with open(pkg) as fid:
@@ -313,44 +327,47 @@ class TestExtension(TestCase):
         app = NotebookApp()
         stderr = sys.stderr
         sys.stderr = self.devnull
-        app.initialize()
+        app.initialize(argv=[])
         sys.stderr = stderr
         load_jupyter_server_extension(app)
 
     def test_disable_extension(self):
         app_dir = self.tempdir()
         install_extension(self.mock_extension, app_dir)
-        disable_extension('@jupyterlab/python-tests', app_dir)
-        disabled = _get_disabled(app_dir)
-        assert '@jupyterlab/python-tests' in disabled
+        disable_extension(self.pkg_names['extension'], app_dir)
+        info = get_app_info(app_dir)
+        assert self.pkg_names['extension'] in info['disabled']
         disable_extension('@jupyterlab/notebook-extension', app_dir)
-        disabled = _get_disabled(app_dir)
-        assert '@jupyterlab/notebook-extension' in disabled
-        assert '@jupyterlab/python-tests' in disabled
+        info = get_app_info(app_dir)
+        assert '@jupyterlab/notebook-extension' in info['disabled']
+        assert self.pkg_names['extension'] in info['disabled']
 
     def test_enable_extension(self):
         app_dir = self.tempdir()
         install_extension(self.mock_extension, app_dir)
-        disable_extension('@jupyterlab/python-tests', app_dir)
-        enable_extension('@jupyterlab/python-tests', app_dir)
-        disabled = _get_disabled(app_dir)
-        assert '@jupyterlab/python-tests' not in disabled
+        disable_extension(self.pkg_names['extension'], app_dir)
+        enable_extension(self.pkg_names['extension'], app_dir)
+        info = get_app_info(app_dir)
+        assert self.pkg_names['extension'] not in info['disabled']
+        disable_extension('@jupyterlab/notebook-extension', app_dir)
+        assert self.pkg_names['extension'] not in info['disabled']
+        assert '@jupyterlab/notebook-extension' not in info['disabled']
 
     def test_build_check(self):
         # Do the initial build.
-        assert build_check()[0]
-        link_package(self.mock_extension)
+        assert build_check()
+        install_extension(self.mock_extension)
         link_package(self.mock_package)
         build()
-        assert not build_check()[0]
+        assert not build_check()
 
         # Check installed extensions.
         install_extension(self.mock_mimeextension)
-        assert build_check()[0]
-        uninstall_extension('@jupyterlab/mime-extension-test')
-        assert not build_check()[0]
+        assert build_check()
+        uninstall_extension(self.pkg_names['mimeextension'])
+        assert not build_check()
 
-        # Check linked extensions.
+        # Check local extensions.
         pkg_path = pjoin(self.mock_extension, 'package.json')
         with open(pkg_path) as fid:
             data = json.load(fid)
@@ -359,28 +376,26 @@ class TestExtension(TestCase):
         data['foo'] = 'bar'
         with open(pkg_path, 'w') as fid:
             json.dump(data, fid)
-        assert build_check()[0]
-        assert build_check()[0]
+        assert build_check()
+        assert build_check()
 
         with open(pkg_path, 'wb') as fid:
             fid.write(orig)
-        assert not build_check()[0]
+
+        assert not build_check()
 
         # Check linked packages.
-        pkg_path = pjoin(self.mock_package, 'package.json')
-        with open(pkg_path) as fid:
-            data = json.load(fid)
+        pkg_path = pjoin(self.mock_package, 'index.js')
         with open(pkg_path, 'rb') as fid:
             orig = fid.read()
-        data['foo'] = 'bar'
-        with open(pkg_path, 'w') as fid:
-            json.dump(data, fid)
-        assert build_check()[0]
-        assert build_check()[0]
+        with open(pkg_path, 'wb') as fid:
+            fid.write(orig + b'\nconsole.log("hello");')
+        assert build_check()
+        assert build_check()
 
         with open(pkg_path, 'wb') as fid:
             fid.write(orig)
-        assert not build_check()[0]
+        assert not build_check()
 
     def test_compatibility(self):
         assert _test_overlap('^0.6.0', '^0.6.1')

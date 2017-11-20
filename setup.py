@@ -25,9 +25,16 @@ PY3 = (sys.version_info[0] >= 3)
 #-----------------------------------------------------------------------------
 
 from distutils import log
+from hashlib import sha256
 import json
 import os
 from glob import glob
+
+try:
+    from urllib2 import urlopen
+except ImportError:
+    from urllib.request import urlopen
+
 
 # BEFORE importing distutils, remove MANIFEST. distutils doesn't properly
 # update it when the contents of directories change.
@@ -38,6 +45,7 @@ from distutils.command.build_py import build_py
 from setuptools.command.sdist import sdist
 from setuptools import setup
 from setuptools.command.bdist_egg import bdist_egg
+from setuptools import setup
 
 
 # Our own imports
@@ -114,12 +122,15 @@ setup_args['cmdclass'] = cmdclass
 setuptools_args = {}
 install_requires = setuptools_args['install_requires'] = [
     'notebook>=4.3.1',
-    'jupyterlab_launcher>=0.5.2,<0.6.0'
+    'jupyterlab_launcher>=0.5.2,<0.6.0',
+    'ipython_genutils',
+    "futures;python_version<'3.0'",
+    "subprocess32;python_version<'3.0'"
 ]
 
 extras_require = setuptools_args['extras_require'] = {
     'test:python_version == "2.7"': ['mock'],
-    'test': ['pytest', 'requests', 'selenium'],
+    'test': ['pytest', 'requests', 'pytest-check-links', 'selenium'],
     'docs': [
         'sphinx',
         'recommonmark',
@@ -136,7 +147,8 @@ if 'setuptools' in sys.modules:
         'console_scripts': [
             'jupyter-lab = jupyterlab.labapp:main',
             'jupyter-labextension = jupyterlab.labextensions:main',
-            'jupyter-labhub = jupyterlab.labhubapp:main'
+            'jupyter-labhub = jupyterlab.labhubapp:main',
+            'jlpm = jupyterlab.jlpmapp:main',
         ]
     }
     setup_args.pop('scripts', None)

@@ -37,5 +37,5 @@ inquirer.prompt(questions).then(answers => {
   data.name = name;
   data.description = description;
   utils.writePackageData(jsonPath, data);
-  utils.run('npm run integrity');
+  utils.run('jlpm run integrity');
 });

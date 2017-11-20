@@ -12,7 +12,7 @@ environment:
 
 # build cache to preserve files/folders between builds
 cache:
-  - '%APPDATA%\npm-cache'  # npm cache
+  - '%LOCALAPPDATA%\\Yarn' # yarn cache
 
 # scripts that run after cloning repository
 install:
@@ -30,14 +30,15 @@ install:
   - ps: Install-Product node $env:nodejs_version
   # Install newer Firefox
   - choco install firefox
-  # Make sure our packages are up to date.
-  - npm update
   # Ensure python and python scripts are from right version:
   - 'SET "PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"'
   # Install our package:
   - 'pip install --upgrade -e ".[test]"'
-  - 'npm install'
-  - 'npm run build:main'
+  - 'jlpm versions'
+  - 'jlpm config current'
+  - 'jlpm cache list'
+  - 'jlpm install'
+  - 'jlpm run build:main'
   - 'jupyter lab build'
 
 build: off
@@ -45,9 +46,10 @@ build: off
 # to run your custom scripts instead of automatic tests
 test_script:
   # Run integrity first we we see the message.
-  - 'npm run integrity'
+  - 'jlpm run integrity'
   - 'py.test'
-  - 'npm run build'
-  - 'npm run build:test'
-  - 'npm test || npm test || npm test'
+  - 'git status'
+  - 'jlpm run build'
+  - 'jlpm run build:test'
+  - 'jlpm test || jlpm test || jlpm test'
   - 'python -m jupyterlab.selenium_check'

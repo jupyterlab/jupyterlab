@@ -3,6 +3,7 @@ import json
 
 from jupyterlab.tests.utils import LabTestBase, APITester
 from notebook.tests.launchnotebook import assert_http_error
+from jupyterlab.commands import build
 
 
 class SettingsAPI(APITester):
@@ -19,6 +20,10 @@ class SettingsAPI(APITester):
 
 class SettingsAPITest(LabTestBase):
     """Test the settings web service API"""
+    @classmethod
+    def setup_class(cls):
+        super(SettingsAPITest, cls).setup_class()
+        build()
 
     def setUp(self):
         self.settings_api = SettingsAPI(self.request)
