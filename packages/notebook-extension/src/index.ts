@@ -26,7 +26,7 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
-  IMainMenu
+  IMainMenu, IKernelMenu, IRunMenu, IViewMenu
 } from '@jupyterlab/mainmenu';
 
 import {
@@ -449,7 +449,7 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
   mainMenu.fileMenu.newMenu.addItem({ command: CommandIDs.createNew });
 
   // Add a kernel user to the Kernel menu
-  mainMenu.kernelMenu.addUser<NotebookPanel>({
+  mainMenu.kernelMenu.kernelUsers.set('Notebook', {
     tracker,
     interruptKernel: current => {
       let kernel = current.session.kernel;
@@ -460,7 +460,7 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
     },
     restartKernel: current => current.session.restart(),
     changeKernel: current => current.session.selectKernel()
-  });
+  } as IKernelMenu.IKernelUser<NotebookPanel>);
 
   // Add some commands to the application view menu.
   const viewGroup = [
@@ -472,7 +472,7 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
   mainMenu.viewMenu.addGroup(viewGroup);
 
   // Add an IEditorViewer to the application view menu
-  mainMenu.viewMenu.addEditorViewer<NotebookPanel>({
+  mainMenu.viewMenu.editorViewers.set('Editor', {
     tracker,
     toggleLineNumbers: widget => {
       NotebookActions.toggleAllLineNumbers(widget.notebook);
@@ -484,10 +484,10 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
       widget.notebook.activeCell.editor.getOption('lineNumbers'),
     matchBracketsToggled: widget =>
       widget.notebook.activeCell.editor.getOption('matchBrackets'),
-  });
+  } as IViewMenu.IEditorViewer<NotebookPanel>);
 
   // Add an ICodeRunner to the application run menu
-  mainMenu.runMenu.addRunner<NotebookPanel>({
+  mainMenu.runMenu.codeRunners.set('Notebook', {
     tracker,
     run: current => {
       const { context, notebook } = current;
@@ -499,7 +499,7 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
       return NotebookActions.runAll(notebook, context.session)
       .then(() => void 0);
     }
-  });
+  } as IRunMenu.ICodeRunner<NotebookPanel>);
 
   // Add commands to the application edit menu.
   const editGroup = [

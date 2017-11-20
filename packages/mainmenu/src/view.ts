@@ -6,7 +6,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IJupyterLabMenu, IMenuExtender, JupyterLabMenu, findExtender
+  IJupyterLabMenu, IMenuExtender, JupyterLabMenu
 } from './labmenu';
 
 /**
@@ -15,11 +15,12 @@ import {
 export
 interface IViewMenu extends IJupyterLabMenu {
   /**
-   * Add an IKernelUser to the Kernel menu.
+   * A map storing IKernelUsers for the Kernel menu.
    *
-   * @param user - An IKernelUser.
+   * ### Notes
+   * The key for the map may be used in menu labels.
    */
-  addEditorViewer<T extends Widget>(user: IViewMenu.IEditorViewer<T>): void;
+  readonly editorViewers: Map<string, IViewMenu.IEditorViewer<Widget>>;
 }
 
 /**
@@ -33,30 +34,18 @@ class ViewMenu extends JupyterLabMenu implements IViewMenu {
   constructor(options: Menu.IOptions) {
     super(options);
     this.title.label = 'View';
+
+    this.editorViewers =
+      new Map<string, IViewMenu.IEditorViewer<Widget>>();
   }
 
   /**
-   * Add a new KernelUser to the menu.
+   * A map storing IKernelUsers for the Kernel menu.
    *
-   * @param user - the user to add.
+   * ### Notes
+   * The key for the map may be used in menu labels.
    */
-  addEditorViewer<T extends Widget>(editorViewer: IViewMenu.IEditorViewer<T>): void {
-    this._editorViewers.push(editorViewer);
-  }
-
-  /**
-   * Find a kernel user for a given widget.
-   *
-   * @param widget - A widget to check.
-   *
-   * @returns an IKernelUser if any of the registered users own the widget.
-   *   Otherwise it returns undefined.
-   */
-  findEditorViewer(widget: Widget | null): IViewMenu.IEditorViewer<Widget> | undefined {
-    return findExtender<Widget>(widget, this._editorViewers);
-  }
-
-  private _editorViewers: IViewMenu.IEditorViewer<Widget>[] = [];
+  readonly editorViewers: Map<string, IViewMenu.IEditorViewer<Widget>>;
 }
 
 /**

@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
-  IMainMenu
+  IMainMenu, IViewMenu
 } from '@jupyterlab/mainmenu';
 
 
@@ -398,7 +398,7 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
     menu.fileMenu.newMenu.addItem({ command: CommandIDs.createNew });
 
     // Add editor view options.
-    menu.viewMenu.addEditorViewer<FileEditor>({
+    menu.viewMenu.editorViewers.set('Editor', {
       tracker,
       toggleLineNumbers: widget => {
         const lineNumbers = !widget.editor.getOption('lineNumbers');
@@ -415,7 +415,7 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
       lineNumbersToggled: widget => widget.editor.getOption('lineNumbers'),
       wordWrapToggled: widget => widget.editor.getOption('lineWrap'),
       matchBracketsToggled: widget => widget.editor.getOption('matchBrackets')
-    });
+    } as IViewMenu.IEditorViewer<FileEditor>);
   }
 
   app.contextMenu.addItem({

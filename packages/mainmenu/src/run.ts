@@ -6,7 +6,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IJupyterLabMenu, IMenuExtender, JupyterLabMenu, findExtender
+  IJupyterLabMenu, IMenuExtender, JupyterLabMenu
 } from './labmenu';
 
 /**
@@ -15,23 +15,12 @@ import {
 export
 interface IRunMenu extends IJupyterLabMenu {
   /**
-   * Add an ICodeRunner to the Run menu.
+   * A map storing ICodeRunner for the Run menu.
    *
-   * @param user - An ICodeRunner.
+   * ### Notes
+   * The key for the map may be used in menu labels.
    */
-  addRunner<T extends Widget>(user: IRunMenu.ICodeRunner<T>): void;
-
-  /**
-   * Given a widget, see if it belongs to
-   * any of the ICodeRunners registered with
-   * the run menu.
-   *
-   * @param widget: a widget.
-   *
-   * @returns an ICodeRunner, if any of the registered users own
-   *   the widget, otherwise undefined.
-   */
-  findRunner(widget: Widget | null): IRunMenu.ICodeRunner<Widget> | undefined;
+  readonly codeRunners: Map<string, IRunMenu.ICodeRunner<Widget>>;
 }
 
 /**
@@ -45,32 +34,18 @@ class RunMenu extends JupyterLabMenu implements IRunMenu {
   constructor(options: Menu.IOptions) {
     super(options);
     this.title.label = 'Run';
+
+    this.codeRunners =
+      new Map<string, IRunMenu.ICodeRunner<Widget>>();
   }
 
   /**
-   * Add an ICodeRunner to the Run menu.
+   * A map storing ICodeRunner for the Run menu.
    *
-   * @param user - An ICodeRunner.
+   * ### Notes
+   * The key for the map may be used in menu labels.
    */
-  addRunner<T extends Widget>(runner: IRunMenu.ICodeRunner<T>): void {
-    this._runners.push(runner);
-  }
-
-  /**
-   * Given a widget, see if it belongs to
-   * any of the ICodeRunner registered with
-   * the run menu.
-   *
-   * @param widget: a widget.
-   *
-   * @returns an ICodeRunner, if any of the registered users own
-   *   the widget, otherwise undefined.
-   */
-  findRunner(widget: Widget | null): IRunMenu.ICodeRunner<Widget> | undefined {
-    return findExtender<Widget>(widget, this._runners);
-  }
-
-  private _runners: IRunMenu.ICodeRunner<Widget>[] = [];
+  readonly codeRunners: Map<string, IRunMenu.ICodeRunner<Widget>>;
 }
 
 /**

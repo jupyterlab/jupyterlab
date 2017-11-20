@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
-  IMainMenu
+  IMainMenu, IKernelMenu, IRunMenu
 } from '@jupyterlab/mainmenu';
 
 import {
@@ -414,7 +414,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
   mainMenu.fileMenu.newMenu.addItem({ command: CommandIDs.create });
 
   // Add a kernel user to the Kernel menu
-  mainMenu.kernelMenu.addUser<ConsolePanel>({
+  mainMenu.kernelMenu.kernelUsers.set('Console', {
     tracker,
     interruptKernel: current => {
       let kernel = current.console.session.kernel;
@@ -425,13 +425,13 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     },
     restartKernel: current => current.console.session.restart(),
     changeKernel: current => current.console.session.selectKernel()
-  });
+  } as IKernelMenu.IKernelUser<ConsolePanel>);
 
   // Add a code runner to the Run menu.
-  mainMenu.runMenu.addRunner<ConsolePanel>({
+  mainMenu.runMenu.codeRunners.set('Console', {
     tracker,
     run: current => current.console.execute(true)
-  });
+  } as IRunMenu.ICodeRunner<ConsolePanel>);
 
   // Add the console menu.
   menu.addItem({ command: CommandIDs.runUnforced });

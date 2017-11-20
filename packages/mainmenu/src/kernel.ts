@@ -10,7 +10,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IJupyterLabMenu, JupyterLabMenu, IMenuExtender, findExtender
+  IJupyterLabMenu, JupyterLabMenu, IMenuExtender
 } from './labmenu';
 
 /**
@@ -19,23 +19,20 @@ import {
 export
 interface IKernelMenu extends IJupyterLabMenu {
   /**
-   * Add an IKernelUser to the Kernel menu.
+   * A map storing IKernelUsers for the Kernel menu.
    *
-   * @param user - An IKernelUser.
+   * ### Notes
+   * The key for the map may be used in menu labels.
    */
-  addUser<T extends Widget>(user: IKernelMenu.IKernelUser<T>): void;
-
+  readonly kernelUsers: Map<string, IKernelMenu.IKernelUser<Widget>>;
+  
   /**
-   * Given a widget, see if it belongs to
-   * any of the IKernelUsers registered with
-   * the kernel menu.
+   * A map storing IConsoleCreators for the Kernel menu.
    *
-   * @param widget: a widget.
-   *
-   * @returns an IKernelUser, if any of the registered users own
-   *   the widget, otherwise undefined.
+   * ### Notes
+   * The key for the map may be used in menu labels.
    */
-  findUser(widget: Widget | null): IKernelMenu.IKernelUser<Widget> | undefined;
+  readonly consoleCreators: Map<string, IKernelMenu.IConsoleCreator<Widget>>;
 }
 
 /**
@@ -49,30 +46,28 @@ class KernelMenu extends JupyterLabMenu implements IKernelMenu {
   constructor(options: Menu.IOptions) {
     super(options);
     this.title.label = 'Kernel';
+
+    this.kernelUsers =
+      new Map<string, IKernelMenu.IKernelUser<Widget>>();
+    this.consoleCreators =
+      new Map<string, IKernelMenu.IConsoleCreator<Widget>>();
   }
 
   /**
-   * Add a new KernelUser to the menu.
+   * A map storing IKernelUsers for the Kernel menu.
    *
-   * @param user - the user to add.
+   * ### Notes
+   * The key for the map may be used in menu labels.
    */
-  addUser<T extends Widget>(user: IKernelMenu.IKernelUser<T>): void {
-    this._users.push(user);
-  }
-
+  readonly kernelUsers: Map<string, IKernelMenu.IKernelUser<Widget>>;
+  
   /**
-   * Find a kernel user for a given widget.
+   * A map storing IConsoleCreators for the Kernel menu.
    *
-   * @param widget - A widget to check.
-   *
-   * @returns an IKernelUser if any of the registered users own the widget.
-   *   Otherwise it returns undefined.
+   * ### Notes
+   * The key for the map may be used in menu labels.
    */
-  findUser(widget: Widget | null): IKernelMenu.IKernelUser<Widget> | undefined {
-    return findExtender<Widget>(widget, this._users);
-  }
-
-  private _users: IKernelMenu.IKernelUser<Widget>[] = [];
+  readonly consoleCreators: Map<string, IKernelMenu.IConsoleCreator<Widget>>;
 }
 
 /**
@@ -100,6 +95,17 @@ namespace IKernelMenu {
      * A function to change the kernel.
      */
     changeKernel?: (widget: T) => Promise<void>;
+  }
+
+  /**
+   * Interface for a command to create a console for an activity.
+   */
+  export
+  interface IConsoleCreator<T extends Widget> extends IMenuExtender<T> {
+    /**
+     * The function to create the console.
+     */
+    createConsole: (widget: T) => Promise<void>;
   }
 }
 

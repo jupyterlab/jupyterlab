@@ -114,17 +114,6 @@ class JupyterLabMenu extends Menu implements IJupyterLabMenu {
   private _startIndex = 0;
 }
 
-/**
- * Given a widget and a list of menu extenders, check to see if
- * any of the menu extenders own that widget.
- */
-export
-function findExtender<T extends Widget>(widget: T | null, extenders: IMenuExtender<T>[]): IMenuExtender<T> | undefined {
-  if (!widget) {
-    return undefined;
-  }
-  return ArrayExt.findFirstValue(extenders, el => el.tracker.has(widget))
-}
 
 /**
  * A namespace for private data.
