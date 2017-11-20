@@ -67,10 +67,10 @@
       },
       "type": "object"
     },
-    "console:run": {
+    "console:run-unforced": {
       "default": { },
       "properties": {
-        "command": { "default": "console:run" },
+        "command": { "default": "console:run-unforced" },
         "keys": { "default": ["Enter"] },
         "selector": { "default": ".jp-CodeConsole-promptCell" }
       },
@@ -483,21 +483,12 @@
       },
       "type": "object"
     },
-    "notebook:run-cell-and-select-next-1": {
+    "notebook:run-cell-and-select-next": {
       "default": { },
       "properties": {
         "command": { "default": "notebook:run-cell-and-select-next" },
         "keys": { "default": ["Shift Enter"] },
         "selector": { "default": ".jp-Notebook.jp-mod-editMode" }
-      },
-      "type": "object"
-    },
-    "notebook:run-cell-and-select-next-2": {
-      "default": { },
-      "properties": {
-        "command": { "default": "notebook:run-cell-and-select-next" },
-        "keys": { "default": ["Shift Enter"] },
-        "selector": { "default": ".jp-Notebook:focus" }
       },
       "type": "object"
     },
@@ -543,6 +534,15 @@
         "command": { "default": "settingeditor:debug" },
         "keys": { "default": ["Accel I"] },
         "selector": { "default": ".jp-SettingEditor" }
+      },
+      "type": "object"
+    },
+    "run:run": {
+      "default": { },
+      "properties": {
+        "command": { "default": "run:run" },
+        "keys": { "default": ["Shift Enter"] },
+        "selector": { "default": "[data-jp-code-runner]:focus" }
       },
       "type": "object"
     },

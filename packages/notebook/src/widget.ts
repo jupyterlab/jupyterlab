@@ -66,6 +66,11 @@ import {
 const KERNEL_USER = 'jpKernelUser';
 
 /**
+ * The data attribute added to a widget that can run code.
+ */
+const CODE_RUNNER = 'jpCodeRunner';
+
+/**
  * The class name added to notebook widgets.
  */
 const NB_CLASS = 'jp-Notebook';
@@ -175,6 +180,7 @@ class StaticNotebook extends Widget {
     super();
     this.addClass(NB_CLASS);
     this.node.dataset[KERNEL_USER] = 'true';
+    this.node.dataset[CODE_RUNNER] = 'true';
     this.rendermime = options.rendermime;
     this.layout = new Private.NotebookPanelLayout();
     this.contentFactory = (

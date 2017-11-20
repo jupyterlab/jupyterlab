@@ -57,6 +57,11 @@ import {
 const KERNEL_USER = 'jpKernelUser';
 
 /**
+ * The data attribute added to a widget can run code.
+ */
+const CODE_RUNNER = 'jpCodeRunner';
+
+/**
  * The class name added to console widgets.
  */
 const CONSOLE_CLASS = 'jp-CodeConsole';
@@ -108,6 +113,7 @@ class CodeConsole extends Widget {
     super();
     this.addClass(CONSOLE_CLASS);
     this.node.dataset[KERNEL_USER] = 'true';
+    this.node.dataset[CODE_RUNNER] = 'true';
     this.node.tabIndex = -1;  // Allow the widget to take focus.
 
     // Create the panels that hold the content and input.

@@ -57,7 +57,7 @@ namespace CommandIDs {
   const clear = 'console:clear';
 
   export
-  const run = 'console:run';
+  const runUnforced = 'console:run-unforced';
 
   export
   const runForced = 'console:run-forced';
@@ -280,9 +280,9 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
   });
   palette.addItem({ command, category });
 
-  command = CommandIDs.run;
+  command = CommandIDs.runUnforced;
   commands.addCommand(command, {
-    label: 'Run Cell',
+    label: 'Run Cell (unforced)',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
@@ -434,7 +434,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
   });
 
   // Add the console menu.
-  menu.addItem({ command: CommandIDs.run });
+  menu.addItem({ command: CommandIDs.runUnforced });
   menu.addItem({ command: CommandIDs.runForced });
   menu.addItem({ command: CommandIDs.linebreak });
   menu.addItem({ type: 'separator' });
