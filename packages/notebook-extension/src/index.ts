@@ -462,6 +462,18 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
     changeKernel: current => current.session.selectKernel()
   } as IKernelMenu.IKernelUser<NotebookPanel>);
 
+  // Add a console creator the the Kernel menu
+  mainMenu.kernelMenu.consoleCreators.set('Notebook', {
+    tracker,
+    createConsole: current => {
+      const options: ReadonlyJSONObject = {
+        path: current.context.path,
+        preferredLanguage: current.context.model.defaultKernelLanguage
+      };
+      return commands.execute('console:create', options);
+    }
+  } as IKernelMenu.IConsoleCreator<NotebookPanel>);
+
   // Add some commands to the application view menu.
   const viewGroup = [
     CommandIDs.hideAllCode,
@@ -1371,8 +1383,6 @@ function createMenu(app: JupyterLab): Menu {
   });
 
   menu.addItem({ command: CommandIDs.runAll });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ command: CommandIDs.createConsole });
   menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.closeAndShutdown });
   menu.addItem({ command: CommandIDs.trust });

@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
-  IMainMenu, IViewMenu
+  IMainMenu, IKernelMenu, IViewMenu
 } from '@jupyterlab/mainmenu';
 
 
@@ -416,6 +416,18 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
       wordWrapToggled: widget => widget.editor.getOption('lineWrap'),
       matchBracketsToggled: widget => widget.editor.getOption('matchBrackets')
     } as IViewMenu.IEditorViewer<FileEditor>);
+
+    // Add a console creator the the Kernel menu
+    menu.kernelMenu.consoleCreators.set('Editor', {
+      tracker,
+      createConsole: current => {
+        const options = {
+          path: current.context.path,
+          preferredLanguage: current.context.model.defaultKernelLanguage
+        };
+        return commands.execute('console:create', options);
+      }
+    } as IKernelMenu.IConsoleCreator<FileEditor>);
   }
 
   app.contextMenu.addItem({
