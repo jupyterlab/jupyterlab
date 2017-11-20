@@ -198,6 +198,8 @@ class WatchHelper(Process):
 
         while 1:
             line = self._stdout.readline().decode('utf-8')
+            if not line:
+                raise RuntimeError('Process ended improperly')
             print(line.rstrip())
             if re.match(startup_regex, line):
                 break
