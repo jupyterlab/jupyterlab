@@ -28,9 +28,8 @@
     "clean": "rimraf lib",
     "docs": "typedoc --mode modules --module commonjs --excludeNotExported --target es5 --moduleResolution node --name JupyterLab --out ../../docs/api .",
     "prepublishOnly": "npm run build",
-    "watch": "npm run clean && run-p watch:*",
-    "watch:files": "node watch-files.js",
-    "watch:tsc": "tsc -w"
+    "watch": "tsc -w",
+    "watch:files": "node watch-files.js"
   },
   "dependencies": {
     "@jupyterlab/application": "^0.12.0",
@@ -90,7 +89,6 @@
     "fs-extra": "~4.0.2",
     "rimraf": "~2.6.2",
     "typedoc": "~0.7.2",
-    "typescript": "~2.4.2",
-    "watch": "~1.0.2"
+    "typescript": "~2.4.2"
   }
 }
