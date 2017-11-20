@@ -97,8 +97,3 @@ select.jp-mod-styled {
   -webkit-appearance: none;
   -moz-appearance: none;
 }
-
-
-a:-webkit-any-link {
-  color: var(--md-blue-600);
-}

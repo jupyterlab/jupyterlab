@@ -113,13 +113,15 @@
 }
 
 
-.jp-RenderedHTMLCommon:link {
+.jp-RenderedHTMLCommon a:link {
   text-decoration: underline;
+  color: var(--jp-content-link-color);
 }
 
 
-.jp-RenderedHTMLCommon:visited {
+.jp-RenderedHTMLCommon a:visited {
   text-decoration: underline;
+  color: var(--jp-content-link-color);
 }
 
 /*For a 14px base font size this goes as:
