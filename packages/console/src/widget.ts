@@ -52,9 +52,9 @@ import {
 
 
 /**
- * The class name added to a widget that has an active kernel.
+ * The data attribute added to a widget that has an active kernel.
  */
-const KERNEL_USER = 'jp-KernelUser';
+const KERNEL_USER = 'jpKernelUser';
 
 /**
  * The class name added to console widgets.
@@ -107,7 +107,7 @@ class CodeConsole extends Widget {
   constructor(options: CodeConsole.IOptions) {
     super();
     this.addClass(CONSOLE_CLASS);
-    this.addClass(KERNEL_USER);
+    this.node.dataset[KERNEL_USER] = 'true';
     this.node.tabIndex = -1;  // Allow the widget to take focus.
 
     // Create the panels that hold the content and input.

@@ -180,7 +180,7 @@
       "properties": {
         "command": { "default": "kernel:interrupt" },
         "keys": { "default": ["I", "I"] },
-        "selector": { "default": ".jp-KernelUser:focus" }
+        "selector": { "default": "[data-jp-kernel-user]:focus" }
       },
       "type": "object"
     },
@@ -189,7 +189,7 @@
       "properties": {
         "command": { "default": "kernel:restart" },
         "keys": { "default": ["0", "0"] },
-        "selector": { "default": ".jp-KernelUser:focus" }
+        "selector": { "default": "[data-jp-kernel-user]:focus" }
       },
       "type": "object"
     },

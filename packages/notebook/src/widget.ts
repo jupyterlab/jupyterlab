@@ -61,9 +61,9 @@ import {
 
 
 /**
- * The class name added to a widget that has an active kernel.
+ * The data attribute added to a widget that has an active kernel.
  */
-const KERNEL_USER = 'jp-KernelUser';
+const KERNEL_USER = 'jpKernelUser';
 
 /**
  * The class name added to notebook widgets.
@@ -174,7 +174,7 @@ class StaticNotebook extends Widget {
   constructor(options: StaticNotebook.IOptions) {
     super();
     this.addClass(NB_CLASS);
-    this.addClass(KERNEL_USER);
+    this.node.dataset[KERNEL_USER] = 'true';
     this.rendermime = options.rendermime;
     this.layout = new Private.NotebookPanelLayout();
     this.contentFactory = (
