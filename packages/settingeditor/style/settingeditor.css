@@ -174,7 +174,6 @@
   height: var(--jp-private-settingeditor-banner-height);
   max-height: var(--jp-private-settingeditor-banner-height);
   padding-top: 5px;
-  text-align: center;
 }
 
 
@@ -190,7 +189,7 @@
 }
 
 
-#setting-editor .jp-SettingsRawEditor .jp-SettingsRawEditor-user.jp-mod-error {
+#setting-editor .jp-SettingsRawEditor.jp-mod-error .jp-SettingsRawEditor-user {
   border: 1px solid red;
 }
 

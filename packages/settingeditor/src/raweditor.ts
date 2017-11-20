@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Toolbar
+} from '@jupyterlab/apputils';
+
+import {
   CodeEditor, CodeEditorWrapper
 } from '@jupyterlab/codeeditor';
 
@@ -24,6 +28,7 @@ import {
 import {
   SplitPanel
 } from './splitpanel';
+
 
 /**
  * A class name added to all raw editors.
@@ -97,8 +102,8 @@ class RawEditor extends SplitPanel {
 
     this.addClass(RAW_EDITOR_CLASS);
     this._onSaveError = options.onSaveError;
-    this.addWidget(Private.addBanner(defaults, DEFAULT_TITLE, BANNER_CLASS));
-    this.addWidget(Private.addBanner(user, USER_TITLE, BANNER_CLASS));
+    this.addWidget(Private.wrapEditor(defaults, DEFAULT_TITLE));
+    this.addWidget(Private.wrapEditor(user, USER_TITLE, this._toolbar));
   }
 
   /**
@@ -224,15 +229,16 @@ class RawEditor extends SplitPanel {
     const errors = settings.validate(raw);
 
     if (errors) {
-      this._user.addClass(ERROR_CLASS);
+      this.addClass(ERROR_CLASS);
     } else {
-      this._user.removeClass(ERROR_CLASS);
+      this.removeClass(ERROR_CLASS);
     }
   }
 
   private _defaults: CodeEditorWrapper;
   private _onSaveError: (reason: any) => void;
   private _settings: ISettingRegistry.ISettings | null = null;
+  private _toolbar: Toolbar<Widget> = new Toolbar();
   private _user: CodeEditorWrapper;
 }
 
@@ -268,14 +274,20 @@ namespace Private {
    * Returns a wrapper widget to hold an editor and its banner.
    */
   export
-  function addBanner(editor: Widget, bannerText: string, bannerClass: string): Widget {
+  function wrapEditor(editor: Widget, bannerText: string, toolbar?: Toolbar<Widget>): Widget {
     const widget = new Widget();
     const layout = widget.layout = new BoxLayout({ spacing: 0 });
     const banner = new Widget({
-      node: VirtualDOM.realize(h.div({ className: bannerClass }, bannerText))
+      node: VirtualDOM.realize(h.div({ className: BANNER_CLASS }, bannerText))
     });
 
-    layout.addWidget(banner);
+    if (toolbar) {
+      toolbar.insertItem(0, 'banner', banner);
+      layout.addWidget(toolbar);
+    } else {
+      layout.addWidget(banner);
+    }
+
     layout.addWidget(editor);
 
     return widget;
