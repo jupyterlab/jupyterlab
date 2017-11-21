@@ -153,7 +153,8 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
       return `Close ${widget && widget.title.label ?
              `"${widget.title.label}"` : 'Tab'}`;
     },
-    isEnabled: () => app.shell.currentWidget ? true : false,
+    isEnabled: () => !!app.shell.currentWidget &&
+                     !!app.shell.currentWidget.title.closable,
     execute: () => {
       if (app.shell.currentWidget) {
         app.shell.currentWidget.close();
