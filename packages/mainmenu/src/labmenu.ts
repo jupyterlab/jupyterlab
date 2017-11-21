@@ -69,7 +69,8 @@ class JupyterLabMenu extends Menu implements IJupyterLabMenu {
     const groupIndex = ArrayExt.upperBound(this._groups, rankGroup, Private.itemCmp);
 
     // Determine whether we need separators before or after the group.
-    let shouldPrependSeparator = groupIndex > 0;
+    let shouldPrependSeparator = groupIndex > 0 ||
+                                 (groupIndex === 0 && this.startIndex > 0);
     let shouldAppendSeparator = groupIndex === 0 && this._groups.length > 0;
 
     // Determine the index of the menu at which to insert the group.

@@ -45,6 +45,7 @@ class FileMenu extends JupyterLabMenu implements IFileMenu {
 
     this.closeAndCleaners =
       new Map<string, IFileMenu.ICloseAndCleaner<Widget>>();
+    this.startIndex = 1;
   }
 
   /**

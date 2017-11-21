@@ -467,6 +467,18 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
     }
   } as IFileMenu.ICloseAndCleaner<NotebookPanel>);
 
+  // Add a notebook group to the File menu.
+  let exportTo = new Menu({ commands } );
+  exportTo.title.label = 'Export to ...';
+  EXPORT_TO_FORMATS.forEach(exportToFormat => {
+    exportTo.addItem({ command: CommandIDs.exportToFormat, args: exportToFormat });
+  });
+  const fileGroup = [
+    { command: CommandIDs.trust },
+    { type: 'submenu', submenu: exportTo } as Menu.IItemOptions
+  ];
+  mainMenu.fileMenu.addGroup(fileGroup);
+
   // Add a kernel user to the Kernel menu
   mainMenu.kernelMenu.kernelUsers.set('Notebook', {
     tracker,

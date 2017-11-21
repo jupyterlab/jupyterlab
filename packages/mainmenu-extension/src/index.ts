@@ -116,7 +116,10 @@ function createFileMenu(app: JupyterLab, menu: FileMenu): void {
     'docmanager:close',
     'filemenu:close-and-cleanup',
     'docmanager:close-all-files'
-  ].forEach(command => { menu.addItem({ command }); });
+  ].forEach(command => {
+    menu.addItem({ command });
+    menu.startIndex++;
+  });
   menu.addItem({ type: 'separator' });
   menu.addItem({ command: 'settingeditor:open' });
 }
