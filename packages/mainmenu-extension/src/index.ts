@@ -131,7 +131,7 @@ function createFileMenu(app: JupyterLab, menu: FileMenu): void {
   });
 
   // Add the commands to the File menu.
-  [
+  const docmanagerGroup = [
     'docmanager:save',
     'docmanager:save-as',
     'docmanager:rename',
@@ -140,12 +140,9 @@ function createFileMenu(app: JupyterLab, menu: FileMenu): void {
     'docmanager:close',
     'filemenu:close-and-cleanup',
     'docmanager:close-all-files'
-  ].forEach(command => {
-    menu.addItem({ command });
-    menu.startIndex++;
-  });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ command: 'settingeditor:open' });
+  ].map(command => { return { command }; }, 1);
+  menu.addGroup(docmanagerGroup);
+  menu.addGroup([{ command: 'settingeditor:open' }], 1000);
 }
 
 /**
@@ -182,19 +179,14 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
     execute: Private.delegateExecute(app, menu.consoleCreators, 'createConsole')
   });
 
-  [
+  const kernelUserGroup = [
     CommandIDs.interruptKernel,
     CommandIDs.restartKernel,
     CommandIDs.changeKernel
-  ].forEach( command => {
-    menu.addItem({ command });
-    menu.startIndex++;
-  });
+  ].map(command => { return { command }; });
+  menu.addGroup(kernelUserGroup, 0);
 
-  menu.addItem({ type: 'separator' });
-  menu.startIndex++;
-  menu.addItem({ command: CommandIDs.createConsole });
-  menu.startIndex++;
+  menu.addGroup([{ command: CommandIDs.createConsole }], 1);
 }
 
 /**
@@ -233,17 +225,12 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
                (app, menu.editorViewers, 'toggleWordWrap')
   });
 
-  let items = [
+  const editorViewerGroup = [
     CommandIDs.lineNumbering,
     CommandIDs.matchBrackets,
     CommandIDs.wordWrap
-  ];
-  items.forEach( command => {
-    menu.addItem({ command });
-    menu.startIndex++;
-  });
-  menu.addItem({ type: 'separator' });
-  menu.startIndex++;
+  ].map( command => { return { command }; });
+  menu.addGroup(editorViewerGroup, 10);
 }
 
 function createRunMenu(app: JupyterLab, menu: RunMenu): void {
@@ -285,16 +272,13 @@ function createRunMenu(app: JupyterLab, menu: RunMenu): void {
     execute: Private.delegateExecute(app, menu.codeRunners, 'runBelow')
   });
 
-  let items = [
+  const codeRunnerGroup = [
     CommandIDs.run,
     CommandIDs.runAll,
     CommandIDs.runAbove,
     CommandIDs.runBelow,
-  ];
-  items.forEach( command => {
-    menu.addItem({ command });
-    menu.startIndex++;
-  });
+  ].map(command => { return { command }; });
+  menu.addGroup(codeRunnerGroup, 0)
 }
 export default menuPlugin;
 

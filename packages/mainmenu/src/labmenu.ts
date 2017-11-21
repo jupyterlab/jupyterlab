@@ -68,51 +68,31 @@ class JupyterLabMenu extends Menu implements IJupyterLabMenu {
     // Insert the plugin group into the list of groups.
     const groupIndex = ArrayExt.upperBound(this._groups, rankGroup, Private.itemCmp);
 
-    // Determine whether we need separators before or after the group.
-    let shouldPrependSeparator = groupIndex > 0 ||
-                                 (groupIndex === 0 && this.startIndex > 0);
-    let shouldAppendSeparator = groupIndex === 0 && this._groups.length > 0;
-
     // Determine the index of the menu at which to insert the group.
-    let insertIndex = this.startIndex;
+    let insertIndex = 0;
     for (let i = 0; i < groupIndex; ++i) {
       if (this._groups.length > 0) {
-        // Increase the insert index by one extra in order
-        // to include the separator.
-        insertIndex += this._groups[i].items.length + 1;
+        // Increase the insert index by two extra in order
+        // to include the leading and trailing separators.
+        insertIndex += this._groups[i].items.length + 2;
       }
     }
 
-    // Insert a separator if necessary.
-    if (shouldPrependSeparator) {
-      this.insertItem(insertIndex++, { type: 'separator' });
-    }
+    // Insert a separator before the group.
+    // Phosphor takes care of superfluous leading,
+    // trailing, and duplicate separators.
+    this.insertItem(insertIndex++, { type: 'separator' });
     // Insert the group.
     for (let item of items) {
       this.insertItem(insertIndex++, item);
     }
-    // Insert a separator if necessary.
-    if (shouldAppendSeparator) {
-      this.insertItem(insertIndex++, { type: 'separator' });
-    }
+    // Insert a separator after the group.
+    this.insertItem(insertIndex++, { type: 'separator' });
 
     ArrayExt.insert(this._groups, groupIndex, rankGroup);
   }
 
-  /**
-   * The menu index at which plugin groups begin to be inserted.
-   * A menu may define a few initial items, and then all additional
-   * plugin groups will be inserted at `startIndex`.
-   */
-  get startIndex(): number {
-    return this._startIndex;
-  }
-  set startIndex(value: number) {
-    this._startIndex = value;
-  }
-
   private _groups: Private.IRankGroup[] = [];
-  private _startIndex = 0;
 }
 
 

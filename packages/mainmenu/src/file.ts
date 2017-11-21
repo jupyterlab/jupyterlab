@@ -38,14 +38,13 @@ class FileMenu extends JupyterLabMenu implements IFileMenu {
     // Create the "New" submenu.
     this.newMenu = new Menu(options);
     this.newMenu.title.label = 'New';
-    this.addItem({
+    this.addGroup([{
       type: 'submenu',
       submenu: this.newMenu
-    });
+    }], 0);
 
     this.closeAndCleaners =
       new Map<string, IFileMenu.ICloseAndCleaner<Widget>>();
-    this.startIndex = 1;
   }
 
   /**
