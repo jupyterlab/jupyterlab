@@ -150,7 +150,8 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   commands.addCommand(CommandIDs.close, {
     label: () => {
       const widget = app.shell.currentWidget;
-      return `Close ${widget ? `"${widget.title.label}"` : 'Tab'}`;
+      return `Close ${widget && widget.title.label ?
+             `"${widget.title.label}"` : 'Tab'}`;
     },
     isEnabled: () => app.shell.currentWidget ? true : false,
     execute: () => {
