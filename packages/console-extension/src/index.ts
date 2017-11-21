@@ -461,8 +461,6 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
   menu.addItem({ command: CommandIDs.linebreak });
   menu.addItem({ type: 'separator' });
   menu.addItem({ command: CommandIDs.clear });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ command: CommandIDs.closeAndShutdown });
 
   mainMenu.addMenu(menu, {rank: 50});
 

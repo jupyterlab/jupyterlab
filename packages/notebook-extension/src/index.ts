@@ -1402,9 +1402,6 @@ function createMenu(app: JupyterLab): Menu {
     exportTo.addItem({ command: CommandIDs.exportToFormat, args: exportToFormat });
   });
 
-  menu.addItem({ command: CommandIDs.runAll });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ command: CommandIDs.closeAndShutdown });
   menu.addItem({ command: CommandIDs.trust });
   menu.addItem({ type: 'submenu', submenu: exportTo });
   menu.addItem({ type: 'separator' });
