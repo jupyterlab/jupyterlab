@@ -1370,7 +1370,7 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   mainMenu.viewMenu.addGroup(viewGroup, 10);
 
   // Add an IEditorViewer to the application view menu
-  mainMenu.viewMenu.editorViewers.set('Editor', {
+  mainMenu.viewMenu.editorViewers.set('Notebook', {
     tracker,
     toggleLineNumbers: widget => {
       NotebookActions.toggleAllLineNumbers(widget.notebook);
