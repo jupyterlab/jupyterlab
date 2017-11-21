@@ -236,6 +236,15 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
     CommandIDs.wordWrap
   ].map( command => { return { command }; });
   menu.addGroup(editorViewerGroup, 10);
+
+  // Add commands for cycling the active tabs.
+  menu.addGroup([
+    { command: 'application:activate-next-tab' },
+    { command: 'application:activate-previous-tab' }
+  ], 0);
+
+  // Add the command for toggling single-document mode.
+  menu.addGroup([ { command: 'application:toggle-mode' }], 1000);
 }
 
 function createRunMenu(app: JupyterLab, menu: RunMenu): void {
