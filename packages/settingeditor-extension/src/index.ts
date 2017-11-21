@@ -37,7 +37,16 @@ import {
  */
 namespace CommandIDs {
   export
+  const debug = 'settingeditor:debug';
+
+  export
   const open = 'settingeditor:open';
+
+  export
+  const revert = 'settingeditor:revert';
+
+  export
+  const save = 'settingeditor:save';
 }
 
 

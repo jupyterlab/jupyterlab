@@ -198,6 +198,7 @@ class RawEditor extends SplitPanel {
    * Handle `after-attach` messages.
    */
   protected onAfterAttach(msg: Message): void {
+    Private.populateToolbar(this._commands, this._toolbar);
     this.update();
   }
 
@@ -212,7 +213,6 @@ class RawEditor extends SplitPanel {
     if (settings) {
       defaults.editor.refresh();
       user.editor.refresh();
-      Private.populateToolbar(this._toolbar);
     }
   }
 
@@ -257,6 +257,7 @@ class RawEditor extends SplitPanel {
     this._canDebug = debug;
     this._canRevert = revert;
     this._canSave = save;
+    Private.updateToolbar(this._commands);
   }
 
   private _canDebug = false;
@@ -304,11 +305,44 @@ namespace RawEditor {
  */
 namespace Private {
   /**
+   * The command IDs used by the setting editor.
+   */
+  namespace CommandIDs {
+    export
+    const debug = 'settingeditor:debug';
+
+    export
+    const revert = 'settingeditor:revert';
+
+    export
+    const save = 'settingeditor:save';
+  }
+
+  /**
    * Populate the raw editor toolbar.
    */
   export
-  function populateToolbar(toolbar: Toolbar<Widget>): void {
-    /* no op */
+  function populateToolbar(commands: CommandRegistry, toolbar: Toolbar<Widget>): void {
+    toolbar.addItem('spacer', Toolbar.createSpacerItem());
+    [CommandIDs.debug, CommandIDs.revert, CommandIDs.save].forEach(name => {
+      if (commands.hasCommand(name)) {
+        toolbar.addItem(name, Toolbar.createFromCommand(commands, name));
+      } else {
+        console.warn(`Command ${name} is not registered, ignoring.`);
+      }
+    });
+  }
+
+  /**
+   * Update the raw editor toolbar.
+   */
+  export
+  function updateToolbar(commands: CommandRegistry): void {
+    [CommandIDs.debug, CommandIDs.revert, CommandIDs.save].forEach(name => {
+      if (commands.hasCommand(name)) {
+        commands.notifyCommandChanged(name);
+      }
+    });
   }
 
   /**
