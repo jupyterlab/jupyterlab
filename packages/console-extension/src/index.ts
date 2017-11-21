@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
-  IMainMenu, IKernelMenu, IRunMenu
+  IFileMenu, IMainMenu, IKernelMenu, IRunMenu
 } from '@jupyterlab/mainmenu';
 
 import {
@@ -412,6 +412,27 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
 
   // Add a console creator to the File menu
   mainMenu.fileMenu.newMenu.addItem({ command: CommandIDs.create });
+
+  // Add a close and shutdown command to the file menu.
+  mainMenu.fileMenu.closeAndCleaners.set('Console', {
+    tracker,
+    action: 'Shutdown',
+    closeAndCleanup: (current: ConsolePanel) => {
+      return showDialog({
+        title: 'Shutdown the console?',
+        body: `Are you sure you want to close "${current.title.label}"?`,
+        buttons: [Dialog.cancelButton(), Dialog.warnButton()]
+      }).then(result => {
+        if (result.button.accept) {
+          current.console.session.shutdown().then(() => {
+            current.dispose();
+          });
+        } else {
+          return void 0;
+        }
+      });
+    }
+  } as IFileMenu.ICloseAndCleaner<ConsolePanel>);
 
   // Add a kernel user to the Kernel menu
   mainMenu.kernelMenu.kernelUsers.set('Console', {

@@ -26,7 +26,7 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
-  IMainMenu, IKernelMenu, IRunMenu, IViewMenu
+  IMainMenu, IFileMenu, IKernelMenu, IRunMenu, IViewMenu
 } from '@jupyterlab/mainmenu';
 
 import {
@@ -447,6 +447,25 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
 
   // Add new notebook creation to the file menu.
   mainMenu.fileMenu.newMenu.addItem({ command: CommandIDs.createNew });
+
+  // Add a close and shutdown command to the file menu.
+  mainMenu.fileMenu.closeAndCleaners.set('Notebook', {
+    tracker,
+    action: 'Shutdown',
+    closeAndCleanup: (current: NotebookPanel) => {
+      const fileName = current.title.label;
+      return showDialog({
+        title: 'Shutdown the notebook?',
+        body: `Are you sure you want to close "${fileName}"?`,
+        buttons: [Dialog.cancelButton(), Dialog.warnButton()]
+      }).then(result => {
+        if (result.button.accept) {
+          return current.context.session.shutdown()
+            .then(() => { current.dispose(); });
+        }
+      });
+    }
+  } as IFileMenu.ICloseAndCleaner<NotebookPanel>);
 
   // Add a kernel user to the Kernel menu
   mainMenu.kernelMenu.kernelUsers.set('Notebook', {

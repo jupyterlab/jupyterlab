@@ -2,11 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Menu
+  Menu, Widget
 } from '@phosphor/widgets';
 
 import {
-  IJupyterLabMenu, JupyterLabMenu
+  IJupyterLabMenu, IMenuExtender, JupyterLabMenu
 } from './labmenu';
 
 /**
@@ -18,6 +18,11 @@ interface IFileMenu extends IJupyterLabMenu {
    * A submenu for creating new files/launching new activities.
    */
   readonly newMenu: Menu;
+
+  /**
+   * The close and cleanup extension point.
+   */
+  readonly closeAndCleaners: Map<string, IFileMenu.ICloseAndCleaner<Widget>>;
 }
 
 /**
@@ -37,10 +42,42 @@ class FileMenu extends JupyterLabMenu implements IFileMenu {
       type: 'submenu',
       submenu: this.newMenu
     });
+
+    this.closeAndCleaners =
+      new Map<string, IFileMenu.ICloseAndCleaner<Widget>>();
   }
 
   /**
    * The New submenu.
    */
   readonly newMenu: Menu;
+
+  /**
+   * The close and cleanup extension point.
+   */
+  readonly closeAndCleaners: Map<string, IFileMenu.ICloseAndCleaner<Widget>>;
+}
+
+
+/**
+ * Namespace for IFileMenu
+ */
+export
+namespace IFileMenu {
+  /**
+   * Interface for an activity that has some cleanup action associated
+   * with it in addition to merely closing its widget in the main area.
+   */
+  export
+  interface ICloseAndCleaner<T extends Widget> extends IMenuExtender<T> {
+    /**
+     * A label to use for the cleanup action.
+     */
+    action: string;
+
+    /**
+     * A function to perform the close and cleanup action.
+     */
+    closeAndCleanup: (widget: T) => Promise<void>;
+  }
 }

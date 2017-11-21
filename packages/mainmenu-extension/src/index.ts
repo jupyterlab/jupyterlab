@@ -21,6 +21,9 @@ import {
 export
 namespace CommandIDs {
   export
+  const closeAndCleanup = 'file:close-and-cleanup';
+
+  export
   const interruptKernel = 'kernel:interrupt';
 
   export
@@ -86,7 +89,24 @@ const menuPlugin: JupyterLabPlugin<IMainMenu> = {
  * Create the basic `File` menu.
  */
 function createFileMenu(app: JupyterLab, menu: FileMenu): void {
-  // Create the top-level File menu
+  const commands = menu.commands;
+
+  // Add a delegator command for closing and cleaning up an activity.
+  commands.addCommand(CommandIDs.closeAndCleanup, {
+    label: () => {
+      const widget = app.shell.currentWidget;
+      const name = widget ? widget.title.label : '...';
+      const action =
+        Private.delegateLabel(app, menu.closeAndCleaners, 'action');
+      return `Close and ${action ? ` ${action} "${name}"` : 'Shutdown…'}`;
+    },
+    isEnabled:
+      Private.delegateEnabled(app, menu.closeAndCleaners, 'closeAndCleanup'),
+    execute:
+      Private.delegateExecute(app, menu.closeAndCleaners, 'closeAndCleanup')
+  });
+
+  // Add the commands to the File menu.
   [
     'docmanager:save',
     'docmanager:save-as',
@@ -94,6 +114,7 @@ function createFileMenu(app: JupyterLab, menu: FileMenu): void {
     'docmanager:restore-checkpoint',
     'docmanager:clone',
     'docmanager:close',
+    'file:close-and-cleanup',
     'docmanager:close-all-files'
   ].forEach(command => { menu.addItem({ command }); });
   menu.addItem({ type: 'separator' });
