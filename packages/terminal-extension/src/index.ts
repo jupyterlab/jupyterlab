@@ -115,7 +115,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     CommandIDs.decreaseFont,
     CommandIDs.toggleTheme
   ].map(command => { return { command }; });
-  mainMenu.viewMenu.addGroup(viewGroup);
+  mainMenu.viewMenu.addGroup(viewGroup, 30);
 
   // Add command palette items.
   [

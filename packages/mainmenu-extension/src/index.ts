@@ -106,7 +106,7 @@ function createEditMenu(app: JupyterLab, menu: EditMenu): void {
     execute:
       Private.delegateExecute(app, menu.clearers, 'clear')
   });
-  menu.addGroup([{ command: CommandIDs.clear }]);
+  menu.addGroup([{ command: CommandIDs.clear }], 10);
 }
 
 /**
@@ -131,17 +131,22 @@ function createFileMenu(app: JupyterLab, menu: FileMenu): void {
   });
 
   // Add the commands to the File menu.
-  const docmanagerGroup = [
+  const fileOperationGroup = [
     'docmanager:save',
     'docmanager:save-as',
     'docmanager:rename',
     'docmanager:restore-checkpoint',
-    'docmanager:clone',
+    'docmanager:clone'
+  ].map(command => { return { command }; });
+
+  const closeGroup = [
     'docmanager:close',
     'filemenu:close-and-cleanup',
     'docmanager:close-all-files'
-  ].map(command => { return { command }; }, 1);
-  menu.addGroup(docmanagerGroup);
+  ].map(command => { return { command }; });
+
+  menu.addGroup(fileOperationGroup, 1);
+  menu.addGroup(closeGroup, 2);
   menu.addGroup([{ command: 'settingeditor:open' }], 1000);
 }
 
@@ -172,7 +177,7 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
   commands.addCommand(CommandIDs.createConsole, {
     label: () => {
       const name = Private.findExtenderName(app, menu.consoleCreators);
-      const label = 'Create Console for ' + (name ? name : '...');
+      const label = `Create Console for${name ? ` ${name}` : '…'}`;
       return label;
     },
     isEnabled: Private.delegateEnabled(app, menu.consoleCreators, 'createConsole'),

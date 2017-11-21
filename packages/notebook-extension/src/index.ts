@@ -1332,7 +1332,7 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
     { command: CommandIDs.trust },
     { type: 'submenu', submenu: exportTo } as Menu.IItemOptions
   ];
-  mainMenu.fileMenu.addGroup(fileGroup);
+  mainMenu.fileMenu.addGroup(fileGroup, 10);
 
   // Add a kernel user to the Kernel menu
   mainMenu.kernelMenu.kernelUsers.set('Notebook', {
@@ -1367,7 +1367,7 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
     CommandIDs.hideAllOutputs,
     CommandIDs.showAllOutputs
   ].map(command => { return { command }; });
-  mainMenu.viewMenu.addGroup(viewGroup);
+  mainMenu.viewMenu.addGroup(viewGroup, 10);
 
   // Add an IEditorViewer to the application view menu
   mainMenu.viewMenu.editorViewers.set('Editor', {
@@ -1401,16 +1401,18 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   } as IRunMenu.ICodeRunner<NotebookPanel>);
 
   // Add commands to the application edit menu.
-  const editGroup = [
+  const undoGroup = [
     CommandIDs.undo,
-    CommandIDs.redo,
+    CommandIDs.redo
+  ].map(command => { return { command }; });
+  const editGroup = [
     CommandIDs.cut,
     CommandIDs.copy,
     CommandIDs.paste,
     CommandIDs.deleteCell,
     CommandIDs.split,
-    CommandIDs.merge,
-    CommandIDs.clearAllOutputs
+    CommandIDs.merge
   ].map(command => { return { command }; });
-  mainMenu.editMenu.addGroup(editGroup);
+  mainMenu.editMenu.addGroup(undoGroup, 4);
+  mainMenu.editMenu.addGroup(editGroup, 5);
 }
