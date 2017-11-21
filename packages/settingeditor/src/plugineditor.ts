@@ -68,13 +68,23 @@ class PluginEditor extends Widget {
     const layout = this.layout = new StackedLayout();
     const { onSaveError } = Private;
 
-    this._rawEditor = new RawEditor({ editorFactory, onSaveError });
-    this._tableEditor = new TableEditor({ onSaveError });
+    this.raw = this._rawEditor = new RawEditor({ editorFactory, onSaveError });
+    this.table = this._tableEditor = new TableEditor({ onSaveError });
     this._rawEditor.handleMoved.connect(this._onStateChanged, this);
 
     layout.addWidget(this._rawEditor);
     layout.addWidget(this._tableEditor);
   }
+
+  /**
+   * The plugin editor's raw editor.
+   */
+  readonly raw: RawEditor;
+
+  /**
+   * The plugin editor's table editor.
+   */
+  readonly table: TableEditor;
 
   /**
    * Tests whether the settings have been modified and need saving.
@@ -99,13 +109,6 @@ class PluginEditor extends Widget {
 
     this._settings = raw.settings = table.settings = settings;
     this.update();
-  }
-
-  /**
-   * The inspectable raw editor source.
-   */
-  get source(): CodeEditor.IEditor {
-    return this._rawEditor.source;
   }
 
   /**

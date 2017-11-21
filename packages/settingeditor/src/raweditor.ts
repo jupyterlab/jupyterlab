@@ -14,6 +14,10 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
+  CommandRegistry
+} from '@phosphor/commands';
+
+import {
   Message
 } from '@phosphor/messaging';
 
@@ -34,12 +38,6 @@ import {
  * A class name added to all raw editors.
  */
 const RAW_EDITOR_CLASS = 'jp-SettingsRawEditor';
-
-/**
- * A class name added to the banner of editors in the raw settings editor.
- */
-const BANNER_CLASS = 'jp-SettingsRawEditor-banner';
-
 
 /**
  * A class name added to the user settings editor.
@@ -77,7 +75,9 @@ class RawEditor extends SplitPanel {
       spacing: 1
     });
 
-    const { editorFactory } = options;
+    const { commands, editorFactory } = options;
+
+    this._commands = commands;
 
     // Create read-only defaults editor.
     const defaults = this._defaults = new CodeEditorWrapper({
@@ -104,6 +104,18 @@ class RawEditor extends SplitPanel {
     this._onSaveError = options.onSaveError;
     this.addWidget(Private.wrapEditor(defaults, DEFAULT_TITLE));
     this.addWidget(Private.wrapEditor(user, USER_TITLE, this._toolbar));
+  }
+
+  get canDebug(): boolean {
+    return this._canDebug;
+  }
+
+  get canRevert(): boolean {
+    return this._canRevert;
+  }
+
+  get canSave(): boolean {
+    return this._canSave;
   }
 
   /**
@@ -200,6 +212,7 @@ class RawEditor extends SplitPanel {
     if (settings) {
       defaults.editor.refresh();
       user.editor.refresh();
+      Private.populateToolbar(this._toolbar);
     }
   }
 
@@ -223,6 +236,7 @@ class RawEditor extends SplitPanel {
     const settings = this._settings;
 
     if (!raw || !settings || settings.raw === raw) {
+      this._updateToolbar(false, false, false);
       return;
     }
 
@@ -230,11 +244,25 @@ class RawEditor extends SplitPanel {
 
     if (errors) {
       this.addClass(ERROR_CLASS);
-    } else {
-      this.removeClass(ERROR_CLASS);
+      this._updateToolbar(true, true, false);
+      return;
     }
+
+    this.removeClass(ERROR_CLASS);
+    this._updateToolbar(false, false, true);
   }
 
+  private _updateToolbar(debug: boolean, revert: boolean, save: boolean): void {
+    console.log('update toolbar');
+    this._canDebug = debug;
+    this._canRevert = revert;
+    this._canSave = save;
+  }
+
+  private _canDebug = false;
+  private _canRevert = false;
+  private _canSave = false;
+  private _commands: CommandRegistry;
   private _defaults: CodeEditorWrapper;
   private _onSaveError: (reason: any) => void;
   private _settings: ISettingRegistry.ISettings | null = null;
@@ -254,6 +282,11 @@ namespace RawEditor {
   export
   interface IOptions {
     /**
+     * The command registry that houses the raw editor toolbar commands.
+     */
+    commands: CommandRegistry;
+
+    /**
      * The editor factory used by the raw editor.
      */
     editorFactory: CodeEditor.Factory;
@@ -271,21 +304,32 @@ namespace RawEditor {
  */
 namespace Private {
   /**
+   * Populate the raw editor toolbar.
+   */
+  export
+  function populateToolbar(toolbar: Toolbar<Widget>): void {
+    /* no op */
+  }
+
+  /**
    * Returns a wrapper widget to hold an editor and its banner.
    */
   export
   function wrapEditor(editor: Widget, bannerText: string, toolbar?: Toolbar<Widget>): Widget {
     const widget = new Widget();
     const layout = widget.layout = new BoxLayout({ spacing: 0 });
-    const banner = new Widget({
-      node: VirtualDOM.realize(h.div({ className: BANNER_CLASS }, bannerText))
-    });
+    const banner = new Widget({ node: VirtualDOM.realize(h.div(bannerText)) });
 
     if (toolbar) {
       toolbar.insertItem(0, 'banner', banner);
       layout.addWidget(toolbar);
     } else {
-      layout.addWidget(banner);
+      // If a toolbar is not passed in, create a toolbar that only has the
+      // banner text in it.
+      const bar = new Toolbar();
+
+      bar.insertItem(0, 'banner', banner);
+      layout.addWidget(bar);
     }
 
     layout.addWidget(editor);

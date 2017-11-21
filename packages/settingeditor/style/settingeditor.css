@@ -5,11 +5,11 @@
 
 
 :root {
-  --jp-private-settingeditor-banner-height: 24px;
   --jp-private-settingeditor-key-width: 150px;
   --jp-private-settingeditor-legend-height: 16px;
   --jp-private-settingeditor-row-height: 16px;
   --jp-private-settingeditor-switcher-height: 32px;
+  --jp-private-settingeditor-toolbar-height: 28px;
   --jp-private-settingeditor-type-width: 75px;
 }
 
@@ -168,21 +168,12 @@
 }
 
 
-#setting-editor .jp-SettingsRawEditor .jp-SettingsRawEditor-banner {
+#setting-editor .jp-SettingsRawEditor .jp-Toolbar {
   color: var(--jp-ui-font-color0);
   font-size: var(--jp-ui-font-size1);
-  height: var(--jp-private-settingeditor-banner-height);
-  max-height: var(--jp-private-settingeditor-banner-height);
-  padding-top: 5px;
+  height: var(--jp-private-settingeditor-toolbar-height);
+  max-height: var(--jp-private-settingeditor-toolbar-height);
 }
-
-
-#setting-editor .jp-SettingsRawEditor .jp-JSONEditor-header {
-  position: absolute;
-  right: 0;
-  z-index: 9999;
-}
-
 
 #setting-editor .jp-SettingsRawEditor .jp-SettingsRawEditor-user {
   border: 1px solid transparent;

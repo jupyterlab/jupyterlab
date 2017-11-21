@@ -74,7 +74,7 @@ const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
         const when = app.restored;
 
         editor = new SettingEditor({
-          editorFactory, key, registry, state, when
+          commands, editorFactory, key, registry, state, when
         });
 
         tracker.add(editor);

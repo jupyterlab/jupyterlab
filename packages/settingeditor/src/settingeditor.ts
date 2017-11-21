@@ -16,6 +16,10 @@ import {
 } from '@jupyterlab/inspector';
 
 import {
+  CommandRegistry
+} from '@phosphor/commands';
+
+import {
   JSONExt, JSONObject, JSONValue, ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
@@ -204,6 +208,27 @@ class SettingEditor extends Widget {
   readonly state: IStateDB;
 
   /**
+   * Whether the raw editor debug functionality is enabled.
+   */
+  get canDebugRaw(): boolean {
+    return this._editor.raw.canDebug;
+  }
+
+  /**
+   * Whether the raw editor revert functionality is enabled.
+   */
+  get canRevertRaw(): boolean {
+    return this._editor.raw.canRevert;
+  }
+
+  /**
+   * Whether the raw editor save functionality is enabled.
+   */
+  get canSaveRaw(): boolean {
+    return this._editor.raw.canSave;
+  }
+
+  /**
    * The currently loaded settings.
    */
   get settings(): ISettingRegistry.ISettings {
@@ -214,7 +239,7 @@ class SettingEditor extends Widget {
    * The inspectable raw user editor source for the currently loaded settings.
    */
   get source(): CodeEditor.IEditor {
-    return this._editor.source;
+    return this._editor.raw.source;
   }
 
   /**
@@ -403,6 +428,11 @@ namespace SettingEditor {
    */
   export
   interface IOptions {
+    /**
+     * The command registry that holds the setting editor toolbar commands.
+     */
+    commands: CommandRegistry;
+
     /**
      * The editor factory used by the setting editor.
      */
