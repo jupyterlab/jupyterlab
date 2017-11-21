@@ -133,9 +133,26 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     const { currentWidget } = app.shell;
     return !!(currentWidget && docManager.contextForWidget(currentWidget));
   };
+  const fileName = () => {
+    const { currentWidget } = app.shell;
+    if (!currentWidget) {
+      return 'File';
+    }
+    const context = docManager.contextForWidget(currentWidget);
+    if (!context) {
+      return 'File';
+    }
+    // TODO: we should consider eliding the name
+    // if it is very long.
+    return `"${context.contentsModel.name}"`;
+  };
 
   commands.addCommand(CommandIDs.close, {
-    label: 'Close',
+    label: () => {
+      const widget = app.shell.currentWidget;
+      return `Close ${widget ? `"${widget.title.label}"` : 'Tab'}`;
+    },
+    isEnabled: () => app.shell.currentWidget ? true : false,
     execute: () => {
       if (app.shell.currentWidget) {
         app.shell.currentWidget.close();
@@ -196,7 +213,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   commands.addCommand(CommandIDs.restoreCheckpoint, {
-    label: 'Revert to Checkpoint',
+    label: () => `Revert ${fileName()} to Checkpoint`,
     caption: 'Revert contents to previous checkpoint',
     isEnabled,
     execute: () => {
@@ -211,7 +228,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   commands.addCommand(CommandIDs.save, {
-    label: 'Save',
+    label: () => `Save ${fileName()}`,
     caption: 'Save and create checkpoint',
     isEnabled,
     execute: () => {
@@ -230,7 +247,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   commands.addCommand(CommandIDs.saveAs, {
-    label: 'Save As...',
+    label: () => `Save ${fileName()} As…`,
     caption: 'Save with new path',
     isEnabled,
     execute: () => {
@@ -242,7 +259,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   commands.addCommand(CommandIDs.rename, {
-    label: 'Rename',
+    label: () => `Rename ${fileName()}`,
     isEnabled,
     execute: () => {
       if (isEnabled()) {
@@ -253,7 +270,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   commands.addCommand(CommandIDs.clone, {
-    label: 'New View into File',
+    label: () => `New View Into ${fileName()}`,
     isEnabled,
     execute: () => {
       const widget = app.shell.currentWidget;
