@@ -242,39 +242,19 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   commands.addCommand(CommandIDs.rename, {
-    isVisible: () => {
-      const widget = app.shell.currentWidget;
-      if (!widget) {
-        return;
-      }
-      // Find the context for the widget.
-      let context = docManager.contextForWidget(widget);
-      return context !== null;
-    },
+    label: 'Rename',
+    isEnabled,
     execute: () => {
-      const widget = app.shell.currentWidget;
-      if (!widget) {
-        return;
+      if (isEnabled()) {
+        let context = docManager.contextForWidget(app.shell.currentWidget);
+        return renameDialog(docManager, context!.path);
       }
-      // Find the context for the widget.
-      let context = docManager.contextForWidget(widget);
-      if (context) {
-        return renameDialog(docManager, context.path);
-      }
-    },
-    label: 'Rename'
+    }
   });
 
   commands.addCommand(CommandIDs.clone, {
-    isVisible: () => {
-      const widget = app.shell.currentWidget;
-      if (!widget) {
-        return;
-      }
-      // Find the context for the widget.
-      let context = docManager.contextForWidget(widget);
-      return context !== null;
-    },
+    label: 'New View into File',
+    isEnabled,
     execute: () => {
       const widget = app.shell.currentWidget;
       if (!widget) {
@@ -286,7 +266,6 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
         opener.open(child);
       }
     },
-    label: 'New View into File'
   });
 
   app.contextMenu.addItem({
