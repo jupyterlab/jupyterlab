@@ -81,16 +81,11 @@ class Process(object):
 
         # Kill the process.
         if proc.poll() is None:
-            try:
-                os.kill(proc.pid, signal.SIGTERM)
-            except Exception as e:
-                self.logger.error(str(e))
+            os.kill(proc.pid, signal.SIGTERM)
 
         # Wait for the process to close.
         try:
             proc.wait()
-        except Exception as e:
-            self.logger.error(e)
         finally:
             Process._procs.remove(self)
 
@@ -105,18 +100,11 @@ class Process(object):
         """
         proc = self.proc
         kill_event = self._kill_event
-        try:
-            while proc.poll() is None:
-                if kill_event.is_set():
-                    self.terminate()
-                    raise ValueError('Process Aborted')
-                time.sleep(1.)
-        except subprocess.CalledProcessError as error:
-            output = error.output.decode('utf-8')
-            self.logger.error(output)
-            self.terminate()
-            raise error
-
+        while proc.poll() is None:
+            if kill_event.is_set():
+                self.terminate()
+                raise ValueError('Process was aborted')
+            time.sleep(1.)
         return self.terminate()
 
     @gen.coroutine
@@ -125,17 +113,11 @@ class Process(object):
         """
         proc = self.proc
         kill_event = self._kill_event
-        try:
-            while proc.poll() is None:
-                if kill_event.is_set():
-                    self.terminate()
-                    raise ValueError('Process Aborted')
-                yield gen.sleep(1.)
-        except subprocess.CalledProcessError as error:
-            output = error.output.decode('utf-8')
-            self.logger.error(output)
-            self.terminate()
-            raise error
+        while proc.poll() is None:
+            if kill_event.is_set():
+                self.terminate()
+                raise ValueError('Process was aborted')
+            yield gen.sleep(1.)
 
         raise gen.Return(self.terminate())
 
@@ -149,14 +131,7 @@ class Process(object):
             kwargs['shell'] = True
 
         cmd[0] = which(cmd[0], kwargs.get('env'))
-
-        try:
-            proc = subprocess.Popen(cmd, **kwargs)
-        except subprocess.CalledProcessError as error:
-            output = error.output.decode('utf-8')
-            self.logger.error(output)
-            raise error
-
+        proc = subprocess.Popen(cmd, **kwargs)
         return proc
 
     @classmethod
@@ -229,9 +204,6 @@ class WatchHelper(Process):
         # Wait for the process to close.
         try:
             proc.wait()
-        except Exception as e:
-            print('on close')
-            self.logger.error(e)
         finally:
             Process._procs.remove(self)
 

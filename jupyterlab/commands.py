@@ -13,7 +13,6 @@ import json
 import logging
 import os
 import os.path as osp
-from os.path import join as pjoin
 import re
 import shutil
 import site
@@ -33,6 +32,15 @@ from .process import Process, WatchHelper
 
 # The regex for expecting the webpack output.
 WEBPACK_EXPECT = re.compile(r'.*/index.out.js')
+
+# The dev mode directory.
+DEV_DIR = osp.realpath(os.path.join(HERE, '..', 'dev_mode'))
+
+
+def pjoin(*args):
+    """Join paths to create a real path.
+    """
+    return osp.realpath(osp.join(*args))
 
 
 def get_user_settings_dir():
@@ -72,13 +80,26 @@ def get_app_dir():
     return osp.realpath(app_dir)
 
 
-def watch_dev(cwd, logger=None):
+def ensure_dev(logger=None):
+    """Ensure that the dev assets are available.
+    """
+    parent = pjoin(HERE, '..')
+
+    if not osp.exists(pjoin(parent, 'node_modules')):
+        yarn_proc = Process(['node', YARN_PATH], cwd=parent, logger=logger)
+        yarn_proc.wait()
+
+    if not osp.exists(pjoin(parent, 'dev_mode', 'build')):
+        yarn_proc = Process(['node', YARN_PATH, 'build'], cwd=parent,
+                            logger=logger)
+        yarn_proc.wait()
+
+
+def watch_dev(logger=None):
     """Run watch mode in a given directory.
 
     Parameters
     ----------
-    cwd: string
-        The current working directory.
     logger: :class:`~logger.Logger`, optional
         The logger instance.
 
@@ -86,6 +107,12 @@ def watch_dev(cwd, logger=None):
     -------
     A list of `WatchHelper` objects.
     """
+    parent = pjoin(HERE, '..')
+
+    if not osp.exists(pjoin(parent, 'node_modules')):
+        yarn_proc = Process(['node', YARN_PATH], cwd=parent, logger=logger)
+        yarn_proc.wait()
+
     logger = logger or logging.getLogger('jupyterlab')
     ts_dir = osp.realpath(osp.join(HERE, '..', 'packages', 'metapackage'))
 
@@ -101,7 +128,8 @@ def watch_dev(cwd, logger=None):
 
     # Run webpack watch and wait for compilation.
     wp_proc = WatchHelper(['node', YARN_PATH, 'run', 'watch'],
-        cwd=HERE, logger=logger, startup_regex=WEBPACK_EXPECT)
+        cwd=DEV_DIR, logger=logger,
+        startup_regex=WEBPACK_EXPECT)
 
     return [ts_proc, tsf_proc, wp_proc]
 
@@ -143,7 +171,9 @@ def uninstall_extension(name, app_dir=None, logger=None):
 def clean(app_dir=None):
     """Clean the JupyterLab application directory."""
     app_dir = app_dir or get_app_dir()
-    if app_dir == HERE:
+    if app_dir == pjoin(HERE, 'dev'):
+        raise ValueError('Cannot clean the dev app')
+    if app_dir == pjoin(HERE, 'core'):
         raise ValueError('Cannot clean the core app')
     for name in ['static', 'staging']:
         target = pjoin(app_dir, name)
@@ -152,12 +182,12 @@ def clean(app_dir=None):
 
 
 def build(app_dir=None, name=None, version=None, logger=None,
-        updating=False, command='build:prod', kill_event=None,
+        command='build:prod', kill_event=None,
         clean_staging=False):
     """Build the JupyterLab application.
     """
     handler = _AppHandler(app_dir, logger, kill_event=kill_event)
-    handler.build(name=name, version=version, updating=updating,
+    handler.build(name=name, version=version,
                   command=command, clean_staging=clean_staging)
 
 
@@ -224,7 +254,7 @@ def get_app_version():
 class _AppHandler(object):
 
     def __init__(self, app_dir, logger=None, kill_event=None):
-        if app_dir == HERE:
+        if app_dir and app_dir.startswith(HERE):
             raise ValueError('Cannot run lab extension commands in core app')
         self.app_dir = app_dir or get_app_dir()
         self.sys_dir = get_app_dir()
@@ -272,15 +302,15 @@ class _AppHandler(object):
             if other['path'] != info['path'] and other['location'] == 'app':
                 os.remove(other['path'])
 
-    def build(self, name=None, version=None, updating=False,
-              command='build:prod', clean_staging=False):
+    def build(self, name=None, version=None, command='build:prod',
+            clean_staging=False):
         """Build the application.
         """
         # Set up the build directory.
         app_dir = self.app_dir
 
         self._populate_staging(
-            name=name, version=version, updating=updating, clean=clean_staging
+            name=name, version=version, clean=clean_staging
         )
 
         staging = pjoin(app_dir, 'staging')
@@ -381,7 +411,7 @@ class _AppHandler(object):
             return [msg % (static_version, core_version)]
 
         # Look for mismatched extensions.
-        new_package = self._get_package_template()
+        new_package = self._get_package_template(silent=fast)
         new_jlab = new_package['jupyterlab']
         new_deps = new_package.get('dependencies', dict())
 
@@ -462,14 +492,21 @@ class _AppHandler(object):
     def link_package(self, path):
         """Link a package at the given path.
         """
+        path = _normalize_path(path)
         if not osp.exists(path) or not osp.isdir(path):
-            raise ValueError('Can only link local directories')
+            msg = 'Can install "%s" only link local directories'
+            raise ValueError(msg % path)
 
         with TemporaryDirectory() as tempdir:
             info = self._extract_package(path, tempdir)
 
-        if _is_extension(info['data']):
+        messages = _validate_extension(info['data'])
+        if not messages:
             return self.install_extension(path)
+
+        # Warn that it is a linked package.
+        self.logger.warn('Installing %s as a linked package:', path)
+        [self.logger.warn(m) for m in messages]
 
         # Add to metadata.
         config = self._read_build_config()
@@ -480,6 +517,7 @@ class _AppHandler(object):
     def unlink_package(self, path):
         """Link a package by name or at the given path.
         """
+        path = _normalize_path(path)
         config = self._read_build_config()
         linked = config.setdefault('linked_packages', dict())
 
@@ -551,8 +589,7 @@ class _AppHandler(object):
         info['disabled_core'] = disabled_core
         return info
 
-    def _populate_staging(self, name=None, version=None, updating=False,
-            clean=False):
+    def _populate_staging(self, name=None, version=None, clean=False):
         """Set up the assets in the staging directory.
         """
         app_dir = self.app_dir
@@ -567,7 +604,7 @@ class _AppHandler(object):
 
         # Look for mismatched version.
         pkg_path = pjoin(staging, 'package.json')
-        overwrite_lock = not updating
+        overwrite_lock = False
 
         if osp.exists(pkg_path):
             with open(pkg_path) as fid:
@@ -578,39 +615,35 @@ class _AppHandler(object):
             else:
                 overwrite_lock = False
 
-        for fname in ['index.app.js', 'webpack.config.js',
-                'yarn.app.lock', '.yarnrc', 'yarn.js']:
-            if fname == 'yarn.app.lock' and not overwrite_lock:
+        for fname in ['index.js', 'webpack.config.js',
+                'yarn.lock', '.yarnrc', 'yarn.js']:
+            if fname == 'yarn.lock' and not overwrite_lock:
                 continue
-            dest = pjoin(staging, fname.replace('.app', ''))
-            shutil.copy(pjoin(HERE, fname), dest)
+            shutil.copy(pjoin(HERE, 'staging', fname), pjoin(staging, fname))
 
-        # Ensure a clean linked packes directory.
+        # Ensure a clean linked packages directory.
         linked_dir = pjoin(staging, 'linked_packages')
         if osp.exists(linked_dir):
             shutil.rmtree(linked_dir)
         os.makedirs(linked_dir)
 
         # Template the package.json file.
-        if updating:
-            data = self.info['core_data']
-        else:
-            # Update the local extensions.
-            extensions = self.info['extensions']
-            for (key, source) in self.info['local_extensions'].items():
-                dname = pjoin(app_dir, 'extensions')
-                self._update_local(key, source, dname, extensions[key],
-                    'local_extensions')
+        # Update the local extensions.
+        extensions = self.info['extensions']
+        for (key, source) in self.info['local_extensions'].items():
+            dname = pjoin(app_dir, 'extensions')
+            self._update_local(key, source, dname, extensions[key],
+                'local_extensions')
 
-            # Update the linked packages.
-            linked = self.info['linked_packages']
-            for (key, item) in linked.items():
-                dname = pjoin(staging, 'linked_packages')
-                self._update_local(key, item['source'], dname, item,
-                    'linked_packages')
+        # Update the linked packages.
+        linked = self.info['linked_packages']
+        for (key, item) in linked.items():
+            dname = pjoin(staging, 'linked_packages')
+            self._update_local(key, item['source'], dname, item,
+                'linked_packages')
 
-            # Then get the package template.
-            data = self._get_package_template()
+        # Then get the package template.
+        data = self._get_package_template()
 
         if version:
             data['jupyterlab']['version'] = version
@@ -622,7 +655,7 @@ class _AppHandler(object):
         with open(pkg_path, 'w') as fid:
             json.dump(data, fid, indent=4)
 
-    def _get_package_template(self):
+    def _get_package_template(self, silent=False):
         """Get the template the for staging package.json file.
         """
         logger = self.logger
@@ -648,7 +681,8 @@ class _AppHandler(object):
                 msg = _format_compatibility_errors(
                     key, value['version'], errors
                 )
-                logger.warn(msg + '\n')
+                if not silent:
+                    logger.warn(msg + '\n')
                 continue
 
             data['dependencies'][key] = format_path(value['path'])
@@ -915,8 +949,10 @@ class _AppHandler(object):
         data = info['data']
 
         # Verify that the package is an extension.
-        if not _is_extension(data):
-            raise ValueError('Not a valid extension')
+        messages = _validate_extension(data)
+        if messages:
+            msg = '"%s" is not a valid extension:\n%s'
+            raise ValueError(msg % (extension, '\n'.join(messages)))
 
         # Verify package compatibility.
         core_data = _get_core_data()
@@ -946,13 +982,12 @@ class _AppHandler(object):
 
         info = dict(source=source, is_dir=is_dir)
 
-        self._run([which('npm'), 'pack', source], cwd=tempdir)
+        ret = self._run([which('npm'), 'pack', source], cwd=tempdir)
+        if ret != 0:
+            msg = '"%s" is not a valid npm package'
+            raise ValueError(msg % source)
 
-        paths = glob.glob(pjoin(tempdir, '*.tgz'))
-        if not paths:
-            raise ValueError('Extension failed to pack')
-
-        path = paths[0]
+        path = glob.glob(pjoin(tempdir, '*.tgz'))[0]
         info['data'] = _read_package(path)
         if is_dir:
             info['sha'] = sha = _tarsum(path)
@@ -970,6 +1005,8 @@ class _AppHandler(object):
 
     def _run(self, cmd, **kwargs):
         """Run the command using our logger and abort callback.
+
+        Returns the exit code.
         """
         if self.kill_event.is_set():
             raise ValueError('Command was killed')
@@ -977,7 +1014,7 @@ class _AppHandler(object):
         kwargs['logger'] = self.logger
         kwargs['kill_event'] = self.kill_event
         proc = Process(cmd, **kwargs)
-        proc.wait()
+        return proc.wait()
 
 
 def _normalize_path(extension):
@@ -995,20 +1032,58 @@ def _read_package(target):
     tar = tarfile.open(target, "r:gz")
     f = tar.extractfile('package/package.json')
     data = json.loads(f.read().decode('utf8'))
+    data['jupyterlab_extracted_files'] = [
+        f.path[len('package/'):] for f in tar.getmembers()
+    ]
     tar.close()
     return data
 
 
-def _is_extension(data):
+def _validate_extension(data):
     """Detect if a package is an extension using its metadata.
+
+    Returns any problems it finds.
     """
-    if 'jupyterlab' not in data:
-        return False
-    if not isinstance(data['jupyterlab'], dict):
-        return False
-    is_extension = data['jupyterlab'].get('extension', False)
-    is_mime_extension = data['jupyterlab'].get('mimeExtension', False)
-    return is_extension or is_mime_extension
+    jlab = data.get('jupyterlab', None)
+    if jlab is None:
+        return ['No `jupyterlab` key']
+    if not isinstance(jlab, dict):
+        return ['The `jupyterlab` key must be a JSON object']
+    extension = jlab.get('extension', False)
+    mime_extension = jlab.get('mimeExtension', False)
+    themeDir = jlab.get('themeDir', '')
+    schemaDir = jlab.get('schemaDir', '')
+
+    messages = []
+    if not extension and not mime_extension:
+        messages.append('No `extension` or `mimeExtension` key present')
+
+    if extension == mime_extension:
+        msg = '`mimeExtension` and `extension` must point to different modules'
+        messages.append(msg)
+
+    files = data['jupyterlab_extracted_files']
+    main = data.get('main', 'index.js')
+
+    if extension is True:
+        if main not in files:
+            messages.append('Missing extension module "%s"' % main)
+    elif extension and extension not in files:
+        messages.append('Missing extension module "%s"' % extension)
+
+    if mime_extension is True:
+        if main not in files:
+            messages.append('Missing mimeExtension module "%s"' % main)
+    elif mime_extension and mime_extension not in files:
+        messages.append('Missing mimeExtension module "%s"' % mime_extension)
+
+    if themeDir and not any(f.startswith(themeDir) for f in files):
+        messages.append('themeDir is empty: "%s"' % themeDir)
+
+    if schemaDir and not any(f.startswith(schemaDir) for f in files):
+        messages.append('schemaDir is empty: "%s"' % schemaDir)
+
+    return messages
 
 
 def _tarsum(input_file):
@@ -1033,7 +1108,7 @@ def _tarsum(input_file):
 def _get_core_data():
     """Get the data for the app template.
     """
-    with open(pjoin(HERE, 'package.app.json')) as fid:
+    with open(pjoin(HERE, 'staging', 'package.json')) as fid:
         return json.load(fid)
 
 

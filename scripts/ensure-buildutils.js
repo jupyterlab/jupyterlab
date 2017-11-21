@@ -9,7 +9,9 @@ var childProcess = require('child_process');
 
 
 if (!fs.existsSync(path.join('buildutils', 'lib'))) {
-  childProcess.execSync('npm run build:utils',
-    { 'stdio': [0, 1, 2] }
+  // This must be "npm" because it is run during `pip install -e .` before
+  // jlpm is installed.
+  childProcess.execSync('npm run build',
+    { 'stdio': [0, 1, 2], cwd: path.resolve('./buildutils') }
   );
 }

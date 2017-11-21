@@ -4,9 +4,9 @@ JupyterLab extensions add functionality to the JupyterLab application.
 They can provide new file viewer types, launcher activities, and new Notebook
 output renderers for example.
 
-### Installing Node.js and npm
+### Installing Node.js
 
-Installing JupyterLab extensions requires Node.js version 6+ and Node's package manager, ``npm``.
+Installing JupyterLab extensions requires Node.js version 4+.
 
 If you use ``conda``, you can get them with:
 

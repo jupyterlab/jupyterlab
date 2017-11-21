@@ -12,7 +12,8 @@ from traitlets import Bool, Unicode
 from ._version import __version__
 from .extension import load_jupyter_server_extension
 from .commands import (
-    build, clean, get_app_dir, get_user_settings_dir, get_app_version
+    build, clean, get_app_dir, get_user_settings_dir, get_app_version,
+    ensure_dev
 )
 
 
@@ -98,7 +99,7 @@ lab_flags['core-mode'] = (
     "Start the app in core mode."
 )
 lab_flags['dev-mode'] = (
-    {'LabApp': {'core_mode': True}},
+    {'LabApp': {'dev_mode': True}},
     "Start the app in dev mode for running from source."
 )
 lab_flags['watch'] = (
@@ -122,9 +123,9 @@ class LabApp(NotebookApp):
       assets contained in the installed `jupyterlab` Python package. In core mode, no
       extensions are enabled. This is the default in a stable JupyterLab release if you
       have no extensions installed.
-    * Dev mode (`--dev-mode`): like core mode, but when the `jupyterlab` Python package
-      is installed from source and installed using `pip install -e .`. In this case
-      JupyterLab will show a red stripe at the top of the page.
+    * Dev mode (`--dev-mode`): uses the unpublished local JavaScript packages
+        in the `dev_mode` folder.  In this case JupyterLab will show a red stripe at the top of the page.  It can only be used if JupyterLab
+        is installed as `pip install -e .`.
     * App mode: JupyterLab allows multiple JupyterLab "applications" to be
       created by the user with different combinations of extensions. The `--app-dir` can
       be used to set a directory for different applications. The default application
@@ -152,7 +153,7 @@ class LabApp(NotebookApp):
     default_url = Unicode('/lab', config=True,
         help="The default URL to redirect to from `/`")
 
-    app_dir = Unicode('', config=True,
+    app_dir = Unicode(get_app_dir(), config=True,
         help="The app directory to launch JupyterLab from.")
 
     core_mode = Bool(False, config=True,
@@ -161,6 +162,12 @@ class LabApp(NotebookApp):
         JupyterLab Python package. In core mode, third party extensions are disabled.
         The `--dev-mode` flag is an alias to this to be used when the Python package
         itself is installed in development mode (`pip install -e .`).
+        """)
+
+    dev_mode = Bool(False, config=True,
+        help="""Whether to start the app in dev mode. Uses the unpublished local JavaScript packages
+        in the `dev_mode` folder.  In this case JupyterLab will show a red stripe at the top of the page.  It can only be used if JupyterLab
+        is installed as `pip install -e .`.
         """)
 
     watch = Bool(False, config=True,

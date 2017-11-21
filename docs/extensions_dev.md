@@ -93,29 +93,19 @@ jupyter lab --watch
 ```
 
 This will cause the application to incrementally rebuild when one of the
-linked packages changes.  You can open another terminal and run
-
-```bash
-npm run watch
-```
-
-to automatically recompile the TypeScript files while editing.  Note that
-only the compiled JavaScript files (and the CSS files) are watched by the 
-WebPack process.  
-
-The is also a `jupyter lab --fast-watch` that allows you to skip the
-initial build if the app is already built.  
+linked packages changes.  Note that only compiled JavaScript files (and the 
+CSS files) are watched by the WebPack process.  
 
 Note that the application is built against **released** versions of the
 core JupyterLab extensions.  If your extension depends on JupyterLab
 packages, it should be compatible with the dependencies in the
-`jupyterlab/package.app.json` file.  If you must
+`jupyterlab/static/package.json` file.  If you must
 install a extension into a development branch of JupyterLab, you
 have to graft it into the source tree of JupyterLab itself.
 This may be done using the command
 
 ```
-jlpm run add:sibling <path-or-url> && npm install
+jlpm run add:sibling <path-or-url>
 ```
 
 in the JupyterLab root directory, where `<path-or-url>` refers either to an

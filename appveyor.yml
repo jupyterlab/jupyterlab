@@ -12,7 +12,7 @@ environment:
 
 # build cache to preserve files/folders between builds
 cache:
-  - '%LOCALAPPDATA%\\Yarn' # yarn cache
+  - '%LOCALAPPDATA%\\Yarn' # jlpm cache
 
 # scripts that run after cloning repository
 install:
@@ -37,8 +37,8 @@ install:
   - 'jlpm versions'
   - 'jlpm config current'
   - 'jlpm cache list'
-  - 'jlpm install'
-  - 'jlpm run build:main'
+  - 'jlpm'
+  - 'jlpm run build'
   - 'jupyter lab build'
 
 build: off
@@ -47,9 +47,13 @@ build: off
 test_script:
   # Run integrity first we we see the message.
   - 'jlpm run integrity'
+  - 'python -m jupyterlab.selenium_check'
+  - 'pip install jupyterlab_launcher==0.6'
   - 'py.test'
   - 'git status'
   - 'jlpm run build'
   - 'jlpm run build:test'
   - 'jlpm test || jlpm test || jlpm test'
-  - 'python -m jupyterlab.selenium_check'
+  - 'python -m jupyterlab.selenium_check --dev-mode'
+
+

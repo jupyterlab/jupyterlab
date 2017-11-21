@@ -113,7 +113,7 @@ function ensureJupyterlab(): string[] {
   let version = String(childProcess.execSync(cmd)).trim();
 
   let basePath = path.resolve('.');
-  let corePath = path.join(basePath, 'jupyterlab', 'package.json');
+  let corePath = path.join(basePath, 'dev_mode', 'package.json');
   let corePackage = utils.readJSONFile(corePath);
 
   corePackage.jupyterlab.extensions = {};
@@ -183,7 +183,14 @@ function ensureIntegrity(): boolean {
   let messages: { [key: string]: string[] } = {};
 
   // Pick up all the package versions.
-  utils.getLernaPaths().forEach(pkgPath => {
+  let paths = utils.getLernaPaths();
+
+  // These two are not part of the workspaces but should be kept
+  // in sync.
+  paths.push('./jupyterlab/tests/mock_packages/extension');
+  paths.push('./jupyterlab/tests/mock_packages/mimeextension');
+
+  paths.forEach(pkgPath => {
     // Read in the package.json.
     let data: any;
     try {

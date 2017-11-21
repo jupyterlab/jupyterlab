@@ -14,7 +14,7 @@ except ImportError:
     import subprocess
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-YARN_PATH = os.path.join(HERE, 'yarn.js')
+YARN_PATH = os.path.join(HERE, 'staging', 'yarn.js')
 
 
 def execvp(cmd, argv):

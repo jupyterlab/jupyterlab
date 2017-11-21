@@ -3,7 +3,7 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-if [[ $TRAVIS_PULL_REQUEST == false && $TRAVIS_BRANCH == "master" && $GROUP == "coverage_and_docs" ]]
+if [[ $TRAVIS_PULL_REQUEST == false && $TRAVIS_BRANCH == "master" && $GROUP == "docs" ]]
 then
     echo "-- pushing docs --"
 

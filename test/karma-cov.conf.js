@@ -29,6 +29,8 @@ module.exports = function (config) {
       html: 'coverage/html'
     },
     browserNoActivityTimeout: 31000, // 31 seconds - upped from 10 seconds
+    browserDisconnectTimeout: 31000, // 31 seconds - upped from 2 seconds
+    browserDisconnectTolerance: 2,
     port: 9876,
     colors: true,
     singleRun: true,
