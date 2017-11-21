@@ -162,7 +162,7 @@ class SettingEditor extends Widget {
     this.key = options.key;
     this.state = options.state;
 
-    const editorFactory = options.editorFactory;
+    const { commands, editorFactory } = options;
     const layout = this.layout = new PanelLayout();
     const registry = this.registry = options.registry;
     const panel = this._panel = new SplitPanel({
@@ -173,7 +173,7 @@ class SettingEditor extends Widget {
     const instructions = this._instructions = new Widget({
       node: Private.createInstructionsNode()
     });
-    const editor = this._editor = new PluginEditor({ editorFactory });
+    const editor = this._editor = new PluginEditor({ commands, editorFactory });
     const confirm = () => editor.confirm();
     const list = this._list = new PluginList({ confirm, registry });
     const when = options.when;

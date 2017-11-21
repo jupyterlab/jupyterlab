@@ -16,6 +16,10 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
+  CommandRegistry
+} from '@phosphor/commands';
+
+import {
   JSONExt
 } from '@phosphor/coreutils';
 
@@ -64,11 +68,13 @@ class PluginEditor extends Widget {
     super();
     this.addClass(PLUGIN_EDITOR_CLASS);
 
-    const { editorFactory } = options;
+    const { commands, editorFactory } = options;
     const layout = this.layout = new StackedLayout();
     const { onSaveError } = Private;
 
-    this.raw = this._rawEditor = new RawEditor({ editorFactory, onSaveError });
+    this.raw = this._rawEditor = new RawEditor({
+      commands, editorFactory, onSaveError
+    });
     this.table = this._tableEditor = new TableEditor({ onSaveError });
     this._rawEditor.handleMoved.connect(this._onStateChanged, this);
 
@@ -221,6 +227,11 @@ namespace PluginEditor {
    */
   export
   interface IOptions {
+    /**
+     * The command registry the editor uses for toolbars.
+     */
+    commands: CommandRegistry;
+
     /**
      * The editor factory used by the plugin editor.
      */
