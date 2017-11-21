@@ -430,6 +430,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
   // Add a code runner to the Run menu.
   mainMenu.runMenu.codeRunners.set('Console', {
     tracker,
+    noun: 'Cell',
     run: current => current.console.execute(true)
   } as IRunMenu.ICodeRunner<ConsolePanel>);
 

@@ -501,6 +501,7 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
   // Add an ICodeRunner to the application run menu
   mainMenu.runMenu.codeRunners.set('Notebook', {
     tracker,
+    noun: 'Cell',
     run: current => {
       const { context, notebook } = current;
       return NotebookActions.runAndAdvance(notebook, context.session)

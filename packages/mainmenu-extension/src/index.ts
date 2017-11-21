@@ -202,25 +202,37 @@ function createRunMenu(app: JupyterLab, menu: RunMenu): void {
   const commands = menu.commands;
 
   commands.addCommand(CommandIDs.run, {
-    label: 'Run',
+    label: () => {
+      const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
+      return `Run${noun ? ` ${noun}(s)` : ''}`;
+    },
     isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'run'),
     execute: Private.delegateExecute(app, menu.codeRunners, 'run')
   });
 
   commands.addCommand(CommandIDs.runAll, {
-    label: 'Run All',
+    label: () => {
+      const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
+      return `Run All${noun ? ` ${noun}s` : ''}`;
+    },
     isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'runAll'),
     execute: Private.delegateExecute(app, menu.codeRunners, 'runAll')
   });
 
   commands.addCommand(CommandIDs.runAbove, {
-    label: 'Run Above',
+    label: () => {
+      const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
+      return `Run${noun ? ` ${noun}(s)` : ''} Above`;
+    },
     isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'runAbove'),
     execute: Private.delegateExecute(app, menu.codeRunners, 'runAbove')
   });
 
   commands.addCommand(CommandIDs.runBelow, {
-    label: 'Run Below',
+    label: () => {
+      const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
+      return `Run${noun ? ` ${noun}(s)` : ''} Below`;
+    },
     isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'runBelow'),
     execute: Private.delegateExecute(app, menu.codeRunners, 'runBelow')
   });
@@ -268,6 +280,16 @@ namespace Private {
     const widget = app.shell.currentWidget;
     const [name, ] = findExtender(widget, map);
     return name;
+  }
+
+  export
+  function delegateLabel<E extends IMenuExtender<Widget>>(app: JupyterLab, map: Map<string, E>, label: keyof E): string {
+    let widget = app.shell.currentWidget;
+    const [, extender] = findExtender(widget, map);
+    if (!extender) {
+      return '';
+    }
+    return extender[label];
   }
 
   /**

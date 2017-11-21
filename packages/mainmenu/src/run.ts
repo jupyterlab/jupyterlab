@@ -60,6 +60,12 @@ namespace IRunMenu {
   export
   interface ICodeRunner<T extends Widget> extends IMenuExtender<T> {
     /**
+     * A string label for the thing that is being run,
+     * which is used to populate the menu labels.
+     */
+    noun: string;
+
+    /**
      * A function to run a chunk of code.
      */
     run?: (widget: T) => Promise<void>;
