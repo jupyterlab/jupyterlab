@@ -108,4 +108,3 @@ namespace IKernelMenu {
     createConsole: (widget: T) => Promise<void>;
   }
 }
-

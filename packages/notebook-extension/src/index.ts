@@ -26,7 +26,7 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
-  IMainMenu, IFileMenu, IKernelMenu, IRunMenu, IViewMenu
+  IMainMenu, IEditMenu, IFileMenu, IKernelMenu, IRunMenu, IViewMenu
 } from '@jupyterlab/mainmenu';
 
 import {
@@ -1290,6 +1290,15 @@ function populatePalette(palette: ICommandPalette): void {
  */
 function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookTracker): void {
   let { commands } = app;
+
+  // Add a clearer to the edit menu
+  mainMenu.editMenu.clearers.set('Notebook', {
+    tracker,
+    noun: 'All Cells',
+    clear: (current: NotebookPanel) => {
+      return NotebookActions.clearAllOutputs(current.notebook);
+    }
+  } as IEditMenu.IClearer<NotebookPanel>);
 
   // Add new notebook creation to the file menu.
   mainMenu.fileMenu.newMenu.addItem({ command: CommandIDs.createNew });

@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
-  IFileMenu, IMainMenu, IKernelMenu, IRunMenu
+  IEditMenu, IFileMenu, IKernelMenu, IMainMenu, IRunMenu
 } from '@jupyterlab/mainmenu';
 
 import {
@@ -40,10 +40,6 @@ import {
 import {
   ReadonlyJSONObject
 } from '@phosphor/coreutils';
-
-import {
-  Menu
-} from '@phosphor/widgets';
 
 
 /**
@@ -135,7 +131,6 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
   const manager = app.serviceManager;
   const { commands, shell } = app;
   const category = 'Console';
-  const menu = new Menu({ commands });
 
   // Create an instance tracker for all console panels.
   const tracker = new InstanceTracker<ConsolePanel>({ namespace: 'console' });
@@ -191,9 +186,6 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
       }
     });
   }
-
-  // Set the main menu title.
-  menu.title.label = category;
 
   /**
    * Create a console for a given path.
@@ -455,14 +447,15 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     run: current => current.console.execute(true)
   } as IRunMenu.ICodeRunner<ConsolePanel>);
 
-  // Add the console menu.
-  menu.addItem({ command: CommandIDs.runUnforced });
-  menu.addItem({ command: CommandIDs.runForced });
-  menu.addItem({ command: CommandIDs.linebreak });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ command: CommandIDs.clear });
+  // Add a group to the edit menu.
+  mainMenu.editMenu.addGroup([{ command: CommandIDs.linebreak }]);
 
-  mainMenu.addMenu(menu, {rank: 50});
+  // Add a clearer to the edit menu
+  mainMenu.editMenu.clearers.set('Console', {
+    tracker,
+    noun: 'Console',
+    clear: (current: ConsolePanel) => { return current.console.clear() }
+  } as IEditMenu.IClearer<ConsolePanel>);
 
   app.contextMenu.addItem({command: CommandIDs.clear, selector: '.jp-CodeConsole'});
   app.contextMenu.addItem({command: CommandIDs.restart, selector: '.jp-CodeConsole'});

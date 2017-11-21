@@ -11,7 +11,7 @@ import {
 
 import {
   IMainMenu, IMenuExtender,
-  MainMenu, FileMenu, KernelMenu, ViewMenu, RunMenu
+  EditMenu, FileMenu, KernelMenu, MainMenu, RunMenu, ViewMenu
 } from '@jupyterlab/mainmenu';
 
 
@@ -20,6 +20,9 @@ import {
  */
 export
 namespace CommandIDs {
+  export
+  const clear = 'editmenu:clear';
+
   export
   const closeAndCleanup = 'filemenu:close-and-cleanup';
 
@@ -73,6 +76,7 @@ const menuPlugin: JupyterLabPlugin<IMainMenu> = {
     logo.id = 'jp-MainLogo';
 
     // Create the application menus.
+    createEditMenu(app, menu.editMenu);
     createFileMenu(app, menu.fileMenu);
     createKernelMenu(app, menu.kernelMenu);
     createRunMenu(app, menu.runMenu);
@@ -84,6 +88,26 @@ const menuPlugin: JupyterLabPlugin<IMainMenu> = {
     return menu;
   }
 };
+
+/**
+ * Create the basic `Edit` menu.
+ */
+function createEditMenu(app: JupyterLab, menu: EditMenu): void {
+  const commands = menu.commands;
+
+  commands.addCommand(CommandIDs.clear, {
+    label: () => {
+      const action =
+        Private.delegateLabel(app, menu.clearers, 'noun');
+      return `Clear${action ? ` ${action}` : '…'}`;
+    },
+    isEnabled:
+      Private.delegateEnabled(app, menu.clearers, 'clear'),
+    execute:
+      Private.delegateExecute(app, menu.clearers, 'clear')
+  });
+  menu.addGroup([{ command: CommandIDs.clear }]);
+}
 
 /**
  * Create the basic `File` menu.
