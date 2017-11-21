@@ -420,9 +420,9 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
   });
 
   // Add main menu notebook menu.
-  mainMenu.addMenu(createMenu(app), { rank: 20 });
+  populateMenus(app, mainMenu, tracker);
 
-  // The launcher callback.
+  // Utility function to create a new notebook.
   const createNew = (cwd: string, kernelName?: string) => {
     return commands.execute(
       'docmanager:new-untitled', { path: cwd, type: 'notebook' }
@@ -445,119 +445,6 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
     }
   });
 
-  // Add new notebook creation to the file menu.
-  mainMenu.fileMenu.newMenu.addItem({ command: CommandIDs.createNew });
-
-  // Add a close and shutdown command to the file menu.
-  mainMenu.fileMenu.closeAndCleaners.set('Notebook', {
-    tracker,
-    action: 'Shutdown',
-    closeAndCleanup: (current: NotebookPanel) => {
-      const fileName = current.title.label;
-      return showDialog({
-        title: 'Shutdown the notebook?',
-        body: `Are you sure you want to close "${fileName}"?`,
-        buttons: [Dialog.cancelButton(), Dialog.warnButton()]
-      }).then(result => {
-        if (result.button.accept) {
-          return current.context.session.shutdown()
-            .then(() => { current.dispose(); });
-        }
-      });
-    }
-  } as IFileMenu.ICloseAndCleaner<NotebookPanel>);
-
-  // Add a notebook group to the File menu.
-  let exportTo = new Menu({ commands } );
-  exportTo.title.label = 'Export to ...';
-  EXPORT_TO_FORMATS.forEach(exportToFormat => {
-    exportTo.addItem({ command: CommandIDs.exportToFormat, args: exportToFormat });
-  });
-  const fileGroup = [
-    { command: CommandIDs.trust },
-    { type: 'submenu', submenu: exportTo } as Menu.IItemOptions
-  ];
-  mainMenu.fileMenu.addGroup(fileGroup);
-
-  // Add a kernel user to the Kernel menu
-  mainMenu.kernelMenu.kernelUsers.set('Notebook', {
-    tracker,
-    interruptKernel: current => {
-      let kernel = current.session.kernel;
-      if (kernel) {
-        return kernel.interrupt();
-      }
-      return Promise.resolve(void 0);
-    },
-    restartKernel: current => current.session.restart(),
-    changeKernel: current => current.session.selectKernel()
-  } as IKernelMenu.IKernelUser<NotebookPanel>);
-
-  // Add a console creator the the Kernel menu
-  mainMenu.kernelMenu.consoleCreators.set('Notebook', {
-    tracker,
-    createConsole: current => {
-      const options: ReadonlyJSONObject = {
-        path: current.context.path,
-        preferredLanguage: current.context.model.defaultKernelLanguage
-      };
-      return commands.execute('console:create', options);
-    }
-  } as IKernelMenu.IConsoleCreator<NotebookPanel>);
-
-  // Add some commands to the application view menu.
-  const viewGroup = [
-    CommandIDs.hideAllCode,
-    CommandIDs.showAllCode,
-    CommandIDs.hideAllOutputs,
-    CommandIDs.showAllOutputs
-  ].map(command => { return { command }; });
-  mainMenu.viewMenu.addGroup(viewGroup);
-
-  // Add an IEditorViewer to the application view menu
-  mainMenu.viewMenu.editorViewers.set('Editor', {
-    tracker,
-    toggleLineNumbers: widget => {
-      NotebookActions.toggleAllLineNumbers(widget.notebook);
-    },
-    toggleMatchBrackets: widget => {
-      NotebookActions.toggleAllMatchBrackets(widget.notebook);
-    },
-    lineNumbersToggled: widget =>
-      widget.notebook.activeCell.editor.getOption('lineNumbers'),
-    matchBracketsToggled: widget =>
-      widget.notebook.activeCell.editor.getOption('matchBrackets'),
-  } as IViewMenu.IEditorViewer<NotebookPanel>);
-
-  // Add an ICodeRunner to the application run menu
-  mainMenu.runMenu.codeRunners.set('Notebook', {
-    tracker,
-    noun: 'Cell',
-    run: current => {
-      const { context, notebook } = current;
-      return NotebookActions.runAndAdvance(notebook, context.session)
-      .then(() => void 0);
-    },
-    runAll: current => {
-      const { context, notebook } = current;
-      return NotebookActions.runAll(notebook, context.session)
-      .then(() => void 0);
-    }
-  } as IRunMenu.ICodeRunner<NotebookPanel>);
-
-  // Add commands to the application edit menu.
-  const editGroup = [
-    CommandIDs.undo,
-    CommandIDs.redo,
-    CommandIDs.cut,
-    CommandIDs.copy,
-    CommandIDs.paste,
-    CommandIDs.deleteCell,
-    CommandIDs.split,
-    CommandIDs.merge,
-    CommandIDs.clearAllOutputs
-  ].map(command => { return { command }; });
-  mainMenu.editMenu.addGroup(editGroup);
 
   // Add a launcher item if the launcher is available.
   if (launcher) {
@@ -1399,25 +1286,122 @@ function populatePalette(palette: ICommandPalette): void {
 
 
 /**
- * Creates a menu for the notebook.
+ * Populates the application menus for the notebook.
  */
-function createMenu(app: JupyterLab): Menu {
+function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookTracker): void {
   let { commands } = app;
-  let menu = new Menu({ commands });
-  let settings = new Menu({ commands });
+
+  // Add new notebook creation to the file menu.
+  mainMenu.fileMenu.newMenu.addItem({ command: CommandIDs.createNew });
+
+  // Add a close and shutdown command to the file menu.
+  mainMenu.fileMenu.closeAndCleaners.set('Notebook', {
+    tracker,
+    action: 'Shutdown',
+    closeAndCleanup: (current: NotebookPanel) => {
+      const fileName = current.title.label;
+      return showDialog({
+        title: 'Shutdown the notebook?',
+        body: `Are you sure you want to close "${fileName}"?`,
+        buttons: [Dialog.cancelButton(), Dialog.warnButton()]
+      }).then(result => {
+        if (result.button.accept) {
+          return current.context.session.shutdown()
+            .then(() => { current.dispose(); });
+        }
+      });
+    }
+  } as IFileMenu.ICloseAndCleaner<NotebookPanel>);
+
+  // Add a notebook group to the File menu.
   let exportTo = new Menu({ commands } );
-
-  menu.title.label = 'Notebook';
-
   exportTo.title.label = 'Export to ...';
   EXPORT_TO_FORMATS.forEach(exportToFormat => {
     exportTo.addItem({ command: CommandIDs.exportToFormat, args: exportToFormat });
   });
+  const fileGroup = [
+    { command: CommandIDs.trust },
+    { type: 'submenu', submenu: exportTo } as Menu.IItemOptions
+  ];
+  mainMenu.fileMenu.addGroup(fileGroup);
 
-  menu.addItem({ command: CommandIDs.trust });
-  menu.addItem({ type: 'submenu', submenu: exportTo });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ type: 'submenu', submenu: settings });
+  // Add a kernel user to the Kernel menu
+  mainMenu.kernelMenu.kernelUsers.set('Notebook', {
+    tracker,
+    interruptKernel: current => {
+      let kernel = current.session.kernel;
+      if (kernel) {
+        return kernel.interrupt();
+      }
+      return Promise.resolve(void 0);
+    },
+    restartKernel: current => current.session.restart(),
+    changeKernel: current => current.session.selectKernel()
+  } as IKernelMenu.IKernelUser<NotebookPanel>);
 
-  return menu;
+  // Add a console creator the the Kernel menu
+  mainMenu.kernelMenu.consoleCreators.set('Notebook', {
+    tracker,
+    createConsole: current => {
+      const options: ReadonlyJSONObject = {
+        path: current.context.path,
+        preferredLanguage: current.context.model.defaultKernelLanguage
+      };
+      return commands.execute('console:create', options);
+    }
+  } as IKernelMenu.IConsoleCreator<NotebookPanel>);
+
+  // Add some commands to the application view menu.
+  const viewGroup = [
+    CommandIDs.hideAllCode,
+    CommandIDs.showAllCode,
+    CommandIDs.hideAllOutputs,
+    CommandIDs.showAllOutputs
+  ].map(command => { return { command }; });
+  mainMenu.viewMenu.addGroup(viewGroup);
+
+  // Add an IEditorViewer to the application view menu
+  mainMenu.viewMenu.editorViewers.set('Editor', {
+    tracker,
+    toggleLineNumbers: widget => {
+      NotebookActions.toggleAllLineNumbers(widget.notebook);
+    },
+    toggleMatchBrackets: widget => {
+      NotebookActions.toggleAllMatchBrackets(widget.notebook);
+    },
+    lineNumbersToggled: widget =>
+      widget.notebook.activeCell.editor.getOption('lineNumbers'),
+    matchBracketsToggled: widget =>
+      widget.notebook.activeCell.editor.getOption('matchBrackets'),
+  } as IViewMenu.IEditorViewer<NotebookPanel>);
+
+  // Add an ICodeRunner to the application run menu
+  mainMenu.runMenu.codeRunners.set('Notebook', {
+    tracker,
+    noun: 'Cell',
+    run: current => {
+      const { context, notebook } = current;
+      return NotebookActions.runAndAdvance(notebook, context.session)
+      .then(() => void 0);
+    },
+    runAll: current => {
+      const { context, notebook } = current;
+      return NotebookActions.runAll(notebook, context.session)
+      .then(() => void 0);
+    }
+  } as IRunMenu.ICodeRunner<NotebookPanel>);
+
+  // Add commands to the application edit menu.
+  const editGroup = [
+    CommandIDs.undo,
+    CommandIDs.redo,
+    CommandIDs.cut,
+    CommandIDs.copy,
+    CommandIDs.paste,
+    CommandIDs.deleteCell,
+    CommandIDs.split,
+    CommandIDs.merge,
+    CommandIDs.clearAllOutputs
+  ].map(command => { return { command }; });
+  mainMenu.editMenu.addGroup(editGroup);
 }
