@@ -24,6 +24,12 @@ namespace CommandIDs {
   const clear = 'editmenu:clear';
 
   export
+  const find = 'editmenu:find';
+
+  export
+  const findAndReplace = 'editmenu:find-and-replace';
+
+  export
   const closeAndCleanup = 'filemenu:close-and-cleanup';
 
   export
@@ -95,6 +101,7 @@ const menuPlugin: JupyterLabPlugin<IMainMenu> = {
 function createEditMenu(app: JupyterLab, menu: EditMenu): void {
   const commands = menu.commands;
 
+  // Add the clear command to the Edit menu.
   commands.addCommand(CommandIDs.clear, {
     label: () => {
       const action =
@@ -107,6 +114,26 @@ function createEditMenu(app: JupyterLab, menu: EditMenu): void {
       Private.delegateExecute(app, menu.clearers, 'clear')
   });
   menu.addGroup([{ command: CommandIDs.clear }], 10);
+
+  // Add the find/replace commands the the Edit menu.
+  commands.addCommand(CommandIDs.find, {
+    label: 'Find…',
+    isEnabled:
+      Private.delegateEnabled(app, menu.findReplacers, 'find'),
+    execute:
+      Private.delegateExecute(app, menu.findReplacers, 'find')
+  });
+  commands.addCommand(CommandIDs.findAndReplace, {
+    label: 'Find and Replace…',
+    isEnabled:
+      Private.delegateEnabled(app, menu.findReplacers, 'findAndReplace'),
+    execute:
+      Private.delegateExecute(app, menu.findReplacers, 'findAndReplace')
+  });
+  menu.addGroup([
+    { command: CommandIDs.find },
+    { command: CommandIDs.findAndReplace }
+  ], 200);
 }
 
 /**

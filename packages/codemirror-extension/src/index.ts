@@ -18,7 +18,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IMainMenu
+  IMainMenu, IEditMenu
 } from '@jupyterlab/mainmenu';
 
 import {
@@ -34,7 +34,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IEditorTracker
+  IEditorTracker, FileEditor
 } from '@jupyterlab/fileeditor';
 
 
@@ -322,10 +322,16 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
 
   mainMenu.addMenu(createMenu(), { rank: 30 });
 
-
-  const editGroup = [
-    CommandIDs.find,
-    CommandIDs.findAndReplace
-  ].map(command => { return { command }; });
-  mainMenu.editMenu.addGroup(editGroup);
+  // Add find-replace capabilities to the edit menu.
+  mainMenu.editMenu.findReplacers.set('Editor', {
+    tracker,
+    find: (widget: FileEditor) => {
+      let editor = widget.editor as CodeMirrorEditor;
+      editor.execCommand('find');
+    },
+    findAndReplace: (widget: FileEditor) => {
+      let editor = widget.editor as CodeMirrorEditor;
+      editor.execCommand('find');
+    }
+  } as IEditMenu.IFindReplacer<FileEditor>)
 }

@@ -22,6 +22,14 @@ interface IEditMenu extends IJupyterLabMenu {
    * The key for the map may be used in menu labels.
    */
   readonly clearers: Map<string, IEditMenu.IClearer<Widget>>;
+
+  /**
+   * A map storing IClearers for the Edit menu.
+   *
+   * ### Notes
+   * The key for the map may be used in menu labels.
+   */
+  readonly findReplacers: Map<string, IEditMenu.IFindReplacer<Widget>>;
 }
 
 /**
@@ -38,6 +46,9 @@ class EditMenu extends JupyterLabMenu implements IEditMenu {
 
     this.clearers =
       new Map<string, IEditMenu.IClearer<Widget>>();
+
+    this.findReplacers =
+      new Map<string, IEditMenu.IFindReplacer<Widget>>();
   }
 
   /**
@@ -47,6 +58,14 @@ class EditMenu extends JupyterLabMenu implements IEditMenu {
    * The key for the map may be used in menu labels.
    */
   readonly clearers: Map<string, IEditMenu.IClearer<Widget>>;
+
+  /**
+   * A map storing IClearers for the Edit menu.
+   *
+   * ### Notes
+   * The key for the map may be used in menu labels.
+   */
+  readonly findReplacers: Map<string, IEditMenu.IFindReplacer<Widget>>;
 }
 
 /**
@@ -68,5 +87,21 @@ namespace IEditMenu {
      * A function to clear an activity.
      */
     clear: (widget: T) => void;
+  }
+
+  /**
+   * Interface for an activity that uses Find/Find+Replace.
+   */
+  export
+  interface IFindReplacer<T extends Widget> extends IMenuExtender<T> {
+    /**
+     * Execute a find command for the activity.
+     */
+    find?: (widget: T) => void;
+
+    /**
+     * Execute a find/replace command for the activity.
+     */
+    findAndReplace?: (widget: T) => void;
   }
 }
