@@ -21,47 +21,47 @@ import {
 export
 namespace CommandIDs {
   export
-  const closeAndCleanup = 'file:close-and-cleanup';
+  const closeAndCleanup = 'filemenu:close-and-cleanup';
 
   export
-  const interruptKernel = 'kernel:interrupt';
+  const interruptKernel = 'kernelmenu:interrupt';
 
   export
-  const restartKernel = 'kernel:restart';
+  const restartKernel = 'kernelmenu:restart';
 
   export
-  const changeKernel = 'kernel:change';
+  const changeKernel = 'kernelmenu:change';
 
   export
-  const createConsole = 'kernel:create-console';
+  const createConsole = 'kernelmenu:create-console';
 
   export
-  const wordWrap = 'editor:word-wrap';
+  const wordWrap = 'viewmenu:word-wrap';
 
   export
-  const lineNumbering = 'editor:line-numbering';
+  const lineNumbering = 'viewmenu:line-numbering';
 
   export
-  const matchBrackets = 'editor:match-brackets';
+  const matchBrackets = 'viewmenu:match-brackets';
 
   export
-  const run = 'run:run';
+  const run = 'runmenu:run';
 
   export
-  const runAll = 'run:run-all';
+  const runAll = 'runmenu:run-all';
 
   export
-  const runAbove = 'run:run-above';
+  const runAbove = 'runmenu:run-above';
 
   export
-  const runBelow = 'run:run-below';
+  const runBelow = 'runmenu:run-below';
 }
 
 /**
  * A service providing an interface to the main menu.
  */
 const menuPlugin: JupyterLabPlugin<IMainMenu> = {
-  id: '@jupyterlab/apputils-extension:menu',
+  id: '@jupyterlab/mainmenu-extension:plugin',
   provides: IMainMenu,
   activate: (app: JupyterLab): IMainMenu => {
     let menu = new MainMenu(app.commands);
@@ -114,7 +114,7 @@ function createFileMenu(app: JupyterLab, menu: FileMenu): void {
     'docmanager:restore-checkpoint',
     'docmanager:clone',
     'docmanager:close',
-    'file:close-and-cleanup',
+    'filemenu:close-and-cleanup',
     'docmanager:close-all-files'
   ].forEach(command => { menu.addItem({ command }); });
   menu.addItem({ type: 'separator' });

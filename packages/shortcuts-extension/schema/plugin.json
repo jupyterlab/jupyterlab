@@ -178,7 +178,7 @@
     "kernel:interrupt": {
       "default": { },
       "properties": {
-        "command": { "default": "kernel:interrupt" },
+        "command": { "default": "kernelmenu:interrupt" },
         "keys": { "default": ["I", "I"] },
         "selector": { "default": "[data-jp-kernel-user]:focus" }
       },
@@ -187,7 +187,7 @@
     "kernel:restart": {
       "default": { },
       "properties": {
-        "command": { "default": "kernel:restart" },
+        "command": { "default": "kernelmenu:restart" },
         "keys": { "default": ["0", "0"] },
         "selector": { "default": "[data-jp-kernel-user]:focus" }
       },
@@ -540,7 +540,7 @@
     "run:run": {
       "default": { },
       "properties": {
-        "command": { "default": "run:run" },
+        "command": { "default": "runmenu:run" },
         "keys": { "default": ["Shift Enter"] },
         "selector": { "default": "[data-jp-code-runner]:focus" }
       },
