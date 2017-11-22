@@ -240,13 +240,12 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
 
   command = CommandIDs.create;
   commands.addCommand(command, {
-    label: 'New Console',
+    label: 'Console',
     execute: (args: Partial<ConsolePanel.IOptions>) => {
       let basePath = args.basePath || browserFactory.defaultBrowser.model.path;
       return createConsole({ basePath, ...args });
     }
   });
-  palette.addItem({ command, category });
 
   // Get the current widget and activate unless the args specify otherwise.
   function getCurrent(args: ReadonlyJSONObject): ConsolePanel | null {

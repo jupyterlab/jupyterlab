@@ -374,7 +374,7 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
 
   // Add a command for creating a new text file.
   commands.addCommand(CommandIDs.createNew, {
-    label: 'New File',
+    label: 'Text File',
     caption: 'Create a new text file',
     execute: () => {
       let cwd = browserFactory.defaultBrowser.model.path;

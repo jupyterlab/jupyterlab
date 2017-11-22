@@ -436,7 +436,7 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
 
   // Add a command for creating a new notebook in the File Menu.
   commands.addCommand(CommandIDs.createNew, {
-    label: 'New Notebook',
+    label: 'Notebook',
     caption: 'Create a new notebook',
     execute: () => {
       let cwd = browserFactory ?

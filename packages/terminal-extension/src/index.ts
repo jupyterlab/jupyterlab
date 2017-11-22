@@ -119,7 +119,6 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
 
   // Add command palette items.
   [
-    CommandIDs.createNew,
     CommandIDs.refresh,
     CommandIDs.increaseFont,
     CommandIDs.decreaseFont,
@@ -166,7 +165,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
 
   // Add terminal commands.
   commands.addCommand(CommandIDs.createNew, {
-    label: 'New Terminal',
+    label: 'Terminal',
     caption: 'Start a new terminal session',
     execute: args => {
       let name = args['name'] as string;
