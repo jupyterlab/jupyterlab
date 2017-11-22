@@ -22,6 +22,10 @@ import {
 } from '@phosphor/messaging';
 
 import {
+  ISignal, Signal
+} from '@phosphor/signaling';
+
+import {
   h, VirtualDOM
 } from '@phosphor/virtualdom';
 
@@ -106,16 +110,32 @@ class RawEditor extends SplitPanel {
     this.addWidget(Private.wrapEditor(user, USER_TITLE, this._toolbar));
   }
 
+  /**
+   * Whether the raw editor debug functionality is enabled.
+   */
   get canDebug(): boolean {
     return this._canDebug;
   }
 
+  /**
+   * Whether the raw editor revert functionality is enabled.
+   */
   get canRevert(): boolean {
     return this._canRevert;
   }
 
+  /**
+   * Whether the raw editor save functionality is enabled.
+   */
   get canSave(): boolean {
     return this._canSave;
+  }
+
+  /**
+   * Emits when the commands passed in at instantiation change.
+   */
+  get commandsChanged(): ISignal<any, string[]> {
+    return this._commandsChanged;
   }
 
   /**
@@ -217,18 +237,6 @@ class RawEditor extends SplitPanel {
   }
 
   /**
-   * Handle updates to the settings.
-   */
-  private _onSettingsChanged(): void {
-    const settings = this._settings;
-    const defaults = this._defaults;
-    const user = this._user;
-
-    defaults.editor.model.value.text = settings.annotatedDefaults();
-    user.editor.model.value.text = settings.raw;
-  }
-
-  /**
    * Handle text changes in the underlying editor.
    */
   private _onTextChanged(): void {
@@ -252,17 +260,35 @@ class RawEditor extends SplitPanel {
     this._updateToolbar(false, false, true);
   }
 
+  /**
+   * Handle updates to the settings.
+   */
+  private _onSettingsChanged(): void {
+    const settings = this._settings;
+    const defaults = this._defaults;
+    const user = this._user;
+
+    defaults.editor.model.value.text = settings.annotatedDefaults();
+    user.editor.model.value.text = settings.raw;
+  }
+
   private _updateToolbar(debug: boolean, revert: boolean, save: boolean): void {
-    console.log('update toolbar');
+    const commands = this._commands;
+
     this._canDebug = debug;
     this._canRevert = revert;
     this._canSave = save;
-    Private.updateToolbar(this._commands);
+    this._commandsChanged.emit([
+      commands.debug,
+      commands.revert,
+      commands.save
+    ]);
   }
 
   private _canDebug = false;
   private _canRevert = false;
   private _canSave = false;
+  private _commandsChanged = new Signal<this, string[]>(this);
   private _commands: RawEditor.ICommandBundle;
   private _defaults: CodeEditorWrapper;
   private _onSaveError: (reason: any) => void;
@@ -343,26 +369,6 @@ namespace Private {
 
       if (item) {
         toolbar.addItem(name, item);
-      }
-
-      // if (registry.hasCommand(name)) {
-      //   toolbar.addItem(name, Toolbar.createFromCommand(registry, name));
-      // } else {
-      //   console.warn(`Command ${name} is not registered, ignoring.`);
-      // }
-    });
-  }
-
-  /**
-   * Update the raw editor toolbar.
-   */
-  export
-  function updateToolbar(commands: RawEditor.ICommandBundle): void {
-    const { debug, registry, revert, save } = commands;
-
-    [debug, revert, save].forEach(name => {
-      if (registry.hasCommand(name)) {
-        registry.notifyCommandChanged(name);
       }
     });
   }

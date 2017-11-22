@@ -28,6 +28,10 @@ import {
 } from '@phosphor/messaging';
 
 import {
+  ISignal
+} from '@phosphor/signaling';
+
+import {
   h, VirtualDOM
 } from '@phosphor/virtualdom';
 
@@ -185,6 +189,13 @@ class SettingEditor extends Widget {
    */
   get canSaveRaw(): boolean {
     return this._editor.raw.canSave;
+  }
+
+  /**
+   * Emits when the commands passed in at instantiation change.
+   */
+  get commandsChanged(): ISignal<any, string[]> {
+    return this._editor.raw.commandsChanged;
   }
 
   /**
