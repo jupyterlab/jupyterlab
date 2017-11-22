@@ -52,13 +52,6 @@ interface IMenuExtender<T extends Widget> {
 export
 class JupyterLabMenu extends Menu implements IJupyterLabMenu {
   /**
-   * Create a new menu.
-   */
-  constructor(options: Menu.IOptions) {
-    super(options);
-  }
-
-  /**
    * Add a group of menu items specific to a particular
    * plugin.
    */
