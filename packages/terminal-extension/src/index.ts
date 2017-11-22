@@ -249,15 +249,16 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
     isEnabled: hasWidget
   });
 
+  let terminalTheme: Terminal.Theme = 'dark';
   commands.addCommand('terminal:toggle-theme', {
-    label: 'Toggle Terminal Theme',
-    caption: 'Switch Terminal Theme',
+    label: 'Use Dark Terminal Theme',
+    caption: 'Whether to use the dark terminal theme',
+    isToggled: () => terminalTheme === 'dark',
     execute: () => {
+      terminalTheme = terminalTheme === 'dark' ? 'light' : 'dark';
       tracker.forEach(widget => {
-        if (widget.theme === 'dark') {
-          widget.theme = 'light';
-        } else {
-          widget.theme = 'dark';
+        if (widget.theme !== terminalTheme) {
+          widget.theme = terminalTheme;
         }
       });
     },
