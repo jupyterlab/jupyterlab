@@ -1302,7 +1302,7 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   // Add a clearer to the edit menu
   mainMenu.editMenu.clearers.set('Notebook', {
     tracker,
-    noun: 'All Cells',
+    noun: 'All Cell Outputs',
     clear: (current: NotebookPanel) => {
       return NotebookActions.clearAllOutputs(current.notebook);
     }
@@ -1404,6 +1404,16 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
     runAll: current => {
       const { context, notebook } = current;
       return NotebookActions.runAll(notebook, context.session)
+      .then(() => void 0);
+    },
+    runAbove: current => {
+      const { context, notebook } = current;
+      return NotebookActions.runAllAbove(notebook, context.session)
+      .then(() => void 0);
+    },
+    runBelow: current => {
+      const { context, notebook } = current;
+      return NotebookActions.runAllBelow(notebook, context.session)
       .then(() => void 0);
     }
   } as IRunMenu.ICodeRunner<NotebookPanel>);
