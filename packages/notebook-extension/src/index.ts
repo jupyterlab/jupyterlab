@@ -1353,7 +1353,8 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
       return Promise.resolve(void 0);
     },
     restartKernel: current => current.session.restart(),
-    changeKernel: current => current.session.selectKernel()
+    changeKernel: current => current.session.selectKernel(),
+    shutdownKernel: current => current.session.shutdown(),
   } as IKernelMenu.IKernelUser<NotebookPanel>);
 
   // Add a console creator the the Kernel menu

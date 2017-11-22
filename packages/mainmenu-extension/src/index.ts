@@ -48,6 +48,9 @@ namespace CommandIDs {
   const changeKernel = 'kernelmenu:change';
 
   export
+  const shutdownKernel = 'kernelmenu:shutdown';
+
+  export
   const createConsole = 'kernelmenu:create-console';
 
   export
@@ -227,6 +230,12 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
     execute: Private.delegateExecute(app, menu.kernelUsers, 'changeKernel')
   });
 
+  commands.addCommand(CommandIDs.shutdownKernel, {
+    label: 'Shutdown Kernel',
+    isEnabled: Private.delegateEnabled(app, menu.kernelUsers, 'shutdownKernel'),
+    execute: Private.delegateExecute(app, menu.kernelUsers, 'shutdownKernel')
+  });
+
   commands.addCommand(CommandIDs.createConsole, {
     label: () => {
       const name = Private.findExtenderName(app, menu.consoleCreators);
@@ -240,7 +249,8 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
   const kernelUserGroup = [
     CommandIDs.interruptKernel,
     CommandIDs.restartKernel,
-    CommandIDs.changeKernel
+    CommandIDs.changeKernel,
+    CommandIDs.shutdownKernel
   ].map(command => { return { command }; });
   menu.addGroup(kernelUserGroup, 0);
 

@@ -437,7 +437,8 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
       return Promise.resolve(void 0);
     },
     restartKernel: current => current.console.session.restart(),
-    changeKernel: current => current.console.session.selectKernel()
+    changeKernel: current => current.console.session.selectKernel(),
+    shutdownKernel: current => current.console.session.shutdown()
   } as IKernelMenu.IKernelUser<ConsolePanel>);
 
   // Add a code runner to the Run menu.
