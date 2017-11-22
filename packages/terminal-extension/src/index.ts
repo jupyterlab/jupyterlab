@@ -99,13 +99,6 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     name: widget => widget.session && widget.session.name
   });
 
-  // Update the command registry when the terminal state changes.
-  tracker.currentChanged.connect(() => {
-    if (tracker.size <= 1) {
-      commands.notifyCommandChanged(CommandIDs.refresh);
-    }
-  });
-
   addCommands(app, serviceManager, tracker);
 
   // Add some commands to the application view menu.

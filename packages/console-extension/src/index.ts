@@ -146,13 +146,6 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     when: manager.ready
   });
 
-  // Update the command registry when the console state changes.
-  tracker.currentChanged.connect(() => {
-    if (tracker.size <= 1) {
-      commands.notifyCommandChanged(CommandIDs.interrupt);
-    }
-  });
-
   // The launcher callback.
   let callback = (cwd: string, name: string) => {
     return createConsole({ basePath: cwd, kernelPreference: { name } });

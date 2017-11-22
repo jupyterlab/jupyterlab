@@ -150,13 +150,6 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     }
   });
 
-  // Update the command registry when the codemirror state changes.
-  tracker.currentChanged.connect(() => {
-    if (tracker.size <= 1) {
-      commands.notifyCommandChanged(CommandIDs.changeKeyMap);
-    }
-  });
-
   /**
    * A test for whether the tracker has an active widget.
    */

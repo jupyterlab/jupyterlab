@@ -123,13 +123,6 @@ function addCommands(tracker: IImageTracker, commands: CommandRegistry) {
     return tracker.currentWidget !== null;
   }
 
-  // Update the command registry when the image viewer state changes.
-  tracker.currentChanged.connect(() => {
-    if (tracker.size <= 1) {
-      commands.notifyCommandChanged(CommandIDs.zoomIn);
-    }
-  });
-
   commands.addCommand('imageviewer:zoom-in', {
     execute: zoomIn,
     label: 'Zoom In',

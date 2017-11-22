@@ -393,13 +393,6 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
     when: services.ready
   });
 
-  // Update the command registry when the notebook state changes.
-  tracker.currentChanged.connect(() => {
-    if (tracker.size <= 1) {
-      commands.notifyCommandChanged(CommandIDs.interrupt);
-    }
-  });
-
   let registry = app.docRegistry;
   registry.addModelFactory(new NotebookModelFactory({}));
   registry.addWidgetFactory(factory);
