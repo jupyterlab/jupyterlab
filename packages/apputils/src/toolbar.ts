@@ -203,7 +203,8 @@ class Toolbar<T extends Widget> extends Widget {
 export
 namespace Toolbar {
   /**
-   * Create a toolbar item for a command.
+   * Create a toolbar item for a command or `null` if the command does not exist
+   * in the registry.
    *
    * Notes:
    * If the command has an icon label it will be added to the button.
@@ -211,13 +212,18 @@ namespace Toolbar {
    * be added.
    */
   export
-  function createFromCommand(commands: CommandRegistry, id: string): ToolbarButton {
-    let button = new ToolbarButton({
+  function createFromCommand(commands: CommandRegistry, id: string): ToolbarButton | null {
+    if (!commands.hasCommand(id)) {
+      return null;
+    }
+
+    const button = new ToolbarButton({
       onClick: () => { commands.execute(id); },
       className: Private.commandClassName(commands, id),
       tooltip: Private.commandTooltip(commands, id),
     });
     let oldClasses = Private.commandClassName(commands, id).split(/\s/);
+
     (button.node as HTMLButtonElement).disabled = !commands.isEnabled(id);
     Private.setNodeContentFromCommand(button.node, commands, id);
 
@@ -226,30 +232,37 @@ namespace Toolbar {
       if (args.id !== id) {
         return;  // Not our command
       }
+
       if (args.type === 'removed') {
         // Dispose of button
         button.dispose();
-      } else if (args.type === 'changed') {
-        // Update all fields (onClick is already indirected)
-        let newClasses = Private.commandClassName(sender, id).split(/\s/);
-
-        for (let cls of oldClasses) {
-          if (cls && newClasses.indexOf(cls) === -1) {
-            button.removeClass(cls);
-          }
-        }
-        for (let cls of newClasses) {
-          if (cls && oldClasses.indexOf(cls) === -1) {
-            button.addClass(cls);
-          }
-        }
-        oldClasses = newClasses;
-        button.node.title = Private.commandTooltip(sender, id);
-        Private.setNodeContentFromCommand(button.node, sender, id);
-        (button.node as HTMLButtonElement).disabled = !sender.isEnabled(id);
+        return;
       }
+
+      if (args.type !== 'changed') {
+        return;
+      }
+
+      // Update all fields (onClick is already indirected)
+      const newClasses = Private.commandClassName(sender, id).split(/\s/);
+
+      for (let cls of oldClasses) {
+        if (cls && newClasses.indexOf(cls) === -1) {
+          button.removeClass(cls);
+        }
+      }
+      for (let cls of newClasses) {
+        if (cls && oldClasses.indexOf(cls) === -1) {
+          button.addClass(cls);
+        }
+      }
+      oldClasses = newClasses;
+      button.node.title = Private.commandTooltip(sender, id);
+      Private.setNodeContentFromCommand(button.node, sender, id);
+      (button.node as HTMLButtonElement).disabled = !sender.isEnabled(id);
     }
     commands.commandChanged.connect(onChange, button);
+
     return button;
   }
 

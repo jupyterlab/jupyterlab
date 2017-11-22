@@ -228,9 +228,29 @@ namespace PluginEditor {
   export
   interface IOptions {
     /**
-     * The command registry the editor uses for toolbars.
+     * The toolbar commands and registry for the setting editor toolbar.
      */
-    commands: CommandRegistry;
+    commands: {
+      /**
+       * The command registry.
+       */
+      registry: CommandRegistry;
+
+      /**
+       * The debug command ID.
+       */
+      debug: string;
+
+      /**
+       * The revert command ID.
+       */
+      revert: string;
+
+      /**
+       * The save command ID.
+       */
+      save: string;
+    };
 
     /**
      * The editor factory used by the plugin editor.

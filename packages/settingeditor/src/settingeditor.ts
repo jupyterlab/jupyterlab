@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  DataConnector, IDataConnector, ISchemaValidator, ISettingRegistry, IStateDB
+  IDataConnector, ISettingRegistry, IStateDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -20,7 +20,7 @@ import {
 } from '@phosphor/commands';
 
 import {
-  JSONExt, JSONObject, JSONValue, ReadonlyJSONObject
+  JSONExt, JSONObject, JSONValue
 } from '@phosphor/coreutils';
 
 import {
@@ -34,6 +34,10 @@ import {
 import {
   PanelLayout, Widget
 } from '@phosphor/widgets';
+
+import {
+  InspectorConnector
+} from './connector';
 
 import {
   PluginEditor
@@ -102,51 +106,6 @@ const INSTRUCTIONS_TEXT = `
 Select a plugin from the list to view and edit its preferences.
 `;
 
-
-/**
- * The data connector used to populate a code inspector.
- */
-class InspectorConnector extends DataConnector<InspectionHandler.IReply, void, InspectionHandler.IRequest> {
-  constructor(editor: SettingEditor) {
-    super();
-    this._editor = editor;
-  }
-
-  /**
-   * Fetch inspection requests.
-   */
-  fetch(request: InspectionHandler.IRequest): Promise<InspectionHandler.IReply> {
-    return new Promise<InspectionHandler.IReply>(resolve => {
-      // Debounce requests at a rate of 100ms.
-      const current = this._current = window.setTimeout(() => {
-        if (current !== this._current) {
-          return resolve(null);
-        }
-
-        const errors = this._validate(request.text);
-
-        if (!errors) {
-          return resolve(null);
-        }
-
-        resolve({ data: Private.render(errors), metadata: { } });
-      }, 100);
-    });
-  }
-
-  private _validate(raw: string): ISchemaValidator.IError[] | null {
-    const editor = this._editor;
-    const data = { composite: { }, user: { } };
-    const id = editor.settings.plugin;
-    const schema = editor.settings.schema;
-    const validator = editor.registry.validator;
-
-    return validator.validateData({ data, id, raw, schema }, false);
-  }
-
-  private _current = 0;
-  private _editor: SettingEditor;
-}
 
 /**
  * An interface for modifying and saving application settings.
@@ -429,9 +388,29 @@ namespace SettingEditor {
   export
   interface IOptions {
     /**
-     * The command registry that holds the setting editor toolbar commands.
+     * The toolbar commands and registry for the setting editor toolbar.
      */
-    commands: CommandRegistry;
+    commands: {
+      /**
+       * The command registry.
+       */
+      registry: CommandRegistry;
+
+      /**
+       * The debug command ID.
+       */
+      debug: string;
+
+      /**
+       * The revert command ID.
+       */
+      revert: string;
+
+      /**
+       * The save command ID.
+       */
+      save: string;
+    };
 
     /**
      * The editor factory used by the setting editor.
@@ -547,31 +526,5 @@ namespace Private {
    */
   function numberArray(value: JSONValue): boolean {
     return Array.isArray(value) && value.every(x => typeof x === 'number');
-  }
-
-  /**
-   * Render validation errors as an HTML string.
-   */
-  export
-  function render(errors: ISchemaValidator.IError[]): ReadonlyJSONObject {
-    return { 'text/markdown': errors.map(renderError).join('') };
-  }
-
-  /**
-   * Render an individual validation error as a markdown string.
-   */
-  function renderError(error: ISchemaValidator.IError): string {
-    switch (error.keyword) {
-      case 'additionalProperties':
-        return `**\`[additional property error]\`**
-          \`${error.params.additionalProperty}\` is not a valid property`;
-      case 'syntax':
-        return `**\`[syntax error]\`** *${error.message}*`;
-      case 'type':
-        return `**\`[type error]\`**
-          \`${error.dataPath}\` ${error.message}`;
-      default:
-        return `**\`[error]\`** *${error.message}*`;
-    }
   }
 }

@@ -263,7 +263,7 @@ class RawEditor extends SplitPanel {
   private _canDebug = false;
   private _canRevert = false;
   private _canSave = false;
-  private _commands: CommandRegistry;
+  private _commands: RawEditor.ICommandBundle;
   private _defaults: CodeEditorWrapper;
   private _onSaveError: (reason: any) => void;
   private _settings: ISettingRegistry.ISettings | null = null;
@@ -278,14 +278,40 @@ class RawEditor extends SplitPanel {
 export
 namespace RawEditor {
   /**
+   * The toolbar commands and registry for the setting editor toolbar.
+   */
+  export
+  interface ICommandBundle {
+    /**
+     * The command registry.
+     */
+    registry: CommandRegistry;
+
+    /**
+     * The debug command ID.
+     */
+    debug: string;
+
+    /**
+     * The revert command ID.
+     */
+    revert: string;
+
+    /**
+     * The save command ID.
+     */
+    save: string;
+  }
+
+  /**
    * The instantiation options for a raw editor.
    */
   export
   interface IOptions {
     /**
-     * The command registry that houses the raw editor toolbar commands.
+     * The toolbar commands and registry for the setting editor toolbar.
      */
-    commands: CommandRegistry;
+    commands: ICommandBundle;
 
     /**
      * The editor factory used by the raw editor.
@@ -305,31 +331,25 @@ namespace RawEditor {
  */
 namespace Private {
   /**
-   * The command IDs used by the setting editor.
-   */
-  namespace CommandIDs {
-    export
-    const debug = 'settingeditor:debug';
-
-    export
-    const revert = 'settingeditor:revert';
-
-    export
-    const save = 'settingeditor:save';
-  }
-
-  /**
    * Populate the raw editor toolbar.
    */
   export
-  function populateToolbar(commands: CommandRegistry, toolbar: Toolbar<Widget>): void {
+  function populateToolbar(commands: RawEditor.ICommandBundle, toolbar: Toolbar<Widget>): void {
+    const { debug, registry, revert, save } = commands;
+
     toolbar.addItem('spacer', Toolbar.createSpacerItem());
-    [CommandIDs.debug, CommandIDs.revert, CommandIDs.save].forEach(name => {
-      if (commands.hasCommand(name)) {
-        toolbar.addItem(name, Toolbar.createFromCommand(commands, name));
-      } else {
-        console.warn(`Command ${name} is not registered, ignoring.`);
+    [debug, revert, save].forEach(name => {
+      const item = Toolbar.createFromCommand(registry, name);
+
+      if (item) {
+        toolbar.addItem(name, item);
       }
+
+      // if (registry.hasCommand(name)) {
+      //   toolbar.addItem(name, Toolbar.createFromCommand(registry, name));
+      // } else {
+      //   console.warn(`Command ${name} is not registered, ignoring.`);
+      // }
     });
   }
 
@@ -337,10 +357,12 @@ namespace Private {
    * Update the raw editor toolbar.
    */
   export
-  function updateToolbar(commands: CommandRegistry): void {
-    [CommandIDs.debug, CommandIDs.revert, CommandIDs.save].forEach(name => {
-      if (commands.hasCommand(name)) {
-        commands.notifyCommandChanged(name);
+  function updateToolbar(commands: RawEditor.ICommandBundle): void {
+    const { debug, registry, revert, save } = commands;
+
+    [debug, revert, save].forEach(name => {
+      if (registry.hasCommand(name)) {
+        registry.notifyCommandChanged(name);
       }
     });
   }
