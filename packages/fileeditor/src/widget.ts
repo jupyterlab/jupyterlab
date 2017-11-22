@@ -31,6 +31,11 @@ import {
 const CODE_RUNNER = 'jpCodeRunner';
 
 /**
+ * The data attribute added to a widget that can undo.
+ */
+const UNDOER = 'jpUndoer';
+
+/**
  * The class name added to a dirty widget.
  */
 const DIRTY_CLASS = 'jp-mod-dirty';
@@ -60,6 +65,7 @@ class FileEditorCodeWrapper extends CodeEditorWrapper {
 
     this.addClass(EDITOR_CLASS);
     this.node.dataset[CODE_RUNNER] = 'true';
+    this.node.dataset[UNDOER] = 'true';
 
     editor.model.value.text = context.model.toString();
     context.ready.then(() => { this._onContextReady(); });

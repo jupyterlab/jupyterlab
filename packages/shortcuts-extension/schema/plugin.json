@@ -103,6 +103,24 @@
       },
       "type": "object"
     },
+    "editmenu:undo": {
+      "default": { },
+      "properties": {
+        "command": { "default": "editmenu:undo" },
+        "keys": { "default": ["Ctrl Z"] },
+        "selector": { "default": "[data-jp-undoer]" }
+      },
+      "type": "object"
+    },
+    "editmenu:redo": {
+      "default": { },
+      "properties": {
+        "command": { "default": "editmenu:redo" },
+        "keys": { "default": ["Ctrl Shift Z"] },
+        "selector": { "default": "[data-jp-undoer]" }
+      },
+      "type": "object"
+    },
     "filebrowser:create-main-launcher": {
       "default": { },
       "properties": {

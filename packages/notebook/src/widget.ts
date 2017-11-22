@@ -71,6 +71,11 @@ const KERNEL_USER = 'jpKernelUser';
 const CODE_RUNNER = 'jpCodeRunner';
 
 /**
+ * The data attribute added to a widget that can undo.
+ */
+const UNDOER = 'jpUndoer';
+
+/**
  * The class name added to notebook widgets.
  */
 const NB_CLASS = 'jp-Notebook';
@@ -181,6 +186,7 @@ class StaticNotebook extends Widget {
     this.addClass(NB_CLASS);
     this.node.dataset[KERNEL_USER] = 'true';
     this.node.dataset[CODE_RUNNER] = 'true';
+    this.node.dataset[UNDOER] = 'true';
     this.rendermime = options.rendermime;
     this.layout = new Private.NotebookPanelLayout();
     this.contentFactory = (
