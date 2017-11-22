@@ -34,7 +34,7 @@
     "@jupyterlab/codeeditor": "^0.12.0",
     "@jupyterlab/console": "^0.12.0",
     "@jupyterlab/coreutils": "^0.12.0",
-    "@jupyterlab/filebrowser": "^0.12.0",
+    "@jupyterlab/filebrowser": "^0.12.1",
     "@jupyterlab/launcher": "^0.12.0",
     "@jupyterlab/mainmenu": "^0.1.0",
     "@phosphor/algorithm": "^1.1.2",
