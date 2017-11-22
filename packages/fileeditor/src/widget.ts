@@ -26,6 +26,11 @@ import {
 } from '@phosphor/messaging';
 
 /**
+ * The data attribute added to a widget that can run code.
+ */
+const CODE_RUNNER = 'jpCodeRunner';
+
+/**
  * The class name added to a dirty widget.
  */
 const DIRTY_CLASS = 'jp-mod-dirty';
@@ -54,6 +59,7 @@ class FileEditorCodeWrapper extends CodeEditorWrapper {
     const editor = this.editor;
 
     this.addClass(EDITOR_CLASS);
+    this.node.dataset[CODE_RUNNER] = 'true';
 
     editor.model.value.text = context.model.toString();
     context.ready.then(() => { this._onContextReady(); });

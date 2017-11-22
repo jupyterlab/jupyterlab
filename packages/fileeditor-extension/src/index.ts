@@ -417,7 +417,7 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
       matchBracketsToggled: widget => widget.editor.getOption('matchBrackets')
     } as IViewMenu.IEditorViewer<FileEditor>);
 
-    // Add a console creator the the Kernel menu
+    // Add a console creator the the Kernel menu.
     menu.kernelMenu.consoleCreators.set('Editor', {
       tracker,
       createConsole: current => {
@@ -428,6 +428,13 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
         return commands.execute('console:create', options);
       }
     } as IKernelMenu.IConsoleCreator<FileEditor>);
+
+    // Add a code runner to the Run menu.
+    menu.runMenu.codeRunners.set('Editor', {
+      tracker,
+      noun: 'Code Snippet',
+      run: () => commands.execute(CommandIDs.runCode)
+    });
   }
 
   app.contextMenu.addItem({

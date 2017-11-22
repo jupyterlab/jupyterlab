@@ -121,15 +121,6 @@
       },
       "type": "object"
     },
-    "fileeditor:run-code": {
-      "default": { },
-      "properties": {
-        "command": { "default": "fileeditor:run-code" },
-        "keys": { "default": ["Shift Enter"] },
-        "selector": { "default": ".jp-FileEditor" }
-      },
-      "type": "object"
-    },
     "help:toggle": {
       "default": { },
       "properties": {
@@ -175,7 +166,7 @@
       },
       "type": "object"
     },
-    "kernel:interrupt": {
+    "kernelmenu:interrupt": {
       "default": { },
       "properties": {
         "command": { "default": "kernelmenu:interrupt" },
@@ -184,7 +175,7 @@
       },
       "type": "object"
     },
-    "kernel:restart": {
+    "kernelmenu:restart": {
       "default": { },
       "properties": {
         "command": { "default": "kernelmenu:restart" },
@@ -528,21 +519,21 @@
       },
       "type": "object"
     },
+    "runmenu:run": {
+      "default": { },
+      "properties": {
+        "command": { "default": "runmenu:run" },
+        "keys": { "default": ["Shift Enter"] },
+        "selector": { "default": "[data-jp-code-runner]" }
+      },
+      "type": "object"
+    },
     "settingeditor:debug": {
       "default": { },
       "properties": {
         "command": { "default": "settingeditor:debug" },
         "keys": { "default": ["Accel I"] },
         "selector": { "default": ".jp-SettingEditor" }
-      },
-      "type": "object"
-    },
-    "run:run": {
-      "default": { },
-      "properties": {
-        "command": { "default": "runmenu:run" },
-        "keys": { "default": ["Shift Enter"] },
-        "selector": { "default": "[data-jp-code-runner]:focus" }
       },
       "type": "object"
     },
