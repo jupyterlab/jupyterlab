@@ -220,7 +220,7 @@ namespace Toolbar {
     const button = new ToolbarButton({
       onClick: () => { commands.execute(id); },
       className: Private.commandClassName(commands, id),
-      tooltip: Private.commandTooltip(commands, id),
+      tooltip: Private.commandTooltip(commands, id)
     });
     let oldClasses = Private.commandClassName(commands, id).split(/\s/);
 
@@ -355,11 +355,14 @@ class ToolbarButton extends Widget {
     Styling.styleNodeByTag(this.node, 'button');
     this.addClass(TOOLBAR_BUTTON_CLASS);
     this._onClick = options.onClick || Private.noOp;
-    if (options.className) {
-      for (let extra of options.className.split(/\s/)) {
-        this.addClass(extra);
-      }
+
+    const classes = options.className ?
+      options.className.trim().replace(/\s{2,}/g, ' ').split(/\s/) : null;
+
+    if (classes) {
+      classes.forEach(name => { this.addClass(name); });
     }
+
     this.node.title = options.tooltip || '';
   }
 
@@ -492,16 +495,16 @@ namespace Private {
    */
   export
   function setNodeContentFromCommand(node: HTMLElement, commands: CommandRegistry, id: string): void {
-    let iconClass = commands.iconClass(id);
-    let iconLabel = commands.iconLabel(id);
+    const iconClass = commands.iconClass(id);
+    const iconLabel = commands.iconLabel(id);
+    const label = commands.label(id);
+
     node.innerHTML = '';
-    if (iconClass || iconLabel) {
-      let icon = document.createElement('div');
-      icon.innerText = commands.iconLabel(id);
-      icon.className += ` ${iconClass}`;
-      node.appendChild(icon);
+    if (iconClass) {
+      node.className += ` ${iconClass}`;
+      node.setAttribute('title', iconLabel || label);
     } else {
-      node.innerText = commands.label(id);
+      node.innerText = label;
     }
   }
 
