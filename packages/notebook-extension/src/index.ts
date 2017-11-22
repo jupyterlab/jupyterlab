@@ -539,6 +539,16 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     return tracker.currentWidget !== null;
   }
 
+  /**
+   * The name of the current notebook widget.
+   */
+  function currentName(): string {
+    if (tracker.currentWidget && tracker.currentWidget.title.label) {
+      return `"${tracker.currentWidget.title.label}"`;
+    }
+    return 'Notebook';
+  }
+
   commands.addCommand(CommandIDs.runAndAdvance, {
     label: 'Run Cell(s) and Select Below',
     execute: args => {
@@ -627,7 +637,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled: hasWidget
   });
   commands.addCommand(CommandIDs.trust, {
-    label: 'Trust Notebook',
+    label: () => `Trust ${currentName()}`,
     execute: args => {
       const current = getCurrent(args);
 
@@ -642,8 +652,9 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.exportToFormat, {
     label: args => {
         const formatLabel = (args['label']) as string;
+        const name = currentName();
 
-        return (args['isPalette'] ? 'Export To ' : '') + formatLabel;
+        return (args['isPalette'] ? `Export ${name} to ` : '') + formatLabel;
     },
     execute: args => {
       const current = getCurrent(args);
