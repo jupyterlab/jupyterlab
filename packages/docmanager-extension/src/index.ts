@@ -144,7 +144,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     }
     // TODO: we should consider eliding the name
     // if it is very long.
-    return `"${context.contentsModel.name}"`;
+    return `"${currentWidget.title.label}"`;
   };
 
   commands.addCommand(CommandIDs.close, {
