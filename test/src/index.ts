@@ -73,6 +73,15 @@ import './imageviewer/widget.spec';
 
 import './inspector/inspector.spec';
 
+import './mainmenu/mainmenu.spec';
+import './mainmenu/labmenu.spec';
+import './mainmenu/edit.spec';
+import './mainmenu/file.spec';
+import './mainmenu/help.spec';
+import './mainmenu/kernel.spec';
+import './mainmenu/run.spec';
+import './mainmenu/view.spec';
+
 import './notebook/actions.spec';
 import './notebook/celltools.spec';
 import './notebook/default-toolbar.spec';
