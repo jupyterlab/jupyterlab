@@ -92,6 +92,13 @@ const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
           editorFactory, key, registry, state, when
         });
 
+        // Notify the command registry when the visibility status of the setting
+        // editor's commands change. The setting editor toolbar listens for this
+        // signal from the command registry.
+        editor.commandsChanged.connect((sender: any, args: string[]) => {
+          args.forEach(commands.notifyCommandChanged);
+        });
+
         tracker.add(editor);
         editor.id = namespace;
         editor.title.label = 'Settings';
