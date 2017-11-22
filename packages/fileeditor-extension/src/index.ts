@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
-  IMainMenu, IKernelMenu, IViewMenu
+  IEditMenu, IMainMenu, IKernelMenu, IViewMenu
 } from '@jupyterlab/mainmenu';
 
 
@@ -396,6 +396,13 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
   if (menu) {
     // Add new text file creation to the file menu.
     menu.fileMenu.newMenu.addItem({ command: CommandIDs.createNew });
+
+    // Add undo/redo hooks to the edit menu.
+    menu.editMenu.undoers.set('Editor', {
+      tracker,
+      undo: widget => { widget.editor.undo(); },
+      redo: widget => { widget.editor.redo(); }
+    } as IEditMenu.IUndoer<FileEditor>);
 
     // Add editor view options.
     menu.viewMenu.editorViewers.set('Editor', {

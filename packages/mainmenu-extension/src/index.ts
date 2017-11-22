@@ -21,6 +21,12 @@ import {
 export
 namespace CommandIDs {
   export
+  const undo = 'editmenu:undo';
+
+  export
+  const redo = 'editmenu:redo';
+
+  export
   const clear = 'editmenu:clear';
 
   export
@@ -100,6 +106,26 @@ const menuPlugin: JupyterLabPlugin<IMainMenu> = {
  */
 function createEditMenu(app: JupyterLab, menu: EditMenu): void {
   const commands = menu.commands;
+
+  // Add the undo/redo commands the the Edit menu.
+  commands.addCommand(CommandIDs.undo, {
+    label: 'Undo',
+    isEnabled:
+      Private.delegateEnabled(app, menu.undoers, 'undo'),
+    execute:
+      Private.delegateExecute(app, menu.undoers, 'undo')
+  });
+  commands.addCommand(CommandIDs.redo, {
+    label: 'Redo',
+    isEnabled:
+      Private.delegateEnabled(app, menu.undoers, 'redo'),
+    execute:
+      Private.delegateExecute(app, menu.undoers, 'redo')
+  });
+  menu.addGroup([
+    { command: CommandIDs.undo },
+    { command: CommandIDs.redo }
+  ], 0);
 
   // Add the clear command to the Edit menu.
   commands.addCommand(CommandIDs.clear, {

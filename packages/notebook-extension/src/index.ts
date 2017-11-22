@@ -171,10 +171,10 @@ namespace CommandIDs {
   const toggleAllLines = 'notebook:toggle-all-cell-line-numbers';
 
   export
-  const undo = 'notebook:undo-cell-action';
+  const undoCellAction = 'notebook:undo-cell-action';
 
   export
-  const redo = 'notebook:redo-cell-action';
+  const redoCellAction = 'notebook:redo-cell-action';
 
   export
   const markdown1 = 'notebook:change-cell-to-heading-1';
@@ -491,12 +491,12 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
     rank: 0
   });
   app.contextMenu.addItem({
-    command: CommandIDs.undo,
+    command: CommandIDs.undoCellAction,
     selector: '.jp-Notebook',
     rank: 1
   });
   app.contextMenu.addItem({
-    command: CommandIDs.redo,
+    command: CommandIDs.redoCellAction,
     selector: '.jp-Notebook',
     rank: 2
   });
@@ -967,7 +967,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     },
     isEnabled: hasWidget
   });
-  commands.addCommand(CommandIDs.undo, {
+  commands.addCommand(CommandIDs.undoCellAction, {
     label: 'Undo Cell Operation',
     execute: args => {
       const current = getCurrent(args);
@@ -978,7 +978,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     },
     isEnabled: hasWidget
   });
-  commands.addCommand(CommandIDs.redo, {
+  commands.addCommand(CommandIDs.redoCellAction, {
     label: 'Redo Cell Operation',
     execute: args => {
       const current = getCurrent(args);
@@ -1265,8 +1265,8 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.extendBelow,
     CommandIDs.moveDown,
     CommandIDs.moveUp,
-    CommandIDs.undo,
-    CommandIDs.redo,
+    CommandIDs.undoCellAction,
+    CommandIDs.redoCellAction,
     CommandIDs.markdown1,
     CommandIDs.markdown2,
     CommandIDs.markdown3,
@@ -1291,6 +1291,14 @@ function populatePalette(palette: ICommandPalette): void {
 function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookTracker): void {
   let { commands } = app;
 
+  // Add undo/redo hooks to the edit menu.
+  mainMenu.editMenu.undoers.set('Notebook', {
+    tracker,
+    undo: widget => { widget.notebook.activeCell.editor.undo(); },
+    redo: widget => { widget.notebook.activeCell.editor.redo(); }
+  } as IEditMenu.IUndoer<NotebookPanel>);
+
+    // Add editor view options.
   // Add a clearer to the edit menu
   mainMenu.editMenu.clearers.set('Notebook', {
     tracker,
@@ -1401,9 +1409,9 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   } as IRunMenu.ICodeRunner<NotebookPanel>);
 
   // Add commands to the application edit menu.
-  const undoGroup = [
-    CommandIDs.undo,
-    CommandIDs.redo
+  const undoCellActionGroup = [
+    CommandIDs.undoCellAction,
+    CommandIDs.redoCellAction
   ].map(command => { return { command }; });
   const editGroup = [
     CommandIDs.cut,
@@ -1413,6 +1421,6 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
     CommandIDs.split,
     CommandIDs.merge
   ].map(command => { return { command }; });
-  mainMenu.editMenu.addGroup(undoGroup, 4);
+  mainMenu.editMenu.addGroup(undoCellActionGroup, 4);
   mainMenu.editMenu.addGroup(editGroup, 5);
 }

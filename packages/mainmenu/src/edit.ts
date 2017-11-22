@@ -16,6 +16,14 @@ import {
 export
 interface IEditMenu extends IJupyterLabMenu {
   /**
+   * A map storing IUndoers for the Edit menu.
+   *
+   * ### Notes
+   * The key for the map may be used in menu labels.
+   */
+  readonly undoers: Map<string, IEditMenu.IUndoer<Widget>>;
+
+  /**
    * A map storing IClearers for the Edit menu.
    *
    * ### Notes
@@ -44,12 +52,23 @@ class EditMenu extends JupyterLabMenu implements IEditMenu {
     super(options);
     this.title.label = 'Edit';
 
+    this.undoers =
+      new Map<string, IEditMenu.IUndoer<Widget>>();
+
     this.clearers =
       new Map<string, IEditMenu.IClearer<Widget>>();
 
     this.findReplacers =
       new Map<string, IEditMenu.IFindReplacer<Widget>>();
   }
+
+  /**
+   * A map storing IUndoers for the Edit menu.
+   *
+   * ### Notes
+   * The key for the map may be used in menu labels.
+   */
+  readonly undoers: Map<string, IEditMenu.IUndoer<Widget>>;
 
   /**
    * A map storing IClearers for the Edit menu.
@@ -73,6 +92,22 @@ class EditMenu extends JupyterLabMenu implements IEditMenu {
  */
 export
 namespace IEditMenu {
+  /**
+   * Interface for an activity that uses Undo/Redo.
+   */
+  export
+  interface IUndoer<T extends Widget> extends IMenuExtender<T> {
+    /**
+     * Execute an undo command for the activity.
+     */
+    undo?: (widget: T) => void;
+
+    /**
+     * Execute a redo command for the activity.
+     */
+    redo?: (widget: T) => void;
+  }
+
   /**
    * Interface for an activity that wants to register a 'Clear...' menu item
    */
