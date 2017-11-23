@@ -75,8 +75,7 @@ const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
     commands.addCommand(CommandIDs.debug, {
       execute: () => { console.log('debug'); },
       iconClass: 'jp-MaterialIcon jp-BugIcon',
-      iconLabel: 'Debug user settings in inspector',
-      label: 'Debug in inspector',
+      label: 'Debug user settings in inspector',
       isVisible: () => tracker.currentWidget.canDebugRaw
     });
 
@@ -120,12 +119,16 @@ const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
 
     commands.addCommand(CommandIDs.revert, {
       execute: () => { console.log('revert'); },
-      iconClass: 'jp-MaterialIcon jp-RefreshIcon'
+      iconClass: 'jp-MaterialIcon jp-RefreshIcon',
+      label: 'Revert user settings',
+      isVisible: () => tracker.currentWidget.canRevertRaw
     });
 
     commands.addCommand(CommandIDs.save, {
       execute: () => { console.log('save'); },
-      iconClass: 'jp-MaterialIcon jp-SaveIcon'
+      iconClass: 'jp-MaterialIcon jp-SaveIcon',
+      label: 'Save user settings',
+      isVisible: () => tracker.currentWidget.canSaveRaw
     });
 
     // Create an inspection handler for each setting editor that is created.

@@ -243,6 +243,8 @@ class RawEditor extends SplitPanel {
     const raw = this._user.editor.model.value.text;
     const settings = this._settings;
 
+    this.removeClass(ERROR_CLASS);
+
     if (!raw || !settings || settings.raw === raw) {
       this._updateToolbar(false, false, false);
       return;
@@ -256,8 +258,7 @@ class RawEditor extends SplitPanel {
       return;
     }
 
-    this.removeClass(ERROR_CLASS);
-    this._updateToolbar(false, false, true);
+    this._updateToolbar(false, true, true);
   }
 
   /**
@@ -364,7 +365,11 @@ namespace Private {
     const { debug, registry, revert, save } = commands;
 
     toolbar.addItem('spacer', Toolbar.createSpacerItem());
-    [debug, revert, save].forEach(name => {
+
+    // Note the button order. The rationale here is that no matter what state
+    // the toolbar is in, the relative location of the revert button in the
+    // toolbar remains the same.
+    [revert, debug, save].forEach(name => {
       const item = Toolbar.createFromCommand(registry, name);
 
       if (item) {
