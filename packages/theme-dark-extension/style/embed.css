@@ -38,6 +38,7 @@
   --jp-icon-book-selected: url('./icons/jupyter/book_selected.svg');
   --jp-icon-book-running: url('./icons/jupyter/book_running.svg');
   --jp-icon-book-running-selected: url('./icons/jupyter/book_running_selected.svg');
+  --jp-icon-bug: url('./icons/md/bug.svg');
   --jp-icon-directory: url('./icons/jupyter/directory.svg');
   --jp-icon-directory-selected: url('./icons/jupyter/directory_selected.svg');
   --jp-icon-new-directory: url('./icons/md/new-folder.svg');

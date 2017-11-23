@@ -35,6 +35,7 @@
   --jp-icon-book-selected: url('./lab/api/themes/@jupyterlab/theme-light-extension/icons/jupyter/book_selected.svg');
   --jp-icon-book-running: url('./lab/api/themes/@jupyterlab/theme-light-extension/icons/jupyter/book_running.svg');
   --jp-icon-book-running-selected: url('./lab/api/themes/@jupyterlab/theme-light-extension/icons/jupyter/book_running_selected.svg');
+  --jp-icon-bug: url('./lab/api/themes/@jupyterlab/theme-light-extension/icons/md/bug.svg');
   --jp-icon-directory: url('./lab/api/themes/@jupyterlab/theme-light-extension/icons/jupyter/directory.svg');
   --jp-icon-directory-selected: url('./lab/api/themes/@jupyterlab/theme-light-extension/icons/jupyter/directory_selected.svg');
   --jp-icon-new-directory: url('./lab/api/themes/@jupyterlab/theme-light-extension/icons/md/new-folder.svg');

@@ -19,6 +19,11 @@
 }
 
 
+.jp-BugIcon {
+  background-image: var(--jp-icon-bug);
+}
+
+
 .jp-ChatIcon {
   background-image: var(--jp-icon-chat);
 }
