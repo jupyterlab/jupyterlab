@@ -8,12 +8,8 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IDataConnector, ISettingRegistry, IStateDB
+  ISettingRegistry, IStateDB
 } from '@jupyterlab/coreutils';
-
-import {
-  InspectionHandler
-} from '@jupyterlab/inspector';
 
 import {
   CommandRegistry
@@ -38,10 +34,6 @@ import {
 import {
   PanelLayout, Widget
 } from '@phosphor/widgets';
-
-import {
-  InspectorConnector
-} from './connector';
 
 import {
   PluginEditor
@@ -136,7 +128,9 @@ class SettingEditor extends Widget {
     const instructions = this._instructions = new Widget({
       node: Private.createInstructionsNode()
     });
-    const editor = this._editor = new PluginEditor({ commands, editorFactory });
+    const editor = this._editor = new PluginEditor({
+      commands, editorFactory, registry
+    });
     const confirm = () => editor.confirm();
     const list = this._list = new PluginList({ confirm, registry });
     const when = options.when;
@@ -161,7 +155,7 @@ class SettingEditor extends Widget {
   readonly key: string;
 
   /**
-   * The setting registry modified by the editor.
+   * The setting registry used by the editor.
    */
   readonly registry: ISettingRegistry;
 
@@ -211,11 +205,6 @@ class SettingEditor extends Widget {
   get source(): CodeEditor.IEditor {
     return this._editor.raw.source;
   }
-
-  /**
-   * A data connector for populating an inspector.
-   */
-  readonly connector: IDataConnector<InspectionHandler.IReply, void, InspectionHandler.IRequest> = new InspectorConnector(this);
 
   /**
    * Dispose of the resources held by the setting editor.

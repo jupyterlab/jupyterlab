@@ -20,14 +20,6 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IInspector, InspectionHandler
-} from '@jupyterlab/inspector';
-
-import {
-  RenderMime, defaultRendererFactories
-} from '@jupyterlab/rendermime';
-
-import {
   ISettingEditorTracker, SettingEditor
 } from '@jupyterlab/settingeditor';
 
@@ -55,14 +47,12 @@ namespace CommandIDs {
  */
 const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
   id: '@jupyterlab/settingeditor-extension:plugin',
-  activate: (app: JupyterLab, restorer: ILayoutRestorer, registry: ISettingRegistry, editorServices: IEditorServices, state: IStateDB, inspector: IInspector) => {
+  activate: (app: JupyterLab, restorer: ILayoutRestorer, registry: ISettingRegistry, editorServices: IEditorServices, state: IStateDB) => {
     const { commands, shell } = app;
     const namespace = 'setting-editor';
     const factoryService = editorServices.factoryService;
     const editorFactory = factoryService.newInlineEditor.bind(factoryService);
     const tracker = new InstanceTracker<SettingEditor>({ namespace });
-
-    let handler: InspectionHandler;
     let editor: SettingEditor;
 
     // Handle state restoration.
@@ -131,48 +121,9 @@ const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
       isVisible: () => tracker.currentWidget.canSaveRaw
     });
 
-    // Create an inspection handler for each setting editor that is created.
-    if (inspector) {
-      const rendermime = new RenderMime({
-        initialFactories: defaultRendererFactories
-      });
-
-      tracker.widgetAdded.connect((sender, parent) => {
-        const connector = parent.connector;
-
-        handler = new InspectionHandler({ connector, rendermime });
-        handler.editor = parent.source;
-
-        // Listen for parent disposal.
-        parent.disposed.connect(() => {
-          if (handler) {
-            handler.dispose();
-            handler = null;
-          }
-          if (editor) {
-            editor = null;
-          }
-        });
-      });
-
-      // Keep track of setting editors and set inspector source.
-      app.shell.currentChanged.connect((sender, args) => {
-        const widget = args.newValue;
-        if (!widget || !tracker.has(widget)) {
-          return;
-        }
-
-        if (handler) {
-          inspector.source = handler;
-        }
-      });
-
-    }
-
     return tracker;
   },
   requires: [ILayoutRestorer, ISettingRegistry, IEditorServices, IStateDB],
-  optional: [IInspector],
   autoStart: true,
   provides: ISettingEditorTracker
 };

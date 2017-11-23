@@ -181,13 +181,13 @@
 }
 
 
-#setting-editor .jp-SettingsRawEditor .jp-SettingsRawEditor-user {
-  border: 1px solid transparent;
+#setting-editor .jp-SettingsRawEditor.jp-mod-error .jp-Toolbar-item.jp-BugIcon {
+  background-color: red;
 }
 
 
-#setting-editor .jp-SettingsRawEditor.jp-mod-error .jp-SettingsRawEditor-user {
-  border: 1px solid red;
+#setting-editor .jp-SettingsRawEditor .jp-Inspector {
+  max-height: 35px;
 }
 
 

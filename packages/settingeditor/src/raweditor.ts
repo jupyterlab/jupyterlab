@@ -10,8 +10,16 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  ISettingRegistry
+  IDataConnector, ISettingRegistry
 } from '@jupyterlab/coreutils';
+
+import {
+  InspectionHandler, InspectorPanel
+} from '@jupyterlab/inspector';
+
+import {
+  RenderMime, defaultRendererFactories
+} from '@jupyterlab/rendermime';
 
 import {
   CommandRegistry
@@ -32,6 +40,10 @@ import {
 import {
   BoxLayout, Widget
 } from '@phosphor/widgets';
+
+import {
+  InspectorConnector
+} from './connector';
 
 import {
   SplitPanel
@@ -63,6 +75,11 @@ const DEFAULT_TITLE = 'System Defaults';
  */
 const USER_TITLE = 'User Overrides';
 
+/**
+ * The MIME renderer used for the settings editor error inspector.
+ */
+const rendermime = new RenderMime({ initialFactories: defaultRendererFactories });
+
 
 /**
  * A raw JSON settings editor.
@@ -79,8 +96,9 @@ class RawEditor extends SplitPanel {
       spacing: 1
     });
 
-    const { commands, editorFactory } = options;
+    const { commands, editorFactory, registry } = options;
 
+    this.registry = registry;
     this._commands = commands;
 
     // Create read-only defaults editor.
@@ -93,6 +111,18 @@ class RawEditor extends SplitPanel {
     defaults.editor.model.mimeType = 'text/javascript';
     defaults.editor.setOption('readOnly', true);
 
+    // Set up inspector.
+    const connector = this.connector;
+    const handler = new InspectionHandler({ connector, rendermime });
+
+    this._inspector.add({
+      className: 'jp-HintsInspectorItem',
+      name: 'Hints',
+      rank: 20,
+      type: 'hints'
+    });
+    this._inspector.source = handler;
+
     // Create read-write user settings editor.
     const user = this._user = new CodeEditorWrapper({
       model: new CodeEditor.Model(),
@@ -103,12 +133,23 @@ class RawEditor extends SplitPanel {
     user.addClass(USER_CLASS);
     user.editor.model.mimeType = 'text/javascript';
     user.editor.model.value.changed.connect(this._onTextChanged, this);
+    handler.editor = user.editor;
 
     this.addClass(RAW_EDITOR_CLASS);
     this._onSaveError = options.onSaveError;
-    this.addWidget(Private.wrapEditor(defaults, DEFAULT_TITLE));
-    this.addWidget(Private.wrapEditor(user, USER_TITLE, this._toolbar));
+    this.addWidget(Private.defaultsEditor(defaults));
+    this.addWidget(Private.userEditor(user, this._toolbar, this._inspector));
   }
+
+  /**
+   * A data connector for populating an inspector.
+   */
+  readonly connector: IDataConnector<InspectionHandler.IReply, void, InspectionHandler.IRequest> = new InspectorConnector(this);
+
+  /**
+   * The setting registry used by the editor.
+   */
+  readonly registry: ISettingRegistry;
 
   /**
    * Whether the raw editor debug functionality is enabled.
@@ -292,6 +333,7 @@ class RawEditor extends SplitPanel {
   private _commandsChanged = new Signal<this, string[]>(this);
   private _commands: RawEditor.ICommandBundle;
   private _defaults: CodeEditorWrapper;
+  private _inspector = new InspectorPanel();
   private _onSaveError: (reason: any) => void;
   private _settings: ISettingRegistry.ISettings | null = null;
   private _toolbar: Toolbar<Widget> = new Toolbar();
@@ -349,6 +391,11 @@ namespace RawEditor {
      * A function the raw editor calls on save errors.
      */
     onSaveError: (reason: any) => void;
+
+    /**
+     * The setting registry used by the editor.
+     */
+    registry: ISettingRegistry;
   }
 }
 
@@ -357,6 +404,25 @@ namespace RawEditor {
  * A namespace for private module data.
  */
 namespace Private {
+  /**
+   * Returns the wrapped setting defaults editor.
+   */
+  export
+  function defaultsEditor(editor: Widget): Widget {
+    const widget = new Widget();
+    const layout = widget.layout = new BoxLayout({ spacing: 0 });
+    const banner = new Widget({
+      node: VirtualDOM.realize(h.div(DEFAULT_TITLE))
+    });
+    const bar = new Toolbar();
+
+    bar.insertItem(0, 'banner', banner);
+    layout.addWidget(bar);
+    layout.addWidget(editor);
+
+    return widget;
+  }
+
   /**
    * Populate the raw editor toolbar.
    */
@@ -379,27 +445,18 @@ namespace Private {
   }
 
   /**
-   * Returns a wrapper widget to hold an editor and its banner.
+   * Returns the wrapped user overrides editor.
    */
   export
-  function wrapEditor(editor: Widget, bannerText: string, toolbar?: Toolbar<Widget>): Widget {
+  function userEditor(editor: Widget, toolbar: Toolbar<Widget>, inspector: Widget): Widget {
     const widget = new Widget();
     const layout = widget.layout = new BoxLayout({ spacing: 0 });
-    const banner = new Widget({ node: VirtualDOM.realize(h.div(bannerText)) });
+    const banner = new Widget({ node: VirtualDOM.realize(h.div(USER_TITLE)) });
 
-    if (toolbar) {
-      toolbar.insertItem(0, 'banner', banner);
-      layout.addWidget(toolbar);
-    } else {
-      // If a toolbar is not passed in, create a toolbar that only has the
-      // banner text in it.
-      const bar = new Toolbar();
-
-      bar.insertItem(0, 'banner', banner);
-      layout.addWidget(bar);
-    }
-
+    toolbar.insertItem(0, 'banner', banner);
+    layout.addWidget(toolbar);
     layout.addWidget(editor);
+    layout.addWidget(inspector);
 
     return widget;
   }

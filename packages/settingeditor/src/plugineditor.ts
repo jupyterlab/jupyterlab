@@ -68,12 +68,12 @@ class PluginEditor extends Widget {
     super();
     this.addClass(PLUGIN_EDITOR_CLASS);
 
-    const { commands, editorFactory } = options;
+    const { commands, editorFactory, registry } = options;
     const layout = this.layout = new StackedLayout();
     const { onSaveError } = Private;
 
     this.raw = this._rawEditor = new RawEditor({
-      commands, editorFactory, onSaveError
+      commands, editorFactory, onSaveError, registry
     });
     this.table = this._tableEditor = new TableEditor({ onSaveError });
     this._rawEditor.handleMoved.connect(this._onStateChanged, this);
@@ -256,6 +256,11 @@ namespace PluginEditor {
      * The editor factory used by the plugin editor.
      */
     editorFactory: CodeEditor.Factory;
+
+    /**
+     * The setting registry used by the editor.
+     */
+    registry: ISettingRegistry;
   }
 }
 

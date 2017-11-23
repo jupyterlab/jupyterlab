@@ -16,16 +16,21 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  SettingEditor
-} from './settingeditor';
+  RawEditor
+} from './raweditor';
 
 
 /**
  * The data connector used to populate a code inspector.
+ *
+ * #### Notes
+ * This data connector debounces fetch requests to throttle them at no more than
+ * one request per 100ms. This means that using the connector to populate
+ * multiple client objects can lead to missed fetch responses.
  */
 export
 class InspectorConnector extends DataConnector<InspectionHandler.IReply, void, InspectionHandler.IRequest> {
-  constructor(editor: SettingEditor) {
+  constructor(editor: RawEditor) {
     super();
     this._editor = editor;
   }
@@ -63,7 +68,7 @@ class InspectorConnector extends DataConnector<InspectionHandler.IReply, void, I
   }
 
   private _current = 0;
-  private _editor: SettingEditor;
+  private _editor: RawEditor;
 }
 
 
