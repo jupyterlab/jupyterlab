@@ -1002,13 +1002,14 @@ namespace Private {
   function annotatedDefaults(schema: ISettingRegistry.ISchema, plugin: string): string {
     const { description, properties, title } = schema;
     const keys = Object.keys(properties).sort((a, b) => a.localeCompare(b));
+    const length = Math.max((description || nondescript).length, plugin.length);
 
     return [
       '{',
       prefix(`${title || untitled}`),
       prefix(plugin),
       prefix(description || nondescript),
-      prefix(line((description || nondescript).length)),
+      prefix(line(length)),
       '',
       keys.map(key => docstring(schema, key)).join('\n\n'),
       '}'
