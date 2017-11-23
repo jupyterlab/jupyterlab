@@ -175,6 +175,12 @@
   max-height: var(--jp-private-settingeditor-toolbar-height);
 }
 
+
+#setting-editor .jp-SettingsRawEditor .jp-Toolbar-item {
+  margin-top: 2px;
+}
+
+
 #setting-editor .jp-SettingsRawEditor .jp-SettingsRawEditor-user {
   border: 1px solid transparent;
 }

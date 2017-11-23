@@ -72,6 +72,14 @@ const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
       name: widget => namespace
     });
 
+    commands.addCommand(CommandIDs.debug, {
+      execute: () => { console.log('debug'); },
+      iconClass: 'jp-MaterialIcon jp-BugIcon',
+      iconLabel: 'Debug user settings in inspector',
+      label: 'Debug in inspector',
+      isVisible: () => tracker.currentWidget.canDebugRaw
+    });
+
     commands.addCommand(CommandIDs.open, {
       execute: () => {
         if (tracker.currentWidget) {
@@ -96,7 +104,7 @@ const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
         // editor's commands change. The setting editor toolbar listens for this
         // signal from the command registry.
         editor.commandsChanged.connect((sender: any, args: string[]) => {
-          args.forEach(commands.notifyCommandChanged);
+          args.forEach(id => { commands.notifyCommandChanged(id); });
         });
 
         tracker.add(editor);
@@ -108,6 +116,16 @@ const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
         shell.activateById(editor.id);
       },
       label: 'Settings'
+    });
+
+    commands.addCommand(CommandIDs.revert, {
+      execute: () => { console.log('revert'); },
+      iconClass: 'jp-MaterialIcon jp-RefreshIcon'
+    });
+
+    commands.addCommand(CommandIDs.save, {
+      execute: () => { console.log('save'); },
+      iconClass: 'jp-MaterialIcon jp-SaveIcon'
     });
 
     // Create an inspection handler for each setting editor that is created.
