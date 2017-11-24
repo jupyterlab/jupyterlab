@@ -18,10 +18,6 @@ import {
 } from '@jupyterlab/inspector';
 
 import {
-  RenderMime, defaultRendererFactories
-} from '@jupyterlab/rendermime';
-
-import {
   CommandRegistry
 } from '@phosphor/commands';
 
@@ -42,7 +38,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  InspectorConnector
+  connectInspector, InspectorConnector
 } from './connector';
 
 import {
@@ -75,11 +71,6 @@ const DEFAULT_TITLE = 'System Defaults';
  */
 const USER_TITLE = 'User Overrides';
 
-/**
- * The MIME renderer used for the settings editor error inspector.
- */
-const rendermime = new RenderMime({ initialFactories: defaultRendererFactories });
-
 
 /**
  * A raw JSON settings editor.
@@ -111,18 +102,6 @@ class RawEditor extends SplitPanel {
     defaults.editor.model.mimeType = 'text/javascript';
     defaults.editor.setOption('readOnly', true);
 
-    // Set up inspector.
-    const connector = this.connector;
-    const handler = new InspectionHandler({ connector, rendermime });
-
-    this._inspector.add({
-      className: 'jp-HintsInspectorItem',
-      name: 'Hints',
-      rank: 20,
-      type: 'hints'
-    });
-    this._inspector.source = handler;
-
     // Create read-write user settings editor.
     const user = this._user = new CodeEditorWrapper({
       model: new CodeEditor.Model(),
@@ -133,7 +112,9 @@ class RawEditor extends SplitPanel {
     user.addClass(USER_CLASS);
     user.editor.model.mimeType = 'text/javascript';
     user.editor.model.value.changed.connect(this._onTextChanged, this);
-    handler.editor = user.editor;
+
+    // Set up inspector.
+    connectInspector(this._inspector, this.connector, user.editor);
 
     this.addClass(RAW_EDITOR_CLASS);
     this._onSaveError = options.onSaveError;

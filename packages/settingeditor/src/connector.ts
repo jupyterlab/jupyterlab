@@ -4,12 +4,20 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  DataConnector, ISchemaValidator
+  CodeEditor
+} from '@jupyterlab/codeeditor';
+
+import {
+  DataConnector, IDataConnector, ISchemaValidator
 } from '@jupyterlab/coreutils';
 
 import {
-  InspectionHandler
+  IInspector, InspectionHandler
 } from '@jupyterlab/inspector';
+
+import {
+  RenderMime, defaultRendererFactories
+} from '@jupyterlab/rendermime';
 
 import {
   ReadonlyJSONObject
@@ -18,6 +26,29 @@ import {
 import {
   RawEditor
 } from './raweditor';
+
+
+/**
+ * The MIME renderer used for the settings editor error inspector.
+ */
+const rendermime = new RenderMime({ initialFactories: defaultRendererFactories });
+
+
+/**
+ * Connect a raw editor inspector to its text editor.
+ */
+export
+function connectInspector(inspector: IInspector, connector: IDataConnector<InspectionHandler.IReply, void, InspectionHandler.IRequest>, editor: CodeEditor.IEditor): void {
+  const handler = new InspectionHandler({ connector, rendermime });
+  inspector.add({
+    className: 'jp-HintsInspectorItem',
+    name: 'Hints',
+    rank: 20,
+    type: 'hints'
+  });
+  inspector.source = handler;
+  handler.editor = editor;
+}
 
 
 /**
