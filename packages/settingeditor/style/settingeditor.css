@@ -5,6 +5,7 @@
 
 
 :root {
+  --jp-private-settingeditor-debug-height: 28px;
   --jp-private-settingeditor-key-width: 150px;
   --jp-private-settingeditor-legend-height: 16px;
   --jp-private-settingeditor-row-height: 16px;
@@ -187,7 +188,18 @@
 
 
 #setting-editor .jp-SettingsRawEditor .jp-Inspector {
-  max-height: 35px;
+  max-height: var(--jp-private-settingeditor-debug-height);
+}
+
+
+#setting-editor .jp-SettingsRawEditor .jp-InspectorItem.jp-SettingsDebug .jp-RenderedHTMLCommon {
+  padding: 2px 5px 2px 0;
+  width: 100%;
+}
+
+
+#setting-editor .jp-SettingsRawEditor .jp-InspectorItem.jp-SettingsDebug .jp-RenderedHTMLCommon p {
+  text-align: right;
 }
 
 

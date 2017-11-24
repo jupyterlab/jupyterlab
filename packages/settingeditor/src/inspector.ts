@@ -40,7 +40,7 @@ function createInspector(editor: RawEditor): InspectorPanel {
   const inspector = new InspectorPanel();
 
   inspector.add({
-    className: 'jp-HintsInspectorItem',
+    className: 'jp-SettingsDebug',
     name: 'Debug',
     rank: 0,
     type: 'hints'
