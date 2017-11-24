@@ -4,15 +4,11 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  CodeEditor
-} from '@jupyterlab/codeeditor';
-
-import {
-  DataConnector, IDataConnector, ISchemaValidator
+  DataConnector, ISchemaValidator
 } from '@jupyterlab/coreutils';
 
 import {
-  IInspector, InspectionHandler
+  InspectionHandler, InspectorPanel
 } from '@jupyterlab/inspector';
 
 import {
@@ -35,19 +31,24 @@ const rendermime = new RenderMime({ initialFactories: defaultRendererFactories }
 
 
 /**
- * Connect a raw editor inspector to its text editor.
+ * Create a raw editor inspector.
  */
 export
-function connectInspector(inspector: IInspector, connector: IDataConnector<InspectionHandler.IReply, void, InspectionHandler.IRequest>, editor: CodeEditor.IEditor): void {
+function createInspector(editor: RawEditor): InspectorPanel {
+  const connector = new InspectorConnector(editor);
   const handler = new InspectionHandler({ connector, rendermime });
+  const inspector = new InspectorPanel();
+
   inspector.add({
     className: 'jp-HintsInspectorItem',
-    name: 'Hints',
-    rank: 20,
+    name: 'Debug',
+    rank: 0,
     type: 'hints'
   });
   inspector.source = handler;
-  handler.editor = editor;
+  handler.editor = editor.source;
+
+  return inspector;
 }
 
 
@@ -59,7 +60,6 @@ function connectInspector(inspector: IInspector, connector: IDataConnector<Inspe
  * one request per 100ms. This means that using the connector to populate
  * multiple client objects can lead to missed fetch responses.
  */
-export
 class InspectorConnector extends DataConnector<InspectionHandler.IReply, void, InspectionHandler.IRequest> {
   constructor(editor: RawEditor) {
     super();

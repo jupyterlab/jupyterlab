@@ -10,12 +10,8 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IDataConnector, ISettingRegistry
+  ISettingRegistry
 } from '@jupyterlab/coreutils';
-
-import {
-  InspectionHandler, InspectorPanel
-} from '@jupyterlab/inspector';
 
 import {
   CommandRegistry
@@ -38,8 +34,8 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  connectInspector, InspectorConnector
-} from './connector';
+  createInspector
+} from './inspector';
 
 import {
   SplitPanel
@@ -113,19 +109,14 @@ class RawEditor extends SplitPanel {
     user.editor.model.mimeType = 'text/javascript';
     user.editor.model.value.changed.connect(this._onTextChanged, this);
 
-    // Set up inspector.
-    connectInspector(this._inspector, this.connector, user.editor);
+    // Create and set up an inspector.
+    this._inspector = createInspector(this);
 
     this.addClass(RAW_EDITOR_CLASS);
     this._onSaveError = options.onSaveError;
     this.addWidget(Private.defaultsEditor(defaults));
     this.addWidget(Private.userEditor(user, this._toolbar, this._inspector));
   }
-
-  /**
-   * A data connector for populating an inspector.
-   */
-  readonly connector: IDataConnector<InspectionHandler.IReply, void, InspectionHandler.IRequest> = new InspectorConnector(this);
 
   /**
    * The setting registry used by the editor.
@@ -314,7 +305,7 @@ class RawEditor extends SplitPanel {
   private _commandsChanged = new Signal<this, string[]>(this);
   private _commands: RawEditor.ICommandBundle;
   private _defaults: CodeEditorWrapper;
-  private _inspector = new InspectorPanel();
+  private _inspector: Widget;
   private _onSaveError: (reason: any) => void;
   private _settings: ISettingRegistry.ISettings | null = null;
   private _toolbar: Toolbar<Widget> = new Toolbar();
