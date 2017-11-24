@@ -21,6 +21,9 @@ import {
   PromiseDelegate
 } from '@phosphor/coreutils';
 
+import {
+  Message
+} from '@phosphor/messaging';
 
 /**
  * The class name added to a dirty widget.
@@ -185,6 +188,7 @@ class FileEditor extends Widget implements DocumentRegistry.IReadyWidget {
    */
   constructor(options: FileEditor.IOptions) {
     super();
+    this.node.tabIndex = -1;
 
     const context = this._context = options.context;
     this._mimeTypeService = options.mimeTypeService;
@@ -219,6 +223,13 @@ class FileEditor extends Widget implements DocumentRegistry.IReadyWidget {
    */
   get ready(): Promise<void> {
     return this.editorWidget.ready;
+  }
+
+  /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this.node.focus();
   }
 
   /**
