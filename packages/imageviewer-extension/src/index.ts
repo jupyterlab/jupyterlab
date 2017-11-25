@@ -13,11 +13,6 @@ import {
   ImageViewer, ImageViewerFactory, IImageTracker
 } from '@jupyterlab/imageviewer';
 
-import {
-  CommandRegistry
-} from '@phosphor/commands';
-
-
 /**
  * The command IDs used by the image widget plugin.
  */
@@ -99,7 +94,7 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRe
     }
   });
 
-  addCommands(tracker, app.commands);
+  addCommands(app, tracker);
 
   const category = 'Image Viewer';
 
@@ -114,31 +109,33 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRe
  * Add the commands for the image widget.
  */
 export
-function addCommands(tracker: IImageTracker, commands: CommandRegistry) {
+function addCommands(app: JupyterLab, tracker: IImageTracker) {
+  const { commands } = app;
 
   /**
-   * Whether there is an active notebook.
+   * Whether there is an active image viewer.
    */
-  function hasWidget(): boolean {
-    return tracker.currentWidget !== null;
+  function isEnabled(): boolean {
+    return tracker.currentWidget !== null &&
+           tracker.currentWidget === app.shell.currentWidget;
   }
 
   commands.addCommand('imageviewer:zoom-in', {
     execute: zoomIn,
     label: 'Zoom In',
-    isEnabled: hasWidget
+    isEnabled
   });
 
   commands.addCommand('imageviewer:zoom-out', {
     execute: zoomOut,
     label: 'Zoom Out',
-    isEnabled: hasWidget
+    isEnabled
   });
 
   commands.addCommand('imageviewer:reset-zoom', {
     execute: resetZoom,
     label: 'Reset Zoom',
-    isEnabled: hasWidget
+    isEnabled
   });
 
   function zoomIn(): void {
