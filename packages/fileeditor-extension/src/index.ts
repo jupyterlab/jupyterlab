@@ -109,7 +109,8 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
   });
   const { commands, restored } = app;
   const tracker = new InstanceTracker<FileEditor>({ namespace });
-  const hasWidget = () => !!tracker.currentWidget;
+  const isEnabled = () => tracker.currentWidget !== null &&
+                          tracker.currentWidget === app.shell.currentWidget;
 
   let {
     lineNumbers, lineWrap, matchBrackets, autoClosingBrackets
@@ -192,7 +193,7 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
         console.error(`Failed to set ${id}:${key} - ${reason.message}`);
       });
     },
-    isEnabled: hasWidget,
+    isEnabled,
     isToggled: () => lineNumbers,
     label: 'Line Numbers'
   });
@@ -207,7 +208,7 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
         console.error(`Failed to set ${id}:${key} - ${reason.message}`);
       });
     },
-    isEnabled: hasWidget,
+    isEnabled,
     isToggled: () => lineWrap,
     label: 'Word Wrap'
   });
@@ -225,7 +226,7 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
       editor.setOption('insertSpaces', insertSpaces);
       editor.setOption('tabSize', size);
     },
-    isEnabled: hasWidget,
+    isEnabled,
     isToggled: args => {
       let widget = tracker.currentWidget;
       if (!widget) {
@@ -250,7 +251,7 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
       return settingRegistry.set(id, 'matchBrackets', matchBrackets);
     },
     label: 'Match Brackets',
-    isEnabled: hasWidget,
+    isEnabled,
     isToggled: () => matchBrackets
   });
 
@@ -264,7 +265,7 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
         .set(id, 'autoClosingBrackets', autoClosingBrackets);
     },
     label: 'Auto-Closing Brackets',
-    isEnabled: hasWidget,
+    isEnabled,
     isToggled: () => autoClosingBrackets
   });
 
@@ -282,7 +283,7 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
         preferredLanguage: widget.context.model.defaultKernelLanguage
       });
     },
-    isEnabled: hasWidget,
+    isEnabled,
     label: 'Create Console for Editor'
   });
 
@@ -340,7 +341,7 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
         return Promise.resolve(void 0);
       }
     },
-    isEnabled: hasWidget,
+    isEnabled,
     label: 'Run Code'
   });
 

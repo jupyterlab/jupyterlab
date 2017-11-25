@@ -152,8 +152,9 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
   /**
    * Whether there is an active terminal.
    */
-  function hasWidget(): boolean {
-    return tracker.currentWidget !== null;
+  function isEnabled(): boolean {
+    return tracker.currentWidget !== null &&
+           tracker.currentWidget === app.shell.currentWidget;
   }
 
   // Add terminal commands.
@@ -226,7 +227,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
         tracker.forEach(widget => { widget.fontSize = options.fontSize; });
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
 
   commands.addCommand('terminal:decrease-font', {
@@ -238,7 +239,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
         tracker.forEach(widget => { widget.fontSize = options.fontSize; });
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
 
   let terminalTheme: Terminal.Theme = 'dark';
@@ -254,7 +255,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
         }
       });
     },
-    isEnabled: hasWidget
+    isEnabled
   });
 }
 

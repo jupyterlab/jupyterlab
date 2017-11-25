@@ -153,8 +153,9 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
   /**
    * A test for whether the tracker has an active widget.
    */
-  function hasWidget(): boolean {
-    return tracker.currentWidget !== null;
+  function isEnabled(): boolean {
+    return tracker.currentWidget !== null &&
+           tracker.currentWidget === app.shell.currentWidget;
   }
 
   /**
@@ -184,7 +185,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
           console.error(`Failed to set ${id}:${key} - ${reason.message}`);
         });
       },
-      isEnabled: hasWidget,
+      isEnabled,
       isToggled: args => args['theme'] === theme
     });
 
@@ -202,7 +203,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
           console.error(`Failed to set ${id}:${key} - ${reason.message}`);
         });
       },
-      isEnabled: hasWidget,
+      isEnabled,
       isToggled: args => args['keyMap'] === keyMap
     });
 
@@ -216,7 +217,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
         let editor = widget.editor as CodeMirrorEditor;
         editor.execCommand('find');
       },
-      isEnabled: hasWidget
+      isEnabled
     });
 
     commands.addCommand(CommandIDs.findAndReplace, {
@@ -229,7 +230,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
         let editor = widget.editor as CodeMirrorEditor;
         editor.execCommand('replace');
       },
-      isEnabled: hasWidget
+      isEnabled
     });
 
     commands.addCommand(CommandIDs.changeMode, {
@@ -244,7 +245,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
           }
         }
       },
-      isEnabled: hasWidget,
+      isEnabled,
       isToggled: args => {
         let widget = tracker.currentWidget;
         if (!widget) {
