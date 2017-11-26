@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  ClientSession, Toolbar, ToolbarButton
+} from '@jupyterlab/apputils';
+
+import {
   toArray
 } from '@phosphor/algorithm';
 
@@ -26,10 +30,6 @@ import {
 import {
   simulate
 } from 'simulate-event';
-
-import {
-  ClientSession, Toolbar, ToolbarButton
-} from '@jupyterlab/apputils';
 
 import {
   createClientSession
@@ -158,9 +158,9 @@ describe('@jupyterlab/apputils', () => {
         iconClass: 'test-icon-class',
         iconLabel: 'Test log icon label',
         className: 'test-log-class',
-        isEnabled: (args) => { return enabled; },
-        isToggled: (args) => { return toggled; },
-        isVisible: (args) => { return visible; },
+        isEnabled: () => enabled,
+        isToggled: () => toggled,
+        isVisible: () => visible,
       });
 
       it('should create a button', () => {
@@ -183,11 +183,11 @@ describe('@jupyterlab/apputils', () => {
         button.dispose();
       });
 
-      it('should add an icon node with icon class and label', () => {
+      it('should add an icon with icon class and label', () => {
         let button = Toolbar.createFromCommand(commands, testLogCommandId);
-        let iconNode = button.node.children[0] as HTMLElement;
+        let iconNode = button.node as HTMLElement;
         expect(iconNode.classList.contains('test-icon-class')).to.be(true);
-        expect(iconNode.innerText).to.equal('Test log icon label');
+        expect(iconNode.title).to.equal('Test log icon label');
         button.dispose();
       });
 
@@ -237,9 +237,9 @@ describe('@jupyterlab/apputils', () => {
         let id = 'to-be-removed';
         let iconClassValue: string | null = null;
         let cmd = commands.addCommand(id, {
-          execute: () => { return; },
+          execute: () => { /* no op */ },
           label: 'Label-only button',
-          iconClass: (args) => { return iconClassValue; }
+          iconClass: () => iconClassValue
         });
         let button = Toolbar.createFromCommand(commands, id);
         expect(button.node.childElementCount).to.be(0);
@@ -249,8 +249,7 @@ describe('@jupyterlab/apputils', () => {
         commands.notifyCommandChanged(id);
 
         expect(button.node.innerText).to.equal('');
-        expect(button.node.childElementCount).to.be(1);
-        let iconNode = button.node.children[0] as HTMLElement;
+        let iconNode = button.node as HTMLElement;
         expect(iconNode.classList.contains(iconClassValue)).to.be(true);
 
         cmd.dispose();
