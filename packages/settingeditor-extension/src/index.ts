@@ -115,7 +115,7 @@ const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
     });
 
     commands.addCommand(CommandIDs.save, {
-      execute: () => { console.log('save'); },
+      execute: () => tracker.currentWidget.save(),
       iconClass: 'jp-MaterialIcon jp-SaveIcon',
       label: 'Save user settings',
       isEnabled: () => tracker.currentWidget.canSaveRaw

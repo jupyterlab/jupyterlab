@@ -229,6 +229,13 @@ class SettingEditor extends Widget {
   }
 
   /**
+   * Save the contents of the raw editor.
+   */
+  save(): Promise<void> {
+    return this._editor.raw.save();
+  }
+
+  /**
    * Toggle the debug functionality.
    */
   toggleDebug(): void {

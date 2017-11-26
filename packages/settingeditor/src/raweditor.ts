@@ -236,6 +236,20 @@ class RawEditor extends SplitPanel {
   }
 
   /**
+   * Save the contents of the raw editor.
+   */
+  save(): Promise<void> {
+    if (!this.isDirty) {
+      return Promise.resolve(undefined);
+    }
+
+    const settings = this._settings;
+    const source = this._user.editor.model.value.text;
+
+    return settings.save(source).catch(this._onSaveError);
+  }
+
+  /**
    * Toggle the debug functionality.
    */
   toggleDebug(): void {
