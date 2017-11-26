@@ -165,13 +165,6 @@ class SettingEditor extends Widget {
   readonly state: IStateDB;
 
   /**
-   * Whether the raw editor debug functionality is enabled.
-   */
-  get canDebugRaw(): boolean {
-    return this._editor.raw.canDebug;
-  }
-
-  /**
    * Whether the raw editor revert functionality is enabled.
    */
   get canRevertRaw(): boolean {
@@ -190,6 +183,13 @@ class SettingEditor extends Widget {
    */
   get commandsChanged(): ISignal<any, string[]> {
     return this._editor.raw.commandsChanged;
+  }
+
+  /**
+   * Whether the debug panel is visible.
+   */
+  get isDebugVisible(): boolean {
+    return this._editor.raw.isDebugVisible;
   }
 
   /**
@@ -219,6 +219,13 @@ class SettingEditor extends Widget {
     this._instructions.dispose();
     this._list.dispose();
     this._panel.dispose();
+  }
+
+  /**
+   * Toggle the debug functionality.
+   */
+  toggleDebug(): void {
+    this._editor.raw.toggleDebug();
   }
 
   /**

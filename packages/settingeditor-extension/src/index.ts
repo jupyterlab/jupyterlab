@@ -63,10 +63,10 @@ const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
     });
 
     commands.addCommand(CommandIDs.debug, {
-      execute: () => { console.log('debug'); },
+      execute: () => { tracker.currentWidget.toggleDebug(); },
       iconClass: 'jp-MaterialIcon jp-BugIcon',
       label: 'Debug user settings in inspector',
-      isVisible: () => tracker.currentWidget.canDebugRaw
+      isToggled: () => tracker.currentWidget.isDebugVisible
     });
 
     commands.addCommand(CommandIDs.open, {
@@ -111,14 +111,14 @@ const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
       execute: () => { console.log('revert'); },
       iconClass: 'jp-MaterialIcon jp-RefreshIcon',
       label: 'Revert user settings',
-      isVisible: () => tracker.currentWidget.canRevertRaw
+      isEnabled: () => tracker.currentWidget.canRevertRaw
     });
 
     commands.addCommand(CommandIDs.save, {
       execute: () => { console.log('save'); },
       iconClass: 'jp-MaterialIcon jp-SaveIcon',
       label: 'Save user settings',
-      isVisible: () => tracker.currentWidget.canSaveRaw
+      isEnabled: () => tracker.currentWidget.canSaveRaw
     });
 
     return tracker;

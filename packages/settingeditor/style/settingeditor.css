@@ -182,12 +182,20 @@
 }
 
 
-#setting-editor .jp-SettingsRawEditor.jp-mod-error .jp-Toolbar-item.jp-BugIcon {
-  background-color: red;
+#setting-editor .jp-SettingsRawEditor.jp-mod-error .jp-Toolbar-item.jp-BugIcon::after {
+  color: red;
+  content: "\25CF";
+  font-size: 7px;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 4px;
+  left: 6px;
 }
 
 
 #setting-editor .jp-SettingsRawEditor .jp-Inspector {
+  border-top: 2px solid var(--jp-layout-color2);
   max-height: var(--jp-private-settingeditor-debug-height);
 }
 

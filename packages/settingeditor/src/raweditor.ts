@@ -124,13 +124,6 @@ class RawEditor extends SplitPanel {
   readonly registry: ISettingRegistry;
 
   /**
-   * Whether the raw editor debug functionality is enabled.
-   */
-  get canDebug(): boolean {
-    return this._canDebug;
-  }
-
-  /**
    * Whether the raw editor revert functionality is enabled.
    */
   get canRevert(): boolean {
@@ -149,6 +142,13 @@ class RawEditor extends SplitPanel {
    */
   get commandsChanged(): ISignal<any, string[]> {
     return this._commandsChanged;
+  }
+
+  /**
+   * Whether the debug panel is visible.
+   */
+  get isDebugVisible(): boolean {
+    return this._inspector.isVisible;
   }
 
   /**
@@ -228,6 +228,20 @@ class RawEditor extends SplitPanel {
   }
 
   /**
+   * Toggle the debug functionality.
+   */
+  toggleDebug(): void {
+    const inspector = this._inspector;
+
+    if (inspector.isHidden) {
+      inspector.show();
+    } else {
+      inspector.hide();
+    }
+    this._updateToolbar(this._canRevert, this._canSave);
+  }
+
+  /**
    * Handle `after-attach` messages.
    */
   protected onAfterAttach(msg: Message): void {
@@ -259,7 +273,7 @@ class RawEditor extends SplitPanel {
     this.removeClass(ERROR_CLASS);
 
     if (!raw || !settings || settings.raw === raw) {
-      this._updateToolbar(false, false, false);
+      this._updateToolbar(false, false);
       return;
     }
 
@@ -267,11 +281,11 @@ class RawEditor extends SplitPanel {
 
     if (errors) {
       this.addClass(ERROR_CLASS);
-      this._updateToolbar(true, true, false);
+      this._updateToolbar(true, false);
       return;
     }
 
-    this._updateToolbar(false, true, true);
+    this._updateToolbar(true, true);
   }
 
   /**
@@ -286,10 +300,9 @@ class RawEditor extends SplitPanel {
     user.editor.model.value.text = settings.raw;
   }
 
-  private _updateToolbar(debug: boolean, revert: boolean, save: boolean): void {
+  private _updateToolbar(revert: boolean, save: boolean): void {
     const commands = this._commands;
 
-    this._canDebug = debug;
     this._canRevert = revert;
     this._canSave = save;
     this._commandsChanged.emit([
@@ -299,7 +312,6 @@ class RawEditor extends SplitPanel {
     ]);
   }
 
-  private _canDebug = false;
   private _canRevert = false;
   private _canSave = false;
   private _commandsChanged = new Signal<this, string[]>(this);
