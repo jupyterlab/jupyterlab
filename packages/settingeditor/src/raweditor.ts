@@ -228,6 +228,14 @@ class RawEditor extends SplitPanel {
   }
 
   /**
+   * Revert the editor back to original settings.
+   */
+  revert(): void {
+    this._user.editor.model.value.text = this.settings.raw;
+    this._updateToolbar(false, false);
+  }
+
+  /**
    * Toggle the debug functionality.
    */
   toggleDebug(): void {

@@ -222,6 +222,13 @@ class SettingEditor extends Widget {
   }
 
   /**
+   * Revert raw editor back to original settings.
+   */
+  revert(): void {
+    this._editor.raw.revert();
+  }
+
+  /**
    * Toggle the debug functionality.
    */
   toggleDebug(): void {

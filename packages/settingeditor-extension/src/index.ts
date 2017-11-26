@@ -108,7 +108,7 @@ const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
     });
 
     commands.addCommand(CommandIDs.revert, {
-      execute: () => { console.log('revert'); },
+      execute: () => { tracker.currentWidget.revert(); },
       iconClass: 'jp-MaterialIcon jp-RefreshIcon',
       label: 'Revert user settings',
       isEnabled: () => tracker.currentWidget.canRevertRaw
