@@ -246,7 +246,12 @@ class RawEditor extends SplitPanel {
     const settings = this._settings;
     const source = this._user.editor.model.value.text;
 
-    return settings.save(source).catch(this._onSaveError);
+    return settings.save(source)
+      .then(() => { this._updateToolbar(false, false); })
+      .catch(reason => {
+        this._updateToolbar(true, false);
+        this._onSaveError(reason);
+      });
   }
 
   /**
