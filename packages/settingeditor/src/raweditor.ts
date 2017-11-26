@@ -265,7 +265,7 @@ class RawEditor extends SplitPanel {
     } else {
       inspector.hide();
     }
-    this._updateToolbar(this._canRevert, this._canSave);
+    this._updateToolbar();
   }
 
   /**
@@ -327,7 +327,7 @@ class RawEditor extends SplitPanel {
     user.editor.model.value.text = settings.raw;
   }
 
-  private _updateToolbar(revert: boolean, save: boolean): void {
+  private _updateToolbar(revert = this._canRevert, save = this._canSave): void {
     const commands = this._commands;
 
     this._canRevert = revert;

@@ -537,12 +537,30 @@
       },
       "type": "object"
     },
+    "settingeditor:debug": {
+      "default": { },
+      "properties": {
+        "command": { "default": "settingeditor:debug" },
+        "keys": { "default": ["Accel I"] },
+        "selector": { "default": ".jp-SettingEditor" }
+      },
+      "type": "object"
+    },
     "settingeditor:open": {
       "default": { },
       "properties": {
         "command": { "default": "settingeditor:open" },
         "keys": { "default": ["Accel ,"] },
         "selector": { "default": "body" }
+      },
+      "type": "object"
+    },
+    "settingeditor:save": {
+      "default": { },
+      "properties": {
+        "command": { "default": "settingeditor:save" },
+        "keys": { "default": ["Accel S"] },
+        "selector": { "default": ".jp-SettingEditor" }
       },
       "type": "object"
     },
