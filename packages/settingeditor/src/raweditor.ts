@@ -346,8 +346,8 @@ class RawEditor extends SplitPanel {
 
   private _canRevert = false;
   private _canSave = false;
-  private _commandsChanged = new Signal<this, string[]>(this);
   private _commands: RawEditor.ICommandBundle;
+  private _commandsChanged = new Signal<this, string[]>(this);
   private _defaults: CodeEditorWrapper;
   private _inspector: Widget;
   private _onSaveError: (reason: any) => void;
