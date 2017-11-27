@@ -25,19 +25,18 @@ import {
 
 
 /**
- * The MIME renderer used for the settings editor error inspector.
- */
-const rendermime = new RenderMime({ initialFactories: defaultRendererFactories });
-
-
-/**
  * Create a raw editor inspector.
  */
 export
-function createInspector(editor: RawEditor): InspectorPanel {
+function createInspector(editor: RawEditor, rendermime?: RenderMime): InspectorPanel {
   const connector = new InspectorConnector(editor);
-  const handler = new InspectionHandler({ connector, rendermime });
   const inspector = new InspectorPanel();
+  const handler = new InspectionHandler({
+    connector,
+    rendermime: rendermime || new RenderMime({
+      initialFactories: defaultRendererFactories
+    })
+  });
 
   inspector.add({
     className: 'jp-SettingsDebug',

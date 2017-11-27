@@ -14,6 +14,10 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
+  RenderMime
+} from '@jupyterlab/rendermime';
+
+import {
   CommandRegistry
 } from '@phosphor/commands';
 
@@ -110,7 +114,7 @@ class RawEditor extends SplitPanel {
     user.editor.model.value.changed.connect(this._onTextChanged, this);
 
     // Create and set up an inspector.
-    this._inspector = createInspector(this);
+    this._inspector = createInspector(this, options.rendermime);
 
     this.addClass(RAW_EDITOR_CLASS);
     this._onSaveError = options.onSaveError;
@@ -408,6 +412,11 @@ namespace RawEditor {
      * The setting registry used by the editor.
      */
     registry: ISettingRegistry;
+
+    /**
+     * The optional MIME renderer to use for rendering debug messages.
+     */
+    rendermime?: RenderMime;
   }
 }
 

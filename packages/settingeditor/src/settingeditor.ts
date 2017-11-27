@@ -12,6 +12,10 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
+  RenderMime
+} from '@jupyterlab/rendermime';
+
+import {
   CommandRegistry
 } from '@phosphor/commands';
 
@@ -117,7 +121,7 @@ class SettingEditor extends Widget {
     this.key = options.key;
     this.state = options.state;
 
-    const { commands, editorFactory } = options;
+    const { commands, editorFactory, rendermime } = options;
     const layout = this.layout = new PanelLayout();
     const registry = this.registry = options.registry;
     const panel = this._panel = new SplitPanel({
@@ -129,7 +133,7 @@ class SettingEditor extends Widget {
       node: Private.createInstructionsNode()
     });
     const editor = this._editor = new PluginEditor({
-      commands, editorFactory, registry
+      commands, editorFactory, registry, rendermime
     });
     const confirm = () => editor.confirm();
     const list = this._list = new PluginList({ confirm, registry });
@@ -447,6 +451,11 @@ namespace SettingEditor {
      * The setting registry the editor modifies.
      */
     registry: ISettingRegistry;
+
+    /**
+     * The optional MIME renderer to use for rendering debug messages.
+     */
+    rendermime?: RenderMime;
 
     /**
      * The state database used to store layout.

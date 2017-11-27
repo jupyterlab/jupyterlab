@@ -16,6 +16,10 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
+  RenderMime
+} from '@jupyterlab/rendermime';
+
+import {
   CommandRegistry
 } from '@phosphor/commands';
 
@@ -68,12 +72,12 @@ class PluginEditor extends Widget {
     super();
     this.addClass(PLUGIN_EDITOR_CLASS);
 
-    const { commands, editorFactory, registry } = options;
+    const { commands, editorFactory, registry, rendermime } = options;
     const layout = this.layout = new StackedLayout();
     const { onSaveError } = Private;
 
     this.raw = this._rawEditor = new RawEditor({
-      commands, editorFactory, onSaveError, registry
+      commands, editorFactory, onSaveError, registry, rendermime
     });
     this.table = this._tableEditor = new TableEditor({ onSaveError });
     this._rawEditor.handleMoved.connect(this._onStateChanged, this);
@@ -261,6 +265,11 @@ namespace PluginEditor {
      * The setting registry used by the editor.
      */
     registry: ISettingRegistry;
+
+    /**
+     * The optional MIME renderer to use for rendering debug messages.
+     */
+    rendermime?: RenderMime;
   }
 }
 

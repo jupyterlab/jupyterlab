@@ -48,7 +48,7 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
   id: '@jupyterlab/settingeditor-extension:plugin',
   activate: (app: JupyterLab, restorer: ILayoutRestorer, registry: ISettingRegistry, editorServices: IEditorServices, state: IStateDB) => {
-    const { commands, shell } = app;
+    const { commands, rendermime, shell } = app;
     const namespace = 'setting-editor';
     const factoryService = editorServices.factoryService;
     const editorFactory = factoryService.newInlineEditor.bind(factoryService);
@@ -86,7 +86,7 @@ const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
             revert: CommandIDs.revert,
             save: CommandIDs.save
           },
-          editorFactory, key, registry, state, when
+          editorFactory, key, registry, rendermime, state, when
         });
 
         // Notify the command registry when the visibility status of the setting
