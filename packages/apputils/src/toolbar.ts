@@ -218,7 +218,10 @@ namespace Toolbar {
     }
 
     const button = new ToolbarButton({
-      onClick: () => { commands.execute(id); },
+      onClick: () => {
+        commands.execute(id);
+        button.node.blur();
+      },
       className: Private.commandClassName(commands, id),
       tooltip: Private.commandTooltip(commands, id)
     });
