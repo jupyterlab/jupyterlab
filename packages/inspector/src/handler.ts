@@ -199,6 +199,7 @@ namespace InspectionHandler {
   interface IOptions {
     /**
      * The connector used to make inspection requests.
+     *
      * #### Notes
      * The only method of this connector that will ever be called is `fetch`, so
      * it is acceptable for the other methods to be simple functions that return

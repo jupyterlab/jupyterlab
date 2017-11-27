@@ -367,7 +367,7 @@ class CompletionHandler implements IDisposable {
   }
 
   /**
-   * Receive a completion reply from the kernel.
+   * Receive a completion reply from the connector.
    *
    * @param state - The state of the editor when completion request was made.
    *

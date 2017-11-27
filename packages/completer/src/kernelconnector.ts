@@ -8,6 +8,7 @@ import {
 import {
   DataConnector
 } from '@jupyterlab/coreutils';
+
 import {
   KernelMessage
 } from '@jupyterlab/services';
