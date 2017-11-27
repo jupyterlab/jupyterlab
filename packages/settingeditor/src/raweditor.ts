@@ -299,7 +299,8 @@ class RawEditor extends SplitPanel {
 
     this.removeClass(ERROR_CLASS);
 
-    if (!raw || !settings || settings.raw === raw) {
+    // If there are no settings loaded or there are no changes, bail.
+    if (!settings || settings.raw === raw) {
       this._updateToolbar(false, false);
       return;
     }
