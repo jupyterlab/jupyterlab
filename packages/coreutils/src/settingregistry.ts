@@ -1023,7 +1023,7 @@ namespace Private {
     const { description, title } = schema.properties[key];
     const reified = reifyDefault(schema, key);
     const defaults = reified === undefined ? prefix(`"${key}": ${undefaulted}`)
-      : prefix(`"${key}": ${JSON.stringify(reified, null, 2)}`, '  ');
+      : prefix(`"${key}": ${JSON.stringify(reified, null, 2)}`, '    ');
 
     return [
       prefix(`${title || untitled}`),
@@ -1042,7 +1042,7 @@ namespace Private {
   /**
    * Returns a documentation string with a comment prefix added on every line.
    */
-  function prefix(source: string, pre = '  \/\/ '): string {
+  function prefix(source: string, pre = '    \/\/ '): string {
     return pre + source.split('\n').join(`\n${pre}`);
   }
 
