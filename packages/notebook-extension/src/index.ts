@@ -544,7 +544,9 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
    * The name of the current notebook widget.
    */
   function currentName(): string {
-    if (tracker.currentWidget && tracker.currentWidget.title.label) {
+    if (tracker.currentWidget  &&
+        tracker.currentWidget === app.shell.currentWidget &&
+        tracker.currentWidget.title.label) {
       return `"${tracker.currentWidget.title.label}"`;
     }
     return 'Notebook';
