@@ -145,15 +145,8 @@ class InspectionHandler implements IDisposable, IInspector.IInspectable {
     const position = editor.getCursorPosition();
     const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), text);
     const update: IInspector.IInspectorUpdate = {
-      content: null,
-      type: 'hints'
+      content: null, type: 'hints'
     };
-
-    // Clear hints if the new text value is empty or kernel is unavailable.
-    if (!text) {
-      this._inspected.emit(update);
-      return;
-    }
 
     const pending = ++this._pending;
 
