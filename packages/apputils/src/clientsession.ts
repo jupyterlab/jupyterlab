@@ -35,7 +35,7 @@ import {
 
 import {
   showDialog, Dialog
-} from '.';
+} from './dialog';
 
 
 /**

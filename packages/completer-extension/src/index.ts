@@ -6,7 +6,8 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  CompleterModel, Completer, CompletionHandler, ICompletionManager
+  CompleterModel, Completer, CompletionHandler, ICompletionManager,
+  KernelConnector
 } from '@jupyterlab/completer';
 
 import {
@@ -87,10 +88,10 @@ const manager: JupyterLabPlugin<ICompletionManager> = {
 
     return {
       register: (completable: ICompletionManager.ICompletable): ICompletionManager.ICompletableAttributes => {
-        const { editor, session, parent } = completable;
+        const { connector, editor, parent } = completable;
         const model = new CompleterModel();
         const completer = new Completer({ editor, model });
-        const handler = new CompletionHandler({ completer, session });
+        const handler = new CompletionHandler({ completer, connector });
         const id = parent.id;
 
         // Hide the widget when it first loads.
@@ -135,7 +136,8 @@ const consoles: JupyterLabPlugin<void> = {
       const editor = cell && cell.editor;
       const session = anchor.session;
       const parent = panel;
-      const handler = manager.register({ editor, session, parent });
+      const connector = new KernelConnector({ session });
+      const handler = manager.register({ connector, editor, parent });
 
       // Listen for prompt creation.
       anchor.promptCellCreated.connect((sender, cell) => {
@@ -188,7 +190,8 @@ const notebooks: JupyterLabPlugin<void> = {
       const editor = cell && cell.editor;
       const session = panel.session;
       const parent = panel;
-      const handler = manager.register({ editor, session, parent });
+      const connector = new KernelConnector({ session });
+      const handler = manager.register({ connector, editor, parent });
 
       // Listen for active cell changes.
       panel.notebook.activeCellChanged.connect((sender, cell) => {

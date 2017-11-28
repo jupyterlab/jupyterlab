@@ -15,21 +15,22 @@ import {
 
 
 export
-class TestConnector extends StateDB implements IDataConnector<ISettingRegistry.IPlugin, JSONObject> {
+class TestConnector extends StateDB implements IDataConnector<ISettingRegistry.IPlugin, string> {
   constructor(public schemas: { [key: string]: ISettingRegistry.ISchema } = { }) {
     super({ namespace: 'setting-registry-tests' });
   }
 
   fetch(id: string): Promise<ISettingRegistry.IPlugin | null> {
-    return super.fetch(id).then(data => {
+    return super.fetch(id).then((data: string) => {
       if (!data && !this.schemas[id]) {
         return null;
       }
 
-      let user = data as JSONObject || { };
-
       const schema = this.schemas[id] || { type: 'object' };
-      const result = { data: { composite: { }, user }, id, schema };
+      const composite = { };
+      const user = { };
+      const raw = data || '{ }';
+      const result = { id, data: { composite, user }, raw, schema };
 
       return result;
     });
@@ -51,42 +52,6 @@ describe('@jupyterlab/coreutils', () => {
 
     });
 
-    describe('#addSchema()', () => {
-
-      it('should add a schema', () => {
-        const validator = new DefaultSchemaValidator();
-        const plugin = 'foo';
-        const schema = { type: 'object' };
-        const errors = validator.addSchema(plugin, schema);
-
-        expect(errors).to.be(null);
-      });
-
-      it('should return errors if adding failed', () => {
-        const validator = new DefaultSchemaValidator();
-        const plugin = 'foo';
-
-        // Coerce a broken schema for testing.
-        const schema = ({ type: 10 } as any) as ISettingRegistry.ISchema;
-        const errors = validator.addSchema(plugin, schema);
-
-        expect(errors).to.not.be(null);
-      });
-
-      it('should be safe to call multiple times', () => {
-        const validator = new DefaultSchemaValidator();
-        const plugin = 'foo';
-        const schema = { type: 'object' };
-
-        let errors = validator.addSchema(plugin, schema);
-
-        expect(errors).to.be(null);
-        errors = validator.addSchema(plugin, schema);
-        expect(errors).to.be(null);
-      });
-
-    });
-
     describe('#validateData()', () => {
 
       it('should validate data against a schema', () => {
@@ -100,13 +65,11 @@ describe('@jupyterlab/coreutils', () => {
           type: 'object'
         };
         const composite = { };
-        const user = { bar: 'baz' };
-        const plugin = { id, data: { composite, user }, schema };
+        const user = { };
+        const raw = '{ "bar": "baz" }';
+        const plugin = { id, data: { composite, user }, raw, schema };
+        const errors = validator.validateData(plugin);
 
-        let errors = validator.addSchema(id, schema);
-
-        expect(errors).to.be(null);
-        errors = validator.validateData(plugin);
         expect(errors).to.be(null);
       });
 
@@ -121,13 +84,11 @@ describe('@jupyterlab/coreutils', () => {
           type: 'object'
         };
         const composite = { };
-        const user = { baz: 'qux' };
-        const plugin = { id, data: { composite, user }, schema };
+        const user = { };
+        const raw = '{ "baz": "qux" }';
+        const plugin = { id, data: { composite, user }, raw, schema };
+        const errors = validator.validateData(plugin);
 
-        let errors = validator.addSchema(id, schema);
-
-        expect(errors).to.be(null);
-        errors = validator.validateData(plugin);
         expect(errors).to.not.be(null);
       });
 
@@ -143,15 +104,12 @@ describe('@jupyterlab/coreutils', () => {
         };
         const composite = { } as JSONObject;
         const user = { } as JSONObject;
-        const plugin = { id, data: { composite, user }, schema };
-
-        let errors = validator.addSchema(id, schema);
+        const raw = '{ }';
+        const plugin = { id, data: { composite, user }, raw, schema };
+        const errors = validator.validateData(plugin);
 
         expect(errors).to.be(null);
-        expect(plugin.data.composite.bar).to.be(void 0);
-        errors = validator.validateData(plugin);
-        expect(errors).to.be(null);
-        expect(plugin.data.user.bar).to.be(void 0);
+        expect(plugin.data.user.bar).to.be(undefined);
         expect(plugin.data.composite.bar).to.be(schema.properties.bar.default);
       });
 
@@ -222,7 +180,7 @@ describe('@jupyterlab/coreutils', () => {
         const value = 'baz';
 
         connector.schemas[id] = { type: 'object' };
-        connector.save(id, { [key]: value })
+        connector.save(id, JSON.stringify({ [key]: value }))
           .then(() => registry.load(id))
           .then(() => registry.get(id, key))
           .then(saved => { expect(saved.user).to.be(value); })
@@ -235,7 +193,7 @@ describe('@jupyterlab/coreutils', () => {
         const value = 'gamma';
 
         connector.schemas[id] = { type: 'object' };
-        connector.save(id, { [key]: value })
+        connector.save(id, JSON.stringify({ [key]: value }))
           .then(() => registry.get(id, key))
           .then(saved => { expect(saved.composite).to.be(value); })
           .then(done).catch(done);
@@ -271,7 +229,7 @@ describe('@jupyterlab/coreutils', () => {
           }
         };
 
-        connector.save(id, { [key]: value })
+        connector.save(id, JSON.stringify({ [key]: value }))
           .then(() => registry.get(id, key))
           .then(saved => {
             expect(saved.composite).to.be(value);
@@ -384,7 +342,8 @@ describe('@jupyterlab/coreutils', () => {
         const id = 'alpha';
         const data = { composite: { }, user: { } };
         const schema = { type: 'object' };
-        const plugin = { id, data, schema };
+        const raw = '{ }';
+        const plugin = { id, data, raw, schema };
 
         settings = new Settings({ plugin, registry });
         expect(settings).to.be.a(Settings);
@@ -453,7 +412,8 @@ describe('@jupyterlab/coreutils', () => {
         const id = 'alpha';
         const data = { composite: { }, user: { } };
         const schema = { type: 'object' };
-        const plugin = { id, data, schema };
+        const raw = '{ }';
+        const plugin = { id, data, raw, schema };
 
         settings = new Settings({ plugin, registry });
         expect(settings.isDisposed).to.be(false);
@@ -469,7 +429,8 @@ describe('@jupyterlab/coreutils', () => {
         const id = 'alpha';
         const data = { composite: { }, user: { } };
         const schema = { type: 'object' };
-        const plugin = { id, data, schema };
+        const raw = '{ }';
+        const plugin = { id, data, raw, schema };
 
         settings = new Settings({ plugin, registry });
         expect(settings.schema).to.eql(schema);
@@ -505,7 +466,8 @@ describe('@jupyterlab/coreutils', () => {
         const id = 'alpha';
         const data = { composite: { }, user: { } };
         const schema = { type: 'object' };
-        const plugin = { id, data, schema };
+        const raw = '{ }';
+        const plugin = { id, data, raw, schema };
 
         settings = new Settings({ plugin, registry });
         expect(settings.plugin).to.equal(id);
@@ -519,7 +481,8 @@ describe('@jupyterlab/coreutils', () => {
         const id = 'alpha';
         const data = { composite: { }, user: { } };
         const schema = { type: 'object' };
-        const plugin = { id, data, schema };
+        const raw = '{ }';
+        const plugin = { id, data, raw, schema };
 
         settings = new Settings({ plugin, registry });
         expect(settings.registry).to.be(registry);
@@ -533,7 +496,8 @@ describe('@jupyterlab/coreutils', () => {
         const id = 'alpha';
         const data = { composite: { }, user: { } };
         const schema = { type: 'object' };
-        const plugin = { id, data, schema };
+        const raw = '{ }';
+        const plugin = { id, data, raw, schema };
 
         settings = new Settings({ plugin, registry });
         expect(settings.isDisposed).to.be(false);
@@ -610,7 +574,8 @@ describe('@jupyterlab/coreutils', () => {
         const value = 'baz';
 
         connector.schemas[id] = { type: 'object' };
-        connector.save(id, { [key]: value }).then(() => registry.load(id))
+        connector.save(id, JSON.stringify({ [key]: value }))
+          .then(() => registry.load(id))
           .then(s => {
             const saved = (settings = s as Settings).get(key);
 
@@ -648,7 +613,7 @@ describe('@jupyterlab/coreutils', () => {
           }
         };
 
-        connector.save(id, { [key]: value })
+        connector.save(id, JSON.stringify({ [key]: value }))
           .then(() => registry.load(id))
           .then(s => {
             const saved = (settings = s as Settings).get(key);
@@ -684,7 +649,8 @@ describe('@jupyterlab/coreutils', () => {
         const value = 'baz';
 
         connector.schemas[id] = { type: 'object' };
-        connector.save(id, { [key]: value }).then(() => registry.load(id))
+        connector.save(id, JSON.stringify({ [key]: value }))
+          .then(() => registry.load(id))
           .then(s => {
             const saved = (settings = s as Settings).get(key);
 
@@ -709,7 +675,7 @@ describe('@jupyterlab/coreutils', () => {
 
         connector.schemas[id] = { type: 'object' };
         registry.load(id).then(s => {
-          return (settings = s as Settings).save({ one, two });
+          return (settings = s as Settings).save(JSON.stringify({ one, two }));
         }).then(() => {
           let saved = settings.get('one');
 

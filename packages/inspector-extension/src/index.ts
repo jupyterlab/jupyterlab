@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/console';
 
 import {
-  IInspector, InspectorPanel, InspectionHandler
+  IInspector, InspectionHandler, InspectorPanel, KernelConnector
 } from '@jupyterlab/inspector';
 
 import {
@@ -117,7 +117,8 @@ const consoles: JupyterLabPlugin<void> = {
     consoles.widgetAdded.connect((sender, parent) => {
       const session = parent.console.session;
       const rendermime = parent.console.rendermime;
-      const handler = new InspectionHandler({ session, rendermime });
+      const connector = new KernelConnector({ session });
+      const handler = new InspectionHandler({ connector, rendermime });
 
       // Associate the handler to the widget.
       handlers[parent.id] = handler;
@@ -150,7 +151,10 @@ const consoles: JupyterLabPlugin<void> = {
       }
     });
 
-    app.contextMenu.addItem({command: CommandIDs.open, selector: '.jp-CodeConsole'});
+    app.contextMenu.addItem({
+      command: CommandIDs.open,
+      selector: '.jp-CodeConsole'
+    });
   }
 };
 
@@ -169,7 +173,8 @@ const notebooks: JupyterLabPlugin<void> = {
     notebooks.widgetAdded.connect((sender, parent) => {
       const session = parent.session;
       const rendermime = parent.rendermime;
-      const handler = new InspectionHandler({ session, rendermime });
+      const connector = new KernelConnector({ session });
+      const handler = new InspectionHandler({ connector, rendermime });
 
       // Associate the handler to the widget.
       handlers[parent.id] = handler;
@@ -202,7 +207,10 @@ const notebooks: JupyterLabPlugin<void> = {
       }
     });
 
-    app.contextMenu.addItem({command: CommandIDs.open, selector: '.jp-NotebookPanel'});
+    app.contextMenu.addItem({
+      command: CommandIDs.open,
+      selector: '.jp-NotebookPanel'
+    });
   }
 };
 

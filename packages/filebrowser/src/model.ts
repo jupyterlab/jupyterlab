@@ -18,7 +18,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  PromiseDelegate
+  PromiseDelegate, ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
 import {
@@ -286,7 +286,7 @@ class FileBrowserModel implements IDisposable {
         return;
       }
 
-      const path = cwd['path'] as string;
+      const path = (cwd as ReadonlyJSONObject)['path'] as string;
       const localPath = path.split(':').pop();
       return manager.services.contents.get(path)
         .then(() => this.cd(localPath))

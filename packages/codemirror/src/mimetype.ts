@@ -11,7 +11,7 @@ import {
 
 import {
   Mode
-} from '.';
+} from './mode';
 
 /**
  * The mime type service for CodeMirror.

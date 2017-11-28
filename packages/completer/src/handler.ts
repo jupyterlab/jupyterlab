@@ -2,8 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  KernelMessage
-} from '@jupyterlab/services';
+  CodeEditor
+} from '@jupyterlab/codeeditor';
+
+import {
+  IDataConnector, Text
+} from '@jupyterlab/coreutils';
+
+import {
+  ReadonlyJSONObject
+} from '@phosphor/coreutils';
 
 import {
   IDisposable
@@ -16,18 +24,6 @@ import {
 import {
   Signal
 } from '@phosphor/signaling';
-
-import {
-  Text
-} from '@jupyterlab/coreutils';
-
-import {
-  IClientSession
-} from '@jupyterlab/apputils';
-
-import {
-  CodeEditor
-} from '@jupyterlab/codeeditor';
 
 import {
   Completer
@@ -57,13 +53,28 @@ class CompletionHandler implements IDisposable {
     this.completer = options.completer;
     this.completer.selected.connect(this.onCompletionSelected, this);
     this.completer.visibilityChanged.connect(this.onVisibilityChanged, this);
-    this.session = options.session;
+    this._connector = options.connector;
   }
 
   /**
    * The completer widget managed by the handler.
    */
   readonly completer: Completer;
+
+  /**
+   * The data connector used to populate completion requests.
+   *
+   * #### Notes
+   * The only method of this connector that will ever be called is `fetch`, so
+   * it is acceptable for the other methods to be simple functions that return
+   * rejected promises.
+   */
+  get connector(): IDataConnector<CompletionHandler.IReply, void, CompletionHandler.IRequest> {
+    return this._connector;
+  }
+  set connector(connector: IDataConnector<CompletionHandler.IReply, void, CompletionHandler.IRequest>) {
+    this._connector = connector;
+  }
 
   /**
    * The editor used by the completion handler.
@@ -80,7 +91,8 @@ class CompletionHandler implements IDisposable {
 
     // Clean up and disconnect from old editor.
     if (editor && !editor.isDisposed) {
-      let model = editor.model;
+      const model = editor.model;
+
       editor.host.classList.remove(COMPLETER_ENABLED_CLASS);
       model.selections.changed.disconnect(this.onSelectionsChanged, this);
       model.value.changed.disconnect(this.onTextChanged, this);
@@ -94,6 +106,7 @@ class CompletionHandler implements IDisposable {
     editor = this._editor = newValue;
     if (editor) {
       const model = editor.model;
+
       this._enabled = false;
       model.selections.changed.connect(this.onSelectionsChanged, this);
       model.value.changed.connect(this.onTextChanged, this);
@@ -101,11 +114,6 @@ class CompletionHandler implements IDisposable {
       this.onSelectionsChanged();
     }
   }
-
-  /**
-   * The session used by the completion handler.
-   */
-  readonly session: IClientSession;
 
   /**
    * Get whether the completion handler is disposed.
@@ -159,60 +167,24 @@ class CompletionHandler implements IDisposable {
   }
 
   /**
-   * Make a complete request using the session.
-   */
-  protected makeRequest(position: CodeEditor.IPosition): Promise<void> {
-    if (!this.session.kernel) {
-      return Promise.reject(new Error('no kernel for completion request'));
-    }
-
-    let editor = this.editor;
-    if (!editor) {
-      return Promise.reject(new Error('No active editor'));
-    }
-
-    const code = editor.model.value.text;
-    const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), code);
-    let content: KernelMessage.ICompleteRequest = {
-      code: editor.model.value.text,
-      cursor_pos: offset
-    };
-    let pending = ++this._pending;
-    let request = this.getState(editor, position);
-
-    return this.session.kernel.requestComplete(content).then(msg => {
-      if (this.isDisposed) {
-        return;
-      }
-
-      // If a newer completion request has created a pending request, bail.
-      if (pending !== this._pending) {
-        return;
-      }
-
-      this.onReply(request, msg);
-    });
-  }
-
-  /**
    * Handle a completion selected signal from the completion widget.
    */
   protected onCompletionSelected(completer: Completer, value: string): void {
-    let model = completer.model;
-    let editor = this._editor;
+    const model = completer.model;
+    const editor = this._editor;
     if (!editor || !model) {
       return;
     }
 
-    let patch = model.createPatch(value);
+    const patch = model.createPatch(value);
     if (!patch) {
       return;
     }
 
-    let { offset, text } = patch;
+    const { offset, text } = patch;
     editor.model.value.text = text;
 
-    let position = editor.getPositionAt(offset);
+    const position = editor.getPositionAt(offset);
     if (position) {
       editor.setCursorPosition(position);
     }
@@ -222,8 +194,8 @@ class CompletionHandler implements IDisposable {
    * Handle `invoke-request` messages.
    */
   protected onInvokeRequest(msg: Message): void {
-    // If there is neither a kernel nor a completer model, bail.
-    if (!this.session.kernel || !this.completer.model) {
+    // If there is no completer model, bail.
+    if (!this.completer.model) {
       return;
     }
 
@@ -234,42 +206,8 @@ class CompletionHandler implements IDisposable {
 
     let editor = this._editor;
     if (editor) {
-      this.makeRequest(editor.getCursorPosition());
+      this._makeRequest(editor.getCursorPosition());
     }
-  }
-
-  /**
-   * Receive a completion reply from the kernel.
-   *
-   * @param state - The state of the editor when completion request was made.
-   *
-   * @param reply - The API response returned for a completion request.
-   */
-  protected onReply(state: Completer.ITextState, reply: KernelMessage.ICompleteReplyMsg): void {
-    const model = this.completer.model;
-    if (!model) {
-      return;
-    }
-
-    // Completion request failures or negative results fail silently.
-    const value = reply.content;
-    if (value.status !== 'ok') {
-      model.reset(true);
-      return;
-    }
-
-    // Update the original request.
-    model.original = state;
-
-    // Update the options.
-    model.setOptions(value.matches || []);
-
-    // Update the cursor.
-    const text = state.text;
-    model.cursor = {
-      start: Text.charIndexToJsIndex(value.cursor_start, text),
-      end: Text.charIndexToJsIndex(value.cursor_end, text),
-    };
   }
 
   /**
@@ -281,7 +219,7 @@ class CompletionHandler implements IDisposable {
    * the completer completable class to the editor host node.
    *
    * Despite the fact that the editor widget adds a class whenever there is a
-   * primary selection, this method checks indepenently for two reasons:
+   * primary selection, this method checks independently for two reasons:
    *
    * 1. The editor widget connects to the same signal to add that class, so
    *    there is no guarantee that the class will be added before this method
@@ -299,7 +237,7 @@ class CompletionHandler implements IDisposable {
     const model = this.completer.model;
     const editor = this._editor;
 
-    if (!model || !editor) {
+    if (!editor) {
       return;
     }
 
@@ -391,6 +329,72 @@ class CompletionHandler implements IDisposable {
     }
   }
 
+  /**
+   * Make a completion request.
+   */
+  private _makeRequest(position: CodeEditor.IPosition): Promise<void> {
+    const editor = this.editor;
+
+    if (!editor) {
+      return Promise.reject(new Error('No active editor'));
+    }
+
+    const text = editor.model.value.text;
+    const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), text);
+    const pending = ++this._pending;
+    const state = this.getState(editor, position);
+    const request: CompletionHandler.IRequest = { text, offset };
+
+    return this._connector.fetch(request).then(reply => {
+      if (this.isDisposed) {
+        return;
+      }
+
+      // If a newer completion request has created a pending request, bail.
+      if (pending !== this._pending) {
+        return;
+      }
+
+      this._onReply(state, reply);
+    }).catch(reason => {
+      // Completion request failures or negative results fail silently.
+      const model = this.completer.model;
+
+      if (model) {
+        model.reset(true);
+      }
+    });
+  }
+
+  /**
+   * Receive a completion reply from the connector.
+   *
+   * @param state - The state of the editor when completion request was made.
+   *
+   * @param reply - The API response returned for a completion request.
+   */
+  private _onReply(state: Completer.ITextState, reply: CompletionHandler.IReply): void {
+    const model = this.completer.model;
+    const text = state.text;
+
+    if (!model) {
+      return;
+    }
+
+    // Update the original request.
+    model.original = state;
+
+    // Update the options.
+    model.setOptions(reply.matches || []);
+
+    // Update the cursor.
+    model.cursor = {
+      start: Text.charIndexToJsIndex(reply.start, text),
+      end: Text.charIndexToJsIndex(reply.end, text)
+    };
+  }
+
+  private _connector: IDataConnector<CompletionHandler.IReply, void, CompletionHandler.IRequest>;
   private _editor: CodeEditor.IEditor | null = null;
   private _enabled = false;
   private _pending = 0;
@@ -414,9 +418,56 @@ namespace CompletionHandler {
     completer: Completer;
 
     /**
-     * The session for the completion handler.
+     * The data connector used to populate completion requests.
+     *
+     * #### Notes
+     * The only method of this connector that will ever be called is `fetch`, so
+     * it is acceptable for the other methods to be simple functions that return
+     * rejected promises.
      */
-    session: IClientSession;
+    connector: IDataConnector<IReply, void, IRequest>;
+  }
+
+  /**
+   * A reply to a completion request.
+   */
+  export
+  interface IReply {
+    /**
+     * The starting index for the substring being replaced by completion.
+     */
+    start: number;
+
+    /**
+     * The end index for the substring being replaced by completion.
+     */
+    end: number;
+
+    /**
+     * A list of matching completion strings.
+     */
+    matches: string[];
+
+    /**
+     * Any metadata that accompanies the completion reply.
+     */
+    metadata: ReadonlyJSONObject;
+  }
+
+  /**
+   * The details of a completion request.
+   */
+  export
+  interface IRequest {
+    /**
+     * The cursor offset position within the text being completed.
+     */
+    offset: number;
+
+    /**
+     * The text being completed.
+     */
+    text: string;
   }
 
   /**

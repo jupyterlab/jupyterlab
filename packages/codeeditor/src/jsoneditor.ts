@@ -23,7 +23,7 @@ import {
 
 import {
   CodeEditor
-} from '.';
+} from './editor';
 
 
 /**

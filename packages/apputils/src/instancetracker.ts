@@ -306,22 +306,20 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * respective widgets.
    */
   restore(options: InstanceTracker.IRestoreOptions<T>): Promise<any> {
+    const { command, registry, state, when } = options;
+    const namespace = this.namespace;
+    const promises = when ? [state.fetchNamespace(namespace)].concat(when)
+      : [state.fetchNamespace(namespace)];
+
     this._restore = options;
-
-    let { command, registry, state, when } = options;
-    let namespace = this.namespace;
-    let promises = [state.fetchNamespace(namespace)];
-
-    if (when) {
-      promises = promises.concat(when);
-    }
 
     return Promise.all(promises).then(([saved]) => {
       return Promise.all(saved.map(item => {
-        let args = (item.value as any).data;
+        const { id, value } = item;
+        const args = (value as any).data;
+
         // Execute the command and if it fails, delete the state restore data.
-        return registry.execute(command, args)
-          .catch(() => { state.remove(item.id); });
+        return registry.execute(command, args).catch(() => state.remove(id));
       }));
     });
   }
@@ -332,15 +330,16 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * @param widget - The widget being saved.
    */
   save(widget: T): void {
-    let injected = Private.injectedProperty.get(widget);
+    const injected = Private.injectedProperty.get(widget);
+
     if (!this._restore || !this.has(widget) || injected) {
       return;
     }
 
-    let { state } = this._restore;
-    let widgetName = this._restore.name(widget);
-    let oldName = Private.nameProperty.get(widget);
-    let newName = widgetName ? `${this.namespace}:${widgetName}` : '';
+    const { state } = this._restore;
+    const widgetName = this._restore.name(widget);
+    const oldName = Private.nameProperty.get(widget);
+    const newName = widgetName ? `${this.namespace}:${widgetName}` : '';
 
     if (oldName && oldName !== newName) {
       state.remove(oldName);
@@ -350,7 +349,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     Private.nameProperty.set(widget, newName);
 
     if (newName) {
-      let data = this._restore.args(widget);
+      const data = this._restore.args(widget);
       state.save(newName, { data });
     }
 
@@ -375,6 +374,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     if (args.newValue === this._currentWidget) {
       return;
     }
+
     this._currentWidget = args.newValue;
     this.onCurrentChanged(args.newValue);
     this._currentChanged.emit(args.newValue);
@@ -384,7 +384,8 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * Clean up after disposed widgets.
    */
   private _onWidgetDisposed(widget: T): void {
-    let injected = Private.injectedProperty.get(widget);
+    const injected = Private.injectedProperty.get(widget);
+
     if (injected) {
       return;
     }
@@ -392,7 +393,7 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
     // Handle widget removal.
     ArrayExt.removeFirstOf(this._widgets, widget);
 
-    // Handle a current changed.
+    // Handle the current widget being disposed.
     if (widget === this._currentWidget) {
       this._currentWidget = (
         this._tracker.currentWidget ||
@@ -403,11 +404,11 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
       this.onCurrentChanged(this._currentWidget);
     }
 
+    // If there is no restore data, return.
     if (!this._restore) {
       return;
     }
 
-    // If restore data was saved, delete it from the database.
     const { state } = this._restore;
     const name = Private.nameProperty.get(widget);
 

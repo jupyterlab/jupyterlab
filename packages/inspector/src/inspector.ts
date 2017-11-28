@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  Toolbar, ToolbarButton
+} from '@jupyterlab/apputils';
+
+import {
   Token
 } from '@phosphor/coreutils';
 
@@ -18,16 +22,8 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  PanelLayout, TabPanel
+  PanelLayout, TabPanel, Widget
 } from '@phosphor/widgets';
-
-import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
-  Toolbar, ToolbarButton
-} from '@jupyterlab/apputils';
 
 
 /**
@@ -210,7 +206,7 @@ class InspectorPanel extends TabPanel implements IInspector {
     }
 
     // Clear the inspector child items (but maintain history) if necessary.
-    Object.keys(this._items).forEach(i => this._items[i].content = null);
+    Object.keys(this._items).forEach(i => { this._items[i].content = null; });
 
     this._source = source;
 

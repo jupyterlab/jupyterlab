@@ -120,6 +120,10 @@
   version "0.0.51"
   resolved "https://registry.npmjs.org/@types/codemirror/-/codemirror-0.0.51.tgz#2755675a67572d2339bdff2c73a7bc5b9003deff"
 
+"@types/comment-json@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.npmjs.org/@types/comment-json/-/comment-json-1.1.0.tgz#60457bdeab1d6e697ad9cdda275dc3d0b6a5278c"
+
 "@types/d3-dsv@~1.0.30":
   version "1.0.31"
   resolved "https://registry.npmjs.org/@types/d3-dsv/-/d3-dsv-1.0.31.tgz#468302f18ac44db2a3944086388d862503ab9c6c"
@@ -1223,6 +1227,12 @@ commander@2.9.0:
   dependencies:
     graceful-readlink ">= 1.0.0"
 
+comment-json@^1.1.3:
+  version "1.1.3"
+  resolved "https://registry.npmjs.org/comment-json/-/comment-json-1.1.3.tgz#6986c3330fee0c4c9e00c2398cd61afa5d8f239e"
+  dependencies:
+    json-parser "^1.0.0"
+
 compare-func@^1.3.1:
   version "1.3.2"
   resolved "https://registry.npmjs.org/compare-func/-/compare-func-1.3.2.tgz#99dd0ba457e1f9bc722b12c08ec33eeab31fa648"
@@ -2144,7 +2154,7 @@ esprima@2.5.x:
   version "2.5.0"
   resolved "https://registry.npmjs.org/esprima/-/esprima-2.5.0.tgz#f387a46fd344c1b1a39baf8c20bfb43b6d0058cc"
 
-esprima@2.7.x, esprima@^2.6.0, esprima@^2.7.1:
+esprima@2.7.x, esprima@^2.6.0, esprima@^2.7.0, esprima@^2.7.1:
   version "2.7.3"
   resolved "https://registry.npmjs.org/esprima/-/esprima-2.7.3.tgz#96e3b70d5779f6ad49cd032673d1c312767ba581"
 
@@ -3351,6 +3361,12 @@ json-loader@^0.5.4, json-loader@~0.5.7:
 json-parse-better-errors@^1.0.0, json-parse-better-errors@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npmjs.org/json-parse-better-errors/-/json-parse-better-errors-1.0.1.tgz#50183cd1b2d25275de069e9e71b467ac9eab973a"
+
+json-parser@^1.0.0:
+  version "1.1.5"
+  resolved "https://registry.npmjs.org/json-parser/-/json-parser-1.1.5.tgz#e62ec5261d1a6a5fc20e812a320740c6d9005677"
+  dependencies:
+    esprima "^2.7.0"
 
 json-schema-traverse@^0.3.0:
   version "0.3.1"

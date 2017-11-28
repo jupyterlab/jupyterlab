@@ -5,11 +5,12 @@
 
 
 :root {
-  --jp-private-settingeditor-banner-height: 24px;
+  --jp-private-settingeditor-debug-height: 28px;
   --jp-private-settingeditor-key-width: 150px;
   --jp-private-settingeditor-legend-height: 16px;
   --jp-private-settingeditor-row-height: 16px;
   --jp-private-settingeditor-switcher-height: 32px;
+  --jp-private-settingeditor-toolbar-height: 28px;
   --jp-private-settingeditor-type-width: 75px;
 }
 
@@ -168,26 +169,45 @@
 }
 
 
-#setting-editor .jp-SettingsRawEditor .jp-SettingsRawEditor-banner {
+#setting-editor .jp-SettingsRawEditor .jp-Toolbar {
   color: var(--jp-ui-font-color0);
   font-size: var(--jp-ui-font-size1);
-  height: var(--jp-private-settingeditor-banner-height);
-  max-height: var(--jp-private-settingeditor-banner-height);
-  padding-top: 5px;
-  text-align: center;
+  height: var(--jp-private-settingeditor-toolbar-height);
+  max-height: var(--jp-private-settingeditor-toolbar-height);
 }
 
 
-#setting-editor .jp-SettingsRawEditor .jp-JSONEditor-host {
-  background-color: var(--jp-layout-color1);
-  overflow: auto;
+#setting-editor .jp-SettingsRawEditor .jp-Toolbar-item {
+  margin-top: 2px;
 }
 
 
-#setting-editor .jp-SettingsRawEditor .jp-JSONEditor-header {
+#setting-editor .jp-SettingsRawEditor.jp-mod-error .jp-Toolbar-item.jp-BugIcon::after {
+  color: red;
+  content: "\25CF"; /* Unicode circle character (error dot) */
+  font-size: 7px;
+  width: 100%;
+  height: 100%;
   position: absolute;
-  right: 0;
-  z-index: 9999;
+  top: 4px;
+  left: 6px;
+}
+
+
+#setting-editor .jp-SettingsRawEditor .jp-Inspector {
+  border-top: 2px solid var(--jp-layout-color2);
+  max-height: var(--jp-private-settingeditor-debug-height);
+}
+
+
+#setting-editor .jp-SettingsRawEditor .jp-InspectorItem.jp-SettingsDebug .jp-RenderedHTMLCommon {
+  padding: 2px 5px 2px 0;
+  width: 100%;
+}
+
+
+#setting-editor .jp-SettingsRawEditor .jp-InspectorItem.jp-SettingsDebug .jp-RenderedHTMLCommon p {
+  text-align: right;
 }
 
 

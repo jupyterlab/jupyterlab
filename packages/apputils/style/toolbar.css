@@ -53,7 +53,7 @@
 }
 
 
-.jp-Toolbar-button:hover {
+.jp-Toolbar-button:enabled:hover {
   border: 1px solid var(--jp-border-color1);
   background-color: var(--jp-layout-color1);
   box-shadow: 0px 0px 2px 0px rgba(0,0,0,0.24);

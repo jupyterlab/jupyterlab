@@ -23,7 +23,7 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
-  CompleterModel, Completer, CompletionHandler
+  CompleterModel, Completer, CompletionHandler, KernelConnector
 } from '@jupyterlab/completer';
 
 import {
@@ -131,7 +131,8 @@ function createApp(manager: ServiceManager.IManager): void {
   const editor = nbWidget.notebook.activeCell && nbWidget.notebook.activeCell.editor;
   const model = new CompleterModel();
   const completer = new Completer({ editor, model });
-  const handler = new CompletionHandler({ completer, session: nbWidget.session });
+  const connector = new KernelConnector({ session: nbWidget.session });
+  const handler = new CompletionHandler({ completer, connector });
 
   // Set the handler's editor.
   handler.editor = editor;

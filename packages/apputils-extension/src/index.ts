@@ -13,7 +13,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IDataConnector, ISettingRegistry, IStateDB, SettingRegistry, StateDB
+  DataConnector, ISettingRegistry, IStateDB, SettingRegistry, StateDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -49,58 +49,56 @@ namespace CommandIDs {
 
 
 /**
- * Convert an API `XMLHTTPRequest` error to a simple error.
+ * A data connector to access plugin settings.
  */
-function apiError(id: string, xhr: XMLHttpRequest): Error {
-  let message: string;
-
-  try {
-    message = JSON.parse(xhr.response).message;
-  } catch (error) {
-    message = `Error accessing ${id} HTTP ${xhr.status} ${xhr.statusText}`;
+class SettingsConnector extends DataConnector<ISettingRegistry.IPlugin, string> {
+  /**
+   * Create a new settings connector.
+   */
+  constructor(manager: ServiceManager) {
+    super();
+    this._manager = manager;
   }
 
-  return new Error(message);
-}
+  /**
+   * Retrieve a saved bundle from the data connector.
+   */
+  fetch(id: string): Promise<ISettingRegistry.IPlugin> {
+    return this._manager.settings.fetch(id).then(data => {
+      // Replace the server ID with the original unmodified version.
+      data.id = id;
 
+      return data;
+    }).catch(reason => {
+      throw this._error(id, (reason as ServerConnection.IError).xhr);
+    });
+  }
 
-/**
- * Create a data connector to access plugin settings.
- */
-function newConnector(manager: ServiceManager): IDataConnector<ISettingRegistry.IPlugin, JSONObject> {
-  return {
-    /**
-     * Retrieve a saved bundle from the data connector.
-     */
-    fetch(id: string): Promise<ISettingRegistry.IPlugin> {
-      return manager.settings.fetch(id).then(data => {
-        // Replace the server ID with the original unmodified version.
-        data.id = id;
+  /**
+   * Save the user setting data in the data connector.
+   */
+  save(id: string, raw: string): Promise<void> {
+    return this._manager.settings.save(id, raw).catch(reason => {
+      throw this._error(id, (reason as ServerConnection.IError).xhr);
+    });
+  }
 
-        return data;
-      }).catch(reason => {
-        throw apiError(id, (reason as ServerConnection.IError).xhr);
-      });
-    },
+  /**
+   * Convert an API `XMLHTTPRequest` error to a simple error.
+   */
+  private _error(id: string, xhr: XMLHttpRequest): Error {
+    let message: string;
 
-    /**
-     * Remove a value from the data connector.
-     */
-    remove(): Promise<void> {
-      const message = 'Removing setting resources is not supported.';
-
-      return Promise.reject(new Error(message));
-    },
-
-    /**
-     * Save the user setting data in the data connector.
-     */
-    save(id: string, user: JSONObject): Promise<void> {
-      return manager.settings.save(id, user).catch(reason => {
-        throw apiError(id, (reason as ServerConnection.IError).xhr);
-      });
+    try {
+      message = JSON.parse(xhr.response).message;
+    } catch (error) {
+      message = `Error accessing ${id} HTTP ${xhr.status} ${xhr.statusText}`;
     }
-  };
+
+    return new Error(message);
+  }
+
+  private _manager: ServiceManager;
 }
 
 
@@ -145,7 +143,9 @@ const palette: JupyterLabPlugin<ICommandPalette> = {
 const settings: JupyterLabPlugin<ISettingRegistry> = {
   id: '@jupyterlab/apputils-extension:settings',
   activate: (app: JupyterLab): ISettingRegistry => {
-    return new SettingRegistry({ connector: newConnector(app.serviceManager) });
+    const connector = new SettingsConnector(app.serviceManager);
+
+    return new SettingRegistry({ connector });
   },
   autoStart: true,
   provides: ISettingRegistry

@@ -93,6 +93,7 @@
 .jp-InspectorItem-content {
   overflow: auto;
   padding: 8px;
+  width: 100%;
 }
 
 

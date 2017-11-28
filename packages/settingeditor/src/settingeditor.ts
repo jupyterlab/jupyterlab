@@ -12,12 +12,24 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
+  RenderMime
+} from '@jupyterlab/rendermime';
+
+import {
+  CommandRegistry
+} from '@phosphor/commands';
+
+import {
   JSONExt, JSONObject, JSONValue
 } from '@phosphor/coreutils';
 
 import {
   Message
 } from '@phosphor/messaging';
+
+import {
+  ISignal
+} from '@phosphor/signaling';
 
 import {
   h, VirtualDOM
@@ -109,7 +121,7 @@ class SettingEditor extends Widget {
     this.key = options.key;
     this.state = options.state;
 
-    const editorFactory = options.editorFactory;
+    const { commands, editorFactory, rendermime } = options;
     const layout = this.layout = new PanelLayout();
     const registry = this.registry = options.registry;
     const panel = this._panel = new SplitPanel({
@@ -120,7 +132,9 @@ class SettingEditor extends Widget {
     const instructions = this._instructions = new Widget({
       node: Private.createInstructionsNode()
     });
-    const editor = this._editor = new PluginEditor({ editorFactory });
+    const editor = this._editor = new PluginEditor({
+      commands, editorFactory, registry, rendermime
+    });
     const confirm = () => editor.confirm();
     const list = this._list = new PluginList({ confirm, registry });
     const when = options.when;
@@ -145,7 +159,7 @@ class SettingEditor extends Widget {
   readonly key: string;
 
   /**
-   * The setting registry modified by the editor.
+   * The setting registry used by the editor.
    */
   readonly registry: ISettingRegistry;
 
@@ -153,6 +167,48 @@ class SettingEditor extends Widget {
    * The state database used to store layout.
    */
   readonly state: IStateDB;
+
+  /**
+   * Whether the raw editor revert functionality is enabled.
+   */
+  get canRevertRaw(): boolean {
+    return this._editor.raw.canRevert;
+  }
+
+  /**
+   * Whether the raw editor save functionality is enabled.
+   */
+  get canSaveRaw(): boolean {
+    return this._editor.raw.canSave;
+  }
+
+  /**
+   * Emits when the commands passed in at instantiation change.
+   */
+  get commandsChanged(): ISignal<any, string[]> {
+    return this._editor.raw.commandsChanged;
+  }
+
+  /**
+   * Whether the debug panel is visible.
+   */
+  get isDebugVisible(): boolean {
+    return this._editor.raw.isDebugVisible;
+  }
+
+  /**
+   * The currently loaded settings.
+   */
+  get settings(): ISettingRegistry.ISettings {
+    return this._editor.settings;
+  }
+
+  /**
+   * The inspectable raw user editor source for the currently loaded settings.
+   */
+  get source(): CodeEditor.IEditor {
+    return this._editor.raw.source;
+  }
 
   /**
    * Dispose of the resources held by the setting editor.
@@ -167,6 +223,27 @@ class SettingEditor extends Widget {
     this._instructions.dispose();
     this._list.dispose();
     this._panel.dispose();
+  }
+
+  /**
+   * Revert raw editor back to original settings.
+   */
+  revert(): void {
+    this._editor.raw.revert();
+  }
+
+  /**
+   * Save the contents of the raw editor.
+   */
+  save(): Promise<void> {
+    return this._editor.raw.save();
+  }
+
+  /**
+   * Toggle the debug functionality.
+   */
+  toggleDebug(): void {
+    this._editor.raw.toggleDebug();
   }
 
   /**
@@ -336,6 +413,31 @@ namespace SettingEditor {
   export
   interface IOptions {
     /**
+     * The toolbar commands and registry for the setting editor toolbar.
+     */
+    commands: {
+      /**
+       * The command registry.
+       */
+      registry: CommandRegistry;
+
+      /**
+       * The debug command ID.
+       */
+      debug: string;
+
+      /**
+       * The revert command ID.
+       */
+      revert: string;
+
+      /**
+       * The save command ID.
+       */
+      save: string;
+    };
+
+    /**
      * The editor factory used by the setting editor.
      */
     editorFactory: CodeEditor.Factory;
@@ -349,6 +451,11 @@ namespace SettingEditor {
      * The setting registry the editor modifies.
      */
     registry: ISettingRegistry;
+
+    /**
+     * The optional MIME renderer to use for rendering debug messages.
+     */
+    rendermime?: RenderMime;
 
     /**
      * The state database used to store layout.
@@ -410,6 +517,9 @@ namespace Private {
       h.span({ className: INSTRUCTIONS_TEXT_CLASS }, INSTRUCTIONS_TEXT)));
   }
 
+  /**
+   * Return a normalized restored layout state that defaults to the presets.
+   */
   export
   function normalizeState(saved: JSONObject | null, current: SettingEditor.ILayoutState): SettingEditor.ILayoutState {
     if (!saved) {
@@ -441,6 +551,9 @@ namespace Private {
     return saved as SettingEditor.ILayoutState;
   }
 
+  /**
+   * Tests whether an array consists exclusively of numbers.
+   */
   function numberArray(value: JSONValue): boolean {
     return Array.isArray(value) && value.every(x => typeof x === 'number');
   }

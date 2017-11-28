@@ -29,7 +29,7 @@ import {
 
 import {
   ApplicationShell
-} from '.';
+} from './shell';
 
 
 

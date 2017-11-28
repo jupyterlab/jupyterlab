@@ -1,3 +1,7 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
 
 import {
   Dialog, showDialog
@@ -10,6 +14,14 @@ import {
 import {
   ISettingRegistry
 } from '@jupyterlab/coreutils';
+
+import {
+  RenderMime
+} from '@jupyterlab/rendermime';
+
+import {
+  CommandRegistry
+} from '@phosphor/commands';
 
 import {
   JSONExt
@@ -53,22 +65,36 @@ export
 class PluginEditor extends Widget {
   /**
    * Create a new plugin editor.
+   *
+   * @param options - The plugin editor instantiation options.
    */
   constructor(options: PluginEditor.IOptions) {
     super();
     this.addClass(PLUGIN_EDITOR_CLASS);
 
-    const { editorFactory } = options;
+    const { commands, editorFactory, registry, rendermime } = options;
     const layout = this.layout = new StackedLayout();
     const { onSaveError } = Private;
 
-    this._rawEditor = new RawEditor({ editorFactory, onSaveError });
-    this._tableEditor = new TableEditor({ onSaveError });
+    this.raw = this._rawEditor = new RawEditor({
+      commands, editorFactory, onSaveError, registry, rendermime
+    });
+    this.table = this._tableEditor = new TableEditor({ onSaveError });
     this._rawEditor.handleMoved.connect(this._onStateChanged, this);
 
     layout.addWidget(this._rawEditor);
     layout.addWidget(this._tableEditor);
   }
+
+  /**
+   * The plugin editor's raw editor.
+   */
+  readonly raw: RawEditor;
+
+  /**
+   * The plugin editor's table editor.
+   */
+  readonly table: TableEditor;
 
   /**
    * Tests whether the settings have been modified and need saving.
@@ -206,9 +232,44 @@ namespace PluginEditor {
   export
   interface IOptions {
     /**
+     * The toolbar commands and registry for the setting editor toolbar.
+     */
+    commands: {
+      /**
+       * The command registry.
+       */
+      registry: CommandRegistry;
+
+      /**
+       * The debug command ID.
+       */
+      debug: string;
+
+      /**
+       * The revert command ID.
+       */
+      revert: string;
+
+      /**
+       * The save command ID.
+       */
+      save: string;
+    };
+
+    /**
      * The editor factory used by the plugin editor.
      */
     editorFactory: CodeEditor.Factory;
+
+    /**
+     * The setting registry used by the editor.
+     */
+    registry: ISettingRegistry;
+
+    /**
+     * The optional MIME renderer to use for rendering debug messages.
+     */
+    rendermime?: RenderMime;
   }
 }
 

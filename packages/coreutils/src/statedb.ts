@@ -2,12 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ReadonlyJSONObject, Token
+  ReadonlyJSONValue, Token
 } from '@phosphor/coreutils';
 
 import {
   IDataConnector
-} from '.';
+} from './interfaces';
 
 
 /* tslint:disable */
@@ -32,7 +32,7 @@ interface IStateItem {
   /**
    * The data value for a state item.
    */
-  value: ReadonlyJSONObject;
+  value: ReadonlyJSONValue;
 }
 
 
@@ -40,7 +40,7 @@ interface IStateItem {
  * The description of a state database.
  */
 export
-interface IStateDB extends IDataConnector<ReadonlyJSONObject> {
+interface IStateDB extends IDataConnector<ReadonlyJSONValue> {
   /**
    * The maximum allowed length of the data after it has been serialized.
    */
@@ -111,13 +111,16 @@ class StateDB implements IStateDB {
   clear(): Promise<void> {
     const prefix = `${this.namespace}:`;
     let i = window.localStorage.length;
+
     while (i) {
       let key = window.localStorage.key(--i);
+
       if (key && key.indexOf(prefix) === 0) {
         window.localStorage.removeItem(key);
       }
     }
-    return Promise.resolve(void 0);
+
+    return Promise.resolve(undefined);
   }
 
   /**
@@ -137,14 +140,18 @@ class StateDB implements IStateDB {
    * The promise returned by this method may be rejected if an error occurs in
    * retrieving the data. Non-existence of an `id` will succeed with `null`.
    */
-  fetch(id: string): Promise<ReadonlyJSONObject | undefined> {
+  fetch(id: string): Promise<ReadonlyJSONValue | undefined> {
     const key = `${this.namespace}:${id}`;
     const value = window.localStorage.getItem(key);
+
     if (!value) {
       return Promise.resolve(undefined);
     }
+
     try {
-      return Promise.resolve(JSON.parse(value));
+      const envelope = JSON.parse(value) as Private.Envelope;
+
+      return Promise.resolve(envelope.v);
     } catch (error) {
       return Promise.reject(error);
     }
@@ -171,14 +178,19 @@ class StateDB implements IStateDB {
     const regex = new RegExp(`^${this.namespace}\:`);
     let items: IStateItem[] = [];
     let i = window.localStorage.length;
+
     while (i) {
       let key = window.localStorage.key(--i);
+
       if (key && key.indexOf(prefix) === 0) {
         let value = window.localStorage.getItem(key);
+
         try {
+          let envelope = JSON.parse(value) as Private.Envelope;
+
           items.push({
             id: key.replace(regex, ''),
-            value: value ? JSON.parse(value) : undefined
+            value: envelope ? envelope.v : undefined
           });
         } catch (error) {
           console.warn(error);
@@ -186,6 +198,7 @@ class StateDB implements IStateDB {
         }
       }
     }
+
     return Promise.resolve(items);
   }
 
@@ -198,7 +211,8 @@ class StateDB implements IStateDB {
    */
   remove(id: string): Promise<void> {
     window.localStorage.removeItem(`${this.namespace}:${id}`);
-    return Promise.resolve(void 0);
+
+    return Promise.resolve(undefined);
   }
 
   /**
@@ -217,17 +231,21 @@ class StateDB implements IStateDB {
    * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
    * using the `fetchNamespace()` method.
    */
-  save(id: string, value: ReadonlyJSONObject): Promise<void> {
+  save(id: string, value: ReadonlyJSONValue): Promise<void> {
     try {
       const key = `${this.namespace}:${id}`;
-      const serialized = JSON.stringify(value);
+      const envelope: Private.Envelope = { v: value };
+      const serialized = JSON.stringify(envelope);
       const length = serialized.length;
       const max = this.maxLength;
+
       if (length > max) {
         throw new Error(`Data length (${length}) exceeds maximum (${max})`);
       }
+
       window.localStorage.setItem(key, serialized);
-      return Promise.resolve(void 0);
+
+      return Promise.resolve(undefined);
     } catch (error) {
       return Promise.reject(error);
     }
@@ -249,4 +267,16 @@ namespace StateDB {
      */
     namespace: string;
   }
+}
+
+
+/*
+ * A namespace for private module data.
+ */
+namespace Private {
+  /**
+   * An envelope around a JSON value stored in the state database.
+   */
+  export
+  type Envelope = { readonly v: ReadonlyJSONValue };
 }

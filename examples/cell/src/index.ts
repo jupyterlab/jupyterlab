@@ -18,7 +18,7 @@ import {
 } from '@jupyterlab/codemirror';
 
 import {
-  CompleterModel, Completer, CompletionHandler
+  CompleterModel, Completer, CompletionHandler, KernelConnector
 } from '@jupyterlab/completer';
 
 import {
@@ -39,13 +39,13 @@ import {
 
 
 function main(): void {
-  let manager = new SessionManager();
-  let session = new ClientSession({ manager, name: 'Example' });
-  let mimeService = new CodeMirrorMimeTypeService();
+  const manager = new SessionManager();
+  const session = new ClientSession({ manager, name: 'Example' });
+  const mimeService = new CodeMirrorMimeTypeService();
 
   // Initialize the command registry with the bindings.
-  let commands = new CommandRegistry();
-  let useCapture = true;
+  const commands = new CommandRegistry();
+  const useCapture = true;
 
   // Setup the keydown listener for the document.
   document.addEventListener('keydown', event => {
@@ -53,11 +53,11 @@ function main(): void {
   }, useCapture);
 
   // Create the cell widget with a default rendermime instance.
-  let rendermime = new RenderMime({
+  const rendermime = new RenderMime({
     initialFactories: defaultRendererFactories
   });
 
-  let cellWidget = new CodeCell({
+  const cellWidget = new CodeCell({
     rendermime,
     model: new CodeCellModel({})
   });
@@ -65,8 +65,8 @@ function main(): void {
   // Handle the mimeType for the current kernel.
   session.kernelChanged.connect(() => {
     session.kernel.ready.then(() => {
-      let lang = session.kernel.info.language_info;
-      let mimeType = mimeService.getMimeTypeByLanguage(lang);
+      const lang = session.kernel.info.language_info;
+      const mimeType = mimeService.getMimeTypeByLanguage(lang);
       cellWidget.model.mimeType = mimeType;
     });
   });
@@ -79,7 +79,8 @@ function main(): void {
   const editor = cellWidget.editor;
   const model = new CompleterModel();
   const completer = new Completer({ editor, model });
-  const handler = new CompletionHandler({ completer, session });
+  const connector = new KernelConnector({ session });
+  const handler = new CompletionHandler({ completer, connector });
 
   // Set the handler's editor.
   handler.editor = editor;
@@ -96,7 +97,7 @@ function main(): void {
   toolbar.addItem('status', Toolbar.createKernelStatusItem(session));
 
   // Lay out the widgets.
-  let panel = new BoxPanel();
+  const panel = new BoxPanel();
   panel.id = 'main';
   panel.direction = 'top-to-bottom';
   panel.spacing = 0;

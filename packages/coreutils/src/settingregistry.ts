@@ -3,12 +3,14 @@
 
 import * as Ajv from 'ajv';
 
+import * as json from 'comment-json';
+
 import {
   find
 } from '@phosphor/algorithm';
 
 import {
-  JSONExt, JSONObject, JSONValue, Token
+  JSONExt, JSONObject, JSONValue, ReadonlyJSONObject, Token
 } from '@phosphor/coreutils';
 
 import {
@@ -48,30 +50,18 @@ const copy = JSONExt.deepCopy;
 export
 interface ISchemaValidator {
   /**
-   * Add a schema to the validator.
-   *
-   * @param plugin - The plugin ID.
-   *
-   * @param schema - The schema being added.
-   *
-   * @return A list of errors if the schema fails to validate or `null` if there
-   * are no errors.
-   *
-   * #### Notes
-   * It is safe to call this function multiple times with the same plugin name.
-   */
-  addSchema(plugin: string, schema: ISettingRegistry.ISchema): ISchemaValidator.IError[] | null;
-
-  /**
    * Validate a plugin's schema and user data; populate the `composite` data.
    *
    * @param plugin - The plugin being validated. Its `composite` data will be
    * populated by reference.
    *
+   * @param populate - Whether plugin data should be populated, defaults to
+   * `true`.
+   *
    * @return A list of errors if either the schema or data fail to validate or
    * `null` if there are no errors.
    */
-  validateData(plugin: ISettingRegistry.IPlugin): ISchemaValidator.IError[] | null;
+  validateData(plugin: ISettingRegistry.IPlugin, populate?: boolean): ISchemaValidator.IError[] | null;
 }
 
 
@@ -99,6 +89,11 @@ namespace ISchemaValidator {
      * The error message.
      */
     message: string;
+
+    /**
+     * Optional parameter metadata that might be included in an error.
+     */
+    params?: ReadonlyJSONObject;
 
     /**
      * The path in the schema where the error occurred.
@@ -136,6 +131,11 @@ namespace ISettingRegistry {
      * The collection of values for a specified setting.
      */
     data: ISettingBundle;
+
+    /**
+     * The raw user settings data as a string containing JSON with comments.
+     */
+    raw: string;
 
     /**
      * The JSON schema for the plugin.
@@ -244,6 +244,11 @@ namespace ISettingRegistry {
     readonly plugin: string;
 
     /**
+     * The plugin settings raw text value.
+     */
+    readonly raw: string;
+
+    /**
      * Get the plugin settings schema.
      */
     readonly schema: ISettingRegistry.ISchema;
@@ -291,7 +296,7 @@ namespace ISettingRegistry {
     /**
      * Save all of the plugin's user settings at once.
      */
-    save(user: JSONObject): Promise<void>;
+    save(raw: string): Promise<void>;
 
     /**
      * Set a single setting.
@@ -306,6 +311,15 @@ namespace ISettingRegistry {
      * This function is asynchronous because it writes to the setting registry.
      */
     set(key: string, value: JSONValue): Promise<void>;
+
+    /**
+     * Validates raw settings with comments.
+     *
+     * @param raw - The JSON with comments string being validated.
+     *
+     * @returns A list of errors or `null` if valid.
+     */
+    validate(raw: string): ISchemaValidator.IError[] | null;
   }
 }
 
@@ -331,6 +345,74 @@ class DefaultSchemaValidator implements ISchemaValidator {
   }
 
   /**
+   * Validate a plugin's schema and user data; populate the `composite` data.
+   *
+   * @param plugin - The plugin being validated. Its `composite` data will be
+   * populated by reference.
+   *
+   * @param populate - Whether plugin data should be populated, defaults to
+   * `true`.
+   *
+   * @return A list of errors if either the schema or data fail to validate or
+   * `null` if there are no errors.
+   */
+  validateData(plugin: ISettingRegistry.IPlugin, populate = true): ISchemaValidator.IError[] | null {
+    const validate = this._validator.getSchema(plugin.id);
+    const compose = this._composer.getSchema(plugin.id);
+
+    // If the schemas do not exist, add them to the validator and continue.
+    if (!validate || !compose) {
+      const errors = this._addSchema(plugin.id, plugin.schema);
+
+      if (errors) {
+        return errors;
+      }
+
+      return this.validateData(plugin);
+    }
+
+    // Parse the raw commented JSON into a user map.
+    let user: JSONObject;
+    try {
+      const strip = true;
+
+      user = json.parse(plugin.raw, null, strip) as JSONObject;
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        return [{
+          dataPath: '', keyword: 'syntax', schemaPath: '',
+          message: error.message
+        }];
+      }
+
+      const { column, description } = error;
+      const line = error.lineNumber;
+
+      return [{
+        dataPath: '', keyword: 'parse', schemaPath: '',
+        message: `${description} (line ${line} column ${column})`
+      }];
+    }
+
+    if (!validate(user)) {
+      return validate.errors as ISchemaValidator.IError[];
+    }
+
+    // Copy the user data before merging defaults into composite map.
+    const composite = copy(user);
+
+    if (!compose(composite)) {
+      return compose.errors as ISchemaValidator.IError[];
+    }
+
+    if (populate) {
+      plugin.data = { composite, user };
+    }
+
+    return null;
+  }
+
+  /**
    * Add a schema to the validator.
    *
    * @param plugin - The plugin ID.
@@ -343,7 +425,7 @@ class DefaultSchemaValidator implements ISchemaValidator {
    * #### Notes
    * It is safe to call this function multiple times with the same plugin name.
    */
-  addSchema(plugin: string, schema: ISettingRegistry.ISchema): ISchemaValidator.IError[] | null {
+  private _addSchema(plugin: string, schema: ISettingRegistry.ISchema): ISchemaValidator.IError[] | null {
     const composer = this._composer;
     const validator = this._validator;
     const validate = validator.getSchema('main');
@@ -367,42 +449,6 @@ class DefaultSchemaValidator implements ISchemaValidator {
     validator.addSchema(schema, plugin);
 
     return null;
-
-  }
-
-  /**
-   * Validate a plugin's schema and user data; populate the `composite` data.
-   *
-   * @param plugin - The plugin being validated. Its `composite` data will be
-   * populated by reference.
-   *
-   * @return A list of errors if either the schema or data fail to validate or
-   * `null` if there are no errors.
-   */
-  validateData(plugin: ISettingRegistry.IPlugin): ISchemaValidator.IError[] | null {
-    const validate = this._validator.getSchema(plugin.id);
-    const compose = this._composer.getSchema(plugin.id);
-
-    if (!validate || !compose) {
-      const errors = this.addSchema(plugin.id, plugin.schema);
-
-      if (errors) {
-        return errors;
-      }
-    }
-
-    if (!validate(plugin.data.user)) {
-      return validate.errors as ISchemaValidator.IError[];
-    }
-
-    // Copy the user data before validating (and merging defaults).
-    plugin.data.composite = copy(plugin.data.user);
-
-    if (!compose(plugin.data.composite)) {
-      return compose.errors as ISchemaValidator.IError[];
-    }
-
-    return null;
   }
 
   private _composer = new Ajv({ useDefaults: true });
@@ -420,13 +466,18 @@ class SettingRegistry {
    */
   constructor(options: SettingRegistry.IOptions) {
     this._connector = options.connector;
-    this._validator = options.validator || new DefaultSchemaValidator();
+    this.validator = options.validator || new DefaultSchemaValidator();
   }
 
   /**
    * The schema of the setting registry.
    */
   readonly schema = Private.SCHEMA;
+
+  /**
+   * The schema validator used by the setting registry.
+   */
+  readonly validator: ISchemaValidator;
 
   /**
    * A signal that emits the name of a plugin when its settings change.
@@ -460,8 +511,8 @@ class SettingRegistry {
     if (plugin in plugins) {
       const { composite, user } = plugins[plugin].data;
       const result = {
-        composite: key in composite ? copy(composite[key]) : void 0,
-        user: key in user ? copy(user[key]) : void 0
+        composite: key in composite ? copy(composite[key]) : undefined,
+        user: key in user ? copy(user[key]) : undefined
       };
 
       return Promise.resolve(result);
@@ -504,6 +555,7 @@ class SettingRegistry {
   reload(plugin: string): Promise<ISettingRegistry.ISettings> {
     const connector = this._connector;
     const plugins = this._plugins;
+    const registry = this;
 
     // If the plugin needs to be loaded from the connector, fetch.
     return connector.fetch(plugin).then(data => {
@@ -512,6 +564,7 @@ class SettingRegistry {
         this._validate(data);
       } catch (errors) {
         const output = [`Validating ${plugin} failed:`];
+
         (errors as ISchemaValidator.IError[]).forEach((error, index) => {
           const { dataPath, schemaPath, keyword, message } = error;
 
@@ -526,10 +579,7 @@ class SettingRegistry {
       // Emit that a plugin has changed.
       this._pluginChanged.emit(plugin);
 
-      return new Settings({
-        plugin: copy(plugins[plugin]) as ISettingRegistry.IPlugin,
-        registry: this
-      });
+      return new Settings({ plugin: plugins[plugin], registry });
     });
   }
 
@@ -546,10 +596,15 @@ class SettingRegistry {
     const plugins = this._plugins;
 
     if (!(plugin in plugins)) {
-      return Promise.resolve(void 0);
+      return Promise.resolve(undefined);
     }
 
-    delete plugins[plugin].data.user[key];
+    const raw = json.parse(plugins[plugin].raw);
+
+    // Delete both the value and any associated comment.
+    delete raw[key];
+    delete raw[`// ${key}`];
+    plugins[plugin].raw = json.stringify(raw);
 
     return this._save(plugin);
   }
@@ -573,7 +628,9 @@ class SettingRegistry {
       return this.load(plugin).then(() => this.set(plugin, key, value));
     }
 
-    plugins[plugin].data.user[key] = value;
+    const raw = json.parse(plugins[plugin].raw);
+
+    plugins[plugin].raw = json.stringify({ ...raw, [key]: value });
 
     return this._save(plugin);
   }
@@ -581,28 +638,21 @@ class SettingRegistry {
   /**
    * Upload a plugin's settings.
    *
+   * @param plugin - The name of the plugin whose settings are being set.
+   *
    * @param raw - The raw plugin settings being uploaded.
    *
    * @returns A promise that resolves when the settings have been saved.
-   *
-   * #### Notes
-   * Only the `user` data will be saved.
    */
-  upload(raw: ISettingRegistry.IPlugin): Promise<void> {
+  upload(plugin: string, raw: string): Promise<void> {
     const plugins = this._plugins;
-    const plugin = raw.id;
-    let errors: ISchemaValidator.IError[] | null = null;
 
-    // Validate the user data and create the composite data.
-    raw.data.user = raw.data.user || { };
-    delete raw.data.composite;
-    errors = this._validator.validateData(raw);
-    if (errors) {
-      return Promise.reject(errors);
+    if (!(plugin in plugins)) {
+      return this.load(plugin).then(() => this.upload(plugin, raw));
     }
 
     // Set the local copy.
-    plugins[plugin] = raw;
+    plugins[plugin].raw = raw;
 
     return this._save(plugin);
   }
@@ -614,12 +664,21 @@ class SettingRegistry {
     const plugins = this._plugins;
 
     if (!(plugin in plugins)) {
-      return Promise.reject(`${plugin} does not exist in setting registry.`);
+      const message = `${plugin} does not exist in setting registry.`;
+
+      return Promise.reject(new Error(message));
     }
 
-    this._validate(plugins[plugin]);
+    try {
+      this._validate(plugins[plugin]);
+    } catch (errors) {
+      const message = `${plugin} failed to validate; check console for errors.`;
 
-    return this._connector.save(plugin, plugins[plugin].data.user)
+      console.warn(`${plugin} validation errors:`, errors);
+      return Promise.reject(new Error(message));
+    }
+
+    return this._connector.save(plugin, plugins[plugin].raw)
       .then(() => { this._pluginChanged.emit(plugin); });
   }
 
@@ -627,18 +686,9 @@ class SettingRegistry {
    * Validate a plugin's data and schema, compose the `composite` data.
    */
   private _validate(plugin: ISettingRegistry.IPlugin): void {
-    let errors: ISchemaValidator.IError[] | null = null;
-
-    // Add the schema to the registry.
-    errors = this._validator.addSchema(plugin.id, plugin.schema);
-    if (errors) {
-      throw errors;
-    }
-
     // Validate the user data and create the composite data.
-    plugin.data.user = plugin.data.user || { };
-    delete plugin.data.composite;
-    errors = this._validator.validateData(plugin);
+    const errors = this.validator.validateData(plugin);
+
     if (errors) {
       throw errors;
     }
@@ -647,10 +697,9 @@ class SettingRegistry {
     this._plugins[plugin.id] = plugin;
   }
 
-  private _connector: IDataConnector<ISettingRegistry.IPlugin, JSONObject>;
+  private _connector: IDataConnector<ISettingRegistry.IPlugin, string>;
   private _pluginChanged = new Signal<this, string>(this);
   private _plugins: { [name: string]: ISettingRegistry.IPlugin } = Object.create(null);
-  private _validator: ISchemaValidator;
 }
 
 
@@ -669,6 +718,7 @@ class Settings implements ISettingRegistry.ISettings {
     this.registry = options.registry;
 
     this._composite = plugin.data.composite || { };
+    this._raw = plugin.raw || '{ }';
     this._schema = plugin.schema || { type: 'object' };
     this._user = plugin.data.user || { };
 
@@ -701,6 +751,13 @@ class Settings implements ISettingRegistry.ISettings {
    */
   get schema(): ISettingRegistry.ISchema {
     return this._schema;
+  }
+
+  /**
+   * Get the plugin settings raw text value.
+   */
+  get raw(): string {
+    return this._raw;
   }
 
   /**
@@ -765,8 +822,8 @@ class Settings implements ISettingRegistry.ISettings {
     const { composite, user } = this;
 
     return {
-      composite: key in composite ? copy(composite[key]) : void 0,
-      user: key in user ? copy(user[key]) : void 0
+      composite: key in composite ? copy(composite[key]) : undefined,
+      user: key in user ? copy(user[key]) : undefined
     };
   }
 
@@ -787,12 +844,8 @@ class Settings implements ISettingRegistry.ISettings {
   /**
    * Save all of the plugin's user settings at once.
    */
-  save(user: JSONObject): Promise<void> {
-    return this.registry.upload({
-      id: this.plugin,
-      data: { composite: this._composite, user },
-      schema: this._schema
-    });
+  save(raw: string): Promise<void> {
+    return this.registry.upload(this.plugin, raw);
   }
 
   /**
@@ -812,6 +865,22 @@ class Settings implements ISettingRegistry.ISettings {
   }
 
   /**
+   * Validates raw settings with comments.
+   *
+   * @param raw - The JSON with comments string being validated.
+   *
+   * @returns A list of errors or `null` if valid.
+   */
+  validate(raw: string): ISchemaValidator.IError[] | null {
+    const data = { composite: { }, user: { } };
+    const id = this.plugin;
+    const schema = this._schema;
+    const validator = this.registry.validator;
+
+    return validator.validateData({ data, id, raw, schema }, false);
+  }
+
+  /**
    * Handle plugin changes in the setting registry.
    */
   private _onPluginChanged(sender: any, plugin: string): void {
@@ -823,18 +892,20 @@ class Settings implements ISettingRegistry.ISettings {
       }
 
       const { composite, user } = found.data;
-      const schema = found.schema;
+      const { raw, schema } = found;
 
       this._composite = composite || { };
+      this._raw = raw;
       this._schema = schema || { type: 'object' };
       this._user = user || { };
-      this._changed.emit(void 0);
+      this._changed.emit(undefined);
     }
   }
 
   private _changed = new Signal<this, void>(this);
   private _composite: JSONObject = Object.create(null);
   private _isDisposed = false;
+  private _raw = '{ }';
   private _schema: ISettingRegistry.ISchema = Object.create(null);
   private _user: JSONObject = Object.create(null);
 }
@@ -853,7 +924,7 @@ namespace SettingRegistry {
     /**
      * The data connector used by the setting registry.
      */
-    connector: IDataConnector<ISettingRegistry.IPlugin, JSONObject>;
+    connector: IDataConnector<ISettingRegistry.IPlugin, string>;
 
     /**
      * The validator used to enforce the settings JSON schema.
@@ -910,6 +981,11 @@ namespace Private {
   /* tslint:enable */
 
   /**
+   * The default indentation level, uses spaces instead of tabs.
+   */
+  const indent = '    ';
+
+  /**
    * Replacement text for schema properties missing a `description` field.
    */
   const nondescript = '[missing schema description]';
@@ -931,13 +1007,14 @@ namespace Private {
   function annotatedDefaults(schema: ISettingRegistry.ISchema, plugin: string): string {
     const { description, properties, title } = schema;
     const keys = Object.keys(properties).sort((a, b) => a.localeCompare(b));
+    const length = Math.max((description || nondescript).length, plugin.length);
 
     return [
       '{',
       prefix(`${title || untitled}`),
       prefix(plugin),
       prefix(description || nondescript),
-      prefix(line((description || nondescript).length)),
+      prefix(line(length)),
       '',
       keys.map(key => docstring(schema, key)).join('\n\n'),
       '}'
@@ -951,7 +1028,7 @@ namespace Private {
     const { description, title } = schema.properties[key];
     const reified = reifyDefault(schema, key);
     const defaults = reified === undefined ? prefix(`"${key}": ${undefaulted}`)
-      : prefix(`"${key}": ${JSON.stringify(reified, null, 2)}`, '  ');
+      : prefix(`"${key}": ${JSON.stringify(reified, null, 2)}`, indent);
 
     return [
       prefix(`${title || untitled}`),
@@ -970,7 +1047,7 @@ namespace Private {
   /**
    * Returns a documentation string with a comment prefix added on every line.
    */
-  function prefix(source: string, pre = '  \/\/ '): string {
+  function prefix(source: string, pre = `${indent}\/\/ `): string {
     return pre + source.split('\n').join(`\n${pre}`);
   }
 
