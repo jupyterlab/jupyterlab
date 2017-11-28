@@ -57,7 +57,6 @@ class TableEditor extends Widget {
   constructor(options: TableEditor.IOptions) {
     super({ node: document.createElement('fieldset') });
     this.addClass(TABLE_EDITOR_CLASS);
-    this._onSaveError = options.onSaveError;
   }
 
   /**
@@ -106,7 +105,6 @@ class TableEditor extends Widget {
     this.update();
   }
 
-  private _onSaveError: (reason: any) => void;
   private _settings: ISettingRegistry.ISettings | null = null;
 }
 

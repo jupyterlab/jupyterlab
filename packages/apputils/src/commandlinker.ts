@@ -162,9 +162,11 @@ class CommandLinker implements IDisposable {
    * ```
    */
   populateVNodeDataset(command: string, args?: JSONObject): ElementDataset {
-    let dataset = { [COMMAND_ATTR]: command };
+    let dataset: ElementDataset;
     if (args !== void 0) {
-      dataset[ARGS_ATTR] = JSON.stringify(args);
+      dataset = { [ARGS_ATTR]: JSON.stringify(args), [COMMAND_ATTR]: command };
+    } else {
+      dataset = { [COMMAND_ATTR]: command };
     }
     return dataset;
   }

@@ -1764,7 +1764,6 @@ namespace Private {
    */
   export
   function doRename(text: HTMLElement, edit: HTMLInputElement): Promise<string> {
-    let changed = true;
     let parent = text.parentElement as HTMLElement;
     parent.replaceChild(edit, text);
     edit.focus();
@@ -1790,7 +1789,6 @@ namespace Private {
         case 27:  // Escape
           event.stopPropagation();
           event.preventDefault();
-          changed = false;
           edit.blur();
           break;
         case 38:  // Up arrow

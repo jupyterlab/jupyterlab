@@ -32,7 +32,6 @@ class CellList implements IObservableUndoableList<ICellModel> {
    * Construct the cell list.
    */
   constructor(modelDB: IModelDB, factory: NotebookModel.IContentFactory) {
-    this._modelDB = modelDB;
     this._factory = factory;
     this._cellOrder = modelDB.createList<string>('cellOrder');
     this._cellMap = new ObservableMap<ICellModel>();
@@ -504,6 +503,5 @@ class CellList implements IObservableUndoableList<ICellModel> {
   private _cellOrder: IObservableUndoableList<string> = null;
   private _cellMap: IObservableMap<ICellModel> = null;
   private _changed = new Signal<this, IObservableList.IChangedArgs<ICellModel>>(this);
-  private _modelDB: IModelDB = null;
   private _factory: NotebookModel.IContentFactory = null;
 }
