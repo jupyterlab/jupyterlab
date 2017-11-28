@@ -391,6 +391,9 @@ namespace Private {
     return name;
   }
 
+  /**
+   * A utility function that delegates a portion of a label to an IMenuExtender.
+   */
   export
   function delegateLabel<E extends IMenuExtender<Widget>>(app: JupyterLab, map: Map<string, E>, label: keyof E): string {
     let widget = app.shell.currentWidget;
