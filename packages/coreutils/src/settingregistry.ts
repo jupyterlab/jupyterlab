@@ -356,7 +356,7 @@ class DefaultSchemaValidator implements ISchemaValidator {
    * @return A list of errors if either the schema or data fail to validate or
    * `null` if there are no errors.
    */
-  validateData(plugin: ISettingRegistry.IPlugin, populate?: boolean): ISchemaValidator.IError[] | null {
+  validateData(plugin: ISettingRegistry.IPlugin, populate = true): ISchemaValidator.IError[] | null {
     const validate = this._validator.getSchema(plugin.id);
     const compose = this._composer.getSchema(plugin.id);
 
@@ -405,7 +405,7 @@ class DefaultSchemaValidator implements ISchemaValidator {
       return compose.errors as ISchemaValidator.IError[];
     }
 
-    if (populate === undefined ? true : populate) {
+    if (populate) {
       plugin.data = { composite, user };
     }
 
