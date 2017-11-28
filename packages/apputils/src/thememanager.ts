@@ -54,7 +54,6 @@ class ThemeManager {
 
     when.then(() => { this._sealed = true; });
 
-    this._baseUrl = options.baseUrl;
     this._host = options.host;
     this.ready = promises.then(([settings]) => {
       this._settings = settings;
@@ -210,7 +209,6 @@ class ThemeManager {
     }
   }
 
-  private _baseUrl: string;
   private _themes: { [key: string]: ThemeManager.ITheme } = {};
   private _links: HTMLLinkElement[] = [];
   private _host: Widget;
@@ -232,11 +230,6 @@ namespace ThemeManager {
    */
   export
   interface IOptions {
-    /**
-     * The base url for the theme manager.
-     */
-    baseUrl: string;
-
     /**
      * The setting registry key that holds theme setting data.
      */

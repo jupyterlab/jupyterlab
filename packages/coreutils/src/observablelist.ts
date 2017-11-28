@@ -607,10 +607,8 @@ class ObservableList<T> implements IObservableList<T> {
    */
   pushAll(values: IterableOrArrayLike<T>): number {
     let newIndex = this.length;
-    let count = 0;
     each(values, value => {
       this._array.push(value);
-      count++;
     });
     this._changed.emit({
       type: 'add',
@@ -643,10 +641,8 @@ class ObservableList<T> implements IObservableList<T> {
    */
   insertAll(index: number, values: IterableOrArrayLike<T>): void {
     let newIndex = index;
-    let count = 0;
     each(values, value => {
       ArrayExt.insert(this._array, index++, value);
-      count++;
     });
     this._changed.emit({
       type: 'add',

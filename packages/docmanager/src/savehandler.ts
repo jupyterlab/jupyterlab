@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ServiceManager
-} from '@jupyterlab/services';
-
-import {
   IDisposable
 } from '@phosphor/disposable';
 
@@ -30,7 +26,6 @@ class SaveHandler implements IDisposable {
    * Construct a new save handler.
    */
   constructor(options: SaveHandler.IOptions) {
-    this._manager = options.manager;
     this._context = options.context;
     let interval = options.saveInterval || 120;
     this._minInterval = interval * 1000;
@@ -147,7 +142,6 @@ class SaveHandler implements IDisposable {
   private _minInterval = -1;
   private _interval = -1;
   private _context: DocumentRegistry.Context;
-  private _manager: ServiceManager.IManager;
   private _isActive = false;
   private _inDialog = false;
   private _isDisposed = false;
@@ -169,11 +163,6 @@ namespace SaveHandler {
      * The context asssociated with the file.
      */
     context: DocumentRegistry.Context;
-
-    /**
-     * The service manager to use for checking last saved.
-     */
-    manager: ServiceManager.IManager;
 
     /**
      * The minimum save interval in seconds (default is two minutes).

@@ -197,29 +197,6 @@ function objectIncludes(data: JSONValue, query: string): boolean {
   return JSON.stringify(data).includes(query);
 }
 
-function filterObject(data: JSONValue, query: string): JSONValue {
-  if (Array.isArray(data)) {
-    return data.reduce(
-      (result: JSONArray, item: JSONValue) => {
-        if (objectIncludes(item, query)) {
-          return [...result, filterObject(item, query)];
-        }
-        return result;
-      },
-      []
-    );
-  }
-  if (data && typeof data === 'object') {
-    return Object.keys(data).reduce((result: JSONObject, key: string) => {
-      let item = data[key];
-      if (key.includes(query) || objectIncludes(item, query)) {
-        result[key] = filterObject(item, query);
-      }
-      return result;
-    }, {});
-  }
-  return data;
-}
 
 function filterPaths(data: JSONValue, query: string, parent: JSONArray = ['root']): JSONArray {
   if (Array.isArray(data)) {
