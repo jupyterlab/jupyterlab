@@ -2,6 +2,7 @@ var childProcess = require('child_process');
 var fs = require('fs-extra');
 var glob = require('glob');
 var path = require('path');
+var url = require('url');
 
 var basePath = path.resolve('..');
 var baseUrl = 'https://github.com/jupyterlab/jupyterlab/tree/master/packages';
@@ -40,7 +41,7 @@ packages.forEach(function(packagePath) {
   }
 
   // Construct a URL to the package on GitHub.
-  var Url = path.join(baseUrl, path.basename(packagePath));
+  var Url = url.resolve(baseUrl, 'packages/'+path.basename(packagePath));
   
   // Remove the '@jupyterlab' part of the name.
   var name = '"'+data.name.split('/')[1] +'"';
