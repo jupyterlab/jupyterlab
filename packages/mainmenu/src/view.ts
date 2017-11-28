@@ -78,10 +78,12 @@ namespace IViewMenu {
      * Whether line numbers are toggled.
      */
     lineNumbersToggled?: (widget: T) => boolean;
+
     /**
      * Whether word wrap is toggled.
      */
     wordWrapToggled?: (widget: T) => boolean;
+
     /**
      * Whether match brackets is toggled.
      */

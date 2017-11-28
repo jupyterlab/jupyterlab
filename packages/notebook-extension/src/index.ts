@@ -1305,7 +1305,6 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
     redo: widget => { widget.notebook.activeCell.editor.redo(); }
   } as IEditMenu.IUndoer<NotebookPanel>);
 
-    // Add editor view options.
   // Add a clearer to the edit menu
   mainMenu.editMenu.clearers.set('Notebook', {
     tracker,

@@ -383,7 +383,7 @@ class CodeConsole extends Widget {
   protected onAfterAttach(msg: Message): void {
     let node = this.node;
     node.addEventListener('keydown', this, true);
-    node.addEventListener('onclick', this);
+    node.addEventListener('click', this);
     // Create a prompt if necessary.
     if (!this.promptCell) {
       this.newPromptCell();
@@ -399,7 +399,7 @@ class CodeConsole extends Widget {
   protected onBeforeDetach(msg: Message): void {
     let node = this.node;
     node.removeEventListener('keydown', this, true);
-    node.removeEventListener('mousedown', this);
+    node.removeEventListener('click', this);
   }
 
   /**

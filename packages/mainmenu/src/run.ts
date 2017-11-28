@@ -82,7 +82,7 @@ namespace IRunMenu {
     runAbove?: (widget: T) => Promise<void>;
 
     /**
-     * A function to run all code above the currently selected
+     * A function to run all code below the currently selected
      * point (inclusive).
      */
     runBelow?: (widget: T) => Promise<void>;
