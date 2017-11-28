@@ -135,10 +135,4 @@ if [[ $GROUP == other ]]; then
     npm run get:dependency @jupyterlab/buildutils
     npm run get:dependency typescript
     npm run get:dependency react-native 
-
-    # Make sure we can make release assets
-    jlpm run build:static
-    if [ ! -f ./build/release_data.json ]; then
-        echo "jlpm publish in jupyterlab unsucessful!"
-    fi
 fi
