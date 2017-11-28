@@ -87,7 +87,6 @@ class DocumentManager implements IDisposable {
     this.services = options.manager;
 
     this._opener = options.opener;
-    this._modelDBFactory = options.modelDBFactory || null;
 
     let widgetManager = new DocumentWidgetManager({ registry: this.registry });
     widgetManager.activateRequested.connect(this._onActivateRequested, this);
@@ -391,10 +390,7 @@ class DocumentManager implements IDisposable {
       kernelPreference,
       modelDBFactory
     });
-    let handler = new SaveHandler({
-      context,
-      manager: this.services
-    });
+    let handler = new SaveHandler({ context });
     Private.saveHandlerProperty.set(context, handler);
     context.ready.then(() => {
       handler.start();
@@ -482,7 +478,6 @@ class DocumentManager implements IDisposable {
 
   private _activateRequested = new Signal<this, string>(this);
   private _contexts: Private.IContext[] = [];
-  private _modelDBFactory: ModelDB.IFactory | null = null;
   private _opener: DocumentManager.IWidgetOpener;
   private _widgetManager: DocumentWidgetManager;
   private _isDisposed = false;

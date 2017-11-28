@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
  import {
-  URLExt, uuid
+  URLExt
  } from '@jupyterlab/coreutils';
 
 import {
@@ -51,7 +51,6 @@ class DefaultSession implements Session.ISession {
     this._type = options.type || 'file';
     this._name = options.name || '';
     this.serverSettings = options.serverSettings || ServerConnection.makeSettings();
-    this._uuid = uuid();
     Private.addRunning(this);
     this.setupKernel(kernel);
     this.terminated = new Signal<this, void>(this);
@@ -384,7 +383,6 @@ class DefaultSession implements Session.ISession {
   private _name = '';
   private _type = '';
   private _kernel: Kernel.IKernel;
-  private _uuid = '';
   private _isDisposed = false;
   private _updating = false;
   private _kernelChanged = new Signal<this, Kernel.IKernelConnection>(this);

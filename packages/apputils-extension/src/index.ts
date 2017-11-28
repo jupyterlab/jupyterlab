@@ -159,12 +159,11 @@ const themes: JupyterLabPlugin<IThemeManager> = {
   id: '@jupyterlab/apputils-extension:themes',
   requires: [ISettingRegistry, ISplashScreen],
   activate: (app: JupyterLab, settingRegistry: ISettingRegistry, splash: ISplashScreen): IThemeManager => {
-    const baseUrl = app.serviceManager.serverSettings.baseUrl;
     const host = app.shell;
     const when = app.started;
     const manager = new ThemeManager({
       key: themes.id,
-      baseUrl, host, settingRegistry, when
+      host, settingRegistry, when
     });
     const disposable = splash.show();
     const dispose = () => { disposable.dispose(); };

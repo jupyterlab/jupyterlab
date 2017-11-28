@@ -1,0 +1,48 @@
+{
+  "name": "@jupyterlab/fileeditor-extension",
+  "version": "0.12.0",
+  "description": "JupyterLab - Editor Widget Extension",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js.map",
+    "lib/*.js",
+    "schema/*.json"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib",
+    "prepublishOnly": "npm run build",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "@jupyterlab/application": "^0.12.0",
+    "@jupyterlab/apputils": "^0.12.4",
+    "@jupyterlab/codeeditor": "^0.12.0",
+    "@jupyterlab/coreutils": "^0.12.0",
+    "@jupyterlab/fileeditor": "^0.12.0",
+    "@jupyterlab/launcher": "^0.12.0"
+  },
+  "devDependencies": {
+    "rimraf": "~2.6.2",
+    "typescript": "~2.4.2"
+  },
+  "jupyterlab": {
+    "extension": true,
+    "schemaDir": "schema"
+  }
+}

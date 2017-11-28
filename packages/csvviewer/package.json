@@ -44,6 +44,6 @@
   "devDependencies": {
     "@types/d3-dsv": "~1.0.30",
     "rimraf": "~2.6.2",
-    "typescript": "~2.4.2"
+    "typescript": "~2.6.1"
   }
 }
