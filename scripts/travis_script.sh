@@ -107,7 +107,6 @@ if [[ $GROUP == other ]]; then
 
     # Build the api docs
     jlpm run docs
-    cp jupyter_plugins.png docs
 
     # Verify tutorial docs build
     pushd docs
