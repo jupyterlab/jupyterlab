@@ -122,7 +122,7 @@ setup_args['cmdclass'] = cmdclass
 setuptools_args = {}
 install_requires = setuptools_args['install_requires'] = [
     'notebook>=4.3.1',
-    'jupyterlab_launcher>=0.5.2,<0.6.0',
+    'jupyterlab_launcher>=0.6.0',
     'ipython_genutils',
     "futures;python_version<'3.0'",
     "subprocess32;python_version<'3.0'"
