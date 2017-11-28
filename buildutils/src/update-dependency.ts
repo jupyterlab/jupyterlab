@@ -22,6 +22,7 @@ parts[0] = process.argv[2][0] + parts[0];
 // Translate @latest to a concrete version.
 if (parts.length === 1 || parts[1] === 'latest') {
   let cmd = 'npm view ' + parts[0] + ' version';
+  parts = [parts[0]];
   parts.push('~' + String(childProcess.execSync(cmd)).trim());
 }
 let name = parts[0];

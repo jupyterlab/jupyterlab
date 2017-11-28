@@ -18,7 +18,7 @@
     "rimraf": "~2.6.2",
     "style-loader": "~0.13.2",
     "tslint": "~4.5.1",
-    "typescript": "latest",
+    "typescript": "~2.6.2",
     "webpack": "~2.7.0"
   }
 }
