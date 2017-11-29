@@ -265,32 +265,23 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
 
   commands.addCommand(CommandIDs.lineNumbering, {
     label: 'Line Numbers',
-    isEnabled: Private.delegateEnabled
-             (app, menu.editorViewers, 'toggleLineNumbers'),
-    isToggled: Private.delegateToggled
-             (app, menu.editorViewers, 'lineNumbersToggled'),
-    execute: Private.delegateExecute
-             (app, menu.editorViewers, 'toggleLineNumbers')
+    isEnabled: Private.delegateEnabled(app, menu.editorViewers, 'toggleLineNumbers'),
+    isToggled: Private.delegateToggled(app, menu.editorViewers, 'lineNumbersToggled'),
+    execute: Private.delegateExecute(app, menu.editorViewers, 'toggleLineNumbers')
   });
 
   commands.addCommand(CommandIDs.matchBrackets, {
     label: 'Match Brackets',
-    isEnabled: Private.delegateEnabled
-             (app, menu.editorViewers, 'toggleMatchBrackets'),
-    isToggled: Private.delegateToggled
-             (app, menu.editorViewers, 'matchBracketsToggled'),
-    execute: Private.delegateExecute
-             (app, menu.editorViewers, 'toggleMatchBrackets')
+    isEnabled: Private.delegateEnabled(app, menu.editorViewers, 'toggleMatchBrackets'),
+    isToggled: Private.delegateToggled(app, menu.editorViewers, 'matchBracketsToggled'),
+    execute: Private.delegateExecute(app, menu.editorViewers, 'toggleMatchBrackets')
   });
 
   commands.addCommand(CommandIDs.wordWrap, {
     label: 'Word Wrap',
-    isEnabled: Private.delegateEnabled
-               (app, menu.editorViewers, 'toggleWordWrap'),
-    isToggled: Private.delegateToggled
-               (app, menu.editorViewers, 'wordWrapToggled'),
-    execute: Private.delegateExecute
-               (app, menu.editorViewers, 'toggleWordWrap')
+    isEnabled: Private.delegateEnabled(app, menu.editorViewers, 'toggleWordWrap'),
+    isToggled: Private.delegateToggled(app, menu.editorViewers, 'wordWrapToggled'),
+    execute: Private.delegateExecute(app, menu.editorViewers, 'toggleWordWrap')
   });
 
   const editorViewerGroup = [
