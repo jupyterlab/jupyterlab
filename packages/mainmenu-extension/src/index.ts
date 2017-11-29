@@ -307,7 +307,7 @@ function createRunMenu(app: JupyterLab, menu: RunMenu): void {
   commands.addCommand(CommandIDs.run, {
     label: () => {
       const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
-      return `Run${noun ? ` ${noun}(s)` : ''}`;
+      return `Run${noun ? ` ${noun}` : ''}`;
     },
     isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'run'),
     execute: Private.delegateExecute(app, menu.codeRunners, 'run')
@@ -315,8 +315,8 @@ function createRunMenu(app: JupyterLab, menu: RunMenu): void {
 
   commands.addCommand(CommandIDs.runAll, {
     label: () => {
-      const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
-      return `Run All${noun ? ` ${noun}s` : ''}`;
+      const noun = Private.delegateLabel(app, menu.codeRunners, 'pluralNoun');
+      return `Run All${noun ? ` ${noun}` : ''}`;
     },
     isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'runAll'),
     execute: Private.delegateExecute(app, menu.codeRunners, 'runAll')
@@ -325,7 +325,7 @@ function createRunMenu(app: JupyterLab, menu: RunMenu): void {
   commands.addCommand(CommandIDs.runAbove, {
     label: () => {
       const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
-      return `Run${noun ? ` ${noun}(s)` : ''} Above`;
+      return `Run${noun ? ` ${noun}` : ''} Above`;
     },
     isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'runAbove'),
     execute: Private.delegateExecute(app, menu.codeRunners, 'runAbove')
@@ -334,7 +334,7 @@ function createRunMenu(app: JupyterLab, menu: RunMenu): void {
   commands.addCommand(CommandIDs.runBelow, {
     label: () => {
       const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
-      return `Run${noun ? ` ${noun}(s)` : ''} Below`;
+      return `Run${noun ? ` ${noun}` : ''} Below`;
     },
     isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'runBelow'),
     execute: Private.delegateExecute(app, menu.codeRunners, 'runBelow')

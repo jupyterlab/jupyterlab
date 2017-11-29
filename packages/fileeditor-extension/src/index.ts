@@ -440,7 +440,8 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
     // Add a code runner to the Run menu.
     menu.runMenu.codeRunners.set('Editor', {
       tracker,
-      noun: 'Code Snippet',
+      noun: 'Code',
+      pluralNoun: 'Code',
       run: () => commands.execute(CommandIDs.runCode)
     });
   }

@@ -1402,7 +1402,8 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   // Add an ICodeRunner to the application run menu
   mainMenu.runMenu.codeRunners.set('Notebook', {
     tracker,
-    noun: 'Cell',
+    noun: 'Cell(s)',
+    pluralNoun: 'Cells',
     run: current => {
       const { context, notebook } = current;
       return NotebookActions.runAndAdvance(notebook, context.session)

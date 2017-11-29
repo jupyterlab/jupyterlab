@@ -74,6 +74,12 @@ namespace IRunMenu {
     noun: string;
 
     /**
+     * A string label for the plural of things that are being run,
+     * to be used where appropriate in menu labels.
+     */
+    pluralNoun: string;
+
+    /**
      * A function to run a chunk of code.
      */
     run?: (widget: T) => Promise<void>;
