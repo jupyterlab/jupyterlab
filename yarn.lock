@@ -6114,7 +6114,7 @@ typescript@2.3.4:
   version "2.3.4"
   resolved "https://registry.npmjs.org/typescript/-/typescript-2.3.4.tgz#3d38321828231e434f287514959c37a82b629f42"
 
-typescript@latest:
+typescript@~2.6.2:
   version "2.6.2"
   resolved "https://registry.npmjs.org/typescript/-/typescript-2.6.2.tgz#3c5b6fd7f6de0914269027f03c0946758f7673a4"
 

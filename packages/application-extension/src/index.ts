@@ -47,6 +47,12 @@ const main: JupyterLabPlugin<void> = {
   activate: (app: JupyterLab, palette: ICommandPalette) => {
     addCommands(app, palette);
 
+    // If the currently active widget changes,
+    // trigger a refresh of the commands.
+    app.shell.currentChanged.connect(() => {
+      app.commands.notifyCommandChanged(CommandIDs.closeAll);
+    });
+
     let builder = app.serviceManager.builder;
 
     let doBuild = () => {

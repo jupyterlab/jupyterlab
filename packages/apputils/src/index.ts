@@ -12,7 +12,6 @@ export * from './domutils';
 export * from './hoverbox';
 export * from './iframe';
 export * from './instancetracker';
-export * from './mainmenu';
 export * from './sanitizer';
 export * from './spinner';
 export * from './splash';

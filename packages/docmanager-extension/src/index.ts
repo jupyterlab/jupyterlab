@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  showDialog, showErrorMessage, Spinner, Dialog, ICommandPalette, IMainMenu
+  showDialog, showErrorMessage, Spinner, Dialog, ICommandPalette
 } from '@jupyterlab/apputils';
 
 import {
@@ -75,8 +75,8 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<IDocumentManager> = {
   id: '@jupyterlab/docmanager-extension:plugin',
   provides: IDocumentManager,
-  requires: [ICommandPalette, IMainMenu],
-  activate: (app: JupyterLab, palette: ICommandPalette, mainMenu: IMainMenu): IDocumentManager => {
+  requires: [ICommandPalette],
+  activate: (app: JupyterLab, palette: ICommandPalette): IDocumentManager => {
     const manager = app.serviceManager;
     const contexts = new WeakSet<DocumentRegistry.Context>();
     const opener: DocumentManager.IWidgetOpener = {
@@ -133,9 +133,28 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     const { currentWidget } = app.shell;
     return !!(currentWidget && docManager.contextForWidget(currentWidget));
   };
+  const fileName = () => {
+    const { currentWidget } = app.shell;
+    if (!currentWidget) {
+      return 'File';
+    }
+    const context = docManager.contextForWidget(currentWidget);
+    if (!context) {
+      return 'File';
+    }
+    // TODO: we should consider eliding the name
+    // if it is very long.
+    return `"${currentWidget.title.label}"`;
+  };
 
   commands.addCommand(CommandIDs.close, {
-    label: 'Close',
+    label: () => {
+      const widget = app.shell.currentWidget;
+      return `Close ${widget && widget.title.label ?
+             `"${widget.title.label}"` : 'Tab'}`;
+    },
+    isEnabled: () => !!app.shell.currentWidget &&
+                     !!app.shell.currentWidget.title.closable,
     execute: () => {
       if (app.shell.currentWidget) {
         app.shell.currentWidget.close();
@@ -196,7 +215,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   commands.addCommand(CommandIDs.restoreCheckpoint, {
-    label: 'Revert to Checkpoint',
+    label: () => `Revert ${fileName()} to Checkpoint`,
     caption: 'Revert contents to previous checkpoint',
     isEnabled,
     execute: () => {
@@ -211,7 +230,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   commands.addCommand(CommandIDs.save, {
-    label: 'Save',
+    label: () => `Save ${fileName()}`,
     caption: 'Save and create checkpoint',
     isEnabled,
     execute: () => {
@@ -230,7 +249,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   commands.addCommand(CommandIDs.saveAs, {
-    label: 'Save As...',
+    label: () => `Save ${fileName()} As…`,
     caption: 'Save with new path',
     isEnabled,
     execute: () => {
@@ -242,39 +261,19 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   commands.addCommand(CommandIDs.rename, {
-    isVisible: () => {
-      const widget = app.shell.currentWidget;
-      if (!widget) {
-        return;
-      }
-      // Find the context for the widget.
-      let context = docManager.contextForWidget(widget);
-      return context !== null;
-    },
+    label: () => `Rename ${fileName()}`,
+    isEnabled,
     execute: () => {
-      const widget = app.shell.currentWidget;
-      if (!widget) {
-        return;
+      if (isEnabled()) {
+        let context = docManager.contextForWidget(app.shell.currentWidget);
+        return renameDialog(docManager, context!.path);
       }
-      // Find the context for the widget.
-      let context = docManager.contextForWidget(widget);
-      if (context) {
-        return renameDialog(docManager, context.path);
-      }
-    },
-    label: 'Rename'
+    }
   });
 
   commands.addCommand(CommandIDs.clone, {
-    isVisible: () => {
-      const widget = app.shell.currentWidget;
-      if (!widget) {
-        return;
-      }
-      // Find the context for the widget.
-      let context = docManager.contextForWidget(widget);
-      return context !== null;
-    },
+    label: () => `New View Into ${fileName()}`,
+    isEnabled,
     execute: () => {
       const widget = app.shell.currentWidget;
       if (!widget) {
@@ -286,7 +285,6 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
         opener.open(child);
       }
     },
-    label: 'New View into File'
   });
 
   app.contextMenu.addItem({

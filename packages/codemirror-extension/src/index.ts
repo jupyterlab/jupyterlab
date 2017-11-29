@@ -14,8 +14,12 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, IMainMenu
+  ICommandPalette
 } from '@jupyterlab/apputils';
+
+import {
+  IMainMenu, IEditMenu
+} from '@jupyterlab/mainmenu';
 
 import {
   IEditorServices
@@ -30,7 +34,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IEditorTracker
+  IEditorTracker, FileEditor
 } from '@jupyterlab/fileeditor';
 
 
@@ -146,18 +150,12 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     }
   });
 
-  // Update the command registry when the codemirror state changes.
-  tracker.currentChanged.connect(() => {
-    if (tracker.size <= 1) {
-      commands.notifyCommandChanged(CommandIDs.changeKeyMap);
-    }
-  });
-
   /**
    * A test for whether the tracker has an active widget.
    */
-  function hasWidget(): boolean {
-    return tracker.currentWidget !== null;
+  function isEnabled(): boolean {
+    return tracker.currentWidget !== null &&
+           tracker.currentWidget === app.shell.currentWidget;
   }
 
   /**
@@ -187,7 +185,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
           console.error(`Failed to set ${id}:${key} - ${reason.message}`);
         });
       },
-      isEnabled: hasWidget,
+      isEnabled,
       isToggled: args => args['theme'] === theme
     });
 
@@ -205,12 +203,12 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
           console.error(`Failed to set ${id}:${key} - ${reason.message}`);
         });
       },
-      isEnabled: hasWidget,
+      isEnabled,
       isToggled: args => args['keyMap'] === keyMap
     });
 
     commands.addCommand(CommandIDs.find, {
-      label: 'Find',
+      label: 'Find...',
       execute: () => {
         let widget = tracker.currentWidget;
         if (!widget) {
@@ -219,11 +217,11 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
         let editor = widget.editor as CodeMirrorEditor;
         editor.execCommand('find');
       },
-      isEnabled: hasWidget
+      isEnabled
     });
 
     commands.addCommand(CommandIDs.findAndReplace, {
-      label: 'Find & Replace',
+      label: 'Find & Replace...',
       execute: () => {
         let widget = tracker.currentWidget;
         if (!widget) {
@@ -232,7 +230,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
         let editor = widget.editor as CodeMirrorEditor;
         editor.execCommand('replace');
       },
-      isEnabled: hasWidget
+      isEnabled
     });
 
     commands.addCommand(CommandIDs.changeMode, {
@@ -247,7 +245,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
           }
         }
       },
-      isEnabled: hasWidget,
+      isEnabled,
       isToggled: args => {
         let widget = tracker.currentWidget;
         if (!widget) {
@@ -306,15 +304,10 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
       palette.addItem({ command, args, category: 'Editor' });
     }
 
-    menu.addItem({ type: 'submenu', submenu: modeMenu });
-    menu.addItem({ type: 'submenu', submenu: tabMenu });
-    menu.addItem({ command: CommandIDs.find });
-    menu.addItem({ command: CommandIDs.findAndReplace });
-    menu.addItem({ type: 'separator' });
-    menu.addItem({ command: 'fileeditor:toggle-line-numbers' });
-    menu.addItem({ command: 'fileeditor:toggle-line-wrap' });
-    menu.addItem({ command: 'fileeditor:toggle-match-brackets' });
     menu.addItem({ command: 'fileeditor:toggle-autoclosing-brackets' });
+    menu.addItem({ type: 'submenu', submenu: tabMenu });
+    menu.addItem({ type: 'separator' });
+    menu.addItem({ type: 'submenu', submenu: modeMenu });
     menu.addItem({ type: 'submenu', submenu: keyMapMenu });
     menu.addItem({ type: 'submenu', submenu: themeMenu });
 
@@ -323,13 +316,16 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
 
   mainMenu.addMenu(createMenu(), { rank: 30 });
 
-  [
-    'editor:line-numbers',
-    'editor:line-wrap',
-    'editor:match-brackets',
-    'editor-autoclosing-brackets',
-    'editor:create-console',
-    'editor:run-code'
-  ].forEach(command => palette.addItem({ command, category: 'Editor' }));
-
+  // Add find-replace capabilities to the edit menu.
+  mainMenu.editMenu.findReplacers.set('Editor', {
+    tracker,
+    find: (widget: FileEditor) => {
+      let editor = widget.editor as CodeMirrorEditor;
+      editor.execCommand('find');
+    },
+    findAndReplace: (widget: FileEditor) => {
+      let editor = widget.editor as CodeMirrorEditor;
+      editor.execCommand('replace');
+    }
+  } as IEditMenu.IFindReplacer<FileEditor>)
 }

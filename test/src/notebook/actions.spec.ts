@@ -1218,40 +1218,6 @@ describe('@jupyterlab/notebook', () => {
 
     });
 
-    describe('#toggleLineNumbers()', () => {
-
-      it('should toggle line numbers on the selected cells', () => {
-        let state = widget.activeCell.editor.getOption('lineNumbers');
-        NotebookActions.toggleLineNumbers(widget);
-        expect(widget.activeCell.editor.getOption('lineNumbers')).to.be(!state);
-      });
-
-      it('should be based on the state of the active cell', () => {
-        let state = widget.activeCell.editor.getOption('lineNumbers');
-        let next = widget.widgets[1];
-        next.editor.setOption('lineNumbers', !state);
-        widget.select(next);
-        NotebookActions.toggleLineNumbers(widget);
-        expect(widget.widgets[0].editor.getOption('lineNumbers')).to.be(!state);
-        expect(widget.widgets[1].editor.getOption('lineNumbers')).to.be(!state);
-      });
-
-      it('should preserve the widget mode', () => {
-        NotebookActions.toggleLineNumbers(widget);
-        expect(widget.mode).to.be('command');
-        widget.mode = 'edit';
-        NotebookActions.toggleLineNumbers(widget);
-        expect(widget.mode).to.be('edit');
-      });
-
-      it('should be a no-op if there is no model', () => {
-        widget.model = null;
-        NotebookActions.toggleLineNumbers(widget);
-        expect(widget.activeCellIndex).to.be(-1);
-      });
-
-    });
-
     describe('#toggleAllLineNumbers()', () => {
 
       it('should toggle line numbers on all cells', () => {

@@ -33,6 +33,7 @@
     "@jupyterlab/application": "^0.12.0",
     "@jupyterlab/apputils": "^0.12.4",
     "@jupyterlab/coreutils": "^0.12.0",
+    "@jupyterlab/mainmenu": "^0.1.0",
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/virtualdom": "^1.1.2",
     "@phosphor/widgets": "^1.5.0"

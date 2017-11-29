@@ -6,12 +6,41 @@ import {
 } from '@phosphor/algorithm';
 
 import {
+  CommandRegistry
+} from '@phosphor/commands';
+
+import {
   Token
 } from '@phosphor/coreutils';
 
 import {
   Menu, MenuBar
 } from '@phosphor/widgets';
+
+import {
+  IFileMenu, FileMenu
+} from './file';
+
+import {
+  IEditMenu, EditMenu
+} from './edit';
+
+import {
+  IHelpMenu, HelpMenu
+} from './help';
+
+import {
+  IKernelMenu, KernelMenu
+} from './kernel';
+
+import {
+  IRunMenu, RunMenu
+} from './run';
+
+import {
+  IViewMenu, ViewMenu
+} from './view';
+
 
 
 /* tslint:disable */
@@ -32,6 +61,36 @@ interface IMainMenu {
    * Add a new menu to the main menu bar.
    */
   addMenu(menu: Menu, options?: IMainMenu.IAddOptions): void;
+
+  /**
+   * The application "File" menu.
+   */
+  readonly fileMenu: IFileMenu;
+
+  /**
+   * The application "Edit" menu.
+   */
+  readonly editMenu: IEditMenu;
+
+  /**
+   * The application "View" menu.
+   */
+  readonly viewMenu: IViewMenu;
+
+  /**
+   * The application "Help" menu.
+   */
+  readonly helpMenu: IHelpMenu;
+
+  /**
+   * The application "Kernel" menu.
+   */
+  readonly kernelMenu: IKernelMenu;
+
+  /**
+   * The application "Run" menu.
+   */
+  readonly runMenu: IRunMenu;
 }
 
 
@@ -50,14 +109,65 @@ namespace IMainMenu {
      */
     rank?: number;
   }
-}
 
+}
 
 /**
  * The main menu class.  It is intended to be used as a singleton.
  */
 export
 class MainMenu extends MenuBar implements IMainMenu {
+  /**
+   * Construct the main menu bar.
+   */
+  constructor(commands: CommandRegistry) {
+    super();
+    this.editMenu = new EditMenu({ commands });
+    this.fileMenu = new FileMenu({ commands });
+    this.helpMenu = new HelpMenu({ commands });
+    this.kernelMenu = new KernelMenu({ commands });
+    this.runMenu = new RunMenu({ commands });
+    this.viewMenu = new ViewMenu({ commands });
+
+    this.addMenu(this.fileMenu.menu, { rank: 0 });
+    this.addMenu(this.editMenu.menu, { rank: 1 });
+    this.addMenu(this.runMenu.menu, { rank: 2 });
+    this.addMenu(this.kernelMenu.menu, { rank: 3 });
+    this.addMenu(this.viewMenu.menu, { rank: 4 });
+    this.addMenu(this.helpMenu.menu, { rank: 1000 });
+  }
+
+  /**
+   * The application "Edit" menu.
+   */
+  readonly editMenu: EditMenu;
+
+  /**
+   * The application "File" menu.
+   */
+  readonly fileMenu: FileMenu;
+
+  /**
+   * The application "Help" menu.
+   */
+  readonly helpMenu: HelpMenu;
+
+  /**
+   * The application "Kernel" menu.
+   */
+  readonly kernelMenu: KernelMenu;
+
+  /**
+   * The application "Run" menu.
+   */
+  readonly runMenu: RunMenu;
+
+  /**
+   * The application "View" menu.
+   */
+  readonly viewMenu: ViewMenu;
+
+
   /**
    * Add a new menu to the main menu bar.
    */
@@ -74,7 +184,23 @@ class MainMenu extends MenuBar implements IMainMenu {
     menu.disposed.connect(this._onMenuDisposed, this);
 
     ArrayExt.insert(this._items, index, rankItem);
+    /**
+     * Create a new menu.
+     */
     this.insertMenu(index, menu);
+  }
+
+  /**
+   * Dispose of the resources held by the menu bar.
+   */
+  dispose(): void {
+    this.editMenu.dispose();
+    this.fileMenu.dispose();
+    this.helpMenu.dispose();
+    this.kernelMenu.dispose();
+    this.runMenu.dispose();
+    this.viewMenu.dispose();
+    super.dispose();
   }
 
   /**

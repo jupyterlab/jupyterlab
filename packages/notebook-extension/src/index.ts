@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, IMainMenu, showDialog
+  Dialog, ICommandPalette, showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -17,9 +17,17 @@ import {
   IStateDB, PageConfig, URLExt, uuid
 } from '@jupyterlab/coreutils';
 
+import  {
+  IFileBrowserFactory
+} from '@jupyterlab/filebrowser';
+
 import {
   ILauncher
 } from '@jupyterlab/launcher';
+
+import {
+  IMainMenu, IEditMenu, IFileMenu, IKernelMenu, IRunMenu, IViewMenu
+} from '@jupyterlab/mainmenu';
 
 import {
   CellTools, ICellTools, INotebookTracker, NotebookActions,
@@ -48,6 +56,9 @@ import {
  * The command IDs used by the notebook plugin.
  */
 namespace CommandIDs {
+  export
+  const createNew = 'notebook:create-new';
+
   export
   const interrupt = 'notebook:interrupt-kernel';
 
@@ -157,16 +168,13 @@ namespace CommandIDs {
   const commandMode = 'notebook:enter-command-mode';
 
   export
-  const toggleLines = 'notebook:toggle-cell-line-numbers';
-
-  export
   const toggleAllLines = 'notebook:toggle-all-cell-line-numbers';
 
   export
-  const undo = 'notebook:undo-cell-action';
+  const undoCellAction = 'notebook:undo-cell-action';
 
   export
-  const redo = 'notebook:redo-cell-action';
+  const redoCellAction = 'notebook:redo-cell-action';
 
   export
   const markdown1 = 'notebook:change-cell-to-heading-1';
@@ -250,7 +258,7 @@ const tracker: JupyterLabPlugin<INotebookTracker> = {
     IEditorServices,
     ILayoutRestorer
   ],
-  optional: [ILauncher],
+  optional: [IFileBrowserFactory, ILauncher],
   activate: activateNotebookHandler,
   autoStart: true
 };
@@ -361,7 +369,7 @@ function activateCellTools(app: JupyterLab, tracker: INotebookTracker, editorSer
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: NotebookPanel.IContentFactory, editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): INotebookTracker {
+function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: NotebookPanel.IContentFactory, editorServices: IEditorServices, restorer: ILayoutRestorer, browserFactory: IFileBrowserFactory | null, launcher: ILauncher | null): INotebookTracker {
   const services = app.serviceManager;
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
@@ -385,21 +393,9 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
     when: services.ready
   });
 
-  // Update the command registry when the notebook state changes.
-  tracker.currentChanged.connect(() => {
-    if (tracker.size <= 1) {
-      commands.notifyCommandChanged(CommandIDs.interrupt);
-    }
-  });
-
   let registry = app.docRegistry;
   registry.addModelFactory(new NotebookModelFactory({}));
   registry.addWidgetFactory(factory);
-  registry.addCreator({
-    name: 'Notebook',
-    fileType: 'Notebook',
-    widgetName: 'Notebook'
-  });
 
   addCommands(app, services, tracker);
   populatePalette(palette);
@@ -417,19 +413,31 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
   });
 
   // Add main menu notebook menu.
-  mainMenu.addMenu(createMenu(app), { rank: 20 });
+  populateMenus(app, mainMenu, tracker);
 
-  // The launcher callback.
-  let callback = (cwd: string, name: string) => {
+  // Utility function to create a new notebook.
+  const createNew = (cwd: string, kernelName?: string) => {
     return commands.execute(
       'docmanager:new-untitled', { path: cwd, type: 'notebook' }
     ).then(model => {
       return commands.execute('docmanager:open', {
         path: model.path, factory: FACTORY,
-        kernel: { name }
+        kernel: { name: kernelName }
       });
     });
   };
+
+  // Add a command for creating a new notebook in the File Menu.
+  commands.addCommand(CommandIDs.createNew, {
+    label: 'Notebook',
+    caption: 'Create a new notebook',
+    execute: () => {
+      let cwd = browserFactory ?
+        browserFactory.defaultBrowser.model.path : '';
+      return createNew(cwd);
+    }
+  });
+
 
   // Add a launcher item if the launcher is available.
   if (launcher) {
@@ -450,7 +458,7 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
           category: 'Notebook',
           name,
           iconClass: 'jp-NotebookRunningIcon',
-          callback,
+          callback: createNew,
           rank,
           kernelIconUrl
         });
@@ -476,12 +484,12 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
     rank: 0
   });
   app.contextMenu.addItem({
-    command: CommandIDs.undo,
+    command: CommandIDs.undoCellAction,
     selector: '.jp-Notebook',
     rank: 1
   });
   app.contextMenu.addItem({
-    command: CommandIDs.redo,
+    command: CommandIDs.redoCellAction,
     selector: '.jp-Notebook',
     rank: 2
   });
@@ -527,8 +535,21 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   /**
    * Whether there is an active notebook.
    */
-  function hasWidget(): boolean {
-    return tracker.currentWidget !== null;
+  function isEnabled(): boolean {
+    return tracker.currentWidget !== null &&
+           tracker.currentWidget === app.shell.currentWidget;
+  }
+
+  /**
+   * The name of the current notebook widget.
+   */
+  function currentName(): string {
+    if (tracker.currentWidget  &&
+        tracker.currentWidget === app.shell.currentWidget &&
+        tracker.currentWidget.title.label) {
+      return `"${tracker.currentWidget.title.label}"`;
+    }
+    return 'Notebook';
   }
 
   commands.addCommand(CommandIDs.runAndAdvance, {
@@ -542,7 +563,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.runAndAdvance(notebook, context.session);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.run, {
     label: 'Run Cell(s)',
@@ -555,7 +576,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.run(notebook, context.session);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.runAndInsert, {
     label: 'Run Cell(s) and Insert Below',
@@ -568,7 +589,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.runAndInsert(notebook, context.session);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.runAll, {
     label: 'Run All Cells',
@@ -581,7 +602,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.runAll(notebook, context.session);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.restart, {
     label: 'Restart Kernel',
@@ -592,7 +613,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return current.session.restart();
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.closeAndShutdown, {
     label: 'Close and Shutdown',
@@ -616,10 +637,10 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         }
       });
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.trust, {
-    label: 'Trust Notebook',
+    label: () => `Trust ${currentName()}`,
     execute: args => {
       const current = getCurrent(args);
 
@@ -629,13 +650,14 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.trust(notebook).then(() => context.save());
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.exportToFormat, {
     label: args => {
         const formatLabel = (args['label']) as string;
+        const name = currentName();
 
-        return (args['isPalette'] ? 'Export To ' : '') + formatLabel;
+        return (args['isPalette'] ? `Export ${name} to ` : '') + formatLabel;
     },
     execute: args => {
       const current = getCurrent(args);
@@ -663,7 +685,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         resolve(undefined);
       });
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.restartClear, {
     label: 'Restart Kernel & Clear Outputs',
@@ -677,7 +699,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
           .then(() => { NotebookActions.clearAllOutputs(notebook); });
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.restartRunAll, {
     label: 'Restart Kernel & Run All',
@@ -691,7 +713,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
           .then(() => { NotebookActions.runAll(notebook, context.session); });
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.clearAllOutputs, {
     label: 'Clear All Outputs',
@@ -702,7 +724,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.clearAllOutputs(current.notebook);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.clearOutputs, {
     label: 'Clear Output(s)',
@@ -713,7 +735,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.clearOutputs(current.notebook);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.interrupt, {
     label: 'Interrupt Kernel',
@@ -730,7 +752,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return kernel.interrupt();
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.toCode, {
     label: 'Change to Code Cell Type',
@@ -741,7 +763,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.changeCellType(current.notebook, 'code');
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.toMarkdown, {
     label: 'Change to Markdown Cell Type',
@@ -752,7 +774,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.changeCellType(current.notebook, 'markdown');
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.toRaw, {
     label: 'Change to Raw Cell Type',
@@ -763,7 +785,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.changeCellType(current.notebook, 'raw');
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.cut, {
     label: 'Cut Cell(s)',
@@ -774,7 +796,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.cut(current.notebook);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.copy, {
     label: 'Copy Cell(s)',
@@ -785,7 +807,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.copy(current.notebook);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.paste, {
     label: 'Paste Cell(s) Below',
@@ -796,7 +818,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.paste(current.notebook);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.deleteCell, {
     label: 'Delete Cell(s)',
@@ -807,7 +829,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.deleteCells(current.notebook);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.split, {
     label: 'Split Cell',
@@ -818,7 +840,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.splitCell(current.notebook);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.merge, {
     label: 'Merge Selected Cell(s)',
@@ -829,7 +851,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.mergeCells(current.notebook);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.insertAbove, {
     label: 'Insert Cell Above',
@@ -840,7 +862,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.insertAbove(current.notebook);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.insertBelow, {
     label: 'Insert Cell Below',
@@ -851,7 +873,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.insertBelow(current.notebook);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.selectAbove, {
     label: 'Select Cell Above',
@@ -862,7 +884,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.selectAbove(current.notebook);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.selectBelow, {
     label: 'Select Cell Below',
@@ -873,7 +895,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.selectBelow(current.notebook);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.extendAbove, {
     label: 'Extend Selection Above',
@@ -884,7 +906,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.extendSelectionAbove(current.notebook);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.extendBelow, {
     label: 'Extend Selection Below',
@@ -895,7 +917,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.extendSelectionBelow(current.notebook);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.moveUp, {
     label: 'Move Cell(s) Up',
@@ -906,7 +928,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.moveUp(current.notebook);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.moveDown, {
     label: 'Move Cell(s) Down',
@@ -917,18 +939,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.moveDown(current.notebook);
       }
     },
-    isEnabled: hasWidget
-  });
-  commands.addCommand(CommandIDs.toggleLines, {
-    label: 'Toggle Line Numbers',
-    execute: args => {
-      const current = getCurrent(args);
-
-      if (current) {
-        return NotebookActions.toggleLineNumbers(current.notebook);
-      }
-    },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.toggleAllLines, {
     label: 'Toggle All Line Numbers',
@@ -939,7 +950,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.toggleAllLineNumbers(current.notebook);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.commandMode, {
     label: 'Enter Command Mode',
@@ -950,7 +961,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         current.notebook.mode = 'command';
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.editMode, {
     label: 'Enter Edit Mode',
@@ -961,9 +972,9 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         current.notebook.mode = 'edit';
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
-  commands.addCommand(CommandIDs.undo, {
+  commands.addCommand(CommandIDs.undoCellAction, {
     label: 'Undo Cell Operation',
     execute: args => {
       const current = getCurrent(args);
@@ -972,9 +983,9 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.undo(current.notebook);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
-  commands.addCommand(CommandIDs.redo, {
+  commands.addCommand(CommandIDs.redoCellAction, {
     label: 'Redo Cell Operation',
     execute: args => {
       const current = getCurrent(args);
@@ -983,7 +994,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.redo(current.notebook);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.changeKernel, {
     label: 'Change Kernel',
@@ -994,7 +1005,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return current.context.session.selectKernel();
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.reconnectToKernel, {
     label: 'Reconnect To Kernel',
@@ -1011,7 +1022,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return kernel.reconnect();
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.createCellView, {
     label: 'Create New View for Cell',
@@ -1032,7 +1043,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       p.addWidget(newCell);
       shell.addToMainArea(p);
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.createConsole, {
     label: 'Create Console for Notebook',
@@ -1052,7 +1063,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
 
       return commands.execute('console:create', options);
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.markdown1, {
     label: 'Change to Heading 1',
@@ -1063,7 +1074,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.setMarkdownHeader(current.notebook, 1);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.markdown2, {
     label: 'Change to Heading 2',
@@ -1074,7 +1085,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.setMarkdownHeader(current.notebook, 2);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.markdown3, {
     label: 'Change to Heading 3',
@@ -1085,7 +1096,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.setMarkdownHeader(current.notebook, 3);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.markdown4, {
     label: 'Change to Heading 4',
@@ -1096,7 +1107,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.setMarkdownHeader(current.notebook, 4);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.markdown5, {
     label: 'Change to Heading 5',
@@ -1107,7 +1118,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.setMarkdownHeader(current.notebook, 5);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.markdown6, {
     label: 'Change to Heading 6',
@@ -1118,7 +1129,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.setMarkdownHeader(current.notebook, 6);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.hideCode, {
     label: 'Hide Code',
@@ -1129,7 +1140,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.hideCode(current.notebook);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.showCode, {
     label: 'Show Code',
@@ -1140,7 +1151,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.showCode(current.notebook);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.hideAllCode, {
     label: 'Hide All Code',
@@ -1151,7 +1162,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.hideAllCode(current.notebook);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.showAllCode, {
     label: 'Show All Code',
@@ -1162,7 +1173,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.showAllCode(current.notebook);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.hideOutput, {
     label: 'Hide Output',
@@ -1173,7 +1184,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.hideOutput(current.notebook);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.showOutput, {
     label: 'Show Output',
@@ -1184,7 +1195,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.showOutput(current.notebook);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.hideAllOutputs, {
     label: 'Hide All Outputs',
@@ -1195,7 +1206,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.hideAllOutputs(current.notebook);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   commands.addCommand(CommandIDs.showAllOutputs, {
     label: 'Show All Outputs',
@@ -1206,9 +1217,9 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.showAllOutputs(current.notebook);
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
-  }
+}
 
 
 /**
@@ -1261,9 +1272,8 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.extendBelow,
     CommandIDs.moveDown,
     CommandIDs.moveUp,
-    CommandIDs.toggleLines,
-    CommandIDs.undo,
-    CommandIDs.redo,
+    CommandIDs.undoCellAction,
+    CommandIDs.redoCellAction,
     CommandIDs.markdown1,
     CommandIDs.markdown2,
     CommandIDs.markdown3,
@@ -1283,52 +1293,151 @@ function populatePalette(palette: ICommandPalette): void {
 
 
 /**
- * Creates a menu for the notebook.
+ * Populates the application menus for the notebook.
  */
-function createMenu(app: JupyterLab): Menu {
+function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookTracker): void {
   let { commands } = app;
-  let menu = new Menu({ commands });
-  let settings = new Menu({ commands });
+
+  // Add undo/redo hooks to the edit menu.
+  mainMenu.editMenu.undoers.set('Notebook', {
+    tracker,
+    undo: widget => { widget.notebook.activeCell.editor.undo(); },
+    redo: widget => { widget.notebook.activeCell.editor.redo(); }
+  } as IEditMenu.IUndoer<NotebookPanel>);
+
+  // Add a clearer to the edit menu
+  mainMenu.editMenu.clearers.set('Notebook', {
+    tracker,
+    noun: 'All Cell Outputs',
+    clear: (current: NotebookPanel) => {
+      return NotebookActions.clearAllOutputs(current.notebook);
+    }
+  } as IEditMenu.IClearer<NotebookPanel>);
+
+  // Add new notebook creation to the file menu.
+  mainMenu.fileMenu.newMenu.addItem({ command: CommandIDs.createNew });
+
+  // Add a close and shutdown command to the file menu.
+  mainMenu.fileMenu.closeAndCleaners.set('Notebook', {
+    tracker,
+    action: 'Shutdown',
+    closeAndCleanup: (current: NotebookPanel) => {
+      const fileName = current.title.label;
+      return showDialog({
+        title: 'Shutdown the notebook?',
+        body: `Are you sure you want to close "${fileName}"?`,
+        buttons: [Dialog.cancelButton(), Dialog.warnButton()]
+      }).then(result => {
+        if (result.button.accept) {
+          return current.context.session.shutdown()
+            .then(() => { current.dispose(); });
+        }
+      });
+    }
+  } as IFileMenu.ICloseAndCleaner<NotebookPanel>);
+
+  // Add a notebook group to the File menu.
   let exportTo = new Menu({ commands } );
-
-  menu.title.label = 'Notebook';
-  settings.title.label = 'Settings';
-  settings.addItem({ command: CommandIDs.toggleAllLines });
-
   exportTo.title.label = 'Export to ...';
   EXPORT_TO_FORMATS.forEach(exportToFormat => {
     exportTo.addItem({ command: CommandIDs.exportToFormat, args: exportToFormat });
   });
+  const fileGroup = [
+    { command: CommandIDs.trust },
+    { type: 'submenu', submenu: exportTo } as Menu.IItemOptions
+  ];
+  mainMenu.fileMenu.addGroup(fileGroup, 10);
 
-  menu.addItem({ command: CommandIDs.undo });
-  menu.addItem({ command: CommandIDs.redo });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ command: CommandIDs.cut });
-  menu.addItem({ command: CommandIDs.copy });
-  menu.addItem({ command: CommandIDs.paste });
-  menu.addItem({ command: CommandIDs.deleteCell });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ command: CommandIDs.split });
-  menu.addItem({ command: CommandIDs.merge });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ command: CommandIDs.hideAllCode });
-  menu.addItem({ command: CommandIDs.showAllCode });
-  menu.addItem({ command: CommandIDs.hideAllOutputs });
-  menu.addItem({ command: CommandIDs.showAllOutputs });
-  menu.addItem({ command: CommandIDs.clearAllOutputs });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ command: CommandIDs.runAll });
-  menu.addItem({ command: CommandIDs.interrupt });
-  menu.addItem({ command: CommandIDs.restart });
-  menu.addItem({ command: CommandIDs.changeKernel });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ command: CommandIDs.createConsole });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ command: CommandIDs.closeAndShutdown });
-  menu.addItem({ command: CommandIDs.trust });
-  menu.addItem({ type: 'submenu', submenu: exportTo });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ type: 'submenu', submenu: settings });
+  // Add a kernel user to the Kernel menu
+  mainMenu.kernelMenu.kernelUsers.set('Notebook', {
+    tracker,
+    interruptKernel: current => {
+      let kernel = current.session.kernel;
+      if (kernel) {
+        return kernel.interrupt();
+      }
+      return Promise.resolve(void 0);
+    },
+    restartKernel: current => current.session.restart(),
+    changeKernel: current => current.session.selectKernel(),
+    shutdownKernel: current => current.session.shutdown(),
+  } as IKernelMenu.IKernelUser<NotebookPanel>);
 
-  return menu;
+  // Add a console creator the the Kernel menu
+  mainMenu.kernelMenu.consoleCreators.set('Notebook', {
+    tracker,
+    createConsole: current => {
+      const options: ReadonlyJSONObject = {
+        path: current.context.path,
+        preferredLanguage: current.context.model.defaultKernelLanguage
+      };
+      return commands.execute('console:create', options);
+    }
+  } as IKernelMenu.IConsoleCreator<NotebookPanel>);
+
+  // Add some commands to the application view menu.
+  const viewGroup = [
+    CommandIDs.hideAllCode,
+    CommandIDs.showAllCode,
+    CommandIDs.hideAllOutputs,
+    CommandIDs.showAllOutputs
+  ].map(command => { return { command }; });
+  mainMenu.viewMenu.addGroup(viewGroup, 10);
+
+  // Add an IEditorViewer to the application view menu
+  mainMenu.viewMenu.editorViewers.set('Notebook', {
+    tracker,
+    toggleLineNumbers: widget => {
+      NotebookActions.toggleAllLineNumbers(widget.notebook);
+    },
+    toggleMatchBrackets: widget => {
+      NotebookActions.toggleAllMatchBrackets(widget.notebook);
+    },
+    lineNumbersToggled: widget =>
+      widget.notebook.activeCell.editor.getOption('lineNumbers'),
+    matchBracketsToggled: widget =>
+      widget.notebook.activeCell.editor.getOption('matchBrackets'),
+  } as IViewMenu.IEditorViewer<NotebookPanel>);
+
+  // Add an ICodeRunner to the application run menu
+  mainMenu.runMenu.codeRunners.set('Notebook', {
+    tracker,
+    noun: 'Cell',
+    run: current => {
+      const { context, notebook } = current;
+      return NotebookActions.runAndAdvance(notebook, context.session)
+      .then(() => void 0);
+    },
+    runAll: current => {
+      const { context, notebook } = current;
+      return NotebookActions.runAll(notebook, context.session)
+      .then(() => void 0);
+    },
+    runAbove: current => {
+      const { context, notebook } = current;
+      return NotebookActions.runAllAbove(notebook, context.session)
+      .then(() => void 0);
+    },
+    runBelow: current => {
+      const { context, notebook } = current;
+      return NotebookActions.runAllBelow(notebook, context.session)
+      .then(() => void 0);
+    }
+  } as IRunMenu.ICodeRunner<NotebookPanel>);
+
+  // Add commands to the application edit menu.
+  const undoCellActionGroup = [
+    CommandIDs.undoCellAction,
+    CommandIDs.redoCellAction
+  ].map(command => { return { command }; });
+  const editGroup = [
+    CommandIDs.cut,
+    CommandIDs.copy,
+    CommandIDs.paste,
+    CommandIDs.deleteCell,
+    CommandIDs.split,
+    CommandIDs.merge
+  ].map(command => { return { command }; });
+  mainMenu.editMenu.addGroup(undoCellActionGroup, 4);
+  mainMenu.editMenu.addGroup(editGroup, 5);
 }

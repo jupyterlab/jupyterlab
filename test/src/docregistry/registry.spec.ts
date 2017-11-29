@@ -235,46 +235,6 @@ describe('docregistry/registry', () => {
 
     });
 
-    describe('#addCreator()', () => {
-
-      it('should add a file type to the document registry', () => {
-        let creator = { name: 'notebook', fileType: 'notebook' };
-        registry.addCreator(creator);
-        expect(registry.creators().next()).to.be(creator);
-      });
-
-      it('should be removed from the registry when disposed', () => {
-        let creator = { name: 'notebook', fileType: 'notebook' };
-        let disposable = registry.addCreator(creator);
-        disposable.dispose();
-        expect(toArray(registry.creators()).length).to.be(0);
-      });
-
-      it('should end up in locale order', () => {
-        let creators = [
-          { name: 'Python Notebook', fileType: 'notebook' },
-          { name: 'R Notebook', fileType: 'notebook' },
-          { name: 'CSharp Notebook', fileType: 'notebook' }
-        ];
-        registry.addCreator(creators[0]);
-        registry.addCreator(creators[1]);
-        registry.addCreator(creators[2]);
-        let it = registry.creators();
-        expect(it.next()).to.be(creators[2]);
-        expect(it.next()).to.be(creators[0]);
-        expect(it.next()).to.be(creators[1]);
-      });
-
-      it('should be a no-op if a file type of the same name is registered', () => {
-        let creator = { name: 'notebook', fileType: 'notebook' };
-        registry.addCreator(creator);
-        let disposable = registry.addCreator(creator);
-        disposable.dispose();
-        expect(registry.creators().next()).to.eql(creator);
-      });
-
-    });
-
     describe('#preferredWidgetFactories()', () => {
 
       beforeEach(() => {
@@ -411,24 +371,6 @@ describe('docregistry/registry', () => {
 
     });
 
-    describe('#creators()', () => {
-
-      it('should get the registered file creators', () => {
-        expect(toArray(registry.creators()).length).to.be(0);
-        let creators = [
-          { name: 'Python Notebook', fileType: 'notebook' },
-          { name: 'R Notebook', fileType: 'notebook' },
-          { name: 'CSharp Notebook', fileType: 'notebook' }
-        ];
-        registry.addCreator(creators[0]);
-        registry.addCreator(creators[1]);
-        registry.addCreator(creators[2]);
-        expect(toArray(registry.creators()).length).to.be(3);
-        expect(registry.creators().next().name).to.be('CSharp Notebook');
-      });
-
-    });
-
     describe('#getFileType()', () => {
 
       it('should get a file type by name', () => {
@@ -436,25 +378,6 @@ describe('docregistry/registry', () => {
         expect(registry.getFileType('python')).to.be.ok();
         expect(registry.getFileType('fizzbuzz')).to.be(void 0);
       });
-    });
-
-    describe('#getCreator()', () => {
-
-      it('should get a creator by name', () => {
-        let creators = [
-          { name: 'Python Notebook', fileType: 'notebook' },
-          { name: 'R Notebook', fileType: 'notebook' },
-          { name: 'Shell Notebook', fileType: 'notebook' }
-        ];
-        registry.addCreator(creators[0]);
-        registry.addCreator(creators[1]);
-        registry.addCreator(creators[2]);
-        expect(registry.getCreator('Python Notebook')).to.be(creators[0]);
-        expect(registry.getCreator('r notebook')).to.be(creators[1]);
-        expect(registry.getCreator('shell Notebook')).to.be(creators[2]);
-        expect(registry.getCreator('foo')).to.be(void 0);
-      });
-
     });
 
     describe('#getKernelPreference()', () => {

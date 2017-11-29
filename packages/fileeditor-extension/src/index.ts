@@ -18,12 +18,20 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
+  IFileBrowserFactory
+} from '@jupyterlab/filebrowser';
+
+import {
   FileEditor, FileEditorFactory, IEditorTracker
 } from '@jupyterlab/fileeditor';
 
 import {
   ILauncher
 } from '@jupyterlab/launcher';
+
+import {
+  IEditMenu, IMainMenu, IKernelMenu, IViewMenu
+} from '@jupyterlab/mainmenu';
 
 
 /**
@@ -41,6 +49,9 @@ const FACTORY = 'Editor';
  * The command IDs used by the fileeditor plugin.
  */
 namespace CommandIDs {
+  export
+  const createNew = 'fileeditor:create-new';
+
   export
   const lineNumbers = 'fileeditor:toggle-line-numbers';
 
@@ -73,8 +84,8 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<IEditorTracker> = {
   activate,
   id: '@jupyterlab/fileeditor-extension:plugin',
-  requires: [ILayoutRestorer, IEditorServices, ISettingRegistry],
-  optional: [ILauncher],
+  requires: [IEditorServices, IFileBrowserFactory, ILayoutRestorer, ISettingRegistry],
+  optional: [ILauncher, IMainMenu],
   provides: IEditorTracker,
   autoStart: true
 };
@@ -89,7 +100,7 @@ export default plugin;
 /**
  * Activate the editor tracker plugin.
  */
-function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IEditorServices, settingRegistry: ISettingRegistry, launcher: ILauncher | null): IEditorTracker {
+function activate(app: JupyterLab, editorServices: IEditorServices, browserFactory: IFileBrowserFactory, restorer: ILayoutRestorer, settingRegistry: ISettingRegistry, launcher: ILauncher | null, menu: IMainMenu | null): IEditorTracker {
   const id = plugin.id;
   const namespace = 'editor';
   const factory = new FileEditorFactory({
@@ -98,7 +109,8 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
   });
   const { commands, restored } = app;
   const tracker = new InstanceTracker<FileEditor>({ namespace });
-  const hasWidget = () => !!tracker.currentWidget;
+  const isEnabled = () => tracker.currentWidget !== null &&
+                          tracker.currentWidget === app.shell.currentWidget;
 
   let {
     lineNumbers, lineWrap, matchBrackets, autoClosingBrackets
@@ -181,7 +193,7 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
         console.error(`Failed to set ${id}:${key} - ${reason.message}`);
       });
     },
-    isEnabled: hasWidget,
+    isEnabled,
     isToggled: () => lineNumbers,
     label: 'Line Numbers'
   });
@@ -196,7 +208,7 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
         console.error(`Failed to set ${id}:${key} - ${reason.message}`);
       });
     },
-    isEnabled: hasWidget,
+    isEnabled,
     isToggled: () => lineWrap,
     label: 'Word Wrap'
   });
@@ -214,7 +226,7 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
       editor.setOption('insertSpaces', insertSpaces);
       editor.setOption('tabSize', size);
     },
-    isEnabled: hasWidget,
+    isEnabled,
     isToggled: args => {
       let widget = tracker.currentWidget;
       if (!widget) {
@@ -239,7 +251,7 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
       return settingRegistry.set(id, 'matchBrackets', matchBrackets);
     },
     label: 'Match Brackets',
-    isEnabled: hasWidget,
+    isEnabled,
     isToggled: () => matchBrackets
   });
 
@@ -253,7 +265,7 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
         .set(id, 'autoClosingBrackets', autoClosingBrackets);
     },
     label: 'Auto-Closing Brackets',
-    isEnabled: hasWidget,
+    isEnabled,
     isToggled: () => autoClosingBrackets
   });
 
@@ -271,7 +283,7 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
         preferredLanguage: widget.context.model.defaultKernelLanguage
       });
     },
-    isEnabled: hasWidget,
+    isEnabled,
     label: 'Create Console for Editor'
   });
 
@@ -329,7 +341,7 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
         return Promise.resolve(void 0);
       }
     },
-    isEnabled: hasWidget,
+    isEnabled,
     label: 'Run Code'
   });
 
@@ -349,6 +361,28 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
     label: 'Show Markdown Preview'
   });
 
+  // Function to create a new untitled text file, given
+  // the current working directory.
+  const createNew = (cwd: string) => {
+    return commands.execute('docmanager:new-untitled', {
+      path: cwd, type: 'file'
+    }).then(model => {
+      return commands.execute('docmanager:open', {
+        path: model.path, factory: FACTORY
+      });
+    });
+  }
+
+  // Add a command for creating a new text file.
+  commands.addCommand(CommandIDs.createNew, {
+    label: 'Text File',
+    caption: 'Create a new text file',
+    execute: () => {
+      let cwd = browserFactory.defaultBrowser.model.path;
+      return createNew(cwd);
+    }
+  });
+
   // Add a launcher item if the launcher is available.
   if (launcher) {
     launcher.add({
@@ -356,15 +390,58 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, editorServices: IE
       category: 'Other',
       rank: 1,
       iconClass: EDITOR_ICON_CLASS,
-      callback: cwd => {
-        return commands.execute('docmanager:new-untitled', {
-          path: cwd, type: 'file'
-        }).then(model => {
-          return commands.execute('docmanager:open', {
-            path: model.path, factory: FACTORY
-          });
-        });
+      callback: createNew
+    });
+  }
+
+  if (menu) {
+    // Add new text file creation to the file menu.
+    menu.fileMenu.newMenu.addItem({ command: CommandIDs.createNew });
+
+    // Add undo/redo hooks to the edit menu.
+    menu.editMenu.undoers.set('Editor', {
+      tracker,
+      undo: widget => { widget.editor.undo(); },
+      redo: widget => { widget.editor.redo(); }
+    } as IEditMenu.IUndoer<FileEditor>);
+
+    // Add editor view options.
+    menu.viewMenu.editorViewers.set('Editor', {
+      tracker,
+      toggleLineNumbers: widget => {
+        const lineNumbers = !widget.editor.getOption('lineNumbers');
+        widget.editor.setOption('lineNumbers', lineNumbers);
+      },
+      toggleWordWrap: widget => {
+        const wordWrap = !widget.editor.getOption('lineWrap');
+        widget.editor.setOption('lineWrap', wordWrap);
+      },
+      toggleMatchBrackets: widget => {
+        const matchBrackets = !widget.editor.getOption('matchBrackets');
+        widget.editor.setOption('matchBrackets', matchBrackets);
+      },
+      lineNumbersToggled: widget => widget.editor.getOption('lineNumbers'),
+      wordWrapToggled: widget => widget.editor.getOption('lineWrap'),
+      matchBracketsToggled: widget => widget.editor.getOption('matchBrackets')
+    } as IViewMenu.IEditorViewer<FileEditor>);
+
+    // Add a console creator the the Kernel menu.
+    menu.kernelMenu.consoleCreators.set('Editor', {
+      tracker,
+      createConsole: current => {
+        const options = {
+          path: current.context.path,
+          preferredLanguage: current.context.model.defaultKernelLanguage
+        };
+        return commands.execute('console:create', options);
       }
+    } as IKernelMenu.IConsoleCreator<FileEditor>);
+
+    // Add a code runner to the Run menu.
+    menu.runMenu.codeRunners.set('Editor', {
+      tracker,
+      noun: 'Code Snippet',
+      run: () => commands.execute(CommandIDs.runCode)
     });
   }
 

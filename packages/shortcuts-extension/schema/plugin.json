@@ -67,10 +67,10 @@
       },
       "type": "object"
     },
-    "console:run": {
+    "console:run-unforced": {
       "default": { },
       "properties": {
-        "command": { "default": "console:run" },
+        "command": { "default": "console:run-unforced" },
         "keys": { "default": ["Enter"] },
         "selector": { "default": ".jp-CodeConsole-promptCell" }
       },
@@ -103,6 +103,24 @@
       },
       "type": "object"
     },
+    "editmenu:undo": {
+      "default": { },
+      "properties": {
+        "command": { "default": "editmenu:undo" },
+        "keys": { "default": ["Ctrl Z"] },
+        "selector": { "default": "[data-jp-undoer]" }
+      },
+      "type": "object"
+    },
+    "editmenu:redo": {
+      "default": { },
+      "properties": {
+        "command": { "default": "editmenu:redo" },
+        "keys": { "default": ["Ctrl Shift Z"] },
+        "selector": { "default": "[data-jp-undoer]" }
+      },
+      "type": "object"
+    },
     "filebrowser:create-main-launcher": {
       "default": { },
       "properties": {
@@ -118,15 +136,6 @@
         "command": { "default": "filebrowser:toggle-main" },
         "keys": { "default": ["Accel Shift F"] },
         "selector": { "default": "body" }
-      },
-      "type": "object"
-    },
-    "fileeditor:run-code": {
-      "default": { },
-      "properties": {
-        "command": { "default": "fileeditor:run-code" },
-        "keys": { "default": ["Shift Enter"] },
-        "selector": { "default": ".jp-FileEditor" }
       },
       "type": "object"
     },
@@ -172,6 +181,24 @@
         "command": { "default": "inspector:open" },
         "keys": { "default": ["Accel I"] },
         "selector": { "default": "body" }
+      },
+      "type": "object"
+    },
+    "kernelmenu:interrupt": {
+      "default": { },
+      "properties": {
+        "command": { "default": "kernelmenu:interrupt" },
+        "keys": { "default": ["I", "I"] },
+        "selector": { "default": "[data-jp-kernel-user]:focus" }
+      },
+      "type": "object"
+    },
+    "kernelmenu:restart": {
+      "default": { },
+      "properties": {
+        "command": { "default": "kernelmenu:restart" },
+        "keys": { "default": ["0", "0"] },
+        "selector": { "default": "[data-jp-kernel-user]:focus" }
       },
       "type": "object"
     },
@@ -366,15 +393,6 @@
       },
       "type": "object"
     },
-    "notebook:interrupt-kernel": {
-      "default": { },
-      "properties": {
-        "command": { "default": "notebook:interrupt-kernel" },
-        "keys": { "default": ["I", "I"] },
-        "selector": { "default": ".jp-Notebook:focus" }
-      },
-      "type": "object"
-    },
     "notebook:merge-cells": {
       "default": { },
       "properties": {
@@ -438,15 +456,6 @@
       },
       "type": "object"
     },
-    "notebook:restart-kernel": {
-      "default": { },
-      "properties": {
-        "command": { "default": "notebook:restart-kernel" },
-        "keys": { "default": ["0", "0"] },
-        "selector": { "default": ".jp-Notebook:focus" }
-      },
-      "type": "object"
-    },
     "notebook:run-cell-1": {
       "default": { },
       "properties": {
@@ -483,21 +492,12 @@
       },
       "type": "object"
     },
-    "notebook:run-cell-and-select-next-1": {
+    "notebook:run-cell-and-select-next": {
       "default": { },
       "properties": {
         "command": { "default": "notebook:run-cell-and-select-next" },
         "keys": { "default": ["Shift Enter"] },
         "selector": { "default": ".jp-Notebook.jp-mod-editMode" }
-      },
-      "type": "object"
-    },
-    "notebook:run-cell-and-select-next-2": {
-      "default": { },
-      "properties": {
-        "command": { "default": "notebook:run-cell-and-select-next" },
-        "keys": { "default": ["Shift Enter"] },
-        "selector": { "default": ".jp-Notebook:focus" }
       },
       "type": "object"
     },
@@ -534,6 +534,15 @@
         "command": { "default": "notebook:undo-cell-action" },
         "keys": { "default": ["Z"] },
         "selector": { "default": ".jp-Notebook:focus" }
+      },
+      "type": "object"
+    },
+    "runmenu:run": {
+      "default": { },
+      "properties": {
+        "command": { "default": "runmenu:run" },
+        "keys": { "default": ["Shift Enter"] },
+        "selector": { "default": "[data-jp-code-runner]" }
       },
       "type": "object"
     },

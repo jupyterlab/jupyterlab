@@ -52,6 +52,16 @@ import {
 
 
 /**
+ * The data attribute added to a widget that has an active kernel.
+ */
+const KERNEL_USER = 'jpKernelUser';
+
+/**
+ * The data attribute added to a widget can run code.
+ */
+const CODE_RUNNER = 'jpCodeRunner';
+
+/**
  * The class name added to console widgets.
  */
 const CONSOLE_CLASS = 'jp-CodeConsole';
@@ -102,6 +112,9 @@ class CodeConsole extends Widget {
   constructor(options: CodeConsole.IOptions) {
     super();
     this.addClass(CONSOLE_CLASS);
+    this.node.dataset[KERNEL_USER] = 'true';
+    this.node.dataset[CODE_RUNNER] = 'true';
+    this.node.tabIndex = -1;  // Allow the widget to take focus.
 
     // Create the panels that hold the content and input.
     let layout = this.layout = new PanelLayout();
@@ -355,6 +368,10 @@ class CodeConsole extends Widget {
     case 'keydown':
       this._evtKeyDown(event as KeyboardEvent);
       break;
+    case 'onclick':
+      this.node.focus();
+      event.preventDefault();
+      break;
     default:
       break;
     }
@@ -366,6 +383,7 @@ class CodeConsole extends Widget {
   protected onAfterAttach(msg: Message): void {
     let node = this.node;
     node.addEventListener('keydown', this, true);
+    node.addEventListener('click', this);
     // Create a prompt if necessary.
     if (!this.promptCell) {
       this.newPromptCell();
@@ -381,6 +399,7 @@ class CodeConsole extends Widget {
   protected onBeforeDetach(msg: Message): void {
     let node = this.node;
     node.removeEventListener('keydown', this, true);
+    node.removeEventListener('click', this);
   }
 
   /**

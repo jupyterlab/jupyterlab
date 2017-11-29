@@ -32,6 +32,7 @@
     "@jupyterlab/fileeditor": "^0.12.0",
     "@jupyterlab/imageviewer": "^0.12.0",
     "@jupyterlab/inspector": "^0.12.0",
+    "@jupyterlab/mainmenu": "^0.1.0",
     "@jupyterlab/notebook": "^0.12.0",
     "@jupyterlab/outputarea": "^0.12.0",
     "@jupyterlab/rendermime": "^0.12.0",

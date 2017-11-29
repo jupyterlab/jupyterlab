@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, IMainMenu, InstanceTracker, showDialog
+  Dialog, ICommandPalette, InstanceTracker, showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -22,8 +22,16 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
+  IFileBrowserFactory
+} from '@jupyterlab/filebrowser';
+
+import {
   ILauncher
 } from '@jupyterlab/launcher';
+
+import {
+  IEditMenu, IFileMenu, IKernelMenu, IMainMenu, IRunMenu
+} from '@jupyterlab/mainmenu';
 
 import {
   find
@@ -32,10 +40,6 @@ import {
 import {
   ReadonlyJSONObject
 } from '@phosphor/coreutils';
-
-import {
-  Menu
-} from '@phosphor/widgets';
 
 
 /**
@@ -49,7 +53,7 @@ namespace CommandIDs {
   const clear = 'console:clear';
 
   export
-  const run = 'console:run';
+  const runUnforced = 'console:run-unforced';
 
   export
   const runForced = 'console:run-forced';
@@ -88,7 +92,8 @@ const tracker: JupyterLabPlugin<IConsoleTracker> = {
     ICommandPalette,
     ConsolePanel.IContentFactory,
     IEditorServices,
-    ILayoutRestorer
+    ILayoutRestorer,
+    IFileBrowserFactory
   ],
   optional: [ILauncher],
   activate: activateConsole,
@@ -122,11 +127,10 @@ export default plugins;
 /**
  * Activate the console extension.
  */
-function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer, launcher: ILauncher | null): IConsoleTracker {
+function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer, browserFactory: IFileBrowserFactory, launcher: ILauncher | null): IConsoleTracker {
   const manager = app.serviceManager;
   const { commands, shell } = app;
   const category = 'Console';
-  const menu = new Menu({ commands });
 
   // Create an instance tracker for all console panels.
   const tracker = new InstanceTracker<ConsolePanel>({ namespace: 'console' });
@@ -140,13 +144,6 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     }),
     name: panel => panel.console.session.path,
     when: manager.ready
-  });
-
-  // Update the command registry when the console state changes.
-  tracker.currentChanged.connect(() => {
-    if (tracker.size <= 1) {
-      commands.notifyCommandChanged(CommandIDs.interrupt);
-    }
   });
 
   // The launcher callback.
@@ -183,9 +180,6 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     });
   }
 
-  // Set the main menu title.
-  menu.title.label = category;
-
   /**
    * Create a console for a given path.
    */
@@ -210,8 +204,9 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
   /**
    * Whether there is an active console.
    */
-  function hasWidget(): boolean {
-    return tracker.currentWidget !== null;
+  function isEnabled(): boolean {
+    return tracker.currentWidget !== null
+           && tracker.currentWidget === app.shell.currentWidget;
   }
 
   let command = CommandIDs.open;
@@ -239,13 +234,12 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
 
   command = CommandIDs.create;
   commands.addCommand(command, {
-    label: 'Start New Console',
+    label: 'Console',
     execute: (args: Partial<ConsolePanel.IOptions>) => {
-      let basePath = args.basePath || '.';
+      let basePath = args.basePath || browserFactory.defaultBrowser.model.path;
       return createConsole({ basePath, ...args });
     }
   });
-  palette.addItem({ command, category });
 
   // Get the current widget and activate unless the args specify otherwise.
   function getCurrent(args: ReadonlyJSONObject): ConsolePanel | null {
@@ -267,13 +261,13 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
       }
       current.console.clear();
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   palette.addItem({ command, category });
 
-  command = CommandIDs.run;
+  command = CommandIDs.runUnforced;
   commands.addCommand(command, {
-    label: 'Run Cell',
+    label: 'Run Cell (unforced)',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
@@ -281,7 +275,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
       }
       return current.console.execute();
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   palette.addItem({ command, category });
 
@@ -295,7 +289,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
       }
       current.console.execute(true);
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   palette.addItem({ command, category });
 
@@ -309,7 +303,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
       }
       current.console.insertLinebreak();
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   palette.addItem({ command, category });
 
@@ -326,7 +320,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
         return kernel.interrupt();
       }
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   palette.addItem({ command, category });
 
@@ -340,7 +334,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
       }
       return current.console.session.restart();
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   palette.addItem({ command, category });
 
@@ -366,7 +360,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
         }
       });
     },
-    isEnabled: hasWidget
+    isEnabled
   });
 
   command = CommandIDs.inject;
@@ -384,7 +378,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
         return false;
       });
     },
-    isEnabled: hasWidget
+    isEnabled
   });
 
   command = CommandIDs.changeKernel;
@@ -397,23 +391,65 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
       }
       return current.console.session.selectKernel();
     },
-    isEnabled: hasWidget
+    isEnabled
   });
   palette.addItem({ command, category });
 
-  menu.addItem({ command: CommandIDs.run });
-  menu.addItem({ command: CommandIDs.runForced });
-  menu.addItem({ command: CommandIDs.linebreak });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ command: CommandIDs.clear });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ command: CommandIDs.interrupt });
-  menu.addItem({ command: CommandIDs.restart });
-  menu.addItem({ command: CommandIDs.changeKernel });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ command: CommandIDs.closeAndShutdown });
+  // Add a console creator to the File menu
+  mainMenu.fileMenu.newMenu.addItem({ command: CommandIDs.create });
 
-  mainMenu.addMenu(menu, {rank: 50});
+  // Add a close and shutdown command to the file menu.
+  mainMenu.fileMenu.closeAndCleaners.set('Console', {
+    tracker,
+    action: 'Shutdown',
+    closeAndCleanup: (current: ConsolePanel) => {
+      return showDialog({
+        title: 'Shutdown the console?',
+        body: `Are you sure you want to close "${current.title.label}"?`,
+        buttons: [Dialog.cancelButton(), Dialog.warnButton()]
+      }).then(result => {
+        if (result.button.accept) {
+          current.console.session.shutdown().then(() => {
+            current.dispose();
+          });
+        } else {
+          return void 0;
+        }
+      });
+    }
+  } as IFileMenu.ICloseAndCleaner<ConsolePanel>);
+
+  // Add a kernel user to the Kernel menu
+  mainMenu.kernelMenu.kernelUsers.set('Console', {
+    tracker,
+    interruptKernel: current => {
+      let kernel = current.console.session.kernel;
+      if (kernel) {
+        return kernel.interrupt();
+      }
+      return Promise.resolve(void 0);
+    },
+    restartKernel: current => current.console.session.restart(),
+    changeKernel: current => current.console.session.selectKernel(),
+    shutdownKernel: current => current.console.session.shutdown()
+  } as IKernelMenu.IKernelUser<ConsolePanel>);
+
+  // Add a code runner to the Run menu.
+  mainMenu.runMenu.codeRunners.set('Console', {
+    tracker,
+    noun: 'Cell',
+    run: current => current.console.execute(true)
+  } as IRunMenu.ICodeRunner<ConsolePanel>);
+
+  // Add a group to the edit menu.
+  mainMenu.editMenu.addGroup([{ command: CommandIDs.linebreak }]);
+
+  // Add a clearer to the edit menu
+  mainMenu.editMenu.clearers.set('Console', {
+    tracker,
+    noun: 'Console',
+    clear: (current: ConsolePanel) => { return current.console.clear() }
+  } as IEditMenu.IClearer<ConsolePanel>);
 
   app.contextMenu.addItem({command: CommandIDs.clear, selector: '.jp-CodeConsole'});
   app.contextMenu.addItem({command: CommandIDs.restart, selector: '.jp-CodeConsole'});

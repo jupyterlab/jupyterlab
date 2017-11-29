@@ -99,7 +99,6 @@ class DocumentRegistry implements IDisposable {
     }
 
     this._fileTypes.length = 0;
-    this._creators.length = 0;
     Signal.clearData(this);
   }
 
@@ -277,37 +276,6 @@ class DocumentRegistry implements IDisposable {
   }
 
   /**
-   * Add a creator to the registry.
-   *
-   * @params creator - The file creator object to register.
-   *
-   * @returns A disposable which will unregister the creator.
-   */
-  addCreator(creator: DocumentRegistry.IFileCreator): IDisposable {
-    let index = ArrayExt.findFirstIndex(this._creators, (value) => {
-      return value.name.localeCompare(creator.name) > 0;
-    });
-    if (index !== -1) {
-      ArrayExt.insert(this._creators, index, creator);
-    } else {
-      this._creators.push(creator);
-    }
-    this._changed.emit({
-      type: 'fileCreator',
-      name: creator.name,
-      change: 'added'
-    });
-    return new DisposableDelegate(() => {
-      ArrayExt.removeFirstOf(this._creators, creator);
-      this._changed.emit({
-        type: 'fileCreator',
-        name: creator.name,
-        change: 'removed'
-      });
-    });
-  }
-
-  /**
    * Get a list of the preferred widget factories.
    *
    * @param path - The file path to filter the results.
@@ -439,15 +407,6 @@ class DocumentRegistry implements IDisposable {
   }
 
   /**
-   * Create an iterator over the file creators that have been registered.
-   *
-   * @returns A new iterator of file creatores.
-   */
-  creators(): IIterator<DocumentRegistry.IFileCreator> {
-    return new ArrayIterator(this._creators);
-  }
-
-  /**
    * Get a widget factory by name.
    *
    * @param widgetName - The name of the widget factory.
@@ -476,16 +435,6 @@ class DocumentRegistry implements IDisposable {
     name = name.toLowerCase();
     return find(this._fileTypes, fileType => {
       return fileType.name.toLowerCase() === name;
-    });
-  }
-
-  /**
-   * Get a creator by name.
-   */
-  getCreator(name: string): DocumentRegistry.IFileCreator | undefined {
-    name = name.toLowerCase();
-    return find(this._creators, creator => {
-      return creator.name.toLowerCase() === name;
     });
   }
 
@@ -586,7 +535,6 @@ class DocumentRegistry implements IDisposable {
   private _defaultWidgetFactories: { [key: string]: string } = Object.create(null);
   private _widgetFactoryExtensions: {[key: string]: string[] } = Object.create(null);
   private _fileTypes: DocumentRegistry.IFileType[] = [];
-  private _creators: DocumentRegistry.IFileCreator[] = [];
   private _extenders: { [key: string] : DocumentRegistry.WidgetExtension[] } = Object.create(null);
   private _changed = new Signal<this, DocumentRegistry.IChangedArgs>(this);
   private _isDisposed = false;
@@ -1042,32 +990,6 @@ namespace DocumentRegistry {
   };
 
   /**
-   * An interface for a "Create New" item.
-   */
-  export
-  interface IFileCreator {
-    /**
-     * The name of the file creator.
-     */
-    readonly name: string;
-
-    /**
-     * The filetype name associated with the creator.
-     */
-    readonly fileType: string;
-
-    /**
-     * The optional widget name.
-     */
-    readonly widgetName?: string;
-
-    /**
-     * The optional kernel name.
-     */
-    readonly kernelName?: string;
-  }
-
-  /**
    * An arguments object for the `changed` signal.
    */
   export
@@ -1075,7 +997,7 @@ namespace DocumentRegistry {
     /**
      * The type of the changed item.
      */
-    readonly type: 'widgetFactory' | 'modelFactory' | 'widgetExtension' | 'fileCreator' | 'fileType';
+    readonly type: 'widgetFactory' | 'modelFactory' | 'widgetExtension' | 'fileType';
 
     /**
      * The name of the item or the widget factory being extended.
