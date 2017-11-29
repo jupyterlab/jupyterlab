@@ -63,8 +63,10 @@ describe('@jupyterlab/mainmenu', () => {
       it('should add a new group to the menu', () => {
         menu.addGroup([ { command: 'run1'}, { command: 'run2' }]);
 
-        let idx1 = ArrayExt.findFirstIndex(menu.items, m => m.command === 'run1');
-        let idx2 = ArrayExt.findFirstIndex(menu.items, m => m.command === 'run2');
+        let idx1 = ArrayExt.findFirstIndex(menu.menu.items,
+                                           m => m.command === 'run1');
+        let idx2 = ArrayExt.findFirstIndex(menu.menu.items,
+                                           m => m.command === 'run2');
 
         expect(idx1 === -1).to.be(false);
         expect(idx2 === -1).to.be(false);
@@ -75,10 +77,14 @@ describe('@jupyterlab/mainmenu', () => {
         menu.addGroup([ { command: 'run1'}, { command: 'run2' }], 2);
         menu.addGroup([ { command: 'run3'}, { command: 'run4' }], 1);
 
-        let idx1 = ArrayExt.findFirstIndex(menu.items, m => m.command === 'run1');
-        let idx2 = ArrayExt.findFirstIndex(menu.items, m => m.command === 'run2');
-        let idx3 = ArrayExt.findFirstIndex(menu.items, m => m.command === 'run3');
-        let idx4 = ArrayExt.findFirstIndex(menu.items, m => m.command === 'run4');
+        let idx1 = ArrayExt.findFirstIndex(menu.menu.items,
+                                           m => m.command === 'run1');
+        let idx2 = ArrayExt.findFirstIndex(menu.menu.items,
+                                           m => m.command === 'run2');
+        let idx3 = ArrayExt.findFirstIndex(menu.menu.items,
+                                           m => m.command === 'run3');
+        let idx4 = ArrayExt.findFirstIndex(menu.menu.items,
+                                           m => m.command === 'run4');
         expect(idx3 < idx4).to.be(true);
         expect(idx4 < idx1).to.be(true);
         expect(idx1 < idx2).to.be(true);

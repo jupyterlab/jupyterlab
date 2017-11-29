@@ -34,7 +34,7 @@ describe('@jupyterlab/mainmenu', () => {
     describe('#constructor()', () => {
       it('should construct a new help menu', () => {
         expect(menu).to.be.an(HelpMenu);
-        expect(menu.title.label).to.be('Help');
+        expect(menu.menu.title.label).to.be('Help');
       });
 
     });

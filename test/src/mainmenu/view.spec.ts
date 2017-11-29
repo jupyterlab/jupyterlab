@@ -54,7 +54,7 @@ describe('@jupyterlab/mainmenu', () => {
 
       it('should construct a new view menu', () => {
         expect(menu).to.be.an(ViewMenu);
-        expect(menu.title.label).to.be('View');
+        expect(menu.menu.title.label).to.be('View');
       });
 
     });

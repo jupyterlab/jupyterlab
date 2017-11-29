@@ -52,7 +52,7 @@ describe('@jupyterlab/mainmenu', () => {
 
       it('should construct a new edit menu', () => {
         expect(menu).to.be.an(EditMenu);
-        expect(menu.title.label).to.be('Edit');
+        expect(menu.menu.title.label).to.be('Edit');
       });
 
     });

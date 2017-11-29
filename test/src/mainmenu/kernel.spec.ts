@@ -52,7 +52,7 @@ describe('@jupyterlab/mainmenu', () => {
 
       it('should construct a new kernel menu', () => {
         expect(menu).to.be.an(KernelMenu);
-        expect(menu.title.label).to.be('Kernel');
+        expect(menu.menu.title.label).to.be('Kernel');
       });
 
     });

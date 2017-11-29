@@ -74,7 +74,8 @@ describe('@jupyterlab/mainmenu', () => {
       });
 
       it('should be the first menu', () => {
-        expect(ArrayExt.firstIndexOf(mainMenu.menus, mainMenu.fileMenu)).to.be(0);
+        expect(ArrayExt.firstIndexOf(
+          mainMenu.menus, mainMenu.fileMenu.menu)).to.be(0);
       });
 
     });
@@ -86,7 +87,8 @@ describe('@jupyterlab/mainmenu', () => {
       });
 
       it('should be the second menu', () => {
-        expect(ArrayExt.firstIndexOf(mainMenu.menus, mainMenu.editMenu)).to.be(1);
+        expect(ArrayExt.firstIndexOf(mainMenu.menus,
+                                     mainMenu.editMenu.menu)).to.be(1);
       });
 
     });
@@ -98,7 +100,8 @@ describe('@jupyterlab/mainmenu', () => {
       });
 
       it('should be the third menu', () => {
-        expect(ArrayExt.firstIndexOf(mainMenu.menus, mainMenu.runMenu)).to.be(2);
+        expect(ArrayExt.firstIndexOf(mainMenu.menus,
+                                     mainMenu.runMenu.menu)).to.be(2);
       });
 
     });
@@ -110,7 +113,8 @@ describe('@jupyterlab/mainmenu', () => {
       });
 
       it('should be the fourth menu', () => {
-        expect(ArrayExt.firstIndexOf(mainMenu.menus, mainMenu.kernelMenu)).to.be(3);
+        expect(ArrayExt.firstIndexOf(mainMenu.menus,
+                                     mainMenu.kernelMenu.menu)).to.be(3);
       });
 
     });
@@ -122,7 +126,8 @@ describe('@jupyterlab/mainmenu', () => {
       });
 
       it('should be the fifth menu', () => {
-        expect(ArrayExt.firstIndexOf(mainMenu.menus, mainMenu.viewMenu)).to.be(4);
+        expect(ArrayExt.firstIndexOf(mainMenu.menus,
+                                     mainMenu.viewMenu.menu)).to.be(4);
       });
 
     });
@@ -134,7 +139,8 @@ describe('@jupyterlab/mainmenu', () => {
       });
 
       it('should be the sixth menu', () => {
-        expect(ArrayExt.firstIndexOf(mainMenu.menus, mainMenu.helpMenu)).to.be(5);
+        expect(ArrayExt.firstIndexOf(mainMenu.menus,
+                                     mainMenu.helpMenu.menu)).to.be(5);
       });
 
     });
