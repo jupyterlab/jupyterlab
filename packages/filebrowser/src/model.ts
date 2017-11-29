@@ -208,6 +208,7 @@ class FileBrowserModel implements IDisposable {
       if (this.isDisposed) {
         return;
       }
+      this._refreshDuration = REFRESH_DURATION;
       this._handleContents(contents);
       this._pendingPath = null;
       if (oldValue !== newValue) {
@@ -230,6 +231,9 @@ class FileBrowserModel implements IDisposable {
         error.message = `Directory not found: "${this._model.path}"`;
         this._connectionFailure.emit(error);
         this.cd('/');
+      } else {
+        this._refreshDuration = REFRESH_DURATION * 10;
+        this._connectionFailure.emit(error);
       }
     });
     return this._pending;
@@ -437,7 +441,7 @@ class FileBrowserModel implements IDisposable {
         return;
       }
       let date = new Date().getTime();
-      if ((date - this._lastRefresh) > REFRESH_DURATION) {
+      if ((date - this._lastRefresh) > this._refreshDuration) {
         this.refresh();
       }
     }, MIN_REFRESH);
@@ -471,6 +475,7 @@ class FileBrowserModel implements IDisposable {
   private _sessions: Session.IModel[] = [];
   private _state: IStateDB | null = null;
   private _timeoutId = -1;
+  private _refreshDuration = REFRESH_DURATION;
   private _driveName: string;
   private _isDisposed = false;
   private _restored = new PromiseDelegate<void>();

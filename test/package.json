@@ -12,7 +12,6 @@
     "test:firefox": "python run-test.py --browsers=Firefox karma.conf.js",
     "test:ie": "python run-test.py  --browsers=IE karma.conf.js",
     "watch": "jlpm run clean && tsc && run-p watch:*",
-    "watch:test": "node watch-test.js",
     "watch:ts": "tsc -w",
     "watch:webpack": "webpack --watch"
   },

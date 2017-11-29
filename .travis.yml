@@ -19,6 +19,7 @@ env:
     - GROUP=cli
     - GROUP=docs
     - GROUP=js_cov
+    - GROUP=js_services
   global:
   - MINICONDA_DIR="$HOME/miniconda"
   - GH_REF: github.com/jupyterlab/jupyterlab.git

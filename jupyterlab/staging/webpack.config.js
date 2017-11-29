@@ -97,7 +97,7 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
 
 
 module.exports = {
-  entry:  path.resolve(buildDir, 'index.out.js'),
+  entry:  ['whatwg-fetch', path.resolve(buildDir, 'index.out.js')],
   output: {
     path: path.resolve(buildDir),
     filename: '[name].bundle.js'

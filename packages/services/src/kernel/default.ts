@@ -370,9 +370,10 @@ class DefaultKernel implements Kernel.IKernel {
     if (this.status === 'dead') {
       return Promise.reject(new Error('Kernel is dead'));
     }
-    this._clearState();
-    this._clearSocket();
-    return Private.shutdownKernel(this.id, this.serverSettings);
+    return Private.shutdownKernel(this.id, this.serverSettings).then(() => {
+      this._clearState();
+      this._clearSocket();
+    });
   }
 
   /**
@@ -651,7 +652,7 @@ class DefaultKernel implements Kernel.IKernel {
 
     this._connectionPromise = new PromiseDelegate<void>();
     this._wsStopped = false;
-    this._ws = settings.wsFactory(url);
+    this._ws = new settings.WebSocket(url);
 
     // Ensure incoming binary messages are not Blobs
     this._ws.binaryType = 'arraybuffer';
@@ -1125,7 +1126,7 @@ namespace DefaultKernel {
   /**
    * Connect to a running kernel.
    *
-   * @param id - The id of the running kernel.
+   * @param model - The model of the running kernel.
    *
    * @param settings - The server settings for the request.
    *
@@ -1134,18 +1135,10 @@ namespace DefaultKernel {
    * #### Notes
    * If the kernel was already started via `startNewKernel`, the existing
    * Kernel object info is used to create another instance.
-   *
-   * Otherwise, if `options` are given, we attempt to connect to the existing
-   * kernel found by calling `listRunningKernels`.
-   * The promise is fulfilled when the kernel is running on the server,
-   * otherwise the promise is rejected.
-   *
-   * If the kernel was not already started and no `options` are given,
-   * the promise is rejected.
    */
   export
-  function connectTo(id: string, settings?: ServerConnection.ISettings): Promise<Kernel.IKernel> {
-    return Private.connectTo(id, settings);
+  function connectTo(model: Kernel.IModel, settings?: ServerConnection.ISettings): Promise<Kernel.IKernel> {
+    return Private.connectTo(model, settings);
   }
 
   /**
@@ -1160,6 +1153,18 @@ namespace DefaultKernel {
   export
   function shutdown(id: string, settings?: ServerConnection.ISettings): Promise<void> {
     return Private.shutdownKernel(id, settings);
+  }
+
+  /**
+   * Shut down all kernels.
+   *
+   * @param settings - The server settings to use.
+   *
+   * @returns A promise that resolves when all the kernels are shut down.
+   */
+  export
+  function shutdownAll(settings?: ServerConnection.ISettings): Promise<void> {
+    return Private.shutdownAll(settings);
   }
 }
 
@@ -1218,20 +1223,14 @@ namespace Private {
   export
   function getSpecs(settings?: ServerConnection.ISettings): Promise<Kernel.ISpecModels> {
     settings = settings || ServerConnection.makeSettings();
-    let request = {
-      url: URLExt.join(settings.baseUrl, KERNELSPEC_SERVICE_URL),
-      method: 'GET',
-      cache: false
-    };
-    let promise = ServerConnection.makeRequest(request, settings).then(response => {
-      if (response.xhr.status !== 200) {
-        throw ServerConnection.makeError(response);
+    let url = URLExt.join(settings.baseUrl, KERNELSPEC_SERVICE_URL);
+    let promise = ServerConnection.makeRequest(url, {}, settings).then(response => {
+      if (response.status !== 200) {
+        throw new ServerConnection.ResponseError(response);
       }
-      try {
-        return validate.validateSpecModels(response.data);
-      } catch (err) {
-        throw ServerConnection.makeError(response, err.message);
-      }
+      return response.json();
+    }).then(data => {
+      return validate.validateSpecModels(data);
     });
     Private.specs[settings.baseUrl] = promise;
     return promise;
@@ -1248,27 +1247,21 @@ namespace Private {
   export
   function listRunning(settings?: ServerConnection.ISettings): Promise<Kernel.IModel[]> {
     settings = settings || ServerConnection.makeSettings();
-    let request = {
-      url: URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL),
-      method: 'GET',
-      cache: false
-    };
-    return ServerConnection.makeRequest(request, settings).then(response => {
-      if (response.xhr.status !== 200) {
-        throw ServerConnection.makeError(response);
+    let url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL);
+    return ServerConnection.makeRequest(url, {}, settings).then(response => {
+      if (response.status !== 200) {
+        throw new ServerConnection.ResponseError(response);
       }
-      if (!Array.isArray(response.data)) {
-        throw ServerConnection.makeError(response, 'Invalid kernel list');
+      return response.json();
+    }).then(data => {
+      if (!Array.isArray(data)) {
+        throw new Error('Invalid kernel list');
       }
-      for (let i = 0; i < response.data.length; i++) {
-        try {
-          validate.validateModel(response.data[i]);
-        } catch (err) {
-          throw ServerConnection.makeError(response, err.message);
-        }
+      for (let i = 0; i < data.length; i++) {
+        validate.validateModel(data[i]);
       }
-      return updateRunningKernels(response.data);
-    }, onKernelError);
+      return updateRunningKernels(data);
+    });
   }
 
   /**
@@ -1295,59 +1288,42 @@ namespace Private {
   export
   function startNew(options: Kernel.IOptions): Promise<Kernel.IKernel> {
     let settings = options.serverSettings || ServerConnection.makeSettings();
-    let request = {
-      url: URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL),
+    let url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL);
+    let init = {
       method: 'POST',
-      data: JSON.stringify({ name: options.name }),
-      contentType: 'application/json',
-      cache: false
+      body: JSON.stringify({ name: options.name })
     };
-    return ServerConnection.makeRequest(request, settings).then(response => {
-      if (response.xhr.status !== 201) {
-        throw ServerConnection.makeError(response);
+    return ServerConnection.makeRequest(url, init, settings).then(response => {
+      if (response.status !== 201) {
+        throw new ServerConnection.ResponseError(response);
       }
-      validate.validateModel(response.data);
+      return response.json();
+    }).then(data => {
+      validate.validateModel(data);
       return new DefaultKernel({
         ...options,
-        name: response.data.name,
+        name: data.name,
         serverSettings: settings
-      }, response.data.id);
-    }, onKernelError);
+      }, data.id);
+    });
   }
 
   /**
    * Connect to a running kernel.
-   *
-   * #### Notes
-   * If the kernel was already started via `startNewKernel`, the existing
-   * Kernel object info is used to create another instance.
-   *
-   * Otherwise, if `options` are given, we attempt to connect to the existing
-   * kernel found by calling `listRunningKernels`.
-   * The promise is fulfilled when the kernel is running on the server,
-   * otherwise the promise is rejected.
-   *
-   * If the kernel was not already started and no `options` are given,
-   * the promise is rejected.
    */
   export
-  function connectTo(id: string, settings?: ServerConnection.ISettings): Promise<Kernel.IKernel> {
-    settings = settings || ServerConnection.makeSettings();
+  function connectTo(model: Kernel.IModel, settings?: ServerConnection.ISettings): Promise<Kernel.IKernel> {
+    let serverSettings = settings || ServerConnection.makeSettings();
     let kernel = find(runningKernels, value => {
-      return value.id === id;
+      return value.id === model.id;
     });
     if (kernel) {
       return Promise.resolve(kernel.clone());
     }
 
-    return getKernelModel(id, settings).then(model => {
-      return new DefaultKernel({
-        name: model.name,
-        serverSettings: settings
-        }, id);
-    }).catch(() => {
-      throw new Error(`No running kernel with id: ${id}`);
-    });
+    return Promise.resolve(new DefaultKernel(
+      { name: model.name, serverSettings }, model.id
+    ));
   }
 
   /**
@@ -1363,21 +1339,15 @@ namespace Private {
       settings.baseUrl, KERNEL_SERVICE_URL,
       encodeURIComponent(kernel.id), 'restart'
     );
-    let request = {
-      url,
-      method: 'POST',
-      cache: false
-    };
-    return ServerConnection.makeRequest(request, settings).then(response => {
-      if (response.xhr.status !== 200) {
-        throw ServerConnection.makeError(response);
+    let init = { method: 'POST' };
+    return ServerConnection.makeRequest(url, init, settings).then(response => {
+      if (response.status !== 200) {
+        throw new ServerConnection.ResponseError(response);
       }
-      try {
-        validate.validateModel(response.data);
-      } catch (err) {
-        throw ServerConnection.makeError(response, err.message);
-      }
-    }, onKernelError);
+      return response.json();
+    }).then(data => {
+      validate.validateModel(data);
+    });
   }
 
   /**
@@ -1393,16 +1363,12 @@ namespace Private {
       settings.baseUrl, KERNEL_SERVICE_URL,
       encodeURIComponent(kernel.id), 'interrupt'
     );
-    let request = {
-      url,
-      method: 'POST',
-      cache: false
-    };
-    return ServerConnection.makeRequest(request, settings).then(response => {
-      if (response.xhr.status !== 204) {
-        throw ServerConnection.makeError(response);
+    let init = { method: 'POST' };
+    return ServerConnection.makeRequest(url, init, settings).then(response => {
+      if (response.status !== 204) {
+        throw new ServerConnection.ResponseError(response);
       }
-    }, onKernelError);
+    });
   }
 
   /**
@@ -1413,24 +1379,36 @@ namespace Private {
     settings = settings || ServerConnection.makeSettings();
     let url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL,
                                 encodeURIComponent(id));
-    let request = {
-      url,
-      method: 'DELETE',
-      cache: false
-    };
-    return ServerConnection.makeRequest(request, settings).then(response => {
-      if (response.xhr.status !== 204) {
-        throw ServerConnection.makeError(response);
+    let init = { method: 'DELETE' };
+    return ServerConnection.makeRequest(url, init, settings).then(response => {
+      if (response.status === 404) {
+        response.json().then(data => {
+          let msg = (
+            data.message || `The kernel "${id}"" does not exist on the server`
+          );
+          console.warn(msg);
+        });
+      } else if (response.status !== 204) {
+        throw new ServerConnection.ResponseError(response);
       }
       killKernels(id);
-    }, error => {
-      if (error.xhr.status === 404) {
-        let response = JSON.parse(error.xhr.responseText) as any;
-        console.warn(response['message']);
-        killKernels(id);
-      } else {
-        return onKernelError(error);
-      }
+    });
+  }
+
+  /**
+   * Shut down all kernels.
+   *
+   * @param settings - The server settings to use.
+   *
+   * @returns A promise that resolves when all the kernels are shut down.
+   */
+  export
+  function shutdownAll(settings?: ServerConnection.ISettings): Promise<void> {
+    settings = settings || ServerConnection.makeSettings();
+    return listRunning(settings).then(running => {
+      each(running, k => {
+        shutdownKernel(k.id, settings);
+      });
     });
   }
 
@@ -1454,23 +1432,15 @@ namespace Private {
     settings = settings || ServerConnection.makeSettings();
     let url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL,
                                 encodeURIComponent(id));
-    let request = {
-      url,
-      method: 'GET',
-      cache: false
-    };
-    return ServerConnection.makeRequest(request, settings).then(response => {
-      if (response.xhr.status !== 200) {
-        throw ServerConnection.makeError(response);
+    return ServerConnection.makeRequest(url, {}, settings).then(response => {
+      if (response.status !== 200) {
+        throw new ServerConnection.ResponseError(response);
       }
-      let data = response.data as Kernel.IModel;
-      try {
-        validate.validateModel(data);
-      } catch (err) {
-        throw ServerConnection.makeError(response, err.message);
-      }
+      return response.json();
+    }).then(data => {
+      validate.validateModel(data);
       return data;
-    }, Private.onKernelError);
+    });
   }
 
   /**
@@ -1487,19 +1457,6 @@ namespace Private {
       console.log(`Kernel: ${kernel.status} (${kernel.id})`);
       break;
     }
-  }
-
-  /**
-   * Handle an error on a kernel Ajax call.
-   */
-  export
-  function onKernelError(error: ServerConnection.IError): Promise<any> {
-    let text = (error.message ||
-                error.xhr.statusText ||
-                error.xhr.responseText);
-    let msg = `API request failed: ${text}`;
-    console.error(msg);
-    return Promise.reject(error);
   }
 
   /**

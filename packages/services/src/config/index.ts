@@ -119,15 +119,13 @@ class DefaultConfigSection implements IConfigSection {
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
   load(): Promise<void> {
-    let request = {
-      url: this._url,
-      method: 'GET'
-    };
-    return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
-      if (response.xhr.status !== 200) {
-         throw ServerConnection.makeError(response);
+    return ServerConnection.makeRequest(this._url, {}, this.serverSettings).then(response => {
+      if (response.status !== 200) {
+         throw new ServerConnection.ResponseError(response);
       }
-      this._data = response.data as JSONObject;
+      return response.json();
+    }).then(data => {
+      this._data = data;
     });
   }
 
@@ -145,17 +143,17 @@ class DefaultConfigSection implements IConfigSection {
    */
   update(newdata: JSONObject): Promise<JSONObject> {
     this._data = {...this._data, ...newdata};
-    let request = {
-      url: this._url,
+    let init = {
       method: 'PATCH',
-      data: JSON.stringify(newdata),
-      contentType: 'application/json'
+      body: JSON.stringify(newdata)
     };
-    return ServerConnection.makeRequest(request, this.serverSettings).then(response => {
-      if (response.xhr.status !== 200) {
-       throw ServerConnection.makeError(response);
+    return ServerConnection.makeRequest(this._url, init, this.serverSettings).then(response => {
+      if (response.status !== 200) {
+       throw new ServerConnection.ResponseError(response);
       }
-      this._data = response.data as JSONObject;
+      return response.json();
+    }).then(data => {
+      this._data = data;
       return this._data;
     });
   }

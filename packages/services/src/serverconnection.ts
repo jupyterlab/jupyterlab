@@ -5,37 +5,97 @@ import {
   PageConfig
 } from '@jupyterlab/coreutils';
 
-import {
-  PromiseDelegate
-} from '@phosphor/coreutils';
+
+/**
+ * Handle the default `fetch` and `WebSocket` providers.
+ */
+declare var global: any;
+
+let FETCH: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
+let HEADERS: typeof Headers;
+let REQUEST: typeof Request;
+let WEBSOCKET: typeof WebSocket;
+
+if (typeof window === 'undefined') {
+  // Mangle the require statements so it does not get picked up in the
+  // browser assets.
+  /* tslint:disable */
+  let fetchMod = eval('require')('node-fetch');
+  FETCH = global.fetch || fetchMod;
+  REQUEST = global.Request || fetchMod.Request;
+  HEADERS = global.Headers || fetchMod.Headers;
+  WEBSOCKET = global.WebSocket || eval('require')('ws');
+  /* tslint:enable */
+} else {
+  FETCH = fetch;
+  REQUEST = Request;
+  HEADERS = Headers;
+  WEBSOCKET = WebSocket;
+}
 
 
 /**
  * The namespace for ServerConnection functions.
+ *
+ * #### Notes
+ * This is only intended to manage communication with the Jupyter server.
+ *
+ * The default values can be used in a JupyterLab or Jupyter Notebook context.
+ *
+ * We use `token` authentication if available, falling back on an XSRF
+ * cookie if one has been provided on the `document`.
+ *
+ * A content type of `'application/json'` is added when using authentication
+ * and there is no body data to allow the server to prevent malicious forms.
  */
 export
 namespace ServerConnection {
-  /**
-   * Make an Asynchronous XMLHttpRequest.
-   *
-   * @param request - The data for the request.
-   *
-   * @param settings - The server settings to apply to the request.
-   *
-   * @returns a Promise that resolves with the response data.
-   */
-  export
-  function makeRequest(request: IRequest, settings: ISettings): Promise<IResponse> {
-    let url = request.url;
-    if (request.cache !== true) {
-      // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest#Bypassing_the_cache.
-      url += ((/\?/).test(url) ? '&' : '?') + (new Date()).getTime();
-    }
-    let xhr = settings.xhrFactory();
-    xhr.open(request.method || 'GET', url, true,
-             settings.user, settings.password);
-    Private.populateRequest(xhr, request, settings);
-    return Private.handleRequest(xhr, request, settings);
+   /**
+    * A Jupyter server settings object.
+    * Note that all of the settings are optional when passed to
+    * [[makeSettings]].  The default settings are given in [[defaultSettings]].
+    */
+   export
+   interface ISettings {
+     /**
+      * The base url of the server.
+      */
+     readonly baseUrl: string;
+
+     /**
+      * The base ws url of the server.
+      */
+     readonly wsUrl: string;
+
+     /**
+      * The default request init options.
+      */
+     readonly init: RequestInit;
+
+     /**
+      * The authentication token for requests.  Use an empty string to disable.
+      */
+     readonly token: string;
+
+     /**
+      * The `fetch` method to use.
+      */
+     readonly fetch: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
+
+     /**
+      * The `Request` object constructor.
+      */
+     readonly Request: typeof Request;
+
+     /**
+      * The `Headers` object constructor.
+      */
+     readonly Headers: typeof Headers;
+
+     /**
+      * The `WebSocket` object constructor.
+      */
+     readonly WebSocket: typeof WebSocket;
   }
 
   /**
@@ -47,191 +107,81 @@ namespace ServerConnection {
    */
   export
   function makeSettings(options?: Partial<ISettings>) {
-    // Use the singleton default settings if no options are given.
-    if (options === void 0) {
-      if (Private.defaultSettings === void 0) {
-        Private.defaultSettings = Private.makeSettings();
-      }
-      return Private.defaultSettings;
-    }
     return Private.makeSettings(options);
   }
 
   /**
-   * Create an AJAX error from an AJAX success.
+   * Make an request to the notebook server.
    *
-   * @param response - The response object.
+   * @param url - The url for the request.
    *
-   * @param message - The optional new error message.  If not given
-   *  we use "Invalid Status: <xhr.status>"
+   * @param init - The initialization options for the request.
+   *
+   * @param settings - The server settings to apply to the request.
+   *
+   * @returns a Promise that resolves with the response.
+   *
+   * @throws If the url of the request is not a notebook server url.
+   *
+   * #### Notes
+   * If there is no body data, we set the content type to `application/json`
+   * because it is required by the Notebook server.
    */
   export
-  function makeError(response: IResponse, message?: string): IError {
-    let { xhr, request, settings, event } = response;
-    message = message || `Invalid Status: ${xhr.status}`;
-    return { xhr, request, settings, event, message };
+  function makeRequest(url: string, init: RequestInit, settings: ISettings): Promise<Response> {
+    return Private.handleRequest(url, init, settings);
   }
 
   /**
-   * Ajax Request data.
+   * A wrapped error for a fetch response.
    */
   export
-  interface IRequest {
+  class ResponseError extends Error {
     /**
-     * The url of the request.
+     * Create a new response error.
      */
-    url: string;
+    constructor(response: Response, message?: string) {
+      message = (message ||
+        `Invalid response: ${response.status} ${response.statusText}`
+      );
+      super(message);
+      this.response = response;
+    }
 
     /**
-     * The HTTP method to use.  Defaults to `'GET'`.
+     * The response associated with the error.
      */
-    method?: string;
-
-    /**
-     * The return data type (used to parse the return data).  Defaults to 'json'.
-     */
-    dataType?: string;
-
-    /**
-     * The outgoing content type, used to set the `Content-Type` header.
-     */
-    contentType?: string;
-
-    /**
-     * The request data.
-     */
-    data?: Blob | BufferSource | FormData | URLSearchParams | ReadableStream | string;
-
-    /**
-     * Whether to cache the response. Defaults to `false`.
-     */
-    cache?: boolean;
-
-    /**
-     * A mapping of request headers, used via `setRequestHeader`.
-     */
-    headers?: { [key: string]: string; };
+    response: Response;
   }
 
   /**
-   * A server settings object.
+   * A wrapped error for a network error.
    */
   export
-  interface ISettings {
+  class NetworkError extends TypeError {
     /**
-     * The base url of the server.  Defaults to PageConfig.getBaseUrl.
+     * Create a new network error.
      */
-    readonly baseUrl: string;
-
-    /**
-     * The base ws url of the server.  Defaults to PageConfig.getWsUrl.
-     */
-    readonly wsUrl: string;
-
-    /**
-     * Is a Boolean that indicates whether or not cross-site Access-Control
-     * requests should be made using credentials such as cookies or
-     * authorization headers.  Defaults to `false`.
-     */
-    readonly withCredentials: boolean;
-
-    /**
-     * The user name associated with the request.  Defaults to `''`.
-     */
-    readonly user: string;
-
-    /**
-     * The password associated with the request.  Defaults to `''`.
-     */
-    readonly password: string;
-
-    /**
-     * The timeout associated with requests.  Defaults to `0`.
-     */
-    readonly timeout: number;
-
-    /**
-     * The optional token for ajax requests. Defaults to PageConfig `token`.
-     */
-    readonly token: string;
-
-    /*
-     * A mapping of request headers, used via `setRequestHeader`.
-     */
-    readonly requestHeaders: { readonly [key: string]: string; };
-
-    /**
-     * The XMLHttpRequest factory to use.  Defaults creating a new `XMLHttpRequest`.
-     */
-    readonly xhrFactory: () => XMLHttpRequest;
-
-    /**
-     * The WebSocket factory to use.  Defaults to creating a new `WebSocket`.
-     */
-    readonly wsFactory: (url: string, protocols?: string | string[]) => WebSocket;
+    constructor(original: TypeError) {
+      super(original.message);
+      this.stack = original.stack;
+    }
   }
 
   /**
-   * Data for a successful  AJAX request.
+   * The default settings.
    */
   export
-  interface IResponse {
-    /**
-     * The `onload` event.
-     */
-    readonly event: ProgressEvent;
-
-    /**
-     * The XHR object.
-     */
-    readonly xhr: XMLHttpRequest;
-
-    /**
-     * The request input data.
-     */
-    readonly request: IRequest;
-
-    /**
-     * The settings associated with the request.
-     */
-    readonly settings: ISettings;
-
-    /**
-     * The data returned by the ajax call.
-     */
-    readonly data: any;
-  }
-
-  /**
-   * Data for an unsuccesful AJAX request.
-   */
-  export
-  interface IError {
-    /**
-     * The event triggering the error.
-     */
-    readonly event: Event;
-
-    /**
-     * The XHR object.
-     */
-    readonly xhr: XMLHttpRequest;
-
-    /**
-     * The request input data.
-     */
-    readonly request: IRequest;
-
-    /**
-     * The settings associated with the request.
-     */
-    readonly settings: ISettings;
-
-    /**
-     * The error message associated with the error.
-     */
-    readonly message: string;
-  }
+  const defaultSettings: ServerConnection.ISettings = {
+    baseUrl: PageConfig.getBaseUrl(),
+    wsUrl: PageConfig.getWsUrl(),
+    token: PageConfig.getToken(),
+    init: { 'cache': 'no-cache', 'credentials': 'same-origin' },
+    fetch: FETCH,
+    Headers: HEADERS,
+    Request: REQUEST,
+    WebSocket: WEBSOCKET
+  };
 }
 
 
@@ -239,136 +189,55 @@ namespace ServerConnection {
  * The namespace for module private data.
  */
 namespace Private {
-  export
-  let defaultSettings: ServerConnection.ISettings;
-
   /**
    * Handle the server connection settings, returning a new value.
    */
   export
   function makeSettings(options: Partial<ServerConnection.ISettings> = {}): ServerConnection.ISettings {
-    let baseUrl = options.baseUrl || PageConfig.getBaseUrl();
     return {
-      baseUrl,
-      wsUrl: options.wsUrl || PageConfig.getWsUrl(baseUrl),
-      user: options.user || '',
-      password: options.password || '',
-      withCredentials: !!options.withCredentials,
-      timeout: options.timeout || 0,
-      token: options.token || PageConfig.getOption('token'),
-      requestHeaders: { ...options.requestHeaders || {} },
-      xhrFactory: options.xhrFactory || xhrFactory,
-      wsFactory: options.wsFactory || wsFactory
+      ...ServerConnection.defaultSettings,
+      ...options
     };
-  }
-
-  /**
-   * Make an xhr request using settings.
-   */
-  export
-  function populateRequest(xhr: XMLHttpRequest, request: ServerConnection.IRequest, settings: ServerConnection.ISettings): void {
-    if (request.contentType !== void 0) {
-      xhr.setRequestHeader('Content-Type', request.contentType);
-    }
-
-    xhr.timeout = settings.timeout;
-    if (settings.withCredentials) {
-      xhr.withCredentials = true;
-    }
-
-    // Write the request headers.
-    let headers = request.headers;
-    if (headers) {
-      for (let prop in headers) {
-        xhr.setRequestHeader(prop, headers[prop]);
-      }
-    }
-
-    headers = settings.requestHeaders;
-    for (let prop in headers) {
-      xhr.setRequestHeader(prop, headers[prop]);
-    }
-
-    // Handle authorization.
-    if (settings.token) {
-      xhr.setRequestHeader('Authorization', `token ${settings.token}`);
-    } else if (typeof document !== 'undefined' && document.cookie) {
-      let xsrfToken = getCookie('_xsrf');
-      if (xsrfToken !== void 0) {
-        xhr.setRequestHeader('X-XSRFToken', xsrfToken);
-      }
-    }
   }
 
   /**
    * Handle a request.
    */
   export
-  function handleRequest(xhr: XMLHttpRequest, request: ServerConnection.IRequest, settings: ServerConnection.ISettings): Promise<ServerConnection.IResponse> {
-    let delegate = new PromiseDelegate<ServerConnection.IResponse>();
+  function handleRequest(url: string, init: RequestInit, settings: ServerConnection.ISettings): Promise<Response> {
 
-    xhr.onload = (event: ProgressEvent) => {
-      if (xhr.status >= 300) {
-        let message = xhr.statusText || `Invalid Status: ${xhr.status}`;
-        delegate.reject({ event, xhr, request, settings, message });
-        return;
-      }
-      let data = xhr.responseText;
-      if (request.dataType === 'json' || request.dataType === undefined) {
-         try {
-          data = JSON.parse(data);
-        } catch (err) {
-          // no-op
-        }
-      }
-      delegate.resolve({ xhr, request, settings, data, event });
-    };
-
-    xhr.onabort = (event: Event) => {
-      delegate.reject({ xhr, event, request, settings, message: 'Aborted' });
-    };
-
-    xhr.onerror = (event?: ErrorEvent) => {
-      delegate.reject({ xhr, event, request, settings, message: event ? event.message : 'Errored' });
-    };
-
-    xhr.ontimeout = (event: ProgressEvent) => {
-      delegate.reject({ xhr, event, request, settings, message: 'Timed Out' });
-    };
-
-    // Send the request, adding data if needed.
-    switch (request.method) {
-    case 'GET':
-    case 'DELETE':
-    case 'HEAD':
-    case 'CONNECT':
-    case 'TRACE':
-      // These methods take no payload.
-      xhr.send();
-      break;
-    default:
-      // Set the content type if there is no given data.
-      if (!request.data) {
-        xhr.setRequestHeader('Content-Type', 'application/json');
-      }
-      xhr.send(request.data || '{}');
+    // Handle notebook server requests.
+    if (url.indexOf(settings.baseUrl) !== 0) {
+      throw new Error('Can only be used for notebook server requests');
     }
 
-    return delegate.promise;
-  }
+    let request = new settings.Request(url, init);
+    request = new settings.Request(request, settings.init);
 
-  /**
-   * Create a new xhr object.
-   */
-  function xhrFactory(): XMLHttpRequest {
-    return new XMLHttpRequest();
-  }
+    // Handle authentication.
+    let authenticated = false;
+    if (settings.token) {
+      authenticated = true;
+      request.headers.append('Authorization', `token ${settings.token}`);
+    } else if (typeof document !== 'undefined' && document.cookie) {
+      let xsrfToken = getCookie('_xsrf');
+      if (xsrfToken !== void 0) {
+        authenticated = true;
+        request.headers.append('X-XSRFToken', xsrfToken);
+      }
+    }
 
-  /**
-   * Create a new ws object.
-   */
-  function wsFactory(url: string, protocols?: string | string[]): WebSocket {
-    return new WebSocket(url, protocols);
+    // Set the content type if there is no given data and we are
+    // using an authenticated connection.
+    if (!request.bodyUsed && authenticated) {
+      request.headers.set('Content-Type', 'application/json');
+    }
+
+    // Use `call` to avoid a `TypeError` in the browser.
+    return settings.fetch.call(null, request).catch((e: TypeError) => {
+      // Convert the TypeError into a more specific error.
+      throw new ServerConnection.NetworkError(e);
+    });
   }
 
   /**

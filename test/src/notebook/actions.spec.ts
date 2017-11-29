@@ -48,11 +48,15 @@ describe('@jupyterlab/notebook', () => {
 
     let widget: Notebook;
     let session: ClientSession;
+    let ipySession: ClientSession;
 
     before(() => {
       return createClientSession().then(s => {
         session = s;
-        return session.initialize();
+        return createClientSession({ kernelPreference: { name: 'ipython' } });
+      }).then(s => {
+        ipySession = s;
+        return Promise.all([s.initialize(), session.initialize()]);
       });
     });
 
@@ -75,7 +79,7 @@ describe('@jupyterlab/notebook', () => {
     });
 
     after(() => {
-      return session.shutdown();
+      return Promise.all([session.shutdown(), ipySession.shutdown()]);
     });
 
     describe('#splitCell({})', () => {
@@ -532,9 +536,10 @@ describe('@jupyterlab/notebook', () => {
         cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.push(cell);
         widget.select(widget.widgets[widget.widgets.length - 1]);
-        return NotebookActions.run(widget, session).then(result => {
+        return NotebookActions.run(widget, ipySession).then(result => {
           expect(result).to.be(false);
           expect(cell.executionCount).to.be(null);
+          return ipySession.kernel.restart();
         });
       });
 
@@ -545,9 +550,10 @@ describe('@jupyterlab/notebook', () => {
         child.rendered = false;
         widget.select(child);
         widget.activeCell.model.value.text = ERROR_INPUT;
-        return NotebookActions.run(widget, session).then(result => {
+        return NotebookActions.run(widget, ipySession).then(result => {
           expect(result).to.be(false);
           expect(child.rendered).to.be(true);
+          return ipySession.kernel.restart();
         });
       });
 
@@ -578,9 +584,10 @@ describe('@jupyterlab/notebook', () => {
       it('should clear the existing selection', () => {
         let next = widget.widgets[2];
         widget.select(next);
-        return NotebookActions.runAndAdvance(widget, session).then(result => {
+        return NotebookActions.runAndAdvance(widget, ipySession).then(result => {
           expect(result).to.be(false);
           expect(widget.isSelected(widget.widgets[0])).to.be(false);
+          return ipySession.kernel.restart();
         });
       });
 
@@ -627,9 +634,10 @@ describe('@jupyterlab/notebook', () => {
         let cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.push(cell);
         widget.select(widget.widgets[widget.widgets.length - 1]);
-        return NotebookActions.runAndAdvance(widget, session).then(result => {
+        return NotebookActions.runAndAdvance(widget, ipySession).then(result => {
           expect(result).to.be(false);
           expect(cell.executionCount).to.be(null);
+          return ipySession.kernel.restart();
         });
       });
 
@@ -638,10 +646,11 @@ describe('@jupyterlab/notebook', () => {
         let cell = widget.widgets[1] as MarkdownCell;
         cell.rendered = false;
         widget.select(cell);
-        return NotebookActions.runAndAdvance(widget, session).then(result => {
+        return NotebookActions.runAndAdvance(widget, ipySession).then(result => {
           expect(result).to.be(false);
           expect(cell.rendered).to.be(true);
           expect(widget.activeCellIndex).to.be(2);
+          return ipySession.kernel.restart();
         });
       });
 
@@ -708,9 +717,10 @@ describe('@jupyterlab/notebook', () => {
         let cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.push(cell);
         widget.select(widget.widgets[widget.widgets.length - 1]);
-        return NotebookActions.runAndInsert(widget, session).then(result => {
+        return NotebookActions.runAndInsert(widget, ipySession).then(result => {
           expect(result).to.be(false);
           expect(cell.executionCount).to.be(null);
+          return ipySession.kernel.restart();
         });
       });
 
@@ -719,10 +729,11 @@ describe('@jupyterlab/notebook', () => {
         let cell = widget.widgets[1] as MarkdownCell;
         cell.rendered = false;
         widget.select(cell);
-        return NotebookActions.runAndInsert(widget, session).then(result => {
+        return NotebookActions.runAndInsert(widget, ipySession).then(result => {
           expect(result).to.be(false);
           expect(cell.rendered).to.be(true);
           expect(widget.activeCellIndex).to.be(2);
+          return ipySession.kernel.restart();
         });
       });
 
@@ -781,10 +792,11 @@ describe('@jupyterlab/notebook', () => {
         widget.activeCell.model.value.text = ERROR_INPUT;
         let cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.push(cell);
-        return NotebookActions.runAll(widget, session).then(result => {
+        return NotebookActions.runAll(widget, ipySession).then(result => {
           expect(result).to.be(false);
           expect(cell.executionCount).to.be(null);
           expect(widget.activeCellIndex).to.be(widget.widgets.length - 1);
+          return ipySession.kernel.restart();
         });
       });
 
@@ -792,9 +804,10 @@ describe('@jupyterlab/notebook', () => {
         widget.activeCell.model.value.text = ERROR_INPUT;
         let cell = widget.widgets[1] as MarkdownCell;
         cell.rendered = false;
-        return NotebookActions.runAll(widget, session).then(result => {
+        return NotebookActions.runAll(widget, ipySession).then(result => {
           expect(result).to.be(false);
           expect(cell.rendered).to.be(true);
+          return ipySession.kernel.restart();
         });
       });
 

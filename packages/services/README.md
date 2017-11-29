@@ -116,26 +116,6 @@ Usage from Node.js
 
 Follow the package install instructions first.
 
-```bash
-npm install --save xmlhttprequest ws
-```
-
-Use `XMLHttpRequest` and `WebSocket` in the server settings (in ES5 syntax):
-
-```javascript
-var services = require('@jupyterlab/services');
-var ws = require('ws');
-var xhr = require('xmlhttprequest');
-
-
-// Set the request and socket functions.
-var serverSettings = services.ServerConnection.makeSettings({
-  xhrFactory: function () { return new xhr.XMLHttpRequest(); },
-  wsFactory: function (url, protocol) { return new ws(url, protocol); }
-});
-Kernel.startNew({ serverSettings }).then(...);
-```
-
 See `examples/node` for an example of using an ES5 node script.
 
 

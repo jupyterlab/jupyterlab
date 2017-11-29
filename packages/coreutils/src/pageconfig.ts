@@ -44,7 +44,7 @@ namespace PageConfig {
   export
   function getOption(name: string): string {
     if (configData) {
-      return configData[name] || '';
+      return configData[name] || Private.getBodyData(name);
     }
     configData = Object.create(null);
     let found = false;
@@ -119,7 +119,7 @@ namespace PageConfig {
   }
 
   /**
-   * Get the base websocket URLExt for a Jupyter application.
+   * Get the base websocket url for a Jupyter application.
    */
   export
   function getWsUrl(baseUrl?: string): string {
@@ -139,7 +139,38 @@ namespace PageConfig {
   }
 
   /**
+   * Get the authorization token for a Jupyter application.
+   */
+  export
+  function getToken(): string {
+    return getOption('token') || Private.getBodyData('jupyterApiToken');
+  }
+
+  /**
    * Private page config data for the Jupyter application.
    */
   let configData: { [key: string]: string } | null = null;
+}
+
+
+/**
+ * A namespace for module private data.
+ */
+namespace Private {
+  /**
+   * Get a url-encoded item from `body.data` and decode it
+   * We should never have any encoded URLs anywhere else in code
+   * until we are building an actual request.
+   */
+  export
+  function getBodyData(key: string): string {
+    if (typeof document === 'undefined') {
+      return '';
+    }
+    let val = document.body.dataset[key];
+    if (typeof val === 'undefined') {
+      return '';
+    }
+    return decodeURIComponent(val);
+  }
 }

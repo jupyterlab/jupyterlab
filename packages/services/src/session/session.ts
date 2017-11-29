@@ -259,7 +259,7 @@ namespace Session {
   /**
    * Connect to a running session.
    *
-   * @param id - The id of the target session.
+   * @param model - The model of the target session.
    *
    * @param settigns - The server settings.
    *
@@ -277,8 +277,8 @@ namespace Session {
    * the promise is rejected.
    */
   export
-  function connectTo(id: string, settings?: ServerConnection.ISettings): Promise<ISession> {
-    return DefaultSession.connectTo(id, settings);
+  function connectTo(model: Session.IModel, settings?: ServerConnection.ISettings): Promise<ISession> {
+    return DefaultSession.connectTo(model, settings);
   }
 
   /**
@@ -294,6 +294,16 @@ namespace Session {
   export
   function shutdown(id: string, settings?: ServerConnection.ISettings): Promise<void> {
     return DefaultSession.shutdown(id, settings);
+  }
+
+  /**
+   * Shut down all sessions.
+   *
+   * @returns A promise that resolves when all of the sessions are shut down.
+   */
+  export
+  function shutdownAll(settings?: ServerConnection.ISettings): Promise<void> {
+    return DefaultSession.shutdownAll(settings);
   }
 
   /**
@@ -424,13 +434,13 @@ namespace Session {
     /**
      * Connect to a running session.
      *
-     * @param id - The id of the target session.
+     * @param model - The model of the target session.
      *
      * @param options - The session options to use.
      *
      * @returns A promise that resolves with the new session instance.
      */
-    connectTo(id: string): Promise<ISession>;
+    connectTo(model: Session.IModel): Promise<ISession>;
 
     /**
      * Shut down a session by id.
@@ -440,6 +450,13 @@ namespace Session {
      * @returns A promise that resolves when the operation is complete.
      */
     shutdown(id: string): Promise<void>;
+
+    /**
+     * Shut down all sessions.
+     *
+     * @returns A promise that resolves when all of the sessions are shut down.
+     */
+    shutdownAll(): Promise<void>;
 
     /**
      * Force a refresh of the specs from the server.

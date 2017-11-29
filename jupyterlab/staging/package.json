@@ -83,7 +83,8 @@
     "source-map-loader": "~0.2.1",
     "style-loader": "~0.13.2",
     "url-loader": "~0.5.9",
-    "webpack": "~2.7.0"
+    "webpack": "~2.7.0",
+    "whatwg-fetch": "~2.0.3"
   },
   "jupyterlab": {
     "extensions": {

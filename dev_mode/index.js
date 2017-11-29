@@ -5,10 +5,10 @@ __webpack_public_path__ = PageConfig.getOption('publicUrl');
 
 // This needs to come after __webpack_public_path__ is set.
 require('font-awesome/css/font-awesome.min.css');
-var app = require('@jupyterlab/application').JupyterLab;
-
 
 function main() {
+    var app = require('@jupyterlab/application').JupyterLab;
+
     // Get the disabled extensions.
     var disabled = { patterns: [], matches: [] };
     var disabledExtensions = [];

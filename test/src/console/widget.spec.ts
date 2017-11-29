@@ -241,7 +241,9 @@ describe('console/widget', () => {
         Widget.attach(widget, document.body);
         widget.promptCell.model.value.text = 'for x in range(5):';
         expect(widget.cells.length).to.be(0);
-        return (widget.session as ClientSession).initialize().then(() => {
+        let session = widget.session as ClientSession;
+        session.kernelPreference = { name: 'ipython' };
+        return session.initialize().then(() => {
           return widget.execute(force, timeout);
         }).then(() => {
           expect(widget.cells.length).to.be(0);

@@ -4,15 +4,19 @@
 import expect = require('expect.js');
 
 import {
+  uuid
+} from '@jupyterlab/coreutils';
+
+import {
   JSONObject
 } from '@phosphor/coreutils';
 
 import {
-  ConfigSection, ConfigWithDefaults
+  ConfigSection, ConfigWithDefaults, IConfigSection
 } from '../../../lib/config';
 
 import {
-  RequestHandler, serverSettings, expectAjaxError
+  expectFailure, handleRequest, makeSettings, getRequestHandler
 } from '../utils';
 
 
@@ -20,92 +24,63 @@ describe('config', () => {
 
   describe('ConfigSection.create()', () => {
 
-    it('should complete properly', (done) => {
-      let handler = new RequestHandler(() => {
-        handler.respond(200, {});
-      });
-      ConfigSection.create({ name: 'test' }).then(config => {
-        done();
+    it('should load a config', () => {
+      return ConfigSection.create({ name: uuid() }).then(config => {
+        expect(Object.keys(config.data).length).to.be(0);
       });
     });
 
-    it('should accept ajaxOptions', (done) => {
-      let handler = new RequestHandler(() => {
-        handler.respond(200, {});
-      });
-      ConfigSection.create({ name: 'test', serverSettings }).then(config => {
-        done();
+    it('should accept server settings', () => {
+      let serverSettings = makeSettings();
+      return ConfigSection.create({ name: uuid(), serverSettings }).then(config => {
+        expect(Object.keys(config.data).length).to.be(0);
       });
     });
 
-    it('should load a config', (done) => {
-      let handler = new RequestHandler(() => {
-        handler.respond(200, { foo: 'bar' });
-      });
-      ConfigSection.create({ name: 'test' }).then(config => {
-        expect(config.data['foo']).to.be('bar');
-        done();
-      });
-    });
 
     it('should fail for an incorrect response', (done) => {
-      let handler = new RequestHandler(() => {
-        handler.respond(201, { });
-      });
-      let configPromise = ConfigSection.create({ name: 'test' });
-      expectAjaxError(configPromise, done, 'Invalid Status: 201');
+      let serverSettings = getRequestHandler(201, { });
+      let configPromise = ConfigSection.create({ name: uuid(), serverSettings });
+      expectFailure(configPromise, done, 'Invalid response: 201 Created');
     });
 
   });
 
   describe('#update()', () => {
 
-    it('should update a config', (done) => {
-      let handler = new RequestHandler(() => {
-        handler.respond(200, {});
-      });
-      ConfigSection.create({ name: 'test' }).then(config => {
-        handler.onRequest = () => {
-          handler.respond(200, config.data );
-        };
-        let update = config.update( { foo: 'baz', spam: 'eggs' });
-        update.then((data: any) => {
-          expect(data.foo).to.be('baz');
-          expect(config.data['foo']).to.be('baz');
-          expect(data['spam']).to.be('eggs');
-          expect(config.data['spam']).to.be('eggs');
-          done();
-        });
+    it('should update a config', () => {
+      let config: IConfigSection;
+      return ConfigSection.create({ name: uuid() }).then(c => {
+        config = c;
+        return config.update( { foo: 'baz', spam: 'eggs' });
+      }).then((data: any) => {
+        expect(data.foo).to.be('baz');
+        expect(config.data['foo']).to.be('baz');
+        expect(data['spam']).to.be('eggs');
+        expect(config.data['spam']).to.be('eggs');
       });
     });
 
-    it('should accept server settings', (done) => {
-      let handler = new RequestHandler(() => {
-        handler.respond(200, {});
-      });
-      ConfigSection.create({ name: 'test', serverSettings }).then(config => {
-        handler.onRequest = () => {
-          handler.respond(200, config.data );
-        };
-        let update = config.update({ foo: 'baz', spam: 'eggs' });
-        update.then((data: any) => {
-          expect(data.foo).to.be('baz');
-          done();
-        });
+    it('should accept server settings', () => {
+      let config: IConfigSection;
+      let serverSettings = makeSettings();
+      return ConfigSection.create({ name: uuid(), serverSettings }).then(c => {
+        config = c;
+        return config.update( { foo: 'baz', spam: 'eggs' });
+      }).then((data: any) => {
+        expect(data.foo).to.be('baz');
+        expect(config.data['foo']).to.be('baz');
+        expect(data['spam']).to.be('eggs');
+        expect(config.data['spam']).to.be('eggs');
       });
     });
 
     it('should fail for an incorrect response', (done) => {
-      let handler = new RequestHandler(() => {
-        handler.respond(200, {});
-      });
-      ConfigSection.create({ name: 'test' }).then(config => {
-        handler.onRequest = () => {
-          handler.respond(201, { });
-        };
+      ConfigSection.create({ name: uuid() }).then(config => {
+        handleRequest(config, 201, { });
         let update = config.update({ foo: 'baz' });
-        expectAjaxError(update, done, 'Invalid Status: 201');
-      });
+        expectFailure(update, done, 'Invalid response: 201 Created');
+      }).catch(done);
     });
 
   });
@@ -117,16 +92,12 @@ describe('jupyter.services - ConfigWithDefaults', () => {
 
   describe('#constructor()', () => {
 
-    it('should complete properly', (done) => {
-      let handler = new RequestHandler(() => {
-        handler.respond(200, { testclass: { foo: 'bar' } });
-      });
+    it('should complete properly', () => {
       let defaults: JSONObject = { spam: 'eggs' };
       let className = 'testclass';
-      ConfigSection.create({ name: 'test' }).then(section => {
+      return ConfigSection.create({ name: uuid() }).then(section => {
         let config = new ConfigWithDefaults({ section, defaults, className });
         expect(config).to.be.a(ConfigWithDefaults);
-        done();
       });
     });
 
@@ -134,115 +105,87 @@ describe('jupyter.services - ConfigWithDefaults', () => {
 
   describe('#get()', () => {
 
-    it('should get a new config value', (done) => {
-      let handler = new RequestHandler(() => {
-        handler.respond(200, { testclass: { foo: 'bar' } });
-      });
+    it('should get a new config value', () => {
       let defaults: JSONObject = { foo: 'bar' };
       let className = 'testclass';
-      ConfigSection.create({ name: 'test' }).then(section => {
+      return ConfigSection.create({ name: uuid() }).then(section => {
         let config = new ConfigWithDefaults({ section, defaults, className });
         let data = config.get('foo');
         expect(data).to.be('bar');
-        done();
       });
     });
 
-    it('should get a default config value', (done) => {
-      let handler = new RequestHandler(() => {
-        handler.respond(200, { testclass: { foo: 'bar' } });
-      });
+    it('should get a default config value', () => {
       let defaults: JSONObject = { spam: 'eggs' };
       let className = 'testclass';
-      ConfigSection.create({ name: 'test' }).then(section => {
+      return ConfigSection.create({ name: uuid() }).then(section => {
         let config = new ConfigWithDefaults({ section, defaults, className });
         let data = config.get('spam');
         expect(data).to.be('eggs');
-        done();
       });
     });
 
-    it('should get a default config value with no class', (done) => {
-      let handler = new RequestHandler(() => {
-        handler.respond(200, { foo: 'bar' });
-      });
+    it('should get a default config value with no class', () => {
       let defaults: JSONObject = { spam: 'eggs' };
       let className = 'testclass';
-      ConfigSection.create({ name: 'test' }).then(section => {
+      return ConfigSection.create({ name: uuid() }).then(section => {
         let config = new ConfigWithDefaults({ section, defaults, className });
         let data = config.get('spam');
         expect(data).to.be('eggs');
-        done();
       });
     });
 
-    it('should get a falsey value', (done) => {
-      let handler = new RequestHandler(() => {
-        handler.respond(200, { testclass: { foo: 0 } });
-      });
+    it('should get a falsey value', () => {
       let defaults: JSONObject = { foo: true };
       let className = 'testclass';
-      ConfigSection.create({ name: 'test' }).then(section => {
+      let serverSettings = getRequestHandler(200, {foo: false });
+      return ConfigSection.create({ name: uuid(), serverSettings }).then(section => {
         let config = new ConfigWithDefaults({ section, defaults, className });
         let data = config.get('foo');
         expect(data).to.not.be.ok();
-        done();
       });
     });
+
   });
 
   describe('#set()', () => {
 
-    it('should set a value in a class immediately', (done) => {
-      let handler = new RequestHandler(() => {
-        handler.respond(200, {});
-      });
+    it('should set a value in a class immediately', () => {
       let className = 'testclass';
-      ConfigSection.create({ name: 'test' }).then(section => {
+      let section: IConfigSection;
+      return ConfigSection.create({ name: uuid() }).then(s => {
+        section = s;
         let config = new ConfigWithDefaults({ section, className });
-        handler.onRequest = () => {
-          handler.respond(200, {});
-          done();
-        };
-        let set = config.set('foo', 'bar');
-        expect(set).to.be.a(Promise);
+        return config.set('foo', 'bar');
+      }).then(() => {
         let data = section.data['testclass'] as JSONObject;
         expect(data['foo']).to.be('bar');
       });
     });
 
-    it('should set a top level value', (done) => {
-      let handler = new RequestHandler(() => {
-        handler.respond(200, {});
-      });
-      ConfigSection.create({ name: 'test' }).then(section => {
-        handler.onRequest = () => {
-          handler.respond(200, {foo: 'bar'});
-        };
+    it('should set a top level value', () => {
+      let section: IConfigSection;
+      return ConfigSection.create({ name: uuid() }).then(s => {
+        section = s;
         let config = new ConfigWithDefaults({ section });
         let set = config.set('foo', 'bar');
         expect(section.data['foo']).to.be('bar');
-        set.then((data) => {
-          expect(section.data['foo']).to.be('bar');
-          done();
-        });
+        return set;
+      }).then((data) => {
+        expect(section.data['foo']).to.be('bar');
       });
 
     });
 
     it('should fail for an invalid response', (done) => {
-      let handler = new RequestHandler(() => {
-        handler.respond(200, {});
-      });
-      ConfigSection.create({ name: 'test' }).then(section => {
-        handler.onRequest = () => {
-          handler.respond(201, {foo: 'bar'});
-        };
+      let serverSettings = getRequestHandler(200, {});
+      ConfigSection.create({ name: uuid(), serverSettings }).then(section => {
+        handleRequest(section, 201, {foo: 'bar'});
         let config = new ConfigWithDefaults({ section });
         let set = config.set('foo', 'bar');
         expect(section.data['foo']).to.be('bar');
-        expectAjaxError(set, done, 'Invalid Status: 201');
-      });
+        expectFailure(set, done, 'Invalid response: 201 Created');
+      }).catch(done);
 
     });
 

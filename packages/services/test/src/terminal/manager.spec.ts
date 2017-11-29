@@ -15,29 +15,29 @@ import {
   ServerConnection, TerminalSession, TerminalManager
 } from '../../../lib';
 
-import {
-  TerminalTester
-} from '../utils';
-
 
 describe('terminal', () => {
 
-  let tester: TerminalTester;
   let manager: TerminalSession.IManager;
-  let data: TerminalSession.IModel[] =  [{ name: 'foo'}, { name: 'bar' }];
+  let session: TerminalSession.ISession;
+
+  before(() => {
+    return TerminalSession.startNew().then(s => {
+      session = s;
+    });
+  });
 
   beforeEach(() => {
-    tester = new TerminalTester();
-    tester.runningTerminals = data;
     manager = new TerminalManager();
     return manager.ready;
   });
 
   afterEach(() => {
-    return manager.ready.then(() => {
-      manager.dispose();
-      tester.dispose();
-    });
+    manager.dispose();
+  });
+
+  after(() => {
+    return TerminalSession.shutdownAll();
   });
 
   describe('TerminalManager', () => {
@@ -73,14 +73,13 @@ describe('terminal', () => {
 
     describe('#isReady', () => {
 
-      it('should test whether the manager is ready', (done) => {
+      it('should test whether the manager is ready', () => {
         manager.dispose();
         manager = new TerminalManager();
         expect(manager.isReady).to.be(false);
-        manager.ready.then(() => {
+        return manager.ready.then(() => {
           expect(manager.isReady).to.be(true);
-          done();
-        }).catch(done);
+        });
       });
 
     });
@@ -104,18 +103,20 @@ describe('terminal', () => {
     describe('#running()', () => {
 
       it('should give an iterator over the list of running models', () => {
-        expect(toArray(manager.running())).to.eql(data);
+        return manager.refreshRunning().then(() => {
+          let running = toArray(manager.running());
+          expect(running.length).to.be.greaterThan(0);
+        });
       });
 
     });
 
     describe('#startNew()', () => {
 
-      it('should startNew a new terminal session', (done) => {
-        manager.startNew().then(session => {
+      it('should startNew a new terminal session', () => {
+        return manager.startNew().then(session => {
           expect(session.name).to.be.ok();
-          done();
-        }).catch(done);
+        });
       });
 
       it('should emit a runningChanged signal', (done) => {
@@ -129,37 +130,38 @@ describe('terminal', () => {
 
     describe('#connectTo()', () => {
 
-      it('should connect to an existing kernel', () => {
-        return manager.connectTo(data[0].name).then(session => {
-          expect(session.name).to.be(data[0].name);
+      it('should connect to an existing session', () => {
+        let name = session.name;
+        return manager.connectTo(name).then(session => {
+          expect(session.name).to.be(name);
         });
-      });
-
-      it('should emit a runningChanged signal', (done) => {
-        tester.runningTerminals = [{ name: 'baz' }];
-        manager.runningChanged.connect(() => {
-          done();
-        });
-        manager.connectTo('baz');
       });
 
     });
 
     describe('#shutdown()', () => {
 
-      it('should shut down a terminal session by name', (done) => {
-        manager.startNew().then(session => {
-          return manager.shutdown(session.name);
+      it('should shut down a session by id', () => {
+        let temp: TerminalSession.ISession;
+        return manager.startNew().then(s => {
+          temp = s;
+          return manager.shutdown(s.name);
         }).then(() => {
-          done();
-        }).catch(done);
+          expect(temp.isDisposed).to.be(true);
+        });
       });
 
-      it('should emit a runningChanged signal', (done) => {
-        manager.runningChanged.connect((sender, args) => {
-          done();
+      it('should emit a runningChanged signal', () => {
+        let called = false;
+        return manager.startNew().then(s => {
+          manager.runningChanged.connect((sender, args) => {
+            expect(s.isDisposed).to.be(true);
+            called = true;
+          });
+          return manager.shutdown(s.name);
+        }).then(() => {
+          expect(called).to.be(true);
         });
-        manager.shutdown(data[0].name);
       });
 
     });
@@ -167,38 +169,35 @@ describe('terminal', () => {
     describe('#runningChanged', () => {
 
       it('should be emitted when the running terminals changed', (done) => {
-        let newData: TerminalSession.IModel[] = [{ name: 'foo'}];
-        tester.runningTerminals = newData;
         manager.runningChanged.connect((sender, args) => {
           expect(sender).to.be(manager);
-          expect(JSONExt.deepEqual(toArray(args), newData)).to.be(true);
+          expect(toArray(args).length).to.be.greaterThan(0);
           done();
         });
-        manager.refreshRunning();
-      });
-
-      it('should be emitted when a session is shut down', (done) => {
-        manager.startNew().then(session => {
-          manager.runningChanged.connect(() => {
-            manager.dispose();
-            done();
-          });
-          return session.shutdown();
-        }).catch(done);
+        manager.startNew().catch(done);
       });
 
     });
 
     describe('#refreshRunning()', () => {
 
-      it('should update the running session models', (done) => {
-        let newData: TerminalSession.IModel[] = [{ name: 'foo'}];
-        tester.runningTerminals = newData;
-        manager.refreshRunning().then(() => {
+      it('should update the running session models', () => {
+        let model: TerminalSession.IModel;
+        let before = toArray(manager.running()).length;
+        return TerminalSession.startNew().then(s => {
+          model = s.model;
+          return manager.refreshRunning();
+        }).then(() => {
           let running = toArray(manager.running());
-          expect(JSONExt.deepEqual(newData, running)).to.be(true);
-          done();
-        }).catch(done);
+          expect(running.length).to.be(before + 1);
+          let found = false;
+          running.map(m => {
+            if (m.name === model.name) {
+              found = true;
+            }
+          });
+          expect(found).to.be(true);
+        });
       });
 
     });

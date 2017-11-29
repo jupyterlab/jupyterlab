@@ -3,6 +3,8 @@
 
 import encoding = require('text-encoding');
 
+import WebSocket = require('ws');
+
 import {
   uuid
 } from '@jupyterlab/coreutils';
@@ -11,15 +13,10 @@ import {
   JSONObject, JSONPrimitive, PromiseDelegate
 } from '@phosphor/coreutils';
 
-import * as WebSocket
-  from  'ws';
+import { Response } from 'node-fetch';
 
 import {
-  Server
-} from 'ws';
-
-import {
-  Contents, TerminalSession, Session, ServerConnection
+  Contents, TerminalSession, ServerConnection
 } from '../../lib';
 
 import {
@@ -31,36 +28,40 @@ import {
 } from '../../lib/kernel/serialize';
 
 import {
-  MockXMLHttpRequest
-} from './mockxhr';
+  Session
+} from '../../lib/session';
 
 
 // stub for node global
 declare var global: any;
 
-global.WebSocket = WebSocket;
-if (typeof window === 'undefined') {
-  global.XMLHttpRequest = MockXMLHttpRequest;
-  global.TextEncoder = encoding.TextEncoder;
-  global.TextDecoder = encoding.TextDecoder;
-} else {
-  (window as any).XMLHttpRequest = MockXMLHttpRequest;
+
+/**
+ * This can be used by test modules that wouldn't otherwise import
+ * this file.
+ */
+export
+function init() {
+  if (typeof global !== 'undefined') {
+    global.TextEncoder = encoding.TextEncoder;
+    global.TextDecoder = encoding.TextDecoder;
+  }
 }
 
 
+// Call init.
+init();
+
+
 /**
- * Optional ajax arguments.
+ * Create a set of server settings.
  */
 export
-const serverSettings: ServerConnection.ISettings = ServerConnection.makeSettings({
-  requestHeaders: { foo: 'bar', fizz: 'buzz' },
-  withCredentials: true,
-  user: 'foo',
-  password: 'bar'
-});
+function makeSettings(settings?: Partial<ServerConnection.ISettings>): ServerConnection.ISettings {
+  return ServerConnection.makeSettings(settings);
+}
 
 
-export
 const EXAMPLE_KERNEL_INFO: KernelMessage.IInfoReply = {
   protocol_version: '1',
   implementation: 'a',
@@ -86,14 +87,6 @@ export
 const KERNEL_OPTIONS: Kernel.IOptions = {
   name: 'python',
   username: 'testUser',
-};
-
-
-export
-const AJAX_KERNEL_OPTIONS: Kernel.IOptions = {
-  name: 'python',
-  username: 'testUser',
-  serverSettings
 };
 
 
@@ -143,203 +136,113 @@ const KERNELSPECS: JSONObject = {
 };
 
 
+/**
+ * Create a message from an existing message.
+ */
 export
-interface IFakeRequest {
-  url: string;
-  method: string;
-  requestHeaders: any;
-  requestBody: string;
-  status: number;
-  statusText: string;
-  async: boolean;
-  username: string;
-  password: string;
-  withCredentials: boolean;
-  respond(status: number, headers: any, body: string): void;
-}
-
-
-
-export
-class RequestHandler {
-  specs: JSONObject = KERNELSPECS;
-  runningKernels: Kernel.IModel[] = [];
-  runningSessions: Session.IModel[] = [];
-  runningTerminals: TerminalSession.IModel[] = [];
-
-  /**
-   * Create a new RequestHandler.
-   */
-  constructor(onRequest?: (request: MockXMLHttpRequest) => void) {
-    MockXMLHttpRequest.requests = [];
-
-    if (!onRequest) {
-      onRequest = this._defaultHandler.bind(this);
-    }
-    this.onRequest = onRequest;
-  }
-
-  /**
-   * Test whether the handler is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
-  /**
-   * The request handler for the handler.
-   */
-  set onRequest(cb: (request: MockXMLHttpRequest) => void) {
-    MockXMLHttpRequest.onRequest = cb;
-  }
-
-  /**
-   * Dispose of the resources used by the handler.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    this.onRequest = this._defaultHandler.bind(this);
-  }
-
-  /**
-   * Respond to the latest Ajax request.
-   */
-  respond(statusCode: number, data: any, header?: any): void {
-    let len = MockXMLHttpRequest.requests.length;
-    let request = MockXMLHttpRequest.requests[len - 1];
-    request.respond(statusCode, data, header);
-  }
-
-  /**
-   * The default handler for requests.
-   */
-  private _defaultHandler(request: MockXMLHttpRequest): void {
-    let url = request.url;
-    if (url.indexOf('api/sessions') !== -1) {
-      this._handleSessionRequest(request);
-    } else if (url.indexOf('api/kernelspecs') !== -1) {
-      request.respond(200, this.specs);
-    } else if (url.indexOf('api/kernels') !== -1) {
-      this._handleKernelRequest(request);
-    } else if (url.indexOf('api/terminals') !== -1) {
-      this._handleTerminalRequst(request);
-    }
-  }
-
-  /**
-   * Handle kernel requests.
-   */
-  private _handleKernelRequest(request: MockXMLHttpRequest): void {
-    let url = request.url;
-    switch (request.method) {
-    case 'POST':
-      let data = { id: uuid(), name: KERNEL_OPTIONS.name };
-      if (url.indexOf('interrupt') !== -1) {
-        request.respond(204, data);
-      } else if (url.indexOf('restart') !== -1) {
-        request.respond(200, data);
-      } else {
-        request.respond(201, data);
-      }
-      break;
-    case 'GET':
-      for (let model of this.runningKernels) {
-        if (request.url.indexOf(model.id) !== -1) {
-          request.respond(200, model);
-          return;
-        }
-      }
-      for (let model of this.runningSessions) {
-        if (request.url.indexOf(model.kernel.id) !== -1) {
-          request.respond(200, model.kernel);
-          return;
-        }
-      }
-      request.respond(200, this.runningKernels);
-      break;
-    case 'DELETE':
-      request.respond(204, {});
-      break;
-    default:
-      break;
-    }
-  }
-
-  /**
-   * Handle session requests.
-   */
-  private _handleSessionRequest(request: MockXMLHttpRequest): void {
-    let session: Session.IModel = {
-      id: uuid(),
-      kernel: {
-        name: 'python',
-        id: uuid()
-      },
-      path: uuid(),
-      type: '',
-      name: ''
-    };
-    switch (request.method) {
-    case 'PATCH':
-      this.respond(200, session);
-      break;
-    case 'GET':
-      for (let model of this.runningSessions) {
-        if (request.url.indexOf(model.id) !== -1) {
-          this.respond(200, model);
-          return;
-        }
-      }
-      this.respond(200, this.runningSessions);
-      break;
-    case 'POST':
-      let model = { name: session.kernel.name, id: session.kernel.id };
-      this.runningKernels.push(model);
-      request.respond(201, session);
-      break;
-    case 'DELETE':
-      request.respond(204, {});
-      break;
-    default:
-      break;
-    }
-  }
-
-  /**
-   * Handle terminal requests.
-   */
-  private _handleTerminalRequst(request: MockXMLHttpRequest): void {
-    switch (request.method) {
-    case 'POST':
-      request.respond(200, { name: uuid() });
-      break;
-    case 'GET':
-      request.respond(200, this.runningTerminals);
-      break;
-    case 'DELETE':
-      request.respond(204, {});
-      break;
-    default:
-      break;
-    }
+function createMsg(channel: KernelMessage.Channel, parentHeader: JSONObject): KernelMessage.IMessage {
+  return {
+    channel: channel,
+    parent_header: JSON.parse(JSON.stringify(parentHeader)),
+    content: {},
+    header: JSON.parse(JSON.stringify(parentHeader)),
+    metadata: {},
+    buffers: []
   };
+};
 
-  private _isDisposed = false;
+
+/**
+ * Get a single handler for a request.
+ */
+export
+function getRequestHandler(status: number, body: any): ServerConnection.ISettings {
+  let fetch = (info: RequestInfo, init: RequestInit) => {
+    // Normalize the body.
+    body = JSON.stringify(body);
+
+    // Create the response and return it as a promise.
+    let response = new Response(body, { status });
+    return Promise.resolve(response as any);
+  };
+  return ServerConnection.makeSettings({ fetch });
 }
 
 
 /**
- * Request and socket class test rig.
+ * An interface for a service that has server settings.
  */
-class RequestSocketTester extends RequestHandler {
+export
+interface IService {
+  readonly serverSettings: ServerConnection.ISettings;
+}
+
+
+/**
+ * Handle a single request with a mock response.
+ */
+export
+function handleRequest(item: IService, status: number, body: any) {
+  // Store the existing fetch function.
+  let oldFetch = item.serverSettings.fetch;
+
+  // A single use callback.
+  let temp = (info: RequestInfo, init: RequestInit) => {
+    // Restore fetch.
+    (item.serverSettings as any).fetch = oldFetch;
+
+    // Normalize the body.
+    if (typeof body !== 'string') {
+      body = JSON.stringify(body);
+    }
+
+    // Create the response and return it as a promise.
+    let response = new Response(body, { status });
+    return Promise.resolve(response as any);
+  };
+
+  // Override the fetch function.
+  (item.serverSettings as any).fetch = temp;
+}
+
+
+/**
+ * Expect a failure on a promise with the given message, then call `done`.
+ */
+export
+function expectFailure(promise: Promise<any>, done: () => void, message?: string): Promise<any> {
+  return promise.then((msg: any) => {
+    throw Error('Expected failure did not occur');
+  }, (error: Error) => {
+    if (message && error.message.indexOf(message) === -1) {
+      throw Error(`Error "${message}" not in: "${error.message}"`);
+    }
+  }).then(done, done);
+}
+
+
+/**
+ * Do something in the future ensuring total ordering wrt to Promises.
+ */
+export
+function doLater(cb: () => void): void {
+  Promise.resolve().then(cb);
+}
+
+
+/**
+ * Socket class test rig.
+ */
+class SocketTester implements IService {
   /**
    * Create a new request and socket tester.
    */
-  constructor(onRequest?: (request: any) => void) {
-    super(onRequest);
-    this._server = new Server({ port: 8888 });
+  constructor() {
+    this._server = new WebSocket.Server({ port: 8080 });
+    this.serverSettings = ServerConnection.makeSettings({
+      wsUrl: 'ws://localhost:8080/',
+      WebSocket: WebSocket as any
+    });
     this._promiseDelegate = new PromiseDelegate<void>();
     this._server.on('connection', ws => {
       this._ws = ws;
@@ -352,13 +255,26 @@ class RequestSocketTester extends RequestHandler {
     });
   }
 
+  readonly serverSettings: ServerConnection.ISettings;
+
+  start(): Promise<Kernel.IKernel> {
+    handleRequest(this, 201, { name: 'test', id: uuid() });
+    let serverSettings = this.serverSettings;
+    return Kernel.startNew({ serverSettings }).then(k => {
+      this._kernel = k;
+      return k;
+    });
+  }
+
   dispose(): void {
     if (this.isDisposed) {
       return;
     }
+    if (this._kernel) {
+      this._kernel.dispose();
+    }
     this._server.close();
     this._server = null;
-    super.dispose();
   }
 
   get isDisposed(): boolean {
@@ -395,8 +311,10 @@ class RequestSocketTester extends RequestHandler {
 
   private _ws: WebSocket = null;
   private _promiseDelegate: PromiseDelegate<void> = null;
-  private _server: Server = null;
+  private _server: WebSocket.Server = null;
   private _onConnect: (ws: WebSocket) => void = null;
+  private _kernel: Kernel.IKernel | null = null;
+  protected settings: ServerConnection.ISettings;
 }
 
 
@@ -404,7 +322,7 @@ class RequestSocketTester extends RequestHandler {
  * Kernel class test rig.
  */
 export
-class KernelTester extends RequestSocketTester {
+class KernelTester extends SocketTester {
 
   get initialStatus(): string {
     return this._initialStatus;
@@ -462,12 +380,55 @@ class KernelTester extends RequestSocketTester {
 }
 
 
+
+/**
+ * Create a unique session id.
+ */
+ export
+function createSessionModel(id?: string): Session.IModel {
+  return {
+    id: id || uuid(),
+    path: uuid(),
+    name: '',
+    type: '',
+    kernel: { id: uuid(), name: uuid() }
+  };
+}
+
+
+/**
+ * Session test rig.
+ */
+export
+class SessionTester extends KernelTester {
+  /**
+   * Start a mock session.
+   */
+  startSession(): Promise<Session.ISession> {
+    handleRequest(this, 201, createSessionModel());
+    let serverSettings = this.serverSettings;
+    return Session.startNew({ path: uuid(), serverSettings }).then(s => {
+      this._session = s;
+      return s;
+    });
+  }
+
+  dispose(): void {
+    if (this._session) {
+      this._session.dispose();
+    }
+    super.dispose();
+  }
+
+  private _session: Session.ISession;
+}
+
+
 /**
  * Terminal session test rig.
  */
 export
-class TerminalTester extends RequestSocketTester {
-
+class TerminalTester extends SocketTester {
   /**
    * Register the message callback with the websocket server.
    */
@@ -493,41 +454,3 @@ class TerminalTester extends RequestSocketTester {
   private _onMessage: (msg: TerminalSession.IMessage) => void = null;
 }
 
-
-/**
- * Expect a failure on a promise with the given message, then call `done`.
- */
-export
-function expectFailure(promise: Promise<any>, done: () => void, message?: string): Promise<any> {
-  return promise.then((msg: any) => {
-    throw Error('Expected failure did not occur');
-  }, (error: Error) => {
-    if (message && error.message.indexOf(message) === -1) {
-      throw Error(`Error "${message}" not in: "${error.message}"`);
-    }
-  }).then(done, done);
-}
-
-
-/**
- * Expect an Ajax failure with a given message.
- */
-export
-function expectAjaxError(promise: Promise<any>, done: () => void, message: string): Promise<any> {
-  return promise.then((msg: any) => {
-    throw Error('Expected failure did not occur');
-  }, (error: ServerConnection.IError) => {
-    if (error.message !== message) {
-      throw Error(`Error "${message}" not equal to "${error.message}"`);
-    }
-  }).then(done, done);
-}
-
-
-/**
- * Do something in the future ensuring total ordering wrt to Promises.
- */
-export
-function doLater(cb: () => void): void {
-  Promise.resolve().then(cb);
-}

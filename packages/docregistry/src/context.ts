@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Contents, ServiceManager
+  Contents, ServiceManager, ServerConnection
 } from '@jupyterlab/services';
 
 import {
@@ -233,20 +233,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         return this._populate();
       }
     }).catch(err => {
-      let body = '';
-      // Check for a more specific error message.
-      if (err.xhr) {
-        try {
-          body = JSON.parse(err.xhr.response).message;
-        } catch (e) {
-          body = err.xhr.responseText;
-        }
-      }
-      showDialog({
-        title: 'File Save Error',
-        body: body || String(err),
-        buttons: [Dialog.okButton()]
-      });
+      this._handleError(err, 'File Save Error');
     });
   }
 
@@ -267,7 +254,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       }).then(() => {
         return this._maybeOverWrite(newPath);
       }).catch(err => {
-        if (!err.xhr || err.xhr.status !== 404) {
+        if (!err.response || err.response.status !== 404) {
           throw err;
         }
         return this._finishSaveAs(newPath);
@@ -311,11 +298,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         return this._populate();
       }
     }).catch(err => {
-      showDialog({
-        title: 'File Load Error',
-        body: err.xhr.responseText,
-        buttons: [Dialog.okButton()]
-      });
+      this._handleError(err, 'File Load Error');
     });
   }
 
@@ -508,11 +491,35 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       }
       return this._manager.contents.save(path, options);
     }, (err) => {
-      if (err.xhr && err.xhr.status === 404) {
+      if (err.response && err.response.status === 404) {
         return this._manager.contents.save(path, options);
       }
       throw err;
     });
+  }
+
+  /**
+   * Handle a save/load error with a dialog.
+   */
+  private _handleError(err: Error | ServerConnection.ResponseError, title: string): void {
+    let buttons = [Dialog.okButton()];
+
+    // Check for a more specific error message.
+    if (err instanceof ServerConnection.ResponseError) {
+      err.response.text().then(text => {
+        let body = '';
+        try {
+          body = JSON.parse(text).message;
+        } catch (e) {
+          body = text;
+        }
+        body = body || err.message;
+        showDialog({ title, body, buttons });
+      });
+    } else {
+      let body = err.message;
+      showDialog({ title, body, buttons });
+    }
   }
 
   /**
@@ -536,7 +543,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     }
     return promise.catch(err => {
       // Handle a read-only folder.
-      if (!err.xhr || err.xhr.status !== 403) {
+      if (!err.response || err.response.status !== 403) {
         throw err;
       }
     });

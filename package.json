@@ -34,9 +34,11 @@
     "test:chrome": "lerna run test:chrome --stream",
     "test:firefox": "lerna run test:firefox --stream",
     "test:ie": "lerna run test:ie --concurrency 1 --stream",
-    "test:services": "cd packages/services && jlpm test && jlpm run test:integration && cd examples/node && python main.py",
+    "test:services": "cd packages/services && jlpm test && cd examples/node && python main.py",
     "update:dependency": "node buildutils/lib/update-dependency.js",
-    "watch": "cd packages/metapackage && jlpm run watch"
+    "watch": "python scripts/watch_dev.py",
+    "watch:main": "jlpm run watch",
+    "watch:packages": "python scripts/watch_packages.py"
   },
   "dependencies": {},
   "devDependencies": {

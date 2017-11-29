@@ -24,7 +24,6 @@ if [[ $GROUP == js ]]; then
 
     # Allow the tests to fail once due to slow CI.
     jlpm test || jlpm test
-    jlpm run test:services || jlpm run test:services
     jlpm run clean
 fi
 
@@ -45,6 +44,16 @@ if [[ $GROUP == js_cov ]]; then
     jlpm run clean
 fi
 
+
+if [[ $GROUP == js_services ]]; then
+
+    jlpm build:packages
+    jlpm build:test
+
+    # Allow the tests to fail once due to slow CI. 
+    jlpm run test:services || jlpm run test:services
+
+fi
 
 if [[ $GROUP == docs ]]; then
 

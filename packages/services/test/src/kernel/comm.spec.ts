@@ -4,36 +4,65 @@
 import expect = require('expect.js');
 
 import {
-  uuid
-} from '@jupyterlab/coreutils';
-
-import {
   KernelMessage, Kernel
 } from '../../../lib/kernel';
 
 import {
-  KernelTester
+  init
 } from '../utils';
+
+
+// Initialize fetch override.
+init();
+
+
+let BLIP = [
+  'from ipykernel.comm import Comm',
+  'comm = Comm(target_name="test", data="hello")',
+  'comm.send(data="hello")',
+  'comm.close("goodbye")'
+].join('\n');
+
+let RECEIVE = [
+  'def _recv(msg):',
+  '    data = msg["content"]["data"]',
+  '    if data == "quit":',
+  '         comm.close("goodbye")',
+  '    else:',
+  '         comm.send(data)'
+].join('\n');
+
+let SEND = RECEIVE + '\n' + [
+  'from ipykernel.comm import Comm',
+  'comm = Comm(target_name="test", data="hello")',
+  'comm.send(data="hello")',
+  'comm.on_msg(_recv)'
+].join('\n');
+
+let TARGET = RECEIVE + '\n' + [
+  'def target_func(comm, msg):',
+  '    comm.on_msg(_recv)',
+  'get_ipython().kernel.comm_manager.register_target("test", target_func)'
+].join('\n');
 
 
 describe('jupyter.services - Comm', () => {
 
-  let tester: KernelTester;
   let kernel: Kernel.IKernel;
 
-  beforeEach(() => {
-    tester = new KernelTester();
-    return Kernel.startNew().then(k => {
+  before(() => {
+    return Kernel.startNew({ name: 'ipython' }).then(k => {
       kernel = k;
-      return kernel.ready;
     });
   });
 
   afterEach(() => {
-    if (kernel) {
-      kernel.dispose();
-    }
-    tester.dispose();
+    // A no-op comm target.
+    kernel.registerCommTarget('test', (comm, msg) => { /* no op */ });
+  });
+
+  after(() => {
+    return kernel.shutdown();
   });
 
   describe('Kernel', () => {
@@ -46,7 +75,7 @@ describe('jupyter.services - Comm', () => {
         expect(typeof comm.commId).to.be('string');
       });
 
-      it('should use the given commId', () => {
+      it('should use the given id', () => {
         let comm = kernel.connectToComm('test', '1234');
         expect(comm.targetName).to.be('test');
         expect(comm.commId).to.be('1234');
@@ -58,7 +87,7 @@ describe('jupyter.services - Comm', () => {
         expect(comm.commId).to.be('1234');
       });
 
-      it('should use the given commId', () => {
+      it('should use the given id', () => {
         let comm = kernel.connectToComm('test', '1234');
         expect(comm.targetName).to.be('test');
         expect(comm.commId).to.be('1234');
@@ -77,59 +106,44 @@ describe('jupyter.services - Comm', () => {
     context('#registerCommTarget()', () => {
 
       it('should call the provided callback', (done) => {
-        kernel.registerCommTarget('test', (comm, msg) => {
+        let disposable = kernel.registerCommTarget('test', (comm, msg) => {
+          disposable.dispose();
           let content = msg.content;
+          expect(content.data).to.be('hello');
           kernel.connectToComm(content.target_name, content.comm_id);
+          comm.dispose();
           done();
         });
-        let contents = {
-          target_name: 'test',
-          comm_id: uuid(),
-          data: { foo: 'bar'}
-        };
-        sendCommMessage(tester, kernel, 'comm_open', contents);
+        kernel.requestExecute({ code: BLIP }, true).done.catch(done);
       });
     });
 
     context('#commInfo()', () => {
 
       it('should get the comm info', (done) => {
-        tester.onMessage((msg) => {
-          msg.parent_header = msg.header;
-          msg.content = {
-            comms: {
-               '1234': 'test',
-               '5678': 'test2',
-               '4321': 'test'
-
-            }
-          };
-          tester.send(msg);
+        let disposable = kernel.registerCommTarget('test', (comm, msg) => {
+          disposable.dispose();
+          kernel.requestCommInfo({ }).then((msg) => {
+            let comms = msg.content.comms;
+            expect(comms[comm.commId].target_name).to.be('test');
+            comm.dispose();
+            done();
+          }).catch(done);
         });
-        kernel.requestCommInfo({ }).then((msg) => {
-          let comms = msg.content.comms as any;
-          expect(comms['1234']).to.be('test');
-          done();
+        kernel.requestExecute({ code: SEND }, true).done.catch(done);
+      });
+
+      it('should allow an optional target', () => {
+        return kernel.requestExecute({ code: SEND }, true).done.then(() => {
+          return kernel.requestCommInfo({ target: 'test' });
+        }).then(msg => {
+          let comms = msg.content.comms;
+          for (let id in comms) {
+            expect(comms[id].target_name).to.be('test');
+          }
         });
       });
 
-      it('should allow an optional target', (done) => {
-        tester.onMessage((msg) => {
-          msg.parent_header = msg.header;
-          msg.content = {
-            comms: {
-               '1234': 'test',
-               '4321': 'test'
-            }
-          };
-          tester.send(msg);
-        });
-        kernel.requestCommInfo({ target: 'test' }).then((msg) => {
-          let comms = msg.content.comms as any;
-          expect(comms['1234']).to.be('test');
-          done();
-        });
-      });
     });
 
     context('#isDisposed', () => {
@@ -160,59 +174,25 @@ describe('jupyter.services - Comm', () => {
       });
     });
 
-    describe('#_handleOpen()', () => {
-
-      it('should load a required module', () => {
-        let contents = {
-          target_name: 'test',
-          target_module: '../../../test/build/target',
-          comm_id: '1234',
-          data: { foo: 'bar'}
-        };
-        sendCommMessage(tester, kernel, 'comm_open', contents);
-        kernel.connectToComm('test', '1234');
-      });
-
-      it('should fail to load the module', () => {
-        let contents = {
-          target_name: 'test2',
-          target_module: '../../../test/build/target',
-          comm_id: '1234',
-          data: { foo: 'bar'}
-        };
-        sendCommMessage(tester, kernel, 'comm_open', contents);
-        kernel.connectToComm('test2', '1234');
-      });
-
-      it('should fail to find the target', () => {
-        let contents = {
-          target_name: 'unavailable',
-          target_module: '../../../test/build/target',
-          comm_id: '1234',
-          data: { foo: 'bar'}
-        };
-        sendCommMessage(tester, kernel, 'comm_open', contents);
-        kernel.connectToComm('test2', '1234');
-      });
-
-    });
   });
 
   describe('IComm', () => {
 
-    context('#commId', () => {
+    let comm: Kernel.IComm;
+
+    context('#id', () => {
 
       it('should be a string', () => {
-        let comm = kernel.connectToComm('test');
+        comm = kernel.connectToComm('test');
         expect(typeof comm.commId).to.be('string');
       });
 
     });
 
-    context('#targetName', () => {
+    context('#name', () => {
 
       it('should be a string', () => {
-        let comm = kernel.connectToComm('test');
+        comm = kernel.connectToComm('test');
         expect(comm.targetName).to.be('test');
       });
 
@@ -221,41 +201,29 @@ describe('jupyter.services - Comm', () => {
     context('#onClose', () => {
 
       it('should be readable and writable function', (done) => {
-        let comm = kernel.connectToComm('test');
-        comm.onClose = (data) => {
+        comm = kernel.connectToComm('test');
+        expect(comm.onClose).to.be(undefined);
+        comm.onClose = msg => {
           done();
         };
-        expect(typeof comm.onClose).to.be('function');
         comm.close();
       });
 
       it('should be called when the server side closes', (done) => {
-        let comm = kernel.connectToComm('test');
-        comm.onClose = (msg) => {
-          expect(msg.content.data).to.eql({ foo: 'bar' });
-          done();
-        };
-        let content = {
-          comm_id: comm.commId,
-          target_name: comm.targetName,
-          data: { foo: 'bar' }
-        };
-        sendCommMessage(tester, kernel, 'comm_close', content);
+        kernel.registerCommTarget('test', (comm, msg) => {
+          comm.onClose = data => {
+            done();
+          };
+          comm.send('quit');
+        });
+        kernel.requestExecute({ code: SEND }, true).done.catch(done);
       });
 
-      it('should ignore a close message for an unregistered id', () => {
-        let comm = kernel.connectToComm('test');
-        let content = {
-          comm_id: '1234',
-          target_name: comm.targetName
-        };
-        sendCommMessage(tester, kernel, 'comm_close', content);
-      });
     });
 
     context('#onMsg', () => {
       it('should be readable and writable function', (done) => {
-        let comm = kernel.connectToComm('test');
+        comm = kernel.connectToComm('test');
         comm.onMsg = (msg) => {
           done();
         };
@@ -271,162 +239,85 @@ describe('jupyter.services - Comm', () => {
       });
 
       it('should be called when the server side sends a message', (done) => {
-        let comm = kernel.connectToComm('test');
-        comm.onMsg = (msg) => {
-          expect(msg.content.data).to.eql({ foo: 'bar' });
-          done();
-        };
-        let content = {
-          comm_id: comm.commId,
-          target_name: comm.targetName,
-          data: { foo: 'bar' }
-        };
-        sendCommMessage(tester, kernel, 'comm_msg', content);
-      });
-
-      it('should ignore a message for an unregistered id', () => {
-        let comm = kernel.connectToComm('test');
-        let content = {
-          comm_id: '1234',
-          target_name: comm.targetName
-        };
-        sendCommMessage(tester, kernel, 'comm_msg', content);
+        kernel.registerCommTarget('test', (comm, msg) => {
+          comm.onMsg = (msg) => {
+            expect(msg.content.data).to.be('hello');
+            done();
+          };
+        });
+        kernel.requestExecute({ code: BLIP }, true).done.catch(done);
       });
     });
 
     context('#open()', () => {
 
-      it('should send a message to the server', (done) => {
-        let comm = kernel.connectToComm('test');
-        tester.onMessage((msg: KernelMessage.ICommOpenMsg) => {
-          expect(msg.content.data).to.eql({ foo: 'bar' });
-          let decoder = new TextDecoder('utf8');
-          let item = msg.buffers[0] as DataView;
-          expect(decoder.decode(item)).to.be('hello');
-          done();
+      it('should send a message to the server', () => {
+        let future = kernel.requestExecute({ code: TARGET });
+        future.done.then(() => {
+          comm = kernel.connectToComm('test');
+          let encoder = new TextEncoder('utf8');
+          let data = encoder.encode('hello');
+          future = comm.open({ foo: 'bar' }, { fizz: 'buzz' }, [data, data.buffer]);
+          return future.done;
         });
-        let encoder = new TextEncoder('utf8');
-        let data = encoder.encode('hello');
-        comm.open({ foo: 'bar' }, { fizz: 'buzz' }, [data, data.buffer]);
       });
 
-      it('should yield a future', (done) => {
-        let comm = kernel.connectToComm('test');
-        tester.onMessage((msg) => {
-          msg.parent_header = msg.header;
-          msg.channel = 'iopub';
-          tester.send(msg);
-        });
-        let future = comm.open();
-        future.onIOPub = () => {
-          done();
-        };
-      });
     });
 
     context('#send()', () => {
 
-      it('should send a message to the server', (done) => {
-        let comm = kernel.connectToComm('test');
-        tester.onMessage((msg: KernelMessage.ICommMsgMsg) => {
-          expect(msg.content.data).to.eql({ foo: 'bar' });
-          let decoder = new TextDecoder('utf8');
-          let item = msg.buffers[0] as DataView;
-          expect(decoder.decode(item)).to.be('hello');
-          done();
+      it('should send a message to the server', () => {
+        comm = kernel.connectToComm('test');
+        return comm.open().done.then(() => {
+          let future = comm.send({ foo: 'bar' }, { fizz: 'buzz' });
+          return future.done;
         });
-        let encoder = new TextEncoder('utf8');
-        let data = encoder.encode('hello');
-        comm.send({ foo: 'bar' }, { fizz: 'buzz' }, [data, data.buffer]);
       });
 
-      it('should yield a future', (done) => {
-        let comm = kernel.connectToComm('test');
-        tester.onMessage((msg) => {
-          msg.parent_header = msg.header;
-          msg.channel = 'iopub';
-          tester.send(msg);
+      it('should pass through a buffers field', () => {
+        comm = kernel.connectToComm('test');
+        return comm.open().done.then(() => {
+          let future = comm.send({ buffers: 'bar' });
+          return future.done;
         });
-        let future = comm.send('foo');
-        future.onIOPub = () => {
-          done();
-        };
       });
-
-      it('should pass through a buffers field', (done) => {
-        let comm = kernel.connectToComm('test');
-        tester.onMessage((msg: KernelMessage.ICommMsgMsg) => {
-          expect(msg.content.data).to.eql({ buffers: 'bar' });
-          done();
-        });
-        comm.send({ buffers: 'bar' });
-      });
-
 
     });
 
     context('#close()', () => {
 
-      it('should send a message to the server', (done) => {
-        let comm = kernel.connectToComm('test');
-        tester.onMessage((msg: KernelMessage.ICommCloseMsg) => {
-          expect(msg.content.data).to.eql({ foo: 'bar' });
-          let decoder = new TextDecoder('utf8');
-          let item = msg.buffers[0] as DataView;
-          expect(decoder.decode(item)).to.be('hello');
-          done();
+      it('should send a message to the server', () => {
+        comm = kernel.connectToComm('test');
+        return comm.open().done.then(() => {
+          let encoder = new TextEncoder('utf8');
+          let data = encoder.encode('hello');
+          let future = comm.close({ foo: 'bar' }, { }, [data, data.buffer]);
+          return future.done;
         });
-        let encoder = new TextEncoder('utf8');
-        let data = encoder.encode('hello');
-        comm.close({ foo: 'bar' }, { }, [data, data.buffer]);
       });
 
       it('should trigger an onClose', (done) => {
-        let comm = kernel.connectToComm('test');
-        comm.onClose = (msg: KernelMessage.ICommCloseMsg) => {
-          expect(msg.content.data).to.eql({ foo: 'bar' });
-          done();
-        };
-        comm.close({ foo: 'bar' });
+        comm = kernel.connectToComm('test');
+        comm.open().done.then(() => {
+          comm.onClose = (msg: KernelMessage.ICommCloseMsg) => {
+            expect(msg.content.data).to.eql({ foo: 'bar' });
+            done();
+          };
+          let future = comm.close({ foo: 'bar' });
+          return future.done;
+        }).catch(done);
       });
 
       it('should not send subsequent messages', () => {
-        let comm = kernel.connectToComm('test');
-        comm.close({ foo: 'bar' });
-        expect(() => { comm.send('test'); }).to.throwError();
-      });
-
-      it('should throw if already closed', () => {
-        let comm = kernel.connectToComm('test');
-        comm.close({ foo: 'bar' });
-        expect(() => { comm.close(); }).to.throwError();
-      });
-
-      it('should yield a future', (done) => {
-        let comm = kernel.connectToComm('test');
-        tester.onMessage((msg) => {
-          msg.parent_header = msg.header;
-          msg.channel = 'iopub';
-          tester.send(msg);
+        comm = kernel.connectToComm('test');
+        return comm.open().done.then(() => {
+          return comm.close({ foo: 'bar' }).done;
+        }).then(() => {
+          expect(() => { comm.send('test'); }).to.throwError();
         });
-        let future = comm.close();
-        future.onIOPub = () => {
-          done();
-        };
       });
+
     });
 
   });
 });
-
-
-function sendCommMessage(tester: KernelTester, kernel: Kernel.IKernel, msgType: string, content: any) {
-  let options: KernelMessage.IOptions = {
-    msgType: msgType,
-    channel: 'iopub',
-    username: kernel.username,
-    session: kernel.clientId
-  };
-  let msg = KernelMessage.createMessage(options, content);
-  tester.send(msg);
-}
