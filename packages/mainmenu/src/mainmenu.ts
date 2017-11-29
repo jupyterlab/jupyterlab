@@ -129,12 +129,12 @@ class MainMenu extends MenuBar implements IMainMenu {
     this.runMenu = new RunMenu({ commands });
     this.viewMenu = new ViewMenu({ commands });
 
-    this.addMenu(this.fileMenu, { rank: 0 });
-    this.addMenu(this.editMenu, { rank: 1 });
-    this.addMenu(this.runMenu, { rank: 2 });
-    this.addMenu(this.kernelMenu, { rank: 3 });
-    this.addMenu(this.viewMenu, { rank: 4 });
-    this.addMenu(this.helpMenu, { rank: 1000 });
+    this.addMenu(this.fileMenu.menu, { rank: 0 });
+    this.addMenu(this.editMenu.menu, { rank: 1 });
+    this.addMenu(this.runMenu.menu, { rank: 2 });
+    this.addMenu(this.kernelMenu.menu, { rank: 3 });
+    this.addMenu(this.viewMenu.menu, { rank: 4 });
+    this.addMenu(this.helpMenu.menu, { rank: 1000 });
   }
 
   /**
@@ -188,6 +188,19 @@ class MainMenu extends MenuBar implements IMainMenu {
      * Create a new menu.
      */
     this.insertMenu(index, menu);
+  }
+
+  /**
+   * Dispose of the resources held by the menu bar.
+   */
+  dispose(): void {
+    this.editMenu.dispose();
+    this.fileMenu.dispose();
+    this.helpMenu.dispose();
+    this.kernelMenu.dispose();
+    this.runMenu.dispose();
+    this.viewMenu.dispose();
+    super.dispose();
   }
 
   /**

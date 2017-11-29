@@ -45,7 +45,7 @@ class KernelMenu extends JupyterLabMenu implements IKernelMenu {
    */
   constructor(options: Menu.IOptions) {
     super(options);
-    this.title.label = 'Kernel';
+    this.menu.title.label = 'Kernel';
 
     this.kernelUsers =
       new Map<string, IKernelMenu.IKernelUser<Widget>>();
@@ -68,6 +68,15 @@ class KernelMenu extends JupyterLabMenu implements IKernelMenu {
    * The key for the map may be used in menu labels.
    */
   readonly consoleCreators: Map<string, IKernelMenu.IConsoleCreator<Widget>>;
+
+  /**
+   * Dispose of the resources held by the kernel menu.
+   */
+  dispose(): void {
+    this.kernelUsers.clear();
+    this.consoleCreators.clear();
+    super.dispose();
+  }
 }
 
 /**

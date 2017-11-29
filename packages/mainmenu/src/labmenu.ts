@@ -10,6 +10,10 @@ import {
 } from '@phosphor/algorithm';
 
 import {
+  IDisposable
+} from '@phosphor/disposable';
+
+import {
   Menu, Widget
 } from '@phosphor/widgets';
 
@@ -23,7 +27,7 @@ import {
  * such as "Edit" and "View"
  */
 export
-interface IJupyterLabMenu extends Menu {
+interface IJupyterLabMenu extends IDisposable {
   /**
    * Add a group of menu items specific to a particular
    * plugin.
@@ -50,7 +54,14 @@ interface IMenuExtender<T extends Widget> {
  * An extensible menu for JupyterLab application menus.
  */
 export
-class JupyterLabMenu extends Menu implements IJupyterLabMenu {
+class JupyterLabMenu implements IJupyterLabMenu {
+  /**
+   * Construct a new menu.
+   */
+  constructor(options: Menu.IOptions) {
+    this.menu = new Menu(options);
+  }
+
   /**
    * Add a group of menu items specific to a particular
    * plugin.
@@ -74,18 +85,40 @@ class JupyterLabMenu extends Menu implements IJupyterLabMenu {
     // Insert a separator before the group.
     // Phosphor takes care of superfluous leading,
     // trailing, and duplicate separators.
-    this.insertItem(insertIndex++, { type: 'separator' });
+    this.menu.insertItem(insertIndex++, { type: 'separator' });
     // Insert the group.
     for (let item of items) {
-      this.insertItem(insertIndex++, item);
+      this.menu.insertItem(insertIndex++, item);
     }
     // Insert a separator after the group.
-    this.insertItem(insertIndex++, { type: 'separator' });
+    this.menu.insertItem(insertIndex++, { type: 'separator' });
 
     ArrayExt.insert(this._groups, groupIndex, rankGroup);
   }
 
+  /**
+   * The underlying Phosphor menu.
+   */
+  readonly menu: Menu;
+
+  /**
+   * Whether the menu has been disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose of the resources held by the menu.
+   */
+  dispose(): void {
+    this._groups.length = 0;
+    this._isDisposed = true;
+    this.menu.dispose();
+  }
+
   private _groups: Private.IRankGroup[] = [];
+  private _isDisposed = false;
 }
 
 

@@ -50,7 +50,7 @@ class EditMenu extends JupyterLabMenu implements IEditMenu {
    */
   constructor(options: Menu.IOptions) {
     super(options);
-    this.title.label = 'Edit';
+    this.menu.title.label = 'Edit';
 
     this.undoers =
       new Map<string, IEditMenu.IUndoer<Widget>>();
@@ -85,6 +85,16 @@ class EditMenu extends JupyterLabMenu implements IEditMenu {
    * The key for the map may be used in menu labels.
    */
   readonly findReplacers: Map<string, IEditMenu.IFindReplacer<Widget>>;
+
+  /**
+   * Dispose of the resources held by the edit menu.
+   */
+  dispose(): void {
+    this.undoers.clear();
+    this.clearers.clear();
+    this.findReplacers.clear();
+    super.dispose();
+  }
 }
 
 /**

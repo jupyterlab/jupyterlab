@@ -108,7 +108,7 @@ const menuPlugin: JupyterLabPlugin<IMainMenu> = {
  * Create the basic `Edit` menu.
  */
 function createEditMenu(app: JupyterLab, menu: EditMenu): void {
-  const commands = menu.commands;
+  const commands = menu.menu.commands;
 
   // Add the undo/redo commands the the Edit menu.
   commands.addCommand(CommandIDs.undo, {
@@ -169,7 +169,7 @@ function createEditMenu(app: JupyterLab, menu: EditMenu): void {
  * Create the basic `File` menu.
  */
 function createFileMenu(app: JupyterLab, menu: FileMenu): void {
-  const commands = menu.commands;
+  const commands = menu.menu.commands;
 
   // Add a delegator command for closing and cleaning up an activity.
   commands.addCommand(CommandIDs.closeAndCleanup, {
@@ -210,7 +210,7 @@ function createFileMenu(app: JupyterLab, menu: FileMenu): void {
  * Create the basic `Kernel` menu.
  */
 function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
-  const commands = menu.commands;
+  const commands = menu.menu.commands;
 
   commands.addCommand(CommandIDs.interruptKernel, {
     label: 'Interrupt Kernel',
@@ -261,7 +261,7 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
  * Create the basic `View` menu.
  */
 function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
-  const commands = menu.commands;
+  const commands = menu.menu.commands;
 
   commands.addCommand(CommandIDs.lineNumbering, {
     label: 'Line Numbers',
@@ -311,7 +311,7 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
 }
 
 function createRunMenu(app: JupyterLab, menu: RunMenu): void {
-  const commands = menu.commands;
+  const commands = menu.menu.commands;
 
   commands.addCommand(CommandIDs.run, {
     label: () => {

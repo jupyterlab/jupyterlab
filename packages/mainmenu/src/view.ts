@@ -33,19 +33,27 @@ class ViewMenu extends JupyterLabMenu implements IViewMenu {
    */
   constructor(options: Menu.IOptions) {
     super(options);
-    this.title.label = 'View';
+    this.menu.title.label = 'View';
 
     this.editorViewers =
       new Map<string, IViewMenu.IEditorViewer<Widget>>();
   }
 
   /**
-   * A map storing IKernelUsers for the Kernel menu.
+   * A map storing IEditorViewers for the View menu.
    *
    * ### Notes
    * The key for the map may be used in menu labels.
    */
   readonly editorViewers: Map<string, IViewMenu.IEditorViewer<Widget>>;
+
+  /**
+   * Dispose of the resources held by the view menu.
+   */
+  dispose(): void {
+    this.editorViewers.clear();
+    super.dispose();
+  }
 }
 
 /**

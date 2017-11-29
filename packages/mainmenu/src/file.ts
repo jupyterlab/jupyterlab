@@ -33,7 +33,7 @@ class FileMenu extends JupyterLabMenu implements IFileMenu {
   constructor(options: Menu.IOptions) {
     super(options);
 
-    this.title.label = 'File';
+    this.menu.title.label = 'File';
 
     // Create the "New" submenu.
     this.newMenu = new Menu(options);
@@ -56,6 +56,14 @@ class FileMenu extends JupyterLabMenu implements IFileMenu {
    * The close and cleanup extension point.
    */
   readonly closeAndCleaners: Map<string, IFileMenu.ICloseAndCleaner<Widget>>;
+
+  /**
+   * Dispose of the resources held by the file menu.
+   */
+  dispose(): void {
+    this.newMenu.dispose();
+    super.dispose();
+  }
 }
 
 

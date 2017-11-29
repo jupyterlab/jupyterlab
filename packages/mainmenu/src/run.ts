@@ -33,7 +33,7 @@ class RunMenu extends JupyterLabMenu implements IRunMenu {
    */
   constructor(options: Menu.IOptions) {
     super(options);
-    this.title.label = 'Run';
+    this.menu.title.label = 'Run';
 
     this.codeRunners =
       new Map<string, IRunMenu.ICodeRunner<Widget>>();
@@ -46,6 +46,14 @@ class RunMenu extends JupyterLabMenu implements IRunMenu {
    * The key for the map may be used in menu labels.
    */
   readonly codeRunners: Map<string, IRunMenu.ICodeRunner<Widget>>;
+
+  /**
+   * Dispose of the resources held by the run menu.
+   */
+  dispose(): void {
+    this.codeRunners.clear();
+    super.dispose();
+  }
 }
 
 /**

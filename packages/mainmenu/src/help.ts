@@ -10,7 +10,7 @@ import {
 } from './labmenu';
 
 /**
- * An interface for a Run menu.
+ * An interface for a Help menu.
  */
 export
 interface IHelpMenu extends IJupyterLabMenu {
@@ -26,6 +26,6 @@ class HelpMenu extends JupyterLabMenu implements IHelpMenu {
    */
   constructor(options: Menu.IOptions) {
     super(options);
-    this.title.label = 'Help';
+    this.menu.title.label = 'Help';
   }
 }
