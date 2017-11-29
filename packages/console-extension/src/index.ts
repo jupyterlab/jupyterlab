@@ -399,7 +399,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
   mainMenu.fileMenu.newMenu.addItem({ command: CommandIDs.create });
 
   // Add a close and shutdown command to the file menu.
-  mainMenu.fileMenu.closeAndCleaners.set('Console', {
+  mainMenu.fileMenu.closeAndCleaners.add({
     tracker,
     action: 'Shutdown',
     closeAndCleanup: (current: ConsolePanel) => {
@@ -420,7 +420,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
   } as IFileMenu.ICloseAndCleaner<ConsolePanel>);
 
   // Add a kernel user to the Kernel menu
-  mainMenu.kernelMenu.kernelUsers.set('Console', {
+  mainMenu.kernelMenu.kernelUsers.add({
     tracker,
     interruptKernel: current => {
       let kernel = current.console.session.kernel;
@@ -435,7 +435,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
   } as IKernelMenu.IKernelUser<ConsolePanel>);
 
   // Add a code runner to the Run menu.
-  mainMenu.runMenu.codeRunners.set('Console', {
+  mainMenu.runMenu.codeRunners.add({
     tracker,
     noun: 'Cell',
     pluralNoun: 'Cells',
@@ -446,7 +446,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
   mainMenu.editMenu.addGroup([{ command: CommandIDs.linebreak }]);
 
   // Add a clearer to the edit menu
-  mainMenu.editMenu.clearers.set('Console', {
+  mainMenu.editMenu.clearers.add({
     tracker,
     noun: 'Console',
     clear: (current: ConsolePanel) => { return current.console.clear() }

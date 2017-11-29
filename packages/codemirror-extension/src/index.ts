@@ -317,7 +317,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
   mainMenu.addMenu(createMenu(), { rank: 30 });
 
   // Add find-replace capabilities to the edit menu.
-  mainMenu.editMenu.findReplacers.set('Editor', {
+  mainMenu.editMenu.findReplacers.add({
     tracker,
     find: (widget: FileEditor) => {
       let editor = widget.editor as CodeMirrorEditor;

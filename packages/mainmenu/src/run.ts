@@ -15,12 +15,12 @@ import {
 export
 interface IRunMenu extends IJupyterLabMenu {
   /**
-   * A map storing ICodeRunner for the Run menu.
+   * A set storing ICodeRunner for the Run menu.
    *
    * ### Notes
-   * The key for the map may be used in menu labels.
+   * The key for the set may be used in menu labels.
    */
-  readonly codeRunners: Map<string, IRunMenu.ICodeRunner<Widget>>;
+  readonly codeRunners: Set<IRunMenu.ICodeRunner<Widget>>;
 }
 
 /**
@@ -36,16 +36,16 @@ class RunMenu extends JupyterLabMenu implements IRunMenu {
     this.menu.title.label = 'Run';
 
     this.codeRunners =
-      new Map<string, IRunMenu.ICodeRunner<Widget>>();
+      new Set<IRunMenu.ICodeRunner<Widget>>();
   }
 
   /**
-   * A map storing ICodeRunner for the Run menu.
+   * A set storing ICodeRunner for the Run menu.
    *
    * ### Notes
-   * The key for the map may be used in menu labels.
+   * The key for the set may be used in menu labels.
    */
-  readonly codeRunners: Map<string, IRunMenu.ICodeRunner<Widget>>;
+  readonly codeRunners: Set<IRunMenu.ICodeRunner<Widget>>;
 
   /**
    * Dispose of the resources held by the run menu.

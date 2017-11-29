@@ -19,20 +19,14 @@ import {
 export
 interface IKernelMenu extends IJupyterLabMenu {
   /**
-   * A map storing IKernelUsers for the Kernel menu.
-   *
-   * ### Notes
-   * The key for the map may be used in menu labels.
+   * A set storing IKernelUsers for the Kernel menu.
    */
-  readonly kernelUsers: Map<string, IKernelMenu.IKernelUser<Widget>>;
+  readonly kernelUsers: Set<IKernelMenu.IKernelUser<Widget>>;
   
   /**
-   * A map storing IConsoleCreators for the Kernel menu.
-   *
-   * ### Notes
-   * The key for the map may be used in menu labels.
+   * A set storing IConsoleCreators for the Kernel menu.
    */
-  readonly consoleCreators: Map<string, IKernelMenu.IConsoleCreator<Widget>>;
+  readonly consoleCreators: Set<IKernelMenu.IConsoleCreator<Widget>>;
 }
 
 /**
@@ -48,26 +42,20 @@ class KernelMenu extends JupyterLabMenu implements IKernelMenu {
     this.menu.title.label = 'Kernel';
 
     this.kernelUsers =
-      new Map<string, IKernelMenu.IKernelUser<Widget>>();
+      new Set<IKernelMenu.IKernelUser<Widget>>();
     this.consoleCreators =
-      new Map<string, IKernelMenu.IConsoleCreator<Widget>>();
+      new Set<IKernelMenu.IConsoleCreator<Widget>>();
   }
 
   /**
-   * A map storing IKernelUsers for the Kernel menu.
-   *
-   * ### Notes
-   * The key for the map may be used in menu labels.
+   * A set storing IKernelUsers for the Kernel menu.
    */
-  readonly kernelUsers: Map<string, IKernelMenu.IKernelUser<Widget>>;
+  readonly kernelUsers: Set<IKernelMenu.IKernelUser<Widget>>;
   
   /**
-   * A map storing IConsoleCreators for the Kernel menu.
-   *
-   * ### Notes
-   * The key for the map may be used in menu labels.
+   * A set storing IConsoleCreators for the Kernel menu.
    */
-  readonly consoleCreators: Map<string, IKernelMenu.IConsoleCreator<Widget>>;
+  readonly consoleCreators: Set<IKernelMenu.IConsoleCreator<Widget>>;
 
   /**
    * Dispose of the resources held by the kernel menu.

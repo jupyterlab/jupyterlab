@@ -16,28 +16,19 @@ import {
 export
 interface IEditMenu extends IJupyterLabMenu {
   /**
-   * A map storing IUndoers for the Edit menu.
-   *
-   * ### Notes
-   * The key for the map may be used in menu labels.
+   * A set storing IUndoers for the Edit menu.
    */
-  readonly undoers: Map<string, IEditMenu.IUndoer<Widget>>;
+  readonly undoers: Set<IEditMenu.IUndoer<Widget>>;
 
   /**
-   * A map storing IClearers for the Edit menu.
-   *
-   * ### Notes
-   * The key for the map may be used in menu labels.
+   * A set storing IClearers for the Edit menu.
    */
-  readonly clearers: Map<string, IEditMenu.IClearer<Widget>>;
+  readonly clearers: Set<IEditMenu.IClearer<Widget>>;
 
   /**
-   * A map storing IClearers for the Edit menu.
-   *
-   * ### Notes
-   * The key for the map may be used in menu labels.
+   * A set storing IClearers for the Edit menu.
    */
-  readonly findReplacers: Map<string, IEditMenu.IFindReplacer<Widget>>;
+  readonly findReplacers: Set<IEditMenu.IFindReplacer<Widget>>;
 }
 
 /**
@@ -53,38 +44,29 @@ class EditMenu extends JupyterLabMenu implements IEditMenu {
     this.menu.title.label = 'Edit';
 
     this.undoers =
-      new Map<string, IEditMenu.IUndoer<Widget>>();
+      new Set<IEditMenu.IUndoer<Widget>>();
 
     this.clearers =
-      new Map<string, IEditMenu.IClearer<Widget>>();
+      new Set<IEditMenu.IClearer<Widget>>();
 
     this.findReplacers =
-      new Map<string, IEditMenu.IFindReplacer<Widget>>();
+      new Set<IEditMenu.IFindReplacer<Widget>>();
   }
 
   /**
-   * A map storing IUndoers for the Edit menu.
-   *
-   * ### Notes
-   * The key for the map may be used in menu labels.
+   * A set storing IUndoers for the Edit menu.
    */
-  readonly undoers: Map<string, IEditMenu.IUndoer<Widget>>;
+  readonly undoers: Set<IEditMenu.IUndoer<Widget>>;
 
   /**
-   * A map storing IClearers for the Edit menu.
-   *
-   * ### Notes
-   * The key for the map may be used in menu labels.
+   * A set storing IClearers for the Edit menu.
    */
-  readonly clearers: Map<string, IEditMenu.IClearer<Widget>>;
+  readonly clearers: Set<IEditMenu.IClearer<Widget>>;
 
   /**
-   * A map storing IClearers for the Edit menu.
-   *
-   * ### Notes
-   * The key for the map may be used in menu labels.
+   * A set storing IClearers for the Edit menu.
    */
-  readonly findReplacers: Map<string, IEditMenu.IFindReplacer<Widget>>;
+  readonly findReplacers: Set<IEditMenu.IFindReplacer<Widget>>;
 
   /**
    * Dispose of the resources held by the edit menu.

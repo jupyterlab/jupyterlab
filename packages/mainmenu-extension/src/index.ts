@@ -238,8 +238,9 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
 
   commands.addCommand(CommandIDs.createConsole, {
     label: () => {
-      const name = Private.findExtenderName(app, menu.consoleCreators);
-      const label = `Create Console for${name ? ` ${name}` : '…'}`;
+      const widget = app.shell.currentWidget;
+      const name = widget ? widget.title.label : '';
+      const label = `Create Console for ${name ? `"${name}"` : '…' }`;
       return label;
     },
     isEnabled: Private.delegateEnabled(app, menu.consoleCreators, 'createConsole'),
@@ -355,40 +356,27 @@ export default menuPlugin;
  */
 namespace Private {
   /**
-   * Given a widget and a map containing IMenuExtenders,
+   * Given a widget and a set containing IMenuExtenders,
    * check the tracker and return the extender, if any,
    * that holds the widget.
    */
-  function findExtender<E extends IMenuExtender<Widget>>(widget: Widget, map: Map<string, E>): [string, E] {
+  function findExtender<E extends IMenuExtender<Widget>>(widget: Widget, s: Set<E>): E {
     let extender: E;
-    let name = '';
-    map.forEach((value, key) => {
+    s.forEach(value => {
       if (value.tracker.has(widget)) {
         extender = value;
-        name = key;
       }
     });
-    return [name, extender];
-  }
-
-  /**
-   * Given a map containing IMenuExtenders,
-   * return the key of the extender, or the empty string if none is found.
-   */
-  export
-  function findExtenderName<E extends IMenuExtender<Widget>>(app: JupyterLab, map: Map<string, E>): string {
-    const widget = app.shell.currentWidget;
-    const [name, ] = findExtender(widget, map);
-    return name;
+    return extender;
   }
 
   /**
    * A utility function that delegates a portion of a label to an IMenuExtender.
    */
   export
-  function delegateLabel<E extends IMenuExtender<Widget>>(app: JupyterLab, map: Map<string, E>, label: keyof E): string {
+  function delegateLabel<E extends IMenuExtender<Widget>>(app: JupyterLab, s: Set<E>, label: keyof E): string {
     let widget = app.shell.currentWidget;
-    const [, extender] = findExtender(widget, map);
+    const extender = findExtender(widget, s);
     if (!extender) {
       return '';
     }
@@ -400,10 +388,10 @@ namespace Private {
    * to an IMenuExtender.
    */
   export
-  function delegateExecute<E extends IMenuExtender<Widget>>(app: JupyterLab, map: Map<string, E>, executor: keyof E): () => Promise<any> {
+  function delegateExecute<E extends IMenuExtender<Widget>>(app: JupyterLab, s: Set<E>, executor: keyof E): () => Promise<any> {
     return () => {
       let widget = app.shell.currentWidget;
-      const [, extender] = findExtender(widget, map);
+      const extender = findExtender(widget, s);
       if (!extender) {
         return Promise.resolve(void 0);
       }
@@ -416,10 +404,10 @@ namespace Private {
    * to an IMenuExtender.
    */
   export
-  function delegateEnabled<E extends IMenuExtender<Widget>>(app: JupyterLab, map: Map<string, E>, executor: keyof E): () => boolean {
+  function delegateEnabled<E extends IMenuExtender<Widget>>(app: JupyterLab, s: Set<E>, executor: keyof E): () => boolean {
     return () => {
       let widget = app.shell.currentWidget;
-      const [, extender] = findExtender(widget, map);
+      const extender = findExtender(widget, s);
       return !!extender && !!extender[executor];
     };
   }
@@ -429,10 +417,10 @@ namespace Private {
    * for an IMenuExtender.
    */
   export
-  function delegateToggled<E extends IMenuExtender<Widget>>(app: JupyterLab, map: Map<string, E>, toggled: keyof E): () => boolean {
+  function delegateToggled<E extends IMenuExtender<Widget>>(app: JupyterLab, s: Set<E>, toggled: keyof E): () => boolean {
     return () => {
       let widget = app.shell.currentWidget;
-      const [, extender] = findExtender(widget, map);
+      const extender = findExtender(widget, s);
       return !!extender && !!extender[toggled] && !!extender[toggled](widget);
     };
   }

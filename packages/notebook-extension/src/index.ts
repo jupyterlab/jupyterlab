@@ -1299,14 +1299,14 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   let { commands } = app;
 
   // Add undo/redo hooks to the edit menu.
-  mainMenu.editMenu.undoers.set('Notebook', {
+  mainMenu.editMenu.undoers.add({
     tracker,
     undo: widget => { widget.notebook.activeCell.editor.undo(); },
     redo: widget => { widget.notebook.activeCell.editor.redo(); }
   } as IEditMenu.IUndoer<NotebookPanel>);
 
   // Add a clearer to the edit menu
-  mainMenu.editMenu.clearers.set('Notebook', {
+  mainMenu.editMenu.clearers.add({
     tracker,
     noun: 'All Cell Outputs',
     clear: (current: NotebookPanel) => {
@@ -1318,7 +1318,7 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   mainMenu.fileMenu.newMenu.addItem({ command: CommandIDs.createNew });
 
   // Add a close and shutdown command to the file menu.
-  mainMenu.fileMenu.closeAndCleaners.set('Notebook', {
+  mainMenu.fileMenu.closeAndCleaners.add({
     tracker,
     action: 'Shutdown',
     closeAndCleanup: (current: NotebookPanel) => {
@@ -1349,7 +1349,7 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   mainMenu.fileMenu.addGroup(fileGroup, 10);
 
   // Add a kernel user to the Kernel menu
-  mainMenu.kernelMenu.kernelUsers.set('Notebook', {
+  mainMenu.kernelMenu.kernelUsers.add({
     tracker,
     interruptKernel: current => {
       let kernel = current.session.kernel;
@@ -1364,7 +1364,7 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   } as IKernelMenu.IKernelUser<NotebookPanel>);
 
   // Add a console creator the the Kernel menu
-  mainMenu.kernelMenu.consoleCreators.set('Notebook', {
+  mainMenu.kernelMenu.consoleCreators.add({
     tracker,
     createConsole: current => {
       const options: ReadonlyJSONObject = {
@@ -1385,7 +1385,7 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   mainMenu.viewMenu.addGroup(viewGroup, 10);
 
   // Add an IEditorViewer to the application view menu
-  mainMenu.viewMenu.editorViewers.set('Notebook', {
+  mainMenu.viewMenu.editorViewers.add({
     tracker,
     toggleLineNumbers: widget => {
       NotebookActions.toggleAllLineNumbers(widget.notebook);
@@ -1400,7 +1400,7 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   } as IViewMenu.IEditorViewer<NotebookPanel>);
 
   // Add an ICodeRunner to the application run menu
-  mainMenu.runMenu.codeRunners.set('Notebook', {
+  mainMenu.runMenu.codeRunners.add({
     tracker,
     noun: 'Cell(s)',
     pluralNoun: 'Cells',
