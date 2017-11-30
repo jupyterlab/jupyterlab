@@ -19,6 +19,10 @@ import {
   ViewMenu, IViewMenu
 } from '@jupyterlab/mainmenu';
 
+import {
+  delegateExecute, delegateToggled
+} from './util';
+
 class Wodget extends Widget {
   wrapped: boolean = false;
   matched: boolean = false;
@@ -32,13 +36,14 @@ describe('@jupyterlab/mainmenu', () => {
     let commands: CommandRegistry;
     let menu: ViewMenu;
     let tracker: InstanceTracker<Wodget>;
-    let wodget = new Wodget();
+    let wodget: Wodget;
 
     before(() => {
       commands = new CommandRegistry();
     });
 
     beforeEach(() => {
+      wodget = new Wodget();
       menu = new ViewMenu({ commands });
       tracker = new InstanceTracker<Wodget>({ namespace: 'wodget' });
       tracker.add(wodget);
@@ -80,21 +85,24 @@ describe('@jupyterlab/mainmenu', () => {
           lineNumbersToggled: widget => widget.numbered,
           wordWrapToggled: widget => widget.wrapped
         }
-        menu.editorViewers.set('Wodget', viewer);
-        expect(menu.editorViewers.get('Wodget').matchBracketsToggled(wodget))
+        menu.editorViewers.add(viewer);
+
+        expect(delegateToggled(wodget, menu.editorViewers, 'matchBracketsToggled'))
         .to.be(false);
-        expect(menu.editorViewers.get('Wodget').wordWrapToggled(wodget))
+        expect(delegateToggled(wodget, menu.editorViewers, 'wordWrapToggled'))
         .to.be(false);
-        expect(menu.editorViewers.get('Wodget').lineNumbersToggled(wodget))
+        expect(delegateToggled(wodget, menu.editorViewers, 'lineNumbersToggled'))
         .to.be(false);
-        menu.editorViewers.get('Wodget').toggleLineNumbers(wodget);
-        menu.editorViewers.get('Wodget').toggleMatchBrackets(wodget);
-        menu.editorViewers.get('Wodget').toggleWordWrap(wodget);
-        expect(menu.editorViewers.get('Wodget').matchBracketsToggled(wodget))
+
+        delegateExecute(wodget, menu.editorViewers, 'toggleLineNumbers');
+        delegateExecute(wodget, menu.editorViewers, 'toggleMatchBrackets');
+        delegateExecute(wodget, menu.editorViewers, 'toggleWordWrap');
+
+        expect(delegateToggled(wodget, menu.editorViewers, 'matchBracketsToggled'))
         .to.be(true);
-        expect(menu.editorViewers.get('Wodget').wordWrapToggled(wodget))
+        expect(delegateToggled(wodget, menu.editorViewers, 'wordWrapToggled'))
         .to.be(true);
-        expect(menu.editorViewers.get('Wodget').lineNumbersToggled(wodget))
+        expect(delegateToggled(wodget, menu.editorViewers, 'lineNumbersToggled'))
         .to.be(true);
       });
 

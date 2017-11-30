@@ -22,7 +22,7 @@ interface IFileMenu extends IJupyterLabMenu {
   /**
    * The close and cleanup extension point.
    */
-  readonly closeAndCleaners: Map<string, IFileMenu.ICloseAndCleaner<Widget>>;
+  readonly closeAndCleaners: Set<IFileMenu.ICloseAndCleaner<Widget>>;
 }
 
 /**
@@ -44,7 +44,7 @@ class FileMenu extends JupyterLabMenu implements IFileMenu {
     }], 0);
 
     this.closeAndCleaners =
-      new Map<string, IFileMenu.ICloseAndCleaner<Widget>>();
+      new Set<IFileMenu.ICloseAndCleaner<Widget>>();
   }
 
   /**
@@ -55,7 +55,7 @@ class FileMenu extends JupyterLabMenu implements IFileMenu {
   /**
    * The close and cleanup extension point.
    */
-  readonly closeAndCleaners: Map<string, IFileMenu.ICloseAndCleaner<Widget>>;
+  readonly closeAndCleaners: Set<IFileMenu.ICloseAndCleaner<Widget>>;
 
   /**
    * Dispose of the resources held by the file menu.

@@ -15,12 +15,9 @@ import {
 export
 interface IViewMenu extends IJupyterLabMenu {
   /**
-   * A map storing IKernelUsers for the Kernel menu.
-   *
-   * ### Notes
-   * The key for the map may be used in menu labels.
+   * A set storing IKernelUsers for the Kernel menu.
    */
-  readonly editorViewers: Map<string, IViewMenu.IEditorViewer<Widget>>;
+  readonly editorViewers: Set<IViewMenu.IEditorViewer<Widget>>;
 }
 
 /**
@@ -36,16 +33,13 @@ class ViewMenu extends JupyterLabMenu implements IViewMenu {
     this.menu.title.label = 'View';
 
     this.editorViewers =
-      new Map<string, IViewMenu.IEditorViewer<Widget>>();
+      new Set<IViewMenu.IEditorViewer<Widget>>();
   }
 
   /**
-   * A map storing IEditorViewers for the View menu.
-   *
-   * ### Notes
-   * The key for the map may be used in menu labels.
+   * A set storing IEditorViewers for the View menu.
    */
-  readonly editorViewers: Map<string, IViewMenu.IEditorViewer<Widget>>;
+  readonly editorViewers: Set<IViewMenu.IEditorViewer<Widget>>;
 
   /**
    * Dispose of the resources held by the view menu.

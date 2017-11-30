@@ -19,6 +19,10 @@ import {
   KernelMenu, IKernelMenu
 } from '@jupyterlab/mainmenu';
 
+import {
+  delegateExecute
+} from './util';
+
 class Wodget extends Widget {
   state: string;
 }
@@ -79,14 +83,14 @@ describe('@jupyterlab/mainmenu', () => {
             return Promise.resolve(void 0);
           },
         }
-        menu.kernelUsers.set('Wodget', user);
-        menu.kernelUsers.get('Wodget').interruptKernel(wodget);
+        menu.kernelUsers.add(user);
+        delegateExecute(wodget, menu.kernelUsers, 'interruptKernel');
         expect(wodget.state).to.be('interrupt');
-        menu.kernelUsers.get('Wodget').restartKernel(wodget);
+        delegateExecute(wodget, menu.kernelUsers, 'restartKernel');
         expect(wodget.state).to.be('restart');
-        menu.kernelUsers.get('Wodget').changeKernel(wodget);
+        delegateExecute(wodget, menu.kernelUsers, 'changeKernel');
         expect(wodget.state).to.be('change');
-        menu.kernelUsers.get('Wodget').shutdownKernel(wodget);
+        delegateExecute(wodget, menu.kernelUsers, 'shutdownKernel');
         expect(wodget.state).to.be('shutdown');
       });
 
@@ -102,8 +106,8 @@ describe('@jupyterlab/mainmenu', () => {
             return Promise.resolve(void 0);
           },
         }
-        menu.consoleCreators.set('Wodget', creator);
-        menu.consoleCreators.get('Wodget').createConsole(wodget);
+        menu.consoleCreators.add(creator);
+        delegateExecute(wodget, menu.consoleCreators, 'createConsole');
         expect(wodget.state).to.be('create');
       });
 

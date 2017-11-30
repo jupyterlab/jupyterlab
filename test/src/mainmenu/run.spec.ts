@@ -23,6 +23,10 @@ class Wodget extends Widget {
   state: string;
 }
 
+import {
+  delegateExecute
+} from './util';
+
 describe('@jupyterlab/mainmenu', () => {
 
   describe('RunMenu', () => {
@@ -63,6 +67,7 @@ describe('@jupyterlab/mainmenu', () => {
         const runner: IRunMenu.ICodeRunner<Wodget> = {
           tracker,
           noun: 'Noun',
+          pluralNoun: 'Nouns',
           run: widget => {
             widget.state = 'run';
             return Promise.resolve(void 0);
@@ -80,14 +85,14 @@ describe('@jupyterlab/mainmenu', () => {
             return Promise.resolve(void 0);
           },
         }
-        menu.codeRunners.set('Wodget', runner);
-        menu.codeRunners.get('Wodget').run(wodget);
+        menu.codeRunners.add(runner);
+        delegateExecute(wodget, menu.codeRunners, 'run');
         expect(wodget.state).to.be('run');
-        menu.codeRunners.get('Wodget').runAll(wodget);
+        delegateExecute(wodget, menu.codeRunners, 'runAll');
         expect(wodget.state).to.be('runAll');
-        menu.codeRunners.get('Wodget').runAbove(wodget);
+        delegateExecute(wodget, menu.codeRunners, 'runAbove');
         expect(wodget.state).to.be('runAbove');
-        menu.codeRunners.get('Wodget').runBelow(wodget);
+        delegateExecute(wodget, menu.codeRunners, 'runBelow');
         expect(wodget.state).to.be('runBelow');
       });
 

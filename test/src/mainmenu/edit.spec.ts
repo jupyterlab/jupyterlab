@@ -19,6 +19,10 @@ import {
   EditMenu, IEditMenu
 } from '@jupyterlab/mainmenu';
 
+import {
+  delegateExecute
+} from './util';
+
 class Wodget extends Widget {
   state: string;
 }
@@ -71,10 +75,10 @@ describe('@jupyterlab/mainmenu', () => {
             return;
           }
         }
-        menu.undoers.set('Wodget', undoer);
-        menu.undoers.get('Wodget').undo(wodget);
+        menu.undoers.add(undoer);
+        delegateExecute(wodget, menu.undoers, 'undo');
         expect(wodget.state).to.be('undo');
-        menu.undoers.get('Wodget').redo(wodget);
+        delegateExecute(wodget, menu.undoers, 'redo');
         expect(wodget.state).to.be('redo');
       });
 
@@ -91,8 +95,8 @@ describe('@jupyterlab/mainmenu', () => {
             return;
           },
         }
-        menu.clearers.set('Wodget', clearer);
-        menu.clearers.get('Wodget').clear(wodget);
+        menu.clearers.add(clearer);
+        delegateExecute(wodget, menu.clearers, 'clear');
         expect(wodget.state).to.be('clear');
       });
 
@@ -112,10 +116,10 @@ describe('@jupyterlab/mainmenu', () => {
             return;
           },
         }
-        menu.findReplacers.set('Wodget', finder);
-        menu.findReplacers.get('Wodget').find(wodget);
+        menu.findReplacers.add(finder);
+        delegateExecute(wodget, menu.findReplacers, 'find');
         expect(wodget.state).to.be('find');
-        menu.findReplacers.get('Wodget').findAndReplace(wodget);
+        delegateExecute(wodget, menu.findReplacers, 'findAndReplace');
         expect(wodget.state).to.be('findAndReplace');
       });
 

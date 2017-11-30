@@ -399,14 +399,14 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
     menu.fileMenu.newMenu.addItem({ command: CommandIDs.createNew });
 
     // Add undo/redo hooks to the edit menu.
-    menu.editMenu.undoers.set('Editor', {
+    menu.editMenu.undoers.add({
       tracker,
       undo: widget => { widget.editor.undo(); },
       redo: widget => { widget.editor.redo(); }
     } as IEditMenu.IUndoer<FileEditor>);
 
     // Add editor view options.
-    menu.viewMenu.editorViewers.set('Editor', {
+    menu.viewMenu.editorViewers.add({
       tracker,
       toggleLineNumbers: widget => {
         const lineNumbers = !widget.editor.getOption('lineNumbers');
@@ -426,7 +426,7 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
     } as IViewMenu.IEditorViewer<FileEditor>);
 
     // Add a console creator the the Kernel menu.
-    menu.kernelMenu.consoleCreators.set('Editor', {
+    menu.kernelMenu.consoleCreators.add({
       tracker,
       createConsole: current => {
         const options = {
@@ -438,9 +438,10 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
     } as IKernelMenu.IConsoleCreator<FileEditor>);
 
     // Add a code runner to the Run menu.
-    menu.runMenu.codeRunners.set('Editor', {
+    menu.runMenu.codeRunners.add({
       tracker,
-      noun: 'Code Snippet',
+      noun: 'Code',
+      pluralNoun: 'Code',
       run: () => commands.execute(CommandIDs.runCode)
     });
   }

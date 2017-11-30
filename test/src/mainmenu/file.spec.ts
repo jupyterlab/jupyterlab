@@ -19,6 +19,10 @@ import {
   FileMenu, IFileMenu
 } from '@jupyterlab/mainmenu';
 
+import {
+  delegateExecute
+} from './util';
+
 class Wodget extends Widget {
   state: string;
 }
@@ -76,8 +80,8 @@ describe('@jupyterlab/mainmenu', () => {
             return Promise.resolve(void 0);
           }
         }
-        menu.closeAndCleaners.set('Wodget', cleaner);
-        menu.closeAndCleaners.get('Wodget').closeAndCleanup(wodget);
+        menu.closeAndCleaners.add(cleaner);
+        delegateExecute(wodget, menu.closeAndCleaners, 'closeAndCleanup');
         expect(wodget.state).to.be('clean');
       });
 
