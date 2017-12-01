@@ -37,6 +37,7 @@ import "@jupyterlab/mainmenu-extension";
 import "@jupyterlab/markdownviewer-extension";
 import "@jupyterlab/notebook";
 import "@jupyterlab/notebook-extension";
+import "@jupyterlab/observables";
 import "@jupyterlab/outputarea";
 import "@jupyterlab/pdf-extension";
 import "@jupyterlab/rendermime";

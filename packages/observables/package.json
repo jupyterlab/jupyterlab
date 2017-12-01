@@ -1,7 +1,7 @@
 {
-  "name": "@jupyterlab/coreutils",
-  "version": "0.12.0",
-  "description": "JupyterLab - Core Utilities",
+  "name": "@jupyterlab/observables",
+  "version": "0.1.1",
+  "description": "Data structures which may be observed for changes.",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
@@ -9,9 +9,8 @@
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
   "files": [
-    "lib/*.d.ts",
-    "lib/*.js.map",
-    "lib/*.js"
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -28,21 +27,7 @@
     "prepublishOnly": "npm run build",
     "watch": "tsc -w"
   },
-  "dependencies": {
-    "@phosphor/algorithm": "^1.1.2",
-    "@phosphor/coreutils": "^1.3.0",
-    "@phosphor/disposable": "^1.1.2",
-    "@phosphor/signaling": "^1.2.2",
-    "ajv": "~5.1.6",
-    "comment-json": "^1.1.3",
-    "minimist": "~1.2.0",
-    "moment": "~2.17.1",
-    "path-posix": "~1.0.0",
-    "url-parse": "~1.1.9"
-  },
   "devDependencies": {
-    "@types/comment-json": "^1.1.0",
-    "@types/minimist": "~1.2.0",
     "rimraf": "~2.6.2",
     "typescript": "~2.6.2"
   }
