@@ -25,12 +25,6 @@ all of MD as it is not optimized for dense, information rich UIs.
 */
 
 
-/*
- * Optional monospace font for input/output prompt.
- */
-@import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
-
-
 :root {
 
   /* Borders
