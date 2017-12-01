@@ -120,11 +120,13 @@ class ThemeManager {
     const link = document.createElement('link');
     const baseUrl = PageConfig.getOption('themePath');
     const delegate = new PromiseDelegate<void>();
+    const href = URLExt.join(baseUrl, path);
 
     link.rel = 'stylesheet';
     link.type = 'text/css';
-    link.href = URLExt.join(baseUrl, path);
+    link.href = href;
     link.onload = () => { delegate.resolve(void 0); };
+    link.onerror = () => { delegate.reject(`Stylesheet failed to load: ${href}`); };
     document.body.appendChild(link);
     this._links.push(link);
 
