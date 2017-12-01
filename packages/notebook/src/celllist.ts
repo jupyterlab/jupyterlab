@@ -10,13 +10,13 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  IObservableMap, ObservableMap, IObservableList,
-  IObservableUndoableList, IModelDB
-} from '@jupyterlab/coreutils';
-
-import {
   ICellModel
 } from '@jupyterlab/cells';
+
+import {
+  IObservableMap, ObservableMap, IObservableList,
+  IObservableUndoableList, IModelDB
+} from '@jupyterlab/observables';
 
 import {
   NotebookModel

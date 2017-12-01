@@ -9,7 +9,7 @@ import {
 
 import {
   ObservableUndoableList, ISerializer
-} from '@jupyterlab/coreutils';
+} from '@jupyterlab/observables';
 
 
 
@@ -43,7 +43,7 @@ const serializer = new Serializer();
 const value: JSONObject = { name: 'foo' };
 
 
-describe('@jupyterlab/coreutils', () => {
+describe('@jupyterlab/observables', () => {
 
   describe('ObservableUndoableList', () => {
 

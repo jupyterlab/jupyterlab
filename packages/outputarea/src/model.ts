@@ -14,9 +14,13 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  IObservableList, ObservableList, nbformat,
-  IObservableValue, ObservableValue, IModelDB
+  nbformat,
 } from '@jupyterlab/coreutils';
+
+import {
+  IObservableList, ObservableList,
+  IObservableValue, ObservableValue, IModelDB
+} from '@jupyterlab/observables';
 
 import {
   IOutputModel, OutputModel

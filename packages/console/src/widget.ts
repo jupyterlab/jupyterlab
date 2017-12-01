@@ -15,8 +15,12 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  nbformat, IObservableList, ObservableList
+  nbformat
 } from '@jupyterlab/coreutils';
+
+import {
+  IObservableList, ObservableList
+} from '@jupyterlab/observables';
 
 import {
   RenderMime

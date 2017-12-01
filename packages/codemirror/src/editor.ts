@@ -29,8 +29,12 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IObservableMap, IObservableString, uuid, ICollaborator
+  uuid
 } from '@jupyterlab/coreutils';
+
+import {
+  IObservableMap, IObservableString, ICollaborator
+} from '@jupyterlab/observables';
 
 import {
   Mode

@@ -38,17 +38,11 @@ import './console/panel.spec';
 import './console/widget.spec';
 
 import './coreutils/activitymonitor.spec';
-import './coreutils/modeldb.spec';
 import './coreutils/nbformat.spec';
-import './coreutils/observablejson.spec';
-import './coreutils/observablemap.spec';
-import './coreutils/observablestring.spec';
-import './coreutils/observablelist.spec';
 import './coreutils/pageconfig.spec';
 import './coreutils/path.spec';
 import './coreutils/settingregistry.spec';
 import './coreutils/time.spec';
-import './coreutils/undoablelist.spec';
 import './coreutils/url.spec';
 import './coreutils/uuid.spec';
 import './coreutils/markdowncodeblocks.spec';
@@ -91,6 +85,13 @@ import './notebook/panel.spec';
 import './notebook/tracker.spec';
 import './notebook/widget.spec';
 import './notebook/widgetfactory.spec';
+
+import './observables/modeldb.spec';
+import './observables/observablejson.spec';
+import './observables/observablemap.spec';
+import './observables/observablestring.spec';
+import './observables/observablelist.spec';
+import './observables/undoablelist.spec';
 
 import './outputarea/model.spec';
 import './outputarea/widget.spec';

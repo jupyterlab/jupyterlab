@@ -2,20 +2,20 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Contents
-} from '@jupyterlab/services';
-
-import {
-  IModelDB
-} from '@jupyterlab/coreutils';
+  CodeCellModel
+} from '@jupyterlab/cells';
 
 import {
   DocumentRegistry
 } from '@jupyterlab/docregistry';
 
 import {
-  CodeCellModel
-} from '@jupyterlab/cells';
+  IModelDB
+} from '@jupyterlab/observables';
+
+import {
+  Contents
+} from '@jupyterlab/services';
 
 import {
   INotebookModel, NotebookModel

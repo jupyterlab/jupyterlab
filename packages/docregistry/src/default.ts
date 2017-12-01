@@ -30,8 +30,12 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  ActivityMonitor, IChangedArgs, IModelDB, PathExt
+  ActivityMonitor, IChangedArgs, PathExt
 } from '@jupyterlab/coreutils';
+
+import {
+  IModelDB
+} from '@jupyterlab/observables';
 
 import {
   IRenderMime, RenderMime, MimeModel

@@ -48,8 +48,12 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IChangedArgs, IObservableMap, IObservableList, nbformat
+  IChangedArgs, nbformat
 } from '@jupyterlab/coreutils';
+
+import {
+  IObservableMap, IObservableList
+} from '@jupyterlab/observables';
 
 import {
   RenderMime

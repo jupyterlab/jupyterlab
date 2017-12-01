@@ -2,8 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  URLExt, PathExt, ModelDB
+  URLExt, PathExt
 } from '@jupyterlab/coreutils';
+
+import {
+  ModelDB
+} from '@jupyterlab/observables';
 
 import {
   JSONObject

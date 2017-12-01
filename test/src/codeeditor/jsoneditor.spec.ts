@@ -9,7 +9,7 @@ import {
 
 import {
   ObservableJSON
-} from '@jupyterlab/coreutils';
+} from '@jupyterlab/observables';
 
 import {
   JSONEditor

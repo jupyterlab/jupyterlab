@@ -21,7 +21,7 @@ import {
 
 import {
   IObservableJSON, IModelDB, IObservableValue, ObservableValue
-} from '@jupyterlab/coreutils';
+} from '@jupyterlab/observables';
 
 import {
   IOutputAreaModel, OutputAreaModel
