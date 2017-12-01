@@ -34,8 +34,12 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IChangedArgs as IChangedArgsGeneric, PathExt, IModelDB
+  IChangedArgs as IChangedArgsGeneric, PathExt
 } from '@jupyterlab/coreutils';
+
+import {
+  IModelDB
+} from '@jupyterlab/observables';
 
 import {
   TextModelFactory

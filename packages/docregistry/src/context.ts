@@ -26,8 +26,12 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  PathExt, URLExt, IModelDB, ModelDB
+  PathExt, URLExt
 } from '@jupyterlab/coreutils';
+
+import {
+  IModelDB, ModelDB
+} from '@jupyterlab/observables';
 
 import {
   DocumentRegistry

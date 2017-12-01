@@ -15,9 +15,13 @@ import {
 } from '@jupyterlab/cells';
 
 import {
-  IObservableJSON, IObservableUndoableList, uuid,
-  IObservableList, nbformat, IModelDB
+  nbformat, uuid
 } from '@jupyterlab/coreutils';
+
+import {
+  IObservableJSON, IObservableUndoableList,
+  IObservableList, IModelDB
+} from '@jupyterlab/observables';
 
 import {
   CellList

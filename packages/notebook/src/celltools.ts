@@ -34,8 +34,12 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IObservableMap, nbformat, ObservableJSON
+  nbformat
 } from '@jupyterlab/coreutils';
+
+import {
+  IObservableMap, ObservableJSON
+} from '@jupyterlab/observables';
 
 import {
   INotebookTracker

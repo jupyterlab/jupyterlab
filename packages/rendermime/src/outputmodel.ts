@@ -11,8 +11,12 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  IObservableJSON, ObservableJSON, nbformat
+  nbformat
 } from '@jupyterlab/coreutils';
+
+import {
+  IObservableJSON, ObservableJSON
+} from '@jupyterlab/observables';
 
 import {
   IRenderMime
