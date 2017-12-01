@@ -9,10 +9,10 @@ import {
 
 import {
   ObservableList
-} from '@jupyterlab/coreutils';
+} from '@jupyterlab/observables';
 
 
-describe('@jupyterlab/coreutils', () => {
+describe('@jupyterlab/observables', () => {
 
   describe('ObservableList', () => {
 

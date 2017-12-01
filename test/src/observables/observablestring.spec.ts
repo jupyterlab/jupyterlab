@@ -5,10 +5,10 @@ import expect = require('expect.js');
 
 import {
   ObservableString 
-} from '@jupyterlab/coreutils';
+} from '@jupyterlab/observables';
 
 
-describe('@jupyterlab/coreutils', () => {
+describe('@jupyterlab/observables', () => {
 
   describe('ObservableString', () => {
 

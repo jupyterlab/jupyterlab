@@ -12,12 +12,16 @@ import {
 } from '@jupyterlab/cells';
 
 import {
-  nbformat, ModelDB
+  nbformat
 } from '@jupyterlab/coreutils';
 
 import {
   NotebookModel
 } from '@jupyterlab/notebook';
+
+import {
+  ModelDB
+} from '@jupyterlab/observables';
 
 import {
   DEFAULT_CONTENT
