@@ -5,10 +5,11 @@ skip_branch_with_pr: true
 environment:
   nodejs_version: "6.9"
   matrix:
-    - PYTHON: "C:\\Python35-x64"
-      PYTHON_VERSION: "3.5.x"
-      PYTHON_MAJOR: 3
-      PYTHON_ARCH: "64"
+    - PYTHON: C:\Miniconda36-x64
+      PYTHON_VERSION: 3.6
+
+    - PYTHON: C:\Miniconda
+      PYTHON_VERSION: 2.7
 
 # build cache to preserve files/folders between builds
 cache:
@@ -37,23 +38,21 @@ install:
   - 'jlpm versions'
   - 'jlpm config current'
   - 'jlpm cache list'
-  - 'jlpm'
-  - 'jlpm run build'
-  - 'jupyter lab build'
 
 build: off
 
 # to run your custom scripts instead of automatic tests
 test_script:
-  # Run integrity first we we see the message.
-  - 'jlpm run integrity'
-  - 'python -m jupyterlab.selenium_check'
-  - 'pip install jupyterlab_launcher==0.6'
-  - 'py.test'
-  - 'git status'
-  - 'jlpm run build'
-  - 'jlpm run build:test'
-  - 'jlpm test || jlpm test || jlpm test'
-  - 'python -m jupyterlab.selenium_check --dev-mode'
-
-
+  - ps: |
+      jlpm
+      If ($PYTHON_VERSION -eq 36) {
+        py.test
+        python -m jupyterlab.selenium_check
+        python -m jupyterlab.selenium_check --dev-mode
+      } Else {
+        jlpm run integrity
+        jlpm run build
+        jlpm run build:test
+        jlpm test || jlpm test || jlpm test
+        jupyter lab build
+      }
