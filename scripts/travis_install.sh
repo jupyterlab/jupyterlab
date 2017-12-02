@@ -35,7 +35,6 @@ mkdir ~/.jupyter
 
 
 # Install and enable the server extension
-conda install --file requirements.txt -c conda-forge
 pip install -v -e ".[test]"
 jlpm versions
 jlpm config current

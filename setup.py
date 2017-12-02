@@ -84,10 +84,6 @@ cmdclass['jsdeps'] = combine_commands(
 )
 
 
-with open('requirements.txt') as f:
-    install_requires = f.read().splitlines()
-
-
 setup_args = dict(
     name             = NAME,
     description      = DESCRIPTION,
@@ -95,7 +91,6 @@ setup_args = dict(
     version          = VERSION,
     packages         = find_packages(),
     cmdclass         = cmdclass,
-    install_requires = install_requires,
     author           = 'Jupyter Development Team',
     author_email     = 'jupyter@googlegroups.com',
     url              = 'http://jupyter.org',
@@ -122,8 +117,8 @@ setup_args['install_requires'] = [
     'notebook>=4.3.1',
     'jupyterlab_launcher>=0.6.0,<0.7.0',
     'ipython_genutils',
-    "futures;python_version<'3.0'",
-    "subprocess32;python_version<'3.0'"
+    'futures;python_version<"3.0"',
+    'subprocess32;python_version<"3.0"'
 ]
 
 setup_args['extras_require'] = {
