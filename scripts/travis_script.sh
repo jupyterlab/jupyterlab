@@ -11,9 +11,6 @@ export PATH="$MINICONDA_DIR/bin:$PATH"
 source activate test
 
 
-pip install jupyterlab_launcher==0.6
-
-
 if [[ $GROUP == py2 || $GROUP == py3 ]]; then
     # Run the python tests
     py.test -v
@@ -86,7 +83,6 @@ if [[ $GROUP == integrity ]]; then
 
     # Make sure we can run the built app.
     jupyter labextension install ./jupyterlab/tests/mock_packages/extension
-    pip install jupyterlab_launcher==0.5.5
     python -m jupyterlab.selenium_check
     jupyter labextension list
 
