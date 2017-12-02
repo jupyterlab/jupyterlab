@@ -1,6 +1,9 @@
 # Do not build feature branch with open Pull Requests
 skip_branch_with_pr: true
 
+matrix:
+fast_finish: true
+
 # environment variables
 environment:
   nodejs_version: "6.9"
