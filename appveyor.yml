@@ -46,7 +46,7 @@ build: off
 
 # to run your custom scripts instead of automatic tests
 test_script:
-  - ps: |
+  - cmd: |
       jlpm
       If ($PYTHON_VERSION -eq 36) {
         py.test
