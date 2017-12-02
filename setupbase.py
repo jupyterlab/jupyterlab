@@ -489,22 +489,31 @@ def _get_file_handler(package_data_spec, data_files_spec):
             for (key, patterns) in package_spec.items():
                 package_data[key] = _get_package_data(key, patterns)
 
+            # Extract the existing data files into a staging object.
             file_data = defaultdict(list)
             for (path, files) in self.distribution.data_files or []:
                 file_data[path] = files
 
             for (path, dname) in data_spec:
                 for root, subdirs, fnames in os.walk(dname):
-                    root = root.replace(os.sep, '/')
+                    # Don't recurse into node_modules
+                    if 'node_modules' in subdirs:
+                        subdirs.remove('node_modules')
+
+                    # Bail if there are no files.
                     if not fnames:
                         continue
-                    files = []
-                    for fname in fnames:
-                        files.append('%s/%s' % (root, fname))
+
+                    # Normalize the path.
+                    root = root.replace(os.sep, '/')
                     offset = len(dname) + 1
                     full_path = pjoin(path, root[offset:])
+
+                    # Add the files.
+                    files = ['%s/%s' % (root, f) for f in fnames]
                     file_data[full_path].extend(files)
 
+            # Construct the data files spec.
             data_files = []
             for (path, files) in file_data.items():
                 data_files.append((path, files))
