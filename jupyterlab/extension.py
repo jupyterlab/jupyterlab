@@ -42,11 +42,11 @@ def load_jupyter_server_extension(nbapp):
     web_app = nbapp.web_app
     logger = nbapp.log
     config = LabConfig()
+    app_dir = getattr(nbapp, 'app_dir', get_app_dir())
 
     # Print messages.
     logger.info('JupyterLab alpha preview extension loaded from %s' % HERE)
-
-    app_dir = getattr(nbapp, 'app_dir', get_app_dir())
+    logger.info('JupyterLab application directory is %s' % app_dir)
 
     config.name = 'JupyterLab'
     config.page_title = 'JupyterLab Alpha Preview'
@@ -56,11 +56,13 @@ def load_jupyter_server_extension(nbapp):
     core_mode = False
     if getattr(nbapp, 'core_mode', False) or app_dir.startswith(HERE):
         core_mode = True
+        logger.info('Running JupyterLab in core mode')
 
     # Check for dev mode.
     dev_mode = False
     if getattr(nbapp, 'dev_mode', False) or app_dir.startswith(DEV_DIR):
         dev_mode = True
+        logger.info('Running JupyterLab in dev mode')
 
     # Check for watch.
     watch_mode = getattr(nbapp, 'watch', False)
@@ -112,6 +114,8 @@ def load_jupyter_server_extension(nbapp):
     config.user_settings_dir = get_user_settings_dir()
 
     if watch_mode:
+        logger.info('Starting JupyterLab watch mode...')
+
         # Set the ioloop in case the watch fails.
         nbapp.ioloop = IOLoop.current()
         if config.dev_mode:
