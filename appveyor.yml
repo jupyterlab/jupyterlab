@@ -53,6 +53,6 @@ test_script:
         jlpm run integrity
         jlpm run build
         jlpm run build:test
-        jlpm test || jlpm test || jlpm test
+        (jlpm test) -OR (jlpm test) -OR (jlpm test)
         jupyter lab build
       }
