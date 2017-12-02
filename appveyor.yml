@@ -17,6 +17,7 @@ environment:
 # build cache to preserve files/folders between builds
 cache:
   - '%LOCALAPPDATA%\\Yarn' # jlpm cache
+  - C:\Users\appveyor\pip\wheels
 
 # scripts that run after cloning repository
 install:
