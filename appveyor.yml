@@ -41,7 +41,6 @@ install:
   - 'pip install --upgrade -e ".[test]"'
   - 'jlpm versions'
   - 'jlpm config current'
-  - 'jlpm cache list'
 
 build: off
 
