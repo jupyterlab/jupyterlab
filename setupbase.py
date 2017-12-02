@@ -9,6 +9,7 @@ This file originates from the 'jupyter-packaging' package, and
 contains a set of useful utilities for including npm packages
 within a Python package.
 """
+from collections import defaultdict
 from os.path import join as pjoin
 import io
 import os
@@ -488,9 +489,25 @@ def _get_file_handler(package_data_spec, data_files_spec):
             for (key, patterns) in package_spec.items():
                 package_data[key] = _get_package_data(key, patterns)
 
-            data_files = self.distribution.data_files or []
-            for (path, patterns) in data_spec:
-                data_files.append((path, _get_files(patterns)))
+            file_data = defaultdict(list)
+            for (path, files) in self.distribution.data_files or []:
+                file_data[path] = files
+
+            for (path, dname) in data_spec:
+                for root, subdirs, fnames in os.walk(dname):
+                    root = root.replace(os.sep, '/')
+                    if not fnames:
+                        continue
+                    files = []
+                    for fname in fnames:
+                        files.append('%s/%s' % (root, fname))
+                    offset = len(dname) + 1
+                    full_path = pjoin(path, root[offset:])
+                    file_data[full_path].extend(files)
+
+            data_files = []
+            for (path, files) in file_data.items():
+                data_files.append((path, files))
 
             self.distribution.data_files = data_files
 
