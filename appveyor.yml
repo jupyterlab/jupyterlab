@@ -48,7 +48,7 @@ build: off
 test_script:
   - cmd: |
       jlpm
-      If "%PYTHON_VERSION%" == "36" ( 
+      If "%PYTHON_VERSION%"=="36" ( 
         py.test
         python -m jupyterlab.selenium_check
         python -m jupyterlab.selenium_check --dev-mode
