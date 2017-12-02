@@ -46,7 +46,7 @@ build: off
 
 # to run your custom scripts instead of automatic tests
 test_script:
-  - cmd: |
+  - cmd: >-
       jlpm
       If "%PYTHON_VERSION%"=="3.6" ( 
         py.test
