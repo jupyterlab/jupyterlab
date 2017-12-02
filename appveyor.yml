@@ -2,7 +2,7 @@
 skip_branch_with_pr: true
 
 matrix:
-fast_finish: true
+  fast_finish: true
 
 # environment variables
 environment:
