@@ -34,6 +34,7 @@ install:
   # Ensure python and python scripts are from right version:
   - 'SET "PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"'
   # Install our package:
+  - 'conda install --file requirements.txt -c conda-forge'
   - 'pip install --upgrade -e ".[test]"'
   - 'jlpm versions'
   - 'jlpm config current'

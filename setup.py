@@ -84,6 +84,10 @@ cmdclass['jsdeps'] = combine_commands(
 )
 
 
+with open('requirements.txt') as f:
+    install_requires = f.read().splitlines()
+
+
 setup_args = dict(
     name             = NAME,
     description      = DESCRIPTION,
@@ -91,6 +95,7 @@ setup_args = dict(
     version          = VERSION,
     packages         = find_packages(),
     cmdclass         = cmdclass,
+    install_requires = install_requires,
     author           = 'Jupyter Development Team',
     author_email     = 'jupyter@googlegroups.com',
     url              = 'http://jupyter.org',
