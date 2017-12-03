@@ -120,7 +120,11 @@ class ThemeManager {
     const link = document.createElement('link');
     const baseUrl = PageConfig.getOption('themePath');
     const delegate = new PromiseDelegate<void>();
-    const href = URLExt.join(baseUrl, path);
+    let href = URLExt.join(baseUrl, path);
+
+    if (!URLExt.isLocal(path)) {
+      href = path;
+    }
 
     link.rel = 'stylesheet';
     link.type = 'text/css';
