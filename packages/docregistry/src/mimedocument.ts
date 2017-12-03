@@ -22,8 +22,12 @@ import {
 } from '@jupyterlab/rendermime';
 
 import {
+  ABCWidgetFactory
+} from './default';
+
+import {
   DocumentRegistry
-} from './index';
+} from './registry';
 
 
 /**
@@ -142,7 +146,8 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
     } else {
       data[this._mimeType] = model.toJSON();
     }
-    let mimeModel = new MimeModel({ data });
+    let mimeModel = new MimeModel({ data, callback: this._changeCallback });
+
     return this._renderer.renderModel(mimeModel).then(() => {
       // Handle the first render after an activation.
       if (!this._hasRendered && this.node === document.activeElement) {
@@ -157,6 +162,21 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
    */
   private _onPathChanged(): void {
     this.title.label = PathExt.basename(this._context.path);
+  }
+
+  /**
+   * A bound change callback.
+   */
+  private _changeCallback = (options: IRenderMime.IMimeModel.ISetDataOptions) => {
+    if (!options.data || !options.data[this._mimeType]) {
+      return;
+    }
+    let data = options.data[this._mimeType];
+    if (typeof data === 'string') {
+      this._context.model.fromString(data);
+    } else {
+      this._context.model.fromJSON(data);
+    }
   }
 
   private _context: DocumentRegistry.Context;
