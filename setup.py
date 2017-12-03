@@ -3,7 +3,6 @@
 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
-import glob
 from os.path import join as pjoin
 import json
 import os
@@ -29,9 +28,9 @@ https://gitter.im/jupyter/jupyterlab.
 ensure_python(['2.7', '>=3.3'])
 
 data_files_spec = [
-    ('share/jupyter/lab/static', '%s/static' % NAME),
-    ('share/jupyter/lab/schemas', '%s/schemas' % NAME),
-    ('share/jupyter/lab/themes', '%s/themes' % NAME)
+    ('share/jupyter/lab/static', '%s/static' % NAME, '**'),
+    ('share/jupyter/lab/schemas', '%s/schemas' % NAME, '**'),
+    ('share/jupyter/lab/themes', '%s/themes' % NAME, '**')
 ]
 
 package_data_spec = dict()
