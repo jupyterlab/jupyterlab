@@ -338,12 +338,17 @@ class OutputAreaModel implements IOutputAreaModel {
       // This also replaces the metadata of the last item.
       this._lastStream += value.text as string;
       value.text = this._lastStream;
+      this._removeOverwrittenChars(value);
       let item = this._createItem({ value, trusted });
       let index = this.length - 1;
       let prev = this.list.get(index);
       prev.dispose();
       this.list.set(index, item);
       return index;
+    }
+
+    if (nbformat.isStream(value)) {
+      this._removeOverwrittenChars(value);
     }
 
     // Create the new item.
@@ -370,6 +375,33 @@ class OutputAreaModel implements IOutputAreaModel {
         value.text = (value.text as string[]).join('\n');
       }
     }
+  }
+
+  /*
+   * Remove characters overridden by backspaces and carriage returns
+   */
+  private _removeOverwrittenChars(value: nbformat.IOutput): void {
+    let tmp = value.text as string;
+
+    // Remove characters that should be overridden by backspaces
+    tmp = tmp.replace(/^\x08+/, ''); // Dissolve backspaces at start of text
+    do {
+      // Remove any character preceding a backspace
+      tmp = tmp.replace(/.\x08/gm, '');
+    } while (tmp.indexOf('\x08') > -1);
+
+    // Remove chunks that should be overridden by carriage returns
+    do {
+      // Remove any chunks preceding a carriage return unless carriage
+      // return followed by a newline
+      tmp = tmp.replace(/^[^\n]*(?:\r(?!\n))+/gm, '');
+    } while (tmp.search(/\r(?!\n)/) > -1);
+    do {
+      // Replace remaining \r\n characters with a newline
+      tmp = tmp.replace(/\r\n/gm, '\n');
+    } while (tmp.indexOf('\r\n') > -1);
+
+    value.text = tmp;
   }
 
   protected clearNext = false;
