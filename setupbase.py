@@ -488,37 +488,56 @@ def _get_file_handler(package_data_spec, data_files_spec):
         def run(self):
             package_data = self.distribution.package_data
             package_spec = package_data_spec or dict()
-            data_spec = data_files_spec or []
 
             for (key, patterns) in package_spec.items():
                 package_data[key] = _get_package_data(key, patterns)
 
-            # Extract the existing data files into a staging object.
-            file_data = defaultdict(list)
-            for (path, files) in self.distribution.data_files or []:
-                file_data[path] = files
-
-            # Extract the files and assign them to the proper data
-            # files path.
-            for (key, dname, pattern) in data_spec:
-                dname = dname.replace(os.sep, '/')
-                offset = len(dname) + 1
-
-                files = _get_files(pjoin(dname, pattern))
-                for fname in files:
-                    # Normalize the path.
-                    root = os.path.dirname(fname)
-                    full_path = pjoin(dname, root[offset:])
-                    file_data[full_path].append(fname)
-
-            # Construct the data files spec.
-            data_files = []
-            for (path, files) in file_data.items():
-                data_files.append((path, files))
-
-            self.distribution.data_files = data_files
+            self.distribution.data_files = _get_data_files(
+                data_files_spec, self.distribution.data_files
+            )
 
     return FileHandler
+
+
+def _get_data_files(data_specs, existing):
+    """Expand data file specs into valid data files metadata.
+
+    Parameters
+    ----------
+    data_specs: list of tuples
+        See [createcmdclass] for description.
+    existing: list of tuples
+        The existing distrubution data_files metadata.
+
+    Returns
+    -------
+    A valid list of data_files items.
+    """
+    # Extract the existing data files into a staging object.
+    file_data = defaultdict(list)
+    for (path, files) in existing or []:
+        file_data[path] = files
+
+    # Extract the files and assign them to the proper data
+    # files path.
+    for (path, dname, pattern) in data_specs or []:
+        dname = dname.replace(os.sep, '/')
+        offset = len(dname) + 1
+
+        files = _get_files(pjoin(dname, pattern))
+        for fname in files:
+            # Normalize the path.
+            root = os.path.dirname(fname)
+            full_path = '/'.join([path, root[offset:]])
+            if full_path.endswith('/'):
+                full_path = full_path[:-1]
+            file_data[full_path].append(fname)
+
+    # Construct the data files spec.
+    data_files = []
+    for (path, files) in file_data.items():
+        data_files.append((path, files))
+    return data_files
 
 
 def _get_files(file_patterns, top=HERE):
