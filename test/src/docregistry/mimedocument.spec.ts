@@ -138,13 +138,11 @@ describe('docregistry/mimedocument', () => {
           let widget = new LogRenderer({
             context: dContext,
             rendermime: RENDERMIME,
-            mimeType: 'foo/bar',
+            mimeType: 'text/foo',
             renderTimeout: 1000,
             dataType: 'string'
           });
-
-          expect(widget).to.be.ok();
-
+          return widget.ready;
         }).catch(done);
       });
 
