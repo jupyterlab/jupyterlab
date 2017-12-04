@@ -75,8 +75,10 @@ const EXAMPLE_KERNEL_INFO: KernelMessage.IInfoReply = {
     nbconverter_exporter: ''
   },
   banner: '',
-  help_links: {
-  }
+  help_links: [{
+    text: 'A very helpful link',
+    url: 'https://very.helpful.website'
+  }]
 };
 
 
