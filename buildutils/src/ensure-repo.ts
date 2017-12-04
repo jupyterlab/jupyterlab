@@ -169,7 +169,7 @@ function ensureJupyterlab(): string[] {
 
   // Write the package.json back to disk.
   if (utils.writePackageData(corePath, corePackage)) {
-    return ['Updated core'];
+    return ['Updated dev mode'];
   }
   return [];
 }

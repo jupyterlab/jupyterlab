@@ -31,7 +31,7 @@ jlpm run publish
 - Prep the static assets for release:
 
 ```bash
-jlpm run build:static
+jlpm run build:update
 ```
 
 - Commit and tag and push the tag
