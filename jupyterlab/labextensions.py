@@ -5,9 +5,9 @@
 # Distributed under the terms of the Modified BSD License.
 from __future__ import print_function
 
-import json
 import os
 import sys
+import traceback
 
 from jupyter_core.application import JupyterApp, base_flags, base_aliases
 
@@ -16,7 +16,7 @@ from traitlets import Bool, Unicode
 from .commands import (
     install_extension, uninstall_extension, list_extensions,
     enable_extension, disable_extension,
-    link_package, unlink_package, build
+    link_package, unlink_package, build, get_app_version
 )
 
 
@@ -33,11 +33,7 @@ flags['clean'] = (
 aliases = dict(base_aliases)
 aliases['app-dir'] = 'BaseExtensionApp.app_dir'
 
-
-here = os.path.dirname(__file__)
-with open(os.path.join(here, 'package.app.json')) as fid:
-    data = json.load(fid)
-VERSION = data['jupyterlab']['version']
+VERSION = get_app_version()
 
 
 class BaseExtensionApp(JupyterApp):
@@ -54,6 +50,20 @@ class BaseExtensionApp(JupyterApp):
     should_clean = Bool(False, config=True,
         help="Whether temporary files should be cleaned up after building jupyterlab")
 
+    def start(self):
+        try:
+            self.run_task()
+        except Exception as ex:
+            ex_traceback = ex.__traceback__
+            msg = traceback.format_exception(ex.__class__, ex, ex_traceback)
+            for line in msg:
+                self.log.debug(line)
+            self.log.error(str(ex))
+            sys.exit(1)
+
+    def run_task(self):
+        pass
+
     def _log_format_default(self):
         """A default format for messages"""
         return "%(message)s"
@@ -64,17 +74,14 @@ class InstallLabExtensionApp(BaseExtensionApp):
     should_build = Bool(True, config=True,
         help="Whether to build the app after the action")
 
-    def start(self):
+    def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        [install_extension(arg, self.app_dir, logger=self.log)
-         for arg in self.extra_args]
+        [install_extension(arg, self.app_dir, logger=self.log) for
+         arg in self.extra_args]
+
         if self.should_build:
-            try:
-                build(self.app_dir, clean_staging=self.should_clean, logger=self.log)
-            except Exception as e:
-                for arg in self.extra_args:
-                    uninstall_extension(arg, self.app_dir, logger=self.log)
-                raise e
+            build(self.app_dir, clean_staging=self.should_clean,
+                 logger=self.log)
 
 
 class LinkLabExtensionApp(BaseExtensionApp):
@@ -88,17 +95,14 @@ class LinkLabExtensionApp(BaseExtensionApp):
     should_build = Bool(True, config=True,
         help="Whether to build the app after the action")
 
-    def start(self):
+    def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
         [link_package(arg, self.app_dir, logger=self.log)
          for arg in self.extra_args]
+
         if self.should_build:
-            try:
-                build(self.app_dir, clean_staging=self.should_clean, logger=self.log)
-            except Exception as e:
-                for arg in self.extra_args:
-                    unlink_package(arg, self.app_dir, logger=self.log)
-                raise e
+            build(self.app_dir, clean_staging=self.should_clean,
+                  logger=self.log)
 
 
 class UnlinkLabExtensionApp(BaseExtensionApp):
@@ -106,12 +110,13 @@ class UnlinkLabExtensionApp(BaseExtensionApp):
     should_build = Bool(True, config=True,
         help="Whether to build the app after the action")
 
-    def start(self):
+    def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
         ans = any([unlink_package(arg, self.app_dir, logger=self.log)
                    for arg in self.extra_args])
         if ans and self.should_build:
-            build(self.app_dir, clean_staging=self.should_clean, logger=self.log)
+            build(self.app_dir, clean_staging=self.should_clean,
+                  logger=self.log)
 
 
 class UninstallLabExtensionApp(BaseExtensionApp):
@@ -119,25 +124,26 @@ class UninstallLabExtensionApp(BaseExtensionApp):
     should_build = Bool(True, config=True,
         help="Whether to build the app after the action")
 
-    def start(self):
+    def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
         ans = any([uninstall_extension(arg, self.app_dir, logger=self.log)
                    for arg in self.extra_args])
         if ans and self.should_build:
-            build(self.app_dir, clean_staging=self.should_clean, logger=self.log)
+            build(self.app_dir, clean_staging=self.should_clean,
+                  logger=self.log)
 
 
 class ListLabExtensionsApp(BaseExtensionApp):
     description = "List the installed labextensions"
 
-    def start(self):
+    def run_task(self):
         list_extensions(self.app_dir, logger=self.log)
 
 
 class EnableLabExtensionsApp(BaseExtensionApp):
     description = "Enable labextension(s) by name"
 
-    def start(self):
+    def run_task(self):
         [enable_extension(arg, self.app_dir, logger=self.log)
          for arg in self.extra_args]
 
@@ -145,7 +151,7 @@ class EnableLabExtensionsApp(BaseExtensionApp):
 class DisableLabExtensionsApp(BaseExtensionApp):
     description = "Disable labextension(s) by name"
 
-    def start(self):
+    def run_task(self):
         [disable_extension(arg, self.app_dir, logger=self.log)
          for arg in self.extra_args]
 

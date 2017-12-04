@@ -56,15 +56,10 @@ Note: If installing using `pip install --user`, you must add the user-level
  `bin` directory to your `PATH` environment variable in order to launch
  `jupyter lab`.
 
-Note: JupyterLab can be installed from a git checkout using `pip`.  Note
-that you will have to build the application after installing to get the static 
-assets.  `pip` will warn you that the static assets are not included when 
-installing, and it will fail to build a cached wheel if it decides to try 
-and make one.  Example:
+JupyterLab can be installed from a git checkout using `pip`.  Example:
 
 ```bash
 pip install git+git://github.com/jupyterlab/jupyterlab.git
-jupyter lab build   # Requires nodejs
 jupyter serverextension enable --py jupyterlab --sys-prefix
 ```
 

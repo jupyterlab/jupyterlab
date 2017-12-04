@@ -89,6 +89,10 @@ test_flags['core-mode'] = (
     {'SeleniumApp': {'core_mode': True}},
     "Start the app in core mode."
 )
+test_flags['dev-mode'] = (
+    {'SeleniumApp': {'dev_mode': True}},
+    "Start the app in dev mode."
+)
 
 
 test_aliases = dict(aliases)
@@ -102,12 +106,6 @@ class SeleniumApp(LabApp):
     ip = '127.0.0.1'
     flags = test_flags
     aliases = test_aliases
-
-    core_mode = Bool(False, config=True,
-        help="Whether to start the app in core mode")
-
-    app_dir = Unicode('', config=True,
-        help="The app directory to build in")
 
     def start(self):
         web_app = self.web_app

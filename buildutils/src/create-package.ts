@@ -37,5 +37,6 @@ inquirer.prompt(questions).then(answers => {
   data.name = name;
   data.description = description;
   utils.writePackageData(jsonPath, data);
-  utils.run('jlpm run integrity');
+  // Use npm here so this file can be used outside of JupyterLab.
+  utils.run('npm run integrity');
 });

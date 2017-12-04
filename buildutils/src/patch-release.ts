@@ -27,16 +27,20 @@ if (!fs.existsSync(packagePath)) {
 
 // Perform the patch operations.
 console.log('Patching', target, '...');
-utils.run('jlpm run build:packages');
-utils.run('jlpm version patch', { cwd: packagePath });
-utils.run('jlpm publish', { cwd: packagePath});
+// Use npm here so this file can be used outside of JupyterLab.
+utils.run('npm run build:packages');
+utils.run('npm version patch', { cwd: packagePath });
+utils.run('npm publish', { cwd: packagePath});
+
+// Update the static folder.
+utils.run('npm run build:update');
 
 // Extract the new package info.
 let data = utils.readJSONFile(path.join(packagePath, 'package.json'));
 let name = data.name;
 let version = data.version;
 
-utils.run('jlpm run integrity');
+utils.run('npm run integrity');
 utils.run('git commit -a -m "Release ' + name + '@' + version + '"');
 utils.run('git tag ' + name + '@' + version);
 

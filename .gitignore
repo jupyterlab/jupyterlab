@@ -2,10 +2,12 @@ MANIFEST
 build
 dist
 lib
-jupyterlab/build
+jupyterlab/static
 jupyterlab/schemas
 jupyterlab/themes
 jupyterlab/geckodriver
+dev_mode/schemas
+dev_mode/themes
 
 node_modules
 .cache

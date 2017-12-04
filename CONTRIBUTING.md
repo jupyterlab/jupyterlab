@@ -23,7 +23,7 @@ All source code is written in [TypeScript](http://www.typescriptlang.org/Handboo
 
 ## Setting Up a Development Environment
 
-### Installing Node.js and npm
+### Installing Node.js and jlpm
 
 Building the JupyterLab from its GitHub source code requires Node.js version
 4+.
@@ -82,14 +82,13 @@ jupyter serverextension enable --py jupyterlab
 
 Notes:
 
-* The `jlpm` command is a JupyterLab-provided, locked version of the [yarn](https://yarnpkg.com/en/).  If you have `yarn` installed already, you can use
-the `yarn` command when developing, and it will use the local version of `yarn`
- in `jupyterlab/yarn.js` when run in the repository or a built application
- directory.
+* The `jlpm` command is a JupyterLab-provided, locked version of the [yarn](https://yarnpkg.com/en/) package manager.  If you have `yarn` installed 
+already, you can use the `yarn` command when developing, and it will use the 
+local version of `yarn` in `jupyterlab/yarn.js` when run in the repository or 
+a built application directory.
 
-* At times, it may be necessary to clean your local repo with the command `npm run clean:slate`.  This will clean the repository, and re-install and
-rebuild.  Note that we use `npm` in this one instance because the `jlpm`
-command may not be available at the time.
+* At times, it may be necessary to clean your local repo with the command `jlpm run clean:slate`.  This will clean the repository, and re-install and
+rebuild.
 
 * If `pip` gives a `VersionConflict` error, it usually means that the installed
 version of `jupyterlab_launcher` is out of date. Run `pip install --upgrade
@@ -156,22 +155,13 @@ provides additional architecture information.
 The repository consists of many npm packages that are managed using the lerna
 build tool.  The npm package source files are in the `packages/` subdirectory.
 
-**Prerequisites**
-
-- [node](http://nodejs.org/) (preferably version 5 or later)
-- Jupyter notebook server version 4.3 or later (to run examples)
-
-```bash
-npm install --save jupyterlab
-```
-
 ### Build the NPM Packages from Source
 
 ```bash
 git clone https://github.com/jupyterlab/jupyterlab.git
 cd jupyterlab
 pip install -e .
-jlpm install
+jlpm
 jlpm run build:packages
 ```
 
@@ -211,11 +201,11 @@ the initial build if the assets are already built.
 ## Build Utilities
 
 There are a series of build utilities for maintaining the repository.
-To get a suggested version for a library use `npm run get:dependency foo`.
-To update the version of a library across the repo use `npm run update:dependency foo@^x.x`.
-To remove an unwanted dependency use `npm run remove:dependency foo`.
+To get a suggested version for a library use `jlpm run get:dependency foo`.
+To update the version of a library across the repo use `jlpm run update:dependency foo@^x.x`.
+To remove an unwanted dependency use `jlpm run remove:dependency foo`.
 
-The key utility is `npm run integrity`, which ensures the integrity of
+The key utility is `jlpm run integrity`, which ensures the integrity of
 the packages in the repo. It will:
 
 - Ensure the core package version dependencies match everywhere.
@@ -228,10 +218,10 @@ in the repository at once, instead of 50+ individual builds.
 
 The integrity script also allows you to automatically add a dependency for
 a package by importing from it in the TypeScript file, and then running:
-`npm run integrity && npm install` from the repo root.
+`jlpm run integrity` from the repo root.
 
 We also have scripts for creating and removing packages in `packages/`,
-`npm run create:package` and `npm run remove:package`.
+`jlpm run create:package` and `jlpm run remove:package`.
 
 
 ## Notes

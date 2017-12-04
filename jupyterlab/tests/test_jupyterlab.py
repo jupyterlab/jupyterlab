@@ -77,7 +77,7 @@ class TestExtension(TestCase):
         # Copy in the mock packages.
         for name in ['extension', 'incompat', 'package', 'mimeextension']:
             src = pjoin(here, 'mock_packages', name)
- 
+
             def ignore(dname, files):
                 if 'node_modules' in dname:
                     files = []
@@ -166,6 +166,17 @@ class TestExtension(TestCase):
             data = json.load(fid)
         extensions = get_app_info(self.app_dir)['extensions']
         assert not data['name'] in extensions
+
+    def test_validation(self):
+        path = self.mock_extension
+        os.remove(pjoin(path, 'index.js'))
+        with pytest.raises(ValueError):
+            install_extension(path)
+
+        path = self.mock_mimeextension
+        os.remove(pjoin(path, 'index.js'))
+        with pytest.raises(ValueError):
+            install_extension(path)
 
     def test_uninstall_extension(self):
         install_extension(self.mock_extension)

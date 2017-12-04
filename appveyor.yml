@@ -1,18 +1,23 @@
 # Do not build feature branch with open Pull Requests
 skip_branch_with_pr: true
 
+matrix:
+  fast_finish: true
+
 # environment variables
 environment:
   nodejs_version: "6.9"
   matrix:
-    - PYTHON: "C:\\Python35-x64"
-      PYTHON_VERSION: "3.5.x"
-      PYTHON_MAJOR: 3
-      PYTHON_ARCH: "64"
+    - PYTHON: C:\Miniconda36-x64
+      PYTHON_VERSION: 3.6
+
+    - PYTHON: C:\Miniconda
+      PYTHON_VERSION: 2.7
 
 # build cache to preserve files/folders between builds
 cache:
-  - '%LOCALAPPDATA%\\Yarn' # yarn cache
+  - '%LOCALAPPDATA%\\Yarn' # jlpm cache
+  - C:\Users\appveyor\pip\wheels
 
 # scripts that run after cloning repository
 install:
@@ -36,20 +41,9 @@ install:
   - 'pip install --upgrade -e ".[test]"'
   - 'jlpm versions'
   - 'jlpm config current'
-  - 'jlpm cache list'
-  - 'jlpm install'
-  - 'jlpm run build:main'
-  - 'jupyter lab build'
 
 build: off
 
 # to run your custom scripts instead of automatic tests
 test_script:
-  # Run integrity first we we see the message.
-  - 'jlpm run integrity'
-  - 'py.test'
-  - 'git status'
-  - 'jlpm run build'
-  - 'jlpm run build:test'
-  - 'jlpm test || jlpm test || jlpm test'
-  - 'python -m jupyterlab.selenium_check'
+  - "cmd /E:ON /V:ON /C .\\scripts\\appveyor.cmd"
