@@ -72,7 +72,22 @@ class ApplicationShell extends Widget {
     let topPanel = this._topPanel = new Panel();
     let hboxPanel = this._hboxPanel = new BoxPanel();
     let dockPanel = this._dockPanel = new DockPanel();
-    MessageLoop.installMessageHook(dockPanel, Private.dockChildHookFactory(this._tracker));
+    let dockChildHook = this._dockChildHook = (handler, msg) => {
+      switch (msg.type) {
+        case 'child-added':
+          (msg as Widget.ChildMessage).child.addClass(ACTIVITY_CLASS);
+          this._tracker.add((msg as Widget.ChildMessage).child);
+          break;
+        case 'child-removed':
+          (msg as Widget.ChildMessage).child.removeClass(ACTIVITY_CLASS);
+          this._tracker.remove((msg as Widget.ChildMessage).child);
+          break;
+        default:
+          break;
+      }
+      return true;
+    };
+    MessageLoop.installMessageHook(dockPanel, dockChildHook);
 
     let hsplitPanel = this._hsplitPanel = new SplitPanel();
     let leftHandler = this._leftHandler = new Private.SideBarHandler('left');
@@ -611,6 +626,7 @@ class ApplicationShell extends Widget {
   private _activeChanged = new Signal<this, ApplicationShell.IChangedArgs>(this);
   private _cachedLayout: DockLayout.ILayoutConfig | null = null;
   private _currentChanged = new Signal<this, ApplicationShell.IChangedArgs>(this);
+  private _dockChildHook: (handler: IMessageHandler, msg: Message) => boolean;
   private _dockPanel: DockPanel;
   private _hboxPanel: BoxPanel;
   private _hsplitPanel: SplitPanel;
@@ -968,28 +984,6 @@ namespace Private {
     private _side: string;
     private _sideBar: TabBar<Widget>;
     private _stackedPanel: StackedPanel;
-  }
-
-  /**
-   * A factory returning a message hook for main area dock panel bookkeeping.
-   */
-  export
-  function dockChildHookFactory(tracker: FocusTracker<Widget>) {
-    return (handler: IMessageHandler, msg: Message): boolean => {
-      switch (msg.type) {
-        case 'child-added':
-          (msg as Widget.ChildMessage).child.addClass(ACTIVITY_CLASS);
-          tracker.add((msg as Widget.ChildMessage).child);
-          break;
-        case 'child-removed':
-          (msg as Widget.ChildMessage).child.removeClass(ACTIVITY_CLASS);
-          tracker.remove((msg as Widget.ChildMessage).child);
-          break;
-        default:
-          break;
-      }
-      return true;
-    }
   }
 
 }
