@@ -175,7 +175,7 @@ def clean(app_dir=None):
         raise ValueError('Cannot clean the dev app')
     if app_dir == pjoin(HERE, 'core'):
         raise ValueError('Cannot clean the core app')
-    for name in ['static', 'staging']:
+    for name in ['staging']:
         target = pjoin(app_dir, name)
         if osp.exists(target):
             shutil.rmtree(target)
