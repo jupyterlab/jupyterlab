@@ -176,9 +176,10 @@ module (e.g. `"lib/foo"`).
 
 The mime renderer can update its data by calling `.setData()` on the model
 it is given to render.  This can be used for example to add a `png` 
-representation of a dynamic figure.  When using `IDocumentWidgetFactoryOptions`, you can update the document model by calling `.setData()` with updated data
-for the rendered MIME type.  The document can then be saved by the user in the 
-usual manner.
+representation of a dynamic figure, which will be picked up by a notebook 
+model and added to the notebook document.  
+When using `IDocumentWidgetFactoryOptions`, you can update the document model by calling `.setData()` with updated data for the rendered MIME type.  The 
+document can then be saved by the user in the usual manner.
 
 
 ## Themes
