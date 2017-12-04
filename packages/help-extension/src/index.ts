@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  PageConfig, URLExt, uuid
+  PageConfig, URLExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -202,31 +202,21 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   helpMenu.addGroup(resourcesGroup, 10);
 
   // Generate a cache of the kernel help links.
-  // TODO: respond to the specsChanged signal.
-  function populateKernelInfo(): void {
-    const kernelInfo = new Map<string, KernelMessage.IInfoReply>();
-    const promises: Promise<void>[] = [];
-    serviceManager.ready.then(() => {
-      // For each of the kernelSpecs, start a
-      // test kernel, request info from it,
-      // and cache it in order to populate the menu links.
-      const names = Object.keys(serviceManager.specs.kernelspecs);
-      names.forEach(name => {
-        const path = `help-menu-${uuid()}`;
-        const promise = serviceManager.sessions.startNew({ path, name })
-        .then(session => {
-          return session.kernel.ready.then(() => {
-            kernelInfo.set(name, session.kernel.info);
-            return session.shutdown();
-          });
-        });
-        promises.push(promise);
-      });
-    });
-    Promise.all(promises).then(() => {
-      // Once we have started and shut down all of the
-      // test kernels, populate the help menu with the links.
-      kernelInfo.forEach((info, name) => {
+  const kernelInfoCache = new Map<string, KernelMessage.IInfoReply>();
+  serviceManager.sessions.runningChanged.connect((m, sessions) => {
+    // If a new session has been added, it is at the back
+    // of the session list. If one has changed or stopped,
+    // it does not hurt to check it.
+    const sessionModel = sessions[sessions.length-1];
+    if (kernelInfoCache.has(sessionModel.kernel.name)) {
+      return;
+    }
+    serviceManager.sessions.connectTo(sessionModel.id).then((session) => {
+      session.kernel.ready.then(() => {
+        // Set the Kernel Info cache.
+        const name = session.kernel.name;
+        kernelInfoCache.set(name, session.kernel.info);
+
         // Utility function to check if the current widget
         // has registered itself with the help menu.
         const usesKernel = () => {
@@ -242,9 +232,10 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
           });
           return result;
         }
-        const links = info.help_links;
+
+        // Add the kernel info help_links to the Help menu.
         const kernelGroup: Menu.IItemOptions[] = [];
-        links.forEach((link) => {
+        session.kernel.info.help_links.forEach((link) => {
           const commandId = `help-menu-${name}:${link.text}`;
           commands.addCommand(commandId, {
             label: link.text,
@@ -257,8 +248,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
         helpMenu.addGroup(kernelGroup, 20);
       });
     });
-  }
-  populateKernelInfo();
+  });
 
   commands.addCommand(CommandIDs.about, {
     label: `About ${info.name}`,
