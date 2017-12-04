@@ -534,6 +534,22 @@
     "@phosphor/signaling" "^1.2.2"
     "@phosphor/widgets" "^1.5.0"
 
+"@jupyterlab/outputarea@^0.13.1":
+  version "0.13.1"
+  resolved "https://registry.npmjs.org/@jupyterlab/outputarea/-/outputarea-0.13.1.tgz#060364407414df141f71c01202efa3d908395957"
+  dependencies:
+    "@jupyterlab/apputils" "^0.13.0"
+    "@jupyterlab/coreutils" "^0.13.0"
+    "@jupyterlab/observables" "^0.2.0"
+    "@jupyterlab/rendermime" "^0.13.0"
+    "@jupyterlab/services" "^0.52.0"
+    "@phosphor/algorithm" "^1.1.2"
+    "@phosphor/coreutils" "^1.3.0"
+    "@phosphor/disposable" "^1.1.2"
+    "@phosphor/messaging" "^1.2.2"
+    "@phosphor/signaling" "^1.2.2"
+    "@phosphor/widgets" "^1.5.0"
+
 "@jupyterlab/pdf-extension@^0.5.0":
   version "0.5.0"
   resolved "https://registry.yarnpkg.com/@jupyterlab/pdf-extension/-/pdf-extension-0.5.0.tgz#1ef7b8021505cef9c94b83b649c01227de339b95"
