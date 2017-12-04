@@ -10,12 +10,16 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  PageConfig, URLExt
+  PageConfig, URLExt, uuid
 } from '@jupyterlab/coreutils';
 
 import {
   IMainMenu
 } from '@jupyterlab/mainmenu';
+
+import {
+  KernelMessage
+} from '@jupyterlab/services';
 
 import {
   Message
@@ -26,7 +30,7 @@ import {
 } from '@phosphor/virtualdom';
 
 import {
-  PanelLayout, Widget
+  Menu, PanelLayout, Widget
 } from '@phosphor/widgets';
 
 import '../style/index.css';
@@ -83,34 +87,6 @@ const RESOURCES = [
   {
     text: 'Notebook Reference',
     url: 'https://jupyter-notebook.readthedocs.io/en/latest/'
-  },
-  {
-    text: 'IPython Reference',
-    url: 'https://ipython.readthedocs.io/en/stable/'
-  },
-  {
-    text: 'Numpy Reference',
-    url: 'https://docs.scipy.org/doc/numpy/reference/'
-  },
-  {
-    text: 'Scipy Reference',
-    url: 'https://docs.scipy.org/doc/scipy/reference/'
-  },
-  {
-    text: 'Python Reference',
-    url: 'https://docs.python.org/3.5/'
-  },
-  {
-    text: 'Matplotlib Reference',
-    url: 'https://matplotlib.org/contents.html?v=20160707164940'
-  },
-  {
-    text: 'SymPy Reference',
-    url: 'http://docs.sympy.org/latest/index.html?v=20160707164940'
-  },
-  {
-    text: 'Pandas Reference',
-    url: 'https://pandas.pydata.org/pandas-docs/stable/?v=20160707164940'
   },
   {
     text: 'Markdown Reference',
@@ -190,7 +166,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   let counter = 0;
   const category = 'Help';
   const namespace = 'help-doc';
-  const { commands, shell, info} = app;
+  const { commands, shell, info, serviceManager } = app;
   const tracker = new InstanceTracker<HelpWidget>({ namespace });
 
   // Handle state restoration.
@@ -224,6 +200,64 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   const resourcesGroup =
     RESOURCES.map(args => { return { args, command: CommandIDs.open }; });
   helpMenu.addGroup(resourcesGroup, 10);
+
+  // Generate a cache of the kernel help links.
+  // TODO: respond to the specsChanged signal.
+  function populateKernelInfo(): void {
+    const kernelInfo = new Map<string, KernelMessage.IInfoReply>();
+    const promises: Promise<void>[] = [];
+    serviceManager.ready.then(() => {
+      // For each of the kernelSpecs, start a
+      // test kernel, request info from it,
+      // and cache it in order to populate the menu links.
+      const names = Object.keys(serviceManager.specs.kernelspecs);
+      names.forEach(name => {
+        const path = `help-menu-${uuid()}`;
+        const promise = serviceManager.sessions.startNew({ path, name })
+        .then(session => {
+          return session.kernel.ready.then(() => {
+            kernelInfo.set(name, session.kernel.info);
+            return session.shutdown();
+          });
+        });
+        promises.push(promise);
+      });
+    });
+    Promise.all(promises).then(() => {
+      // Once we have started and shut down all of the
+      // test kernels, populate the help menu with the links.
+      kernelInfo.forEach((info, name) => {
+        // Utility function to check if the current widget
+        // has registered itself with the help menu.
+        const usesKernel = () => {
+          let result = false;
+          const widget = app.shell.currentWidget;
+          if (!widget) {
+            return result;
+          }
+          helpMenu.kernelUsers.forEach(u => {
+            if (u.tracker.has(widget) && u.getKernel(widget).name === name) {
+              result = true;
+            }
+          });
+          return result;
+        }
+        const links  = info.help_links;
+        const kernelGroup: Menu.IItemOptions[] = [];
+        links.forEach((link: any) => {
+          const commandId = `help-menu-${name}:${link.text}`;
+          commands.addCommand(commandId, {
+            isVisible: usesKernel,
+            isEnabled: usesKernel,
+            execute: () => { commands.execute(CommandIDs.open, link) }
+          });
+          kernelGroup.push({ command: commandId });
+        });
+        helpMenu.addGroup(kernelGroup, 20);
+      });
+    });
+  }
+  populateKernelInfo();
 
   commands.addCommand(CommandIDs.about, {
     label: `About ${info.name}`,
