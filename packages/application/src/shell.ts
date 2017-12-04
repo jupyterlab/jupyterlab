@@ -72,7 +72,7 @@ class ApplicationShell extends Widget {
     let topPanel = this._topPanel = new Panel();
     let hboxPanel = this._hboxPanel = new BoxPanel();
     let dockPanel = this._dockPanel = new DockPanel();
-    MessageLoop.installMessageHook(dockPanel, Private.activityClassHook);
+    MessageLoop.installMessageHook(dockPanel, Private.dockChildHookFactory(this._tracker));
 
     let hsplitPanel = this._hsplitPanel = new SplitPanel();
     let leftHandler = this._leftHandler = new Private.SideBarHandler('left');
@@ -369,7 +369,6 @@ class ApplicationShell extends Widget {
     }
 
     dock.addWidget(widget, { mode: 'tab-after', ref });
-    this._tracker.add(widget);
   }
 
   /**
@@ -972,22 +971,25 @@ namespace Private {
   }
 
   /**
-   * A message hook that adds and removes the .jp-Activity class to widgets in the dock panel.
+   * A factory returning a message hook for main area dock panel bookkeeping.
    */
   export
-  function activityClassHook(handler: IMessageHandler, msg: Message): boolean {
-    switch (msg.type) {
-      case 'child-added':
-        (msg as Widget.ChildMessage).child.addClass(ACTIVITY_CLASS);
-        break;
-      case 'child-removed':
-        (msg as Widget.ChildMessage).child.removeClass(ACTIVITY_CLASS);
-        break;
-      default:
-        break;
+  function dockChildHookFactory(tracker: FocusTracker<Widget>) {
+    return (handler: IMessageHandler, msg: Message): boolean => {
+      switch (msg.type) {
+        case 'child-added':
+          (msg as Widget.ChildMessage).child.addClass(ACTIVITY_CLASS);
+          tracker.add((msg as Widget.ChildMessage).child);
+          break;
+        case 'child-removed':
+          (msg as Widget.ChildMessage).child.removeClass(ACTIVITY_CLASS);
+          tracker.remove((msg as Widget.ChildMessage).child);
+          break;
+        default:
+          break;
+      }
+      return true;
     }
-
-    return true;
   }
 
 }
