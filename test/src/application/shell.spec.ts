@@ -62,6 +62,8 @@ describe('ApplicationShell', () => {
       expect(shell.currentWidget).to.be(null);
       simulate(widget.node, 'focus');
       expect(shell.currentWidget).to.be(widget);
+      widget.parent = null;
+      expect(shell.currentWidget).to.be(null);
     });
 
   });
