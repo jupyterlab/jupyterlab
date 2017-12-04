@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
-  IEditMenu, IFileMenu, IKernelMenu, IMainMenu, IRunMenu
+  IEditMenu, IFileMenu, IHelpMenu, IKernelMenu, IMainMenu, IRunMenu
 } from '@jupyterlab/mainmenu';
 
 import {
@@ -451,6 +451,12 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     noun: 'Console',
     clear: (current: ConsolePanel) => { return current.console.clear() }
   } as IEditMenu.IClearer<ConsolePanel>);
+
+  // Add kernel information to the application help menu.
+  mainMenu.helpMenu.kernelUsers.add({
+    tracker,
+    getKernel: current => current.session.kernel
+  } as IHelpMenu.IKernelUser<ConsolePanel>);
 
   app.contextMenu.addItem({command: CommandIDs.clear, selector: '.jp-CodeConsole'});
   app.contextMenu.addItem({command: CommandIDs.restart, selector: '.jp-CodeConsole'});
