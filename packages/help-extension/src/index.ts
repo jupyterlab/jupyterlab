@@ -242,11 +242,12 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
           });
           return result;
         }
-        const links  = info.help_links;
+        const links = info.help_links;
         const kernelGroup: Menu.IItemOptions[] = [];
-        links.forEach((link: any) => {
+        links.forEach((link) => {
           const commandId = `help-menu-${name}:${link.text}`;
           commands.addCommand(commandId, {
+            label: link.text,
             isVisible: usesKernel,
             isEnabled: usesKernel,
             execute: () => { commands.execute(CommandIDs.open, link) }
