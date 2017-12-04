@@ -175,7 +175,7 @@ def clean(app_dir=None):
         raise ValueError('Cannot clean the dev app')
     if app_dir == pjoin(HERE, 'core'):
         raise ValueError('Cannot clean the core app')
-    for name in ['static', 'staging']:
+    for name in ['staging']:
         target = pjoin(app_dir, name)
         if osp.exists(target):
             shutil.rmtree(target)
@@ -419,12 +419,12 @@ class _AppHandler(object):
             # Extensions that were added.
             for ext in new_jlab[ext_type]:
                 if ext not in old_jlab[ext_type]:
-                    messages.append('%s was added' % ext)
+                    messages.append('%s needs to be included' % ext)
 
             # Extensions that were removed.
             for ext in old_jlab[ext_type]:
                 if ext not in new_jlab[ext_type]:
-                    messages.append('%s was removed' % ext)
+                    messages.append('%s needs to be removed' % ext)
 
         # Look for mismatched dependencies
         for (pkg, dep) in new_deps.items():

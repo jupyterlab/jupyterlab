@@ -54,8 +54,8 @@ class BaseExtensionApp(JupyterApp):
         try:
             self.run_task()
         except Exception as ex:
-            ex_traceback = ex.__traceback__
-            msg = traceback.format_exception(ex.__class__, ex, ex_traceback)
+            _, _, exc_traceback = sys.exc_info()
+            msg = traceback.format_exception(ex.__class__, ex, exc_traceback)
             for line in msg:
                 self.log.debug(line)
             self.log.error(str(ex))
