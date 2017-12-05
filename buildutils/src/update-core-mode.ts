@@ -7,7 +7,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as utils from './utils';
 
-// Make sure the repo is in a stable state..
+// Ensure the repo is in a stable state.
 utils.run('jlpm integrity');
 
 // Get the dev mode package.json file.
@@ -30,7 +30,8 @@ fs.copySync('./dev_mode/webpack.config.js',
             './jupyterlab/staging/webpack.config.js');
 
 
-// Update the yarn.lock file.
+// Create a new yarn.lock file to ensure it is correct.
+fs.removeSync(path.join(staging, 'yarn.lock'));
 utils.run('jlpm', { cwd: staging });
 
 

@@ -428,20 +428,7 @@
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/launcher@^0.13.0":
-  version "0.13.0"
-  resolved "https://registry.npmjs.org/@jupyterlab/launcher/-/launcher-0.13.0.tgz#6d36d24db259d5ad698549f3d794ae8be3639ddb"
-  dependencies:
-    "@jupyterlab/apputils" "^0.13.0"
-    "@phosphor/algorithm" "^1.1.2"
-    "@phosphor/coreutils" "^1.3.0"
-    "@phosphor/disposable" "^1.1.2"
-    "@phosphor/messaging" "^1.2.2"
-    "@phosphor/properties" "^1.1.2"
-    "@phosphor/widgets" "^1.5.0"
-    react "~16.0.0"
-
-"@jupyterlab/launcher@^0.13.2":
+"@jupyterlab/launcher@^0.13.0", "@jupyterlab/launcher@^0.13.2":
   version "0.13.2"
   resolved "https://registry.npmjs.org/@jupyterlab/launcher/-/launcher-0.13.2.tgz#593ea8ca9fdb714323e28bc906ff96bcc091d640"
   dependencies:
