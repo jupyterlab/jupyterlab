@@ -164,6 +164,14 @@ key in its `package.json` with `"mimeExtension"` metadata.  The value can be
 `true` to use the main module of the package, or a string path to a specific
 module (e.g. `"lib/foo"`).
 
+The mime renderer can update its data by calling `.setData()` on the model
+it is given to render.  This can be used for example to add a `png` 
+representation of a dynamic figure, which will be picked up by a notebook 
+model and added to the notebook document.  
+When using `IDocumentWidgetFactoryOptions`, you can update the document model by calling `.setData()` with updated data for the rendered MIME type.  The 
+document can then be saved by the user in the usual manner.
+
+
 ## Themes
 A theme is a JupyterLab extension that uses a `ThemeManager` and can be
 loaded and unloaded dynamically.  The package must include all static assets

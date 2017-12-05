@@ -56,6 +56,7 @@ import './docmanager/widgetmanager.spec';
 
 import './docregistry/context.spec';
 import './docregistry/default.spec';
+import './docregistry/mimedocument.spec';
 import './docregistry/registry.spec';
 
 import './fileeditor/widget.spec';

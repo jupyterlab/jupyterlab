@@ -23,6 +23,7 @@ class MimeModel implements IRenderMime.IMimeModel {
     this.trusted = !!options.trusted;
     this._data = options.data || {};
     this._metadata = options.metadata || {};
+    this._callback = options.callback || Private.noOp;
   }
 
   /**
@@ -54,8 +55,10 @@ class MimeModel implements IRenderMime.IMimeModel {
   setData(options: IRenderMime.IMimeModel.ISetDataOptions): void {
     this._data = options.data || this._data;
     this._metadata = options.metadata || this._metadata;
+    this._callback(options);
   }
 
+  private _callback: (options: IRenderMime.IMimeModel.ISetDataOptions) => void;
   private _data: ReadonlyJSONObject;
   private _metadata: ReadonlyJSONObject;
 }
@@ -77,6 +80,11 @@ namespace MimeModel {
     trusted?: boolean;
 
     /**
+     * A callback function for when the data changes.
+     */
+    callback?: (options: IRenderMime.IMimeModel.ISetDataOptions) => void;
+
+    /**
      * The initial mime data.
      */
     data?: ReadonlyJSONObject;
@@ -86,4 +94,16 @@ namespace MimeModel {
      */
     metadata?: ReadonlyJSONObject;
   }
+}
+
+
+/**
+ * The namespace for module private data.
+ */
+namespace Private {
+  /**
+   * A no-op callback function.
+   */
+  export
+  function noOp() { /* no-op */}
 }

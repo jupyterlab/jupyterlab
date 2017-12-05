@@ -4,40 +4,17 @@
 import expect = require('expect.js');
 
 import {
-  Message
-} from '@phosphor/messaging';
-
-import {
-  PanelLayout, Widget
+  Widget
 } from '@phosphor/widgets';
 
 import {
   ABCWidgetFactory, Base64ModelFactory, DocumentModel,
-  DocumentRegistry, TextModelFactory, Context,
-  MimeDocument, MimeDocumentFactory
+  DocumentRegistry, TextModelFactory
 } from '@jupyterlab/docregistry';
 
 import {
   createFileContext, defaultRenderMime
 } from '../utils';
-
-
-const RENDERMIME = defaultRenderMime();
-
-
-class LogRenderer extends MimeDocument {
-  methods: string[] = [];
-
-  protected onAfterAttach(msg: Message): void {
-    super.onAfterAttach(msg);
-    this.methods.push('onAfterAttach');
-  }
-
-  protected onUpdateRequest(msg: Message): void {
-    super.onUpdateRequest(msg);
-    this.methods.push('onUpdateRequest');
-  }
-}
 
 
 class DocWidget extends Widget implements DocumentRegistry.IReadyWidget {
@@ -65,16 +42,6 @@ function createFactory(): WidgetFactory {
 
 
 describe('docregistry/default', () => {
-
-  let context: Context<DocumentRegistry.IModel>;
-
-  beforeEach(() => {
-    context = createFileContext();
-  });
-
-  afterEach(() => {
-    context.dispose();
-  });
 
   describe('ABCWidgetFactory', () => {
 
@@ -238,6 +205,7 @@ describe('docregistry/default', () => {
 
       it('should create a new widget given a document model and a context', () => {
         let factory = createFactory();
+        let context = createFileContext();
         let widget = factory.createNew(context);
         expect(widget).to.be.a(Widget);
       });
@@ -578,62 +546,6 @@ describe('docregistry/default', () => {
         let factory = new TextModelFactory();
         expect(factory.preferredLanguage('.py')).to.be('python');
         expect(factory.preferredLanguage('.jl')).to.be('julia');
-      });
-
-    });
-
-  });
-
-  describe('MimeDocumentFactory', () => {
-
-    describe('#createNew()', () => {
-
-      it('should require a context parameter', () => {
-        let widgetFactory = new MimeDocumentFactory({
-          name: 'markdown',
-          fileTypes: ['markdown'],
-          rendermime: RENDERMIME,
-          primaryFileType: DocumentRegistry.defaultTextFileType
-        });
-        expect(widgetFactory.createNew(context)).to.be.a(MimeDocument);
-      });
-
-    });
-
-  });
-
-  describe('MimeDocument', () => {
-
-    describe('#constructor()', () => {
-
-      it('should require options', () => {
-        let widget = new MimeDocument({
-          context,
-          rendermime: RENDERMIME,
-          mimeType: 'text/markdown',
-          renderTimeout: 1000,
-          dataType: 'string'
-        });
-        expect(widget).to.be.a(MimeDocument);
-      });
-
-    });
-
-    describe('#ready', () => {
-
-      it('should resolve when the widget is ready', () => {
-        let widget = new LogRenderer({
-          context,
-          rendermime: RENDERMIME,
-          mimeType: 'text/markdown',
-          renderTimeout: 1000,
-          dataType: 'string'
-        });
-        context.save();
-        return widget.ready.then(() => {
-          let layout = widget.layout as PanelLayout;
-          expect(layout.widgets.length).to.be(2);
-        });
       });
 
     });
