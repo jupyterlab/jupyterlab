@@ -371,7 +371,7 @@ namespace KernelMessage {
     implementation_version: string;
     language_info: ILanguageInfo;
     banner: string;
-    help_links: { [key: string]: string; };
+    help_links: { text: string; url: string }[];
   }
 
   /**

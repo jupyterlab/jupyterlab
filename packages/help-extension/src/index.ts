@@ -18,6 +18,10 @@ import {
 } from '@jupyterlab/mainmenu';
 
 import {
+  KernelMessage
+} from '@jupyterlab/services';
+
+import {
   Message
 } from '@phosphor/messaging';
 
@@ -26,7 +30,7 @@ import {
 } from '@phosphor/virtualdom';
 
 import {
-  PanelLayout, Widget
+  Menu, PanelLayout, Widget
 } from '@phosphor/widgets';
 
 import '../style/index.css';
@@ -83,34 +87,6 @@ const RESOURCES = [
   {
     text: 'Notebook Reference',
     url: 'https://jupyter-notebook.readthedocs.io/en/latest/'
-  },
-  {
-    text: 'IPython Reference',
-    url: 'https://ipython.readthedocs.io/en/stable/'
-  },
-  {
-    text: 'Numpy Reference',
-    url: 'https://docs.scipy.org/doc/numpy/reference/'
-  },
-  {
-    text: 'Scipy Reference',
-    url: 'https://docs.scipy.org/doc/scipy/reference/'
-  },
-  {
-    text: 'Python Reference',
-    url: 'https://docs.python.org/3.5/'
-  },
-  {
-    text: 'Matplotlib Reference',
-    url: 'https://matplotlib.org/contents.html?v=20160707164940'
-  },
-  {
-    text: 'SymPy Reference',
-    url: 'http://docs.sympy.org/latest/index.html?v=20160707164940'
-  },
-  {
-    text: 'Pandas Reference',
-    url: 'https://pandas.pydata.org/pandas-docs/stable/?v=20160707164940'
   },
   {
     text: 'Markdown Reference',
@@ -190,7 +166,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   let counter = 0;
   const category = 'Help';
   const namespace = 'help-doc';
-  const { commands, shell, info} = app;
+  const { commands, shell, info, serviceManager } = app;
   const tracker = new InstanceTracker<HelpWidget>({ namespace });
 
   // Handle state restoration.
@@ -224,6 +200,55 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   const resourcesGroup =
     RESOURCES.map(args => { return { args, command: CommandIDs.open }; });
   helpMenu.addGroup(resourcesGroup, 10);
+
+  // Generate a cache of the kernel help links.
+  const kernelInfoCache = new Map<string, KernelMessage.IInfoReply>();
+  serviceManager.sessions.runningChanged.connect((m, sessions) => {
+    // If a new session has been added, it is at the back
+    // of the session list. If one has changed or stopped,
+    // it does not hurt to check it.
+    const sessionModel = sessions[sessions.length-1];
+    if (kernelInfoCache.has(sessionModel.kernel.name)) {
+      return;
+    }
+    serviceManager.sessions.connectTo(sessionModel.id).then((session) => {
+      session.kernel.ready.then(() => {
+        // Set the Kernel Info cache.
+        const name = session.kernel.name;
+        kernelInfoCache.set(name, session.kernel.info);
+
+        // Utility function to check if the current widget
+        // has registered itself with the help menu.
+        const usesKernel = () => {
+          let result = false;
+          const widget = app.shell.currentWidget;
+          if (!widget) {
+            return result;
+          }
+          helpMenu.kernelUsers.forEach(u => {
+            if (u.tracker.has(widget) && u.getKernel(widget).name === name) {
+              result = true;
+            }
+          });
+          return result;
+        }
+
+        // Add the kernel info help_links to the Help menu.
+        const kernelGroup: Menu.IItemOptions[] = [];
+        session.kernel.info.help_links.forEach((link) => {
+          const commandId = `help-menu-${name}:${link.text}`;
+          commands.addCommand(commandId, {
+            label: link.text,
+            isVisible: usesKernel,
+            isEnabled: usesKernel,
+            execute: () => { commands.execute(CommandIDs.open, link) }
+          });
+          kernelGroup.push({ command: commandId });
+        });
+        helpMenu.addGroup(kernelGroup, 20);
+      });
+    });
+  });
 
   commands.addCommand(CommandIDs.about, {
     label: `About ${info.name}`,

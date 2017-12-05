@@ -26,7 +26,7 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
-  IMainMenu, IEditMenu, IFileMenu, IKernelMenu, IRunMenu, IViewMenu
+  IMainMenu, IEditMenu, IFileMenu, IHelpMenu, IKernelMenu, IRunMenu, IViewMenu
 } from '@jupyterlab/mainmenu';
 
 import {
@@ -1441,4 +1441,10 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   ].map(command => { return { command }; });
   mainMenu.editMenu.addGroup(undoCellActionGroup, 4);
   mainMenu.editMenu.addGroup(editGroup, 5);
+
+  // Add kernel information to the application help menu.
+  mainMenu.helpMenu.kernelUsers.add({
+    tracker,
+    getKernel: current => current.session.kernel
+  } as IHelpMenu.IKernelUser<NotebookPanel>);
 }

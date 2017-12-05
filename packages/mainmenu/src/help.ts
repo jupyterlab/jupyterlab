@@ -2,11 +2,15 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Menu
+  Kernel
+} from '@jupyterlab/services';
+
+import {
+  Menu, Widget
 } from '@phosphor/widgets';
 
 import {
-  IJupyterLabMenu, JupyterLabMenu
+  IJupyterLabMenu, IMenuExtender, JupyterLabMenu
 } from './labmenu';
 
 /**
@@ -14,6 +18,12 @@ import {
  */
 export
 interface IHelpMenu extends IJupyterLabMenu {
+  /**
+   * A set of kernel users for the help menu.
+   * This is used to populate additional help
+   * links provided by the kernel of a widget.
+   */
+  readonly kernelUsers: Set<IHelpMenu.IKernelUser<Widget>>;
 }
 
 /**
@@ -27,5 +37,31 @@ class HelpMenu extends JupyterLabMenu implements IHelpMenu {
   constructor(options: Menu.IOptions) {
     super(options);
     this.menu.title.label = 'Help';
+    this.kernelUsers = new Set<IHelpMenu.IKernelUser<Widget>>();
+  }
+
+  /**
+   * A set of kernel users for the help menu.
+   * This is used to populate additional help
+   * links provided by the kernel of a widget.
+   */
+  readonly kernelUsers: Set<IHelpMenu.IKernelUser<Widget>>;
+}
+
+/**
+ * Namespace for IHelpMenu
+ */
+export
+namespace IHelpMenu {
+  /**
+   * Interface for a Kernel user to register itself
+   * with the IHelpMenu's semantic extension points.
+   */
+  export
+  interface IKernelUser<T extends Widget> extends IMenuExtender<T> {
+    /**
+     * A function to get the kernel for a widget.
+     */
+    getKernel: (widget: T) => Kernel.IKernelConnection;
   }
 }
