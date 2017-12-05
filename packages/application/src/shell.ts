@@ -72,7 +72,7 @@ class ApplicationShell extends Widget {
     let topPanel = this._topPanel = new Panel();
     let hboxPanel = this._hboxPanel = new BoxPanel();
     let dockPanel = this._dockPanel = new DockPanel();
-    MessageLoop.installMessageHook(dockPanel, Private.activityClassHook);
+    MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 
     let hsplitPanel = this._hsplitPanel = new SplitPanel();
     let leftHandler = this._leftHandler = new Private.SideBarHandler('left');
@@ -369,7 +369,6 @@ class ApplicationShell extends Widget {
     }
 
     dock.addWidget(widget, { mode: 'tab-after', ref });
-    this._tracker.add(widget);
   }
 
   /**
@@ -608,6 +607,25 @@ class ApplicationShell extends Widget {
   private _onLayoutModified(): void {
     this._layoutModified.emit(void 0);
   }
+
+  /**
+   * A message hook for child add/remove messages on the main area dock panel.
+   */
+  private _dockChildHook = (handler: IMessageHandler, msg: Message): boolean => {
+    switch (msg.type) {
+      case 'child-added':
+        (msg as Widget.ChildMessage).child.addClass(ACTIVITY_CLASS);
+        this._tracker.add((msg as Widget.ChildMessage).child);
+        break;
+      case 'child-removed':
+        (msg as Widget.ChildMessage).child.removeClass(ACTIVITY_CLASS);
+        this._tracker.remove((msg as Widget.ChildMessage).child);
+        break;
+      default:
+        break;
+    }
+    return true;
+  };
 
   private _activeChanged = new Signal<this, ApplicationShell.IChangedArgs>(this);
   private _cachedLayout: DockLayout.ILayoutConfig | null = null;
@@ -969,25 +987,6 @@ namespace Private {
     private _side: string;
     private _sideBar: TabBar<Widget>;
     private _stackedPanel: StackedPanel;
-  }
-
-  /**
-   * A message hook that adds and removes the .jp-Activity class to widgets in the dock panel.
-   */
-  export
-  function activityClassHook(handler: IMessageHandler, msg: Message): boolean {
-    switch (msg.type) {
-      case 'child-added':
-        (msg as Widget.ChildMessage).child.addClass(ACTIVITY_CLASS);
-        break;
-      case 'child-removed':
-        (msg as Widget.ChildMessage).child.removeClass(ACTIVITY_CLASS);
-        break;
-      default:
-        break;
-    }
-
-    return true;
   }
 
 }
