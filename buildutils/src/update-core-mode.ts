@@ -7,7 +7,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as utils from './utils';
 
-// Update the dev_mode package.json.
+// Make sure the repo is in a stable state..
 utils.run('jlpm integrity');
 
 // Get the dev mode package.json file.

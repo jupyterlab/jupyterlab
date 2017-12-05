@@ -61,7 +61,7 @@
     "@jupyterlab/inspector": "^0.13.0",
     "@jupyterlab/inspector-extension": "^0.13.0",
     "@jupyterlab/json-extension": "^0.13.0",
-    "@jupyterlab/launcher": "^0.13.0",
+    "@jupyterlab/launcher": "^0.13.2",
     "@jupyterlab/launcher-extension": "^0.13.0",
     "@jupyterlab/mainmenu": "^0.2.0",
     "@jupyterlab/mainmenu-extension": "^0.2.0",
