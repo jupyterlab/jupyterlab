@@ -22,7 +22,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IClientSession
+  IClientSession, bidiSTT
 } from '@jupyterlab/apputils';
 
 import {
@@ -421,6 +421,7 @@ class OutputArea extends Widget {
       let output = this.rendermime.createRenderer(mimeType);
       output.renderModel(model);
       output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
+      if (bidiSTT.isBidiLocale()) bidiSTT.attachElement(output.node,'filepath');
       panel.addWidget(output);
     }
 
