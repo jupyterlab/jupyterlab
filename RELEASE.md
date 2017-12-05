@@ -83,8 +83,10 @@ xckd repo
 ```bash
 git checkout --orphan name-of-branch
 git rm -rf .
+git clean -dfx
 cookiecutter path-to-local-extension-cookiecutter-ts
-cp -r jupyterlab_xkcd/ .
+# Fill in the values from the previous branch package.json
+cp -r jupyterlab_xkcd .
 rm -rf jupyterlab_xkcd
 ```
 
@@ -98,6 +100,12 @@ files from the previous branch, as well as the `package.json` fields up to
 - Push the branch and set it as the default branch for the tutorial repo.
 - Submit the PR to JupyterLab
 
+If you make a mistake and need to start over, clear the tags using the
+following pattern:
+
+```bash
+git tag | grep 0.xx | xargs git tag -d
+```
 
 ### Publishing to conda-forge
 - Get the sha256 hash for conda-forge release:

@@ -58,6 +58,13 @@ source ~/miniconda/bin/activate jupyterlab-ext
 
 Note: You'll need to run the command above in each new terminal you open before you can work with the tools you installed in the `jupyterlab-ext` environment.
 
+
+## Create a repository
+
+Create a new repository for your extension.  For example, on [Github](https://help.github.com/articles/create-a-repo/).  This is an optional step but
+highly recommended if you want to share your extension.
+
+
 ## Create an extension project
 
 ### Initialize the project from a cookiecutter
@@ -72,10 +79,14 @@ When prompted, enter values like the following for all of the cookiecutter promp
 
 ```
 author_name []: Your Name
-author_email []: your-email@somewhere.org
 extension_name [jupyterlab_myextension]: jupyterlab_xkcd
 project_short_description [A JupyterLab extension.]: Show a random xkcd.com comic in a JupyterLab panel
+repository [https://github.com/my_name/jupyterlab_myextension]: Your repository
+url
 ```
+
+Note: if not using a repository, leave the field blank.  You can come back
+and edit the repository links in the `package.json` file later.
 
 Change to the directory the cookiecutter created and list the files.
 
@@ -90,17 +101,19 @@ You should see a list like the following.
 README.md     package.json  src           style         tsconfig.json
 ```
 
-### Build and link the extension for development
+### Build and install the extension for development
 
-Your new extension project has enough code in it to see it working in your JupyterLab. Run the following commands to install the initial project dependencies and link it to the JupyterLab environment.
+Your new extension project has enough code in it to see it working in your JupyterLab. Run the following commands to install the initial project dependencies and install it in the JupyterLab environment.
 
 ```bash
 npm install
-jupyter labextension link .
+npm run build
+jupyter labextension install .
 ```
 
-Open a second terminal.  Run these commands to activate the `jupyterlab-ext` environment and to start a JupyterLab instance in watch mode so that it will 
-keep up with our changes as we make them.
+After the build completes, open a second terminal.  Run these commands to 
+activate the `jupyterlab-ext` environment and to start a JupyterLab instance 
+in watch mode so that it will keep up with our changes as we make them.
 
 ```bash
 source ~/miniconda/bin/activate jupyterlab-ext
@@ -191,7 +204,7 @@ const extension: JupyterLabPlugin<void> = {
   id: 'jupyterlab_xkcd',
   autoStart: true,
   requires: [ICommandPalette],
-  activate: (app, palette: ICommandPalette) => {
+  activate: (app: JupyterLab, palette: ICommandPalette) => {
     console.log('JupyterLab extension jupyterlab_xkcd is activated!');
     console.log('ICommandPalette:', palette);
   }
@@ -230,7 +243,7 @@ import {
 Then modify the `activate` function again so that it has the following code:
 
 ```typescript
-  activate: (app, palette: ICommandPalette) => {
+  activate: (app: JupyterLab, palette: ICommandPalette) => {
     console.log('JupyterLab extension jupyterlab_xkcd is activated!');
 
     // Create a single widget
@@ -265,7 +278,7 @@ Build your extension again using `npm run build` (unless you are using
 
 ![Empty xkcd extension panel](xkcd_tutorial_empty.png)
 
-If your widget is not behaving, compare your code with the reference project state at the [01-show-a-panel tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.29-01-show-a-panel). Once you've got everything working properly, git commit your changes and carry on.
+If your widget is not behaving, compare your code with the reference project state at the [01-show-a-panel tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.30-01-show-a-panel). Once you've got everything working properly, git commit your changes and carry on.
 
 ```bash
 git add .
@@ -274,15 +287,7 @@ git commit -m 'Show xkcd panel on command'
 
 ### Show a comic in the panel
 
-You've got an empty panel. It's time to add a comic to it. Go back to your code editor. Add the following new import near the top of the file:
-
-```typescript
-import {
-  ServerConnection
-} from '@jupyterlab/services';
-```
-
-Now return to the `activate` function. Add the following code below the lines that create a `Widget` instance and above the lines that define the command.
+You've got an empty panel. It's time to add a comic to it. Go back to your code editor.  Add the following code below the lines that create a `Widget` instance and above the lines that define the command.
 
 ```typescript
     // Add an image element to the panel
@@ -290,15 +295,18 @@ Now return to the `activate` function. Add the following code below the lines th
     widget.node.appendChild(img);
 
     // Fetch info about a random comic
-    let settings = ServerConnection.makeSettings();
-    ServerConnection.makeRequest({url: 'https:////egszlpbmle.execute-api.us-east-1.amazonaws.com/prod'}, settings).then(response => {
-      img.src = response.data.img;
-      img.alt = response.data.title;
-      img.title = response.data.alt;
+    fetch('https:////egszlpbmle.execute-api.us-east-1.amazonaws.com/prod').then(response => {
+      return response.json();
+    }).then(data => {
+      img.src = data.img;
+      img.alt = data.title;
+      img.title = data.alt;
     });
 ```
 
-The first two lines create a new HTML `<img>` element and add it to the widget DOM node. The next lines make a request to an API that returns information about a random xkcd comic, and set the image source, alternate text, and title attributes based on the response.
+The first two lines create a new HTML `<img>` element and add it to the widget DOM node. The next lines make a request using the HTML [fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch) 
+API that returns information about a random xkcd comic, and set the image 
+source, alternate text, and title attributes based on the response.
 
 Rebuild your extension if necessary (`npm run build`), refresh your browser tab, and run the *Random xkcd comic* command again. You should now see a comic in the xkcd.com panel when it opens.
 
@@ -306,7 +314,7 @@ Rebuild your extension if necessary (`npm run build`), refresh your browser tab,
 
 Note that the comic is not centered in the panel nor does the panel scroll if the comic is larger than the panel area. Also note that the comic does not update no matter how many times you close and reopen the panel. You'll address both of these problems in the upcoming sections.
 
-If you don't see a comic at all, compare your code with the [02-show-a-comic tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.29-02-show-a-comic) in the reference project. When it's working, make another git commit.
+If you don't see a comic at all, compare your code with the [02-show-a-comic tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.30-02-show-a-comic) in the reference project. When it's working, make another git commit.
 
 ```bash
 git add .
@@ -342,7 +350,7 @@ Return to the `index.ts` file. Note that there is already an import of the CSS
  function should read like the following:
 
 ```typescript
-  activate: (app, palette: ICommandPalette) => {
+  activate: (app: JupyterLab, palette: ICommandPalette) => {
     console.log('JupyterLab extension jupyterlab_xkcd is activated!');
 
     // Create a single widget
@@ -366,7 +374,7 @@ Return to the `index.ts` file. Note that there is already an import of the CSS
       </div>`
     );
 
-    // Keep all the remaining ServerConnection and command lines the same
+    // Keep all the remaining fetch and command lines the same
     // as before from here down ...
 ```
 
@@ -378,7 +386,7 @@ sure you can scroll the panel over the entire area of the comic.
 
 ![Styled xkcd panel with attribution](xkcd_tutorial_complete.png)
 
-If anything is misbehaving, compare your code with the reference project [03-style-and-attribute tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.29-03-style-and-attribute). When everything is working as expected, make another commit.
+If anything is misbehaving, compare your code with the reference project [03-style-and-attribute tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.30-03-style-and-attribute). When everything is working as expected, make another commit.
 
 ```bash
 git add .
@@ -412,7 +420,6 @@ class XkcdWidget extends Widget {
    */
   constructor() {
     super();
-    this.settings = ServerConnection.makeSettings();
 
     this.id = 'xkcd-jupyterlab';
     this.title.label = 'xkcd.com';
@@ -433,11 +440,6 @@ class XkcdWidget extends Widget {
   }
 
   /**
-   * The server settings associated with the widget.
-   */
-  readonly settings: ServerConnection.ISettings;
-
-  /**
    * The image element associated with the widget.
    */
   readonly img: HTMLImageElement;
@@ -446,10 +448,12 @@ class XkcdWidget extends Widget {
    * Handle update requests for the widget.
    */
   onUpdateRequest(msg: Message): void {
-    ServerConnection.makeRequest({url: 'https://egszlpbmle.execute-api.us-east-1.amazonaws.com/prod'}, this.settings).then(response => {
-      this.img.src = response.data.img;
-      this.img.alt = response.data.title;
-      this.img.title = response.data.alt;
+    fetch('https://egszlpbmle.execute-api.us-east-1.amazonaws.com/prod').then(response => {
+      return response.json();
+    }).then(data => {
+      this.img.src = data.img;
+      this.img.alt = data.title;
+      this.img.title = data.alt;
     });
   }
 };
@@ -490,13 +494,6 @@ function activate(app: JupyterLab, palette: ICommandPalette) {
 };
 ```
 
-Modify the import statement for `@jupyterlab/application` at the top of the file so that the `JupyterLab` type is known for the `app` parameter to the function.
-
-```typescript
-import {
-  JupyterLab, JupyterLabPlugin
-} from '@jupyterlab/application';
-```
 
 Remove the `activate` function definition from the `JupyterLabPlugin` object and refer instead to the top-level function like so:
 
@@ -511,7 +508,7 @@ const extension: JupyterLabPlugin<void> = {
 
 Make sure you retain the `export default extension;` line in the file. Now build the extension again and refresh the JupyterLab browser tab. Run the *Random xkcd comic* command more than once without closing the panel. The comic should update each time you execute the command. Close the panel, run the command, and it should both reappear and show a new comic.
 
-If anything is amiss, compare your code with the [04-refactor-and-refresh tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.29-04-refactor-and-refresh) to debug. Once it's working properly, commit it.
+If anything is amiss, compare your code with the [04-refactor-and-refresh tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.30-04-refactor-and-refresh) to debug. Once it's working properly, commit it.
 
 ```bash
 git add .
@@ -534,10 +531,6 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  ServerConnection
-} from '@jupyterlab/services';
-
-import {
   JSONExt // new
 } from '@phosphor/coreutils';
 
@@ -552,13 +545,18 @@ import {
 import '../style/index.css';
 ```
 
-Declare a third, new parameter in the `activate` function definition of type `ILayoutRestorer`.
+Then, add the `ILayoutRestorer` interface to the `JupyterLabPlugin` definition. This addition passes the global `LayoutRestorer` to the third parameter of the `activate`.
 
 ```typescript
-function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRestorer) {
+const extension: JupyterLabPlugin<void> = {
+  id: 'jupyterlab_xkcd',
+  autoStart: true,
+  requires: [ICommandPalette, ILayoutRestorer],
+  activate: activate
+};
 ```
 
-Then rewrite the body of `activate` function so that it:
+Finally, rewrite the `activate` function so that it:
 
 1. Declares a widget variable, but does not create an instance immediately
 2. Constructs an `InstanceTracker` and tells the `ILayoutRestorer` to use it to save/restore panel state
@@ -611,20 +609,9 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRe
 };
 ```
 
-Finally, add the `ILayoutRestorer` interface to the `JupyterLabPlugin` definition. This addition passes the global `LayoutRestorer` to the third parameter of the `activate`.
-
-```typescript
-const extension: JupyterLabPlugin<void> = {
-  id: 'jupyterlab_xkcd',
-  autoStart: true,
-  requires: [ICommandPalette, ILayoutRestorer],
-  activate: activate
-};
-```
-
 Rebuild your extension one last time and refresh your browser tab. Execute the *Random xkcd comic* command and validate that the panel appears with a comic in it. Refresh the browser tab again. You should see an xkcd panel appear immediately without running the command. Close the panel and refresh the browser tab. You should not see an xkcd tab after the refresh.
 
-Refer to the [05-restore-panel-state tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.29-05-restore-panel-state) if your extension is misbehaving. Make a commit when the state of your extension persists properly.
+Refer to the [05-restore-panel-state tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.30-05-restore-panel-state) if your extension is misbehaving. Make a commit when the state of your extension persists properly.
 
 ```bash
 git add .
@@ -637,7 +624,7 @@ Congrats! You've implemented all of the behaviors laid out at the start of this 
 
 npm is both a JavaScript package manager and the de facto registry for JavaScript software. You can [sign up for an account on the npmjs.com site](https://www.npmjs.com/signup) or create an account from the command line by running `npm adduser` and entering values when prompted. Create an account now if you do not already have one. If you already have an account, login by running `npm login` and answering the prompts.
 
-Next, open the project `package.json` file in your text editor. Prefix the `name` field value with `@your-npm-username>/` so that the entire field reads `"name": "@your-npm-username/xkcd-extension"` where you've replaced the string `your-npm-username` with your real username. Consider adding the homepage, repository, license, and [other supported package.json](https://docs.npmjs.com/files/package.json) fields while you have the file open. Then open the `README.md` file and adjust the command in the *Installation* section so that it includes the full, username-prefixed package name you just included in the `package.json` file. For example:
+Next, open the project `package.json` file in your text editor. Prefix the `name` field value with `@your-npm-username>/` so that the entire field reads `"name": "@your-npm-username/xkcd-extension"` where you've replaced the string `your-npm-username` with your real username. Review the homepage, repository, license, and [other supported package.json](https://docs.npmjs.com/files/package.json) fields while you have the file open. Then open the `README.md` file and adjust the command in the *Installation* section so that it includes the full, username-prefixed package name you just included in the `package.json` file. For example:
 
 ```bash
 jupyter labextension install @your-npm-username/xkcd-extension
@@ -656,7 +643,7 @@ Now run the following command to publish your package:
 npm publish --access=public
 ```
 
-Check that your package appears on the npm website. You can either search for it from the homepage or visit `https://www.npmjs.com/package/@your-username/jupyterlab_xkcd` directly. If it doesn't appear, make sure you've updated the package name properly in the `package.json` and run the npm command correctly. Compare your work with the state of the reference project at the [06-prepare-to-publish tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.29-06-prepare-to-publish) for further debugging.
+Check that your package appears on the npm website. You can either search for it from the homepage or visit `https://www.npmjs.com/package/@your-username/jupyterlab_xkcd` directly. If it doesn't appear, make sure you've updated the package name properly in the `package.json` and run the npm command correctly. Compare your work with the state of the reference project at the [06-prepare-to-publish tag](https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.30-06-prepare-to-publish) for further debugging.
 
 ![Extension page on npmjs.com](xkcd_tutorial_npm.png)
 
