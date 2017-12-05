@@ -121,6 +121,11 @@
 }
 
 
+.jp-RunningSessions-itemIcon.jp-mod-notebook {
+  background-image: var(--jp-icon-book);
+}
+
+
 .jp-RunningSessions-itemIcon.jp-mod-console {
   background-image: var(--jp-icon-console);
 }
