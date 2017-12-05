@@ -140,7 +140,7 @@
       "@phosphor/coreutils",
       "@phosphor/widgets"
     ],
-    "version": "0.30.0rc1",
+    "version": "0.30.0",
     "linkedPackages": {},
     "staticDir": "../static"
   }
