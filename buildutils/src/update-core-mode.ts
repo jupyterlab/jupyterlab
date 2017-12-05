@@ -30,8 +30,7 @@ fs.copySync('./dev_mode/webpack.config.js',
             './jupyterlab/staging/webpack.config.js');
 
 
-// Create a new yarn.lock file to ensure it is correct.
-fs.removeSync(path.join(staging, 'yarn.lock'));
+// Update the yarn.lock file.
 utils.run('jlpm', { cwd: staging });
 
 

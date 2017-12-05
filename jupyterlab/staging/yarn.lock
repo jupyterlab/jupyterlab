@@ -11,11 +11,11 @@
     "@jupyterlab/coreutils" "^0.13.0"
     "@phosphor/virtualdom" "^1.1.2"
 
-"@jupyterlab/application@^0.13.0":
-  version "0.13.0"
-  resolved "https://registry.npmjs.org/@jupyterlab/application/-/application-0.13.0.tgz#486911f4187e70f9e168dce357179855c76a18fe"
+"@jupyterlab/application@^0.13.0", "@jupyterlab/application@^0.13.1":
+  version "0.13.1"
+  resolved "https://registry.npmjs.org/@jupyterlab/application/-/application-0.13.1.tgz#9467fb74d4a03c58cf11c8e9b3f50a910cdf89f5"
   dependencies:
-    "@jupyterlab/apputils" "^0.13.0"
+    "@jupyterlab/apputils" "^0.13.1"
     "@jupyterlab/coreutils" "^0.13.0"
     "@jupyterlab/docregistry" "^0.13.0"
     "@jupyterlab/rendermime" "^0.13.0"
@@ -837,8 +837,8 @@
     "@phosphor/virtualdom" "^1.1.2"
 
 "@types/react@~16.0.19":
-  version "16.0.26"
-  resolved "https://registry.npmjs.org/@types/react/-/react-16.0.26.tgz#ccc243302d2a4b4a02923ddc1263599d957d3174"
+  version "16.0.27"
+  resolved "https://registry.npmjs.org/@types/react/-/react-16.0.27.tgz#341899469ea2e98b48b11c18afb4d8361d03b013"
 
 abbrev@1:
   version "1.1.1"

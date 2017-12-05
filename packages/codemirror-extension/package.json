@@ -30,7 +30,7 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.13.0",
+    "@jupyterlab/application": "^0.13.1",
     "@jupyterlab/apputils": "^0.13.1",
     "@jupyterlab/codeeditor": "^0.13.0",
     "@jupyterlab/codemirror": "^0.13.0",
