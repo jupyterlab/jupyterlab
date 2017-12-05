@@ -57,6 +57,9 @@ def which(command, env=None):
         if command == 'node':
             msg = 'Please install nodejs using conda or the nodejs website'
             raise ValueError(msg)
+        elif command == 'npm':
+            msg = 'Please install npm before attempting install.'
+            raise ValueError(msg)
         raise ValueError('The command was not found or was not ' +
                 'executable: %s.' % command)
     return command_with_path
