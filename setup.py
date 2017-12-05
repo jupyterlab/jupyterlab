@@ -131,7 +131,6 @@ setup_args['extras_require'] = {
 }
 
 
-# Because of this we do not need a MANIFEST.in
 setup_args['include_package_data'] = True
 
 # Force entrypoints with setuptools (needed for Windows, unconditional
