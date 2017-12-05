@@ -224,7 +224,7 @@ namespace CommandIDs {
 /**
  * The class name for the notebook icon from the default theme.
  */
-const NOTEBOOK_ICON_CLASS = 'jp-NotebookRunningIcon';
+const NOTEBOOK_ICON_CLASS = 'jp-NotebookIcon';
 
 /**
  * The name of the factory that creates notebooks.
@@ -457,7 +457,7 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
           displayName,
           category: 'Notebook',
           name,
-          iconClass: 'jp-NotebookRunningIcon',
+          iconClass: 'jp-NotebookIcon',
           callback: createNew,
           rank,
           kernelIconUrl

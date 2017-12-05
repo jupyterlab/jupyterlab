@@ -168,11 +168,6 @@
 }
 
 
-.jp-NotebookRunningIcon {
-  background-image: var(--jp-icon-book-running);
-}
-
-
 .jp-OpenFolderIcon {
   background-image: var(--jp-icon-directory);
 }
