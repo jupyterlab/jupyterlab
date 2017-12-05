@@ -158,14 +158,14 @@ def install_extension(extension, app_dir=None, logger=None):
     The extension is first validated.
     """
     handler = _AppHandler(app_dir, logger)
-    handler.install_extension(extension)
+    return handler.install_extension(extension)
 
 
 def uninstall_extension(name, app_dir=None, logger=None):
     """Uninstall an extension by name or path.
     """
     handler = _AppHandler(app_dir, logger)
-    handler.uninstall_extension(name)
+    return handler.uninstall_extension(name)
 
 
 def clean(app_dir=None):
@@ -187,7 +187,7 @@ def build(app_dir=None, name=None, version=None, logger=None,
     """Build the JupyterLab application.
     """
     handler = _AppHandler(app_dir, logger, kill_event=kill_event)
-    handler.build(name=name, version=version,
+    return handler.build(name=name, version=version,
                   command=command, clean_staging=clean_staging)
 
 
@@ -202,14 +202,14 @@ def enable_extension(extension, app_dir=None, logger=None):
     """Enable a JupyterLab extension.
     """
     handler = _AppHandler(app_dir, logger)
-    handler.toggle_extension(extension, False)
+    return handler.toggle_extension(extension, False)
 
 
 def disable_extension(extension, app_dir=None, logger=None):
     """Disable a JupyterLab package.
     """
     handler = _AppHandler(app_dir, logger)
-    handler.toggle_extension(extension, True)
+    return handler.toggle_extension(extension, True)
 
 
 def build_check(app_dir=None, logger=None):
@@ -225,20 +225,20 @@ def list_extensions(app_dir=None, logger=None):
     """List the extensions.
     """
     handler = _AppHandler(app_dir, logger)
-    handler.list_extensions()
+    return handler.list_extensions()
 
 
 def link_package(path, app_dir=None, logger=None):
     """Link a package against the JupyterLab build."""
     handler = _AppHandler(app_dir, logger)
-    handler.link_package(path)
+    return handler.link_package(path)
 
 
 def unlink_package(package, app_dir=None, logger=None):
     """Unlink a package from JupyterLab by path or name.
     """
     handler = _AppHandler(app_dir, logger)
-    handler.unlink_package(package)
+    return handler.unlink_package(package)
 
 
 def get_app_version():
@@ -356,13 +356,13 @@ class _AppHandler(object):
 
         local = info['local_extensions']
         if local:
-            logger.info('   local extensions:')
+            logger.info('\n   local extensions:')
             for name in sorted(local):
                 logger.info('        %s: %s' % (name, local[name]))
 
         linked_packages = info['linked_packages']
         if linked_packages:
-            logger.info('   linked packages:')
+            logger.info('\n   linked packages:')
             for key in sorted(linked_packages):
                 source = linked_packages[key]['source']
                 logger.info('        %s: %s' % (key, source))
