@@ -227,7 +227,7 @@
 }
 
 
-.jp-DirListing-item.jp-mod-running .jp-DirListing-itemIcon {
+.jp-DirListing-item.jp-mod-running .jp-DirListing-itemIcon.jp-NotebookIcon {
   background-image: var(--jp-icon-book-running);
 }
 
