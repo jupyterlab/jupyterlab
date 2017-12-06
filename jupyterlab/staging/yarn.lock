@@ -323,6 +323,25 @@
     "@phosphor/signaling" "^1.2.2"
     "@phosphor/widgets" "^1.5.0"
 
+"@jupyterlab/filebrowser@^0.13.1":
+  version "0.13.1"
+  resolved "https://registry.npmjs.org/@jupyterlab/filebrowser/-/filebrowser-0.13.1.tgz#9f3d03cc799cfc0259ea0abd9e4acbab2eef3cdf"
+  dependencies:
+    "@jupyterlab/apputils" "^0.13.1"
+    "@jupyterlab/coreutils" "^0.13.0"
+    "@jupyterlab/docmanager" "^0.13.0"
+    "@jupyterlab/docregistry" "^0.13.0"
+    "@jupyterlab/services" "^0.52.0"
+    "@phosphor/algorithm" "^1.1.2"
+    "@phosphor/commands" "^1.4.0"
+    "@phosphor/coreutils" "^1.3.0"
+    "@phosphor/disposable" "^1.1.2"
+    "@phosphor/domutils" "^1.1.2"
+    "@phosphor/dragdrop" "^1.3.0"
+    "@phosphor/messaging" "^1.2.2"
+    "@phosphor/signaling" "^1.2.2"
+    "@phosphor/widgets" "^1.5.0"
+
 "@jupyterlab/fileeditor-extension@^0.13.0":
   version "0.13.0"
   resolved "https://registry.npmjs.org/@jupyterlab/fileeditor-extension/-/fileeditor-extension-0.13.0.tgz#735640e80aee508f7286731dec8f0b94fd94474e"
