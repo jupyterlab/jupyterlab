@@ -224,7 +224,8 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
         }
         // Set the Kernel Info cache.
         const name = session.kernel.name;
-        kernelInfoCache.set(name, session.kernel.info);
+        const kernelInfo = session.kernel.info;
+        kernelInfoCache.set(name, kernelInfo);
 
         // Utility function to check if the current widget
         // has registered itself with the help menu.
@@ -264,7 +265,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
               headerLogo,
               h.div({className: 'jp-About-header-info'}, kernelName)
             );
-            const banner = h.pre({}, session.kernel.info.banner);
+            const banner = h.pre({}, kernelInfo.banner);
             let body = h.div({ className: 'jp-About-body' },
               banner
             );
