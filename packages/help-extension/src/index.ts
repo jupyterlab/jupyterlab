@@ -166,6 +166,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   let counter = 0;
   const category = 'Help';
   const namespace = 'help-doc';
+  const baseUrl = PageConfig.getBaseUrl();
   const { commands, shell, info, serviceManager } = app;
   const tracker = new InstanceTracker<HelpWidget>({ namespace });
 
@@ -233,6 +234,40 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
           return result;
         }
 
+        // Add the kernel banner to the Help Menu.
+        const bannerCommand = `help-menu-${name}:banner`;
+        const spec = serviceManager.specs.kernelspecs[name];
+        const kernelName = spec.display_name;
+        let kernelIconUrl = spec.resources['logo-64x64'];
+        if (kernelIconUrl) {
+          let index = kernelIconUrl.indexOf('kernelspecs');
+          kernelIconUrl = baseUrl + kernelIconUrl.slice(index);
+        }
+        commands.addCommand(bannerCommand, {
+          label: `About the ${kernelName} Kernel`,
+          isVisible: usesKernel,
+          isEnabled: usesKernel,
+          execute: () => {
+            // Create the header of the about dialog
+            let headerLogo = h.img({ src: kernelIconUrl});
+            let title = h.span({className: 'jp-About-header'},
+              headerLogo,
+              h.div({className: 'jp-About-header-info'}, kernelName)
+            );
+            const banner = h.pre({}, session.kernel.info.banner);
+            let body = h.div({ className: 'jp-About-body' },
+              banner
+            );
+
+            showDialog({
+              title,
+              body,
+              buttons: [Dialog.createButton({label: 'DISMISS', className: 'jp-About-button jp-mod-reject jp-mod-styled'})]
+            });
+          }
+        });
+        helpMenu.addGroup([{ command: bannerCommand }], 20);
+
         // Add the kernel info help_links to the Help menu.
         const kernelGroup: Menu.IItemOptions[] = [];
         session.kernel.info.help_links.forEach((link) => {
@@ -245,7 +280,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
           });
           kernelGroup.push({ command: commandId });
         });
-        helpMenu.addGroup(kernelGroup, 20);
+        helpMenu.addGroup(kernelGroup, 21);
       });
     });
   });
