@@ -217,6 +217,11 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     }
     serviceManager.sessions.connectTo(sessionModel.id).then((session) => {
       session.kernel.ready.then(() => {
+        // Check the cache second time so that, if two callbacks get scheduled,
+        // they don't try to add the same commands.
+        if (kernelInfoCache.has(sessionModel.kernel.name)) {
+          return;
+        }
         // Set the Kernel Info cache.
         const name = session.kernel.name;
         kernelInfoCache.set(name, session.kernel.info);
