@@ -1429,16 +1429,29 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
     CommandIDs.undoCellAction,
     CommandIDs.redoCellAction
   ].map(command => { return { command }; });
-  const editGroup = [
+
+  const copyGroup = [
     CommandIDs.cut,
     CommandIDs.copy,
     CommandIDs.paste,
-    CommandIDs.deleteCell,
+  ].map(command => { return { command }; });
+
+  const splitMergeGroup = [
     CommandIDs.split,
     CommandIDs.merge
   ].map(command => { return { command }; });
+
+  const moveCellsGroup = [
+    CommandIDs.moveUp,
+    CommandIDs.moveDown
+  ].map(command => { return { command }; });
+
+
   mainMenu.editMenu.addGroup(undoCellActionGroup, 4);
-  mainMenu.editMenu.addGroup(editGroup, 5);
+  mainMenu.editMenu.addGroup(copyGroup, 5);
+  mainMenu.editMenu.addGroup([{ command: CommandIDs.deleteCell }], 6);
+  mainMenu.editMenu.addGroup(moveCellsGroup, 7);
+  mainMenu.editMenu.addGroup(splitMergeGroup, 8);
 
   // Add kernel information to the application help menu.
   mainMenu.helpMenu.kernelUsers.add({
