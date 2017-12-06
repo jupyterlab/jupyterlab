@@ -208,6 +208,9 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     // If a new session has been added, it is at the back
     // of the session list. If one has changed or stopped,
     // it does not hurt to check it.
+    if (!sessions.length) {
+      return;
+    }
     const sessionModel = sessions[sessions.length-1];
     if (kernelInfoCache.has(sessionModel.kernel.name)) {
       return;
