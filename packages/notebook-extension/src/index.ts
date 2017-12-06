@@ -1336,7 +1336,7 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
 
   // Add a notebook group to the File menu.
   let exportTo = new Menu({ commands } );
-  exportTo.title.label = 'Export to ...';
+  exportTo.title.label = 'Export Notebook As…';
   EXPORT_TO_FORMATS.forEach(exportToFormat => {
     exportTo.addItem({ command: CommandIDs.exportToFormat, args: exportToFormat });
   });

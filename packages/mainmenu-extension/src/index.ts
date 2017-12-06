@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Widget
+  Menu, Widget
 } from '@phosphor/widgets';
 
 import {
@@ -186,23 +186,36 @@ function createFileMenu(app: JupyterLab, menu: FileMenu): void {
       Private.delegateExecute(app, menu.closeAndCleaners, 'closeAndCleanup')
   });
 
-  // Add the commands to the File menu.
-  const fileOperationGroup = [
-    'docmanager:save',
-    'docmanager:save-as',
-    'docmanager:rename',
-    'docmanager:restore-checkpoint',
-    'docmanager:clone'
-  ].map(command => { return { command }; });
+  // Add the new group
+  const newGroup = [
+    { type: 'submenu' as Menu.ItemType, submenu: menu.newMenu },
+    { command: 'docmanager:clone' }
+  ];
 
+  // Add the close group
   const closeGroup = [
     'docmanager:close',
     'filemenu:close-and-cleanup',
     'docmanager:close-all-files'
   ].map(command => { return { command }; });
 
-  menu.addGroup(fileOperationGroup, 1);
-  menu.addGroup(closeGroup, 2);
+  // Add save group.
+  const saveGroup = [
+    'docmanager:save',
+    'docmanager:save-as'
+  ].map(command => { return { command }; });
+
+  // Add the re group.
+  const reGroup = [
+    'docmanager:restore-checkpoint',
+    'docmanager:rename'
+  ].map(command => { return { command }; });
+
+  menu.addGroup(newGroup, 0);
+  menu.addGroup(closeGroup, 1);
+  menu.addGroup(saveGroup, 2);
+  menu.addGroup(reGroup, 3);
+  menu.addGroup([{ command: 'docmanager:delete-file' }], 4);
   menu.addGroup([{ command: 'settingeditor:open' }], 1000);
 }
 

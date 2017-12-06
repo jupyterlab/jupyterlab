@@ -168,6 +168,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   commands.addCommand(CommandIDs.deleteFile, {
+    label: () => `Delete ${fileName()}`,
     execute: args => {
       const path = typeof args['path'] === 'undefined' ? ''
         : args['path'] as string;
@@ -215,7 +216,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   commands.addCommand(CommandIDs.restoreCheckpoint, {
-    label: () => `Revert ${fileName()} to Checkpoint`,
+    label: () => `Revert ${fileName()} to Saved`,
     caption: 'Revert contents to previous checkpoint',
     isEnabled,
     execute: () => {
@@ -261,7 +262,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   commands.addCommand(CommandIDs.rename, {
-    label: () => `Rename ${fileName()}`,
+    label: () => `Rename ${fileName()}…`,
     isEnabled,
     execute: () => {
       if (isEnabled()) {
