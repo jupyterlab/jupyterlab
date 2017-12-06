@@ -28,7 +28,7 @@
     "@jupyterlab/csvviewer": "^0.13.0",
     "@jupyterlab/docmanager": "^0.13.0",
     "@jupyterlab/docregistry": "^0.13.0",
-    "@jupyterlab/filebrowser": "^0.13.1",
+    "@jupyterlab/filebrowser": "^0.13.2",
     "@jupyterlab/fileeditor": "^0.13.0",
     "@jupyterlab/imageviewer": "^0.13.0",
     "@jupyterlab/inspector": "^0.13.0",

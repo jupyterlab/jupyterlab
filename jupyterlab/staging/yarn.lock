@@ -323,9 +323,9 @@
     "@phosphor/signaling" "^1.2.2"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/filebrowser@^0.13.1":
-  version "0.13.1"
-  resolved "https://registry.npmjs.org/@jupyterlab/filebrowser/-/filebrowser-0.13.1.tgz#9f3d03cc799cfc0259ea0abd9e4acbab2eef3cdf"
+"@jupyterlab/filebrowser@^0.13.2":
+  version "0.13.2"
+  resolved "https://registry.npmjs.org/@jupyterlab/filebrowser/-/filebrowser-0.13.2.tgz#77e883314feefb327aa2c51386c29022bf8fbd4c"
   dependencies:
     "@jupyterlab/apputils" "^0.13.1"
     "@jupyterlab/coreutils" "^0.13.0"
