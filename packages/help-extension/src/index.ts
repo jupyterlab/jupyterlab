@@ -230,7 +230,9 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
             return result;
           }
           helpMenu.kernelUsers.forEach(u => {
-            if (u.tracker.has(widget) && u.getKernel(widget).name === name) {
+            if (u.tracker.has(widget) &&
+                u.getKernel(widget) &&
+                u.getKernel(widget).name === name) {
               result = true;
             }
           });
