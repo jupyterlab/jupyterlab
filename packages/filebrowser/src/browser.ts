@@ -270,7 +270,11 @@ class FileBrowser extends Widget {
       return;
     }
     this._showingError = true;
-    showErrorMessage('Server Connection Error', args).then(() => {
+    let title = 'Server Connection Error';
+    if (args.message.indexOf('Directory not found') === 0) {
+      title = 'Directory not found';
+    }
+    showErrorMessage(title, args).then(() => {
       this._showingError = false;
     });
   }
