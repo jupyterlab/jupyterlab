@@ -304,26 +304,7 @@
     "@phosphor/commands" "^1.4.0"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/filebrowser@^0.13.0":
-  version "0.13.0"
-  resolved "https://registry.npmjs.org/@jupyterlab/filebrowser/-/filebrowser-0.13.0.tgz#a36ded6e864032b1336a15d2e87e1d0517e44a2d"
-  dependencies:
-    "@jupyterlab/apputils" "^0.13.0"
-    "@jupyterlab/coreutils" "^0.13.0"
-    "@jupyterlab/docmanager" "^0.13.0"
-    "@jupyterlab/docregistry" "^0.13.0"
-    "@jupyterlab/services" "^0.52.0"
-    "@phosphor/algorithm" "^1.1.2"
-    "@phosphor/commands" "^1.4.0"
-    "@phosphor/coreutils" "^1.3.0"
-    "@phosphor/disposable" "^1.1.2"
-    "@phosphor/domutils" "^1.1.2"
-    "@phosphor/dragdrop" "^1.3.0"
-    "@phosphor/messaging" "^1.2.2"
-    "@phosphor/signaling" "^1.2.2"
-    "@phosphor/widgets" "^1.5.0"
-
-"@jupyterlab/filebrowser@^0.13.2":
+"@jupyterlab/filebrowser@^0.13.0", "@jupyterlab/filebrowser@^0.13.2":
   version "0.13.2"
   resolved "https://registry.npmjs.org/@jupyterlab/filebrowser/-/filebrowser-0.13.2.tgz#77e883314feefb327aa2c51386c29022bf8fbd4c"
   dependencies:
@@ -1266,8 +1247,8 @@ caniuse-api@^1.5.2:
     lodash.uniq "^4.5.0"
 
 caniuse-db@^1.0.30000529, caniuse-db@^1.0.30000634, caniuse-db@^1.0.30000639:
-  version "1.0.30000778"
-  resolved "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000778.tgz#167c60e9542a2aa60537c446fb3881d853a3072a"
+  version "1.0.30000780"
+  resolved "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000780.tgz#8d1977561d00ff0f0ed2b6b66140328ab4504c0a"
 
 canvas@^1.2.9, canvas@^1.3.4:
   version "1.6.7"
@@ -1822,8 +1803,8 @@ ecc-jsbn@~0.1.1:
     jsbn "~0.1.0"
 
 electron-to-chromium@^1.2.7:
-  version "1.3.27"
-  resolved "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.3.27.tgz#78ecb8a399066187bb374eede35d9c70565a803d"
+  version "1.3.28"
+  resolved "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.3.28.tgz#8dd4e6458086644e9f9f0a1cf32e2a1f9dffd9ee"
 
 elliptic@^6.0.0:
   version "6.4.0"
@@ -2085,8 +2066,8 @@ form-data@~2.3.1:
     mime-types "^2.1.12"
 
 fs-extra@~4.0.2:
-  version "4.0.2"
-  resolved "https://registry.npmjs.org/fs-extra/-/fs-extra-4.0.2.tgz#f91704c53d1b461f893452b0c307d9997647ab6b"
+  version "4.0.3"
+  resolved "https://registry.npmjs.org/fs-extra/-/fs-extra-4.0.3.tgz#0d852122e5bc5beb453fb028e9c0c9bf36340c94"
   dependencies:
     graceful-fs "^4.1.2"
     jsonfile "^4.0.0"
