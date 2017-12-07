@@ -400,7 +400,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
   palette.addItem({ command, category });
 
   // Add a console creator to the File menu
-  mainMenu.fileMenu.newMenu.addItem({ command: CommandIDs.create });
+  mainMenu.fileMenu.newMenu.addGroup([{ command: CommandIDs.create }], 0);
 
   // Add a close and shutdown command to the file menu.
   mainMenu.fileMenu.closeAndCleaners.add({

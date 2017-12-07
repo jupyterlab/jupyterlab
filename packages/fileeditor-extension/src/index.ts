@@ -396,7 +396,7 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
 
   if (menu) {
     // Add new text file creation to the file menu.
-    menu.fileMenu.newMenu.addItem({ command: CommandIDs.createNew });
+    menu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 30);
 
     // Add undo/redo hooks to the edit menu.
     menu.editMenu.undoers.add({

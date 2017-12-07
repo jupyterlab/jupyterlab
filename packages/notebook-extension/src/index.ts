@@ -1300,7 +1300,7 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   } as IEditMenu.IClearer<NotebookPanel>);
 
   // Add new notebook creation to the file menu.
-  mainMenu.fileMenu.newMenu.addItem({ command: CommandIDs.createNew });
+  mainMenu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 10);
 
   // Add a close and shutdown command to the file menu.
   mainMenu.fileMenu.closeAndCleaners.add({
