@@ -125,6 +125,11 @@ namespace IRenderMime {
     readonly extensions: ReadonlyArray<string>;
 
     /**
+     * An optional display name for the file type.
+     */
+    readonly displayName?: string;
+
+    /**
      * An optional pattern for a file name (e.g. `^Dockerfile$`).
      */
     readonly pattern?: string;
