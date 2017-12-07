@@ -269,12 +269,12 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
   const kernelUserGroup = [
     CommandIDs.interruptKernel,
     CommandIDs.restartKernel,
-    CommandIDs.changeKernel,
-    CommandIDs.shutdownKernel
+    CommandIDs.shutdownKernel,
   ].map(command => { return { command }; });
   menu.addGroup(kernelUserGroup, 0);
 
-  menu.addGroup([{ command: CommandIDs.createConsole }], 1);
+  menu.addGroup([{ command: CommandIDs.changeKernel }], 1);
+  menu.addGroup([{ command: CommandIDs.createConsole }], 2);
 }
 
 /**
