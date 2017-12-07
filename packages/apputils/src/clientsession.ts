@@ -635,7 +635,6 @@ class ClientSession implements IClientSession {
    * Handle a new session object.
    */
   private _handleNewSession(session: Session.ISession): Kernel.IKernelConnection {
-    debugger;
     if (this.isDisposed) {
       throw Error('Disposed');
     }
