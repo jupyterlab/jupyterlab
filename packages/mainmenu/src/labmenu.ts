@@ -57,9 +57,15 @@ export
 class JupyterLabMenu implements IJupyterLabMenu {
   /**
    * Construct a new menu.
+   *
+   * @param options - Options for the phosphor menu.
+   *
+   * @param includeSeparators - whether to include separators between the
+   *   groups that are added to the menu.
    */
-  constructor(options: Menu.IOptions) {
+  constructor(options: Menu.IOptions, includeSeparators: boolean = true) {
     this.menu = new Menu(options);
+    this._includeSeparators = includeSeparators;
   }
 
   /**
@@ -76,22 +82,27 @@ class JupyterLabMenu implements IJupyterLabMenu {
     let insertIndex = 0;
     for (let i = 0; i < groupIndex; ++i) {
       if (this._groups.length > 0) {
+        insertIndex += this._groups[i].items.length;
         // Increase the insert index by two extra in order
         // to include the leading and trailing separators.
-        insertIndex += this._groups[i].items.length + 2;
+        insertIndex += this._includeSeparators ? 2 : 0;
       }
     }
 
     // Insert a separator before the group.
     // Phosphor takes care of superfluous leading,
     // trailing, and duplicate separators.
-    this.menu.insertItem(insertIndex++, { type: 'separator' });
+    if (this._includeSeparators) {
+      this.menu.insertItem(insertIndex++, { type: 'separator' });
+    }
     // Insert the group.
     for (let item of items) {
       this.menu.insertItem(insertIndex++, item);
     }
     // Insert a separator after the group.
-    this.menu.insertItem(insertIndex++, { type: 'separator' });
+    if (this._includeSeparators) {
+      this.menu.insertItem(insertIndex++, { type: 'separator' });
+    }
 
     ArrayExt.insert(this._groups, groupIndex, rankGroup);
   }
@@ -119,6 +130,7 @@ class JupyterLabMenu implements IJupyterLabMenu {
 
   private _groups: Private.IRankGroup[] = [];
   private _isDisposed = false;
+  private _includeSeparators: boolean;
 }
 
 

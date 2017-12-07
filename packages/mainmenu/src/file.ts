@@ -17,7 +17,7 @@ interface IFileMenu extends IJupyterLabMenu {
   /**
    * A submenu for creating new files/launching new activities.
    */
-  readonly newMenu: Menu;
+  readonly newMenu: IJupyterLabMenu;
 
   /**
    * The close and cleanup extension point.
@@ -36,9 +36,8 @@ class FileMenu extends JupyterLabMenu implements IFileMenu {
     this.menu.title.label = 'File';
 
     // Create the "New" submenu.
-    this.newMenu = new Menu(options);
-    this.newMenu.title.label = 'New';
-
+    this.newMenu = new JupyterLabMenu(options, false);
+    this.newMenu.menu.title.label = 'New';
     this.closeAndCleaners =
       new Set<IFileMenu.ICloseAndCleaner<Widget>>();
   }
@@ -46,7 +45,7 @@ class FileMenu extends JupyterLabMenu implements IFileMenu {
   /**
    * The New submenu.
    */
-  readonly newMenu: Menu;
+  readonly newMenu: JupyterLabMenu;
 
   /**
    * The close and cleanup extension point.
