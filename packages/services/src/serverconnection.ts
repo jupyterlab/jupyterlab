@@ -124,6 +124,9 @@ namespace ServerConnection {
    * @throws If the url of the request is not a notebook server url.
    *
    * #### Notes
+   * The `url` must start with `settings.baseUrl`.  The `init` settings are
+   * merged with `settings.init`, with `init` taking precedence.
+   * The headers in the two objects are not merged.
    * If there is no body data, we set the content type to `application/json`
    * because it is required by the Notebook server.
    */
@@ -202,6 +205,16 @@ namespace Private {
 
   /**
    * Handle a request.
+   *
+   * @param url - The url for the request.
+   *
+   * @param init - The overrides for the request init.
+   *
+   * @param settings - The settings object for the request.
+   *
+   * #### Notes
+   * The `url` must start with `settings.baseUrl`.  The `init` settings
+   * take precedence over `settings.init`.
    */
   export
   function handleRequest(url: string, init: RequestInit, settings: ServerConnection.ISettings): Promise<Response> {
@@ -211,8 +224,7 @@ namespace Private {
       throw new Error('Can only be used for notebook server requests');
     }
 
-    let request = new settings.Request(url, init);
-    request = new settings.Request(request, settings.init);
+    let request = new settings.Request(url, { ...settings.init, ...init });
 
     // Handle authentication.
     let authenticated = false;
