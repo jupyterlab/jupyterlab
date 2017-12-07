@@ -40,7 +40,7 @@ For a good overview of JupyterLab, please see [this link](https://channel9.msdn.
 If you use ``conda``, you can install as:
 
 ```bash
-conda install -c conda-forge jupyterlab
+conda install jupyterlab
 ```
 
 If you use ``pip``, you can install it as:
