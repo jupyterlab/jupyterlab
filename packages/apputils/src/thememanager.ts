@@ -60,6 +60,8 @@ class ThemeManager {
       this._settings.changed.connect(this._onSettingsChanged, this);
 
       return this._handleSettings();
+    }).catch(reason => {
+      throw `Theme manager is ready but failed at runtime: ${reason}`;
     });
   }
 
@@ -166,9 +168,9 @@ class ThemeManager {
 
       theme = settings.default('theme') as string;
       if (!this._themes[theme]) {
-        return Promise.reject('No default theme to load');
+        return Promise.reject(`Default theme "${theme}" did not load.`);
       }
-      console.warn(`Could not find theme "${old}", loading default "${theme}"`);
+      console.warn(`Could not load theme "${old}", using default "${theme}".`);
     }
     this._pendingTheme = theme;
 
