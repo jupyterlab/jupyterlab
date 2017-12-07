@@ -8,8 +8,8 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, IThemeManager, ThemeManager,
-  ISplashScreen
+  Dialog, ICommandPalette, IThemeManager, ThemeManager, ISplashScreen,
+  showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -139,9 +139,17 @@ const themes: JupyterLabPlugin<IThemeManager> = {
       host, settingRegistry, when
     });
     const disposable = splash.show();
-    const dispose = () => { disposable.dispose(); };
+    const success = () => { disposable.dispose(); };
+    const failure = (reason: string) => {
+      disposable.dispose();
+      showDialog({
+        title: 'Error Loading Theme',
+        body: reason,
+        buttons: [Dialog.okButton({ label: 'OK' })]
+      });
+    };
 
-    manager.ready.then(dispose, dispose);
+    manager.ready.then(success).catch(failure);
 
     return manager;
   },
