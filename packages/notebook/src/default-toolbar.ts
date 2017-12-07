@@ -125,7 +125,7 @@ namespace ToolbarItems {
       onClick: () => {
         NotebookActions.cut(panel.notebook);
       },
-      tooltip: 'Cut the selected cell(s)'
+      tooltip: 'Cut the selected cells'
     });
   }
 
@@ -139,7 +139,7 @@ namespace ToolbarItems {
       onClick: () => {
         NotebookActions.copy(panel.notebook);
       },
-      tooltip: 'Copy the selected cell(s)'
+      tooltip: 'Copy the selected cells'
     });
   }
 
@@ -153,7 +153,7 @@ namespace ToolbarItems {
       onClick: () => {
         NotebookActions.paste(panel.notebook);
       },
-      tooltip: 'Paste cell(s) from the clipboard'
+      tooltip: 'Paste cells from the clipboard'
     });
   }
 
@@ -167,7 +167,7 @@ namespace ToolbarItems {
       onClick: () => {
         NotebookActions.runAndAdvance(panel.notebook, panel.session);
       },
-      tooltip: 'Run the selected cell(s) and advance'
+      tooltip: 'Run the selected cells and advance'
     });
   }
 

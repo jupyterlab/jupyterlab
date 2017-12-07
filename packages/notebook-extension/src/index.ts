@@ -544,7 +544,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   }
 
   commands.addCommand(CommandIDs.runAndAdvance, {
-    label: 'Run Cell(s) and Select Below',
+    label: 'Run Cells and Select Below',
     execute: args => {
       const current = getCurrent(args);
 
@@ -557,7 +557,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.run, {
-    label: 'Run Cell(s)',
+    label: 'Run Cells',
     execute: args => {
       const current = getCurrent(args);
 
@@ -570,7 +570,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.runAndInsert, {
-    label: 'Run Cell(s) and Insert Below',
+    label: 'Run Cells and Insert Below',
     execute: args => {
       const current = getCurrent(args);
 
@@ -717,7 +717,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.clearOutputs, {
-    label: 'Clear Output(s)',
+    label: 'Clear Outputs',
     execute: args => {
       const current = getCurrent(args);
 
@@ -778,7 +778,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.cut, {
-    label: 'Cut Cell(s)',
+    label: 'Cut Cells',
     execute: args => {
       const current = getCurrent(args);
 
@@ -789,7 +789,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.copy, {
-    label: 'Copy Cell(s)',
+    label: 'Copy Cells',
     execute: args => {
       const current = getCurrent(args);
 
@@ -800,7 +800,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.paste, {
-    label: 'Paste Cell(s) Below',
+    label: 'Paste Cells Below',
     execute: args => {
       const current = getCurrent(args);
 
@@ -811,7 +811,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.deleteCell, {
-    label: 'Delete Cell(s)',
+    label: 'Delete Cells',
     execute: args => {
       const current = getCurrent(args);
 
@@ -833,7 +833,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.merge, {
-    label: 'Merge Selected Cell(s)',
+    label: 'Merge Selected Cells',
     execute: args => {
       const current = getCurrent(args);
 
@@ -910,7 +910,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.moveUp, {
-    label: 'Move Cell(s) Up',
+    label: 'Move Cells Up',
     execute: args => {
       const current = getCurrent(args);
 
@@ -921,7 +921,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.moveDown, {
-    label: 'Move Cell(s) Down',
+    label: 'Move Cells Down',
     execute: args => {
       const current = getCurrent(args);
 
