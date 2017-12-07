@@ -1064,17 +1064,23 @@ def _validate_extension(data):
 
     files = data['jupyterlab_extracted_files']
     main = data.get('main', 'index.js')
+    if not main.endswith('.js'):
+        main += '.js'
 
     if extension is True:
-        if main not in files:
-            messages.append('Missing extension module "%s"' % main)
-    elif extension and extension not in files:
-        messages.append('Missing extension module "%s"' % extension)
+        extension = main
+    elif extension and not extension.endswith('.js'):
+        extension += '.js'
 
     if mime_extension is True:
-        if main not in files:
-            messages.append('Missing mimeExtension module "%s"' % main)
-    elif mime_extension and mime_extension not in files:
+        mime_extension = main
+    elif mime_extension and not mime_extension.endswith('.js'):
+        mime_extension += '.js'
+
+    if extension and extension not in files:
+        messages.append('Missing extension module "%s"' % extension)
+
+    if mime_extension and mime_extension not in files:
         messages.append('Missing mimeExtension module "%s"' % mime_extension)
 
     if themeDir and not any(f.startswith(themeDir) for f in files):
