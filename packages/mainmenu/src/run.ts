@@ -74,12 +74,6 @@ namespace IRunMenu {
     noun: string;
 
     /**
-     * A string label for the plural of things that are being run,
-     * to be used where appropriate in menu labels.
-     */
-    pluralNoun: string;
-
-    /**
      * A function to run a chunk of code.
      */
     run?: (widget: T) => Promise<void>;
@@ -88,6 +82,16 @@ namespace IRunMenu {
      * A function to run the entirety of the code hosted by the widget.
      */
     runAll?: (widget: T) => Promise<void>;
+
+    /**
+     * A function to run and advance code hosted by the widget.
+     */
+    runAndAdvance?: (widget: T) => Promise<void>;
+
+    /**
+     * A function to run and insert code hosted by the widget.
+     */
+    runAndInsert?: (widget: T) => Promise<void>;
 
     /**
      * A function to run all code above the currently selected

@@ -1130,7 +1130,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.hideCode, {
-    label: 'Hide Code',
+    label: 'Hide Selected Code Cells in Notebook',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1141,7 +1141,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.showCode, {
-    label: 'Show Code',
+    label: 'Show Selected Code Cells in Notebook',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1152,7 +1152,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.hideAllCode, {
-    label: 'Hide All Code',
+    label: 'Hide All Code Cells in Notebook',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1163,7 +1163,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.showAllCode, {
-    label: 'Show All Code',
+    label: 'Show All Code Cells in Notebook',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1174,7 +1174,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.hideOutput, {
-    label: 'Hide Output',
+    label: 'Hide Selected Outputs in Notebook',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1185,7 +1185,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.showOutput, {
-    label: 'Show Output',
+    label: 'Show Selected Outputs in Notebook',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1196,7 +1196,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.hideAllOutputs, {
-    label: 'Hide All Outputs',
+    label: 'Hide All Outputs in Notebook',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1207,7 +1207,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.showAllOutputs, {
-    label: 'Show All Outputs',
+    label: 'Show All Outputs in Notebook',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1374,13 +1374,21 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   } as IKernelMenu.IConsoleCreator<NotebookPanel>);
 
   // Add some commands to the application view menu.
-  const viewGroup = [
+  const codeCellViewGroup = [
+    CommandIDs.hideCode,
     CommandIDs.hideAllCode,
-    CommandIDs.showAllCode,
+    CommandIDs.showCode,
+    CommandIDs.showAllCode
+  ].map(command => { return { command }; });
+  mainMenu.viewMenu.addGroup(codeCellViewGroup, 10);
+
+  const outputViewGroup = [
+    CommandIDs.hideOutput,
     CommandIDs.hideAllOutputs,
+    CommandIDs.showOutput,
     CommandIDs.showAllOutputs
   ].map(command => { return { command }; });
-  mainMenu.viewMenu.addGroup(viewGroup, 10);
+  mainMenu.viewMenu.addGroup(outputViewGroup, 11);
 
   // Add an IEditorViewer to the application view menu
   mainMenu.viewMenu.editorViewers.add({
@@ -1400,8 +1408,7 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   // Add an ICodeRunner to the application run menu
   mainMenu.runMenu.codeRunners.add({
     tracker,
-    noun: 'Cell(s)',
-    pluralNoun: 'Cells',
+    noun: 'Cells',
     run: current => {
       const { context, notebook } = current;
       return NotebookActions.runAndAdvance(notebook, context.session)

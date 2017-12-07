@@ -69,6 +69,12 @@ namespace CommandIDs {
   const runAll = 'runmenu:run-all';
 
   export
+  const runAndAdvance = 'runmenu:run-and-advance';
+
+  export
+  const runAndInsert = 'runmenu:run-and-insert';
+
+  export
   const runAbove = 'runmenu:run-above';
 
   export
@@ -309,7 +315,7 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
   menu.addGroup([
     { command: 'application:activate-next-tab' },
     { command: 'application:activate-previous-tab' }
-  ], 0);
+  ], 999);
 
   // Add the command for toggling single-document mode.
   menu.addGroup([ { command: 'application:toggle-mode' }], 1000);
@@ -321,7 +327,7 @@ function createRunMenu(app: JupyterLab, menu: RunMenu): void {
   commands.addCommand(CommandIDs.run, {
     label: () => {
       const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
-      return `Run${noun ? ` ${noun}` : ''}`;
+      return `Run Selected${noun ? ` ${noun}` : ''}`;
     },
     isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'run'),
     execute: Private.delegateExecute(app, menu.codeRunners, 'run')
@@ -329,11 +335,29 @@ function createRunMenu(app: JupyterLab, menu: RunMenu): void {
 
   commands.addCommand(CommandIDs.runAll, {
     label: () => {
-      const noun = Private.delegateLabel(app, menu.codeRunners, 'pluralNoun');
+      const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
       return `Run All${noun ? ` ${noun}` : ''}`;
     },
     isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'runAll'),
     execute: Private.delegateExecute(app, menu.codeRunners, 'runAll')
+  });
+
+  commands.addCommand(CommandIDs.runAndAdvance, {
+    label: () => {
+      const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
+      return `Run Selected${noun ? ` ${noun}` : ''} and Select Below`;
+    },
+    isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'runAndAdvance'),
+    execute: Private.delegateExecute(app, menu.codeRunners, 'runAndAdvance')
+  });
+
+  commands.addCommand(CommandIDs.runAndInsert, {
+    label: () => {
+      const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
+      return `Run Selected${noun ? ` ${noun}` : ''} and Insert Below`;
+    },
+    isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'runAndInsert'),
+    execute: Private.delegateExecute(app, menu.codeRunners, 'runAndInsert')
   });
 
   commands.addCommand(CommandIDs.runAbove, {
@@ -354,13 +378,18 @@ function createRunMenu(app: JupyterLab, menu: RunMenu): void {
     execute: Private.delegateExecute(app, menu.codeRunners, 'runBelow')
   });
 
-  const codeRunnerGroup = [
+  const runGroup = [
     CommandIDs.run,
-    CommandIDs.runAll,
+    CommandIDs.runAndAdvance,
+    CommandIDs.runAndInsert,
+  ].map(command => { return { command }; });
+  const runAllGroup = [
     CommandIDs.runAbove,
     CommandIDs.runBelow,
+    CommandIDs.runAll
   ].map(command => { return { command }; });
-  menu.addGroup(codeRunnerGroup, 0);
+  menu.addGroup(runGroup, 0);
+  menu.addGroup(runAllGroup, 1);
 }
 export default menuPlugin;
 
