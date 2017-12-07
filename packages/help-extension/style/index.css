@@ -107,6 +107,9 @@
   align-items: center;
 }
 
+.jp-About-body pre {
+  white-space: pre-wrap;
+}
 
 .jp-About-header-info {
   display: flex;

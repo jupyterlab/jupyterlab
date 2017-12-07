@@ -166,6 +166,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   let counter = 0;
   const category = 'Help';
   const namespace = 'help-doc';
+  const baseUrl = PageConfig.getBaseUrl();
   const { commands, shell, info, serviceManager } = app;
   const tracker = new InstanceTracker<HelpWidget>({ namespace });
 
@@ -207,15 +208,24 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     // If a new session has been added, it is at the back
     // of the session list. If one has changed or stopped,
     // it does not hurt to check it.
+    if (!sessions.length) {
+      return;
+    }
     const sessionModel = sessions[sessions.length-1];
     if (kernelInfoCache.has(sessionModel.kernel.name)) {
       return;
     }
     serviceManager.sessions.connectTo(sessionModel.id).then((session) => {
       session.kernel.ready.then(() => {
+        // Check the cache second time so that, if two callbacks get scheduled,
+        // they don't try to add the same commands.
+        if (kernelInfoCache.has(sessionModel.kernel.name)) {
+          return;
+        }
         // Set the Kernel Info cache.
         const name = session.kernel.name;
-        kernelInfoCache.set(name, session.kernel.info);
+        const kernelInfo = session.kernel.info;
+        kernelInfoCache.set(name, kernelInfo);
 
         // Utility function to check if the current widget
         // has registered itself with the help menu.
@@ -226,12 +236,48 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
             return result;
           }
           helpMenu.kernelUsers.forEach(u => {
-            if (u.tracker.has(widget) && u.getKernel(widget).name === name) {
+            if (u.tracker.has(widget) &&
+                u.getKernel(widget) &&
+                u.getKernel(widget).name === name) {
               result = true;
             }
           });
           return result;
         }
+
+        // Add the kernel banner to the Help Menu.
+        const bannerCommand = `help-menu-${name}:banner`;
+        const spec = serviceManager.specs.kernelspecs[name];
+        const kernelName = spec.display_name;
+        let kernelIconUrl = spec.resources['logo-64x64'];
+        if (kernelIconUrl) {
+          let index = kernelIconUrl.indexOf('kernelspecs');
+          kernelIconUrl = baseUrl + kernelIconUrl.slice(index);
+        }
+        commands.addCommand(bannerCommand, {
+          label: `About the ${kernelName} Kernel`,
+          isVisible: usesKernel,
+          isEnabled: usesKernel,
+          execute: () => {
+            // Create the header of the about dialog
+            let headerLogo = h.img({ src: kernelIconUrl});
+            let title = h.span({className: 'jp-About-header'},
+              headerLogo,
+              h.div({className: 'jp-About-header-info'}, kernelName)
+            );
+            const banner = h.pre({}, kernelInfo.banner);
+            let body = h.div({ className: 'jp-About-body' },
+              banner
+            );
+
+            showDialog({
+              title,
+              body,
+              buttons: [Dialog.createButton({label: 'DISMISS', className: 'jp-About-button jp-mod-reject jp-mod-styled'})]
+            });
+          }
+        });
+        helpMenu.addGroup([{ command: bannerCommand }], 20);
 
         // Add the kernel info help_links to the Help menu.
         const kernelGroup: Menu.IItemOptions[] = [];
@@ -245,7 +291,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
           });
           kernelGroup.push({ command: commandId });
         });
-        helpMenu.addGroup(kernelGroup, 20);
+        helpMenu.addGroup(kernelGroup, 21);
       });
     });
   });

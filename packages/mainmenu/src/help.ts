@@ -62,6 +62,6 @@ namespace IHelpMenu {
     /**
      * A function to get the kernel for a widget.
      */
-    getKernel: (widget: T) => Kernel.IKernelConnection;
+    getKernel: (widget: T) => Kernel.IKernelConnection | null;
   }
 }
