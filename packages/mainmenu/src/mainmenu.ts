@@ -131,9 +131,9 @@ class MainMenu extends MenuBar implements IMainMenu {
 
     this.addMenu(this.fileMenu.menu, { rank: 0 });
     this.addMenu(this.editMenu.menu, { rank: 1 });
+    this.addMenu(this.viewMenu.menu, { rank: 2 });
     this.addMenu(this.runMenu.menu, { rank: 2 });
     this.addMenu(this.kernelMenu.menu, { rank: 3 });
-    this.addMenu(this.viewMenu.menu, { rank: 4 });
     this.addMenu(this.helpMenu.menu, { rank: 1000 });
   }
 
