@@ -428,6 +428,7 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
     // Add a console creator the the Kernel menu.
     menu.kernelMenu.consoleCreators.add({
       tracker,
+      name: 'Editor',
       createConsole: current => {
         const options = {
           path: current.context.path,
@@ -441,7 +442,6 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
     menu.runMenu.codeRunners.add({
       tracker,
       noun: 'Code',
-      pluralNoun: 'Code',
       run: () => commands.execute(CommandIDs.runCode)
     });
   }

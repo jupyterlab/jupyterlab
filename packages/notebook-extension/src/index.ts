@@ -543,18 +543,6 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
            tracker.currentWidget === app.shell.currentWidget;
   }
 
-  /**
-   * The name of the current notebook widget.
-   */
-  function currentName(): string {
-    if (tracker.currentWidget  &&
-        tracker.currentWidget === app.shell.currentWidget &&
-        tracker.currentWidget.title.label) {
-      return `"${tracker.currentWidget.title.label}"`;
-    }
-    return 'Notebook';
-  }
-
   commands.addCommand(CommandIDs.runAndAdvance, {
     label: 'Run Cell(s) and Select Below',
     execute: args => {
@@ -643,7 +631,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.trust, {
-    label: () => `Trust ${currentName()}`,
+    label: () => 'Trust Notebook',
     execute: args => {
       const current = getCurrent(args);
 
@@ -658,9 +646,8 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.exportToFormat, {
     label: args => {
         const formatLabel = (args['label']) as string;
-        const name = currentName();
 
-        return (args['isPalette'] ? `Export ${name} to ` : '') + formatLabel;
+        return (args['isPalette'] ? 'Export Notebook to ' : '') + formatLabel;
     },
     execute: args => {
       const current = getCurrent(args);
@@ -1319,6 +1306,7 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   mainMenu.fileMenu.closeAndCleaners.add({
     tracker,
     action: 'Shutdown',
+    name: 'Notebook',
     closeAndCleanup: (current: NotebookPanel) => {
       const fileName = current.title.label;
       return showDialog({
@@ -1364,6 +1352,7 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   // Add a console creator the the Kernel menu
   mainMenu.kernelMenu.consoleCreators.add({
     tracker,
+    name: 'Notebook',
     createConsole: current => {
       const options: ReadonlyJSONObject = {
         path: current.context.path,

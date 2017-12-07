@@ -105,6 +105,11 @@ namespace IKernelMenu {
   export
   interface IConsoleCreator<T extends Widget> extends IMenuExtender<T> {
     /**
+     * A label to use for the activity for which a console is being created.
+     */
+    name: string;
+
+    /**
      * The function to create the console.
      */
     createConsole: (widget: T) => Promise<void>;

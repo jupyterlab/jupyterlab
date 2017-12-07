@@ -75,6 +75,11 @@ namespace IFileMenu {
   export
   interface ICloseAndCleaner<T extends Widget> extends IMenuExtender<T> {
     /**
+     * A label to use for the activity that is being cleaned up.
+     */
+    name: string;
+
+    /**
      * A label to use for the cleanup action.
      */
     action: string;

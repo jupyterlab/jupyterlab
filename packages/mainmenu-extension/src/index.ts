@@ -180,11 +180,11 @@ function createFileMenu(app: JupyterLab, menu: FileMenu): void {
   // Add a delegator command for closing and cleaning up an activity.
   commands.addCommand(CommandIDs.closeAndCleanup, {
     label: () => {
-      const widget = app.shell.currentWidget;
-      const name = widget ? widget.title.label : '...';
       const action =
         Private.delegateLabel(app, menu.closeAndCleaners, 'action');
-      return `Close and ${action ? ` ${action} "${name}"` : 'Shutdown…'}`;
+      const name =
+        Private.delegateLabel(app, menu.closeAndCleaners, 'name');
+      return `Close and ${action ? ` ${action} ${name}` : 'Shutdown…'}`;
     },
     isEnabled:
       Private.delegateEnabled(app, menu.closeAndCleaners, 'closeAndCleanup'),
@@ -257,9 +257,8 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
 
   commands.addCommand(CommandIDs.createConsole, {
     label: () => {
-      const widget = app.shell.currentWidget;
-      const name = widget ? widget.title.label : '';
-      const label = `Create Console for ${name ? `"${name}"` : '…' }`;
+      const name = Private.delegateLabel(app, menu.consoleCreators, 'name');
+      const label = `Create Console for ${name ? name : '…' }`;
       return label;
     },
     isEnabled: Private.delegateEnabled(app, menu.consoleCreators, 'createConsole'),

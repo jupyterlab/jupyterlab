@@ -406,6 +406,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
   mainMenu.fileMenu.closeAndCleaners.add({
     tracker,
     action: 'Shutdown',
+    name: 'Console',
     closeAndCleanup: (current: ConsolePanel) => {
       return showDialog({
         title: 'Shutdown the console?',
