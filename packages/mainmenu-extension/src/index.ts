@@ -195,6 +195,7 @@ function createFileMenu(app: JupyterLab, menu: FileMenu): void {
   // Add the new group
   const newGroup = [
     { type: 'submenu' as Menu.ItemType, submenu: menu.newMenu },
+    { command: 'filebrowser:create-main-launcher' },
     { command: 'docmanager:clone' }
   ];
 
