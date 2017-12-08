@@ -647,6 +647,34 @@ namespace NotebookActions {
   }
 
   /**
+   * Select all of the cells of the notebook.
+   *
+   * @param widget - the targe notebook widget.
+   */
+  export
+  function selectAll(widget: Notebook): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    each(widget.widgets, child => {
+      widget.select(child);
+    });
+  }
+
+  /**
+   * Deselect all of the cells of the notebook.
+   *
+   * @param widget - the targe notebook widget.
+   */
+  export
+  function deselectAll(widget: Notebook): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    widget.deselectAll();
+  }
+
+  /**
    * Copy the selected cell data to a clipboard.
    *
    * @param widget - The target notebook widget.

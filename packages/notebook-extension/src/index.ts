@@ -160,6 +160,12 @@ namespace CommandIDs {
   const extendBelow = 'notebook:extend-marked-cells-below';
 
   export
+  const selectAll = 'notebook:select-all';
+
+  export
+  const deselectAll = 'notebook:deselect-all';
+
+  export
   const editMode = 'notebook:enter-edit-mode';
 
   export
@@ -909,6 +915,28 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     },
     isEnabled
   });
+  commands.addCommand(CommandIDs.selectAll, {
+    label: 'Select All Cells',
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.selectAll(current.notebook);
+      }
+    },
+    isEnabled
+  });
+  commands.addCommand(CommandIDs.deselectAll, {
+    label: 'Deselect All Cells',
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.deselectAll(current.notebook);
+      }
+    },
+    isEnabled
+  });
   commands.addCommand(CommandIDs.moveUp, {
     label: 'Move Cells Up',
     execute: args => {
@@ -1218,6 +1246,8 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.restartClear,
     CommandIDs.restartRunAll,
     CommandIDs.runAll,
+    CommandIDs.selectAll,
+    CommandIDs.deselectAll,
     CommandIDs.clearAllOutputs,
     CommandIDs.toggleAllLines,
     CommandIDs.editMode,
@@ -1435,6 +1465,11 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
     CommandIDs.paste,
   ].map(command => { return { command }; });
 
+  const selectGroup = [
+    CommandIDs.selectAll,
+    CommandIDs.deselectAll,
+  ].map(command => { return { command }; });
+
   const splitMergeGroup = [
     CommandIDs.split,
     CommandIDs.merge
@@ -1449,8 +1484,9 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   mainMenu.editMenu.addGroup(undoCellActionGroup, 4);
   mainMenu.editMenu.addGroup(copyGroup, 5);
   mainMenu.editMenu.addGroup([{ command: CommandIDs.deleteCell }], 6);
-  mainMenu.editMenu.addGroup(moveCellsGroup, 7);
-  mainMenu.editMenu.addGroup(splitMergeGroup, 8);
+  mainMenu.editMenu.addGroup(selectGroup, 7);
+  mainMenu.editMenu.addGroup(moveCellsGroup, 8);
+  mainMenu.editMenu.addGroup(splitMergeGroup, 9);
 
   // Add kernel information to the application help menu.
   mainMenu.helpMenu.kernelUsers.add({
