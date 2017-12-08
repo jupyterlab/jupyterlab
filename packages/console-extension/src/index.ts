@@ -446,9 +446,6 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     run: current => current.console.execute(true)
   } as IRunMenu.ICodeRunner<ConsolePanel>);
 
-  // Add a group to the edit menu.
-  mainMenu.editMenu.addGroup([{ command: CommandIDs.linebreak }]);
-
   // Add a clearer to the edit menu
   mainMenu.editMenu.clearers.add({
     tracker,
