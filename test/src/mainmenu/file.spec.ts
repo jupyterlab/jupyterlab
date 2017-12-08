@@ -64,7 +64,7 @@ describe('@jupyterlab/mainmenu', () => {
     describe('#newMenu', () => {
 
       it('should be a submenu for `New...` commands', () => {
-        expect(menu.newMenu.title.label).to.be('New');
+        expect(menu.newMenu.menu.title.label).to.be('New');
       });
 
     });
@@ -74,6 +74,7 @@ describe('@jupyterlab/mainmenu', () => {
       it('should allow setting of an ICloseAndCleaner', () => {
         const cleaner: IFileMenu.ICloseAndCleaner<Wodget> = {
           tracker,
+          name: 'Wodget',
           action: 'Clean',
           closeAndCleanup: widget => {
             widget.state = 'clean';

@@ -67,7 +67,6 @@ describe('@jupyterlab/mainmenu', () => {
         const runner: IRunMenu.ICodeRunner<Wodget> = {
           tracker,
           noun: 'Noun',
-          pluralNoun: 'Nouns',
           run: widget => {
             widget.state = 'run';
             return Promise.resolve(void 0);

@@ -101,6 +101,7 @@ describe('@jupyterlab/mainmenu', () => {
       it('should allow setting of an IConsoleCreator', () => {
         const creator: IKernelMenu.IConsoleCreator<Wodget> = {
           tracker,
+          name: 'Wodget',
           createConsole: widget => {
             widget.state = 'create';
             return Promise.resolve(void 0);

@@ -93,15 +93,28 @@ describe('@jupyterlab/mainmenu', () => {
 
     });
 
+    describe('#viewMenu', () => {
+
+      it('should be a ViewMenu', () => {
+        expect(mainMenu.viewMenu).to.be.a(ViewMenu);
+      });
+
+      it('should be the third menu', () => {
+        expect(ArrayExt.firstIndexOf(mainMenu.menus,
+                                     mainMenu.viewMenu.menu)).to.be(2);
+      });
+
+    });
+
     describe('#runMenu', () => {
 
       it('should be a RunMenu', () => {
         expect(mainMenu.runMenu).to.be.a(RunMenu);
       });
 
-      it('should be the third menu', () => {
+      it('should be the fourth menu', () => {
         expect(ArrayExt.firstIndexOf(mainMenu.menus,
-                                     mainMenu.runMenu.menu)).to.be(2);
+                                     mainMenu.runMenu.menu)).to.be(3);
       });
 
     });
@@ -112,22 +125,9 @@ describe('@jupyterlab/mainmenu', () => {
         expect(mainMenu.kernelMenu).to.be.a(KernelMenu);
       });
 
-      it('should be the fourth menu', () => {
-        expect(ArrayExt.firstIndexOf(mainMenu.menus,
-                                     mainMenu.kernelMenu.menu)).to.be(3);
-      });
-
-    });
-
-    describe('#viewMenu', () => {
-
-      it('should be a ViewMenu', () => {
-        expect(mainMenu.viewMenu).to.be.a(ViewMenu);
-      });
-
       it('should be the fifth menu', () => {
         expect(ArrayExt.firstIndexOf(mainMenu.menus,
-                                     mainMenu.viewMenu.menu)).to.be(4);
+                                     mainMenu.kernelMenu.menu)).to.be(4);
       });
 
     });

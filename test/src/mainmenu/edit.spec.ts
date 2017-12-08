@@ -90,14 +90,20 @@ describe('@jupyterlab/mainmenu', () => {
         const clearer: IEditMenu.IClearer<Wodget> = {
           tracker,
           noun: 'Nouns',
-          clear: widget => {
-            widget.state = 'clear';
+          clearCurrent: widget => {
+            widget.state = 'clearCurrent';
             return;
           },
+          clearAll: widget => {
+            widget.state = 'clearAll';
+            return;
+          }
         };
         menu.clearers.add(clearer);
-        delegateExecute(wodget, menu.clearers, 'clear');
-        expect(wodget.state).to.be('clear');
+        delegateExecute(wodget, menu.clearers, 'clearCurrent');
+        expect(wodget.state).to.be('clearCurrent');
+        delegateExecute(wodget, menu.clearers, 'clearAll');
+        expect(wodget.state).to.be('clearAll');
       });
 
     });
