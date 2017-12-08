@@ -703,14 +703,18 @@ namespace NotebookActions {
    *
    * @param widget - The target notebook widget.
    *
+   * @param mode - the mode of the paste operation: 'below' pastes cells
+   *   below the active cell, 'above' pastes cells above the active cell,
+   *   and 'replace' removes the currently selected cells and pastes cells
+   *   in their place.
+   *
    * #### Notes
-   * The cells are pasted below the active cell.
    * The last pasted cell becomes the active cell.
    * This is a no-op if there is no cell data on the clipboard.
    * This action can be undone.
    */
   export
-  function paste(widget: Notebook): void {
+  function paste(widget: Notebook, mode: 'below' | 'above' | 'replace' = 'below'): void {
     if (!widget.model || !widget.activeCell) {
       return;
     }
@@ -737,10 +741,40 @@ namespace NotebookActions {
         break;
       }
     });
-    let index = widget.activeCellIndex;
 
     let cells = widget.model.cells;
+    let index: number;
     cells.beginCompoundOperation();
+
+    // Set the starting index of the paste
+    // operation depending upon the mode.
+    switch (mode) {
+      case 'below':
+        index = widget.activeCellIndex;
+        break;
+      case 'above':
+        index = widget.activeCellIndex-1;
+        break;
+      case 'replace':
+        // Find the cells to delete.
+        const toDelete: number[] = [];
+        each(widget.widgets, (child, i) => {
+          let deletable = child.model.metadata.get('deletable');
+          if (widget.isSelected(child) && deletable !== false) {
+            toDelete.push(i);
+          }
+        });
+        // If cells are not deletable, we may not have anything to delete.
+        if (toDelete.length > 0) {
+          // Delete the cells as one undo event.
+          each(toDelete.reverse(), i => {
+            cells.remove(i);
+          });
+        }
+        index = toDelete[0];
+        break;
+    }
+
     each(newCells, cell => {
       cells.insert(++index, cell);
     });

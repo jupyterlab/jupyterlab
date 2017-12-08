@@ -127,7 +127,13 @@ namespace CommandIDs {
   const copy = 'notebook:copy-cell';
 
   export
-  const paste = 'notebook:paste-cell';
+  const pasteAbove = 'notebook:paste-cell-above';
+
+  export
+  const pasteBelow = 'notebook:paste-cell-below';
+
+  export
+  const pasteAndReplace = 'notebook:paste-and-replace-cell';
 
   export
   const moveUp = 'notebook:move-cell-up';
@@ -805,13 +811,35 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     },
     isEnabled
   });
-  commands.addCommand(CommandIDs.paste, {
+  commands.addCommand(CommandIDs.pasteBelow, {
     label: 'Paste Cells Below',
     execute: args => {
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.paste(current.notebook);
+        return NotebookActions.paste(current.notebook, 'below');
+      }
+    },
+    isEnabled
+  });
+  commands.addCommand(CommandIDs.pasteAbove, {
+    label: 'Paste Cells Above',
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.paste(current.notebook, 'above');
+      }
+    },
+    isEnabled
+  });
+  commands.addCommand(CommandIDs.pasteAndReplace, {
+    label: 'Paste Cells and Replace',
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.paste(current.notebook, 'replace');
       }
     },
     isEnabled
@@ -1275,7 +1303,9 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.toRaw,
     CommandIDs.cut,
     CommandIDs.copy,
-    CommandIDs.paste,
+    CommandIDs.pasteBelow,
+    CommandIDs.pasteAbove,
+    CommandIDs.pasteAndReplace,
     CommandIDs.deleteCell,
     CommandIDs.split,
     CommandIDs.merge,
@@ -1462,7 +1492,9 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   const copyGroup = [
     CommandIDs.cut,
     CommandIDs.copy,
-    CommandIDs.paste,
+    CommandIDs.pasteBelow,
+    CommandIDs.pasteAbove,
+    CommandIDs.pasteAndReplace,
   ].map(command => { return { command }; });
 
   const selectGroup = [
