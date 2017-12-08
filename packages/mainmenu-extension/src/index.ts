@@ -27,7 +27,10 @@ namespace CommandIDs {
   const redo = 'editmenu:redo';
 
   export
-  const clear = 'editmenu:clear';
+  const clearCurrent = 'editmenu:clear-current';
+
+  export
+  const clearAll = 'editmenu:clear-all';
 
   export
   const find = 'editmenu:find';
@@ -136,19 +139,33 @@ function createEditMenu(app: JupyterLab, menu: EditMenu): void {
     { command: CommandIDs.redo }
   ], 0);
 
-  // Add the clear command to the Edit menu.
-  commands.addCommand(CommandIDs.clear, {
+  // Add the clear commands to the Edit menu.
+  commands.addCommand(CommandIDs.clearCurrent, {
     label: () => {
-      const action =
+      const noun =
         Private.delegateLabel(app, menu.clearers, 'noun');
-      return `Clear${action ? ` ${action}` : '…'}`;
+      return `Clear${noun ? ` ${noun}` : ''}`;
     },
     isEnabled:
-      Private.delegateEnabled(app, menu.clearers, 'clear'),
+      Private.delegateEnabled(app, menu.clearers, 'clearCurrent'),
     execute:
-      Private.delegateExecute(app, menu.clearers, 'clear')
+      Private.delegateExecute(app, menu.clearers, 'clearCurrent')
   });
-  menu.addGroup([{ command: CommandIDs.clear }], 10);
+  commands.addCommand(CommandIDs.clearAll, {
+    label: () => {
+      const noun =
+        Private.delegateLabel(app, menu.clearers, 'noun');
+      return `Clear All${noun ? ` ${noun}` : ''}`;
+    },
+    isEnabled:
+      Private.delegateEnabled(app, menu.clearers, 'clearAll'),
+    execute:
+      Private.delegateExecute(app, menu.clearers, 'clearAll')
+  });
+  menu.addGroup([
+    { command: CommandIDs.clearCurrent },
+    { command: CommandIDs.clearAll },
+  ], 10);
 
   // Add the find/replace commands the the Edit menu.
   commands.addCommand(CommandIDs.find, {
@@ -260,7 +277,7 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
   commands.addCommand(CommandIDs.createConsole, {
     label: () => {
       const name = Private.delegateLabel(app, menu.consoleCreators, 'name');
-      const label = `Create Console for ${name ? name : '…' }`;
+      const label = `Create Console for ${name ? name : 'Activity' }`;
       return label;
     },
     isEnabled: Private.delegateEnabled(app, menu.consoleCreators, 'createConsole'),

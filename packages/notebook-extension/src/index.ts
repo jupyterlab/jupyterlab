@@ -1293,8 +1293,11 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   // Add a clearer to the edit menu
   mainMenu.editMenu.clearers.add({
     tracker,
-    noun: 'All Cell Outputs',
-    clear: (current: NotebookPanel) => {
+    noun: 'Cell Outputs',
+    clearCurrent: (current: NotebookPanel) => {
+      return NotebookActions.clearOutputs(current.notebook);
+    },
+    clearAll: (current: NotebookPanel) => {
       return NotebookActions.clearAllOutputs(current.notebook);
     }
   } as IEditMenu.IClearer<NotebookPanel>);

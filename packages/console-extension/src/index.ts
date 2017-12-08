@@ -453,8 +453,8 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
   // Add a clearer to the edit menu
   mainMenu.editMenu.clearers.add({
     tracker,
-    noun: 'Console',
-    clear: (current: ConsolePanel) => { return current.console.clear(); }
+    noun: 'Cells',
+    clearAll: (current: ConsolePanel) => { return current.console.clear(); }
   } as IEditMenu.IClearer<ConsolePanel>);
 
   // Add kernel information to the application help menu.
