@@ -864,7 +864,13 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.splitCell(current.notebook);
       }
     },
-    isEnabled
+    isEnabled: () => {
+      // Special case this `isEnabled` so that it is only available
+      // in edit mode, when it is clearer where the cursor is placed.
+      const current = tracker.currentWidget;
+      return current !== null && current === app.shell.currentWidget &&
+             current.notebook.mode === 'edit';
+    }
   });
   commands.addCommand(CommandIDs.merge, {
     label: 'Merge Selected Cells',
