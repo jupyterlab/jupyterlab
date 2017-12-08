@@ -120,7 +120,7 @@ mode, the page will have a red stripe at the top to indicate it is an unreleased
 
 ```bash
 jlpm run build:test
-jplm test
+jlpm test
 ```
 
 ### Build and run the stand-alone examples
