@@ -72,12 +72,6 @@ namespace CommandIDs {
   const runAll = 'runmenu:run-all';
 
   export
-  const runAndAdvance = 'runmenu:run-and-advance';
-
-  export
-  const runAndInsert = 'runmenu:run-and-insert';
-
-  export
   const runAbove = 'runmenu:run-above';
 
   export
@@ -359,24 +353,6 @@ function createRunMenu(app: JupyterLab, menu: RunMenu): void {
     execute: Private.delegateExecute(app, menu.codeRunners, 'runAll')
   });
 
-  commands.addCommand(CommandIDs.runAndAdvance, {
-    label: () => {
-      const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
-      return `Run Selected${noun ? ` ${noun}` : ''} and Select Below`;
-    },
-    isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'runAndAdvance'),
-    execute: Private.delegateExecute(app, menu.codeRunners, 'runAndAdvance')
-  });
-
-  commands.addCommand(CommandIDs.runAndInsert, {
-    label: () => {
-      const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
-      return `Run Selected${noun ? ` ${noun}` : ''} and Insert Below`;
-    },
-    isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'runAndInsert'),
-    execute: Private.delegateExecute(app, menu.codeRunners, 'runAndInsert')
-  });
-
   commands.addCommand(CommandIDs.runAbove, {
     label: () => {
       const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
@@ -397,8 +373,6 @@ function createRunMenu(app: JupyterLab, menu: RunMenu): void {
 
   const runGroup = [
     CommandIDs.run,
-    CommandIDs.runAndAdvance,
-    CommandIDs.runAndInsert,
   ].map(command => { return { command }; });
   const runAllGroup = [
     CommandIDs.runAbove,

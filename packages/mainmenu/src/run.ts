@@ -84,16 +84,6 @@ namespace IRunMenu {
     runAll?: (widget: T) => Promise<void>;
 
     /**
-     * A function to run and advance code hosted by the widget.
-     */
-    runAndAdvance?: (widget: T) => Promise<void>;
-
-    /**
-     * A function to run and insert code hosted by the widget.
-     */
-    runAndInsert?: (widget: T) => Promise<void>;
-
-    /**
      * A function to run all code above the currently selected
      * point (exclusive).
      */
