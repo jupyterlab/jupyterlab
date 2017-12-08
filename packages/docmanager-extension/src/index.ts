@@ -29,6 +29,10 @@ import {
   IDisposable
 } from '@phosphor/disposable';
 
+import {
+  Widget
+} from '@phosphor/widgets';
+
 
 /**
  * The command IDs used by the document manager plugin.
@@ -63,6 +67,9 @@ namespace CommandIDs {
 
   export
   const save = 'docmanager:save';
+
+  export
+  const saveAll = 'docmanager:save-all';
 
   export
   const saveAs = 'docmanager:save-as';
@@ -249,6 +256,35 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
         }
         return context.save().then(() => context.createCheckpoint());
       }
+    }
+  });
+
+  commands.addCommand(CommandIDs.saveAll, {
+    label: () => 'Save All',
+    caption: 'Save all open documents',
+    isEnabled: () => {
+      const iterator = app.shell.widgets('main');
+      let widget: Widget | undefined;
+      while (widget = iterator.next()) {
+        if (docManager.contextForWidget(widget)) {
+          return true;
+        }
+      }
+      return false;
+    },
+    execute: () => {
+      const iterator = app.shell.widgets('main');
+      const promises: Promise<void>[] = [];
+      const paths = new Set<string>(); //Cache so we don't double save files.
+      let widget: Widget | undefined;
+      while (widget = iterator.next()) {
+        const context = docManager.contextForWidget(widget);
+        if (context && !context.model.readOnly && !paths.has(context.path)) {
+          paths.add(context.path);
+          promises.push(context.save());
+        }
+      }
+      return Promise.all(promises);
     }
   });
 

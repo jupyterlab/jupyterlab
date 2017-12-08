@@ -209,7 +209,8 @@ function createFileMenu(app: JupyterLab, menu: FileMenu): void {
   // Add save group.
   const saveGroup = [
     'docmanager:save',
-    'docmanager:save-as'
+    'docmanager:save-as',
+    'docmanager:save-all'
   ].map(command => { return { command }; });
 
   // Add the re group.
