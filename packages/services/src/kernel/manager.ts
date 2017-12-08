@@ -43,7 +43,7 @@ class KernelManager implements Kernel.IManager {
     });
 
     // Set up polling.
-    this._runningTimer = (setInterval as any)(() => {
+    this._modelsTimer = (setInterval as any)(() => {
       this._refreshRunning();
     }, 10000);
     this._specsTimer = (setInterval as any)(() => {
@@ -80,10 +80,10 @@ class KernelManager implements Kernel.IManager {
       return;
     }
     this._isDisposed = true;
-    clearInterval(this._runningTimer);
+    clearInterval(this._modelsTimer);
     clearInterval(this._specsTimer);
     Signal.clearData(this);
-    this._running = [];
+    this._models = [];
   }
 
   /**
@@ -118,7 +118,7 @@ class KernelManager implements Kernel.IManager {
    * @returns A new iterator over the running kernels.
    */
   running(): IIterator<Kernel.IModel> {
-    return iter(this._running);
+    return iter(this._models);
   }
 
   /**
@@ -179,12 +179,12 @@ class KernelManager implements Kernel.IManager {
   /**
    * Connect to an existing kernel.
    *
-   * @param id - The id of the target kernel.
+   * @param model - The model of the target kernel.
    *
    * @returns A promise that resolves with the new kernel instance.
    */
-  connectTo(id: string): Promise<Kernel.IKernel> {
-    return Kernel.connectTo(id, this.serverSettings).then(kernel => {
+  connectTo(model: Kernel.IModel): Promise<Kernel.IKernel> {
+    return Kernel.connectTo(model, this.serverSettings).then(kernel => {
       this._onStarted(kernel);
       return kernel;
     });
@@ -202,8 +202,33 @@ class KernelManager implements Kernel.IManager {
    * changes.
    */
   shutdown(id: string): Promise<void> {
+    let index = ArrayExt.findFirstIndex(this._models, value => value.id === id);
+    if (index === -1) {
+      return;
+    }
     return Kernel.shutdown(id, this.serverSettings).then(() => {
-      this._onTerminated(id);
+      let toRemove: Kernel.IKernel[] = [];
+      this._kernels.forEach(k => {
+        if (k.id === id) {
+          k.dispose();
+          toRemove.push(k);
+        }
+      });
+      toRemove.forEach(k => { this._kernels.delete(k); });
+      this._runningChanged.emit(this._models.slice());
+    });
+  }
+
+  /**
+   * Shut down all kernels.
+   *
+   * @returns A promise that resolves when all of the kernels are shut down.
+   */
+  shutdownAll(): Promise<void> {
+    return this._refreshRunning().then(() => {
+      return Promise.all(this._models.map(model => this.shutdown(model.name))).then(() => {
+        return Promise.resolve(void 0);
+      });
     });
   }
 
@@ -211,10 +236,10 @@ class KernelManager implements Kernel.IManager {
    * Handle a kernel terminating.
    */
   private _onTerminated(id: string): void {
-    let index = ArrayExt.findFirstIndex(this._running, value => value.id === id);
+    let index = ArrayExt.findFirstIndex(this._models, value => value.id === id);
     if (index !== -1) {
-      this._running.splice(index, 1);
-      this._runningChanged.emit(this._running.slice());
+      this._models.splice(index, 1);
+      this._runningChanged.emit(this._models.slice());
     }
   }
 
@@ -223,10 +248,11 @@ class KernelManager implements Kernel.IManager {
    */
   private _onStarted(kernel: Kernel.IKernel): void {
     let id = kernel.id;
-    let index = ArrayExt.findFirstIndex(this._running, value => value.id === id);
+    this._kernels.add(kernel);
+    let index = ArrayExt.findFirstIndex(this._models, value => value.id === id);
     if (index === -1) {
-      this._running.push(kernel.model);
-      this._runningChanged.emit(this._running.slice());
+      this._models.push(kernel.model);
+      this._runningChanged.emit(this._models.slice());
     }
     kernel.terminated.connect(() => {
       this._onTerminated(id);
@@ -249,19 +275,29 @@ class KernelManager implements Kernel.IManager {
    * Refresh the running sessions.
    */
   private _refreshRunning(): Promise<void> {
-    return Kernel.listRunning(this.serverSettings).then(running => {
+    return Kernel.listRunning(this.serverSettings).then(models => {
       this._isReady = true;
-      if (!JSONExt.deepEqual(running, this._running)) {
-        this._running = running.slice();
-        this._runningChanged.emit(running);
+      if (!JSONExt.deepEqual(models, this._models)) {
+        let ids = models.map(r => r.id);
+        let toRemove: Kernel.IKernel[] = [];
+        this._kernels.forEach(k => {
+          if (ids.indexOf(k.id) === -1) {
+            k.dispose();
+            toRemove.push(k);
+          }
+        });
+        toRemove.forEach(s => { this._kernels.delete(s); });
+        this._models = models.slice();
+        this._runningChanged.emit(models);
       }
     });
   }
 
-  private _running: Kernel.IModel[] = [];
+  private _models: Kernel.IModel[] = [];
+  private _kernels = new Set<Kernel.IKernel>();
   private _specs: Kernel.ISpecModels | null = null;
   private _isDisposed = false;
-  private _runningTimer = -1;
+  private _modelsTimer = -1;
   private _specsTimer = -1;
   private _readyPromise: Promise<void>;
   private _isReady = false;

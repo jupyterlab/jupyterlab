@@ -54,27 +54,25 @@ class BuildManager {
   getStatus(): Promise<BuildManager.IStatus> {
     const base = this.serverSettings.baseUrl;
     const url = URLExt.join(base, BUILD_SETTINGS_URL);
-    const request = { method: 'GET', url };
     const { serverSettings } = this;
-    const promise = ServerConnection.makeRequest(request, serverSettings);
+    const promise = ServerConnection.makeRequest(url, {}, serverSettings);
 
     return promise.then(response => {
-      const { status } = response.xhr;
-
-      if (status !== 200) {
-        throw ServerConnection.makeError(response);
+      if (response.status !== 200) {
+        throw new ServerConnection.ResponseError(response);
       }
 
-      let data = response.data as BuildManager.IStatus;
+      return response.json();
+    }).then(data => {
       if (typeof data.status !== 'string') {
-        throw ServerConnection.makeError(response, 'Invalid data');
+        throw new Error('Invalid data');
       }
       if (typeof data.message !== 'string') {
-        throw ServerConnection.makeError(response, 'Invalid data');
+        throw new Error('Invalid data');
       }
       return data;
 
-    }).catch(reason => { throw ServerConnection.makeError(reason); });
+    });
   }
 
   /**
@@ -83,23 +81,18 @@ class BuildManager {
   build(): Promise<void> {
     const base = this.serverSettings.baseUrl;
     const url = URLExt.join(base, BUILD_SETTINGS_URL);
-    const request = { method: 'POST', url, contentType: 'application/json' };
     const { serverSettings } = this;
-    const promise = ServerConnection.makeRequest(request, serverSettings);
+    const init = { method: 'POST' };
+    const promise = ServerConnection.makeRequest(url, init, serverSettings);
 
     return promise.then(response => {
-      const { status } = response.xhr;
-
-      if (status !== 200) {
-        throw ServerConnection.makeError(response);
+      if (response.status === 400) {
+        throw new ServerConnection.ResponseError(response, 'Build aborted');
       }
-
-    }).catch(reason => {
-      let message = 'Build failed, please run `jupyter lab build` on the server for full output';
-      if (reason.xhr.status === 400) {
-        message = 'Build aborted';
+      if (response.status !== 200) {
+        let message = 'Build failed with ${response.status)`, please run `jupyter lab build` on the server for full output';
+        throw new ServerConnection.ResponseError(response, message);
       }
-      throw ServerConnection.makeError(reason, message);
     });
   }
 
@@ -109,18 +102,15 @@ class BuildManager {
   cancel(): Promise<void> {
     const base = this.serverSettings.baseUrl;
     const url = URLExt.join(base, BUILD_SETTINGS_URL);
-    const request = { method: 'DELETE', url };
     const { serverSettings } = this;
-    const promise = ServerConnection.makeRequest(request, serverSettings);
+    const init = { method: 'DELETE' };
+    const promise = ServerConnection.makeRequest(url, init, serverSettings);
 
     return promise.then(response => {
-      const { status } = response.xhr;
-
-      if (status !== 204) {
-        throw ServerConnection.makeError(response);
+      if (response.status !== 204) {
+        throw new ServerConnection.ResponseError(response);
       }
-
-    }).catch(reason => { throw ServerConnection.makeError(reason); });
+    });
   }
 }
 

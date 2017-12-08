@@ -159,6 +159,16 @@ namespace TerminalSession {
   }
 
   /**
+   * Shut down all terminal sessions.
+   *
+   * @returns A promise that resolves when all of the sessions are shut down.
+   */
+  export
+  function shutdownAll(settings?: ServerConnection.ISettings): Promise<void> {
+    return DefaultTerminalSession.shutdownAll(settings);
+  }
+
+  /**
    * The options for intializing a terminal session object.
    */
   export
@@ -272,6 +282,13 @@ namespace TerminalSession {
      * @returns A promise that resolves when the session is shut down.
      */
     shutdown(name: string): Promise<void>;
+
+    /**
+     * Shut down all terminal sessions.
+     *
+     * @returns A promise that resolves when all of the sessions are shut down.
+     */
+    shutdownAll(): Promise<void>;
 
     /**
      * Force a refresh of the running terminal sessions.

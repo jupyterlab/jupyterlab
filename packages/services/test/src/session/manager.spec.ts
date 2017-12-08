@@ -12,6 +12,10 @@ import {
 } from '@phosphor/algorithm';
 
 import {
+  Signal
+} from '@phosphor/signaling';
+
+import {
   JSONExt
 } from '@phosphor/coreutils';
 
@@ -20,50 +24,40 @@ import {
 } from '../../../lib';
 
 import {
-  KernelTester, KERNELSPECS
+  KERNELSPECS, handleRequest
 } from '../utils';
 
 
 /**
- * Create a unique session id.
+ * Start a new session on with a default name.
  */
-function createSessionModel(id = ''): Session.IModel {
-  return {
-    id: id || uuid(),
-    path: uuid(),
-    type: '',
-    name: '',
-    kernel: { id: uuid(), name: uuid() }
-  };
+function startNew(manager: SessionManager): Promise<Session.ISession> {
+  return manager.startNew({ path: uuid() });
 }
 
 
 describe('session/manager', () => {
 
-  let tester: KernelTester;
-  let session: Session.ISession;
   let manager: SessionManager;
-  let data: Session.IModel[];
+  let session: Session.ISession;
 
-  beforeEach((done) => {
-    data = [createSessionModel(), createSessionModel()];
-    tester = new KernelTester();
-    tester.runningSessions = data;
-    manager = new SessionManager();
-    expect(manager.specs).to.be(null);
-    expect(manager.running().next()).to.be(void 0);
-    manager.ready.then(done, done);
+  before(() => {
+    return Session.startNew({ path: uuid() }).then(s => {
+      session = s;
+    });
   });
 
-  afterEach((done) => {
-    manager.ready.then(() => {
-      manager.dispose();
-      if (session) {
-        session.dispose();
-      }
-      tester.dispose();
-      done();
-    }).catch(done);
+  beforeEach(() => {
+    manager = new SessionManager();
+    expect(manager.specs).to.be(null);
+  });
+
+  afterEach(() => {
+    manager.dispose();
+  });
+
+  after(() => {
+    return Session.shutdownAll();
   });
 
   describe('SessionManager', () => {
@@ -90,29 +84,30 @@ describe('session/manager', () => {
     describe('#specs', () => {
 
       it('should be the kernel specs', () => {
-        expect(manager.specs.default).to.be(KERNELSPECS.default);
+        return manager.ready.then(() => {
+          expect(manager.specs.default).to.be.ok();
+        });
       });
 
     });
 
     describe('#isReady', () => {
 
-      it('should test whether the manager is ready', (done) => {
+      it('should test whether the manager is ready', () => {
         manager.dispose();
         manager = new SessionManager();
         expect(manager.isReady).to.be(false);
-        manager.ready.then(() => {
+        return manager.ready.then(() => {
           expect(manager.isReady).to.be(true);
-          done();
-        }).catch(done);
+        });
       });
 
     });
 
     describe('#ready', () => {
 
-      it('should resolve when the manager is ready', (done) => {
-        manager.ready.then(done, done);
+      it('should resolve when the manager is ready', () => {
+        return manager.ready;
       });
 
     });
@@ -120,8 +115,10 @@ describe('session/manager', () => {
     describe('#running()', () => {
 
       it('should get the running sessions', () => {
-        let test = JSONExt.deepEqual(toArray(manager.running()), data);
-        expect(test).to.be(true);
+        return manager.refreshRunning().then(() => {
+          let running = toArray(manager.running());
+          expect(running.length).to.be.greaterThan(0);
+        });
       });
 
     });
@@ -131,7 +128,7 @@ describe('session/manager', () => {
       it('should be emitted when the specs change', (done) => {
         let specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
         specs.default = 'shell';
-        tester.specs = specs;
+        handleRequest(manager, 200, specs);
         manager.specsChanged.connect((sender, args) => {
           expect(sender).to.be(manager);
           expect(args.default).to.be(specs.default);
@@ -144,137 +141,107 @@ describe('session/manager', () => {
 
     describe('#runningChanged', () => {
 
-      it('should be emitted in refreshRunning when the running sessions changed', (done) => {
-        let sessionModels = [createSessionModel(), createSessionModel()];
-        tester.runningSessions = sessionModels;
+      it('should be emitted when the running sessions changed', (done) => {
+        let object = {};
         manager.runningChanged.connect((sender, args) => {
           expect(sender).to.be(manager);
-          expect(JSONExt.deepEqual(toArray(args), sessionModels)).to.be(true);
+          expect(toArray(args).length).to.be.greaterThan(0);
+          Signal.disconnectReceiver(object);
           done();
-        });
-        manager.refreshRunning();
+        }, object);
+        startNew(manager).catch(done);
       });
 
-      it('should be emitted when a session is shut down', (done) => {
-        manager.startNew({ path: 'foo' }).then(s => {
+      it('should be emitted when a session is shut down', () => {
+        let called = false;
+        return startNew(manager).then(s => {
           manager.runningChanged.connect(() => {
             manager.dispose();
-            done();
+            called = true;
           });
           return s.shutdown();
-        }).catch(done);
+        }).then(() => {
+          expect(called).to.be(true);
+        });
       });
 
-      it('should be emitted when a session is renamed', (done) => {
-        manager.startNew({ path: 'foo' }).then(s => {
-          let model = {
-            id: s.id,
-            kernel: s.kernel.model,
-            path: 'bar',
-            type: '',
-            name: ''
-          };
-          tester.onRequest = () => {
-            tester.respond(200, model);
-          };
-          manager.runningChanged.connect(() => {
-            manager.dispose();
-            done();
-          });
-          return s.setPath(model.path);
-        }).catch(done);
+      it('should be emitted when a session is renamed', () => {
+        let called = false;
+        manager.runningChanged.connect(() => {
+          manager.dispose();
+          called = true;
+        });
+        return session.setPath(uuid()).then(() => {
+          return manager.refreshRunning();
+        }).then(() => {
+          expect(called).to.be(true);
+        });
       });
 
-      it('should be emitted when a session changes kernels', (done) => {
-        manager.startNew({ path: 'foo' }).then(s => {
-          let model = {
-            id: s.id,
-            kernel: {
-              name: 'foo',
-              id: uuid()
-            },
-            path: 'bar',
-            name: '',
-            type: ''
-          };
-          let name = model.kernel.name;
-          tester.onRequest = request => {
-            if (request.method === 'PATCH') {
-              tester.respond(200, model);
-            } else {
-              tester.respond(200, { name, id: model.kernel.id });
-            }
-          };
-          manager.runningChanged.connect(() => {
-            manager.dispose();
-            done();
-          });
-          return s.changeKernel({ name });
-        }).catch(done);
+      it('should be emitted when a session changes kernels', () => {
+        let called = false;
+        manager.runningChanged.connect(() => {
+          manager.dispose();
+          called = true;
+        });
+        return session.changeKernel({ name: session.kernel.name }).then(() => {
+          expect(called).to.be(true);
+        });
       });
 
     });
 
     describe('#refreshRunning()', () => {
 
-      it('should refresh the list of session ids', (done) => {
-        let sessionModels = [createSessionModel(), createSessionModel()];
-        tester.runningSessions = sessionModels;
-        manager.refreshRunning().then(() => {
+      it('should refresh the list of session ids', () => {
+        return manager.refreshRunning().then(() => {
           let running = toArray(manager.running());
-          expect(running[0]).to.eql(sessionModels[0]);
-          expect(running[1]).to.eql(sessionModels[1]);
-          done();
+          expect(running.length).to.be.greaterThan(0);
         });
-
       });
 
     });
 
     describe('#refreshSpecs()', () => {
 
-      it('should refresh the specs', (done) => {
+      it('should refresh the specs', () => {
         let specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
         specs.default = 'shell';
-        tester.specs = specs;
-        manager.refreshSpecs().then(() => {
+        handleRequest(manager, 200, specs);
+        return manager.refreshSpecs().then(() => {
           expect(manager.specs.default).to.be(specs.default);
-          done();
-        }).catch(done);
+        });
       });
 
     });
 
     describe('#startNew()', () => {
 
-      it('should start a session', (done) => {
-        manager.startNew({ path: 'test.ipynb'}).then(s => {
-          session = s;
+      it('should start a session', () => {
+        return manager.startNew({ path: uuid() }).then(session => {
           expect(session.id).to.be.ok();
-          done();
-        }).catch(done);
+          return session.shutdown();
+        });
       });
 
-      it('should emit a runningChanged signal', (done) => {
+      it('should emit a runningChanged signal', () => {
+        let called = false;
         manager.runningChanged.connect(() => {
-          done();
+          called = true;
         });
-        manager.startNew({ path: 'foo.ipynb' });
+        return manager.startNew({ path: uuid() }).then(() => {
+          expect(called).to.be(true);
+        });
       });
 
     });
 
     describe('#findByPath()', () => {
 
-      it('should find an existing session by path', (done) => {
-        manager.startNew({ path: 'test.ipynb' }).then(s => {
-          session = s;
-          tester.runningSessions = [s.model];
-          return manager.findByPath(session.path);
-        }).then(newModel => {
+      it('should find an existing session by path', () => {
+        return manager.findByPath(session.path).then(newModel => {
           expect(newModel.id).to.be(session.id);
-          done();
-        }).catch(done);
+        });
       });
 
     });
@@ -282,57 +249,50 @@ describe('session/manager', () => {
 
     describe('#findById()', () => {
 
-      it('should find an existing session by id', (done) => {
-        manager.startNew({ path: 'test.ipynb' }).then(s => {
-          session = s;
-          tester.runningSessions = [s.model];
-          return manager.findById(session.id);
-        }).then(newModel => {
+      it('should find an existing session by id', () => {
+        return manager.findById(session.id).then(newModel => {
           expect(newModel.id).to.be(session.id);
-          done();
-        }).catch(done);
+        });
       });
 
     });
 
     describe('#connectTo()', () => {
 
-      it('should connect to a running session', (done) => {
-        manager.startNew({ path: 'test.ipynb' }).then(s => {
-          session = s;
-          manager.connectTo(session.id).then(newSession => {
-            expect(newSession.id).to.be(session.id);
-            expect(newSession.kernel.id).to.be(session.kernel.id);
-            expect(newSession).to.not.be(session);
-            expect(newSession.kernel).to.not.be(session.kernel);
-            newSession.dispose();
-            done();
-          });
-        }).catch(done);
-      });
-
-      it('should emit a runningChanged signal', (done) => {
-        manager.runningChanged.connect(() => {
-          done();
+      it('should connect to a running session', () => {
+        return manager.connectTo(session.model).then(newSession => {
+          expect(newSession.id).to.be(session.id);
+          expect(newSession.kernel.id).to.be(session.kernel.id);
+          expect(newSession).to.not.be(session);
+          expect(newSession.kernel).to.not.be(session.kernel);
         });
-        let model = createSessionModel();
-        tester.runningSessions = [model];
-        manager.connectTo(model.id);
       });
 
     });
 
     describe('shutdown()', () => {
 
-      it('should shut down a session by id', (done) => {
-        manager.shutdown('foo').then(done, done);
+      it('should shut down a session by id', () => {
+        let temp: Session.ISession;
+        return startNew(manager).then(s => {
+          temp = s;
+          return manager.shutdown(s.id);
+        }).then(() => {
+          expect(temp.isDisposed).to.be(true);
+        });
       });
 
-      it('should emit a runningChanged signal', (done) => {
-        manager.runningChanged.connect((sender, args) => {
-          done();
+      it('should emit a runningChanged signal', () => {
+        let called = false;
+        return startNew(manager).then(s => {
+          manager.runningChanged.connect((sender, args) => {
+            expect(s.isDisposed).to.be(true);
+            called = true;
+          });
+          return manager.shutdown(s.id);
+        }).then(() => {
+          expect(called).to.be(true);
         });
-        manager.shutdown(data[0].id);
       });
 
     });

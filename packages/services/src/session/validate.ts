@@ -32,7 +32,7 @@ function validateProperty(object: any, name: string, typeName?: string): void {
       valid = typeof value === typeName;
     }
     if (!valid) {
-      throw new Error(`Property '${name}' is not of type '${typeName}`);
+      throw new Error(`Property '${name}' is not of type '${typeName}'`);
     }
   }
 }

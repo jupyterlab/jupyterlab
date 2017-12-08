@@ -7,6 +7,14 @@ import {
   ServerConnection, SettingManager
 } from '../../../lib';
 
+import {
+  init
+} from '../utils';
+
+
+// Initialize the fetch overrides.
+init();
+
 
 describe('setting', () => {
 

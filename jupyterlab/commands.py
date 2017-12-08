@@ -95,8 +95,8 @@ def ensure_dev(logger=None):
         yarn_proc.wait()
 
 
-def watch_dev(logger=None):
-    """Run watch mode in a given directory.
+def watch_packages(logger=None):
+    """Run watch mode for the source packages.
 
     Parameters
     ----------
@@ -126,12 +126,31 @@ def watch_dev(logger=None):
     tsf_proc = WatchHelper(['node', YARN_PATH, 'run', 'watch:files'],
         cwd=ts_dir, logger=logger, startup_regex=tsf_regex)
 
+    return [ts_proc, tsf_proc]
+
+
+def watch_dev(logger=None):
+    """Run watch mode in a given directory.
+
+    Parameters
+    ----------
+    logger: :class:`~logger.Logger`, optional
+        The logger instance.
+
+    Returns
+    -------
+    A list of `WatchHelper` objects.
+    """
+    logger = logger or logging.getLogger('jupyterlab')
+
+    package_procs = watch_packages(logger)
+
     # Run webpack watch and wait for compilation.
     wp_proc = WatchHelper(['node', YARN_PATH, 'run', 'watch'],
         cwd=DEV_DIR, logger=logger,
         startup_regex=WEBPACK_EXPECT)
 
-    return [ts_proc, tsf_proc, wp_proc]
+    return package_procs + [wp_proc]
 
 
 def watch(app_dir=None, logger=None):
@@ -1228,3 +1247,7 @@ def _get_core_extensions():
     """
     data = _get_core_data()['jupyterlab']
     return list(data['extensions']) + list(data['mimeExtensions'])
+
+
+if __name__ == '__main__':
+    watch_dev(HERE)

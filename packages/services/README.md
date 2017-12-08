@@ -7,8 +7,11 @@ Javascript client for the Jupyter services REST APIs
 
 [REST API Docs](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml)
 
-Note: All functions and classes using the REST API allow an `ajaxOptions` 
+Note: All functions and classes using the REST API allow a `serverSettings` 
 parameter to configure requests.
+Requests are made using the `fetch` API, which is available in modern browsers
+or via `npm install fetch` for node users.  The `whatwg-fetch` npm package
+can be used to polyfill browsers that do not support the `fetch` API.
 
 
 Package Install
@@ -80,11 +83,11 @@ Earlier versions may also work, but come with no guarantees.
 - Firefox 32+
 - Chrome 38+
 
-Note: "requirejs" must be included in a global context for Comm targets.  
+Note: "requirejs" may need be included in a global context for `Comm` targets
+using the a `target_module` (in the classic Notebook).
 This can be as a `<script>` tag in the browser or by using the `requirejs`
 package in node (`npm install requirejs` and setting 
-`global.requirejs = require('requirejs');`).  See the `examples` folder
-for usage.
+`global.requirejs = require('requirejs');`).
 
 
 Starting the Notebook Server
@@ -95,10 +98,8 @@ Follow the package install instructions first.
 The library requires a running Jupyter Notebook server, launched as:
 
 ```bash
-python -m notebook --NotebookApp.allow_origin="*"
+jupyter notebook
 ```
-
-The origin can be specified directly instead of using `*` if desired.
 
 
 Bundling for the Browser
@@ -109,32 +110,14 @@ Follow the package install instructions first.
 See `examples/browser` for an example of using Webpack to bundle the library.
 
 Note: Some browsers (such as IE11), require a polyfill for Promises.
-The example demonstrates the use of the polyfill.
+The example demonstrates the use of the polyfill.  See also notes about
+the `fetch` API polyfill above.
+
 
 Usage from Node.js
 ------------------
 
 Follow the package install instructions first.
-
-```bash
-npm install --save xmlhttprequest ws
-```
-
-Use `XMLHttpRequest` and `WebSocket` in the server settings (in ES5 syntax):
-
-```javascript
-var services = require('@jupyterlab/services');
-var ws = require('ws');
-var xhr = require('xmlhttprequest');
-
-
-// Set the request and socket functions.
-var serverSettings = services.ServerConnection.makeSettings({
-  xhrFactory: function () { return new xhr.XMLHttpRequest(); },
-  wsFactory: function (url, protocol) { return new ws(url, protocol); }
-});
-Kernel.startNew({ serverSettings }).then(...);
-```
 
 See `examples/node` for an example of using an ES5 node script.
 

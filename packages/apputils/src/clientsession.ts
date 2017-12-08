@@ -526,7 +526,7 @@ class ClientSession implements IClientSession {
       if (!model) {
         return;
       }
-      return manager.connectTo(model.id).then(session => {
+      return manager.connectTo(model).then(session => {
         this._handleNewSession(session);
       }).catch(err => {
         this._handleSessionError(err);
@@ -669,24 +669,27 @@ class ClientSession implements IClientSession {
   /**
    * Handle an error in session startup.
    */
-  private _handleSessionError(err: ServerConnection.IError): Promise<void> {
-    let response = String(err.xhr.response);
-    try {
-      response = JSON.parse(err.xhr.response)['traceback'];
-    } catch (err) {
-      // no-op
-    }
-    return showDialog({
-      title: 'Error Starting Kernel',
-      body: h.pre(response),
-      buttons: [Dialog.okButton()]
-    }).then(() => void 0);
+  private _handleSessionError(err: ServerConnection.ResponseError): Promise<void> {
+    return err.response.text().then(text => {
+      let message = err.message;
+      try {
+        message = JSON.parse(text)['traceback'];
+      } catch (err) {
+        // no-op
+      }
+      return showDialog({
+        title: 'Error Starting Kernel',
+        body: h.pre(message),
+        buttons: [Dialog.okButton()]
+      });
+    }).then(() => undefined);
   }
 
   /**
    * Handle a session termination.
    */
   private _onTerminated(): void {
+    debugger;
     if (this._session) {
       this._session.dispose();
     }

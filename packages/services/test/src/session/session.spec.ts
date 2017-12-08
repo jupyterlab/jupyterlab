@@ -12,7 +12,15 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  KernelMessage
+  Signal
+} from '@phosphor/signaling';
+
+import {
+  ServerConnection
+} from '../../../lib/serverconnection';
+
+import {
+  Kernel, KernelMessage
 } from '../../../lib/kernel';
 
 import {
@@ -20,153 +28,103 @@ import {
 } from '../../../lib/session';
 
 import {
-  serverSettings, expectFailure, KernelTester
+  expectFailure, handleRequest, makeSettings,
+  SessionTester, createSessionModel, getRequestHandler, init
 } from '../utils';
 
 
+init();
+
 /**
- * Create a unique session id.
+ * Create session options based on a sessionModel.
  */
-function createSessionModel(id?: string): Session.IModel {
+function createSessionOptions(sessionModel: Session.IModel, serverSettings: ServerConnection.ISettings): Session.IOptions {
   return {
-    id: id || uuid(),
-    path: uuid(),
-    name: '',
-    type: '',
-    kernel: { id: uuid(), name: uuid() }
+    path: sessionModel.path,
+    kernelName: sessionModel.kernel.name,
+    serverSettings
   };
 }
 
 
 /**
- * Create session options based on a sessionModel.
+ * Start a new session with a unique name.
  */
-function createSessionOptions(sessionModel?: Session.IModel): Session.IOptions {
-  sessionModel = sessionModel || createSessionModel();
-  return {
-    path: sessionModel.path,
-    kernelName: sessionModel.kernel.name
-  };
+function startNew(): Promise<Session.ISession> {
+  return Session.startNew({ path: uuid() });
 }
 
 
 describe('session', () => {
 
-  let tester: KernelTester;
   let session: Session.ISession;
+  let defaultSession: Session.ISession;
 
-  beforeEach(() => {
-    tester = new KernelTester();
+  before(() => {
+    return startNew().then(s => {
+      defaultSession = s;
+    });
   });
 
   afterEach(() => {
-    if (session) {
-      session.dispose();
+    if (session && !session.isDisposed) {
+      return session.shutdown();
     }
-    tester.dispose();
+  });
+
+  after(() => {
+    return defaultSession.shutdown();
   });
 
   describe('Session.listRunning()', () => {
 
-    it('should yield a list of valid session models', (done) => {
-      let sessionModels = [createSessionModel(), createSessionModel()];
-      tester.runningSessions = sessionModels;
-      let list = Session.listRunning();
-      list.then(response => {
+    it('should yield a list of valid session models', () => {
+      return Session.listRunning().then(response => {
         let running = toArray(response);
-        expect(running[0]).to.eql(sessionModels[0]);
-        expect(running[1]).to.eql(sessionModels[1]);
-        done();
-      });
-    });
-
-    it('should accept ajax options', (done) => {
-      let sessionModels = [createSessionModel(), createSessionModel()];
-      tester.runningSessions = sessionModels;
-      let list = Session.listRunning(serverSettings);
-      list.then(response => {
-        let running = toArray(response);
-        expect(running[0]).to.eql(sessionModels[0]);
-        expect(running[1]).to.eql(sessionModels[1]);
-        done();
+        expect(running.length).to.greaterThan(0);
       });
     });
 
     it('should throw an error for an invalid model', (done) => {
       let data = { id: '1234', path: 'test' };
-      tester.onRequest = () => {
-        tester.respond(200, data);
-      };
-      let list = Session.listRunning();
+      let serverSettings = getRequestHandler(200, data);
+      let list = Session.listRunning(serverSettings);
       expectFailure(list, done);
     });
 
     it('should throw an error for another invalid model', (done) => {
       let data = [{ id: '1234', kernel: { id: '', name: '' }, path: '' }];
-      tester.onRequest = () => {
-        tester.respond(200, data);
-      };
-      let list = Session.listRunning();
+      let serverSettings = getRequestHandler(200, data);
+      let list = Session.listRunning(serverSettings);
       expectFailure(list, done);
     });
 
     it('should fail for wrong response status', (done) => {
-      tester.onRequest = () => {
-        tester.respond(201, [createSessionModel()]);
-      };
-      let list = Session.listRunning();
+      let serverSettings = getRequestHandler(201, [createSessionModel()]);
+      let list = Session.listRunning(serverSettings);
       expectFailure(list, done);
     });
 
     it('should fail for error response status', (done) => {
-      tester.onRequest = () => {
-        tester.respond(500, { });
-      };
-      let list = Session.listRunning();
+      let serverSettings = getRequestHandler(500, { });
+      let list = Session.listRunning(serverSettings);
       expectFailure(list, done, '');
-    });
-
-    it('should update an existing session', (done) => {
-      let newKernel = { name: 'fizz', id: 'buzz' };
-      Session.startNew({ path: 'foo' }).then(s => {
-        session = s;
-        tester.onRequest = request => {
-          tester.respond(200, [ {
-            id: session.model.id,
-            path: 'foo/bar.ipynb',
-            name: '',
-            type: '',
-            kernel: newKernel
-          } ]);
-          tester.onRequest = () => {
-            tester.respond(200, newKernel);
-          };
-        };
-        session.kernelChanged.connect((value, kernel) => {
-          expect(kernel.name).to.be(newKernel.name);
-          expect(kernel.id).to.be(newKernel.id);
-          expect(value.path).to.be('foo/bar.ipynb');
-          value.dispose();
-          done();
-        });
-        Session.listRunning();
-      });
     });
 
   });
 
   describe('Session.startNew', () => {
 
-    it('should start a session', (done) => {
-      Session.startNew({ path: 'foo' }).then(s => {
+    it('should start a session', () => {
+      return startNew().then(s => {
         session = s;
         expect(session.id).to.be.ok();
-        done();
       });
     });
 
     it('should accept ajax options', (done) => {
-      let options: Session.IOptions = { path: 'foo', serverSettings };
+      let serverSettings = makeSettings();
+      let options: Session.IOptions = { path: uuid(), serverSettings };
       Session.startNew(options).then(s => {
         session = s;
         expect(session.id).to.ok();
@@ -174,216 +132,132 @@ describe('session', () => {
       });
     });
 
-    it('should start even if the websocket fails', (done) => {
+    it('should start even if the websocket fails', () => {
+      let tester = new SessionTester();
       tester.initialStatus = 'dead';
-      Session.startNew({ path: 'foo' }).then(s => {
-        session = s;
-        done();
+      return tester.startSession().then(() => {
+        tester.dispose();
       });
     });
 
     it('should fail for wrong response status', (done) => {
       let sessionModel = createSessionModel();
-      tester.onRequest = () => {
-        tester.respond(200, sessionModel);
-      };
-      let options = createSessionOptions(sessionModel);
+      let serverSettings = getRequestHandler(200, sessionModel);
+      let options = createSessionOptions(sessionModel, serverSettings);
       let sessionPromise = Session.startNew(options);
       expectFailure(sessionPromise, done);
     });
 
     it('should fail for error response status', (done) => {
-      tester.onRequest = () => {
-        tester.respond(500, {});
-      };
+      let serverSettings = getRequestHandler(500, {});
       let sessionModel = createSessionModel();
-      let options = createSessionOptions(sessionModel);
+      let options = createSessionOptions(sessionModel, serverSettings);
       let sessionPromise = Session.startNew(options);
       expectFailure(sessionPromise, done, '');
     });
 
     it('should fail for wrong response model', (done) => {
       let sessionModel = createSessionModel();
-      let data = {
-        id: 1, kernel: { name: '', id: '' }, path: '', type: '', name: ''
-      };
-      tester.onRequest = request => {
-        if (request.method === 'POST') {
-          tester.respond(201, sessionModel);
-        } else {
-          tester.respond(200, data);
-        }
-      };
-      let options = createSessionOptions(sessionModel);
+      (sessionModel as any).path = 1;
+      let serverSettings = getRequestHandler(201, sessionModel);
+      let options = createSessionOptions(sessionModel, serverSettings);
       let sessionPromise = Session.startNew(options);
-      let msg = `Session failed to start: No running kernel with id: ${sessionModel.kernel.id}`;
+      let msg = `Property 'path' is not of type 'string'`;
       expectFailure(sessionPromise, done, msg);
     });
 
-    it('should handle a deprecated response model', (done) => {
+    it('should handle a deprecated response model', () => {
       let sessionModel = createSessionModel();
       let data = {
-        id: '', kernel: { name: '', id: '' }, notebook: { path: '' }
+        id: sessionModel.id,
+        kernel: sessionModel.kernel,
+        notebook: { path: sessionModel.path }
       };
-      tester.onRequest = request => {
-        if (request.method === 'POST') {
-          tester.respond(201, sessionModel);
-        } else {
-          tester.respond(200, data);
-        }
-      };
-      let options = createSessionOptions(sessionModel);
-      let sessionPromise = Session.startNew(options);
-      let msg = `Session failed to start: No running kernel with id: ${sessionModel.kernel.id}`;
-      expectFailure(sessionPromise, done, msg);
-    });
-
-    it('should fail if the kernel is not running', (done) => {
-      let sessionModel = createSessionModel();
-      tester.onRequest = request => {
-        if (request.method === 'POST') {
-          tester.respond(201, sessionModel);
-        } else {
-          tester.respond(400, {});
-        }
-      };
-      let options = createSessionOptions(sessionModel);
-      let sessionPromise = Session.startNew(options);
-      expectFailure(sessionPromise, done, 'Session failed to start');
+      let serverSettings = getRequestHandler(201, data);
+      let options = createSessionOptions(sessionModel, serverSettings);
+      return Session.startNew(options);
     });
   });
 
   describe('Session.findByPath()', () => {
 
-    it('should find an existing session by path', (done) => {
-      let sessionModel = createSessionModel();
-      tester.runningSessions = [sessionModel];
-      Session.findByPath(sessionModel.path).then(newId => {
-        expect(newId.path).to.be(sessionModel.path);
-        done();
-      }).catch(done);
+    it('should find an existing session by path', () => {
+      return Session.findByPath(defaultSession.path);
     });
 
   });
 
   describe('Session.findById()', () => {
 
-    it('should find an existing session by id', (done) => {
-      let sessionModel = createSessionModel();
-      tester.runningSessions = [sessionModel];
-      Session.findById(sessionModel.id).then(newId => {
-        expect(newId.id).to.be(sessionModel.id);
-        done();
-      }).catch(done);
+    it('should find an existing session by id', () => {
+      return Session.findById(defaultSession.id);
     });
 
   });
 
   describe('Session.connectTo()', () => {
 
-    it('should connect to a running session', (done) => {
-      Session.startNew({ path: 'foo' }).then(s => {
-        session = s;
-        Session.connectTo(session.id).then((newSession) => {
-          expect(newSession.id).to.be(session.id);
-          expect(newSession.kernel.id).to.be(session.kernel.id);
-          expect(newSession).to.not.be(session);
-          expect(newSession.kernel).to.not.be(session.kernel);
-          newSession.dispose();
-          done();
-        }).catch(done);
+    it('should connect to a running session', () => {
+      return Session.connectTo(defaultSession.model).then(newSession => {
+        expect(newSession.id).to.be(defaultSession.id);
+        expect(newSession.kernel.id).to.be(defaultSession.kernel.id);
+        expect(newSession).to.not.be(defaultSession);
+        expect(newSession.kernel).to.not.be(defaultSession.kernel);
       });
     });
 
-    it('should connect to a client session if available', (done) => {
-      let sessionModel = createSessionModel();
-      tester.runningSessions = [sessionModel];
-      Session.connectTo(sessionModel.id, serverSettings).then(s => {
-        session = s;
-        expect(session.id).to.be(sessionModel.id);
-        done();
-      }).catch(done);
-    });
-
-    it('should accept server settings', (done) => {
-      let sessionModel = createSessionModel();
-      tester.runningSessions = [sessionModel];
-      Session.connectTo(sessionModel.id, serverSettings).then(s => {
-        session = s;
+    it('should accept server settings', () => {
+      let serverSettings = makeSettings();
+      return Session.connectTo(defaultSession.model, serverSettings).then(session => {
         expect(session.id).to.be.ok();
-        done();
-      }).catch(done);
+      });
     });
 
-    it('should fail if session is not available', (done) => {
-      tester.onRequest = () => {
-        tester.respond(500, {});
-      };
-      let sessionModel = createSessionModel();
-      let sessionPromise = Session.connectTo(sessionModel.id, serverSettings);
-      expectFailure(
-        sessionPromise, done, 'No running session with id: ' + sessionModel.id
-      );
-    });
   });
 
   describe('Session.shutdown()', () => {
 
-    it('should shut down a kernel by id', (done) => {
-      Session.shutdown('foo').then(done, done);
+    it('should shut down a kernel by id', () => {
+      return startNew().then(s => {
+        session = s;
+        return Session.shutdown(s.id);
+      });
     });
 
-    it('should handle a 404 status', (done) => {
-      tester.onRequest = () => {
-        tester.respond(404, { });
-      };
-      Session.shutdown('foo').then(done, done);
+    it('should handle a 404 status', () => {
+      return Session.shutdown(uuid());
     });
 
   });
 
-
   describe('Session.ISession', () => {
-
-
-    beforeEach((done) => {
-      Session.startNew({ path: 'foo' }).then(s => {
-        session = s;
-        done();
-      }).catch(done);
-    });
-
-    afterEach(() => {
-      session.dispose();
-    });
 
     context('#terminated', () => {
 
-      it('should emit when the session is shut down', (done) => {
-        session.terminated.connect(() => {
-          done();
+      it('should emit when the session is shut down', () => {
+        let called = false;
+        return startNew().then(session => {
+          session.terminated.connect(() => {
+            called = true;
+          });
+          return session.shutdown();
+        }).then(() => {
+          expect(called).to.be(true);
         });
-        session.shutdown();
       });
     });
 
     context('#kernelChanged', () => {
 
-      it('should emit when the kernel changes', (done) => {
-        let model = createSessionModel(session.id);
-        let name = model.kernel.name;
-        let id = model.kernel.id;
-        tester.onRequest = request => {
-          if (request.method === 'PATCH') {
-            tester.respond(200, model);
-          } else {
-            tester.respond(200, { name, id });
-          }
-        };
-        session.changeKernel({ name });
-        session.kernelChanged.connect((s, kernel) => {
-          expect(kernel.name).to.be(name);
-          done();
+      it('should emit when the kernel changes', () => {
+        let called = false;
+        let object = {};
+        defaultSession.kernelChanged.connect((s, kernel) => {
+          called = true;
+          Signal.disconnectReceiver(object);
+        }, object);
+        return defaultSession.changeKernel({ name: defaultSession.kernel.name }).then(() => {
+          expect(called).to.be(true);
         });
       });
 
@@ -391,67 +265,72 @@ describe('session', () => {
 
     context('#statusChanged', () => {
 
-      it('should emit when the kernel status changes', (done) => {
-        session.statusChanged.connect((s, status) => {
+      it('should emit when the kernel status changes', () => {
+        let called = false;
+        defaultSession.statusChanged.connect((s, status) => {
           if (status === 'busy') {
-            done();
+            called = true;
           }
         });
-        session.kernel.requestKernelInfo().then(() => {
-          tester.sendStatus('busy');
-        }).catch(done);
+        return defaultSession.kernel.requestKernelInfo().then(() => {
+          expect(called).to.be(true);
+        });
       });
     });
 
     context('#iopubMessage', () => {
 
-      it('should be emitted for an iopub message', (done) => {
-        session.iopubMessage.connect((s, msg) => {
-          expect(msg.header.msg_type).to.be('status');
-          done();
+      it('should be emitted for an iopub message', () => {
+        let called = false;
+        defaultSession.iopubMessage.connect((s, msg) => {
+          if (msg.header.msg_type === 'status') {
+            called = true;
+          }
         });
-        let msg = KernelMessage.createMessage({
-          msgType: 'status',
-          channel: 'iopub',
-          session: ''
-        }) as KernelMessage.IStatusMsg;
-        msg.content.execution_state = 'idle';
-        msg.parent_header = msg.header;
-        tester.send(msg);
+        return defaultSession.kernel.requestExecute({ code: 'a=1' }, true).done.then(() => {
+          expect(called).to.be(true);
+        });
       });
     });
 
     context('#unhandledMessage', () => {
 
       it('should be emitted for an unhandled message', (done) => {
-        session.unhandledMessage.connect((s, msg) => {
-          expect(msg.header.msg_type).to.be('foo');
-          done();
-        });
-        let msg = KernelMessage.createMessage({
-          msgType: 'foo',
-          channel: 'shell',
-          session: session.kernel.clientId
-        });
-        msg.parent_header = msg.header;
-        tester.send(msg);
+        let tester = new SessionTester();
+        let msgType = uuid();
+        tester.startSession().then(session => {
+          session.unhandledMessage.connect((s, msg) => {
+            expect(msg.header.msg_type).to.be(msgType);
+            tester.dispose();
+            done();
+          });
+          let msg = KernelMessage.createMessage({
+            msgType: msgType,
+            channel: 'shell',
+            session: session.kernel.clientId
+          });
+          msg.parent_header = msg.header;
+          tester.send(msg);
+        }).catch(done);
       });
+
     });
 
     context('#propertyChanged', () => {
 
       it('should be emitted when the session path changes', () => {
-        // TODO: reinstate after switching to mock-socket
-        // let model = createSessionModel(session.id);
-        // tester.onRequest = () => {
-        //   tester.respond(200, model);
-        // };
-        // session.pathChanged.connect((s, path) => {
-        //   // expect(session.path).to.be(model.path);
-        //   // expect(path).to.be(model.path);
-        //   done();
-        // });
-        // session.rename(model.path);
+        let newPath = uuid();
+        let called = false;
+        let object = {};
+        defaultSession.propertyChanged.connect((s, type) => {
+          expect(defaultSession.path).to.be(newPath);
+          expect(type).to.be('path');
+          called = true;
+          Signal.disconnectReceiver(object);
+        }, object);
+        return defaultSession.setPath(newPath).then(() => {
+          expect(called).to.be(true);
+        });
       });
 
     });
@@ -459,35 +338,35 @@ describe('session', () => {
     context('#id', () => {
 
       it('should be a string', () => {
-        expect(typeof session.id).to.be('string');
+        expect(typeof defaultSession.id).to.be('string');
       });
     });
 
     context('#path', () => {
 
       it('should be a string', () => {
-        expect(typeof session.path).to.be('string');
+        expect(typeof defaultSession.path).to.be('string');
       });
     });
 
     context('#name', () => {
 
       it('should be a string', () => {
-        expect(typeof session.name).to.be('string');
+        expect(typeof defaultSession.name).to.be('string');
       });
     });
 
     context('#type', () => {
 
       it('should be a string', () => {
-        expect(typeof session.name).to.be('string');
+        expect(typeof defaultSession.name).to.be('string');
       });
     });
 
     context('#model', () => {
 
       it('should be an IModel', () => {
-        let model = session.model;
+        let model = defaultSession.model;
         expect(typeof model.id).to.be('string');
         expect(typeof model.path).to.be('string');
         expect(typeof model.kernel.name).to.be('string');
@@ -499,7 +378,7 @@ describe('session', () => {
     context('#kernel', () => {
 
       it('should be an IKernel object', () => {
-        expect(typeof session.kernel.id).to.be('string');
+        expect(typeof defaultSession.kernel.id).to.be('string');
       });
 
     });
@@ -507,14 +386,14 @@ describe('session', () => {
     context('#kernel', () => {
 
       it('should be a delegate to the kernel status', () => {
-        expect(session.status).to.be(session.kernel.status);
+        expect(defaultSession.status).to.be(defaultSession.kernel.status);
       });
     });
 
     context('#serverSettings', () => {
 
       it('should be the serverSettings', () => {
-        expect(session.serverSettings.baseUrl).to.be(PageConfig.getBaseUrl());
+        expect(defaultSession.serverSettings.baseUrl).to.be(PageConfig.getBaseUrl());
       });
 
     });
@@ -522,38 +401,48 @@ describe('session', () => {
     context('#isDisposed', () => {
 
       it('should be true after we dispose of the session', () => {
-        expect(session.isDisposed).to.be(false);
-        session.dispose();
-        expect(session.isDisposed).to.be(true);
+        return Session.connectTo(defaultSession.model).then(session => {
+          expect(session.isDisposed).to.be(false);
+          session.dispose();
+          expect(session.isDisposed).to.be(true);
+        });
       });
 
       it('should be safe to call multiple times', () => {
-        expect(session.isDisposed).to.be(false);
-        expect(session.isDisposed).to.be(false);
-        session.dispose();
-        expect(session.isDisposed).to.be(true);
-        expect(session.isDisposed).to.be(true);
+        return Session.connectTo(defaultSession.model).then(session => {
+          expect(session.isDisposed).to.be(false);
+          expect(session.isDisposed).to.be(false);
+          session.dispose();
+          expect(session.isDisposed).to.be(true);
+          expect(session.isDisposed).to.be(true);
+        });
       });
     });
 
     context('#dispose()', () => {
 
       it('should dispose of the resources held by the session', () => {
-        session.dispose();
-        expect(session.isDisposed).to.be(true);
+        return Session.connectTo(defaultSession.model).then(session => {
+          session.dispose();
+          expect(session.isDisposed).to.be(true);
+        });
       });
 
       it('should be safe to call twice', () => {
-        session.dispose();
-        expect(session.isDisposed).to.be(true);
-        session.dispose();
-        expect(session.isDisposed).to.be(true);
+        return Session.connectTo(defaultSession.model).then(session => {
+          session.dispose();
+          expect(session.isDisposed).to.be(true);
+          session.dispose();
+          expect(session.isDisposed).to.be(true);
+        });
       });
 
       it('should be safe to call if the kernel is disposed', () => {
-        session.kernel.dispose();
-        session.dispose();
-        expect(session.isDisposed).to.be(true);
+        return Session.connectTo(defaultSession.model).then(session => {
+          session.kernel.dispose();
+          session.dispose();
+          expect(session.isDisposed).to.be(true);
+        });
       });
 
     });
@@ -561,44 +450,33 @@ describe('session', () => {
     context('#setPath()', () => {
 
       it('should set the path of the session', () => {
-        let model = { ...session.model, path: 'foo.ipynb' };
-        tester.onRequest = () => {
-          tester.respond(200, model);
-        };
-        return session.setPath(model.path).then(() => {
-          expect(session.path).to.be(model.path);
-          session.dispose();
+        let newPath = uuid();
+        return defaultSession.setPath(newPath).then(() => {
+          expect(defaultSession.path).to.be(newPath);
         });
       });
 
       it('should fail for improper response status', (done) => {
-        let promise = session.setPath('foo');
-        tester.onRequest = () => {
-          tester.respond(201, { });
-          expectFailure(promise, done);
-        };
+        handleRequest(defaultSession, 201, {});
+        expectFailure(defaultSession.setPath(uuid()), done);
       });
 
       it('should fail for error response status', (done) => {
-        let promise = session.setPath('foo');
-        tester.onRequest = () => {
-          tester.respond(500, { });
-          expectFailure(promise, done, '');
-        };
+        handleRequest(defaultSession, 500, {});
+        expectFailure(defaultSession.setPath(uuid()), done, '');
       });
 
       it('should fail for improper model', (done) => {
-        let promise = session.setPath('foo');
-        tester.onRequest = () => {
-          tester.respond(200, { });
-          expectFailure(promise, done);
-        };
+        handleRequest(defaultSession, 200, {});
+        expectFailure(defaultSession.setPath(uuid()), done);
       });
 
       it('should fail if the session is disposed', (done) => {
-        session.dispose();
-        let promise = session.setPath('foo');
-        expectFailure(promise, done, 'Session is disposed');
+        Session.connectTo(defaultSession.model).then(session => {
+          session.dispose();
+          let promise = session.setPath(uuid());
+          expectFailure(promise, done, 'Session is disposed');
+        }).catch(done);
       });
 
     });
@@ -606,44 +484,33 @@ describe('session', () => {
     context('#setType()', () => {
 
       it('should set the type of the session', () => {
-        let model = { ...session.model, type: 'foo' };
-        tester.onRequest = () => {
-          tester.respond(200, model);
-        };
-        return session.setType(model.type).then(() => {
-          expect(session.type).to.be(model.type);
-          session.dispose();
+        let type = uuid();
+        return defaultSession.setType(type).then(() => {
+          expect(defaultSession.type).to.be(type);
         });
       });
 
       it('should fail for improper response status', (done) => {
-        let promise = session.setType('foo');
-        tester.onRequest = () => {
-          tester.respond(201, { });
-          expectFailure(promise, done);
-        };
+        handleRequest(defaultSession, 201, {});
+        expectFailure(defaultSession.setType(uuid()), done);
       });
 
       it('should fail for error response status', (done) => {
-        let promise = session.setType('foo');
-        tester.onRequest = () => {
-          tester.respond(500, { });
-          expectFailure(promise, done, '');
-        };
+        handleRequest(defaultSession, 500, {});
+        expectFailure(defaultSession.setType(uuid()), done, '');
       });
 
       it('should fail for improper model', (done) => {
-        let promise = session.setType('foo');
-        tester.onRequest = () => {
-          tester.respond(200, { });
-          expectFailure(promise, done);
-        };
+        handleRequest(defaultSession, 200, {});
+        expectFailure(defaultSession.setType(uuid()), done);
       });
 
       it('should fail if the session is disposed', (done) => {
-        session.dispose();
-        let promise = session.setPath('foo');
-        expectFailure(promise, done, 'Session is disposed');
+        Session.connectTo(defaultSession.model).then(session => {
+          session.dispose();
+          let promise = session.setPath(uuid());
+          expectFailure(promise, done, 'Session is disposed');
+        }).catch(done);
       });
 
     });
@@ -651,44 +518,33 @@ describe('session', () => {
     context('#setName()', () => {
 
       it('should set the name of the session', () => {
-        let model = { ...session.model, name: 'foo' };
-        tester.onRequest = () => {
-          tester.respond(200, model);
-        };
-        return session.setName(model.name).then(() => {
-          expect(session.name).to.be(model.name);
-          session.dispose();
+        let name = uuid();
+        return defaultSession.setName(name).then(() => {
+          expect(defaultSession.name).to.be(name);
         });
       });
 
       it('should fail for improper response status', (done) => {
-        let promise = session.setName('foo');
-        tester.onRequest = () => {
-          tester.respond(201, { });
-          expectFailure(promise, done);
-        };
+        handleRequest(defaultSession, 201, {});
+        expectFailure(defaultSession.setName(uuid()), done);
       });
 
       it('should fail for error response status', (done) => {
-        let promise = session.setName('foo');
-        tester.onRequest = () => {
-          tester.respond(500, { });
-          expectFailure(promise, done, '');
-        };
+        handleRequest(defaultSession, 500, {});
+        expectFailure(defaultSession.setName(uuid()), done, '');
       });
 
       it('should fail for improper model', (done) => {
-        let promise = session.setName('foo');
-        tester.onRequest = () => {
-          tester.respond(200, { });
-          expectFailure(promise, done);
-        };
+        handleRequest(defaultSession, 200, {});
+        expectFailure(defaultSession.setName(uuid()), done);
       });
 
       it('should fail if the session is disposed', (done) => {
-        session.dispose();
-        let promise = session.setPath('foo');
-        expectFailure(promise, done, 'Session is disposed');
+        Session.connectTo(defaultSession.model).then(session => {
+          session.dispose();
+          let promise = session.setPath(uuid());
+          expectFailure(promise, done, 'Session is disposed');
+        });
       });
 
     });
@@ -696,56 +552,32 @@ describe('session', () => {
     context('#changeKernel()', () => {
 
       it('should create a new kernel with the new name', () => {
-        let previous = session.kernel;
-        let model = createSessionModel(session.id);
-        let name = model.kernel.name;
-        tester.onRequest = request => {
-          if (request.method === 'PATCH') {
-            tester.respond(200, model);
-          } else {
-            tester.respond(200, { name, id: model.kernel.id });
-          }
-        };
-        return session.changeKernel({ name }).then(kernel => {
+        let previous = defaultSession.kernel;
+        let name = previous.name;
+        return defaultSession.changeKernel({ name }).then(kernel => {
           expect(kernel.name).to.be(name);
-          expect(session.kernel).to.not.be(previous);
+          expect(defaultSession.kernel).to.not.be(previous);
         });
       });
 
       it('should accept the id of the new kernel', () => {
-        let previous = session.kernel;
-        let model = createSessionModel(session.id);
-        let id = model.kernel.id;
-        let name = model.kernel.name;
-        tester.onRequest = request => {
-          if (request.method === 'PATCH') {
-            tester.respond(200, model);
-          } else {
-            tester.respond(200, { name, id });
-          }
-        };
-        return session.changeKernel({ id }).then(kernel => {
-          expect(kernel.name).to.be(name);
-          expect(kernel.id).to.be(id);
-          expect(session.kernel).to.not.be(previous);
+        let previous = defaultSession.kernel;
+        return Kernel.startNew().then(kernel => {
+          return defaultSession.changeKernel({ id: kernel.id });
+        }).then(() => {
+          let kernel = defaultSession.kernel;
+          expect(kernel.id).to.not.be(previous.id);
+          expect(kernel).to.not.be(previous);
         });
       });
 
       it('should update the session path if it has changed', () => {
-        let model = { ...session.model, path: 'foo.ipynb' };
-        let name = model.kernel.name;
-        let id = model.kernel.id;
-        tester.onRequest = request => {
-          if (request.method === 'PATCH') {
-            tester.respond(200, model);
-          } else {
-            tester.respond(200, { name, id});
-          }
-        };
-        return session.changeKernel({ name }).then(kernel => {
+        let model = { ...defaultSession.model, path: 'foo.ipynb' };
+        let name = defaultSession.kernel.name;
+        handleRequest(defaultSession, 200, model);
+        return defaultSession.changeKernel({ name }).then(kernel => {
           expect(kernel.name).to.be(name);
-          expect(session.path).to.be(model.path);
-          session.dispose();
+          expect(defaultSession.path).to.be(model.path);
         });
       });
 
@@ -753,71 +585,69 @@ describe('session', () => {
 
     context('#shutdown()', () => {
 
-      it('should shut down properly', (done) => {
-        session.shutdown().then(done, done);
+      it('should shut down properly', () => {
+        return startNew().then(session => {
+          return session.shutdown();
+        });
       });
 
-      it('should emit a terminated signal', (done) => {
-        session.shutdown();
-        session.terminated.connect(() => {
-          done();
+      it('should emit a terminated signal', () => {
+        let called = false;
+        return startNew().then(session => {
+          session.terminated.connect(() => {
+            called = true;
+          });
+          return session.shutdown();
+        }).then(() => {
+          expect(called).to.be(true);
         });
       });
 
       it('should fail for an incorrect response status', (done) => {
-        tester.onRequest = () => {
-          tester.respond(200, { });
-        };
-        let promise = session.shutdown();
-        expectFailure(promise, done);
+        handleRequest(defaultSession, 200, { });
+        expectFailure(defaultSession.shutdown(), done);
       });
 
-      it('should handle a 404 status', (done) => {
-        tester.onRequest = () => {
-          tester.respond(404, { });
-        };
-        session.shutdown().then(done, done);
+      it('should handle a 404 status', () => {
+        return startNew().then(session => {
+          handleRequest(session, 404, { });
+          return session.shutdown();
+        });
       });
 
       it('should handle a specific error status', (done) => {
-        tester.onRequest = () => {
-          tester.respond(410, { });
-        };
-        session.shutdown().catch(err => {
+        handleRequest(defaultSession, 410, { });
+        defaultSession.shutdown().catch(err => {
           let text ='The kernel was deleted but the session was not';
           expect(err.message).to.contain(text);
         }).then(done, done);
       });
 
       it('should fail for an error response status', (done) => {
-        tester.onRequest = () => {
-          tester.respond(500, { });
-        };
-        let promise = session.shutdown();
-        expectFailure(promise, done, '');
+        handleRequest(defaultSession, 500, { });
+        expectFailure(defaultSession.shutdown(), done, '');
       });
 
       it('should fail if the session is disposed', (done) => {
-        tester.onRequest = () => {
-          tester.respond(204, { });
-        };
-        session.dispose();
-        expectFailure(session.shutdown(), done, 'Session is disposed');
+        Session.connectTo(defaultSession.model).then(session => {
+          session.dispose();
+          expectFailure(session.shutdown(), done, 'Session is disposed');
+        }).catch(done);
       });
 
-      // it('should dispose of all session instances', () => {
-      // TODO: reinstate after swithing to server based tests.
-      //   let session2: Session.ISession;
-      //   return Session.connectTo(session.id).then(s => {
-      //     session2 = s;
-      //     tester.onRequest = () => {
-      //       tester.respond(204, { });
-      //     };
-      //     return session.shutdown();
-      //   }).then(() => {
-      //     expect(session2.isDisposed).to.be(true);
-      //   });
-      // });
+      it('should dispose of all session instances', () => {
+        let session0: Session.ISession;
+        let session1: Session.ISession;
+        return startNew().then(s => {
+          session0 = s;
+          return Session.connectTo(session0.model);
+        }).then(s => {
+          session1 = s;
+          return session0.shutdown();
+        }).then(() => {
+          expect(session1.isDisposed).to.be(true);
+        });
+      });
 
     });
 

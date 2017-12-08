@@ -476,7 +476,7 @@ namespace Kernel {
   /**
    * Connect to a running kernel.
    *
-   * @param id - The id of the running kernel.
+   * @param model - The model of the running kernel.
    *
    * @param settings - The server settings for the request.
    *
@@ -485,18 +485,10 @@ namespace Kernel {
    * #### Notes
    * If the kernel was already started via `startNewKernel`, the existing
    * Kernel object info is used to create another instance.
-   *
-   * Otherwise, if `options` are given, we attempt to connect to the existing
-   * kernel found by calling `listRunningKernels`.
-   * The promise is fulfilled when the kernel is running on the server,
-   * otherwise the promise is rejected.
-   *
-   * If the kernel was not already started and no `options` are given,
-   * the promise is rejected.
    */
   export
-  function connectTo(id: string, settings?: ServerConnection.ISettings): Promise<IKernel> {
-    return DefaultKernel.connectTo(id, settings);
+  function connectTo(model: Kernel.IModel, settings?: ServerConnection.ISettings): Promise<IKernel> {
+    return DefaultKernel.connectTo(model, settings);
   }
 
   /**
@@ -511,6 +503,16 @@ namespace Kernel {
   export
   function shutdown(id: string, settings?: ServerConnection.ISettings): Promise<void> {
     return DefaultKernel.shutdown(id, settings);
+  }
+
+  /**
+   * Shut down all kernels.
+   *
+   * @returns A promise that resolves when all of the kernels are shut down.
+   */
+  export
+  function shutdownAll(settings?: ServerConnection.ISettings): Promise<void> {
+    return DefaultKernel.shutdownAll(settings);
   }
 
   /**
@@ -634,11 +636,11 @@ namespace Kernel {
     /**
      * Connect to an existing  kernel.
      *
-     * @param id - The id of the target kernel.
+     * @param model - The model of the target kernel.
      *
      * @returns A promise that resolves with the new kernel instance.
      */
-    connectTo(id: string): Promise<IKernel>;
+    connectTo(model: Kernel.IModel): Promise<IKernel>;
 
     /**
      * Shut down a kernel by id.
@@ -648,6 +650,13 @@ namespace Kernel {
      * @returns A promise that resolves when the operation is complete.
      */
     shutdown(id: string): Promise<void>;
+
+    /**
+     * Shut down all kernels.
+     *
+     * @returns A promise that resolves when all of the kernels are shut down.
+     */
+    shutdownAll(): Promise<void>;
   }
 
   /**

@@ -20,32 +20,25 @@ import {
   TerminalManager
 } from '../../lib/terminal';
 
-import {
-  KernelTester
-} from './utils';
-
 
 describe('manager', () => {
 
   describe('ServiceManager', () => {
 
     let manager: ServiceManager.IManager;
-    let tester: KernelTester;
 
     beforeEach(() => {
-      tester = new KernelTester();
       manager = new ServiceManager();
       return manager.ready;
     });
 
     afterEach(() => {
       manager.dispose();
-      tester.dispose();
     });
 
     describe('#constructor()', () => {
 
-      it('should create a new session manager', () => {
+      it('should create a new service manager', () => {
         expect(manager).to.be.a(ServiceManager);
       });
 
@@ -77,14 +70,13 @@ describe('manager', () => {
 
     describe('#isReady', () => {
 
-      it('should test whether the manager is ready', (done) => {
+      it('should test whether the manager is ready', () => {
         manager.dispose();
         manager = new ServiceManager();
         expect(manager.isReady).to.be(false);
-        manager.ready.then(() => {
+        return manager.ready.then(() => {
           expect(manager.isReady).to.be(true);
-          done();
-        }).catch(done);
+        });
       });
 
     });

@@ -44,19 +44,17 @@ class SettingManager {
    */
   fetch(id: string): Promise<ISettingRegistry.IPlugin> {
     const base = this.serverSettings.baseUrl;
-    const request = { method: 'GET', url: Private.url(base, id) };
     const { serverSettings } = this;
-    const promise = ServerConnection.makeRequest(request, serverSettings);
+    const url = Private.url(base, id);
+    const promise = ServerConnection.makeRequest(url, {}, serverSettings);
 
     return promise.then(response => {
-      const { status } = response.xhr;
-
-      if (status !== 200) {
-        throw ServerConnection.makeError(response);
+      if (response.status !== 200) {
+        throw new ServerConnection.ResponseError(response);
       }
 
-      return response.data;
-    }).catch(reason => { throw ServerConnection.makeError(reason); });
+      return response.json();
+    });
   }
 
   /**
@@ -71,24 +69,21 @@ class SettingManager {
    */
   save(id: string, raw: string): Promise<void> {
     const base = this.serverSettings.baseUrl;
-    const request = {
-      data: raw,
-      contentType: 'text/javascript',
-      method: 'PUT',
-      url: Private.url(base, id)
-    };
     const { serverSettings } = this;
-    const promise = ServerConnection.makeRequest(request, serverSettings);
+    const url = Private.url(base, id);
+    const init = {
+      body: raw,
+      method: 'PUT'
+    };
+    const promise = ServerConnection.makeRequest(url, init, serverSettings);
 
     return promise.then(response => {
-      const { status } = response.xhr;
-
-      if (status !== 204) {
-        throw ServerConnection.makeError(response);
+      if (response.status !== 204) {
+        throw new ServerConnection.ResponseError(response);
       }
 
       return void 0;
-    }).catch(reason => { throw ServerConnection.makeError(reason); });
+    });
   }
 }
 

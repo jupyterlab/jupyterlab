@@ -17,7 +17,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  ServiceManager, ServerConnection
+  ServiceManager
 } from '@jupyterlab/services';
 
 import {
@@ -65,8 +65,6 @@ class SettingsConnector extends DataConnector<ISettingRegistry.IPlugin, string> 
       data.id = id;
 
       return data;
-    }).catch(reason => {
-      throw this._error(id, (reason as ServerConnection.IError).xhr);
     });
   }
 
@@ -74,24 +72,7 @@ class SettingsConnector extends DataConnector<ISettingRegistry.IPlugin, string> 
    * Save the user setting data in the data connector.
    */
   save(id: string, raw: string): Promise<void> {
-    return this._manager.settings.save(id, raw).catch(reason => {
-      throw this._error(id, (reason as ServerConnection.IError).xhr);
-    });
-  }
-
-  /**
-   * Convert an API `XMLHTTPRequest` error to a simple error.
-   */
-  private _error(id: string, xhr: XMLHttpRequest): Error {
-    let message: string;
-
-    try {
-      message = JSON.parse(xhr.response).message;
-    } catch (error) {
-      message = `Error accessing ${id} HTTP ${xhr.status} ${xhr.statusText}`;
-    }
-
-    return new Error(message);
+    return this._manager.settings.save(id, raw);
   }
 
   private _manager: ServiceManager;

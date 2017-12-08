@@ -6,7 +6,7 @@
 require('es6-promise').polyfill();
 
 module.exports = {
-  entry: './index.js',
+  entry: ['whatwg-fetch', './index.js'],
   output: {
     path: __dirname + '/build',
     filename: 'bundle.js',

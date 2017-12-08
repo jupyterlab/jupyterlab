@@ -712,9 +712,10 @@ namespace KernelMessage {
       /**
        * Mapping of comm ids to target names.
        */
-      comms: { [id: string]: string };
+      comms: { [commId: string]: { 'target_name': string } };
     };
   }
+
 
   /**
    * Options for an `IMessage`.

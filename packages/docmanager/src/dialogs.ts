@@ -80,9 +80,6 @@ function renameDialog(manager: IDocumentManager, oldPath: string): Promise<Conte
 export
 function renameFile(manager: IDocumentManager, oldPath: string, newPath: string): Promise<Contents.IModel | null> {
   return manager.rename(oldPath, newPath).catch(error => {
-    if (error.xhr) {
-      error.message = `${error.xhr.statusText} ${error.xhr.status}`;
-    }
     if (error.message.indexOf('409') === -1) {
       throw error;
     }

@@ -175,7 +175,7 @@ class DefaultSession implements Session.ISession {
    * Clone the current session with a new clientId.
    */
   clone(): Promise<Session.ISession> {
-    return Kernel.connectTo(this.kernel.id, this.serverSettings).then(kernel => {
+    return Kernel.connectTo(this.kernel.model, this.serverSettings).then(kernel => {
       return new DefaultSession({
         path: this._path,
         serverSettings: this.serverSettings
@@ -197,7 +197,7 @@ class DefaultSession implements Session.ISession {
     this._type = model.type;
 
     if (this._kernel.isDisposed || model.kernel.id !== this._kernel.id) {
-      return Kernel.connectTo(model.kernel.id, this.serverSettings).then(kernel => {
+      return Kernel.connectTo(model.kernel, this.serverSettings).then(kernel => {
         this.setupKernel(kernel);
         this._kernelChanged.emit(kernel);
         this._handleModelChange(oldModel);
@@ -292,7 +292,7 @@ class DefaultSession implements Session.ISession {
    *
    * #### Notes
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/sessions), and validates the response.
-   * Emits a [sessionDied] signal on success.
+   * Disposes of the session and emits a [sessionDied] signal on success.
    */
   shutdown(): Promise<void> {
     if (this.isDisposed) {
@@ -302,7 +302,8 @@ class DefaultSession implements Session.ISession {
   }
 
   /**
-   * Handle connections to a kernel.
+   * Handle connections to a kernel.  This method is not meant to be
+   * subclassed.
    */
   protected setupKernel(kernel: Kernel.IKernel): void {
     this._kernel = kernel;
@@ -335,31 +336,26 @@ class DefaultSession implements Session.ISession {
   /**
    * Send a PATCH to the server, updating the session path or the kernel.
    */
-  private _patch(data: string): Promise<Session.IModel> {
+  private _patch(body: string): Promise<Session.IModel> {
     this._updating = true;
     let settings = this.serverSettings;
-    let request = {
-      url: Private.getSessionUrl(settings.baseUrl, this._id),
+    let url = Private.getSessionUrl(settings.baseUrl, this._id);
+    let init = {
       method: 'PATCH',
-      data,
-      contentType: 'application/json',
-      cache: false
+      body
     };
-    return ServerConnection.makeRequest(request, settings).then(response => {
+    return ServerConnection.makeRequest(url, init, settings).then(response => {
       this._updating = false;
-      if (response.xhr.status !== 200) {
-        throw ServerConnection.makeError(response);
+      if (response.status !== 200) {
+        throw new ServerConnection.ResponseError(response);
       }
-      let value = response.data;
-      try {
-        let model = validate.validateModel(value);
-        return Private.updateFromServer(model, settings.baseUrl);
-      } catch (err) {
-        throw ServerConnection.makeError(response, err.message);
-      }
+      return response.json();
+    }).then(data => {
+      let model = validate.validateModel(data);
+      return Private.updateFromServer(model, settings.baseUrl);
     }, error => {
       this._updating = false;
-      return Private.onSessionError(error);
+      throw error;
     });
   }
 
@@ -434,8 +430,8 @@ namespace DefaultSession {
    * Connect to a running session.
    */
   export
-  function connectTo(id: string, settings?: ServerConnection.ISettings): Promise<Session.ISession> {
-    return Private.connectTo(id, settings);
+  function connectTo(model: Session.IModel, settings?: ServerConnection.ISettings): Promise<Session.ISession> {
+    return Private.connectTo(model, settings);
   }
 
   /**
@@ -444,6 +440,18 @@ namespace DefaultSession {
   export
   function shutdown(id: string, settings?: ServerConnection.ISettings): Promise<void> {
     return Private.shutdownSession(id, settings);
+  }
+
+  /**
+   * Shut down all sessions.
+   *
+   * @param settings - The server settings to use.
+   *
+   * @returns A promise that resolves when all the sessions are shut down.
+   */
+  export
+  function shutdownAll(settings?: ServerConnection.ISettings): Promise<void> {
+    return Private.shutdownAll(settings);
   }
 }
 
@@ -484,19 +492,14 @@ namespace Private {
    * Connect to a running session.
    */
   export
-  function connectTo(id: string, settings?: ServerConnection.ISettings): Promise<Session.ISession> {
+  function connectTo(model: Session.IModel, settings?: ServerConnection.ISettings): Promise<Session.ISession> {
     settings = settings || ServerConnection.makeSettings();
     let running = runningSessions.get(settings.baseUrl) || [];
-    let session = find(running, value => value.id === id);
+    let session = find(running, value => value.id === model.id);
     if (session) {
       return Promise.resolve(session.clone());
     }
-    return getSessionModel(id, settings).then(model => {
-      return createSession(model, settings);
-    }).catch(() => {
-      let msg = `No running session with id: ${id}`;
-      return typedThrow<Session.ISession>(msg);
-    });
+    return createSession(model, settings);
   }
 
   /**
@@ -507,15 +510,13 @@ namespace Private {
   export
   function createSession(model: Session.IModel, settings?: ServerConnection.ISettings): Promise<DefaultSession> {
     settings = settings || ServerConnection.makeSettings();
-    return Kernel.connectTo(model.kernel.id, settings).then(kernel => {
+    return Kernel.connectTo(model.kernel, settings).then(kernel => {
       return new DefaultSession({
         path: model.path,
         type: model.type,
         name: model.name,
         serverSettings: settings
       }, model.id, kernel);
-    }).catch(error => {
-      return typedThrow('Session failed to start: ' + error.message);
     });
   }
 
@@ -532,8 +533,7 @@ namespace Private {
     }
 
     return getSessionModel(id, settings).catch(() => {
-      let msg = `No running session for id: ${id}`;
-      return typedThrow<Session.IModel>(msg);
+      throw new Error(`No running session for id: ${id}`);
     });
   }
 
@@ -556,8 +556,7 @@ namespace Private {
       if (model) {
         return model;
       }
-      let msg = `No running session for path: ${path}`;
-      return typedThrow<Session.IModel>(msg);
+      throw new Error(`No running session for path: ${path}`);
     });
   }
 
@@ -567,23 +566,16 @@ namespace Private {
   export
   function getSessionModel(id: string, settings?: ServerConnection.ISettings): Promise<Session.IModel> {
     settings = settings || ServerConnection.makeSettings();
-    let request = {
-      url: getSessionUrl(settings.baseUrl, id),
-      method: 'GET',
-      cache: false
-    };
-    return ServerConnection.makeRequest(request, settings).then(response => {
-      if (response.xhr.status !== 200) {
-        throw ServerConnection.makeError(response);
+    let url = getSessionUrl(settings.baseUrl, id);
+    return ServerConnection.makeRequest(url, {}, settings).then(response => {
+      if (response.status !== 200) {
+        throw new ServerConnection.ResponseError(response);
       }
-      let data = response.data as Session.IModel;
-      try {
-        validate.validateModel(data);
-      } catch (err) {
-        throw ServerConnection.makeError(response, err.message || String(err));
-      }
+      return response.json();
+    }).then(data => {
+      validate.validateModel(data);
       return updateFromServer(data, settings!.baseUrl);
-    }, Private.onSessionError);
+    });
   }
 
   /**
@@ -613,41 +605,21 @@ namespace Private {
   export
   function listRunning(settings?: ServerConnection.ISettings): Promise<Session.IModel[]> {
     settings = settings || ServerConnection.makeSettings();
-    let request = {
-      url: URLExt.join(settings.baseUrl, SESSION_SERVICE_URL),
-      method: 'GET',
-      cache: false
-    };
-    return ServerConnection.makeRequest(request, settings).then(response => {
-      if (response.xhr.status !== 200) {
-        throw ServerConnection.makeError(response);
+    let url = URLExt.join(settings.baseUrl, SESSION_SERVICE_URL);
+    return ServerConnection.makeRequest(url, {}, settings).then(response => {
+      if (response.status !== 200) {
+        throw new ServerConnection.ResponseError(response);
       }
-      let data = response.data as Session.IModel[];
-      if (!Array.isArray(response.data)) {
-        throw ServerConnection.makeError(response, 'Invalid Session list');
+      return response.json();
+    }).then(data => {
+      if (!Array.isArray(data)) {
+        throw new Error('Invalid Session list');
       }
       for (let i = 0; i < data.length; i++) {
-        try {
-          validate.validateModel(data[i]);
-        } catch (err) {
-          throw ServerConnection.makeError(response, err.message);
-        }
+        validate.validateModel(data[i]);
       }
       return updateRunningSessions(data, settings!.baseUrl);
-    }, Private.onSessionError);
-  }
-
-  /**
-   * Handle an error on a session Ajax call.
-   */
-  export
-  function onSessionError(error: ServerConnection.IError): Promise<any> {
-    let text = (error.message ||
-                error.xhr.statusText ||
-                error.xhr.responseText);
-    let msg = `API request failed: ${text}`;
-    console.error(msg);
-    return Promise.reject(error);
+    });
   }
 
   /**
@@ -656,28 +628,37 @@ namespace Private {
   export
   function shutdownSession(id: string, settings?: ServerConnection.ISettings): Promise<void> {
     settings = settings || ServerConnection.makeSettings();
-    let request = {
-      url: getSessionUrl(settings.baseUrl, id),
-      method: 'DELETE',
-      cache: false
-    };
-
-    return ServerConnection.makeRequest(request, settings).then(response => {
-      if (response.xhr.status !== 204) {
-        throw ServerConnection.makeError(response);
+    let url = getSessionUrl(settings.baseUrl, id);
+    let init = { method: 'DELETE' };
+    return ServerConnection.makeRequest(url, init, settings).then(response => {
+      if (response.status === 404) {
+        response.json().then(data => {
+          let msg = (
+            data.message || `The session "${id}"" does not exist on the server`
+          );
+          console.warn(msg);
+        });
+      } else if (response.status === 410) {
+        throw new ServerConnection.ResponseError(response,
+          'The kernel was deleted but the session was not'
+        );
+      } else if (response.status !== 204) {
+        throw new ServerConnection.ResponseError(response);
       }
       killSessions(id, settings!.baseUrl);
-    }, err => {
-      if (err.xhr.status === 404) {
-        let response = JSON.parse(err.xhr.responseText) as any;
-        console.warn(response['message']);
-        killSessions(id, settings!.baseUrl);
-        return;
-      }
-      if (err.xhr.status === 410) {
-        err.message = 'The kernel was deleted but the session was not';
-      }
-      return onSessionError(err);
+    });
+  }
+
+  /**
+   * Shut down all sessions.
+   */
+  export
+  function shutdownAll(settings?: ServerConnection.ISettings): Promise<void> {
+    settings = settings || ServerConnection.makeSettings();
+    return listRunning(settings).then(running => {
+      each(running, s => {
+        shutdownSession(s.id, settings);
+      });
     });
   }
 
@@ -707,33 +688,20 @@ namespace Private {
       type: options.type || '',
       name: options.name || ''
     };
-    let request = {
-      url: URLExt.join(settings.baseUrl, SESSION_SERVICE_URL),
+    let url = URLExt.join(settings.baseUrl, SESSION_SERVICE_URL);
+    let init = {
       method: 'POST',
-      cache: false,
-      data: JSON.stringify(model),
-      contentType: 'application/json'
+      body: JSON.stringify(model)
     };
-    return ServerConnection.makeRequest(request, settings).then(response => {
-      if (response.xhr.status !== 201) {
-        throw ServerConnection.makeError(response);
+    return ServerConnection.makeRequest(url, init, settings).then(response => {
+      if (response.status !== 201) {
+        throw new ServerConnection.ResponseError(response);
       }
-      try {
-        validate.validateModel(response.data);
-      } catch (err) {
-        throw ServerConnection.makeError(response, err.message);
-      }
-      let data = response.data as Session.IModel;
+      return response.json();
+    }).then(data => {
+      validate.validateModel(data);
       return updateFromServer(data, settings.baseUrl);
-    }, onSessionError);
-  }
-
-  /**
-   * Throw a typed error.
-   */
-  export
-  function typedThrow<T>(msg: string): T {
-    throw new Error(msg);
+    });
   }
 
   /**

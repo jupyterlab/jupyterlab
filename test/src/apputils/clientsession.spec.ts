@@ -519,6 +519,7 @@ describe('@jupyterlab/apputils', () => {
         let spec = manager.specs.kernelspecs[manager.specs.default];
         let kernelspecs: any = {};
         kernelspecs[spec.name] = spec;
+        debugger;
         expect(ClientSession.getDefaultKernel({
           specs: {
             default: spec.name,

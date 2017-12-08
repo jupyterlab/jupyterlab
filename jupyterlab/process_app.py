@@ -3,16 +3,12 @@
 
 from __future__ import print_function, absolute_import
 
-import atexit
-import os
-import shutil
 import sys
-import tempfile
 
 from jupyterlab.process import Process
 from notebook.notebookapp import NotebookApp
 from tornado.ioloop import IOLoop
-from traitlets import Bool, Unicode
+from traitlets import Bool
 
 
 class ProcessApp(NotebookApp):
@@ -45,23 +41,3 @@ class ProcessApp(NotebookApp):
         except Exception as e:
             self.log.error(str(e))
             sys.exit(1)
-
-
-def _create_notebook_dir():
-    """Create a temporary directory with some file structure."""
-    root_dir = tempfile.mkdtemp(prefix='mock_contents')
-    os.mkdir(os.path.join(root_dir, 'src'))
-    with open(os.path.join(root_dir, 'src', 'temp.txt'), 'w') as fid:
-        fid.write('hello')
-    atexit.register(lambda: shutil.rmtree(root_dir, True))
-    return root_dir
-
-
-class TestApp(ProcessApp):
-    """A process app for running tests, includes a mock contents directory.
-    """
-    notebook_dir = Unicode(_create_notebook_dir())
-
-
-if __name__ == '__main__':
-    TestApp.launch_instance()

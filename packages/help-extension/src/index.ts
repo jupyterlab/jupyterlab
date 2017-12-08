@@ -211,11 +211,11 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     if (!sessions.length) {
       return;
     }
-    const sessionModel = sessions[sessions.length-1];
+    const sessionModel = sessions[sessions.length - 1];
     if (kernelInfoCache.has(sessionModel.kernel.name)) {
       return;
     }
-    serviceManager.sessions.connectTo(sessionModel.id).then((session) => {
+    serviceManager.sessions.connectTo(sessionModel).then(session => {
       session.kernel.ready.then(() => {
         // Check the cache second time so that, if two callbacks get scheduled,
         // they don't try to add the same commands.
@@ -243,7 +243,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
             }
           });
           return result;
-        }
+        };
 
         // Add the kernel banner to the Help Menu.
         const bannerCommand = `help-menu-${name}:banner`;
@@ -287,7 +287,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
             label: link.text,
             isVisible: usesKernel,
             isEnabled: usesKernel,
-            execute: () => { commands.execute(CommandIDs.open, link) }
+            execute: () => { commands.execute(CommandIDs.open, link); }
           });
           kernelGroup.push({ command: commandId });
         });

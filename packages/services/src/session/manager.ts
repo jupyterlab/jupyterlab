@@ -47,7 +47,7 @@ class SessionManager implements Session.IManager {
     });
 
     // Set up polling.
-    this._runningTimer = (setInterval as any)(() => {
+    this._modelsTimer = (setInterval as any)(() => {
       this._refreshRunning();
     }, 10000);
     this._specsTimer = (setInterval as any)(() => {
@@ -110,10 +110,10 @@ class SessionManager implements Session.IManager {
       return;
     }
     this._isDisposed = true;
-    clearInterval(this._runningTimer);
+    clearInterval(this._modelsTimer);
     clearInterval(this._specsTimer);
     Signal.clearData(this);
-    this._running.length = 0;
+    this._models.length = 0;
   }
 
   /**
@@ -122,7 +122,7 @@ class SessionManager implements Session.IManager {
    * @returns A new iterator over the running sessions.
    */
   running(): IIterator<Session.IModel> {
-    return iter(this._running);
+    return iter(this._models);
   }
 
   /**
@@ -200,8 +200,8 @@ class SessionManager implements Session.IManager {
   /*
    * Connect to a running session.  See also [[connectToSession]].
    */
-  connectTo(id: string): Promise<Session.ISession> {
-    return Session.connectTo(id, this.serverSettings).then(session => {
+  connectTo(model: Session.IModel): Promise<Session.ISession> {
+    return Session.connectTo(model, this.serverSettings).then(session => {
       this._onStarted(session);
       return session;
     });
@@ -211,8 +211,33 @@ class SessionManager implements Session.IManager {
    * Shut down a session by id.
    */
   shutdown(id: string): Promise<void> {
+    let index = ArrayExt.findFirstIndex(this._models, value => value.id === id);
+    if (index === -1) {
+      return;
+    }
     return Session.shutdown(id, this.serverSettings).then(() => {
-      this._onTerminated(id);
+      let toRemove: Session.ISession[] = [];
+      this._sessions.forEach(s => {
+        if (s.id === id) {
+          s.dispose();
+          toRemove.push(s);
+        }
+      });
+      toRemove.forEach(s => { this._sessions.delete(s); });
+      this._runningChanged.emit(this._models.slice());
+    });
+  }
+
+  /**
+   * Shut down all sessions.
+   *
+   * @returns A promise that resolves when all of the sessions are shut down.
+   */
+  shutdownAll(): Promise<void> {
+    return this._refreshRunning().then(() => {
+      return Promise.all(this._models.map(model => this.shutdown(model.name))).then(() => {
+        return Promise.resolve(void 0);
+      });
     });
   }
 
@@ -220,10 +245,10 @@ class SessionManager implements Session.IManager {
    * Handle a session terminating.
    */
   private _onTerminated(id: string): void {
-    let index = ArrayExt.findFirstIndex(this._running, value => value.id === id);
+    let index = ArrayExt.findFirstIndex(this._models, value => value.id === id);
     if (index !== -1) {
-      this._running.splice(index, 1);
-      this._runningChanged.emit(this._running.slice());
+      this._models.splice(index, 1);
+      this._runningChanged.emit(this._models.slice());
     }
   }
 
@@ -232,15 +257,16 @@ class SessionManager implements Session.IManager {
    */
   private _onStarted(session: Session.ISession): void {
     let id = session.id;
-    let index = ArrayExt.findFirstIndex(this._running, value => value.id === id);
+    let index = ArrayExt.findFirstIndex(this._models, value => value.id === id);
+    this._sessions.add(session);
     if (index === -1) {
-      this._running.push(session.model);
-      this._runningChanged.emit(this._running.slice());
+      this._models.push(session.model);
+      this._runningChanged.emit(this._models.slice());
     }
-    session.terminated.connect(() => {
+    session.terminated.connect((s) => {
       this._onTerminated(id);
     });
-    session.propertyChanged.connect(() => {
+    session.propertyChanged.connect((sender, prop) => {
       this._onChanged(session.model);
     });
     session.kernelChanged.connect(() => {
@@ -252,10 +278,10 @@ class SessionManager implements Session.IManager {
    * Handle a change to a session.
    */
   private _onChanged(model: Session.IModel): void {
-    let index = ArrayExt.findFirstIndex(this._running, value => value.id === model.id);
+    let index = ArrayExt.findFirstIndex(this._models, value => value.id === model.id);
     if (index !== -1) {
-      this._running[index] = model;
-      this._runningChanged.emit(this._running.slice());
+      this._models[index] = model;
+      this._runningChanged.emit(this._models.slice());
     }
   }
 
@@ -275,18 +301,28 @@ class SessionManager implements Session.IManager {
    * Refresh the running sessions.
    */
   private _refreshRunning(): Promise<void> {
-    return Session.listRunning(this.serverSettings).then(running => {
-      if (!JSONExt.deepEqual(running, this._running)) {
-        this._running = running.slice();
-        this._runningChanged.emit(running);
+    return Session.listRunning(this.serverSettings).then(models => {
+      if (!JSONExt.deepEqual(models, this._models)) {
+        let ids = models.map(r => r.id);
+        let toRemove: Session.ISession[] = [];
+        this._sessions.forEach(s => {
+          if (ids.indexOf(s.id) === -1) {
+            s.dispose();
+            toRemove.push(s);
+          }
+        });
+        toRemove.forEach(s => { this._sessions.delete(s); });
+        this._models = models.slice();
+        this._runningChanged.emit(models);
       }
     });
   }
 
   private _isDisposed = false;
-  private _running: Session.IModel[] = [];
+  private _models: Session.IModel[] = [];
+  private _sessions = new Set<Session.ISession>();
   private _specs: Kernel.ISpecModels | null = null;
-  private _runningTimer = -1;
+  private _modelsTimer = -1;
   private _specsTimer = -1;
   private _readyPromise: Promise<void>;
   private _specsChanged = new Signal<this, Kernel.ISpecModels>(this);

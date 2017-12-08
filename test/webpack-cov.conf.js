@@ -1,7 +1,7 @@
 var path = require('path');
 
 module.exports = {
-  entry: './build/index.js',
+  entry: ['@phosphor/widgets/style/index.css', './build/index.js'],
   output: {
     path: __dirname + "/build",
     filename: "coverage.js",

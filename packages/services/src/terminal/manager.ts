@@ -81,7 +81,7 @@ class TerminalManager implements TerminalSession.IManager {
     this._isDisposed = true;
     clearInterval(this._refreshTimer);
     Signal.clearData(this);
-    this._running = [];
+    this._models = [];
   }
 
   /**
@@ -104,7 +104,7 @@ class TerminalManager implements TerminalSession.IManager {
    * @returns A new iterator over the running terminals.
    */
   running(): IIterator<TerminalSession.IModel> {
-    return iter(this._running);
+    return iter(this._models);
   }
 
   /**
@@ -149,8 +149,33 @@ class TerminalManager implements TerminalSession.IManager {
    * Shut down a terminal session by name.
    */
   shutdown(name: string): Promise<void> {
+    let index = ArrayExt.findFirstIndex(this._models, value => value.name === name);
+    if (index === -1) {
+      return;
+    }
     return TerminalSession.shutdown(name, this.serverSettings).then(() => {
-      this._onTerminated(name);
+      let toRemove: TerminalSession.ISession[] = [];
+      this._sessions.forEach(s => {
+        if (s.name === name) {
+          s.dispose();
+          toRemove.push(s);
+        }
+      });
+      toRemove.forEach(s => { this._sessions.delete(s); });
+      this._runningChanged.emit(this._models.slice());
+    });
+  }
+
+  /**
+   * Shut down all terminal sessions.
+   *
+   * @returns A promise that resolves when all of the sessions are shut down.
+   */
+  shutdownAll(): Promise<void> {
+    return this._refreshRunning().then(() => {
+      return Promise.all(this._models.map(model => this.shutdown(model.name)));
+    }).then(() => {
+      return Promise.resolve(void 0);
     });
   }
 
@@ -171,10 +196,10 @@ class TerminalManager implements TerminalSession.IManager {
    * Handle a session terminating.
    */
   private _onTerminated(name: string): void {
-    let index = ArrayExt.findFirstIndex(this._running, value => value.name === name);
+    let index = ArrayExt.findFirstIndex(this._models, value => value.name === name);
     if (index !== -1) {
-      this._running.splice(index, 1);
-      this._runningChanged.emit(this._running.slice());
+      this._models.splice(index, 1);
+      this._runningChanged.emit(this._models.slice());
     }
   }
 
@@ -183,10 +208,11 @@ class TerminalManager implements TerminalSession.IManager {
    */
   private _onStarted(session: TerminalSession.ISession): void {
     let name = session.name;
-    let index = ArrayExt.findFirstIndex(this._running, value => value.name === name);
+    this._sessions.add(session);
+    let index = ArrayExt.findFirstIndex(this._models, value => value.name === name);
     if (index === -1) {
-      this._running.push(session.model);
-      this._runningChanged.emit(this._running.slice());
+      this._models.push(session.model);
+      this._runningChanged.emit(this._models.slice());
     }
     session.terminated.connect(() => {
       this._onTerminated(name);
@@ -197,11 +223,20 @@ class TerminalManager implements TerminalSession.IManager {
    * Refresh the running sessions.
    */
   private _refreshRunning(): Promise<void> {
-    return TerminalSession.listRunning(this.serverSettings).then(running => {
+    return TerminalSession.listRunning(this.serverSettings).then(models => {
       this._isReady = true;
-      if (!JSONExt.deepEqual(running, this._running)) {
-        this._running = running.slice();
-        this._runningChanged.emit(running);
+      if (!JSONExt.deepEqual(models, this._models)) {
+        let names = models.map(r => r.name);
+        let toRemove: TerminalSession.ISession[] = [];
+        this._sessions.forEach(s => {
+          if (names.indexOf(s.name) === -1) {
+            s.dispose();
+            toRemove.push(s);
+          }
+        });
+        toRemove.forEach(s => { this._sessions.delete(s); });
+        this._models = models.slice();
+        this._runningChanged.emit(models);
       }
     });
   }
@@ -213,7 +248,8 @@ class TerminalManager implements TerminalSession.IManager {
     return { ...options, serverSettings: this.serverSettings };
   };
 
-  private _running: TerminalSession.IModel[] = [];
+  private _models: TerminalSession.IModel[] = [];
+  private _sessions = new Set<TerminalSession.ISession>();
   private _isDisposed = false;
   private _isReady = false;
   private _refreshTimer = -1;

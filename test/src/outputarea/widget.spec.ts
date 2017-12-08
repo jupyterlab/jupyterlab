@@ -259,12 +259,19 @@ describe('outputarea/widget', () => {
           'display_with_id(3, "there")',
           'display_with_id(4, "here")',
         ].join('\n');
-        let promise0 = OutputArea.execute(code0, widget0, session);
-        let promise1 = OutputArea.execute(code1, widget1, session);
-        return Promise.all([promise0, promise1]).then(() => {
+
+        let ipySession: ClientSession;
+        return createClientSession({ kernelPreference: { name: 'ipython' } }).then(s => {
+          ipySession = s;
+          return s.initialize();
+        }).then(() => {
+          let promise0 = OutputArea.execute(code0, widget0, ipySession);
+          let promise1 = OutputArea.execute(code1, widget1, ipySession);
+          return Promise.all([promise0, promise1]);
+        }).then(() => {
           expect(model1.length).to.be(3);
           expect(model1.toJSON()[1].data).to.eql({ 'text/plain': '1' });
-          return OutputArea.execute(code2, widget2, session);
+          return OutputArea.execute(code2, widget2, ipySession);
         }).then(() => {
           expect(model1.length).to.be(3);
           expect(model1.toJSON()[1].data).to.eql({ 'text/plain': '4' });
@@ -273,6 +280,7 @@ describe('outputarea/widget', () => {
           expect(outputs[0].data).to.eql({ 'text/plain': '4' });
           expect(outputs[1].data).to.eql({ 'text/plain': '3' });
           expect(outputs[2].data).to.eql({ 'text/plain': '4' });
+          return ipySession.shutdown();
         });
       });
 

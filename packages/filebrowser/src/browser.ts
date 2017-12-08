@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/docmanager';
 
 import {
-  Contents
+  Contents, ServerConnection
 } from '@jupyterlab/services';
 
 import {
@@ -270,10 +270,25 @@ class FileBrowser extends Widget {
       return;
     }
     this._showingError = true;
+
     let title = 'Server Connection Error';
-    if (args.message.indexOf('Directory not found') === 0) {
-      title = 'Directory not found';
+    let networkMsg = (
+      'A connection to the Jupyter server could not be established.\n' +
+      'JupyterLab will continue trying to reconnect.\n' +
+      'Check your network connection or Jupyter server configuration.\n'
+    );
+
+    // Check for a fetch error.
+    if (args instanceof ServerConnection.NetworkError) {
+      args.message = networkMsg;
+
+    } else if (args instanceof ServerConnection.ResponseError) {
+      if (args.response.status === 404) {
+        title = 'Directory not found';
+        args.message = `Directory not found: "${this.model.path}"`;
+      }
     }
+
     showErrorMessage(title, args).then(() => {
       this._showingError = false;
     });
