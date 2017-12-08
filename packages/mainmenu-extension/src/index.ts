@@ -240,7 +240,6 @@ function createFileMenu(app: JupyterLab, menu: FileMenu): void {
   menu.addGroup(closeGroup, 1);
   menu.addGroup(saveGroup, 2);
   menu.addGroup(reGroup, 3);
-  menu.addGroup([{ command: 'docmanager:delete-file' }], 4);
   menu.addGroup([{ command: 'settingeditor:open' }], 1000);
 }
 
