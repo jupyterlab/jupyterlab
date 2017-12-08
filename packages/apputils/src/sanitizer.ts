@@ -35,6 +35,12 @@ class Sanitizer implements ISanitizer {
       'code': ['class'],
       // Allow "class" attribute for <span> tags.
       'span': ['class'],
+      // Allow "class" attribute for <div> tags.
+      'div': ['class'],
+      // Allow "class" attribute for <p> tags.
+      'p': ['class'],
+      // Allow "class" attribute for <pre> tags.
+      'pre': ['class'],
       // Allow the "src" attribute for <audio> tags.
       'audio': ['src', 'autoplay', 'loop', 'muted', 'controls'],
       // Allow the "src" attribute for <video> tags.

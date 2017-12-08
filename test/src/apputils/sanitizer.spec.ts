@@ -48,6 +48,21 @@ describe('defaultSanitizer', () => {
       expect(defaultSanitizer.sanitize(code)).to.be(code);
     });
 
+    it('should allow the class attribute for div tags', () => {
+      let div = '<div class="foo">bar</div>';
+      expect(defaultSanitizer.sanitize(div)).to.be(div);
+    });
+
+    it('should allow the class attribute for p tags', () => {
+      let p = '<p class="foo">bar</p>';
+      expect(defaultSanitizer.sanitize(p)).to.be(p);
+    });
+
+    it('should allow the class attribute for pre tags', () => {
+      let pre = '<pre class="foo">bar</pre>';
+      expect(defaultSanitizer.sanitize(pre)).to.be(pre);
+    });
+
     it('should strip script tags', () => {
       let script = '<script>alert("foo")</script>';
       expect(defaultSanitizer.sanitize(script)).to.be('');
