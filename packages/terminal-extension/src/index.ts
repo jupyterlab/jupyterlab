@@ -110,11 +110,14 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
 
   // Add command palette items.
   [
+    CommandIDs.createNew,
     CommandIDs.refresh,
     CommandIDs.increaseFont,
     CommandIDs.decreaseFont,
     CommandIDs.toggleTheme
-  ].forEach(command => { palette.addItem({ command, category }); });
+  ].forEach(command => {
+    palette.addItem({ command, category, args: { 'isPalette': true } });
+  });
 
   // Add terminal creation to the file menu.
   mainMenu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 20);
@@ -153,7 +156,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
 
   // Add terminal commands.
   commands.addCommand(CommandIDs.createNew, {
-    label: 'Terminal',
+    label: args => args['isPalette'] ? 'New Terminal' : 'Terminal',
     caption: 'Start a new terminal session',
     execute: args => {
       const name = args['name'] as string;

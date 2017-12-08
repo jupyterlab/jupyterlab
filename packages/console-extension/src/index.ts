@@ -238,7 +238,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
 
   command = CommandIDs.create;
   commands.addCommand(command, {
-    label: 'Console',
+    label: args => args['isPalette'] ? 'New Console' : 'Console',
     execute: (args: Partial<ConsolePanel.IOptions>) => {
       let basePath = args.basePath || browserFactory.defaultBrowser.model.path;
       return createConsole({ basePath, ...args });
@@ -255,8 +255,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     return widget;
   }
 
-  command = CommandIDs.clear;
-  commands.addCommand(command, {
+  commands.addCommand(CommandIDs.clear, {
     label: 'Clear Cells',
     execute: args => {
       let current = getCurrent(args);
@@ -267,10 +266,8 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     },
     isEnabled
   });
-  palette.addItem({ command, category });
 
-  command = CommandIDs.runUnforced;
-  commands.addCommand(command, {
+  commands.addCommand(CommandIDs.runUnforced, {
     label: 'Run Cell (unforced)',
     execute: args => {
       let current = getCurrent(args);
@@ -281,10 +278,8 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     },
     isEnabled
   });
-  palette.addItem({ command, category });
 
-  command = CommandIDs.runForced;
-  commands.addCommand(command, {
+  commands.addCommand(CommandIDs.runForced, {
     label: 'Run Cell (forced)',
     execute: args => {
       let current = getCurrent(args);
@@ -295,10 +290,8 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     },
     isEnabled
   });
-  palette.addItem({ command, category });
 
-  command = CommandIDs.linebreak;
-  commands.addCommand(command, {
+  commands.addCommand(CommandIDs.linebreak, {
     label: 'Insert Line Break',
     execute: args => {
       let current = getCurrent(args);
@@ -309,10 +302,8 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     },
     isEnabled
   });
-  palette.addItem({ command, category });
 
-  command = CommandIDs.interrupt;
-  commands.addCommand(command, {
+  commands.addCommand(CommandIDs.interrupt, {
     label: 'Interrupt Kernel',
     execute: args => {
       let current = getCurrent(args);
@@ -326,10 +317,8 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     },
     isEnabled
   });
-  palette.addItem({ command, category });
 
-  command = CommandIDs.restart;
-  commands.addCommand(command, {
+  commands.addCommand(CommandIDs.restart, {
     label: 'Restart Kernel',
     execute: args => {
       let current = getCurrent(args);
@@ -340,10 +329,8 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     },
     isEnabled
   });
-  palette.addItem({ command, category });
 
-  command = CommandIDs.closeAndShutdown;
-  commands.addCommand(command, {
+  commands.addCommand(CommandIDs.closeAndShutdown, {
     label: 'Close and Shutdown',
     execute: args => {
       const current = getCurrent(args);
@@ -367,8 +354,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     isEnabled
   });
 
-  command = CommandIDs.inject;
-  commands.addCommand(command, {
+  commands.addCommand(CommandIDs.inject, {
     execute: args => {
       let path = args['path'];
       tracker.find(widget => {
@@ -385,8 +371,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     isEnabled
   });
 
-  command = CommandIDs.changeKernel;
-  commands.addCommand(command, {
+  commands.addCommand(CommandIDs.changeKernel, {
     label: 'Change Kernel',
     execute: args => {
       let current = getCurrent(args);
@@ -397,7 +382,21 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     },
     isEnabled
   });
-  palette.addItem({ command, category });
+
+  // Add command palette items
+  [
+    CommandIDs.create,
+    CommandIDs.linebreak,
+    CommandIDs.clear,
+    CommandIDs.runUnforced,
+    CommandIDs.runForced,
+    CommandIDs.restart,
+    CommandIDs.interrupt,
+    CommandIDs.changeKernel,
+    CommandIDs.closeAndShutdown,
+  ].forEach(command => {
+    palette.addItem({ command, category, args: { 'isPalette': true } });
+  });
 
   // Add a console creator to the File menu
   mainMenu.fileMenu.newMenu.addGroup([{ command: CommandIDs.create }], 0);
