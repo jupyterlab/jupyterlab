@@ -232,7 +232,7 @@ def disable_extension(extension, app_dir=None, logger=None):
 
 
 def check_extension(extension, app_dir=None, installed=False, logger=None):
-    """Enable a JupyterLab extension.
+    """Check if a JupyterLab extension is enabled or disabled.
     """
     handler = _AppHandler(app_dir, logger)
     return handler.check_extension(extension, installed)
@@ -580,6 +580,22 @@ class _AppHandler(object):
             disabled.remove(extension)
         self._write_page_config(config)
 
+    def check_extension(self, extension, check_installed_only=False):
+        """Check if a lab extension is enabled or disabled
+        """
+        info = self.info
+
+        if extension in info["core_extensions"]:
+            return self._check_core_extension(
+                extension, info, check_installed_only)
+
+        if extension in info["linked_packages"]:
+            self.logger.info('%s:%s' % (extension, GREEN_ENABLED))
+            return True
+
+        return self._check_common_extension(
+            extension, info, check_installed_only)
+
     def _check_core_extension(self, extension, info, check_installed_only):
         """Check if a core extension is enabled or disabled
         """
@@ -596,7 +612,7 @@ class _AppHandler(object):
         return True
 
     def _check_common_extension(self, extension, info, check_installed_only):
-        """Check if a core extension is enabled or disabled
+        """Check if a common (non-core) extension is enabled or disabled
         """
         if extension not in info['extensions']:
             self.logger.info('%s:%s' % (extension, RED_X))
@@ -617,23 +633,6 @@ class _AppHandler(object):
 
         self.logger.info('%s:%s' % (extension, GREEN_ENABLED))
         return True
-
-    def check_extension(self, extension, check_installed_only=False):
-        """Check if a lab extension is enabled or disabled
-        """
-        config = self._read_page_config()
-        info = self.info
-
-        if extension in info["core_extensions"]:
-            return self._check_core_extension(
-                extension, info, check_installed_only)
-
-        if extension in info["linked_packages"]:
-            self.logger.info('%s:%s' % (extension, GREEN_ENABLED))
-            return True
-
-        return self._check_common_extension(
-            extension, info, check_installed_only)
 
     def _get_app_info(self):
         """Get information about the app.
