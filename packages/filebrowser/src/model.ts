@@ -544,12 +544,9 @@ namespace Private {
    */
   export
   function normalizePath(root: string, path: string): string {
-    let parts = root.split(':');
-    if (parts.length === 1) {
-      return PathExt.resolve(root, path);
-    } else {
-      let resolved = PathExt.resolve(parts[1], path);
-      return parts[0] + ':' + resolved;
-    }
+    const driveName = PathExt.driveName(root);
+    const localPath = PathExt.localPath(root);
+    const resolved = PathExt.resolve(localPath, path);
+    return driveName ? `${driveName}:${resolved}` : resolved;
   }
 }

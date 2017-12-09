@@ -829,15 +829,16 @@ class ContentsManager implements Contents.IManager {
    */
   private _driveForPath(path: string): [Contents.IDrive, string] {
     // Split the path at ':'
-    let parts = path.split(':')
-    if (parts.length === 1) {
+    const driveName = PathExt.driveName(path);
+    const localPath = PathExt.localPath(path);
+    if (!driveName) {
       throw Error('ContentsManager: drive not specified');
     } else {
-      let drive = this._drives.get(parts[0]);
+      let drive = this._drives.get(driveName);
       if (!drive) {
         throw Error('ContentsManager: cannot find requested drive');
       }
-      return [drive, Private.normalize(parts[1])];
+      return [drive, Private.normalize(localPath)];
     }
   }
 
@@ -1357,16 +1358,8 @@ namespace Private {
    */
   export
   function normalize(path: string): string {
-    const parts = path.split(':');
-
-    if (parts.length === 1) {
-      return PathExt.normalize(path);
-    }
-
-    if (parts.length === 2) {
-      return parts[0] + ':' + PathExt.normalize(parts[1]);
-    }
-
-    throw new Error('Malformed path: ' + path);
+    const driveName = PathExt.driveName(path);
+    const localPath = PathExt.normalize(PathExt.localPath(path));
+    return driveName ? `${driveName}:${localPath}` : localPath;
   }
 }
