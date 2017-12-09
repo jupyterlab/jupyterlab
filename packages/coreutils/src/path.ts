@@ -45,7 +45,7 @@ namespace PathExt {
   export
   function dirname(path: string): string {
     const drive = driveName(path);
-    let dir = removeSlash(posix.dirname(localPath(path)));
+    let dir = posix.dirname(localPath(path));
     dir = dir === '.' ? '' : dir;
     return drive ? `${drive}:${dir}` : dir;
   }
@@ -63,7 +63,7 @@ namespace PathExt {
     if (parts.length === 1) {
       return removeSlash(path);
     }
-    return removeSlash(join(...parts.slice(1)));
+    return removeSlash(parts.slice(1).join(':'));
   }
 
   /**
