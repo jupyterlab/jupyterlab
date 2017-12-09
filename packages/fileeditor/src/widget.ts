@@ -300,7 +300,7 @@ class FileEditor extends Widget implements DocumentRegistry.IReadyWidget {
     const path = this._context.path;
 
     editor.model.mimeType = this._mimeTypeService.getMimeTypeByFilePath(path);
-    this.title.label = PathExt.basename(path.split(':').pop()!);
+    this.title.label = PathExt.basename(path);
   }
 
   private editorWidget: FileEditorCodeWrapper;
