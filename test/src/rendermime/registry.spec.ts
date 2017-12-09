@@ -36,7 +36,7 @@ import {
 } from '../utils';
 
 
-const RESOLVER: IRenderMime.IResolver = createFileContext();
+const RESOLVER: IRenderMime.IResolver = createFileContext().urlResolver;
 
 
 function createModel(data: JSONObject): IRenderMime.IMimeModel {

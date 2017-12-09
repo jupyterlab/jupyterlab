@@ -42,6 +42,10 @@ import {
 } from '@jupyterlab/observables';
 
 import {
+  IRenderMime
+} from '@jupyterlab/rendermime-interfaces';
+
+import {
   TextModelFactory
 } from './default';
 
@@ -702,6 +706,11 @@ namespace DocumentRegistry {
     readonly contentsModel: Contents.IModel | null;
 
     /**
+     * The url resolver for the context.
+     */
+    readonly urlResolver: IRenderMime.IResolver;
+
+    /**
      * Whether the context is ready.
      */
     readonly isReady: boolean;
@@ -760,16 +769,6 @@ namespace DocumentRegistry {
      *    the file.
      */
     listCheckpoints(): Promise<Contents.ICheckpointModel[]>;
-
-    /**
-     * Resolve a relative url to a correct server path.
-     */
-    resolveUrl(url: string): Promise<string>;
-
-    /**
-     * Get the download url of a given absolute server path.
-     */
-    getDownloadUrl(path: string): Promise<string>;
 
     /**
      * Add a sibling widget to the document manager.

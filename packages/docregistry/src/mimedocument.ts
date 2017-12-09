@@ -48,7 +48,9 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
     layout.addWidget(toolbar);
     BoxLayout.setStretch(toolbar, 0);
     let context = options.context;
-    this.rendermime = options.rendermime.clone({ resolver: context });
+    this.rendermime = options.rendermime.clone({
+      resolver: context.urlResolver
+    });
 
     this._context = context;
     this._mimeType = options.mimeType;
