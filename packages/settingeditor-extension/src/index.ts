@@ -51,7 +51,7 @@ const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
     const { commands, rendermime, shell } = app;
     const namespace = 'setting-editor';
     const factoryService = editorServices.factoryService;
-    const editorFactory = factoryService.newInlineEditor.bind(factoryService);
+    const editorFactory = factoryService.newInlineEditor;
     const tracker = new InstanceTracker<SettingEditor>({ namespace });
     let editor: SettingEditor;
 

@@ -262,7 +262,7 @@ namespace InputArea {
    */
   function _createDefaultEditorFactory(): CodeEditor.Factory {
     let editorServices = new CodeMirrorEditorFactory();
-    return editorServices.newInlineEditor.bind(editorServices);
+    return editorServices.newInlineEditor;
   }
 
   /**

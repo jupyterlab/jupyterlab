@@ -455,8 +455,8 @@ namespace CellTools {
       this.addClass(KEYSELECTOR_CLASS);
       this.key = options.key;
       this._validCellTypes = options.validCellTypes || [];
-      this._getter = (options.getter || this._getValue.bind(this));
-      this._setter = (options.setter || this._setValue.bind(this));
+      this._getter = options.getter || this._getValue;
+      this._setter = options.setter || this._setValue;
     }
 
     /**
@@ -566,14 +566,14 @@ namespace CellTools {
     /**
      * Get the value for the data.
      */
-    private _getValue(cell: Cell): JSONValue {
+    private _getValue = (cell: Cell) => {
       return cell.model.metadata.get(this.key);
     }
 
     /**
      * Set the value for the data.
      */
-    private _setValue(cell: Cell, value: JSONValue): void {
+    private _setValue = (cell: Cell, value: JSONValue) => {
       cell.model.metadata.set(this.key, value);
     }
 

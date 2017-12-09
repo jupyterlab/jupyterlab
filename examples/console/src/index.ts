@@ -72,8 +72,7 @@ function startApp(path: string, manager: ServiceManager.IManager) {
     initialFactories: defaultRendererFactories
   });
 
-  let editorFactory = editorServices.factoryService.newInlineEditor.bind(
-    editorServices.factoryService);
+  let editorFactory = editorServices.factoryService.newInlineEditor;
   let contentFactory = new ConsolePanel.ContentFactory({ editorFactory });
   let consolePanel = new ConsolePanel({
     rendermime,
