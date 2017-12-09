@@ -990,7 +990,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     execute: args => {
       const current = getCurrent(args);
 
-      if (!current) {
+      if (current) {
         return NotebookActions.redo(current.notebook);
       }
     },
