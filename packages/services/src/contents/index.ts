@@ -535,7 +535,10 @@ class ContentsManager implements Contents.IManager {
     let serverSettings = this.serverSettings = (
       options.serverSettings || ServerConnection.makeSettings()
     );
-    this._defaultDrive = options.defaultDrive || new Drive({ serverSettings});
+    this._defaultDrive = options.defaultDrive||
+                         new Drive({ name: 'Default', serverSettings });
+
+    this._drives.set(this._defaultDrive.name, this._defaultDrive);
     this._defaultDrive.fileChanged.connect(this._onFileChanged, this);
   }
 
@@ -573,7 +576,7 @@ class ContentsManager implements Contents.IManager {
    * Add an `IDrive` to the manager.
    */
   addDrive(drive: Contents.IDrive): void {
-    this._additionalDrives.set(drive.name, drive);
+    this._drives.set(drive.name, drive);
     drive.fileChanged.connect(this._onFileChanged, this);
   }
 
@@ -812,18 +815,12 @@ class ContentsManager implements Contents.IManager {
    * @returns the fully qualified path.
    */
   private _toGlobalPath(drive: Contents.IDrive, localPath: string): string {
-    if (drive === this._defaultDrive) {
-      return PathExt.removeSlash(localPath);
-    } else {
-      return drive.name + ':' + PathExt.removeSlash(localPath);
-    }
+    return drive.name + ':' + PathExt.removeSlash(localPath);
   }
 
   /**
    * Given a path, get the `IDrive to which it refers,
-   * where the path satisfies the pattern
-   * `'driveName:path/to/file'`. If there is no `driveName`
-   * prepended to the path, it returns the default drive.
+   * where the path satisfies the pattern `'driveName:path/to/file'`.
    *
    * @param path: a path to a file.
    *
@@ -834,9 +831,9 @@ class ContentsManager implements Contents.IManager {
     // Split the path at ':'
     let parts = path.split(':')
     if (parts.length === 1) {
-      return [this._defaultDrive, path]
+      throw Error('ContentsManager: drive not specified');
     } else {
-      let drive = this._additionalDrives.get(parts[0]);
+      let drive = this._drives.get(parts[0]);
       if (!drive) {
         throw Error('ContentsManager: cannot find requested drive');
       }
@@ -850,33 +847,29 @@ class ContentsManager implements Contents.IManager {
    * and then forwards the signal.
    */
   private _onFileChanged(sender: Contents.IDrive, args: Contents.IChangedArgs) {
-    if (sender === this._defaultDrive) {
-      this._fileChanged.emit(args);
-    } else {
-      let newValue: Partial<Contents.IModel> | null = null;
-      let oldValue: Partial<Contents.IModel> | null = null;
-      if (args.newValue && args.newValue.path) {
-        newValue = {
-          ...args.newValue,
-          path: this._toGlobalPath(sender, args.newValue.path)
-        };
-      }
-      if (args.oldValue && args.oldValue.path) {
-        oldValue = {
-          ...args.oldValue,
-          path: this._toGlobalPath(sender, args.oldValue.path)
-        };
-      }
-      this._fileChanged.emit({
-        type: args.type,
-        newValue,
-        oldValue
-      });
+    let newValue: Partial<Contents.IModel> | null = null;
+    let oldValue: Partial<Contents.IModel> | null = null;
+    if (args.newValue && args.newValue.path) {
+      newValue = {
+        ...args.newValue,
+        path: this._toGlobalPath(sender, args.newValue.path)
+      };
     }
+    if (args.oldValue && args.oldValue.path) {
+      oldValue = {
+        ...args.oldValue,
+        path: this._toGlobalPath(sender, args.oldValue.path)
+      };
+    }
+    this._fileChanged.emit({
+      type: args.type,
+      newValue,
+      oldValue
+    });
   }
 
   private _isDisposed = false;
-  private _additionalDrives = new Map<string, Contents.IDrive>();
+  private _drives = new Map<string, Contents.IDrive>();
   private _defaultDrive: Contents.IDrive;
   private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
 }
