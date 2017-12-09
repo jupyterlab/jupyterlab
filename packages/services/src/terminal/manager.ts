@@ -246,7 +246,7 @@ class TerminalManager implements TerminalSession.IManager {
    */
   private _getOptions(options: TerminalSession.IOptions = {}): TerminalSession.IOptions {
     return { ...options, serverSettings: this.serverSettings };
-  };
+  }
 
   private _models: TerminalSession.IModel[] = [];
   private _sessions = new Set<TerminalSession.ISession>();

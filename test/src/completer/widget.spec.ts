@@ -541,9 +541,8 @@ describe('completer/widget', () => {
           let options: Completer.IOptions = {
             editor: anchor.editor, model
           };
-          let value = '';
           let listener = (sender: any, selected: string) => {
-            value = selected;
+            // no op
           };
           model.setOptions(['foo', 'bar']);
           Widget.attach(anchor, document.body);

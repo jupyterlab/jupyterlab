@@ -32,7 +32,7 @@ class Wodget extends Widget {
 describe('@jupyterlab/mainmenu', () => {
 
   describe('ViewMenu', () => {
-    
+
     let commands: CommandRegistry;
     let menu: ViewMenu;
     let tracker: InstanceTracker<Wodget>;
@@ -84,7 +84,7 @@ describe('@jupyterlab/mainmenu', () => {
           matchBracketsToggled: widget => widget.matched,
           lineNumbersToggled: widget => widget.numbered,
           wordWrapToggled: widget => widget.wrapped
-        }
+        };
         menu.editorViewers.add(viewer);
 
         expect(delegateToggled(wodget, menu.editorViewers, 'matchBracketsToggled'))

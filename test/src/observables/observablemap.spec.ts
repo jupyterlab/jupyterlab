@@ -28,8 +28,8 @@ describe('@jupyterlab/observables', () => {
       });
     });
 
-    describe('#size', ()=>{
-      it('should return the number of entries in the map', ()=>{
+    describe('#size', () => {
+      it('should return the number of entries in the map', () => {
         let value = new ObservableMap<number>();
         value.set('one', 1);
         value.set('two', 2);
@@ -43,7 +43,7 @@ describe('@jupyterlab/observables', () => {
         let called = false;
         let value = new ObservableMap<number>();
         value.changed.connect(() => { called = true; });
-        value.set("entry", 1);
+        value.set('entry', 1);
         expect(called).to.be(true);
       });
 
@@ -119,21 +119,21 @@ describe('@jupyterlab/observables', () => {
     });
 
     describe('#get()', () => {
-      it('should get the value for a key', ()=>{
+      it('should get the value for a key', () => {
         let value = new ObservableMap<number>();
         value.set('one', 1);
         expect(value.get('one')).to.be(1);
       });
 
-      it('should return undefined if the key does not exist', ()=>{
+      it('should return undefined if the key does not exist', () => {
         let value = new ObservableMap<number>();
         value.set('one', 1);
         expect(value.get('two')).to.be(undefined);
       });
     });
 
-    describe('#has()', ()=>{
-      it('should whether the key exists in a map', ()=>{
+    describe('#has()', () => {
+      it('should whether the key exists in a map', () => {
         let value = new ObservableMap<number>();
         value.set('one', 1);
         expect(value.has('one')).to.be(true);
@@ -141,8 +141,8 @@ describe('@jupyterlab/observables', () => {
       });
     });
 
-    describe('#keys()', ()=>{
-      it('should return a list of the keys in the map', ()=>{
+    describe('#keys()', () => {
+      it('should return a list of the keys in the map', () => {
         let value = new ObservableMap<number>();
         value.set('one', 1);
         value.set('two', 2);
@@ -152,8 +152,8 @@ describe('@jupyterlab/observables', () => {
       });
     });
 
-    describe('#values()', ()=>{
-      it('should return a list of the values in the map', ()=>{
+    describe('#values()', () => {
+      it('should return a list of the values in the map', () => {
         let value = new ObservableMap<number>();
         value.set('one', 1);
         value.set('two', 2);
@@ -165,7 +165,7 @@ describe('@jupyterlab/observables', () => {
 
     describe('#delete()', () => {
 
-      it('should remove an item from the map', ()=>{
+      it('should remove an item from the map', () => {
         let value = new ObservableMap<number>();
         value.set('one', 1);
         value.set('two', 2);
@@ -175,7 +175,7 @@ describe('@jupyterlab/observables', () => {
         expect(value.get('two')).to.be(undefined);
       });
 
-      it('should return the value of the key it removed', ()=>{
+      it('should return the value of the key it removed', () => {
         let value = new ObservableMap<number>();
         value.set('one', 1);
         expect(value.delete('one')).to.be(1);

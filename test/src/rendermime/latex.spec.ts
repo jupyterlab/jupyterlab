@@ -16,7 +16,7 @@ describe('jupyter-ui', () => {
       let input = 'hello, $ /alpha $, there';
       let { text, math } = removeMath(input);
       expect(text).to.be('hello, @@0@@, there');
-      expect(math).to.eql(['$ /alpha $'])
+      expect(math).to.eql(['$ /alpha $']);
     });
 
     it('should handle code spans', () => {
@@ -30,35 +30,35 @@ describe('jupyter-ui', () => {
       let input = ' @@0@@ hello, $ /alpha $, there';
       let { text, math } = removeMath(input);
       expect(text).to.be(' @@0@@ hello, @@1@@, there');
-      expect(math).to.eql([ '@@0@@', '$ /alpha $' ])
+      expect(math).to.eql([ '@@0@@', '$ /alpha $' ]);
     });
 
     it('should handle unbalanced braces', () => {
       let input = 'hello, $ /alpha { $, there';
       let { text, math } = removeMath(input);
       expect(text).to.be('hello, @@0@@, there');
-      expect(math).to.eql(['$ /alpha { $' ])
+      expect(math).to.eql(['$ /alpha { $' ]);
     });
 
     it('should handle balanced braces', () => {
       let input = 'hello, $ /alpha { } $, there';
       let { text, math } = removeMath(input);
       expect(text).to.be('hello, @@0@@, there');
-      expect(math).to.eql(['$ /alpha { } $' ])
+      expect(math).to.eql(['$ /alpha { } $' ]);
     });
 
     it('should handle math blocks', () => {
       let input = 'hello, $$\nfoo\n$$, there';
       let { text, math } = removeMath(input);
       expect(text).to.be('hello, @@0@@, there');
-      expect(math).to.eql(['$$\nfoo\n$$' ])
+      expect(math).to.eql(['$$\nfoo\n$$' ]);
     });
 
     it('should handle begin statements', () => {
       let input = 'hello, \\begin{align} \\end{align}, there';
       let { text, math } = removeMath(input);
       expect(text).to.be('hello, @@0@@, there');
-      expect(math).to.eql(['\\begin{align} \\end{align}'])
+      expect(math).to.eql(['\\begin{align} \\end{align}']);
     });
 
     it('should handle `\\(` delimiters in GFM', () => {
@@ -107,7 +107,7 @@ describe('jupyter-ui', () => {
   describe('MathJaxTypesetter', () => {
 
     describe('#constructor()', () => {
-      
+
       it('should create a MathJaxTypesetter', () => {
         let typesetter = new MathJaxTypesetter();
         expect(typesetter).to.be.a(MathJaxTypesetter);

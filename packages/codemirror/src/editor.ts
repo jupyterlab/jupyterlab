@@ -1151,7 +1151,7 @@ namespace Private {
   export
   function posEq(a: CodeMirror.Position, b: CodeMirror.Position): boolean {
     return a.line === b.line && a.ch === b.ch;
-  };
+  }
 
   /**
    * Get a config option for the editor.

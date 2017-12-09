@@ -494,6 +494,7 @@ describe('@jupyterlab/domutils', () => {
             expect(footer.node.contains(nodes[0])).to.equal(true);
             expect(footer.node.contains(nodes[1])).to.equal(true);
             let buttonNodes = footer.node.querySelectorAll('button');
+            // tslint:disable-next-line
             expect(buttonNodes.length).to.be.ok;
             each(buttonNodes, (node: Element) => {
               expect(node.className).to.contain('jp-mod-styled');
@@ -507,7 +508,9 @@ describe('@jupyterlab/domutils', () => {
           it('should create a button node for the dialog', () => {
             let node = renderer.createButtonNode(data);
             expect(node.className).to.contain('jp-Dialog-button');
+            // tslint:disable-next-line
             expect(node.querySelector('.jp-Dialog-buttonIcon')).to.be.ok;
+            // tslint:disable-next-line
             expect(node.querySelector('.jp-Dialog-buttonLabel')).to.be.ok;
           });
 

@@ -210,7 +210,9 @@ namespace Private {
     let columns: string[] = [];
     let rowFn: RowFn | null = null;
     let rows = dsv.dsvFormat(delimiter).parseRows(text, row => {
-      if (rowFn) return rowFn(row);
+      if (rowFn) {
+        return rowFn(row);
+      }
       columns = uniquifyColumns(row);
       rowFn = makeRowFn(columns);
     });

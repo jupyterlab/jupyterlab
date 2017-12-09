@@ -693,7 +693,7 @@ namespace Private {
   export
   function headerAnchors(node: HTMLElement): void {
     let headerNames = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
-    for (let headerType of headerNames){
+    for (let headerType of headerNames) {
       let headers = node.getElementsByTagName(headerType);
       for (let i=0; i < headers.length; i++) {
         let header = headers[i];

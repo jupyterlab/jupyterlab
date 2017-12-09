@@ -20,7 +20,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  Cell, CellModel, InputPrompt, Collapser,
+  Cell, CellModel, InputPrompt,
   CodeCell, CodeCellModel, MarkdownCell,
   RawCell, RawCellModel, MarkdownCellModel,
   CellFooter, CellHeader, InputArea

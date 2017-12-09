@@ -22,7 +22,7 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
-  Cell, CodeCell, CodeCellModel
+  Cell, CodeCellModel
 } from '@jupyterlab/cells';
 
 import {
@@ -33,6 +33,7 @@ import {
  * The default notebook content.
  */
 export
+// tslint:disable-next-line
 const DEFAULT_CONTENT: nbformat.INotebookContent = require('../../../examples/notebook/test.ipynb') as nbformat.INotebookContent;
 
 
@@ -56,7 +57,7 @@ const clipboard = Clipboard.getInstance();
 export
 function createBaseCellFactory(): Cell.IContentFactory {
   return new Cell.ContentFactory({ editorFactory });
-};
+}
 
 
 /**

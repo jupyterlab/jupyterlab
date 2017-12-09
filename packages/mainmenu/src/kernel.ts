@@ -22,7 +22,7 @@ interface IKernelMenu extends IJupyterLabMenu {
    * A set storing IKernelUsers for the Kernel menu.
    */
   readonly kernelUsers: Set<IKernelMenu.IKernelUser<Widget>>;
-  
+
   /**
    * A set storing IConsoleCreators for the Kernel menu.
    */
@@ -51,7 +51,7 @@ class KernelMenu extends JupyterLabMenu implements IKernelMenu {
    * A set storing IKernelUsers for the Kernel menu.
    */
   readonly kernelUsers: Set<IKernelMenu.IKernelUser<Widget>>;
-  
+
   /**
    * A set storing IConsoleCreators for the Kernel menu.
    */

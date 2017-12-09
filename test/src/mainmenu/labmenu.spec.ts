@@ -19,7 +19,7 @@ import {
 describe('@jupyterlab/mainmenu', () => {
 
   describe('JupyterLabMenu', () => {
-    
+
     let commands: CommandRegistry;
     let menu: JupyterLabMenu;
 
@@ -27,15 +27,15 @@ describe('@jupyterlab/mainmenu', () => {
       commands = new CommandRegistry();
       commands.addCommand('run1', {
         label: 'Run 1',
-        execute: () => void 0 
+        execute: () => void 0
       });
       commands.addCommand('run2', {
         label: 'Run 2',
-        execute: () => void 0 
+        execute: () => void 0
       });
       commands.addCommand('run3', {
         label: 'Run 3',
-        execute: () => void 0 
+        execute: () => void 0
       });
       commands.addCommand('run4', {
         label: 'Run 4',

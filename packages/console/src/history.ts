@@ -316,18 +316,18 @@ class ConsoleHistory implements IConsoleHistory {
    * Set the filter data.
    *
    * @param filterStr - The string to use when filtering the data.
-  */
+   */
   protected setFilter(filterStr: string = ''): void {
-    
+
     // Apply the new filter and remove contiguous duplicates.
     this._filtered.length = 0;
-    
+
     let last = '';
     let current = '';
 
     for (let i = 0; i < this._history.length; i++) {
       current = this._history[i];
-      if (current !== last && filterStr == current.slice(0, filterStr.length)) {
+      if (current !== last && filterStr === current.slice(0, filterStr.length)) {
         this._filtered.push(last = current);
       }
     }

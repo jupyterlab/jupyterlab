@@ -689,7 +689,6 @@ class ClientSession implements IClientSession {
    * Handle a session termination.
    */
   private _onTerminated(): void {
-    debugger;
     if (this._session) {
       this._session.dispose();
     }

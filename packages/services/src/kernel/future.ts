@@ -156,6 +156,8 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
     case 'iopub':
       this._handleIOPub(msg as KernelMessage.IIOPubMessage);
       break;
+    default:
+      break;
     }
   }
 
@@ -202,6 +204,7 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
    * Test whether the given future flag is set.
    */
   private _testFlag(flag: Private.KernelFutureFlag): boolean {
+    // tslint:disable-next-line
     return (this._status & flag) !== 0;
   }
 
@@ -209,6 +212,7 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
    * Set the given future flag.
    */
   private _setFlag(flag: Private.KernelFutureFlag): void {
+    // tslint:disable-next-line
     this._status |= flag;
   }
 
@@ -274,12 +278,12 @@ namespace Private {
     process(msg: T): boolean {
       let continueHandling: boolean;
       // most recently-added hook is called first
-      for (let i = this._hooks.length-1; i>=0; i--) {
+      for (let i = this._hooks.length - 1; i >= 0; i--) {
         let hook = this._hooks[i];
         if (hook === null) { continue; }
         try {
           continueHandling = hook(msg);
-        } catch(err) {
+        } catch (err) {
           continueHandling = true;
           console.error(err);
         }

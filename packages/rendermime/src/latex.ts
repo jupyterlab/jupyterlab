@@ -192,7 +192,7 @@ function removeMath(text: string): { text: string, math: string[] } {
     last = null;
   }
   return { text: deTilde(blocks.join('')), math };
-};
+}
 
 
 /**
@@ -208,19 +208,19 @@ function replaceMath(text: string, math: string[]): string {
    */
   let process = (match: string, n: number): string => {
     let group = math[n];
-    if (group.substr(0, 3) === "\\\\\(" &&
-        group.substr(group.length - 3) === "\\\\\)") {
-      group = "\\\(" + group.substring(3, group.length - 3) + "\\\)";
-    } else if (group.substr(0, 3) === "\\\\\[" &&
-               group.substr(group.length - 3) === "\\\\\]") {
-      group = "\\\[" + group.substring(3, group.length - 3) + "\\\]";
+    if (group.substr(0, 3) === '\\\\\(' &&
+        group.substr(group.length - 3) === '\\\\\)') {
+      group = '\\\(' + group.substring(3, group.length - 3) + '\\\)';
+    } else if (group.substr(0, 3) === '\\\\\[' &&
+               group.substr(group.length - 3) === '\\\\\]') {
+      group = '\\\[' + group.substring(3, group.length - 3) + '\\\]';
     }
     return group;
   };
   // Replace all the math group placeholders in the text
   // with the saved strings.
   return text.replace(/@@(\d+)@@/g, process);
-};
+}
 
 /**
  * Process math blocks.
@@ -251,4 +251,4 @@ function processMath(i: number, j: number, preProcess: (input: string) => string
   }
   math.push(block);
   return blocks;
-};
+}

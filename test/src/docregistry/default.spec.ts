@@ -13,7 +13,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  createFileContext, defaultRenderMime
+  createFileContext
 } from '../utils';
 
 

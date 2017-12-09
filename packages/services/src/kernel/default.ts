@@ -1504,5 +1504,5 @@ namespace Private {
         }
       }
     });
-  };
+  }
 }

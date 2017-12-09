@@ -1029,6 +1029,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const nb = current.notebook;
       const newCell = nb.activeCell.clone();
 
+      // tslint:disable-next-line
       const CellPanel = class extends Panel {
         protected onCloseRequest(msg: Message): void {
           this.dispose();

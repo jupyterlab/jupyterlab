@@ -371,7 +371,7 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
         path: model.path, factory: FACTORY
       });
     });
-  }
+  };
 
   // Add a command for creating a new text file.
   commands.addCommand(CommandIDs.createNew, {

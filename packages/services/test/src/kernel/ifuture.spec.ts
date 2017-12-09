@@ -52,18 +52,18 @@ describe('Kernel.IFuture', () => {
 
       tester.onMessage((message) => {
         // send a reply
-        let parent_header = message.header;
-        let msg = createMsg('shell', parent_header);
+        let parentHeader = message.header;
+        let msg = createMsg('shell', parentHeader);
         tester.send(msg);
 
         future.onReply = () => {
           // trigger onIOPub with a 'stream' message
-          let msgStream = createMsg('iopub', parent_header);
+          let msgStream = createMsg('iopub', parentHeader);
           msgStream.header.msg_type = 'stream';
           msgStream.content = { 'name': 'stdout', 'text': 'foo' };
           tester.send(msgStream);
           // trigger onDone
-          let msgDone = createMsg('iopub', parent_header);
+          let msgDone = createMsg('iopub', parentHeader);
           msgDone.header.msg_type = 'status';
           (msgDone as KernelMessage.IStatusMsg).content.execution_state = 'idle';
           tester.send(msgDone);
@@ -117,18 +117,18 @@ describe('Kernel.IFuture', () => {
 
       tester.onMessage((message) => {
         // send a reply
-        let parent_header = message.header;
-        let msg = createMsg('shell',  parent_header);
+        let parentHeader = message.header;
+        let msg = createMsg('shell',  parentHeader);
         tester.send(msg);
 
         future.onReply = () => {
           // trigger onIOPub with a 'stream' message
-          let msgStream = createMsg('iopub', parent_header);
+          let msgStream = createMsg('iopub', parentHeader);
           msgStream.header.msg_type = 'stream';
           msgStream.content = { 'name': 'stdout', 'text': 'foo' };
           tester.send(msgStream);
           // trigger onDone
-          let msgDone = createMsg('iopub', parent_header);
+          let msgDone = createMsg('iopub', parentHeader);
           msgDone.header.msg_type = 'status';
           (msgDone as KernelMessage.IStatusMsg).content.execution_state = 'idle';
           tester.send(msgDone);
@@ -174,18 +174,18 @@ describe('Kernel.IFuture', () => {
 
       tester.onMessage((message) => {
         // send a reply
-        let parent_header = message.header;
-        let msg = createMsg('shell', parent_header);
+        let parentHeader = message.header;
+        let msg = createMsg('shell', parentHeader);
         tester.send(msg);
 
         future.onReply = () => {
           // trigger onIOPub with a 'stream' message
-          let msgStream = createMsg('iopub', parent_header);
+          let msgStream = createMsg('iopub', parentHeader);
           msgStream.header.msg_type = 'stream';
           msgStream.content = { 'name': 'stdout', 'text': 'foo' };
           tester.send(msgStream);
           // trigger onDone
-          let msgDone = createMsg('iopub', parent_header);
+          let msgDone = createMsg('iopub', parentHeader);
           msgDone.header.msg_type = 'status';
           (msgDone as KernelMessage.IStatusMsg).content.execution_state = 'idle';
           tester.send(msgDone);
@@ -241,18 +241,18 @@ describe('Kernel.IFuture', () => {
 
       tester.onMessage((message) => {
         // send a reply
-        let parent_header = message.header;
-        let msg = createMsg('shell', parent_header);
+        let parentHeader = message.header;
+        let msg = createMsg('shell', parentHeader);
         tester.send(msg);
 
         future.onReply = () => {
           // trigger onIOPub with a 'stream' message
-          let msgStream = createMsg('iopub', parent_header);
+          let msgStream = createMsg('iopub', parentHeader);
           msgStream.header.msg_type = 'stream';
           msgStream.content = { 'name': 'stdout', 'text': 'foo' };
           tester.send(msgStream);
           // trigger onDone
-          let msgDone = createMsg('iopub', parent_header);
+          let msgDone = createMsg('iopub', parentHeader);
           msgDone.header.msg_type = 'status';
           (msgDone as KernelMessage.IStatusMsg).content.execution_state = 'idle';
           tester.send(msgDone);

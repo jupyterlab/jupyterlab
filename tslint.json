@@ -22,7 +22,8 @@
     "forin": false,
     "indent": [
       true,
-      "spaces"
+      "spaces",
+      2
     ],
     "interface-name": [
       true,
@@ -30,7 +31,6 @@
     ],
     "jsdoc-format": true,
     "label-position": true,
-    "label-undefined": true,
     "max-line-length": [
       false
     ],
@@ -54,10 +54,8 @@
       "trace"
     ],
     "no-construct": true,
-    "no-constructor-vars": true,
     "no-debugger": true,
     "no-default-export": false,
-    "no-duplicate-key": true,
     "no-duplicate-variable": true,
     "no-empty": true,
     "no-eval": true,
@@ -74,9 +72,7 @@
     "no-string-literal": false,
     "no-switch-case-fall-through": true,
     "no-trailing-whitespace": true,
-    "no-unreachable": true,
     "no-unused-expression": true,
-    "no-unused-variable": true,
     "no-use-before-declare": false,
     "no-var-keyword": true,
     "no-var-requires": true,

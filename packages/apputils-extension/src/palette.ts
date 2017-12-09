@@ -33,7 +33,7 @@ namespace CommandIDs {
 
   export
   const toggle = 'apputils:toggle-command-palette';
-};
+}
 
 
 /**

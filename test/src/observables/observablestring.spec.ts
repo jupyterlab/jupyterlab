@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  ObservableString 
+  ObservableString
 } from '@jupyterlab/observables';
 
 
@@ -20,13 +20,13 @@ describe('@jupyterlab/observables', () => {
       });
 
       it('should accept a string argument', () => {
-        let value = new ObservableString("hello");
+        let value = new ObservableString('hello');
         expect(value instanceof ObservableString).to.be(true);
       });
 
       it('should initialize the string value', () => {
-        let value = new ObservableString("hello");
-        expect(value.text).to.eql("hello");
+        let value = new ObservableString('hello');
+        expect(value.text).to.eql('hello');
       });
 
     });
@@ -45,7 +45,7 @@ describe('@jupyterlab/observables', () => {
         let called = false;
         let value = new ObservableString();
         value.changed.connect(() => { called = true; });
-        value.text = "change";
+        value.text = 'change';
         expect(called).to.be(true);
       });
 
@@ -131,7 +131,7 @@ describe('@jupyterlab/observables', () => {
 
       it('should remove a substring from the string', () => {
         let value = new ObservableString('one two two three');
-        value.remove(4,8);
+        value.remove(4, 8);
         expect(value.text).to.eql('one two three');
       });
 
@@ -146,7 +146,7 @@ describe('@jupyterlab/observables', () => {
           expect(args.value).to.be('two ');
           called = true;
         });
-        value.remove(4,8);
+        value.remove(4, 8);
         expect(called).to.be(true);
       });
 

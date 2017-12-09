@@ -30,7 +30,7 @@ class Wodget extends Widget {
 describe('@jupyterlab/mainmenu', () => {
 
   describe('KernelMenu', () => {
-    
+
     let commands: CommandRegistry;
     let menu: KernelMenu;
     let tracker: InstanceTracker<Wodget>;
@@ -82,7 +82,7 @@ describe('@jupyterlab/mainmenu', () => {
             widget.state = 'shutdown';
             return Promise.resolve(void 0);
           },
-        }
+        };
         menu.kernelUsers.add(user);
         delegateExecute(wodget, menu.kernelUsers, 'interruptKernel');
         expect(wodget.state).to.be('interrupt');
@@ -105,7 +105,7 @@ describe('@jupyterlab/mainmenu', () => {
             widget.state = 'create';
             return Promise.resolve(void 0);
           },
-        }
+        };
         menu.consoleCreators.add(creator);
         delegateExecute(wodget, menu.consoleCreators, 'createConsole');
         expect(wodget.state).to.be('create');

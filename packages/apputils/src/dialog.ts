@@ -486,7 +486,7 @@ namespace Dialog {
   function okButton(options: ButtonOptions = {}): Readonly<IButton> {
     options.accept = true;
     return createButton(options);
-  };
+  }
 
   /**
    * Create a reject button.
@@ -495,7 +495,7 @@ namespace Dialog {
   function cancelButton(options: ButtonOptions = {}): Readonly<IButton>  {
     options.accept = false;
     return createButton(options);
-  };
+  }
 
   /**
    * Create a warn button.
@@ -504,7 +504,7 @@ namespace Dialog {
   function warnButton(options: ButtonOptions = {}): Readonly<IButton>  {
     options.displayType = 'warn';
     return createButton(options);
-  };
+  }
 
   /**
    * Create a button item.

@@ -108,6 +108,7 @@ describe('terminal/index', () => {
 
       it('should set the title when ready', function(done) {
         if (Platform.IS_WIN) {
+          // tslint:disable-next-line
           return this.skip();
         }
         widget.session = session;
