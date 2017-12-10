@@ -108,8 +108,7 @@ function createApp(manager: ServiceManager.IManager): void {
     opener
   });
   let mFactory = new NotebookModelFactory({});
-  let editorFactory = editorServices.factoryService.newInlineEditor.bind(
-    editorServices.factoryService);
+  let editorFactory = editorServices.factoryService.newInlineEditor;
   let contentFactory = new NotebookPanel.ContentFactory({ editorFactory });
 
   let wFactory = new NotebookWidgetFactory({

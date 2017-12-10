@@ -193,10 +193,10 @@ class OutputArea extends Widget {
     }
 
     // Handle published messages.
-    value.onIOPub = this._onIOPub.bind(this);
+    value.onIOPub = this._onIOPub;
 
     // Handle the execute reply.
-    value.onReply = this._onExecuteReply.bind(this);
+    value.onReply = this._onExecuteReply;
 
     // Handle stdin.
     value.onStdin = msg => {
@@ -282,76 +282,6 @@ class OutputArea extends Widget {
   }
 
   /**
-   * Handle an iopub message.
-   */
-  private _onIOPub(msg: KernelMessage.IIOPubMessage): void {
-    let model = this.model;
-    let msgType = msg.header.msg_type;
-    let output: nbformat.IOutput;
-    let transient = (msg.content.transient || {}) as JSONObject;
-    let displayId = transient['display_id'] as string;
-    let targets: number[];
-
-    switch (msgType) {
-    case 'execute_result':
-    case 'display_data':
-    case 'stream':
-    case 'error':
-      output = msg.content as nbformat.IOutput;
-      output.output_type = msgType as nbformat.OutputType;
-      model.add(output);
-      break;
-    case 'clear_output':
-      let wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
-      model.clear(wait);
-      break;
-    case 'update_display_data':
-      output = msg.content as nbformat.IOutput;
-      output.output_type = 'display_data';
-      targets = this._displayIdMap.get(displayId);
-      if (targets) {
-        for (let index of targets) {
-          model.set(index, output);
-        }
-      }
-      break;
-    default:
-      break;
-    }
-    if (displayId && msgType === 'display_data') {
-       targets = this._displayIdMap.get(displayId) || [];
-       targets.push(model.length - 1);
-       this._displayIdMap.set(displayId, targets);
-    }
-  }
-
-  /**
-   * Handle an execute reply message.
-   */
-  private _onExecuteReply(msg: KernelMessage.IExecuteReplyMsg): void {
-    // API responses that contain a pager are special cased and their type
-    // is overriden from 'execute_reply' to 'display_data' in order to
-    // render output.
-    let model = this.model;
-    let content = msg.content as KernelMessage.IExecuteOkReply;
-    let payload = content && content.payload;
-    if (!payload || !payload.length) {
-      return;
-    }
-    let pages = payload.filter((i: any) => (i as any).source === 'page');
-    if (!pages.length) {
-      return;
-    }
-    let page = JSON.parse(JSON.stringify(pages[0]));
-    let output: nbformat.IOutput = {
-      output_type: 'display_data',
-      data: (page as any).data as nbformat.IMimeBundle,
-      metadata: {}
-    };
-    model.add(output);
-  }
-
-  /**
    * Handle an input request from a kernel.
    */
   private _onInputRequest(msg: KernelMessage.IInputRequestMsg, future: Kernel.IFuture): void {
@@ -425,6 +355,76 @@ class OutputArea extends Widget {
     }
 
     return panel;
+  }
+
+  /**
+   * Handle an iopub message.
+   */
+  private _onIOPub = (msg: KernelMessage.IIOPubMessage) => {
+    let model = this.model;
+    let msgType = msg.header.msg_type;
+    let output: nbformat.IOutput;
+    let transient = (msg.content.transient || {}) as JSONObject;
+    let displayId = transient['display_id'] as string;
+    let targets: number[];
+
+    switch (msgType) {
+    case 'execute_result':
+    case 'display_data':
+    case 'stream':
+    case 'error':
+      output = msg.content as nbformat.IOutput;
+      output.output_type = msgType as nbformat.OutputType;
+      model.add(output);
+      break;
+    case 'clear_output':
+      let wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
+      model.clear(wait);
+      break;
+    case 'update_display_data':
+      output = msg.content as nbformat.IOutput;
+      output.output_type = 'display_data';
+      targets = this._displayIdMap.get(displayId);
+      if (targets) {
+        for (let index of targets) {
+          model.set(index, output);
+        }
+      }
+      break;
+    default:
+      break;
+    }
+    if (displayId && msgType === 'display_data') {
+       targets = this._displayIdMap.get(displayId) || [];
+       targets.push(model.length - 1);
+       this._displayIdMap.set(displayId, targets);
+    }
+  }
+
+  /**
+   * Handle an execute reply message.
+   */
+  private _onExecuteReply = (msg: KernelMessage.IExecuteReplyMsg) => {
+    // API responses that contain a pager are special cased and their type
+    // is overriden from 'execute_reply' to 'display_data' in order to
+    // render output.
+    let model = this.model;
+    let content = msg.content as KernelMessage.IExecuteOkReply;
+    let payload = content && content.payload;
+    if (!payload || !payload.length) {
+      return;
+    }
+    let pages = payload.filter((i: any) => (i as any).source === 'page');
+    if (!pages.length) {
+      return;
+    }
+    let page = JSON.parse(JSON.stringify(pages[0]));
+    let output: nbformat.IOutput = {
+      output_type: 'display_data',
+      data: (page as any).data as nbformat.IMimeBundle,
+      metadata: {}
+    };
+    model.add(output);
   }
 
   private _minHeightTimeout: number = null;

@@ -273,8 +273,7 @@ const factory: JupyterLabPlugin<NotebookPanel.IContentFactory> = {
   requires: [IEditorServices],
   autoStart: true,
   activate: (app: JupyterLab, editorServices: IEditorServices) => {
-    let editorFactory = editorServices.factoryService.newInlineEditor.bind(
-      editorServices.factoryService);
+    let editorFactory = editorServices.factoryService.newInlineEditor;
     return new NotebookPanel.ContentFactory({ editorFactory });
   }
 };
@@ -307,8 +306,7 @@ function activateCellTools(app: JupyterLab, tracker: INotebookTracker, editorSer
   const activeCellTool = new CellTools.ActiveCellTool();
   const slideShow = CellTools.createSlideShowSelector();
   const nbConvert = CellTools.createNBConvertSelector();
-  const editorFactory = editorServices.factoryService.newInlineEditor
-    .bind(editorServices.factoryService);
+  const editorFactory = editorServices.factoryService.newInlineEditor;
   const metadataEditor = new CellTools.MetadataEditorTool({ editorFactory });
 
   // Create message hook for triggers to save to the database.

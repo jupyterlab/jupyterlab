@@ -356,8 +356,7 @@ class FileEditorFactory extends ABCWidgetFactory<FileEditor, DocumentRegistry.IC
    * Create a new widget given a context.
    */
   protected createNewWidget(context: DocumentRegistry.CodeContext): FileEditor {
-    let func = this._services.factoryService.newDocumentEditor.bind(
-      this._services.factoryService);
+    let func = this._services.factoryService.newDocumentEditor;
     let factory: CodeEditor.Factory = options => {
       return func(options);
     };

@@ -59,8 +59,8 @@ class Uploader extends ToolbarButton {
     uploadContent.appendChild(uploadIcon);
     this.node.appendChild(uploadContent);
     this.model = options.model;
-    this._input.onclick = this._onInputClicked.bind(this);
-    this._input.onchange = this._onInputChanged.bind(this);
+    this._input.onclick = this._onInputClicked;
+    this._input.onchange = this._onInputChanged;
   }
 
   /**
@@ -71,7 +71,7 @@ class Uploader extends ToolbarButton {
   /**
    * The 'change' handler for the input field.
    */
-  private _onInputChanged(): void {
+  private _onInputChanged = () => {
     let files = Array.prototype.slice.call(this._input.files) as File[];
     let pending = files.map(file => this.model.upload(file));
     Promise.all(pending).catch(error => {
@@ -82,7 +82,7 @@ class Uploader extends ToolbarButton {
   /**
    * The 'click' handler for the input field.
    */
-  private _onInputClicked(): void {
+  private _onInputClicked = () => {
     // In order to allow repeated uploads of the same file (with delete in between),
     // we need to clear the input value to trigger a change event.
     this._input.value = '';

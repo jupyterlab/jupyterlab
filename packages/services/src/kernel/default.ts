@@ -629,128 +629,6 @@ class DefaultKernel implements Kernel.IKernel {
   }
 
   /**
-   * Create the kernel websocket connection and add socket status handlers.
-   */
-  private _createSocket(): void {
-    let settings = this.serverSettings;
-    let partialUrl = URLExt.join(settings.wsUrl, KERNEL_SERVICE_URL,
-                                 encodeURIComponent(this._id));
-
-    // Strip any authentication from the display string.
-    let display = partialUrl.replace(/^((?:\w+:)?\/\/)(?:[^@\/]+@)/, '$1');
-    console.log('Starting WebSocket:', display);
-
-    let url = URLExt.join(
-        partialUrl,
-        'channels?session_id=' + encodeURIComponent(this._clientId)
-    );
-    // If token authentication is in use.
-    let token = settings.token;
-    if (token !== '') {
-      url = url + `&token=${encodeURIComponent(token)}`;
-    }
-
-    this._connectionPromise = new PromiseDelegate<void>();
-    this._wsStopped = false;
-    this._ws = new settings.WebSocket(url);
-
-    // Ensure incoming binary messages are not Blobs
-    this._ws.binaryType = 'arraybuffer';
-
-    this._ws.onmessage = (evt: MessageEvent) => { this._onWSMessage(evt); };
-    this._ws.onopen = (evt: Event) => { this._onWSOpen(evt); };
-    this._ws.onclose = (evt: Event) => { this._onWSClose(evt); };
-    this._ws.onerror = (evt: Event) => { this._onWSClose(evt); };
-  }
-
-  /**
-   * Handle a websocket open event.
-   */
-  private _onWSOpen(evt: Event): void {
-    this._reconnectAttempt = 0;
-    // Allow the message to get through.
-    this._isReady = true;
-    // Update our status to connected.
-    this._updateStatus('connected');
-    // Get the kernel info, signaling that the kernel is ready.
-    this.requestKernelInfo().then(() => {
-      this._connectionPromise.resolve(void 0);
-    }).catch(err => {
-      this._connectionPromise.reject(err);
-    });
-    this._isReady = false;
-  }
-
-  /**
-   * Handle a websocket message, validating and routing appropriately.
-   */
-  private _onWSMessage(evt: MessageEvent) {
-    if (this._wsStopped) {
-      // If the socket is being closed, ignore any messages
-      return;
-    }
-    let msg = serialize.deserialize(evt.data);
-    try {
-      validate.validateMessage(msg);
-    } catch (error) {
-      console.error(`Invalid message: ${error.message}`);
-      return;
-    }
-
-    let handled = false;
-
-    if (msg.parent_header && msg.channel === 'iopub') {
-      switch (msg.header.msg_type) {
-      case 'display_data':
-      case 'update_display_data':
-      case 'execute_result':
-        // display_data messages may re-route based on their display_id.
-        let transient = (msg.content.transient || {}) as JSONObject;
-        let displayId = transient['display_id'] as string;
-        if (displayId) {
-          handled = this._handleDisplayId(displayId, msg);
-        }
-        break;
-      default:
-        break;
-      }
-    }
-
-    if (!handled && msg.parent_header) {
-      let parentHeader = msg.parent_header as KernelMessage.IHeader;
-      let future = this._futures && this._futures.get(parentHeader.msg_id);
-      if (future) {
-        future.handleMsg(msg);
-      } else {
-        // If the message was sent by us and was not iopub, it is orphaned.
-        let owned = parentHeader.session === this.clientId;
-        if (msg.channel !== 'iopub' && owned) {
-          this._unhandledMessage.emit(msg);
-        }
-      }
-    }
-    if (msg.channel === 'iopub') {
-      switch (msg.header.msg_type) {
-      case 'status':
-        this._updateStatus((msg as KernelMessage.IStatusMsg).content.execution_state);
-        break;
-      case 'comm_open':
-        this._handleCommOpen(msg as KernelMessage.ICommOpenMsg);
-        break;
-      case 'comm_msg':
-        this._handleCommMsg(msg as KernelMessage.ICommMsgMsg);
-        break;
-      case 'comm_close':
-        this._handleCommClose(msg as KernelMessage.ICommCloseMsg);
-        break;
-      default:
-        break;
-      }
-      this._iopubMessage.emit(msg as KernelMessage.IIOPubMessage);
-    }
-  }
-
-  /**
    * Handle a message with a display id.
    *
    * @returns Whether the message was handled.
@@ -802,30 +680,6 @@ class DefaultKernel implements Kernel.IKernel {
 
     // Let it propagate to the intended recipient.
     return false;
-  }
-
-  /**
-   * Handle a websocket close event.
-   */
-  private _onWSClose(evt: Event) {
-    if (this._wsStopped || !this._ws) {
-      return;
-    }
-    // Clear the websocket event handlers and the socket itself.
-    this._ws.onclose = this._noOp;
-    this._ws.onerror = this._noOp;
-    this._ws = null;
-
-    if (this._reconnectAttempt < this._reconnectLimit) {
-      this._updateStatus('reconnecting');
-      let timeout = Math.pow(2, this._reconnectAttempt);
-      console.error('Connection lost, reconnecting in ' + timeout + ' seconds.');
-      setTimeout(this._createSocket.bind(this), 1e3 * timeout);
-      this._reconnectAttempt += 1;
-    } else {
-      this._updateStatus('dead');
-      this._connectionPromise.reject(new Error('Could not establish connection'));
-    }
   }
 
   /**
@@ -1012,6 +866,152 @@ class DefaultKernel implements Kernel.IKernel {
   private _unregisterComm(commId: string) {
     this._comms.delete(commId);
     this._commPromises.delete(commId);
+  }
+
+  /**
+   * Create the kernel websocket connection and add socket status handlers.
+   */
+  private _createSocket = () => {
+    let settings = this.serverSettings;
+    let partialUrl = URLExt.join(settings.wsUrl, KERNEL_SERVICE_URL,
+                                 encodeURIComponent(this._id));
+
+    // Strip any authentication from the display string.
+    let display = partialUrl.replace(/^((?:\w+:)?\/\/)(?:[^@\/]+@)/, '$1');
+    console.log('Starting WebSocket:', display);
+
+    let url = URLExt.join(
+        partialUrl,
+        'channels?session_id=' + encodeURIComponent(this._clientId)
+    );
+    // If token authentication is in use.
+    let token = settings.token;
+    if (token !== '') {
+      url = url + `&token=${encodeURIComponent(token)}`;
+    }
+
+    this._connectionPromise = new PromiseDelegate<void>();
+    this._wsStopped = false;
+    this._ws = new settings.WebSocket(url);
+
+    // Ensure incoming binary messages are not Blobs
+    this._ws.binaryType = 'arraybuffer';
+
+    this._ws.onmessage = this._onWSMessage;
+    this._ws.onopen = this._onWSOpen;
+    this._ws.onclose = this._onWSClose;
+    this._ws.onerror = this._onWSClose;
+  }
+
+  /**
+   * Handle a websocket open event.
+   */
+  private _onWSOpen = (evt: Event) => {
+    this._reconnectAttempt = 0;
+    // Allow the message to get through.
+    this._isReady = true;
+    // Update our status to connected.
+    this._updateStatus('connected');
+    // Get the kernel info, signaling that the kernel is ready.
+    this.requestKernelInfo().then(() => {
+      this._connectionPromise.resolve(void 0);
+    }).catch(err => {
+      this._connectionPromise.reject(err);
+    });
+    this._isReady = false;
+  }
+
+  /**
+   * Handle a websocket message, validating and routing appropriately.
+   */
+  private _onWSMessage = (evt: MessageEvent) => {
+    if (this._wsStopped) {
+      // If the socket is being closed, ignore any messages
+      return;
+    }
+    let msg = serialize.deserialize(evt.data);
+    try {
+      validate.validateMessage(msg);
+    } catch (error) {
+      console.error(`Invalid message: ${error.message}`);
+      return;
+    }
+
+    let handled = false;
+
+    if (msg.parent_header && msg.channel === 'iopub') {
+      switch (msg.header.msg_type) {
+      case 'display_data':
+      case 'update_display_data':
+      case 'execute_result':
+        // display_data messages may re-route based on their display_id.
+        let transient = (msg.content.transient || {}) as JSONObject;
+        let displayId = transient['display_id'] as string;
+        if (displayId) {
+          handled = this._handleDisplayId(displayId, msg);
+        }
+        break;
+      default:
+        break;
+      }
+    }
+
+    if (!handled && msg.parent_header) {
+      let parentHeader = msg.parent_header as KernelMessage.IHeader;
+      let future = this._futures && this._futures.get(parentHeader.msg_id);
+      if (future) {
+        future.handleMsg(msg);
+      } else {
+        // If the message was sent by us and was not iopub, it is orphaned.
+        let owned = parentHeader.session === this.clientId;
+        if (msg.channel !== 'iopub' && owned) {
+          this._unhandledMessage.emit(msg);
+        }
+      }
+    }
+    if (msg.channel === 'iopub') {
+      switch (msg.header.msg_type) {
+      case 'status':
+        this._updateStatus((msg as KernelMessage.IStatusMsg).content.execution_state);
+        break;
+      case 'comm_open':
+        this._handleCommOpen(msg as KernelMessage.ICommOpenMsg);
+        break;
+      case 'comm_msg':
+        this._handleCommMsg(msg as KernelMessage.ICommMsgMsg);
+        break;
+      case 'comm_close':
+        this._handleCommClose(msg as KernelMessage.ICommCloseMsg);
+        break;
+      default:
+        break;
+      }
+      this._iopubMessage.emit(msg as KernelMessage.IIOPubMessage);
+    }
+  }
+
+  /**
+   * Handle a websocket close event.
+   */
+  private _onWSClose = (evt: Event) => {
+    if (this._wsStopped || !this._ws) {
+      return;
+    }
+    // Clear the websocket event handlers and the socket itself.
+    this._ws.onclose = this._noOp;
+    this._ws.onerror = this._noOp;
+    this._ws = null;
+
+    if (this._reconnectAttempt < this._reconnectLimit) {
+      this._updateStatus('reconnecting');
+      let timeout = Math.pow(2, this._reconnectAttempt);
+      console.error('Connection lost, reconnecting in ' + timeout + ' seconds.');
+      setTimeout(this._createSocket, 1e3 * timeout);
+      this._reconnectAttempt += 1;
+    } else {
+      this._updateStatus('dead');
+      this._connectionPromise.reject(new Error('Could not establish connection'));
+    }
   }
 
   private _id = '';
