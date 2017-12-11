@@ -246,6 +246,27 @@ namespace Contents {
     addDrive(drive: IDrive): void;
 
     /**
+     * Given a path of the form `drive:local/portion/of/it.txt`
+     * get the local part of it.
+     *
+     * @param path: the path.
+     *
+     * @returns The local part of the path.
+     */
+    localPath(path: string): string;
+
+    /**
+     * Given a path of the form `drive:local/portion/of/it.txt`
+     * get the name of the drive. If the path is missing
+     * a drive portion, returns an empty string.
+     *
+     * @param path: the path.
+     *
+     * @returns The drive name for the path, or the empty string.
+     */
+    driveName(path: string): string;
+
+    /**
      * Given a path, get a ModelDB.IFactory from the
      * relevant backend. Returns `null` if the backend
      * does not provide one.
@@ -588,6 +609,44 @@ class ContentsManager implements Contents.IManager {
   }
 
   /**
+   * Given a path of the form `drive:local/portion/of/it.txt`
+   * get the local part of it.
+   *
+   * @param path: the path.
+   *
+   * @returns The local part of the path.
+   */
+  localPath(path: string): string {
+    const parts = path.split('/');
+    const firstParts = parts[0].split(':');
+    if (firstParts.length === 1 || !this._additionalDrives.has(firstParts[0])) {
+      return PathExt.removeSlash(path);
+    }
+    return PathExt.join(firstParts.slice(1).join(':'), ...parts.slice(1));
+  }
+
+  /**
+   * Given a path of the form `drive:local/portion/of/it.txt`
+   * get the name of the drive. If the path is missing
+   * a drive portion, returns an empty string.
+   *
+   * @param path: the path.
+   *
+   * @returns The drive name for the path, or the empty string.
+   */
+  driveName(path: string): string {
+    const parts = path.split('/');
+    const firstParts = parts[0].split(':');
+    if (firstParts.length === 1) {
+      return '';
+    }
+    if (this._additionalDrives.has(firstParts[0])) {
+      return firstParts[0];
+    }
+    return '';
+  }
+
+  /**
    * Get a file or directory.
    *
    * @param path: The path to the file.
@@ -598,9 +657,6 @@ class ContentsManager implements Contents.IManager {
    */
   get(path: string, options?: Contents.IFetchOptions): Promise<Contents.IModel> {
     let [drive, localPath] = this._driveForPath(path);
-    if (!drive) {
-      return Promise.reject(`No valid drive for path: ${path}`);
-    }
     return drive.get(localPath, options).then(contentsModel => {
       let listing: Contents.IModel[] = [];
       if (contentsModel.type === 'directory' && contentsModel.content) {
@@ -649,9 +705,6 @@ class ContentsManager implements Contents.IManager {
     if (options.path) {
       let globalPath = Private.normalize(options.path);
       let [drive, localPath] = this._driveForPath(globalPath);
-      if (!drive) {
-        return Promise.reject(`No valid drive for path: ${globalPath}`);
-      }
       return drive.newUntitled({ ...options, path: localPath }).then( contentsModel => {
         return {
           ...contentsModel,
@@ -832,20 +885,12 @@ class ContentsManager implements Contents.IManager {
    * and a local path for that drive.
    */
   private _driveForPath(path: string): [Contents.IDrive, string] {
-    // Split the path at ':'
-    let parts = path.split(':');
-    if (parts.length === 1) {
-      return [this._defaultDrive, path];
+    const driveName = this.driveName(path);
+    const localPath = this.localPath(path);
+    if (driveName) {
+      return [this._additionalDrives.get(driveName), localPath];
     } else {
-      const drive = this._additionalDrives.get(parts[0]);
-      // If there is no drive with the right name, assume
-      // that it is part of a valid file/directory name in the
-      // default drive.
-      if (!drive) {
-        return [this._defaultDrive, path]
-      } else {
-        return [drive, parts.slice(1).join(':')];
-      }
+      return [this._defaultDrive, localPath];
     }
   }
 

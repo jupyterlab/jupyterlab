@@ -35,7 +35,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IChangedArgs
+  IChangedArgs, PathExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -284,7 +284,7 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
    * Handle a change to the document path.
    */
   protected onPathChanged(sender: DocumentRegistry.IContext<INotebookModel>, path: string): void {
-    this.title.label = path.split('/').pop();
+    this.title.label = PathExt.basename(path);
   }
 
   /**
