@@ -44,8 +44,8 @@ namespace PathExt {
    */
   export
   function dirname(path: string): string {
-    let dir = posix.dirname(path)
-    return  dir === '.' ? '' : dir;
+    let dir = removeSlash(posix.dirname(path));
+    return dir === '.' ? '' : dir;
   }
 
   /**

@@ -117,6 +117,14 @@ describe('contents', () => {
 
   });
 
+  describe('#localPath()', () => {
+
+  });
+
+  describe('.driveName()', () => {
+
+  });
+
   describe('#get()', () => {
 
     it('should get a file', () => {

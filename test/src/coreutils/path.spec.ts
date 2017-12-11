@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 
-const TESTPATH = 'drive:foo/test/simple/test-path.js';
+const TESTPATH = 'foo/test/simple/test-path.js';
 
 
 describe('@jupyterlab/coreutils', () => {
@@ -32,21 +32,12 @@ describe('@jupyterlab/coreutils', () => {
         expect(PathExt.basename(TESTPATH)).to.equal('test-path.js');
       });
 
-      it('should not return the drive name for a file in the root directory', () => {
-        expect(PathExt.basename('drive:test.js')).to.equal('test.js');
-      });
-
-      it('should work for local paths that include a ":"', () => {
-        expect(PathExt.basename('drive:foo/test:directory/test:file.json'))
-        .to.equal('test:file.json');
-      });
-
     });
 
     describe('.dirname()', () => {
 
       it('should get the directory name of a path', () => {
-        expect(PathExt.dirname(TESTPATH)).to.equal('drive:foo/test/simple');
+        expect(PathExt.dirname(TESTPATH)).to.equal('foo/test/simple');
       });
 
       it('should not return "." for an empty path', () => {
@@ -57,42 +48,6 @@ describe('@jupyterlab/coreutils', () => {
       it('should not return "." for a path in the root directory', () => {
         let path = PathExt.dirname('foo.txt');
         expect(path).to.equal('');
-      });
-
-      it('should return the drive name for a path in the root of a drive', () => {
-        expect(PathExt.dirname('drive:test.js')).to.equal('drive:');
-      });
-
-      it('should work for local paths that include a ":"', () => {
-        expect(PathExt.dirname('drive:foo/test:directory/test:file.json'))
-        .to.equal('drive:foo/test:directory');
-      });
-    });
-
-    describe('.localPath()', () => {
-
-      it('should return the portion of the path after a drive name', () => {
-        expect(PathExt.localPath(TESTPATH))
-        .to.equal('foo/test/simple/test-path.js');
-      });
-
-      it('should return the path if it does not include a drive name', () => {
-        expect(PathExt.localPath('foo/test/odd:directory/test-path.js'))
-        .to.equal('foo/test/odd:directory/test-path.js');
-      });
-
-    });
-
-    describe('.driveName()', () => {
-
-      it('should return the drive name for a path', () => {
-        expect(PathExt.driveName(TESTPATH))
-        .to.equal('drive');
-      });
-
-      it('should return empty string if it does not include a drive name', () => {
-        expect(PathExt.driveName('foo/test/odd:directory/test-path.js'))
-        .to.equal('');
       });
 
     });
