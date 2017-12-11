@@ -713,9 +713,10 @@ class ContentsManager implements Contents.IManager {
    * Ensure that `model.content` is populated for the file.
    */
   save(path: string, options: Partial<Contents.IModel> = {}): Promise<Contents.IModel> {
-    let [drive, localPath] = this._driveForPath(path);
+    const globalPath = Private.normalize(path);
+    const [drive, localPath] = this._driveForPath(path);
     return drive.save(localPath, { ...options, path: localPath }).then(contentsModel => {
-      return { ...contentsModel, path: Private.normalize(path) } as Contents.IModel;
+      return { ...contentsModel, path: globalPath } as Contents.IModel;
     });
   }
 
@@ -815,7 +816,7 @@ class ContentsManager implements Contents.IManager {
     if (drive === this._defaultDrive) {
       return PathExt.removeSlash(localPath);
     } else {
-      return drive.name + ':' + PathExt.removeSlash(localPath);
+      return `${drive.name}:${PathExt.removeSlash(localPath)}`;
     }
   }
 
@@ -836,11 +837,15 @@ class ContentsManager implements Contents.IManager {
     if (parts.length === 1) {
       return [this._defaultDrive, path];
     } else {
-      let drive = this._additionalDrives.get(parts[0]);
+      const drive = this._additionalDrives.get(parts[0]);
+      // If there is no drive with the right name, assume
+      // that it is part of a valid file/directory name in the
+      // default drive.
       if (!drive) {
-        throw Error('ContentsManager: cannot find requested drive');
+        return [this._defaultDrive, path]
+      } else {
+        return [drive, parts.slice(1).join(':')];
       }
-      return [drive, Private.normalize(parts[1])];
     }
   }
 
@@ -1365,15 +1370,9 @@ namespace Private {
   export
   function normalize(path: string): string {
     const parts = path.split(':');
-
     if (parts.length === 1) {
       return PathExt.normalize(path);
     }
-
-    if (parts.length === 2) {
-      return parts[0] + ':' + PathExt.normalize(parts[1]);
-    }
-
-    throw new Error('Malformed path: ' + path);
+    return `${parts[0]}:${PathExt.normalize(parts.slice(1).join(':'))}`;
   }
 }
