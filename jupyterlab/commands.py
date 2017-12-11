@@ -617,9 +617,11 @@ class _AppHandler(object):
 
         for fname in ['index.js', 'webpack.config.js',
                 'yarn.lock', '.yarnrc', 'yarn.js']:
-            if fname == 'yarn.lock' and not overwrite_lock:
+            target = pjoin(staging, fname)
+            if (fname == 'yarn.lock' and os.path.exists(target) and
+                    not overwrite_lock):
                 continue
-            shutil.copy(pjoin(HERE, 'staging', fname), pjoin(staging, fname))
+            shutil.copy(pjoin(HERE, 'staging', fname), target)
 
         # Ensure a clean linked packages directory.
         linked_dir = pjoin(staging, 'linked_packages')
