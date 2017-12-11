@@ -30,7 +30,7 @@ import {
 describe('@jupyterlab/mainmenu', () => {
 
   describe('RunMenu', () => {
-    
+
     let commands: CommandRegistry;
     let menu: RunMenu;
     let tracker: InstanceTracker<Wodget>;
@@ -84,7 +84,7 @@ describe('@jupyterlab/mainmenu', () => {
             widget.state = 'runBelow';
             return Promise.resolve(void 0);
           },
-        }
+        };
         menu.codeRunners.add(runner);
         delegateExecute(wodget, menu.codeRunners, 'run');
         expect(wodget.state).to.be('run');

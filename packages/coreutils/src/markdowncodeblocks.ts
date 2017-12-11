@@ -8,7 +8,7 @@
 export
 namespace MarkdownCodeBlocks {
   export
-  const CODE_BLOCK_MARKER = "```";
+  const CODE_BLOCK_MARKER = '```';
   const markdownExtensions: string[] = [
     '.markdown',
     '.mdown',
@@ -30,12 +30,12 @@ namespace MarkdownCodeBlocks {
     code: string;
     constructor(startLine: number) {
       this.startLine = startLine;
-      this.code = "";
+      this.code = '';
       this.endLine = -1;
     }
   }
 
-  /**
+ /**
   * Check whether the given file extension is a markdown extension
   * @param extension - A file extension
   *
@@ -43,10 +43,10 @@ namespace MarkdownCodeBlocks {
   */
   export
   function isMarkdown(extension: string): boolean {
-    return markdownExtensions.indexOf(extension) > -1
+    return markdownExtensions.indexOf(extension) > -1;
   }
 
-  /**
+ /**
   * Construct all code snippets from current text
   * (this could be potentially optimized if we can cache and detect differences)
   * @param text - A string to parse codeblocks from
@@ -55,14 +55,14 @@ namespace MarkdownCodeBlocks {
   */
   export
   function findMarkdownCodeBlocks(text: string): MarkdownCodeBlock[] {
-    if (!text || text == '') {
+    if (!text || text === '') {
       return [];
     }
 
-    const lines = text.split("\n");
+    const lines = text.split('\n');
     const codeBlocks: MarkdownCodeBlock[] = [];
-    var currentBlock = null;
-    for (var lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+    let currentBlock = null;
+    for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
       const line = lines[lineIndex];
       const lineContainsMarker = line.indexOf(CODE_BLOCK_MARKER) === 0;
       const constructingBlock = currentBlock != null;

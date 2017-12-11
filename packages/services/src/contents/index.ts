@@ -832,9 +832,9 @@ class ContentsManager implements Contents.IManager {
    */
   private _driveForPath(path: string): [Contents.IDrive, string] {
     // Split the path at ':'
-    let parts = path.split(':')
+    let parts = path.split(':');
     if (parts.length === 1) {
-      return [this._defaultDrive, path]
+      return [this._defaultDrive, path];
     } else {
       let drive = this._additionalDrives.get(parts[0]);
       if (!drive) {

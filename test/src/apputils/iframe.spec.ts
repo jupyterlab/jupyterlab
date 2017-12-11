@@ -20,6 +20,7 @@ describe('@jupyterlab/domutils', () => {
         let iframe = new IFrame();
         expect(iframe).to.be.an.instanceof(IFrame);
         expect(iframe.hasClass('jp-IFrame')).to.equal(true);
+        // tslint:disable-next-line
         expect(iframe.node.querySelector('iframe')).to.be.ok;
       });
 

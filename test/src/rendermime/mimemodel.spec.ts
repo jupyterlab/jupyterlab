@@ -10,12 +10,6 @@ import {
 
 describe('rendermime/mimemodel', () => {
 
-  let model: MimeModel;
-
-  beforeEach(() => {
-    model = new MimeModel();
-  });
-
   describe('MimeModel', () => {
 
     describe('#constructor()', () => {

@@ -276,7 +276,7 @@ namespace OutputModel {
 /**
  * The namespace for module private data.
  */
- namespace Private {
+namespace Private {
   /**
    * Get the data from a notebook output.
    */

@@ -1292,29 +1292,29 @@ namespace Private {
    *
    * @param cut - Whether to copy or cut.
    */
-   export
-   function copyOrCut(widget: Notebook, cut: boolean): void {
-     if (!widget.model || !widget.activeCell) {
-       return;
-     }
-     let state = getState(widget);
-     widget.mode = 'command';
-     let clipboard = Clipboard.getInstance();
-     clipboard.clear();
-     let data: nbformat.IBaseCell[] = [];
-     each(widget.widgets, child => {
-       if (widget.isSelected(child)) {
-         data.push(child.model.toJSON());
-       }
-     });
-     clipboard.setData(JUPYTER_CELL_MIME, data);
-     if (cut) {
-       deleteCells(widget);
-     } else {
-       widget.deselectAll();
-     }
-     handleState(widget, state);
-   }
+  export
+  function copyOrCut(widget: Notebook, cut: boolean): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    let state = getState(widget);
+    widget.mode = 'command';
+    let clipboard = Clipboard.getInstance();
+    clipboard.clear();
+    let data: nbformat.IBaseCell[] = [];
+    each(widget.widgets, child => {
+      if (widget.isSelected(child)) {
+        data.push(child.model.toJSON());
+      }
+    });
+    clipboard.setData(JUPYTER_CELL_MIME, data);
+    if (cut) {
+      deleteCells(widget);
+    } else {
+      widget.deselectAll();
+    }
+    handleState(widget, state);
+  }
 
   /**
    * Change the selected cell type(s).

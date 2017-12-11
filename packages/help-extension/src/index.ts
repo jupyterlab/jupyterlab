@@ -62,7 +62,7 @@ namespace CommandIDs {
 
   export
   const launchClassic = 'help:launch-classic-notebook';
-};
+}
 
 
 /**

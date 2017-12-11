@@ -8,14 +8,14 @@ import {
 } from '@phosphor/commands';
 
 import {
-  HelpMenu, IHelpMenu
+  HelpMenu
 } from '@jupyterlab/mainmenu';
 
 
 describe('@jupyterlab/mainmenu', () => {
 
   describe('HelpMenu', () => {
-    
+
     let commands: CommandRegistry;
     let menu: HelpMenu;
 

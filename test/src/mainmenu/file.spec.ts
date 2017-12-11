@@ -30,7 +30,7 @@ class Wodget extends Widget {
 describe('@jupyterlab/mainmenu', () => {
 
   describe('FileMenu', () => {
-    
+
     let commands: CommandRegistry;
     let menu: FileMenu;
     let tracker: InstanceTracker<Wodget>;
@@ -79,7 +79,7 @@ describe('@jupyterlab/mainmenu', () => {
             widget.state = 'clean';
             return Promise.resolve(void 0);
           }
-        }
+        };
         menu.closeAndCleaners.add(cleaner);
         delegateExecute(wodget, menu.closeAndCleaners, 'closeAndCleanup');
         expect(wodget.state).to.be('clean');

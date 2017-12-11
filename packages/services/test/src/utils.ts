@@ -149,7 +149,7 @@ function createMsg(channel: KernelMessage.Channel, parentHeader: JSONObject): Ke
     metadata: {},
     buffers: []
   };
-};
+}
 
 
 /**
@@ -384,7 +384,7 @@ class KernelTester extends SocketTester {
 /**
  * Create a unique session id.
  */
- export
+export
 function createSessionModel(id?: string): Session.IModel {
   return {
     id: id || uuid(),

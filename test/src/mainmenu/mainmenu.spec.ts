@@ -23,7 +23,7 @@ import {
 describe('@jupyterlab/mainmenu', () => {
 
   describe('MainMenu', () => {
-    
+
     let commands: CommandRegistry;
     let mainMenu: MainMenu;
 

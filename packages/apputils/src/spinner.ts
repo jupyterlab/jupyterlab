@@ -3,9 +3,8 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-
 import {
-  Widget 
+  Widget
 } from '@phosphor/widgets';
 
 

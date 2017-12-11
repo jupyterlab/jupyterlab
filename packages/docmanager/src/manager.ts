@@ -540,5 +540,5 @@ namespace Private {
    * A type alias for a standard context.
    */
   export
-  interface IContext extends Context<DocumentRegistry.IModel> {};
+  interface IContext extends Context<DocumentRegistry.IModel> { /* no op */ }
 }

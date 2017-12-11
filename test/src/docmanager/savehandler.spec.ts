@@ -8,10 +8,6 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  Platform
-} from '@phosphor/domutils';
-
-import {
   ServiceManager
 } from '@jupyterlab/services';
 

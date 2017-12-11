@@ -30,7 +30,7 @@ class Wodget extends Widget {
 describe('@jupyterlab/mainmenu', () => {
 
   describe('EditMenu', () => {
-    
+
     let commands: CommandRegistry;
     let menu: EditMenu;
     let tracker: InstanceTracker<Wodget>;
@@ -74,7 +74,7 @@ describe('@jupyterlab/mainmenu', () => {
             widget.state = 'redo';
             return;
           }
-        }
+        };
         menu.undoers.add(undoer);
         delegateExecute(wodget, menu.undoers, 'undo');
         expect(wodget.state).to.be('undo');
@@ -94,7 +94,7 @@ describe('@jupyterlab/mainmenu', () => {
             widget.state = 'clear';
             return;
           },
-        }
+        };
         menu.clearers.add(clearer);
         delegateExecute(wodget, menu.clearers, 'clear');
         expect(wodget.state).to.be('clear');
@@ -115,7 +115,7 @@ describe('@jupyterlab/mainmenu', () => {
             widget.state = 'findAndReplace';
             return;
           },
-        }
+        };
         menu.findReplacers.add(finder);
         delegateExecute(wodget, menu.findReplacers, 'find');
         expect(wodget.state).to.be('find');

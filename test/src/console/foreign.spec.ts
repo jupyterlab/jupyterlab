@@ -83,7 +83,7 @@ function cellFactory(): CodeCell {
   let model = new CodeCellModel({});
   let cell = new CodeCell({ model, rendermime, contentFactory });
   return cell;
-};
+}
 const relevantTypes = [
   'execute_input',
   'execute_result',

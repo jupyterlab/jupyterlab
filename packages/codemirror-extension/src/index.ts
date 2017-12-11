@@ -327,5 +327,5 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
       let editor = widget.editor as CodeMirrorEditor;
       editor.execCommand('replace');
     }
-  } as IEditMenu.IFindReplacer<FileEditor>)
+  } as IEditMenu.IFindReplacer<FileEditor>);
 }

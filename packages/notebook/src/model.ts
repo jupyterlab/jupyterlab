@@ -262,14 +262,14 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       });
       break;
     case 'remove':
-      each(change.oldValues, cell => {
+      each(change.oldValues, cell => { /* no op */
       });
       break;
     case 'set':
       each(change.newValues, cell => {
         cell.contentChanged.connect(this.triggerContentChange, this);
       });
-      each(change.oldValues, cell => {
+      each(change.oldValues, cell => { /* no op */
       });
       break;
     default:
@@ -468,7 +468,7 @@ namespace NotebookModel {
         }
         options.modelDB = this.modelDB.view(options.id);
       }
-     return new RawCellModel(options);
+      return new RawCellModel(options);
     }
 
     /**

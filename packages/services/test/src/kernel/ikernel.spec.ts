@@ -887,29 +887,29 @@ describe('Kernel.IKernel', () => {
       tester = new KernelTester();
       tester.onMessage((message) => {
         // send a reply
-        let parent_header = message.header;
-        let msg = createMsg('shell', parent_header);
+        let parentHeader = message.header;
+        let msg = createMsg('shell', parentHeader);
         tester.send(msg);
 
         future.onReply = () => {
           // trigger onIOPub with a 'stream' message
-          let msgStream = createMsg('iopub', parent_header);
+          let msgStream = createMsg('iopub', parentHeader);
           msgStream.header.msg_type = 'stream';
           msgStream.content = { 'name': 'stdout', 'text': 'foo' };
           tester.send(msgStream);
           // trigger onDone
-          let msgDone = createMsg('iopub', parent_header);
+          let msgDone = createMsg('iopub', parentHeader);
           msgDone.header.msg_type = 'status';
           (msgDone as KernelMessage.IStatusMsg).content.execution_state = 'idle';
           tester.send(msgDone);
         };
 
-        kernel.registerMessageHook(parent_header.msg_id, (msg) => {
+        kernel.registerMessageHook(parentHeader.msg_id, (msg) => {
           calls.push('last');
           return true;
         });
 
-        kernel.registerMessageHook(parent_header.msg_id, (msg) => {
+        kernel.registerMessageHook(parentHeader.msg_id, (msg) => {
           calls.push('first');
           // not returning should also continue handling
           return void 0;
@@ -947,29 +947,29 @@ describe('Kernel.IKernel', () => {
 
       tester.onMessage((message) => {
         // send a reply
-        let parent_header = message.header;
-        let msg = createMsg('shell', parent_header);
+        let parentHeader = message.header;
+        let msg = createMsg('shell', parentHeader);
         tester.send(msg);
 
         future.onReply = () => {
           // trigger onIOPub with a 'stream' message
-          let msgStream = createMsg('iopub', parent_header);
+          let msgStream = createMsg('iopub', parentHeader);
           msgStream.header.msg_type = 'stream';
           msgStream.content = { 'name': 'stdout', 'text': 'foo' };
           tester.send(msgStream);
           // trigger onDone
-          let msgDone = createMsg('iopub', parent_header);
+          let msgDone = createMsg('iopub', parentHeader);
           msgDone.header.msg_type = 'status';
           (msgDone as KernelMessage.IStatusMsg).content.execution_state = 'idle';
           tester.send(msgDone);
         };
 
-        kernel.registerMessageHook(parent_header.msg_id, (msg) => {
+        kernel.registerMessageHook(parentHeader.msg_id, (msg) => {
           calls.push('last');
           return true;
         });
 
-        kernel.registerMessageHook(parent_header.msg_id, (msg) => {
+        kernel.registerMessageHook(parentHeader.msg_id, (msg) => {
           calls.push('first');
           return false;
         });
@@ -1005,26 +1005,26 @@ describe('Kernel.IKernel', () => {
 
       tester.onMessage((message) => {
         // send a reply
-        let parent_header = message.header;
-        let msg = createMsg('shell', parent_header);
+        let parentHeader = message.header;
+        let msg = createMsg('shell', parentHeader);
         tester.send(msg);
 
         future.onReply = () => {
           // trigger onIOPub with a 'stream' message
-          let msgStream = createMsg('iopub', parent_header);
+          let msgStream = createMsg('iopub', parentHeader);
           msgStream.header.msg_type = 'stream';
           msgStream.content = { 'name': 'stdout', 'text': 'foo' };
           tester.send(msgStream);
           // trigger onDone
-          let msgDone = createMsg('iopub', parent_header);
+          let msgDone = createMsg('iopub', parentHeader);
           msgDone.header.msg_type = 'status';
           (msgDone as KernelMessage.IStatusMsg).content.execution_state = 'idle';
           tester.send(msgDone);
         };
 
-        kernel.registerMessageHook(parent_header.msg_id, (msg) => {
+        kernel.registerMessageHook(parentHeader.msg_id, (msg) => {
           calls.push('last');
-          kernel.registerMessageHook(parent_header.msg_id, (msg) => {
+          kernel.registerMessageHook(parentHeader.msg_id, (msg) => {
             calls.push('first');
             return true;
           });
@@ -1060,18 +1060,18 @@ describe('Kernel.IKernel', () => {
 
       tester.onMessage((message) => {
         // send a reply
-        let parent_header = message.header;
-        let msg = createMsg('shell', parent_header);
+        let parentHeader = message.header;
+        let msg = createMsg('shell', parentHeader);
         tester.send(msg);
 
         future.onReply = () => {
           // trigger onIOPub with a 'stream' message
-          let msgStream = createMsg('iopub', parent_header);
+          let msgStream = createMsg('iopub', parentHeader);
           msgStream.header.msg_type = 'stream';
           msgStream.content = { 'name': 'stdout', 'text': 'foo' };
           tester.send(msgStream);
           // trigger onDone
-          let msgDone = createMsg('iopub', parent_header);
+          let msgDone = createMsg('iopub', parentHeader);
           msgDone.header.msg_type = 'status';
           (msgDone as KernelMessage.IStatusMsg).content.execution_state = 'idle';
           tester.send(msgDone);
@@ -1081,9 +1081,9 @@ describe('Kernel.IKernel', () => {
           calls.push('delete');
           return true;
         };
-        let toDeleteHook = kernel.registerMessageHook(parent_header.msg_id, toDelete);
+        let toDeleteHook = kernel.registerMessageHook(parentHeader.msg_id, toDelete);
 
-        kernel.registerMessageHook(parent_header.msg_id, (msg) => {
+        kernel.registerMessageHook(parentHeader.msg_id, (msg) => {
           if (calls.length > 0) {
             // delete the hook the second time around
             toDeleteHook.dispose();

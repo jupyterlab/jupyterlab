@@ -196,7 +196,7 @@ describe('@jupyterlab/observables', () => {
 
       it('should return true if a value exists at a path', () => {
         let db = new ModelDB();
-        let value = db.createValue('value');
+        db.createValue('value');
         expect(db.has('value')).to.be(true);
       });
 

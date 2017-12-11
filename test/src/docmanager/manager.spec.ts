@@ -54,7 +54,6 @@ describe('@jupyterlab/docmanager', () => {
     canStartKernel: true,
     preferKernel: true
   });
-  let openedWidget: Widget;
 
   before(() => {
     services = new ServiceManager();
@@ -72,7 +71,7 @@ describe('@jupyterlab/docmanager', () => {
       manager: services,
       opener: {
         open: (widget: Widget) => {
-          openedWidget = widget;
+          // no-op
         }
       }
     });

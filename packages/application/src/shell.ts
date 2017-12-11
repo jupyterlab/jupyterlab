@@ -625,7 +625,7 @@ class ApplicationShell extends Widget {
         break;
     }
     return true;
-  };
+  }
 
   private _activeChanged = new Signal<this, ApplicationShell.IChangedArgs>(this);
   private _cachedLayout: DockLayout.ILayoutConfig | null = null;
@@ -717,7 +717,7 @@ namespace ApplicationShell {
      * The document mode (i.e., multiple/single) of the main dock panel.
      */
     readonly mode: DockPanel.Mode | null;
-  };
+  }
 
   /**
    * The restorable description of a sidebar in the user interface.

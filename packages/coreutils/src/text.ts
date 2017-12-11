@@ -30,12 +30,12 @@ namespace Text {
       // not using surrogates, nothing to do
       return jsIdx;
     }
-    var charIdx = jsIdx;
-    for (var i = 0; i + 1 < text.length && i < jsIdx; i++) {
-      var charCode = text.charCodeAt(i);
+    let charIdx = jsIdx;
+    for (let i = 0; i + 1 < text.length && i < jsIdx; i++) {
+      let charCode = text.charCodeAt(i);
       // check for surrogate pair
       if (charCode >= 0xD800 && charCode <= 0xDBFF) {
-        var nextCharCode = text.charCodeAt(i+1);
+        let nextCharCode = text.charCodeAt(i + 1);
         if (nextCharCode >= 0xDC00 && nextCharCode <= 0xDFFF) {
           charIdx--;
           i++;
@@ -60,12 +60,12 @@ namespace Text {
       // not using surrogates, nothing to do
       return charIdx;
     }
-    var jsIdx = charIdx;
-    for (var i = 0; i + 1 < text.length && i < jsIdx; i++) {
-      var charCode = text.charCodeAt(i);
+    let jsIdx = charIdx;
+    for (let i = 0; i + 1 < text.length && i < jsIdx; i++) {
+      let charCode = text.charCodeAt(i);
       // check for surrogate pair
       if (charCode >= 0xD800 && charCode <= 0xDBFF) {
-        var nextCharCode = text.charCodeAt(i+1);
+        let nextCharCode = text.charCodeAt(i + 1);
         if (nextCharCode >= 0xDC00 && nextCharCode <= 0xDFFF) {
           jsIdx++;
           i++;

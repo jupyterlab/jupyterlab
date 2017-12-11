@@ -347,7 +347,7 @@ function createRunMenu(app: JupyterLab, menu: RunMenu): void {
     CommandIDs.runAbove,
     CommandIDs.runBelow,
   ].map(command => { return { command }; });
-  menu.addGroup(codeRunnerGroup, 0)
+  menu.addGroup(codeRunnerGroup, 0);
 }
 export default menuPlugin;
 

@@ -305,11 +305,11 @@ namespace KernelMessage {
    *
    * See [Comm close](https://jupyter-client.readthedocs.io/en/latest/messaging.html#opening-a-comm).
    */
-   export
-   interface ICommClose extends JSONObject {
-      comm_id: string;
-      data: JSONValue;
-   }
+  export
+  interface ICommClose extends JSONObject {
+    comm_id: string;
+    data: JSONValue;
+  }
 
   /**
    * Test whether a kernel message is a `'comm_close'` message.
@@ -665,7 +665,7 @@ namespace KernelMessage {
      * If so, the frontend shouldn't echo input.
      */
     password: boolean;
-  };
+  }
 
   /**
    * Test whether a kernel message is an `'input_request'` message.

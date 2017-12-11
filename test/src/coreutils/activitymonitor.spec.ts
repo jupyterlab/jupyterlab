@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  ISignal, Signal
+  Signal
 } from '@phosphor/signaling';
 
 import {
