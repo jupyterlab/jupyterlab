@@ -469,16 +469,16 @@
     "@jupyterlab/apputils" "^0.13.0"
     "@jupyterlab/docregistry" "^0.13.0"
 
-"@jupyterlab/notebook-extension@^0.13.0":
-  version "0.13.0"
-  resolved "https://registry.npmjs.org/@jupyterlab/notebook-extension/-/notebook-extension-0.13.0.tgz#c7f88fd51b8cceeb9610f35e2eb5e4ec36213a86"
+"@jupyterlab/notebook-extension@^0.13.1":
+  version "0.13.1"
+  resolved "https://registry.npmjs.org/@jupyterlab/notebook-extension/-/notebook-extension-0.13.1.tgz#074924d8d03fa9f584ca48856a0bded610bd560d"
   dependencies:
-    "@jupyterlab/application" "^0.13.0"
-    "@jupyterlab/apputils" "^0.13.0"
+    "@jupyterlab/application" "^0.13.1"
+    "@jupyterlab/apputils" "^0.13.1"
     "@jupyterlab/codeeditor" "^0.13.0"
     "@jupyterlab/coreutils" "^0.13.0"
-    "@jupyterlab/filebrowser" "^0.13.0"
-    "@jupyterlab/launcher" "^0.13.0"
+    "@jupyterlab/filebrowser" "^0.13.2"
+    "@jupyterlab/launcher" "^0.13.2"
     "@jupyterlab/mainmenu" "^0.2.0"
     "@jupyterlab/notebook" "^0.13.0"
     "@jupyterlab/services" "^0.52.0"
@@ -1247,8 +1247,8 @@ caniuse-api@^1.5.2:
     lodash.uniq "^4.5.0"
 
 caniuse-db@^1.0.30000529, caniuse-db@^1.0.30000634, caniuse-db@^1.0.30000639:
-  version "1.0.30000780"
-  resolved "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000780.tgz#8d1977561d00ff0f0ed2b6b66140328ab4504c0a"
+  version "1.0.30000782"
+  resolved "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000782.tgz#d8815bce1578c350aced1132507301205e0fab53"
 
 canvas@^1.2.9, canvas@^1.3.4:
   version "1.6.7"
@@ -1458,8 +1458,8 @@ core-js@^1.0.0:
   resolved "https://registry.npmjs.org/core-js/-/core-js-1.2.7.tgz#652294c14651db28fa93bd2d5ff2983a4f08c636"
 
 core-js@^2.4.0:
-  version "2.5.1"
-  resolved "https://registry.npmjs.org/core-js/-/core-js-2.5.1.tgz#ae6874dc66937789b80754ff5428df66819ca50b"
+  version "2.5.2"
+  resolved "https://registry.npmjs.org/core-js/-/core-js-2.5.2.tgz#bc4648656e7dc9dc80d7d3c7bbc172d96e744e63"
 
 core-util-is@1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
@@ -1842,10 +1842,10 @@ entities@^1.1.1, entities@~1.1.1:
   resolved "https://registry.npmjs.org/entities/-/entities-1.1.1.tgz#6e5c2d0a5621b5dadaecef80b90edfb5cd7772f0"
 
 errno@^0.1.3:
-  version "0.1.4"
-  resolved "https://registry.npmjs.org/errno/-/errno-0.1.4.tgz#b896e23a9e5e8ba33871fc996abd3635fc9a1c7d"
+  version "0.1.5"
+  resolved "https://registry.npmjs.org/errno/-/errno-0.1.5.tgz#a563781a6052bc2c9ccd89e8cef0eb9506e0c321"
   dependencies:
-    prr "~0.0.0"
+    prr "~1.0.1"
 
 error-ex@^1.2.0:
   version "1.3.1"
@@ -3384,9 +3384,9 @@ prop-types@^15.5.8, prop-types@^15.6.0:
     loose-envify "^1.3.1"
     object-assign "^4.1.1"
 
-prr@~0.0.0:
-  version "0.0.0"
-  resolved "https://registry.npmjs.org/prr/-/prr-0.0.0.tgz#1a84b85908325501411853d0081ee3fa86e2926a"
+prr@~1.0.1:
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/prr/-/prr-1.0.1.tgz#d3fc114ba06995a45ec6893f484ceb1d78f5f476"
 
 public-encrypt@^4.0.0:
   version "4.0.0"
