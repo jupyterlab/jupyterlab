@@ -33,7 +33,7 @@ namespace PathExt {
    */
   export
   function basename(path: string, ext?: string): string {
-    return posix.basename(path, ext);
+    return posix.basename(localPath(path), ext);
   }
 
   /**
@@ -44,8 +44,39 @@ namespace PathExt {
    */
   export
   function dirname(path: string): string {
-    let dir = removeSlash(posix.dirname(path));
-    return dir === '.' ? '' : dir;
+    const drive = driveName(path);
+    let dir = posix.dirname(localPath(path));
+    dir = dir === '.' ? '' : dir;
+    return drive ? `${drive}:${dir}` : dir;
+  }
+
+  /**
+   * Given a path of the form `drive:path/to/file`, get the local part
+   * of the path (that is, removing the `drive:` component). If the
+   * path does not include a drive, it just returns the path.
+   *
+   * @param path - The file path.
+   */
+  export
+  function localPath(path: string): string {
+    const parts = path.split(':');
+    if (parts.length === 1) {
+      return removeSlash(path);
+    }
+    return removeSlash(parts.slice(1).join(':'));
+  }
+
+  /**
+   * Given a path of the form `drive:path/to/file`, get the name of the
+   * drive for the path. If the  path does not include a drive,
+   * returns an empty string.
+   *
+   * @param path - The file path.
+   */
+  export
+  function driveName(path: string): string {
+    const parts = path.split(':');
+    return parts.length > 1 ? parts[0] : '';
   }
 
   /**

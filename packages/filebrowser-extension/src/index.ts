@@ -160,7 +160,8 @@ function activateFactory(app: JupyterLab, docManager: IDocumentManager, state: I
 
     return widget;
   };
-  const defaultBrowser = createFileBrowser('filebrowser');
+  const defaultBrowser =
+    createFileBrowser('filebrowser', { driveName: 'Default' });
 
   return { createFileBrowser, defaultBrowser, tracker };
 }

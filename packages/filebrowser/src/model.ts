@@ -287,7 +287,7 @@ class FileBrowserModel implements IDisposable {
       }
 
       const path = (cwd as ReadonlyJSONObject)['path'] as string;
-      const localPath = path.split(':').pop();
+      const localPath = PathExt.localPath(path);
       return manager.services.contents.get(path)
         .then(() => this.cd(localPath))
         .catch(() => state.remove(key));
@@ -544,12 +544,9 @@ namespace Private {
    */
   export
   function normalizePath(root: string, path: string): string {
-    let parts = root.split(':');
-    if (parts.length === 1) {
-      return PathExt.resolve(root, path);
-    } else {
-      let resolved = PathExt.resolve(parts[1], path);
-      return parts[0] + ':' + resolved;
-    }
+    const driveName = PathExt.driveName(root);
+    const localPath = PathExt.localPath(root);
+    const resolved = PathExt.resolve(localPath, path);
+    return driveName ? `${driveName}:${resolved}` : resolved;
   }
 }

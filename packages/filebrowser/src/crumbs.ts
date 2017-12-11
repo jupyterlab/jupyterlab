@@ -340,7 +340,7 @@ namespace Private {
       node.removeChild(firstChild.nextSibling);
     }
 
-    let localPath = path.split(':').pop() as string;
+    const localPath = PathExt.localPath(path);
     let localParts = localPath.split('/');
     let parts = path.split('/');
     if (parts.length > 2) {
