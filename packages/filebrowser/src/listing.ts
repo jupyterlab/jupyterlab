@@ -1090,7 +1090,8 @@ class DirListing extends Widget {
     const promises: Promise<Contents.IModel | null>[] = [];
     const paths = event.mimeData.getData(CONTENTS_MIME) as string[];
     for (let path of paths) {
-      let name = PathExt.basename(path);
+      let localPath = manager.services.contents.localPath(path)
+      let name = PathExt.basename(localPath);
       let newPath = PathExt.join(basePath, name);
       // Skip files that are not moving.
       if (newPath === path) {

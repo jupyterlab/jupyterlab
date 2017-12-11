@@ -48,7 +48,6 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
     layout.addWidget(toolbar);
     BoxLayout.setStretch(toolbar, 0);
     let context = options.context;
-    this.title.label = PathExt.basename(context.path);
     this.rendermime = options.rendermime.clone({ resolver: context });
 
     this._context = context;
@@ -60,6 +59,7 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
     BoxLayout.setStretch(this._renderer, 1);
 
     context.pathChanged.connect(this._onPathChanged, this);
+    this._onPathChanged();
 
     this._context.ready.then(() => {
       if (this.isDisposed) {
@@ -161,7 +161,9 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
    * Handle a path change.
    */
   private _onPathChanged(): void {
-    this.title.label = PathExt.basename(this._context.path);
+    const localPath =
+      this._context.manager.contents.localPath(this._context.path);
+    this.title.label = PathExt.basename(localPath);
   }
 
   /**

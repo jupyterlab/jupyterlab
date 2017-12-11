@@ -298,9 +298,11 @@ class FileEditor extends Widget implements DocumentRegistry.IReadyWidget {
   private _onPathChanged(): void {
     const editor = this.editor;
     const path = this._context.path;
+    const localPath = this._context.manager.contents.localPath(path);
 
-    editor.model.mimeType = this._mimeTypeService.getMimeTypeByFilePath(path);
-    this.title.label = PathExt.basename(path);
+    editor.model.mimeType =
+      this._mimeTypeService.getMimeTypeByFilePath(localPath);
+    this.title.label = PathExt.basename(localPath);
   }
 
   private editorWidget: FileEditorCodeWrapper;

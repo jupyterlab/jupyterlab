@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Contents, Kernel
+  Contents, Kernel, ServiceManager
 } from '@jupyterlab/services';
 
 import {
@@ -679,6 +679,11 @@ namespace DocumentRegistry {
      * The client session object associated with the context.
      */
     readonly session: IClientSession;
+
+    /**
+     * The ServiceManager associated with the document.
+     */
+    readonly manager: ServiceManager.IManager;
 
     /**
      * The current path associated with the document.
