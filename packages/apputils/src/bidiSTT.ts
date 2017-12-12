@@ -14,7 +14,7 @@ namespace bidiSTT {
    * @param element The HTML element to attach the event to
    * @param type    The handler type - The type of structured text required. 
    */  
-  function attachElement(element: HTMLElement, type: string) {
+  function applyBidi(element: HTMLElement, type: string) {
     if (!element || element.nodeType != 1)
       return false;
     if (!event) {
@@ -538,7 +538,7 @@ namespace Private {
    * This function is called for each user's input into the attached editable HTML element
    * It controls correct display of the structured text in the element, a content which is changed dynamically.
    * Attributes needed to display the structure, are added previously as custom attributes of
-   * the element (see function attachElement()) . The main attribute is 'type' ("data-tf-type"), which represents
+   * the element (see function applyBidi()) . The main attribute is 'type' ("data-tf-type"), which represents
    * one of predefined types of text structures (currently only file paths are supported). Some types of text structure
    * additionally require flow direction (e.g. direction, in which separate segments of the text
    * are displayed) and locale(e.g. language of the text). 

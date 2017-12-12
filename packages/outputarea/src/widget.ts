@@ -421,7 +421,7 @@ class OutputArea extends Widget {
       let output = this.rendermime.createRenderer(mimeType);
       output.renderModel(model);
       output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
-      if (bidiSTT.isBidiLocale()) bidiSTT.attachElement(output.node,'filepath');
+      if (bidiSTT.isBidiLocale()) bidiSTT.applyBidi(output.node,'filepath');
       panel.addWidget(output);
     }
 
