@@ -139,7 +139,9 @@ function createEditMenu(app: JupyterLab, menu: EditMenu): void {
     label: () => {
       const noun =
         Private.delegateLabel(app, menu.clearers, 'noun');
-      return `Clear${noun ? ` ${noun}` : ''}`;
+      const enabled =
+        Private.delegateEnabled(app, menu.clearers, 'clearCurrent')();
+      return `Clear${enabled ? ` ${noun}` : ''}`;
     },
     isEnabled:
       Private.delegateEnabled(app, menu.clearers, 'clearCurrent'),
@@ -148,9 +150,9 @@ function createEditMenu(app: JupyterLab, menu: EditMenu): void {
   });
   commands.addCommand(CommandIDs.clearAll, {
     label: () => {
-      const noun =
-        Private.delegateLabel(app, menu.clearers, 'noun');
-      return `Clear All${noun ? ` ${noun}` : ''}`;
+      const noun = Private.delegateLabel(app, menu.clearers, 'noun');
+      const enabled = Private.delegateEnabled(app, menu.clearers, 'clearAll')();
+      return `Clear All${enabled ? ` ${noun}` : ''}`;
     },
     isEnabled:
       Private.delegateEnabled(app, menu.clearers, 'clearAll'),
