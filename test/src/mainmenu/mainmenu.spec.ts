@@ -16,7 +16,8 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  MainMenu, EditMenu, FileMenu, HelpMenu, KernelMenu, RunMenu, ViewMenu
+  MainMenu, EditMenu, FileMenu, HelpMenu,
+  KernelMenu, RunMenu, ViewMenu, WindowMenu
 } from '@jupyterlab/mainmenu';
 
 
@@ -93,15 +94,15 @@ describe('@jupyterlab/mainmenu', () => {
 
     });
 
-    describe('#viewMenu', () => {
+    describe('#windowMenu', () => {
 
-      it('should be a ViewMenu', () => {
-        expect(mainMenu.viewMenu).to.be.a(ViewMenu);
+      it('should be a WindowMenu', () => {
+        expect(mainMenu.windowMenu).to.be.a(WindowMenu);
       });
 
       it('should be the third menu', () => {
         expect(ArrayExt.firstIndexOf(mainMenu.menus,
-                                     mainMenu.viewMenu.menu)).to.be(2);
+                                     mainMenu.windowMenu.menu)).to.be(2);
       });
 
     });
@@ -132,15 +133,28 @@ describe('@jupyterlab/mainmenu', () => {
 
     });
 
+    describe('#viewMenu', () => {
+
+      it('should be a ViewMenu', () => {
+        expect(mainMenu.viewMenu).to.be.a(ViewMenu);
+      });
+
+      it('should be the sixth menu', () => {
+        expect(ArrayExt.firstIndexOf(mainMenu.menus,
+                                     mainMenu.viewMenu.menu)).to.be(5);
+      });
+
+    });
+
     describe('#helpMenu', () => {
 
       it('should be a HelpMenu', () => {
         expect(mainMenu.helpMenu).to.be.a(HelpMenu);
       });
 
-      it('should be the sixth menu', () => {
+      it('should be the seventh menu', () => {
         expect(ArrayExt.firstIndexOf(mainMenu.menus,
-                                     mainMenu.helpMenu.menu)).to.be(5);
+                                     mainMenu.helpMenu.menu)).to.be(6);
       });
 
     });
