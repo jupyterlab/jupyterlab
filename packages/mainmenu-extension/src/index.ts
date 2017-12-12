@@ -11,7 +11,7 @@ import {
 
 import {
   IMainMenu, IMenuExtender,
-  EditMenu, FileMenu, KernelMenu, MainMenu, RunMenu, ViewMenu
+  EditMenu, FileMenu, KernelMenu, MainMenu, RunMenu, ViewMenu, WindowMenu
 } from '@jupyterlab/mainmenu';
 
 
@@ -99,6 +99,7 @@ const menuPlugin: JupyterLabPlugin<IMainMenu> = {
     createKernelMenu(app, menu.kernelMenu);
     createRunMenu(app, menu.runMenu);
     createViewMenu(app, menu.viewMenu);
+    createWindowMenu(app, menu.windowMenu);
 
     app.shell.addToTopArea(logo);
     app.shell.addToTopArea(menu);
@@ -207,7 +208,6 @@ function createFileMenu(app: JupyterLab, menu: FileMenu): void {
   const newGroup = [
     { type: 'submenu' as Menu.ItemType, submenu: menu.newMenu.menu },
     { command: 'filebrowser:create-main-launcher' },
-    { command: 'docmanager:clone' }
   ];
 
   // Add the close group
@@ -321,15 +321,6 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
     CommandIDs.wordWrap
   ].map( command => { return { command }; });
   menu.addGroup(editorViewerGroup, 10);
-
-  // Add commands for cycling the active tabs.
-  menu.addGroup([
-    { command: 'application:activate-next-tab' },
-    { command: 'application:activate-previous-tab' }
-  ], 999);
-
-  // Add the command for toggling single-document mode.
-  menu.addGroup([ { command: 'application:toggle-mode' }], 1000);
 }
 
 function createRunMenu(app: JupyterLab, menu: RunMenu): void {
@@ -382,6 +373,20 @@ function createRunMenu(app: JupyterLab, menu: RunMenu): void {
   menu.addGroup(runGroup, 0);
   menu.addGroup(runAllGroup, 1);
 }
+
+function createWindowMenu(app: JupyterLab, menu: WindowMenu): void {
+  menu.addGroup([{ command: 'docmanager:clone' }], 0);
+
+  // Add commands for cycling the active tabs.
+  menu.addGroup([
+    { command: 'application:activate-next-tab' },
+    { command: 'application:activate-previous-tab' }
+  ], 999);
+
+  // Add the command for toggling single-document mode.
+  menu.addGroup([ { command: 'application:toggle-mode' }], 1000);
+}
+
 export default menuPlugin;
 
 /**

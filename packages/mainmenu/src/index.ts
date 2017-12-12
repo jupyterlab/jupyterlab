@@ -9,3 +9,4 @@ export * from './help';
 export * from './kernel';
 export * from './run';
 export * from './view';
+export * from './window';

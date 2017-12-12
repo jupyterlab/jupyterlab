@@ -41,6 +41,9 @@ import {
   IViewMenu, ViewMenu
 } from './view';
 
+import {
+  IWindowMenu, WindowMenu
+} from './window';
 
 
 /* tslint:disable */
@@ -91,6 +94,11 @@ interface IMainMenu {
    * The application "Run" menu.
    */
   readonly runMenu: IRunMenu;
+
+  /**
+   * The application "Window" menu.
+   */
+  readonly windowMenu: IWindowMenu;
 }
 
 
@@ -128,12 +136,14 @@ class MainMenu extends MenuBar implements IMainMenu {
     this.kernelMenu = new KernelMenu({ commands });
     this.runMenu = new RunMenu({ commands });
     this.viewMenu = new ViewMenu({ commands });
+    this.windowMenu = new WindowMenu({ commands });
 
     this.addMenu(this.fileMenu.menu, { rank: 0 });
     this.addMenu(this.editMenu.menu, { rank: 1 });
-    this.addMenu(this.viewMenu.menu, { rank: 2 });
-    this.addMenu(this.runMenu.menu, { rank: 2 });
-    this.addMenu(this.kernelMenu.menu, { rank: 3 });
+    this.addMenu(this.windowMenu.menu, { rank: 2 });
+    this.addMenu(this.runMenu.menu, { rank: 3 });
+    this.addMenu(this.kernelMenu.menu, { rank: 4 });
+    this.addMenu(this.viewMenu.menu, { rank: 500 });
     this.addMenu(this.helpMenu.menu, { rank: 1000 });
   }
 
@@ -166,6 +176,11 @@ class MainMenu extends MenuBar implements IMainMenu {
    * The application "View" menu.
    */
   readonly viewMenu: ViewMenu;
+
+  /**
+   * The application "Window" menu.
+   */
+  readonly windowMenu: WindowMenu;
 
 
   /**
@@ -200,6 +215,7 @@ class MainMenu extends MenuBar implements IMainMenu {
     this.kernelMenu.dispose();
     this.runMenu.dispose();
     this.viewMenu.dispose();
+    this.windowMenu.dispose();
     super.dispose();
   }
 
