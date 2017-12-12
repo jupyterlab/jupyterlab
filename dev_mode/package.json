@@ -107,6 +107,7 @@
       "@jupyterlab/launcher-extension": "",
       "@jupyterlab/mainmenu-extension": "",
       "@jupyterlab/markdownviewer-extension": "",
+      "@jupyterlab/mathjax2-extension": "",
       "@jupyterlab/notebook-extension": "",
       "@jupyterlab/rendermime-extension": "",
       "@jupyterlab/running-extension": "",
