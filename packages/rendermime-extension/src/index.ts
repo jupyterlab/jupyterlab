@@ -46,4 +46,4 @@ function activate(app: JupyterLab, latexTypesetter: ILatexTypesetter) {
     },
     latexTypesetter
   });
-};
+}
