@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  removeMath, replaceMath, MathJaxTypesetter
+  removeMath, replaceMath
 } from '@jupyterlab/rendermime';
 
 
@@ -100,27 +100,6 @@ describe('jupyter-ui', () => {
       let input = 'hello, $ /alpha $, there';
       let { text, math } = removeMath(input);
       expect(replaceMath(text, math)).to.be(input);
-    });
-
-  });
-
-  describe('MathJaxTypesetter', () => {
-
-    describe('#constructor()', () => {
-
-      it('should create a MathJaxTypesetter', () => {
-        let typesetter = new MathJaxTypesetter();
-        expect(typesetter).to.be.a(MathJaxTypesetter);
-      });
-
-    });
-
-    describe('#typeset()', () => {
-      it('should be a no-op if MathJax is not defined', () => {
-        let typesetter = new MathJaxTypesetter();
-        typesetter.typeset(document.body);
-      });
-
     });
 
   });

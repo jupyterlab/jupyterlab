@@ -99,6 +99,6 @@ import './rendermime/latex.spec';
 import './rendermime/factories.spec';
 import './rendermime/mimemodel.spec';
 import './rendermime/outputmodel.spec';
-import './rendermime/rendermime.spec';
+import './rendermime/registry.spec';
 
 import './terminal/terminal.spec';
