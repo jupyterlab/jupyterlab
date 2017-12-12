@@ -76,7 +76,7 @@ function ensureMetaPackage(): string[] {
     if (index.indexOf(name) === -1) {
       valid = false;
     }
-    lines.push(`import '${name}';`);
+    lines.push('import \'' + name + '\';');
 
     if (!valid) {
       messages.push(`Updated: ${name}`);
