@@ -1179,7 +1179,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.hideCode, {
-    label: 'Collapse Selected Code Cells',
+    label: 'Collapse Selected Code',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1190,7 +1190,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.showCode, {
-    label: 'Expand Selected Code Cells',
+    label: 'Expand Selected Code',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1201,7 +1201,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.hideAllCode, {
-    label: 'Collapse All Code Cells',
+    label: 'Collapse All Code',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1212,7 +1212,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.showAllCode, {
-    label: 'Expand All Code Cells',
+    label: 'Expand All Code',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1432,21 +1432,21 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   } as IKernelMenu.IConsoleCreator<NotebookPanel>);
 
   // Add some commands to the application view menu.
-  const allViewGroup = [
+  const collapseGroup = [
+    CommandIDs.hideCode,
+    CommandIDs.hideOutput,
     CommandIDs.hideAllCode,
-    CommandIDs.hideAllOutputs,
+    CommandIDs.hideAllOutputs
+  ].map(command => { return { command }; });
+  mainMenu.viewMenu.addGroup(collapseGroup, 10);
+
+  const expandGroup = [
+    CommandIDs.showCode,
+    CommandIDs.showOutput,
     CommandIDs.showAllCode,
     CommandIDs.showAllOutputs
   ].map(command => { return { command }; });
-  mainMenu.viewMenu.addGroup(allViewGroup, 10);
-
-  const selectedViewGroup = [
-    CommandIDs.hideCode,
-    CommandIDs.hideOutput,
-    CommandIDs.showCode,
-    CommandIDs.showOutput
-  ].map(command => { return { command }; });
-  mainMenu.viewMenu.addGroup(selectedViewGroup, 11);
+  mainMenu.viewMenu.addGroup(expandGroup, 11);
 
   // Add an IEditorViewer to the application view menu
   mainMenu.viewMenu.editorViewers.add({

@@ -10,22 +10,22 @@ import {
 } from './labmenu';
 
 /**
- * An interface for a Window menu.
+ * An interface for a Tabs menu.
  */
 export
-interface IWindowMenu extends IJupyterLabMenu {
+interface ITabsMenu extends IJupyterLabMenu {
 }
 
 /**
- * An extensible Window menu for the application.
+ * An extensible Tabs menu for the application.
  */
 export
-class WindowMenu extends JupyterLabMenu implements IWindowMenu {
+class TabsMenu extends JupyterLabMenu implements ITabsMenu {
   /**
-   * Construct the window menu.
+   * Construct the tabs menu.
    */
   constructor(options: Menu.IOptions) {
     super(options);
-    this.menu.title.label = 'Window';
+    this.menu.title.label = 'Tabs';
   }
 }
