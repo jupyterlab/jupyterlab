@@ -53,11 +53,13 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     this._factory = options.factory;
     this._opener = options.opener || Private.noOp;
     this._path = options.path;
-    let lang = this._factory.preferredLanguage(PathExt.basename(this._path));
+    const localPath = this._manager.contents.localPath(this._path);
+    let lang = this._factory.preferredLanguage(PathExt.basename(localPath));
 
     let dbFactory = options.modelDBFactory;
     if (dbFactory) {
-      this._modelDB = dbFactory.createNew(this._path.split(':').pop()!);
+      const localPath = manager.contents.localPath(this._path);
+      this._modelDB = dbFactory.createNew(localPath);
       this._model = this._factory.createNew(lang, this._modelDB);
     } else {
       this._model = this._factory.createNew(lang);
@@ -72,7 +74,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       manager: manager.sessions,
       path: this._path,
       type: ext === '.ipynb' ? 'notebook' : 'file',
-      name: PathExt.basename(this._path),
+      name: PathExt.basename(localPath),
       kernelPreference: options.kernelPreference || { shouldStart: false }
     });
     this.session.propertyChanged.connect(this._onSessionChanged, this);
@@ -117,6 +119,15 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    */
   get path(): string {
     return this._path;
+  }
+
+  /**
+   * The current local path associated with the document.
+   * If the document is in the default notebook file browser,
+   * this is the same as the path.
+   */
+  get localPath(): string {
+    return this._manager.contents.localPath(this._path);
   }
 
   /**
@@ -398,7 +409,8 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     let newPath = change.newValue && change.newValue.path;
     if (newPath && oldPath === this._path) {
       this.session.setPath(newPath);
-      this.session.setName(PathExt.basename(newPath));
+      const localPath = this._manager.contents.localPath(newPath);
+      this.session.setName(PathExt.basename(localPath));
       this._path = newPath;
       this._updateContentsModel(change.newValue as Contents.IModel);
       this._pathChanged.emit(this._path);

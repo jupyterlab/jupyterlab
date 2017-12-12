@@ -686,6 +686,13 @@ namespace DocumentRegistry {
     readonly path: string;
 
     /**
+     * The current local path associated with the document.
+     * If the document is in the default notebook file browser,
+     * this is the same as the path.
+     */
+    readonly localPath: string;
+
+    /**
      * The current contents model associated with the document
      *
      * #### Notes

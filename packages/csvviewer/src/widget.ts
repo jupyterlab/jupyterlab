@@ -68,7 +68,6 @@ class CSVViewer extends Widget implements DocumentRegistry.IReadyWidget {
     let layout = this.layout = new PanelLayout();
 
     this.addClass(CSV_CLASS);
-    this.title.label = PathExt.basename(context.path);
 
     this._grid = new DataGrid();
     this._grid.addClass(CSV_GRID_CLASS);
@@ -81,6 +80,7 @@ class CSVViewer extends Widget implements DocumentRegistry.IReadyWidget {
     layout.addWidget(this._grid);
 
     context.pathChanged.connect(this._onPathChanged, this);
+    this._onPathChanged();
 
     this._context.ready.then(() => {
       this._updateGrid();
@@ -138,7 +138,7 @@ class CSVViewer extends Widget implements DocumentRegistry.IReadyWidget {
    * Handle a change in path.
    */
   private _onPathChanged(): void {
-    this.title.label = PathExt.basename(this._context.path);
+    this.title.label = PathExt.basename(this._context.localPath);
   }
 
   /**

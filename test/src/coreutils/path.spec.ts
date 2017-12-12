@@ -24,6 +24,11 @@ describe('@jupyterlab/coreutils', () => {
         expect(path).to.equal('../../bar');
       });
 
+      it('should not return "." for an empty path', () => {
+        let path = PathExt.join('', '');
+        expect(path).to.equal('');
+      });
+
     });
 
     describe('.basename()', () => {

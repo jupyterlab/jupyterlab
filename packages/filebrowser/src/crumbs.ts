@@ -164,7 +164,9 @@ class BreadCrumbs extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     // Update the breadcrumb list.
-    Private.updateCrumbs(this._crumbs, this._crumbSeps, this._model.path);
+    const contents = this._model.manager.services.contents;
+    const localPath = contents.localPath(this._model.path);
+    Private.updateCrumbs(this._crumbs, this._crumbSeps, localPath);
   }
 
   /**
@@ -277,7 +279,8 @@ class BreadCrumbs extends Widget {
     let promises: Promise<any>[] = [];
     let oldPaths = event.mimeData.getData(CONTENTS_MIME) as string[];
     for (let oldPath of oldPaths) {
-      let name = PathExt.basename(oldPath);
+      let localOldPath = manager.services.contents.localPath(oldPath);
+      let name = PathExt.basename(localOldPath);
       let newPath = PathExt.join(path, name);
       promises.push(renameFile(manager, oldPath, newPath));
     }
@@ -340,8 +343,6 @@ namespace Private {
       node.removeChild(firstChild.nextSibling);
     }
 
-    let localPath = path.split(':').pop() as string;
-    let localParts = localPath.split('/');
     let parts = path.split('/');
     if (parts.length > 2) {
       node.appendChild(separators[0]);
@@ -353,13 +354,13 @@ namespace Private {
     if (path) {
       if (parts.length >= 2) {
         node.appendChild(separators[1]);
-        breadcrumbs[Crumb.Parent].textContent = localParts[localParts.length - 2];
+        breadcrumbs[Crumb.Parent].textContent = parts[parts.length - 2];
         node.appendChild(breadcrumbs[Crumb.Parent]);
         let parent = parts.slice(0, parts.length - 1).join('/');
         breadcrumbs[Crumb.Parent].title = parent;
       }
       node.appendChild(separators[2]);
-      breadcrumbs[Crumb.Current].textContent = localParts[localParts.length - 1];
+      breadcrumbs[Crumb.Current].textContent = parts[parts.length - 1];
       node.appendChild(breadcrumbs[Crumb.Current]);
       breadcrumbs[Crumb.Current].title = path;
     }
