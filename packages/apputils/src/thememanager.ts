@@ -123,17 +123,15 @@ class ThemeManager {
   loadCSS(path: string): Promise<void> {
     const link = document.createElement('link');
     const delegate = new PromiseDelegate<void>();
-    let href = URLExt.join(this._baseUrl, path);
-
-    if (!URLExt.isLocal(path)) {
-      href = path;
-    }
+    const href = URLExt.isLocal(path) ? URLExt.join(this._baseUrl, path) : path;
 
     link.rel = 'stylesheet';
     link.type = 'text/css';
     link.href = href;
-    link.onload = () => { delegate.resolve(void 0); };
-    link.onerror = () => { delegate.reject(`Stylesheet failed to load: ${href}`); };
+    link.addEventListener('load', () => { delegate.resolve(undefined); });
+    link.addEventListener('error', () => {
+      delegate.reject(`Stylesheet failed to load: ${href}`);
+    });
     document.body.appendChild(link);
     this._links.push(link);
 
