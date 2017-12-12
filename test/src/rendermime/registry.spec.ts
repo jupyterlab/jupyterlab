@@ -46,11 +46,12 @@ function createModel(data: JSONObject): IRenderMime.IMimeModel {
 const fooFactory: IRenderMime.IRendererFactory  = {
   mimeTypes: ['text/foo'],
   safe: true,
+  defaultRank: 1000,
   createRenderer: options => new RenderedText(options)
 };
 
 
-describe('rendermime/index', () => {
+describe('rendermime/registry', () => {
 
   let r: RenderMimeRegistry;
 

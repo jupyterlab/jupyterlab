@@ -17,7 +17,6 @@ try:
 except ImportError:
     from mock import patch  # py2
 
-from tornado.ioloop import IOLoop
 from traitlets import Unicode
 from ipython_genutils.tempdir import TemporaryDirectory
 from ipykernel.kernelspec import write_kernel_spec
@@ -98,13 +97,16 @@ class TestApp(ProcessApp):
     notebook_dir = Unicode(_create_notebook_dir())
     allow_origin = Unicode('*')
 
+    def __init__(self):
+        self.env_patch = _test_env()
+        self.env_patch.start()
+        ProcessApp.__init__(self)
+
     def init_server_extensions(self):
         """Disable server extensions"""
         pass
 
     def start(self):
-        self.env_patch = _test_env()
-        self.env_patch.start()
         _install_kernels()
         self.kernel_manager.default_kernel_name = 'echo'
         ProcessApp.start(self)
