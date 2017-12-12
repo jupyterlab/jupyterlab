@@ -548,6 +548,6 @@ namespace Private {
     const driveName = contents.driveName(root);
     const localPath = contents.localPath(root);
     const resolved = PathExt.resolve(localPath, path);
-    return driveName ? `${driveName}:${resolved}`: resolved;
+    return driveName ? `${driveName}:${resolved}` : resolved;
   }
 }

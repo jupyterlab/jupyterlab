@@ -119,9 +119,65 @@ describe('contents', () => {
 
   describe('#localPath()', () => {
 
+    it('should parse the local part of a path', () => {
+      const contents = new ContentsManager();
+      contents.addDrive(new Drive({ name: 'other' }));
+      contents.addDrive(new Drive({ name: 'alternative' }));
+
+      expect(contents.localPath('other:foo/bar/example.txt'))
+      .to.be('foo/bar/example.txt');
+
+      expect(contents.localPath('alternative:/foo/bar/example.txt'))
+      .to.be('foo/bar/example.txt');
+    });
+
+    it('should allow the ":" character in other parts of the path', () => {
+      const contents = new ContentsManager();
+      contents.addDrive(new Drive({ name: 'other' }));
+
+      expect(contents.localPath('other:foo/odd:directory/example:file.txt'))
+      .to.be('foo/odd:directory/example:file.txt');
+    });
+
+    it('should leave alone names with ":" that are not drive names', () => {
+      const contents = new ContentsManager();
+      contents.addDrive(new Drive({ name: 'other' }));
+
+      expect(contents.localPath('which:foo/odd:directory/example:file.txt'))
+      .to.be('which:foo/odd:directory/example:file.txt');
+    });
+
   });
 
   describe('.driveName()', () => {
+
+    it('should parse the drive name a path', () => {
+      const contents = new ContentsManager();
+      contents.addDrive(new Drive({ name: 'other' }));
+      contents.addDrive(new Drive({ name: 'alternative' }));
+
+      expect(contents.driveName('other:foo/bar/example.txt'))
+      .to.be('other');
+
+      expect(contents.driveName('alternative:/foo/bar/example.txt'))
+      .to.be('alternative');
+    });
+
+    it('should allow the ":" character in other parts of the path', () => {
+      const contents = new ContentsManager();
+      contents.addDrive(new Drive({ name: 'other' }));
+
+      expect(contents.driveName('other:foo/odd:directory/example:file.txt'))
+      .to.be('other');
+    });
+
+    it('should leave alone names with ":" that are not drive names', () => {
+      const contents = new ContentsManager();
+      contents.addDrive(new Drive({ name: 'other' }));
+
+      expect(contents.driveName('which:foo/odd:directory/example:file.txt'))
+      .to.be('');
+    });
 
   });
 
@@ -163,7 +219,6 @@ describe('contents', () => {
       handleRequest(drive, 200, DEFAULT_DIR);
       let options: Contents.IFetchOptions = { type: 'directory' };
       return contents.get('other:/foo', options).then(model => {
-        console.error(model.content[0].path);
         expect(model.content[0].path).to.be('other:foo/bar/buzz.txt');
       });
     });
@@ -332,7 +387,7 @@ describe('contents', () => {
       handleRequest(contents, 204, { path });
       contents.fileChanged.connect((sender, args) => {
         expect(args.type).to.be('delete');
-        expect(args.oldValue.path).to.be(path);
+        expect(args.oldValue.path).to.be('foo/bar.txt');
         done();
       });
       contents.delete(path).catch(done);
@@ -388,8 +443,8 @@ describe('contents', () => {
       handleRequest(contents, 200, DEFAULT_FILE);
       contents.fileChanged.connect((sender, args) => {
         expect(args.type).to.be('rename');
-        expect(args.oldValue.path).to.be('/foo/bar.txt');
-        expect(args.newValue.path).to.be(DEFAULT_FILE.path);
+        expect(args.oldValue.path).to.be('foo/bar.txt');
+        expect(args.newValue.path).to.be('foo/test');
         done();
       });
       contents.rename('/foo/bar.txt', '/foo/baz.txt').catch(done);
@@ -900,7 +955,7 @@ describe('drive', () => {
       handleRequest(drive, 204, { path });
       drive.fileChanged.connect((sender, args) => {
         expect(args.type).to.be('delete');
-        expect(args.oldValue.path).to.be(path);
+        expect(args.oldValue.path).to.be('/foo/bar.txt');
         done();
       });
       drive.delete(path).catch(done);
@@ -952,7 +1007,7 @@ describe('drive', () => {
       drive.fileChanged.connect((sender, args) => {
         expect(args.type).to.be('rename');
         expect(args.oldValue.path).to.be('/foo/bar.txt');
-        expect(args.newValue.path).to.be(DEFAULT_FILE.path);
+        expect(args.newValue.path).to.be('foo/test');
         done();
       });
       drive.rename('/foo/bar.txt', '/foo/baz.txt').catch(done);
