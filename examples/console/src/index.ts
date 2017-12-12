@@ -26,7 +26,7 @@ import {
 } from '@jupyterlab/console';
 
 import {
-  RenderMime, defaultRendererFactories
+  RenderMimeRegistry, standardRendererFactories as initialFactories
 } from '@jupyterlab/rendermime';
 
 
@@ -68,9 +68,7 @@ function startApp(path: string, manager: ServiceManager.IManager) {
     commands.processKeydownEvent(event);
   });
 
-  let rendermime = new RenderMime({
-    initialFactories: defaultRendererFactories
-  });
+  let rendermime = new RenderMimeRegistry({ initialFactories });
 
   let editorFactory = editorServices.factoryService.newInlineEditor;
   let contentFactory = new ConsolePanel.ContentFactory({ editorFactory });
