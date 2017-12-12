@@ -29,10 +29,6 @@ import {
   IDisposable
 } from '@phosphor/disposable';
 
-import {
-  Widget
-} from '@phosphor/widgets';
-
 
 /**
  * The command IDs used by the document manager plugin.
@@ -156,7 +152,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   commands.addCommand(CommandIDs.close, {
     label: () => {
       const widget = app.shell.currentWidget;
-      let name = 'File'
+      let name = 'File';
       if (widget) {
         const typeName = fileType();
         name = typeName === 'File' ? widget.title.label : typeName;
@@ -264,25 +260,27 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     caption: 'Save all open documents',
     isEnabled: () => {
       const iterator = app.shell.widgets('main');
-      let widget: Widget | undefined;
-      while (widget = iterator.next()) {
+      let widget = iterator.next();
+      while (widget) {
         if (docManager.contextForWidget(widget)) {
           return true;
         }
+        widget = iterator.next();
       }
       return false;
     },
     execute: () => {
       const iterator = app.shell.widgets('main');
       const promises: Promise<void>[] = [];
-      const paths = new Set<string>(); //Cache so we don't double save files.
-      let widget: Widget | undefined;
-      while (widget = iterator.next()) {
+      const paths = new Set<string>(); // Cache so we don't double save files.
+      let widget = iterator.next();
+      while (widget) {
         const context = docManager.contextForWidget(widget);
         if (context && !context.model.readOnly && !paths.has(context.path)) {
           paths.add(context.path);
           promises.push(context.save());
         }
+        widget = iterator.next();
       }
       return Promise.all(promises);
     }

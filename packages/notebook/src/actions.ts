@@ -753,7 +753,7 @@ namespace NotebookActions {
         index = widget.activeCellIndex;
         break;
       case 'above':
-        index = widget.activeCellIndex-1;
+        index = widget.activeCellIndex - 1;
         break;
       case 'replace':
         // Find the cells to delete.
@@ -772,6 +772,8 @@ namespace NotebookActions {
           });
         }
         index = toDelete[0];
+        break;
+      default:
         break;
     }
 
