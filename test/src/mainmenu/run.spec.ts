@@ -74,25 +74,13 @@ describe('@jupyterlab/mainmenu', () => {
           runAll: widget => {
             widget.state = 'runAll';
             return Promise.resolve(void 0);
-          },
-          runAbove: widget => {
-            widget.state = 'runAbove';
-            return Promise.resolve(void 0);
-          },
-          runBelow: widget => {
-            widget.state = 'runBelow';
-            return Promise.resolve(void 0);
-          },
+          }
         };
         menu.codeRunners.add(runner);
         delegateExecute(wodget, menu.codeRunners, 'run');
         expect(wodget.state).to.be('run');
         delegateExecute(wodget, menu.codeRunners, 'runAll');
         expect(wodget.state).to.be('runAll');
-        delegateExecute(wodget, menu.codeRunners, 'runAbove');
-        expect(wodget.state).to.be('runAbove');
-        delegateExecute(wodget, menu.codeRunners, 'runBelow');
-        expect(wodget.state).to.be('runBelow');
       });
 
     });

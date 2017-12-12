@@ -17,7 +17,7 @@ import {
 
 import {
   MainMenu, EditMenu, FileMenu, HelpMenu,
-  KernelMenu, RunMenu, ViewMenu, WindowMenu
+  KernelMenu, RunMenu, ViewMenu, TabsMenu
 } from '@jupyterlab/mainmenu';
 
 
@@ -94,15 +94,15 @@ describe('@jupyterlab/mainmenu', () => {
 
     });
 
-    describe('#windowMenu', () => {
+    describe('#viewMenu', () => {
 
-      it('should be a WindowMenu', () => {
-        expect(mainMenu.windowMenu).to.be.a(WindowMenu);
+      it('should be a ViewMenu', () => {
+        expect(mainMenu.viewMenu).to.be.a(ViewMenu);
       });
 
       it('should be the third menu', () => {
         expect(ArrayExt.firstIndexOf(mainMenu.menus,
-                                     mainMenu.windowMenu.menu)).to.be(2);
+                                     mainMenu.viewMenu.menu)).to.be(2);
       });
 
     });
@@ -133,15 +133,15 @@ describe('@jupyterlab/mainmenu', () => {
 
     });
 
-    describe('#viewMenu', () => {
+    describe('#tabsMenu', () => {
 
-      it('should be a ViewMenu', () => {
-        expect(mainMenu.viewMenu).to.be.a(ViewMenu);
+      it('should be a TabsMenu', () => {
+        expect(mainMenu.tabsMenu).to.be.a(TabsMenu);
       });
 
       it('should be the sixth menu', () => {
         expect(ArrayExt.firstIndexOf(mainMenu.menus,
-                                     mainMenu.viewMenu.menu)).to.be(5);
+                                     mainMenu.tabsMenu.menu)).to.be(5);
       });
 
     });
