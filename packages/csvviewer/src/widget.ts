@@ -138,9 +138,7 @@ class CSVViewer extends Widget implements DocumentRegistry.IReadyWidget {
    * Handle a change in path.
    */
   private _onPathChanged(): void {
-    const context = this._context;
-    const localPath = context.manager.contents.localPath(context.path);
-    this.title.label = PathExt.basename(localPath);
+    this.title.label = PathExt.basename(this._context.localPath);
   }
 
   /**

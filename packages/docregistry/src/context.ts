@@ -122,6 +122,15 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   }
 
   /**
+   * The current local path associated with the document.
+   * If the document is in the default notebook file browser,
+   * this is the same as the path.
+   */
+  get localPath(): string {
+    return this._manager.contents.localPath(this._path);
+  }
+
+  /**
    * The current contents model associated with the document.
    *
    * #### Notes
@@ -130,13 +139,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    */
   get contentsModel(): Contents.IModel | null {
     return this._contentsModel;
-  }
-
-  /**
-   * The ServiceManager associated with the document.
-   */
-  get manager(): ServiceManager.IManager {
-    return this._manager;
   }
 
   /**

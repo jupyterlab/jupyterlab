@@ -284,8 +284,7 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
    * Handle a change to the document path.
    */
   protected onPathChanged(sender: DocumentRegistry.IContext<INotebookModel>, path: string): void {
-    const localPath = sender.manager.contents.localPath(path);
-    this.title.label = PathExt.basename(localPath);
+    this.title.label = PathExt.basename(sender.localPath);
   }
 
   /**

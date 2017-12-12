@@ -106,9 +106,7 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
    * Handle a change to the title.
    */
   private _onTitleChanged(): void {
-    const context = this.context;
-    const localPath = context.manager.contents.localPath(context.path);
-    this.title.label = PathExt.basename(localPath);
+    this.title.label = PathExt.basename(this.context.localPath);
   }
 
   /**

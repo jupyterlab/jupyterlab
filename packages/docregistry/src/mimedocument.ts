@@ -161,9 +161,7 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
    * Handle a path change.
    */
   private _onPathChanged(): void {
-    const localPath =
-      this._context.manager.contents.localPath(this._context.path);
-    this.title.label = PathExt.basename(localPath);
+    this.title.label = PathExt.basename(this._context.localPath);
   }
 
   /**
