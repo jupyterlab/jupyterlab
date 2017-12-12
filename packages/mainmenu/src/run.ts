@@ -82,17 +82,5 @@ namespace IRunMenu {
      * A function to run the entirety of the code hosted by the widget.
      */
     runAll?: (widget: T) => Promise<void>;
-
-    /**
-     * A function to run all code above the currently selected
-     * point (exclusive).
-     */
-    runAbove?: (widget: T) => Promise<void>;
-
-    /**
-     * A function to run all code below the currently selected
-     * point (inclusive).
-     */
-    runBelow?: (widget: T) => Promise<void>;
   }
 }

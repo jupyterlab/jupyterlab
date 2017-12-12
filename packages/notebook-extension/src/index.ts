@@ -112,6 +112,12 @@ namespace CommandIDs {
   const runAll = 'notebook:run-all-cells';
 
   export
+  const runAllAbove = 'notebook:run-all-above';
+
+  export
+  const runAllBelow = 'notebook:run-all-below';
+
+  export
   const toCode = 'notebook:change-cell-to-code';
 
   export
@@ -603,6 +609,32 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         const { context, notebook } = current;
 
         return NotebookActions.runAll(notebook, context.session);
+      }
+    },
+    isEnabled
+  });
+  commands.addCommand(CommandIDs.runAllAbove, {
+    label: 'Run All Above Selected Cell',
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        const { context, notebook } = current;
+
+        return NotebookActions.runAllAbove(notebook, context.session);
+      }
+    },
+    isEnabled
+  });
+  commands.addCommand(CommandIDs.runAllBelow, {
+    label: 'Run Selected Cell and All Below',
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        const { context, notebook } = current;
+
+        return NotebookActions.runAllBelow(notebook, context.session);
       }
     },
     isEnabled
@@ -1280,6 +1312,8 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.restartClear,
     CommandIDs.restartRunAll,
     CommandIDs.runAll,
+    CommandIDs.runAllAbove,
+    CommandIDs.runAllBelow,
     CommandIDs.selectAll,
     CommandIDs.deselectAll,
     CommandIDs.clearAllOutputs,
@@ -1476,18 +1510,14 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
       const { context, notebook } = current;
       return NotebookActions.runAll(notebook, context.session)
       .then(() => void 0);
-    },
-    runAbove: current => {
-      const { context, notebook } = current;
-      return NotebookActions.runAllAbove(notebook, context.session)
-      .then(() => void 0);
-    },
-    runBelow: current => {
-      const { context, notebook } = current;
-      return NotebookActions.runAllBelow(notebook, context.session)
-      .then(() => void 0);
     }
   } as IRunMenu.ICodeRunner<NotebookPanel>);
+
+  // Add a run all above/below group to the run menu.
+  const runAboveBelowGroup = [
+    CommandIDs.runAllAbove,
+    CommandIDs.runAllBelow
+  ].map(command => { return { command }; });
 
   // Add commands to the application edit menu.
   const undoCellActionGroup = [
@@ -1525,6 +1555,7 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   mainMenu.editMenu.addGroup(selectGroup, 7);
   mainMenu.editMenu.addGroup(moveCellsGroup, 8);
   mainMenu.editMenu.addGroup(splitMergeGroup, 9);
+  mainMenu.runMenu.addGroup(runAboveBelowGroup, 10);
 
   // Add kernel information to the application help menu.
   mainMenu.helpMenu.kernelUsers.add({
