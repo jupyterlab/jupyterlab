@@ -89,9 +89,9 @@ class InputPlaceholder extends Placeholder {
    */
   protected render(): React.ReactElement<any>[] {
     return [
-        <div className={INPUT_PROMPT_CLASS}>
+        <div className={INPUT_PROMPT_CLASS} key="input">
         </div>,
-        <div className={CONTENT_CLASS} onClick={ (e) => this.handleClick(e) }>
+        <div className={CONTENT_CLASS} onClick={ (e) => this.handleClick(e) } key="content">
           <div className="jp-MoreHorizIcon" />
         </div>
     ];
@@ -118,9 +118,9 @@ class OutputPlaceholder extends Placeholder {
    */
   protected render(): React.ReactElement<any>[] {
     return [
-        <div className={OUTPUT_PROMPT_CLASS}>
+        <div className={OUTPUT_PROMPT_CLASS} key="output">
         </div>,
-        <div className={CONTENT_CLASS} onClick={ (e) => this.handleClick(e) }>
+        <div className={CONTENT_CLASS} onClick={ (e) => this.handleClick(e) } key="content">
           <div className="jp-MoreHorizIcon" />
         </div>
     ];
