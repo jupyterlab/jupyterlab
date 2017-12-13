@@ -89,7 +89,7 @@
     "@jupyterlab/tooltip": "^0.15.4",
     "@jupyterlab/tooltip-extension": "^0.15.4",
     "@jupyterlab/vdom-extension": "^0.15.4",
-    "@jupyterlab/vega2-extension": "^0.15.5"
+    "@jupyterlab/vega3-extension": "^0.14.2"
   },
   "devDependencies": {
     "fs-extra": "~4.0.2",
