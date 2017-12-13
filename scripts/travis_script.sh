@@ -169,6 +169,8 @@ if [[ $GROUP == cli ]]; then
     pip install pexpect
     python scripts/create_theme.py
     mv foo packages
-    jlpm run build
+    jlpm run build; true
     python -m jupyterlab.selenium_check --dev-mode
+    rm -rf packagess/foo
+    jlpm integrity; true
 fi
