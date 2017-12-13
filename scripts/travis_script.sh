@@ -167,7 +167,7 @@ if [[ $GROUP == cli ]]; then
     # Test theme creation - make sure we can add it as a package, build,
     # and run selenium
     pip install pexpect
-    python scripts/create-theme.py
+    python scripts/create_theme.py
     mv foo packages
     jlpm run build
     python -m jupyterlab.selenium_check --dev-mode
