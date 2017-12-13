@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, showDialog
+  Dialog, FocusPanel, ICommandPalette, showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -1028,31 +1028,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
       const nb = current.notebook;
       const newCell = nb.activeCell.clone();
-
-      // tslint:disable-next-line
-      const CellPanel = class extends Panel {
-        constructor() {
-          super();
-          // TODO: add styling so that p.node outline is gone (e.g., no blue border when focused)
-          this.node.tabIndex = -1;
-        }
-
-        /**
-         * Handle `'activate-request'` messages.
-         */
-        protected onActivateRequest(msg: Message): void {
-          this.node.focus();
-        }
-
-        /**
-         * Handle `'close-request'` messages.
-         */
-        protected onCloseRequest(msg: Message): void {
-          this.dispose();
-        }
-      };
-
-      const p = new CellPanel();
+      const p = new FocusPanel();
       p.id = `Cell-${uuid()}`;
       p.title.closable = true;
       p.title.label = current.title.label ? `Cell: ${current.title.label}` : 'Cell';

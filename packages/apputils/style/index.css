@@ -7,6 +7,7 @@
 
 @import './commandpalette.css';
 @import './dialog.css';
+@import './focuspanel.css';
 @import './hoverbox.css';
 @import './iframe.css';
 @import './spinner.css';

@@ -9,6 +9,7 @@ export * from './commandlinker';
 export * from './commandpalette';
 export * from './dialog';
 export * from './domutils';
+export * from './focuspanel';
 export * from './hoverbox';
 export * from './iframe';
 export * from './instancetracker';
