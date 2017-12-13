@@ -395,7 +395,7 @@ function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcher
     let value = callback(launcher.cwd, item.name);
     Promise.resolve(value).then(widget => {
       if (!widget) {
-        console.error('Launcher callbacks must resolve with a widget');
+        throw new Error('Launcher callbacks must resolve with a widget');
       }
       launcherCallback(widget);
       launcher.dispose();
