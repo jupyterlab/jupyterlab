@@ -77,8 +77,10 @@ An Extension is a valid [npm package](https://docs.npmjs.com/getting-started/wha
 
 While authoring the extension, you can use the command:
 
-```
-jupyter labextension install <path>
+```bash
+npm install   # install npm package dependencies
+npm run build  # optional build step if using TypeScript, babel, etc.
+jupyter labextension install  # install the current directory as an extension
 ```
 
 This causes the builder to re-install the source folder before building
@@ -191,6 +193,9 @@ and then run `jlpm run create:theme` from the repository root directory.
 Once you select a name, title and a description, a new theme folder will be 
 created  in the current directory.  You can move that new folder to a location 
 of your choice, and start making desired changes.
+
+The theme extension is installed the same as a regular extension (see 
+[extension authoring](#Extension Authoring)).
 
 ## Standard (General-Purpose) Extensions
 See the example,
