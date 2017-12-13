@@ -30,6 +30,10 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
+  Contents
+} from '@jupyterlab/services';
+
+import {
   each
 } from '@phosphor/algorithm';
 
@@ -150,9 +154,11 @@ function activateFactory(app: JupyterLab, docManager: IDocumentManager, state: I
     let node = widget.node.getElementsByClassName('jp-DirListing-content')[0];
     node.addEventListener('contextmenu', (event: MouseEvent) => {
       event.preventDefault();
-      const path = widget.pathForClick(event) || '';
-      const menu = createContextMenu(path, commands, registry);
-      menu.open(event.clientX, event.clientY);
+      const model = widget.modelForClick(event);
+      if (model) {
+        const menu = createContextMenu(model, commands, registry);
+        menu.open(event.clientX, event.clientY);
+      }
     });
 
     // Track the newly created file browser.
@@ -380,7 +386,8 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, bro
  * This function generates temporary commands with an incremented name. These
  * commands are disposed when the menu itself is disposed.
  */
-function createContextMenu(path: string, commands: CommandRegistry, registry: DocumentRegistry): Menu {
+function createContextMenu(model: Contents.IModel, commands: CommandRegistry, registry: DocumentRegistry): Menu {
+  const path = model.path;
   const menu = new Menu({ commands });
 
   menu.addItem({ command: CommandIDs.open });
@@ -398,12 +405,15 @@ function createContextMenu(path: string, commands: CommandRegistry, registry: Do
 
   menu.addItem({ command: CommandIDs.rename });
   menu.addItem({ command: CommandIDs.del });
-  menu.addItem({ command: CommandIDs.duplicate });
   menu.addItem({ command: CommandIDs.cut });
   menu.addItem({ command: CommandIDs.copy });
   menu.addItem({ command: CommandIDs.paste });
-  menu.addItem({ command: CommandIDs.download });
-  menu.addItem({ command: CommandIDs.shutdown });
+
+  if (model.type !== 'directory') {
+    menu.addItem({ command: CommandIDs.duplicate });
+    menu.addItem({ command: CommandIDs.download });
+    menu.addItem({ command: CommandIDs.shutdown });
+  }
 
   return menu;
 }
