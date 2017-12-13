@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/application';
 
 import {
+  each
+} from '@phosphor/algorithm';
+
+import {
   Menu, Widget
 } from '@phosphor/widgets';
 
@@ -358,11 +362,48 @@ function createRunMenu(app: JupyterLab, menu: RunMenu): void {
 }
 
 function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
+  const commands = app.commands;
+
   // Add commands for cycling the active tabs.
   menu.addGroup([
     { command: 'application:activate-next-tab' },
     { command: 'application:activate-previous-tab' }
-  ], 999);
+  ], 0);
+
+
+  let tabGroup: Menu.IItemOptions[] = [];
+
+  // Utility function to create a command to activate
+  // a given tab, or get it if it already exists.
+  const createMenuItem = (widget: Widget): Menu.IItemOptions => {
+    const commandID = `tabmenu:activate-${widget.id}`;
+    if (!commands.hasCommand(commandID)) {
+      commands.addCommand(commandID, {
+        label: () => widget.title.label,
+        isVisible: () => !widget.isDisposed,
+        isEnabled: () => !widget.isDisposed,
+        isToggled: () => app.shell.currentWidget === widget,
+        execute: () => app.shell.activateById(widget.id)
+      });
+    }
+    return { command: commandID };
+  };
+
+  app.restored.then(() => {
+    // Iterate over the current widgets in the
+    // main area, and add them to the tab group
+    // of the menu.
+    const populateTabs = () => {
+      menu.removeGroup(tabGroup);
+      tabGroup.length = 0;
+      each(app.shell.widgets('main'), widget => {
+        tabGroup.push(createMenuItem(widget));
+      });
+      menu.addGroup(tabGroup, 1);
+    };
+    populateTabs();
+    app.shell.layoutModified.connect(() => { populateTabs(); });
+  });
 }
 
 export default menuPlugin;

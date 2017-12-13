@@ -30,6 +30,7 @@
   "dependencies": {
     "@jupyterlab/application": "^0.13.1",
     "@jupyterlab/mainmenu": "^0.2.0",
+    "@phosphor/algorithm": "^1.1.2",
     "@phosphor/widgets": "^1.5.0"
   },
   "devDependencies": {
