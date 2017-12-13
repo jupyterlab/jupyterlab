@@ -1031,6 +1031,12 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
 
       // tslint:disable-next-line
       const CellPanel = class extends Panel {
+        constructor() {
+          super();
+          // TODO: add styling so that p.node outline is gone (e.g., no blue border when focused)
+          this.node.tabIndex = -1;
+        }
+
         /**
          * Handle `'activate-request'` messages.
          */
@@ -1047,8 +1053,6 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       };
 
       const p = new CellPanel();
-      p.node.tabIndex = -1;
-      // TODO: add styling so that p.node outline is gone (e.g., no blue border when focused)
       p.id = `Cell-${uuid()}`;
       p.title.closable = true;
       p.title.label = current.title.label ? `Cell: ${current.title.label}` : 'Cell';
