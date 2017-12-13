@@ -712,10 +712,23 @@ class _AppHandler(object):
         # Template the package.json file.
         # Update the local extensions.
         extensions = self.info['extensions']
+        removed = False
         for (key, source) in self.info['local_extensions'].items():
+            # Handle a local extension that was removed.
+            if key not in extensions:
+                config = self._read_build_config()
+                data = config.setdefault('local_extensions', dict())
+                del data[key]
+                self._write_build_config(config)
+                removed = True
+                continue
             dname = pjoin(app_dir, 'extensions')
             self._update_local(key, source, dname, extensions[key],
                 'local_extensions')
+
+        # Update the list of local extensions if any were removed.
+        if removed:
+            self.info['local_extensions'] = self._get_local_extensions()
 
         # Update the linked packages.
         linked = self.info['linked_packages']
