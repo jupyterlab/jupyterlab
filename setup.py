@@ -36,8 +36,8 @@ data_files_spec = [
 
 package_data_spec = dict()
 package_data_spec[NAME] = [
-    'staging/*', 'static/**', 'tests/mock_packages/**', 'themes/**',
-    'schemas/**'
+    'staging/*', 'staging/templates/*', 'static/**',
+    'tests/mock_packages/**', 'themes/**', 'schemas/**'
 ]
 
 staging = pjoin(HERE, NAME, 'staging')
@@ -59,7 +59,7 @@ def check_assets():
         if skip_npm:
             return
         run(npm, cwd=HERE)
- 
+
     for t in targets:
         if not os.path.exists(pjoin(HERE, NAME, t)):
             msg = ('Missing file: %s, `build:prod` script did not complete '
@@ -78,7 +78,7 @@ def check_assets():
 
 
 cmdclass = create_cmdclass('jsdeps', data_files_spec=data_files_spec,
-    package_data_spec=package_data_spec)
+                           package_data_spec=package_data_spec)
 cmdclass['jsdeps'] = combine_commands(
     install_npm(build_cmd='build:prod', path=staging, source_dir=staging,
                 build_dir=pjoin(HERE, NAME, 'static'), npm=npm),
@@ -87,19 +87,19 @@ cmdclass['jsdeps'] = combine_commands(
 
 
 setup_args = dict(
-    name             = NAME,
-    description      = DESCRIPTION,
-    long_description = LONG_DESCRIPTION,
-    version          = VERSION,
-    packages         = find_packages(),
-    cmdclass         = cmdclass,
-    author           = 'Jupyter Development Team',
-    author_email     = 'jupyter@googlegroups.com',
-    url              = 'http://jupyter.org',
-    license          = 'BSD',
-    platforms        = "Linux, Mac OS X, Windows",
-    keywords         = ['ipython', 'jupyter', 'Web'],
-    classifiers      = [
+    name=NAME,
+    description=DESCRIPTION,
+    long_description=LONG_DESCRIPTION,
+    version=VERSION,
+    packages=find_packages(),
+    cmdclass=cmdclass,
+    author='Jupyter Development Team',
+    author_email='jupyter@googlegroups.com',
+    url='http://jupyter.org',
+    license='BSD',
+    platforms="Linux, Mac OS X, Windows",
+    keywords=['ipython', 'jupyter', 'Web'],
+    classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
