@@ -22,6 +22,7 @@
     "clean:utils": "cd buildutils && jlpm run clean",
     "coverage": "lerna run coverage --stream",
     "create:package": "node buildutils/lib/create-package.js",
+    "create:theme": "node buildutils/lib/create-theme.js",
     "docs": "lerna run docs",
     "get:dependency": "node buildutils/lib/get-dependency.js",
     "postinstall": "node scripts/ensure-buildutils.js",
@@ -43,6 +44,7 @@
   "dependencies": {},
   "devDependencies": {
     "lerna": "^2.4.0",
+    "mock-stdin": "^0.3.1",
     "npm-run-all": "~4.1.1",
     "tslint": "^5.8.0"
   },

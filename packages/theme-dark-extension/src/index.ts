@@ -14,7 +14,7 @@ import {
  * A plugin for the Jupyter Dark Theme.
  */
 const plugin: JupyterLabPlugin<void> = {
-  id: 'jupyter.themes.dark',
+  id: '@jupyterlab/theme-dark-extension:plugin',
   requires: [IThemeManager],
   activate: function(app: JupyterLab, manager: IThemeManager) {
     manager.register({

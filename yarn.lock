@@ -4037,6 +4037,10 @@ mocha@~3.5.3:
     mkdirp "0.5.1"
     supports-color "3.1.2"
 
+mock-stdin@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.npmjs.org/mock-stdin/-/mock-stdin-0.3.1.tgz#c657d9642d90786435c64ca5e99bbd4d09bd7dd3"
+
 modify-values@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/modify-values/-/modify-values-1.0.0.tgz#e2b6cdeb9ce19f99317a53722f3dbf5df5eaaab2"

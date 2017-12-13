@@ -14,7 +14,7 @@ import {
  * A plugin for the Jupyter Light Theme.
  */
 const plugin: JupyterLabPlugin<void> = {
-  id: 'jupyter.themes.light',
+  id: '@jupyterlab/theme-light-extension:plugin',
   requires: [IThemeManager],
   activate: function(app: JupyterLab, manager: IThemeManager) {
     manager.register({

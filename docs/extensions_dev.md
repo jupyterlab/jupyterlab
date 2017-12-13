@@ -184,7 +184,13 @@ The path to the theme  assets is specified `package.json` under the
 for an example.  Ensure that the theme files are included in the
 `"files"` metadata in package.json.  A theme can optionally specify
 an `embed.css` file that can be consumed outside of a JupyterLab application.
-See the JupyterLab Light Theme for an example.
+
+To quickly create a theme based on the JupyterLab Light Theme, follow the 
+instructions in the [contributing guide](https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md#setting-up-a-development-environment) 
+and then run `jlpm run create:theme` from the repository root directory.  
+Once you select a name, title and a description, a new theme folder will be 
+created  in the current directory.  You can move that new folder to a location 
+of your choice, and start making desired changes.
 
 ## Standard (General-Purpose) Extensions
 See the example,
