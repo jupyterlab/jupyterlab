@@ -107,6 +107,17 @@ function ensurePackage(options: IEnsurePackageOptions): string[] {
     }
   });
 
+  // Ensure dependencies and dev dependencies.
+  data.dependencies = deps;
+  data.devDependencies = devDeps;
+
+  if (Object.keys(data.dependencies).length === 0) {
+    delete data.dependencies;
+  }
+  if (Object.keys(data.devDependencies).length === 0) {
+    delete data.devDependencies;
+  }
+
   if (utils.writePackageData(path.join(pkgPath, 'package.json'), data)) {
     messages.push('Updated package.json');
   }

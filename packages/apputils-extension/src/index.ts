@@ -117,7 +117,9 @@ const themes: JupyterLabPlugin<IThemeManager> = {
     const when = app.started;
     const manager = new ThemeManager({
       key: themes.id,
-      host, settingRegistry, when
+      host, settingRegistry,
+      url: app.info.urls.themes,
+      when
     });
     const disposable = splash.show();
     const success = () => { disposable.dispose(); };

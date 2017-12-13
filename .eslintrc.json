@@ -1,0 +1,35 @@
+{
+    "env": {
+        "browser": true,
+        "node": true,
+        "commonjs": true
+    },
+    "extends": [
+        "eslint:recommended"
+    ],
+    "plugins": [
+        "@jupyterlab/eslint-plugin-jinja"
+    ],
+    "rules": {
+        "indent": [
+            "error",
+            2
+        ],
+        "linebreak-style": [
+            "error",
+            "unix"
+        ],
+        "quotes": [
+            "error",
+            "single"
+        ],
+        "semi": [
+            "error",
+            "always"
+        ],
+        "no-console": [
+            "error", 
+            { "allow": ["warn", "error"] }
+        ]
+    }
+}

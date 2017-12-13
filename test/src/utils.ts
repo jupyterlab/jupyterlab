@@ -28,7 +28,7 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
-  IRenderMime, RenderMime, RenderedHTML, defaultRendererFactories
+  IRenderMime, RenderMimeRegistry, RenderedHTML, standardRendererFactories
 } from '@jupyterlab/rendermime';
 
 
@@ -36,7 +36,7 @@ import {
  * Get a copy of the default rendermime instance.
  */
 export
-function defaultRenderMime(): RenderMime {
+function defaultRenderMime(): RenderMimeRegistry {
   return Private.rendermime.clone();
 }
 
@@ -172,8 +172,8 @@ namespace Private {
   };
 
   export
-  const rendermime = new RenderMime({
-    initialFactories: defaultRendererFactories
+  const rendermime = new RenderMimeRegistry({
+    initialFactories: standardRendererFactories
   });
   rendermime.addFactory(jsonRendererFactory, 10);
 }

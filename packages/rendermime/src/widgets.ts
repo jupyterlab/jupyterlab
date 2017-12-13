@@ -151,7 +151,9 @@ class RenderedHTML extends RenderedHTMLCommon {
    * A message handler invoked on an `'after-attach'` message.
    */
   onAfterAttach(msg: Message): void {
-    this.latexTypesetter.typeset(this.node);
+    if (this.latexTypesetter) {
+      this.latexTypesetter.typeset(this.node);
+    }
   }
 }
 
@@ -191,7 +193,9 @@ class RenderedLatex extends RenderedCommon {
    * A message handler invoked on an `'after-attach'` message.
    */
   onAfterAttach(msg: Message): void {
-    this.latexTypesetter.typeset(this.node);
+    if (this.latexTypesetter) {
+      this.latexTypesetter.typeset(this.node);
+    }
   }
 }
 
@@ -271,7 +275,9 @@ class RenderedMarkdown extends RenderedHTMLCommon {
    * A message handler invoked on an `'after-attach'` message.
    */
   onAfterAttach(msg: Message): void {
-    this.latexTypesetter.typeset(this.node);
+    if (this.latexTypesetter) {
+      this.latexTypesetter.typeset(this.node);
+    }
   }
 }
 
@@ -316,7 +322,9 @@ class RenderedSVG extends RenderedCommon {
    * A message handler invoked on an `'after-attach'` message.
    */
   onAfterAttach(msg: Message): void {
-    this.latexTypesetter.typeset(this.node);
+    if (this.latexTypesetter) {
+      this.latexTypesetter.typeset(this.node);
+    }
   }
 }
 

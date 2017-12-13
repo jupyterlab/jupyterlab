@@ -1,0 +1,6 @@
+node_modules
+**/node_modules
+**/lib
+**/build
+jupyterlab/staging/yarn.js
+jupyterlab/static

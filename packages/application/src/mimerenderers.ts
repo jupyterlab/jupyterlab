@@ -10,6 +10,10 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
+  IRenderMimeRegistry
+} from '@jupyterlab/rendermime';
+
+import {
   IRenderMime
 } from '@jupyterlab/rendermime-interfaces';
 
@@ -54,16 +58,16 @@ export
 function createRendermimePlugin(item: IRenderMime.IExtension): JupyterLabPlugin<void> {
   return {
     id: item.id,
-    requires: [ILayoutRestorer],
+    requires: [ILayoutRestorer, IRenderMimeRegistry],
     autoStart: true,
-    activate: (app: JupyterLab, restorer: ILayoutRestorer) => {
+    activate: (app: JupyterLab, restorer: ILayoutRestorer, rendermime: IRenderMimeRegistry) => {
       // Add the mime renderer.
       if (item.rank !== undefined) {
-        app.rendermime.addFactory(
+        rendermime.addFactory(
           item.rendererFactory, item.rank
         );
       } else {
-        app.rendermime.addFactory(item.rendererFactory);
+        rendermime.addFactory(item.rendererFactory);
       }
 
       // Handle the widget factory.
@@ -89,7 +93,7 @@ function createRendermimePlugin(item: IRenderMime.IExtension): JupyterLabPlugin<
         let factory = new MimeDocumentFactory({
           renderTimeout: item.renderTimeout,
           dataType: item.dataType,
-          rendermime: app.rendermime,
+          rendermime,
           modelName: option.modelName,
           name: option.name,
           primaryFileType: registry.getFileType(option.primaryFileType),

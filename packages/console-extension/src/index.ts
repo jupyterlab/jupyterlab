@@ -34,6 +34,10 @@ import {
 } from '@jupyterlab/mainmenu';
 
 import {
+  IRenderMimeRegistry
+} from '@jupyterlab/rendermime';
+
+import {
   find
 } from '@phosphor/algorithm';
 
@@ -93,7 +97,8 @@ const tracker: JupyterLabPlugin<IConsoleTracker> = {
     ConsolePanel.IContentFactory,
     IEditorServices,
     ILayoutRestorer,
-    IFileBrowserFactory
+    IFileBrowserFactory,
+    IRenderMimeRegistry
   ],
   optional: [ILauncher],
   activate: activateConsole,
@@ -126,7 +131,7 @@ export default plugins;
 /**
  * Activate the console extension.
  */
-function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer, browserFactory: IFileBrowserFactory, launcher: ILauncher | null): IConsoleTracker {
+function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: ConsolePanel.IContentFactory,  editorServices: IEditorServices, restorer: ILayoutRestorer, browserFactory: IFileBrowserFactory, rendermime: IRenderMimeRegistry, launcher: ILauncher | null): IConsoleTracker {
   const manager = app.serviceManager;
   const { commands, shell } = app;
   const category = 'Console';
@@ -186,9 +191,9 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     return manager.ready.then(() => {
       let panel = new ConsolePanel({
         manager,
-        rendermime: app.rendermime.clone(),
         contentFactory,
         mimeTypeService: editorServices.mimeTypeService,
+        rendermime,
         ...options
       });
 

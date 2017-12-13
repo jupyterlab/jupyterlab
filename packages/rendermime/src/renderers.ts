@@ -89,7 +89,7 @@ function renderHTML(options: renderHTML.IOptions): Promise<void> {
 
   // Return the final rendered promise.
   return promise.then(() => {
-    if (shouldTypeset) { latexTypesetter.typeset(host); }
+    if (shouldTypeset && latexTypesetter ) { latexTypesetter.typeset(host); }
   });
 }
 
@@ -142,7 +142,7 @@ namespace renderHTML {
     /**
      * The LaTeX typesetter for the application.
      */
-    latexTypesetter: IRenderMime.ILatexTypesetter;
+    latexTypesetter: IRenderMime.ILatexTypesetter | null;
   }
 }
 
@@ -247,7 +247,7 @@ function renderLatex(options: renderLatex.IRenderOptions): Promise<void> {
   host.textContent = source;
 
   // Typeset the node if needed.
-  if (shouldTypeset) {
+  if (shouldTypeset && latexTypesetter) {
     latexTypesetter.typeset(host);
   }
 
@@ -284,7 +284,7 @@ namespace renderLatex {
     /**
      * The LaTeX typesetter for the application.
      */
-    latexTypesetter: IRenderMime.ILatexTypesetter;
+    latexTypesetter: IRenderMime.ILatexTypesetter | null;
   }
 }
 
@@ -357,7 +357,11 @@ function renderMarkdown(options: renderMarkdown.IRenderOptions): Promise<void> {
 
     // Return the rendered promise.
     return promise;
-  }).then(() => { if (shouldTypeset) { latexTypesetter.typeset(host); } });
+  }).then(() => {
+    if (shouldTypeset && latexTypesetter) {
+      latexTypesetter.typeset(host);
+    }
+  });
 }
 
 
@@ -409,7 +413,7 @@ namespace renderMarkdown {
     /**
      * The LaTeX typesetter for the application.
      */
-    latexTypesetter: IRenderMime.ILatexTypesetter;
+    latexTypesetter: IRenderMime.ILatexTypesetter | null;
   }
 }
 
@@ -460,7 +464,7 @@ function renderSVG(options: renderSVG.IRenderOptions): Promise<void> {
 
   // Return the final rendered promise.
   return promise.then(() => {
-    if (shouldTypeset) { latexTypesetter.typeset(host); }
+    if (shouldTypeset && latexTypesetter) { latexTypesetter.typeset(host); }
   });
 }
 
@@ -513,7 +517,7 @@ namespace renderSVG {
     /**
      * The LaTeX typesetter for the application.
      */
-    latexTypesetter: IRenderMime.ILatexTypesetter;
+    latexTypesetter: IRenderMime.ILatexTypesetter | null;
   }
 }
 

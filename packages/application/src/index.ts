@@ -13,8 +13,8 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  IRenderMime, RenderMime, defaultRendererFactories
-} from '@jupyterlab/rendermime';
+  IRenderMime
+} from '@jupyterlab/rendermime-interfaces';
 
 import {
   ServiceManager
@@ -57,16 +57,7 @@ class JupyterLab extends Application<ApplicationShell> {
    */
   constructor(options: JupyterLab.IOptions = {}) {
     super({ shell: new ApplicationShell() });
-    this._info = {
-      name: options.name || 'JupyterLab',
-      namespace: options.namespace || 'jupyterlab',
-      version:  options.version || 'unknown',
-      devMode: options.devMode || false,
-      settingsDir: options.settingsDir || '',
-      assetsDir: options.assetsDir || '',
-      disabled: options.disabled || { patterns: [], matches: [] },
-      deferred: options.deferred || { patterns: [], matches: [] }
-    };
+    this._info = { ...JupyterLab.defaultInfo, ...options };
     if (options.devMode) {
       this.shell.addClass('jp-mod-devMode');
     }
@@ -75,14 +66,6 @@ class JupyterLab extends Application<ApplicationShell> {
 
     let linker = new CommandLinker({ commands: this.commands });
     this.commandLinker = linker;
-
-    let linkHandler = {
-      handleLink: (node: HTMLElement, path: string) => {
-        linker.connectNode(node, 'docmanager:open', { path });
-      }
-    };
-    let initialFactories = defaultRendererFactories;
-    this.rendermime = new RenderMime({ initialFactories, linkHandler });
 
     let registry = this.docRegistry = new DocumentRegistry();
     registry.addModelFactory(new Base64ModelFactory());
@@ -97,11 +80,6 @@ class JupyterLab extends Application<ApplicationShell> {
    * The document registry instance used by the application.
    */
   readonly docRegistry: DocumentRegistry;
-
-  /**
-   * The rendermime instance used by the application.
-   */
-  readonly rendermime: RenderMime;
 
   /**
    * The command linker used by the application.
@@ -189,58 +167,7 @@ namespace JupyterLab {
    * The options used to initialize a JupyterLab object.
    */
   export
-  interface IOptions {
-    /**
-     * The name of the JupyterLab application.
-     */
-    name?: string;
-
-    /**
-     * The namespace/prefix plugins may use to denote their origin.
-     *
-     * #### Notes
-     * This field may be used by persistent storage mechanisms such as state
-     * databases, cookies, session storage, etc.
-     *
-     * If unspecified, the default value is `'jupyterlab'`.
-     */
-    namespace?: string;
-
-    /**
-     * The version of the JupyterLab application.
-     */
-    version?: string;
-
-    /**
-     * Whether the application is in dev mode.
-     */
-    devMode?: boolean;
-
-    /**
-     * The settings directory of the app on the server.
-     */
-    settingsDir?: string;
-
-    /**
-     * The assets directory of the app on the server.
-     */
-    assetsDir?: string;
-
-    /**
-     * The mime renderer extensions.
-     */
-    mimeExtensions?: IRenderMime.IExtensionModule[];
-
-    /**
-     * The collection of deferred extension patterns and matched extensions.
-     */
-    deferred?: { patterns: string[], matches: string[] };
-
-    /**
-     * The collection of disabled extension patterns and matched extensions.
-     */
-    disabled?: { patterns: string[], matches: string[] };
-  }
+  interface IOptions extends Partial<IInfo> {}
 
   /**
    * The information about a JupyterLab application.
@@ -253,29 +180,19 @@ namespace JupyterLab {
     readonly name: string;
 
     /**
-     * The namespace/prefix plugins may use to denote their origin.
-     */
-    readonly namespace: string;
-
-    /**
      * The version of the JupyterLab application.
      */
     readonly version: string;
 
     /**
+     * The namespace/prefix plugins may use to denote their origin.
+     */
+    readonly namespace: string;
+
+    /**
      * Whether the application is in dev mode.
      */
     readonly devMode: boolean;
-
-    /**
-     * The settings directory of the app on the server.
-     */
-    readonly settingsDir: string;
-
-    /**
-     * The assets directory of the app on the server.
-     */
-    readonly assetsDir: string;
 
     /**
      * The collection of deferred extension patterns and matched extensions.
@@ -286,7 +203,68 @@ namespace JupyterLab {
      * The collection of disabled extension patterns and matched extensions.
      */
     readonly disabled: { patterns: string[], matches: string[] };
+
+    /**
+     * The mime renderer extensions.
+     */
+    readonly mimeExtensions: IRenderMime.IExtensionModule[];
+
+    /**
+     * The urls used by the application.
+     */
+    readonly urls: {
+      readonly page: string,
+      readonly public: string,
+      readonly settings: string,
+      readonly themes: string
+    };
+
+    /**
+     * The local directories used by the application.
+     */
+    readonly directories: {
+      readonly appSettings: string,
+      readonly schemas: string,
+      readonly static: string,
+      readonly templates: string,
+      readonly themes: string
+      readonly userSettings: string,
+    };
+
+    /**
+     * Whether files are cached on the server.
+     */
+    readonly filesCached: boolean;
   }
+
+  /**
+   * The default application info.
+   */
+  export
+  const defaultInfo: IInfo = {
+    name: 'JupyterLab',
+    namespace: 'jupyterlab',
+    version: 'unknown',
+    devMode: false,
+    deferred: { patterns: [], matches: [] },
+    disabled: { patterns: [], matches: [] },
+    mimeExtensions: [],
+    urls: {
+      page: 'unknown',
+      public: 'unknown',
+      settings: 'unknown',
+      themes: 'unknown'
+    },
+    directories: {
+      appSettings: 'unknown',
+      schemas: 'unknown',
+      static: 'unknown',
+      templates: 'unknown',
+      themes: 'unknown',
+      userSettings: 'unknown'
+    },
+    filesCached: true
+  };
 
   /**
    * The interface for a module that exports a plugin or plugins as

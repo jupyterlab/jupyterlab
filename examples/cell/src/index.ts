@@ -22,7 +22,7 @@ import {
 } from '@jupyterlab/completer';
 
 import {
-  RenderMime, defaultRendererFactories
+  RenderMimeRegistry, standardRendererFactories as initialFactories
 } from '@jupyterlab/rendermime';
 
 import {
@@ -53,9 +53,7 @@ function main(): void {
   }, useCapture);
 
   // Create the cell widget with a default rendermime instance.
-  const rendermime = new RenderMime({
-    initialFactories: defaultRendererFactories
-  });
+  const rendermime = new RenderMimeRegistry({ initialFactories });
 
   const cellWidget = new CodeCell({
     rendermime,

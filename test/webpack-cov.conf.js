@@ -3,8 +3,8 @@ var path = require('path');
 module.exports = {
   entry: ['@phosphor/widgets/style/index.css', './build/index.js'],
   output: {
-    path: __dirname + "/build",
-    filename: "coverage.js",
+    path: __dirname + '/build',
+    filename: 'coverage.js',
     devtoolModuleFilenameTemplate: '[resource-path]'
   },
   bail: true,
@@ -24,4 +24,4 @@ module.exports = {
       }
     ],
   }
-}
+};

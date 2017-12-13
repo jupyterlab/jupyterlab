@@ -3,29 +3,22 @@
 
 var Widget = require('@phosphor/widgets').Widget;
 
-var renderer = {
-  mimeTypes = ['text/plain'],
-
-  canRender: function (options) {
-    return this.mimeTypes.indexOf(options.mimeType) !== -1;
-  },
-
-  render: function (options) {
+var factory = {
+  safe: true,
+  mimeTypes: ['text/plain'],
+  defaultRank: 1000,
+  createRenderer: function() {
     return new Widget();
-  },
-
-  wouldSanitize: function (options) {
-    return false;
   }
 };
 
 
 module.exports = {
   mimeType: 'text/plain',
-  renderer: renderer,
+  rendererFactory: factory,
   widgetFactoryOptions: {
     name: 'Test',
     fileExtensions: ['.txt'],
     readOnly: true
   }
-}
+};

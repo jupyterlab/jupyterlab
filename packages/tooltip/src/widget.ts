@@ -26,7 +26,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IRenderMime, RenderMime, MimeModel
+  IRenderMime, RenderMimeRegistry, MimeModel
 } from '@jupyterlab/rendermime';
 
 
@@ -235,7 +235,7 @@ class Tooltip extends Widget {
 
   private _content: IRenderMime.IRenderer | null = null;
   private _editor: CodeEditor.IEditor;
-  private _rendermime: RenderMime;
+  private _rendermime: RenderMimeRegistry;
 }
 
 /**
@@ -266,6 +266,6 @@ namespace Tooltip {
     /**
      * The rendermime instance used by the tooltip model.
      */
-    rendermime: RenderMime;
+    rendermime: RenderMimeRegistry;
   }
 }

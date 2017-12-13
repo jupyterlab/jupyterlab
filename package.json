@@ -16,7 +16,7 @@
     "clean:dev": "cd dev_mode && jlpm run clean",
     "clean:examples": "node buildutils/lib/clean-packages.js examples",
     "clean:packages": "node buildutils/lib/clean-packages.js packages",
-    "clean:slate": "python clean.py && pip install -e .",
+    "clean:slate": "python clean.py && pip install --global-option='--skip-npm' -v -e . && jlpm",
     "clean:src": "jlpm run clean",
     "clean:test": "lerna run clean --scope \"@jupyterlab/test-*\"",
     "clean:utils": "cd buildutils && jlpm run clean",
@@ -42,6 +42,8 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "@jupyterlab/eslint-plugin-jinja": "^0.2.0",
+    "eslint": "^4.12.1",
     "lerna": "^2.4.0",
     "npm-run-all": "~4.1.1",
     "tslint": "^5.8.0"

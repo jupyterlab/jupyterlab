@@ -7,17 +7,21 @@
 // Polyfill for ES6 Promises
 import 'es6-promise';
 
-import { OutputArea, OutputAreaModel } from '@jupyterlab/outputarea';
-import { RenderMime, defaultRendererFactories } from '@jupyterlab/rendermime';
-import { Kernel } from '@jupyterlab/services';
+import {
+  OutputArea, OutputAreaModel
+} from '@jupyterlab/outputarea';
+
+import {
+  RenderMimeRegistry, standardRendererFactories as initialFactories
+} from '@jupyterlab/rendermime';
+
+import {
+  Kernel
+} from '@jupyterlab/services';
+
 
 function main() {
-  let renderMime: RenderMime;
-  let model: OutputAreaModel;
-  let outputAreaOptions: OutputArea.IOptions;
-  let outputArea: OutputArea;
-
-  let testcode = [
+  const code = [
     'import numpy as np',
     'import matplotlib.pyplot as plt',
     '%matplotlib inline',
@@ -27,19 +31,12 @@ function main() {
     'print(y)',
     'plt.plot(x, y)'
   ].join('\n');
-
-  model = new OutputAreaModel();
-  renderMime = new RenderMime({ initialFactories: defaultRendererFactories });
-
-  outputAreaOptions = {
-    model: model,
-    rendermime: renderMime
-  };
-
-  outputArea = new OutputArea(outputAreaOptions);
+  const model = new OutputAreaModel();
+  const rendermime = new RenderMimeRegistry({ initialFactories });
+  const outputArea = new OutputArea({ model, rendermime });
 
   Kernel.startNew().then(kernel => {
-    outputArea.future = kernel.requestExecute({ code: testcode });
+    outputArea.future = kernel.requestExecute({ code });
     document.getElementById('outputarea').appendChild(outputArea.node);
   });
 }

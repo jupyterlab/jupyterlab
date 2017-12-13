@@ -1,13 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-module.exports = [
-{
+module.exports = [{
   id: 'mockextension',
   autoStart: true,
   activate: function(application) {
-    console.log('mock extension activated')
+    // eslint-disable-next-line no-console
+    console.log('mock extension activated');
     window.commands = application.commands;
   }
-}
-]
+}];

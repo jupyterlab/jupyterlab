@@ -48,9 +48,10 @@ def load_jupyter_server_extension(nbapp):
     logger.info('JupyterLab alpha preview extension loaded from %s' % HERE)
     logger.info('JupyterLab application directory is %s' % app_dir)
 
-    config.name = 'JupyterLab'
-    config.page_title = 'JupyterLab Alpha Preview'
+    config.app_name = 'JupyterLab'
+    config.app_namespace = 'jupyterlab'
     config.page_url = '/lab'
+    config.cache_files = True
 
     # Check for core mode.
     core_mode = False
@@ -81,48 +82,55 @@ def load_jupyter_server_extension(nbapp):
     page_config['token'] = nbapp.token
 
     if core_mode:
-        config.assets_dir = pjoin(HERE, 'static')
+        config.static_dir = pjoin(HERE, 'static')
         config.schemas_dir = pjoin(HERE, 'schemas')
-        config.settings_dir = ''
+        config.app_settings_dir = ''
         config.themes_dir = pjoin(HERE, 'themes')
-        config.version = get_app_version()
+        config.app_version = get_app_version()
 
         logger.info(CORE_NOTE.strip())
-        if not os.path.exists(config.assets_dir):
+        if not os.path.exists(config.static_dir):
             msg = 'Static assets not built, please see CONTRIBUTING.md'
             logger.error(msg)
 
     elif dev_mode:
-        config.assets_dir = pjoin(DEV_DIR, 'build')
+        config.static_dir = pjoin(DEV_DIR, 'build')
         config.schemas_dir = pjoin(DEV_DIR, 'schemas')
-        config.settings_dir = ''
+        config.app_settings_dir = ''
         config.themes_dir = pjoin(DEV_DIR, 'themes')
-        config.version = __version__
+        config.app_version = __version__
 
         ensure_dev(logger)
         if not watch_mode:
             logger.info(DEV_NOTE)
 
     else:
-        config.assets_dir = pjoin(app_dir, 'static')
+        config.static_dir = pjoin(app_dir, 'static')
         config.schemas_dir = pjoin(app_dir, 'schemas')
-        config.settings_dir = pjoin(app_dir, 'settings')
+        config.app_settings_dir = pjoin(app_dir, 'settings')
         config.themes_dir = pjoin(app_dir, 'themes')
-        config.version = get_app_version()
+        config.app_version = get_app_version()
 
-    config.dev_mode = dev_mode
+    page_config['devMode'] = dev_mode
     config.user_settings_dir = get_user_settings_dir()
+    config.templates_dir = config.static_dir
+
+    page_config['themePath'] = '/lab/api/themes'
+    if 'rc' in __version__:
+        raise ValueError('remove the theme path shim')
 
     if watch_mode:
         logger.info('Starting JupyterLab watch mode...')
 
         # Set the ioloop in case the watch fails.
         nbapp.ioloop = IOLoop.current()
-        if config.dev_mode:
+        if dev_mode:
             watch_dev(logger)
         else:
             watch(app_dir, logger)
             page_config['buildAvailable'] = False
+
+        config.cache_files = False
 
     add_handlers(web_app, config)
 

@@ -35,6 +35,10 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
+  IRenderMimeRegistry
+} from '@jupyterlab/rendermime';
+
+import {
   ServiceManager
 } from '@jupyterlab/services';
 
@@ -256,7 +260,8 @@ const tracker: JupyterLabPlugin<INotebookTracker> = {
     ICommandPalette,
     NotebookPanel.IContentFactory,
     IEditorServices,
-    ILayoutRestorer
+    ILayoutRestorer,
+    IRenderMimeRegistry
   ],
   optional: [IFileBrowserFactory, ILauncher],
   activate: activateNotebookHandler,
@@ -367,7 +372,7 @@ function activateCellTools(app: JupyterLab, tracker: INotebookTracker, editorSer
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: NotebookPanel.IContentFactory, editorServices: IEditorServices, restorer: ILayoutRestorer, browserFactory: IFileBrowserFactory | null, launcher: ILauncher | null): INotebookTracker {
+function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: NotebookPanel.IContentFactory, editorServices: IEditorServices, restorer: ILayoutRestorer, rendermime: IRenderMimeRegistry, browserFactory: IFileBrowserFactory | null, launcher: ILauncher | null): INotebookTracker {
   const services = app.serviceManager;
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
@@ -376,7 +381,7 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
     defaultFor: ['notebook'],
     preferKernel: true,
     canStartKernel: true,
-    rendermime: app.rendermime,
+    rendermime: rendermime,
     contentFactory,
     mimeTypeService: editorServices.mimeTypeService
   });

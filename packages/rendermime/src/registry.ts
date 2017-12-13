@@ -19,16 +19,37 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  ReadonlyJSONObject
+  ReadonlyJSONObject, Token
 } from '@phosphor/coreutils';
 
 import {
   MimeModel
 } from './mimemodel';
 
-import {
-  MathJaxTypesetter
-} from './latex';
+
+/* tslint:disable */
+/**
+ * The rendermime token.
+ */
+export
+const IRenderMimeRegistry = new Token<IRenderMimeRegistry>('@jupyterlab/rendermime:IRenderMimeRegistry');
+
+export
+interface IRenderMimeRegistry extends RenderMimeRegistry {};
+/* tslint:enable */
+
+
+/* tslint:disable */
+/**
+ * The latex typesetter token.
+ */
+export
+const ILatexTypesetter = new Token<IRenderMime.ILatexTypesetter>('@jupyterlab/rendermime:ILatexTypesetter');
+
+export
+interface ILatexTypesetter extends IRenderMime.ILatexTypesetter {}
+/* tslint:enable */
+
 
 
 /**
@@ -42,17 +63,17 @@ import {
  * This class is not intended to be subclassed.
  */
 export
-class RenderMime {
+class RenderMimeRegistry {
   /**
    * Construct a new rendermime.
    *
    * @param options - The options for initializing the instance.
    */
-  constructor(options: RenderMime.IOptions = {}) {
+  constructor(options: RenderMimeRegistry.IOptions = {}) {
     // Parse the options.
     this.resolver = options.resolver || null;
     this.linkHandler = options.linkHandler || null;
-    this._latexTypesetter = options.latexTypesetter || new MathJaxTypesetter();
+    this.latexTypesetter = options.latexTypesetter || null;
     this.sanitizer = options.sanitizer || defaultSanitizer;
 
     // Add the initial factories.
@@ -80,17 +101,8 @@ class RenderMime {
 
   /**
    * The LaTeX typesetter for the rendermime.
-   *
-   * #### Notes
-   * This is settable so that extension authors may provide
-   * alternative implementations of the `IRenderMime.ILatexTypesetter`.
    */
-  get latexTypesetter(): IRenderMime.ILatexTypesetter {
-    return this._latexTypesetter;
-  }
-  set latexTypesetter(typesetter: IRenderMime.ILatexTypesetter) {
-    this._latexTypesetter = typesetter;
-  }
+  readonly latexTypesetter: IRenderMime.ILatexTypesetter | null;
 
   /**
    * The ordered list of mimeTypes.
@@ -173,9 +185,9 @@ class RenderMime {
    *
    * @returns A new independent clone of the rendermime.
    */
-  clone(options: RenderMime.ICloneOptions = {}): RenderMime {
+  clone(options: RenderMimeRegistry.ICloneOptions = {}): RenderMimeRegistry {
     // Create the clone.
-    let clone = new RenderMime({
+    let clone = new RenderMimeRegistry({
       resolver: options.resolver || this.resolver || undefined,
       sanitizer: options.sanitizer || this.sanitizer || undefined,
       linkHandler: options.linkHandler || this.linkHandler || undefined,
@@ -208,13 +220,21 @@ class RenderMime {
    * @param factory - The renderer factory of interest.
    *
    * @param rank - The rank of the renderer. A lower rank indicates
-   *   a higher priority for rendering. The default is `100`.
+   *   a higher priority for rendering. If not given, the rank will
+   *   defer to the `defaultRank` of the factory.  If no `defaultRank`
+   *   is given, it will default to 100.
    *
    * #### Notes
    * The renderer will replace an existing renderer for the given
    * mimeType.
    */
-  addFactory(factory: IRenderMime.IRendererFactory, rank = 100): void {
+  addFactory(factory: IRenderMime.IRendererFactory, rank?: number): void {
+    if (rank === undefined) {
+      rank = factory.defaultRank;
+      if (rank === undefined) {
+        rank = 100;
+      }
+    }
     for (let mt of factory.mimeTypes) {
       this._factories[mt] = factory;
       this._ranks[mt] = { rank, id: this._id++ };
@@ -223,13 +243,44 @@ class RenderMime {
   }
 
   /**
-   * Remove the factory for a mime type.
+   * Remove a mime type.
    *
    * @param mimeType - The mime type of interest.
    */
-  removeFactory(mimeType: string): void {
+  removeMimeType(mimeType: string): void {
     delete this._factories[mimeType];
     delete this._ranks[mimeType];
+    this._types = null;
+  }
+
+  /**
+   * Get the rank for a given mime type.
+   *
+   * @param mimeType - The mime type of interest.
+   *
+   * @returns The rank of the mime type or undefined.
+   */
+  getRank(mimeType: string): number | undefined {
+    let rank = this._ranks[mimeType];
+    return rank && rank.rank;
+  }
+
+  /**
+   * Set the rank of a given mime type.
+   *
+   * @param mimeType - The mime type of interest.
+   *
+   * @param rank - The new rank to assign.
+   *
+   * #### Notes
+   * This is a no-op if the mime type is not registered.
+   */
+  setRank(mimeType: string, rank: number): void {
+    if (!this._ranks[mimeType]) {
+      return;
+    }
+    let id = this._id++;
+    this._ranks[mimeType] = { rank, id };
     this._types = null;
   }
 
@@ -237,15 +288,14 @@ class RenderMime {
   private _ranks: Private.RankMap = {};
   private _types: string[] | null = null;
   private _factories: Private.FactoryMap = {};
-  private _latexTypesetter: IRenderMime.ILatexTypesetter;
 }
 
 
 /**
- * The namespace for `RenderMime` class statics.
+ * The namespace for `RenderMimeRegistry` class statics.
  */
 export
-namespace RenderMime {
+namespace RenderMimeRegistry {
   /**
    * The options used to initialize a rendermime instance.
    */

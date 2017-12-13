@@ -1,7 +1,14 @@
-var webpack = require('webpack');
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
 var path = require('path');
 var fs = require('fs-extra');
 var Handlebars = require('handlebars');
+var HtmlWebpackPlugin = require('html-webpack-plugin');
+var webpack = require('webpack');
+
 var Build = require('@jupyterlab/buildutils').Build;
 var package_data = require('./package.json');
 
@@ -32,11 +39,11 @@ var result = template(data);
 
 fs.writeFileSync(path.join(buildDir, 'index.out.js'), result);
 fs.copySync('./package.json', path.join(buildDir, 'package.json'));
-
+fs.copySync('./templates/error.html', path.join(buildDir, 'error.html'));
 
 // Set up variables for watch mode.
 var localLinked = {};
-var ignoreCache = new Map();
+var ignoreCache = Object.create(null);
 Object.keys(jlab.linkedPackages).forEach(function (name) {
   var localPath = require.resolve(path.join(name, 'package.json'));
   localLinked[name] = path.dirname(localPath);
@@ -60,7 +67,6 @@ function maybeSync(localPath, name, rest) {
       return;
     }
     try {
-      console.log('updating', path.join(name, rest));
       fs.copySync(source, localPath);
     } catch (err) {
       console.error(err);
@@ -72,9 +78,7 @@ function maybeSync(localPath, name, rest) {
 /**
  * A WebPack Plugin that copies the assets to the static directory.
  */
-function JupyterLabPlugin(options) {
-  _first = true;
-}
+function JupyterLabPlugin() { }
 
 JupyterLabPlugin.prototype.apply = function(compiler) {
 
@@ -94,21 +98,28 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
   }.bind(this));
 };
 
+JupyterLabPlugin.prototype._first = true;
 
 
 module.exports = {
-  entry:  path.resolve(buildDir, 'index.out.js'),
+  entry: {
+    main: ['whatwg-fetch', path.resolve(buildDir, 'index.out.js')],
+    vendor: [
+      'react', 'react-dom', 'codemirror', 'xterm'
+    ]
+  },
   output: {
     path: path.resolve(buildDir),
-    filename: '[name].bundle.js'
+    publicPath: 'lab/static/',
+    filename: '[name].[chunkhash].js'
   },
   module: {
     rules: [
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },
       { test: /\.json$/, use: 'json-loader' },
-      { test: /\.html$/, use: 'file-loader' },
       { test: /\.md$/, use: 'raw-loader' },
       { test: /\.js$/, use: ['source-map-loader'], enforce: 'pre',
+        // eslint-disable-next-line no-undef
         exclude: path.join(process.cwd(), 'node_modules')
       },
       { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
@@ -123,8 +134,8 @@ module.exports = {
   watchOptions: {
     ignored: function(localPath) {
       localPath = path.resolve(localPath);
-      if (ignoreCache.has(localPath)) {
-        return ignoreCache.get(localPath);
+      if (localPath in ignoreCache) {
+        return ignoreCache[localPath];
       }
       // Limit the watched files to those in our local linked package dirs.
       var ignore = true;
@@ -142,7 +153,7 @@ module.exports = {
         }
         return true;
       });
-      ignoreCache.set(localPath, ignore);
+      ignoreCache[localPath] = ignore;
       return ignore;
     }
   },
@@ -151,5 +162,18 @@ module.exports = {
   },
   bail: true,
   devtool: 'cheap-source-map',
-  plugins: [ new JupyterLabPlugin({}) ]
-}
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: path.join('templates', 'template.html'),
+      title: 'JupyterLab'
+    }),
+    new webpack.HashedModuleIdsPlugin(),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'vendor'
+    }),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'manifest'
+    }),
+    new JupyterLabPlugin({})
+  ]
+};

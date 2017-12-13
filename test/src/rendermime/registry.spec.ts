@@ -24,7 +24,11 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  MimeModel, IRenderMime, RenderedText, RenderMime, MathJaxTypesetter
+  MathJaxTypesetter
+} from '@jupyterlab/mathjax2-extension';
+
+import {
+  MimeModel, IRenderMime, RenderedText, RenderMimeRegistry
 } from '@jupyterlab/rendermime';
 
 import {
@@ -42,24 +46,25 @@ function createModel(data: JSONObject): IRenderMime.IMimeModel {
 const fooFactory: IRenderMime.IRendererFactory  = {
   mimeTypes: ['text/foo'],
   safe: true,
+  defaultRank: 1000,
   createRenderer: options => new RenderedText(options)
 };
 
 
-describe('rendermime/index', () => {
+describe('rendermime/registry', () => {
 
-  let r: RenderMime;
+  let r: RenderMimeRegistry;
 
   beforeEach(() => {
     r = defaultRenderMime();
   });
 
-  describe('RenderMime', () => {
+  describe('RenderMimeRegistry', () => {
 
     describe('#constructor()', () => {
 
       it('should create a new rendermime instance', () => {
-        expect(r instanceof RenderMime).to.be(true);
+        expect(r instanceof RenderMimeRegistry).to.be(true);
       });
 
     });
@@ -89,15 +94,13 @@ describe('rendermime/index', () => {
 
     describe('#latexTypesetter', () => {
 
-      it('should be the MathJax typesetter by default', () => {
-        expect(r.latexTypesetter instanceof MathJaxTypesetter).to.be(true);
+      it('should be the null typesetter by default', () => {
+        expect(r.latexTypesetter).to.be(null);
       });
 
-      it('should be settable and clonable', () => {
+      it('should be clonable', () => {
         let typesetter1 = new MathJaxTypesetter();
-        r.latexTypesetter = typesetter1;
-        expect(r.latexTypesetter).to.be(typesetter1);
-        let clone1 = r.clone();
+        let clone1 = r.clone({ latexTypesetter: typesetter1 });
         expect(clone1.latexTypesetter).to.be(typesetter1);
         let typesetter2 = new MathJaxTypesetter();
         let clone2 = r.clone({ latexTypesetter: typesetter2 });
@@ -229,16 +232,16 @@ describe('rendermime/index', () => {
 
     });
 
-    describe('#removeFactory()', () => {
+    describe('#removeMimeType()', () => {
 
       it('should remove a factory by mimeType', () => {
-        r.removeFactory('text/html');
+        r.removeMimeType('text/html');
         let model = createModel({ 'text/html': '<h1>foo</h1>' });
         expect(r.preferredMimeType(model.data, true)).to.be(void 0);
       });
 
       it('should be a no-op if the mimeType is not registered', () => {
-        r.removeFactory('text/foo');
+        r.removeMimeType('text/foo');
       });
 
     });
@@ -265,7 +268,7 @@ describe('rendermime/index', () => {
     });
 
     describe('.UrlResolver', () => {
-      let resolver: RenderMime.UrlResolver;
+      let resolver: RenderMimeRegistry.UrlResolver;
       let contents: Contents.IManager;
       let session: Session.ISession;
 
@@ -276,7 +279,7 @@ describe('rendermime/index', () => {
           return manager.sessions.startNew({ path: uuid() });
         }).then(s => {
           session = s;
-          resolver = new RenderMime.UrlResolver({
+          resolver = new RenderMimeRegistry.UrlResolver({
             session,
             contents: manager.contents
           });
@@ -290,7 +293,7 @@ describe('rendermime/index', () => {
       context('#constructor', () => {
 
         it('should create a UrlResolver instance', () => {
-          expect(resolver).to.be.a(RenderMime.UrlResolver);
+          expect(resolver).to.be.a(RenderMimeRegistry.UrlResolver);
         });
 
       });

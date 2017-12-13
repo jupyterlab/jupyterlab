@@ -703,6 +703,12 @@ class _AppHandler(object):
                 continue
             shutil.copy(pjoin(HERE, 'staging', fname), target)
 
+        # Ensure a clean templates directory
+        templates = pjoin(staging, 'templates')
+        if osp.exists(templates):
+            shutil.rmtree(templates)
+        shutil.copytree(pjoin(HERE, 'staging', 'templates'), templates)
+
         # Ensure a clean linked packages directory.
         linked_dir = pjoin(staging, 'linked_packages')
         if osp.exists(linked_dir):
