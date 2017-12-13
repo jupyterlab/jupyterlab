@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog, FocusPanel, ICommandPalette, showDialog
+  Dialog, ICommandPalette, MainAreaWidget, showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -47,7 +47,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  Menu, Panel, Widget
+  Menu, PanelLayout, Widget
 } from '@phosphor/widgets';
 
 
@@ -1028,11 +1028,12 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
       const nb = current.notebook;
       const newCell = nb.activeCell.clone();
-      const p = new FocusPanel();
+      const layout = new PanelLayout();
+      const p = new MainAreaWidget({layout: layout});
       p.id = `Cell-${uuid()}`;
       p.title.closable = true;
       p.title.label = current.title.label ? `Cell: ${current.title.label}` : 'Cell';
-      p.addWidget(newCell);
+      layout.addWidget(newCell);
       shell.addToMainArea(p);
     },
     isEnabled
