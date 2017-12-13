@@ -90,7 +90,7 @@ class StateDB implements IStateDB {
     this.namespace = options.namespace;
     let key = `${this.namespace}:stateDb:sentinel`;
     let sentinel = window.localStorage.getItem(key);
-    // Check if the sentinel was not properly cleared on last page load.
+    // Clear state if the sentinel was not properly cleared on last page load.
     if (sentinel) {
       this._clear();
     }
