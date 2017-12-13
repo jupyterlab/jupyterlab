@@ -575,7 +575,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.run, {
-    label: 'Run Cells',
+    label: 'Run Selected Cells and Don\'t Advance',
     execute: args => {
       const current = getCurrent(args);
 
@@ -588,7 +588,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.runAndInsert, {
-    label: 'Run Cells and Insert Below',
+    label: 'Run Selected Cells and Insert Below',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1513,6 +1513,12 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
     }
   } as IRunMenu.ICodeRunner<NotebookPanel>);
 
+  // Add a run+insert and run+don't advance group to the run menu.
+  const runExtras = [
+    CommandIDs.runAndInsert,
+    CommandIDs.run
+  ].map(command => { return { command }; });
+
   // Add a run all above/below group to the run menu.
   const runAboveBelowGroup = [
     CommandIDs.runAllAbove,
@@ -1555,7 +1561,8 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   mainMenu.editMenu.addGroup(selectGroup, 7);
   mainMenu.editMenu.addGroup(moveCellsGroup, 8);
   mainMenu.editMenu.addGroup(splitMergeGroup, 9);
-  mainMenu.runMenu.addGroup(runAboveBelowGroup, 10);
+  mainMenu.runMenu.addGroup(runExtras, 10);
+  mainMenu.runMenu.addGroup(runAboveBelowGroup, 11);
 
   // Add kernel information to the application help menu.
   mainMenu.helpMenu.kernelUsers.add({

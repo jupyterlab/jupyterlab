@@ -339,7 +339,9 @@ function createRunMenu(app: JupyterLab, menu: RunMenu): void {
   commands.addCommand(CommandIDs.run, {
     label: () => {
       const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
-      return `Run Selected${noun ? ` ${noun}` : ''}`;
+      const enabled =
+        Private.delegateEnabled(app, menu.codeRunners, 'run')();
+      return `Run Selected${enabled ? ` ${noun}` : ''}`;
     },
     isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'run'),
     execute: Private.delegateExecute(app, menu.codeRunners, 'run')
@@ -348,17 +350,16 @@ function createRunMenu(app: JupyterLab, menu: RunMenu): void {
   commands.addCommand(CommandIDs.runAll, {
     label: () => {
       const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
-      return `Run All${noun ? ` ${noun}` : ''}`;
+      const enabled =
+        Private.delegateEnabled(app, menu.codeRunners, 'runAll')();
+      return `Run All${enabled ? ` ${noun}` : ''}`;
     },
     isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'runAll'),
     execute: Private.delegateExecute(app, menu.codeRunners, 'runAll')
   });
 
-  const runGroup = [
-    CommandIDs.run,
-    CommandIDs.runAll
-  ].map(command => { return { command }; });
-  menu.addGroup(runGroup, 0);
+  menu.addGroup([{ command: CommandIDs.run }], 0);
+  menu.addGroup([{ command: CommandIDs.runAll }], 999);
 }
 
 function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
