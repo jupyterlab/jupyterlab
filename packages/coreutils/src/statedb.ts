@@ -94,6 +94,8 @@ class StateDB implements IStateDB {
     if (sentinel) {
       this._clear();
     }
+    // Set the sentinel value and clear it when the statedb is initialized.
+    window.localStorage.setItem(key, 'sentinel');
     options.when.then(() => {
       window.localStorage.removeItem(key);
     });
