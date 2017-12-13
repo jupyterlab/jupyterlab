@@ -88,6 +88,14 @@ class StateDB implements IStateDB {
    */
   constructor(options: StateDB.IOptions) {
     this.namespace = options.namespace;
+    let key = `${this.namespace}:stateDb:sentinel`;
+    let sentinel = window.localStorage.getItem(key);
+    if (sentinel) {
+      this._clear();
+    }
+    options.when.then(() => {
+      window.localStorage.removeItem(key);
+    });
   }
 
   /**
@@ -109,18 +117,7 @@ class StateDB implements IStateDB {
    * Clear the entire database.
    */
   clear(): Promise<void> {
-    const prefix = `${this.namespace}:`;
-    let i = window.localStorage.length;
-
-    while (i) {
-      let key = window.localStorage.key(--i);
-
-      if (key && key.indexOf(prefix) === 0) {
-        window.localStorage.removeItem(key);
-      }
-    }
-
-    return Promise.resolve(undefined);
+    return this._clear();
   }
 
   /**
@@ -250,6 +247,24 @@ class StateDB implements IStateDB {
       return Promise.reject(error);
     }
   }
+
+  /**
+   * Clear the entire database.
+   */
+  private _clear(): Promise<void> {
+    const prefix = `${this.namespace}:`;
+    let i = window.localStorage.length;
+
+    while (i) {
+      let key = window.localStorage.key(--i);
+
+      if (key && key.indexOf(prefix) === 0) {
+        window.localStorage.removeItem(key);
+      }
+    }
+
+    return Promise.resolve(undefined);
+  }
 }
 
 /**
@@ -266,6 +281,12 @@ namespace StateDB {
      * The namespace prefix for all state database entries.
      */
     namespace: string;
+
+    /**
+     * The Promise for when the state database should be considered
+     * initialized.
+     */
+    when: Promise<void>;
   }
 }
 
