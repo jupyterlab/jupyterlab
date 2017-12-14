@@ -264,7 +264,7 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
       return settingRegistry
         .set(id, 'autoClosingBrackets', autoClosingBrackets);
     },
-    label: 'Auto-Closing Brackets',
+    label: 'Auto Close Brackets',
     isEnabled,
     isToggled: () => autoClosingBrackets
   });

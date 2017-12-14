@@ -14,8 +14,8 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IMainMenu, IMenuExtender,
-  EditMenu, FileMenu, KernelMenu, MainMenu, RunMenu, ViewMenu, TabsMenu
+  IMainMenu, IMenuExtender, EditMenu, FileMenu, KernelMenu,
+  MainMenu, RunMenu, SettingsMenu, ViewMenu, TabsMenu
 } from '@jupyterlab/mainmenu';
 
 
@@ -108,6 +108,7 @@ const menuPlugin: JupyterLabPlugin<IMainMenu> = {
     createFileMenu(app, menu.fileMenu);
     createKernelMenu(app, menu.kernelMenu);
     createRunMenu(app, menu.runMenu);
+    createSettingsMenu(app, menu.settingsMenu);
     createViewMenu(app, menu.viewMenu);
     createTabsMenu(app, menu.tabsMenu);
 
@@ -263,7 +264,6 @@ function createFileMenu(app: JupyterLab, menu: FileMenu): void {
   menu.addGroup(closeGroup, 2);
   menu.addGroup(saveGroup, 3);
   menu.addGroup(reGroup, 4);
-  menu.addGroup([{ command: 'settingeditor:open' }], 1000);
 }
 
 /**
@@ -404,6 +404,9 @@ function createRunMenu(app: JupyterLab, menu: RunMenu): void {
   menu.addGroup(runAllGroup, 999);
 }
 
+function createSettingsMenu(app: JupyterLab, menu: SettingsMenu): void {
+  menu.addGroup([{ command: 'settingeditor:open' }], 1000);
+}
 function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
   const commands = app.commands;
 

@@ -118,7 +118,7 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, registry: ISetting
       shell.addToMainArea(editor);
       shell.activateById(editor.id);
     },
-    label: 'Settings'
+    label: 'Advanced Settings'
   });
 
   commands.addCommand(CommandIDs.revert, {
