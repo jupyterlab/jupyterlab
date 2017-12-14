@@ -125,7 +125,7 @@ class Terminal extends Widget {
       return;
     }
     this._fontSize = size;
-    this._needsSnap = true;
+    this._needsResize = true;
     this.update();
   }
 
@@ -224,10 +224,9 @@ class Terminal extends Widget {
     if (!this.isVisible) {
       return;
     }
-    if (this._needsSnap) {
-      this._snapTermSizing();
-    }
+
     if (this._needsResize) {
+      this._snapTermSizing();
       this._resizeTerminal();
     }
   }
@@ -290,33 +289,30 @@ class Terminal extends Widget {
    * Use the dummy terminal to measure the row and column sizes.
    */
   private _snapTermSizing(): void {
+    const node = this._dummyTerm;
+
     this._term.element.style.fontSize = `${this.fontSize}px`;
-    let node = this._dummyTerm;
     this._term.element.appendChild(node);
     this._rowHeight = node.offsetHeight / DUMMY_ROWS;
     this._colWidth = node.offsetWidth / DUMMY_COLS;
     this._term.element.removeChild(node);
-    this._needsSnap = false;
-    this._needsResize = true;
   }
 
   /**
    * Resize the terminal based on computed geometry.
    */
   private _resizeTerminal() {
-    let offsetWidth = this._offsetWidth;
-    let offsetHeight = this._offsetHeight;
-    if (offsetWidth < 0) {
-      offsetWidth = this.node.offsetWidth;
-    }
-    if (offsetHeight < 0) {
-      offsetHeight = this.node.offsetHeight;
-    }
-    let box = this._box || (this._box = ElementExt.boxSizing(this.node));
-    let height = offsetHeight - box.verticalSum;
-    let width = offsetWidth - box.horizontalSum;
-    let rows = Math.floor(height / this._rowHeight) - 1;
-    let cols = Math.floor(width / this._colWidth) - 1;
+    const { node } = this;
+    const offsetWidth = this._offsetWidth < 0 ? node.offsetWidth
+      : this._offsetWidth;
+    const offsetHeight = this._offsetHeight < 0 ? node.offsetHeight
+      : this._offsetHeight;
+    const box = this._box = ElementExt.boxSizing(this.node);
+    const height = offsetHeight - box.verticalSum;
+    const width = offsetWidth - box.horizontalSum;
+    const rows = Math.floor(height / this._rowHeight) - 1;
+    const cols = Math.floor(width / this._colWidth) - 1;
+
     this._term.resize(cols, rows);
     this._sessionSize = [rows, cols, height, width];
     this._setSessionSize();
@@ -327,18 +323,16 @@ class Terminal extends Widget {
    * Send the size to the session.
    */
   private _setSessionSize(): void {
-    if (this._session) {
-      this._session.send({
-        type: 'set_size',
-        content: this._sessionSize
-      });
+    const session = this._session;
+
+    if (session) {
+      session.send({ type: 'set_size', content: this._sessionSize });
     }
   }
 
   private _term: Xterm;
   private _dummyTerm: HTMLElement;
   private _fontSize = -1;
-  private _needsSnap = true;
   private _needsResize = true;
   private _rowHeight = -1;
   private _colWidth = -1;

@@ -22,7 +22,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Terminal, ITerminalTracker
+  ITerminalTracker, Terminal
 } from '@jupyterlab/terminal';
 
 
@@ -63,9 +63,7 @@ const plugin: JupyterLabPlugin<ITerminalTracker> = {
   activate,
   id: '@jupyterlab/terminal-extension:plugin',
   provides: ITerminalTracker,
-  requires: [
-    IMainMenu, ICommandPalette, ILayoutRestorer
-  ],
+  requires: [IMainMenu, ICommandPalette, ILayoutRestorer],
   optional: [ILauncher],
   autoStart: true
 };
@@ -116,9 +114,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     CommandIDs.increaseFont,
     CommandIDs.decreaseFont,
     CommandIDs.toggleTheme
-  ].forEach(command => {
-    palette.addItem({ command, category });
-  });
+  ].forEach(command => { palette.addItem({ command, category }); });
 
   // Add terminal creation to the file menu.
   mainMenu.fileMenu.newMenu.addItem({ command: CommandIDs.createNew });
@@ -130,9 +126,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
       category: 'Other',
       rank: 0,
       iconClass: TERMINAL_ICON_CLASS,
-      callback: () => {
-        return commands.execute(CommandIDs.createNew);
-      }
+      callback: () => commands.execute(CommandIDs.createNew)
     });
   }
 
@@ -162,22 +156,22 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
     label: 'Terminal',
     caption: 'Start a new terminal session',
     execute: args => {
-      let name = args['name'] as string;
-      let initialCommand = args['initialCommand'] as string;
-      let term = new Terminal({ initialCommand });
+      const name = args['name'] as string;
+      const initialCommand = args['initialCommand'] as string;
+      const term = new Terminal({ initialCommand });
+      const promise = name ? services.terminals.connectTo(name)
+        : services.terminals.startNew();
+
       term.title.closable = true;
       term.title.icon = TERMINAL_ICON_CLASS;
       term.title.label = '...';
       shell.addToMainArea(term);
 
-      let promise = name ?
-        services.terminals.connectTo(name)
-        : services.terminals.startNew();
-
       return promise.then(session => {
         term.session = session;
         tracker.add(term);
         shell.activateById(term.id);
+
         return term;
       }).catch(() => { term.dispose(); });
     }

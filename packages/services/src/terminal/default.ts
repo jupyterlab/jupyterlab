@@ -106,6 +106,7 @@ class DefaultTerminalSession implements TerminalSession.ISession {
     if (this._isDisposed) {
       return;
     }
+
     this._isDisposed = true;
     if (this._ws) {
       this._ws.close();
@@ -123,16 +124,20 @@ class DefaultTerminalSession implements TerminalSession.ISession {
       return;
     }
 
-    let msg: JSONPrimitive[] = [message.type];
-    msg.push(...message.content);
-    let value = JSON.stringify(msg);
-    if (this._isReady && this._ws) {
-      this._ws.send(value);
+    const msg = [message.type, ...message.content];
+    const socket = this._ws;
+    const value = JSON.stringify(msg);
+
+    if (this._isReady && socket) {
+      socket.send(value);
       return;
     }
+
     this.ready.then(() => {
-      if (this._ws) {
-        this._ws.send(value);
+      const socket = this._ws;
+
+      if (socket) {
+        socket.send(value);
       }
     });
   }
@@ -151,43 +156,50 @@ class DefaultTerminalSession implements TerminalSession.ISession {
    * Shut down the terminal session.
    */
   shutdown(): Promise<void> {
-    return DefaultTerminalSession.shutdown(this.name, this.serverSettings);
+    const { name, serverSettings } = this;
+    return DefaultTerminalSession.shutdown(name, serverSettings);
   }
 
   /**
    * Clone the current session object.
    */
   clone(): TerminalSession.ISession {
-    return new DefaultTerminalSession(this.name, {
-      serverSettings: this.serverSettings
-    });
+    const { name, serverSettings } = this;
+    return new DefaultTerminalSession(name, { serverSettings });
   }
 
   /**
    * Connect to the websocket.
    */
   private _initializeSocket(): Promise<void> {
-    let name = this._name;
-    if (this._ws) {
-      this._ws.close();
+    const name = this._name;
+    let socket = this._ws;
+
+    if (socket) {
+      socket.close();
     }
     this._isReady = false;
-    let settings = this.serverSettings;
+
+    const settings = this.serverSettings;
+    const token = this.serverSettings.token;
+
     this._url = Private.getTermUrl(settings.baseUrl, this._name);
     Private.running[this._url] = this;
+
     let wsUrl = URLExt.join(settings.wsUrl, `terminals/websocket/${name}`);
-    let token = this.serverSettings.token;
+
     if (token) {
       wsUrl = wsUrl + `?token=${token}`;
     }
-    this._ws = new settings.WebSocket(wsUrl);
+    socket = this._ws = new settings.WebSocket(wsUrl);
 
-    this._ws.onmessage = (event: MessageEvent) => {
+    socket.onmessage = (event: MessageEvent) => {
       if (this._isDisposed) {
         return;
       }
 
-      let data = JSON.parse(event.data) as JSONPrimitive[];
+      const data = JSON.parse(event.data) as JSONPrimitive[];
+
       this._messageReceived.emit({
         type: data[0] as TerminalSession.MessageType,
         content: data.slice(1)
@@ -195,32 +207,34 @@ class DefaultTerminalSession implements TerminalSession.ISession {
     };
 
     return new Promise<void>((resolve, reject) => {
-      if (!this._ws) {
+      const socket = this._ws;
+
+      if (!socket) {
         return;
       }
-      this._ws.onopen = (event: MessageEvent) => {
-        if (this._isDisposed) {
-          return;
+
+      socket.onopen = (event: MessageEvent) => {
+        if (!this._isDisposed) {
+          this._isReady = true;
+          resolve(undefined);
         }
-        this._isReady = true;
-        resolve(void 0);
       };
-      this._ws.onerror = (event: Event) => {
-        if (this._isDisposed) {
-          return;
+
+      socket.onerror = (event: Event) => {
+        if (!this._isDisposed) {
+          reject(event);
         }
-        reject(event);
       };
     });
   }
 
-  private _name: string;
-  private _url: string;
-  private _ws: WebSocket | null = null;
   private _isDisposed = false;
-  private _readyPromise: Promise<void>;
   private _isReady = false;
   private _messageReceived = new Signal<this, TerminalSession.IMessage>(this);
+  private _name: string;
+  private _readyPromise: Promise<void>;
+  private _url: string;
+  private _ws: WebSocket | null = null;
 }
 
 

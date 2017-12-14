@@ -86,8 +86,8 @@ A [CodeCell](http://jupyterlab.github.io/jupyterlab/classes/_cells_src_widget_.c
 also contains an [OutputArea](http://jupyterlab.github.io/jupyterlab/classes/_outputarea_src_widget_.outputarea.html).
 An OutputArea is responsible for rendering the outputs in the
 [OutputAreaModel](http://jupyterlab.github.io/jupyterlab/classes/_outputarea_src_model_.outputareamodel.html)
-list. An OutputArea uses a
-notebook-specific [RenderMimeRegistry](http://jupyterlab.github.io/jupyterlab/classes/_rendermime_src_registry_.rendermimeregistry.html)
+list. An OutputArea uses a notebook-specific
+[RenderMimeRegistry](http://jupyterlab.github.io/jupyterlab/classes/_rendermime_src_registry_.rendermimeregistry.html)
 object to render `display_data` output messages.
 
 #### Rendering output messages
