@@ -1540,6 +1540,12 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
       const { context, notebook } = current;
       return NotebookActions.runAll(notebook, context.session)
       .then(() => void 0);
+    },
+    restartAndRunAll: current => {
+      const { context, notebook } = current;
+      return context.session.restart()
+      .then(() => { NotebookActions.runAll(notebook, context.session); })
+      .then(() => void 0);
     }
   } as IRunMenu.ICodeRunner<NotebookPanel>);
 

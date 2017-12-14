@@ -82,5 +82,10 @@ namespace IRunMenu {
      * A function to run the entirety of the code hosted by the widget.
      */
     runAll?: (widget: T) => Promise<void>;
+
+    /**
+     * A function to restart and run all the code hosted by the widget.
+     */
+    restartAndRunAll?: (widget: T) => Promise<void>;
   }
 }

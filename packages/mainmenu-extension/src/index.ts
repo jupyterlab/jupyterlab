@@ -76,6 +76,9 @@ namespace CommandIDs {
   const runAll = 'runmenu:run-all';
 
   export
+  const restartAndRunAll = 'runmenu:restart-and-run-all';
+
+  export
   const runAbove = 'runmenu:run-above';
 
   export
@@ -358,8 +361,24 @@ function createRunMenu(app: JupyterLab, menu: RunMenu): void {
     execute: Private.delegateExecute(app, menu.codeRunners, 'runAll')
   });
 
+  commands.addCommand(CommandIDs.restartAndRunAll, {
+    label: () => {
+      const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
+      const enabled =
+        Private.delegateEnabled(app, menu.codeRunners, 'restartAndRunAll')();
+      return `Restart and Run All${enabled ? ` ${noun}` : ''}`;
+    },
+    isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'restartAndRunAll'),
+    execute: Private.delegateExecute(app, menu.codeRunners, 'restartAndRunAll')
+  });
+
+  const runAllGroup = [
+    CommandIDs.runAll,
+    CommandIDs.restartAndRunAll
+  ].map( command => { return { command }; });
+
   menu.addGroup([{ command: CommandIDs.run }], 0);
-  menu.addGroup([{ command: CommandIDs.runAll }], 999);
+  menu.addGroup(runAllGroup, 999);
 }
 
 function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
