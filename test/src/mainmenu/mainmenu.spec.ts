@@ -17,7 +17,7 @@ import {
 
 import {
   MainMenu, EditMenu, FileMenu, HelpMenu,
-  KernelMenu, RunMenu, ViewMenu, TabsMenu
+  KernelMenu, RunMenu, SettingsMenu, TabsMenu, ViewMenu
 } from '@jupyterlab/mainmenu';
 
 
@@ -146,15 +146,28 @@ describe('@jupyterlab/mainmenu', () => {
 
     });
 
+    describe('#settingsMenu', () => {
+
+      it('should be a SettingsMenu', () => {
+        expect(mainMenu.settingsMenu).to.be.a(SettingsMenu);
+      });
+
+      it('should be the seventh menu', () => {
+        expect(ArrayExt.firstIndexOf(mainMenu.menus,
+                                     mainMenu.settingsMenu.menu)).to.be(6);
+      });
+
+    });
+
     describe('#helpMenu', () => {
 
       it('should be a HelpMenu', () => {
         expect(mainMenu.helpMenu).to.be.a(HelpMenu);
       });
 
-      it('should be the seventh menu', () => {
+      it('should be the eighth menu', () => {
         expect(ArrayExt.firstIndexOf(mainMenu.menus,
-                                     mainMenu.helpMenu.menu)).to.be(6);
+                                     mainMenu.helpMenu.menu)).to.be(7);
       });
 
     });
