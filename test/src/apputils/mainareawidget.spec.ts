@@ -61,7 +61,7 @@ describe('@jupyterlab/apputils', () => {
         const widget = new MainAreaWidget();
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.CloseRequest);
-        expect(widget.isDisposed).to.be.true;
+        expect(widget.isDisposed).to.equal(true);
       });
 
     });

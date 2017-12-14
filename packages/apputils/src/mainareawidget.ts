@@ -40,7 +40,7 @@ class MainAreaWidget extends Widget {
   protected onCloseRequest(msg: Message): void {
     this.dispose();
   }
-};
+}
 
 /**
  * The namespace for the `MainAreaWidget` class statics.
