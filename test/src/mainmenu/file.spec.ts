@@ -88,6 +88,24 @@ describe('@jupyterlab/mainmenu', () => {
 
     });
 
+    describe('#consoleCreators', () => {
+
+      it('should allow setting of an IConsoleCreator', () => {
+        const creator: IFileMenu.IConsoleCreator<Wodget> = {
+          tracker,
+          name: 'Wodget',
+          createConsole: widget => {
+            widget.state = 'create';
+            return Promise.resolve(void 0);
+          },
+        };
+        menu.consoleCreators.add(creator);
+        delegateExecute(wodget, menu.consoleCreators, 'createConsole');
+        expect(wodget.state).to.be('create');
+      });
+
+    });
+
   });
 
 });

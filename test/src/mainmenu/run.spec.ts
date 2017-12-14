@@ -74,6 +74,10 @@ describe('@jupyterlab/mainmenu', () => {
           runAll: widget => {
             widget.state = 'runAll';
             return Promise.resolve(void 0);
+          },
+          restartAndRunAll: widget => {
+            widget.state = 'restartAndRunAll';
+            return Promise.resolve(void 0);
           }
         };
         menu.codeRunners.add(runner);
@@ -81,6 +85,8 @@ describe('@jupyterlab/mainmenu', () => {
         expect(wodget.state).to.be('run');
         delegateExecute(wodget, menu.codeRunners, 'runAll');
         expect(wodget.state).to.be('runAll');
+        delegateExecute(wodget, menu.codeRunners, 'restartAndRunAll');
+        expect(wodget.state).to.be('restartAndRunAll');
       });
 
     });
