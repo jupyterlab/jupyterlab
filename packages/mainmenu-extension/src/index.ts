@@ -293,14 +293,15 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
     execute: Private.delegateExecute(app, menu.kernelUsers, 'shutdownKernel')
   });
 
-  const kernelUserGroup = [
-    CommandIDs.interruptKernel,
+  const restartGroup = [
     CommandIDs.restartKernel,
-    CommandIDs.shutdownKernel,
+    CommandIDs.restartAndRunAll,
   ].map(command => { return { command }; });
-  menu.addGroup(kernelUserGroup, 0);
 
-  menu.addGroup([{ command: CommandIDs.changeKernel }], 1);
+  menu.addGroup([{ command: CommandIDs.interruptKernel }], 0);
+  menu.addGroup(restartGroup, 1);
+  menu.addGroup([{ command: CommandIDs.shutdownKernel }], 2);
+  menu.addGroup([{ command: CommandIDs.changeKernel }], 3);
 }
 
 /**
