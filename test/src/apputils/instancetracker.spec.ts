@@ -43,7 +43,7 @@ function createWidget(): Widget {
 }
 
 
-describe('common/instancetracker', () => {
+describe('@jupyterlab/apputils', () => {
 
   describe('InstanceTracker', () => {
 

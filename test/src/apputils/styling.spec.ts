@@ -18,7 +18,7 @@ import {
 } from '@jupyterlab/apputils';
 
 
-describe('@jupyterlab/domutils', () => {
+describe('@jupyterlab/apputils', () => {
 
   describe('Styling', () => {
 

@@ -42,7 +42,7 @@ class TestWidgetNoModel extends VDomRenderer<null> {
 }
 
 
-describe('@jupyterlab/domutils', () => {
+describe('@jupyterlab/apputils', () => {
 
   describe('VDomModel', () => {
 

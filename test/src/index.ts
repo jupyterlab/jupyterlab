@@ -9,6 +9,7 @@ import './apputils/commandlinker.spec';
 import './apputils/dialog.spec';
 import './apputils/iframe.spec';
 import './apputils/instancetracker.spec';
+import './apputils/mainareawidget.spec';
 import './apputils/sanitizer.spec';
 import './apputils/statedb.spec';
 import './apputils/styling.spec';
