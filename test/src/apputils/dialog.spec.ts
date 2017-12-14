@@ -67,7 +67,7 @@ class ValueWidget extends Widget {
 }
 
 
-describe('@jupyterlab/domutils', () => {
+describe('@jupyterlab/apputils', () => {
 
   describe('showDialog()', () => {
 
