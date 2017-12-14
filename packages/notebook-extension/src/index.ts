@@ -624,7 +624,22 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.runAllAbove(notebook, context.session);
       }
     },
-    isEnabled
+    isEnabled: args => {
+      if (!isEnabled()) { return false; }
+      const current = getCurrent(args);
+      const { notebook } = current;
+      const index = notebook.activeCellIndex;
+      // Can't run above if we are at the top of a notebook.
+      if (index === 0) { return false; }
+      // If there are selections that are not the active cell,
+      // this command is confusing, so disable it.
+      for (let i = 0; i < notebook.widgets.length; ++i) {
+        if (notebook.isSelected(notebook.widgets[i]) && i !== index) {
+          return false;
+        }
+      }
+      return true;
+    }
   });
   commands.addCommand(CommandIDs.runAllBelow, {
     label: 'Run Selected Cell and All Below',
@@ -637,7 +652,22 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.runAllBelow(notebook, context.session);
       }
     },
-    isEnabled
+    isEnabled: args => {
+      if (!isEnabled()) { return false; }
+      const current = getCurrent(args);
+      const { notebook } = current;
+      const index = notebook.activeCellIndex;
+      // Can't run above if we are at the top of a notebook.
+      if (index === notebook.widgets.length - 1) { return false; }
+      // If there are selections that are not the active cell,
+      // this command is confusing, so disable it.
+      for (let i = 0; i < notebook.widgets.length; ++i) {
+        if (notebook.isSelected(notebook.widgets[i]) && i !== index) {
+          return false;
+        }
+      }
+      return true;
+    }
   });
   commands.addCommand(CommandIDs.restart, {
     label: 'Restart Kernel',
