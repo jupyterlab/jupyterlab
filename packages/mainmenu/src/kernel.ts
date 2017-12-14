@@ -22,11 +22,6 @@ interface IKernelMenu extends IJupyterLabMenu {
    * A set storing IKernelUsers for the Kernel menu.
    */
   readonly kernelUsers: Set<IKernelMenu.IKernelUser<Widget>>;
-
-  /**
-   * A set storing IConsoleCreators for the Kernel menu.
-   */
-  readonly consoleCreators: Set<IKernelMenu.IConsoleCreator<Widget>>;
 }
 
 /**
@@ -43,8 +38,6 @@ class KernelMenu extends JupyterLabMenu implements IKernelMenu {
 
     this.kernelUsers =
       new Set<IKernelMenu.IKernelUser<Widget>>();
-    this.consoleCreators =
-      new Set<IKernelMenu.IConsoleCreator<Widget>>();
   }
 
   /**
@@ -53,16 +46,10 @@ class KernelMenu extends JupyterLabMenu implements IKernelMenu {
   readonly kernelUsers: Set<IKernelMenu.IKernelUser<Widget>>;
 
   /**
-   * A set storing IConsoleCreators for the Kernel menu.
-   */
-  readonly consoleCreators: Set<IKernelMenu.IConsoleCreator<Widget>>;
-
-  /**
    * Dispose of the resources held by the kernel menu.
    */
   dispose(): void {
     this.kernelUsers.clear();
-    this.consoleCreators.clear();
     super.dispose();
   }
 }
@@ -97,21 +84,5 @@ namespace IKernelMenu {
      * A function to shut down the kernel.
      */
     shutdownKernel?: (widget: T) => Promise<void>;
-  }
-
-  /**
-   * Interface for a command to create a console for an activity.
-   */
-  export
-  interface IConsoleCreator<T extends Widget> extends IMenuExtender<T> {
-    /**
-     * A label to use for the activity for which a console is being created.
-     */
-    name: string;
-
-    /**
-     * The function to create the console.
-     */
-    createConsole: (widget: T) => Promise<void>;
   }
 }

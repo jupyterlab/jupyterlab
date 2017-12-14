@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
-  IEditMenu, IMainMenu, IKernelMenu, IViewMenu
+  IEditMenu, IFileMenu, IMainMenu, IViewMenu
 } from '@jupyterlab/mainmenu';
 
 
@@ -426,7 +426,7 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
     } as IViewMenu.IEditorViewer<FileEditor>);
 
     // Add a console creator the the Kernel menu.
-    menu.kernelMenu.consoleCreators.add({
+    menu.fileMenu.consoleCreators.add({
       tracker,
       name: 'Editor',
       createConsole: current => {
@@ -436,7 +436,7 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
         };
         return commands.execute('console:create', options);
       }
-    } as IKernelMenu.IConsoleCreator<FileEditor>);
+    } as IFileMenu.IConsoleCreator<FileEditor>);
 
     // Add a code runner to the Run menu.
     menu.runMenu.codeRunners.add({

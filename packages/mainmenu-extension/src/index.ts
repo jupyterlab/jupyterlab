@@ -46,6 +46,9 @@ namespace CommandIDs {
   const closeAndCleanup = 'filemenu:close-and-cleanup';
 
   export
+  const createConsole = 'filemenu:create-console';
+
+  export
   const interruptKernel = 'kernelmenu:interrupt';
 
   export
@@ -56,9 +59,6 @@ namespace CommandIDs {
 
   export
   const shutdownKernel = 'kernelmenu:shutdown';
-
-  export
-  const createConsole = 'kernelmenu:create-console';
 
   export
   const wordWrap = 'viewmenu:word-wrap';
@@ -213,11 +213,26 @@ function createFileMenu(app: JupyterLab, menu: FileMenu): void {
       Private.delegateExecute(app, menu.closeAndCleaners, 'closeAndCleanup')
   });
 
+  // Add a delegator command for creating a console for an activity.
+  commands.addCommand(CommandIDs.createConsole, {
+    label: () => {
+      const name = Private.delegateLabel(app, menu.consoleCreators, 'name');
+      const label = `New Console for ${name ? name : 'Activity' }`;
+      return label;
+    },
+    isEnabled: Private.delegateEnabled(app, menu.consoleCreators, 'createConsole'),
+    execute: Private.delegateExecute(app, menu.consoleCreators, 'createConsole')
+  });
+
   // Add the new group
   const newGroup = [
     { type: 'submenu' as Menu.ItemType, submenu: menu.newMenu.menu },
     { command: 'filebrowser:create-main-launcher' },
-    { command: 'docmanager:clone' }
+  ];
+
+  const newViewGroup = [
+    { command: 'docmanager:clone' },
+    { command: CommandIDs.createConsole }
   ];
 
   // Add the close group
@@ -241,9 +256,10 @@ function createFileMenu(app: JupyterLab, menu: FileMenu): void {
   ].map(command => { return { command }; });
 
   menu.addGroup(newGroup, 0);
-  menu.addGroup(closeGroup, 1);
-  menu.addGroup(saveGroup, 2);
-  menu.addGroup(reGroup, 3);
+  menu.addGroup(newViewGroup, 1);
+  menu.addGroup(closeGroup, 2);
+  menu.addGroup(saveGroup, 3);
+  menu.addGroup(reGroup, 4);
   menu.addGroup([{ command: 'settingeditor:open' }], 1000);
 }
 
@@ -277,16 +293,6 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
     execute: Private.delegateExecute(app, menu.kernelUsers, 'shutdownKernel')
   });
 
-  commands.addCommand(CommandIDs.createConsole, {
-    label: () => {
-      const name = Private.delegateLabel(app, menu.consoleCreators, 'name');
-      const label = `Create Console for ${name ? name : 'Activity' }`;
-      return label;
-    },
-    isEnabled: Private.delegateEnabled(app, menu.consoleCreators, 'createConsole'),
-    execute: Private.delegateExecute(app, menu.consoleCreators, 'createConsole')
-  });
-
   const kernelUserGroup = [
     CommandIDs.interruptKernel,
     CommandIDs.restartKernel,
@@ -295,7 +301,6 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
   menu.addGroup(kernelUserGroup, 0);
 
   menu.addGroup([{ command: CommandIDs.changeKernel }], 1);
-  menu.addGroup([{ command: CommandIDs.createConsole }], 2);
 }
 
 /**
@@ -366,7 +371,7 @@ function createRunMenu(app: JupyterLab, menu: RunMenu): void {
       const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
       const enabled =
         Private.delegateEnabled(app, menu.codeRunners, 'restartAndRunAll')();
-      return `Restart and Run All${enabled ? ` ${noun}` : ''}`;
+      return `Restart Kernel and Run All${enabled ? ` ${noun}` : ''}`;
     },
     isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'restartAndRunAll'),
     execute: Private.delegateExecute(app, menu.codeRunners, 'restartAndRunAll')

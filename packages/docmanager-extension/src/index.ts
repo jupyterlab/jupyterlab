@@ -310,7 +310,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   commands.addCommand(CommandIDs.clone, {
-    label: () => `New View For ${fileType()}`,
+    label: () => `New View for ${fileType()}`,
     isEnabled,
     execute: () => {
       const widget = app.shell.currentWidget;

@@ -1483,7 +1483,7 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   } as IKernelMenu.IKernelUser<NotebookPanel>);
 
   // Add a console creator the the Kernel menu
-  mainMenu.kernelMenu.consoleCreators.add({
+  mainMenu.fileMenu.consoleCreators.add({
     tracker,
     name: 'Notebook',
     createConsole: current => {
@@ -1493,7 +1493,7 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
       };
       return commands.execute('console:create', options);
     }
-  } as IKernelMenu.IConsoleCreator<NotebookPanel>);
+  } as IFileMenu.IConsoleCreator<NotebookPanel>);
 
   // Add some commands to the application view menu.
   const collapseGroup = [

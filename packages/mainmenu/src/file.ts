@@ -23,6 +23,11 @@ interface IFileMenu extends IJupyterLabMenu {
    * The close and cleanup extension point.
    */
   readonly closeAndCleaners: Set<IFileMenu.ICloseAndCleaner<Widget>>;
+
+  /**
+   * A set storing IConsoleCreators for the File menu.
+   */
+  readonly consoleCreators: Set<IFileMenu.IConsoleCreator<Widget>>;
 }
 
 /**
@@ -40,6 +45,8 @@ class FileMenu extends JupyterLabMenu implements IFileMenu {
     this.newMenu.menu.title.label = 'New';
     this.closeAndCleaners =
       new Set<IFileMenu.ICloseAndCleaner<Widget>>();
+    this.consoleCreators =
+      new Set<IFileMenu.IConsoleCreator<Widget>>();
   }
 
   /**
@@ -53,10 +60,16 @@ class FileMenu extends JupyterLabMenu implements IFileMenu {
   readonly closeAndCleaners: Set<IFileMenu.ICloseAndCleaner<Widget>>;
 
   /**
+   * A set storing IConsoleCreators for the Kernel menu.
+   */
+  readonly consoleCreators: Set<IFileMenu.IConsoleCreator<Widget>>;
+
+  /**
    * Dispose of the resources held by the file menu.
    */
   dispose(): void {
     this.newMenu.dispose();
+    this.consoleCreators.clear();
     super.dispose();
   }
 }
@@ -87,5 +100,21 @@ namespace IFileMenu {
      * A function to perform the close and cleanup action.
      */
     closeAndCleanup: (widget: T) => Promise<void>;
+  }
+
+  /**
+   * Interface for a command to create a console for an activity.
+   */
+  export
+  interface IConsoleCreator<T extends Widget> extends IMenuExtender<T> {
+    /**
+     * A label to use for the activity for which a console is being created.
+     */
+    name: string;
+
+    /**
+     * The function to create the console.
+     */
+    createConsole: (widget: T) => Promise<void>;
   }
 }
