@@ -17,8 +17,16 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
+  IMainMenu
+} from '@jupyterlab/mainmenu';
+
+import {
   ServiceManager
 } from '@jupyterlab/services';
+
+import {
+  each
+} from '@phosphor/algorithm';
 
 import {
   JSONObject
@@ -27,6 +35,10 @@ import {
 import {
   DisposableDelegate, IDisposable
 } from '@phosphor/disposable';
+
+import {
+  Menu
+} from '@phosphor/widgets';
 
 import {
   activatePalette
@@ -41,6 +53,9 @@ import '../style/index.css';
 namespace CommandIDs {
   export
   const clearStateDB = 'apputils:clear-statedb';
+
+  export
+  const changeTheme = 'apputils:change-theme';
 }
 
 
@@ -112,9 +127,12 @@ const settings: JupyterLabPlugin<ISettingRegistry> = {
 const themes: JupyterLabPlugin<IThemeManager> = {
   id: '@jupyterlab/apputils-extension:themes',
   requires: [ISettingRegistry, ISplashScreen],
-  activate: (app: JupyterLab, settingRegistry: ISettingRegistry, splash: ISplashScreen): IThemeManager => {
+  optional: [ICommandPalette, IMainMenu],
+  activate: (app: JupyterLab, settingRegistry: ISettingRegistry, splash: ISplashScreen, palette: ICommandPalette | null, mainMenu: IMainMenu | null): IThemeManager => {
     const host = app.shell;
     const when = app.started;
+    const commands = app.commands;
+
     const manager = new ThemeManager({
       key: themes.id,
       host, settingRegistry,
@@ -133,6 +151,53 @@ const themes: JupyterLabPlugin<IThemeManager> = {
     };
 
     manager.ready.then(success).catch(failure);
+
+    commands.addCommand(CommandIDs.changeTheme, {
+      label: args => {
+        const theme = args['theme'] as string;
+        return  args['isPalette'] ? `Use ${theme} Theme` : theme;
+      },
+      isToggled: args => args['theme'] === manager.theme,
+      execute: args => {
+        if (args['theme'] === manager.theme) {
+          return;
+        }
+        manager.setTheme(args['theme'] as string);
+      }
+    });
+
+    // If we have a main menu, add the theme manager
+    // to the settings menu.
+    if (mainMenu) {
+      const themeMenu = new Menu({ commands });
+      themeMenu.title.label = 'JupyterLab Theme';
+      manager.ready.then(() => {
+        each(manager.themes, theme => {
+          themeMenu.addItem({
+            command: CommandIDs.changeTheme,
+            args: { isPalette: false, theme: theme }
+          });
+        });
+      });
+      mainMenu.settingsMenu.addGroup([{
+        type: 'submenu' as Menu.ItemType, submenu: themeMenu
+      }], 0);
+    }
+
+    // If we have a command palette, add theme
+    // switching options to it.
+    if (palette) {
+      const category = 'Settings';
+      manager.ready.then(() => {
+        each(manager.themes, theme => {
+          palette.addItem({
+            command: CommandIDs.changeTheme,
+            args: { isPalette: true, theme: theme },
+            category
+          });
+        });
+      });
+    }
 
     return manager;
   },
