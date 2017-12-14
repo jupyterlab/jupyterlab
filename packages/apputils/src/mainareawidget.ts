@@ -20,7 +20,7 @@ class MainAreaWidget extends Widget {
    *
    * @param options - The options for initializing the widget.
    */
-  constructor(options: MainAreaWidget.IOptions) {
+  constructor(options: MainAreaWidget.IOptions = {}) {
     super(options);
     this.node.tabIndex = -1;
     this.addClass('jp-MainAreaWidget');
