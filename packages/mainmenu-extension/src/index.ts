@@ -55,6 +55,9 @@ namespace CommandIDs {
   const restartKernel = 'kernelmenu:restart';
 
   export
+  const restartKernelAndClear = 'kernelmenu:restart-and-clear';
+
+  export
   const changeKernel = 'kernelmenu:change';
 
   export
@@ -205,7 +208,7 @@ function createFileMenu(app: JupyterLab, menu: FileMenu): void {
         Private.delegateLabel(app, menu.closeAndCleaners, 'action');
       const name =
         Private.delegateLabel(app, menu.closeAndCleaners, 'name');
-      return `Close and ${action ? ` ${action} ${name}` : 'Shutdown…'}`;
+      return `Close and ${action ? ` ${action} ${name}` : 'Shutdown'}`;
     },
     isEnabled:
       Private.delegateEnabled(app, menu.closeAndCleaners, 'closeAndCleanup'),
@@ -276,13 +279,26 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
   });
 
   commands.addCommand(CommandIDs.restartKernel, {
-    label: 'Restart Kernel',
+    label: 'Restart Kernel…',
     isEnabled: Private.delegateEnabled(app, menu.kernelUsers, 'restartKernel'),
     execute: Private.delegateExecute(app, menu.kernelUsers, 'restartKernel')
   });
 
+  commands.addCommand(CommandIDs.restartKernelAndClear, {
+    label: () => {
+      const noun = Private.delegateLabel(app, menu.kernelUsers, 'noun');
+      const enabled =
+        Private.delegateEnabled(app, menu.kernelUsers, 'restartKernelAndClear')();
+      return `Restart Kernel and Clear${enabled ? ` ${noun}` : ''}…`;
+    },
+    isEnabled:
+      Private.delegateEnabled(app, menu.kernelUsers, 'restartKernelAndClear'),
+    execute:
+      Private.delegateExecute(app, menu.kernelUsers, 'restartKernelAndClear')
+  });
+
   commands.addCommand(CommandIDs.changeKernel, {
-    label: 'Change Kernel',
+    label: 'Change Kernel…',
     isEnabled: Private.delegateEnabled(app, menu.kernelUsers, 'changeKernel'),
     execute: Private.delegateExecute(app, menu.kernelUsers, 'changeKernel')
   });
@@ -295,6 +311,7 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
 
   const restartGroup = [
     CommandIDs.restartKernel,
+    CommandIDs.restartKernelAndClear,
     CommandIDs.restartAndRunAll,
   ].map(command => { return { command }; });
 
@@ -372,7 +389,7 @@ function createRunMenu(app: JupyterLab, menu: RunMenu): void {
       const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
       const enabled =
         Private.delegateEnabled(app, menu.codeRunners, 'restartAndRunAll')();
-      return `Restart Kernel and Run All${enabled ? ` ${noun}` : ''}`;
+      return `Restart Kernel and Run All${enabled ? ` ${noun}` : ''}…`;
     },
     isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'restartAndRunAll'),
     execute: Private.delegateExecute(app, menu.codeRunners, 'restartAndRunAll')

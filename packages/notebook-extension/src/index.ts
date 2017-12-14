@@ -1477,7 +1477,12 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
       }
       return Promise.resolve(void 0);
     },
+    noun: 'All Outputs',
     restartKernel: current => current.session.restart(),
+    restartKernelAndClear: current => {
+      NotebookActions.clearAllOutputs(current.notebook);
+      return current.session.restart();
+    },
     changeKernel: current => current.session.selectKernel(),
     shutdownKernel: current => current.session.shutdown(),
   } as IKernelMenu.IKernelUser<NotebookPanel>);

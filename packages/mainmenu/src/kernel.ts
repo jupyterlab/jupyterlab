@@ -76,6 +76,11 @@ namespace IKernelMenu {
     restartKernel?: (widget: T) => Promise<Kernel.IKernelConnection>;
 
     /**
+     * A function to restart the kernel.
+     */
+    restartKernelAndClear?: (widget: T) => Promise<Kernel.IKernelConnection>;
+
+    /**
      * A function to change the kernel.
      */
     changeKernel?: (widget: T) => Promise<void>;
@@ -84,5 +89,10 @@ namespace IKernelMenu {
      * A function to shut down the kernel.
      */
     shutdownKernel?: (widget: T) => Promise<void>;
+
+    /**
+     * A noun to use for the restart and clear all command.
+     */
+    noun?: string;
   }
 }
