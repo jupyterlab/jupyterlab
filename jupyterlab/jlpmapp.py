@@ -53,7 +53,7 @@ def which(command, env=None):
     env = env or os.environ
     path = env.get('PATH') or os.defpath
     command_with_path = _which(command, path=path)
-    if command_with_path is None:
+    if not command_with_path:
         if command in ['node', 'npm']:
             msg = 'Please install nodejs and npm before continuing installation. nodejs may be installed using conda or directly from the website.'
             raise ValueError(msg)
