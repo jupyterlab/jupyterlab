@@ -110,6 +110,8 @@ if [[ $GROUP == integrity ]]; then
     source activate test_install
     pip install ".[test]"  # this populates <sys_prefix>/share/jupyter/lab
     python -m jupyterlab.selenium_check
+    # Make sure we can run the build
+    jupyter lab build
 
     # Make sure we can start and kill the lab server
     jupyter lab --no-browser &
