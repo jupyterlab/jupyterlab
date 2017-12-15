@@ -626,8 +626,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     },
     isEnabled: args => {
       if (!isEnabled()) { return false; }
-      const current = getCurrent(args);
-      const { notebook } = current;
+      const { notebook } = tracker.currentWidget;
       const index = notebook.activeCellIndex;
       // Can't run above if we are at the top of a notebook.
       if (index === 0) { return false; }
@@ -654,8 +653,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     },
     isEnabled: args => {
       if (!isEnabled()) { return false; }
-      const current = getCurrent(args);
-      const { notebook } = current;
+      const { notebook } = tracker.currentWidget;
       const index = notebook.activeCellIndex;
       // Can't run above if we are at the top of a notebook.
       if (index === notebook.widgets.length - 1) { return false; }
