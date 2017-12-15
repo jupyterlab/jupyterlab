@@ -45,7 +45,6 @@
   },
   "devDependencies": {
     "@types/marked": "~0.0.28",
-    "@types/mathjax": "~0.0.31",
     "rimraf": "~2.6.2",
     "typescript": "~2.6.2"
   }
