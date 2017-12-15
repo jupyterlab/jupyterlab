@@ -101,12 +101,11 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
 JupyterLabPlugin.prototype._first = true;
 
 
+
 module.exports = {
   entry: {
     main: ['whatwg-fetch', path.resolve(buildDir, 'index.out.js')],
-    vendor: [
-      'react', 'react-dom', 'codemirror', 'xterm'
-    ]
+    vendor: jlab.vendor
   },
   output: {
     path: path.resolve(buildDir),
