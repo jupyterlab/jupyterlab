@@ -170,5 +170,17 @@ if [[ $GROUP == cli ]]; then
     jlpm run remove:dependency mocha
     jlpm run get:dependency @jupyterlab/buildutils
     jlpm run get:dependency typescript
-    jlpm run get:dependency react-native 
+    jlpm run get:dependency react-native
+
+    # Test theme creation - make sure we can add it as a package, build,
+    # and run selenium
+    pip install pexpect
+    python scripts/create_theme.py
+    mv foo packages
+    jlpm run integrity || exit 0
+    jlpm run build:packages
+    jlpm run build:dev
+    python -m jupyterlab.selenium_check --dev-mode
+    rm -rf packages/foo
+    jlpm run integrity || exit 0
 fi

@@ -22,6 +22,7 @@
     "clean:utils": "cd buildutils && jlpm run clean",
     "coverage": "lerna run coverage --stream",
     "create:package": "node buildutils/lib/create-package.js",
+    "create:theme": "node buildutils/lib/create-theme.js",
     "docs": "lerna run docs",
     "get:dependency": "node buildutils/lib/get-dependency.js",
     "postinstall": "node scripts/ensure-buildutils.js",
