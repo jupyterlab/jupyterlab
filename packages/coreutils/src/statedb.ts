@@ -88,17 +88,9 @@ class StateDB implements IStateDB {
    */
   constructor(options: StateDB.IOptions) {
     this.namespace = options.namespace;
-    let key = `${this.namespace}:stateDb:sentinel`;
-    let sentinel = window.localStorage.getItem(key);
-    // Clear state if the sentinel was not properly cleared on last page load.
-    if (sentinel) {
-      this._clear();
+    if (options.when) {
+      this._handleSentinel(options.when);
     }
-    // Set the sentinel value and clear it when the statedb is initialized.
-    window.localStorage.setItem(key, 'sentinel');
-    options.when.then(() => {
-      window.localStorage.removeItem(key);
-    });
   }
 
   /**
@@ -268,6 +260,23 @@ class StateDB implements IStateDB {
 
     return Promise.resolve(undefined);
   }
+
+  /**
+   * Handle the startup sentinel.
+   */
+  private _handleSentinel(when: Promise<void>): void {
+    let key = `${this.namespace}:stateDb:sentinel`;
+    let sentinel = window.localStorage.getItem(key);
+    // Clear state if the sentinel was not properly cleared on last page load.
+    if (sentinel) {
+      this._clear();
+    }
+    // Set the sentinel value and clear it when the statedb is initialized.
+    window.localStorage.setItem(key, 'sentinel');
+    when.then(() => {
+      window.localStorage.removeItem(key);
+    });
+  }
 }
 
 /**
@@ -286,10 +295,10 @@ namespace StateDB {
     namespace: string;
 
     /**
-     * The Promise for when the state database should be considered
+     * An optional Promise for when the state database should be considered
      * initialized.
      */
-    when: Promise<void>;
+    when?: Promise<void>;
   }
 }
 

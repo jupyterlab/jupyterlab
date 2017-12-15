@@ -10,7 +10,6 @@ import './apputils/dialog.spec';
 import './apputils/iframe.spec';
 import './apputils/instancetracker.spec';
 import './apputils/sanitizer.spec';
-import './apputils/statedb.spec';
 import './apputils/styling.spec';
 import './apputils/toolbar.spec';
 import './apputils/vdom.spec';
@@ -36,14 +35,15 @@ import './console/panel.spec';
 import './console/widget.spec';
 
 import './coreutils/activitymonitor.spec';
+import './coreutils/markdowncodeblocks.spec';
 import './coreutils/nbformat.spec';
 import './coreutils/pageconfig.spec';
 import './coreutils/path.spec';
 import './coreutils/settingregistry.spec';
+import './coreutils/statedb.spec';
 import './coreutils/time.spec';
 import './coreutils/url.spec';
 import './coreutils/uuid.spec';
-import './coreutils/markdowncodeblocks.spec';
 
 import './csvviewer/toolbar.spec';
 import './csvviewer/widget.spec';
