@@ -40,7 +40,7 @@ class Builder(object):
             self.log.warn('Build recommended')
             [self.log.warn(m) for m in messages]
         else:
-            self.log.info('Build not recommended')
+            self.log.info('Build is up to date')
 
         raise gen.Return(dict(status=status, message='\n'.join(messages)))
 

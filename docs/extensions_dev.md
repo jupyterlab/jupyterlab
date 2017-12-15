@@ -151,9 +151,9 @@ The extension is treated the same from the command line perspective (`jupyter la
 exports an interface given in the [rendermime-interfaces](http://jupyterlab.github.io/jupyterlab/interfaces/_rendermime_interfaces_src_index_.irendermime.iextension.html)
 package.
 
-The JupyterLab repo has an example mime renderer extension for [vega2](https://github.com/jupyterlab/jupyterlab/tree/master/packages/vega2-extension).  It
-provides a mime renderer for [vega](https://vega.github.io/vega/) data and
-registers itself as a document renderer for vega file types.
+The JupyterLab repo has an example mime renderer extension for [pdf](https://github.com/jupyterlab/jupyterlab/tree/master/packages/pdf-extension) files.  It
+provides a mime renderer for pdf data and
+registers itself as a document renderer for pdf file types.
 
 The `rendermime-interfaces` package is intended to be the only JupyterLab
 package needed to create a mime renderer extension (using the interfaces
