@@ -106,6 +106,10 @@ interface ILauncherItem {
    * The callback is invoked with a current working directory and the
    * name of the selected launcher item.  When the function returns
    * the launcher will close.
+   *
+   * #### Notes
+   * The callback must return the widget that was created so the launcher
+   * can replace itself with the created widget.
    */
   callback: (cwd: string, name: string) => Widget | Promise<Widget>;
 
@@ -390,6 +394,9 @@ function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcher
     let callback = item.callback as any;
     let value = callback(launcher.cwd, item.name);
     Promise.resolve(value).then(widget => {
+      if (!widget) {
+        throw new Error('Launcher callbacks must resolve with a widget');
+      }
       launcherCallback(widget);
       launcher.dispose();
     }).catch(err => {
