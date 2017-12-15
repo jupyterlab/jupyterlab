@@ -18,6 +18,7 @@ import {
 /**
  * Import vega-embed in this manner due to how it is exported.
  */
+// Import only the typings for vega-embed - do not use for values.
 import embed = require('vega-embed');
 
 
@@ -99,15 +100,33 @@ class RenderedVega extends Widget implements IRenderMime.IRenderer {
       spec: updatedData
     };
 
-    return new Promise<void>((resolve, reject) => {
-      embed(this.node, embedSpec, (error: any, result: any): any => {
-        resolve(undefined);
-        // This is copied out for now as there is a bug in JupyterLab
-        // that triggers and infinite rendering loop when this is done.
-        // let imageData = result.view.toImageURL();
-        // imageData = imageData.split(',')[1];
-        // this._injector('image/png', imageData);
+    return this._ensureMod().then(embedFunc => {
+      return new Promise<void>((resolve, reject) => {
+        embedFunc(this.node, embedSpec, (error: any, result: any): any => {
+          resolve(undefined);
+          // This is copied out for now as there is a bug in JupyterLab
+          // that triggers and infinite rendering loop when this is done.
+          // let imageData = result.view.toImageURL();
+          // imageData = imageData.split(',')[1];
+          // this._injector('image/png', imageData);
+        });
       });
+    });
+  }
+
+  /**
+   * Initialize the vega-embed module.
+   */
+  private _ensureMod(): Promise<typeof embed> {
+    return new Promise((resolve, reject) => {
+      (require as any).ensure(['vega-embed'], (require: NodeRequire) => {
+        resolve(require('vega-embed'));
+      },
+      (err: any) => {
+        reject(err);
+      },
+      'vega2'
+      );
     });
   }
 

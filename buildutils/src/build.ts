@@ -6,6 +6,8 @@
 import * as fs from 'fs-extra';
 import * as glob from 'glob';
 import * as path from 'path';
+import * as utils from './utils';
+
 
 /**
  *  A namespace for JupyterLab build utilities.
@@ -100,7 +102,7 @@ namespace Build {
     packageNames.forEach(function(name) {
       const packageDataPath = require.resolve(path.join(name, 'package.json'));
       const packageDir = path.dirname(packageDataPath);
-      const packageData = require(packageDataPath);
+      const packageData = utils.readJSONFile(packageDataPath);
       const extension = normalizeExtension(packageData);
       const { schemaDir, themeDir } = extension;
 
@@ -112,7 +114,8 @@ namespace Build {
         // Remove the existing directory if necessary.
         if (fs.existsSync(destination)) {
           try {
-            const oldPackageData = require(path.join(destination, 'package.json'));
+            const oldPackagePath = path.join(destination, 'package.json');
+            const oldPackageData = utils.readJSONFile(oldPackagePath);
             if (oldPackageData.version === packageData.version) {
               fs.removeSync(destination);
             }
