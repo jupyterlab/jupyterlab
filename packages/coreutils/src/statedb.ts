@@ -112,7 +112,9 @@ class StateDB implements IStateDB {
    * Clear the entire database.
    */
   clear(): Promise<void> {
-    return this._clear();
+    this._clear();
+
+    return Promise.resolve(undefined);
   }
 
   /**
@@ -166,16 +168,17 @@ class StateDB implements IStateDB {
    * This promise will always succeed.
    */
   fetchNamespace(namespace: string): Promise<IStateItem[]> {
+    const { localStorage } = window;
     const prefix = `${this.namespace}:${namespace}:`;
     const regex = new RegExp(`^${this.namespace}\:`);
     let items: IStateItem[] = [];
-    let i = window.localStorage.length;
+    let i = localStorage.length;
 
     while (i) {
-      let key = window.localStorage.key(--i);
+      let key = localStorage.key(--i);
 
       if (key && key.indexOf(prefix) === 0) {
-        let value = window.localStorage.getItem(key);
+        let value = localStorage.getItem(key);
 
         try {
           let envelope = JSON.parse(value) as Private.Envelope;
@@ -186,7 +189,7 @@ class StateDB implements IStateDB {
           });
         } catch (error) {
           console.warn(error);
-          window.localStorage.removeItem(key);
+          localStorage.removeItem(key);
         }
       }
     }
@@ -245,37 +248,40 @@ class StateDB implements IStateDB {
 
   /**
    * Clear the entire database.
+   *
+   * #### Notes
+   * Unlike the public `clear` method, this method is synchronous.
    */
-  private _clear(): Promise<void> {
+  private _clear(): void {
+    const { localStorage } = window;
     const prefix = `${this.namespace}:`;
-    let i = window.localStorage.length;
+    let i = localStorage.length;
 
     while (i) {
-      let key = window.localStorage.key(--i);
+      let key = localStorage.key(--i);
 
       if (key && key.indexOf(prefix) === 0) {
-        window.localStorage.removeItem(key);
+        localStorage.removeItem(key);
       }
     }
-
-    return Promise.resolve(undefined);
   }
 
   /**
    * Handle the startup sentinel.
    */
   private _handleSentinel(when: Promise<void>): void {
-    let key = `${this.namespace}:stateDb:sentinel`;
-    let sentinel = window.localStorage.getItem(key);
+    const { localStorage } = window;
+    let key = `${this.namespace}:statedb:sentinel`;
+    let sentinel = localStorage.getItem(key);
+
     // Clear state if the sentinel was not properly cleared on last page load.
     if (sentinel) {
       this._clear();
     }
+
     // Set the sentinel value and clear it when the statedb is initialized.
-    window.localStorage.setItem(key, 'sentinel');
-    when.then(() => {
-      window.localStorage.removeItem(key);
-    });
+    localStorage.setItem(key, 'sentinel');
+    when.then(() => { localStorage.removeItem(key); });
   }
 }
 
