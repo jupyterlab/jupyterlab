@@ -75,9 +75,10 @@ git clone https://github.com/<your-github-username>/jupyterlab.git
 cd jupyterlab
 pip install -e .
 jlpm install
-jlpm run build  # Build the dev mode assets
-jupyter lab build  # Build the app dir assets
-jupyter serverextension enable --py jupyterlab
+jlpm run build  # Build the dev mode assets (optional)
+jlpm run build:core  # Build the core mode assets (optional)
+jupyter lab build  # Build the app dir assets (optional)
+jupyter serverextension enable --py jupyterlab (optional)
 ```
 
 Notes:
