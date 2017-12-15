@@ -109,7 +109,7 @@ def load_jupyter_server_extension(nbapp):
         config.schemas_dir = pjoin(app_dir, 'schemas')
         config.app_settings_dir = pjoin(app_dir, 'settings')
         config.themes_dir = pjoin(app_dir, 'themes')
-        config.app_version = get_app_version()
+        config.app_version = get_app_version(app_dir)
 
     page_config['devMode'] = dev_mode
     config.user_settings_dir = get_user_settings_dir()

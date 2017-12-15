@@ -110,7 +110,7 @@ module.exports = {
   },
   output: {
     path: path.resolve(buildDir),
-    publicPath: 'lab/static/',
+    publicPath: jlab.publicUrl || 'lab/static/',
     filename: '[name].[chunkhash].js'
   },
   module: {
@@ -165,7 +165,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: path.join('templates', 'template.html'),
-      title: 'JupyterLab'
+      title: jlab.name || 'JupyterLab'
     }),
     new webpack.HashedModuleIdsPlugin(),
     new webpack.optimize.CommonsChunkPlugin({

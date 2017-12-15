@@ -200,13 +200,13 @@ def clean(app_dir=None):
             shutil.rmtree(target)
 
 
-def build(app_dir=None, name=None, version=None, logger=None,
-        command='build:prod', kill_event=None,
+def build(app_dir=None, name=None, version=None, public_url=None,
+        logger=None, command='build:prod', kill_event=None,
         clean_staging=False):
     """Build the JupyterLab application.
     """
     handler = _AppHandler(app_dir, logger, kill_event=kill_event)
-    return handler.build(name=name, version=version,
+    return handler.build(name=name, version=version, public_url=public_url,
                   command=command, clean_staging=clean_staging)
 
 
@@ -267,9 +267,11 @@ def unlink_package(package, app_dir=None, logger=None):
     return handler.unlink_package(package)
 
 
-def get_app_version():
+def get_app_version(app_dir=None):
     """Get the application version."""
-    return _get_core_data()['jupyterlab']['version']
+    app_dir = app_dir or get_app_dir()
+    handler = _AppHandler(app_dir)
+    return handler.info['version']
 
 
 # ----------------------------------------------------------------------
@@ -328,15 +330,16 @@ class _AppHandler(object):
             if other['path'] != info['path'] and other['location'] == 'app':
                 os.remove(other['path'])
 
-    def build(self, name=None, version=None, command='build:prod',
-            clean_staging=False):
+    def build(self, name=None, version=None, public_url=None,
+            command='build:prod', clean_staging=False):
         """Build the application.
         """
         # Set up the build directory.
         app_dir = self.app_dir
 
         self._populate_staging(
-            name=name, version=version, clean=clean_staging
+            name=name, version=version, public_url=public_url,
+            clean=clean_staging
         )
 
         staging = pjoin(app_dir, 'staging')
@@ -669,7 +672,8 @@ class _AppHandler(object):
         info['disabled_core'] = disabled_core
         return info
 
-    def _populate_staging(self, name=None, version=None, clean=False):
+    def _populate_staging(self, name=None, version=None, public_url=None,
+            clean=False):
         """Set up the assets in the staging directory.
         """
         app_dir = self.app_dir
@@ -738,6 +742,9 @@ class _AppHandler(object):
 
         if name:
             data['jupyterlab']['name'] = name
+
+        if public_url:
+            data['jupyterlab']['publicUrl'] = public_url
 
         pkg_path = pjoin(staging, 'package.json')
         with open(pkg_path, 'w') as fid:
