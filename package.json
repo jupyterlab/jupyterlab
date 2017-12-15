@@ -16,7 +16,7 @@
     "clean:dev": "cd dev_mode && jlpm run clean",
     "clean:examples": "node buildutils/lib/clean-packages.js examples",
     "clean:packages": "node buildutils/lib/clean-packages.js packages",
-    "clean:slate": "python clean.py && pip install --global-option='--skip-npm' -v -e . && jlpm",
+    "clean:slate": "python clean.py && pip install -v -e . && jlpm",
     "clean:src": "jlpm run clean",
     "clean:test": "lerna run clean --scope \"@jupyterlab/test-*\"",
     "clean:utils": "cd buildutils && jlpm run clean",
