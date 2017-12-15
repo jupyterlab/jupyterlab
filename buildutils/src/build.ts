@@ -195,46 +195,4 @@ namespace Build {
 
     return { extension, mimeExtension, schemaDir, themeDir };
   }
-
-  /**
-   * Find the packages that should be vendored.
-   *
-   * @returns An array of package names.
-   *
-   * #### Notes
-   * Dependencies that are not extensions or in the `@jupyterlab` scope
-   * are considered vendored.  We check the dependencies of JupyterLab
-   * itself and of the installed extensions.
-   */
-  export
-  function findVendored(): string[] {
-    const data = require('./package.json');
-    let deps = data.dependencies;
-    let vendored: string[] = [];
-    let extras = Object.keys(data.jupyterlab.extensions);
-
-    // Add any non-JupyterLab scoped packages that aren't extensions.
-    Object.keys(deps).forEach(function (key) {
-      if (key.indexOf('@jupyterlab/') === -1) {
-        if (extras.indexOf(key) === -1) {
-          vendored.push(key);
-        }
-      } else if (extras.indexOf(key) === -1) {
-        // Mark JupyterLab packages for dep checking.
-        extras.push(key);
-      }
-    });
-
-    // Check the dependencies of the extensions and JupyterLab packages.
-    extras.forEach(function (key) {
-      let subData = require(key + '/package.json');
-      Object.keys(subData.dependencies).forEach(function (subKey) {
-        if (subKey.indexOf('@jupyterlab/') === -1 && vendored.indexOf(subKey) === -1) {
-          vendored.push(subKey);
-        }
-      });
-    });
-
-    return vendored;
-  }
 }
