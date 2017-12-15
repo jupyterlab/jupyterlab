@@ -39,6 +39,7 @@
     "vega-lite": "~1.0.16"
   },
   "devDependencies": {
+    "@types/node": "~8.0.47",
     "rimraf": "~2.6.2",
     "typescript": "~2.6.2"
   },
