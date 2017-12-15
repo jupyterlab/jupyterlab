@@ -41,7 +41,7 @@ describe('StateDB', () => {
 
     it('should clear the namespace if the sentinel is set', () => {
       let { localStorage } = window;
-      let key = 'test:stateDb:sentinel';
+      let key = 'test:statedb:sentinel';
       localStorage.setItem(key, 'sentinel');
       localStorage.setItem('test:foo', 'bar');
       let promise = new PromiseDelegate<void>();
