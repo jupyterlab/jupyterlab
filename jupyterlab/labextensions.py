@@ -65,7 +65,8 @@ class BaseExtensionApp(JupyterApp):
             msg = traceback.format_exception(ex.__class__, ex, exc_traceback)
             for line in msg:
                 self.log.debug(line)
-            self.log.error(str(ex))
+            self.log.error('\nErrored, use --debug for full output:')
+            self.log.error(msg[-1].strip())
             sys.exit(1)
 
     def run_task(self):
