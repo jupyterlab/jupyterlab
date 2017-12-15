@@ -392,21 +392,27 @@ function createContextMenu(model: Contents.IModel, commands: CommandRegistry, re
 
   menu.addItem({ command: CommandIDs.open });
 
-  const factories = registry.preferredWidgetFactories(path).map(f => f.name);
-  if (path && factories.length > 1) {
-    const command =  'docmanager:open';
-    const openWith = new Menu({ commands });
-    openWith.title.label = 'Open With...';
-    factories.forEach(factory => {
-      openWith.addItem({ args: { factory, path }, command });
-    });
-    menu.addItem({ type: 'submenu', submenu: openWith });
+  if (model.type !== 'directory') {
+    const factories = registry.preferredWidgetFactories(path).map(f => f.name);
+    if (path && factories.length > 1) {
+      const command =  'docmanager:open';
+      const openWith = new Menu({ commands });
+      openWith.title.label = 'Open With...';
+      factories.forEach(factory => {
+        openWith.addItem({ args: { factory, path }, command });
+      });
+      menu.addItem({ type: 'submenu', submenu: openWith });
+    }
   }
 
   menu.addItem({ command: CommandIDs.rename });
   menu.addItem({ command: CommandIDs.del });
   menu.addItem({ command: CommandIDs.cut });
-  menu.addItem({ command: CommandIDs.copy });
+
+  if (model.type !== 'directory') {
+    menu.addItem({ command: CommandIDs.copy });
+  }
+
   menu.addItem({ command: CommandIDs.paste });
 
   if (model.type !== 'directory') {
