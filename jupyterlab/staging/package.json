@@ -123,6 +123,7 @@
       "@jupyterlab/vega2-extension": ""
     },
     "name": "JupyterLab",
+    "buildDir": "./build",
     "outputDir": "..",
     "singletonPackages": [
       "@jupyterlab/application",

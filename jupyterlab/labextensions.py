@@ -18,7 +18,7 @@ from traitlets import Bool, Unicode
 from .commands import (
     install_extension, uninstall_extension, list_extensions,
     enable_extension, disable_extension, check_extension,
-    link_package, unlink_package, build, get_app_version
+    link_package, unlink_package, build, get_app_version, HERE
 )
 
 
@@ -58,6 +58,8 @@ class BaseExtensionApp(JupyterApp):
         help="Whether temporary files should be cleaned up after building jupyterlab")
 
     def start(self):
+        if self.app_dir and self.app_dir.startswith(HERE):
+            raise ValueError('Cannot run lab extension commands in core app')
         try:
             self.run_task()
         except Exception as ex:
