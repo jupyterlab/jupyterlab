@@ -252,14 +252,14 @@ class FileBrowser extends Widget {
   }
 
   /**
-   * Find a path given a click.
+   * Find a model given a click.
    *
    * @param event - The mouse event.
    *
-   * @returns The path to the selected file.
+   * @returns The model for the selected file.
    */
-  pathForClick(event: MouseEvent): string | undefined {
-    return this._listing.pathForClick(event);
+  modelForClick(event: MouseEvent): Contents.IModel | undefined {
+    return this._listing.modelForClick(event);
   }
 
   /**

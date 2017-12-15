@@ -540,17 +540,17 @@ class DirListing extends Widget {
   }
 
   /**
-   * Find a path given a click.
+   * Find a model given a click.
    *
    * @param event - The mouse event.
    *
-   * @returns The path to the selected file.
+   * @returns The model for the selected file.
    */
-  pathForClick(event: MouseEvent): string | undefined {
+  modelForClick(event: MouseEvent): Contents.IModel | undefined {
     let items = this._sortedItems;
     let index = Private.hitTestNodes(this._items, event.clientX, event.clientY);
     if (index !== -1) {
-      return items[index].path;
+      return items[index];
     }
     return undefined;
   }
@@ -1265,9 +1265,7 @@ class DirListing extends Widget {
   private _copy(): void {
     this._clipboard.length = 0;
     each(this.selectedItems(), item => {
-      if (item.type !== 'directory') {
-        this._clipboard.push(item.path);
-      }
+      this._clipboard.push(item.path);
     });
   }
 
