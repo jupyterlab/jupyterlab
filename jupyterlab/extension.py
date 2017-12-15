@@ -35,7 +35,7 @@ def load_jupyter_server_extension(nbapp):
     from .build_handler import build_path, Builder, BuildHandler
     from .commands import (
         get_app_dir, get_user_settings_dir, watch, ensure_dev, watch_dev,
-        pjoin, DEV_DIR, HERE, get_app_version
+        pjoin, DEV_DIR, HERE, get_app_info
     )
     from ._version import __version__
 
@@ -86,7 +86,9 @@ def load_jupyter_server_extension(nbapp):
         config.schemas_dir = pjoin(HERE, 'schemas')
         config.app_settings_dir = ''
         config.themes_dir = pjoin(HERE, 'themes')
-        config.app_version = get_app_version()
+        info = get_app_info(app_dir)
+        config.app_version = info['version']
+        config.public_url = info['data']['jupyterlab']['publicUrl']
 
         logger.info(CORE_NOTE.strip())
         if not os.path.exists(config.static_dir):
@@ -109,7 +111,9 @@ def load_jupyter_server_extension(nbapp):
         config.schemas_dir = pjoin(app_dir, 'schemas')
         config.app_settings_dir = pjoin(app_dir, 'settings')
         config.themes_dir = pjoin(app_dir, 'themes')
-        config.app_version = get_app_version(app_dir)
+        info = get_app_info(app_dir)
+        config.app_version = info['version']
+        config.public_url = info['data']['jupyterlab']['publicUrl']
 
     page_config['devMode'] = dev_mode
     config.user_settings_dir = get_user_settings_dir()
