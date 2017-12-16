@@ -7,14 +7,48 @@ import {
   StateDB
 } from '@jupyterlab/coreutils';
 
+import {
+  PromiseDelegate
+} from '@phosphor/coreutils';
+
 
 describe('StateDB', () => {
+
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
 
   describe('#constructor()', () => {
 
     it('should create a state database', () => {
       let db = new StateDB({ namespace: 'test' });
       expect(db).to.be.a(StateDB);
+    });
+
+    it('should take an optional when promise', () => {
+      let { localStorage } = window;
+      let promise = new PromiseDelegate<void>();
+      let db = new StateDB({ namespace: 'test', when: promise.promise });
+      let key = 'foo:bar';
+      let value = { baz: 'qux' };
+      promise.resolve(void 0);
+      return promise.promise.then(() => {
+        expect(localStorage.length).to.be(0);
+        return db.save(key, value);
+      }).then(() => db.fetch(key))
+      .then(fetched => { expect(fetched).to.eql(value); });
+    });
+
+    it('should clear the namespace if the sentinel is set', () => {
+      let { localStorage } = window;
+      let key = 'test:statedb:sentinel';
+      localStorage.setItem(key, 'sentinel');
+      localStorage.setItem('test:foo', 'bar');
+      let promise = new PromiseDelegate<void>();
+      let db = new StateDB({ namespace: 'test', when: promise.promise });
+      expect(db).to.be.a(StateDB);
+      expect(localStorage.length).to.be(1);
+      expect(localStorage.getItem('test:foo')).to.be(null);
     });
 
   });
@@ -46,7 +80,6 @@ describe('StateDB', () => {
 
     it('should empty the items in a state database', done => {
       let { localStorage } = window;
-      localStorage.clear();
 
       let db = new StateDB({ namespace: 'test-namespace' });
       let key = 'foo:bar';
@@ -63,7 +96,6 @@ describe('StateDB', () => {
 
     it('should only clear its own namespace', done => {
       let { localStorage } = window;
-      localStorage.clear();
 
       let db1 = new StateDB({ namespace: 'test-namespace-1' });
       let db2 = new StateDB({ namespace: 'test-namespace-2' });
@@ -87,7 +119,6 @@ describe('StateDB', () => {
 
     it('should fetch a stored key', done => {
       let { localStorage } = window;
-      localStorage.clear();
 
       let db = new StateDB({ namespace: 'test-namespace' });
       let key = 'foo:bar';
@@ -105,7 +136,6 @@ describe('StateDB', () => {
 
     it('should resolve a nonexistent key fetch with undefined', done => {
       let { localStorage } = window;
-      localStorage.clear();
 
       let db = new StateDB({ namespace: 'test-namespace' });
       let key = 'foo:bar';
@@ -123,7 +153,6 @@ describe('StateDB', () => {
 
     it('should fetch a stored namespace', done => {
       let { localStorage } = window;
-      localStorage.clear();
 
       let db = new StateDB({ namespace: 'test-namespace' });
       let keys = [
@@ -170,7 +199,6 @@ describe('StateDB', () => {
 
     it('should remove a stored key', done => {
       let { localStorage } = window;
-      localStorage.clear();
 
       let db = new StateDB({ namespace: 'test-namespace' });
       let key = 'foo:bar';
@@ -191,7 +219,6 @@ describe('StateDB', () => {
 
     it('should save a key and a value', done => {
       let { localStorage } = window;
-      localStorage.clear();
 
       let db = new StateDB({ namespace: 'test-namespace' });
       let key = 'foo:bar';

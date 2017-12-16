@@ -88,6 +88,9 @@ class StateDB implements IStateDB {
    */
   constructor(options: StateDB.IOptions) {
     this.namespace = options.namespace;
+    if (options.when) {
+      this._handleSentinel(options.when);
+    }
   }
 
   /**
@@ -109,16 +112,7 @@ class StateDB implements IStateDB {
    * Clear the entire database.
    */
   clear(): Promise<void> {
-    const prefix = `${this.namespace}:`;
-    let i = window.localStorage.length;
-
-    while (i) {
-      let key = window.localStorage.key(--i);
-
-      if (key && key.indexOf(prefix) === 0) {
-        window.localStorage.removeItem(key);
-      }
-    }
+    this._clear();
 
     return Promise.resolve(undefined);
   }
@@ -174,16 +168,17 @@ class StateDB implements IStateDB {
    * This promise will always succeed.
    */
   fetchNamespace(namespace: string): Promise<IStateItem[]> {
+    const { localStorage } = window;
     const prefix = `${this.namespace}:${namespace}:`;
     const regex = new RegExp(`^${this.namespace}\:`);
     let items: IStateItem[] = [];
-    let i = window.localStorage.length;
+    let i = localStorage.length;
 
     while (i) {
-      let key = window.localStorage.key(--i);
+      let key = localStorage.key(--i);
 
       if (key && key.indexOf(prefix) === 0) {
-        let value = window.localStorage.getItem(key);
+        let value = localStorage.getItem(key);
 
         try {
           let envelope = JSON.parse(value) as Private.Envelope;
@@ -194,7 +189,7 @@ class StateDB implements IStateDB {
           });
         } catch (error) {
           console.warn(error);
-          window.localStorage.removeItem(key);
+          localStorage.removeItem(key);
         }
       }
     }
@@ -250,6 +245,44 @@ class StateDB implements IStateDB {
       return Promise.reject(error);
     }
   }
+
+  /**
+   * Clear the entire database.
+   *
+   * #### Notes
+   * Unlike the public `clear` method, this method is synchronous.
+   */
+  private _clear(): void {
+    const { localStorage } = window;
+    const prefix = `${this.namespace}:`;
+    let i = localStorage.length;
+
+    while (i) {
+      let key = localStorage.key(--i);
+
+      if (key && key.indexOf(prefix) === 0) {
+        localStorage.removeItem(key);
+      }
+    }
+  }
+
+  /**
+   * Handle the startup sentinel.
+   */
+  private _handleSentinel(when: Promise<void>): void {
+    const { localStorage } = window;
+    let key = `${this.namespace}:statedb:sentinel`;
+    let sentinel = localStorage.getItem(key);
+
+    // Clear state if the sentinel was not properly cleared on last page load.
+    if (sentinel) {
+      this._clear();
+    }
+
+    // Set the sentinel value and clear it when the statedb is initialized.
+    localStorage.setItem(key, 'sentinel');
+    when.then(() => { localStorage.removeItem(key); });
+  }
 }
 
 /**
@@ -266,6 +299,12 @@ namespace StateDB {
      * The namespace prefix for all state database entries.
      */
     namespace: string;
+
+    /**
+     * An optional Promise for when the state database should be considered
+     * initialized.
+     */
+    when?: Promise<void>;
   }
 }
 

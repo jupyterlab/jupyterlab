@@ -166,7 +166,10 @@ const state: JupyterLabPlugin<IStateDB> = {
   autoStart: true,
   provides: IStateDB,
   activate: (app: JupyterLab) => {
-    const state = new StateDB({ namespace: app.info.namespace });
+    const state = new StateDB({
+      namespace: app.info.namespace,
+      when: app.restored.then(() => { /* no-op */ })
+    });
     const version = app.info.version;
     const key = 'statedb:version';
     const fetch = state.fetch(key);
