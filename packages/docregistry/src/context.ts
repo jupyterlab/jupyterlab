@@ -34,7 +34,7 @@ import {
 } from '@jupyterlab/observables';
 
 import {
-  RenderMime
+  RenderMimeRegistry
 } from '@jupyterlab/rendermime';
 
 import {
@@ -88,7 +88,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     this.session.propertyChanged.connect(this._onSessionChanged, this);
     manager.contents.fileChanged.connect(this._onFileChanged, this);
 
-    this.urlResolver = new RenderMime.UrlResolver({
+    this.urlResolver = new RenderMimeRegistry.UrlResolver({
       session: this.session,
       contents: manager.contents
     });
