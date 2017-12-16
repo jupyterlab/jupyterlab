@@ -16,9 +16,9 @@ for twine setup instructions and for why twine is the recommended method.
 
 ### Publish the npm packages
 The command below ensures the latest dependencies and built files,
-then prompts you to select package versions.  When one package has an 
-effective major release, the packages that depend on it should also get a 
-major release, to prevent consumers that are using the `^` semver 
+then prompts you to select package versions.  When one package has an
+effective major release, the packages that depend on it should also get a
+major release, to prevent consumers that are using the `^` semver
 requirement from getting a conflict.
 
 ```bash
@@ -44,7 +44,7 @@ python setup.py bdist_wheel --universal
 twine upload dist/*
 ```
 
-- Test the `rc` in a clean environment 
+- Test the `rc` in a clean environment
 - Make sure the CI builds pass
   - The build will fail if we publish a new package because by default it is
     private.  Use `npm access public @jupyterlab/<name>` to make it public.
@@ -54,7 +54,7 @@ twine upload dist/*
 - Update the other repos listed below
 - Update the extension examples listed below
 - Update the xkcd tutorial
-- Update `jupyterlab/_version.py` with a final version 
+- Update `jupyterlab/_version.py` with a final version
 - Make another Python release
 - Create a branch for the release and push to GitHub
 - Merge the PRs on the other repos and set the default branch of the
@@ -96,7 +96,7 @@ rm -rf jupyterlab_xkcd
 the tutorial as appropriate.
 - Prefix the new tags with the branch name, e.g. `0.28-01-show-a-panel`
 - For the publish section of the readme, use the `LICENSE` and `README`
-files from the previous branch, as well as the `package.json` fields up to 
+files from the previous branch, as well as the `package.json` fields up to
 `license`.
 - Push the branch and set it as the default branch for the tutorial repo.
 - Submit the PR to JupyterLab
@@ -132,3 +132,5 @@ jlpm run patch:release package-folder-name
 - Push the resulting commit and tag.
 - Create a new Python release on the previous branch
 - Cherry pick the patch commit to the master branch
+- Update the dev version of the master branch in `_version.py`
+- Update the `package.json` file in `dev_mode` with the new JupyterLab version in the `jupyterlab` metadata section.
