@@ -100,6 +100,10 @@ def ensure_core(logger=None):
     """
     staging = pjoin(HERE, 'staging')
 
+    # Bail if the static directory already exists.
+    if osp.exists(pjoin(HERE, 'static')):
+        return
+
     if not osp.exists(pjoin(staging, 'node_modules')):
         yarn_proc = Process(['node', YARN_PATH], cwd=staging, logger=logger)
         yarn_proc.wait()
