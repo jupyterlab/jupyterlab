@@ -179,7 +179,7 @@ namespace ServerConnection {
     baseUrl: PageConfig.getBaseUrl(),
     wsUrl: PageConfig.getWsUrl(),
     token: PageConfig.getToken(),
-    init: { 'cache': 'no-cache', 'credentials': 'same-origin' },
+    init: { 'cache': 'no-store', 'credentials': 'same-origin' },
     fetch: FETCH,
     Headers: HEADERS,
     Request: REQUEST,
