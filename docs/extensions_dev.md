@@ -84,7 +84,7 @@ jupyter labextension install  # install the current directory as an extension
 ```
 
 This causes the builder to re-install the source folder before building
-the application files.  You can re-build at any time using `jupyter lab build` and it will reinstall these packages.  You can also link other local npm packages that you are working on simultaneously using 
+the application files.  You can re-build at any time using `jupyter lab build` and it will reinstall these packages.  You can also link other local npm packages that you are working on simultaneously using
 `jupyter labextension link`; they will be re-installed but not
 considered as extensions.  Local extensions and linked packages are included in `jupyter labextension list`.
 
@@ -95,8 +95,8 @@ jupyter lab --watch
 ```
 
 This will cause the application to incrementally rebuild when one of the
-linked packages changes.  Note that only compiled JavaScript files (and the 
-CSS files) are watched by the WebPack process.  
+linked packages changes.  Note that only compiled JavaScript files (and the
+CSS files) are watched by the WebPack process.
 
 Note that the application is built against **released** versions of the
 core JupyterLab extensions.  If your extension depends on JupyterLab
@@ -167,10 +167,10 @@ key in its `package.json` with `"mimeExtension"` metadata.  The value can be
 module (e.g. `"lib/foo"`).
 
 The mime renderer can update its data by calling `.setData()` on the model
-it is given to render.  This can be used for example to add a `png` 
-representation of a dynamic figure, which will be picked up by a notebook 
-model and added to the notebook document.  
-When using `IDocumentWidgetFactoryOptions`, you can update the document model by calling `.setData()` with updated data for the rendered MIME type.  The 
+it is given to render.  This can be used for example to add a `png`
+representation of a dynamic figure, which will be picked up by a notebook
+model and added to the notebook document.
+When using `IDocumentWidgetFactoryOptions`, you can update the document model by calling `.setData()` with updated data for the rendered MIME type.  The
 document can then be saved by the user in the usual manner.
 
 
@@ -178,8 +178,8 @@ document can then be saved by the user in the usual manner.
 A theme is a JupyterLab extension that uses a `ThemeManager` and can be
 loaded and unloaded dynamically.  The package must include all static assets
 that are referenced by `url()` in its CSS files.  Local URLs can be used
-to reference files relative to the location of the referring CSS file in the theme directory.  For example `url('images/foo.png')` or 
-`url('../foo/bar.css')`can be used to refer local files in the theme.  
+to reference files relative to the location of the referring CSS file in the theme directory.  For example `url('images/foo.png')` or
+`url('../foo/bar.css')`can be used to refer local files in the theme.
 Absolute URLs (starting with a `/`) or external URLs (e.g. `https:`) can be used to refer to external assets.
 The path to the theme  assets is specified `package.json` under the
 `"jupyterlab"` key as `"themeDir"`. See the [JupyterLab Light Theme](https://github.com/jupyterlab/jupyterlab/tree/master/packages/theme-light-extension)
@@ -187,14 +187,14 @@ for an example.  Ensure that the theme files are included in the
 `"files"` metadata in package.json.  A theme can optionally specify
 an `embed.css` file that can be consumed outside of a JupyterLab application.
 
-To quickly create a theme based on the JupyterLab Light Theme, follow the 
-instructions in the [contributing guide](https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md#setting-up-a-development-environment) 
-and then run `jlpm run create:theme` from the repository root directory.  
-Once you select a name, title and a description, a new theme folder will be 
-created  in the current directory.  You can move that new folder to a location 
+To quickly create a theme based on the JupyterLab Light Theme, follow the
+instructions in the [contributing guide](https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md#setting-up-a-development-environment)
+and then run `jlpm run create:theme` from the repository root directory.
+Once you select a name, title and a description, a new theme folder will be
+created  in the current directory.  You can move that new folder to a location
 of your choice, and start making desired changes.
 
-The theme extension is installed the same as a regular extension (see 
+The theme extension is installed the same as a regular extension (see
 [extension authoring](#Extension Authoring)).
 
 ## Standard (General-Purpose) Extensions
