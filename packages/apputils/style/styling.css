@@ -24,7 +24,7 @@ button.jp-mod-styled {
 
 
 input.jp-mod-styled {
-  background: var(--jp-input-background-color);
+  background: var(--jp-input-background);
   height: 28px;
   box-sizing: border-box;
   border: var(--jp-border-width) solid var(--jp-border-color1);
@@ -62,9 +62,9 @@ button.jp-mod-styled:focus {
 
 
 .jp-select-wrapper.jp-mod-focused select.jp-mod-styled {
-  border: var(--jp-border-width) solid var(--jp-input-border-color-active);
+  border: var(--jp-border-width) solid var(--jp-input-active-border-color);
   box-shadow: var(--jp-input-box-shadow);
-  background-color: var(--jp-input-background-color-active);
+  background-color: var(--jp-input-active-background);
 }
 
 
@@ -72,7 +72,7 @@ select.jp-mod-styled:hover {
   background-color: var(--jp-layout-color1);
   cursor: pointer;
   color: var(--jp-ui-font-color0);
-  background-color: var(--jp-input-background-color-hover);
+  background-color: var(--jp-input-hover-background);
   box-shadow: inset 0 0px 1px rgba(0, 0, 0, 0.5);
 }
 
@@ -82,7 +82,7 @@ select.jp-mod-styled {
   height: 32px;
   width: 100%;
   font-size: var(--jp-ui-font-size2);
-  background: var(--jp-input-background-color);
+  background: var(--jp-input-background);
   color: var(--jp-ui-font-color0);
   padding-left: 8px;
   padding-right: 8px;

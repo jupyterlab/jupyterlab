@@ -93,13 +93,13 @@
 /* Command or edit modes */
 
 .jp-Notebook .jp-Cell:not(.jp-mod-active) .jp-InputPrompt {
-  opacity: var(--jp-cell-prompt-opacity-not-active);
-  color: var(--jp-cell-prompt-font-color-not-active);
+  opacity: var(--jp-cell-prompt-not-active-opacity);
+  color: var(--jp-cell-prompt-not-active-font-color);
 }
 
 .jp-Notebook .jp-Cell:not(.jp-mod-active) .jp-OutputPrompt {
-  opacity: var(--jp-cell-prompt-opacity-not-active);
-  color: var(--jp-cell-prompt-font-color-not-active);
+  opacity: var(--jp-cell-prompt-not-active-opacity);
+  color: var(--jp-cell-prompt-not-active-font-color);
 }
 
 .jp-Notebook .jp-Cell.jp-mod-active .jp-Cell-inputCollapser .jp-Collapser-child,
@@ -126,9 +126,9 @@
 /* Edit mode */
 
 .jp-Notebook.jp-mod-editMode .jp-Cell.jp-mod-active .jp-InputArea-editor {
-  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color-active);
+  border: var(--jp-border-width) solid var(--jp-cell-editor-active-border-color);
   box-shadow: var(--jp-input-box-shadow);
-  background-color: var(--jp-cell-editor-background-active);
+  background-color: var(--jp-cell-editor-active-background);
 }
 
 
@@ -237,8 +237,8 @@
 
 .jp-ActiveCellTool .jp-InputArea-editor {
   flex: 1 1 auto;
-  background-color: var(--jp-cell-editor-background-active);
-  border-color: var(--jp-cell-editor-border-color-active);
+  background-color: var(--jp-cell-editor-active-background);
+  border-color: var(--jp-cell-editor-active-border-color);
   box-shadow: var(--jp-cell-editor-box-shadow);
 }
 

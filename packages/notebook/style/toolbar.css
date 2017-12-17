@@ -30,7 +30,7 @@
 /* select wrapper */
 .jp-Toolbar-item.jp-Notebook-toolbarCellType > .jp-select-wrapper {
   height: 100%;
-  background-color: var(--jp-notebook-select-background-color);
+  background-color: var(--jp-notebook-select-background);
 }
 
 
