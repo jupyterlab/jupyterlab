@@ -780,7 +780,10 @@ namespace Private {
      */
     renderModel(model: IRenderMime.IMimeModel): Promise<void> {
       return this._wrapped.renderModel(model).then(() => {
-        (this.node as HTMLIFrameElement).contentWindow.location.reload();
+        let win = (this.node as HTMLIFrameElement).contentWindow;
+        if (win) {
+          win.location.reload();
+        }
       });
     }
 
