@@ -41,7 +41,9 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
     content.node.tabIndex = -1;
     let layout = this.layout = new BoxLayout();
     layout.direction = 'top-to-bottom';
-    if (options.microToolbar !== false) {
+    if (options.toolbar) {
+      layout.addWidget(options.toolbar);
+    } else {
       let toolbar = new Widget();
       toolbar.addClass('jp-MicroToolbar');
       layout.addWidget(toolbar);
@@ -105,8 +107,8 @@ namespace MainAreaWidget {
     content: T;
 
     /**
-     * Whether to add a micro toolbar.  Default is `true`.
+     * The toolbar to use for the widget.  Defaults to a micro toolbar.
      */
-    microToolbar?: boolean;
+    toolbar?: Widget;
   }
 }

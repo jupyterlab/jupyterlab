@@ -53,32 +53,23 @@ const RENDER_TIMEOUT = 1000;
  * A viewer for CSV tables.
  */
 export
-class CSVViewer extends Widget implements DocumentRegistry.IReadyWidget {
+class CSVViewer extends DataGrid implements DocumentRegistry.IDocumentWidget {
   /**
    * Construct a new CSV viewer.
    */
   constructor(options: CSVViewer.IOptions) {
     super();
 
-    let context = this._context = options.context;
+    let context = this.context = options.context;
     let layout = this.layout = new PanelLayout();
 
     this.addClass(CSV_CLASS);
-
-    this._grid = new DataGrid();
-    this._grid.addClass(CSV_GRID_CLASS);
-    this._grid.headerVisibility = 'column';
-
-    this._toolbar = new CSVToolbar({ selected: this._delimiter });
-    this._toolbar.delimiterChanged.connect(this._onDelimiterChanged, this);
-    this._toolbar.addClass(CSV_VIEWER_CLASS);
-    layout.addWidget(this._toolbar);
-    layout.addWidget(this._grid);
+    this.headerVisibility = 'column';
 
     context.pathChanged.connect(this._onPathChanged, this);
     this._onPathChanged();
 
-    this._context.ready.then(() => {
+    this.context.ready.then(() => {
       this._updateGrid();
       this._ready.resolve(undefined);
       // Throttle the rendering rate of the widget.
@@ -93,8 +84,17 @@ class CSVViewer extends Widget implements DocumentRegistry.IReadyWidget {
   /**
    * The CSV widget's context.
    */
-  get context(): DocumentRegistry.Context {
-    return this._context;
+  readonly context: DocumentRegistry.Context;
+
+  /**
+   * The csv widget's delimiter.
+   */
+  get delimiter(): ISignal<this, string> {
+    return this._delimiter;
+  }
+  set delimiter(value: string) {
+    this._delimiter = delimiter;
+    this._updateGrid();
   }
 
   /**
@@ -115,31 +115,22 @@ class CSVViewer extends Widget implements DocumentRegistry.IReadyWidget {
   }
 
   /**
-   * Handle a change in delimiter.
-   */
-  private _onDelimiterChanged(sender: CSVToolbar, delimiter: string): void {
-    this._delimiter = delimiter;
-    this._updateGrid();
-  }
-
-  /**
    * Handle a change in path.
    */
   private _onPathChanged(): void {
-    this.title.label = PathExt.basename(this._context.localPath);
+    this.title.label = PathExt.basename(this.context.localPath);
   }
 
   /**
    * Create the json model for the grid.
    */
   private _updateGrid(): void {
-    let text = this._context.model.toString();
+    let text = this.context.model.toString();
     let [columns, data] = Private.parse(text, this._delimiter);
     let fields = columns.map(name => ({ name, type: 'string' }));
     this._grid.model = new JSONModel({ data, schema: { fields } });
   }
 
-  private _context: DocumentRegistry.Context;
   private _grid: DataGrid;
   private _toolbar: CSVToolbar;
   private _monitor: ActivityMonitor<any, any> | null = null;
@@ -176,6 +167,20 @@ class CSVViewerFactory extends ABCWidgetFactory<CSVViewer, DocumentRegistry.IMod
    */
   protected createNewWidget(context: DocumentRegistry.Context): CSVViewer {
     return new CSVViewer({ context });
+  }
+
+  /**
+   * Create a new toolbar given a created widget.
+   *
+   * #### Notes
+   * The default implementation returns `undefined`.
+   */
+  createToolbar(widget: CSVViewer): CSVToolbar {
+    let toolbar = new CSVToolbar({ selected: widget.delimiter });
+    toolbar.delimiterChanged.connect((sender, delimiter) => {
+      widget.delimiter = delimiter;
+    }, widget);
+    toolbar.addClass(CSV_VIEWER_CLASS);
   }
 }
 

@@ -295,13 +295,6 @@ abstract class ABCWidgetFactory<T extends DocumentRegistry.IReadyWidget, U exten
   }
 
   /**
-   * Whether a micro toolbar should be added to the widget.
-   */
-  get microToolbar(): boolean {
-    return true;
-  }
-
-  /**
    * A signal emitted when a widget is created.
    */
   get widgetCreated(): ISignal<DocumentRegistry.IWidgetFactory<T, U>, T> {
@@ -381,6 +374,16 @@ abstract class ABCWidgetFactory<T extends DocumentRegistry.IReadyWidget, U exten
     let widget = this.createNewWidget(context);
     this._widgetCreated.emit(widget);
     return widget;
+  }
+
+  /**
+   * Create a new toolbar given a created widget.
+   *
+   * #### Notes
+   * The default implementation returns `undefined`.
+   */
+  createToolbar(widget: T): Widget | undefined {
+    return undefined;
   }
 
   /**

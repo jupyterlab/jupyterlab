@@ -32,7 +32,7 @@ const IMAGE_CLASS = 'jp-ImageViewer';
  * A widget for images.
  */
 export
-class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
+class ImageViewer extends Widget implements DocumentRegistry.IDocumentWidget {
   /**
    * Construct a new image widget.
    */

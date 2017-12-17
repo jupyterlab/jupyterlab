@@ -43,7 +43,7 @@ const EDITOR_CLASS = 'jp-FileEditor';
  * A code editor wrapper for the file editor.
  */
 export
-class FileEditor extends CodeEditorWrapper implements DocumentRegistry.IReadyWidget {
+class FileEditor extends CodeEditorWrapper implements DocumentRegistry.IDocumentWidget {
   /**
    * Construct a new editor widget.
    */
@@ -53,7 +53,7 @@ class FileEditor extends CodeEditorWrapper implements DocumentRegistry.IReadyWid
       model: options.context.model
     });
 
-    const context = this._context = options.context;
+    const context = this.context = options.context;
     const editor = this.editor;
 
     this.addClass(EDITOR_CLASS);
@@ -88,11 +88,9 @@ class FileEditor extends CodeEditorWrapper implements DocumentRegistry.IReadyWid
   }
 
   /**
-   * Get the context for the editor widget.
+   * The context for the editor widget.
    */
-  get context(): DocumentRegistry.Context {
-    return this._context;
-  }
+  readonly context: DocumentRegistry.Context;
 
   /**
    * A promise that resolves when the file editor is ready.
@@ -108,7 +106,7 @@ class FileEditor extends CodeEditorWrapper implements DocumentRegistry.IReadyWid
     if (this.isDisposed) {
       return;
     }
-    const contextModel = this._context.model;
+    const contextModel = this.context.model;
     const editor = this.editor;
     const editorModel = editor.model;
 
@@ -140,7 +138,7 @@ class FileEditor extends CodeEditorWrapper implements DocumentRegistry.IReadyWid
    * Handle the dirty state of the context model.
    */
   private _handleDirtyState(): void {
-    if (this._context.model.dirty) {
+    if (this.context.model.dirty) {
       this.title.className += ` ${DIRTY_CLASS}`;
     } else {
       this.title.className = this.title.className.replace(DIRTY_CLASS, '');
@@ -153,7 +151,7 @@ class FileEditor extends CodeEditorWrapper implements DocumentRegistry.IReadyWid
   private _onContentChanged(): void {
     const editorModel = this.editor.model;
     const oldValue = editorModel.value.text;
-    const newValue = this._context.model.toString();
+    const newValue = this.context.model.toString();
 
     if (oldValue !== newValue) {
       editorModel.value.text = newValue;
@@ -167,7 +165,7 @@ class FileEditor extends CodeEditorWrapper implements DocumentRegistry.IReadyWid
   private _onCollaboratorsChanged(): void {
     // If there are selections corresponding to non-collaborators,
     // they are stale and should be removed.
-    let collaborators = this._context.model.modelDB.collaborators;
+    let collaborators = this.context.model.modelDB.collaborators;
     if (!collaborators) {
       return;
     }
@@ -178,7 +176,6 @@ class FileEditor extends CodeEditorWrapper implements DocumentRegistry.IReadyWid
     }
   }
 
-  protected _context: DocumentRegistry.Context;
   private _ready = new PromiseDelegate<void>();
 }
 

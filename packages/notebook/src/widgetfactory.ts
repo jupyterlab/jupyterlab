@@ -39,7 +39,6 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
   constructor(options: NotebookWidgetFactory.IOptions) {
     super(options);
     this.rendermime = options.rendermime;
-    this.contentFactory = options.contentFactory;
     this.mimeTypeService = options.mimeTypeService;
   }
 
@@ -49,21 +48,9 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
   readonly rendermime: RenderMimeRegistry;
 
   /**
-   * The content factory used by the widget factory.
-   */
-  readonly contentFactory: NotebookPanel.IContentFactory;
-
-  /**
    * The service used to look up mime types.
    */
   readonly mimeTypeService: IEditorMimeTypeService;
-
-  /**
-   * Whether a micro toolbar should be added to the widget.
-   */
-  get microToolbar(): boolean {
-    return false;
-  }
 
   /**
    * Create a new widget.
@@ -75,11 +62,10 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
   protected createNewWidget(context: DocumentRegistry.IContext<INotebookModel>): NotebookPanel {
     let rendermime = this.rendermime.clone({ resolver: context });
     let panel = new NotebookPanel({
+      context,
       rendermime,
-      contentFactory: this.contentFactory,
       mimeTypeService: this.mimeTypeService
     });
-    panel.context = context;
     ToolbarItems.populateDefaults(panel);
     return panel;
   }
@@ -100,11 +86,6 @@ namespace NotebookWidgetFactory {
       * A rendermime instance.
       */
     rendermime: RenderMimeRegistry;
-
-    /**
-     * A notebook panel content factory.
-     */
-    contentFactory: NotebookPanel.IContentFactory;
 
     /**
      * The service used to look up mime types.

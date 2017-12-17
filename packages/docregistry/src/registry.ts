@@ -843,11 +843,16 @@ namespace DocumentRegistry {
    * A widget for a document.
    */
   export
-  interface IReadyWidget extends Widget {
+  interface IDocumentWidget<T extends IModel = IModel> extends Widget {
     /**
      * A promise that resolves when the widget is ready.
      */
     readonly ready: Promise<void>;
+
+    /**
+     * The context associated with the widget.
+     */
+    readonly context: Context<T>;
   }
 
   /**
@@ -855,11 +860,6 @@ namespace DocumentRegistry {
    */
   export
   interface IWidgetFactory<T extends IReadyWidget, U extends IModel> extends IDisposable, IWidgetFactoryOptions {
-    /**
-     * Whether a micro toolbar should be added to the widget.
-     */
-    readonly microToolbar: boolean;
-
     /**
      * A signal emitted when a widget is created.
      */
@@ -872,6 +872,11 @@ namespace DocumentRegistry {
      * It should emit the [widgetCreated] signal with the new widget.
      */
     createNew(context: IContext<U>): T;
+
+    /**
+     * Create a toolbar given a widget.
+     */
+    createToolbar(widget: T): Widget | undefined;
   }
 
   /**
