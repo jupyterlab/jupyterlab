@@ -20,7 +20,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  RenderMime
+  RenderMimeRegistry
 } from '@jupyterlab/rendermime';
 
 import {
@@ -393,7 +393,7 @@ describe('docregistry/context', () => {
     describe('#urlResolver', () => {
 
       it('should be a url resolver', () => {
-        expect(context.urlResolver).to.be.a(RenderMime.UrlResolver);
+        expect(context.urlResolver).to.be.a(RenderMimeRegistry.UrlResolver);
       });
 
     });
