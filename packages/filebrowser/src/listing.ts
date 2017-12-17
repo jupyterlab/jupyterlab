@@ -816,6 +816,10 @@ class DirListing extends Widget {
     }
     this._handleFileSelect(event);
 
+    if (event.button !== 0) {
+      clearTimeout(this._selectTimer);
+    }
+
     // Check for clearing a context menu.
     let newContext = (IS_MAC && event.ctrlKey) || (event.button === 2);
     if (newContext) {
@@ -828,10 +832,6 @@ class DirListing extends Widget {
                          index: index };
       document.addEventListener('mouseup', this, true);
       document.addEventListener('mousemove', this, true);
-    }
-
-    if (event.button !== 0) {
-      clearTimeout(this._selectTimer);
     }
   }
 
