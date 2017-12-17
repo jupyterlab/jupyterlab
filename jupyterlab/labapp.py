@@ -165,8 +165,9 @@ class LabApp(NotebookApp):
         """)
 
     dev_mode = Bool(False, config=True,
-        help="""Whether to start the app in dev mode. Uses the unpublished local JavaScript packages
-        in the `dev_mode` folder.  In this case JupyterLab will show a red stripe at the top of the page.  It can only be used if JupyterLab
+        help="""Whether to start the app in dev mode. Uses the unpublished local
+        JavaScript packages in the `dev_mode` folder.  In this case JupyterLab will
+        show a red stripe at the top of the page.  It can only be used if JupyterLab
         is installed as `pip install -e .`.
         """)
 
