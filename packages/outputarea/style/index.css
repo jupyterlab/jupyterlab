@@ -56,6 +56,36 @@
 }
 
 
+/**
+ * Isolated output.
+ */
+ .jp-OutputArea-output.jp-mod-isolated {
+  width: 100%;
+  display: block;
+}
+
+
+/*
+When drag events occur, `p-mod-override-cursor` is added to the body.
+Because iframes steal all cursor events, the following two rules are necessary
+to suppress pointer events while resize drags are occuring. There may be a
+better solution to this problem.
+*/
+body.p-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated {
+  position: relative;
+}
+
+body.p-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+}
+
+
 /* pre */
 
 .jp-OutputArea-output pre {
