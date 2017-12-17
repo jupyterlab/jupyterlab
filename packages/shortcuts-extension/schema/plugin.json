@@ -438,10 +438,10 @@
       },
       "type": "object"
     },
-    "notebook:paste-cell": {
+    "notebook:paste-cell-below": {
       "default": { },
       "properties": {
-        "command": { "default": "notebook:paste-cell" },
+        "command": { "default": "notebook:paste-cell-below" },
         "keys": { "default": ["V"] },
         "selector": { "default": ".jp-Notebook:focus" }
       },

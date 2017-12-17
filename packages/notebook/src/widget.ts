@@ -843,6 +843,7 @@ class Notebook extends StaticNotebook {
     }
     // Make sure we have a valid active cell.
     this.activeCellIndex = this.activeCellIndex;
+    this.update();
   }
 
   /**

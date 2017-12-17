@@ -56,6 +56,16 @@ describe('@jupyterlab/mainmenu', () => {
         expect(menu).to.be.a(JupyterLabMenu);
       });
 
+      it('should accept useSeparators as an option', () => {
+        const menu1 = new JupyterLabMenu({ commands }, false);
+        const menu2 = new JupyterLabMenu({ commands }, true);
+        menu1.addGroup([ { command: 'run1'}, { command: 'run2' }]);
+        menu2.addGroup([ { command: 'run1'}, { command: 'run2' }]);
+
+        expect(menu1.menu.items.length).to.be(2);
+        expect(menu2.menu.items.length).to.be(4);
+      });
+
     });
 
     describe('#addGroup()', () => {
@@ -88,6 +98,32 @@ describe('@jupyterlab/mainmenu', () => {
         expect(idx3 < idx4).to.be(true);
         expect(idx4 < idx1).to.be(true);
         expect(idx1 < idx2).to.be(true);
+      });
+
+    });
+
+    describe('#removeGroup()', () => {
+
+      it('should remove a group from the menu', () => {
+        const group1 = [ { command: 'run1'}, { command: 'run2' }];
+        const group2 = [ { command: 'run3'}, { command: 'run4' }];
+        menu.addGroup(group1);
+        menu.addGroup(group2);
+        menu.removeGroup(group1);
+
+        let idx1 = ArrayExt.findFirstIndex(menu.menu.items,
+                                           m => m.command === 'run1');
+        let idx2 = ArrayExt.findFirstIndex(menu.menu.items,
+                                           m => m.command === 'run2');
+        let idx3 = ArrayExt.findFirstIndex(menu.menu.items,
+                                           m => m.command === 'run3');
+        let idx4 = ArrayExt.findFirstIndex(menu.menu.items,
+                                           m => m.command === 'run4');
+
+        expect(idx1).to.be(-1);
+        expect(idx2).to.be(-1);
+        expect(idx3 === -1).to.be(false);
+        expect(idx4 === -1).to.be(false);
       });
 
     });

@@ -161,160 +161,153 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
   /**
    * Create a menu for the editor.
    */
-  function createMenu(): Menu {
-    const menu = new Menu({ commands });
-    const themeMenu = new Menu({ commands });
-    const keyMapMenu = new Menu({ commands });
-    const modeMenu = new Menu({ commands });
-    const tabMenu = new Menu({ commands });
+  const themeMenu = new Menu({ commands });
+  const keyMapMenu = new Menu({ commands });
+  const modeMenu = new Menu({ commands });
+  const tabMenu = new Menu({ commands });
 
-    menu.title.label = 'Editor';
-    themeMenu.title.label = 'Theme';
-    keyMapMenu.title.label = 'Key Map';
-    modeMenu.title.label = 'Language';
-    tabMenu.title.label = 'Tabs';
+  themeMenu.title.label = 'Text Editor Theme';
+  keyMapMenu.title.label = 'Text Editor Key Map';
+  modeMenu.title.label = 'Text Editor Syntax Highlighting';
+  tabMenu.title.label = 'Text Editor Indentation';
 
-    commands.addCommand(CommandIDs.changeTheme, {
-      label: args => args['theme'] as string,
-      execute: args => {
-        const key = 'theme';
-        const value = theme = args['theme'] as string || theme;
+  commands.addCommand(CommandIDs.changeTheme, {
+    label: args => args['theme'] as string,
+    execute: args => {
+      const key = 'theme';
+      const value = theme = args['theme'] as string || theme;
 
-        updateTracker();
-        return settingRegistry.set(id, key, value).catch((reason: Error) => {
-          console.error(`Failed to set ${id}:${key} - ${reason.message}`);
-        });
-      },
-      isEnabled,
-      isToggled: args => args['theme'] === theme
-    });
+      updateTracker();
+      return settingRegistry.set(id, key, value).catch((reason: Error) => {
+        console.error(`Failed to set ${id}:${key} - ${reason.message}`);
+      });
+    },
+    isToggled: args => args['theme'] === theme
+  });
 
-    commands.addCommand(CommandIDs.changeKeyMap, {
-      label: args => {
-        let title = args['keyMap'] as string;
-        return title === 'sublime' ? 'Sublime Text' : title;
-      },
-      execute: args => {
-        const key = 'keyMap';
-        const value = keyMap = args['keyMap'] as string || keyMap;
+  commands.addCommand(CommandIDs.changeKeyMap, {
+    label: args => {
+      let title = args['keyMap'] as string;
+      return title === 'sublime' ? 'Sublime Text' : title;
+    },
+    execute: args => {
+      const key = 'keyMap';
+      const value = keyMap = args['keyMap'] as string || keyMap;
 
-        updateTracker();
-        return settingRegistry.set(id, key, value).catch((reason: Error) => {
-          console.error(`Failed to set ${id}:${key} - ${reason.message}`);
-        });
-      },
-      isEnabled,
-      isToggled: args => args['keyMap'] === keyMap
-    });
+      updateTracker();
+      return settingRegistry.set(id, key, value).catch((reason: Error) => {
+        console.error(`Failed to set ${id}:${key} - ${reason.message}`);
+      });
+    },
+    isToggled: args => args['keyMap'] === keyMap
+  });
 
-    commands.addCommand(CommandIDs.find, {
-      label: 'Find...',
-      execute: () => {
-        let widget = tracker.currentWidget;
-        if (!widget) {
-          return;
-        }
-        let editor = widget.editor as CodeMirrorEditor;
-        editor.execCommand('find');
-      },
-      isEnabled
-    });
-
-    commands.addCommand(CommandIDs.findAndReplace, {
-      label: 'Find & Replace...',
-      execute: () => {
-        let widget = tracker.currentWidget;
-        if (!widget) {
-          return;
-        }
-        let editor = widget.editor as CodeMirrorEditor;
-        editor.execCommand('replace');
-      },
-      isEnabled
-    });
-
-    commands.addCommand(CommandIDs.changeMode, {
-      label: args => args['name'] as string,
-      execute: args => {
-        let name = args['name'] as string;
-        let widget = tracker.currentWidget;
-        if (name && widget) {
-          let spec = Mode.findByName(name);
-          if (spec) {
-            widget.model.mimeType = spec.mime;
-          }
-        }
-      },
-      isEnabled,
-      isToggled: args => {
-        let widget = tracker.currentWidget;
-        if (!widget) {
-          return false;
-        }
-        let mime = widget.model.mimeType;
-        let spec = Mode.findByMIME(mime);
-        let name = spec && spec.name;
-        return args['name'] === name;
-      }
-    });
-
-    Mode.getModeInfo().sort((a, b) => {
-      let aName = a.name || '';
-      let bName = b.name || '';
-      return aName.localeCompare(bName);
-    }).forEach(spec => {
-      // Avoid mode name with a curse word.
-      if (spec.mode.indexOf('brainf') === 0) {
+  commands.addCommand(CommandIDs.find, {
+    label: 'Find...',
+    execute: () => {
+      let widget = tracker.currentWidget;
+      if (!widget) {
         return;
       }
-      modeMenu.addItem({
-        command: CommandIDs.changeMode,
-        args: {...spec}
-      });
-    });
+      let editor = widget.editor as CodeMirrorEditor;
+      editor.execCommand('find');
+    },
+    isEnabled
+  });
 
-    [
-     'jupyter', 'default', 'abcdef', 'base16-dark', 'base16-light',
-     'hopscotch', 'material', 'mbo', 'mdn-like', 'seti', 'the-matrix',
-     'xq-light', 'zenburn'
-    ].forEach(name => themeMenu.addItem({
-      command: CommandIDs.changeTheme,
-      args: { theme: name }
-    }));
+  commands.addCommand(CommandIDs.findAndReplace, {
+    label: 'Find & Replace...',
+    execute: () => {
+      let widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+      let editor = widget.editor as CodeMirrorEditor;
+      editor.execCommand('replace');
+    },
+    isEnabled
+  });
 
-    ['default', 'sublime', 'vim', 'emacs'].forEach(name => {
-      keyMapMenu.addItem({
-        command: CommandIDs.changeKeyMap,
-        args: { keyMap: name }
-      });
-    });
-
-    let args: JSONObject = {
-      insertSpaces: false, size: 4, name: 'Indent with Tab'
-    };
-    let command = 'fileeditor:change-tabs';
-    tabMenu.addItem({ command, args });
-    palette.addItem({ command, args, category: 'Editor' });
-
-    for (let size of [1, 2, 4, 8]) {
-      let args: JSONObject = {
-        insertSpaces: true, size, name: `Spaces: ${size} `
-      };
-      tabMenu.addItem({ command, args });
-      palette.addItem({ command, args, category: 'Editor' });
+  commands.addCommand(CommandIDs.changeMode, {
+    label: args => args['name'] as string,
+    execute: args => {
+      let name = args['name'] as string;
+      let widget = tracker.currentWidget;
+      if (name && widget) {
+        let spec = Mode.findByName(name);
+        if (spec) {
+          widget.model.mimeType = spec.mime;
+        }
+      }
+    },
+    isEnabled,
+    isToggled: args => {
+      let widget = tracker.currentWidget;
+      if (!widget) {
+        return false;
+      }
+      let mime = widget.model.mimeType;
+      let spec = Mode.findByMIME(mime);
+      let name = spec && spec.name;
+      return args['name'] === name;
     }
+  });
 
-    menu.addItem({ command: 'fileeditor:toggle-autoclosing-brackets' });
-    menu.addItem({ type: 'submenu', submenu: tabMenu });
-    menu.addItem({ type: 'separator' });
-    menu.addItem({ type: 'submenu', submenu: modeMenu });
-    menu.addItem({ type: 'submenu', submenu: keyMapMenu });
-    menu.addItem({ type: 'submenu', submenu: themeMenu });
+  Mode.getModeInfo().sort((a, b) => {
+    let aName = a.name || '';
+    let bName = b.name || '';
+    return aName.localeCompare(bName);
+  }).forEach(spec => {
+    // Avoid mode name with a curse word.
+    if (spec.mode.indexOf('brainf') === 0) {
+      return;
+    }
+    modeMenu.addItem({
+      command: CommandIDs.changeMode,
+      args: {...spec}
+    });
+  });
 
-    return menu;
+  [
+   'jupyter', 'default', 'abcdef', 'base16-dark', 'base16-light',
+   'hopscotch', 'material', 'mbo', 'mdn-like', 'seti', 'the-matrix',
+   'xq-light', 'zenburn'
+  ].forEach(name => themeMenu.addItem({
+    command: CommandIDs.changeTheme,
+    args: { theme: name }
+  }));
+
+  ['default', 'sublime', 'vim', 'emacs'].forEach(name => {
+    keyMapMenu.addItem({
+      command: CommandIDs.changeKeyMap,
+      args: { keyMap: name }
+    });
+  });
+
+  let args: JSONObject = {
+    insertSpaces: false, size: 4, name: 'Indent with Tab'
+  };
+  let command = 'fileeditor:change-tabs';
+  tabMenu.addItem({ command, args });
+  palette.addItem({ command, args, category: 'Text Editor' });
+
+  for (let size of [1, 2, 4, 8]) {
+    let args: JSONObject = {
+      insertSpaces: true, size, name: `Spaces: ${size} `
+    };
+    tabMenu.addItem({ command, args });
+    palette.addItem({ command, args, category: 'Text Editor' });
   }
 
-  mainMenu.addMenu(createMenu(), { rank: 30 });
+  // Add some of the editor settings to the settings menu.
+  mainMenu.settingsMenu.addGroup([
+    { type: 'submenu' as Menu.ItemType, submenu: keyMapMenu },
+    { type: 'submenu' as Menu.ItemType, submenu: themeMenu }
+  ], 10);
+
+  // Add indentation settings to the edit menu.
+  mainMenu.editMenu.addGroup([{ type: 'submenu', submenu: tabMenu }], 20);
+  mainMenu.viewMenu.addGroup([{ type: 'submenu', submenu: modeMenu }], 40);
 
   // Add find-replace capabilities to the edit menu.
   mainMenu.editMenu.findReplacers.add({

@@ -167,6 +167,7 @@ const extension: IRenderMime.IExtension = {
   fileTypes: [{
     mimeTypes: [VEGA_MIME_TYPE],
     name: 'vega',
+    displayName: 'Vega File',
     fileFormat: 'text',
     extensions: ['.vg', '.vg.json'],
     iconClass: 'jp-MaterialIcon jp-VegaIcon',
@@ -174,6 +175,7 @@ const extension: IRenderMime.IExtension = {
   {
     mimeTypes: [VEGALITE_MIME_TYPE],
     name: 'vega-lite',
+    displayName: 'Vega-Lite File',
     fileFormat: 'text',
     extensions: ['.vl', '.vl.json'],
     iconClass: 'jp-MaterialIcon jp-VegaIcon',

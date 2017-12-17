@@ -111,9 +111,14 @@ namespace IEditMenu {
     noun: string;
 
     /**
-     * A function to clear an activity.
+     * A function to clear the currently portion of activity.
      */
-    clear: (widget: T) => void;
+    clearCurrent?: (widget: T) => void;
+
+    /**
+     * A function to clear all of an activity.
+     */
+    clearAll?: (widget: T) => void;
   }
 
   /**

@@ -66,12 +66,17 @@ describe('@jupyterlab/mainmenu', () => {
       it('should allow setting of an IKernelUser', () => {
         const user: IKernelMenu.IKernelUser<Wodget> = {
           tracker,
+          noun: 'Wodget',
           interruptKernel: widget => {
             widget.state = 'interrupt';
             return Promise.resolve(void 0);
           },
           restartKernel: widget => {
             widget.state = 'restart';
+            return Promise.resolve(void 0);
+          },
+          restartKernelAndClear: widget => {
+            widget.state = 'restartAndClear';
             return Promise.resolve(void 0);
           },
           changeKernel: widget => {
@@ -88,27 +93,12 @@ describe('@jupyterlab/mainmenu', () => {
         expect(wodget.state).to.be('interrupt');
         delegateExecute(wodget, menu.kernelUsers, 'restartKernel');
         expect(wodget.state).to.be('restart');
+        delegateExecute(wodget, menu.kernelUsers, 'restartKernelAndClear');
+        expect(wodget.state).to.be('restartAndClear');
         delegateExecute(wodget, menu.kernelUsers, 'changeKernel');
         expect(wodget.state).to.be('change');
         delegateExecute(wodget, menu.kernelUsers, 'shutdownKernel');
         expect(wodget.state).to.be('shutdown');
-      });
-
-    });
-
-    describe('#consoleCreators', () => {
-
-      it('should allow setting of an IConsoleCreator', () => {
-        const creator: IKernelMenu.IConsoleCreator<Wodget> = {
-          tracker,
-          createConsole: widget => {
-            widget.state = 'create';
-            return Promise.resolve(void 0);
-          },
-        };
-        menu.consoleCreators.add(creator);
-        delegateExecute(wodget, menu.consoleCreators, 'createConsole');
-        expect(wodget.state).to.be('create');
       });
 
     });

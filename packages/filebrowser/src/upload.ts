@@ -50,7 +50,7 @@ class Uploader extends ToolbarButton {
       onClick: () => {
         this._input.click();
       },
-      tooltip: 'Upload File(s)'
+      tooltip: 'Upload Files'
     });
     let uploadContent = document.createElement('span');
     let uploadIcon = document.createElement('span');

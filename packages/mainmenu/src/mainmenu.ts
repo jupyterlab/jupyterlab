@@ -38,9 +38,16 @@ import {
 } from './run';
 
 import {
+  ISettingsMenu, SettingsMenu
+} from './settings';
+
+import {
   IViewMenu, ViewMenu
 } from './view';
 
+import {
+  ITabsMenu, TabsMenu
+} from './tabs';
 
 
 /* tslint:disable */
@@ -91,6 +98,16 @@ interface IMainMenu {
    * The application "Run" menu.
    */
   readonly runMenu: IRunMenu;
+
+  /**
+   * The application "Settings" menu.
+   */
+  readonly settingsMenu: ISettingsMenu;
+
+  /**
+   * The application "Tabs" menu.
+   */
+  readonly tabsMenu: ITabsMenu;
 }
 
 
@@ -127,13 +144,17 @@ class MainMenu extends MenuBar implements IMainMenu {
     this.helpMenu = new HelpMenu({ commands });
     this.kernelMenu = new KernelMenu({ commands });
     this.runMenu = new RunMenu({ commands });
+    this.settingsMenu = new SettingsMenu({ commands });
     this.viewMenu = new ViewMenu({ commands });
+    this.tabsMenu = new TabsMenu({ commands });
 
     this.addMenu(this.fileMenu.menu, { rank: 0 });
     this.addMenu(this.editMenu.menu, { rank: 1 });
-    this.addMenu(this.runMenu.menu, { rank: 2 });
-    this.addMenu(this.kernelMenu.menu, { rank: 3 });
-    this.addMenu(this.viewMenu.menu, { rank: 4 });
+    this.addMenu(this.viewMenu.menu, { rank: 2 });
+    this.addMenu(this.runMenu.menu, { rank: 3 });
+    this.addMenu(this.kernelMenu.menu, { rank: 4 });
+    this.addMenu(this.tabsMenu.menu, { rank: 500 });
+    this.addMenu(this.settingsMenu.menu, { rank: 999 });
     this.addMenu(this.helpMenu.menu, { rank: 1000 });
   }
 
@@ -163,9 +184,19 @@ class MainMenu extends MenuBar implements IMainMenu {
   readonly runMenu: RunMenu;
 
   /**
+   * The application "Settings" menu.
+   */
+  readonly settingsMenu: SettingsMenu;
+
+  /**
    * The application "View" menu.
    */
   readonly viewMenu: ViewMenu;
+
+  /**
+   * The application "Tabs" menu.
+   */
+  readonly tabsMenu: TabsMenu;
 
 
   /**
@@ -199,7 +230,9 @@ class MainMenu extends MenuBar implements IMainMenu {
     this.helpMenu.dispose();
     this.kernelMenu.dispose();
     this.runMenu.dispose();
+    this.settingsMenu.dispose();
     this.viewMenu.dispose();
+    this.tabsMenu.dispose();
     super.dispose();
   }
 

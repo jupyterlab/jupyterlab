@@ -373,7 +373,7 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, bro
   });
 
   commands.addCommand(CommandIDs.createLauncher, {
-    label: 'New...',
+    label: 'New Launcher',
     execute: () => createLauncher(commands, browser)
   });
 }

@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
-  IEditMenu, IMainMenu, IKernelMenu, IViewMenu
+  IEditMenu, IFileMenu, IMainMenu, IViewMenu
 } from '@jupyterlab/mainmenu';
 
 
@@ -264,7 +264,7 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
       return settingRegistry
         .set(id, 'autoClosingBrackets', autoClosingBrackets);
     },
-    label: 'Auto-Closing Brackets',
+    label: 'Auto Close Brackets',
     isEnabled,
     isToggled: () => autoClosingBrackets
   });
@@ -396,7 +396,7 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
 
   if (menu) {
     // Add new text file creation to the file menu.
-    menu.fileMenu.newMenu.addItem({ command: CommandIDs.createNew });
+    menu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 30);
 
     // Add undo/redo hooks to the edit menu.
     menu.editMenu.undoers.add({
@@ -426,8 +426,9 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
     } as IViewMenu.IEditorViewer<FileEditor>);
 
     // Add a console creator the the Kernel menu.
-    menu.kernelMenu.consoleCreators.add({
+    menu.fileMenu.consoleCreators.add({
       tracker,
+      name: 'Editor',
       createConsole: current => {
         const options = {
           path: current.context.path,
@@ -435,13 +436,12 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
         };
         return commands.execute('console:create', options);
       }
-    } as IKernelMenu.IConsoleCreator<FileEditor>);
+    } as IFileMenu.IConsoleCreator<FileEditor>);
 
     // Add a code runner to the Run menu.
     menu.runMenu.codeRunners.add({
       tracker,
       noun: 'Code',
-      pluralNoun: 'Code',
       run: () => commands.execute(CommandIDs.runCode)
     });
   }

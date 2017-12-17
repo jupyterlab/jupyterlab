@@ -74,12 +74,6 @@ namespace IRunMenu {
     noun: string;
 
     /**
-     * A string label for the plural of things that are being run,
-     * to be used where appropriate in menu labels.
-     */
-    pluralNoun: string;
-
-    /**
      * A function to run a chunk of code.
      */
     run?: (widget: T) => Promise<void>;
@@ -90,15 +84,8 @@ namespace IRunMenu {
     runAll?: (widget: T) => Promise<void>;
 
     /**
-     * A function to run all code above the currently selected
-     * point (exclusive).
+     * A function to restart and run all the code hosted by the widget.
      */
-    runAbove?: (widget: T) => Promise<void>;
-
-    /**
-     * A function to run all code below the currently selected
-     * point (inclusive).
-     */
-    runBelow?: (widget: T) => Promise<void>;
+    restartAndRunAll?: (widget: T) => Promise<void>;
   }
 }

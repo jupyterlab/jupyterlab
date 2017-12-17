@@ -89,6 +89,7 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
     dataType: 'string',
     fileTypes: [{
       name: 'PDF',
+      displayName: 'PDF',
       fileFormat: 'base64',
       mimeTypes: [MIME_TYPE],
       extensions: ['.pdf']

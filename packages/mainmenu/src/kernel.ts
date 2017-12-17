@@ -22,11 +22,6 @@ interface IKernelMenu extends IJupyterLabMenu {
    * A set storing IKernelUsers for the Kernel menu.
    */
   readonly kernelUsers: Set<IKernelMenu.IKernelUser<Widget>>;
-
-  /**
-   * A set storing IConsoleCreators for the Kernel menu.
-   */
-  readonly consoleCreators: Set<IKernelMenu.IConsoleCreator<Widget>>;
 }
 
 /**
@@ -43,8 +38,6 @@ class KernelMenu extends JupyterLabMenu implements IKernelMenu {
 
     this.kernelUsers =
       new Set<IKernelMenu.IKernelUser<Widget>>();
-    this.consoleCreators =
-      new Set<IKernelMenu.IConsoleCreator<Widget>>();
   }
 
   /**
@@ -53,16 +46,10 @@ class KernelMenu extends JupyterLabMenu implements IKernelMenu {
   readonly kernelUsers: Set<IKernelMenu.IKernelUser<Widget>>;
 
   /**
-   * A set storing IConsoleCreators for the Kernel menu.
-   */
-  readonly consoleCreators: Set<IKernelMenu.IConsoleCreator<Widget>>;
-
-  /**
    * Dispose of the resources held by the kernel menu.
    */
   dispose(): void {
     this.kernelUsers.clear();
-    this.consoleCreators.clear();
     super.dispose();
   }
 }
@@ -89,6 +76,11 @@ namespace IKernelMenu {
     restartKernel?: (widget: T) => Promise<Kernel.IKernelConnection>;
 
     /**
+     * A function to restart the kernel.
+     */
+    restartKernelAndClear?: (widget: T) => Promise<Kernel.IKernelConnection>;
+
+    /**
      * A function to change the kernel.
      */
     changeKernel?: (widget: T) => Promise<void>;
@@ -97,16 +89,10 @@ namespace IKernelMenu {
      * A function to shut down the kernel.
      */
     shutdownKernel?: (widget: T) => Promise<void>;
-  }
 
-  /**
-   * Interface for a command to create a console for an activity.
-   */
-  export
-  interface IConsoleCreator<T extends Widget> extends IMenuExtender<T> {
     /**
-     * The function to create the console.
+     * A noun to use for the restart and clear all command.
      */
-    createConsole: (widget: T) => Promise<void>;
+    noun?: string;
   }
 }

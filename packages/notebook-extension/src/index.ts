@@ -112,6 +112,12 @@ namespace CommandIDs {
   const runAll = 'notebook:run-all-cells';
 
   export
+  const runAllAbove = 'notebook:run-all-above';
+
+  export
+  const runAllBelow = 'notebook:run-all-below';
+
+  export
   const toCode = 'notebook:change-cell-to-code';
 
   export
@@ -127,7 +133,13 @@ namespace CommandIDs {
   const copy = 'notebook:copy-cell';
 
   export
-  const paste = 'notebook:paste-cell';
+  const pasteAbove = 'notebook:paste-cell-above';
+
+  export
+  const pasteBelow = 'notebook:paste-cell-below';
+
+  export
+  const pasteAndReplace = 'notebook:paste-and-replace-cell';
 
   export
   const moveUp = 'notebook:move-cell-up';
@@ -158,6 +170,12 @@ namespace CommandIDs {
 
   export
   const extendBelow = 'notebook:extend-marked-cells-below';
+
+  export
+  const selectAll = 'notebook:select-all';
+
+  export
+  const deselectAll = 'notebook:deselect-all';
 
   export
   const editMode = 'notebook:enter-edit-mode';
@@ -543,20 +561,8 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
            tracker.currentWidget === app.shell.currentWidget;
   }
 
-  /**
-   * The name of the current notebook widget.
-   */
-  function currentName(): string {
-    if (tracker.currentWidget  &&
-        tracker.currentWidget === app.shell.currentWidget &&
-        tracker.currentWidget.title.label) {
-      return `"${tracker.currentWidget.title.label}"`;
-    }
-    return 'Notebook';
-  }
-
   commands.addCommand(CommandIDs.runAndAdvance, {
-    label: 'Run Cell(s) and Select Below',
+    label: 'Run Cells and Select Below',
     execute: args => {
       const current = getCurrent(args);
 
@@ -569,7 +575,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.run, {
-    label: 'Run Cell(s)',
+    label: 'Run Selected Cells and Don\'t Advance',
     execute: args => {
       const current = getCurrent(args);
 
@@ -582,7 +588,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.runAndInsert, {
-    label: 'Run Cell(s) and Insert Below',
+    label: 'Run Selected Cells and Insert Below',
     execute: args => {
       const current = getCurrent(args);
 
@@ -606,6 +612,60 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       }
     },
     isEnabled
+  });
+  commands.addCommand(CommandIDs.runAllAbove, {
+    label: 'Run All Above Selected Cell',
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        const { context, notebook } = current;
+
+        return NotebookActions.runAllAbove(notebook, context.session);
+      }
+    },
+    isEnabled: args => {
+      if (!isEnabled()) { return false; }
+      const { notebook } = tracker.currentWidget;
+      const index = notebook.activeCellIndex;
+      // Can't run above if we are at the top of a notebook.
+      if (index === 0) { return false; }
+      // If there are selections that are not the active cell,
+      // this command is confusing, so disable it.
+      for (let i = 0; i < notebook.widgets.length; ++i) {
+        if (notebook.isSelected(notebook.widgets[i]) && i !== index) {
+          return false;
+        }
+      }
+      return true;
+    }
+  });
+  commands.addCommand(CommandIDs.runAllBelow, {
+    label: 'Run Selected Cell and All Below',
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        const { context, notebook } = current;
+
+        return NotebookActions.runAllBelow(notebook, context.session);
+      }
+    },
+    isEnabled: args => {
+      if (!isEnabled()) { return false; }
+      const { notebook } = tracker.currentWidget;
+      const index = notebook.activeCellIndex;
+      // Can't run above if we are at the top of a notebook.
+      if (index === notebook.widgets.length - 1) { return false; }
+      // If there are selections that are not the active cell,
+      // this command is confusing, so disable it.
+      for (let i = 0; i < notebook.widgets.length; ++i) {
+        if (notebook.isSelected(notebook.widgets[i]) && i !== index) {
+          return false;
+        }
+      }
+      return true;
+    }
   });
   commands.addCommand(CommandIDs.restart, {
     label: 'Restart Kernel',
@@ -643,7 +703,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.trust, {
-    label: () => `Trust ${currentName()}`,
+    label: () => 'Trust Notebook',
     execute: args => {
       const current = getCurrent(args);
 
@@ -658,9 +718,8 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.exportToFormat, {
     label: args => {
         const formatLabel = (args['label']) as string;
-        const name = currentName();
 
-        return (args['isPalette'] ? `Export ${name} to ` : '') + formatLabel;
+        return (args['isPalette'] ? 'Export Notebook to ' : '') + formatLabel;
     },
     execute: args => {
       const current = getCurrent(args);
@@ -730,7 +789,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.clearOutputs, {
-    label: 'Clear Output(s)',
+    label: 'Clear Outputs',
     execute: args => {
       const current = getCurrent(args);
 
@@ -791,7 +850,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.cut, {
-    label: 'Cut Cell(s)',
+    label: 'Cut Cells',
     execute: args => {
       const current = getCurrent(args);
 
@@ -802,7 +861,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.copy, {
-    label: 'Copy Cell(s)',
+    label: 'Copy Cells',
     execute: args => {
       const current = getCurrent(args);
 
@@ -812,19 +871,41 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     },
     isEnabled
   });
-  commands.addCommand(CommandIDs.paste, {
-    label: 'Paste Cell(s) Below',
+  commands.addCommand(CommandIDs.pasteBelow, {
+    label: 'Paste Cells Below',
     execute: args => {
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.paste(current.notebook);
+        return NotebookActions.paste(current.notebook, 'below');
+      }
+    },
+    isEnabled
+  });
+  commands.addCommand(CommandIDs.pasteAbove, {
+    label: 'Paste Cells Above',
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.paste(current.notebook, 'above');
+      }
+    },
+    isEnabled
+  });
+  commands.addCommand(CommandIDs.pasteAndReplace, {
+    label: 'Paste Cells and Replace',
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.paste(current.notebook, 'replace');
       }
     },
     isEnabled
   });
   commands.addCommand(CommandIDs.deleteCell, {
-    label: 'Delete Cell(s)',
+    label: 'Delete Cells',
     execute: args => {
       const current = getCurrent(args);
 
@@ -843,10 +924,16 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.splitCell(current.notebook);
       }
     },
-    isEnabled
+    isEnabled: () => {
+      // Special case this `isEnabled` so that it is only available
+      // in edit mode, when it is clearer where the cursor is placed.
+      const current = tracker.currentWidget;
+      return current !== null && current === app.shell.currentWidget &&
+             current.notebook.mode === 'edit';
+    }
   });
   commands.addCommand(CommandIDs.merge, {
-    label: 'Merge Selected Cell(s)',
+    label: 'Merge Selected Cells',
     execute: args => {
       const current = getCurrent(args);
 
@@ -922,8 +1009,30 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     },
     isEnabled
   });
+  commands.addCommand(CommandIDs.selectAll, {
+    label: 'Select All Cells',
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.selectAll(current.notebook);
+      }
+    },
+    isEnabled
+  });
+  commands.addCommand(CommandIDs.deselectAll, {
+    label: 'Deselect All Cells',
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.deselectAll(current.notebook);
+      }
+    },
+    isEnabled
+  });
   commands.addCommand(CommandIDs.moveUp, {
-    label: 'Move Cell(s) Up',
+    label: 'Move Cells Up',
     execute: args => {
       const current = getCurrent(args);
 
@@ -934,7 +1043,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.moveDown, {
-    label: 'Move Cell(s) Down',
+    label: 'Move Cells Down',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1130,7 +1239,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.hideCode, {
-    label: 'Hide Code',
+    label: 'Collapse Selected Code',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1141,7 +1250,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.showCode, {
-    label: 'Show Code',
+    label: 'Expand Selected Code',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1152,7 +1261,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.hideAllCode, {
-    label: 'Hide All Code',
+    label: 'Collapse All Code',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1163,7 +1272,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.showAllCode, {
-    label: 'Show All Code',
+    label: 'Expand All Code',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1174,7 +1283,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.hideOutput, {
-    label: 'Hide Output',
+    label: 'Collapse Selected Outputs',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1185,7 +1294,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.showOutput, {
-    label: 'Show Output',
+    label: 'Expand Selected Outputs',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1196,7 +1305,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.hideAllOutputs, {
-    label: 'Hide All Outputs',
+    label: 'Collapse All Outputs',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1207,7 +1316,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.showAllOutputs, {
-    label: 'Show All Outputs',
+    label: 'Expand All Outputs',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1231,6 +1340,10 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.restartClear,
     CommandIDs.restartRunAll,
     CommandIDs.runAll,
+    CommandIDs.runAllAbove,
+    CommandIDs.runAllBelow,
+    CommandIDs.selectAll,
+    CommandIDs.deselectAll,
     CommandIDs.clearAllOutputs,
     CommandIDs.toggleAllLines,
     CommandIDs.editMode,
@@ -1258,7 +1371,9 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.toRaw,
     CommandIDs.cut,
     CommandIDs.copy,
-    CommandIDs.paste,
+    CommandIDs.pasteBelow,
+    CommandIDs.pasteAbove,
+    CommandIDs.pasteAndReplace,
     CommandIDs.deleteCell,
     CommandIDs.split,
     CommandIDs.merge,
@@ -1306,19 +1421,23 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   // Add a clearer to the edit menu
   mainMenu.editMenu.clearers.add({
     tracker,
-    noun: 'All Cell Outputs',
-    clear: (current: NotebookPanel) => {
+    noun: 'Cell Outputs',
+    clearCurrent: (current: NotebookPanel) => {
+      return NotebookActions.clearOutputs(current.notebook);
+    },
+    clearAll: (current: NotebookPanel) => {
       return NotebookActions.clearAllOutputs(current.notebook);
     }
   } as IEditMenu.IClearer<NotebookPanel>);
 
   // Add new notebook creation to the file menu.
-  mainMenu.fileMenu.newMenu.addItem({ command: CommandIDs.createNew });
+  mainMenu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 10);
 
   // Add a close and shutdown command to the file menu.
   mainMenu.fileMenu.closeAndCleaners.add({
     tracker,
     action: 'Shutdown',
+    name: 'Notebook',
     closeAndCleanup: (current: NotebookPanel) => {
       const fileName = current.title.label;
       return showDialog({
@@ -1336,7 +1455,7 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
 
   // Add a notebook group to the File menu.
   let exportTo = new Menu({ commands } );
-  exportTo.title.label = 'Export to ...';
+  exportTo.title.label = 'Export Notebook As…';
   EXPORT_TO_FORMATS.forEach(exportToFormat => {
     exportTo.addItem({ command: CommandIDs.exportToFormat, args: exportToFormat });
   });
@@ -1356,14 +1475,20 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
       }
       return Promise.resolve(void 0);
     },
+    noun: 'All Outputs',
     restartKernel: current => current.session.restart(),
+    restartKernelAndClear: current => {
+      NotebookActions.clearAllOutputs(current.notebook);
+      return current.session.restart();
+    },
     changeKernel: current => current.session.selectKernel(),
     shutdownKernel: current => current.session.shutdown(),
   } as IKernelMenu.IKernelUser<NotebookPanel>);
 
   // Add a console creator the the Kernel menu
-  mainMenu.kernelMenu.consoleCreators.add({
+  mainMenu.fileMenu.consoleCreators.add({
     tracker,
+    name: 'Notebook',
     createConsole: current => {
       const options: ReadonlyJSONObject = {
         path: current.context.path,
@@ -1371,16 +1496,24 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
       };
       return commands.execute('console:create', options);
     }
-  } as IKernelMenu.IConsoleCreator<NotebookPanel>);
+  } as IFileMenu.IConsoleCreator<NotebookPanel>);
 
   // Add some commands to the application view menu.
-  const viewGroup = [
+  const collapseGroup = [
+    CommandIDs.hideCode,
+    CommandIDs.hideOutput,
     CommandIDs.hideAllCode,
+    CommandIDs.hideAllOutputs
+  ].map(command => { return { command }; });
+  mainMenu.viewMenu.addGroup(collapseGroup, 10);
+
+  const expandGroup = [
+    CommandIDs.showCode,
+    CommandIDs.showOutput,
     CommandIDs.showAllCode,
-    CommandIDs.hideAllOutputs,
     CommandIDs.showAllOutputs
   ].map(command => { return { command }; });
-  mainMenu.viewMenu.addGroup(viewGroup, 10);
+  mainMenu.viewMenu.addGroup(expandGroup, 11);
 
   // Add an IEditorViewer to the application view menu
   mainMenu.viewMenu.editorViewers.add({
@@ -1400,8 +1533,7 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   // Add an ICodeRunner to the application run menu
   mainMenu.runMenu.codeRunners.add({
     tracker,
-    noun: 'Cell(s)',
-    pluralNoun: 'Cells',
+    noun: 'Cells',
     run: current => {
       const { context, notebook } = current;
       return NotebookActions.runAndAdvance(notebook, context.session)
@@ -1412,33 +1544,64 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
       return NotebookActions.runAll(notebook, context.session)
       .then(() => void 0);
     },
-    runAbove: current => {
+    restartAndRunAll: current => {
       const { context, notebook } = current;
-      return NotebookActions.runAllAbove(notebook, context.session)
-      .then(() => void 0);
-    },
-    runBelow: current => {
-      const { context, notebook } = current;
-      return NotebookActions.runAllBelow(notebook, context.session)
+      return context.session.restart()
+      .then(() => { NotebookActions.runAll(notebook, context.session); })
       .then(() => void 0);
     }
   } as IRunMenu.ICodeRunner<NotebookPanel>);
+
+  // Add a run+insert and run+don't advance group to the run menu.
+  const runExtras = [
+    CommandIDs.runAndInsert,
+    CommandIDs.run
+  ].map(command => { return { command }; });
+
+  // Add a run all above/below group to the run menu.
+  const runAboveBelowGroup = [
+    CommandIDs.runAllAbove,
+    CommandIDs.runAllBelow
+  ].map(command => { return { command }; });
 
   // Add commands to the application edit menu.
   const undoCellActionGroup = [
     CommandIDs.undoCellAction,
     CommandIDs.redoCellAction
   ].map(command => { return { command }; });
-  const editGroup = [
+
+  const copyGroup = [
     CommandIDs.cut,
     CommandIDs.copy,
-    CommandIDs.paste,
-    CommandIDs.deleteCell,
+    CommandIDs.pasteBelow,
+    CommandIDs.pasteAbove,
+    CommandIDs.pasteAndReplace,
+  ].map(command => { return { command }; });
+
+  const selectGroup = [
+    CommandIDs.selectAll,
+    CommandIDs.deselectAll,
+  ].map(command => { return { command }; });
+
+  const splitMergeGroup = [
     CommandIDs.split,
     CommandIDs.merge
   ].map(command => { return { command }; });
+
+  const moveCellsGroup = [
+    CommandIDs.moveUp,
+    CommandIDs.moveDown
+  ].map(command => { return { command }; });
+
+
   mainMenu.editMenu.addGroup(undoCellActionGroup, 4);
-  mainMenu.editMenu.addGroup(editGroup, 5);
+  mainMenu.editMenu.addGroup(copyGroup, 5);
+  mainMenu.editMenu.addGroup([{ command: CommandIDs.deleteCell }], 6);
+  mainMenu.editMenu.addGroup(selectGroup, 7);
+  mainMenu.editMenu.addGroup(moveCellsGroup, 8);
+  mainMenu.editMenu.addGroup(splitMergeGroup, 9);
+  mainMenu.runMenu.addGroup(runExtras, 10);
+  mainMenu.runMenu.addGroup(runAboveBelowGroup, 11);
 
   // Add kernel information to the application help menu.
   mainMenu.helpMenu.kernelUsers.add({
