@@ -69,7 +69,6 @@ function activate(app: JupyterLab, palette: ICommandPalette): ILauncher {
       const id = `launcher-${Private.id++}`;
       const callback = (item: Widget) => {
         shell.addToMainArea(item, { ref: id });
-        shell.activateById(item.id);
       };
       const launcher = new Launcher({ cwd, callback });
 
@@ -83,10 +82,7 @@ function activate(app: JupyterLab, palette: ICommandPalette): ILauncher {
       // If there are any other widgets open, remove the launcher close icon.
       main.title.closable = !!toArray(shell.widgets('main')).length;
 
-      shell.addToMainArea(main);
-      if (args['activate'] !== false) {
-        shell.activateById(main.id);
-      }
+      shell.addToMainArea(main, { activate: args['activate'] as boolean });
 
       shell.layoutModified.connect(() => {
         // If there is only a launcher open, remove the close icon.

@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, InstanceTracker
+  ICommandPalette, InstanceTracker, MainAreaWidget
 } from '@jupyterlab/apputils';
 
 import {
@@ -18,11 +18,7 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  Message
-} from '@phosphor/messaging';
-
-import {
-  PanelLayout, Widget
+  Widget
 } from '@phosphor/widgets';
 
 import '../style/index.css';
@@ -63,45 +59,6 @@ const SOURCE = require('../faq.md');
 
 
 /**
- * A widget which is an faq viewer.
- */
-class FAQWidget extends Widget {
-  /**
-   * Construct a new `AppWidget`.
-   */
-  constructor(content: Widget) {
-    super();
-    this.addClass('jp-FAQ');
-    this.title.closable = true;
-    this.node.tabIndex = -1;
-    this.id = 'faq';
-    this.title.label = 'FAQ';
-
-    let toolbar = new Widget();
-    toolbar.addClass('jp-FAQ-toolbar');
-
-    let layout = this.layout = new PanelLayout();
-    layout.addWidget(toolbar);
-    layout.addWidget(content);
-  }
-
-  /**
-   * Handle `close-request` events for the widget.
-   */
-  onCloseRequest(message: Message): void {
-    this.dispose();
-  }
-
-  /**
-   * Handle `activate-request` events for the widget.
-   */
-  onActivateRequest(message: Message): void {
-    this.node.focus();
-  }
-}
-
-
-/**
  * Activate the FAQ plugin.
  */
 function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRestorer, rendermime: IRenderMimeRegistry): void {
@@ -124,10 +81,10 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRe
     });
     content.renderModel(model);
     content.addClass('jp-FAQ-content');
-    return new FAQWidget(content);
+    return new MainAreaWidget({ content });
   };
 
-  let widget: FAQWidget;
+  let widget: MainAreaWidget;
 
   commands.addCommand(command, {
     label: 'Open FAQ',
@@ -137,7 +94,7 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRe
       }
       if (!tracker.has(widget)) {
         tracker.add(widget);
-        shell.addToMainArea(widget);
+        shell.addToMainArea(widget, { activate: false });
       }
       shell.activateById(widget.id);
     }

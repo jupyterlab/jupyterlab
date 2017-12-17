@@ -170,8 +170,6 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
       return promise.then(session => {
         term.session = session;
         tracker.add(term);
-        shell.activateById(main.id);
-
         return main;
       }).catch(() => { main.dispose(); });
     }
