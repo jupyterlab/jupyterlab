@@ -580,6 +580,7 @@ namespace Private {
         currentIndex: area.currentIndex,
         widgets: area.widgets
           .map(widget => {
+            // Handle a tracked widget that is wrapped in a main area widget.
             if (widget instanceof MainAreaWidget) {
               widget = widget.content;
             }
@@ -648,6 +649,7 @@ namespace Private {
         currentIndex: currentIndex || 0,
         widgets: widgets && widgets.map(widget => names.get(widget))
             .map(widget => {
+              // Handle a tracked widget that is wrapped in a main area widget.
               if (widget.parent instanceof MainAreaWidget) {
                 widget = widget.parent;
               }
