@@ -20,10 +20,6 @@ import {
 } from '@phosphor/datagrid';
 
 import {
-  Message
-} from '@phosphor/messaging';
-
-import {
   PanelLayout, Widget
 } from '@phosphor/widgets';
 
@@ -116,14 +112,6 @@ class CSVViewer extends Widget implements DocumentRegistry.IReadyWidget {
       this._monitor.dispose();
     }
     super.dispose();
-  }
-
-  /**
-   * Handle `'activate-request'` messages.
-   */
-  protected onActivateRequest(msg: Message): void {
-    this.node.tabIndex = -1;
-    this.node.focus();
   }
 
   /**

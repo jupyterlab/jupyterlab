@@ -501,7 +501,7 @@ namespace Private {
   });
 
   /**
-   * An attached property for a widget's ID in the state database.
+   * An attached property for a widget's name in the state database.
    */
   export
   const nameProperty = new AttachedProperty<Widget, string>({

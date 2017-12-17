@@ -295,6 +295,13 @@ abstract class ABCWidgetFactory<T extends DocumentRegistry.IReadyWidget, U exten
   }
 
   /**
+   * Whether a micro toolbar should be added to the widget.
+   */
+  get microToolbar(): boolean {
+    return true;
+  }
+
+  /**
    * A signal emitted when a widget is created.
    */
   get widgetCreated(): ISignal<DocumentRegistry.IWidgetFactory<T, U>, T> {

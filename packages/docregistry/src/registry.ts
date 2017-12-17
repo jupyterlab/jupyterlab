@@ -856,9 +856,14 @@ namespace DocumentRegistry {
   export
   interface IWidgetFactory<T extends IReadyWidget, U extends IModel> extends IDisposable, IWidgetFactoryOptions {
     /**
+     * Whether a micro toolbar should be added to the widget.
+     */
+    readonly microToolbar: boolean;
+
+    /**
      * A signal emitted when a widget is created.
      */
-    widgetCreated: ISignal<IWidgetFactory<T, U>, T>;
+    readonly widgetCreated: ISignal<IWidgetFactory<T, U>, T>;
 
     /**
      * Create a new widget given a context.

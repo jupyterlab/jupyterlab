@@ -8,18 +8,6 @@
   min-width: 240px;
   min-height: 240px;
   background: white;
-  outline: none;
-}
-
-
-.jp-Help::before {
-    content: '';
-    display: block;
-    height: var(--jp-toolbar-micro-height);
-    background: var(--jp-toolbar-background);
-    border-bottom: 1px solid var(--jp-toolbar-border-color);
-    box-shadow: var(--jp-toolbar-box-shadow);
-    z-index: 1;
 }
 
 

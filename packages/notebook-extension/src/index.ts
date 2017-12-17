@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, MainAreaWidget, showDialog
+  Dialog, ICommandPalette, showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IStateDB, PageConfig, URLExt, uuid
+  IStateDB, PageConfig, URLExt
 } from '@jupyterlab/coreutils';
 
 import  {
@@ -51,7 +51,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  Menu, PanelLayout, Widget
+  Menu, Widget
 } from '@phosphor/widgets';
 
 
@@ -1032,14 +1032,9 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     execute: args => {
       const current = getCurrent(args);
       const nb = current.notebook;
-      const newCell = nb.activeCell.clone();
-      const layout = new PanelLayout();
-      const p = new MainAreaWidget({layout: layout});
-      p.id = `Cell-${uuid()}`;
-      p.title.closable = true;
-      p.title.label = current.title.label ? `Cell: ${current.title.label}` : 'Cell';
-      layout.addWidget(newCell);
-      shell.addToMainArea(p);
+      const child = nb.activeCell.clone();
+      child.title.label = current.title.label ? `Cell: ${current.title.label}` : 'Cell';
+      current.context.addSibling(child);
     },
     isEnabled
   });

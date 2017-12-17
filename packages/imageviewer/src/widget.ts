@@ -39,7 +39,6 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
   constructor(context: DocumentRegistry.Context) {
     super({ node: Private.createNode() });
     this.context = context;
-    this.node.tabIndex = -1;
     this.addClass(IMAGE_CLASS);
 
     this._onTitleChanged();
@@ -93,13 +92,6 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
       return;
     }
     this._render();
-  }
-
-  /**
-   * Handle `'activate-request'` messages.
-   */
-  protected onActivateRequest(msg: Message): void {
-    this.node.focus();
   }
 
   /**

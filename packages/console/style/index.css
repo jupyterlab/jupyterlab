@@ -19,17 +19,6 @@
 }
 
 
-.jp-ConsolePanel::before {
-    content: '';
-    display: block;
-    height: var(--jp-toolbar-micro-height);
-    background: var(--jp-toolbar-background);
-    border-bottom: 1px solid var(--jp-toolbar-border-color);
-    box-shadow: var(--jp-toolbar-box-shadow);
-    z-index: 1;
-}
-
-
 .jp-CodeConsole {
   height: 100%;
   padding: 0;

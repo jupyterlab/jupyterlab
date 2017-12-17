@@ -220,7 +220,7 @@ class ApplicationShell extends Widget {
     // layout has been restored.
     widgets.forEach(widget => {
       if (!widget.parent) {
-        this.addToMainArea(widget);
+        this.addToMainArea(widget, { activate: false });
       }
     });
 
@@ -369,6 +369,10 @@ class ApplicationShell extends Widget {
     }
 
     dock.addWidget(widget, { mode: 'tab-after', ref });
+
+    if (options.activate !== false) {
+      dock.activateWidget(widget);
+    }
   }
 
   /**
@@ -762,6 +766,13 @@ namespace ApplicationShell {
      * The default is `null`.
      */
     ref?: string | null;
+
+    /**
+     * Whether to activate the widget.
+     *
+     * The default is `true`.
+     */
+    activate?: boolean;
   }
 }
 

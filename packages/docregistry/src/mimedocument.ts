@@ -10,7 +10,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  BoxLayout, Widget
+  PanelLayout, Widget
 } from '@phosphor/widgets';
 
 import {
@@ -41,22 +41,15 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
   constructor(options: MimeDocument.IOptions) {
     super();
     this.addClass('jp-MimeDocument');
-    this.node.tabIndex = -1;
-    let layout = this.layout = new BoxLayout();
-    let toolbar = new Widget();
-    toolbar.addClass('jp-Toolbar');
-    layout.addWidget(toolbar);
-    BoxLayout.setStretch(toolbar, 0);
+
+    this._renderer = options.renderer;
+    let layout = this.layout = new PanelLayout();
+    layout.addWidget(this._renderer);
     let context = options.context;
-    this.rendermime = options.rendermime.clone({ resolver: context });
 
     this._context = context;
     this._mimeType = options.mimeType;
     this._dataType = options.dataType || 'string';
-
-    this._renderer = this.rendermime.createRenderer(this._mimeType);
-    layout.addWidget(this._renderer);
-    BoxLayout.setStretch(this._renderer, 1);
 
     context.pathChanged.connect(this._onPathChanged, this);
     this._onPathChanged();
@@ -84,11 +77,6 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
   get context(): DocumentRegistry.Context {
     return this._context;
   }
-
-  /**
-   * The rendermime instance associated with the widget.
-   */
-  readonly rendermime: RenderMimeRegistry;
 
   /**
    * A promise that resolves when the widget is ready.
@@ -205,9 +193,9 @@ namespace MimeDocument {
     context: DocumentRegistry.Context;
 
     /**
-     * The rendermime instance.
+     * The renderer.
      */
-    rendermime: RenderMimeRegistry;
+    renderer: IRenderMime.IRenderer;
 
     /**
      * The mime type.
@@ -249,10 +237,14 @@ class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument, DocumentRegistr
   protected createNewWidget(context: DocumentRegistry.Context): MimeDocument {
     let ft = this._fileType;
     let mimeType = ft.mimeTypes.length ? ft.mimeTypes[0] : 'text/plain';
+
+    let rendermime = this._rendermime.clone({ resolver: context });
+    let renderer = rendermime.createRenderer(mimeType);
+
     let widget = new MimeDocument({
       context,
       mimeType,
-      rendermime: this._rendermime.clone(),
+      renderer,
       renderTimeout: this._renderTimeout,
       dataType: this._dataType,
     });

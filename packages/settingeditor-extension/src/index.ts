@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  InstanceTracker
+  InstanceTracker, MainAreaWidget
 } from '@jupyterlab/apputils';
 
 import {
@@ -86,7 +86,7 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, registry: ISetting
   commands.addCommand(CommandIDs.open, {
     execute: () => {
       if (tracker.currentWidget) {
-        shell.activateById(tracker.currentWidget.id);
+        shell.activateById(tracker.currentWidget.parent.id);
         return;
       }
 
@@ -114,9 +114,8 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, registry: ISetting
       editor.id = namespace;
       editor.title.label = 'Settings';
       editor.title.iconClass = 'jp-SettingsIcon';
-      editor.title.closable = true;
-      shell.addToMainArea(editor);
-      shell.activateById(editor.id);
+      let main = new MainAreaWidget({ content: editor });
+      shell.addToMainArea(main);
     },
     label: 'Settings'
   });

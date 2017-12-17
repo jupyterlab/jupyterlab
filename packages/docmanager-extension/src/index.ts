@@ -6,7 +6,8 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  showDialog, showErrorMessage, Spinner, Dialog, ICommandPalette
+  showDialog, showErrorMessage, Spinner, Dialog, ICommandPalette, 
+  MainAreaWidget
 } from '@jupyterlab/apputils';
 
 import {
@@ -89,14 +90,20 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
           ...widget.title.dataset
         };
         if (!widget.isAttached) {
-          app.shell.addToMainArea(widget);
+          let factory = docManager.factoryForWidget(widget);
+          let main = new MainAreaWidget({
+            content: widget,
+            microToolbar: factory.microToolbar
+          });
+          app.shell.addToMainArea(main);
 
           // Add a loading spinner, and remove it when the widget is ready.
           let spinner = new Spinner();
           widget.node.appendChild(spinner.node);
           widget.ready.then(() => { widget.node.removeChild(spinner.node); });
+        } else {
+          app.shell.activateById(widget.parent.id);
         }
-        app.shell.activateById(widget.id);
 
         // Handle dirty state for open documents.
         let context = docManager.contextForWidget(widget);
@@ -207,7 +214,8 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
       const factory = args['factory'] as string || void 0;
       const kernel = args['kernel'] as Kernel.IModel || void 0;
       return docManager.services.contents.get(path, { content: false })
-        .then(() => docManager.openOrReveal(path, factory, kernel));
+        .then(() => docManager.openOrReveal(path, factory, kernel))
+        .then(widget => widget.parent);
     },
     icon: args => args['icon'] as string || '',
     label: args => (args['label'] || args['factory']) as string,

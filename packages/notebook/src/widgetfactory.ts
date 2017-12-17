@@ -59,6 +59,13 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
   readonly mimeTypeService: IEditorMimeTypeService;
 
   /**
+   * Whether a micro toolbar should be added to the widget.
+   */
+  get microToolbar(): boolean {
+    return false;
+  }
+
+  /**
    * Create a new widget.
    *
    * #### Notes
