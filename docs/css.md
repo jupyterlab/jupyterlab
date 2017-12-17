@@ -13,8 +13,8 @@ depend on CSS variables dfined in a main theme package.
   imported into the plugin's `index.css`.
 * The JupyterLab default CSS variables in the `theme-light-extension` and
   `theme-dark-extension` packages are used to style packages where ever possible.
-  Individual packages should not npm-depend on these package though, to allow the
-  theme to be swaped out.
+  Individual packages should not npm-depend on these packages though, to allow the
+  theme to be swapped out.
 * Additional public/private CSS variables are defined by plugins sparingly and in
   accordance with the conventions described below.
 
