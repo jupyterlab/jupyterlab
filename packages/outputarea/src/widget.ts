@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject
+  JSONObject, ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
 import {
@@ -30,8 +30,12 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  IOutputModel, RenderMimeRegistry
+ IOutputModel, RenderMimeRegistry
 } from '@jupyterlab/rendermime';
+
+import {
+  IRenderMime
+} from '@jupyterlab/rendermime-interfaces';
 
 import {
   Kernel, KernelMessage
@@ -348,7 +352,21 @@ class OutputArea extends Widget {
       model.data, !model.trusted
     );
     if (mimeType) {
+      let metadata = model.metadata;
+      let mimeMd = metadata[mimeType] as ReadonlyJSONObject;
+      let isolated = false;
+      // mime-specific higher priority
+      if (mimeMd && mimeMd['isolated'] !== undefined) {
+        isolated = mimeMd['isolated'] as boolean;
+      } else {
+        // fallback on global
+        isolated = metadata['isolated'] as boolean;
+      }
+
       let output = this.rendermime.createRenderer(mimeType);
+      if (isolated === true) {
+        output = new Private.IsolatedRenderer(output);
+      }
       output.renderModel(model);
       output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
       panel.addWidget(output);
@@ -707,5 +725,68 @@ namespace Private {
     node.appendChild(prompt);
     node.appendChild(input);
     return node;
+  }
+
+  /**
+   * A renderer for IFrame data.
+   */
+  export
+  class IsolatedRenderer extends Widget implements IRenderMime.IRenderer {
+    /**
+     * Create an isolated renderer.
+     */
+    constructor(wrapped: IRenderMime.IRenderer) {
+      super({ node: document.createElement('iframe') });
+      this.addClass('jp-mod-isolated');
+
+      this._wrapped = wrapped;
+
+      // Once the iframe is loaded, the subarea is dynamically inserted
+      let iframe = this.node as HTMLIFrameElement;
+
+      iframe.frameBorder = '0';
+      iframe.scrolling = 'auto';
+
+      iframe.addEventListener('load', () => {
+        // Workaround needed by Firefox, to properly render svg inside
+        // iframes, see https://stackoverflow.com/questions/10177190/
+        // svg-dynamically-added-to-iframe-does-not-render-correctly
+        iframe.contentDocument.open();
+
+        // Insert the subarea into the iframe
+        // We must directly write the html. At this point, subarea doesn't
+        // contain any user content.
+        iframe.contentDocument.write(this._wrapped.node.innerHTML);
+
+        iframe.contentDocument.close();
+
+        let body = iframe.contentDocument.body;
+
+        // Adjust the iframe height automatically
+        iframe.style.height = body.scrollHeight + 'px';
+      });
+    }
+
+    /**
+     * Render a mime model.
+     *
+     * @param model - The mime model to render.
+     *
+     * @returns A promise which resolves when rendering is complete.
+     *
+     * #### Notes
+     * This method may be called multiple times during the lifetime
+     * of the widget to update it if and when new data is available.
+     */
+    renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+      return this._wrapped.renderModel(model).then(() => {
+        let win = (this.node as HTMLIFrameElement).contentWindow;
+        if (win) {
+          win.location.reload();
+        }
+      });
+    }
+
+    private _wrapped: IRenderMime.IRenderer;
   }
 }
