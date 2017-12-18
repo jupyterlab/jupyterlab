@@ -175,7 +175,8 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   /* Console specific styles */
 
-  --jp-console-background: var(--jp-layout-color1);
+  --jp-console-padding: 10px;
+  --jp-console-background: var(--jp-layout-color0);
 
   /* Toolbar specific styles */
 
