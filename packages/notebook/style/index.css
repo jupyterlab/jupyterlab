@@ -97,26 +97,40 @@
   color: var(--jp-cell-prompt-not-active-font-color);
 }
 
+
 .jp-Notebook .jp-Cell:not(.jp-mod-active) .jp-OutputPrompt {
   opacity: var(--jp-cell-prompt-not-active-opacity);
   color: var(--jp-cell-prompt-not-active-font-color);
 }
 
+
 .jp-Notebook .jp-Cell.jp-mod-active .jp-Cell-inputCollapser .jp-Collapser-child,
 .jp-Notebook .jp-Cell.jp-mod-active .jp-Cell-outputCollapser .jp-Collapser-child {
   border-left: 4px solid var(--jp-brand-color1);
+  opacity: 1;
 }
+
 
 .jp-Notebook .jp-Cell .jp-Cell-inputCollapser:hover .jp-Collapser-child,
 .jp-Notebook .jp-Cell .jp-Cell-outputCollapser:hover .jp-Collapser-child {
   border-left: 20px solid var(--jp-brand-color1);
+  opacity: .4;
 }
+
+
+.jp-Notebook .jp-Cell.jp-mod-active .jp-Cell-inputCollapser:hover .jp-Collapser-child,
+.jp-Notebook .jp-Cell.jp-mod-active .jp-Cell-outputCollapser:hover .jp-Collapser-child {
+  border-left: 20px solid var(--jp-brand-color1);
+  opacity: 1;
+}
+
 
 /* Command mode */
 
 .jp-Notebook.jp-mod-commandMode .jp-Cell.jp-mod-selected {
   background: var(--jp-notebook-multiselected-color);
 }
+
 
 .jp-Notebook.jp-mod-commandMode .jp-Cell.jp-mod-active.jp-mod-selected:not(.jp-mod-multiSelected) {
   background: transparent;
