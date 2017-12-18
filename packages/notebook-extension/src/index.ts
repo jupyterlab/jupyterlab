@@ -1147,6 +1147,10 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       p.id = `Cell-${uuid()}`;
       p.title.closable = true;
       p.title.label = current.title.label ? `Cell: ${current.title.label}` : 'Cell';
+      p.title.icon = NOTEBOOK_ICON_CLASS;
+      // Add the notebook class to give it all the styles of a cell in a notebook.
+      p.addClass('jp-Notebook');
+      p.addClass('jp-CellView');
       layout.addWidget(newCell);
       shell.addToMainArea(p);
     },
