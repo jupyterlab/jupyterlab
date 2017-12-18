@@ -62,15 +62,6 @@
       "default": { },
       "properties": {
         "command": { "default": "console:linebreak" },
-        "keys": { "default": ["Ctrl Enter"] },
-        "selector": { "default": ".jp-CodeConsole-promptCell" }
-      },
-      "type": "object"
-    },
-    "console:run-unforced": {
-      "default": { },
-      "properties": {
-        "command": { "default": "console:run-unforced" },
         "keys": { "default": ["Enter"] },
         "selector": { "default": ".jp-CodeConsole-promptCell" }
       },
