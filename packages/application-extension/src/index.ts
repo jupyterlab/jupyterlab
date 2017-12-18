@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin, ILayoutRestorer, LayoutRestorer
+  JupyterLab, JupyterLabPlugin, ILayoutRestorer, IRouter, LayoutRestorer, Router
 } from '@jupyterlab/application';
 
 import {
@@ -151,6 +151,16 @@ const layout: JupyterLabPlugin<ILayoutRestorer> = {
 
 
 /**
+ * The default URL router provider.
+ */
+const router: JupyterLabPlugin<IRouter> = {
+  id: '@jupyterlab/application-extension:router',
+  activate: () => new Router(),
+  autoStart: true,
+  provides: IRouter
+};
+
+/**
  * Add the main application commands.
  */
 function addCommands(app: JupyterLab, palette: ICommandPalette): void {
@@ -240,6 +250,6 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [main, layout];
+const plugins: JupyterLabPlugin<any>[] = [main, layout, router];
 
 export default plugins;
