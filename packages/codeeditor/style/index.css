@@ -82,7 +82,7 @@
 
 
 .jp-JSONEditor-host.jp-mod-focused {
-  background-color: var(--jp-input-background-color-active);
-  border: 1px solid var(--jp-input-border-color-active);
+  background-color: var(--jp-input-active-background);
+  border: 1px solid var(--jp-input-active-border-color);
   box-shadow: var(--jp-input-box-shadow);
 }

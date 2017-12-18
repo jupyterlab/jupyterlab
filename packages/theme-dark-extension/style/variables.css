@@ -64,10 +64,10 @@ all of MD as it is not optimized for dense, information rich UIs.
      These will typically go from light to darker, in both a dark and light theme
    */
 
-  --jp-inverse-ui-font-color0: rgba(0,0,0,1.0);
-  --jp-inverse-ui-font-color1: rgba(0,0,0,0.8);
-  --jp-inverse-ui-font-color2: rgba(0,0,0,0.5);
-  --jp-inverse-ui-font-color3: rgba(0,0,0,0.3);
+  --jp-ui-inverse-font-color0: rgba(0,0,0,1.0);
+  --jp-ui-inverse-font-color1: rgba(0,0,0,0.8);
+  --jp-ui-inverse-font-color2: rgba(0,0,0,0.5);
+  --jp-ui-inverse-font-color3: rgba(0,0,0,0.3);
 
   /* Content Fonts
 
@@ -145,15 +145,15 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-cell-editor-background: var(--jp-layout-color1);
   --jp-cell-editor-border-color: var(--md-grey-700);
   --jp-cell-editor-box-shadow: inset 0 0 2px var(--md-blue-300);
-  --jp-cell-editor-background-active: var(--jp-layout-color0);
-  --jp-cell-editor-border-color-active: var(--jp-brand-color1);
+  --jp-cell-editor-active-background: var(--jp-layout-color0);
+  --jp-cell-editor-active-border-color: var(--jp-brand-color1);
   --jp-cell-padding: 5px;
   --jp-cell-prompt-width: 100px;
   --jp-cell-prompt-font-family: 'Roboto Mono', monospace;
   --jp-cell-prompt-letter-spacing: 0px;
   --jp-cell-prompt-opacity: 1.0;
-  --jp-cell-prompt-opacity-not-active: 0.5;
-  --jp-cell-prompt-font-color-not-active: var(--md-grey-300);
+  --jp-cell-prompt-not-active-opacity: 0.5;
+  --jp-cell-prompt-not-active-font-color: var(--md-grey-300);
   --jp-cell-inprompt-font-color: var(--md-grey-50);
   --jp-cell-outprompt-font-color: var(--md-grey-50);
 
@@ -161,12 +161,12 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   --jp-notebook-padding: 10px;
   --jp-notebook-scroll-padding: 100px;
-  --jp-notebook-select-background-color: var(--jp-layout-color1);
+  --jp-notebook-select-background: var(--jp-layout-color1);
   --jp-notebook-multiselected-color: rgba(33,150,243,.24);
-  --jp-rendermime-error-background: rgba(244,67,54,.28);
 
   /* Rendermime styles */
 
+  --jp-rendermime-error-background: rgba(244,67,54,.28);
   --jp-rendermime-row-background: var(--md-grey-900);
   --jp-rendermime-row-hover-background: rgba(3,169,244,.2);
 
@@ -189,11 +189,11 @@ all of MD as it is not optimized for dense, information rich UIs.
   /* Input field styles */
 
   --jp-input-box-shadow: inset 0 0 2px var(--md-blue-300);
-  --jp-input-background-color-active: var(--jp-layout-color0);
-  --jp-input-background-color-hover: var(--jp-layout-color2);
-  --jp-input-background-color: var(--md-grey-800);
+  --jp-input-active-background: var(--jp-layout-color0);
+  --jp-input-hover-background: var(--jp-layout-color2);
+  --jp-input-background: var(--md-grey-800);
   --jp-input-border-color: var(--jp-border-color1);
-  --jp-input-border-color-active: var(--jp-brand-color1);
+  --jp-input-active-border-color: var(--jp-brand-color1);
 
   /* General editor styles */
 

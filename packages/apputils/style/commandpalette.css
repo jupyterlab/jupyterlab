@@ -40,7 +40,7 @@
   overflow: overlay;
   padding: 0px 8px;
   border: 1px solid var(--jp-border-color0);
-  background-color: var(--jp-input-background-color-active);
+  background-color: var(--jp-input-active-background);
   height: 30px;
 }
 

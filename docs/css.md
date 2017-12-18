@@ -7,21 +7,22 @@ depend on CSS variables dfined in a main theme package.
 
 ## CSS checklist
 
-* CSS classnames are defined as all caps file-level `const`s and follow the CSS
-  class naming convention described below.
-* CSS files for packages are located within the `src/style` subdirecotory and
+* CSS classnames are defined inline in the code. We used to put them as all caps
+  file-level `const`s, but we are moving away from that.
+* CSS files for packages are located within the `src/style` subdirectory and
   imported into the plugin's `index.css`.
-* The JupyterLab default CSS variables in the `default-theme` package
-  are used to style packages where ever possible. Individual packages should not
-  depend on this package though, to allow the theme to be swaped out.
+* The JupyterLab default CSS variables in the `theme-light-extension` and
+  `theme-dark-extension` packages are used to style packages where ever possible.
+  Individual packages should not npm-depend on these packages though, to allow the
+  theme to be swapped out.
 * Additional public/private CSS variables are defined by plugins sparingly and in
   accordance with the conventions described below.
 
 ## CSS variables
 
 We are using native CSS variables in JupyterLab. This is to enable dynamic theming
-of built-in and third party plugins. As of Septmeber 2016, CSS variables are
-supported in the latest stable versions of all popular browsers, except for IE/Edge.
+of built-in and third party plugins. As of December 2017, CSS variables are
+supported in the latest stable versions of all popular browsers, except for IE.
 If a JupyterLab deployment needs to support these browsers, a server side CSS
 preprocessor such as Myth or cssnext may be used.
 
@@ -29,12 +30,15 @@ preprocessor such as Myth or cssnext may be used.
 
 We use the following convention for naming CSS variables:
 
-* Start all CSS variables with `--jp-`
-* Words in the variable name should be lowercase and separated with `-`
+* Start all CSS variables with `--jp-`.
+* Words in the variable name should be lowercase and separated with `-`.
+* The next segment should refer to the component and subcomponent, such as
+  `--jp-notebook-cell-`.
+* The next segment should refer to any state modifiers such as `active`, `not-active` or
+  `focused`: `--jp-notebook-cell-focused`.
 * The final segment will typically be related to a CSS properties, such as
-  `color`, `font-size` or `background`.
-* Intermediate segments should have refer to the component and subcomponent, such
-  as `--jp-notebook-cell-`.
+  `color`, `font-size` or `background`: `--jp-notebook-cell-focused-background`.
+
 
 ### Public/private
 
@@ -48,13 +52,13 @@ The difference between public and private variables is simple:
   ensures that public CSS variables can be inspected under the top-level
   `<html>` tag in the browser's dev tools.
 * Where possible, private variables should be defined and scoped under an 
-  appropriate selector.
+  appropriate selector other than `:root`.
 
 ### CSS variable usage
 
 JupyterLab includes a default set of CSS variables in the file:
 
-`packages/default-theme/style/variables.css`
+`packages/theme-light-extension/style/variables.css`
 
 To ensure consistent design in JupyterLab, all built-in and third party
 extensions should use these variables in their styles if at all possible.
@@ -75,8 +79,6 @@ We are organizing our CSS files in the following manner:
   any CSS files in a `style` subdirectory that are needed to style itself.
 * Multiple CSS files may be used and organized as needed, but they should be
   imported into a single `index.css` at the top-level of the plugin.
-* The `index.css` of each plugin should be imported inside
-  `packages/default-theme/style/index.css`.
 
 ## CSS class names
 
@@ -86,17 +88,16 @@ First, CSS class names are associated with TypeScript classes that extend
 `phosphor.Widget`:
 
 The `.node` of each such widget should have a CSS class that matches
-the name of the TypeScript class, and those classnames should be defined
-as a file-level `const`:
+the name of the TypeScript class:
 
 ```TypeScript
-const MYWIDGET_CLASS = 'jp-MyWidget';
+
 
 class MyWidget extends Widget {
 
   constructor() {
     super();
-    this.addClass(MYWIDGET_CLASS);
+    this.addClass('jp-MyWidget');
   }
 
 }
@@ -105,13 +106,11 @@ class MyWidget extends Widget {
 Second, subclasses should have a CSS class for both the parent and child:
 
 ```TypeScript
-const MYWIDGET_SUBCLASS_CLASS = 'jp-MyWidgetSubclass';
-
 class MyWidgetSubclass extends MyWidget {
 
   constructor() {
     super(); // Adds `jp-MyWidget`
-    this.addClass(MYWIDGET_SUBCLASS_CLASS);
+    this.addClass('jp-MyWidgetSubclass');
   }
 
 }
@@ -143,8 +142,8 @@ Fourth, some CSS classes are used to modify the state of a widget:
 
 Fifth, some CSS classes are used to distinguish different types of a widget:
 
-* `--jp-type-separator`: applied to menu items that are separators
-* `--jp-type-directory`: applied to elements in the file browser that are directories
+* `jp-type-separator`: applied to menu items that are separators
+* `jp-type-directory`: applied to elements in the file browser that are directories
 
 ## Edge cases
 
@@ -170,7 +169,3 @@ the DOM stucture is highly recursive, the usual descendant selectors may
 not be specific to target only the desired children.
 
 When in doubt, there is little harm done in parents adding selectors to children.
-
-
-
-
