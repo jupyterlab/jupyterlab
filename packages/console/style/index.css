@@ -88,8 +88,9 @@
 }
 
 
-.jp-CodeConsole-content .jp-Cell .jp-Cell-inputCollapser:hover .jp-Collapser-child,
-.jp-CodeConsole-content .jp-Cell .jp-Cell-outputCollapser:hover .jp-Collapser-child {
-  border-left: 20px solid var(--jp-brand-color1);
-  opacity: .4;
+/* collapser is hovered */
+.jp-CodeConsole-content .jp-Cell .jp-Collapser:hover {
+  box-shadow: 0px 0px 2px 0px rgba(0,0,0,0.25);
+  background: var(--jp-brand-color1);
+  opacity: var(--jp-cell-collapser-not-active-hover-opacity);
 }
