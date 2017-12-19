@@ -1166,7 +1166,9 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       layout.addWidget(outputAreaView);
       shell.addToMainArea(widget);
       // Remove the output view if the parent notebook is closed.
-      nb.disposed.connect(() => {widget.dispose();})
+      nb.disposed.connect(
+        () => { widget.dispose(); }
+      );
     },
     isEnabled
   });
