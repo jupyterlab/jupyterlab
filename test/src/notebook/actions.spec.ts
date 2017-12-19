@@ -887,7 +887,7 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCellIndex).to.be(-1);
       });
 
-      it('should change to command mode', () => {
+      it('should change to command mode if there is a selection', () => {
         widget.mode = 'edit';
         widget.activeCellIndex = 1;
         NotebookActions.extendSelectionAbove(widget);
@@ -895,10 +895,12 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should not wrap around to the bottom', () => {
+        widget.mode = 'edit';
         NotebookActions.extendSelectionAbove(widget);
         expect(widget.activeCellIndex).to.be(0);
         let last = widget.widgets[widget.widgets.length - 1];
         expect(widget.isSelected(last)).to.be(false);
+        expect(widget.mode).to.equal('edit');
       });
 
       it('should deselect the current cell if the cell above is selected', () => {
@@ -939,18 +941,20 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCellIndex).to.be(-1);
       });
 
-      it('should change to command mode', () => {
+      it('should change to command mode if there is a selection', () => {
         widget.mode = 'edit';
         NotebookActions.extendSelectionBelow(widget);
         expect(widget.mode).to.be('command');
       });
 
-      it('should not wrap around to the bottom', () => {
+      it('should not wrap around to the top', () => {
         let last = widget.widgets.length - 1;
         widget.activeCellIndex = last;
+        widget.mode = 'edit';
         NotebookActions.extendSelectionBelow(widget);
         expect(widget.activeCellIndex).to.be(last);
         expect(widget.isSelected(widget.widgets[0])).to.be(false);
+        expect(widget.mode).to.equal('edit');
       });
 
       it('should deselect the current cell if the cell below is selected', () => {
