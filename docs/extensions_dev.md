@@ -177,7 +177,10 @@ document can then be saved by the user in the usual manner.
 ## Themes
 A theme is a JupyterLab extension that uses a `ThemeManager` and can be
 loaded and unloaded dynamically.  The package must include all static assets
-that are referenced by `url()` in its CSS files.
+that are referenced by `url()` in its CSS files.  Local URLs can be used
+to reference files relative to the location of the referring CSS file in the theme directory.  For example `url('images/foo.png')` or 
+`url('../foo/bar.css')`can be used to refer local files in the theme.  
+Absolute URLs (starting with a `/`) or external URLs (e.g. `https:`) can be used to refer to external assets.
 The path to the theme  assets is specified `package.json` under the
 `"jupyterlab"` key as `"themeDir"`. See the [JupyterLab Light Theme](https://github.com/jupyterlab/jupyterlab/tree/master/packages/theme-light-extension)
 for an example.  Ensure that the theme files are included in the
