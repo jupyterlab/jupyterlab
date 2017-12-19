@@ -3,66 +3,28 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-:root {
-  --jp-private-collapser-width: 12px;
-}
 
 .jp-Collapser {
-  flex: 0 0 var(--jp-private-collapser-width);
+  flex: 0 0 var(--jp-cell-collapser-width);
   padding: 0px;
   margin: 0px;
   border: none;
   outline: none;
   background: transparent;
+  border-radius: var(--jp-button-border-radius);
+  opacity: 1.0;
 }
 
 
 .jp-Collapser-child {
   display: block;
   width: 100%;
-  height: 100%;
   box-sizing: border-box;
+  /* height: 100% doesn't work because the height of its parent is computed from content */
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
 }
 
 
-.jp-Cell .jp-Collapser .jp-Collapser-child:hover {
-  opacity: .2;
-  border-left: 2px solid var(--jp-brand-color1);
-  border-top: 2px solid var(--jp-brand-color1);
-  border-bottom: 2px solid var(--jp-brand-color1);
-}
 
-
-.jp-Cell.jp-mod-active .jp-Collapser-child:hover {
-  opacity: 1;
-  border: none;
-}
-
-
-.jp-Cell .jp-Collapser .jp-Collapser-icon {
-  display: none;
-  height: 100%;
-  background-repeat: no-repeat;
-  background-position: -3px 100%;
-  background-size: 16px;
-}
-
-
-.jp-Cell .jp-Collapser .jp-Collapser-icon.jp-ExpandLessIcon {
-  position: relative;
-  bottom: -3px;
-}
-
-
-.jp-Cell.jp-mod-active .jp-Collapser-child .jp-Collapser-icon {
-  display: block;
-}
-
-
-.jp-Collapser-child:hover .jp-Collapser-icon {
-  display: block;
-}
-
-.jp-Collapser-child.jp-mod-collapsed .jp-Collapser-icon {
-  background-position: -3px center !important;
-}
