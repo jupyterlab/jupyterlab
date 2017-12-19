@@ -140,6 +140,18 @@ function createActiveWidget(): LogNotebook {
 }
 
 
+function selected(nb: Notebook): number[] {
+    const selected = [];
+    const cells = nb.widgets;
+    for (let i = 0; i < cells.length; i++) {
+      if (nb.isSelected(cells[i])) {
+        selected.push(i);
+      }
+    }
+    return selected;
+}
+
+
 describe('notebook/widget', () => {
 
   describe('StaticNotebook', () => {
@@ -669,19 +681,10 @@ describe('notebook/widget', () => {
         widget.model.fromJSON(DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
         requestAnimationFrame(() => {
-          for (let i = 0; i < widget.widgets.length; i++) {
-            let cell = widget.widgets[i];
-            widget.select(cell);
-            expect(widget.isSelected(cell)).to.be(true);
-          }
+          let selectedRange = Array.from(Array(widget.widgets.length).keys());
+          expect(selected(widget)).to.eql(selectedRange);
           widget.mode = 'edit';
-          for (let i = 0; i < widget.widgets.length; i++) {
-            if (i === widget.activeCellIndex) {
-              continue;
-            }
-            let cell = widget.widgets[i];
-            expect(widget.isSelected(cell)).to.be(false);
-          }
+          expect(selected(widget)).to.eql([widget.activeCellIndex]);
           widget.dispose();
           done();
         });
@@ -790,11 +793,9 @@ describe('notebook/widget', () => {
       it('should allow multiple widgets to be selected', () => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
-        for (let i = 0; i < widget.widgets.length; i++) {
-          let cell = widget.widgets[i];
-          widget.select(cell);
-          expect(widget.isSelected(cell)).to.be(true);
-        }
+        widget.widgets.forEach(cell => { widget.select(cell); });
+        let expectSelected = Array.from(Array(widget.widgets.length).keys());
+        expect(selected(widget)).to.eql(expectSelected);
       });
 
     });
@@ -832,14 +833,7 @@ describe('notebook/widget', () => {
       it('should get whether the cell is selected', () => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
-        for (let i = 0; i < widget.widgets.length; i++) {
-          let cell = widget.widgets[i];
-          if (i === widget.activeCellIndex) {
-            expect(widget.isSelected(cell)).to.be(true);
-          } else {
-            expect(widget.isSelected(cell)).to.be(false);
-          }
-        }
+        expect(selected(widget)).to.eql([widget.activeCellIndex]);
       });
 
     });
@@ -887,17 +881,6 @@ describe('notebook/widget', () => {
         });
 
         it('should extend selection if invoked with shift', () => {
-          const selected = (nb: Notebook) => {
-            const selected = [];
-            const cells = nb.widgets;
-            for (let i = 0; i < cells.length; i++) {
-              if (nb.isSelected(cells[i])) {
-                selected.push(i);
-              }
-            }
-            return selected;
-          };
-
           widget.activeCellIndex = 3;
 
           // shift click below
