@@ -15,6 +15,7 @@ See the Python docs on [package uploading](https://packaging.python.org/guides/t
 for twine setup instructions and for why twine is the recommended method.
 
 ### Publish the npm packages
+
 The command below ensures the latest dependencies and built files,
 then prompts you to select package versions.  When one package has an
 effective major release, the packages that depend on it should also get a
@@ -66,6 +67,7 @@ xckd repo
 - Release the other repos as appropriate
 
 ### Other repos to update
+
 - https://github.com/jupyterlab/extension-cookiecutter-js
 - https://github.com/jupyterlab/extension-cookiecutter-ts
 - https://github.com/jupyterlab/mimerender-cookiecutter
@@ -79,6 +81,7 @@ xckd repo
 
 
 ### Updating the xkcd tutorial
+
 - Create a new empty branch in the xkcd repo.
 
 ```bash
@@ -109,6 +112,7 @@ git tag | grep 0.xx | xargs git tag -d
 ```
 
 ### Publishing to conda-forge
+
 - Get the sha256 hash for conda-forge release:
 
 ```bash
@@ -121,6 +125,7 @@ shasum -a 256 dist/*.tar.gz
 
 
 ## Making a patch release of a JavaScript package
+
 - Backport the change to the previous release branch
 - Make a new PR against the previous branch
 - Run the following script, where the package is in `/packages/package-folder-name`:
@@ -134,3 +139,14 @@ jlpm run patch:release package-folder-name
 - Cherry pick the patch commit to the master branch
 - Update the dev version of the master branch in `_version.py`
 - Update the `package.json` file in `dev_mode` with the new JupyterLab version in the `jupyterlab` metadata section.
+
+## Update version for binder
+
+Each time we release JupyterLab, we should update the version of JupyterLab
+used in binder and repo2docker. Here is an example PR that updates the
+relevant files:
+
+https://github.com/jupyter/repo2docker/pull/169/files
+
+This needs to be done in both the conda and pip buildpacks in both the
+frozen and non-frozen version of the files.
