@@ -295,6 +295,7 @@ margin-top = 14, 14, 14, 14, 8, 8
 .jp-RenderedHTMLCommon table {
   border-collapse: collapse;
   border-spacing: 0;
+  border: none;
   color: var(--jp-ui-font-color1);
   font-size: 12px;
   table-layout: fixed;
@@ -310,7 +311,8 @@ margin-top = 14, 14, 14, 14, 8, 8
 
 
 .jp-RenderedHTMLCommon td,
-.jp-RenderedHTMLCommon th {
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon tr {
   text-align: right;
   vertical-align: middle;
   padding: 0.5em 0.5em;
