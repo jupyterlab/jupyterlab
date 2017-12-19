@@ -902,7 +902,18 @@ describe('notebook/widget', () => {
           simulate(widget.widgets[2].node, 'mousedown', {shiftKey: true});
           expect(widget.activeCellIndex).to.be(2);
           expect(selected(widget)).to.eql([2, 3]);
+        });
 
+      });
+
+      context('mouseup', () => {
+
+        it('should deselect cells if not dragging', () => {
+          widget.select(widget.widgets[0]);
+          widget.select(widget.widgets[1]);
+          widget.select(widget.widgets[2]);
+          simulate(widget.widgets[0].node, 'mouseup');
+          expect(selected(widget)).to.eql([0]);
         });
 
       });
