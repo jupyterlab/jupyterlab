@@ -3,7 +3,7 @@
   "scripts": {
     "add:sibling": "node buildutils/lib/add-sibling.js",
     "build": "jlpm run build:dev",
-    "build:core": "cd jupyterlab/staging && jlpm run build",
+    "build:core": "cd jupyterlab/staging && jlpm && jlpm run build",
     "build:dev": "jlpm run integrity && jlpm run build:packages && cd dev_mode && jlpm run build",
     "build:examples": "lerna run build --scope \"@jupyterlab/example-*\"",
     "build:packages": "cd packages/metapackage && jlpm run build",
@@ -16,7 +16,7 @@
     "clean:dev": "cd dev_mode && jlpm run clean",
     "clean:examples": "node buildutils/lib/clean-packages.js examples",
     "clean:packages": "node buildutils/lib/clean-packages.js packages",
-    "clean:slate": "python clean.py && pip install --global-option='--skip-npm' -v -e . && jlpm",
+    "clean:slate": "python clean.py && pip install -v -e . && jlpm",
     "clean:src": "jlpm run clean",
     "clean:test": "lerna run clean --scope \"@jupyterlab/test-*\"",
     "clean:utils": "cd buildutils && jlpm run clean",

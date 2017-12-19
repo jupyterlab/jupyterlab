@@ -16,6 +16,7 @@ from setupbase import (
 )
 
 from setuptools import setup
+from setuptools.command.develop import develop
 
 
 NAME = 'jupyterlab'
@@ -84,6 +85,8 @@ cmdclass['jsdeps'] = combine_commands(
                 build_dir=pjoin(HERE, NAME, 'static'), npm=npm),
     command_for_func(check_assets)
 )
+# Use default develop - we can ensure core mode later if needed.
+cmdclass['develop'] = develop
 
 
 setup_args = dict(

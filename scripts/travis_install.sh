@@ -36,7 +36,7 @@ mkdir ~/.jupyter
 
 # Install and enable the server extension
 pip install -v -e ".[test]"
+jlpm
 jlpm versions
 jlpm config current
-jlpm cache list
 jupyter serverextension enable --py jupyterlab

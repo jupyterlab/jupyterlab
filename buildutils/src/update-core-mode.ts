@@ -18,6 +18,7 @@ let data = utils.readJSONFile('./dev_mode/package.json');
 data['scripts']['build'] = 'webpack';
 data['scripts']['watch'] = 'webpack --watch';
 data['scripts']['build:prod'] = "webpack --define process.env.NODE_ENV=\"'production'\"";
+data['jupyterlab']['buildDir'] = './build';
 data['jupyterlab']['outputDir'] = '..';
 data['jupyterlab']['staticDir'] = '../static';
 data['jupyterlab']['linkedPackages'] = {};

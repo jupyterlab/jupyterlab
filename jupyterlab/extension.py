@@ -35,7 +35,7 @@ def load_jupyter_server_extension(nbapp):
     from .build_handler import build_path, Builder, BuildHandler
     from .commands import (
         get_app_dir, get_user_settings_dir, watch, ensure_dev, watch_dev,
-        pjoin, DEV_DIR, HERE, get_app_version
+        pjoin, DEV_DIR, HERE, get_app_info, ensure_core
     )
     from ._version import __version__
 
@@ -80,44 +80,32 @@ def load_jupyter_server_extension(nbapp):
     page_config['buildAvailable'] = not core_mode and not dev_mode
     page_config['buildCheck'] = not core_mode and not dev_mode
     page_config['token'] = nbapp.token
+    page_config['devMode'] = dev_mode
 
     if core_mode:
-        config.static_dir = pjoin(HERE, 'static')
-        config.schemas_dir = pjoin(HERE, 'schemas')
-        config.app_settings_dir = ''
-        config.themes_dir = pjoin(HERE, 'themes')
-        config.app_version = get_app_version()
-
+        app_dir = HERE
         logger.info(CORE_NOTE.strip())
-        if not os.path.exists(config.static_dir):
-            msg = 'Static assets not built, please see CONTRIBUTING.md'
-            logger.error(msg)
+        ensure_core(logger)
 
     elif dev_mode:
-        config.static_dir = pjoin(DEV_DIR, 'build')
-        config.schemas_dir = pjoin(DEV_DIR, 'schemas')
-        config.app_settings_dir = ''
-        config.themes_dir = pjoin(DEV_DIR, 'themes')
-        config.app_version = __version__
-
+        app_dir = DEV_DIR
         ensure_dev(logger)
         if not watch_mode:
             logger.info(DEV_NOTE)
 
+    config.app_settings_dir = pjoin(app_dir, 'settings')
+    config.schemas_dir = pjoin(app_dir, 'schemas')
+    config.themes_dir = pjoin(app_dir, 'themes')
+    info = get_app_info(app_dir)
+    config.app_version = info['version']
+    public_url = info['publicUrl']
+    if public_url:
+        config.public_url = public_url
     else:
         config.static_dir = pjoin(app_dir, 'static')
-        config.schemas_dir = pjoin(app_dir, 'schemas')
-        config.app_settings_dir = pjoin(app_dir, 'settings')
-        config.themes_dir = pjoin(app_dir, 'themes')
-        config.app_version = get_app_version()
 
-    page_config['devMode'] = dev_mode
     config.user_settings_dir = get_user_settings_dir()
-    config.templates_dir = config.static_dir
-
-    page_config['themePath'] = '/lab/api/themes'
-    if 'rc' in __version__:
-        raise ValueError('remove the theme path shim')
+    config.templates_dir = pjoin(app_dir, 'static')
 
     if watch_mode:
         logger.info('Starting JupyterLab watch mode...')
@@ -138,5 +126,9 @@ def load_jupyter_server_extension(nbapp):
     build_url = ujoin(base_url, build_path)
     builder = Builder(logger, core_mode, app_dir)
     build_handler = (build_url, BuildHandler, {'builder': builder})
+
+    page_config['themePath'] = ujoin(base_url, '/lab/api/themes')
+    if 'rc' in __version__:
+        raise ValueError('remove the theme path shim')
 
     web_app.add_handlers(".*$", [build_handler])

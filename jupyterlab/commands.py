@@ -89,8 +89,27 @@ def ensure_dev(logger=None):
         yarn_proc = Process(['node', YARN_PATH], cwd=parent, logger=logger)
         yarn_proc.wait()
 
-    if not osp.exists(pjoin(parent, 'dev_mode', 'build')):
+    if not osp.exists(pjoin(parent, 'dev_mode', 'static')):
         yarn_proc = Process(['node', YARN_PATH, 'build'], cwd=parent,
+                            logger=logger)
+        yarn_proc.wait()
+
+
+def ensure_core(logger=None):
+    """Ensure that the core assets are available.
+    """
+    staging = pjoin(HERE, 'staging')
+
+    # Bail if the static directory already exists.
+    if osp.exists(pjoin(HERE, 'static')):
+        return
+
+    if not osp.exists(pjoin(staging, 'node_modules')):
+        yarn_proc = Process(['node', YARN_PATH], cwd=staging, logger=logger)
+        yarn_proc.wait()
+
+    if not osp.exists(pjoin(HERE, 'static')):
+        yarn_proc = Process(['node', YARN_PATH, 'build'], cwd=staging,
                             logger=logger)
         yarn_proc.wait()
 
@@ -200,13 +219,13 @@ def clean(app_dir=None):
             shutil.rmtree(target)
 
 
-def build(app_dir=None, name=None, version=None, logger=None,
-        command='build:prod', kill_event=None,
+def build(app_dir=None, name=None, version=None, public_url=None,
+        logger=None, command='build:prod', kill_event=None,
         clean_staging=False):
     """Build the JupyterLab application.
     """
     handler = _AppHandler(app_dir, logger, kill_event=kill_event)
-    return handler.build(name=name, version=version,
+    return handler.build(name=name, version=version, public_url=public_url,
                   command=command, clean_staging=clean_staging)
 
 
@@ -267,9 +286,11 @@ def unlink_package(package, app_dir=None, logger=None):
     return handler.unlink_package(package)
 
 
-def get_app_version():
+def get_app_version(app_dir=None):
     """Get the application version."""
-    return _get_core_data()['jupyterlab']['version']
+    app_dir = app_dir or get_app_dir()
+    handler = _AppHandler(app_dir)
+    return handler.info['version']
 
 
 # ----------------------------------------------------------------------
@@ -280,8 +301,6 @@ def get_app_version():
 class _AppHandler(object):
 
     def __init__(self, app_dir, logger=None, kill_event=None):
-        if app_dir and app_dir.startswith(HERE):
-            raise ValueError('Cannot run lab extension commands in core app')
         self.app_dir = app_dir or get_app_dir()
         self.sys_dir = get_app_dir()
         self.logger = logger or logging.getLogger('jupyterlab')
@@ -328,15 +347,16 @@ class _AppHandler(object):
             if other['path'] != info['path'] and other['location'] == 'app':
                 os.remove(other['path'])
 
-    def build(self, name=None, version=None, command='build:prod',
-            clean_staging=False):
+    def build(self, name=None, version=None, public_url=None,
+            command='build:prod', clean_staging=False):
         """Build the application.
         """
         # Set up the build directory.
         app_dir = self.app_dir
 
         self._populate_staging(
-            name=name, version=version, clean=clean_staging
+            name=name, version=version, public_url=public_url,
+            clean=clean_staging
         )
 
         staging = pjoin(app_dir, 'staging')
@@ -423,9 +443,7 @@ class _AppHandler(object):
         if not osp.exists(pkg_path):
             return ['No built application']
 
-        with open(pkg_path) as fid:
-            static_data = json.load(fid)
-
+        static_data = self.info['static_data']
         old_jlab = static_data['jupyterlab']
         old_deps = static_data.get('dependencies', dict())
 
@@ -655,7 +673,12 @@ class _AppHandler(object):
                 sys.append(name)
 
         info['uninstalled_core'] = self._get_uninstalled_core_extensions()
-        info['version'] = core_data['jupyterlab']['version']
+
+        info['static_data'] = _get_static_data(self.app_dir)
+        app_data = info['static_data'] or core_data
+        info['version'] = app_data['jupyterlab']['version']
+        info['publicUrl'] = app_data['jupyterlab'].get('publicUrl', '')
+
         info['sys_dir'] = self.sys_dir
         info['app_dir'] = self.app_dir
 
@@ -669,7 +692,8 @@ class _AppHandler(object):
         info['disabled_core'] = disabled_core
         return info
 
-    def _populate_staging(self, name=None, version=None, clean=False):
+    def _populate_staging(self, name=None, version=None, public_url=None,
+            clean=False):
         """Set up the assets in the staging directory.
         """
         app_dir = self.app_dir
@@ -751,6 +775,9 @@ class _AppHandler(object):
 
         if name:
             data['jupyterlab']['name'] = name
+
+        if public_url:
+            data['jupyterlab']['publicUrl'] = public_url
 
         pkg_path = pjoin(staging, 'package.json')
         with open(pkg_path, 'w') as fid:
@@ -1217,6 +1244,17 @@ def _get_core_data():
     """
     with open(pjoin(HERE, 'staging', 'package.json')) as fid:
         return json.load(fid)
+
+
+def _get_static_data(app_dir):
+    """Get the data for the app static dir.
+    """
+    target = pjoin(app_dir, 'static', 'package.json')
+    if os.path.exists(target):
+        with open(target) as fid:
+            return json.load(fid)
+    else:
+        return None
 
 
 def _validate_compatibility(extension, deps, core_data):

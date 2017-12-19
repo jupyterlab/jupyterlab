@@ -12,13 +12,6 @@ var webpack = require('webpack');
 var Build = require('@jupyterlab/buildutils').Build;
 var package_data = require('./package.json');
 
-// Ensure a clear build directory.
-var buildDir = path.resolve('./build');
-if (fs.existsSync(buildDir)) {
-  fs.removeSync(buildDir);
-}
-fs.ensureDirSync(buildDir);
-
 // Handle the extensions.
 var jlab = package_data.jupyterlab;
 var extensions = jlab.extensions;
@@ -36,6 +29,13 @@ var data = {
   jupyterlab_mime_extensions: mimeExtensions,
 };
 var result = template(data);
+
+// Ensure a clear build directory.
+var buildDir = path.resolve(jlab.buildDir);
+if (fs.existsSync(buildDir)) {
+  fs.removeSync(buildDir);
+}
+fs.ensureDirSync(buildDir);
 
 fs.writeFileSync(path.join(buildDir, 'index.out.js'), result);
 fs.copySync('./package.json', path.join(buildDir, 'package.json'));
@@ -109,7 +109,7 @@ module.exports = {
   },
   output: {
     path: path.resolve(buildDir),
-    publicPath: 'lab/static/',
+    publicPath: jlab.publicUrl || '{{base_url}}lab/static/',
     filename: '[name].[chunkhash].js'
   },
   module: {
@@ -164,7 +164,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: path.join('templates', 'template.html'),
-      title: 'JupyterLab'
+      title: jlab.name || 'JupyterLab'
     }),
     new webpack.HashedModuleIdsPlugin(),
     new webpack.optimize.CommonsChunkPlugin({
