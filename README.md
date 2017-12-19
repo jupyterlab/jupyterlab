@@ -132,7 +132,7 @@ JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by
 
 (listed in alphabetical order, with affiliation, and main areas of contribution)
 
-* Chris Colbert, Anaconda, Inc. (co-creator, application/low-level architecture,
+* Chris Colbert, Project Jupyter (co-creator, application/low-level architecture,
   technical leadership, vision, phosphor.js)
 * Afshin Darian, Anaconda, Inc. (co-creator, settings, inspector, completer,
   prolific contributions throughout the code base).
