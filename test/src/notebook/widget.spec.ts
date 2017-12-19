@@ -912,6 +912,12 @@ describe('notebook/widget', () => {
           widget.select(widget.widgets[0]);
           widget.select(widget.widgets[1]);
           widget.select(widget.widgets[2]);
+
+          // mousedown doesn't deselect
+          simulate(widget.widgets[0].node, 'mousedown');
+          expect(selected(widget)).to.eql([0, 1, 2]);
+
+          // mouseup does deselect when we aren't dragging
           simulate(widget.widgets[0].node, 'mouseup');
           expect(selected(widget)).to.eql([0]);
         });
