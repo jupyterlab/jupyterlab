@@ -907,9 +907,16 @@ class Notebook extends StaticNotebook {
   }
 
   /**
-   * Whether a cell is selected or is the active cell.
+   * Whether a cell is selected.
    */
   isSelected(widget: Cell): boolean {
+    return Private.selectedProperty.get(widget);
+  }
+
+  /**
+   * Whether a cell is selected or is the active cell.
+   */
+  isSelectedOrActive(widget: Cell): boolean {
     if (widget === this._activeCell) {
       return true;
     }
@@ -1071,7 +1078,7 @@ class Notebook extends StaticNotebook {
         widget.removeClass(ACTIVE_CLASS);
       }
       widget.removeClass(OTHER_SELECTED_CLASS);
-      if (this.isSelected(widget)) {
+      if (this.isSelectedOrActive(widget)) {
         widget.addClass(SELECTED_CLASS);
         count++;
       } else {
@@ -1125,7 +1132,7 @@ class Notebook extends StaticNotebook {
     // cell index, otherwise it stays the same.
     this.activeCellIndex = index <= this.activeCellIndex ?
       this.activeCellIndex - 1 : this.activeCellIndex ;
-    if (this.isSelected(cell)) {
+    if (this.isSelectedOrActive(cell)) {
       this._selectionChanged.emit(void 0);
     }
   }
@@ -1440,7 +1447,7 @@ class Notebook extends StaticNotebook {
 
     each(this.widgets, (widget, i) => {
       let cell = cells.get(i);
-      if (this.isSelected(widget)) {
+      if (this.isSelectedOrActive(widget)) {
         widget.addClass(DROP_SOURCE_CLASS);
         selected.push(cell.toJSON());
         toMove.push(widget);

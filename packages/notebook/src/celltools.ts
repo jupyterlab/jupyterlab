@@ -124,7 +124,7 @@ class CellTools extends Widget {
       return selected;
     }
     each(panel.notebook.widgets, widget => {
-      if (panel.notebook.isSelected(widget)) {
+      if (panel.notebook.isSelectedOrActive(widget)) {
         selected.push(widget);
       }
     });
