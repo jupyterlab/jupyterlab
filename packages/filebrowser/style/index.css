@@ -172,6 +172,13 @@
 }
 
 
+/* Style the directory listing content when a user drops a file to upload */
+.jp-DirListing.jp-mod-native-drop .jp-DirListing-content {
+  outline: 5px dashed rgba(128, 128, 128, 0.5);
+  outline-offset: -10px;
+}
+
+
 .jp-DirListing-item {
   display: flex;
   flex-direction: row;
