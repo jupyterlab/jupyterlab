@@ -26,12 +26,20 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  PathExt, URLExt
+  PathExt
 } from '@jupyterlab/coreutils';
 
 import {
   IModelDB, ModelDB
 } from '@jupyterlab/observables';
+
+import {
+  RenderMimeRegistry
+} from '@jupyterlab/rendermime';
+
+import {
+  IRenderMime
+} from '@jupyterlab/rendermime-interfaces';
 
 import {
   DocumentRegistry
@@ -79,6 +87,11 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     });
     this.session.propertyChanged.connect(this._onSessionChanged, this);
     manager.contents.fileChanged.connect(this._onFileChanged, this);
+
+    this.urlResolver = new RenderMimeRegistry.UrlResolver({
+      session: this.session,
+      contents: manager.contents
+    });
   }
 
   /**
@@ -188,6 +201,11 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   get ready(): Promise<void> {
     return this._readyPromise;
   }
+
+  /**
+   * The url resolver for the context.
+   */
+  readonly urlResolver: IRenderMime.IResolver;
 
   /**
    * Populate the contents of the model, either from
@@ -361,28 +379,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     return this._manager.ready.then(() => {
       return contents.listCheckpoints(this._path);
     });
-  }
-
-  /**
-   * Resolve a relative url to a correct server path.
-   */
-  resolveUrl(url: string): Promise<string> {
-    if (URLExt.isLocal(url)) {
-      let cwd = PathExt.dirname(this._path);
-      url = PathExt.resolve(cwd, url);
-    }
-    return Promise.resolve(url);
-  }
-
-  /**
-   * Get the download url of a given absolute server path.
-   */
-  getDownloadUrl(path: string): Promise<string> {
-    let contents = this._manager.contents;
-    if (URLExt.isLocal(path)) {
-      return this._manager.ready.then(() => contents.getDownloadUrl(path));
-    }
-    return Promise.resolve(path);
   }
 
   /**

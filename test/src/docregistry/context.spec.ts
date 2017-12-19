@@ -20,6 +20,10 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
+  RenderMimeRegistry
+} from '@jupyterlab/rendermime';
+
+import {
   waitForDialog, acceptDialog, dismissDialog
 } from '../utils';
 
@@ -386,37 +390,10 @@ describe('docregistry/context', () => {
 
     });
 
-    describe('#resolveUrl()', () => {
+    describe('#urlResolver', () => {
 
-      it('should resolve a relative url to a correct server path', () => {
-        return context.resolveUrl('./foo').then(path => {
-          expect(path).to.be('foo');
-        });
-      });
-
-      it('should ignore urls that have a protocol', () => {
-        return context.resolveUrl('http://foo').then(path => {
-          expect(path).to.be('http://foo');
-        });
-      });
-
-    });
-
-    describe('#getDownloadUrl()', () => {
-
-      it('should resolve an absolute server url to a download url', () => {
-        let contextPromise = context.getDownloadUrl('foo');
-        let contentsPromise = manager.contents.getDownloadUrl('foo');
-        return Promise.all([contextPromise, contentsPromise])
-        .then(values => {
-          expect(values[0]).to.be(values[1]);
-        });
-      });
-
-      it('should ignore urls that have a protocol', () => {
-        return context.getDownloadUrl('http://foo').then(path => {
-          expect(path).to.be('http://foo');
-        });
+      it('should be a url resolver', () => {
+        expect(context.urlResolver).to.be.a(RenderMimeRegistry.UrlResolver);
       });
 
     });

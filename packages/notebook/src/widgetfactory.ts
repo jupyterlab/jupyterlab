@@ -66,7 +66,7 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
    * the default toolbar items using `ToolbarItems.populateDefaults`.
    */
   protected createNewWidget(context: DocumentRegistry.IContext<INotebookModel>): NotebookPanel {
-    let rendermime = this.rendermime.clone({ resolver: context });
+    let rendermime = this.rendermime.clone({ resolver: context.urlResolver });
     let panel = new NotebookPanel({
       rendermime,
       contentFactory: this.contentFactory,
