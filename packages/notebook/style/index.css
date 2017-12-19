@@ -273,3 +273,27 @@
 .jp-KeySelector label {
   line-height: 1.4;
 }
+
+
+/*-----------------------------------------------------------------------------
+| Output Area View
+|----------------------------------------------------------------------------*/
+
+
+.jp-LinkedOutputView .jp-OutputArea-prompt {
+  display: none;
+}
+
+
+.jp-LinkedOutputView .jp-OutputArea {
+  height: 100%;
+  padding: var(--jp-notebook-padding) 0px var(--jp-notebook-padding) var(--jp-notebook-padding);
+}
+
+
+.jp-LinkedOutputView-toolbar {
+  box-shadow: var(--jp-toolbar-box-shadow);
+  background: var(--jp-toolbar-background);
+  height: var(--jp-toolbar-micro-height);
+  z-index: 1;
+}
