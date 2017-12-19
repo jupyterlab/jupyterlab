@@ -633,6 +633,17 @@ class CodeCell extends Cell {
   }
 
   /**
+   * Clone the OutputArea alone, using the same model.
+   */
+  cloneOutputArea(): OutputArea {
+    return new OutputArea({
+      model: this.model.outputs,
+      contentFactory: this.contentFactory,
+      rendermime: this._rendermime,
+    });
+  }
+
+  /**
    * Dispose of the resources used by the widget.
    */
   dispose(): void {

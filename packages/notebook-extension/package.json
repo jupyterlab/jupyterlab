@@ -31,6 +31,7 @@
   "dependencies": {
     "@jupyterlab/application": "^0.13.1",
     "@jupyterlab/apputils": "^0.13.1",
+    "@jupyterlab/cells": "^0.13.0",
     "@jupyterlab/codeeditor": "^0.13.0",
     "@jupyterlab/coreutils": "^0.13.0",
     "@jupyterlab/filebrowser": "^0.13.2",

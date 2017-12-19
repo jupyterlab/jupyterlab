@@ -10,6 +10,10 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
+  CodeCell
+} from '@jupyterlab/cells';
+
+import {
   IEditorServices
 } from '@jupyterlab/codeeditor';
 
@@ -85,7 +89,7 @@ namespace CommandIDs {
   const createConsole = 'notebook:create-console';
 
   export
-  const createCellView = 'notebook:create-cell-view';
+  const createOutputView = 'notebook:create-output-view';
 
   export
   const clearAllOutputs = 'notebook:clear-all-cell-outputs';
@@ -496,7 +500,7 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
     selector: '.jp-Notebook .jp-Cell'
   });
   app.contextMenu.addItem({
-    command: CommandIDs.createCellView,
+    command: CommandIDs.createOutputView,
     selector: '.jp-Notebook .jp-Cell'
   });
   app.contextMenu.addItem({
@@ -1136,23 +1140,33 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     },
     isEnabled
   });
-  commands.addCommand(CommandIDs.createCellView, {
-    label: 'Create New View for Cell',
+  commands.addCommand(CommandIDs.createOutputView, {
+    label: 'Create New View for Output',
     execute: args => {
+      // Clone the OutputArea
       const current = getCurrent(args);
       const nb = current.notebook;
-      const newCell = nb.activeCell.clone();
+      const outputAreaView = (nb.activeCell as CodeCell).cloneOutputArea();
+      // Create an empty toolbar
+      const toolbar = new Widget();
+      toolbar.addClass('jp-Toolbar');
+      toolbar.addClass('jp-LinkedOutputView-toolbar');
+      // Create a MainAreaWidget
       const layout = new PanelLayout();
-      const p = new MainAreaWidget({layout: layout});
-      p.id = `Cell-${uuid()}`;
-      p.title.closable = true;
-      p.title.label = current.title.label ? `Cell: ${current.title.label}` : 'Cell';
-      p.title.icon = NOTEBOOK_ICON_CLASS;
-      // Add the notebook class to give it all the styles of a cell in a notebook.
-      p.addClass('jp-Notebook');
-      p.addClass('jp-CellView');
-      layout.addWidget(newCell);
-      shell.addToMainArea(p);
+      const widget = new MainAreaWidget({layout: layout});
+      widget.id = `LinkedOutputView-${uuid()}`;
+      widget.title.closable = true;
+      widget.title.label = 'Output View';
+      widget.title.icon = NOTEBOOK_ICON_CLASS;
+      widget.title.caption = current.title.label ? `For Notebook: ${current.title.label}` : 'For Notebook:';
+      widget.addClass('jp-LinkedOutputView');
+      // Allow the widget to take focus if needed, helpful for working with jupyter widgets.
+      widget.node.tabIndex = -1;
+      layout.addWidget(toolbar);
+      layout.addWidget(outputAreaView);
+      shell.addToMainArea(widget);
+      // Remove the output view if the parent notebook is closed.
+      nb.disposed.connect(() => {widget.dispose();})
     },
     isEnabled
   });
