@@ -681,10 +681,11 @@ describe('notebook/widget', () => {
         widget.model.fromJSON(DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
         requestAnimationFrame(() => {
+          widget.extendContiguousSelectionTo(widget.widgets.length - 1);
           let selectedRange = Array.from(Array(widget.widgets.length).keys());
           expect(selected(widget)).to.eql(selectedRange);
           widget.mode = 'edit';
-          expect(selected(widget)).to.eql([widget.activeCellIndex]);
+          expect(selected(widget)).to.eql([]);
           widget.dispose();
           done();
         });
@@ -806,9 +807,6 @@ describe('notebook/widget', () => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
         for (let i = 0; i < widget.widgets.length; i++) {
-          if (i === widget.activeCellIndex) {
-            continue;
-          }
           let cell = widget.widgets[i];
           widget.select(cell);
           expect(widget.isSelected(cell)).to.be(true);
@@ -817,14 +815,16 @@ describe('notebook/widget', () => {
         }
       });
 
-      it('should have no effect on the active cell', () => {
+      it('should let the active cell be deselected', () => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
-        let cell = widget.widgets[widget.activeCellIndex];
+        let cell = widget.activeCell;
+        widget.select(cell);
         expect(widget.isSelected(cell)).to.be(true);
         widget.deselect(cell);
-        expect(widget.isSelected(cell)).to.be(true);
+        expect(widget.isSelected(cell)).to.be(false);
       });
+
 
     });
 
@@ -833,8 +833,18 @@ describe('notebook/widget', () => {
       it('should get whether the cell is selected', () => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
-        expect(selected(widget)).to.eql([widget.activeCellIndex]);
+        widget.select(widget.widgets[0]);
+        widget.select(widget.widgets[2]);
+        expect(selected(widget)).to.eql([0, 2]);
       });
+
+      it('reports selection whether or not cell is active', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        expect(selected(widget)).to.eql([]);
+        widget.select(widget.activeCell);
+        expect(selected(widget)).to.eql([widget.activeCellIndex]);
+      })
 
     });
 
@@ -919,7 +929,7 @@ describe('notebook/widget', () => {
 
           // mouseup does deselect when we aren't dragging
           simulate(widget.widgets[0].node, 'mouseup');
-          expect(selected(widget)).to.eql([0]);
+          expect(selected(widget)).to.eql([]);
         });
 
       });

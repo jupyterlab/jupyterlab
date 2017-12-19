@@ -592,20 +592,7 @@ namespace NotebookActions {
     }
     let state = Private.getState(widget);
     widget.mode = 'command';
-    let current = widget.activeCell;
-    let prev = widget.widgets[widget.activeCellIndex - 1];
-    if (widget.isSelected(prev)) {
-      widget.deselect(current);
-      if (widget.activeCellIndex > 1) {
-        let prevPrev = widget.widgets[widget.activeCellIndex - 2];
-        if (!widget.isSelected(prevPrev)) {
-          widget.deselect(prev);
-        }
-      }
-    } else {
-      widget.select(current);
-    }
-    widget.activeCellIndex -= 1;
+    widget.extendContiguousSelectionTo(widget.activeCellIndex - 1);
     Private.handleState(widget, state, true);
   }
 
@@ -629,20 +616,7 @@ namespace NotebookActions {
     }
     let state = Private.getState(widget);
     widget.mode = 'command';
-    let current = widget.activeCell;
-    let next = widget.widgets[widget.activeCellIndex + 1];
-    if (widget.isSelected(next)) {
-      widget.deselect(current);
-      if (widget.activeCellIndex < widget.model.cells.length - 2) {
-        let nextNext = widget.widgets[widget.activeCellIndex + 2];
-        if (!widget.isSelected(nextNext)) {
-          widget.deselect(next);
-        }
-      }
-    } else {
-      widget.select(current);
-    }
-    widget.activeCellIndex += 1;
+    widget.extendContiguousSelectionTo(widget.activeCellIndex + 1);
     Private.handleState(widget, state, true);
   }
 

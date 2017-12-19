@@ -943,6 +943,119 @@ class Notebook extends StaticNotebook {
   }
 
   /**
+   * Move the head of an existing contiguous selection to extend the selection.
+   *
+   * If the new selection is a single cell, that becomes the active cell and all
+   * cells are deselected.
+   *
+   * #### Note
+   * There is no change if there are no cells (i.e., activeCellIndex is -1).
+   */
+  extendContiguousSelectionTo(index: number): void {
+    let {head, anchor} = this.getContiguousSelection();
+    let i: number;
+
+    // Handle the case of no current selection.
+    if (anchor === null) {
+      if (index === this.activeCellIndex) {
+        // Already collapsed selection, nothing more to do.
+        return;
+      } else {
+        // We will start a new selection below.
+        head = this.activeCellIndex;
+        anchor = this.activeCellIndex;
+      }
+    }
+
+    // Move the active cell. We do this before the collapsing shortcut below.
+    this.activeCellIndex = index;
+
+    // Make sure the index is valid, according to the rules for setting the
+    // active cell. This may change the index, based on the rules for clipping
+    // the active cell index.
+    index = this.activeCellIndex;
+
+    // Collapse the selection if it is only the active cell.
+    if (index === anchor) {
+      this.deselectAll();
+      return;
+    }
+
+    if (head < index) {
+      if (head < anchor) {
+        Private.selectedProperty.set(this.widgets[head], false);
+      }
+
+      // Toggle everything strictly between head and index except anchor.
+      for (i = head + 1; i < index; i++) {
+        if (i !== anchor) {
+          Private.selectedProperty.set(this.widgets[i], !Private.selectedProperty.get(this.widgets[i]));
+        }
+      }
+
+    } else if (index < head) {
+      if (anchor < head) {
+        Private.selectedProperty.set(this.widgets[head], false);
+      }
+
+      // Toggle everything strictly between head and index except anchor.
+      for (i = index + 1; i < head; i++) {
+        if (i !== anchor) {
+          Private.selectedProperty.set(this.widgets[i], !Private.selectedProperty.get(this.widgets[i]));
+        }
+      }
+    }
+
+    // Anchor and index should *always* be selected.
+    Private.selectedProperty.set(this.widgets[anchor], true);
+    Private.selectedProperty.set(this.widgets[index], true);
+
+    this._selectionChanged.emit(void 0);
+  }
+
+  /**
+   * Get the head and anchor of a contiguous cell selection.
+   *
+   * The head of a contiguous selection is always the active cell.
+   *
+   * If there are no cells selected, `{head: null, anchor: null}` is returned.
+   *
+   * Throws an error if the currently selected cells do not form a contiguous
+   * selection.
+   */
+  getContiguousSelection(): {head: number | null, anchor: number | null} {
+    let cells = this.widgets;
+    let first = ArrayExt.findFirstIndex(cells, c => this.isSelected(c));
+
+    // Return early if no cells are selected.
+    if (first === -1) {
+      return {head: null, anchor: null};
+    }
+
+    let last = ArrayExt.findLastIndex(cells, c => this.isSelected(c), -1, first);
+
+    // Check that the selection is contiguous.
+    for (let i = first; i <= last; i++) {
+      if (!this.isSelected(cells[i])) {
+        throw new Error('Selection not contiguous');
+      }
+    }
+
+    // Check that the active cell is one of the endpoints of the selection.
+    let activeIndex = this.activeCellIndex;
+    if (first !== activeIndex && last !== activeIndex) {
+      throw new Error('Active cell not at endpoint of selection');
+    }
+
+    // Determine the head and anchor of the selection.
+    if (first === activeIndex) {
+      return {head: first, anchor: last};
+    } else {
+      return {head: last, anchor: first};
+    }
+  }
+
+  /**
    * Scroll so that the given position is visible.
    *
    * @param position - The vertical position in the notebook widget.
@@ -1552,28 +1665,6 @@ class Notebook extends StaticNotebook {
     } else if (target.localName === 'img') {
       target.classList.toggle(UNCONFINED_CLASS);
     }
-  }
-
-  /**
-   * Extend the selection to a given index.
-   */
-  private _extendSelectionTo(index: number): void {
-    let activeIndex = this.activeCellIndex;
-    let j = index;
-    // extend the existing selection.
-    if (j > activeIndex) {
-      while (j > activeIndex) {
-        Private.selectedProperty.set(this.widgets[j], true);
-        j--;
-      }
-    } else if (j < activeIndex) {
-      while (j < activeIndex) {
-        Private.selectedProperty.set(this.widgets[j], true);
-        j++;
-      }
-    }
-    Private.selectedProperty.set(this.widgets[activeIndex], true);
-    this._selectionChanged.emit(void 0);
   }
 
   /**
