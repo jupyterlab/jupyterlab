@@ -110,7 +110,7 @@ module.exports = {
   },
   output: {
     path: path.resolve(buildDir),
-    publicPath: jlab.publicUrl || 'lab/static/',
+    publicPath: jlab.publicUrl || '{{base_url}}lab/static/',
     filename: '[name].[chunkhash].js'
   },
   module: {
