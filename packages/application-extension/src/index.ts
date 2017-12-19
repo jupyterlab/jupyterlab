@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IStateDB
+  IStateDB, PageConfig
 } from '@jupyterlab/coreutils';
 
 import {
@@ -155,7 +155,7 @@ const layout: JupyterLabPlugin<ILayoutRestorer> = {
  */
 const router: JupyterLabPlugin<IRouter> = {
   id: '@jupyterlab/application-extension:router',
-  activate: () => new Router(),
+  activate: () => new Router({ base: PageConfig.getBaseUrl() }),
   autoStart: true,
   provides: IRouter
 };
