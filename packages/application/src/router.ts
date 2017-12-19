@@ -4,6 +4,10 @@
 |----------------------------------------------------------------------------*/
 
 import {
+  PageConfig
+} from '@jupyterlab/coreutils';
+
+import {
   Token
 } from '@phosphor/coreutils';
 
@@ -31,6 +35,6 @@ interface IRouter {
 export
 class Router implements IRouter {
   constructor() {
-    console.log('A router instance has been created.');
+    console.log('A router instance has been created.', PageConfig.getBaseUrl());
   }
 }
