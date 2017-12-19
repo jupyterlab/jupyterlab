@@ -1153,18 +1153,15 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       toolbar.addClass('jp-LinkedOutputView-toolbar');
       // Create a MainAreaWidget
       const layout = new PanelLayout();
-      const widget = new MainAreaWidget({layout: layout});
+      const widget = new MainAreaWidget({ layout });
       widget.id = `LinkedOutputView-${uuid()}`;
-      widget.title.closable = true;
       widget.title.label = 'Output View';
       widget.title.icon = NOTEBOOK_ICON_CLASS;
       widget.title.caption = current.title.label ? `For Notebook: ${current.title.label}` : 'For Notebook:';
       widget.addClass('jp-LinkedOutputView');
-      // Allow the widget to take focus if needed, helpful for working with jupyter widgets.
-      widget.node.tabIndex = -1;
       layout.addWidget(toolbar);
       layout.addWidget(outputAreaView);
-      shell.addToMainArea(widget);
+      current.context.addSibling(widget);
       // Remove the output view if the parent notebook is closed.
       nb.disposed.connect(
         () => { widget.dispose(); }
