@@ -865,6 +865,7 @@ describe('notebook/widget', () => {
           let child = widget.widgets[1];
           simulate(child.node, 'mousedown');
           expect(widget.events).to.contain('mousedown');
+          expect(widget.isSelected(widget.widgets[0])).to.be(false);
           expect(widget.activeCellIndex).to.be(1);
         });
 
@@ -883,6 +884,42 @@ describe('notebook/widget', () => {
           simulate(child.node, 'mousedown');
           expect(child.rendered).to.be(true);
           expect(widget.activeCell).to.be(child);
+        });
+
+        it('should extend selection if invoked with shift', () => {
+          const selected = (nb: Notebook) => {
+            const selected = [];
+            const cells = nb.widgets;
+            for (let i = 0; i < cells.length; i++) {
+              if (nb.isSelected(cells[i])) {
+                selected.push(i);
+              }
+            }
+            return selected;
+          };
+
+          widget.activeCellIndex = 3;
+
+          // shift click below
+          simulate(widget.widgets[4].node, 'mousedown', {shiftKey: true});
+          expect(widget.activeCellIndex).to.be(4);
+          expect(selected(widget)).to.eql([3, 4]);
+
+          // shift click above
+          simulate(widget.widgets[1].node, 'mousedown', {shiftKey: true});
+          expect(widget.activeCellIndex).to.be(1);
+          expect(selected(widget)).to.eql([1, 2, 3]);
+
+          // shift click expand
+          simulate(widget.widgets[0].node, 'mousedown', {shiftKey: true});
+          expect(widget.activeCellIndex).to.be(0);
+          expect(selected(widget)).to.eql([0, 1, 2, 3]);
+
+          // shift click contract
+          simulate(widget.widgets[2].node, 'mousedown', {shiftKey: true});
+          expect(widget.activeCellIndex).to.be(2);
+          expect(selected(widget)).to.eql([2, 3]);
+
         });
 
       });
