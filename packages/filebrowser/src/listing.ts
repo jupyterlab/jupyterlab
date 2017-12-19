@@ -611,9 +611,15 @@ class DirListing extends Widget {
       break;
     case 'dragenter':
     case 'dragover':
+      this.addClass('jp-mod-native-drop');
       event.preventDefault();
       break;
+    case 'dragleave':
+    case 'dragend':
+      this.removeClass('jp-mod-native-drop');
+      break;
     case 'drop':
+      this.removeClass('jp-mod-native-drop');
       this._evtNativeDrop(event as DragEvent);
       break;
     case 'scroll':
@@ -649,6 +655,8 @@ class DirListing extends Widget {
     node.addEventListener('dblclick', this);
     content.addEventListener('dragenter', this);
     content.addEventListener('dragover', this);
+    content.addEventListener('dragleave', this);
+    content.addEventListener('dragend', this);
     content.addEventListener('drop', this);
     content.addEventListener('scroll', this);
     content.addEventListener('p-dragenter', this);
@@ -671,6 +679,8 @@ class DirListing extends Widget {
     content.removeEventListener('scroll', this);
     content.removeEventListener('dragover', this);
     content.removeEventListener('dragover', this);
+    content.removeEventListener('dragleave', this);
+    content.removeEventListener('dragend', this);
     content.removeEventListener('drop', this);
     content.removeEventListener('p-dragenter', this);
     content.removeEventListener('p-dragleave', this);
