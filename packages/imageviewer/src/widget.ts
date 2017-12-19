@@ -2,152 +2,164 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  PathExt
-} from '@jupyterlab/coreutils';
+  ILayoutRestorer, JupyterLab, JupyterLabPlugin
+} from '@jupyterlab/application';
 
 import {
-  ABCWidgetFactory, DocumentRegistry
-} from '@jupyterlab/docregistry';
+  ICommandPalette, InstanceTracker
+} from '@jupyterlab/apputils';
 
 import {
-  PromiseDelegate
-} from '@phosphor/coreutils';
-
-import {
-  Message
-} from '@phosphor/messaging';
-
-import {
-  Widget
-} from '@phosphor/widgets';
-
+  ImageViewer, ImageViewerFactory, IImageTracker
+} from '@jupyterlab/imageviewer';
 
 /**
- * The class name added to a imageviewer.
+ * The command IDs used by the image widget plugin.
  */
-const IMAGE_CLASS = 'jp-ImageViewer';
-
-
-/**
- * A widget for images.
- */
-export
-class ImageViewer extends Widget implements DocumentRegistry.IDocumentWidget {
-  /**
-   * Construct a new image widget.
-   */
-  constructor(context: DocumentRegistry.Context) {
-    super({ node: Private.createNode() });
-    this.context = context;
-    this.addClass(IMAGE_CLASS);
-
-    this._onTitleChanged();
-    context.pathChanged.connect(this._onTitleChanged, this);
-
-    context.ready.then(() => {
-      if (this.isDisposed) {
-        return;
-      }
-      this._render();
-      context.model.contentChanged.connect(this.update, this);
-      context.fileChanged.connect(this.update, this);
-      this._ready.resolve(void 0);
-    });
-  }
-
-  /**
-   * The image widget's context.
-   */
-  readonly context: DocumentRegistry.Context;
-
-  /**
-   * A promise that resolves when the image viewer is ready.
-   */
-  get ready(): Promise<void> {
-    return this._ready.promise;
-  }
-
-  /**
-   * The scale factor for the image.
-   */
-  get scale(): number {
-    return this._scale;
-  }
-  set scale(value: number) {
-    if (value === this._scale) {
-      return;
-    }
-    this._scale = value;
-    let scaleNode = this.node.querySelector('div') as HTMLElement;
-    let transform: string;
-    transform = `scale(${value})`;
-    scaleNode.style.transform = transform;
-  }
-
-  /**
-   * Handle `update-request` messages for the widget.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    if (this.isDisposed || !this.context.isReady) {
-      return;
-    }
-    this._render();
-  }
-
-  /**
-   * Handle a change to the title.
-   */
-  private _onTitleChanged(): void {
-    this.title.label = PathExt.basename(this.context.localPath);
-  }
-
-  /**
-   * Render the widget content.
-   */
-  private _render(): void {
-    let context = this.context;
-    let cm = context.contentsModel;
-    if (!cm) {
-      return;
-    }
-    let content = context.model.toString();
-    let src = `data:${cm.mimetype};${cm.format},${content}`;
-    let node = this.node.querySelector('img') as HTMLImageElement;
-    node.setAttribute('src', src);
-  }
-
-  private _scale = 1;
-  private _ready = new PromiseDelegate<void>();
-}
-
-
-/**
- * A widget factory for images.
- */
-export
-class ImageViewerFactory extends ABCWidgetFactory<ImageViewer, DocumentRegistry.IModel> {
-  /**
-   * Create a new widget given a context.
-   */
-  protected createNewWidget(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): ImageViewer {
-    return new ImageViewer(context);
-  }
-}
-
-/**
- * A namespace for image widget private data.
- */
-namespace Private {
-  /**
-   * Create the node for the image widget.
-   */
+namespace CommandIDs {
   export
-  function createNode(): HTMLElement {
-    let node = document.createElement('div');
-    let innerNode = document.createElement('div');
-    let image = document.createElement('img');
-    node.appendChild(innerNode);
-    innerNode.appendChild(image);
-    return node;
+  const resetZoom = 'imageviewer:reset-zoom';
+
+  export
+  const zoomIn = 'imageviewer:zoom-in';
+
+  export
+  const zoomOut = 'imageviewer:zoom-out';
+}
+
+
+/**
+ * The list of file types for images.
+ */
+const FILE_TYPES = [
+  'png', 'gif', 'jpeg', 'svg', 'bmp', 'ico', 'xbm', 'tiff'
+];
+
+/**
+ * The name of the factory that creates image widgets.
+ */
+const FACTORY = 'Image';
+
+/**
+ * The image file handler extension.
+ */
+const plugin: JupyterLabPlugin<IImageTracker> = {
+  activate,
+  id: '@jupyterlab/imageviewer-extension:plugin',
+  provides: IImageTracker,
+  requires: [ICommandPalette, ILayoutRestorer],
+  autoStart: true
+};
+
+
+/**
+ * Export the plugin as default.
+ */
+export default plugin;
+
+
+/**
+ * Activate the image widget extension.
+ */
+function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRestorer): IImageTracker {
+  const namespace = 'image-widget';
+  const factory = new ImageViewerFactory({
+    name: FACTORY,
+    modelName: 'base64',
+    fileTypes: FILE_TYPES,
+    defaultFor: FILE_TYPES,
+    readOnly: true
+  });
+  const tracker = new InstanceTracker<ImageViewer>({ namespace });
+
+  // Handle state restoration.
+  restorer.restore(tracker, {
+    command: 'docmanager:open',
+    args: widget => ({ path: widget.context.path, factory: FACTORY }),
+    name: widget => widget.context.path
+  });
+
+  app.docRegistry.addWidgetFactory(factory);
+
+  factory.widgetCreated.connect((sender, widget) => {
+    // Notify the instance tracker if restore data needs to update.
+    widget.context.pathChanged.connect(() => { tracker.save(widget); });
+    tracker.add(widget);
+
+    const types = app.docRegistry.getFileTypesForPath(widget.context.path);
+
+    if (types.length > 0) {
+      widget.title.iconClass = types[0].iconClass;
+      widget.title.iconLabel = types[0].iconLabel;
+    }
+  });
+
+  addCommands(app, tracker);
+
+  const category = 'Image Viewer';
+
+  [CommandIDs.zoomIn, CommandIDs.zoomOut, CommandIDs.resetZoom]
+    .forEach(command => { palette.addItem({ command, category }); });
+
+  return tracker;
+}
+
+
+/**
+ * Add the commands for the image widget.
+ */
+export
+function addCommands(app: JupyterLab, tracker: IImageTracker) {
+  const { commands } = app;
+
+  /**
+   * Whether there is an active image viewer.
+   */
+  function isEnabled(): boolean {
+    return tracker.currentWidget !== null &&
+           tracker.currentWidget === app.shell.currentWidget;
+  }
+
+  commands.addCommand('imageviewer:zoom-in', {
+    execute: zoomIn,
+    label: 'Zoom In',
+    isEnabled
+  });
+
+  commands.addCommand('imageviewer:zoom-out', {
+    execute: zoomOut,
+    label: 'Zoom Out',
+    isEnabled
+  });
+
+  commands.addCommand('imageviewer:reset-zoom', {
+    execute: resetZoom,
+    label: 'Reset Zoom',
+    isEnabled
+  });
+
+  function zoomIn(): void {
+    const widget = tracker.currentWidget;
+
+    if (widget) {
+      widget.scale = widget.scale > 1 ? widget.scale + 0.5 : widget.scale * 2;
+    }
+  }
+
+  function zoomOut(): void {
+    const widget = tracker.currentWidget;
+
+    if (widget) {
+      widget.scale = widget.scale > 1 ? widget.scale - 0.5 : widget.scale / 2;
+    }
+  }
+
+  function resetZoom(): void {
+    const widget = tracker.currentWidget;
+
+    if (widget) {
+      widget.scale = 1;
+    }
   }
 }
+

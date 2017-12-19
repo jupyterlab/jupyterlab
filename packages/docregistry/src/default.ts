@@ -377,16 +377,6 @@ abstract class ABCWidgetFactory<T extends DocumentRegistry.IReadyWidget, U exten
   }
 
   /**
-   * Create a new toolbar given a created widget.
-   *
-   * #### Notes
-   * The default implementation returns `undefined`.
-   */
-  createToolbar(widget: T): Widget | undefined {
-    return undefined;
-  }
-
-  /**
    * Create a widget for a context.
    */
   protected abstract createNewWidget(context: DocumentRegistry.IContext<U>): T;

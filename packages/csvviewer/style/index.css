@@ -11,6 +11,7 @@
 .jp-CSVViewer {
   display: flex;
   flex-direction: column;
+  outline: none;
 }
 
 .jp-CSVToolbar {

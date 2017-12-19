@@ -6,8 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  showDialog, showErrorMessage, Spinner, Dialog, ICommandPalette, 
-  MainAreaWidget
+  showDialog, showErrorMessage, Spinner, Dialog, ICommandPalette
 } from '@jupyterlab/apputils';
 
 import {
@@ -66,6 +65,9 @@ namespace CommandIDs {
   const save = 'docmanager:save';
 
   export
+  const saveAll = 'docmanager:save-all';
+
+  export
   const saveAs = 'docmanager:save-as';
 }
 
@@ -90,20 +92,16 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
           ...widget.title.dataset
         };
         if (!widget.isAttached) {
-          let factory = docManager.factoryForWidget(widget);
-          let main = new MainAreaWidget({
-            content: widget,
-            microToolbar: factory.microToolbar
-          });
-          app.shell.addToMainArea(main);
+          app.shell.addToMainArea(widget);
 
           // Add a loading spinner, and remove it when the widget is ready.
-          let spinner = new Spinner();
-          widget.node.appendChild(spinner.node);
-          widget.ready.then(() => { widget.node.removeChild(spinner.node); });
-        } else {
-          app.shell.activateById(widget.parent.id);
+          if (widget.ready !== undefined) {
+            let spinner = new Spinner();
+            widget.node.appendChild(spinner.node);
+            widget.ready.then(() => { widget.node.removeChild(spinner.node); });
+          }
         }
+        app.shell.activateById(widget.id);
 
         // Handle dirty state for open documents.
         let context = docManager.contextForWidget(widget);
@@ -134,13 +132,13 @@ export default plugin;
  * Add the file operations commands to the application's command registry.
  */
 function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICommandPalette, opener: DocumentManager.IWidgetOpener): void {
-  const { commands } = app;
+  const { commands, docRegistry } = app;
   const category = 'File Operations';
   const isEnabled = () => {
     const { currentWidget } = app.shell;
     return !!(currentWidget && docManager.contextForWidget(currentWidget));
   };
-  const fileName = () => {
+  const fileType = () => {
     const { currentWidget } = app.shell;
     if (!currentWidget) {
       return 'File';
@@ -149,16 +147,19 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     if (!context) {
       return 'File';
     }
-    // TODO: we should consider eliding the name
-    // if it is very long.
-    return `"${currentWidget.title.label}"`;
+    const fts = docRegistry.getFileTypesForPath(context.path);
+    return (fts.length && fts[0].displayName) ? fts[0].displayName : 'File';
   };
 
   commands.addCommand(CommandIDs.close, {
     label: () => {
       const widget = app.shell.currentWidget;
-      return `Close ${widget && widget.title.label ?
-             `"${widget.title.label}"` : 'Tab'}`;
+      let name = 'File';
+      if (widget) {
+        const typeName = fileType();
+        name = typeName === 'File' ? widget.title.label : typeName;
+      }
+      return `Close ${name}`;
     },
     isEnabled: () => !!app.shell.currentWidget &&
                      !!app.shell.currentWidget.title.closable,
@@ -175,6 +176,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   commands.addCommand(CommandIDs.deleteFile, {
+    label: () => `Delete ${fileType()}`,
     execute: args => {
       const path = typeof args['path'] === 'undefined' ? ''
         : args['path'] as string;
@@ -214,8 +216,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
       const factory = args['factory'] as string || void 0;
       const kernel = args['kernel'] as Kernel.IModel || void 0;
       return docManager.services.contents.get(path, { content: false })
-        .then(() => docManager.openOrReveal(path, factory, kernel))
-        .then(widget => widget.parent);
+        .then(() => docManager.openOrReveal(path, factory, kernel));
     },
     icon: args => args['icon'] as string || '',
     label: args => (args['label'] || args['factory']) as string,
@@ -223,7 +224,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   commands.addCommand(CommandIDs.restoreCheckpoint, {
-    label: () => `Revert ${fileName()} to Checkpoint`,
+    label: () => `Revert ${fileType()} to Saved`,
     caption: 'Revert contents to previous checkpoint',
     isEnabled,
     execute: () => {
@@ -238,7 +239,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   commands.addCommand(CommandIDs.save, {
-    label: () => `Save ${fileName()}`,
+    label: () => `Save ${fileType()}`,
     caption: 'Save and create checkpoint',
     isEnabled,
     execute: () => {
@@ -256,8 +257,39 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     }
   });
 
+  commands.addCommand(CommandIDs.saveAll, {
+    label: () => 'Save All',
+    caption: 'Save all open documents',
+    isEnabled: () => {
+      const iterator = app.shell.widgets('main');
+      let widget = iterator.next();
+      while (widget) {
+        if (docManager.contextForWidget(widget)) {
+          return true;
+        }
+        widget = iterator.next();
+      }
+      return false;
+    },
+    execute: () => {
+      const iterator = app.shell.widgets('main');
+      const promises: Promise<void>[] = [];
+      const paths = new Set<string>(); // Cache so we don't double save files.
+      let widget = iterator.next();
+      while (widget) {
+        const context = docManager.contextForWidget(widget);
+        if (context && !context.model.readOnly && !paths.has(context.path)) {
+          paths.add(context.path);
+          promises.push(context.save());
+        }
+        widget = iterator.next();
+      }
+      return Promise.all(promises);
+    }
+  });
+
   commands.addCommand(CommandIDs.saveAs, {
-    label: () => `Save ${fileName()} As…`,
+    label: () => `Save ${fileType()} As…`,
     caption: 'Save with new path',
     isEnabled,
     execute: () => {
@@ -269,7 +301,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   commands.addCommand(CommandIDs.rename, {
-    label: () => `Rename ${fileName()}`,
+    label: () => `Rename ${fileType()}…`,
     isEnabled,
     execute: () => {
       if (isEnabled()) {
@@ -280,7 +312,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   commands.addCommand(CommandIDs.clone, {
-    label: () => `New View Into ${fileName()}`,
+    label: () => `New View for ${fileType()}`,
     isEnabled,
     execute: () => {
       const widget = app.shell.currentWidget;

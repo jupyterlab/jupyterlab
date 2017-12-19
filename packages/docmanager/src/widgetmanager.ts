@@ -172,17 +172,6 @@ class DocumentWidgetManager implements IDisposable {
   }
 
   /**
-   * Get the document factory for a widget.
-   *
-   * @param widget - The widget of interest.
-   *
-   * @returns The factory associated with the widget, or `undefined`.
-   */
-  factoryForWidget(widget: Widget): DocumentRegistry.WidgetFactory | undefined {
-    return Private.factoryProperty.get(widget);
-  }
-
-  /**
    * Clone a widget.
    *
    * @param widget - The source widget.

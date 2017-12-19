@@ -78,19 +78,36 @@ const DIRTY_CLASS = 'jp-mod-dirty';
  * kernel on the context.
  */
 export
-class NotebookPanel extends Notebook implements DocumentRegistry.IDocumentWidget {
+class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
   /**
    * Construct a new notebook panel.
    */
   constructor(options: NotebookPanel.IOptions) {
-    super(options);
+    super();
     this.addClass(NOTEBOOK_PANEL_CLASS);
+    this.rendermime = options.rendermime;
+    let contentFactory = this.contentFactory = (
+      options.contentFactory || NotebookPanel.defaultContentFactory
+    );
 
-    let toolbar = this.toolbar = new Toolbar();
+    let layout = this.layout = new PanelLayout();
+
+    // Toolbar
+    let toolbar = new Toolbar();
     toolbar.addClass(NOTEBOOK_PANEL_TOOLBAR_CLASS);
 
-    // TODO handle context
-    throw;
+    // Notebook
+    let nbOptions = {
+      rendermime: this.rendermime,
+      languagePreference: options.languagePreference,
+      contentFactory: contentFactory,
+      mimeTypeService: options.mimeTypeService
+    };
+    let notebook = this.notebook = contentFactory.createNotebook(nbOptions);
+    notebook.addClass(NOTEBOOK_PANEL_NOTEBOOK_CLASS);
+
+    layout.addWidget(toolbar);
+    layout.addWidget(this.notebook);
   }
 
   /**
@@ -132,14 +149,67 @@ class NotebookPanel extends Notebook implements DocumentRegistry.IDocumentWidget
   readonly rendermime: RenderMimeRegistry;
 
   /**
+   * The notebook used by the widget.
+   */
+  readonly notebook: Notebook;
+
+  /**
    * Get the toolbar used by the widget.
    */
-  readonly toolbar: Toolbar<Widget>;
+  get toolbar(): Toolbar<Widget> {
+    return (this.layout as PanelLayout).widgets[0] as Toolbar<Widget>;
+  }
+
+  /**
+   * The model for the widget.
+   */
+  get model(): INotebookModel {
+    return this.notebook ? this.notebook.model : null;
+  }
 
   /**
    * The document context for the widget.
+   *
+   * #### Notes
+   * Changing the context also changes the model on the
+   * `content`.
    */
-  readonly context: DocumentRegistry.IContext<INotebookModel>;
+  get context(): DocumentRegistry.IContext<INotebookModel> {
+    return this._context;
+  }
+  set context(newValue: DocumentRegistry.IContext<INotebookModel>) {
+    newValue = newValue || null;
+    if (newValue === this._context) {
+      return;
+    }
+    let oldValue = this._context;
+    this._context = newValue;
+    // Trigger private, protected, and public changes.
+    this._onContextChanged(oldValue, newValue);
+    this.onContextChanged(oldValue, newValue);
+    this._contextChanged.emit(void 0);
+
+    if (!oldValue) {
+      newValue.ready.then(() => {
+        if (this.notebook.widgets.length === 1) {
+          let model = this.notebook.widgets[0].model;
+          if (model.type === 'code' && model.value.text === '') {
+            this.notebook.mode = 'edit';
+          }
+        }
+        this._ready.resolve(undefined);
+      });
+    }
+  }
+
+  /**
+   * Dispose of the resources used by the widget.
+   */
+  dispose(): void {
+    this._context = null;
+    this.notebook.dispose();
+    super.dispose();
+  }
 
   /**
    * Handle the DOM events for the widget.
@@ -158,7 +228,7 @@ class NotebookPanel extends Notebook implements DocumentRegistry.IDocumentWidget
       let target = event.target as HTMLElement;
       if (this.toolbar.node.contains(document.activeElement) &&
           target.localName !== 'select') {
-        this.node.focus();
+        this.notebook.node.focus();
       }
       break;
     default:
@@ -186,9 +256,20 @@ class NotebookPanel extends Notebook implements DocumentRegistry.IDocumentWidget
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    super.activate();
+    this.notebook.activate();
     this._activated.emit(void 0);
   }
+
+  /**
+   * Handle a change to the document context.
+   *
+   * #### Notes
+   * The default implementation is a no-op.
+   */
+  protected onContextChanged(oldValue: DocumentRegistry.IContext<INotebookModel>, newValue: DocumentRegistry.IContext<INotebookModel>): void {
+    // This is a no-op.
+  }
+
 
   /**
    * Handle a change in the model state.
@@ -301,7 +382,9 @@ class NotebookPanel extends Notebook implements DocumentRegistry.IDocumentWidget
     }
   }
 
+  private _context: DocumentRegistry.IContext<INotebookModel> = null;
   private _activated = new Signal<this, void>(this);
+  private _contextChanged = new Signal<this, void>(this);
   private _ready = new PromiseDelegate<void>();
 }
 
@@ -321,11 +404,6 @@ export namespace NotebookPanel {
     rendermime: RenderMimeRegistry;
 
     /**
-     * The context for the panel.
-     */
-    context: DocumentRegistry.IContext<INotebookModel>;
-
-    /**
      * The language preference for the model.
      */
     languagePreference?: string;
@@ -339,6 +417,31 @@ export namespace NotebookPanel {
      * The mimeType service.
      */
     mimeTypeService: IEditorMimeTypeService;
+  }
+
+  /**
+   * A content factory interface for NotebookPanel.
+   */
+  export
+  interface IContentFactory extends Notebook.IContentFactory {
+    /**
+     * Create a new content area for the panel.
+     */
+    createNotebook(options: Notebook.IOptions): Notebook;
+
+  }
+
+  /**
+   * The default implementation of an `IContentFactory`.
+   */
+  export
+  class ContentFactory extends Notebook.ContentFactory implements IContentFactory {
+    /**
+     * Create a new content area for the panel.
+     */
+    createNotebook(options: Notebook.IOptions): Notebook {
+      return new Notebook(options);
+    }
   }
 
   /**

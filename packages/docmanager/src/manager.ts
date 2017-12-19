@@ -184,17 +184,6 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * Get the document factory for a widget.
-   *
-   * @param widget - The widget of interest.
-   *
-   * @returns The factory associated with the widget, or `undefined`.
-   */
-  factoryForWidget(widget: Widget): DocumentRegistry.WidgetFactory | undefined {
-    return this._widgetManager.factoryForWidget(widget);
-  }
-
-  /**
    * Copy a file.
    *
    * @param fromFile - The full path of the original file.
