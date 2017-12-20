@@ -4,8 +4,20 @@
 |----------------------------------------------------------------------------*/
 
 import {
+  URLExt
+} from '@jupyterlab/coreutils';
+
+import {
+  CommandRegistry
+} from '@phosphor/commands';
+
+import {
   Token
 } from '@phosphor/coreutils';
+
+import {
+  IDisposable, DisposableDelegate
+} from '@phosphor/disposable';
 
 
 /* tslint:disable */
@@ -21,21 +33,61 @@ const IRouter = new Token<IRouter>('@jupyterlab/application:IRouter');
  * A static class that routes URLs within the application.
  */
 export
-interface IRouter {
-}
+interface IRouter extends Router {}
 
 
 /**
  * A static class that routes URLs within the application.
  */
 export
-class Router implements IRouter {
+class Router {
   /**
    * Create a URL router.
    */
   constructor(options: Router.IOptions) {
-    console.log('A router instance has been created.', options.base);
+    this.base = options.base;
+    this.commands = options.commands;
   }
+
+  /**
+   * The base URL for the router.
+   */
+  readonly base: string;
+
+  /**
+   * The command registry used by the router.
+   */
+  readonly commands: CommandRegistry;
+
+  /**
+   * Register to route a path pattern to a command.
+   */
+  register(pattern: RegExp, command: string): IDisposable {
+    const rules = this._rules;
+
+    rules.set(pattern, command);
+
+    return new DisposableDelegate(() => { rules.delete(pattern); });
+  }
+
+  /**
+   * Route a specific path to an action.
+   */
+  route(url: string): void {
+    const { base } = this;
+    const parsed = URLExt.parse(url);
+    const path = parsed.pathname.indexOf(base) === 0 ?
+      parsed.pathname.replace(base, '') : parsed.pathname;
+    const rules = this._rules;
+
+    rules.forEach((command, pattern) => {
+      if (path.match(pattern)) {
+        this.commands.execute(command);
+      }
+    });
+  }
+
+  private _rules = new Map<RegExp, string>();
 }
 
 
@@ -53,5 +105,10 @@ namespace Router {
      * The base URL for the router.
      */
     base: string;
+
+    /**
+     * The command registry used by the router.
+     */
+    commands: CommandRegistry;
   }
 }
