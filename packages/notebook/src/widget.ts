@@ -196,6 +196,8 @@ class StaticNotebook extends Widget {
     this.contentFactory = (
       options.contentFactory || StaticNotebook.defaultContentFactory
     );
+    this.editorConfig = options.editorConfig ||
+                        StaticNotebook.defaultEditorConfig;
     this._mimetypeService = options.mimeTypeService;
   }
 
@@ -271,6 +273,17 @@ class StaticNotebook extends Widget {
    */
   get widgets(): ReadonlyArray<Cell> {
     return (this.layout as PanelLayout).widgets as ReadonlyArray<Cell>;
+  }
+
+  /**
+   * A configuration object for cell editor settings.
+   */
+  get editorConfig(): StaticNotebook.IEditorConfig {
+    return this._editorConfig;
+  }
+  set editorConfig(value: StaticNotebook.IEditorConfig) {
+    this._editorConfig = value;
+    this._updateEditorConfig();
   }
 
   /**
@@ -444,7 +457,8 @@ class StaticNotebook extends Widget {
   private _createCodeCell(model: ICodeCellModel): CodeCell {
     let rendermime = this.rendermime;
     let contentFactory = this.contentFactory;
-    let options = { model, rendermime, contentFactory };
+    const editorConfig = this.editorConfig.code;
+    let options = { editorConfig, model, rendermime, contentFactory };
     return this.contentFactory.createCodeCell(options, this);
   }
 
@@ -454,7 +468,8 @@ class StaticNotebook extends Widget {
   private _createMarkdownCell(model: IMarkdownCellModel): MarkdownCell {
     let rendermime = this.rendermime;
     let contentFactory = this.contentFactory;
-    let options = { model, rendermime, contentFactory };
+    const editorConfig = this.editorConfig.markdown;
+    let options = { editorConfig, model, rendermime, contentFactory };
     return this.contentFactory.createMarkdownCell(options, this);
   }
 
@@ -463,7 +478,8 @@ class StaticNotebook extends Widget {
    */
   private _createRawCell(model: IRawCellModel): RawCell {
     let contentFactory = this.contentFactory;
-    let options = { model, contentFactory };
+    const editorConfig = this.editorConfig.raw;
+    let options = { editorConfig, model, contentFactory };
     return this.contentFactory.createRawCell(options, this);
   }
 
@@ -519,7 +535,31 @@ class StaticNotebook extends Widget {
     }
   }
 
+  /**
+   * Update editor settings for notebook cells.
+   */
+  private _updateEditorConfig() {
+    for (let i = 0; i < this.widgets.length; i++) {
+      const cell = this.widgets[i];
+      let config: Partial<CodeEditor.IConfig>;
+      switch (cell.model.type) {
+        case 'code':
+          config = this._editorConfig.code;
+          break;
+        case 'markdown':
+          config = this._editorConfig.markdown;
+          break;
+        default:
+          config = this._editorConfig.raw;
+          break;
+      }
+      Object.keys(config).forEach((key: keyof CodeEditor.IConfig) => {
+        cell.editor.setOption(key, config[key]);
+      });
+    }
+  }
 
+  private _editorConfig = StaticNotebook.defaultEditorConfig;
   private _mimetype = 'text/plain';
   private _model: INotebookModel = null;
   private _mimetypeService: IEditorMimeTypeService;
@@ -554,6 +594,11 @@ namespace StaticNotebook {
     contentFactory?: IContentFactory;
 
     /**
+     * A configuration object for the cell editor settings.
+     */
+    editorConfig?: IEditorConfig;
+
+    /**
      * The service used to look up mime types.
      */
     mimeTypeService: IEditorMimeTypeService;
@@ -585,6 +630,50 @@ namespace StaticNotebook {
      */
     createRawCell(options: RawCell.IOptions, parent: StaticNotebook): RawCell;
   }
+
+  /**
+   * A config object for the cell editors.
+   */
+  export
+  interface IEditorConfig {
+    /**
+     * Config options for code cells.
+     */
+    readonly code: Partial<CodeEditor.IConfig>;
+    /**
+     * Config options for markdown cells.
+     */
+    readonly markdown: Partial<CodeEditor.IConfig>;
+    /**
+     * Config options for raw cells.
+     */
+    readonly raw: Partial<CodeEditor.IConfig>;
+  }
+
+  /**
+   * Default configuration options for cell editors.
+   */
+  export
+  const defaultEditorConfig: IEditorConfig = {
+    code: {
+      ...CodeEditor.defaultConfig,
+      lineWrap: false,
+      matchBrackets: true,
+      autoClosingBrackets: true
+    },
+    markdown: {
+      ...CodeEditor.defaultConfig,
+      lineWrap: true,
+      matchBrackets: false,
+      autoClosingBrackets: false
+    },
+    raw: {
+      ...CodeEditor.defaultConfig,
+      lineWrap: true,
+      matchBrackets: false,
+      autoClosingBrackets: false
+    }
+  };
 
   /**
    * The default implementation of an `IContentFactory`.

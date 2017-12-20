@@ -25,6 +25,10 @@ import {
   NotebookPanel
 } from './panel';
 
+import {
+  StaticNotebook
+} from './widget';
+
 
 /**
  * A widget factory for notebook panels.
@@ -41,6 +45,8 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
     this.rendermime = options.rendermime;
     this.contentFactory = options.contentFactory;
     this.mimeTypeService = options.mimeTypeService;
+    this._editorConfig = options.editorConfig
+                         || StaticNotebook.defaultEditorConfig;
   }
 
   /*
@@ -59,6 +65,16 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
   readonly mimeTypeService: IEditorMimeTypeService;
 
   /**
+   * A configuration object for cell editor settings.
+   */
+  get editorConfig(): StaticNotebook.IEditorConfig {
+    return this._editorConfig;
+  }
+  set editorConfig(value: StaticNotebook.IEditorConfig) {
+    this._editorConfig = value;
+  }
+
+  /**
    * Create a new widget.
    *
    * #### Notes
@@ -70,12 +86,15 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
     let panel = new NotebookPanel({
       rendermime,
       contentFactory: this.contentFactory,
-      mimeTypeService: this.mimeTypeService
+      mimeTypeService: this.mimeTypeService,
+      editorConfig: this._editorConfig
     });
     panel.context = context;
     ToolbarItems.populateDefaults(panel);
     return panel;
   }
+
+  private _editorConfig: StaticNotebook.IEditorConfig;
 }
 
 
@@ -103,5 +122,10 @@ namespace NotebookWidgetFactory {
      * The service used to look up mime types.
      */
     mimeTypeService: IEditorMimeTypeService;
+
+    /**
+     * The notebook cell editor configuration.
+     */
+    editorConfig?: StaticNotebook.IEditorConfig;
   }
 }

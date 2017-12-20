@@ -203,6 +203,14 @@ class Cell extends Widget {
     let footer = this._footer = this.contentFactory.createCellFooter();
     footer.addClass(CELL_FOOTER_CLASS);
     (this.layout as PanelLayout).addWidget(footer);
+
+    // Editor settings
+    if (options.editorConfig) {
+      Object.keys(options.editorConfig)
+      .forEach((key: keyof CodeEditor.IConfig) => {
+        this.editor.setOption(key, options.editorConfig[key]);
+      });
+    }
   }
 
   /**
@@ -398,6 +406,11 @@ namespace Cell {
      * The factory object for customizable cell children.
      */
     contentFactory?: IContentFactory;
+
+    /**
+     * The configuration options for the text editor widget.
+     */
+    editorConfig?: Partial<CodeEditor.IConfig>;
   }
 
   /**
@@ -529,9 +542,6 @@ class CodeCell extends Cell {
     let rendermime = this._rendermime = options.rendermime;
     let contentFactory = this.contentFactory;
     let model = this.model;
-
-    // Code cells should not wrap lines.
-    this.editor.setOption('lineWrap', false);
 
     // Insert the output before the cell footer.
     let outputWrapper = this._outputWrapper = new Panel();
