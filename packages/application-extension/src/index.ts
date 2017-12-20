@@ -136,13 +136,15 @@ const layout: JupyterLabPlugin<ILayoutRestorer> = {
   activate: (app: JupyterLab, state: IStateDB) => {
     const first = app.started;
     const registry = app.commands;
-    let restorer = new LayoutRestorer({ first, registry, state });
+    const restorer = new LayoutRestorer({ first, registry, state });
+
     restorer.fetch().then(saved => {
       app.shell.restoreLayout(saved);
       app.shell.layoutModified.connect(() => {
         restorer.save(app.shell.saveLayout());
       });
     });
+
     return restorer;
   },
   autoStart: true,
@@ -155,7 +157,15 @@ const layout: JupyterLabPlugin<ILayoutRestorer> = {
  */
 const router: JupyterLabPlugin<IRouter> = {
   id: '@jupyterlab/application-extension:router',
-  activate: () => new Router({ base: PageConfig.getBaseUrl() }),
+  activate: (app: JupyterLab) => {
+    const { commands } = app;
+    const base = PageConfig.getBaseUrl();
+    const router = new Router({ base, commands });
+
+    app.restored.then(() => { router.route(window.location.href); });
+
+    return router;
+  },
   autoStart: true,
   provides: IRouter
 };
