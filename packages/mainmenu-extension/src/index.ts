@@ -348,7 +348,10 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
     execute: Private.delegateExecute(app, menu.editorViewers, 'toggleWordWrap')
   });
 
-  menu.addGroup([{ command: 'application:toggle-left-area' }], 0);
+  menu.addGroup([
+    { command: 'application:toggle-left-area' },
+    { command: 'application:toggle-right-area' }
+  ], 0);
 
   const editorViewerGroup = [
     CommandIDs.lineNumbering,

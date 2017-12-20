@@ -39,6 +39,9 @@ namespace CommandIDs {
 
   export
   const toggleLeftArea: string = 'application:toggle-left-area';
+
+  export
+  const toggleRightArea: string = 'application:toggle-right-area';
 }
 
 
@@ -183,7 +186,23 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
         app.shell.collapseLeft();
       }
     },
-    isToggled: () => !app.shell.leftCollapsed
+    isToggled: () => !app.shell.leftCollapsed,
+    isVisible: () => !app.shell.leftEmpty
+  });
+  palette.addItem({ command, category });
+
+  command = CommandIDs.toggleRightArea;
+  app.commands.addCommand(command, {
+    label: 'Show Right Area',
+    execute: () => {
+      if (app.shell.rightCollapsed) {
+        app.shell.expandRight();
+      } else {
+        app.shell.collapseRight();
+      }
+    },
+    isToggled: () => !app.shell.rightCollapsed,
+    isVisible: () => !app.shell.rightEmpty
   });
   palette.addItem({ command, category });
 
