@@ -27,12 +27,6 @@ import {
 namespace CommandIDs {
   export
   const activate = 'apputils:activate-command-palette';
-
-  export
-  const hide = 'apputils:hide-command-palette';
-
-  export
-  const toggle = 'apputils:toggle-command-palette';
 }
 
 
@@ -100,25 +94,6 @@ function activatePalette(app: JupyterLab, restorer: ILayoutRestorer): ICommandPa
   commands.addCommand(CommandIDs.activate, {
     execute: () => { shell.activateById(palette.id); },
     label: 'Activate Command Palette'
-  });
-
-  commands.addCommand(CommandIDs.hide, {
-    execute: () => {
-      if (!palette.isHidden) {
-        shell.collapseLeft();
-      }
-    },
-    label: 'Hide Command Palette'
-  });
-
-  commands.addCommand(CommandIDs.toggle, {
-    execute: () => {
-      if (palette.isHidden) {
-        return commands.execute(CommandIDs.activate, void 0);
-      }
-      return commands.execute(CommandIDs.hide, void 0);
-    },
-    label: 'Toggle Command Palette'
   });
 
   palette.inputNode.placeholder = 'SEARCH';
