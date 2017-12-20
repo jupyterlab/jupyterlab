@@ -1588,13 +1588,11 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
     toggleLineNumbers: widget => {
       NotebookActions.toggleAllLineNumbers(widget.notebook);
     },
-    toggleMatchBrackets: widget => {
-      NotebookActions.toggleAllMatchBrackets(widget.notebook);
-    },
-    lineNumbersToggled: widget =>
-      widget.notebook.activeCell.editor.getOption('lineNumbers'),
-    matchBracketsToggled: widget =>
-      widget.notebook.activeCell.editor.getOption('matchBrackets'),
+    lineNumbersToggled: widget => {
+      const config = widget.notebook.editorConfig;
+      return !!(config.code.lineNumbers && config.markdown.lineNumbers &&
+        config.raw.lineNumbers);
+    }
   } as IViewMenu.IEditorViewer<NotebookPanel>);
 
   // Add an ICodeRunner to the application run menu
