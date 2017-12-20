@@ -36,6 +36,9 @@ namespace CommandIDs {
 
   export
   const toggleMode: string = 'application:toggle-mode';
+
+  export
+  const toggleLeftArea: string = 'application:toggle-left-area';
 }
 
 
@@ -167,6 +170,20 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
   app.commands.addCommand(command, {
     label: 'Close All Widgets',
     execute: () => { app.shell.closeAll(); }
+  });
+  palette.addItem({ command, category });
+
+  command = CommandIDs.toggleLeftArea;
+  app.commands.addCommand(command, {
+    label: 'Show Left Area',
+    execute: () => {
+      if (app.shell.leftCollapsed) {
+        app.shell.expandLeft();
+      } else {
+        app.shell.collapseLeft();
+      }
+    },
+    isToggled: () => !app.shell.leftCollapsed
   });
   palette.addItem({ command, category });
 
