@@ -244,7 +244,7 @@ namespace Private {
     let cache = init.cache || settings.init.cache;
     if (cache === 'no-store') {
       request.headers.append('Cache-Control', 'no-store');
-    } else if (cache == 'no-cache') {
+    } else if (cache === 'no-cache') {
       request.headers.append('Cache-Control', 'no-cache');
     }
 
