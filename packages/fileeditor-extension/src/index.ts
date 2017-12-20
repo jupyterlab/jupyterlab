@@ -280,7 +280,9 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
       return commands.execute('console:create', {
         activate: args['activate'],
         path: widget.context.path,
-        preferredLanguage: widget.context.model.defaultKernelLanguage
+        preferredLanguage: widget.context.model.defaultKernelLanguage,
+        ref: widget.id,
+        insertMode: 'split-bottom'
       });
     },
     isEnabled,

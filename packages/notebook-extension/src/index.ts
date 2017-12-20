@@ -1183,7 +1183,9 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const options: ReadonlyJSONObject = {
         path: widget.context.path,
         preferredLanguage: widget.context.model.defaultKernelLanguage,
-        activate: args['activate']
+        activate: args['activate'],
+        ref: current.id,
+        insertMode: 'split-bottom'
       };
 
       return commands.execute('console:create', options);
