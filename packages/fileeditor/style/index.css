@@ -5,15 +5,13 @@
 
 
 .jp-FileEditor {
-    border-top: var(--jp-border-width) solid var(--jp-border-color1);
-    margin-top: -1px;
+    
 }
 
 .jp-FileEditor > .jp-Toolbar {
-    display: block;
     min-height: var(--jp-toolbar-micro-height);
     background: var(--jp-toolbar-background);
     border-bottom: 1px solid var(--jp-toolbar-border-color);
     box-shadow: var(--jp-toolbar-box-shadow);
-    z-index: 1;
+    z-index: 10;
 }
