@@ -651,6 +651,14 @@ namespace Private {
         anchors[i].target = '_blank';
       }
     }
+
+    // Handle image elements.
+    let imgs = node.getElementsByTagName('img');
+    for (let i = 0; i < imgs.length; i++) {
+      if (!imgs[i].alt) {
+        imgs[i].alt = 'Image';
+      }
+    }
   }
 
   /**
