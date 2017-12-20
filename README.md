@@ -134,7 +134,7 @@ JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by
 
 * Chris Colbert, Project Jupyter (co-creator, application/low-level architecture,
   technical leadership, vision, phosphor.js)
-* Afshin Darian, Anaconda, Inc. (co-creator, settings, inspector, completer,
+* Afshin Darian, Project Jupyter (co-creator, settings, inspector, completer,
   prolific contributions throughout the code base).
 * Jessica Forde, Project Jupyter (demo, documentation)
 * Brian Granger, Cal Poly (co-creator, strategy, vision, management, UI/UX design,
@@ -143,7 +143,7 @@ JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by
 * Cameron Oelsen, Cal Poly (UI/UX design).
 * Fernando Perez, UC Berkeley (co-creator, vision).
 * Ian Rose, UC Berkeley (Real-time collaboration, document architecture).
-* Steven Silvester, Anaconda, Inc. (co-creator, release management, packaging,
+* Steven Silvester, Project Jupyter (co-creator, release management, packaging,
   prolific contributions throughout the code base).
 
 This list is provided to help provide context about who we are and how our team functions.
