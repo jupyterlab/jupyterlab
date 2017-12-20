@@ -6,7 +6,9 @@
 require('es6-promise/auto');  // polyfill Promise on IE
 
 var PageConfig = require('@jupyterlab/coreutils').PageConfig;
+__webpack_public_path__ = PageConfig.getOption('publicUrl');
 
+// This needs to come after __webpack_public_path__ is set.
 require('font-awesome/css/font-awesome.min.css');
 
 /**
