@@ -368,7 +368,9 @@ class ApplicationShell extends Widget {
       ref = find(dock.widgets(), value => value.id === options.ref!) || null;
     }
 
-    dock.addWidget(widget, { mode: 'tab-after', ref });
+    let mode = options.mode || 'tab-after';
+
+    dock.addWidget(widget, { mode, ref });
   }
 
   /**
@@ -762,6 +764,14 @@ namespace ApplicationShell {
      * The default is `null`.
      */
     ref?: string | null;
+
+    /**
+     * The supported insertion modes.
+     *
+     * An insert mode is used to specify how a widget should be added
+     * to the main area relative to a reference widget.
+     */
+    mode?: DockLayout.InsertMode;
   }
 }
 
