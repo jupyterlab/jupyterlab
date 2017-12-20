@@ -366,6 +366,7 @@ margin-top = 14, 14, 14, 14, 8, 8
 
 
 .jp-RenderedHTMLCommon img {
+  -moz-force-broken-image-icon: 1;
   display: block;
   margin-left: auto;
   margin-right: auto;
