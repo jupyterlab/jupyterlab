@@ -189,8 +189,8 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
   }
 
   interface ICreateOptions extends Partial<ConsolePanel.IOptions> {
-    ref?: string,
-    insertMode?: DockLayout.InsertMode
+    ref?: string;
+    insertMode?: DockLayout.InsertMode;
   }
 
   /**
@@ -209,8 +209,8 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
       // Add the console panel to the tracker.
       tracker.add(panel);
       shell.addToMainArea(
-        panel, { 
-          ref: options.ref || null, mode: options.insertMode || 'tab-after' 
+        panel, {
+          ref: options.ref || null, mode: options.insertMode || 'tab-after'
         }
       );
       shell.activateById(panel.id);
