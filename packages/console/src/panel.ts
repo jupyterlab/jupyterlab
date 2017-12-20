@@ -97,8 +97,6 @@ class ConsolePanel extends Panel {
     session.propertyChanged.connect(this._updateTitle, this);
 
     this.title.icon = CONSOLE_ICON_CLASS;
-    this.title.closable = true;
-    this.id = `console-${count}`;
   }
 
   /**

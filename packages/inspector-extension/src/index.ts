@@ -89,7 +89,7 @@ const inspector: JupyterLabPlugin<IInspector> = {
       execute: () => {
         if (!manager.inspector || manager.inspector.isDisposed) {
           manager.inspector = newInspectorPanel();
-          shell.addToMainArea(manager.inspector);
+          shell.addToMainArea(manager.inspector, { activate: false });
         }
         if (manager.inspector.isAttached) {
           shell.activateById(manager.inspector.id);

@@ -2,11 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  BoxLayout, Widget
-} from '@phosphor/widgets';
-
-import {
-  IChangedArgs, PathExt
+  IChangedArgs
 } from '@jupyterlab/coreutils';
 
 import {
@@ -21,9 +17,6 @@ import {
   PromiseDelegate
 } from '@phosphor/coreutils';
 
-import {
-  Message
-} from '@phosphor/messaging';
 
 /**
  * The data attribute added to a widget that can run code.
@@ -50,7 +43,7 @@ const EDITOR_CLASS = 'jp-FileEditor';
  * A code editor wrapper for the file editor.
  */
 export
-class FileEditorCodeWrapper extends CodeEditorWrapper {
+class FileEditor extends CodeEditorWrapper implements DocumentRegistry.IDocumentWidget {
   /**
    * Construct a new editor widget.
    */
@@ -60,7 +53,7 @@ class FileEditorCodeWrapper extends CodeEditorWrapper {
       model: options.context.model
     });
 
-    const context = this._context = options.context;
+    const context = this.context = options.context;
     const editor = this.editor;
 
     this.addClass(EDITOR_CLASS);
@@ -95,11 +88,9 @@ class FileEditorCodeWrapper extends CodeEditorWrapper {
   }
 
   /**
-   * Get the context for the editor widget.
+   * The context for the editor widget.
    */
-  get context(): DocumentRegistry.Context {
-    return this._context;
-  }
+  readonly context: DocumentRegistry.Context;
 
   /**
    * A promise that resolves when the file editor is ready.
@@ -115,7 +106,7 @@ class FileEditorCodeWrapper extends CodeEditorWrapper {
     if (this.isDisposed) {
       return;
     }
-    const contextModel = this._context.model;
+    const contextModel = this.context.model;
     const editor = this.editor;
     const editorModel = editor.model;
 
@@ -147,7 +138,7 @@ class FileEditorCodeWrapper extends CodeEditorWrapper {
    * Handle the dirty state of the context model.
    */
   private _handleDirtyState(): void {
-    if (this._context.model.dirty) {
+    if (this.context.model.dirty) {
       this.title.className += ` ${DIRTY_CLASS}`;
     } else {
       this.title.className = this.title.className.replace(DIRTY_CLASS, '');
@@ -160,7 +151,7 @@ class FileEditorCodeWrapper extends CodeEditorWrapper {
   private _onContentChanged(): void {
     const editorModel = this.editor.model;
     const oldValue = editorModel.value.text;
-    const newValue = this._context.model.toString();
+    const newValue = this.context.model.toString();
 
     if (oldValue !== newValue) {
       editorModel.value.text = newValue;
@@ -174,7 +165,7 @@ class FileEditorCodeWrapper extends CodeEditorWrapper {
   private _onCollaboratorsChanged(): void {
     // If there are selections corresponding to non-collaborators,
     // they are stale and should be removed.
-    let collaborators = this._context.model.modelDB.collaborators;
+    let collaborators = this.context.model.modelDB.collaborators;
     if (!collaborators) {
       return;
     }
@@ -185,135 +176,13 @@ class FileEditorCodeWrapper extends CodeEditorWrapper {
     }
   }
 
-  protected _context: DocumentRegistry.Context;
   private _ready = new PromiseDelegate<void>();
 }
 
 
-/**
- * A document widget for editors.
- */
-export
-class FileEditor extends Widget implements DocumentRegistry.IReadyWidget {
-  /**
-   * Construct a new editor widget.
-   */
-  constructor(options: FileEditor.IOptions) {
-    super();
-
-    const context = this._context = options.context;
-    this._mimeTypeService = options.mimeTypeService;
-
-    let editorWidget = this.editorWidget = new FileEditorCodeWrapper(options);
-    this.editor = editorWidget.editor;
-    this.model = editorWidget.model;
-
-    context.pathChanged.connect(this._onPathChanged, this);
-    this._onPathChanged();
-
-
-    let layout = this.layout = new BoxLayout();
-    let toolbar = new Widget();
-    toolbar.addClass('jp-Toolbar');
-
-    layout.addWidget(toolbar);
-    BoxLayout.setStretch(toolbar, 0);
-    layout.addWidget(editorWidget);
-    BoxLayout.setStretch(editorWidget, 1);
-  }
-
-  /**
-   * Get the context for the editor widget.
-   */
-  get context(): DocumentRegistry.Context {
-    return this.editorWidget.context;
-  }
-
-  /**
-   * A promise that resolves when the file editor is ready.
-   */
-  get ready(): Promise<void> {
-    return this.editorWidget.ready;
-  }
-
-  /**
-   * Handle the DOM events for the widget.
-   *
-   * @param event - The DOM event sent to the widget.
-   *
-   * #### Notes
-   * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the widget's node. It should
-   * not be called directly by user code.
-   */
-  handleEvent(event: Event): void {
-    if (!this.model) {
-      return;
-    }
-    switch (event.type) {
-    case 'mousedown':
-      this._ensureFocus();
-      break;
-    default:
-      break;
-    }
-  }
-
-  /**
-   * Handle `after-attach` messages for the widget.
-   */
-  protected onAfterAttach(msg: Message): void {
-    super.onAfterAttach(msg);
-    let node = this.node;
-    node.addEventListener('mousedown', this);
-  }
-
-  /**
-   * Handle `before-detach` messages for the widget.
-   */
-  protected onBeforeDetach(msg: Message): void {
-    let node = this.node;
-    node.removeEventListener('mousedown', this);
-  }
-
-  /**
-   * Handle `'activate-request'` messages.
-   */
-  protected onActivateRequest(msg: Message): void {
-    this._ensureFocus();
-  }
-
-  /**
-   * Ensure that the widget has focus.
-   */
-  private _ensureFocus(): void {
-    if (!this.editor.hasFocus()) {
-      this.editor.focus();
-    }
-  }
-
-  /**
-   * Handle a change to the path.
-   */
-  private _onPathChanged(): void {
-    const editor = this.editor;
-    const localPath = this._context.localPath;
-
-    editor.model.mimeType =
-      this._mimeTypeService.getMimeTypeByFilePath(localPath);
-    this.title.label = PathExt.basename(localPath);
-  }
-
-  private editorWidget: FileEditorCodeWrapper;
-  public model: CodeEditor.IModel;
-  public editor: CodeEditor.IEditor;
-  protected _context: DocumentRegistry.Context;
-  private _mimeTypeService: IEditorMimeTypeService;
-}
-
 
 /**
- * The namespace for editor widget statics.
+ * The namespace for `FileEditor` statics.
  */
 export
 namespace FileEditor {

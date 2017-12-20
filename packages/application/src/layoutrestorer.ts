@@ -20,7 +20,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  InstanceTracker
+  InstanceTracker, MainAreaWidget
 } from '@jupyterlab/apputils';
 
 import {
@@ -579,7 +579,13 @@ namespace Private {
         type: 'tab-area',
         currentIndex: area.currentIndex,
         widgets: area.widgets
-          .map(widget => nameProperty.get(widget))
+          .map(widget => {
+            // Handle a tracked widget that is wrapped in a main area widget.
+            if (widget instanceof MainAreaWidget) {
+              widget = widget.content;
+            }
+            return nameProperty.get(widget);
+          })
           .filter(name => !!name)
       };
     }
@@ -642,6 +648,13 @@ namespace Private {
         type: 'tab-area',
         currentIndex: currentIndex || 0,
         widgets: widgets && widgets.map(widget => names.get(widget))
+            .map(widget => {
+              // Handle a tracked widget that is wrapped in a main area widget.
+              if (widget.parent instanceof MainAreaWidget) {
+                widget = widget.parent;
+              }
+              return widget;
+            })
             .filter(widget => !!widget) as Widget[] || []
       };
 

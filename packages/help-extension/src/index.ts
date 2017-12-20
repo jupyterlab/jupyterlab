@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, IFrame, InstanceTracker, showDialog
+  Dialog, ICommandPalette, IFrame, InstanceTracker, MainAreaWidget, showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -22,18 +22,15 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Message
-} from '@phosphor/messaging';
-
-import {
   h
 } from '@phosphor/virtualdom';
 
 import {
-  Menu, PanelLayout, Widget
+  Menu
 } from '@phosphor/widgets';
 
 import '../style/index.css';
+
 
 /**
  * The command IDs used by the help plugin.
@@ -116,44 +113,6 @@ const plugin: JupyterLabPlugin<void> = {
  */
 export default plugin;
 
-/*
-  * An IFrame the disposes itself when closed.
-  *
-  * This is needed to clear the state restoration db when IFrames are closed.
- */
-class HelpWidget extends Widget {
-  /**
-   * Construct a new help widget.
-   */
-  constructor(url: string) {
-    super();
-    let layout = this.layout = new PanelLayout();
-    let iframe = new IFrame();
-    this.url = iframe.url = url;
-    layout.addWidget(iframe);
-  }
-
-  /**
-   * The url of the widget.
-   */
-  readonly url: string;
-
-  /**
-   * Handle activate requests for the widget.
-   */
-  protected onActivateRequest(msg: Message): void {
-    this.node.tabIndex = -1;
-    this.node.focus();
-  }
-
-  /**
-   * Dispose of the IFrame when closing.
-   */
-  protected onCloseRequest(msg: Message): void {
-    this.dispose();
-  }
-}
-
 
 /**
  * Activate the help handler extension.
@@ -163,12 +122,11 @@ class HelpWidget extends Widget {
  * returns A promise that resolves when the extension is activated.
  */
 function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer): void {
-  let counter = 0;
   const category = 'Help';
   const namespace = 'help-doc';
   const baseUrl = PageConfig.getBaseUrl();
   const { commands, shell, info, serviceManager } = app;
-  const tracker = new InstanceTracker<HelpWidget>({ namespace });
+  const tracker = new InstanceTracker<IFrame>({ namespace });
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -176,19 +134,6 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     args: widget => ({ url: widget.url, text: widget.title.label }),
     name: widget => widget.url
   });
-
-  /**
-   * Create a new HelpWidget widget.
-   */
-  function newClosableIFrame(url: string, text: string): HelpWidget {
-    let iframe = new HelpWidget(url);
-    iframe.addClass(HELP_CLASS);
-    iframe.title.label = text;
-    iframe.title.closable = true;
-    iframe.id = `${namespace}-${++counter}`;
-    tracker.add(iframe);
-    return iframe;
-  }
 
   // Populate the Help menu.
   const helpMenu = mainMenu.helpMenu;
@@ -350,9 +295,13 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
         return;
       }
 
-      let iframe = newClosableIFrame(url, text);
-      shell.addToMainArea(iframe);
-      shell.activateById(iframe.id);
+      let iframe = new IFrame();
+      iframe.addClass(HELP_CLASS);
+      iframe.url = url;
+      iframe.title.label = text;
+      let main = new MainAreaWidget({ content: iframe });
+      tracker.add(iframe);
+      shell.addToMainArea(main);
     }
   });
 

@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, InstanceTracker
+  ICommandPalette, InstanceTracker, MainAreaWidget
 } from '@jupyterlab/apputils';
 
 import {
@@ -177,18 +177,16 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
       const promise = name ? services.terminals.connectTo(name)
         : services.terminals.startNew();
 
-      term.title.closable = true;
       term.title.icon = TERMINAL_ICON_CLASS;
       term.title.label = '...';
-      shell.addToMainArea(term);
+      let main = new MainAreaWidget({ content: term });
+      shell.addToMainArea(main);
 
       return promise.then(session => {
         term.session = session;
         tracker.add(term);
-        shell.activateById(term.id);
-
-        return term;
-      }).catch(() => { term.dispose(); });
+        return main;
+      }).catch(() => { main.dispose(); });
     }
   });
 
@@ -200,7 +198,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
         return value.session && value.session.name === name || false;
       });
       if (widget) {
-        shell.activateById(widget.id);
+        shell.activateById(widget.parent.id);
       } else {
         // Otherwise, create a new terminal with a given name.
         return commands.execute(CommandIDs.createNew, { name });
@@ -216,7 +214,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
       if (!current) {
         return;
       }
-      shell.activateById(current.id);
+      shell.activateById(current.parent.id);
 
       return current.refresh().then(() => {
         if (current) {

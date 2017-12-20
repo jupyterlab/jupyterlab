@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, InstanceTracker, showDialog
+  Dialog, ICommandPalette, InstanceTracker, MainAreaWidget, showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -197,10 +197,11 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
         ...options
       });
 
+      let main = new MainAreaWidget({ content: panel });
+
       // Add the console panel to the tracker.
       tracker.add(panel);
-      shell.addToMainArea(panel);
-      shell.activateById(panel.id);
+      shell.addToMainArea(main);
       return panel;
     });
   }
