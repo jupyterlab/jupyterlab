@@ -22,7 +22,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  Widget
+  DockLayout, Widget
 } from '@phosphor/widgets';
 
 import {
@@ -775,13 +775,15 @@ namespace DocumentRegistry {
      *
      * @param widget - The widget to add to the document manager.
      *
+     * @param options - The desired options for adding the sibling.
+     *
      * @returns A disposable used to remove the sibling if desired.
      *
      * #### Notes
      * It is assumed that the widget has the same model and context
      * as the original widget.
      */
-    addSibling(widget: Widget): IDisposable;
+    addSibling(widget: Widget, options?: IOpenOptions): IDisposable;
   }
 
   /**
@@ -847,6 +849,27 @@ namespace DocumentRegistry {
      * A promise that resolves when the widget is ready.
      */
     readonly ready: Promise<void>;
+  }
+
+  /**
+   * The options used to open a widget.
+   */
+  export
+  interface IOpenOptions {
+    /**
+     * The reference widget id for the insert location.
+     *
+     * The default is `null`.
+     */
+    ref?: string | null;
+
+    /**
+     * The supported insertion modes.
+     *
+     * An insert mode is used to specify how a widget should be added
+     * to the main area relative to a reference widget.
+     */
+    mode?: DockLayout.InsertMode;
   }
 
   /**

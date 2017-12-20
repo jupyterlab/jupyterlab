@@ -22,6 +22,10 @@ import {
   Panel, SplitPanel, StackedPanel, TabBar, Title, Widget
 } from '@phosphor/widgets';
 
+import {
+  DocumentRegistry
+} from '@jupyterlab/docregistry';
+
 
 /**
  * The class name added to AppShell instances.
@@ -757,22 +761,7 @@ namespace ApplicationShell {
    * The options for adding a widget to a side area of the shell.
    */
   export
-  interface IMainAreaOptions {
-    /**
-     * The reference widget id for the insert location.
-     *
-     * The default is `null`.
-     */
-    ref?: string | null;
-
-    /**
-     * The supported insertion modes.
-     *
-     * An insert mode is used to specify how a widget should be added
-     * to the main area relative to a reference widget.
-     */
-    mode?: DockLayout.InsertMode;
-  }
+  interface IMainAreaOptions extends DocumentRegistry.IOpenOptions {}
 }
 
 

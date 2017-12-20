@@ -377,9 +377,10 @@ class DocumentManager implements IDisposable {
    * Create a context from a path and a model factory.
    */
   private _createContext(path: string, factory: DocumentRegistry.ModelFactory, kernelPreference: IClientSession.IKernelPreference): Private.IContext {
-    let adopter = (widget: DocumentRegistry.IReadyWidget) => {
+    // Allow options to be passed when adding a sibling.
+    let adopter = (widget: Widget, options?: DocumentRegistry.IOpenOptions) => {
       this._widgetManager.adoptWidget(context, widget);
-      this._opener.open(widget);
+      this._opener.open(widget, options);
     };
     let modelDBFactory = this.services.contents.getModelDBFactory(path) || undefined;
     let context = new Context({
@@ -518,7 +519,7 @@ namespace DocumentManager {
     /**
      * Open the given widget.
      */
-    open(widget: DocumentRegistry.IReadyWidget): void;
+    open(widget: Widget, options?: DocumentRegistry.IOpenOptions): void;
   }
 }
 

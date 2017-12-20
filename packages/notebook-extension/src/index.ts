@@ -1161,11 +1161,12 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       widget.addClass('jp-LinkedOutputView');
       layout.addWidget(toolbar);
       layout.addWidget(outputAreaView);
-      current.context.addSibling(widget);
-      // Remove the output view if the parent notebook is closed.
-      nb.disposed.connect(
-        () => { widget.dispose(); }
+      current.context.addSibling(
+        widget, { ref: current.id, mode: 'split-bottom' }
       );
+
+      // Remove the output view if the parent notebook is closed.
+      nb.disposed.connect(widget.dispose);
     },
     isEnabled
   });
