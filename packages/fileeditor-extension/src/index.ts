@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  InstanceTracker
+  ICommandPalette, InstanceTracker
 } from '@jupyterlab/apputils';
 
 import {
@@ -33,6 +33,13 @@ import {
   IEditMenu, IFileMenu, IMainMenu, IViewMenu
 } from '@jupyterlab/mainmenu';
 
+import {
+  JSONObject
+} from '@phosphor/coreutils';
+
+import {
+  Menu
+} from '@phosphor/widgets';
 
 /**
  * The class name for the text editor icon from the default theme.
@@ -85,7 +92,7 @@ const plugin: JupyterLabPlugin<IEditorTracker> = {
   activate,
   id: '@jupyterlab/fileeditor-extension:plugin',
   requires: [IEditorServices, IFileBrowserFactory, ILayoutRestorer, ISettingRegistry],
-  optional: [ILauncher, IMainMenu],
+  optional: [ICommandPalette, ILauncher, IMainMenu],
   provides: IEditorTracker,
   autoStart: true
 };
@@ -100,7 +107,7 @@ export default plugin;
 /**
  * Activate the editor tracker plugin.
  */
-function activate(app: JupyterLab, editorServices: IEditorServices, browserFactory: IFileBrowserFactory, restorer: ILayoutRestorer, settingRegistry: ISettingRegistry, launcher: ILauncher | null, menu: IMainMenu | null): IEditorTracker {
+function activate(app: JupyterLab, editorServices: IEditorServices, browserFactory: IFileBrowserFactory, restorer: ILayoutRestorer, settingRegistry: ISettingRegistry, palette: ICommandPalette, launcher: ILauncher | null, menu: IMainMenu | null): IEditorTracker {
   const id = plugin.id;
   const namespace = 'editor';
   const factory = new FileEditorFactory({
@@ -128,7 +135,8 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
     let cached =
       settings.get('editorConfig').composite as Partial<CodeEditor.IConfig>;
     Object.keys(config).forEach((key: keyof CodeEditor.IConfig) => {
-      config[key] = cached[key] || CodeEditor.defaultConfig[key];
+      config[key] = cached[key] === null ?
+        CodeEditor.defaultConfig[key] : cached[key];
     });
   }
 
@@ -179,12 +187,10 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
 
   commands.addCommand(CommandIDs.lineNumbers, {
     execute: () => {
-      const key = 'lineNumbers';
-      const value = config.lineNumbers = !config.lineNumbers;
-
-      updateTracker();
-      return settingRegistry.set(id, key, value).catch((reason: Error) => {
-        console.error(`Failed to set ${id}:${key} - ${reason.message}`);
+      config.lineNumbers = !config.lineNumbers;
+      return settingRegistry.set(id, 'editorConfig', config)
+      .catch((reason: Error) => {
+        console.error(`Failed to set ${id}: ${reason.message}`);
       });
     },
     isEnabled,
@@ -194,12 +200,10 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
 
   commands.addCommand(CommandIDs.lineWrap, {
     execute: () => {
-      const key = 'lineWrap';
-      const value = config.lineWrap = !config.lineWrap;
-
-      updateTracker();
-      return settingRegistry.set(id, key, value).catch((reason: Error) => {
-        console.error(`Failed to set ${id}:${key} - ${reason.message}`);
+      config.lineWrap = !config.lineWrap;
+      return settingRegistry.set(id, 'editorConfig', config)
+      .catch((reason: Error) => {
+        console.error(`Failed to set ${id}: ${reason.message}`);
       });
     },
     isEnabled,
@@ -210,39 +214,28 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
   commands.addCommand(CommandIDs.changeTabs, {
     label: args => args['name'] as string,
     execute: args => {
-      let widget = tracker.currentWidget;
-      if (!widget) {
-        return;
-      }
-      let editor = widget.editor;
-      let size = args['size'] as number || 4;
-      let insertSpaces = !!args['insertSpaces'];
-      editor.setOption('insertSpaces', insertSpaces);
-      editor.setOption('tabSize', size);
+      config.tabSize = args['size'] as number || 4;
+      config.insertSpaces = !!args['insertSpaces'];
+      return settingRegistry.set(id, 'editorConfig', config)
+      .catch((reason: Error) => {
+        console.error(`Failed to set ${id}: ${reason.message}`);
+      });
     },
     isEnabled,
     isToggled: args => {
-      let widget = tracker.currentWidget;
-      if (!widget) {
-        return false;
-      }
-      let insertSpaces = !!args['insertSpaces'];
-      let size = args['size'] as number || 4;
-      let editor = widget.editor;
-      if (editor.getOption('insertSpaces') !== insertSpaces) {
-        return false;
-      }
-      return editor.getOption('tabSize') === size;
+      const insertSpaces = !!args['insertSpaces'];
+      const size = args['size'] as number || 4;
+      return config.insertSpaces === insertSpaces && config.tabSize === size;
     }
   });
 
   commands.addCommand(CommandIDs.matchBrackets, {
     execute: () => {
       config.matchBrackets = !config.matchBrackets;
-      tracker.forEach(widget => {
-        widget.editor.setOption('matchBrackets', config.matchBrackets);
+      return settingRegistry.set(id, 'editorConfig', config)
+      .catch((reason: Error) => {
+        console.error(`Failed to set ${id}: ${reason.message}`);
       });
-      return settingRegistry.set(id, 'matchBrackets', config.matchBrackets);
     },
     label: 'Match Brackets',
     isEnabled,
@@ -252,14 +245,12 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
   commands.addCommand(CommandIDs.autoClosingBrackets, {
     execute: () => {
       config.autoClosingBrackets = !config.autoClosingBrackets;
-      tracker.forEach(widget => {
-        widget.editor.setOption('autoClosingBrackets',
-                                config.autoClosingBrackets);
+      return settingRegistry.set(id, 'editorConfig', config)
+      .catch((reason: Error) => {
+        console.error(`Failed to set ${id}: ${reason.message}`);
       });
-      return settingRegistry
-        .set(id, 'autoClosingBrackets', config.autoClosingBrackets);
     },
-    label: 'Auto Close Brackets',
+    label: 'Auto Close Brackets for Text Editor',
     isEnabled,
     isToggled: () => config.autoClosingBrackets
   });
@@ -389,7 +380,42 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
     });
   }
 
+  if (palette) {
+    let args: JSONObject = {
+      insertSpaces: false, size: 4, name: 'Indent with Tab'
+    };
+    let command = 'fileeditor:change-tabs';
+    palette.addItem({ command, args, category: 'Text Editor' });
+
+    for (let size of [1, 2, 4, 8]) {
+      let args: JSONObject = {
+        insertSpaces: true, size, name: `Spaces: ${size} `
+      };
+      palette.addItem({ command, args, category: 'Text Editor' });
+    }
+  }
+
   if (menu) {
+    // Add the editing commands to the settings menu.
+    const tabMenu = new Menu({ commands });
+    tabMenu.title.label = 'Text Editor Indentation';
+    let args: JSONObject = {
+      insertSpaces: false, size: 4, name: 'Indent with Tab'
+    };
+    let command = 'fileeditor:change-tabs';
+    tabMenu.addItem({ command, args });
+
+    for (let size of [1, 2, 4, 8]) {
+      let args: JSONObject = {
+        insertSpaces: true, size, name: `Spaces: ${size} `
+      };
+      tabMenu.addItem({ command, args });
+    }
+    menu.settingsMenu.addGroup([
+      { type: 'submenu', submenu: tabMenu },
+      { command: CommandIDs.autoClosingBrackets }
+    ], 30);
+
     // Add new text file creation to the file menu.
     menu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 30);
 

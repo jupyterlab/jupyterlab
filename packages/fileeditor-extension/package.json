@@ -37,7 +37,9 @@
     "@jupyterlab/filebrowser": "^0.13.2",
     "@jupyterlab/fileeditor": "^0.13.0",
     "@jupyterlab/launcher": "^0.13.2",
-    "@jupyterlab/mainmenu": "^0.2.0"
+    "@jupyterlab/mainmenu": "^0.2.0",
+    "@phosphor/coreutils": "^1.3.0",
+    "@phosphor/widgets": "^1.5.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
