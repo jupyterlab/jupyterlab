@@ -112,9 +112,7 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
   const isEnabled = () => tracker.currentWidget !== null &&
                           tracker.currentWidget === app.shell.currentWidget;
 
-  let {
-    lineNumbers, lineWrap, matchBrackets, autoClosingBrackets
-  } = CodeEditor.defaultConfig;
+  let config = { ...CodeEditor.defaultConfig };
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -127,14 +125,11 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
    * Update the setting values.
    */
   function updateSettings(settings: ISettingRegistry.ISettings): void {
-    let cached = settings.get('lineNumbers').composite as boolean | null;
-    lineNumbers = cached === null ? lineNumbers : !!cached;
-    cached = settings.get('matchBrackets').composite as boolean | null;
-    matchBrackets = cached === null ? matchBrackets : !!cached;
-    cached = settings.get('autoClosingBrackets').composite as boolean | null;
-    autoClosingBrackets = cached === null ? autoClosingBrackets : !!cached;
-    cached = settings.get('lineWrap').composite as boolean | null;
-    lineWrap = cached === null ? lineWrap : !!cached;
+    let cached =
+      settings.get('editorConfig').composite as Partial<CodeEditor.IConfig>;
+    Object.keys(config).forEach((key: keyof CodeEditor.IConfig) => {
+      config[key] = cached[key] || CodeEditor.defaultConfig[key];
+    });
   }
 
   /**
@@ -149,10 +144,9 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
    */
   function updateWidget(widget: FileEditor): void {
     const editor = widget.editor;
-    editor.setOption('lineNumbers', lineNumbers);
-    editor.setOption('lineWrap', lineWrap);
-    editor.setOption('matchBrackets', matchBrackets);
-    editor.setOption('autoClosingBrackets', autoClosingBrackets);
+    Object.keys(config).forEach((key: keyof CodeEditor.IConfig) => {
+      editor.setOption(key, config[key]);
+    });
   }
 
   // Fetch the initial state of the settings.
@@ -186,7 +180,7 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
   commands.addCommand(CommandIDs.lineNumbers, {
     execute: () => {
       const key = 'lineNumbers';
-      const value = lineNumbers = !lineNumbers;
+      const value = config.lineNumbers = !config.lineNumbers;
 
       updateTracker();
       return settingRegistry.set(id, key, value).catch((reason: Error) => {
@@ -194,14 +188,14 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
       });
     },
     isEnabled,
-    isToggled: () => lineNumbers,
+    isToggled: () => config.lineNumbers,
     label: 'Line Numbers'
   });
 
   commands.addCommand(CommandIDs.lineWrap, {
     execute: () => {
       const key = 'lineWrap';
-      const value = lineWrap = !lineWrap;
+      const value = config.lineWrap = !config.lineWrap;
 
       updateTracker();
       return settingRegistry.set(id, key, value).catch((reason: Error) => {
@@ -209,7 +203,7 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
       });
     },
     isEnabled,
-    isToggled: () => lineWrap,
+    isToggled: () => config.lineWrap,
     label: 'Word Wrap'
   });
 
@@ -244,29 +238,30 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
 
   commands.addCommand(CommandIDs.matchBrackets, {
     execute: () => {
-      matchBrackets = !matchBrackets;
+      config.matchBrackets = !config.matchBrackets;
       tracker.forEach(widget => {
-        widget.editor.setOption('matchBrackets', matchBrackets);
+        widget.editor.setOption('matchBrackets', config.matchBrackets);
       });
-      return settingRegistry.set(id, 'matchBrackets', matchBrackets);
+      return settingRegistry.set(id, 'matchBrackets', config.matchBrackets);
     },
     label: 'Match Brackets',
     isEnabled,
-    isToggled: () => matchBrackets
+    isToggled: () => config.matchBrackets
   });
 
   commands.addCommand(CommandIDs.autoClosingBrackets, {
     execute: () => {
-      autoClosingBrackets = !autoClosingBrackets;
+      config.autoClosingBrackets = !config.autoClosingBrackets;
       tracker.forEach(widget => {
-        widget.editor.setOption('autoClosingBrackets', autoClosingBrackets);
+        widget.editor.setOption('autoClosingBrackets',
+                                config.autoClosingBrackets);
       });
       return settingRegistry
-        .set(id, 'autoClosingBrackets', autoClosingBrackets);
+        .set(id, 'autoClosingBrackets', config.autoClosingBrackets);
     },
     label: 'Auto Close Brackets',
     isEnabled,
-    isToggled: () => autoClosingBrackets
+    isToggled: () => config.autoClosingBrackets
   });
 
   commands.addCommand(CommandIDs.createConsole, {
