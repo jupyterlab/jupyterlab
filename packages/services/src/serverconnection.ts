@@ -242,10 +242,12 @@ namespace Private {
     // Handle explicit cache header for browsers that don't properly
     // implement the fetch API.
     let cache = init.cache || settings.init.cache;
-    if (cache === 'no-store') {
-      request.headers.append('Cache-Control', 'no-store');
-    } else if (cache === 'no-cache') {
-      request.headers.append('Cache-Control', 'no-cache');
+    if (cache && !request.headers.has('Cache-Control')) {
+      if (cache === 'no-store') {
+        request.headers.append('Cache-Control', 'no-store');
+      } else if (cache === 'no-cache') {
+        request.headers.append('Cache-Control', 'no-cache');
+      }
     }
 
     // Set the content type if there is no given data and we are
