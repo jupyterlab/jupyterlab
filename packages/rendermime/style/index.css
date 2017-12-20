@@ -14,6 +14,7 @@
   padding-left: var(--jp-code-padding);
   font-size: var(--jp-code-font-size);
   line-height: var(--jp-code-line-height);
+  font-family: var(--jp-code-font-family);
 }
 
 
@@ -76,7 +77,7 @@
 
 .jp-RenderedLatex {
   color: var(--jp-content-font-color1);
-  font-size: var(--jp-content-font-size);
+  font-size: var(--jp-content-font-size1);
   line-height: var(--jp-content-line-height);
 }
 
@@ -88,7 +89,7 @@
 
 .jp-RenderedHTMLCommon {
   color: var(--jp-content-font-color1);
-  font-size: var(--jp-content-font-size);
+  font-size: var(--jp-content-font-size1);
   line-height: var(--jp-content-line-height);
 }
 
@@ -124,88 +125,60 @@
   color: var(--jp-content-link-color);
 }
 
-/*For a 14px base font size this goes as:
-font-size = 26, 22, 18, 14, 12, 12
-margin-top = 14, 14, 14, 14, 8, 8
-*/
+/* Headings */
 
 .jp-RenderedHTMLCommon h1 {
-  font-size: 185.7%;
-  margin: 1.08em 0 0 0;
-  font-weight: bold;
-  line-height: 1.0;
+  font-size: var(--jp-content-font-size5);
+  line-height: var(--jp-content-heading-line-height);
+  font-weight: 400;
+  font-style: normal;
+  margin: var(--jp-content-heading-margin-top) 0 0 0;
 }
 
 
 .jp-RenderedHTMLCommon h2 {
-  font-size: 157.1%;
-  margin: 1.27em 0 0 0;
-  font-weight: bold;
-  line-height: 1.0;
+  font-size: var(--jp-content-font-size4);
+  line-height: var(--jp-content-heading-line-height);
+  font-weight: 400;
+  font-style: normal;
+  margin: var(--jp-content-heading-margin-top) 0 0 0;
 }
 
 
 .jp-RenderedHTMLCommon h3 {
-  font-size: 128.6%;
-  margin: 1.55em 0 0 0;
-  font-weight: bold;
-  line-height: 1.0;
+  font-size: var(--jp-content-font-size3);
+  line-height: var(--jp-content-heading-line-height);
+  font-weight: 400;
+  font-style: normal;
+  margin: var(--jp-content-heading-margin-top) 0 0 0;
 }
 
 
+
 .jp-RenderedHTMLCommon h4 {
-  font-size: 100%;
-  margin: 2em 0 0 0;
-  font-weight: bold;
-  line-height: 1.0;
+  font-size: var(--jp-content-font-size2);
+  line-height: var(--jp-content-heading-line-height);
+  font-weight: 400;
+  font-style: normal;
+  margin: var(--jp-content-heading-margin-top) 0 0 0;
 }
 
 
 .jp-RenderedHTMLCommon h5 {
-  font-size: 100%;
-  margin: 2em 0 0 0;
-  font-weight: bold;
-  line-height: 1.0;
-  font-style: italic;
+  font-size: var(--jp-content-font-size1);
+  line-height: var(--jp-content-heading-line-height);
+  font-weight: 400;
+  font-style: normal;
+  margin: var(--jp-content-heading-margin-top) 0 0 0;
 }
 
 
 .jp-RenderedHTMLCommon h6 {
-  font-size: 100%;
-  margin: 2em 0 0 0;
-  font-weight: bold;
-  line-height: 1.0;
-  font-style: italic;
-}
-
-
-.jp-RenderedHTMLCommon h1:first-child {
-  margin-top: 0.538em;
-}
-
-
-.jp-RenderedHTMLCommon h2:first-child {
-  margin-top: 0.636em;
-}
-
-
-.jp-RenderedHTMLCommon h3:first-child {
-  margin-top: 0.777em;
-}
-
-
-.jp-RenderedHTMLCommon h4:first-child {
-  margin-top: 1em;
-}
-
-
-.jp-RenderedHTMLCommon h5:first-child {
-  margin-top: 1em;
-}
-
-
-.jp-RenderedHTMLCommon h6:first-child {
-  margin-top: 1em;
+  font-size: var(--jp-content-font-size0);
+  line-height: var(--jp-content-heading-line-height);
+  font-weight: 400;
+  font-style: normal;
+  margin: var(--jp-content-heading-margin-top) 0 0 0;
 }
 
 

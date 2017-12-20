@@ -21,7 +21,7 @@ const plugin: JupyterLabPlugin<void> = {
       name: 'JupyterLab Light',
       load: function() {
         // Load the optional monospace font for the input/output prompt.
-        manager.loadCSS('https://fonts.googleapis.com/css?family=Roboto+Mono');
+        manager.loadCSS('https://fonts.googleapis.com/css?family=Roboto|Source+Code+Pro');
         return manager.loadCSS('@jupyterlab/theme-light-extension/index.css');
       },
       unload: function() {
