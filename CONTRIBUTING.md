@@ -7,7 +7,7 @@ Please take a look at the Contributor documentation, familiarize yourself with
 using the Jupyter Notebook, and introduce yourself on the mailing list and share
 what area of the project you are interested in working on.
 
-We have labeled some issues as [sprint friendly](https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aopen+is%3Aissue+label%3Asprint-friendly)
+We have labeled some issues as [good first issue](https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22)
 that we believe are good examples of small, self contained changes.
 We encourage those that are new to the code base to implement and/or ask
 questions about these issues.
