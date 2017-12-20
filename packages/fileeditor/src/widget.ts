@@ -208,7 +208,7 @@ class FileEditor extends Widget implements DocumentRegistry.IReadyWidget {
     this._onPathChanged();
 
 
-    let layout = this.layout = new BoxLayout();
+    let layout = this.layout = new BoxLayout({ spacing: 0 });
     let toolbar = new Widget();
     toolbar.addClass('jp-Toolbar');
 
