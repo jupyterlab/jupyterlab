@@ -97,12 +97,12 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
     toolbar.addClass(NOTEBOOK_PANEL_TOOLBAR_CLASS);
 
     // Notebook
-    let nbOptions = {
+    let nbOptions: Notebook.IOptions = {
       rendermime: this.rendermime,
       languagePreference: options.languagePreference,
       contentFactory: contentFactory,
       mimeTypeService: options.mimeTypeService,
-      editorConfgi: options.editorConfig,
+      editorConfig: options.editorConfig,
     };
     let notebook = this.notebook = contentFactory.createNotebook(nbOptions);
     notebook.addClass(NOTEBOOK_PANEL_NOTEBOOK_CLASS);

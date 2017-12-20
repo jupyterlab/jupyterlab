@@ -16,7 +16,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  CodeEditorWrapper
+  CodeEditor, CodeEditorWrapper
 } from '@jupyterlab/codeeditor';
 
 import {
@@ -119,6 +119,18 @@ describe('cells/widget', () => {
         contentFactory = createBaseCellFactory();
         let widget = new Cell({ model, contentFactory });
         expect(widget).to.be.a(Cell);
+      });
+
+      it('shoule accept a custom editorConfig', () => {
+        let editorConfig: Partial<CodeEditor.IConfig> = {
+          insertSpaces: false,
+          matchBrackets: false
+        };
+        let widget = new Cell({ editorConfig, model, contentFactory });
+        expect(widget.editor.getOption('insertSpaces')).to.be(false);
+        expect(widget.editor.getOption('matchBrackets')).to.be(false);
+        expect(widget.editor.getOption('lineNumbers'))
+        .to.be(CodeEditor.defaultConfig.lineNumbers);
       });
 
     });

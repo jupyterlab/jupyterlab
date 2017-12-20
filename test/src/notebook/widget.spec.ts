@@ -30,13 +30,13 @@ import {
 
 import {
   DEFAULT_CONTENT, createNotebookFactory, rendermime, mimeTypeService,
-  editorFactory
+  editorFactory, defaultEditorConfig
 } from './utils';
 
 
 const contentFactory = createNotebookFactory();
 const options: Notebook.IOptions = {
-  rendermime, contentFactory, mimeTypeService
+  rendermime, contentFactory, mimeTypeService, editorConfig: defaultEditorConfig
 };
 
 
@@ -161,6 +161,10 @@ describe('notebook/widget', () => {
         expect(widget.contentFactory).to.be(contentFactory);
       });
 
+      it('should accept an optional editor config', () => {
+        let widget = new StaticNotebook(options);
+        expect(widget.editorConfig).to.be(defaultEditorConfig);
+      });
     });
 
     describe('#modelChanged', () => {
@@ -325,6 +329,32 @@ describe('notebook/widget', () => {
       it('should be the cell widget contentFactory used by the widget', () => {
         let widget = new StaticNotebook(options);
         expect(widget.contentFactory).to.be.a(StaticNotebook.ContentFactory);
+      });
+
+    });
+
+    describe('#editorConfig', () => {
+
+      it('should be the cell widget contentFactory used by the widget', () => {
+        let widget = new StaticNotebook(options);
+        expect(widget.editorConfig).to.be(options.editorConfig);
+      });
+
+      it('should be settable', () => {
+        let widget = createWidget();
+        expect(widget.widgets[0].editor.getOption('autoClosingBrackets'))
+        .to.be(true);
+        let newConfig = {
+          raw: defaultEditorConfig.raw,
+          markdown: defaultEditorConfig.markdown,
+          code: {
+            ...defaultEditorConfig.code,
+            autoClosingBrackets: false
+          }
+        };
+        widget.editorConfig = newConfig;
+        expect(widget.widgets[0].editor.getOption('autoClosingBrackets'))
+        .to.be(false);
       });
 
     });
