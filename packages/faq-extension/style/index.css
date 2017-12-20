@@ -5,7 +5,10 @@
 
 
 .jp-FAQ {
-  font-family: var(--jp-ui-font-family);
+  font-family: var(--jp-content-font-family);
+  line-height: var(--jp-content-line-height);
+  font-size: var(--jp-content-font-size1);
+  color: var(--jp-content-font-color1);
   outline: none;
   display: flex;
   flex-direction: column;
@@ -28,17 +31,34 @@
 }
 
 
+.jp-FAQ-content h1 {
+  font-size: var(--jp-content-font-size5);
+  line-height: var(--jp-content-heading-line-height);
+  font-weight: 400;
+  font-style: normal;
+  margin: var(--jp-content-heading-margin-top) 0 0 0;
+}
+
+
 .jp-FAQ-content h2 {
-  font-size: 20px;
-  font-weight: 500;
+  font-size: var(--jp-content-font-size4);
+  line-height: var(--jp-content-heading-line-height);
+  font-weight: 400;
+  font-style: normal;
+  margin: var(--jp-content-heading-margin-top) 0 0 0;
 }
 
 
 .jp-FAQ-content h3 {
-  font-weight: 500;
+  font-size: var(--jp-content-font-size3);
+  line-height: var(--jp-content-heading-line-height);
+  font-weight: 400;
+  font-style: normal;
+  margin: var(--jp-content-heading-margin-top) 0 0 0;
 }
 
 
+
 .jp-FAQ-content a {
-  color: var(--jp-brand-color1);
+  color: var(--jp-content-link-color);
 }
