@@ -1302,6 +1302,11 @@ namespace Private {
             }
           }
           return reply ? reply.content.status === 'ok' : true;
+        }).catch(e => {
+          if (e.message !== 'Canceled') {
+            throw e;
+          }
+          return false;
         });
       }
       (child.model as ICodeCellModel).executionCount = null;

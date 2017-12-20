@@ -139,6 +139,9 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
     this._stdin = Private.noOp;
     this._iopub = Private.noOp;
     this._reply = Private.noOp;
+    if (!this._testFlag(Private.KernelFutureFlag.IsDone)) {
+      this._done.reject(new Error('Canceled'));
+    }
     super.dispose();
   }
 
