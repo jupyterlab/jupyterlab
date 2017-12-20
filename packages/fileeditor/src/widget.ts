@@ -195,7 +195,7 @@ class FileEditor extends Widget implements DocumentRegistry.IReadyWidget {
    */
   constructor(options: FileEditor.IOptions) {
     super();
-    this.addClass('jp-FileEditor')
+    this.addClass('jp-FileEditor');
 
     const context = this._context = options.context;
     this._mimeTypeService = options.mimeTypeService;
