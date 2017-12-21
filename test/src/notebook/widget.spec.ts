@@ -878,7 +878,7 @@ describe('notebook/widget', () => {
         widget.dispose();
       });
 
-      it('should work in each distinct permutation of head, anchor, and index', () => {
+      it('should work in each permutation of anchor, head, and index', () => {
         let checkSelection = (anchor: number, head: number, index: number, select = true) => {
           // Set up the test by pre-selecting appropriate cells if select is true.
           if (select) {
@@ -940,9 +940,9 @@ describe('notebook/widget', () => {
         };
 
 
-        // Lists are of the form [head, anchor, index].
+        // Lists are of the form [anchor, head, index].
         let permutations = [
-          // Head, anchor, and index are distinct
+          // Anchor, head, and index are distinct
           [1, 3, 5],
           [1, 5, 3],
           [3, 1, 5],
@@ -950,12 +950,12 @@ describe('notebook/widget', () => {
           [5, 1, 3],
           [5, 3, 1],
 
-          // Two of head, anchor, and index are equal
+          // Two of anchor, head, and index are equal
           [1, 3, 3],
           [3, 1, 3],
           [3, 3, 1],
 
-          // Head, anchor, and index all equal
+          // Anchor, head, and index all equal
           [3, 3, 3]
 
         ];
@@ -967,7 +967,7 @@ describe('notebook/widget', () => {
           checkSelection(p[0], p[1], Number.MAX_SAFE_INTEGER);
           checkSelection(p[0], p[1], -10);
 
-          // If head and anchor are the same, also check when we only have an
+          // If anchor and head are the same, also check when we only have an
           // active cell, with no selection.
           if (p[0] === p[1]) {
             checkSelection(p[0], p[1], p[2], false);
