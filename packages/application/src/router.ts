@@ -12,7 +12,7 @@ import {
 } from '@phosphor/commands';
 
 import {
-  Token
+  ReadonlyJSONObject, Token
 } from '@phosphor/coreutils';
 
 import {
@@ -77,7 +77,7 @@ namespace IRouter {
    * The arguments passed into a command execution when a path is routed.
    */
   export
-  interface ICommandArgs {
+  interface ICommandArgs extends ReadonlyJSONObject {
     /**
      * The path that matched a routing pattern.
      */

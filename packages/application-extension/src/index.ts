@@ -42,6 +42,9 @@ namespace CommandIDs {
 
   export
   const toggleRightArea: string = 'application:toggle-right-area';
+
+  export
+  const tree: string = 'router:tree';
 }
 
 
@@ -162,7 +165,15 @@ const router: JupyterLabPlugin<IRouter> = {
     const base = PageConfig.getBaseUrl();
     const router = new Router({ base, commands });
 
+    commands.addCommand(CommandIDs.tree, {
+      execute: (args: IRouter.ICommandArgs) => {
+        const path = args.path.replace('/lab/tree', '');
+
+        console.log(`Navigate to ${path}`);
+      }
+    });
     app.restored.then(() => { router.route(window.location.href); });
+    router.register(/tree\/.+/, CommandIDs.tree);
 
     return router;
   },
@@ -176,6 +187,7 @@ const router: JupyterLabPlugin<IRouter> = {
 function addCommands(app: JupyterLab, palette: ICommandPalette): void {
   const category = 'Main Area';
   let command = CommandIDs.activateNextTab;
+
   app.commands.addCommand(command, {
     label: 'Activate Next Tab',
     execute: () => { app.shell.activateNextTab(); }
