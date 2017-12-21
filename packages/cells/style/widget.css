@@ -100,8 +100,8 @@
 
 .jp-MarkdownOutput {
   flex: 1 1 auto;
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
+  margin-top: 0;
+  margin-bottom: 0;
   padding-left: var(--jp-code-padding);
 }
 

@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 :root {
-  --jp-private-markdownviewer-padding: 16px;
+  --jp-private-markdownviewer-padding: 32px;
 }
 
 .jp-Document.jp-MimeDocument .jp-RenderedMarkdown {

@@ -27,38 +27,5 @@
 
 .jp-FAQ-content {
   overflow-y: auto;
-  padding: 16px 32px;
-}
-
-
-.jp-FAQ-content h1 {
-  font-size: var(--jp-content-font-size5);
-  line-height: var(--jp-content-heading-line-height);
-  font-weight: 400;
-  font-style: normal;
-  margin: var(--jp-content-heading-margin-top) 0 0 0;
-}
-
-
-.jp-FAQ-content h2 {
-  font-size: var(--jp-content-font-size4);
-  line-height: var(--jp-content-heading-line-height);
-  font-weight: 400;
-  font-style: normal;
-  margin: var(--jp-content-heading-margin-top) 0 0 0;
-}
-
-
-.jp-FAQ-content h3 {
-  font-size: var(--jp-content-font-size3);
-  line-height: var(--jp-content-heading-line-height);
-  font-weight: 400;
-  font-style: normal;
-  margin: var(--jp-content-heading-margin-top) 0 0 0;
-}
-
-
-
-.jp-FAQ-content a {
-  color: var(--jp-content-link-color);
+  padding: 32px;
 }
