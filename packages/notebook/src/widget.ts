@@ -1362,15 +1362,11 @@ class Notebook extends StaticNotebook {
       }
       if (event.shiftKey) {
         shouldDrag = false;
-        this.extendContiguousSelectionTo(i);
 
         // Prevent text select behavior.
         event.preventDefault();
         event.stopPropagation();
       }
-      // Set the cell as the active one.
-      // This must be done *after* setting the mode above.
-      this.activeCellIndex = i;
     }
 
     this._ensureFocus(true);
@@ -1388,8 +1384,16 @@ class Notebook extends StaticNotebook {
    * Handle the `'mouseup'` event for the widget.
    */
   private _evtMouseup(event: MouseEvent): void {
-    if (!this._drag) {
+    if (this._drag) {
+      return;
+    }
+    let target = event.target as HTMLElement;
+    let i = this._findCell(target);
+    if (event.shiftKey) {
+      this.extendContiguousSelectionTo(i);
+    } else {
       this.deselectAll();
+      this.activeCellIndex = i;
     }
   }
 
