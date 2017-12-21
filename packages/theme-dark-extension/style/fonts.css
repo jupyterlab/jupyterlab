@@ -1,0 +1,20 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+@font-face {
+    font-family: 'Source Code Pro';
+    src: url('fonts/SourceCodePro-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+
+@font-face {
+    font-family: 'Source Code Pro';
+    src: url('fonts/SourceCodePro-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
