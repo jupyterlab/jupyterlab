@@ -5,7 +5,10 @@
 
 
 .jp-FAQ {
-  font-family: var(--jp-ui-font-family);
+  font-family: var(--jp-content-font-family);
+  line-height: var(--jp-content-line-height);
+  font-size: var(--jp-content-font-size1);
+  color: var(--jp-content-font-color1);
   outline: none;
   display: flex;
   flex-direction: column;
@@ -24,21 +27,5 @@
 
 .jp-FAQ-content {
   overflow-y: auto;
-  padding: 16px 32px;
-}
-
-
-.jp-FAQ-content h2 {
-  font-size: 20px;
-  font-weight: 500;
-}
-
-
-.jp-FAQ-content h3 {
-  font-weight: 500;
-}
-
-
-.jp-FAQ-content a {
-  color: var(--jp-brand-color1);
+  padding: 32px;
 }

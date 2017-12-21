@@ -28,8 +28,8 @@ all of MD as it is not optimized for dense, information rich UIs.
 :root {
 
   /* Borders
-
-  The following variables, specify the visual styling of borders in JupyterLab.
+   *
+   * The following variables, specify the visual styling of borders in JupyterLab.
    */
 
   --jp-border-width: 1px;
@@ -40,29 +40,33 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-button-border-radius: 2px;
 
   /* UI Fonts
-
-  The UI font CSS variables are used for the typography all of the JupyterLab
-  user interface elements that are not directly user generated content.
-  */
+   *
+   * The UI font CSS variables are used for the typography all of the JupyterLab
+   * user interface elements that are not directly user generated content.
+   */
 
   --jp-ui-font-scale-factor: 1.2;
   --jp-ui-font-size0: calc(var(--jp-ui-font-size1)/var(--jp-ui-font-scale-factor));
   --jp-ui-font-size1: 13px; /* Base font size */
   --jp-ui-font-size2: calc(var(--jp-ui-font-size1)*var(--jp-ui-font-scale-factor));
   --jp-ui-font-size3: calc(var(--jp-ui-font-size2)*var(--jp-ui-font-scale-factor));
-  --jp-ui-font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 
-  /* Use these font colors against the corresponding main layout colors.
-     In a light theme, these go from dark to light.
-  */
+  --jp-ui-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 
+  /*
+   * Use these font colors against the corresponding main layout colors.
+   * In a light theme, these go from dark to light.
+   */
+
+  /* Defaults use Material Design specification */
   --jp-ui-font-color0: white;
   --jp-ui-font-color1: var(--md-grey-300);
   --jp-ui-font-color2: var(--md-grey-500);
   --jp-ui-font-color3: var(--md-grey-700);
 
-  /* Use these against the brand/accent/warn/error colors.
-     These will typically go from light to darker, in both a dark and light theme
+  /*
+   * Use these against the brand/accent/warn/error colors.
+   * These will typically go from light to darker, in both a dark and light theme.
    */
 
   --jp-ui-inverse-font-color0: rgba(0,0,0,1.0);
@@ -71,35 +75,51 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-ui-inverse-font-color3: rgba(0,0,0,0.3);
 
   /* Content Fonts
+   *
+   * Content font variables are used for typography of user generated content.
+   */
 
-  Content font variables are used for typography of user generated content.
-  */
+  --jp-content-line-height: 1.6;
+  --jp-content-font-scale-factor: 1.2;
+  --jp-content-font-size0: calc( var(--jp-content-font-size1)/var(--jp-content-font-scale-factor) );
+  --jp-content-font-size1: 14px; /* Base font size */
+  --jp-content-font-size2: calc( var(--jp-content-font-size1)*var(--jp-content-font-scale-factor) );
+  --jp-content-font-size3: calc( var(--jp-content-font-size2)*var(--jp-content-font-scale-factor) );
+  --jp-content-font-size4: calc( var(--jp-content-font-size3)*var(--jp-content-font-scale-factor) );
+  --jp-content-font-size5: calc( var(--jp-content-font-size4)*var(--jp-content-font-scale-factor) );
 
-  --jp-content-font-size: 13px;
-  --jp-content-line-height: 1.5;
-  --jp-content-font-color0: white;
-  --jp-content-font-color1: var(--md-grey-300);
-  --jp-content-font-color2: var(--md-grey-500);
-  --jp-content-font-color3: var(--md-grey-700);
+  --jp-content-heading-line-height: 1.0;
+  --jp-content-heading-margin-top: 1.2em;
+  --jp-content-heading-margin-bottom: 0.8em;
+  --jp-content-heading-font-weight: 500;
 
-  --jp-content-link-color: var(--md-blue-400);
+  /* Defaults use Material Design specification */
+  --jp-content-font-color0: rgba(255,255,255,1.0);
+  --jp-content-font-color1: rgba(255,255,255,1.0);
+  --jp-content-font-color2: rgba(0,0,0,0.7);
+  --jp-content-font-color3: rgba(0,0,0,0.5);
 
-  --jp-ui-font-scale-factor: 1.2;
-  --jp-ui-font-size0: calc(var(--jp-ui-font-size1)/var(--jp-ui-font-scale-factor));
-  --jp-ui-font-size1: 13px; /* Base font size */
-  --jp-ui-font-size2: calc(var(--jp-ui-font-size1)*var(--jp-ui-font-scale-factor));
-  --jp-ui-font-size3: calc(var(--jp-ui-font-size2)*var(--jp-ui-font-scale-factor));
+  --jp-content-link-color: var(--md-blue-300);
+
+  --jp-content-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+
+
+  /* 
+   * Code Fonts
+   * 
+   * Code font variables are used for typography of code and other monospaces content.
+   */
 
   --jp-code-font-size: 13px;
   --jp-code-line-height: 17px;
   --jp-code-padding: 5px;
-  --jp-code-font-family: monospace;
+  --jp-code-font-family: 'Source Code Pro', monospace;
 
   /* Layout
-
-  The following are the main layout colors use in JupyterLab. In a light
-  theme these would go from light to dark.
-  */
+   *
+   * The following are the main layout colors use in JupyterLab. In a light
+   * theme these would go from light to dark.
+   */
 
   --jp-layout-color0: #111111;
   --jp-layout-color1: var(--md-grey-900);
@@ -143,17 +163,20 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   /* Cell specific styles */
 
+  --jp-cell-padding: 5px;
+
   --jp-cell-collapser-width: 8px;
   --jp-cell-collapser-min-height: 20px;
   --jp-cell-collapser-not-active-hover-opacity: 0.6;
+
   --jp-cell-editor-background: var(--jp-layout-color1);
   --jp-cell-editor-border-color: var(--md-grey-700);
   --jp-cell-editor-box-shadow: inset 0 0 2px var(--md-blue-300);
   --jp-cell-editor-active-background: var(--jp-layout-color0);
   --jp-cell-editor-active-border-color: var(--jp-brand-color1);
-  --jp-cell-padding: 5px;
+
   --jp-cell-prompt-width: 90px;
-  --jp-cell-prompt-font-family: 'Roboto Mono', monospace;
+  --jp-cell-prompt-font-family: 'Source Code Pro', monospace;
   --jp-cell-prompt-letter-spacing: 0px;
   --jp-cell-prompt-opacity: 1.0;
   --jp-cell-prompt-not-active-opacity: 0.5;
@@ -171,10 +194,11 @@ all of MD as it is not optimized for dense, information rich UIs.
   /* Rendermime styles */
 
   --jp-rendermime-error-background: rgba(244,67,54,.28);
-  --jp-rendermime-row-background: var(--md-grey-900);
-  --jp-rendermime-row-hover-background: rgba(3,169,244,.2);
+  --jp-rendermime-table-row-background: var(--md-grey-900);
+  --jp-rendermime-table-row-hover-background: rgba(3,169,244,.2);
 
   /* Dialog specific styles */
+  
   --jp-dialog-background: rgba(0,0,0,.6);
 
   /* Console specific styles */

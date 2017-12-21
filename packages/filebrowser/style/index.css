@@ -237,11 +237,11 @@
 .jp-DirListing-item.jp-mod-running .jp-DirListing-itemIcon:before {
   color: limegreen;
   content: "\25CF";
-  font-size: 13px;
+  font-size: 8px;
   position: relative;
   width: 100%;
   height: 100%;
-  top: 0px;
+  top: -2px;
   left: -8px;
 }
 

@@ -14,6 +14,7 @@
   padding-left: var(--jp-code-padding);
   font-size: var(--jp-code-font-size);
   line-height: var(--jp-code-line-height);
+  font-family: var(--jp-code-font-family);
 }
 
 
@@ -76,7 +77,7 @@
 
 .jp-RenderedLatex {
   color: var(--jp-content-font-color1);
-  font-size: var(--jp-content-font-size);
+  font-size: var(--jp-content-font-size1);
   line-height: var(--jp-content-line-height);
 }
 
@@ -88,8 +89,10 @@
 
 .jp-RenderedHTMLCommon {
   color: var(--jp-content-font-color1);
-  font-size: var(--jp-content-font-size);
+  font-size: var(--jp-content-font-size1);
   line-height: var(--jp-content-line-height);
+  /* Give a bit more R padding on Markdown text to keep line lengths reasonable */
+  padding-right: 20px;
 }
 
 
@@ -114,100 +117,88 @@
 
 
 .jp-RenderedHTMLCommon a:link {
+  text-decoration: none;
+  color: var(--jp-content-link-color);
+}
+
+
+.jp-RenderedHTMLCommon a:hover {
   text-decoration: underline;
   color: var(--jp-content-link-color);
 }
 
 
 .jp-RenderedHTMLCommon a:visited {
-  text-decoration: underline;
+  text-decoration: none;
   color: var(--jp-content-link-color);
 }
 
-/*For a 14px base font size this goes as:
-font-size = 26, 22, 18, 14, 12, 12
-margin-top = 14, 14, 14, 14, 8, 8
-*/
+
+/* Headings */
+
+.jp-RenderedHTMLCommon h1,
+.jp-RenderedHTMLCommon h2,
+.jp-RenderedHTMLCommon h3,
+.jp-RenderedHTMLCommon h4,
+.jp-RenderedHTMLCommon h5,
+.jp-RenderedHTMLCommon h6 {
+  line-height: var(--jp-content-heading-line-height);
+  font-weight: var(--jp-content-heading-font-weight);
+  font-style: normal;
+  margin: var(--jp-content-heading-margin-top) 0 var(--jp-content-heading-margin-bottom) 0;
+}
+
+
+.jp-RenderedHTMLCommon h1:first-child,
+.jp-RenderedHTMLCommon h2:first-child,
+.jp-RenderedHTMLCommon h3:first-child,
+.jp-RenderedHTMLCommon h4:first-child,
+.jp-RenderedHTMLCommon h5:first-child,
+.jp-RenderedHTMLCommon h6:first-child {
+  margin-top: calc( 0.5 * var(--jp-content-heading-margin-top) );
+}
+
+
+.jp-RenderedHTMLCommon h1:last-child,
+.jp-RenderedHTMLCommon h2:last-child,
+.jp-RenderedHTMLCommon h3:last-child,
+.jp-RenderedHTMLCommon h4:last-child,
+.jp-RenderedHTMLCommon h5:last-child,
+.jp-RenderedHTMLCommon h6:last-child {
+  margin-bottom: calc( 0.5 * var(--jp-content-heading-margin-bottom) );
+}
+
 
 .jp-RenderedHTMLCommon h1 {
-  font-size: 185.7%;
-  margin: 1.08em 0 0 0;
-  font-weight: bold;
-  line-height: 1.0;
+  font-size: var(--jp-content-font-size5);
 }
 
 
 .jp-RenderedHTMLCommon h2 {
-  font-size: 157.1%;
-  margin: 1.27em 0 0 0;
-  font-weight: bold;
-  line-height: 1.0;
+  font-size: var(--jp-content-font-size4);
 }
 
 
 .jp-RenderedHTMLCommon h3 {
-  font-size: 128.6%;
-  margin: 1.55em 0 0 0;
-  font-weight: bold;
-  line-height: 1.0;
+  font-size: var(--jp-content-font-size3);
 }
 
 
 .jp-RenderedHTMLCommon h4 {
-  font-size: 100%;
-  margin: 2em 0 0 0;
-  font-weight: bold;
-  line-height: 1.0;
+  font-size: var(--jp-content-font-size2);
 }
 
 
 .jp-RenderedHTMLCommon h5 {
-  font-size: 100%;
-  margin: 2em 0 0 0;
-  font-weight: bold;
-  line-height: 1.0;
-  font-style: italic;
+  font-size: var(--jp-content-font-size1);
 }
 
 
 .jp-RenderedHTMLCommon h6 {
-  font-size: 100%;
-  margin: 2em 0 0 0;
-  font-weight: bold;
-  line-height: 1.0;
-  font-style: italic;
+  font-size: var(--jp-content-font-size0);
 }
 
-
-.jp-RenderedHTMLCommon h1:first-child {
-  margin-top: 0.538em;
-}
-
-
-.jp-RenderedHTMLCommon h2:first-child {
-  margin-top: 0.636em;
-}
-
-
-.jp-RenderedHTMLCommon h3:first-child {
-  margin-top: 0.777em;
-}
-
-
-.jp-RenderedHTMLCommon h4:first-child {
-  margin-top: 1em;
-}
-
-
-.jp-RenderedHTMLCommon h5:first-child {
-  margin-top: 1em;
-}
-
-
-.jp-RenderedHTMLCommon h6:first-child {
-  margin-top: 1em;
-}
-
+/* Lists */
 
 .jp-RenderedHTMLCommon ul:not(.list-inline),
 .jp-RenderedHTMLCommon ol:not(.list-inline) {
@@ -255,42 +246,45 @@ margin-top = 14, 14, 14, 14, 8, 8
 }
 
 
-.jp-RenderedHTMLCommon * + ol,
-.jp-RenderedHTMLCommon * + ul {
-  margin-top: 1em;
+.jp-RenderedHTMLCommon ol,
+.jp-RenderedHTMLCommon ul {
+  margin-bottom: 1em;
 }
 
 
-.jp-RenderedHTMLCommon ul * + ul,
-.jp-RenderedHTMLCommon ul * + ol,
-.jp-RenderedHTMLCommon ol * + ul,
-.jp-RenderedHTMLCommon ol * + ol {
-  margin-top: 0em;
+.jp-RenderedHTMLCommon ul ul,
+.jp-RenderedHTMLCommon ul ol,
+.jp-RenderedHTMLCommon ol ul,
+.jp-RenderedHTMLCommon ol ol {
+  margin-bottom: 0em;
 }
 
 
 .jp-RenderedHTMLCommon hr {
-  color: var(--jp-border-color1);
+  color: var(--jp-border-color2);
   background-color: var(--jp-border-color1);
   margin-top: 1em;
   margin-bottom: 1em;
 }
 
 
-.jp-RenderedHTMLCommon pre {
-  margin: 1em 2em;
+.jp-RenderedHTMLCommon > pre {
+  margin: 1.5em 2em;
 }
 
 
 .jp-RenderedHTMLCommon pre,
 .jp-RenderedHTMLCommon code {
   border: 0;
-  background-color: var(--jp-layout-color1);
+  background-color: var(--jp-layout-color0);
   color: var(--jp-content-font-color1);
-  font-size: 100%;
+  font-family: var(--jp-code-font-family);
+  font-size: var(--jp-code-font-size);
+  line-height: var(--jp-code-line-height);
   padding: 0px;
 }
 
+/* Tables */
 
 .jp-RenderedHTMLCommon table {
   border-collapse: collapse;
@@ -340,17 +334,17 @@ margin-top = 14, 14, 14, 14, 8, 8
 
 
 .jp-RenderedHTMLCommon tbody tr:nth-child(even) {
-  background: var(  --jp-rendermime-row-background);
+  background: var(  --jp-rendermime-table-row-background);
 }
 
 
 .jp-RenderedHTMLCommon tbody tr:hover {
-  background: var( --jp-rendermime-row-hover-background);
+  background: var( --jp-rendermime-table-row-hover-background);
 }
 
 
-.jp-RenderedHTMLCommon * + table {
-  margin-top: 1em;
+.jp-RenderedHTMLCommon table {
+  margin-bottom: 1em;
 }
 
 
@@ -360,21 +354,22 @@ margin-top = 14, 14, 14, 14, 8, 8
 }
 
 
-.jp-RenderedHTMLCommon * + p {
-  margin-top: 1em;
+.jp-RenderedHTMLCommon p {
+  margin-bottom: 1em;
 }
 
 
 .jp-RenderedHTMLCommon img {
-  -moz-force-broken-image-icon: 1;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
+    -moz-force-broken-image-icon: 1;
 }
 
 
-.jp-RenderedHTMLCommon * + img {
-  margin-top: 1em;
+/* Restrict to direct children as other images could be nested in other content. */
+.jp-RenderedHTMLCommon > img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 1em;
 }
 
 
@@ -396,12 +391,7 @@ margin-top = 14, 14, 14, 14, 8, 8
 
 
 .jp-RenderedHTMLCommon .alert {
-  margin-bottom: initial;
-}
-
-
-.jp-RenderedHTMLCommon * + .alert {
-  margin-top: 1em;
+  margin-bottom: 1em;
 }
 
 
@@ -424,6 +414,16 @@ h4:hover .jp-InternalAnchorLink,
 h5:hover .jp-InternalAnchorLink,
 h6:hover .jp-InternalAnchorLink {
   visibility: visible;
+}
+
+
+/* Most direct children of .jp-RenderedHTMLCommon have a margin-bottom of 1.0.
+ * At the bottom of cells this is a bit too much as there is also spacing
+ * between cells. Going all the way to 0 gets too tight between markdown and
+ * code cells.
+ */
+.jp-RenderedHTMLCommon > *:last-child {
+  margin-bottom: 0.5em;
 }
 
 
