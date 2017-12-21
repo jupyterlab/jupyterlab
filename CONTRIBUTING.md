@@ -78,7 +78,7 @@ jlpm install
 jlpm run build  # Build the dev mode assets (optional)
 jlpm run build:core  # Build the core mode assets (optional)
 jupyter lab build  # Build the app dir assets (optional)
-jupyter serverextension enable --py jupyterlab (optional)
+jupyter serverextension enable --py jupyterlab  # (optional)
 ```
 
 Notes:
