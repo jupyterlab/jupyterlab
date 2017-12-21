@@ -16,7 +16,7 @@
 [![Join the Gitter Chat](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/jupyterlab/jupyterlab)
 
 
-An extensible environment for interactive and reproducible computing, based on the 
+An extensible environment for interactive and reproducible computing, based on the
 Jupyter Notebook and Architecture.
 
 JupyterLab is the next generation user interface for Project Jupyter. It offers all the
@@ -40,7 +40,7 @@ For a good overview of JupyterLab, please see [this link](https://channel9.msdn.
 If you use ``conda``, you can install as:
 
 ```bash
-conda install jupyterlab
+conda install -c conda-forge jupyterlab
 ```
 
 If you use ``pip``, you can install it as:

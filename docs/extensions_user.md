@@ -11,7 +11,7 @@ Installing JupyterLab extensions requires Node.js version 4+.
 If you use ``conda``, you can get them with:
 
 ```bash
-conda install nodejs
+conda -c conda-forge install nodejs
 ```
 
 If you use [Homebrew](http://brew.sh/) on Mac OS X:

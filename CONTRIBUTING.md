@@ -50,13 +50,13 @@ JupyterLab requires Jupyter Notebook version 4.3 or later.
 If you use ``conda``, you can install notebook using:
 
 ```bash
-conda install notebook
+conda install -c conda-forge notebook
 ```
 
 You may also want to install `nb_conda_kernels` to have a kernel option for different [conda environments](http://conda.pydata.org/docs/using/envs.html)
 
 ```bash
-conda install nb_conda_kernels
+conda install -c conda-forge nb_conda_kernels
 ```
 
 If you use `pip` you can install notebook using:
@@ -83,9 +83,9 @@ jupyter serverextension enable --py jupyterlab (optional)
 
 Notes:
 
-* The `jlpm` command is a JupyterLab-provided, locked version of the [yarn](https://yarnpkg.com/en/) package manager.  If you have `yarn` installed 
-already, you can use the `yarn` command when developing, and it will use the 
-local version of `yarn` in `jupyterlab/yarn.js` when run in the repository or 
+* The `jlpm` command is a JupyterLab-provided, locked version of the [yarn](https://yarnpkg.com/en/) package manager.  If you have `yarn` installed
+already, you can use the `yarn` command when developing, and it will use the
+local version of `yarn` in `jupyterlab/yarn.js` when run in the repository or
 a built application directory.
 
 * At times, it may be necessary to clean your local repo with the command `jlpm run clean:slate`.  This will clean the repository, and re-install and
@@ -196,7 +196,7 @@ jupyter lab --dev-mode --watch
 ```
 
 You can also run `jupyter lab --dev-mode --fast-watch` to skip
-the initial build if the assets are already built.  
+the initial build if the assets are already built.
 
 
 ## Build Utilities
