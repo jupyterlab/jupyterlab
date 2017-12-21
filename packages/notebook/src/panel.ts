@@ -51,7 +51,7 @@ import {
 } from './model';
 
 import {
-  Notebook
+  Notebook, StaticNotebook
 } from './widget';
 
 
@@ -97,11 +97,12 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
     toolbar.addClass(NOTEBOOK_PANEL_TOOLBAR_CLASS);
 
     // Notebook
-    let nbOptions = {
+    let nbOptions: Notebook.IOptions = {
       rendermime: this.rendermime,
       languagePreference: options.languagePreference,
       contentFactory: contentFactory,
-      mimeTypeService: options.mimeTypeService
+      mimeTypeService: options.mimeTypeService,
+      editorConfig: options.editorConfig,
     };
     let notebook = this.notebook = contentFactory.createNotebook(nbOptions);
     notebook.addClass(NOTEBOOK_PANEL_NOTEBOOK_CLASS);
@@ -417,6 +418,11 @@ export namespace NotebookPanel {
      * The mimeType service.
      */
     mimeTypeService: IEditorMimeTypeService;
+
+    /**
+     * The notebook cell editor configuration.
+     */
+    editorConfig?: StaticNotebook.IEditorConfig;
   }
 
   /**

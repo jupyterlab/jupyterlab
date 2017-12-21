@@ -828,28 +828,6 @@ namespace NotebookActions {
   }
 
   /**
-   * Toggle match-brackets of all cells.
-   *
-   * @param widget - The target notebook widget.
-   *
-   * #### Notes
-   * The original state is based on the state of the active cell.
-   * The `mode` of the widget will be preserved.
-   */
-  export
-  function toggleAllMatchBrackets(widget: Notebook): void {
-    if (!widget.model || !widget.activeCell) {
-      return;
-    }
-    let state = Private.getState(widget);
-    let matchBrackets = widget.activeCell.editor.getOption('matchBrackets');
-    each(widget.widgets, child => {
-      child.editor.setOption('matchBrackets', !matchBrackets);
-    });
-    Private.handleState(widget, state);
-  }
-
-  /**
    * Toggle the line number of all cells.
    *
    * @param widget - The target notebook widget.
@@ -864,10 +842,15 @@ namespace NotebookActions {
       return;
     }
     let state = Private.getState(widget);
-    let lineNumbers = widget.activeCell.editor.getOption('lineNumbers');
-    each(widget.widgets, child => {
-      child.editor.setOption('lineNumbers', !lineNumbers);
-    });
+    const config = widget.editorConfig;
+    const lineNumbers = !(config.code.lineNumbers &&
+      config.markdown.lineNumbers && config.raw.lineNumbers);
+    const newConfig = {
+      code: { ...config.code, lineNumbers },
+      markdown: { ...config.markdown, lineNumbers },
+      raw: { ...config.raw, lineNumbers }
+    };
+    widget.editorConfig = newConfig;
     Private.handleState(widget, state);
   }
 

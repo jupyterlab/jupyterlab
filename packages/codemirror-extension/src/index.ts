@@ -2,20 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject
-} from '@phosphor/coreutils';
-
-import {
   Menu
 } from '@phosphor/widgets';
 
 import {
   JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
-
-import {
-  ICommandPalette
-} from '@jupyterlab/apputils';
 
 import {
   IMainMenu, IEditMenu
@@ -77,7 +69,6 @@ const commands: JupyterLabPlugin<void> = {
   requires: [
     IEditorTracker,
     IMainMenu,
-    ICommandPalette,
     IStateDB,
     ISettingRegistry
   ],
@@ -101,7 +92,7 @@ const id = commands.id;
 /**
  * Set up the editor widget menu and commands.
  */
-function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMenu: IMainMenu, palette: ICommandPalette, state: IStateDB, settingRegistry: ISettingRegistry): void {
+function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMenu: IMainMenu, state: IStateDB, settingRegistry: ISettingRegistry): void {
   const { commands, restored } = app;
   let { theme, keyMap } = CodeMirrorEditor.defaultConfig;
 
@@ -164,12 +155,10 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
   const themeMenu = new Menu({ commands });
   const keyMapMenu = new Menu({ commands });
   const modeMenu = new Menu({ commands });
-  const tabMenu = new Menu({ commands });
 
   themeMenu.title.label = 'Text Editor Theme';
   keyMapMenu.title.label = 'Text Editor Key Map';
   modeMenu.title.label = 'Text Editor Syntax Highlighting';
-  tabMenu.title.label = 'Text Editor Indentation';
 
   commands.addCommand(CommandIDs.changeTheme, {
     label: args => args['theme'] as string,
@@ -284,29 +273,13 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     });
   });
 
-  let args: JSONObject = {
-    insertSpaces: false, size: 4, name: 'Indent with Tab'
-  };
-  let command = 'fileeditor:change-tabs';
-  tabMenu.addItem({ command, args });
-  palette.addItem({ command, args, category: 'Text Editor' });
-
-  for (let size of [1, 2, 4, 8]) {
-    let args: JSONObject = {
-      insertSpaces: true, size, name: `Spaces: ${size} `
-    };
-    tabMenu.addItem({ command, args });
-    palette.addItem({ command, args, category: 'Text Editor' });
-  }
-
   // Add some of the editor settings to the settings menu.
   mainMenu.settingsMenu.addGroup([
     { type: 'submenu' as Menu.ItemType, submenu: keyMapMenu },
     { type: 'submenu' as Menu.ItemType, submenu: themeMenu }
   ], 10);
 
-  // Add indentation settings to the edit menu.
-  mainMenu.editMenu.addGroup([{ type: 'submenu', submenu: tabMenu }], 20);
+  // Add the syntax highlighting submenu to the `View` menu.
   mainMenu.viewMenu.addGroup([{ type: 'submenu', submenu: modeMenu }], 40);
 
   // Add find-replace capabilities to the edit menu.

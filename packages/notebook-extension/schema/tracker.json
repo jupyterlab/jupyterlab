@@ -1,0 +1,81 @@
+{
+  "jupyter.lab.setting-icon-class": "jp-NotebookIcon",
+  "jupyter.lab.setting-icon-label": "Notebook",
+  "title": "Notebook",
+  "description": "Notebook settings.",
+  "definitions": {
+    "editorConfig": {
+      "properties": {
+        "autoClosingBrackets": {
+          "type": "boolean"
+        },
+        "lineNumbers": {
+          "type": "boolean"
+        },
+        "lineWrap": {
+          "type": "boolean"
+        },
+        "matchBrackets": {
+          "type": "boolean"
+        },
+        "readOnly": {
+          "type": "boolean"
+        },
+        "insertSpaces": {
+          "type": "boolean"
+        },
+        "tabSize": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    }
+  },
+  "properties": {
+    "codeCellConfig": {
+      "title": "Code Cell Configuration",
+      "description": "The configuration for all code cells.",
+      "$ref": "#/definitions/editorConfig",
+      "default": {
+        "autoClosingBrackets": true,
+        "lineNumbers": false,
+        "lineWrap": false,
+        "matchBrackets": true,
+        "readOnly": false,
+        "insertSpaces": true,
+        "tabSize": 4
+      }
+    },
+    "markdownCellConfig": {
+      "title": "Markdown Cell Configuration",
+      "description": "The configuration for all markdown cells.",
+      "$ref": "#/definitions/editorConfig",
+      "default": {
+        "autoClosingBrackets": false,
+        "lineNumbers": false,
+        "lineWrap": true,
+        "matchBrackets": false,
+        "readOnly": false,
+        "insertSpaces": true,
+        "tabSize": 4
+      }
+    },
+    "rawCellConfig": {
+      "title": "Raw Cell Configuration",
+      "description": "The configuration for all raw cells.",
+      "$ref": "#/definitions/editorConfig",
+      "default": {
+        "autoClosingBrackets": false,
+        "lineNumbers": false,
+        "lineWrap": true,
+        "matchBrackets": false,
+        "readOnly": false,
+        "insertSpaces": true,
+        "tabSize": 4
+      }
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}

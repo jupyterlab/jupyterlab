@@ -14,11 +14,11 @@ import {
 } from '@jupyterlab/cells';
 
 import {
-  IEditorServices
+  CodeEditor, IEditorServices
 } from '@jupyterlab/codeeditor';
 
 import {
-  IStateDB, PageConfig, URLExt, uuid
+  ISettingRegistry, IStateDB, PageConfig, URLExt, uuid
 } from '@jupyterlab/coreutils';
 
 import  {
@@ -35,7 +35,8 @@ import {
 
 import {
   CellTools, ICellTools, INotebookTracker, NotebookActions,
-  NotebookModelFactory,  NotebookPanel, NotebookTracker, NotebookWidgetFactory
+  NotebookModelFactory,  NotebookPanel, NotebookTracker, NotebookWidgetFactory,
+  StaticNotebook
 } from '@jupyterlab/notebook';
 
 import {
@@ -274,7 +275,7 @@ const EXPORT_TO_FORMATS = [
 /**
  * The notebook widget tracker provider.
  */
-const tracker: JupyterLabPlugin<INotebookTracker> = {
+const trackerPlugin: JupyterLabPlugin<INotebookTracker> = {
   id: '@jupyterlab/notebook-extension:tracker',
   provides: INotebookTracker,
   requires: [
@@ -283,7 +284,8 @@ const tracker: JupyterLabPlugin<INotebookTracker> = {
     NotebookPanel.IContentFactory,
     IEditorServices,
     ILayoutRestorer,
-    IRenderMimeRegistry
+    IRenderMimeRegistry,
+    ISettingRegistry
   ],
   optional: [IFileBrowserFactory, ILauncher],
   activate: activateNotebookHandler,
@@ -320,7 +322,7 @@ const tools: JupyterLabPlugin<ICellTools> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [factory, tracker, tools];
+const plugins: JupyterLabPlugin<any>[] = [factory, trackerPlugin, tools];
 export default plugins;
 
 
@@ -394,8 +396,10 @@ function activateCellTools(app: JupyterLab, tracker: INotebookTracker, editorSer
 /**
  * Activate the notebook handler extension.
  */
-function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: NotebookPanel.IContentFactory, editorServices: IEditorServices, restorer: ILayoutRestorer, rendermime: IRenderMimeRegistry, browserFactory: IFileBrowserFactory | null, launcher: ILauncher | null): INotebookTracker {
+function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, contentFactory: NotebookPanel.IContentFactory, editorServices: IEditorServices, restorer: ILayoutRestorer, rendermime: IRenderMimeRegistry, settingRegistry: ISettingRegistry, browserFactory: IFileBrowserFactory | null, launcher: ILauncher | null): INotebookTracker {
   const services = app.serviceManager;
+  // An object for tracking the current notebook settings.
+  let editorConfig = StaticNotebook.defaultEditorConfig;
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
     fileTypes: ['notebook'],
@@ -405,9 +409,10 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
     canStartKernel: true,
     rendermime: rendermime,
     contentFactory,
+    editorConfig,
     mimeTypeService: editorServices.mimeTypeService
   });
-  const { commands } = app;
+  const { commands, restored } = app;
   const tracker = new NotebookTracker({ namespace: 'notebook' });
 
   // Handle state restoration.
@@ -435,6 +440,51 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
     widget.context.pathChanged.connect(() => { tracker.save(widget); });
     // Add the notebook panel to the tracker.
     tracker.add(widget);
+  });
+
+  /**
+   * Update the setting values.
+   */
+  function updateConfig(settings: ISettingRegistry.ISettings): void {
+    let cached =
+      settings.get('codeCellConfig').composite as Partial<CodeEditor.IConfig>;
+    let code = { ...StaticNotebook.defaultEditorConfig.code };
+    Object.keys(code).forEach((key: keyof CodeEditor.IConfig) => {
+      code[key] = cached[key] === null ? code[key] : cached[key];
+    });
+    cached =
+      settings.get('markdownCellConfig').composite as Partial<CodeEditor.IConfig>;
+    let markdown = { ...StaticNotebook.defaultEditorConfig.markdown };
+    Object.keys(markdown).forEach((key: keyof CodeEditor.IConfig) => {
+      markdown[key] = cached[key] === null ? markdown[key] : cached[key];
+    });
+    cached =
+      settings.get('rawCellConfig').composite as Partial<CodeEditor.IConfig>;
+    let raw = { ...StaticNotebook.defaultEditorConfig.raw };
+    Object.keys(raw).forEach((key: keyof CodeEditor.IConfig) => {
+      raw[key] = cached[key] === null ? raw[key] : cached[key];
+    });
+    factory.editorConfig = editorConfig = { code, markdown, raw };
+  }
+
+  /**
+   * Update the settings of the current tracker instances.
+   */
+  function updateTracker(): void {
+    tracker.forEach(widget => { widget.notebook.editorConfig = editorConfig; });
+  }
+
+  // Fetch the initial state of the settings.
+  Promise.all([settingRegistry.load(trackerPlugin.id), restored]).then(([settings]) => {
+    updateConfig(settings);
+    updateTracker();
+    settings.changed.connect(() => {
+      updateConfig(settings);
+      updateTracker();
+    });
+  }).catch((reason: Error) => {
+    console.error(reason.message);
+    updateTracker();
   });
 
   // Add main menu notebook menu.
@@ -1541,13 +1591,11 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
     toggleLineNumbers: widget => {
       NotebookActions.toggleAllLineNumbers(widget.notebook);
     },
-    toggleMatchBrackets: widget => {
-      NotebookActions.toggleAllMatchBrackets(widget.notebook);
-    },
-    lineNumbersToggled: widget =>
-      widget.notebook.activeCell.editor.getOption('lineNumbers'),
-    matchBracketsToggled: widget =>
-      widget.notebook.activeCell.editor.getOption('matchBrackets'),
+    lineNumbersToggled: widget => {
+      const config = widget.notebook.editorConfig;
+      return !!(config.code.lineNumbers && config.markdown.lineNumbers &&
+        config.raw.lineNumbers);
+    }
   } as IViewMenu.IEditorViewer<NotebookPanel>);
 
   // Add an ICodeRunner to the application run menu

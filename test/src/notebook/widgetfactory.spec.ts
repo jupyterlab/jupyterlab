@@ -28,7 +28,7 @@ import {
 } from '../utils';
 
 import {
-  createNotebookPanelFactory, rendermime, mimeTypeService
+  createNotebookPanelFactory, defaultEditorConfig, rendermime, mimeTypeService
 } from './utils';
 
 
@@ -41,7 +41,8 @@ function createFactory(): NotebookWidgetFactory {
     fileTypes: ['notebook'],
     rendermime,
     contentFactory,
-    mimeTypeService
+    mimeTypeService,
+    editorConfig: defaultEditorConfig
   });
 }
 
@@ -101,6 +102,22 @@ describe('notebook/notebook/widgetfactory', () => {
 
     });
 
+    describe('#editorConfig', () => {
+
+      it('should be the editor config passed into the constructor', () => {
+        let factory = createFactory();
+        expect(factory.editorConfig).to.be(defaultEditorConfig);
+      });
+
+      it('should be settable', () => {
+        let factory = createFactory();
+        let newConfig = { ...defaultEditorConfig };
+        factory.editorConfig = newConfig;
+        expect(factory.editorConfig).to.be(newConfig);
+      });
+
+    });
+
     describe('#createNew()', () => {
 
       it('should create a new `NotebookPanel` widget', () => {
@@ -113,6 +130,12 @@ describe('notebook/notebook/widgetfactory', () => {
         let factory = createFactory();
         let panel = factory.createNew(context);
         expect(panel.rendermime).to.not.be(rendermime);
+      });
+
+      it('should pass the editor config to the notebook', () => {
+        let factory = createFactory();
+        let panel = factory.createNew(context);
+        expect(panel.notebook.editorConfig).to.be(defaultEditorConfig);
       });
 
       it('should populate the default toolbar items', () => {

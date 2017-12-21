@@ -2,21 +2,52 @@
   "jupyter.lab.setting-icon-class": "jp-TextEditorIcon",
   "jupyter.lab.setting-icon-label": "Editor",
   "title": "Text Editor",
-  "description": "Text editor settings for all editors.",
-  "additionalProperties": false,
-  "properties": {
-    "autoClosingBrackets": {
-      "type": "boolean", "title": "Autoclosing Brackets", "default": true
-    },
-    "lineNumbers": {
-      "type": "boolean", "title": "Line Numbers", "default": true
-    },
-    "lineWrap": {
-      "type": "boolean", "title": "Line Wrap", "default": false
-    },
-    "matchBrackets": {
-      "type": "boolean", "title": "Match Brackets", "default": true
+  "description": "Text editor settings.",
+  "definitions": {
+    "editorConfig": {
+      "properties": {
+        "autoClosingBrackets": {
+          "type": "boolean"
+        },
+        "lineNumbers": {
+          "type": "boolean"
+        },
+        "lineWrap": {
+          "type": "boolean"
+        },
+        "matchBrackets": {
+          "type": "boolean"
+        },
+        "readOnly": {
+          "type": "boolean"
+        },
+        "insertSpaces": {
+          "type": "boolean"
+        },
+        "tabSize": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
     }
   },
+  "properties": {
+    "editorConfig": {
+      "title": "Editor Configuration",
+      "description": "The configuration for all text editors.",
+      "$ref": "#/definitions/editorConfig",
+      "default": {
+        "autoClosingBrackets": true,
+        "lineNumbers": true,
+        "lineWrap": true,
+        "matchBrackets": true,
+        "readOnly": false,
+        "insertSpaces": true,
+        "tabSize": 4
+      }
+    }
+  },
+  "additionalProperties": false,
   "type": "object"
 }

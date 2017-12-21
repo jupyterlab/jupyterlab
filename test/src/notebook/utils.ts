@@ -18,7 +18,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  NotebookPanel, Notebook, NotebookModel
+  NotebookPanel, Notebook, NotebookModel, StaticNotebook
 } from '@jupyterlab/notebook';
 
 import {
@@ -36,6 +36,8 @@ export
 // tslint:disable-next-line
 const DEFAULT_CONTENT: nbformat.INotebookContent = require('../../../examples/notebook/test.ipynb') as nbformat.INotebookContent;
 
+export
+const defaultEditorConfig = { ...StaticNotebook.defaultEditorConfig };
 
 export
 const editorFactory = editorServices.factoryService.newInlineEditor.bind(
