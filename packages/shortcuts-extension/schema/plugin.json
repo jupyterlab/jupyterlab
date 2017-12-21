@@ -31,6 +31,15 @@
       },
       "type": "object"
     },
+    "application:toggle-left-area": {
+      "default": { },
+      "properties": {
+        "command": { "default": "application:toggle-left-area" },
+        "keys": { "default": ["Accel B"] },
+        "selector": { "default": "body" }
+      },
+      "type": "object"
+    },
     "command-palette:activate": {
       "default": { },
       "properties": {

@@ -348,6 +348,11 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
     execute: Private.delegateExecute(app, menu.editorViewers, 'toggleWordWrap')
   });
 
+  menu.addGroup([
+    { command: 'application:toggle-left-area' },
+    { command: 'application:toggle-right-area' }
+  ], 0);
+
   const editorViewerGroup = [
     CommandIDs.lineNumbering,
     CommandIDs.matchBrackets,
@@ -356,7 +361,7 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
   menu.addGroup(editorViewerGroup, 10);
 
   // Add the command for toggling single-document mode.
-  menu.addGroup([ { command: 'application:toggle-mode' }], 1000);
+  menu.addGroup([{ command: 'application:toggle-mode' }], 1000);
 }
 
 function createRunMenu(app: JupyterLab, menu: RunMenu): void {

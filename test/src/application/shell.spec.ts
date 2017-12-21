@@ -51,6 +51,32 @@ describe('ApplicationShell', () => {
 
   });
 
+  describe('#leftCollapsed', () => {
+
+    it('should return whether the left area is collapsed', () => {
+      let widget = new Widget();
+      widget.id = 'foo';
+      shell.addToLeftArea(widget);
+      expect(shell.leftCollapsed).to.be(true);
+      shell.activateById('foo');
+      expect(shell.leftCollapsed).to.be(false);
+    });
+
+  });
+
+  describe('#rightCollapsed', () => {
+
+    it('should return whether the right area is collapsed', () => {
+      let widget = new Widget();
+      widget.id = 'foo';
+      shell.addToRightArea(widget);
+      expect(shell.rightCollapsed).to.be(true);
+      shell.activateById('foo');
+      expect(shell.rightCollapsed).to.be(false);
+    });
+
+  });
+
   describe('#currentWidget', () => {
 
     it('should be the current widget in the shell main area', () => {
@@ -286,6 +312,66 @@ describe('ApplicationShell', () => {
       expect(widget.isVisible).to.be(true);
       shell.collapseRight();
       expect(widget.isVisible).to.be(false);
+    });
+
+  });
+
+  describe('#expandLeft()', () => {
+
+    it('should expand the most recently used widget', () => {
+      let widget = new Widget();
+      widget.id = 'foo';
+      let widget2 = new Widget();
+      widget2.id = 'bar';
+      shell.addToLeftArea(widget, { rank: 10 });
+      shell.addToLeftArea(widget2, { rank: 1 });
+      shell.activateById('foo');
+      shell.collapseLeft();
+      expect(widget.isVisible).to.be(false);
+      shell.expandLeft();
+      expect(widget.isVisible).to.be(true);
+    });
+
+    it('should expand the first widget if none have been activated', () => {
+      let widget = new Widget();
+      widget.id = 'foo';
+      let widget2 = new Widget();
+      widget2.id = 'bar';
+      shell.addToLeftArea(widget, { rank: 10 });
+      shell.addToLeftArea(widget2, { rank: 1 });
+      expect(widget2.isVisible).to.be(false);
+      shell.expandLeft();
+      expect(widget2.isVisible).to.be(true);
+    });
+
+  });
+
+  describe('#expandRight()', () => {
+
+    it('should expand the most recently used widget', () => {
+      let widget = new Widget();
+      widget.id = 'foo';
+      let widget2 = new Widget();
+      widget2.id = 'bar';
+      shell.addToRightArea(widget, { rank: 10 });
+      shell.addToRightArea(widget2, { rank: 1 });
+      shell.activateById('foo');
+      shell.collapseRight();
+      expect(widget.isVisible).to.be(false);
+      shell.expandRight();
+      expect(widget.isVisible).to.be(true);
+    });
+
+    it('should expand the first widget if none have been activated', () => {
+      let widget = new Widget();
+      widget.id = 'foo';
+      let widget2 = new Widget();
+      widget2.id = 'bar';
+      shell.addToRightArea(widget, { rank: 10 });
+      shell.addToRightArea(widget2, { rank: 1 });
+      expect(widget2.isVisible).to.be(false);
+      shell.expandRight();
+      expect(widget2.isVisible).to.be(true);
     });
 
   });
