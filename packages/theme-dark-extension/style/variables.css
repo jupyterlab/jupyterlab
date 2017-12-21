@@ -99,7 +99,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-content-font-color2: rgba(0,0,0,0.7);
   --jp-content-font-color3: rgba(0,0,0,0.5);
 
-  --jp-content-link-color: var(--md-blue-700);
+  --jp-content-link-color: var(--md-blue-300);
 
   --jp-content-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 
