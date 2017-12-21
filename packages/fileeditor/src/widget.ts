@@ -40,11 +40,6 @@ const UNDOER = 'jpUndoer';
  */
 const DIRTY_CLASS = 'jp-mod-dirty';
 
-/**
- * The class name added to a jupyter editor widget.
- */
-const EDITOR_CLASS = 'jp-FileEditor';
-
 
 /**
  * A code editor wrapper for the file editor.
@@ -63,7 +58,7 @@ class FileEditorCodeWrapper extends CodeEditorWrapper {
     const context = this._context = options.context;
     const editor = this.editor;
 
-    this.addClass(EDITOR_CLASS);
+    this.addClass('jp-FileEditorCodeWrapper');
     this.node.dataset[CODE_RUNNER] = 'true';
     this.node.dataset[UNDOER] = 'true';
 
@@ -200,6 +195,7 @@ class FileEditor extends Widget implements DocumentRegistry.IReadyWidget {
    */
   constructor(options: FileEditor.IOptions) {
     super();
+    this.addClass('jp-FileEditor');
 
     const context = this._context = options.context;
     this._mimeTypeService = options.mimeTypeService;
@@ -212,7 +208,7 @@ class FileEditor extends Widget implements DocumentRegistry.IReadyWidget {
     this._onPathChanged();
 
 
-    let layout = this.layout = new BoxLayout();
+    let layout = this.layout = new BoxLayout({ spacing: 0 });
     let toolbar = new Widget();
     toolbar.addClass('jp-Toolbar');
 
