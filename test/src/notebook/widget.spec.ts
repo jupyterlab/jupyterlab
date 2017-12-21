@@ -848,6 +848,131 @@ describe('notebook/widget', () => {
 
     });
 
+    describe('#deselectAll()', () => {
+
+      it('should deselect all cells', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.select(widget.widgets[0]);
+        widget.select(widget.widgets[2]);
+        widget.select(widget.widgets[3]);
+        widget.select(widget.widgets[4]);
+        expect(selected(widget)).to.eql([0, 2, 3, 4]);
+        widget.deselectAll();
+        expect(selected(widget)).to.eql([]);
+      });
+
+    });
+
+    describe('#extendContiguousSelectionTo()', () => {
+      let widget: LogNotebook;
+
+      beforeEach((done) => {
+        widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        Widget.attach(widget, document.body);
+        requestAnimationFrame(() => { done(); });
+      });
+
+      afterEach(() => {
+        widget.dispose();
+      });
+
+      it('should work in each distinct permutation of head, anchor, and index', () => {
+        let checkSelection = (anchor: number, head: number, index: number, select = true) => {
+          // Set up the test by pre-selecting appropriate cells if select is true.
+          if (select) {
+            for (let i = Math.min(anchor, head); i <= Math.max(anchor, head); i++) {
+              widget.select(widget.widgets[i]);
+            }
+          }
+
+          // Set the active cell to indicate the head of the selection.
+          widget.activeCellIndex = head;
+
+          // Check the contiguous selection.
+          let selection = widget.getContiguousSelection();
+          if (select) {
+            expect(selection.anchor).to.be(anchor);
+            expect(selection.head).to.be(head);
+          } else {
+            expect(selection.anchor).to.be(null);
+            expect(selection.head).to.be(null);
+          }
+
+          // Extend the selection.
+          widget.extendContiguousSelectionTo(index);
+
+          // Clip index to fall within the cell index range.
+          index = Math.max(0, Math.min(widget.widgets.length - 1, index));
+
+          // Check the active cell is now at the index.
+          expect(widget.activeCellIndex).to.be.equal(index);
+
+          // Check the contiguous selection.
+          selection = widget.getContiguousSelection();
+
+          if (anchor !== index) {
+            expect(selection.anchor).to.be.equal(anchor);
+            expect(selection.head).to.be.equal(index);
+          } else {
+            // If the anchor and index are the same, the selection is collapsed.
+            expect(selection.anchor).to.be.equal(null);
+            expect(selection.head).to.be.equal(null);
+          }
+
+          // Clear the selection for the next round.
+          widget.deselectAll();
+        };
+
+
+        // Lists are of the form [head, anchor, index].
+        let permutations = [
+          // Head, anchor, and index are distinct
+          [1, 3, 5],
+          [1, 5, 3],
+          [3, 1, 5],
+          [3, 5, 1],
+          [5, 1, 3],
+          [5, 3, 1],
+
+          // Two of head, anchor, and index are equal
+          [1, 3, 3],
+          [3, 1, 3],
+          [3, 3, 1],
+
+          // Head, anchor, and index all equal
+          [3, 3, 3]
+
+        ];
+
+        permutations.forEach(p => {
+          checkSelection(p[0], p[1], p[2]);
+
+          // Check when index needs to be clipped to the cell range.
+          checkSelection(p[0], p[1], Number.MAX_SAFE_INTEGER);
+          checkSelection(p[0], p[1], -10);
+
+          // If head and anchor are the same, also check when we only have an
+          // active cell, with no selection.
+          if (p[0] === p[1]) {
+            checkSelection(p[0], p[1], p[2], false);
+
+            // Check when index needs to be clipped to the cell range.
+            checkSelection(p[0], p[1], Number.MAX_SAFE_INTEGER, false);
+            checkSelection(p[0], p[1], -10, false);
+          }
+        });
+      });
+
+      it.only('handles the case of no cells', () => {
+        widget.model.cells.clear();
+        widget.extendContiguousSelectionTo(3);
+        expect(widget.activeCellIndex).to.be(-1);
+      });
+
+    });
+
     describe('#handleEvent()', () => {
 
       let widget: LogNotebook;
