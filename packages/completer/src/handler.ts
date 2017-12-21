@@ -384,8 +384,12 @@ class CompletionHandler implements IDisposable {
     // Update the original request.
     model.original = state;
 
+    // Dedupe the matches.
+    let matches = reply.matches || [];
+    matches = Array.from(new Set(matches) as any);
+
     // Update the options.
-    model.setOptions(reply.matches || []);
+    model.setOptions(matches);
 
     // Update the cursor.
     model.cursor = {
