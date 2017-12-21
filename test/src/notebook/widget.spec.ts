@@ -1038,6 +1038,93 @@ describe('notebook/widget', () => {
 
     });
 
+    describe('#getContiguousSelection()', () => {
+
+      it('throws an error when the selection is not contiguous', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+
+        widget.select(widget.widgets[1]);
+        widget.select(widget.widgets[3]);
+        widget.activeCellIndex = 3;
+
+        expect(() => widget.getContiguousSelection()).to.throwError(/Selection not contiguous/);
+      });
+
+      it('throws an error if the active cell is not at an endpoint', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+
+        widget.select(widget.widgets[1]);
+        widget.select(widget.widgets[2]);
+        widget.select(widget.widgets[3]);
+
+        // Check if active cell is outside selection.
+        widget.activeCellIndex = 0;
+        expect(() => widget.getContiguousSelection()).to.throwError(/Active cell not at endpoint of selection/);
+
+        // Check if active cell is inside selection.
+        widget.activeCellIndex = 2;
+        expect(() => widget.getContiguousSelection()).to.throwError(/Active cell not at endpoint of selection/);
+
+      });
+
+      it('returns null values if there is no selection', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+
+        let selection = widget.getContiguousSelection();
+        expect(selection).to.eql({head: null, anchor: null});
+      });
+
+      it('handles the case of no cells', () => {
+        let widget = createActiveWidget();
+        widget.model.cells.clear();
+        expect(widget.widgets.length).to.be(0);
+
+        let selection = widget.getContiguousSelection();
+        expect(selection).to.eql({head: null, anchor: null});
+      });
+
+      it('works if head is before the anchor', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+
+        widget.select(widget.widgets[1]);
+        widget.select(widget.widgets[2]);
+        widget.select(widget.widgets[3]);
+        widget.activeCellIndex = 1;
+
+        let selection = widget.getContiguousSelection();
+        expect(selection).to.eql({head: 1, anchor: 3});
+      });
+
+      it('works if head is after the anchor', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+
+        widget.select(widget.widgets[1]);
+        widget.select(widget.widgets[2]);
+        widget.select(widget.widgets[3]);
+        widget.activeCellIndex = 3;
+
+        let selection = widget.getContiguousSelection();
+        expect(selection).to.eql({head: 3, anchor: 1});
+      });
+
+      it('works if head and anchor are the same', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+
+        widget.select(widget.widgets[3]);
+        widget.activeCellIndex = 3;
+
+        let selection = widget.getContiguousSelection();
+        expect(selection).to.eql({head: 3, anchor: 3});
+      });
+
+    });
+
     describe('#handleEvent()', () => {
 
       let widget: LogNotebook;
