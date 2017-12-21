@@ -970,9 +970,8 @@ class Notebook extends StaticNotebook {
     // Move the active cell. We do this before the collapsing shortcut below.
     this.activeCellIndex = index;
 
-    // Make sure the index is valid, according to the rules for setting the
-    // active cell. This may change the index, based on the rules for clipping
-    // the active cell index.
+    // Make sure the index is valid, according to the rules for setting and clipping the
+    // active cell index. This may change the index.
     index = this.activeCellIndex;
 
     // Collapse the selection if it is only the active cell.
