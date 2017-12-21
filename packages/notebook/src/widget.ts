@@ -1007,7 +1007,7 @@ class Notebook extends StaticNotebook {
         selectionChanged = true;
       }
 
-      // Toggle everything strictly between head and index except anchor.
+      // Toggle everything strictly between index and head except anchor.
       for (i = index + 1; i < head; i++) {
         if (i !== anchor) {
           Private.selectedProperty.set(this.widgets[i], !Private.selectedProperty.get(this.widgets[i]));
