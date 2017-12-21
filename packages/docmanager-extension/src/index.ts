@@ -145,7 +145,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     }
     const context = docManager.contextForWidget(currentWidget);
     if (!context) {
-      return 'File';
+      return '';
     }
     const fts = docRegistry.getFileTypesForPath(context.path);
     return (fts.length && fts[0].displayName) ? fts[0].displayName : 'File';
@@ -157,7 +157,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
       let name = 'File';
       if (widget) {
         const typeName = fileType();
-        name = typeName === 'File' ? widget.title.label : typeName;
+        name = typeName || widget.title.label;
       }
       return `Close ${name}`;
     },
