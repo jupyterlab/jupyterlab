@@ -1266,7 +1266,7 @@ class Notebook extends StaticNotebook {
     // cell index, otherwise it stays the same.
     this.activeCellIndex = index <= this.activeCellIndex ?
       this.activeCellIndex - 1 : this.activeCellIndex ;
-    if (this.isSelectedOrActive(cell)) {
+    if (this.isSelected(cell)) {
       this._selectionChanged.emit(void 0);
     }
   }
