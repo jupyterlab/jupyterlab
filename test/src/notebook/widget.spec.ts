@@ -865,122 +865,163 @@ describe('notebook/widget', () => {
     });
 
     describe('#extendContiguousSelectionTo()', () => {
-      let widget: LogNotebook;
 
-      beforeEach((done) => {
-        widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
-        Widget.attach(widget, document.body);
-        requestAnimationFrame(() => { done(); });
-      });
+      // Test a permutation for extending a selection.
+      let checkSelection = (widget: Notebook, anchor: number, head: number, index: number, select = true) => {
 
-      afterEach(() => {
-        widget.dispose();
-      });
+        if (!select && anchor !== head) {
+          throw new Error('anchor must equal head if select is false');
+        }
+
+        // Set up the test by pre-selecting appropriate cells if select is true.
+        if (select) {
+          for (let i = Math.min(anchor, head); i <= Math.max(anchor, head); i++) {
+            widget.select(widget.widgets[i]);
+          }
+        }
+
+        // Set the active cell to indicate the head of the selection.
+        widget.activeCellIndex = head;
+
+        // Set up a selection event listener.
+        let selectionChanged = 0;
+        let countSelectionChanged = (sender: Notebook, args: void) => {
+          selectionChanged += 1;
+        };
+        widget.selectionChanged.connect(countSelectionChanged);
+
+        // Check the contiguous selection.
+        let selection = widget.getContiguousSelection();
+        if (select) {
+          expect(selection.anchor).to.be(anchor);
+          expect(selection.head).to.be(head);
+        } else {
+          expect(selection.anchor).to.be(null);
+          expect(selection.head).to.be(null);
+        }
+
+        // Extend the selection.
+        widget.extendContiguousSelectionTo(index);
+
+        // Clip index to fall within the cell index range.
+        index = Math.max(0, Math.min(widget.widgets.length - 1, index));
+
+        // Check the active cell is now at the index.
+        expect(widget.activeCellIndex).to.be.equal(index);
+
+        // Check the contiguous selection.
+        selection = widget.getContiguousSelection();
+
+        // Check the selection changed signal was emitted once if necessary.
+        if (head === index) {
+          if (index === anchor && select) {
+            // we should have collapsed the single cell selection
+            expect(selectionChanged).to.be(1);
+          } else {
+            expect(selectionChanged).to.be(0);
+          }
+        } else {
+          expect(selectionChanged).to.be(1);
+        }
+
+        if (anchor !== index) {
+          expect(selection.anchor).to.be.equal(anchor);
+          expect(selection.head).to.be.equal(index);
+        } else {
+          // If the anchor and index are the same, the selection is collapsed.
+          expect(selection.anchor).to.be.equal(null);
+          expect(selection.head).to.be.equal(null);
+        }
+
+        // Clean up widget
+        widget.selectionChanged.disconnect(countSelectionChanged);
+        widget.activeCellIndex = 0;
+        widget.deselectAll();
+      };
+
+      // Lists are of the form [anchor, head, index].
+      let permutations = [
+        // Anchor, head, and index are distinct
+        [1, 3, 5],
+        [1, 5, 3],
+        [3, 1, 5],
+        [3, 5, 1],
+        [5, 1, 3],
+        [5, 3, 1],
+
+        // Two of anchor, head, and index are equal
+        [1, 3, 3],
+        [3, 1, 3],
+        [3, 3, 1],
+
+        // Anchor, head, and index all equal
+        [3, 3, 3]
+      ];
 
       it('should work in each permutation of anchor, head, and index', () => {
-        let checkSelection = (anchor: number, head: number, index: number, select = true) => {
-          // Set up the test by pre-selecting appropriate cells if select is true.
-          if (select) {
-            for (let i = Math.min(anchor, head); i <= Math.max(anchor, head); i++) {
-              widget.select(widget.widgets[i]);
-            }
-          }
-
-          // Set the active cell to indicate the head of the selection.
-          widget.activeCellIndex = head;
-
-          // Set up a selection event listener.
-          let selectionChanged = 0;
-          widget.selectionChanged.connect((sender, args) => {
-            selectionChanged += 1;
-          })
-
-          // Check the contiguous selection.
-          let selection = widget.getContiguousSelection();
-          if (select) {
-            expect(selection.anchor).to.be(anchor);
-            expect(selection.head).to.be(head);
-          } else {
-            expect(selection.anchor).to.be(null);
-            expect(selection.head).to.be(null);
-          }
-
-          // Extend the selection.
-          widget.extendContiguousSelectionTo(index);
-
-          // Clip index to fall within the cell index range.
-          index = Math.max(0, Math.min(widget.widgets.length - 1, index));
-
-          // Check the active cell is now at the index.
-          expect(widget.activeCellIndex).to.be.equal(index);
-
-          // Check the contiguous selection.
-          selection = widget.getContiguousSelection();
-
-
-          // Check the selection changed signal was emitted once if necessary.
-          if (head === index) {
-            expect(selectionChanged).to.be(0);
-          } else {
-            expect(selectionChanged).to.be(1);
-          }
-
-          if (anchor !== index) {
-            expect(selection.anchor).to.be.equal(anchor);
-            expect(selection.head).to.be.equal(index);
-          } else {
-            // If the anchor and index are the same, the selection is collapsed.
-            expect(selection.anchor).to.be.equal(null);
-            expect(selection.head).to.be.equal(null);
-          }
-
-          // Clear the selection for the next round.
-          widget.deselectAll();
-        };
-
-
-        // Lists are of the form [anchor, head, index].
-        let permutations = [
-          // Anchor, head, and index are distinct
-          [1, 3, 5],
-          [1, 5, 3],
-          [3, 1, 5],
-          [3, 5, 1],
-          [5, 1, 3],
-          [5, 3, 1],
-
-          // Two of anchor, head, and index are equal
-          [1, 3, 3],
-          [3, 1, 3],
-          [3, 3, 1],
-
-          // Anchor, head, and index all equal
-          [3, 3, 3]
-
-        ];
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
 
         permutations.forEach(p => {
-          checkSelection(p[0], p[1], p[2]);
+          checkSelection(widget, p[0], p[1], p[2]);
+        });
+      });
 
-          // Check when index needs to be clipped to the cell range.
-          checkSelection(p[0], p[1], Number.MAX_SAFE_INTEGER);
-          checkSelection(p[0], p[1], -10);
+      it('should work when we only have an active cell, with no existing selection', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
 
-          // If anchor and head are the same, also check when we only have an
-          // active cell, with no selection.
+        permutations.forEach(p => {
           if (p[0] === p[1]) {
-            checkSelection(p[0], p[1], p[2], false);
-
-            // Check when index needs to be clipped to the cell range.
-            checkSelection(p[0], p[1], Number.MAX_SAFE_INTEGER, false);
-            checkSelection(p[0], p[1], -10, false);
+            checkSelection(widget, p[0], p[1], p[2], false);
           }
         });
       });
 
-      it.only('handles the case of no cells', () => {
+      it('should clip when the index is greater than the last index', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+
+        permutations.forEach(p => {
+          checkSelection(widget, p[0], p[1], Number.MAX_SAFE_INTEGER);
+        });
+      });
+
+      it('should clip when the index is greater than the last index with no existing selection', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+
+        permutations.forEach(p => {
+          if (p[0] === p[1]) {
+            checkSelection(widget, p[0], p[1], Number.MAX_SAFE_INTEGER, false);
+          }
+        });
+      });
+
+      it('should clip when the index is less than 0', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+
+        permutations.forEach(p => {
+          checkSelection(widget, p[0], p[1], -10);
+        });
+      });
+
+      it('should clip when the index is less than 0 with no existing selection', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+
+        permutations.forEach(p => {
+          if (p[0] === p[1]) {
+            checkSelection(widget, p[0], p[1], -10, false);
+          }
+        });
+      });
+
+      it('handles the case of no cells', () => {
+        let widget = createActiveWidget();
         widget.model.cells.clear();
+        expect(widget.widgets.length).to.be(0);
 
         // Set up a selection event listener.
         let selectionChanged = 0;
