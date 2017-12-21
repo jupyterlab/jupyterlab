@@ -21,6 +21,13 @@ import {
   Widget
 } from '@phosphor/widgets';
 
+import {
+  Dialog, showDialog
+} from './dialog';
+
+import {
+  ISplashScreen
+} from './splash';
 
 
 /* tslint:disable */
@@ -48,22 +55,22 @@ class ThemeManager {
    * Construct a new theme manager.
    */
   constructor(options: ThemeManager.IOptions) {
-    const { key, when, url } = options;
+    const { key, when, url, splash } = options;
     const registry = options.settingRegistry;
     const promises = Promise.all([registry.load(key), when]);
+    this._splash = splash;
 
     this._baseUrl = url;
 
     when.then(() => { this._sealed = true; });
 
     this._host = options.host;
+    this._splashDisposable = splash.show();
     this.ready = promises.then(([settings]) => {
       this._settings = settings;
       this._settings.changed.connect(this._onSettingsChanged, this);
 
       return this._handleSettings();
-    }).catch(reason => {
-      throw `Theme manager is ready but failed at runtime: ${reason}`;
     });
   }
 
@@ -167,13 +174,13 @@ class ThemeManager {
 
       theme = settings.default('theme') as string;
       if (!this._themes[theme]) {
-        return Promise.reject(`Default theme "${theme}" did not load.`);
+        this._onError(new Error(`Default theme "${theme}" did not load.`));
       }
       console.warn(`Could not load theme "${old}", using default "${theme}".`);
     }
     this._pendingTheme = theme;
 
-    return this._loadTheme();
+    return this._loadTheme().catch(reason => { this._onError(reason); });
   }
 
   /**
@@ -184,6 +191,7 @@ class ThemeManager {
     let oldPromise = Promise.resolve(void 0);
     let oldTheme = this._themes[this._loadedTheme];
     if (oldTheme) {
+      this._splashDisposable = this._splash.show();
       oldPromise = oldTheme.unload();
     }
     this._pendingTheme = '';
@@ -198,8 +206,10 @@ class ThemeManager {
     }).then(() => {
       this._loadedTheme = newTheme.name;
       this._finishLoad();
+    }).then(() => {
+      this._splashDisposable.dispose();
     }).catch(error => {
-      console.error(error);
+      this._onError(error);
     });
     return this._loadPromise;
   }
@@ -216,6 +226,18 @@ class ThemeManager {
     }
   }
 
+  /**
+   * Handle a theme error.
+   */
+  private _onError(reason: any): void {
+    this._splashDisposable.dispose();
+    showDialog({
+      title: 'Error Loading Theme',
+      body: String(reason),
+      buttons: [Dialog.okButton({ label: 'OK' })]
+    });
+  }
+
   private _baseUrl: string;
   private _themes: { [key: string]: ThemeManager.ITheme } = {};
   private _links: HTMLLinkElement[] = [];
@@ -225,6 +247,8 @@ class ThemeManager {
   private _loadedTheme: string | null = null;
   private _loadPromise: Promise<void> | null = null;
   private _sealed = false;
+  private _splash: ISplashScreen;
+  private _splashDisposable: IDisposable;
 }
 
 
@@ -262,6 +286,11 @@ namespace ThemeManager {
      * A promise for when all themes should have been registered.
      */
     when: Promise<void>;
+
+    /**
+     * The splash screen to show when loading themes.
+     */
+    splash: ISplashScreen;
   }
 
   /**
