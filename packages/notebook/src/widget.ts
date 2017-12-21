@@ -965,11 +965,11 @@ class Notebook extends StaticNotebook {
       if (index === this.activeCellIndex) {
         // Already collapsed selection, nothing more to do.
         return;
-      } else {
-        // We will start a new selection below.
-        head = this.activeCellIndex;
-        anchor = this.activeCellIndex;
       }
+
+      // We will start a new selection below.
+      head = this.activeCellIndex;
+      anchor = this.activeCellIndex;
     }
 
     // Move the active cell. We do this before the collapsing shortcut below.
