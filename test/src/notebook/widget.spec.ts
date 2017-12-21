@@ -890,6 +890,12 @@ describe('notebook/widget', () => {
           // Set the active cell to indicate the head of the selection.
           widget.activeCellIndex = head;
 
+          // Set up a selection event listener.
+          let selectionChanged = 0;
+          widget.selectionChanged.connect((sender, args) => {
+            selectionChanged += 1;
+          })
+
           // Check the contiguous selection.
           let selection = widget.getContiguousSelection();
           if (select) {
@@ -911,6 +917,14 @@ describe('notebook/widget', () => {
 
           // Check the contiguous selection.
           selection = widget.getContiguousSelection();
+
+
+          // Check the selection changed signal was emitted once if necessary.
+          if (head === index) {
+            expect(selectionChanged).to.be(0);
+          } else {
+            expect(selectionChanged).to.be(1);
+          }
 
           if (anchor !== index) {
             expect(selection.anchor).to.be.equal(anchor);
@@ -967,8 +981,18 @@ describe('notebook/widget', () => {
 
       it.only('handles the case of no cells', () => {
         widget.model.cells.clear();
+
+        // Set up a selection event listener.
+        let selectionChanged = 0;
+        widget.selectionChanged.connect((sender, args) => {
+          selectionChanged += 1;
+        })
+
         widget.extendContiguousSelectionTo(3);
+
         expect(widget.activeCellIndex).to.be(-1);
+        expect(selectionChanged).to.be(0);
+
       });
 
     });

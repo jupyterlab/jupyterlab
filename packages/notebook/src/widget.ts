@@ -980,36 +980,51 @@ class Notebook extends StaticNotebook {
       return;
     }
 
+    let selectionChanged = false;
+
     if (head < index) {
       if (head < anchor) {
         Private.selectedProperty.set(this.widgets[head], false);
+        selectionChanged = true;
       }
 
       // Toggle everything strictly between head and index except anchor.
       for (i = head + 1; i < index; i++) {
         if (i !== anchor) {
           Private.selectedProperty.set(this.widgets[i], !Private.selectedProperty.get(this.widgets[i]));
+          selectionChanged = true;
         }
       }
 
     } else if (index < head) {
       if (anchor < head) {
         Private.selectedProperty.set(this.widgets[head], false);
+        selectionChanged = true;
       }
 
       // Toggle everything strictly between head and index except anchor.
       for (i = index + 1; i < head; i++) {
         if (i !== anchor) {
           Private.selectedProperty.set(this.widgets[i], !Private.selectedProperty.get(this.widgets[i]));
+          selectionChanged = true;
         }
       }
     }
 
     // Anchor and index should *always* be selected.
+    if (!Private.selectedProperty.get(this.widgets[anchor])) {
+      selectionChanged = true;
+    }
     Private.selectedProperty.set(this.widgets[anchor], true);
+
+    if (!Private.selectedProperty.get(this.widgets[index])) {
+      selectionChanged = true;
+    }
     Private.selectedProperty.set(this.widgets[index], true);
 
-    this._selectionChanged.emit(void 0);
+    if (selectionChanged) {
+      this._selectionChanged.emit(void 0);
+    }
   }
 
   /**
