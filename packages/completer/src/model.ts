@@ -181,7 +181,7 @@ class CompleterModel implements Completer.IModel {
   }
 
   /**
-   * Set the avilable options in the completer menu.
+   * Set the available options in the completer menu.
    */
   setOptions(newValue: IterableOrArrayLike<string>) {
     const values = toArray(newValue || []);

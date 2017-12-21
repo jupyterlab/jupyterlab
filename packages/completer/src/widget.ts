@@ -585,7 +585,7 @@ namespace Completer {
     options(): IIterator<string>;
 
     /**
-     * Set the avilable options in the completer menu.
+     * Set the available options in the completer menu.
      */
     setOptions(options: IterableOrArrayLike<string>): void;
 
