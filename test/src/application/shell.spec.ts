@@ -77,30 +77,6 @@ describe('ApplicationShell', () => {
 
   });
 
-  describe('#leftEmpty', () => {
-
-    it('should return whether the left area is empty', () => {
-      let widget = new Widget();
-      widget.id = 'foo';
-      expect(shell.leftEmpty).to.be(true);
-      shell.addToLeftArea(widget);
-      expect(shell.leftEmpty).to.be(false);
-    });
-
-  });
-
-  describe('#rightEmpty', () => {
-
-    it('should return whether the right area is empty', () => {
-      let widget = new Widget();
-      widget.id = 'foo';
-      expect(shell.rightEmpty).to.be(true);
-      shell.addToRightArea(widget);
-      expect(shell.rightEmpty).to.be(false);
-    });
-
-  });
-
   describe('#currentWidget', () => {
 
     it('should be the current widget in the shell main area', () => {

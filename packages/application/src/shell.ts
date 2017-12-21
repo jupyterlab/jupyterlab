@@ -188,20 +188,6 @@ class ApplicationShell extends Widget {
   }
 
   /**
-   * Whether the left area is empty.
-   */
-  get leftEmpty(): boolean {
-    return this._leftHandler.sideBar.titles.length === 0;
-  }
-
-  /**
-   * Whether the right area is empty.
-   */
-  get rightEmpty(): boolean {
-    return this._rightHandler.sideBar.titles.length === 0;
-  }
-
-  /**
    * The main dock area's user interface mode.
    */
   get mode(): DockPanel.Mode {

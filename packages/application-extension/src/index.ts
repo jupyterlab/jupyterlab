@@ -187,7 +187,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
       }
     },
     isToggled: () => !app.shell.leftCollapsed,
-    isVisible: () => !app.shell.leftEmpty
+    isVisible: () => !app.shell.isEmpty('left')
   });
   palette.addItem({ command, category });
 
@@ -202,7 +202,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
       }
     },
     isToggled: () => !app.shell.rightCollapsed,
-    isVisible: () => !app.shell.rightEmpty
+    isVisible: () => !app.shell.isEmpty('right')
   });
   palette.addItem({ command, category });
 
