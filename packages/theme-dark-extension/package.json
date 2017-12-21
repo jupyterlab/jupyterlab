@@ -15,7 +15,8 @@
     "style/*.css",
     "style/images/*.*",
     "style/icons/*.*",
-    "style/icons/**/*.*"
+    "style/icons/**/*.*",
+    "style/fonts/*.*"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
