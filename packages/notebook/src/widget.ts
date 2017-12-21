@@ -945,10 +945,15 @@ class Notebook extends StaticNotebook {
   /**
    * Move the head of an existing contiguous selection to extend the selection.
    *
-   * If the new selection is a single cell, that becomes the active cell and all
-   * cells are deselected.
+   * @param index - The new head of the existing selection.
    *
-   * #### Note
+   * #### Notes
+   * If there is no existing selection, the active cell is considered an
+   * existing one-cell selection.
+   *
+   * If the new selection is a single cell, that cell becomes the active cell
+   * and all cells are deselected.
+   *
    * There is no change if there are no cells (i.e., activeCellIndex is -1).
    */
   extendContiguousSelectionTo(index: number): void {
