@@ -47,8 +47,6 @@ const plugin: JupyterLabPlugin<void> = {
     manager.register({
       name: '{{title}}',
       load: function() {
-        // Load the optional monospace font for the input/output prompt.
-        manager.loadCSS('https://fonts.googleapis.com/css?family=Roboto+Mono');
         return manager.loadCSS('{{name}}/index.css');
       },
       unload: function() {
