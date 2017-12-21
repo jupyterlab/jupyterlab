@@ -893,7 +893,9 @@ namespace Private {
     expand(): void {
       const previous =
         this._lastCurrent || (this._items.length > 0 && this._items[0].widget);
-      this._sideBar.currentTitle = previous.title;
+      if (previous) {
+        this.activate(previous.id);
+      }
     }
 
     /**
