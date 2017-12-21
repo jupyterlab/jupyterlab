@@ -757,6 +757,11 @@ namespace CodeCell {
     return OutputArea.execute(code, cell.outputArea, session).then(msg => {
       model.executionCount = msg.content.execution_count;
       return msg;
+    }).catch(e => {
+      if (e.message === 'Canceled') {
+        cell.setPrompt('');
+      }
+      throw e;
     });
   }
 }
