@@ -83,7 +83,7 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
     const manager = app.serviceManager;
     const contexts = new WeakSet<DocumentRegistry.Context>();
     const opener: DocumentManager.IWidgetOpener = {
-      open: widget => {
+      open: (widget, options) => {
         if (!widget.id) {
           widget.id = `document-manager-${++Private.id}`;
         }
@@ -92,13 +92,13 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
           ...widget.title.dataset
         };
         if (!widget.isAttached) {
-          app.shell.addToMainArea(widget);
+          app.shell.addToMainArea(widget, options || {});
 
           // Add a loading spinner, and remove it when the widget is ready.
-          if (widget.ready !== undefined) {
+          if ((widget as any).ready !== undefined) {
             let spinner = new Spinner();
             widget.node.appendChild(spinner.node);
-            widget.ready.then(() => { widget.node.removeChild(spinner.node); });
+            (widget as any).ready.then(() => { widget.node.removeChild(spinner.node); });
           }
         }
         app.shell.activateById(widget.id);

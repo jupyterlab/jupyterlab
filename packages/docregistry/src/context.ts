@@ -383,11 +383,21 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
 
   /**
    * Add a sibling widget to the document manager.
+   *
+   * @param widget - The widget to add to the document manager.
+   *
+   * @param options - The desired options for adding the sibling.
+   *
+   * @returns A disposable used to remove the sibling if desired.
+   *
+   * #### Notes
+   * It is assumed that the widget has the same model and context
+   * as the original widget.
    */
-  addSibling(widget: Widget): IDisposable {
+  addSibling(widget: Widget, options: DocumentRegistry.IOpenOptions = {}): IDisposable {
     let opener = this._opener;
     if (opener) {
-      opener(widget);
+      opener(widget, options);
     }
     return new DisposableDelegate(() => {
       widget.close();
@@ -622,7 +632,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   }
 
   private _manager: ServiceManager.IManager;
-  private _opener: (widget: Widget) => void;
+  private _opener: (widget: Widget, options?: DocumentRegistry.IOpenOptions) => void;
   private _model: T;
   private _modelDB: IModelDB;
   private _path = '';

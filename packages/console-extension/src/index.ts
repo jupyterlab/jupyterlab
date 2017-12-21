@@ -45,6 +45,10 @@ import {
   ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
+import {
+  DockLayout
+} from '@phosphor/widgets';
+
 
 /**
  * The command IDs used by the console plugin.
@@ -184,22 +188,31 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     });
   }
 
+  interface ICreateOptions extends Partial<ConsolePanel.IOptions> {
+    ref?: string;
+    insertMode?: DockLayout.InsertMode;
+  }
+
   /**
    * Create a console for a given path.
    */
-  function createConsole(options: Partial<ConsolePanel.IOptions>): Promise<ConsolePanel> {
+  function createConsole(options: ICreateOptions): Promise<ConsolePanel> {
     return manager.ready.then(() => {
       let panel = new ConsolePanel({
         manager,
         contentFactory,
         mimeTypeService: editorServices.mimeTypeService,
         rendermime,
-        ...options
+        ...options as Partial<ConsolePanel.IOptions>
       });
 
       // Add the console panel to the tracker.
       tracker.add(panel);
-      shell.addToMainArea(panel);
+      shell.addToMainArea(
+        panel, {
+          ref: options.ref || null, mode: options.insertMode || 'tab-after'
+        }
+      );
       shell.activateById(panel.id);
       return panel;
     });

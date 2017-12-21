@@ -22,6 +22,10 @@ import {
   Panel, SplitPanel, StackedPanel, TabBar, Title, Widget
 } from '@phosphor/widgets';
 
+import {
+  DocumentRegistry
+} from '@jupyterlab/docregistry';
+
 
 /**
  * The class name added to AppShell instances.
@@ -368,7 +372,9 @@ class ApplicationShell extends Widget {
       ref = find(dock.widgets(), value => value.id === options.ref!) || null;
     }
 
-    dock.addWidget(widget, { mode: 'tab-after', ref });
+    let mode = options.mode || 'tab-after';
+
+    dock.addWidget(widget, { mode, ref });
   }
 
   /**
@@ -755,14 +761,7 @@ namespace ApplicationShell {
    * The options for adding a widget to a side area of the shell.
    */
   export
-  interface IMainAreaOptions {
-    /**
-     * The reference widget id for the insert location.
-     *
-     * The default is `null`.
-     */
-    ref?: string | null;
-  }
+  interface IMainAreaOptions extends DocumentRegistry.IOpenOptions {}
 }
 
 
