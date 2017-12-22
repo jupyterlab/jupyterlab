@@ -1110,9 +1110,7 @@ class Notebook extends StaticNotebook {
       this._evtMouseDown(event as MouseEvent);
       break;
     case 'mouseup':
-      if (event.currentTarget === this.node) {
-        this._evtMouseup(event as MouseEvent);
-      } else if (event.currentTarget === document) {
+      if (event.currentTarget === document) {
         this._evtDocumentMouseup(event as MouseEvent);
       }
       break;
@@ -1157,7 +1155,6 @@ class Notebook extends StaticNotebook {
     super.onAfterAttach(msg);
     let node = this.node;
     node.addEventListener('mousedown', this);
-    node.addEventListener('mouseup', this);
     node.addEventListener('keydown', this);
     node.addEventListener('dblclick', this);
     node.addEventListener('focus', this, true);
@@ -1174,7 +1171,6 @@ class Notebook extends StaticNotebook {
   protected onBeforeDetach(msg: Message): void {
     let node = this.node;
     node.removeEventListener('mousedown', this);
-    node.removeEventListener('mouseup', this);
     node.removeEventListener('keydown', this);
     node.removeEventListener('dblclick', this);
     node.removeEventListener('focus', this, true);
@@ -1350,67 +1346,69 @@ class Notebook extends StaticNotebook {
    * Handle `mousedown` events for the widget.
    */
   private _evtMouseDown(event: MouseEvent): void {
-    let target = event.target as HTMLElement;
-    let i = this._findCell(target);
-    let shouldDrag = false;
 
-    if (i !== -1) {
-      let widget = this.widgets[i];
+    // Mouse click should always ensure the notebook is focused.
+    this._ensureFocus(true);
+
+    // We only handle main button actions.
+    if (event.button !== 0) {
+      return;
+    }
+
+    // Try to find the cell associated with the event.
+    let target = event.target as HTMLElement;
+    let index = this._findCell(target);
+
+    if (index !== -1) {
+      let widget = this.widgets[index];
+
       // Event is on a cell but not in its editor, switch to command mode.
       if (!widget.editorWidget.node.contains(target)) {
         this.mode = 'command';
-        shouldDrag = widget.promptNode.contains(target);
       }
+
       if (event.shiftKey) {
-        shouldDrag = false;
+        this.extendContiguousSelectionTo(index);
+
+        // Enter selecting mode
+        this._mouseMode = 'select';
+        document.addEventListener('mouseup', this, true);
+        document.addEventListener('mousemove', this, true);
 
         // Prevent text select behavior.
         event.preventDefault();
         event.stopPropagation();
+      } else {
+        // Check if we need to change the active cell.
+        if (!this.isSelectedOrActive(widget)) {
+          this.deselectAll();
+          this.activeCellIndex = index;
+        }
+
+        // Prepare to start a drag if we are on the drag region.
+        if (widget.promptNode.contains(target)) {
+          // Prepare for a drag start
+          this._dragData = { pressX: event.clientX, pressY: event.clientY, index: index};
+
+          // Enter possible drag mode
+          this._mouseMode = 'couldDrag';
+          document.addEventListener('mouseup', this, true);
+          document.addEventListener('mousemove', this, true);
+        }
+        event.preventDefault();
       }
-    }
 
-    this._ensureFocus(true);
-
-    // Left mouse press for drag start.
-    if (event.button === 0 && shouldDrag) {
-      this._dragData = { pressX: event.clientX, pressY: event.clientY, index: i};
-      document.addEventListener('mouseup', this, true);
-      document.addEventListener('mousemove', this, true);
-      event.preventDefault();
     }
   }
 
   /**
-   * Handle the `'mouseup'` event for the widget.
-   */
-  private _evtMouseup(event: MouseEvent): void {
-    if (this._drag) {
-      return;
-    }
-    let target = event.target as HTMLElement;
-    let i = this._findCell(target);
-    if (i == -1) {
-      this.deselectAll();
-      return;
-    }
-    if (event.shiftKey) {
-      this.extendContiguousSelectionTo(i);
-    } else {
-      this.deselectAll();
-      this.activeCellIndex = i;
-    }
-  }
-
-  /**
-   * Handle the `'mouseup'` event for the drag.
+   * Handle the `'mouseup'` event on the document.
    */
   private _evtDocumentMouseup(event: MouseEvent): void {
-    if (event.button !== 0 || !this._drag) {
-      document.removeEventListener('mousemove', this, true);
-      document.removeEventListener('mouseup', this, true);
-      return;
-    }
+    // Remove the event listeners we put on the document
+    document.removeEventListener('mousemove', this, true);
+    document.removeEventListener('mouseup', this, true);
+    this._mouseMode = null;
     event.preventDefault();
     event.stopPropagation();
   }
@@ -1419,23 +1417,30 @@ class Notebook extends StaticNotebook {
    * Handle the `'mousemove'` event for the widget.
    */
   private _evtDocumentMousemove(event: MouseEvent): void {
+
     event.preventDefault();
     event.stopPropagation();
 
-    // Bail if we are the one dragging.
-    if (this._drag) {
-      return;
+    // If in select mode, update the selection
+    switch (this._mouseMode) {
+    case 'select':
+      let target = event.target as HTMLElement;
+      let index = this._findCell(target);
+      if (index !== -1) {
+        this.extendContiguousSelectionTo(index);
+      }
+      break;
+    case 'couldDrag':
+      // Check for a drag initialization.
+      let data = this._dragData;
+      let dx = Math.abs(event.clientX - data.pressX);
+      let dy = Math.abs(event.clientY - data.pressY);
+      if (dx >= DRAG_THRESHOLD || dy >= DRAG_THRESHOLD) {
+        this._mouseMode = null;
+        this._startDrag(data.index, event.clientX, event.clientY);
+      }
+      break;
     }
-
-    // Check for a drag initialization.
-    let data = this._dragData;
-    let dx = Math.abs(event.clientX - data.pressX);
-    let dy = Math.abs(event.clientY - data.pressY);
-    if (dx < DRAG_THRESHOLD && dy < DRAG_THRESHOLD) {
-      return;
-    }
-
-    this._startDrag(data.index, event.clientX, event.clientY);
   }
 
   /**
@@ -1541,7 +1546,10 @@ class Notebook extends StaticNotebook {
       if (toIndex >= fromIndex && toIndex < fromIndex + toMove.length) {
         return;
       }
+      let relativeActiveIndex = this.activeCellIndex - fromIndex;
+
       // Move the cells one by one
+      let start = toIndex;
       this.model.cells.beginCompoundOperation();
       if (fromIndex < toIndex) {
         each(toMove, (cellWidget) => {
@@ -1553,6 +1561,8 @@ class Notebook extends StaticNotebook {
         });
       }
       this.model.cells.endCompoundOperation();
+
+      this.activeCellIndex = start + relativeActiveIndex;
     } else {
       // Handle the case where we are copying cells between
       // notebooks.
@@ -1641,6 +1651,7 @@ class Notebook extends StaticNotebook {
     // Remove mousemove and mouseup listeners and start the drag.
     document.removeEventListener('mousemove', this, true);
     document.removeEventListener('mouseup', this, true);
+    this._mouseMode = null;
     this._drag.start(clientX, clientY).then(action => {
       if (this.isDisposed) {
         return;
@@ -1728,6 +1739,7 @@ class Notebook extends StaticNotebook {
   private _mode: NotebookMode = 'command';
   private _drag: Drag = null;
   private _dragData: { pressX: number, pressY: number, index: number } = null;
+  private _mouseMode: 'select' | 'couldDrag' | null = null;
   private _activeCellChanged = new Signal<this, Cell>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
   private _selectionChanged = new Signal<this, void>(this);
