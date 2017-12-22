@@ -14,6 +14,11 @@
 |----------------------------------------------------------------------------*/
 
 
+button {
+    border-radius: var(--jp-border-radius);
+}
+
+
 button.jp-mod-styled.jp-mod-accept {
     background: var(--jp-brand-color1);
     color: white;

@@ -134,6 +134,7 @@
   background: var(--jp-layout-color1);
   box-shadow: 0px 1px 1px 1px rgba(0,0,0,.08);
   transition: .2s box-shadow;
+  border-radius: var(--jp-border-radius);
 }
 
 

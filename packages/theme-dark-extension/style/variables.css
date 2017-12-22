@@ -37,7 +37,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-border-color1: var(--md-grey-800);
   --jp-border-color2: var(--md-grey-800);
   --jp-border-color3: var(--md-grey-900);
-  --jp-button-border-radius: 2px;
+  --jp-border-radius: 2px;
 
   /* UI Fonts
    *
