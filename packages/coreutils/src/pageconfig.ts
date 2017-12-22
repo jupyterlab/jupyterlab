@@ -121,6 +121,14 @@ namespace PageConfig {
   }
 
   /**
+   * Get the tree url for a JupyterLab application.
+   */
+  export
+  function getTreeUrl(): string {
+    return URLExt.join(getBaseUrl(), getOption('pageUrl'), 'tree');
+  }
+
+  /**
    * Get the base websocket url for a Jupyter application.
    */
   export

@@ -169,7 +169,7 @@ const router: JupyterLabPlugin<IRouter> = {
       PageConfig.getBaseUrl(),
       PageConfig.getOption('pageUrl')
     );
-    const tree = URLExt.join(base, 'tree');
+    const tree = PageConfig.getTreeUrl();
     const router = new Router({ base, commands });
 
     commands.addCommand(CommandIDs.tree, {

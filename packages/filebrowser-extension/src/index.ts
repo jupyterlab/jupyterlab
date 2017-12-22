@@ -381,11 +381,7 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, bro
   commands.addCommand(CommandIDs.share, {
     execute: () => {
       const path = browser.selectedItems().next().path;
-      const base = URLExt.join(
-        PageConfig.getBaseUrl(),
-        PageConfig.getOption('pageUrl')
-      );
-      const tree = URLExt.join(base, 'tree');
+      const tree = PageConfig.getTreeUrl();
 
       Clipboard.copyToSystem(URLExt.join(tree, (path as string)));
     },
