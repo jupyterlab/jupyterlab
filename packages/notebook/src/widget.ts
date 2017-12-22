@@ -1390,6 +1390,10 @@ class Notebook extends StaticNotebook {
     }
     let target = event.target as HTMLElement;
     let i = this._findCell(target);
+    if (i == -1) {
+      this.deselectAll();
+      return;
+    }
     if (event.shiftKey) {
       this.extendContiguousSelectionTo(i);
     } else {
