@@ -138,6 +138,11 @@
 }
 
 
+.jp-LinkIcon {
+  background-image: var(--jp-icon-link);
+}
+
+
 .jp-MainAreaLandscapeIcon {
   background-repeat: no-repeat;
   margin-right: 2px;

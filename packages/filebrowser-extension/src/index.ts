@@ -386,7 +386,8 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, bro
         .then((url: string) => { Clipboard.copyToSystem(url); });
     },
     isVisible: () => toArray(browser.selectedItems()).length === 1,
-    label: 'Copy Sharing Link'
+    iconClass: 'jp-MaterialIcon jp-LinkIcon',
+    label: 'Copy Shareable Link'
   });
 
   commands.addCommand(CommandIDs.showBrowser, {
