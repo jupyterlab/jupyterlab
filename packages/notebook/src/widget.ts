@@ -1110,13 +1110,14 @@ class Notebook extends StaticNotebook {
       this._evtMouseDown(event as MouseEvent);
       break;
     case 'mouseup':
-      this._evtMouseup(event as MouseEvent);
-      if (event.target === document) {
+      if (event.currentTarget === this.node) {
+        this._evtMouseup(event as MouseEvent);
+      } else if (event.currentTarget === document) {
         this._evtDocumentMouseup(event as MouseEvent);
       }
       break;
     case 'mousemove':
-      if (event.target === document) {
+      if (event.currentTarget === document) {
         this._evtDocumentMousemove(event as MouseEvent);
       }
       break;
