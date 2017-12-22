@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IStateDB, PathExt
+  IStateDB, PageConfig, PathExt, URLExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -381,9 +381,13 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, bro
   commands.addCommand(CommandIDs.share, {
     execute: () => {
       const path = browser.selectedItems().next().path;
+      const base = URLExt.join(
+        PageConfig.getBaseUrl(),
+        PageConfig.getOption('pageUrl')
+      );
+      const tree = URLExt.join(base, 'tree');
 
-      return commands.execute('router:tree-url', { path })
-        .then((url: string) => { Clipboard.copyToSystem(url); });
+      Clipboard.copyToSystem(URLExt.join(tree, (path as string)));
     },
     isVisible: () => toArray(browser.selectedItems()).length === 1,
     iconClass: 'jp-MaterialIcon jp-LinkIcon',
