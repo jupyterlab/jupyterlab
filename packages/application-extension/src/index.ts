@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IStateDB, PageConfig
+  IStateDB, PageConfig, URLExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -47,7 +47,7 @@ namespace CommandIDs {
   const tree: string = 'router:tree';
 
   export
-  const navigate: string = 'router:navigate';
+  const url: string = 'router:tree-url';
 }
 
 
@@ -165,22 +165,30 @@ const router: JupyterLabPlugin<IRouter> = {
   id: '@jupyterlab/application-extension:router',
   activate: (app: JupyterLab) => {
     const { commands } = app;
-    const base = PageConfig.getBaseUrl();
+    const base = URLExt.join(
+      PageConfig.getBaseUrl(),
+      PageConfig.getOption('pageUrl')
+    );
+    const tree = URLExt.join(base, 'tree');
     const router = new Router({ base, commands });
 
     commands.addCommand(CommandIDs.tree, {
       execute: (args: IRouter.ICommandArgs) => {
-        const path = (args.path as string).replace('/lab/tree', '');
+        const path = (args.path as string).replace('tree', '');
 
         // Change the URL back to the base application URL.
-        window.history.replaceState({ }, '', `${base}lab`);
+        window.history.replaceState({ }, '', base);
 
         return commands.execute('filebrowser:navigate-main', { path });
       }
     });
 
+    commands.addCommand(CommandIDs.url, {
+      execute: args => Promise.resolve(URLExt.join(tree, (args.path as string)))
+    });
+
     app.restored.then(() => { router.route(window.location.href); });
-    router.register(/tree\/.+/, CommandIDs.tree);
+    router.register(/^\/tree\/.+/, CommandIDs.tree);
 
     return router;
   },

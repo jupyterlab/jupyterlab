@@ -143,9 +143,8 @@ class Router implements IRouter {
    */
   route(url: string): void {
     const { base } = this;
-    const parsed = URLExt.parse(url);
-    const path = parsed.pathname.indexOf(base) === 0 ?
-      parsed.pathname.replace(base, '') : parsed.pathname;
+    const parsed = URLExt.parse(url.replace(base, ''));
+    const path = parsed.pathname;
     const search = parsed.search;
     const rules = this._rules;
 
@@ -171,7 +170,7 @@ namespace Router {
   export
   interface IOptions {
     /**
-     * The base URL for the router.
+     * The fully qualified base URL for the router.
      */
     base: string;
 
