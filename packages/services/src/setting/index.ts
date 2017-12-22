@@ -13,7 +13,7 @@ import {
 /**
  * The url for the lab settings service.
  */
-const SERVICE_SETTINGS_URL = 'lab/api/settings';
+const SERVICE_SETTINGS_URL = 'api/settings';
 
 
 /**
@@ -43,8 +43,9 @@ class SettingManager {
    * with a `ServerConnection.IError`.
    */
   fetch(id: string): Promise<ISettingRegistry.IPlugin> {
-    const base = this.serverSettings.baseUrl;
     const { serverSettings } = this;
+    const { baseUrl, pageUrl } = serverSettings;
+    const base = baseUrl + pageUrl;
     const url = Private.url(base, id);
     const promise = ServerConnection.makeRequest(url, {}, serverSettings);
 
@@ -68,8 +69,9 @@ class SettingManager {
    * with a `ServerConnection.IError`.
    */
   save(id: string, raw: string): Promise<void> {
-    const base = this.serverSettings.baseUrl;
     const { serverSettings } = this;
+    const { baseUrl, pageUrl } = serverSettings;
+    const base = baseUrl + pageUrl;
     const url = Private.url(base, id);
     const init = {
       body: raw,

@@ -63,6 +63,11 @@ namespace ServerConnection {
      readonly baseUrl: string;
 
      /**
+      * The page url of the JupyterLab application.
+      */
+     readonly pageUrl: string;
+
+     /**
       * The base ws url of the server.
       */
      readonly wsUrl: string;
@@ -177,6 +182,7 @@ namespace ServerConnection {
   export
   const defaultSettings: ServerConnection.ISettings = {
     baseUrl: PageConfig.getBaseUrl(),
+    pageUrl: PageConfig.getOption('pageUrl'),
     wsUrl: PageConfig.getWsUrl(),
     token: PageConfig.getToken(),
     init: { 'cache': 'no-store', 'credentials': 'same-origin' },
