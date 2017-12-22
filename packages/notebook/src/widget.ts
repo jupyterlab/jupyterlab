@@ -1255,8 +1255,13 @@ class Notebook extends StaticNotebook {
    * Handle a cell being moved.
    */
   protected onCellMoved(fromIndex: number, toIndex: number): void {
-    if (fromIndex === this.activeCellIndex) {
+    let i = this.activeCellIndex;
+    if (fromIndex === i) {
       this.activeCellIndex = toIndex;
+    } else if (fromIndex < i && i <= toIndex) {
+      this.activeCellIndex--;
+    } else if (toIndex <= i && i < fromIndex) {
+      this.activeCellIndex++;
     }
   }
 
@@ -1552,10 +1557,8 @@ class Notebook extends StaticNotebook {
       if (toIndex >= fromIndex && toIndex < fromIndex + toMove.length) {
         return;
       }
-      let relativeActiveIndex = this.activeCellIndex - fromIndex;
 
       // Move the cells one by one
-      let start = toIndex;
       this.model.cells.beginCompoundOperation();
       if (fromIndex < toIndex) {
         each(toMove, (cellWidget) => {
@@ -1567,8 +1570,6 @@ class Notebook extends StaticNotebook {
         });
       }
       this.model.cells.endCompoundOperation();
-
-      this.activeCellIndex = start + relativeActiveIndex;
     } else {
       // Handle the case where we are copying cells between
       // notebooks.
