@@ -33,7 +33,7 @@
   width: 32px;
   height: 16px;
   border: 1px solid transparent;
-  border-radius: var(--jp-button-border-radius);
+  border-radius: var(--jp-border-radius);
 }
 
 .jp-Placeholder-content .jp-MoreHorizIcon:hover {

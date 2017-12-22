@@ -11,7 +11,7 @@
   border: none;
   outline: none;
   background: transparent;
-  border-radius: var(--jp-button-border-radius);
+  border-radius: var(--jp-border-radius);
   opacity: 1.0;
 }
 
