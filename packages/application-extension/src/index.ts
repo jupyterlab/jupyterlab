@@ -174,7 +174,7 @@ const router: JupyterLabPlugin<IRouter> = {
 
     commands.addCommand(CommandIDs.tree, {
       execute: (args: IRouter.ICommandArgs) => {
-        const path = (args.path as string).replace('tree', '');
+        const path = (args.path as string).replace('/tree', '');
 
         // Change the URL back to the base application URL.
         window.history.replaceState({ }, '', base);
