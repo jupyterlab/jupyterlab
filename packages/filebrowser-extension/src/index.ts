@@ -145,7 +145,8 @@ function activateFactory(app: JupyterLab, docManager: IDocumentManager, state: I
       className: 'jp-AddIcon',
       onClick: () => {
         return createLauncher(commands, widget);
-      }
+      },
+      tooltip: 'New Launcher'
     });
     launcher.addClass('jp-MaterialIcon');
     widget.toolbar.insertItem(0, 'launch', launcher);
