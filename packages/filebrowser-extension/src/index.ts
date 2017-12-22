@@ -310,24 +310,26 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, bro
   commands.addCommand(CommandIDs.navigate, {
     execute: args => {
       const path = args.path as string || '';
-      const dir = PathExt.dirname(path);
-      const file = PathExt.basename(path);
-      const cd = browser.model.cd(dir);
+      const services = app.serviceManager;
+      const open = 'docmanager:open';
       const failure = (reason: any) => {
         console.warn(`${CommandIDs.navigate} failed to open: ${path}`, reason);
       };
 
-      if (!file) {
-        return cd.catch(failure);
-      }
+      return services.ready
+        .then(() => services.contents.get(path))
+        .then(value => {
+          const { model } = browser;
+          const { restored } = model;
 
-      const open = commands.execute('docmanager:open', { path });
+          if (value.type === 'directory') {
+            return restored.then(() => model.cd(`/${path}`));
+          }
 
-      return Promise.all([cd, open]).catch(failure);
-    },
-    iconClass: 'jp-MaterialIcon jp-OpenFolderIcon',
-    label: 'Open',
-    mnemonic: 0,
+          return restored.then(() => model.cd(`/${PathExt.dirname(path)}`))
+            .then(() => commands.execute(open, { path }));
+        }).catch(failure);
+    }
   });
 
   commands.addCommand(CommandIDs.open, {
