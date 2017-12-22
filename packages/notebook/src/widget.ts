@@ -1368,16 +1368,22 @@ class Notebook extends StaticNotebook {
       }
 
       if (event.shiftKey) {
-        this.extendContiguousSelectionTo(index);
+        // Prevent text select behavior.
+        event.preventDefault();
+        event.stopPropagation();
 
+        try {
+          this.extendContiguousSelectionTo(index);
+        } catch (e) {
+          console.error(e);
+          this.deselectAll();
+          return;
+        }
         // Enter selecting mode
         this._mouseMode = 'select';
         document.addEventListener('mouseup', this, true);
         document.addEventListener('mousemove', this, true);
 
-        // Prevent text select behavior.
-        event.preventDefault();
-        event.stopPropagation();
       } else {
         // Check if we need to change the active cell.
         if (!this.isSelectedOrActive(widget)) {
