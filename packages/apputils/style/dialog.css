@@ -39,6 +39,7 @@
   box-sizing: border-box;
   box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.5);
   word-wrap: break-word;
+  border-radius: var(--jp-border-radius);
 }
 
 
