@@ -34,7 +34,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  each
+  map, toArray
 } from '@phosphor/algorithm';
 
 import {
@@ -235,11 +235,10 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, bro
   commands.addCommand(CommandIDs.del, {
     execute: () => {
       const widget = tracker.currentWidget;
-      if (!widget) {
-        return;
-      }
 
-      return widget.delete();
+      if (widget) {
+        return widget.delete();
+      }
     },
     iconClass: 'jp-MaterialIcon jp-CloseIcon',
     label: 'Delete',
@@ -249,11 +248,10 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, bro
   commands.addCommand(CommandIDs.copy, {
     execute: () => {
       const widget = tracker.currentWidget;
-      if (!widget) {
-        return;
-      }
 
-      return widget.copy();
+      if (widget) {
+        return widget.copy();
+      }
     },
     iconClass: 'jp-MaterialIcon jp-CopyIcon',
     label: 'Copy',
@@ -263,11 +261,10 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, bro
   commands.addCommand(CommandIDs.cut, {
     execute: () => {
       const widget = tracker.currentWidget;
-      if (!widget) {
-        return;
-      }
 
-      return widget.cut();
+      if (widget) {
+        return widget.cut();
+      }
     },
     iconClass: 'jp-MaterialIcon jp-CutIcon',
     label: 'Cut'
@@ -276,11 +273,10 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, bro
   commands.addCommand(CommandIDs.download, {
     execute: () => {
       const widget = tracker.currentWidget;
-      if (!widget) {
-        return;
-      }
 
-      return widget.download();
+      if (widget) {
+        return widget.download();
+      }
     },
     iconClass: 'jp-MaterialIcon jp-DownloadIcon',
     label: 'Download'
@@ -289,11 +285,10 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, bro
   commands.addCommand(CommandIDs.duplicate, {
     execute: () => {
       const widget = tracker.currentWidget;
-      if (!widget) {
-        return;
-      }
 
-      return widget.duplicate();
+      if (widget) {
+        return widget.duplicate();
+      }
     },
     iconClass: 'jp-MaterialIcon jp-CopyIcon',
     label: 'Duplicate'
@@ -335,31 +330,31 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, bro
   commands.addCommand(CommandIDs.open, {
     execute: () => {
       const widget = tracker.currentWidget;
+
       if (!widget) {
         return;
       }
 
-      each(widget.selectedItems(), item => {
+      return Promise.all(toArray(map(widget.selectedItems(), item => {
         if (item.type === 'directory') {
-          widget.model.cd(item.path);
-        } else {
-          commands.execute('docmanager:open', { path: item.path });
+          return widget.model.cd(item.path);
         }
-      });
+
+        return commands.execute('docmanager:open', { path: item.path });
+      })));
     },
     iconClass: 'jp-MaterialIcon jp-OpenFolderIcon',
     label: 'Open',
-    mnemonic: 0,
+    mnemonic: 0
   });
 
   commands.addCommand(CommandIDs.paste, {
     execute: () => {
       const widget = tracker.currentWidget;
-      if (!widget) {
-        return;
-      }
 
-      return widget.paste();
+      if (widget) {
+        return widget.paste();
+      }
     },
     iconClass: 'jp-MaterialIcon jp-PasteIcon',
     label: 'Paste',
@@ -369,10 +364,10 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, bro
   commands.addCommand(CommandIDs.rename, {
     execute: (args) => {
       const widget = tracker.currentWidget;
-      if (!widget) {
-        return;
+
+      if (widget) {
+        return widget.rename();
       }
-      return widget.rename();
     },
     iconClass: 'jp-MaterialIcon jp-EditIcon',
     label: 'Rename',
@@ -386,11 +381,10 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, bro
   commands.addCommand(CommandIDs.shutdown, {
     execute: () => {
       const widget = tracker.currentWidget;
-      if (!widget) {
-        return;
-      }
 
-      return widget.shutdownKernels();
+      if (widget) {
+        return widget.shutdownKernels();
+      }
     },
     iconClass: 'jp-MaterialIcon jp-StopIcon',
     label: 'Shutdown Kernel'
@@ -400,9 +394,9 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, bro
     execute: () => {
       if (browser.isHidden) {
         return commands.execute(CommandIDs.showBrowser, void 0);
-      } else {
-        return commands.execute(CommandIDs.hideBrowser, void 0);
       }
+
+      return commands.execute(CommandIDs.hideBrowser, void 0);
     }
   });
 
