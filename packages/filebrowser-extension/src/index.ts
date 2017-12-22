@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  InstanceTracker, ToolbarButton
+  Clipboard, InstanceTracker, ToolbarButton
 } from '@jupyterlab/apputils';
 
 import {
@@ -85,6 +85,10 @@ namespace CommandIDs {
 
   export
   const rename = 'filebrowser:rename';
+
+  // For main browser only.
+  export
+  const share = 'filebrowser:share-main';
 
   // For main browser only.
   export
@@ -374,6 +378,17 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, bro
     mnemonic: 0
   });
 
+  commands.addCommand(CommandIDs.share, {
+    execute: () => {
+      const path = browser.selectedItems().next().path;
+
+      return commands.execute('router:tree-url', { path })
+        .then((url: string) => { Clipboard.copyToSystem(url); });
+    },
+    isVisible: () => toArray(browser.selectedItems()).length === 1,
+    label: 'Copy Sharing Link'
+  });
+
   commands.addCommand(CommandIDs.showBrowser, {
     execute: () => { app.shell.activateById(browser.id); }
   });
@@ -448,6 +463,8 @@ function createContextMenu(model: Contents.IModel, commands: CommandRegistry, re
     menu.addItem({ command: CommandIDs.download });
     menu.addItem({ command: CommandIDs.shutdown });
   }
+
+  menu.addItem({ command: CommandIDs.share });
 
   return menu;
 }
