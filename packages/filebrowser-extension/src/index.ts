@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IStateDB
+  IStateDB, PathExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -53,6 +53,10 @@ namespace CommandIDs {
   export
   const copy = 'filebrowser:copy';
 
+  // For main browser only.
+  export
+  const createLauncher = 'filebrowser:create-main-launcher';
+
   export
   const cut = 'filebrowser:cut';
 
@@ -65,8 +69,13 @@ namespace CommandIDs {
   export
   const duplicate = 'filebrowser:duplicate';
 
+  // For main browser only.
   export
-  const hideBrowser = 'filebrowser:hide-main'; // For main browser only.
+  const hideBrowser = 'filebrowser:hide-main';
+
+  // For main browser only.
+  export
+  const navigate = 'filebrowser:navigate-main';
 
   export
   const open = 'filebrowser:open';
@@ -77,17 +86,16 @@ namespace CommandIDs {
   export
   const rename = 'filebrowser:rename';
 
+  // For main browser only.
   export
-  const showBrowser = 'filebrowser:activate-main'; // For main browser only.
+  const showBrowser = 'filebrowser:activate-main';
 
   export
   const shutdown = 'filebrowser:shutdown';
 
+  // For main browser only.
   export
-  const toggleBrowser = 'filebrowser:toggle-main'; // For main browser only.
-
-  export
-  const createLauncher = 'filebrowser:create-main-launcher'; // For main browser only.
+  const toggleBrowser = 'filebrowser:toggle-main';
 }
 
 
@@ -297,6 +305,29 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, bro
         app.shell.collapseLeft();
       }
     }
+  });
+
+  commands.addCommand(CommandIDs.navigate, {
+    execute: args => {
+      const path = args.path as string || '';
+      const dir = PathExt.dirname(path);
+      const file = PathExt.basename(path);
+      const cd = browser.model.cd(dir);
+      const failure = (reason: any) => {
+        console.warn(`${CommandIDs.navigate} failed to open: ${path}`, reason);
+      };
+
+      if (!file) {
+        return cd.catch(failure);
+      }
+
+      const open = commands.execute('docmanager:open', { path });
+
+      return Promise.all([cd, open]).catch(failure);
+    },
+    iconClass: 'jp-MaterialIcon jp-OpenFolderIcon',
+    label: 'Open',
+    mnemonic: 0,
   });
 
   commands.addCommand(CommandIDs.open, {
