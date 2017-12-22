@@ -45,6 +45,9 @@ namespace CommandIDs {
 
   export
   const tree: string = 'router:tree';
+
+  export
+  const navigate: string = 'router:navigate';
 }
 
 
@@ -167,11 +170,15 @@ const router: JupyterLabPlugin<IRouter> = {
 
     commands.addCommand(CommandIDs.tree, {
       execute: (args: IRouter.ICommandArgs) => {
-        const path = args.path.replace('/lab/tree', '');
+        const path = (args.path as string).replace('/lab/tree', '');
 
-        console.log(`Navigate to ${path}`);
+        // Change the URL back to the base application URL.
+        window.history.replaceState({ }, '', `${base}lab`);
+
+        return commands.execute('filebrowser:navigate-main', { path });
       }
     });
+
     app.restored.then(() => { router.route(window.location.href); });
     router.register(/tree\/.+/, CommandIDs.tree);
 
