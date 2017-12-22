@@ -1562,6 +1562,7 @@ class Notebook extends StaticNotebook {
       if (index === -1) {
         index = this.widgets.length;
       }
+      let start = index;
       let model = this.model;
       let values = event.mimeData.getData(JUPYTER_CELL_MIME);
       let factory = model.contentFactory;
@@ -1584,8 +1585,10 @@ class Notebook extends StaticNotebook {
         model.cells.insert(index++, value);
       });
       model.cells.endCompoundOperation();
-      // Activate the last cell.
-      this.activeCellIndex = index - 1;
+      // Select the inserted cells.
+      this.deselectAll();
+      this.activeCellIndex = start;
+      this.extendContiguousSelectionTo(index - 1);
     }
   }
 
