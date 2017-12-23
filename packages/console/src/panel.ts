@@ -303,7 +303,7 @@ namespace Private {
     if (executed) {
       caption += `\nLast Execution: ${Time.format(executed.toISOString())}`;
     }
-    panel.title.label = session.name;
+    panel.title.label = session.name || 'Console';
     panel.title.caption = caption;
   }
 }
