@@ -1468,9 +1468,29 @@ describe('notebook/widget', () => {
 
       it('should update the active cell index if necessary', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
-        widget.model.cells.move(1, 0);
-        expect(widget.activeCellIndex).to.be(0);
+
+        // [fromIndex, toIndex, activeIndex], starting with activeIndex=3.
+        let moves = [
+          [0, 2, 3],
+          [0, 3, 2],
+          [0, 4, 2],
+          [3, 2, 2],
+          [3, 3, 3],
+          [3, 4, 4],
+          [4, 2, 4],
+          [4, 3, 4],
+          [4, 5, 3]
+        ];
+
+        moves.forEach((m) => {
+          let [fromIndex, toIndex, activeIndex] = m;
+          widget.model.fromJSON(DEFAULT_CONTENT);
+          let cell = widget.widgets[3];
+          widget.activeCellIndex = 3;
+          widget.model.cells.move(fromIndex, toIndex);
+          expect(widget.activeCellIndex).to.be(activeIndex);
+          expect(widget.widgets[activeIndex]).to.be(cell);
+        })
       });
 
     });
