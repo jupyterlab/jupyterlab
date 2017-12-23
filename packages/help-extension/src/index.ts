@@ -303,7 +303,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
       // Create the header of the about dialog
       let headerLogo = h.div({className: 'jp-About-header-logo'});
       let headerWordmark = h.div({className: 'jp-About-header-wordmark'});
-      let release = 'alpha release';
+      let release = 'beta release';
       let versionNumber = `version: ${info.version}`;
       let versionInfo = h.span({className: 'jp-About-version-info'},
         h.span({className: 'jp-About-release'}, release),
