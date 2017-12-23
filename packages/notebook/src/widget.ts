@@ -1451,6 +1451,8 @@ class Notebook extends StaticNotebook {
         this._startDrag(data.index, event.clientX, event.clientY);
       }
       break;
+    default:
+      break;
     }
   }
 

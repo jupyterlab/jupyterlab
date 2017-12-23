@@ -1472,7 +1472,7 @@ describe('notebook/widget', () => {
           widget.model.cells.move(fromIndex, toIndex);
           expect(widget.activeCellIndex).to.be(activeIndex);
           expect(widget.widgets[activeIndex]).to.be(cell);
-        })
+        });
       });
 
     });
