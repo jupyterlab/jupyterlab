@@ -60,7 +60,7 @@ def check_assets():
         if skip_npm:
             return
         run(npm, cwd=HERE)
- 
+
     for t in targets:
         if not os.path.exists(pjoin(HERE, NAME, t)):
             msg = ('Missing file: %s, `build:prod` script did not complete '
@@ -120,7 +120,7 @@ setup_args = dict(
 
 setup_args['install_requires'] = [
     'notebook>=4.3.1',
-    'jupyterlab_launcher>=0.8.0,<0.9.0',
+    'jupyterlab_launcher>=0.9.0,<0.10.0',
     'ipython_genutils',
     'futures;python_version<"3.0"',
     'subprocess32;python_version<"3.0"'
