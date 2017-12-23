@@ -178,6 +178,8 @@ class DefaultSession implements Session.ISession {
     return Kernel.connectTo(this.kernel.model, this.serverSettings).then(kernel => {
       return new DefaultSession({
         path: this._path,
+        name: this._name,
+        type: this._type,
         serverSettings: this.serverSettings
       }, this._id, kernel);
     });
