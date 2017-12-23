@@ -131,10 +131,6 @@ def load_jupyter_server_extension(nbapp):
     builder = Builder(logger, core_mode, app_dir)
     build_handler = (build_url, BuildHandler, {'builder': builder})
 
-    page_config['themePath'] = ujoin(base_url, '/lab/api/themes')
-    if 'rc' in __version__:
-        raise ValueError('remove the theme path shim')
-
     # Must add before the launcher handlers to avoid shadowing.
     web_app.add_handlers(".*$", [build_handler])
 
