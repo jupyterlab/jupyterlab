@@ -238,14 +238,14 @@ class SessionManager implements Session.IManager {
    */
   shutdownAll(): Promise<void> {
     // Proactively remove all models.
-    let previous = this._models.length;
-    if (previous) {
+    let models = this._models;
+    if (models.length > 0) {
       this._models = [];
       this._runningChanged.emit([]);
     }
 
     return this._refreshRunning().then(() => {
-      return Promise.all(this._models.map(model => {
+      return Promise.all(models.map(model => {
         return Session.shutdown(model.id, this.serverSettings).then(() => {
           let toRemove: Session.ISession[] = [];
           this._sessions.forEach(s => {
