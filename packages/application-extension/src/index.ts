@@ -198,7 +198,7 @@ const router: JupyterLabPlugin<IRouter> = {
 
 
 /**
- * The default URL router provider.
+ * The default URL not found extension.
  */
 const notfound: JupyterLabPlugin<void> = {
   id: '@jupyterlab/application-extension:notfound',
