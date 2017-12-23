@@ -907,9 +907,16 @@ class Notebook extends StaticNotebook {
   }
 
   /**
-   * Whether a cell is selected or is the active cell.
+   * Whether a cell is selected.
    */
   isSelected(widget: Cell): boolean {
+    return Private.selectedProperty.get(widget);
+  }
+
+  /**
+   * Whether a cell is selected or is the active cell.
+   */
+  isSelectedOrActive(widget: Cell): boolean {
     if (widget === this._activeCell) {
       return true;
     }
@@ -933,6 +940,138 @@ class Notebook extends StaticNotebook {
     // Make sure we have a valid active cell.
     this.activeCellIndex = this.activeCellIndex;
     this.update();
+  }
+
+  /**
+   * Move the head of an existing contiguous selection to extend the selection.
+   *
+   * @param index - The new head of the existing selection.
+   *
+   * #### Notes
+   * If there is no existing selection, the active cell is considered an
+   * existing one-cell selection.
+   *
+   * If the new selection is a single cell, that cell becomes the active cell
+   * and all cells are deselected.
+   *
+   * There is no change if there are no cells (i.e., activeCellIndex is -1).
+   */
+  extendContiguousSelectionTo(index: number): void {
+    let {head, anchor} = this.getContiguousSelection();
+    let i: number;
+
+    // Handle the case of no current selection.
+    if (anchor === null) {
+      if (index === this.activeCellIndex) {
+        // Already collapsed selection, nothing more to do.
+        return;
+      }
+
+      // We will start a new selection below.
+      head = this.activeCellIndex;
+      anchor = this.activeCellIndex;
+    }
+
+    // Move the active cell. We do this before the collapsing shortcut below.
+    this.activeCellIndex = index;
+
+    // Make sure the index is valid, according to the rules for setting and clipping the
+    // active cell index. This may change the index.
+    index = this.activeCellIndex;
+
+    // Collapse the selection if it is only the active cell.
+    if (index === anchor) {
+      this.deselectAll();
+      return;
+    }
+
+    let selectionChanged = false;
+
+    if (head < index) {
+      if (head < anchor) {
+        Private.selectedProperty.set(this.widgets[head], false);
+        selectionChanged = true;
+      }
+
+      // Toggle everything strictly between head and index except anchor.
+      for (i = head + 1; i < index; i++) {
+        if (i !== anchor) {
+          Private.selectedProperty.set(this.widgets[i], !Private.selectedProperty.get(this.widgets[i]));
+          selectionChanged = true;
+        }
+      }
+
+    } else if (index < head) {
+      if (anchor < head) {
+        Private.selectedProperty.set(this.widgets[head], false);
+        selectionChanged = true;
+      }
+
+      // Toggle everything strictly between index and head except anchor.
+      for (i = index + 1; i < head; i++) {
+        if (i !== anchor) {
+          Private.selectedProperty.set(this.widgets[i], !Private.selectedProperty.get(this.widgets[i]));
+          selectionChanged = true;
+        }
+      }
+    }
+
+    // Anchor and index should *always* be selected.
+    if (!Private.selectedProperty.get(this.widgets[anchor])) {
+      selectionChanged = true;
+    }
+    Private.selectedProperty.set(this.widgets[anchor], true);
+
+    if (!Private.selectedProperty.get(this.widgets[index])) {
+      selectionChanged = true;
+    }
+    Private.selectedProperty.set(this.widgets[index], true);
+
+    if (selectionChanged) {
+      this._selectionChanged.emit(void 0);
+    }
+  }
+
+  /**
+   * Get the head and anchor of a contiguous cell selection.
+   *
+   * The head of a contiguous selection is always the active cell.
+   *
+   * If there are no cells selected, `{head: null, anchor: null}` is returned.
+   *
+   * Throws an error if the currently selected cells do not form a contiguous
+   * selection.
+   */
+  getContiguousSelection(): {head: number | null, anchor: number | null} {
+    let cells = this.widgets;
+    let first = ArrayExt.findFirstIndex(cells, c => this.isSelected(c));
+
+    // Return early if no cells are selected.
+    if (first === -1) {
+      return {head: null, anchor: null};
+    }
+
+    let last = ArrayExt.findLastIndex(cells, c => this.isSelected(c), -1, first);
+
+    // Check that the selection is contiguous.
+    for (let i = first; i <= last; i++) {
+      if (!this.isSelected(cells[i])) {
+        throw new Error('Selection not contiguous');
+      }
+    }
+
+    // Check that the active cell is one of the endpoints of the selection.
+    let activeIndex = this.activeCellIndex;
+    if (first !== activeIndex && last !== activeIndex) {
+      throw new Error('Active cell not at endpoint of selection');
+    }
+
+    // Determine the head and anchor of the selection.
+    if (first === activeIndex) {
+      return {head: first, anchor: last};
+    } else {
+      return {head: last, anchor: first};
+    }
   }
 
   /**
@@ -971,10 +1110,14 @@ class Notebook extends StaticNotebook {
       this._evtMouseDown(event as MouseEvent);
       break;
     case 'mouseup':
-      this._evtMouseup(event as MouseEvent);
+      if (event.currentTarget === document) {
+        this._evtDocumentMouseup(event as MouseEvent);
+      }
       break;
     case 'mousemove':
-      this._evtMousemove(event as MouseEvent);
+      if (event.currentTarget === document) {
+        this._evtDocumentMousemove(event as MouseEvent);
+      }
       break;
     case 'keydown':
       this._ensureFocus(true);
@@ -1071,7 +1214,7 @@ class Notebook extends StaticNotebook {
         widget.removeClass(ACTIVE_CLASS);
       }
       widget.removeClass(OTHER_SELECTED_CLASS);
-      if (this.isSelected(widget)) {
+      if (this.isSelectedOrActive(widget)) {
         widget.addClass(SELECTED_CLASS);
         count++;
       } else {
@@ -1112,8 +1255,13 @@ class Notebook extends StaticNotebook {
    * Handle a cell being moved.
    */
   protected onCellMoved(fromIndex: number, toIndex: number): void {
-    if (fromIndex === this.activeCellIndex) {
+    let i = this.activeCellIndex;
+    if (fromIndex === i) {
       this.activeCellIndex = toIndex;
+    } else if (fromIndex < i && i <= toIndex) {
+      this.activeCellIndex--;
+    } else if (toIndex <= i && i < fromIndex) {
+      this.activeCellIndex++;
     }
   }
 
@@ -1203,55 +1351,75 @@ class Notebook extends StaticNotebook {
    * Handle `mousedown` events for the widget.
    */
   private _evtMouseDown(event: MouseEvent): void {
-    let target = event.target as HTMLElement;
-    let i = this._findCell(target);
-    let shouldDrag = false;
 
-    if (i !== -1) {
-      let widget = this.widgets[i];
+    // Mouse click should always ensure the notebook is focused.
+    this._ensureFocus(true);
+
+    // We only handle main button actions.
+    if (event.button !== 0) {
+      return;
+    }
+
+    // Try to find the cell associated with the event.
+    let target = event.target as HTMLElement;
+    let index = this._findCell(target);
+
+    if (index !== -1) {
+      let widget = this.widgets[index];
+
       // Event is on a cell but not in its editor, switch to command mode.
       if (!widget.editorWidget.node.contains(target)) {
         this.mode = 'command';
-        shouldDrag = widget.promptNode.contains(target);
       }
-      if (event.shiftKey) {
-        shouldDrag = false;
-        this._extendSelectionTo(i);
 
+      if (event.shiftKey) {
         // Prevent text select behavior.
         event.preventDefault();
         event.stopPropagation();
-      } else {
-        if (!this.isSelected(widget)) {
+
+        try {
+          this.extendContiguousSelectionTo(index);
+        } catch (e) {
+          console.error(e);
           this.deselectAll();
+          return;
         }
+        // Enter selecting mode
+        this._mouseMode = 'select';
+        document.addEventListener('mouseup', this, true);
+        document.addEventListener('mousemove', this, true);
+
+      } else {
+        // Check if we need to change the active cell.
+        if (!this.isSelectedOrActive(widget)) {
+          this.deselectAll();
+          this.activeCellIndex = index;
+        }
+
+        // Prepare to start a drag if we are on the drag region.
+        if (widget.promptNode.contains(target)) {
+          // Prepare for a drag start
+          this._dragData = { pressX: event.clientX, pressY: event.clientY, index: index};
+
+          // Enter possible drag mode
+          this._mouseMode = 'couldDrag';
+          document.addEventListener('mouseup', this, true);
+          document.addEventListener('mousemove', this, true);
+        }
+        event.preventDefault();
       }
-      // Set the cell as the active one.
-      // This must be done *after* setting the mode above.
-      this.activeCellIndex = i;
-    }
 
-    this._ensureFocus(true);
-
-    // Left mouse press for drag start.
-    if (event.button === 0 && shouldDrag) {
-      this._dragData = { pressX: event.clientX, pressY: event.clientY, index: i};
-      document.addEventListener('mouseup', this, true);
-      document.addEventListener('mousemove', this, true);
-      event.preventDefault();
     }
   }
 
-
   /**
-   * Handle the `'mouseup'` event for the widget.
+   * Handle the `'mouseup'` event on the document.
    */
-  private _evtMouseup(event: MouseEvent): void {
-    if (event.button !== 0 || !this._drag) {
-      document.removeEventListener('mousemove', this, true);
-      document.removeEventListener('mouseup', this, true);
-      return;
-    }
+  private _evtDocumentMouseup(event: MouseEvent): void {
+    // Remove the event listeners we put on the document
+    document.removeEventListener('mousemove', this, true);
+    document.removeEventListener('mouseup', this, true);
+    this._mouseMode = null;
     event.preventDefault();
     event.stopPropagation();
   }
@@ -1259,24 +1427,33 @@ class Notebook extends StaticNotebook {
   /**
    * Handle the `'mousemove'` event for the widget.
    */
-  private _evtMousemove(event: MouseEvent): void {
+  private _evtDocumentMousemove(event: MouseEvent): void {
+
     event.preventDefault();
     event.stopPropagation();
 
-    // Bail if we are the one dragging.
-    if (this._drag) {
-      return;
+    // If in select mode, update the selection
+    switch (this._mouseMode) {
+    case 'select':
+      let target = event.target as HTMLElement;
+      let index = this._findCell(target);
+      if (index !== -1) {
+        this.extendContiguousSelectionTo(index);
+      }
+      break;
+    case 'couldDrag':
+      // Check for a drag initialization.
+      let data = this._dragData;
+      let dx = Math.abs(event.clientX - data.pressX);
+      let dy = Math.abs(event.clientY - data.pressY);
+      if (dx >= DRAG_THRESHOLD || dy >= DRAG_THRESHOLD) {
+        this._mouseMode = null;
+        this._startDrag(data.index, event.clientX, event.clientY);
+      }
+      break;
+    default:
+      break;
     }
-
-    // Check for a drag initialization.
-    let data = this._dragData;
-    let dx = Math.abs(event.clientX - data.pressX);
-    let dy = Math.abs(event.clientY - data.pressY);
-    if (dx < DRAG_THRESHOLD && dy < DRAG_THRESHOLD) {
-      return;
-    }
-
-    this._startDrag(data.index, event.clientX, event.clientY);
   }
 
   /**
@@ -1382,6 +1559,7 @@ class Notebook extends StaticNotebook {
       if (toIndex >= fromIndex && toIndex < fromIndex + toMove.length) {
         return;
       }
+
       // Move the cells one by one
       this.model.cells.beginCompoundOperation();
       if (fromIndex < toIndex) {
@@ -1403,6 +1581,7 @@ class Notebook extends StaticNotebook {
       if (index === -1) {
         index = this.widgets.length;
       }
+      let start = index;
       let model = this.model;
       let values = event.mimeData.getData(JUPYTER_CELL_MIME);
       let factory = model.contentFactory;
@@ -1425,8 +1604,10 @@ class Notebook extends StaticNotebook {
         model.cells.insert(index++, value);
       });
       model.cells.endCompoundOperation();
-      // Activate the last cell.
-      this.activeCellIndex = index - 1;
+      // Select the inserted cells.
+      this.deselectAll();
+      this.activeCellIndex = start;
+      this.extendContiguousSelectionTo(index - 1);
     }
   }
 
@@ -1440,7 +1621,7 @@ class Notebook extends StaticNotebook {
 
     each(this.widgets, (widget, i) => {
       let cell = cells.get(i);
-      if (this.isSelected(widget)) {
+      if (this.isSelectedOrActive(widget)) {
         widget.addClass(DROP_SOURCE_CLASS);
         selected.push(cell.toJSON());
         toMove.push(widget);
@@ -1479,6 +1660,7 @@ class Notebook extends StaticNotebook {
     // Remove mousemove and mouseup listeners and start the drag.
     document.removeEventListener('mousemove', this, true);
     document.removeEventListener('mouseup', this, true);
+    this._mouseMode = null;
     this._drag.start(clientX, clientY).then(action => {
       if (this.isDisposed) {
         return;
@@ -1548,28 +1730,6 @@ class Notebook extends StaticNotebook {
   }
 
   /**
-   * Extend the selection to a given index.
-   */
-  private _extendSelectionTo(index: number): void {
-    let activeIndex = this.activeCellIndex;
-    let j = index;
-    // extend the existing selection.
-    if (j > activeIndex) {
-      while (j > activeIndex) {
-        Private.selectedProperty.set(this.widgets[j], true);
-        j--;
-      }
-    } else if (j < activeIndex) {
-      while (j < activeIndex) {
-        Private.selectedProperty.set(this.widgets[j], true);
-        j++;
-      }
-    }
-    Private.selectedProperty.set(this.widgets[activeIndex], true);
-    this._selectionChanged.emit(void 0);
-  }
-
-  /**
    * Remove selections from inactive cells to avoid
    * spurious cursors.
    */
@@ -1588,6 +1748,7 @@ class Notebook extends StaticNotebook {
   private _mode: NotebookMode = 'command';
   private _drag: Drag = null;
   private _dragData: { pressX: number, pressY: number, index: number } = null;
+  private _mouseMode: 'select' | 'couldDrag' | null = null;
   private _activeCellChanged = new Signal<this, Cell>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
   private _selectionChanged = new Signal<this, void>(this);

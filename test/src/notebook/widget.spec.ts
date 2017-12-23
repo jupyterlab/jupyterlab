@@ -140,6 +140,18 @@ function createActiveWidget(): LogNotebook {
 }
 
 
+function selected(nb: Notebook): number[] {
+    const selected = [];
+    const cells = nb.widgets;
+    for (let i = 0; i < cells.length; i++) {
+      if (nb.isSelected(cells[i])) {
+        selected.push(i);
+      }
+    }
+    return selected;
+}
+
+
 describe('notebook/widget', () => {
 
   describe('StaticNotebook', () => {
@@ -669,19 +681,11 @@ describe('notebook/widget', () => {
         widget.model.fromJSON(DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
         requestAnimationFrame(() => {
-          for (let i = 0; i < widget.widgets.length; i++) {
-            let cell = widget.widgets[i];
-            widget.select(cell);
-            expect(widget.isSelected(cell)).to.be(true);
-          }
+          widget.extendContiguousSelectionTo(widget.widgets.length - 1);
+          let selectedRange = Array.from(Array(widget.widgets.length).keys());
+          expect(selected(widget)).to.eql(selectedRange);
           widget.mode = 'edit';
-          for (let i = 0; i < widget.widgets.length; i++) {
-            if (i === widget.activeCellIndex) {
-              continue;
-            }
-            let cell = widget.widgets[i];
-            expect(widget.isSelected(cell)).to.be(false);
-          }
+          expect(selected(widget)).to.eql([]);
           widget.dispose();
           done();
         });
@@ -790,11 +794,9 @@ describe('notebook/widget', () => {
       it('should allow multiple widgets to be selected', () => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
-        for (let i = 0; i < widget.widgets.length; i++) {
-          let cell = widget.widgets[i];
-          widget.select(cell);
-          expect(widget.isSelected(cell)).to.be(true);
-        }
+        widget.widgets.forEach(cell => { widget.select(cell); });
+        let expectSelected = Array.from(Array(widget.widgets.length).keys());
+        expect(selected(widget)).to.eql(expectSelected);
       });
 
     });
@@ -805,9 +807,6 @@ describe('notebook/widget', () => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
         for (let i = 0; i < widget.widgets.length; i++) {
-          if (i === widget.activeCellIndex) {
-            continue;
-          }
           let cell = widget.widgets[i];
           widget.select(cell);
           expect(widget.isSelected(cell)).to.be(true);
@@ -816,14 +815,16 @@ describe('notebook/widget', () => {
         }
       });
 
-      it('should have no effect on the active cell', () => {
+      it('should let the active cell be deselected', () => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
-        let cell = widget.widgets[widget.activeCellIndex];
+        let cell = widget.activeCell;
+        widget.select(cell);
         expect(widget.isSelected(cell)).to.be(true);
         widget.deselect(cell);
-        expect(widget.isSelected(cell)).to.be(true);
+        expect(widget.isSelected(cell)).to.be(false);
       });
+
 
     });
 
@@ -832,14 +833,292 @@ describe('notebook/widget', () => {
       it('should get whether the cell is selected', () => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
-        for (let i = 0; i < widget.widgets.length; i++) {
-          let cell = widget.widgets[i];
-          if (i === widget.activeCellIndex) {
-            expect(widget.isSelected(cell)).to.be(true);
-          } else {
-            expect(widget.isSelected(cell)).to.be(false);
+        widget.select(widget.widgets[0]);
+        widget.select(widget.widgets[2]);
+        expect(selected(widget)).to.eql([0, 2]);
+      });
+
+      it('reports selection whether or not cell is active', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        expect(selected(widget)).to.eql([]);
+        widget.select(widget.activeCell);
+        expect(selected(widget)).to.eql([widget.activeCellIndex]);
+      });
+
+    });
+
+    describe('#deselectAll()', () => {
+
+      it('should deselect all cells', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.select(widget.widgets[0]);
+        widget.select(widget.widgets[2]);
+        widget.select(widget.widgets[3]);
+        widget.select(widget.widgets[4]);
+        expect(selected(widget)).to.eql([0, 2, 3, 4]);
+        widget.deselectAll();
+        expect(selected(widget)).to.eql([]);
+      });
+
+    });
+
+    describe('#extendContiguousSelectionTo()', () => {
+
+      // Test a permutation for extending a selection.
+      let checkSelection = (widget: Notebook, anchor: number, head: number, index: number, select = true) => {
+
+        if (!select && anchor !== head) {
+          throw new Error('anchor must equal head if select is false');
+        }
+
+        // Set up the test by pre-selecting appropriate cells if select is true.
+        if (select) {
+          for (let i = Math.min(anchor, head); i <= Math.max(anchor, head); i++) {
+            widget.select(widget.widgets[i]);
           }
         }
+
+        // Set the active cell to indicate the head of the selection.
+        widget.activeCellIndex = head;
+
+        // Set up a selection event listener.
+        let selectionChanged = 0;
+        let countSelectionChanged = (sender: Notebook, args: void) => {
+          selectionChanged += 1;
+        };
+        widget.selectionChanged.connect(countSelectionChanged);
+
+        // Check the contiguous selection.
+        let selection = widget.getContiguousSelection();
+        if (select) {
+          expect(selection.anchor).to.be(anchor);
+          expect(selection.head).to.be(head);
+        } else {
+          expect(selection.anchor).to.be(null);
+          expect(selection.head).to.be(null);
+        }
+
+        // Extend the selection.
+        widget.extendContiguousSelectionTo(index);
+
+        // Clip index to fall within the cell index range.
+        index = Math.max(0, Math.min(widget.widgets.length - 1, index));
+
+        // Check the active cell is now at the index.
+        expect(widget.activeCellIndex).to.be.equal(index);
+
+        // Check the contiguous selection.
+        selection = widget.getContiguousSelection();
+
+        // Check the selection changed signal was emitted once if necessary.
+        if (head === index) {
+          if (index === anchor && select) {
+            // we should have collapsed the single cell selection
+            expect(selectionChanged).to.be(1);
+          } else {
+            expect(selectionChanged).to.be(0);
+          }
+        } else {
+          expect(selectionChanged).to.be(1);
+        }
+
+        if (anchor !== index) {
+          expect(selection.anchor).to.be.equal(anchor);
+          expect(selection.head).to.be.equal(index);
+        } else {
+          // If the anchor and index are the same, the selection is collapsed.
+          expect(selection.anchor).to.be.equal(null);
+          expect(selection.head).to.be.equal(null);
+        }
+
+        // Clean up widget
+        widget.selectionChanged.disconnect(countSelectionChanged);
+        widget.activeCellIndex = 0;
+        widget.deselectAll();
+      };
+
+      // Lists are of the form [anchor, head, index].
+      let permutations = [
+        // Anchor, head, and index are distinct
+        [1, 3, 5],
+        [1, 5, 3],
+        [3, 1, 5],
+        [3, 5, 1],
+        [5, 1, 3],
+        [5, 3, 1],
+
+        // Two of anchor, head, and index are equal
+        [1, 3, 3],
+        [3, 1, 3],
+        [3, 3, 1],
+
+        // Anchor, head, and index all equal
+        [3, 3, 3]
+      ];
+
+      it('should work in each permutation of anchor, head, and index', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+
+        permutations.forEach(p => {
+          checkSelection(widget, p[0], p[1], p[2]);
+        });
+      });
+
+      it('should work when we only have an active cell, with no existing selection', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+
+        permutations.forEach(p => {
+          if (p[0] === p[1]) {
+            checkSelection(widget, p[0], p[1], p[2], false);
+          }
+        });
+      });
+
+      it('should clip when the index is greater than the last index', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+
+        permutations.forEach(p => {
+          checkSelection(widget, p[0], p[1], Number.MAX_SAFE_INTEGER);
+        });
+      });
+
+      it('should clip when the index is greater than the last index with no existing selection', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+
+        permutations.forEach(p => {
+          if (p[0] === p[1]) {
+            checkSelection(widget, p[0], p[1], Number.MAX_SAFE_INTEGER, false);
+          }
+        });
+      });
+
+      it('should clip when the index is less than 0', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+
+        permutations.forEach(p => {
+          checkSelection(widget, p[0], p[1], -10);
+        });
+      });
+
+      it('should clip when the index is less than 0 with no existing selection', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+
+        permutations.forEach(p => {
+          if (p[0] === p[1]) {
+            checkSelection(widget, p[0], p[1], -10, false);
+          }
+        });
+      });
+
+      it('handles the case of no cells', () => {
+        let widget = createActiveWidget();
+        widget.model.cells.clear();
+        expect(widget.widgets.length).to.be(0);
+
+        // Set up a selection event listener.
+        let selectionChanged = 0;
+        widget.selectionChanged.connect((sender, args) => {
+          selectionChanged += 1;
+        });
+
+        widget.extendContiguousSelectionTo(3);
+
+        expect(widget.activeCellIndex).to.be(-1);
+        expect(selectionChanged).to.be(0);
+      });
+
+    });
+
+    describe('#getContiguousSelection()', () => {
+
+      it('throws an error when the selection is not contiguous', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+
+        widget.select(widget.widgets[1]);
+        widget.select(widget.widgets[3]);
+        widget.activeCellIndex = 3;
+
+        expect(() => widget.getContiguousSelection()).to.throwError(/Selection not contiguous/);
+      });
+
+      it('throws an error if the active cell is not at an endpoint', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+
+        widget.select(widget.widgets[1]);
+        widget.select(widget.widgets[2]);
+        widget.select(widget.widgets[3]);
+
+        // Check if active cell is outside selection.
+        widget.activeCellIndex = 0;
+        expect(() => widget.getContiguousSelection()).to.throwError(/Active cell not at endpoint of selection/);
+
+        // Check if active cell is inside selection.
+        widget.activeCellIndex = 2;
+        expect(() => widget.getContiguousSelection()).to.throwError(/Active cell not at endpoint of selection/);
+      });
+
+      it('returns null values if there is no selection', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+
+        let selection = widget.getContiguousSelection();
+        expect(selection).to.eql({head: null, anchor: null});
+      });
+
+      it('handles the case of no cells', () => {
+        let widget = createActiveWidget();
+        widget.model.cells.clear();
+        expect(widget.widgets.length).to.be(0);
+
+        let selection = widget.getContiguousSelection();
+        expect(selection).to.eql({head: null, anchor: null});
+      });
+
+      it('works if head is before the anchor', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+
+        widget.select(widget.widgets[1]);
+        widget.select(widget.widgets[2]);
+        widget.select(widget.widgets[3]);
+        widget.activeCellIndex = 1;
+
+        let selection = widget.getContiguousSelection();
+        expect(selection).to.eql({head: 1, anchor: 3});
+      });
+
+      it('works if head is after the anchor', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+
+        widget.select(widget.widgets[1]);
+        widget.select(widget.widgets[2]);
+        widget.select(widget.widgets[3]);
+        widget.activeCellIndex = 3;
+
+        let selection = widget.getContiguousSelection();
+        expect(selection).to.eql({head: 3, anchor: 1});
+      });
+
+      it('works if head and anchor are the same', () => {
+        let widget = createActiveWidget();
+        widget.model.fromJSON(DEFAULT_CONTENT);
+
+        widget.select(widget.widgets[3]);
+        widget.activeCellIndex = 3;
+
+        let selection = widget.getContiguousSelection();
+        expect(selection).to.eql({head: 3, anchor: 3});
       });
 
     });
@@ -865,6 +1144,7 @@ describe('notebook/widget', () => {
           let child = widget.widgets[1];
           simulate(child.node, 'mousedown');
           expect(widget.events).to.contain('mousedown');
+          expect(widget.isSelected(widget.widgets[0])).to.be(false);
           expect(widget.activeCellIndex).to.be(1);
         });
 
@@ -883,6 +1163,30 @@ describe('notebook/widget', () => {
           simulate(child.node, 'mousedown');
           expect(child.rendered).to.be(true);
           expect(widget.activeCell).to.be(child);
+        });
+
+        it('should extend selection if invoked with shift', () => {
+          widget.activeCellIndex = 3;
+
+          // shift click below
+          simulate(widget.widgets[4].node, 'mousedown', {shiftKey: true});
+          expect(widget.activeCellIndex).to.be(4);
+          expect(selected(widget)).to.eql([3, 4]);
+
+          // shift click above
+          simulate(widget.widgets[1].node, 'mousedown', {shiftKey: true});
+          expect(widget.activeCellIndex).to.be(1);
+          expect(selected(widget)).to.eql([1, 2, 3]);
+
+          // shift click expand
+          simulate(widget.widgets[0].node, 'mousedown', {shiftKey: true});
+          expect(widget.activeCellIndex).to.be(0);
+          expect(selected(widget)).to.eql([0, 1, 2, 3]);
+
+          // shift click contract
+          simulate(widget.widgets[2].node, 'mousedown', {shiftKey: true});
+          expect(widget.activeCellIndex).to.be(2);
+          expect(selected(widget)).to.eql([2, 3]);
         });
 
       });
@@ -1146,9 +1450,29 @@ describe('notebook/widget', () => {
 
       it('should update the active cell index if necessary', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
-        widget.model.cells.move(1, 0);
-        expect(widget.activeCellIndex).to.be(0);
+
+        // [fromIndex, toIndex, activeIndex], starting with activeIndex=3.
+        let moves = [
+          [0, 2, 3],
+          [0, 3, 2],
+          [0, 4, 2],
+          [3, 2, 2],
+          [3, 3, 3],
+          [3, 4, 4],
+          [4, 2, 4],
+          [4, 3, 4],
+          [4, 5, 3]
+        ];
+
+        moves.forEach((m) => {
+          let [fromIndex, toIndex, activeIndex] = m;
+          widget.model.fromJSON(DEFAULT_CONTENT);
+          let cell = widget.widgets[3];
+          widget.activeCellIndex = 3;
+          widget.model.cells.move(fromIndex, toIndex);
+          expect(widget.activeCellIndex).to.be(activeIndex);
+          expect(widget.widgets[activeIndex]).to.be(cell);
+        });
       });
 
     });
