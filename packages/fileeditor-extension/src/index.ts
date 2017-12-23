@@ -14,6 +14,10 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
+  IConsoleTracker
+} from '@jupyterlab/console';
+
+import {
   ISettingRegistry, MarkdownCodeBlocks, PathExt
 } from '@jupyterlab/coreutils';
 
@@ -30,7 +34,7 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
-  IEditMenu, IFileMenu, IMainMenu, IViewMenu
+  IEditMenu, IFileMenu, IMainMenu, IRunMenu, IViewMenu
 } from '@jupyterlab/mainmenu';
 
 import {
@@ -91,7 +95,7 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<IEditorTracker> = {
   activate,
   id: '@jupyterlab/fileeditor-extension:plugin',
-  requires: [IEditorServices, IFileBrowserFactory, ILayoutRestorer, ISettingRegistry],
+  requires: [IConsoleTracker, IEditorServices, IFileBrowserFactory, ILayoutRestorer, ISettingRegistry],
   optional: [ICommandPalette, ILauncher, IMainMenu],
   provides: IEditorTracker,
   autoStart: true
@@ -107,7 +111,7 @@ export default plugin;
 /**
  * Activate the editor tracker plugin.
  */
-function activate(app: JupyterLab, editorServices: IEditorServices, browserFactory: IFileBrowserFactory, restorer: ILayoutRestorer, settingRegistry: ISettingRegistry, palette: ICommandPalette, launcher: ILauncher | null, menu: IMainMenu | null): IEditorTracker {
+function activate(app: JupyterLab, consoleTracker: IConsoleTracker, editorServices: IEditorServices, browserFactory: IFileBrowserFactory, restorer: ILayoutRestorer, settingRegistry: ISettingRegistry, palette: ICommandPalette, launcher: ILauncher | null, menu: IMainMenu | null): IEditorTracker {
   const id = plugin.id;
   const namespace = 'editor';
   const factory = new FileEditorFactory({
@@ -465,8 +469,17 @@ function activate(app: JupyterLab, editorServices: IEditorServices, browserFacto
     menu.runMenu.codeRunners.add({
       tracker,
       noun: 'Code',
+      isEnabled: current => {
+        let found = false;
+        consoleTracker.forEach(console => {
+          if (console.console.session.path === current.context.path) {
+            found = true;
+          }
+        });
+        return found;
+      },
       run: () => commands.execute(CommandIDs.runCode)
-    });
+    } as IRunMenu.ICodeRunner<FileEditor>);
   }
 
   app.contextMenu.addItem({
