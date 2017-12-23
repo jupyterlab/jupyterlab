@@ -53,13 +53,14 @@ class DefaultSession implements Session.ISession {
     this.serverSettings = options.serverSettings || ServerConnection.makeSettings();
     Private.addRunning(this);
     this.setupKernel(kernel);
-    this.terminated = new Signal<this, void>(this);
   }
 
   /**
    * A signal emitted when the session is shut down.
    */
-  readonly terminated: Signal<this, void>;
+  get terminated(): ISignal<this, void> {
+    return this._terminated;
+  }
 
   /**
    * A signal emitted when the kernel changes.
@@ -217,6 +218,8 @@ class DefaultSession implements Session.ISession {
     }
     this._isDisposed = true;
     this._kernel.dispose();
+    this._statusChanged.emit('dead');
+    this._terminated.emit(void 0);
     Private.removeRunning(this);
     Signal.clearData(this);
   }
@@ -386,6 +389,7 @@ class DefaultSession implements Session.ISession {
   private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);
+  private _terminated = new Signal<this, void>(this);
 }
 
 
@@ -593,7 +597,6 @@ namespace Private {
     let running = runningSessions.get(baseUrl) || [];
     each(running.slice(), session => {
       if (session.id === id) {
-        session.terminated.emit(void 0);
         session.dispose();
       }
     });
@@ -736,7 +739,7 @@ namespace Private {
       });
       // If session is no longer running on disk, emit dead signal.
       if (!updated && session.status !== 'dead') {
-        session.terminated.emit(void 0);
+        session.dispose();
       }
     });
     return Promise.all(promises).then(() => { return sessions; });

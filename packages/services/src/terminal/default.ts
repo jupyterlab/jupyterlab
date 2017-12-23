@@ -44,13 +44,14 @@ class DefaultTerminalSession implements TerminalSession.ISession {
     this._name = name;
     this.serverSettings = options.serverSettings || ServerConnection.makeSettings();
     this._readyPromise = this._initializeSocket();
-    this.terminated = new Signal<this, void>(this);
   }
 
   /**
    * A signal emitted when the session is shut down.
    */
-  readonly terminated: Signal<this, void>;
+  get terminated(): Signal<this, void> {
+    return this._terminated;
+  }
 
   /**
    * A signal emitted when a message is received from the server.
@@ -107,6 +108,7 @@ class DefaultTerminalSession implements TerminalSession.ISession {
       return;
     }
 
+    this.terminated.emit(void 0);
     this._isDisposed = true;
     if (this._ws) {
       this._ws.close();
@@ -231,6 +233,7 @@ class DefaultTerminalSession implements TerminalSession.ISession {
   private _isDisposed = false;
   private _isReady = false;
   private _messageReceived = new Signal<this, TerminalSession.IMessage>(this);
+  private _terminated = new Signal<this, void>(this);
   private _name: string;
   private _readyPromise: Promise<void>;
   private _url: string;
@@ -349,7 +352,6 @@ namespace DefaultTerminalSession {
       each(Object.keys(Private.running), runningUrl => {
         if (urls.indexOf(runningUrl) === -1) {
           let session = Private.running[runningUrl];
-          session.terminated.emit(void 0);
           session.dispose();
         }
       });
@@ -447,7 +449,6 @@ namespace Private {
     // Update the local data store.
     if (Private.running[url]) {
       let session = Private.running[url];
-      session.terminated.emit(void 0);
       session.dispose();
     }
   }

@@ -207,18 +207,20 @@ class KernelManager implements Kernel.IManager {
       return;
     }
 
-    // Proactively remove the items.
-    let toRemove: Kernel.IKernel[] = [];
-    this._kernels.forEach(k => {
-      if (k.id === id) {
-        k.dispose();
-        toRemove.push(k);
-      }
-    });
-    toRemove.forEach(k => { this._kernels.delete(k); });
+    // Proactively remove the model.
+    this._models.splice(index, 1);
     this._runningChanged.emit(this._models.slice());
 
-    return Kernel.shutdown(id, this.serverSettings);
+    return Kernel.shutdown(id, this.serverSettings).then(() => {
+      let toRemove: Kernel.IKernel[] = [];
+      this._kernels.forEach(k => {
+        if (k.id === id) {
+          k.dispose();
+          toRemove.push(k);
+        }
+      });
+      toRemove.forEach(k => { this._kernels.delete(k); });
+    });
   }
 
   /**
@@ -227,24 +229,24 @@ class KernelManager implements Kernel.IManager {
    * @returns A promise that resolves when all of the kernels are shut down.
    */
   shutdownAll(): Promise<void> {
+    // Proactively remove all models.
     let previous = this._models.length;
-
-    // Proactively remove all items.
-    this._models = [];
-    let toRemove: Kernel.IKernel[] = [];
-    this._kernels.forEach(k => {
-      k.dispose();
-      toRemove.push(k);
-    });
-    toRemove.forEach(k => { this._kernels.delete(k); });
     if (previous) {
+      this._models = [];
       this._runningChanged.emit([]);
     }
 
     return this._refreshRunning().then(() => {
-      return Promise.all(this._models.map(model => Kernel.shutdown(model.id, this.serverSettings))).then(() => {
-        return Promise.resolve(void 0);
-      });
+      return Promise.all(this._models.map(model => {
+        return Kernel.shutdown(model.id, this.serverSettings).then(() => {
+          let toRemove: Kernel.IKernel[] = [];
+          this._kernels.forEach(k => {
+            k.dispose();
+            toRemove.push(k);
+          });
+          toRemove.forEach(k => { this._kernels.delete(k); });
+        });
+      })).then(() => { return undefined; });
     });
   }
 

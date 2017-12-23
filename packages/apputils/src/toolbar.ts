@@ -548,7 +548,7 @@ namespace Private {
     /**
      * Update the text of the kernel name item.
      */
-    _onKernelChanged(session: IClientSession): void {
+    private _onKernelChanged(session: IClientSession): void {
       this.node.textContent = session.kernelDisplayName;
     }
   }

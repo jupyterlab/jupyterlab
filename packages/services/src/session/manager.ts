@@ -215,18 +215,20 @@ class SessionManager implements Session.IManager {
     if (index === -1) {
       return;
     }
-    // Proactively remove the items.
+    // Proactively remove the model.
     this._models.splice(index, 1);
-    let toRemove: Session.ISession[] = [];
-    this._sessions.forEach(s => {
-      if (s.id === id) {
-        s.dispose();
-        toRemove.push(s);
-      }
-    });
-    toRemove.forEach(s => { this._sessions.delete(s); });
     this._runningChanged.emit(this._models.slice());
-    return Session.shutdown(id, this.serverSettings);
+
+    return Session.shutdown(id, this.serverSettings).then(() => {
+      let toRemove: Session.ISession[] = [];
+      this._sessions.forEach(s => {
+        if (s.id === id) {
+          s.dispose();
+          toRemove.push(s);
+        }
+      });
+      toRemove.forEach(s => { this._sessions.delete(s); });
+    });
   }
 
   /**
@@ -235,23 +237,24 @@ class SessionManager implements Session.IManager {
    * @returns A promise that resolves when all of the sessions are shut down.
    */
   shutdownAll(): Promise<void> {
+    // Proactively remove all models.
     let previous = this._models.length;
-
-    // Proactively remove all items.
-    this._models = [];
-    let toRemove: Session.ISession[] = [];
-    this._sessions.forEach(s => {
-      s.dispose();
-      toRemove.push(s);
-    });
-    toRemove.forEach(s => { this._sessions.delete(s); });
     if (previous) {
+      this._models = [];
       this._runningChanged.emit([]);
     }
+
     return this._refreshRunning().then(() => {
-      return Promise.all(this._models.map(model => Session.shutdown(model.id, this.serverSettings))).then(() => {
-        return Promise.resolve(void 0);
-      });
+      return Promise.all(this._models.map(model => {
+        return Session.shutdown(model.id, this.serverSettings).then(() => {
+          let toRemove: Session.ISession[] = [];
+          this._sessions.forEach(s => {
+            s.dispose();
+            toRemove.push(s);
+          });
+          toRemove.forEach(s => { this._sessions.delete(s); });
+        });
+      })).then(() => { return undefined; });
     });
   }
 
