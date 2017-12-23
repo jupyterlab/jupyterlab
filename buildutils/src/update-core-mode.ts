@@ -17,7 +17,7 @@ let data = utils.readJSONFile('./dev_mode/package.json');
 // Update the values that need to change and write to staging.
 data['scripts']['build'] = 'webpack';
 data['scripts']['watch'] = 'webpack --watch';
-data['scripts']['build:prod'] = "webpack --define process.env.NODE_ENV=\"'production'\"";
+data['scripts']['build:prod'] = 'webpack -p';
 data['jupyterlab']['buildDir'] = './build';
 data['jupyterlab']['outputDir'] = '..';
 data['jupyterlab']['staticDir'] = '../static';

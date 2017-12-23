@@ -124,6 +124,7 @@ function ensureJupyterlab(): string[] {
   corePackage.dependencies = {};
 
   let singletonPackages = corePackage.jupyterlab.singletonPackages;
+  let vendorPackages = corePackage.jupyterlab.vendor;
 
   utils.getCorePaths().forEach(pkgPath => {
     let dataPath = path.join(pkgPath, 'package.json');
@@ -142,10 +143,13 @@ function ensureJupyterlab(): string[] {
     let relativePath = `../packages/${path.basename(pkgPath)}`;
     corePackage.jupyterlab.linkedPackages[data.name] = relativePath;
     // Add its dependencies to the core dependencies if they are in the
-    // singleton packages.
+    // singleton packages or vendor packages.
     let deps = data.dependencies || {};
     for (let dep in deps) {
       if (singletonPackages.indexOf(dep) !== -1) {
+        corePackage.dependencies[dep] = deps[dep];
+      }
+      if (vendorPackages.indexOf(dep) !== -1) {
         corePackage.dependencies[dep] = deps[dep];
       }
     }
