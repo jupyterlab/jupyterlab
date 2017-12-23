@@ -87,12 +87,13 @@ class ConsolePanel extends Panel {
     });
     this.addWidget(this.console);
 
-    session.ready.then(() => {
+    session.initialize().then(() => {
       this._connected = new Date();
       this._updateTitle();
     });
 
     this.console.executed.connect(this._onExecuted, this);
+    this._updateTitle();
     session.kernelChanged.connect(this._updateTitle, this);
     session.propertyChanged.connect(this._updateTitle, this);
 
@@ -126,16 +127,6 @@ class ConsolePanel extends Panel {
     super.dispose();
   }
 
-  /**
-   * Handle `'after-attach'` messages.
-   */
-  protected onAfterAttach(msg: Message): void {
-    this._session.initialize();
-    let prompt = this.console.promptCell;
-    if (prompt) {
-      prompt.editor.focus();
-    }
-  }
 
   /**
    * Handle `'activate-request'` messages.
