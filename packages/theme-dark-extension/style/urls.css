@@ -9,6 +9,7 @@
 
   These images are included with JupyterLab for showing the Project Jupyter logo
   */
+
   --jp-image-jupyter: url('images/jupyter.svg');
   --jp-image-jupyterlab: url('images/jupyterlab.svg');
   --jp-image-jupyterlab-workmark: url('images/jupyterlab-wordmark.svg');
@@ -74,6 +75,7 @@
   --jp-icon-home: url('icons/md/home.svg');
   --jp-icon-jupyter: url('icons/jupyter/jupyter.svg');
   --jp-icon-launcher: url('icons/jupyter/launcher.svg');
+  --jp-icon-link: url('icons/md/link.svg');
   --jp-icon-more: url('icons/md/more-horiz.svg');
   --jp-icon-run: url('icons/md/run.svg');
   --jp-icon-save: url('icons/md/save.svg');

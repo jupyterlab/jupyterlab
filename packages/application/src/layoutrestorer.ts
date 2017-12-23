@@ -4,6 +4,14 @@
 |----------------------------------------------------------------------------*/
 
 import {
+  InstanceTracker
+} from '@jupyterlab/apputils';
+
+import {
+  IStateDB
+} from '@jupyterlab/coreutils';
+
+import {
   CommandRegistry
 } from '@phosphor/commands';
 
@@ -18,14 +26,6 @@ import {
 import {
   DockPanel, Widget
 } from '@phosphor/widgets';
-
-import {
-  InstanceTracker
-} from '@jupyterlab/apputils';
-
-import {
-  IStateDB
-} from '@jupyterlab/coreutils';
 
 import {
   ApplicationShell

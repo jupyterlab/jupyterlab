@@ -38,6 +38,7 @@ import {
 
 export { ApplicationShell } from './shell';
 export { ILayoutRestorer, LayoutRestorer } from './layoutrestorer';
+export { IRouter, Router } from './router';
 
 
 /**

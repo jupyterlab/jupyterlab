@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  InstanceTracker
+  ICommandPalette, InstanceTracker
 } from '@jupyterlab/apputils';
 
 import {
@@ -51,7 +51,14 @@ namespace CommandIDs {
  */
 const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
   id: '@jupyterlab/settingeditor-extension:plugin',
-  requires: [ILayoutRestorer, ISettingRegistry, IEditorServices, IStateDB, IRenderMimeRegistry],
+  requires: [
+    ILayoutRestorer,
+    ISettingRegistry,
+    IEditorServices,
+    IStateDB,
+    IRenderMimeRegistry,
+    ICommandPalette
+  ],
   autoStart: true,
   provides: ISettingEditorTracker,
   activate
@@ -61,7 +68,7 @@ const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
 /**
  * Activate the setting editor extension.
  */
-function activate(app: JupyterLab, restorer: ILayoutRestorer, registry: ISettingRegistry, editorServices: IEditorServices, state: IStateDB, rendermime: IRenderMimeRegistry): ISettingEditorTracker {
+function activate(app: JupyterLab, restorer: ILayoutRestorer, registry: ISettingRegistry, editorServices: IEditorServices, state: IStateDB, rendermime: IRenderMimeRegistry, palette: ICommandPalette): ISettingEditorTracker {
   const { commands, shell } = app;
   const namespace = 'setting-editor';
   const factoryService = editorServices.factoryService;
@@ -118,8 +125,9 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, registry: ISetting
       shell.addToMainArea(editor);
       shell.activateById(editor.id);
     },
-    label: 'Advanced Settings'
+    label: 'Advanced Settings Editor'
   });
+  palette.addItem({ category: 'Settings', command: CommandIDs.open });
 
   commands.addCommand(CommandIDs.revert, {
     execute: () => { tracker.currentWidget.revert(); },

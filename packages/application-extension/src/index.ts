@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin, ILayoutRestorer, LayoutRestorer
+  JupyterLab, JupyterLabPlugin, ILayoutRestorer, IRouter, LayoutRestorer, Router
 } from '@jupyterlab/application';
 
 import {
@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IStateDB
+  IStateDB, PageConfig, URLExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -42,6 +42,12 @@ namespace CommandIDs {
 
   export
   const toggleRightArea: string = 'application:toggle-right-area';
+
+  export
+  const tree: string = 'router:tree';
+
+  export
+  const url: string = 'router:tree-url';
 }
 
 
@@ -136,17 +142,88 @@ const layout: JupyterLabPlugin<ILayoutRestorer> = {
   activate: (app: JupyterLab, state: IStateDB) => {
     const first = app.started;
     const registry = app.commands;
-    let restorer = new LayoutRestorer({ first, registry, state });
+    const restorer = new LayoutRestorer({ first, registry, state });
+
     restorer.fetch().then(saved => {
       app.shell.restoreLayout(saved);
       app.shell.layoutModified.connect(() => {
         restorer.save(app.shell.saveLayout());
       });
     });
+
     return restorer;
   },
   autoStart: true,
   provides: ILayoutRestorer
+};
+
+
+/**
+ * The default URL router provider.
+ */
+const router: JupyterLabPlugin<IRouter> = {
+  id: '@jupyterlab/application-extension:router',
+  activate: (app: JupyterLab) => {
+    const { commands } = app;
+    const base = URLExt.join(
+      PageConfig.getBaseUrl(),
+      PageConfig.getOption('pageUrl')
+    );
+    const tree = PageConfig.getTreeUrl();
+    const router = new Router({ base, commands });
+
+    commands.addCommand(CommandIDs.tree, {
+      execute: (args: IRouter.ICommandArgs) => {
+        const path = (args.path as string).replace('/tree', '');
+
+        // Change the URL back to the base application URL.
+        window.history.replaceState({ }, '', base);
+
+        return commands.execute('filebrowser:navigate-main', { path });
+      }
+    });
+
+    commands.addCommand(CommandIDs.url, {
+      execute: args => URLExt.join(tree, (args.path as string))
+    });
+
+    app.restored.then(() => { router.route(window.location.href); });
+    router.register(/^\/tree\/.+/, CommandIDs.tree);
+
+    return router;
+  },
+  autoStart: true,
+  provides: IRouter
+};
+
+
+/**
+ * The default URL not found extension.
+ */
+const notfound: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/application-extension:notfound',
+  activate: (app: JupyterLab) => {
+    const bad = PageConfig.getOption('notFoundUrl');
+
+    if (!bad) {
+      return;
+    }
+
+    const base = URLExt.join(
+      PageConfig.getBaseUrl(),
+      PageConfig.getOption('pageUrl')
+    );
+
+    // Change the URL back to the base application URL.
+    window.history.replaceState({ }, '', base);
+
+    showDialog({
+      title: 'Path Not Found',
+      body: `The path: ${bad} was not found. JupyterLab redirected to: ${base}`,
+      buttons: [Dialog.okButton()]
+    });
+  },
+  autoStart: true
 };
 
 
@@ -156,6 +233,7 @@ const layout: JupyterLabPlugin<ILayoutRestorer> = {
 function addCommands(app: JupyterLab, palette: ICommandPalette): void {
   const category = 'Main Area';
   let command = CommandIDs.activateNextTab;
+
   app.commands.addCommand(command, {
     label: 'Activate Next Tab',
     execute: () => { app.shell.activateNextTab(); }
@@ -240,6 +318,6 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [main, layout];
+const plugins: JupyterLabPlugin<any>[] = [main, layout, router, notfound];
 
 export default plugins;
