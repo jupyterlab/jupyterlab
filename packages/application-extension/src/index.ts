@@ -196,6 +196,37 @@ const router: JupyterLabPlugin<IRouter> = {
   provides: IRouter
 };
 
+
+/**
+ * The default URL router provider.
+ */
+const notfound: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/application-extension:notfound',
+  activate: (app: JupyterLab) => {
+    const bad = PageConfig.getOption('notFoundUrl');
+
+    if (!bad) {
+      return;
+    }
+
+    const base = URLExt.join(
+      PageConfig.getBaseUrl(),
+      PageConfig.getOption('pageUrl')
+    );
+
+    // Change the URL back to the base application URL.
+    window.history.replaceState({ }, '', base);
+
+    showDialog({
+      title: 'Path Not Found',
+      body: `The path: ${bad} was not found. JupyterLab redirected to: ${base}`,
+      buttons: [Dialog.okButton()]
+    });
+  },
+  autoStart: true
+};
+
+
 /**
  * Add the main application commands.
  */
@@ -287,6 +318,6 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [main, layout, router];
+const plugins: JupyterLabPlugin<any>[] = [main, layout, router, notfound];
 
 export default plugins;
