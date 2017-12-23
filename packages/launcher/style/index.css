@@ -132,14 +132,14 @@
   padding: 0px;
   border: 1px solid var(--jp-border-color1);
   background: var(--jp-layout-color1);
-  box-shadow: 0px 1px 1px 1px rgba(0,0,0,.08);
+  box-shadow: var(--jp-elevation-z2);
   transition: .2s box-shadow;
   border-radius: var(--jp-border-radius);
 }
 
 
 .jp-LauncherCard:hover {
-  box-shadow: 0px 2px 4px 1px rgba(0,0,0,.20);
+  box-shadow: var(--jp-elevation-z6);
 }
 
 

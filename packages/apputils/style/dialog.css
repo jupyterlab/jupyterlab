@@ -37,7 +37,7 @@
   max-width: 500px;
   max-height: 500px;
   box-sizing: border-box;
-  box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.5);
+  box-shadow: var(--jp-elevation-z20);
   word-wrap: break-word;
   border-radius: var(--jp-border-radius);
 }

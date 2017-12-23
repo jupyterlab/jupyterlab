@@ -27,6 +27,49 @@ all of MD as it is not optimized for dense, information rich UIs.
 
 :root {
 
+  /* Elevation
+   *
+   * We style box-shadows using Material Design's idea of elevation. These particular numbers are taken from here:
+   * 
+   * https://github.com/material-components/material-components-web
+   * https://material-components-web.appspot.com/elevation.html
+   */
+
+  /* The dark theme shadows need a bit of work, but this will probably also require work on the core layout
+   * colors used in the theme as well. */
+  --jp-shadow-base-lightness: 32;
+  --jp-shadow-umbra-color: rgba(var(--jp-shadow-base-lightness), var(--jp-shadow-base-lightness), var(--jp-shadow-base-lightness), 0.2);
+  --jp-shadow-penumbra-color: rgba(var(--jp-shadow-base-lightness), var(--jp-shadow-base-lightness), var(--jp-shadow-base-lightness), 0.14);
+  --jp-shadow-ambient-color: rgba(var(--jp-shadow-base-lightness), var(--jp-shadow-base-lightness), var(--jp-shadow-base-lightness), 0.12);
+  --jp-elevation-z0: none;
+  --jp-elevation-z1: 0px 2px 1px -1px var(--jp-shadow-umbra-color),
+                     0px 1px 1px 0px var(--jp-shadow-penumbra-color),
+                     0px 1px 3px 0px var(--jp-shadow-ambient-color);
+  --jp-elevation-z2: 0px 3px 1px -2px var(--jp-shadow-umbra-color),
+                     0px 2px 2px 0px var(--jp-shadow-penumbra-color),
+                     0px 1px 5px 0px var(--jp-shadow-ambient-color);
+  --jp-elevation-z4: 0px 2px 4px -1px var(--jp-shadow-umbra-color),
+                     0px 4px 5px 0px var(--jp-shadow-penumbra-color),
+                     0px 1px 10px 0px var(--jp-shadow-ambient-color);
+  --jp-elevation-z6: 0px 3px 5px -1px var(--jp-shadow-umbra-color),
+                     0px 6px 10px 0px var(--jp-shadow-penumbra-color),
+                     0px 1px 18px 0px var(--jp-shadow-ambient-color);
+  --jp-elevation-z8: 0px 5px 5px -3px var(--jp-shadow-umbra-color),
+                     0px 8px 10px 1px var(--jp-shadow-penumbra-color),
+                     0px 3px 14px 2px var(--jp-shadow-ambient-color);
+  --jp-elevation-z12: 0px 7px 8px -4px var(--jp-shadow-umbra-color),
+                      0px 12px 17px 2px var(--jp-shadow-penumbra-color),
+                      0px 5px 22px 4px var(--jp-shadow-ambient-color);
+  --jp-elevation-z16: 0px 8px 10px -5px var(--jp-shadow-umbra-color),
+                      0px 16px 24px 2px var(--jp-shadow-penumbra-color),
+                      0px 6px 30px 5px var(--jp-shadow-ambient-color);
+  --jp-elevation-z20: 0px 10px 13px -6px var(--jp-shadow-umbra-color),
+                      0px 20px 31px 3px var(--jp-shadow-penumbra-color),
+                      0px 8px 38px 7px var(--jp-shadow-ambient-color);
+  --jp-elevation-z24: 0px 11px 15px -7px var(--jp-shadow-umbra-color),
+                      0px 24px 38px 3px var(--jp-shadow-penumbra-color),
+                      0px 9px 46px 8px var(--jp-shadow-ambient-color);
+
   /* Borders
    *
    * The following variables, specify the visual styling of borders in JupyterLab.

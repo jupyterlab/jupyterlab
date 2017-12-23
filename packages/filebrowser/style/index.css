@@ -302,7 +302,7 @@
   margin-left: 4px;
   width: 160px;
   background-color: rgba(255,255,255,.7);
-  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+  box-shadow: var(--jp-elevation-z2);
   border-radius: 0px;
   color: var(--jp-ui-font-color1);
   transform: translateX(-2%) translateY(4%);
