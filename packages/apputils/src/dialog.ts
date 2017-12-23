@@ -466,7 +466,7 @@ namespace Dialog {
    * A widget used as a dialog body.
    */
   export
-  interface IBodyWidget<T> extends Widget {
+  interface IBodyWidget<T = string> extends Widget {
     /**
      * Get the serialized value of the widget.
      */

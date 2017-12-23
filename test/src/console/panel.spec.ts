@@ -137,7 +137,6 @@ describe('console/panel', () => {
         MessageLoop.sendMessage(panel, Widget.Msg.CloseRequest);
         expect(panel.methods).to.contain('onCloseRequest');
         expect(panel.isDisposed).to.be(true);
-        return dismissDialog();
       });
 
     });

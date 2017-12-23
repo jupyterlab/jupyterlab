@@ -197,8 +197,9 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
    * Create a console for a given path.
    */
   function createConsole(options: ICreateOptions): Promise<ConsolePanel> {
+    let panel: ConsolePanel;
     return manager.ready.then(() => {
-      let panel = new ConsolePanel({
+      panel = new ConsolePanel({
         manager,
         contentFactory,
         mimeTypeService: editorServices.mimeTypeService,
@@ -206,6 +207,8 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
         ...options as Partial<ConsolePanel.IOptions>
       });
 
+      return panel.session.ready;
+    }).then(() => {
       // Add the console panel to the tracker.
       tracker.add(panel);
       shell.addToMainArea(
