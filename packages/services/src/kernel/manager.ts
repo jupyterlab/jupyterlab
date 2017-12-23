@@ -206,17 +206,19 @@ class KernelManager implements Kernel.IManager {
     if (index === -1) {
       return;
     }
-    return Kernel.shutdown(id, this.serverSettings).then(() => {
-      let toRemove: Kernel.IKernel[] = [];
-      this._kernels.forEach(k => {
-        if (k.id === id) {
-          k.dispose();
-          toRemove.push(k);
-        }
-      });
-      toRemove.forEach(k => { this._kernels.delete(k); });
-      this._runningChanged.emit(this._models.slice());
+
+    // Proactively remove the items.
+    let toRemove: Kernel.IKernel[] = [];
+    this._kernels.forEach(k => {
+      if (k.id === id) {
+        k.dispose();
+        toRemove.push(k);
+      }
     });
+    toRemove.forEach(k => { this._kernels.delete(k); });
+    this._runningChanged.emit(this._models.slice());
+
+    return Kernel.shutdown(id, this.serverSettings);
   }
 
   /**
@@ -225,8 +227,22 @@ class KernelManager implements Kernel.IManager {
    * @returns A promise that resolves when all of the kernels are shut down.
    */
   shutdownAll(): Promise<void> {
+    let previous = this._models.length;
+
+    // Proactively remove all items.
+    this._models = [];
+    let toRemove: Kernel.IKernel[] = [];
+    this._kernels.forEach(k => {
+      k.dispose();
+      toRemove.push(k);
+    });
+    toRemove.forEach(k => { this._kernels.delete(k); });
+    if (previous) {
+      this._runningChanged.emit([]);
+    }
+
     return this._refreshRunning().then(() => {
-      return Promise.all(this._models.map(model => this.shutdown(model.name))).then(() => {
+      return Promise.all(this._models.map(model => Kernel.shutdown(model.id, this.serverSettings))).then(() => {
         return Promise.resolve(void 0);
       });
     });
