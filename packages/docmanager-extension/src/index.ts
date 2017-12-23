@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IChangedArgs
+  IChangedArgs, uuid
 } from '@jupyterlab/coreutils';
 
 import {
@@ -84,6 +84,7 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
     const contexts = new WeakSet<DocumentRegistry.Context>();
     const opener: DocumentManager.IWidgetOpener = {
       open: (widget, options) => {
+        const shell = app.shell;
         if (!widget.id) {
           widget.id = `document-manager-${++Private.id}`;
         }
@@ -91,17 +92,28 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
           'type': 'document-title',
           ...widget.title.dataset
         };
-        if (!widget.isAttached) {
-          app.shell.addToMainArea(widget, options || {});
-
+        if (!widget.isAttached && (widget as any).ready !== undefined) {
           // Add a loading spinner, and remove it when the widget is ready.
-          if ((widget as any).ready !== undefined) {
-            let spinner = new Spinner();
-            widget.node.appendChild(spinner.node);
-            (widget as any).ready.then(() => { widget.node.removeChild(spinner.node); });
-          }
+          let spinner = new Spinner();
+          spinner.id = uuid();
+          spinner.title.label = widget.title.label;
+          shell.addToMainArea(spinner, options || {});
+          shell.activateById(spinner.id);
+
+          (widget as any).ready.then(() => {
+            const isCurrent = app.shell.currentWidget === spinner;
+            app.shell.addToMainArea(widget, { ref: spinner.id });
+            spinner.dispose();
+            if (isCurrent) {
+              shell.activateById(widget.id);
+            }
+          });
+        } else if (!widget.isAttached) {
+          shell.addToMainArea(widget, options || {});
+          shell.activateById(widget.id);
+        } else {
+          shell.activateById(widget.id);
         }
-        app.shell.activateById(widget.id);
 
         // Handle dirty state for open documents.
         let context = docManager.contextForWidget(widget);
@@ -216,7 +228,10 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
       const factory = args['factory'] as string || void 0;
       const kernel = args['kernel'] as Kernel.IModel || void 0;
       return docManager.services.contents.get(path, { content: false })
-        .then(() => docManager.openOrReveal(path, factory, kernel));
+        .then(() => docManager.openOrReveal(path, factory, kernel))
+        .then(widget => {
+          return widget.ready.then(() => { return widget; });
+        });
     },
     icon: args => args['icon'] as string || '',
     label: args => (args['label'] || args['factory']) as string,

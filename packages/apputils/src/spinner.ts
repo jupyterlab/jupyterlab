@@ -4,6 +4,10 @@
 |----------------------------------------------------------------------------*/
 
 import {
+  Message
+} from '@phosphor/messaging';
+
+import {
   Widget
 } from '@phosphor/widgets';
 
@@ -19,8 +23,16 @@ class Spinner extends Widget {
   constructor () {
     super();
     this.addClass('jp-Spinner');
+    this.node.tabIndex = -1;
     let content = document.createElement('div');
     content.className = 'jp-SpinnerContent';
     this.node.appendChild(content);
+  }
+
+  /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this.node.focus();
   }
 }
