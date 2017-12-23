@@ -15,7 +15,7 @@
   background: var(--jp-layout-color1);
   color: var(--jp-content-font-color1);
   border: var(--jp-border-width) solid var(--jp-border-color1);
-  box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--jp-elevation-z6);
   list-style-type: none;
   overflow: auto;
   padding: 0;
