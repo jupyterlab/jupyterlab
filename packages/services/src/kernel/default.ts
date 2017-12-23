@@ -80,14 +80,15 @@ class DefaultKernel implements Kernel.IKernel {
     this._commPromises = new Map<string, Promise<Kernel.IComm>>();
     this._comms = new Map<string, Kernel.IComm>();
     this._createSocket();
-    this.terminated = new Signal<this, void>(this);
     Private.runningKernels.push(this);
   }
 
   /**
    * A signal emitted when the kernel is shut down.
    */
-  readonly terminated: Signal<this, void>;
+  get terminated(): ISignal<this, void> {
+    return this._terminated;
+  }
 
   /**
    * The server settings for the kernel.
@@ -222,6 +223,7 @@ class DefaultKernel implements Kernel.IKernel {
       return;
     }
     this._isDisposed = true;
+    this._terminated.emit(void 0);
     this._status = 'dead';
     this._clearSocket();
     this._futures.forEach((future, key) => {
@@ -1038,6 +1040,7 @@ class DefaultKernel implements Kernel.IKernel {
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _displayIdToParentIds = new Map<string, string[]>();
   private _msgIdToDisplayIds = new Map<string, string[]>();
+  private _terminated = new Signal<this, void>(this);
   private _noOp = () => { /* no-op */};
 }
 
@@ -1275,7 +1278,6 @@ namespace Private {
       });
       // If kernel is no longer running on disk, emit dead signal.
       if (!updated && kernel.status !== 'dead') {
-        kernel.terminated.emit(void 0);
         kernel.dispose();
       }
     });
@@ -1418,7 +1420,6 @@ namespace Private {
   function killKernels(id: string): void {
     each(toArray(runningKernels), kernel => {
       if (kernel.id === id) {
-        kernel.terminated.emit(void 0);
         kernel.dispose();
       }
     });

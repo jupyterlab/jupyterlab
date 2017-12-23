@@ -153,6 +153,11 @@ class TerminalManager implements TerminalSession.IManager {
     if (index === -1) {
       return;
     }
+
+    // Proactively remove the model.
+    this._models.splice(index, 1);
+    this._runningChanged.emit(this._models.slice());
+
     return TerminalSession.shutdown(name, this.serverSettings).then(() => {
       let toRemove: TerminalSession.ISession[] = [];
       this._sessions.forEach(s => {
@@ -162,7 +167,6 @@ class TerminalManager implements TerminalSession.IManager {
         }
       });
       toRemove.forEach(s => { this._sessions.delete(s); });
-      this._runningChanged.emit(this._models.slice());
     });
   }
 
@@ -172,10 +176,24 @@ class TerminalManager implements TerminalSession.IManager {
    * @returns A promise that resolves when all of the sessions are shut down.
    */
   shutdownAll(): Promise<void> {
+    // Proactively remove all models.
+    let models = this._models;
+    if (models.length > 0) {
+      this._models = [];
+      this._runningChanged.emit([]);
+    }
+
     return this._refreshRunning().then(() => {
-      return Promise.all(this._models.map(model => this.shutdown(model.name)));
-    }).then(() => {
-      return Promise.resolve(void 0);
+      return Promise.all(models.map(model => {
+        return TerminalSession.shutdown(model.name, this.serverSettings).then(() => {
+          let toRemove: TerminalSession.ISession[] = [];
+          this._sessions.forEach(s => {
+            s.dispose();
+            toRemove.push(s);
+          });
+          toRemove.forEach(s => { this._sessions.delete(s); });
+        });
+      })).then(() => { return undefined; });
     });
   }
 

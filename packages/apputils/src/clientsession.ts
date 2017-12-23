@@ -689,11 +689,15 @@ class ClientSession implements IClientSession {
    * Handle a session termination.
    */
   private _onTerminated(): void {
+    let kernel = this.kernel;
     if (this._session) {
       this._session.dispose();
     }
     this._session = null;
     this._terminated.emit(void 0);
+    if (kernel) {
+      this._kernelChanged.emit(null);
+    }
   }
 
   /**
