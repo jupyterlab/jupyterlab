@@ -380,6 +380,9 @@ class ClientSession implements IClientSession {
       this._session.dispose();
       this._session = null;
     }
+    if (this._dialog) {
+      this._dialog.dispose();
+    }
     Signal.clearData(this);
   }
 
@@ -592,11 +595,13 @@ class ClientSession implements IClientSession {
     if (this.isDisposed) {
       return Promise.resolve(void 0);
     }
-    return showDialog({
+    let dialog = this._dialog = new Dialog({
       title: 'Select Kernel',
       body: new Private.KernelSelector(this),
       buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'SELECT' })]
-    }).then(result => {
+    });
+
+    return dialog.launch().then(result => {
       if (this.isDisposed || !result.button.accept) {
         return;
       }
@@ -607,7 +612,7 @@ class ClientSession implements IClientSession {
       if (model) {
         return this._changeKernel(model).then(() => void 0);
       }
-    }).then(() => void 0);
+    }).then(() => { this._dialog = null; });
   }
 
   /**
@@ -677,12 +682,13 @@ class ClientSession implements IClientSession {
       } catch (err) {
         // no-op
       }
-      return showDialog({
+      let dialog = this._dialog = new Dialog({
         title: 'Error Starting Kernel',
         body: h.pre(message),
         buttons: [Dialog.okButton()]
       });
-    }).then(() => undefined);
+      return dialog.launch();
+    }).then(() => { this._dialog = null; });
   }
 
   /**
@@ -758,6 +764,7 @@ class ClientSession implements IClientSession {
   private _iopubMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);
+  private _dialog: Dialog<any> | null = null;
 }
 
 

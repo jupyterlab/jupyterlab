@@ -123,6 +123,7 @@ class ConsolePanel extends Panel {
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
+    this.session.dispose();
     this.console.dispose();
     super.dispose();
   }
