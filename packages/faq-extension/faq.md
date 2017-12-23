@@ -38,13 +38,7 @@ Notebook. Here are a few of them you may want to try out:
 
 ### How stable is JupyterLab?
 
-We are currently making a series of alpha releases of JupyterLab.
-These releases are mostly usable, but you may
-experience bugs and other rough edges as the code base is still
-changing rapidly.
-
-In June 2017, we will be releasing a beta version. This beta
-version will be characterized by:
+This beta version of JupyterLab will be characterized by:
 
 * Stable and featureful enough for daily usage by most Jupyter users.
 * Most of the commonly used features in the classic notebook are
@@ -52,7 +46,7 @@ version will be characterized by:
 * Developer APIs that are approaching stability but stil undergoing
   significant changes.
 
-Later in 2017, we will release the 1.0 version of JupyterLab that will
+Early in 2018, we will release the 1.0 version of JupyterLab that will
 provide additional UI/UX improvements, features, and API stability. At
 that point, JupyterLab should be a full featured replacement for the
 classic notebook - and go far beyond its capabilities.

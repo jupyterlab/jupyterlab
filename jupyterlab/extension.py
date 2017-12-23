@@ -45,10 +45,10 @@ def load_jupyter_server_extension(nbapp):
     app_dir = getattr(nbapp, 'app_dir', get_app_dir())
 
     # Print messages.
-    logger.info('JupyterLab alpha preview extension loaded from %s' % HERE)
+    logger.info('JupyterLab beta preview extension loaded from %s' % HERE)
     logger.info('JupyterLab application directory is %s' % app_dir)
 
-    config.app_name = 'JupyterLab'
+    config.app_name = 'JupyterLab Beta'
     config.app_namespace = 'jupyterlab'
     config.page_url = '/lab'
     config.cache_files = True
