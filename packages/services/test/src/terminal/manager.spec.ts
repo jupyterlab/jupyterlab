@@ -155,7 +155,7 @@ describe('terminal', () => {
         let called = false;
         return manager.startNew().then(s => {
           manager.runningChanged.connect((sender, args) => {
-            expect(s.isDisposed).to.be(true);
+            expect(s.isDisposed).to.be(false);
             called = true;
           });
           return manager.shutdown(s.name);

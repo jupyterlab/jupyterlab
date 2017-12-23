@@ -222,8 +222,8 @@ class DefaultKernel implements Kernel.IKernel {
     if (this.isDisposed) {
       return;
     }
-    this._terminated.emit(void 0);
     this._isDisposed = true;
+    this._terminated.emit(void 0);
     this._status = 'dead';
     this._clearSocket();
     this._futures.forEach((future, key) => {

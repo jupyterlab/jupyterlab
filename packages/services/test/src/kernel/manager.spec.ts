@@ -245,7 +245,7 @@ describe('kernel/manager', () => {
         let called = false;
         return manager.startNew().then(k => {
           manager.runningChanged.connect((sender, args) => {
-            expect(k.isDisposed).to.be(true);
+            expect(k.isDisposed).to.be(false);
             called = true;
           });
           return manager.shutdown(k.id);
