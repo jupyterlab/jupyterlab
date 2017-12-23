@@ -516,7 +516,8 @@ namespace Private {
     return () => {
       let widget = app.shell.currentWidget;
       const extender = findExtender(widget, s);
-      return !!extender && !!extender[executor];
+      return !!extender && !!extender[executor] &&
+        (extender.isEnabled ? extender.isEnabled(widget) : true);
     };
   }
 

@@ -48,6 +48,15 @@ interface IMenuExtender<T extends Widget> {
    * A widget tracker for identifying the appropriate extender.
    */
   tracker: IInstanceTracker<T>;
+
+  /**
+   * An additional function that determines whether the extender
+   * is enabled. By default it is considered enabled if the application
+   * active widget is contained in the `tracker`. If this is also
+   * provided, the critereon is equivalent to
+   * `tracker.has(widget) && extender.isEnabled(widget)`
+   */
+  isEnabled?: (widget: T) => boolean;
 }
 
 /**
