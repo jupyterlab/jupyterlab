@@ -3,14 +3,16 @@
 
 from __future__ import print_function, absolute_import
 
+from os import path as osp
 from os.path import join as pjoin
+import argparse
 import atexit
+import glob
 import json
 import os
 import shutil
 import sys
 import tempfile
-import time
 
 try:
     from unittest.mock import patch
@@ -25,11 +27,14 @@ import jupyter_core
 from jupyterlab.process_app import ProcessApp
 
 
+HERE = osp.realpath(osp.dirname(__file__))
+
+
 def _create_notebook_dir():
     """Create a temporary directory with some file structure."""
     root_dir = tempfile.mkdtemp(prefix='mock_contents')
-    os.mkdir(os.path.join(root_dir, 'src'))
-    with open(os.path.join(root_dir, 'src', 'temp.txt'), 'w') as fid:
+    os.mkdir(osp.join(root_dir, 'src'))
+    with open(osp.join(root_dir, 'src', 'temp.txt'), 'w') as fid:
         fid.write('hello')
     atexit.register(lambda: shutil.rmtree(root_dir, True))
     return root_dir
@@ -38,9 +43,11 @@ def _create_notebook_dir():
 def _install_kernels():
     # Install echo and ipython kernels - should be done after env patch
     kernel_json = {
-        'argv': [sys.executable,
-             '-m', 'jupyterlab.tests.echo_kernel',
-             '-f', '{connection_file}'],
+        'argv': [
+            sys.executable,
+            '-m', 'jupyterlab.tests.echo_kernel',
+            '-f', '{connection_file}'
+        ],
         'display_name': "Echo Kernel",
         'language': 'echo'
     }
@@ -120,6 +127,81 @@ class TestApp(ProcessApp):
         except Exception as e:
             self.log.error(str(e))
             os._exit(1)
+
+
+class KarmaTestApp(TestApp):
+    """A notebook app that runs the jupyterlab karma tests.
+    """
+    karma_pattern = Unicode('src/*.spec.ts')
+    karma_base_dir = Unicode('')
+
+    def get_command(self):
+        """Get the command to run."""
+        terminalsAvailable = self.web_app.settings['terminals_available']
+        # Compatibility with Notebook 4.2.
+        token = getattr(self, 'token', '')
+        config = dict(baseUrl=self.connection_url, token=token,
+                      terminalsAvailable=str(terminalsAvailable),
+                      foo='bar')
+
+        print('\n\nNotebook config:')
+        print(json.dumps(config))
+
+        cwd = self.karma_base_dir
+
+        karma_inject_file = pjoin(cwd, 'build', 'injector.js')
+        if not os.path.exists(pjoin(cwd, 'build')):
+            os.makedirs(pjoin(cwd, 'build'))
+
+        with open(karma_inject_file, 'w') as fid:
+            fid.write("""
+            require('es6-promise/dist/es6-promise.js');
+            require('@phosphor/widgets/style/index.css');
+
+            var node = document.createElement('script');
+            node.id = 'jupyter-config-data';
+            node.type = 'application/json';
+            node.textContent = '%s';
+            document.body.appendChild(node);
+            """ % json.dumps(config))
+
+        # validate the pattern
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--pattern', action='store')
+        args, argv = parser.parse_known_args()
+        pattern = args.pattern or 'src/*.spec.ts'
+        files = glob.glob(pjoin(cwd, pattern))
+        if not files:
+            msg = 'No files matching "%s" found in "%s"'
+            raise ValueError(msg % (pattern, msg))
+
+        # Find and validate the coverage folder
+        with open(pjoin(cwd, 'package.json')) as fid:
+            data = json.load(fid)
+        name = data['name'].replace('@jupyterlab/test-', '')
+        folder = osp.realpath(pjoin(HERE, '..', '..', 'packages', name))
+        if not osp.exists(folder):
+            raise ValueError(
+                'No source package directory found for "%s", use the pattern '
+                '"@jupyterlab/test-<package_dir_name>"' % name
+            )
+
+        env = os.environ.copy()
+        env['KARMA_INJECT_FILE'] = karma_inject_file.encode('utf-8')
+        env.setdefault('KARMA_FILE_PATTERN', pattern)
+        env.setdefault('KARMA_COVER_FOLDER', folder.encode('utf-8'))
+        cwd = self.karma_base_dir
+        cmd = ['karma', 'start'] + sys.argv[1:]
+        return cmd, dict(env=env, cwd=cwd)
+
+
+def run_karma(base_dir):
+    """Run a karma test in the given base directory.
+    """
+    app = KarmaTestApp.instance()
+    app.karma_base_dir = base_dir
+    app.initialize([])
+    app.start()
 
 
 if __name__ == '__main__':

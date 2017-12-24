@@ -127,10 +127,11 @@ class Process(object):
         cmd = self.cmd
         kwargs.setdefault('stderr', subprocess.STDOUT)
 
+        cmd[0] = which(cmd[0], kwargs.get('env'))
+
         if os.name == 'nt':
             kwargs['shell'] = True
 
-        cmd[0] = which(cmd[0], kwargs.get('env'))
         proc = subprocess.Popen(cmd, **kwargs)
         return proc
 
@@ -242,6 +243,7 @@ class WatchHelper(Process):
                 startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
                 kwargs['startupinfo'] = startupinfo
                 kwargs['creationflags'] = subprocess.CREATE_NEW_PROCESS_GROUP
+                kwargs['shell'] = True
 
         return super(WatchHelper, self)._create_process(**kwargs)
 

@@ -97,7 +97,7 @@ jupyterlab_launcher` to get the latest version.
 
 * To install JupyterLab in isolation for a single conda/virtual environment, you can add the `--sys-prefix` flag to the extension activation above; this will tie the installation to the `sys.prefix` location of your environment, without writing anything in your user-wide settings area (which are visible to all your envs):
 
-* You can run `jlpm run build:main:prod` to build more accurate sourcemaps that show the original
+* You can run `jlpm run build:dev:prod` to build more accurate sourcemaps that show the original
   Typescript code when debugging. However, it takes a bit longer to build the sources, so is used only to build for production
   by default.
 
@@ -122,6 +122,39 @@ mode, the page will have a red stripe at the top to indicate it is an unreleased
 ```bash
 jlpm run build:test
 jlpm test
+```
+
+You can run tests for an individual package by changing to the appropriate
+folder in tests:
+
+```bash
+cd tests/test-notebook
+jlpm test
+```
+
+You can also select specific test file(s) to run using a pattern:
+
+```bash
+cd tests/test-console
+jlpm test --pattern=src/*.spec.ts
+jlpm test --pattern=src/history.spec.ts
+```
+
+You can run `jlpm watch` from a test folder, and it  will re-run the tests
+when the source file(s) change.  Note that you have to launch the browser
+of your choice after it says `No captured browser`.  You can put a `debugger`
+statement on a line and open the browser debugger to debug specific tests.
+`jlpm watch` also accepts the `--pattern` argument.
+
+Note that there are some helper functions in `tests/utils.ts` and
+`tests/notebook-utils.ts` that are used by many of the tests.
+
+To create a new test for a package in `packages/`, use the following
+command, where `<package-directory-name>` is the name of the folder in
+`packages/`:
+
+```bash
+jlpm create:test <package-directory-name>
 ```
 
 ### Build and run the stand-alone examples

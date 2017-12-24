@@ -21,9 +21,7 @@ if [[ $GROUP == js ]]; then
 
     jlpm build:packages
     jlpm build:test
-
-    # Allow the tests to fail once due to slow CI.
-    jlpm test || jlpm test
+    jlpm test
     jlpm run clean
 fi
 
@@ -32,9 +30,7 @@ if [[ $GROUP == js_cov ]]; then
 
     jlpm run build:packages
     jlpm run build:test
-
-    # Allow the tests to fail once due to slow CI.
-    jlpm run coverage || jlpm run coverage
+    jlpm run coverage
 
     # Run the services node example.
     pushd packages/services/examples/node
@@ -49,9 +45,7 @@ if [[ $GROUP == js_services ]]; then
 
     jlpm build:packages
     jlpm build:test
-
-    # Allow the tests to fail once due to slow CI. 
-    jlpm run test:services || jlpm run test:services
+    jlpm run test:services
 
 fi
 
@@ -99,6 +93,10 @@ if [[ $GROUP == integrity ]]; then
     # Make sure we can successfully load the dev app.
     python -m jupyterlab.selenium_check --dev-mode
 
+    # Make sure core mode works
+    jlpm run build:core
+    python -m jupyterlab.selenium_check --core-mode
+
     # Make sure we can run the built app.
     jupyter labextension install ./jupyterlab/tests/mock_packages/extension
     python -m jupyterlab.selenium_check
@@ -122,7 +120,7 @@ if [[ $GROUP == integrity ]]; then
     kill $TASK_PID
     wait $TASK_PID
     source deactivate
-fi 
+fi
 
 
 if [[ $GROUP == cli ]]; then

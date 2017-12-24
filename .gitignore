@@ -28,7 +28,7 @@ __pycache__
 *.map
 .idea/
 
-test/coverage
+tests/**/coverage
 docs/_build
 docs/api
 packages/services/examples/node/config.json

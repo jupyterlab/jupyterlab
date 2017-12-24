@@ -178,42 +178,43 @@ class DefaultTerminalSession implements TerminalSession.ISession {
     let socket = this._ws;
 
     if (socket) {
+      // Clear the websocket event handlers and the socket itself.
+      socket.onopen = this._noOp;
+      socket.onclose = this._noOp;
+      socket.onerror = this._noOp;
+      socket.onmessage = this._noOp;
       socket.close();
+      this._ws = null;
     }
     this._isReady = false;
 
-    const settings = this.serverSettings;
-    const token = this.serverSettings.token;
-
-    this._url = Private.getTermUrl(settings.baseUrl, this._name);
-    Private.running[this._url] = this;
-
-    let wsUrl = URLExt.join(settings.wsUrl, `terminals/websocket/${name}`);
-
-    if (token) {
-      wsUrl = wsUrl + `?token=${token}`;
-    }
-    socket = this._ws = new settings.WebSocket(wsUrl);
-
-    socket.onmessage = (event: MessageEvent) => {
-      if (this._isDisposed) {
-        return;
-      }
-
-      const data = JSON.parse(event.data) as JSONPrimitive[];
-
-      this._messageReceived.emit({
-        type: data[0] as TerminalSession.MessageType,
-        content: data.slice(1)
-      });
-    };
-
     return new Promise<void>((resolve, reject) => {
-      const socket = this._ws;
+      const settings = this.serverSettings;
+      const token = this.serverSettings.token;
 
-      if (!socket) {
-        return;
+      this._url = Private.getTermUrl(settings.baseUrl, this._name);
+      Private.running[this._url] = this;
+
+      let wsUrl = URLExt.join(settings.wsUrl, `terminals/websocket/${name}`);
+
+      if (token) {
+        wsUrl = wsUrl + `?token=${token}`;
       }
+
+      socket = this._ws = new settings.WebSocket(wsUrl);
+
+      socket.onmessage = (event: MessageEvent) => {
+        if (this._isDisposed) {
+          return;
+        }
+
+        const data = JSON.parse(event.data) as JSONPrimitive[];
+
+        this._messageReceived.emit({
+          type: data[0] as TerminalSession.MessageType,
+          content: data.slice(1)
+        });
+      };
 
       socket.onopen = (event: MessageEvent) => {
         if (!this._isDisposed) {
@@ -238,6 +239,7 @@ class DefaultTerminalSession implements TerminalSession.ISession {
   private _readyPromise: Promise<void>;
   private _url: string;
   private _ws: WebSocket | null = null;
+  private _noOp = () => { /* no-op */};
 }
 
 

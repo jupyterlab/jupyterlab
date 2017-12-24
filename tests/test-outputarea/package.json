@@ -1,0 +1,31 @@
+{
+  "name": "@jupyterlab/test-outputarea",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf build && rimraf coverage",
+    "coverage": "python run-test.py --browsers=Firefox karma-cov.conf.js",
+    "test": "jlpm run test:firefox",
+    "test:chrome": "python run-test.py --browsers=Chrome karma.conf.js",
+    "test:debug": "python run-test.py  --browsers=Chrome --singleRun=false --debug=true --browserNoActivityTimeout=10000000 karma.conf.js",
+    "test:firefox": "python run-test.py --browsers=Firefox karma.conf.js",
+    "test:ie": "python run-test.py  --browsers=IE karma.conf.js",
+    "watch": "python run-test.py --singleRun=false",
+    "watch:src": "tsc -w"
+  },
+  "dependencies": {
+    "@jupyterlab/apputils": "^0.14.1",
+    "@jupyterlab/outputarea": "^0.14.1",
+    "@jupyterlab/rendermime": "^0.14.1",
+    "@jupyterlab/services": "^1.0.1",
+    "@phosphor/messaging": "^1.2.2",
+    "@phosphor/widgets": "^1.5.0",
+    "expect.js": "~0.3.1"
+  },
+  "devDependencies": {
+    "karma": "~1.7.1",
+    "rimraf": "~2.6.2",
+    "typescript": "~2.6.2"
+  }
+}

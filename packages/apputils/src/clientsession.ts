@@ -126,7 +126,7 @@ interface IClientSession extends IDisposable {
   /**
    * Change the current kernel associated with the document.
    */
-  changeKernel(options: Kernel.IModel): Promise<Kernel.IKernelConnection>;
+  changeKernel(options: Partial<Kernel.IModel>): Promise<Kernel.IKernelConnection>;
 
   /**
    * Kill the kernel and shutdown the session.
@@ -938,6 +938,7 @@ namespace Private {
     let {
       name, language, shouldStart, canStart, autoStartDefault
     } = preference;
+
     if (!specs || shouldStart === false || canStart === false) {
       return null;
     }
@@ -968,6 +969,7 @@ namespace Private {
         matches.push(specName);
       }
     }
+
     if (matches.length === 1) {
       let specName = matches[0];
       console.log('No exact match found for ' + specName +
