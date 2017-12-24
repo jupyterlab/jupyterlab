@@ -43,7 +43,7 @@ This beta version of JupyterLab will be characterized by:
 * Stable and featureful enough for daily usage by most Jupyter users.
 * Most of the commonly used features in the classic notebook are
   implemented.
-* Developer APIs that are approaching stability but stil undergoing
+* Developer APIs that are approaching stability but still undergoing
   significant changes.
 
 Early in 2018, we will release the 1.0 version of JupyterLab that will
