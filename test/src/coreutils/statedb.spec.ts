@@ -195,6 +195,37 @@ describe('StateDB', () => {
 
   });
 
+  describe('#fromJSON()', () => {
+
+    it('overwrites the full contents of a state database', done => {
+      let { localStorage } = window;
+
+      let db = new StateDB({ namespace: 'test-namespace' });
+      let key = 'abc';
+      let value = '123';
+      let contents: ReadonlyJSONObject = {
+        [key]: 'def',
+        ghi: 'jkl',
+        mno: 1,
+        pqr: {
+          foo: { bar: { baz: 'qux' } }
+        }
+      };
+
+      expect(localStorage.length).to.be(0);
+      db.save(key, value)
+        .then(() => db.fetch(key))
+        .then(result => { expect(result).to.be(value); })
+        .then(() => db.fromJSON(contents))
+        .then(() => db.fetch(key))
+        .then(result => { expect(result).to.be(contents[key]); })
+        .then(() => db.clear())
+        .then(done)
+        .catch(done);
+    });
+
+  });
+
   describe('#remove()', () => {
 
     it('should remove a stored key', done => {
