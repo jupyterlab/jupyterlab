@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  PromiseDelegate
+  PromiseDelegate, ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
 
@@ -230,6 +230,32 @@ describe('StateDB', () => {
         .then(fetched => { expect(fetched).to.eql(value); })
         .then(() => db.remove(key))
         .then(() => { expect(localStorage).to.be.empty(); })
+        .then(done)
+        .catch(done);
+    });
+
+  });
+
+  describe('#toJSON()', () => {
+
+    it('return the full contents of a state database', done => {
+      let { localStorage } = window;
+
+      let db = new StateDB({ namespace: 'test-namespace' });
+      let contents: ReadonlyJSONObject = {
+        abc: 'def',
+        ghi: 'jkl',
+        mno: 1,
+        pqr: {
+          foo: { bar: { baz: 'qux' } }
+        }
+      };
+
+      expect(localStorage.length).to.be(0);
+      Promise.all(Object.keys(contents).map(key => db.save(key, contents[key])))
+        .then(() => db.toJSON())
+        .then(serialized => { expect(serialized).to.eql(contents); })
+        .then(() => db.clear())
         .then(done)
         .catch(done);
     });
