@@ -5,6 +5,10 @@
 import '../style/index.css';
 
 import {
+  PageConfig
+} from '@jupyterlab/coreutils';
+
+import {
   CommandLinker
 } from '@jupyterlab/apputils';
 
@@ -228,8 +232,9 @@ namespace JupyterLab {
       readonly schemas: string,
       readonly static: string,
       readonly templates: string,
-      readonly themes: string
+      readonly themes: string,
       readonly userSettings: string,
+      readonly serverRoot: string
     };
 
     /**
@@ -243,28 +248,29 @@ namespace JupyterLab {
    */
   export
   const defaultInfo: IInfo = {
-    name: 'JupyterLab',
-    namespace: 'jupyterlab',
-    version: 'unknown',
-    devMode: false,
+    name: PageConfig.getOption('appName') || 'JupyterLab',
+    namespace: PageConfig.getOption('appNamespace'),
+    version: PageConfig.getOption('appVersion') || 'unknown',
+    devMode: PageConfig.getOption('devMode').toLowerCase() === 'true',
     deferred: { patterns: [], matches: [] },
     disabled: { patterns: [], matches: [] },
     mimeExtensions: [],
     urls: {
-      page: 'unknown',
-      public: 'unknown',
-      settings: 'unknown',
-      themes: 'unknown'
+      page: PageConfig.getOption('pageUrl'),
+      public: PageConfig.getOption('publicUrl'),
+      settings: PageConfig.getOption('settingsUrl'),
+      themes: PageConfig.getOption('themesUrl')
     },
     directories: {
-      appSettings: 'unknown',
-      schemas: 'unknown',
-      static: 'unknown',
-      templates: 'unknown',
-      themes: 'unknown',
-      userSettings: 'unknown'
+      appSettings: PageConfig.getOption('appSettingsDir'),
+      schemas: PageConfig.getOption('schemasDir'),
+      static: PageConfig.getOption('staticDir'),
+      templates: PageConfig.getOption('templatesDir'),
+      themes: PageConfig.getOption('themesDir'),
+      userSettings: PageConfig.getOption('userSettingsDir'),
+      serverRoot: PageConfig.getOption('serverRoot')
     },
-    filesCached: true
+    filesCached: PageConfig.getOption('cacheFiles').toLowerCase() === 'true'
   };
 
   /**
