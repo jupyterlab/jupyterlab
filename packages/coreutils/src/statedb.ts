@@ -177,7 +177,6 @@ class StateDB implements IStateDB {
   fetchNamespace(namespace: string): Promise<IStateItem[]> {
     const { localStorage } = window;
     const prefix = `${this.namespace}:${namespace}:`;
-    const regex = new RegExp(`^${this.namespace}\:`);
     let items: IStateItem[] = [];
     let i = localStorage.length;
 
@@ -191,7 +190,7 @@ class StateDB implements IStateDB {
           let envelope = JSON.parse(value) as Private.Envelope;
 
           items.push({
-            id: key.replace(regex, ''),
+            id: key.replace(`${this.namespace}:`, ''),
             value: envelope ? envelope.v : undefined
           });
         } catch (error) {
@@ -224,21 +223,21 @@ class StateDB implements IStateDB {
    */
   toJSON(): Promise<ReadonlyJSONObject> {
     const { localStorage } = window;
-    const regex = new RegExp(`^${this.namespace}\:`);
+    const prefix = `${this.namespace}:`;
     const contents: Partial<ReadonlyJSONObject> =  { };
     let i = localStorage.length;
 
     while (i) {
       let key = localStorage.key(--i);
 
-      if (key && key.match(regex)) {
+      if (key && key.indexOf(prefix) === 0) {
         let value = localStorage.getItem(key);
 
         try {
           let envelope = JSON.parse(value) as Private.Envelope;
 
           if (envelope) {
-            contents[key.replace(regex, '')] = envelope.v;
+            contents[key.replace(prefix, '')] = envelope.v;
           }
         } catch (error) {
           console.warn(error);
