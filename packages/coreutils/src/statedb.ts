@@ -75,6 +75,20 @@ interface IStateDB extends IDataConnector<ReadonlyJSONValue> {
   fetchNamespace(namespace: string): Promise<IStateItem[]>;
 
   /**
+   * Overwrite all the data in the state database with new contents.
+   *
+   * @param contents - The new contents of the state database.
+   *
+   * @returns A promise that resolves on success.
+   *
+   * #### Notes
+   * Each top-level key in the `contents` object will be stored as an individual
+   * value in the state database. This method accepts JSON in the same format
+   * this is returned by the `toJSON` method.
+   */
+  fromJSON(contents: ReadonlyJSONObject): Promise<void>;
+
+  /**
    * Return a serialized copy of the state database's entire contents.
    *
    * @returns A promise that bears the database contents as JSON.
@@ -201,6 +215,30 @@ class StateDB implements IStateDB {
     }
 
     return Promise.resolve(items);
+  }
+
+  /**
+   * Overwrite all the data in the state database with new contents.
+   *
+   * @param contents - The new contents of the state database.
+   *
+   * @returns A promise that resolves on success.
+   *
+   * #### Notes
+   * Each top-level key in the `contents` object will be stored as an individual
+   * value in the state database. This method accepts JSON in the same format
+   * this is returned by the `toJSON` method.
+   */
+  fromJSON(contents: ReadonlyJSONObject): Promise<void> {
+    this._clear();
+
+    try {
+      Object.keys(contents).forEach(key => { this._save(key, contents[key]); });
+    } catch (error) {
+      return Promise.reject(error);
+    }
+
+    return Promise.resolve(undefined);
   }
 
   /**
