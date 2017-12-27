@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ReadonlyJSONValue, Token
+  ReadonlyJSONObject, ReadonlyJSONValue, Token
 } from '@phosphor/coreutils';
 
 import {
@@ -73,6 +73,13 @@ interface IStateDB extends IDataConnector<ReadonlyJSONValue> {
    * This promise will always succeed.
    */
   fetchNamespace(namespace: string): Promise<IStateItem[]>;
+
+  /**
+   * Return a serialized copy of the state database's entire contents.
+   *
+   * @returns A promise that bears the database contents as JSON.
+   */
+  toJSON(): Promise<ReadonlyJSONObject>;
 }
 
 
@@ -208,6 +215,39 @@ class StateDB implements IStateDB {
     window.localStorage.removeItem(`${this.namespace}:${id}`);
 
     return Promise.resolve(undefined);
+  }
+
+  /**
+   * Return a serialized copy of the state database's entire contents.
+   *
+   * @returns A promise that bears the database contents as JSON.
+   */
+  toJSON(): Promise<ReadonlyJSONObject> {
+    const { localStorage } = window;
+    const regex = new RegExp(`^${this.namespace}\:`);
+    const contents: Partial<ReadonlyJSONObject> =  { };
+    let i = localStorage.length;
+
+    while (i) {
+      let key = localStorage.key(--i);
+
+      if (key && key.match(regex)) {
+        let value = localStorage.getItem(key);
+
+        try {
+          let envelope = JSON.parse(value) as Private.Envelope;
+
+          if (envelope) {
+            contents[key.replace(regex, '')] = envelope.v;
+          }
+        } catch (error) {
+          console.warn(error);
+          localStorage.removeItem(key);
+        }
+      }
+    }
+
+    return Promise.resolve(contents);
   }
 
   /**
