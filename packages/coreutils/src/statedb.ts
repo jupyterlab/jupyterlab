@@ -217,6 +217,31 @@ class StateDB implements IStateDB {
   }
 
   /**
+   * Save a value in the database.
+   *
+   * @param id - The identifier for the data being saved.
+   *
+   * @param value - The data being saved.
+   *
+   * @returns A promise that is rejected if saving fails and succeeds otherwise.
+   *
+   * #### Notes
+   * The `id` values of stored items in the state database are formatted:
+   * `'namespace:identifier'`, which is the same convention that command
+   * identifiers in JupyterLab use as well. While this is not a technical
+   * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
+   * using the `fetchNamespace()` method.
+   */
+  save(id: string, value: ReadonlyJSONValue): Promise<void> {
+    try {
+      this._save(id, value);
+      return Promise.resolve(undefined);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  }
+
+  /**
    * Return a serialized copy of the state database's entire contents.
    *
    * @returns A promise that bears the database contents as JSON.
@@ -247,42 +272,6 @@ class StateDB implements IStateDB {
     }
 
     return Promise.resolve(contents);
-  }
-
-  /**
-   * Save a value in the database.
-   *
-   * @param id - The identifier for the data being saved.
-   *
-   * @param value - The data being saved.
-   *
-   * @returns A promise that is rejected if saving fails and succeeds otherwise.
-   *
-   * #### Notes
-   * The `id` values of stored items in the state database are formatted:
-   * `'namespace:identifier'`, which is the same convention that command
-   * identifiers in JupyterLab use as well. While this is not a technical
-   * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
-   * using the `fetchNamespace()` method.
-   */
-  save(id: string, value: ReadonlyJSONValue): Promise<void> {
-    try {
-      const key = `${this.namespace}:${id}`;
-      const envelope: Private.Envelope = { v: value };
-      const serialized = JSON.stringify(envelope);
-      const length = serialized.length;
-      const max = this.maxLength;
-
-      if (length > max) {
-        throw new Error(`Data length (${length}) exceeds maximum (${max})`);
-      }
-
-      window.localStorage.setItem(key, serialized);
-
-      return Promise.resolve(undefined);
-    } catch (error) {
-      return Promise.reject(error);
-    }
   }
 
   /**
@@ -321,6 +310,26 @@ class StateDB implements IStateDB {
     // Set the sentinel value and clear it when the statedb is initialized.
     localStorage.setItem(key, 'sentinel');
     when.then(() => { localStorage.removeItem(key); });
+  }
+
+  /**
+   * Save a key and its value in the database.
+   *
+   * #### Notes
+   * Unlike the public `save` method, this method is synchronous.
+   */
+  private _save(id: string, value: ReadonlyJSONValue): void {
+    const key = `${this.namespace}:${id}`;
+    const envelope: Private.Envelope = { v: value };
+    const serialized = JSON.stringify(envelope);
+    const length = serialized.length;
+    const max = this.maxLength;
+
+    if (length > max) {
+      throw new Error(`Data length (${length}) exceeds maximum (${max})`);
+    }
+
+    window.localStorage.setItem(key, serialized);
   }
 }
 
