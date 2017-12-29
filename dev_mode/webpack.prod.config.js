@@ -1,9 +1,23 @@
 
+var UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+var merge = require('webpack-merge');
+var webpack = require('webpack');
 
-var config = require('./webpack.config');
+var common = require('./webpack.config');
 
-config.devtool = 'source-map';
-
-// Add the uglify plugin and define production.
-
-module.exports = config;
+module.exports = merge(common, {
+  devtool: 'source-map',
+  plugins: [
+    new UglifyJSPlugin({
+      uglifyOptions: {
+        beautify: false,
+        ecma: 6,
+        compress: true,
+        comments: false
+      }
+    }),
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify('production')
+    })
+  ]
+});

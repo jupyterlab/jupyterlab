@@ -112,7 +112,8 @@
     "style-loader": "~0.13.2",
     "uglifyjs-webpack-plugin": "~1.1.5",
     "url-loader": "~0.5.9",
-    "webpack": "~2.7.0"
+    "webpack": "~2.7.0",
+    "webpack-merge": "^4.1.1"
   },
   "jupyterlab": {
     "extensions": {

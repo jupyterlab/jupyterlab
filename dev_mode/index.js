@@ -5,7 +5,10 @@
 
 require('es6-promise/auto');  // polyfill Promise on IE
 
-var PageConfig = require('@jupyterlab/coreutils').PageConfig;
+import {
+  PageConfig
+} from '@jupyterlab/coreutils';
+
 // eslint-disable-next-line
 __webpack_public_path__ = PageConfig.getOption('publicUrl');
 
