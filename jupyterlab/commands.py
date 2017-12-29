@@ -720,6 +720,7 @@ class _AppHandler(object):
                 overwrite_lock = False
 
         for fname in ['index.js', 'webpack.config.js',
+                'webpack.prod.config.js',
                 'yarn.lock', '.yarnrc', 'yarn.js']:
             target = pjoin(staging, fname)
             if (fname == 'yarn.lock' and os.path.exists(target) and
