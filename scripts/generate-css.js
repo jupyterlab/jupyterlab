@@ -14,7 +14,7 @@ myFont.defaultVariantClasses = {};
 myFont.defaultStyles = {};
 
 const font = new myFont({
-    fontURL: 'node_modules/mathjax3/mathjax2/css'  // Path to fonts 
+    fontURL: '~mathjax3/mathjax2/css'  // Path to fonts.
 });
 
 const styles = new CssStyles.CssStyles();
