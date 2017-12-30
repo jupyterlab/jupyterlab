@@ -338,9 +338,9 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
 
   menu.addGroup([{ command: CommandIDs.interruptKernel }], 0);
   menu.addGroup(restartGroup, 1);
-  menu.addGroup([{ command: CommandIDs.shutdownKernel }], 2);
+  menu.addGroup([{ command: CommandIDs.shutdownKernel },
+                 { command: CommandIDs.shutdownAllKernels }], 2);
   menu.addGroup([{ command: CommandIDs.changeKernel }], 3);
-  menu.addGroup([{ command: CommandIDs.shutdownAllKernels }], 4);
 }
 
 /**
