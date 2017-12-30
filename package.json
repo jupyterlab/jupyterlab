@@ -18,9 +18,9 @@
     "mathjax"
   ],
   "dependencies": {
-    "@jupyterlab/application": "^0.12.0",
-    "@jupyterlab/rendermime-interfaces": "^0.4.1",
-    "mathjax3": "3.0.0-alpha.1"
+    "@jupyterlab/application": "^0.14.1",
+    "@jupyterlab/rendermime-interfaces": "^1.0.1",
+    "mathjax3": "3.0.0-alpha.2"
   },
   "devDependencies": {
     "rimraf": "^2.6.2",

@@ -2,12 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin
+  JupyterLabPlugin
 } from '@jupyterlab/application';
 
 import {
-  IRenderMime
-} from '@jupyterlab/rendermime-interfaces';
+  ILatexTypesetter
+} from '@jupyterlab/rendermime';
 
 // the MathJax core
 import {
@@ -25,7 +25,9 @@ import {
 } from 'mathjax3/mathjax3/output/chtml';
 
 // handler for HTML documents
-import {HTMLHandler} from "mathjax3/mathjax3/handlers/html/HTMLHandler.js";
+import {
+  HTMLHandler
+} from "mathjax3/mathjax3/handlers/html/HTMLHandler.js";
 MathJax.handlers.register(new HTMLHandler());
 
 
@@ -34,7 +36,7 @@ MathJax.handlers.register(new HTMLHandler());
  * The MathJax 3 Typesetter.
  */
 export
-class MathJax3Typesetter implements IRenderMime.ILatexTypesetter {
+class MathJax3Typesetter implements ILatexTypesetter {
 
   constructor() {
     const chtml = new CHTML();
@@ -62,13 +64,11 @@ class MathJax3Typesetter implements IRenderMime.ILatexTypesetter {
 /**
  * The MathJax 3 extension.
  */
-const mathJax3Plugin: JupyterLabPlugin<void> = {
-  id: 'jupyter.extensions.mathjax3',
+const mathJax3Plugin: JupyterLabPlugin<ILatexTypesetter> = {
+  id: '@jupyterlab/mathjax3-extension:plugin',
   requires: [],
-  activate: (app: JupyterLab) => {
-    const typesetter = new MathJax3Typesetter();
-    app.rendermime.latexTypesetter = typesetter;
-  },
+  provides: ILatexTypesetter,
+  activate: () => new MathJax3Typesetter(),
   autoStart: true
 }
 
