@@ -3,7 +3,7 @@
 
 import {
   ILauncher
-} from '@jupyterlab/launcher'
+} from '@jupyterlab/launcher';
 
 
 module.exports = [{
