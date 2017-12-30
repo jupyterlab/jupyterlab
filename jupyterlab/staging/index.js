@@ -16,7 +16,7 @@ require('font-awesome/css/font-awesome.min.css');
  * The main entry point for the application.
  */
 function main() {
-  var app = require('@jupyterlab/application').JupyterLab;
+  var app = window.lab = require('@jupyterlab/application').JupyterLab;
 
   // Get the disabled extensions.
   var disabled = { patterns: [], matches: [] };
