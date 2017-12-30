@@ -870,6 +870,11 @@ namespace DocumentRegistry {
      * to the main area relative to a reference widget.
      */
     mode?: DockLayout.InsertMode;
+
+    /**
+     * Whether to activate the widget.  Defaults to `true`.
+     */
+    activate?: boolean;
   }
 
   /**

@@ -38,11 +38,6 @@ class LogTerminal extends Terminal {
     this.methods.push('onAfterShow');
   }
 
-  protected onCloseRequest(msg: Message): void {
-    super.onCloseRequest(msg);
-    this.methods.push('onCloseRequest');
-  }
-
   protected onResize(msg: Widget.ResizeMessage): void {
     super.onResize(msg);
     this.methods.push('onResize');
@@ -206,16 +201,6 @@ describe('terminal/index', () => {
             done();
           });
         });
-      });
-
-    });
-
-    describe('#onCloseRequest', () => {
-
-      it('should dispose of the terminal after closing', () => {
-        widget.close();
-        expect(widget.methods).to.contain('onCloseRequest');
-        expect(widget.isDisposed).to.be(true);
       });
 
     });

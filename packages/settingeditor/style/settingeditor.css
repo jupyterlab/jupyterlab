@@ -19,7 +19,6 @@
   min-width: 360px;
   min-height: 240px;
   background-color: var(--jp-layout-color0);
-  border-top: var(--jp-border-width) solid var(--jp-border-color1);
   margin-top: -1px;
   outline: none;
   /* This is needed so that all font sizing of children done in ems is
@@ -28,20 +27,9 @@
 }
 
 
-#setting-editor::before {
-  content: '';
-  display: block;
-  height: var(--jp-toolbar-micro-height);
-  background: var(--jp-toolbar-background);
-  border-bottom: 1px solid var(--jp-toolbar-border-color);
-  box-shadow: var(--jp-toolbar-box-shadow);
-  z-index: 10;
-}
-
-
 #setting-editor > .p-Widget {
   position: absolute;
-  top: var(--jp-toolbar-micro-height);
+  top: 0;
   bottom: 0;
   left: 0;
   right: 0;

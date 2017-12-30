@@ -34,18 +34,6 @@
 }
 
 
-.jp-Launcher::before {
-  content: '';
-  display: block;
-  height: var(--jp-toolbar-micro-height);
-  width: 100%;
-  background: var(--jp-toolbar-background);
-  border-bottom: 1px solid var(--jp-toolbar-border-color);
-  box-shadow: var(--jp-toolbar-box-shadow);
-  z-index: 1;
-}
-
-
 .jp-Launcher-body {
   width: 100%;
   height: 100%;
