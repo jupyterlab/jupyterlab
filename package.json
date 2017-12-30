@@ -29,6 +29,7 @@
   "scripts": {
     "build": "tsc",
     "clean": "rimraf lib",
+    "generate:css": "node scripts/generate-css.js",
     "prepack": "npm run clean && npm run build",
     "watch": "tsc -w"
   },
