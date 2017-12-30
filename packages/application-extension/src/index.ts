@@ -177,20 +177,21 @@ const router: JupyterLabPlugin<IRouter> = {
 
     commands.addCommand(CommandIDs.tree, {
       execute: (args: IRouter.ICommandArgs) => {
-        const path = (args.path as string).replace('/tree', '');
+        return app.restored.then(() => {
+          const path = (args.path as string).replace('/tree', '');
 
-        // Change the URL back to the base application URL.
-        window.history.replaceState({ }, '', base);
+          // Change the URL back to the base application URL.
+          window.history.replaceState({ }, '', base);
 
-        return commands.execute('filebrowser:navigate-main', { path });
+          return commands.execute('filebrowser:navigate-main', { path });
+        });
       }
     });
 
     commands.addCommand(CommandIDs.url, {
       execute: args => URLExt.join(tree, (args.path as string))
     });
-
-    app.restored.then(() => { router.route(window.location.href); });
+    app.started.then(() => { router.route(window.location.href); });
     router.register(/^\/tree\/.+/, CommandIDs.tree);
 
     return router;

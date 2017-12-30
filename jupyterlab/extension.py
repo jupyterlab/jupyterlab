@@ -4,9 +4,9 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-#-----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Module globals
-#-----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 import os
 
 DEV_NOTE = """You're running JupyterLab from source.
@@ -37,7 +37,6 @@ def load_jupyter_server_extension(nbapp):
         get_app_dir, get_user_settings_dir, watch, ensure_dev, watch_dev,
         pjoin, DEV_DIR, HERE, get_app_info, ensure_core
     )
-    from ._version import __version__
 
     web_app = nbapp.web_app
     logger = nbapp.log
@@ -101,6 +100,7 @@ def load_jupyter_server_extension(nbapp):
 
     config.app_settings_dir = pjoin(app_dir, 'settings')
     config.schemas_dir = pjoin(app_dir, 'schemas')
+    config.sessions_dir = pjoin(app_dir, 'sessions')
     config.themes_dir = pjoin(app_dir, 'themes')
     info = get_app_info(app_dir)
     config.app_version = info['version']
@@ -132,6 +132,6 @@ def load_jupyter_server_extension(nbapp):
     build_handler = (build_url, BuildHandler, {'builder': builder})
 
     # Must add before the launcher handlers to avoid shadowing.
-    web_app.add_handlers(".*$", [build_handler])
+    web_app.add_handlers('.*$', [build_handler])
 
     add_handlers(web_app, config)
