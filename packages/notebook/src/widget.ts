@@ -1355,22 +1355,35 @@ class Notebook extends StaticNotebook {
     // Mouse click should always ensure the notebook is focused.
     this._ensureFocus(true);
 
-    // We only handle main button actions.
-    if (event.button !== 0) {
+    // We only handle main or secondary button actions.
+    if (!(event.button === 0 || event.button === 2)) {
       return;
     }
 
     // Try to find the cell associated with the event.
     let target = event.target as HTMLElement;
     let index = this._findCell(target);
+    let widget = this.widgets[index];
+
+
+    // Switch to command mode if the click is not in an editor.
+    if (index === -1 || !widget.editorWidget.node.contains(target)) {
+      this.mode = 'command';
+    }
+
+
+    // Secondary click deselects cells and possibly changes the active cell.
+    if (event.button === 2) {
+      this.deselectAll();
+      if (index !== -1) {
+        this.activeCellIndex = index;
+      }
+      return;
+    }
+
+
 
     if (index !== -1) {
-      let widget = this.widgets[index];
-
-      // Event is on a cell but not in its editor, switch to command mode.
-      if (!widget.editorWidget.node.contains(target)) {
-        this.mode = 'command';
-      }
 
       if (event.shiftKey) {
         // Prevent text select behavior.
