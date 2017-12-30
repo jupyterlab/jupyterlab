@@ -51,10 +51,13 @@ import '../style/index.css';
  */
 namespace CommandIDs {
   export
+  const changeTheme = 'apputils:change-theme';
+
+  export
   const clearStateDB = 'apputils:clear-statedb';
 
   export
-  const changeTheme = 'apputils:change-theme';
+  const loadState = 'apputils:load-statedb';
 }
 
 
@@ -201,13 +204,7 @@ const splash: JupyterLabPlugin<ISplashScreen> = {
   id: '@jupyterlab/apputils-extension:splash',
   autoStart: true,
   provides: ISplashScreen,
-  activate: () => {
-    return {
-      show: () => {
-        return Private.showSplash();
-      }
-    };
-  }
+  activate: () => ({ show: () => Private.showSplash() })
 };
 
 
@@ -218,12 +215,14 @@ const state: JupyterLabPlugin<IStateDB> = {
   id: '@jupyterlab/apputils-extension:state',
   autoStart: true,
   provides: IStateDB,
-  activate: (app: JupyterLab) => {
+  requires: [IRouter],
+  activate: (app: JupyterLab, router: IRouter) => {
+    const { commands, info, restored } = app;
     const state = new StateDB({
-      namespace: app.info.namespace,
-      when: app.restored.then(() => { /* no-op */ })
+      namespace: info.namespace,
+      when: restored.then(() => { /* no-op */ })
     });
-    const version = app.info.version;
+    const version = info.version;
     const key = 'statedb:version';
     const fetch = state.fetch(key);
     const save = () => state.save(key, { version });

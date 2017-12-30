@@ -192,7 +192,7 @@ const router: JupyterLabPlugin<IRouter> = {
       execute: args => URLExt.join(tree, (args.path as string))
     });
     app.started.then(() => { router.route(window.location.href); });
-    router.register(/^\/tree\/.+/, CommandIDs.tree);
+    router.register({ command: CommandIDs.tree, pattern: /^\/tree\/.+/ });
 
     return router;
   },
