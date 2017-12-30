@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/application';
 
 import {
+  ICommandPalette
+} from '@jupyterlab/apputils';
+
+import {
   each
 } from '@phosphor/algorithm';
 
@@ -64,6 +68,9 @@ namespace CommandIDs {
   const shutdownKernel = 'kernelmenu:shutdown';
 
   export
+  const shutdownAllKernels = 'kernelmenu:shutdownAll';
+
+  export
   const wordWrap = 'viewmenu:word-wrap';
 
   export
@@ -93,8 +100,9 @@ namespace CommandIDs {
  */
 const menuPlugin: JupyterLabPlugin<IMainMenu> = {
   id: '@jupyterlab/mainmenu-extension:plugin',
+  requires: [ICommandPalette],
   provides: IMainMenu,
-  activate: (app: JupyterLab): IMainMenu => {
+  activate: (app: JupyterLab, palette: ICommandPalette): IMainMenu => {
     let menu = new MainMenu(app.commands);
     menu.id = 'jp-MainMenu';
 
@@ -111,6 +119,11 @@ const menuPlugin: JupyterLabPlugin<IMainMenu> = {
     createSettingsMenu(app, menu.settingsMenu);
     createViewMenu(app, menu.viewMenu);
     createTabsMenu(app, menu.tabsMenu);
+
+    palette.addItem({
+      command: CommandIDs.shutdownAllKernels,
+      category: 'Kernel Operations'
+    });
 
     app.shell.addToTopArea(logo);
     app.shell.addToTopArea(menu);
@@ -309,6 +322,14 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
     execute: Private.delegateExecute(app, menu.kernelUsers, 'shutdownKernel')
   });
 
+  commands.addCommand(CommandIDs.shutdownAllKernels, {
+    label: 'Shutdown All Kernels',
+    isEnabled: () => {
+      return app.serviceManager.sessions.running().next() !== undefined;
+    },
+    execute: () => app.serviceManager.sessions.shutdownAll()
+  });
+
   const restartGroup = [
     CommandIDs.restartKernel,
     CommandIDs.restartKernelAndClear,
@@ -319,6 +340,7 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
   menu.addGroup(restartGroup, 1);
   menu.addGroup([{ command: CommandIDs.shutdownKernel }], 2);
   menu.addGroup([{ command: CommandIDs.changeKernel }], 3);
+  menu.addGroup([{ command: CommandIDs.shutdownAllKernels }], 4);
 }
 
 /**

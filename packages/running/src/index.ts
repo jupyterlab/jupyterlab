@@ -47,6 +47,11 @@ const HEADER_CLASS = 'jp-RunningSessions-header';
 const REFRESH_CLASS = 'jp-RunningSessions-headerRefresh';
 
 /**
+ * The class name added to a shutdown all button.
+ */
+const SHUTDOWN_CLASS = 'jp-RunningSessions-headerShutdownAll';
+
+/**
  * The class name added to the running terminal sessions section.
  */
 const SECTION_CLASS = 'jp-RunningSessions-section';
@@ -294,12 +299,21 @@ class RunningSessions extends Widget {
     let sessionSection = DOMUtils.findElement(this.node, SESSIONS_CLASS);
     let sessionList = DOMUtils.findElement(sessionSection, LIST_CLASS);
     let refresh = DOMUtils.findElement(this.node, REFRESH_CLASS);
+    let shutdown = DOMUtils.findElement(this.node, SHUTDOWN_CLASS);
     let renderer = this._renderer;
     let clientX = event.clientX;
     let clientY = event.clientY;
 
     // Check for a refresh.
     if (ElementExt.hitTest(refresh, clientX, clientY)) {
+      this.refresh();
+      return;
+    }
+
+    // Check for a shutdown.
+    if (ElementExt.hitTest(shutdown, clientX, clientY)) {
+      this._manager.sessions.shutdownAll();
+      this._manager.terminals.shutdownAll();
       return;
     }
 
@@ -513,6 +527,10 @@ namespace RunningSessions {
       let refresh = document.createElement('button');
       refresh.className = REFRESH_CLASS;
       header.appendChild(refresh);
+
+      let shutdown = document.createElement('button');
+      shutdown.className = SHUTDOWN_CLASS;
+      header.appendChild(shutdown);
 
       node.appendChild(header);
       node.appendChild(terminals);

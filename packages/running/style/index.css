@@ -52,6 +52,26 @@
 }
 
 
+.jp-RunningSessions-headerShutdownAll {
+  flex: 1 1 auto;
+  height: var(--jp-private-running-button-height);
+  width: var(--jp-private-running-button-width);
+  max-width: 100px;
+  min-width: 16px;
+  min-height: 16px;
+  padding: 4px 6px;
+  background: var(--jp-layout-color1);
+  border: none;
+  outline: 0;
+  background-image: var(--jp-icon-close);
+  background-size: 16px;
+  display: block;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+
 .jp-RunningSessions-section {
   display: flex;
   flex: 0 1 auto;
@@ -59,7 +79,8 @@
 }
 
 
-.jp-RunningSessions-headerRefresh:hover {
+.jp-RunningSessions-headerRefresh:hover,
+.jp-RunningSessions-headerShutdownAll:hover {
   background-color: var(--jp-layout-color0);
   box-shadow: var(--jp-toolbar-box-shadow);
   border: 1px solid var(--jp-toolbar-border-color);
@@ -67,7 +88,8 @@
 }
 
 
-.jp-RunningSessions-headerRefresh:active {
+.jp-RunningSessions-headerRefresh:active,
+.jp-RunningSessions-headerShutdownAll:active  {
   border: 1px solid var(--jp-toolbar-border-color);
   background-color: var(--jp-toolbar-active-background);
   box-shadow: var(--jp-toolbar-box-shadow);
