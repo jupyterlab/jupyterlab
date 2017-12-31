@@ -94,17 +94,17 @@ class StateDB implements IStateDB {
    * @param options - The instantiation options for a state database.
    */
   constructor(options: StateDB.IOptions) {
-    const { load, namespace } = options;
+    const { namespace, transform } = options;
 
     this.namespace = namespace;
 
-    if (!load) {
+    if (!transform) {
       this._ready = Promise.resolve(undefined);
       return;
     }
 
-    this._ready = load.then(initial => {
-      const { contents, type } = initial;
+    this._ready = transform.then(transformation => {
+      const { contents, type } = transformation;
 
       switch (type) {
         case 'cancel':
@@ -381,10 +381,11 @@ namespace StateDB {
     namespace: string;
 
     /**
-     * An optional promise that resolves with the contents that should reside
-     * in the state database.
+     * An optional promise that resolves with a data transformation that is
+     * applied to the database contents before the database begins resolving
+     * client requests.
      */
-    load?: Promise<DataTransform>;
+    transform?: Promise<DataTransform>;
   }
 }
 

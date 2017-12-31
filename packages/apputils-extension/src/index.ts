@@ -225,7 +225,7 @@ const state: JupyterLabPlugin<IStateDB> = {
     const transform = new PromiseDelegate<StateDB.DataTransform>();
     const state = new StateDB({
       namespace: info.namespace,
-      load: transform.promise
+      transform: transform.promise
     });
     const disposables = new DisposableSet();
     const pattern = /^\/workspaces\/(.+)/;
