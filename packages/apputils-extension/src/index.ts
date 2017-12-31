@@ -218,13 +218,15 @@ const state: JupyterLabPlugin<IStateDB> = {
   provides: IStateDB,
   requires: [IRouter],
   activate: (app: JupyterLab, router: IRouter) => {
+    let command: string;
+    let resolved = false;
+
     const { commands, info } = app;
-    const delegate = new PromiseDelegate<StateDB.DataChange>();
+    const transform = new PromiseDelegate<StateDB.DataTransform>();
     const state = new StateDB({
       namespace: info.namespace,
-      load: delegate.promise
+      load: transform.promise
     });
-    let resolved = false;
     const disposables = new DisposableSet();
     const pattern = /^\/workspaces\/(.+)/;
     const unload = () => {
@@ -235,11 +237,11 @@ const state: JupyterLabPlugin<IStateDB> = {
       // leave the database intact.
       if (!resolved) {
         console.log('No workspace requested. Leaving state database intact.');
-        delegate.resolve({ type: 'cancel', contents: null });
+        transform.resolve({ type: 'cancel', contents: null });
       }
     };
 
-    let command = CommandIDs.clearStateDB;
+    command = CommandIDs.clearStateDB;
     commands.addCommand(command, {
       label: 'Clear Application Restore State',
       execute: () => state.clear()
@@ -261,14 +263,14 @@ const state: JupyterLabPlugin<IStateDB> = {
         if (!workspace) {
           console.log('No workspace found. Leaving state database intact.');
           resolved = true;
-          delegate.resolve({ type: 'cancel', contents: null });
+          transform.resolve({ type: 'cancel', contents: null });
           return;
         }
 
         // Fetch the workspace and overwrite the state database.
         console.log('Fetch the workspace:', workspace);
         resolved = true;
-        delegate.resolve({ type: 'merge', contents: { } });
+        transform.resolve({ type: 'merge', contents: { } });
       }
     }));
     disposables.add(router.register({ command, pattern }));

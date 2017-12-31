@@ -358,7 +358,7 @@ namespace StateDB {
    * A data transformation that can be applied to a state database.
    */
   export
-  type DataChange = {
+  type DataTransform = {
     /*
      * The change operation being applied.
      */
@@ -384,7 +384,7 @@ namespace StateDB {
      * An optional promise that resolves with the contents that should reside
      * in the state database.
      */
-    load?: Promise<DataChange>;
+    load?: Promise<DataTransform>;
   }
 }
 
