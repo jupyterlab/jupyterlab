@@ -352,6 +352,12 @@ class StateDB implements IStateDB {
  */
 export
 namespace StateDB {
+  export
+  type DataChange = {
+    type: 'cancel' | 'clear' | 'merge' | 'overwrite',
+    contents: ReadonlyJSONObject | null
+  };
+
   /**
    * The instantiation options for a state database.
    */
@@ -371,7 +377,7 @@ namespace StateDB {
      * be cleared, merged with the `contents` data, or if it should be
      * overwritten with the `contents` data.
      */
-    load?: Promise<{ type: 'clear' | 'merge' | 'overwrite', contents?: ReadonlyJSONObject}>;
+    load?: Promise<DataChange>;
   }
 }
 

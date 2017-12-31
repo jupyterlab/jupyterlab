@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  ILayoutRestorer, JupyterLab, JupyterLabPlugin
+  ILayoutRestorer, IRouter, JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -28,11 +28,11 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONObject
+  PromiseDelegate
 } from '@phosphor/coreutils';
 
 import {
-  DisposableDelegate, IDisposable
+  DisposableDelegate, DisposableSet, IDisposable
 } from '@phosphor/disposable';
 
 import {
@@ -217,31 +217,59 @@ const state: JupyterLabPlugin<IStateDB> = {
   provides: IStateDB,
   requires: [IRouter],
   activate: (app: JupyterLab, router: IRouter) => {
-    const { commands, info, restored } = app;
+    const { commands, info } = app;
+    const delegate = new PromiseDelegate<StateDB.DataChange>();
     const state = new StateDB({
       namespace: info.namespace,
-      when: restored.then(() => { /* no-op */ })
+      load: delegate.promise
     });
-    const version = info.version;
-    const key = 'statedb:version';
-    const fetch = state.fetch(key);
-    const save = () => state.save(key, { version });
-    const reset = () => state.clear().then(save);
-    const check = (value: JSONObject) => {
-      let old = value && value['version'];
-      if (!old || old !== version) {
-        const previous = old || 'unknown';
-        console.log(`Upgraded: ${previous} to ${version}; Resetting DB.`);
-        return reset();
+    let resolved = false;
+    const disposables = new DisposableSet();
+    const pattern = /^\/workspaces\/(.+)/;
+    const unload = () => {
+      disposables.dispose();
+      router.routed.disconnect(unload, state);
+
+      // If the request that was routed did not contain a workspace,
+      // leave the database intact.
+      if (!resolved) {
+        console.log('No workspace requested. Leaving state database intact.');
+        delegate.resolve({ type: 'cancel', contents: null });
       }
     };
 
-    app.commands.addCommand(CommandIDs.clearStateDB, {
+    let command = CommandIDs.clearStateDB;
+    commands.addCommand(command, {
       label: 'Clear Application Restore State',
       execute: () => state.clear()
     });
 
-    return fetch.then(check, reset).then(() => state);
+    command = CommandIDs.loadState;
+    disposables.add(commands.addCommand(command, {
+      execute: (args: IRouter.ICommandArgs) => {
+        const workspace = (args.path || '').match(pattern)[1];
+
+        // If there is no workspace, leave the state database intact.
+        if (!workspace) {
+          console.log('No workspace found. Leaving state database intact.');
+          resolved = true;
+          delegate.resolve({ type: 'cancel', contents: null });
+          return;
+        }
+
+        // Fetch the workspace and overwrite the state database.
+        console.log('Fetch the workspace:', workspace);
+        resolved = true;
+        delegate.resolve({ type: 'merge', contents: { } });
+      }
+    }));
+    disposables.add(router.register({ command, pattern }));
+
+    // After the first route in the application lifecycle has been routed,
+    // stop listening to routing events.
+    router.routed.connect(unload, state);
+
+    return state;
   }
 };
 
