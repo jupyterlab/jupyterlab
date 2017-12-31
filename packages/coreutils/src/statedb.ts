@@ -107,6 +107,8 @@ class StateDB implements IStateDB {
       const { contents, type } = initial;
 
       switch (type) {
+        case 'cancel':
+          return;
         case 'clear':
           this._clear();
           return;
@@ -352,9 +354,19 @@ class StateDB implements IStateDB {
  */
 export
 namespace StateDB {
+  /**
+   * A data transformation that can be applied to a state database.
+   */
   export
   type DataChange = {
+    /*
+     * The change operation being applied.
+     */
     type: 'cancel' | 'clear' | 'merge' | 'overwrite',
+
+    /**
+     * The contents of the change operation.
+     */
     contents: ReadonlyJSONObject | null
   };
 
@@ -371,11 +383,6 @@ namespace StateDB {
     /**
      * An optional promise that resolves with the contents that should reside
      * in the state database.
-     *
-     * #### Notes
-     * The `type` field indicates whether the data in the state database should
-     * be cleared, merged with the `contents` data, or if it should be
-     * overwritten with the `contents` data.
      */
     load?: Promise<DataChange>;
   }
