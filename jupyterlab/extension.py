@@ -100,8 +100,8 @@ def load_jupyter_server_extension(nbapp):
 
     config.app_settings_dir = pjoin(app_dir, 'settings')
     config.schemas_dir = pjoin(app_dir, 'schemas')
-    config.sessions_dir = pjoin(app_dir, 'sessions')
     config.themes_dir = pjoin(app_dir, 'themes')
+    config.workspaces_dir = pjoin(app_dir, 'workspaces')
     info = get_app_info(app_dir)
     config.app_version = info['version']
     public_url = info['publicUrl']
