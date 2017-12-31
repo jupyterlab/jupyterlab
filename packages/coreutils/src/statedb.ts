@@ -109,9 +109,9 @@ class StateDB implements IStateDB {
    */
   constructor(options: StateDB.IOptions) {
     this.namespace = options.namespace;
-    if (options.when) {
-      this._handleSentinel(options.when);
-    }
+    this._ready = options.load ?
+      options.load.then(contents => { this._fromJSON(contents); })
+        : Promise.resolve(undefined);
   }
 
   /**
@@ -133,9 +133,7 @@ class StateDB implements IStateDB {
    * Clear the entire database.
    */
   clear(): Promise<void> {
-    this._clear();
-
-    return Promise.resolve(undefined);
+    return this._ready.then(() => { this._clear(); });
   }
 
   /**
@@ -156,20 +154,16 @@ class StateDB implements IStateDB {
    * retrieving the data. Non-existence of an `id` will succeed with `null`.
    */
   fetch(id: string): Promise<ReadonlyJSONValue | undefined> {
-    const key = `${this.namespace}:${id}`;
-    const value = window.localStorage.getItem(key);
+    return this._ready.then(() => {
+      const key = `${this.namespace}:${id}`;
+      const value = window.localStorage.getItem(key);
 
-    if (!value) {
-      return Promise.resolve(undefined);
-    }
+      if (value) {
+        const envelope = JSON.parse(value) as Private.Envelope;
 
-    try {
-      const envelope = JSON.parse(value) as Private.Envelope;
-
-      return Promise.resolve(envelope.v);
-    } catch (error) {
-      return Promise.reject(error);
-    }
+        return envelope.v;
+      }
+    });
   }
 
   /**
@@ -189,32 +183,34 @@ class StateDB implements IStateDB {
    * This promise will always succeed.
    */
   fetchNamespace(namespace: string): Promise<IStateItem[]> {
-    const { localStorage } = window;
-    const prefix = `${this.namespace}:${namespace}:`;
-    let items: IStateItem[] = [];
-    let i = localStorage.length;
+    return this._ready.then(() => {
+      const { localStorage } = window;
+      const prefix = `${this.namespace}:${namespace}:`;
+      let items: IStateItem[] = [];
+      let i = localStorage.length;
 
-    while (i) {
-      let key = localStorage.key(--i);
+      while (i) {
+        let key = localStorage.key(--i);
 
-      if (key && key.indexOf(prefix) === 0) {
-        let value = localStorage.getItem(key);
+        if (key && key.indexOf(prefix) === 0) {
+          let value = localStorage.getItem(key);
 
-        try {
-          let envelope = JSON.parse(value) as Private.Envelope;
+          try {
+            let envelope = JSON.parse(value) as Private.Envelope;
 
-          items.push({
-            id: key.replace(`${this.namespace}:`, ''),
-            value: envelope ? envelope.v : undefined
-          });
-        } catch (error) {
-          console.warn(error);
-          localStorage.removeItem(key);
+            items.push({
+              id: key.replace(`${this.namespace}:`, ''),
+              value: envelope ? envelope.v : undefined
+            });
+          } catch (error) {
+            console.warn(error);
+            localStorage.removeItem(key);
+          }
         }
       }
-    }
 
-    return Promise.resolve(items);
+      return items;
+    });
   }
 
   /**
@@ -230,15 +226,7 @@ class StateDB implements IStateDB {
    * this is returned by the `toJSON` method.
    */
   fromJSON(contents: ReadonlyJSONObject): Promise<void> {
-    this._clear();
-
-    try {
-      Object.keys(contents).forEach(key => { this._save(key, contents[key]); });
-    } catch (error) {
-      return Promise.reject(error);
-    }
-
-    return Promise.resolve(undefined);
+    return this._ready.then(() => { this._fromJSON(contents); });
   }
 
   /**
@@ -249,9 +237,9 @@ class StateDB implements IStateDB {
    * @returns A promise that is rejected if remove fails and succeeds otherwise.
    */
   remove(id: string): Promise<void> {
-    window.localStorage.removeItem(`${this.namespace}:${id}`);
-
-    return Promise.resolve(undefined);
+    return this._ready.then(() => {
+      window.localStorage.removeItem(`${this.namespace}:${id}`);
+    });
   }
 
   /**
@@ -271,12 +259,7 @@ class StateDB implements IStateDB {
    * using the `fetchNamespace()` method.
    */
   save(id: string, value: ReadonlyJSONValue): Promise<void> {
-    try {
-      this._save(id, value);
-      return Promise.resolve(undefined);
-    } catch (error) {
-      return Promise.reject(error);
-    }
+    return this._ready.then(() => this._save(id, value));
   }
 
   /**
@@ -285,31 +268,33 @@ class StateDB implements IStateDB {
    * @returns A promise that bears the database contents as JSON.
    */
   toJSON(): Promise<ReadonlyJSONObject> {
-    const { localStorage } = window;
-    const prefix = `${this.namespace}:`;
-    const contents: Partial<ReadonlyJSONObject> =  { };
-    let i = localStorage.length;
+    return this._ready.then(() => {
+      const { localStorage } = window;
+      const prefix = `${this.namespace}:`;
+      const contents: Partial<ReadonlyJSONObject> =  { };
+      let i = localStorage.length;
 
-    while (i) {
-      let key = localStorage.key(--i);
+      while (i) {
+        let key = localStorage.key(--i);
 
-      if (key && key.indexOf(prefix) === 0) {
-        let value = localStorage.getItem(key);
+        if (key && key.indexOf(prefix) === 0) {
+          let value = localStorage.getItem(key);
 
-        try {
-          let envelope = JSON.parse(value) as Private.Envelope;
+          try {
+            let envelope = JSON.parse(value) as Private.Envelope;
 
-          if (envelope) {
-            contents[key.replace(prefix, '')] = envelope.v;
+            if (envelope) {
+              contents[key.replace(prefix, '')] = envelope.v;
+            }
+          } catch (error) {
+            console.warn(error);
+            localStorage.removeItem(key);
           }
-        } catch (error) {
-          console.warn(error);
-          localStorage.removeItem(key);
         }
       }
-    }
 
-    return Promise.resolve(contents);
+      return contents;
+    });
   }
 
   /**
@@ -333,21 +318,11 @@ class StateDB implements IStateDB {
   }
 
   /**
-   * Handle the startup sentinel.
+   * Overwrite the entire database with new contents.
    */
-  private _handleSentinel(when: Promise<void>): void {
-    const { localStorage } = window;
-    let key = `${this.namespace}:statedb:sentinel`;
-    let sentinel = localStorage.getItem(key);
-
-    // Clear state if the sentinel was not properly cleared on last page load.
-    if (sentinel) {
-      this._clear();
-    }
-
-    // Set the sentinel value and clear it when the statedb is initialized.
-    localStorage.setItem(key, 'sentinel');
-    when.then(() => { localStorage.removeItem(key); });
+  private _fromJSON(contents: ReadonlyJSONObject): void {
+    this._clear();
+    Object.keys(contents).forEach(key => { this._save(key, contents[key]); });
   }
 
   /**
@@ -369,6 +344,8 @@ class StateDB implements IStateDB {
 
     window.localStorage.setItem(key, serialized);
   }
+
+  private _ready: Promise<void>;
 }
 
 /**
@@ -387,10 +364,13 @@ namespace StateDB {
     namespace: string;
 
     /**
-     * An optional Promise for when the state database should be considered
-     * initialized.
+     * An optional promise that resolves with the contents that should reside
+     * in the state database.
+     *
+     * #### Notes
+     * If this promise is provided at instantiation, it will overwrite all data.
      */
-    when?: Promise<void>;
+    load?: Promise<ReadonlyJSONObject>;
   }
 }
 
