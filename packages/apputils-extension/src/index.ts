@@ -12,7 +12,8 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  DataConnector, ISettingRegistry, IStateDB, SettingRegistry, StateDB
+  DataConnector, ISettingRegistry, IStateDB, PageConfig, SettingRegistry,
+  StateDB, URLExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -248,6 +249,13 @@ const state: JupyterLabPlugin<IStateDB> = {
     disposables.add(commands.addCommand(command, {
       execute: (args: IRouter.ICommandArgs) => {
         const workspace = (args.path || '').match(pattern)[1];
+        const base = URLExt.join(
+          PageConfig.getBaseUrl(),
+          PageConfig.getOption('pageUrl')
+        );
+
+        // Change the URL back to the base application URL.
+        window.history.replaceState({ }, '', base);
 
         // If there is no workspace, leave the state database intact.
         if (!workspace) {
