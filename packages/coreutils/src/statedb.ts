@@ -75,20 +75,6 @@ interface IStateDB extends IDataConnector<ReadonlyJSONValue> {
   fetchNamespace(namespace: string): Promise<IStateItem[]>;
 
   /**
-   * Overwrite all the data in the state database with new contents.
-   *
-   * @param contents - The new contents of the state database.
-   *
-   * @returns A promise that resolves on success.
-   *
-   * #### Notes
-   * Each top-level key in the `contents` object will be stored as an individual
-   * value in the state database. This method accepts JSON in the same format
-   * this is returned by the `toJSON` method.
-   */
-  fromJSON(contents: ReadonlyJSONObject): Promise<void>;
-
-  /**
    * Return a serialized copy of the state database's entire contents.
    *
    * @returns A promise that bears the database contents as JSON.
@@ -108,10 +94,32 @@ class StateDB implements IStateDB {
    * @param options - The instantiation options for a state database.
    */
   constructor(options: StateDB.IOptions) {
-    this.namespace = options.namespace;
-    this._ready = options.load ?
-      options.load.then(contents => { this._fromJSON(contents); })
-        : Promise.resolve(undefined);
+    const { load, namespace } = options;
+
+    this.namespace = namespace;
+
+    if (!load) {
+      this._ready = Promise.resolve(undefined);
+      return;
+    }
+
+    this._ready = load.then(initial => {
+      const { contents, type } = initial;
+
+      switch (type) {
+        case 'clear':
+          this._clear();
+          return;
+        case 'merge':
+          this._merge(contents || { });
+          return;
+        case 'overwrite':
+          this._overwrite(contents || { });
+          return;
+        default:
+          return;
+      }
+    });
   }
 
   /**
@@ -214,22 +222,6 @@ class StateDB implements IStateDB {
   }
 
   /**
-   * Overwrite all the data in the state database with new contents.
-   *
-   * @param contents - The new contents of the state database.
-   *
-   * @returns A promise that resolves on success.
-   *
-   * #### Notes
-   * Each top-level key in the `contents` object will be stored as an individual
-   * value in the state database. This method accepts JSON in the same format
-   * this is returned by the `toJSON` method.
-   */
-  fromJSON(contents: ReadonlyJSONObject): Promise<void> {
-    return this._ready.then(() => { this._fromJSON(contents); });
-  }
-
-  /**
    * Remove a value from the database.
    *
    * @param id - The identifier for the data being removed.
@@ -318,11 +310,18 @@ class StateDB implements IStateDB {
   }
 
   /**
+   * Merge data into the state database.
+   */
+  private _merge(contents: ReadonlyJSONObject): void {
+    Object.keys(contents).forEach(key => { this._save(key, contents[key]); });
+  }
+
+  /**
    * Overwrite the entire database with new contents.
    */
-  private _fromJSON(contents: ReadonlyJSONObject): void {
+  private _overwrite(contents: ReadonlyJSONObject): void {
     this._clear();
-    Object.keys(contents).forEach(key => { this._save(key, contents[key]); });
+    this._merge(contents);
   }
 
   /**
@@ -368,9 +367,11 @@ namespace StateDB {
      * in the state database.
      *
      * #### Notes
-     * If this promise is provided at instantiation, it will overwrite all data.
+     * The `type` field indicates whether the data in the state database should
+     * be cleared, merged with the `contents` data, or if it should be
+     * overwritten with the `contents` data.
      */
-    load?: Promise<ReadonlyJSONObject>;
+    load?: Promise<{ type: 'clear' | 'merge' | 'overwrite', contents?: ReadonlyJSONObject}>;
   }
 }
 
