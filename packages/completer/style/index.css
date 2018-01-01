@@ -12,10 +12,10 @@
 
 
 .jp-Completer {
+  box-shadow: var(--jp-elevation-z6);
   background: var(--jp-layout-color1);
   color: var(--jp-content-font-color1);
   border: var(--jp-border-width) solid var(--jp-border-color1);
-  box-shadow: var(--jp-elevation-z6);
   list-style-type: none;
   overflow: auto;
   padding: 0;
@@ -27,27 +27,105 @@
 
 
 .jp-Completer-item {
+  display: table-row;
+  box-sizing: border-box;
   margin: 0;
+  padding: 0;
+  height: var(--jp-private-completer-item-height);
   min-width: 150px;
-  padding: 0 2px;
+  font-size: var(--jp-private-completer-code-font-size);
+}
+
+
+.jp-Completer-item .jp-Completer-match {
+  display: table-cell;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0 8px 0 6px;
+  height: var(--jp-private-completer-item-height);
+  vertical-align: middle;
+}
+
+
+.jp-Completer-item .jp-Completer-type {
+  display: table-cell;
+  box-sizing: border-box;
+  height: var(--jp-private-completer-item-height);
+  text-align: center;
+  vertical-align: middle;
+  background: var(--jp-layout-color4);
+  color: white;
+  width: 24px;
+  font-family: var(-jp-ui-font-family);
 }
 
 
 .jp-Completer-item:hover, .jp-Completer-item.jp-mod-active {
-  background: var(--jp-layout-color2);
+  background: var(--jp-brand-color3);
+  opacity: 0.8;
 }
 
 
-.jp-Completer-item code {
-  font-size: var(--jp-private-completer-code-font-size);
-  height: var(--jp-private-completer-item-height);
-  padding: 0;
-  margin: 0;
-}
-
-
-.jp-Completer-item mark {
+.jp-Completer-item .jp-Completer-match mark {
   font-weight: bold;
   background: inherit;
   color: inherit;
 }
+
+
+.jp-Completer-type[data-color-index='0'] {
+  background: transparent;
+}
+
+
+.jp-Completer-type[data-color-index='1'] {
+  background: #1f77b4;
+}
+
+
+.jp-Completer-type[data-color-index='2'] {
+  background: #ff7f0e;
+}
+
+
+.jp-Completer-type[data-color-index='3'] {
+  background: #2ca02c;
+}
+
+
+.jp-Completer-type[data-color-index='4'] {
+  background: #d62728;
+}
+
+
+.jp-Completer-type[data-color-index='5'] {
+  background: #9467bd;
+}
+
+
+.jp-Completer-type[data-color-index='6'] {
+  background: #8c564b;
+}
+
+
+.jp-Completer-type[data-color-index='7'] {
+  background: #e377c2;
+}
+
+
+.jp-Completer-type[data-color-index='8'] {
+  background: #7f7f7f;
+}
+
+
+.jp-Completer-type[data-color-index='9'] {
+  background: #bcbd22;
+}
+
+
+.jp-Completer-type[data-color-index='10'] {
+  background: #17becf;
+}
+
+
+
