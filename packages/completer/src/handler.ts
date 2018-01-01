@@ -405,10 +405,10 @@ class CompletionHandler implements IDisposable {
         // For some reason the _jupyter_types_experimental list has two entries for each
         // match, with one having a type of "<unknown>". Discard those and use undefined
         // to indicate an unknown type.
-        if (matches.indexOf(item.text as string) !== -1 && item.type !== "<unknown>") {
+        if (matches.indexOf(item.text as string) !== -1 && item.type !== '<unknown>') {
           typeMap[item.text as string] = item.type;
         }
-      })
+      });
     }
 
     // Update the options, including the type map.

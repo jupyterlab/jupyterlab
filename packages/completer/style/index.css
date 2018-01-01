@@ -6,8 +6,9 @@
 
 
 :root {
-  --jp-private-completer-code-font-size: 14px;
-  --jp-private-completer-item-height: 24px;
+  --jp-private-completer-item-height: 22px;
+  /* Shift the baseline of the type character to align with the match text */
+  --jp-private-completer-type-offset: 2px;
 }
 
 
@@ -33,7 +34,6 @@
   padding: 0;
   height: var(--jp-private-completer-item-height);
   min-width: 150px;
-  font-size: var(--jp-private-completer-code-font-size);
 }
 
 
@@ -43,7 +43,9 @@
   margin: 0;
   padding: 0 8px 0 6px;
   height: var(--jp-private-completer-item-height);
-  vertical-align: middle;
+  font-family: var(--jp-code-font-family);
+  font-size: var(--jp-code-font-size);
+  line-height: var(--jp-private-completer-item-height);
 }
 
 
@@ -52,15 +54,23 @@
   box-sizing: border-box;
   height: var(--jp-private-completer-item-height);
   text-align: center;
-  vertical-align: middle;
-  background: var(--jp-layout-color4);
+  background: transparent;
   color: white;
-  width: 24px;
-  font-family: var(-jp-ui-font-family);
+  width: var(--jp-private-completer-item-height);
+  font-family: var(--jp-ui-font-family);
+  font-size: var(--jp-ui-font-size1);
+  line-height: calc( var(--jp-private-completer-item-height) - var(--jp-private-completer-type-offset) );
+  padding-bottom: var(--jp-private-completer-type-offset);
 }
 
 
-.jp-Completer-item:hover, .jp-Completer-item.jp-mod-active {
+.jp-Completer-item:hover {
+  background: var(--jp-layout-color2);
+  opacity: 0.8;
+}
+
+
+.jp-Completer-item.jp-mod-active {
   background: var(--jp-brand-color3);
   opacity: 0.8;
 }

@@ -257,7 +257,7 @@ class Completer extends Widget {
     let node = this.node;
     node.textContent = '';
 
-    // Compute an ordered list of all the types in the typeMap, this is computed once by the 
+    // Compute an ordered list of all the types in the typeMap, this is computed once by the
     // model each time new data arrives for efficiency.
     let orderedTypes = model.orderedTypes();
 
@@ -672,7 +672,7 @@ namespace Completer {
 
   export
   interface  ITypeMap {
-    [index: string]: string
+    [index: string]: string;
   }
 
 
@@ -711,7 +711,7 @@ namespace Completer {
         let typeNode = document.createElement('span');
         let type = typeMap[item.raw] || '';
         typeNode.textContent = (type[0] || '').toLowerCase();
-        let colorIndex: number = orderedTypes.indexOf(type) + 1
+        let colorIndex: number = orderedTypes.indexOf(type) + 1;
         typeNode.className = 'jp-Completer-type';
         typeNode.setAttribute(`data-color-index`, colorIndex.toString());
         li.appendChild(typeNode);

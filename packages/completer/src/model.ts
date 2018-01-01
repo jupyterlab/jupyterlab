@@ -182,11 +182,11 @@ class CompleterModel implements Completer.IModel {
 
   /**
    * The map from identifiers (a.b) to types (function, module, class, instance, etc.).
-   * 
+   *
    * #### Notes
    * A type map is currently only provided by the latest IPython kernel using the
    * completer reply metadata field `_jupyter_types_experimental`. The values are completely up to the kernel.
-   * 
+   *
    */
   typeMap(): ReadonlyJSONObject {
     return this._typeMap;
@@ -194,7 +194,7 @@ class CompleterModel implements Completer.IModel {
 
   /**
    * An ordered list of all the known types in the typeMap.
-   * 
+   *
    * #### Notes
    * To visually encode the types of the completer matches, we assemble an ordered list. This list begin
    * with ['function', 'instance', 'class', 'module', 'keyword'] and then has any remaining types
@@ -443,7 +443,7 @@ namespace Private {
 
   /**
    * Compute a reliably ordered list of types.
-   * 
+   *
    * #### Notes
    * The resulting list always begins with the known types
    * ['function', 'instance', 'class', 'module', 'keyword'], followed by other types in alphabetical
