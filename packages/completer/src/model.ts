@@ -210,7 +210,7 @@ class CompleterModel implements Completer.IModel {
    */
   setOptions(newValue: IterableOrArrayLike<string>, typeMap: JSONObject) {
     const values = toArray(newValue || []);
-    if (JSONExt.deepEqual(values, this._options)) {
+    if (JSONExt.deepEqual(values, this._options) && JSONExt.deepEqual(typeMap, this._typeMap)) {
       return;
     }
     if (values.length) {
@@ -220,6 +220,8 @@ class CompleterModel implements Completer.IModel {
       this._subsetMatch = true;
     } else {
       this._options = [];
+      this._typeMap = {};
+      this._orderedTypes = [];
     }
     this._stateChanged.emit(void 0);
   }
