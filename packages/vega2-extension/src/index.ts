@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  JSONObject, ReadonlyJSONObject
+  JSONObject, ReadonlyJSONObject, JSONValue
 } from '@phosphor/coreutils';
 
 import {
@@ -87,10 +87,10 @@ class RenderedVega extends Widget implements IRenderMime.IRenderer {
    */
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
 
-    let data = model.data[this._mimeType];
+    let data = model.data[this._mimeType] as ReadonlyJSONObject;
     let updatedData: JSONObject;
     if (this._mode === 'vega-lite') {
-      updatedData = Private.updateVegaLiteDefaults(data as ReadonlyJSONObject);
+      updatedData = Private.updateVegaLiteDefaults(data);
     } else {
       updatedData = data as JSONObject;
     }
@@ -103,12 +103,13 @@ class RenderedVega extends Widget implements IRenderMime.IRenderer {
     return this._ensureMod().then(embedFunc => {
       return new Promise<void>((resolve, reject) => {
         embedFunc(this.node, embedSpec, (error: any, result: any): any => {
+          // Save png data in MIME bundle along with original MIME data.
+          if (!model.data['image/png']) {
+            let imageData = result.view.toImageURL().split(',')[1] as JSONValue;
+            let newData = {...(model.data), 'image/png': imageData};
+            model.setData({ data: newData });
+          }
           resolve(undefined);
-          // This is copied out for now as there is a bug in JupyterLab
-          // that triggers and infinite rendering loop when this is done.
-          // let imageData = result.view.toImageURL();
-          // imageData = imageData.split(',')[1];
-          // this._injector('image/png', imageData);
         });
       });
     });
