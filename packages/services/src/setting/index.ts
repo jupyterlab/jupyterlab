@@ -17,7 +17,7 @@ const SERVICE_SETTINGS_URL = 'api/settings';
 
 
 /**
- * The static namespace for `SettingManager`.
+ * The settings API service manager.
  */
 export
 class SettingManager {
@@ -47,7 +47,7 @@ class SettingManager {
     const { baseUrl, pageUrl } = serverSettings;
     const base = baseUrl + pageUrl;
     const url = Private.url(base, id);
-    const promise = ServerConnection.makeRequest(url, {}, serverSettings);
+    const promise = ServerConnection.makeRequest(url, { }, serverSettings);
 
     return promise.then(response => {
       if (response.status !== 200) {
@@ -84,7 +84,7 @@ class SettingManager {
         throw new ServerConnection.ResponseError(response);
       }
 
-      return void 0;
+      return undefined;
     });
   }
 }
