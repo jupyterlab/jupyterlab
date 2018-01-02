@@ -44,6 +44,9 @@ namespace CommandIDs {
   const toggleRightArea: string = 'application:toggle-right-area';
 
   export
+  const togglePresentationMode: string = 'application:toggle-presentation-mode';
+
+  export
   const tree: string = 'router:tree';
 
   export
@@ -283,6 +286,18 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
     isVisible: () => !app.shell.isEmpty('right')
   });
   palette.addItem({ command, category });
+
+  command = CommandIDs.togglePresentationMode;
+  app.commands.addCommand(command, {
+    label: args => args['isPalette'] ?
+      'Toggle Presentation Mode' : 'Presentation Mode',
+    execute: () => {
+      app.shell.presentationMode = !app.shell.presentationMode;
+    },
+    isToggled: () => app.shell.presentationMode,
+    isVisible: () => true
+  });
+  palette.addItem({ command, category,  args: { 'isPalette': true } });
 
   command = CommandIDs.setMode;
   app.commands.addCommand(command, {

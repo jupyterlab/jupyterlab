@@ -116,3 +116,20 @@
   box-shadow: var(--jp-input-box-shadow);
   background-color: var(--jp-cell-editor-active-background);
 }
+
+
+/*-----------------------------------------------------------------------------
+| Presentation Mode (.jp-mod-presentationMode)
+|----------------------------------------------------------------------------*/
+
+
+.jp-mod-presentationMode .jp-CodeConsole {
+  --jp-content-font-size1: var(--jp-content-presentation-font-size1);
+  --jp-code-font-size: var(--jp-code-presentation-font-size);
+}
+
+
+.jp-mod-presentationMode .jp-CodeConsole .jp-Cell .jp-InputPrompt,
+.jp-mod-presentationMode .jp-CodeConsole .jp-Cell .jp-OutputPrompt {
+  flex: 0 0 110px;
+}
