@@ -31,6 +31,7 @@
     "publish": "jlpm run clean:slate && jlpm run build:packages && lerna publish --force-publish=* -m \"Publish\" && jlpm run build:update",
     "remove:dependency": "node buildutils/lib/remove-dependency.js",
     "remove:package": "node buildutils/lib/remove-package.js",
+    "remove:sibling": "node buildutils/lib/remove-package.js",
     "test": "cd test && jlpm test",
     "test:chrome": "lerna run test:chrome --stream",
     "test:firefox": "lerna run test:firefox --stream",

@@ -1316,7 +1316,9 @@ class Notebook extends StaticNotebook {
   private _ensureFocus(force=false): void {
     let activeCell = this.activeCell;
     if (this.mode === 'edit' && activeCell) {
-      activeCell.editor.focus();
+      if (!activeCell.editor.hasFocus()) {
+        activeCell.editor.focus();
+      }
     } else if (activeCell) {
       activeCell.editor.blur();
     }
@@ -1418,8 +1420,9 @@ class Notebook extends StaticNotebook {
           this._mouseMode = 'couldDrag';
           document.addEventListener('mouseup', this, true);
           document.addEventListener('mousemove', this, true);
+          event.preventDefault();
         }
-        event.preventDefault();
+
       }
 
     }
