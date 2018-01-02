@@ -61,6 +61,36 @@ class WorkspaceManager {
       return response.json();
     });
   }
+
+  /**
+   * Save a workspace.
+   *
+   * @param id - The workspace's ID.
+   *
+   * @param workspace - The workspace being saved.
+   *
+   * @returns A promise that resolves when saving is complete or rejects with
+   * a `ServerConnection.IError`.
+   */
+  save(id: string, workspace: Workspace.IWorkspace): Promise<void> {
+    const { serverSettings } = this;
+    const { baseUrl, pageUrl } = serverSettings;
+    const base = baseUrl + pageUrl;
+    const url = Private.url(base, id);
+    const init = {
+      body: JSON.stringify(workspace),
+      method: 'PUT'
+    };
+    const promise = ServerConnection.makeRequest(url, init, serverSettings);
+
+    return promise.then(response => {
+      if (response.status !== 204) {
+        throw new ServerConnection.ResponseError(response);
+      }
+
+      return undefined;
+    });
+  }
 }
 
 
