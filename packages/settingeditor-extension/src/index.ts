@@ -86,7 +86,7 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, registry: ISetting
   commands.addCommand(CommandIDs.debug, {
     execute: () => { tracker.currentWidget.toggleDebug(); },
     iconClass: 'jp-MaterialIcon jp-BugIcon',
-    label: 'Debug user settings in inspector',
+    label: 'Debug User Settings In Inspector',
     isToggled: () => tracker.currentWidget.isDebugVisible
   });
 
@@ -132,14 +132,14 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, registry: ISetting
   commands.addCommand(CommandIDs.revert, {
     execute: () => { tracker.currentWidget.revert(); },
     iconClass: 'jp-MaterialIcon jp-RefreshIcon',
-    label: 'Revert user settings',
+    label: 'Revert User Settings',
     isEnabled: () => tracker.currentWidget.canRevertRaw
   });
 
   commands.addCommand(CommandIDs.save, {
     execute: () => tracker.currentWidget.save(),
     iconClass: 'jp-MaterialIcon jp-SaveIcon',
-    label: 'Save user settings',
+    label: 'Save User Settings',
     isEnabled: () => tracker.currentWidget.canSaveRaw
   });
 

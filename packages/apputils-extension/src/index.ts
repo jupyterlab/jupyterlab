@@ -25,10 +25,6 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  each
-} from '@phosphor/algorithm';
-
-import {
   PromiseDelegate
 } from '@phosphor/coreutils';
 
@@ -55,7 +51,7 @@ namespace CommandIDs {
   const changeTheme = 'apputils:change-theme';
 
   export
-  const clearStateDB = 'apputils:clear-statedb';
+  const clearState = 'apputils:clear-statedb';
 
   export
   const loadState = 'apputils:load-statedb';
@@ -164,11 +160,11 @@ const themes: JupyterLabPlugin<IThemeManager> = {
       const themeMenu = new Menu({ commands });
       themeMenu.title.label = 'JupyterLab Theme';
       manager.ready.then(() => {
-        each(manager.themes, theme => {
-          themeMenu.addItem({
-            command: CommandIDs.changeTheme,
-            args: { isPalette: false, theme: theme }
-          });
+        const command = CommandIDs.changeTheme;
+        const isPalette = false;
+
+        manager.themes.forEach(theme => {
+          themeMenu.addItem({ command, args: { isPalette, theme } });
         });
       });
       mainMenu.settingsMenu.addGroup([{
@@ -176,17 +172,15 @@ const themes: JupyterLabPlugin<IThemeManager> = {
       }], 0);
     }
 
-    // If we have a command palette, add theme
-    // switching options to it.
+    // If we have a command palette, add theme switching options to it.
     if (palette) {
-      const category = 'Settings';
       manager.ready.then(() => {
-        each(manager.themes, theme => {
-          palette.addItem({
-            command: CommandIDs.changeTheme,
-            args: { isPalette: true, theme: theme },
-            category
-          });
+        const category = 'Settings';
+        const command = CommandIDs.changeTheme;
+        const isPalette = true;
+
+        manager.themes.forEach(theme => {
+          palette.addItem({ command, args: { isPalette, theme }, category });
         });
       });
     }
@@ -242,7 +236,7 @@ const state: JupyterLabPlugin<IStateDB> = {
       }
     };
 
-    command = CommandIDs.clearStateDB;
+    command = CommandIDs.clearState;
     commands.addCommand(command, {
       label: 'Clear Application Restore State',
       execute: () => state.clear()
@@ -365,9 +359,7 @@ namespace Private {
       splashCount = Math.max(splashCount - 1, 0);
       if (splashCount === 0 && splash) {
         splash.classList.add('splash-fade');
-        setTimeout(() => {
-          document.body.removeChild(splash);
-        }, 500);
+        setTimeout(() => { document.body.removeChild(splash); }, 500);
       }
     });
   }
