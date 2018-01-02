@@ -1424,9 +1424,13 @@ class Notebook extends StaticNotebook {
           document.addEventListener('mousemove', this, true);
           event.preventDefault();
         }
-
       }
-
+    } else {
+      // If there is a click event in the notebook, but not on any cells,
+      // deselect any current selection.
+      this.deselectAll();
+      event.preventDefault();
+      event.stopPropagation();
     }
   }
 
@@ -1733,6 +1737,7 @@ class Notebook extends StaticNotebook {
     if (!model) {
       return;
     }
+    this.deselectAll();
 
     // `event.target` sometimes gives an orphaned node in Firefox 57.
     let target = event.target as HTMLElement;
