@@ -40,9 +40,9 @@ import {
   Mode
 } from './mode';
 
+import 'codemirror/addon/comment/comment.js';
 import 'codemirror/addon/edit/matchbrackets.js';
 import 'codemirror/addon/edit/closebrackets.js';
-import 'codemirror/addon/comment/comment.js';
 import 'codemirror/addon/scroll/scrollpastend.js';
 import 'codemirror/addon/search/searchcursor';
 import 'codemirror/addon/search/search';
@@ -327,7 +327,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Test whether the editor has keyboard focus.
    */
   hasFocus(): boolean {
-    return this._editor.hasFocus();
+    return this._editor.getWrapperElement().contains(document.activeElement);
   }
 
   /**

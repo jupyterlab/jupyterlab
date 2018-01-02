@@ -38,7 +38,7 @@ if (fs.existsSync(packagePath)) {
 } else {
   // Otherwise treat it as a git reposotory and try to add it.
   packageDirName = target.split('/').pop().split('.')[0];
-  let packagePath = path.join(basePath, 'packages', packageDirName);
+  packagePath = path.join(basePath, 'packages', packageDirName);
   utils.run('git clone ' + target + ' ' + packagePath);
 }
 

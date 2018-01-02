@@ -1316,7 +1316,9 @@ class Notebook extends StaticNotebook {
   private _ensureFocus(force=false): void {
     let activeCell = this.activeCell;
     if (this.mode === 'edit' && activeCell) {
-      activeCell.editor.focus();
+      if (!activeCell.editor.hasFocus()) {
+        activeCell.editor.focus();
+      }
     } else if (activeCell) {
       activeCell.editor.blur();
     }
@@ -1352,25 +1354,29 @@ class Notebook extends StaticNotebook {
    */
   private _evtMouseDown(event: MouseEvent): void {
 
-    // Mouse click should always ensure the notebook is focused.
-    this._ensureFocus(true);
-
     // We only handle main or secondary button actions.
     if (!(event.button === 0 || event.button === 2)) {
       return;
     }
 
     // Try to find the cell associated with the event.
+    // `event.target` sometimes gives an orphaned node in Firefox 57.
     let target = event.target as HTMLElement;
+    if (!target.parentElement) {
+      target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
+    }
     let index = this._findCell(target);
     let widget = this.widgets[index];
-
 
     // Switch to command mode if the click is not in an editor.
     if (index === -1 || !widget.editorWidget.node.contains(target)) {
       this.mode = 'command';
+    } else if (index !== -1) {
+      this.mode = 'edit';
     }
 
+    // Mouse click should always ensure the notebook is focused.
+    this._ensureFocus(true);
 
     // Secondary click deselects cells and possibly changes the active cell.
     if (event.button === 2) {
@@ -1380,8 +1386,6 @@ class Notebook extends StaticNotebook {
       }
       return;
     }
-
-
 
     if (index !== -1) {
 
@@ -1418,12 +1422,15 @@ class Notebook extends StaticNotebook {
           this._mouseMode = 'couldDrag';
           document.addEventListener('mouseup', this, true);
           document.addEventListener('mousemove', this, true);
-
           event.preventDefault();
         }
-
       }
-
+    } else {
+      // If there is a click event in the notebook, but not on any cells,
+      // deselect any current selection.
+      this.deselectAll();
+      event.preventDefault();
+      event.stopPropagation();
     }
   }
 
@@ -1730,7 +1737,13 @@ class Notebook extends StaticNotebook {
     if (!model) {
       return;
     }
+    this.deselectAll();
+
+    // `event.target` sometimes gives an orphaned node in Firefox 57.
     let target = event.target as HTMLElement;
+    if (!target.parentElement) {
+      target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
+    }
     let i = this._findCell(target);
     if (i === -1) {
       return;

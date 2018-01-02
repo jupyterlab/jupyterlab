@@ -36,6 +36,11 @@
 }
 
 
+.CodeMirror-dialog {
+  background-color: var(--jp-layout-color0);
+}
+
+
 /* This causes https://github.com/jupyter/jupyterlab/issues/522 */
 /* May not cause it not because we changed it! */
 .CodeMirror-lines {
@@ -55,12 +60,6 @@
 
 .jp-CodeMirrorEditor, .jp-CodeMirrorEditor-static {
   cursor: text;
-}
-
-
-/* Hide dialogs in inline editors due to poor UX with small editors. */
-.jp-CodeMirrorEditor[data-type="inline"] .CodeMirror-dialog {
-  display: none;
 }
 
 
