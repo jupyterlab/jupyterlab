@@ -65,8 +65,8 @@ class SettingManager {
    *
    * @param raw - The user setting values as a raw string of JSON with comments.
    *
-   * @returns A promise that resolves when saving is complete or rejects
-   * with a `ServerConnection.IError`.
+   * @returns A promise that resolves when saving is complete or rejects with
+   * a `ServerConnection.IError`.
    */
   save(id: string, raw: string): Promise<void> {
     const { serverSettings } = this;
