@@ -1360,9 +1360,11 @@ class Notebook extends StaticNotebook {
     }
 
     // Try to find the cell associated with the event.
-    // We cannot use `event.target` because it sometimes gives an orphaned
-    // node in Firefox 57.
-    let target = document.elementFromPoint(event.clientX, event.clientY);
+    // `event.target` sometimes gives an orphaned node in Firefox 57.
+    let target = event.target;
+    if (!target.parentElement) {
+      target = document.elementFromPoint(event.clientX, event.clientY);
+    }
     let index = this._findCell(target as HTMLElement);
     let widget = this.widgets[index];
 
@@ -1732,9 +1734,11 @@ class Notebook extends StaticNotebook {
       return;
     }
 
-    // We cannot use `event.target` because it sometimes gives an orphaned
-    // node in Firefox 57.
-    let target = document.elementFromPoint(event.clientX, event.clientY);
+    // `event.target` sometimes gives an orphaned node in Firefox 57.
+    let target = event.target;
+    if (!target.parentElement) {
+      target = document.elementFromPoint(event.clientX, event.clientY);
+    }
     let i = this._findCell(target as HTMLElement);
     if (i === -1) {
       return;
