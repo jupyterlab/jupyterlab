@@ -8,12 +8,12 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, IThemeManager, ThemeManager, ISplashScreen
+  Clipboard, ICommandPalette, IThemeManager, ThemeManager, ISplashScreen
 } from '@jupyterlab/apputils';
 
 import {
   DataConnector, ISettingRegistry, IStateDB, PageConfig, SettingRegistry,
-  StateDB, URLExt
+  StateDB, Time, URLExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -55,6 +55,9 @@ namespace CommandIDs {
 
   export
   const loadState = 'apputils:load-statedb';
+
+  export
+  const saveState = 'apputils:save-statedb';
 }
 
 
@@ -240,6 +243,28 @@ const state: JupyterLabPlugin<IStateDB> = {
     commands.addCommand(command, {
       label: 'Clear Application Restore State',
       execute: () => state.clear()
+    });
+
+    command = CommandIDs.saveState;
+    commands.addCommand(command, {
+      label: 'Copy Shareable Workspace Link',
+      execute: () => {
+        const date = new Date();
+        const format = 'YYYYMMDDHHmm-x';
+        const id = Time.format(date, format);
+        const metadata = { id };
+        const url = URLExt.join(PageConfig.getWorkspacesUrl(), id);
+
+        // Optimistically copy the workspace URL to the clipboard.
+        Clipboard.copyToSystem(url);
+
+        return state.toJSON()
+          .then(data => workspaces.save(id, { data, metadata }))
+          .then(() => { console.log('boom!'); })
+          .catch(reason => {
+            console.warn('Saving workspace failed.', reason);
+          });
+      }
     });
 
     command = CommandIDs.loadState;

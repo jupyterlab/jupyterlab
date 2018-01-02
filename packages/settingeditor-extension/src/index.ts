@@ -143,6 +143,8 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, registry: ISetting
     isEnabled: () => tracker.currentWidget.canSaveRaw
   });
 
+  palette.addItem({ category: 'Settings', command: 'apputils:save-statedb' });
+
   return tracker;
 }
 export default plugin;
