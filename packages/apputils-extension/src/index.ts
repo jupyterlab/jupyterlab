@@ -221,7 +221,8 @@ const state: JupyterLabPlugin<IStateDB> = {
     let command: string;
     let resolved = false;
 
-    const { commands, info } = app;
+    const { commands, info, serviceManager } = app;
+    const { workspaces } = serviceManager;
     const transform = new PromiseDelegate<StateDB.DataTransform>();
     const state = new StateDB({
       namespace: info.namespace,
@@ -259,18 +260,24 @@ const state: JupyterLabPlugin<IStateDB> = {
         // Change the URL back to the base application URL.
         window.history.replaceState({ }, '', base);
 
+        // Irrespective of whether the workspace exists, the state database's
+        // initial data transormation resolves if this command is executed.
+        resolved = true;
+
         // If there is no workspace, leave the state database intact.
         if (!workspace) {
           console.log('No workspace found. Leaving state database intact.');
-          resolved = true;
           transform.resolve({ type: 'cancel', contents: null });
           return;
         }
 
         // Fetch the workspace and overwrite the state database.
-        console.log('Fetch the workspace:', workspace);
-        resolved = true;
-        transform.resolve({ type: 'merge', contents: { } });
+        return workspaces.fetch(workspace).then(session => {
+          transform.resolve({ type: 'overwrite', contents: session.data });
+        }).catch(reason => {
+          console.warn(`Fetching workspace (${workspace}) failed.`, reason);
+          transform.resolve({ type: 'cancel', contents: null });
+        });
       }
     }));
     disposables.add(router.register({ command, pattern }));
