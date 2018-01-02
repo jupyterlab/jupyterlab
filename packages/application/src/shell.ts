@@ -192,6 +192,20 @@ class ApplicationShell extends Widget {
   }
 
   /**
+   * Whether JupyterLab is in presentation mode with the `jp-mod-presentationMode` CSS class.
+   */
+  get presentationMode(): boolean {
+    return this.hasClass('jp-mod-presentationMode');
+  }
+
+  /**
+   * Enable/disable presentation mode (`jp-mod-presentationMode` CSS class) with a boolean.
+   */
+  set presentationMode(value: boolean) {
+    this.toggleClass('jp-mod-presentationMode', value);
+  }
+
+  /**
    * The main dock area's user interface mode.
    */
   get mode(): DockPanel.Mode {
