@@ -1354,25 +1354,27 @@ class Notebook extends StaticNotebook {
    */
   private _evtMouseDown(event: MouseEvent): void {
 
-    // Mouse click should always ensure the notebook is focused.
-    this._ensureFocus(true);
-
     // We only handle main or secondary button actions.
     if (!(event.button === 0 || event.button === 2)) {
       return;
     }
 
     // Try to find the cell associated with the event.
-    let target = event.target as HTMLElement;
-    let index = this._findCell(target);
+    // We cannot use `event.target` because it sometimes gives an orphaned
+    // node in Firefox 57.
+    let target = document.elementFromPoint(event.clientX, event.clientY);
+    let index = this._findCell(target as HTMLElement);
     let widget = this.widgets[index];
-
 
     // Switch to command mode if the click is not in an editor.
     if (index === -1 || !widget.editorWidget.node.contains(target)) {
       this.mode = 'command';
+    } else if (index !== -1) {
+      this.mode = 'edit';
     }
 
+    // Mouse click should always ensure the notebook is focused.
+    this._ensureFocus(true);
 
     // Secondary click deselects cells and possibly changes the active cell.
     if (event.button === 2) {
@@ -1382,8 +1384,6 @@ class Notebook extends StaticNotebook {
       }
       return;
     }
-
-
 
     if (index !== -1) {
 
@@ -1731,8 +1731,11 @@ class Notebook extends StaticNotebook {
     if (!model) {
       return;
     }
-    let target = event.target as HTMLElement;
-    let i = this._findCell(target);
+
+    // We cannot use `event.target` because it sometimes gives an orphaned
+    // node in Firefox 57.
+    let target = document.elementFromPoint(event.clientX, event.clientY);
+    let i = this._findCell(target as HTMLElement);
     if (i === -1) {
       return;
     }
