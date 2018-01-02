@@ -87,10 +87,10 @@ all of MD as it is not optimized for dense, information rich UIs.
    */
 
   --jp-ui-font-scale-factor: 1.2;
-  --jp-ui-font-size0: calc(var(--jp-ui-font-size1)/var(--jp-ui-font-scale-factor));
+  --jp-ui-font-size0: 0.83333em;
   --jp-ui-font-size1: 13px; /* Base font size */
-  --jp-ui-font-size2: calc(var(--jp-ui-font-size1)*var(--jp-ui-font-scale-factor));
-  --jp-ui-font-size3: calc(var(--jp-ui-font-size2)*var(--jp-ui-font-scale-factor));
+  --jp-ui-font-size2: 1.2em;
+  --jp-ui-font-size3: 1.44em;
 
   --jp-ui-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 
@@ -118,16 +118,23 @@ all of MD as it is not optimized for dense, information rich UIs.
   /* Content Fonts
    *
    * Content font variables are used for typography of user generated content.
+   *
+   * The font sizing here is done assuming that the body font size of --jp-content-font-size1
+   * is applied to a parent element. When children elements, such as headings, are sized
+   * in em all things will be computed relative to that body size.
    */
 
   --jp-content-line-height: 1.6;
   --jp-content-font-scale-factor: 1.2;
-  --jp-content-font-size0: calc( var(--jp-content-font-size1)/var(--jp-content-font-scale-factor) );
+  --jp-content-font-size0: 0.83333em;
   --jp-content-font-size1: 14px; /* Base font size */
-  --jp-content-font-size2: calc( var(--jp-content-font-size1)*var(--jp-content-font-scale-factor) );
-  --jp-content-font-size3: calc( var(--jp-content-font-size2)*var(--jp-content-font-scale-factor) );
-  --jp-content-font-size4: calc( var(--jp-content-font-size3)*var(--jp-content-font-scale-factor) );
-  --jp-content-font-size5: calc( var(--jp-content-font-size4)*var(--jp-content-font-scale-factor) );
+  --jp-content-font-size2: 1.2em;
+  --jp-content-font-size3: 1.44em;
+  --jp-content-font-size4: 1.728em;
+  --jp-content-font-size5: 2.0736em;
+
+  /* This gives a magnification of about 125% in presentation mode over normal. */
+  --jp-content-presentation-font-size1: 17px;
 
   --jp-content-heading-line-height: 1.0;
   --jp-content-heading-margin-top: 1.2em;
@@ -151,9 +158,12 @@ all of MD as it is not optimized for dense, information rich UIs.
    */
 
   --jp-code-font-size: 13px;
-  --jp-code-line-height: 17px;
-  --jp-code-padding: 5px;
+  --jp-code-line-height: 1.3077; /* 17px for 13px base */
+  --jp-code-padding: 0.385em; /* 5px for 13px base */
   --jp-code-font-family: 'Source Code Pro', monospace;
+
+  /* This gives a magnification of about 125% in presentation mode over normal. */
+  --jp-code-presentation-font-size: 16px;
 
   /* Layout
    *
