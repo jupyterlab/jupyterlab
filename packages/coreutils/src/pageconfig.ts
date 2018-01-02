@@ -129,6 +129,14 @@ namespace PageConfig {
   }
 
   /**
+   * Get the workspaces url for a JupyterLab application.
+   */
+  export
+  function getWorkspacesUrl(): string {
+    return URLExt.join(getBaseUrl(), getOption('pageUrl'), 'workspaces');
+  }
+
+  /**
    * Get the base websocket url for a Jupyter application.
    */
   export
