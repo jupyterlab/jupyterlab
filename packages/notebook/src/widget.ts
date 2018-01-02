@@ -1381,8 +1381,6 @@ class Notebook extends StaticNotebook {
       return;
     }
 
-
-
     if (index !== -1) {
 
       if (event.shiftKey) {
@@ -1418,8 +1416,10 @@ class Notebook extends StaticNotebook {
           this._mouseMode = 'couldDrag';
           document.addEventListener('mouseup', this, true);
           document.addEventListener('mousemove', this, true);
+
+          event.preventDefault();
         }
-        event.preventDefault();
+
       }
 
     }
