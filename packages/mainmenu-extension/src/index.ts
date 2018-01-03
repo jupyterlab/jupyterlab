@@ -2,20 +2,20 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin
-} from '@jupyterlab/application';
-
-import {
-  ICommandPalette
-} from '@jupyterlab/apputils';
-
-import {
   each
 } from '@phosphor/algorithm';
 
 import {
   Menu, Widget
 } from '@phosphor/widgets';
+
+import {
+  JupyterLab, JupyterLabPlugin
+} from '@jupyterlab/application';
+
+import {
+  ICommandPalette, showDialog, Dialog
+} from '@jupyterlab/apputils';
 
 import {
   IMainMenu, IMenuExtender, EditMenu, FileMenu, KernelMenu,
@@ -327,7 +327,19 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
     isEnabled: () => {
       return app.serviceManager.sessions.running().next() !== undefined;
     },
-    execute: () => app.serviceManager.sessions.shutdownAll()
+    execute: () => {
+      showDialog({
+        title: 'Shutdown All?',
+        body: 'Shut down all kernels?',
+        buttons: [
+          Dialog.cancelButton(), Dialog.warnButton({ label: 'SHUTDOWN' })
+        ]
+      }).then(result => {
+        if (result.button.accept) {
+          return app.serviceManager.sessions.shutdownAll();
+        }
+      });
+    }
   });
 
   const restartGroup = [

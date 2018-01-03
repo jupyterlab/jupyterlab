@@ -18,7 +18,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  DOMUtils
+ Dialog, DOMUtils, showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -312,9 +312,18 @@ class RunningSessions extends Widget {
 
     // Check for a shutdown.
     if (ElementExt.hitTest(shutdown, clientX, clientY)) {
-      this._manager.sessions.shutdownAll();
-      this._manager.terminals.shutdownAll();
-      return;
+      showDialog({
+        title: 'Shutdown All?',
+        body: 'Shut down all kernels and terminals?',
+        buttons: [
+          Dialog.cancelButton(), Dialog.warnButton({ label: 'SHUTDOWN' })
+        ]
+      }).then(result => {
+        if (result.button.accept) {
+          this._manager.sessions.shutdownAll();
+          this._manager.terminals.shutdownAll();
+        }
+      });
     }
 
     // Create a dummy div if terminals are not available.
