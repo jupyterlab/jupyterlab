@@ -2,16 +2,20 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin
-} from '@jupyterlab/application';
-
-import {
   each
 } from '@phosphor/algorithm';
 
 import {
   Menu, Widget
 } from '@phosphor/widgets';
+
+import {
+  JupyterLab, JupyterLabPlugin
+} from '@jupyterlab/application';
+
+import {
+  ICommandPalette, showDialog, Dialog
+} from '@jupyterlab/apputils';
 
 import {
   IMainMenu, IMenuExtender, EditMenu, FileMenu, KernelMenu,
@@ -64,6 +68,9 @@ namespace CommandIDs {
   const shutdownKernel = 'kernelmenu:shutdown';
 
   export
+  const shutdownAllKernels = 'kernelmenu:shutdownAll';
+
+  export
   const wordWrap = 'viewmenu:word-wrap';
 
   export
@@ -93,8 +100,9 @@ namespace CommandIDs {
  */
 const menuPlugin: JupyterLabPlugin<IMainMenu> = {
   id: '@jupyterlab/mainmenu-extension:plugin',
+  requires: [ICommandPalette],
   provides: IMainMenu,
-  activate: (app: JupyterLab): IMainMenu => {
+  activate: (app: JupyterLab, palette: ICommandPalette): IMainMenu => {
     let menu = new MainMenu(app.commands);
     menu.id = 'jp-MainMenu';
 
@@ -111,6 +119,11 @@ const menuPlugin: JupyterLabPlugin<IMainMenu> = {
     createSettingsMenu(app, menu.settingsMenu);
     createViewMenu(app, menu.viewMenu);
     createTabsMenu(app, menu.tabsMenu);
+
+    palette.addItem({
+      command: CommandIDs.shutdownAllKernels,
+      category: 'Kernel Operations'
+    });
 
     app.shell.addToTopArea(logo);
     app.shell.addToTopArea(menu);
@@ -309,6 +322,26 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
     execute: Private.delegateExecute(app, menu.kernelUsers, 'shutdownKernel')
   });
 
+  commands.addCommand(CommandIDs.shutdownAllKernels, {
+    label: 'Shutdown All Kernels...',
+    isEnabled: () => {
+      return app.serviceManager.sessions.running().next() !== undefined;
+    },
+    execute: () => {
+      showDialog({
+        title: 'Shutdown All?',
+        body: 'Shut down all kernels?',
+        buttons: [
+          Dialog.cancelButton(), Dialog.warnButton({ label: 'SHUTDOWN' })
+        ]
+      }).then(result => {
+        if (result.button.accept) {
+          return app.serviceManager.sessions.shutdownAll();
+        }
+      });
+    }
+  });
+
   const restartGroup = [
     CommandIDs.restartKernel,
     CommandIDs.restartKernelAndClear,
@@ -317,7 +350,8 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
 
   menu.addGroup([{ command: CommandIDs.interruptKernel }], 0);
   menu.addGroup(restartGroup, 1);
-  menu.addGroup([{ command: CommandIDs.shutdownKernel }], 2);
+  menu.addGroup([{ command: CommandIDs.shutdownKernel },
+                 { command: CommandIDs.shutdownAllKernels }], 2);
   menu.addGroup([{ command: CommandIDs.changeKernel }], 3);
 }
 
