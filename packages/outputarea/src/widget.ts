@@ -611,14 +611,10 @@ class Stdin extends Widget implements IStdin {
    * Construct a new input widget.
    */
   constructor(options: Stdin.IOptions) {
-    super({ node: Private.createInputWidgetNode() });
+    super({ node: Private.createInputWidgetNode(options.prompt, options.password) });
     this.addClass(STDIN_CLASS);
-    let text = this.node.firstChild as HTMLElement;
-    text.textContent = options.prompt;
-    this._input = this.node.lastChild as HTMLInputElement;
-    if (options.password) {
-      this._input.type = 'password';
-    }
+    this._input = this.node.getElementsByTagName('input')[0];
+    this._input.focus();
     this._future = options.future;
   }
 
@@ -646,7 +642,7 @@ class Stdin extends Widget implements IStdin {
         } else {
           rendered.textContent = input.value;
         }
-        this.node.replaceChild(rendered, input);
+        input.parentElement.replaceChild(rendered, input);
       }
     }
   }
@@ -716,14 +712,18 @@ namespace Private {
    * Create the node for an InputWidget.
    */
   export
-  function createInputWidgetNode(): HTMLElement {
+  function createInputWidgetNode(prompt: string, password: boolean): HTMLElement {
     let node = document.createElement('div');
-    let prompt = document.createElement('span');
-    prompt.className = STDIN_PROMPT_CLASS;
+    let promptNode = document.createElement('pre');
+    promptNode.className = STDIN_PROMPT_CLASS;
+    promptNode.textContent = prompt;
     let input = document.createElement('input');
     input.className = STDIN_INPUT_CLASS;
-    node.appendChild(prompt);
-    node.appendChild(input);
+    if (password) {
+      input.type = 'password';
+    }
+    node.appendChild(promptNode);
+    promptNode.appendChild(input);
     return node;
   }
 
