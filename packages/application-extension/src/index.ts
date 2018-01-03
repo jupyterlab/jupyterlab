@@ -48,9 +48,6 @@ namespace CommandIDs {
 
   export
   const tree: string = 'router:tree';
-
-  export
-  const url: string = 'router:tree-url';
 }
 
 
@@ -172,13 +169,13 @@ const router: JupyterLabPlugin<IRouter> = {
       PageConfig.getBaseUrl(),
       PageConfig.getOption('pageUrl')
     );
-    const tree = PageConfig.getTreeUrl();
     const router = new Router({ base, commands });
+    const pattern = /^\/tree\/(.*)/;
 
     commands.addCommand(CommandIDs.tree, {
       execute: (args: IRouter.ICommandArgs) => {
         return app.restored.then(() => {
-          const path = (args.path as string).replace('/tree', '');
+          const path = decodeURIComponent((args.path.match(pattern)[1]));
 
           // Change the URL back to the base application URL.
           window.history.replaceState({ }, '', base);
@@ -188,10 +185,7 @@ const router: JupyterLabPlugin<IRouter> = {
       }
     });
 
-    commands.addCommand(CommandIDs.url, {
-      execute: args => URLExt.join(tree, (args.path as string))
-    });
-    router.register({ command: CommandIDs.tree, pattern: /^\/tree\/.+/ });
+    router.register({ command: CommandIDs.tree, pattern });
     app.started.then(() => { router.route(window.location.href); });
 
     return router;

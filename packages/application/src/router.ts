@@ -189,14 +189,15 @@ class Router implements IRouter {
       }
     });
 
-    // Order the rules by rank and collect the promises their commands return.
-    const promises = matches.sort((a, b) => a.rank - b.rank)
-      .map(rule => this.commands.execute(rule.command, args));
+    // Order the matching rules by rank and execute them.
+    matches.sort((a, b) => a.rank - b.rank).forEach(rule => {
+      // Ignore the results of each executed promise.
+      this.commands.execute(rule.command, args).catch(reason => {
+        console.warn(`Routing ${url} using ${rule.command} failed:`, reason);
+      });
+    });
 
-    // After all the promises (if any) resolve, emit the routed signal.
-    Promise.all(promises)
-      .catch(reason => { console.warn(`Routing ${url} failed:`, reason); })
-      .then(() => { this._routed.emit(args); });
+    this._routed.emit(args);
   }
 
   private _routed = new Signal<this, IRouter.ICommandArgs>(this);
