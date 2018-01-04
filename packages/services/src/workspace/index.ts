@@ -2,8 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ISettingRegistry, URLExt
+  URLExt
 } from '@jupyterlab/coreutils';
+
+import {
+  ReadonlyJSONObject
+} from '@phosphor/coreutils';
 
 import {
   ServerConnection
@@ -11,20 +15,20 @@ import {
 
 
 /**
- * The url for the lab settings service.
+ * The url for the lab workspaces service.
  */
-const SERVICE_SETTINGS_URL = 'api/settings';
+const SERVICE_WORKSPACES_URL = 'api/workspaces';
 
 
 /**
- * The settings API service manager.
+ * The workspaces API service manager.
  */
 export
-class SettingManager {
+class WorkspaceManager {
   /**
-   * Create a new setting manager.
+   * Create a new workspace manager.
    */
-  constructor(options: SettingManager.IOptions = { }) {
+  constructor(options: WorkspaceManager.IOptions = { }) {
     this.serverSettings = options.serverSettings ||
       ServerConnection.makeSettings();
   }
@@ -35,14 +39,14 @@ class SettingManager {
   readonly serverSettings: ServerConnection.ISettings;
 
   /**
-   * Fetch a plugin's settings.
+   * Fetch a workspace.
    *
-   * @param id - The plugin's ID.
+   * @param id - The workspaces's ID.
    *
-   * @returns A promise that resolves with the plugin settings or rejects
-   * with a `ServerConnection.IError`.
+   * @returns A promise that resolves with the workspace or rejects with a
+   * `ServerConnection.IError`.
    */
-  fetch(id: string): Promise<ISettingRegistry.IPlugin> {
+  fetch(id: string): Promise<Workspace.IWorkspace> {
     const { serverSettings } = this;
     const { baseUrl, pageUrl } = serverSettings;
     const base = baseUrl + pageUrl;
@@ -59,22 +63,22 @@ class SettingManager {
   }
 
   /**
-   * Save a plugin's settings.
+   * Save a workspace.
    *
-   * @param id - The plugin's ID.
+   * @param id - The workspace's ID.
    *
-   * @param raw - The user setting values as a raw string of JSON with comments.
+   * @param workspace - The workspace being saved.
    *
    * @returns A promise that resolves when saving is complete or rejects with
    * a `ServerConnection.IError`.
    */
-  save(id: string, raw: string): Promise<void> {
+  save(id: string, workspace: Workspace.IWorkspace): Promise<void> {
     const { serverSettings } = this;
     const { baseUrl, pageUrl } = serverSettings;
     const base = baseUrl + pageUrl;
     const url = Private.url(base, id);
     const init = {
-      body: raw,
+      body: JSON.stringify(workspace),
       method: 'PUT'
     };
     const promise = ServerConnection.makeRequest(url, init, serverSettings);
@@ -91,12 +95,12 @@ class SettingManager {
 
 
 /**
- * A namespace for `SettingManager` statics.
+ * A namespace for `WorkspaceManager` statics.
  */
 export
-namespace SettingManager {
+namespace WorkspaceManager {
   /**
-   * The instantiation options for a setting manager.
+   * The instantiation options for a workspace manager.
    */
   export
   interface IOptions {
@@ -109,15 +113,36 @@ namespace SettingManager {
 
 
 /**
- * A namespace for setting API interfaces.
+ * A namespace for workspace API interfaces.
  */
 export
-namespace Setting {
+namespace Workspace {
   /**
-   * The interface for the setting system manager.
+   * The interface for the workspace API manager.
    */
   export
-  interface IManager extends SettingManager { }
+  interface IManager extends WorkspaceManager { }
+
+  /**
+   * The interface describing a workspace API response.
+   */
+  export
+  interface IWorkspace {
+    /**
+     * The workspace data.
+     */
+    data: ReadonlyJSONObject;
+
+    /**
+     * The metadata for a workspace.
+     */
+    metadata: {
+      /**
+       * The workspace ID.
+       */
+      id: string;
+    };
+  }
 }
 
 
@@ -126,10 +151,10 @@ namespace Setting {
  */
 namespace Private {
   /**
-   * Get the url for a plugin's settings.
+   * Get the url for a workspace.
    */
   export
   function url(base: string, id: string): string {
-    return URLExt.join(base, SERVICE_SETTINGS_URL, id);
+    return URLExt.join(base, SERVICE_WORKSPACES_URL, id);
   }
 }

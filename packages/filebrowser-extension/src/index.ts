@@ -380,10 +380,10 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, bro
 
   commands.addCommand(CommandIDs.share, {
     execute: () => {
-      const path = browser.selectedItems().next().path;
+      const path = encodeURIComponent(browser.selectedItems().next().path);
       const tree = PageConfig.getTreeUrl();
 
-      Clipboard.copyToSystem(URLExt.join(tree, (path as string)));
+      Clipboard.copyToSystem(URLExt.join(tree, path));
     },
     isVisible: () => toArray(browser.selectedItems()).length === 1,
     iconClass: 'jp-MaterialIcon jp-LinkIcon',

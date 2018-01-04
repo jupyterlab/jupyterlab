@@ -7,8 +7,9 @@ jupyterlab/schemas
 jupyterlab/themes
 jupyterlab/geckodriver
 dev_mode/schemas
-dev_mode/themes
 dev_mode/static
+dev_mode/themes
+dev_mode/workspaces
 
 node_modules
 .cache

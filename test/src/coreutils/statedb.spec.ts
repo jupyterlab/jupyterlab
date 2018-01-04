@@ -8,15 +8,13 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  PromiseDelegate
+  PromiseDelegate, ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
 
 describe('StateDB', () => {
 
-  beforeEach(() => {
-    window.localStorage.clear();
-  });
+  beforeEach(() => { window.localStorage.clear(); });
 
   describe('#constructor()', () => {
 
@@ -25,30 +23,68 @@ describe('StateDB', () => {
       expect(db).to.be.a(StateDB);
     });
 
-    it('should take an optional when promise', () => {
-      let { localStorage } = window;
-      let promise = new PromiseDelegate<void>();
-      let db = new StateDB({ namespace: 'test', when: promise.promise });
-      let key = 'foo:bar';
-      let value = { baz: 'qux' };
-      promise.resolve(void 0);
-      return promise.promise.then(() => {
-        expect(localStorage.length).to.be(0);
-        return db.save(key, value);
-      }).then(() => db.fetch(key))
-      .then(fetched => { expect(fetched).to.eql(value); });
+    it('should allow an overwrite data transformation', done => {
+      let transform = new PromiseDelegate<StateDB.DataTransform>();
+      let db = new StateDB({ namespace: 'test', transform: transform.promise });
+      let prepopulate = new StateDB({ namespace: 'test' });
+      let key = 'foo';
+      let correct = 'bar';
+      let incorrect = 'baz';
+
+      // By sharing a namespace, the two databases will share data.
+      prepopulate.save(key, incorrect)
+        .then(() => db.fetch(key))
+        .then(value => { expect(value).to.be(correct); })
+        .then(() => db.clear())
+        .then(done)
+        .catch(done);
+      transform.resolve({ type: 'overwrite', contents: { [key]: correct } });
     });
 
-    it('should clear the namespace if the sentinel is set', () => {
-      let { localStorage } = window;
-      let key = 'test:statedb:sentinel';
-      localStorage.setItem(key, 'sentinel');
-      localStorage.setItem('test:foo', 'bar');
-      let promise = new PromiseDelegate<void>();
-      let db = new StateDB({ namespace: 'test', when: promise.promise });
-      expect(db).to.be.a(StateDB);
-      expect(localStorage.length).to.be(1);
-      expect(localStorage.getItem('test:foo')).to.be(null);
+    it('should allow a merge data transformation', done => {
+      let transform = new PromiseDelegate<StateDB.DataTransform>();
+      let db = new StateDB({ namespace: 'test', transform: transform.promise });
+      let prepopulate = new StateDB({ namespace: 'test' });
+      let key = 'baz';
+      let value = 'qux';
+
+      // By sharing a namespace, the two databases will share data.
+      prepopulate.save('foo', 'bar')
+        .then(() => db.fetch('foo'))
+        .then(saved => { expect(saved).to.be('bar'); })
+        .then(() => db.fetch(key))
+        .then(saved => { expect(saved).to.be(value); })
+        .then(() => db.clear())
+        .then(done)
+        .catch(done);
+      transform.resolve({ type: 'merge', contents: { [key]: value } });
+    });
+
+  });
+
+  describe('#changed', () => {
+
+    it('should emit changes when the database is updated', done => {
+      let namespace = 'test-namespace';
+      let db = new StateDB({ namespace });
+      let changes: StateDB.Change[] = [
+        { id: 'foo', type: 'save' },
+        { id: 'foo', type: 'remove' },
+        { id: 'bar', type: 'save' },
+        { id: 'bar', type: 'remove' }
+      ];
+      let recorded: StateDB.Change[] = [];
+
+      db.changed.connect((sender, change) => { recorded.push(change); });
+
+      db.save('foo', 0)
+        .then(() => db.remove('foo'))
+        .then(() => db.save('bar', 1))
+        .then(() => db.remove('bar'))
+        .then(() => { expect(recorded).to.eql(changes); })
+        .then(() => db.clear())
+        .then(done)
+        .catch(done);
     });
 
   });
@@ -230,6 +266,32 @@ describe('StateDB', () => {
         .then(fetched => { expect(fetched).to.eql(value); })
         .then(() => db.remove(key))
         .then(() => { expect(localStorage).to.be.empty(); })
+        .then(done)
+        .catch(done);
+    });
+
+  });
+
+  describe('#toJSON()', () => {
+
+    it('return the full contents of a state database', done => {
+      let { localStorage } = window;
+
+      let db = new StateDB({ namespace: 'test-namespace' });
+      let contents: ReadonlyJSONObject = {
+        abc: 'def',
+        ghi: 'jkl',
+        mno: 1,
+        pqr: {
+          foo: { bar: { baz: 'qux' } }
+        }
+      };
+
+      expect(localStorage.length).to.be(0);
+      Promise.all(Object.keys(contents).map(key => db.save(key, contents[key])))
+        .then(() => db.toJSON())
+        .then(serialized => { expect(serialized).to.eql(contents); })
+        .then(() => db.clear())
         .then(done)
         .catch(done);
     });

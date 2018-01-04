@@ -40,7 +40,7 @@
       },
       "type": "object"
     },
-    "command-palette:activate": {
+    "apputils:activate-command-palette": {
       "default": { },
       "properties": {
         "command": { "default": "apputils:activate-command-palette" },

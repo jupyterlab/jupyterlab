@@ -37,6 +37,10 @@ import {
   ServerConnection
 } from './serverconnection';
 
+import {
+  WorkspaceManager
+} from './workspace';
+
 
 /**
  * A Jupyter services manager.
@@ -56,6 +60,7 @@ class ServiceManager implements ServiceManager.IManager {
     this.settings = new SettingManager(options);
     this.terminals = new TerminalManager(options);
     this.builder = new BuildManager(options);
+    this.workspaces = new WorkspaceManager(options);
 
     this.sessions.specsChanged.connect((sender, specs) => {
       this._specsChanged.emit(specs);
@@ -134,6 +139,11 @@ class ServiceManager implements ServiceManager.IManager {
    * Get the terminal manager instance.
    */
   readonly terminals: TerminalManager;
+
+  /**
+   * Get the workspace manager instance.
+   */
+  readonly workspaces: WorkspaceManager;
 
   /**
    * Test whether the manager is ready.

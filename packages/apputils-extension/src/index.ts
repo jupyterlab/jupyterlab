@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  ILayoutRestorer, JupyterLab, JupyterLabPlugin
+  ILayoutRestorer, IRouter, JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -24,15 +24,11 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  each
-} from '@phosphor/algorithm';
-
-import {
-  JSONObject
+  PromiseDelegate
 } from '@phosphor/coreutils';
 
 import {
-  DisposableDelegate, IDisposable
+  DisposableDelegate, DisposableSet, IDisposable
 } from '@phosphor/disposable';
 
 import {
@@ -47,14 +43,28 @@ import '../style/index.css';
 
 
 /**
+ * The interval in milliseconds that calls to save a workspace are debounced
+ * to allow for multiple quickly executed state changes to result in a single
+ * workspace save operation.
+ */
+const WORKSPACE_SAVE_DEBOUNCE_INTERVAL = 2000;
+
+
+/**
  * The command IDs used by the apputils plugin.
  */
 namespace CommandIDs {
   export
-  const clearStateDB = 'apputils:clear-statedb';
+  const changeTheme = 'apputils:change-theme';
 
   export
-  const changeTheme = 'apputils:change-theme';
+  const clearState = 'apputils:clear-statedb';
+
+  export
+  const loadState = 'apputils:load-statedb';
+
+  export
+  const saveState = 'apputils:save-statedb';
 }
 
 
@@ -160,11 +170,11 @@ const themes: JupyterLabPlugin<IThemeManager> = {
       const themeMenu = new Menu({ commands });
       themeMenu.title.label = 'JupyterLab Theme';
       manager.ready.then(() => {
-        each(manager.themes, theme => {
-          themeMenu.addItem({
-            command: CommandIDs.changeTheme,
-            args: { isPalette: false, theme: theme }
-          });
+        const command = CommandIDs.changeTheme;
+        const isPalette = false;
+
+        manager.themes.forEach(theme => {
+          themeMenu.addItem({ command, args: { isPalette, theme } });
         });
       });
       mainMenu.settingsMenu.addGroup([{
@@ -172,17 +182,15 @@ const themes: JupyterLabPlugin<IThemeManager> = {
       }], 0);
     }
 
-    // If we have a command palette, add theme
-    // switching options to it.
+    // If we have a command palette, add theme switching options to it.
     if (palette) {
-      const category = 'Settings';
       manager.ready.then(() => {
-        each(manager.themes, theme => {
-          palette.addItem({
-            command: CommandIDs.changeTheme,
-            args: { isPalette: true, theme: theme },
-            category
-          });
+        const category = 'Settings';
+        const command = CommandIDs.changeTheme;
+        const isPalette = true;
+
+        manager.themes.forEach(theme => {
+          palette.addItem({ command, args: { isPalette, theme }, category });
         });
       });
     }
@@ -201,13 +209,7 @@ const splash: JupyterLabPlugin<ISplashScreen> = {
   id: '@jupyterlab/apputils-extension:splash',
   autoStart: true,
   provides: ISplashScreen,
-  activate: () => {
-    return {
-      show: () => {
-        return Private.showSplash();
-      }
-    };
-  }
+  activate: app => ({ show: () => Private.showSplash(app.restored) })
 };
 
 
@@ -218,31 +220,106 @@ const state: JupyterLabPlugin<IStateDB> = {
   id: '@jupyterlab/apputils-extension:state',
   autoStart: true,
   provides: IStateDB,
-  activate: (app: JupyterLab) => {
+  requires: [IRouter],
+  activate: (app: JupyterLab, router: IRouter) => {
+    let command: string;
+    let debouncer: number;
+    let resolved = false;
+    let workspace = '';
+
+    const { commands, info, serviceManager } = app;
+    const { workspaces } = serviceManager;
+    const transform = new PromiseDelegate<StateDB.DataTransform>();
     const state = new StateDB({
-      namespace: app.info.namespace,
-      when: app.restored.then(() => { /* no-op */ })
+      namespace: info.namespace,
+      transform: transform.promise
     });
-    const version = app.info.version;
-    const key = 'statedb:version';
-    const fetch = state.fetch(key);
-    const save = () => state.save(key, { version });
-    const reset = () => state.clear().then(save);
-    const check = (value: JSONObject) => {
-      let old = value && value['version'];
-      if (!old || old !== version) {
-        const previous = old || 'unknown';
-        console.log(`Upgraded: ${previous} to ${version}; Resetting DB.`);
-        return reset();
+    const disposables = new DisposableSet();
+    const pattern = /^\/workspaces\/(.+)/;
+    const unload = () => {
+      disposables.dispose();
+      router.routed.disconnect(unload, state);
+
+      // If the request that was routed did not contain a workspace,
+      // leave the database intact.
+      if (!resolved) {
+        transform.resolve({ type: 'cancel', contents: null });
       }
     };
 
-    app.commands.addCommand(CommandIDs.clearStateDB, {
+    command = CommandIDs.clearState;
+    commands.addCommand(command, {
       label: 'Clear Application Restore State',
       execute: () => state.clear()
     });
 
-    return fetch.then(check, reset).then(() => state);
+    command = CommandIDs.saveState;
+    commands.addCommand(command, {
+      label: () => `Save Workspace (${workspace})`,
+      isEnabled: () => !!workspace,
+      execute: () => {
+        if (!workspace) {
+          return;
+        }
+
+        const id = workspace;
+        const metadata = { id };
+
+        if (debouncer) {
+          window.clearTimeout(debouncer);
+        }
+
+        debouncer = window.setTimeout(() => {
+          state.toJSON()
+            .then(data => workspaces.save(id, { data, metadata }))
+            .catch(reason => {
+              console.warn(`Saving workspace (${id}) failed.`, reason);
+            });
+        }, WORKSPACE_SAVE_DEBOUNCE_INTERVAL);
+      }
+    });
+
+    command = CommandIDs.loadState;
+    disposables.add(commands.addCommand(command, {
+      execute: (args: IRouter.ICommandArgs) => {
+        // Irrespective of whether the workspace exists, the state database's
+        // initial data transormation resolves if this command is executed.
+        resolved = true;
+
+        // Populate the workspace placeholder.
+        workspace = decodeURIComponent((args.path.match(pattern)[1]));
+
+        // If there is no workspace, leave the state database intact.
+        if (!workspace) {
+          transform.resolve({ type: 'cancel', contents: null });
+          return;
+        }
+
+        // Any time the local state database changes, save the workspace.
+        state.changed.connect(() => {
+          commands.execute(CommandIDs.saveState);
+        });
+
+        // Fetch the workspace and overwrite the state database.
+        return workspaces.fetch(workspace).then(session => {
+          transform.resolve({ type: 'overwrite', contents: session.data });
+        }).catch(reason => {
+          console.warn(`Fetching workspace (${workspace}) failed.`, reason);
+
+          // If the workspace does not exist, cancel the data transformation and
+          // save a workspace with the current user state data.
+          transform.resolve({ type: 'cancel', contents: null });
+          commands.execute(CommandIDs.saveState);
+        });
+      }
+    }));
+    disposables.add(router.register({ command, pattern }));
+
+    // After the first route in the application lifecycle has been routed,
+    // stop listening to routing events.
+    router.routed.connect(unload, state);
+
+    return state;
   }
 };
 
@@ -254,7 +331,6 @@ const plugins: JupyterLabPlugin<any>[] = [
   palette, settings, state, splash, themes
 ];
 export default plugins;
-
 
 
 /**
@@ -275,7 +351,7 @@ namespace Private {
    * Show the splash element.
    */
   export
-  function showSplash(): IDisposable {
+  function showSplash(ready: Promise<any>): IDisposable {
     if (!splash) {
       splash = document.createElement('div');
       splash.id = 'jupyterlab-splash';
@@ -318,13 +394,13 @@ namespace Private {
     document.body.appendChild(splash);
     splashCount++;
     return new DisposableDelegate(() => {
-      splashCount = Math.max(splashCount - 1, 0);
-      if (splashCount === 0 && splash) {
-        splash.classList.add('splash-fade');
-        setTimeout(() => {
-          document.body.removeChild(splash);
-        }, 500);
-      }
+      ready.then(() => {
+        splashCount = Math.max(splashCount - 1, 0);
+        if (splashCount === 0 && splash) {
+          splash.classList.add('splash-fade');
+          setTimeout(() => { document.body.removeChild(splash); }, 500);
+        }
+      });
     });
   }
 }
