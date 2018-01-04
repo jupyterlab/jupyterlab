@@ -265,7 +265,7 @@ const state: JupyterLabPlugin<IStateDB> = {
           state.toJSON()
             .then(data => workspaces.save(id, { data, metadata }))
             .catch(reason => {
-              console.warn('Saving workspace failed.', reason);
+              console.warn(`Saving workspace (${id}) failed.`, reason);
             });
         }, 2000);
       }

@@ -25,6 +25,33 @@ describe('StateDB', () => {
 
   });
 
+  describe('#changed', () => {
+
+    it('should emit changes when the database is updated', done => {
+      let namespace = 'test-namespace';
+      let db = new StateDB({ namespace });
+      let changes: StateDB.Change[] = [
+        { id: 'foo', type: 'save' },
+        { id: 'foo', type: 'remove' },
+        { id: 'bar', type: 'save' },
+        { id: 'bar', type: 'remove' }
+      ];
+      let recorded: StateDB.Change[] = [];
+
+      db.changed.connect((sender, change) => { recorded.push(change); });
+
+      db.save('foo', 0)
+        .then(() => db.remove('foo'))
+        .then(() => db.save('bar', 1))
+        .then(() => db.remove('bar'))
+        .then(() => { expect(recorded).to.eql(changes); })
+        .then(() => db.clear())
+        .then(done)
+        .catch(done);
+    });
+
+  });
+
   describe('#maxLength', () => {
 
     it('should enforce the maximum length of a stored item', done => {
