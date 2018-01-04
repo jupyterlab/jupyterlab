@@ -8,12 +8,11 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Clipboard, ICommandPalette, IThemeManager, ThemeManager, ISplashScreen
+  ICommandPalette, IThemeManager, ThemeManager, ISplashScreen
 } from '@jupyterlab/apputils';
 
 import {
-  DataConnector, ISettingRegistry, IStateDB, PageConfig, SettingRegistry,
-  StateDB, Time, URLExt
+  DataConnector, ISettingRegistry, IStateDB, SettingRegistry, StateDB
 } from '@jupyterlab/coreutils';
 
 import {
@@ -216,7 +215,9 @@ const state: JupyterLabPlugin<IStateDB> = {
   requires: [IRouter],
   activate: (app: JupyterLab, router: IRouter) => {
     let command: string;
+    let debouncer: number;
     let resolved = false;
+    let workspace = '';
 
     const { commands, info, serviceManager } = app;
     const { workspaces } = serviceManager;
@@ -234,7 +235,6 @@ const state: JupyterLabPlugin<IStateDB> = {
       // If the request that was routed did not contain a workspace,
       // leave the database intact.
       if (!resolved) {
-        console.log('No workspace requested. Leaving state database intact.');
         transform.resolve({ type: 'cancel', contents: null });
       }
     };
@@ -247,54 +247,61 @@ const state: JupyterLabPlugin<IStateDB> = {
 
     command = CommandIDs.saveState;
     commands.addCommand(command, {
-      label: 'Copy Shareable Workspace Link',
+      label: () => `Save Workspace (${workspace})`,
+      isEnabled: () => !!workspace,
       execute: () => {
-        const date = new Date();
-        const format = 'YYYYMMDDHHmm-x';
-        const id = Time.format(date, format);
+        if (!workspace) {
+          return;
+        }
+
+        const id = workspace;
         const metadata = { id };
-        const url = URLExt.join(PageConfig.getWorkspacesUrl(), id);
 
-        // Optimistically copy the workspace URL to the clipboard.
-        Clipboard.copyToSystem(url);
+        if (debouncer) {
+          window.clearTimeout(debouncer);
+        }
 
-        return state.toJSON()
-          .then(data => workspaces.save(id, { data, metadata }))
-          .catch(reason => {
-            console.warn('Saving workspace failed.', reason);
-          });
+        debouncer = window.setTimeout(() => {
+          state.toJSON()
+            .then(data => workspaces.save(id, { data, metadata }))
+            .catch(reason => {
+              console.warn('Saving workspace failed.', reason);
+            });
+        }, 2000);
       }
     });
 
     command = CommandIDs.loadState;
     disposables.add(commands.addCommand(command, {
       execute: (args: IRouter.ICommandArgs) => {
-        const workspace = (args.path || '').match(pattern)[1];
-        const base = URLExt.join(
-          PageConfig.getBaseUrl(),
-          PageConfig.getOption('pageUrl')
-        );
-
-        // Change the URL back to the base application URL.
-        window.history.replaceState({ }, '', base);
-
         // Irrespective of whether the workspace exists, the state database's
         // initial data transormation resolves if this command is executed.
         resolved = true;
 
+        // Populate the workspace placeholder.
+        workspace = decodeURIComponent((args.path.match(pattern)[1]));
+
         // If there is no workspace, leave the state database intact.
         if (!workspace) {
-          console.log('No workspace found. Leaving state database intact.');
           transform.resolve({ type: 'cancel', contents: null });
           return;
         }
+
+        // Any time the local state database changes, save the workspace.
+        state.changed.connect(() => {
+          commands.execute(CommandIDs.saveState);
+        });
 
         // Fetch the workspace and overwrite the state database.
         return workspaces.fetch(workspace).then(session => {
           transform.resolve({ type: 'overwrite', contents: session.data });
         }).catch(reason => {
           console.warn(`Fetching workspace (${workspace}) failed.`, reason);
+
+          // If the workspace does not exist, cancel the data transformation and
+          // save a workspace with the current user state data.
           transform.resolve({ type: 'cancel', contents: null });
+          commands.execute(CommandIDs.saveState);
         });
       }
     }));
@@ -316,7 +323,6 @@ const plugins: JupyterLabPlugin<any>[] = [
   palette, settings, state, splash, themes
 ];
 export default plugins;
-
 
 
 /**
