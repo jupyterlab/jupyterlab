@@ -61,32 +61,7 @@ function main() {
     });
   }
 
-  var version = PageConfig.getOption('appVersion') || 'unknown';
-  var name = PageConfig.getOption('appName') || 'JupyterLab';
-  var namespace = PageConfig.getOption('appNamespace') || 'jupyterlab';
-  var devMode = PageConfig.getOption('devMode') || 'false';
-
-  // Get the lab config data.
-  var urls = Object.create(null);
-  [
-    'pageUrl', 'publicUrl', 'settingsUrl', 'userSettingsUrl', 'themesUrl'
-  ].forEach(function (key) {
-    urls[key.replace('Url', '')] = PageConfig.getOption(key);
-  });
-
-  var directories = Object.create(null);
-  [
-    'appSettingsDir', 'templatesDir', 'staticDir', 'schemasDir', 'themesDir'
-  ].forEach(function (key) {
-    directories[key.replace('Dir', '')] = PageConfig.getOption(key);
-  });
-  directories['serverRoot'] = PageConfig.getOption('serverRoot');
-
   var register = [];
-
-  if (version[0] === 'v') {
-    version = version.slice(1);
-  }
 
   // Handle the registered mime extensions.
   var mimeExtensions = [];
@@ -172,16 +147,9 @@ function main() {
   {{/each}}
 
   var lab = new app({
-    name: name,
-    namespace: namespace,
-    version: version,
-    devMode: devMode.toLowerCase() === 'true',
     mimeExtensions: mimeExtensions,
     disabled: disabled,
     deferred: deferred,
-    urls: urls,
-    directories: directories,
-    filesCached: PageConfig.getOption('cacheFiles').toLowerCase() == true
   });
   register.forEach(function(item) { lab.registerPluginModule(item); });
   lab.start({ ignorePlugins: ignorePlugins });
