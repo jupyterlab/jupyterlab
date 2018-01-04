@@ -201,7 +201,7 @@ const splash: JupyterLabPlugin<ISplashScreen> = {
   id: '@jupyterlab/apputils-extension:splash',
   autoStart: true,
   provides: ISplashScreen,
-  activate: () => ({ show: () => Private.showSplash() })
+  activate: app => ({ show: () => Private.showSplash(app.restored) })
 };
 
 
@@ -343,7 +343,7 @@ namespace Private {
    * Show the splash element.
    */
   export
-  function showSplash(): IDisposable {
+  function showSplash(ready: Promise<any>): IDisposable {
     if (!splash) {
       splash = document.createElement('div');
       splash.id = 'jupyterlab-splash';
@@ -386,11 +386,13 @@ namespace Private {
     document.body.appendChild(splash);
     splashCount++;
     return new DisposableDelegate(() => {
-      splashCount = Math.max(splashCount - 1, 0);
-      if (splashCount === 0 && splash) {
-        splash.classList.add('splash-fade');
-        setTimeout(() => { document.body.removeChild(splash); }, 500);
-      }
+      ready.then(() => {
+        splashCount = Math.max(splashCount - 1, 0);
+        if (splashCount === 0 && splash) {
+          splash.classList.add('splash-fade');
+          setTimeout(() => { document.body.removeChild(splash); }, 500);
+        }
+      });
     });
   }
 }
