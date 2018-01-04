@@ -9,7 +9,7 @@
 
 :root {
   --jp-private-tab-manager-active-top-border: 2px;
-  --jp-private-tab-manager-tab-height: 32px;
+  --jp-private-tab-manager-tab-height: 24px;
   --jp-private-tab-manager-tab-padding-top: 8px;
 }
 
@@ -22,6 +22,8 @@
   background: var(--jp-layout-color1);
   overflow: visible;
   color: var(--jp-ui-font-color1);
+  /* This is needed so that all font sizing of children done in ems is
+   * relative to this base size */
   font-size: var(--jp-ui-font-size1);
 }
 
@@ -39,11 +41,9 @@
 
 
 #tab-manager .p-TabBar-tab {
-  margin-left: calc(-1*var(--jp-border-width));
   height: var(--jp-private-tab-manager-tab-height);
-  padding: 0px 8px;
-  border-top: var(--jp-border-width) solid transparent;
-  border-bottom: var(--jp-border-width) solid transparent;
+  padding: 0px 12px;
+  border: none;
   position: relative;
   overflow: visible;
 }
@@ -73,7 +73,7 @@
 
 
 #tab-manager .p-TabBar-tabLabel {
-  padding-top: var(--jp-private-tab-manager-tab-padding-top);
+  line-height: var(--jp-private-tab-manager-tab-height);
   padding-left: 4px;
 }
 
@@ -85,13 +85,9 @@
   margin-right: 2px;
 }
 
-#tab-manager .p-TabBar-tab.p-mod-current .p-TabBar-tabIcon {
-  margin-bottom: var(--jp-border-width);
-}
 
 #tab-manager .p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon {
-  margin-left: 4px;
-  padding-top: 12px;
+  padding: 4px 0px 4px 4px;
   background-size: 16px;
   height: 16px;
   width: 16px;

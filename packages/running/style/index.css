@@ -14,13 +14,17 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+
+
 .jp-RunningSessions {
   display: flex;
   flex-direction: column;
   min-width: 300px;
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color1);
-  font-size: var(--jp-ui-font-size0);
+  /* This is needed so that all font sizing of children done in ems is
+   * relative to this base size */
+  font-size: var(--jp-ui-font-size1);
 }
 
 
@@ -99,11 +103,12 @@
 .jp-RunningSessions-sectionHeader {
   flex: 0 0 auto;
   margin: 4px 0px;
-  padding: 4px 12px;
+  padding: 12px 0 4px 12px;
   font-weight: 600;
   text-transform: uppercase;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   letter-spacing: 1px;
+  font-size: var(--jp-ui-font-size0);
 }
 
 
@@ -135,7 +140,7 @@
   flex: 0 0 auto;
   padding: 0px 8px;
   margin-right: 4px;
-  margin-left: 8px;
+  margin-left: 12px;
   vertical-align: baseline;
   background-size: 16px;
   background-repeat: no-repeat;

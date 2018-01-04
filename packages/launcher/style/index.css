@@ -28,6 +28,9 @@
   box-sizing: border-box;
   min-width: 120px;
   min-height: 120px;
+  /* This is needed so that all font sizing of children done in ems is
+   * relative to this base size */
+  font-size: var(--jp-ui-font-size1);
 }
 
 
