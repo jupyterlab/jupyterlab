@@ -543,44 +543,44 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
 
   app.contextMenu.addItem({
     command: CommandIDs.clearOutputs,
-    selector: '.jp-Notebook .jp-Cell'
+    selector: '.jp-Notebook:focus .jp-Cell'
   });
   app.contextMenu.addItem({
     command: CommandIDs.split,
-    selector: '.jp-Notebook .jp-Cell'
+    selector: '.jp-Notebook:focus .jp-Cell'
   });
   app.contextMenu.addItem({
     command: CommandIDs.createOutputView,
-    selector: '.jp-Notebook .jp-Cell'
+    selector: '.jp-Notebook:focus .jp-Cell'
   });
   app.contextMenu.addItem({
     type: 'separator',
-    selector: '.jp-Notebook',
+    selector: '.jp-Notebook:focus',
     rank: 0
   });
   app.contextMenu.addItem({
     command: CommandIDs.undoCellAction,
-    selector: '.jp-Notebook',
+    selector: '.jp-Notebook:focus',
     rank: 1
   });
   app.contextMenu.addItem({
     command: CommandIDs.redoCellAction,
-    selector: '.jp-Notebook',
+    selector: '.jp-Notebook:focus',
     rank: 2
   });
   app.contextMenu.addItem({
     type: 'separator',
-    selector: '.jp-Notebook',
+    selector: '.jp-Notebook:focus',
     rank: 0
   });
   app.contextMenu.addItem({
     command: CommandIDs.createConsole,
-    selector: '.jp-Notebook',
+    selector: '.jp-Notebook:focus',
     rank: 3
   });
   app.contextMenu.addItem({
     command: CommandIDs.clearAllOutputs,
-    selector: '.jp-Notebook',
+    selector: '.jp-Notebook:focus',
     rank: 3
   });
 
