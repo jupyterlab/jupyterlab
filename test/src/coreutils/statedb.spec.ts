@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  ReadonlyJSONObject
+  PromiseDelegate, ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
 
@@ -21,6 +21,43 @@ describe('StateDB', () => {
     it('should create a state database', () => {
       let db = new StateDB({ namespace: 'test' });
       expect(db).to.be.a(StateDB);
+    });
+
+    it('should allow an overwrite data transformation', done => {
+      let transform = new PromiseDelegate<StateDB.DataTransform>();
+      let db = new StateDB({ namespace: 'test', transform: transform.promise });
+      let prepopulate = new StateDB({ namespace: 'test' });
+      let key = 'foo';
+      let correct = 'bar';
+      let incorrect = 'baz';
+
+      // By sharing a namespace, the two databases will share data.
+      prepopulate.save(key, incorrect)
+        .then(() => db.fetch(key))
+        .then(value => { expect(value).to.be(correct); })
+        .then(() => db.clear())
+        .then(done)
+        .catch(done);
+      transform.resolve({ type: 'overwrite', contents: { [key]: correct } });
+    });
+
+    it('should allow a merge data transformation', done => {
+      let transform = new PromiseDelegate<StateDB.DataTransform>();
+      let db = new StateDB({ namespace: 'test', transform: transform.promise });
+      let prepopulate = new StateDB({ namespace: 'test' });
+      let key = 'baz';
+      let value = 'qux';
+
+      // By sharing a namespace, the two databases will share data.
+      prepopulate.save('foo', 'bar')
+        .then(() => db.fetch('foo'))
+        .then(saved => { expect(saved).to.be('bar'); })
+        .then(() => db.fetch(key))
+        .then(saved => { expect(saved).to.be(value); })
+        .then(() => db.clear())
+        .then(done)
+        .catch(done);
+      transform.resolve({ type: 'merge', contents: { [key]: value } });
     });
 
   });
