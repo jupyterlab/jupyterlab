@@ -8,47 +8,19 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  PromiseDelegate, ReadonlyJSONObject
+  ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
 
 describe('StateDB', () => {
 
-  beforeEach(() => {
-    window.localStorage.clear();
-  });
+  beforeEach(() => { window.localStorage.clear(); });
 
   describe('#constructor()', () => {
 
     it('should create a state database', () => {
       let db = new StateDB({ namespace: 'test' });
       expect(db).to.be.a(StateDB);
-    });
-
-    it('should take an optional when promise', () => {
-      let { localStorage } = window;
-      let promise = new PromiseDelegate<void>();
-      let db = new StateDB({ namespace: 'test', when: promise.promise });
-      let key = 'foo:bar';
-      let value = { baz: 'qux' };
-      promise.resolve(void 0);
-      return promise.promise.then(() => {
-        expect(localStorage.length).to.be(0);
-        return db.save(key, value);
-      }).then(() => db.fetch(key))
-      .then(fetched => { expect(fetched).to.eql(value); });
-    });
-
-    it('should clear the namespace if the sentinel is set', () => {
-      let { localStorage } = window;
-      let key = 'test:statedb:sentinel';
-      localStorage.setItem(key, 'sentinel');
-      localStorage.setItem('test:foo', 'bar');
-      let promise = new PromiseDelegate<void>();
-      let db = new StateDB({ namespace: 'test', when: promise.promise });
-      expect(db).to.be.a(StateDB);
-      expect(localStorage.length).to.be(1);
-      expect(localStorage.getItem('test:foo')).to.be(null);
     });
 
   });
@@ -188,37 +160,6 @@ describe('StateDB', () => {
           expect(sorted[1].id).to.be(keys[4]);
           expect(sorted[2].id).to.be(keys[5]);
         })
-        .then(() => db.clear())
-        .then(done)
-        .catch(done);
-    });
-
-  });
-
-  describe('#fromJSON()', () => {
-
-    it('overwrites the full contents of a state database', done => {
-      let { localStorage } = window;
-
-      let db = new StateDB({ namespace: 'test-namespace' });
-      let key = 'abc';
-      let value = '123';
-      let contents: ReadonlyJSONObject = {
-        [key]: 'def',
-        ghi: 'jkl',
-        mno: 1,
-        pqr: {
-          foo: { bar: { baz: 'qux' } }
-        }
-      };
-
-      expect(localStorage.length).to.be(0);
-      db.save(key, value)
-        .then(() => db.fetch(key))
-        .then(result => { expect(result).to.be(value); })
-        .then(() => db.fromJSON(contents))
-        .then(() => db.fetch(key))
-        .then(result => { expect(result).to.be(contents[key]); })
         .then(() => db.clear())
         .then(done)
         .catch(done);
