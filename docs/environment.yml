@@ -1,4 +1,4 @@
-name: lab_tutorial
+name: jupyterlab_documentation
 channels:
   - conda-forge
 dependencies:
@@ -6,5 +6,4 @@ dependencies:
 - sphinx>=1.6
 - sphinx_rtd_theme
 - pip:
-  - jupyter_alabaster_theme
   - recommonmark==0.4.0
