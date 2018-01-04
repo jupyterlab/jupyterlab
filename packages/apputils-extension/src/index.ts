@@ -43,6 +43,14 @@ import '../style/index.css';
 
 
 /**
+ * The interval in milliseconds that calls to save a workspace are debounced
+ * to allow for multiple quickly executed state changes to result in a single
+ * workspace save operation.
+ */
+const WORKSPACE_SAVE_DEBOUNCE_INTERVAL = 2000;
+
+
+/**
  * The command IDs used by the apputils plugin.
  */
 namespace CommandIDs {
@@ -267,7 +275,7 @@ const state: JupyterLabPlugin<IStateDB> = {
             .catch(reason => {
               console.warn(`Saving workspace (${id}) failed.`, reason);
             });
-        }, 2000);
+        }, WORKSPACE_SAVE_DEBOUNCE_INTERVAL);
       }
     });
 
