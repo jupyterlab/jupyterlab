@@ -6,7 +6,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONObject
+  JSONObject, ReadonlyJSONObject, JSONExt
 } from '@phosphor/coreutils';
 
 import {
@@ -37,11 +37,6 @@ import {
   HoverBox
 } from '@jupyterlab/apputils';
 
-
-/**
- * The class name added to completer menu widgets.
- */
-const COMPLETER_CLASS = 'jp-Completer';
 
 /**
  * The class name added to completer menu items.
@@ -82,7 +77,7 @@ class Completer extends Widget {
     this._renderer = options.renderer || Completer.defaultRenderer;
     this.model = options.model || null;
     this.editor = options.editor || null;
-    this.addClass(COMPLETER_CLASS);
+    this.addClass('jp-Completer');
   }
 
   /**
@@ -262,11 +257,14 @@ class Completer extends Widget {
     let node = this.node;
     node.textContent = '';
 
+    // Compute an ordered list of all the types in the typeMap, this is computed
+    // once by the model each time new data arrives for efficiency.
+    let orderedTypes = model.orderedTypes();
+
     // Populate the completer items.
     for (let item of items) {
-      let li = this._renderer.createItemNode(item!);
-      // Set the raw, un-marked up value as a data attribute.
-      li.setAttribute('data-value', item.raw);
+      let li = this._renderer
+        .createItemNode(item!, model.typeMap(), orderedTypes);
       node.appendChild(li);
     }
 
@@ -456,7 +454,8 @@ class Completer extends Widget {
       return;
     }
 
-    const position = editor.getPositionAt(model.cursor.start) as CodeEditor.IPosition;
+    const start = model.cursor.start;
+    const position = editor.getPositionAt(start) as CodeEditor.IPosition;
     const anchor = editor.getCoordinateForPosition(position) as ClientRect;
     const style = window.getComputedStyle(this.node);
     const borderLeft = parseInt(style.borderLeftWidth!, 10) || 0;
@@ -585,9 +584,20 @@ namespace Completer {
     options(): IIterator<string>;
 
     /**
+     * The map from identifiers (`a.b`) to their types (function, module, class,
+     * instance, etc.).
+     */
+    typeMap(): ReadonlyJSONObject;
+
+    /**
+     * An oredered list of types used for visual encoding.
+     */
+    orderedTypes(): string[];
+
+    /**
      * Set the available options in the completer menu.
      */
-    setOptions(options: IterableOrArrayLike<string>): void;
+    setOptions(options: IterableOrArrayLike<string>, typeMap?: JSONObject): void;
 
     /**
      * Handle a cursor change.
@@ -662,6 +672,13 @@ namespace Completer {
     end: number;
   }
 
+
+  export
+  interface  ITypeMap {
+    [index: string]: string;
+  }
+
+
   /**
    * A renderer for completer widget nodes.
    */
@@ -670,7 +687,7 @@ namespace Completer {
     /**
      * Create an item node (an `li` element) for a text completer menu.
      */
-    createItemNode(item: IItem): HTMLLIElement;
+    createItemNode(item: IItem, typeMap: ReadonlyJSONObject, orderedTypes: string[]): HTMLLIElement;
   }
 
   /**
@@ -681,15 +698,35 @@ namespace Completer {
     /**
      * Create an item node for a text completer menu.
      */
-    createItemNode(item: IItem): HTMLLIElement {
+    createItemNode(item: IItem, typeMap: Completer.ITypeMap, orderedTypes: string[]): HTMLLIElement {
       let li = document.createElement('li');
-      let code = document.createElement('code');
-
-      // Use innerHTML because search results include <mark> tags.
-      code.innerHTML = item.text;
-
       li.className = ITEM_CLASS;
-      li.appendChild(code);
+      // Set the raw, un-marked up value as a data attribute.
+      li.setAttribute('data-value', item.raw);
+
+      let matchNode = document.createElement('code');
+      matchNode.className = 'jp-Completer-match';
+      // Use innerHTML because search results include <mark> tags.
+      matchNode.innerHTML = item.text;
+
+      // If there are types provided add those.
+      if (!JSONExt.deepEqual(typeMap, {})) {
+        let typeNode = document.createElement('span');
+        let type = typeMap[item.raw] || '';
+        typeNode.textContent = (type[0] || '').toLowerCase();
+        let colorIndex: number = orderedTypes.indexOf(type) + 1;
+        typeNode.className = 'jp-Completer-type';
+        typeNode.setAttribute(`data-color-index`, colorIndex.toString());
+        li.title = type;
+        let typeExtendedNode = document.createElement('code');
+        typeExtendedNode.className = 'jp-Completer-typeExtended';
+        typeExtendedNode.textContent = type.toLocaleLowerCase();
+        li.appendChild(typeNode);
+        li.appendChild(matchNode);
+        li.appendChild(typeExtendedNode);
+      } else {
+        li.appendChild(matchNode);
+      }
       return li;
     }
   }
@@ -736,7 +773,7 @@ namespace Private {
   function itemValues(items: NodeList): string[] {
     let values: string[] = [];
     for (let i = 0, len = items.length; i < len; i++) {
-      values.push((items[i] as HTMLElement).getAttribute('data-value') as string);
+      values.push((items[i] as HTMLElement).getAttribute('data-value'));
     }
     return values;
   }

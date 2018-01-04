@@ -8,6 +8,10 @@ import {
 } from '@phosphor/algorithm';
 
 import {
+  JSONExt
+} from '@phosphor/coreutils';
+
+import {
   CodeEditor
 } from '@jupyterlab/codeeditor';
 
@@ -51,7 +55,7 @@ describe('completer/model', () => {
         expect(called).to.be(0);
         model.setOptions(['foo']);
         expect(called).to.be(1);
-        model.setOptions([]);
+        model.setOptions(['foo'], {foo: 'instance'});
         expect(called).to.be(2);
       });
 
@@ -64,9 +68,12 @@ describe('completer/model', () => {
         model.setOptions(['foo']);
         model.setOptions(['foo']);
         expect(called).to.be(1);
-        model.setOptions([]);
-        model.setOptions([]);
+        model.setOptions(['foo'], {foo: 'instance'});
+        model.setOptions(['foo'], {foo: 'instance'});
         expect(called).to.be(2);
+        model.setOptions([], {});
+        model.setOptions([], {});
+        expect(called).to.be(3);
       });
 
       it('should signal when original request changes', () => {
@@ -196,9 +203,17 @@ describe('completer/model', () => {
       it('should return model options', () => {
         let model = new CompleterModel();
         let options = ['foo'];
-        model.setOptions(options);
+        model.setOptions(options, {});
         expect(toArray(model.options())).to.not.equal(options);
         expect(toArray(model.options())).to.eql(options);
+      });
+
+      it('should return the typeMap', () => {
+        let model = new CompleterModel();
+        let options = ['foo'];
+        let typeMap = {foo: 'instance'};
+        model.setOptions(options, typeMap);
+        expect(JSONExt.deepEqual(model.typeMap(), typeMap)).to.be.ok();
       });
 
     });
@@ -308,7 +323,7 @@ describe('completer/model', () => {
 
       it('should dispose of the model resources', () => {
         let model = new CompleterModel();
-        model.setOptions(['foo']);
+        model.setOptions(['foo'], {foo: 'instance'});
         expect(model.isDisposed).to.be(false);
         model.dispose();
         expect(model.isDisposed).to.be(true);

@@ -6,7 +6,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONExt
+  JSONExt, JSONObject, ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
 import {
@@ -181,18 +181,55 @@ class CompleterModel implements Completer.IModel {
   }
 
   /**
+   * The map from identifiers (a.b) to types (function, module, class, instance,
+   * etc.).
+   *
+   * #### Notes
+   * A type map is currently only provided by the latest IPython kernel using
+   * the completer reply metadata field `_jupyter_types_experimental`. The
+   * values are completely up to the kernel.
+   *
+   */
+  typeMap(): ReadonlyJSONObject {
+    return this._typeMap;
+  }
+
+  /**
+   * An ordered list of all the known types in the typeMap.
+   *
+   * #### Notes
+   * To visually encode the types of the completer matches, we assemble an
+   * ordered list. This list begins with:
+   * ```
+   * ['function', 'instance', 'class', 'module', 'keyword']
+   * ```
+   * and then has any remaining types listed alphebetically. This will give
+   * reliable visual encoding for these known types, but allow kernels to
+   * provide new types.
+   */
+  orderedTypes(): string[] {
+    return this._orderedTypes;
+  }
+
+  /**
    * Set the available options in the completer menu.
    */
-  setOptions(newValue: IterableOrArrayLike<string>) {
+  setOptions(newValue: IterableOrArrayLike<string>, typeMap?: JSONObject) {
     const values = toArray(newValue || []);
-    if (JSONExt.deepEqual(values, this._options)) {
+    const types = typeMap || {};
+    if (JSONExt.deepEqual(values, this._options) &&
+        JSONExt.deepEqual(types, this._typeMap)) {
       return;
     }
     if (values.length) {
       this._options = values;
+      this._typeMap = types;
+      this._orderedTypes = Private.findOrderedTypes(types);
       this._subsetMatch = true;
     } else {
       this._options = [];
+      this._typeMap = {};
+      this._orderedTypes = [];
     }
     this._stateChanged.emit(void 0);
   }
@@ -346,6 +383,8 @@ class CompleterModel implements Completer.IModel {
     this._original = null;
     this._query = '';
     this._subsetMatch = false;
+    this._typeMap = {};
+    this._orderedTypes = [];
   }
 
   private _current: Completer.ITextState | null = null;
@@ -355,6 +394,8 @@ class CompleterModel implements Completer.IModel {
   private _original: Completer.ITextState | null = null;
   private _query = '';
   private _subsetMatch = false;
+  private _typeMap: ReadonlyJSONObject = {};
+  private _orderedTypes: string[] = [];
   private _stateChanged = new Signal<this, void>(this);
 }
 
@@ -409,4 +450,26 @@ namespace Private {
     }
     return a.raw.localeCompare(b.raw);
   }
+
+  /**
+   * Compute a reliably ordered list of types.
+   *
+   * #### Notes
+   * The resulting list always begins with the known types:
+   * ```
+   * ['function', 'instance', 'class', 'module', 'keyword']
+   * ```
+   * followed by other types in alphabetical order.
+   */
+  export
+  function findOrderedTypes(typeMap: ReadonlyJSONObject): string[] {
+    const knownTypes = ['function', 'instance', 'class', 'module', 'keyword'];
+    let allTypes: string[] = Object.keys(typeMap)
+      .map(key => typeMap[key].toString());
+    let newTypes = allTypes
+      .filter(value => knownTypes.indexOf(value) === -1).sort();
+
+    return knownTypes.concat(newTypes);
+  }
+
 }

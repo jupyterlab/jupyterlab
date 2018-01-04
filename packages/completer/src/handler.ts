@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  ReadonlyJSONObject
+  ReadonlyJSONObject, JSONObject, JSONArray
 } from '@phosphor/coreutils';
 
 import {
@@ -392,8 +392,27 @@ class CompletionHandler implements IDisposable {
       });
     }
 
-    // Update the options.
-    model.setOptions(matches);
+    // Extract the optional typeMap. The current implementation uses
+    // _jupyter_types_experimental which provide string type names. We make no
+    // assumptions about the names of the types, so other kernels can provide
+    // their own types.
+    let typeMap: JSONObject = {};
+    if (reply.metadata._jupyter_types_experimental) {
+      let types = (reply.metadata._jupyter_types_experimental as JSONArray);
+      types.forEach((item: JSONObject) => {
+        // For some reason the _jupyter_types_experimental list has two entries
+        // for each match, with one having a type of "<unknown>". Discard those
+        // and use undefined to indicate an unknown type.
+        let text = item.text as string;
+        let type = item.type as string;
+        if (matches.indexOf(text) !== -1 && type !== '<unknown>') {
+          typeMap[text] = item.type;
+        }
+      });
+    }
+
+    // Update the options, including the type map.
+    model.setOptions(matches, typeMap as Completer.ITypeMap);
 
     // Update the cursor.
     model.cursor = {

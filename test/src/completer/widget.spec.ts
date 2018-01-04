@@ -49,8 +49,8 @@ function createEditorWidget(): CodeEditorWrapper {
 
 
 class CustomRenderer extends Completer.Renderer {
-  createItemNode(item: Completer.IItem): HTMLLIElement {
-    let li = super.createItemNode(item);
+  createItemNode(item: Completer.IItem, typeMap: Completer.ITypeMap, orderedTypes: string[]): HTMLLIElement {
+    let li = super.createItemNode(item, typeMap, orderedTypes);
     li.classList.add(TEST_ITEM_CLASS);
     return li;
   }
@@ -278,7 +278,7 @@ describe('completer/widget', () => {
         let options: Completer.IOptions = {
           editor: anchor.editor, model
         };
-        model.setOptions(['foo', 'bar']);
+        model.setOptions(['foo', 'bar'], {foo: 'instance', bar: 'function'});
         Widget.attach(anchor, document.body);
 
         let widget = new Completer(options);
@@ -320,7 +320,7 @@ describe('completer/widget', () => {
           let options: Completer.IOptions = {
             editor: anchor.editor, model
           };
-          model.setOptions(['foo', 'bar']);
+          model.setOptions(['foo', 'bar'], {foo: 'instance', bar: 'function'});
           Widget.attach(anchor, document.body);
 
           let widget = new Completer(options);
@@ -343,7 +343,7 @@ describe('completer/widget', () => {
           let options: Completer.IOptions = {
             editor: anchor.editor, model
           };
-          model.setOptions(['foo', 'bar', 'baz']);
+          model.setOptions(['foo', 'bar', 'baz'], {foo: 'instance', bar: 'function'});
           Widget.attach(anchor, document.body);
 
           let widget = new Completer(options);
@@ -380,7 +380,7 @@ describe('completer/widget', () => {
           let options: Completer.IOptions = {
             editor: anchor.editor, model
           };
-          model.setOptions(['foo', 'bar', 'baz']);
+          model.setOptions(['foo', 'bar', 'baz'], {foo: 'instance', bar: 'function'});
           Widget.attach(anchor, document.body);
 
           let widget = new Completer(options);
@@ -427,7 +427,7 @@ describe('completer/widget', () => {
           let listener = (sender: any, selected: string) => {
             value = selected;
           };
-          model.setOptions(['fo', 'foo', 'foo', 'fooo']);
+          model.setOptions(['fo', 'foo', 'foo', 'fooo'], {foo: 'instance', bar: 'function'});
           Widget.attach(anchor, document.body);
 
           let widget = new Completer(options);
@@ -466,7 +466,7 @@ describe('completer/widget', () => {
           let listener = (sender: any, selected: string) => {
             value = selected;
           };
-          model.setOptions(['foo', 'bar', 'baz']);
+          model.setOptions(['foo', 'bar', 'baz'], {foo: 'instance', bar: 'function'});
           model.query = 'b';
           Widget.attach(anchor, document.body);
 
