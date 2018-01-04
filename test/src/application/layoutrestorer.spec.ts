@@ -163,14 +163,15 @@ describe('apputils', () => {
           execute: () => { called = true; }
         });
         state.save(key, { data: null }).then(() => {
+          ready.resolve(undefined);
           return restorer.restore(tracker, {
             args: () => null,
             name: () => tracker.namespace,
             command: tracker.namespace
           });
         }).catch(done);
-        ready.resolve(void 0);
-        restorer.restored.then(() => { expect(called).to.be(true); })
+        restorer.restored
+          .then(() => { expect(called).to.be(true); })
           .then(() => state.remove(key))
           .then(() => { done(); })
           .catch(done);
