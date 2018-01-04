@@ -323,7 +323,7 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
   });
 
   commands.addCommand(CommandIDs.shutdownAllKernels, {
-    label: 'Shutdown All Kernels...',
+    label: 'Shutdown All Kernels…',
     isEnabled: () => {
       return app.serviceManager.sessions.running().next() !== undefined;
     },
