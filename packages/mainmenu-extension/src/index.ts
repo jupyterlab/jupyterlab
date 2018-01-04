@@ -174,7 +174,7 @@ function createEditMenu(app: JupyterLab, menu: EditMenu): void {
   });
   commands.addCommand(CommandIDs.clearAll, {
     label: () => {
-      const noun = Private.delegateLabel(app, menu.clearers, 'noun');
+      const noun = Private.delegateLabel(app, menu.clearers, 'pluralNoun');
       const enabled = Private.delegateEnabled(app, menu.clearers, 'clearAll')();
       return `Clear All${enabled ? ` ${noun}` : ''}`;
     },
