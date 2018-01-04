@@ -8,10 +8,8 @@
 
 # [JupyterLab](http://jupyterlab.github.io/jupyterlab/)
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/jupyterlab/jupyterlab.svg)](https://greenkeeper.io/)
-
 [![Build Status](https://travis-ci.org/jupyterlab/jupyterlab.svg?branch=master)](https://travis-ci.org/jupyterlab/jupyterlab)
-[![Documentation Status](https://readthedocs.org/projects/jupyterlab/badge/?version=latest)](https://jupyterlab.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/jupyterlab/badge/?version=stable)](https://readthedocs.org/projects/jupyterlab/badge/?version=stable)
 [![Google Group](https://img.shields.io/badge/-Google%20Group-lightgrey.svg)](https://groups.google.com/forum/#!forum/jupyter)
 [![Join the Gitter Chat](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/jupyterlab/jupyterlab)
 
