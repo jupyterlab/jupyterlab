@@ -6,6 +6,10 @@ import {
 } from '@phosphor/coreutils';
 
 import {
+  ISignal, Signal
+} from '@phosphor/signaling';
+
+import {
   IDataConnector
 } from './interfaces';
 
@@ -124,6 +128,10 @@ class StateDB implements IStateDB {
     });
   }
 
+  get changed(): ISignal<this, StateDB.Change> {
+    return this._changed;
+  }
+
   /**
    * The maximum allowed length of the data after it has been serialized.
    */
@@ -233,6 +241,7 @@ class StateDB implements IStateDB {
   remove(id: string): Promise<void> {
     return this._ready.then(() => {
       window.localStorage.removeItem(`${this.namespace}:${id}`);
+      this._changed.emit({ id, type: 'remove' });
     });
   }
 
@@ -253,7 +262,10 @@ class StateDB implements IStateDB {
    * using the `fetchNamespace()` method.
    */
   save(id: string, value: ReadonlyJSONValue): Promise<void> {
-    return this._ready.then(() => this._save(id, value));
+    return this._ready.then(() => {
+      this._save(id, value);
+      this._changed.emit({ id, type: 'save' });
+    });
   }
 
   /**
@@ -346,6 +358,7 @@ class StateDB implements IStateDB {
     window.localStorage.setItem(key, serialized);
   }
 
+  private _changed = new Signal<this, StateDB.Change>(this);
   private _ready: Promise<void>;
 }
 
@@ -354,6 +367,22 @@ class StateDB implements IStateDB {
  */
 export
 namespace StateDB {
+  /**
+   * A state database change.
+   */
+  export
+  type Change = {
+    /**
+     * The key of the database item that was changed.
+     */
+    id: string;
+
+    /**
+     * The type of change.
+     */
+    type: 'remove' | 'save'
+  };
+
   /**
    * A data transformation that can be applied to a state database.
    */
