@@ -140,6 +140,11 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
    * Render the mime content.
    */
   private _render(): Promise<void> {
+    if (this._isRendering) {
+      this._renderRequested = true;
+      return;
+    }
+    this._renderRequested = false;
     let context = this._context;
     let model = context.model;
     let data: JSONObject = {};
@@ -150,12 +155,17 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
     }
     let mimeModel = new MimeModel({ data, callback: this._changeCallback });
 
+    this._isRendering = true;
     return this._renderer.renderModel(mimeModel).then(() => {
       // Handle the first render after an activation.
       if (!this._hasRendered && this.node === document.activeElement) {
         MessageLoop.sendMessage(this._renderer, Widget.Msg.ActivateRequest);
       }
       this._hasRendered = true;
+      this._isRendering = false;
+      if (this._renderRequested) {
+        this._render();
+      }
     });
   }
 
@@ -188,6 +198,8 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
   private _ready = new PromiseDelegate<void>();
   private _dataType: 'string' | 'json';
   private _hasRendered = false;
+  private _isRendering = false;
+  private _renderRequested = false;
 }
 
 

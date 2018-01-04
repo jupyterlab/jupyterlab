@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  JSONObject, ReadonlyJSONObject, JSONValue
+  JSONObject, JSONValue, ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
 import {
@@ -100,7 +100,7 @@ class RenderedVega extends Widget implements IRenderMime.IRenderer {
       spec: updatedData
     };
 
-    return this._ensureMod().then(embedFunc => {
+    return Private.ensureMod().then(embedFunc => {
       return new Promise<void>((resolve, reject) => {
         embedFunc(this.node, embedSpec, (error: any, result: any): any => {
           // Save png data in MIME bundle along with original MIME data.
@@ -112,22 +112,6 @@ class RenderedVega extends Widget implements IRenderMime.IRenderer {
           resolve(undefined);
         });
       });
-    });
-  }
-
-  /**
-   * Initialize the vega-embed module.
-   */
-  private _ensureMod(): Promise<typeof embed> {
-    return new Promise((resolve, reject) => {
-      (require as any).ensure(['vega-embed'], (require: NodeRequire) => {
-        resolve(require('vega-embed'));
-      },
-      (err: any) => {
-        reject(err);
-      },
-      'vega2'
-      );
     });
   }
 
@@ -198,6 +182,33 @@ namespace Private {
     'width': 400,
     'height': 400 / 1.5
   };
+
+  /**
+   * The embed module import.
+   */
+  let mod: typeof embed;
+
+  /**
+   * Initialize the vega-embed module.
+   */
+  export
+  function ensureMod(): Promise<typeof embed> {
+    return new Promise((resolve, reject) => {
+      if (mod !== undefined) {
+        resolve(mod);
+        return;
+      }
+      (require as any).ensure(['vega-embed'], (require: NodeRequire) => {
+        mod = require('vega-embed');
+        resolve(mod);
+      },
+      (err: any) => {
+        reject(err);
+      },
+      'vega2'
+      );
+    });
+  }
 
   /**
    * Apply the default cell config to the spec in place.
