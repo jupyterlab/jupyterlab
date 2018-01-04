@@ -208,15 +208,16 @@ class CompleterModel implements Completer.IModel {
   /**
    * Set the available options in the completer menu.
    */
-  setOptions(newValue: IterableOrArrayLike<string>, typeMap: JSONObject) {
+  setOptions(newValue: IterableOrArrayLike<string>, typeMap?: JSONObject) {
     const values = toArray(newValue || []);
-    if (JSONExt.deepEqual(values, this._options) && JSONExt.deepEqual(typeMap, this._typeMap)) {
+    const types = typeMap || {};
+    if (JSONExt.deepEqual(values, this._options) && JSONExt.deepEqual(types, this._typeMap)) {
       return;
     }
     if (values.length) {
       this._options = values;
-      this._typeMap = typeMap;
-      this._orderedTypes = Private.findOrderedTypes(typeMap);
+      this._typeMap = types;
+      this._orderedTypes = Private.findOrderedTypes(types);
       this._subsetMatch = true;
     } else {
       this._options = [];

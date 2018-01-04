@@ -107,7 +107,7 @@ describe('completer/widget', () => {
           model: new CompleterModel(),
           renderer: new CustomRenderer()
         };
-        options.model.setOptions(['foo', 'bar'], {});
+        options.model.setOptions(['foo', 'bar']);
 
         let widget = new Completer(options);
         expect(widget).to.be.a(Completer);
@@ -130,7 +130,7 @@ describe('completer/widget', () => {
         };
         let value = '';
         let listener = (sender: any, selected: string) => { value = selected; };
-        options.model.setOptions(['foo', 'bar'], {});
+        options.model.setOptions(['foo', 'bar']);
         Widget.attach(anchor, document.body);
 
         let widget = new Completer(options);
@@ -181,7 +181,7 @@ describe('completer/widget', () => {
 
           model.original = request;
           model.cursor = { start: 0, end: 1 };
-          model.setOptions(['abc', 'abd', 'abe', 'abi'], {});
+          model.setOptions(['abc', 'abd', 'abe', 'abi']);
 
           let widget = new Completer({ model, editor: code.editor });
           widget.hide();
@@ -495,7 +495,7 @@ describe('completer/widget', () => {
           let listener = (sender: any, selected: string) => {
             value = selected;
           };
-          model.setOptions(['foo', 'bar'], {});
+          model.setOptions(['foo', 'bar']);
           Widget.attach(anchor, document.body);
 
           let widget = new Completer(options);
@@ -520,7 +520,7 @@ describe('completer/widget', () => {
           let listener = (sender: any, selected: string) => {
             value = selected;
           };
-          model.setOptions(['foo', 'bar'], {});
+          model.setOptions(['foo', 'bar']);
           Widget.attach(anchor, document.body);
 
           let widget = new Completer(options);
@@ -544,7 +544,7 @@ describe('completer/widget', () => {
           let listener = (sender: any, selected: string) => {
             // no op
           };
-          model.setOptions(['foo', 'bar'], {});
+          model.setOptions(['foo', 'bar']);
           Widget.attach(anchor, document.body);
 
           let widget = new Completer(options);
@@ -605,7 +605,7 @@ describe('completer/widget', () => {
 
           model.original = request;
           model.cursor = { start: text.length - 1, end: text.length };
-          model.setOptions(['abc', 'abd', 'abe', 'abi'], {});
+          model.setOptions(['abc', 'abd', 'abe', 'abi']);
 
           let widget = new Completer({ model, editor: code.editor });
           Widget.attach(widget, document.body);
@@ -650,7 +650,7 @@ describe('completer/widget', () => {
 
         Widget.attach(anchor, document.body);
         model.original = request;
-        model.setOptions(['foo'], {});
+        model.setOptions(['foo']);
 
         let widget = new Completer(options);
         widget.selected.connect(listener);
@@ -688,7 +688,7 @@ describe('completer/widget', () => {
 
         Widget.attach(anchor, document.body);
         model.original = request;
-        model.setOptions(['foo', 'bar', 'baz'], {});
+        model.setOptions(['foo', 'bar', 'baz']);
 
         let widget = new Completer(options);
         widget.hide();

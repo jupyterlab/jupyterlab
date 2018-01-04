@@ -64,6 +64,20 @@
 }
 
 
+.jp-Completer-item .jp-Completer-typeExtended {
+  display: table-cell;
+  box-sizing: border-box;
+  height: var(--jp-private-completer-item-height);
+  text-align: right;
+  background: transparent;
+  color: var(--jp-ui-font-color2);
+  font-family: var(--jp-code-font-family);
+  font-size: var(--jp-code-font-size);
+  line-height: var(--jp-private-completer-item-height);
+  padding-right: 8px;
+}
+
+
 .jp-Completer-item:hover {
   background: var(--jp-layout-color2);
   opacity: 0.8;

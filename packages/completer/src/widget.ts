@@ -594,7 +594,7 @@ namespace Completer {
     /**
      * Set the available options in the completer menu.
      */
-    setOptions(options: IterableOrArrayLike<string>, typeMap: JSONObject): void;
+    setOptions(options: IterableOrArrayLike<string>, typeMap?: JSONObject): void;
 
     /**
      * Handle a cursor change.
@@ -714,11 +714,16 @@ namespace Completer {
         let colorIndex: number = orderedTypes.indexOf(type) + 1;
         typeNode.className = 'jp-Completer-type';
         typeNode.setAttribute(`data-color-index`, colorIndex.toString());
-        li.appendChild(typeNode);
         li.title = type;
+        let typeExtendedNode = document.createElement('code');
+        typeExtendedNode.className = 'jp-Completer-typeExtended';
+        typeExtendedNode.textContent = type.toLocaleLowerCase();
+        li.appendChild(typeNode);
+        li.appendChild(matchNode);
+        li.appendChild(typeExtendedNode);
+      } else {
+        li.appendChild(matchNode);
       }
-
-      li.appendChild(matchNode);
       return li;
     }
   }

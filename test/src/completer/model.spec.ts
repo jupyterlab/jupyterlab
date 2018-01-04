@@ -53,7 +53,7 @@ describe('completer/model', () => {
         let listener = (sender: any, args: void) => { called++; };
         model.stateChanged.connect(listener);
         expect(called).to.be(0);
-        model.setOptions(['foo'], {});
+        model.setOptions(['foo']);
         expect(called).to.be(1);
         model.setOptions(['foo'], {foo: 'instance'});
         expect(called).to.be(2);
@@ -65,8 +65,8 @@ describe('completer/model', () => {
         let listener = (sender: any, args: void) => { called++; };
         model.stateChanged.connect(listener);
         expect(called).to.be(0);
-        model.setOptions(['foo'], {});
-        model.setOptions(['foo'], {});
+        model.setOptions(['foo']);
+        model.setOptions(['foo']);
         expect(called).to.be(1);
         model.setOptions(['foo'], {foo: 'instance'});
         model.setOptions(['foo'], {foo: 'instance'});
@@ -155,7 +155,7 @@ describe('completer/model', () => {
           { raw: 'bar', text: 'bar' },
           { raw: 'baz', text: 'baz' }
         ];
-        model.setOptions(['foo', 'bar', 'baz'], {});
+        model.setOptions(['foo', 'bar', 'baz']);
         expect(toArray(model.items())).to.eql(want);
       });
 
@@ -164,7 +164,7 @@ describe('completer/model', () => {
         let want: Completer.IItem[] = [
           { raw: 'foo', text: '<mark>f</mark>oo' }
         ];
-        model.setOptions(['foo', 'bar', 'baz'], {});
+        model.setOptions(['foo', 'bar', 'baz']);
         model.query = 'f';
         expect(toArray(model.items())).to.eql(want);
       });
@@ -175,7 +175,7 @@ describe('completer/model', () => {
           { raw: 'qux', text: '<mark>qux</mark>' },
           { raw: 'quux', text: '<mark>qu</mark>u<mark>x</mark>' }
         ];
-        model.setOptions(['foo', 'bar', 'baz', 'quux', 'qux'], {});
+        model.setOptions(['foo', 'bar', 'baz', 'quux', 'qux']);
         model.query = 'qux';
         expect(toArray(model.items())).to.eql(want);
       });
@@ -186,7 +186,7 @@ describe('completer/model', () => {
           { raw: 'quux', text: '<mark>qu</mark>ux' },
           { raw: 'qux', text: '<mark>qu</mark>x' }
         ];
-        model.setOptions(['foo', 'bar', 'baz', 'qux', 'quux'], {});
+        model.setOptions(['foo', 'bar', 'baz', 'qux', 'quux']);
         model.query = 'qu';
         expect(toArray(model.items())).to.eql(want);
       });
