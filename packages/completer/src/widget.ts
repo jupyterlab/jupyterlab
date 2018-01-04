@@ -257,13 +257,14 @@ class Completer extends Widget {
     let node = this.node;
     node.textContent = '';
 
-    // Compute an ordered list of all the types in the typeMap, this is computed once by the
-    // model each time new data arrives for efficiency.
+    // Compute an ordered list of all the types in the typeMap, this is computed
+    // once by the model each time new data arrives for efficiency.
     let orderedTypes = model.orderedTypes();
 
     // Populate the completer items.
     for (let item of items) {
-      let li = this._renderer.createItemNode(item!, model.typeMap(), orderedTypes);
+      let li = this._renderer
+        .createItemNode(item!, model.typeMap(), orderedTypes);
       node.appendChild(li);
     }
 
@@ -453,7 +454,8 @@ class Completer extends Widget {
       return;
     }
 
-    const position = editor.getPositionAt(model.cursor.start) as CodeEditor.IPosition;
+    const start = model.cursor.start;
+    const position = editor.getPositionAt(start) as CodeEditor.IPosition;
     const anchor = editor.getCoordinateForPosition(position) as ClientRect;
     const style = window.getComputedStyle(this.node);
     const borderLeft = parseInt(style.borderLeftWidth!, 10) || 0;
@@ -582,7 +584,8 @@ namespace Completer {
     options(): IIterator<string>;
 
     /**
-     * The map from identifiers (`a.b`) to their types (function, module, class, instance, etc.).
+     * The map from identifiers (`a.b`) to their types (function, module, class,
+     * instance, etc.).
      */
     typeMap(): ReadonlyJSONObject;
 
@@ -770,7 +773,7 @@ namespace Private {
   function itemValues(items: NodeList): string[] {
     let values: string[] = [];
     for (let i = 0, len = items.length; i < len; i++) {
-      values.push((items[i] as HTMLElement).getAttribute('data-value') as string);
+      values.push((items[i] as HTMLElement).getAttribute('data-value'));
     }
     return values;
   }

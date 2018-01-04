@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  each, iter, toArray
-} from '@phosphor/algorithm';
-
-import {
   CodeEditor
 } from '@jupyterlab/codeeditor';
 
@@ -396,17 +392,21 @@ class CompletionHandler implements IDisposable {
       });
     }
 
-    // Extract the optional typeMap. The current implementation uses _jupyter_types_experimental
-    // which provide string type names. We make no assumptions about the names of the types, so
-    // other kernels can provide their own types.
+    // Extract the optional typeMap. The current implementation uses
+    // _jupyter_types_experimental which provide string type names. We make no
+    // assumptions about the names of the types, so other kernels can provide
+    // their own types.
     let typeMap: JSONObject = {};
     if (reply.metadata._jupyter_types_experimental) {
-      each(iter(toArray(reply.metadata._jupyter_types_experimental as JSONArray)), (item: JSONObject) => {
-        // For some reason the _jupyter_types_experimental list has two entries for each
-        // match, with one having a type of "<unknown>". Discard those and use undefined
-        // to indicate an unknown type.
-        if (matches.indexOf(item.text as string) !== -1 && item.type !== '<unknown>') {
-          typeMap[item.text as string] = item.type;
+      let types = (reply.metadata._jupyter_types_experimental as JSONArray);
+      types.forEach((item: JSONObject) => {
+        // For some reason the _jupyter_types_experimental list has two entries
+        // for each match, with one having a type of "<unknown>". Discard those
+        // and use undefined to indicate an unknown type.
+        let text = item.text as string;
+        let type = item.type as string;
+        if (matches.indexOf(text) !== -1 && type !== '<unknown>') {
+          typeMap[text] = item.type;
         }
       });
     }
