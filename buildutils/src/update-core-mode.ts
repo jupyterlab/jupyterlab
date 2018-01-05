@@ -15,9 +15,6 @@ utils.run('jlpm integrity');
 let data = utils.readJSONFile('./dev_mode/package.json');
 
 // Update the values that need to change and write to staging.
-data['scripts']['build'] = 'webpack';
-data['scripts']['watch'] = 'webpack --watch';
-data['scripts']['build:prod'] = 'webpack -p';
 data['jupyterlab']['buildDir'] = './build';
 data['jupyterlab']['outputDir'] = '..';
 data['jupyterlab']['staticDir'] = '../static';
@@ -27,11 +24,12 @@ let staging = './jupyterlab/staging';
 utils.writePackageData(path.join(staging, 'package.json'), data);
 
 // Update our staging files.
-fs.copySync('./dev_mode/index.js', './jupyterlab/staging/index.js');
-fs.copySync('./dev_mode/webpack.config.js',
-            './jupyterlab/staging/webpack.config.js');
-fs.copySync('./dev_mode/templates', './jupyterlab/staging/templates');
-
+[
+  'index.js', 'webpack.config.js', 'webpack.prod.config.js', 'templates'
+].forEach(name => {
+    fs.copySync(path.join('.', 'dev_mode', name),
+                path.join('.', 'jupyterlab', 'staging', name));
+});
 
 // Create a new yarn.lock file to ensure it is correct.
 fs.removeSync(path.join(staging, 'yarn.lock'));

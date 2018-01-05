@@ -1,11 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import {
+  ILauncher
+} from '@jupyterlab/launcher';
+
+
 module.exports = [{
   id: 'mockextension',
-  requires: [
-    require('@jupyterlab/launcher').ILauncher,
-  ],
+  requires: [ILauncher],
   autoStart: true,
   activate: function(application, launcher) {
     // eslint-disable-next-line no-console
