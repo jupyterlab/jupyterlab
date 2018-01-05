@@ -614,11 +614,12 @@ class CodeCell extends Cell {
     this._outputHidden = value;
   }
 
-  get outputScrolled(): boolean {
-    return this._outputScrolled;
+  get outputsScrolled(): boolean {
+    return this._outputsScrolled;
   }
-  set outputScrolled(value: boolean) {
-    this.toggleClass('jp-mod-outputScrolled', value);
+  set outputsScrolled(value: boolean) {
+    this.toggleClass('jp-mod-outputsScrolled', value);
+    this._outputsScrolled = value;
   }
 
   /**
@@ -725,7 +726,7 @@ class CodeCell extends Cell {
 
   private _rendermime: RenderMimeRegistry = null;
   private _outputHidden = false;
-  private _outputScrolled = false;
+  private _outputsScrolled = false;
   private _outputWrapper: Widget = null;
   private _outputCollapser: OutputCollapser = null;
   private _outputPlaceholder: OutputPlaceholder = null;

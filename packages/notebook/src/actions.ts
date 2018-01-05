@@ -1044,7 +1044,7 @@ namespace NotebookActions {
   }
 
   export
-  function toggleOutputScrolled(widget: Notebook): void {
+  function toggleOutputsScrolled(widget: Notebook): void {
     if (!widget.model || !widget.activeCell) {
       return;
     }
@@ -1053,7 +1053,7 @@ namespace NotebookActions {
     each(cells, (cell: Cell) => {
       if (widget.isSelectedOrActive(cell) && cell.model.type === 'code') {
         const codeCell: CodeCell = (cell as CodeCell);
-        codeCell.outputScrolled = !codeCell.outputScrolled;
+        codeCell.outputsScrolled = !codeCell.outputsScrolled;
       }
     });
     Private.handleState(widget, state);

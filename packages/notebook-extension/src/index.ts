@@ -246,7 +246,7 @@ namespace CommandIDs {
   const showAllOutputs = 'notebook:show-all-cell-outputs';
 
   export
-  const toggleOutputScrolled = 'notebook:toggle-cell-outputs-scrolled';
+  const toggleOutputsScrolled = 'notebook:toggle-cell-outputs-scrolled';
 }
 
 
@@ -544,6 +544,26 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
   }
 
   app.contextMenu.addItem({
+    type: 'separator',
+    selector: '.jp-Notebook.jp-mod-focus  .jp-Cell',
+    rank: 0
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.deleteCell,
+    selector: '.jp-Notebook.jp-mod-focus .jp-Cell',
+    rank: 1
+  });
+
+  app.contextMenu.addItem({
+    command: CommandIDs.split,
+    selector: '.jp-Notebook:focus .jp-Cell'
+  });
+  app.contextMenu.addItem({
+    type: 'separator',
+    selector: '.jp-Notebook.jp-mod-focus',
+    rank: 0
+  });
+  app.contextMenu.addItem({
     command: CommandIDs.clearOutputs,
     selector: '.jp-Notebook.jp-mod-focus .jp-Cell'
   });
@@ -554,6 +574,19 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
   app.contextMenu.addItem({
     command: CommandIDs.createOutputView,
     selector: '.jp-Notebook.jp-mod-focus .jp-Cell'
+  });
+
+  app.contextMenu.addItem({
+    command: CommandIDs.clearOutputs,
+    selector: '.jp-Notebook:focus .jp-CodeCell'
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.createOutputView,
+    selector: '.jp-Notebook:focus .jp-CodeCell'
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.toggleOutputsScrolled,
+    selector: '.jp-Notebook:focus .jp-CodeCell',
   });
   app.contextMenu.addItem({
     type: 'separator',
@@ -585,6 +618,7 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
     selector: '.jp-Notebook.jp-mod-focus',
     rank: 3
   });
+
 
   return tracker;
 }
@@ -1398,13 +1432,13 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     },
     isEnabled
   });
-  commands.addCommand(CommandIDs.showAllOutputs, {
-    label: 'Scroll Selected Output',
+  commands.addCommand(CommandIDs.toggleOutputsScrolled, {
+    label: 'Scroll Selected Outputs',
     execute: args => {
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.toggleOutputScrolled(current.notebook);
+        return NotebookActions.toggleOutputsScrolled(current.notebook);
       }
     },
     isEnabled
@@ -1484,7 +1518,7 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.showOutput,
     CommandIDs.hideAllOutputs,
     CommandIDs.showAllOutputs,
-    CommandIDs.toggleOutputScrolled
+    CommandIDs.toggleOutputsScrolled
   ].forEach(command => { palette.addItem({ command, category }); });
 }
 
