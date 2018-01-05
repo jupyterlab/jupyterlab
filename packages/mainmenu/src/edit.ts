@@ -106,9 +106,14 @@ namespace IEditMenu {
   export
   interface IClearer<T extends Widget> extends IMenuExtender<T> {
     /**
-     * A label for the thing to be cleared.
+     * A name for the thing to be cleared, used for labeling `clearCurrent`.
      */
-    noun: string;
+    noun?: string;
+
+    /**
+     * A plural name for the thing to be cleared, used for labeling `clearAll`.
+     */
+    pluralNoun?: string;
 
     /**
      * A function to clear the currently portion of activity.

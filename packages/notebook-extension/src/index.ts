@@ -804,7 +804,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.restartClear, {
-    label: 'Restart Kernel & Clear Outputs',
+    label: 'Restart Kernel & Clear All Outputs',
     execute: args => {
       const current = getCurrent(args);
 
@@ -843,7 +843,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.clearOutputs, {
-    label: 'Clear Outputs',
+    label: 'Clear Selected Outputs',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1491,7 +1491,8 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   // Add a clearer to the edit menu
   mainMenu.editMenu.clearers.add({
     tracker,
-    noun: 'Cell Outputs',
+    noun: 'Selected Outputs',
+    pluralNoun: 'Outputs',
     clearCurrent: (current: NotebookPanel) => {
       return NotebookActions.clearOutputs(current.notebook);
     },
