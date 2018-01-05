@@ -6,17 +6,30 @@
 JupyterLab Documentation
 ========================
 
-Contents:
+.. toctree::
+   :maxdepth: 1
+   :caption: User Documentation
+
+   user/extensions_user
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
+   :caption: Developer Documentation
 
-  user/index
-  developer/index
+   developer/repo.md
+   developer/extensions_dev.md
+   developer/documents.md
+   developer/notebook.md
+   developer/patterns.md
+   developer/css.md
+   developer/virtualdom.md
+   developer/adding_content.md
+   developer/examples.md
+   developer/terminology.md
+   developer/xkcd_extension_tutorial.md
 
-
-Indices and tables
-==================
+Indices and Tables
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
