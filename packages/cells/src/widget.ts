@@ -722,6 +722,10 @@ class CodeCell extends Cell {
   private _outputLengthHandler(sender: OutputArea, args: number) {
     let force = args === 0 ? true : false;
     this.toggleClass(NO_OUTPUTS_CLASS, force);
+    /* Turn of scrolling outputs if there are none */
+    if (force) {
+      this.outputsScrolled = false;
+    }
   }
 
   private _rendermime: RenderMimeRegistry = null;

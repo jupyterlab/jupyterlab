@@ -10,6 +10,7 @@
 
 
 :root {
+  --jp-private-cell-scrolling-output-offset: 5px;
 }
 
 
@@ -91,7 +92,12 @@
   overflow-y: auto;
   max-height: 200px;
   box-shadow: inset 0 0 6px 2px rgba(0,0,0,0.3);
-  margin-left: 5px;
+  margin-left: var(--jp-private-cell-scrolling-output-offset);
+}
+
+
+.jp-CodeCell.jp-mod-outputsScrolled .jp-OutputArea-prompt {
+  flex: 0 0 calc( var(--jp-cell-prompt-width) - var(--jp-private-cell-scrolling-output-offset) );
 }
 
 
