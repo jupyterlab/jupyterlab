@@ -4498,9 +4498,13 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
-marked@^0.3.5, marked@~0.3.6:
+marked@^0.3.5:
   version "0.3.7"
   resolved "https://registry.npmjs.org/marked/-/marked-0.3.7.tgz#80ef3bbf1bd00d1c9cfebe42ba1b8c85da258d0d"
+
+marked@~0.3.9:
+  version "0.3.9"
+  resolved "https://registry.npmjs.org/marked/-/marked-0.3.9.tgz#54ce6a57e720c3ac6098374ec625fcbcc97ff290"
 
 math-expression-evaluator@^1.2.14:
   version "1.2.17"
