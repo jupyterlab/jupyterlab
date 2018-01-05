@@ -614,6 +614,13 @@ class CodeCell extends Cell {
     this._outputHidden = value;
   }
 
+  get outputScrolled(): boolean {
+    return this._outputScrolled;
+  }
+  set outputScrolled(value: boolean) {
+    this.toggleClass('jp-mod-outputScrolled', value);
+  }
+
   /**
    * Handle the input being hidden.
    *
@@ -718,6 +725,7 @@ class CodeCell extends Cell {
 
   private _rendermime: RenderMimeRegistry = null;
   private _outputHidden = false;
+  private _outputScrolled = false;
   private _outputWrapper: Widget = null;
   private _outputCollapser: OutputCollapser = null;
   private _outputPlaceholder: OutputPlaceholder = null;

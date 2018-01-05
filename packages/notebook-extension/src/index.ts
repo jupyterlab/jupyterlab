@@ -245,6 +245,8 @@ namespace CommandIDs {
   export
   const showAllOutputs = 'notebook:show-all-cell-outputs';
 
+  export
+  const toggleOutputScrolled = 'notebook:toggle-cell-outputs-scrolled';
 }
 
 
@@ -1396,6 +1398,17 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     },
     isEnabled
   });
+  commands.addCommand(CommandIDs.showAllOutputs, {
+    label: 'Scroll Selected Output',
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.toggleOutputScrolled(current.notebook);
+      }
+    },
+    isEnabled
+  });
 }
 
 
@@ -1471,6 +1484,7 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.showOutput,
     CommandIDs.hideAllOutputs,
     CommandIDs.showAllOutputs,
+    CommandIDs.toggleOutputScrolled
   ].forEach(command => { palette.addItem({ command, category }); });
 }
 

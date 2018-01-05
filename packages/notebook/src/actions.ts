@@ -1043,6 +1043,22 @@ namespace NotebookActions {
     Private.handleState(widget, state);
   }
 
+  export
+  function toggleOutputScrolled(widget: Notebook): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    let state = Private.getState(widget);
+    let cells = widget.widgets;
+    each(cells, (cell: Cell) => {
+      if (widget.isSelectedOrActive(cell) && cell.model.type === 'code') {
+        const codeCell: CodeCell = (cell as CodeCell);
+        codeCell.outputScrolled = !codeCell.outputScrolled;
+      }
+    });
+    Private.handleState(widget, state);
+  }
+
   /**
    * Set the markdown header level.
    *
