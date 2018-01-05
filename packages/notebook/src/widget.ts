@@ -1157,8 +1157,8 @@ class Notebook extends StaticNotebook {
     node.addEventListener('mousedown', this);
     node.addEventListener('keydown', this);
     node.addEventListener('dblclick', this);
-    node.addEventListener('focusin', this, true);
-    node.addEventListener('focusout', this, true);
+    node.addEventListener('focusin', this);
+    node.addEventListener('focusout', this);
     node.addEventListener('p-dragenter', this);
     node.addEventListener('p-dragleave', this);
     node.addEventListener('p-dragover', this);
@@ -1173,8 +1173,8 @@ class Notebook extends StaticNotebook {
     node.removeEventListener('mousedown', this);
     node.removeEventListener('keydown', this);
     node.removeEventListener('dblclick', this);
-    node.removeEventListener('focusin', this, true);
-    node.removeEventListener('focusout', this, true);
+    node.removeEventListener('focusin', this);
+    node.removeEventListener('focusout', this);
     node.removeEventListener('p-dragenter', this);
     node.removeEventListener('p-dragleave', this);
     node.removeEventListener('p-dragover', this);
