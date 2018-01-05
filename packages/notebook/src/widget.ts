@@ -1125,11 +1125,11 @@ class Notebook extends StaticNotebook {
     case 'dblclick':
       this._evtDblClick(event as MouseEvent);
       break;
-    case 'focus':
-      this._evtFocus(event as MouseEvent);
+    case 'focusin':
+      this._evtFocusIn(event as MouseEvent);
       break;
-    case 'blur':
-      this._evtBlur(event as MouseEvent);
+    case 'focusout':
+      this._evtFocusOut(event as MouseEvent);
       break;
     case 'p-dragenter':
       this._evtDragEnter(event as IDragEvent);
@@ -1157,8 +1157,8 @@ class Notebook extends StaticNotebook {
     node.addEventListener('mousedown', this);
     node.addEventListener('keydown', this);
     node.addEventListener('dblclick', this);
-    node.addEventListener('focus', this, true);
-    node.addEventListener('blur', this, true);
+    node.addEventListener('focusin', this, true);
+    node.addEventListener('focusout', this, true);
     node.addEventListener('p-dragenter', this);
     node.addEventListener('p-dragleave', this);
     node.addEventListener('p-dragover', this);
@@ -1173,8 +1173,8 @@ class Notebook extends StaticNotebook {
     node.removeEventListener('mousedown', this);
     node.removeEventListener('keydown', this);
     node.removeEventListener('dblclick', this);
-    node.removeEventListener('focus', this, true);
-    node.removeEventListener('blur', this, true);
+    node.removeEventListener('focusin', this, true);
+    node.removeEventListener('focusout', this, true);
     node.removeEventListener('p-dragenter', this);
     node.removeEventListener('p-dragleave', this);
     node.removeEventListener('p-dragover', this);
@@ -1696,7 +1696,7 @@ class Notebook extends StaticNotebook {
   /**
    * Handle `focus` events for the widget.
    */
-  private _evtFocus(event: MouseEvent): void {
+  private _evtFocusIn(event: MouseEvent): void {
     let target = event.target as HTMLElement;
     let i = this._findCell(target);
     if (i !== -1) {
@@ -1718,9 +1718,9 @@ class Notebook extends StaticNotebook {
   }
 
   /**
-   * Handle `blur` events for the notebook.
+   * Handle `focusout` events for the notebook.
    */
-  private _evtBlur(event: MouseEvent): void {
+  private _evtFocusOut(event: MouseEvent): void {
     let relatedTarget = event.relatedTarget as HTMLElement;
     // Bail if focus is leaving the notebook.
     if (!this.node.contains(relatedTarget)) {
