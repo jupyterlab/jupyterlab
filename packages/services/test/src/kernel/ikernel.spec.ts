@@ -41,6 +41,10 @@ describe('Kernel.IKernel', () => {
     });
   });
 
+  beforeEach(() => {
+    return defaultKernel.restart();
+  });
+
   afterEach(() => {
     if (tester) {
       tester.dispose();
@@ -69,29 +73,35 @@ describe('Kernel.IKernel', () => {
 
   context('#statusChanged', () => {
 
-    it('should be a signal following the Kernel status', (done) => {
+    it('should be a signal following the Kernel status', () => {
       let object = {};
+      let called = false;
       defaultKernel.statusChanged.connect(() => {
         if (defaultKernel.status === 'busy') {
           Signal.disconnectReceiver(object);
-          done();
+          called = true;
         }
       }, object);
-      defaultKernel.requestExecute({ code: 'a=1' }, true).done.catch(done);
+      return defaultKernel.requestExecute({ code: 'a=1' }, true).done.then(() => {
+        expect(called).to.be(true);
+      });
     });
 
   });
 
   context('#iopubMessage', () => {
 
-    it('should be emitted for an iopub message', (done) => {
+    it('should be emitted for an iopub message', () => {
       let object = {};
+      let called = false;
       defaultKernel.iopubMessage.connect((k, msg) => {
         expect(msg.header.msg_type).to.be('status');
         Signal.disconnectReceiver(object);
-        done();
+        called = true;
       }, object);
-      defaultKernel.requestExecute({ code: 'a=1' }, true).done.catch(done);
+      return defaultKernel.requestExecute({ code: 'a=1' }, true).done.then(() => {
+        expect(called).to.be(true);
+      });
     });
 
     it('should be emitted regardless of the sender', (done) => {

@@ -1,13 +1,30 @@
 
 
-IF "%PYTHON_VERSION%"=="3.6" ( 
+IF "%NAME%"=="python" (
     py.test -v
-) ELSE (
+
+) ELSE IF "%NAME%"=="integrity" (
+    if !errorlevel! neq 0 exit /b !errorlevel!
+    jlpm run build:core
+    if !errorlevel! neq 0 exit /b !errorlevel!
     jlpm run integrity
-    python -m jupyterlab.selenium_check
+    if !errorlevel! neq 0 exit /b !errorlevel!
+    python -m jupyterlab.selenium_check --core-mode
+    if !errorlevel! neq 0 exit /b !errorlevel!
     python -m jupyterlab.selenium_check --dev-mode
+    if !errorlevel! neq 0 exit /b !errorlevel!
     jlpm run build
-    jlpm run build:test
-    jlpm test || jlpm test || jlpm test
+    if !errorlevel! neq 0 exit /b !errorlevel!
     jupyter lab build
+    if !errorlevel! neq 0 exit /b !errorlevel!
+    python -m jupyterlab.selenium_check
+
+) ELSE (
+    jlpm run build:packages
+    if !errorlevel! neq 0 exit /b !errorlevel!
+    jlpm run build:test
+    if !errorlevel! neq 0 exit /b !errorlevel!
+    jlpm test
 )
+
+if !errorlevel! neq 0 exit /b !errorlevel!

@@ -8,11 +8,18 @@ matrix:
 environment:
   nodejs_version: "6.9"
   matrix:
-    - PYTHON: C:\Miniconda36-x64
-      PYTHON_VERSION: 3.6
 
     - PYTHON: C:\Miniconda
       PYTHON_VERSION: 2.7
+      NAME: javascript
+
+    - PYTHON: C:\Miniconda36-x64
+      PYTHON_VERSION: 3.6
+      NAME: python
+
+    - PYTHON: C:\Miniconda36-x64
+      PYTHON_VERSION: 3.6
+      NAME: integrity
 
 # build cache to preserve files/folders between builds
 cache:
@@ -39,6 +46,7 @@ install:
   - 'SET "PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"'
   # Install our package:
   - 'pip install --upgrade -e ".[test]"'
+  - 'jupyter kernelspec list'
   - 'jlpm versions'
   - 'jlpm config current'
 
@@ -46,4 +54,4 @@ build: off
 
 # to run your custom scripts instead of automatic tests
 test_script:
-  - "cmd /E:ON /V:ON /C .\\scripts\\appveyor.cmd"
+  - cmd /E:ON /V:ON /C .\\scripts\\appveyor.cmd

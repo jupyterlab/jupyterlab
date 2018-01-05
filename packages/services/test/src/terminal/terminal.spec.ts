@@ -221,12 +221,14 @@ describe('terminal', () => {
     describe('#reconnect()', () => {
 
       it('should reconnect to the socket', () => {
-        return defaultSession.ready.then(() => {
-          let promise = defaultSession.reconnect();
-          expect(defaultSession.isReady).to.be(false);
+        let session: TerminalSession.ISession;
+        return TerminalSession.startNew().then(s => {
+          session = s;
+          let promise = session.reconnect();
+          expect(session.isReady).to.be(false);
           return promise;
         }).then(() => {
-          expect(defaultSession.isReady).to.be(true);
+          expect(session.isReady).to.be(true);
         });
       });
 

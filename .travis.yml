@@ -12,14 +12,14 @@ cache:
     - $HOME/.cache/pip
 env:
   matrix:
+    - GROUP=js
+    - GROUP=js_cov
     - GROUP=py3
     - GROUP=py2
-    - GROUP=js
     - GROUP=integrity
+    - GROUP=js_services
     - GROUP=cli
     - GROUP=docs
-    - GROUP=js_cov
-    - GROUP=js_services
   global:
   - MINICONDA_DIR="$HOME/miniconda"
   - GH_REF: github.com/jupyterlab/jupyterlab.git

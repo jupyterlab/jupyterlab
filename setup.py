@@ -56,11 +56,6 @@ def check_assets():
         'themes/@jupyterlab/theme-light-extension/images/jupyterlab.svg'
     ]
 
-    if 'develop' in sys.argv:
-        if skip_npm:
-            return
-        run(npm, cwd=HERE)
-
     for t in targets:
         if not os.path.exists(pjoin(HERE, NAME, t)):
             msg = ('Missing file: %s, `build:prod` script did not complete '
@@ -85,8 +80,19 @@ cmdclass['jsdeps'] = combine_commands(
                 build_dir=pjoin(HERE, NAME, 'static'), npm=npm),
     command_for_func(check_assets)
 )
+
+
+class JupyterlabDevelop(develop):
+    """A custom develop command that runs yarn"""
+
+    def run(self):
+        if not skip_npm:
+            run(npm, cwd=HERE)
+        develop.run(self)
+
+
 # Use default develop - we can ensure core mode later if needed.
-cmdclass['develop'] = develop
+cmdclass['develop'] = JupyterlabDevelop
 
 
 setup_args = dict(
