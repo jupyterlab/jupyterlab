@@ -1359,13 +1359,16 @@ class Notebook extends StaticNotebook {
       return;
     }
 
-    // Try to find the cell associated with the event.
-    // `event.target` sometimes gives an orphaned node in Firefox 57.
+    // `event.target` sometimes gives an orphaned node in Firefox 57, which
+    // can have `null` anywhere in its parent tree. If we fail to find a
+    // cell using `event.taget`, try again using a `target reconstructed from
+    // the position of the click event.
     let target = event.target as HTMLElement;
-    if (!target.parentElement) {
-      target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
-    }
     let index = this._findCell(target);
+    if (index === -1) {
+      target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
+      index = this._findCell(target);
+    }
     let widget = this.widgets[index];
 
     // Switch to command mode if the click is not in an editor.
@@ -1726,6 +1729,16 @@ class Notebook extends StaticNotebook {
     if (!this.node.contains(relatedTarget)) {
       return;
     }
+    // Bail if the item gaining focus is another cell,
+    // and we should not be entering command mode.
+    const i = this._findCell(relatedTarget);
+    if (i !== -1) {
+      const widget = this.widgets[i];
+      if (widget.editorWidget.node.contains(relatedTarget)) {
+        return;
+      }
+    }
+    // Otherwise enter command mode.
     this.mode = 'command';
   }
 
@@ -1739,12 +1752,17 @@ class Notebook extends StaticNotebook {
     }
     this.deselectAll();
 
-    // `event.target` sometimes gives an orphaned node in Firefox 57.
+    // `event.target` sometimes gives an orphaned node in Firefox 57, which
+    // can have `null` anywhere in its parent tree. If we fail to find a
+    // cell using `event.taget`, try again using a `target reconstructed from
+    // the position of the click event.
     let target = event.target as HTMLElement;
-    if (!target.parentElement) {
-      target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
-    }
     let i = this._findCell(target);
+    if (i === -1) {
+      target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
+      i = this._findCell(target);
+    }
+
     if (i === -1) {
       return;
     }
