@@ -31,6 +31,8 @@
 .jp-About-body {
   display: flex;
   font-family: var(--jp-ui-font-family);
+  /* This is needed so that all font sizing of children done in ems is
+   * relative to this base size */
   font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color1);
   text-align: left;

@@ -86,6 +86,10 @@ all of MD as it is not optimized for dense, information rich UIs.
    *
    * The UI font CSS variables are used for the typography all of the JupyterLab
    * user interface elements that are not directly user generated content.
+   *
+   * The font sizing here is done assuming that the body font size of --jp-ui-font-size1
+   * is applied to a parent element. When children elements, such as headings, are sized
+   * in em all things will be computed relative to that body size.
    */
 
   --jp-ui-font-scale-factor: 1.2;
