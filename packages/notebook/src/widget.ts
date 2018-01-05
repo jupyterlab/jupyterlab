@@ -1361,7 +1361,7 @@ class Notebook extends StaticNotebook {
 
     // `event.target` sometimes gives an orphaned node in Firefox 57, which
     // can have `null` anywhere in its parent tree. If we fail to find a
-    // cell using `event.taget`, try again using a `target reconstructed from
+    // cell using `event.target`, try again using a target reconstructed from
     // the position of the click event.
     let target = event.target as HTMLElement;
     let index = this._findCell(target);
@@ -1754,7 +1754,7 @@ class Notebook extends StaticNotebook {
 
     // `event.target` sometimes gives an orphaned node in Firefox 57, which
     // can have `null` anywhere in its parent tree. If we fail to find a
-    // cell using `event.taget`, try again using a `target reconstructed from
+    // cell using `event.target`, try again using a target reconstructed from
     // the position of the click event.
     let target = event.target as HTMLElement;
     let i = this._findCell(target);
