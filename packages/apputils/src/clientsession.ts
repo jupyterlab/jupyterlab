@@ -377,7 +377,6 @@ class ClientSession implements IClientSession {
     }
     this._isDisposed = true;
     if (this._session) {
-      this._session.dispose();
       this._session = null;
     }
     if (this._dialog) {
