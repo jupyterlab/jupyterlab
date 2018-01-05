@@ -8,13 +8,25 @@ JupyterLab Documentation
 
 .. toctree::
    :maxdepth: 1
-   :caption: User Documentation
+   :caption: User Guide
 
-   user/extensions_user
+   user/installation
+   user/interface
+   user/files
+   user/running_list
+   user/commands
+   user/tabs
+   user/file_editor
+   user/markdown
+   user/notebook
+   user/code_console
+   user/terminal
+   user/file_formats
+   user/extensions
 
 .. toctree::
    :maxdepth: 1
-   :caption: Developer Documentation
+   :caption: Developer Guide
 
    developer/repo.md
    developer/extensions_dev.md

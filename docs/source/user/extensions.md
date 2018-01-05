@@ -1,4 +1,4 @@
-# Extensions User Guide
+# Extensions
 
 JupyterLab extensions add functionality to the JupyterLab application.
 They can provide new file viewer types, launcher activities, and new Notebook
