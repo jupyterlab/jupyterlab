@@ -1701,8 +1701,12 @@ class Notebook extends StaticNotebook {
    */
   private _evtFocusIn(event: MouseEvent): void {
     let target = event.target as HTMLElement;
-    let i = this._findCell(target);
+
+    // Add a class to designate that either the notebook element or
+    // a cell editor has focus.
     this.addClass('jp-mod-focus');
+
+    let i = this._findCell(target);
     if (i !== -1) {
       let widget = this.widgets[i];
       // If the editor itself does not have focus, ensure command mode.
