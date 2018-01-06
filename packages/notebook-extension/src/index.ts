@@ -543,51 +543,72 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
     });
   }
 
+  // Cell context menu groups
   app.contextMenu.addItem({
     type: 'separator',
     selector: '.jp-Notebook.jp-mod-focus  .jp-Cell',
     rank: 0
   });
   app.contextMenu.addItem({
-    command: CommandIDs.deleteCell,
+    command: CommandIDs.cut,
     selector: '.jp-Notebook.jp-mod-focus .jp-Cell',
     rank: 1
   });
-
   app.contextMenu.addItem({
-    command: CommandIDs.split,
-    selector: '.jp-Notebook:focus .jp-Cell'
+    command: CommandIDs.copy,
+    selector: '.jp-Notebook.jp-mod-focus .jp-Cell',
+    rank: 2
   });
   app.contextMenu.addItem({
     type: 'separator',
-    selector: '.jp-Notebook.jp-mod-focus',
-    rank: 0
+    selector: '.jp-Notebook.jp-mod-focus  .jp-Cell',
+    rank: 3
   });
   app.contextMenu.addItem({
-    command: CommandIDs.clearOutputs,
-    selector: '.jp-Notebook.jp-mod-focus .jp-Cell'
+    command: CommandIDs.deleteCell,
+    selector: '.jp-Notebook.jp-mod-focus .jp-Cell',
+    rank: 4
+  });
+  app.contextMenu.addItem({
+    type: 'separator',
+    selector: '.jp-Notebook.jp-mod-focus .jp-Cell',
+    rank: 5
   });
   app.contextMenu.addItem({
     command: CommandIDs.split,
-    selector: '.jp-Notebook.jp-mod-focus .jp-Cell'
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.createOutputView,
-    selector: '.jp-Notebook.jp-mod-focus .jp-Cell'
+    selector: '.jp-Notebook.jp-mod-focus .jp-Cell',
+    rank: 6
   });
 
+  // CodeCell context menu groups
   app.contextMenu.addItem({
-    command: CommandIDs.clearOutputs,
-    selector: '.jp-Notebook:focus .jp-CodeCell'
+    type: 'separator',
+    selector: '.jp-Notebook.jp-mod-focus .jp-CodeCell',
+    rank: 7
   });
   app.contextMenu.addItem({
-    command: CommandIDs.createOutputView,
-    selector: '.jp-Notebook:focus .jp-CodeCell'
+    command: CommandIDs.clearOutputs,
+    selector: '.jp-Notebook.jp-mod-focus .jp-CodeCell',
+    rank: 8
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.clearAllOutputs,
+    selector: '.jp-Notebook.jp-mod-focus .jp-CodeCell',
+    rank: 9
   });
   app.contextMenu.addItem({
     command: CommandIDs.toggleOutputsScrolled,
     selector: '.jp-Notebook:focus .jp-CodeCell',
+    rank: 10
   });
+  app.contextMenu.addItem({
+    command: CommandIDs.createOutputView,
+    selector: '.jp-Notebook.jp-mod-focus .jp-CodeCell',
+    rank: 12
+  });
+
+
+  // Notebook context menu groups
   app.contextMenu.addItem({
     type: 'separator',
     selector: '.jp-Notebook.jp-mod-focus',
@@ -606,18 +627,14 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
   app.contextMenu.addItem({
     type: 'separator',
     selector: '.jp-Notebook.jp-mod-focus',
-    rank: 0
+    rank: 3
   });
   app.contextMenu.addItem({
     command: CommandIDs.createConsole,
     selector: '.jp-Notebook.jp-mod-focus',
-    rank: 3
+    rank: 4
   });
-  app.contextMenu.addItem({
-    command: CommandIDs.clearAllOutputs,
-    selector: '.jp-Notebook.jp-mod-focus',
-    rank: 3
-  });
+
 
 
   return tracker;
