@@ -294,8 +294,8 @@ class DocumentManager implements IDisposable {
    * This function will return `undefined` if a valid widget factory
    * cannot be found.
    */
-  open(path: string, widgetName='default', kernel?: Partial<Kernel.IModel>): DocumentRegistry.IReadyWidget | undefined {
-    return this._createOrOpenDocument('open', path, widgetName, kernel);
+  open(path: string, widgetName='default', kernel?: Partial<Kernel.IModel>, options?: DocumentRegistry.IOpenOptions ): DocumentRegistry.IReadyWidget | undefined {
+    return this._createOrOpenDocument('open', path, widgetName, kernel, options);
   }
 
   /**
@@ -314,13 +314,13 @@ class DocumentManager implements IDisposable {
    * This function will return `undefined` if a valid widget factory
    * cannot be found.
    */
-  openOrReveal(path: string, widgetName='default', kernel?: Partial<Kernel.IModel>): DocumentRegistry.IReadyWidget | undefined {
+  openOrReveal(path: string, widgetName='default', kernel?: Partial<Kernel.IModel>, options?: DocumentRegistry.IOpenOptions ): DocumentRegistry.IReadyWidget | undefined {
     let widget = this.findWidget(path, widgetName);
     if (widget) {
-      this._opener.open(widget);
+      this._opener.open(widget, options || {});
       return widget;
     }
-    return this.open(path, widgetName, kernel);
+    return this.open(path, widgetName, kernel, options || {});
   }
 
   /**
@@ -431,7 +431,7 @@ class DocumentManager implements IDisposable {
    * The two cases differ in how the document context is handled, but the creation
    * of the widget and launching of the kernel are identical.
    */
-  private _createOrOpenDocument(which: 'open'|'create', path: string, widgetName='default', kernel?: Partial<Kernel.IModel>): DocumentRegistry.IReadyWidget | undefined {
+  private _createOrOpenDocument(which: 'open'|'create', path: string, widgetName='default', kernel?: Partial<Kernel.IModel>, options?: DocumentRegistry.IOpenOptions): DocumentRegistry.IReadyWidget | undefined {
     let widgetFactory = this._widgetFactoryFor(path, widgetName);
     if (!widgetFactory) {
       return undefined;
@@ -466,7 +466,7 @@ class DocumentManager implements IDisposable {
     }
 
     let widget = this._widgetManager.createWidget(widgetFactory, context!);
-    this._opener.open(widget);
+    this._opener.open(widget, options || {});
     return widget;
   }
 
