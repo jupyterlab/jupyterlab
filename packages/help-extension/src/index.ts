@@ -309,7 +309,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
       let headerLogo = h.div({className: 'jp-About-header-logo'});
       let headerWordmark = h.div({className: 'jp-About-header-wordmark'});
       let release = 'Beta Release';
-      let versionNumber = `Version: ${info.version}`;
+      let versionNumber = `Version ${info.version}`;
       let versionInfo = h.span({className: 'jp-About-version-info'},
         h.span({className: 'jp-About-release'}, release),
         h.span({className: 'jp-About-version'}, versionNumber)
