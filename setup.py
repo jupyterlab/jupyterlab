@@ -32,7 +32,9 @@ ensure_python(['2.7', '>=3.3'])
 data_files_spec = [
     ('share/jupyter/lab/static', '%s/static' % NAME, '**'),
     ('share/jupyter/lab/schemas', '%s/schemas' % NAME, '**'),
-    ('share/jupyter/lab/themes', '%s/themes' % NAME, '**')
+    ('share/jupyter/lab/themes', '%s/themes' % NAME, '**'),
+    ('etc/jupyter/jupyter_notebook_config.d',
+     'jupyter-config/jupyter_notebook_config.d', 'jupyterlab.json'),
 ]
 
 package_data_spec = dict()
