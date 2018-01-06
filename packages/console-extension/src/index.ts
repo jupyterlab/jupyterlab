@@ -480,8 +480,8 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     getKernel: current => current.session.kernel
   } as IHelpMenu.IKernelUser<ConsolePanel>);
 
-  app.contextMenu.addItem({command: CommandIDs.clear, selector: '.jp-CodeConsole-content.jp-mod-focus'});
-  app.contextMenu.addItem({command: CommandIDs.restart, selector: '.jp-CodeConsole.jp-mod-focus'});
+  app.contextMenu.addItem({command: CommandIDs.clear, selector: '.jp-CodeConsole-content'});
+  app.contextMenu.addItem({command: CommandIDs.restart, selector: '.jp-CodeConsole'});
 
   return tracker;
 }

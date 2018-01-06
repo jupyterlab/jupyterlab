@@ -812,6 +812,12 @@ class Notebook extends StaticNotebook {
         activeCell.rendered = false;
       }
       activeCell.inputHidden = false;
+    } else {
+      // Blur the active cell.
+      let activeCell = this.activeCell;
+      if (activeCell) {
+        activeCell.editor.blur();
+      }
     }
     this._stateChanged.emit({ name: 'mode', oldValue, newValue });
     this._ensureFocus();
@@ -837,11 +843,15 @@ class Notebook extends StaticNotebook {
       newValue = Math.max(newValue, 0);
       newValue = Math.min(newValue, this.model.cells.length - 1);
     }
+
     this._activeCellIndex = newValue;
     let cell = this.widgets[newValue];
     if (cell !== this._activeCell) {
       // Post an update request.
       this.update();
+      if (this._activeCell) {
+        this._activeCell.editor.blur();
+      }
       this._activeCell = cell;
       this._activeCellChanged.emit(cell);
     }
@@ -1105,6 +1115,7 @@ class Notebook extends StaticNotebook {
     if (!this.model) {
       return;
     }
+
     switch (event.type) {
     case 'mousedown':
       this._evtMouseDown(event as MouseEvent);
@@ -1154,6 +1165,10 @@ class Notebook extends StaticNotebook {
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     let node = this.node;
+    // We must use to capture phase to prevent the code editor
+    // from receiving the mousedown so we can intercept right click
+    // event.
+    node.addEventListener('mousedown', this, true);
     node.addEventListener('mousedown', this);
     node.addEventListener('keydown', this);
     node.addEventListener('dblclick', this);
@@ -1170,6 +1185,7 @@ class Notebook extends StaticNotebook {
    */
   protected onBeforeDetach(msg: Message): void {
     let node = this.node;
+    node.removeEventListener('mousedown', this, true);
     node.removeEventListener('mousedown', this);
     node.removeEventListener('keydown', this);
     node.removeEventListener('dblclick', this);
@@ -1308,6 +1324,7 @@ class Notebook extends StaticNotebook {
         editor.setCursorPosition({ line: 0, column: 0 });
       }
     }
+    this.mode = 'edit';
   }
 
   /**
@@ -1319,8 +1336,6 @@ class Notebook extends StaticNotebook {
       if (!activeCell.editor.hasFocus()) {
         activeCell.editor.focus();
       }
-    } else if (activeCell) {
-      activeCell.editor.blur();
     }
     if (force && !this.node.contains(document.activeElement)) {
       this.node.focus();
@@ -1354,15 +1369,21 @@ class Notebook extends StaticNotebook {
    */
   private _evtMouseDown(event: MouseEvent): void {
 
+    const { button, shiftKey } = event;
+
     // We only handle main or secondary button actions.
-    if (!(event.button === 0 || event.button === 2)) {
+    if (!(button === 0 || button === 2)) {
       return;
     }
 
     // Shift right-click gives the browser default behavior.
-    if (event.shiftKey && event.button === 2) {
+    if (shiftKey && button === 2) {
       return;
     }
+
+    // Switch to command mode - let code editor focus determine
+    // a switch to edit mode.
+    this.mode = 'command';
 
     // `event.target` sometimes gives an orphaned node in Firefox 57, which
     // can have `null` anywhere in its parent tree. If we fail to find a
@@ -1376,19 +1397,18 @@ class Notebook extends StaticNotebook {
     }
     let widget = this.widgets[index];
 
-    // Switch to command mode if the click is not in an editor.
-    if (index === -1 || !widget.editorWidget.node.contains(target)) {
-      this.mode = 'command';
-    } else if (index !== -1) {
-      this.mode = 'edit';
+    // If in capture phase - only handle the case of right click on an editor
+    // widget.
+    if (event.eventPhase === Event.CAPTURING_PHASE) {
+      if (button === 2 && widget && widget.editorWidget.node.contains(target)) {
+        event.stopPropagation();
+      }
+      return;
     }
-
-    // Mouse click should always ensure the notebook is focused.
-    this._ensureFocus(true);
 
     if (index !== -1) {
 
-      if (event.shiftKey) {
+      if (shiftKey) {
         // Prevent text select behavior.
         event.preventDefault();
         event.stopPropagation();
@@ -1431,6 +1451,9 @@ class Notebook extends StaticNotebook {
       event.preventDefault();
       event.stopPropagation();
     }
+
+    // Mousedown should always have focus.
+    this._ensureFocus(true);
   }
 
   /**
@@ -1698,17 +1721,11 @@ class Notebook extends StaticNotebook {
   private _evtFocusIn(event: MouseEvent): void {
     let target = event.target as HTMLElement;
 
-    // Add a class to designate that either the notebook element or
-    // a cell editor has focus.
-    this.addClass('jp-mod-focus');
-
     let i = this._findCell(target);
     if (i !== -1) {
       let widget = this.widgets[i];
       // If the editor itself does not have focus, ensure command mode.
       if (!widget.editorWidget.node.contains(target)) {
-        // Remove the focus class.
-        this.removeClass('jp-mod-focus');
         this.mode = 'command';
       }
       this.activeCellIndex = i;
@@ -1728,12 +1745,13 @@ class Notebook extends StaticNotebook {
    */
   private _evtFocusOut(event: MouseEvent): void {
     let relatedTarget = event.relatedTarget as HTMLElement;
-    this.removeClass('jp-mod-focus');
 
     // Bail if focus is leaving the notebook.
     if (!this.node.contains(relatedTarget)) {
+      this.mode = 'command';
       return;
     }
+
     // Bail if the item gaining focus is another cell,
     // and we should not be entering command mode.
     const i = this._findCell(relatedTarget);

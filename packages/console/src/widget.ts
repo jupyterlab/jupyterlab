@@ -369,12 +369,6 @@ class CodeConsole extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'focusin':
-      this._evtFocusIn(event as FocusEvent);
-      break;
-    case 'focusout':
-      this._evtFocusOut(event as FocusEvent);
-      break;
     case 'keydown':
       this._evtKeyDown(event as KeyboardEvent);
       break;
@@ -393,8 +387,6 @@ class CodeConsole extends Widget {
     let node = this.node;
     node.addEventListener('keydown', this, true);
     node.addEventListener('click', this);
-    node.addEventListener('focusin', this);
-    node.addEventListener('focusout', this);
     // Create a prompt if necessary.
     if (!this.promptCell) {
       this.newPromptCell();
@@ -411,8 +403,6 @@ class CodeConsole extends Widget {
     let node = this.node;
     node.removeEventListener('keydown', this, true);
     node.removeEventListener('click', this);
-    node.removeEventListener('focusin', this);
-    node.removeEventListener('focusout', this);
   }
 
   /**
@@ -481,34 +471,6 @@ class CodeConsole extends Widget {
       event.preventDefault();
       editor.focus();
     }
-  }
-
-  /**
-   * Handle the `'focusin'` event for the widget.
-   */
-  private _evtFocusIn(event: FocusEvent): void {
-    // Add a class to designate that either the console element or
-    // the cell editor has focus.
-    this.addClass('jp-mod-focus');
-
-    // Check whether the console itself is getting focused.
-    if (event.target === this.node) {
-      this._content.addClass('jp-mod-focus');
-      return;
-    }
-
-    // Check for an element that is not the cell.
-    if (this.promptCell && !this.promptCell.node.contains(event.target as HTMLElement)) {
-      this.removeClass('jp-mod-focus');
-    }
-  }
-
-  /**
-   * Handle the `'focusin'` event for the widget.
-   */
-  private _evtFocusOut(event: FocusEvent): void {
-    this.removeClass('jp-mod-focus');
-    this._content.removeClass('jp-mod-focus');
   }
 
   /**
