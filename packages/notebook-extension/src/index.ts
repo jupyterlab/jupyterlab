@@ -610,12 +610,12 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
   });
   app.contextMenu.addItem({
     command: CommandIDs.enableOutputScrolling,
-    selector: '.jp-Notebook:focus .jp-CodeCell',
+    selector: '.jp-Notebook.jp-mod-focus .jp-CodeCell',
     rank: 12
   });
   app.contextMenu.addItem({
     command: CommandIDs.disableOutputScrolling,
-    selector: '.jp-Notebook:focus .jp-CodeCell',
+    selector: '.jp-Notebook.jp-mod-focus .jp-CodeCell',
     rank: 13
   });
   app.contextMenu.addItem({
