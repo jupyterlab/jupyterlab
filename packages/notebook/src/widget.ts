@@ -837,6 +837,7 @@ class Notebook extends StaticNotebook {
       newValue = Math.max(newValue, 0);
       newValue = Math.min(newValue, this.model.cells.length - 1);
     }
+    let prev = this.activeCell;
     this._activeCellIndex = newValue;
     let cell = this.widgets[newValue];
     if (cell !== this._activeCell) {
@@ -851,6 +852,10 @@ class Notebook extends StaticNotebook {
     this._ensureFocus();
     if (newValue === oldValue) {
       return;
+    }
+    // Ensure that the previous cell's editor is blurred.
+    if (prev && prev !== this.activeCell) {
+      prev.editor.blur();
     }
     this._trimSelections();
     this._stateChanged.emit({ name: 'activeCellIndex', oldValue, newValue });
