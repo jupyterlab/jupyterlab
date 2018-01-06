@@ -425,7 +425,7 @@ class _AppHandler(object):
 
         messages = self.build_check(fast=True)
         if messages:
-            logger.info('\nBuild recommended:')
+            logger.info('\nBuild recommended, please run `jupyter lab build`:')
             [logger.info('    %s' % item) for item in messages]
 
     def build_check(self, fast=False):
@@ -463,12 +463,12 @@ class _AppHandler(object):
             # Extensions that were added.
             for ext in new_jlab[ext_type]:
                 if ext not in old_jlab[ext_type]:
-                    messages.append('%s needs to be included' % ext)
+                    messages.append('%s needs to be included in build' % ext)
 
             # Extensions that were removed.
             for ext in old_jlab[ext_type]:
                 if ext not in new_jlab[ext_type]:
-                    messages.append('%s needs to be removed' % ext)
+                    messages.append('%s needs to be removed from build' % ext)
 
         # Look for mismatched dependencies
         for (pkg, dep) in new_deps.items():
