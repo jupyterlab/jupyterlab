@@ -55,7 +55,7 @@
 
 
 .jp-About-version-info {
-  color: var(--md-grey-600);
+  color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size2);
   width: 200px;
   font-weight: 400;
@@ -73,7 +73,6 @@
 
 .jp-About-release, .jp-About-version {
   display: block;
-  color: var(--jp-ui-font-color0);
 }
 
 
