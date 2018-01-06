@@ -14,7 +14,7 @@
 
 ## General
 
-Welcome to the Frequently Asked Questions (FAQ) for the JupyterLab Beta Release.
+Welcome to the Frequently Asked Questions (FAQ) for the JupyterLab Beta 1 Release.
 
 ### What is JupyterLab?
 
@@ -22,14 +22,14 @@ JupyterLab is a new user interface for Project Jupyter, allowing users to
 arrange multiple Jupyter notebooks, file editors, terminals, output areas,
 etc. on a single page with multiple panels and tabs in one integrated
 application. While JupyterLab looks like an IDE (Integrated Development
-Environment) it remains focused on the core Jupyter experience of
+Environment), it remains focused on the core Jupyter experience of
 interactive computing with data.
 
 In addition to the Jupyter Notebook, JupyterLab offers multiple models of
 interactive computing, including a scratchpad-like Code Console and the
 ability to attach kernels to any text file. JupyterLab has
-built-in support for many common file and outputs formats (CVS, PDF, Vega,
-Vega-Lite, Markdown, JSON, VDOM, PNG, JPEG, HTML).
+built-in support for many common file and output formats (CVS, PDF, Vega,
+Vega-Lite, Markdown, JSON, VDOM, PNG, JPEG, HTML, etc.).
 
 The codebase and user-interface of JupyterLab is based on a flexible extension
 system that makes it easy to extend with new functionality.
@@ -52,10 +52,10 @@ for more detailed information about these and other features.
 
 ### How stable is JupyterLab?
 
-This Beta version of JupyterLab is ready for you to use! More specifically,
-it is characterized by:
+This Beta 1 version of JupyterLab is ready for you to use! Starting with this
+release, the JupyterLab Beta series of releases are characterized by:
 
-* Stable and featureful enough for daily usage by users.
+* Stable and featureful enough for daily usage.
 * Most of the commonly used features in the classic notebook are
   implemented.
 * Developer APIs that are approaching stability but still undergoing
@@ -64,7 +64,9 @@ it is characterized by:
 Early in 2018, we will release the 1.0 version of JupyterLab that will
 provide additional UI/UX improvements, features, and API stability. At
 that point, JupyterLab should be a full featured replacement for the
-classic notebook - and go far beyond its capabilities.
+classic notebook - and go far beyond its capabilities. Between now and then
+we will release a series of Beta releases, all of which should be stable
+for daily usage.
 
 ### What will happen to the classic Jupyter Notebook?
 
