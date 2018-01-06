@@ -65,7 +65,7 @@ Early in 2018, we will release the 1.0 version of JupyterLab that will
 provide additional UI/UX improvements, features, and API stability. At
 that point, JupyterLab should be a full featured replacement for the
 classic notebook - and go far beyond its capabilities. Between now and then
-we will release a series of Beta releases, all of which should be stable
+we will release a series of beta releases, all of which should be stable
 for daily usage.
 
 ### What will happen to the classic Jupyter Notebook?
