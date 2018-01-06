@@ -690,6 +690,9 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
            tracker.currentWidget === app.shell.currentWidget;
   }
 
+  /**
+   * Whether there is an notebook active, with a single selected cell.
+   */
   function isEnabledAndSingleSelected(): boolean {
     if (!isEnabled()) { return false; }
     const { notebook } = tracker.currentWidget;

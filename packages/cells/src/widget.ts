@@ -614,6 +614,9 @@ class CodeCell extends Cell {
     this._outputHidden = value;
   }
 
+  /**
+   * Whether the output is in a scrolled state?
+   */
   get outputsScrolled(): boolean {
     return this._outputsScrolled;
   }
@@ -722,7 +725,7 @@ class CodeCell extends Cell {
   private _outputLengthHandler(sender: OutputArea, args: number) {
     let force = args === 0 ? true : false;
     this.toggleClass(NO_OUTPUTS_CLASS, force);
-    /* Turn of scrolling outputs if there are none */
+    /* Turn off scrolling outputs if there are none */
     if (force) {
       this.outputsScrolled = false;
     }

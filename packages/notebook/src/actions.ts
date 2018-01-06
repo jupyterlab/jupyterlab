@@ -1043,6 +1043,11 @@ namespace NotebookActions {
     Private.handleState(widget, state);
   }
 
+  /**
+   * Enable output scrolling for all selected cells.
+   *
+   * @param widget - The target notebook widget.
+   */
   export
   function enableOutputScrolling(widget: Notebook): void {
     if (!widget.model || !widget.activeCell) {
@@ -1058,7 +1063,11 @@ namespace NotebookActions {
     Private.handleState(widget, state);
   }
 
-
+  /**
+   * Disable output scrolling for all selected cells.
+   *
+   * @param widget - The target notebook widget.
+   */
   export
   function disableOutputScrolling(widget: Notebook): void {
     if (!widget.model || !widget.activeCell) {
