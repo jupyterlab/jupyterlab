@@ -246,7 +246,10 @@ namespace CommandIDs {
   const showAllOutputs = 'notebook:show-all-cell-outputs';
 
   export
-  const toggleOutputsScrolled = 'notebook:toggle-cell-outputs-scrolled';
+  const enableOutputScrolling = 'notebook:enable-output-scrolling';
+
+  export
+  const disableOutputScrolling = 'notebook:disable-output-scrolling';
 }
 
 
@@ -597,14 +600,29 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
     rank: 9
   });
   app.contextMenu.addItem({
-    command: CommandIDs.toggleOutputsScrolled,
-    selector: '.jp-Notebook:focus .jp-CodeCell',
+    type: 'separator',
+    selector: '.jp-Notebook.jp-mod-focus .jp-CodeCell',
     rank: 10
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.enableOutputScrolling,
+    selector: '.jp-Notebook:focus .jp-CodeCell',
+    rank: 11
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.disableOutputScrolling,
+    selector: '.jp-Notebook:focus .jp-CodeCell',
+    rank: 12
+  });
+  app.contextMenu.addItem({
+    type: 'separator',
+    selector: '.jp-Notebook.jp-mod-focus .jp-CodeCell',
+    rank: 13
   });
   app.contextMenu.addItem({
     command: CommandIDs.createOutputView,
     selector: '.jp-Notebook.jp-mod-focus .jp-CodeCell',
-    rank: 12
+    rank: 14
   });
 
 
@@ -896,7 +914,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.clearOutputs, {
-    label: 'Clear Selected Outputs',
+    label: 'Clear Outputs',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1449,13 +1467,24 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     },
     isEnabled
   });
-  commands.addCommand(CommandIDs.toggleOutputsScrolled, {
-    label: 'Scroll Selected Outputs',
+  commands.addCommand(CommandIDs.enableOutputScrolling, {
+    label: 'Enable Scrolling for Outputs',
     execute: args => {
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.toggleOutputsScrolled(current.notebook);
+        return NotebookActions.enableOutputScrolling(current.notebook);
+      }
+    },
+    isEnabled
+  });
+  commands.addCommand(CommandIDs.disableOutputScrolling, {
+    label: 'Disable Scrolling for Outputs',
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.disableOutputScrolling(current.notebook);
       }
     },
     isEnabled
@@ -1535,7 +1564,8 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.showOutput,
     CommandIDs.hideAllOutputs,
     CommandIDs.showAllOutputs,
-    CommandIDs.toggleOutputsScrolled
+    CommandIDs.enableOutputScrolling,
+    CommandIDs.disableOutputScrolling
   ].forEach(command => { palette.addItem({ command, category }); });
 }
 
@@ -1556,7 +1586,7 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   // Add a clearer to the edit menu
   mainMenu.editMenu.clearers.add({
     tracker,
-    noun: 'Selected Outputs',
+    noun: 'Outputs',
     pluralNoun: 'Outputs',
     clearCurrent: (current: NotebookPanel) => {
       return NotebookActions.clearOutputs(current.notebook);
