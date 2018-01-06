@@ -18,7 +18,8 @@
   color: var(--jp-content-font-color1);
   border: var(--jp-border-width) solid var(--jp-border-color1);
   list-style-type: none;
-  overflow: auto;
+  overflow-y: scroll;
+  overflow-x: auto;
   padding: 0;
   /* Position the completer relative to the text editor, align the '.' */
   margin: 4px 0 0 -30px;
