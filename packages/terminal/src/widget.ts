@@ -176,8 +176,8 @@ class Terminal extends Widget {
    * Set the size of the terminal when attached if dirty.
    */
   protected onAfterAttach(msg: Message): void {
-    this.update();
     this._openTerm();
+    this.update();
   }
 
   /**
