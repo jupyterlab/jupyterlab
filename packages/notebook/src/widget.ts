@@ -1381,15 +1381,6 @@ class Notebook extends StaticNotebook {
     // Mouse click should always ensure the notebook is focused.
     this._ensureFocus(true);
 
-    // Secondary click deselects cells and possibly changes the active cell.
-    if (event.button === 2) {
-      this.deselectAll();
-      if (index !== -1) {
-        this.activeCellIndex = index;
-      }
-      return;
-    }
-
     if (index !== -1) {
 
       if (event.shiftKey) {
