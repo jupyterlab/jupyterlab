@@ -396,8 +396,8 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
 
   // Add the command for toggling single-document mode.
   menu.addGroup([
-    { command: 'application:toggle-mode' },
-    { command: 'application:toggle-presentation-mode'}
+    { command: 'application:toggle-presentation-mode'},
+    { command: 'application:toggle-mode' }
   ], 1000);
 }
 
