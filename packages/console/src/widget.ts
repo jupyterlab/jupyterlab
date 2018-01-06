@@ -392,7 +392,7 @@ class CodeConsole extends Widget {
   protected onAfterAttach(msg: Message): void {
     let node = this.node;
     node.addEventListener('keydown', this, true);
-    node.addEventListener('click', this, true);
+    node.addEventListener('click', this);
     node.addEventListener('focusin', this);
     node.addEventListener('focusout', this);
     // Create a prompt if necessary.
@@ -410,7 +410,7 @@ class CodeConsole extends Widget {
   protected onBeforeDetach(msg: Message): void {
     let node = this.node;
     node.removeEventListener('keydown', this, true);
-    node.removeEventListener('click', this, true);
+    node.removeEventListener('click', this);
     node.removeEventListener('focusin', this);
     node.removeEventListener('focusout', this);
   }
@@ -517,10 +517,6 @@ class CodeConsole extends Widget {
   private _evtClick(event: MouseEvent): void {
     if (this.promptCell && this.promptCell.node.contains(event.target as HTMLElement)) {
       this.promptCell.editor.focus();
-    }
-    if (this.promptCell && this.promptCell.inputArea.promptNode.contains(event.target as HTMLElement)) {
-      event.preventDefault();
-      event.stopPropagation();
     }
   }
 
