@@ -1,4 +1,5 @@
 ## General
+
 * [What is JupyterLab?](#What-is-JupyterLab?)
 * [What new features does JupyterLab offer?](#What-new-features-does-JupyterLab-offer?)
 * [How stable is JupyterLab?](#How-stable-is-JupyterLab?)
@@ -13,10 +14,12 @@
 
 ## General
 
+Welcome to the Frequently Asked Questions (FAQ) for the JupyterLab Beta Release.
+
 ### What is JupyterLab?
 
-JupyterLab is a new user interface for the Jupyter Notebook, allowing
-users to arrange multiple Jupyter notebooks, text editors, terminals,
+JupyterLab is a new user interface for Project Jupyter, allowing
+users to arrange multiple Jupyter notebooks, file editors, terminals,
 output areas, etc. on a single page with multiple panels and tabs in
 one integrated application. The codebase and user-interface of JupyterLab
 is based on a flexible extension system that makes it easy to extend with new
@@ -27,10 +30,23 @@ functionality.
 JupyterLab offers a number of features beyond the classic Jupyter
 Notebook. Here are a few of them you may want to try out:
 
+* Multiple models of interactive computing in addition to Jupyter
+  Notebooks:
+  - Code Consoles provide an interactive scratchpad for coding.
+  - Attach a Kernel to any text file, including source files in your
+    favorite language, markdown, and LaTeX.
 * Arrange multiple notebooks, terminals, text files, etc. in the
   application using drag and drop.
+* Build-in support for a wide variety of file and output formats:
+  - Image
+  - HTML
+  - PDF
+  - Virtual DOM
+  - Vega/Vega-Lite
+  - CSV
+  - JSON
 * Run code interactively outside of a notebook in the Code Console,
-  and connect one  to a text file.
+  and connect one to a text file.
 * Right click on a markdown file and "Open with..." a live markdown
   viewer.
 * Double click on CSV files to view them as a nicely formatted table.
@@ -40,7 +56,7 @@ Notebook. Here are a few of them you may want to try out:
 
 This beta version of JupyterLab will be characterized by:
 
-* Stable and featureful enough for daily usage by most Jupyter users.
+* Stable and featureful enough for daily usage by Jupyter users.
 * Most of the commonly used features in the classic notebook are
   implemented.
 * Developer APIs that are approaching stability but still undergoing
