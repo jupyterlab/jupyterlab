@@ -153,7 +153,7 @@ const consoles: JupyterLabPlugin<void> = {
 
     app.contextMenu.addItem({
       command: CommandIDs.open,
-      selector: '.jp-CodeConsole'
+      selector: '.jp-CodeConsole-promptCell'
     });
   }
 };
