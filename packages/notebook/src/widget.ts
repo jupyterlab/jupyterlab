@@ -1125,11 +1125,11 @@ class Notebook extends StaticNotebook {
     case 'dblclick':
       this._evtDblClick(event as MouseEvent);
       break;
-    case 'focus':
-      this._evtFocus(event as MouseEvent);
+    case 'focusin':
+      this._evtFocusIn(event as MouseEvent);
       break;
-    case 'blur':
-      this._evtBlur(event as MouseEvent);
+    case 'focusout':
+      this._evtFocusOut(event as MouseEvent);
       break;
     case 'p-dragenter':
       this._evtDragEnter(event as IDragEvent);
@@ -1157,8 +1157,8 @@ class Notebook extends StaticNotebook {
     node.addEventListener('mousedown', this);
     node.addEventListener('keydown', this);
     node.addEventListener('dblclick', this);
-    node.addEventListener('focus', this, true);
-    node.addEventListener('blur', this, true);
+    node.addEventListener('focusin', this);
+    node.addEventListener('focusout', this);
     node.addEventListener('p-dragenter', this);
     node.addEventListener('p-dragleave', this);
     node.addEventListener('p-dragover', this);
@@ -1173,8 +1173,8 @@ class Notebook extends StaticNotebook {
     node.removeEventListener('mousedown', this);
     node.removeEventListener('keydown', this);
     node.removeEventListener('dblclick', this);
-    node.removeEventListener('focus', this, true);
-    node.removeEventListener('blur', this, true);
+    node.removeEventListener('focusin', this);
+    node.removeEventListener('focusout', this);
     node.removeEventListener('p-dragenter', this);
     node.removeEventListener('p-dragleave', this);
     node.removeEventListener('p-dragover', this);
@@ -1359,13 +1359,16 @@ class Notebook extends StaticNotebook {
       return;
     }
 
-    // Try to find the cell associated with the event.
-    // `event.target` sometimes gives an orphaned node in Firefox 57.
+    // `event.target` sometimes gives an orphaned node in Firefox 57, which
+    // can have `null` anywhere in its parent tree. If we fail to find a
+    // cell using `event.target`, try again using a target reconstructed from
+    // the position of the click event.
     let target = event.target as HTMLElement;
-    if (!target.parentElement) {
-      target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
-    }
     let index = this._findCell(target);
+    if (index === -1) {
+      target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
+      index = this._findCell(target);
+    }
     let widget = this.widgets[index];
 
     // Switch to command mode if the click is not in an editor.
@@ -1696,7 +1699,7 @@ class Notebook extends StaticNotebook {
   /**
    * Handle `focus` events for the widget.
    */
-  private _evtFocus(event: MouseEvent): void {
+  private _evtFocusIn(event: MouseEvent): void {
     let target = event.target as HTMLElement;
     let i = this._findCell(target);
     if (i !== -1) {
@@ -1718,14 +1721,24 @@ class Notebook extends StaticNotebook {
   }
 
   /**
-   * Handle `blur` events for the notebook.
+   * Handle `focusout` events for the notebook.
    */
-  private _evtBlur(event: MouseEvent): void {
+  private _evtFocusOut(event: MouseEvent): void {
     let relatedTarget = event.relatedTarget as HTMLElement;
     // Bail if focus is leaving the notebook.
     if (!this.node.contains(relatedTarget)) {
       return;
     }
+    // Bail if the item gaining focus is another cell,
+    // and we should not be entering command mode.
+    const i = this._findCell(relatedTarget);
+    if (i !== -1) {
+      const widget = this.widgets[i];
+      if (widget.editorWidget.node.contains(relatedTarget)) {
+        return;
+      }
+    }
+    // Otherwise enter command mode.
     this.mode = 'command';
   }
 
@@ -1739,12 +1752,17 @@ class Notebook extends StaticNotebook {
     }
     this.deselectAll();
 
-    // `event.target` sometimes gives an orphaned node in Firefox 57.
+    // `event.target` sometimes gives an orphaned node in Firefox 57, which
+    // can have `null` anywhere in its parent tree. If we fail to find a
+    // cell using `event.target`, try again using a target reconstructed from
+    // the position of the click event.
     let target = event.target as HTMLElement;
-    if (!target.parentElement) {
-      target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
-    }
     let i = this._findCell(target);
+    if (i === -1) {
+      target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
+      i = this._findCell(target);
+    }
+
     if (i === -1) {
       return;
     }

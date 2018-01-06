@@ -1206,35 +1206,35 @@ describe('notebook/widget', () => {
 
       });
 
-      context('focus', () => {
+      context('focusin', () => {
 
         it('should change to edit mode if a child cell takes focus', () => {
           let child = widget.widgets[0];
-          simulate(child.editorWidget.node, 'focus');
-          expect(widget.events).to.contain('focus');
+          simulate(child.editorWidget.node, 'focusin');
+          expect(widget.events).to.contain('focusin');
           expect(widget.mode).to.be('edit');
         });
 
         it('should change to command mode if the widget takes focus', () => {
           let child = widget.widgets[0];
-          simulate(child.editorWidget.node, 'focus');
-          expect(widget.events).to.contain('focus');
+          simulate(child.editorWidget.node, 'focusin');
+          expect(widget.events).to.contain('focusin');
           expect(widget.mode).to.be('edit');
           widget.events = [];
-          simulate(widget.node, 'focus');
-          expect(widget.events).to.contain('focus');
+          simulate(widget.node, 'focusin');
+          expect(widget.events).to.contain('focusin');
           expect(widget.mode).to.be('command');
         });
 
       });
 
-      context('blur', () => {
+      context('focusout', () => {
 
         it('should preserve the mode', () => {
-          simulate(widget.node, 'focus');
+          simulate(widget.node, 'focusin');
           widget.mode = 'edit';
           let other = document.createElement('div');
-          simulate(widget.node, 'blur', { relatedTarget: other });
+          simulate(widget.node, 'focusout', { relatedTarget: other });
           expect(widget.mode).to.be('edit');
           MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
           expect(widget.mode).to.be('edit');
@@ -1242,9 +1242,9 @@ describe('notebook/widget', () => {
         });
 
         it('should set command mode', () => {
-          simulate(widget.node, 'focus');
+          simulate(widget.node, 'focusin');
           widget.mode = 'edit';
-          let evt = generate('blur');
+          let evt = generate('focusout');
           (evt as any).relatedTarget = widget.activeCell.node;
           widget.node.dispatchEvent(evt);
           expect(widget.mode).to.be('command');
@@ -1267,8 +1267,8 @@ describe('notebook/widget', () => {
           expect(widget.events).to.contain('mousedown');
           simulate(widget.node, 'dblclick');
           expect(widget.events).to.contain('dblclick');
-          simulate(child.node, 'focus');
-          expect(widget.events).to.contain('focus');
+          simulate(child.node, 'focusin');
+          expect(widget.events).to.contain('focusin');
           widget.dispose();
           done();
         });
@@ -1305,8 +1305,8 @@ describe('notebook/widget', () => {
           expect(widget.events).to.not.contain('mousedown');
           simulate(widget.node, 'dblclick');
           expect(widget.events).to.not.contain('dblclick');
-          simulate(child.node, 'focus');
-          expect(widget.events).to.not.contain('focus');
+          simulate(child.node, 'focusin');
+          expect(widget.events).to.not.contain('focusin');
           widget.dispose();
           done();
         });
