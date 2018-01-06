@@ -177,9 +177,7 @@ class Terminal extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     this.update();
-
-    // Workaround for https://github.com/xtermjs/xterm.js/issues/1194
-    this._term.setOption('cursorBlink', this._term.getOption('cursorBlink'));
+    this._openTerm();
   }
 
   /**
@@ -207,13 +205,8 @@ class Terminal extends Widget {
       return;
     }
 
-    // Open the terminal if it has not yet been opened.
-    // This must be done when the terminal is attached and visible.
-    if (!this._termOpened) {
-      this._term.open(this.node);
-      this._term.element.classList.add(TERMINAL_BODY_CLASS);
-      this._termOpened = true;
-    }
+    // Open the terminal if necessary.
+    this._openTerm();
 
     if (this._needsResize) {
       this._resizeTerminal();
@@ -251,6 +244,27 @@ class Terminal extends Widget {
     this._term.on('title', (title: string) => {
         this.title.label = title;
     });
+  }
+
+  /**
+   * Open the terminal if necessary.
+   */
+  private _openTerm(): void {
+    // The host element must be attached and visible.
+    if (!this.isAttached || !this.isVisible) {
+      return;
+    }
+
+    // Open the terminal if it has not yet been opened.
+    if (!this._termOpened) {
+      this._term.open(this.node);
+      this._term.element.classList.add(TERMINAL_BODY_CLASS);
+
+      // Workaround for https://github.com/xtermjs/xterm.js/issues/1194
+      this._term.setOption('cursorBlink', this._term.getOption('cursorBlink'));
+
+      this._termOpened = true;
+    }
   }
 
   /**

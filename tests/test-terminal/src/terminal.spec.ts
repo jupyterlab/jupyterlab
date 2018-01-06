@@ -125,21 +125,13 @@ describe('terminal/index', () => {
 
     describe('#theme', () => {
 
-      it('should be dark by default', (done) => {
+      it('should be dark by default', () => {
         expect(widget.theme).to.be('dark');
-        requestAnimationFrame(() => {
-          expect(widget.hasClass('jp-Terminal-dark')).to.be(true);
-          done();
-        });
       });
 
-      it('should be light if we change it', (done) => {
+      it('should be light if we change it', () => {
         widget.theme = 'light';
         expect(widget.theme).to.be('light');
-        requestAnimationFrame(() => {
-          expect(widget.hasClass('jp-Terminal-light')).to.be(true);
-          done();
-        });
       });
 
     });
@@ -226,8 +218,7 @@ describe('terminal/index', () => {
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
         let style = window.getComputedStyle(widget.node);
-        expect(style.backgroundColor).to.be('rgb(0, 0, 0)');
-        expect(style.color).to.be('rgb(255, 255, 255)');
+        expect(style.backgroundColor).to.be('rgba(0, 0, 0, 0)');
       });
 
     });
