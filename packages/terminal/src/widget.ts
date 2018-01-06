@@ -17,8 +17,13 @@ import {
   Widget
 } from '@phosphor/widgets';
 
-import * as Xterm
-  from 'xterm';
+import {
+  Terminal as Xterm, ITerminalOptions as IXtermOptions
+} from 'xterm';
+
+import {
+  fit
+} from 'xterm/lib/addons/fit';
 
 /**
  * The class name added to a terminal widget.
@@ -29,27 +34,6 @@ const TERMINAL_CLASS = 'jp-Terminal';
  * The class name added to a terminal body.
  */
 const TERMINAL_BODY_CLASS = 'jp-Terminal-body';
-
-/**
- * The class name add to the terminal widget when it has the dark theme.
- */
-const TERMINAL_DARK_THEME = 'jp-Terminal-dark';
-
-/**
- * The class name add to the terminal widget when it has the light theme.
- */
-const TERMINAL_LIGHT_THEME = 'jp-Terminal-light';
-
-
-/**
- * The number of rows to use in the dummy terminal.
- */
-const DUMMY_ROWS = 24;
-
-/**
- * The number of cols to use in the dummy terminal.
- */
-const DUMMY_COLS = 80;
 
 
 /**
@@ -66,16 +50,16 @@ class Terminal extends Widget {
     super();
     this.addClass(TERMINAL_CLASS);
 
-    // Create the xterm, dummy terminal, and private style sheet.
+    // Create the xterm.
     this._term = new Xterm(Private.getConfig(options));
     this._initializeTerm();
-    this._dummyTerm = Private.createDummyTerm();
 
     // Initialize settings.
     let defaults = Terminal.defaultOptions;
     this._fontSize = options.fontSize || defaults.fontSize;
     this._initialCommand = options.initialCommand || defaults.initialCommand;
     this.theme = options.theme || defaults.theme;
+
     this.id = `jp-Terminal-${Private.id++}`;
     this.title.label = 'Terminal';
   }
@@ -141,8 +125,11 @@ class Terminal extends Widget {
    */
   set theme(value: Terminal.Theme) {
     this._theme = value;
-    this.toggleClass(TERMINAL_LIGHT_THEME, value === 'light');
-    this.toggleClass(TERMINAL_DARK_THEME, value === 'dark');
+    if (value === 'light') {
+      this._term.setOption('theme', Private.lightTheme);
+    } else {
+      this._term.setOption('theme', Private.darkTheme);
+    }
   }
 
   /**
@@ -190,6 +177,13 @@ class Terminal extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     this.update();
+
+    // Open the terminal - must be done when attached.
+    this._term.open(this.node);
+    this._term.element.classList.add(TERMINAL_BODY_CLASS);
+
+    // Workaround for https://github.com/xtermjs/xterm.js/issues/1194
+    this._term.setOption('cursorBlink', this._term.getOption('cursorBlink'));
   }
 
   /**
@@ -218,7 +212,6 @@ class Terminal extends Widget {
     }
 
     if (this._needsResize) {
-      this._snapTermSizing();
       this._resizeTerminal();
     }
   }
@@ -239,12 +232,9 @@ class Terminal extends Widget {
   }
 
   /**
-   * Create the terminal object.
+   * Initialize the terminal object.
    */
   private _initializeTerm(): void {
-    this._term.open(this.node, false);
-    this._term.element.classList.add(TERMINAL_BODY_CLASS);
-
     this._term.on('data', (data: string) => {
       if (this._session) {
         this._session.send({
@@ -278,19 +268,6 @@ class Terminal extends Widget {
   }
 
   /**
-   * Use the dummy terminal to measure the row and column sizes.
-   */
-  private _snapTermSizing(): void {
-    const node = this._dummyTerm;
-
-    this._term.element.style.fontSize = `${this.fontSize}px`;
-    this._term.element.appendChild(node);
-    this._rowHeight = node.offsetHeight / DUMMY_ROWS;
-    this._colWidth = node.offsetWidth / DUMMY_COLS;
-    this._term.element.removeChild(node);
-  }
-
-  /**
    * Resize the terminal based on computed geometry.
    */
   private _resizeTerminal() {
@@ -302,11 +279,10 @@ class Terminal extends Widget {
     const box = this._box = ElementExt.boxSizing(this.node);
     const height = offsetHeight - box.verticalSum;
     const width = offsetWidth - box.horizontalSum;
-    const rows = Math.floor(height / this._rowHeight) - 1;
-    const cols = Math.floor(width / this._colWidth) - 1;
 
-    this._term.resize(cols, rows);
-    this._sessionSize = [rows, cols, height, width];
+    fit(this._term);
+
+    this._sessionSize = [this._term.rows, this._term.cols, height, width];
     this._setSessionSize();
     this._needsResize = false;
   }
@@ -323,11 +299,8 @@ class Terminal extends Widget {
   }
 
   private _term: Xterm;
-  private _dummyTerm: HTMLElement;
   private _fontSize = -1;
   private _needsResize = true;
-  private _rowHeight = -1;
-  private _colWidth = -1;
   private _offsetWidth = -1;
   private _offsetHeight = -1;
   private _sessionSize: [number, number, number, number] = [1, 1, 1, 1];
@@ -396,8 +369,8 @@ namespace Private {
    * Get term.js options from ITerminalOptions.
    */
   export
-  function getConfig(options: Partial<Terminal.IOptions>): Xterm.IOptions {
-    let config: Xterm.IOptions = {};
+  function getConfig(options: Partial<Terminal.IOptions>): IXtermOptions {
+    let config: IXtermOptions = {};
     if (options.cursorBlink !== void 0) {
       config.cursorBlink = options.cursorBlink;
     } else {
@@ -407,28 +380,32 @@ namespace Private {
   }
 
   /**
-   * Create a dummy terminal element used to measure text size.
-   */
-  export
-  function createDummyTerm(): HTMLElement {
-    let node = document.createElement('div');
-    let rowspan = document.createElement('span');
-    rowspan.innerHTML = Array(DUMMY_ROWS).join('a<br>');
-    let colspan = document.createElement('span');
-    colspan.textContent = Array(DUMMY_COLS + 1).join('a');
-    node.appendChild(rowspan);
-    node.appendChild(colspan);
-    node.style.visibility = 'hidden';
-    node.style.position = 'absolute';
-    node.style.height = 'auto';
-    node.style.width = 'auto';
-    (node.style as any)['white-space'] = 'nowrap';
-    return node;
-  }
-
-  /**
    * An incrementing counter for ids.
    */
   export
   let id = 0;
+
+  /**
+   * The light terminal theme.
+   */
+  export
+  const lightTheme = {
+    foreground: '#000',
+    background: '#fff',
+    cursor: '#616161',  // md-grey-700
+    cursorAccent: '#F5F5F5',  // md-grey-100
+    selection: 'rgba(97, 97, 97, 0.3)',  // md-grey-700
+  };
+
+  /**
+   * The dark terminal theme.
+   */
+  export
+  const darkTheme = {
+    foreground: '#fff',
+    background: '#000',
+    cursor: '#fff',
+    cursorAccent: '#000',
+    selection: 'rgba(255, 255, 255, 0.3)',
+  };
 }

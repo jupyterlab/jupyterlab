@@ -93,7 +93,7 @@
     "react-dom": "~16.2.0",
     "sanitize-html": "~1.14.3",
     "url-parse": "~1.1.9",
-    "xterm": "~2.8.1"
+    "xterm": "3"
   },
   "devDependencies": {
     "@jupyterlab/buildutils": "^0.7.2",
