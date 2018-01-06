@@ -178,10 +178,6 @@ class Terminal extends Widget {
   protected onAfterAttach(msg: Message): void {
     this.update();
 
-    // Open the terminal - must be done when attached.
-    this._term.open(this.node);
-    this._term.element.classList.add(TERMINAL_BODY_CLASS);
-
     // Workaround for https://github.com/xtermjs/xterm.js/issues/1194
     this._term.setOption('cursorBlink', this._term.getOption('cursorBlink'));
   }
@@ -207,8 +203,16 @@ class Terminal extends Widget {
    * A message handler invoked on an `'update-request'` message.
    */
   protected onUpdateRequest(msg: Message): void {
-    if (!this.isVisible) {
+    if (!this.isVisible || !this.isAttached) {
       return;
+    }
+
+    // Open the terminal if it has not yet been opened.
+    // This must be done when the terminal is attached and visible.
+    if (!this._termOpened) {
+      this._term.open(this.node);
+      this._term.element.classList.add(TERMINAL_BODY_CLASS);
+      this._termOpened = true;
     }
 
     if (this._needsResize) {
@@ -308,6 +312,7 @@ class Terminal extends Widget {
   private _box: ElementExt.IBoxSizing | null = null;
   private _session: TerminalSession.ISession | null = null;
   private _initialCommand: string;
+  private _termOpened = false;
 }
 
 

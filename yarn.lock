@@ -8755,7 +8755,7 @@ xtend@^4.0.0, xtend@^4.0.1, xtend@~4.0.1:
   version "4.0.1"
   resolved "https://registry.npmjs.org/xtend/-/xtend-4.0.1.tgz#a5c6d532be656e23db820efb943a1f04998d63af"
 
-xterm@3:
+xterm@~3.0.1:
   version "3.0.1"
   resolved "https://registry.npmjs.org/xterm/-/xterm-3.0.1.tgz#6fef126c6198699d08c3d1dfd43f4c7c45740d39"
 
