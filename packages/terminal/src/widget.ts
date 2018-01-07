@@ -6,10 +6,6 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  ElementExt
-} from '@phosphor/domutils';
-
-import {
   Message, MessageLoop
 } from '@phosphor/messaging';
 
@@ -56,7 +52,6 @@ class Terminal extends Widget {
 
     // Initialize settings.
     let defaults = Terminal.defaultOptions;
-    this._fontSize = options.fontSize || defaults.fontSize;
     this._initialCommand = options.initialCommand || defaults.initialCommand;
     this.theme = options.theme || defaults.theme;
 
@@ -84,7 +79,6 @@ class Terminal extends Widget {
       }
       value.messageReceived.connect(this._onMessage, this);
       this.title.label = `Terminal ${value.name}`;
-      this._setSessionSize();
       if (this._initialCommand) {
         this._session.send({
           type: 'stdin',
@@ -98,17 +92,17 @@ class Terminal extends Widget {
    * Get the font size of the terminal in pixels.
    */
   get fontSize(): number {
-    return this._fontSize;
+    return this._term.getOption('fontSize');
   }
 
   /**
    * Set the font size of the terminal in pixels.
    */
   set fontSize(size: number) {
-    if (this._fontSize === size) {
+    if (this.fontSize === size) {
       return;
     }
-    this._fontSize = size;
+    this._term.setOption('fontSize', size);
     this._needsResize = true;
     this.update();
   }
@@ -132,6 +126,7 @@ class Terminal extends Widget {
       this.removeClass('jp-mod-light');
       this._term.setOption('theme', Private.darkTheme);
     }
+    this.update();
   }
 
   /**
@@ -139,7 +134,6 @@ class Terminal extends Widget {
    */
   dispose(): void {
     this._session = null;
-    this._box = null;
     super.dispose();
   }
 
@@ -178,7 +172,6 @@ class Terminal extends Widget {
    * Set the size of the terminal when attached if dirty.
    */
   protected onAfterAttach(msg: Message): void {
-    this._openTerm();
     this.update();
   }
 
@@ -193,8 +186,6 @@ class Terminal extends Widget {
    * On resize, use the computed row and column sizes to resize the terminal.
    */
   protected onResize(msg: Widget.ResizeMessage): void {
-    this._offsetWidth = msg.width;
-    this._offsetHeight = msg.height;
     this._needsResize = true;
     this.update();
   }
@@ -208,11 +199,17 @@ class Terminal extends Widget {
     }
 
     // Open the terminal if necessary.
-    this._openTerm();
+    this._ensureTerm();
 
     if (this._needsResize) {
       this._resizeTerminal();
     }
+
+    const style = getComputedStyle(document.body);
+    const family = style.getPropertyValue('--jp-code-font-family');
+    this._term.setOption('fontFamily', family);
+
+    this._term.refresh(0, this._term.rows - 1);
   }
 
   /**
@@ -246,12 +243,19 @@ class Terminal extends Widget {
     this._term.on('title', (title: string) => {
         this.title.label = title;
     });
+
+    this._term.on('resize', () => {
+      let content = [this._term.rows, this._term.cols];
+      if (this._session) {
+        this._session.send({ type: 'set_size', content });
+      }
+    });
   }
 
   /**
    * Open the terminal if necessary.
    */
-  private _openTerm(): void {
+  private _ensureTerm(): void {
     // The host element must be attached and visible.
     if (!this.isAttached || !this.isVisible) {
       return;
@@ -291,41 +295,14 @@ class Terminal extends Widget {
    * Resize the terminal based on computed geometry.
    */
   private _resizeTerminal() {
-    const { node } = this;
-    const offsetWidth = this._offsetWidth < 0 ? node.offsetWidth
-      : this._offsetWidth;
-    const offsetHeight = this._offsetHeight < 0 ? node.offsetHeight
-      : this._offsetHeight;
-    const box = this._box = ElementExt.boxSizing(this.node);
-    const height = offsetHeight - box.verticalSum;
-    const width = offsetWidth - box.horizontalSum;
-
     fit(this._term);
-
-    this._sessionSize = [this._term.rows, this._term.cols, height, width];
-    this._setSessionSize();
     this._needsResize = false;
   }
 
-  /**
-   * Send the size to the session.
-   */
-  private _setSessionSize(): void {
-    const session = this._session;
-
-    if (session) {
-      session.send({ type: 'set_size', content: this._sessionSize });
-    }
-  }
 
   private _term: Xterm;
-  private _fontSize = -1;
   private _needsResize = true;
-  private _offsetWidth = -1;
-  private _offsetHeight = -1;
-  private _sessionSize: [number, number, number, number] = [1, 1, 1, 1];
   private _theme: Terminal.Theme = 'dark';
-  private _box: ElementExt.IBoxSizing | null = null;
   private _session: TerminalSession.ISession | null = null;
   private _initialCommand: string;
   private _termOpened = false;
@@ -396,6 +373,11 @@ namespace Private {
       config.cursorBlink = options.cursorBlink;
     } else {
       config.cursorBlink = Terminal.defaultOptions.cursorBlink;
+    }
+    if (options.fontSize !== void 0) {
+      config.fontSize = options.fontSize;
+    } else {
+      config.fontSize = Terminal.defaultOptions.fontSize;
     }
     return config;
   }
