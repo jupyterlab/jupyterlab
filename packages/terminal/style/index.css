@@ -11,6 +11,12 @@
   min-height: 120px;
   padding: 8px;
   margin: 0;
+  background: black;
+}
+
+
+.jp-Terminal.jp-mod-light {
+  background: white;
 }
 
 
@@ -19,4 +25,9 @@
   outline: none;
   user-select: text;
   -webkit-user-select: text;
+}
+
+
+.terminal .xterm-viewport {
+  overflow-y: auto;
 }

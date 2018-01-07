@@ -126,8 +126,10 @@ class Terminal extends Widget {
   set theme(value: Terminal.Theme) {
     this._theme = value;
     if (value === 'light') {
+      this.addClass('jp-mod-light');
       this._term.setOption('theme', Private.lightTheme);
     } else {
+      this.removeClass('jp-mod-light');
       this._term.setOption('theme', Private.darkTheme);
     }
   }
