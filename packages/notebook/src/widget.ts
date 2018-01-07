@@ -1359,6 +1359,11 @@ class Notebook extends StaticNotebook {
       return;
     }
 
+    // Shift right-click gives the browser default behavior.
+    if (event.shiftKey && event.button === 2) {
+      return;
+    }
+
     // `event.target` sometimes gives an orphaned node in Firefox 57, which
     // can have `null` anywhere in its parent tree. If we fail to find a
     // cell using `event.target`, try again using a target reconstructed from
