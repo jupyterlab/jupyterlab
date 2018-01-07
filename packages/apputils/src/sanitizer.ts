@@ -7,9 +7,39 @@ export
 interface ISanitizer {
   /**
    * Sanitize an HTML string.
+   *
+   * @param dirty - The dirty text.
+   *
+   * @param options - The optional sanitization options.
+   *
+   * @returns The sanitized string.
    */
-  sanitize(dirty: string): string;
+  sanitize(dirty: string, options?: ISanitizer.IOptions): string;
 }
+
+
+/**
+ * The namespace for `ISanitizer` related interfaces.
+ */
+export
+namespace ISanitizer {
+  /**
+   * The options used to sanitize.
+   */
+  export
+  interface IOptions {
+    /**
+     * The allowed tags.
+     */
+    allowedTags?: string[];
+
+    /**
+     * The allowed attributes for a given tag.
+     */
+    allowedAttributes?: { [key: string]: string[] };
+  }
+}
+
 
 
 /**
@@ -18,9 +48,15 @@ interface ISanitizer {
 class Sanitizer implements ISanitizer {
   /**
    * Sanitize an HTML string.
+   *
+   * @param dirty - The dirty text.
+   *
+   * @param options - The optional sanitization options.
+   *
+   * @returns The sanitized string.
    */
-  sanitize(dirty: string): string {
-    return sanitize(dirty, this._options);
+  sanitize(dirty: string, options?: ISanitizer.IOptions): string {
+    return sanitize(dirty, { ...this._options, ...options || {} });
   }
 
   private _options: sanitize.IOptions = {

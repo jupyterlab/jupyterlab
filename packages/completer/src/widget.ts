@@ -14,6 +14,10 @@ import {
 } from '@phosphor/disposable';
 
 import {
+  ElementExt
+} from '@phosphor/domutils';
+
+import {
   Message
 } from '@phosphor/messaging';
 
@@ -22,20 +26,16 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  ElementExt
-} from '@phosphor/domutils';
-
-import {
   Widget
 } from '@phosphor/widgets';
 
 import {
-  CodeEditor
-} from '@jupyterlab/codeeditor';
+  HoverBox, defaultSanitizer
+} from '@jupyterlab/apputils';
 
 import {
-  HoverBox
-} from '@jupyterlab/apputils';
+  CodeEditor
+} from '@jupyterlab/codeeditor';
 
 
 /**
@@ -707,7 +707,9 @@ namespace Completer {
       let matchNode = document.createElement('code');
       matchNode.className = 'jp-Completer-match';
       // Use innerHTML because search results include <mark> tags.
-      matchNode.innerHTML = item.text;
+      matchNode.innerHTML = defaultSanitizer.sanitize(
+        item.text, { allowedTags: ['mark'] }
+      );
 
       // If there are types provided add those.
       if (!JSONExt.deepEqual(typeMap, {})) {
