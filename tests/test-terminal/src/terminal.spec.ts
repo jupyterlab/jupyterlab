@@ -218,7 +218,7 @@ describe('terminal/index', () => {
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
         let style = window.getComputedStyle(widget.node);
-        expect(style.backgroundColor).to.be('rgba(0, 0, 0, 0)');
+        expect(style.backgroundColor).to.be('rgb(0, 0, 0)');
       });
 
     });
