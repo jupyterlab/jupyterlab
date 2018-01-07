@@ -707,7 +707,9 @@ namespace Completer {
       let matchNode = document.createElement('code');
       matchNode.className = 'jp-Completer-match';
       // Use innerHTML because search results include <mark> tags.
-      matchNode.innerHTML = defaultSanitizer.sanitize(item.text);
+      matchNode.innerHTML = defaultSanitizer.sanitize(
+        item.text, { allowedTags: ['mark'] }
+      );
 
       // If there are types provided add those.
       if (!JSONExt.deepEqual(typeMap, {})) {
