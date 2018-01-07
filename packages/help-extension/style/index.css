@@ -30,9 +30,6 @@
 
 .jp-About-body {
   display: flex;
-  font-family: var(--jp-ui-font-family);
-  /* This is needed so that all font sizing of children done in ems is
-   * relative to this base size */
   font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color1);
   text-align: left;
@@ -55,8 +52,9 @@
 
 
 .jp-About-version-info {
-  color: var(--md-grey-600);
-  font-size: var(--jp-ui-font-size2);
+  color: var(--jp-ui-font-color1);
+  /* Dialog-header sets the font size to 3, we reset to 1 */
+  font-size: var(--jp-ui-font-size1);
   width: 200px;
   font-weight: 400;
   letter-spacing: .4px;
@@ -73,7 +71,6 @@
 
 .jp-About-release, .jp-About-version {
   display: block;
-  color: var(--jp-ui-font-color0);
 }
 
 
@@ -99,7 +96,7 @@
 
 .jp-About-copyright {
   position: relative;
-  bottom: -48px;
+  bottom: -44px;
 }
 
 

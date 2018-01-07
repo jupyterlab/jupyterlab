@@ -308,8 +308,8 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
       // Create the header of the about dialog
       let headerLogo = h.div({className: 'jp-About-header-logo'});
       let headerWordmark = h.div({className: 'jp-About-header-wordmark'});
-      let release = 'beta release';
-      let versionNumber = `version: ${info.version}`;
+      let release = 'Beta 1 Release';
+      let versionNumber = `Version ${info.version}`;
       let versionInfo = h.span({className: 'jp-About-version-info'},
         h.span({className: 'jp-About-release'}, release),
         h.span({className: 'jp-About-version'}, versionNumber)
@@ -339,7 +339,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
       );
       let copyright = h.span({
         className: 'jp-About-copyright'
-      }, '© 2017 Project Jupyter');
+      }, '© 2018 Project Jupyter');
       let body = h.div({ className: 'jp-About-body' },
         externalLinks,
         copyright
