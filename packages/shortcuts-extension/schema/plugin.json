@@ -501,6 +501,15 @@
       },
       "type": "object"
     },
+    "notebook:select-all": {
+      "default": { },
+      "properties": {
+        "command": { "default": "notebook:select-all" },
+        "keys": { "default": ["Accel A"] },
+        "selector": { "default": ".jp-Notebook:focus" }
+      },
+      "type": "object"
+    },
     "notebook:split-cell-at-cursor": {
       "default": { },
       "properties": {
