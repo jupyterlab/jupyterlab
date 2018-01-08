@@ -12,7 +12,7 @@ import sys
 from setupbase import (
     create_cmdclass, ensure_python, find_packages, get_version,
     command_for_func, combine_commands, install_npm, HERE, run,
-    skip_npm
+    skip_npm, which, log
 )
 
 from setuptools import setup
@@ -89,6 +89,9 @@ class JupyterlabDevelop(develop):
 
     def run(self):
         if not skip_npm:
+            if not which('node'):
+                log.error('Please install nodejs and npm before continuing installation. nodejs may be installed using conda or directly from the nodejs website.')
+                return
             run(npm, cwd=HERE)
         develop.run(self)
 
