@@ -49,7 +49,10 @@ class CompleterModel implements Completer.IModel {
     }
 
     this._reset();
-    this._original = newValue;
+
+    // Set both the current and original to the same value when original is set.
+    this._current = this._original = newValue;
+
     this._stateChanged.emit(void 0);
   }
 
@@ -285,8 +288,10 @@ class CompleterModel implements Completer.IModel {
    * Handle a text change.
    */
   handleTextChange(change: Completer.ITextState): void {
+    const original = this._original;
+
     // If there is no active completion, return.
-    if (!this._original) {
+    if (!original) {
       return;
     }
 
@@ -300,8 +305,9 @@ class CompleterModel implements Completer.IModel {
     const { text, column, line } = change;
     const last = text.split('\n')[line][column - 1];
 
-    // If last character entered is not whitespace, update completion.
-    if (last && last.match(/\S/)) {
+    // If last character entered is not whitespace or if the change column is
+    // greater than or equal to the original column, update completion.
+    if ((last && last.match(/\S/)) || change.column >= original.column) {
       this.current = change;
     } else {
       // If final character is whitespace, reset completion.

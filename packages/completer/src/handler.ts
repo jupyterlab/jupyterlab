@@ -206,7 +206,8 @@ class CompletionHandler implements IDisposable {
 
     let editor = this._editor;
     if (editor) {
-      this._makeRequest(editor.getCursorPosition());
+      this._makeRequest(editor.getCursorPosition())
+        .catch(reason => { console.log('Invoke request bailed', reason); });
     }
   }
 
@@ -347,12 +348,12 @@ class CompletionHandler implements IDisposable {
 
     return this._connector.fetch(request).then(reply => {
       if (this.isDisposed) {
-        return;
+        throw new Error('Handler is disposed');
       }
 
       // If a newer completion request has created a pending request, bail.
       if (pending !== this._pending) {
-        return;
+        throw new Error('A newer completion request is pending');
       }
 
       this._onReply(state, reply);
