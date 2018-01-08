@@ -21,12 +21,11 @@ import tarfile
 from threading import Event
 
 from ipython_genutils.tempdir import TemporaryDirectory
-from ipython_genutils.py3compat import which
 from jupyter_core.paths import jupyter_config_path
 from notebook.nbextensions import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 
 from .semver import Range, gte, lt, lte, gt
-from .jlpmapp import YARN_PATH, HERE
+from .jlpmapp import YARN_PATH, HERE, which
 from .process import Process, WatchHelper
 
 
