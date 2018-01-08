@@ -8,18 +8,24 @@ JupyterLab Documentation
 
 .. toctree::
    :maxdepth: 1
+   :caption: Getting Started
+
+   getting_started/overview
+   getting_started/installation
+   getting_started/starting
+
+.. toctree::
+   :maxdepth: 1
    :caption: User Guide
 
-   user/installation
    user/interface
    user/files
-   user/running_list
-   user/commands
-   user/tabs
    user/file_editor
-   user/markdown
    user/notebook
    user/code_console
+   user/documents_kernels
+   user/running
+   user/commands
    user/terminal
    user/file_formats
    user/extensions

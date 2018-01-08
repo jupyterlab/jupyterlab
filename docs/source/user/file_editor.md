@@ -16,11 +16,3 @@ To edit an existing text file, double-click on the file in the File Browser or d
 To create a new text file in the current directory of the File Browser, click the + button at the top of the File Browser and click the “Text Editor” card in the Launcher:
 
 [animation]
-
-JupyterLab allows you to connect an open text file to a Code Console/Kernel. With this, you can run code from the text file in the Kernel interactively. Right-click on the document and select “Create Console for Editor”: 
-
-[animation]
-
-Once the Code Console is open, send a single line of code or a seletion of code to the Code Console by hitting `Shift Enter`:
-
-[animation]

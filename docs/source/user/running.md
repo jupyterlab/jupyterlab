@@ -1,4 +1,4 @@
-# Running List
+# Running kernels and terminals
 
 The Running List (Running tab in the Left Panel) shows a list of all the notebooks, code consoles and terminals that are currently running across all directories:
 

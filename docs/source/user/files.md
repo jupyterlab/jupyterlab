@@ -1,6 +1,8 @@
 
 # Working with files
 
+## Overview
+
 The File Browser and File menu allow you to work with files and directories on your system. This includes opening, creating, deleting, renaming, downloading, copying and sharing files and directories.
 
 The File Browser is in the Left Panel as the Files tab:
@@ -19,7 +21,7 @@ You can also drag a file into the Dock Panel:
 
 [animation]
 
-Many files types have multiple viewers/editors. For example, you can open a markdown file in the text editor, or as rendered markdown. To open a file in a non-default viewer/editor, right click on its name in the File Browser and select the viewer/editor:
+Many files types have multiple viewers/editors. For example, you can open a markdown file in the text editor, or as rendered markdown. To open a file in a non-default viewer/editor, right click on its name in the File Browser, and use the "Open With..." submenu to select the viewer/editor:
 
 [animation]
 
@@ -31,7 +33,7 @@ The file system can be navigated by double clicking on folders, or on the direct
 
 [animation]
 
-## Creating Files/Activities
+## Creating files and activities
 
 Create new files or activities by clicking the + button at the top of the File Browser. This will open the Launcher in the Dock Panel, which allows you to pick an activity and kernel:
 
@@ -41,7 +43,7 @@ The current working directory of the Launcher will follow that of the File Brows
 
 [animation]
 
-## Uploading/Downloading
+## Uploading and downloading
 
 Files can be uploaded to the current directory of the File Browser by dragging and dropping files onto the File Browser:
 

@@ -1,7 +1,7 @@
 
 # The Interface
 
-The JupyterLab provides the flexible building blocks for interactive, exploratory computing. While JupyterLab has many features found in traditional IDEs (Integrated Development Environments), its focus remains on interactive, exploratory computing.
+The JupyterLab provides the flexible building blocks for interactive, exploratory computing. While JupyterLab has many features found in traditional IDEs (Integrated Development Environments), it remains focused on interactive, exploratory computing.
 
 The JupyterLab Interface consists of a Menu Bar at the top, with a Left Panel and Dock Panel below. The Left Panel contains the File Browser, the Running List, the Command Palette, the Cell Tools Inspector and the Tabs List. The main work area for documents in JupyterLab is called the Dock Panel.
 
@@ -44,6 +44,25 @@ The Dock Panel is the main work area in JupyterLab and allows you to arrange doc
 The Dock Panel has a single active document or activity that receives keyboard focus and whose tab is marked with a colored top border (blue by default):
 
 [screenshot]
+
+## Tabs and single-document view
+
+The Tabs List gives you access to the open documents and activities in the Dock Panel:
+
+[screenshot]
+
+The same information is also available in the Tab Menu:
+
+[screenshot]
+
+It is often useful to focus your work on a single document, while not closing other documents. Single Document Mode toggles the view of the Dock Panel to show only a single document at a time:
+
+[animation]
+
+When you leave Single Document Mode, the original layout of the Dock Panel is restored:
+
+[animation]
+
 
 ## Context Menus
 

@@ -1,10 +1,11 @@
 # Extensions
 
 JupyterLab extensions add functionality to the JupyterLab application.
-They can provide new file viewer types, launcher activities, and new Notebook
-output renderers for example.
+They can provide new file viewer types, launcher activities, and
+output renderers for example. JupyterLab extensions are [NPM](https://www.npmjs.com/)
+packages.
 
-### Installing Node.js
+## Installing Node.js
 
 Installing JupyterLab extensions requires Node.js version 4+.
 
@@ -20,26 +21,29 @@ If you use [Homebrew](http://brew.sh/) on Mac OS X:
 brew install node
 ```
 
-### Installing Extensions
+## Installing Extensions
 
-The base JupyterLab application comes with core set of extensions, which
-provide the Notebook, Terminal, Text Editor, etc.  New extensions can be
-installed into the application using the command:
+The base JupyterLab application includes a core set of extensions, which
+provide the features described in this User Guide (Notebook, Terminal,
+Text Editor, etc.)  New extensions can be installed into the application using the command:
 
 ```
 jupyter labextension install <foo>
 ```
 
 Where `<foo>` is a valid JupyterLab extension specifier.  This specifier
-is defined by the extension author in their installation instructions.
+is defined by the extension author in their installation instructions. We are
+encouraging extension authors to add the `jupyterlab-extensions` GitHub topic
+to any repository with a JupyterLab extension. You can see a list of
+extensions by [searching Github for the juputerlab-extensions topic](https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extensions&type=Repositories)
 
-The currently installed extensions can be listed by running the command:
+List the currently installed extensions by running the command:
 
 ```
 jupyter labextension list
 ```
 
-An installed extension can be uninstalled by running the command:
+Uninstalled an extension by running the command:
 
 ```
 jupyter labextension uninstall <bar>
@@ -49,7 +53,7 @@ Where `<bar>` is the name of the extension, as printed in the extension
 list.  Core extensions can also be uninstalled this way (and can later be
 re-installed).
 
-Extensions can be disabled by running the command:
+Disable an extension (without unistalilng it) by running the command:
 
 ```
 jupyter labextension disable <foo>
@@ -57,7 +61,7 @@ jupyter labextension disable <foo>
 
 Where `<foo>` is the name of the extension.  This will prevent the
 extension from loading on the front end, but does not require a rebuild.
-The extension can be re-enabled using the command:
+Re-enabled the extension later using the command:
 
 ```
 jupyter labextension enable <foo>
