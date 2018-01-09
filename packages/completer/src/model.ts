@@ -328,12 +328,12 @@ class CompleterModel implements Completer.IModel {
   createPatch(patch: string): Completer.IPatch | undefined {
     const original = this._original;
     const cursor = this._cursor;
-    const { start, end } = cursor;
 
     if (!original || !cursor) {
       return undefined;
     }
 
+    const { start, end } = cursor;
     const { text } = original;
     const prefix = text.substring(0, start);
     const suffix = text.substring(end);
