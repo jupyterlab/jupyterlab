@@ -416,6 +416,19 @@ class CompleterModel implements Completer.IModel {
  */
 namespace Private {
   /**
+   * The list of known type annotations of completer matches.
+   */
+  const KNOWN_TYPES = ['function', 'instance', 'class', 'module', 'keyword'];
+
+  /**
+   * The map of known type annotations of completer matches.
+   */
+  const KNOWN_MAP: ReadonlyJSONObject = KNOWN_TYPES.reduce((acc, type) => {
+    acc[type] = null;
+    return acc;
+  }, { } as Partial<ReadonlyJSONObject>);
+
+  /**
    * A filtered completion menu matching result.
    */
   export
@@ -474,13 +487,12 @@ namespace Private {
    */
   export
   function findOrderedTypes(typeMap: ReadonlyJSONObject): string[] {
-    const knownTypes = ['function', 'instance', 'class', 'module', 'keyword'];
-    let allTypes: string[] = Object.keys(typeMap)
-      .map(key => typeMap[key].toString());
-    let newTypes = allTypes
-      .filter(value => knownTypes.indexOf(value) === -1).sort();
+    const filtered = Object.keys(typeMap)
+      .map(key => typeMap[key] as string)
+      .filter(value => !(value in KNOWN_MAP))
+      .sort();
 
-    return knownTypes.concat(newTypes);
+    return KNOWN_TYPES.concat(filtered);
   }
 
 }
