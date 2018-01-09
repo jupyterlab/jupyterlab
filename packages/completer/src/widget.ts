@@ -598,7 +598,7 @@ namespace Completer {
     typeMap(): ITypeMap;
 
     /**
-     * An oredered list of types used for visual encoding.
+     * An ordered list of types used for visual encoding.
      */
     orderedTypes(): string[];
 

@@ -85,7 +85,7 @@ namespace HoverBox {
      * #### Notes
      * The default value is `'below'`.
      */
-    privilege?: 'above' | 'below' | 'forceBelow' | 'forceAbove';
+    privilege?: 'above' | 'below' | 'forceAbove' | 'forceBelow';
   }
 
 
@@ -96,7 +96,7 @@ namespace HoverBox {
    */
   export
   function setGeometry(options: IOptions): void {
-    const { anchor, host, node } = options;
+    const { anchor, host, node, privilege } = options;
 
     // Add hover box class if it does not exist.
     node.classList.add(HOVERBOX_CLASS);
@@ -128,16 +128,11 @@ namespace HoverBox {
     let maxHeight = parseInt(style.maxHeight!, 10) || options.maxHeight;
 
     // Determine whether to render above or below; check privilege.
-    let renderBelow = true;
-    if (options.privilege === 'forceAbove') {
-      renderBelow = false;
-    } else if (options.privilege === 'forceBelow') {
-      renderBelow = true;
-    } else {
-      renderBelow = options.privilege === 'above' ?
-        spaceAbove < maxHeight && spaceAbove < spaceBelow
-          : spaceBelow >= maxHeight || spaceBelow >= spaceAbove;
-    }
+    const renderBelow = privilege === 'forceAbove' ? false
+      : privilege === 'forceBelow' ? true
+        : options.privilege === 'above' ?
+          spaceAbove < maxHeight && spaceAbove < spaceBelow
+            : spaceBelow >= maxHeight || spaceBelow >= spaceAbove;
 
     if (renderBelow) {
       maxHeight = Math.min(spaceBelow - marginTop, maxHeight);
