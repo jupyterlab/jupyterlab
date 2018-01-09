@@ -451,14 +451,10 @@ class Completer extends Widget {
     const model = this._model;
     const editor = this._editor;
 
-    if (!editor) {
-      return;
-    }
-
     // This is an overly defensive test: `cursor` will always exist if
     // `original` exists, except in contrived tests. But since it is possible
     // to generate a runtime error, the check occurs here.
-    if (!model || !model.original || !model.cursor) {
+    if (!editor || !model || !model.original || !model.cursor) {
       return;
     }
 

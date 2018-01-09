@@ -130,7 +130,7 @@ namespace HoverBox {
     // Determine whether to render above or below; check privilege.
     const renderBelow = privilege === 'forceAbove' ? false
       : privilege === 'forceBelow' ? true
-        : options.privilege === 'above' ?
+        : privilege === 'above' ?
           spaceAbove < maxHeight && spaceAbove < spaceBelow
             : spaceBelow >= maxHeight || spaceBelow >= spaceAbove;
 
