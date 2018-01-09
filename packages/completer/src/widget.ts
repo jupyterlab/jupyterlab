@@ -220,6 +220,7 @@ class Completer extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     const model = this._model;
+
     if (!model) {
       return;
     }
@@ -228,7 +229,7 @@ class Completer extends Widget {
       this._resetFlag = false;
       if (!this.isHidden) {
         this.hide();
-        this._visibilityChanged.emit(void 0);
+        this._visibilityChanged.emit(undefined);
       }
       return;
     }
@@ -241,7 +242,7 @@ class Completer extends Widget {
       this.reset();
       if (!this.isHidden) {
         this.hide();
-        this._visibilityChanged.emit(void 0);
+        this._visibilityChanged.emit(undefined);
       }
       return;
     }
@@ -273,9 +274,10 @@ class Completer extends Widget {
 
     // If this is the first time the current completer session has loaded,
     // populate any initial subset match.
-    if (this._model && this._model.subsetMatch) {
-      let populated = this._populateSubset();
-      this.model.subsetMatch = false;
+    if (model.subsetMatch) {
+      const populated = this._populateSubset();
+
+      model.subsetMatch = false;
       if (populated) {
         this.update();
         return;
@@ -285,7 +287,7 @@ class Completer extends Widget {
     if (this.isHidden) {
       this.show();
       this._setGeometry();
-      this._visibilityChanged.emit(void 0);
+      this._visibilityChanged.emit(undefined);
     } else {
       this._setGeometry();
     }
@@ -422,16 +424,23 @@ class Completer extends Widget {
    * @returns `true` if a subset match was found and populated.
    */
   private _populateSubset(): boolean {
-    let items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
-    let subset = Private.commonSubset(Private.itemValues(items));
-    if (!this.model) {
+    const { model } = this;
+
+    if (!model) {
       return false;
     }
-    let query = this.model.query;
+
+    const items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
+    const subset = Private.commonSubset(Private.itemValues(items));
+    const { query } = model;
+
+    // If a common subset exists and it is not the current query, highlight it.
     if (subset && subset !== query && subset.indexOf(query) === 0) {
-      this.model.query = subset;
+      model.query = subset;
+
       return true;
     }
+
     return false;
   }
 

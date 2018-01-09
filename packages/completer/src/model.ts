@@ -53,7 +53,7 @@ class CompleterModel implements Completer.IModel {
     // Set both the current and original to the same value when original is set.
     this._current = this._original = newValue;
 
-    this._stateChanged.emit(void 0);
+    this._stateChanged.emit(undefined);
   }
 
   /**
@@ -87,7 +87,7 @@ class CompleterModel implements Completer.IModel {
 
     let current = this._current = newValue;
     if (!current) {
-      this._stateChanged.emit(void 0);
+      this._stateChanged.emit(undefined);
       return;
     }
 
@@ -108,7 +108,7 @@ class CompleterModel implements Completer.IModel {
     const ending = original.text.substring(end);
     query = query.substring(0, query.lastIndexOf(ending));
     this._query = query;
-    this._stateChanged.emit(void 0);
+    this._stateChanged.emit(undefined);
   }
 
 
@@ -234,7 +234,7 @@ class CompleterModel implements Completer.IModel {
       this._typeMap = {};
       this._orderedTypes = [];
     }
-    this._stateChanged.emit(void 0);
+    this._stateChanged.emit(undefined);
   }
 
   /**
@@ -267,7 +267,8 @@ class CompleterModel implements Completer.IModel {
       return;
     }
 
-    let { cursor, current } = this;
+    const { cursor, current } = this;
+
     if (!cursor || !current) {
       return;
     }
@@ -278,6 +279,7 @@ class CompleterModel implements Completer.IModel {
     const originalLine = original.text.split('\n')[original.line];
     const currentLine = current.text.split('\n')[current.line];
     const inputDelta = currentLine.length - originalLine.length;
+
     if (column > original.column + cursorDelta + inputDelta) {
       this.reset(true);
       return;
@@ -309,10 +311,11 @@ class CompleterModel implements Completer.IModel {
     // greater than or equal to the original column, update completion.
     if ((last && last.match(/\S/)) || change.column >= original.column) {
       this.current = change;
-    } else {
-      // If final character is whitespace, reset completion.
-      this.reset();
+      return;
     }
+
+    // If final character is whitespace, reset completion.
+    this.reset(true);
   }
 
   /**
@@ -323,15 +326,17 @@ class CompleterModel implements Completer.IModel {
    * @returns A patched text change or undefined if original value did not exist.
    */
   createPatch(patch: string): Completer.IPatch | undefined {
-    let original = this._original;
-    let cursor = this._cursor;
+    const original = this._original;
+    const cursor = this._cursor;
+    const { start, end } = cursor;
 
     if (!original || !cursor) {
       return undefined;
     }
 
-    let prefix = original.text.substring(0, cursor.start);
-    let suffix = original.text.substring(cursor.end);
+    const { text } = original;
+    const prefix = text.substring(0, start);
+    const suffix = text.substring(end);
 
     return { offset: (prefix + patch).length, text: prefix + patch + suffix };
   }
@@ -350,7 +355,7 @@ class CompleterModel implements Completer.IModel {
     }
     this._subsetMatch = false;
     this._reset();
-    this._stateChanged.emit(void 0);
+    this._stateChanged.emit(undefined);
   }
 
   /**

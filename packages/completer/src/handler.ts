@@ -177,6 +177,7 @@ class CompletionHandler implements IDisposable {
     }
 
     const patch = model.createPatch(value);
+
     if (!patch) {
       return;
     }
