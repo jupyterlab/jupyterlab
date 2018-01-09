@@ -98,7 +98,7 @@ class _test_env(object):
         self.stop()
 
 
-class TestApp(ProcessApp):
+class ProcessTestApp(ProcessApp):
     """A process app for running tests, includes a mock contents directory.
     """
     notebook_dir = Unicode(_create_notebook_dir())
@@ -129,7 +129,7 @@ class TestApp(ProcessApp):
             os._exit(1)
 
 
-class KarmaTestApp(TestApp):
+class KarmaTestApp(ProcessTestApp):
     """A notebook app that runs the jupyterlab karma tests.
     """
     karma_pattern = Unicode('src/*.spec.ts')

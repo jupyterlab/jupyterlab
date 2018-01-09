@@ -4,7 +4,7 @@ JupyterLab can be extended in two ways via:
 
 - Extensions (top level): Application extensions extend the
   functionality of JupyterLab itself, and we cover them in the
-  [Extensions](extensions_dev.md) developer tutorial.
+  [Extensions](extension_dev.md) developer tutorial.
 - **document widget extensions (lower level):** Document widget extensions extend
   the functionality of document widgets added to the application, and we cover
   them in this section.
@@ -69,7 +69,7 @@ giving list of items that can be created with default options  (e.g. "Python 3 N
 
 Created by the model factories and passed to widget factories and widget
 extension factories.  Models are the way in which we interact with the data of
-a document.  For a simple text file, we typically only use the 
+a document.  For a simple text file, we typically only use the
 `to/fromString()` methods.  A more complex document like a Notebook
 contains more points of interaction like the Notebook metadata.
 
@@ -90,7 +90,7 @@ Manager.  Contexts are not meant to be subclassed or re-implemented. Instead, th
 
 ## Document Manager
 
-The *Document Manager* handles: 
+The *Document Manager* handles:
 - document models
 - document contexts
 
