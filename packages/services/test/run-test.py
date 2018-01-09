@@ -9,13 +9,13 @@ import os
 
 from traitlets import Bool
 
-from jupyterlab.tests.test_app import TestApp
+from jupyterlab.tests.test_app import ProcessTestApp
 
 
 HERE = os.path.dirname(os.path.realpath(__file__))
 
 
-class ServicesTestApp(TestApp):
+class ServicesTestApp(ProcessTestApp):
     """A notebook app that runs a mocha test."""
 
     coverage = Bool(False, help='Whether to run coverage')
