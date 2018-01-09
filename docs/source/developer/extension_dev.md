@@ -199,7 +199,7 @@ The theme extension is installed the same as a regular extension (see
 
 ## Standard (General-Purpose) Extensions
 See the example,
-[How to Extend the Notebook Plugin](https://github.com/jupyterlab/jupyterlab/blob/master/docs/notebook.md#how-to-extend-the-notebook-plugin). Notice that the mime
+[How to Extend the Notebook Plugin](./notebook.md#how-to-extend-the-notebook-plugin). Notice that the mime
 renderer and themes extensions above use a limited, simplified interface to
 JupyterLab's extension system. Modifying the notebook plugin requires the full,
 general-purpose interface to the extension system.
