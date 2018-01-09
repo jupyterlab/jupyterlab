@@ -63,7 +63,7 @@ class JupyterLab extends Application<ApplicationShell> {
   constructor(options: JupyterLab.IOptions = {}) {
     super({ shell: new ApplicationShell() });
     this._info = { ...JupyterLab.defaultInfo, ...options };
-    if (options.devMode) {
+    if (this._info.devMode) {
       this.shell.addClass('jp-mod-devMode');
     }
 
