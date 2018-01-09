@@ -430,7 +430,6 @@ class Completer extends Widget {
     let query = this.model.query;
     if (subset && subset !== query && subset.indexOf(query) === 0) {
       this.model.query = subset;
-      this._selected.emit(subset);
       return true;
     }
     return false;
