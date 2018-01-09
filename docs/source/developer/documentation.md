@@ -63,3 +63,13 @@ demonstrate the software. Here are some guidelines for preparing them:
   if we should do that beforehand or in CSS (the xkcd extension tutorial has images
   with shadowns already - let's think through this.)
 
+  To help us organize them, let's name the files like this:
+
+  ```
+  sourcefile.md
+  sourcefile_filebrowser.png
+  sourcefile_editmenu.png
+  ```
+
+  This will help us track the images next to the content they are used in.
+
