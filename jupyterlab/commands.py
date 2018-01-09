@@ -43,13 +43,23 @@ def pjoin(*args):
 
 
 def get_user_settings_dir():
-    """Get the configured JupyterLab app directory.
+    """Get the configured JupyterLab user settings directory.
     """
     settings_dir = os.environ.get('JUPYTERLAB_SETTINGS_DIR')
     settings_dir = settings_dir or pjoin(
         jupyter_config_path()[0], 'lab', 'user-settings'
     )
     return osp.realpath(settings_dir)
+
+
+def get_workspaces_dir():
+    """Get the configured JupyterLab workspaces directory.
+    """
+    workspaces_dir = os.environ.get('JUPYTERLAB_WORKSPACES_DIR')
+    workspaces_dir = workspaces_dir or pjoin(
+        jupyter_config_path()[0], 'lab', 'workspaces'
+    )
+    return osp.realpath(workspaces_dir)
 
 
 def get_app_dir():
