@@ -1118,7 +1118,11 @@ class Notebook extends StaticNotebook {
 
     switch (event.type) {
     case 'mousedown':
-      this._evtMouseDown(event as MouseEvent);
+      if (event.eventPhase === Event.CAPTURING_PHASE) {
+        this._evtMouseDownCapture(event as MouseEvent);
+      } else {
+        this._evtMouseDown(event as MouseEvent);
+      }
       break;
     case 'mouseup':
       if (event.currentTarget === document) {
@@ -1165,9 +1169,6 @@ class Notebook extends StaticNotebook {
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     let node = this.node;
-    // We must use to capture phase to prevent the code editor
-    // from receiving the mousedown so we can intercept right click
-    // event.
     node.addEventListener('mousedown', this, true);
     node.addEventListener('mousedown', this);
     node.addEventListener('keydown', this);
@@ -1365,6 +1366,32 @@ class Notebook extends StaticNotebook {
   }
 
   /**
+   * Handle `mousedown` event in the capture phase for the widget.
+   */
+  private _evtMouseDownCapture(event: MouseEvent): void {
+    const { button, shiftKey } = event;
+
+    // `event.target` sometimes gives an orphaned node in Firefox 57, which
+    // can have `null` anywhere in its parent tree. If we fail to find a
+    // cell using `event.target`, try again using a target reconstructed from
+    // the position of the click event.
+    let target = event.target as HTMLElement;
+    let index = this._findCell(target);
+    if (index === -1) {
+      target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
+      index = this._findCell(target);
+    }
+    let widget = this.widgets[index];
+
+    // Prevent an editor from receiving a plain right-click event so we can show
+    // an application context menu without the editor focusing, etc.
+    if (button === 2 && !shiftKey && widget && widget.editorWidget.node.contains(target)) {
+      this.mode = 'command';
+      event.stopPropagation();
+    }
+  }
+
+  /**
    * Handle `mousedown` events for the widget.
    */
   private _evtMouseDown(event: MouseEvent): void {
@@ -1381,9 +1408,6 @@ class Notebook extends StaticNotebook {
       return;
     }
 
-    // Switch to command mode - let code editor focus determine
-    // a switch to edit mode.
-    this.mode = 'command';
 
     // `event.target` sometimes gives an orphaned node in Firefox 57, which
     // can have `null` anywhere in its parent tree. If we fail to find a
@@ -1397,14 +1421,25 @@ class Notebook extends StaticNotebook {
     }
     let widget = this.widgets[index];
 
-    // If in capture phase - only handle the case of right click on an editor
-    // widget.
-    if (event.eventPhase === Event.CAPTURING_PHASE) {
-      if (button === 2 && widget && widget.editorWidget.node.contains(target)) {
-        event.stopPropagation();
+    let targetArea: 'input' | 'prompt' | 'cell' | 'notebook';
+    if (widget) {
+      if (widget.editorWidget.node.contains(target)) {
+        targetArea = 'input';
+      } else if (widget.promptNode.contains(target)) {
+        targetArea = 'prompt';
+      } else {
+        targetArea = 'cell';
       }
-      return;
+    } else {
+      targetArea = 'notebook';
     }
+
+    // Switch to command mode if the click isn't in the cell editor
+    if (targetArea !== 'input') {
+      this.mode = 'command';
+    }
+
+
 
     if (index !== -1) {
 
@@ -1433,7 +1468,7 @@ class Notebook extends StaticNotebook {
         }
 
         // Prepare to start a drag if we are on the drag region.
-        if (widget.promptNode.contains(target)) {
+        if (targetArea === 'prompt') {
           // Prepare for a drag start
           this._dragData = { pressX: event.clientX, pressY: event.clientY, index: index};
 
