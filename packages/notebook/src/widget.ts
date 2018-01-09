@@ -1117,6 +1117,11 @@ class Notebook extends StaticNotebook {
     }
 
     switch (event.type) {
+    case 'contextmenu':
+      if (event.eventPhase === Event.CAPTURING_PHASE) {
+        this._evtContextMenuCapture(event as PointerEvent);
+      }
+      break;
     case 'mousedown':
       if (event.eventPhase === Event.CAPTURING_PHASE) {
         this._evtMouseDownCapture(event as MouseEvent);
@@ -1169,6 +1174,7 @@ class Notebook extends StaticNotebook {
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     let node = this.node;
+    node.addEventListener('contextmenu', this, true);
     node.addEventListener('mousedown', this, true);
     node.addEventListener('mousedown', this);
     node.addEventListener('keydown', this);
@@ -1186,6 +1192,7 @@ class Notebook extends StaticNotebook {
    */
   protected onBeforeDetach(msg: Message): void {
     let node = this.node;
+    node.removeEventListener('contextmenu', this, true);
     node.removeEventListener('mousedown', this, true);
     node.removeEventListener('mousedown', this);
     node.removeEventListener('keydown', this);
@@ -1366,6 +1373,29 @@ class Notebook extends StaticNotebook {
   }
 
   /**
+   * Handle `contextmenu` event.
+   */
+  private _evtContextMenuCapture(event: PointerEvent): void {
+    // `event.target` sometimes gives an orphaned node in Firefox 57, which
+    // can have `null` anywhere in its parent tree. If we fail to find a
+    // cell using `event.target`, try again using a target reconstructed from
+    // the position of the click event.
+    let target = event.target as HTMLElement;
+    let index = this._findCell(target);
+    if (index === -1) {
+      target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
+      index = this._findCell(target);
+    }
+    let widget = this.widgets[index];
+
+    if (widget && widget.editorWidget.node.contains(target)) {
+      // Prevent CodeMirror from focusing the editor.
+      // TODO: find an editor-agnostic solution.
+      event.preventDefault();
+    }
+  }
+
+  /**
    * Handle `mousedown` event in the capture phase for the widget.
    */
   private _evtMouseDownCapture(event: MouseEvent): void {
@@ -1383,16 +1413,14 @@ class Notebook extends StaticNotebook {
     }
     let widget = this.widgets[index];
 
-    // Prevent an editor from receiving a plain right-click event so we can show
-    // an application context menu without the editor focusing, etc.
-
     // On OS X, the context menu may be triggered with ctrl-left-click. In
     // Firefox, ctrl-left-click gives an event with button 2, but in Chrome,
     // ctrl-left-click gives an event with button 0 with the ctrl modifier.
     if (button === 2 && !shiftKey && widget && widget.editorWidget.node.contains(target)) {
       this.mode = 'command';
 
-      // Prevent the browser from focusing the editor.
+      // Prevent CodeMirror from focusing the editor.
+      // TODO: find an editor-agnostic solution.
       event.preventDefault();
     }
   }
