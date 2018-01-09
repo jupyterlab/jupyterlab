@@ -223,7 +223,7 @@ used to automatically associate it with its settings file, so this naming
 convention is important. Ensure that the schema files are included in the
 `"files"` metadata in `package.json`.
 
-See the (fileeditor-extension)[https://github.com/jupyterlab/jupyterlab/tree/master/packages/fileeditor-extension]
+See the [fileeditor-extension](https://github.com/jupyterlab/jupyterlab/tree/master/packages/fileeditor-extension)
 for another example of an extension that uses settings.
 
 
