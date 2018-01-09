@@ -6,7 +6,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONExt, JSONObject, ReadonlyJSONObject
+  JSONExt
 } from '@phosphor/coreutils';
 
 import {
@@ -197,7 +197,7 @@ class CompleterModel implements Completer.IModel {
    * values are completely up to the kernel.
    *
    */
-  typeMap(): ReadonlyJSONObject {
+  typeMap(): Completer.ITypeMap {
     return this._typeMap;
   }
 
@@ -221,9 +221,10 @@ class CompleterModel implements Completer.IModel {
   /**
    * Set the available options in the completer menu.
    */
-  setOptions(newValue: IterableOrArrayLike<string>, typeMap?: JSONObject) {
+  setOptions(newValue: IterableOrArrayLike<string>, typeMap?: Completer.ITypeMap) {
     const values = toArray(newValue || []);
-    const types = typeMap || {};
+    const types = typeMap || { };
+
     if (JSONExt.deepEqual(values, this._options) &&
         JSONExt.deepEqual(types, this._typeMap)) {
       return;
@@ -409,7 +410,7 @@ class CompleterModel implements Completer.IModel {
   private _original: Completer.ITextState | null = null;
   private _query = '';
   private _subsetMatch = false;
-  private _typeMap: ReadonlyJSONObject = {};
+  private _typeMap: Completer.ITypeMap = { };
   private _orderedTypes: string[] = [];
   private _stateChanged = new Signal<this, void>(this);
 }
@@ -427,10 +428,10 @@ namespace Private {
   /**
    * The map of known type annotations of completer matches.
    */
-  const KNOWN_MAP: ReadonlyJSONObject = KNOWN_TYPES.reduce((acc, type) => {
+  const KNOWN_MAP: Completer.ITypeMap = KNOWN_TYPES.reduce((acc, type) => {
     acc[type] = null;
     return acc;
-  }, { } as Partial<ReadonlyJSONObject>);
+  }, { } as Partial<Completer.ITypeMap>);
 
   /**
    * A filtered completion menu matching result.
@@ -490,9 +491,9 @@ namespace Private {
    * followed by other types in alphabetical order.
    */
   export
-  function findOrderedTypes(typeMap: ReadonlyJSONObject): string[] {
+  function findOrderedTypes(typeMap: Completer.ITypeMap): string[] {
     const filtered = Object.keys(typeMap)
-      .map(key => typeMap[key] as string)
+      .map(key => typeMap[key])
       .filter(value => !(value in KNOWN_MAP))
       .sort((a, b) => a.localeCompare(b));
 

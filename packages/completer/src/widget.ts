@@ -6,7 +6,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONObject, ReadonlyJSONObject, JSONExt
+  JSONObject, JSONExt
 } from '@phosphor/coreutils';
 
 import {
@@ -595,7 +595,7 @@ namespace Completer {
      * The map from identifiers (`a.b`) to their types (function, module, class,
      * instance, etc.).
      */
-    typeMap(): ReadonlyJSONObject;
+    typeMap(): ITypeMap;
 
     /**
      * An oredered list of types used for visual encoding.
@@ -682,7 +682,7 @@ namespace Completer {
 
 
   export
-  interface  ITypeMap {
+  interface ITypeMap {
     [index: string]: string;
   }
 
@@ -695,7 +695,7 @@ namespace Completer {
     /**
      * Create an item node (an `li` element) for a text completer menu.
      */
-    createItemNode(item: IItem, typeMap: ReadonlyJSONObject, orderedTypes: string[]): HTMLLIElement;
+    createItemNode(item: IItem, typeMap: ITypeMap, orderedTypes: string[]): HTMLLIElement;
   }
 
   /**
@@ -706,7 +706,7 @@ namespace Completer {
     /**
      * Create an item node for a text completer menu.
      */
-    createItemNode(item: IItem, typeMap: Completer.ITypeMap, orderedTypes: string[]): HTMLLIElement {
+    createItemNode(item: IItem, typeMap: ITypeMap, orderedTypes: string[]): HTMLLIElement {
       let li = document.createElement('li');
       li.className = ITEM_CLASS;
       // Set the raw, un-marked up value as a data attribute.
