@@ -494,7 +494,7 @@ namespace Private {
     const filtered = Object.keys(typeMap)
       .map(key => typeMap[key] as string)
       .filter(value => !(value in KNOWN_MAP))
-      .sort();
+      .sort((a, b) => a.localeCompare(b));
 
     return KNOWN_TYPES.concat(filtered);
   }
