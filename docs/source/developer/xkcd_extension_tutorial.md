@@ -111,8 +111,8 @@ npm run build
 jupyter labextension install .
 ```
 
-After the build completes, open a second terminal.  Run these commands to 
-activate the `jupyterlab-ext` environment and to start a JupyterLab instance 
+After the build completes, open a second terminal.  Run these commands to
+activate the `jupyterlab-ext` environment and to start a JupyterLab instance
 in watch mode so that it will keep up with our changes as we make them.
 
 ```bash
@@ -273,7 +273,7 @@ Then modify the `activate` function again so that it has the following code:
 
 The first new block of code creates a `Widget` instance, assigns it a unique ID, gives it a label that will appear as its tab title, and makes the tab closable by the user. The second block of code add a new command labeled *Random xkcd comic* to JupyterLab. When the comm and executes, it attaches the widget to the main display area if it is not already present and then makes it the active tab. The last new line of code adds the command to the command palette in a section called *Tutorial*.
 
-Build your extension again using `npm run build` (unless you are using 
+Build your extension again using `npm run build` (unless you are using
 `npm run watch` already) and refresh the browser tab. Open the command palette on the left side and type *xkcd*. Your *Random xkcd comic* command should appear. Click it or select it with the keyboard and press *Enter*. You should see a new, blank panel appear with the tab title *xkcd.com*. Click the *x* on the tab to close it and activate the command again. The tab should reappear. Finally, click one of the launcher tabs so that the *xkcd.com* panel is still open but no longer active. Now run the *Random xkcd comic* command one more time. The single *xkcd.com* tab should come to the foreground.
 
 ![Empty xkcd extension panel](xkcd_tutorial_empty.png)
@@ -304,8 +304,8 @@ You've got an empty panel. It's time to add a comic to it. Go back to your code 
     });
 ```
 
-The first two lines create a new HTML `<img>` element and add it to the widget DOM node. The next lines make a request using the HTML [fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch) 
-API that returns information about a random xkcd comic, and set the image 
+The first two lines create a new HTML `<img>` element and add it to the widget DOM node. The next lines make a request using the HTML [fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch)
+API that returns information about a random xkcd comic, and set the image
 source, alternate text, and title attributes based on the response.
 
 Rebuild your extension if necessary (`npm run build`), refresh your browser tab, and run the *Random xkcd comic* command again. You should now see a comic in the xkcd.com panel when it opens.
@@ -345,8 +345,8 @@ Open `style/index.css` in our extension project directory for editing. Add the f
 The first rule stacks content vertically within the widget panel and lets the panel scroll when the content overflows. The other rules center the cartoon and attribution badge horizontally and space them out vertically.
 
 Return to the `index.ts` file. Note that there is already an import of the CSS
- file in the `index.ts` file.  Modify the the `activate` function to apply the 
- CSS classes and add the attribution badge markup. The beginning of the 
+ file in the `index.ts` file.  Modify the the `activate` function to apply the
+ CSS classes and add the attribution badge markup. The beginning of the
  function should read like the following:
 
 ```typescript
@@ -378,10 +378,10 @@ Return to the `index.ts` file. Note that there is already an import of the CSS
     // as before from here down ...
 ```
 
-Build your extension if necessary (`npm run build`) and refresh your 
-JupyterLab browser tab. Invoke the *Random xkcd comic* command and confirm the 
-comic is centered with an attribution badge below it. Resize the browser 
-window or the panel so that the comic is larger than the available area. Make 
+Build your extension if necessary (`npm run build`) and refresh your
+JupyterLab browser tab. Invoke the *Random xkcd comic* command and confirm the
+comic is centered with an attribution badge below it. Resize the browser
+window or the panel so that the comic is larger than the available area. Make
 sure you can scroll the panel over the entire area of the comic.
 
 ![Styled xkcd panel with attribution](xkcd_tutorial_complete.png)
@@ -666,4 +666,4 @@ You've completed the tutorial. Nicely done! If you want to keep learning, here a
 * Make the image a link to the comic on https://xkcd.com.
 * Push your extension git repository to GitHub.
 * Give users the ability to pin comics in separate, permanent panels.
-* Learn how to write [other kinds of extensions](./extensions_dev.md).
+* Learn how to write [other kinds of extensions](./extension_dev.md).
