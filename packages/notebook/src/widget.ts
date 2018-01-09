@@ -1494,7 +1494,7 @@ class Notebook extends StaticNotebook {
     document.removeEventListener('mouseup', this, true);
 
     if (this._mouseMode === 'couldDrag') {
-      // We didn't end up dragging if we are here, so deselect the cells.
+      // We didn't end up dragging if we are here, so treat it as a click event.
 
       // Find the target cell.
       let target = event.target as HTMLElement;
