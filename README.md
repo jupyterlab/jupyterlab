@@ -117,7 +117,7 @@ JupyterLab follows the official [Jupyter Code of Conduct](https://github.com/jup
 
 JupyterLab can be extended using extensions that are [npm](https://www.npmjs.com/) packages
 and use our public APIs. See our documentation
-for [users](https://jupyterlab-tutorial.readthedocs.io/en/latest/extensions_user.html) and [developers](https://jupyterlab-tutorial.readthedocs.io/en/latest/extensions_dev.html).
+for [users](https://jupyterlab-tutorial.readthedocs.io/en/latest/user/extensions.html) and [developers](https://jupyterlab-tutorial.readthedocs.io/en/latest/developer/extension_dev.html).
 
 ### License
 
