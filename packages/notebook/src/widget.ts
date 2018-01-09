@@ -1385,9 +1385,15 @@ class Notebook extends StaticNotebook {
 
     // Prevent an editor from receiving a plain right-click event so we can show
     // an application context menu without the editor focusing, etc.
+
+    // On OS X, the context menu may be triggered with ctrl-left-click. In
+    // Firefox, ctrl-left-click gives an event with button 2, but in Chrome,
+    // ctrl-left-click gives an event with button 0 with the ctrl modifier.
     if (button === 2 && !shiftKey && widget && widget.editorWidget.node.contains(target)) {
       this.mode = 'command';
-      event.stopPropagation();
+
+      // Prevent the browser from focusing the editor.
+      event.preventDefault();
     }
   }
 
@@ -1445,6 +1451,9 @@ class Notebook extends StaticNotebook {
       this.deselectAll();
     } else if (targetArea === 'prompt' || targetArea === 'cell') {
       if (button === 0 && shiftKey) {
+        // Prevent browser selecting text in prompt or output
+        event.preventDefault();
+
         // Shift-click - extend selection
         try {
           this.extendContiguousSelectionTo(index);
@@ -1478,6 +1487,11 @@ class Notebook extends StaticNotebook {
           this.activeCellIndex = index;
         }
         event.preventDefault();
+      }
+    } else if (targetArea === 'input') {
+      if (button === 2 && !this.isSelectedOrActive(widget)) {
+        this.deselectAll();
+        this.activeCellIndex = index;
       }
     }
 
