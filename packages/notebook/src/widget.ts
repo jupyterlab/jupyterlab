@@ -1408,14 +1408,14 @@ class Notebook extends StaticNotebook {
       return;
     }
 
-
-    // `event.target` sometimes gives an orphaned node in Firefox 57, which
-    // can have `null` anywhere in its parent tree. If we fail to find a
-    // cell using `event.target`, try again using a target reconstructed from
-    // the position of the click event.
+    // Find the target cell.
     let target = event.target as HTMLElement;
     let index = this._findCell(target);
     if (index === -1) {
+      // `event.target` sometimes gives an orphaned node in
+      // Firefox 57, which can have `null` anywhere in its parent line. If we fail
+      // to find a cell using `event.target`, try again using a target
+      // reconstructed from the position of the click event.
       target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
       index = this._findCell(target);
     }
@@ -1434,20 +1434,18 @@ class Notebook extends StaticNotebook {
       targetArea = 'notebook';
     }
 
-    // Switch to command mode if the click isn't in the cell editor
+    // Make sure we go to command mode if the click isn't in the cell editor If
+    // we do click in the cell editor, the editor handles the focus event to
+    // switch to edit mode.
     if (targetArea !== 'input') {
       this.mode = 'command';
     }
 
-
-
-    if (index !== -1) {
-
-      if (shiftKey) {
-        // Prevent text select behavior.
-        event.preventDefault();
-        event.stopPropagation();
-
+    if (targetArea === 'notebook') {
+      this.deselectAll();
+    } else if (targetArea === 'prompt' || targetArea === 'cell') {
+      if (button === 0 && shiftKey) {
+        // Shift-click - extend selection
         try {
           this.extendContiguousSelectionTo(index);
         } catch (e) {
@@ -1459,16 +1457,9 @@ class Notebook extends StaticNotebook {
         this._mouseMode = 'select';
         document.addEventListener('mouseup', this, true);
         document.addEventListener('mousemove', this, true);
-
-      } else {
-        // Check if we need to change the active cell.
-        if (!this.isSelectedOrActive(widget)) {
-          this.deselectAll();
-          this.activeCellIndex = index;
-        }
-
-        // Prepare to start a drag if we are on the drag region.
-        if (targetArea === 'prompt') {
+      } else if (button === 0 && !shiftKey) {
+        // Prepare to start a drag if we are on the drag region. TODO: If there is no drag, we'll deselect on mouseup.
+        if (targetArea === 'prompt' && this.isSelectedOrActive(widget)) {
           // Prepare for a drag start
           this._dragData = { pressX: event.clientX, pressY: event.clientY, index: index};
 
@@ -1477,17 +1468,20 @@ class Notebook extends StaticNotebook {
           document.addEventListener('mouseup', this, true);
           document.addEventListener('mousemove', this, true);
           event.preventDefault();
+        } else {
+          this.deselectAll();
+          this.activeCellIndex = index;
         }
+      } else if (button === 2) {
+        if (!this.isSelectedOrActive(widget)) {
+          this.deselectAll();
+          this.activeCellIndex = index;
+        }
+        event.preventDefault();
       }
-    } else {
-      // If there is a click event in the notebook, but not on any cells,
-      // deselect any current selection.
-      this.deselectAll();
-      event.preventDefault();
-      event.stopPropagation();
     }
 
-    // Mousedown should always have focus.
+    // If we didn't set focus above, make sure we get focus now.
     this._ensureFocus(true);
   }
 
@@ -1498,6 +1492,24 @@ class Notebook extends StaticNotebook {
     // Remove the event listeners we put on the document
     document.removeEventListener('mousemove', this, true);
     document.removeEventListener('mouseup', this, true);
+
+    if (event.button === 0 && this._mouseMode !== 'select') {
+      // Find the target cell.
+      let target = event.target as HTMLElement;
+      let index = this._findCell(target);
+      if (index === -1) {
+        // `event.target` sometimes gives an orphaned node in
+        // Firefox 57, which can have `null` anywhere in its parent line. If we fail
+        // to find a cell using `event.target`, try again using a target
+        // reconstructed from the position of the click event.
+        target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
+        index = this._findCell(target);
+      }
+
+      this.deselectAll();
+      this.activeCellIndex = index;
+    }
+
     this._mouseMode = null;
     event.preventDefault();
     event.stopPropagation();
