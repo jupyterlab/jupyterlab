@@ -63,14 +63,15 @@ class CompleterModel implements Completer.IModel {
     return this._current;
   }
   set current(newValue: Completer.ITextState | null) {
-    let unchanged = this._current === newValue ||
+    const unchanged = this._current === newValue ||
       this._current && newValue &&
       JSONExt.deepEqual(newValue, this._current);
+
     if (unchanged) {
       return;
     }
 
-    let original = this._original;
+    const original = this._original;
 
     // Original request must always be set before a text change. If it isn't
     // the model fails silently.
@@ -78,14 +79,17 @@ class CompleterModel implements Completer.IModel {
       return;
     }
 
+    const cursor = this._cursor;
+
     // Cursor must always be set before a text change. This happens
     // automatically in the completer handler, but since `current` is a public
     // attribute, this defensive check is necessary.
-    if (!this._cursor) {
+    if (!cursor) {
       return;
     }
 
-    let current = this._current = newValue;
+    const current = this._current = newValue;
+
     if (!current) {
       this._stateChanged.emit(undefined);
       return;
