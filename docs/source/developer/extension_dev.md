@@ -1,4 +1,4 @@
-# Extensions Developer Guide
+# Extension Developer Guide
 
 JupyterLab can be extended in three ways via:
 

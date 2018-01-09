@@ -34,17 +34,18 @@ JupyterLab Documentation
    :maxdepth: 1
    :caption: Developer Guide
 
-   developer/repo.md
-   developer/extensions_dev.md
-   developer/documents.md
-   developer/notebook.md
-   developer/patterns.md
-   developer/css.md
-   developer/virtualdom.md
-   developer/adding_content.md
-   developer/examples.md
-   developer/terminology.md
-   developer/xkcd_extension_tutorial.md
+   developer/repo
+   developer/extension_dev
+   developer/documents
+   developer/notebook
+   developer/patterns
+   developer/css
+   developer/documentation
+   developer/virtualdom
+   developer/adding_content
+   developer/examples
+   developer/terminology
+   developer/xkcd_extension_tutorial
 
 Indices and Tables
 ------------------
