@@ -645,9 +645,6 @@ class Stdin extends Widget implements IStdin {
    */
   handleEvent(event: Event): void {
     let input = this._input;
-    if (event.type === 'contextmenu') {
-      event.stopPropagation();
-    }
     if (event.type === 'keydown') {
       if ((event as KeyboardEvent).keyCode === 13) {  // Enter
         this._future.sendInputReply({
@@ -669,7 +666,6 @@ class Stdin extends Widget implements IStdin {
    * Handle `after-attach` messages sent to the widget.
    */
   protected onAfterAttach(msg: Message): void {
-    this._input.addEventListener('contextmenu', this);
     this._input.addEventListener('keydown', this);
     this.update();
   }
