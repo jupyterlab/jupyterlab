@@ -1173,8 +1173,8 @@ describe('notebook/widget', () => {
           expect(widget.activeCellIndex).to.be(4);
           expect(selected(widget)).to.eql([3, 4]);
 
-          // shift click above in an editor
-          simulate(widget.widgets[1].editorWidget.node, 'mousedown', {shiftKey: true});
+          // shift click above
+          simulate(widget.widgets[1].node, 'mousedown', {shiftKey: true});
           expect(widget.activeCellIndex).to.be(1);
           expect(selected(widget)).to.eql([1, 2, 3]);
 
