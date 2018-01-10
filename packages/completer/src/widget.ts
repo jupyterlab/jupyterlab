@@ -509,6 +509,12 @@ class Completer extends Widget {
 export
 namespace Completer {
   /**
+   * A type map that may add type annotations to completer matches.
+   */
+  export
+  type TypeMap = { [index: string]: string; };
+
+  /**
    * The initialization options for a completer widget.
    */
   export
@@ -610,7 +616,7 @@ namespace Completer {
      * The map from identifiers (`a.b`) to their types (function, module, class,
      * instance, etc.).
      */
-    typeMap(): ITypeMap;
+    typeMap(): TypeMap;
 
     /**
      * An ordered list of types used for visual encoding.
@@ -696,12 +702,6 @@ namespace Completer {
   }
 
 
-  export
-  interface ITypeMap {
-    [index: string]: string;
-  }
-
-
   /**
    * A renderer for completer widget nodes.
    */
@@ -710,7 +710,7 @@ namespace Completer {
     /**
      * Create an item node (an `li` element) for a text completer menu.
      */
-    createItemNode(item: IItem, typeMap: ITypeMap, orderedTypes: string[]): HTMLLIElement;
+    createItemNode(item: IItem, typeMap: TypeMap, orderedTypes: string[]): HTMLLIElement;
   }
 
   /**
@@ -721,7 +721,7 @@ namespace Completer {
     /**
      * Create an item node for a text completer menu.
      */
-    createItemNode(item: IItem, typeMap: ITypeMap, orderedTypes: string[]): HTMLLIElement {
+    createItemNode(item: IItem, typeMap: TypeMap, orderedTypes: string[]): HTMLLIElement {
       let li = document.createElement('li');
       li.className = ITEM_CLASS;
       // Set the raw, un-marked up value as a data attribute.

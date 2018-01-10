@@ -197,7 +197,7 @@ class CompleterModel implements Completer.IModel {
    * values are completely up to the kernel.
    *
    */
-  typeMap(): Completer.ITypeMap {
+  typeMap(): Completer.TypeMap {
     return this._typeMap;
   }
 
@@ -221,7 +221,7 @@ class CompleterModel implements Completer.IModel {
   /**
    * Set the available options in the completer menu.
    */
-  setOptions(newValue: IterableOrArrayLike<string>, typeMap?: Completer.ITypeMap) {
+  setOptions(newValue: IterableOrArrayLike<string>, typeMap?: Completer.TypeMap) {
     const values = toArray(newValue || []);
     const types = typeMap || { };
 
@@ -410,7 +410,7 @@ class CompleterModel implements Completer.IModel {
   private _original: Completer.ITextState | null = null;
   private _query = '';
   private _subsetMatch = false;
-  private _typeMap: Completer.ITypeMap = { };
+  private _typeMap: Completer.TypeMap = { };
   private _orderedTypes: string[] = [];
   private _stateChanged = new Signal<this, void>(this);
 }
@@ -428,10 +428,10 @@ namespace Private {
   /**
    * The map of known type annotations of completer matches.
    */
-  const KNOWN_MAP: Completer.ITypeMap = KNOWN_TYPES.reduce((acc, type) => {
+  const KNOWN_MAP = KNOWN_TYPES.reduce((acc, type) => {
     acc[type] = null;
     return acc;
-  }, { } as Partial<Completer.ITypeMap>);
+  }, { } as Completer.TypeMap);
 
   /**
    * A filtered completion menu matching result.
@@ -491,7 +491,7 @@ namespace Private {
    * followed by other types in alphabetical order.
    */
   export
-  function findOrderedTypes(typeMap: Completer.ITypeMap): string[] {
+  function findOrderedTypes(typeMap: Completer.TypeMap): string[] {
     const filtered = Object.keys(typeMap)
       .map(key => typeMap[key])
       .filter(value => !(value in KNOWN_MAP))

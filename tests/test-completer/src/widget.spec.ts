@@ -49,7 +49,7 @@ function createEditorWidget(): CodeEditorWrapper {
 
 
 class CustomRenderer extends Completer.Renderer {
-  createItemNode(item: Completer.IItem, typeMap: Completer.ITypeMap, orderedTypes: string[]): HTMLLIElement {
+  createItemNode(item: Completer.IItem, typeMap: Completer.TypeMap, orderedTypes: string[]): HTMLLIElement {
     let li = super.createItemNode(item, typeMap, orderedTypes);
     li.classList.add(TEST_ITEM_CLASS);
     return li;
