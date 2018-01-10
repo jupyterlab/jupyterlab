@@ -477,7 +477,8 @@ class Completer extends Widget {
       minHeight: MIN_HEIGHT,
       node: node,
       offset: { horizontal: borderLeft + paddingLeft },
-      privilege: 'below'
+      privilege: 'below',
+      style: style
     });
   }
 

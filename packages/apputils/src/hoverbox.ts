@@ -86,6 +86,12 @@ namespace HoverBox {
      * The default value is `'below'`.
      */
     privilege?: 'above' | 'below' | 'forceAbove' | 'forceBelow';
+
+    /**
+     * If the style of the node has already been computed, it can be passed into
+     * the hover box for geometry calculation.
+     */
+    style?: CSSStyleDeclaration;
   }
 
 
@@ -118,7 +124,7 @@ namespace HoverBox {
     // Make sure the node is visible so that its dimensions can be queried.
     node.classList.remove(OUTOFVIEW_CLASS);
 
-    const style = window.getComputedStyle(node);
+    const style = options.style || window.getComputedStyle(node);
     const innerHeight = window.innerHeight;
     const spaceAbove = anchor.top;
     const spaceBelow = innerHeight - anchor.bottom;
