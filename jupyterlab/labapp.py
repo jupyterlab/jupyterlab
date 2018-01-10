@@ -22,6 +22,11 @@ build_aliases['app-dir'] = 'LabBuildApp.app_dir'
 build_aliases['name'] = 'LabBuildApp.name'
 build_aliases['version'] = 'LabBuildApp.version'
 
+build_flags = dict(flags)
+build_flags['dev'] = (
+    {'LabBuildApp': {'dev_build': True}},
+    "Build in Development mode"
+)
 
 version = __version__
 app_version = get_app_version()
@@ -39,6 +44,7 @@ class LabBuildApp(JupyterApp):
     directory, where it is used to serve the application.
     """
     aliases = build_aliases
+    flags = build_flags
 
     app_dir = Unicode('', config=True,
         help="The app directory to build in")
@@ -49,8 +55,13 @@ class LabBuildApp(JupyterApp):
     version = Unicode('', config=True,
         help="The version of the built application")
 
+    dev_build = Bool(False, config=True,
+        help="Whether to build in dev mode (defaults to production mode)")
+
     def start(self):
-        build(self.app_dir, self.name, self.version)
+        command = 'build:prod' if not self.dev_build else 'build'
+        build(app_dir=self.app_dir, name=self.name, version=self.version,
+              command=command, logger=self.log)
 
 
 clean_aliases = dict(base_aliases)
