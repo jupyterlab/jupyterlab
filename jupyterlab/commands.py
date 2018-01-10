@@ -356,6 +356,8 @@ class _AppHandler(object):
             if other['path'] != info['path'] and other['location'] == 'app':
                 os.remove(other['path'])
 
+        return True
+
     def build(self, name=None, version=None, public_url=None,
             command='build:prod', clean_staging=False):
         """Build the application.
@@ -566,6 +568,8 @@ class _AppHandler(object):
         linked = config.setdefault('linked_packages', dict())
         linked[info['name']] = info['source']
         self._write_build_config(config)
+
+        return True
 
     def unlink_package(self, path):
         """Link a package by name or at the given path.

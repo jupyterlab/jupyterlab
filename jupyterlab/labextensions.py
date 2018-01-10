@@ -27,6 +27,10 @@ flags['no-build'] = (
     {'BaseExtensionApp': {'should_build': False}},
     "Defer building the app after the action."
 )
+flags['dev-build'] = (
+    {'BaseExtensionApp': {'dev_build': True}},
+    "Build in Development mode"
+)
 flags['clean'] = (
     {'BaseExtensionApp': {'should_clean': True}},
     "Cleanup intermediate files after the action."
@@ -51,8 +55,11 @@ class BaseExtensionApp(JupyterApp):
     app_dir = Unicode('', config=True,
         help="The app directory to target")
 
-    should_build = Bool(False, config=True,
+    should_build = Bool(True, config=True,
         help="Whether to build the app after the action")
+
+    dev_build = Bool(False, config=True,
+        help="Whether to build in dev mode (defaults to production mode)")
 
     should_clean = Bool(False, config=True,
         help="Whether temporary files should be cleaned up after building jupyterlab")
@@ -61,7 +68,11 @@ class BaseExtensionApp(JupyterApp):
         if self.app_dir and self.app_dir.startswith(HERE):
             raise ValueError('Cannot run lab extension commands in core app')
         try:
-            self.run_task()
+            ans = self.run_task()
+            if ans and self.should_build:
+                command = 'build:prod' if not self.dev_build else 'build'
+                build(app_dir=self.app_dir, clean_staging=self.should_clean,
+                      logger=self.log, command=command)
         except Exception as ex:
             _, _, exc_traceback = sys.exc_info()
             msg = traceback.format_exception(ex.__class__, ex, exc_traceback)
@@ -81,17 +92,13 @@ class BaseExtensionApp(JupyterApp):
 
 class InstallLabExtensionApp(BaseExtensionApp):
     description = "Install labextension(s)"
-    should_build = Bool(True, config=True,
-        help="Whether to build the app after the action")
 
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        [install_extension(arg, self.app_dir, logger=self.log) for
-         arg in self.extra_args]
-
-        if self.should_build:
-            build(self.app_dir, clean_staging=self.should_clean,
-                 logger=self.log)
+        return any([
+            install_extension(arg, self.app_dir, logger=self.log)
+            for arg in self.extra_args
+        ])
 
 
 class LinkLabExtensionApp(BaseExtensionApp):
@@ -107,40 +114,32 @@ class LinkLabExtensionApp(BaseExtensionApp):
 
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        [link_package(arg, self.app_dir, logger=self.log)
-         for arg in self.extra_args]
-
-        if self.should_build:
-            build(self.app_dir, clean_staging=self.should_clean,
-                  logger=self.log)
+        return any([
+            link_package(arg, self.app_dir, logger=self.log)
+            for arg in self.extra_args
+        ])
 
 
 class UnlinkLabExtensionApp(BaseExtensionApp):
     description = "Unlink packages by name or path"
-    should_build = Bool(True, config=True,
-        help="Whether to build the app after the action")
 
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        ans = any([unlink_package(arg, self.app_dir, logger=self.log)
-                   for arg in self.extra_args])
-        if ans and self.should_build:
-            build(self.app_dir, clean_staging=self.should_clean,
-                  logger=self.log)
+        return any([
+            unlink_package(arg, self.app_dir, logger=self.log)
+            for arg in self.extra_args
+        ])
 
 
 class UninstallLabExtensionApp(BaseExtensionApp):
     description = "Uninstall labextension(s) by name"
-    should_build = Bool(True, config=True,
-        help="Whether to build the app after the action")
 
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        ans = any([uninstall_extension(arg, self.app_dir, logger=self.log)
-                   for arg in self.extra_args])
-        if ans and self.should_build:
-            build(self.app_dir, clean_staging=self.should_clean,
-                  logger=self.log)
+        return any([
+            uninstall_extension(arg, self.app_dir, logger=self.log)
+            for arg in self.extra_args
+        ])
 
 
 class ListLabExtensionsApp(BaseExtensionApp):
