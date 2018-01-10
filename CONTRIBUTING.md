@@ -4,11 +4,11 @@ If you're reading this section, you're probably interested in contributing to
 JupyterLab.  Welcome and thanks for your interest in contributing!
 
 Please take a look at the Contributor documentation, familiarize yourself with
-using the Jupyter Notebook, and introduce yourself on the mailing list and share
+using Jupyter Notebook, and introduce yourself on the mailing list and share
 what area of the project you are interested in working on.
 
 We have labeled some issues as [good first issue](https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22)
-that we believe are good examples of small, self contained changes.
+that we believe are good examples of small, self-contained changes.
 We encourage those that are new to the code base to implement and/or ask
 questions about these issues.
 
@@ -25,7 +25,7 @@ All source code is written in [TypeScript](http://www.typescriptlang.org/Handboo
 
 ### Installing Node.js and jlpm
 
-Building the JupyterLab from its GitHub source code requires Node.js version
+Building JupyterLab from its GitHub source code requires Node.js version
 4+.
 
 If you use ``conda``, you can get it with:
@@ -59,7 +59,7 @@ You may also want to install `nb_conda_kernels` to have a kernel option for diff
 conda install -c conda-forge nb_conda_kernels
 ```
 
-If you use `pip` you can install notebook using:
+If you use `pip`, you can install notebook using:
 
 ```bash
 pip install notebook
@@ -165,7 +165,7 @@ To install and build the examples in the `examples` directory:
 jlpm run build:examples
 ```
 
-To run a specific example, change to the example's directory (i.e.
+To run a specific example, change to the examples directory (i.e.
 `examples/filebrowser`) and enter:
 
 ```bash
@@ -209,7 +209,7 @@ jlpm run build:packages
 ## The Jupyter Server Extension
 
 The Jupyter server extension source files are in the `jupyterlab/`
-subdirectory. To use this extension, make sure the Jupyter notebook server
+subdirectory. To use this extension, make sure the Jupyter Notebook server
 version 4.3 or later is installed.
 
 ### Build the JupyterLab server extension
@@ -220,7 +220,7 @@ When you make a change to JupyterLab npm package source files, run:
 jlpm run build
 ```
 
-to build the changes and then refresh your browser to see the changes.
+to build the changes, and then refresh your browser to see the changes.
 
 To have the system build after each source file change, run:
 
@@ -234,7 +234,7 @@ the initial build if the assets are already built.
 
 ## Build Utilities
 
-There are a series of build utilities for maintaining the repository.
+There is a range of build utilities for maintaining the repository.
 To get a suggested version for a library use `jlpm run get:dependency foo`.
 To update the version of a library across the repo use `jlpm run update:dependency foo@^x.x`.
 To remove an unwanted dependency use `jlpm run remove:dependency foo`.
