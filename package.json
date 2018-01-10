@@ -18,8 +18,8 @@
     "mathjax"
   ],
   "dependencies": {
-    "@jupyterlab/application": "^0.14.1",
-    "@jupyterlab/rendermime": "^0.14.1",
+    "@jupyterlab/application": "^0.15.0",
+    "@jupyterlab/rendermime": "^0.15.0",
     "mathjax3": "3.0.0-alpha.2"
   },
   "devDependencies": {
