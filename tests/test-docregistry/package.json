@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-docregistry",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "scripts": {
     "build": "tsc",
@@ -15,10 +15,10 @@
     "watch:src": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^1.0.1",
-    "@jupyterlab/docregistry": "^0.14.1",
-    "@jupyterlab/rendermime": "^0.14.1",
-    "@jupyterlab/services": "^1.0.1",
+    "@jupyterlab/coreutils": "^1.0.2",
+    "@jupyterlab/docregistry": "^0.15.0",
+    "@jupyterlab/rendermime": "^0.15.0",
+    "@jupyterlab/services": "^1.1.0",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/disposable": "^1.1.2",
     "@phosphor/messaging": "^1.2.2",
