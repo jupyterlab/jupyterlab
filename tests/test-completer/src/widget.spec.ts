@@ -617,7 +617,11 @@ describe('completer/widget', () => {
           MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
           simulate(document.body, 'scroll');
 
-          requestAnimationFrame(() => {
+          // Because the scroll handling is asynchronous and debounced at an
+          // interval defined in the module: `SCROLL_DEBOUNCE_INTERVAL`,
+          // this test uses a large timeout (500ms) to guarantee the scroll
+          // handling has finished.
+          window.setTimeout(() => {
             let top = parseInt(window.getComputedStyle(widget.node).top, 10);
             let bottom = Math.floor(coords.bottom);
             expect(top + panel.node.scrollTop).to.be(bottom);
@@ -625,7 +629,7 @@ describe('completer/widget', () => {
             code.dispose();
             panel.dispose();
             done();
-          });
+          }, 500);
         });
 
       });
