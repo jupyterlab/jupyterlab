@@ -63,6 +63,11 @@ const MAX_HEIGHT = 200;
  */
 const USE_CAPTURE = true;
 
+/**
+ * The number of milliseconds to debounce geometry calculation when scrolling.
+ */
+const SCROLL_DEBOUNCE_INTERVAL = 50;
+
 
 /**
  * A widget that enables text completion.
@@ -448,6 +453,7 @@ class Completer extends Widget {
    * Set the visible dimensions of the widget.
    */
   private _setGeometry(): void {
+    const { node } = this;
     const model = this._model;
     const editor = this._editor;
 
@@ -458,26 +464,39 @@ class Completer extends Widget {
       return;
     }
 
-    const start = model.cursor.start;
-    const position = editor.getPositionAt(start) as CodeEditor.IPosition;
-    const anchor = editor.getCoordinateForPosition(position) as ClientRect;
-    const style = window.getComputedStyle(this.node);
-    const borderLeft = parseInt(style.borderLeftWidth!, 10) || 0;
-    const paddingLeft = parseInt(style.paddingLeft!, 10) || 0;
+    // Hide the node in a way that does not affect its dimensions.
+    node.style.opacity = '0';
 
-    // Calculate the geometry of the completer.
-    HoverBox.setGeometry({
-      anchor,
-      host: editor.host,
-      maxHeight: MAX_HEIGHT,
-      minHeight: MIN_HEIGHT,
-      node: this.node,
-      offset: { horizontal: borderLeft + paddingLeft },
-      privilege: 'below'
-    });
+    // Set the node geometry asynchronously.
+    if (this._debouncer) {
+      window.clearTimeout(this._debouncer);
+    }
+    this._debouncer = window.setTimeout(() => {
+      const start = model.cursor.start;
+      const position = editor.getPositionAt(start) as CodeEditor.IPosition;
+      const anchor = editor.getCoordinateForPosition(position) as ClientRect;
+      const style = window.getComputedStyle(this.node);
+      const borderLeft = parseInt(style.borderLeftWidth!, 10) || 0;
+      const paddingLeft = parseInt(style.paddingLeft!, 10) || 0;
+
+      // Calculate the geometry of the completer.
+      HoverBox.setGeometry({
+        anchor,
+        host: editor.host,
+        maxHeight: MAX_HEIGHT,
+        minHeight: MIN_HEIGHT,
+        node: node,
+        offset: { horizontal: borderLeft + paddingLeft },
+        privilege: 'below'
+      });
+
+      // Reveal the node once its dimensions are set.
+      node.style.opacity = '1';
+    }, SCROLL_DEBOUNCE_INTERVAL);
   }
 
   private _activeIndex = 0;
+  private _debouncer = 0;
   private _editor: CodeEditor.IEditor | null = null;
   private _model: Completer.IModel | null = null;
   private _renderer: Completer.IRenderer | null = null;
