@@ -95,10 +95,10 @@ class InstallLabExtensionApp(BaseExtensionApp):
 
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        return any(
+        return any([
             install_extension(arg, self.app_dir, logger=self.log)
             for arg in self.extra_args
-        )
+        ])
 
 
 class LinkLabExtensionApp(BaseExtensionApp):
@@ -114,10 +114,10 @@ class LinkLabExtensionApp(BaseExtensionApp):
 
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        return any(
+        return any([
             link_package(arg, self.app_dir, logger=self.log)
             for arg in self.extra_args
-        )
+        ])
 
 
 class UnlinkLabExtensionApp(BaseExtensionApp):
@@ -125,10 +125,10 @@ class UnlinkLabExtensionApp(BaseExtensionApp):
 
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        return any(
+        return any([
             unlink_package(arg, self.app_dir, logger=self.log)
             for arg in self.extra_args
-        )
+        ])
 
 
 class UninstallLabExtensionApp(BaseExtensionApp):
@@ -136,10 +136,10 @@ class UninstallLabExtensionApp(BaseExtensionApp):
 
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        return any(
+        return any([
             uninstall_extension(arg, self.app_dir, logger=self.log)
             for arg in self.extra_args
-        )
+        ])
 
 
 class ListLabExtensionsApp(BaseExtensionApp):
