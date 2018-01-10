@@ -63,11 +63,6 @@ const MAX_HEIGHT = 200;
  */
 const USE_CAPTURE = true;
 
-/**
- * The number of milliseconds to debounce geometry calculation when scrolling.
- */
-const SCROLL_DEBOUNCE_INTERVAL = 50;
-
 
 /**
  * A widget that enables text completion.
@@ -413,14 +408,17 @@ class Completer extends Widget {
       return;
     }
 
+    const { node } = this;
+
     // All scrolls except scrolls in the actual hover box node may cause the
     // referent editor that anchors the node to move, so the only scroll events
     // that can safely be ignored are ones that happen inside the hovering node.
-    if (this.node.contains(event.target as HTMLElement)) {
+    if (node.contains(event.target as HTMLElement)) {
       return;
     }
 
-    this._setGeometry();
+    // Set the geometry of the node asynchronously.
+    requestAnimationFrame(() => { this._setGeometry(); });
   }
 
   /**
@@ -464,39 +462,26 @@ class Completer extends Widget {
       return;
     }
 
-    // Hide the node in a way that does not affect its dimensions.
-    node.style.opacity = '0';
+    const start = model.cursor.start;
+    const position = editor.getPositionAt(start) as CodeEditor.IPosition;
+    const anchor = editor.getCoordinateForPosition(position) as ClientRect;
+    const style = window.getComputedStyle(node);
+    const borderLeft = parseInt(style.borderLeftWidth!, 10) || 0;
+    const paddingLeft = parseInt(style.paddingLeft!, 10) || 0;
 
-    // Set the node geometry asynchronously.
-    if (this._debouncer) {
-      window.clearTimeout(this._debouncer);
-    }
-    this._debouncer = window.setTimeout(() => {
-      const start = model.cursor.start;
-      const position = editor.getPositionAt(start) as CodeEditor.IPosition;
-      const anchor = editor.getCoordinateForPosition(position) as ClientRect;
-      const style = window.getComputedStyle(this.node);
-      const borderLeft = parseInt(style.borderLeftWidth!, 10) || 0;
-      const paddingLeft = parseInt(style.paddingLeft!, 10) || 0;
-
-      // Calculate the geometry of the completer.
-      HoverBox.setGeometry({
-        anchor,
-        host: editor.host,
-        maxHeight: MAX_HEIGHT,
-        minHeight: MIN_HEIGHT,
-        node: node,
-        offset: { horizontal: borderLeft + paddingLeft },
-        privilege: 'below'
-      });
-
-      // Reveal the node once its dimensions are set.
-      node.style.opacity = '1';
-    }, SCROLL_DEBOUNCE_INTERVAL);
+    // Calculate the geometry of the completer.
+    HoverBox.setGeometry({
+      anchor,
+      host: editor.host,
+      maxHeight: MAX_HEIGHT,
+      minHeight: MIN_HEIGHT,
+      node: node,
+      offset: { horizontal: borderLeft + paddingLeft },
+      privilege: 'below'
+    });
   }
 
   private _activeIndex = 0;
-  private _debouncer = 0;
   private _editor: CodeEditor.IEditor | null = null;
   private _model: Completer.IModel | null = null;
   private _renderer: Completer.IRenderer | null = null;
