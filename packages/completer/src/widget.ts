@@ -6,7 +6,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONObject, ReadonlyJSONObject, JSONExt
+  JSONObject, JSONExt
 } from '@phosphor/coreutils';
 
 import {
@@ -220,6 +220,7 @@ class Completer extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     const model = this._model;
+
     if (!model) {
       return;
     }
@@ -228,7 +229,7 @@ class Completer extends Widget {
       this._resetFlag = false;
       if (!this.isHidden) {
         this.hide();
-        this._visibilityChanged.emit(void 0);
+        this._visibilityChanged.emit(undefined);
       }
       return;
     }
@@ -241,7 +242,7 @@ class Completer extends Widget {
       this.reset();
       if (!this.isHidden) {
         this.hide();
-        this._visibilityChanged.emit(void 0);
+        this._visibilityChanged.emit(undefined);
       }
       return;
     }
@@ -273,9 +274,10 @@ class Completer extends Widget {
 
     // If this is the first time the current completer session has loaded,
     // populate any initial subset match.
-    if (this._model && this._model.subsetMatch) {
-      let populated = this._populateSubset();
-      this.model.subsetMatch = false;
+    if (model.subsetMatch) {
+      const populated = this._populateSubset();
+
+      model.subsetMatch = false;
       if (populated) {
         this.update();
         return;
@@ -285,7 +287,7 @@ class Completer extends Widget {
     if (this.isHidden) {
       this.show();
       this._setGeometry();
-      this._visibilityChanged.emit(void 0);
+      this._visibilityChanged.emit(undefined);
     } else {
       this._setGeometry();
     }
@@ -406,14 +408,17 @@ class Completer extends Widget {
       return;
     }
 
+    const { node } = this;
+
     // All scrolls except scrolls in the actual hover box node may cause the
     // referent editor that anchors the node to move, so the only scroll events
     // that can safely be ignored are ones that happen inside the hovering node.
-    if (this.node.contains(event.target as HTMLElement)) {
+    if (node.contains(event.target as HTMLElement)) {
       return;
     }
 
-    this._setGeometry();
+    // Set the geometry of the node asynchronously.
+    requestAnimationFrame(() => { this._setGeometry(); });
   }
 
   /**
@@ -422,17 +427,23 @@ class Completer extends Widget {
    * @returns `true` if a subset match was found and populated.
    */
   private _populateSubset(): boolean {
-    let items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
-    let subset = Private.commonSubset(Private.itemValues(items));
-    if (!this.model) {
+    const { model } = this;
+
+    if (!model) {
       return false;
     }
-    let query = this.model.query;
+
+    const items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
+    const subset = Private.commonSubset(Private.itemValues(items));
+    const { query } = model;
+
+    // If a common subset exists and it is not the current query, highlight it.
     if (subset && subset !== query && subset.indexOf(query) === 0) {
-      this.model.query = subset;
-      this._selected.emit(subset);
+      model.query = subset;
+
       return true;
     }
+
     return false;
   }
 
@@ -440,24 +451,21 @@ class Completer extends Widget {
    * Set the visible dimensions of the widget.
    */
   private _setGeometry(): void {
+    const { node } = this;
     const model = this._model;
     const editor = this._editor;
-
-    if (!editor) {
-      return;
-    }
 
     // This is an overly defensive test: `cursor` will always exist if
     // `original` exists, except in contrived tests. But since it is possible
     // to generate a runtime error, the check occurs here.
-    if (!model || !model.original || !model.cursor) {
+    if (!editor || !model || !model.original || !model.cursor) {
       return;
     }
 
     const start = model.cursor.start;
     const position = editor.getPositionAt(start) as CodeEditor.IPosition;
     const anchor = editor.getCoordinateForPosition(position) as ClientRect;
-    const style = window.getComputedStyle(this.node);
+    const style = window.getComputedStyle(node);
     const borderLeft = parseInt(style.borderLeftWidth!, 10) || 0;
     const paddingLeft = parseInt(style.paddingLeft!, 10) || 0;
 
@@ -467,7 +475,7 @@ class Completer extends Widget {
       host: editor.host,
       maxHeight: MAX_HEIGHT,
       minHeight: MIN_HEIGHT,
-      node: this.node,
+      node: node,
       offset: { horizontal: borderLeft + paddingLeft },
       privilege: 'below'
     });
@@ -485,6 +493,12 @@ class Completer extends Widget {
 
 export
 namespace Completer {
+  /**
+   * A type map that may add type annotations to completer matches.
+   */
+  export
+  type TypeMap = { [index: string]: string; };
+
   /**
    * The initialization options for a completer widget.
    */
@@ -587,10 +601,10 @@ namespace Completer {
      * The map from identifiers (`a.b`) to their types (function, module, class,
      * instance, etc.).
      */
-    typeMap(): ReadonlyJSONObject;
+    typeMap(): TypeMap;
 
     /**
-     * An oredered list of types used for visual encoding.
+     * An ordered list of types used for visual encoding.
      */
     orderedTypes(): string[];
 
@@ -673,12 +687,6 @@ namespace Completer {
   }
 
 
-  export
-  interface  ITypeMap {
-    [index: string]: string;
-  }
-
-
   /**
    * A renderer for completer widget nodes.
    */
@@ -687,7 +695,7 @@ namespace Completer {
     /**
      * Create an item node (an `li` element) for a text completer menu.
      */
-    createItemNode(item: IItem, typeMap: ReadonlyJSONObject, orderedTypes: string[]): HTMLLIElement;
+    createItemNode(item: IItem, typeMap: TypeMap, orderedTypes: string[]): HTMLLIElement;
   }
 
   /**
@@ -698,7 +706,7 @@ namespace Completer {
     /**
      * Create an item node for a text completer menu.
      */
-    createItemNode(item: IItem, typeMap: Completer.ITypeMap, orderedTypes: string[]): HTMLLIElement {
+    createItemNode(item: IItem, typeMap: TypeMap, orderedTypes: string[]): HTMLLIElement {
       let li = document.createElement('li');
       li.className = ITEM_CLASS;
       // Set the raw, un-marked up value as a data attribute.

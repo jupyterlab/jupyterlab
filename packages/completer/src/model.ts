@@ -6,7 +6,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONExt, JSONObject, ReadonlyJSONObject
+  JSONExt
 } from '@phosphor/coreutils';
 
 import {
@@ -49,8 +49,11 @@ class CompleterModel implements Completer.IModel {
     }
 
     this._reset();
-    this._original = newValue;
-    this._stateChanged.emit(void 0);
+
+    // Set both the current and original to the same value when original is set.
+    this._current = this._original = newValue;
+
+    this._stateChanged.emit(undefined);
   }
 
   /**
@@ -60,14 +63,15 @@ class CompleterModel implements Completer.IModel {
     return this._current;
   }
   set current(newValue: Completer.ITextState | null) {
-    let unchanged = this._current === newValue ||
+    const unchanged = this._current === newValue ||
       this._current && newValue &&
       JSONExt.deepEqual(newValue, this._current);
+
     if (unchanged) {
       return;
     }
 
-    let original = this._original;
+    const original = this._original;
 
     // Original request must always be set before a text change. If it isn't
     // the model fails silently.
@@ -75,16 +79,19 @@ class CompleterModel implements Completer.IModel {
       return;
     }
 
+    const cursor = this._cursor;
+
     // Cursor must always be set before a text change. This happens
     // automatically in the completer handler, but since `current` is a public
     // attribute, this defensive check is necessary.
-    if (!this._cursor) {
+    if (!cursor) {
       return;
     }
 
-    let current = this._current = newValue;
+    const current = this._current = newValue;
+
     if (!current) {
-      this._stateChanged.emit(void 0);
+      this._stateChanged.emit(undefined);
       return;
     }
 
@@ -105,7 +112,7 @@ class CompleterModel implements Completer.IModel {
     const ending = original.text.substring(end);
     query = query.substring(0, query.lastIndexOf(ending));
     this._query = query;
-    this._stateChanged.emit(void 0);
+    this._stateChanged.emit(undefined);
   }
 
 
@@ -190,7 +197,7 @@ class CompleterModel implements Completer.IModel {
    * values are completely up to the kernel.
    *
    */
-  typeMap(): ReadonlyJSONObject {
+  typeMap(): Completer.TypeMap {
     return this._typeMap;
   }
 
@@ -214,9 +221,10 @@ class CompleterModel implements Completer.IModel {
   /**
    * Set the available options in the completer menu.
    */
-  setOptions(newValue: IterableOrArrayLike<string>, typeMap?: JSONObject) {
+  setOptions(newValue: IterableOrArrayLike<string>, typeMap?: Completer.TypeMap) {
     const values = toArray(newValue || []);
-    const types = typeMap || {};
+    const types = typeMap || { };
+
     if (JSONExt.deepEqual(values, this._options) &&
         JSONExt.deepEqual(types, this._typeMap)) {
       return;
@@ -231,7 +239,7 @@ class CompleterModel implements Completer.IModel {
       this._typeMap = {};
       this._orderedTypes = [];
     }
-    this._stateChanged.emit(void 0);
+    this._stateChanged.emit(undefined);
   }
 
   /**
@@ -264,7 +272,8 @@ class CompleterModel implements Completer.IModel {
       return;
     }
 
-    let { cursor, current } = this;
+    const { cursor, current } = this;
+
     if (!cursor || !current) {
       return;
     }
@@ -275,6 +284,7 @@ class CompleterModel implements Completer.IModel {
     const originalLine = original.text.split('\n')[original.line];
     const currentLine = current.text.split('\n')[current.line];
     const inputDelta = currentLine.length - originalLine.length;
+
     if (column > original.column + cursorDelta + inputDelta) {
       this.reset(true);
       return;
@@ -285,8 +295,10 @@ class CompleterModel implements Completer.IModel {
    * Handle a text change.
    */
   handleTextChange(change: Completer.ITextState): void {
+    const original = this._original;
+
     // If there is no active completion, return.
-    if (!this._original) {
+    if (!original) {
       return;
     }
 
@@ -300,13 +312,15 @@ class CompleterModel implements Completer.IModel {
     const { text, column, line } = change;
     const last = text.split('\n')[line][column - 1];
 
-    // If last character entered is not whitespace, update completion.
-    if (last && last.match(/\S/)) {
+    // If last character entered is not whitespace or if the change column is
+    // greater than or equal to the original column, update completion.
+    if ((last && last.match(/\S/)) || change.column >= original.column) {
       this.current = change;
-    } else {
-      // If final character is whitespace, reset completion.
-      this.reset();
+      return;
     }
+
+    // If final character is whitespace, reset completion.
+    this.reset(true);
   }
 
   /**
@@ -317,15 +331,17 @@ class CompleterModel implements Completer.IModel {
    * @returns A patched text change or undefined if original value did not exist.
    */
   createPatch(patch: string): Completer.IPatch | undefined {
-    let original = this._original;
-    let cursor = this._cursor;
+    const original = this._original;
+    const cursor = this._cursor;
 
     if (!original || !cursor) {
       return undefined;
     }
 
-    let prefix = original.text.substring(0, cursor.start);
-    let suffix = original.text.substring(cursor.end);
+    const { start, end } = cursor;
+    const { text } = original;
+    const prefix = text.substring(0, start);
+    const suffix = text.substring(end);
 
     return { offset: (prefix + patch).length, text: prefix + patch + suffix };
   }
@@ -344,7 +360,7 @@ class CompleterModel implements Completer.IModel {
     }
     this._subsetMatch = false;
     this._reset();
-    this._stateChanged.emit(void 0);
+    this._stateChanged.emit(undefined);
   }
 
   /**
@@ -394,7 +410,7 @@ class CompleterModel implements Completer.IModel {
   private _original: Completer.ITextState | null = null;
   private _query = '';
   private _subsetMatch = false;
-  private _typeMap: ReadonlyJSONObject = {};
+  private _typeMap: Completer.TypeMap = { };
   private _orderedTypes: string[] = [];
   private _stateChanged = new Signal<this, void>(this);
 }
@@ -404,6 +420,19 @@ class CompleterModel implements Completer.IModel {
  * A namespace for completer model private data.
  */
 namespace Private {
+  /**
+   * The list of known type annotations of completer matches.
+   */
+  const KNOWN_TYPES = ['function', 'instance', 'class', 'module', 'keyword'];
+
+  /**
+   * The map of known type annotations of completer matches.
+   */
+  const KNOWN_MAP = KNOWN_TYPES.reduce((acc, type) => {
+    acc[type] = null;
+    return acc;
+  }, { } as Completer.TypeMap);
+
   /**
    * A filtered completion menu matching result.
    */
@@ -462,14 +491,13 @@ namespace Private {
    * followed by other types in alphabetical order.
    */
   export
-  function findOrderedTypes(typeMap: ReadonlyJSONObject): string[] {
-    const knownTypes = ['function', 'instance', 'class', 'module', 'keyword'];
-    let allTypes: string[] = Object.keys(typeMap)
-      .map(key => typeMap[key].toString());
-    let newTypes = allTypes
-      .filter(value => knownTypes.indexOf(value) === -1).sort();
+  function findOrderedTypes(typeMap: Completer.TypeMap): string[] {
+    const filtered = Object.keys(typeMap)
+      .map(key => typeMap[key])
+      .filter(value => !(value in KNOWN_MAP))
+      .sort((a, b) => a.localeCompare(b));
 
-    return knownTypes.concat(newTypes);
+    return KNOWN_TYPES.concat(filtered);
   }
 
 }

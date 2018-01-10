@@ -241,6 +241,13 @@ describe('completer/model', () => {
         expect(model.current).to.be(null);
       });
 
+      it('should initially equal the original request', () => {
+        let model = new CompleterModel();
+        let request = makeState('foo');
+        model.original = request;
+        expect(model.current).to.be(request);
+      });
+
       it('should not set if original request is nonexistent', () => {
         let model = new CompleterModel();
         let currentValue = 'foo';
@@ -260,15 +267,12 @@ describe('completer/model', () => {
         let model = new CompleterModel();
         let currentValue = 'foo';
         let newValue = 'foob';
-        let cursor: Completer.ICursorSpan = { start: 0, end: 0 };
         let request = makeState(currentValue);
         let change = makeState(newValue);
         model.original = request;
+        model.cursor = null;
         model.current = change;
-        expect(model.current).to.be(null);
-        model.cursor = cursor;
-        model.current = change;
-        expect(model.current).to.be(change);
+        expect(model.current).to.not.be(change);
       });
 
       it('should reset model if change is shorter than original', () => {
@@ -351,20 +355,21 @@ describe('completer/model', () => {
         (change as any).column = 4;
         model.original = request;
         model.cursor = cursor;
-        expect(model.current).to.be(null);
+        expect(model.current).to.be(request);
         model.handleTextChange(change);
-        expect(model.current).to.be.ok();
+        expect(model.current).to.be(change);
       });
 
-      it('should reset model if last character of change is whitespace', () => {
+      it('should reset if last char is whitespace && column < original', () => {
         let model = new CompleterModel();
         let currentValue = 'foo';
         let newValue = 'foo ';
         let request = makeState(currentValue);
+        (request as any).column = 3;
         let change = makeState(newValue);
-        (change as any).column = 4;
+        (change as any).column = 0;
         model.original = request;
-        expect(model.original).to.be.ok();
+        expect(model.original).to.be(request);
         model.handleTextChange(change);
         expect(model.original).to.be(null);
       });

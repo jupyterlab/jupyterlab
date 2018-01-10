@@ -49,7 +49,7 @@ function createEditorWidget(): CodeEditorWrapper {
 
 
 class CustomRenderer extends Completer.Renderer {
-  createItemNode(item: Completer.IItem, typeMap: Completer.ITypeMap, orderedTypes: string[]): HTMLLIElement {
+  createItemNode(item: Completer.IItem, typeMap: Completer.TypeMap, orderedTypes: string[]): HTMLLIElement {
     let li = super.createItemNode(item, typeMap, orderedTypes);
     li.classList.add(TEST_ITEM_CLASS);
     return li;
@@ -427,7 +427,9 @@ describe('completer/widget', () => {
           let listener = (sender: any, selected: string) => {
             value = selected;
           };
-          model.setOptions(['fo', 'foo', 'foo', 'fooo'], {foo: 'instance', bar: 'function'});
+          model.setOptions(['fo', 'foo', 'foo', 'fooo'], {
+            foo: 'instance', bar: 'function'
+          });
           Widget.attach(anchor, document.body);
 
           let widget = new Completer(options);
@@ -437,7 +439,7 @@ describe('completer/widget', () => {
           MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
           requestAnimationFrame(() => {
             let marked = widget.node.querySelectorAll(`.${ITEM_CLASS} mark`);
-            expect(value).to.be('fo');
+            expect(value).to.be.empty();
             expect(marked).to.have.length(4);
             expect(marked[0].textContent).to.be('fo');
             expect(marked[1].textContent).to.be('fo');
@@ -466,7 +468,10 @@ describe('completer/widget', () => {
           let listener = (sender: any, selected: string) => {
             value = selected;
           };
-          model.setOptions(['foo', 'bar', 'baz'], {foo: 'instance', bar: 'function'});
+          model.setOptions(['foo', 'bar', 'baz'], {
+            foo: 'instance',
+            bar: 'function'
+          });
           model.query = 'b';
           Widget.attach(anchor, document.body);
 
@@ -478,7 +483,7 @@ describe('completer/widget', () => {
 
           let item = widget.node.querySelectorAll(`.${ITEM_CLASS} mark`)[1];
 
-          expect(value).to.be('ba');
+          expect(model.query).to.be('ba');
           simulate(item, 'mousedown');
           expect(value).to.be('baz');
           widget.dispose();
@@ -612,7 +617,9 @@ describe('completer/widget', () => {
           MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
           simulate(document.body, 'scroll');
 
-          requestAnimationFrame(() => {
+          // Because the scroll handling is asynchronous, this test uses a large
+          // timeout (500ms) to guarantee the scroll handling has finished.
+          window.setTimeout(() => {
             let top = parseInt(window.getComputedStyle(widget.node).top, 10);
             let bottom = Math.floor(coords.bottom);
             expect(top + panel.node.scrollTop).to.be(bottom);
@@ -620,7 +627,7 @@ describe('completer/widget', () => {
             code.dispose();
             panel.dispose();
             done();
-          });
+          }, 500);
         });
 
       });

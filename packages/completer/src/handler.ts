@@ -177,6 +177,7 @@ class CompletionHandler implements IDisposable {
     }
 
     const patch = model.createPatch(value);
+
     if (!patch) {
       return;
     }
@@ -206,7 +207,8 @@ class CompletionHandler implements IDisposable {
 
     let editor = this._editor;
     if (editor) {
-      this._makeRequest(editor.getCursorPosition());
+      this._makeRequest(editor.getCursorPosition())
+        .catch(reason => { console.log('Invoke request bailed', reason); });
     }
   }
 
@@ -347,12 +349,12 @@ class CompletionHandler implements IDisposable {
 
     return this._connector.fetch(request).then(reply => {
       if (this.isDisposed) {
-        return;
+        throw new Error('Handler is disposed');
       }
 
       // If a newer completion request has created a pending request, bail.
       if (pending !== this._pending) {
-        return;
+        throw new Error('A newer completion request is pending');
       }
 
       this._onReply(state, reply);
@@ -385,34 +387,36 @@ class CompletionHandler implements IDisposable {
     model.original = state;
 
     // Dedupe the matches.
-    let matches: string[] = [];
+    const matches: string[] = [];
+    const matchSet = new Set(reply.matches || []);
+
     if (reply.matches) {
-      (new Set(reply.matches)).forEach(match => {
-        matches.push(match);
-      });
+      matchSet.forEach(match => { matches.push(match); });
     }
 
-    // Extract the optional typeMap. The current implementation uses
+    // Extract the optional type map. The current implementation uses
     // _jupyter_types_experimental which provide string type names. We make no
     // assumptions about the names of the types, so other kernels can provide
     // their own types.
-    let typeMap: JSONObject = {};
-    if (reply.metadata._jupyter_types_experimental) {
-      let types = (reply.metadata._jupyter_types_experimental as JSONArray);
+    const types = reply.metadata._jupyter_types_experimental as JSONArray;
+    const typeMap: Completer.TypeMap = { };
+
+    if (types) {
       types.forEach((item: JSONObject) => {
         // For some reason the _jupyter_types_experimental list has two entries
         // for each match, with one having a type of "<unknown>". Discard those
         // and use undefined to indicate an unknown type.
-        let text = item.text as string;
-        let type = item.type as string;
-        if (matches.indexOf(text) !== -1 && type !== '<unknown>') {
-          typeMap[text] = item.type;
+        const text = item.text as string;
+        const type = item.type as string;
+
+        if (matchSet.has(text) && type !== '<unknown>') {
+          typeMap[text] = type;
         }
       });
     }
 
     // Update the options, including the type map.
-    model.setOptions(matches, typeMap as Completer.ITypeMap);
+    model.setOptions(matches, typeMap);
 
     // Update the cursor.
     model.cursor = {
