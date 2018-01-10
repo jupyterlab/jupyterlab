@@ -1189,6 +1189,62 @@ describe('notebook/widget', () => {
           expect(selected(widget)).to.eql([2, 3]);
         });
 
+        it('should leave a markdown cell rendered', () => {
+          let code = widget.model.contentFactory.createCodeCell({});
+          let md = widget.model.contentFactory.createMarkdownCell({});
+          widget.model.cells.push(code);
+          widget.model.cells.push(md);
+          let count = widget.widgets.length;
+          let codeChild = widget.widgets[count - 2];
+          let mdChild = widget.widgets[count - 1] as MarkdownCell;
+          widget.select(codeChild);
+          widget.select(mdChild);
+          widget.activeCellIndex = count - 2;
+          expect(mdChild.rendered).to.be(true);
+          simulate(codeChild.editorWidget.node, 'mousedown');
+          simulate(codeChild.editorWidget.node, 'focusin');
+          expect(mdChild.rendered).to.be(true);
+          expect(widget.activeCell).to.be(codeChild);
+          expect(widget.mode).to.be('edit');
+        });
+
+        it('should remove selection and switch to command mode', () => {
+          let code = widget.model.contentFactory.createCodeCell({});
+          let md = widget.model.contentFactory.createMarkdownCell({});
+          widget.model.cells.push(code);
+          widget.model.cells.push(md);
+          let count = widget.widgets.length;
+          let codeChild = widget.widgets[count - 2];
+          let mdChild = widget.widgets[count - 1] as MarkdownCell;
+          widget.select(codeChild);
+          widget.select(mdChild);
+          widget.activeCellIndex = count - 2;
+          simulate(codeChild.editorWidget.node, 'mousedown');
+          simulate(codeChild.editorWidget.node, 'focusin');
+          expect(widget.mode).to.be('edit');
+          simulate(codeChild.editorWidget.node, 'mousedown', { button: 2 });
+          expect(widget.isSelected(mdChild)).to.be(false);
+          expect(widget.mode).to.be('command');
+        });
+
+        it('should have no effect on shift right click', () => {
+          let code = widget.model.contentFactory.createCodeCell({});
+          let md = widget.model.contentFactory.createMarkdownCell({});
+          widget.model.cells.push(code);
+          widget.model.cells.push(md);
+          let count = widget.widgets.length;
+          let codeChild = widget.widgets[count - 2];
+          let mdChild = widget.widgets[count - 1] as MarkdownCell;
+          widget.select(codeChild);
+          widget.select(mdChild);
+          widget.activeCellIndex = count - 2;
+          simulate(codeChild.editorWidget.node, 'mousedown', {
+            shiftKey: true, button: 2
+          });
+          expect(widget.isSelected(mdChild)).to.be(true);
+          expect(widget.mode).to.be('command');
+        });
+
       });
 
       context('dblclick', () => {
@@ -1230,15 +1286,15 @@ describe('notebook/widget', () => {
 
       context('focusout', () => {
 
-        it('should preserve the mode', () => {
+        it('should switch to command mode', () => {
           simulate(widget.node, 'focusin');
           widget.mode = 'edit';
           let other = document.createElement('div');
           simulate(widget.node, 'focusout', { relatedTarget: other });
-          expect(widget.mode).to.be('edit');
+          expect(widget.mode).to.be('command');
           MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
-          expect(widget.mode).to.be('edit');
-          expect(widget.activeCell.editor.hasFocus()).to.be(true);
+          expect(widget.mode).to.be('command');
+          expect(widget.activeCell.editor.hasFocus()).to.be(false);
         });
 
         it('should set command mode', () => {

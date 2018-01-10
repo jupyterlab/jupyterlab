@@ -209,7 +209,7 @@ const notebooks: JupyterLabPlugin<void> = {
 
     app.contextMenu.addItem({
       command: CommandIDs.open,
-      selector: '.jp-Notebook.jp-mod-focus'
+      selector: '.jp-Notebook'
     });
   }
 };

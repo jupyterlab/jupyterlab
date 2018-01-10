@@ -554,84 +554,84 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
   // Cell context menu groups
   app.contextMenu.addItem({
     type: 'separator',
-    selector: '.jp-Notebook.jp-mod-focus  .jp-Cell',
+    selector: '.jp-Notebook .jp-Cell',
     rank: 0
   });
   app.contextMenu.addItem({
     command: CommandIDs.cut,
-    selector: '.jp-Notebook.jp-mod-focus .jp-Cell',
+    selector: '.jp-Notebook .jp-Cell',
     rank: 1
   });
   app.contextMenu.addItem({
     command: CommandIDs.copy,
-    selector: '.jp-Notebook.jp-mod-focus .jp-Cell',
+    selector: '.jp-Notebook .jp-Cell',
     rank: 2
   });
   app.contextMenu.addItem({
     command: CommandIDs.pasteBelow,
-    selector: '.jp-Notebook.jp-mod-focus .jp-Cell',
+    selector: '.jp-Notebook .jp-Cell',
     rank: 3
   });
   app.contextMenu.addItem({
     type: 'separator',
-    selector: '.jp-Notebook.jp-mod-focus  .jp-Cell',
+    selector: '.jp-Notebook .jp-Cell',
     rank: 4
   });
   app.contextMenu.addItem({
     command: CommandIDs.deleteCell,
-    selector: '.jp-Notebook.jp-mod-focus .jp-Cell',
+    selector: '.jp-Notebook .jp-Cell',
     rank: 5
   });
   app.contextMenu.addItem({
     type: 'separator',
-    selector: '.jp-Notebook.jp-mod-focus .jp-Cell',
+    selector: '.jp-Notebook .jp-Cell',
     rank: 6
   });
   app.contextMenu.addItem({
     command: CommandIDs.split,
-    selector: '.jp-Notebook.jp-mod-focus .jp-Cell',
+    selector: '.jp-Notebook .jp-Cell',
     rank: 7
   });
 
   // CodeCell context menu groups
   app.contextMenu.addItem({
     type: 'separator',
-    selector: '.jp-Notebook.jp-mod-focus .jp-CodeCell',
+    selector: '.jp-Notebook .jp-CodeCell',
     rank: 8
   });
   app.contextMenu.addItem({
     command: CommandIDs.clearOutputs,
-    selector: '.jp-Notebook.jp-mod-focus .jp-CodeCell',
+    selector: '.jp-Notebook .jp-CodeCell',
     rank: 9
   });
   app.contextMenu.addItem({
     command: CommandIDs.clearAllOutputs,
-    selector: '.jp-Notebook.jp-mod-focus .jp-CodeCell',
+    selector: '.jp-Notebook .jp-CodeCell',
     rank: 10
   });
   app.contextMenu.addItem({
     type: 'separator',
-    selector: '.jp-Notebook.jp-mod-focus .jp-CodeCell',
+    selector: '.jp-Notebook .jp-CodeCell',
     rank: 11
   });
   app.contextMenu.addItem({
     command: CommandIDs.enableOutputScrolling,
-    selector: '.jp-Notebook.jp-mod-focus .jp-CodeCell',
+    selector: '.jp-Notebook .jp-CodeCell',
     rank: 12
   });
   app.contextMenu.addItem({
     command: CommandIDs.disableOutputScrolling,
-    selector: '.jp-Notebook.jp-mod-focus .jp-CodeCell',
+    selector: '.jp-Notebook .jp-CodeCell',
     rank: 13
   });
   app.contextMenu.addItem({
     type: 'separator',
-    selector: '.jp-Notebook.jp-mod-focus .jp-CodeCell',
+    selector: '.jp-Notebook .jp-CodeCell',
     rank: 14
   });
   app.contextMenu.addItem({
     command: CommandIDs.createOutputView,
-    selector: '.jp-Notebook.jp-mod-focus .jp-CodeCell',
+    selector: '.jp-Notebook .jp-CodeCell',
     rank: 15
   });
 
@@ -639,27 +639,27 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
   // Notebook context menu groups
   app.contextMenu.addItem({
     type: 'separator',
-    selector: '.jp-Notebook.jp-mod-focus',
+    selector: '.jp-Notebook',
     rank: 0
   });
   app.contextMenu.addItem({
     command: CommandIDs.undoCellAction,
-    selector: '.jp-Notebook.jp-mod-focus',
+    selector: '.jp-Notebook',
     rank: 1
   });
   app.contextMenu.addItem({
     command: CommandIDs.redoCellAction,
-    selector: '.jp-Notebook.jp-mod-focus',
+    selector: '.jp-Notebook',
     rank: 2
   });
   app.contextMenu.addItem({
     type: 'separator',
-    selector: '.jp-Notebook.jp-mod-focus',
+    selector: '.jp-Notebook',
     rank: 3
   });
   app.contextMenu.addItem({
     command: CommandIDs.createConsole,
-    selector: '.jp-Notebook.jp-mod-focus',
+    selector: '.jp-Notebook',
     rank: 4
   });
 
@@ -1050,13 +1050,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.splitCell(current.notebook);
       }
     },
-    isEnabled: () => {
-      // Special case this `isEnabled` so that it is only available
-      // in edit mode, when it is clearer where the cursor is placed.
-      const current = tracker.currentWidget;
-      return current !== null && current === app.shell.currentWidget &&
-             current.notebook.mode === 'edit';
-    }
+    isEnabled
   });
   commands.addCommand(CommandIDs.merge, {
     label: 'Merge Selected Cells',

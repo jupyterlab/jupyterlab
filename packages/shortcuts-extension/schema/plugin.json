@@ -587,7 +587,7 @@
       "properties": {
         "command": { "default": "tooltip:dismiss" },
         "keys": { "default": ["Escape"] },
-        "selector": { "default": "body.jp-mod-tooltip .jp-CodeConsole" }
+        "selector": { "default": "body.jp-mod-tooltip .jp-CodeConsole-promptCell" }
       },
       "type": "object"
     },
