@@ -617,10 +617,8 @@ describe('completer/widget', () => {
           MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
           simulate(document.body, 'scroll');
 
-          // Because the scroll handling is asynchronous and debounced at an
-          // interval defined in the module: `SCROLL_DEBOUNCE_INTERVAL`,
-          // this test uses a large timeout (500ms) to guarantee the scroll
-          // handling has finished.
+          // Because the scroll handling is asynchronous, this test uses a large
+          // timeout (500ms) to guarantee the scroll handling has finished.
           window.setTimeout(() => {
             let top = parseInt(window.getComputedStyle(widget.node).top, 10);
             let bottom = Math.floor(coords.bottom);
