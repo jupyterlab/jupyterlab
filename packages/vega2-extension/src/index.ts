@@ -154,7 +154,7 @@ const extension: IRenderMime.IExtension = {
     name: 'vega',
     displayName: 'Vega File',
     fileFormat: 'text',
-    extensions: ['.vg', '.vg.json'],
+    extensions: ['.vg', '.vg.json', '.vega'],
     iconClass: 'jp-MaterialIcon jp-VegaIcon',
   },
   {
@@ -162,7 +162,7 @@ const extension: IRenderMime.IExtension = {
     name: 'vega-lite',
     displayName: 'Vega-Lite File',
     fileFormat: 'text',
-    extensions: ['.vl', '.vl.json'],
+    extensions: ['.vl', '.vl.json', '.vegalite'],
     iconClass: 'jp-MaterialIcon jp-VegaIcon',
   }]
 };
