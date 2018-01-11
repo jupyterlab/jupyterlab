@@ -67,7 +67,7 @@
     "@jupyterlab/tooltip": "^0.15.0",
     "@jupyterlab/tooltip-extension": "^0.15.0",
     "@jupyterlab/vdom-extension": "^0.15.0",
-    "@jupyterlab/vega2-extension": "^0.15.0",
+    "@jupyterlab/vega2-extension": "^0.15.1",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/application": "^1.5.0",
     "@phosphor/commands": "^1.4.0",
