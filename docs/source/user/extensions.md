@@ -5,11 +5,10 @@ provide new file viewer types, launcher activities, and output renderers, among
 many other things. JupyterLab extensions are [npm](https://www.npmjs.com/) packages
 (the standard package format in Javascript development).
 
-## Installing Node.js
+In order to install JupyterLab extensions you need to have Node.js version 4+
+installed.
 
-Installing JupyterLab extensions requires Node.js version 4+.
-
-If you use ``conda``, you can get them with:
+If you use ``conda``, you can get it with:
 
 ```bash
 conda -c conda-forge install nodejs
@@ -98,8 +97,10 @@ If not specified, it will default to `<sys-prefix>/share/jupyter/lab`, where
 environment.  You can query the current application path by running `jupyter
 lab path`.
 
-To create the app directory without installing any extensions, run `jupyter lab
-build`. By default the `install` command already builds the application,
+### JupyterLab Build Process
+
+To rebuild the app directory, run `jupyter lab build`.
+By default the `jupyter lab install` command already builds the application,
 so you typically do not need to call `build` directly.
 
 Building consists of:
@@ -110,10 +111,35 @@ Building consists of:
 - Bundling the assets
 - Copying the assets to the `static` directory
 
+### JupyterLab Application Directory
+
+The JupyterLab application directory contains the subdirectories
+`extensions`, `schemas`, `settings`, `staging`, `static`, and `themes`.
+
+#### `extensions`
+
+The `extensions` folder has the packed tarballs for each of the
+installed extensions for the app.  If the application directory is not the same
+as the `sys-prefix` directory, the extensions installed in the `sys-prefix`
+directory will be used in the app directory.  If an extension is installed in
+the app directory that exists in the `sys-prefix` directory, it will shadow the
+`sys-prefix` version.  Uninstalling an extension will first uninstall the
+shadowed extension, and then attempt to uninstall the `sys-prefix` version if
+called again.  If the `sys-prefix` version cannot be uninstalled, its plugins
+can still be ignored using `ignoredPackages` metadata in `settings`.
+
+#### `schemas`
+
+The `schemas` directory contains [JSON Schemas](http://json-schema.org/) that
+describe the settings used by individual extensions. Users may edit these
+settings using the JupyterLab Settings Editor.
+
+#### `settings`
+
 The `settings` directory contains `page_config.json` and `build_config.json`
 files.
 
-### `page_config.json`
+##### `page_config.json`
 
 The `page_config.json` data is used to provide config data to the application
 environment.
@@ -145,7 +171,7 @@ are performed against the patterns in `disabledExtensions` and
   `"disabledExtensions": ["^@jupyterlab/apputils-extension:set.*$"]`), then that
   specific plugin is disabled (or deferred).
 
-### `build_config.json`
+##### `build_config.json`
 
 The `build_config.json` file is used to track the local folders that have been installed
 using `jupyter labextension install <folder>`, as well as core extensions that have
@@ -163,21 +189,17 @@ $ cat settings/build_config.json
 }
 ```
 
-The other folders in the app directory are: `extensions`, `static`, and
-`staging`.  The `extensions` folder has the packed tarballs for each of the
-installed extensions for the app.  If the application directory is not the same
-as the `sys-prefix` directory, the extensions installed in the `sys-prefix`
-directory will be used in the app directory.  If an extension is installed in
-the app directory that exists in the `sys-prefix` directory, it will shadow the
-`sys-prefix` version.  Uninstalling an extension will first uninstall the
-shadowed extension, and then attempt to uninstall the `sys-prefix` version if
-called again.  If the `sys-prefix` version cannot be uninstalled, its plugins
-can still be ignored using `ignoredPackages` metadata in `settings`.
+#### `staging` and `static`
 
-The `static` folder contains the assets that will be loaded by the JuptyerLab
+The `static` directory contains the assets that will be loaded by the JuptyerLab
 application.  The `staging` folder is used to create the build and then populate
 the `static` folder.
 
 Running `jupyter lab` will attempt to run the `static` assets in the application
 folder if they exist.  You can run `jupyter lab --core-mode` to load the core
 JupyterLab application (i.e., the application without any extensions) instead.
+
+#### `themes`
+
+The `themes` directory contains assets (such as CSS and icons)
+for JupyterLab theme extensions.
