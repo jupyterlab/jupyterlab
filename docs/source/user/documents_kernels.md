@@ -1,5 +1,5 @@
 
-## Kernel backed documents
+## Documents and kernels
 
 In the Jupyter architecture, kernels are separate processes started by the
 server that run your code in different programming languages and environments.
