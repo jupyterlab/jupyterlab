@@ -1113,7 +1113,7 @@ namespace DocumentRegistry {
       name: 'json',
       displayName: 'JSON File',
       extensions: ['.json'],
-      mimeTypes: ['application/json', 'application/x-json'],
+      mimeTypes: ['application/json'],
       iconClass: 'jp-MaterialIcon jp-JSONIcon'
     },
     {
