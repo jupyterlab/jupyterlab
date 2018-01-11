@@ -1191,21 +1191,6 @@ namespace DocumentRegistry {
       iconClass: 'jp-MaterialIcon jp-ImageIcon',
       fileFormat: 'base64'
     },
-    {
-      name: 'xbm',
-      displayName: 'Image',
-      mimeTypes: ['image/xbm'],
-      extensions: ['.xbm'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
-      fileFormat: 'base64'
-    },
-    {
-      name: 'raw',
-      displayName: 'Image',
-      extensions: ['.raw'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
-      fileFormat: 'base64'
-    }
   ];
 }
 
