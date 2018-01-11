@@ -4,23 +4,24 @@
 ## Overview
 
 When working with code and data, you will encounter data and files in a wide
-variety of formats. JupyterLab provides a unified architecture for working with
-data. This model applies whether the data is in a file, or is provided by a
-Kernel as output in a notebook or code console.
+variety of formats. JupyterLab provides a unified architecture for viewing and editing
+data. This model applies whether the data is in a file or is provided by a
+kernel as rich output in a notebook or code console.
 
 For files, the data format is detected by the extension of the file. A single
 file extension may have multiple editors or viewers registered. For example a
-Markdown file (`.md`) can be edited in the File Editor, or rendered inline.
+Markdown file (`.md`) can be edited in the file editor or rendered and displayed
+as HTML.
 
-You can access different editors and viewers for a file, by right-clicking on
-the filename in the File Browser and using the "Open With..." submenu:
+You can open different editors and viewers for a file by right-clicking on
+the filename in the file browser and using the "Open With..." submenu:
 
 [screenshot]
 
-To use these different data formats as output in the Notebook or Code Console,
+To use these different data formats as output in a notebook or code console,
 you can use the relevant display API for the kernel you are using. For example,
 the IPython kernel provides a `display` function that takes a `dict` of keys
-(MIME types) and value (MIME data):
+(MIME types) and values (MIME data):
 
 ```python
 from IPython.display import display
@@ -32,7 +33,7 @@ console:
 
 [screenshot]
 
-Other Jupyter Kernels offer similar APIs.
+Other Jupyter kernels offer similar APIs.
 
 ## Markdown
 
@@ -47,23 +48,23 @@ Markdown documents can be edited as text files or rendered inline:
 [animation]
 
 The markdown syntax supported in this mode is the same as that in the Jupyter
-Notebook (LaTeX equations work). As seen in the animation, edits to the markdown
-source are immediately reflected in the rendered version:
+Notebook (LaTeX equations work). As seen in the animation, edits to the Markdown
+source are immediately reflected in the rendered version.
 
 ## Images
 
 * File format: `.png`, `.jpeg`, `.gif`
 * MIME type: `image/png`, `image/jpeg`, `image/gif`
 
-JupyterLab supports image data as files and output in the above formats.
+JupyterLab supports image data as files and output in the above formats. In the image file viewer, you can use keyboard shortcuts such as `+` and `-` to zoom the image and `0` to reset the zoom level.
 
 ## HTML
 
-* File format: edit as text file
+* File format: `.html`
 * MIME type: `text/html`
 
 JupyterLab supports rendered HTML in output. HTML files can be edited as text
-files in the File Editor.
+files in the file editor.
 
 ## SVG
 
@@ -71,20 +72,20 @@ files in the File Editor.
 * MIME type: `image/svg+xml`
 
 JupyterLab will render Scalable Vector Graphics (SVG) in files and output. SVG
-files can slso be edited as text files in the File Editor.
+files can slso be edited as text files in the file editor.
 
 ## LaTeX
 
-* File format: edit as text file
+* File format: `.tex`
 * MIME type: `text/latex`
 
 JupyterLab will render LaTeX questions in output, and LaTeX files (`.tex`) can
-be edited as text files in the File Editor.
+be edited as text files in the file editor.
 
 ## JSON
 
 * File format: `.json`
-* MIME type: `application+json`
+* MIME type: `application/binary+json`
 
 JavaScript Object Notation (JSON) files are common in data science.
 
@@ -92,7 +93,7 @@ The default viewer for JSON files is a searchable tree view:
 
 [animation]
 
-To edit the JSON as a text file, right-click on the file in the File Browser and
+To edit the JSON as a text file, right-click on the file in the file browser and
 select the “Editor” item in the “Open With…” submenu:
 
 [animation]
@@ -102,16 +103,15 @@ select the “Editor” item in the “Open With…” submenu:
 * File format: `.csv`
 * MIME type: None
 
-Files with rows of Comma Separate Values (with a `.csv` extension) are a common
+Files with rows of Comma-Separated Values (with a `.csv` extension) are a common
 format for tabular data.
 
 The default viewer for CSV files in JupyterLab is a high performance data grid
-viewer. To view a CSV file in the interactive Data Grid, double-click on the
-file in the File Browser:
+viewer:
 
 [animation]
 
-To edit a CSV file as a text file, right-click on the file in the File Browser
+To edit a CSV file as a text file, right-click on the file in the file browser
 and select the “Editor” item in the “Open With…” submenu:
 
 [animation]
@@ -121,9 +121,9 @@ and select the “Editor” item in the “Open With…” submenu:
 * File format: `.pdf`
 * MIME type: `application/pdf`
 
-PDF files (`.pdf` extension) are a common and standard file format for
+PDF files are a common standard file format for
 documents. To view a PDF file in JupyterLab, double-click on the file in the
-File Browser:
+file browser:
 
 [animation]
 
@@ -141,22 +141,22 @@ Vega-Lite:
 * MIME type: `application/vnd.vegalite.v1+json`
 
 Vega and Vega-Lite are declarative visualization grammars that allow
-visualizations to be encoded as JSON data. Fro more information see the
+visualizations to be encoded as JSON data. For more information, see the
 documentation of Vega or Vega-Lite. JupyterLab has built-in rendering support
 for Vega 2.x and Vega-Lite 1.x data. This support works for both files and
 output in the Notebook and Code Console.
 
 Vega-Lite 1.x files, with a `.vl` or `.vl.json` file extension, can be opened by
-double-clicking he file in the File Browser:
+double-clicking the file in the File Browser:
 
 [animation]
 
-The files can also be opened in the JSON viewer or File Editor through the “Open
-With…” submenu in the File Browser content menu:
+The files can also be opened in the JSON viewer or file editor through the “Open
+With…” submenu in the file browser content menu:
 
 [animation]
 
-As with other files in JupyterLab multiple views of a single file remain
+As with other files in JupyterLab, multiple views of a single file remain
 synchronized, allowing you to interactively edit and render Vega-Lite/Vega
 visualizations:
 
@@ -165,7 +165,7 @@ visualizations:
 The same workflow also works for Vega 2.x files, with a `.vg` or `.vg.json` file
 extension.
 
-Output support for Vega/Vega-Lite in the Notebook or Code Console is provided
+Output support for Vega/Vega-Lite in a notebook or code console is provided
 through third party libraries such as Altair (Python), the vegalite R package,
 or Vegas (Scala/Spark).
 
