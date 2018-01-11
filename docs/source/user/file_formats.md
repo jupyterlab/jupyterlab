@@ -9,7 +9,7 @@ whole filename if there is no extension). A single file extension may have
 multiple editors or viewers registered. For example a Markdown file (`.md`) can
 be edited in the file editor or rendered and displayed as HTML. You can open
 different editors and viewers for a file by right-clicking on the filename in
-the file browser and using the "Open With..." submenu:
+the file browser and using the “Open With” submenu:
 
 [screenshot]
 
@@ -61,7 +61,11 @@ edits to the Markdown source are immediately reflected in the rendered version.
 * File extensions: `.bmp`, `.gif`, `.jpeg`, `.jpg`, `.png`, `.svg`
 * MIME types: `image/bmp`, `image/gif`, `image/jpeg`, `image/png`, `image/svg+xml`
 
-JupyterLab supports image data in cell output and as files in the above formats. In the image file viewer, you can use keyboard shortcuts such as `+` and `-` to zoom the image and `0` to reset the zoom level. To edit an SVG image as a text file, right-click on the SVG filename in the file browser and select the “Editor” item in the “Open With…” submenu:
+JupyterLab supports image data in cell output and as files in the above formats.
+In the image file viewer, you can use keyboard shortcuts such as `+` and `-` to
+zoom the image and `0` to reset the zoom level. To edit an SVG image as a text
+file, right-click on the SVG filename in the file browser and select the
+“Editor” item in the “Open With” submenu:
 
 [animation]
 
@@ -78,7 +82,7 @@ semicolon-separated values):
 [animation]
 
 To edit a CSV file as a text file, right-click on the file in the file browser
-and select the “Editor” item in the “Open With…” submenu:
+and select the “Editor” item in the “Open With” submenu:
 
 [animation]
 
@@ -92,7 +96,7 @@ JavaScript Object Notation (JSON) files are common in data science. JupyterLab s
 [animation showing both rendering JSON as cell output and viewing a JSON file]
 
 To edit the JSON as a text file, right-click on the filename in the file browser
-and select the “Editor” item in the “Open With…” submenu:
+and select the “Editor” item in the “Open With” submenu:
 
 [animation]
 
