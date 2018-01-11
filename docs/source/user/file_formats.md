@@ -133,12 +133,12 @@ JupyterLab, double-click on the file in the file browser:
 
 Vega:
 
-* File extension: `.vg`, `.vg.json`
+* File extensions: `.vg`, `.vg.json`
 * MIME type: `application/vnd.vega.v2+json`
 
 Vega-Lite:
 
-* File extension: `.vl`, `.vl.json`
+* File extensions: `.vl`, `.vl.json`
 * MIME type: `application/vnd.vegalite.v1+json`
 
 Vega and Vega-Lite are declarative visualization grammars that allow
@@ -176,7 +176,7 @@ A JupyterLab extension that supports Vega 3.x and Vega-Lite 2.x can be found
 
 ## Virtual DOM
 
-* File extension: `.vdom`, `.json`
+* File extensions: `.vdom`, `.json`
 * MIME type: `application/vdom.v1+json`
 
 Virtual DOM libraries such as [react.js](https://reactjs.org/) have greatly
