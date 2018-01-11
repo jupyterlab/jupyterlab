@@ -58,9 +58,17 @@ You can also create new documents or activities using the File menu:
 
 [screenshot]
 
-The current working directory of a new activity or document will be the directory listed in the file browser (except for a terminal, which always starts in the root directory of the file browser):
+The current working directory of a new activity or document will be the
+directory listed in the file browser (except for a terminal, which always starts
+in the root directory of the file browser):
 
 [animation]
+
+A new file is created with a default name. Rename a file by right-clicking on
+its name in the file browser and selecting “Rename” from the context menu:
+
+[animation]
+
 
 ## Uploading and downloading
 
