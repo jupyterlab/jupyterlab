@@ -67,7 +67,10 @@ install/uninstall step. Once you are ready to rebuild, you can run the command:
 jupyter lab build
 ```
 
-You can disable an extension (without unistalilng it) by running the command:
+## Disabling Extensions
+
+You may want to disable specific JupyterLab extensions without rebuilding
+the application. You can disable an extension by running the command:
 
 ```
 jupyter labextension disable <bar>
