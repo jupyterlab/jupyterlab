@@ -6,7 +6,7 @@ provided by a kernel as rich cell output in a notebook or code console.
 
 For files, the data format is detected by the extension of the file (or the
 whole filename if there is no extension). A single file extension may have
-multiple editors or viewers registered. For example a Markdown file (`.md`) can
+multiple editors or viewers registered. For example, a Markdown file (`.md`) can
 be edited in the file editor or rendered and displayed as HTML. You can open
 different editors and viewers for a file by right-clicking on the filename in
 the file browser and using the “Open With” submenu:
