@@ -93,13 +93,13 @@ environment.  You can query the current application path by running `jupyter
 lab path`.
 
 To create the app directory without installing any extensions, run `jupyter lab
-build`. By default, the `install` and `link` commands already run the build,
+build`. By default the `install` command already builds the application,
 so you typically do not need to call `build` directly.
 
 Building consists of:
 
 - Populating the `staging/` directory using template files
-- Handling any linked packages (see `jupyter labextension link`)
+- Handling any locally installed packages
 - Ensuring all installed assets are available
 - Bundling the assets
 - Copying the assets to the `static` directory
@@ -141,8 +141,8 @@ are performed against the patterns in `disabledExtensions` and
 
 ### `build_config.json`
 
-The `build_config.json` file is used to track the folders that have been added
-using `jupyter labextension link <folder>`, as well as core extensions that have
+The `build_config.json` file is used to track the local folders that have been installed
+using `jupyter labextension install <folder>`, as well as core extensions that have
 been explicitly uninstalled.  e.g.
 
 ```bash
@@ -151,7 +151,7 @@ $ cat settings/build_config.json
     "uninstalled_core_extensions": [
         "@jupyterlab/markdownwidget-extension"
     ],
-    "linked_packages": {
+    "local_extensions": {
         "@jupyterlab/python-tests": "/path/to/my/extension"
     }
 }
