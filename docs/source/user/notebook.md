@@ -10,7 +10,7 @@ rich output:
 **Jupyter Notebook (.ipynb files) are fully supported in JupyterLab.**
 Furthermore, the [notebook document
 format](http://nbformat.readthedocs.io/en/latest/) used in JupyterLab is the
-same as in the classic notebook. Your existing notebooks should work fine in
+same as in the classic notebook. Your existing notebooks should open correctly in
 JupyterLab. If they don’t, please open an issue on our [GitHub
 issues](https://github.com/jupyterlab/jupyterlab/issues) page.
 

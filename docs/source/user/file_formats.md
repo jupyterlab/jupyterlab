@@ -4,11 +4,12 @@ JupyterLab provides a unified architecture for viewing and editing data in a
 wide variety of formats. This model applies whether the data is in a file or is
 provided by a kernel as rich cell output in a notebook or code console.
 
-For files, the data format is detected by the extension of the file. A single
-file extension may have multiple editors or viewers registered. For example a
-Markdown file (`.md`) can be edited in the file editor or rendered and displayed
-as HTML. You can open different editors and viewers for a file by right-clicking
-on the filename in the file browser and using the "Open With..." submenu:
+For files, the data format is detected by the extension of the file (or the
+whole filename if there is no extension). A single file extension may have
+multiple editors or viewers registered. For example a Markdown file (`.md`) can
+be edited in the file editor or rendered and displayed as HTML. You can open
+different editors and viewers for a file by right-clicking on the filename in
+the file browser and using the "Open With..." submenu:
 
 [screenshot]
 
@@ -69,8 +70,10 @@ JupyterLab supports image data in cell output and as files in the above formats.
 * File extension: `.csv`
 * MIME type: None
 
-Files with rows of comma-separated values (CSV files) are a common
-format for tabular data. The default viewer for CSV files in JupyterLab is a high-performance data grid viewer:
+Files with rows of comma-separated values (CSV files) are a common format for
+tabular data. The default viewer for CSV files in JupyterLab is a
+high-performance data grid viewer (which can also handle tab- and
+semicolon-separated values):
 
 [animation]
 
@@ -105,7 +108,7 @@ JupyterLab supports rendering HTML in cell output and editing HTML files as text
 * File extension: `.tex`
 * MIME type: `text/latex`
 
-JupyterLab supports rendering LaTeX in cell output and editing LaTeX files as text in the file editor.
+JupyterLab supports rendering LaTeX equations in cell output and editing LaTeX files as text in the file editor.
 
 
 ## PDF
