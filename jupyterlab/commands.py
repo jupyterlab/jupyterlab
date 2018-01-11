@@ -19,12 +19,14 @@ import site
 import sys
 import tarfile
 from threading import Event
+from urllib.request import Request, urlopen, urljoin
+from urllib.error import HTTPError
 
 from ipython_genutils.tempdir import TemporaryDirectory
 from jupyter_core.paths import jupyter_config_path
 from notebook.nbextensions import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 
-from .semver import Range, gte, lt, lte, gt
+from .semver import Range, gte, lt, lte, gt, make_semver
 from .jlpmapp import YARN_PATH, HERE, which
 from .process import Process, WatchHelper
 
@@ -315,6 +317,8 @@ class _AppHandler(object):
         self.logger = logger or logging.getLogger('jupyterlab')
         self.info = self._get_app_info()
         self.kill_event = kill_event or Event()
+        # TODO: Make this configurable
+        self.registry = 'https://registry.npmjs.org'
 
     def install_extension(self, extension, existing=None):
         """Install an extension package into JupyterLab.
@@ -1100,6 +1104,19 @@ class _AppHandler(object):
             msg = _format_compatibility_errors(
                 data['name'], data['version'], errors
             )
+            # Check for compatible version unless:
+            # - A specific version was requested (@ in name,
+            #   but after first char to allow for scope marker).
+            # - Package is locally installed.
+            if '@' not in extension[1:] and not info['is_dir']:
+                self.logger.warning('Incompatible extension:\n%s', msg)
+                name = info['name']
+                version = self._latest_compatible_package_version(name)
+                if version and name:
+                    self.logger.warning('Found compatible version: %s', version)
+                    return self._install_extension(
+                        '%s@%s' % (name, version), tempdir)
+
             raise ValueError(msg)
 
         # Move the file to the app directory.
@@ -1140,6 +1157,43 @@ class _AppHandler(object):
         info['version'] = info['data']['version']
 
         return info
+
+    def _fetch_package_metadata(self, name):
+        """Fetch the metadata for a package from the npm registry"""
+        req = Request(
+            urljoin(self.registry, name),
+            method='GET',
+            headers={
+                'Accept': ('application/vnd.npm.install-v1+json;'
+                          ' q=1.0, application/json; q=0.8, */*')
+            }
+        )
+        try:
+            with urlopen(req) as response:
+                return json.load(response)
+        except HTTPError as exc:
+            self.logger.warning(
+                'Failed to fetch package metadata for %r: %r',
+                name, exc)
+
+    def _latest_compatible_package_version(self, name):
+        """Get the latest compatible version of a package"""
+        core_data = self.info['core_data']
+        metadata = self._fetch_package_metadata(name)
+        versions = metadata.get('versions', [])
+
+        # Sort pre-release first, as we will reverse the sort:
+        def sort_key(key_value):
+            return _semver_key(key_value[0], prerelease_first=True)
+
+        for version, data in sorted(versions.items(),
+                                    key=sort_key,
+                                    reverse=True):
+            print(version)
+            deps = data.get('dependencies', [])
+            errors = _validate_compatibility(name, deps, core_data)
+            if not errors:
+                return version
 
     def _run(self, cmd, **kwargs):
         """Run the command using our logger and abort callback.
@@ -1377,6 +1431,47 @@ def _get_core_extensions():
     """
     data = _get_core_data()['jupyterlab']
     return list(data['extensions']) + list(data['mimeExtensions'])
+
+
+def _semver_prerelease_key(prerelease):
+    """Sort key for prereleases.
+
+    Precedence for two pre-release versions with the same
+    major, minor, and patch version MUST be determined by
+    comparing each dot separated identifier from left to
+    right until a difference is found as follows:
+    identifiers consisting of only digits are compare
+    numerically and identifiers with letters or hyphens
+    are compared lexically in ASCII sort order. Numeric
+    identifiers always have lower precedence than non-
+    numeric identifiers. A larger set of pre-release
+    fields has a higher precedence than a smaller set,
+    if all of the preceding identifiers are equal.
+    """
+    for entry in prerelease:
+        if isinstance(entry, int):
+            # Assure numerics always sort before string
+            yield ('', entry)
+        else:
+            # Use ASCII compare:
+            yield (entry,)
+
+
+def _semver_key(version, prerelease_first=False):
+    v = make_semver(version, True)
+    if prerelease_first:
+        key = (0,) if v.prerelease else (1,)
+    else:
+        key = ()
+    key = key + (v.major, v.minor, v.patch)
+    if not prerelease_first:
+        #  NOT having a prerelease is > having one
+        key = key + (0,) if v.prerelease else (1,)
+    if v.prerelease:
+        key = key + tuple(_prerelease_key(
+            v.prerelease))
+
+    return key
 
 
 if __name__ == '__main__':

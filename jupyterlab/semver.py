@@ -552,13 +552,32 @@ def rcompare(a, b, loose):
     return compare(b, a, loose)
 
 
+def make_key_function(loose):
+    def key_function(version):
+        v = make_semver(version, loose)
+        key = (v.major, v.minor, v.patch)
+        if v.prerelease:
+            key = key + tuple(v.prerelease)
+        else:
+            #  NOT having a prerelease is > having one
+            key = key + (float('inf'),)
+
+        return key
+    return key_function
+
+loose_key_function = make_key_function(True)
+full_key_function = make_key_function(True)
+
+
 def sort(list, loose):
-    list.sort(lambda a, b: compare(a, b, loose))
+    keyf = loose_key_function if loose else full_key_function
+    list.sort(key=keyf)
     return list
 
 
 def rsort(list, loose):
-    list.sort(lambda a, b: rcompare(a, b, loose))
+    keyf = loose_key_function if loose else full_key_function
+    list.sort(key=keyf, reverse=True)
     return list
 
 
