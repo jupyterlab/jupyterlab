@@ -28,7 +28,7 @@ const htmlRendererFactory: IRenderMime.IRendererFactory = {
 export
 const imageRendererFactory: IRenderMime.IRendererFactory = {
   safe: true,
-  mimeTypes: ['image/png', 'image/jpeg', 'image/gif'],
+  mimeTypes: ['image/bmp', 'image/png', 'image/jpeg', 'image/gif'],
   defaultRank: 90,
   createRenderer: options => new widgets.RenderedImage(options)
 };
