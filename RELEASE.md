@@ -65,6 +65,7 @@ xckd repo
 - Run `jlpm integrity` to update the `dev_mode` version
 - Commit and push the version update to master
 - Release the other repos as appropriate
+- Update version for binder (see below)
 
 ### Other repos to update
 
@@ -89,17 +90,19 @@ git checkout --orphan name-of-branch
 git rm -rf .
 git clean -dfx
 cookiecutter path-to-local-extension-cookiecutter-ts
-# Fill in the values from the previous branch package.json
-cp -r jupyterlab_xkcd .
+# Fill in the values from the previous branch package.json initial commit
+cp -r jupyterlab_xkcd/ .
 rm -rf jupyterlab_xkcd
 ```
 
 - Create a new PR in JupyterLab.
 - Run through the tutorial in the PR, making commits and updating
 the tutorial as appropriate.
+- Replace the tag references in the tutorial with the new branch number,
+e.g. replace `0.28-` with `0.29-`.
 - Prefix the new tags with the branch name, e.g. `0.28-01-show-a-panel`
-- For the publish section of the readme, use the `LICENSE` and `README`
-files from the previous branch, as well as the `package.json` fields up to
+- For the publish section of the readme, use the `README`
+file from the previous branch, as well as the `package.json` fields up to
 `license`.
 - Push the branch and set it as the default branch for the tutorial repo.
 - Submit the PR to JupyterLab
