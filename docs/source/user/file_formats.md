@@ -1,7 +1,5 @@
 # File and output formats
 
-## Overview
-
 JupyterLab provides a unified architecture for viewing and editing data in a
 wide variety of formats. This model applies whether the data is in a file or is
 provided by a kernel as rich cell output in a notebook or code console.
@@ -38,9 +36,10 @@ display({'text/html': '<h1>Hello World</h1>', 'text/plain': 'Hello World'}, raw=
 
 Other Jupyter kernels offer similar APIs.
 
-## Formats
+The rest of this section highlights some of the common data formats that
+JupyterLab supports.
 
-### Markdown
+## Markdown
 
 * File extension: `.md`
 * MIME type: `text/markdown`
@@ -56,7 +55,7 @@ The Markdown syntax supported in this mode is the same syntax used in the
 Jupyter Notebook (for example, LaTeX equations work). As seen in the animation,
 edits to the Markdown source are immediately reflected in the rendered version.
 
-### Images
+## Images
 
 * File extensions: `.bmp`, `.gif`, `.jpeg`, `.jpg`, `.png`, `.svg`
 * MIME types: `image/bmp`, `image/gif`, `image/jpeg`, `image/png`, `image/svg+xml`
@@ -65,35 +64,7 @@ JupyterLab supports image data in cell output and as files in the above formats.
 
 [animation]
 
-### HTML
-
-* File extension: `.html`
-* MIME type: `text/html`
-
-JupyterLab supports rendering HTML in cell output and editing HTML files as text in the file editor.
-
-### LaTeX
-
-* File extension: `.tex`
-* MIME type: `text/latex`
-
-JupyterLab supports rendering LaTeX in cell output and editing LaTeX files as text in the file editor.
-
-### JSON
-
-* File extension: `.json`
-* MIME type: `application/json`
-
-JavaScript Object Notation (JSON) files are common in data science. JupyterLab supports displaying JSON data in cell output or viewing a JSON file using a searchable tree view:
-
-[animation showing both rendering JSON as cell output and viewing a JSON file]
-
-To edit the JSON as a text file, right-click on the filename in the file browser
-and select the “Editor” item in the “Open With…” submenu:
-
-[animation]
-
-### CSV
+## CSV
 
 * File extension: `.csv`
 * MIME type: None
@@ -108,7 +79,36 @@ and select the “Editor” item in the “Open With…” submenu:
 
 [animation]
 
-### PDF
+## JSON
+
+* File extension: `.json`
+* MIME type: `application/json`
+
+JavaScript Object Notation (JSON) files are common in data science. JupyterLab supports displaying JSON data in cell output or viewing a JSON file using a searchable tree view:
+
+[animation showing both rendering JSON as cell output and viewing a JSON file]
+
+To edit the JSON as a text file, right-click on the filename in the file browser
+and select the “Editor” item in the “Open With…” submenu:
+
+[animation]
+
+## HTML
+
+* File extension: `.html`
+* MIME type: `text/html`
+
+JupyterLab supports rendering HTML in cell output and editing HTML files as text in the file editor.
+
+## LaTeX
+
+* File extension: `.tex`
+* MIME type: `text/latex`
+
+JupyterLab supports rendering LaTeX in cell output and editing LaTeX files as text in the file editor.
+
+
+## PDF
 
 * File extension: `.pdf`
 * MIME type: `application/pdf`
@@ -118,7 +118,7 @@ JupyterLab, double-click on the file in the file browser:
 
 [animation]
 
-### Vega/Vega-Lite
+## Vega/Vega-Lite
 
 Vega:
 
@@ -163,7 +163,7 @@ or Vegas (Scala/Spark).
 A JupyterLab extension that supports Vega 3.x and Vega-Lite 2.x can be found
 [here](https://github.com/jupyterlab/jupyter-renderers).
 
-### Virtual DOM
+## Virtual DOM
 
 * File extension: `.vdom`, `.json`
 * MIME type: `application/vdom.v1+json`
