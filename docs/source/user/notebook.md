@@ -1,8 +1,8 @@
 
 # Notebooks
 
-Jupyter Notebooks are documents that combine live runnable code, with narrative
-text (markdown), equations (LaTeX), images, interactive visualizations and other
+Jupyter Notebooks are documents that combine live runnable code with narrative
+text (Markdown), equations (LaTeX), images, interactive visualizations and other
 rich output:
 
 [screenshot]
@@ -14,8 +14,15 @@ same as the classic notebook. Thus, your existing notebooks should work fine in
 JupyterLab. If they don’t, please open an issue on our [GitHub
 issues](https://github.com/jupyterlab/jupyterlab/issues) page.
 
-Create a notebook by clicking the + button in the File Browser and then
-selecting a kernel:
+Create a notebook by clicking the `+` button in the file browser and then
+selecting a kernel in the new Launcher tab:
+
+[animation]
+
+A new file is created with a default name. Rename a file by right-clicking on
+its name in the file browser and selecting “Rename” from the context menu:
+
+[animation]
 
 The user interface for Notebooks in JupyterLab closely follows that of the
 classic Jupyter Notebook. The keyboard shortcuts of the classic Notebook
@@ -30,7 +37,7 @@ Drag cells between notebooks to quickly copy content:
 
 [animation]
 
-Create multiple, synchronized views of a single notebook:
+Create multiple synchronized views of a single notebook:
 
 [animation]
 
@@ -39,7 +46,7 @@ button on left of each cell:
 
 [animation]
 
-Create a new, synchronized view of a cell’s output:
+Create a new synchronized view of a cell’s output:
 
 [animation]
 
@@ -52,4 +59,3 @@ The tooltip (activated with `Shift Tab`) contains additional information about
 objects:
 
 [animation]
-
