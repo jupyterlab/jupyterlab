@@ -34,10 +34,12 @@ jupyter labextension install <foo>
 where `<foo>` is the name of a valid JupyterLab extension on
 [npm](https://www.npmjs.com). If the extension is not published there,
 `<foo>` can also refer to a local directory containing the extension.
+
 We encourage extension authors to add the `jupyterlab-extensions` GitHub topic to
 any repository with a JupyterLab extension to facilitate discovery.
-You can see a list of extensions by [searching Github for the
-juputerlab-extensions topic](https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extensions&type=Repositories)
+You can see a list of extensions by searching Github for the
+[jupyterlab-extensions](https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extensions&type=Repositories)
+topic.
 
 You can list the currently installed extensions by running the command:
 
@@ -72,8 +74,9 @@ jupyter labextension disable <bar>
 ```
 
 where `<bar>` is the name of the extension.  This will prevent the extension
-from loading in the browser, but does not require a rebuild. You can re-enable
-the extension later using the command:
+from loading in the browser, but does not require a rebuild.
+
+You can re-enable the extension later using the command:
 
 ```
 jupyter labextension enable <foo>
