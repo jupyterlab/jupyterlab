@@ -46,6 +46,11 @@ button on left of each cell:
 
 [animation]
 
+Enable scrolling for long outputs by right-clicking on a cell and selecting
+“Enable Scrolling for Outputs”:
+
+[animation]
+
 Create a new synchronized view of a cell’s output:
 
 [animation]
