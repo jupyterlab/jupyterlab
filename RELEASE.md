@@ -65,6 +65,7 @@ xckd repo
 - Run `jlpm integrity` to update the `dev_mode` version
 - Commit and push the version update to master
 - Release the other repos as appropriate
+- Update version for binder (see below)
 
 ### Other repos to update
 
