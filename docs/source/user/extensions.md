@@ -88,7 +88,7 @@ jupyter labextension enable <foo>
 Core plugins can also be disabled (and then re-enabled).
 
 
-## Advanced usage
+## Advanced Usage
 
 The JupyterLab application directory (where the application assets are built and
 the settings reside) can be overridden using `--app-dir` in any of the
