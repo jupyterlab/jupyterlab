@@ -24,9 +24,9 @@ JupyterLab Documentation
    user/notebook
    user/code_console
    user/terminal
-   user/documents_kernels
    user/running
    user/commands
+   user/documents_kernels
    user/file_formats
    user/extensions
 
