@@ -26,11 +26,10 @@ jupyter notebook --version
 
 ## Supported browsers
 
-The following browsers are currently *known to work*:
+The following browsers are currently known to work:
 
-- Firefox Latest
-- Chrome Latest
-- Safari Latest
+- Firefox (latest version)
+- Chrome (latest version)
+- Safari (latest version)
 
-Earlier browser versions or other browsers may also work, but come with no
-guarantees.
+Earlier browser versions or other browsers may also work, but may not be tested.
