@@ -49,6 +49,11 @@ import '../style/index.css';
  */
 const WORKSPACE_SAVE_DEBOUNCE_INTERVAL = 2000;
 
+/**
+ * The interval in milliseconds before recover options appear during splash.
+ */
+const SPLASH_RECOVER_TIMEOUT = 12000;
+
 
 /**
  * The command IDs used by the apputils plugin.
@@ -338,9 +343,52 @@ export default plugins;
  */
 namespace Private {
   /**
+   * Create a splash element.
+   */
+  function createSplash(): HTMLElement {
+      const splash = document.createElement('div');
+      const galaxy = document.createElement('div');
+      const logo = document.createElement('div');
+
+      splash.id = 'jupyterlab-splash';
+      galaxy.id = 'galaxy';
+      logo.id = 'main-logo';
+
+      galaxy.appendChild(logo);
+      ['1', '2', '3'].forEach(id => {
+        const moon = document.createElement('div');
+        const planet = document.createElement('div');
+
+        moon.id = `moon${id}`;
+        moon.className = 'moon orbit';
+        planet.id = `planet${id}`;
+        planet.className = 'planet';
+
+        moon.appendChild(planet);
+        galaxy.appendChild(moon);
+      });
+
+      splash.appendChild(galaxy);
+
+      return splash;
+  }
+
+  /**
+   * A debouncer for recovery attempts.
+   */
+  let debouncer = 0;
+
+  /**
+   * Allows the user to clear state if splash screen takes too long.
+   */
+  function recover(): void {
+    console.log('Offer recovery options to user.');
+  }
+
+  /**
    * The splash element.
    */
-  let splash: HTMLElement | null;
+  const splash = createSplash();
 
   /**
    * The splash screen counter.
@@ -352,53 +400,28 @@ namespace Private {
    */
   export
   function showSplash(ready: Promise<any>): IDisposable {
-    if (!splash) {
-      splash = document.createElement('div');
-      splash.id = 'jupyterlab-splash';
-
-      let galaxy = document.createElement('div');
-      galaxy.id = 'galaxy';
-      splash.appendChild(galaxy);
-
-      let mainLogo = document.createElement('div');
-      mainLogo.id = 'main-logo';
-
-      let planet = document.createElement('div');
-      let planet2 = document.createElement('div');
-      let planet3 = document.createElement('div');
-      planet.className = 'planet';
-      planet2.className = 'planet';
-      planet3.className = 'planet';
-
-      let moon1 = document.createElement('div');
-      moon1.id = 'moon1';
-      moon1.className = 'moon orbit';
-      moon1.appendChild(planet);
-
-      let moon2 = document.createElement('div');
-      moon2.id = 'moon2';
-      moon2.className = 'moon orbit';
-      moon2.appendChild(planet2);
-
-      let moon3 = document.createElement('div');
-      moon3.id = 'moon3';
-      moon3.className = 'moon orbit';
-      moon3.appendChild(planet3);
-
-      galaxy.appendChild(mainLogo);
-      galaxy.appendChild(moon1);
-      galaxy.appendChild(moon2);
-      galaxy.appendChild(moon3);
-    }
     splash.classList.remove('splash-fade');
-    document.body.appendChild(splash);
     splashCount++;
+
+    if (debouncer) {
+      window.clearTimeout(debouncer);
+    }
+    debouncer = window.setTimeout(() => {
+      recover();
+    }, SPLASH_RECOVER_TIMEOUT);
+
+    document.body.appendChild(splash);
+
     return new DisposableDelegate(() => {
       ready.then(() => {
-        splashCount = Math.max(splashCount - 1, 0);
-        if (splashCount === 0 && splash) {
+        if (debouncer) {
+          window.clearTimeout(debouncer);
+          debouncer = 0;
+        }
+
+        if (--splashCount === 0) {
           splash.classList.add('splash-fade');
-          setTimeout(() => { document.body.removeChild(splash); }, 500);
+          window.setTimeout(() => { document.body.removeChild(splash); }, 500);
         }
       });
     });
