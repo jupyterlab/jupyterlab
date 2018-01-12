@@ -1289,8 +1289,9 @@ describe('notebook/widget', () => {
         it('should switch to command mode', () => {
           simulate(widget.node, 'focusin');
           widget.mode = 'edit';
-          let other = document.createElement('div');
-          simulate(widget.node, 'focusout', { relatedTarget: other });
+          let event = generate('focusout');
+          (event as any).relatedTarget = document.body;
+          widget.node.dispatchEvent(event);
           expect(widget.mode).to.be('command');
           MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
           expect(widget.mode).to.be('command');
