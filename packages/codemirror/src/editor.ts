@@ -1190,12 +1190,7 @@ namespace Private {
       break;
     case 'readOnly':
       let el = editor.getWrapperElement();
-      if (value) {
-        el.classList.add(READ_ONLY_CLASS);
-      } else {
-        el.classList.remove(READ_ONLY_CLASS);
-        editor.getInputField().blur();
-      }
+      el.classList.toggle(READ_ONLY_CLASS, value);
       editor.setOption(option, value);
       break;
     default:
