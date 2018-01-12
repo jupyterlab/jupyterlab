@@ -337,8 +337,14 @@ const state: JupyterLabPlugin<IStateDB> = {
         // Populate the workspace placeholder.
         workspace = decodeURIComponent((args.path.match(pattern)[1]));
 
+        // This command only runs once, when the page loads.
+        if (resolved) {
+          console.warn(`${command} was called after state resolution.`);
+          return;
+        }
+
         // If there is no workspace, leave the state database intact.
-        if (!workspace && !resolved) {
+        if (!workspace) {
           resolved = true;
           transform.resolve({ type: 'cancel', contents: null });
           return;
