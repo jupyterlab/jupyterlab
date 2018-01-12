@@ -261,6 +261,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
         app.shell.expandLeft();
       } else {
         app.shell.collapseLeft();
+        app.shell.activateById(app.shell.currentWidget.id);
       }
     },
     isToggled: () => !app.shell.leftCollapsed,
@@ -277,6 +278,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
         app.shell.expandRight();
       } else {
         app.shell.collapseRight();
+        app.shell.activateById(app.shell.currentWidget.id);
       }
     },
     isToggled: () => !app.shell.rightCollapsed,
