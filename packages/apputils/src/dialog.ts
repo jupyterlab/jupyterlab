@@ -69,7 +69,7 @@ class Dialog<T> extends Widget {
    *
    * @param options - The dialog setup options.
    */
-  constructor(options: Partial<Dialog.IOptions<T>>={}) {
+  constructor(options: Partial<Dialog.IOptions<T>> = { }) {
     super();
     this.addClass('jp-Dialog');
     let normalized = Private.handleOptions(options);
