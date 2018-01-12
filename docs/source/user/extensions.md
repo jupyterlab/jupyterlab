@@ -31,9 +31,17 @@ You can install new extensions into the application using the command:
 jupyter labextension install <foo>
 ```
 
-where `<foo>` is the name of a valid JupyterLab extension on
-[npm](https://www.npmjs.com). If the extension is not published there,
-`<foo>` can also refer to a local directory containing the extension.
+where `<foo>` is the name of a valid JupyterLab extension npm package on
+[npm](https://www.npmjs.com). Use the `<foo>@<foo version>` syntax to install a
+specific version of an extension, for example:
+
+```
+jupyter labextension install <foo>@1.2.3
+```
+
+You can also install an extension that is not uploaded to npm, i.e., `<foo>` can
+be a local directory containing the extension, a gzipped tarball, or a URL to a
+gzipped tarball.
 
 We encourage extension authors to add the `jupyterlab-extensions` GitHub topic to
 any repository with a JupyterLab extension to facilitate discovery.
