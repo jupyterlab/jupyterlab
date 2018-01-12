@@ -150,9 +150,14 @@ class StateDB implements IStateDB {
   /**
    * Clear the entire database.
    */
-  clear(): Promise<void> {
+  clear(silent = false): Promise<void> {
     return this._ready.then(() => {
       this._clear();
+
+      if (silent) {
+        return;
+      }
+
       this._changed.emit({ id: null, type: 'clear' });
     });
   }
