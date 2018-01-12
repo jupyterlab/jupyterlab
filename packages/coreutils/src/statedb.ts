@@ -150,8 +150,16 @@ class StateDB implements IStateDB {
   /**
    * Clear the entire database.
    */
-  clear(): Promise<void> {
-    return this._ready.then(() => { this._clear(); });
+  clear(silent = false): Promise<void> {
+    return this._ready.then(() => {
+      this._clear();
+
+      if (silent) {
+        return;
+      }
+
+      this._changed.emit({ id: null, type: 'clear' });
+    });
   }
 
   /**
@@ -374,13 +382,16 @@ namespace StateDB {
   type Change = {
     /**
      * The key of the database item that was changed.
+     *
+     * #### Notes
+     * This field is set to `null` for global changes (i.e. `clear`).
      */
-    id: string;
+    id: string | null;
 
     /**
      * The type of change.
      */
-    type: 'remove' | 'save'
+    type: 'clear' | 'remove' | 'save'
   };
 
   /**
