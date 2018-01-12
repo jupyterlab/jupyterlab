@@ -1113,7 +1113,7 @@ namespace DocumentRegistry {
       name: 'json',
       displayName: 'JSON File',
       extensions: ['.json'],
-      mimeTypes: ['application/json', 'application/x-json'],
+      mimeTypes: ['application/json'],
       iconClass: 'jp-MaterialIcon jp-JSONIcon'
     },
     {
@@ -1191,21 +1191,6 @@ namespace DocumentRegistry {
       iconClass: 'jp-MaterialIcon jp-ImageIcon',
       fileFormat: 'base64'
     },
-    {
-      name: 'xbm',
-      displayName: 'Image',
-      mimeTypes: ['image/xbm'],
-      extensions: ['.xbm'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
-      fileFormat: 'base64'
-    },
-    {
-      name: 'raw',
-      displayName: 'Image',
-      extensions: ['.raw'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
-      fileFormat: 'base64'
-    }
   ];
 }
 

@@ -1,27 +1,33 @@
 
 # Code Consoles
 
-Notebooks allow you to write and run code while you create a document. At times,
-it is helpful to write and run code in an exploratory manner, while not creating
-a document; a sort of transient playground for interactive code. The JupyterLab
-Code Console addresses this usage case, with full support for the rich output of
-Jupyter.
+Code consoles allow you to run code interactively in a kernel. The cells of a
+code console show the order in which code was executed in the kernel, as opposed
+to the explicit ordering of cells in a notebook document. Code consoles also
+display rich output, just like notebook cells.
 
-Create a code console by clicking the + button in the File Browser and selecting
-the kernel:
-
-[animation]
-
-Run code using `Shift Enter` and use the up and down arrows allow you to browse
-the history of previously run code:
+Create a new code console by clicking the `+` button in the file browser and
+selecting the kernel:
 
 [animation]
 
-Tab completion (`Tab`) and tooltips (`Shift Tab`) work as in the Notebook:
+Run code using `Shift Enter`. Use the up and down arrows to browse
+the history of previously-run code:
 
 [animation]
 
-You can clear the previous cells of the Code Console by right-clicking on the
-Code Console and selecting the “Clear Console Cells” item:
+Tab completion (`Tab`) and tooltips (`Shift Tab`) work as in the notebook:
+
+[animation]
+
+Clear the cells of the code console without restarting the kernel by
+right-clicking on the code console and selecting “Clear Console Cells”:
+
+[animation]
+
+Creating a code console from the File menu lets you select an existing kernel
+for the code console. The code console then acts as a log of computations in
+that kernel, and a place you can interactively inspect and run code in the
+kernel:
 
 [animation]

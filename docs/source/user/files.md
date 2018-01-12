@@ -1,13 +1,13 @@
 
 # Working with files
 
-## Overview
+## Opening files
 
-The File Browser and File menu allow you to work with files and directories on
-your system. This includes opening, creating, deleting, renaming, downloading,
-copying and sharing files and directories.
+The file browser and File menu allow you to work with
+files and directories on your system. This includes opening, creating, deleting,
+renaming, downloading, copying, and sharing files and directories.
 
-The File Browser is in the Left Panel (the Files tab):
+The file browser is in the left sidebar Files tab:
 
 [screenshot]
 
@@ -15,18 +15,19 @@ Many actions on files can also be carried out in the File menu:
 
 [screenshot]
 
-To open any file double-click on its name in the File Browser:
+To open any file, double-click on its name in the file browser:
 
 [animation]
 
-You can also drag a file into the Dock Panel:
+You can also drag a file into the main area to create a new tab:
 
 [animation]
 
-Many files types have multiple viewers/editors. For example, you can open a
-markdown file in the text editor, or as rendered markdown. To open a file in a
-non-default viewer/editor, right-click on its name in the File Browser, and use
-the "Open With..." submenu to select the viewer/editor:
+Many files types have multiple viewers/editors. For example, you can open a Markdown file in
+a text editor or as rendered HTML. A JupyterLab extension can also
+add new viewers/editors for files. To open a file in a non-default
+viewer/editor, right-click on its name in the file browser and use the "Open
+With..." submenu to select the viewer/editor:
 
 [animation]
 
@@ -35,42 +36,49 @@ will remain in sync:
 
 [animation]
 
-The file system can be navigated by double clicking on folders, or on the
-directories at the top of the directory listing:
+The file system can be navigated by double clicking on folders in the listing or
+clicking on the folders at the top of the directory listing:
 
 [animation]
 
-Each file or directory in JupyterLab also has a URL that can used to open
-JupyterLab with that file or directory open. To get the shareable link,
-right-click on the file or directory and select the "Copy Shareable Link" item:
+Right-click on a file or directory and select "Copy Shareable Link" to copy a
+URL that can be used to open JupyterLab with that file or directory open.
 
 [screenshot]
 
 ## Creating files and activities
 
-Create new files or activities by clicking the + button at the top of the File
-Browser. This will open the Launcher in the Dock Panel, which allows you to pick
+Create new files or activities by clicking the `+` button at the top of the file
+browser. This will open a new Launcher tab in the main area, which allows you to pick
 an activity and kernel:
 
 [animation]
 
-You can also create new documents or activities using the File Menu:
+You can also create new documents or activities using the File menu:
 
 [screenshot]
 
-The current working directory of the Launcher will follow that of the File
-Browser:
+The current working directory of a new activity or document will be the
+directory listed in the file browser (except for a terminal, which always starts
+in the root directory of the file browser):
 
 [animation]
+
+A new file is created with a default name. Rename a file by right-clicking on
+its name in the file browser and selecting “Rename” from the context menu:
+
+[animation]
+
 
 ## Uploading and downloading
 
-Files can be uploaded to the current directory of the File Browser by dragging
-and dropping files onto the File Browser:
+Files can be uploaded to the current directory of the file browser by dragging
+and dropping files onto the file browser, or by clicking the "Upload Files"
+button at the top of the file browser:
 
 [animation]
 
-Any file in JupyterLab can be downloaded by clicking on the “Download” button at
-the top of the File Browser:
+Any file in JupyterLab can be downloaded by right-clicking its name in the file
+browser and selecting “Download” from the context menu:
 
 [animation]

@@ -43,7 +43,7 @@ Notebook. Here are a few of them you may want to try out:
   application using drag and drop.
 * Run code interactively outside of a notebook in the Code Console, and
   connect one to a text file.
-* Right click on a markdown file and "Open with..." a live markdown viewer.
+* Right click on a markdown file and “Open with” a live markdown viewer.
 * Double click on CSV files to view them as a nicely formatted table.
 * Drag and drop notebook cells within a notebook or between notebooks.
 

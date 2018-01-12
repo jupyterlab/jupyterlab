@@ -312,7 +312,7 @@ describe('rendermime/factories', () => {
     describe('#mimeTypes', () => {
 
       it('should support multiple mimeTypes', () => {
-        expect(imageRendererFactory.mimeTypes).to.eql(['image/png', 'image/jpeg', 'image/gif']);
+        expect(imageRendererFactory.mimeTypes).to.eql(['image/bmp', 'image/png', 'image/jpeg', 'image/gif']);
       });
 
     });

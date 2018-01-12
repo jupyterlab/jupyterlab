@@ -23,10 +23,10 @@ JupyterLab Documentation
    user/file_editor
    user/notebook
    user/code_console
-   user/documents_kernels
+   user/terminal
    user/running
    user/commands
-   user/terminal
+   user/documents_kernels
    user/file_formats
    user/extensions
 
