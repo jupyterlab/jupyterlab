@@ -2,6 +2,7 @@
 var UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 var merge = require('webpack-merge');
 var webpack = require('webpack');
+var os = require('os');
 
 var common = require('./webpack.config');
 
@@ -9,11 +10,13 @@ module.exports = merge(common, {
   devtool: 'source-map',
   plugins: [
     new UglifyJSPlugin({
+      sourceMap: true,
+      parallel: os.cpus().length,
       uglifyOptions: {
         beautify: false,
         ecma: 6,
         compress: true,
-        comments: false
+        comments: false,
       }
     }),
     new webpack.DefinePlugin({
