@@ -441,7 +441,7 @@ function createContextMenu(model: Contents.IModel, commands: CommandRegistry, re
     if (path && factories.length > 1) {
       const command =  'docmanager:open';
       const openWith = new Menu({ commands });
-      openWith.title.label = 'Open With...';
+      openWith.title.label = 'Open With';
       factories.forEach(factory => {
         openWith.addItem({ args: { factory, path }, command });
       });
