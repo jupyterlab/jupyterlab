@@ -81,8 +81,8 @@ jupyter lab build
 
 ## Disabling Extensions
 
-You may want to disable specific JupyterLab extensions without rebuilding
-the application. You can disable an extension by running the command:
+You can disable specific JupyterLab extensions (including core extensions)
+without rebuilding the application by running the command:
 
 ```bash
 jupyter labextension disable <bar>
@@ -91,14 +91,11 @@ jupyter labextension disable <bar>
 where `<bar>` is the name of the extension.  This will prevent the extension
 from loading in the browser, but does not require a rebuild.
 
-You can re-enable the extension later using the command:
+You can re-enable an extension using the command:
 
 ```bash
 jupyter labextension enable <foo>
 ```
-
-Core plugins can also be disabled (and then re-enabled).
-
 
 ## Advanced Usage
 
@@ -113,7 +110,7 @@ lab path`.
 ### JupyterLab Build Process
 
 To rebuild the app directory, run `jupyter lab build`.
-By default the `jupyter lab install` command already builds the application,
+By default the `jupyter lab install` command builds the application,
 so you typically do not need to call `build` directly.
 
 Building consists of:
@@ -129,9 +126,9 @@ Building consists of:
 The JupyterLab application directory contains the subdirectories
 `extensions`, `schemas`, `settings`, `staging`, `static`, and `themes`.
 
-#### `extensions`
+#### extensions
 
-The `extensions` folder has the packed tarballs for each of the
+The `extensions` directory has the packed tarballs for each of the
 installed extensions for the app.  If the application directory is not the same
 as the `sys-prefix` directory, the extensions installed in the `sys-prefix`
 directory will be used in the app directory.  If an extension is installed in
@@ -141,18 +138,18 @@ shadowed extension, and then attempt to uninstall the `sys-prefix` version if
 called again.  If the `sys-prefix` version cannot be uninstalled, its plugins
 can still be ignored using `ignoredPackages` metadata in `settings`.
 
-#### `schemas`
+#### schemas
 
 The `schemas` directory contains [JSON Schemas](http://json-schema.org/) that
 describe the settings used by individual extensions. Users may edit these
 settings using the JupyterLab Settings Editor.
 
-#### `settings`
+#### settings
 
 The `settings` directory contains `page_config.json` and `build_config.json`
 files.
 
-##### `page_config.json`
+##### page_config.json
 
 The `page_config.json` data is used to provide config data to the application
 environment.
@@ -164,34 +161,33 @@ plugins load:
 2. `deferredExtensions` for extensions that do not load until they are required
    by something, irrespective of whether they set `autostart` to `true`.
 
-The values for each are an array of strings. The following sequence of checks
+The value for each field is an array of strings. The following sequence of checks
 are performed against the patterns in `disabledExtensions` and
 `deferredExtensions`.
 
 * If an identical string match occurs between a config value and a package name
-  (*e.g.*, `"@jupyterlab/apputils-extension"`), then the entire package is
+  (e.g., `"@jupyterlab/apputils-extension"`), then the entire package is
   disabled (or deferred).
 * If the string value is compiled as a regular expression and tests positive
-  against a package name (*e.g.*, `"disabledExtensions":
+  against a package name (e.g., `"disabledExtensions":
   ["@jupyterlab/apputils*$"]`), then the entire package is disabled (or
   deferred).
 * If an identical string match occurs between a config value and an individual
-  plugin ID within a larger package (*e.g.*, `"disabledExtensions":
+  plugin ID within a package (e.g., `"disabledExtensions":
   ["@jupyterlab/apputils-extension:settings"]`), then that specific plugin is
   disabled (or deferred).
 * If the string value is compiled as a regular expression and tests positive
-  against an individual plugin ID within a larger package (*e.g.*,
+  against an individual plugin ID within a package (e.g.,
   `"disabledExtensions": ["^@jupyterlab/apputils-extension:set.*$"]`), then that
   specific plugin is disabled (or deferred).
 
-##### `build_config.json`
+##### build_config.json
 
-The `build_config.json` file is used to track the local folders that have been installed
-using `jupyter labextension install <folder>`, as well as core extensions that have
-been explicitly uninstalled.  e.g.
+The `build_config.json` file is used to track the local directories that have been installed
+using `jupyter labextension install <directory>`, as well as core extensions that have
+been explicitly uninstalled.  An example of a `build_config.json` file is:
 
-```bash
-$ cat settings/build_config.json
+```json
 {
     "uninstalled_core_extensions": [
         "@jupyterlab/markdownwidget-extension"
@@ -202,17 +198,17 @@ $ cat settings/build_config.json
 }
 ```
 
-#### `staging` and `static`
+#### staging and static
 
 The `static` directory contains the assets that will be loaded by the JuptyerLab
-application.  The `staging` folder is used to create the build and then populate
-the `static` folder.
+application.  The `staging` directory is used to create the build and then populate
+the `static` directory.
 
 Running `jupyter lab` will attempt to run the `static` assets in the application
-folder if they exist.  You can run `jupyter lab --core-mode` to load the core
+directory if they exist.  You can run `jupyter lab --core-mode` to load the core
 JupyterLab application (i.e., the application without any extensions) instead.
 
-#### `themes`
+#### themes
 
 The `themes` directory contains assets (such as CSS and icons)
 for JupyterLab theme extensions.
