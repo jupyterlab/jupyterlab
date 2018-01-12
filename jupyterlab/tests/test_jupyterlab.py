@@ -475,7 +475,6 @@ class TestExtension(TestCase):
                 '@jupyterlab/application': ver
             }}
         def _mock_metadata(self, name):
-            print('Mocking metadata')
             assert name == 'mockextension'
             return {
                 "name": name,
@@ -503,14 +502,12 @@ class TestExtension(TestCase):
                 filename='mockextension.tgz',
                 path=pjoin(tempdir, 'mockextension.tgz'),
             )
-            print('mock extract', info)
             return info
 
         class Success(Exception):
             pass
 
         def _mock_install(self, name, *args, **kwargs):
-            print('mock install', name)
             assert name in ('mockextension', 'mockextension@1.1.0')
             if name == 'mockextension@1.1.0':
                 raise Success()
