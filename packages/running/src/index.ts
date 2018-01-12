@@ -534,10 +534,12 @@ namespace RunningSessions {
       sessions.className = `${SECTION_CLASS} ${SESSIONS_CLASS}`;
 
       let refresh = document.createElement('button');
+      refresh.title = 'Refresh List';
       refresh.className = REFRESH_CLASS;
       header.appendChild(refresh);
 
       let shutdown = document.createElement('button');
+      shutdown.title = 'Shutdown All Kernels…';
       shutdown.className = SHUTDOWN_CLASS;
       header.appendChild(shutdown);
 
