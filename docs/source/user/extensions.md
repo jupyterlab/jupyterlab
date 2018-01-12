@@ -27,7 +27,7 @@ The base JupyterLab application includes a core set of extensions, which provide
 the features described in this User Guide (Notebook, Terminal, Text Editor, etc.)
 You can install new extensions into the application using the command:
 
-```
+```bash
 jupyter labextension install <foo>
 ```
 
@@ -35,7 +35,7 @@ where `<foo>` is the name of a valid JupyterLab extension npm package on
 [npm](https://www.npmjs.com). Use the `<foo>@<foo version>` syntax to install a
 specific version of an extension, for example:
 
-```
+```bash
 jupyter labextension install <foo>@1.2.3
 ```
 
@@ -51,13 +51,13 @@ topic.
 
 You can list the currently installed extensions by running the command:
 
-```
+```bash
 jupyter labextension list
 ```
 
 Uninstall an extension by running the command:
 
-```
+```bash
 jupyter labextension uninstall <bar>
 ```
 
@@ -75,7 +75,7 @@ you may want to defer rebuilding the application by including the flag
 `--no-build` in the install/uninstall step.
 Once you are ready to rebuild, you can run the command:
 
-```
+```bash
 jupyter lab build
 ```
 
@@ -84,7 +84,7 @@ jupyter lab build
 You may want to disable specific JupyterLab extensions without rebuilding
 the application. You can disable an extension by running the command:
 
-```
+```bash
 jupyter labextension disable <bar>
 ```
 
@@ -93,7 +93,7 @@ from loading in the browser, but does not require a rebuild.
 
 You can re-enable the extension later using the command:
 
-```
+```bash
 jupyter labextension enable <foo>
 ```
 
