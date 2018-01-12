@@ -104,7 +104,7 @@ class RenderedVega extends Widget implements IRenderMime.IRenderer {
       return new Promise<void>((resolve, reject) => {
         embedFunc(this.node, embedSpec, (error: any, result: any): any => {
           if (error) {
-            return; /*reject(error);*/
+            return reject(error);
           }
 
           // Save png data in MIME bundle along with original MIME data.
