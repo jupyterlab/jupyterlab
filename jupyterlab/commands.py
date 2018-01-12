@@ -1190,7 +1190,7 @@ class _AppHandler(object):
                                     key=sort_key,
                                     reverse=True):
             print(version)
-            deps = data.get('dependencies', [])
+            deps = data.get('dependencies', {})
             errors = _validate_compatibility(name, deps, core_data)
             if not errors:
                 return version
@@ -1468,7 +1468,7 @@ def _semver_key(version, prerelease_first=False):
         #  NOT having a prerelease is > having one
         key = key + (0,) if v.prerelease else (1,)
     if v.prerelease:
-        key = key + tuple(_prerelease_key(
+        key = key + tuple(_semver_prerelease_key(
             v.prerelease))
 
     return key
