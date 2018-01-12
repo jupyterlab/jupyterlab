@@ -4,6 +4,7 @@ JupyterLab extensions add functionality to the JupyterLab application. They can
 provide new file viewer types, launcher activities, and output renderers, among
 many other things. JupyterLab extensions are [npm](https://www.npmjs.com/) packages
 (the standard package format in Javascript development).
+For information about developing extensions, see the [developer documentation]().
 
 In order to install JupyterLab extensions you need to have Node.js version 4+
 installed.
@@ -53,14 +54,18 @@ jupyter labextension uninstall <bar>
 ```
 
 where `<bar>` is the name of the extension, as printed in the extension list.
-You can also uninstall core extensions uninstalled this way (which can later be
+You can also uninstall core extensions using this command (which can later be
 re-installed).
 
 Installing and uninstalling extensions can take some time, as they are
 downloaded, bundled with the core extensions, and the whole application is rebuilt.
-If you are installing/uninstalling several extensions, you may want to defer
-rebuilding the application by including the flag `--no-build` in the
-install/uninstall step. Once you are ready to rebuild, you can run the command:
+You can install/uninstall more than one extension in the same command by listing
+their names after the `install` command.
+
+If you are installing/uninstalling several extensions in several stages,
+you may want to defer rebuilding the application by including the flag
+`--no-build` in the install/uninstall step.
+Once you are ready to rebuild, you can run the command:
 
 ```
 jupyter lab build
