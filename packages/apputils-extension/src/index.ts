@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, IThemeManager, ThemeManager, ISplashScreen
+  Dialog, ICommandPalette, IThemeManager, ThemeManager, ISplashScreen
 } from '@jupyterlab/apputils';
 
 import {
@@ -49,6 +49,11 @@ import '../style/index.css';
  */
 const WORKSPACE_SAVE_DEBOUNCE_INTERVAL = 2000;
 
+/**
+ * The interval in milliseconds before recover options appear during splash.
+ */
+const SPLASH_RECOVER_TIMEOUT = 12000;
+
 
 /**
  * The command IDs used by the apputils plugin.
@@ -62,6 +67,9 @@ namespace CommandIDs {
 
   export
   const loadState = 'apputils:load-statedb';
+
+  export
+  const recoverState = 'apputils:recover-statedb';
 
   export
   const saveState = 'apputils:save-statedb';
@@ -209,7 +217,16 @@ const splash: JupyterLabPlugin<ISplashScreen> = {
   id: '@jupyterlab/apputils-extension:splash',
   autoStart: true,
   provides: ISplashScreen,
-  activate: app => ({ show: () => Private.showSplash(app.restored) })
+  activate: app => {
+    return {
+      show: () => {
+        const { commands, restored } = app;
+        const recovery = () => { commands.execute(CommandIDs.recoverState); };
+
+        return Private.showSplash(restored, recovery);
+      }
+    };
+  }
 };
 
 
@@ -243,6 +260,7 @@ const state: JupyterLabPlugin<IStateDB> = {
       // If the request that was routed did not contain a workspace,
       // leave the database intact.
       if (!resolved) {
+        resolved = true;
         transform.resolve({ type: 'cancel', contents: null });
       }
     };
@@ -253,17 +271,44 @@ const state: JupyterLabPlugin<IStateDB> = {
       execute: () => state.clear()
     });
 
+    command = CommandIDs.recoverState;
+    commands.addCommand(command, {
+      execute: () => {
+        const immediate = true;
+        const silent = true;
+
+        // Clear the state silenty so that the state changed signal listener
+        // will not be triggered as it causes a save state, but the save state
+        // promise is lost and cannot be used to reload the application.
+        return state.clear(silent)
+          .then(() => commands.execute(CommandIDs.saveState, { immediate }))
+          .then(() => { document.location.reload(); })
+          .catch(() => { document.location.reload(); });
+      }
+    });
+
+    // Hold a reference to each outstanding promise delegate in order to resolve
+    // when debouncing occurs.
+    let outstanding: PromiseDelegate<void> | null = null;
+
     command = CommandIDs.saveState;
     commands.addCommand(command, {
       label: () => `Save Workspace (${workspace})`,
       isEnabled: () => !!workspace,
-      execute: () => {
+      execute: args => {
         if (!workspace) {
           return;
         }
 
+        const timeout = args.immediate ? 0 : WORKSPACE_SAVE_DEBOUNCE_INTERVAL;
         const id = workspace;
         const metadata = { id };
+        const delegate = new PromiseDelegate<void>();
+
+        if (outstanding) {
+          outstanding.resolve(delegate.promise);
+        }
+        outstanding = delegate;
 
         if (debouncer) {
           window.clearTimeout(debouncer);
@@ -272,44 +317,61 @@ const state: JupyterLabPlugin<IStateDB> = {
         debouncer = window.setTimeout(() => {
           state.toJSON()
             .then(data => workspaces.save(id, { data, metadata }))
+            .then(() => {
+              outstanding.resolve(undefined);
+              outstanding = null;
+            })
             .catch(reason => {
-              console.warn(`Saving workspace (${id}) failed.`, reason);
+              outstanding.reject(reason);
+              outstanding = null;
             });
-        }, WORKSPACE_SAVE_DEBOUNCE_INTERVAL);
+        }, timeout);
+
+        return delegate.promise;
       }
     });
 
     command = CommandIDs.loadState;
     disposables.add(commands.addCommand(command, {
       execute: (args: IRouter.ICommandArgs) => {
-        // Irrespective of whether the workspace exists, the state database's
-        // initial data transormation resolves if this command is executed.
-        resolved = true;
-
         // Populate the workspace placeholder.
         workspace = decodeURIComponent((args.path.match(pattern)[1]));
 
+        // This command only runs once, when the page loads.
+        if (resolved) {
+          console.warn(`${command} was called after state resolution.`);
+          return;
+        }
+
         // If there is no workspace, leave the state database intact.
         if (!workspace) {
+          resolved = true;
           transform.resolve({ type: 'cancel', contents: null });
           return;
         }
 
         // Any time the local state database changes, save the workspace.
-        state.changed.connect(() => {
+        state.changed.connect((sender: any, change: StateDB.Change) => {
           commands.execute(CommandIDs.saveState);
         });
 
         // Fetch the workspace and overwrite the state database.
         return workspaces.fetch(workspace).then(session => {
-          transform.resolve({ type: 'overwrite', contents: session.data });
+          if (!resolved) {
+            resolved = true;
+            transform.resolve({ type: 'overwrite', contents: session.data });
+          }
         }).catch(reason => {
           console.warn(`Fetching workspace (${workspace}) failed.`, reason);
 
           // If the workspace does not exist, cancel the data transformation and
           // save a workspace with the current user state data.
-          transform.resolve({ type: 'cancel', contents: null });
-          commands.execute(CommandIDs.saveState);
+          if (!resolved) {
+            resolved = true;
+            transform.resolve({ type: 'cancel', contents: null });
+          }
+
+          return commands.execute(CommandIDs.saveState);
         });
       }
     }));
@@ -338,9 +400,82 @@ export default plugins;
  */
 namespace Private {
   /**
+   * Create a splash element.
+   */
+  function createSplash(): HTMLElement {
+      const splash = document.createElement('div');
+      const galaxy = document.createElement('div');
+      const logo = document.createElement('div');
+
+      splash.id = 'jupyterlab-splash';
+      galaxy.id = 'galaxy';
+      logo.id = 'main-logo';
+
+      galaxy.appendChild(logo);
+      ['1', '2', '3'].forEach(id => {
+        const moon = document.createElement('div');
+        const planet = document.createElement('div');
+
+        moon.id = `moon${id}`;
+        moon.className = 'moon orbit';
+        planet.id = `planet${id}`;
+        planet.className = 'planet';
+
+        moon.appendChild(planet);
+        galaxy.appendChild(moon);
+      });
+
+      splash.appendChild(galaxy);
+
+      return splash;
+  }
+
+  /**
+   * A debouncer for recovery attempts.
+   */
+  let debouncer = 0;
+
+  /**
+   * The recovery dialog.
+   */
+  let dialog: Dialog<any>;
+
+  /**
+   * Allows the user to clear state if splash screen takes too long.
+   */
+  function recover(fn: () => void): void {
+    if (dialog) {
+      return;
+    }
+
+    dialog = new Dialog({
+      title: 'Loading...',
+      body: `The loading screen is taking a long time.
+        Would you like to clear the workspace or keep waiting?`,
+      buttons: [
+        Dialog.cancelButton({ label: 'Keep Waiting' }),
+        Dialog.warnButton({ label: 'Clear Workspace' })
+      ]
+    });
+
+    dialog.launch().then(result => {
+      if (result.button.accept) {
+        return fn();
+      }
+
+      dialog.dispose();
+      dialog = null;
+
+      debouncer = window.setTimeout(() => {
+        recover(fn);
+      }, SPLASH_RECOVER_TIMEOUT);
+    });
+  }
+
+  /**
    * The splash element.
    */
-  let splash: HTMLElement | null;
+  const splash = createSplash();
 
   /**
    * The splash screen counter.
@@ -349,56 +484,40 @@ namespace Private {
 
   /**
    * Show the splash element.
+   *
+   * @param ready - A promise that must be resolved before splash disappears.
+   *
+   * @param recovery - A function that recovers from a hanging splash.
    */
   export
-  function showSplash(ready: Promise<any>): IDisposable {
-    if (!splash) {
-      splash = document.createElement('div');
-      splash.id = 'jupyterlab-splash';
-
-      let galaxy = document.createElement('div');
-      galaxy.id = 'galaxy';
-      splash.appendChild(galaxy);
-
-      let mainLogo = document.createElement('div');
-      mainLogo.id = 'main-logo';
-
-      let planet = document.createElement('div');
-      let planet2 = document.createElement('div');
-      let planet3 = document.createElement('div');
-      planet.className = 'planet';
-      planet2.className = 'planet';
-      planet3.className = 'planet';
-
-      let moon1 = document.createElement('div');
-      moon1.id = 'moon1';
-      moon1.className = 'moon orbit';
-      moon1.appendChild(planet);
-
-      let moon2 = document.createElement('div');
-      moon2.id = 'moon2';
-      moon2.className = 'moon orbit';
-      moon2.appendChild(planet2);
-
-      let moon3 = document.createElement('div');
-      moon3.id = 'moon3';
-      moon3.className = 'moon orbit';
-      moon3.appendChild(planet3);
-
-      galaxy.appendChild(mainLogo);
-      galaxy.appendChild(moon1);
-      galaxy.appendChild(moon2);
-      galaxy.appendChild(moon3);
-    }
+  function showSplash(ready: Promise<any>, recovery: () => void): IDisposable {
     splash.classList.remove('splash-fade');
-    document.body.appendChild(splash);
     splashCount++;
+
+    if (debouncer) {
+      window.clearTimeout(debouncer);
+    }
+    debouncer = window.setTimeout(() => {
+      recover(recovery);
+    }, SPLASH_RECOVER_TIMEOUT);
+
+    document.body.appendChild(splash);
+
     return new DisposableDelegate(() => {
       ready.then(() => {
-        splashCount = Math.max(splashCount - 1, 0);
-        if (splashCount === 0 && splash) {
+        if (--splashCount === 0) {
+          if (debouncer) {
+            window.clearTimeout(debouncer);
+            debouncer = 0;
+          }
+
+          if (dialog) {
+            dialog.dispose();
+            dialog = null;
+          }
+
           splash.classList.add('splash-fade');
-          setTimeout(() => { document.body.removeChild(splash); }, 500);
+          window.setTimeout(() => { document.body.removeChild(splash); }, 500);
         }
       });
     });

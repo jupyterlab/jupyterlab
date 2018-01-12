@@ -2,6 +2,18 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  showErrorMessage
+} from '@jupyterlab/apputils';
+
+import {
+  ActivityMonitor, PathExt
+} from '@jupyterlab/coreutils';
+
+import {
+  IRenderMime, RenderMimeRegistry, MimeModel
+} from '@jupyterlab/rendermime';
+
+import {
   JSONObject, PromiseDelegate
 } from '@phosphor/coreutils';
 
@@ -12,14 +24,6 @@ import {
 import {
   BoxLayout, Widget
 } from '@phosphor/widgets';
-
-import {
-  ActivityMonitor, PathExt
-} from '@jupyterlab/coreutils';
-
-import {
-  IRenderMime, RenderMimeRegistry, MimeModel
-} from '@jupyterlab/rendermime';
 
 import {
   ABCWidgetFactory
@@ -67,7 +71,7 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
       if (this.isDisposed) {
         return;
       }
-      return this._render().then();
+      return this._render();
     }).then(() => {
       // Throttle the rendering rate of the widget.
       this._monitor = new ActivityMonitor({
@@ -164,8 +168,13 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
       this._hasRendered = true;
       this._isRendering = false;
       if (this._renderRequested) {
-        this._render();
+        return this._render();
       }
+    }).catch(reason => {
+      // Dispose the document if rendering fails.
+      requestAnimationFrame(() => { this.dispose(); });
+
+      showErrorMessage(`Renderer Failure: ${context.path}`, reason);
     });
   }
 
