@@ -287,6 +287,10 @@ const state: JupyterLabPlugin<IStateDB> = {
       }
     });
 
+    // Hold a reference to each outstanding promise delegate in order to resolve
+    // when debouncing occurs.
+    let outstanding: PromiseDelegate<void> | null = null;
+
     command = CommandIDs.saveState;
     commands.addCommand(command, {
       label: () => `Save Workspace (${workspace})`,
@@ -296,10 +300,15 @@ const state: JupyterLabPlugin<IStateDB> = {
           return;
         }
 
-        const immediate = !!(args.immediate);
+        const timeout = args.immediate ? 0 : WORKSPACE_SAVE_DEBOUNCE_INTERVAL;
         const id = workspace;
         const metadata = { id };
         const delegate = new PromiseDelegate<void>();
+
+        if (outstanding) {
+          outstanding.resolve(delegate.promise);
+        }
+        outstanding = delegate;
 
         if (debouncer) {
           window.clearTimeout(debouncer);
@@ -308,9 +317,15 @@ const state: JupyterLabPlugin<IStateDB> = {
         debouncer = window.setTimeout(() => {
           state.toJSON()
             .then(data => workspaces.save(id, { data, metadata }))
-            .then(() => { delegate.resolve(undefined); })
-            .catch(reason => { delegate.reject(reason); });
-        }, immediate ? 0 : WORKSPACE_SAVE_DEBOUNCE_INTERVAL);
+            .then(() => {
+              outstanding.resolve(undefined);
+              outstanding = null;
+            })
+            .catch(reason => {
+              outstanding.reject(reason);
+              outstanding = null;
+            });
+        }, timeout);
 
         return delegate.promise;
       }
