@@ -370,8 +370,10 @@ class Cell extends Widget {
       return;
     }
     // Handle read only state.
-    this.editor.setOption('readOnly', this._readOnly);
-    this.toggleClass(READONLY_CLASS, this._readOnly);
+    if (this.editor.getOption('readOnly') !== this._readOnly) {
+      this.editor.setOption('readOnly', this._readOnly);
+      this.toggleClass(READONLY_CLASS, this._readOnly);
+    }
   }
 
   private _readOnly = false;
