@@ -1831,9 +1831,9 @@ class Notebook extends StaticNotebook {
   private _evtFocusOut(event: MouseEvent): void {
     let relatedTarget = event.relatedTarget as HTMLElement;
 
-    // Bail if focus is leaving the notebook.
-    if (!this.node.contains(relatedTarget)) {
-      this.mode = 'command';
+    // Bail if the window is losing focus, to preserve edit mode. This test
+    // assumes that we explicitly focus things rather than calling blur()
+    if (!relatedTarget) {
       return;
     }
 
@@ -1846,6 +1846,7 @@ class Notebook extends StaticNotebook {
         return;
       }
     }
+
     // Otherwise enter command mode.
     this.mode = 'command';
   }
