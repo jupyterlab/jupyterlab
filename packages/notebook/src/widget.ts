@@ -813,11 +813,8 @@ class Notebook extends StaticNotebook {
       }
       activeCell.inputHidden = false;
     } else {
-      // Blur the active cell.
-      let activeCell = this.activeCell;
-      if (activeCell) {
-        activeCell.editor.blur();
-      }
+      // Focus on the notebook document, which blurs the active cell.
+      this.node.focus();
     }
     this._stateChanged.emit({ name: 'mode', oldValue, newValue });
     this._ensureFocus();
@@ -849,9 +846,6 @@ class Notebook extends StaticNotebook {
     if (cell !== this._activeCell) {
       // Post an update request.
       this.update();
-      if (this._activeCell) {
-        this._activeCell.editor.blur();
-      }
       this._activeCell = cell;
       this._activeCellChanged.emit(cell);
     }
