@@ -160,7 +160,7 @@ module.exports = {
     fs: 'empty'
   },
   bail: true,
-  devtool: 'cheap-source-map',
+  devtool: 'cheap-module-eval-sourcemap',
   plugins: [
     new HtmlWebpackPlugin({
       template: path.join('templates', 'template.html'),
