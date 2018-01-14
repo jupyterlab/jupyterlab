@@ -173,6 +173,26 @@ To run a specific example, change to the examples directory (i.e.
 python main.py
 ```
 
+## Debugging
+
+All methods of building JupyterLab produce source maps.  The source maps
+should be available in the source files view of your browser's development
+tools under the `webpack://` header.
+
+When running JupyterLab normally, expand the `~` header to see the source maps for individual packages.
+
+When running in `--dev-mode`, the core packages are available under
+`packages/`, while the third party libraries are available under `~`.
+Note: it is recommended to use `jupyter lab --watch --dev-mode` while
+debugging.
+
+When running a test, the packages will be available at the top level
+(e.g. `application/src`), and the current set of test files available under
+`/src`.  Note: it is recommended to use `jlpm run watch` in the test folder
+while debugging (see [above](#Build and run the tests) for more info) on
+test options.
+
+
 ----
 
 ## High level Architecture
@@ -228,9 +248,6 @@ To have the system build after each source file change, run:
 ```bash
 jupyter lab --dev-mode --watch
 ```
-
-You can also run `jupyter lab --dev-mode --fast-watch` to skip
-the initial build if the assets are already built.
 
 
 ## Build Utilities
