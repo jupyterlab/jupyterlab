@@ -15,16 +15,16 @@ cells around a notebook or between notebooks with drag-and-drop).
 **JupyterLab has full support for Jupyter Notebook documents.** In
 addition, it enables other models of interactive computing, such as:
 
--  `Code Consoles <>`__ provide transient scratchpads for running code
+-  :ref:`code-consoles` provide transient scratchpads for running code
    interactively, with full support for rich output.
--  `Kernel-backed documents <>`__ allow code in any text file (Markdown,
+-  :ref:`Kernel-backed documents <kernel-backed-documents>` allow code in any text file (Markdown,
    Python, R, LaTeX, etc.) to be run interactively in any Jupyter
    kernel.
 
 JupyterLab also offers a unified model for viewing and handling data
 formats. This allows data in many formats (images, CSV, JSON, Markdown,
 PDF, Vega, Vega-Lite, etc.) to be opened as a file or returned by a
-kernel as rich output. See `File and output formats <>`__ for more
+kernel as rich output. See :ref:`file-and-output-formats` for more
 information.
 
 JupyterLab is served from the same

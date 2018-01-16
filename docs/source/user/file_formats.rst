@@ -1,3 +1,5 @@
+.. _file-and-output-formats:
+
 File and output formats
 -----------------------
 

@@ -6,7 +6,7 @@ They can provide new file viewer types, launcher activities, and output
 renderers, among many other things. JupyterLab extensions are
 `npm <https://www.npmjs.com/>`__ packages (the standard package format
 in Javascript development). For information about developing extensions,
-see the `developer documentation <>`__.
+see the :ref:`developer documentation <developer-guide>`.
 
 In order to install JupyterLab extensions, you need to have Node.js
 version 4+ installed.

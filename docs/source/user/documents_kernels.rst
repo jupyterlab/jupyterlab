@@ -1,3 +1,5 @@
+.. _kernel-backed-documents:
+
 Documents and kernels
 ~~~~~~~~~~~~~~~~~~~~~
 

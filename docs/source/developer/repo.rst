@@ -1,3 +1,5 @@
+.. _developer-guide:
+
 General Codebase Orientation
 ----------------------------
 

@@ -409,7 +409,7 @@ Rebuild your extension if necessary (``npm run build``), refresh your
 browser tab, and run the *Random xkcd comic* command again. You should
 now see a comic in the xkcd.com panel when it opens.
 
-|Empty xkcd extension panel|
+|Single xkcd extension panel|
 
 Note that the comic is not centered in the panel nor does the panel
 scroll if the comic is larger than the panel area. Also note that the
@@ -860,7 +860,7 @@ learning, here are some suggestions about what to try next:
 
 .. |Completed xkcd extension screenshot| image:: xkcd_tutorial_complete.png
 .. |Empty xkcd extension panel| image:: xkcd_tutorial_empty.png
-.. |Empty xkcd extension panel| image:: xkcd_tutorial_single.png
+.. |Single xkcd extension panel| image:: xkcd_tutorial_single.png
 .. |Styled xkcd panel with attribution| image:: xkcd_tutorial_complete.png
 .. |Extension page on npmjs.com| image:: xkcd_tutorial_npm.png
 

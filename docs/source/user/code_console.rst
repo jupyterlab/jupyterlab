@@ -1,3 +1,5 @@
+.. _code-consoles:
+
 Code Consoles
 -------------
 
