@@ -286,7 +286,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
 
         // Add the kernel info help_links to the Help menu.
         const kernelGroup: Menu.IItemOptions[] = [];
-        session.kernel.info.help_links.forEach((link) => {
+        (session.kernel.info.help_links || []).forEach((link) => {
           const commandId = `help-menu-${name}:${link.text}`;
           commands.addCommand(commandId, {
             label: link.text,
