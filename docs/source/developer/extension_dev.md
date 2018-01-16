@@ -232,6 +232,7 @@ In addition to the file system that is accessed by using the `@jupyterlab/servic
 
 ### State Database
 The state database can be accessed by importing `IStateDB` from `@jupyterlab/coreutils` and adding it to the list of `requires` for a plugin:
+
 ```typescript
 const id = 'foo-extension:IFoo';
 
@@ -263,21 +264,24 @@ const plugin: JupyterLabPlugin<IFoo> = {
 
 
 ### Context Menus
+
 JupyterLab has an application-wide context menu available as `app.contextMenu`.
-See the Phosphor [docs](http://phosphorjs.github.io/phosphor/api/widgets/interfaces/contextmenu.iitemoptions.html) for the item creation options.
+See the Phosphor [docs](http://phosphorjs.github.io/phosphor/api/widgets/interfaces/contextmenu.iitemoptions.html)
+for the item creation options.
 If you wish to preempt the the application context menu, you can use a
- `'contextmenu'` event listener and call `event.stopPropagation`
+'contextmenu' event listener and call `event.stopPropagation`
 to prevent the application context menu handler from being called (it is
 listening in the bubble phase on the `document`).  At this point you could
-show your own Phosphor [contextMenu](http://phosphorjs.github.io/phosphor/api/widgets/classes/contextmenu.html), or simply stop propagation and let the
-system context menu be shown. This would look something like the following in a
-`Widget` subclass:
+show your own Phosphor
+[contextMenu](http://phosphorjs.github.io/phosphor/api/widgets/classes/contextmenu.html),
+or simply stop propagation and let the system context menu be shown. This would
+look something like the following in a `Widget` subclass:
 
 ```javascript
-# In `onAfterAttach()`
+// In `onAfterAttach()`
 this.node.addEventListener('contextmenu', this);
 
-# In `handleEvent()`
+// In `handleEvent()`
 case 'contextmenu':
   event.stopPropagation();
 ```
