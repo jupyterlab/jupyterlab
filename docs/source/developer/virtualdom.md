@@ -11,7 +11,7 @@ In situations where these feature are needed, we recommend using Phosphor's
 `Widget` class directly.
 
 The idea of virtual DOM rendering, which became popular in the
-[React](https://facebook.github.io/react/) community, is a very elegant and
+[React](https://nodejs.org/en/) community, is a very elegant and
 efficient way of rendering and updating DOM content in response to model/state
 changes.
 

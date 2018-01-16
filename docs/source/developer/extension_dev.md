@@ -117,7 +117,6 @@ reversed by running
 
 ```
 jlpm run remove:package <extension-dir-name>
-=======
 ```
 
 This will remove the package metadata from the source tree, but wil **not**
@@ -188,7 +187,7 @@ for an example.  Ensure that the theme files are included in the
 an `embed.css` file that can be consumed outside of a JupyterLab application.
 
 To quickly create a theme based on the JupyterLab Light Theme, follow the
-instructions in the [contributing guide](https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md#setting-up-a-development-environment)
+instructions in the [contributing guide](CONTRIBUTING.html#setting-up-a-development-environment)
 and then run `jlpm run create:theme` from the repository root directory.
 Once you select a name, title and a description, a new theme folder will be
 created  in the current directory.  You can move that new folder to a location
@@ -199,7 +198,7 @@ The theme extension is installed the same as a regular extension (see
 
 ## Standard (General-Purpose) Extensions
 See the example,
-[How to Extend the Notebook Plugin](./notebook.md#how-to-extend-the-notebook-plugin). Notice that the mime
+[How to Extend the Notebook Plugin](./notebook.html#how-to-extend-the-notebook-plugin). Notice that the mime
 renderer and themes extensions above use a limited, simplified interface to
 JupyterLab's extension system. Modifying the notebook plugin requires the full,
 general-purpose interface to the extension system.
@@ -233,6 +232,7 @@ In addition to the file system that is accessed by using the `@jupyterlab/servic
 
 ### State Database
 The state database can be accessed by importing `IStateDB` from `@jupyterlab/coreutils` and adding it to the list of `requires` for a plugin:
+
 ```typescript
 const id = 'foo-extension:IFoo';
 
@@ -264,23 +264,24 @@ const plugin: JupyterLabPlugin<IFoo> = {
 
 
 ### Context Menus
+
 JupyterLab has an application-wide context menu available as `app.contextMenu`.
-See the Phosphor [docs](http://phosphorjs.github.io/phosphor/api/widgets/interfaces/contextmenu.iitemoptions.html) for the item creation options.
+See the Phosphor [docs](http://phosphorjs.github.io/phosphor/api/widgets/interfaces/contextmenu.iitemoptions.html)
+for the item creation options.
 If you wish to preempt the the application context menu, you can use a
- `'contextmenu'` event listener and call `event.stopPropagation`
+'contextmenu' event listener and call `event.stopPropagation`
 to prevent the application context menu handler from being called (it is
 listening in the bubble phase on the `document`).  At this point you could
-show your own Phosphor [contextMenu](http://phosphorjs.github.io/phosphor/api/widgets/classes/contextmenu.html), or simply stop propagation and let the
-system context menu be shown. This would look something like the following in a
-`Widget` subclass:
+show your own Phosphor
+[contextMenu](http://phosphorjs.github.io/phosphor/api/widgets/classes/contextmenu.html),
+or simply stop propagation and let the system context menu be shown. This would
+look something like the following in a `Widget` subclass:
 
 ```javascript
-# In `onAfterAttach()`
+// In `onAfterAttach()`
 this.node.addEventListener('contextmenu', this);
 
-# In `handleEvent()`
+// In `handleEvent()`
 case 'contextmenu':
   event.stopPropagation();
 ```
-
-

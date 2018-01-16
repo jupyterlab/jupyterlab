@@ -58,7 +58,7 @@ to each widget or observe the widget and/or its context.
 
 Intended to be used in a "Create New" dialog, providing a list of known file types.
 
-### [File Creators](http://jupyterlab.github.io/jupyterlab/classes/_docregistry_src_registry_.documentregistry.html#addcreator)
+### [File Creators](http://jupyterlab.github.io/jupyterlab/classes/_docregistry_src_registry_.documentregistry.html)
 
 Intended for create quick launch file creators.
 
