@@ -15,7 +15,7 @@ If you use ``conda``, you can get it with:
 conda -c conda-forge install nodejs
 ```
 
-If you use [Homebrew](http://brew.sh/) on Mac OS X:
+If you use [Homebrew](https://brew.sh/) on Mac OS X:
 
 ```bash
 brew install node
