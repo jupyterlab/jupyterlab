@@ -117,7 +117,6 @@ reversed by running
 
 ```
 jlpm run remove:package <extension-dir-name>
-=======
 ```
 
 This will remove the package metadata from the source tree, but wil **not**
