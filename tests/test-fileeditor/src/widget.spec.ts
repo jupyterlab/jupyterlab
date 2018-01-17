@@ -108,14 +108,6 @@ describe('fileeditorcodewrapper', () => {
         }).then(done, done);
       });
 
-      it('should add the dirty class when the model is dirty', (done) => {
-        context.save().catch(done);
-        context.ready.then(() => {
-          context.model.fromString('bar');
-          expect(widget.title.className).to.contain('jp-mod-dirty');
-        }).then(done, done);
-      });
-
     });
 
     describe('#context', () => {
@@ -188,6 +180,14 @@ describe('fileeditorcodewrapper', () => {
         context.save().then(() => {
           return manager.contents.rename(context.path, path);
         }).catch(done);
+      });
+
+      it('should add the dirty class when the model is dirty', (done) => {
+        context.save().catch(done);
+        context.ready.then(() => {
+          context.model.fromString('bar');
+          expect(widget.title.className).to.contain('jp-mod-dirty');
+        }).then(done, done);
       });
 
     });
