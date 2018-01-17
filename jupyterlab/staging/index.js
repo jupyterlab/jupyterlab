@@ -149,13 +149,18 @@ function main() {
   // eslint-disable-next-line semi
   {{/each}}
 
-  var lab = window.lab = new JupyterLab({
+  var lab = new JupyterLab({
     mimeExtensions: mimeExtensions,
     disabled: disabled,
     deferred: deferred
   });
   register.forEach(function(item) { lab.registerPluginModule(item); });
   lab.start({ ignorePlugins: ignorePlugins });
+
+  // Expose global lab instance when in dev mode.
+  if ((PageConfig.getOption('devMode') || '').toLowerCase() === 'true') {
+    window.lab = lab;
+  }
 
   // Handle a selenium test.
   var seleniumTest = PageConfig.getOption('seleniumTest');
