@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IChangedArgs, uuid
+  IChangedArgs
 } from '@jupyterlab/coreutils';
 
 import {
@@ -92,28 +92,18 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
           'type': 'document-title',
           ...widget.title.dataset
         };
-        if (!widget.isAttached && (widget as any).ready !== undefined) {
-          // Add a loading spinner, and remove it when the widget is ready.
-          let spinner = new Spinner();
-          spinner.id = uuid();
-          spinner.title.label = widget.title.label;
-          shell.addToMainArea(spinner, options || {});
-          shell.activateById(spinner.id);
+        if (!widget.isAttached) {
+          app.shell.addToMainArea(widget, options || {});
 
-          (widget as any).ready.then(() => {
-            const isCurrent = app.shell.currentWidget === spinner;
-            app.shell.addToMainArea(widget, {...options, ref: spinner.id });
+          // Add a loading spinner, and remove it when the widget is ready.
+          const spinner = new Spinner();
+          widget.node.appendChild(spinner.node);
+          widget.ready.then(() => {
+            widget.node.removeChild(spinner.node);
             spinner.dispose();
-            if (isCurrent) {
-              shell.activateById(widget.id);
-            }
           });
-        } else if (!widget.isAttached) {
-          shell.addToMainArea(widget, options || {});
-          shell.activateById(widget.id);
-        } else {
-          shell.activateById(widget.id);
         }
+        shell.activateById(widget.id);
 
         // Handle dirty state for open documents.
         let context = docManager.contextForWidget(widget);
