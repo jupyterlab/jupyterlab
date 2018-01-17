@@ -19,7 +19,7 @@ require('font-awesome/css/font-awesome.min.css');
  * The main entry point for the application.
  */
 function main() {
-  var app = window.lab = require('@jupyterlab/application').JupyterLab;
+  var JupyterLab = require('@jupyterlab/application').JupyterLab;
 
   // Get the disabled extensions.
   var disabled = { patterns: [], matches: [] };
@@ -149,10 +149,10 @@ function main() {
   // eslint-disable-next-line semi
   {{/each}}
 
-  var lab = new app({
+  var lab = window.lab = new JupyterLab({
     mimeExtensions: mimeExtensions,
     disabled: disabled,
-    deferred: deferred,
+    deferred: deferred
   });
   register.forEach(function(item) { lab.registerPluginModule(item); });
   lab.start({ ignorePlugins: ignorePlugins });
