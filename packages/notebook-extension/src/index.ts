@@ -1287,9 +1287,9 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled: isEnabledAndSingleSelected
   });
   commands.addCommand(CommandIDs.createConsole, {
-    label: 'Create Console for Notebook',
+    label: 'New Console for Notebook',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent({ ...args, activate: false });
       const widget = tracker.currentWidget;
 
       if (!current || !widget) {
@@ -1653,7 +1653,10 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
     createConsole: current => {
       const options: ReadonlyJSONObject = {
         path: current.context.path,
-        preferredLanguage: current.context.model.defaultKernelLanguage
+        preferredLanguage: current.context.model.defaultKernelLanguage,
+        activate: true,
+        ref: current.id,
+        insertMode: 'split-bottom'
       };
       return commands.execute('console:create', options);
     }
