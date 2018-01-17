@@ -327,9 +327,17 @@ class DefaultKernel implements Kernel.IKernel {
    * invalid.
    */
   restart(): Promise<void> {
+    return Private.restartKernel(this, this.serverSettings);
+  }
+
+  /**
+   * Handle a restart on the kernel.  This is not part of the `IKernel`
+   * interface.
+   */
+  handleRestart(): void {
     this._clearState();
     this._updateStatus('restarting');
-    return Private.restartKernel(this, this.serverSettings);
+    this._clearSocket();
   }
 
   /**
@@ -339,16 +347,7 @@ class DefaultKernel implements Kernel.IKernel {
    * Used when the websocket connection to the kernel is lost.
    */
   reconnect(): Promise<void> {
-    this._isReady = false;
-    if (this._ws !== null) {
-      // Clear the websocket event handlers and the socket itself.
-      this._ws.onopen = this._noOp;
-      this._ws.onclose = this._noOp;
-      this._ws.onerror = this._noOp;
-      this._ws.onmessage = this._noOp;
-      this._ws.close();
-      this._ws = null;
-    }
+    this._clearSocket();
     this._updateStatus('reconnecting');
     this._createSocket();
     return this._connectionPromise.promise;
@@ -689,10 +688,16 @@ class DefaultKernel implements Kernel.IKernel {
    */
   private _clearSocket(): void {
     this._wsStopped = true;
+    this._isReady = false;
     if (this._ws !== null) {
+      // Clear the websocket event handlers and the socket itself.
+      this._ws.onopen = this._noOp;
+      this._ws.onclose = this._noOp;
+      this._ws.onerror = this._noOp;
+      this._ws.onmessage = this._noOp;
       this._ws.close();
+      this._ws = null;
     }
-    this._ws = null;
   }
 
   /**
@@ -1342,6 +1347,12 @@ namespace Private {
       encodeURIComponent(kernel.id), 'restart'
     );
     let init = { method: 'POST' };
+    // Handle the restart on all of the kernels with the same id.
+    each(runningKernels, k => {
+      if (k.id === kernel.id) {
+        k.handleRestart();
+      }
+    });
     return ServerConnection.makeRequest(url, init, settings).then(response => {
       if (response.status !== 200) {
         throw new ServerConnection.ResponseError(response);
@@ -1349,6 +1360,13 @@ namespace Private {
       return response.json();
     }).then(data => {
       validate.validateModel(data);
+      // Reconnect the other kernels asynchronously.
+      each(runningKernels, k => {
+        if (k !== kernel && k.id === kernel.id) {
+          k.reconnect();
+        }
+      });
+      return kernel.reconnect();
     });
   }
 

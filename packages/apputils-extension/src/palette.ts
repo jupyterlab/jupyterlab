@@ -68,7 +68,7 @@ class Palette implements ICommandPalette {
    */
   addItem(options: IPaletteItem): IDisposable {
     let item = this._palette.addItem(options as CommandPalette.IItemOptions);
-    return new DisposableDelegate(() => this._palette.removeItem(item));
+    return new DisposableDelegate(() => { this._palette.removeItem(item); });
   }
 
   private _palette: CommandPalette;

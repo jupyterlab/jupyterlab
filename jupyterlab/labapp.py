@@ -13,7 +13,7 @@ from ._version import __version__
 from .extension import load_jupyter_server_extension
 from .commands import (
     build, clean, get_app_dir, get_user_settings_dir, get_app_version,
-    ensure_dev
+    get_workspaces_dir
 )
 
 
@@ -22,6 +22,11 @@ build_aliases['app-dir'] = 'LabBuildApp.app_dir'
 build_aliases['name'] = 'LabBuildApp.name'
 build_aliases['version'] = 'LabBuildApp.version'
 
+build_flags = dict(flags)
+build_flags['dev'] = (
+    {'LabBuildApp': {'dev_build': True}},
+    "Build in Development mode"
+)
 
 version = __version__
 app_version = get_app_version()
@@ -39,6 +44,7 @@ class LabBuildApp(JupyterApp):
     directory, where it is used to serve the application.
     """
     aliases = build_aliases
+    flags = build_flags
 
     app_dir = Unicode('', config=True,
         help="The app directory to build in")
@@ -49,8 +55,13 @@ class LabBuildApp(JupyterApp):
     version = Unicode('', config=True,
         help="The version of the built application")
 
+    dev_build = Bool(False, config=True,
+        help="Whether to build in dev mode (defaults to production mode)")
+
     def start(self):
-        build(self.app_dir, self.name, self.version)
+        command = 'build:prod' if not self.dev_build else 'build'
+        build(app_dir=self.app_dir, name=self.name, version=self.version,
+              command=command, logger=self.log)
 
 
 clean_aliases = dict(base_aliases)
@@ -83,11 +94,15 @@ class LabPathApp(JupyterApp):
     The user settings path can be configured using the JUPYTERLAB_SETTINGS_DIR
         environment variable or it will fall back to
         `/lab/user-settings` in the default Jupyter configuration directory.
+    The workspaces path can be configured using the JUPYTERLAB_WORKSPACES_DIR
+        environment variable or it will fall back to
+        '/lab/workspaces' in the default Jupyter configuration directory.
     """
 
     def start(self):
         print('Application directory:   %s' % get_app_dir())
         print('User Settings directory: %s' % get_user_settings_dir())
+        print('Workspaces directory %s' % get_workspaces_dir())
 
 
 lab_aliases = dict(aliases)
@@ -155,6 +170,12 @@ class LabApp(NotebookApp):
 
     app_dir = Unicode(get_app_dir(), config=True,
         help="The app directory to launch JupyterLab from.")
+
+    user_settings_dir = Unicode(get_user_settings_dir(), config=True,
+        help="The directory for user settings.")
+
+    workspaces_dir = Unicode(get_workspaces_dir(), config=True,
+        help="The directory for workspaces")
 
     core_mode = Bool(False, config=True,
         help="""Whether to start the app in core mode. In this mode, JupyterLab

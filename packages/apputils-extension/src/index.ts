@@ -4,11 +4,11 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  ILayoutRestorer, JupyterLab, JupyterLabPlugin
+  ILayoutRestorer, IRouter, JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, IThemeManager, ThemeManager, ISplashScreen
+  Dialog, ICommandPalette, IThemeManager, ThemeManager, ISplashScreen
 } from '@jupyterlab/apputils';
 
 import {
@@ -24,15 +24,11 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  each
-} from '@phosphor/algorithm';
-
-import {
-  JSONObject
+  PromiseDelegate
 } from '@phosphor/coreutils';
 
 import {
-  DisposableDelegate, IDisposable
+  DisposableDelegate, DisposableSet, IDisposable
 } from '@phosphor/disposable';
 
 import {
@@ -47,14 +43,36 @@ import '../style/index.css';
 
 
 /**
+ * The interval in milliseconds that calls to save a workspace are debounced
+ * to allow for multiple quickly executed state changes to result in a single
+ * workspace save operation.
+ */
+const WORKSPACE_SAVE_DEBOUNCE_INTERVAL = 2000;
+
+/**
+ * The interval in milliseconds before recover options appear during splash.
+ */
+const SPLASH_RECOVER_TIMEOUT = 12000;
+
+
+/**
  * The command IDs used by the apputils plugin.
  */
 namespace CommandIDs {
   export
-  const clearStateDB = 'apputils:clear-statedb';
+  const changeTheme = 'apputils:change-theme';
 
   export
-  const changeTheme = 'apputils:change-theme';
+  const clearState = 'apputils:clear-statedb';
+
+  export
+  const loadState = 'apputils:load-statedb';
+
+  export
+  const recoverState = 'apputils:recover-statedb';
+
+  export
+  const saveState = 'apputils:save-statedb';
 }
 
 
@@ -160,11 +178,11 @@ const themes: JupyterLabPlugin<IThemeManager> = {
       const themeMenu = new Menu({ commands });
       themeMenu.title.label = 'JupyterLab Theme';
       manager.ready.then(() => {
-        each(manager.themes, theme => {
-          themeMenu.addItem({
-            command: CommandIDs.changeTheme,
-            args: { isPalette: false, theme: theme }
-          });
+        const command = CommandIDs.changeTheme;
+        const isPalette = false;
+
+        manager.themes.forEach(theme => {
+          themeMenu.addItem({ command, args: { isPalette, theme } });
         });
       });
       mainMenu.settingsMenu.addGroup([{
@@ -172,17 +190,15 @@ const themes: JupyterLabPlugin<IThemeManager> = {
       }], 0);
     }
 
-    // If we have a command palette, add theme
-    // switching options to it.
+    // If we have a command palette, add theme switching options to it.
     if (palette) {
-      const category = 'Settings';
       manager.ready.then(() => {
-        each(manager.themes, theme => {
-          palette.addItem({
-            command: CommandIDs.changeTheme,
-            args: { isPalette: true, theme: theme },
-            category
-          });
+        const category = 'Settings';
+        const command = CommandIDs.changeTheme;
+        const isPalette = true;
+
+        manager.themes.forEach(theme => {
+          palette.addItem({ command, args: { isPalette, theme }, category });
         });
       });
     }
@@ -201,10 +217,13 @@ const splash: JupyterLabPlugin<ISplashScreen> = {
   id: '@jupyterlab/apputils-extension:splash',
   autoStart: true,
   provides: ISplashScreen,
-  activate: () => {
+  activate: app => {
     return {
       show: () => {
-        return Private.showSplash();
+        const { commands, restored } = app;
+        const recovery = () => { commands.execute(CommandIDs.recoverState); };
+
+        return Private.showSplash(restored, recovery);
       }
     };
   }
@@ -218,31 +237,150 @@ const state: JupyterLabPlugin<IStateDB> = {
   id: '@jupyterlab/apputils-extension:state',
   autoStart: true,
   provides: IStateDB,
-  activate: (app: JupyterLab) => {
+  requires: [IRouter],
+  activate: (app: JupyterLab, router: IRouter) => {
+    let command: string;
+    let debouncer: number;
+    let resolved = false;
+    let workspace = '';
+
+    const { commands, info, serviceManager } = app;
+    const { workspaces } = serviceManager;
+    const transform = new PromiseDelegate<StateDB.DataTransform>();
     const state = new StateDB({
-      namespace: app.info.namespace,
-      when: app.restored.then(() => { /* no-op */ })
+      namespace: info.namespace,
+      transform: transform.promise
     });
-    const version = app.info.version;
-    const key = 'statedb:version';
-    const fetch = state.fetch(key);
-    const save = () => state.save(key, { version });
-    const reset = () => state.clear().then(save);
-    const check = (value: JSONObject) => {
-      let old = value && value['version'];
-      if (!old || old !== version) {
-        const previous = old || 'unknown';
-        console.log(`Upgraded: ${previous} to ${version}; Resetting DB.`);
-        return reset();
+    const disposables = new DisposableSet();
+    const pattern = /^\/workspaces\/(.+)/;
+    const unload = () => {
+      disposables.dispose();
+      router.routed.disconnect(unload, state);
+
+      // If the request that was routed did not contain a workspace,
+      // leave the database intact.
+      if (!resolved) {
+        resolved = true;
+        transform.resolve({ type: 'cancel', contents: null });
       }
     };
 
-    app.commands.addCommand(CommandIDs.clearStateDB, {
+    command = CommandIDs.clearState;
+    commands.addCommand(command, {
       label: 'Clear Application Restore State',
       execute: () => state.clear()
     });
 
-    return fetch.then(check, reset).then(() => state);
+    command = CommandIDs.recoverState;
+    commands.addCommand(command, {
+      execute: () => {
+        const immediate = true;
+        const silent = true;
+
+        // Clear the state silenty so that the state changed signal listener
+        // will not be triggered as it causes a save state, but the save state
+        // promise is lost and cannot be used to reload the application.
+        return state.clear(silent)
+          .then(() => commands.execute(CommandIDs.saveState, { immediate }))
+          .then(() => { document.location.reload(); })
+          .catch(() => { document.location.reload(); });
+      }
+    });
+
+    // Conflate all outstanding requests to the save state command that happen
+    // within the `WORKSPACE_SAVE_DEBOUNCE_INTERVAL` into a single promise.
+    let conflated: PromiseDelegate<void> | null = null;
+
+    command = CommandIDs.saveState;
+    commands.addCommand(command, {
+      label: () => `Save Workspace (${workspace})`,
+      isEnabled: () => !!workspace,
+      execute: args => {
+        if (!workspace) {
+          return;
+        }
+
+        const timeout = args.immediate ? 0 : WORKSPACE_SAVE_DEBOUNCE_INTERVAL;
+        const id = workspace;
+        const metadata = { id };
+
+        // Only instantiate a new conflated promise if one is not outstanding.
+        if (!conflated) {
+          conflated = new PromiseDelegate<void>();
+        }
+
+        if (debouncer) {
+          window.clearTimeout(debouncer);
+        }
+
+        debouncer = window.setTimeout(() => {
+          state.toJSON()
+            .then(data => workspaces.save(id, { data, metadata }))
+            .then(() => {
+              conflated.resolve(undefined);
+              conflated = null;
+            })
+            .catch(reason => {
+              conflated.reject(reason);
+              conflated = null;
+            });
+        }, timeout);
+
+        return conflated.promise;
+      }
+    });
+
+    command = CommandIDs.loadState;
+    disposables.add(commands.addCommand(command, {
+      execute: (args: IRouter.ICommandArgs) => {
+        // Populate the workspace placeholder.
+        workspace = decodeURIComponent((args.path.match(pattern)[1]));
+
+        // This command only runs once, when the page loads.
+        if (resolved) {
+          console.warn(`${command} was called after state resolution.`);
+          return;
+        }
+
+        // If there is no workspace, leave the state database intact.
+        if (!workspace) {
+          resolved = true;
+          transform.resolve({ type: 'cancel', contents: null });
+          return;
+        }
+
+        // Any time the local state database changes, save the workspace.
+        state.changed.connect((sender: any, change: StateDB.Change) => {
+          commands.execute(CommandIDs.saveState);
+        });
+
+        // Fetch the workspace and overwrite the state database.
+        return workspaces.fetch(workspace).then(session => {
+          if (!resolved) {
+            resolved = true;
+            transform.resolve({ type: 'overwrite', contents: session.data });
+          }
+        }).catch(reason => {
+          console.warn(`Fetching workspace (${workspace}) failed.`, reason);
+
+          // If the workspace does not exist, cancel the data transformation and
+          // save a workspace with the current user state data.
+          if (!resolved) {
+            resolved = true;
+            transform.resolve({ type: 'cancel', contents: null });
+          }
+
+          return commands.execute(CommandIDs.saveState);
+        });
+      }
+    }));
+    disposables.add(router.register({ command, pattern }));
+
+    // After the first route in the application lifecycle has been routed,
+    // stop listening to routing events.
+    router.routed.connect(unload, state);
+
+    return state;
   }
 };
 
@@ -256,15 +394,87 @@ const plugins: JupyterLabPlugin<any>[] = [
 export default plugins;
 
 
-
 /**
  * The namespace for module private data.
  */
 namespace Private {
   /**
+   * Create a splash element.
+   */
+  function createSplash(): HTMLElement {
+      const splash = document.createElement('div');
+      const galaxy = document.createElement('div');
+      const logo = document.createElement('div');
+
+      splash.id = 'jupyterlab-splash';
+      galaxy.id = 'galaxy';
+      logo.id = 'main-logo';
+
+      galaxy.appendChild(logo);
+      ['1', '2', '3'].forEach(id => {
+        const moon = document.createElement('div');
+        const planet = document.createElement('div');
+
+        moon.id = `moon${id}`;
+        moon.className = 'moon orbit';
+        planet.id = `planet${id}`;
+        planet.className = 'planet';
+
+        moon.appendChild(planet);
+        galaxy.appendChild(moon);
+      });
+
+      splash.appendChild(galaxy);
+
+      return splash;
+  }
+
+  /**
+   * A debouncer for recovery attempts.
+   */
+  let debouncer = 0;
+
+  /**
+   * The recovery dialog.
+   */
+  let dialog: Dialog<any>;
+
+  /**
+   * Allows the user to clear state if splash screen takes too long.
+   */
+  function recover(fn: () => void): void {
+    if (dialog) {
+      return;
+    }
+
+    dialog = new Dialog({
+      title: 'Loading...',
+      body: `The loading screen is taking a long time.
+        Would you like to clear the workspace or keep waiting?`,
+      buttons: [
+        Dialog.cancelButton({ label: 'Keep Waiting' }),
+        Dialog.warnButton({ label: 'Clear Workspace' })
+      ]
+    });
+
+    dialog.launch().then(result => {
+      if (result.button.accept) {
+        return fn();
+      }
+
+      dialog.dispose();
+      dialog = null;
+
+      debouncer = window.setTimeout(() => {
+        recover(fn);
+      }, SPLASH_RECOVER_TIMEOUT);
+    });
+  }
+
+  /**
    * The splash element.
    */
-  let splash: HTMLElement | null;
+  const splash = createSplash();
 
   /**
    * The splash screen counter.
@@ -273,58 +483,42 @@ namespace Private {
 
   /**
    * Show the splash element.
+   *
+   * @param ready - A promise that must be resolved before splash disappears.
+   *
+   * @param recovery - A function that recovers from a hanging splash.
    */
   export
-  function showSplash(): IDisposable {
-    if (!splash) {
-      splash = document.createElement('div');
-      splash.id = 'jupyterlab-splash';
-
-      let galaxy = document.createElement('div');
-      galaxy.id = 'galaxy';
-      splash.appendChild(galaxy);
-
-      let mainLogo = document.createElement('div');
-      mainLogo.id = 'main-logo';
-
-      let planet = document.createElement('div');
-      let planet2 = document.createElement('div');
-      let planet3 = document.createElement('div');
-      planet.className = 'planet';
-      planet2.className = 'planet';
-      planet3.className = 'planet';
-
-      let moon1 = document.createElement('div');
-      moon1.id = 'moon1';
-      moon1.className = 'moon orbit';
-      moon1.appendChild(planet);
-
-      let moon2 = document.createElement('div');
-      moon2.id = 'moon2';
-      moon2.className = 'moon orbit';
-      moon2.appendChild(planet2);
-
-      let moon3 = document.createElement('div');
-      moon3.id = 'moon3';
-      moon3.className = 'moon orbit';
-      moon3.appendChild(planet3);
-
-      galaxy.appendChild(mainLogo);
-      galaxy.appendChild(moon1);
-      galaxy.appendChild(moon2);
-      galaxy.appendChild(moon3);
-    }
+  function showSplash(ready: Promise<any>, recovery: () => void): IDisposable {
     splash.classList.remove('splash-fade');
-    document.body.appendChild(splash);
     splashCount++;
+
+    if (debouncer) {
+      window.clearTimeout(debouncer);
+    }
+    debouncer = window.setTimeout(() => {
+      recover(recovery);
+    }, SPLASH_RECOVER_TIMEOUT);
+
+    document.body.appendChild(splash);
+
     return new DisposableDelegate(() => {
-      splashCount = Math.max(splashCount - 1, 0);
-      if (splashCount === 0 && splash) {
-        splash.classList.add('splash-fade');
-        setTimeout(() => {
-          document.body.removeChild(splash);
-        }, 500);
-      }
+      ready.then(() => {
+        if (--splashCount === 0) {
+          if (debouncer) {
+            window.clearTimeout(debouncer);
+            debouncer = 0;
+          }
+
+          if (dialog) {
+            dialog.dispose();
+            dialog = null;
+          }
+
+          splash.classList.add('splash-fade');
+          window.setTimeout(() => { document.body.removeChild(splash); }, 500);
+        }
+      });
     });
   }
 }

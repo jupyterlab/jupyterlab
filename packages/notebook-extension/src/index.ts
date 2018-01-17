@@ -60,7 +60,6 @@ import {
 } from '@phosphor/widgets';
 
 
-
 /**
  * The command IDs used by the notebook plugin.
  */
@@ -245,6 +244,11 @@ namespace CommandIDs {
   export
   const showAllOutputs = 'notebook:show-all-cell-outputs';
 
+  export
+  const enableOutputScrolling = 'notebook:enable-output-scrolling';
+
+  export
+  const disableOutputScrolling = 'notebook:disable-output-scrolling';
 }
 
 
@@ -450,19 +454,25 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
       settings.get('codeCellConfig').composite as Partial<CodeEditor.IConfig>;
     let code = { ...StaticNotebook.defaultEditorConfig.code };
     Object.keys(code).forEach((key: keyof CodeEditor.IConfig) => {
-      code[key] = cached[key] === null ? code[key] : cached[key];
+      code[key] = (cached[key] === null || cached[key] === undefined)
+                  ? code[key]
+                  : cached[key];
     });
     cached =
       settings.get('markdownCellConfig').composite as Partial<CodeEditor.IConfig>;
     let markdown = { ...StaticNotebook.defaultEditorConfig.markdown };
     Object.keys(markdown).forEach((key: keyof CodeEditor.IConfig) => {
-      markdown[key] = cached[key] === null ? markdown[key] : cached[key];
+      markdown[key] = (cached[key] === null || cached[key] === undefined)
+                      ? markdown[key]
+                      : cached[key];
     });
     cached =
       settings.get('rawCellConfig').composite as Partial<CodeEditor.IConfig>;
     let raw = { ...StaticNotebook.defaultEditorConfig.raw };
     Object.keys(raw).forEach((key: keyof CodeEditor.IConfig) => {
-      raw[key] = cached[key] === null ? raw[key] : cached[key];
+      raw[key] = (cached[key] === null || cached[key] === undefined)
+                 ? raw[key]
+                 : cached[key];
     });
     factory.editorConfig = editorConfig = { code, markdown, raw };
   }
@@ -541,18 +551,92 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
     });
   }
 
+  // Cell context menu groups
   app.contextMenu.addItem({
-    command: CommandIDs.clearOutputs,
-    selector: '.jp-Notebook .jp-Cell'
+    type: 'separator',
+    selector: '.jp-Notebook .jp-Cell',
+    rank: 0
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.cut,
+    selector: '.jp-Notebook .jp-Cell',
+    rank: 1
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.copy,
+    selector: '.jp-Notebook .jp-Cell',
+    rank: 2
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.pasteBelow,
+    selector: '.jp-Notebook .jp-Cell',
+    rank: 3
+  });
+  app.contextMenu.addItem({
+    type: 'separator',
+    selector: '.jp-Notebook .jp-Cell',
+    rank: 4
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.deleteCell,
+    selector: '.jp-Notebook .jp-Cell',
+    rank: 5
+  });
+  app.contextMenu.addItem({
+    type: 'separator',
+    selector: '.jp-Notebook .jp-Cell',
+    rank: 6
   });
   app.contextMenu.addItem({
     command: CommandIDs.split,
-    selector: '.jp-Notebook .jp-Cell'
+    selector: '.jp-Notebook .jp-Cell',
+    rank: 7
+  });
+
+  // CodeCell context menu groups
+  app.contextMenu.addItem({
+    type: 'separator',
+    selector: '.jp-Notebook .jp-CodeCell',
+    rank: 8
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.clearOutputs,
+    selector: '.jp-Notebook .jp-CodeCell',
+    rank: 9
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.clearAllOutputs,
+    selector: '.jp-Notebook .jp-CodeCell',
+    rank: 10
+  });
+  app.contextMenu.addItem({
+    type: 'separator',
+    selector: '.jp-Notebook .jp-CodeCell',
+    rank: 11
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.enableOutputScrolling,
+    selector: '.jp-Notebook .jp-CodeCell',
+    rank: 12
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.disableOutputScrolling,
+    selector: '.jp-Notebook .jp-CodeCell',
+    rank: 13
+  });
+  app.contextMenu.addItem({
+    type: 'separator',
+    selector: '.jp-Notebook .jp-CodeCell',
+    rank: 14
   });
   app.contextMenu.addItem({
     command: CommandIDs.createOutputView,
-    selector: '.jp-Notebook .jp-Cell'
+    selector: '.jp-Notebook .jp-CodeCell',
+    rank: 15
   });
+
+
+  // Notebook context menu groups
   app.contextMenu.addItem({
     type: 'separator',
     selector: '.jp-Notebook',
@@ -571,18 +655,15 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
   app.contextMenu.addItem({
     type: 'separator',
     selector: '.jp-Notebook',
-    rank: 0
+    rank: 3
   });
   app.contextMenu.addItem({
     command: CommandIDs.createConsole,
     selector: '.jp-Notebook',
-    rank: 3
+    rank: 4
   });
-  app.contextMenu.addItem({
-    command: CommandIDs.clearAllOutputs,
-    selector: '.jp-Notebook',
-    rank: 3
-  });
+
+
 
   return tracker;
 }
@@ -613,6 +694,25 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   function isEnabled(): boolean {
     return tracker.currentWidget !== null &&
            tracker.currentWidget === app.shell.currentWidget;
+  }
+
+  /**
+   * Whether there is an notebook active, with a single selected cell.
+   */
+  function isEnabledAndSingleSelected(): boolean {
+    if (!isEnabled()) { return false; }
+    const { notebook } = tracker.currentWidget;
+    const index = notebook.activeCellIndex;
+    // Can't run above if we are at the top of a notebook.
+    if (index === notebook.widgets.length - 1) { return false; }
+    // If there are selections that are not the active cell,
+    // this command is confusing, so disable it.
+    for (let i = 0; i < notebook.widgets.length; ++i) {
+      if (notebook.isSelected(notebook.widgets[i]) && i !== index) {
+        return false;
+      }
+    }
+    return true;
   }
 
   commands.addCommand(CommandIDs.runAndAdvance, {
@@ -678,21 +778,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.runAllAbove(notebook, context.session);
       }
     },
-    isEnabled: args => {
-      if (!isEnabled()) { return false; }
-      const { notebook } = tracker.currentWidget;
-      const index = notebook.activeCellIndex;
-      // Can't run above if we are at the top of a notebook.
-      if (index === 0) { return false; }
-      // If there are selections that are not the active cell,
-      // this command is confusing, so disable it.
-      for (let i = 0; i < notebook.widgets.length; ++i) {
-        if (notebook.isSelected(notebook.widgets[i]) && i !== index) {
-          return false;
-        }
-      }
-      return true;
-    }
+    isEnabled: isEnabledAndSingleSelected
   });
   commands.addCommand(CommandIDs.runAllBelow, {
     label: 'Run Selected Cell and All Below',
@@ -705,21 +791,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.runAllBelow(notebook, context.session);
       }
     },
-    isEnabled: args => {
-      if (!isEnabled()) { return false; }
-      const { notebook } = tracker.currentWidget;
-      const index = notebook.activeCellIndex;
-      // Can't run above if we are at the top of a notebook.
-      if (index === notebook.widgets.length - 1) { return false; }
-      // If there are selections that are not the active cell,
-      // this command is confusing, so disable it.
-      for (let i = 0; i < notebook.widgets.length; ++i) {
-        if (notebook.isSelected(notebook.widgets[i]) && i !== index) {
-          return false;
-        }
-      }
-      return true;
-    }
+    isEnabled: isEnabledAndSingleSelected
   });
   commands.addCommand(CommandIDs.restart, {
     label: 'Restart Kernel',
@@ -804,7 +876,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.restartClear, {
-    label: 'Restart Kernel & Clear Outputs',
+    label: 'Restart Kernel & Clear All Outputs',
     execute: args => {
       const current = getCurrent(args);
 
@@ -978,13 +1050,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.splitCell(current.notebook);
       }
     },
-    isEnabled: () => {
-      // Special case this `isEnabled` so that it is only available
-      // in edit mode, when it is clearer where the cursor is placed.
-      const current = tracker.currentWidget;
-      return current !== null && current === app.shell.currentWidget &&
-             current.notebook.mode === 'edit';
-    }
+    isEnabled
   });
   commands.addCommand(CommandIDs.merge, {
     label: 'Merge Selected Cells',
@@ -1218,7 +1284,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       // Remove the output view if the parent notebook is closed.
       nb.disposed.connect(widget.dispose);
     },
-    isEnabled
+    isEnabled: isEnabledAndSingleSelected
   });
   commands.addCommand(CommandIDs.createConsole, {
     label: 'Create Console for Notebook',
@@ -1396,6 +1462,28 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     },
     isEnabled
   });
+  commands.addCommand(CommandIDs.enableOutputScrolling, {
+    label: 'Enable Scrolling for Outputs',
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.enableOutputScrolling(current.notebook);
+      }
+    },
+    isEnabled
+  });
+  commands.addCommand(CommandIDs.disableOutputScrolling, {
+    label: 'Disable Scrolling for Outputs',
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.disableOutputScrolling(current.notebook);
+      }
+    },
+    isEnabled
+  });
 }
 
 
@@ -1471,6 +1559,8 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.showOutput,
     CommandIDs.hideAllOutputs,
     CommandIDs.showAllOutputs,
+    CommandIDs.enableOutputScrolling,
+    CommandIDs.disableOutputScrolling
   ].forEach(command => { palette.addItem({ command, category }); });
 }
 
@@ -1491,7 +1581,8 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   // Add a clearer to the edit menu
   mainMenu.editMenu.clearers.add({
     tracker,
-    noun: 'Cell Outputs',
+    noun: 'Outputs',
+    pluralNoun: 'Outputs',
     clearCurrent: (current: NotebookPanel) => {
       return NotebookActions.clearOutputs(current.notebook);
     },

@@ -119,34 +119,12 @@ class FileEditorCodeWrapper extends CodeEditorWrapper {
 
     // Prevent the initial loading from disk from being in the editor history.
     editor.clearHistory();
-    this._handleDirtyState();
 
     // Wire signal connections.
-    contextModel.stateChanged.connect(this._onModelStateChanged, this);
     contextModel.contentChanged.connect(this._onContentChanged, this);
 
     // Resolve the ready promise.
     this._ready.resolve(undefined);
-  }
-
-  /**
-   * Handle a change to the context model state.
-   */
-  private _onModelStateChanged(sender: DocumentRegistry.IModel, args: IChangedArgs<any>): void {
-    if (args.name === 'dirty') {
-      this._handleDirtyState();
-    }
-  }
-
-  /**
-   * Handle the dirty state of the context model.
-   */
-  private _handleDirtyState(): void {
-    if (this._context.model.dirty) {
-      this.title.className += ` ${DIRTY_CLASS}`;
-    } else {
-      this.title.className = this.title.className.replace(DIRTY_CLASS, '');
-    }
   }
 
   /**
@@ -204,8 +182,13 @@ class FileEditor extends Widget implements DocumentRegistry.IReadyWidget {
     this.editor = editorWidget.editor;
     this.model = editorWidget.model;
 
+    // Listen for changes to the path.
     context.pathChanged.connect(this._onPathChanged, this);
     this._onPathChanged();
+
+    // Listen for changes in the dirty state.
+    context.model.stateChanged.connect(this._onModelStateChanged, this);
+    context.ready.then(() => { this._handleDirtyState(); });
 
 
     let layout = this.layout = new BoxLayout({ spacing: 0 });
@@ -298,6 +281,26 @@ class FileEditor extends Widget implements DocumentRegistry.IReadyWidget {
     editor.model.mimeType =
       this._mimeTypeService.getMimeTypeByFilePath(localPath);
     this.title.label = PathExt.basename(localPath);
+  }
+
+  /**
+   * Handle a change to the context model state.
+   */
+  private _onModelStateChanged(sender: DocumentRegistry.IModel, args: IChangedArgs<any>): void {
+    if (args.name === 'dirty') {
+      this._handleDirtyState();
+    }
+  }
+
+  /**
+   * Handle the dirty state of the context model.
+   */
+  private _handleDirtyState(): void {
+    if (this._context.model.dirty) {
+      this.title.className += ` ${DIRTY_CLASS}`;
+    } else {
+      this.title.className = this.title.className.replace(DIRTY_CLASS, '');
+    }
   }
 
   private editorWidget: FileEditorCodeWrapper;

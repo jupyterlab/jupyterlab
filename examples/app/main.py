@@ -9,7 +9,7 @@ from notebook.base.handlers import IPythonHandler, FileFindHandler
 from notebook.utils import url_path_join as ujoin
 from notebook.notebookapp import NotebookApp
 from traitlets import Unicode
-from jupyterlab_launcher.handlers import default_settings_path, SettingsHandler
+from jupyterlab_launcher.handlers import SettingsHandler, ThemesHandler
 
 HERE = os.path.dirname(__file__)
 
@@ -39,23 +39,37 @@ class ExampleApp(NotebookApp):
         super(ExampleApp, self).init_webapp()
         wsettings = self.web_app.settings
         base_url = wsettings['base_url']
+        page_url = self.default_url
         settings_path = ujoin(
-            base_url, default_settings_path + '(?P<section_name>.+)'
+            base_url, page_url, 'api', 'settings', '(?P<section_name>.+)'
+        )
+        themes_path = ujoin(
+            base_url, page_url, 'api', 'themes'
         )
 
         wsettings.setdefault('page_config_data', dict())
         wsettings['page_config_data']['token'] = self.token
+        wsettings['page_config_data']['pageUrl'] = page_url
+        wsettings['page_config_data']['themesUrl'] = themes_path
 
         default_handlers = [
             (ujoin(base_url, '/example?'), ExampleHandler),
-            (ujoin(base_url, '/example/(.*)'), FileFindHandler,
-                {'path': 'build'}),
             ((settings_path, SettingsHandler, {
                 'schemas_dir': os.path.join(HERE, 'build', 'schemas'),
-                'settings_dir': ''
-                })
-            )
+                'settings_dir': '',
+                'app_settings_dir': ''
+            })),
+            ((ujoin(themes_path, "(.*)"), ThemesHandler, {
+                'themes_url': themes_path,
+                'path': os.path.join(HERE, 'build', 'themes')
+            })),
+            (ujoin(base_url, '/example/static/(.*)'), FileFindHandler,
+                {'path': 'build'}),
+            # Let the lab handler act as the fallthrough option instead
+            # of a 404.
+            (ujoin(base_url, page_url, r'/?.*'), ExampleHandler)
         ]
+
         self.web_app.add_handlers(".*$", default_handlers)
 
 

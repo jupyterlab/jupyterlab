@@ -12,7 +12,7 @@ import sys
 from setupbase import (
     create_cmdclass, ensure_python, find_packages, get_version,
     command_for_func, combine_commands, install_npm, HERE, run,
-    skip_npm
+    skip_npm, which, log
 )
 
 from setuptools import setup
@@ -32,7 +32,9 @@ ensure_python(['2.7', '>=3.3'])
 data_files_spec = [
     ('share/jupyter/lab/static', '%s/static' % NAME, '**'),
     ('share/jupyter/lab/schemas', '%s/schemas' % NAME, '**'),
-    ('share/jupyter/lab/themes', '%s/themes' % NAME, '**')
+    ('share/jupyter/lab/themes', '%s/themes' % NAME, '**'),
+    ('etc/jupyter/jupyter_notebook_config.d',
+     'jupyter-config/jupyter_notebook_config.d', 'jupyterlab.json'),
 ]
 
 package_data_spec = dict()
@@ -55,11 +57,6 @@ def check_assets():
         'schemas/@jupyterlab/shortcuts-extension/plugin.json',
         'themes/@jupyterlab/theme-light-extension/images/jupyterlab.svg'
     ]
-
-    if 'develop' in sys.argv:
-        if skip_npm:
-            return
-        run(npm, cwd=HERE)
 
     for t in targets:
         if not os.path.exists(pjoin(HERE, NAME, t)):
@@ -85,8 +82,22 @@ cmdclass['jsdeps'] = combine_commands(
                 build_dir=pjoin(HERE, NAME, 'static'), npm=npm),
     command_for_func(check_assets)
 )
+
+
+class JupyterlabDevelop(develop):
+    """A custom develop command that runs yarn"""
+
+    def run(self):
+        if not skip_npm:
+            if not which('node'):
+                log.error('Please install nodejs and npm before continuing installation. nodejs may be installed using conda or directly from the nodejs website.')
+                return
+            run(npm, cwd=HERE)
+        develop.run(self)
+
+
 # Use default develop - we can ensure core mode later if needed.
-cmdclass['develop'] = develop
+cmdclass['develop'] = JupyterlabDevelop
 
 
 setup_args = dict(
@@ -120,7 +131,7 @@ setup_args = dict(
 
 setup_args['install_requires'] = [
     'notebook>=4.3.1',
-    'jupyterlab_launcher>=0.9.0,<0.10.0',
+    'jupyterlab_launcher>=0.10.0,<0.11.0',
     'ipython_genutils',
     'futures;python_version<"3.0"',
     'subprocess32;python_version<"3.0"'

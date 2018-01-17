@@ -9,7 +9,7 @@ if [ -d "$MINICONDA_DIR" ] && [ -e "$MINICONDA_DIR/bin/conda" ]; then
     echo "Miniconda install already present from cache: $MINICONDA_DIR"
 else # if it does not exist, we need to install miniconda
     rm -rf "$MINICONDA_DIR" # remove the directory in case we have an empty cached directory
-    
+
     if [[ $GROUP == py2 ]]; then
         wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O ~/miniconda.sh;
     else
@@ -36,7 +36,6 @@ mkdir ~/.jupyter
 
 # Install and enable the server extension
 pip install -v -e ".[test]"
-jlpm
 jlpm versions
 jlpm config current
 jupyter serverextension enable --py jupyterlab

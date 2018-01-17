@@ -5,7 +5,7 @@
   <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML-full,Safe&amp;delayStartupUntil=configured"></script>
 </head>
 <body>
-  <script id='jupyter-config-data' type="application/json">{ 
+  <script id='jupyter-config-data' type="application/json">{
   {% for key, value in page_config.items() -%}
   "{{ key }}": "{{ value }}",
   {% endfor -%}
@@ -13,6 +13,6 @@
   "wsUrl": "{{ws_url}}",
   "terminalsAvailable": "{{terminals_available}}"
  }</script>
-  <script src="example/bundle.js" main="index"></script>
+  <script src="/example/static/bundle.js" main="index"></script>
 </body>
 </html>

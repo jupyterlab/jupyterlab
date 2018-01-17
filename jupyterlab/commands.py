@@ -21,12 +21,11 @@ import tarfile
 from threading import Event
 
 from ipython_genutils.tempdir import TemporaryDirectory
-from ipython_genutils.py3compat import which
 from jupyter_core.paths import jupyter_config_path
 from notebook.nbextensions import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 
 from .semver import Range, gte, lt, lte, gt
-from .jlpmapp import YARN_PATH, HERE
+from .jlpmapp import YARN_PATH, HERE, which
 from .process import Process, WatchHelper
 
 
@@ -44,13 +43,23 @@ def pjoin(*args):
 
 
 def get_user_settings_dir():
-    """Get the configured JupyterLab app directory.
+    """Get the configured JupyterLab user settings directory.
     """
     settings_dir = os.environ.get('JUPYTERLAB_SETTINGS_DIR')
     settings_dir = settings_dir or pjoin(
         jupyter_config_path()[0], 'lab', 'user-settings'
     )
     return osp.realpath(settings_dir)
+
+
+def get_workspaces_dir():
+    """Get the configured JupyterLab workspaces directory.
+    """
+    workspaces_dir = os.environ.get('JUPYTERLAB_WORKSPACES_DIR')
+    workspaces_dir = workspaces_dir or pjoin(
+        jupyter_config_path()[0], 'lab', 'workspaces'
+    )
+    return osp.realpath(workspaces_dir)
 
 
 def get_app_dir():
@@ -347,6 +356,8 @@ class _AppHandler(object):
             if other['path'] != info['path'] and other['location'] == 'app':
                 os.remove(other['path'])
 
+        return True
+
     def build(self, name=None, version=None, public_url=None,
             command='build:prod', clean_staging=False):
         """Build the application.
@@ -425,7 +436,7 @@ class _AppHandler(object):
 
         messages = self.build_check(fast=True)
         if messages:
-            logger.info('\nBuild recommended:')
+            logger.info('\nBuild recommended, please run `jupyter lab build`:')
             [logger.info('    %s' % item) for item in messages]
 
     def build_check(self, fast=False):
@@ -463,12 +474,12 @@ class _AppHandler(object):
             # Extensions that were added.
             for ext in new_jlab[ext_type]:
                 if ext not in old_jlab[ext_type]:
-                    messages.append('%s needs to be included' % ext)
+                    messages.append('%s needs to be included in build' % ext)
 
             # Extensions that were removed.
             for ext in old_jlab[ext_type]:
                 if ext not in new_jlab[ext_type]:
-                    messages.append('%s needs to be removed' % ext)
+                    messages.append('%s needs to be removed from build' % ext)
 
         # Look for mismatched dependencies
         for (pkg, dep) in new_deps.items():
@@ -557,6 +568,8 @@ class _AppHandler(object):
         linked = config.setdefault('linked_packages', dict())
         linked[info['name']] = info['source']
         self._write_build_config(config)
+
+        return True
 
     def unlink_package(self, path):
         """Link a package by name or at the given path.
@@ -720,6 +733,7 @@ class _AppHandler(object):
                 overwrite_lock = False
 
         for fname in ['index.js', 'webpack.config.js',
+                'webpack.prod.config.js',
                 'yarn.lock', '.yarnrc', 'yarn.js']:
             target = pjoin(staging, fname)
             if (fname == 'yarn.lock' and os.path.exists(target) and

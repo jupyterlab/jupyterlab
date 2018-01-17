@@ -1044,6 +1044,47 @@ namespace NotebookActions {
   }
 
   /**
+   * Enable output scrolling for all selected cells.
+   *
+   * @param widget - The target notebook widget.
+   */
+  export
+  function enableOutputScrolling(widget: Notebook): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    let state = Private.getState(widget);
+    let cells = widget.widgets;
+    each(cells, (cell: Cell) => {
+      if (widget.isSelectedOrActive(cell) && cell.model.type === 'code') {
+        (cell as CodeCell).outputsScrolled = true;
+      }
+    });
+    Private.handleState(widget, state);
+  }
+
+  /**
+   * Disable output scrolling for all selected cells.
+   *
+   * @param widget - The target notebook widget.
+   */
+  export
+  function disableOutputScrolling(widget: Notebook): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    let state = Private.getState(widget);
+    let cells = widget.widgets;
+    each(cells, (cell: Cell) => {
+      if (widget.isSelectedOrActive(cell) && cell.model.type === 'code') {
+        (cell as CodeCell).outputsScrolled = false;
+      }
+    });
+    Private.handleState(widget, state);
+  }
+
+
+  /**
    * Set the markdown header level.
    *
    * @param widget - The target notebook widget.

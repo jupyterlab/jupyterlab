@@ -198,8 +198,8 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     CommandIDs.launchClassic
   ].map(command => { return { command }; });
   helpMenu.addGroup(labGroup, 0);
-  const resourcesGroup =
-    RESOURCES.map(args => { return { args, command: CommandIDs.open }; });
+  const resourcesGroup = RESOURCES
+    .map(args => ({ args, command: CommandIDs.open }));
   helpMenu.addGroup(resourcesGroup, 10);
 
   // Generate a cache of the kernel help links.
@@ -273,7 +273,12 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
             showDialog({
               title,
               body,
-              buttons: [Dialog.createButton({label: 'DISMISS', className: 'jp-About-button jp-mod-reject jp-mod-styled'})]
+              buttons: [
+                Dialog.createButton({
+                  label: 'DISMISS',
+                  className: 'jp-About-button jp-mod-reject jp-mod-styled'
+                })
+              ]
             });
           }
         });
@@ -281,7 +286,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
 
         // Add the kernel info help_links to the Help menu.
         const kernelGroup: Menu.IItemOptions[] = [];
-        session.kernel.info.help_links.forEach((link) => {
+        (session.kernel.info.help_links || []).forEach((link) => {
           const commandId = `help-menu-${name}:${link.text}`;
           commands.addCommand(commandId, {
             label: link.text,
@@ -303,8 +308,8 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
       // Create the header of the about dialog
       let headerLogo = h.div({className: 'jp-About-header-logo'});
       let headerWordmark = h.div({className: 'jp-About-header-wordmark'});
-      let release = 'beta release';
-      let versionNumber = `version: ${info.version}`;
+      let release = 'Beta 1 Release';
+      let versionNumber = `Version ${info.version}`;
       let versionInfo = h.span({className: 'jp-About-version-info'},
         h.span({className: 'jp-About-release'}, release),
         h.span({className: 'jp-About-version'}, versionNumber)
@@ -321,10 +326,20 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
       let jupyterURL = 'https://jupyter.org/about.html';
       let contributorsURL = 'https://github.com/jupyterlab/jupyterlab/graphs/contributors';
       let externalLinks = h.span({className: 'jp-About-externalLinks'},
-        h.a({href: contributorsURL, target: '_blank', className: 'jp-Button-flat'}, 'CONTRIBUTOR LIST'),
-        h.a({href: jupyterURL, target: '_blank', className: 'jp-Button-flat'}, 'ABOUT PROJECT JUPYTER')
+        h.a({
+          href: contributorsURL,
+          target: '_blank',
+          className: 'jp-Button-flat'
+        }, 'CONTRIBUTOR LIST'),
+        h.a({
+          href: jupyterURL,
+          target: '_blank',
+          className: 'jp-Button-flat'
+        }, 'ABOUT PROJECT JUPYTER')
       );
-      let copyright = h.span({className: 'jp-About-copyright'}, '© 2017 Project Jupyter');
+      let copyright = h.span({
+        className: 'jp-About-copyright'
+      }, '© 2018 Project Jupyter');
       let body = h.div({ className: 'jp-About-body' },
         externalLinks,
         copyright
@@ -333,7 +348,12 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
       showDialog({
         title,
         body,
-        buttons: [Dialog.createButton({label: 'DISMISS', className: 'jp-About-button jp-mod-reject jp-mod-styled'})]
+        buttons: [
+          Dialog.createButton({
+            label: 'DISMISS',
+            className: 'jp-About-button jp-mod-reject jp-mod-styled'
+          })
+        ]
       });
     }
   });

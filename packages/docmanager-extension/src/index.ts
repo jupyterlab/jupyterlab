@@ -102,7 +102,7 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
 
           (widget as any).ready.then(() => {
             const isCurrent = app.shell.currentWidget === spinner;
-            app.shell.addToMainArea(widget, { ref: spinner.id });
+            app.shell.addToMainArea(widget, {...options, ref: spinner.id });
             spinner.dispose();
             if (isCurrent) {
               shell.activateById(widget.id);
@@ -227,8 +227,9 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
         : args['path'] as string;
       const factory = args['factory'] as string || void 0;
       const kernel = args['kernel'] as Kernel.IModel || void 0;
+      const options = args['options'] as DocumentRegistry.IOpenOptions || void 0;
       return docManager.services.contents.get(path, { content: false })
-        .then(() => docManager.openOrReveal(path, factory, kernel))
+        .then(() => docManager.openOrReveal(path, factory, kernel, options))
         .then(widget => {
           return widget.ready.then(() => { return widget; });
         });
@@ -329,15 +330,16 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   commands.addCommand(CommandIDs.clone, {
     label: () => `New View for ${fileType()}`,
     isEnabled,
-    execute: () => {
+    execute: (args) => {
       const widget = app.shell.currentWidget;
+      const options = args['options'] as DocumentRegistry.IOpenOptions || void 0;
       if (!widget) {
         return;
       }
       // Clone the widget.
       let child = docManager.cloneWidget(widget);
       if (child) {
-        opener.open(child);
+        opener.open(child, options);
       }
     },
   });

@@ -370,8 +370,10 @@ class Cell extends Widget {
       return;
     }
     // Handle read only state.
-    this.editor.setOption('readOnly', this._readOnly);
-    this.toggleClass(READONLY_CLASS, this._readOnly);
+    if (this.editor.getOption('readOnly') !== this._readOnly) {
+      this.editor.setOption('readOnly', this._readOnly);
+      this.toggleClass(READONLY_CLASS, this._readOnly);
+    }
   }
 
   private _readOnly = false;
@@ -615,6 +617,17 @@ class CodeCell extends Cell {
   }
 
   /**
+   * Whether the output is in a scrolled state?
+   */
+  get outputsScrolled(): boolean {
+    return this._outputsScrolled;
+  }
+  set outputsScrolled(value: boolean) {
+    this.toggleClass('jp-mod-outputsScrolled', value);
+    this._outputsScrolled = value;
+  }
+
+  /**
    * Handle the input being hidden.
    *
    * #### Notes
@@ -714,10 +727,15 @@ class CodeCell extends Cell {
   private _outputLengthHandler(sender: OutputArea, args: number) {
     let force = args === 0 ? true : false;
     this.toggleClass(NO_OUTPUTS_CLASS, force);
+    /* Turn off scrolling outputs if there are none */
+    if (force) {
+      this.outputsScrolled = false;
+    }
   }
 
   private _rendermime: RenderMimeRegistry = null;
   private _outputHidden = false;
+  private _outputsScrolled = false;
   private _outputWrapper: Widget = null;
   private _outputCollapser: OutputCollapser = null;
   private _outputPlaceholder: OutputPlaceholder = null;

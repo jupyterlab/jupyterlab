@@ -226,9 +226,11 @@ class OutputArea extends Widget {
    * Follow changes on the model state.
    */
   protected onModelChanged(sender: IOutputAreaModel, args: IOutputAreaModel.ChangedArgs): void {
+    let layoutIndex;
     switch (args.type) {
     case 'add':
-      this._insertOutput(args.newIndex, args.newValues[0]);
+      layoutIndex = this._modelToLayoutIndex(args.newIndex);
+      this._insertOutput(layoutIndex, args.newValues[0]);
       this.outputLengthChanged.emit(this.model.length);
       break;
     case 'remove':
@@ -239,7 +241,8 @@ class OutputArea extends Widget {
       }
       break;
     case 'set':
-      this._setOutput(args.newIndex, args.newValues[0]);
+      layoutIndex = this._modelToLayoutIndex(args.newIndex);
+      this._setOutput(layoutIndex, args.newValues[0]);
       this.outputLengthChanged.emit(this.model.length);
       break;
     default:
@@ -311,17 +314,10 @@ class OutputArea extends Widget {
   }
 
   /**
-   * Update an output in place.
+   * Update an output in the layout in place.
    */
   private _setOutput(index: number, model: IOutputModel): void {
     let layout = this.layout as PanelLayout;
-    let widgets = this.widgets;
-    // Skip any stdin widgets to find the correct index.
-    for (let i = 0; i < index; i++) {
-      if (widgets[i].hasClass(OUTPUT_AREA_STDIN_ITEM_CLASS)) {
-        index++;
-      }
-    }
     layout.widgets[index].dispose();
     this._insertOutput(index, model);
   }
@@ -334,6 +330,25 @@ class OutputArea extends Widget {
     output.toggleClass(EXECUTE_CLASS, model.executionCount !== null);
     let layout = this.layout as PanelLayout;
     layout.insertWidget(index, output);
+  }
+
+  /**
+   * Adjust the model index to the widgets index (skipping stdin widgets).
+   */
+  private _modelToLayoutIndex(index: number) {
+    let widgets = this.widgets;
+    let modelOutputs = -1;
+    let i;
+
+    for (i = 0; i < widgets.length; i++) {
+      if (!widgets[i].hasClass(OUTPUT_AREA_STDIN_ITEM_CLASS)) {
+        modelOutputs++;
+        if (modelOutputs === index) {
+          break;
+        }
+      }
+    }
+    return i;
   }
 
   /**
@@ -611,14 +626,10 @@ class Stdin extends Widget implements IStdin {
    * Construct a new input widget.
    */
   constructor(options: Stdin.IOptions) {
-    super({ node: Private.createInputWidgetNode() });
+    super({ node: Private.createInputWidgetNode(options.prompt, options.password) });
     this.addClass(STDIN_CLASS);
-    let text = this.node.firstChild as HTMLElement;
-    text.textContent = options.prompt;
-    this._input = this.node.lastChild as HTMLInputElement;
-    if (options.password) {
-      this._input.type = 'password';
-    }
+    this._input = this.node.getElementsByTagName('input')[0];
+    this._input.focus();
     this._future = options.future;
   }
 
@@ -646,7 +657,7 @@ class Stdin extends Widget implements IStdin {
         } else {
           rendered.textContent = input.value;
         }
-        this.node.replaceChild(rendered, input);
+        input.parentElement.replaceChild(rendered, input);
       }
     }
   }
@@ -716,14 +727,18 @@ namespace Private {
    * Create the node for an InputWidget.
    */
   export
-  function createInputWidgetNode(): HTMLElement {
+  function createInputWidgetNode(prompt: string, password: boolean): HTMLElement {
     let node = document.createElement('div');
-    let prompt = document.createElement('span');
-    prompt.className = STDIN_PROMPT_CLASS;
+    let promptNode = document.createElement('pre');
+    promptNode.className = STDIN_PROMPT_CLASS;
+    promptNode.textContent = prompt;
     let input = document.createElement('input');
     input.className = STDIN_INPUT_CLASS;
-    node.appendChild(prompt);
-    node.appendChild(input);
+    if (password) {
+      input.type = 'password';
+    }
+    node.appendChild(promptNode);
+    promptNode.appendChild(input);
     return node;
   }
 

@@ -771,7 +771,7 @@ class DirListing extends Widget {
       if (specs) {
         name = specs.kernelspecs[name].display_name;
       }
-      node.title = name;
+      node.title = `${node.title}\nKernel: ${name}`;
     });
 
     this._prevPath = this._model.path;
@@ -1677,18 +1677,18 @@ namespace DirListing {
         icon.className = ITEM_ICON_CLASS;
       }
 
+      node.title = model.name;
+      // If an item is being edited currently, its text node is unavailable.
+      if (text) {
+        text.textContent = model.name;
+      }
+
       let modText = '';
       let modTitle = '';
       if (model.last_modified) {
         modText = Time.formatHuman(new Date(model.last_modified));
         modTitle = Time.format(new Date(model.last_modified));
       }
-
-      // If an item is being edited currently, its text node is unavailable.
-      if (text) {
-        text.textContent = model.name;
-      }
-
       modified.textContent = modText;
       modified.title = modTitle;
     }

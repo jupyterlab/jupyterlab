@@ -15,3 +15,13 @@
     box-shadow: var(--jp-toolbar-box-shadow);
     z-index: 10;
 }
+
+
+/*-----------------------------------------------------------------------------
+| Presentation Mode (.jp-mod-presentationMode)
+|----------------------------------------------------------------------------*/
+
+
+.jp-mod-presentationMode .jp-FileEditor {
+  --jp-code-font-size: var(--jp-code-presentation-font-size);
+}

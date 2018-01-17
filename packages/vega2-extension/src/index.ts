@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  JSONObject, ReadonlyJSONObject
+  JSONObject, JSONValue, ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
 import {
@@ -87,10 +87,10 @@ class RenderedVega extends Widget implements IRenderMime.IRenderer {
    */
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
 
-    let data = model.data[this._mimeType];
+    let data = model.data[this._mimeType] as ReadonlyJSONObject;
     let updatedData: JSONObject;
     if (this._mode === 'vega-lite') {
-      updatedData = Private.updateVegaLiteDefaults(data as ReadonlyJSONObject);
+      updatedData = Private.updateVegaLiteDefaults(data);
     } else {
       updatedData = data as JSONObject;
     }
@@ -100,33 +100,22 @@ class RenderedVega extends Widget implements IRenderMime.IRenderer {
       spec: updatedData
     };
 
-    return this._ensureMod().then(embedFunc => {
+    return Private.ensureMod().then(embedFunc => {
       return new Promise<void>((resolve, reject) => {
         embedFunc(this.node, embedSpec, (error: any, result: any): any => {
+          if (error) {
+            return reject(error);
+          }
+
+          // Save png data in MIME bundle along with original MIME data.
+          if (!model.data['image/png']) {
+            let imageData = result.view.toImageURL().split(',')[1] as JSONValue;
+            let newData = {...(model.data), 'image/png': imageData};
+            model.setData({ data: newData });
+          }
           resolve(undefined);
-          // This is copied out for now as there is a bug in JupyterLab
-          // that triggers and infinite rendering loop when this is done.
-          // let imageData = result.view.toImageURL();
-          // imageData = imageData.split(',')[1];
-          // this._injector('image/png', imageData);
         });
       });
-    });
-  }
-
-  /**
-   * Initialize the vega-embed module.
-   */
-  private _ensureMod(): Promise<typeof embed> {
-    return new Promise((resolve, reject) => {
-      (require as any).ensure(['vega-embed'], (require: NodeRequire) => {
-        resolve(require('vega-embed'));
-      },
-      (err: any) => {
-        reject(err);
-      },
-      'vega2'
-      );
     });
   }
 
@@ -169,7 +158,7 @@ const extension: IRenderMime.IExtension = {
     name: 'vega',
     displayName: 'Vega File',
     fileFormat: 'text',
-    extensions: ['.vg', '.vg.json'],
+    extensions: ['.vg', '.vg.json', '.vega'],
     iconClass: 'jp-MaterialIcon jp-VegaIcon',
   },
   {
@@ -177,7 +166,7 @@ const extension: IRenderMime.IExtension = {
     name: 'vega-lite',
     displayName: 'Vega-Lite File',
     fileFormat: 'text',
-    extensions: ['.vl', '.vl.json'],
+    extensions: ['.vl', '.vl.json', '.vegalite'],
     iconClass: 'jp-MaterialIcon jp-VegaIcon',
   }]
 };
@@ -197,6 +186,33 @@ namespace Private {
     'width': 400,
     'height': 400 / 1.5
   };
+
+  /**
+   * The embed module import.
+   */
+  let mod: typeof embed;
+
+  /**
+   * Initialize the vega-embed module.
+   */
+  export
+  function ensureMod(): Promise<typeof embed> {
+    return new Promise((resolve, reject) => {
+      if (mod !== undefined) {
+        resolve(mod);
+        return;
+      }
+      (require as any).ensure(['vega-embed'], (require: NodeRequire) => {
+        mod = require('vega-embed');
+        resolve(mod);
+      },
+      (err: any) => {
+        reject(err);
+      },
+      'vega2'
+      );
+    });
+  }
 
   /**
    * Apply the default cell config to the spec in place.

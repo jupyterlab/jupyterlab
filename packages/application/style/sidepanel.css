@@ -17,6 +17,12 @@
 |----------------------------------------------------------------------------*/
 
 
+.jp-SideBar {
+  /* This is needed so that all font sizing of children done in ems is
+   * relative to this base size */
+  font-size: var(--jp-ui-font-size1);
+}
+
 .jp-SideBar.p-TabBar {
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color2);

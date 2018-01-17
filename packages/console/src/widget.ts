@@ -372,9 +372,8 @@ class CodeConsole extends Widget {
     case 'keydown':
       this._evtKeyDown(event as KeyboardEvent);
       break;
-    case 'onclick':
-      this.node.focus();
-      event.preventDefault();
+    case 'click':
+      this._evtClick(event as MouseEvent);
       break;
     default:
       break;
@@ -471,6 +470,15 @@ class CodeConsole extends Widget {
     if (event.keyCode === 13 && !editor.hasFocus()) {
       event.preventDefault();
       editor.focus();
+    }
+  }
+
+  /**
+   * Handle the `'click'` event for the widget.
+   */
+  private _evtClick(event: MouseEvent): void {
+    if (this.promptCell && this.promptCell.node.contains(event.target as HTMLElement)) {
+      this.promptCell.editor.focus();
     }
   }
 

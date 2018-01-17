@@ -221,6 +221,8 @@
   min-width: 300px;
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color1);
+  /* This is needed so that all font sizing of children done in ems is
+   * relative to this base size */
   font-size: var(--jp-ui-font-size1);
 }
 
@@ -297,3 +299,20 @@
   height: var(--jp-toolbar-micro-height);
   z-index: 1;
 }
+
+
+/*-----------------------------------------------------------------------------
+| Presentation Mode (.jp-mod-presentationMode)
+|----------------------------------------------------------------------------*/
+
+
+.jp-mod-presentationMode .jp-Notebook {
+  --jp-content-font-size1: var(--jp-content-presentation-font-size1);
+  --jp-code-font-size: var(--jp-code-presentation-font-size);
+}
+
+.jp-mod-presentationMode .jp-Notebook .jp-Cell .jp-InputPrompt,
+.jp-mod-presentationMode .jp-Notebook .jp-Cell .jp-OutputPrompt {
+  flex: 0 0 110px;
+}
+

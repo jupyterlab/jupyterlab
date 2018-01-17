@@ -272,7 +272,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
   }
 
   commands.addCommand(CommandIDs.clear, {
-    label: 'Clear Cells',
+    label: 'Clear Console Cells',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
@@ -470,7 +470,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
   // Add a clearer to the edit menu
   mainMenu.editMenu.clearers.add({
     tracker,
-    noun: 'Console',
+    noun: 'Console Cells',
     clearCurrent: (current: ConsolePanel) => { return current.console.clear(); }
   } as IEditMenu.IClearer<ConsolePanel>);
 
@@ -480,7 +480,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     getKernel: current => current.session.kernel
   } as IHelpMenu.IKernelUser<ConsolePanel>);
 
-  app.contextMenu.addItem({command: CommandIDs.clear, selector: '.jp-CodeConsole'});
+  app.contextMenu.addItem({command: CommandIDs.clear, selector: '.jp-CodeConsole-content'});
   app.contextMenu.addItem({command: CommandIDs.restart, selector: '.jp-CodeConsole'});
 
   return tracker;

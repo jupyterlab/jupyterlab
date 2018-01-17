@@ -53,8 +53,8 @@ namespace nbformat {
    */
   export
   interface INotebookMetadata extends JSONObject {
-    kernelspec: IKernelspecMetadata;
-    language_info: ILanguageInfoMetadata;
+    kernelspec?: IKernelspecMetadata;
+    language_info?: ILanguageInfoMetadata;
     orig_nbformat: number;
   }
 

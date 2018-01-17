@@ -10,6 +10,13 @@
     "plugins": [
         "@jupyterlab/eslint-plugin-jinja"
     ],
+    "parserOptions": {
+        "ecmaVersion": 6,
+        "sourceType": "module",
+        "ecmaFeatures": {
+            "modules": true
+        }
+    },
     "rules": {
         "indent": [
             "error",
@@ -28,7 +35,7 @@
             "always"
         ],
         "no-console": [
-            "error", 
+            "error",
             { "allow": ["warn", "error"] }
         ]
     }

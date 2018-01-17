@@ -812,6 +812,9 @@ class Notebook extends StaticNotebook {
         activeCell.rendered = false;
       }
       activeCell.inputHidden = false;
+    } else {
+      // Focus on the notebook document, which blurs the active cell.
+      this.node.focus();
     }
     this._stateChanged.emit({ name: 'mode', oldValue, newValue });
     this._ensureFocus();
@@ -837,6 +840,7 @@ class Notebook extends StaticNotebook {
       newValue = Math.max(newValue, 0);
       newValue = Math.min(newValue, this.model.cells.length - 1);
     }
+
     this._activeCellIndex = newValue;
     let cell = this.widgets[newValue];
     if (cell !== this._activeCell) {
@@ -1105,9 +1109,19 @@ class Notebook extends StaticNotebook {
     if (!this.model) {
       return;
     }
+
     switch (event.type) {
+    case 'contextmenu':
+      if (event.eventPhase === Event.CAPTURING_PHASE) {
+        this._evtContextMenuCapture(event as PointerEvent);
+      }
+      break;
     case 'mousedown':
-      this._evtMouseDown(event as MouseEvent);
+      if (event.eventPhase === Event.CAPTURING_PHASE) {
+        this._evtMouseDownCapture(event as MouseEvent);
+      } else {
+        this._evtMouseDown(event as MouseEvent);
+      }
       break;
     case 'mouseup':
       if (event.currentTarget === document) {
@@ -1125,11 +1139,11 @@ class Notebook extends StaticNotebook {
     case 'dblclick':
       this._evtDblClick(event as MouseEvent);
       break;
-    case 'focus':
-      this._evtFocus(event as MouseEvent);
+    case 'focusin':
+      this._evtFocusIn(event as MouseEvent);
       break;
-    case 'blur':
-      this._evtBlur(event as MouseEvent);
+    case 'focusout':
+      this._evtFocusOut(event as MouseEvent);
       break;
     case 'p-dragenter':
       this._evtDragEnter(event as IDragEvent);
@@ -1154,11 +1168,13 @@ class Notebook extends StaticNotebook {
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     let node = this.node;
+    node.addEventListener('contextmenu', this, true);
+    node.addEventListener('mousedown', this, true);
     node.addEventListener('mousedown', this);
     node.addEventListener('keydown', this);
     node.addEventListener('dblclick', this);
-    node.addEventListener('focus', this, true);
-    node.addEventListener('blur', this, true);
+    node.addEventListener('focusin', this);
+    node.addEventListener('focusout', this);
     node.addEventListener('p-dragenter', this);
     node.addEventListener('p-dragleave', this);
     node.addEventListener('p-dragover', this);
@@ -1170,11 +1186,13 @@ class Notebook extends StaticNotebook {
    */
   protected onBeforeDetach(msg: Message): void {
     let node = this.node;
+    node.removeEventListener('contextmenu', this, true);
+    node.removeEventListener('mousedown', this, true);
     node.removeEventListener('mousedown', this);
     node.removeEventListener('keydown', this);
     node.removeEventListener('dblclick', this);
-    node.removeEventListener('focus', this, true);
-    node.removeEventListener('blur', this, true);
+    node.removeEventListener('focusin', this);
+    node.removeEventListener('focusout', this);
     node.removeEventListener('p-dragenter', this);
     node.removeEventListener('p-dragleave', this);
     node.removeEventListener('p-dragover', this);
@@ -1308,6 +1326,7 @@ class Notebook extends StaticNotebook {
         editor.setCursorPosition({ line: 0, column: 0 });
       }
     }
+    this.mode = 'edit';
   }
 
   /**
@@ -1316,9 +1335,9 @@ class Notebook extends StaticNotebook {
   private _ensureFocus(force=false): void {
     let activeCell = this.activeCell;
     if (this.mode === 'edit' && activeCell) {
-      activeCell.editor.focus();
-    } else if (activeCell) {
-      activeCell.editor.blur();
+      if (!activeCell.editor.hasFocus()) {
+        activeCell.editor.focus();
+      }
     }
     if (force && !this.node.contains(document.activeElement)) {
       this.node.focus();
@@ -1348,35 +1367,116 @@ class Notebook extends StaticNotebook {
   }
 
   /**
+   * Handle `contextmenu` event.
+   */
+  private _evtContextMenuCapture(event: PointerEvent): void {
+    // `event.target` sometimes gives an orphaned node in Firefox 57, which
+    // can have `null` anywhere in its parent tree. If we fail to find a
+    // cell using `event.target`, try again using a target reconstructed from
+    // the position of the click event.
+    let target = event.target as HTMLElement;
+    let index = this._findCell(target);
+    if (index === -1) {
+      target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
+      index = this._findCell(target);
+    }
+    let widget = this.widgets[index];
+
+    if (widget && widget.editorWidget.node.contains(target)) {
+      // Prevent CodeMirror from focusing the editor.
+      // TODO: find an editor-agnostic solution.
+      event.preventDefault();
+    }
+  }
+
+  /**
+   * Handle `mousedown` event in the capture phase for the widget.
+   */
+  private _evtMouseDownCapture(event: MouseEvent): void {
+    const { button, shiftKey } = event;
+
+    // `event.target` sometimes gives an orphaned node in Firefox 57, which
+    // can have `null` anywhere in its parent tree. If we fail to find a
+    // cell using `event.target`, try again using a target reconstructed from
+    // the position of the click event.
+    let target = event.target as HTMLElement;
+    let index = this._findCell(target);
+    if (index === -1) {
+      target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
+      index = this._findCell(target);
+    }
+    let widget = this.widgets[index];
+
+    // On OS X, the context menu may be triggered with ctrl-left-click. In
+    // Firefox, ctrl-left-click gives an event with button 2, but in Chrome,
+    // ctrl-left-click gives an event with button 0 with the ctrl modifier.
+    if (button === 2 && !shiftKey && widget && widget.editorWidget.node.contains(target)) {
+      this.mode = 'command';
+
+      // Prevent CodeMirror from focusing the editor.
+      // TODO: find an editor-agnostic solution.
+      event.preventDefault();
+    }
+  }
+
+  /**
    * Handle `mousedown` events for the widget.
    */
   private _evtMouseDown(event: MouseEvent): void {
 
-    // Mouse click should always ensure the notebook is focused.
-    this._ensureFocus(true);
+    const { button, shiftKey } = event;
 
-    // We only handle main button actions.
-    if (event.button !== 0) {
+    // We only handle main or secondary button actions.
+    if (!(button === 0 || button === 2)) {
       return;
     }
 
-    // Try to find the cell associated with the event.
+    // Shift right-click gives the browser default behavior.
+    if (shiftKey && button === 2) {
+      return;
+    }
+
+    // Find the target cell.
     let target = event.target as HTMLElement;
     let index = this._findCell(target);
+    if (index === -1) {
+      // `event.target` sometimes gives an orphaned node in
+      // Firefox 57, which can have `null` anywhere in its parent line. If we fail
+      // to find a cell using `event.target`, try again using a target
+      // reconstructed from the position of the click event.
+      target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
+      index = this._findCell(target);
+    }
+    let widget = this.widgets[index];
 
-    if (index !== -1) {
-      let widget = this.widgets[index];
-
-      // Event is on a cell but not in its editor, switch to command mode.
-      if (!widget.editorWidget.node.contains(target)) {
-        this.mode = 'command';
+    let targetArea: 'input' | 'prompt' | 'cell' | 'notebook';
+    if (widget) {
+      if (widget.editorWidget.node.contains(target)) {
+        targetArea = 'input';
+      } else if (widget.promptNode.contains(target)) {
+        targetArea = 'prompt';
+      } else {
+        targetArea = 'cell';
       }
+    } else {
+      targetArea = 'notebook';
+    }
 
-      if (event.shiftKey) {
-        // Prevent text select behavior.
+    // Make sure we go to command mode if the click isn't in the cell editor If
+    // we do click in the cell editor, the editor handles the focus event to
+    // switch to edit mode.
+    if (targetArea !== 'input') {
+      this.mode = 'command';
+    }
+
+    if (targetArea === 'notebook') {
+      this.deselectAll();
+    } else if (targetArea === 'prompt' || targetArea === 'cell') {
+      if (button === 0 && shiftKey) {
+        // Prevent browser selecting text in prompt or output
         event.preventDefault();
-        event.stopPropagation();
 
+        // Shift-click - extend selection
         try {
           this.extendContiguousSelectionTo(index);
         } catch (e) {
@@ -1388,16 +1488,9 @@ class Notebook extends StaticNotebook {
         this._mouseMode = 'select';
         document.addEventListener('mouseup', this, true);
         document.addEventListener('mousemove', this, true);
-
-      } else {
-        // Check if we need to change the active cell.
-        if (!this.isSelectedOrActive(widget)) {
-          this.deselectAll();
-          this.activeCellIndex = index;
-        }
-
-        // Prepare to start a drag if we are on the drag region.
-        if (widget.promptNode.contains(target)) {
+      } else if (button === 0 && !shiftKey) {
+        // Prepare to start a drag if we are on the drag region. TODO: If there is no drag, we'll deselect on mouseup.
+        if (targetArea === 'prompt' && this.isSelectedOrActive(widget)) {
           // Prepare for a drag start
           this._dragData = { pressX: event.clientX, pressY: event.clientY, index: index};
 
@@ -1405,11 +1498,27 @@ class Notebook extends StaticNotebook {
           this._mouseMode = 'couldDrag';
           document.addEventListener('mouseup', this, true);
           document.addEventListener('mousemove', this, true);
+          event.preventDefault();
+        } else {
+          this.deselectAll();
+          this.activeCellIndex = index;
+        }
+      } else if (button === 2) {
+        if (!this.isSelectedOrActive(widget)) {
+          this.deselectAll();
+          this.activeCellIndex = index;
         }
         event.preventDefault();
       }
-
+    } else if (targetArea === 'input') {
+      if (button === 2 && !this.isSelectedOrActive(widget)) {
+        this.deselectAll();
+        this.activeCellIndex = index;
+      }
     }
+
+    // If we didn't set focus above, make sure we get focus now.
+    this._ensureFocus(true);
   }
 
   /**
@@ -1419,6 +1528,26 @@ class Notebook extends StaticNotebook {
     // Remove the event listeners we put on the document
     document.removeEventListener('mousemove', this, true);
     document.removeEventListener('mouseup', this, true);
+
+    if (this._mouseMode === 'couldDrag') {
+      // We didn't end up dragging if we are here, so treat it as a click event.
+
+      // Find the target cell.
+      let target = event.target as HTMLElement;
+      let index = this._findCell(target);
+      if (index === -1) {
+        // `event.target` sometimes gives an orphaned node in
+        // Firefox 57, which can have `null` anywhere in its parent line. If we fail
+        // to find a cell using `event.target`, try again using a target
+        // reconstructed from the position of the click event.
+        target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
+        index = this._findCell(target);
+      }
+
+      this.deselectAll();
+      this.activeCellIndex = index;
+    }
+
     this._mouseMode = null;
     event.preventDefault();
     event.stopPropagation();
@@ -1674,8 +1803,9 @@ class Notebook extends StaticNotebook {
   /**
    * Handle `focus` events for the widget.
    */
-  private _evtFocus(event: MouseEvent): void {
+  private _evtFocusIn(event: MouseEvent): void {
     let target = event.target as HTMLElement;
+
     let i = this._findCell(target);
     if (i !== -1) {
       let widget = this.widgets[i];
@@ -1696,14 +1826,28 @@ class Notebook extends StaticNotebook {
   }
 
   /**
-   * Handle `blur` events for the notebook.
+   * Handle `focusout` events for the notebook.
    */
-  private _evtBlur(event: MouseEvent): void {
+  private _evtFocusOut(event: MouseEvent): void {
     let relatedTarget = event.relatedTarget as HTMLElement;
-    // Bail if focus is leaving the notebook.
-    if (!this.node.contains(relatedTarget)) {
+
+    // Bail if the window is losing focus, to preserve edit mode. This test
+    // assumes that we explicitly focus things rather than calling blur()
+    if (!relatedTarget) {
       return;
     }
+
+    // Bail if the item gaining focus is another cell,
+    // and we should not be entering command mode.
+    const i = this._findCell(relatedTarget);
+    if (i !== -1) {
+      const widget = this.widgets[i];
+      if (widget.editorWidget.node.contains(relatedTarget)) {
+        return;
+      }
+    }
+
+    // Otherwise enter command mode.
     this.mode = 'command';
   }
 
@@ -1715,8 +1859,19 @@ class Notebook extends StaticNotebook {
     if (!model) {
       return;
     }
+    this.deselectAll();
+
+    // `event.target` sometimes gives an orphaned node in Firefox 57, which
+    // can have `null` anywhere in its parent tree. If we fail to find a
+    // cell using `event.target`, try again using a target reconstructed from
+    // the position of the click event.
     let target = event.target as HTMLElement;
     let i = this._findCell(target);
+    if (i === -1) {
+      target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
+      i = this._findCell(target);
+    }
+
     if (i === -1) {
       return;
     }

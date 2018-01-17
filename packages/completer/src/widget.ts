@@ -6,12 +6,16 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  JSONObject
+  JSONObject, JSONExt
 } from '@phosphor/coreutils';
 
 import {
   IDisposable
 } from '@phosphor/disposable';
+
+import {
+  ElementExt
+} from '@phosphor/domutils';
 
 import {
   Message
@@ -22,26 +26,17 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  ElementExt
-} from '@phosphor/domutils';
-
-import {
   Widget
 } from '@phosphor/widgets';
+
+import {
+  HoverBox, defaultSanitizer
+} from '@jupyterlab/apputils';
 
 import {
   CodeEditor
 } from '@jupyterlab/codeeditor';
 
-import {
-  HoverBox
-} from '@jupyterlab/apputils';
-
-
-/**
- * The class name added to completer menu widgets.
- */
-const COMPLETER_CLASS = 'jp-Completer';
 
 /**
  * The class name added to completer menu items.
@@ -82,7 +77,7 @@ class Completer extends Widget {
     this._renderer = options.renderer || Completer.defaultRenderer;
     this.model = options.model || null;
     this.editor = options.editor || null;
-    this.addClass(COMPLETER_CLASS);
+    this.addClass('jp-Completer');
   }
 
   /**
@@ -225,6 +220,7 @@ class Completer extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     const model = this._model;
+
     if (!model) {
       return;
     }
@@ -233,7 +229,7 @@ class Completer extends Widget {
       this._resetFlag = false;
       if (!this.isHidden) {
         this.hide();
-        this._visibilityChanged.emit(void 0);
+        this._visibilityChanged.emit(undefined);
       }
       return;
     }
@@ -246,7 +242,7 @@ class Completer extends Widget {
       this.reset();
       if (!this.isHidden) {
         this.hide();
-        this._visibilityChanged.emit(void 0);
+        this._visibilityChanged.emit(undefined);
       }
       return;
     }
@@ -262,11 +258,14 @@ class Completer extends Widget {
     let node = this.node;
     node.textContent = '';
 
+    // Compute an ordered list of all the types in the typeMap, this is computed
+    // once by the model each time new data arrives for efficiency.
+    let orderedTypes = model.orderedTypes();
+
     // Populate the completer items.
     for (let item of items) {
-      let li = this._renderer.createItemNode(item!);
-      // Set the raw, un-marked up value as a data attribute.
-      li.setAttribute('data-value', item.raw);
+      let li = this._renderer
+        .createItemNode(item!, model.typeMap(), orderedTypes);
       node.appendChild(li);
     }
 
@@ -275,9 +274,10 @@ class Completer extends Widget {
 
     // If this is the first time the current completer session has loaded,
     // populate any initial subset match.
-    if (this._model && this._model.subsetMatch) {
-      let populated = this._populateSubset();
-      this.model.subsetMatch = false;
+    if (model.subsetMatch) {
+      const populated = this._populateSubset();
+
+      model.subsetMatch = false;
       if (populated) {
         this.update();
         return;
@@ -287,7 +287,7 @@ class Completer extends Widget {
     if (this.isHidden) {
       this.show();
       this._setGeometry();
-      this._visibilityChanged.emit(void 0);
+      this._visibilityChanged.emit(undefined);
     } else {
       this._setGeometry();
     }
@@ -408,14 +408,17 @@ class Completer extends Widget {
       return;
     }
 
+    const { node } = this;
+
     // All scrolls except scrolls in the actual hover box node may cause the
     // referent editor that anchors the node to move, so the only scroll events
     // that can safely be ignored are ones that happen inside the hovering node.
-    if (this.node.contains(event.target as HTMLElement)) {
+    if (node.contains(event.target as HTMLElement)) {
       return;
     }
 
-    this._setGeometry();
+    // Set the geometry of the node asynchronously.
+    requestAnimationFrame(() => { this._setGeometry(); });
   }
 
   /**
@@ -424,17 +427,23 @@ class Completer extends Widget {
    * @returns `true` if a subset match was found and populated.
    */
   private _populateSubset(): boolean {
-    let items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
-    let subset = Private.commonSubset(Private.itemValues(items));
-    if (!this.model) {
+    const { model } = this;
+
+    if (!model) {
       return false;
     }
-    let query = this.model.query;
+
+    const items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
+    const subset = Private.commonSubset(Private.itemValues(items));
+    const { query } = model;
+
+    // If a common subset exists and it is not the current query, highlight it.
     if (subset && subset !== query && subset.indexOf(query) === 0) {
-      this.model.query = subset;
-      this._selected.emit(subset);
+      model.query = subset;
+
       return true;
     }
+
     return false;
   }
 
@@ -442,23 +451,21 @@ class Completer extends Widget {
    * Set the visible dimensions of the widget.
    */
   private _setGeometry(): void {
+    const { node } = this;
     const model = this._model;
     const editor = this._editor;
-
-    if (!editor) {
-      return;
-    }
 
     // This is an overly defensive test: `cursor` will always exist if
     // `original` exists, except in contrived tests. But since it is possible
     // to generate a runtime error, the check occurs here.
-    if (!model || !model.original || !model.cursor) {
+    if (!editor || !model || !model.original || !model.cursor) {
       return;
     }
 
-    const position = editor.getPositionAt(model.cursor.start) as CodeEditor.IPosition;
+    const start = model.cursor.start;
+    const position = editor.getPositionAt(start) as CodeEditor.IPosition;
     const anchor = editor.getCoordinateForPosition(position) as ClientRect;
-    const style = window.getComputedStyle(this.node);
+    const style = window.getComputedStyle(node);
     const borderLeft = parseInt(style.borderLeftWidth!, 10) || 0;
     const paddingLeft = parseInt(style.paddingLeft!, 10) || 0;
 
@@ -468,9 +475,10 @@ class Completer extends Widget {
       host: editor.host,
       maxHeight: MAX_HEIGHT,
       minHeight: MIN_HEIGHT,
-      node: this.node,
+      node: node,
       offset: { horizontal: borderLeft + paddingLeft },
-      privilege: 'below'
+      privilege: 'below',
+      style: style
     });
   }
 
@@ -486,6 +494,12 @@ class Completer extends Widget {
 
 export
 namespace Completer {
+  /**
+   * A type map that may add type annotations to completer matches.
+   */
+  export
+  type TypeMap = { [index: string]: string; };
+
   /**
    * The initialization options for a completer widget.
    */
@@ -585,9 +599,20 @@ namespace Completer {
     options(): IIterator<string>;
 
     /**
+     * The map from identifiers (`a.b`) to their types (function, module, class,
+     * instance, etc.).
+     */
+    typeMap(): TypeMap;
+
+    /**
+     * An ordered list of types used for visual encoding.
+     */
+    orderedTypes(): string[];
+
+    /**
      * Set the available options in the completer menu.
      */
-    setOptions(options: IterableOrArrayLike<string>): void;
+    setOptions(options: IterableOrArrayLike<string>, typeMap?: JSONObject): void;
 
     /**
      * Handle a cursor change.
@@ -662,6 +687,7 @@ namespace Completer {
     end: number;
   }
 
+
   /**
    * A renderer for completer widget nodes.
    */
@@ -670,7 +696,7 @@ namespace Completer {
     /**
      * Create an item node (an `li` element) for a text completer menu.
      */
-    createItemNode(item: IItem): HTMLLIElement;
+    createItemNode(item: IItem, typeMap: TypeMap, orderedTypes: string[]): HTMLLIElement;
   }
 
   /**
@@ -681,15 +707,37 @@ namespace Completer {
     /**
      * Create an item node for a text completer menu.
      */
-    createItemNode(item: IItem): HTMLLIElement {
+    createItemNode(item: IItem, typeMap: TypeMap, orderedTypes: string[]): HTMLLIElement {
       let li = document.createElement('li');
-      let code = document.createElement('code');
-
-      // Use innerHTML because search results include <mark> tags.
-      code.innerHTML = item.text;
-
       li.className = ITEM_CLASS;
-      li.appendChild(code);
+      // Set the raw, un-marked up value as a data attribute.
+      li.setAttribute('data-value', item.raw);
+
+      let matchNode = document.createElement('code');
+      matchNode.className = 'jp-Completer-match';
+      // Use innerHTML because search results include <mark> tags.
+      matchNode.innerHTML = defaultSanitizer.sanitize(
+        item.text, { allowedTags: ['mark'] }
+      );
+
+      // If there are types provided add those.
+      if (!JSONExt.deepEqual(typeMap, {})) {
+        let typeNode = document.createElement('span');
+        let type = typeMap[item.raw] || '';
+        typeNode.textContent = (type[0] || '').toLowerCase();
+        let colorIndex: number = orderedTypes.indexOf(type) + 1;
+        typeNode.className = 'jp-Completer-type';
+        typeNode.setAttribute(`data-color-index`, colorIndex.toString());
+        li.title = type;
+        let typeExtendedNode = document.createElement('code');
+        typeExtendedNode.className = 'jp-Completer-typeExtended';
+        typeExtendedNode.textContent = type.toLocaleLowerCase();
+        li.appendChild(typeNode);
+        li.appendChild(matchNode);
+        li.appendChild(typeExtendedNode);
+      } else {
+        li.appendChild(matchNode);
+      }
       return li;
     }
   }
@@ -736,7 +784,7 @@ namespace Private {
   function itemValues(items: NodeList): string[] {
     let values: string[] = [];
     for (let i = 0, len = items.length; i < len; i++) {
-      values.push((items[i] as HTMLElement).getAttribute('data-value') as string);
+      values.push((items[i] as HTMLElement).getAttribute('data-value'));
     }
     return values;
   }

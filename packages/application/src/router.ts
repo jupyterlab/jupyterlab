@@ -16,8 +16,12 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  IDisposable, DisposableDelegate
+  DisposableDelegate, IDisposable
 } from '@phosphor/disposable';
+
+import {
+  ISignal, Signal
+} from '@phosphor/signaling';
 
 
 /* tslint:disable */
@@ -45,15 +49,18 @@ interface IRouter {
   readonly commands: CommandRegistry;
 
   /**
+   * A signal emitted when the router routes a route.
+   */
+  readonly routed: ISignal<IRouter, IRouter.ICommandArgs>;
+
+  /**
    * Register to route a path pattern to a command.
    *
-   * @param pattern - The regular expression that will be matched against URLs.
-   *
-   * @param command - The command string that will be invoked upon matching.
+   * @param options - The route registration options.
    *
    * @returns A disposable that removes the registered rul from the router.
    */
-  register(pattern: RegExp, command: string): IDisposable;
+  register(options: IRouter.IRegisterArgs): IDisposable;
 
   /**
    * Route a specific path to an action.
@@ -89,6 +96,28 @@ namespace IRouter {
      */
     search: string;
   }
+
+  /**
+   * The specification for registering a route with the router.
+   */
+  export
+  interface IRegisterArgs {
+    /**
+     * The command string that will be invoked upon matching.
+     */
+    command: string;
+
+    /**
+     * The regular expression that will be matched against URLs.
+     */
+    pattern: RegExp;
+
+    /**
+     * The rank order of the registered rule. A lower rank denotes a higher
+     * priority. The default rank is `100`.
+     */
+    rank?: number;
+  }
 }
 
 
@@ -116,18 +145,25 @@ class Router implements IRouter {
   readonly commands: CommandRegistry;
 
   /**
+   * A signal emitted when the router routes a route.
+   */
+  get routed(): ISignal<this, IRouter.ICommandArgs> {
+    return this._routed;
+  }
+
+  /**
    * Register to route a path pattern to a command.
    *
-   * @param pattern - The regular expression that will be matched against URLs.
-   *
-   * @param command - The command string that will be invoked upon matching.
+   * @param options - The route registration options.
    *
    * @returns A disposable that removes the registered rul from the router.
    */
-  register(pattern: RegExp, command: string): IDisposable {
+  register(options: IRouter.IRegisterArgs): IDisposable {
+    const { command, pattern } = options;
+    const rank = 'rank' in options ? options.rank : 100;
     const rules = this._rules;
 
-    rules.set(pattern, command);
+    rules.set(pattern, { command, rank });
 
     return new DisposableDelegate(() => { rules.delete(pattern); });
   }
@@ -142,20 +178,30 @@ class Router implements IRouter {
    * match the `IRouter.ICommandArgs` interface.
    */
   route(url: string): void {
-    const { base } = this;
-    const parsed = URLExt.parse(url.replace(base, ''));
-    const path = parsed.pathname;
-    const search = parsed.search;
-    const rules = this._rules;
+    const parsed = URLExt.parse(url.replace(this.base, ''));
+    const args = { path: parsed.pathname, search: parsed.search };
+    const matches: Private.Rule[] = [];
 
-    rules.forEach((command, pattern) => {
-      if (path.match(pattern)) {
-        this.commands.execute(command, { path, search });
+    // Collect all rules that match the URL.
+    this._rules.forEach((rule, pattern) => {
+      if (parsed.pathname.match(pattern)) {
+        matches.push(rule);
       }
     });
+
+    // Order the matching rules by rank and execute them.
+    matches.sort((a, b) => a.rank - b.rank).forEach(rule => {
+      // Ignore the results of each executed promise.
+      this.commands.execute(rule.command, args).catch(reason => {
+        console.warn(`Routing ${url} using ${rule.command} failed:`, reason);
+      });
+    });
+
+    this._routed.emit(args);
   }
 
-  private _rules = new Map<RegExp, string>();
+  private _routed = new Signal<this, IRouter.ICommandArgs>(this);
+  private _rules = new Map<RegExp, Private.Rule>();
 }
 
 
@@ -179,4 +225,16 @@ namespace Router {
      */
     commands: CommandRegistry;
   }
+}
+
+
+/**
+ * A namespace for private module data.
+ */
+namespace Private {
+  /**
+   * The internal representation of a routing rule.
+   */
+  export
+  type Rule = { command: string; rank: number };
 }

@@ -380,10 +380,10 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, bro
 
   commands.addCommand(CommandIDs.share, {
     execute: () => {
-      const path = browser.selectedItems().next().path;
+      const path = encodeURIComponent(browser.selectedItems().next().path);
       const tree = PageConfig.getTreeUrl();
 
-      Clipboard.copyToSystem(URLExt.join(tree, (path as string)));
+      Clipboard.copyToSystem(URLExt.join(tree, path));
     },
     isVisible: () => toArray(browser.selectedItems()).length === 1,
     iconClass: 'jp-MaterialIcon jp-LinkIcon',
@@ -441,7 +441,7 @@ function createContextMenu(model: Contents.IModel, commands: CommandRegistry, re
     if (path && factories.length > 1) {
       const command =  'docmanager:open';
       const openWith = new Menu({ commands });
-      openWith.title.label = 'Open With...';
+      openWith.title.label = 'Open With';
       factories.forEach(factory => {
         openWith.addItem({ args: { factory, path }, command });
       });

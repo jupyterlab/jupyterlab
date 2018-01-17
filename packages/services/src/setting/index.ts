@@ -17,7 +17,7 @@ const SERVICE_SETTINGS_URL = 'api/settings';
 
 
 /**
- * The static namespace for `SettingManager`.
+ * The settings API service manager.
  */
 export
 class SettingManager {
@@ -47,7 +47,7 @@ class SettingManager {
     const { baseUrl, pageUrl } = serverSettings;
     const base = baseUrl + pageUrl;
     const url = Private.url(base, id);
-    const promise = ServerConnection.makeRequest(url, {}, serverSettings);
+    const promise = ServerConnection.makeRequest(url, { }, serverSettings);
 
     return promise.then(response => {
       if (response.status !== 200) {
@@ -65,8 +65,8 @@ class SettingManager {
    *
    * @param raw - The user setting values as a raw string of JSON with comments.
    *
-   * @returns A promise that resolves when saving is complete or rejects
-   * with a `ServerConnection.IError`.
+   * @returns A promise that resolves when saving is complete or rejects with
+   * a `ServerConnection.IError`.
    */
   save(id: string, raw: string): Promise<void> {
     const { serverSettings } = this;
@@ -84,7 +84,7 @@ class SettingManager {
         throw new ServerConnection.ResponseError(response);
       }
 
-      return void 0;
+      return undefined;
     });
   }
 }

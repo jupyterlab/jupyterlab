@@ -4,9 +4,9 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-#-----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Module globals
-#-----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 import os
 
 DEV_NOTE = """You're running JupyterLab from source.
@@ -35,14 +35,19 @@ def load_jupyter_server_extension(nbapp):
     from .build_handler import build_path, Builder, BuildHandler
     from .commands import (
         get_app_dir, get_user_settings_dir, watch, ensure_dev, watch_dev,
-        pjoin, DEV_DIR, HERE, get_app_info, ensure_core
+        pjoin, DEV_DIR, HERE, get_app_info, ensure_core, get_workspaces_dir
     )
-    from ._version import __version__
 
     web_app = nbapp.web_app
     logger = nbapp.log
     config = LabConfig()
     app_dir = getattr(nbapp, 'app_dir', get_app_dir())
+    user_settings_dir = getattr(
+        nbapp, 'user_settings_dir', get_user_settings_dir()
+    )
+    workspaces_dir = getattr(
+        nbapp, 'workspaces_dir', get_workspaces_dir()
+    )
 
     # Print messages.
     logger.info('JupyterLab beta preview extension loaded from %s' % HERE)
@@ -102,6 +107,7 @@ def load_jupyter_server_extension(nbapp):
     config.app_settings_dir = pjoin(app_dir, 'settings')
     config.schemas_dir = pjoin(app_dir, 'schemas')
     config.themes_dir = pjoin(app_dir, 'themes')
+    config.workspaces_dir = workspaces_dir
     info = get_app_info(app_dir)
     config.app_version = info['version']
     public_url = info['publicUrl']
@@ -110,7 +116,9 @@ def load_jupyter_server_extension(nbapp):
     else:
         config.static_dir = pjoin(app_dir, 'static')
 
-    config.user_settings_dir = get_user_settings_dir()
+    config.user_settings_dir = user_settings_dir
+
+    # The templates end up in the built static directory.
     config.templates_dir = pjoin(app_dir, 'static')
 
     if watch_mode:
@@ -132,6 +140,6 @@ def load_jupyter_server_extension(nbapp):
     build_handler = (build_url, BuildHandler, {'builder': builder})
 
     # Must add before the launcher handlers to avoid shadowing.
-    web_app.add_handlers(".*$", [build_handler])
+    web_app.add_handlers('.*$', [build_handler])
 
     add_handlers(web_app, config)

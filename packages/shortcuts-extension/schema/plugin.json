@@ -40,7 +40,7 @@
       },
       "type": "object"
     },
-    "command-palette:activate": {
+    "apputils:activate-command-palette": {
       "default": { },
       "properties": {
         "command": { "default": "apputils:activate-command-palette" },
@@ -501,6 +501,15 @@
       },
       "type": "object"
     },
+    "notebook:select-all": {
+      "default": { },
+      "properties": {
+        "command": { "default": "notebook:select-all" },
+        "keys": { "default": ["Accel A"] },
+        "selector": { "default": ".jp-Notebook:focus" }
+      },
+      "type": "object"
+    },
     "notebook:split-cell-at-cursor": {
       "default": { },
       "properties": {
@@ -578,7 +587,7 @@
       "properties": {
         "command": { "default": "tooltip:dismiss" },
         "keys": { "default": ["Escape"] },
-        "selector": { "default": "body.jp-mod-tooltip .jp-CodeConsole" }
+        "selector": { "default": "body.jp-mod-tooltip .jp-CodeConsole-promptCell" }
       },
       "type": "object"
     },

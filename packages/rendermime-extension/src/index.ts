@@ -40,7 +40,7 @@ function activate(app: JupyterLab, latexTypesetter: ILatexTypesetter) {
     linkHandler: {
       handleLink: (node, path) => {
         app.commandLinker.connectNode(
-          node, 'file-operations:open', { path: path }
+          node, 'docmanager:open', { path: path }
         );
       }
     },
