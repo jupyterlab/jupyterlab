@@ -1260,7 +1260,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     label: 'Create New View for Output',
     execute: args => {
       // Clone the OutputArea
-      const current = getCurrent(args);
+      const current = getCurrent({ ...args, activate: false });
       const nb = current.notebook;
       const outputAreaView = (nb.activeCell as CodeCell).cloneOutputArea();
       // Create an empty toolbar
