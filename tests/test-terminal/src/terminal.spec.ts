@@ -74,11 +74,6 @@ describe('terminal/index', () => {
     let session: TerminalSession.ISession;
 
     before((done) => {
-      if (Platform.IS_WIN) {
-        session = null;
-        expect(() => { TerminalSession.startNew(); }).to.throwError();
-        return done();
-      }
       TerminalSession.startNew().then(s => {
         session = s;
       }).then(done, done);
@@ -107,10 +102,6 @@ describe('terminal/index', () => {
       });
 
       it('should set the title when ready', function(done) {
-        if (Platform.IS_WIN) {
-          // tslint:disable-next-line
-          return this.skip();
-        }
         widget.session = session;
         expect(widget.session).to.be(session);
         session.ready.then(() => {
@@ -173,10 +164,6 @@ describe('terminal/index', () => {
     describe('#refresh()', () => {
 
       it('should refresh the widget', (done) => {
-        if (Platform.IS_WIN) {
-          expect(widget.refresh()).to.be.a(Promise);
-          return done();
-        }
         widget.session = session;
         widget.refresh().then(done, done);
       });
