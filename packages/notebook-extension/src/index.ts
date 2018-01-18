@@ -716,7 +716,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   }
 
   commands.addCommand(CommandIDs.runAndAdvance, {
-    label: 'Run Cells and Select Below',
+    label: 'Run Selected Cells',
     execute: args => {
       const current = getCurrent(args);
 
@@ -794,7 +794,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled: isEnabledAndSingleSelected
   });
   commands.addCommand(CommandIDs.restart, {
-    label: 'Restart Kernel',
+    label: 'Restart Kernel…',
     execute: args => {
       const current = getCurrent(args);
 
@@ -876,7 +876,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.restartClear, {
-    label: 'Restart Kernel & Clear All Outputs',
+    label: 'Restart Kernel and Clear All Outputs…',
     execute: args => {
       const current = getCurrent(args);
 
@@ -890,7 +890,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.restartRunAll, {
-    label: 'Restart Kernel & Run All',
+    label: 'Restart Kernel and Run All Cells…',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1229,7 +1229,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.changeKernel, {
-    label: 'Change Kernel',
+    label: 'Change Kernel…',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1260,7 +1260,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     label: 'Create New View for Output',
     execute: args => {
       // Clone the OutputArea
-      const current = getCurrent(args);
+      const current = getCurrent({ ...args, activate: false });
       const nb = current.notebook;
       const outputAreaView = (nb.activeCell as CodeCell).cloneOutputArea();
       // Create an empty toolbar
@@ -1287,9 +1287,9 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled: isEnabledAndSingleSelected
   });
   commands.addCommand(CommandIDs.createConsole, {
-    label: 'Create Console for Notebook',
+    label: 'New Console for Notebook',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent({ ...args, activate: false });
       const widget = tracker.currentWidget;
 
       if (!current || !widget) {
@@ -1653,7 +1653,10 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
     createConsole: current => {
       const options: ReadonlyJSONObject = {
         path: current.context.path,
-        preferredLanguage: current.context.model.defaultKernelLanguage
+        preferredLanguage: current.context.model.defaultKernelLanguage,
+        activate: true,
+        ref: current.id,
+        insertMode: 'split-bottom'
       };
       return commands.execute('console:create', options);
     }

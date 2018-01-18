@@ -335,7 +335,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
   });
 
   commands.addCommand(CommandIDs.restart, {
-    label: 'Restart Kernel',
+    label: 'Restart Kernel…',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
@@ -347,7 +347,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
   });
 
   commands.addCommand(CommandIDs.closeAndShutdown, {
-    label: 'Close and Shutdown',
+    label: 'Close and Shutdown…',
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -388,7 +388,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
   });
 
   commands.addCommand(CommandIDs.changeKernel, {
-    label: 'Change Kernel',
+    label: 'Change Kernel…',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
