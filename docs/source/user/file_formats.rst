@@ -1,6 +1,6 @@
 .. _file-and-output-formats:
 
-File and output formats
+File and Output Formats
 -----------------------
 
 JupyterLab provides a unified architecture for viewing and editing data
@@ -45,6 +45,7 @@ Other Jupyter kernels offer similar APIs.
 
 The rest of this section highlights some of the common data formats that
 JupyterLab supports.
+
 
 Markdown
 ~~~~~~~~

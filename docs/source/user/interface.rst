@@ -1,3 +1,5 @@
+.. _interface:
+
 The JupyterLab Interface
 ------------------------
 
@@ -6,13 +8,15 @@ exploratory computing. While JupyterLab has many features found in
 traditional integrated development environments (IDEs), it remains
 focused on interactive, exploratory computing.
 
-The JupyterLab interface consists of a main work area containing tabs of
-documents and activities, a collapsible left sidebar, and a menu bar.
-The left sidebar contains a file browser, the list of running kernels
-and terminals, the command palette, the notebook cell tools inspector,
-and the tabs list.
+The JupyterLab interface consists of a :ref:`main work area <main_area>` containing tabs of
+documents and activities, a collapsible :ref:`left sidebar <left_sidebar>`, and a :ref:`menu bar <menu_bar>`.
+The left sidebar contains a :ref:`file browser <working_with_files>`, the :ref:`list of running kernels
+and terminals <running>`, the :ref:`command palette <commands>`, the :ref:`notebook cell tools inspector <notebook>`,
+and the :ref:`tabs list <tabs>`.
 
 [screenshot]
+
+.. _menu_bar:
 
 Menu Bar
 ~~~~~~~~
@@ -32,8 +36,10 @@ default menus are:
 -  Settings: common settings and an advanced settings editor
 -  Help: a list of JupyterLab and kernel help links
 
-JupyterLab extensions can also create new top-level menus in the menu
+:ref:`JupyterLab extensions <user_extensions>` can also create new top-level menus in the menu
 bar.
+
+.. _left_sidebar:
 
 Left Sidebar
 ~~~~~~~~~~~~
@@ -51,6 +57,8 @@ sidebar tab:
 
 JupyterLab extensions can add additional panels to the left sidebar.
 
+.. _main_area:
+
 Main area
 ~~~~~~~~~
 
@@ -64,6 +72,8 @@ The main area has a single current activity. The tab for this activity
 is marked with a colored top border (blue by default).
 
 [screenshot]
+
+.. _tabs:
 
 Tabs and Single Document Mode
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

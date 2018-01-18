@@ -1,3 +1,5 @@
+.. _user_extensions:
+
 Extensions
 ----------
 
@@ -6,7 +8,7 @@ They can provide new file viewer types, launcher activities, and output
 renderers, among many other things. JupyterLab extensions are
 `npm <https://www.npmjs.com/>`__ packages (the standard package format
 in Javascript development). For information about developing extensions,
-see the :ref:`developer documentation <developer-guide>`.
+see the :ref:`developer documentation <developer_extensions>`.
 
 In order to install JupyterLab extensions, you need to have Node.js
 version 4+ installed.
@@ -50,7 +52,7 @@ tarball, or a URL to a gzipped tarball.
 We encourage extension authors to add the ``jupyterlab-extensions``
 GitHub topic to any repository with a JupyterLab extension to facilitate
 discovery. You can see a list of extensions by searching Github for the
-`jupyterlab-extensions <https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extensions&type=Repositories>`__
+`jupyterlab-extension <https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extension&type=Repositories>`__
 topic.
 
 You can list the currently installed extensions by running the command:
@@ -168,7 +170,7 @@ The ``settings`` directory contains ``page_config.json`` and
 .. _page_configjson:
 
 page_config.json
-                
+
 
 The ``page_config.json`` data is used to provide config data to the
 application environment.
@@ -204,7 +206,7 @@ and ``deferredExtensions``.
 .. _build_configjson:
 
 build_config.json
-                 
+
 
 The ``build_config.json`` file is used to track the local directories
 that have been installed using

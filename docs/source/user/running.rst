@@ -1,4 +1,6 @@
-Managing kernels and terminals
+.. _running:
+
+Managing Kernels and Terminals
 ------------------------------
 
 The Running tab in the left sidebar shows a list of all the kernels and
