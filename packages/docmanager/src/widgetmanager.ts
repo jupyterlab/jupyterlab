@@ -125,7 +125,7 @@ class DocumentWidgetManager implements IDisposable {
    *
    * @param widget - The widget to adopt.
    */
-  adoptWidget(context: DocumentRegistry.Context, widget: Widget): void {
+  adoptWidget(context: DocumentRegistry.Context, widget: DocumentRegistry.IReadyWidget): void {
     let widgets = Private.widgetsProperty.get(context);
     widgets.push(widget);
     MessageLoop.installMessageHook(widget, this);
@@ -157,7 +157,7 @@ class DocumentWidgetManager implements IDisposable {
         return false;
       }
       return factory.name === widgetName;
-    }) as DocumentRegistry.IReadyWidget;
+    });
   }
 
   /**
@@ -448,7 +448,7 @@ namespace Private {
    * A private attached property for the widgets associated with a context.
    */
   export
-  const widgetsProperty = new AttachedProperty<DocumentRegistry.Context, Widget[]>({
+  const widgetsProperty = new AttachedProperty<DocumentRegistry.Context, DocumentRegistry.IReadyWidget[]>({
     name: 'widgets',
     create: () => []
   });

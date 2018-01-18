@@ -378,7 +378,7 @@ class DocumentManager implements IDisposable {
    */
   private _createContext(path: string, factory: DocumentRegistry.ModelFactory, kernelPreference: IClientSession.IKernelPreference): Private.IContext {
     // Allow options to be passed when adding a sibling.
-    let adopter = (widget: Widget, options?: DocumentRegistry.IOpenOptions) => {
+    let adopter = (widget: DocumentRegistry.IReadyWidget, options?: DocumentRegistry.IOpenOptions) => {
       this._widgetManager.adoptWidget(context, widget);
       this._opener.open(widget, options);
     };
@@ -519,7 +519,7 @@ namespace DocumentManager {
     /**
      * Open the given widget.
      */
-    open(widget: Widget, options?: DocumentRegistry.IOpenOptions): void;
+    open(widget: DocumentRegistry.IReadyWidget, options?: DocumentRegistry.IOpenOptions): void;
   }
 }
 

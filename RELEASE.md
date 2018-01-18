@@ -78,7 +78,7 @@ xckd repo
 
 
 ### Extension examples to update
-- https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/developer/notebook.md#adding-a-button-to-the-toolbar
+- https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/developer/notebook.rst#adding-a-button-to-the-toolbar
 
 
 ### Updating the xkcd tutorial
