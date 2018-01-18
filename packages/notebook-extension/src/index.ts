@@ -716,7 +716,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   }
 
   commands.addCommand(CommandIDs.runAndAdvance, {
-    label: 'Run Cells and Select Below',
+    label: 'Run Selected Cells',
     execute: args => {
       const current = getCurrent(args);
 
@@ -794,7 +794,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled: isEnabledAndSingleSelected
   });
   commands.addCommand(CommandIDs.restart, {
-    label: 'Restart Kernel',
+    label: 'Restart Kernel…',
     execute: args => {
       const current = getCurrent(args);
 
@@ -876,7 +876,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.restartClear, {
-    label: 'Restart Kernel and Clear All Outputs',
+    label: 'Restart Kernel and Clear All Outputs…',
     execute: args => {
       const current = getCurrent(args);
 
@@ -890,7 +890,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.restartRunAll, {
-    label: 'Restart Kernel and Run All',
+    label: 'Restart Kernel and Run All Cells…',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1229,7 +1229,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.changeKernel, {
-    label: 'Change Kernel',
+    label: 'Change Kernel…',
     execute: args => {
       const current = getCurrent(args);
 
