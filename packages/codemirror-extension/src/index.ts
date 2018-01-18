@@ -205,7 +205,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
   });
 
   commands.addCommand(CommandIDs.findAndReplace, {
-    label: 'Find & Replace...',
+    label: 'Find and Replace...',
     execute: () => {
       let widget = tracker.currentWidget;
       if (!widget) {

@@ -876,7 +876,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.restartClear, {
-    label: 'Restart Kernel & Clear All Outputs',
+    label: 'Restart Kernel and Clear All Outputs',
     execute: args => {
       const current = getCurrent(args);
 
@@ -890,7 +890,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     isEnabled
   });
   commands.addCommand(CommandIDs.restartRunAll, {
-    label: 'Restart Kernel & Run All',
+    label: 'Restart Kernel and Run All',
     execute: args => {
       const current = getCurrent(args);
 
