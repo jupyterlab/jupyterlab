@@ -54,11 +54,17 @@ interface IRouter {
   readonly routed: ISignal<IRouter, IRouter.ICommandArgs>;
 
   /**
-   * Register to route a path pattern to a command.
+   * If a matching rule's command resolves with the `stop` token during routing,
+   * no further matches will execute.
+   */
+  readonly stop: Token<void>;
+
+  /**
+   * Register a rule that maps a path pattern to a command.
    *
    * @param options - The route registration options.
    *
-   * @returns A disposable that removes the registered rul from the router.
+   * @returns A disposable that removes the registered rule from the router.
    */
   register(options: IRouter.IRegisterArgs): IDisposable;
 
@@ -145,6 +151,12 @@ class Router implements IRouter {
   readonly commands: CommandRegistry;
 
   /**
+   * If a matching rule's command resolves with the `stop` token during routing,
+   * no further matches will execute.
+   */
+  readonly stop = new Token<void>('Router#stop');
+
+  /**
    * A signal emitted when the router routes a route.
    */
   get routed(): ISignal<this, IRouter.ICommandArgs> {
@@ -178,6 +190,7 @@ class Router implements IRouter {
    * match the `IRouter.ICommandArgs` interface.
    */
   route(url: string): void {
+    const { commands, stop } = this;
     const parsed = URLExt.parse(url.replace(this.base, ''));
     const args = { path: parsed.pathname, search: parsed.search };
     const matches: Private.Rule[] = [];
@@ -189,15 +202,29 @@ class Router implements IRouter {
       }
     });
 
-    // Order the matching rules by rank and execute them.
-    matches.sort((a, b) => a.rank - b.rank).forEach(rule => {
-      // Ignore the results of each executed promise.
-      this.commands.execute(rule.command, args).catch(reason => {
-        console.warn(`Routing ${url} using ${rule.command} failed:`, reason);
-      });
-    });
+    // Order the matching rules by rank and enqueue them.
+    const queue = matches.sort((a, b) => a.rank - b.rank);
 
-    this._routed.emit(args);
+    // Process one enqueued promise at a time.
+    const next = () => {
+      if (!queue.length) {
+        this._routed.emit(args);
+        return;
+      }
+
+      const { command } = queue.shift();
+
+      commands.execute(command, args).then(result => {
+        if (result === stop) {
+          queue.length = 0;
+          console.log(`Routing ${url} was short-circuited by ${command}`);
+        }
+      }).catch(reason => {
+        console.warn(`Routing ${url} to ${command} failed`, reason);
+      }).then(() => { next(); });
+    };
+
+    next();
   }
 
   private _routed = new Signal<this, IRouter.ICommandArgs>(this);
