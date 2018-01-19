@@ -75,7 +75,7 @@ from the context menu:
 
 [animation]
 
-Uploading and downloading
+Uploading and Downloading
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Files can be uploaded to the current directory of the file browser by
