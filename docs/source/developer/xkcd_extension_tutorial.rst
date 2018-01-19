@@ -1,3 +1,5 @@
+.. _xkcd_extension_tutorial:
+
 Let's Make an xkcd JupyterLab Extension
 ---------------------------------------
 
@@ -863,4 +865,3 @@ learning, here are some suggestions about what to try next:
 .. |Single xkcd extension panel| image:: xkcd_tutorial_single.png
 .. |Styled xkcd panel with attribution| image:: xkcd_tutorial_complete.png
 .. |Extension page on npmjs.com| image:: xkcd_tutorial_npm.png
-

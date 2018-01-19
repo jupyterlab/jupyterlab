@@ -1,4 +1,4 @@
-.. _code-consoles:
+.. _code_console:
 
 Code Consoles
 -------------
@@ -9,8 +9,8 @@ kernel, as opposed to the explicit ordering of cells in a notebook
 document. Code consoles also display rich output, just like notebook
 cells.
 
-Create a new code console by clicking the ``+`` button in the file
-browser and selecting the kernel:
+Create a new code console by clicking the ``+`` button in the :ref:`file
+browser <left_sidebar>` and selecting the kernel:
 
 [animation]
 
@@ -29,7 +29,7 @@ right-clicking on the code console and selecting “Clear Console Cells”:
 
 [animation]
 
-Creating a code console from the File menu lets you select an existing
+Creating a code console from the :ref:`file menu <menu_bar>` lets you select an existing
 kernel for the code console. The code console then acts as a log of
 computations in that kernel, and a place you can interactively inspect
 and run code in the kernel:

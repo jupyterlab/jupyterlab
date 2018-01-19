@@ -1,3 +1,5 @@
+.. _notebook:
+
 Notebooks
 ---------
 
@@ -67,7 +69,7 @@ information about objects:
 
 [animation]
 
-You can connect a code console to a notebook kernel to have a log of
+You can connect a :ref:`code console <code_console>` to a notebook kernel to have a log of
 computations done in the kernel, in the order in which they were done.
 The attached code console also provides a place to interactively inspect
 kernel state without changing the notebook. Right-click on a notebook

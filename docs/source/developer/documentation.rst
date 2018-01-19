@@ -1,10 +1,10 @@
-Writing documentation
+Writing Documentation
 ---------------------
 
 This section provide information about writing documentation for
 JupyterLab.
 
-Writing style
+Writing Style
 ~~~~~~~~~~~~~
 
 -  The documentation should be written in the second person, referring
@@ -20,7 +20,7 @@ Writing style
 -  The beginning of each section should begin with a short (1-2
    sentence) high-level description of the topic, feature or component.
 
-Proper nouns
+Proper Nouns
 ~~~~~~~~~~~~
 
 The main parts of JupyterLab should be treated as proper nouns and
@@ -37,7 +37,7 @@ capitalized:
 -  Code Console
 -  Terminal
 
-Keyboard shortcuts
+Keyboard Shortcuts
 ~~~~~~~~~~~~~~~~~~
 
 Typeset keyboard shortcuts as follows:
@@ -50,7 +50,7 @@ Typeset keyboard shortcuts as follows:
 -  Don’t use platform specific icons for modifier keys, as they are
    difficult to display in a platform specific way on Sphinx/RTD.
 
-Screenshots and animations
+Screenshots and Animations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Our documentation should contain screenshots and animations that

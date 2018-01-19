@@ -1,21 +1,23 @@
+.. _overview:
+
 Overview
 --------
 
 *JupyterLab is the next generation user interface for Project Jupyter*
 
 JupyterLab goes beyond the classic Jupyter Notebook by providing a
-flexible and extensible web application with a set of reusable
+flexible and :ref:`extensible <user_extensions>` web application with a set of reusable
 components. You can arrange multiple notebooks, text editors, terminals,
 output areas, and custom components using tabs/panels and collapsible
-sidebars. These components are carefully designed to enable you to use
+sidebars. These :ref:`components <interface>` are carefully designed to enable you to use
 them together or on their own to support new workflows (for example, you
 can send code from a file to a code console with a keystroke, or move
 cells around a notebook or between notebooks with drag-and-drop).
 
-**JupyterLab has full support for Jupyter Notebook documents.** In
+:ref:`JupyterLab has full support for Jupyter Notebook documents. <notebook>` In
 addition, it enables other models of interactive computing, such as:
 
--  :ref:`code-consoles` provide transient scratchpads for running code
+-  :ref:`code_console` provide transient scratchpads for running code
    interactively, with full support for rich output.
 -  :ref:`Kernel-backed documents <kernel-backed-documents>` allow code in any text file (Markdown,
    Python, R, LaTeX, etc.) to be run interactively in any Jupyter

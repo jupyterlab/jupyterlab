@@ -6,7 +6,7 @@ Documents and kernels
 In the Jupyter architecture, kernels are separate processes started by
 the server that run your code in different programming languages and
 environments. JupyterLab allows you to connect any open text file to a
-code console and kernel. This means you can easily run code from the
+:ref:`code console and kernel <code_console>`. This means you can easily run code from the
 text file in the kernel interactively.
 
 Right-click on a document and select “Create Console for Editor”:

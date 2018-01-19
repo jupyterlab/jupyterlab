@@ -1,7 +1,9 @@
-Working with files
+.. _working_with_files:
+
+Working with Files
 ------------------
 
-Opening files
+Opening Files
 ~~~~~~~~~~~~~
 
 The file browser and File menu allow you to work with files and
@@ -24,11 +26,11 @@ You can also drag a file into the main area to create a new tab:
 
 [animation]
 
-Many files types have multiple viewers/editors. For example, you can
-open a Markdown file in a text editor or as rendered HTML. A JupyterLab
-extension can also add new viewers/editors for files. To open a file in
-a non-default viewer/editor, right-click on its name in the file browser
-and use the "Open With..." submenu to select the viewer/editor:
+Many files types have :ref:`multiple viewers/editors <file-and-output-formats>`.
+For example, you can open a Markdown file in a text editor or as rendered HTML.
+A JupyterLab extension can also add new viewers/editors for files.
+To open a file in a non-default viewer/editor, right-click on its name in the
+file browser and use the "Open With..." submenu to select the viewer/editor:
 
 [animation]
 
@@ -48,7 +50,7 @@ directory open.
 
 [screenshot]
 
-Creating files and activities
+Creating Files and Activities
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Create new files or activities by clicking the ``+`` button at the top
@@ -73,7 +75,7 @@ from the context menu:
 
 [animation]
 
-Uploading and downloading
+Uploading and Downloading
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Files can be uploaded to the current directory of the file browser by

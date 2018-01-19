@@ -1,3 +1,5 @@
+.. _developer_extensions:
+
 Extension Developer Guide
 -------------------------
 
@@ -11,6 +13,8 @@ JupyterLab can be extended in three ways via:
 -  document widget extensions (lower level): Document widget extensions
    extend the functionality of document widgets added to the
    application, and we cover them in the "Documents" tutorial.
+
+See :ref:`xkcd_extension_tutorial` to learn how to make a simple JupyterLab extension.
 
 A JupyterLab application is comprised of:
 
@@ -31,6 +35,10 @@ A plugin adds a core functionality to the application:
    `JupyterLab.IPluginModule <http://jupyterlab.github.io/jupyterlab/interfaces/_application_src_index_.jupyterlab.ipluginmodule.html>`__
    interface, by exporting a plugin object or array of plugin objects as
    the default export.
+
+   We provide two cookie cutters to create JuptyerLab plugin extensions in
+   `CommonJS <https://github.com/jupyterlab/extension-cookiecutter-js>` and
+   `TypeScript <https://github.com/jupyterlab/extension-cookiecutter-ts>`.
 
 The default plugins in the JupyterLab application include:
 
@@ -185,6 +193,9 @@ Mime Renderer Extensions
 
 Mime Renderer extensions are a convenience for creating an extension
 that can render mime data and potentially render files of a given type.
+We provide cookiecutters for Mime render extensions in
+`JavaScript <https://github.com/jupyterlab/mimerender-cookiecutter>`__ and
+`TypeScript <https://github.com/jupyterlab/mimerender-cookiecutter-ts>`__.
 
 Mime renderer extensions are more declarative than standard extensions.
 The extension is treated the same from the command line perspective
@@ -353,4 +364,3 @@ This would look something like the following in a ``Widget`` subclass:
       event.stopPropagation();
 
 .. |dependencies| image:: dependency-graph.svg
-

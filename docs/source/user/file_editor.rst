@@ -1,3 +1,5 @@
+.. _file_editor:
+
 File Editor
 -----------
 
