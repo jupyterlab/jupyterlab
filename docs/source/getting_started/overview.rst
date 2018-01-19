@@ -14,7 +14,7 @@ them together or on their own to support new workflows (for example, you
 can send code from a file to a code console with a keystroke, or move
 cells around a notebook or between notebooks with drag-and-drop).
 
-**JupyterLab has full support for Jupyter Notebook documents.** In
+:ref:`JupyterLab has full support for Jupyter Notebook documents. <notebook>` In
 addition, it enables other models of interactive computing, such as:
 
 -  :ref:`code_console` provide transient scratchpads for running code
