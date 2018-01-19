@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, IThemeManager, ThemeManager, ISplashScreen
+  Dialog, ICommandPalette, ISplashScreen, IThemeManager, ThemeManager
 } from '@jupyterlab/apputils';
 
 import {
@@ -221,7 +221,11 @@ const splash: JupyterLabPlugin<ISplashScreen> = {
     return {
       show: () => {
         const { commands, restored } = app;
-        const recovery = () => { commands.execute(CommandIDs.recoverState); };
+        const recovery = () => {
+          commands.execute(CommandIDs.recoverState)
+            .then(() => { document.location.reload(); })
+            .catch(() => { document.location.reload(); });
+        };
 
         return Private.showSplash(restored, recovery);
       }
@@ -277,13 +281,10 @@ const state: JupyterLabPlugin<IStateDB> = {
         const immediate = true;
         const silent = true;
 
-        // Clear the state silenty so that the state changed signal listener
-        // will not be triggered as it causes a save state, but the save state
-        // promise is lost and cannot be used to reload the application.
+        // Clear the state silently so that the state changed signal listener
+        // will not be triggered as it causes a save state.
         return state.clear(silent)
-          .then(() => commands.execute(CommandIDs.saveState, { immediate }))
-          .then(() => { document.location.reload(); })
-          .catch(() => { document.location.reload(); });
+          .then(() => commands.execute(CommandIDs.saveState, { immediate }));
       }
     });
 
