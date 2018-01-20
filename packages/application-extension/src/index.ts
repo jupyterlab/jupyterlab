@@ -174,13 +174,17 @@ const router: JupyterLabPlugin<IRouter> = {
 
     commands.addCommand(CommandIDs.tree, {
       execute: (args: IRouter.ICommandArgs) => {
-        return app.restored.then(() => {
+        // Tree handling waits for the application to be restored. As a result,
+        // it cannot return a promise, otherwise the router would hang waiting
+        // for a restoration that cannot finish.
+        app.restored.then(() => {
           const path = decodeURIComponent((args.path.match(pattern)[1]));
 
-          // Change the URL back to the base application URL.
-          window.history.replaceState({ }, '', base);
+          // Change the URL back to the base application URL without triggering
+          // further routing events.
+          router.navigate('', { silent: true });
 
-          return commands.execute('filebrowser:navigate-main', { path });
+          commands.execute('filebrowser:navigate-main', { path });
         });
       }
     });

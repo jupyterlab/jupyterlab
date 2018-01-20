@@ -66,7 +66,7 @@ interface IRouter {
    *
    * @returns A disposable that removes the registered rule from the router.
    */
-  register(options: IRouter.IRegisterArgs): IDisposable;
+  register(options: IRouter.IRegisterOptions): IDisposable;
 
   /**
    * Route a specific path to an action.
@@ -103,11 +103,16 @@ namespace IRouter {
     search: string;
   }
 
+  export
+  interface INavigateOptions {
+    silent: boolean;
+  }
+
   /**
    * The specification for registering a route with the router.
    */
   export
-  interface IRegisterArgs {
+  interface IRegisterOptions {
     /**
      * The command string that will be invoked upon matching.
      */
@@ -163,6 +168,18 @@ class Router implements IRouter {
     return this._routed;
   }
 
+  navigate(path: string, options: IRouter.INavigateOptions = { silent: false }): void {
+    const url = URLExt.join(this.base, path);
+
+    console.log('navigate to', url);
+
+    if (options.silent) {
+      window.history.replaceState({ }, '', url);
+    } else {
+      window.history.pushState({ }, '', url);
+    }
+  }
+
   /**
    * Register to route a path pattern to a command.
    *
@@ -170,7 +187,7 @@ class Router implements IRouter {
    *
    * @returns A disposable that removes the registered rul from the router.
    */
-  register(options: IRouter.IRegisterArgs): IDisposable {
+  register(options: IRouter.IRegisterOptions): IDisposable {
     const { command, pattern } = options;
     const rank = 'rank' in options ? options.rank : 100;
     const rules = this._rules;
@@ -190,14 +207,15 @@ class Router implements IRouter {
    * match the `IRouter.ICommandArgs` interface.
    */
   route(url: string): void {
-    const { commands, stop } = this;
-    const parsed = URLExt.parse(url.replace(this.base, ''));
+    const { base, commands, stop } = this;
+    const request = url.replace(base, '');
+    const parsed = URLExt.parse(request);
     const args = { path: parsed.pathname, search: parsed.search };
     const matches: Private.Rule[] = [];
 
     // Collect all rules that match the URL.
     this._rules.forEach((rule, pattern) => {
-      if (parsed.pathname.match(pattern)) {
+      if (request.match(pattern)) {
         matches.push(rule);
       }
     });
