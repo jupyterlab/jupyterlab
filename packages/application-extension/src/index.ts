@@ -170,22 +170,21 @@ const router: JupyterLabPlugin<IRouter> = {
       PageConfig.getOption('pageUrl')
     );
     const router = new Router({ base, commands });
-    const pattern = /^\/tree\/(.*)/;
+    const pattern = /^\/tree\/([^\?]+)/;
 
     commands.addCommand(CommandIDs.tree, {
       execute: (args: IRouter.ICommandArgs) => {
-        // Tree handling waits for the application to be restored. As a result,
-        // it cannot return a promise, otherwise the router would hang waiting
-        // for a restoration that cannot finish.
-        app.restored.then(() => {
-          const path = decodeURIComponent((args.path.match(pattern)[1]));
+        const path = decodeURIComponent((args.path.match(pattern)[1]));
 
-          // Change the URL back to the base application URL without triggering
-          // further routing events.
-          router.navigate('', { silent: true });
+        // Change the URL back to the base application URL without triggering
+        // further routing events.
+        router.navigate('', { silent: true });
 
-          commands.execute('filebrowser:navigate-main', { path });
-        });
+        // File browser navigation waits for the application to be restored.
+        // As a result, this command cannot return a promise because the it
+        // would create a circular dependency on the restored promise that would
+        // cause the router to hang on page load.
+        commands.execute('filebrowser:navigate-main', { path });
       }
     });
 
