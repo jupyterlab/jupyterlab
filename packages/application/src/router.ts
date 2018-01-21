@@ -60,6 +60,15 @@ interface IRouter {
   readonly stop: Token<void>;
 
   /**
+   * Navigate to a new path within the application.
+   *
+   * @param path - The new path or empty string if redirecting to root.
+   *
+   * @param options - The navigation options.
+   */
+  navigate(path: string, options: IRouter.INavigateOptions): void;
+
+  /**
    * Register a rule that maps a path pattern to a command.
    *
    * @param options - The route registration options.
@@ -103,8 +112,14 @@ namespace IRouter {
     search: string;
   }
 
+  /**
+   * The options passed into a navigation request.
+   */
   export
   interface INavigateOptions {
+    /**
+     * Whether the navigation should generate an HTML history `popstate` event.
+     */
     silent: boolean;
   }
 
@@ -168,10 +183,15 @@ class Router implements IRouter {
     return this._routed;
   }
 
+  /**
+   * Navigate to a new path within the application.
+   *
+   * @param path - The new path or empty string if redirecting to root.
+   *
+   * @param options - The navigation options.
+   */
   navigate(path: string, options: IRouter.INavigateOptions = { silent: false }): void {
-    const url = URLExt.join(this.base, path);
-
-    console.log('navigate to', url);
+    const url = path ? URLExt.join(this.base, path) : this.base;
 
     if (options.silent) {
       window.history.replaceState({ }, '', url);
