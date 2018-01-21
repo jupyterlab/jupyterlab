@@ -203,20 +203,17 @@ const router: JupyterLabPlugin<IRouter> = {
  */
 const notfound: JupyterLabPlugin<void> = {
   id: '@jupyterlab/application-extension:notfound',
-  activate: (app: JupyterLab) => {
+  activate: (app: JupyterLab, router: IRouter) => {
     const bad = PageConfig.getOption('notFoundUrl');
+    const base = router.base;
 
     if (!bad) {
       return;
     }
 
-    const base = URLExt.join(
-      PageConfig.getBaseUrl(),
-      PageConfig.getOption('pageUrl')
-    );
-
-    // Change the URL back to the base application URL.
-    window.history.replaceState({ }, '', base);
+    // Change the URL back to the base application URL without triggering
+    // further routing events.
+    router.navigate('', { silent: true });
 
     showDialog({
       title: 'Path Not Found',
@@ -224,6 +221,7 @@ const notfound: JupyterLabPlugin<void> = {
       buttons: [Dialog.okButton()]
     });
   },
+  requires: [IRouter],
   autoStart: true
 };
 
