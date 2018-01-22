@@ -12,7 +12,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  DataConnector, ISettingRegistry, IStateDB, SettingRegistry, StateDB
+  DataConnector, ISettingRegistry, IStateDB, SettingRegistry, StateDB, URLExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -69,10 +69,25 @@ namespace CommandIDs {
   const loadState = 'apputils:load-statedb';
 
   export
+  const recoverOnLoad = 'apputils:recover-on-load';
+
+  export
   const recoverState = 'apputils:recover-statedb';
 
   export
   const saveState = 'apputils:save-statedb';
+}
+
+
+/**
+ * The routing regular expressions used by the apputils plugin.
+ */
+namespace Patterns {
+  export
+  const loadState = /^\/workspaces\/([^?]+)/;
+
+  export
+  const recoverOnLoad = /(\?recover|\&recover)($|&)/;
 }
 
 
@@ -243,7 +258,6 @@ const state: JupyterLabPlugin<IStateDB> = {
   provides: IStateDB,
   requires: [IRouter],
   activate: (app: JupyterLab, router: IRouter) => {
-    let command: string;
     let debouncer: number;
     let resolved = false;
     let workspace = '';
@@ -255,28 +269,13 @@ const state: JupyterLabPlugin<IStateDB> = {
       namespace: info.namespace,
       transform: transform.promise
     });
-    const disposables = new DisposableSet();
-    const pattern = /^\/workspaces\/(.+)/;
-    const unload = () => {
-      disposables.dispose();
-      router.routed.disconnect(unload, state);
 
-      // If the request that was routed did not contain a workspace,
-      // leave the database intact.
-      if (!resolved) {
-        resolved = true;
-        transform.resolve({ type: 'cancel', contents: null });
-      }
-    };
-
-    command = CommandIDs.clearState;
-    commands.addCommand(command, {
+    commands.addCommand(CommandIDs.clearState, {
       label: 'Clear Application Restore State',
       execute: () => state.clear()
     });
 
-    command = CommandIDs.recoverState;
-    commands.addCommand(command, {
+    commands.addCommand(CommandIDs.recoverState, {
       execute: () => {
         const immediate = true;
         const silent = true;
@@ -292,8 +291,7 @@ const state: JupyterLabPlugin<IStateDB> = {
     // within the `WORKSPACE_SAVE_DEBOUNCE_INTERVAL` into a single promise.
     let conflated: PromiseDelegate<void> | null = null;
 
-    command = CommandIDs.saveState;
-    commands.addCommand(command, {
+    commands.addCommand(CommandIDs.saveState, {
       label: () => `Save Workspace (${workspace})`,
       isEnabled: () => !!workspace,
       execute: args => {
@@ -331,22 +329,35 @@ const state: JupyterLabPlugin<IStateDB> = {
       }
     });
 
-    command = CommandIDs.loadState;
-    disposables.add(commands.addCommand(command, {
+    const disposables = new DisposableSet();
+    const unload = () => {
+      disposables.dispose();
+      router.routed.disconnect(unload, state);
+
+      // If the request that was routed did not contain a workspace,
+      // leave the database intact.
+      if (!resolved) {
+        resolved = true;
+        transform.resolve({ type: 'cancel', contents: null });
+      }
+    };
+
+    // After the first route in the application lifecycle has been routed,
+    // disconnect the `apputils:load-statedb` command from routing events.
+    router.routed.connect(unload, state);
+
+    disposables.add(commands.addCommand(CommandIDs.loadState, {
       execute: (args: IRouter.ICommandArgs) => {
         // Populate the workspace placeholder.
-        workspace = decodeURIComponent((args.path.match(pattern)[1]));
+        workspace = decodeURIComponent(args.path.match(Patterns.loadState)[1]);
 
-        // This command only runs once, when the page loads.
-        if (resolved) {
-          console.warn(`${command} was called after state resolution.`);
-          return;
-        }
-
-        // If there is no workspace, leave the state database intact.
+        // If there is no workspace, bail.
         if (!workspace) {
-          resolved = true;
-          transform.resolve({ type: 'cancel', contents: null });
+          // If the state database is still unresolved, leave it intact.
+          if (!resolved) {
+            resolved = true;
+            transform.resolve({ type: 'cancel', contents: null });
+          }
           return;
         }
 
@@ -375,11 +386,46 @@ const state: JupyterLabPlugin<IStateDB> = {
         });
       }
     }));
-    disposables.add(router.register({ command, pattern }));
+    disposables.add(router.register({
+      command: CommandIDs.loadState,
+      pattern: Patterns.loadState
+    }));
 
-    // After the first route in the application lifecycle has been routed,
-    // stop listening to routing events.
-    router.routed.connect(unload, state);
+
+    disposables.add(commands.addCommand(CommandIDs.recoverOnLoad, {
+      execute: (args: IRouter.ICommandArgs) => {
+        const { path, search } = args;
+        const query = URLExt.queryStringToObject(search || '');
+        const recover = 'recover' in query;
+        const silent = true;
+
+        delete query['recover'];
+        if (!recover) {
+          return;
+        }
+        if (!resolved) {
+          resolved = true;
+          transform.resolve({ type: 'clear', contents: null });
+        }
+
+        // If the URL contains a workspace, set it so that the recover state
+        // command clears out both the state database and the workspace.
+        const match = path.match(Patterns.loadState);
+
+        if (match && match[1]) {
+          workspace = match[1];
+        }
+
+        router.navigate(path + URLExt.objectToQueryString(query), { silent });
+
+        return commands.execute(CommandIDs.recoverState);
+      }
+    }));
+    disposables.add(router.register({
+      command: CommandIDs.recoverOnLoad,
+      pattern: Patterns.recoverOnLoad,
+      rank: 90 // Set recovery rank at a higher priority than the default 100.
+    }));
 
     return state;
   }
