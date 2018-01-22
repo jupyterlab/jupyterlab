@@ -87,9 +87,31 @@ namespace URLExt {
    */
   export
   function objectToQueryString(value: JSONObject): string {
-    return '?' + Object.keys(value).map(key =>
-      encodeURIComponent(key) + '=' + encodeURIComponent(String(value[key]))
-    ).join('&');
+    const keys = Object.keys(value);
+
+    if (!keys.length) {
+      return '';
+    }
+
+    return '?' + keys.map(key => {
+      const content = encodeURIComponent(String(value[key]));
+
+      return key + (content ? '=' + content : '');
+    }).join('&');
+  }
+
+  /**
+   * Return a parsed object that represents the values in a query string.
+   */
+  export
+  function queryStringToObject(value: string): JSONObject {
+    return value.replace(/^\?/, '').split('&').reduce((acc, val) => {
+      const [key, value] = val.split('=');
+
+      acc[key] = decodeURIComponent(value || '');
+
+      return acc;
+    }, { } as { [key: string]: string });
   }
 
   /**
