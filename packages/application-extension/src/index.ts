@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IStateDB, PageConfig, URLExt
+  IStateDB, PageConfig
 } from '@jupyterlab/coreutils';
 
 import {
@@ -165,15 +165,12 @@ const router: JupyterLabPlugin<IRouter> = {
   id: '@jupyterlab/application-extension:router',
   activate: (app: JupyterLab) => {
     const { commands } = app;
-    const base = URLExt.join(
-      PageConfig.getBaseUrl(),
-      PageConfig.getOption('pageUrl')
-    );
+    const base = PageConfig.getOption('pageUrl');
     const router = new Router({ base, commands });
     const pattern = /^\/tree\/([^\?]+)/;
 
     commands.addCommand(CommandIDs.tree, {
-      execute: (args: IRouter.ICommandArgs) => {
+      execute: (args: IRouter.ILocation) => {
         const path = decodeURIComponent((args.path.match(pattern)[1]));
 
         // Change the URL back to the base application URL without triggering
@@ -189,7 +186,13 @@ const router: JupyterLabPlugin<IRouter> = {
     });
 
     router.register({ command: CommandIDs.tree, pattern });
-    app.started.then(() => { router.route(window.location.href); });
+    app.started.then(() => {
+      // Route the very first request on load.
+      router.route();
+
+      // Route all pop state events.
+      window.addEventListener('popstate', () => { router.route(); });
+    });
 
     return router;
   },
