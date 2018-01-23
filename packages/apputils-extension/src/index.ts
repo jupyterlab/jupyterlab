@@ -340,11 +340,6 @@ const state: JupyterLabPlugin<IStateDB> = {
 
         // If there is no workspace, bail.
         if (!workspace) {
-          // If the state database is still unresolved, leave it intact.
-          if (!resolved) {
-            resolved = true;
-            transform.resolve({ type: 'cancel', contents: null });
-          }
           return;
         }
 
@@ -419,6 +414,18 @@ const state: JupyterLabPlugin<IStateDB> = {
       rank: 10 // Set recovery rank at a higher priority than the default 100.
     });
 
+    const fallthrough = () => {
+      // If the state database is still unresolved after the first URL has been
+      // routed, leave it intact.
+      if (!resolved) {
+        resolved = true;
+        transform.resolve({ type: 'cancel', contents: null });
+      }
+      router.routed.disconnect(fallthrough, state);
+    };
+
+    router.routed.connect(fallthrough, state);
+
     return state;
   }
 };
@@ -446,7 +453,7 @@ namespace Private {
     // command clears out both the state database and the workspace.
     const match = router.current().path.match(Patterns.loadState);
 
-    return match && match[1] || '';
+    return match && decodeURIComponent(match[1]) || '';
   }
 
   /**

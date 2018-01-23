@@ -52,6 +52,15 @@ namespace CommandIDs {
 
 
 /**
+ * The routing regular expressions used by the application plugin.
+ */
+namespace Patterns {
+  export
+  const tree = /^\/tree\/(.+)/;
+}
+
+
+/**
  * The main extension.
  */
 const main: JupyterLabPlugin<void> = {
@@ -167,25 +176,24 @@ const router: JupyterLabPlugin<IRouter> = {
     const { commands } = app;
     const base = PageConfig.getOption('pageUrl');
     const router = new Router({ base, commands });
-    const pattern = /^\/tree\/([^\?]+)/;
 
     commands.addCommand(CommandIDs.tree, {
       execute: (args: IRouter.ILocation) => {
-        const path = decodeURIComponent((args.path.match(pattern)[1]));
-
-        // Change the URL back to the base application URL without triggering
-        // further routing events.
-        router.navigate('', { silent: true });
+        const path = decodeURIComponent((args.path.match(Patterns.tree)[1]));
 
         // File browser navigation waits for the application to be restored.
         // As a result, this command cannot return a promise because the it
         // would create a circular dependency on the restored promise that would
         // cause the router to hang on page load.
-        commands.execute('filebrowser:navigate-main', { path });
+        const opened = commands.execute('filebrowser:navigate-main', { path });
+
+        // Change the URL back to the base application URL without triggering
+        // further routing events.
+        router.navigate('', { silent: true, when: opened });
       }
     });
 
-    router.register({ command: CommandIDs.tree, pattern });
+    router.register({ command: CommandIDs.tree, pattern: Patterns.tree });
     app.started.then(() => {
       // Route the very first request on load.
       router.route();
