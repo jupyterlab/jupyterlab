@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as CodeMirror from 'codemirror';
+
 import {
   Menu
 } from '@phosphor/widgets';
@@ -294,4 +296,9 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
       editor.execCommand('replace');
     }
   } as IEditMenu.IFindReplacer<FileEditor>);
+
+  // Add save functionality to CodeMirror
+  CodeMirror.prototype.save = () => {
+    commands.execute('docmanager:save');
+  }
 }
