@@ -28,7 +28,7 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  DisposableDelegate, DisposableSet, IDisposable
+  DisposableDelegate, IDisposable
 } from '@phosphor/disposable';
 
 import {
@@ -47,7 +47,7 @@ import '../style/index.css';
  * to allow for multiple quickly executed state changes to result in a single
  * workspace save operation.
  */
-const WORKSPACE_SAVE_DEBOUNCE_INTERVAL = 2000;
+const WORKSPACE_SAVE_DEBOUNCE_INTERVAL = 1500;
 
 /**
  * The interval in milliseconds before recover options appear during splash.
@@ -330,24 +330,11 @@ const state: JupyterLabPlugin<IStateDB> = {
       }
     });
 
-    const disposables = new DisposableSet();
-    const unload = () => {
-      disposables.dispose();
-      router.routed.disconnect(unload, state);
-
-      // If the request that was routed did not contain a workspace,
-      // leave the database intact.
-      if (!resolved) {
-        resolved = true;
-        transform.resolve({ type: 'cancel', contents: null });
-      }
+    const listener = (sender: any, change: StateDB.Change) => {
+      commands.execute(CommandIDs.saveState);
     };
 
-    // After the first route in the application lifecycle has been routed,
-    // disconnect the `apputils:load-statedb` command from routing events.
-    router.routed.connect(unload, state);
-
-    disposables.add(commands.addCommand(CommandIDs.loadState, {
+    commands.addCommand(CommandIDs.loadState, {
       execute: (args: IRouter.ILocation) => {
         const workspace = Private.getWorkspace(router);
 
@@ -362,9 +349,8 @@ const state: JupyterLabPlugin<IStateDB> = {
         }
 
         // Any time the local state database changes, save the workspace.
-        state.changed.connect((sender: any, change: StateDB.Change) => {
-          commands.execute(CommandIDs.saveState);
-        });
+        state.changed.disconnect(listener, state);
+        state.changed.connect(listener, state);
 
         // Fetch the workspace and overwrite the state database.
         return workspaces.fetch(workspace).then(session => {
@@ -385,14 +371,14 @@ const state: JupyterLabPlugin<IStateDB> = {
           return commands.execute(CommandIDs.saveState);
         });
       }
-    }));
-    disposables.add(router.register({
+    });
+    router.register({
       command: CommandIDs.loadState,
       pattern: Patterns.loadState
-    }));
+    });
 
 
-    disposables.add(commands.addCommand(CommandIDs.recoverOnLoad, {
+    commands.addCommand(CommandIDs.recoverOnLoad, {
       execute: (args: IRouter.ILocation) => {
         const { path, search } = args;
         const query = URLExt.queryStringToObject(search || '');
@@ -420,12 +406,12 @@ const state: JupyterLabPlugin<IStateDB> = {
         return commands.execute(CommandIDs.recoverState)
           .then(() => router.stop);
       }
-    }));
-    disposables.add(router.register({
+    });
+    router.register({
       command: CommandIDs.recoverOnLoad,
       pattern: Patterns.recoverOnLoad,
       rank: 10 // Set recovery rank at a higher priority than the default 100.
-    }));
+    });
 
     return state;
   }
