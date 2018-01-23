@@ -452,8 +452,13 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     noun: 'Console',
     restartKernel: current => current.console.session.restart(),
     restartKernelAndClear: current => {
-      current.console.clear();
-      return current.console.session.restart();
+      return current.console.session.restart()
+      .then(restarted => {
+        if (restarted) {
+          current.console.clear();
+        }
+        return restarted;
+      });
     },
     changeKernel: current => current.console.session.selectKernel(),
     shutdownKernel: current => current.console.session.shutdown()

@@ -143,14 +143,15 @@ interface IClientSession extends IDisposable {
   /**
    * Restart the session.
    *
-   * @returns A promise that resolves with the kernel model.
+   * @returns A promise that resolves with whether the kernel has restarted.
    *
    * #### Notes
    * If there is a running kernel, present a dialog.
    * If there is no kernel, we start a kernel with the last run
-   * kernel name.  If no kernel has been started, this is a no-op.
+   * kernel name and resolves with `true`. If no kernel has been started,
+   * this is a no-op, and resolves with `false`.
    */
-  restart(): Promise<Kernel.IKernelConnection | null>;
+  restart(): Promise<boolean>;
 
   /**
    * Change the session path.
@@ -426,15 +427,14 @@ class ClientSession implements IClientSession {
   /**
    * Restart the session.
    *
-   * @returns A promise that resolves with the kernel model.
+   * @returns A promise that resolves with whether the kernel has restarted.
    *
    * #### Notes
    * If there is a running kernel, present a dialog.
    * If there is no kernel, we start a kernel with the last run
-   * kernel name.
-   * If no kernel has been started, this is a no-op.
+   * kernel name and resolves with `true`.
    */
-  restart(): Promise<Kernel.IKernelConnection | null> {
+  restart(): Promise<boolean> {
     return this.initialize().then(() => {
       if (this.isDisposed) {
         return Promise.reject(void 0);
@@ -442,7 +442,8 @@ class ClientSession implements IClientSession {
       let kernel = this.kernel;
       if (!kernel) {
         if (this._prevKernelName) {
-          return this.changeKernel({ name: this._prevKernelName });
+          return this.changeKernel({ name: this._prevKernelName })
+            .then(() => true);
         }
         // Bail if there is no previous kernel to start.
         return Promise.reject('No kernel to restart');
@@ -809,9 +810,11 @@ namespace ClientSession {
 
   /**
    * Restart a kernel if the user accepts the risk.
+   *
+   * Returns a promise resolving with whether the kernel was restarted.
    */
   export
-  function restartKernel(kernel: Kernel.IKernelConnection): Promise<Kernel.IKernelConnection | null> {
+  function restartKernel(kernel: Kernel.IKernelConnection): Promise<boolean> {
     let restartBtn = Dialog.warnButton({ label: 'RESTART '});
     return showDialog({
       title: 'Restart Kernel?',
@@ -819,14 +822,14 @@ namespace ClientSession {
       buttons: [Dialog.cancelButton(), restartBtn]
     }).then(result => {
       if (kernel.isDisposed) {
-        return Promise.resolve(null);
+        return Promise.resolve(false);
       }
       if (result.button.accept) {
         return kernel.restart().then(() => {
-          return kernel;
+          return true;
         });
       }
-      return kernel;
+      return false;
     });
   }
 
