@@ -297,6 +297,9 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
           kernelGroup.push({ command: commandId });
         });
         helpMenu.addGroup(kernelGroup, 21);
+
+        // Dispose of the session object since we no longer need it.
+        session.dispose();
       });
     });
   });
