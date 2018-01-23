@@ -1721,7 +1721,7 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
         if (restarted) {
           NotebookActions.runAll(notebook, context.session);
         }
-        return void 0;
+        return restarted;
       });
     }
   } as IRunMenu.ICodeRunner<NotebookPanel>);
