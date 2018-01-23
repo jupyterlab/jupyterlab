@@ -255,10 +255,11 @@ class Router implements IRouter {
     const { commands, stop } = this;
     const current = this.current();
     const { request } = current;
+    const rules = this._rules;
     const matches: Private.Rule[] = [];
 
     // Collect all rules that match the URL.
-    this._rules.forEach((rule, pattern) => {
+    rules.forEach((rule, pattern) => {
       if (request.match(pattern)) {
         matches.push(rule);
       }

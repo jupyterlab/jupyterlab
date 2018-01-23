@@ -403,7 +403,7 @@ const state: JupyterLabPlugin<IStateDB> = {
           .then(() => router.stop); // Stop routing before new route navigation.
 
         // After the state has been reset, navigate to the URL.
-        cleared.then(() => { router.navigate(url); });
+        cleared.then(() => { router.navigate(url, { silent: true }); });
 
         return cleared;
       }
