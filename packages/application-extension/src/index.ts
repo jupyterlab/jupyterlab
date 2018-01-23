@@ -182,13 +182,13 @@ const router: JupyterLabPlugin<IRouter> = {
         const path = decodeURIComponent((args.path.match(Patterns.tree)[1]));
 
         // File browser navigation waits for the application to be restored.
-        // As a result, this command cannot return a promise because the it
-        // would create a circular dependency on the restored promise that would
-        // cause the router to hang on page load.
+        // As a result, this command cannot return a promise because it would
+        // create a circular dependency on the restored promise that would
+        // cause the application to never restore.
         const opened = commands.execute('filebrowser:navigate-main', { path });
 
-        // Change the URL back to the base application URL without triggering
-        // further routing events.
+        // Change the URL back to the base application URL without adding the
+        // URL change to the browser history.
         opened.then(() => { router.navigate('', { silent: true }); });
       }
     });
@@ -222,8 +222,8 @@ const notfound: JupyterLabPlugin<void> = {
       return;
     }
 
-    // Change the URL back to the base application URL without triggering
-    // further routing events.
+    // Change the URL back to the base application URL without adding the
+    // URL change to the browser history.
     router.navigate('', { silent: true });
 
     showDialog({

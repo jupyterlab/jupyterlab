@@ -128,7 +128,7 @@ namespace IRouter {
   export
   interface INavigateOptions {
     /**
-     * Whether the navigation should generate an HTML history `popstate` event.
+     * Whether the navigation should be added to the browser's history.
      */
     silent?: boolean;
   }
@@ -203,7 +203,7 @@ class Router implements IRouter {
     const path = parsed.pathname.replace(base, '');
     const request = path + search;
 
-    return { path, request,  search };
+    return { path, request, search };
   }
 
   /**
