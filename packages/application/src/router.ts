@@ -51,7 +51,7 @@ interface IRouter {
   /**
    * A signal emitted when the router routes a route.
    */
-  readonly routed: ISignal<IRouter, IRouter.ICommandArgs>;
+  readonly routed: ISignal<IRouter, IRouter.ILocation>;
 
   /**
    * If a matching rule's command resolves with the `stop` token during routing,
@@ -60,13 +60,18 @@ interface IRouter {
   readonly stop: Token<void>;
 
   /**
+   * Returns the parsed current URL of the application.
+   */
+  current(): IRouter.ILocation;
+
+  /**
    * Navigate to a new path within the application.
    *
    * @param path - The new path or empty string if redirecting to root.
    *
    * @param options - The navigation options.
    */
-  navigate(path: string, options: IRouter.INavigateOptions): void;
+  navigate(path: string, options?: IRouter.INavigateOptions): void;
 
   /**
    * Register a rule that maps a path pattern to a command.
@@ -84,7 +89,7 @@ interface IRouter {
    *
    * #### Notes
    * If a pattern is matched, its command will be invoked with arguments that
-   * match the `IRouter.ICommandArgs` interface.
+   * match the `IRouter.ILocation` interface.
    */
   route(url: string): void;
 }
@@ -96,14 +101,19 @@ interface IRouter {
 export
 namespace IRouter {
   /**
-   * The arguments passed into a command execution when a path is routed.
+   * The parsed location currently being routed.
    */
   export
-  interface ICommandArgs extends ReadonlyJSONObject {
+  interface ILocation extends ReadonlyJSONObject {
     /**
      * The path that matched a routing pattern.
      */
     path: string;
+
+    /**
+     * The request being routed with the router `base` omitted.
+     */
+    request: string;
 
     /**
      * The search element, including leading question mark (`'?'`), if any,
@@ -174,13 +184,26 @@ class Router implements IRouter {
    * If a matching rule's command resolves with the `stop` token during routing,
    * no further matches will execute.
    */
-  readonly stop = new Token<void>('Router#stop');
+  readonly stop = new Token<void>('@jupyterlab/application:Router#stop');
 
   /**
    * A signal emitted when the router routes a route.
    */
-  get routed(): ISignal<this, IRouter.ICommandArgs> {
+  get routed(): ISignal<this, IRouter.ILocation> {
     return this._routed;
+  }
+
+  /**
+   * Returns the parsed current URL of the application.
+   */
+  current(): IRouter.ILocation {
+    const { base } = this;
+    const parsed = URLExt.parse(window.location.href);
+    const { search } = parsed;
+    const path = parsed.pathname.replace(base, '');
+    const request = path + search;
+
+    return { path, request,  search };
   }
 
   /**
@@ -192,11 +215,12 @@ class Router implements IRouter {
    */
   navigate(path: string, options: IRouter.INavigateOptions = { silent: false }): void {
     const url = path ? URLExt.join(this.base, path) : this.base;
+    const { history } = window;
 
     if (options.silent) {
-      window.history.replaceState({ }, '', url);
+      requestAnimationFrame(() => { history.replaceState({ }, '', url); });
     } else {
-      window.history.pushState({ }, '', url);
+      requestAnimationFrame(() => { history.pushState({ }, '', url); });
     }
   }
 
@@ -220,17 +244,14 @@ class Router implements IRouter {
   /**
    * Route a specific path to an action.
    *
-   * @param url - The URL string that will be routed.
-   *
    * #### Notes
    * If a pattern is matched, its command will be invoked with arguments that
-   * match the `IRouter.ICommandArgs` interface.
+   * match the `IRouter.ILocation` interface.
    */
-  route(url: string): void {
-    const { base, commands, stop } = this;
-    const request = url.replace(base, '');
-    const parsed = URLExt.parse(request);
-    const args = { path: parsed.pathname, search: parsed.search };
+  route(): void {
+    const { commands, stop } = this;
+    const current = this.current();
+    const { request } = current;
     const matches: Private.Rule[] = [];
 
     // Collect all rules that match the URL.
@@ -246,26 +267,26 @@ class Router implements IRouter {
     // Process one enqueued promise at a time.
     const next = () => {
       if (!queue.length) {
-        this._routed.emit(args);
+        this._routed.emit(current);
         return;
       }
 
       const { command } = queue.shift();
 
-      commands.execute(command, args).then(result => {
+      commands.execute(command, current).then(result => {
         if (result === stop) {
           queue.length = 0;
-          console.log(`Routing ${url} was short-circuited by ${command}`);
+          console.log(`Routing ${request} was short-circuited by ${command}`);
         }
       }).catch(reason => {
-        console.warn(`Routing ${url} to ${command} failed`, reason);
+        console.warn(`Routing ${request} to ${command} failed`, reason);
       }).then(() => { next(); });
     };
 
     next();
   }
 
-  private _routed = new Signal<this, IRouter.ICommandArgs>(this);
+  private _routed = new Signal<this, IRouter.ILocation>(this);
   private _rules = new Map<RegExp, Private.Rule>();
 }
 
