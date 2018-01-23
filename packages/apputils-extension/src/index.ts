@@ -69,7 +69,7 @@ namespace CommandIDs {
   const loadState = 'apputils:load-statedb';
 
   export
-  const recoverOnLoad = 'apputils:recover-on-load';
+  const resetOnLoad = 'apputils:reset-on-load';
 
   export
   const recoverState = 'apputils:recover-statedb';
@@ -87,7 +87,7 @@ namespace Patterns {
   const loadState = /^\/workspaces\/([^?]+)/;
 
   export
-  const recoverOnLoad = /(\?recover|\&recover)($|&)/;
+  const resetOnLoad = /(\?reset|\&reset)($|&)/;
 }
 
 
@@ -349,7 +349,7 @@ const state: JupyterLabPlugin<IStateDB> = {
 
         // Fetch the workspace and overwrite the state database.
         return workspaces.fetch(workspace).then(session => {
-          // If this command is called after a recovery, the state database will
+          // If this command is called after a reset, the state database will
           // already be resolved.
           if (!resolved) {
             resolved = true;
@@ -375,17 +375,17 @@ const state: JupyterLabPlugin<IStateDB> = {
     });
 
 
-    commands.addCommand(CommandIDs.recoverOnLoad, {
+    commands.addCommand(CommandIDs.resetOnLoad, {
       execute: (args: IRouter.ILocation) => {
         const { path, search } = args;
         const query = URLExt.queryStringToObject(search || '');
-        const recover = 'recover' in query;
+        const reset = 'reset' in query;
 
-        if (!recover) {
+        if (!reset) {
           return;
         }
 
-        // If the state database has already been resolved, recovery is
+        // If the state database has already been resolved, resetting is
         // impossible without reloading.
         if (resolved) {
           return document.location.reload();
@@ -395,23 +395,23 @@ const state: JupyterLabPlugin<IStateDB> = {
         resolved = true;
         transform.resolve({ type: 'clear', contents: null });
 
-        // Maintain the query string parameters but remove `recover`.
-        delete query['recover'];
+        // Maintain the query string parameters but remove `reset`.
+        delete query['reset'];
 
         const url = path + URLExt.objectToQueryString(query);
-        const recovered = commands.execute(CommandIDs.recoverState)
+        const cleared = commands.execute(CommandIDs.recoverState)
           .then(() => router.stop); // Stop routing before new route navigation.
 
-        // After the state has been recovered, navigate to the URL.
-        recovered.then(() => { router.navigate(url); });
+        // After the state has been reset, navigate to the URL.
+        cleared.then(() => { router.navigate(url); });
 
-        return recovered;
+        return cleared;
       }
     });
     router.register({
-      command: CommandIDs.recoverOnLoad,
-      pattern: Patterns.recoverOnLoad,
-      rank: 10 // Set recovery rank at a higher priority than the default 100.
+      command: CommandIDs.resetOnLoad,
+      pattern: Patterns.resetOnLoad,
+      rank: 10 // Set reset rank at a higher priority than the default 100.
     });
 
     const fallthrough = () => {
@@ -449,8 +449,6 @@ namespace Private {
    */
   export
   function getWorkspace(router: IRouter): string {
-    // If the URL contains a workspace, set it so that the recover state
-    // command clears out both the state database and the workspace.
     const match = router.current().path.match(Patterns.loadState);
 
     return match && decodeURIComponent(match[1]) || '';
