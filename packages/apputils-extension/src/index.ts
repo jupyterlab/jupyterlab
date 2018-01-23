@@ -354,6 +354,8 @@ const state: JupyterLabPlugin<IStateDB> = {
 
         // Fetch the workspace and overwrite the state database.
         return workspaces.fetch(workspace).then(session => {
+          // If this command is called after a recovery, the state database will
+          // already be resolved.
           if (!resolved) {
             resolved = true;
             transform.resolve({ type: 'overwrite', contents: session.data });
@@ -400,11 +402,15 @@ const state: JupyterLabPlugin<IStateDB> = {
 
         // Maintain the query string parameters but remove `recover`.
         delete query['recover'];
-        router.navigate(path + URLExt.objectToQueryString(query));
 
-        // Stop current URL's routing beacuse a new URL navigation will occur.
-        return commands.execute(CommandIDs.recoverState)
-          .then(() => router.stop);
+        const url = path + URLExt.objectToQueryString(query);
+        const recovered = commands.execute(CommandIDs.recoverState)
+          .then(() => router.stop); // Stop routing before new route navigation.
+
+        // After the state has been recovered, navigate to the URL.
+        router.navigate(url, { when: recovered });
+
+        return recovered;
       }
     });
     router.register({
