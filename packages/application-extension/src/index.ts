@@ -189,7 +189,7 @@ const router: JupyterLabPlugin<IRouter> = {
 
         // Change the URL back to the base application URL without triggering
         // further routing events.
-        router.navigate('', { silent: true, when: opened });
+        opened.then(() => { router.navigate('', { silent: true }); });
       }
     });
 

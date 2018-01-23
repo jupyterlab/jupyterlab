@@ -131,11 +131,6 @@ namespace IRouter {
      * Whether the navigation should generate an HTML history `popstate` event.
      */
     silent?: boolean;
-
-    /**
-     * An optional promise that must resolve before navigation happens.
-     */
-    when?: Promise<any>;
   }
 
   /**
@@ -221,15 +216,15 @@ class Router implements IRouter {
   navigate(path: string, options: IRouter.INavigateOptions = { }): void {
     const url = path ? URLExt.join(this.base, path) : this.base;
     const { history } = window;
-    const { silent, when} = options;
+    const { silent } = options;
 
-    (when || Promise.resolve(undefined)).then(() => {
-      if (silent) {
-        history.replaceState({ }, '', url);
-      } else {
-        history.pushState({ }, '', url);
-      }
-    });
+    if (silent) {
+      history.replaceState({ }, '', url);
+    } else {
+      history.pushState({ }, '', url);
+    }
+
+    requestAnimationFrame(() => { this.route(); });
   }
 
   /**

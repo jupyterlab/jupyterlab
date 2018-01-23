@@ -83,7 +83,7 @@ namespace URLExt {
    * @returns an encoded url query.
    *
    * #### Notes
-   * From [stackoverflow](http://stackoverflow.com/a/30707423).
+   * Modified version of [stackoverflow](http://stackoverflow.com/a/30707423).
    */
   export
   function objectToQueryString(value: JSONObject): string {
