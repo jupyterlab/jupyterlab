@@ -260,7 +260,6 @@ const state: JupyterLabPlugin<IStateDB> = {
   activate: (app: JupyterLab, router: IRouter) => {
     let debouncer: number;
     let resolved = false;
-    let workspace = '';
 
     const { commands, info, serviceManager } = app;
     const { workspaces } = serviceManager;
@@ -292,9 +291,11 @@ const state: JupyterLabPlugin<IStateDB> = {
     let conflated: PromiseDelegate<void> | null = null;
 
     commands.addCommand(CommandIDs.saveState, {
-      label: () => `Save Workspace (${workspace})`,
-      isEnabled: () => !!workspace,
+      label: () => `Save Workspace (${Private.getWorkspace(router)})`,
+      isEnabled: () => !!Private.getWorkspace(router),
       execute: args => {
+        const workspace = Private.getWorkspace(router);
+
         if (!workspace) {
           return;
         }
@@ -347,9 +348,8 @@ const state: JupyterLabPlugin<IStateDB> = {
     router.routed.connect(unload, state);
 
     disposables.add(commands.addCommand(CommandIDs.loadState, {
-      execute: (args: IRouter.ICommandArgs) => {
-        // Populate the workspace placeholder.
-        workspace = decodeURIComponent(args.path.match(Patterns.loadState)[1]);
+      execute: (args: IRouter.ILocation) => {
+        const workspace = Private.getWorkspace(router);
 
         // If there is no workspace, bail.
         if (!workspace) {
@@ -393,38 +393,38 @@ const state: JupyterLabPlugin<IStateDB> = {
 
 
     disposables.add(commands.addCommand(CommandIDs.recoverOnLoad, {
-      execute: (args: IRouter.ICommandArgs) => {
+      execute: (args: IRouter.ILocation) => {
         const { path, search } = args;
         const query = URLExt.queryStringToObject(search || '');
         const recover = 'recover' in query;
-        const silent = true;
 
-        delete query['recover'];
         if (!recover) {
           return;
         }
-        if (!resolved) {
-          resolved = true;
-          transform.resolve({ type: 'clear', contents: null });
+
+        // If the state database has already been resolved, recovery is
+        // impossible without reloading.
+        if (resolved) {
+          return document.location.reload();
         }
 
-        // If the URL contains a workspace, set it so that the recover state
-        // command clears out both the state database and the workspace.
-        const match = path.match(Patterns.loadState);
+        // Empty the state database.
+        resolved = true;
+        transform.resolve({ type: 'clear', contents: null });
 
-        if (match && match[1]) {
-          workspace = match[1];
-        }
+        // Maintain the query string parameters but remove `recover`.
+        delete query['recover'];
+        router.navigate(path + URLExt.objectToQueryString(query));
 
-        router.navigate(path + URLExt.objectToQueryString(query), { silent });
-
-        return commands.execute(CommandIDs.recoverState);
+        // Stop current URL's routing beacuse a new URL navigation will occur.
+        return commands.execute(CommandIDs.recoverState)
+          .then(() => router.stop);
       }
     }));
     disposables.add(router.register({
       command: CommandIDs.recoverOnLoad,
       pattern: Patterns.recoverOnLoad,
-      rank: 90 // Set recovery rank at a higher priority than the default 100.
+      rank: 10 // Set recovery rank at a higher priority than the default 100.
     }));
 
     return state;
@@ -445,6 +445,18 @@ export default plugins;
  * The namespace for module private data.
  */
 namespace Private {
+  /**
+   * Returns the workspace name from the URL, if it exists.
+   */
+  export
+  function getWorkspace(router: IRouter): string {
+    // If the URL contains a workspace, set it so that the recover state
+    // command clears out both the state database and the workspace.
+    const match = router.current().path.match(Patterns.loadState);
+
+    return match && match[1] || '';
+  }
+
   /**
    * Create a splash element.
    */
