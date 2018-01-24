@@ -1079,12 +1079,19 @@ class Notebook extends StaticNotebook {
   }
 
   /**
-   * Scroll so that the given position is visible.
+   * Scroll so that the given position is centered.
    *
    * @param position - The vertical position in the notebook widget.
    *
-   * @param threshold - An optional threshold for the scroll.  Defaults to 25
-   *   percent of the widget height.
+   * @param threshold - An optional threshold for the scroll (0-50, defaults to
+   * 25).
+   *
+   * #### Notes
+   * If the position is within the threshold percentage of the widget height,
+   * measured from the center of the widget, the scroll position will not be
+   * changed. A threshold of 0 means we will always scroll so the position is
+   * centered, and a threshold of 50 means scrolling only happens if position is
+   * outside the current window.
    */
   scrollToPosition(position: number, threshold=25): void {
     let node = this.node;

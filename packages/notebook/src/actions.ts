@@ -1218,7 +1218,7 @@ namespace Private {
     if (scroll) {
       // Scroll to the top of the previous active cell output.
       let er = state.activeCell.inputArea.node.getBoundingClientRect();
-      widget.scrollToPosition(er.bottom);
+      widget.scrollToPosition(er.bottom, 45);
     }
   }
 
