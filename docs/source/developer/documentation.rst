@@ -20,22 +20,61 @@ Writing Style
 -  The beginning of each section should begin with a short (1-2
    sentence) high-level description of the topic, feature or component.
 
-Proper Nouns
-~~~~~~~~~~~~
+User Interface Naming Conventions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The main parts of JupyterLab should be treated as proper nouns and
-capitalized:
+Documents, Files, and Activities
+''''''''''''''''''''''''''''''''
 
--  Main Menu
--  Left Panel
--  Dock Panel
--  File Browser
--  Command Palette
--  Running List
--  Tabs List
--  Notebook
--  Code Console
--  Terminal
+Files are referrred to as either files or documents, depending on the context.
+
+Documents are more human centered.
+If human viewing, interpretation, interaction is an important part of the experience, it is a document in that context.
+For example, notebooks and markdown files will often be referring to as documents unless referring to the file-ness aspect of it (e.g., the notebook filename).
+
+Files are used in a less human-focused context.
+For example, we refer to files in relation to a file system or file name.
+
+Activities can be either a document or another UI panel that is not file backed, such as terminals, consoles or the inspector.
+An open document or file is an activity in that it is represented by a panel that you can interact with.
+
+
+Element Names
+'''''''''''''
+
+- The generic content area of a tabbed UI is a panel, but prefer to refer to the more specific name, such as “File browser.” Tab bars have tabs which toggle panels.
+- The menu bar contains menu items, which have their own submenus.
+- The main work area can be referred to as work area when the name is unambiguous.
+- When describing elements in the UI, colloquial names are preferred (e.g., “File browser” instead of “Files panel”).
+
+The majority of names are written in lower case.  These names include:
+
+- tab
+- panel
+- menu bar
+- sidebar
+- file
+- document
+- activity
+- tab bar
+- main work area
+- file browser
+- command palette
+- cell inspector
+
+
+The following sections of the user interface should be in title case, directly quoting a word in the UI:
+
+- File menu
+- Files tab
+- Running panel
+- Tabs panel
+
+The capitalized words match the label of the UI element the user is clicking on
+because there does not exist a good colloquial name for the tool,
+such as “file browser” or “command palette”.
+
+See :ref:`interface` for descriptions of elements in the UI.
 
 Keyboard Shortcuts
 ~~~~~~~~~~~~~~~~~~
