@@ -272,4 +272,4 @@ https://jupyterlab-tutorial.readthedocs.io/en/latest/index.html.
 - The npm modules are fully compatible with Node/Babel/ES6/ES5. Simply
 omit the type declarations when using a language other than TypeScript.
 
-- For more information, read the [documentation](http://jupyterlab-tutorial.readthedocs.io/en/latest/).
+- For more information, read the [documentation](http://jupyterlab.readthedocs.io/en/latest/).
