@@ -119,8 +119,8 @@ JupyterLab Build Process
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 To rebuild the app directory, run ``jupyter lab build``. By default the
-``jupyter lab install`` command builds the application, so you typically
-do not need to call ``build`` directly.
+``jupyter labextension install`` command builds the application, so you
+typically do not need to call ``build`` directly.
 
 Building consists of:
 
