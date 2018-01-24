@@ -54,7 +54,9 @@ and a list of tabs in the main area:
 The left sidebar can be collapsed or expanded by clicking on the active
 sidebar tab:
 
-[animation]
+.. raw:: html
+
+   <iframe width="560" height="315" src="https://www.youtube.com/embed/PlJGecfetek" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
 JupyterLab extensions can add additional panels to the left sidebar.
 
@@ -67,7 +69,9 @@ The main work area in JupyterLab allows you to arrange documents
 (notebooks, text files, etc.) and other activities (terminals, code
 consoles, etc.) into panels of tabs that can be resized or subdivided:
 
-[animation]
+.. raw:: html
+
+   <iframe width="560" height="315" src="https://www.youtube.com/embed/Ka8qS7CO1XQ" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
 The main area has a single current activity. The tab for this activity
 is marked with a colored top border (blue by default).
@@ -92,7 +96,9 @@ It is often useful to focus on a single document or activity without
 closing other tabs in the main area. Single Document Mode toggles the
 view of the main area to show only a single tab at a time:
 
-[animation]
+.. raw:: html
+
+   <iframe width="560" height="315" src="https://www.youtube.com/embed/DO7NOenMQC0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
 When you leave Single Document Mode, the original layout of the main
 area is restored.
@@ -104,9 +110,13 @@ Many parts of JupyterLab, such as notebooks, text files, code consoles,
 and tabs have context menus that can be accessed by right-clicking on
 the element:
 
-[animation]
+.. raw:: html
+
+   <iframe width="560" height="315" src="https://www.youtube.com/embed/y30fs6kg6fc" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
 The browser’s native context menu can be accessed by holding down
 ``Shift`` and right-clicking:
 
-[animation]
+.. raw:: html
+
+   <iframe width="560" height="315" src="https://www.youtube.com/embed/XPPWW-7WJ40" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>

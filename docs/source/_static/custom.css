@@ -5,3 +5,8 @@
 div.wy-side-nav-search {
   background: #F37626;
 }
+
+.wy-nav-content iframe {
+  margin: auto;
+  display: block;
+}
