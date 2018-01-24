@@ -47,7 +47,7 @@ If you use ``pip``, you can install it as:
 pip install jupyterlab
 ```
 
-For all methods of installation, if you are using a version of Jupyter Notebook earlier than 5.3, then you must also run the following command
+Note: For all methods of installation, if you are using a version of Jupyter Notebook earlier than 5.3, then you must also run the following command
 after installation to enable the JupyterLab server extension:
 
 ```bash
