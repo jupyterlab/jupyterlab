@@ -1,6 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as CodeMirror
+  from 'codemirror';
+
 import {
   Menu
 } from '@phosphor/widgets';
@@ -57,8 +60,9 @@ namespace CommandIDs {
 const services: JupyterLabPlugin<IEditorServices> = {
   id: '@jupyterlab/codemirror-extension:services',
   provides: IEditorServices,
-  activate: (): IEditorServices => editorServices
+  activate: activateEditorServices
 };
+
 
 
 /**
@@ -88,6 +92,18 @@ export default plugins;
  * The plugin ID used as the key in the setting registry.
  */
 const id = commands.id;
+
+
+/**
+ * Set up the editor services.
+ */
+function activateEditorServices(app: JupyterLab): IEditorServices {
+  CodeMirror.prototype.save = () => {
+    app.commands.execute('docmanager:save');
+  };
+  return editorServices;
+}
+
 
 /**
  * Set up the editor widget menu and commands.
