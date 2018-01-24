@@ -9,29 +9,27 @@
 <body>
 
 <script type="text/javascript">
-  function _remove_token_from_url() {
-    if (window.location.search.length <= 1) {
+  /* Remove token from URL. */
+  (function () {
+    var location = window.location;
+    var search = location.search;
+
+    // If there is no query string, bail.
+    if (search.length <= 1) {
       return;
     }
-    var search_parameters = window.location.search.slice(1).split('&');
-    for (var i = 0; i < search_parameters.length; i++) {
-      if (search_parameters[i].split('=')[0] === 'token') {
-        // remote token from search parameters
-        search_parameters.splice(i, 1);
-        var new_search = '';
-        if (search_parameters.length) {
-          new_search = '?' + search_parameters.join('&');
-        }
-        var new_url = window.location.origin +
-                      window.location.pathname +
-                      new_search +
-                      window.location.hash;
-        window.history.replaceState({}, "", new_url);
-        return;
-      }
-    }
-  }
-  _remove_token_from_url();
+
+    // Rebuild the query string without the `token`.
+    var query = '?' + search.slice(1).split('&')
+      .filter(function (param) { return param.split('=')[0] !== 'token'; })
+      .join('&');
+
+    // Rebuild the URL with the new query string.
+    var url = location.origin + location.pathname +
+      (query !== '?' ? query : '') + location.hash;
+
+    window.history.replaceState({ }, '', url);
+  })();
 </script>
 
 </body>
