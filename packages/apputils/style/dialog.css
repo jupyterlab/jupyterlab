@@ -99,3 +99,8 @@
   line-height: 1.4;
   color: var(--jp-ui-font-color0);
 }
+
+
+.jp-Dialog-button.jp-mod-styled:not(:last-child) {
+  margin-right: 12px;
+}
