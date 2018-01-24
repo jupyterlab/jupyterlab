@@ -45,6 +45,12 @@ If you use ``pip``, you can install it as:
 
 ```bash
 pip install jupyterlab
+```
+
+For all methods of installation, if you are using a version of Jupyter Notebook earlier than 5.3, then you must also run the following command
+after installation to enable the JupyterLab server extension:
+
+```bash
 jupyter serverextension enable --py jupyterlab --sys-prefix
 ```
 
@@ -58,7 +64,6 @@ JupyterLab can be installed from a git checkout using `pip`.  Example:
 
 ```bash
 pip install git+git://github.com/jupyterlab/jupyterlab.git
-jupyter serverextension enable --py jupyterlab --sys-prefix
 ```
 
 If you use ``pipenv``, you can install it as:
@@ -66,7 +71,6 @@ If you use ``pipenv``, you can install it as:
 ```bash
 pipenv install jupyterlab
 pipenv shell
-jupyter serverextension enable --py jupyterlab --sys-prefix
 ```
 
 or from a git checkout:
@@ -74,7 +78,6 @@ or from a git checkout:
 ```bash
 pipenv install git+git://github.com/jupyterlab/jupyterlab.git#egg=jupyterlab
 pipenv shell
-jupyter serverextension enable --py jupyterlab --sys-prefix
 ```
 
 When using ``pipenv``, in order to launch `jupyter lab`, you must activate the project's virtualenv. For example, in the directory where ``pipenv``'s `Pipfile` and `Pipfile.lock` live (i.e., where you ran the above commands):
