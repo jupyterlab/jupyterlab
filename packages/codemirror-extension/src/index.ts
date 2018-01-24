@@ -100,7 +100,7 @@ const id = commands.id;
 function activateEditorServices(app: JupyterLab): IEditorServices {
   CodeMirror.prototype.save = () => {
     app.commands.execute('docmanager:save');
-  }
+  };
   return editorServices;
 }
 
