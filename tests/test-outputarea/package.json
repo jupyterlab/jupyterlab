@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-outputarea",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "scripts": {
     "build": "tsc",
@@ -15,10 +15,10 @@
     "watch:src": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^0.15.1",
-    "@jupyterlab/outputarea": "^0.15.1",
-    "@jupyterlab/rendermime": "^0.15.1",
-    "@jupyterlab/services": "^1.1.1",
+    "@jupyterlab/apputils": "^0.15.2",
+    "@jupyterlab/outputarea": "^0.15.2",
+    "@jupyterlab/rendermime": "^0.15.2",
+    "@jupyterlab/services": "^1.1.2",
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/widgets": "^1.5.0",
     "expect.js": "~0.3.1"
