@@ -71,7 +71,7 @@ interface IRouter {
    *
    * @param options - The navigation options.
    */
-  navigate(path: string, options?: IRouter.INavigateOptions): void;
+  navigate(path: string, options?: IRouter.INavOptions): void;
 
   /**
    * Register a rule that maps a path pattern to a command.
@@ -126,7 +126,7 @@ namespace IRouter {
    * The options passed into a navigation request.
    */
   export
-  interface INavigateOptions {
+  interface INavOptions {
     /**
      * Whether the navigation should be added to the browser's history.
      */
@@ -213,7 +213,7 @@ class Router implements IRouter {
    *
    * @param options - The navigation options.
    */
-  navigate(path: string, options: IRouter.INavigateOptions = { }): void {
+  navigate(path: string, options: IRouter.INavOptions = { }): void {
     const url = path ? URLExt.join(this.base, path) : this.base;
     const { history } = window;
     const { silent } = options;

@@ -344,7 +344,6 @@ const state: JupyterLabPlugin<IStateDB> = {
         }
 
         // Any time the local state database changes, save the workspace.
-        state.changed.disconnect(listener, state);
         state.changed.connect(listener, state);
 
         // Fetch the workspace and overwrite the state database.
