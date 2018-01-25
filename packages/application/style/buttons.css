@@ -28,7 +28,6 @@ button.jp-mod-styled.jp-mod-accept {
 
 button.jp-mod-styled.jp-mod-reject {
     background: var(--md-grey-500);
-    margin-right: 12px;
     border: 1px solid var(--md-grey-500);
     color: white;
 }
