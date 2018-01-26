@@ -54,6 +54,9 @@ namespace CommandIDs {
 
   export
   const open = 'docmanager:open';
+  
+  export
+  const openDirect = 'docmanager:open-direct';
 
   export
   const rename = 'docmanager:rename';
@@ -231,6 +234,24 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     mnemonic: args => args['mnemonic'] as number || -1
   });
 
+  commands.addCommand(CommandIDs.openDirect, {
+    execute: args => {
+      const path = typeof args['path'] === 'undefined' ? ''
+        : args['path'] as string;
+      const factory = args['factory'] as string || void 0;
+      const kernel = args['kernel'] as Kernel.IModel || void 0;
+      const options = args['options'] as DocumentRegistry.IOpenOptions || void 0;
+      return docManager.services.contents.get(path, { content: false })
+        .then(() => docManager.openOrReveal(path, factory, kernel, options))
+        .then(widget => {
+          return widget.ready.then(() => { return widget; });
+        });
+    },
+    icon: args => args['icon'] as string || '',
+    label: args => (args['label'] || args['factory']) as string,
+    mnemonic: args => args['mnemonic'] as number || -1
+  });
+ 
   commands.addCommand(CommandIDs.restoreCheckpoint, {
     label: () => `Revert ${fileType()} to Saved`,
     caption: 'Revert contents to previous checkpoint',
