@@ -1127,7 +1127,7 @@ class DirListing extends Widget {
     if (!source.classList.contains(SELECTED_CLASS)) {
       item = items[index];
       selectedNames = [item.name];
-    } else if (selectedNames.length === 1) {
+    } else {
       let name = selectedNames[0];
       item = find(items, value => value.name === name);
     }
