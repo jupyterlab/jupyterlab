@@ -20,6 +20,8 @@
 
 .jp-OutputArea {
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 
@@ -54,8 +56,6 @@
 
 
 .jp-OutputArea-output {
-  flex-grow: 1;
-  flex-shrink: 1;
   height: auto;
   overflow-x: auto;
   user-select: text;

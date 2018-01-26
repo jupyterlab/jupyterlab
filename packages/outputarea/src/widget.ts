@@ -205,7 +205,7 @@ class OutputArea extends Widget {
     // Handle stdin.
     value.onStdin = msg => {
       if (KernelMessage.isInputRequestMsg(msg)) {
-        this._onInputRequest(msg, value);
+        this.onInputRequest(msg, value);
       }
     };
   }
@@ -291,7 +291,7 @@ class OutputArea extends Widget {
   /**
    * Handle an input request from a kernel.
    */
-  private _onInputRequest(msg: KernelMessage.IInputRequestMsg, future: Kernel.IFuture): void {
+  protected onInputRequest(msg: KernelMessage.IInputRequestMsg, future: Kernel.IFuture): void {
     // Add an output widget to the end.
     let factory = this.contentFactory;
     let stdinPrompt = msg.content.prompt;
@@ -326,7 +326,7 @@ class OutputArea extends Widget {
    * Render and insert a single output into the layout.
    */
   private _insertOutput(index: number, model: IOutputModel): void {
-    let output = this._createOutputItem(model);
+    let output = this.createOutputItem(model);
     output.toggleClass(EXECUTE_CLASS, model.executionCount !== null);
     let layout = this.layout as PanelLayout;
     layout.insertWidget(index, output);
@@ -354,7 +354,7 @@ class OutputArea extends Widget {
   /**
    * Create an output item with a prompt and actual output
    */
-  private _createOutputItem(model: IOutputModel): Widget {
+  protected createOutputItem(model: IOutputModel): Widget {
     let panel = new Panel();
     panel.addClass(OUTPUT_AREA_ITEM_CLASS);
 
@@ -363,6 +363,18 @@ class OutputArea extends Widget {
     prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
     panel.addWidget(prompt);
 
+    let output = this.createRenderedMimetype(model);
+    output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
+    panel.addWidget(output);
+
+    return panel;
+  }
+
+  /**
+   * Render a mimetype
+   */
+  protected createRenderedMimetype(model: IOutputModel): Widget {
+    let widget: Widget;
     let mimeType = this.rendermime.preferredMimeType(
       model.data, !model.trusted
     );
@@ -383,11 +395,11 @@ class OutputArea extends Widget {
         output = new Private.IsolatedRenderer(output);
       }
       output.renderModel(model);
-      output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
-      panel.addWidget(output);
+      widget = output;
+    } else {
+      widget = new Widget();
     }
-
-    return panel;
+    return widget;
   }
 
   /**
@@ -463,6 +475,25 @@ class OutputArea extends Widget {
   private _minHeightTimeout: number = null;
   private _future: Kernel.IFuture = null;
   private _displayIdMap = new Map<string, number[]>();
+}
+
+export
+class SimplifiedOutputArea extends OutputArea {
+  /**
+   * Handle an input request from a kernel by doing nothing.
+   */
+  protected onInputRequest(msg: KernelMessage.IInputRequestMsg, future: Kernel.IFuture): void {
+    return;
+  }
+
+  /**
+   * Create an output item without a prompt, just the output widgets
+   */
+  protected createOutputItem(model: IOutputModel): Widget {
+    let output = this.createRenderedMimetype(model);
+    output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
+    return output;
+  }
 }
 
 
