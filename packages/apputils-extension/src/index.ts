@@ -448,7 +448,7 @@ namespace Private {
    */
   export
   function getWorkspace(router: IRouter): string {
-    const match = router.current().path.match(Patterns.loadState);
+    const match = router.current.path.match(Patterns.loadState);
 
     return match && decodeURIComponent(match[1]) || '';
   }

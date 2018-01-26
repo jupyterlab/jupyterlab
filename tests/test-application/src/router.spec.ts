@@ -55,6 +55,37 @@ describe('apputils', () => {
 
     });
 
+    describe('#current', () => {
+
+      it('should return the current window location as an object', () => {
+        // The karma test window location is a file called `context.html`
+        // without any query string parameters.
+        const path = 'context.html';
+        const request = path;
+        const search = '';
+
+        expect(router.current).to.eql({ path, request, search });
+      });
+
+    });
+
+    describe('#routed', () => {
+
+      it('should emit a signal when a path is routed', done => {
+        let routed = false;
+
+        commands.addCommand('a', { execute: () => { routed = true; } });
+        router.register({ command: 'a', pattern: /.*/, rank: 10 });
+        router.route();
+
+        router.routed.connect(() => {
+          expect(routed).to.be(true);
+          done();
+        });
+      });
+
+    });
+
     describe('#stop', () => {
 
       it('should be a unique token', () => {

@@ -49,6 +49,11 @@ interface IRouter {
   readonly commands: CommandRegistry;
 
   /**
+   * The parsed current URL of the application.
+   */
+  readonly current: IRouter.ILocation;
+
+  /**
    * A signal emitted when the router routes a route.
    */
   readonly routed: ISignal<IRouter, IRouter.ILocation>;
@@ -58,11 +63,6 @@ interface IRouter {
    * no further matches will execute.
    */
   readonly stop: Token<void>;
-
-  /**
-   * Returns the parsed current URL of the application.
-   */
-  current(): IRouter.ILocation;
 
   /**
    * Navigate to a new path within the application.
@@ -181,10 +181,17 @@ class Router implements IRouter {
   readonly commands: CommandRegistry;
 
   /**
-   * If a matching rule's command resolves with the `stop` token during routing,
-   * no further matches will execute.
+   * Returns the parsed current URL of the application.
    */
-  readonly stop = new Token<void>('@jupyterlab/application:Router#stop');
+  get current(): IRouter.ILocation {
+    const { base } = this;
+    const parsed = URLExt.parse(window.location.href);
+    const { search } = parsed;
+    const path = parsed.pathname.replace(base, '');
+    const request = path + search;
+
+    return { path, request, search };
+  }
 
   /**
    * A signal emitted when the router routes a route.
@@ -194,17 +201,10 @@ class Router implements IRouter {
   }
 
   /**
-   * Returns the parsed current URL of the application.
+   * If a matching rule's command resolves with the `stop` token during routing,
+   * no further matches will execute.
    */
-  current(): IRouter.ILocation {
-    const { base } = this;
-    const parsed = URLExt.parse(window.location.href);
-    const { search } = parsed;
-    const path = parsed.pathname.replace(base, '');
-    const request = path + search;
-
-    return { path, request, search };
-  }
+  readonly stop = new Token<void>('@jupyterlab/application:Router#stop');
 
   /**
    * Navigate to a new path within the application.
@@ -252,8 +252,7 @@ class Router implements IRouter {
    * match the `IRouter.ILocation` interface.
    */
   route(): void {
-    const { commands, stop } = this;
-    const current = this.current();
+    const { commands, current, stop } = this;
     const { request } = current;
     const rules = this._rules;
     const matches: Private.Rule[] = [];
