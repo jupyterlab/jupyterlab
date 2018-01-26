@@ -16,6 +16,13 @@ If you use ``pip``, you can install it with:
 .. code:: bash
 
     pip install jupyterlab
+
+If you are using a version of Jupyter Notebook earlier than 5.3, then
+you must also run the following command to enable the JupyterLab
+server extension:
+
+.. code:: bash
+
     jupyter serverextension enable --py jupyterlab --sys-prefix
 
 Prerequisites

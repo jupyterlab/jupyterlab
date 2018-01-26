@@ -174,7 +174,7 @@ namespace Private {
    */
   export
   function getBodyData(key: string): string {
-    if (typeof document === 'undefined') {
+    if (typeof document === 'undefined' || !document.body) {
       return '';
     }
     let val = document.body.dataset[key];

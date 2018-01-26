@@ -78,7 +78,6 @@ jlpm install
 jlpm run build  # Build the dev mode assets (optional)
 jlpm run build:core  # Build the core mode assets (optional)
 jupyter lab build  # Build the app dir assets (optional)
-jupyter serverextension enable --py jupyterlab  # (optional)
 ```
 
 Notes:
@@ -101,7 +100,11 @@ jupyterlab_launcher` to get the latest version.
   Typescript code when debugging. However, it takes a bit longer to build the sources, so is used only to build for production
   by default.
 
-```
+If you are using a version of Jupyter Notebook earlier than 5.3, then
+you must also run the following command to enable the JupyterLab
+server extension:
+
+```bash
 jupyter serverextension enable --py --sys-prefix jupyterlab
 ```
 
@@ -317,3 +320,5 @@ https://jupyterlab-tutorial.readthedocs.io/en/latest/index.html.
 
 - The npm modules are fully compatible with Node/Babel/ES6/ES5. Simply
 omit the type declarations when using a language other than TypeScript.
+
+- For more information, read the [documentation](http://jupyterlab.readthedocs.io/en/latest/).

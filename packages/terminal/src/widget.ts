@@ -104,7 +104,7 @@ class Terminal extends Widget {
       if (this._initialCommand) {
         this._session.send({
           type: 'stdin',
-          content: [this._initialCommand + '\n']
+          content: [this._initialCommand + '\r']
         });
       }
     });

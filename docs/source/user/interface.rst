@@ -14,7 +14,7 @@ The left sidebar contains a :ref:`file browser <working_with_files>`, the :ref:`
 and terminals <running>`, the :ref:`command palette <commands>`, the :ref:`notebook cell tools inspector <notebook>`,
 and the :ref:`tabs list <tabs>`.
 
-[screenshot]
+.. image:: images/interface_jupyterlab.png
 
 .. _menu_bar:
 
@@ -48,7 +48,8 @@ The left sidebar contains a number of commonly-used tabs, such as a file
 browser, a list of running kernels and terminals, the command palette,
 and a list of tabs in the main area:
 
-[screenshot]
+.. image:: images/interface_left.png
+   :align: center
 
 The left sidebar can be collapsed or expanded by clicking on the active
 sidebar tab:
@@ -71,8 +72,6 @@ consoles, etc.) into panels of tabs that can be resized or subdivided:
 The main area has a single current activity. The tab for this activity
 is marked with a colored top border (blue by default).
 
-[screenshot]
-
 .. _tabs:
 
 Tabs and Single Document Mode
@@ -81,11 +80,13 @@ Tabs and Single Document Mode
 The Tabs panel in the left sidebar lists the open documents or
 activities in the main area:
 
-[screenshot]
+.. image:: images/interface_tabs.png
+   :align: center
 
 The same information is also available in the Tabs Menu:
 
-[screenshot]
+.. image:: images/interface_tabs_menu.png
+   :align: center
 
 It is often useful to focus on a single document or activity without
 closing other tabs in the main area. Single Document Mode toggles the
@@ -94,9 +95,7 @@ view of the main area to show only a single tab at a time:
 [animation]
 
 When you leave Single Document Mode, the original layout of the main
-area is restored:
-
-[animation]
+area is restored.
 
 Context Menus
 ~~~~~~~~~~~~~
