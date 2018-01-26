@@ -59,12 +59,13 @@ describe('apputils', () => {
 
       it('should return the current window location as an object', () => {
         // The karma test window location is a file called `context.html`
-        // without any query string parameters.
+        // without any query string parameters or hash.
         const path = 'context.html';
         const request = path;
         const search = '';
+        const hash = '';
 
-        expect(router.current).to.eql({ path, request, search });
+        expect(router.current).to.eql({ hash, path, request, search });
       });
 
     });
@@ -110,6 +111,52 @@ describe('apputils', () => {
 
         router.routed.connect(() => {
           expect(recorded).to.eql(wanted);
+          done();
+        });
+      });
+
+    });
+
+    describe('#navigate()', () => {
+
+      it('cannot be tested since changing location is a security risk', () => {
+        // Router#navigate() changes window.location.href but karma tests
+        // disallow changing the window location.
+      });
+
+    });
+
+    describe('#register()', () => {
+
+      it('should register a command with a route pattern', done => {
+        const wanted = ['a'];
+        let recorded: string[] = [];
+
+        commands.addCommand('a', { execute: () => { recorded.push('a'); } });
+        router.register({ command: 'a', pattern: /.*/ });
+        router.route();
+        router.routed.connect(() => {
+          expect(recorded).to.eql(wanted);
+          done();
+        });
+      });
+
+    });
+
+    describe('#route()', () => {
+
+      it('should route the location to a command', done => {
+        const wanted = ['a'];
+        let recorded: string[] = [];
+
+        commands.addCommand('a', { execute: () => { recorded.push('a'); } });
+        router.register({ command: 'a', pattern: /#a/, rank: 10 });
+        expect(recorded).to.be.empty();
+        window.location.hash = 'a';
+        router.route();
+        router.routed.connect(() => {
+          expect(recorded).to.eql(wanted);
+          window.location.hash = '';
           done();
         });
       });

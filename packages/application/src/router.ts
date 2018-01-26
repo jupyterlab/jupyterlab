@@ -232,6 +232,8 @@ class Router implements IRouter {
       history.pushState({ }, '', url);
     }
 
+    // Because a `route()` call may still be in the stack after having received
+    // a `stop` token, wait for the next stack frame before calling `route()`.
     requestAnimationFrame(() => { this.route(); });
   }
 

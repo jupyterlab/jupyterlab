@@ -69,10 +69,10 @@ namespace CommandIDs {
   const loadState = 'apputils:load-statedb';
 
   export
-  const resetOnLoad = 'apputils:reset-on-load';
+  const recoverState = 'apputils:recover-statedb';
 
   export
-  const recoverState = 'apputils:recover-statedb';
+  const resetOnLoad = 'apputils:reset-on-load';
 
   export
   const saveState = 'apputils:save-statedb';
