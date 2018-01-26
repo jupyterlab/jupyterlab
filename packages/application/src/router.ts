@@ -106,12 +106,20 @@ namespace IRouter {
   export
   interface ILocation extends ReadonlyJSONObject {
     /**
+     * The location hash.
+     */
+    hash: string;
+
+    /**
      * The path that matched a routing pattern.
      */
     path: string;
 
     /**
      * The request being routed with the router `base` omitted.
+     *
+     * #### Notes
+     * This field includes the query string and hash, if they exist.
      */
     request: string;
 
@@ -186,11 +194,11 @@ class Router implements IRouter {
   get current(): IRouter.ILocation {
     const { base } = this;
     const parsed = URLExt.parse(window.location.href);
-    const { search } = parsed;
+    const { search, hash } = parsed;
     const path = parsed.pathname.replace(base, '');
-    const request = path + search;
+    const request = path + search + hash;
 
-    return { path, request, search };
+    return { hash, path, request, search };
   }
 
   /**
