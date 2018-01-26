@@ -77,12 +77,12 @@ describe('apputils', () => {
 
         commands.addCommand('a', { execute: () => { routed = true; } });
         router.register({ command: 'a', pattern: /.*/, rank: 10 });
-        router.route();
 
         router.routed.connect(() => {
           expect(routed).to.be(true);
           done();
         });
+        router.route();
       });
 
     });
@@ -107,12 +107,11 @@ describe('apputils', () => {
         router.register({ command: 'c', pattern: /.*/, rank: 30 });
         router.register({ command: 'd', pattern: /.*/, rank: 40 });
 
-        router.route();
-
         router.routed.connect(() => {
           expect(recorded).to.eql(wanted);
           done();
         });
+        router.route();
       });
 
     });
@@ -134,11 +133,12 @@ describe('apputils', () => {
 
         commands.addCommand('a', { execute: () => { recorded.push('a'); } });
         router.register({ command: 'a', pattern: /.*/ });
-        router.route();
+
         router.routed.connect(() => {
           expect(recorded).to.eql(wanted);
           done();
         });
+        router.route();
       });
 
     });
@@ -152,13 +152,16 @@ describe('apputils', () => {
         commands.addCommand('a', { execute: () => { recorded.push('a'); } });
         router.register({ command: 'a', pattern: /#a/, rank: 10 });
         expect(recorded).to.be.empty();
+
+        // Change the hash because changing location is a security error.
         window.location.hash = 'a';
-        router.route();
+
         router.routed.connect(() => {
           expect(recorded).to.eql(wanted);
           window.location.hash = '';
           done();
         });
+        router.route();
       });
 
     });
