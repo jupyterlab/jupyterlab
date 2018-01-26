@@ -111,6 +111,24 @@ class DocumentManager implements IDisposable {
   }
 
   /**
+   * Whether to autosave documents.
+   */
+  get autosave(): boolean {
+    return this._autosave;
+  }
+  set autosave(value: boolean) {
+    this._autosave = value;
+    each(toArray(this._contexts), context => {
+      const handler = Private.saveHandlerProperty.get(context);
+      if (value === true && !handler.isActive) {
+        handler.start();
+      } else if (value === false && handler.isActive) {
+        handler.stop();
+      }
+    });
+  }
+
+  /**
    * Get whether the document manager has been disposed.
    */
   get isDisposed(): boolean {
@@ -394,7 +412,9 @@ class DocumentManager implements IDisposable {
     let handler = new SaveHandler({ context });
     Private.saveHandlerProperty.set(context, handler);
     context.ready.then(() => {
-      handler.start();
+      if (this.autosave) {
+        handler.start();
+      }
     });
     context.disposed.connect(this._onContextDisposed, this);
     this._contexts.push(context);
@@ -482,6 +502,7 @@ class DocumentManager implements IDisposable {
   private _opener: DocumentManager.IWidgetOpener;
   private _widgetManager: DocumentWidgetManager;
   private _isDisposed = false;
+  private _autosave = true;
 }
 
 
