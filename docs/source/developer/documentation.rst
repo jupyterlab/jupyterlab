@@ -2,7 +2,7 @@ Writing Documentation
 ---------------------
 
 This section provide information about writing documentation for
-JupyterLab.
+JupyterLab.  See  our [Contributor Guide](https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md) for details on installation and testing.
 
 Writing Style
 ~~~~~~~~~~~~~

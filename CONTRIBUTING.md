@@ -16,7 +16,7 @@ questions about these issues.
 ## General Guidelines
 
 For general documentation about contributing to Jupyter projects, see the
-[Project Jupyter Contributor Documentation](https://jupyter.readthedocs.io/en/latest/contributor/content-contributor.html).
+[Project Jupyter Contributor Documentation](https://jupyter.readthedocs.io/en/latest/contributor/content-contributor.html) and [Code of Conduct](https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md).
 
 All source code is written in [TypeScript](http://www.typescriptlang.org/Handbook). See the [Style Guide](https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide).
 
@@ -105,6 +105,8 @@ jupyterlab_launcher` to get the latest version.
 jupyter serverextension enable --py --sys-prefix jupyterlab
 ```
 
+For installation instructions to write documentation, please see [Writing Documentation](#writing-documentation)
+
 ### Run JupyterLab
 
 Start JupyterLab in development mode:
@@ -118,7 +120,7 @@ built in the dev-installed Python package.  When running in dev mode, a red
 stripe will appear at the top of the page; this is to indicate running
 an unreleased version.
 
-### Build and run the tests
+### Build and Run the Tests
 
 ```bash
 jlpm run build:test
@@ -172,7 +174,6 @@ To run a specific example, change to the examples directory (i.e.
 ```bash
 python main.py
 ```
-
 ## Debugging
 
 All methods of building JupyterLab produce source maps.  The source maps
@@ -189,8 +190,7 @@ debugging.
 When running a test, the packages will be available at the top level
 (e.g. `application/src`), and the current set of test files available under
 `/src`.  Note: it is recommended to use `jlpm run watch` in the test folder
-while debugging (see [above](#Build and run the tests) for more info) on
-test options.
+while debugging test options.  See [above](#build-and-run-the-tests) for more info.
 
 
 ----
@@ -225,6 +225,35 @@ jlpm run build:packages
 ```bash
 jlpm run clean
 jlpm run build:packages
+```
+
+## [Writing Documentation](#writing-documenation)
+
+Documentation is written in Markdown and reStructuredText.  In particular, the documentation on our Sphinx page is written in reStructuredText. To ensure that the Sphinx page builds, you'll need to install the documentation dependencies with `conda`.  These dependencies are located in `docs/enviornment.yml`
+
+```bash
+conda env create -f docs/environment.yml
+```
+
+The Developer Documentation includes a [guide](http://jupyterlab.readthedocs.io/en/latest/developer/documentation.html) to writing documentation including writing style, naming conventions, keyboard shortcuts, and screenshots.
+
+To test the docs call:
+
+```
+py.test --check-links -k .md . || py.test --check-links -k .md --lf .
+```
+
+The Sphinx pages can be built using `make`:
+
+```bash
+cd docs
+make html
+```
+
+Or with `jlpm`:
+
+```
+jlpm run docs
 ```
 
 ## The Jupyter Server Extension
