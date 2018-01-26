@@ -264,6 +264,7 @@ class Router implements IRouter {
   route(): void {
     const { commands, current, stop } = this;
     const { request } = current;
+    const routed = this._routed;
     const rules = this._rules;
     const matches: Private.Rule[] = [];
 
@@ -275,16 +276,17 @@ class Router implements IRouter {
     });
 
     // Order the matching rules by rank and enqueue them.
-    const queue = matches.sort((a, b) => a.rank - b.rank);
+    const queue = matches.sort((a, b) => b.rank - a.rank);
 
-    // Process one enqueued promise at a time.
-    const next = () => {
+    // Process each enqueued command sequentially and short-circuit if a promise
+    // resolves with the `stop` token.
+    (function next() {
       if (!queue.length) {
-        this._routed.emit(current);
+        routed.emit(current);
         return;
       }
 
-      const { command } = queue.shift();
+      const { command } = queue.pop();
 
       commands.execute(command, current).then(result => {
         if (result === stop) {
@@ -294,9 +296,7 @@ class Router implements IRouter {
       }).catch(reason => {
         console.warn(`Routing ${request} to ${command} failed`, reason);
       }).then(() => { next(); });
-    };
-
-    next();
+    })();
   }
 
   private _routed = new Signal<this, IRouter.ILocation>(this);
