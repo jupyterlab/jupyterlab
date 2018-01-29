@@ -58,7 +58,7 @@ the Jupyter Notebook.
 
 Markdown documents can be edited as text files or rendered inline:
 
-[animation showing opening a markdown document editor and renderer
+[animation showing opening a Markdown document editor and renderer
 side-by-side, and changes in the editor being reflected in the renderer]
 
 The Markdown syntax supported in this mode is the same syntax used in
@@ -178,7 +178,7 @@ the “Open With…” submenu in the file browser content menu:
 
 As with other files in JupyterLab, multiple views of a single file
 remain synchronized, allowing you to interactively edit and render
-Vega-Lite/Vega visualizations:
+Vega/Vega-Lite visualizations:
 
 [animation]
 

@@ -28,7 +28,7 @@ from the context menu:
 
 [animation]
 
-The user interface for Notebooks in JupyterLab closely follows that of
+The user interface for notebooks in JupyterLab closely follows that of
 the classic Jupyter Notebook. The keyboard shortcuts of the classic
 Notebook continue to work (with command and edit mode). However, a
 number of new things are possible with notebooks in JupyterLab.

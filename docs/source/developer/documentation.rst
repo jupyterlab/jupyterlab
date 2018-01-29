@@ -61,6 +61,7 @@ The majority of names are written in lower case.  These names include:
 - file browser
 - command palette
 - cell inspector
+- code console
 
 
 The following sections of the user interface should be in title case, directly quoting a word in the UI:
@@ -69,6 +70,7 @@ The following sections of the user interface should be in title case, directly q
 - Files tab
 - Running panel
 - Tabs panel
+- Single-Document Mode
 
 The capitalized words match the label of the UI element the user is clicking on
 because there does not exist a good colloquial name for the tool,

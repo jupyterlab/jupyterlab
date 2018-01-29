@@ -11,7 +11,7 @@ any JupyterLab command:
 
 [screenshot]
 
-The Command Palette can be accessed using the keyboard shortcut
+The command palette can be accessed using the keyboard shortcut
 Command-Shift-C:
 
 [animation]
