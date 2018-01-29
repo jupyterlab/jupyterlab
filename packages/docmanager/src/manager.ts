@@ -19,7 +19,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  ArrayExt, each, find, map, toArray
+  ArrayExt, find, map, toArray
 } from '@phosphor/algorithm';
 
 import {
@@ -118,7 +118,7 @@ class DocumentManager implements IDisposable {
   }
   set autosave(value: boolean) {
     this._autosave = value;
-    each(toArray(this._contexts), context => {
+    this._contexts.forEach(context => {
       const handler = Private.saveHandlerProperty.get(context);
       if (value === true && !handler.isActive) {
         handler.start();
@@ -144,7 +144,7 @@ class DocumentManager implements IDisposable {
     }
     this._isDisposed = true;
     Signal.clearData(this);
-    each(toArray(this._contexts), context => {
+    this._contexts.forEach(context => {
       this._widgetManager.closeWidgets(context);
     });
     this._widgetManager.dispose();
