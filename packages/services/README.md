@@ -205,7 +205,7 @@ import {
 
 // Get a list of available sessions and connect to one.
 Session.listRunning().then(sessionModels => {
-  Session.connectTo(sessionModels[0].id).then((session) => {
+  Session.connectTo(sessionModels[0]).then((session) => {
     console.log(session.kernel.name);
   });
 });
