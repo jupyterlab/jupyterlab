@@ -1,3 +1,5 @@
+.. _documents:
+
 Documents
 ---------
 
@@ -5,12 +7,12 @@ JupyterLab can be extended in two ways via:
 
 -  Extensions (top level): Application extensions extend the
    functionality of JupyterLab itself, and we cover them in the
-   `Extensions <extension_dev.md>`__ developer tutorial.
--  **document widget extensions (lower level):** Document widget
+   :ref:`developer_extensions`.
+-  **Document widget extensions (lower level):** Document widget
    extensions extend the functionality of document widgets added to the
    application, and we cover them in this section.
 
-For this section, the term, 'document', refers to any visual thing that
+For this section, the term 'document' refers to any visual thing that
 is backed by a file stored on disk (i.e. uses Contents API).
 
 The `Document
