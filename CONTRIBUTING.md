@@ -232,7 +232,7 @@ jlpm run build:packages
 
 ## [Writing Documentation](#writing-documenation)
 
-Documentation is written in Markdown and reStructuredText.  In particular, the documentation on our Sphinx page is written in reStructuredText. To ensure that the Sphinx page builds, you'll need to install the documentation dependencies with `conda`.  These dependencies are located in `docs/enviornment.yml`
+Documentation is written in Markdown and reStructuredText.  In particular, the documentation on our Read the Docs page is written in reStructuredText. To ensure that the Read the Docs page builds, you'll need to install the documentation dependencies with `conda`.  These dependencies are located in `docs/environment.yml`.  You can install the dependencies for building the documentation by creating a new conda environment:
 
 ```bash
 conda env create -f docs/environment.yml
@@ -240,13 +240,13 @@ conda env create -f docs/environment.yml
 
 The Developer Documentation includes a [guide](http://jupyterlab.readthedocs.io/en/latest/developer/documentation.html) to writing documentation including writing style, naming conventions, keyboard shortcuts, and screenshots.
 
-To test the docs call:
+To test the docs run:
 
 ```
 py.test --check-links -k .md . || py.test --check-links -k .md --lf .
 ```
 
-The Sphinx pages can be built using `make`:
+The Read the Docs pages can be built using `make`:
 
 ```bash
 cd docs

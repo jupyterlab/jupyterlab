@@ -45,7 +45,7 @@ Create multiple synchronized views of a single notebook:
 
 [animation]
 
-Collapse and expand code and output using the View Menu or the blue
+Collapse and expand code and output using the View menu or the blue
 collapser button on left of each cell:
 
 [animation]

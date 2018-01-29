@@ -167,7 +167,7 @@ documentation of Vega or Vega-Lite. JupyterLab supports rendering Vega
 2.x and Vega-Lite 1.x data in files and cell output.
 
 Vega-Lite 1.x files, with a ``.vl`` or ``.vl.json`` file extension, can
-be opened by double-clicking the file in the File Browser:
+be opened by double-clicking the file in the file browser:
 
 [animation]
 
