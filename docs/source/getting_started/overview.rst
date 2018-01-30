@@ -29,7 +29,7 @@ PDF, Vega, Vega-Lite, etc.) to be opened as a file or returned by a
 kernel as rich output. See :ref:`file-and-output-formats` for more
 information.
 
-To navigate the user interface, JupyterLab offers :ref:`keyboard shortcuts <shortcuts>`
+To navigate the user interface, JupyterLab offers :ref:`customizable keyboard shortcuts <shortcuts>`
 and the ability to use key-maps from vim, emacs, and Sublime.
 
 JupyterLab is served from the same
