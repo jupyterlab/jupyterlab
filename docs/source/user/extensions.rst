@@ -29,8 +29,8 @@ Installing Extensions
 ~~~~~~~~~~~~~~~~~~~~~
 
 The base JupyterLab application includes a core set of extensions, which
-provide the features described in this User Guide (Notebook, Terminal,
-Text Editor, etc.) You can install new extensions into the application
+provide the features described in this user guide (notebook, terminal,
+text editor, etc.) You can install new extensions into the application
 using the command:
 
 .. code:: bash
@@ -51,7 +51,7 @@ tarball, or a URL to a gzipped tarball.
 
 We encourage extension authors to add the ``jupyterlab-extensions``
 GitHub topic to any repository with a JupyterLab extension to facilitate
-discovery. You can see a list of extensions by searching Github for the
+discovery. You can see a list of extensions by searching GitHub for the
 `jupyterlab-extension <https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extension&type=Repositories>`__
 topic.
 

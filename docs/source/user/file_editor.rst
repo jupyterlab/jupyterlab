@@ -1,14 +1,14 @@
 .. _file_editor:
 
-File Editor
+Text Editor
 -----------
 
-The file editor in JupyterLab enables you to edit text files in
+The text editor in JupyterLab enables you to edit text files in
 JupyterLab:
 
 [screenshot]
 
-The file editor includes syntax highlighting, configurable indentation
+The text editor includes syntax highlighting, configurable indentation
 (tabs or spaces), different key maps (vim, emacs, Sublime Text) and
 basic theming. These settings can be found in the Settings menu:
 

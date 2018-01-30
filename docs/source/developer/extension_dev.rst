@@ -12,7 +12,7 @@ JupyterLab can be extended in three ways via:
    potentially render files of a given type.
 -  document widget extensions (lower level): Document widget extensions
    extend the functionality of document widgets added to the
-   application, and we cover them in the "Documents" tutorial.
+   application, and we cover them in :ref:`documents`.
 
 See :ref:`xkcd_extension_tutorial` to learn how to make a simple JupyterLab extension.
 

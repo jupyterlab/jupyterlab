@@ -27,7 +27,7 @@ You can also drag a file into the main area to create a new tab:
 [animation]
 
 Many files types have :ref:`multiple viewers/editors <file-and-output-formats>`.
-For example, you can open a Markdown file in a text editor or as rendered HTML.
+For example, you can open a Markdown file in a :ref:`text editor <file_editor>` or as rendered HTML.
 A JupyterLab extension can also add new viewers/editors for files.
 To open a file in a non-default viewer/editor, right-click on its name in the
 file browser and use the "Open With..." submenu to select the viewer/editor:
