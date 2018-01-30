@@ -110,3 +110,17 @@ The browser’s native context menu can be accessed by holding down
 ``Shift`` and right-clicking:
 
 [animation]
+
+.. _shortcuts:
+
+Keyboard Shortcuts
+~~~~~~~~~~~~~~~~~~
+
+As in the classic Notebook, you can navigate the user interface through keyboard shortcuts.
+To find these shortcuts, go to the File, select the Settings menu option, then select Keyboard Shortcuts.
+With Keyboard Shortcuts in the settings editor, you can see a full list of keyboard shortcuts, and customize them as well.
+
+[screenshot]
+
+You can also navigate JupyterLab using vim, emacs, and Sublime style key-maps.
+Customize your shortcuts with these settings, by selecting Settings, Text Editor Key Map, and selecting your preferred key-map.
