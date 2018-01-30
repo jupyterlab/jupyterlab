@@ -33,6 +33,10 @@ import {
   IDisposable
 } from '@phosphor/disposable';
 
+import {
+  Widget
+} from '@phosphor/widgets';
+
 
 /**
  * The command IDs used by the document manager plugin.
@@ -58,6 +62,9 @@ namespace CommandIDs {
 
   export
   const open = 'docmanager:open';
+  
+  export
+  const openDirect = 'docmanager:open-direct';
 
   export
   const rename = 'docmanager:rename';
@@ -256,6 +263,26 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     mnemonic: args => args['mnemonic'] as number || -1
   });
 
+  commands.addCommand(CommandIDs.openDirect, {
+    label: () => 'Open from Path',
+    caption: 'Open from path',
+    isEnabled: () => true,
+    execute: () => {
+    return Private.getOpenPath(docManager.services.contents).then(path => {
+      if(!path){
+        return;
+      }
+      docManager.services.contents.get(path, { content: false }).then( (args) => {
+        // exists
+        return commands.execute(CommandIDs.open,{path:path})
+      }, () => {
+        // does not exist
+        return;
+      });
+      return;
+    })},
+  });
+ 
   commands.addCommand(CommandIDs.restoreCheckpoint, {
     label: () => `Revert ${fileType()} to Saved`,
     caption: 'Revert contents to previous checkpoint',
@@ -387,6 +414,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   [
+    CommandIDs.openDirect,
     CommandIDs.save,
     CommandIDs.restoreCheckpoint,
     CommandIDs.saveAs,
@@ -442,4 +470,53 @@ namespace Private {
    */
   export
   let id = 0;
+
+
+  /*
+   * Autocomplete file path for a user.
+   * similar to docregistry.context.Private.getSavePath
+   */
+  export
+  function getOpenPath(contents_manager: any): Promise<string | undefined> {
+    let saveBtn = Dialog.okButton({ label: 'OPEN' });
+    return showDialog({
+      title: 'Open File',
+      body: new OpenDirectWidget(),
+      buttons: [Dialog.cancelButton(), saveBtn]
+    }).then( (result: any) => {
+      if (result.button.label === 'OPEN') {
+        return result.value;
+      }
+      return;
+    });
+  }
+
+  /*
+   * A widget that does an autocomplete file path for a user.
+   * similar to docregistry.context.Private.SaveWidget
+   */
+  class OpenDirectWidget extends Widget {
+    /**
+     * Construct a new save widget.
+     */
+    constructor() {
+      super({ node: createNode() });
+    }
+
+    /**
+     * Get the value for the widget.
+     */
+    getValue(): string {
+      return (this.node as HTMLInputElement).value;
+    }
+  }
+
+  /**
+   * Create the node for a save widget.
+   */
+  function createNode(): HTMLElement {
+    let input = document.createElement('input');
+    input.value = '';
+    return input;
+  }
 }
