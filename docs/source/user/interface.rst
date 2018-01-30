@@ -122,5 +122,5 @@ With Keyboard Shortcuts in the settings editor, you can see a full list of keybo
 
 [screenshot]
 
-You can also navigate JupyterLab using vim, emacs, and Sublime style key-maps.
+You can also navigate JupyterLab using vim, emacs, and Sublime Text key-maps.
 Customize your shortcuts with these settings, by selecting Settings, Text Editor Key Map, and selecting your preferred key-map.
