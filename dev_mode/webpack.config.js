@@ -116,6 +116,7 @@ module.exports = {
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },
       { test: /\.json$/, use: 'json-loader' },
       { test: /\.md$/, use: 'raw-loader' },
+      { test: /\.txt$/, use: 'raw-loader' },
       { test: /\.js$/, use: ['source-map-loader'], enforce: 'pre',
         // eslint-disable-next-line no-undef
         exclude: path.join(process.cwd(), 'node_modules')
