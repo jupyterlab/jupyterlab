@@ -41,6 +41,12 @@ If you use ``conda``, you can install as:
 conda install -c conda-forge jupyterlab
 ```
 
+or you may update conda before installing jupyterlab as:
+
+```bash
+conda update conda
+```
+
 If you use ``pip``, you can install it as:
 
 ```bash
