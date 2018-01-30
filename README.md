@@ -40,7 +40,13 @@ If you use ``conda``, you can install as:
 ```bash
 conda install -c conda-forge jupyterlab
 ```
-Before
+
+or you may update conda before installing jupyterlab as:
+
+```bash
+conda update conda
+```
+
 If you use ``pip``, you can install it as:
 
 ```bash
@@ -53,11 +59,8 @@ after installation to enable the JupyterLab server extension:
 ```bash
 jupyter serverextension enable --py jupyterlab --sys-prefix
 ```
-or you may update conda before installing jupyterlab as:
 
-```bash
-conda update conda
-```
+
 
 Instructions on how to install the project from the git sources are available in our [contributor documentation](CONTRIBUTING.md).
 
