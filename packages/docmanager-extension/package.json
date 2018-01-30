@@ -11,7 +11,8 @@
   "files": [
     "lib/*.d.ts",
     "lib/*.js.map",
-    "lib/*.js"
+    "lib/*.js",
+    "schema/*.json"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -34,6 +35,7 @@
     "@jupyterlab/coreutils": "^1.0.4",
     "@jupyterlab/docmanager": "^0.15.2",
     "@jupyterlab/docregistry": "^0.15.2",
+    "@jupyterlab/mainmenu": "^0.4.2",
     "@jupyterlab/services": "^1.1.2",
     "@phosphor/disposable": "^1.1.2",
     "@phosphor/widgets": "^1.5.0"
@@ -43,6 +45,7 @@
     "typescript": "~2.6.2"
   },
   "jupyterlab": {
-    "extension": true
+    "extension": true,
+    "schemaDir": "schema"
   }
 }

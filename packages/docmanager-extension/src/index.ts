@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IChangedArgs
+  IChangedArgs, ISettingRegistry
 } from '@jupyterlab/coreutils';
 
 import {
@@ -20,6 +20,10 @@ import {
 import {
   DocumentRegistry
 } from '@jupyterlab/docregistry';
+
+import {
+  IMainMenu
+} from '@jupyterlab/mainmenu';
 
 import {
   Contents, Kernel
@@ -76,17 +80,21 @@ namespace CommandIDs {
 
   export
   const saveAs = 'docmanager:save-as';
+
+  export
+  const toggleAutosave = 'docmanager:toggle-autosave';
 }
 
+const pluginId = '@jupyterlab/docmanager-extension:plugin';
 
 /**
  * The default document manager provider.
  */
 const plugin: JupyterLabPlugin<IDocumentManager> = {
-  id: '@jupyterlab/docmanager-extension:plugin',
+  id: pluginId,
   provides: IDocumentManager,
-  requires: [ICommandPalette],
-  activate: (app: JupyterLab, palette: ICommandPalette): IDocumentManager => {
+  requires: [ICommandPalette, IMainMenu, ISettingRegistry],
+  activate: (app: JupyterLab, palette: ICommandPalette, menu: IMainMenu, settingRegistry: ISettingRegistry): IDocumentManager => {
     const manager = app.serviceManager;
     const contexts = new WeakSet<DocumentRegistry.Context>();
     const opener: DocumentManager.IWidgetOpener = {
@@ -126,7 +134,24 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
     const docManager = new DocumentManager({ registry, manager, opener });
 
     // Register the file operations commands.
-    addCommands(app, docManager, palette, opener);
+    addCommands(app, docManager, palette, opener, settingRegistry);
+
+    const onSettingsUpdated = (settings: ISettingRegistry.ISettings) => {
+      const autosave = settings.get('autosave').composite as boolean | null;
+      docManager.autosave = (autosave === true || autosave === false)
+                            ? autosave
+                            : true;
+    };
+
+    // Fetch the initial state of the settings.
+    Promise.all([settingRegistry.load(pluginId), app.restored])
+    .then(([settings]) => {
+      settings.changed.connect(onSettingsUpdated);
+      onSettingsUpdated(settings);
+    }).catch((reason: Error) => {
+      console.error(reason.message);
+    });
+    menu.settingsMenu.addGroup([{ command: CommandIDs.toggleAutosave }], 5);
 
     return docManager;
   }
@@ -142,7 +167,7 @@ export default plugin;
 /**
  * Add the file operations commands to the application's command registry.
  */
-function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICommandPalette, opener: DocumentManager.IWidgetOpener): void {
+function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICommandPalette, opener: DocumentManager.IWidgetOpener, settingRegistry: ISettingRegistry): void {
   const { commands, docRegistry } = app;
   const category = 'File Operations';
   const isEnabled = () => {
@@ -363,6 +388,20 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     },
   });
 
+  commands.addCommand(CommandIDs.toggleAutosave, {
+    label: args =>
+      args['isPalette'] ? 'Toggle Document Autosave' : 'Autosave Documents',
+    isToggled: () => docManager.autosave,
+    execute: () => {
+      const value = !docManager.autosave;
+      const key = 'autosave';
+      return settingRegistry.set(pluginId, key, value)
+      .catch((reason: Error) => {
+        console.error(`Failed to set ${pluginId}:${key} - ${reason.message}`);
+      });
+    }
+  });
+
   app.contextMenu.addItem({
     command: CommandIDs.rename,
     selector: '[data-type="document-title"]',
@@ -383,6 +422,11 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     CommandIDs.close,
     CommandIDs.closeAllFiles
   ].forEach(command => { palette.addItem({ command, category }); });
+  palette.addItem({
+    command: CommandIDs.toggleAutosave,
+    category,
+    args: { isPalette: true }
+  });
 }
 
 
