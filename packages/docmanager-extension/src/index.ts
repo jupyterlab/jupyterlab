@@ -62,7 +62,7 @@ namespace CommandIDs {
 
   export
   const open = 'docmanager:open';
-  
+
   export
   const openDirect = 'docmanager:open-direct';
 
@@ -268,21 +268,22 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     caption: 'Open from path',
     isEnabled: () => true,
     execute: () => {
-    return Private.getOpenPath(docManager.services.contents).then(path => {
-      if(!path){
-        return;
-      }
-      docManager.services.contents.get(path, { content: false }).then( (args) => {
-        // exists
-        return commands.execute(CommandIDs.open,{path:path})
-      }, () => {
-        // does not exist
+      return Private.getOpenPath(docManager.services.contents).then(path => {
+        if (!path) {
+          return;
+        }
+        docManager.services.contents.get(path, { content: false }).then( (args) => {
+          // exists
+          return commands.execute(CommandIDs.open, {path: path});
+        }, () => {
+          // does not exist
+          return;
+        });
         return;
       });
-      return;
-    })},
+    },
   });
- 
+
   commands.addCommand(CommandIDs.restoreCheckpoint, {
     label: () => `Revert ${fileType()} to Saved`,
     caption: 'Revert contents to previous checkpoint',
@@ -477,7 +478,7 @@ namespace Private {
    * similar to docregistry.context.Private.getSavePath
    */
   export
-  function getOpenPath(contents_manager: any): Promise<string | undefined> {
+  function getOpenPath(contentsManager: any): Promise<string | undefined> {
     let saveBtn = Dialog.okButton({ label: 'OPEN' });
     return showDialog({
       title: 'Open File',
