@@ -1,0 +1,16 @@
+{
+  "jupyter.lab.setting-icon-class": "jp-FileIcon",
+  "jupyter.lab.setting-icon-label": "Document Manager",
+  "title": "Document Manager",
+  "description": "Document Manager settings.",
+  "properties": {
+    "autosave": {
+      "type": "boolean",
+      "title": "Autosave Documents",
+      "description": "Whether to autosave documents",
+      "default": true
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}

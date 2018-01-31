@@ -11,8 +11,8 @@ components. You can arrange multiple notebooks, text editors, terminals,
 output areas, and custom components using tabs/panels and collapsible
 sidebars. These :ref:`components <interface>` are carefully designed to enable you to use
 them together or on their own to support new workflows (for example, you
-can send code from a file to a code console with a keystroke, or move
-cells around a notebook or between notebooks with drag-and-drop).
+can send code from a file to a :ref:`code console <code_console>` with a keystroke, or move
+cells around a :ref:`notebook <notebook>` or between notebooks with drag-and-drop).
 
 :ref:`JupyterLab has full support for Jupyter Notebook documents. <notebook>` In
 addition, it enables other models of interactive computing, such as:
@@ -28,6 +28,9 @@ formats. This allows data in many formats (images, CSV, JSON, Markdown,
 PDF, Vega, Vega-Lite, etc.) to be opened as a file or returned by a
 kernel as rich output. See :ref:`file-and-output-formats` for more
 information.
+
+To navigate the user interface, JupyterLab offers :ref:`customizable keyboard shortcuts <shortcuts>`
+and the ability to use key-maps from vim, emacs, and Sublime Text.
 
 JupyterLab is served from the same
 `server <https://jupyter-notebook.readthedocs.io/en/stable/>`__ and uses
