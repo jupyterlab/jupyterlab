@@ -88,13 +88,13 @@ The same information is also available in the Tabs menu:
 .. image:: images/interface_tabs_menu.png
    :align: center
 
-It is often useful to focus on a single document or activity without
-closing other tabs in the main area. Single-Document Mode toggles the
-view of the main area to show only a single tab at a time:
+It is often useful to focus on a single document or activity without closing
+other tabs in the main area. The Single-Document Mode item in the View menu
+toggles the view of the main area to show only a single tab at a time:
 
 [animation]
 
-When you leave Single-Document Mode, the original layout of the main
+When you leave single-document mode, the original layout of the main
 area is restored.
 
 Context Menus
@@ -116,11 +116,13 @@ The browser’s native context menu can be accessed by holding down
 Keyboard Shortcuts
 ~~~~~~~~~~~~~~~~~~
 
-As in the classic Notebook, you can navigate the user interface through keyboard shortcuts.
-To find these shortcuts, go to the File, select the Settings menu option, then select Keyboard Shortcuts.
-With Keyboard Shortcuts in the settings editor, you can see a full list of keyboard shortcuts, and customize them as well.
+As in the classic Notebook, you can navigate the user interface through keyboard
+shortcuts. You can find and customize the current list of keyboard shortcuts by
+selecting the Advanced Settings Editor item in the Settings menu, then selecting
+Keyboard Shortcuts in the settings tab.
 
 [screenshot]
 
-You can also navigate JupyterLab using vim, emacs, and Sublime Text key-maps.
-Customize your shortcuts with these settings, by selecting Settings, Text Editor Key Map, and selecting your preferred key-map.
+You can also customize the text editor to use vim, emacs, or Sublime Text
+keyboard shortcuts by using the Text Editor Key Map submenu in the Settings
+menu.
