@@ -98,19 +98,27 @@ Our documentation should contain screenshots and animations that
 illustrate and demonstrate the software. Here are some guidelines for
 preparing them:
 
--  Take screenshots and animations at the standard browser font sizes,
-   100% browser zoom.
+-  Set screen resolution to non-hidpi (non-retina)
+
+-  Set browser viewport to 1280x720 px.
+   Firefox Web Developer extension is useful for doing this
+
+-  Capture the viewport, **not the full browser window**,
+   using the capture software of your choice.
+
+-  For PNGs, reduce their size using pngqant.
+   For movies, upload them to the IPython/Juptyter YouTube channel
+   and embed them in the docs with an iframe. The pngs can live in the main repository.
+   The movies should be added to the ``jupyterlab-media`` repository.
+
+-  Use `www.youtube-nocookie.com` website, which can be found by
+   clicking on the 'privacy-enhanced' embedding option in the Share dialog on YouTube.
+   Add the following parameters the end of the URL ``?rel=0&amp;showinfo=0``.
+   This disables the video title and related video suggestions.
 
 -  It is often helpful to have a colored background to highlight the
    content of an animation or screenshot. If a colored background is
    needed, use Material Design Grey 500 (``#9e9e9e``).
-
--  Screenshots and animations should be styled in the documentation with
-   a ``max-width: 100%`` property. Never stretch them wider than the
-   original.
-
--  Screenshots and animations taken on high resolution screens (retina)
-   may need to be saved at half resolution to be consistent.
 
 -  Screenshots or animations should be proceeded by a sentence
    describing the content, such as "To open a file, double-click on its
