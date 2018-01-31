@@ -10,3 +10,12 @@ div.wy-side-nav-search {
   margin: auto;
   display: block;
 }
+
+.imageshadow {
+  border: 1px solid lightgray;
+  box-shadow: 3px 3px 6px 0px #CCCCCC;
+}
+
+.rst-content .section>iframe, .rst-content .section>a>iframe {
+  margin-bottom: 24px;
+}
