@@ -11,9 +11,18 @@ div.wy-side-nav-search {
   display: block;
 }
 
-.imageshadow {
-  border: 1px solid lightgray;
-  box-shadow: 3px 3px 6px 0px #CCCCCC;
+/* Elevation
+  *
+  * We style box-shadows using Material Design's idea of elevation. These particular numbers are taken from here:
+  *
+  * https://github.com/material-components/material-components-web
+  * https://material-components-web.appspot.com/elevation.html
+  */
+.shadow {
+  border: 1px solid #E0E0E0;
+  box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
+              0px 4px 5px 0px rgba(0, 0, 0, 0.14),
+              0px 1px 10px 0px rgba(0, 0, 0, 0.12);
 }
 
 .rst-content .section>iframe, .rst-content .section>a>iframe {
