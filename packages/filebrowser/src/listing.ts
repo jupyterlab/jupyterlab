@@ -26,7 +26,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  MimeData
+  MimeData, PromiseDelegate
 } from '@phosphor/coreutils';
 
 import {
@@ -1127,7 +1127,7 @@ class DirListing extends Widget {
     if (!source.classList.contains(SELECTED_CLASS)) {
       item = items[index];
       selectedNames = [item.name];
-    } else if (selectedNames.length === 1) {
+    } else {
       let name = selectedNames[0];
       item = find(items, value => value.name === name);
     }
@@ -1153,6 +1153,7 @@ class DirListing extends Widget {
     }));
     this._drag.mimeData.setData(CONTENTS_MIME, paths);
     if (item && item.type !== 'directory') {
+      const otherPaths = paths.slice(1).reverse();
       this._drag.mimeData.setData(FACTORY_MIME, () => {
         if (!item) {
           return;
@@ -1161,6 +1162,21 @@ class DirListing extends Widget {
         let widget = this._manager.findWidget(path);
         if (!widget) {
           widget = this._manager.open(item.path);
+        }
+        if (otherPaths.length) {
+          const firstWidgetPlaced = new PromiseDelegate<void>();
+          firstWidgetPlaced.promise.then(() => {
+            let prevWidget = widget;
+            otherPaths.forEach(path => {
+              const options: DocumentRegistry.IOpenOptions = {
+                ref: prevWidget.id,
+                mode: 'tab-after'
+              };
+              prevWidget = this._manager.openOrReveal(path, void 0, void 0, options);
+              this._manager.openOrReveal(item.path);
+            });
+          });
+          firstWidgetPlaced.resolve(void 0);
         }
         return widget;
       });
