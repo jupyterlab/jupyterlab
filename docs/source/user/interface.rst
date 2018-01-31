@@ -56,7 +56,7 @@ sidebar tab:
 
 .. raw:: html
 
-   <iframe width="560" height="315" src="https://www.youtube.com/embed/PlJGecfetek" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+   <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/PlJGecfetek?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
 JupyterLab extensions can add additional panels to the left sidebar.
 
@@ -71,7 +71,7 @@ consoles, etc.) into panels of tabs that can be resized or subdivided:
 
 .. raw:: html
 
-   <iframe width="560" height="315" src="https://www.youtube.com/embed/Ka8qS7CO1XQ" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+   <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/Ka8qS7CO1XQ?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
 The main area has a single current activity. The tab for this activity
 is marked with a colored top border (blue by default).
@@ -98,7 +98,7 @@ view of the main area to show only a single tab at a time:
 
 .. raw:: html
 
-   <iframe width="560" height="315" src="https://www.youtube.com/embed/DO7NOenMQC0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+   <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/DO7NOenMQC0?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
 When you leave Single Document Mode, the original layout of the main
 area is restored.
@@ -112,11 +112,11 @@ the element:
 
 .. raw:: html
 
-   <iframe width="560" height="315" src="https://www.youtube.com/embed/y30fs6kg6fc" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+   <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/y30fs6kg6fc?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
 The browser’s native context menu can be accessed by holding down
 ``Shift`` and right-clicking:
 
 .. raw:: html
 
-   <iframe width="560" height="315" src="https://www.youtube.com/embed/XPPWW-7WJ40" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+   <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/XPPWW-7WJ40?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
