@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  renameDialog, DocumentManager, IDocumentManager
+  renameDialog, getOpenPath, DocumentManager, IDocumentManager
 } from '@jupyterlab/docmanager';
 
 import {
@@ -32,10 +32,6 @@ import {
 import {
   IDisposable
 } from '@phosphor/disposable';
-
-import {
-  Widget
-} from '@phosphor/widgets';
 
 
 /**
@@ -268,7 +264,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     caption: 'Open from path',
     isEnabled: () => true,
     execute: () => {
-      return Private.getOpenPath(docManager.services.contents).then(path => {
+      return getOpenPath(docManager.services.contents).then(path => {
         if (!path) {
           return;
         }
@@ -471,53 +467,4 @@ namespace Private {
    */
   export
   let id = 0;
-
-
-  /*
-   * Autocomplete file path for a user.
-   * similar to docregistry.context.Private.getSavePath
-   */
-  export
-  function getOpenPath(contentsManager: any): Promise<string | undefined> {
-    let saveBtn = Dialog.okButton({ label: 'OPEN' });
-    return showDialog({
-      title: 'Open File',
-      body: new OpenDirectWidget(),
-      buttons: [Dialog.cancelButton(), saveBtn]
-    }).then( (result: any) => {
-      if (result.button.label === 'OPEN') {
-        return result.value;
-      }
-      return;
-    });
-  }
-
-  /*
-   * A widget that does an autocomplete file path for a user.
-   * similar to docregistry.context.Private.SaveWidget
-   */
-  class OpenDirectWidget extends Widget {
-    /**
-     * Construct a new save widget.
-     */
-    constructor() {
-      super({ node: createNode() });
-    }
-
-    /**
-     * Get the value for the widget.
-     */
-    getValue(): string {
-      return (this.node as HTMLInputElement).value;
-    }
-  }
-
-  /**
-   * Create the node for a save widget.
-   */
-  function createNode(): HTMLElement {
-    let input = document.createElement('input');
-    input.value = '';
-    return input;
-  }
 }

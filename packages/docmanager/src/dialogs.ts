@@ -140,6 +140,52 @@ class RenameHandler extends Widget {
 }
 
 
+/*
+ * A widget used to open a file directly
+ */
+class OpenDirectWidget extends Widget {
+  /**
+   * Construct a new save widget.
+   */
+  constructor() {
+    super({ node: createNode() });
+  }
+
+  /**
+   * Get the value for the widget.
+   */
+  getValue(): string {
+    return (this.node as HTMLInputElement).value;
+  }
+}
+
+/**
+ * Create the node for a open widget.
+ */
+function createNode(): HTMLElement {
+  let input = document.createElement('input');
+  input.value = '';
+  return input;
+}
+
+/**
+ * Create the node for the open handler.
+ */
+export
+function getOpenPath(contentsManager: any): Promise<string | undefined> {
+  let saveBtn = Dialog.okButton({ label: 'OPEN' });
+  return showDialog({
+    title: 'Open File',
+    body: new OpenDirectWidget(),
+    buttons: [Dialog.cancelButton(), saveBtn]
+  }).then( (result: any) => {
+    if (result.button.label === 'OPEN') {
+      return result.value;
+    }
+    return;
+  });
+}
+
 /**
  * A namespace for private data.
  */
