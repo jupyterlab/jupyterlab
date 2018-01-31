@@ -272,7 +272,7 @@ const EXPORT_TO_FORMATS = [
   { 'format': 'pdf', 'label': 'PDF' },
   { 'format': 'rst', 'label': 'ReStructured Text' },
   { 'format': 'script', 'label': 'Executable Script' },
-  { 'format': 'slides', 'label': 'Reveal JS' }
+  { 'format': 'slides', 'label': 'Reveal.js Slides' }
 ];
 
 
