@@ -140,7 +140,7 @@ import {
 
 // Get a list of available kernels and connect to one.
 Kernel.listRunning().then(kernelModels => {
-  Kernel.connectTo(kernelModels[0].id).then((kernel) => {
+  Kernel.connectTo(kernelModels[0]).then((kernel) => {
     console.log(kernel.name);
   });
 });
