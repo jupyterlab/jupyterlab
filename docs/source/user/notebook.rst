@@ -7,7 +7,8 @@ Jupyter Notebooks are documents that combine live runnable code with
 narrative text (Markdown), equations (LaTeX), images, interactive
 visualizations and other rich output:
 
-[screenshot]
+.. image:: images/notebook/notebook_ui.png
+   :class: jp-screenshot
 
 **Jupyter Notebook (.ipynb files) are fully supported in JupyterLab.**
 Furthermore, the `notebook document
@@ -20,13 +21,21 @@ page.
 Create a notebook by clicking the ``+`` button in the file browser and
 then selecting a kernel in the new Launcher tab:
 
-[animation]
+.. raw:: html
+
+  <div class="jp-youtube-video">
+     <iframe src="https://www.youtube-nocookie.com/embed/QL0IxDAOEc0?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
 
 A new file is created with a default name. Rename a file by
 right-clicking on its name in the file browser and selecting “Rename”
 from the context menu:
 
-[animation]
+.. raw:: html
+
+  <div class="jp-youtube-video">
+     <iframe src="https://www.youtube-nocookie.com/embed/y3xzXelypjs?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
 
 The user interface for notebooks in JupyterLab closely follows that of
 the classic Jupyter Notebook. The keyboard shortcuts of the classic
@@ -35,39 +44,71 @@ number of new things are possible with notebooks in JupyterLab.
 
 Drag and drop cells to rearrange your notebook:
 
-[animation]
+.. raw:: html
+
+  <div class="jp-youtube-video">
+     <iframe src="https://www.youtube-nocookie.com/embed/J9xoTGdqWIo?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
 
 Drag cells between notebooks to quickly copy content:
 
-[animation]
+.. raw:: html
+
+  <div class="jp-youtube-video">
+     <iframe src="https://www.youtube-nocookie.com/embed/YTNZ5TS2LfU?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
 
 Create multiple synchronized views of a single notebook:
 
-[animation]
+.. raw:: html
+
+  <div class="jp-youtube-video">
+     <iframe src="https://www.youtube-nocookie.com/embed/SQn9aRc050w?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
 
 Collapse and expand code and output using the View menu or the blue
 collapser button on left of each cell:
 
-[animation]
+.. raw:: html
+
+  <div class="jp-youtube-video">
+     <iframe src="https://www.youtube-nocookie.com/embed/WgiX3ZRaTiY?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
 
 Enable scrolling for long outputs by right-clicking on a cell and
 selecting “Enable Scrolling for Outputs”:
 
-[animation]
+.. raw:: html
+
+  <div class="jp-youtube-video">
+     <iframe src="https://www.youtube-nocookie.com/embed/U4usAUZCv_c?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
 
 Create a new synchronized view of a cell’s output:
 
-[animation]
+.. raw:: html
+
+  <div class="jp-youtube-video">
+     <iframe src="https://www.youtube-nocookie.com/embed/Asa_ML45HP8?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
 
 Tab completion (activated with the ``Tab`` key) now includes additional
 information about the types of the matched items:
 
-[animation]
+.. raw:: html
+
+  <div class="jp-youtube-video">
+     <iframe src="https://www.youtube-nocookie.com/embed/XXX NEED TODO?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
 
 The tooltip (activated with ``Shift Tab``) contains additional
 information about objects:
 
-[animation]
+.. raw:: html
+
+  <div class="jp-youtube-video">
+     <iframe src="https://www.youtube-nocookie.com/embed/TgqMK1SG7XI?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
 
 You can connect a :ref:`code console <code_console>` to a notebook kernel to have a log of
 computations done in the kernel, in the order in which they were done.
@@ -75,4 +116,8 @@ The attached code console also provides a place to interactively inspect
 kernel state without changing the notebook. Right-click on a notebook
 and select “Create Console for Notebook”:
 
-[animation]
+.. raw:: html
+
+  <div class="jp-youtube-video">
+     <iframe src="https://www.youtube-nocookie.com/embed/eq1l7DBngQQ?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
