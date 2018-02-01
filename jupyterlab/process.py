@@ -42,7 +42,7 @@ class Process(object):
     _pool = None
 
     def __init__(self, cmd, logger=None, cwd=None, kill_event=None,
-                 env=None):
+                 env=None, quiet=False):
         """Start a subprocess that can be run asynchronously.
 
         Parameters
@@ -66,7 +66,8 @@ class Process(object):
 
         self.logger = logger = logger or logging.getLogger('jupyterlab')
         self._last_line = ''
-        self.logger.info('> ' + list2cmdline(cmd))
+        if not quiet:
+            self.logger.info('> ' + list2cmdline(cmd))
         self.cmd = cmd
 
         self.proc = self._create_process(cwd=cwd, env=env)

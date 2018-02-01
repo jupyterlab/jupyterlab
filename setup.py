@@ -40,7 +40,7 @@ data_files_spec = [
 package_data_spec = dict()
 package_data_spec[NAME] = [
     'staging/*', 'staging/templates/*', 'static/**', 'tests/mock_packages/**',
-    'themes/**', 'schemas/**'
+    'themes/**', 'schemas/**', 'node-version-check.js'
 ]
 
 staging = pjoin(HERE, NAME, 'staging')

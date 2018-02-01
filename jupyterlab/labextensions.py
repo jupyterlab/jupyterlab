@@ -146,6 +146,7 @@ class ListLabExtensionsApp(BaseExtensionApp):
     description = "List the installed labextensions"
 
     def run_task(self):
+        print('hi hi')
         list_extensions(self.app_dir, logger=self.log)
 
 

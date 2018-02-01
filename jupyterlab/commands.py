@@ -298,7 +298,7 @@ def unlink_package(package, app_dir=None, logger=None):
 def get_app_version(app_dir=None):
     """Get the application version."""
     app_dir = app_dir or get_app_dir()
-    handler = _AppHandler(app_dir)
+    handler = _AppHandler(app_dir, node_check=False)
     return handler.info['version']
 
 
@@ -309,12 +309,19 @@ def get_app_version(app_dir=None):
 
 class _AppHandler(object):
 
-    def __init__(self, app_dir, logger=None, kill_event=None):
+    def __init__(self, app_dir, logger=None, kill_event=None, node_check=True):
         self.app_dir = app_dir or get_app_dir()
         self.sys_dir = get_app_dir()
         self.logger = logger or logging.getLogger('jupyterlab')
         self.info = self._get_app_info()
         self.kill_event = kill_event or Event()
+        if not node_check:
+            return
+        try:
+            self._run(['node', 'node-version-check.js'], cwd=HERE, quiet=True)
+        except Exception:
+            msg = 'Please install nodejs 5+ and npm before continuing installation. nodejs may be installed using conda or directly from the nodejs website.'
+            raise ValueError(msg)
 
     def install_extension(self, extension, existing=None):
         """Install an extension package into JupyterLab.
@@ -1381,6 +1388,13 @@ def _get_core_extensions():
     """
     data = _get_core_data()['jupyterlab']
     return list(data['extensions']) + list(data['mimeExtensions'])
+
+
+def _node_check():
+    try:
+        run(['node', 'node-version-check.js'], cwd=HERE)
+    except Exception:
+        raise ValueError('`node` version 5+ is required, see extensions in README')
 
 
 if __name__ == '__main__':
