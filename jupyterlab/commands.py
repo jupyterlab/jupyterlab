@@ -1390,12 +1390,5 @@ def _get_core_extensions():
     return list(data['extensions']) + list(data['mimeExtensions'])
 
 
-def _node_check():
-    try:
-        run(['node', 'node-version-check.js'], cwd=HERE)
-    except Exception:
-        raise ValueError('`node` version 5+ is required, see extensions in README')
-
-
 if __name__ == '__main__':
     watch_dev(HERE)
