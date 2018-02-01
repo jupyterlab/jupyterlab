@@ -16,7 +16,9 @@ displayed as HTML. You can open different editors and viewers for a file
 by right-clicking on the filename in the file browser and using the
 “Open With” submenu:
 
-[screenshot]
+.. image:: images/file_formats_open_with.png
+   :align: center
+   :class: jp-screenshot
 
 To use these different data formats as output in a notebook or code
 console, you can use the relevant display API for the kernel you are
@@ -31,7 +33,9 @@ classes for displaying rich output:
 Running this code will display the HTML in the output of a notebook or
 code console cell:
 
-[screenshot]
+.. image:: images/file_formats_html_display.png
+   :align: center
+   :class: jp-screenshot
 
 The IPython display function can also construct a raw rich output
 message from a dictionary of keys (MIME types) and values (MIME data):
@@ -189,7 +193,9 @@ Output support for Vega/Vega-Lite in a notebook or code console is
 provided through third-party libraries such as Altair (Python), the
 vegalite R package, or Vegas (Scala/Spark).
 
-[screenshot]
+.. image:: images/file_formats_altair.png
+   :align: center
+   :class: jp-screenshot
 
 A JupyterLab extension that supports Vega 3.x and Vega-Lite 2.x can be
 found `here <https://github.com/jupyterlab/jupyter-renderers>`__.
@@ -217,4 +223,6 @@ The `nteract/vdom <https://github.com/nteract/vdom>`__ library provides
 a Python API for creating VDOM output that is rendered in nteract and
 JupyterLab:
 
-[screenshot or animation]
+.. image:: images/file_formats_nteract_vdom.png
+   :align: center
+   :class: jp-screenshot
