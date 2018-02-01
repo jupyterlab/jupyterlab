@@ -16,7 +16,7 @@ terminals <running>`, the :ref:`command palette <commands>`, the :ref:`notebook
 cell tools inspector <notebook>`, and the :ref:`tabs list <tabs>`.
 
 .. image:: images/interface_jupyterlab.png
-   :class: shadow
+   :class: jp-screenshot
 
 .. _menu_bar:
 
@@ -52,14 +52,16 @@ and a list of tabs in the main area:
 
 .. image:: images/interface_left.png
    :align: center
-   :class: shadow
+   :class: jp-screenshot
 
 The left sidebar can be collapsed or expanded by clicking on the active
 sidebar tab:
 
 .. raw:: html
 
-   <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/PlJGecfetek?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen class="shadow"></iframe>
+  <div class="jp-youtube-video">
+     <iframe src="https://www.youtube-nocookie.com/embed/PlJGecfetek?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
 
 JupyterLab extensions can add additional panels to the left sidebar.
 
@@ -74,7 +76,9 @@ consoles, etc.) into panels of tabs that can be resized or subdivided:
 
 .. raw:: html
 
-   <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/Ka8qS7CO1XQ?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen class="shadow"></iframe>
+  <div class="jp-youtube-video">
+    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/Ka8qS7CO1XQ?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
 
 The work area has a single current activity. The tab for this activity
 is marked with a colored top border (blue by default).
@@ -89,13 +93,13 @@ activities in the main area:
 
 .. image:: images/interface_tabs.png
    :align: center
-   :class: shadow
+   :class: jp-screenshot
 
 The same information is also available in the Tabs menu:
 
 .. image:: images/interface_tabs_menu.png
    :align: center
-   :class: shadow
+   :class: jp-screenshot
 
 It is often useful to focus on a single document or activity without closing
 other tabs in the main area. Single-document mode enable this, while making
@@ -104,7 +108,9 @@ Toggle single-document mode using the View menu:
 
 .. raw:: html
 
-   <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/DO7NOenMQC0?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen class="shadow"></iframe>
+  <div class="jp-youtube-video">
+    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/DO7NOenMQC0?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
 
 When you leave single-document mode, the original layout of the main
 area is restored.
@@ -118,14 +124,18 @@ the element:
 
 .. raw:: html
 
-   <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/y30fs6kg6fc?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen class="shadow"></iframe>
+  <div class="jp-youtube-video">
+    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/y30fs6kg6fc?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
 
 The browser’s native context menu can be accessed by holding down
 ``Shift`` and right-clicking:
 
 .. raw:: html
 
-   <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/XPPWW-7WJ40?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen class="shadow"></iframe>
+  <div class="jp-youtube-video">
+    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/XPPWW-7WJ40?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
 
 .. _shortcuts:
 
