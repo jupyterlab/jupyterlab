@@ -281,10 +281,8 @@ class DefaultSession implements Session.ISession {
       return Promise.reject(new Error('Session is disposed'));
     }
     let data = JSON.stringify({ kernel: options });
-    if (this._kernel) {
-      this._kernel.dispose();
-      this._statusChanged.emit('restarting');
-    }
+    this._kernel.dispose();
+    this._statusChanged.emit('restarting');
     return this._patch(data).then(() => this.kernel);
   }
 
