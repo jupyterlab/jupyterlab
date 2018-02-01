@@ -8,11 +8,12 @@ exploratory computing. While JupyterLab has many features found in
 traditional integrated development environments (IDEs), it remains
 focused on interactive, exploratory computing.
 
-The JupyterLab interface consists of a :ref:`main work area <main_area>` containing tabs of
-documents and activities, a collapsible :ref:`left sidebar <left_sidebar>`, and a :ref:`menu bar <menu_bar>`.
-The left sidebar contains a :ref:`file browser <working_with_files>`, the :ref:`list of running kernels
-and terminals <running>`, the :ref:`command palette <commands>`, the :ref:`notebook cell tools inspector <notebook>`,
-and the :ref:`tabs list <tabs>`.
+The JupyterLab interface consists of a :ref:`main work area <main_area>`
+containing tabs of documents and activities, a collapsible :ref:`left sidebar
+<left_sidebar>`, and a :ref:`menu bar <menu_bar>`. The left sidebar contains a
+:ref:`file browser <working_with_files>`, the :ref:`list of running kernels and
+terminals <running>`, the :ref:`command palette <commands>`, the :ref:`notebook
+cell tools inspector <notebook>`, and the :ref:`tabs list <tabs>`.
 
 .. image:: images/interface_jupyterlab.png
    :class: shadow
@@ -97,8 +98,9 @@ The same information is also available in the Tabs menu:
    :class: shadow
 
 It is often useful to focus on a single document or activity without closing
-other tabs in the main area. The Single-Document Mode item in the View menu
-toggles the view of the main area to show only a single tab at a time:
+other tabs in the main area. Single-document mode enable this, while making
+it simple to return to your multi-activity layout in the main work area.
+Toggle single-document mode using the View menu:
 
 .. raw:: html
 
@@ -133,7 +135,7 @@ Keyboard Shortcuts
 As in the classic Notebook, you can navigate the user interface through keyboard
 shortcuts. You can find and customize the current list of keyboard shortcuts by
 selecting the Advanced Settings Editor item in the Settings menu, then selecting
-Keyboard Shortcuts in the settings tab.
+Keyboard Shortcuts in the Settings tab.
 
 [screenshot]
 
