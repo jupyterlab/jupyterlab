@@ -708,8 +708,6 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     if (!isEnabled()) { return false; }
     const { notebook } = tracker.currentWidget;
     const index = notebook.activeCellIndex;
-    // Can't run above if we are at the top of a notebook.
-    if (index === notebook.widgets.length - 1) { return false; }
     // If there are selections that are not the active cell,
     // this command is confusing, so disable it.
     for (let i = 0; i < notebook.widgets.length; ++i) {
