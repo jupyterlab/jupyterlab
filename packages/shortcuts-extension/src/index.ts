@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/application';
 
 import {
+  InstanceTracker
+} from '@jupyterlab/apputils';
+
+import {
   ISettingRegistry
 } from '@jupyterlab/coreutils';
 
@@ -20,6 +24,20 @@ import {
 import {
   DisposableSet, IDisposable
 } from '@phosphor/disposable';
+
+import {
+  Widget
+} from '@phosphor/widgets';
+
+
+/**
+ * The command IDs used by the shortcuts editor.
+ */
+namespace CommandIDs {
+  export
+  const open = 'shortcuts:open-editor';
+}
+
 
 /**
  * The default shortcuts extension.
@@ -53,10 +71,10 @@ import {
 const plugin: JupyterLabPlugin<void> = {
   id: '@jupyterlab/shortcuts-extension:plugin',
   requires: [ISettingRegistry],
-  activate: (app: JupyterLab, settingReqistry: ISettingRegistry): void => {
+  activate: (app: JupyterLab, registry: ISettingRegistry): void => {
     const { commands } = app;
 
-    settingReqistry.load(plugin.id).then(settings => {
+    registry.load(plugin.id).then(settings => {
       Private.loadShortcuts(commands, settings.composite);
       settings.changed.connect(() => {
         Private.loadShortcuts(commands, settings.composite);
@@ -69,10 +87,61 @@ const plugin: JupyterLabPlugin<void> = {
 };
 
 
+class ShortcutsEditor extends Widget {}
+
+
 /**
- * Export the plugin as default.
+ * The shortcuts editor plugin.
  */
-export default plugin;
+const editor: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/shortcuts-extension:editor',
+  activate: (app: JupyterLab): void => {
+    const { commands, shell } = app;
+    const namespace = 'shortcuts-editor';
+    const tracker = new InstanceTracker<ShortcutsEditor>({ namespace });
+
+    commands.addCommand(CommandIDs.open, {
+      execute: () => {
+        if (tracker.currentWidget) {
+          shell.activateById(tracker.currentWidget.id);
+          return;
+        }
+
+        const editor = new ShortcutsEditor({
+          node: (div => {
+            div.innerHTML = 'Shortcuts Editor';
+
+            return div;
+          })(document.createElement('div'))
+        });
+
+        tracker.add(editor);
+        editor.id = namespace;
+        editor.title.label = 'Shortcuts';
+        editor.title.iconClass = 'jp-SettingsIcon';
+        editor.title.closable = true;
+        shell.addToRightArea(editor);
+        shell.activateById(editor.id);
+      },
+      label: 'Shortcuts Editor'
+    });
+    commands.addKeyBinding({
+      selector: 'body',
+      keys: ['Shift /'],
+      command: CommandIDs.open
+    });
+    console.log('shortcuts editor activated');
+  },
+  autoStart: true
+};
+
+
+/**
+ * Export the plugins as default.
+ */
+const plugins: JupyterLabPlugin<any>[] = [plugin, editor];
+
+export default plugins;
 
 
 /**
