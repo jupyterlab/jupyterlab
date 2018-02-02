@@ -13,8 +13,8 @@ directories:
 
 As with the classic Jupyter Notebook, when you close a notebook
 document, code console, or terminal, the underlying kernel or terminal
-running on the server continues to run. This allows you to perform
-long-running actions and return later. The Running tab allows you to
+running on the server continues to run. This enables you to perform
+long-running actions and return later. The Running tab enables you to
 re-open or focus the document linked to a given kernel or terminal:
 
 .. raw:: html

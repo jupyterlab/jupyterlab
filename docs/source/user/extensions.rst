@@ -175,7 +175,7 @@ page_config.json
 The ``page_config.json`` data is used to provide config data to the
 application environment.
 
-Two important fields in the ``page_config.json`` file allow control of
+Two important fields in the ``page_config.json`` file enable control of
 which plugins load:
 
 1. ``disabledExtensions`` for extensions that should not load at all.

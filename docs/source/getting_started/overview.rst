@@ -19,12 +19,12 @@ addition, it enables other models of interactive computing, such as:
 
 -  :ref:`code_console` provide transient scratchpads for running code
    interactively, with full support for rich output.
--  :ref:`Kernel-backed documents <kernel-backed-documents>` allow code in any text file (Markdown,
+-  :ref:`Kernel-backed documents <kernel-backed-documents>` enable code in any text file (Markdown,
    Python, R, LaTeX, etc.) to be run interactively in any Jupyter
    kernel.
 
 JupyterLab also offers a unified model for viewing and handling data
-formats. This allows data in many formats (images, CSV, JSON, Markdown,
+formats. This enables data in many formats (images, CSV, JSON, Markdown,
 PDF, Vega, Vega-Lite, etc.) to be opened as a file or returned by a
 kernel as rich output. See :ref:`file-and-output-formats` for more
 information.

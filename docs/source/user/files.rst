@@ -6,7 +6,7 @@ Working with Files
 Opening Files
 ~~~~~~~~~~~~~
 
-The file browser and File menu allow you to work with files and
+The file browser and File menu enable you to work with files and
 directories on your system. This includes opening, creating, deleting,
 renaming, downloading, copying, and sharing files and directories.
 
@@ -80,8 +80,8 @@ Creating Files and Activities
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Create new files or activities by clicking the ``+`` button at the top
-of the file browser. This will open a new Launcher tab in the main area,
-which allows you to pick an activity and kernel:
+of the file browser. This will open a new Launcher tab in the main work area,
+which enables you to pick an activity and kernel:
 
 .. raw:: html
 
