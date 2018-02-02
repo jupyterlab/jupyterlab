@@ -83,7 +83,7 @@ application consists of:
 
 -  A top area for things like top level menus and toolbars
 -  Left and right side bar areas for collapsible content
--  A main area for user activity.
+-  A main work area for user activity.
 -  A bottom area for things like status bars
 
 Phosphor

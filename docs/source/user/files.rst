@@ -30,7 +30,7 @@ To open any file, double-click on its name in the file browser:
      <iframe src="https://www.youtube-nocookie.com/embed/Rh-vwjTwBTI?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
-You can also drag a file into the main area to create a new tab:
+You can also drag a file into the main work area to create a new tab:
 
 .. raw:: html
 

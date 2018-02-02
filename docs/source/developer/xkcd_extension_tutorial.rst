@@ -334,7 +334,7 @@ code:
           label: 'Random xkcd comic',
           execute: () => {
             if (!widget.isAttached) {
-              // Attach the widget to the main area if it's not there
+              // Attach the widget to the main work area if it's not there
               app.shell.addToMainArea(widget);
             }
             // Activate the widget
@@ -612,7 +612,7 @@ these changes:
         label: 'Random xkcd comic',
         execute: () => {
           if (!widget.isAttached) {
-            // Attach the widget to the main area if it's not there
+            // Attach the widget to the main work area if it's not there
             app.shell.addToMainArea(widget);
           }
           // Refresh the comic in the widget
@@ -736,7 +736,7 @@ Finally, rewrite the ``activate`` function so that it:
             tracker.add(widget);
           }
           if (!widget.isAttached) {
-            // Attach the widget to the main area if it's not there
+            // Attach the widget to the main work area if it's not there
             app.shell.addToMainArea(widget);
           } else {
             // Refresh the comic in the widget

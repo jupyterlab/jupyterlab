@@ -53,7 +53,7 @@ Element Names
   more specific name, such as “File browser.” Tab bars have tabs which toggle
   panels.
 - The menu bar contains menu items, which have their own submenus.
-- The main work area can be referred to as work area when the name is unambiguous.
+- The main work area can be referred to as the work area when the name is unambiguous.
 - When describing elements in the UI, colloquial names are preferred
   (e.g., “File browser” instead of “Files panel”).
   

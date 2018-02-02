@@ -49,7 +49,7 @@ Left Sidebar
 
 The left sidebar contains a number of commonly-used tabs, such as a file
 browser, a list of running kernels and terminals, the command palette,
-and a list of tabs in the main area:
+and a list of tabs in the main work area:
 
 .. image:: images/interface_left.png
    :align: center
@@ -90,7 +90,7 @@ Tabs and Single-Document Mode
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The Tabs panel in the left sidebar lists the open documents or
-activities in the main area:
+activities in the main work area:
 
 .. image:: images/interface_tabs.png
    :align: center
@@ -103,7 +103,7 @@ The same information is also available in the Tabs menu:
    :class: jp-screenshot
 
 It is often useful to focus on a single document or activity without closing
-other tabs in the main area. Single-document mode enable this, while making
+other tabs in the main work area. Single-document mode enable this, while making
 it simple to return to your multi-activity layout in the main work area.
 Toggle single-document mode using the View menu:
 

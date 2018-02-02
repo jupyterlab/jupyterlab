@@ -19,7 +19,7 @@ basic theming. These settings can be found in the Settings menu:
    :class: jp-screenshot
 
 To edit an existing text file, double-click on its name in the file
-browser or drag it into the main area:
+browser or drag it into the main work area:
 
 .. raw:: html
 
