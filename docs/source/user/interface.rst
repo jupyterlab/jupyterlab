@@ -55,8 +55,8 @@ and a list of tabs in the main work area:
    :align: center
    :class: jp-screenshot
 
-The left sidebar can be collapsed or expanded by clicking on the active
-sidebar tab:
+The left sidebar can be collapsed or expanded by selecting "Show Left Sidebar"
+in the View menu or by clicking on the active sidebar tab:
 
 .. raw:: html
 
