@@ -6,13 +6,17 @@ Text Editor
 The text editor in JupyterLab enables you to edit text files in
 JupyterLab:
 
-[screenshot]
+.. image:: images/file_editor_overview.png
+   :align: center
+   :class: jp-screenshot
 
 The text editor includes syntax highlighting, configurable indentation
 (tabs or spaces), different key maps (vim, emacs, Sublime Text) and
 basic theming. These settings can be found in the Settings menu:
 
-[screenshot]
+.. image:: images/file_editor_settings.png
+   :align: center
+   :class: jp-screenshot
 
 To edit an existing text file, double-click on its name in the file
 browser or drag it into the main area:
