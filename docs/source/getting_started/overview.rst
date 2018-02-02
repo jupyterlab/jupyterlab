@@ -3,7 +3,7 @@
 Overview
 --------
 
-*JupyterLab is the next generation user interface for Project Jupyter*
+*JupyterLab is the next-generation user interface for Project Jupyter*
 
 JupyterLab goes beyond the classic Jupyter Notebook by providing a
 flexible and :ref:`extensible <user_extensions>` web application with a set of reusable
