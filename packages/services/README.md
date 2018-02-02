@@ -140,7 +140,7 @@ import {
 
 // Get a list of available kernels and connect to one.
 Kernel.listRunning().then(kernelModels => {
-  Kernel.connectTo(kernelModels[0].id).then((kernel) => {
+  Kernel.connectTo(kernelModels[0]).then((kernel) => {
     console.log(kernel.name);
   });
 });
@@ -205,7 +205,7 @@ import {
 
 // Get a list of available sessions and connect to one.
 Session.listRunning().then(sessionModels => {
-  Session.connectTo(sessionModels[0].id).then((session) => {
+  Session.connectTo(sessionModels[0]).then((session) => {
     console.log(session.kernel.name);
   });
 });

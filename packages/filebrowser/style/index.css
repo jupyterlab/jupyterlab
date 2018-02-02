@@ -31,7 +31,7 @@
 }
 
 
-.jp-FileBrowser-toolbar {
+.jp-FileBrowser-toolbar.jp-Toolbar {
   border-bottom: none;
   height: auto;
   margin: var(--jp-toolbar-header-margin);
@@ -65,7 +65,7 @@
 |----------------------------------------------------------------------------*/
 
 
-.jp-FileBrowser-toolbar > .jp-Toolbar-button {
+.jp-FileBrowser-toolbar.jp-Toolbar > .jp-Toolbar-button {
   flex: 1 1 auto;
   height: var(--jp-private-filebrowser-button-height);
   line-height: var(--jp-private-filebrowser-button-height);
@@ -76,7 +76,7 @@
 }
 
 
-.jp-FileBrowser-toolbar > .jp-Toolbar-button:focus {
+.jp-FileBrowser-toolbar.jp-Toolbar > .jp-Toolbar-button:focus {
   box-shadow: var(--jp-toolbar-box-shadow);
   border-color: var(--jp-toolbar-border-color);
 }

@@ -30,7 +30,7 @@ kernel as rich output. See :ref:`file-and-output-formats` for more
 information.
 
 To navigate the user interface, JupyterLab offers :ref:`customizable keyboard shortcuts <shortcuts>`
-and the ability to use key-maps from vim, emacs, and Sublime Text.
+and the ability to use key maps from vim, emacs, and Sublime Text.
 
 JupyterLab is served from the same
 `server <https://jupyter-notebook.readthedocs.io/en/stable/>`__ and uses

@@ -23,7 +23,7 @@ file browser, rich outputs, etc.) in a flexible and powerful user inteface that 
 extended through third party extensions that access our public APIs. Eventually, JupyterLab
 will replace the classic Jupyter Notebook.
 
-**JupyterLab is approaching its beta release in 2017. During our pre-beta series of releases, we encourage users and developers to try out JupyterLab and give us feedback.
+**JupyterLab is approaching its beta release in 2018. During our pre-beta series of releases, we encourage users and developers to try out JupyterLab and give us feedback.
 For users, the upcoming beta will be suitable for general usage.  For developers, our
 APIs will continue to change significantly up until the 1.0 release.**
 

@@ -11,14 +11,24 @@ running, with the privileges of your user. Thus, if JupyterLab is
 installed on your local machine, the JupyterLab terminals will run
 there.
 
-[screenshot]
+.. image:: images/terminal_layout.png
+   :align: center
+   :class: jp-screenshot
 
 To open a new terminal, click the ``+`` button in the file browser and
 select the terminal in the new Launcher tab:
 
-[animation]
+.. raw:: html
+
+  <div class="jp-youtube-video">
+     <iframe src="https://www.youtube-nocookie.com/embed/ynMjz1tiq9o?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
 
 Closing a terminal tab will leave it running on the server, but you can
 re-open it using the Running tab in the left sidebar:
 
-[animation]
+.. raw:: html
+
+  <div class="jp-youtube-video">
+     <iframe src="https://www.youtube-nocookie.com/embed/gDM5lwU6Dmo?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
