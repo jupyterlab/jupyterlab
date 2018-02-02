@@ -7,7 +7,7 @@ All user actions in JupyterLab are processed through a centralized
 command system. These commands are shared and used throughout JupyterLab
 (menu bar, context menus, keyboard shortcuts, etc.). The command palette
 in the left sidebar provides a keyboard-driven way to search for and run
-any JupyterLab command:
+JupyterLab commands:
 
 .. image:: images/command_palette.png
    :align: center

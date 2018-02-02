@@ -59,7 +59,7 @@ they will remain in sync:
      <iframe src="https://www.youtube-nocookie.com/embed/87ALbxm1Y3I?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
-The file system can be navigated by double clicking on folders in the
+The file system can be navigated by double-clicking on folders in the
 listing or clicking on the folders at the top of the directory listing:
 
 .. raw:: html
