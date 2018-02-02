@@ -16,6 +16,7 @@ terminals <running>`, the :ref:`command palette <commands>`, the :ref:`notebook
 cell tools inspector <notebook>`, and the :ref:`tabs list <tabs>`.
 
 .. image:: images/interface_jupyterlab.png
+   :align: center
    :class: jp-screenshot
 
 .. _menu_bar:

@@ -10,6 +10,7 @@ in the left sidebar provides a keyboard-driven way to search for and run
 any JupyterLab command:
 
 .. image:: images/command_palette.png
+   :align: center
    :class: jp-screenshot
 
 The command palette can be accessed using the keyboard shortcut
