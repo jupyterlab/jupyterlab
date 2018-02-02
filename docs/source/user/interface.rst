@@ -71,9 +71,11 @@ JupyterLab extensions can add additional panels to the left sidebar.
 Main Work Area
 ~~~~~~~~~~~~~~
 
-The main work area in JupyterLab allows you to arrange documents
-(notebooks, text files, etc.) and other activities (terminals, code
-consoles, etc.) into panels of tabs that can be resized or subdivided:
+The main work area in JupyterLab enables you to arrange documents (notebooks,
+text files, etc.) and other activities (terminals, code consoles, etc.) into
+panels of tabs that can be resized or subdivided. Drag a tab to the center of a
+tab panel to move the tab to the panel. Subdivide a tab panel by dragging a tab to
+the left, right, top, or bottom of the panel:
 
 .. raw:: html
 
@@ -81,8 +83,8 @@ consoles, etc.) into panels of tabs that can be resized or subdivided:
     <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/Ka8qS7CO1XQ?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
-The work area has a single current activity. The tab for this activity
-is marked with a colored top border (blue by default).
+The work area has a single current activity. The tab for the current activity is
+marked with a colored top border (blue by default).
 
 .. _tabs:
 
@@ -120,7 +122,7 @@ Context Menus
 ~~~~~~~~~~~~~
 
 Many parts of JupyterLab, such as notebooks, text files, code consoles,
-and tabs have context menus that can be accessed by right-clicking on
+and tabs, have context menus that can be accessed by right-clicking on
 the element:
 
 .. raw:: html
