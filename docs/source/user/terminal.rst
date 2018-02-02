@@ -12,6 +12,7 @@ installed on your local machine, the JupyterLab terminals will run
 there.
 
 .. image:: images/terminal_layout.png
+   :align: center
    :class: jp-screenshot
 
 To open a new terminal, click the ``+`` button in the file browser and

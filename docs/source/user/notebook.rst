@@ -8,6 +8,7 @@ narrative text (Markdown), equations (LaTeX), images, interactive
 visualizations and other rich output:
 
 .. image:: images/notebook/notebook_ui.png
+   :align: center
    :class: jp-screenshot
 
 **Jupyter Notebook (.ipynb files) are fully supported in JupyterLab.**

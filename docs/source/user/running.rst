@@ -8,6 +8,7 @@ terminals currently running across all notebooks, code consoles, and
 directories:
 
 .. image:: images/running_layout.png
+   :align: center
    :class: jp-screenshot
 
 As with the classic Jupyter Notebook, when you close a notebook

@@ -16,6 +16,7 @@ terminals <running>`, the :ref:`command palette <commands>`, the :ref:`notebook
 cell tools inspector <notebook>`, and the :ref:`tabs list <tabs>`.
 
 .. image:: images/interface_jupyterlab.png
+   :align: center
    :class: jp-screenshot
 
 .. _menu_bar:
@@ -147,8 +148,10 @@ shortcuts. You can find and customize the current list of keyboard shortcuts by
 selecting the Advanced Settings Editor item in the Settings menu, then selecting
 Keyboard Shortcuts in the Settings tab.
 
-[screenshot]
+.. image:: images/interface_keyboard_shortcuts.png
+   :align: center
+   :class: jp-screenshot
 
 You can also customize the text editor to use vim, emacs, or Sublime Text
-keyboard shortcuts by using the Text Editor Key Map submenu in the Settings
+keyboard maps by using the Text Editor Key Map submenu in the Settings
 menu.
