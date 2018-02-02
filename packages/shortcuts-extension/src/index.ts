@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin
+  ILayoutRestorer, JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -36,6 +36,9 @@ import {
 namespace CommandIDs {
   export
   const open = 'shortcuts:open-editor';
+
+  export
+  const toggle = 'shortcuts:toggle-editor';
 }
 
 
@@ -95,7 +98,8 @@ class ShortcutsEditor extends Widget {}
  */
 const editor: JupyterLabPlugin<void> = {
   id: '@jupyterlab/shortcuts-extension:editor',
-  activate: (app: JupyterLab): void => {
+  requires: [ILayoutRestorer],
+  activate: (app: JupyterLab, restorer: ILayoutRestorer): void => {
     const { commands, shell } = app;
     const namespace = 'shortcuts-editor';
     const tracker = new InstanceTracker<ShortcutsEditor>({ namespace });
@@ -130,6 +134,33 @@ const editor: JupyterLabPlugin<void> = {
       keys: ['Shift /'],
       command: CommandIDs.open
     });
+
+    commands.addCommand(CommandIDs.toggle, {
+      isEnabled: () => !!tracker.currentWidget,
+      execute: () => {
+        const editor = tracker.currentWidget;
+        const right = document.body.getAttribute('data-right-sidebar-widget');
+
+        if (!editor || editor.id !== right) {
+          return commands.execute(CommandIDs.open);
+        }
+
+        editor.dispose();
+      }
+    });
+    commands.addKeyBinding({
+      selector: `body[data-right-sidebar-widget="${namespace}"]`,
+      keys: ['Shift /'],
+      command: CommandIDs.toggle
+    });
+
+    // Handle state restoration.
+    restorer.restore(tracker, {
+      command: CommandIDs.open,
+      args: widget => ({ }),
+      name: widget => namespace
+    });
+
     console.log('shortcuts editor activated');
   },
   autoStart: true
