@@ -272,7 +272,7 @@ class CompletionHandler implements IDisposable {
     }
 
     // If the part of the line before the cursor is white space, return.
-    if (line.slice(0, position.column).match(/^\W*$/)) {
+    if (line.slice(0, position.column).match(/^\s*$/)) {
       this._enabled = false;
       model.reset(true);
       host.classList.remove(COMPLETER_ENABLED_CLASS);
