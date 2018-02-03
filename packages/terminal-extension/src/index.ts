@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
-  IMainMenu, IEditMenu
+  IMainMenu
 } from '@jupyterlab/mainmenu';
 
 import {
@@ -121,19 +121,6 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   // Add terminal creation to the file menu.
   mainMenu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 20);
 
-  // Add terminal clearing to the edit menu.
-  mainMenu.editMenu.clearers.add({
-    tracker,
-    noun: 'Terminal',
-    clearCurrent: current => {
-      current.refresh().then(() => {
-        if (current) {
-          current.activate();
-        }
-      });
-    }
-  } as IEditMenu.IClearer<Terminal>);
-
   // Add a launcher item if the launcher is available.
   if (launcher) {
     launcher.add({
@@ -209,7 +196,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
   });
 
   commands.addCommand(CommandIDs.refresh, {
-    label: 'Clear Terminal',
+    label: 'Refresh Terminal',
     caption: 'Refresh the current terminal session',
     execute: () => {
       let current = tracker.currentWidget;
