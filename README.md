@@ -127,7 +127,7 @@ A tool like [postcss](http://postcss.org/) can be used to convert the CSS files 
 
 ## Documentation
 
-Read our documentation on [ReadTheDocs](http://jupyterlab-tutorial.readthedocs.io/en/latest/).
+Read our documentation on [ReadTheDocs](http://jupyterlab.readthedocs.io/en/latest/).
 
 ----
 
@@ -143,7 +143,7 @@ JupyterLab follows the official [Jupyter Code of Conduct](https://github.com/jup
 
 JupyterLab can be extended using extensions that are [npm](https://www.npmjs.com/) packages
 and use our public APIs. See our documentation
-for [users](https://jupyterlab-tutorial.readthedocs.io/en/latest/user/extensions.html) and [developers](https://jupyterlab-tutorial.readthedocs.io/en/latest/developer/extension_dev.html).
+for [users](https://jupyterlab.readthedocs.io/en/latest/user/extensions.html) and [developers](https://jupyterlab.readthedocs.io/en/latest/developer/extension_dev.html).
 
 ### License
 
@@ -185,7 +185,7 @@ and you may participate in development discussions or get live help on [Gitter](
 ## Resources
 
 - [Reporting Issues](https://github.com/jupyterlab/jupyterlab/issues)
-- [Architecture tutorial](https://jupyterlab-tutorial.readthedocs.io/en/latest/index.html)
+- [Architecture tutorial](https://jupyterlab.readthedocs.io/en/latest/index.html)
 - [API Docs](http://jupyterlab.github.io/jupyterlab/)
 - [Documentation for Project Jupyter](https://jupyter.readthedocs.io/en/latest/index.html) | [PDF](https://media.readthedocs.org/pdf/jupyter/latest/jupyter.pdf)
 - [Project Jupyter website](https://jupyter.org)

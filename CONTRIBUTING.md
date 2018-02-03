@@ -205,7 +205,7 @@ The JupyterLab application is made up of two major parts:
 - an npm package
 - a Jupyter server extension (Python package)
 
-Each part is named `jupyterlab`. The [developer tutorial documentation](https://jupyterlab-tutorial.readthedocs.io/en/latest/index.html)
+Each part is named `jupyterlab`. The [developer tutorial documentation](https://jupyterlab.readthedocs.io/en/latest/index.html)
 provides additional architecture information.
 
 ## The NPM Packages
@@ -316,7 +316,7 @@ run `jupyter lab --core-mode`.  This is the core application that will
 be shipped.
 
 - If working with extensions, see the extension documentation on
-https://jupyterlab-tutorial.readthedocs.io/en/latest/index.html.
+https://jupyterlab.readthedocs.io/en/latest/index.html.
 
 - The npm modules are fully compatible with Node/Babel/ES6/ES5. Simply
 omit the type declarations when using a language other than TypeScript.
