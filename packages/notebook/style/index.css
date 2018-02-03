@@ -29,8 +29,8 @@
 
 
 .jp-NotebookPanel {
-  display: flex;
-  flex-direction: column;
+  display: block;
+  overflow: scroll;
   height: 100%;
 }
 
@@ -40,7 +40,6 @@
 }
 
 .jp-Notebook {
-  flex: 1 1 auto;
   padding: var(--jp-notebook-padding);
   outline: none;
   overflow: auto;
