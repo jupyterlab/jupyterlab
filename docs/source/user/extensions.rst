@@ -10,8 +10,8 @@ renderers, among many other things. JupyterLab extensions are
 in Javascript development). For information about developing extensions,
 see the :ref:`developer documentation <developer_extensions>`.
 
-In order to install JupyterLab extensions, you need to have Node.js
-version 4+ installed.
+In order to install JupyterLab extensions, you need to have `Node.js
+<https://nodejs.org/>`__ version 4 or later installed.
 
 If you use ``conda``, you can get it with:
 
@@ -25,6 +25,9 @@ If you use `Homebrew <https://brew.sh/>`__ on Mac OS X:
 
     brew install node
 
+You can also download Node.js from the `Node.js website <https://nodejs.org/>`__ and
+install it directly.
+
 Installing Extensions
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -35,21 +38,21 @@ using the command:
 
 .. code:: bash
 
-    jupyter labextension install <foo>
+    jupyter labextension install my-extension
 
-where ``<foo>`` is the name of a valid JupyterLab extension npm package
-on `npm <https://www.npmjs.com>`__. Use the ``<foo>@<foo version>``
+where ``my-extension`` is the name of a valid JupyterLab extension npm package
+on `npm <https://www.npmjs.com>`__. Use the ``my-extension@version``
 syntax to install a specific version of an extension, for example:
 
 .. code:: bash
 
-    jupyter labextension install <foo>@1.2.3
+    jupyter labextension install my-extension@1.2.3
 
 You can also install an extension that is not uploaded to npm, i.e.,
-``<foo>`` can be a local directory containing the extension, a gzipped
+``my-extension`` can be a local directory containing the extension, a gzipped
 tarball, or a URL to a gzipped tarball.
 
-We encourage extension authors to add the ``jupyterlab-extensions``
+We encourage extension authors to add the ``jupyterlab-extension``
 GitHub topic to any repository with a JupyterLab extension to facilitate
 discovery. You can see a list of extensions by searching GitHub for the
 `jupyterlab-extension <https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extension&type=Repositories>`__
@@ -65,11 +68,11 @@ Uninstall an extension by running the command:
 
 .. code:: bash
 
-    jupyter labextension uninstall <bar>
+    jupyter labextension uninstall my-extension
 
-where ``<bar>`` is the name of the extension, as printed in the
+where ``my-extension`` is the name of the extension, as printed in the
 extension list. You can also uninstall core extensions using this
-command (which can later be re-installed).
+command (you can always re-install core extensions later).
 
 Installing and uninstalling extensions can take some time, as they are
 downloaded, bundled with the core extensions, and the whole application
@@ -93,16 +96,16 @@ extensions) without rebuilding the application by running the command:
 
 .. code:: bash
 
-    jupyter labextension disable <bar>
+    jupyter labextension disable my-extension
 
-where ``<bar>`` is the name of the extension. This will prevent the
-extension from loading in the browser, but does not require a rebuild.
+This will prevent the extension from loading in the browser, but does not
+require a rebuild.
 
 You can re-enable an extension using the command:
 
 .. code:: bash
 
-    jupyter labextension enable <foo>
+    jupyter labextension enable my-extension
 
 Advanced Usage
 ~~~~~~~~~~~~~~
@@ -118,7 +121,7 @@ can query the current application path by running ``jupyter lab path``.
 JupyterLab Build Process
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-To rebuild the app directory, run ``jupyter lab build``. By default the
+To rebuild the app directory, run ``jupyter lab build``. By default, the
 ``jupyter labextension install`` command builds the application, so you
 typically do not need to call ``build`` directly.
 
@@ -128,7 +131,7 @@ Building consists of:
 -  Handling any locally installed packages
 -  Ensuring all installed assets are available
 -  Bundling the assets
--  Copying the assets to the ``static`` directory
+-  Copying the bundled assets to the ``static`` directory
 
 JupyterLab Application Directory
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

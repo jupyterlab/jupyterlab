@@ -48,7 +48,8 @@ message from a dictionary of keys (MIME types) and values (MIME data):
 Other Jupyter kernels offer similar APIs.
 
 The rest of this section highlights some of the common data formats that
-JupyterLab supports.
+JupyterLab supports by default. JupyterLab extensions can also add support for
+other file formats.
 
 
 Markdown
