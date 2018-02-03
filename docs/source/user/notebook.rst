@@ -99,7 +99,7 @@ information about the types of the matched items:
 .. raw:: html
 
   <div class="jp-youtube-video">
-     <iframe src="https://www.youtube-nocookie.com/embed/XXX NEED TODO?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/MuNr0i8LgpM?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
 The tooltip (activated with ``Shift Tab``) contains additional
