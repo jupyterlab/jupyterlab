@@ -293,9 +293,11 @@ class Router implements IRouter {
           queue.length = 0;
           console.log(`Routing ${request} was short-circuited by ${command}`);
         }
+        next();
       }).catch(reason => {
         console.warn(`Routing ${request} to ${command} failed`, reason);
-      }).then(() => { next(); });
+        next();
+      });
     })();
   }
 
