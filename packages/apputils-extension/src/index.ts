@@ -376,7 +376,7 @@ const state: JupyterLabPlugin<IStateDB> = {
 
     commands.addCommand(CommandIDs.resetOnLoad, {
       execute: (args: IRouter.ILocation) => {
-        const { path, search } = args;
+        const { hash, path, search } = args;
         const query = URLExt.queryStringToObject(search || '');
         const reset = 'reset' in query;
 
@@ -397,7 +397,7 @@ const state: JupyterLabPlugin<IStateDB> = {
         // Maintain the query string parameters but remove `reset`.
         delete query['reset'];
 
-        const url = path + URLExt.objectToQueryString(query);
+        const url = path + URLExt.objectToQueryString(query) + hash;
         const cleared = commands.execute(CommandIDs.recoverState)
           .then(() => router.stop); // Stop routing before new route navigation.
 
