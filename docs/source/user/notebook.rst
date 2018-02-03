@@ -94,11 +94,7 @@ Create a new synchronized view of a cell’s output:
 Tab completion (activated with the ``Tab`` key) now includes additional
 information about the types of the matched items:
 
-.. raw:: html
-
-  <div class="jp-youtube-video">
-     <iframe src="https://www.youtube-nocookie.com/embed/XXX NEED TODO?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-  </div>
+.. todo:: Make a screencast video of this?
 
 The tooltip (activated with ``Shift Tab``) contains additional
 information about objects:
