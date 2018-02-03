@@ -1175,6 +1175,11 @@ namespace Private {
    */
   export
   function setOption<K extends keyof CodeMirrorEditor.IConfig>(editor: CodeMirror.Editor, option: K, value: CodeMirrorEditor.IConfig[K]): void {
+    // Don't bother setting the option if it is already the same.
+    const oldValue = getOption(editor, option);
+    if (oldValue === value) {
+      return;
+    }
     switch (option) {
     case 'lineWrap':
       editor.setOption('lineWrapping', value);

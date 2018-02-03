@@ -10,7 +10,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  JSONValue, JSONObject
+  JSONExt, JSONValue, JSONObject
 } from '@phosphor/coreutils';
 
 import {
@@ -319,6 +319,9 @@ class ObservableValue implements IObservableValue {
    */
   set(value: JSONValue): void {
     let oldValue = this._value;
+    if (JSONExt.deepEqual(oldValue, value)) {
+      return;
+    }
     this._value = value;
     this._changed.emit({
       oldValue: oldValue,
