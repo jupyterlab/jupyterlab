@@ -3,7 +3,8 @@
 Overview
 --------
 
-*JupyterLab is the next-generation user interface for Project Jupyter, and will eventually replace the classic Jupyter Notebook.*
+*JupyterLab is the next-generation user interface for Project Jupyter.
+JupyterLab will eventually replace the classic Jupyter Notebook.*
 
 JupyterLab is an extensible open-source web-based interface for Project Jupyter.
 In JupyterLab, you can arrange multiple notebooks, text editors, terminals,
