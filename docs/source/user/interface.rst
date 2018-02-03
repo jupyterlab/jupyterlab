@@ -80,7 +80,7 @@ the left, right, top, or bottom of the panel:
 .. raw:: html
 
   <div class="jp-youtube-video">
-    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/Ka8qS7CO1XQ?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <iframe src="https://www.youtube-nocookie.com/embed/Ka8qS7CO1XQ?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
 The work area has a single current activity. The tab for the current activity is
@@ -112,7 +112,7 @@ Toggle single-document mode using the View menu:
 .. raw:: html
 
   <div class="jp-youtube-video">
-    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/DO7NOenMQC0?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <iframe src="https://www.youtube-nocookie.com/embed/DO7NOenMQC0?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
 When you leave single-document mode, the original layout of the main
@@ -128,7 +128,7 @@ the element:
 .. raw:: html
 
   <div class="jp-youtube-video">
-    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/y30fs6kg6fc?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <iframe src="https://www.youtube-nocookie.com/embed/y30fs6kg6fc?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
 The browser’s native context menu can be accessed by holding down
@@ -137,7 +137,7 @@ The browser’s native context menu can be accessed by holding down
 .. raw:: html
 
   <div class="jp-youtube-video">
-    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/XPPWW-7WJ40?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <iframe src="https://www.youtube-nocookie.com/embed/XPPWW-7WJ40?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
 .. _shortcuts:

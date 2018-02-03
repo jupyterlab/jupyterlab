@@ -66,7 +66,7 @@ Markdown documents can be edited as text files or rendered inline:
 .. raw:: html
 
   <div class="jp-youtube-video">
-    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/eQsRlqK-z1c?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <iframe src="https://www.youtube-nocookie.com/embed/eQsRlqK-z1c?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
 The Markdown syntax supported in this mode is the same syntax used in
@@ -92,7 +92,7 @@ submenu:
 .. raw:: html
 
   <div class="jp-youtube-video">
-    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/y_ydmAmVdCA?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <iframe src="https://www.youtube-nocookie.com/embed/y_ydmAmVdCA?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
 CSV
@@ -109,7 +109,7 @@ semicolon-separated values):
 .. raw:: html
 
   <div class="jp-youtube-video">
-    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/z6xuZ9H3Imo?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <iframe src="https://www.youtube-nocookie.com/embed/z6xuZ9H3Imo?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
 To edit a CSV file as a text file, right-click on the file in the file
@@ -118,7 +118,7 @@ browser and select the “Editor” item in the “Open With” submenu:
 .. raw:: html
 
   <div class="jp-youtube-video">
-    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/b5oAoVB3Wd4?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <iframe src="https://www.youtube-nocookie.com/embed/b5oAoVB3Wd4?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
 JSON
@@ -134,7 +134,7 @@ JSON file using a searchable tree view:
 .. raw:: html
 
   <div class="jp-youtube-video">
-    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/FRj1r7-7kiQ?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <iframe src="https://www.youtube-nocookie.com/embed/FRj1r7-7kiQ?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
 To edit the JSON as a text file, right-click on the filename in the file
@@ -143,7 +143,7 @@ browser and select the “Editor” item in the “Open With” submenu:
 .. raw:: html
 
   <div class="jp-youtube-video">
-    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/HKcJAGZngzw?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <iframe src="https://www.youtube-nocookie.com/embed/HKcJAGZngzw?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
 HTML
@@ -176,7 +176,7 @@ in JupyterLab, double-click on the file in the file browser:
 .. raw:: html
 
   <div class="jp-youtube-video">
-    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/vLAEzD5dxQw?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <iframe src="https://www.youtube-nocookie.com/embed/vLAEzD5dxQw?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
 Vega/Vega-Lite
@@ -203,7 +203,7 @@ be opened by double-clicking the file in the file browser:
 .. raw:: html
 
   <div class="jp-youtube-video">
-    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/Dddtyz5fWkU?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <iframe src="https://www.youtube-nocookie.com/embed/Dddtyz5fWkU?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
 The files can also be opened in the JSON viewer or file editor through
@@ -212,7 +212,7 @@ the “Open With…” submenu in the file browser content menu:
 .. raw:: html
 
   <div class="jp-youtube-video">
-    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/qaiGRXh4jxc?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <iframe src="https://www.youtube-nocookie.com/embed/qaiGRXh4jxc?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
 As with other files in JupyterLab, multiple views of a single file
@@ -222,7 +222,7 @@ Vega/Vega-Lite visualizations:
 .. raw:: html
 
   <div class="jp-youtube-video">
-    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/4Me4rCeS8To?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <iframe src="https://www.youtube-nocookie.com/embed/4Me4rCeS8To?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
 
@@ -260,7 +260,7 @@ interactively:
 .. raw:: html
 
   <div class="jp-youtube-video">
-    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/fObR8xeKCJU?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <iframe src="https://www.youtube-nocookie.com/embed/fObR8xeKCJU?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
 The `nteract/vdom <https://github.com/nteract/vdom>`__ library provides
