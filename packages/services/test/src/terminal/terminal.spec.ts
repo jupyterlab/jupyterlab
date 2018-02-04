@@ -8,6 +8,10 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
+  Signal
+} from '@phosphor/signaling';
+
+import {
   TerminalSession
 } from '../../../lib/terminal';
 
@@ -120,14 +124,16 @@ describe('terminal', () => {
     describe('#messageReceived', () => {
 
       it('should be emitted when a message is received', (done) => {
+        const object = {};
         TerminalSession.startNew().then(s => {
           session = s;
           session.messageReceived.connect((sender, msg) => {
             expect(sender).to.be(session);
             if (msg.type === 'stdout') {
+              Signal.disconnectReceiver(object);
               done();
             }
-          });
+          }, object);
         }).catch(done);
       });
 
