@@ -131,8 +131,9 @@ describe('session/manager', () => {
         handleRequest(manager, 200, specs);
         manager.specsChanged.connect((sender, args) => {
           expect(sender).to.be(manager);
-          expect(args.default).to.be(specs.default);
-          done();
+          if (args.default === specs.default) {
+            done();
+          }
         });
         manager.refreshSpecs();
       });
@@ -185,6 +186,8 @@ describe('session/manager', () => {
           called = true;
         });
         return session.changeKernel({ name: session.kernel.name }).then(() => {
+          return manager.refreshRunning();
+        }).then(() => {
           expect(called).to.be(true);
         });
       });
@@ -286,8 +289,9 @@ describe('session/manager', () => {
         let called = false;
         return startNew(manager).then(s => {
           manager.runningChanged.connect((sender, args) => {
-            expect(s.isDisposed).to.be(true);
-            called = true;
+            if (s.isDisposed) {
+              called = true;
+            }
           });
           return manager.shutdown(s.id);
         }).then(() => {
