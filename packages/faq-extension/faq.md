@@ -14,7 +14,7 @@
 
 ## General
 
-Welcome to the Frequently Asked Questions (FAQ) for the JupyterLab Beta 1 Release.
+Welcome to the Frequently Asked Questions (FAQ) for the JupyterLab Beta Release Series.
 
 ### What is JupyterLab?
 
@@ -52,7 +52,7 @@ for more detailed information about these and other features.
 
 ### How stable is JupyterLab?
 
-This Beta 1 version of JupyterLab is ready for you to use! Starting with this
+This Beta version of JupyterLab is ready for you to use! Starting with this
 release, the JupyterLab Beta series of releases are characterized by:
 
 * Stable and featureful enough for daily usage.
