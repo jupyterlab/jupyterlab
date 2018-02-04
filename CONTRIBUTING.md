@@ -26,7 +26,7 @@ All source code is written in [TypeScript](http://www.typescriptlang.org/Handboo
 ### Installing Node.js and jlpm
 
 Building JupyterLab from its GitHub source code requires Node.js version
-4+.
+5+.
 
 If you use ``conda``, you can get it with:
 
