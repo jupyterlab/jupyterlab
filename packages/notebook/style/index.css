@@ -30,7 +30,6 @@
 
 .jp-NotebookPanel {
   display: block;
-  overflow: scroll;
   height: 100%;
 }
 
@@ -43,6 +42,7 @@
   padding: var(--jp-notebook-padding);
   outline: none;
   overflow: auto;
+  height: 100%;
   background: var(--jp-layout-color0);
 }
 
