@@ -39,7 +39,6 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
     this.addClass('jp-MainAreaWidget');
     this.id = uuid();
     let content = this.content = options.content;
-    content.addClass('jp-MainAreaWidget-content');
     if (!content.id) {
       content.id = uuid();
     }
