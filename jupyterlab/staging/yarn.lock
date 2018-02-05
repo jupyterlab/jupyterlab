@@ -2,25 +2,25 @@
 # yarn lockfile v1
 
 
-"@jupyterlab/application-extension@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/application-extension/-/application-extension-0.15.2.tgz#87a22447dc7cb9444abea7ef43b398de002bbcf8"
+"@jupyterlab/application-extension@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/application-extension/-/application-extension-0.15.3.tgz#98da8e903351e376c9878b9bcac8a15963315676"
   dependencies:
-    "@jupyterlab/application" "^0.15.2"
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
+    "@jupyterlab/application" "^0.15.3"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
     "@phosphor/virtualdom" "^1.1.2"
 
-"@jupyterlab/application@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/application/-/application-0.15.2.tgz#2cc59b4c5fb26d3398d9ba7b6e0c9cc482244bdc"
+"@jupyterlab/application@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/application/-/application-0.15.3.tgz#fb70a1bc869331f02a52b9fbe066f5e0c97d610a"
   dependencies:
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/docregistry" "^0.15.2"
-    "@jupyterlab/rendermime" "^0.15.2"
-    "@jupyterlab/rendermime-interfaces" "^1.0.4"
-    "@jupyterlab/services" "^1.1.2"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/docregistry" "^0.15.3"
+    "@jupyterlab/rendermime" "^0.15.3"
+    "@jupyterlab/rendermime-interfaces" "^1.0.5"
+    "@jupyterlab/services" "^1.1.3"
     "@phosphor/algorithm" "^1.1.2"
     "@phosphor/application" "^1.5.0"
     "@phosphor/commands" "^1.4.0"
@@ -31,26 +31,26 @@
     "@phosphor/signaling" "^1.2.2"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/apputils-extension@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/apputils-extension/-/apputils-extension-0.15.2.tgz#5f26b8a9232a6bb5ced7abe1b7437706127cecb5"
+"@jupyterlab/apputils-extension@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/apputils-extension/-/apputils-extension-0.15.3.tgz#871c39983af1659e7af4b829d79f02f3917886e5"
   dependencies:
-    "@jupyterlab/application" "^0.15.2"
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/mainmenu" "^0.4.2"
-    "@jupyterlab/services" "^1.1.2"
+    "@jupyterlab/application" "^0.15.3"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/mainmenu" "^0.4.3"
+    "@jupyterlab/services" "^1.1.3"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/disposable" "^1.1.2"
     "@phosphor/widgets" "^1.5.0"
     es6-promise "~4.1.1"
 
-"@jupyterlab/apputils@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/apputils/-/apputils-0.15.2.tgz#ac2c27d704c864e151c288fb4da2dcfa479c8860"
+"@jupyterlab/apputils@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/apputils/-/apputils-0.15.3.tgz#2ab0227975a0031549ee232cd4d0dd70d2b1321b"
   dependencies:
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/services" "^1.1.2"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/services" "^1.1.3"
     "@phosphor/algorithm" "^1.1.2"
     "@phosphor/commands" "^1.4.0"
     "@phosphor/coreutils" "^1.3.0"
@@ -66,9 +66,9 @@
     react-dom "~16.0.0"
     sanitize-html "~1.14.3"
 
-"@jupyterlab/buildutils@^0.6.2":
-  version "0.6.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/buildutils/-/buildutils-0.6.2.tgz#213bbc5ae306ebfe7e5532a9f95fbec1c59c1021"
+"@jupyterlab/buildutils@^0.6.3":
+  version "0.6.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/buildutils/-/buildutils-0.6.3.tgz#a3699a7927178637002372301209b23454a34ead"
   dependencies:
     child_process "~1.0.2"
     fs-extra "~4.0.2"
@@ -78,30 +78,30 @@
     sort-package-json "~1.7.1"
     typescript "~2.6.2"
 
-"@jupyterlab/cells@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/cells/-/cells-0.15.2.tgz#c641edb129ad7f9267bf104b1cfb508c4cec63f7"
+"@jupyterlab/cells@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/cells/-/cells-0.15.3.tgz#ca22dbf83a8bd7df5f5f125c92148fc3d7bb3729"
   dependencies:
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/codeeditor" "^0.15.2"
-    "@jupyterlab/codemirror" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/observables" "^1.0.4"
-    "@jupyterlab/outputarea" "^0.15.2"
-    "@jupyterlab/rendermime" "^0.15.2"
-    "@jupyterlab/services" "^1.1.2"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/codeeditor" "^0.15.3"
+    "@jupyterlab/codemirror" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/observables" "^1.0.5"
+    "@jupyterlab/outputarea" "^0.15.3"
+    "@jupyterlab/rendermime" "^0.15.3"
+    "@jupyterlab/services" "^1.1.3"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/messaging" "^1.2.2"
     "@phosphor/signaling" "^1.2.2"
     "@phosphor/widgets" "^1.5.0"
     react "~16.0.0"
 
-"@jupyterlab/codeeditor@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/codeeditor/-/codeeditor-0.15.2.tgz#a7a33b6fa181964df05718d7b1e6e9f3e1000d1f"
+"@jupyterlab/codeeditor@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/codeeditor/-/codeeditor-0.15.3.tgz#bda5356fa0385d3d49d5e1ecfaef60b6a5a25bea"
   dependencies:
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/observables" "^1.0.4"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/observables" "^1.0.5"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/disposable" "^1.1.2"
     "@phosphor/messaging" "^1.2.2"
@@ -109,51 +109,51 @@
     "@phosphor/virtualdom" "^1.1.2"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/codemirror-extension@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/codemirror-extension/-/codemirror-extension-0.15.2.tgz#6b7f75b0526b1924f7e6c4b8ca5eb5f49c8085a9"
+"@jupyterlab/codemirror-extension@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/codemirror-extension/-/codemirror-extension-0.15.3.tgz#ed9b8e04a9aac37cdc96325942c2ad3d22305039"
   dependencies:
-    "@jupyterlab/application" "^0.15.2"
-    "@jupyterlab/codeeditor" "^0.15.2"
-    "@jupyterlab/codemirror" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/fileeditor" "^0.15.2"
-    "@jupyterlab/mainmenu" "^0.4.2"
+    "@jupyterlab/application" "^0.15.3"
+    "@jupyterlab/codeeditor" "^0.15.3"
+    "@jupyterlab/codemirror" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/fileeditor" "^0.15.3"
+    "@jupyterlab/mainmenu" "^0.4.3"
     "@phosphor/widgets" "^1.5.0"
     codemirror "~5.24.2"
 
-"@jupyterlab/codemirror@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/codemirror/-/codemirror-0.15.2.tgz#7749429e3d46358f620064991d623e040f33fdfc"
+"@jupyterlab/codemirror@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/codemirror/-/codemirror-0.15.3.tgz#b5db922ac3d30b7307a7811821199ab4c6d536b3"
   dependencies:
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/codeeditor" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/observables" "^1.0.4"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/codeeditor" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/observables" "^1.0.5"
     "@phosphor/algorithm" "^1.1.2"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/disposable" "^1.1.2"
     "@phosphor/signaling" "^1.2.2"
     codemirror "~5.24.2"
 
-"@jupyterlab/completer-extension@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/completer-extension/-/completer-extension-0.15.2.tgz#a6469c2ab77998dd9b38ad0270daa6af956d599f"
+"@jupyterlab/completer-extension@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/completer-extension/-/completer-extension-0.15.3.tgz#871d083eba2b1cb78f4a741c489d870e1381ec41"
   dependencies:
-    "@jupyterlab/application" "^0.15.2"
-    "@jupyterlab/completer" "^0.15.2"
-    "@jupyterlab/console" "^0.15.2"
-    "@jupyterlab/notebook" "^0.15.2"
+    "@jupyterlab/application" "^0.15.3"
+    "@jupyterlab/completer" "^0.15.3"
+    "@jupyterlab/console" "^0.15.3"
+    "@jupyterlab/notebook" "^0.15.3"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/completer@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/completer/-/completer-0.15.2.tgz#111772c813b4c2ac7e0d6ec4ebfffb30e7fc5f26"
+"@jupyterlab/completer@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/completer/-/completer-0.15.3.tgz#8c1b1b6c1c7e3d6b98a5eb3157c8c0282f8dc6f6"
   dependencies:
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/codeeditor" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/services" "^1.1.2"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/codeeditor" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/services" "^1.1.3"
     "@phosphor/algorithm" "^1.1.2"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/disposable" "^1.1.2"
@@ -162,34 +162,34 @@
     "@phosphor/signaling" "^1.2.2"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/console-extension@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/console-extension/-/console-extension-0.15.2.tgz#56df5779056f259b6ff80a393e8bbdf3ed3fa50a"
+"@jupyterlab/console-extension@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/console-extension/-/console-extension-0.15.3.tgz#7b03ce9714c24eb71f3311185160db6502dd4bb5"
   dependencies:
-    "@jupyterlab/application" "^0.15.2"
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/codeeditor" "^0.15.2"
-    "@jupyterlab/console" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/filebrowser" "^0.15.2"
-    "@jupyterlab/launcher" "^0.15.2"
-    "@jupyterlab/mainmenu" "^0.4.2"
-    "@jupyterlab/rendermime" "^0.15.2"
+    "@jupyterlab/application" "^0.15.3"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/codeeditor" "^0.15.3"
+    "@jupyterlab/console" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/filebrowser" "^0.15.3"
+    "@jupyterlab/launcher" "^0.15.3"
+    "@jupyterlab/mainmenu" "^0.4.3"
+    "@jupyterlab/rendermime" "^0.15.3"
     "@phosphor/algorithm" "^1.1.2"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/console@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/console/-/console-0.15.2.tgz#d736ee8d16aafebabb33edfbe57ca91d31ffcc7e"
+"@jupyterlab/console@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/console/-/console-0.15.3.tgz#1131569e38a1c3f59816e2bf2d681089a4a109f9"
   dependencies:
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/cells" "^0.15.2"
-    "@jupyterlab/codeeditor" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/observables" "^1.0.4"
-    "@jupyterlab/rendermime" "^0.15.2"
-    "@jupyterlab/services" "^1.1.2"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/cells" "^0.15.3"
+    "@jupyterlab/codeeditor" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/observables" "^1.0.5"
+    "@jupyterlab/rendermime" "^0.15.3"
+    "@jupyterlab/services" "^1.1.3"
     "@phosphor/algorithm" "^1.1.2"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/disposable" "^1.1.2"
@@ -197,9 +197,9 @@
     "@phosphor/signaling" "^1.2.2"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/coreutils@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.npmjs.org/@jupyterlab/coreutils/-/coreutils-1.0.4.tgz#242e198958b984fdcf319edfea932cefb34b9616"
+"@jupyterlab/coreutils@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.npmjs.org/@jupyterlab/coreutils/-/coreutils-1.0.5.tgz#2f556cbe7ee92d0b8c4320daf4173568c4832654"
   dependencies:
     "@phosphor/algorithm" "^1.1.2"
     "@phosphor/coreutils" "^1.3.0"
@@ -212,21 +212,21 @@
     path-posix "~1.0.0"
     url-parse "~1.1.9"
 
-"@jupyterlab/csvviewer-extension@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/csvviewer-extension/-/csvviewer-extension-0.15.2.tgz#975719151d4153638ce7df7bd25f2af06e7cfe4c"
+"@jupyterlab/csvviewer-extension@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/csvviewer-extension/-/csvviewer-extension-0.15.3.tgz#bdd809664558550d202a918be8c46ae99a142eeb"
   dependencies:
-    "@jupyterlab/application" "^0.15.2"
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/csvviewer" "^0.15.2"
+    "@jupyterlab/application" "^0.15.3"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/csvviewer" "^0.15.3"
 
-"@jupyterlab/csvviewer@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/csvviewer/-/csvviewer-0.15.2.tgz#11ef3825a0f832b58225ea5a56980f6e367d6f1e"
+"@jupyterlab/csvviewer@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/csvviewer/-/csvviewer-0.15.3.tgz#acdf797ae373c949c82709fb61714518da2f11ec"
   dependencies:
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/docregistry" "^0.15.2"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/docregistry" "^0.15.3"
     "@phosphor/algorithm" "^1.1.2"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/datagrid" "^0.1.5"
@@ -235,26 +235,27 @@
     "@phosphor/widgets" "^1.5.0"
     d3-dsv "~1.0.7"
 
-"@jupyterlab/docmanager-extension@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/docmanager-extension/-/docmanager-extension-0.15.2.tgz#d49c152f9d2e775a8be7d57eb9f7019967d8b88d"
+"@jupyterlab/docmanager-extension@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/docmanager-extension/-/docmanager-extension-0.15.3.tgz#a6223a0ca2890e36ddf365baf86d774153af204e"
   dependencies:
-    "@jupyterlab/application" "^0.15.2"
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/docmanager" "^0.15.2"
-    "@jupyterlab/docregistry" "^0.15.2"
-    "@jupyterlab/services" "^1.1.2"
+    "@jupyterlab/application" "^0.15.3"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/docmanager" "^0.15.3"
+    "@jupyterlab/docregistry" "^0.15.3"
+    "@jupyterlab/mainmenu" "^0.4.3"
+    "@jupyterlab/services" "^1.1.3"
     "@phosphor/disposable" "^1.1.2"
 
-"@jupyterlab/docmanager@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/docmanager/-/docmanager-0.15.2.tgz#b49353fbd849a49627763f1a9709ccf73d4b87d5"
+"@jupyterlab/docmanager@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/docmanager/-/docmanager-0.15.3.tgz#eafe6d50fdb78b8659d9aa1aadaef9de86b22cba"
   dependencies:
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/docregistry" "^0.15.2"
-    "@jupyterlab/services" "^1.1.2"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/docregistry" "^0.15.3"
+    "@jupyterlab/services" "^1.1.3"
     "@phosphor/algorithm" "^1.1.2"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/disposable" "^1.1.2"
@@ -263,18 +264,18 @@
     "@phosphor/signaling" "^1.2.2"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/docregistry@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/docregistry/-/docregistry-0.15.2.tgz#7590999456870e8867dad1a525815dce9efce8fb"
+"@jupyterlab/docregistry@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/docregistry/-/docregistry-0.15.3.tgz#abe0c728d8a857e19c424f59681ee9003f0f32a4"
   dependencies:
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/codeeditor" "^0.15.2"
-    "@jupyterlab/codemirror" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/observables" "^1.0.4"
-    "@jupyterlab/rendermime" "^0.15.2"
-    "@jupyterlab/rendermime-interfaces" "^1.0.4"
-    "@jupyterlab/services" "^1.1.2"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/codeeditor" "^0.15.3"
+    "@jupyterlab/codemirror" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/observables" "^1.0.5"
+    "@jupyterlab/rendermime" "^0.15.3"
+    "@jupyterlab/rendermime-interfaces" "^1.0.5"
+    "@jupyterlab/services" "^1.1.3"
     "@phosphor/algorithm" "^1.1.2"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/disposable" "^1.1.2"
@@ -282,42 +283,42 @@
     "@phosphor/signaling" "^1.2.2"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/faq-extension@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/faq-extension/-/faq-extension-0.15.2.tgz#cbd70461ae518c100df74557b356991f1530ca84"
+"@jupyterlab/faq-extension@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/faq-extension/-/faq-extension-0.15.3.tgz#710a09b44b0422f8e60fc76ded526863cce16ffd"
   dependencies:
-    "@jupyterlab/application" "^0.15.2"
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/rendermime" "^0.15.2"
+    "@jupyterlab/application" "^0.15.3"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/rendermime" "^0.15.3"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/messaging" "^1.2.2"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/filebrowser-extension@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/filebrowser-extension/-/filebrowser-extension-0.15.2.tgz#9e6a2b3dc7b69189302a78d0475e715b453794a1"
+"@jupyterlab/filebrowser-extension@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/filebrowser-extension/-/filebrowser-extension-0.15.3.tgz#b9426a5ad019e978b713083361cec0e7efde737b"
   dependencies:
-    "@jupyterlab/application" "^0.15.2"
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/docmanager" "^0.15.2"
-    "@jupyterlab/docregistry" "^0.15.2"
-    "@jupyterlab/filebrowser" "^0.15.2"
-    "@jupyterlab/launcher" "^0.15.2"
-    "@jupyterlab/services" "^1.1.2"
+    "@jupyterlab/application" "^0.15.3"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/docmanager" "^0.15.3"
+    "@jupyterlab/docregistry" "^0.15.3"
+    "@jupyterlab/filebrowser" "^0.15.3"
+    "@jupyterlab/launcher" "^0.15.3"
+    "@jupyterlab/services" "^1.1.3"
     "@phosphor/algorithm" "^1.1.2"
     "@phosphor/commands" "^1.4.0"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/filebrowser@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/filebrowser/-/filebrowser-0.15.2.tgz#d0666e47d9e304065f3c88be0bdb5c59d34c0e3a"
+"@jupyterlab/filebrowser@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/filebrowser/-/filebrowser-0.15.3.tgz#e38181df1b054b8e66979be57c4754cb5aa1baf8"
   dependencies:
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/docmanager" "^0.15.2"
-    "@jupyterlab/docregistry" "^0.15.2"
-    "@jupyterlab/services" "^1.1.2"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/docmanager" "^0.15.3"
+    "@jupyterlab/docregistry" "^0.15.3"
+    "@jupyterlab/services" "^1.1.3"
     "@phosphor/algorithm" "^1.1.2"
     "@phosphor/commands" "^1.4.0"
     "@phosphor/coreutils" "^1.3.0"
@@ -328,97 +329,97 @@
     "@phosphor/signaling" "^1.2.2"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/fileeditor-extension@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/fileeditor-extension/-/fileeditor-extension-0.15.2.tgz#e66a98073d0c587b9e9b231cdcf8d7f5068a9b57"
+"@jupyterlab/fileeditor-extension@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/fileeditor-extension/-/fileeditor-extension-0.15.3.tgz#3c7cb421ba75089f206faf7f9fa1df561dafe604"
   dependencies:
-    "@jupyterlab/application" "^0.15.2"
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/codeeditor" "^0.15.2"
-    "@jupyterlab/console" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/filebrowser" "^0.15.2"
-    "@jupyterlab/fileeditor" "^0.15.2"
-    "@jupyterlab/launcher" "^0.15.2"
-    "@jupyterlab/mainmenu" "^0.4.2"
+    "@jupyterlab/application" "^0.15.3"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/codeeditor" "^0.15.3"
+    "@jupyterlab/console" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/filebrowser" "^0.15.3"
+    "@jupyterlab/fileeditor" "^0.15.3"
+    "@jupyterlab/launcher" "^0.15.3"
+    "@jupyterlab/mainmenu" "^0.4.3"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/fileeditor@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/fileeditor/-/fileeditor-0.15.2.tgz#128acc31474754b1d97acd7a3b83469de8e2ab61"
+"@jupyterlab/fileeditor@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/fileeditor/-/fileeditor-0.15.3.tgz#3a89ca773f44a38b301901b6b334048832362c41"
   dependencies:
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/codeeditor" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/docregistry" "^0.15.2"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/codeeditor" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/docregistry" "^0.15.3"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/messaging" "^1.2.2"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/help-extension@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/help-extension/-/help-extension-0.15.2.tgz#f04011da01c15a40640dc02bd6f5b295a4f508a6"
+"@jupyterlab/help-extension@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/help-extension/-/help-extension-0.15.3.tgz#eaec019820ffd076238fb547f4cdab74178cb9e4"
   dependencies:
-    "@jupyterlab/application" "^0.15.2"
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/mainmenu" "^0.4.2"
-    "@jupyterlab/services" "^1.1.2"
+    "@jupyterlab/application" "^0.15.3"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/mainmenu" "^0.4.3"
+    "@jupyterlab/services" "^1.1.3"
     "@phosphor/messaging" "^1.2.2"
     "@phosphor/virtualdom" "^1.1.2"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/imageviewer-extension@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/imageviewer-extension/-/imageviewer-extension-0.15.2.tgz#d4390f55d97b352aedcd1d5e5f045de240e4d55f"
+"@jupyterlab/imageviewer-extension@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/imageviewer-extension/-/imageviewer-extension-0.15.3.tgz#0514cbc124a1df9ecf7a9ebded76a2c69e35d1ea"
   dependencies:
-    "@jupyterlab/application" "^0.15.2"
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/imageviewer" "^0.15.2"
+    "@jupyterlab/application" "^0.15.3"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/imageviewer" "^0.15.3"
 
-"@jupyterlab/imageviewer@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/imageviewer/-/imageviewer-0.15.2.tgz#499e3a89b0f666900335c25eb7f0d1ce3a6055d0"
+"@jupyterlab/imageviewer@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/imageviewer/-/imageviewer-0.15.3.tgz#f743b0f03232c096c56224ef4c3883830d8a085f"
   dependencies:
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/docregistry" "^0.15.2"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/docregistry" "^0.15.3"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/messaging" "^1.2.2"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/inspector-extension@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/inspector-extension/-/inspector-extension-0.15.2.tgz#6ac076b9d89c1d0ef0c8eed96e20fbcc261ceb2e"
+"@jupyterlab/inspector-extension@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/inspector-extension/-/inspector-extension-0.15.3.tgz#5ae1a0e8dd7804d64f598771c90dd3919da54250"
   dependencies:
-    "@jupyterlab/application" "^0.15.2"
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/console" "^0.15.2"
-    "@jupyterlab/inspector" "^0.15.2"
-    "@jupyterlab/notebook" "^0.15.2"
+    "@jupyterlab/application" "^0.15.3"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/console" "^0.15.3"
+    "@jupyterlab/inspector" "^0.15.3"
+    "@jupyterlab/notebook" "^0.15.3"
     "@phosphor/disposable" "^1.1.2"
 
-"@jupyterlab/inspector@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/inspector/-/inspector-0.15.2.tgz#44fbb04b2af00d334a4f0cefe1c91ee1104ef420"
+"@jupyterlab/inspector@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/inspector/-/inspector-0.15.3.tgz#9d5dcbc68c0a342f3f7deac1786589cdcd9083e3"
   dependencies:
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/codeeditor" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/rendermime" "^0.15.2"
-    "@jupyterlab/services" "^1.1.2"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/codeeditor" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/rendermime" "^0.15.3"
+    "@jupyterlab/services" "^1.1.3"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/disposable" "^1.1.2"
     "@phosphor/messaging" "^1.2.2"
     "@phosphor/signaling" "^1.2.2"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/json-extension@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/json-extension/-/json-extension-0.15.2.tgz#94b3aa130ff0c3ce21bc3ba95fa604f158fe0f9a"
+"@jupyterlab/json-extension@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/json-extension/-/json-extension-0.15.3.tgz#fc49961c99a65784a9aabd84e4ca02d59b0f3a37"
   dependencies:
-    "@jupyterlab/rendermime-interfaces" "^1.0.4"
+    "@jupyterlab/rendermime-interfaces" "^1.0.5"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/widgets" "^1.5.0"
     react "~16.0.0"
@@ -426,22 +427,22 @@
     react-highlighter "^0.4.0"
     react-json-tree "^0.10.9"
 
-"@jupyterlab/launcher-extension@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/launcher-extension/-/launcher-extension-0.15.2.tgz#d1219da85dcb0a54d75894efe1c6b5f2b86bb93d"
+"@jupyterlab/launcher-extension@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/launcher-extension/-/launcher-extension-0.15.3.tgz#6f25a09447f6476d5b46f7755ca417f0bfcd4de6"
   dependencies:
-    "@jupyterlab/application" "^0.15.2"
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/launcher" "^0.15.2"
+    "@jupyterlab/application" "^0.15.3"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/launcher" "^0.15.3"
     "@phosphor/algorithm" "^1.1.2"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/launcher@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/launcher/-/launcher-0.15.2.tgz#cff5af362e4b69873189f9aedc342f0135542600"
+"@jupyterlab/launcher@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/launcher/-/launcher-0.15.3.tgz#028dab28a68517584321516f8a47bef2aa2a5b23"
   dependencies:
-    "@jupyterlab/apputils" "^0.15.2"
+    "@jupyterlab/apputils" "^0.15.3"
     "@phosphor/algorithm" "^1.1.2"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/disposable" "^1.1.2"
@@ -450,78 +451,78 @@
     "@phosphor/widgets" "^1.5.0"
     react "~16.0.0"
 
-"@jupyterlab/mainmenu-extension@^0.4.2":
-  version "0.4.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/mainmenu-extension/-/mainmenu-extension-0.4.2.tgz#1cf4585e37afdd1ac5e8792360f1af1aa7c45f85"
+"@jupyterlab/mainmenu-extension@^0.4.3":
+  version "0.4.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/mainmenu-extension/-/mainmenu-extension-0.4.3.tgz#41a249e0801eb701cd33eefcb03bee18f46b57a4"
   dependencies:
-    "@jupyterlab/application" "^0.15.2"
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/mainmenu" "^0.4.2"
+    "@jupyterlab/application" "^0.15.3"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/mainmenu" "^0.4.3"
     "@phosphor/algorithm" "^1.1.2"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/mainmenu@^0.4.2":
-  version "0.4.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/mainmenu/-/mainmenu-0.4.2.tgz#7accc73109774a584ef0f54336bf38f1113ff5aa"
+"@jupyterlab/mainmenu@^0.4.3":
+  version "0.4.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/mainmenu/-/mainmenu-0.4.3.tgz#db3ecd9580cac52cb054a860112604da8b4d946e"
   dependencies:
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/services" "^1.1.2"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/services" "^1.1.3"
     "@phosphor/algorithm" "^1.1.2"
     "@phosphor/commands" "^1.4.0"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/disposable" "^1.1.2"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/markdownviewer-extension@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/markdownviewer-extension/-/markdownviewer-extension-0.15.2.tgz#79dcd40013639804f1bbd7133ddaab8fee601e3c"
+"@jupyterlab/markdownviewer-extension@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/markdownviewer-extension/-/markdownviewer-extension-0.15.3.tgz#c57841b939b9275e68da5b45fea2fc09316db321"
   dependencies:
-    "@jupyterlab/application" "^0.15.2"
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/docregistry" "^0.15.2"
-    "@jupyterlab/rendermime" "^0.15.2"
+    "@jupyterlab/application" "^0.15.3"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/docregistry" "^0.15.3"
+    "@jupyterlab/rendermime" "^0.15.3"
 
-"@jupyterlab/mathjax2-extension@^0.3.2":
-  version "0.3.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/mathjax2-extension/-/mathjax2-extension-0.3.2.tgz#0cd96e79fa5f3f676b74ee95606c302e60e85772"
+"@jupyterlab/mathjax2-extension@^0.3.3":
+  version "0.3.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/mathjax2-extension/-/mathjax2-extension-0.3.3.tgz#1dad7c1cba7e7661ed8526e806ee57671513590d"
   dependencies:
-    "@jupyterlab/application" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/rendermime" "^0.15.2"
-    "@jupyterlab/rendermime-interfaces" "^1.0.4"
+    "@jupyterlab/application" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/rendermime" "^0.15.3"
+    "@jupyterlab/rendermime-interfaces" "^1.0.5"
     "@phosphor/coreutils" "^1.3.0"
 
-"@jupyterlab/notebook-extension@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/notebook-extension/-/notebook-extension-0.15.2.tgz#83b5969a45827a18a4f2656838cda9434f6c4380"
+"@jupyterlab/notebook-extension@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/notebook-extension/-/notebook-extension-0.15.3.tgz#143955321b0871512f8ffa6f1abb37c958f4d49a"
   dependencies:
-    "@jupyterlab/application" "^0.15.2"
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/cells" "^0.15.2"
-    "@jupyterlab/codeeditor" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/filebrowser" "^0.15.2"
-    "@jupyterlab/launcher" "^0.15.2"
-    "@jupyterlab/mainmenu" "^0.4.2"
-    "@jupyterlab/notebook" "^0.15.2"
-    "@jupyterlab/rendermime" "^0.15.2"
-    "@jupyterlab/services" "^1.1.2"
+    "@jupyterlab/application" "^0.15.3"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/cells" "^0.15.3"
+    "@jupyterlab/codeeditor" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/filebrowser" "^0.15.3"
+    "@jupyterlab/launcher" "^0.15.3"
+    "@jupyterlab/mainmenu" "^0.4.3"
+    "@jupyterlab/notebook" "^0.15.3"
+    "@jupyterlab/rendermime" "^0.15.3"
+    "@jupyterlab/services" "^1.1.3"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/messaging" "^1.2.2"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/notebook@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/notebook/-/notebook-0.15.2.tgz#e539d75e47ea18cf0651966f46c5fe2f1f5f75dc"
+"@jupyterlab/notebook@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/notebook/-/notebook-0.15.3.tgz#8b06cd1f7503ce8b552bf03d3b13f6502cb5e1cb"
   dependencies:
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/cells" "^0.15.2"
-    "@jupyterlab/codeeditor" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/docregistry" "^0.15.2"
-    "@jupyterlab/observables" "^1.0.4"
-    "@jupyterlab/rendermime" "^0.15.2"
-    "@jupyterlab/services" "^1.1.2"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/cells" "^0.15.3"
+    "@jupyterlab/codeeditor" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/docregistry" "^0.15.3"
+    "@jupyterlab/observables" "^1.0.5"
+    "@jupyterlab/rendermime" "^0.15.3"
+    "@jupyterlab/services" "^1.1.3"
     "@phosphor/algorithm" "^1.1.2"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/domutils" "^1.1.2"
@@ -532,9 +533,9 @@
     "@phosphor/virtualdom" "^1.1.2"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/observables@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.npmjs.org/@jupyterlab/observables/-/observables-1.0.4.tgz#7c46b52a6a3c1440478e12e6fc6e464cc0f21cbf"
+"@jupyterlab/observables@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.npmjs.org/@jupyterlab/observables/-/observables-1.0.5.tgz#b8fb8fd0d19f979a53118363573554d573f3849c"
   dependencies:
     "@phosphor/algorithm" "^1.1.2"
     "@phosphor/coreutils" "^1.3.0"
@@ -542,16 +543,16 @@
     "@phosphor/messaging" "^1.2.2"
     "@phosphor/signaling" "^1.2.2"
 
-"@jupyterlab/outputarea@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/outputarea/-/outputarea-0.15.2.tgz#9203469248890af5e68d6d1b0f9a55b73aa15abd"
+"@jupyterlab/outputarea@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/outputarea/-/outputarea-0.15.3.tgz#facc110dd59cd1cbebf9a6438403f6d838b071f5"
   dependencies:
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/observables" "^1.0.4"
-    "@jupyterlab/rendermime" "^0.15.2"
-    "@jupyterlab/rendermime-interfaces" "^1.0.4"
-    "@jupyterlab/services" "^1.1.2"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/observables" "^1.0.5"
+    "@jupyterlab/rendermime" "^0.15.3"
+    "@jupyterlab/rendermime-interfaces" "^1.0.5"
+    "@jupyterlab/services" "^1.1.3"
     "@phosphor/algorithm" "^1.1.2"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/disposable" "^1.1.2"
@@ -559,37 +560,37 @@
     "@phosphor/signaling" "^1.2.2"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/pdf-extension@^0.7.2":
-  version "0.7.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/pdf-extension/-/pdf-extension-0.7.2.tgz#21a29fbccf383e5cb7c27647945cca1a05008ae9"
+"@jupyterlab/pdf-extension@^0.7.3":
+  version "0.7.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/pdf-extension/-/pdf-extension-0.7.3.tgz#cc510dd4a4a05fdc105488683c4dab52f0240f74"
   dependencies:
-    "@jupyterlab/rendermime-interfaces" "^1.0.4"
+    "@jupyterlab/rendermime-interfaces" "^1.0.5"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/rendermime-extension@^0.9.2":
-  version "0.9.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/rendermime-extension/-/rendermime-extension-0.9.2.tgz#c63d6bf59efc365bccd42075feb136bb6fdc28c1"
+"@jupyterlab/rendermime-extension@^0.9.3":
+  version "0.9.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/rendermime-extension/-/rendermime-extension-0.9.3.tgz#993398025930ee539e35930b7cc8a74b4969c5cd"
   dependencies:
-    "@jupyterlab/application" "^0.15.2"
-    "@jupyterlab/rendermime" "^0.15.2"
+    "@jupyterlab/application" "^0.15.3"
+    "@jupyterlab/rendermime" "^0.15.3"
 
-"@jupyterlab/rendermime-interfaces@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.npmjs.org/@jupyterlab/rendermime-interfaces/-/rendermime-interfaces-1.0.4.tgz#98dddd8a103b12c146934dac242db60811b7c3a7"
+"@jupyterlab/rendermime-interfaces@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.npmjs.org/@jupyterlab/rendermime-interfaces/-/rendermime-interfaces-1.0.5.tgz#bf4d2b672561a19c71209b4d566f884fc79a803f"
   dependencies:
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/rendermime@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/rendermime/-/rendermime-0.15.2.tgz#af438810191317c49ddfde9ed456013515e719ff"
+"@jupyterlab/rendermime@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/rendermime/-/rendermime-0.15.3.tgz#ad9c81f586f492139a53919abe8066763c9e9f00"
   dependencies:
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/codemirror" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/observables" "^1.0.4"
-    "@jupyterlab/rendermime-interfaces" "^1.0.4"
-    "@jupyterlab/services" "^1.1.2"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/codemirror" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/observables" "^1.0.5"
+    "@jupyterlab/rendermime-interfaces" "^1.0.5"
+    "@jupyterlab/services" "^1.1.3"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/messaging" "^1.2.2"
     "@phosphor/signaling" "^1.2.2"
@@ -597,31 +598,31 @@
     ansi_up "~1.3.0"
     marked "~0.3.9"
 
-"@jupyterlab/running-extension@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/running-extension/-/running-extension-0.15.2.tgz#06cec8c9a9e726138643fefdbb1746d700725866"
+"@jupyterlab/running-extension@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/running-extension/-/running-extension-0.15.3.tgz#a4c56914657b9312091121cb2fac9c8fb46083de"
   dependencies:
-    "@jupyterlab/application" "^0.15.2"
-    "@jupyterlab/running" "^0.15.2"
+    "@jupyterlab/application" "^0.15.3"
+    "@jupyterlab/running" "^0.15.3"
 
-"@jupyterlab/running@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/running/-/running-0.15.2.tgz#2494d17e20d620d2f86a16fca83809e2b0bba121"
+"@jupyterlab/running@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/running/-/running-0.15.3.tgz#8b12f1d14357d0f4b9e9fcb0ef01f42a1dc2289d"
   dependencies:
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/services" "^1.1.2"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/services" "^1.1.3"
     "@phosphor/domutils" "^1.1.2"
     "@phosphor/messaging" "^1.2.2"
     "@phosphor/signaling" "^1.2.2"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/services@^1.1.2":
-  version "1.1.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/services/-/services-1.1.2.tgz#36af71b26a43a225b29fd03e8ced57d9598d7415"
+"@jupyterlab/services@^1.1.3":
+  version "1.1.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/services/-/services-1.1.3.tgz#ff3f0574f83a27ee5147f10ec4ab13e91d6987d9"
   dependencies:
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/observables" "^1.0.4"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/observables" "^1.0.5"
     "@phosphor/algorithm" "^1.1.2"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/disposable" "^1.1.2"
@@ -629,26 +630,26 @@
     node-fetch "~1.7.3"
     ws "~1.1.4"
 
-"@jupyterlab/settingeditor-extension@^0.10.2":
-  version "0.10.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/settingeditor-extension/-/settingeditor-extension-0.10.2.tgz#0c6eca697ff8f60d9de46aa5adaa12fd060fd927"
+"@jupyterlab/settingeditor-extension@^0.10.3":
+  version "0.10.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/settingeditor-extension/-/settingeditor-extension-0.10.3.tgz#bb4300e43ce2b3e962a04f32732c5c561028c2ee"
   dependencies:
-    "@jupyterlab/application" "^0.15.2"
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/codeeditor" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/rendermime" "^0.15.2"
-    "@jupyterlab/settingeditor" "^0.4.2"
+    "@jupyterlab/application" "^0.15.3"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/codeeditor" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/rendermime" "^0.15.3"
+    "@jupyterlab/settingeditor" "^0.4.3"
 
-"@jupyterlab/settingeditor@^0.4.2":
-  version "0.4.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/settingeditor/-/settingeditor-0.4.2.tgz#ddc959408889963c378b39f832e2d6d056af54d5"
+"@jupyterlab/settingeditor@^0.4.3":
+  version "0.4.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/settingeditor/-/settingeditor-0.4.3.tgz#5f80e35e16ba090e96ca3df1fceba892210920dc"
   dependencies:
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/codeeditor" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/inspector" "^0.15.2"
-    "@jupyterlab/rendermime" "^0.15.2"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/codeeditor" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/inspector" "^0.15.3"
+    "@jupyterlab/rendermime" "^0.15.3"
     "@phosphor/commands" "^1.4.0"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/messaging" "^1.2.2"
@@ -656,104 +657,104 @@
     "@phosphor/virtualdom" "^1.1.2"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/shortcuts-extension@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/shortcuts-extension/-/shortcuts-extension-0.15.2.tgz#2dd18718340b88cdf587cfc3faaa026f4f5f1874"
+"@jupyterlab/shortcuts-extension@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/shortcuts-extension/-/shortcuts-extension-0.15.3.tgz#9defc6c21bf7d7bfa64f325a4d19d195a6da175d"
   dependencies:
-    "@jupyterlab/application" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
+    "@jupyterlab/application" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
     "@phosphor/commands" "^1.4.0"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/disposable" "^1.1.2"
 
-"@jupyterlab/tabmanager-extension@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/tabmanager-extension/-/tabmanager-extension-0.15.2.tgz#9d8e9fbff177de36367612172c30b73b538e7259"
+"@jupyterlab/tabmanager-extension@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/tabmanager-extension/-/tabmanager-extension-0.15.3.tgz#1b4038450338e8d1e2b258232fac2bd3d955648d"
   dependencies:
-    "@jupyterlab/application" "^0.15.2"
+    "@jupyterlab/application" "^0.15.3"
     "@phosphor/algorithm" "^1.1.2"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/terminal-extension@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/terminal-extension/-/terminal-extension-0.15.2.tgz#014ecd2f857cc72c7d212ac9a290a697f8616b3a"
+"@jupyterlab/terminal-extension@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/terminal-extension/-/terminal-extension-0.15.3.tgz#d562e4614a0326f49d2d7fc755e0b43c4b0f0350"
   dependencies:
-    "@jupyterlab/application" "^0.15.2"
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/launcher" "^0.15.2"
-    "@jupyterlab/mainmenu" "^0.4.2"
-    "@jupyterlab/services" "^1.1.2"
-    "@jupyterlab/terminal" "^0.15.2"
+    "@jupyterlab/application" "^0.15.3"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/launcher" "^0.15.3"
+    "@jupyterlab/mainmenu" "^0.4.3"
+    "@jupyterlab/services" "^1.1.3"
+    "@jupyterlab/terminal" "^0.15.3"
 
-"@jupyterlab/terminal@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/terminal/-/terminal-0.15.2.tgz#ca753352cea29ce9d38bf0d49077082d68fa7bc0"
+"@jupyterlab/terminal@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/terminal/-/terminal-0.15.3.tgz#c3a8b6ed7ac0ea6b53c27111d132f03ee7dd6e6b"
   dependencies:
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/services" "^1.1.2"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/services" "^1.1.3"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/domutils" "^1.1.2"
     "@phosphor/messaging" "^1.2.2"
     "@phosphor/widgets" "^1.5.0"
     xterm "~2.8.1"
 
-"@jupyterlab/theme-dark-extension@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/theme-dark-extension/-/theme-dark-extension-0.15.2.tgz#cf864cb51e0d6a2214ded2ce96f1aca2d2ef0dce"
+"@jupyterlab/theme-dark-extension@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/theme-dark-extension/-/theme-dark-extension-0.15.3.tgz#1250ce676075386ef71e69fd78babef81f4788ae"
   dependencies:
-    "@jupyterlab/application" "^0.15.2"
-    "@jupyterlab/apputils" "^0.15.2"
+    "@jupyterlab/application" "^0.15.3"
+    "@jupyterlab/apputils" "^0.15.3"
     font-awesome "~4.7.0"
 
-"@jupyterlab/theme-light-extension@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/theme-light-extension/-/theme-light-extension-0.15.2.tgz#3bebaaad8fd373d6a16e4cc5570f9102d1c8418f"
+"@jupyterlab/theme-light-extension@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/theme-light-extension/-/theme-light-extension-0.15.3.tgz#328c7c8940beaa658efd20c3eeeaf0e2bd7ce7ac"
   dependencies:
-    "@jupyterlab/application" "^0.15.2"
-    "@jupyterlab/apputils" "^0.15.2"
+    "@jupyterlab/application" "^0.15.3"
+    "@jupyterlab/apputils" "^0.15.3"
     font-awesome "~4.7.0"
 
-"@jupyterlab/tooltip-extension@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/tooltip-extension/-/tooltip-extension-0.15.2.tgz#6a6b68e3e5bb2f692b6caec840724f22dca4d0a8"
+"@jupyterlab/tooltip-extension@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/tooltip-extension/-/tooltip-extension-0.15.3.tgz#993b0daaf4c0fe47fb575b29250e9ac235af2e5b"
   dependencies:
-    "@jupyterlab/application" "^0.15.2"
-    "@jupyterlab/codeeditor" "^0.15.2"
-    "@jupyterlab/console" "^0.15.2"
-    "@jupyterlab/coreutils" "^1.0.4"
-    "@jupyterlab/notebook" "^0.15.2"
-    "@jupyterlab/services" "^1.1.2"
-    "@jupyterlab/tooltip" "^0.15.2"
+    "@jupyterlab/application" "^0.15.3"
+    "@jupyterlab/codeeditor" "^0.15.3"
+    "@jupyterlab/console" "^0.15.3"
+    "@jupyterlab/coreutils" "^1.0.5"
+    "@jupyterlab/notebook" "^0.15.3"
+    "@jupyterlab/services" "^1.1.3"
+    "@jupyterlab/tooltip" "^0.15.3"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/tooltip@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/tooltip/-/tooltip-0.15.2.tgz#e217af0c6f68893f2b44cbf92fa0c475ee01b416"
+"@jupyterlab/tooltip@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/tooltip/-/tooltip-0.15.3.tgz#9f905c123e31b7d2cf6bf989db1b4353d2335674"
   dependencies:
-    "@jupyterlab/apputils" "^0.15.2"
-    "@jupyterlab/codeeditor" "^0.15.2"
-    "@jupyterlab/rendermime" "^0.15.2"
-    "@jupyterlab/services" "^1.1.2"
+    "@jupyterlab/apputils" "^0.15.3"
+    "@jupyterlab/codeeditor" "^0.15.3"
+    "@jupyterlab/rendermime" "^0.15.3"
+    "@jupyterlab/services" "^1.1.3"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/messaging" "^1.2.2"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/vdom-extension@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/vdom-extension/-/vdom-extension-0.15.2.tgz#5a0c887aa5c1a426c355b07707ee1a00cd8facb5"
+"@jupyterlab/vdom-extension@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/vdom-extension/-/vdom-extension-0.15.3.tgz#779b5a9f42e82a11a3df267d37e48142722d48c5"
   dependencies:
-    "@jupyterlab/rendermime-interfaces" "^1.0.4"
+    "@jupyterlab/rendermime-interfaces" "^1.0.5"
     "@nteract/transform-vdom" "^1.1.1"
     "@phosphor/widgets" "^1.5.0"
     react "~16.0.0"
     react-dom "~16.0.0"
 
-"@jupyterlab/vega2-extension@^0.15.3":
-  version "0.15.3"
-  resolved "https://registry.npmjs.org/@jupyterlab/vega2-extension/-/vega2-extension-0.15.3.tgz#2f3488ebb9e33e3949c0f9b1f60b5a3432f3cd96"
+"@jupyterlab/vega2-extension@^0.15.4":
+  version "0.15.4"
+  resolved "https://registry.npmjs.org/@jupyterlab/vega2-extension/-/vega2-extension-0.15.4.tgz#d52604b77c66c37cbaa0ffa60ff2c6e333632a7d"
   dependencies:
-    "@jupyterlab/rendermime-interfaces" "^1.0.4"
+    "@jupyterlab/rendermime-interfaces" "^1.0.5"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/widgets" "^1.5.0"
     d3 "~3.5.17"
@@ -872,8 +873,8 @@
     "@phosphor/virtualdom" "^1.1.2"
 
 "@types/react@~16.0.19":
-  version "16.0.35"
-  resolved "https://registry.npmjs.org/@types/react/-/react-16.0.35.tgz#7ce8a83cad9690fd965551fc513217a74fc9e079"
+  version "16.0.36"
+  resolved "https://registry.npmjs.org/@types/react/-/react-16.0.36.tgz#ceb5639013bdb92a94147883052e69bb2c22c69b"
 
 abbrev@1:
   version "1.1.1"
@@ -890,8 +891,8 @@ acorn@^4.0.3:
   resolved "https://registry.npmjs.org/acorn/-/acorn-4.0.13.tgz#105495ae5361d697bd195c825192e1ad7f253787"
 
 acorn@^5.0.0:
-  version "5.3.0"
-  resolved "https://registry.npmjs.org/acorn/-/acorn-5.3.0.tgz#7446d39459c54fb49a80e6ee6478149b940ec822"
+  version "5.4.1"
+  resolved "https://registry.npmjs.org/acorn/-/acorn-5.4.1.tgz#fdc58d9d17f4a4e98d102ded826a9b9759125102"
 
 ajv-keywords@^1.1.1:
   version "1.5.1"
@@ -1181,12 +1182,12 @@ braces@^1.8.2:
     repeat-element "^1.1.2"
 
 brfs@^1.3.0:
-  version "1.4.3"
-  resolved "https://registry.npmjs.org/brfs/-/brfs-1.4.3.tgz#db675d6f5e923e6df087fca5859c9090aaed3216"
+  version "1.4.4"
+  resolved "https://registry.npmjs.org/brfs/-/brfs-1.4.4.tgz#fc316bc4880180fa8ee25bcaab65f86910ce1dd5"
   dependencies:
     quote-stream "^1.0.1"
     resolve "^1.1.5"
-    static-module "^1.1.0"
+    static-module "^2.1.1"
     through2 "^2.0.0"
 
 brorand@^1.0.1:
@@ -1323,8 +1324,8 @@ caniuse-api@^1.5.2:
     lodash.uniq "^4.5.0"
 
 caniuse-db@^1.0.30000529, caniuse-db@^1.0.30000634, caniuse-db@^1.0.30000639:
-  version "1.0.30000795"
-  resolved "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000795.tgz#644f03fab00dd8bd1693e5e1e70d86b31c5cfece"
+  version "1.0.30000802"
+  resolved "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000802.tgz#f7dca342da1c12cf84ff2c80432e24c7e1cc36d9"
 
 canvas@^1.2.9, canvas@^1.3.4:
   version "1.6.9"
@@ -1596,8 +1597,8 @@ create-hmac@^1.1.0, create-hmac@^1.1.2, create-hmac@^1.1.4:
     sha.js "^2.4.8"
 
 create-react-class@^15.6.2:
-  version "15.6.2"
-  resolved "https://registry.npmjs.org/create-react-class/-/create-react-class-15.6.2.tgz#cf1ed15f12aad7f14ef5f2dfe05e6c42f91ef02a"
+  version "15.6.3"
+  resolved "https://registry.npmjs.org/create-react-class/-/create-react-class-15.6.3.tgz#2d73237fb3f970ae6ebe011a9e66f46dbca80036"
   dependencies:
     fbjs "^0.8.9"
     loose-envify "^1.3.1"
@@ -1728,12 +1729,12 @@ cyclist@~0.2.2:
   resolved "https://registry.npmjs.org/cyclist/-/cyclist-0.2.2.tgz#1b33792e11e914a2fd6d6ed6447464444e5fa640"
 
 d3-cloud@^1.2.1:
-  version "1.2.4"
-  resolved "https://registry.npmjs.org/d3-cloud/-/d3-cloud-1.2.4.tgz#3e169403adab74fdb0c867638d7f0bb8e6ae71ff"
+  version "1.2.5"
+  resolved "https://registry.npmjs.org/d3-cloud/-/d3-cloud-1.2.5.tgz#3e91564f2d27fba47fcc7d812eb5081ea24c603d"
   dependencies:
-    d3-dispatch "1"
+    d3-dispatch "^1.0.3"
 
-d3-dispatch@1:
+d3-dispatch@^1.0.3:
   version "1.0.3"
   resolved "https://registry.npmjs.org/d3-dispatch/-/d3-dispatch-1.0.3.tgz#46e1491eaa9b58c358fce5be4e8bed626e7871f8"
 
@@ -1817,6 +1818,10 @@ deep-extend@~0.4.0:
   version "0.4.2"
   resolved "https://registry.npmjs.org/deep-extend/-/deep-extend-0.4.2.tgz#48b699c27e334bf89f10892be432f6e4c7d34a7f"
 
+deep-is@~0.1.3:
+  version "0.1.3"
+  resolved "https://registry.npmjs.org/deep-is/-/deep-is-0.1.3.tgz#b369d6fb5dbc13eecf524f91b070feedc357cf34"
+
 defined@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/defined/-/defined-1.0.0.tgz#c98d9bcef75674188e110969151199e39b1fa693"
@@ -1862,8 +1867,8 @@ dom-serializer@0:
     entities "~1.1.1"
 
 domain-browser@^1.1.1:
-  version "1.1.7"
-  resolved "https://registry.npmjs.org/domain-browser/-/domain-browser-1.1.7.tgz#867aa4b093faa05f1de08c06f4d7b21fdf8698bc"
+  version "1.2.0"
+  resolved "https://registry.npmjs.org/domain-browser/-/domain-browser-1.2.0.tgz#3d31f50191a6749dd1375a7f522e823d42e54eda"
 
 domelementtype@1, domelementtype@^1.3.0:
   version "1.3.0"
@@ -1905,11 +1910,11 @@ domutils@^1.5.1:
     dom-serializer "0"
     domelementtype "1"
 
-duplexer2@~0.0.2:
-  version "0.0.2"
-  resolved "https://registry.npmjs.org/duplexer2/-/duplexer2-0.0.2.tgz#c614dcf67e2fb14995a91711e5a617e8a60a31db"
+duplexer2@~0.1.4:
+  version "0.1.4"
+  resolved "https://registry.npmjs.org/duplexer2/-/duplexer2-0.1.4.tgz#8b12dab878c0d69e3e7891051662a32fc6bddcc1"
   dependencies:
-    readable-stream "~1.1.9"
+    readable-stream "^2.0.2"
 
 duplexify@^3.4.2, duplexify@^3.5.3:
   version "3.5.3"
@@ -1927,8 +1932,8 @@ ecc-jsbn@~0.1.1:
     jsbn "~0.1.0"
 
 electron-to-chromium@^1.2.7:
-  version "1.3.31"
-  resolved "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.3.31.tgz#00d832cba9fe2358652b0c48a8816c8e3a037e9f"
+  version "1.3.32"
+  resolved "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.3.32.tgz#11d0684c0840e003c4be8928f8ac5f35dbc2b4e6"
 
 elliptic@^6.0.0:
   version "6.4.0"
@@ -1998,56 +2003,32 @@ escape-string-regexp@^1.0.2, escape-string-regexp@^1.0.5:
   version "1.0.5"
   resolved "https://registry.npmjs.org/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz#1b61c0562190a8dff6ae3bb2cf0200ca130b86d4"
 
-escodegen@~0.0.24:
-  version "0.0.28"
-  resolved "https://registry.npmjs.org/escodegen/-/escodegen-0.0.28.tgz#0e4ff1715f328775d6cab51ac44a406cd7abffd3"
+escodegen@^1.8.1, escodegen@~1.9.0:
+  version "1.9.0"
+  resolved "https://registry.npmjs.org/escodegen/-/escodegen-1.9.0.tgz#9811a2f265dc1cd3894420ee3717064b632b8852"
   dependencies:
-    esprima "~1.0.2"
-    estraverse "~1.3.0"
+    esprima "^3.1.3"
+    estraverse "^4.2.0"
+    esutils "^2.0.2"
+    optionator "^0.8.1"
   optionalDependencies:
-    source-map ">= 0.1.2"
-
-escodegen@~1.3.2:
-  version "1.3.3"
-  resolved "https://registry.npmjs.org/escodegen/-/escodegen-1.3.3.tgz#f024016f5a88e046fd12005055e939802e6c5f23"
-  dependencies:
-    esprima "~1.1.1"
-    estraverse "~1.5.0"
-    esutils "~1.0.0"
-  optionalDependencies:
-    source-map "~0.1.33"
+    source-map "~0.5.6"
 
 esprima@^2.6.0, esprima@^2.7.0:
   version "2.7.3"
   resolved "https://registry.npmjs.org/esprima/-/esprima-2.7.3.tgz#96e3b70d5779f6ad49cd032673d1c312767ba581"
 
-esprima@~1.0.2:
-  version "1.0.4"
-  resolved "https://registry.npmjs.org/esprima/-/esprima-1.0.4.tgz#9f557e08fc3b4d26ece9dd34f8fbf476b62585ad"
-
-esprima@~1.1.1:
-  version "1.1.1"
-  resolved "https://registry.npmjs.org/esprima/-/esprima-1.1.1.tgz#5b6f1547f4d102e670e140c509be6771d6aeb549"
-
-esprima@~3.1.0:
+esprima@^3.1.3, esprima@~3.1.0:
   version "3.1.3"
   resolved "https://registry.npmjs.org/esprima/-/esprima-3.1.3.tgz#fdca51cee6133895e3c88d535ce49dbff62a4633"
 
-estraverse@~1.3.0:
-  version "1.3.2"
-  resolved "https://registry.npmjs.org/estraverse/-/estraverse-1.3.2.tgz#37c2b893ef13d723f276d878d60d8535152a6c42"
-
-estraverse@~1.5.0:
-  version "1.5.1"
-  resolved "https://registry.npmjs.org/estraverse/-/estraverse-1.5.1.tgz#867a3e8e58a9f84618afb6c2ddbcd916b7cbaf71"
+estraverse@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.npmjs.org/estraverse/-/estraverse-4.2.0.tgz#0dee3fed31fcd469618ce7342099fc1afa0bdb13"
 
 esutils@^2.0.2:
   version "2.0.2"
   resolved "https://registry.npmjs.org/esutils/-/esutils-2.0.2.tgz#0abf4f1caa5bcb1f7a9d8acc6dea4faaa04bac9b"
-
-esutils@~1.0.0:
-  version "1.0.0"
-  resolved "https://registry.npmjs.org/esutils/-/esutils-1.0.0.tgz#8151d358e20c8acc7fb745e7472c0025fe496570"
 
 events@^1.0.0:
   version "1.1.1"
@@ -2114,6 +2095,10 @@ fast-deep-equal@^1.0.0:
 fast-json-stable-stringify@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/fast-json-stable-stringify/-/fast-json-stable-stringify-2.0.0.tgz#d5142c0caee6b1189f87d3a76111064f86c8bbf2"
+
+fast-levenshtein@~2.0.4:
+  version "2.0.6"
+  resolved "https://registry.npmjs.org/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz#3d8a5c66883a16a30ca8643e851f19baa7797917"
 
 fastparse@^1.1.1:
   version "1.1.1"
@@ -2384,7 +2369,7 @@ has-unicode@^2.0.0:
   version "2.0.1"
   resolved "https://registry.npmjs.org/has-unicode/-/has-unicode-2.0.1.tgz#e0e6fe6a28cf51138855e086d1691e771de2a8b9"
 
-has@^1.0.0, has@^1.0.1:
+has@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npmjs.org/has/-/has-1.0.1.tgz#8461733f538b0837c9361e39a9ab9e9704dc2f28"
   dependencies:
@@ -2756,8 +2741,8 @@ isstream@~0.1.2:
   resolved "https://registry.npmjs.org/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
 
 js-base64@^2.1.9:
-  version "2.4.2"
-  resolved "https://registry.npmjs.org/js-base64/-/js-base64-2.4.2.tgz#1896da010ef8862f385d8887648e9b6dc4a7a2e9"
+  version "2.4.3"
+  resolved "https://registry.npmjs.org/js-base64/-/js-base64-2.4.3.tgz#2e545ec2b0f2957f41356510205214e98fad6582"
 
 js-tokens@^3.0.0, js-tokens@^3.0.2:
   version "3.0.2"
@@ -2851,6 +2836,13 @@ lcid@^1.0.0:
   dependencies:
     invert-kv "^1.0.0"
 
+levn@~0.3.0:
+  version "0.3.0"
+  resolved "https://registry.npmjs.org/levn/-/levn-0.3.0.tgz#3b09924edf9f083c0490fdd4c0bc4421e04764ee"
+  dependencies:
+    prelude-ls "~1.1.2"
+    type-check "~0.3.2"
+
 load-json-file@^1.0.0:
   version "1.1.0"
   resolved "https://registry.npmjs.org/load-json-file/-/load-json-file-1.1.0.tgz#956905708d58b4bab4c2261b04f59f31c99374c0"
@@ -2918,8 +2910,8 @@ lodash.uniq@^4.5.0:
   resolved "https://registry.npmjs.org/lodash.uniq/-/lodash.uniq-4.5.0.tgz#d0225373aeb652adc1bc82e4945339a842754773"
 
 lodash@^4.14.0, lodash@^4.17.3, lodash@^4.17.4, lodash@^4.3.0:
-  version "4.17.4"
-  resolved "https://registry.npmjs.org/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
+  version "4.17.5"
+  resolved "https://registry.npmjs.org/lodash/-/lodash-4.17.5.tgz#99a92d65c0272debe8c96b6057bc8fbfa3bed511"
 
 longest@^1.0.1:
   version "1.0.1"
@@ -3014,8 +3006,8 @@ mime@1.3.x:
   resolved "https://registry.npmjs.org/mime/-/mime-1.3.6.tgz#591d84d3653a6b0b4a3b9df8de5aa8108e72e5e0"
 
 mimic-fn@^1.0.0:
-  version "1.1.0"
-  resolved "https://registry.npmjs.org/mimic-fn/-/mimic-fn-1.1.0.tgz#e667783d92e89dbd342818b5230b9d62a672ad18"
+  version "1.2.0"
+  resolved "https://registry.npmjs.org/mimic-fn/-/mimic-fn-1.2.0.tgz#820c86a39334640e99516928bd03fca88057d022"
 
 minimalistic-assert@^1.0.0:
   version "1.0.0"
@@ -3220,17 +3212,13 @@ object-assign@^4.0.1, object-assign@^4.1.0, object-assign@^4.1.1:
   version "4.1.1"
   resolved "https://registry.npmjs.org/object-assign/-/object-assign-4.1.1.tgz#2109adc7965887cfc05cbbd442cac8bfbb360863"
 
-object-inspect@~0.4.0:
-  version "0.4.0"
-  resolved "https://registry.npmjs.org/object-inspect/-/object-inspect-0.4.0.tgz#f5157c116c1455b243b06ee97703392c5ad89fec"
+object-inspect@~1.4.0:
+  version "1.4.1"
+  resolved "https://registry.npmjs.org/object-inspect/-/object-inspect-1.4.1.tgz#37ffb10e71adaf3748d05f713b4c9452f402cbc4"
 
 object-keys@^1.0.6:
   version "1.0.11"
   resolved "https://registry.npmjs.org/object-keys/-/object-keys-1.0.11.tgz#c54601778ad560f1142ce0e01bcca8b56d13426d"
-
-object-keys@~0.4.0:
-  version "0.4.0"
-  resolved "https://registry.npmjs.org/object-keys/-/object-keys-0.4.0.tgz#28a6aae7428dd2c3a92f3d95f21335dd204e0336"
 
 object.omit@^2.0.0:
   version "2.0.1"
@@ -3263,6 +3251,17 @@ optimist@^0.6.1:
   dependencies:
     minimist "~0.0.1"
     wordwrap "~0.0.2"
+
+optionator@^0.8.1:
+  version "0.8.2"
+  resolved "https://registry.npmjs.org/optionator/-/optionator-0.8.2.tgz#364c5e409d3f4d6301d6c0b4c05bba50180aeb64"
+  dependencies:
+    deep-is "~0.1.3"
+    fast-levenshtein "~2.0.4"
+    levn "~0.3.0"
+    prelude-ls "~1.1.2"
+    type-check "~0.3.2"
+    wordwrap "~1.0.0"
 
 options@>=0.0.5:
   version "0.0.6"
@@ -3678,12 +3677,16 @@ postcss@^5.0.10, postcss@^5.0.11, postcss@^5.0.12, postcss@^5.0.13, postcss@^5.0
     supports-color "^3.2.3"
 
 postcss@^6.0.1:
-  version "6.0.16"
-  resolved "https://registry.npmjs.org/postcss/-/postcss-6.0.16.tgz#112e2fe2a6d2109be0957687243170ea5589e146"
+  version "6.0.17"
+  resolved "https://registry.npmjs.org/postcss/-/postcss-6.0.17.tgz#e259a051ca513f81e9afd0c21f7f82eda50c65c5"
   dependencies:
     chalk "^2.3.0"
     source-map "^0.6.1"
     supports-color "^5.1.0"
+
+prelude-ls@~1.1.2:
+  version "1.1.2"
+  resolved "https://registry.npmjs.org/prelude-ls/-/prelude-ls-1.1.2.tgz#21932a549f5e52ffd9a827f570e04be62a97da54"
 
 prepend-http@^1.0.0:
   version "1.0.4"
@@ -3813,20 +3816,13 @@ querystringify@~1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/querystringify/-/querystringify-1.0.0.tgz#6286242112c5b712fa654e526652bf6a13ff05cb"
 
-quote-stream@^1.0.1:
+quote-stream@^1.0.1, quote-stream@~1.0.2:
   version "1.0.2"
   resolved "https://registry.npmjs.org/quote-stream/-/quote-stream-1.0.2.tgz#84963f8c9c26b942e153feeb53aae74652b7e0b2"
   dependencies:
     buffer-equal "0.0.1"
     minimist "^1.1.3"
     through2 "^2.0.0"
-
-quote-stream@~0.0.0:
-  version "0.0.0"
-  resolved "https://registry.npmjs.org/quote-stream/-/quote-stream-0.0.0.tgz#cde29e94c409b16e19dc7098b89b6658f9721d3b"
-  dependencies:
-    minimist "0.0.8"
-    through2 "~0.4.1"
 
 randomatic@^1.1.3:
   version "1.1.7"
@@ -3853,8 +3849,8 @@ raw-loader@~0.5.1:
   resolved "https://registry.npmjs.org/raw-loader/-/raw-loader-0.5.1.tgz#0c3d0beaed8a01c966d9787bf778281252a979aa"
 
 rc@^1.1.7:
-  version "1.2.4"
-  resolved "https://registry.npmjs.org/rc/-/rc-1.2.4.tgz#a0f606caae2a3b862bbd0ef85482c0125b315fa3"
+  version "1.2.5"
+  resolved "https://registry.npmjs.org/rc/-/rc-1.2.5.tgz#275cd687f6e3b36cc756baa26dfee80a790301fd"
   dependencies:
     deep-extend "~0.4.0"
     ini "~1.3.0"
@@ -3920,7 +3916,7 @@ read-pkg@^1.0.0:
     normalize-package-data "^2.3.2"
     path-type "^1.0.0"
 
-"readable-stream@1 || 2", readable-stream@^2.0.0, readable-stream@^2.0.1, readable-stream@^2.0.2, readable-stream@^2.0.4, readable-stream@^2.0.6, readable-stream@^2.1.4, readable-stream@^2.1.5, readable-stream@^2.2.2, readable-stream@^2.3.3:
+"readable-stream@1 || 2", readable-stream@^2.0.0, readable-stream@^2.0.1, readable-stream@^2.0.2, readable-stream@^2.0.4, readable-stream@^2.0.6, readable-stream@^2.1.4, readable-stream@^2.1.5, readable-stream@^2.2.2, readable-stream@^2.3.3, readable-stream@~2.3.3:
   version "2.3.3"
   resolved "https://registry.npmjs.org/readable-stream/-/readable-stream-2.3.3.tgz#368f2512d79f9d46fdfc71349ae7878bbc1eb95c"
   dependencies:
@@ -3932,18 +3928,9 @@ read-pkg@^1.0.0:
     string_decoder "~1.0.3"
     util-deprecate "~1.0.1"
 
-readable-stream@1.0, readable-stream@~1.0.17, readable-stream@~1.0.27-1:
+readable-stream@1.0:
   version "1.0.34"
   resolved "https://registry.npmjs.org/readable-stream/-/readable-stream-1.0.34.tgz#125820e34bc842d2f2aaafafe4c2916ee32c157c"
-  dependencies:
-    core-util-is "~1.0.0"
-    inherits "~2.0.1"
-    isarray "0.0.1"
-    string_decoder "~0.10.x"
-
-readable-stream@~1.1.9:
-  version "1.1.14"
-  resolved "https://registry.npmjs.org/readable-stream/-/readable-stream-1.1.14.tgz#7cf4c54ef648e3813084c636dd2079e166c081d9"
   dependencies:
     core-util-is "~1.0.0"
     inherits "~2.0.1"
@@ -4270,13 +4257,9 @@ source-map-loader@~0.2.1:
     loader-utils "~0.2.2"
     source-map "~0.6.1"
 
-source-map@0.5.x, source-map@^0.5.3, source-map@^0.5.6, source-map@~0.5.0, source-map@~0.5.1:
+source-map@0.5.x, source-map@^0.5.3, source-map@^0.5.6, source-map@~0.5.0, source-map@~0.5.1, source-map@~0.5.6:
   version "0.5.7"
   resolved "https://registry.npmjs.org/source-map/-/source-map-0.5.7.tgz#8a039d2d1021d22d1ea14c80d8ea468ba2ef3fcc"
-
-"source-map@>= 0.1.2":
-  version "0.7.0"
-  resolved "https://registry.npmjs.org/source-map/-/source-map-0.7.0.tgz#ebf0d13a48f3619f91891816fdda932f83a6021f"
 
 source-map@^0.4.4:
   version "0.4.4"
@@ -4287,12 +4270,6 @@ source-map@^0.4.4:
 source-map@^0.6.1, source-map@~0.6.1:
   version "0.6.1"
   resolved "https://registry.npmjs.org/source-map/-/source-map-0.6.1.tgz#74722af32e9614e9c287a8d0bbde48b5e2f1a263"
-
-source-map@~0.1.33:
-  version "0.1.43"
-  resolved "https://registry.npmjs.org/source-map/-/source-map-0.1.43.tgz#c24bc146ca517c1471f5dacbe2571b2b7f9e3346"
-  dependencies:
-    amdefine ">=0.0.4"
 
 spawn-sync@^1.0.1:
   version "1.0.15"
@@ -4339,27 +4316,27 @@ ssri@^5.0.0:
   dependencies:
     safe-buffer "^5.1.0"
 
-static-eval@~0.2.0:
-  version "0.2.4"
-  resolved "https://registry.npmjs.org/static-eval/-/static-eval-0.2.4.tgz#b7d34d838937b969f9641ca07d48f8ede263ea7b"
+static-eval@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.npmjs.org/static-eval/-/static-eval-2.0.0.tgz#0e821f8926847def7b4b50cda5d55c04a9b13864"
   dependencies:
-    escodegen "~0.0.24"
+    escodegen "^1.8.1"
 
-static-module@^1.1.0:
-  version "1.5.0"
-  resolved "https://registry.npmjs.org/static-module/-/static-module-1.5.0.tgz#27da9883c41a8cd09236f842f0c1ebc6edf63d86"
+static-module@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.npmjs.org/static-module/-/static-module-2.1.1.tgz#c771f827177507aff941be65a00fb85c210aa668"
   dependencies:
     concat-stream "~1.6.0"
-    duplexer2 "~0.0.2"
-    escodegen "~1.3.2"
+    duplexer2 "~0.1.4"
+    escodegen "~1.9.0"
     falafel "^2.1.0"
-    has "^1.0.0"
-    object-inspect "~0.4.0"
-    quote-stream "~0.0.0"
-    readable-stream "~1.0.27-1"
+    has "^1.0.1"
+    object-inspect "~1.4.0"
+    quote-stream "~1.0.2"
+    readable-stream "~2.3.3"
     shallow-copy "~0.0.1"
-    static-eval "~0.2.0"
-    through2 "~0.4.1"
+    static-eval "^2.0.0"
+    through2 "~2.0.3"
 
 stream-browserify@^2.0.1:
   version "2.0.1"
@@ -4529,19 +4506,12 @@ then-request@^2.0.1:
     promise "^7.1.1"
     qs "^6.1.0"
 
-through2@^2.0.0:
+through2@^2.0.0, through2@~2.0.3:
   version "2.0.3"
   resolved "https://registry.npmjs.org/through2/-/through2-2.0.3.tgz#0004569b37c7c74ba39c43f3ced78d1ad94140be"
   dependencies:
     readable-stream "^2.1.5"
     xtend "~4.0.1"
-
-through2@~0.4.1:
-  version "0.4.2"
-  resolved "https://registry.npmjs.org/through2/-/through2-0.4.2.tgz#dbf5866031151ec8352bb6c4db64a2292a840b9b"
-  dependencies:
-    readable-stream "~1.0.17"
-    xtend "~2.1.1"
 
 through@^2.3.6, through@~2.3.6:
   version "2.3.8"
@@ -4598,6 +4568,12 @@ tweetnacl@^0.14.3, tweetnacl@~0.14.0:
   version "0.14.5"
   resolved "https://registry.npmjs.org/tweetnacl/-/tweetnacl-0.14.5.tgz#5ae68177f192d4456269d108afa93ff8743f4f64"
 
+type-check@~0.3.2:
+  version "0.3.2"
+  resolved "https://registry.npmjs.org/type-check/-/type-check-0.3.2.tgz#5884cab512cf1d355e3fb784f30804b2b520db72"
+  dependencies:
+    prelude-ls "~1.1.2"
+
 typedarray@^0.0.6:
   version "0.0.6"
   resolved "https://registry.npmjs.org/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
@@ -4611,15 +4587,15 @@ ua-parser-js@^0.7.9:
   resolved "https://registry.npmjs.org/ua-parser-js/-/ua-parser-js-0.7.17.tgz#e9ec5f9498b9ec910e7ae3ac626a805c4d09ecac"
 
 uglify-es@^3.3.4:
-  version "3.3.8"
-  resolved "https://registry.npmjs.org/uglify-es/-/uglify-es-3.3.8.tgz#f2c68e6cff0d0f9dc9577e4da207151c2e753b7e"
+  version "3.3.9"
+  resolved "https://registry.npmjs.org/uglify-es/-/uglify-es-3.3.9.tgz#0c1c4f0700bed8dbc124cdb304d2592ca203e677"
   dependencies:
     commander "~2.13.0"
     source-map "~0.6.1"
 
 uglify-js@3.3.x:
-  version "3.3.8"
-  resolved "https://registry.npmjs.org/uglify-js/-/uglify-js-3.3.8.tgz#51e9a5db73afb53ac98603d08224edcd0be45fd8"
+  version "3.3.9"
+  resolved "https://registry.npmjs.org/uglify-js/-/uglify-js-3.3.9.tgz#33869666c8ab7f7658ce3d22f0f1ced40097d33a"
   dependencies:
     commander "~2.13.0"
     source-map "~0.6.1"
@@ -4638,8 +4614,8 @@ uglify-to-browserify@~1.0.0:
   resolved "https://registry.npmjs.org/uglify-to-browserify/-/uglify-to-browserify-1.0.2.tgz#6e0924d6bda6b5afe349e39a6d632850a0f882b7"
 
 uglifyjs-webpack-plugin@~1.1.5:
-  version "1.1.6"
-  resolved "https://registry.npmjs.org/uglifyjs-webpack-plugin/-/uglifyjs-webpack-plugin-1.1.6.tgz#f4ba8449edcf17835c18ba6ae99b9d610857fb19"
+  version "1.1.8"
+  resolved "https://registry.npmjs.org/uglifyjs-webpack-plugin/-/uglifyjs-webpack-plugin-1.1.8.tgz#1302fb9471a7daf3d0a5174da6d65f0f415e75ad"
   dependencies:
     cacache "^10.0.1"
     find-cache-dir "^1.0.0"
@@ -4903,6 +4879,10 @@ wordwrap@~0.0.2:
   version "0.0.3"
   resolved "https://registry.npmjs.org/wordwrap/-/wordwrap-0.0.3.tgz#a3d5da6cd5c0bc0008d37234bbaf1bed63059107"
 
+wordwrap@~1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/wordwrap/-/wordwrap-1.0.0.tgz#27584810891456a4171c8d0226441ade90cbcaeb"
+
 worker-farm@^1.5.2:
   version "1.5.2"
   resolved "https://registry.npmjs.org/worker-farm/-/worker-farm-1.5.2.tgz#32b312e5dc3d5d45d79ef44acc2587491cd729ae"
@@ -4935,12 +4915,6 @@ xml-char-classes@^1.0.0:
 xtend@^4.0.0, xtend@^4.0.1, xtend@~4.0.1:
   version "4.0.1"
   resolved "https://registry.npmjs.org/xtend/-/xtend-4.0.1.tgz#a5c6d532be656e23db820efb943a1f04998d63af"
-
-xtend@~2.1.1:
-  version "2.1.2"
-  resolved "https://registry.npmjs.org/xtend/-/xtend-2.1.2.tgz#6efecc2a4dad8e6962c4901b337ce7ba87b5d28b"
-  dependencies:
-    object-keys "~0.4.0"
 
 xterm@~2.8.1:
   version "2.8.1"
