@@ -4,6 +4,17 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+ .jp-MainAreaWidget {
+   display: block;
+   height: 100%;
+ }
+
+
 .jp-MainAreaWidget > :focus {
   outline: none;
+}
+
+
+.jp-MainAreaWidget-content {
+    height: calc(100% - var(--jp-private-toolbar-height));
 }
