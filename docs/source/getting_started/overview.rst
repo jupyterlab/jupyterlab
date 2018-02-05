@@ -4,7 +4,6 @@ Overview
 --------
 
 JupyterLab is the next-generation web-based user interface for Project Jupyter.
-JupyterLab will eventually replace the classic Jupyter Notebook.
 
 JupyterLab enables you to work with documents and activities such as notebooks,
 text editors, terminals, and custom components in a flexible, integrated, and
@@ -44,8 +43,8 @@ See :ref:`file-and-output-formats` for more information.
 To navigate the user interface, JupyterLab offers :ref:`customizable keyboard shortcuts <shortcuts>`
 and the ability to use key maps from vim, emacs, and Sublime Text.
 
-JupyterLab is served from the same
-`server <https://jupyter-notebook.readthedocs.io/en/stable/>`__ and uses
-the same `notebook document
-format <http://nbformat.readthedocs.io/en/latest/>`__ as the classic
-Jupyter Notebook.
+JupyterLab is served from the same `server
+<https://jupyter-notebook.readthedocs.io/en/stable/>`__ and uses the same
+`notebook document format <http://nbformat.readthedocs.io/en/latest/>`__ as the
+classic Jupyter Notebook. JupyterLab will eventually replace the classic Jupyter
+Notebook after it reaches 1.0 and we have a transition period.
