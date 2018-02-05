@@ -149,7 +149,6 @@ class OpenDirectWidget extends Widget {
    */
   constructor() {
     super({ node: Private.createOpenNode() });
-    (this.node as HTMLInputElement).focus();
   }
 
   /**
@@ -211,9 +210,16 @@ namespace Private {
    */
   export
   function createOpenNode(): HTMLElement {
+    let body = document.createElement('div');
+    let existingLabel = document.createElement('label');
+    existingLabel.textContent = 'File Path';
+
     let input = document.createElement('input');
     input.value = '';
     input.placeholder = '/path/to/file';
-    return input;
+
+    body.appendChild(existingLabel);
+    body.appendChild(input);
+    return body;
   }
 }
