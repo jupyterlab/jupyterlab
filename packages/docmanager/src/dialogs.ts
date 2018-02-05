@@ -152,10 +152,17 @@ class OpenDirectWidget extends Widget {
   }
 
   /**
-   * Get the value for the widget.
+   * Get the value of the widget.
    */
   getValue(): string {
-    return (this.node as HTMLInputElement).value;
+    return this.inputNode.value;
+  }
+
+  /**
+   * Get the input text node.
+   */
+  get inputNode(): HTMLInputElement {
+    return this.node.getElementsByTagName('input')[0] as HTMLInputElement;
   }
 }
 
