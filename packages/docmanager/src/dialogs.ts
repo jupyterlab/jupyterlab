@@ -148,7 +148,8 @@ class OpenDirectWidget extends Widget {
    * Construct a new save widget.
    */
   constructor() {
-    super({ node: createNode() });
+    super({ node: Private.createOpenNode() });
+    (this.node as HTMLInputElement).focus();
   }
 
   /**
@@ -159,25 +160,17 @@ class OpenDirectWidget extends Widget {
   }
 }
 
-/**
- * Create the node for a open widget.
- */
-function createNode(): HTMLElement {
-  let input = document.createElement('input');
-  input.value = '';
-  return input;
-}
 
 /**
  * Create the node for the open handler.
  */
 export
 function getOpenPath(contentsManager: any): Promise<string | undefined> {
-  let saveBtn = Dialog.okButton({ label: 'OPEN' });
   return showDialog({
     title: 'Open File',
     body: new OpenDirectWidget(),
-    buttons: [Dialog.cancelButton(), saveBtn]
+    buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OPEN' })],
+    focusNodeSelector: 'input'
   }).then( (result: any) => {
     if (result.button.label === 'OPEN') {
       return result.value;
@@ -211,5 +204,16 @@ namespace Private {
     body.appendChild(nameTitle);
     body.appendChild(name);
     return body;
+  }
+
+  /**
+   * Create the node for a open widget.
+   */    
+  export
+  function createOpenNode(): HTMLElement {
+    let input = document.createElement('input');
+    input.value = '';
+    input.placeholder = '/path/to/file';
+    return input;
   }
 }
