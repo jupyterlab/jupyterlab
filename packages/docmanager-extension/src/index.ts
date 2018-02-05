@@ -33,6 +33,8 @@ import {
   IDisposable
 } from '@phosphor/disposable';
 
+import '../style/index.css';
+
 
 /**
  * The command IDs used by the document manager plugin.
@@ -106,9 +108,11 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
           // Add a loading spinner, and remove it when the widget is ready.
           if (widget.ready !== undefined) {
             const spinner = new Spinner();
+            widget.addClass('jp-mod-loading');
             widget.node.appendChild(spinner.node);
             widget.ready.then(() => {
               widget.node.removeChild(spinner.node);
+              widget.removeClass('jp-mod-loading');
               spinner.dispose();
             });
           }
