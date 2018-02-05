@@ -3,8 +3,8 @@
 Overview
 --------
 
-*JupyterLab is the next-generation user interface for Project Jupyter.
-JupyterLab will eventually replace the classic Jupyter Notebook.*
+JupyterLab is the next-generation user interface for Project Jupyter.
+JupyterLab will eventually replace the classic Jupyter Notebook.
 
 JupyterLab is an extensible open-source web-based interface for Project Jupyter.
 In JupyterLab, you can arrange multiple notebooks, text editors, terminals,
@@ -31,11 +31,10 @@ JupyterLab also enables other models of interactive computing:
    have live preview of Markdown documents, or edit GeoJSON files with live
    updates of an adjoining map.
 
-JupyterLab also offers a unified model for viewing and handling data
-formats. This enables data in many formats (images, CSV, JSON, Markdown,
-PDF, Vega, Vega-Lite, etc.) to be opened as a file or returned by a
-kernel as rich output. See :ref:`file-and-output-formats` for more
-information.
+JupyterLab also offers a unified model for viewing and handling data formats.
+JupyterLab understands many file formats (images, CSV, JSON, Markdown, PDF,
+Vega, Vega-Lite, etc.) and can also display rich kernel output in these formats.
+See :ref:`file-and-output-formats` for more information.
 
 To navigate the user interface, JupyterLab offers :ref:`customizable keyboard shortcuts <shortcuts>`
 and the ability to use key maps from vim, emacs, and Sublime Text.

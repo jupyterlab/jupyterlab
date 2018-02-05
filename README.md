@@ -25,7 +25,7 @@ Eventually, JupyterLab will replace the classic Jupyter Notebook.
 
 **JupyterLab is currently in beta.** The beta releases are suitable for general
 usage. For JupyterLab extension developers, the extension APIs will continue to
-change and iterate until the 1.0 release.
+evolve until the 1.0 release.
 
 For a good overview of JupyterLab, please see [this link](https://channel9.msdn.com/Events/PyData/Seattle2017/BRK11) to a recent talk we gave about JupyterLab at PyData Seattle (2017).
 
