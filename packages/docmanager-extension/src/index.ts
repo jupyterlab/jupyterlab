@@ -273,7 +273,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
           return commands.execute(CommandIDs.open, {path: path});
         }, () => {
           // does not exist
-          return;
+          Promise.reject(new Error('File Not Found'));
         });
         return;
       });
