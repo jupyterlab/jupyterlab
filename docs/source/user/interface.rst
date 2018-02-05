@@ -154,7 +154,7 @@ Keyboard Shortcuts in the Settings tab.
        <iframe src="https://www.youtube-nocookie.com/embed/rhW3kAExCik?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
     </div>
 
-You can also customize the text editor to use vim, emacs, or Sublime Text
+You can also customize the :ref:`text editor <file_editor>` to use vim, emacs, or Sublime Text
 keyboard maps by using the Text Editor Key Map submenu in the Settings
 menu:
 
