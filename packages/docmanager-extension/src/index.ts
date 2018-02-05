@@ -273,7 +273,11 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
           return commands.execute(CommandIDs.open, {path: path});
         }, () => {
           // does not exist
-          Promise.reject(new Error('File Not Found'));
+          return showDialog({
+            title: 'Cannot open',
+            body: 'File not found',
+            buttons: [Dialog.okButton()]
+          });
         });
         return;
       });

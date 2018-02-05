@@ -208,7 +208,7 @@ namespace Private {
 
   /**
    * Create the node for a open widget.
-   */    
+   */
   export
   function createOpenNode(): HTMLElement {
     let input = document.createElement('input');
