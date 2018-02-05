@@ -60,12 +60,6 @@ Note: If installing using `pip install --user`, you must add the user-level
  `bin` directory to your `PATH` environment variable in order to launch
  `jupyter lab`.
 
-JupyterLab can be installed from a git checkout using `pip`.  Example:
-
-```bash
-pip install git+git://github.com/jupyterlab/jupyterlab.git
-```
-
 If you use ``pipenv``, you can install it as:
 
 ```bash
