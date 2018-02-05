@@ -141,11 +141,11 @@ class RenameHandler extends Widget {
 
 
 /*
- * A widget used to open a file directly
+ * A widget used to open a file directly.
  */
 class OpenDirectWidget extends Widget {
   /**
-   * Construct a new save widget.
+   * Construct a new open file widget.
    */
   constructor() {
     super({ node: Private.createOpenNode() });
