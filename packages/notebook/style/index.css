@@ -42,10 +42,12 @@
   padding: var(--jp-notebook-padding);
   outline: none;
   overflow: auto;
-  height: 100%;
   background: var(--jp-layout-color0);
 }
 
+.jp-NotebookPanel > .jp-Notebook {
+  height: calc(100% - var(--jp-private-notebook-panel-toolbar-height));
+}
 
 .jp-Notebook::after {
   display: block;

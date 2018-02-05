@@ -7,6 +7,11 @@
 | Variables
 |----------------------------------------------------------------------------*/
 
+:root {
+  --jp-private-notebook-panel-toolbar-height: 28px;
+}
+
+/*-----------------------------------------------------------------------------
 
 /*-----------------------------------------------------------------------------
 | Styles
@@ -15,7 +20,7 @@
 
 .jp-NotebookPanel-toolbar {
   padding: 2px;
-  height: 28px;
+  height: var(--jp-private-notebook-panel-toolbar-height);
   box-shadow: var(--jp-toolbar-box-shadow);
   background: var(--jp-toolbar-background);
   z-index: 1;
