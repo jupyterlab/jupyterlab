@@ -156,7 +156,7 @@ Keyboard Shortcuts in the Settings tab.
 
 You can also customize the text editor to use vim, emacs, or Sublime Text
 keyboard maps by using the Text Editor Key Map submenu in the Settings
-menu.
+menu:
 
 .. raw:: html
 
