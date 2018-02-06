@@ -11,7 +11,7 @@ JupyterLab:
    :class: jp-screenshot
 
 The text editor includes syntax highlighting, configurable indentation
-(tabs or spaces), :ref:`key maps <shortcuts>` and
+(tabs or spaces), :ref:`key maps <editor_keymaps>` and
 basic theming. These settings can be found in the Settings menu:
 
 .. image:: images/file_editor_settings.png
