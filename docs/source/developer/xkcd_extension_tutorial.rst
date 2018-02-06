@@ -376,7 +376,7 @@ carry on.
 .. code:: bash
 
     git add .
-    git commit -m 'Show xkcd panel on command'
+    git commit -m 'Show xkcd command on panel'
 
 Show a comic in the panel
 ^^^^^^^^^^^^^^^^^^^^^^^^^
