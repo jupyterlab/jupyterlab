@@ -219,7 +219,7 @@ namespace Private {
   function createOpenNode(): HTMLElement {
     let body = document.createElement('div');
     let existingLabel = document.createElement('label');
-    existingLabel.textContent = 'File Path';
+    existingLabel.textContent = 'File Path:';
 
     let input = document.createElement('input');
     input.value = '';
