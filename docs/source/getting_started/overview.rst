@@ -7,15 +7,14 @@ JupyterLab is the next-generation web-based user interface for Project Jupyter.
 
 JupyterLab enables you to work with documents and activities such as notebooks,
 text editors, terminals, and custom components in a flexible, integrated, and
-extensible manner. You can arrange multiple documents and activities in the work
-area using tabs, adjustable splitters, and collapsible sidebars, and then save
-layouts as custom named workspaces. Documents and activites integrate with each
-other (for example, you can send a code chunk from a text editor to a console to
-execute with a keystroke, you can open a live preview of a Markdown, CSV, or
-Vega document you are editing, and you can drag cells between notebooks).
-JupyterLab extensions can customize or enhance any part of the JupyterLab,
-including extending existing components or providing new activities, themes, and
-file viewers and editors.
+extensible manner. You can arrange multiple documents and activities side by
+side in the work area using tabs and splitters. Documents and activities
+integrate with each other (for example, you can run a code chunk from a text
+editor in a code console with a keystroke, you can open a live preview of a
+Markdown, CSV, or Vega document you are editing, and you can drag cells between
+notebooks). JupyterLab extensions can customize or enhance any part of the
+JupyterLab, including extending existing components or providing new activities,
+themes, and file viewers and editors.
 
 :ref:`JupyterLab has full support for Jupyter Notebook documents. <notebook>`
 JupyterLab also enables other models of interactive computing:
@@ -27,7 +26,7 @@ JupyterLab also enables other models of interactive computing:
 -  :ref:`Kernel-backed documents <kernel-backed-documents>` enable code in any
    text file (Markdown, Python, R, LaTeX, etc.) to be run interactively in any
    Jupyter kernel.
--  Notebook cell outputs can be pulled into their own tab, side-by-side with
+-  Notebook cell outputs can be pulled into their own tab, side by side with
    the notebook, enabling simple dashboards with interactive controls backed by
    a kernel.
 -  Multiple views of documents with different editors or viewers enable live
