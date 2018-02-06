@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/application-extension",
-  "version": "0.15.3",
+  "version": "0.15.4",
   "description": "JupyterLab - Application Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -29,9 +29,9 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.15.3",
-    "@jupyterlab/apputils": "^0.15.3",
-    "@jupyterlab/coreutils": "^1.0.5",
+    "@jupyterlab/application": "^0.15.4",
+    "@jupyterlab/apputils": "^0.15.4",
+    "@jupyterlab/coreutils": "^1.0.6",
     "@phosphor/virtualdom": "^1.1.2"
   },
   "devDependencies": {
