@@ -150,10 +150,18 @@ shortcuts. You can find and customize the current list of keyboard shortcuts by
 selecting the Advanced Settings Editor item in the Settings menu, then selecting
 Keyboard Shortcuts in the Settings tab.
 
-.. image:: images/interface_keyboard_shortcuts.png
-   :align: center
-   :class: jp-screenshot
+.. raw:: html
 
-You can also customize the text editor to use vim, emacs, or Sublime Text
+    <div class="jp-youtube-video">
+       <iframe src="https://www.youtube-nocookie.com/embed/rhW3kAExCik?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    </div>
+
+You can also customize the :ref:`text editor <file_editor>` to use vim, emacs, or Sublime Text
 keyboard maps by using the Text Editor Key Map submenu in the Settings
-menu.
+menu:
+
+.. raw:: html
+
+    <div class="jp-youtube-video">
+       <iframe src="https://www.youtube-nocookie.com/embed/COheO7sA4-U?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    </div>
