@@ -195,6 +195,7 @@ def watch(app_dir=None, logger=None):
     -------
     A list of processes to run asynchronously.
     """
+    _node_check()
     handler = _AppHandler(app_dir, logger)
     return handler.watch()
 
@@ -204,6 +205,7 @@ def install_extension(extension, app_dir=None, logger=None):
 
     The extension is first validated.
     """
+    _node_check()
     handler = _AppHandler(app_dir, logger)
     return handler.install_extension(extension)
 
@@ -211,6 +213,7 @@ def install_extension(extension, app_dir=None, logger=None):
 def uninstall_extension(name, app_dir=None, logger=None):
     """Uninstall an extension by name or path.
     """
+    _node_check()
     handler = _AppHandler(app_dir, logger)
     return handler.uninstall_extension(name)
 
@@ -233,6 +236,7 @@ def build(app_dir=None, name=None, version=None, public_url=None,
         clean_staging=False):
     """Build the JupyterLab application.
     """
+    _node_check()
     handler = _AppHandler(app_dir, logger, kill_event=kill_event)
     return handler.build(name=name, version=version, public_url=public_url,
                   command=command, clean_staging=clean_staging)
@@ -271,6 +275,7 @@ def build_check(app_dir=None, logger=None):
 
     Returns a list of messages.
     """
+    _node_check()
     handler = _AppHandler(app_dir, logger)
     return handler.build_check()
 
@@ -298,7 +303,7 @@ def unlink_package(package, app_dir=None, logger=None):
 def get_app_version(app_dir=None):
     """Get the application version."""
     app_dir = app_dir or get_app_dir()
-    handler = _AppHandler(app_dir, node_check=False)
+    handler = _AppHandler(app_dir)
     return handler.info['version']
 
 
@@ -309,19 +314,12 @@ def get_app_version(app_dir=None):
 
 class _AppHandler(object):
 
-    def __init__(self, app_dir, logger=None, kill_event=None, node_check=True):
+    def __init__(self, app_dir, logger=None, kill_event=None):
         self.app_dir = app_dir or get_app_dir()
         self.sys_dir = get_app_dir()
         self.logger = logger or logging.getLogger('jupyterlab')
         self.info = self._get_app_info()
         self.kill_event = kill_event or Event()
-        if not node_check:
-            return
-        try:
-            self._run(['node', 'node-version-check.js'], cwd=HERE, quiet=True)
-        except Exception:
-            msg = 'Please install nodejs 5+ and npm before continuing installation. nodejs may be installed using conda or directly from the nodejs website.'
-            raise ValueError(msg)
 
     def install_extension(self, extension, existing=None):
         """Install an extension package into JupyterLab.
@@ -1164,6 +1162,17 @@ class _AppHandler(object):
         kwargs['kill_event'] = self.kill_event
         proc = Process(cmd, **kwargs)
         return proc.wait()
+
+
+def _node_check():
+    """Check for the existence of nodejs with the correct version.
+    """
+    try:
+        proc = Process(['node', 'node-version-check.js'], cwd=HERE, quiet=True)
+        proc.wait()
+    except Exception:
+        msg = 'Please install nodejs 5+ and npm before continuing. nodejs may be installed using conda or directly from the nodejs website.'
+        raise ValueError(msg)
 
 
 def _normalize_path(extension):
