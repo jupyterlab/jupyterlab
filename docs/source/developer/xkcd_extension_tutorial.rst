@@ -349,7 +349,7 @@ code:
 The first new block of code creates a ``Widget`` instance, assigns it a
 unique ID, gives it a label that will appear as its tab title, and makes
 the tab closable by the user. The second block of code add a new command
-labeled *Random xkcd comic* to JupyterLab. When the comm and executes,
+labeled *Random xkcd comic* to JupyterLab. When the command executes,
 it attaches the widget to the main display area if it is not already
 present and then makes it the active tab. The last new line of code adds
 the command to the command palette in a section called *Tutorial*.
