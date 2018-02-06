@@ -3,7 +3,7 @@
 Code Consoles
 -------------
 
-Code consoles allow you to run code interactively in a kernel. The cells
+Code consoles enable you to run code interactively in a kernel. The cells
 of a code console show the order in which code was executed in the
 kernel, as opposed to the explicit ordering of cells in a notebook
 document. Code consoles also display rich output, just like notebook

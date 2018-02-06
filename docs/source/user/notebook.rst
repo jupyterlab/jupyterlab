@@ -3,7 +3,7 @@
 Notebooks
 ---------
 
-Jupyter Notebooks are documents that combine live runnable code with
+Jupyter notebooks are documents that combine live runnable code with
 narrative text (Markdown), equations (LaTeX), images, interactive
 visualizations and other rich output:
 
@@ -11,13 +11,11 @@ visualizations and other rich output:
    :align: center
    :class: jp-screenshot
 
-**Jupyter Notebook (.ipynb files) are fully supported in JupyterLab.**
-Furthermore, the `notebook document
-format <http://nbformat.readthedocs.io/en/latest/>`__ used in JupyterLab
-is the same as in the classic notebook. Your existing notebooks should
-open correctly in JupyterLab. If they don’t, please open an issue on our
-`GitHub issues <https://github.com/jupyterlab/jupyterlab/issues>`__
-page.
+**Jupyter notebooks (.ipynb files) are fully supported in JupyterLab.** The
+`notebook document format <http://nbformat.readthedocs.io/en/latest/>`__ used in
+JupyterLab is the same as in the classic Jupyter Notebook. Your existing notebooks
+should open correctly in JupyterLab. If they don’t, please open an issue on our
+`GitHub issues <https://github.com/jupyterlab/jupyterlab/issues>`__ page.
 
 Create a notebook by clicking the ``+`` button in the file browser and
 then selecting a kernel in the new Launcher tab:
@@ -99,8 +97,9 @@ information about the types of the matched items:
 .. raw:: html
 
   <div class="jp-youtube-video">
-     <iframe src="https://www.youtube-nocookie.com/embed/XXX NEED TODO?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+     <iframe src="https://www.youtube-nocookie.com/embed/MuNr0i8LgpM?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
+
 
 The tooltip (activated with ``Shift Tab``) contains additional
 information about objects:

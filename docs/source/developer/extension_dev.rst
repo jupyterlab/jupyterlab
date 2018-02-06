@@ -83,7 +83,7 @@ application consists of:
 
 -  A top area for things like top level menus and toolbars
 -  Left and right side bar areas for collapsible content
--  A main area for user activity.
+-  A main work area for user activity.
 -  A bottom area for things like status bars
 
 Phosphor
@@ -97,9 +97,9 @@ as patterns and objects for writing clean, well-abstracted code. The
 widgets in the application are primarily **Phosphor widgets**, and
 Phosphor concepts, like message passing and signals, are used
 throughout. **Phosphor messages** are a *many-to-one* interaction that
-allows information like resize events to flow through the widget
+enables information like resize events to flow through the widget
 hierarchy in the application. **Phosphor signals** are a *one-to-many*
-interaction that allow listeners to react to changes in an observed
+interaction that enable listeners to react to changes in an observed
 object.
 
 Extension Authoring
@@ -300,7 +300,7 @@ Storing Extension Data
 In addition to the file system that is accessed by using the
 ``@jupyterlab/services`` package, JupyterLab offers two ways for
 extensions to store data: a client-side state database that is built on
-top of ``localStorage`` and a plugin settings system that allows for
+top of ``localStorage`` and a plugin settings system that provides for
 default setting values and user overrides.
 
 State Database

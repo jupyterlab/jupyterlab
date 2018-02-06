@@ -16,7 +16,7 @@ CSS checklist
 -  The JupyterLab default CSS variables in the ``theme-light-extension``
    and ``theme-dark-extension`` packages are used to style packages
    where ever possible. Individual packages should not npm-depend on
-   these packages though, to allow the theme to be swapped out.
+   these packages though, to enable the theme to be swapped out.
 -  Additional public/private CSS variables are defined by plugins
    sparingly and in accordance with the conventions described below.
 
@@ -147,7 +147,7 @@ CSS class name that gives a semantic naming of the component, such as:
 In general, the parent ``MyWidget`` should add these classes to the
 children. This applies when the children are plain DOM nodes or
 ``Widget`` instances/subclasses themselves. Thus, the general naming of
-CSS classes is of the form ``jp-WidgetName-semanticChild``. This allows
+CSS classes is of the form ``jp-WidgetName-semanticChild``. This enables
 the styling of these children in a manner that is independent of the
 children implementation or CSS classes they have themselves.
 

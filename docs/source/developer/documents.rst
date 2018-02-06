@@ -59,7 +59,7 @@ fetch the model (e.g. text, base64, notebook).
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Adds additional functionality to a widget type. An extension instance is
-created for each widget instance, allowing the extension to add
+created for each widget instance, enabling the extension to add
 functionality to each widget or observe the widget and/or its context.
 
 *Examples*

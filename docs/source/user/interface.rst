@@ -49,14 +49,14 @@ Left Sidebar
 
 The left sidebar contains a number of commonly-used tabs, such as a file
 browser, a list of running kernels and terminals, the command palette,
-and a list of tabs in the main area:
+and a list of tabs in the main work area:
 
 .. image:: images/interface_left.png
    :align: center
    :class: jp-screenshot
 
-The left sidebar can be collapsed or expanded by clicking on the active
-sidebar tab:
+The left sidebar can be collapsed or expanded by selecting "Show Left Area"
+in the View menu or by clicking on the active sidebar tab:
 
 .. raw:: html
 
@@ -71,18 +71,20 @@ JupyterLab extensions can add additional panels to the left sidebar.
 Main Work Area
 ~~~~~~~~~~~~~~
 
-The main work area in JupyterLab allows you to arrange documents
-(notebooks, text files, etc.) and other activities (terminals, code
-consoles, etc.) into panels of tabs that can be resized or subdivided:
+The main work area in JupyterLab enables you to arrange documents (notebooks,
+text files, etc.) and other activities (terminals, code consoles, etc.) into
+panels of tabs that can be resized or subdivided. Drag a tab to the center of a
+tab panel to move the tab to the panel. Subdivide a tab panel by dragging a tab to
+the left, right, top, or bottom of the panel:
 
 .. raw:: html
 
   <div class="jp-youtube-video">
-    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/Ka8qS7CO1XQ?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <iframe src="https://www.youtube-nocookie.com/embed/Ka8qS7CO1XQ?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
-The work area has a single current activity. The tab for this activity
-is marked with a colored top border (blue by default).
+The work area has a single current activity. The tab for the current activity is
+marked with a colored top border (blue by default).
 
 .. _tabs:
 
@@ -90,7 +92,7 @@ Tabs and Single-Document Mode
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The Tabs panel in the left sidebar lists the open documents or
-activities in the main area:
+activities in the main work area:
 
 .. image:: images/interface_tabs.png
    :align: center
@@ -103,14 +105,14 @@ The same information is also available in the Tabs menu:
    :class: jp-screenshot
 
 It is often useful to focus on a single document or activity without closing
-other tabs in the main area. Single-document mode enable this, while making
+other tabs in the main work area. Single-document mode enable this, while making
 it simple to return to your multi-activity layout in the main work area.
 Toggle single-document mode using the View menu:
 
 .. raw:: html
 
   <div class="jp-youtube-video">
-    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/DO7NOenMQC0?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <iframe src="https://www.youtube-nocookie.com/embed/DO7NOenMQC0?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
 When you leave single-document mode, the original layout of the main
@@ -120,13 +122,13 @@ Context Menus
 ~~~~~~~~~~~~~
 
 Many parts of JupyterLab, such as notebooks, text files, code consoles,
-and tabs have context menus that can be accessed by right-clicking on
+and tabs, have context menus that can be accessed by right-clicking on
 the element:
 
 .. raw:: html
 
   <div class="jp-youtube-video">
-    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/y30fs6kg6fc?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <iframe src="https://www.youtube-nocookie.com/embed/y30fs6kg6fc?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
 The browser’s native context menu can be accessed by holding down
@@ -135,7 +137,7 @@ The browser’s native context menu can be accessed by holding down
 .. raw:: html
 
   <div class="jp-youtube-video">
-    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/XPPWW-7WJ40?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <iframe src="https://www.youtube-nocookie.com/embed/XPPWW-7WJ40?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
 .. _shortcuts:

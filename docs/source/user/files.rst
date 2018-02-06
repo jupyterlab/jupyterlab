@@ -6,7 +6,7 @@ Working with Files
 Opening Files
 ~~~~~~~~~~~~~
 
-The file browser and File menu allow you to work with files and
+The file browser and File menu enable you to work with files and
 directories on your system. This includes opening, creating, deleting,
 renaming, downloading, copying, and sharing files and directories.
 
@@ -30,7 +30,7 @@ To open any file, double-click on its name in the file browser:
      <iframe src="https://www.youtube-nocookie.com/embed/Rh-vwjTwBTI?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
-You can also drag a file into the main area to create a new tab:
+You can also drag a file into the main work area to create a new tab:
 
 .. raw:: html
 
@@ -59,7 +59,7 @@ they will remain in sync:
      <iframe src="https://www.youtube-nocookie.com/embed/87ALbxm1Y3I?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
-The file system can be navigated by double clicking on folders in the
+The file system can be navigated by double-clicking on folders in the
 listing or clicking on the folders at the top of the directory listing:
 
 .. raw:: html
@@ -80,8 +80,8 @@ Creating Files and Activities
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Create new files or activities by clicking the ``+`` button at the top
-of the file browser. This will open a new Launcher tab in the main area,
-which allows you to pick an activity and kernel:
+of the file browser. This will open a new Launcher tab in the main work area,
+which enables you to pick an activity and kernel:
 
 .. raw:: html
 

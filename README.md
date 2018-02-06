@@ -17,15 +17,16 @@
 An extensible environment for interactive and reproducible computing, based on the
 Jupyter Notebook and Architecture.
 
-JupyterLab is the next generation user interface for Project Jupyter. It offers all the
-familiar building blocks of the classic Jupyter Notebook (notebook, terminal, text editor,
-file browser, rich outputs, etc.) in a flexible and powerful user inteface that can be
-extended through third party extensions that access our public APIs. Eventually, JupyterLab
-will replace the classic Jupyter Notebook.
+JupyterLab is the next-generation user interface for Project Jupyter. It offers
+all the familiar building blocks of the classic Jupyter Notebook (notebook,
+terminal, text editor, file browser, rich outputs, etc.) in a flexible and
+powerful user inteface that can be extended through third party extensions.
+Eventually, JupyterLab will replace the classic Jupyter Notebook after
+JupyterLab reaches 1.0.
 
-**JupyterLab is approaching its beta release in 2018. During our pre-beta series of releases, we encourage users and developers to try out JupyterLab and give us feedback.
-For users, the upcoming beta will be suitable for general usage.  For developers, our
-APIs will continue to change significantly up until the 1.0 release.**
+**JupyterLab is currently in beta.** The beta releases are suitable for general
+usage. For JupyterLab extension developers, the extension APIs will continue to
+evolve until the 1.0 release.
 
 For a good overview of JupyterLab, please see [this link](https://channel9.msdn.com/Events/PyData/Seattle2017/BRK11) to a recent talk we gave about JupyterLab at PyData Seattle (2017).
 
