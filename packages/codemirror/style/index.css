@@ -68,7 +68,7 @@
 }
 
 
-// When zoomed out 67% and 33% on a screen of 1440 width x 900 height
+/* When zoomed out 67% and 33% on a screen of 1440 width x 900 height */
 @media screen and (min-width: 2138px) and (max-width: 4319px)  {
     .CodeMirror-cursor {
         border-left: 2px solid var(--jp-editor-cursor-color);
@@ -76,7 +76,7 @@
 }
 
 
-// When zoomed out less than 33%
+/* When zoomed out less than 33% */
 @media screen and (min-width: 4320px)  {
     .CodeMirror-cursor {
         border-left: 4px solid var(--jp-editor-cursor-color);
