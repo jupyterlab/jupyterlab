@@ -6,6 +6,14 @@
 JupyterLab Documentation
 ========================
 
+JupyterLab is the next-generation web-based user interface for Project Jupyter. `Try it on Binder <https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/master?urlpath=lab>`__.
+
+.. image:: ./user/images/interface_jupyterlab.png
+   :align: center
+   :class: jp-screenshot
+
+
+
 .. toctree::
    :maxdepth: 1
    :caption: Getting Started
@@ -29,6 +37,7 @@ JupyterLab Documentation
    user/documents_kernels
    user/file_formats
    user/extensions
+
 
 .. toctree::
    :maxdepth: 1

@@ -1,5 +1,7 @@
 .. _developer-guide:
 
+The JupyterLab Developer Guide is for developing JupyterLab extensions or developing JupyterLab itself.
+
 General Codebase Orientation
 ----------------------------
 
