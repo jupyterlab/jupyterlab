@@ -14,7 +14,7 @@
 
 ## General
 
-Welcome to the Frequently Asked Questions (FAQ) for the JupyterLab Beta Release Series.
+Welcome to the Frequently Asked Questions (FAQ) for the JupyterLab Beta release series.
 
 ### What is JupyterLab?
 
@@ -47,39 +47,39 @@ Notebook. Here are a few of them you may want to try out:
 * Double click on CSV files to view them as a nicely formatted table.
 * Drag and drop notebook cells within a notebook or between notebooks.
 
-See the [JupyterLab Documentation](http://jupyterlab.readthedocs.io/en/latest/)
+See the [JupyterLab Documentation](http://jupyterlab.readthedocs.io/en/stable/)
 for more detailed information about these and other features.
 
 ### How stable is JupyterLab?
 
-This Beta version of JupyterLab is ready for you to use! Starting with this
-release, the JupyterLab Beta series of releases are characterized by:
+This beta version of JupyterLab is ready for you to use! The JupyterLab beta
+series of releases are characterized by:
 
 * Stable and featureful enough for daily usage.
-* Most of the commonly used features in the classic notebook are
+* Most of the commonly used features in the classic Notebook are
   implemented.
-* Developer APIs that are approaching stability but still undergoing
+* Developer APIs that are approaching stability, but still undergoing
   significant changes.
 
-Early in 2018, we will release the 1.0 version of JupyterLab that will
+In 2018, we will release the 1.0 version of JupyterLab that will
 provide additional UI/UX improvements, features, and API stability. At
 that point, JupyterLab should be a full featured replacement for the
-classic notebook - and go far beyond its capabilities. Between now and then
+classic Notebook and go far beyond its capabilities. Between now and then,
 we will release a series of beta releases, all of which should be stable
 for daily usage.
 
 ### What will happen to the classic Jupyter Notebook?
 
 JupyterLab is intended to be a full replacement for the classic Jupyter
-Notebook. Because of this, our plan is to gradually retire the classic
-Jupyter Notebook. However, we will support the classic notebook for a
-signifciant period of time to help users and extension authors through
-this transition. It is important to note that the notebook server
-and the notebook document format is unchanged during this transition.
+Notebook. Because of this, our plan is to gradually retire the classic Jupyter
+Notebook after JupyterLab 1.0 is released. However, we will support the classic
+notebook for a signifciant period of time to help users and extension authors
+through this transition. It is important to note that the notebook server and
+the notebook document format is unchanged during this transition.
 
 ### Where is the documentation for JupyterLab?
 
-The [JupyterLab Documentation](http://jupyterlab.readthedocs.io/en/latest/) can be found on ReadTheDocs.
+The [JupyterLab Documentation](http://jupyterlab.readthedocs.io/en/stable/) can be found on ReadTheDocs.
 
 ## Development
 
@@ -117,6 +117,6 @@ extend the functionality of JupyterLab. Examples of possible extensions include:
 To start developing your own JupyterLab extension, please have a look
 at:
 
-* [JupyterLab Documentation](http://jupyterlab.readthedocs.io/en/latest/)
+* [JupyterLab Documentation](http://jupyterlab.readthedocs.io/en/stable/)
 * JupyterLab Extension Template for [TypeScript](https://github.com/jupyterlab/extension-cookiecutter-ts)
 * JupyterLab Extension Template for [JavaScript](https://github.com/jupyterlab/extension-cookiecutter-js)
