@@ -726,7 +726,6 @@ class _AppHandler(object):
 
         # Look for mismatched version.
         pkg_path = pjoin(staging, 'package.json')
-        overwrite_lock = False
 
         if osp.exists(pkg_path):
             with open(pkg_path) as fid:
@@ -734,17 +733,18 @@ class _AppHandler(object):
             if data['jupyterlab'].get('version', '') != version:
                 shutil.rmtree(staging)
                 os.makedirs(staging)
-            else:
-                overwrite_lock = False
 
         for fname in ['index.js', 'webpack.config.js',
-                'webpack.prod.config.js',
-                'yarn.lock', '.yarnrc', 'yarn.js']:
+                      'webpack.prod.config.js',
+                      '.yarnrc', 'yarn.js']:
             target = pjoin(staging, fname)
-            if (fname == 'yarn.lock' and os.path.exists(target) and
-                    not overwrite_lock):
-                continue
             shutil.copy(pjoin(HERE, 'staging', fname), target)
+
+        # Remove an existing yarn.lock file
+        # Because otherwise we can end up with unwanted duplicates
+        # cf https://github.com/yarnpkg/yarn/issues/3967
+        if osp.exists(pjoin(staging, 'yarn.lock')):
+            os.remove(pjoin(staging, 'yarn.lock'))
 
         # Ensure a clean templates directory
         templates = pjoin(staging, 'templates')
