@@ -39,17 +39,8 @@ To navigate the user interface, JupyterLab offers :ref:`customizable keyboard
 shortcuts <shortcuts>` and the ability to use :ref:`key maps <editor_keymaps>`
 from vim, emacs, and Sublime Text in the text editor.
 
-Fundamentally, JupyterLab is designed as an extensible environment. JupyterLab
-extensions can customize or enhance any part of JupyterLab. They can provide new
-themes, file viewers and editors, or renderers for rich outputs in notebooks.
-Extensions can add items to the menu or command palette, keyboard shortcuts, or
-settings in the settings system. Extensions can provide an API for other
-extensions to use and can depend on other extensions. In fact, the whole of
-JupyterLab itself is simply a collection of extensions we have written that are
-no more powerful or privileged than any custom extension. There are also many
-community-developed extensions being built on GitHub. You can search for the
-GitHub topic `jupyterlab-extension
-<https://github.com/topics/jupyterlab-extension>`__ to find extensions.
+JupyterLab :ref:`extensions <user_extensions>` can customize or enhance any part
+of JupyterLab, including new themes, file editors, and custom components.
 
 JupyterLab is served from the same `server
 <https://jupyter-notebook.readthedocs.io/en/stable/>`__ and uses the same

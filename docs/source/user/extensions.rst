@@ -3,12 +3,29 @@
 Extensions
 ----------
 
-JupyterLab extensions add functionality to the JupyterLab application.
-They can provide new file viewer types, launcher activities, and output
-renderers, among many other things. JupyterLab extensions are
-`npm <https://www.npmjs.com/>`__ packages (the standard package format
-in Javascript development). For information about developing extensions,
-see the :ref:`developer documentation <developer_extensions>`.
+Fundamentally, JupyterLab is designed as an extensible environment. JupyterLab
+extensions can customize or enhance any part of JupyterLab. They can provide new
+themes, file viewers and editors, or renderers for rich outputs in notebooks.
+Extensions can add items to the menu or command palette, keyboard shortcuts, or
+settings in the settings system. Extensions can provide an API for other
+extensions to use and can depend on other extensions. In fact, the whole of
+JupyterLab itself is simply a collection of extensions that are no more powerful
+or privileged than any custom extension.
+
+JupyterLab extensions are `npm <https://www.npmjs.com/>`__ packages (the
+standard package format in Javascript development). There are many
+community-developed extensions being built on GitHub. You can search for the
+GitHub topic `jupyterlab-extension
+<https://github.com/topics/jupyterlab-extension>`__ to find extensions. For
+information about developing extensions, see the :ref:`developer documentation
+<developer_extensions>`.
+
+.. note::
+
+   If you are a JupyterLab extension developer, please note that the extension
+   developer API is not stable and will evolve in JupyterLab beta releases. The
+   extension developer API will be stable in JupyterLab 1.0.
+
 
 In order to install JupyterLab extensions, you need to have `Node.js
 <https://nodejs.org/>`__ version 4 or later installed.
