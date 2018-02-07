@@ -4,8 +4,14 @@ Notebook
 Background
 ~~~~~~~~~~
 
-`JupyterLab Walkthrough June 16, 2016 YouTube
-video <https://www.youtube.com/watch?v=4Qm6oD_Rlw8&feature=youtu.be&t=55m19s>`__
+A JupyterLab architecture walkthrough from June 16, 2016, provides an overview of the notebook architecture.
+
+.. raw:: html
+
+  <div class="jp-youtube-video">
+     <iframe src="https://www.youtube-nocookie.com/embed/4Qm6oD_Rlw8?rel=0&amp;showinfo=0&amp;start=3326" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
+
 
 The most complicated plugin included in the **JupyterLab application**
 is the **Notebook plugin**.
@@ -26,11 +32,11 @@ Model
 ^^^^^
 
 The
-**`NotebookModel <http://jupyterlab.github.io/jupyterlab/classes/_notebook_src_model_.notebookmodel.html>`__**
+`NotebookModel <http://jupyterlab.github.io/jupyterlab/classes/_notebook_src_model_.notebookmodel.html>`__
 contains an observable list of cells.
 
-A **`cell
-model <http://jupyterlab.github.io/jupyterlab/modules/_cells_src_model_.html>`__**
+A `cell
+model <http://jupyterlab.github.io/jupyterlab/modules/_cells_src_model_.html>`__
 can be:
 
 -  a code cell
@@ -248,16 +254,15 @@ The *ipywidgets* third party extension
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This discussion will be a bit confusing since we've been using the term
-**widget** to refer to **phosphor widgets**. In the discussion below,
+*widget* to refer to *phosphor widgets*. In the discussion below,
 *ipython widgets* will be referred to as *ipywidgets*. There is no
-intrinsic relation between **phosphor widgets** and *ipython widgets*.
+intrinsic relation between *phosphor widgets* and *ipython widgets*.
 
-The *ipywidgets* extension registers a factory for a notebook **widget**
+The *ipywidgets* extension registers a factory for a notebook *widget*
 extension using the `Document
 Registry <http://jupyterlab.github.io/jupyterlab/classes/_docregistry_src_registry_.documentregistry.html>`__.
 The ``createNew()`` function is called with a NotebookPanel and
-[DocumentContext]
-(http://jupyterlab.github.io/jupyterlab/interfaces/_docregistry_src_registry_.documentregistry.icontext.html).
+`DocumentContext <http://jupyterlab.github.io/jupyterlab/interfaces/_docregistry_src_registry_.documentregistry.icontext.html>`__.
 The plugin then creates a ipywidget manager (which uses the context to
 interact the kernel and kernel's comm manager). The plugin then
 registers an ipywidget renderer with the notebook instance's rendermime
@@ -270,7 +275,7 @@ a ``display_data`` output is sent to the browser with the ipywidget
 model id. The renderer registered in that notebook's rendermime is asked
 to render the output. The renderer asks the ipywidget manager instance
 to render the corresponding model, which returns a JavaScript promise.
-The renderer creates a container **phosphor widget** which it hands back
+The renderer creates a container *phosphor widget* which it hands back
 synchronously to the OutputArea, and then fills the container with the
 rendered *ipywidget* when the promise resolves.
 
