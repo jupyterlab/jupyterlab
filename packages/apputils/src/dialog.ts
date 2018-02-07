@@ -750,12 +750,16 @@ namespace Private {
     let buttons = (
       options.buttons || [Dialog.cancelButton(), Dialog.okButton()]
     );
+    let defaultButton = buttons.length - 1;
+    if (options.defaultButton !== undefined) {
+      defaultButton = options.defaultButton;
+    }
     return {
       title: options.title || '',
       body: options.body || '',
       host: options.host || document.body,
       buttons,
-      defaultButton: options.defaultButton || buttons.length - 1,
+      defaultButton,
       renderer: options.renderer || Dialog.defaultRenderer,
       focusNodeSelector: options.focusNodeSelector || ''
     };

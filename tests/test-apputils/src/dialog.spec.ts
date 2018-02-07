@@ -86,13 +86,14 @@ describe('@jupyterlab/apputils', () => {
         title: 'foo',
         body: 'Hello',
         host: node,
-        buttons: [Dialog.okButton()],
+        defaultButton: 0,
+        buttons: [Dialog.cancelButton(), Dialog.okButton()],
       };
       let promise = showDialog(options).then(result => {
         expect(result.button.accept).to.equal(false);
         expect(result.value).to.equal(null);
       });
-      dismissDialog();
+      acceptDialog();
       return promise;
     });
 
