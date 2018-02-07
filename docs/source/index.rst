@@ -29,6 +29,7 @@ JupyterLab Documentation
    user/documents_kernels
    user/file_formats
    user/extensions
+   user/jupyterhub
 
 .. toctree::
    :maxdepth: 1
