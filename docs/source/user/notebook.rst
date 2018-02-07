@@ -83,6 +83,8 @@ selecting “Enable Scrolling for Outputs”:
      <iframe src="https://www.youtube-nocookie.com/embed/U4usAUZCv_c?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
+.. _cell-output-mirror:
+
 Create a new synchronized view of a cell’s output:
 
 .. raw:: html

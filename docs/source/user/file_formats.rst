@@ -51,6 +51,7 @@ The rest of this section highlights some of the common data formats that
 JupyterLab supports by default. JupyterLab extensions can also add support for
 other file formats.
 
+.. _markdown:
 
 Markdown
 ~~~~~~~~
@@ -94,6 +95,8 @@ submenu:
   <div class="jp-youtube-video">
     <iframe src="https://www.youtube-nocookie.com/embed/y_ydmAmVdCA?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
+
+.. _csv:
 
 CSV
 ~~~
@@ -178,6 +181,8 @@ in JupyterLab, double-click on the file in the file browser:
   <div class="jp-youtube-video">
     <iframe src="https://www.youtube-nocookie.com/embed/vLAEzD5dxQw?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
+
+.. _vega-lite:
 
 Vega/Vega-Lite
 ~~~~~~~~~~~~~~
