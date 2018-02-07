@@ -3,14 +3,13 @@
 JupyterLab on JupyterHub
 ------------------------
 
-JupyterLab works out of the box with JupyterHub, and can even run side-by-side
-with the classic Notebook. There are a couple of configuration options
-you may want to set.
+JupyterLab works out of the box with JupyterHub, and can even run side by side
+with the classic Notebook.
 
 If you install JupyterLab on a system running JupyterHub, it will immediately be
 available at the ``/lab`` URL, but users will still be directed to the classic
 Notebook (``/tree``) by default. To change the user's default user interface to
-JupyterLab set the following configuration options in your
+JupyterLab, set the following configuration option in your
 :file:`jupyterlab_config.py` file::
 
     c.Spawner.default_url = '/lab'
@@ -21,7 +20,7 @@ Notebook" item in JupyterLab's Help menu.
 
 Additional integration between JupyterLab and JupyterHub is offered by the
 `jupyterlab-hub <https://github.com/jupyterhub/jupyterlab-hub>`__ extension for
-JupyterLab. It provides a Hub menu, with items to access the JupyterHub control
+JupyterLab. It provides a Hub menu with items to access the JupyterHub control
 panel or logout of the hub.
 
 To install the ``jupyterlab-hub`` extension, run::
@@ -31,6 +30,6 @@ To install the ``jupyterlab-hub`` extension, run::
 Further directions are provided on the `jupyterlab-hub GitHub repository
 <https://github.com/jupyterhub/jupyterlab-hub>`__.
 
-Finally, for a fully configured example of using JupyterLab with JupyterHub, see
+Finally, for a fully-configured example of using JupyterLab with JupyterHub, see
 the `jupyterhub-deploy-teaching
 <https://github.com/jupyterhub/jupyterhub-deploy-teaching>`__ repository.
