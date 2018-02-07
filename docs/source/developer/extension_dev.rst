@@ -145,7 +145,7 @@ the CSS files) are watched by the WebPack process.
 Note that the application is built against **released** versions of the
 core JupyterLab extensions. If your extension depends on JupyterLab
 packages, it should be compatible with the dependencies in the
-``jupyterlab/static/package.json`` file.  Note that building will always use the latest JavaScript packages that meet the dependency requirements of JupyterLab itself any installed extensions.  If you wish to test against a
+``jupyterlab/static/package.json`` file.  Note that building will always use the latest JavaScript packages that meet the dependency requirements of JupyterLab itself and any installed extensions.  If you wish to test against a
 specific patch release of one of the core JupyterLab packages you can
 temporarily pin that requirement to a specific version in your own
 dependencies.
