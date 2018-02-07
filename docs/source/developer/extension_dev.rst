@@ -3,6 +3,11 @@
 Extension Developer Guide
 -------------------------
 
+.. warning::
+
+   The extension developer API is not stable and will evolve in JupyterLab beta
+   releases. The extension developer API will be stable in JupyterLab 1.0.
+
 JupyterLab can be extended in three ways via:
 
 -  **application plugins (top level):** Application plugins extend the

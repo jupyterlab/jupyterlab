@@ -93,7 +93,7 @@ Keyboard Shortcuts
 
 Typeset keyboard shortcuts as follows:
 
--  Monospace typeface, with no spaces between individual keys:
+-  Monospace typeface, with spaces between individual keys:
    ``Shift Enter``.
 -  For modifiers, use the platform independent word describing key:
    ``Shift``.
