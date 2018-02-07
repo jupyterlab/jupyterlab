@@ -133,6 +133,11 @@ Building consists of:
 -  Bundling the assets
 -  Copying the bundled assets to the ``static`` directory
 
+Note that building will always use the latest JavaScript packages that meet
+the dependency requirements of JupyterLab itself any installed extensions.
+If you wish to run JupyterLab with the set of pinned requirements that was
+shipped with the Python package, you can launch as `jupyter lab --core-mode`.
+
 JupyterLab Application Directory
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
