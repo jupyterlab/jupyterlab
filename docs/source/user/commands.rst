@@ -14,7 +14,7 @@ JupyterLab commands:
    :class: jp-screenshot
 
 The command palette can be accessed using the keyboard shortcut
-Command-Shift-C:
+``Control Shift C`` (``Command Shift C`` on macOS):
 
 .. raw:: html
 
