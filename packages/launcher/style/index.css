@@ -8,8 +8,8 @@
 
 
 :root {
-  --jp-private-launcher-top-margin: 16px;
-  --jp-private-launcher-side-margin: 32px;
+  --jp-private-launcher-top-padding: 16px;
+  --jp-private-launcher-side-padding: 32px;
   --jp-private-launcher-card-size: 100px;
   --jp-private-launcher-card-label-height: 25px;
   --jp-private-launcher-card-icon-height: 75px;
@@ -67,9 +67,9 @@
 .jp-Launcher-content {
   width: 85%;
   height: 100%;
-  margin-top: var(--jp-private-launcher-top-margin);
-  margin-left: var(--jp-private-launcher-side-margin);
-  margin-right: var(--jp-private-launcher-side-margin);
+  padding-top: var(--jp-private-launcher-top-padding);
+  padding-left: var(--jp-private-launcher-side-padding);
+  padding-right: var(--jp-private-launcher-side-padding);
   box-sizing: border-box;
 }
 
