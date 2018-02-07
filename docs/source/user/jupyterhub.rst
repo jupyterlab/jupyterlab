@@ -6,8 +6,8 @@ JupyterLab on JupyterHub
 JupyterLab works out of the box with JupyterHub, and can even run side by side
 with the classic Notebook.
 
-JupyterLab as Default User Interface
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Use JupyterLab by Default
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you install JupyterLab on a system running JupyterHub, it will immediately be
 available at the ``/lab`` URL, but users will still be directed to the classic
@@ -21,8 +21,8 @@ In this configuration, users can still access the classic Notebook at ``/tree``,
 by either typing that URL into the browser, or by using the "Launch Classic
 Notebook" item in JupyterLab's Help menu.
 
-JupyterLab Extension
-~~~~~~~~~~~~~~~~~~~~
+Further Integration
+~~~~~~~~~~~~~~~~~~~
 
 Additional integration between JupyterLab and JupyterHub is offered by the
 `jupyterlab-hub <https://github.com/jupyterhub/jupyterlab-hub>`__ extension for
