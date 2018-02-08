@@ -1,0 +1,12 @@
+{% extends '!breadcrumbs.html' %}
+
+{% block breadcrumbs %}
+  <div>
+    <a href="http://www.jupyter.org/documentation"><img src="./_static/jl.svg" width="90px"></a>
+  </div>
+  <li><a href="{{ pathto(master_doc) }}">{{ _('Docs') }}</a> &raquo;</li>
+    {% for doc in parents %}
+      <li><a href="{{ doc.link|e }}">{{ doc.title }}</a> &raquo;</li>
+    {% endfor %}
+  <li>{{ title }}</li>
+{% endblock %}
