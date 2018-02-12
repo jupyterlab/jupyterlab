@@ -213,18 +213,15 @@ function activateBrowser(app: JupyterLab, factory: IFileBrowserFactory, restorer
   });
 
   Promise.all([app.restored, browser.model.restored]).then(() => {
-    const { model } = browser;
-
     function maybeCreate() {
       // Create a launcher if there are no open items.
       if (app.shell.isEmpty('main')) {
-        model.restored.then(() => createLauncher(commands, browser));
+        createLauncher(commands, browser);
       }
     }
 
     // When layout is modified, create a launcher if there are no open items.
     shell.layoutModified.connect(() => { maybeCreate(); });
-
     maybeCreate();
   });
 }
