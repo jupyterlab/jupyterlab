@@ -99,7 +99,7 @@ namespace URLExt {
   function isLocal(url: string): boolean {
     const { host, protocol } = parse(url);
 
-    return protocol !== 'data:' && host === location.host || host === '';
+    return protocol !== 'data:' && (host === location.host || host === '');
   }
 
   /**
