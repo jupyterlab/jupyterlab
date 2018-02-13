@@ -79,6 +79,7 @@ class Terminal extends Widget {
       }
       value.messageReceived.connect(this._onMessage, this);
       this.title.label = `Terminal ${value.name}`;
+      this._setSessionSize();
       if (this._initialCommand) {
         this._session.send({
           type: 'stdin',
@@ -186,6 +187,8 @@ class Terminal extends Widget {
    * On resize, use the computed row and column sizes to resize the terminal.
    */
   protected onResize(msg: Widget.ResizeMessage): void {
+    this._offsetWidth = msg.width;
+    this._offetHeight = msg.height;
     this._needsResize = true;
     this.update();
   }
@@ -199,23 +202,23 @@ class Terminal extends Widget {
     }
 
     // Open the terminal if necessary.
-    this._ensureTerm();
+    if (!this._termOpened) {
+      this._term.open(this.node);
+      this._term.element.classList.add(TERMINAL_BODY_CLASS);
+      this._setFamily();
+      this._termOpened = true;
+    }
 
     if (this._needsResize) {
       this._resizeTerminal();
     }
-
-    const style = getComputedStyle(document.body);
-    const family = style.getPropertyValue('--jp-code-font-family');
-    this._term.setOption('fontFamily', family);
-
-    this._term.refresh(0, this._term.rows - 1);
   }
 
   /**
    * A message handler invoked on an `'fit-request'` message.
    */
   protected onFitRequest(msg: Message): void {
+    this._setFamily();
     let resize = Widget.ResizeMessage.UnknownSize;
     MessageLoop.sendMessage(this, resize);
   }
@@ -243,34 +246,6 @@ class Terminal extends Widget {
     this._term.on('title', (title: string) => {
         this.title.label = title;
     });
-
-    this._term.on('resize', () => {
-      let content = [this._term.rows, this._term.cols];
-      if (this._session) {
-        this._session.send({ type: 'set_size', content });
-      }
-    });
-  }
-
-  /**
-   * Open the terminal if necessary.
-   */
-  private _ensureTerm(): void {
-    // The host element must be attached and visible.
-    if (!this.isAttached || !this.isVisible) {
-      return;
-    }
-
-    // Open the terminal if it has not yet been opened.
-    if (!this._termOpened) {
-      this._term.open(this.node);
-      this._term.element.classList.add(TERMINAL_BODY_CLASS);
-
-      // Workaround for https://github.com/xtermjs/xterm.js/issues/1194
-      this._term.setOption('cursorBlink', this._term.getOption('cursorBlink'));
-
-      this._termOpened = true;
-    }
   }
 
   /**
@@ -296,9 +271,39 @@ class Terminal extends Widget {
    */
   private _resizeTerminal() {
     fit(this._term);
+    if (this._offsetWidth === -1) {
+      this._offsetWidth = this.node.offsetWidth;
+    }
+    if (this._offetHeight === -1) {
+      this._offetHeight = this.node.offsetHeight;
+    }
+    this._setSessionSize();
     this._needsResize = false;
   }
 
+  /**
+   * Set the size of the terminal in the session.
+   */
+  private _setSessionSize(): void {
+    let content = [
+      this._term.rows, this._term.cols, this._offetHeight, this._offsetWidth
+    ];
+    if (this._session) {
+      this._session.send({ type: 'set_size', content });
+    }
+  }
+
+  /**
+   * Set the font family of the terminal.
+   */
+  private _setFamily(): void {
+    const style = getComputedStyle(document.body);
+    const family = style.getPropertyValue('--jp-code-font-family');
+    if (family) {
+      console.log('setting family', family);
+      //this._term.setOption('fontFamily', '"Source Code Pro", monospace');
+    }
+  }
 
   private _term: Xterm;
   private _needsResize = true;
@@ -306,6 +311,8 @@ class Terminal extends Widget {
   private _session: TerminalSession.ISession | null = null;
   private _initialCommand: string;
   private _termOpened = false;
+  private _offsetWidth = -1;
+  private _offetHeight = -1;
 }
 
 

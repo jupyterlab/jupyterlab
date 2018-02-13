@@ -12,11 +12,13 @@
   background: black;
 }
 
+
 .jp-Terminal.jp-mod-light {
   background: white;
 }
 
 
 .jp-Terminal-body {
-    margin: 8px;
+  padding: 8px;
 }
+
