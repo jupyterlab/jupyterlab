@@ -88,6 +88,7 @@ describe('@jupyterlab/coreutils', () => {
         expect(URLExt.isLocal('http://foo')).to.equal(false);
         expect(URLExt.isLocal('/foo/bar')).to.equal(true);
         expect(URLExt.isLocal('foo.txt')).to.equal(true);
+        expect(URLExt.isLocal('data:text/plain,123ABC')).to.equal(false);
       });
 
     });
