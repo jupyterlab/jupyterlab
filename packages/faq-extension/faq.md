@@ -2,16 +2,16 @@
 
 ## General
 
-* [What is JupyterLab?](http://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html)
+* [What is JupyterLab?](https://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html)
 * [How stable is JupyterLab?](#How-stable-is-JupyterLab?)
 * [What will happen to the classic Jupyter Notebook?](#What-will-happen-to-the-classic-Jupyter-Notebook?)
-* [Where is the documentation for JupyterLab?](http://jupyterlab.readthedocs.io/en/stable/)
+* [Where is the documentation for JupyterLab?](https://jupyterlab.readthedocs.io/en/stable/)
 
 ## Development
 
 * [How can you report a bug or provide feedback?](https://github.com/jupyterlab/jupyterlab/issues)
 * [How can you contribute?](https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md)
-* [How can you extend or customize JupyterLab?](jupyterlab.readthedocs.io/en/stable/user/extensions.html)
+* [How can you extend or customize JupyterLab?](https://jupyterlab.readthedocs.io/en/stable/user/extensions.html)
 
 ### How stable is JupyterLab?
 
@@ -36,6 +36,6 @@ for daily usage.
 JupyterLab is intended to be a full replacement for the classic Jupyter
 Notebook. Because of this, our plan is to gradually retire the classic Jupyter
 Notebook after JupyterLab 1.0 is released. However, we will support the classic
-notebook for a signifciant period of time to help users and extension authors
+notebook for a significant period of time to help users and extension authors
 through this transition. It is important to note that the notebook server and
 the notebook document format is unchanged during this transition.
