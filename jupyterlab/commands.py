@@ -1176,7 +1176,6 @@ class _AppHandler(object):
         for version, data in sorted(versions.items(),
                                     key=sort_key,
                                     reverse=True):
-            print(version)
             deps = data.get('dependencies', {})
             errors = _validate_compatibility(name, deps, core_data)
             if not errors:
