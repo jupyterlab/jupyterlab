@@ -94,12 +94,16 @@ namespace URLExt {
 
   /**
    * Test whether the url is a local url.
+   *
+   * #### Notes
+   * This function returns `false` for any fully qualified url, including
+   * `data:`, `file:`, and `//` protocol URLs.
    */
   export
   function isLocal(url: string): boolean {
-    const { host, protocol } = parse(url);
+    const { protocol } = parse(url);
 
-    return protocol !== 'data:' && (host === location.host || host === '');
+    return url.toLowerCase().indexOf(protocol) !== 0 && url.indexOf('//') !== 0;
   }
 
   /**
