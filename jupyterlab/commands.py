@@ -1186,6 +1186,14 @@ class _AppHandler(object):
             deps = data.get('dependencies', {})
             errors = _validate_compatibility(name, deps, core_data)
             if not errors:
+                # Found a compatible version
+                # Verify that the version is a valid extension.
+                with TemporaryDirectory() as tempdir:
+                    info = self._extract_package('%s@%s' % (name, version), tempdir)
+                if _validate_extension(info['data']):
+                    # Invalid, do not consider other versions
+                    return
+                # Valid
                 return version
 
     def _format_no_compatible_package_version(self, name):
