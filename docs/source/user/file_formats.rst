@@ -8,6 +8,10 @@ in a wide variety of formats. This model applies whether the data is in
 a file or is provided by a kernel as rich cell output in a notebook or
 code console.
 
+.. image:: images/transit.png
+   :align: center
+   :class: jp-screenshot
+
 For files, the data format is detected by the extension of the file (or
 the whole filename if there is no extension). A single file extension
 may have multiple editors or viewers registered. For example, a Markdown
