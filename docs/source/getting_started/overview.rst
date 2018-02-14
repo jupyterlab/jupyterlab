@@ -4,6 +4,7 @@ Overview
 --------
 
 JupyterLab is the next-generation web-based user interface for Project Jupyter.
+The beta release series of JupyterLab is stable for daily use.
 
 JupyterLab enables you to work with documents and activities such as notebooks,
 text editors, terminals, and custom components in a flexible, integrated, and
@@ -46,5 +47,21 @@ and the ability to use key maps from vim, emacs, and Sublime Text.
 JupyterLab is served from the same `server
 <https://jupyter-notebook.readthedocs.io/en/stable/>`__ and uses the same
 `notebook document format <http://nbformat.readthedocs.io/en/latest/>`__ as the
-classic Jupyter Notebook. JupyterLab will eventually replace the classic Jupyter
-Notebook after JupyterLab reaches 1.0.
+classic Jupyter Notebook.
+
+.. _beta:
+
+Beta Series and Beyond
+~~~~~~~~~~~~~~~~~~~~~~
+The developer API will evolve in beta releases and will stabilize in JupyterLab 1.0.
+We appreciate feedback on our `GitHub issues page <https://github.com/jupyterlab/jupyterlab/issues>`
+as we evolve towards a stable extension development API for JupyterLab 1.0.
+
+We plan to release JupyterLab 1.0 later in 2018.
+The beta releases leading up to 1.0 will focus on
+stabilizing the extension development API, UI/UX improvements,
+and additional core features.
+All releases in the beta series will be stable enough for daily usage.
+
+JupyterLab 1.0 will eventually replace the classic Jupyter Notebook.
+Throughout this transition, the same notebook document format will be supported by both the classic Notebook and JupyterLab.
