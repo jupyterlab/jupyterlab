@@ -341,9 +341,8 @@ class _AppHandler(object):
         # Create the app dirs if needed.
         self._ensure_app_dirs()
 
-        # Install the package using a temporary directory.
-        with TemporaryDirectory() as tempdir:
-            info = self._install_extension(extension, tempdir)
+        # Install the package
+        info = self._install_extension(extension)
 
         name = info['name']
 
@@ -1084,10 +1083,11 @@ class _AppHandler(object):
 
         return data
 
-    def _install_extension(self, extension, tempdir):
+    def _install_extension(self, extension):
         """Install an extension with validation and return the name and path.
         """
-        info = self._extract_package(extension, tempdir)
+        with TemporaryDirectory() as tempdir:
+            info = self._extract_package(extension, tempdir)
         data = info['data']
 
         # Verify that the package is an extension.
@@ -1119,8 +1119,7 @@ class _AppHandler(object):
 
                 if version and name:
                     self.logger.warning('Found compatible version: %s', version)
-                    return self._install_extension(
-                        '%s@%s' % (name, version), tempdir)
+                    return self._install_extension('%s@%s' % (name, version))
 
             raise ValueError(msg)
 
