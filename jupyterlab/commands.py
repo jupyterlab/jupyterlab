@@ -19,8 +19,8 @@ import site
 import sys
 import tarfile
 from threading import Event
-from urllib.request import Request, urlopen, urljoin
-from urllib.error import HTTPError
+from urllib.request import Request, urlopen, urljoin, quote
+from urllib.error import URLError
 
 from ipython_genutils.tempdir import TemporaryDirectory
 from jupyter_core.paths import jupyter_config_path
@@ -1111,7 +1111,12 @@ class _AppHandler(object):
             if '@' not in extension[1:] and not info['is_dir']:
                 self.logger.warning('Incompatible extension:\n%s', msg)
                 name = info['name']
-                version = self._latest_compatible_package_version(name)
+                try:
+                    version = self._latest_compatible_package_version(name)
+                except URLError:
+                    # We cannot add any additional information to error message
+                    raise ValueError(msg)
+
                 if version and name:
                     self.logger.warning('Found compatible version: %s', version)
                     return self._install_extension(
@@ -1158,28 +1163,11 @@ class _AppHandler(object):
 
         return info
 
-    def _fetch_package_metadata(self, name):
-        """Fetch the metadata for a package from the npm registry"""
-        req = Request(
-            urljoin(self.registry, name),
-            method='GET',
-            headers={
-                'Accept': ('application/vnd.npm.install-v1+json;'
-                          ' q=1.0, application/json; q=0.8, */*')
-            }
-        )
-        try:
-            with urlopen(req) as response:
-                return json.load(response)
-        except HTTPError as exc:
-            self.logger.warning(
-                'Failed to fetch package metadata for %r: %r',
-                name, exc)
 
     def _latest_compatible_package_version(self, name):
         """Get the latest compatible version of a package"""
         core_data = self.info['core_data']
-        metadata = self._fetch_package_metadata(name)
+        metadata = _fetch_package_metadata(self.registry, name, self.logger)
         versions = metadata.get('versions', [])
 
         # Sort pre-release first, as we will reverse the sort:
@@ -1472,6 +1460,27 @@ def _semver_key(version, prerelease_first=False):
             v.prerelease))
 
     return key
+
+
+def _fetch_package_metadata(registry, name, logger):
+    """Fetch the metadata for a package from the npm registry"""
+    req = Request(
+        urljoin(registry, quote(name, safe='@')),
+        method='GET',
+        headers={
+            'Accept': ('application/vnd.npm.install-v1+json;'
+                        ' q=1.0, application/json; q=0.8, */*')
+        }
+    )
+    logger.debug('Fetching URL: %s' % (req.full_url))
+    try:
+        with urlopen(req) as response:
+            return json.load(response)
+    except URLError as exc:
+        logger.warning(
+            'Failed to fetch package metadata for %r: %r',
+            name, exc)
+        raise
 
 
 if __name__ == '__main__':
