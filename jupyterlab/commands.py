@@ -1332,6 +1332,20 @@ def _test_overlap(spec1, spec2):
     Returns `None` if we cannot determine compatibility,
     otherwise whether there is an overlap
     """
+    cmp = _compare_ranges(spec1, spec2)
+    if cmp is None:
+        return
+    return cmp == 0
+
+
+def _compare_ranges(spec1, spec2):
+    """Test whether two version specs overlap.
+
+    Returns `None` if we cannot determine compatibility,
+    otherwise return 0 if there is an overlap, 1 if
+    spec1 is lower/older than spec2, and -1 if spec1
+    is higher/newer than spec2.
+    """
     # Test for overlapping semver ranges.
     r1 = Range(spec1, True)
     r2 = Range(spec2, True)
@@ -1368,12 +1382,17 @@ def _test_overlap(spec1, spec2):
         ly = noop
 
     # Check for overlap.
-    return (
-        gte(x1, y1, True) and ly(x1, y2, True) or
+    if (gte(x1, y1, True) and ly(x1, y2, True) or
         gy(x2, y1, True) and ly(x2, y2, True) or
         gte(y1, x1, True) and lx(y1, x2, True) or
         gx(y2, x1, True) and lx(y2, x2, True)
-    )
+       ):
+       return 0
+    if gte(y1, x2, True):
+        return 1
+    if gte(x1, y2, True):
+        return -1
+    raise AssertionError('Unexpected case comparing version ranges')
 
 
 def _is_disabled(name, disabled=[]):
