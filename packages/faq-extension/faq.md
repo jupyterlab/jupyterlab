@@ -1,7 +1,7 @@
 # Frequently Asked Questions (FAQ)
 
 Below are some frequently asked questions regarding the beta release series.
-Click on the relevant question to be directed to relevant information in our documentation or our GitHub repo.
+Click on a question to be directed to relevant information in our documentation or our GitHub repo.
 
 ## General
 
