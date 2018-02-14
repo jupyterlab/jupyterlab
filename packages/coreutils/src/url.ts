@@ -96,7 +96,7 @@ namespace URLExt {
    * Test whether the url is a local url.
    *
    * #### Notes
-   * This function returns `false` for any fully qualified URL, including
+   * This function returns `false` for any fully qualified url, including
    * `data:`, `file:`, and `//` protocol URLs.
    */
   export
