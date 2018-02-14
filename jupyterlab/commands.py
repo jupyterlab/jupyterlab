@@ -1109,7 +1109,6 @@ class _AppHandler(object):
             #   but after first char to allow for scope marker).
             # - Package is locally installed.
             if '@' not in extension[1:] and not info['is_dir']:
-                self.logger.warning('Incompatible extension:\n%s', msg)
                 name = info['name']
                 try:
                     version = self._latest_compatible_package_version(name)
@@ -1118,6 +1117,7 @@ class _AppHandler(object):
                     raise ValueError(msg)
 
                 if version and name:
+                    self.logger.warning('Incompatible extension:\n%s', msg)
                     self.logger.warning('Found compatible version: %s', version)
                     return self._install_extension('%s@%s' % (name, version))
 
