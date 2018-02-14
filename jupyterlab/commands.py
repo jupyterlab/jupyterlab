@@ -1121,6 +1121,13 @@ class _AppHandler(object):
                     self.logger.warning('Found compatible version: %s', version)
                     return self._install_extension('%s@%s' % (name, version))
 
+                # Extend message to better guide the user what to do:
+                conflicts = '\n'.join(msg.splitlines()[2:])
+                msg = ''.join((
+                    self._format_no_compatible_package_version(extension),
+                    "\n\n",
+                    conflicts))
+
             raise ValueError(msg)
 
         # Move the file to the app directory.
@@ -1180,6 +1187,48 @@ class _AppHandler(object):
             errors = _validate_compatibility(name, deps, core_data)
             if not errors:
                 return version
+
+    def _format_no_compatible_package_version(self, name):
+        """Get the latest compatible version of a package"""
+        core_data = self.info['core_data']
+        metadata = _fetch_package_metadata(self.registry, name, self.logger)
+        versions = metadata.get('versions', [])
+
+        # Sort pre-release first, as we will reverse the sort:
+        def sort_key(key_value):
+            return _semver_key(key_value[0], prerelease_first=True)
+
+        store = tuple(sorted(versions.items(), key=sort_key, reverse=True))
+        latest_deps = store[0][1].get('dependencies', {})
+        core_deps = core_data['dependencies']
+        singletons = core_data['jupyterlab']['singletonPackages']
+
+        # Whether lab version is too new:
+        lab_newer_than_latest = False
+        # Whether the latest version of the extension depend on a "future" version
+        # of a singleton package (from the perspective of current lab version):
+        latest_newer_than_lab = False
+
+        for (key, value) in latest_deps.items():
+            if key in singletons:
+                c = _compare_ranges(core_deps[key], value)
+                lab_newer_than_latest = lab_newer_than_latest or c < 0
+                latest_newer_than_lab = latest_newer_than_lab or c > 0
+
+        if lab_newer_than_latest:
+            # All singleton deps in current version of lab are newer than those
+            # in the latest version of the extension
+            return ("This extension does not yet support the current version of "
+                    "JupyterLab.\n")
+
+
+        parts = ["No version of {extension} could be found that is compatible with "
+                 "the current version of JupyterLab."]
+        if latest_newer_than_lab:
+            parts.extend(("However, it seems to support a new version of JupyterLab.",
+                          "Consider upgrading JupyterLab."))
+
+        return " ".join(parts).format(extension=name)
 
     def _run(self, cmd, **kwargs):
         """Run the command using our logger and abort callback.
