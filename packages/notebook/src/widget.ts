@@ -1829,7 +1829,7 @@ class Notebook extends StaticNotebook {
       // No cell has focus, ensure command mode.
       this.mode = 'command';
     }
-    if (target !== this.node) {
+    if (this.mode === 'command' && target !== this.node) {
       delete this.node.dataset[CODE_RUNNER];
     } else {
       this.node.dataset[CODE_RUNNER] = 'true';
