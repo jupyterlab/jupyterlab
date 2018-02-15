@@ -287,12 +287,14 @@
   display: none;
 }
 
-
 .jp-LinkedOutputView .jp-OutputArea {
   height: 100%;
-  padding: var(--jp-notebook-padding) 0px var(--jp-notebook-padding) var(--jp-notebook-padding);
+  padding: 0;
 }
 
+.jp-LinkedOutputView .jp-OutputArea-child:only-child {
+  height: 100%;
+}
 
 .jp-LinkedOutputView-toolbar {
   box-shadow: var(--jp-toolbar-box-shadow);
@@ -300,7 +302,6 @@
   height: var(--jp-toolbar-micro-height);
   z-index: 1;
 }
-
 
 /*-----------------------------------------------------------------------------
 | Presentation Mode (.jp-mod-presentationMode)
