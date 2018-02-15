@@ -42,54 +42,48 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
     super(options);
     this.addClass('jp-MainAreaWidget');
     this.id = uuid();
-    const content = this.content = options.content;
-    if (!content.id) {
-      content.id = uuid();
-    }
-    content.node.tabIndex = -1;
+    const content = this.content = Promise.resolve(options.content);
+
     const layout = this.layout = new BoxLayout();
     layout.direction = 'top-to-bottom';
-    const toolbar = this.toolbar = options.toolbar || new Toolbar();
-
     const spinner = new Spinner();
     layout.addWidget(spinner);
 
-    this.ready = options.ready || Promise.resolve(void 0);
+    this._toolbar = options.toolbar || new Toolbar();
 
-    this._updateTitle();
-    content.title.changed.connect(this._updateTitle, this);
-    this.title.closable = true;
-    this.title.changed.connect(this._updateContentTitle, this);
-    content.disposed.connect(() => this.dispose());
-
-    this.ready.then(() => {
+    this.content.then(() => {
+      this._content = content;
       spinner.parent = null;
-      layout.addWidget(toolbar);
       layout.addWidget(content);
+      layout.addWidget(toolbar);
       BoxLayout.setStretch(toolbar, 0);
       BoxLayout.setStretch(content, 1);
+
+      if (!content.id) {
+        content.id = uuid();
+      }
+      content.node.tabIndex = -1;
+
+      this._updateTitle();
+      content.title.changed.connect(this._updateTitle, this);
+      this.title.closable = true;
+      this.title.changed.connect(this._updateContentTitle, this);
+      content.disposed.connect(() => this.dispose());
     });
+
   }
 
   /**
    * The content hosted by the widget.
    */
-  readonly content: T;
+  readonly content: Promise<T>;
 
   /**
    * The toolbar hosted by the widget.
    */
-  readonly toolbar: Toolbar;
-
-  /**
-   * A promise that resolves when the main area widget is ready.
-   *
-   * #### Notes
-   * The toolbar and content should not be considered programmatically
-   * active until this promise has resolved.  A spinner will be shown
-   * until the ready promise is fulfilled.
-   */
-   readonly ready: Promise<void>;
+  get toolbar(): Promise<Toolbar> {
+    return this.content.then(() => this._toolbar);
+  }
 
   /**
    * Handle the DOM events for the widget.
@@ -106,9 +100,9 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
     case 'mouseup':
     case 'mouseout':
       let target = event.target as HTMLElement;
-      if (this.toolbar.node.contains(document.activeElement) &&
-          target.tagName !== 'SELECT') {
-        this.content.node.focus();
+      if (this._toolbar.node.contains(document.activeElement) &&
+          target.tagName !== 'SELECT' && this._content) {
+        this._content.node.focus();
       }
       break;
     default:
@@ -120,27 +114,30 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
    * Handle `after-attach` messages for the widget.
    */
   protected onAfterAttach(msg: Message): void {
-    this.toolbar.node.addEventListener('mouseup', this);
-    this.toolbar.node.addEventListener('mouseout', this);
+    this._toolbar.node.addEventListener('mouseup', this);
+    this._toolbar.node.addEventListener('mouseout', this);
   }
 
   /**
    * Handle `before-detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    this.toolbar.node.removeEventListener('mouseup', this);
-    this.toolbar.node.removeEventListener('mouseout', this);
+    this._toolbar.node.removeEventListener('mouseup', this);
+    this._toolbar.node.removeEventListener('mouseout', this);
   }
 
   /**
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
+    if (!this._content) {
+      return;
+    }
     if (!this.node.contains(document.activeElement)) {
-      this.content.node.focus();
+      this._content.node.focus();
     }
     // Give the content a chance to activate.
-    this.content.activate();
+    this._content.activate();
   }
 
   /**
@@ -158,13 +155,14 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
       return;
     }
     this._changeGuard = true;
-    this.title.label = this.content.title.label;
-    this.title.mnemonic = this.content.title.mnemonic;
-    this.title.iconClass = this.content.title.iconClass;
-    this.title.iconLabel = this.content.title.iconLabel;
-    this.title.caption = this.content.title.caption;
-    this.title.className = this.content.title.className;
-    this.title.dataset = this.content.title.dataset;
+    const content = this._content;
+    this.title.label = content.title.label;
+    this.title.mnemonic = content.title.mnemonic;
+    this.title.iconClass = content.title.iconClass;
+    this.title.iconLabel = content.title.iconLabel;
+    this.title.caption = content.title.caption;
+    this.title.className = content.title.className;
+    this.title.dataset = content.title.dataset;
     this._changeGuard = false;
   }
 
@@ -176,17 +174,20 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
       return;
     }
     this._changeGuard = true;
-    this.content.title.label = this.title.label;
-    this.content.title.mnemonic = this.title.mnemonic;
-    this.content.title.iconClass = this.title.iconClass;
-    this.content.title.iconLabel = this.title.iconLabel;
-    this.content.title.caption = this.title.caption;
-    this.content.title.className = this.title.className;
-    this.content.title.dataset = this.title.dataset;
+    const content = this._content;
+    content.title.label = this.title.label;
+    content.title.mnemonic = this.title.mnemonic;
+    content.title.iconClass = this.title.iconClass;
+    content.title.iconLabel = this.title.iconLabel;
+    content.title.caption = this.title.caption;
+    content.title.className = this.title.className;
+    content.title.dataset = this.title.dataset;
     this._changeGuard = false;
   }
 
   private _changeGuard = false;
+  private _content: Widget | null = null;
+  private _toolbar: Toolbar;
 }
 
 
@@ -203,16 +204,11 @@ namespace MainAreaWidget {
     /**
      * The child widget to wrap.
      */
-    content: T;
+    content: T | Promise<T>;
 
     /**
      * The toolbar to use for the widget.  Defaults to an empty toolbar.
      */
     toolbar?: Toolbar;
-
-    /**
-     * An optional promise for when the widget is ready.
-     */
-    ready?: Promise<void>;
   }
 }
