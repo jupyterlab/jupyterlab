@@ -377,7 +377,9 @@ class OutputAreaModel implements IOutputAreaModel {
     }
   }
 
-  // Remove characters that are overridden by backspace characters
+  /**
+   * Remove characters that are overridden by backspace characters.
+   */
   private _fixBackspace(txt: string): string {
     let tmp = txt;
     do {
@@ -388,8 +390,10 @@ class OutputAreaModel implements IOutputAreaModel {
     return txt;
   }
 
-  // Remove chunks that should be overridden by the effect of
-  // carriage return characters
+  /**
+   * Remove chunks that should be overridden by the effect of
+   * carriage return characters.
+   */
   private _fixCarriageReturn(txt: string): string {
     txt = txt.replace(/\r+\n/gm, '\n'); // \r followed by \n --> newline
     while (txt.search(/\r[^$]/g) > -1) {
