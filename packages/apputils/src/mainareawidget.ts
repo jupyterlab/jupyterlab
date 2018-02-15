@@ -14,6 +14,10 @@ import {
 } from '@phosphor/widgets';
 
 import {
+  Spinner
+} from './spinner';
+
+import {
   Toolbar
 } from './toolbar';
 
@@ -38,25 +42,33 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
     super(options);
     this.addClass('jp-MainAreaWidget');
     this.id = uuid();
-    let content = this.content = options.content;
+    const content = this.content = options.content;
     if (!content.id) {
       content.id = uuid();
     }
     content.node.tabIndex = -1;
-    let layout = this.layout = new BoxLayout();
+    const layout = this.layout = new BoxLayout();
     layout.direction = 'top-to-bottom';
-    let toolbar = this.toolbar = options.toolbar || new Toolbar();
+    const toolbar = this.toolbar = options.toolbar || new Toolbar();
 
-    layout.addWidget(toolbar);
-    layout.addWidget(content);
-    BoxLayout.setStretch(toolbar, 0);
-    BoxLayout.setStretch(content, 1);
+    const spinner = new Spinner();
+    layout.addWidget(spinner);
+
+    this.ready = options.ready || Promise.resolve(void 0);
 
     this._updateTitle();
     content.title.changed.connect(this._updateTitle, this);
     this.title.closable = true;
     this.title.changed.connect(this._updateContentTitle, this);
     content.disposed.connect(() => this.dispose());
+
+    this.ready.then(() => {
+      spinner.parent = null;
+      layout.addWidget(toolbar);
+      layout.addWidget(content);
+      BoxLayout.setStretch(toolbar, 0);
+      BoxLayout.setStretch(content, 1);
+    });
   }
 
   /**
@@ -68,6 +80,16 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
    * The toolbar hosted by the widget.
    */
   readonly toolbar: Toolbar;
+
+  /**
+   * A promise that resolves when the main area widget is ready.
+   *
+   * #### Notes
+   * The toolbar and content should not be considered programmatically
+   * active until this promise has resolved.  A spinner will be shown
+   * until the ready promise is fulfilled.
+   */
+   readonly ready: Promise<void>;
 
   /**
    * Handle the DOM events for the widget.
@@ -187,5 +209,10 @@ namespace MainAreaWidget {
      * The toolbar to use for the widget.  Defaults to an empty toolbar.
      */
     toolbar?: Toolbar;
+
+    /**
+     * An optional promise for when the widget is ready.
+     */
+    ready?: Promise<void>;
   }
 }
