@@ -74,7 +74,6 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, registry: ISetting
   const factoryService = editorServices.factoryService;
   const editorFactory = factoryService.newInlineEditor;
   const tracker = new InstanceTracker<SettingEditor>({ namespace });
-  let editor: SettingEditor;
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -99,8 +98,7 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, registry: ISetting
 
       const key = plugin.id;
       const when = app.restored;
-
-      editor = new SettingEditor({
+      const editor = new SettingEditor({
         commands: {
           registry: commands,
           debug: CommandIDs.debug,
