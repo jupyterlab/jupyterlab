@@ -32,16 +32,16 @@ utils.run('npm run build:packages');
 utils.run('npm version patch', { cwd: packagePath });
 utils.run('npm publish', { cwd: packagePath});
 
-// // Update the static folder.
-// utils.run('npm run build:update');
+// Update the static folder.
+utils.run('npm run build:update');
 
-// // Extract the new package info.
-// let data = utils.readJSONFile(path.join(packagePath, 'package.json'));
-// let name = data.name;
-// let version = data.version;
+// Extract the new package info.
+let data = utils.readJSONFile(path.join(packagePath, 'package.json'));
+let name = data.name;
+let version = data.version;
 
-// utils.run('npm run integrity');
-// utils.run('git commit -a -m "Release ' + name + '@' + version + '"');
-// utils.run('git tag ' + name + '@' + version);
+utils.run('npm run integrity');
+utils.run('git commit -a -m "Release ' + name + '@' + version + '"');
+utils.run('git tag ' + name + '@' + version);
 
-// console.log('\n\nFinished, make sure to push the commit and the tag.');
+console.log('\n\nFinished, make sure to push the commit and the tag.');
