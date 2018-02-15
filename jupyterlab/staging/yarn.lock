@@ -511,15 +511,15 @@
     "@phosphor/messaging" "^1.2.2"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/notebook@^0.15.4", "@jupyterlab/notebook@^0.15.5":
-  version "0.15.5"
-  resolved "https://registry.npmjs.org/@jupyterlab/notebook/-/notebook-0.15.5.tgz#db6f02933a2a023f89b05fec30204a2e5d544766"
+"@jupyterlab/notebook@^0.15.4", "@jupyterlab/notebook@^0.15.6":
+  version "0.15.6"
+  resolved "https://registry.npmjs.org/@jupyterlab/notebook/-/notebook-0.15.6.tgz#ae7a0fce0ff6a4eaf9adc8844925f3a428db3350"
   dependencies:
     "@jupyterlab/apputils" "^0.15.5"
     "@jupyterlab/cells" "^0.15.4"
     "@jupyterlab/codeeditor" "^0.15.4"
-    "@jupyterlab/coreutils" "^1.0.6"
-    "@jupyterlab/docregistry" "^0.15.4"
+    "@jupyterlab/coreutils" "^1.0.9"
+    "@jupyterlab/docregistry" "^0.15.5"
     "@jupyterlab/observables" "^1.0.6"
     "@jupyterlab/rendermime" "^0.15.4"
     "@jupyterlab/services" "^1.1.4"
