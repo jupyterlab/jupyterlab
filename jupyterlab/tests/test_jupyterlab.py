@@ -474,7 +474,7 @@ class TestExtension(TestCase):
             return { "dependencies": {
                 '@jupyterlab/application': ver
             }}
-        def _mock_metadata(self, name):
+        def _mock_metadata(registry, name, logger):
             assert name == 'mockextension'
             return {
                 "name": name,
@@ -514,7 +514,7 @@ class TestExtension(TestCase):
             return orig_install(self, name, *args, **kwargs)
 
         p1 = patch.object(
-            commands._AppHandler,
+            commands,
             '_fetch_package_metadata',
             _mock_metadata)
         p2 = patch.object(
