@@ -551,7 +551,7 @@
       "properties": {
         "command": { "default": "runmenu:run" },
         "keys": { "default": ["Shift Enter"] },
-        "selector": { "default": "[data-jp-code-runner]" }
+        "selector": { "default": "[data-jp-code-runner].focus" }
       },
       "type": "object"
     },
