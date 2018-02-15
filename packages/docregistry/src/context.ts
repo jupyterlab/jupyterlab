@@ -262,7 +262,10 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         return this._populate();
       }
     }).catch(err => {
-      this._handleError(err, 'File Save Error');
+      const localPath = this._manager.contents.localPath(this._path);
+      const name = PathExt.basename(localPath);
+      this._handleError(err, `File Save Error for ${name}`);
+      throw err;
     });
   }
 
@@ -327,7 +330,10 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         return this._populate();
       }
     }).catch(err => {
-      this._handleError(err, 'File Load Error');
+      const localPath = this._manager.contents.localPath(this._path);
+      const name = PathExt.basename(localPath);
+      this._handleError(err, `File Load Error for ${name}`);
+      throw err;
     });
   }
 

@@ -468,6 +468,7 @@ class DocumentManager implements IDisposable {
     );
 
     let context: Private.IContext | null = null;
+    let ready: Promise<void> | null = null;
 
     // Handle the load-from-disk case
     if (which === 'open') {
@@ -477,16 +478,20 @@ class DocumentManager implements IDisposable {
         context = this._createContext(path, factory, preference);
         // Populate the model, either from disk or a
         // model backend.
-        context.fromStore();
+        ready = context.fromStore();
       }
     } else if (which === 'create') {
       context = this._createContext(path, factory, preference);
       // Immediately save the contents to disk.
-      context.save();
+      ready = context.save();
     }
 
     let widget = this._widgetManager.createWidget(widgetFactory, context!);
     this._opener.open(widget, options || {});
+
+    // If the initial opening of the context fails, dispose of the widget.
+    ready.catch(err => { widget.close(); });
+
     return widget;
   }
 
