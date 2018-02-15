@@ -18,10 +18,6 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  h, VirtualDOM
-} from '@phosphor/virtualdom';
-
-import {
   CodeEditor
 } from './editor';
 
@@ -444,20 +440,39 @@ namespace Private {
    */
   export
   function createEditorNode(options: JSONEditor.IOptions): HTMLElement {
-    let revertTitle = 'Revert changes to data';
-    let confirmTitle = 'Commit changes to data';
-    let collapseClass = COLLAPSER_CLASS;
-    if (options.collapsible) {
-      collapseClass += ` ${COLLAPSE_ENABLED_CLASS}`;
-    }
-    return VirtualDOM.realize(
-      h.div({ className: JSONEDITOR_CLASS },
-        h.div({ className: HEADER_CLASS },
-          h.span({ className: TITLE_CLASS }, options.title || ''),
-          h.span({ className: collapseClass }),
-          h.span({ className: REVERT_CLASS, title: revertTitle }),
-          h.span({ className: COMMIT_CLASS, title: confirmTitle })),
-        h.div({ className: HOST_CLASS }))
-    );
+    const revertTitle = 'Revert changes to data';
+    const confirmTitle = 'Commit changes to data';
+
+    // Create nodes.
+    const editor = document.createElement('div');
+    const header = document.createElement('div');
+    const title = document.createElement('span');
+    const collapser = document.createElement('span');
+    const revert = document.createElement('span');
+    const confirm = document.createElement('span');
+    const host = document.createElement('div');
+
+    // Populate nodes.
+    editor.className = JSONEDITOR_CLASS;
+    header.className = HEADER_CLASS;
+    title.className = TITLE_CLASS;
+    title.textContent = options.title || '';
+    collapser.className = options.collapsible ?
+      `${COLLAPSER_CLASS} ${COLLAPSE_ENABLED_CLASS}` : COLLAPSER_CLASS;
+    revert.className = REVERT_CLASS;
+    revert.setAttribute('title', revertTitle);
+    confirm.className = COMMIT_CLASS;
+    confirm.setAttribute('title', confirmTitle);
+    host.className = HOST_CLASS;
+
+    // Compose nodes.
+    header.appendChild(title);
+    header.appendChild(collapser);
+    header.appendChild(revert);
+    header.appendChild(confirm);
+    editor.appendChild(header);
+    editor.appendChild(host);
+
+    return editor;
   }
 }
