@@ -387,8 +387,10 @@ class OutputAreaModel implements IOutputAreaModel {
     tmp = tmp.replace(/^\x08+/, ''); // Dissolve backspaces at start of text
     do {
       // Remove any character preceding a backspace
-      tmp = tmp.replace(/.\x08/gm, '');
-    } while (tmp.indexOf('\x08') > -1);
+      tmp = tmp.replace(/.\x08/m, '');
+      // Dissolve backspaces at start of text
+      tmp = tmp.replace(/^\x08+/, '');
+    } while (tmp.indexOf('\x08') > 0);
 
     // Remove chunks that should be overridden by carriage returns
     do {
