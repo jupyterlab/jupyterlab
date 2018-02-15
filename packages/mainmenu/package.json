@@ -28,7 +28,7 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^0.15.4",
+    "@jupyterlab/apputils": "^0.15.5",
     "@jupyterlab/services": "^1.1.4",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/commands": "^1.4.0",

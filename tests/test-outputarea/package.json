@@ -15,7 +15,7 @@
     "watch:src": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^0.15.4",
+    "@jupyterlab/apputils": "^0.15.5",
     "@jupyterlab/outputarea": "^0.15.4",
     "@jupyterlab/rendermime": "^0.15.4",
     "@jupyterlab/services": "^1.1.4",

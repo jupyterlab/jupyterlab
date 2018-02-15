@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^0.15.4",
-    "@jupyterlab/apputils": "^0.15.4",
+    "@jupyterlab/apputils": "^0.15.5",
     "font-awesome": "~4.7.0"
   },
   "devDependencies": {

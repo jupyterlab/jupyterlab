@@ -34,7 +34,7 @@
   "dependencies": {
     "@jupyterlab/application": "^0.15.4",
     "@jupyterlab/application-extension": "^0.15.4",
-    "@jupyterlab/apputils": "^0.15.4",
+    "@jupyterlab/apputils": "^0.15.5",
     "@jupyterlab/apputils-extension": "^0.15.4",
     "@jupyterlab/cells": "^0.15.4",
     "@jupyterlab/codeeditor": "^0.15.4",
