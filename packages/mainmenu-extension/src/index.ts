@@ -135,7 +135,8 @@ const menuPlugin: JupyterLabPlugin<IMainMenu> = {
 /**
  * Create the basic `Edit` menu.
  */
-export function createEditMenu(app: JupyterLab, menu: EditMenu): void {
+export
+function createEditMenu(app: JupyterLab, menu: EditMenu): void {
   const commands = menu.menu.commands;
 
   // Add the undo/redo commands the the Edit menu.
@@ -212,7 +213,8 @@ export function createEditMenu(app: JupyterLab, menu: EditMenu): void {
 /**
  * Create the basic `File` menu.
  */
-export function createFileMenu(app: JupyterLab, menu: FileMenu): void {
+export
+function createFileMenu(app: JupyterLab, menu: FileMenu): void {
   const commands = menu.menu.commands;
 
   // Add a delegator command for closing and cleaning up an activity.
@@ -282,7 +284,8 @@ export function createFileMenu(app: JupyterLab, menu: FileMenu): void {
 /**
  * Create the basic `Kernel` menu.
  */
-export function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
+export
+function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
   const commands = menu.menu.commands;
 
   commands.addCommand(CommandIDs.interruptKernel, {
@@ -358,7 +361,8 @@ export function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
 /**
  * Create the basic `View` menu.
  */
-export function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
+export
+function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
   const commands = menu.menu.commands;
 
   commands.addCommand(CommandIDs.lineNumbering, {
@@ -401,7 +405,8 @@ export function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
   ], 1000);
 }
 
-export function createRunMenu(app: JupyterLab, menu: RunMenu): void {
+export
+function createRunMenu(app: JupyterLab, menu: RunMenu): void {
   const commands = menu.menu.commands;
 
   commands.addCommand(CommandIDs.run, {
@@ -446,11 +451,13 @@ export function createRunMenu(app: JupyterLab, menu: RunMenu): void {
   menu.addGroup(runAllGroup, 999);
 }
 
-export function createSettingsMenu(app: JupyterLab, menu: SettingsMenu): void {
+export
+function createSettingsMenu(app: JupyterLab, menu: SettingsMenu): void {
   menu.addGroup([{ command: 'settingeditor:open' }], 1000);
 }
 
-export function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
+export
+function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
   const commands = app.commands;
 
   // Add commands for cycling the active tabs.
