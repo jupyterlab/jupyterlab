@@ -341,8 +341,9 @@ class _AppHandler(object):
         # Create the app dirs if needed.
         self._ensure_app_dirs()
 
-        # Install the package
-        info = self._install_extension(extension)
+        # Install the package using a temporary directory.
+        with TemporaryDirectory() as tempdir:
+            info = self._install_extension(extension, tempdir)
 
         name = info['name']
 
@@ -1083,11 +1084,10 @@ class _AppHandler(object):
 
         return data
 
-    def _install_extension(self, extension):
+    def _install_extension(self, extension, tempdir):
         """Install an extension with validation and return the name and path.
         """
-        with TemporaryDirectory() as tempdir:
-            info = self._extract_package(extension, tempdir)
+        info = self._extract_package(extension, tempdir)
         data = info['data']
 
         # Verify that the package is an extension.
@@ -1119,7 +1119,9 @@ class _AppHandler(object):
                 if version and name:
                     self.logger.warning('Incompatible extension:\n%s', msg)
                     self.logger.warning('Found compatible version: %s', version)
-                    return self._install_extension('%s@%s' % (name, version))
+                    with TemporaryDirectory() as tempdir2:
+                        return self._install_extension(
+                            '%s@%s' % (name, version), tempdir2)
 
                 # Extend message to better guide the user what to do:
                 conflicts = '\n'.join(msg.splitlines()[2:])
