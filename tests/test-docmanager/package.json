@@ -15,9 +15,9 @@
     "watch:src": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^1.0.6",
-    "@jupyterlab/docmanager": "^0.15.4",
-    "@jupyterlab/docregistry": "^0.15.4",
+    "@jupyterlab/coreutils": "^1.0.9",
+    "@jupyterlab/docmanager": "^0.15.5",
+    "@jupyterlab/docregistry": "^0.15.5",
     "@jupyterlab/services": "^1.1.4",
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/widgets": "^1.5.0",

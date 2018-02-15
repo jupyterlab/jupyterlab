@@ -15,9 +15,9 @@
     "watch:src": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^1.0.6",
+    "@jupyterlab/coreutils": "^1.0.9",
     "@jupyterlab/csvviewer": "^0.15.4",
-    "@jupyterlab/docregistry": "^0.15.4",
+    "@jupyterlab/docregistry": "^0.15.5",
     "@jupyterlab/services": "^1.1.4",
     "@phosphor/widgets": "^1.5.0",
     "expect.js": "~0.3.1",

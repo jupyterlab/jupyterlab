@@ -30,7 +30,7 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^1.0.6",
+    "@jupyterlab/coreutils": "^1.0.9",
     "@jupyterlab/services": "^1.1.4",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/commands": "^1.4.0",

@@ -10,8 +10,8 @@
   "dependencies": {
     "@jupyterlab/apputils": "^0.15.5",
     "@jupyterlab/codemirror": "^0.15.4",
-    "@jupyterlab/docmanager": "^0.15.4",
-    "@jupyterlab/docregistry": "^0.15.4",
+    "@jupyterlab/docmanager": "^0.15.5",
+    "@jupyterlab/docregistry": "^0.15.5",
     "@jupyterlab/filebrowser": "^0.15.4",
     "@jupyterlab/fileeditor": "^0.15.4",
     "@jupyterlab/services": "^1.1.4",
