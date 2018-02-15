@@ -135,6 +135,7 @@ const menuPlugin: JupyterLabPlugin<IMainMenu> = {
 /**
  * Create the basic `Edit` menu.
  */
+export
 function createEditMenu(app: JupyterLab, menu: EditMenu): void {
   const commands = menu.menu.commands;
 
@@ -212,6 +213,7 @@ function createEditMenu(app: JupyterLab, menu: EditMenu): void {
 /**
  * Create the basic `File` menu.
  */
+export
 function createFileMenu(app: JupyterLab, menu: FileMenu): void {
   const commands = menu.menu.commands;
 
@@ -282,6 +284,7 @@ function createFileMenu(app: JupyterLab, menu: FileMenu): void {
 /**
  * Create the basic `Kernel` menu.
  */
+export
 function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
   const commands = menu.menu.commands;
 
@@ -358,6 +361,7 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
 /**
  * Create the basic `View` menu.
  */
+export
 function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
   const commands = menu.menu.commands;
 
@@ -401,6 +405,7 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
   ], 1000);
 }
 
+export
 function createRunMenu(app: JupyterLab, menu: RunMenu): void {
   const commands = menu.menu.commands;
 
@@ -446,9 +451,12 @@ function createRunMenu(app: JupyterLab, menu: RunMenu): void {
   menu.addGroup(runAllGroup, 999);
 }
 
+export
 function createSettingsMenu(app: JupyterLab, menu: SettingsMenu): void {
   menu.addGroup([{ command: 'settingeditor:open' }], 1000);
 }
+
+export
 function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
   const commands = app.commands;
 
