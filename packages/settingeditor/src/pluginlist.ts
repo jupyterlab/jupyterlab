@@ -16,7 +16,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  ElementAttrs, h, VirtualDOM
+  h, VirtualDOM
 } from '@phosphor/virtualdom';
 
 import {
@@ -273,22 +273,23 @@ namespace Private {
    */
   export
   function createSwitcher(current: 'raw' | 'table'): HTMLElement {
-    let raw: ElementAttrs;
-    let table: ElementAttrs = { dataset: { editor: 'table' } };
+    const switcher = document.createElement('div');
+    const raw = document.createElement('button');
+    const table = document.createElement('button');
 
-    if (current === 'raw') {
-      raw = { dataset: { editor: 'raw' }, disabled: 'disabled' };
-      table = { dataset: { editor: 'table' } };
-    } else {
-      raw = { dataset: { editor: 'raw' } };
-      table = { dataset: { editor: 'table' }, disabled: 'disabled' };
-    }
+    raw.textContent = 'Raw View';
+    raw.dataset['editor'] = 'raw';
+    raw.disabled = current === 'raw';
 
-    return VirtualDOM.realize(
-      h.div({ className: PLUGIN_LIST_SWITCHER_CLASS },
-        h.button(raw, 'Raw View'),
-        h.button(table, 'Table View'))
-    );
+    table.textContent = 'Table View';
+    table.dataset['editor'] = 'table';
+    table.disabled = current === 'table';
+
+    switcher.className = PLUGIN_LIST_SWITCHER_CLASS;
+    switcher.appendChild(raw);
+    switcher.appendChild(table);
+
+    return switcher;
   }
 
   /**
@@ -318,7 +319,7 @@ namespace Private {
 
     // Finally, use the defaults from the registry schema.
     if (!hint) {
-      const properties = registry.schema.properties;
+      const { properties } = registry.schema;
 
       hint = properties && properties[key] && properties[key].default;
     }
