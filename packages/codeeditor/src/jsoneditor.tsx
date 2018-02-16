@@ -17,6 +17,10 @@ import {
   Widget
 } from '@phosphor/widgets';
 
+import * as React from 'react';
+
+import * as ReactDOM from 'react-dom';
+
 import {
   CodeEditor
 } from './editor';
@@ -82,9 +86,14 @@ class JSONEditor extends Widget {
    * Construct a new JSON editor.
    */
   constructor(options: JSONEditor.IOptions) {
-    super({ node: Private.createEditorNode(options) });
+    super();
+
+    this.addClass(JSONEDITOR_CLASS);
+    ReactDOM.render(Private.createEditorContent(options), this.node);
+
     let host = this.editorHostNode;
     let model = new CodeEditor.Model();
+
     model.value.text = 'No data!';
     model.mimeType = 'application/json';
     model.value.changed.connect(this._onValueChanged, this);
@@ -436,43 +445,26 @@ namespace JSONEditor {
  */
 namespace Private {
   /**
-   * Create the node for the JSON Editor.
+   * Create the JSON Editor node's content.
    */
   export
-  function createEditorNode(options: JSONEditor.IOptions): HTMLElement {
+  function createEditorContent(options: JSONEditor.IOptions): React.ReactElement<any> {
     const revertTitle = 'Revert changes to data';
     const confirmTitle = 'Commit changes to data';
-
-    // Create nodes.
-    const editor = document.createElement('div');
-    const header = document.createElement('div');
-    const title = document.createElement('span');
-    const collapser = document.createElement('span');
-    const revert = document.createElement('span');
-    const confirm = document.createElement('span');
-    const host = document.createElement('div');
-
-    // Populate nodes.
-    editor.className = JSONEDITOR_CLASS;
-    header.className = HEADER_CLASS;
-    title.className = TITLE_CLASS;
-    title.textContent = options.title || '';
-    collapser.className = options.collapsible ?
+    const title = options.title || '';
+    const collapseClass = options.collapsible ?
       `${COLLAPSER_CLASS} ${COLLAPSE_ENABLED_CLASS}` : COLLAPSER_CLASS;
-    revert.className = REVERT_CLASS;
-    revert.setAttribute('title', revertTitle);
-    confirm.className = COMMIT_CLASS;
-    confirm.setAttribute('title', confirmTitle);
-    host.className = HOST_CLASS;
 
-    // Compose nodes.
-    header.appendChild(title);
-    header.appendChild(collapser);
-    header.appendChild(revert);
-    header.appendChild(confirm);
-    editor.appendChild(header);
-    editor.appendChild(host);
-
-    return editor;
+    return (
+      <React.Fragment>
+        <div className={HEADER_CLASS}>
+          <span className={TITLE_CLASS}>{title}</span>
+          <span className={collapseClass}></span>
+          <span className={REVERT_CLASS} title={revertTitle}></span>
+          <span className={COMMIT_CLASS} title={confirmTitle}></span>
+        </div>
+        <div className={HOST_CLASS}></div>
+      </React.Fragment>
+    );
   }
 }

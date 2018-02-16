@@ -37,7 +37,7 @@
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/properties": "^1.1.2",
     "@phosphor/widgets": "^1.5.0",
-    "react": "~16.0.0"
+    "react": "~16.2.0"
   },
   "devDependencies": {
     "@types/react": "~16.0.19",
