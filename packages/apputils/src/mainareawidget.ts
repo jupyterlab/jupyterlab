@@ -79,10 +79,12 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
         this.node.removeChild(this._spinner.node);
         this._spinner.dispose();
         // Show the error to the user.
+        // TODO: show a dialog and dispose of the widget?
         const pre = document.createElement('pre');
         pre.textContent = String(e);
         this.node.appendChild(pre);
       });
+    // Handle no populated promise.
     } else {
       this._isPopulated = true;
       this._spinner.dispose();
