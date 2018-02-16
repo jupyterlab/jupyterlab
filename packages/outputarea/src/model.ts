@@ -377,31 +377,40 @@ class OutputAreaModel implements IOutputAreaModel {
     }
   }
 
+  /**
+   * Remove characters that are overridden by backspace characters.
+   */
+  private _fixBackspace(txt: string): string {
+    let tmp = txt;
+    do {
+      txt = tmp;
+      // Cancel out anything-but-newline followed by backspace
+      tmp = txt.replace(/[^\n]\x08/gm, '');
+    } while (tmp.length < txt.length);
+    return txt;
+  }
+
+  /**
+   * Remove chunks that should be overridden by the effect of
+   * carriage return characters.
+   */
+  private _fixCarriageReturn(txt: string): string {
+    txt = txt.replace(/\r+\n/gm, '\n'); // \r followed by \n --> newline
+    while (txt.search(/\r[^$]/g) > -1) {
+      let base = txt.match(/^(.*)\r+/m)[1];
+      let insert = txt.match(/\r+(.*)$/m)[1];
+      insert = insert + base.slice(insert.length, base.length);
+      txt = txt.replace(/\r+.*$/m, '\r').replace(/^.*\r/m, insert);
+    }
+    return txt;
+  }
+
   /*
    * Remove characters overridden by backspaces and carriage returns
    */
   private _removeOverwrittenChars(value: nbformat.IOutput): void {
     let tmp = value.text as string;
-
-    // Remove characters that should be overridden by backspaces
-    tmp = tmp.replace(/^\x08+/, ''); // Dissolve backspaces at start of text
-    do {
-      // Remove any character preceding a backspace
-      tmp = tmp.replace(/.\x08/gm, '');
-    } while (tmp.indexOf('\x08') > -1);
-
-    // Remove chunks that should be overridden by carriage returns
-    do {
-      // Remove any chunks preceding a carriage return unless carriage
-      // return followed by a newline
-      tmp = tmp.replace(/^[^\n]*(?:\r(?!\n))+/gm, '');
-    } while (tmp.search(/\r(?!\n)/) > -1);
-    do {
-      // Replace remaining \r\n characters with a newline
-      tmp = tmp.replace(/\r\n/gm, '\n');
-    } while (tmp.indexOf('\r\n') > -1);
-
-    value.text = tmp;
+    value.text = this._fixCarriageReturn(this._fixBackspace(tmp));
   }
 
   protected clearNext = false;
