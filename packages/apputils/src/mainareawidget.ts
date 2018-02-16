@@ -23,10 +23,12 @@ import {
 
 
 /**
- * A widget which handles tab events according to JupyterLab convention.
+ * A widget meant to be contained in the JupyterLab main area.
  *
  * #### Notes
- * Mirrors all of the `title` attributes of the child.
+ * The content and the toolbar are populated asynchronously and
+ * a spinner is shown until they are ready.
+ * Mirrors all of the `title` attributes of the content.
  * This widget is `closable` by default.
  * This widget is automatically disposed when closed.
  * This widget ensures its own focus when activated.
@@ -42,21 +44,25 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
     super(options);
     this.addClass('jp-MainAreaWidget');
     this.id = uuid();
-    const content = this.content = Promise.resolve(options.content);
 
     const layout = this.layout = new BoxLayout();
     layout.direction = 'top-to-bottom';
-    const spinner = new Spinner();
-    layout.addWidget(spinner);
+    this._spinner = new Spinner();
+    layout.addWidget(this._spinner);
 
     this._toolbar = options.toolbar || new Toolbar();
 
-    this.content.then(() => {
+    Promise.resolve(options.content).then(content => {
+      if (this.isDisposed) {
+        content.dispose();
+        return;
+      }
       this._content = content;
-      spinner.parent = null;
+      let active = document.activeElement;
+      this._spinner.parent = null;
       layout.addWidget(content);
-      layout.addWidget(toolbar);
-      BoxLayout.setStretch(toolbar, 0);
+      layout.addWidget(this._toolbar);
+      BoxLayout.setStretch(this._toolbar, 0);
       BoxLayout.setStretch(content, 1);
 
       if (!content.id) {
@@ -69,20 +75,40 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
       this.title.closable = true;
       this.title.changed.connect(this._updateContentTitle, this);
       content.disposed.connect(() => this.dispose());
-    });
 
+      if (active === this._spinner.node) {
+        this._focusContent();
+      }
+      this._spinner.dispose();
+    });
   }
 
   /**
    * The content hosted by the widget.
    */
-  readonly content: Promise<T>;
+  readonly content(): T {
+    return this._content;
+  }
 
   /**
    * The toolbar hosted by the widget.
    */
-  get toolbar(): Promise<Toolbar> {
-    return this.content.then(() => this._toolbar);
+  get toolbar(): Toolbar {
+    return this._content ? this._toolbar : null;
+  }
+
+  /**
+   * A promise fulfilled when the widget is ready.
+   */
+  readonly ready: Promise<void>;
+
+  /**
+   * Dispose of the resources used by the widget.
+   */
+  dispose(): void {
+    this._toolbar.dispose();
+    this._spinner.dispose();
+    super.dispose();
   }
 
   /**
@@ -100,8 +126,9 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
     case 'mouseup':
     case 'mouseout':
       let target = event.target as HTMLElement;
-      if (this._toolbar.node.contains(document.activeElement) &&
-          target.tagName !== 'SELECT' && this._content) {
+      if (this._content &&
+          this._toolbar.node.contains(document.activeElement) &&
+          target.tagName !== 'SELECT') {
         this._content.node.focus();
       }
       break;
@@ -131,13 +158,10 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
    */
   protected onActivateRequest(msg: Message): void {
     if (!this._content) {
+      this._spinner.node.focus();
       return;
     }
-    if (!this.node.contains(document.activeElement)) {
-      this._content.node.focus();
-    }
-    // Give the content a chance to activate.
-    this._content.activate();
+    this._focusContent();
   }
 
   /**
@@ -185,9 +209,21 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
     this._changeGuard = false;
   }
 
+  /**
+   * Focus the content node.
+   */
+  private _focusContent(): void {
+    if (!this.node.contains(document.activeElement)) {
+      this._content.node.focus();
+    }
+    // Give the content a chance to activate.
+    this._content.activate();
+  }
+
   private _changeGuard = false;
   private _content: Widget | null = null;
   private _toolbar: Toolbar;
+  private _spinner: Spinner;
 }
 
 
