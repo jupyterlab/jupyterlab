@@ -16,10 +16,6 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  h, VirtualDOM
-} from '@phosphor/virtualdom';
-
-import {
   Widget
 } from '@phosphor/widgets';
 
@@ -255,17 +251,20 @@ namespace Private {
    */
   export
   function createListItem(registry: ISettingRegistry, plugin: ISettingRegistry.IPlugin): HTMLLIElement {
-    const icon = getHint(ICON_CLASS_KEY, registry, plugin);
-    const iconClass = `${PLUGIN_ICON_CLASS}${icon ? ' ' + icon : ''}`;
-    const iconLabel = getHint(ICON_LABEL_KEY, registry, plugin);
-    const title = plugin.schema.title || plugin.id;
-    const caption = `(${plugin.id}) ${plugin.schema.description}`;
+    const item = document.createElement('li');
+    const icon = document.createElement('span');
+    const title = document.createElement('span');
+    const image = getHint(ICON_CLASS_KEY, registry, plugin);
 
-    return VirtualDOM.realize(
-      h.li({ dataset: { id: plugin.id }, title: caption },
-        h.span({ className: iconClass, title: iconLabel }),
-        h.span(title))
-    ) as HTMLLIElement;
+    item.dataset['id'] = plugin.id;
+    item.title = `(${plugin.id}) ${plugin.schema.description}`;
+    icon.className = `${PLUGIN_ICON_CLASS}${image ? ' ' + image : ''}`;
+    icon.title = getHint(ICON_LABEL_KEY, registry, plugin);
+    title.textContent = plugin.schema.title || plugin.id;
+    item.appendChild(icon);
+    item.appendChild(title);
+
+    return item;
   }
 
   /**
