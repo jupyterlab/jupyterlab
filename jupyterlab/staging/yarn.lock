@@ -512,14 +512,14 @@
     "@phosphor/widgets" "^1.5.0"
 
 "@jupyterlab/notebook@^0.15.4", "@jupyterlab/notebook@^0.15.5":
-  version "0.15.5"
-  resolved "https://registry.npmjs.org/@jupyterlab/notebook/-/notebook-0.15.5.tgz#db6f02933a2a023f89b05fec30204a2e5d544766"
+  version "0.15.6"
+  resolved "https://registry.npmjs.org/@jupyterlab/notebook/-/notebook-0.15.6.tgz#ae7a0fce0ff6a4eaf9adc8844925f3a428db3350"
   dependencies:
     "@jupyterlab/apputils" "^0.15.5"
     "@jupyterlab/cells" "^0.15.4"
     "@jupyterlab/codeeditor" "^0.15.4"
-    "@jupyterlab/coreutils" "^1.0.6"
-    "@jupyterlab/docregistry" "^0.15.4"
+    "@jupyterlab/coreutils" "^1.0.9"
+    "@jupyterlab/docregistry" "^0.15.5"
     "@jupyterlab/observables" "^1.0.6"
     "@jupyterlab/rendermime" "^0.15.4"
     "@jupyterlab/services" "^1.1.4"
@@ -543,12 +543,12 @@
     "@phosphor/messaging" "^1.2.2"
     "@phosphor/signaling" "^1.2.2"
 
-"@jupyterlab/outputarea@^0.15.4":
-  version "0.15.4"
-  resolved "https://registry.npmjs.org/@jupyterlab/outputarea/-/outputarea-0.15.4.tgz#39fcbf465348b883ed4c8589941a1f6ecfba3b63"
+"@jupyterlab/outputarea@^0.15.4", "@jupyterlab/outputarea@^0.15.5":
+  version "0.15.5"
+  resolved "https://registry.npmjs.org/@jupyterlab/outputarea/-/outputarea-0.15.5.tgz#a2ce9b7150906edcbe998fab200869b46b71b414"
   dependencies:
-    "@jupyterlab/apputils" "^0.15.4"
-    "@jupyterlab/coreutils" "^1.0.6"
+    "@jupyterlab/apputils" "^0.15.5"
+    "@jupyterlab/coreutils" "^1.0.9"
     "@jupyterlab/observables" "^1.0.6"
     "@jupyterlab/rendermime" "^0.15.4"
     "@jupyterlab/rendermime-interfaces" "^1.0.6"
@@ -3298,8 +3298,8 @@ os-tmpdir@^1.0.0, os-tmpdir@~1.0.2:
   resolved "https://registry.npmjs.org/os-tmpdir/-/os-tmpdir-1.0.2.tgz#bbe67406c79aa85c5cfec766fe5734555dfa1274"
 
 osenv@^0.1.4:
-  version "0.1.4"
-  resolved "https://registry.npmjs.org/osenv/-/osenv-0.1.4.tgz#42fe6d5953df06c8064be6f176c3d05aaaa34644"
+  version "0.1.5"
+  resolved "https://registry.npmjs.org/osenv/-/osenv-0.1.5.tgz#85cdfafaeb28e8677f416e287592b5f3f49ea410"
   dependencies:
     os-homedir "^1.0.0"
     os-tmpdir "^1.0.0"
@@ -4596,8 +4596,8 @@ uglify-es@^3.3.4:
     source-map "~0.6.1"
 
 uglify-js@3.3.x:
-  version "3.3.10"
-  resolved "https://registry.npmjs.org/uglify-js/-/uglify-js-3.3.10.tgz#8e47821d4cf28e14c1826a0078ba0825ed094da8"
+  version "3.3.11"
+  resolved "https://registry.npmjs.org/uglify-js/-/uglify-js-3.3.11.tgz#e9d058b20715138bb4e8e5cae2ea581686bdaae3"
   dependencies:
     commander "~2.14.1"
     source-map "~0.6.1"

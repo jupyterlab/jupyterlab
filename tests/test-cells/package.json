@@ -19,7 +19,7 @@
     "@jupyterlab/cells": "^0.15.4",
     "@jupyterlab/codeeditor": "^0.15.4",
     "@jupyterlab/coreutils": "^1.0.9",
-    "@jupyterlab/outputarea": "^0.15.4",
+    "@jupyterlab/outputarea": "^0.15.5",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/widgets": "^1.5.0",
