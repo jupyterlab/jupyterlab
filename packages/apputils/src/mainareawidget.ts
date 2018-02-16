@@ -14,6 +14,10 @@ import {
 } from '@phosphor/widgets';
 
 import {
+  Spinner
+} from './spinner';
+
+import {
   Toolbar
 } from './toolbar';
 
@@ -59,6 +63,31 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
     this.title.closable = true;
     this.title.changed.connect(this._updateContentTitle, this);
     content.disposed.connect(() => this.dispose());
+
+    if (options.populated) {
+      this.node.appendChild(this._spinner.node);
+      this.populated = options.populated;
+      this.populated.then(() => {
+        this._isPopulated = true;
+        const active = document.activeElement;
+        this.node.removeChild(this._spinner.node);
+        if (active === this._spinner.node) {
+          this._focusContent();
+        }
+        this._spinner.dispose();
+      }).catch(e => {
+        this.node.removeChild(this._spinner.node);
+        this._spinner.dispose();
+        // Show the error to the user.
+        const pre = document.createElement('pre');
+        pre.textContent = String(e);
+        this.node.appendChild(pre);
+      });
+    } else {
+      this._isPopulated = true;
+      this._spinner.dispose();
+      this.populated = Promise.resolve(void 0);
+    }
   }
 
   /**
@@ -70,6 +99,18 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
    * The toolbar hosted by the widget.
    */
   readonly toolbar: Toolbar;
+
+  /**
+   * Whether the widget is fully populated.
+   */
+  get isPopulated(): boolean {
+    return this._isPopulated;
+  }
+
+  /**
+   * A promise that resolves when the widget is fully populated.
+   */
+  readonly populated: Promise<void>;
 
   /**
    * Handle the DOM events for the widget.
@@ -86,9 +127,10 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
     case 'mouseup':
     case 'mouseout':
       let target = event.target as HTMLElement;
-      if (this.toolbar.node.contains(document.activeElement) &&
+      if (this._isPopulated &&
+          this.toolbar.node.contains(document.activeElement) &&
           target.tagName !== 'SELECT') {
-        this.content.node.focus();
+        this._focusContent();
       }
       break;
     default:
@@ -116,11 +158,11 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    if (!this.node.contains(document.activeElement)) {
-      this.content.node.focus();
+    if (this._isPopulated) {
+      this._focusContent();
+    } else {
+      this._spinner.node.focus();
     }
-    // Give the content a chance to activate.
-    this.content.activate();
   }
 
   /**
@@ -168,7 +210,20 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
     this._changeGuard = false;
   }
 
+  /**
+   * Give focus to the content.
+   */
+  private _focusContent(): void {
+    if (!this.node.contains(document.activeElement)) {
+      this.content.node.focus();
+    }
+    // Give the content a chance to activate.
+    this.content.activate();
+  }
+
   private _changeGuard = false;
+  private _isPopulated = false;
+  private _spinner = new Spinner();
 }
 
 
@@ -191,5 +246,10 @@ namespace MainAreaWidget {
      * The toolbar to use for the widget.  Defaults to an empty toolbar.
      */
     toolbar?: Toolbar;
+
+    /**
+     * An optional promise for when the content is fully populated.
+     */
+    populated?: Promise<void>;
   }
 }
