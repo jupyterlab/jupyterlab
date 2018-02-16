@@ -12,7 +12,7 @@
 [![Documentation Status](https://readthedocs.org/projects/jupyterlab/badge/?version=stable)](https://readthedocs.org/projects/jupyterlab/badge/?version=stable)
 [![Google Group](https://img.shields.io/badge/-Google%20Group-lightgrey.svg)](https://groups.google.com/forum/#!forum/jupyter)
 [![Join the Gitter Chat](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/jupyterlab/jupyterlab)
-[![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/master?urlpath=lab%2Fworkspaces%2Fdemo)
+[![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/master?urlpath=lab%2Ftree%2Fdemo)
 
 
 An extensible environment for interactive and reproducible computing, based on the
