@@ -75,11 +75,11 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
           this._focusContent();
         }
         this._spinner.dispose();
+      // Catch a population error.
       }).catch(e => {
         this.node.removeChild(this._spinner.node);
         this._spinner.dispose();
         // Show the error to the user.
-        // TODO: show a dialog and dispose of the widget?
         const pre = document.createElement('pre');
         pre.textContent = String(e);
         this.node.appendChild(pre);
