@@ -89,9 +89,6 @@ class TableEditor extends Widget {
   protected onUpdateRequest(msg: Message): void {
     const settings = this._settings;
 
-    // Empty the node.
-    this.node.textContent = '';
-
     // Populate if possible.
     if (settings) {
       Private.populateTable(this.node, settings);
@@ -152,7 +149,7 @@ namespace Private {
       const valueTitle = JSON.stringify(defaultValue, null, 4);
 
       fields[property] = (
-        <tr>
+        <tr key={property}>
           <td className={TABLE_EDITOR_KEY_CLASS} title={title}>
             <code title={title}>{property}</code>
           </td>
@@ -178,12 +175,13 @@ namespace Private {
                 <th className={TABLE_EDITOR_TYPE_CLASS}>Type</th>
               </tr>
             </thead>
-            <tbody>{rows}</tbody>
+            {rows.length ? (<tbody>{rows}</tbody>) : (<></>)}
           </table>
         </div>
       </React.Fragment>
     );
 
+    ReactDOM.unmountComponentAtNode(node);
     ReactDOM.render(fragment, node);
   }
 }
