@@ -131,7 +131,7 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, registry: ISetting
 
   commands.addCommand(CommandIDs.revert, {
     execute: () => { tracker.currentWidget.revert(); },
-    iconClass: 'jp-MaterialIcon jp-RefreshIcon',
+    iconClass: 'jp-MaterialIcon jp-UndoIcon',
     label: 'Revert User Settings',
     isEnabled: () => tracker.currentWidget.canRevertRaw
   });
