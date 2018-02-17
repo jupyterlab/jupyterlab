@@ -12,12 +12,12 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  h, VirtualDOM, VirtualElement
-} from '@phosphor/virtualdom';
-
-import {
   Widget
 } from '@phosphor/widgets';
+
+import * as React from 'react';
+
+import * as ReactDOM from 'react-dom';
 
 
 /**
@@ -138,40 +138,53 @@ namespace Private {
   export
   function populateTable(node: HTMLElement, settings: ISettingRegistry.ISettings): void {
     const { plugin, schema } = settings;
-    const fields: { [property: string]: VirtualElement } = Object.create(null);
+    const fields: { [property: string]: React.ReactElement<any> } = { };
     const properties = schema.properties || { };
     const title = `(${plugin}) ${schema.description}`;
     const label = `Fields - ${schema.title || plugin}`;
-    const headers = h.tr(
-      h.th({ className: TABLE_EDITOR_KEY_CLASS }, 'Key'),
-      h.th({ className: TABLE_EDITOR_VALUE_CLASS }, 'Default'),
-      h.th({ className: TABLE_EDITOR_TYPE_CLASS }, 'Type'));
 
     Object.keys(properties).forEach(property => {
       const field = properties[property];
       const { type } = field;
       const defaultValue = settings.default(property);
+      const title = field.title || property;
       const value = JSON.stringify(defaultValue) || '';
       const valueTitle = JSON.stringify(defaultValue, null, 4);
 
-      fields[property] = h.tr(
-        h.td({
-          className: TABLE_EDITOR_KEY_CLASS,
-          title: field.title || property
-        },
-        h.code({ title: field.title || property }, property)),
-        h.td({ className: TABLE_EDITOR_VALUE_CLASS, title: valueTitle },
-          h.code({ title: valueTitle }, value)),
-        h.td({ className: TABLE_EDITOR_TYPE_CLASS }, type));
+      fields[property] = (
+        <tr>
+          <td className={TABLE_EDITOR_KEY_CLASS} title={title}>
+            <code title={title}>{property}</code>
+          </td>
+          <td className={TABLE_EDITOR_VALUE_CLASS} title={valueTitle}>
+            <code title={valueTitle}>{value}</code>
+          </td>
+          <td className={TABLE_EDITOR_TYPE_CLASS}>{type}</td>
+        </tr>
+      );
     });
 
-    const rows: VirtualElement[] = Object.keys(fields)
+    const rows = Object.keys(fields)
       .sort((a, b) => a.localeCompare(b)).map(property => fields[property]);
-    const wrapper = h.div({ className: TABLE_EDITOR_WRAPPER_CLASS },
-      h.table(headers, rows.length ? rows : undefined));
+    const fragment = (
+      <React.Fragment>
+        <legend title={title}>{label}</legend>
+        <div className={TABLE_EDITOR_WRAPPER_CLASS}>
+          <table>
+            <thead>
+              <tr>
+                <th className={TABLE_EDITOR_KEY_CLASS}>Key</th>
+                <th className={TABLE_EDITOR_VALUE_CLASS}>Default</th>
+                <th className={TABLE_EDITOR_TYPE_CLASS}>Type</th>
+              </tr>
+            </thead>
+            <tbody>{rows}</tbody>
+          </table>
+        </div>
+      </React.Fragment>
+    );
 
-    node.appendChild(VirtualDOM.realize(h.legend({ title }, label)));
-    node.appendChild(VirtualDOM.realize(wrapper));
+    ReactDOM.render(fragment, node);
   }
 }
 

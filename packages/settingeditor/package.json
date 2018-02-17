@@ -39,9 +39,13 @@
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/signaling": "^1.2.2",
     "@phosphor/virtualdom": "^1.1.2",
-    "@phosphor/widgets": "^1.5.0"
+    "@phosphor/widgets": "^1.5.0",
+    "react": "~16.2.0",
+    "react-dom": "~16.2.0"
   },
   "devDependencies": {
+    "@types/react": "~16.0.19",
+    "@types/react-dom": "~16.0.2",
     "rimraf": "~2.6.2",
     "typescript": "~2.6.2"
   }
