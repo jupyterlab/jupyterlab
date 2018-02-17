@@ -32,12 +32,12 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  h, VirtualDOM
-} from '@phosphor/virtualdom';
-
-import {
   PanelLayout, Widget
 } from '@phosphor/widgets';
+
+import * as React from 'react';
+
+import * as ReactDOM from 'react-dom';
 
 import {
   PluginEditor
@@ -129,15 +129,16 @@ class SettingEditor extends Widget {
       renderer: SplitPanel.defaultRenderer,
       spacing: 1
     });
-    const instructions = this._instructions = new Widget({
-      node: Private.createInstructionsNode()
-    });
+    const instructions = this._instructions = new Widget();
     const editor = this._editor = new PluginEditor({
       commands, editorFactory, registry, rendermime
     });
     const confirm = () => editor.confirm();
     const list = this._list = new PluginList({ confirm, registry });
     const when = options.when;
+
+    instructions.addClass(INSTRUCTIONS_CLASS);
+    Private.populateInstructionsNode(instructions.node);
 
     if (when) {
       this._when = Array.isArray(when) ? Promise.all(when) : when;
@@ -506,15 +507,21 @@ namespace SettingEditor {
  */
 namespace Private {
   /**
-   * Create the instructions text node.
+   * Populate the instructions text node.
    */
   export
-  function createInstructionsNode(): HTMLElement {
-    return VirtualDOM.realize(h.div({ className: INSTRUCTIONS_CLASS },
-      h.h2(
-        h.span({ className: `${INSTRUCTIONS_ICON_CLASS} jp-JupyterIcon` }),
-        h.span({ className: INSTRUCTIONS_TITLE_CLASS }, INSTRUCTIONS_TITLE)),
-      h.span({ className: INSTRUCTIONS_TEXT_CLASS }, INSTRUCTIONS_TEXT)));
+  function populateInstructionsNode(node: HTMLElement): void {
+    const iconClass = `${INSTRUCTIONS_ICON_CLASS} jp-JupyterIcon`;
+
+    ReactDOM.render((
+      <React.Fragment>
+        <h2>
+          <span className={iconClass}></span>
+          <span className={INSTRUCTIONS_TITLE_CLASS}>{INSTRUCTIONS_TITLE}</span>
+        </h2>
+        <span className={INSTRUCTIONS_TEXT_CLASS}>{INSTRUCTIONS_TEXT}</span>
+      </React.Fragment>
+    ), node);
   }
 
   /**
