@@ -242,7 +242,7 @@ class Router implements IRouter {
    *
    * @param options - The route registration options.
    *
-   * @returns A disposable that removes the registered rul from the router.
+   * @returns A disposable that removes the registered rule from the router.
    */
   register(options: IRouter.IRegisterOptions): IDisposable {
     const { command, pattern } = options;

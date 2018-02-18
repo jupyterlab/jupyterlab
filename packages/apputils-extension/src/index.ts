@@ -63,13 +63,13 @@ namespace CommandIDs {
   const changeTheme = 'apputils:change-theme';
 
   export
-  const clearState = 'apputils:clear-statedb';
-
-  export
   const loadState = 'apputils:load-statedb';
 
   export
   const recoverState = 'apputils:recover-statedb';
+
+  export
+  const reset = 'apputils:reset';
 
   export
   const resetOnLoad = 'apputils:reset-on-load';
@@ -236,11 +236,7 @@ const splash: JupyterLabPlugin<ISplashScreen> = {
     return {
       show: () => {
         const { commands, restored } = app;
-        const recovery = () => {
-          commands.execute(CommandIDs.recoverState)
-            .then(() => { document.location.reload(); })
-            .catch(() => { document.location.reload(); });
-        };
+        const recovery = () => { commands.execute(CommandIDs.reset); };
 
         return Private.showSplash(restored, recovery);
       }
@@ -267,11 +263,6 @@ const state: JupyterLabPlugin<IStateDB> = {
     const state = new StateDB({
       namespace: info.namespace,
       transform: transform.promise
-    });
-
-    commands.addCommand(CommandIDs.clearState, {
-      label: 'Clear Application Restore State',
-      execute: () => state.clear()
     });
 
     commands.addCommand(CommandIDs.recoverState, {
@@ -373,6 +364,14 @@ const state: JupyterLabPlugin<IStateDB> = {
       pattern: Patterns.loadState
     });
 
+    commands.addCommand(CommandIDs.reset, {
+      label: 'Reset Application State',
+      execute: () => {
+        commands.execute(CommandIDs.recoverState)
+          .then(() => { document.location.reload(); })
+          .catch(() => { document.location.reload(); });
+      }
+    });
 
     commands.addCommand(CommandIDs.resetOnLoad, {
       execute: (args: IRouter.ILocation) => {
