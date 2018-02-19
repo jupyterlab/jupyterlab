@@ -21,32 +21,6 @@ import * as ReactDOM from 'react-dom';
 
 
 /**
- * The class name added to all table editors.
- */
-const TABLE_EDITOR_CLASS = 'jp-SettingsTableEditor';
-
-/**
- * The class name added to the table wrapper to handle overflow.
- */
-const TABLE_EDITOR_WRAPPER_CLASS = 'jp-SettingsTableEditor-wrapper';
-
-/**
- * The class name added to the table key cells.
- */
-const TABLE_EDITOR_KEY_CLASS = 'jp-SettingsTableEditor-key';
-
-/**
- * The class name added to the table default value cells.
- */
-const TABLE_EDITOR_VALUE_CLASS = 'jp-SettingsTableEditor-value';
-
-/**
- * The class name added to the table type cells.
- */
-const TABLE_EDITOR_TYPE_CLASS = 'jp-SettingsTableEditor-type';
-
-
-/**
  * A tabular editor for plugin settings.
  */
 export
@@ -56,7 +30,7 @@ class TableEditor extends Widget {
    */
   constructor(options: TableEditor.IOptions) {
     super({ node: document.createElement('fieldset') });
-    this.addClass(TABLE_EDITOR_CLASS);
+    this.addClass('jp-SettingsTableEditor');
   }
 
   /**
@@ -150,13 +124,13 @@ namespace Private {
 
       fields[property] = (
         <tr key={property}>
-          <td className={TABLE_EDITOR_KEY_CLASS} title={title}>
+          <td className='jp-SettingsTableEditor-key' title={title}>
             <code title={title}>{property}</code>
           </td>
-          <td className={TABLE_EDITOR_VALUE_CLASS} title={valueTitle}>
+          <td className='jp-SettingsTableEditor-value' title={valueTitle}>
             <code title={valueTitle}>{value}</code>
           </td>
-          <td className={TABLE_EDITOR_TYPE_CLASS}>{type}</td>
+          <td className='jp-SettingsTableEditor-type'>{type}</td>
         </tr>
       );
     });
@@ -166,13 +140,13 @@ namespace Private {
     const fragment = (
       <React.Fragment>
         <legend title={title}>{label}</legend>
-        <div className={TABLE_EDITOR_WRAPPER_CLASS}>
+        <div className='jp-SettingsTableEditor-wrapper'>
           <table>
             <thead>
               <tr>
-                <th className={TABLE_EDITOR_KEY_CLASS}>Key</th>
-                <th className={TABLE_EDITOR_VALUE_CLASS}>Default</th>
-                <th className={TABLE_EDITOR_TYPE_CLASS}>Type</th>
+                <th className='jp-SettingsTableEditor-key'>Key</th>
+                <th className='jp-SettingsTableEditor-value'>Default</th>
+                <th className='jp-SettingsTableEditor-type'>Type</th>
               </tr>
             </thead>
             {rows.length ? (<tbody>{rows}</tbody>) : (<></>)}
