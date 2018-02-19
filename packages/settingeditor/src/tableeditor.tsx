@@ -175,7 +175,7 @@ namespace Private {
                 <th className={TABLE_EDITOR_TYPE_CLASS}>Type</th>
               </tr>
             </thead>
-            {rows.length ? (<tbody>{rows}</tbody>) : void 0}
+            {rows.length ? (<tbody>{rows}</tbody>) : (<></>)}
           </table>
         </div>
       </React.Fragment>
