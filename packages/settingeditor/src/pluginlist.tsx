@@ -19,26 +19,9 @@ import {
   Widget
 } from '@phosphor/widgets';
 
+import * as React from 'react';
 
-/**
- * The class name added to all plugin lists.
- */
-const PLUGIN_LIST_CLASS = 'jp-PluginList';
-
-/**
- * The class name added to the plugin list's editor switcher.
- */
-const PLUGIN_LIST_SWITCHER_CLASS = 'jp-PluginList-switcher';
-
-/**
- * The class name added to all plugin list icons.
- */
-const PLUGIN_ICON_CLASS = 'jp-PluginList-icon';
-
-/**
- * The class name added to selected items.
- */
-const SELECTED_CLASS = 'jp-mod-selected';
+import * as ReactDOM from 'react-dom';
 
 
 /**
@@ -52,7 +35,7 @@ class PluginList extends Widget {
   constructor(options: PluginList.IOptions) {
     super();
     this.registry = options.registry;
-    this.addClass(PLUGIN_LIST_CLASS);
+    this.addClass('jp-PluginList');
     this._confirm = options.confirm;
     this.registry.pluginChanged.connect(() => { this.update(); }, this);
   }
@@ -235,52 +218,6 @@ namespace PluginList {
  * A namespace for private module data.
  */
 namespace Private {
-  export
-  type Editor = 'raw' | 'table';
-
-  /**
-   * Create a plugin list item.
-   */
-  function createListItem(registry: ISettingRegistry, plugin: ISettingRegistry.IPlugin): HTMLLIElement {
-    const item = document.createElement('li');
-    const icon = document.createElement('span');
-    const title = document.createElement('span');
-    const image = getHint(ICON_CLASS_KEY, registry, plugin);
-
-    item.dataset['id'] = plugin.id;
-    item.title = `(${plugin.id}) ${plugin.schema.description}`;
-    icon.className = `${PLUGIN_ICON_CLASS}${image ? ' ' + image : ''}`;
-    icon.title = getHint(ICON_LABEL_KEY, registry, plugin);
-    title.textContent = plugin.schema.title || plugin.id;
-    item.appendChild(icon);
-    item.appendChild(title);
-
-    return item;
-  }
-
-  /**
-   * Create the plugin list editor switcher.
-   */
-  function createSwitcher(type: Editor): HTMLElement {
-    const switcher = document.createElement('div');
-    const raw = document.createElement('button');
-    const table = document.createElement('button');
-
-    raw.textContent = 'Raw View';
-    raw.dataset['editor'] = 'raw';
-    raw.disabled = type === 'raw';
-
-    table.textContent = 'Table View';
-    table.dataset['editor'] = 'table';
-    table.disabled = type === 'table';
-
-    switcher.className = PLUGIN_LIST_SWITCHER_CLASS;
-    switcher.appendChild(raw);
-    switcher.appendChild(table);
-
-    return switcher;
-  }
-
   /**
    * Check the plugin for a rendering hint's value.
    *
@@ -320,22 +257,38 @@ namespace Private {
    * Populate the plugin list.
    */
   export
-  function populateList(registry: ISettingRegistry, type: Editor, selection: string, node: HTMLElement): void {
+  function populateList(registry: ISettingRegistry, type: 'raw' | 'table', selection: string, node: HTMLElement): void {
     const plugins = sortPlugins(registry.plugins);
-    const switcher = createSwitcher(type);
-    const list = document.createElement('ul');
-
-    node.textContent = '';
-    node.appendChild(switcher);
-    node.appendChild(list);
-    plugins.forEach(plugin => {
-      const item = createListItem(registry, plugin);
-
-      if (plugin.id === selection) {
-        item.classList.add(SELECTED_CLASS);
-      }
-      list.appendChild(item);
+    const items = plugins.map(plugin => {
+      const itemTitle = `(${plugin.id}) ${plugin.schema.description}`;
+      const image = getHint(ICON_CLASS_KEY, registry, plugin);
+      const iconClass = `jp-PluginList-icon${image ? ' ' + image : ''}`;
+      const iconTitle = getHint(ICON_LABEL_KEY, registry, plugin);
+      return (
+        <li className={plugin.id === selection ? 'jp-mod-selected' : ''}
+            data-id={plugin.id}
+            key={plugin.id}
+            title={itemTitle}>
+          <span className={iconClass} title={iconTitle}></span>
+          <span>{plugin.schema.title || plugin.id}</span>
+        </li>
+      );
     });
+
+    ReactDOM.unmountComponentAtNode(node);
+    ReactDOM.render((
+      <React.Fragment>
+        <div className='jp-PluginList-switcher'>
+          <button data-editor='raw' disabled={type === 'raw'}>
+            Raw View
+          </button>
+          <button data-editor='table' disabled={type === 'table'}>
+            Table View
+          </button>
+        </div>
+        <ul>{items}</ul>
+      </React.Fragment>
+    ), node);
   }
 
   /**

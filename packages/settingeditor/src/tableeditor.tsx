@@ -149,7 +149,7 @@ namespace Private {
                 <th className='jp-SettingsTableEditor-type'>Type</th>
               </tr>
             </thead>
-            {rows.length ? (<tbody>{rows}</tbody>) : (<></>)}
+            <tbody>{rows}</tbody>
           </table>
         </div>
       </React.Fragment>
