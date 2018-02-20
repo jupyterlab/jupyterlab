@@ -144,23 +144,12 @@ class PluginList extends Widget {
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    const plugins = Private.sortPlugins(this.registry.plugins);
-    const switcher = Private.createSwitcher(this._editor);
-    const list = document.createElement('ul');
+    const { node, registry } = this;
+    const type = this._editor;
+    const selection = this._selection;
 
-    this.node.textContent = '';
-    this.node.appendChild(switcher);
-    this.node.appendChild(list);
-    plugins.forEach(plugin => {
-      const item = Private.createListItem(this.registry, plugin);
-
-      if (plugin.id === this._selection) {
-        item.classList.add(SELECTED_CLASS);
-      }
-
-      list.appendChild(item);
-    });
-    list.scrollTop = this._scrollTop;
+    Private.populateList(registry, type, selection, node);
+    node.querySelector('ul').scrollTop = this._scrollTop;
   }
 
   /**
@@ -246,10 +235,12 @@ namespace PluginList {
  * A namespace for private module data.
  */
 namespace Private {
+  export
+  type Editor = 'raw' | 'table';
+
   /**
    * Create a plugin list item.
    */
-  export
   function createListItem(registry: ISettingRegistry, plugin: ISettingRegistry.IPlugin): HTMLLIElement {
     const item = document.createElement('li');
     const icon = document.createElement('span');
@@ -270,19 +261,18 @@ namespace Private {
   /**
    * Create the plugin list editor switcher.
    */
-  export
-  function createSwitcher(current: 'raw' | 'table'): HTMLElement {
+  function createSwitcher(type: Editor): HTMLElement {
     const switcher = document.createElement('div');
     const raw = document.createElement('button');
     const table = document.createElement('button');
 
     raw.textContent = 'Raw View';
     raw.dataset['editor'] = 'raw';
-    raw.disabled = current === 'raw';
+    raw.disabled = type === 'raw';
 
     table.textContent = 'Table View';
     table.dataset['editor'] = 'table';
-    table.disabled = current === 'table';
+    table.disabled = type === 'table';
 
     switcher.className = PLUGIN_LIST_SWITCHER_CLASS;
     switcher.appendChild(raw);
@@ -327,9 +317,30 @@ namespace Private {
   }
 
   /**
-   * Sort a list of plugins by ID.
+   * Populate the plugin list.
    */
   export
+  function populateList(registry: ISettingRegistry, type: Editor, selection: string, node: HTMLElement): void {
+    const plugins = sortPlugins(registry.plugins);
+    const switcher = createSwitcher(type);
+    const list = document.createElement('ul');
+
+    node.textContent = '';
+    node.appendChild(switcher);
+    node.appendChild(list);
+    plugins.forEach(plugin => {
+      const item = createListItem(registry, plugin);
+
+      if (plugin.id === selection) {
+        item.classList.add(SELECTED_CLASS);
+      }
+      list.appendChild(item);
+    });
+  }
+
+  /**
+   * Sort a list of plugins by ID.
+   */
   function sortPlugins(plugins: ISettingRegistry.IPlugin[]): ISettingRegistry.IPlugin[] {
     return plugins.sort((a, b) => {
       return (a.schema.title || a.id).localeCompare(b.schema.title || b.id);
