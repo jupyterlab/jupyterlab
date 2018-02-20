@@ -56,7 +56,7 @@
 }
 
 
-.jp-RunningSessions-headerShutdownAll {
+.jp-RunningSessions-shutdownAll {
   flex: 1 1 auto;
   height: var(--jp-private-running-button-height);
   width: var(--jp-private-running-button-width);
@@ -69,7 +69,6 @@
   outline: 0;
   background-image: var(--jp-icon-close);
   background-size: 16px;
-  display: block;
   vertical-align: middle;
   background-repeat: no-repeat;
   background-position: center;
@@ -84,7 +83,7 @@
 
 
 .jp-RunningSessions-headerRefresh:hover,
-.jp-RunningSessions-headerShutdownAll:hover {
+.jp-RunningSessions-shutdownAll:hover {
   background-color: var(--jp-layout-color0);
   box-shadow: var(--jp-toolbar-box-shadow);
   border: 1px solid var(--jp-toolbar-border-color);
@@ -93,7 +92,7 @@
 
 
 .jp-RunningSessions-headerRefresh:active,
-.jp-RunningSessions-headerShutdownAll:active  {
+.jp-RunningSessions-shutdownAll:active  {
   border: 1px solid var(--jp-toolbar-border-color);
   background-color: var(--jp-toolbar-active-background);
   box-shadow: var(--jp-toolbar-box-shadow);
