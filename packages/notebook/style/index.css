@@ -33,18 +33,16 @@
   height: 100%;
 }
 
-.jp-NotebookContainer {
-  display: flex;
-  flex-direction: row;
-  height: 100%;
+.jp-NotebookContainer .p-SplitPanel-handle {
+  background-color: var(--jp-border-color2);
 }
 
 .jp-NotebookContainer .jp-NotebookTableOfContents {
   overflow: auto;
+  white-space: nowrap;
   padding: var(--jp-notebook-padding);
-  border: 2px grey dotted;
-  width: 240px;
-  font-size: smaller;
+  min-width: 64px;
+  font-size: 0.5em;
 }
 
 .jp-NotebookPanel.jp-Document {

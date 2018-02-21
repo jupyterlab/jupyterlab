@@ -23,7 +23,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  BoxLayout, PanelLayout, Widget
+  BoxLayout, PanelLayout, SplitPanel, Widget
 } from '@phosphor/widgets';
 
 import {
@@ -101,8 +101,7 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
     toolbar.addClass(NOTEBOOK_PANEL_TOOLBAR_CLASS);
 
     // Notebook + TOC container
-    const container = new Widget();
-    container.layout = new PanelLayout();
+    const container = new SplitPanel();
     container.addClass('jp-NotebookContainer');
 
     // Notebook
