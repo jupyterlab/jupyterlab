@@ -73,34 +73,33 @@
 
 .jp-NotebookContainer .jp-NotebookTableOfContents {
   overflow: auto;
-  white-space: nowrap;
   padding: var(--jp-notebook-padding);
-  min-width: 64px;
+  min-width: 120px;
   font-size: 0.5em;
 }
 
 .jp-NotebookTableOfContents h1 {
-  text-indent: 0px;
+  margin-left: 0px;
 }
 
 .jp-NotebookTableOfContents h2 {
-  text-indent: calc(var(--jp-private-notebook-toc-indent-width));
+  margin-left: calc(var(--jp-private-notebook-toc-indent-width));
 }
 
 .jp-NotebookTableOfContents h3 {
-  text-indent: calc(2*var(--jp-private-notebook-toc-indent-width));
+  margin-left: calc(2*var(--jp-private-notebook-toc-indent-width));
 }
 
 .jp-NotebookTableOfContents h4 {
-  text-indent: calc(3*var(--jp-private-notebook-toc-indent-width));
+  margin-left: calc(3*var(--jp-private-notebook-toc-indent-width));
 }
 
 .jp-NotebookTableOfContents h5 {
-  text-indent: calc(4*var(--jp-private-notebook-toc-indent-width));
+  margin-left: calc(4*var(--jp-private-notebook-toc-indent-width));
 }
 
 .jp-NotebookTableOfContents h6 {
-  text-indent: calc(5*var(--jp-private-notebook-toc-indent-width));
+  margin-left: calc(5*var(--jp-private-notebook-toc-indent-width));
 }
 
 .jp-NotebookTableOfContents-header h1 {

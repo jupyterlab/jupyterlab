@@ -42,7 +42,19 @@ class NotebookTableOfContents extends Widget {
     ReactDOM.render(<TOCTree toc={toc}/>, this.node);
   }
 
+  /**
+   * Rerender after showing.
+   */
+  protected onAfterShow(msg: Message): void {
+    this.update();
+  }
+
   private _generateTOC(): IHeading[] {
+    // Don't bother if the TOC is not visible
+    if (!this.isVisible) {
+      return;
+    }
+
     let headings: IHeading[] = [];
     each(this._notebook.widgets, cell => {
       let model = cell.model;
