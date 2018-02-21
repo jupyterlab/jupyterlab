@@ -103,6 +103,11 @@
   text-indent: calc(5*var(--jp-private-notebook-toc-indent-width));
 }
 
+.jp-NotebookTableOfContents-header h1 {
+  margin: 0;
+  text-decoration: underline;
+}
+
 .jp-NotebookTableOfContents a {
   text-decoration: none;
   color: var(--jp-content-link-color);

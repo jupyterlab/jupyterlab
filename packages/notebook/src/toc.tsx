@@ -91,7 +91,12 @@ class TOCTree extends React.Component<ITOCTreeProps, {}> {
     });
 
     return (
-      listing
+      <div>
+        <div className='jp-NotebookTableOfContents-header'>
+          <h1>Table of Contents</h1>
+        </div>
+       { listing }
+      </div>
     );
   }
 }
