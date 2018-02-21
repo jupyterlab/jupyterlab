@@ -117,7 +117,8 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
     notebook.addClass(NOTEBOOK_PANEL_NOTEBOOK_CLASS);
 
     // Table of Contents
-    const toc = new NotebookTableOfContents(this.notebook.model);
+    console.log(this.notebook.model);
+    const toc = new NotebookTableOfContents(this);
 
     (container.layout as PanelLayout).addWidget(toc);
     (container.layout as PanelLayout).addWidget(this.notebook);
