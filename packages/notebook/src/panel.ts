@@ -23,7 +23,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  BoxLayout, PanelLayout, SplitPanel, Widget
+  BoxLayout, SplitLayout, SplitPanel, Widget
 } from '@phosphor/widgets';
 
 import {
@@ -116,11 +116,11 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
     notebook.addClass(NOTEBOOK_PANEL_NOTEBOOK_CLASS);
 
     // Table of Contents
-    console.log(this.notebook.model);
     const toc = new NotebookTableOfContents(this.notebook);
 
-    (container.layout as PanelLayout).addWidget(toc);
-    (container.layout as PanelLayout).addWidget(this.notebook);
+    (container.layout as SplitLayout).addWidget(toc);
+    (container.layout as SplitLayout).addWidget(this.notebook);
+    container.setRelativeSizes([0.2, 0.8]);
     layout.addWidget(toolbar);
     layout.addWidget(container);
 
