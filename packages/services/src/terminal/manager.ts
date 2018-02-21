@@ -40,8 +40,8 @@ class TerminalManager implements TerminalSession.IManager {
 
       // Set up polling.
       this._refreshTimer = (setInterval as any)(() => {
-        if (typeof document !== 'undefined' && !document.hasFocus()) {
-          // don't poll when nobody's looking
+        if (typeof document !== 'undefined' && document.hidden) {
+          // Don't poll when nobody's looking.
           return;
         }
         this._refreshRunning();

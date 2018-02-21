@@ -442,8 +442,8 @@ class FileBrowserModel implements IDisposable {
         this.refresh();
         return;
       }
-      if (!document.hasFocus()) {
-        // don't poll when nobody's looking
+      if (document.hidden) {
+        // Don't poll when nobody's looking.
         return;
       }
       let date = new Date().getTime();
