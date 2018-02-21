@@ -101,7 +101,7 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
     toolbar.addClass(NOTEBOOK_PANEL_TOOLBAR_CLASS);
 
     // Notebook + TOC container
-    const container = new SplitPanel();
+    const container = new SplitPanel({ spacing: 2 });
     container.addClass('jp-NotebookContainer');
 
     // Notebook
@@ -117,7 +117,7 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
 
     // Table of Contents
     console.log(this.notebook.model);
-    const toc = new NotebookTableOfContents(this);
+    const toc = new NotebookTableOfContents(this.notebook);
 
     (container.layout as PanelLayout).addWidget(toc);
     (container.layout as PanelLayout).addWidget(this.notebook);

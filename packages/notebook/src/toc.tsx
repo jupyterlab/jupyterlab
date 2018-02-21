@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  INotebookModel, NotebookPanel
-} from '@jupyterlab/notebook';
-
-import {
   each
 } from '@phosphor/algorithm';
 
@@ -17,6 +13,10 @@ import {
   Widget
 } from '@phosphor/widgets';
 
+import {
+  Notebook
+} from './widget';
+
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
@@ -25,15 +25,12 @@ class NotebookTableOfContents extends Widget {
   /**
    * Create a new extension object.
    */
-  constructor(notebook: NotebookPanel) {
+  constructor(notebook: Notebook) {
     super();
     this.addClass('jp-NotebookTableOfContents');
-    this._model = notebook.model;
-    notebook.contextChanged.connect(() => {
-      this._model = notebook.model;
-      this._model.contentChanged.connect(() => {
-        this.update();
-      });
+    this._notebook = notebook;
+    notebook.modelChanged.connect((nb, args) => {
+      notebook.model.contentChanged.connect(this.update, this);
     });
   }
 
@@ -47,27 +44,29 @@ class NotebookTableOfContents extends Widget {
 
   private _generateTOC(): IHeading[] {
     let headings: IHeading[] = [];
-    each(this._model.cells, cell => {
-      if (cell.type !== 'markdown') {
+    each(this._notebook.widgets, cell => {
+      let model = cell.model;
+      if (model.type !== 'markdown') {
         return;
       }
-      const lines = cell.value.text.split('\n').filter(line => line[0] === '#');
+      const lines = model.value.text.split('\n').filter(line => line[0] === '#');
       lines.forEach(line => {
         const level = line.search(/[^#]/);
         const title = line.slice(level);
-        headings.push({ title, level });
+        headings.push({ title, level, anchor: cell.node });
       });
     });
     return headings;
   }
 
-  private _model: INotebookModel;
+  private _notebook: Notebook;
 }
 
 export
 interface IHeading {
   title: string;
   level: number;
+  anchor: HTMLElement;
 }
 
 export
@@ -82,7 +81,12 @@ class TOCTree extends React.Component<ITOCTreeProps, {}> {
     let listing: JSX.Element[] = this.props.toc.map( el => {
       let level = Math.round(el.level);
       level = (level > 0 && level < 7) ? level : 6;
-      return React.createElement(`h${level}`, {}, el.title);
+      const clickHandler = (evt: MouseEvent) => {
+        evt.preventDefault();
+        el.anchor.scrollIntoView();
+      };
+
+      return React.createElement(`h${level}`, { onClick: clickHandler }, el.title);
     });
 
     return (
