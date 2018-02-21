@@ -23,7 +23,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  BoxLayout, Widget
+  BoxLayout, PanelLayout, Widget
 } from '@phosphor/widgets';
 
 import {
@@ -49,6 +49,10 @@ import {
 import {
   INotebookModel
 } from './model';
+
+import {
+  NotebookTableOfContents
+} from './toc';
 
 import {
   Notebook, StaticNotebook
@@ -96,6 +100,11 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
     let toolbar = new Toolbar();
     toolbar.addClass(NOTEBOOK_PANEL_TOOLBAR_CLASS);
 
+    // Notebook + TOC container
+    const container = new Widget();
+    container.layout = new PanelLayout();
+    container.addClass('jp-NotebookContainer');
+
     // Notebook
     let nbOptions: Notebook.IOptions = {
       rendermime: this.rendermime,
@@ -107,11 +116,16 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
     let notebook = this.notebook = contentFactory.createNotebook(nbOptions);
     notebook.addClass(NOTEBOOK_PANEL_NOTEBOOK_CLASS);
 
+    // Table of Contents
+    const toc = new NotebookTableOfContents(this.notebook.model);
+
+    (container.layout as PanelLayout).addWidget(toc);
+    (container.layout as PanelLayout).addWidget(this.notebook);
     layout.addWidget(toolbar);
-    layout.addWidget(this.notebook);
+    layout.addWidget(container);
 
     BoxLayout.setStretch(toolbar, 0);
-    BoxLayout.setStretch(this.notebook, 1);
+    BoxLayout.setStretch(container, 1);
   }
 
   /**

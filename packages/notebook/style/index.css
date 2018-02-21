@@ -33,6 +33,20 @@
   height: 100%;
 }
 
+.jp-NotebookContainer {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+
+.jp-NotebookContainer .jp-NotebookTableOfContents {
+  overflow: auto;
+  padding: var(--jp-notebook-padding);
+  border: 2px grey dotted;
+  width: 240px;
+  font-size: smaller;
+}
+
 .jp-NotebookPanel.jp-Document {
   min-width: 240px;
   min-height: 120px;
@@ -43,8 +57,8 @@
   outline: none;
   overflow: auto;
   background: var(--jp-layout-color0);
+  height: 100%;
 }
-
 
 .jp-Notebook::after {
   display: block;
