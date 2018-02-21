@@ -37,7 +37,7 @@
     "@jupyterlab/fileeditor": "^0.15.4",
     "@jupyterlab/mainmenu": "^0.4.4",
     "@phosphor/widgets": "^1.5.0",
-    "codemirror": "~5.24.2"
+    "codemirror": "~5.35.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
