@@ -249,6 +249,9 @@ namespace CommandIDs {
 
   export
   const disableOutputScrolling = 'notebook:disable-output-scrolling';
+
+  export
+  const toggleTableOfContents = 'notebook:toggle-table-of-contents';
 }
 
 
@@ -666,6 +669,18 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
     command: CommandIDs.createConsole,
     selector: '.jp-Notebook',
     rank: 9
+  });
+
+  // Notebook panel context menu groups.
+  app.contextMenu.addItem({
+    type: 'separator',
+    selector: '.jp-NotebookPanel',
+    rank: 6
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.toggleTableOfContents,
+    selector: '.jp-NotebookPanel',
+    rank: 7
   });
 
   return tracker;
@@ -1500,6 +1515,27 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     },
     isEnabled
   });
+
+  commands.addCommand(CommandIDs.toggleTableOfContents, {
+    label: args => {
+      return `${args['isPalette'] ? 'Toggle' : 'Show'} Table of Contents`;
+    },
+    isToggled: args => {
+      const current = getCurrent({ ...args, activate: false });
+      return current && current.tableOfContents.isVisible;
+    },
+    execute: args => {
+      const current = getCurrent(args);
+      if (current) {
+        if (current.tableOfContents.isVisible) {
+          current.tableOfContents.hide();
+        } else {
+          current.tableOfContents.show();
+        }
+      }
+    },
+    isEnabled
+  });
 }
 
 
@@ -1528,6 +1564,12 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.closeAndShutdown,
     CommandIDs.trust
   ].forEach(command => { palette.addItem({ command, category }); });
+
+  palette.addItem({
+    command: CommandIDs.toggleTableOfContents,
+    category,
+    args: { 'isPalette': true }
+  });
 
   EXPORT_TO_FORMATS.forEach(exportToFormat => {
     let args = { 'format': exportToFormat['format'], 'label': exportToFormat['label'], 'isPalette': true };
@@ -1683,6 +1725,8 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   } as IFileMenu.IConsoleCreator<NotebookPanel>);
 
   // Add some commands to the application view menu.
+  mainMenu.viewMenu.addGroup([{ command: CommandIDs.toggleTableOfContents }], 9);
+
   const collapseGroup = [
     CommandIDs.hideCode,
     CommandIDs.hideOutput,

@@ -116,9 +116,9 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
     notebook.addClass(NOTEBOOK_PANEL_NOTEBOOK_CLASS);
 
     // Table of Contents
-    const toc = new NotebookTableOfContents(this.notebook);
+    this.tableOfContents = new NotebookTableOfContents(this.notebook);
 
-    (container.layout as SplitLayout).addWidget(toc);
+    (container.layout as SplitLayout).addWidget(this.tableOfContents);
     (container.layout as SplitLayout).addWidget(this.notebook);
     container.setRelativeSizes([0.2, 0.8]);
     layout.addWidget(toolbar);
@@ -170,6 +170,11 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
    * The notebook used by the widget.
    */
   readonly notebook: Notebook;
+
+  /**
+   * The table-of-contents used by the widget.
+   */
+  readonly tableOfContents: NotebookTableOfContents;
 
   /**
    * Get the toolbar used by the widget.
