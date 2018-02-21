@@ -46,6 +46,11 @@
   height: 100%;
 }
 
+.jp-NotebookPanel.jp-Document {
+  min-width: 240px;
+  min-height: 120px;
+}
+
 .jp-Notebook::after {
   display: block;
   content: '';
@@ -98,9 +103,14 @@
   text-indent: calc(5*var(--jp-private-notebook-toc-indent-width));
 }
 
-.jp-NotebookPanel.jp-Document {
-  min-width: 240px;
-  min-height: 120px;
+.jp-NotebookTableOfContents a {
+  text-decoration: none;
+  color: var(--jp-content-link-color);
+}
+
+.jp-NotebookTableOfContents a:visited {
+  text-decoration: none;
+  color: var(--jp-content-link-color);
 }
 
 

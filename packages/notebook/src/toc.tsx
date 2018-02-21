@@ -86,7 +86,8 @@ class TOCTree extends React.Component<ITOCTreeProps, {}> {
         el.anchor.scrollIntoView();
       };
 
-      return React.createElement(`h${level}`, { onClick: clickHandler }, el.title);
+      return React.createElement(`h${level}`, { onClick: clickHandler },
+        <a href=''>{ el.title }</a>);
     });
 
     return (
