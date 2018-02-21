@@ -92,6 +92,10 @@ namespace CommandIDs {
 
   // For main browser only.
   export
+  const openNewWindow = 'filebrowser:open-new-window-main';
+
+  // For main browser only.
+  export
   const showBrowser = 'filebrowser:activate-main';
 
   export
@@ -375,16 +379,29 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, bro
     mnemonic: 0
   });
 
+  function getItemURL() {
+    const path = encodeURIComponent(browser.selectedItems().next().path);
+    const tree = PageConfig.getTreeUrl();
+
+    return URLExt.join(tree, path);
+  }
+
   commands.addCommand(CommandIDs.share, {
     execute: () => {
-      const path = encodeURIComponent(browser.selectedItems().next().path);
-      const tree = PageConfig.getTreeUrl();
-
-      Clipboard.copyToSystem(URLExt.join(tree, path));
+      Clipboard.copyToSystem(getItemURL());
     },
     isVisible: () => toArray(browser.selectedItems()).length === 1,
     iconClass: 'jp-MaterialIcon jp-LinkIcon',
     label: 'Copy Shareable Link'
+  });
+
+  commands.addCommand(CommandIDs.openNewWindow, {
+    execute: () => {
+      window.open(getItemURL());
+    },
+    isVisible: () => toArray(browser.selectedItems()).length === 1,
+    iconClass: 'jp-MaterialIcon jp-LinkIcon',
+    label: 'Open in Separate Browser Tab'
   });
 
   commands.addCommand(CommandIDs.showBrowser, {
@@ -463,6 +480,7 @@ function createContextMenu(model: Contents.IModel, commands: CommandRegistry, re
   }
 
   menu.addItem({ command: CommandIDs.share });
+  menu.addItem({ command: CommandIDs.openNewWindow });
 
   return menu;
 }
