@@ -9,6 +9,7 @@
 
 
 :root {
+  --jp-private-notebook-toc-indent-width: 8px;
   --jp-private-notebook-dragImage-width: 304px;
   --jp-private-notebook-dragImage-height: 36px;
   --jp-private-notebook-selected-color: var(--md-blue-400);
@@ -37,19 +38,6 @@
   background-color: var(--jp-border-color2);
 }
 
-.jp-NotebookContainer .jp-NotebookTableOfContents {
-  overflow: auto;
-  white-space: nowrap;
-  padding: var(--jp-notebook-padding);
-  min-width: 64px;
-  font-size: 0.5em;
-}
-
-.jp-NotebookPanel.jp-Document {
-  min-width: 240px;
-  min-height: 120px;
-}
-
 .jp-Notebook {
   padding: var(--jp-notebook-padding);
   outline: none;
@@ -72,6 +60,47 @@
 
 .jp-Notebook .jp-Cell .jp-InputPrompt {
   cursor: move;
+}
+
+/*-----------------------------------------------------------------------------
+| Notebook Table of Contents
+|----------------------------------------------------------------------------*/
+
+.jp-NotebookContainer .jp-NotebookTableOfContents {
+  overflow: auto;
+  white-space: nowrap;
+  padding: var(--jp-notebook-padding);
+  min-width: 64px;
+  font-size: 0.5em;
+}
+
+.jp-NotebookTableOfContents h1 {
+  text-indent: 0px;
+}
+
+.jp-NotebookTableOfContents h2 {
+  text-indent: calc(var(--jp-private-notebook-toc-indent-width));
+}
+
+.jp-NotebookTableOfContents h3 {
+  text-indent: calc(2*var(--jp-private-notebook-toc-indent-width));
+}
+
+.jp-NotebookTableOfContents h4 {
+  text-indent: calc(3*var(--jp-private-notebook-toc-indent-width));
+}
+
+.jp-NotebookTableOfContents h5 {
+  text-indent: calc(4*var(--jp-private-notebook-toc-indent-width));
+}
+
+.jp-NotebookTableOfContents h6 {
+  text-indent: calc(5*var(--jp-private-notebook-toc-indent-width));
+}
+
+.jp-NotebookPanel.jp-Document {
+  min-width: 240px;
+  min-height: 120px;
 }
 
 
