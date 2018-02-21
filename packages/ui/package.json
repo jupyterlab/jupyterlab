@@ -1,0 +1,41 @@
+{
+  "name": "@jupyterlab/ui",
+  "version": "0.0.1",
+  "description": "JupyterLab - UI components written in React",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js.map",
+    "lib/*.js",
+    "style/*.css"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib",
+    "prepublishOnly": "npm run build",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "@jupyterlab/apputils": "^0.15.5",
+    "react": "~16.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "~16.0.19",
+    "rimraf": "~2.6.2",
+    "typescript": "~2.6.2"
+  }
+}

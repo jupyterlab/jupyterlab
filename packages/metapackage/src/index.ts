@@ -57,5 +57,6 @@ import '@jupyterlab/theme-dark-extension';
 import '@jupyterlab/theme-light-extension';
 import '@jupyterlab/tooltip';
 import '@jupyterlab/tooltip-extension';
+import '@jupyterlab/ui';
 import '@jupyterlab/vdom-extension';
 import '@jupyterlab/vega3-extension';
