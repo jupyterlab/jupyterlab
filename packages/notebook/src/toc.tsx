@@ -20,10 +20,13 @@ import {
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
+/**
+ * A widget for hosting a notebook table-of-contents.
+ */
 export
 class NotebookTableOfContents extends Widget {
   /**
-   * Create a new extension object.
+   * Create a new table of contents.
    */
   constructor(notebook: Notebook) {
     super();
@@ -64,8 +67,8 @@ class NotebookTableOfContents extends Widget {
       const lines = model.value.text.split('\n').filter(line => line[0] === '#');
       lines.forEach(line => {
         const level = line.search(/[^#]/);
-        const title = line.slice(level);
-        headings.push({ title, level, anchor: cell.node });
+        const text = line.slice(level);
+        headings.push({ text, level, anchor: cell.node });
       });
     });
     return headings;
@@ -74,34 +77,67 @@ class NotebookTableOfContents extends Widget {
   private _notebook: Notebook;
 }
 
+/**
+ * An object that represents a markdown heading.
+ */
 export
 interface IHeading {
-  title: string;
+  /**
+   * The text of the heading.
+   */
+  text: string;
+
+  /**
+   * The HTML header level for the heading.
+   */
   level: number;
+
+  /**
+   * An HTML element to scroll into view when the
+   * TOC item is clicked.
+   */
   anchor: HTMLElement;
 }
 
+/**
+ * Props for the TOCTree component.
+ */
 export
 interface ITOCTreeProps extends React.Props<TOCTree> {
+  /**
+   * A list of IHeadings to render.
+   */
   toc: IHeading[];
 }
 
+/**
+ * A React component for a table of contents.
+ */
 export
 class TOCTree extends React.Component<ITOCTreeProps, {}> {
-
+  /**
+   * Render the TOCTree.
+   */
   render() {
+    // Map the heading objects onto a list of JSX elements.
     let listing: JSX.Element[] = this.props.toc.map( el => {
       let level = Math.round(el.level);
-      level = (level > 0 && level < 7) ? level : 6;
+
+      // Clamp the header level between 1 and six.
+      level = Math.max(Math.min(level, 6), 1);
+
+      // Create an onClick handler for the TOC item
+      // that scrolls the anchor into view.
       const clickHandler = (evt: MouseEvent) => {
         evt.preventDefault();
         el.anchor.scrollIntoView();
       };
 
       return React.createElement(`h${level}`, { onClick: clickHandler },
-        <a href=''>{ el.title }</a>);
+        <a href=''>{ el.text }</a>);
     });
 
+    // Return the JSX component.
     return (
       <div>
         <div className='jp-NotebookTableOfContents-header'>

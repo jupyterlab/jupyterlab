@@ -121,6 +121,8 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
     (container.layout as SplitLayout).addWidget(this.tableOfContents);
     (container.layout as SplitLayout).addWidget(this.notebook);
     container.setRelativeSizes([0.2, 0.8]);
+    this.tableOfContents.hide();
+
     layout.addWidget(toolbar);
     layout.addWidget(container);
 
