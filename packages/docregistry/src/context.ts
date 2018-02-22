@@ -262,9 +262,14 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         return this._populate();
       }
     }).catch(err => {
-      if (err === 'Cancel') {
-        return;
+      // If the save has been canceled by the user,
+      // throw the error so that whoever called save()
+      // can decide what to do.
+      if (err.message === 'Cancel') {
+        throw err;
       }
+
+      // Otherwise show an error message and throw the error.
       const localPath = this._manager.contents.localPath(this._path);
       const name = PathExt.basename(localPath);
       this._handleError(err, `File Save Error for ${name}`);
@@ -504,7 +509,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     let promise = this._manager.contents.get(path, { content: false });
     return promise.then(model => {
       if (this.isDisposed) {
-        return Promise.reject('Disposed');
+        return Promise.reject(new Error('Disposed'));
       }
       // We want to check last_modified (disk) > last_modified (client)
       // (our last save)
@@ -595,7 +600,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       buttons: [Dialog.cancelButton(), revertBtn, overwriteBtn]
     }).then(result => {
       if (this.isDisposed) {
-        return Promise.reject('Disposed');
+        return Promise.reject(new Error('Disposed'));
       }
       if (result.button.label === 'OVERWRITE') {
         return this._manager.contents.save(this._path, options);
@@ -603,7 +608,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       if (result.button.label === 'REVERT') {
         return this.revert().then(() => { return model; });
       }
-      return Promise.reject('Cancel'); // Otherwise cancel the save.
+      return Promise.reject(new Error('Cancel')); // Otherwise cancel the save.
     });
   }
 
@@ -618,7 +623,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       buttons: [Dialog.cancelButton(), overwriteBtn]
     }).then(result => {
       if (this.isDisposed) {
-        return Promise.reject('Disposed');
+        return Promise.reject(new Error('Disposed'));
       }
       if (result.button.label === 'OVERWRITE') {
         return this._manager.contents.delete(path).then(() => {
