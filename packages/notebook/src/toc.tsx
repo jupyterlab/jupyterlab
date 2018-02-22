@@ -120,7 +120,7 @@ class TOCTree extends React.Component<ITOCTreeProps, {}> {
    */
   render() {
     // Map the heading objects onto a list of JSX elements.
-    let listing: JSX.Element[] = this.props.toc.map( el => {
+    let listing: JSX.Element[] = this.props.toc.map(el => {
       let level = Math.round(el.level);
 
       // Clamp the header level between 1 and six.
@@ -133,8 +133,11 @@ class TOCTree extends React.Component<ITOCTreeProps, {}> {
         el.anchor.scrollIntoView();
       };
 
-      return React.createElement(`h${level}`, { onClick: clickHandler },
-        <a href=''>{ el.text }</a>);
+      return React.createElement(
+        `h${level}`,
+        { key: `${el.text}-${el.level}`, onClick: clickHandler },
+        <a href=''>{ el.text }</a>
+      );
     });
 
     // Return the JSX component.
