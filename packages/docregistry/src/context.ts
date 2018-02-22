@@ -262,6 +262,9 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         return this._populate();
       }
     }).catch(err => {
+      if (err === 'Cancel') {
+        return;
+      }
       const localPath = this._manager.contents.localPath(this._path);
       const name = PathExt.basename(localPath);
       this._handleError(err, `File Save Error for ${name}`);
@@ -598,6 +601,8 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         return this._manager.contents.save(this._path, options);
       } else if (result.button.label === 'REVERT') {
         return this.revert().then(() => { return model; });
+      } else if (result.button.label === 'CANCEL') {
+        return Promise.reject('Cancel');
       }
     });
   }
