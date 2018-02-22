@@ -599,11 +599,11 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       }
       if (result.button.label === 'OVERWRITE') {
         return this._manager.contents.save(this._path, options);
-      } else if (result.button.label === 'REVERT') {
-        return this.revert().then(() => { return model; });
-      } else if (result.button.label === 'CANCEL') {
-        return Promise.reject('Cancel');
       }
+      if (result.button.label === 'REVERT') {
+        return this.revert().then(() => { return model; });
+      }
+      return Promise.reject('Cancel'); // Otherwise cancel the save.
     });
   }
 
