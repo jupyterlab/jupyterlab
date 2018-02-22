@@ -468,7 +468,7 @@ class DocumentManager implements IDisposable {
     );
 
     let context: Private.IContext | null = null;
-    let ready: Promise<void> | null = null;
+    let ready: Promise<void> = Promise.resolve(undefined);
 
     // Handle the load-from-disk case
     if (which === 'open') {
