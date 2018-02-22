@@ -41,6 +41,11 @@ class NotebookTableOfContents extends Widget {
    * Handle an update request.
    */
   protected onUpdateRequest(msg: Message): void {
+    // Don't bother if the TOC is not visible
+    if (!this.isVisible) {
+      return;
+    }
+
     const toc = this._generateTOC();
     ReactDOM.render(<TOCTree toc={toc}/>, this.node);
   }
@@ -53,11 +58,6 @@ class NotebookTableOfContents extends Widget {
   }
 
   private _generateTOC(): IHeading[] {
-    // Don't bother if the TOC is not visible
-    if (!this.isVisible) {
-      return;
-    }
-
     let headings: IHeading[] = [];
     each(this._notebook.widgets, cell => {
       let model = cell.model;
