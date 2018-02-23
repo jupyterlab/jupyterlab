@@ -157,7 +157,7 @@ JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by
 * Afshin Darian, Project Jupyter (co-creator, settings, inspector, completer,
   prolific contributions throughout the code base).
 * Jessica Forde, Project Jupyter (demo, documentation)
-* Timothy George, Cal Poly (UI/UX design, strategy, management, user needs analysis)
+* Tim George, Cal Poly (UI/UX design, strategy, management, user needs analysis)
 * Brian Granger, Cal Poly (co-creator, strategy, vision, management, UI/UX design,
   architecture).
 * Jason Grout, Bloomberg (co-creator, vision, general development).
