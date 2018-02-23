@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ActivityMonitor
+} from '@jupyterlab/coreutils';
+
+import {
   each
 } from '@phosphor/algorithm';
 
@@ -21,6 +25,11 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
 /**
+ * Timeout for throttling TOC rendering.
+ */
+const RENDER_TIMEOUT = 1000;
+
+/**
  * A widget for hosting a notebook table-of-contents.
  */
 export
@@ -33,7 +42,18 @@ class NotebookTableOfContents extends Widget {
     this.addClass('jp-NotebookTableOfContents');
     this._notebook = notebook;
     notebook.modelChanged.connect((nb, args) => {
-      notebook.model.contentChanged.connect(this.update, this);
+      // Dispose an old activity monitor if it exists
+      if (this._monitor) {
+        this._monitor.dispose();
+        this._monitor = null;
+      }
+
+      // Throttle the rendering rate of the table of contents.
+      this._monitor = new ActivityMonitor({
+        signal: notebook.model.contentChanged,
+        timeout: RENDER_TIMEOUT
+      });
+      this._monitor.activityStopped.connect(this.update, this);
     });
   }
 
@@ -75,6 +95,7 @@ class NotebookTableOfContents extends Widget {
   }
 
   private _notebook: Notebook;
+  private _monitor: ActivityMonitor<any, any> | null;
 }
 
 /**
