@@ -1707,6 +1707,11 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   ].map(command => { return { command }; });
   mainMenu.viewMenu.addGroup(expandGroup, 11);
 
+  const persistGroup = [
+    CommandIDs.persistOutputsCollapsed
+  ].map(command => { return { command }; });
+  mainMenu.viewMenu.addGroup(persistGroup, 12);
+
   // Add an IEditorViewer to the application view menu
   mainMenu.viewMenu.editorViewers.add({
     tracker,
