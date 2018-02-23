@@ -56,8 +56,8 @@ class ExampleApp(NotebookApp):
             (ujoin(base_url, '/example?'), ExampleHandler),
             ((settings_path, SettingsHandler, {
                 'schemas_dir': os.path.join(HERE, 'build', 'schemas'),
-                'settings_dir': '',
-                'app_settings_dir': ''
+                'settings_dir': os.path.join(HERE, 'build', 'settings'),
+                'app_settings_dir': os.path.join(HERE, 'build', 'schemas'),
             })),
             ((ujoin(themes_path, "(.*)"), ThemesHandler, {
                 'themes_url': themes_path,
