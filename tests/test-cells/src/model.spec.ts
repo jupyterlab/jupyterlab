@@ -302,7 +302,7 @@ describe('cells/model', () => {
             } as nbformat.IDisplayData
           ],
           source: 'foo',
-          metadata: { trusted: false }
+          metadata: { trusted: false, collapsed: true }
         };
         let model = new CodeCellModel({ cell });
         expect(model).to.be.a(CodeCellModel);
@@ -376,6 +376,29 @@ describe('cells/model', () => {
         expect(model.executionCount).to.be(1);
         model.executionCount = 1;
         expect(called).to.be(1);
+      });
+
+    });
+
+    describe('#initiallyCollapsed', () => {
+
+      it('should initialize from the metadata', () => {
+        let cell: nbformat.ICodeCell = {
+          cell_type: 'code',
+          execution_count: 1,
+          outputs: [],
+          source: 'foo',
+          metadata: { trusted: false, collapsed: true }
+        };
+        let model = new CodeCellModel({ cell });
+        expect(model.initiallyCollapsed).to.be(true);
+      });
+
+      it('should be settable', () => {
+        let model = new CodeCellModel({});
+        expect(model.initiallyCollapsed).to.be(false);
+        model.initiallyCollapsed = true;
+        expect(model.initiallyCollapsed).to.be(true);
       });
 
     });

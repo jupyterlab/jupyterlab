@@ -386,6 +386,13 @@ describe('cells/widget', () => {
 
     describe('#outputCollapsed', () => {
 
+      it('should initialize from the model', () => {
+        const collapsedModel = new CodeCellModel({});
+        collapsedModel.initiallyCollapsed = true;
+        let widget = new CodeCell({ model: collapsedModel, rendermime });
+        expect(widget.outputHidden).to.be(true);
+      });
+
       it('should be the view state of the output being collapsed', () => {
         let widget = new CodeCell({ model, rendermime });
         expect(widget.outputHidden).to.be(false);

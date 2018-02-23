@@ -572,6 +572,7 @@ class CodeCell extends Cell {
     });
 
     // Modify state
+    this.outputHidden = this.model.initiallyCollapsed;
     this.setPrompt(`${model.executionCount || ''}`);
     model.stateChanged.connect(this.onStateChanged, this);
     model.metadata.changed.connect(this.onMetadataChanged, this);
@@ -734,7 +735,7 @@ class CodeCell extends Cell {
   }
 
   private _rendermime: RenderMimeRegistry = null;
-  private _outputHidden = false;
+  private _outputHidden: boolean;
   private _outputsScrolled = false;
   private _outputWrapper: Widget = null;
   private _outputCollapser: OutputCollapser = null;
