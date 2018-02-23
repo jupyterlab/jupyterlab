@@ -3,7 +3,7 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-
+import re
 import requests
 
 # Get the list of releases.
@@ -17,6 +17,9 @@ if r.status_code == 200:
             name = release['name']
             tag_name = release['tag_name']
             notes = release['body'].replace('\r\n', '\n')
+            notes = re.sub(r'#([0-9]+)',
+                           r'[#\1](https://github.com/jupyterlab/jupyterlab/issues/\1)',
+                           notes)
 
             title = f'{name} ({tag_name})' if name != tag_name else name
             f.write(f'## {title}\n')
