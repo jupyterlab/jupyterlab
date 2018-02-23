@@ -718,8 +718,7 @@ class DirListing extends Widget {
 
     // Remove any excess item nodes.
     while (nodes.length > items.length) {
-      let node = nodes.pop();
-      content.removeChild(node!);
+      content.removeChild(nodes.pop());
     }
 
     // Add any missing item nodes.
@@ -731,16 +730,15 @@ class DirListing extends Widget {
     }
 
     // Remove extra classes from the nodes.
-    each(nodes, item => {
+    nodes.forEach(item => {
       item.classList.remove(SELECTED_CLASS);
       item.classList.remove(RUNNING_CLASS);
       item.classList.remove(CUT_CLASS);
     });
 
     // Add extra classes to item nodes based on widget state.
-    for (let i = 0, n = items.length; i < n; ++i) {
+    items.forEach((item, i) => {
       let node = nodes[i];
-      let item = items[i];
       let ft = this._manager.registry.getFileTypeForModel(item);
       renderer.updateItemNode(node, item, ft);
       if (this._selection[item.name]) {
@@ -749,25 +747,32 @@ class DirListing extends Widget {
           node.classList.add(CUT_CLASS);
         }
       }
-    }
+    });
 
     // Handle the selectors on the widget node.
-    let selectedNames = Object.keys(this._selection);
-    if (selectedNames.length > 1) {
-      this.addClass(MULTI_SELECTED_CLASS);
-    }
-    if (selectedNames.length) {
+    let selected = Object.keys(this._selection).length;
+    if (selected) {
       this.addClass(SELECTED_CLASS);
+      if (selected > 1) {
+        this.addClass(MULTI_SELECTED_CLASS);
+      }
     }
 
     // Handle file session statuses.
-    let paths = toArray(map(items, item => item.path));
+    let paths = items.map(item => item.path);
     each(this._model.sessions(), session => {
       let index = ArrayExt.firstIndexOf(paths, session.path);
+
+      // If the path is not found, bail.
+      if (index === -1) {
+        return;
+      }
+
       let node = nodes[index];
-      node.classList.add(RUNNING_CLASS);
       let name = session.kernel.name;
       let specs = this._model.specs;
+
+      node.classList.add(RUNNING_CLASS);
       if (specs) {
         name = specs.kernelspecs[name].display_name;
       }
