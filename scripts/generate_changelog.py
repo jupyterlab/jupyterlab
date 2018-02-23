@@ -16,12 +16,13 @@ if r.status_code == 200:
         for release in releases:
             name = release['name']
             tag_name = release['tag_name']
+            tag_url = release['html_url']
             notes = release['body'].replace('\r\n', '\n')
             notes = re.sub(r'#([0-9]+)',
                            r'[#\1](https://github.com/jupyterlab/jupyterlab/issues/\1)',
                            notes)
 
             title = f'{name} ({tag_name})' if name != tag_name else name
-            f.write(f'## {title}\n')
+            f.write(f'## [{title}]({tag_url})\n')
             f.write(notes)
             f.write('\n\n')
