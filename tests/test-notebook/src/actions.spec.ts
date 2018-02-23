@@ -1335,6 +1335,26 @@ describe('@jupyterlab/notebook', () => {
 
     });
 
+    describe('#persistOutputsCollapsed()', () => {
+      it('should make sure the model reflects the view', () => {
+        let changedACell = false;
+        for (const cell of widget.widgets) {
+          if (cell instanceof CodeCell) {
+            cell.outputHidden = !cell.outputHidden;
+            changedACell = true;
+          }
+        }
+        expect(changedACell).to.be(true);
+        NotebookActions.persistOutputsCollapsed(widget);
+        for (const cell of widget.widgets) {
+          if (cell instanceof CodeCell) {
+            expect(cell.model.initiallyCollapsed).to.be(cell.outputHidden);
+          }
+        }
+      });
+
+    });
+
     describe('#setMarkdownHeader()', () => {
 
       it('should set the markdown header level of selected cells', () => {

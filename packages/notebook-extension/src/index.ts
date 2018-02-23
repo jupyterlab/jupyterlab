@@ -249,6 +249,9 @@ namespace CommandIDs {
 
   export
   const disableOutputScrolling = 'notebook:disable-output-scrolling';
+
+  export
+  const persistOutputsCollapsed = 'notebook:persist-outputs-collapsed';
 }
 
 
@@ -1493,6 +1496,17 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     },
     isEnabled
   });
+  commands.addCommand(CommandIDs.persistOutputsCollapsed, {
+    label: 'Persist Whether Outputs are Collapsed',
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.persistOutputsCollapsed(current.notebook);
+      }
+    },
+    isEnabled
+  });
 }
 
 
@@ -1569,7 +1583,8 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.hideAllOutputs,
     CommandIDs.showAllOutputs,
     CommandIDs.enableOutputScrolling,
-    CommandIDs.disableOutputScrolling
+    CommandIDs.disableOutputScrolling,
+    CommandIDs.persistOutputsCollapsed
   ].forEach(command => { palette.addItem({ command, category }); });
 }
 

@@ -1083,6 +1083,29 @@ namespace NotebookActions {
     Private.handleState(widget, state);
   }
 
+  /**
+   * Persists the collapsed state of all code cell outputs to the model.
+   *
+   * @param widget - The target notebook widget.
+   */
+  export
+  function persistOutputsCollapsed(widget: Notebook): void {
+    if (!widget.model || !widget.activeCell) {
+      return;
+    }
+    let state = Private.getState(widget);
+    let cells = widget.widgets;
+    each(cells, (cell: Cell) => {
+      if (cell.model.type === 'code') {
+        const {outputHidden, model} = (cell as CodeCell);
+        if (outputHidden !== model.initiallyCollapsed) {
+          model.initiallyCollapsed = outputHidden;
+        }
+      }
+    });
+    Private.handleState(widget, state);
+  }
+
 
   /**
    * Set the markdown header level.
