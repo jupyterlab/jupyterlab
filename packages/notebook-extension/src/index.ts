@@ -344,14 +344,12 @@ function activateCellTools(app: JupyterLab, tracker: INotebookTracker, editorSer
 
   // Create message hook for triggers to save to the database.
   const hook = (sender: any, message: Message): boolean => {
-    const { ActivateRequest, AfterHide, CloseRequest } = Widget.Msg;
-
     switch (message.type) {
-      case ActivateRequest.type:
+      case 'activate-request':
         state.save(id, { open: true });
         break;
-      case AfterHide.type:
-      case CloseRequest.type:
+      case 'after-hide':
+      case 'close-request':
         state.remove(id);
         break;
       default:
