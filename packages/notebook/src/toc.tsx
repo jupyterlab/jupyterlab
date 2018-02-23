@@ -130,6 +130,7 @@ class TOCTree extends React.Component<ITOCTreeProps, {}> {
       // that scrolls the anchor into view.
       const clickHandler = (evt: MouseEvent) => {
         evt.preventDefault();
+        evt.stopPropagation();
         el.anchor.scrollIntoView();
       };
 
