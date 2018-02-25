@@ -45,13 +45,10 @@ rowCount(region: DataModel.RowRegion): number {
  * @returns - The column count for the region.
  */
 columnCount(region: DataModel.ColumnRegion): number {
-  // Parse first row, return that number of columns
-    if (region === 'body') {
-      if (this._offsets.length > 1) {
-        return this._data.slice(0, this._offsets[1]).split(this._delimiter).length;
-      }
-    }
-    return 0;
+  if (region === 'body') {
+    return this._columnCount;
+  }
+  return 0;
 }
 
 /**
@@ -96,18 +93,25 @@ data(region: DataModel.CellRegion, row: number, column: number): any {
 }
 
 private _computeOffsets() {
-    let offsets = [0];
-    // Calculate the line offsets.
-    let len = this._data.length;
-    for (let i = 0; i < len; i++) {
-        if (this._data[i] === '\n') {
-            offsets.push(i + 1);
-        }
-    }
-    if (offsets[offsets.length] > 4294967296) {
-      throw 'csv too large';
-    }
-    this._offsets = Uint32Array.from(offsets);
+  let offsets = [0];
+
+  // Calculate the line offsets.
+  let len = this._data.length;
+  for (let i = 0; i < len; i++) {
+      if (this._data[i] === '\n') {
+          offsets.push(i + 1);
+      }
+  }
+  if (offsets[offsets.length] > 4294967296) {
+    throw 'csv too large';
+  }
+  if (offsets.length > 1) {
+    this._columnCount = this._data.slice(0, offsets[1]).split(this._delimiter).length;
+  } else {
+    // one row
+    this._columnCount = this._data.split(this._delimiter).length;
+  }
+  this._offsets = Uint32Array.from(offsets);
 }
 
 private _data: string;
@@ -117,12 +121,14 @@ private _delimiter: string;
  * The offsets for each successive line.
  *
  * #### Notes
- * If an offset is more than 2^32, then my string is more than 4GB. That's not practical in browsers these days?
+ * If an offset is more than 2^32, then the data is more than 4GB. That's not
+ * practical in browsers these days?
  */
 private _offsets: Uint32Array;
 
 private _parsedRowNum: number;
 private _parsedRow: string[];
+private _columnCount: number;
 }
 
 
