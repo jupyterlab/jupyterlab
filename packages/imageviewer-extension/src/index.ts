@@ -27,10 +27,10 @@ namespace CommandIDs {
   const zoomOut = 'imageviewer:zoom-out';
 
   export
-  const rot90 = 'imageviewer:rotate-clockwise';
+  const rotateClockwise = 'imageviewer:rotate-clockwise';
 
   export
-  const rot270 = 'imageviewer:rotate-counterclockwise';
+  const rotateCounterclockwise = 'imageviewer:rotate-counterclockwise';
 }
 
 
