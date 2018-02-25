@@ -85,7 +85,9 @@ Images
 
 JupyterLab supports image data in cell output and as files in the above
 formats. In the image file viewer, you can use keyboard shortcuts such
-as ``+`` and ``-`` to zoom the image and ``0`` to reset the zoom level.
+as ``+`` and ``-`` to zoom the image, ``[`` and ``]`` to rotate the image, 
+and ``0`` to reset the image.
+
 To edit an SVG image as a text file, right-click on the SVG filename in
 the file browser and select the “Editor” item in the “Open With”
 submenu:
