@@ -81,14 +81,14 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
     this._scale = value;
     let scaleNode = this.node.querySelector('div') as HTMLElement;
     let transform: string;
-      transform = `translate(-50%,-50%) scale(${value}) rotate(${this._rotation}deg)`;
+    transform = `translate(-50%,-50%) scale(${value}) rotate(${this._rotation}deg)`;
     scaleNode.style.transform = transform;
   }
 
   /**
    * The rotation of the image.
    */
-  get rotation(): number{
+  get rotation(): number {
     return this._rotation;
   }
   set rotation(value: number) {
@@ -98,7 +98,7 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
     this._rotation = value;
     let rotNode = this.node.querySelector('div') as HTMLElement;
     let transform: string;
-      transform = `translate(-50%,-50%) scale(${this._scale}) rotate(${value}deg)`;
+    transform = `translate(-50%,-50%) scale(${this._scale}) rotate(${value}deg)`;
     rotNode.style.transform = transform;
   }
 

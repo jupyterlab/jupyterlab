@@ -149,13 +149,13 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
     label: 'Rotate Clockwise',
     isEnabled
   });
-    
+
   commands.addCommand('imageviewer:rot270', {
     execute: rot270,
     label: 'Rotate Counterclockwise',
     isEnabled
   });
-    
+
   function zoomIn(): void {
     const widget = tracker.currentWidget;
 
