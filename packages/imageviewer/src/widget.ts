@@ -96,10 +96,10 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
         return;
     }
     this._rotation = value;
-    let scaleNode = this.node.querySelector('div') as HTMLElement;
+    let rotNode = this.node.querySelector('div') as HTMLElement;
     let transform: string;
-      transform = `rotate(${value}deg)`;
-    scaleNode.style.transform = transform;
+      transform = `translate(-50%,-50%) rotate(${value}deg)`;
+    rotNode.style.transform = transform;
   }
 
   /**
