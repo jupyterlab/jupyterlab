@@ -18,7 +18,7 @@ import {
  */
 namespace CommandIDs {
   export
-  const resetZoom = 'imageviewer:reset-zoom';
+  const resetImage = 'imageviewer:reset-image';
 
   export
   const zoomIn = 'imageviewer:zoom-in';
@@ -27,10 +27,10 @@ namespace CommandIDs {
   const zoomOut = 'imageviewer:zoom-out';
 
   export
-  const rot90 = 'imageviewer:rot90';
+  const rot90 = 'imageviewer:rotate-clockwise';
 
   export
-  const rot270 = 'imageviewer:rot270';
+  const rot270 = 'imageviewer:rotate-counterclockwise';
 }
 
 
@@ -104,7 +104,7 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRe
 
   const category = 'Image Viewer';
 
-  [CommandIDs.zoomIn, CommandIDs.zoomOut, CommandIDs.resetZoom, CommandIDs.rot90, CommandIDs.rot270]
+  [CommandIDs.zoomIn, CommandIDs.zoomOut, CommandIDs.resetImage, CommandIDs.rotateClockwise, CommandIDs.rotateCounterclockwise]
     .forEach(command => { palette.addItem({ command, category }); });
 
   return tracker;
@@ -138,20 +138,20 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
     isEnabled
   });
 
-  commands.addCommand('imageviewer:reset-zoom', {
-    execute: resetZoom,
+  commands.addCommand('imageviewer:reset-image', {
+    execute: resetImage,
     label: 'Reset Image',
     isEnabled
   });
 
-  commands.addCommand('imageviewer:rot90', {
-    execute: rot90,
+  commands.addCommand('imageviewer:rotate-clockwise', {
+    execute: rotateClockwise,
     label: 'Rotate Clockwise',
     isEnabled
   });
 
-  commands.addCommand('imageviewer:rot270', {
-    execute: rot270,
+  commands.addCommand('imageviewer:rotate-counterclockwise', {
+    execute: rotateCounterclockwise,
     label: 'Rotate Counterclockwise',
     isEnabled
   });
@@ -172,7 +172,7 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
     }
   }
 
-  function resetZoom(): void {
+  function resetImage(): void {
     const widget = tracker.currentWidget;
 
     if (widget) {
@@ -181,7 +181,7 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
     }
   }
 
-  function rot90(): void {
+  function rotateClockwise(): void {
     const widget = tracker.currentWidget;
 
     if (widget) {
@@ -189,11 +189,11 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
     }
   }
 
-  function rot270(): void {
+  function rotateCounterclockwise(): void {
     const widget = tracker.currentWidget;
 
     if (widget) {
-      widget.rotation += 270;
+      widget.rotation -= 90;
     }
   }
 }
