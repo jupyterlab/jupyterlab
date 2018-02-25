@@ -10,7 +10,8 @@
 
 
 .jp-ImageViewer > div {
-  transform-origin: top left;
+  position: absolute;
+  transform-origin: center center;
 }
 
 
