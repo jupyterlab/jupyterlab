@@ -25,6 +25,12 @@ namespace CommandIDs {
 
   export
   const zoomOut = 'imageviewer:zoom-out';
+
+  export
+  const rot90 = 'imageviewer:rot90';
+
+  export
+  const rot270 = 'imageviewer:rot270';
 }
 
 
@@ -98,7 +104,7 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRe
 
   const category = 'Image Viewer';
 
-  [CommandIDs.zoomIn, CommandIDs.zoomOut, CommandIDs.resetZoom]
+  [CommandIDs.zoomIn, CommandIDs.zoomOut, CommandIDs.resetZoom, CommandIDs.rot90, CommandIDs.rot270]
     .forEach(command => { palette.addItem({ command, category }); });
 
   return tracker;
@@ -138,6 +144,18 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
     isEnabled
   });
 
+  commands.addCommand('imageviewer:rot90', {
+    execute: rot90,
+    label: 'Rotate clockwise',
+    isEnabled
+  });
+    
+  commands.addCommand('imageviewer:rot270', {
+    execute: rot270,
+    label: 'Rotate counterclockwise',
+    isEnabled
+  });
+    
   function zoomIn(): void {
     const widget = tracker.currentWidget;
 
@@ -159,6 +177,22 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
 
     if (widget) {
       widget.scale = 1;
+    }
+  }
+    
+  function rot90(): void {
+    const widget = tracker.currentWidget;
+
+    if (widget) {
+      widget.rotation += 90;
+    }
+  }
+
+  function rot270(): void {
+    const widget = tracker.currentWidget;
+
+    if (widget) {
+      widget.rotation += 270;
     }
   }
 }

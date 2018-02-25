@@ -86,6 +86,23 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
   }
 
   /**
+   * The rotation of the image.
+   */
+  get rotation(): number{
+    return this._rotation;
+  }
+  set rotation(value: number) {
+    if (value === this._rotation) {
+        return;
+    }
+    this._rotation = value;
+    let scaleNode = this.node.querySelector('div') as HTMLElement;
+    let transform: string;
+      transform = `rotate(${value}deg)`;
+    scaleNode.style.transform = transform;
+  }
+
+  /**
    * Handle `update-request` messages for the widget.
    */
   protected onUpdateRequest(msg: Message): void {
@@ -125,6 +142,7 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
   }
 
   private _scale = 1;
+  private _rotation = 0;
   private _ready = new PromiseDelegate<void>();
 }
 
