@@ -180,7 +180,7 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
       widget.rotation = 0;
     }
   }
-    
+
   function rot90(): void {
     const widget = tracker.currentWidget;
 
