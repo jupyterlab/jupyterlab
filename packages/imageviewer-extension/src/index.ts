@@ -140,19 +140,19 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
 
   commands.addCommand('imageviewer:reset-zoom', {
     execute: resetZoom,
-    label: 'Reset Zoom',
+    label: 'Reset Image',
     isEnabled
   });
 
   commands.addCommand('imageviewer:rot90', {
     execute: rot90,
-    label: 'Rotate clockwise',
+    label: 'Rotate Clockwise',
     isEnabled
   });
     
   commands.addCommand('imageviewer:rot270', {
     execute: rot270,
-    label: 'Rotate counterclockwise',
+    label: 'Rotate Counterclockwise',
     isEnabled
   });
     
@@ -177,6 +177,7 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
 
     if (widget) {
       widget.scale = 1;
+      widget.rotation = 0;
     }
   }
     

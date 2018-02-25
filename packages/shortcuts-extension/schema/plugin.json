@@ -175,6 +175,24 @@
       },
       "type": "object"
     },
+    "imageviewer:rot90": {
+      "default": { },
+      "properties": {
+        "command": { "default": "imageviewer:rot90" },
+        "keys": { "default": ["["] },
+        "selector": { "default": ".jp-ImageViewer" }
+      },
+      "type": "object"
+    },
+    "imageviewer:rot270": {
+      "default": { },
+      "properties": {
+        "command": { "default": "imageviewer:rot270" },
+        "keys": { "default": ["]"] },
+        "selector": { "default": ".jp-ImageViewer" }
+      },
+      "type": "object"
+    },
     "inspector:open": {
       "default": { },
       "properties": {
