@@ -19,9 +19,6 @@
 
 
 .jp-ImageViewer img {
-  display: table-cell;
-  vertical-align: middle;
-  text-align: center;
   margin: auto;
 }
 
