@@ -16,33 +16,12 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  ElementAttrs, h, VirtualDOM
-} from '@phosphor/virtualdom';
-
-import {
   Widget
 } from '@phosphor/widgets';
 
+import * as React from 'react';
 
-/**
- * The class name added to all plugin lists.
- */
-const PLUGIN_LIST_CLASS = 'jp-PluginList';
-
-/**
- * The class name added to the plugin list's editor switcher.
- */
-const PLUGIN_LIST_SWITCHER_CLASS = 'jp-PluginList-switcher';
-
-/**
- * The class name added to all plugin list icons.
- */
-const PLUGIN_ICON_CLASS = 'jp-PluginList-icon';
-
-/**
- * The class name added to selected items.
- */
-const SELECTED_CLASS = 'jp-mod-selected';
+import * as ReactDOM from 'react-dom';
 
 
 /**
@@ -56,7 +35,7 @@ class PluginList extends Widget {
   constructor(options: PluginList.IOptions) {
     super();
     this.registry = options.registry;
-    this.addClass(PLUGIN_LIST_CLASS);
+    this.addClass('jp-PluginList');
     this._confirm = options.confirm;
     this.registry.pluginChanged.connect(() => { this.update(); }, this);
   }
@@ -148,23 +127,12 @@ class PluginList extends Widget {
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    const plugins = Private.sortPlugins(this.registry.plugins);
-    const switcher = Private.createSwitcher(this._editor);
-    const list = document.createElement('ul');
+    const { node, registry } = this;
+    const type = this._editor;
+    const selection = this._selection;
 
-    this.node.textContent = '';
-    this.node.appendChild(switcher);
-    this.node.appendChild(list);
-    plugins.forEach(plugin => {
-      const item = Private.createListItem(this.registry, plugin);
-
-      if (plugin.id === this._selection) {
-        item.classList.add(SELECTED_CLASS);
-      }
-
-      list.appendChild(item);
-    });
-    list.scrollTop = this._scrollTop;
+    Private.populateList(registry, type, selection, node);
+    node.querySelector('ul').scrollTop = this._scrollTop;
   }
 
   /**
@@ -251,47 +219,6 @@ namespace PluginList {
  */
 namespace Private {
   /**
-   * Create a plugin list item.
-   */
-  export
-  function createListItem(registry: ISettingRegistry, plugin: ISettingRegistry.IPlugin): HTMLLIElement {
-    const icon = getHint(ICON_CLASS_KEY, registry, plugin);
-    const iconClass = `${PLUGIN_ICON_CLASS}${icon ? ' ' + icon : ''}`;
-    const iconLabel = getHint(ICON_LABEL_KEY, registry, plugin);
-    const title = plugin.schema.title || plugin.id;
-    const caption = `(${plugin.id}) ${plugin.schema.description}`;
-
-    return VirtualDOM.realize(
-      h.li({ dataset: { id: plugin.id }, title: caption },
-        h.span({ className: iconClass, title: iconLabel }),
-        h.span(title))
-    ) as HTMLLIElement;
-  }
-
-  /**
-   * Create the plugin list editor switcher.
-   */
-  export
-  function createSwitcher(current: 'raw' | 'table'): HTMLElement {
-    let raw: ElementAttrs;
-    let table: ElementAttrs = { dataset: { editor: 'table' } };
-
-    if (current === 'raw') {
-      raw = { dataset: { editor: 'raw' }, disabled: 'disabled' };
-      table = { dataset: { editor: 'table' } };
-    } else {
-      raw = { dataset: { editor: 'raw' } };
-      table = { dataset: { editor: 'table' }, disabled: 'disabled' };
-    }
-
-    return VirtualDOM.realize(
-      h.div({ className: PLUGIN_LIST_SWITCHER_CLASS },
-        h.button(raw, 'Raw View'),
-        h.button(table, 'Table View'))
-    );
-  }
-
-  /**
    * Check the plugin for a rendering hint's value.
    *
    * #### Notes
@@ -318,7 +245,7 @@ namespace Private {
 
     // Finally, use the defaults from the registry schema.
     if (!hint) {
-      const properties = registry.schema.properties;
+      const { properties } = registry.schema;
 
       hint = properties && properties[key] && properties[key].default;
     }
@@ -327,9 +254,46 @@ namespace Private {
   }
 
   /**
-   * Sort a list of plugins by ID.
+   * Populate the plugin list.
    */
   export
+  function populateList(registry: ISettingRegistry, type: 'raw' | 'table', selection: string, node: HTMLElement): void {
+    const plugins = sortPlugins(registry.plugins);
+    const items = plugins.map(plugin => {
+      const itemTitle = `(${plugin.id}) ${plugin.schema.description}`;
+      const image = getHint(ICON_CLASS_KEY, registry, plugin);
+      const iconClass = `jp-PluginList-icon${image ? ' ' + image : ''}`;
+      const iconTitle = getHint(ICON_LABEL_KEY, registry, plugin);
+      return (
+        <li className={plugin.id === selection ? 'jp-mod-selected' : ''}
+            data-id={plugin.id}
+            key={plugin.id}
+            title={itemTitle}>
+          <span className={iconClass} title={iconTitle}></span>
+          <span>{plugin.schema.title || plugin.id}</span>
+        </li>
+      );
+    });
+
+    ReactDOM.unmountComponentAtNode(node);
+    ReactDOM.render((
+      <React.Fragment>
+        <div className='jp-PluginList-switcher'>
+          <button data-editor='raw' disabled={type === 'raw'}>
+            Raw View
+          </button>
+          <button data-editor='table' disabled={type === 'table'}>
+            Table View
+          </button>
+        </div>
+        <ul>{items}</ul>
+      </React.Fragment>
+    ), node);
+  }
+
+  /**
+   * Sort a list of plugins by ID.
+   */
   function sortPlugins(plugins: ISettingRegistry.IPlugin[]): ISettingRegistry.IPlugin[] {
     return plugins.sort((a, b) => {
       return (a.schema.title || a.id).localeCompare(b.schema.title || b.id);

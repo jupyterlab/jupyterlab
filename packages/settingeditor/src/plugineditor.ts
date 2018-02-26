@@ -153,7 +153,7 @@ class PluginEditor extends Widget {
    */
   confirm(): Promise<void> {
     if (this.isHidden || !this.isAttached || !this.isDirty) {
-      return Promise.resolve(void 0);
+      return Promise.resolve(undefined);
     }
 
     return showDialog({
