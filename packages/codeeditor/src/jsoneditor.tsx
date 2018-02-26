@@ -17,9 +17,9 @@ import {
   Widget
 } from '@phosphor/widgets';
 
-import {
-  h, VirtualDOM
-} from '@phosphor/virtualdom';
+import * as React from 'react';
+
+import * as ReactDOM from 'react-dom';
 
 import {
   CodeEditor
@@ -86,9 +86,14 @@ class JSONEditor extends Widget {
    * Construct a new JSON editor.
    */
   constructor(options: JSONEditor.IOptions) {
-    super({ node: Private.createEditorNode(options) });
+    super();
+
+    this.addClass(JSONEDITOR_CLASS);
+    ReactDOM.render(Private.createEditorContent(options), this.node);
+
     let host = this.editorHostNode;
     let model = new CodeEditor.Model();
+
     model.value.text = 'No data!';
     model.mimeType = 'application/json';
     model.value.changed.connect(this._onValueChanged, this);
@@ -440,24 +445,26 @@ namespace JSONEditor {
  */
 namespace Private {
   /**
-   * Create the node for the JSON Editor.
+   * Create the JSON Editor node's content.
    */
   export
-  function createEditorNode(options: JSONEditor.IOptions): HTMLElement {
-    let revertTitle = 'Revert changes to data';
-    let confirmTitle = 'Commit changes to data';
-    let collapseClass = COLLAPSER_CLASS;
-    if (options.collapsible) {
-      collapseClass += ` ${COLLAPSE_ENABLED_CLASS}`;
-    }
-    return VirtualDOM.realize(
-      h.div({ className: JSONEDITOR_CLASS },
-        h.div({ className: HEADER_CLASS },
-          h.span({ className: TITLE_CLASS }, options.title || ''),
-          h.span({ className: collapseClass }),
-          h.span({ className: REVERT_CLASS, title: revertTitle }),
-          h.span({ className: COMMIT_CLASS, title: confirmTitle })),
-        h.div({ className: HOST_CLASS }))
+  function createEditorContent(options: JSONEditor.IOptions): React.ReactElement<any> {
+    const revertTitle = 'Revert changes to data';
+    const confirmTitle = 'Commit changes to data';
+    const title = options.title || '';
+    const collapseClass = options.collapsible ?
+      `${COLLAPSER_CLASS} ${COLLAPSE_ENABLED_CLASS}` : COLLAPSER_CLASS;
+
+    return (
+      <React.Fragment>
+        <div className={HEADER_CLASS}>
+          <span className={TITLE_CLASS}>{title}</span>
+          <span className={collapseClass}></span>
+          <span className={REVERT_CLASS} title={revertTitle}></span>
+          <span className={COMMIT_CLASS} title={confirmTitle}></span>
+        </div>
+        <div className={HOST_CLASS}></div>
+      </React.Fragment>
     );
   }
 }
