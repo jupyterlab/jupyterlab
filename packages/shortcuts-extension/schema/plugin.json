@@ -179,7 +179,7 @@
       "default": { },
       "properties": {
         "command": { "default": "imageviewer:rotate-clockwise" },
-        "keys": { "default": ["["] },
+        "keys": { "default": ["]"] },
         "selector": { "default": ".jp-ImageViewer" }
       },
       "type": "object"
@@ -188,7 +188,7 @@
       "default": { },
       "properties": {
         "command": { "default": "imageviewer:rotate-counterclockwise" },
-        "keys": { "default": ["]"] },
+        "keys": { "default": ["["] },
         "selector": { "default": ".jp-ImageViewer" }
       },
       "type": "object"
