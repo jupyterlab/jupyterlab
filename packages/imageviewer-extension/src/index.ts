@@ -215,7 +215,7 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
     const widget = tracker.currentWidget;
 
     if (widget) {
-      widget.rotation += 90;
+      widget.rotation -= 90;
     }
   }
 
@@ -223,7 +223,7 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
     const widget = tracker.currentWidget;
 
     if (widget) {
-      widget.rotation -= 90;
+      widget.rotation += 90;
     }
   }
 
