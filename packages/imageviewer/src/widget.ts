@@ -79,10 +79,7 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
       return;
     }
     this._scale = value;
-    let scaleNode = this.node.querySelector('div') as HTMLElement;
-    let transform: string;
-    transform = `translate(-50%,-50%) scale(${value}) rotate(${this._rotation}deg)`;
-    scaleNode.style.transform = transform;
+    this.updateStyle();
   }
 
   /**
@@ -96,12 +93,51 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
         return;
     }
     this._rotation = value % 360;
-    let rotNode = this.node.querySelector('div') as HTMLElement;
-    let transform: string;
-    transform = `translate(-50%,-50%) scale(${this._scale}) rotate(${value}deg)`;
-    rotNode.style.transform = transform;
+    this.updateStyle();
+  }
+  
+  /**
+   * The horizontal flip of the image.
+   */
+  get horizontalflip(): number {
+    return this._horizontalflip;
+  }
+  set horizontalflip(value: number) {
+    if (value === this._horizontalflip) {
+        return;
+    }
+    this._horizontalflip = value;
+    this.updateStyle();
   }
 
+  /**
+   * The vertical flip of the image.
+   */
+  get verticalflip(): number {
+    return this._verticalflip;
+  }
+  set verticalflip(value: number) {
+    if (value === this._verticalflip) {
+        return;
+    }
+    this._verticalflip = value;
+    this.updateStyle();
+  }
+
+  /**
+   * The color inversion of the image.
+   */
+  get colorinversion(): number {
+    return this._colorinversion;
+  }
+  set colorinversion(value: number) {
+    if (value === this._colorinversion) {
+        return;
+    }
+    this._colorinversion = value;
+    this.updateStyle();
+  }
+  
   /**
    * Handle `update-request` messages for the widget.
    */
@@ -141,8 +177,25 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
     node.setAttribute('src', src);
   }
 
+  private updateStyle(): void {
+      let transformString: string;
+      let filterString: string;
+  
+      transformString = `translate(-50%,-50%) `;
+      transformString += `scale(${this._scale*this._horizontalflip},${this._scale*this._verticalflip}) `;
+      transformString += `rotate(${this._rotation}deg)`;
+      filterString = `invert(${this._colorinversion})`;
+
+      let rotNode = this.node.querySelector('div') as HTMLElement;
+      rotNode.style.transform = transformString;
+      rotNode.style.filter = filterString;
+  }
+
   private _scale = 1;
   private _rotation = 0;
+  private _horizontalflip = 1;
+  private _verticalflip = 1;
+  private _colorinversion = 0;
   private _ready = new PromiseDelegate<void>();
 }
 
