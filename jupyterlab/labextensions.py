@@ -219,3 +219,6 @@ class LabExtensionApp(JupyterApp):
 
 
 main = LabExtensionApp.launch_instance
+
+if __name__ == '__main__':
+    sys.exit(main())
