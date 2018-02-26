@@ -242,7 +242,7 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
       widget.verticalflip *= -1;
     }
   }
-  
+
   function invertColors(): void {
     const widget = tracker.currentWidget;
 

@@ -95,7 +95,7 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
     this._rotation = value % 360;
     this.updateStyle();
   }
-  
+
   /**
    * The horizontal flip of the image.
    */
@@ -137,7 +137,7 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
     this._colorinversion = value;
     this.updateStyle();
   }
-  
+
   /**
    * Handle `update-request` messages for the widget.
    */
@@ -180,9 +180,9 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
   private updateStyle(): void {
       let transformString: string;
       let filterString: string;
-  
+
       transformString = `translate(-50%,-50%) `;
-      transformString += `scale(${this._scale*this._horizontalflip},${this._scale*this._verticalflip}) `;
+      transformString += `scale(${this._scale * this._horizontalflip},${this._scale * this._verticalflip}) `;
       transformString += `rotate(${this._rotation}deg)`;
       filterString = `invert(${this._colorinversion})`;
 
