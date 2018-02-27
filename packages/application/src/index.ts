@@ -99,7 +99,7 @@ class JupyterLab extends Application<ApplicationShell> {
   /**
    * A list of all errors encountered when registering plugins.
    */
-  public readonly registerPluginErrors: Array<Error> = [];
+  readonly registerPluginErrors: Array<Error> = [];
 
   /**
    * Whether the application is dirty.
