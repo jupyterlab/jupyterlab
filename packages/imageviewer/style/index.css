@@ -15,18 +15,6 @@
   max-height:100%;
 }
 
-.jp-ImageViewer-orientation {
-  box-sizing: border-box;
-  position: absolute;
-  transform-origin: top left;
-  top: 10px;
-  left: 10px;
-  font-size: 30px;
-  font-weight: 900;
-  z-index: 1;
-  background-color: rgba(255, 255, 255, 0.8);
-}
-
 .jp-ImageViewer::before {
     content: '';
     display: block;

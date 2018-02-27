@@ -42,11 +42,6 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
     this.node.tabIndex = -1;
     this.addClass(IMAGE_CLASS);
 
-    this._orientation = document.createElement('div');
-    this._orientation.textContent = '↸';
-    this._orientation.classList.add('jp-ImageViewer-orientation')
-    this.node.appendChild(this._orientation);
-
     this._img = document.createElement('img');
     this.node.appendChild(this._img);
 
@@ -186,8 +181,6 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
     let [tX, tY] = Private.prodVec(this._matrix, [1, 1]);
     let transform = `matrix(${a}, ${b}, ${c}, ${d}, 0, 0) translate(${tX < 0 ? -100 : 0}%, ${tY < 0 ? -100 : 0}%) `;
     this._img.style.transform = `scale(${this._scale}) ${transform}`;
-    this._orientation.style.transform = transform;
-
     this._img.style.filter = `invert(${this._colorinversion})`;
   }
 
@@ -196,7 +189,6 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
   private _colorinversion = 0;
   private _ready = new PromiseDelegate<void>();
   private _img: HTMLImageElement;
-  private _orientation: HTMLDivElement;
 }
 
 
