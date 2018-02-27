@@ -33,10 +33,10 @@ namespace CommandIDs {
   const flipVertical = 'imageviewer:flip-vertical';
 
   export
-  const rotateClockwise = 'imageviewer:rotate-clockwise';
+  const rotateRight = 'imageviewer:rotate-right';
 
   export
-  const rotateCounterclockwise = 'imageviewer:rotate-counterclockwise';
+  const rotateLeft = 'imageviewer:rotate-left';
 
   export
   const invertColors = 'imageviewer:invert-colors';
@@ -113,7 +113,7 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRe
 
   const category = 'Image Viewer';
 
-  [CommandIDs.zoomIn, CommandIDs.zoomOut, CommandIDs.resetImage, CommandIDs.rotateClockwise, CommandIDs.rotateCounterclockwise, CommandIDs.flipHorizontal, CommandIDs.flipVertical, CommandIDs.invertColors]
+  [CommandIDs.zoomIn, CommandIDs.zoomOut, CommandIDs.resetImage, CommandIDs.rotateRight, CommandIDs.rotateLeft, CommandIDs.flipHorizontal, CommandIDs.flipVertical, CommandIDs.invertColors]
     .forEach(command => { palette.addItem({ command, category }); });
 
   return tracker;
@@ -153,15 +153,15 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
     isEnabled
   });
 
-  commands.addCommand('imageviewer:rotate-clockwise', {
-    execute: rotateClockwise,
-    label: 'Rotate Clockwise',
+  commands.addCommand('imageviewer:rotate-right', {
+    execute: rotateRight,
+    label: 'Rotate Right (CW)',
     isEnabled
   });
 
-  commands.addCommand('imageviewer:rotate-counterclockwise', {
-    execute: rotateCounterclockwise,
-    label: 'Rotate Counterclockwise',
+  commands.addCommand('imageviewer:rotate-left', {
+    execute: rotateLeft,
+    label: 'Rotate Left (CCW)',
     isEnabled
   });
 
@@ -204,26 +204,24 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
 
     if (widget) {
       widget.scale = 1;
-      widget.rotation = 0;
-      widget.horizontalflip = 1;
-      widget.verticalflip = 1;
       widget.colorinversion = 0;
+      widget.resetRotationFlip();
     }
   }
 
-  function rotateClockwise(): void {
+  function rotateRight(): void {
     const widget = tracker.currentWidget;
 
     if (widget) {
-      widget.rotation += 90;
+      widget.rotateRight();
     }
   }
 
-  function rotateCounterclockwise(): void {
+  function rotateLeft(): void {
     const widget = tracker.currentWidget;
 
     if (widget) {
-      widget.rotation -= 90;
+      widget.rotateLeft();
     }
   }
 
@@ -231,7 +229,7 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
     const widget = tracker.currentWidget;
 
     if (widget) {
-      widget.horizontalflip *= -1;
+      widget.flipHorizontal();
     }
   }
 
@@ -239,7 +237,7 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
     const widget = tracker.currentWidget;
 
     if (widget) {
-      widget.verticalflip *= -1;
+      widget.flipVertical();
     }
   }
 
