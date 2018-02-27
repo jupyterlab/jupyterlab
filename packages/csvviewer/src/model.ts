@@ -114,6 +114,39 @@ private _computeOffsets() {
   this._offsets = Uint32Array.from(offsets);
 }
 
+private _parseRow(data, start) {
+  let len = this._data.length - start;
+  const QUOTE = `"`;
+  const delimiter = this._delimter;
+  enum STATE {
+    NORMAL,
+    ESCAPED,
+    ESCAPED_FIRST_QUOTE,
+    NEW_FIELD
+  }
+  let state = STATE.NORMAL;
+  for (let i = 0; i < len; i++) {
+    // line termination: \r\n or \n or end of file
+    // delimiter separates fields
+    let char = data[i];
+    if (char === QUOTE) {
+      switch (state) {
+      case STATE.ESCAPED:
+        state = STATE.ESCAPED_FIRST_QUOTE;
+        break;
+      case STATE.ESCAPED_FIRST_QUOTE:
+        state = STATE.ESCAPED;
+        break;
+      case STATE.NEW_FIELD:
+        state = STATE.ESCAPED;
+        break;
+      default:
+        throw
+      }
+    }
+  }
+}
+
 private _data: string;
 private _delimiter: string;
 
