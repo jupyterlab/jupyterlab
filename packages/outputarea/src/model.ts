@@ -396,6 +396,8 @@ class OutputAreaModel implements IOutputAreaModel {
    */
   private _fixCarriageReturn(txt: string): string {
     let tmp = txt;
+    // Handle multiple carriage returns before a newline
+    tmp = tmp.replace(/\r\r+\n/gm, '\r\n');
     // Remove chunks that should be overridden by carriage returns
     do {
       // Remove any chunks preceding a carriage return unless carriage
