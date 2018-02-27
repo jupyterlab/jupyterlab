@@ -102,29 +102,33 @@ class StateDB implements IStateDB {
 
     this.namespace = namespace;
 
-    if (!transform) {
-      this._ready = Promise.resolve(undefined);
-      return;
-    }
+    // Retrieve the window name, which is used as a namespace prefix.
+    this._ready = Private.windowName().then(name => {
+      this._window = name;
 
-    this._ready = transform.then(transformation => {
-      const { contents, type } = transformation;
-
-      switch (type) {
-        case 'cancel':
-          return;
-        case 'clear':
-          this._clear();
-          return;
-        case 'merge':
-          this._merge(contents || { });
-          return;
-        case 'overwrite':
-          this._overwrite(contents || { });
-          return;
-        default:
-          return;
+      if (!transform) {
+        return;
       }
+
+      transform.then(transformation => {
+        const { contents, type } = transformation;
+
+        switch (type) {
+          case 'cancel':
+            return;
+          case 'clear':
+            this._clear();
+            return;
+          case 'merge':
+            this._merge(contents || { });
+            return;
+          case 'overwrite':
+            this._overwrite(contents || { });
+            return;
+          default:
+            return;
+        }
+      });
     });
   }
 
@@ -180,16 +184,7 @@ class StateDB implements IStateDB {
    * retrieving the data. Non-existence of an `id` will succeed with `null`.
    */
   fetch(id: string): Promise<ReadonlyJSONValue | undefined> {
-    return this._ready.then(() => {
-      const key = `${this.namespace}:${id}`;
-      const value = window.localStorage.getItem(key);
-
-      if (value) {
-        const envelope = JSON.parse(value) as Private.Envelope;
-
-        return envelope.v;
-      }
-    });
+    return this._ready.then(() => this._fetch(id));
   }
 
   /**
@@ -211,7 +206,7 @@ class StateDB implements IStateDB {
   fetchNamespace(namespace: string): Promise<IStateItem[]> {
     return this._ready.then(() => {
       const { localStorage } = window;
-      const prefix = `${this.namespace}:${namespace}:`;
+      const prefix = `${this._window}:${this.namespace}:${namespace}:`;
       let items: IStateItem[] = [];
       let i = localStorage.length;
 
@@ -225,7 +220,7 @@ class StateDB implements IStateDB {
             let envelope = JSON.parse(value) as Private.Envelope;
 
             items.push({
-              id: key.replace(`${this.namespace}:`, ''),
+              id: key.replace(`${this._window}:${this.namespace}:`, ''),
               value: envelope ? envelope.v : undefined
             });
           } catch (error) {
@@ -248,7 +243,7 @@ class StateDB implements IStateDB {
    */
   remove(id: string): Promise<void> {
     return this._ready.then(() => {
-      window.localStorage.removeItem(`${this.namespace}:${id}`);
+      this._remove(id);
       this._changed.emit({ id, type: 'remove' });
     });
   }
@@ -284,7 +279,7 @@ class StateDB implements IStateDB {
   toJSON(): Promise<ReadonlyJSONObject> {
     return this._ready.then(() => {
       const { localStorage } = window;
-      const prefix = `${this.namespace}:`;
+      const prefix = `${this._window}:${this.namespace}:`;
       const contents: Partial<ReadonlyJSONObject> =  { };
       let i = localStorage.length;
 
@@ -319,7 +314,7 @@ class StateDB implements IStateDB {
    */
   private _clear(): void {
     const { localStorage } = window;
-    const prefix = `${this.namespace}:`;
+    const prefix = `${this._window}:${this.namespace}:`;
     let i = localStorage.length;
 
     while (i) {
@@ -329,6 +324,25 @@ class StateDB implements IStateDB {
         localStorage.removeItem(key);
       }
     }
+  }
+
+  /**
+   * Fetch a value from the database.
+   *
+   * #### Notes
+   * Unlike the public `fetch` method, this method is synchronous.
+   */
+  private _fetch(id: string): ReadonlyJSONValue | undefined {
+      const key = `${this._window}:${this.namespace}:${id}`;
+      const value = window.localStorage.getItem(key);
+
+      if (value) {
+        const envelope = JSON.parse(value) as Private.Envelope;
+
+        return envelope.v;
+      }
+
+      return undefined;
   }
 
   /**
@@ -347,13 +361,25 @@ class StateDB implements IStateDB {
   }
 
   /**
+   * Remove a key in the database.
+   *
+   * #### Notes
+   * Unlike the public `remove` method, this method is synchronous.
+   */
+  private _remove(id: string): void {
+    const key = `${this._window}:${this.namespace}:${id}`;
+
+    window.localStorage.removeItem(key);
+  }
+
+  /**
    * Save a key and its value in the database.
    *
    * #### Notes
    * Unlike the public `save` method, this method is synchronous.
    */
   private _save(id: string, value: ReadonlyJSONValue): void {
-    const key = `${this.namespace}:${id}`;
+    const key = `${this._window}:${this.namespace}:${id}`;
     const envelope: Private.Envelope = { v: value };
     const serialized = JSON.stringify(envelope);
     const length = serialized.length;
@@ -368,6 +394,7 @@ class StateDB implements IStateDB {
 
   private _changed = new Signal<this, StateDB.Change>(this);
   private _ready: Promise<void>;
+  private _window: string;
 }
 
 /**
@@ -439,4 +466,12 @@ namespace Private {
    */
   export
   type Envelope = { readonly v: ReadonlyJSONValue };
+
+  /**
+   * Returns a promise that resolves with the window name used for restoration.
+   */
+  export
+  function windowName(): Promise<string> {
+    return Promise.resolve('');
+  }
 }
