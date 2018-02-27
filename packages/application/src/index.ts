@@ -146,7 +146,13 @@ class JupyterLab extends Application<ApplicationShell> {
     if (!Array.isArray(data)) {
       data = [data];
     }
-    data.forEach(item => { this.registerPlugin(item); });
+    data.forEach(item => {
+      try {
+        this.registerPlugin(item);
+      } catch (error) {
+        window.alert(error);
+      }
+    });
   }
 
   /**
