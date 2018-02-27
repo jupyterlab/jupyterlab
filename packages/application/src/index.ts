@@ -97,6 +97,11 @@ class JupyterLab extends Application<ApplicationShell> {
   readonly serviceManager: ServiceManager;
 
   /**
+   * A list of all errors encountered when registering plugins.
+   */
+  public readonly registerPluginErrors: Array<Error> = [];
+
+  /**
    * Whether the application is dirty.
    */
   get isDirty(): boolean {
@@ -149,8 +154,9 @@ class JupyterLab extends Application<ApplicationShell> {
     data.forEach(item => {
       try {
         this.registerPlugin(item);
+        this.registerPlugin(item);
       } catch (error) {
-        window.alert(error);
+        this.registerPluginErrors.push(error);
       }
     });
   }
