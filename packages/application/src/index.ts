@@ -154,7 +154,6 @@ class JupyterLab extends Application<ApplicationShell> {
     data.forEach(item => {
       try {
         this.registerPlugin(item);
-        this.registerPlugin(item);
       } catch (error) {
         this.registerPluginErrors.push(error);
       }
