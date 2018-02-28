@@ -110,7 +110,7 @@ class StateDB implements IStateDB {
         return;
       }
 
-      transform.then(transformation => {
+      return transform.then(transformation => {
         const { contents, type } = transformation;
 
         switch (type) {

@@ -38,7 +38,15 @@ describe('StateDB', () => {
         .then(() => db.clear())
         .then(done)
         .catch(done);
-      transform.resolve({ type: 'overwrite', contents: { [key]: correct } });
+
+      // Let some time pass before resolving the database we are testing.
+      // This is necessary to avoid a race condition between the prepopulated
+      // database loading asynchronously along with the transformation happening
+      // asynchronously. The transformation needs to definitively happen *after*
+      // the prepopulated database is ready for this test to be accurate.
+      window.setTimeout(() => {
+        transform.resolve({ type: 'overwrite', contents: { [key]: correct } });
+      }, 100);
     });
 
     it('should allow a merge data transformation', done => {
