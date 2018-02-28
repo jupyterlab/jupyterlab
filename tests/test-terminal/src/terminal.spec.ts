@@ -8,10 +8,6 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Platform
-} from '@phosphor/domutils';
-
-import {
   Message, MessageLoop
 } from '@phosphor/messaging';
 
@@ -74,8 +70,12 @@ describe('terminal/index', () => {
       }).then(done, done);
     });
 
-    beforeEach(() => {
+    beforeEach((done) => {
       widget = new LogTerminal();
+      Widget.attach(widget, document.body);
+      requestAnimationFrame(() => {
+        done();
+      });
     });
 
     afterEach(() => {
@@ -170,6 +170,7 @@ describe('terminal/index', () => {
 
       it('should post an update request', (done) => {
         widget.session = session;
+        Widget.detach(widget);
         Widget.attach(widget, document.body);
         requestAnimationFrame(() => {
           expect(widget.methods).to.contain('onUpdateRequest');
@@ -184,6 +185,7 @@ describe('terminal/index', () => {
       it('should post an update request', (done) => {
         widget.session = session;
         widget.hide();
+        Widget.detach(widget);
         Widget.attach(widget, document.body);
         requestAnimationFrame(() => {
           widget.methods = [];
@@ -214,6 +216,7 @@ describe('terminal/index', () => {
     describe('#onUpdateRequest()', () => {
 
       it('should set the style of the terminal', () => {
+        Widget.detach(widget);
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
@@ -235,6 +238,7 @@ describe('terminal/index', () => {
     describe('#onActivateRequest', () => {
 
       it('should focus the terminal element', () => {
+        Widget.detach(widget);
         Widget.attach(widget, document.body);
         expect(widget.node.contains(document.activeElement)).to.be(false);
         MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);

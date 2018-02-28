@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Message
+  Message, MessageLoop
 } from '@phosphor/messaging';
 
 import {
@@ -211,6 +211,14 @@ class Terminal extends Widget {
     if (this._needsResize) {
       this._resizeTerminal();
     }
+  }
+
+  /**
+   * A message handler invoked on an `'fit-request'` message.
+   */
+  protected onFitRequest(msg: Message): void {
+    let resize = Widget.ResizeMessage.UnknownSize;
+    MessageLoop.sendMessage(this, resize);
   }
 
   /**
