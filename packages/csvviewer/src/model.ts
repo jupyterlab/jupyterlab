@@ -11,157 +11,258 @@ import {
  */
 export
 class DSVModel extends DataModel {
-/**
- * Create a data model with static CSV data.
- *
- * @param options - The options for initializing the data model.
- */
-constructor(options: DSVModel.IOptions) {
-  super();
-  this._data = options.data;
-  this._delimiter = options.delimiter;
-  this._computeOffsets();
-}
-
-/**
- * Get the row count for a region in the data model.
- *
- * @param region - The row region of interest.
- *
- * @returns - The row count for the region.
- */
-rowCount(region: DataModel.RowRegion): number {
-  if (region === 'body') {
-    return this._offsets.length;
+  /**
+   * Create a data model with static CSV data.
+   *
+   * @param options - The options for initializing the data model.
+   */
+  constructor(options: DSVModel.IOptions) {
+    super();
+    this._data = options.data;
+    this._delimiter = options.delimiter;
+    this._computeOffsets();
   }
-  return 1;  // TODO multiple column-header rows?
-}
 
-/**
- * Get the column count for a region in the data model.
- *
- * @param region - The column region of interest.
- *
- * @returns - The column count for the region.
- */
-columnCount(region: DataModel.ColumnRegion): number {
-  if (region === 'body') {
-    return this._columnCount;
-  }
-  return 0;
-}
-
-/**
- * Get the data value for a cell in the data model.
- *
- * @param region - The cell region of interest.
- *
- * @param row - The row index of the cell of interest.
- *
- * @param column - The column index of the cell of interest.
- *
- * @param returns - The data value for the specified cell.
- */
-data(region: DataModel.CellRegion, row: number, column: number): any {
-  // Set up the field and value variables.
-  let value: string;
-
-  // Look up the field and value for the region.
-  switch (region) {
-  case 'body':
-    if (this._parsedRowNum !== row) {
-      this._parsedRow = this._data.slice(this._offsets[row], this._offsets[row + 1]).split(this._delimiter);
-      this._parsedRowNum = row;
+  /**
+   * Get the row count for a region in the data model.
+   *
+   * @param region - The row region of interest.
+   *
+   * @returns - The row count for the region.
+   */
+  rowCount(region: DataModel.RowRegion): number {
+    if (region === 'body') {
+      return this._offsets.length;
     }
-    value = this._parsedRow[column];
-    break;
-  case 'column-header':
-    value = '';
-    break;
-  case 'row-header':
-    value = '';
-    break;
-  case 'corner-header':
-    value = '';
-    break;
-  default:
-    throw 'unreachable';
+    return 1;  // TODO multiple column-header rows?
   }
 
-  // Return the final value.
-  return value;
-}
+  /**
+   * Get the column count for a region in the data model.
+   *
+   * @param region - The column region of interest.
+   *
+   * @returns - The column count for the region.
+   */
+  columnCount(region: DataModel.ColumnRegion): number {
+    if (region === 'body') {
+      return this._columnCount;
+    }
+    return 0;
+  }
 
-private _computeOffsets() {
-  let offsets = [0];
+  /**
+   * Get the data value for a cell in the data model.
+   *
+   * @param region - The cell region of interest.
+   *
+   * @param row - The row index of the cell of interest.
+   *
+   * @param column - The column index of the cell of interest.
+   *
+   * @param returns - The data value for the specified cell.
+   */
+  data(region: DataModel.CellRegion, row: number, column: number): any {
+    // Set up the field and value variables.
+    let value: string;
 
-  // Calculate the line offsets.
-  let len = this._data.length;
-  for (let i = 0; i < len; i++) {
-      if (this._data[i] === '\n') {
-          offsets.push(i + 1);
+    // Look up the field and value for the region.
+    switch (region) {
+    case 'body':
+      if (this._parsedRowNum !== row) {
+        this._parsedRow = this._data.slice(this._offsets[row], this._offsets[row + 1]).split(this._delimiter);
+        this._parsedRowNum = row;
       }
-  }
-  if (offsets[offsets.length] > 4294967296) {
-    throw 'csv too large';
-  }
-  if (offsets.length > 1) {
-    this._columnCount = this._data.slice(0, offsets[1]).split(this._delimiter).length;
-  } else {
-    // one row
-    this._columnCount = this._data.split(this._delimiter).length;
-  }
-  this._offsets = Uint32Array.from(offsets);
-}
+      value = this._parsedRow[column];
+      break;
+    case 'column-header':
+      value = '';
+      break;
+    case 'row-header':
+      value = '';
+      break;
+    case 'corner-header':
+      value = '';
+      break;
+    default:
+      throw 'unreachable';
+    }
 
-private _parseRow(data, start) {
-  let len = this._data.length - start;
-  const QUOTE = `"`;
-  const delimiter = this._delimter;
-  enum STATE {
-    NORMAL,
-    ESCAPED,
-    ESCAPED_FIRST_QUOTE,
-    NEW_FIELD
+    // Return the final value.
+    return value;
   }
-  let state = STATE.NORMAL;
-  for (let i = 0; i < len; i++) {
-    // line termination: \r\n or \n or end of file
-    // delimiter separates fields
-    let char = data[i];
-    if (char === QUOTE) {
+
+  private _computeOffsets() {
+    let offsets = [0];
+
+    // Calculate the line offsets.
+    let len = this._data.length;
+    for (let i = 0; i < len; i++) {
+        if (this._data[i] === '\n') {
+            offsets.push(i + 1);
+        }
+    }
+    if (offsets[offsets.length] > 4294967296) {
+      throw 'csv too large';
+    }
+    if (offsets.length > 1) {
+      this._columnCount = this._data.slice(0, offsets[1]).split(this._delimiter).length;
+    } else {
+      // one row
+      this._columnCount = this._data.split(this._delimiter).length;
+    }
+    this._offsets = Uint32Array.from(offsets);
+  }
+
+  // TODO: do a search at the start to see if there are any quotes. If not, use
+  // the much faster noquote version.
+  private _parseData(data: string, delimiter: string) {
+    let len = data.length;
+    const CHR_DELIMITER = delimiter.charCodeAt(0);
+    const CHR_QUOTE = 34; // "
+    const CHR_LF = 10; // \n
+    const CHR_CR = 13; // \r
+    let endfield = new RegExp(`[${delimiter}\n\r]`, 'g');
+    enum STATE {
+      ESCAPED,
+      ESCAPED_FIRST_QUOTE,
+      UNESCAPED,
+      NEW_FIELD,
+      NEW_ROW,
+      CR
+    }
+    const { ESCAPED, ESCAPED_FIRST_QUOTE, UNESCAPED, NEW_FIELD, NEW_ROW, CR } = STATE;
+    let state = NEW_ROW;
+    let offsets = [];
+    let i = -1;
+    let char;
+    while (i < len - 2) {
+      i++;
+      if (state === NEW_ROW) {
+        offsets.push(i);
+      }
+      char = data[i].charCodeAt(0);
       switch (state) {
-      case STATE.ESCAPED:
-        state = STATE.ESCAPED_FIRST_QUOTE;
+      case NEW_ROW:
+      case NEW_FIELD:
+        switch (char) {
+        case CHR_QUOTE:
+          state = ESCAPED;
+          break;
+        case CHR_CR:
+          state = CR;
+          break;
+        case CHR_LF: // non-compliant
+          state = NEW_ROW;
+          break;
+        default:
+          state = UNESCAPED;
+          break;
+        }
         break;
-      case STATE.ESCAPED_FIRST_QUOTE:
-        state = STATE.ESCAPED;
+
+      case ESCAPED:
+        // skip ahead until we see another quote
+        i = data.indexOf('"', i);
+        if (i < 0) { throw 'mismatched quote'; }
+        char = data[i].charCodeAt(0);
+        switch (char) {
+        case CHR_QUOTE:
+          state = ESCAPED_FIRST_QUOTE;
+          break;
+        default: continue;
+        }
         break;
-      case STATE.NEW_FIELD:
-        state = STATE.ESCAPED;
+
+      case ESCAPED_FIRST_QUOTE:
+        switch (char) {
+        case CHR_QUOTE:
+          state = ESCAPED;
+          break;
+        case CHR_DELIMITER:
+          state = NEW_FIELD;
+          break;
+        case CHR_CR:
+          state = CR;
+          break;
+        case CHR_LF: // non-compliant
+          state = NEW_ROW;
+          break;
+        default:
+          throw 'quote in escaped field not followed by quote, delimiter, or carriage return';
+        }
         break;
+
+      case UNESCAPED:
+        // skip ahead to either the next delimiter or next CR or LF
+        endfield.lastIndex = i;
+        let match = endfield.exec(data);
+        if (match) {
+          i = match.index;
+          char = data[i].charCodeAt(0);
+        }
+
+        switch (char) {
+        case CHR_DELIMITER:
+          state = NEW_FIELD;
+          break;
+        case CHR_CR:
+          state = CR;
+          break;
+        case CHR_LF: // non-compliant
+          state = NEW_ROW;
+          break;
+        default: continue;
+        }
+        break;
+
+      case CR:
+        switch (char) {
+        case CHR_LF:
+          state = NEW_ROW;
+          break;
+        default:
+          throw 'CR not followed by newline';
+        }
+        break;
+
       default:
-        throw
+        throw 'state not recognized';
+        }
       }
-    }
+    return offsets;
   }
-}
 
-private _data: string;
-private _delimiter: string;
+  private _parseDataNoQuotes(data: string, delimiter: string) {
+    let len = data.length;
+    let i = 0;
+    let offsets = [0];
+    let k = 0;
+    while (i < len) {
+      k = data.indexOf('\r\n', i);
+      if (k > 0) {
+        offsets.push(k);
+      }
+      i = k;
+    }
+    return offsets;
+  }
 
-/**
- * The offsets for each successive line.
- *
- * #### Notes
- * If an offset is more than 2^32, then the data is more than 4GB. That's not
- * practical in browsers these days?
- */
-private _offsets: Uint32Array;
+  private _data: string;
+  private _delimiter: string;
 
-private _parsedRowNum: number;
-private _parsedRow: string[];
-private _columnCount: number;
+  /**
+   * The offsets for each successive line.
+   *
+   * #### Notes
+   * If an offset is more than 2^32, then the data is more than 4GB. That's not
+   * practical in browsers these days?
+   */
+  private _offsets: Uint32Array;
+
+  private _parsedRowNum: number;
+  private _parsedRow: string[];
+  private _columnCount: number;
 }
 
 
