@@ -292,8 +292,6 @@ class CodeConsole extends Widget {
       return this._execute(promptCell);
     }
 
-    // Add a new line and indent it before seeing if we can execute
-    promptCell.editor.newIndentedLine();
     // Check whether we should execute.
     return this._shouldExecute(timeout).then(should => {
       if (this.isDisposed) {
@@ -303,6 +301,9 @@ class CodeConsole extends Widget {
         // Create a new prompt cell before kernel execution to allow typeahead.
         this.newPromptCell();
         return this._execute(promptCell);
+      } else {
+        // add a newline if we shouldn't execute
+        promptCell.editor.newIndentedLine();
       }
     });
   }
