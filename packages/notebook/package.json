@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/notebook",
-  "version": "0.15.6",
+  "version": "0.15.7",
   "description": "JupyterLab - Notebook",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
