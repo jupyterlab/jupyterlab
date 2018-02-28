@@ -30,23 +30,21 @@ describe('StateDB', () => {
       let key = 'foo';
       let correct = 'bar';
       let incorrect = 'baz';
+      let transformation: StateDB.DataTransform = {
+        type: 'overwrite',
+        contents: { [key]: correct }
+      };
 
       // By sharing a namespace, the two databases will share data.
       prepopulate.save(key, incorrect)
+        .then(() => prepopulate.fetch(key))
+        .then(value => { expect(value).to.be(incorrect); })
+        .then(() => { transform.resolve(transformation); })
         .then(() => db.fetch(key))
         .then(value => { expect(value).to.be(correct); })
         .then(() => db.clear())
         .then(done)
         .catch(done);
-
-      // Let some time pass before resolving the database we are testing.
-      // This is necessary to avoid a race condition between the prepopulated
-      // database loading asynchronously along with the transformation happening
-      // asynchronously. The transformation needs to definitively happen *after*
-      // the prepopulated database is ready for this test to be accurate.
-      window.setTimeout(() => {
-        transform.resolve({ type: 'overwrite', contents: { [key]: correct } });
-      }, 100);
     });
 
     it('should allow a merge data transformation', done => {
