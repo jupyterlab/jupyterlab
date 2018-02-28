@@ -327,17 +327,7 @@ class CodeConsole extends Widget {
     if (!promptCell) {
       return;
     }
-    let model = promptCell.model;
-    let editor = promptCell.editor;
-    // Insert the line break at the cursor position, and move cursor forward.
-    let pos = editor.getCursorPosition();
-    let offset = editor.getOffsetAt(pos);
-    let text = model.value.text;
-    model.value.text = text.substr(0, offset) + '\n' + text.substr(offset);
-    pos = editor.getPositionAt(offset + 1) as CodeEditor.IPosition;
-    if (pos) {
-      editor.setCursorPosition(pos);
-    }
+    promptCell.editor.newIndentedLine();
   }
 
   /**
