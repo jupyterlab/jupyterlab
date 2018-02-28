@@ -53,8 +53,14 @@ def which(command, env=None):
     env = env or os.environ
     path = env.get('PATH') or os.defpath
     command_with_path = _which(command, path=path)
+
+    # Allow nodejs as an alias to node.
+    if command == 'node' and not command_with_path:
+        command = 'nodejs'
+        command_with_path = _which('nodejs', path=path)
+
     if not command_with_path:
-        if command in ['node', 'npm']:
+        if command in ['nodejs', 'node', 'npm']:
             msg = 'Please install nodejs 5+ and npm before continuing installation. nodejs may be installed using conda or directly from the nodejs website.'
             raise ValueError(msg)
         raise ValueError('The command was not found or was not ' +

@@ -442,6 +442,10 @@ class FileBrowserModel implements IDisposable {
         this.refresh();
         return;
       }
+      if (document.hidden) {
+        // Don't poll when nobody's looking.
+        return;
+      }
       let date = new Date().getTime();
       if ((date - this._lastRefresh) > this._refreshDuration) {
         this.refresh();

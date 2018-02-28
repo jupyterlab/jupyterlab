@@ -398,7 +398,10 @@ class CompletionHandler implements IDisposable {
     // _jupyter_types_experimental which provide string type names. We make no
     // assumptions about the names of the types, so other kernels can provide
     // their own types.
-    const types = reply.metadata._jupyter_types_experimental as JSONArray;
+    // Even though the `metadata` field is required, it has historically not
+    // been used. Defensively check if it exists.
+    const metadata = reply.metadata || { };
+    const types = metadata._jupyter_types_experimental as JSONArray;
     const typeMap: Completer.TypeMap = { };
 
     if (types) {

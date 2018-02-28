@@ -82,8 +82,8 @@ inquirer.prompt(questions).then(answers => {
   text = text.split('@jupyterlab/theme-light-extension').join(name);
   fs.writeFileSync(filePath, text, 'utf8');
 
-  // remove lib and node_modules.
-  ['lib', 'node_modules'].forEach(folder => {
+  // remove lib, node_modules and static.
+  ['lib', 'node_modules', 'static'].forEach(folder => {
     let folderPath = path.join('.', name, folder);
     if (fs.existsSync(folderPath)) {
       fs.remove(folderPath);

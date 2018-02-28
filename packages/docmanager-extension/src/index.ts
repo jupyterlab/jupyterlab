@@ -285,7 +285,15 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
             buttons: [Dialog.okButton()]
           });
         }
-        return context.save().then(() => context.createCheckpoint());
+        return context.save()
+          .then(() => context.createCheckpoint())
+          .catch(err => {
+            // If the save was canceled by user-action, do nothing.
+            if (err.message === 'Cancel') {
+              return;
+            }
+            throw err;
+          });
       }
     }
   });

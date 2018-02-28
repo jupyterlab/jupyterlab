@@ -32,8 +32,8 @@
     "@jupyterlab/rendermime-interfaces": "^1.0.6",
     "@nteract/transform-vdom": "^1.1.1",
     "@phosphor/widgets": "^1.5.0",
-    "react": "~16.0.0",
-    "react-dom": "~16.0.0"
+    "react": "~16.2.0",
+    "react-dom": "~16.2.0"
   },
   "devDependencies": {
     "@types/react": "~16.0.19",

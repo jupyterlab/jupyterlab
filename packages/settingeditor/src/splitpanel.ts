@@ -27,7 +27,7 @@ class SplitPanel extends SPanel {
     super.handleEvent(event);
 
     if (event.type === 'mouseup') {
-      (this.handleMoved as Signal<any, void>).emit(void 0);
+      (this.handleMoved as Signal<any, void>).emit(undefined);
     }
   }
 }

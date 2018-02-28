@@ -32,12 +32,12 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  h, VirtualDOM
-} from '@phosphor/virtualdom';
-
-import {
   PanelLayout, Widget
 } from '@phosphor/widgets';
+
+import * as React from 'react';
+
+import * as ReactDOM from 'react-dom';
 
 import {
   PluginEditor
@@ -64,48 +64,6 @@ const DEFAULT_LAYOUT: SettingEditor.ILayoutState = {
   }
 };
 
-/**
- * The class name added to all setting editors.
- */
-const SETTING_EDITOR_CLASS = 'jp-SettingEditor';
-
-/**
- * The class name added to the top level split panel of the setting editor.
- */
-const SETTING_EDITOR_MAIN_PANEL_CLASS = 'jp-SettingEditor-main';
-
-/**
- * The class name added to the instructions widget.
- */
-const INSTRUCTIONS_CLASS = 'jp-SettingEditorInstructions';
-
-/**
- * The class name added to the instructions icon.
- */
-const INSTRUCTIONS_ICON_CLASS = 'jp-SettingEditorInstructions-icon';
-
-/**
- * The class name added to the instructions title.
- */
-const INSTRUCTIONS_TITLE_CLASS = 'jp-SettingEditorInstructions-title';
-
-/**
- * The class name added to the instructions text.
- */
-const INSTRUCTIONS_TEXT_CLASS = 'jp-SettingEditorInstructions-text';
-
-/**
- * The title of the instructions pane.
- */
-const INSTRUCTIONS_TITLE = 'Settings';
-
-/**
- * The instructions for using the setting editor.
- */
-const INSTRUCTIONS_TEXT = `
-Select a plugin from the list to view and edit its preferences.
-`;
-
 
 /**
  * An interface for modifying and saving application settings.
@@ -117,7 +75,7 @@ class SettingEditor extends Widget {
    */
   constructor(options: SettingEditor.IOptions) {
     super();
-    this.addClass(SETTING_EDITOR_CLASS);
+    this.addClass('jp-SettingEditor');
     this.key = options.key;
     this.state = options.state;
 
@@ -129,9 +87,7 @@ class SettingEditor extends Widget {
       renderer: SplitPanel.defaultRenderer,
       spacing: 1
     });
-    const instructions = this._instructions = new Widget({
-      node: Private.createInstructionsNode()
-    });
+    const instructions = this._instructions = new Widget();
     const editor = this._editor = new PluginEditor({
       commands, editorFactory, registry, rendermime
     });
@@ -139,11 +95,14 @@ class SettingEditor extends Widget {
     const list = this._list = new PluginList({ confirm, registry });
     const when = options.when;
 
+    instructions.addClass('jp-SettingEditorInstructions');
+    Private.populateInstructionsNode(instructions.node);
+
     if (when) {
       this._when = Array.isArray(when) ? Promise.all(when) : when;
     }
 
-    panel.addClass(SETTING_EDITOR_MAIN_PANEL_CLASS);
+    panel.addClass('jp-SettingEditor-main');
     layout.addWidget(panel);
     panel.addWidget(list);
     panel.addWidget(instructions);
@@ -506,15 +465,23 @@ namespace SettingEditor {
  */
 namespace Private {
   /**
-   * Create the instructions text node.
+   * Populate the instructions text node.
    */
   export
-  function createInstructionsNode(): HTMLElement {
-    return VirtualDOM.realize(h.div({ className: INSTRUCTIONS_CLASS },
-      h.h2(
-        h.span({ className: `${INSTRUCTIONS_ICON_CLASS} jp-JupyterIcon` }),
-        h.span({ className: INSTRUCTIONS_TITLE_CLASS }, INSTRUCTIONS_TITLE)),
-      h.span({ className: INSTRUCTIONS_TEXT_CLASS }, INSTRUCTIONS_TEXT)));
+  function populateInstructionsNode(node: HTMLElement): void {
+    const iconClass = `jp-SettingEditorInstructions-icon jp-JupyterIcon`;
+
+    ReactDOM.render((
+      <React.Fragment>
+        <h2>
+          <span className={iconClass}></span>
+          <span className='jp-SettingEditorInstructions-title'>Settings</span>
+        </h2>
+        <span className='jp-SettingEditorInstructions-text'>
+          Select a plugin from the list to view and edit its preferences.
+        </span>
+      </React.Fragment>
+    ), node);
   }
 
   /**
