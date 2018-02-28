@@ -205,22 +205,12 @@ class Terminal extends Widget {
     if (!this._termOpened) {
       this._term.open(this.node);
       this._term.element.classList.add(TERMINAL_BODY_CLASS);
-      this._setFamily();
       this._termOpened = true;
     }
 
     if (this._needsResize) {
       this._resizeTerminal();
     }
-  }
-
-  /**
-   * A message handler invoked on an `'fit-request'` message.
-   */
-  protected onFitRequest(msg: Message): void {
-    this._setFamily();
-    let resize = Widget.ResizeMessage.UnknownSize;
-    MessageLoop.sendMessage(this, resize);
   }
 
   /**
@@ -290,18 +280,6 @@ class Terminal extends Widget {
     ];
     if (this._session) {
       this._session.send({ type: 'set_size', content });
-    }
-  }
-
-  /**
-   * Set the font family of the terminal.
-   */
-  private _setFamily(): void {
-    const style = getComputedStyle(document.body);
-    const family = style.getPropertyValue('--jp-code-font-family');
-    if (family) {
-      console.log('setting family', family);
-      //this._term.setOption('fontFamily', '"Source Code Pro", monospace');
     }
   }
 
