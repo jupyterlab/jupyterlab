@@ -310,11 +310,7 @@ class RenderedSVG extends RenderedCommon {
       host: this.node,
       source: String(model.data[this.mimeType]),
       trusted: model.trusted,
-      resolver: this.resolver,
-      linkHandler: this.linkHandler,
-      shouldTypeset: this.isAttached,
-      unconfined: metadata && metadata.unconfined as boolean | undefined,
-      latexTypesetter: this.latexTypesetter
+      unconfined: metadata && metadata.unconfined as boolean | undefined
     });
   }
 

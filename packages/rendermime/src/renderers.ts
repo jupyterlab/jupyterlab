@@ -428,8 +428,7 @@ export
 function renderSVG(options: renderSVG.IRenderOptions): Promise<void> {
   // Unpack the options.
   let {
-    host, source, trusted, resolver, linkHandler,
-    shouldTypeset, latexTypesetter, unconfined
+    host, source, trusted, unconfined
   } = options;
 
   // Clear the content if there is no source.
@@ -444,28 +443,15 @@ function renderSVG(options: renderSVG.IRenderOptions): Promise<void> {
     return Promise.resolve(undefined);
   }
 
-  // Set the inner HTML of the host.
-  host.innerHTML = source;
+  // Render in img so that user can save it easily
+  const img = new Image();
+  img.src = `data:image/svg+xml,${source}`;
+  host.appendChild(img);
 
   if (unconfined === true) {
     host.classList.add('jp-mod-unconfined');
   }
-
-  // TODO
-  // what about script tags inside the svg?
-
-  // Patch the urls if a resolver is available.
-  let promise: Promise<void>;
-  if (resolver) {
-    promise = Private.handleUrls(host, resolver, linkHandler);
-  } else {
-    promise = Promise.resolve(undefined);
-  }
-
-  // Return the final rendered promise.
-  return promise.then(() => {
-    if (shouldTypeset && latexTypesetter) { latexTypesetter.typeset(host); }
-  });
+  return Promise.resolve();
 }
 
 
@@ -495,29 +481,9 @@ namespace renderSVG {
     trusted: boolean;
 
     /**
-     * An optional url resolver.
-     */
-    resolver: IRenderMime.IResolver | null;
-
-    /**
-     * An optional link handler.
-     */
-    linkHandler: IRenderMime.ILinkHandler | null;
-
-    /**
-     * Whether the node should be typeset.
-     */
-    shouldTypeset: boolean;
-
-    /**
      * Whether the svg should be unconfined.
      */
     unconfined?: boolean;
-
-    /**
-     * The LaTeX typesetter for the application.
-     */
-    latexTypesetter: IRenderMime.ILatexTypesetter | null;
   }
 }
 
