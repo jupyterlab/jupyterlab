@@ -292,6 +292,8 @@ class CodeConsole extends Widget {
       return this._execute(promptCell);
     }
 
+    // Add a new line and indent it before seeing if we can execute
+    promptCell.editor.newIndentedLine();
     // Check whether we should execute.
     return this._shouldExecute(timeout).then(should => {
       if (this.isDisposed) {
@@ -573,7 +575,7 @@ class CodeConsole extends Widget {
       return Promise.resolve(false);
     }
     let model = promptCell.model;
-    let code = model.value.text + '\n';
+    let code = model.value.text;
     return new Promise<boolean>((resolve, reject) => {
       let timer = setTimeout(() => { resolve(true); }, timeout);
       let kernel = this.session.kernel;
@@ -589,12 +591,6 @@ class CodeConsole extends Widget {
         if (isComplete.content.status !== 'incomplete') {
           resolve(true);
           return;
-        }
-        model.value.text = code + isComplete.content.indent;
-        let editor = promptCell.editor;
-        let pos = editor.getPositionAt(model.value.text.length);
-        if (pos) {
-          editor.setCursorPosition(pos);
         }
         resolve(false);
       }).catch(() => { resolve(true); });
