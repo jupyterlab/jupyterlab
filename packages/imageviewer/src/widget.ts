@@ -176,6 +176,9 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
     this._img.src = `data:${cm.mimetype};${cm.format},${content}`;
   }
 
+  /**
+   * Update the image CSS style, including the transform and filter.
+   */
   private _updateStyle(): void {
     let [a, b, c, d] = this._matrix;
     let [tX, tY] = Private.prodVec(this._matrix, [1, 1]);
