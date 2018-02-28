@@ -67,6 +67,18 @@ const main: JupyterLabPlugin<void> = {
   id: '@jupyterlab/application-extension:main',
   requires: [ICommandPalette],
   activate: (app: JupyterLab, palette: ICommandPalette) => {
+    // If there were errors registering plugins, tell the user.
+    if (app.registerPluginErrors.length !== 0) {
+      const body = h.pre(app.registerPluginErrors.map(e => e.message).join('\n'));
+      let options = {
+        title: 'Error Registering Plugins',
+        body,
+        buttons: [Dialog.okButton()],
+        okText: 'DISMISS'
+      };
+      showDialog(options).then(() => { /* no-op */ });
+    }
+
     addCommands(app, palette);
 
     // If the currently active widget changes,
