@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@jupyterlab/codemirror": "^0.15.4",
-    "@jupyterlab/completer": "^0.15.4",
+    "@jupyterlab/completer": "^0.15.5",
     "@jupyterlab/docmanager": "^0.15.5",
     "@jupyterlab/docregistry": "^0.15.5",
     "@jupyterlab/notebook": "^0.15.7",

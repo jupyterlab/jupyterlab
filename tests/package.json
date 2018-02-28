@@ -8,7 +8,7 @@
     "@jupyterlab/cells": "^0.15.4",
     "@jupyterlab/codeeditor": "^0.15.4",
     "@jupyterlab/codemirror": "^0.15.4",
-    "@jupyterlab/completer": "^0.15.4",
+    "@jupyterlab/completer": "^0.15.5",
     "@jupyterlab/console": "^0.15.4",
     "@jupyterlab/coreutils": "^1.0.9",
     "@jupyterlab/csvviewer": "^0.15.4",
