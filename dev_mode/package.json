@@ -125,6 +125,7 @@
       "@jupyterlab/console-extension": "",
       "@jupyterlab/csvviewer-extension": "",
       "@jupyterlab/docmanager-extension": "",
+      "@jupyterlab/execution-time-extension": "",
       "@jupyterlab/faq-extension": "",
       "@jupyterlab/filebrowser-extension": "",
       "@jupyterlab/fileeditor-extension": "",

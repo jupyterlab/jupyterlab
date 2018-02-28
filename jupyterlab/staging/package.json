@@ -28,6 +28,7 @@
     "@jupyterlab/docmanager": "^0.15.5",
     "@jupyterlab/docmanager-extension": "^0.15.4",
     "@jupyterlab/docregistry": "^0.15.5",
+    "@jupyterlab/execution-time-extension": "^0.4.4",
     "@jupyterlab/faq-extension": "^0.15.5",
     "@jupyterlab/filebrowser": "^0.15.4",
     "@jupyterlab/filebrowser-extension": "^0.15.5",
