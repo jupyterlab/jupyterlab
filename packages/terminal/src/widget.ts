@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Message, MessageLoop
+  Message
 } from '@phosphor/messaging';
 
 import {
