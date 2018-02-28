@@ -82,7 +82,7 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
       return;
     }
     this._scale = value;
-    this.updateStyle();
+    this._updateStyle();
   }
 
   /**
@@ -96,7 +96,7 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
         return;
     }
     this._colorinversion = value;
-    this.updateStyle();
+    this._updateStyle();
   }
 
   /**
@@ -104,7 +104,7 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
    */
   resetRotationFlip(): void {
     this._matrix = [1, 0, 0, 1];
-    this.updateStyle();
+    this._updateStyle();
   }
 
   /**
@@ -112,7 +112,7 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
    */
   rotateLeft(): void {
     this._matrix = Private.prod(this._matrix, Private.rotateLeftMatrix);
-    this.updateStyle();
+    this._updateStyle();
   }
 
   /**
@@ -120,7 +120,7 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
    */
   rotateRight(): void {
     this._matrix = Private.prod(this._matrix, Private.rotateRightMatrix);
-    this.updateStyle();
+    this._updateStyle();
   }
 
   /**
@@ -128,7 +128,7 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
    */
   flipHorizontal(): void {
     this._matrix = Private.prod(this._matrix, Private.flipHMatrix);
-    this.updateStyle();
+    this._updateStyle();
   }
 
   /**
@@ -136,7 +136,7 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
    */
   flipVertical(): void {
     this._matrix = Private.prod(this._matrix, Private.flipVMatrix);
-    this.updateStyle();
+    this._updateStyle();
   }
 
   /**
@@ -176,7 +176,7 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
     this._img.src = `data:${cm.mimetype};${cm.format},${content}`;
   }
 
-  private updateStyle(): void {
+  private _updateStyle(): void {
     let [a, b, c, d] = this._matrix;
     let [tX, tY] = Private.prodVec(this._matrix, [1, 1]);
     let transform = `matrix(${a}, ${b}, ${c}, ${d}, 0, 0) translate(${tX < 0 ? -100 : 0}%, ${tY < 0 ? -100 : 0}%) `;
