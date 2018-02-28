@@ -40,7 +40,7 @@
     "@jupyterlab/codeeditor": "^0.15.4",
     "@jupyterlab/codemirror": "^0.15.4",
     "@jupyterlab/codemirror-extension": "^0.15.4",
-    "@jupyterlab/completer": "^0.15.4",
+    "@jupyterlab/completer": "^0.15.5",
     "@jupyterlab/completer-extension": "^0.15.4",
     "@jupyterlab/console": "^0.15.4",
     "@jupyterlab/console-extension": "^0.15.4",

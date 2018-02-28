@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/completer",
-  "version": "0.15.4",
+  "version": "0.15.5",
   "description": "JupyterLab - Completer",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
