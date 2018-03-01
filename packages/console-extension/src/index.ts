@@ -428,18 +428,33 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
   const shortcutPlugin = '@jupyterlab/shortcuts-extension:plugin';
   const selector = '.jp-CodeConsole-promptCell';
 
+  // Keep updated keybindings for the console commands related to execution.
+  let linebreak = find(commands.keyBindings,
+    kb => kb.command === CommandIDs.linebreak);
+  let runUnforced = find(commands.keyBindings,
+    kb => kb.command === CommandIDs.runUnforced);
+  let runForced = find(commands.keyBindings,
+    kb => kb.command === CommandIDs.runForced);
+  commands.keyBindingChanged.connect((s, args) => {
+    if (args.binding.command === CommandIDs.linebreak) {
+      linebreak = args.type === 'added' ? args.binding : undefined;
+      return;
+    }
+    if (args.binding.command === CommandIDs.runUnforced) {
+      runUnforced = args.type === 'added' ? args.binding : undefined;
+      return;
+    }
+    if (args.binding.command === CommandIDs.runForced) {
+      runForced = args.type === 'added' ? args.binding : undefined;
+      return;
+    }
+  });
+
   commands.addCommand(CommandIDs.shiftEnterToExecute, {
     label: 'Execute with Shift+Enter',
     isToggled: () => {
       // Only show as toggled if the shortcuts are strictly
       // The Shift+Enter ones.
-      const keyBindings = commands.keyBindings;
-      const linebreak = find(keyBindings,
-        kb => kb.command === CommandIDs.linebreak);
-      const runUnforced = find(keyBindings,
-        kb => kb.command === CommandIDs.runUnforced);
-      const runForced = find(keyBindings,
-        kb => kb.command === CommandIDs.runForced);
       return linebreak && JSONExt.deepEqual(linebreak.keys, ['Enter']) &&
              runUnforced === undefined &&
              runForced && JSONExt.deepEqual(runForced.keys, ['Shift Enter']);
@@ -466,13 +481,6 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     isToggled: () => {
       // Only show as toggled if the shortcuts are strictly
       // The Enter ones.
-      const keyBindings = commands.keyBindings;
-      const linebreak = find(keyBindings,
-        kb => kb.command === CommandIDs.linebreak);
-      const runUnforced = find(keyBindings,
-        kb => kb.command === CommandIDs.runUnforced);
-      const runForced = find(keyBindings,
-        kb => kb.command === CommandIDs.runForced);
       return linebreak && JSONExt.deepEqual(linebreak.keys, ['Ctrl Enter']) &&
              runUnforced && JSONExt.deepEqual(runUnforced.keys, ['Enter']) &&
              runForced && JSONExt.deepEqual(runForced.keys, ['Shift Enter']);
