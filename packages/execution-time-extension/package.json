@@ -30,7 +30,7 @@
   "dependencies": {
     "@jupyterlab/application": "^0.15.4",
     "@jupyterlab/cells": "^0.15.4",
-    "@jupyterlab/notebook": "^0.15.6",
+    "@jupyterlab/notebook": "^0.15.7",
     "@jupyterlab/observables": "^1.0.6",
     "@phosphor/coreutils": "^1.3.0",
     "moment": "~2.17.1",
