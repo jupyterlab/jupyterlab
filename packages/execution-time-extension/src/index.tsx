@@ -44,7 +44,7 @@ const METADATA_KEY = 'ExecuteTime';
 const TOOL_CLASS = 'et-ExecutionTimeTool';
 
 // Format for moment dates.
-const MOMENT_FORMAT = 'HH:mm:ss YYYY-MM-DD';
+const MOMENT_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 // Format for moment durations.
 const DURATION_FORMAT = 'y[y] w[w] d[d] h[h] m[m] s[s] S[ms]';
 
