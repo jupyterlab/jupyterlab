@@ -80,9 +80,11 @@ interface IValidExecutionTime {
 }
 
 /**
- * Component that formats a valid exeuction time. 
+ * Component that formats a valid exeuction time.
  */
 function ValidExecutionTime({start, end}: IValidExecutionTime) {
+    // moment-duration-format typings are not working for some reason,
+    // so we cast to any.
     const duration = moment.duration(end.diff(start)) as any;
     return (
         <span>
@@ -107,7 +109,7 @@ class ExecutionTimeTool extends CellTools.Tool {
 
     /**
      * Handle a change to the active cell.
-     * 
+     *
      * It should render the metadata for the new cell
      * and track it to see if it's metadata has changed.
      * It should also disconnect tracking for the previous cell.
