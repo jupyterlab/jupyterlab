@@ -194,6 +194,12 @@
   version "2.2.44"
   resolved "https://registry.npmjs.org/@types/mocha/-/mocha-2.2.44.tgz#1d4a798e53f35212fd5ad4d04050620171cd5b5e"
 
+"@types/moment-duration-format@~2.2.0":
+  version "2.2.0"
+  resolved "https://registry.npmjs.org/@types/moment-duration-format/-/moment-duration-format-2.2.0.tgz#4ec44e051df3262711f58802ca881fc7c08e85eb"
+  dependencies:
+    moment ">=2.14.0"
+
 "@types/node-fetch@~1.6.7":
   version "1.6.7"
   resolved "https://registry.npmjs.org/@types/node-fetch/-/node-fetch-1.6.7.tgz#521078e8f0c69a158e5022005aca92d2620f6d57"
@@ -4769,6 +4775,14 @@ mocha@~3.5.3:
 modify-values@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/modify-values/-/modify-values-1.0.0.tgz#e2b6cdeb9ce19f99317a53722f3dbf5df5eaaab2"
+
+moment-duration-format@~2.2.2:
+  version "2.2.2"
+  resolved "https://registry.npmjs.org/moment-duration-format/-/moment-duration-format-2.2.2.tgz#b957612de26016c9ad9eb6087c054573e5127779"
+
+moment@>=2.14.0:
+  version "2.20.1"
+  resolved "https://registry.npmjs.org/moment/-/moment-2.20.1.tgz#d6eb1a46cbcc14a2b2f9434112c1ff8907f313fd"
 
 moment@^2.6.0:
   version "2.19.3"
