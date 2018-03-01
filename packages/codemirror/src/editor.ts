@@ -483,6 +483,10 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     this.doc.setSelections(cmSelections, 0);
   }
 
+  newIndentedLine(): void {
+    this.execCommand('newlineAndIndent');
+  }
+
   /**
    * Execute a codemirror command on the editor.
    *
