@@ -127,7 +127,8 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
       }
     };
     const registry = app.docRegistry;
-    const docManager = new DocumentManager({ registry, manager, opener });
+    const when = app.restored.then(() => void 0);
+    const docManager = new DocumentManager({ registry, manager, opener, when });
 
     // Register the file operations commands.
     addCommands(app, docManager, palette, opener, settingRegistry);
@@ -249,10 +250,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
       const kernel = args['kernel'] as Kernel.IModel || void 0;
       const options = args['options'] as DocumentRegistry.IOpenOptions || void 0;
       return docManager.services.contents.get(path, { content: false })
-        .then(() => docManager.openOrReveal(path, factory, kernel, options))
-        .then(widget => {
-          return widget.ready.then(() => { return widget; });
-        });
+        .then(() => docManager.openOrReveal(path, factory, kernel, options));
     },
     icon: args => args['icon'] as string || '',
     label: args => (args['label'] || args['factory']) as string,
