@@ -118,7 +118,7 @@ preparing them:
    using the capture software of your choice. **Do not include any of the
    desktop background**.
 
--  For PNGs, reduce their size using pngqant.
+-  For PNGs, reduce their size using pngquant.
    For movies, upload them to the IPython/Juptyter YouTube channel
    and embed them in the docs with an iframe. The pngs can live in the main repository.
    The movies should be added to the ``jupyterlab-media`` repository.
