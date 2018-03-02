@@ -1,4 +1,3 @@
 {
-  "singleQuote": true,
-  "parser": "typescript"
+  "singleQuote": true
 }

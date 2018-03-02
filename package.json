@@ -49,8 +49,9 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@jupyterlab/eslint-plugin-jinja": "^0.2.0",
     "eslint": "^4.12.1",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-plugin-prettier": "^2.6.0",
     "lerna": "^2.4.0",
     "npm-run-all": "~4.1.1",
     "prettier": "^1.11.1",    

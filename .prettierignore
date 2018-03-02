@@ -7,7 +7,6 @@ jupyterlab/schemas
 jupyterlab/themes
 jupyterlab/geckodriver
 jupyterlab/staging/yarn.js
-jupyterlab/chrome-test.js
 jupyterlab/staging/index.js
 dev_mode/index.js
 dev_mode/schemas
@@ -20,3 +19,4 @@ examples/app/schemas
 tests/**/coverage
 docs/_build
 docs/api
+**/package.json
