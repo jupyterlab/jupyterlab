@@ -1,5 +1,7 @@
 {
+  "rulesDirectory": ["tslint-plugin-prettier"],
   "rules": {
+    "prettier": [true, { "singleQuote": true }],
     "align": [
       true,
       "parameters",
@@ -94,7 +96,7 @@
       "avoid-escape"
     ],
     "radix": true,
-    "semicolon": [true, "always"],
+    "semicolon": [true, "always", "ignore-bound-class-methods"],
     "switch-default": true,
     "trailing-comma": [
       false,
