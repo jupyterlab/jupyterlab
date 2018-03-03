@@ -404,53 +404,6 @@ describe('@jupyterlab/apputils', () => {
 
       });
 
-      context('mousedown', () => {
-
-        it('should add the `jp-mod-pressed` class', (done) => {
-          let button = new ToolbarButton();
-          Widget.attach(button, document.body);
-          requestAnimationFrame(() => {
-            simulate(button.node, 'mousedown');
-            expect(button.hasClass('jp-mod-pressed')).to.be(true);
-            button.dispose();
-            done();
-          });
-        });
-
-      });
-
-      context('mouseup', () => {
-
-        it('should remove the `jp-mod-pressed` class', (done) => {
-          let button = new ToolbarButton();
-          Widget.attach(button, document.body);
-          requestAnimationFrame(() => {
-            simulate(button.node, 'mousedown');
-            simulate(button.node, 'mouseup');
-            expect(button.hasClass('jp-mod-pressed')).to.be(false);
-            button.dispose();
-            done();
-          });
-        });
-
-      });
-
-      context('mouseout', () => {
-
-        it('should remove the `jp-mod-pressed` class', (done) => {
-          let button = new ToolbarButton();
-          Widget.attach(button, document.body);
-          requestAnimationFrame(() => {
-            simulate(button.node, 'mousedown');
-            simulate(button.node, 'mouseout');
-            expect(button.hasClass('jp-mod-pressed')).to.be(false);
-            button.dispose();
-            done();
-          });
-        });
-
-      });
-
     });
 
     describe('#onAfterAttach()', () => {
@@ -459,12 +412,8 @@ describe('@jupyterlab/apputils', () => {
         let button = new LogToolbarButton();
         Widget.attach(button, document.body);
         expect(button.methods).to.contain('onAfterAttach');
-        simulate(button.node, 'mousedown');
-        simulate(button.node, 'mouseup');
-        simulate(button.node, 'mouseout');
-        expect(button.events).to.contain('mousedown');
-        expect(button.events).to.contain('mouseup');
-        expect(button.events).to.contain('mouseout');
+        simulate(button.node, 'click');
+        expect(button.events).to.contain('click');
         button.dispose();
       });
 
@@ -478,12 +427,8 @@ describe('@jupyterlab/apputils', () => {
         requestAnimationFrame(() => {
           Widget.detach(button);
           expect(button.methods).to.contain('onBeforeDetach');
-          simulate(button.node, 'mousedown');
-          simulate(button.node, 'mouseup');
-          simulate(button.node, 'mouseout');
-          expect(button.events).to.not.contain('mousedown');
-          expect(button.events).to.not.contain('mouseup');
-          expect(button.events).to.not.contain('mouseout');
+          simulate(button.node, 'click');
+          expect(button.events).to.not.contain('click');
           button.dispose();
           done();
         });

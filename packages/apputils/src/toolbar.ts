@@ -46,11 +46,6 @@ const TOOLBAR_ITEM_CLASS = 'jp-Toolbar-item';
 const TOOLBAR_BUTTON_CLASS = 'jp-Toolbar-button';
 
 /**
- * The class name added to a pressed button.
- */
-const TOOLBAR_PRESSED_CLASS = 'jp-mod-pressed';
-
-/**
  * The class name added to toolbar interrupt button.
  */
 const TOOLBAR_INTERRUPT_CLASS = 'jp-StopIcon';
@@ -386,13 +381,6 @@ class ToolbarButton extends Widget {
         this._onClick();
       }
       break;
-    case 'mousedown':
-      this.addClass(TOOLBAR_PRESSED_CLASS);
-      break;
-    case 'mouseup':
-    case 'mouseout':
-      this.removeClass(TOOLBAR_PRESSED_CLASS);
-      break;
     default:
       break;
     }
@@ -403,9 +391,6 @@ class ToolbarButton extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     this.node.addEventListener('click', this);
-    this.node.addEventListener('mousedown', this);
-    this.node.addEventListener('mouseup', this);
-    this.node.addEventListener('mouseout', this);
   }
 
   /**
@@ -413,9 +398,6 @@ class ToolbarButton extends Widget {
    */
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('click', this);
-    this.node.removeEventListener('mousedown', this);
-    this.node.removeEventListener('mouseup', this);
-    this.node.removeEventListener('mouseout', this);
   }
 
   private _onClick: () => void;
