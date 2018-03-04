@@ -468,10 +468,117 @@ namespace Private {
   type Envelope = { readonly v: ReadonlyJSONValue };
 
   /**
+   * The interval (in ms) at which the window name is pinged.
+   */
+  const interval = 100;
+
+  /**
+   * The internal prefix for private local storage keys.
+   */
+  const prefix = '@jupyterlab/coreutils:StateDB';
+
+  /**
+   * The local storage beacon key.
+   */
+  const beacon = `${prefix}:beacon`;
+
+  /**
+   * The known window names.
+   */
+  let windows = fetchWindowNames();
+
+  /**
+   * The window name.
+   */
+  let name: string;
+
+  /**
+   * The window name promise.
+   */
+  let promise: Promise<string>;
+
+  /**
+   * Fetch the known window names.
+   */
+  function fetchWindowNames(): { [name: string]: number } {
+      const names: { [name: string]: number } = { };
+      const { localStorage } = window;
+      const windowPrefix = `${prefix}:window-`;
+      let i = localStorage.length;
+
+      while (i) {
+        let key = localStorage.key(--i);
+
+        if (key && key.indexOf(windowPrefix) === 0) {
+          let name = key.replace(windowPrefix, '');
+          names[name] = parseInt(localStorage.getItem(key));
+        }
+      }
+
+      return names;
+  }
+
+  /**
+   * Respond to a beacon request.
+   */
+  function ping(): void {
+    if (!name) {
+      return;
+    }
+
+    window.localStorage.setItem(name, `${(new Date()).getTime()}`);
+  }
+
+  /**
+   * The window storage event handler.
+   */
+  function storageHandler(event: StorageEvent) {
+    const { key } = event;
+    const windowPrefix = `${prefix}:window-`;
+
+    console.log('event key', key);
+    if (key === beacon) {
+      console.log('The beacon has been fired');
+      ping();
+      return;
+    }
+    if (key.indexOf(windowPrefix) === 0) {
+      let name = key.replace(windowPrefix, '');
+
+      if (name in windows) {
+        console.log(`Window ${name} is a known window.`);
+      } else {
+        console.log(`Window ${name} is an uknown window.`);
+      }
+      return;
+    }
+  }
+
+  /**
    * Returns a promise that resolves with the window name used for restoration.
    */
   export
   function windowName(): Promise<string> {
-    return Promise.resolve('');
+    if (promise) {
+      return promise;
+    }
+
+    promise = new Promise((resolve) => {
+      if (name) {
+        return name;
+      }
+
+      setTimeout(() => {
+        window.localStorage.setItem(beacon, `${(new Date()).getTime()}`);
+        resolve('');
+      }, interval * 2);
+    });
+
+    return promise;
   }
+
+  /**
+   * Start the storage event handler immediately.
+   */
+  window.addEventListener('storage', storageHandler);
 }
