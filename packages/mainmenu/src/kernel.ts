@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Kernel
-} from '@jupyterlab/services';
-
-import {
   Menu, Widget
 } from '@phosphor/widgets';
 
@@ -71,14 +67,16 @@ namespace IKernelMenu {
     interruptKernel?: (widget: T) => Promise<void>;
 
     /**
-     * A function to restart the kernel.
+     * A function to restart the kernel, which
+     * returns a promise of whether the kernel was restarted.
      */
-    restartKernel?: (widget: T) => Promise<Kernel.IKernelConnection>;
+    restartKernel?: (widget: T) => Promise<boolean>;
 
     /**
-     * A function to restart the kernel.
+     * A function to restart the kernel and clear the widget, which
+     * returns a promise of whether the kernel was restarted.
      */
-    restartKernelAndClear?: (widget: T) => Promise<Kernel.IKernelConnection>;
+    restartKernelAndClear?: (widget: T) => Promise<boolean>;
 
     /**
      * A function to change the kernel.
