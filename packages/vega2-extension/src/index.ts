@@ -18,8 +18,8 @@ import {
 /**
  * Import vega-embed in this manner due to how it is exported.
  */
-// Import only the typings for vega-embed - do not use for values.
-import embed = require('vega-embed');
+// Import only the typings for vega-embed-v2 - do not use for values.
+import embed = require('vega-embed-v2');
 
 
 import '../style/index.css';
@@ -63,7 +63,7 @@ const VEGALITE_MIME_TYPE = 'application/vnd.vegalite.v1+json';
  * A widget for rendering Vega or Vega-Lite data, for usage with rendermime.
  */
 export
-class RenderedVega extends Widget implements IRenderMime.IRenderer {
+class RenderedVega2 extends Widget implements IRenderMime.IRenderer {
   /**
    * Create a new widget for rendering Vega/Vega-Lite.
    */
@@ -132,7 +132,7 @@ const rendererFactory: IRenderMime.IRendererFactory = {
   safe: true,
   mimeTypes: [VEGA_MIME_TYPE, VEGALITE_MIME_TYPE],
   defaultRank: 60,
-  createRenderer: options => new RenderedVega(options)
+  createRenderer: options => new RenderedVega2(options)
 };
 
 const extension: IRenderMime.IExtension = {
@@ -140,32 +140,28 @@ const extension: IRenderMime.IExtension = {
   rendererFactory,
   dataType: 'json',
   documentWidgetFactoryOptions: [{
-    name: 'Vega',
-    modelName: 'text',
-    primaryFileType: 'vega',
-    fileTypes: ['vega', 'json'],
-    defaultFor: ['vega']
+    name: 'Vega 2',
+    primaryFileType: 'vega2',
+    fileTypes: ['vega2', 'json'],
+    defaultFor: ['vega2']
   },
   {
-    name: 'Vega Lite',
-    modelName: 'text',
-    primaryFileType: 'vega-lite',
-    fileTypes: ['vega-lite', 'json'],
-    defaultFor: ['vega-lite']
+    name: 'Vega-Lite 1',
+    primaryFileType: 'vega-lite1',
+    fileTypes: ['vega-lite1', 'json'],
+    defaultFor: ['vega-lite1']
   }],
   fileTypes: [{
     mimeTypes: [VEGA_MIME_TYPE],
-    name: 'vega',
-    displayName: 'Vega File',
-    fileFormat: 'text',
+    name: 'vega2',
+    displayName: 'Vega 2 File',
     extensions: ['.vg', '.vg.json', '.vega'],
     iconClass: 'jp-MaterialIcon jp-VegaIcon',
   },
   {
     mimeTypes: [VEGALITE_MIME_TYPE],
-    name: 'vega-lite',
-    displayName: 'Vega-Lite File',
-    fileFormat: 'text',
+    name: 'vega-lite1',
+    displayName: 'Vega-Lite 1 File',
     extensions: ['.vl', '.vl.json', '.vegalite'],
     iconClass: 'jp-MaterialIcon jp-VegaIcon',
   }]
@@ -202,8 +198,8 @@ namespace Private {
         resolve(mod);
         return;
       }
-      (require as any).ensure(['vega-embed'], (require: NodeRequire) => {
-        mod = require('vega-embed');
+      (require as any).ensure(['vega-embed-v2'], (require: NodeRequire) => {
+        mod = require('vega-embed-v2');
         resolve(mod);
       },
       (err: any) => {

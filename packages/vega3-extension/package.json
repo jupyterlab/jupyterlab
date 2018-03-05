@@ -1,7 +1,7 @@
 {
-  "name": "@jupyterlab/vega2-extension",
-  "version": "0.15.5",
-  "description": "JupyterLab - Vega 2 and Vega-Lite 1 Mime Renderer Extension",
+  "name": "@jupyterlab/vega3-extension",
+  "version": "0.14.2",
+  "description": "JupyterLab - Vega 3 and Vega-Lite 2 Mime Renderer Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
@@ -10,9 +10,8 @@
   "author": "Project Jupyter",
   "files": [
     "lib/*.d.ts",
-    "lib/*.js.map",
     "lib/*.js",
-    "style/*.css"
+    "style/*.*"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -33,10 +32,9 @@
     "@jupyterlab/rendermime-interfaces": "^1.0.6",
     "@phosphor/coreutils": "^1.3.0",
     "@phosphor/widgets": "^1.5.0",
-    "vega-embed-v2": "0.0.2"
+    "vega-embed": "^3.0.0"
   },
   "devDependencies": {
-    "@types/node": "~8.0.47",
     "rimraf": "~2.6.2",
     "typescript": "~2.6.2"
   },
