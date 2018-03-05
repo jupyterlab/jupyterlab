@@ -118,7 +118,7 @@ describe('docregistry/context', () => {
           content: 'foo'
         });
         context.ready.then(done, done);
-        context.revert().catch(done);
+        context.initialize(false).catch(done);
       });
 
     });
