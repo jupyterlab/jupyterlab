@@ -33,6 +33,7 @@ def load_jupyter_server_extension(nbapp):
     from notebook.utils import url_path_join as ujoin, url_escape
     from tornado.ioloop import IOLoop
     from .build_handler import build_path, Builder, BuildHandler
+    from .labapp import LabApp
     from .commands import (
         get_app_dir, get_user_settings_dir, watch, ensure_dev, watch_dev,
         pjoin, DEV_DIR, HERE, get_app_info, ensure_core, get_workspaces_dir
@@ -87,7 +88,7 @@ def load_jupyter_server_extension(nbapp):
     page_config['token'] = nbapp.token
     page_config['devMode'] = dev_mode
 
-    if nbapp.file_to_run:
+    if nbapp.file_to_run and isinstance(nbapp, LabApp):
         relpath = os.path.relpath(nbapp.file_to_run, nbapp.notebook_dir)
         uri = url_escape(ujoin('/lab/tree', *relpath.split(os.sep)))
         nbapp.default_url = uri
