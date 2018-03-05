@@ -384,28 +384,21 @@ describe('Kernel.IKernel', () => {
     it('should dispose of the resources held by the kernel', () => {
       return Kernel.connectTo(defaultKernel.model).then(kernel => {
         let future = kernel.requestExecute({ code: 'foo' });
-        let comm = kernel.connectToComm('foo');
         expect(future.isDisposed).to.be(false);
-        expect(comm.isDisposed).to.be(false);
         kernel.dispose();
         expect(future.isDisposed).to.be(true);
-        expect(comm.isDisposed).to.be(true);
       });
     });
 
     it('should be safe to call twice', () => {
       return Kernel.connectTo(defaultKernel.model).then(kernel => {
         let future = kernel.requestExecute({ code: 'foo' });
-        let comm = kernel.connectToComm('foo');
         expect(future.isDisposed).to.be(false);
-        expect(comm.isDisposed).to.be(false);
         kernel.dispose();
         expect(future.isDisposed).to.be(true);
-        expect(comm.isDisposed).to.be(true);
         expect(kernel.isDisposed).to.be(true);
         kernel.dispose();
         expect(future.isDisposed).to.be(true);
-        expect(comm.isDisposed).to.be(true);
         expect(kernel.isDisposed).to.be(true);
       });
     });
@@ -575,11 +568,13 @@ describe('Kernel.IKernel', () => {
 
     it('should dispose of existing comm and future objects', () => {
       let kernel = defaultKernel;
-      let comm = kernel.connectToComm('test');
+      let commFuture = kernel.connectToComm('test');
       let future = kernel.requestExecute({ code: 'foo' });
       return kernel.restart().then(() => {
-        expect(comm.isDisposed).to.be(true);
         expect(future.isDisposed).to.be(true);
+        return commFuture;
+      }).then(comm => {
+        expect(comm.isDisposed).to.be(true);
       });
     });
 
