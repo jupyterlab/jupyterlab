@@ -245,7 +245,7 @@ namespace Private {
    * Create a row conversion function for the given column names.
    */
   function makeRowFn(columns: string[]): RowFn {
-    let pairs = columns.map((name, i) => `'${name}':r[${i}]`).join(',');
+    let pairs = columns.map((name, i) => `'${name.replace(/'/g, '\\\'')}':r[${i}]`).join(',');
     return (new Function('r', `return {${pairs}};`)) as RowFn;
   }
 }
