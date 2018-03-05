@@ -1,7 +1,7 @@
 
 
 IF "%NAME%"=="python" (
-    py.test -v jupyterlab/tests/test_jupyterlab.py
+    py.test -v
 
 ) ELSE IF "%NAME%"=="integrity" (
     if !errorlevel! neq 0 exit /b !errorlevel!
