@@ -387,7 +387,8 @@ describe('@jupyterlab/apputils', () => {
             }
           });
           return session.restart();
-        }).then(() => {
+        }).then(restarted => {
+          expect(restarted).to.be(true);
           expect(called).to.be(true);
         });
       });
@@ -402,7 +403,8 @@ describe('@jupyterlab/apputils', () => {
             }
           });
           return session.restart();
-        }).then(() => {
+        }).then(restarted => {
+          expect(restarted).to.be(false);
           expect(called).to.be(false);
         });
       });
