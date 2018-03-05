@@ -40,7 +40,7 @@ import {
 } from '@jupyterlab/observables';
 
 import {
-  OutputArea, IOutputPrompt, OutputPrompt, IStdin, Stdin
+  OutputArea, SimplifiedOutputArea, IOutputPrompt, OutputPrompt, IStdin, Stdin
 } from '@jupyterlab/outputarea';
 
 import {
@@ -656,10 +656,10 @@ class CodeCell extends Cell {
   }
 
   /**
-   * Clone the OutputArea alone, using the same model.
+   * Clone the OutputArea alone, returning a simplified output area, using the same model.
    */
   cloneOutputArea(): OutputArea {
-    return new OutputArea({
+    return new SimplifiedOutputArea({
       model: this.model.outputs,
       contentFactory: this.contentFactory,
       rendermime: this._rendermime,
