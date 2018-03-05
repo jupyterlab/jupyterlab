@@ -306,10 +306,9 @@ describe('docregistry/context', () => {
     describe('#revert()', () => {
 
       it('should revert the contents of the file to the disk', () => {
-        return manager.contents.save(context.path, {
-          type: factory.contentType,
-          format: factory.fileFormat,
-          content: 'foo'
+        return context.initialize(true).then(() => {
+          context.model.fromString('foo');
+          return context.save();
         }).then(() => {
           context.model.fromString('bar');
           return context.revert();
