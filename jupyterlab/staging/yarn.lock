@@ -197,9 +197,9 @@
     "@phosphor/signaling" "^1.2.2"
     "@phosphor/widgets" "^1.5.0"
 
-"@jupyterlab/coreutils@^1.0.6", "@jupyterlab/coreutils@^1.0.9":
-  version "1.0.9"
-  resolved "https://registry.npmjs.org/@jupyterlab/coreutils/-/coreutils-1.0.9.tgz#6cb98efabf44a0471107832d5b95c50442ee7930"
+"@jupyterlab/coreutils@^1.0.10", "@jupyterlab/coreutils@^1.0.6", "@jupyterlab/coreutils@^1.0.9":
+  version "1.0.10"
+  resolved "https://registry.npmjs.org/@jupyterlab/coreutils/-/coreutils-1.0.10.tgz#259347ec4021e2f1a36b84be4e084631f8fa53a9"
   dependencies:
     "@phosphor/algorithm" "^1.1.2"
     "@phosphor/coreutils" "^1.3.0"
@@ -208,7 +208,7 @@
     ajv "~5.1.6"
     comment-json "^1.1.3"
     minimist "~1.2.0"
-    moment "~2.17.1"
+    moment "~2.21.0"
     path-posix "~1.0.0"
     url-parse "~1.1.9"
 
@@ -891,8 +891,8 @@ acorn@^4.0.3:
   resolved "https://registry.npmjs.org/acorn/-/acorn-4.0.13.tgz#105495ae5361d697bd195c825192e1ad7f253787"
 
 acorn@^5.0.0:
-  version "5.5.0"
-  resolved "https://registry.npmjs.org/acorn/-/acorn-5.5.0.tgz#1abb587fbf051f94e3de20e6b26ef910b1828298"
+  version "5.5.1"
+  resolved "https://registry.npmjs.org/acorn/-/acorn-5.5.1.tgz#84e05a9ea0acbe131227da50301e62464dc9c1d8"
 
 ajv-keywords@^1.1.1:
   version "1.5.1"
@@ -1377,8 +1377,8 @@ caniuse-api@^1.5.2:
     lodash.uniq "^4.5.0"
 
 caniuse-db@^1.0.30000529, caniuse-db@^1.0.30000634, caniuse-db@^1.0.30000639:
-  version "1.0.30000812"
-  resolved "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000812.tgz#29c28dd6927ee43e8c2ab648e5236ac916c97d69"
+  version "1.0.30000813"
+  resolved "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000813.tgz#e0a1c603f8880ad787b2a35652b2733f32a5e29a"
 
 canvas@^1.2.9, canvas@^1.3.4:
   version "1.6.9"
@@ -1472,8 +1472,8 @@ class-utils@^0.3.5:
     static-extend "^0.1.1"
 
 clean-css@4.1.x:
-  version "4.1.9"
-  resolved "https://registry.npmjs.org/clean-css/-/clean-css-4.1.9.tgz#35cee8ae7687a49b98034f70de00c4edd3826301"
+  version "4.1.11"
+  resolved "https://registry.npmjs.org/clean-css/-/clean-css-4.1.11.tgz#2ecdf145aba38f54740f26cefd0ff3e03e125d6a"
   dependencies:
     source-map "0.5.x"
 
@@ -2039,8 +2039,8 @@ ecc-jsbn@~0.1.1:
     jsbn "~0.1.0"
 
 electron-to-chromium@^1.2.7:
-  version "1.3.34"
-  resolved "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.3.34.tgz#d93498f40391bb0c16a603d8241b9951404157ed"
+  version "1.3.36"
+  resolved "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.3.36.tgz#0eabf71a9ebea9013fb1cc35a390e068624f27e8"
 
 elliptic@^6.0.0:
   version "6.4.0"
@@ -3298,9 +3298,9 @@ mixin-deep@^1.2.0:
   dependencies:
     minimist "0.0.8"
 
-moment@~2.17.1:
-  version "2.17.1"
-  resolved "https://registry.npmjs.org/moment/-/moment-2.17.1.tgz#fed9506063f36b10f066c8b59a144d7faebe1d82"
+moment@~2.21.0:
+  version "2.21.0"
+  resolved "https://registry.npmjs.org/moment/-/moment-2.21.0.tgz#2a114b51d2a6ec9e6d83cf803f838a878d8a023a"
 
 move-concurrently@^1.0.1:
   version "1.0.1"
@@ -4750,15 +4750,21 @@ string-width@^2.1.0:
     is-fullwidth-code-point "^2.0.0"
     strip-ansi "^4.0.0"
 
-string_decoder@^1.0.0, string_decoder@~1.0.3:
-  version "1.0.3"
-  resolved "https://registry.npmjs.org/string_decoder/-/string_decoder-1.0.3.tgz#0fc67d7c141825de94282dd536bec6b9bce860ab"
+string_decoder@^1.0.0:
+  version "1.1.0"
+  resolved "https://registry.npmjs.org/string_decoder/-/string_decoder-1.1.0.tgz#384f322ee8a848e500effde99901bba849c5d403"
   dependencies:
     safe-buffer "~5.1.0"
 
 string_decoder@~0.10.x:
   version "0.10.31"
   resolved "https://registry.npmjs.org/string_decoder/-/string_decoder-0.10.31.tgz#62e203bc41766c6c28c9fc84301dab1c5310fa94"
+
+string_decoder@~1.0.3:
+  version "1.0.3"
+  resolved "https://registry.npmjs.org/string_decoder/-/string_decoder-1.0.3.tgz#0fc67d7c141825de94282dd536bec6b9bce860ab"
+  dependencies:
+    safe-buffer "~5.1.0"
 
 stringstream@~0.0.4, stringstream@~0.0.5:
   version "0.0.5"
