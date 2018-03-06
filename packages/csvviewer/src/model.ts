@@ -211,7 +211,9 @@ class DSVModel extends DataModel {
       trimRight += 1;
     }
     value = this._data.slice(index + trimLeft, nextIndex - trimRight);
-    if (trimRight === 1 && value.indexOf(this._quote) >= 0) {
+
+    // If we have a quoted field and we have an escaped quote, unescape it.
+    if (trimLeft === 1 && value.indexOf(this._quote) !== -1) {
       value = value.replace(this._quoteEscaped, this._quote);
     }
     return value;
