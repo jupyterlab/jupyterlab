@@ -32,7 +32,7 @@
     "@jupyterlab/application": "^0.15.4",
     "@jupyterlab/codeeditor": "^0.15.4",
     "@jupyterlab/console": "^0.15.4",
-    "@jupyterlab/coreutils": "^1.0.9",
+    "@jupyterlab/coreutils": "^1.0.10",
     "@jupyterlab/notebook": "^0.15.7",
     "@jupyterlab/services": "^1.1.4",
     "@jupyterlab/tooltip": "^0.15.4",

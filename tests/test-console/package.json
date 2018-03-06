@@ -20,7 +20,7 @@
     "@jupyterlab/codeeditor": "^0.15.4",
     "@jupyterlab/codemirror": "^0.15.4",
     "@jupyterlab/console": "^0.15.4",
-    "@jupyterlab/coreutils": "^1.0.9",
+    "@jupyterlab/coreutils": "^1.0.10",
     "@jupyterlab/services": "^1.1.4",
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/signaling": "^1.2.2",
