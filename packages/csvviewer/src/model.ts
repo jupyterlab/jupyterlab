@@ -6,7 +6,7 @@ import {
 } from '@phosphor/datagrid';
 
 import {
-  parseDSV, STATE
+  parseDSV// , STATE
 } from './parse';
 
 /*
@@ -115,7 +115,7 @@ class DSVModel extends DataModel {
 
   private _computeOffsets() {
     // Calculate the line offsets.
-    let offsets: number[] = [];
+    /*let offsets: number[] = [];
     let callbacks: any = {};
     let nrows = 0;
     let ncols = 0;
@@ -145,18 +145,13 @@ class DSVModel extends DataModel {
       }
       col++;
     };
-    parseDSV({data: this._data, delimiter: this._delimiter, callbacks});
+    */
+    let {nrows, ncols, offsets} = parseDSV({data: this._data, delimiter: this._delimiter, regex: false});
     if (offsets[offsets.length] > 4294967296) {
       throw 'csv too large for offsets to be stored as 32-bit integers';
     }
-    if (offsets.length > 1) {
-      this._columnCount = this._data.slice(0, offsets[1]).split(this._delimiter).length;
-    } else {
-      // one row
-      this._columnCount = this._data.split(this._delimiter).length;
-    }
     this._offsets = Uint32Array.from(offsets);
-    this._columnCount = ncols + 1;
+    this._columnCount = ncols;
     this._rowCount = nrows;
   }
 

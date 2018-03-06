@@ -24,12 +24,12 @@
  * @param options: The function options
  */
 export
-function parseDSV(options: parseDSV.IOptions): void {
+function parseDSV(options: parseDSV.IOptions): {nrows: number, ncols: number, offsets: number[]} {
   const {
     data,
     delimiter = ',',
     regex = true,
-    callbacks = {},
+    // callbacks = {},
     startIndex = 0,
     startState = STATE.NEW_ROW,
     endIndex = data.length
@@ -45,16 +45,44 @@ function parseDSV(options: parseDSV.IOptions): void {
   let state = startState;
   let i = startIndex - 1;
   let char;
-  let result;
-
+  // let result;
+  let offsets = [];
+  let nrows = 0;
+  let ncols = 1;
+  let col = 1;
   while (i < endIndex - 1) {
     i++;
+    if (state === NEW_ROW) {
+      if (col < ncols) {
+        // console.warn(`parsed ${col} columns instead of the expected ${ncols} in row ${nrows} in the row before before data: ${data.slice(i, 50)}`);
+        // pad the number of columns
+        for (; col < ncols; col++) {
+          offsets.push(i);
+        }
+      } else if (col > ncols) {
+        // truncate the columns
+        // console.warn(`parsed ${col} columns instead of the expected ${ncols} in row ${nrows} in the row before before data: ${data.slice(i, 50)}`);
+        offsets.length = offsets.length - (col - ncols);
+      }
+      offsets.push(i);
+      nrows++;
+      col = 1;
+    } else if (state === NEW_FIELD) {
+      offsets.push(i);
+      // At the very start, nrows is immediately incremented.
+      if (nrows === 1) {
+        ncols++;
+      }
+      col++;
+    }
+/*
     if (callbacks[state] !== undefined) {
       result = callbacks[state](i, data, state);
       if (result) {
         return;
       }
     }
+*/
     char = data.charCodeAt(i);
     switch (state) {
     case NEW_ROW:
@@ -162,6 +190,7 @@ function parseDSV(options: parseDSV.IOptions): void {
       throw 'state not recognized';
     }
   }
+  return {nrows, ncols, offsets};
 }
 
 export
