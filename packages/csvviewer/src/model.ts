@@ -13,11 +13,10 @@ import {
 
 TODO:
 
-- [ ] Parse the file incrementally and notify that the model had rows added. Have a UI showing when the parsing is done.
-- [ ] Add a row number row header
+- [ ] Have a UI show that only initial parsing has been done. Perhaps a spinner in the toolbar.
 - [ ] When getting the cache lines, look forward to see how many rows are invalid before just getting the cache line size
-- current progress: Parsed 1169059 rows, 38578947 values, in 3s
 */
+
 
 /**
  * A data model implementation for in-memory DSV data.
@@ -43,13 +42,11 @@ class DSVModel extends DataModel {
     this._quote = quote;
     this._quoteEscaped = new RegExp(quote + quote, 'g');
 
-    console.log('Computing offsets');
     let start = performance.now();
-    this._computeOffsets();
+    this._parseAsync();
     let end = performance.now();
-    console.log(`Parsed ${this._rowCount} rows, ${this._rowCount * this._columnCount} values, in ${(end - start) / 1000}s`);
-    
-    // col offset cache
+
+    console.log(`Parsed initial ${this._rowCount} rows, ${this._rowCount * this._columnCount} values, in ${(end - start) / 1000}s`);
 
   }
 
@@ -118,29 +115,34 @@ class DSVModel extends DataModel {
     return value;
   }
 
-  private _computeOffsets() {
-
-    let {nrows, ncols, offsets} = parseDSV({data: this._data, delimiter: this._delimiter, columnOffsets: false});
-    if (offsets[offsets.length] > 4294967296) {
+  private _computeOffsets(maxRows = 4294967295) {
+    let {nrows, ncols, offsets} = parseDSV({data: this._data, delimiter: this._delimiter, columnOffsets: false, maxRows});
+    if (offsets[offsets.length - 1] > 4294967296) {
       throw 'csv too large for offsets to be stored as 32-bit integers';
     }
-    console.log('got offsets, converting to 32-int array');
-
-    this._rowOffsets = Uint32Array.from(offsets);
 
     // If the full column offsets array is small enough, cache all of them.
     if (nrows * ncols <= this._columnOffsetsMaxSize) {
-      this._columnOffsets = new Uint32Array(ncols * nrows);
       this._rowOffsets = new Uint32Array(0);
+      this._columnOffsets = new Uint32Array(ncols * nrows);
     } else {
+      this._rowOffsets = Uint32Array.from(offsets);
       this._columnOffsets = new Uint32Array(ncols * this._maxCacheGet);
     }
 
     this._columnOffsets.fill(0xFFFFFFFF);
     this._columnOffsetsStartingRow = 0;
-
+    let oldRowCount = this._rowCount;
     this._columnCount = ncols;
     this._rowCount = nrows;
+    if (oldRowCount !== undefined && oldRowCount < nrows) {
+      this.emitChanged({
+        type: 'rows-inserted',
+        region: 'body',
+        index: oldRowCount + 1,
+        span: nrows - oldRowCount
+      });
+    }
   }
 
   _getOffsetIndex(row: number, column: number) {
@@ -217,6 +219,25 @@ class DSVModel extends DataModel {
     return value;
   }
 
+  private _parseAsync() {
+    if (this._delayedParse !== 0) {
+      clearTimeout(this._delayedParse);
+      this._delayedParse = 0;
+    }
+    // Initially parse the first 500 rows to get the first screen up quick.
+    this._computeOffsets(500);
+
+    if (this._rowCount === 500) {
+      // Parse full file later.
+      this._delayedParse = setTimeout(() => {
+        let start = performance.now();
+        this._computeOffsets();
+        let end = performance.now();
+        console.log(`Parsed full ${this._rowCount} rows, ${this._rowCount * this._columnCount} values, in ${(end - start) / 1000}s`);
+      }, 0);
+    }
+  }
+
   private _data: string;
   private _delimiter: string;
   private _rowDelimiter: string;
@@ -256,6 +277,7 @@ class DSVModel extends DataModel {
    */
   private _maxCacheGet: number = 1000;
   private _columnOffsetsMaxSize: number = 33554432; // 128M=2**25=2**(20+7-2)
+  private _delayedParse: number;
 }
 
 
