@@ -5,6 +5,18 @@ import {
   DataModel
 } from '@phosphor/datagrid';
 
+import {
+  parseDSV, STATE
+} from './parse';
+
+/*
+
+TODO:
+
+- [ ] Parse the file incrementally and notify that the model had rows added. Have a UI showing when the parsing is done.
+- [ ] Mode to show just the header (saves a *ton* of memory)
+- current progress: Parsed 1169059 rows, 38578947 values, in 10.476500000047963s
+*/
 
 /**
  * A data model implementation for in-memory DSV data.
@@ -18,9 +30,22 @@ class DSVModel extends DataModel {
    */
   constructor(options: DSVModel.IOptions) {
     super();
-    this._data = options.data;
-    this._delimiter = options.delimiter;
+    let {
+      data,
+      delimiter=',',
+      rowDelimiter = undefined,
+      quote = '"',
+    } = options;
+    this._data = data;
+    this._delimiter = delimiter;
+    this._rowDelimiter = rowDelimiter;
+    this._quote = quote;
+    this._quoteEscaped = new RegExp(quote + quote, 'g');
+
+    let start = performance.now();
     this._computeOffsets();
+    let end = performance.now();
+    console.log(`Parsed ${this._rowCount} rows, ${this._rowCount * this._columnCount} values, in ${(end - start) / 1000}s`);
   }
 
   /**
@@ -32,7 +57,7 @@ class DSVModel extends DataModel {
    */
   rowCount(region: DataModel.RowRegion): number {
     if (region === 'body') {
-      return this._offsets.length;
+      return this._rowCount;
     }
     return 1;  // TODO multiple column-header rows?
   }
@@ -69,11 +94,7 @@ class DSVModel extends DataModel {
     // Look up the field and value for the region.
     switch (region) {
     case 'body':
-      if (this._parsedRowNum !== row) {
-        this._parsedRow = this._data.slice(this._offsets[row], this._offsets[row + 1]).split(this._delimiter);
-        this._parsedRowNum = row;
-      }
-      value = this._parsedRow[column];
+      value = this._getField(row, column);
       break;
     case 'column-header':
       value = '';
@@ -93,17 +114,40 @@ class DSVModel extends DataModel {
   }
 
   private _computeOffsets() {
-    let offsets = [0];
-
     // Calculate the line offsets.
-    let len = this._data.length;
-    for (let i = 0; i < len; i++) {
-        if (this._data[i] === '\n') {
-            offsets.push(i + 1);
+    let offsets: number[] = [];
+    let callbacks: any = {};
+    let nrows = 0;
+    let ncols = 0;
+    let col = 0;
+    callbacks[STATE.NEW_ROW] = (i: number, data: string) => {
+      // Check the number of columns
+      if (col < ncols) {
+        // console.warn(`parsed ${col} columns instead of the expected ${ncols} in row ${nrows} in the row before before data: ${data.slice(i, 50)}`);
+        // pad the number of columns
+        for (; col < ncols; col++) {
+          offsets.push(i);
         }
-    }
+      } else if (col > ncols) {
+        // truncate the columns
+        // console.warn(`parsed ${col} columns instead of the expected ${ncols} in row ${nrows} in the row before before data: ${data.slice(i, 50)}`);
+        offsets.length = offsets.length - (col - ncols);
+      }
+      offsets.push(i);
+      nrows++;
+      col = 0;
+    };
+    callbacks[STATE.NEW_FIELD] = (i: number) => {
+      offsets.push(i);
+      // At the very start, nrows is immediately incremented.
+      if (nrows === 1) {
+        ncols++;
+      }
+      col++;
+    };
+    parseDSV({data: this._data, delimiter: this._delimiter, callbacks});
     if (offsets[offsets.length] > 4294967296) {
-      throw 'csv too large';
+      throw 'csv too large for offsets to be stored as 32-bit integers';
     }
     if (offsets.length > 1) {
       this._columnCount = this._data.slice(0, offsets[1]).split(this._delimiter).length;
@@ -112,157 +156,55 @@ class DSVModel extends DataModel {
       this._columnCount = this._data.split(this._delimiter).length;
     }
     this._offsets = Uint32Array.from(offsets);
+    this._columnCount = ncols + 1;
+    this._rowCount = nrows;
   }
 
-  // TODO: do a search at the start to see if there are any quotes. If not, use
-  // the much faster noquote version.
-  private _parseData(data: string, delimiter: string) {
-    let len = data.length;
-    const CHR_DELIMITER = delimiter.charCodeAt(0);
-    const CHR_QUOTE = 34; // "
-    const CHR_LF = 10; // \n
-    const CHR_CR = 13; // \r
-    let endfield = new RegExp(`[${delimiter}\n\r]`, 'g');
-    enum STATE {
-      ESCAPED,
-      ESCAPED_FIRST_QUOTE,
-      UNESCAPED,
-      NEW_FIELD,
-      NEW_ROW,
-      CR
+  _getField(row: number, column: number) {
+    let value: string;
+    let i = row * this._columnCount + column;
+    let trimRight = 0;
+    let trimLeft = 0;
+    // If we are at the end of a row, then strip off the delimiter.
+    if (column === this._columnCount) {
+      // strip off row ending
+      trimRight += this._rowDelimiter.length;
+    } else {
+      // strip off delimiter
+      trimRight += this._delimiter.length;
     }
-    const { ESCAPED, ESCAPED_FIRST_QUOTE, UNESCAPED, NEW_FIELD, NEW_ROW, CR } = STATE;
-    let state = NEW_ROW;
-    let offsets = [];
-    let i = -1;
-    let char;
-    while (i < len - 2) {
-      i++;
-      if (state === NEW_ROW) {
-        offsets.push(i);
-      }
-      char = data[i].charCodeAt(0);
-      switch (state) {
-      case NEW_ROW:
-      case NEW_FIELD:
-        switch (char) {
-        case CHR_QUOTE:
-          state = ESCAPED;
-          break;
-        case CHR_CR:
-          state = CR;
-          break;
-        case CHR_LF: // non-compliant
-          state = NEW_ROW;
-          break;
-        default:
-          state = UNESCAPED;
-          break;
-        }
-        break;
-
-      case ESCAPED:
-        // skip ahead until we see another quote
-        i = data.indexOf('"', i);
-        if (i < 0) { throw 'mismatched quote'; }
-        char = data[i].charCodeAt(0);
-        switch (char) {
-        case CHR_QUOTE:
-          state = ESCAPED_FIRST_QUOTE;
-          break;
-        default: continue;
-        }
-        break;
-
-      case ESCAPED_FIRST_QUOTE:
-        switch (char) {
-        case CHR_QUOTE:
-          state = ESCAPED;
-          break;
-        case CHR_DELIMITER:
-          state = NEW_FIELD;
-          break;
-        case CHR_CR:
-          state = CR;
-          break;
-        case CHR_LF: // non-compliant
-          state = NEW_ROW;
-          break;
-        default:
-          throw 'quote in escaped field not followed by quote, delimiter, or carriage return';
-        }
-        break;
-
-      case UNESCAPED:
-        // skip ahead to either the next delimiter or next CR or LF
-        endfield.lastIndex = i;
-        let match = endfield.exec(data);
-        if (match) {
-          i = match.index;
-          char = data[i].charCodeAt(0);
-        }
-
-        switch (char) {
-        case CHR_DELIMITER:
-          state = NEW_FIELD;
-          break;
-        case CHR_CR:
-          state = CR;
-          break;
-        case CHR_LF: // non-compliant
-          state = NEW_ROW;
-          break;
-        default: continue;
-        }
-        break;
-
-      case CR:
-        switch (char) {
-        case CHR_LF:
-          state = NEW_ROW;
-          break;
-        default:
-          throw 'CR not followed by newline';
-        }
-        break;
-
-      default:
-        throw 'state not recognized';
-        }
-      }
-    return offsets;
-  }
-
-  private _parseDataNoQuotes(data: string, delimiter: string) {
-    let len = data.length;
-    let i = 0;
-    let offsets = [0];
-    let k = 0;
-    while (i < len) {
-      k = data.indexOf('\r\n', i);
-      if (k > 0) {
-        offsets.push(k);
-      }
-      i = k;
+    // if quoted field, strip quotes
+    if (this._data[this._offsets[i]] === '"') {
+      trimLeft += 1;
+      trimRight += 1;
     }
-    return offsets;
+    value = this._data.slice(this._offsets[i] + trimLeft, this._offsets[i + 1] - trimRight);
+    if (trimRight === 1) {
+      value = value.replace(this._quoteEscaped, this._quote);
+    }
+    return value;
   }
 
   private _data: string;
   private _delimiter: string;
+  private _rowDelimiter: string;
+  private _quote: string;
+  private _quoteEscaped: RegExp;
 
   /**
-   * The offsets for each successive line.
+   * The offsets for each datum.
    *
    * #### Notes
-   * If an offset is more than 2^32, then the data is more than 4GB. That's not
-   * practical in browsers these days?
+   * The offsets are 32-bit integers, on the assumption that bigger offset
+   * (i.e., data over 4GB) is not practical.
+   *
+   * Offsets are stored in row-major order, even though they are accessed
+   * typically in column-major order. The offset for row r, column c is at index
+   * i=r*numColumns+c, and the data is at data.slice(offset[i], offset[i+1]).
    */
   private _offsets: Uint32Array;
-
-  private _parsedRowNum: number;
-  private _parsedRow: string[];
   private _columnCount: number;
+  private _rowCount: number;
 }
 
 
@@ -290,5 +232,23 @@ namespace DSVModel {
      * The data model takes full ownership of the data source.
      */
     data: string;
+
+    /**
+     * Whether the DSV has a one-row header.
+     */
+    header?: boolean;
+
+    /**
+     * Line ending
+     */
+    rowDelimiter?: string;
+
+    /**
+     * Quote character.
+     *
+     * #### Notes
+     * Quotes are escaped by repeating them.
+     */
+    quote?: string;
   }
 }
