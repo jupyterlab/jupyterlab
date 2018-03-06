@@ -104,7 +104,7 @@ if [[ $GROUP == integrity ]]; then
 
     # Make sure we can non-dev install.
     conda remove --name test_install --all || true
-    conda create -n test_install notebook python=3.5
+    conda create -n test_install -c conda-forge notebook python=3.5
     source activate test_install
     pip install ".[test]"  # this populates <sys_prefix>/share/jupyter/lab
     python -m jupyterlab.selenium_check
