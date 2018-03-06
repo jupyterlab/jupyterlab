@@ -35,7 +35,7 @@ function parseDSV(options: parseDSV.IOptions): {nrows: number, ncols: number, of
   const {
     data,
     delimiter = ',',
-    regex = true,
+    regex = false,
     startIndex = 0,
     columnOffsets = false,
     maxRows = 0xFFFFFFFF,
@@ -258,7 +258,8 @@ namespace parseDSV {
     delimiter?: string;
 
     /**
-     * Whether to use a regex to shortcut processing. If false, use a loop-based shortcut which sometimes is faster. Defaults to true.
+     * Whether to use a regex to shortcut processing. If false, use a loop-based
+     * shortcut which sometimes is faster. Defaults to false.
      */
     regex?: boolean;
 

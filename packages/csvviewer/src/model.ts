@@ -120,7 +120,7 @@ class DSVModel extends DataModel {
 
   private _computeOffsets() {
 
-    let {nrows, ncols, offsets} = parseDSV({data: this._data, delimiter: this._delimiter, regex: false, columnOffsets: false});
+    let {nrows, ncols, offsets} = parseDSV({data: this._data, delimiter: this._delimiter, columnOffsets: false});
     if (offsets[offsets.length] > 4294967296) {
       throw 'csv too large for offsets to be stored as 32-bit integers';
     }
@@ -166,7 +166,6 @@ class DSVModel extends DataModel {
       let {offsets} = parseDSV({
         data: this._data,
         delimiter: this._delimiter,
-        regex: false,
         columnOffsets: true,
         maxRows: maxRows,
         ncols: this._columnCount,
