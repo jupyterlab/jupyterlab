@@ -18,6 +18,11 @@
 // https://www.npmjs.com/package/csv-string and fast-csv.
 // Check how fast the callback approach is compared to just getting the line offsets explicitly
 
+// TODO: should the parse take an optional array to slot values into if it is
+// given a specific number of rows and cols? This would save the offset array
+// allocation initially. If so, the column padding/truncation needs to move to
+// the NEW_FIELD case.
+
 /**
  * Parse delimiter-separated data.
  *
@@ -31,12 +36,10 @@ function parseDSV(options: parseDSV.IOptions): {nrows: number, ncols: number, of
     data,
     delimiter = ',',
     regex = true,
-    // callbacks = {},
     startIndex = 0,
     columnOffsets = false,
+    maxRows = 0xFFFFFFFF,
   } = options;
-  // Max possible row goal is 2**31.
-  const rowGoal = options.nrows !== undefined ? options.nrows : 2147483648;
   // ncols will be set automatically if it is undefined.
   let ncols = options.ncols;
 
@@ -87,7 +90,7 @@ function parseDSV(options: parseDSV.IOptions): {nrows: number, ncols: number, of
       }
 
       // Return if nrows reaches the row goal.
-      if (nrows === rowGoal) {
+      if (nrows === maxRows) {
         // Could also do a labeled break to jump to the end, or could convert
         // this switch to an if/else and use a break to escape the while loop.
         return {nrows, ncols, offsets};
@@ -110,14 +113,6 @@ function parseDSV(options: parseDSV.IOptions): {nrows: number, ncols: number, of
 
     default: break;
     }
-/*
-    if (callbacks[state] !== undefined) {
-      result = callbacks[state](i, data, state);
-      if (result) {
-        return;
-      }
-    }
-*/
     char = data.charCodeAt(i);
     switch (state) {
     case NEW_ROW:
@@ -279,11 +274,11 @@ namespace parseDSV {
     startIndex?: number;
 
     /**
-     * Number of rows to parse.
+     * Maximum number of rows to parse.
      *
      * If this is not given, parsing proceeds to the end of the data.
      */
-    nrows?: number;
+    maxRows?: number;
 
     /**
      * Number of columns in each row to parse.

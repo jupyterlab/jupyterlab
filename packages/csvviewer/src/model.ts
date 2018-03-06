@@ -48,6 +48,9 @@ class DSVModel extends DataModel {
     this._computeOffsets();
     let end = performance.now();
     console.log(`Parsed ${this._rowCount} rows, ${this._rowCount * this._columnCount} values, in ${(end - start) / 1000}s`);
+    
+    // col offset cache
+
   }
 
   /**
@@ -116,52 +119,75 @@ class DSVModel extends DataModel {
   }
 
   private _computeOffsets() {
-    // Calculate the line offsets.
-    /*let offsets: number[] = [];
-    let callbacks: any = {};
-    let nrows = 0;
-    let ncols = 0;
-    let col = 0;
-    callbacks[STATE.NEW_ROW] = (i: number, data: string) => {
-      // Check the number of columns
-      if (col < ncols) {
-        // console.warn(`parsed ${col} columns instead of the expected ${ncols} in row ${nrows} in the row before before data: ${data.slice(i, 50)}`);
-        // pad the number of columns
-        for (; col < ncols; col++) {
-          offsets.push(i);
-        }
-      } else if (col > ncols) {
-        // truncate the columns
-        // console.warn(`parsed ${col} columns instead of the expected ${ncols} in row ${nrows} in the row before before data: ${data.slice(i, 50)}`);
-        offsets.length = offsets.length - (col - ncols);
-      }
-      offsets.push(i);
-      nrows++;
-      col = 0;
-    };
-    callbacks[STATE.NEW_FIELD] = (i: number) => {
-      offsets.push(i);
-      // At the very start, nrows is immediately incremented.
-      if (nrows === 1) {
-        ncols++;
-      }
-      col++;
-    };
-    */
 
-    let {nrows, ncols, offsets} = parseDSV({data: this._data, delimiter: this._delimiter, regex: false, columnOffsets: true});
+    let {nrows, ncols, offsets} = parseDSV({data: this._data, delimiter: this._delimiter, regex: false, columnOffsets: false});
     if (offsets[offsets.length] > 4294967296) {
       throw 'csv too large for offsets to be stored as 32-bit integers';
     }
     console.log('got offsets, converting to 32-int array');
-    this._offsets = Uint32Array.from(offsets);
+
+    this._rowOffsets = Uint32Array.from(offsets);
+
+    // This will be filled in as needed
+    this._columnOffsets = new Int32Array(ncols * nrows);
+    this._columnOffsets.fill(0xFFFFFFFF);
+    this._columnOffsetsStartingRow = 0;
+
     this._columnCount = ncols;
     this._rowCount = nrows;
   }
 
+  _getOffsetIndex(row: number, column: number) {
+    // check to see if row *should* be in the cache, based on the cache size.
+    let rowIndex = (row - this._columnOffsetsStartingRow) * this._columnCount;
+    if (rowIndex < 0 || rowIndex > this._columnOffsets.length) {
+      // Row shouldn't be in the cache, invalidate the entire cache by setting
+      // all row indices to 0 (perhaps faster to fill all with zeros?), set the
+      // new starting row index. Proceed to the next step.
+      this._columnOffsets.fill(0xFFFFFFFF);
+      this._columnOffsetsStartingRow = row;
+      rowIndex = 0;
+    }
+
+    if (this._columnOffsets[rowIndex] === 0xFFFFFFFF) {
+      // The row is not in the cache yet.
+
+      // Figure out how many rows we need.
+      let rowsLeft = (this._columnOffsets.length - rowIndex) / this._columnCount;
+      let maxRows = Math.min(this._cacheLineSize, rowsLeft);
+
+      // Parse the data to get the column offsets.
+      let {offsets} = parseDSV({
+        data: this._data,
+        delimiter: this._delimiter,
+        regex: false,
+        columnOffsets: true,
+        maxRows: maxRows,
+        ncols: this._columnCount,
+        startIndex: this._rowOffsets[row]
+      });
+
+      // Fill in cache.
+      for (let i = 0; i < offsets.length; i++) {
+        this._columnOffsets[rowIndex + i] = offsets[i];
+      }
+    }
+
+    // Return index from cache.
+    return this._columnOffsets[rowIndex + column];
+
+  }
+
+
   _getField(row: number, column: number) {
     let value: string;
-    let i = row * this._columnCount + column;
+    let index = this._getOffsetIndex(row, column);
+    let nextIndex;
+    if (column === this._columnCount) {
+      nextIndex = this._getOffsetIndex(row + 1, 0);
+    } else {
+      nextIndex = this._getOffsetIndex(row, column + 1);
+    }
     let trimRight = 0;
     let trimLeft = 0;
     // If we are at the end of a row, then strip off the delimiter.
@@ -173,11 +199,11 @@ class DSVModel extends DataModel {
       trimRight += this._delimiter.length;
     }
     // if quoted field, strip quotes
-    if (this._data[this._offsets[i]] === '"') {
+    if (this._data[index] === '"') {
       trimLeft += 1;
       trimRight += 1;
     }
-    value = this._data.slice(this._offsets[i] + trimLeft, this._offsets[i + 1] - trimRight);
+    value = this._data.slice(index + trimLeft, nextIndex - trimRight);
     if (trimRight === 1) {
       value = value.replace(this._quoteEscaped, this._quote);
     }
@@ -191,19 +217,33 @@ class DSVModel extends DataModel {
   private _quoteEscaped: RegExp;
 
   /**
-   * The offsets for each datum.
+   * The index for the start of each row.
    *
    * #### Notes
-   * The offsets are 32-bit integers, on the assumption that bigger offset
-   * (i.e., data over 4GB) is not practical.
+   * The max string size in browsers is less than 2**32, so we only use uint32
+   *
+   * This may be empty if we store *all* column offsets in the column offset cache.
+   */
+  private _rowOffsets: Uint32Array;
+
+  /**
+   * The column offset cache.
+   *
+   * #### Notes
+   *  This contains all column offsets starting with row
+   * _columnOffsetsStartingRow.
    *
    * Offsets are stored in row-major order, even though they are accessed
    * typically in column-major order. The offset for row r, column c is at index
    * i=r*numColumns+c, and the data is at data.slice(offset[i], offset[i+1]).
+   *
+   * The max string size in browsers is less than 2**32, so we only use uint32.
    */
-  private _offsets: Uint32Array;
+  private _columnOffsets: Uint32Array;
+  private _columnOffsetsStartingRow: number;
   private _columnCount: number;
   private _rowCount: number;
+  private _cacheLineSize: number = 1000;
 }
 
 
