@@ -14,7 +14,6 @@ import {
 TODO:
 
 - [ ] Parse the file incrementally and notify that the model had rows added. Have a UI showing when the parsing is done.
-- [ ] Mode to show just the header (saves a *ton* of memory)
 - [ ] Add a row number row header
 - [ ] When getting the cache lines, look forward to see how many rows are invalid before just getting the cache line size
 - current progress: Parsed 1169059 rows, 38578947 values, in 3s
@@ -79,7 +78,7 @@ class DSVModel extends DataModel {
     if (region === 'body') {
       return this._columnCount;
     }
-    return 0;
+    return 1;
   }
 
   /**
@@ -103,10 +102,10 @@ class DSVModel extends DataModel {
       value = this._getField(row, column);
       break;
     case 'column-header':
-      value = '';
+      value = (column + 1).toString();
       break;
     case 'row-header':
-      value = '';
+      value = (row + 1).toString();
       break;
     case 'corner-header':
       value = '';

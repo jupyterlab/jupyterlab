@@ -72,7 +72,7 @@ class CSVViewer extends Widget implements DocumentRegistry.IReadyWidget {
 
     this._grid = new DataGrid();
     this._grid.addClass(CSV_GRID_CLASS);
-    this._grid.headerVisibility = 'column';
+    this._grid.headerVisibility = 'all';
 
     this._toolbar = new CSVToolbar({ selected: this._delimiter });
     this._toolbar.delimiterChanged.connect(this._onDelimiterChanged, this);
