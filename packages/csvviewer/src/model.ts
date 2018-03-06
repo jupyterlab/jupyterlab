@@ -15,7 +15,8 @@ TODO:
 
 - [ ] Parse the file incrementally and notify that the model had rows added. Have a UI showing when the parsing is done.
 - [ ] Mode to show just the header (saves a *ton* of memory)
-- current progress: Parsed 1169059 rows, 38578947 values, in 10.476500000047963s
+- [ ] Add a row number row header
+- current progress: Parsed 1169059 rows, 38578947 values, in 3s
 */
 
 /**
@@ -42,6 +43,7 @@ class DSVModel extends DataModel {
     this._quote = quote;
     this._quoteEscaped = new RegExp(quote + quote, 'g');
 
+    console.log('Computing offsets');
     let start = performance.now();
     this._computeOffsets();
     let end = performance.now();
@@ -146,10 +148,12 @@ class DSVModel extends DataModel {
       col++;
     };
     */
-    let {nrows, ncols, offsets} = parseDSV({data: this._data, delimiter: this._delimiter, regex: false});
+
+    let {nrows, ncols, offsets} = parseDSV({data: this._data, delimiter: this._delimiter, regex: false, columnOffsets: true});
     if (offsets[offsets.length] > 4294967296) {
       throw 'csv too large for offsets to be stored as 32-bit integers';
     }
+    console.log('got offsets, converting to 32-int array');
     this._offsets = Uint32Array.from(offsets);
     this._columnCount = ncols;
     this._rowCount = nrows;

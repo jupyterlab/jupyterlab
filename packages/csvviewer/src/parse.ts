@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 // Possible features to add:
-// automatically telling if there are no quotes (in which case we can probably use much faster approach)
+// automatically telling if there are no quotes (in which case we can probably use much faster indexOf approach)
 // Perhaps we allow quotes in a 'header row', but the search the rest of the file for quotes for faster approach
 // comment character at start of line
 // skip empty whitespace lines
@@ -22,6 +22,8 @@
  * Parse delimiter-separated data.
  *
  * @param options: The function options
+ * @returns an object representing nrows/ncols parsed, and an offset array of
+ * either nrows*ncols entries, or nrows entries, depending on the input option.
  */
 export
 function parseDSV(options: parseDSV.IOptions): {nrows: number, ncols: number, offsets: number[]} {
@@ -31,49 +33,82 @@ function parseDSV(options: parseDSV.IOptions): {nrows: number, ncols: number, of
     regex = true,
     // callbacks = {},
     startIndex = 0,
-    startState = STATE.NEW_ROW,
-    endIndex = data.length
+    columnOffsets = false,
   } = options;
+  // Max possible row goal is 2**31.
+  const rowGoal = options.nrows !== undefined ? options.nrows : 2147483648;
+  // ncols will be set automatically if it is undefined.
+  let ncols = options.ncols;
+
   const CH_DELIMITER = delimiter.charCodeAt(0);
   const CH_QUOTE = 34; // "
   const CH_LF = 10; // \n
   const CH_CR = 13; // \r
-  let endfield = new RegExp(`[${delimiter}\n\r]`, 'g');
+  const endIndex = data.length;
+  const endfield = new RegExp(`[${delimiter}\n\r]`, 'g');
 
   const { ESCAPED, ESCAPED_FIRST_QUOTE, UNESCAPED, NEW_FIELD, NEW_ROW, CR } = STATE;
 
-  let state = startState;
+  // Always start off at the beginning of a row.
+  let state = NEW_ROW;
+
+  // we increment the index immediately in the loop, so decrement it here.
   let i = startIndex - 1;
+
   let char;
-  // let result;
   let offsets = [];
+
+  // Rows actually parsed
   let nrows = 0;
-  let ncols = 1;
-  let col = 1;
+
+  let col;
   while (i < endIndex - 1) {
     i++;
-    if (state === NEW_ROW) {
-      if (col < ncols) {
-        // console.warn(`parsed ${col} columns instead of the expected ${ncols} in row ${nrows} in the row before before data: ${data.slice(i, 50)}`);
-        // pad the number of columns
-        for (; col < ncols; col++) {
-          offsets.push(i);
-        }
-      } else if (col > ncols) {
-        // truncate the columns
-        // console.warn(`parsed ${col} columns instead of the expected ${ncols} in row ${nrows} in the row before before data: ${data.slice(i, 50)}`);
-        offsets.length = offsets.length - (col - ncols);
+
+    // Update return values based on state.
+    switch (state) {
+    case NEW_ROW:
+      // If we just parsed the first row and the ncols is undefined, set it.
+      if (nrows === 1 && ncols === undefined) {
+        ncols = col;
       }
+
+      // Pad or truncate the column offsets if we are returning them.
+      if (columnOffsets === true && nrows > 0) {
+        if (col < ncols) {
+          // console.warn(`parsed ${col} columns instead of the expected ${ncols} in row ${nrows} in the row before before data: ${data.slice(i, 50)}`);
+          for (; col < ncols; col++) {
+            offsets.push(i);
+          }
+        } else if (col > ncols) {
+          // console.warn(`parsed ${col} columns instead of the expected ${ncols} in row ${nrows} in the row before before data: ${data.slice(i, 50)}`);
+          offsets.length = offsets.length - (col - ncols);
+        }
+      }
+
+      // Return if nrows reaches the row goal.
+      if (nrows === rowGoal) {
+        // Could also do a labeled break to jump to the end, or could convert
+        // this switch to an if/else and use a break to escape the while loop.
+        return {nrows, ncols, offsets};
+      }
+
+      // Push the row offset
       offsets.push(i);
+
+      // Increment row counter and reset column counter.
       nrows++;
       col = 1;
-    } else if (state === NEW_FIELD) {
-      offsets.push(i);
-      // At the very start, nrows is immediately incremented.
-      if (nrows === 1) {
-        ncols++;
+      break;
+
+    case NEW_FIELD:
+      if (columnOffsets === true) {
+        offsets.push(i);
       }
       col++;
+      break;
+
+    default: break;
     }
 /*
     if (callbacks[state] !== undefined) {
@@ -235,22 +270,41 @@ namespace parseDSV {
     /**
      * Callbacks for each state.
      */
-    callbacks?: {[key: number]: ICallback};
+    // callbacks?: {[key: number]: ICallback};
 
     /**
-     * The starting index in the string for processing. Defaults to 0.
+     * The starting index in the string for processing. Defaults to 0. This must
+     * be at the start of a row.
      */
     startIndex?: number;
 
     /**
-     * The starting parse state. Defaults to STATE.NEW_ROW.
+     * Number of rows to parse.
+     *
+     * If this is not given, parsing proceeds to the end of the data.
      */
-    startState?: number;
+    nrows?: number;
 
     /**
-     * The ending index for parsing. Parsing proceeds up to, but not including, this index. Defaults to data.length.
+     * Number of columns in each row to parse.
+     *
+     * #### Notes
+     * If this is not given, the ncols defaults to the number of columns in the
+     * first row.
      */
-    endIndex?: number;
+    ncols?: number;
+
+    /**
+     * Whether to return column offsets in the offsets array.
+     *
+     * #### Notes
+     * If false, the returned offsets array contains just the row offsets. If
+     * true, the returned offsets array contains all column offsets for each
+     * column in the rows (i.e., it has nrows*ncols entries). Individual rows
+     * will have empty columns added or extra columns merged into the last
+     * column if they do not have exactly ncols columns.
+     */
+    columnOffsets?: boolean;
   }
 }
 
