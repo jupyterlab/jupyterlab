@@ -71,6 +71,9 @@ class LabTestBase(NotebookTestBase):
         started = Event()
 
         def start_thread():
+            if 'asyncio' in sys.modules:
+                import asyncio
+                asyncio.set_event_loop(asyncio.new_event_loop())
             app = cls.notebook = LabApp(
                 app_dir=lab_dir,
                 port=cls.port,
