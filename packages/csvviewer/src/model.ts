@@ -16,6 +16,7 @@ TODO:
 - [ ] Parse the file incrementally and notify that the model had rows added. Have a UI showing when the parsing is done.
 - [ ] Mode to show just the header (saves a *ton* of memory)
 - [ ] Add a row number row header
+- [ ] When getting the cache lines, look forward to see how many rows are invalid before just getting the cache line size
 - current progress: Parsed 1169059 rows, 38578947 values, in 3s
 */
 
@@ -128,8 +129,14 @@ class DSVModel extends DataModel {
 
     this._rowOffsets = Uint32Array.from(offsets);
 
-    // This will be filled in as needed
-    this._columnOffsets = new Int32Array(ncols * nrows);
+    // If the full column offsets array is small enough, cache all of them.
+    if (nrows * ncols <= this._columnOffsetsMaxSize) {
+      this._columnOffsets = new Uint32Array(ncols * nrows);
+      this._rowOffsets = new Uint32Array(0);
+    } else {
+      this._columnOffsets = new Uint32Array(ncols * this._maxCacheGet);
+    }
+
     this._columnOffsets.fill(0xFFFFFFFF);
     this._columnOffsetsStartingRow = 0;
 
@@ -154,7 +161,7 @@ class DSVModel extends DataModel {
 
       // Figure out how many rows we need.
       let rowsLeft = (this._columnOffsets.length - rowIndex) / this._columnCount;
-      let maxRows = Math.min(this._cacheLineSize, rowsLeft);
+      let maxRows = Math.min(this._maxCacheGet, rowsLeft);
 
       // Parse the data to get the column offsets.
       let {offsets} = parseDSV({
@@ -243,7 +250,12 @@ class DSVModel extends DataModel {
   private _columnOffsetsStartingRow: number;
   private _columnCount: number;
   private _rowCount: number;
-  private _cacheLineSize: number = 1000;
+
+  /**
+   * The number of lines to parse when filling in the cache.
+   */
+  private _maxCacheGet: number = 1000;
+  private _columnOffsetsMaxSize: number = 33554432; // 128M=2**25=2**(20+7-2)
 }
 
 
