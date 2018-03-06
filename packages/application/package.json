@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@jupyterlab/apputils": "^0.15.5",
-    "@jupyterlab/coreutils": "^1.0.9",
+    "@jupyterlab/coreutils": "^1.0.10",
     "@jupyterlab/docregistry": "^0.15.5",
     "@jupyterlab/rendermime": "^0.15.4",
     "@jupyterlab/rendermime-interfaces": "^1.0.6",

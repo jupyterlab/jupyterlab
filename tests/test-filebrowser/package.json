@@ -15,7 +15,7 @@
     "watch:src": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^1.0.9",
+    "@jupyterlab/coreutils": "^1.0.10",
     "@jupyterlab/docmanager": "^0.15.5",
     "@jupyterlab/docregistry": "^0.15.5",
     "@jupyterlab/filebrowser": "^0.15.4",
