@@ -57,7 +57,7 @@ class DSVModel extends DataModel {
 
     if (quoteParser === undefined) {
       // Check for the existence of quotes if the quoteParser is not set
-      quoteParser = (data.indexOf(quote) > 0);
+      quoteParser = (data.indexOf(quote) >= 0);
     }
 
     if (quoteParser) {
