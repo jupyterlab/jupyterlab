@@ -39,9 +39,21 @@ class DSVModel extends DataModel {
     } = options;
     this._data = data;
     this._delimiter = delimiter;
-    this._rowDelimiter = rowDelimiter;
     this._quote = quote;
     this._quoteEscaped = new RegExp(quote + quote, 'g');
+
+    // Guess the row delimiter
+    if (rowDelimiter === undefined) {
+      let i = data.slice(0, 5000).indexOf('\r');
+      if (i === -1) {
+        rowDelimiter = '\n';
+      } else if (data[i + 1] === '\n') {
+        rowDelimiter = '\r\n';
+      } else {
+        rowDelimiter = '\r';
+      }
+    }
+    this._rowDelimiter = rowDelimiter;
 
     if (quoteParser === undefined) {
       // Check for the existence of quotes if the quoteParser is not set
