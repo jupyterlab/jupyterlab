@@ -26,12 +26,10 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  h
-} from '@phosphor/virtualdom';
-
-import {
   Menu, PanelLayout, Widget
 } from '@phosphor/widgets';
+
+import * as React from 'react';
 
 import '../style/index.css';
 
@@ -201,7 +199,6 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   const resourcesGroup = RESOURCES
     .map(args => ({ args, command: CommandIDs.open }));
   helpMenu.addGroup(resourcesGroup, 10);
-  helpMenu.addGroup([{ command: 'apputils:reset' }], 20);
 
   // Generate a cache of the kernel help links.
   const kernelInfoCache = new Map<string, KernelMessage.IInfoReply>();
@@ -261,14 +258,18 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
           isEnabled: usesKernel,
           execute: () => {
             // Create the header of the about dialog
-            let headerLogo = h.img({ src: kernelIconUrl});
-            let title = h.span({className: 'jp-About-header'},
-              headerLogo,
-              h.div({className: 'jp-About-header-info'}, kernelName)
+            let headerLogo = (<img src={kernelIconUrl} />);
+            let title = (
+              <span className='jp-About-header'>,
+                {headerLogo},
+                <div className='jp-About-header-info'>{kernelName}</div>
+              </span>
             );
-            const banner = h.pre({}, kernelInfo.banner);
-            let body = h.div({ className: 'jp-About-body' },
-              banner
+            const banner = (<pre>{kernelInfo.banner}</pre>);
+            let body = (
+              <div className='jp-About-body'>
+                {banner}
+              </div>
             );
 
             showDialog({
@@ -310,43 +311,53 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     execute: () => {
 
       // Create the header of the about dialog
-      let headerLogo = h.div({className: 'jp-About-header-logo'});
-      let headerWordmark = h.div({className: 'jp-About-header-wordmark'});
+      let headerLogo = (<div className='jp-About-header-logo'/>);
+      let headerWordmark = (<div className='jp-About-header-wordmark'/>);
       let release = 'Beta Release Series';
       let versionNumber = `Version ${info.version}`;
-      let versionInfo = h.span({className: 'jp-About-version-info'},
-        h.span({className: 'jp-About-release'}, release),
-        h.span({className: 'jp-About-version'}, versionNumber)
+      let versionInfo = (
+        <span className='jp-About-version-info'>
+          <span className='jp-About-release'>{release}</span>
+          <span className='jp-About-version'>{versionNumber}</span>
+        </span>
       );
-      let title = h.span({className: 'jp-About-header'},
-        headerLogo,
-        h.div({className: 'jp-About-header-info'},
-          headerWordmark,
-          versionInfo
-        )
+      let title = (
+        <span className='jp-About-header'>
+          {headerLogo},
+          <div className='jp-About-header-info'>
+            {headerWordmark}
+            {versionInfo}
+          </div>
+        </span>
       );
 
       // Create the body of the about dialog
       let jupyterURL = 'https://jupyter.org/about.html';
       let contributorsURL = 'https://github.com/jupyterlab/jupyterlab/graphs/contributors';
-      let externalLinks = h.span({className: 'jp-About-externalLinks'},
-        h.a({
-          href: contributorsURL,
-          target: '_blank',
-          className: 'jp-Button-flat'
-        }, 'CONTRIBUTOR LIST'),
-        h.a({
-          href: jupyterURL,
-          target: '_blank',
-          className: 'jp-Button-flat'
-        }, 'ABOUT PROJECT JUPYTER')
+      let externalLinks = (
+        <span className='jp-About-externalLinks'>
+          <a
+            href={contributorsURL}
+            target='_blank'
+            className='jp-Button-flat'
+          >CONTRIBUTOR LIST</a>
+          <a
+            href={jupyterURL}
+            target='_blank'
+            className='jp-Button-flat'
+          >ABOUT PROJECT JUPYTER</a>
+        </span>
       );
-      let copyright = h.span({
-        className: 'jp-About-copyright'
-      }, '© 2018 Project Jupyter');
-      let body = h.div({ className: 'jp-About-body' },
-        externalLinks,
-        copyright
+      let copyright = (
+        <span
+          className='jp-About-copyright'
+        >© 2018 Project Jupyter</span>
+      );
+      let body = (
+        <div className='jp-About-body'>
+          {externalLinks}
+          {copyright}
+        </div>
       );
 
       showDialog({

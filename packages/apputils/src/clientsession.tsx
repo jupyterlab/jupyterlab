@@ -26,12 +26,10 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  h
-} from '@phosphor/virtualdom';
-
-import {
   Widget
 } from '@phosphor/widgets';
+
+import * as React from 'react';
 
 import {
   showDialog, Dialog
@@ -684,7 +682,7 @@ class ClientSession implements IClientSession {
       }
       let dialog = this._dialog = new Dialog({
         title: 'Error Starting Kernel',
-        body: h.pre(message),
+        body: <pre>{message}</pre>,
         buttons: [Dialog.okButton()]
       });
       return dialog.launch();
