@@ -23,6 +23,9 @@
 // allocation initially. If so, the column padding/truncation needs to move to
 // the NEW_FIELD case.
 
+export
+type IParser = (options: parseDSV.IOptions) => {nrows: number, ncols: number, offsets: number[]};
+
 /**
  * Parse delimiter-separated data.
  *
@@ -314,7 +317,7 @@ namespace parseDSV {
  * Optimized row offset parsing assuming there are no quotes.
  */
 export
-function parseDSVNoQuotes(options: parseDSV.IOptions) {
+function parseDSVNoQuotes(options: parseDSV.IOptions): {nrows: number, ncols: number, offsets: number[]} {
   const {
     data,
     delimiter = ',',

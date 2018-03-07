@@ -6,7 +6,7 @@ import {
 } from '@phosphor/datagrid';
 
 import {
-  parseDSV, parseDSVNoQuotes
+  parseDSV, parseDSVNoQuotes, IParser
 } from './parse';
 
 /*
@@ -35,6 +35,7 @@ class DSVModel extends DataModel {
       delimiter=',',
       rowDelimiter = undefined,
       quote = '"',
+      quoteParser = undefined
     } = options;
     this._data = data;
     this._delimiter = delimiter;
@@ -42,16 +43,22 @@ class DSVModel extends DataModel {
     this._quote = quote;
     this._quoteEscaped = new RegExp(quote + quote, 'g');
 
+    if (quoteParser === undefined) {
+      // Check for the existence of quotes if the quoteParser is not set
+      quoteParser = (data.indexOf(quote) > 0);
+    }
+
+    if (quoteParser) {
+      this._parser = parseDSV;
+    } else {
+      this._parser = parseDSVNoQuotes;
+    }
+
     let start = performance.now();
     this._parseAsync();
     let end = performance.now();
 
     console.log(`Parsed initial ${this._rowCount} rows, ${this._rowCount * this._columnCount} values, in ${(end - start) / 1000}s`);
-
-    start = performance.now();
-    let i = data.indexOf('`');
-    end = performance.now();
-    console.log(`indexOf ${data.length} chars, found at ${i}, in ${(end - start) / 1000}s`);
   }
 
   /**
@@ -120,13 +127,13 @@ class DSVModel extends DataModel {
   }
 
   private _computeOffsets(maxRows = 4294967295) {
-    let {nrows, offsets} = this._parseDSV({data: this._data, delimiter: this._delimiter, columnOffsets: false, maxRows});
+    let {nrows, offsets} = this._parser({data: this._data, delimiter: this._delimiter, columnOffsets: false, maxRows});
     if (offsets[offsets.length - 1] > 4294967296) {
       throw 'csv too large for offsets to be stored as 32-bit integers';
     }
 
     // Get number of columns in first row
-    let {ncols} = this._parseDSV({data: this._data, delimiter: this._delimiter, columnOffsets: true, maxRows: 1});
+    let {ncols} = this._parser({data: this._data, delimiter: this._delimiter, columnOffsets: true, maxRows: 1});
 
     // If the full column offsets array is small enough, cache all of them.
     if (nrows * ncols <= this._columnOffsetsMaxSize) {
@@ -172,7 +179,7 @@ class DSVModel extends DataModel {
       let maxRows = Math.min(this._maxCacheGet, rowsLeft);
 
       // Parse the data to get the column offsets.
-      let {offsets} = this._parseDSV({
+      let {offsets} = this._parser({
         data: this._data,
         delimiter: this._delimiter,
         columnOffsets: true,
@@ -243,24 +250,12 @@ class DSVModel extends DataModel {
     }
   }
 
-  private _parseDSV(options: parseDSV.IOptions) {
-    let start = performance.now();
-    let {nrows, ncols, offsets} = parseDSV(options);
-    let end = performance.now();
-    console.log(`Parsed with dsv ${nrows} rows in ${(end - start) / 1000}s`);
-
-    start = performance.now();
-    let nnrows = parseDSVNoQuotes(options).nrows;
-    end = performance.now();
-    console.log(`Parsed with no quote dsv ${nnrows} rows in ${(end - start) / 1000}s`);
-    return {nrows, ncols, offsets};
-  }
-
   private _data: string;
   private _delimiter: string;
   private _rowDelimiter: string;
   private _quote: string;
   private _quoteEscaped: RegExp;
+  
 
   /**
    * The index for the start of each row.
@@ -296,6 +291,9 @@ class DSVModel extends DataModel {
   private _maxCacheGet: number = 1000;
   private _columnOffsetsMaxSize: number = 33554432; // 128M=2**25=2**(20+7-2)
   private _delayedParse: number;
+
+  // Whether to use the parser that understands quotes or not.
+  private _parser: IParser;
 }
 
 
@@ -341,5 +339,16 @@ namespace DSVModel {
      * Quotes are escaped by repeating them.
      */
     quote?: string;
+
+    /**
+     * Whether to use the parser for quoted fields.
+     *
+     * #### Notes
+     * Setting this to false uses a much, much faster parser, but assumes there
+     * are not any field or row delimiters inside quotes. If this is not set, it
+     * defaults to true if any quotes are found in the data, and false
+     * otherwise.
+     */
+    quoteParser?: boolean;
   }
 }
