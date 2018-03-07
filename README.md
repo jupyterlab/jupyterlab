@@ -164,6 +164,7 @@ JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by
 * Cameron Oelsen, Cal Poly (UI/UX design).
 * Fernando Perez, UC Berkeley (co-creator, vision).
 * Ian Rose, UC Berkeley (Real-time collaboration, document architecture).
+* Saul Shanabrook, Quansight (general development, extensions)
 * Steven Silvester, Quansight (co-creator, release management, packaging,
   prolific contributions throughout the code base).
 
