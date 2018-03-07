@@ -6,7 +6,7 @@ import {
 } from '@phosphor/datagrid';
 
 import {
-  parseDSV// , STATE
+  parseDSV, parseDSVNoQuotes
 } from './parse';
 
 /*
@@ -48,6 +48,10 @@ class DSVModel extends DataModel {
 
     console.log(`Parsed initial ${this._rowCount} rows, ${this._rowCount * this._columnCount} values, in ${(end - start) / 1000}s`);
 
+    start = performance.now();
+    let i = data.indexOf('`');
+    end = performance.now();
+    console.log(`indexOf ${data.length} chars, found at ${i}, in ${(end - start) / 1000}s`);
   }
 
   /**
@@ -116,10 +120,13 @@ class DSVModel extends DataModel {
   }
 
   private _computeOffsets(maxRows = 4294967295) {
-    let {nrows, ncols, offsets} = parseDSV({data: this._data, delimiter: this._delimiter, columnOffsets: false, maxRows});
+    let {nrows, offsets} = this._parseDSV({data: this._data, delimiter: this._delimiter, columnOffsets: false, maxRows});
     if (offsets[offsets.length - 1] > 4294967296) {
       throw 'csv too large for offsets to be stored as 32-bit integers';
     }
+
+    // Get number of columns in first row
+    let {ncols} = this._parseDSV({data: this._data, delimiter: this._delimiter, columnOffsets: true, maxRows: 1});
 
     // If the full column offsets array is small enough, cache all of them.
     if (nrows * ncols <= this._columnOffsetsMaxSize) {
@@ -165,7 +172,7 @@ class DSVModel extends DataModel {
       let maxRows = Math.min(this._maxCacheGet, rowsLeft);
 
       // Parse the data to get the column offsets.
-      let {offsets} = parseDSV({
+      let {offsets} = this._parseDSV({
         data: this._data,
         delimiter: this._delimiter,
         columnOffsets: true,
@@ -182,9 +189,7 @@ class DSVModel extends DataModel {
 
     // Return index from cache.
     return this._columnOffsets[rowIndex + column];
-
   }
-
 
   _getField(row: number, column: number) {
     let value: string;
@@ -234,8 +239,21 @@ class DSVModel extends DataModel {
         this._computeOffsets();
         let end = performance.now();
         console.log(`Parsed full ${this._rowCount} rows, ${this._rowCount * this._columnCount} values, in ${(end - start) / 1000}s`);
-      }, 0);
+      });
     }
+  }
+
+  private _parseDSV(options: parseDSV.IOptions) {
+    let start = performance.now();
+    let {nrows, ncols, offsets} = parseDSV(options);
+    let end = performance.now();
+    console.log(`Parsed with dsv ${nrows} rows in ${(end - start) / 1000}s`);
+
+    start = performance.now();
+    let nnrows = parseDSVNoQuotes(options).nrows;
+    end = performance.now();
+    console.log(`Parsed with no quote dsv ${nnrows} rows in ${(end - start) / 1000}s`);
+    return {nrows, ncols, offsets};
   }
 
   private _data: string;

@@ -29,6 +29,7 @@
  * @param options: The function options
  * @returns an object representing nrows/ncols parsed, and an offset array of
  * either nrows*ncols entries, or nrows entries, depending on the input option.
+ * If computeOffsets is false, ncols returned will be 0.
  */
 export
 function parseDSV(options: parseDSV.IOptions): {nrows: number, ncols: number, offsets: number[]} {
@@ -93,7 +94,7 @@ function parseDSV(options: parseDSV.IOptions): {nrows: number, ncols: number, of
       if (nrows === maxRows) {
         // Could also do a labeled break to jump to the end, or could convert
         // this switch to an if/else and use a break to escape the while loop.
-        return {nrows, ncols, offsets};
+        return {nrows, ncols: columnOffsets ? ncols : 0, offsets};
       }
 
       // Push the row offset
@@ -220,7 +221,7 @@ function parseDSV(options: parseDSV.IOptions): {nrows: number, ncols: number, of
       throw 'state not recognized';
     }
   }
-  return {nrows, ncols, offsets};
+  return {nrows, ncols: columnOffsets ? ncols : 0, offsets};
 }
 
 export
@@ -256,6 +257,11 @@ namespace parseDSV {
      * The delimiter to use. Defaults to ','.
      */
     delimiter?: string;
+
+    /**
+     * The line delimiter to use. Defaults to '\r\n'.
+     */
+    lineDelimiter?: string;
 
     /**
      * Whether to use a regex to shortcut processing. If false, use a loop-based
@@ -304,18 +310,69 @@ namespace parseDSV {
   }
 }
 
+/**
+ * Optimized row offset parsing assuming there are no quotes.
+ */
 export
-function _parseDSVNoQuotes(data: string, delimiter: string) {
+function parseDSVNoQuotes(options: parseDSV.IOptions) {
+  const {
+    data,
+    delimiter = ',',
+    lineDelimiter = '\n',
+    startIndex = 0,
+    columnOffsets = false,
+    maxRows = 0xFFFFFFFF,
+  } = options;
+  // ncols will be set automatically if it is undefined.
+  let ncols = options.ncols;
+  let lineDelimiterLength = lineDelimiter.length;
+  let i = startIndex;
   let len = data.length;
-  let i = 0;
-  let offsets = [0];
-  let k = 0;
-  while (i < len) {
-    k = data.indexOf('\r\n', i);
-    if (k > 0) {
-      offsets.push(k);
+  let nextLine: number;
+  let col: number;
+  let offsets: number[] = [];
+  let nrows = 0;
+  let rowString: string;
+
+
+  let lineEnd: number;
+  nextLine = startIndex;
+  while (nextLine !== -1 && nrows < maxRows) {
+    offsets.push(i);
+    nrows++;
+    nextLine = data.indexOf(lineDelimiter, i);
+    lineEnd = nextLine === -1 ? len : nextLine;
+
+    if (columnOffsets === true) {
+      // Assumes the slice is a zero-cost view. Otherwise it may be better to
+      // just indexOf our way through until we pass stop or go negative,
+      // possibly overshooting the end of the line.
+      col = 1;
+      rowString = data.slice(i, lineEnd);
+      i = rowString.indexOf(delimiter);
+
+      if (ncols === undefined) {
+        while (i !== -1) {
+          offsets.push(startIndex + i);
+          col++;
+          i = rowString.indexOf(delimiter, i + 1);
+        }
+        ncols = col;
+      } else {
+        while (i !== -1 && col <= ncols) {
+          offsets.push(startIndex + i);
+          col++;
+          i = rowString.indexOf(delimiter, i + 1);
+        }
+        if (col < ncols) {
+          for (; col <= ncols; col++) {
+            offsets.push(nextLine);
+          }
+        }
+      }
     }
-    i = k;
+    i = lineEnd + lineDelimiterLength;
   }
-  return offsets;
+
+  return {nrows, ncols: columnOffsets ? ncols : 0, offsets};
 }
