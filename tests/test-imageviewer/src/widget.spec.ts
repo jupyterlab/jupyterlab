@@ -86,7 +86,7 @@ describe('ImageViewer', () => {
   beforeEach(() => {
     context = new Context({ manager, factory, path: IMAGE.path });
     widget = new LogImage(context);
-    return context.revert();
+    return context.initialize(false);
   });
 
   afterEach(() => {
