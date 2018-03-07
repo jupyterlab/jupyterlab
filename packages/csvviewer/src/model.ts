@@ -15,6 +15,7 @@ TODO:
 
 - [ ] Have a UI show that only initial parsing has been done. Perhaps a spinner in the toolbar.
 - [ ] When getting the cache lines, look forward to see how many rows are invalid before just getting the cache line size
+- [ ] introduce a header mode - in that case, check the rest of the file for quotes, to use the no quote parser.
 */
 
 
@@ -59,6 +60,7 @@ class DSVModel extends DataModel {
       // Check for the existence of quotes if the quoteParser is not set
       quoteParser = (data.indexOf(quote) >= 0);
     }
+    console.log(`quote parser:${quoteParser}, ${data.indexOf(quote)}`);
 
     if (quoteParser) {
       this._parser = parseDSV;
@@ -214,23 +216,32 @@ class DSVModel extends DataModel {
     let value: string;
     let index = this._getOffsetIndex(row, column);
     let nextIndex;
-    if (column === this._columnCount) {
-      nextIndex = this._getOffsetIndex(row + 1, 0);
-    } else {
-      nextIndex = this._getOffsetIndex(row, column + 1);
-    }
+
     let trimRight = 0;
     let trimLeft = 0;
-    // If we are at the end of a row, then strip off the delimiter.
-    if (column === this._columnCount) {
-      // strip off row ending
-      trimRight += this._rowDelimiter.length;
+
+    if (column === this._columnCount - 1) {
+      if (row < this._rowCount - 1) {
+        nextIndex = this._getOffsetIndex(row + 1, 0);
+        // strip off row delimiter if we are not in the last row.
+        trimRight += this._rowDelimiter.length;
+      } else {
+        nextIndex = this._data.length;
+        if (this._data[nextIndex - 1] === this._rowDelimiter[this._rowDelimiter.length - 1]) {
+          // The string may or may not end in a row delimiter, so we explicitly check
+          trimRight += this._rowDelimiter.length;
+        }
+      }
     } else {
-      // strip off delimiter
-      trimRight += this._delimiter.length;
+      nextIndex = this._getOffsetIndex(row, column + 1);
+      if (index < nextIndex) {
+        // strip field separator if there is one between the two indices.
+        trimRight += 1;
+      }
     }
+
     // if quoted field, strip quotes
-    if (this._data[index] === '"') {
+    if (this._data[index] === this._quote) {
       trimLeft += 1;
       trimRight += 1;
     }
