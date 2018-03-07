@@ -15,9 +15,18 @@ TODO:
 
 - [ ] Have a UI show that only initial parsing has been done. Perhaps a spinner in the toolbar.
 - [ ] When getting the cache lines, look forward to see how many rows are invalid before just getting the cache line size
-- [ ] introduce a header mode - in that case, check the rest of the file for quotes, to use the no quote parser.
+- [ ] introduce a header mode:
+  - cache the header separately
+  - check the *rest* of the file for quotes to see if the quoted parser is needed - often the first row is quoted, but nothing else is.
+  - be careful about the row indices shifting by one in various parts of the code.
+- [ ] autdetect the delimiter (look for comma, tab, semicolon in first line. If more than one found, parse first line with comma, tab, semicolon delimiters. One with most fields wins).
+- [ ] Tab-delimited files don't work right now, since they appear to have unmatched quotes when the delimiter is ',', so they cause an error that never shows the delimiter picker. If an error fails, just parse with the non-quoted version to get something on the page.
 */
 
+const PARSERS: {[key: string]: IParser} = {
+  'quotes': parseDSV,
+  'noquotes': parseDSVNoQuotes
+};
 
 /**
  * A data model implementation for in-memory DSV data.
@@ -36,7 +45,8 @@ class DSVModel extends DataModel {
       delimiter=',',
       rowDelimiter = undefined,
       quote = '"',
-      quoteParser = undefined
+      quoteParser = undefined,
+      // header = false,
     } = options;
     this._data = data;
     this._delimiter = delimiter;
@@ -63,9 +73,9 @@ class DSVModel extends DataModel {
     console.log(`quote parser:${quoteParser}, ${data.indexOf(quote)}`);
 
     if (quoteParser) {
-      this._parser = parseDSV;
+      this._parser = 'quotes';
     } else {
-      this._parser = parseDSVNoQuotes;
+      this._parser = 'noquotes';
     }
 
     let start = performance.now();
@@ -141,13 +151,13 @@ class DSVModel extends DataModel {
   }
 
   private _computeOffsets(maxRows = 4294967295) {
-    let {nrows, offsets} = this._parser({data: this._data, delimiter: this._delimiter, columnOffsets: false, maxRows});
+    let {nrows, offsets} = PARSERS[this._parser]({data: this._data, delimiter: this._delimiter, columnOffsets: false, maxRows});
     if (offsets[offsets.length - 1] > 4294967296) {
       throw 'csv too large for offsets to be stored as 32-bit integers';
     }
 
     // Get number of columns in first row
-    let {ncols} = this._parser({data: this._data, delimiter: this._delimiter, columnOffsets: true, maxRows: 1});
+    let {ncols} = PARSERS[this._parser]({data: this._data, delimiter: this._delimiter, columnOffsets: true, maxRows: 1});
 
     // If the full column offsets array is small enough, cache all of them.
     if (nrows * ncols <= this._columnOffsetsMaxSize) {
@@ -193,7 +203,7 @@ class DSVModel extends DataModel {
       let maxRows = Math.min(this._maxCacheGet, rowsLeft);
 
       // Parse the data to get the column offsets.
-      let {offsets} = this._parser({
+      let {offsets} = PARSERS[this._parser]({
         data: this._data,
         delimiter: this._delimiter,
         columnOffsets: true,
@@ -260,13 +270,35 @@ class DSVModel extends DataModel {
       this._delayedParse = 0;
     }
     // Initially parse the first 500 rows to get the first screen up quick.
-    this._computeOffsets(500);
+    try {
+      this._computeOffsets(500);
+    } catch (e) {
+      if (this._parser === 'quotes') {
+        console.warn(e);
+        console.log('Switching to noquotes CSV parser')
+        this._parser = 'noquotes';
+        this._computeOffsets(500);
+      } else {
+        throw e;
+      }
+    }
 
     if (this._rowCount === 500) {
       // Parse full file later.
       this._delayedParse = setTimeout(() => {
         let start = performance.now();
-        this._computeOffsets();
+        try {
+          this._computeOffsets();
+        } catch (e) {
+          if (this._parser === 'quotes') {
+            console.warn(e);
+            console.log('Switching to noquotes CSV parser')
+            this._parser = 'noquotes';
+            this._computeOffsets();
+          } else {
+            throw e;
+          }
+        }
         let end = performance.now();
         console.log(`Parsed full ${this._rowCount} rows, ${this._rowCount * this._columnCount} values, in ${(end - start) / 1000}s`);
       });
@@ -316,7 +348,7 @@ class DSVModel extends DataModel {
   private _delayedParse: number;
 
   // Whether to use the parser that understands quotes or not.
-  private _parser: IParser;
+  private _parser: 'quotes' | 'noquotes';
 }
 
 

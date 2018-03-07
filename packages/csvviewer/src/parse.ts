@@ -8,7 +8,7 @@
 // error for too many/too few fields on a line.
 // Trim whitespace around delimiters
 // Sanity check on field size, with error if field exceeds the size.
-// Test against https://github.com/maxogden/csv-spectrum. 
+// Test against https://github.com/maxogden/csv-spectrum.
 // Benchmark against https://www.npmjs.com/package/csv-parser and
 // https://www.npmjs.com/package/csv-string and fast-csv.
 
@@ -18,7 +18,88 @@
 // the NEW_FIELD case.
 
 export
-type IParser = (options: parseDSV.IOptions) => {nrows: number, ncols: number, offsets: number[]};
+type IParser = (options: IParser.IOptions) => {nrows: number, ncols: number, offsets: number[]};
+
+export
+namespace IParser {
+  export
+  interface IOptions {
+    /**
+     * The data to parse.
+     */
+    data: string;
+
+    /**
+     * The delimiter to use. Defaults to ','.
+     */
+    delimiter?: string;
+
+    /**
+     * The line delimiter to use. Defaults to '\r\n'.
+     */
+    lineDelimiter?: string;
+
+    /**
+     * The quote character for quoting fields. Defaults to the double quote (").
+     */
+    quote?: string;
+
+    /**
+     * Whether to use a regex to shortcut processing. If false, use a loop-based
+     * shortcut which sometimes is faster. Defaults to false.
+     */
+    regex?: boolean;
+
+    /**
+     * The starting index in the string for processing. Defaults to 0. This must
+     * be at the start of a row.
+     */
+    startIndex?: number;
+
+    /**
+     * Maximum number of rows to parse.
+     *
+     * If this is not given, parsing proceeds to the end of the data.
+     */
+    maxRows?: number;
+
+    /**
+     * Number of columns in each row to parse.
+     *
+     * #### Notes
+     * If this is not given, the ncols defaults to the number of columns in the
+     * first row.
+     */
+    ncols?: number;
+
+    /**
+     * Whether to return column offsets in the offsets array.
+     *
+     * #### Notes
+     * If false, the returned offsets array contains just the row offsets. If
+     * true, the returned offsets array contains all column offsets for each
+     * column in the rows (i.e., it has nrows*ncols entries). Individual rows
+     * will have empty columns added or extra columns merged into the last
+     * column if they do not have exactly ncols columns.
+     */
+    columnOffsets?: boolean;
+  }
+}
+
+enum STATE {
+  ESCAPED,
+  ESCAPED_FIRST_QUOTE,
+  UNESCAPED,
+  NEW_FIELD,
+  NEW_ROW,
+  CR
+}
+
+enum LINE_DELIMITER {
+  CR,
+  CRLF,
+  LF
+}
 
 /**
  * Parse delimiter-separated data.
@@ -29,7 +110,7 @@ type IParser = (options: parseDSV.IOptions) => {nrows: number, ncols: number, of
  * If computeOffsets is false, ncols returned will be 0.
  */
 export
-function parseDSV(options: parseDSV.IOptions): {nrows: number, ncols: number, offsets: number[]} {
+function parseDSV(options: IParser.IOptions): {nrows: number, ncols: number, offsets: number[]} {
   const {
     data,
     delimiter = ',',
@@ -135,14 +216,14 @@ function parseDSV(options: parseDSV.IOptions): {nrows: number, ncols: number, of
           i++;
           state = NEW_ROW;
         } else {
-          throw 'carriage return found, but not as part of a row delimiter';
+          throw `row ${nrows}, column ${col}: carriage return found, but not as part of a row delimiter`;
         }
         break;
       case CH_LF:
         if (lineDelimiterCode === LF) {
           state = NEW_ROW;
         } else {
-          throw 'line feed found, but line delimiter starts with a carriage return';
+          throw `row ${nrows}, column ${col}: line feed found, but line delimiter starts with a carriage return`;
         }
         break;
       case CH_DELIMITER:
@@ -158,7 +239,7 @@ function parseDSV(options: parseDSV.IOptions): {nrows: number, ncols: number, of
       // skip ahead until we see another quote
       i = data.indexOf(quote, i);
       if (i < 0) {
-        throw 'mismatched quote';
+        throw `row ${nrows}, column ${col}: mismatched quote`;
       }
       state = ESCAPED_FIRST_QUOTE;
       break;
@@ -178,18 +259,18 @@ function parseDSV(options: parseDSV.IOptions): {nrows: number, ncols: number, of
           i++;
           state = NEW_ROW;
         } else {
-          throw 'carriage return found, but not as part of a row delimiter';
+          throw `row ${nrows}, column ${col}: carriage return found, but not as part of a row delimiter`;
         }
         break;
       case CH_LF:
         if (lineDelimiterCode === LF) {
           state = NEW_ROW;
         } else {
-          throw 'line feed found, but line delimiter starts with a carriage return';
+          throw `row ${nrows}, column ${col}: line feed found, but line delimiter starts with a carriage return`;
         }
         break;
       default:
-        throw 'quote in escaped field not followed by quote, delimiter, or carriage return';
+        throw `row ${nrows}, column ${col}: quote in escaped field not followed by quote, delimiter, or carriage return`;
       }
       break;
 
@@ -226,14 +307,14 @@ function parseDSV(options: parseDSV.IOptions): {nrows: number, ncols: number, of
           i++;
           state = NEW_ROW;
         } else {
-          throw 'carriage return found, but not as part of a row delimiter';
+          throw `row ${nrows}, column ${col}: carriage return found, but not as part of a row delimiter`;
         }
         break;
       case CH_LF:
         if (lineDelimiterCode === LF) {
           state = NEW_ROW;
         } else {
-          throw 'line feed found, but line delimiter starts with a carriage return';
+          throw `row ${nrows}, column ${col}: line feed found, but line delimiter starts with a carriage return`;
         }
         break;
 
@@ -242,100 +323,18 @@ function parseDSV(options: parseDSV.IOptions): {nrows: number, ncols: number, of
       break;
 
     default:
-      throw 'state not recognized';
+      throw `row ${nrows}, column ${col}: state not recognized`;
     }
   }
   return {nrows, ncols: columnOffsets ? ncols : 0, offsets};
 }
 
-export
-enum STATE {
-  ESCAPED,
-  ESCAPED_FIRST_QUOTE,
-  UNESCAPED,
-  NEW_FIELD,
-  NEW_ROW,
-  CR
-}
-
-export
-enum LINE_DELIMITER {
-  CR,
-  CRLF,
-  LF
-}
-
-export
-namespace parseDSV {
-  export
-  interface IOptions {
-    /**
-     * The data to parse.
-     */
-    data: string;
-
-    /**
-     * The delimiter to use. Defaults to ','.
-     */
-    delimiter?: string;
-
-    /**
-     * The line delimiter to use. Defaults to '\r\n'.
-     */
-    lineDelimiter?: string;
-
-    /**
-     * The quote character for quoting fields. Defaults to the double quote (").
-     */
-    quote?: string;
-
-    /**
-     * Whether to use a regex to shortcut processing. If false, use a loop-based
-     * shortcut which sometimes is faster. Defaults to false.
-     */
-    regex?: boolean;
-
-    /**
-     * The starting index in the string for processing. Defaults to 0. This must
-     * be at the start of a row.
-     */
-    startIndex?: number;
-
-    /**
-     * Maximum number of rows to parse.
-     *
-     * If this is not given, parsing proceeds to the end of the data.
-     */
-    maxRows?: number;
-
-    /**
-     * Number of columns in each row to parse.
-     *
-     * #### Notes
-     * If this is not given, the ncols defaults to the number of columns in the
-     * first row.
-     */
-    ncols?: number;
-
-    /**
-     * Whether to return column offsets in the offsets array.
-     *
-     * #### Notes
-     * If false, the returned offsets array contains just the row offsets. If
-     * true, the returned offsets array contains all column offsets for each
-     * column in the rows (i.e., it has nrows*ncols entries). Individual rows
-     * will have empty columns added or extra columns merged into the last
-     * column if they do not have exactly ncols columns.
-     */
-    columnOffsets?: boolean;
-  }
-}
 
 /**
  * Optimized row offset parsing assuming there are no quotes.
  */
 export
-function parseDSVNoQuotes(options: parseDSV.IOptions): {nrows: number, ncols: number, offsets: number[]} {
+function parseDSVNoQuotes(options: IParser.IOptions): {nrows: number, ncols: number, offsets: number[]} {
   const {
     data,
     delimiter = ',',
