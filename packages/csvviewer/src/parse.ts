@@ -329,21 +329,21 @@ function parseDSVNoQuotes(options: parseDSV.IOptions): {nrows: number, ncols: nu
   // ncols will be set automatically if it is undefined.
   let ncols = options.ncols;
   let lineDelimiterLength = lineDelimiter.length;
-  let i = startIndex;
+  let currLine = startIndex;
   let len = data.length;
   let nextLine: number;
   let col: number;
   let offsets: number[] = [];
   let nrows = 0;
   let rowString: string;
-
+  let colIndex;
 
   let lineEnd: number;
   nextLine = startIndex;
-  while (nextLine !== -1 && nrows < maxRows) {
-    offsets.push(i);
+  while (nextLine !== -1 && nrows < maxRows && currLine < len) {
+    offsets.push(currLine);
     nrows++;
-    nextLine = data.indexOf(lineDelimiter, i);
+    nextLine = data.indexOf(lineDelimiter, currLine);
     lineEnd = nextLine === -1 ? len : nextLine;
 
     if (columnOffsets === true) {
@@ -351,30 +351,30 @@ function parseDSVNoQuotes(options: parseDSV.IOptions): {nrows: number, ncols: nu
       // just indexOf our way through until we pass stop or go negative,
       // possibly overshooting the end of the line.
       col = 1;
-      rowString = data.slice(i, lineEnd);
-      i = rowString.indexOf(delimiter);
+      rowString = data.slice(currLine, lineEnd);
+      colIndex = rowString.indexOf(delimiter);
 
       if (ncols === undefined) {
-        while (i !== -1) {
-          offsets.push(startIndex + i);
+        while (colIndex !== -1) {
+          offsets.push(currLine + colIndex + 1);
           col++;
-          i = rowString.indexOf(delimiter, i + 1);
+          colIndex = rowString.indexOf(delimiter, colIndex + 1);
         }
         ncols = col;
       } else {
-        while (i !== -1 && col <= ncols) {
-          offsets.push(startIndex + i);
+        while (colIndex !== -1 && col <= ncols) {
+          offsets.push(currLine + colIndex + 1);
           col++;
-          i = rowString.indexOf(delimiter, i + 1);
+          colIndex = rowString.indexOf(delimiter, colIndex + 1);
         }
         if (col < ncols) {
           for (; col <= ncols; col++) {
-            offsets.push(nextLine);
+            offsets.push(lineEnd);
           }
         }
       }
     }
-    i = lineEnd + lineDelimiterLength;
+    currLine = lineEnd + lineDelimiterLength;
   }
 
   return {nrows, ncols: columnOffsets ? ncols : 0, offsets};
