@@ -977,7 +977,7 @@ namespace NotebookActions {
     let cells = widget.widgets;
     each(cells, (cell: Cell) => {
       if (widget.isSelectedOrActive(cell) && cell.model.type === 'code') {
-        (cell as CodeCell).inputHidden = true;
+        (cell as CodeCell).outputHidden = true;
       }
     });
     Private.handleState(widget, state);
@@ -997,7 +997,7 @@ namespace NotebookActions {
     let cells = widget.widgets;
     each(cells, (cell: Cell) => {
       if (widget.isSelectedOrActive(cell) && cell.model.type === 'code') {
-        (cell as CodeCell).inputHidden = false;
+        (cell as CodeCell).outputHidden = false;
       }
     });
     Private.handleState(widget, state);

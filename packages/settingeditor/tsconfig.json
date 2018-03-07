@@ -10,7 +10,8 @@
     "outDir": "./lib",
     "lib": [
       "ES5", "ES2015.Promise", "DOM", "ES2015.Collection", "ES2016", "ES6"
-    ]
+    ],
+    "jsx": "react"
   },
   "include": ["src/*"]
 }

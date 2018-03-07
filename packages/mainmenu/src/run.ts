@@ -84,8 +84,9 @@ namespace IRunMenu {
     runAll?: (widget: T) => Promise<void>;
 
     /**
-     * A function to restart and run all the code hosted by the widget.
+     * A function to restart and run all the code hosted by the widget, which
+     * returns a promise of whether the action was performed.
      */
-    restartAndRunAll?: (widget: T) => Promise<void>;
+    restartAndRunAll?: (widget: T) => Promise<boolean>;
   }
 }

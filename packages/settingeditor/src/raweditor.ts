@@ -30,10 +30,6 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  h, VirtualDOM
-} from '@phosphor/virtualdom';
-
-import {
   BoxLayout, Widget
 } from '@phosphor/widgets';
 
@@ -432,11 +428,10 @@ namespace Private {
   function defaultsEditor(editor: Widget): Widget {
     const widget = new Widget();
     const layout = widget.layout = new BoxLayout({ spacing: 0 });
-    const banner = new Widget({
-      node: VirtualDOM.realize(h.div(DEFAULT_TITLE))
-    });
+    const banner = new Widget();
     const bar = new Toolbar();
 
+    banner.node.innerText = DEFAULT_TITLE;
     bar.insertItem(0, 'banner', banner);
     layout.addWidget(bar);
     layout.addWidget(editor);
@@ -472,8 +467,9 @@ namespace Private {
   function userEditor(editor: Widget, toolbar: Toolbar<Widget>, inspector: Widget): Widget {
     const widget = new Widget();
     const layout = widget.layout = new BoxLayout({ spacing: 0 });
-    const banner = new Widget({ node: VirtualDOM.realize(h.div(USER_TITLE)) });
+    const banner = new Widget();
 
+    banner.node.innerText = USER_TITLE;
     toolbar.insertItem(0, 'banner', banner);
     layout.addWidget(toolbar);
     layout.addWidget(editor);

@@ -301,6 +301,9 @@ class CodeConsole extends Widget {
         // Create a new prompt cell before kernel execution to allow typeahead.
         this.newPromptCell();
         return this._execute(promptCell);
+      } else {
+        // add a newline if we shouldn't execute
+        promptCell.editor.newIndentedLine();
       }
     });
   }
@@ -327,17 +330,7 @@ class CodeConsole extends Widget {
     if (!promptCell) {
       return;
     }
-    let model = promptCell.model;
-    let editor = promptCell.editor;
-    // Insert the line break at the cursor position, and move cursor forward.
-    let pos = editor.getCursorPosition();
-    let offset = editor.getOffsetAt(pos);
-    let text = model.value.text;
-    model.value.text = text.substr(0, offset) + '\n' + text.substr(offset);
-    pos = editor.getPositionAt(offset + 1) as CodeEditor.IPosition;
-    if (pos) {
-      editor.setCursorPosition(pos);
-    }
+    promptCell.editor.newIndentedLine();
   }
 
   /**
@@ -583,7 +576,7 @@ class CodeConsole extends Widget {
       return Promise.resolve(false);
     }
     let model = promptCell.model;
-    let code = model.value.text + '\n';
+    let code = model.value.text;
     return new Promise<boolean>((resolve, reject) => {
       let timer = setTimeout(() => { resolve(true); }, timeout);
       let kernel = this.session.kernel;
@@ -599,12 +592,6 @@ class CodeConsole extends Widget {
         if (isComplete.content.status !== 'incomplete') {
           resolve(true);
           return;
-        }
-        model.value.text = code + isComplete.content.indent;
-        let editor = promptCell.editor;
-        let pos = editor.getPositionAt(model.value.text.length);
-        if (pos) {
-          editor.setCursorPosition(pos);
         }
         resolve(false);
       }).catch(() => { resolve(true); });

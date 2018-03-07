@@ -233,6 +233,11 @@
 }
 
 
+.jp-UndoIcon {
+  background-image: var(--jp-icon-undo);
+}
+
+
 .jp-UploadIcon {
   background-image: var(--jp-icon-upload);
 }

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/outputarea",
-  "version": "0.15.4",
+  "version": "0.15.6",
   "description": "JupyterLab - Notebook Output Area",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@jupyterlab/apputils": "^0.15.5",
-    "@jupyterlab/coreutils": "^1.0.9",
+    "@jupyterlab/coreutils": "^1.0.10",
     "@jupyterlab/observables": "^1.0.6",
     "@jupyterlab/rendermime": "^0.15.4",
     "@jupyterlab/rendermime-interfaces": "^1.0.6",

@@ -12,7 +12,7 @@ The ``jupyterlab/jupyterlab`` repository contains two packages:
 -  a Python package indicated by a ``setup.py`` file in the repo's root
    directory
 
-Th npm package and the Python package are both named ``jupyterlab``.
+The npm package and the Python package are both named ``jupyterlab``.
 
 See the `Contributing
 Guidelines <https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md>`__

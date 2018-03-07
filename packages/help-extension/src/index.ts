@@ -201,6 +201,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   const resourcesGroup = RESOURCES
     .map(args => ({ args, command: CommandIDs.open }));
   helpMenu.addGroup(resourcesGroup, 10);
+  helpMenu.addGroup([{ command: 'apputils:reset' }], 20);
 
   // Generate a cache of the kernel help links.
   const kernelInfoCache = new Map<string, KernelMessage.IInfoReply>();
@@ -388,7 +389,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   RESOURCES.forEach(args => {
     palette.addItem({ args, command: CommandIDs.open, category });
   });
-  palette.addItem({ command: 'apputils:clear-statedb', category });
+  palette.addItem({ command: 'apputils:reset', category });
   palette.addItem({ command: CommandIDs.launchClassic, category });
 
 }

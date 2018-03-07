@@ -33,7 +33,7 @@
     "@jupyterlab/apputils": "^0.15.5",
     "@jupyterlab/codeeditor": "^0.15.4",
     "@jupyterlab/console": "^0.15.4",
-    "@jupyterlab/coreutils": "^1.0.9",
+    "@jupyterlab/coreutils": "^1.0.10",
     "@jupyterlab/filebrowser": "^0.15.4",
     "@jupyterlab/launcher": "^0.15.5",
     "@jupyterlab/mainmenu": "^0.4.4",

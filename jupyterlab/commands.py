@@ -98,6 +98,14 @@ def ensure_dev(logger=None):
         yarn_proc = Process(['node', YARN_PATH], cwd=parent, logger=logger)
         yarn_proc.wait()
 
+    theme_packages = ['theme-light-extension', 'theme-dark-extension']
+    for theme in theme_packages:
+        base_path = pjoin(parent, 'packages', theme)
+        if not osp.exists(pjoin(base_path, 'static')):
+            yarn_proc = Process(['node', YARN_PATH, 'build:webpack'], cwd=base_path,
+                                logger=logger)
+            yarn_proc.wait()
+
     if not osp.exists(pjoin(parent, 'dev_mode', 'static')):
         yarn_proc = Process(['node', YARN_PATH, 'build'], cwd=parent,
                             logger=logger)
@@ -1187,7 +1195,7 @@ def _normalize_path(extension):
 def _read_package(target):
     """Read the package data in a given target tarball.
     """
-    tar = tarfile.open(target, "r:gz")
+    tar = tarfile.open(target, "r")
     f = tar.extractfile('package/package.json')
     data = json.loads(f.read().decode('utf8'))
     data['jupyterlab_extracted_files'] = [
@@ -1254,7 +1262,7 @@ def _tarsum(input_file):
     """
     Compute the recursive sha sum of a tar file.
     """
-    tar = tarfile.open(input_file, "r:gz")
+    tar = tarfile.open(input_file, "r")
     chunk_size = 100 * 1024
     h = hashlib.new("sha1")
 

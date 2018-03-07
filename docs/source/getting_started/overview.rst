@@ -53,7 +53,7 @@ classic Jupyter Notebook.
 Beta Series and Beyond
 ~~~~~~~~~~~~~~~~~~~~~~
 The developer API will evolve in beta releases and will stabilize in JupyterLab 1.0.
-We appreciate feedback on our `GitHub issues page <https://github.com/jupyterlab/jupyterlab/issues>`
+We appreciate feedback on our `GitHub issues page <https://github.com/jupyterlab/jupyterlab/issues>`__
 as we evolve towards a stable extension development API for JupyterLab 1.0.
 
 We plan to release JupyterLab 1.0 later in 2018.

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/notebook",
-  "version": "0.15.6",
+  "version": "0.15.7",
   "description": "JupyterLab - Notebook",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -33,7 +33,7 @@
     "@jupyterlab/apputils": "^0.15.5",
     "@jupyterlab/cells": "^0.15.4",
     "@jupyterlab/codeeditor": "^0.15.4",
-    "@jupyterlab/coreutils": "^1.0.9",
+    "@jupyterlab/coreutils": "^1.0.10",
     "@jupyterlab/docregistry": "^0.15.5",
     "@jupyterlab/observables": "^1.0.6",
     "@jupyterlab/rendermime": "^0.15.4",
