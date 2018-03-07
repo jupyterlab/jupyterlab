@@ -13,7 +13,7 @@ If you install JupyterLab on a system running JupyterHub, it will immediately be
 available at the ``/lab`` URL, but users will still be directed to the classic
 Notebook (``/tree``) by default. To change the user's default user interface to
 JupyterLab, set the following configuration option in your
-:file:`jupyterlab_config.py` file::
+:file:`jupyterhub_config.py` file::
 
     c.Spawner.default_url = '/lab'
 
