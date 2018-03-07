@@ -311,8 +311,9 @@ class DSVModel extends DataModel {
     }
 
     if (this._rowCount === 500) {
-      // Parse full file later.
-      this._delayedParse = setTimeout(() => {
+      // Parse full file later, delayed by just a bit to give the UI time to
+      // update first.
+      this._delayedParse = window.setTimeout(() => {
         let start = performance.now();
         try {
           this._computeOffsets();
@@ -328,7 +329,7 @@ class DSVModel extends DataModel {
         }
         let end = performance.now();
         console.log(`Parsed full ${this._rowCount} rows, ${this._rowCount * this._columnCount} values, in ${(end - start) / 1000}s`);
-      });
+      }, 50);
     }
   }
 
