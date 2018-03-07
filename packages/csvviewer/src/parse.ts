@@ -2,21 +2,15 @@
 // Distributed under the terms of the Modified BSD License.
 
 // Possible features to add:
-// automatically telling if there are no quotes (in which case we can probably use much faster indexOf approach)
-// Perhaps we allow quotes in a 'header row', but the search the rest of the file for quotes for faster approach
 // comment character at start of line
 // skip empty whitespace lines
 // Skip rows with empty columns.
-// preview (only parse the first N rows)
-// header row (which adjusts the row index down one)
-// error for too many/too few fields on a line. 
-// Setting newline (\n, \r, \r\n), or even better, autoguessing it.
-// Trim whitespace around delimiters (unless quoted)
+// error for too many/too few fields on a line.
+// Trim whitespace around delimiters
 // Sanity check on field size, with error if field exceeds the size.
 // Test against https://github.com/maxogden/csv-spectrum. 
 // Benchmark against https://www.npmjs.com/package/csv-parser and
 // https://www.npmjs.com/package/csv-string and fast-csv.
-// Check how fast the callback approach is compared to just getting the line offsets explicitly
 
 // TODO: should the parse take an optional array to slot values into if it is
 // given a specific number of rows and cols? This would save the offset array
@@ -43,18 +37,24 @@ function parseDSV(options: parseDSV.IOptions): {nrows: number, ncols: number, of
     startIndex = 0,
     columnOffsets = false,
     maxRows = 0xFFFFFFFF,
+    lineDelimiter = '\n\r',
+    quote = '"'
   } = options;
   // ncols will be set automatically if it is undefined.
   let ncols = options.ncols;
 
   const CH_DELIMITER = delimiter.charCodeAt(0);
-  const CH_QUOTE = 34; // "
+  const CH_QUOTE = quote.charCodeAt(0);
   const CH_LF = 10; // \n
   const CH_CR = 13; // \r
   const endIndex = data.length;
-  const endfield = new RegExp(`[${delimiter}\n\r]`, 'g');
+  const endfield = new RegExp(`[${delimiter}${lineDelimiter}]`, 'g');
 
-  const { ESCAPED, ESCAPED_FIRST_QUOTE, UNESCAPED, NEW_FIELD, NEW_ROW, CR } = STATE;
+  const { ESCAPED, ESCAPED_FIRST_QUOTE, UNESCAPED, NEW_FIELD, NEW_ROW } = STATE;
+
+  const { CR, LF, CRLF } = LINE_DELIMITER;
+
+  const lineDelimiterCode = lineDelimiter === '\r\n' ? CRLF : (lineDelimiter === '\r' ? CR : LF);
 
   // Always start off at the beginning of a row.
   let state = NEW_ROW;
@@ -117,6 +117,9 @@ function parseDSV(options: parseDSV.IOptions): {nrows: number, ncols: number, of
 
     default: break;
     }
+
+
+
     char = data.charCodeAt(i);
     switch (state) {
     case NEW_ROW:
@@ -126,10 +129,21 @@ function parseDSV(options: parseDSV.IOptions): {nrows: number, ncols: number, of
         state = ESCAPED;
         break;
       case CH_CR:
-        state = CR;
+        if (lineDelimiterCode === CR) {
+          state = NEW_ROW;
+        } else if (lineDelimiterCode === CRLF && data.charCodeAt(i + 1) === CH_LF) {
+          i++;
+          state = NEW_ROW;
+        } else {
+          throw 'carriage return found, but not as part of a row delimiter';
+        }
         break;
       case CH_LF:
-        state = NEW_ROW;
+        if (lineDelimiterCode === LF) {
+          state = NEW_ROW;
+        } else {
+          throw 'line feed found, but line delimiter starts with a carriage return';
+        }
         break;
       case CH_DELIMITER:
         state = NEW_FIELD;
@@ -142,17 +156,11 @@ function parseDSV(options: parseDSV.IOptions): {nrows: number, ncols: number, of
 
     case ESCAPED:
       // skip ahead until we see another quote
-      i = data.indexOf('"', i);
+      i = data.indexOf(quote, i);
       if (i < 0) {
         throw 'mismatched quote';
       }
-      char = data.charCodeAt(i);
-      switch (char) {
-      case CH_QUOTE:
-        state = ESCAPED_FIRST_QUOTE;
-        break;
-      default: continue;
-      }
+      state = ESCAPED_FIRST_QUOTE;
       break;
 
     case ESCAPED_FIRST_QUOTE:
@@ -163,11 +171,22 @@ function parseDSV(options: parseDSV.IOptions): {nrows: number, ncols: number, of
       case CH_DELIMITER:
         state = NEW_FIELD;
         break;
-      case CH_CR: // line ending \r\n
-        state = CR;
+      case CH_CR:
+        if (lineDelimiterCode === CR) {
+          state = NEW_ROW;
+        } else if (lineDelimiterCode === CRLF && data.charCodeAt(i + 1) === CH_LF) {
+          i++;
+          state = NEW_ROW;
+        } else {
+          throw 'carriage return found, but not as part of a row delimiter';
+        }
         break;
-      case CH_LF: // line ending \n
-        state = NEW_ROW;
+      case CH_LF:
+        if (lineDelimiterCode === LF) {
+          state = NEW_ROW;
+        } else {
+          throw 'line feed found, but line delimiter starts with a carriage return';
+        }
         break;
       default:
         throw 'quote in escaped field not followed by quote, delimiter, or carriage return';
@@ -199,24 +218,26 @@ function parseDSV(options: parseDSV.IOptions): {nrows: number, ncols: number, of
       case CH_DELIMITER:
         state = NEW_FIELD;
         break;
-      case CH_CR: // line ending \r\n
-        state = CR;
+
+      case CH_CR:
+        if (lineDelimiterCode === CR) {
+          state = NEW_ROW;
+        } else if (lineDelimiterCode === CRLF && data.charCodeAt(i + 1) === CH_LF) {
+          i++;
+          state = NEW_ROW;
+        } else {
+          throw 'carriage return found, but not as part of a row delimiter';
+        }
         break;
-      case CH_LF: // line ending \n
-        state = NEW_ROW;
+      case CH_LF:
+        if (lineDelimiterCode === LF) {
+          state = NEW_ROW;
+        } else {
+          throw 'line feed found, but line delimiter starts with a carriage return';
+        }
         break;
 
       default: continue;
-      }
-      break;
-
-    case CR:
-      switch (char) {
-      case CH_LF:
-        state = NEW_ROW;
-        break;
-      default:
-        throw 'CR not followed by newline';
       }
       break;
 
@@ -238,7 +259,7 @@ enum STATE {
 }
 
 export
-enum NEWLINE {
+enum LINE_DELIMITER {
   CR,
   CRLF,
   LF
@@ -246,9 +267,6 @@ enum NEWLINE {
 
 export
 namespace parseDSV {
-  export
-  type ICallback = (i: number, data: string, state: STATE) => void | boolean;
-
   export
   interface IOptions {
     /**
@@ -267,15 +285,15 @@ namespace parseDSV {
     lineDelimiter?: string;
 
     /**
+     * The quote character for quoting fields. Defaults to the double quote (").
+     */
+    quote?: string;
+
+    /**
      * Whether to use a regex to shortcut processing. If false, use a loop-based
      * shortcut which sometimes is faster. Defaults to false.
      */
     regex?: boolean;
-
-    /**
-     * Callbacks for each state.
-     */
-    // callbacks?: {[key: number]: ICallback};
 
     /**
      * The starting index in the string for processing. Defaults to 0. This must
