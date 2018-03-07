@@ -150,7 +150,7 @@ describe('@jupyterlab/notebook', () => {
           done();
         });
         panel.session.changeKernel({ name: 'echo' }).catch(done);
-        panel.context.initialize(true).catch(done);
+        (panel.context as any).initialize(true).catch(done);
       });
 
     });
