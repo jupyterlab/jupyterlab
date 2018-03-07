@@ -46,7 +46,7 @@ class DSVModel extends DataModel {
       rowDelimiter = undefined,
       quote = '"',
       quoteParser = undefined,
-      // header = false,
+      header = true,
     } = options;
     this._data = data;
     this._delimiter = delimiter;
@@ -83,6 +83,16 @@ class DSVModel extends DataModel {
     let end = performance.now();
 
     console.log(`Parsed initial ${this._rowCount} rows, ${this._rowCount * this._columnCount} values, in ${(end - start) / 1000}s`);
+
+    if (header === true) {
+      let h = [];
+      for (let c = 0; c < this._columnCount; c++) {
+        h.push(this._getField(0, c));
+      }
+      this._header = h;
+    }
+
+
   }
 
   /**
@@ -94,7 +104,11 @@ class DSVModel extends DataModel {
    */
   rowCount(region: DataModel.RowRegion): number {
     if (region === 'body') {
-      return this._rowCount;
+      if (this._header.length === 0) {
+        return this._rowCount;
+      } else {
+        return this._rowCount - 1;
+      }
     }
     return 1;  // TODO multiple column-header rows?
   }
@@ -131,10 +145,18 @@ class DSVModel extends DataModel {
     // Look up the field and value for the region.
     switch (region) {
     case 'body':
-      value = this._getField(row, column);
+      if (this._header.length === 0) {
+        value = this._getField(row, column);
+      } else {
+        value = this._getField(row + 1, column);
+      }
       break;
     case 'column-header':
-      value = (column + 1).toString();
+      if (this._header.length === 0) {
+        value = (column + 1).toString();
+      } else {
+        value = this._header[column];
+      }
       break;
     case 'row-header':
       value = (row + 1).toString();
@@ -160,11 +182,10 @@ class DSVModel extends DataModel {
     let {ncols} = PARSERS[this._parser]({data: this._data, delimiter: this._delimiter, columnOffsets: true, maxRows: 1});
 
     // If the full column offsets array is small enough, cache all of them.
+    this._rowOffsets = Uint32Array.from(offsets);
     if (nrows * ncols <= this._columnOffsetsMaxSize) {
-      this._rowOffsets = new Uint32Array(0);
       this._columnOffsets = new Uint32Array(ncols * nrows);
     } else {
-      this._rowOffsets = Uint32Array.from(offsets);
       this._columnOffsets = new Uint32Array(ncols * this._maxCacheGet);
     }
 
@@ -174,16 +195,21 @@ class DSVModel extends DataModel {
     this._columnCount = ncols;
     this._rowCount = nrows;
     if (oldRowCount !== undefined && oldRowCount < nrows) {
+      let firstIndex = oldRowCount + 1;
+      if (this._header.length > 0) {
+        firstIndex -= 1;
+      }
       this.emitChanged({
-        type: 'rows-inserted',
-        region: 'body',
-        index: oldRowCount + 1,
-        span: nrows - oldRowCount
-      });
+      type: 'rows-inserted',
+      region: 'body',
+      index: firstIndex,
+      span: nrows - oldRowCount
+    });
     }
   }
 
   _getOffsetIndex(row: number, column: number) {
+
     // check to see if row *should* be in the cache, based on the cache size.
     let rowIndex = (row - this._columnOffsetsStartingRow) * this._columnCount;
     if (rowIndex < 0 || rowIndex > this._columnOffsets.length) {
@@ -269,13 +295,14 @@ class DSVModel extends DataModel {
       clearTimeout(this._delayedParse);
       this._delayedParse = 0;
     }
+
     // Initially parse the first 500 rows to get the first screen up quick.
     try {
       this._computeOffsets(500);
     } catch (e) {
       if (this._parser === 'quotes') {
         console.warn(e);
-        console.log('Switching to noquotes CSV parser')
+        console.log('Switching to noquotes CSV parser');
         this._parser = 'noquotes';
         this._computeOffsets(500);
       } else {
@@ -292,7 +319,7 @@ class DSVModel extends DataModel {
         } catch (e) {
           if (this._parser === 'quotes') {
             console.warn(e);
-            console.log('Switching to noquotes CSV parser')
+            console.log('Switching to noquotes CSV parser');
             this._parser = 'noquotes';
             this._computeOffsets();
           } else {
@@ -349,6 +376,7 @@ class DSVModel extends DataModel {
 
   // Whether to use the parser that understands quotes or not.
   private _parser: 'quotes' | 'noquotes';
+  private _header: string[] = [];
 }
 
 
