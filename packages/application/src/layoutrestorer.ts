@@ -168,6 +168,7 @@ class LayoutRestorer implements ILayoutRestorer {
     this._registry = options.registry;
     this._state = options.state;
     this._first = options.first;
+
     this._first
       .then(() => { this._firstDone = true; })
       .then(() => Promise.all(this._promises))
@@ -283,6 +284,8 @@ class LayoutRestorer implements ILayoutRestorer {
       registry: this._registry,
       state: this._state,
       when: when ? [first].concat(when) : first
+    }).catch(error => {
+      console.error(error);
     });
 
     this._promises.push(promise);
