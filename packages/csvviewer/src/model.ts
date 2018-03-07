@@ -10,17 +10,13 @@ import {
 } from './parse';
 
 /*
+Possible ideas for further implementation:
 
-TODO:
-
-- [ ] Have a UI show that only initial parsing has been done. Perhaps a spinner in the toolbar.
-- [ ] When getting the cache lines, look forward to see how many rows are invalid before just getting the cache line size
-- [ ] introduce a header mode:
-  - cache the header separately
-  - check the *rest* of the file for quotes to see if the quoted parser is needed - often the first row is quoted, but nothing else is.
-  - be careful about the row indices shifting by one in various parts of the code.
+- [ ] Instead of parsing the entire file (and freezing the UI), parse just a chunk at a time (say every 10k lines?).
+- [ ] Show a spinner or something visible when we are doing delayed parsing.
+- [ ] The cache right now handles scrolling down great - it gets the next several hundred rows. However, scrolling up causes lots of cache misses - each new row causes a flush of the cache. When invalidating an entire cache, we should put the requested row in middle of the cache (adjusting for rows at the beginning or end). When populating a cache, we should retrieve rows both above and below the requested row.
+- [ ] When we have a header, and we are guessing the parser to use, try checking just the part of the file *after* the header line for quotes. I think often a first header row is quoted, but the rest of the file is not and can be parsed much faster.
 - [ ] autdetect the delimiter (look for comma, tab, semicolon in first line. If more than one found, parse first line with comma, tab, semicolon delimiters. One with most fields wins).
-- [ ] Tab-delimited files don't work right now, since they appear to have unmatched quotes when the delimiter is ',', so they cause an error that never shows the delimiter picker. If an error fails, just parse with the non-quoted version to get something on the page.
 */
 
 const PARSERS: {[key: string]: IParser} = {
@@ -209,9 +205,9 @@ class DSVModel extends DataModel {
   }
 
   _getOffsetIndex(row: number, column: number) {
-
     // check to see if row *should* be in the cache, based on the cache size.
-    let rowIndex = (row - this._columnOffsetsStartingRow) * this._columnCount;
+    const ncols = this._columnCount;
+    let rowIndex = (row - this._columnOffsetsStartingRow) * ncols;
     if (rowIndex < 0 || rowIndex > this._columnOffsets.length) {
       // Row shouldn't be in the cache, invalidate the entire cache by setting
       // all row indices to 0 (perhaps faster to fill all with zeros?), set the
@@ -224,9 +220,11 @@ class DSVModel extends DataModel {
     if (this._columnOffsets[rowIndex] === 0xFFFFFFFF) {
       // The row is not in the cache yet.
 
-      // Figure out how many rows we need.
-      let rowsLeft = (this._columnOffsets.length - rowIndex) / this._columnCount;
-      let maxRows = Math.min(this._maxCacheGet, rowsLeft);
+      // Figure out how many rows below us are also invalid.
+      let maxRows = 1;
+      while (maxRows <= this._maxCacheGet && this._columnOffsets[rowIndex + maxRows * ncols] === 0xFFFFFF) {
+        maxRows++;
+      }
 
       // Parse the data to get the column offsets.
       let {offsets} = PARSERS[this._parser]({
@@ -234,7 +232,7 @@ class DSVModel extends DataModel {
         delimiter: this._delimiter,
         columnOffsets: true,
         maxRows: maxRows,
-        ncols: this._columnCount,
+        ncols: ncols,
         startIndex: this._rowOffsets[row]
       });
 
