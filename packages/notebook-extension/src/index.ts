@@ -251,7 +251,7 @@ namespace CommandIDs {
   const disableOutputScrolling = 'notebook:disable-output-scrolling';
 
   export
-  const persistOutputsCollapsed = 'notebook:persist-outputs-collapsed';
+  const saveWithView = 'notebook:save-with-view';
 }
 
 
@@ -1496,13 +1496,14 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     },
     isEnabled
   });
-  commands.addCommand(CommandIDs.persistOutputsCollapsed, {
-    label: 'Persist Whether Outputs are Collapsed',
+  commands.addCommand(CommandIDs.saveWithView, {
+    label: 'Save Notebook with View State',
     execute: args => {
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.persistOutputsCollapsed(current.notebook);
+        NotebookActions.persistOutputsCollapsed(current.notebook);
+        app.commands.execute('docmanager:save');
       }
     },
     isEnabled
@@ -1533,7 +1534,8 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.reconnectToKernel,
     CommandIDs.createConsole,
     CommandIDs.closeAndShutdown,
-    CommandIDs.trust
+    CommandIDs.trust,
+    CommandIDs.saveWithView
   ].forEach(command => { palette.addItem({ command, category }); });
 
   EXPORT_TO_FORMATS.forEach(exportToFormat => {
@@ -1584,7 +1586,6 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.showAllOutputs,
     CommandIDs.enableOutputScrolling,
     CommandIDs.disableOutputScrolling,
-    CommandIDs.persistOutputsCollapsed
   ].forEach(command => { palette.addItem({ command, category }); });
 }
 
@@ -1637,6 +1638,18 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
       });
     }
   } as IFileMenu.ICloseAndCleaner<NotebookPanel>);
+
+  // Add a save with view command to the file menu.
+  mainMenu.fileMenu.persistAndSavers.add({
+    tracker,
+    action: 'with View State',
+    name: 'Notebook',
+    persistAndSave: (current: NotebookPanel) => {
+      NotebookActions.persistOutputsCollapsed(current.notebook);
+      app.commands.execute('docmanager:save');
+      return Promise.resolve();
+    }
+  } as IFileMenu.IPersistAndSave<NotebookPanel>);
 
   // Add a notebook group to the File menu.
   let exportTo = new Menu({ commands } );
@@ -1707,10 +1720,6 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   ].map(command => { return { command }; });
   mainMenu.viewMenu.addGroup(expandGroup, 11);
 
-  const persistGroup = [
-    CommandIDs.persistOutputsCollapsed
-  ].map(command => { return { command }; });
-  mainMenu.viewMenu.addGroup(persistGroup, 12);
 
   // Add an IEditorViewer to the application view menu
   mainMenu.viewMenu.editorViewers.add({
