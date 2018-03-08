@@ -783,7 +783,7 @@ namespace CodeCell {
     model.trusted = true;
 
     return OutputArea.execute(code, cell.outputArea, session).then(msg => {
-      model.executionCount = msg.content.execution_count;
+      model.lastReplyMsg.emit(msg);
       return msg;
     }).catch(e => {
       if (e.message === 'Canceled') {

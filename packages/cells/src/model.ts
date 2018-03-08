@@ -27,6 +27,10 @@ import {
   IOutputAreaModel, OutputAreaModel
 } from '@jupyterlab/outputarea';
 
+import {
+  KernelMessage
+} from '@jupyterlab/services';
+
 
 /**
  * The definition of a model object for a cell.
@@ -87,6 +91,11 @@ interface ICodeCellModel extends ICellModel {
    * The code cell's prompt number. Will be null if the cell has not been run.
    */
   executionCount: nbformat.ExecutionCount;
+
+  /**
+   * The last kernel reply message the code cell recieved.
+   */
+  lastReplyMsg: Signal<ICodeCellModel, KernelMessage.IExecuteReplyMsg>;
 
   /**
    * The cell outputs.
@@ -319,6 +328,12 @@ class MarkdownCellModel extends CellModel {
  */
 export
 class CodeCellModel extends CellModel implements ICodeCellModel {
+
+  /**
+   * The last kernel reply message the cell recieved.
+   */
+  lastReplyMsg: Signal<ICodeCellModel, KernelMessage.IExecuteReplyMsg>;
+
   /**
    * Construct a new code cell with optional original cell content.
    */
@@ -340,6 +355,11 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
       }
     }
     executionCount.changed.connect(this._onExecutionCountChanged, this);
+
+    this.lastReplyMsg = new Signal(this);
+    this.lastReplyMsg.connect((_, msg) => {
+      this.executionCount = msg.content.execution_count;
+    });
 
     this._outputs = factory.createOutputArea({
       trusted,
