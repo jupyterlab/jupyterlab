@@ -44,6 +44,7 @@ module.exports = {
         exclude: path.join(process.cwd(), 'node_modules')
       },
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },
+      { test: /\.csv$/, use: 'raw-loader' },
       { test: /\.(json|ipynb)$/, use: 'json-loader' },
       { test: /\.html$/, use: 'file-loader' },
       { test: /\.md$/, use: 'raw-loader' },

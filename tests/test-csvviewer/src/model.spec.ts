@@ -7,6 +7,8 @@ import {
   DSVModel
 } from '@jupyterlab/csvviewer';
 
+let empty = require('csv-spectrum/empty.csv');
+
 describe('csvviewer/model', () => {
 
   describe('DSVModel', () => {
@@ -21,6 +23,7 @@ describe('csvviewer/model', () => {
         expect(d.columnCount('body')).to.be(3);
         expect([0, 1, 2].map(i => d.data('column-header', 0, i))).to.eql(['1', '2', '3']);
         expect([0, 1, 2].map(i => d.data('body', 0, i))).to.eql(['4', '5', '6']);
+        console.log(empty);
       });
 
     });
