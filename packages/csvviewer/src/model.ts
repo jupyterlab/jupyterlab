@@ -169,6 +169,29 @@ class DSVModel extends DataModel implements IDisposable {
   }
 
   /**
+   * Whether this model has been disposed.
+   */
+  get isDisposed() {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose the resources held by this model.
+   */
+  dispose() {
+    if (this._isDisposed) {
+      return;
+    }
+    if (this._delayedParse !== 0) {
+      clearTimeout(this._delayedParse);
+      this._delayedParse = 0;
+    }
+    this._columnOffsets = null;
+    this._data = null;
+    this._rowOffsets = null;
+  }
+
+  /**
    * Compute the row offsets and initialize the column offset cache.
    */
   private _computeOffsets(maxRows = 4294967295) {
@@ -236,64 +259,13 @@ class DSVModel extends DataModel implements IDisposable {
   }
 
   /**
-   * Get the index in the data string for the first character of a row and
-   * column.
-   *
-   * @param row - The row of the data item.
-   * @param column - The column of the data item.
-   * @returns - The index into the data string where the data item starts.
-   */
-  _getOffsetIndex(row: number, column: number): number {
-    // Declare local variables.
-    const ncols = this._columnCount;
-
-    // Check to see if row *should* be in the cache, based on the cache size.
-    let rowIndex = (row - this._columnOffsetsStartingRow) * ncols;
-    if (rowIndex < 0 || rowIndex > this._columnOffsets.length) {
-      // Row isn't in the cache, so we invalidate the entire cache and set up
-      // the cache to hold the requested row.
-      this._columnOffsets.fill(0xFFFFFFFF);
-      this._columnOffsetsStartingRow = row;
-      rowIndex = 0;
-    }
-
-    // Check to see if we need to fetch the row data into the cache.
-    if (this._columnOffsets[rowIndex] === 0xFFFFFFFF) {
-      // Figure out how many rows below us also need to be fetched.
-      let maxRows = 1;
-      while (maxRows <= this._maxCacheGet && this._columnOffsets[rowIndex + maxRows * ncols] === 0xFFFFFF) {
-        maxRows++;
-      }
-
-      // Parse the data to get the column offsets.
-      let {offsets} = PARSERS[this._parser]({
-        data: this._data,
-        delimiter: this._delimiter,
-        rowDelimiter: this._rowDelimiter,
-        columnOffsets: true,
-        maxRows: maxRows,
-        ncols: ncols,
-        startIndex: this._rowOffsets[row]
-      });
-
-      // Copy results to the cache.
-      for (let i = 0; i < offsets.length; i++) {
-        this._columnOffsets[rowIndex + i] = offsets[i];
-      }
-    }
-
-    // Return the offset index from cache.
-    return this._columnOffsets[rowIndex + column];
-  }
-
-  /**
    * Get the parsed string field for a row and column.
    *
    * @param row - The row number of the data item.
    * @param column - The column number of the data item.
    * @returns The parsed string for the data item.
    */
-  _getField(row: number, column: number) {
+  private _getField(row: number, column: number) {
     // Declare local variables.
     let value: string;
     let nextIndex;
@@ -360,6 +332,57 @@ class DSVModel extends DataModel implements IDisposable {
   }
 
   /**
+   * Get the index in the data string for the first character of a row and
+   * column.
+   *
+   * @param row - The row of the data item.
+   * @param column - The column of the data item.
+   * @returns - The index into the data string where the data item starts.
+   */
+  private _getOffsetIndex(row: number, column: number): number {
+    // Declare local variables.
+    const ncols = this._columnCount;
+
+    // Check to see if row *should* be in the cache, based on the cache size.
+    let rowIndex = (row - this._columnOffsetsStartingRow) * ncols;
+    if (rowIndex < 0 || rowIndex > this._columnOffsets.length) {
+      // Row isn't in the cache, so we invalidate the entire cache and set up
+      // the cache to hold the requested row.
+      this._columnOffsets.fill(0xFFFFFFFF);
+      this._columnOffsetsStartingRow = row;
+      rowIndex = 0;
+    }
+
+    // Check to see if we need to fetch the row data into the cache.
+    if (this._columnOffsets[rowIndex] === 0xFFFFFFFF) {
+      // Figure out how many rows below us also need to be fetched.
+      let maxRows = 1;
+      while (maxRows <= this._maxCacheGet && this._columnOffsets[rowIndex + maxRows * ncols] === 0xFFFFFF) {
+        maxRows++;
+      }
+
+      // Parse the data to get the column offsets.
+      let {offsets} = PARSERS[this._parser]({
+        data: this._data,
+        delimiter: this._delimiter,
+        rowDelimiter: this._rowDelimiter,
+        columnOffsets: true,
+        maxRows: maxRows,
+        ncols: ncols,
+        startIndex: this._rowOffsets[row]
+      });
+
+      // Copy results to the cache.
+      for (let i = 0; i < offsets.length; i++) {
+        this._columnOffsets[rowIndex + i] = offsets[i];
+      }
+    }
+
+    // Return the offset index from cache.
+    return this._columnOffsets[rowIndex + column];
+  }
+
+  /**
    * Parse the data string asynchronously.
    *
    * #### Notes
@@ -410,29 +433,6 @@ class DSVModel extends DataModel implements IDisposable {
         }
       }
     }, 50);
-  }
-
-  /**
-   * Whether this model has been disposed.
-   */
-  get isDisposed() {
-    return this._isDisposed;
-  }
-
-  /**
-   * Dispose the resources held by this model.
-   */
-  dispose() {
-    if (this._isDisposed) {
-      return;
-    }
-    if (this._delayedParse !== 0) {
-      clearTimeout(this._delayedParse);
-      this._delayedParse = 0;
-    }
-    this._columnOffsets = null;
-    this._data = null;
-    this._rowOffsets = null;
   }
 
   // Parser settings
