@@ -16,12 +16,12 @@ import {
 /*
 Possible ideas for further implementation:
 
-- Instead of parsing the entire file (and freezing the UI), parse just a chunk at a time (say every 10k lines?).
+- Instead of parsing the entire file (and freezing the UI), parse just a chunk at a time (say every 10k rows?).
 - Show a spinner or something visible when we are doing delayed parsing.
 - The cache right now handles scrolling down great - it gets the next several hundred rows. However, scrolling up causes lots of cache misses - each new row causes a flush of the cache. When invalidating an entire cache, we should put the requested row in middle of the cache (adjusting for rows at the beginning or end). When populating a cache, we should retrieve rows both above and below the requested row.
-- When we have a header, and we are guessing the parser to use, try checking just the part of the file *after* the header line for quotes. I think often a first header row is quoted, but the rest of the file is not and can be parsed much faster.
-- autdetect the delimiter (look for comma, tab, semicolon in first line. If more than one found, parse first line with comma, tab, semicolon delimiters. One with most fields wins).
-- Toolbar buttons to control the line delimiter, the parsing engine (quoted/not quoted), the quote character, etc.
+- When we have a header, and we are guessing the parser to use, try checking just the part of the file *after* the header row for quotes. I think often a first header row is quoted, but the rest of the file is not and can be parsed much faster.
+- autdetect the delimiter (look for comma, tab, semicolon in first line. If more than one found, parse first row with comma, tab, semicolon delimiters. One with most fields wins).
+- Toolbar buttons to control the row delimiter, the parsing engine (quoted/not quoted), the quote character, etc.
 */
 
 /**
@@ -173,10 +173,22 @@ class DSVModel extends DataModel implements IDisposable {
    */
   private _computeOffsets(maxRows = 4294967295) {
     // Parse the data up to the number of rows requested.
-    let {nrows, offsets} = PARSERS[this._parser]({data: this._data, delimiter: this._delimiter, columnOffsets: false, maxRows});
+    let {nrows, offsets} = PARSERS[this._parser]({
+      data: this._data,
+      delimiter: this._delimiter,
+      rowDelimiter: this._rowDelimiter,
+      columnOffsets: false,
+      maxRows,
+    });
 
     // Get number of columns in first row
-    let {ncols} = PARSERS[this._parser]({data: this._data, delimiter: this._delimiter, columnOffsets: true, maxRows: 1});
+    let {ncols} = PARSERS[this._parser]({
+      data: this._data,
+      delimiter: this._delimiter,
+      rowDelimiter: this._rowDelimiter,
+      columnOffsets: true,
+      maxRows: 1
+    });
 
     // Store the row offsets.
     this._rowOffsets = Uint32Array.from(offsets);
@@ -257,6 +269,7 @@ class DSVModel extends DataModel implements IDisposable {
       let {offsets} = PARSERS[this._parser]({
         data: this._data,
         delimiter: this._delimiter,
+        rowDelimiter: this._rowDelimiter,
         columnOffsets: true,
         maxRows: maxRows,
         ncols: ncols,
@@ -452,7 +465,7 @@ class DSVModel extends DataModel implements IDisposable {
    */
   private _columnOffsetsStartingRow: number;
   /**
-   * The maximum number of lines to parse when there is a cache miss.
+   * The maximum number of rows to parse when there is a cache miss.
    */
   private _maxCacheGet: number = 1000;
   /**

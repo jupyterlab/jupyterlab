@@ -11,7 +11,7 @@ Possible options to add to the parser:
 - Logging an error for too many or too few fields on a line
 - Ignore whitespace around delimiters
 - Sanity check on field size, with an error if the field exceeds the size
-- Tests against https://github.com/maxogden/csv-spectrum.
+- Tests against https://github.com/maxogden/csv-spectrum
 - Benchmark against https://www.npmjs.com/package/csv-parser and https://www.npmjs.com/package/csv-string and fast-csv.
 
 */
@@ -58,9 +58,9 @@ namespace IParser {
     delimiter?: string;
 
     /**
-     * The line delimiter to use. Defaults to '\r\n'.
+     * The row delimiter to use. Defaults to '\r\n'.
      */
-    lineDelimiter?: string;
+    rowDelimiter?: string;
 
     /**
      * The quote character for quoting fields. Defaults to the double quote (").
@@ -137,13 +137,12 @@ enum STATE {
   UNQUOTED_FIELD,
   NEW_FIELD,
   NEW_ROW,
-  CR
 }
 
 /**
- * Possible line delimiters for the parser.
+ * Possible row delimiters for the parser.
  */
-enum LINE_DELIMITER {
+enum ROW_DELIMITER {
   CR,
   CRLF,
   LF
@@ -166,7 +165,7 @@ function parseDSV(options: IParser.IOptions): IParser.IResults {
     delimiter = ',',
     startIndex = 0,
     maxRows = 0xFFFFFFFF,
-    lineDelimiter = '\n\r',
+    rowDelimiter = '\r\n',
     quote = '"',
     regex = false,
   } = options;
@@ -184,10 +183,10 @@ function parseDSV(options: IParser.IOptions): IParser.IResults {
   const CH_LF = 10; // \n
   const CH_CR = 13; // \r
   const endIndex = data.length;
-  const endfield = new RegExp(`[${delimiter}${lineDelimiter}]`, 'g');
+  const endfield = new RegExp(`[${delimiter}${rowDelimiter}]`, 'g');
   const { QUOTED_FIELD, QUOTED_FIELD_QUOTE, UNQUOTED_FIELD, NEW_FIELD, NEW_ROW } = STATE;
-  const { CR, LF, CRLF } = LINE_DELIMITER;
-  const lineDelimiterCode = lineDelimiter === '\r\n' ? CRLF : (lineDelimiter === '\r' ? CR : LF);
+  const { CR, LF, CRLF } = ROW_DELIMITER;
+  const rowDelimiterCode = (rowDelimiter === '\r\n' ? CRLF : (rowDelimiter === '\r' ? CR : LF));
 
   // Always start off at the beginning of a row.
   let state = NEW_ROW;
@@ -270,21 +269,21 @@ function parseDSV(options: IParser.IOptions): IParser.IResults {
 
       // A row delimiter means we are immediately starting a new row.
       case CH_CR:
-        if (lineDelimiterCode === CR) {
+        if (rowDelimiterCode === CR) {
           state = NEW_ROW;
-        } else if (lineDelimiterCode === CRLF && data.charCodeAt(i + 1) === CH_LF) {
+        } else if (rowDelimiterCode === CRLF && data.charCodeAt(i + 1) === CH_LF) {
           // If we see an expected \r\n, then increment past the \n and start the new row.
           i++;
           state = NEW_ROW;
         } else {
-          throw `row ${nrows}, column ${col}: carriage return found, but not as part of a row delimiter`;
+          throw `string index ${i} (in row ${nrows}, column ${col}): carriage return found, but not as part of a row delimiter C ${ data.charCodeAt(i + 1)}`;
         }
         break;
       case CH_LF:
-        if (lineDelimiterCode === LF) {
+        if (rowDelimiterCode === LF) {
           state = NEW_ROW;
         } else {
-          throw `row ${nrows}, column ${col}: line feed found, but line delimiter starts with a carriage return`;
+          throw `string index ${i} (in row ${nrows}, column ${col}): line feed found, but row delimiter starts with a carriage return`;
         }
         break;
 
@@ -306,7 +305,7 @@ function parseDSV(options: IParser.IOptions): IParser.IResults {
       // field or starts an escaped quote.
       i = data.indexOf(quote, i);
       if (i < 0) {
-        throw `row ${nrows}, column ${col}: mismatched quote`;
+        throw `string index ${i} (in row ${nrows}, column ${col}): mismatched quote`;
       }
       state = QUOTED_FIELD_QUOTE;
       break;
@@ -327,25 +326,25 @@ function parseDSV(options: IParser.IOptions): IParser.IResults {
         state = NEW_FIELD;
         break;
       case CH_CR:
-        if (lineDelimiterCode === CR) {
+        if (rowDelimiterCode === CR) {
           state = NEW_ROW;
-        } else if (lineDelimiterCode === CRLF && data.charCodeAt(i + 1) === CH_LF) {
+        } else if (rowDelimiterCode === CRLF && data.charCodeAt(i + 1) === CH_LF) {
           i++;
           state = NEW_ROW;
         } else {
-          throw `row ${nrows}, column ${col}: carriage return found, but not as part of a row delimiter`;
+          throw `string index ${i} (in row ${nrows}, column ${col}): carriage return found, but not as part of a row delimiter - A ${ data.charCodeAt(i + 1)}`;
         }
         break;
       case CH_LF:
-        if (lineDelimiterCode === LF) {
+        if (rowDelimiterCode === LF) {
           state = NEW_ROW;
         } else {
-          throw `row ${nrows}, column ${col}: line feed found, but line delimiter starts with a carriage return`;
+          throw `string index ${i} (in row ${nrows}, column ${col}): line feed found at index ${i}, but row delimiter starts with a carriage return`;
         }
         break;
 
       default:
-        throw `row ${nrows}, column ${col}: quote in escaped field not followed by quote, row delimiter, line delimiter`;
+        throw `string index ${i} (in row ${nrows}, column ${col}): quote in escaped field not followed by quote, delimiter, or row delimiter`;
       }
       break;
 
@@ -382,20 +381,20 @@ function parseDSV(options: IParser.IOptions): IParser.IResults {
 
       // A row delimiter means we are starting a new row.
       case CH_CR:
-        if (lineDelimiterCode === CR) {
+        if (rowDelimiterCode === CR) {
           state = NEW_ROW;
-        } else if (lineDelimiterCode === CRLF && data.charCodeAt(i + 1) === CH_LF) {
+        } else if (rowDelimiterCode === CRLF && data.charCodeAt(i + 1) === CH_LF) {
           i++;
           state = NEW_ROW;
         } else {
-          throw `row ${nrows}, column ${col}: carriage return found, but not as part of a row delimiter`;
+          throw `string index ${i} (in row ${nrows}, column ${col}): carriage return found, but not as part of a row delimiter B De ${rowDelimiterCode} ${ data.charCodeAt(i + 1)}`;
         }
         break;
       case CH_LF:
-        if (lineDelimiterCode === LF) {
+        if (rowDelimiterCode === LF) {
           state = NEW_ROW;
         } else {
-          throw `row ${nrows}, column ${col}: line feed found, but line delimiter starts with a carriage return`;
+          throw `string index ${i} (in row ${nrows}, column ${col}): line feed found, but row delimiter starts with a carriage return`;
         }
         break;
 
@@ -407,7 +406,7 @@ function parseDSV(options: IParser.IOptions): IParser.IResults {
     // We should never reach this point since the parser state is handled above,
     // so throw an error if we do.
     default:
-      throw `row ${nrows}, column ${col}: state not recognized`;
+      throw `string index ${i} (in row ${nrows}, column ${col}): state not recognized`;
     }
   }
 
@@ -434,7 +433,7 @@ function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
     data,
     columnOffsets,
     delimiter = ',',
-    lineDelimiter = '\n',
+    rowDelimiter = '\r\n',
     startIndex = 0,
     maxRows = 0xFFFFFFFF,
   } = options;
@@ -447,47 +446,47 @@ function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
   let nrows = 0;
 
   // Set up various state variables.
-  let lineDelimiterLength = lineDelimiter.length;
-  let currLine = startIndex;
+  let rowDelimiterLength = rowDelimiter.length;
+  let currRow = startIndex;
   let len = data.length;
-  let nextLine: number;
+  let nextRow: number;
   let col: number;
   let rowString: string;
   let colIndex: number;
 
-  // The end of the current line.
-  let lineEnd: number;
+  // The end of the current row.
+  let rowEnd: number;
 
   // Start parsing at the start index.
-  nextLine = startIndex;
+  nextRow = startIndex;
 
-  // Loop through lines until we run out of data or we've reached maxRows.
-  while (nextLine !== -1 && nrows < maxRows && currLine < len) {
-    // Store the offset for the beginning of the line and increment the rows.
-    offsets.push(currLine);
+  // Loop through rows until we run out of data or we've reached maxRows.
+  while (nextRow !== -1 && nrows < maxRows && currRow < len) {
+    // Store the offset for the beginning of the row and increment the rows.
+    offsets.push(currRow);
     nrows++;
 
-    // Find the next line delimiter.
-    nextLine = data.indexOf(lineDelimiter, currLine);
+    // Find the next row delimiter.
+    nextRow = data.indexOf(rowDelimiter, currRow);
 
-    // If the next line delimiter is not found, set the end of the line to the
+    // If the next row delimiter is not found, set the end of the row to the
     // end of the data string.
-    lineEnd = nextLine === -1 ? len : nextLine;
+    rowEnd = nextRow === -1 ? len : nextRow;
 
     // If we are returning column offsets, push them onto the array.
     if (columnOffsets === true) {
-      // Find the next field delimiter. We slice the current line out so that
+      // Find the next field delimiter. We slice the current row out so that
       // the indexOf will stop at the end of the row. It may possibly be faster
       // to just use a loop to check each character.
       col = 1;
-      rowString = data.slice(currLine, lineEnd);
+      rowString = data.slice(currRow, rowEnd);
       colIndex = rowString.indexOf(delimiter);
 
       if (ncols === undefined) {
         // If we don't know how many columns we need, loop through and find all
         // of the field delimiters in this row.
         while (colIndex !== -1) {
-          offsets.push(currLine + colIndex + 1);
+          offsets.push(currRow + colIndex + 1);
           col++;
           colIndex = rowString.indexOf(delimiter, colIndex + 1);
         }
@@ -498,7 +497,7 @@ function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
         // If we know the number of columns we expect, find the field delimiters
         // up to that many columns.
         while (colIndex !== -1 && col <= ncols) {
-          offsets.push(currLine + colIndex + 1);
+          offsets.push(currRow + colIndex + 1);
           col++;
           colIndex = rowString.indexOf(delimiter, colIndex + 1);
         }
@@ -507,14 +506,14 @@ function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
         // with the offset just before the row delimiter.
         if (col < ncols) {
           for (; col <= ncols; col++) {
-            offsets.push(lineEnd);
+            offsets.push(rowEnd);
           }
         }
       }
     }
 
-    // Skip past the row delimiter at the end of the line.
-    currLine = lineEnd + lineDelimiterLength;
+    // Skip past the row delimiter at the end of the row.
+    currRow = rowEnd + rowDelimiterLength;
   }
 
   return {nrows, ncols: columnOffsets ? ncols : 0, offsets};
