@@ -1388,7 +1388,7 @@ command-join@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/command-join/-/command-join-2.0.0.tgz#52e8b984f4872d952ff1bdc8b98397d27c7144cf"
 
-commander@2, commander@2.12.x, commander@^2.9.0, commander@~2.12.1:
+commander@2.12.x, commander@^2.9.0, commander@~2.12.1:
   version "2.12.2"
   resolved "https://registry.npmjs.org/commander/-/commander-2.12.2.tgz#0f5946c427ed9ec0d91a46bb9def53e54650e555"
 
@@ -1928,14 +1928,6 @@ d3-dispatch@1:
 d3-dsv@0.1:
   version "0.1.14"
   resolved "https://registry.npmjs.org/d3-dsv/-/d3-dsv-0.1.14.tgz#9833cd61a5a3e81e03263a1ce78f74de56a1dbb8"
-
-d3-dsv@~1.0.7:
-  version "1.0.8"
-  resolved "https://registry.npmjs.org/d3-dsv/-/d3-dsv-1.0.8.tgz#907e240d57b386618dc56468bacfe76bf19764ae"
-  dependencies:
-    commander "2"
-    iconv-lite "0.4"
-    rw "1"
 
 d3-format@0.4:
   version "0.4.2"
@@ -3519,7 +3511,7 @@ iconv-lite@0.2:
   version "0.2.11"
   resolved "https://registry.npmjs.org/iconv-lite/-/iconv-lite-0.2.11.tgz#1ce60a3a57864a292d1321ff4609ca4bb965adc8"
 
-iconv-lite@0.4, iconv-lite@0.4.19, iconv-lite@^0.4.17, iconv-lite@~0.4.13:
+iconv-lite@0.4.19, iconv-lite@^0.4.17, iconv-lite@~0.4.13:
   version "0.4.19"
   resolved "https://registry.npmjs.org/iconv-lite/-/iconv-lite-0.4.19.tgz#f7468f60135f5e5dad3399c0a81be9a1603a082b"
 
