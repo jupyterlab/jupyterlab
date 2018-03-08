@@ -286,6 +286,7 @@
 
 .jp-LinkedOutputView .jp-OutputArea {
   height: 100%;
+  display: block;
 }
 
 .jp-LinkedOutputView .jp-OutputArea-child:only-child {
