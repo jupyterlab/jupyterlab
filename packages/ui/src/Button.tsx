@@ -15,6 +15,11 @@ const UI_CLASS = 'jp-ui';
 const BUTTON_CLASS = 'jp-button';
 
 /**
+ * The class name added to styled buttons.
+ */
+const STYLED_CLASS = 'jp-mod-styled';
+
+/**
  * The class name added to a pressed button.
  */
 const BUTTON_PRESSED_CLASS = 'jp-mod-pressed';
@@ -25,10 +30,11 @@ const BUTTON_PRESSED_CLASS = 'jp-mod-pressed';
  */
 export
 interface IButtonProps {
-  children: any;
-  classNames: string[];
-  onClick: (event: React.MouseEvent<HTMLElement>) => void;
-  tooltip: string;
+  children?: any;
+  className?: string;
+  onClick?: (event?: React.MouseEvent<HTMLElement>) => void;
+  tooltip?: string;
+  [key: string]: any;
 }
 
 
@@ -46,27 +52,36 @@ interface IButtonState {
  */
 export
 class Button extends React.Component<IButtonProps, IButtonState> {
+  static defaultProps = {
+    className: '',
+    tooltip: ''
+   };
+
   state = { pressed: false,  };
 
-  handleClick = (event: React.MouseEvent<HTMLElement>): void => {
-    if (this.props.onClick) this.props.onClick(event);
+  handleClick = (event?: React.MouseEvent<HTMLElement>): void => {
+    if (this.props.onClick) {
+      this.props.onClick(event);
+    }
   }
-  
-  handleMouseDown = (event: React.MouseEvent<HTMLElement>): void => {
+
+  handleMouseDown = (event?: React.MouseEvent<HTMLElement>): void => {
     this.setState({ pressed: true });
   }
-  
-  handleMouseUp = (event: React.MouseEvent<HTMLElement>): void => {
+
+  handleMouseUp = (event?: React.MouseEvent<HTMLElement>): void => {
     this.setState({ pressed: false });
   }
 
   render() {
-    const classNames = [...this.props.classNames, UI_CLASS, BUTTON_CLASS];
-    if (this.state.pressed) classNames.concat(BUTTON_PRESSED_CLASS);
+    const classNames = [...this.props.className.split(' '), UI_CLASS, BUTTON_CLASS, STYLED_CLASS];
+    if (this.state.pressed) {
+      classNames.concat(BUTTON_PRESSED_CLASS);
+    }
     return (
-      <button 
-        className={classNames.join(' ')} 
-        onClick={this.handleClick} 
+      <button
+        className={classNames.join(' ')}
+        onClick={this.handleClick}
         onMouseDown={this.handleMouseDown}
         onMouseOut={this.handleMouseUp}
         title={this.props.tooltip}

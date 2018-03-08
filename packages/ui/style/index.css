@@ -4,8 +4,27 @@
 |----------------------------------------------------------------------------*/
 
 
+/* Private CSS variables */
+
+
+:root {
+  
+}
+
+
 /* UI */
 
 .jp-ui {
   
+}
+
+.jp-button {
+  display: inline-block;
+  height: 24px;
+  width: 32px;
+  background-color: var(--jp-layout-color1);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 16px;
+  border: 1px solid var(--jp-layout-color1);
 }
