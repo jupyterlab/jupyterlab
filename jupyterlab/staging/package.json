@@ -204,5 +204,9 @@
     "version": "0.32.0.dev0",
     "linkedPackages": {},
     "staticDir": "../static"
+  },
+  "resolutions": {
+    "react": "~16.2.0",
+    "react-dom": "~16.2.0"
   }
 }
