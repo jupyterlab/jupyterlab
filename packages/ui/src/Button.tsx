@@ -3,7 +3,6 @@
 
 import * as React from 'react';
 
-
 /**
  * The class name added to all UI components.
  */
@@ -18,11 +17,6 @@ const BUTTON_CLASS = 'jp-button';
  * The class name added to styled buttons.
  */
 const STYLED_CLASS = 'jp-mod-styled';
-
-/**
- * The class name added to a pressed button.
- */
-const BUTTON_PRESSED_CLASS = 'jp-mod-pressed';
 
 
 /**
@@ -39,25 +33,14 @@ interface IButtonProps {
 
 
 /**
- * The state of the Button component.
- */
-export
-interface IButtonState {
-  pressed: boolean;
-}
-
-
-/**
  * A base button comopnent.
  */
 export
-class Button extends React.Component<IButtonProps, IButtonState> {
+class Button extends React.Component<IButtonProps> {
   static defaultProps = {
     className: '',
     tooltip: ''
    };
-
-  state = { pressed: false,  };
 
   handleClick = (event?: React.MouseEvent<HTMLElement>): void => {
     if (this.props.onClick) {
@@ -65,25 +48,12 @@ class Button extends React.Component<IButtonProps, IButtonState> {
     }
   }
 
-  handleMouseDown = (event?: React.MouseEvent<HTMLElement>): void => {
-    this.setState({ pressed: true });
-  }
-
-  handleMouseUp = (event?: React.MouseEvent<HTMLElement>): void => {
-    this.setState({ pressed: false });
-  }
-
   render() {
     const classNames = [...this.props.className.split(' '), UI_CLASS, BUTTON_CLASS, STYLED_CLASS];
-    if (this.state.pressed) {
-      classNames.concat(BUTTON_PRESSED_CLASS);
-    }
     return (
       <button
         className={classNames.join(' ')}
         onClick={this.handleClick}
-        onMouseDown={this.handleMouseDown}
-        onMouseOut={this.handleMouseUp}
         title={this.props.tooltip}
       >
         {this.props.children}
