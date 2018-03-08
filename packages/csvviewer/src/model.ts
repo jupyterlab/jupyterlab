@@ -6,29 +6,40 @@ import {
 } from '@phosphor/datagrid';
 
 import {
+  IDisposable
+} from '@phosphor/disposable';
+
+import {
   parseDSV, parseDSVNoQuotes, IParser
 } from './parse';
 
 /*
 Possible ideas for further implementation:
 
-- [ ] Instead of parsing the entire file (and freezing the UI), parse just a chunk at a time (say every 10k lines?).
-- [ ] Show a spinner or something visible when we are doing delayed parsing.
-- [ ] The cache right now handles scrolling down great - it gets the next several hundred rows. However, scrolling up causes lots of cache misses - each new row causes a flush of the cache. When invalidating an entire cache, we should put the requested row in middle of the cache (adjusting for rows at the beginning or end). When populating a cache, we should retrieve rows both above and below the requested row.
-- [ ] When we have a header, and we are guessing the parser to use, try checking just the part of the file *after* the header line for quotes. I think often a first header row is quoted, but the rest of the file is not and can be parsed much faster.
-- [ ] autdetect the delimiter (look for comma, tab, semicolon in first line. If more than one found, parse first line with comma, tab, semicolon delimiters. One with most fields wins).
+- Instead of parsing the entire file (and freezing the UI), parse just a chunk at a time (say every 10k lines?).
+- Show a spinner or something visible when we are doing delayed parsing.
+- The cache right now handles scrolling down great - it gets the next several hundred rows. However, scrolling up causes lots of cache misses - each new row causes a flush of the cache. When invalidating an entire cache, we should put the requested row in middle of the cache (adjusting for rows at the beginning or end). When populating a cache, we should retrieve rows both above and below the requested row.
+- When we have a header, and we are guessing the parser to use, try checking just the part of the file *after* the header line for quotes. I think often a first header row is quoted, but the rest of the file is not and can be parsed much faster.
+- autdetect the delimiter (look for comma, tab, semicolon in first line. If more than one found, parse first line with comma, tab, semicolon delimiters. One with most fields wins).
+- Toolbar buttons to control the line delimiter, the parsing engine (quoted/not quoted), the quote character, etc.
 */
 
+/**
+ * Possible delimiter-separated data parsers.
+ */
 const PARSERS: {[key: string]: IParser} = {
   'quotes': parseDSV,
   'noquotes': parseDSVNoQuotes
 };
 
 /**
- * A data model implementation for in-memory DSV data.
+ * A data model implementation for in-memory delimiter-separated data.
+ *
+ * #### Notes
+ * This model handles data with up to 2**32 characters.
  */
 export
-class DSVModel extends DataModel {
+class DSVModel extends DataModel implements IDisposable {
   /**
    * Create a data model with static CSV data.
    *
@@ -63,32 +74,22 @@ class DSVModel extends DataModel {
     this._rowDelimiter = rowDelimiter;
 
     if (quoteParser === undefined) {
-      // Check for the existence of quotes if the quoteParser is not set
+      // Check for the existence of quotes if the quoteParser is not set.
       quoteParser = (data.indexOf(quote) >= 0);
     }
-    console.log(`quote parser:${quoteParser}, ${data.indexOf(quote)}`);
+    this._parser = quoteParser ? 'quotes' : 'noquotes';
 
-    if (quoteParser) {
-      this._parser = 'quotes';
-    } else {
-      this._parser = 'noquotes';
-    }
-
-    let start = performance.now();
+    // Parse the data.
     this._parseAsync();
-    let end = performance.now();
 
-    console.log(`Parsed initial ${this._rowCount} rows, ${this._rowCount * this._columnCount} values, in ${(end - start) / 1000}s`);
-
-    if (header === true) {
+    // Cache the header row.
+    if (header === true && this._rowCount > 0 && this._columnCount > 0) {
       let h = [];
       for (let c = 0; c < this._columnCount; c++) {
         h.push(this._getField(0, c));
       }
       this._header = h;
     }
-
-
   }
 
   /**
@@ -106,7 +107,7 @@ class DSVModel extends DataModel {
         return this._rowCount - 1;
       }
     }
-    return 1;  // TODO multiple column-header rows?
+    return 1;
   }
 
   /**
@@ -135,7 +136,6 @@ class DSVModel extends DataModel {
    * @param returns - The data value for the specified cell.
    */
   data(region: DataModel.CellRegion, row: number, column: number): any {
-    // Set up the field and value variables.
     let value: string;
 
     // Look up the field and value for the region.
@@ -168,59 +168,86 @@ class DSVModel extends DataModel {
     return value;
   }
 
+  /**
+   * Compute the row offsets and initialize the column offset cache.
+   */
   private _computeOffsets(maxRows = 4294967295) {
+    // Parse the data up to the number of rows requested.
     let {nrows, offsets} = PARSERS[this._parser]({data: this._data, delimiter: this._delimiter, columnOffsets: false, maxRows});
-    if (offsets[offsets.length - 1] > 4294967296) {
-      throw 'csv too large for offsets to be stored as 32-bit integers';
-    }
 
     // Get number of columns in first row
     let {ncols} = PARSERS[this._parser]({data: this._data, delimiter: this._delimiter, columnOffsets: true, maxRows: 1});
 
-    // If the full column offsets array is small enough, cache all of them.
+    // Store the row offsets.
     this._rowOffsets = Uint32Array.from(offsets);
-    if (nrows * ncols <= this._columnOffsetsMaxSize) {
+
+    // If the full column offsets array is small enough, build a cache big
+    // enough for all column offsets. We allocate up to 128 megabytes:
+    // 128*(2**20 bytes/M)/(4 bytes/entry) = 33554432 entries.
+    if (nrows * ncols <= 33554432) {
       this._columnOffsets = new Uint32Array(ncols * nrows);
     } else {
+      // If not, then our cache size is the maximum number of rows we'll get
+      // from the cache at a time.
       this._columnOffsets = new Uint32Array(ncols * this._maxCacheGet);
     }
 
+    // Invalidate the entire cache.
     this._columnOffsets.fill(0xFFFFFFFF);
     this._columnOffsetsStartingRow = 0;
+
+    // Update the column and row counts.
     let oldRowCount = this._rowCount;
     this._columnCount = ncols;
     this._rowCount = nrows;
+
+    // Emit the model changed signal.
     if (oldRowCount !== undefined && oldRowCount < nrows) {
+      // If we have more rows than before, emit the rows-inserted change signal.
       let firstIndex = oldRowCount + 1;
       if (this._header.length > 0) {
         firstIndex -= 1;
       }
       this.emitChanged({
-      type: 'rows-inserted',
-      region: 'body',
-      index: firstIndex,
-      span: nrows - oldRowCount
-    });
+        type: 'rows-inserted',
+        region: 'body',
+        index: firstIndex,
+        span: nrows - oldRowCount
+      });
+    } else {
+      // Otherwise, emit the full model reset change signal.
+      this.emitChanged({
+        type: 'model-reset',
+        region: 'body',
+      });
     }
   }
 
-  _getOffsetIndex(row: number, column: number) {
-    // check to see if row *should* be in the cache, based on the cache size.
+  /**
+   * Get the index in the data string for the first character of a row and
+   * column.
+   *
+   * @param row - The row of the data item.
+   * @param column - The column of the data item.
+   * @returns - The index into the data string where the data item starts.
+   */
+  _getOffsetIndex(row: number, column: number): number {
+    // Declare local variables.
     const ncols = this._columnCount;
+
+    // Check to see if row *should* be in the cache, based on the cache size.
     let rowIndex = (row - this._columnOffsetsStartingRow) * ncols;
     if (rowIndex < 0 || rowIndex > this._columnOffsets.length) {
-      // Row shouldn't be in the cache, invalidate the entire cache by setting
-      // all row indices to 0 (perhaps faster to fill all with zeros?), set the
-      // new starting row index. Proceed to the next step.
+      // Row isn't in the cache, so we invalidate the entire cache and set up
+      // the cache to hold the requested row.
       this._columnOffsets.fill(0xFFFFFFFF);
       this._columnOffsetsStartingRow = row;
       rowIndex = 0;
     }
 
+    // Check to see if we need to fetch the row data into the cache.
     if (this._columnOffsets[rowIndex] === 0xFFFFFFFF) {
-      // The row is not in the cache yet.
-
-      // Figure out how many rows below us are also invalid.
+      // Figure out how many rows below us also need to be fetched.
       let maxRows = 1;
       while (maxRows <= this._maxCacheGet && this._columnOffsets[rowIndex + maxRows * ncols] === 0xFFFFFF) {
         maxRows++;
@@ -236,71 +263,113 @@ class DSVModel extends DataModel {
         startIndex: this._rowOffsets[row]
       });
 
-      // Fill in cache.
+      // Copy results to the cache.
       for (let i = 0; i < offsets.length; i++) {
         this._columnOffsets[rowIndex + i] = offsets[i];
       }
     }
 
-    // Return index from cache.
+    // Return the offset index from cache.
     return this._columnOffsets[rowIndex + column];
   }
 
+  /**
+   * Get the parsed string field for a row and column.
+   *
+   * @param row - The row number of the data item.
+   * @param column - The column number of the data item.
+   * @returns The parsed string for the data item.
+   */
   _getField(row: number, column: number) {
+    // Declare local variables.
     let value: string;
-    let index = this._getOffsetIndex(row, column);
     let nextIndex;
 
+    // Find the index for the first character in the field.
+    let index = this._getOffsetIndex(row, column);
+
+    // Initialize the trim adjustments.
     let trimRight = 0;
     let trimLeft = 0;
 
+    // Find the end of the slice (the start of the next field), and how much we
+    // should adjust to trim off a trailing field or row delimiter. First check
+    // if we are getting the last column.
     if (column === this._columnCount - 1) {
+      // Check if we are getting any row but the last.
       if (row < this._rowCount - 1) {
+        // Set the next offset to the next row, column 0.
         nextIndex = this._getOffsetIndex(row + 1, 0);
-        // strip off row delimiter if we are not in the last row.
+
+        // Since we are not at the last row, we need to trim off the row
+        // delimiter.
         trimRight += this._rowDelimiter.length;
       } else {
+        // We are getting the last data item, so the slice end is the end of the
+        // data string.
         nextIndex = this._data.length;
+
+        // The string may or may not end in a row delimiter (RFC 4180 2.2), so
+        // we explicitly check if we should trim off a row delimiter.
         if (this._data[nextIndex - 1] === this._rowDelimiter[this._rowDelimiter.length - 1]) {
-          // The string may or may not end in a row delimiter, so we explicitly check
           trimRight += this._rowDelimiter.length;
         }
       }
     } else {
+      // The next field starts at the next column offset.
       nextIndex = this._getOffsetIndex(row, column + 1);
+
+      // We may be in a short row, where we filled in columns without delimiters
+      // in the string. If there is room for a delimiter before the next field,
+      // we need to trim it.
       if (index < nextIndex) {
-        // strip field separator if there is one between the two indices.
+        // Strip field separator if there is room for one between the two indices.
         trimRight += 1;
       }
     }
 
-    // if quoted field, strip quotes
+    // Check to see if the field begins with a quote. If it does, trim a quote on either side.
     if (this._data[index] === this._quote) {
       trimLeft += 1;
       trimRight += 1;
     }
+
+    // Slice the actual value out of the data string.
     value = this._data.slice(index + trimLeft, nextIndex - trimRight);
 
-    // If we have a quoted field and we have an escaped quote, unescape it.
+    // If we have a quoted field and we have an escaped quote inside it, unescape it.
     if (trimLeft === 1 && value.indexOf(this._quote) !== -1) {
       value = value.replace(this._quoteEscaped, this._quote);
     }
+
+    // Return the value.
     return value;
   }
 
+  /**
+   * Parse the data string asynchronously.
+   *
+   * #### Notes
+   * It can take several seconds to parse a several hundred megabyte string, so
+   * we parse the first 500 rows to get something up on the screen, then we
+   * parse the full data string asynchronously.
+   */
   private _parseAsync() {
+    // Cancel any previously-scheduled delayed parsing.
     if (this._delayedParse !== 0) {
       clearTimeout(this._delayedParse);
       this._delayedParse = 0;
     }
 
-    // Initially parse the first 500 rows to get the first screen up quick.
+    // Try parsing the first 500 rows to give us the start of the data right away.
     try {
       this._computeOffsets(500);
     } catch (e) {
+      // Sometimes the data string cannot be parsed with the full parser (for
+      // example, we may have the wrong delimiter). In these cases, fall back to
+      // the simpler parser so we can show something.
       if (this._parser === 'quotes') {
         console.warn(e);
-        console.log('Switching to noquotes CSV parser');
         this._parser = 'noquotes';
         this._computeOffsets(500);
       } else {
@@ -308,74 +377,92 @@ class DSVModel extends DataModel {
       }
     }
 
-    if (this._rowCount === 500) {
-      // Parse full file later, delayed by just a bit to give the UI time to
-      // update first.
-      this._delayedParse = window.setTimeout(() => {
-        let start = performance.now();
-        try {
-          this._computeOffsets();
-        } catch (e) {
-          if (this._parser === 'quotes') {
-            console.warn(e);
-            console.log('Switching to noquotes CSV parser');
-            this._parser = 'noquotes';
-            this._computeOffsets();
-          } else {
-            throw e;
-          }
-        }
-        let end = performance.now();
-        console.log(`Parsed full ${this._rowCount} rows, ${this._rowCount * this._columnCount} values, in ${(end - start) / 1000}s`);
-      }, 50);
+    // If we didn't get 500 rows from the string, then we must have parsed the
+    // entire string, so just return now.
+    if (this._rowCount < 500) {
+      return;
     }
+
+    // Parse full data string, delayed by a few milliseconds to give the UI a chance to draw first.
+    this._delayedParse = window.setTimeout(() => {
+      try {
+        this._computeOffsets();
+      } catch (e) {
+        if (this._parser === 'quotes') {
+          console.warn(e);
+          this._parser = 'noquotes';
+          this._computeOffsets();
+        } else {
+          throw e;
+        }
+      }
+    }, 50);
   }
 
-  private _data: string;
-  private _delimiter: string;
-  private _rowDelimiter: string;
-  private _quote: string;
-  private _quoteEscaped: RegExp;
-  
+  /**
+   * Whether this model has been disposed.
+   */
+  get isDisposed() {
+    return this._isDisposed;
+  }
 
   /**
-   * The index for the start of each row.
+   * Dispose the resources held by this model.
+   */
+  dispose() {
+    if (this._isDisposed) {
+      return;
+    }
+    if (this._delayedParse !== 0) {
+      clearTimeout(this._delayedParse);
+      this._delayedParse = 0;
+    }
+    this._columnOffsets = null;
+    this._data = null;
+    this._rowOffsets = null;
+  }
+
+  // Parser settings
+  private _delimiter: string;
+  private _quote: string;
+  private _quoteEscaped: RegExp;
+  private _parser: 'quotes' | 'noquotes';
+  private _rowDelimiter: string;
+
+  // Data values
+  private _data: string;
+  private _rowCount: number;
+  private _columnCount: number;
+
+  // Cache information
+  /**
+   * The header strings.
+   */
+  private _header: string[] = [];
+  /**
+   * The column offset cache, starting with row _columnOffsetsStartingRow
    *
    * #### Notes
-   * The max string size in browsers is less than 2**32, so we only use uint32
-   *
-   * This may be empty if we store *all* column offsets in the column offset cache.
+   * The index of the first character in the data string for row r, column c is
+   * _columnOffsets[(r-this._columnOffsetsStartingRow)*numColumns+c]
+   */
+  private _columnOffsets: Uint32Array;
+  /**
+   * The row that _columnOffsets[0] represents.
+   */
+  private _columnOffsetsStartingRow: number;
+  /**
+   * The maximum number of lines to parse when there is a cache miss.
+   */
+  private _maxCacheGet: number = 1000;
+  /**
+   * The index for the start of each row.
    */
   private _rowOffsets: Uint32Array;
 
-  /**
-   * The column offset cache.
-   *
-   * #### Notes
-   *  This contains all column offsets starting with row
-   * _columnOffsetsStartingRow.
-   *
-   * Offsets are stored in row-major order, even though they are accessed
-   * typically in column-major order. The offset for row r, column c is at index
-   * i=r*numColumns+c, and the data is at data.slice(offset[i], offset[i+1]).
-   *
-   * The max string size in browsers is less than 2**32, so we only use uint32.
-   */
-  private _columnOffsets: Uint32Array;
-  private _columnOffsetsStartingRow: number;
-  private _columnCount: number;
-  private _rowCount: number;
-
-  /**
-   * The number of lines to parse when filling in the cache.
-   */
-  private _maxCacheGet: number = 1000;
-  private _columnOffsetsMaxSize: number = 33554432; // 128M=2**25=2**(20+7-2)
+  // Bookkeeping variables.
   private _delayedParse: number;
-
-  // Whether to use the parser that understands quotes or not.
-  private _parser: 'quotes' | 'noquotes';
-  private _header: string[] = [];
+  private _isDisposed: boolean = false;
 }
 
 
@@ -386,7 +473,7 @@ export
 namespace DSVModel {
 
   /**
-   * An options object for initializing a CSV data model.
+   * An options object for initializing a delimiter-separated data model.
    */
   export
   interface IOptions {
@@ -405,7 +492,7 @@ namespace DSVModel {
     data: string;
 
     /**
-     * Whether the DSV has a one-row header.
+     * Whether the data has a one-row header.
      */
     header?: boolean;
 
@@ -418,17 +505,17 @@ namespace DSVModel {
      * Quote character.
      *
      * #### Notes
-     * Quotes are escaped by repeating them.
+     * Quotes are escaped by repeating them, as in RFC 4180.
      */
     quote?: string;
 
     /**
-     * Whether to use the parser for quoted fields.
+     * Whether to use the parser that can handle quoted delimiters.
      *
      * #### Notes
-     * Setting this to false uses a much, much faster parser, but assumes there
-     * are not any field or row delimiters inside quotes. If this is not set, it
-     * defaults to true if any quotes are found in the data, and false
+     * Setting this to false uses a much faster parser, but assumes there are
+     * not any field or row delimiters that are quoted in fields. If this is not
+     * set, it defaults to true if any quotes are found in the data, and false
      * otherwise.
      */
     quoteParser?: boolean;

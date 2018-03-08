@@ -148,7 +148,11 @@ class CSVViewer extends Widget implements DocumentRegistry.IReadyWidget {
   private _updateGrid(): void {
     let data: string = this._context.model.toString();
     let delimiter = this._delimiter;
+    let oldModel = this._grid.model as DSVModel;
     this._grid.model = new DSVModel({ data, delimiter });
+    if (oldModel) {
+      oldModel.dispose();
+    }
   }
 
   private _context: DocumentRegistry.Context;

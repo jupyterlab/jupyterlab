@@ -4,15 +4,15 @@
 /*
 Possible options to add to the parser:
 
-- [ ] Optional offsets array to modify, so we don't need to create a new offsets list (we would need to be careful not to overwrite things if a row needs to be truncated.)
-- [ ] Comment character at the start of the line
-- [ ] Skip empty whitespace lines
-- [ ] Skip rows with empty columns
-- [ ] Logging an error for too many or too few fields on a line
-- [ ] Ignore whitespace around delimiters
-- [ ] Sanity check on field size, with an error if the field exceeds the size
-- [ ] Tests against https://github.com/maxogden/csv-spectrum.
-- [ ] Benchmark against https://www.npmjs.com/package/csv-parser and https://www.npmjs.com/package/csv-string and fast-csv.
+- Optional offsets array to modify, so we don't need to create a new offsets list (we would need to be careful not to overwrite things if a row needs to be truncated.)
+- Comment character at the start of the line
+- Skip empty whitespace lines
+- Skip rows with empty columns
+- Logging an error for too many or too few fields on a line
+- Ignore whitespace around delimiters
+- Sanity check on field size, with an error if the field exceeds the size
+- Tests against https://github.com/maxogden/csv-spectrum.
+- Benchmark against https://www.npmjs.com/package/csv-parser and https://www.npmjs.com/package/csv-string and fast-csv.
 
 */
 
