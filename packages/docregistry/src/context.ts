@@ -410,6 +410,8 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    */
   private _populate(): Promise<void> {
     this._isPopulated = true;
+    this._isReady = true;
+    this._populatedPromise.resolve(void 0);
 
     // Add a checkpoint if none exists and the file is writable.
     return this._maybeCheckpoint(false).then(() => {
@@ -426,9 +428,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         language: this._model.defaultKernelLanguage,
       };
       this.session.initialize();
-    }).then(() => {
-      this._isReady = true;
-      this._populatedPromise.resolve(void 0);
     });
   }
 
