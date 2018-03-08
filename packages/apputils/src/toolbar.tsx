@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IIterator, find, map
+  find, IIterator, map
 } from '@phosphor/algorithm';
 
 import {
@@ -21,13 +21,22 @@ import {
   PanelLayout, Widget
 } from '@phosphor/widgets';
 
+import * as React from 'react';
+
+import { Button, IButtonProps } from '@jupyterlab/ui';
+
+import {
+  VDomRenderer,
+  // VDomModel
+} from './vdom';
+
 import {
   IClientSession
 } from './clientsession';
 
-import {
-  Styling
-} from './styling';
+// import {
+//   Styling
+// } from './styling';
 
 
 /**
@@ -100,8 +109,8 @@ class Toolbar<T extends Widget = Widget> extends Widget {
    * @returns An iterator over the toolbar item names.
    */
   names(): IIterator<string> {
-    let layout = this.layout as PanelLayout;
-    return map(layout.widgets, widget => {
+    const layout = this.layout as PanelLayout;
+    return map(layout.widgets, (widget) => {
       return Private.nameProperty.get(widget);
     });
   }
@@ -122,7 +131,7 @@ class Toolbar<T extends Widget = Widget> extends Widget {
    * The item can be removed from the toolbar by setting its parent to `null`.
    */
   addItem(name: string, widget: T): boolean {
-    let layout = this.layout as PanelLayout;
+    const layout = this.layout as PanelLayout;
     return this.insertItem(layout.widgets.length, name, widget);
   }
 
@@ -143,12 +152,12 @@ class Toolbar<T extends Widget = Widget> extends Widget {
    * The item can be removed from the toolbar by setting its parent to `null`.
    */
   insertItem(index: number, name: string, widget: T): boolean {
-    let existing = find(this.names(), value => value === name);
+    const existing = find(this.names(), (value) => value === name);
     if (existing) {
       return false;
     }
     widget.addClass(TOOLBAR_ITEM_CLASS);
-    let layout = this.layout as PanelLayout;
+    const layout = this.layout as PanelLayout;
     layout.insertWidget(index, widget);
     Private.nameProperty.set(widget, name);
     return true;
@@ -244,12 +253,12 @@ namespace Toolbar {
       // Update all fields (onClick is already indirected)
       const newClasses = Private.commandClassName(sender, id).split(/\s/);
 
-      for (let cls of oldClasses) {
+      for (const cls of oldClasses) {
         if (cls && newClasses.indexOf(cls) === -1) {
           button.removeClass(cls);
         }
       }
-      for (let cls of newClasses) {
+      for (const cls of newClasses) {
         if (cls && oldClasses.indexOf(cls) === -1) {
           button.addClass(cls);
         }
@@ -344,63 +353,23 @@ namespace Toolbar {
  * A widget which acts as a button in a toolbar.
  */
 export
-class ToolbarButton extends Widget {
+class ToolbarButton extends VDomRenderer<null> {
   /**
    * Construct a new toolbar button.
    */
-  constructor(options: ToolbarButton.IOptions = {}) {
-    super({ node: document.createElement('button') });
-    Styling.styleNodeByTag(this.node, 'button');
+  constructor(options: IButtonProps) {
+    super();
+    this.props = options;
     this.addClass(TOOLBAR_BUTTON_CLASS);
-    this._onClick = options.onClick || Private.noOp;
-
-    const classes = options.className ?
-      options.className.trim().replace(/\s{2,}/g, ' ').split(/\s/) : null;
-
-    if (classes) {
-      classes.forEach(name => { this.addClass(name); });
-    }
-
-    this.node.title = options.tooltip || '';
   }
-
   /**
-   * Handle the DOM events for the widget.
-   *
-   * @param event - The DOM event sent to the widget.
-   *
-   * #### Notes
-   * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the dock panel's node. It should
-   * not be called directly by user code.
+   * Render the Toolbar to virtual DOM nodes.
    */
-  handleEvent(event: Event): void {
-    switch (event.type) {
-    case 'click':
-      if ((event as MouseEvent).button === 0) {
-        this._onClick();
-      }
-      break;
-    default:
-      break;
-    }
+  protected render(): React.ReactElement<any> {
+    return <Button {...this.props} />;
   }
 
-  /**
-   * Handle `after-attach` messages for the widget.
-   */
-  protected onAfterAttach(msg: Message): void {
-    this.node.addEventListener('click', this);
-  }
-
-  /**
-   * Handle `before-detach` messages for the widget.
-   */
-  protected onBeforeDetach(msg: Message): void {
-    this.node.removeEventListener('click', this);
-  }
-
-  private _onClick: () => void;
+  private props: IButtonProps;
 }
 
 
@@ -417,7 +386,7 @@ namespace ToolbarButton {
     /**
      * The callback for a click event.
      */
-    onClick?: () => void;
+    onClick?: (event?: React.MouseEvent<HTMLElement>) => void;
 
     /**
      * The class name added to the button.
@@ -428,6 +397,8 @@ namespace ToolbarButton {
      * The tooltip added to the button node.
      */
     tooltip?: string;
+    // children?: any;
+    [key: string]: any;
   }
 }
 
@@ -557,10 +528,10 @@ namespace Private {
       if (this.isDisposed) {
         return;
       }
-      let status = session.status;
+      const status = session.status;
       this.toggleClass(TOOLBAR_IDLE_CLASS, status === 'idle');
       this.toggleClass(TOOLBAR_BUSY_CLASS, status !== 'idle');
-      let title = 'Kernel ' + status[0].toUpperCase() + status.slice(1);
+      const title = 'Kernel ' + status[0].toUpperCase() + status.slice(1);
       this.node.title = title;
     }
   }
