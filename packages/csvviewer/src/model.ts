@@ -213,6 +213,7 @@ class DSVModel extends DataModel implements IDisposable {
         data: this._data,
         delimiter: this._delimiter,
         rowDelimiter: this._rowDelimiter,
+        quote: this._quote,
         columnOffsets: true,
         maxRows: 1
       })).ncols;
@@ -225,6 +226,7 @@ class DSVModel extends DataModel implements IDisposable {
       startIndex: this._rowOffsets[this._rowCount - 1],
       delimiter: this._delimiter,
       rowDelimiter: this._rowDelimiter,
+      quote: this._quote,
       columnOffsets: false,
       maxRows: endRow - this._rowCount + 1
     });
@@ -406,6 +408,7 @@ class DSVModel extends DataModel implements IDisposable {
         data: this._data,
         delimiter: this._delimiter,
         rowDelimiter: this._rowDelimiter,
+        quote: this._quote,
         columnOffsets: true,
         maxRows: maxRows,
         ncols: ncols,
@@ -573,9 +576,10 @@ namespace DSVModel {
   export
   interface IOptions {
     /**
-     * The schema for the for the data model.
+     * The field delimiter, such as ',' or '\t'.
      *
-     * The schema should be treated as an immutable object.
+     * #### Notes
+     * The field delimiter must be a single character.
      */
     delimiter: string;
 
@@ -592,15 +596,20 @@ namespace DSVModel {
     header?: boolean;
 
     /**
-     * Line ending
+     * Row delimiter.
+     *
+     * #### Notes
+     * Any carriage return or newline character that is not a delimiter should
+     * be in a quoted field, regardless of the row delimiter setting.
      */
-    rowDelimiter?: string;
+    rowDelimiter?: '\r\n' | '\r' | '\n';
 
     /**
      * Quote character.
      *
      * #### Notes
-     * Quotes are escaped by repeating them, as in RFC 4180.
+     * Quotes are escaped by repeating them, as in RFC 4180. The quote must be a
+     * single character.
      */
     quote?: string;
 
