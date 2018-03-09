@@ -430,7 +430,7 @@ class DSVModel extends DataModel implements IDisposable {
    */
   private _parseAsync() {
     let currentRows = 500;
-    let chunkRows = 200000;
+    let chunkRows = 1000000;
     let delay = 20; // milliseconds
 
     let id = '' + Math.random();
@@ -442,6 +442,7 @@ class DSVModel extends DataModel implements IDisposable {
 
     // Define a function to parse a chunk up to and including endRow.
     let parseChunk = (endRow: number, startid: string, endid: string, measureid: string) => {
+      console.log(`start parsing ${endRow}`);
       performance.mark(startid);
       let start = performance.now();
       try {
@@ -489,7 +490,7 @@ class DSVModel extends DataModel implements IDisposable {
       let done = parseChunk(newEnd, startid, endid, measureid);
       currentRows = newEnd;
       if (!done) {
-        window.setTimeout(delayedParse, delay);
+        that._delayedParse = window.setTimeout(delayedParse, delay);
       } else {
         let wallclockend = performance.now();
         console.log(`Wall clock time parsing ${id}: ${Math.round(wallclockend - wallclockstart)}ms`);
@@ -500,11 +501,9 @@ class DSVModel extends DataModel implements IDisposable {
         measures.forEach( (i: any) => { cputime += i.duration; });
         console.log(`Total time parsing: ${Math.round(cputime)}ms`);
 
-        that._resetParser();
+        // that._resetParser();
         // Time a full parse for comparison
-        parseChunk(10000000, startid + ' FULL', endid + ' FULL', measureid + ' FULL');
-
-
+        // parseChunk(10000000, startid + ' FULL', endid + ' FULL', measureid + ' FULL');
       }
     }
 
@@ -521,10 +520,8 @@ class DSVModel extends DataModel implements IDisposable {
 
     this._columnOffsets = new Uint32Array(0);
     this._doneParsing = false;
-    if (this._delayedParse !== 0) {
-      clearTimeout(this._delayedParse);
-      this._delayedParse = 0;
-    }
+    window.clearTimeout(this._delayedParse);
+    this._delayedParse = null;
     this.emitChanged({ type: 'model-reset' });
   }
 
@@ -567,7 +564,7 @@ class DSVModel extends DataModel implements IDisposable {
   private _rowOffsets: Uint32Array = new Uint32Array(1);
 
   // Bookkeeping variables.
-  private _delayedParse: number;
+  private _delayedParse: number = null;
   private _doneParsing: boolean = false;
   private _isDisposed: boolean = false;
 }
