@@ -16,12 +16,12 @@ import {
 /*
 Possible ideas for further implementation:
 
-- Instead of parsing the entire file (and freezing the UI), parse just a chunk at a time (say every 10k rows?).
 - Show a spinner or something visible when we are doing delayed parsing.
 - The cache right now handles scrolling down great - it gets the next several hundred rows. However, scrolling up causes lots of cache misses - each new row causes a flush of the cache. When invalidating an entire cache, we should put the requested row in middle of the cache (adjusting for rows at the beginning or end). When populating a cache, we should retrieve rows both above and below the requested row.
 - When we have a header, and we are guessing the parser to use, try checking just the part of the file *after* the header row for quotes. I think often a first header row is quoted, but the rest of the file is not and can be parsed much faster.
 - autdetect the delimiter (look for comma, tab, semicolon in first line. If more than one found, parse first row with comma, tab, semicolon delimiters. One with most fields wins).
 - Toolbar buttons to control the row delimiter, the parsing engine (quoted/not quoted), the quote character, etc.
+- Investigate incremental loading strategies in the parseAsync function. In initial investigations, setting the chunk size to 100k in parseAsync seems cause instability with large files in Chrome (such as 8-million row files). Perhaps this is because we are recycling the row offset and column offset arrays quickly? It doesn't seem that there is a memory leak.
 */
 
 /**
@@ -429,22 +429,18 @@ class DSVModel extends DataModel implements IDisposable {
    * parse the full data string asynchronously.
    */
   private _parseAsync() {
+    // Number of rows to get initially.
     let currentRows = 500;
-    let chunkRows = 10000000;
+
+    // Number of rows to get in each chunk thereafter. We set this high to just
+    // get the rest of the rows for now.
+    let chunkRows = Math.pow(2, 32) - 1;
+
+    // We give the UI a chance to draw by delaying the chunk parsing.
     let delay = 20; // milliseconds
 
-    let id = '' + Math.random();
-    let startid = `start parse ${id}`;
-    let endid = `end parse ${id}`;
-    let measureid = `parse time ${id}`;
-
-    this._resetParser();
-
     // Define a function to parse a chunk up to and including endRow.
-    let parseChunk = (endRow: number, startid: string, endid: string, measureid: string) => {
-      console.log(`start parsing ${endRow}`);
-      performance.mark(startid);
-      let start = performance.now();
+    let parseChunk = (endRow: number) => {
       try {
         this._computeRowOffsets(endRow);
       } catch (e) {
@@ -460,50 +456,38 @@ class DSVModel extends DataModel implements IDisposable {
           throw e;
         }
       }
-      let end = performance.now();
-      performance.mark(endid);
-      performance.measure(measureid, startid, endid);
-      console.log(`Parsed up to row ${endRow} in ${Math.round(end - start)}ms`);
       return this._doneParsing;
     };
 
-    let wallclockstart = performance.now();
+    // Reset the parser to its initial state.
+    this._resetParser();
 
-    // Try parsing the first rows to give us the start of the data right away.
-    let done = parseChunk(currentRows, startid, endid, measureid);
+    // Parse the first rows to give us the start of the data right away.
+    let done = parseChunk(currentRows);
 
     // If we are done, return early.
     if (done) {
-      let wallclockend = performance.now();
-      console.log(`Wall clock time parsing ${id}: ${Math.round(wallclockend - wallclockstart)}ms`);
       return;
     }
 
-    let that = this;
     // Define a function to recursively parse the next chunk after a delay.
+    let that = this;
     function delayedParse() {
-      let newEnd = currentRows + chunkRows;
+      // Parse up to the new end row.
+      let done = parseChunk(currentRows + chunkRows);
+      currentRows += chunkRows;
+
+      // Gradually double the chunk size until we reach a million rows, if we
+      // start below a million-row chunk size.
       if (chunkRows < 1000000) {
         chunkRows *= 2;
       }
 
-      let done = parseChunk(newEnd, startid, endid, measureid);
-      currentRows = newEnd;
-      if (!done) {
-        that._delayedParse = window.setTimeout(delayedParse, delay);
+      // If we aren't done, the schedule another parse.
+      if (done) {
+        that._delayedParse = null;
       } else {
-        let wallclockend = performance.now();
-        console.log(`Wall clock time parsing ${id}: ${Math.round(wallclockend - wallclockstart)}ms`);
-
-        // Compute stats
-        let measures = performance.getEntriesByName(measureid, 'measure');
-        let cputime = 0;
-        measures.forEach( (i: any) => { cputime += i.duration; });
-        console.log(`Total time parsing: ${Math.round(cputime)}ms`);
-
-        // that._resetParser();
-        // Time a full parse for comparison
-        // parseChunk(10000000, startid + ' FULL', endid + ' FULL', measureid + ' FULL');
+        that._delayedParse = window.setTimeout(delayedParse, delay);
       }
     }
 
@@ -511,17 +495,22 @@ class DSVModel extends DataModel implements IDisposable {
     this._delayedParse = window.setTimeout(delayedParse, delay);
   }
 
+  /**
+   * Reset the parser state.
+   */
   private _resetParser() {
     this._columnCount = undefined;
 
-    // First row offset is *always* 0.
+    // First row offset is *always* 0, so we always have the first row offset.
     this._rowOffsets = new Uint32Array(1);
     this._rowCount = 1;
 
     this._columnOffsets = new Uint32Array(0);
     this._doneParsing = false;
-    window.clearTimeout(this._delayedParse);
-    this._delayedParse = null;
+    if (this._delayedParse !== null) {
+      window.clearTimeout(this._delayedParse);
+      this._delayedParse = null;
+    }
     this.emitChanged({ type: 'model-reset' });
   }
 
