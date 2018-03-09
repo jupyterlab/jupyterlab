@@ -116,7 +116,7 @@ describe('docregistry/mimedocument', () => {
           renderTimeout: 1000,
           dataType: 'string'
         });
-        dContext.save();
+        dContext.initialize(true);
         return widget.ready.then(() => {
           let layout = widget.layout as PanelLayout;
           expect(layout.widgets.length).to.be(2);
@@ -129,7 +129,7 @@ describe('docregistry/mimedocument', () => {
 
       it('should change the document contents', (done) => {
         RENDERMIME.addFactory(fooFactory);
-        dContext.save().then(() => {
+        dContext.initialize(true).then(() => {
           dContext.model.contentChanged.connect(() => {
             expect(dContext.model.toString()).to.be('bar');
             done();
