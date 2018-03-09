@@ -23,7 +23,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  BoxLayout, Widget
+  BoxLayout, SplitLayout, SplitPanel, Widget
 } from '@phosphor/widgets';
 
 import {
@@ -49,6 +49,10 @@ import {
 import {
   INotebookModel
 } from './model';
+
+import {
+  NotebookTableOfContents
+} from './toc';
 
 import {
   Notebook, StaticNotebook
@@ -96,6 +100,10 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
     let toolbar = new Toolbar();
     toolbar.addClass(NOTEBOOK_PANEL_TOOLBAR_CLASS);
 
+    // Notebook + TOC container
+    const container = new SplitPanel({ spacing: 2 });
+    container.addClass('jp-NotebookContainer');
+
     // Notebook
     let nbOptions: Notebook.IOptions = {
       rendermime: this.rendermime,
@@ -107,11 +115,19 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
     let notebook = this.notebook = contentFactory.createNotebook(nbOptions);
     notebook.addClass(NOTEBOOK_PANEL_NOTEBOOK_CLASS);
 
+    // Table of Contents
+    this.tableOfContents = new NotebookTableOfContents(this.notebook);
+
+    (container.layout as SplitLayout).addWidget(this.tableOfContents);
+    (container.layout as SplitLayout).addWidget(this.notebook);
+    container.setRelativeSizes([0.2, 0.8]);
+    this.tableOfContents.hide();
+
     layout.addWidget(toolbar);
-    layout.addWidget(this.notebook);
+    layout.addWidget(container);
 
     BoxLayout.setStretch(toolbar, 0);
-    BoxLayout.setStretch(this.notebook, 1);
+    BoxLayout.setStretch(container, 1);
   }
 
   /**
@@ -156,6 +172,11 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
    * The notebook used by the widget.
    */
   readonly notebook: Notebook;
+
+  /**
+   * The table-of-contents used by the widget.
+   */
+  readonly tableOfContents: NotebookTableOfContents;
 
   /**
    * Get the toolbar used by the widget.
