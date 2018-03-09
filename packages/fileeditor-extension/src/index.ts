@@ -139,7 +139,7 @@ function activate(app: JupyterLab, consoleTracker: IConsoleTracker, editorServic
     let cached =
       settings.get('editorConfig').composite as Partial<CodeEditor.IConfig>;
     Object.keys(config).forEach((key: keyof CodeEditor.IConfig) => {
-      config[key] = cached[key] === null ?
+      config[key] = (cached[key] === null || cached[key] === undefined) ?
         CodeEditor.defaultConfig[key] : cached[key];
     });
   }
