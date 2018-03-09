@@ -83,7 +83,7 @@ class DSVModel extends DataModel implements IDisposable {
     this._parseAsync();
 
     // Cache the header row.
-    if (header === true && this._rowCount > 0 && this._columnCount > 0) {
+    if (header === true && this._columnCount > 0) {
       let h = [];
       for (let c = 0; c < this._columnCount; c++) {
         h.push(this._getField(0, c));
@@ -182,80 +182,118 @@ class DSVModel extends DataModel implements IDisposable {
     if (this._isDisposed) {
       return;
     }
-    if (this._delayedParse !== 0) {
-      clearTimeout(this._delayedParse);
-      this._delayedParse = 0;
-    }
-    this._columnOffsets = null;
+    this._resetParser();
     this._data = null;
-    this._rowOffsets = null;
   }
 
   /**
    * Compute the row offsets and initialize the column offset cache.
+   *
+   * @param endRow - The last row to parse, from the start of the data (first
+   * row is row 1).
+   *
+   * #### Notes
+   * This method supports parsing the data incrementally by calling it with
+   * incrementally higher endRow. Rows that have already been parsed will not be
+   * parsed again.
    */
-  private _computeOffsets(maxRows = 4294967295) {
-    // Parse the data up to the number of rows requested.
+  private _computeRowOffsets(endRow = 4294967295) {
+    // If we've already parsed up to endRow, or if we've already parsed the
+    // entire data set, return early.
+    if (this._rowCount >= endRow || this._doneParsing === true) {
+      return;
+    }
+
+    // Compute the column count if we don't already have it.
+    if (this._columnCount === undefined) {
+      // Get number of columns in first row
+      this._columnCount = (PARSERS[this._parser]({
+        data: this._data,
+        delimiter: this._delimiter,
+        rowDelimiter: this._rowDelimiter,
+        columnOffsets: true,
+        maxRows: 1
+      })).ncols;
+    }
+
+    // Parse the data up to and including the requested row, starting from the
+    // last row offset we have.
     let {nrows, offsets} = PARSERS[this._parser]({
       data: this._data,
+      startIndex: this._rowOffsets[this._rowCount - 1],
       delimiter: this._delimiter,
       rowDelimiter: this._rowDelimiter,
       columnOffsets: false,
-      maxRows,
+      maxRows: endRow - this._rowCount + 1
     });
 
-    // Get number of columns in first row
-    let {ncols} = PARSERS[this._parser]({
-      data: this._data,
-      delimiter: this._delimiter,
-      rowDelimiter: this._rowDelimiter,
-      columnOffsets: true,
-      maxRows: 1
-    });
+    // Return if we didn't actually get any new rows beyond the one we've
+    // already parsed.
+    if (nrows <= 1) {
+      this._doneParsing = true;
+      return;
+    }
 
-    // Store the row offsets.
-    this._rowOffsets = Uint32Array.from(offsets);
+    // Update the row count.
+    let oldRowCount = this._rowCount;
+    this._rowCount = oldRowCount + nrows - 1;
+
+    // If we didn't reach the requested row, we must be done.
+    if (this._rowCount < endRow) {
+      this._doneParsing = true;
+    }
+
+    // Copy the new offsets into a new row offset array.
+    let oldRowOffsets = this._rowOffsets;
+    this._rowOffsets = new Uint32Array(this._rowCount);
+    this._rowOffsets.set(oldRowOffsets);
+    this._rowOffsets.set(offsets, oldRowCount - 1);
+
+    // Expand the column offsets array if needed
 
     // If the full column offsets array is small enough, build a cache big
     // enough for all column offsets. We allocate up to 128 megabytes:
     // 128*(2**20 bytes/M)/(4 bytes/entry) = 33554432 entries.
-    if (nrows * ncols <= 33554432) {
-      this._columnOffsets = new Uint32Array(ncols * nrows);
-    } else {
-      // If not, then our cache size is the maximum number of rows we'll get
-      // from the cache at a time.
-      this._columnOffsets = new Uint32Array(ncols * this._maxCacheGet);
-    }
+    let maxColumnOffsetsRows = Math.floor(33554432 / this._columnCount);
 
-    // Invalidate the entire cache.
-    this._columnOffsets.fill(0xFFFFFFFF);
-    this._columnOffsetsStartingRow = 0;
+    // We need to expand the column offset array if we were storing all column
+    // offsets before. Check to see if the previous size was small enough that
+    // we stored all column offsets.
+    if (oldRowCount <= maxColumnOffsetsRows) {
+      // Check to see if the new column offsets array is small enough to still
+      // store, or if we should cut over to a small cache.
+      if (this._rowCount <= maxColumnOffsetsRows) {
+        // Expand the existing column offset array for new column offsets.
+        let oldColumnOffsets = this._columnOffsets;
+        this._columnOffsets = new Uint32Array(this._rowCount * this._columnCount);
+        this._columnOffsets.set(oldColumnOffsets);
+        this._columnOffsets.fill(0xFFFFFFFF, oldColumnOffsets.length);
+      } else {
+        // If not, then our cache size is at most the maximum number of rows we
+        // fill in the cache at a time.
+        let oldColumnOffsets = this._columnOffsets;
+        this._columnOffsets = new Uint32Array(Math.min(this._maxCacheGet, maxColumnOffsetsRows) * this._columnCount);
 
-    // Update the column and row counts.
-    let oldRowCount = this._rowCount;
-    this._columnCount = ncols;
-    this._rowCount = nrows;
+        // Fill in the entries we already have.
+        this._columnOffsets.set(oldColumnOffsets.subarray(0, this._columnOffsets.length));
 
-    // Emit the model changed signal.
-    if (oldRowCount !== undefined && oldRowCount < nrows) {
-      // If we have more rows than before, emit the rows-inserted change signal.
-      let firstIndex = oldRowCount + 1;
-      if (this._header.length > 0) {
-        firstIndex -= 1;
+        // Invalidate the rest of the entries.
+        this._columnOffsets.fill(0xFFFFFFFF, oldColumnOffsets.length);
+        this._columnOffsetsStartingRow = 0;
       }
-      this.emitChanged({
-        type: 'rows-inserted',
-        region: 'body',
-        index: firstIndex,
-        span: nrows - oldRowCount
-      });
-    } else {
-      // Otherwise, emit the full model reset change signal.
-      this.emitChanged({
-        type: 'model-reset',
-        region: 'body',
-      });
     }
+
+    // We have more rows than before, so emit the rows-inserted change signal.
+    let firstIndex = oldRowCount;
+    if (this._header.length > 0) {
+      firstIndex -= 1;
+    }
+    this.emitChanged({
+      type: 'rows-inserted',
+      region: 'body',
+      index: firstIndex,
+      span: this._rowCount - oldRowCount
+    });
   }
 
   /**
@@ -391,48 +429,103 @@ class DSVModel extends DataModel implements IDisposable {
    * parse the full data string asynchronously.
    */
   private _parseAsync() {
-    // Cancel any previously-scheduled delayed parsing.
-    if (this._delayedParse !== 0) {
-      clearTimeout(this._delayedParse);
-      this._delayedParse = 0;
-    }
+    let currentRows = 500;
+    let chunkRows = 200000;
+    let delay = 20; // milliseconds
 
-    // Try parsing the first 500 rows to give us the start of the data right away.
-    try {
-      this._computeOffsets(500);
-    } catch (e) {
-      // Sometimes the data string cannot be parsed with the full parser (for
-      // example, we may have the wrong delimiter). In these cases, fall back to
-      // the simpler parser so we can show something.
-      if (this._parser === 'quotes') {
-        console.warn(e);
-        this._parser = 'noquotes';
-        this._computeOffsets(500);
-      } else {
-        throw e;
-      }
-    }
+    let id = '' + Math.random();
+    let startid = `start parse ${id}`;
+    let endid = `end parse ${id}`;
+    let measureid = `parse time ${id}`;
 
-    // If we didn't get 500 rows from the string, then we must have parsed the
-    // entire string, so just return now.
-    if (this._rowCount < 500) {
-      return;
-    }
+    this._resetParser();
 
-    // Parse full data string, delayed by a few milliseconds to give the UI a chance to draw first.
-    this._delayedParse = window.setTimeout(() => {
+    // Define a function to parse a chunk up to and including endRow.
+    let parseChunk = (endRow: number, startid: string, endid: string, measureid: string) => {
+      performance.mark(startid);
+      let start = performance.now();
       try {
-        this._computeOffsets();
+        this._computeRowOffsets(endRow);
       } catch (e) {
+        // Sometimes the data string cannot be parsed with the full parser (for
+        // example, we may have the wrong delimiter). In these cases, fall back to
+        // the simpler parser so we can show something.
         if (this._parser === 'quotes') {
           console.warn(e);
           this._parser = 'noquotes';
-          this._computeOffsets();
+          this._resetParser();
+          this._computeRowOffsets(endRow);
         } else {
           throw e;
         }
       }
-    }, 50);
+      let end = performance.now();
+      performance.mark(endid);
+      performance.measure(measureid, startid, endid);
+      console.log(`Parsed up to row ${endRow} in ${Math.round(end - start)}ms`);
+      return this._doneParsing;
+    };
+
+    let wallclockstart = performance.now();
+
+    // Try parsing the first rows to give us the start of the data right away.
+    let done = parseChunk(currentRows, startid, endid, measureid);
+
+    // If we are done, return early.
+    if (done) {
+      let wallclockend = performance.now();
+      console.log(`Wall clock time parsing ${id}: ${Math.round(wallclockend - wallclockstart)}ms`);
+      return;
+    }
+
+    let that = this;
+    // Define a function to recursively parse the next chunk after a delay.
+    function delayedParse() {
+      let newEnd = currentRows + chunkRows;
+      if (chunkRows < 1000000) {
+        chunkRows *= 2;
+      }
+
+      let done = parseChunk(newEnd, startid, endid, measureid);
+      currentRows = newEnd;
+      if (!done) {
+        window.setTimeout(delayedParse, delay);
+      } else {
+        let wallclockend = performance.now();
+        console.log(`Wall clock time parsing ${id}: ${Math.round(wallclockend - wallclockstart)}ms`);
+
+        // Compute stats
+        let measures = performance.getEntriesByName(measureid, 'measure');
+        let cputime = 0;
+        measures.forEach( (i: any) => { cputime += i.duration; });
+        console.log(`Total time parsing: ${Math.round(cputime)}ms`);
+
+        that._resetParser();
+        // Time a full parse for comparison
+        parseChunk(10000000, startid + ' FULL', endid + ' FULL', measureid + ' FULL');
+
+
+      }
+    }
+
+    // Parse full data string in chunks, delayed by a few milliseconds to give the UI a chance to draw.
+    this._delayedParse = window.setTimeout(delayedParse, delay);
+  }
+
+  private _resetParser() {
+    this._columnCount = undefined;
+
+    // First row offset is *always* 0.
+    this._rowOffsets = new Uint32Array(1);
+    this._rowCount = 1;
+
+    this._columnOffsets = new Uint32Array(0);
+    this._doneParsing = false;
+    if (this._delayedParse !== 0) {
+      clearTimeout(this._delayedParse);
+      this._delayedParse = 0;
+    }
+    this.emitChanged({ type: 'model-reset' });
   }
 
   // Parser settings
@@ -444,7 +537,7 @@ class DSVModel extends DataModel implements IDisposable {
 
   // Data values
   private _data: string;
-  private _rowCount: number;
+  private _rowCount: number = 1;
   private _columnCount: number;
 
   // Cache information
@@ -459,11 +552,11 @@ class DSVModel extends DataModel implements IDisposable {
    * The index of the first character in the data string for row r, column c is
    * _columnOffsets[(r-this._columnOffsetsStartingRow)*numColumns+c]
    */
-  private _columnOffsets: Uint32Array;
+  private _columnOffsets: Uint32Array = new Uint32Array(0);
   /**
    * The row that _columnOffsets[0] represents.
    */
-  private _columnOffsetsStartingRow: number;
+  private _columnOffsetsStartingRow: number = 0;
   /**
    * The maximum number of rows to parse when there is a cache miss.
    */
@@ -471,10 +564,11 @@ class DSVModel extends DataModel implements IDisposable {
   /**
    * The index for the start of each row.
    */
-  private _rowOffsets: Uint32Array;
+  private _rowOffsets: Uint32Array = new Uint32Array(1);
 
   // Bookkeeping variables.
   private _delayedParse: number;
+  private _doneParsing: boolean = false;
   private _isDisposed: boolean = false;
 }
 
