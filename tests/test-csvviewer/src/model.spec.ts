@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/csvviewer';
 
 
-
+/* tslint:disable:no-var-requires */
 const CSV_TEST_FILES = [
   ['comma_in_quotes',
    require('csv-spectrum/csvs/comma_in_quotes.csv'),
@@ -54,6 +54,7 @@ const CSV_TEST_FILES = [
    require('csv-spectrum/csvs/utf8.csv'),
    require('csv-spectrum/json/utf8.json')]
 ];
+/* tslint:enable:no-var-requires */
 
 
 describe('csvviewer/model', () => {
