@@ -430,7 +430,7 @@ class DSVModel extends DataModel implements IDisposable {
    */
   private _parseAsync() {
     let currentRows = 500;
-    let chunkRows = 1000000;
+    let chunkRows = 10000000;
     let delay = 20; // milliseconds
 
     let id = '' + Math.random();
