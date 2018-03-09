@@ -64,13 +64,13 @@ describe('csvviewer/model', () => {
     describe('#constructor()', () => {
 
       it('should instantiate a `DSVModel`', () => {
-        let d = new DSVModel({data: '1,2,3\n4,5,6\n', delimiter: ','});
+        let d = new DSVModel({data: 'a,b,c\nd,e,f\n', delimiter: ','});
         expect(d.rowCount('column-header')).to.be(1);
         expect(d.rowCount('body')).to.be(1);
         expect(d.columnCount('row-header')).to.be(1);
         expect(d.columnCount('body')).to.be(3);
-        expect([0, 1, 2].map(i => d.data('column-header', 0, i))).to.eql(['1', '2', '3']);
-        expect([0, 1, 2].map(i => d.data('body', 0, i))).to.eql(['4', '5', '6']);
+        expect([0, 1, 2].map(i => d.data('column-header', 0, i))).to.eql(['a', 'b', 'c']);
+        expect([0, 1, 2].map(i => d.data('body', 0, i))).to.eql(['d', 'e', 'f']);
       });
 
     });
@@ -92,7 +92,102 @@ describe('csvviewer/model', () => {
         }
         expect(values).to.eql(answer);
       }
+    });
 
+    it('handles tab-separated data', () => {
+      let d = new DSVModel({data: 'a\tb\tc\nd\te\tf\n', delimiter: '\t'});
+      expect(d.rowCount('column-header')).to.be(1);
+      expect(d.rowCount('body')).to.be(1);
+      expect(d.columnCount('row-header')).to.be(1);
+      expect(d.columnCount('body')).to.be(3);
+      expect([0, 1, 2].map(i => d.data('column-header', 0, i))).to.eql(['a', 'b', 'c']);
+      expect([0, 1, 2].map(i => d.data('body', 0, i))).to.eql(['d', 'e', 'f']);
+
+    });
+
+    it('handles not having a header', () => {
+      let d = new DSVModel({data: 'a,b,c\nd,e,f\n', delimiter: ',', header: false});
+      expect(d.rowCount('column-header')).to.be(1);
+      expect(d.rowCount('body')).to.be(2);
+      expect(d.columnCount('row-header')).to.be(1);
+      expect(d.columnCount('body')).to.be(3);
+      expect([0, 1, 2].map(i => d.data('column-header', 0, i))).to.eql(['1', '2', '3']);
+      expect([0, 1, 2].map(i => d.data('body', 0, i))).to.eql(['a', 'b', 'c']);
+      expect([0, 1, 2].map(i => d.data('body', 1, i))).to.eql(['d', 'e', 'f']);
+    });
+
+    it('handles CRLF row delimiter', () => {
+      let d = new DSVModel({data: 'a,b,c\r\nd,e,f\r\n', delimiter: ',', rowDelimiter: '\r\n'});
+      expect(d.rowCount('column-header')).to.be(1);
+      expect(d.rowCount('body')).to.be(1);
+      expect(d.columnCount('row-header')).to.be(1);
+      expect(d.columnCount('body')).to.be(3);
+      expect([0, 1, 2].map(i => d.data('column-header', 0, i))).to.eql(['a', 'b', 'c']);
+      expect([0, 1, 2].map(i => d.data('body', 0, i))).to.eql(['d', 'e', 'f']);
+    });
+
+    it('handles CR row delimiter', () => {
+      let d = new DSVModel({data: 'a,b,c\rd,e,f\r', delimiter: ',', rowDelimiter: '\r'});
+      expect(d.rowCount('column-header')).to.be(1);
+      expect(d.rowCount('body')).to.be(1);
+      expect(d.columnCount('row-header')).to.be(1);
+      expect(d.columnCount('body')).to.be(3);
+      expect([0, 1, 2].map(i => d.data('column-header', 0, i))).to.eql(['a', 'b', 'c']);
+      expect([0, 1, 2].map(i => d.data('body', 0, i))).to.eql(['d', 'e', 'f']);
+    });
+
+    it('can guess the row delimiter', () => {
+      let d = new DSVModel({data: 'a,b,c\rd,e,f\r', delimiter: ','});
+      expect(d.rowCount('column-header')).to.be(1);
+      expect(d.rowCount('body')).to.be(1);
+      expect(d.columnCount('row-header')).to.be(1);
+      expect(d.columnCount('body')).to.be(3);
+      expect([0, 1, 2].map(i => d.data('column-header', 0, i))).to.eql(['a', 'b', 'c']);
+      expect([0, 1, 2].map(i => d.data('body', 0, i))).to.eql(['d', 'e', 'f']);
+    });
+
+    it('handles a given quote character', () => {
+      let d = new DSVModel({data: `a,'b','c'\r'd',e,'f'\r`, delimiter: ',', quote: `'`});
+      expect(d.rowCount('column-header')).to.be(1);
+      expect(d.rowCount('body')).to.be(1);
+      expect(d.columnCount('row-header')).to.be(1);
+      expect(d.columnCount('body')).to.be(3);
+      expect([0, 1, 2].map(i => d.data('column-header', 0, i))).to.eql(['a', 'b', 'c']);
+      expect([0, 1, 2].map(i => d.data('body', 0, i))).to.eql(['d', 'e', 'f']);
+    });
+
+    it('handles a given quote character', () => {
+      let d = new DSVModel({
+        data: `'a\rx',b,'c'\r'd',e,'f'\r`,
+        delimiter: ',',
+        quote: `'`,
+        rowDelimiter: '\r',
+      });
+      expect(d.rowCount('column-header')).to.be(1);
+      expect(d.rowCount('body')).to.be(1);
+      expect(d.columnCount('row-header')).to.be(1);
+      expect(d.columnCount('body')).to.be(3);
+      expect([0, 1, 2].map(i => d.data('column-header', 0, i))).to.eql(['a\rx', 'b', 'c']);
+      expect([0, 1, 2].map(i => d.data('body', 0, i))).to.eql(['d', 'e', 'f']);
+    });
+
+    it('handles rows that are too short or too long', () => {
+      let data = `a,b,c\n,c,d,e,f\ng,h`;
+      let d = new DSVModel({
+        data,
+        delimiter: ',',
+        quoteParser: false
+      });
+      let dd: any = d as any;
+      console.log([Array.from(dd._columnOffsets), dd._columnCount]);
+      console.log(Array.from(dd._columnOffsets).map((i: any) => data[i]));
+      expect(d.rowCount('column-header')).to.be(1);
+      expect(d.rowCount('body')).to.be(2);
+      expect(d.columnCount('row-header')).to.be(1);
+      expect(d.columnCount('body')).to.be(3);
+      expect([0, 1, 2].map(i => d.data('column-header', 0, i))).to.eql(['a', 'b', 'c']);
+      expect([0, 1, 2].map(i => d.data('body', 0, i))).to.eql(['', 'c', 'd,e,f']);
+      expect([0, 1, 2].map(i => d.data('body', 1, i))).to.eql(['g', 'h', '']);
     });
 
   });
