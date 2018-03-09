@@ -1124,12 +1124,6 @@ namespace DocumentRegistry {
       iconClass: 'jp-MaterialIcon jp-SpreadsheetIcon'
     },
     {
-      name: 'xls',
-      displayName: 'Spreadsheet',
-      extensions: ['.xls'],
-      iconClass: 'jp-MaterialIcon jp-SpreadsheetIcon'
-    },
-    {
       name: 'r',
       displayName: 'R File',
       mimeTypes: ['text/x-rsrc'],

@@ -28,7 +28,7 @@ from jupyterlab.commands import (
     install_extension, uninstall_extension, list_extensions,
     build, link_package, unlink_package, build_check,
     disable_extension, enable_extension, get_app_info,
-    check_extension, _test_overlap
+    check_extension, _test_overlap, _get_core_data
 )
 
 here = os.path.dirname(os.path.abspath(__file__))
@@ -466,3 +466,66 @@ class TestExtension(TestCase):
 
         assert _test_overlap('*', '0.6') is None
         assert _test_overlap('<0.6', '0.1') is None
+
+    def test_install_compatible(self):
+        core_data = _get_core_data()
+        current_app_dep = core_data['dependencies']['@jupyterlab/application']
+        def _gen_dep(ver):
+            return { "dependencies": {
+                '@jupyterlab/application': ver
+            }}
+        def _mock_metadata(registry, name, logger):
+            assert name == 'mockextension'
+            return {
+                "name": name,
+                "versions": {
+                    "0.9.0": _gen_dep(current_app_dep),
+                    "1.0.0": _gen_dep(current_app_dep),
+                    "1.1.0": _gen_dep(current_app_dep),
+                    "2.0.0": _gen_dep('^2000.0.0'),
+                    "2.0.0-b0": _gen_dep(current_app_dep),
+                    "2.1.0-b0": _gen_dep('^2000.0.0'),
+                    "2.1.0": _gen_dep('^2000.0.0'),
+                }
+            }
+
+        def _mock_extract(self, source, tempdir):
+            data = dict(
+                name=source, version='2.1.0',
+                jupyterlab=dict(extension=True),
+                jupyterlab_extracted_files=['index.js'],
+            )
+            data.update(_gen_dep('^2000.0.0'))
+            info = dict(
+                source=source, is_dir=False, data=data,
+                name=source, version=data['version'],
+                filename='mockextension.tgz',
+                path=pjoin(tempdir, 'mockextension.tgz'),
+            )
+            return info
+
+        class Success(Exception):
+            pass
+
+        def _mock_install(self, name, *args, **kwargs):
+            assert name in ('mockextension', 'mockextension@1.1.0')
+            if name == 'mockextension@1.1.0':
+                raise Success()
+            return orig_install(self, name, *args, **kwargs)
+
+        p1 = patch.object(
+            commands,
+            '_fetch_package_metadata',
+            _mock_metadata)
+        p2 = patch.object(
+            commands._AppHandler,
+            '_extract_package',
+            _mock_extract)
+        p3 = patch.object(
+            commands._AppHandler,
+            '_install_extension',
+            _mock_install)
+        with p1, p2:
+            orig_install = commands._AppHandler._install_extension
+            with p3, pytest.raises(Success):
+                install_extension('mockextension')

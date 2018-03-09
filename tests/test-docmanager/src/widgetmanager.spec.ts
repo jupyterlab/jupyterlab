@@ -263,7 +263,7 @@ describe('@jupyterlab/docmanager', () => {
     describe('#setCaption()', () => {
 
       it('should set the title of the widget', (done) => {
-        context.save().then(() => {
+        context.initialize(true).then(() => {
           let widget = manager.createWidget(widgetFactory, context);
           widget.title.changed.connect(() => {
             expect(manager.methods).to.contain('setCaption');

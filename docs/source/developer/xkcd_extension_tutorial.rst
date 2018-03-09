@@ -196,7 +196,6 @@ should look something like the following:
      [449] ./~/@jupyterlab/theme-dark-extension/lib/index.js 800 bytes {1} [optional] [built]
      [450] ./~/@jupyterlab/theme-light-extension/lib/index.js 804 bytes {1} [optional] [built]
      [451] ./~/@jupyterlab/tooltip-extension/lib/index.js 5.61 kB {1} [optional] [built]
-     [452] ./~/@jupyterlab/vega2-extension/lib/index.js 6.19 kB {1} [optional] [built]
      [453] ./~/es6-promise/auto.js 179 bytes {1} [built]
      [454] /Users/foo/workspace/xkcd/lib/index.js 353 bytes {1} [optional] [built]
      [455] ./~/font-awesome/css/font-awesome.min.css 892 bytes {1} [built]

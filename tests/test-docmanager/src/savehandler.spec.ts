@@ -39,7 +39,7 @@ describe('docregistry/savehandler', () => {
   beforeEach(() => {
     context = new Context({ manager, factory, path: uuid() + '.txt' });
     handler = new SaveHandler({ context });
-    return context.save();
+    return context.initialize(true);
   });
 
   afterEach(() => {
@@ -146,7 +146,7 @@ describe('docregistry/savehandler', () => {
         // Lower the duration multiplier.
         (handler as any)._multiplier = 1;
         context.model.fromString('foo');
-        context.save().then(() => {
+        context.initialize(true).then(() => {
           setTimeout(() => {
             manager.contents.save(context.path, {
               type: factory.contentType,
@@ -169,7 +169,7 @@ describe('docregistry/savehandler', () => {
         // Lower the duration multiplier.
         (handler as any)._multiplier = 1;
         context.model.fromString('foo');
-        context.save().then(() => {
+        context.initialize(true).then(() => {
           context.fileChanged.connect(() => {
             expect(context.model.toString()).to.be('bar');
             done();

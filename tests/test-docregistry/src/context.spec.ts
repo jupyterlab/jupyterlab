@@ -70,7 +70,7 @@ describe('docregistry/context', () => {
           expect(args).to.be(newPath);
           done();
         });
-        context.save().then(() => {
+        context.initialize(true).then(() => {
           return manager.contents.rename(context.path, newPath);
         }).catch(done);
       });
@@ -86,7 +86,7 @@ describe('docregistry/context', () => {
           expect(args.path).to.be(path);
           done();
         });
-        context.save().catch(done);
+        context.initialize(true).catch(done);
       });
 
     });
@@ -99,7 +99,7 @@ describe('docregistry/context', () => {
           expect(context.isReady).to.be(true);
           done();
         }).catch(done);
-        context.save().catch(done);
+        context.initialize(true).catch(done);
       });
 
     });
@@ -108,7 +108,7 @@ describe('docregistry/context', () => {
 
       it('should resolve when the file is saved for the first time', (done) => {
         context.ready.then(done, done);
-        context.save().catch(done);
+        context.initialize(true).catch(done);
       });
 
       it('should resolve when the file is reverted for the first time', (done) => {
@@ -118,7 +118,7 @@ describe('docregistry/context', () => {
           content: 'foo'
         });
         context.ready.then(done, done);
-        context.revert().catch(done);
+        context.initialize(false).catch(done);
       });
 
     });
@@ -172,7 +172,7 @@ describe('docregistry/context', () => {
           expect(context.contentsModel.path).to.be(path);
           done();
         });
-        context.save().catch(done);
+        context.initialize(true).catch(done);
       });
 
     });
@@ -209,8 +209,10 @@ describe('docregistry/context', () => {
     describe('#save()', () => {
 
       it('should save the contents of the file to disk', () => {
-        context.model.fromString('foo');
-        return context.save().then(() => {
+        return context.initialize(true).then(() => {
+          context.model.fromString('foo');
+          return context.save();
+        }).then(() => {
           let opts: Contents.IFetchOptions = {
             format: factory.fileFormat,
             type: factory.contentType,
@@ -235,7 +237,7 @@ describe('docregistry/context', () => {
           input.value = newPath;
           acceptDialog();
         });
-        return context.save().then(() => {
+        return context.initialize(true).then(() => {
           return context.saveAs();
         }).then(() => {
           expect(context.path).to.be(newPath);
@@ -257,7 +259,7 @@ describe('docregistry/context', () => {
           format: factory.fileFormat,
           content: 'foo'
         }).then(() => {
-          return context.save();
+          return context.initialize(true);
         }).then(() => {
           return context.saveAs();
         }).then(() => {
@@ -281,7 +283,7 @@ describe('docregistry/context', () => {
           format: factory.fileFormat,
           content: 'foo'
         }).then(() => {
-          return context.save();
+          return context.initialize(true);
         }).then(() => {
           return context.saveAs();
         }).then(() => {
@@ -292,7 +294,7 @@ describe('docregistry/context', () => {
       it('should just save if the file name does not change', () => {
         acceptDialog();
         let path = context.path;
-        return context.save().then(() => {
+        return context.initialize(true).then(() => {
           return context.saveAs();
         }).then(() => {
           expect(context.path).to.be(path);
@@ -304,10 +306,9 @@ describe('docregistry/context', () => {
     describe('#revert()', () => {
 
       it('should revert the contents of the file to the disk', () => {
-        return manager.contents.save(context.path, {
-          type: factory.contentType,
-          format: factory.fileFormat,
-          content: 'foo'
+        return context.initialize(true).then(() => {
+          context.model.fromString('foo');
+          return context.save();
         }).then(() => {
           context.model.fromString('bar');
           return context.revert();
@@ -321,7 +322,7 @@ describe('docregistry/context', () => {
     describe('#createCheckpoint()', () => {
 
       it('should create a checkpoint for the file', () => {
-        return context.save().then(() => {
+        return context.initialize(true).then(() => {
           return context.createCheckpoint();
         }).then(model => {
           expect(model.id).to.be.ok();
@@ -334,7 +335,7 @@ describe('docregistry/context', () => {
     describe('#deleteCheckpoint()', () => {
 
       it('should delete the given checkpoint', () => {
-        return context.save().then(() => {
+        return context.initialize(true).then(() => {
           return context.createCheckpoint();
         }).then(model => {
           return context.deleteCheckpoint(model.id);
@@ -352,7 +353,7 @@ describe('docregistry/context', () => {
       it('should restore the value to the last checkpoint value', () => {
         context.model.fromString('bar');
         let id = '';
-        return context.save().then(() => {
+        return context.initialize(true).then(() => {
           return context.createCheckpoint();
         }).then(model => {
           context.model.fromString('foo');
@@ -373,7 +374,7 @@ describe('docregistry/context', () => {
 
       it('should list the checkpoints for the file', () => {
         let id = '';
-        return context.save().then(() => {
+        return context.initialize(true).then(() => {
           context.createCheckpoint().then(model => {
             id = model.id;
             return context.listCheckpoints();

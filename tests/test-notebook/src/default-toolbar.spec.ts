@@ -53,7 +53,7 @@ const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
 
 function startSession(context: DocumentRegistry.IContext<INotebookModel>): Promise<IClientSession> {
-  return context.save().then(() => {
+  return (context as any).initialize(true).then(() => {
     return context.ready;
   }).then(() => {
     return context.session.kernel.ready;
@@ -70,6 +70,7 @@ describe('@jupyterlab/notebook', () => {
   beforeEach(() => {
     return createNotebookContext().then(c => {
       context = c;
+      return context.initialize(true);
     });
   });
 

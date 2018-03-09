@@ -1,5 +1,5 @@
-
-# This file comes from https://github.com/podhmo/python-semver/blob/f0392c5567717ad001c058d80fa09887e482ad62/semver/__init__.py
+# -*- coding:utf-8 -*-
+# This file comes from https://github.com/podhmo/python-semver/blob/b42e9896e391e086b773fc621b23fa299d16b874/semver/__init__.py
 # 
 # It is licensed under the following license:
 # 
@@ -25,17 +25,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# -*- coding:utf-8 -*-
 import logging
-logger = logging.getLogger(__name__)
 import re
+logger = logging.getLogger(__name__)
+
 
 SEMVER_SPEC_VERSION = '2.0.0'
 
-try:
-    string_type = basestring # Python 2
-except NameError:
-    string_type = str # Python 3
 
 class _R(object):
     def __init__(self, i):
@@ -66,6 +62,7 @@ def list_get(xs, i):
         return xs[i]
     except IndexError:
         return None
+
 
 R = _R(0)
 src = Extendlist()
@@ -171,7 +168,7 @@ GTLT = R()
 src[GTLT] = '((?:<|>)?=?)'
 
 #  Something like "2.*" or "1.2.x".
-#  Note that "x.x" is a valid xRange identifer, meaning "any version"
+#  Note that "x.x" is a valid xRange identifier, meaning "any version"
 #  Only the first item is strictly required.
 XRANGEIDENTIFIERLOOSE = R()
 src[XRANGEIDENTIFIERLOOSE] = src[NUMERICIDENTIFIERLOOSE] + '|x|X|\\*'
@@ -182,18 +179,18 @@ XRANGEPLAIN = R()
 src[XRANGEPLAIN] = ('[v=\\s]*(' + src[XRANGEIDENTIFIER] + ')' +
                     '(?:\\.(' + src[XRANGEIDENTIFIER] + ')' +
                     '(?:\\.(' + src[XRANGEIDENTIFIER] + ')' +
-                    '(?:(' + src[PRERELEASE] + ')' +
-                    ')?)?)?')
+                    '(?:' + src[PRERELEASE] + ')?' +
+                    src[BUILD] + '?' +
+                    ')?)?')
 
 XRANGEPLAINLOOSE = R()
 src[XRANGEPLAINLOOSE] = ('[v=\\s]*(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
                          '(?:\\.(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
                          '(?:\\.(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
-                         '(?:(' + src[PRERELEASELOOSE] + ')' +
-                         ')?)?)?')
+                         '(?:' + src[PRERELEASELOOSE] + ')?' +
+                         src[BUILD] + '?' +
+                         ')?)?')
 
-#  >=2.x, for example, means >=2.0.0-0
-#  <1.x would be the same as "<1.0.0-0", though.
 XRANGE = R()
 src[XRANGE] = '^' + src[GTLT] + '\\s*' + src[XRANGEPLAIN] + '$'
 XRANGELOOSE = R()
@@ -306,6 +303,7 @@ def clean(version, loose):
     else:
         return None
 
+
 NUMERIC = re.compile("^\d+$")
 
 
@@ -315,7 +313,7 @@ def semver(version, loose):
             return version
         else:
             version = version.version
-    elif not isinstance(version, string_type):  # xxx:
+    elif not isinstance(version, str):  # xxx:
         raise ValueError("Invalid Version: {}".format(version))
 
     """
@@ -323,6 +321,8 @@ def semver(version, loose):
        return new SemVer(version, loose);
     """
     return SemVer(version, loose)
+
+
 make_semver = semver
 
 
@@ -371,7 +371,7 @@ class SemVer(object):
         return self.version
 
     def __repr__(self):
-        return "<SemVer {!r} >".format(self)
+        return "<SemVer {} >".format(self)
 
     def __str__(self):
         return self.version
@@ -424,37 +424,49 @@ class SemVer(object):
             else:
                 return compare_identifiers(str(a), str(b))
 
-    def inc(self, release):
-        self._inc(release)
-        i = -1
-        while len(self.prerelease) > 1 and self.prerelease[i] == 0:
-            self.prerelease.pop()
-        self.format()
-        return self
-
-    def _inc(self, release):
+    def inc(self, release, identifier=None):
         logger.debug("inc release %s %s", self.prerelease, release)
         if release == 'premajor':
-            self._inc("major")
-            self._inc("pre")
-        elif release == "preminor":
-            self._inc("minor")
-            self._inc("pre")
-        elif release == "prepatch":
-            self._inc("patch")
-            self._inc("pre")
-        elif release == 'prerelease':
-            if len(self.prerelease) == 0:
-                self._inc("patch")
-            self._inc("pre")
-        elif release == "major":
+            self.prerelease = []
+            self.patch = 0
+            self.minor = 0
             self.major += 1
-            self.minor = -1
+            self.inc('pre', identifier=identifier)
+        elif release == "preminor":
+            self.prerelease = []
+            self.patch = 0
             self.minor += 1
+            self.inc('pre', identifier=identifier)
+        elif release == "prepatch":
+            # If this is already a prerelease, it will bump to the next version
+            # drop any prereleases that might already exist, since they are not
+            # relevant at this point.
+            self.prerelease = []
+            self.inc('patch', identifier=identifier)
+            self.inc('pre', identifier=identifier)
+        elif release == 'prerelease':
+            # If the input is a non-prerelease version, this acts the same as
+            # prepatch.
+            if len(self.prerelease) == 0:
+                self.inc("patch", identifier=identifier)
+            self.inc("pre", identifier=identifier)
+        elif release == "major":
+            # If this is a pre-major version, bump up to the same major version.
+            # Otherwise increment major.
+            # 1.0.0-5 bumps to 1.0.0
+            # 1.1.0 bumps to 2.0.0
+            if self.minor != 0 or self.patch != 0 or len(self.prerelease) == 0:
+                self.major += 1
+            self.minor = 0
             self.patch = 0
             self.prerelease = []
         elif release == "minor":
-            self.minor += 1
+            # If this is a pre-minor version, bump up to the same minor version.
+            # Otherwise increment minor.
+            # 1.2.0-5 bumps to 1.2.0
+            # 1.2.1 bumps to 1.3.0
+            if self.patch != 0 or len(self.prerelease) == 0:
+                self.minor += 1
             self.patch = 0
             self.prerelease = []
         elif release == "patch":
@@ -478,16 +490,27 @@ class SemVer(object):
                         self.prerelease[i] += 1
                         i -= 2
                     i -= 1
-                if i == -1:  # didn't increment anything
-                    self.prerelease.append(0)
+                # ## this is needless code in python ##
+                # if i == -1:  # didn't increment anything
+                #     self.prerelease.append(0)
+            if identifier is not None:
+                # 1.2.0-beta.1 bumps to 1.2.0-beta.2,
+                # 1.2.0-beta.fooblz or 1.2.0-beta bumps to 1.2.0-beta.0
+                if self.prerelease[0] == identifier:
+                    if not isinstance(self.prerelease[1], int):
+                        self.prerelease = [identifier, 0]
+                else:
+                    self.prerelease = [identifier, 0]
         else:
             raise ValueError('invalid increment argument: {}'.format(release))
+        self.format()
+        self.raw = self.version
         return self
 
 
-def inc(version, release, loose):  # wow!
+def inc(version, release, loose, identifier=None):  # wow!
     try:
-        return make_semver(version, loose).inc(release).version
+        return make_semver(version, loose).inc(release, identifier=identifier).version
     except Exception as e:
         logger.debug(e, exc_info=5)
         return None
@@ -529,13 +552,32 @@ def rcompare(a, b, loose):
     return compare(b, a, loose)
 
 
+def make_key_function(loose):
+    def key_function(version):
+        v = make_semver(version, loose)
+        key = (v.major, v.minor, v.patch)
+        if v.prerelease:
+            key = key + tuple(v.prerelease)
+        else:
+            #  NOT having a prerelease is > having one
+            key = key + (float('inf'),)
+
+        return key
+    return key_function
+
+loose_key_function = make_key_function(True)
+full_key_function = make_key_function(True)
+
+
 def sort(list, loose):
-    list.sort(lambda a, b: compare(a, b, loose))
+    keyf = loose_key_function if loose else full_key_function
+    list.sort(key=keyf)
     return list
 
 
 def rsort(list, loose):
-    list.sort(lambda a, b: rcompare(a, b, loose))
+    keyf = loose_key_function if loose else full_key_function
+    list.sort(key=keyf, reverse=True)
     return list
 
 
@@ -595,6 +637,8 @@ def comparator(comp, loose):
     # if (!(this instanceof Comparator))
     #   return new Comparator(comp, loose)
     return Comparator(comp, loose)
+
+
 make_comparator = comparator
 
 ANY = object()
@@ -630,17 +674,6 @@ class Comparator(object):
             self.semver = ANY
         else:
             self.semver = semver(m.group(2), self.loose)
-            #  <1.2.3-rc DOES allow 1.2.3-beta (has prerelease)
-            #  >=1.2.3 DOES NOT allow 1.2.3-beta
-            #  <=1.2.3 DOES allow 1.2.3-beta
-            #  However, <1.2.3 does NOT allow 1.2.3-beta,
-            #  even though `1.2.3-beta < 1.2.3`
-            #  The assumption is that the 1.2.3 version has something you
-            #  *don't* want, so we push the prerelease down to the minimum.
-            if (self.operator == '<' and len(self.semver.prerelease) >= 0):
-                self.semver.prerelease = ["0"]
-                self.semver.format()
-                logger.debug("Comparator.parse semver %s", self.semver)
 
     def __repr__(self):
         return '<SemVer Comparator "{}">'.format(self)
@@ -671,7 +704,7 @@ class Range(object):
         #  First, split based on boolean or ||
         self.raw = range_
         xs = [self.parse_range(r.strip()) for r in re.split(r"\s*\|\|\s*", range_)]
-        self.set = [r for r in xs if len(r) >= 0]
+        self.set = [r for r in xs if r]
 
         if not len(self.set):
             raise ValueError("Invalid SemVer Range: {}".format(range_))
@@ -728,8 +761,12 @@ class Range(object):
         return set_
 
     def test(self, version):
-        if version is None:  # xxx
+        if not version:  # xxx
             return False
+
+        if isinstance(version, str):
+            version = make_semver(version, loose=self.loose)
+
         for e in self.set:
             if test_set(e, version):
                 return True
@@ -788,18 +825,18 @@ def replace_tilde(comp, loose):
         if is_x(M):
             ret = ""
         elif is_x(m):
-            ret = '>=' + M + '.0.0-0 <' + str(int(M) + 1) + '.0.0-0'
+            ret = '>=' + M + '.0.0 <' + str(int(M) + 1) + '.0.0'
         elif is_x(p):
-            # ~1.2 == >=1.2.0- <1.3.0-
-            ret = '>=' + M + '.' + m + '.0-0 <' + M + '.' + str(int(m) + 1) + '.0-0'
+            # ~1.2 == >=1.2.0 <1.3.0
+            ret = '>=' + M + '.' + m + '.0 <' + M + '.' + str(int(m) + 1) + '.0'
         elif pr:
             logger.debug("replaceTilde pr %s", pr)
             if (pr[0] != "-"):
                 pr = '-' + pr
-            ret = '>=' + M + '.' + m + '.' + p + pr +' <' + M + '.' + str(int(m) + 1) + '.0-0'
+            ret = '>=' + M + '.' + m + '.' + p + pr + ' <' + M + '.' + str(int(m) + 1) + '.0'
         else:
-            #  ~1.2.3 == >=1.2.3-0 <1.3.0-0
-            ret = '>=' + M + '.' + m + '.' + p + '-0' +' <' + M + '.' + str(int(m) + 1) + '.0-0'
+            #  ~1.2.3 == >=1.2.3 <1.3.0
+            ret = '>=' + M + '.' + m + '.' + p + ' <' + M + '.' + str(int(m) + 1) + '.0'
         logger.debug('tilde return, %s', ret)
         return ret
     return r.sub(repl, comp)
@@ -830,31 +867,31 @@ def replace_caret(comp, loose):
         if is_x(M):
             ret = ""
         elif is_x(m):
-            ret = '>=' + M + '.0.0-0 <' + str((int(M) + 1)) + '.0.0-0'
+            ret = '>=' + M + '.0.0 <' + str((int(M) + 1)) + '.0.0'
         elif is_x(p):
             if M == "0":
-                ret = '>=' + M + '.' + m + '.0-0 <' + M + '.' + str((int(m) + 1)) + '.0-0'
+                ret = '>=' + M + '.' + m + '.0 <' + M + '.' + str((int(m) + 1)) + '.0'
             else:
-                ret = '>=' + M + '.' + m + '.0-0 <' + str(int(M) + 1) + '.0.0-0'
+                ret = '>=' + M + '.' + m + '.0 <' + str(int(M) + 1) + '.0.0'
         elif pr:
             logger.debug('replaceCaret pr %s', pr)
             if pr[0] != "-":
                 pr = "-" + pr
             if M == "0":
                 if m == "0":
-                    ret = '=' + M + '.' + m + '.' + (p or "") + pr
+                    ret = '>=' + M + '.' + m + '.' + (p or "") + pr + ' <' + M + '.' + m + "." + str(int(p or 0) + 1)
                 else:
-                    ret = '>=' + M + '.' + m + '.' + (p or "") + pr +' <' + M + '.' + str(int(m) + 1) + '.0-0'
+                    ret = '>=' + M + '.' + m + '.' + (p or "") + pr + ' <' + M + '.' + str(int(m) + 1) + '.0'
             else:
-                ret = '>=' + M + '.' + m + '.' + (p or "") + pr + ' <' + str(int(M) + 1) + '.0.0-0'
+                ret = '>=' + M + '.' + m + '.' + (p or "") + pr + ' <' + str(int(M) + 1) + '.0.0'
         else:
             if M == "0":
                 if m == "0":
-                    ret = '=' + M + '.' + m + '.' + (p or "")
+                    ret = '>=' + M + '.' + m + '.' + (p or "") + ' <' + M + '.' + m + "." + str(int(p or 0) + 1)
                 else:
-                    ret = '>=' + M + '.' + m + '.' + (p or "") + '-0' + ' <' + M + '.' + str((int(m) + 1)) + '.0-0'
+                    ret = '>=' + M + '.' + m + '.' + (p or "") + ' <' + M + '.' + str((int(m) + 1)) + '.0'
             else:
-                ret = '>=' + M + '.' + m + '.' + (p or "") + '-0' +' <' + str(int(M) + 1) + '.0.0-0'
+                ret = '>=' + M + '.' + m + '.' + (p or "") + ' <' + str(int(M) + 1) + '.0.0'
         logger.debug('caret return %s', ret)
         return ret
 
@@ -889,41 +926,45 @@ def replace_xrange(comp, loose):
             gtlt = ""
 
         logger.debug("xrange gtlt=%s any_x=%s", gtlt, any_x)
-        if gtlt and any_x:
+        if xM:
+            if gtlt == '>' or gtlt == '<':
+                # nothing is allowed
+                ret = '<0.0.0'
+            else:
+                ret = '*'
+        elif gtlt and any_x:
             # replace X with 0, and then append the -0 min-prerelease
-            if xM:
-                M = 0
             if xm:
                 m = 0
             if xp:
                 p = 0
 
             if gtlt == ">":
-                #  >1 => >=2.0.0-0
-                #  >1.2 => >=1.3.0-0
-                #  >1.2.3 => >= 1.2.4-0
+                #  >1 => >=2.0.0
+                #  >1.2 => >=1.3.0
+                #  >1.2.3 => >= 1.2.4
                 gtlt = ">="
-                if xM:
-                    #  not change
-                    pass
-                elif xm:
+                if xm:
                     M = int(M) + 1
                     m = 0
                     p = 0
                 elif xp:
                     m = int(m) + 1
                     p = 0
-            ret = gtlt + str(M) + '.' + str(m) + '.' + str(p) + '-0'
-        elif xM:
-            #  allow any
-            ret = "*"
+            elif gtlt == '<=':
+                # <=0.7.x is actually <0.8.0, since any 0.7.x should
+                # pass.  Similarly, <=7.x is actually <8.0.0, etc.
+                gtlt = '<'
+                if xm:
+                    M = int(M) + 1
+                else:
+                    m = int(m) + 1
+
+            ret = gtlt + str(M) + '.' + str(m) + '.' + str(p)
         elif xm:
-            #  append '-0' onto the version, otherwise
-            #  '1.x.x' matches '2.0.0-beta', since the tag
-            #  *lowers* the version value
-            ret = '>=' + M + '.0.0-0 <' + str(int(M) + 1) + '.0.0-0'
+            ret = '>=' + M + '.0.0 <' + str(int(M) + 1) + '.0.0'
         elif xp:
-            ret = '>=' + M + '.' + m + '.0-0 <' + M + '.' + str(int(m) + 1) + '.0-0'
+            ret = '>=' + M + '.' + m + '.0 <' + M + '.' + str(int(m) + 1) + '.0'
         logger.debug('xRange return %s', ret)
 
         return ret
@@ -940,26 +981,26 @@ def replace_stars(comp, loose):
 
 #  This function is passed to string.replace(re[HYPHENRANGE])
 #  M, m, patch, prerelease, build
-#  1.2 - 3.4.5 => >=1.2.0-0 <=3.4.5
-#  1.2.3 - 3.4 => >=1.2.0-0 <3.5.0-0 Any 3.4.x will do
-#  1.2 - 3.4 => >=1.2.0-0 <3.5.0-0
+#  1.2 - 3.4.5 => >=1.2.0 <=3.4.5
+#  1.2.3 - 3.4 => >=1.2.0 <3.5.0 Any 3.4.x will do
+#  1.2 - 3.4 => >=1.2.0 <3.5.0
 def hyphen_replace(mob):
     from_, fM, fm, fp, fpr, fb, to, tM, tm, tp, tpr, tb = mob.groups()
     if is_x(fM):
         from_ = ""
     elif is_x(fm):
-        from_ = '>=' + fM + '.0.0-0'
+        from_ = '>=' + fM + '.0.0'
     elif is_x(fp):
-        from_ = '>=' + fM + '.' + fm + '.0-0'
+        from_ = '>=' + fM + '.' + fm + '.0'
     else:
         from_ = ">=" + from_
 
     if is_x(tM):
         to = ""
     elif is_x(tm):
-        to = '<' + str(int(tM) + 1) + '.0.0-0'
+        to = '<' + str(int(tM) + 1) + '.0.0'
     elif is_x(tp):
-        to = '<' + tM + '.' + str(int(tm) + 1) + '.0-0'
+        to = '<' + tM + '.' + str(int(tm) + 1) + '.0'
     elif tpr:
         to = '<=' + tM + '.' + tm + '.' + tp + '-' + tpr
     else:
@@ -971,10 +1012,25 @@ def test_set(set_, version):
     for e in set_:
         if not e.test(version):
             return False
+    if len(version.prerelease) > 0:
+        # Find the set of versions that are allowed to have prereleases
+        # For example, ^1.2.3-pr.1 desugars to >=1.2.3-pr.1 <2.0.0
+        # That should allow `1.2.3-pr.2` to pass.
+        # However, `1.2.4-alpha.notready` should NOT be allowed,
+        # even though it's within the range set by the comparators.
+        for e in set_:
+            if e.semver == ANY:
+                continue
+            if len(e.semver.prerelease) > 0:
+                allowed = e.semver
+                if allowed.major == version.major and allowed.minor == version.minor and allowed.patch == version.patch:
+                    return True
+        # Version has a -pre, but it's not one of the ones we like.
+        return False
     return True
 
 
-def satisfies(version, range_, loose):
+def satisfies(version, range_, loose=False):
     try:
         range_ = make_range(range_, loose)
     except Exception as e:
@@ -982,18 +1038,19 @@ def satisfies(version, range_, loose):
     return range_.test(version)
 
 
-def max_satisfying(versions, range_, loose):
-    xs = [version for version in versions if satisfies(version, range_, loose)]
-    if len(xs) <= 0:
+def max_satisfying(versions, range_, loose=False):
+    try:
+        range_ob = make_range(range_, loose=loose)
+    except:
         return None
-    selected = xs[0]
-    for x in xs[1:]:
-        try:
-            if rcompare(selected, x, loose) == 1:
-                selected = x
-        except ValueError:
-            logger.warn("{} is invalud version".format(x))
-    return selected
+    max_ = None
+    max_sv = None
+    for v in versions:
+        if range_ob.test(v):  # satisfies(v, range_, loose=loose)
+            if max_ is None or max_sv.compare(v) == -1:  # compare(max, v, true)
+                max_ = v
+                max_sv = make_semver(max_, loose=loose)
+    return max_
 
 
 def valid_range(range_, loose):

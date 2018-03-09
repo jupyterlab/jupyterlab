@@ -208,23 +208,27 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
   readonly urlResolver: IRenderMime.IResolver;
 
   /**
-   * Populate the contents of the model, either from
-   * disk or from the modelDB backend.
+   * Initialize the context.
    *
-   * @returns a promise that resolves upon model population.
+   * @param isNew - Whether it is a new file.
+   *
+   * @returns a promise that resolves upon initialization.
    */
-  fromStore(): Promise<void> {
+  initialize(isNew: boolean): Promise<void> {
+    if (isNew) {
+      return this._save();
+    }
     if (this._modelDB) {
       return this._modelDB.connected.then(() => {
         if (this._modelDB.isPrepopulated) {
-          this.save();
+          this._save();
           return void 0;
         } else {
-          return this.revert();
+          return this._revert();
         }
       });
     } else {
-      return this.revert();
+      return this._revert();
     }
   }
 
@@ -232,48 +236,8 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    * Save the document contents to disk.
    */
   save(): Promise<void> {
-    let model = this._model;
-    let content: JSONValue;
-    if (this._factory.fileFormat === 'json') {
-      content = model.toJSON();
-    } else {
-      content = model.toString();
-    }
-
-    let options = {
-      type: this._factory.contentType,
-      format: this._factory.fileFormat,
-      content
-    };
-
-    return this._manager.ready.then(() => {
-      if (!model.modelDB.isCollaborative) {
-        return this._maybeSave(options);
-      }
-      return this._manager.contents.save(this._path, options);
-    }).then(value => {
-      if (this.isDisposed) {
-        return;
-      }
-      model.dirty = false;
-      this._updateContentsModel(value);
-
-      if (!this._isPopulated) {
-        return this._populate();
-      }
-    }).catch(err => {
-      // If the save has been canceled by the user,
-      // throw the error so that whoever called save()
-      // can decide what to do.
-      if (err.message === 'Cancel') {
-        throw err;
-      }
-
-      // Otherwise show an error message and throw the error.
-      const localPath = this._manager.contents.localPath(this._path);
-      const name = PathExt.basename(localPath);
-      this._handleError(err, `File Save Error for ${name}`);
-      throw err;
+    return this.ready.then(() => {
+      return this._save();
     });
   }
 
@@ -281,7 +245,9 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    * Save the document to a different path chosen by the user.
    */
   saveAs(): Promise<void> {
-    return Private.getSavePath(this._path).then(newPath => {
+    return this.ready.then(() => {
+      return Private.getSavePath(this._path);
+    }).then(newPath => {
       if (this.isDisposed || !newPath) {
         return;
       }
@@ -306,42 +272,8 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    * Revert the document contents to disk contents.
    */
   revert(): Promise<void> {
-    let opts: Contents.IFetchOptions = {
-      format: this._factory.fileFormat,
-      type: this._factory.contentType,
-      content: true
-    };
-    let path = this._path;
-    let model = this._model;
-    return this._manager.ready.then(() => {
-      return this._manager.contents.get(path, opts);
-    }).then(contents => {
-      if (this.isDisposed) {
-        return;
-      }
-      let dirty = false;
-      if (contents.format === 'json') {
-        model.fromJSON(contents.content);
-      } else {
-        let content = contents.content;
-        // Convert line endings if necessary, marking the file
-        // as dirty.
-        if (content.indexOf('\r') !== -1) {
-          dirty = true;
-          content = content.replace(/\r\n|\r/g, '\n');
-        }
-        model.fromString(content);
-      }
-      this._updateContentsModel(contents);
-      model.dirty = dirty;
-      if (!this._isPopulated) {
-        return this._populate();
-      }
-    }).catch(err => {
-      const localPath = this._manager.contents.localPath(this._path);
-      const name = PathExt.basename(localPath);
-      this._handleError(err, `File Load Error for ${name}`);
-      throw err;
+    return this.ready.then(() => {
+      return this._revert();
     });
   }
 
@@ -478,6 +410,8 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    */
   private _populate(): Promise<void> {
     this._isPopulated = true;
+    this._isReady = true;
+    this._populatedPromise.resolve(void 0);
 
     // Add a checkpoint if none exists and the file is writable.
     return this._maybeCheckpoint(false).then(() => {
@@ -493,10 +427,103 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
         name,
         language: this._model.defaultKernelLanguage,
       };
-      return this.session.initialize();
-    }).then(() => {
-      this._isReady = true;
-      this._populatedPromise.resolve(void 0);
+      this.session.initialize();
+    });
+  }
+
+  /**
+   * Save the document contents to disk.
+   */
+  private _save(): Promise<void> {
+    let model = this._model;
+    let content: JSONValue;
+    if (this._factory.fileFormat === 'json') {
+      content = model.toJSON();
+    } else {
+      content = model.toString();
+    }
+
+    let options = {
+      type: this._factory.contentType,
+      format: this._factory.fileFormat,
+      content
+    };
+
+    return this._manager.ready.then(() => {
+      if (!model.modelDB.isCollaborative) {
+        return this._maybeSave(options);
+      }
+      return this._manager.contents.save(this._path, options);
+    }).then(value => {
+      if (this.isDisposed) {
+        return;
+      }
+      model.dirty = false;
+      this._updateContentsModel(value);
+
+      if (!this._isPopulated) {
+        return this._populate();
+      }
+    }).catch(err => {
+      // If the save has been canceled by the user,
+      // throw the error so that whoever called save()
+      // can decide what to do.
+      if (err.message === 'Cancel') {
+        throw err;
+      }
+
+      // Otherwise show an error message and throw the error.
+      const localPath = this._manager.contents.localPath(this._path);
+      const name = PathExt.basename(localPath);
+      this._handleError(err, `File Save Error for ${name}`);
+      throw err;
+    });
+  }
+
+
+  /**
+   * Revert the document contents to disk contents.
+   */
+  private _revert(): Promise<void> {
+    let opts: Contents.IFetchOptions = {
+      format: this._factory.fileFormat,
+      type: this._factory.contentType,
+      content: true
+    };
+    let path = this._path;
+    let model = this._model;
+    return this._manager.ready.then(() => {
+      return this._manager.contents.get(path, opts);
+    }).then(contents => {
+      if (this.isDisposed) {
+        return;
+      }
+      let dirty = false;
+      if (contents.format === 'json') {
+        model.fromJSON(contents.content);
+      } else {
+        let content = contents.content;
+        // Convert line endings if necessary, marking the file
+        // as dirty.
+        if (content.indexOf('\r') !== -1) {
+          dirty = true;
+          content = content.replace(/\r\n|\r/g, '\n');
+        }
+        model.fromString(content);
+      }
+      this._updateContentsModel(contents);
+      model.dirty = dirty;
+      if (!this._isPopulated) {
+        return this._populate();
+      }
+    }).catch(err => {
+      const localPath = this._manager.contents.localPath(this._path);
+      const name = PathExt.basename(localPath);
+      if (err.message === 'Invalid response: 400 bad format') {
+        err = new Error('JupyterLab is unable to open this file type.');
+      }
+      this._handleError(err, `File Load Error for ${name}`);
+      throw err;
     });
   }
 

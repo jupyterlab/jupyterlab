@@ -150,7 +150,7 @@ describe('@jupyterlab/notebook', () => {
           done();
         });
         panel.session.changeKernel({ name: 'echo' }).catch(done);
-        panel.context.save().catch(done);
+        (panel.context as any).initialize(true).catch(done);
       });
 
     });
@@ -177,7 +177,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should be the current kernel used by the panel', (done) => {
         let panel = createPanel(context);
-        context.save().catch(done);
+        context.initialize(true).catch(done);
         context.session.kernelChanged.connect(() => {
           expect(panel.session.kernel.name).to.be.ok();
           done();
@@ -251,7 +251,7 @@ describe('@jupyterlab/notebook', () => {
           expect(model.cells.canUndo).to.be(false);
           done();
         });
-        context.save();
+        context.initialize(true);
       });
 
     });
@@ -309,7 +309,7 @@ describe('@jupyterlab/notebook', () => {
       it('should be called when the path changes', (done) => {
         let panel = createPanel(context);
         panel.methods = [];
-        context.save().then(() => {
+        context.initialize(true).then(() => {
           return manager.contents.rename(context.path, uuid() + '.ipynb');
         }).catch(done);
         context.pathChanged.connect(() => {

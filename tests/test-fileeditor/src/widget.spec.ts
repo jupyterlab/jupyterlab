@@ -101,7 +101,7 @@ describe('fileeditorcodewrapper', () => {
       });
 
       it('should update the editor text when the model changes', (done) => {
-        context.save().catch(done);
+        context.initialize(true).catch(done);
         context.ready.then(() => {
           widget.context.model.fromString('foo');
           expect(widget.editor.model.value.text).to.be('foo');
@@ -146,7 +146,7 @@ describe('fileeditorcodewrapper', () => {
       });
 
       it('should update the editor text when the model changes', (done) => {
-        context.save().catch(done);
+        context.initialize(true).catch(done);
         context.ready.then(() => {
           widget.context.model.fromString('foo');
           expect(widget.editor.model.value.text).to.be('foo');
@@ -162,7 +162,7 @@ describe('fileeditorcodewrapper', () => {
           expect(widget.editor.model.mimeType).to.be('text/x-julia');
           done();
         });
-        context.save().then(() => {
+        context.initialize(true).then(() => {
           return manager.contents.rename(context.path, uuid() + '.jl');
         }).catch(done);
       });
@@ -177,13 +177,13 @@ describe('fileeditorcodewrapper', () => {
           expect(widget.title.label).to.be(path);
           done();
         });
-        context.save().then(() => {
+        context.initialize(true).then(() => {
           return manager.contents.rename(context.path, path);
         }).catch(done);
       });
 
       it('should add the dirty class when the model is dirty', (done) => {
-        context.save().catch(done);
+        context.initialize(true).catch(done);
         context.ready.then(() => {
           context.model.fromString('bar');
           expect(widget.title.className).to.contain('jp-mod-dirty');
