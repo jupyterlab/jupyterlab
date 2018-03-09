@@ -784,6 +784,7 @@ namespace CodeCell {
 
     return OutputArea.execute(code, cell.outputArea, session).then(msg => {
       model.executionCount = msg.content.execution_count;
+      model.proccessExecuteReplyMsg(msg);
       return msg;
     }).catch(e => {
       if (e.message === 'Canceled') {

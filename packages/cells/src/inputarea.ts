@@ -20,7 +20,7 @@ import {
 } from '@jupyterlab/codemirror';
 
 import {
-  ICellModel
+  ICellModel, ICodeCellModel, CodeCellModel
 } from './model';
 
 
@@ -48,6 +48,32 @@ const INPUT_AREA_EDITOR_CLASS = 'jp-InputArea-editor';
 /******************************************************************************
  * InputArea
  ******************************************************************************/
+
+
+class ExecutionTimeWidget extends Widget {
+  private _dispose: () => void;
+  constructor(model: ICodeCellModel) {
+    super();
+    const n = document.createElement('div');
+    this.node.appendChild(n);
+    n.textContent = JSON.stringify(model.executionTimes);
+    const slot = (_: any, executionTimes: any) => {
+      n.textContent = JSON.stringify(executionTimes);
+    };
+    model.executionTimesSignal.connect(slot);
+    this._dispose = () => {
+      model.executionTimesSignal.disconnect(slot);
+    };
+  }
+
+  dispose() {
+    if (this.isDisposed) {
+      return;
+    }
+    super.dispose();
+    this._dispose();
+  }
+}
 
 
 /**
@@ -78,6 +104,9 @@ class InputArea extends Widget {
     let layout = this.layout = new PanelLayout();
     layout.addWidget(prompt);
     layout.addWidget(editor);
+    if (model instanceof CodeCellModel) {
+      layout.addWidget(new ExecutionTimeWidget(model));
+    }
   }
 
   /**
