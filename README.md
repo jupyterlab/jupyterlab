@@ -165,7 +165,7 @@ JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by
 * Fernando Perez, UC Berkeley (co-creator, vision).
 * Ian Rose, UC Berkeley (Real-time collaboration, document architecture).
 * Saul Shanabrook, Quansight (general development, extensions)
-* Steven Silvester, Quansight (co-creator, release management, packaging,
+* Steven Silvester, JPMorgan Chase (co-creator, release management, packaging,
   prolific contributions throughout the code base).
 
 This list is provided to help provide context about who we are and how our team functions.
