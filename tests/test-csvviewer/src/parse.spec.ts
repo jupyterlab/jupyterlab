@@ -4,11 +4,13 @@
 import expect = require('expect.js');
 
 import {
-  parseDSV
+  parseDSVNoQuotes
 } from '@jupyterlab/csvviewer';
 
+// TODO: Get this working with the noquotes processor. There are plenty of errors still.
+let parseDSV = parseDSVNoQuotes;
 
-describe('csvviewer/parse', () => {
+describe.only('csvviewer/parse', () => {
 
   describe('parseDSV', () => {
 
