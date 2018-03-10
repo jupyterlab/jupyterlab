@@ -9,9 +9,9 @@ import {
 
 let parseDSV = parseDSVNoQuotes;
 
-describe('csvviewer/parse', () => {
+describe('csvviewer/parsenoquotes', () => {
 
-  describe('parseDSV', () => {
+  describe('parseDSVNoQuotes', () => {
 
     it('does basic parsing of csv files', () => {
       let data = `a,b,c,d\r\n0,1,2,3\r\n4,5,6,7`;
@@ -118,9 +118,6 @@ describe('csvviewer/parse', () => {
       // expect(results.offsets).to.eql([0, 8, 12]);
 
       results = parseDSV({...options, columnOffsets: true});
-      console.log(Array.from(results.offsets));
-      console.log(Array.from(results.offsets).map(i => data[i]));
-      console.log(Array.from(results.offsets).map((i, ind, arr) => data.slice(i, arr[ind + 1])));
 
       expect(results.nrows).to.eql(3);
       expect(results.ncols).to.eql(4);
@@ -137,9 +134,6 @@ describe('csvviewer/parse', () => {
       // expect(results.offsets).to.eql([0, 8, 12]);
 
       results = parseDSV({...options, columnOffsets: true});
-      console.log(Array.from(results.offsets));
-      console.log(Array.from(results.offsets).map(i => data[i]));
-      console.log(Array.from(results.offsets).map((i, ind, arr) => data.slice(i, arr[ind + 1])));
 
       expect(results.nrows).to.eql(3);
       expect(results.ncols).to.eql(4);
@@ -156,9 +150,6 @@ describe('csvviewer/parse', () => {
       // expect(results.offsets).to.eql([0, 8, 12]);
 
       results = parseDSV({...options, columnOffsets: true});
-      console.log(Array.from(results.offsets));
-      console.log(Array.from(results.offsets).map(i => data[i]));
-      console.log(Array.from(results.offsets).map((i, ind, arr) => data.slice(i, arr[ind + 1])));
 
       expect(results.nrows).to.eql(3);
       expect(results.ncols).to.eql(5);
@@ -175,9 +166,6 @@ describe('csvviewer/parse', () => {
       // expect(results.offsets).to.eql([0, 8, 12]);
 
       results = parseDSV({...options, columnOffsets: true});
-      console.log(Array.from(results.offsets));
-      console.log(Array.from(results.offsets).map(i => data[i]));
-      console.log(Array.from(results.offsets).map((i, ind, arr) => data.slice(i, arr[ind + 1])));
 
       expect(results.nrows).to.eql(3);
       expect(results.ncols).to.eql(5);
@@ -194,9 +182,6 @@ describe('csvviewer/parse', () => {
       // expect(results.offsets).to.eql([0, 8, 12]);
 
       results = parseDSV({...options, columnOffsets: true});
-      console.log(Array.from(results.offsets));
-      console.log(Array.from(results.offsets).map(i => data[i]));
-      console.log(Array.from(results.offsets).map((i, ind, arr) => data.slice(i, arr[ind + 1])));
 
       expect(results.nrows).to.eql(1);
       expect(results.ncols).to.eql(7);
@@ -212,9 +197,6 @@ describe('csvviewer/parse', () => {
       // expect(results.nrows).to.eql(3);
       // expect(results.offsets).to.eql([0, 8, 12]);
       results = parseDSV({...options, columnOffsets: true});
-      console.log(Array.from(results.offsets));
-      console.log(Array.from(results.offsets).map(i => data[i]));
-      console.log(Array.from(results.offsets).map((i, ind, arr) => data.slice(i, arr[ind + 1])));
 
       expect(results.nrows).to.eql(1);
       expect(results.ncols).to.eql(7);
@@ -231,10 +213,6 @@ describe('csvviewer/parse', () => {
       // expect(results.offsets).to.eql([0, 8, 12]);
 
       results = parseDSV({...options, columnOffsets: true});
-      console.log(Array.from(results.offsets));
-      console.log(Array.from(results.offsets).map(i => data[i]));
-      console.log(Array.from(results.offsets).map((i, ind, arr) => data.slice(i, arr[ind + 1])));
-
       expect(results.nrows).to.eql(1);
       expect(results.ncols).to.eql(1);
       expect(results.offsets).to.eql([0]);
@@ -245,3 +223,4 @@ describe('csvviewer/parse', () => {
 
 // console.log(Array.from(results.offsets));
 // console.log(Array.from(results.offsets).map(i => data[i]));
+// console.log(Array.from(results.offsets).map((i, ind, arr) => data.slice(i, arr[ind + 1])));
