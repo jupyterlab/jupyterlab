@@ -217,8 +217,39 @@ describe('csvviewer/parse', () => {
       expect(results.offsets).to.eql([0]);
     });
 
+    it('handles adding columns or merging columns as necessary', () => {
+      let data = `a,b,c\n,c,d,e,f\ng,h`;
+      let options = {data, rowDelimiter: '\n'};
+      let results;
+
+      // results = parseDSV({...options, columnOffsets: false});
+      // expect(results.nrows).to.eql(3);
+      // expect(results.offsets).to.eql([0, 8, 12]);
+
+      results = parseDSV({...options, columnOffsets: true});
+
+      expect(results.nrows).to.eql(3);
+      expect(results.ncols).to.eql(3);
+      expect(results.offsets).to.eql([0, 2, 4, 6, 7, 9, 15, 17, 18]);
+    });
+
+  });
+
+  describe('parseDSV quotes', () => {
+    it('does basic parsing of quoted csv files', () => {
+      let data = `first,"last",address,city,zip`;
+      let options = {data, rowDelimiter: '\n'};
+      let results;
+      results = parseDSV({...options, columnOffsets: true});
+
+      expect(results.nrows).to.eql(1);
+      expect(results.ncols).to.eql(5);
+      expect(results.offsets).to.eql([0, 6, 13, 21, 26]);
+    });
+
   });
 });
 
 // console.log(Array.from(results.offsets));
 // console.log(Array.from(results.offsets).map(i => data[i]));
+// console.log(Array.from(results.offsets).map((i, ind, arr) => data.slice(i, arr[ind + 1])));

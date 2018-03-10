@@ -218,6 +218,22 @@ describe('csvviewer/parsenoquotes', () => {
       expect(results.offsets).to.eql([0]);
     });
 
+    it('handles adding or deleting columns as necessary', () => {
+      let data = `a,b,c\n,c,d,e,f\ng,h`;
+      let options = {data, rowDelimiter: '\n'};
+      let results;
+
+      // results = parseDSV({...options, columnOffsets: false});
+      // expect(results.nrows).to.eql(3);
+      // expect(results.offsets).to.eql([0, 8, 12]);
+
+      results = parseDSVNoQuotes({...options, columnOffsets: true});
+
+      expect(results.nrows).to.eql(3);
+      expect(results.ncols).to.eql(3);
+      expect(results.offsets).to.eql([0, 2, 4, 6, 7, 9, 15, 17, 18]);
+    });
+
   });
 });
 
