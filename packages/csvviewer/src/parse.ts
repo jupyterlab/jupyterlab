@@ -340,7 +340,7 @@ function parseDSV(options: IParser.IOptions): IParser.IResults {
           char = data.charCodeAt(i);
         }
       } else {
-        while (i < endIndex - 1) {
+        while (i < endIndex) {
           char = data.charCodeAt(i);
           if (char === CH_DELIMITER || char === CH_LF || char === CH_CR) {
             break;
