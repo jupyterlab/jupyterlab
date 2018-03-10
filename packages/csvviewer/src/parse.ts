@@ -75,7 +75,8 @@ namespace IParser {
 
     /**
      * The starting index in the string for processing. Defaults to 0. This
-     * index should be the first character of a new row.
+     * index should be the first character of a new row. This must be less than
+     * data.length.
      */
     startIndex?: number;
 
@@ -173,8 +174,10 @@ function parseDSV(options: IParser.IOptions): IParser.IResults {
   // ncols will be set automatically if it is undefined.
   let ncols = options.ncols;
 
-  // Set up our return variables.
+  // The number of rows we've already parsed.
   let nrows = 0;
+
+  // The row or column offsets we return.
   let offsets = [];
 
   // Set up some useful local variables.
@@ -186,75 +189,45 @@ function parseDSV(options: IParser.IOptions): IParser.IResults {
   const endfield = new RegExp(`[${delimiter}${rowDelimiter}]`, 'g');
   const { QUOTED_FIELD, QUOTED_FIELD_QUOTE, UNQUOTED_FIELD, NEW_FIELD, NEW_ROW } = STATE;
   const { CR, LF, CRLF } = ROW_DELIMITER;
-  const rowDelimiterCode = (rowDelimiter === '\r\n' ? CRLF : (rowDelimiter === '\r' ? CR : LF));
+  const [rowDelimiterCode, rowDelimiterLength] = (rowDelimiter === '\r\n' ? [CRLF, 2] : (rowDelimiter === '\r' ? [CR, 1] : [LF, 1]));
 
   // Always start off at the beginning of a row.
   let state = NEW_ROW;
 
-  // We increment the index immediately in the loop, so decrement the start index here.
-  let i = startIndex - 1;
+  // Set up the starting index.
+  let i = startIndex;
+
+  // We initialize to 0 just in case we are asked to parse past the end of the
+  // string. In that case, we want the number of columns to be 0.
+  let col = 0;
 
   // Declare some useful temporaries
   let char;
-  let col;
 
   // Loop through the data string
-  while (i < endIndex - 1) {
-    // Move to the next character.
-    i++;
+  while (i < endIndex) {
+    // i is the index of a character in the state.
 
-    // Update return values based on state.
-    switch (state) {
-    case NEW_ROW:
-      // If we just parsed the first row and the ncols is undefined, set it to
-      // the number of columns we found in the first row.
-      if (nrows === 1 && ncols === undefined) {
-        ncols = col;
-      }
-
-      // Pad or truncate the column offsets if we are returning them so that
-      // each row has exactly the same number of columns.
-      if (columnOffsets === true && nrows > 0) {
-        if (col < ncols) {
-          // We didn't have enough columns, so add some more.
-          for (; col < ncols; col++) {
-            offsets.push(i);
-          }
-        } else if (col > ncols) {
-          // We had too many columns, so truncate them.
-          offsets.length = offsets.length - (col - ncols);
-        }
-      }
-
-      // Shortcut return if nrows reaches the maximum rows we are to parse.
-      if (nrows === maxRows) {
-        return {nrows, ncols: columnOffsets ? ncols : 0, offsets};
-      }
-
-      // Start a new row offset and update relevant variables.
+    // If we just hit a new row, and there are still characters left, push a new
+    // offset on and reset the column counter. We want this logic at the top of
+    // the while loop rather than the bottom because we don't want a trailing
+    // row delimiter at the end of the data to trigger a new row offset.
+    if (state === NEW_ROW) {
+      // Start a new row and reset the column counter.
       offsets.push(i);
-      nrows++;
       col = 1;
-      break;
-
-    case NEW_FIELD:
-      // If we are returning column offsets, log the current index.
-      if (columnOffsets === true) {
-        offsets.push(i);
-      }
-
-      // Update the column counter.
-      col++;
-      break;
-
-    default: break;
     }
+
+    // Below, we handle this character, modify the parser state and increment the index to be consistent.
 
     // Get the integer code for the current character, so the comparisons below
     // are faster.
     char = data.charCodeAt(i);
 
-    // Update the parser state.
+    // Update the parser state. This switch statement is responsible for
+    // updating the state to be consistent with the index i+1 (we increment i
+    // after the switch statement). In some situations, we may increment i
+    // inside this loop to skip over indices as a shortcut.
     switch (state) {
 
     // At the beginning of a row or field, we can have a quote, row delimiter, or field delimiter.
@@ -267,12 +240,17 @@ function parseDSV(options: IParser.IOptions): IParser.IResults {
         state = QUOTED_FIELD;
         break;
 
-      // A row delimiter means we are immediately starting a new row.
+      // A field delimiter means we are starting a new field.
+      case CH_DELIMITER:
+        state = NEW_FIELD;
+        break;
+
+      // A row delimiter means we are starting a new row.
       case CH_CR:
         if (rowDelimiterCode === CR) {
           state = NEW_ROW;
         } else if (rowDelimiterCode === CRLF && data.charCodeAt(i + 1) === CH_LF) {
-          // If we see an expected \r\n, then increment past the \n and start the new row.
+          // If we see an expected \r\n, then increment to the end of the delimiter.
           i++;
           state = NEW_ROW;
         } else {
@@ -285,11 +263,6 @@ function parseDSV(options: IParser.IOptions): IParser.IResults {
         } else {
           throw `string index ${i} (in row ${nrows}, column ${col}): line feed found, but row delimiter starts with a carriage return`;
         }
-        break;
-
-      // A field delimiter means we are immediately starting a new field.
-      case CH_DELIMITER:
-        state = NEW_FIELD;
         break;
 
       // Otherwise, we are starting an unquoted field.
@@ -311,7 +284,8 @@ function parseDSV(options: IParser.IOptions): IParser.IResults {
       break;
 
     // We just saw a quote in a quoted field. This could be the end of the
-    // field, or it could be a double quote (i.e., an escaped quote).
+    // field, or it could be a repeated quote (i.e., an escaped quote according
+    // to RFC 4180).
     case QUOTED_FIELD_QUOTE:
       switch (char) {
       // Another quote means we just saw an escaped quote, so we are still in
@@ -325,21 +299,24 @@ function parseDSV(options: IParser.IOptions): IParser.IResults {
       case CH_DELIMITER:
         state = NEW_FIELD;
         break;
+
+      // A row delimiter means we are starting a new row in the next index.
       case CH_CR:
         if (rowDelimiterCode === CR) {
           state = NEW_ROW;
         } else if (rowDelimiterCode === CRLF && data.charCodeAt(i + 1) === CH_LF) {
+          // If we see an expected \r\n, then increment to the end of the delimiter.
           i++;
           state = NEW_ROW;
         } else {
-          throw `string index ${i} (in row ${nrows}, column ${col}): carriage return found, but not as part of a row delimiter - A ${ data.charCodeAt(i + 1)}`;
+          throw `string index ${i} (in row ${nrows}, column ${col}): carriage return found, but not as part of a row delimiter C ${ data.charCodeAt(i + 1)}`;
         }
         break;
       case CH_LF:
         if (rowDelimiterCode === LF) {
           state = NEW_ROW;
         } else {
-          throw `string index ${i} (in row ${nrows}, column ${col}): line feed found at index ${i}, but row delimiter starts with a carriage return`;
+          throw `string index ${i} (in row ${nrows}, column ${col}): line feed found, but row delimiter starts with a carriage return`;
         }
         break;
 
@@ -352,9 +329,9 @@ function parseDSV(options: IParser.IOptions): IParser.IResults {
     // row or field delimiter.
     case UNQUOTED_FIELD:
       // Skip ahead to either the next field delimiter or possible start of a
-      // row delimiter (CR or LF). In some cases and browsers, the regex
-      // approach is faster by quite a bit, but in others, the loop is faster.
-      // More testing is needed to see which approach we want to keep.
+      // row delimiter (CR or LF). In some cases and different browsers, the
+      // regex approach is faster by quite a bit, but in others, the loop is
+      // faster. More testing is needed to see which approach we want to keep.
       if (regex) {
         endfield.lastIndex = i;
         let match = endfield.exec(data);
@@ -374,20 +351,21 @@ function parseDSV(options: IParser.IOptions): IParser.IResults {
 
       // Process the character we're seeing in an unquoted field.
       switch (char) {
-      // A row delimiter means we are starting a new field.
+      // A field delimiter means we are starting a new field.
       case CH_DELIMITER:
         state = NEW_FIELD;
         break;
 
-      // A row delimiter means we are starting a new row.
+      // A row delimiter means we are starting a new row in the next index.
       case CH_CR:
         if (rowDelimiterCode === CR) {
           state = NEW_ROW;
         } else if (rowDelimiterCode === CRLF && data.charCodeAt(i + 1) === CH_LF) {
+          // If we see an expected \r\n, then increment to the end of the delimiter.
           i++;
           state = NEW_ROW;
         } else {
-          throw `string index ${i} (in row ${nrows}, column ${col}): carriage return found, but not as part of a row delimiter B De ${rowDelimiterCode} ${ data.charCodeAt(i + 1)}`;
+          throw `string index ${i} (in row ${nrows}, column ${col}): carriage return found, but not as part of a row delimiter C ${ data.charCodeAt(i + 1)}`;
         }
         break;
       case CH_LF:
@@ -408,7 +386,82 @@ function parseDSV(options: IParser.IOptions): IParser.IResults {
     default:
       throw `string index ${i} (in row ${nrows}, column ${col}): state not recognized`;
     }
+
+    // Increment i to the next character index
+    i++;
+
+    // Update return values based on state.
+    switch (state) {
+    case NEW_ROW:
+      nrows++;
+
+      // If we just parsed the first row and the ncols is undefined, set it to
+      // the number of columns we found in the first row.
+      if (nrows === 1 && ncols === undefined) {
+        ncols = col;
+      }
+
+      // Pad or truncate the column offsets in the previous row if we are
+      // returning them.
+      if (columnOffsets === true) {
+        if (col < ncols) {
+          // We didn't have enough columns, so add some more column offsets that
+          // point to just before the row delimiter we just saw.
+          for (; col < ncols; col++) {
+            offsets.push(i - rowDelimiterLength);
+          }
+        } else if (col > ncols) {
+          // We had too many columns, so truncate them.
+          offsets.length = offsets.length - (col - ncols);
+        }
+      }
+
+      // Shortcut return if nrows reaches the maximum rows we are to parse.
+      if (nrows === maxRows) {
+        return {nrows, ncols: columnOffsets ? ncols : 0, offsets};
+      }
+      break;
+
+    case NEW_FIELD:
+      // If we are returning column offsets, log the current index.
+      if (columnOffsets === true) {
+        offsets.push(i);
+      }
+
+      // Update the column counter.
+      col++;
+      break;
+
+    default: break;
+    }
+
   }
+
+  // If we finished parsing and we are *not* in the NEW_ROW state, then do the
+  // column padding/truncation for the last row. Also make sure ncols is
+  // defined.
+  if (state !== NEW_ROW) {
+    nrows++;
+    if (columnOffsets === true) {
+      // If ncols is *still* undefined, then we only parsed one row and didn't
+      // have a newline, so set it to the number of columns we found.
+      if (ncols === undefined) {
+        ncols = col;
+      }
+
+      if (col < ncols) {
+        // We didn't have enough columns, so add some more column offsets that
+        // point to just before the row delimiter we just saw.
+        for (; col < ncols; col++) {
+          offsets.push(i - (rowDelimiterLength - 1));
+        }
+      } else if (col > ncols) {
+        // We had too many columns, so truncate them.
+        offsets.length = offsets.length - (col - ncols);
+      }
+    }
+  }
+
 
   return {nrows, ncols: columnOffsets ? ncols : 0, offsets};
 }
