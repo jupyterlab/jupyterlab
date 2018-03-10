@@ -4,8 +4,10 @@
 import expect = require('expect.js');
 
 import {
-  parseDSV
+  parseDSVNoQuotes
 } from '@jupyterlab/csvviewer';
+
+let parseDSV = parseDSVNoQuotes;
 
 describe('csvviewer/parse', () => {
 

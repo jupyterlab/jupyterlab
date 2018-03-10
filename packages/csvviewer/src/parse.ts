@@ -549,7 +549,7 @@ function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
       } else {
         // If we know the number of columns we expect, find the field delimiters
         // up to that many columns.
-        while (colIndex !== -1 && col <= ncols) {
+        while (colIndex !== -1 && col < ncols) {
           offsets.push(currRow + colIndex + 1);
           col++;
           colIndex = rowString.indexOf(delimiter, colIndex + 1);
@@ -557,10 +557,9 @@ function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
 
         // If we didn't reach the number of columns we expected, pad the offsets
         // with the offset just before the row delimiter.
-        if (col < ncols) {
-          for (; col <= ncols; col++) {
-            offsets.push(rowEnd);
-          }
+        while (col < ncols) {
+          offsets.push(rowEnd);
+          col++;
         }
       }
     }
