@@ -346,11 +346,8 @@ class DSVModel extends DataModel implements IDisposable {
       // The next field starts at the next column offset.
       nextIndex = this._getOffsetIndex(row, column + 1);
 
-      // We may be in a short row, where we filled in columns without delimiters
-      // in the string. If there is room for a delimiter before the next field,
-      // we need to trim it.
-      if (index < nextIndex) {
-        // Strip field separator if there is room for one between the two indices.
+      // Trim off the delimiter if it exists at the end of the field
+      if (index < nextIndex && this._data[nextIndex - 1] === this._delimiter) {
         trimRight += 1;
       }
     }
