@@ -1,25 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ActivityMonitor
-} from '@jupyterlab/coreutils';
+import {ActivityMonitor} from '@jupyterlab/coreutils';
 
-import {
-  each
-} from '@phosphor/algorithm';
+import {IDocumentManager} from '@jupyterlab/docmanager';
 
-import {
-  Message
-} from '@phosphor/messaging';
+import {Message} from '@phosphor/messaging';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import {Widget} from '@phosphor/widgets';
 
-import {
-  Notebook
-} from '@jupyterlab/notebook';
+import {TableOfContentsRegistry} from './registry';
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -32,40 +22,57 @@ const RENDER_TIMEOUT = 1000;
 /**
  * A widget for hosting a notebook table-of-contents.
  */
-export
-class TableOfContents extends Widget {
+export class TableOfContents extends Widget {
   /**
    * Create a new table of contents.
    */
-  constructor() {
+  constructor(docmanager: IDocumentManager) {
     super();
+    this._docmanager = docmanager;
     this.addClass('jp-TableOfContents');
   }
 
   /**
-   * The current notebook for the ToC.
+   * The current widget-generator tuple for the ToC.
    */
-  get notebook(): Notebook {
-    return this._notebook;
+  get current(): TableOfContents.ICurrentWidget {
+    return this._current;
   }
-  set notebook(notebook: Notebook) {
-    this._notebook = notebook;
+  set current(value: TableOfContents.ICurrentWidget) {
+    // If they are the same as previously, do nothing.
+    if (
+      this._current &&
+      this._current.widget === value.widget &&
+      this._current.generator === value.generator
+    ) {
+      return;
+    }
+    this._current = value;
+
     // Dispose an old activity monitor if it existsd
     if (this._monitor) {
       this._monitor.dispose();
       this._monitor = null;
     }
-    if (!this._notebook) {
+    // If we are wiping the ToC, update and return.
+    if (!this._current) {
       this.update();
       return;
     }
 
+    // Find the document model associated with the widget.
+    const context = this._docmanager.contextForWidget(this._current.widget);
+    if (!context || !context.model) {
+      throw Error('Could not find a context for the Table of Contents');
+    }
+
     // Throttle the rendering rate of the table of contents.
     this._monitor = new ActivityMonitor({
-      signal: notebook.model.contentChanged,
-      timeout: RENDER_TIMEOUT
-      });
+      signal: context.model.contentChanged,
+      timeout: RENDER_TIMEOUT,
+    });
     this._monitor.activityStopped.connect(this.update, this);
+    this.update();
   }
 
   /**
@@ -77,8 +84,11 @@ class TableOfContents extends Widget {
       return;
     }
 
-    const toc = this._generateTOC();
-    ReactDOM.render(<TOCTree toc={toc}/>, this.node);
+    let toc: IHeading[] = [];
+    if (this._current) {
+      toc = this._current.generator.generate(this._current.widget);
+    }
+    ReactDOM.render(<TOCTree toc={toc} />, this.node);
   }
 
   /**
@@ -88,32 +98,30 @@ class TableOfContents extends Widget {
     this.update();
   }
 
-  private _generateTOC(): IHeading[] {
-    let headings: IHeading[] = [];
-    each(this._notebook.widgets, cell => {
-      let model = cell.model;
-      if (model.type !== 'markdown') {
-        return;
-      }
-      const lines = model.value.text.split('\n').filter(line => line[0] === '#');
-      lines.forEach(line => {
-        const level = line.search(/[^#]/);
-        const text = line.slice(level);
-        headings.push({ text, level, anchor: cell.node });
-      });
-    });
-    return headings;
-  }
-
-  private _notebook: Notebook;
+  private _docmanager: IDocumentManager;
+  private _current: TableOfContents.ICurrentWidget | null;
   private _monitor: ActivityMonitor<any, any> | null;
+}
+
+/**
+ * A namespace for TableOfContents statics.
+ */
+export namespace TableOfContents {
+  /**
+   * A type representing a tuple of a widget,
+   * and a generator that knows how to generate
+   * heading information from that widget.
+   */
+  export interface ICurrentWidget<W extends Widget = Widget> {
+    widget: W;
+    generator: TableOfContentsRegistry.IGenerator<W>;
+  }
 }
 
 /**
  * An object that represents a markdown heading.
  */
-export
-interface IHeading {
+export interface IHeading {
   /**
    * The text of the heading.
    */
@@ -134,8 +142,7 @@ interface IHeading {
 /**
  * Props for the TOCTree component.
  */
-export
-interface ITOCTreeProps extends React.Props<TOCTree> {
+export interface ITOCTreeProps extends React.Props<TOCTree> {
   /**
    * A list of IHeadings to render.
    */
@@ -145,8 +152,7 @@ interface ITOCTreeProps extends React.Props<TOCTree> {
 /**
  * A React component for a table of contents.
  */
-export
-class TOCTree extends React.Component<ITOCTreeProps, {}> {
+export class TOCTree extends React.Component<ITOCTreeProps, {}> {
   /**
    * Render the TOCTree.
    */
@@ -168,20 +174,18 @@ class TOCTree extends React.Component<ITOCTreeProps, {}> {
 
       return React.createElement(
         `h${level}`,
-        { key: `${el.text}-${el.level}`, onClick: clickHandler },
-        <a href=''>{ el.text }</a>
+        {key: `${el.text}-${el.level}`, onClick: clickHandler},
+        <a href="">{el.text}</a>,
       );
     });
 
     // Return the JSX component.
     return (
       <div>
-        <div className='jp-TableOfContents-header'>
+        <div className="jp-TableOfContents-header">
           <h1>Table of Contents</h1>
         </div>
-        <div className='jp-TableOfContents-content'>
-         { listing }
-        </div>
+        <div className="jp-TableOfContents-content">{listing}</div>
       </div>
     );
   }

@@ -30,7 +30,9 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^0.15.0",
+    "@jupyterlab/apputils": "^0.15.5",
     "@jupyterlab/coreutils": "^1.0.10",
+    "@jupyterlab/docmanager": "^0.15.5",
     "@jupyterlab/notebook": "^0.15.7",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/messaging": "^1.2.2",
