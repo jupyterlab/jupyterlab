@@ -36,6 +36,7 @@
     "@jupyterlab/fileeditor": "^0.15.4",
     "@jupyterlab/notebook": "^0.15.7",
     "@phosphor/algorithm": "^1.1.2",
+    "@phosphor/coreutils": "^1.3.0",
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/widgets": "^1.5.0",
     "react": "^16.2.0",
@@ -48,6 +49,6 @@
     "typescript": "~2.6.0"
   },
   "jupyterlab": {
-    "extension": true
+    "extension": "lib/extension.js"
   }
 }

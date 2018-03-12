@@ -3,9 +3,24 @@
 
 import {IInstanceTracker} from '@jupyterlab/apputils';
 
+import {Token} from '@phosphor/coreutils';
+
 import {Widget} from '@phosphor/widgets';
 
 import {IHeading} from './toc';
+
+/**
+ * An interface for a TableOfContentsRegistry.
+ */
+export interface ITableOfContentsRegistry extends TableOfContentsRegistry {};
+
+/* tslint:disable */
+/**
+ * The TableOfContentsRegistry token.
+ */
+export
+const ITableOfContentsRegistry = new Token<TableOfContentsRegistry>('jupyterlab-toc:ITableOfContentsRegistry');
+/* tslint:enable */
 
 /**
  * A class that keeps track of the different kinds
