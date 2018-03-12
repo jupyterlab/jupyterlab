@@ -198,8 +198,23 @@ class DSVModel extends DataModel implements IDisposable {
     if (this._isDisposed) {
       return;
     }
-    this._resetParser();
+
+    this._columnCount = undefined;
+    this._rowCount = undefined;
+    this._rowOffsets = null;
+    this._columnOffsets = null;
     this._data = null;
+
+    // Clear out state associated with the asynchronous parsing.
+    if (this._doneParsing === false) {
+      // Explicitly catch this rejection at least once so an error is not thrown
+      // to the console.
+      this.ready.catch(() => { return; });
+      this._ready.reject(undefined);
+    }
+    if (this._delayedParse !== null) {
+      window.clearTimeout(this._delayedParse);
+    }
   }
 
   /**
