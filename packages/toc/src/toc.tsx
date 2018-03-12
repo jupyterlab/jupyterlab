@@ -55,6 +55,10 @@ class TableOfContents extends Widget {
       this._monitor.dispose();
       this._monitor = null;
     }
+    if (!this._notebook) {
+      this.update();
+      return;
+    }
 
     // Throttle the rendering rate of the table of contents.
     this._monitor = new ActivityMonitor({
@@ -175,7 +179,9 @@ class TOCTree extends React.Component<ITOCTreeProps, {}> {
         <div className='jp-TableOfContents-header'>
           <h1>Table of Contents</h1>
         </div>
-       { listing }
+        <div className='jp-TableOfContents-content'>
+         { listing }
+        </div>
       </div>
     );
   }

@@ -33,7 +33,7 @@ function activateTOC(app: JupyterLab, notebookTracker: INotebookTracker): void {
   app.shell.addToLeftArea(toc);
 
   notebookTracker.currentChanged.connect((s, current) => {
-    toc.notebook = current.notebook;
+    toc.notebook = current ? current.notebook : null;
   });
 }
 
