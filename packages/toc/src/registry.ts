@@ -23,6 +23,10 @@ export class TableOfContentsRegistry {
     this._generators.forEach(gen => {
       console.log(gen);
       if (gen.tracker.has(widget)) {
+        // If isEnabled is present, check for it.
+        if (gen.isEnabled && !gen.isEnabled(widget)) {
+          return;
+        }
         generator = gen;
       }
     });
@@ -52,6 +56,17 @@ export namespace TableOfContentsRegistry {
      * An instance tracker for the widget.
      */
     tracker: IInstanceTracker<W>;
+
+    /**
+     * A function to test whether to generate a ToC for a widget.
+     *
+     * #### Notes
+     * By default is assumed to be enabled if the widget
+     * is hosted in `tracker`. However, the user may want to add
+     * additional checks. For instance, this can be used to generate
+     * a ToC for text files only if they have a given mimeType.
+     */
+    isEnabled ?: (widget: W) => boolean;
 
     /**
      * A function that takes the widget, and produces

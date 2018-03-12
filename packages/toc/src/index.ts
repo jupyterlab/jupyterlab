@@ -5,6 +5,8 @@ import {JupyterLab, JupyterLabPlugin} from '@jupyterlab/application';
 
 import {IDocumentManager} from '@jupyterlab/docmanager';
 
+import {FileEditor, IEditorTracker} from '@jupyterlab/fileeditor';
+
 import {INotebookTracker, NotebookPanel} from '@jupyterlab/notebook';
 
 import {each} from '@phosphor/algorithm';
@@ -21,7 +23,7 @@ import '../style/index.css';
 const extension: JupyterLabPlugin<void> = {
   id: 'jupyterlab-toc',
   autoStart: true,
-  requires: [IDocumentManager, INotebookTracker],
+  requires: [IDocumentManager, IEditorTracker, INotebookTracker],
   activate: activateTOC,
 };
 
@@ -31,6 +33,7 @@ const extension: JupyterLabPlugin<void> = {
 function activateTOC(
   app: JupyterLab,
   docmanager: IDocumentManager,
+  editorTracker: IEditorTracker,
   notebookTracker: INotebookTracker,
 ): void {
   // Create the ToC widget.
@@ -60,14 +63,49 @@ function activateTOC(
         lines.forEach(line => {
           const level = line.search(/[^#]/);
           const text = line.slice(level);
-          headings.push({text, level, anchor: cell.node});
+          const onClick = () => {
+            cell.node.scrollIntoView();
+          };
+          headings.push({text, level, onClick});
         });
       });
       return headings;
     },
   };
 
+  // Create an markdown editor TableOfContentsRegistry.IGenerator
+  const markdownGenerator: TableOfContentsRegistry.IGenerator<FileEditor> = {
+    tracker: editorTracker,
+    isEnabled: editor => {
+      let mime = editor.model.mimeType;
+      return (
+        mime === 'text/x-ipthongfm' ||
+        mime === 'text/x-markdown' ||
+        mime === 'text/x-gfm' ||
+        mime === 'text/markdown'
+      );
+    },
+    generate: editor => {
+      let headings: IHeading[] = [];
+      let model = editor.model;
+      const lines = model.value.text
+        .split('\n')
+        .map( (value, idx) => { return { value, idx } })
+        .filter(line => line.value[0] === '#');
+      lines.forEach(line => {
+        const level = line.value.search(/[^#]/);
+        const text = line.value.slice(level);
+        const onClick = () => {
+          editor.editor.setCursorPosition({ line: line.idx, column: 0 });
+        };
+        headings.push({text, level, onClick});
+      });
+      return headings;
+    },
+  };
+
   registry.addGenerator(notebookGenerator);
+  registry.addGenerator(markdownGenerator);
 
   // Change the ToC when the active widget changes.
   app.shell.currentChanged.connect(() => {

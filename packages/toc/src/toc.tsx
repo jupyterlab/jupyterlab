@@ -133,10 +133,11 @@ export interface IHeading {
   level: number;
 
   /**
-   * An HTML element to scroll into view when the
-   * TOC item is clicked.
+   * A function to execute when clicking the ToC
+   * item. Typically this will be used to scroll
+   * the parent widget to this item.
    */
-  anchor: HTMLElement;
+  onClick: () => void;
 }
 
 /**
@@ -169,7 +170,7 @@ export class TOCTree extends React.Component<ITOCTreeProps, {}> {
       const clickHandler = (evt: MouseEvent) => {
         evt.preventDefault();
         evt.stopPropagation();
-        el.anchor.scrollIntoView();
+        el.onClick();
       };
 
       return React.createElement(
