@@ -10,6 +10,10 @@ import {
 } from '@phosphor/disposable';
 
 import {
+  PromiseDelegate
+} from '@phosphor/coreutils';
+
+import {
   parseDSV, parseDSVNoQuotes, IParser
 } from './parse';
 
@@ -56,13 +60,16 @@ class DSVModel extends DataModel implements IDisposable {
       quote = '"',
       quoteParser = undefined,
       header = true,
+      initialRows = 500
     } = options;
     this._data = data;
     this._delimiter = delimiter;
     this._quote = quote;
     this._quoteEscaped = new RegExp(quote + quote, 'g');
+    this._initialRows = initialRows;
 
-    // Guess the row delimiter
+    // Guess the row delimiter if it was not supplied. This will be fooled if a
+    // different line delimiter possibility appears in the first row.
     if (rowDelimiter === undefined) {
       let i = data.slice(0, 5000).indexOf('\r');
       if (i === -1) {
@@ -92,6 +99,20 @@ class DSVModel extends DataModel implements IDisposable {
       }
       this._header = h;
     }
+  }
+
+  /**
+   * Whether this model has been disposed.
+   */
+  get isDisposed() {
+    return this._isDisposed;
+  }
+
+  /**
+   * A promise that resolves when the model has parsed all of its data.
+   */
+  get ready() {
+    return this._ready.promise;
   }
 
   /**
@@ -171,13 +192,6 @@ class DSVModel extends DataModel implements IDisposable {
   }
 
   /**
-   * Whether this model has been disposed.
-   */
-  get isDisposed() {
-    return this._isDisposed;
-  }
-
-  /**
    * Dispose the resources held by this model.
    */
   dispose() {
@@ -235,6 +249,7 @@ class DSVModel extends DataModel implements IDisposable {
     // already parsed.
     if (nrows <= 1) {
       this._doneParsing = true;
+      this._ready.resolve(undefined);
       return;
     }
 
@@ -245,6 +260,7 @@ class DSVModel extends DataModel implements IDisposable {
     // If we didn't reach the requested row, we must be done.
     if (this._rowCount < endRow) {
       this._doneParsing = true;
+      this._ready.resolve(undefined);
     }
 
     // Copy the new offsets into a new row offset array.
@@ -432,14 +448,14 @@ class DSVModel extends DataModel implements IDisposable {
    */
   private _parseAsync() {
     // Number of rows to get initially.
-    let currentRows = 500;
+    let currentRows = this._initialRows;
 
     // Number of rows to get in each chunk thereafter. We set this high to just
     // get the rest of the rows for now.
     let chunkRows = Math.pow(2, 32) - 1;
 
     // We give the UI a chance to draw by delaying the chunk parsing.
-    let delay = 20; // milliseconds
+    let delay = 30; // milliseconds
 
     // Define a function to parse a chunk up to and including endRow.
     let parseChunk = (endRow: number) => {
@@ -508,11 +524,21 @@ class DSVModel extends DataModel implements IDisposable {
     this._rowCount = 1;
 
     this._columnOffsets = new Uint32Array(0);
+
+    // Clear out state associated with the asynchronous parsing.
+    if (this._doneParsing === false) {
+      // Explicitly catch this rejection at least once so an error is not thrown
+      // to the console.
+      this.ready.catch(() => { return; });
+      this._ready.reject(undefined);
+    }
     this._doneParsing = false;
+    this._ready = new PromiseDelegate<void>();
     if (this._delayedParse !== null) {
       window.clearTimeout(this._delayedParse);
       this._delayedParse = null;
     }
+
     this.emitChanged({ type: 'model-reset' });
   }
 
@@ -553,11 +579,18 @@ class DSVModel extends DataModel implements IDisposable {
    * The index for the start of each row.
    */
   private _rowOffsets: Uint32Array = new Uint32Array(1);
+  /**
+   * The number of rows to parse initially before doing a delayed parse of the
+   * entire data.
+   */
+  private _initialRows: number;
+
 
   // Bookkeeping variables.
   private _delayedParse: number = null;
   private _doneParsing: boolean = false;
   private _isDisposed: boolean = false;
+  private _ready = new PromiseDelegate<void>();
 }
 
 
@@ -620,5 +653,11 @@ namespace DSVModel {
      * otherwise.
      */
     quoteParser?: boolean;
+
+    /**
+     * The maximum number of initial rows to parse before doing a asynchronous
+     * full parse of the data. This should be greater than 0.
+     */
+    initialRows?: number;
   }
 }

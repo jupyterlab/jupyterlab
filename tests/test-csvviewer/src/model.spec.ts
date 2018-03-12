@@ -156,36 +156,50 @@ describe('csvviewer/model', () => {
       expect([0, 1, 2].map(i => d.data('body', 0, i))).to.eql(['d', 'e', 'f']);
     });
 
-    it('handles a given quote character', () => {
-      let d = new DSVModel({
-        data: `'a\rx',b,'c'\r'd',e,'f'\r`,
-        delimiter: ',',
-        quote: `'`,
-        rowDelimiter: '\r',
-      });
+    it('handles delimiters and quotes inside quotes', () => {
+      let d = new DSVModel({data: `'a\rx',b,'c''x'\r'd,x',e,'f'\r`, delimiter: ',', quote: `'`, rowDelimiter: '\r'});
       expect(d.rowCount('column-header')).to.be(1);
       expect(d.rowCount('body')).to.be(1);
       expect(d.columnCount('row-header')).to.be(1);
       expect(d.columnCount('body')).to.be(3);
-      expect([0, 1, 2].map(i => d.data('column-header', 0, i))).to.eql(['a\rx', 'b', 'c']);
-      expect([0, 1, 2].map(i => d.data('body', 0, i))).to.eql(['d', 'e', 'f']);
+      expect([0, 1, 2].map(i => d.data('column-header', 0, i))).to.eql(['a\rx', 'b', `c'x`]);
+      expect([0, 1, 2].map(i => d.data('body', 0, i))).to.eql(['d,x', 'e', 'f']);
     });
 
     it('handles rows that are too short or too long', () => {
-      let data = `a,b,c\n,c,d,e,f\ng,h`;
-      let d = new DSVModel({
-        data,
-        delimiter: ',',
-        quoteParser: false
-      });
-
+      let d = new DSVModel({data: `a,b,c\n,c,d,e,f\ng,h`, delimiter: ','});
       expect(d.rowCount('column-header')).to.be(1);
       expect(d.rowCount('body')).to.be(2);
       expect(d.columnCount('row-header')).to.be(1);
       expect(d.columnCount('body')).to.be(3);
-      // expect([0, 1, 2].map(i => d.data('column-header', 0, i))).to.eql(['a', 'b', 'c']);
-      // expect([0, 1, 2].map(i => d.data('body', 0, i))).to.eql(['', 'c', 'd,e,f']);
+      expect([0, 1, 2].map(i => d.data('column-header', 0, i))).to.eql(['a', 'b', 'c']);
+      expect([0, 1, 2].map(i => d.data('body', 0, i))).to.eql(['', 'c', 'd,e,f']);
       expect([0, 1, 2].map(i => d.data('body', 1, i))).to.eql(['g', 'h', '']);
+    });
+
+    it('handles delayed parsing of rows past the initial rows', () => {
+      let d = new DSVModel({data: `a,b,c\nc,d,e\nf,g,h\ni,j,k`, delimiter: ',', initialRows: 2});
+      expect(d.rowCount('column-header')).to.be(1);
+      expect(d.rowCount('body')).to.be(1);
+      expect(d.columnCount('row-header')).to.be(1);
+      expect(d.columnCount('body')).to.be(3);
+      expect([0, 1, 2].map(i => d.data('column-header', 0, i))).to.eql(['a', 'b', 'c']);
+
+      // Expected behavior is that all unparsed data is lumped into the final field.
+      expect([0, 1, 2].map(i => d.data('body', 0, i))).to.eql(['c', 'd', 'e\nf,g,h\ni,j,k']);
+
+      // Check everything is in order after all the data has been parsed asynchronously.
+      return d.ready.then(() => {
+        expect(d.rowCount('column-header')).to.be(1);
+        expect(d.rowCount('body')).to.be(3);
+        expect(d.columnCount('row-header')).to.be(1);
+        expect(d.columnCount('body')).to.be(3);
+        expect([0, 1, 2].map(i => d.data('column-header', 0, i))).to.eql(['a', 'b', 'c']);
+        expect([0, 1, 2].map(i => d.data('body', 0, i))).to.eql(['c', 'd', 'e']);
+        expect([0, 1, 2].map(i => d.data('body', 1, i))).to.eql(['f', 'g', 'h']);
+        expect([0, 1, 2].map(i => d.data('body', 2, i))).to.eql(['i', 'j', 'k']);
+      });
+
     });
 
   });

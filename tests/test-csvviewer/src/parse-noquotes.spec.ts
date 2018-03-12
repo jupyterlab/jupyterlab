@@ -228,6 +228,7 @@ describe('csvviewer/parsenoquotes', () => {
   });
 });
 
+// Helpful debugging logging
 // console.log(Array.from(results.offsets));
 // console.log(Array.from(results.offsets).map(i => data[i]));
 // console.log(Array.from(results.offsets).map((i, ind, arr) => data.slice(i, arr[ind + 1])));
