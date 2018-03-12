@@ -78,7 +78,7 @@ function activateTOC(
           .filter(line => line[0] === '#');
         lines.forEach(line => {
           const level = line.search(/[^#]/);
-          const text = line.slice(level);
+          const text = line.slice(level).replace(/\[(.+)\]\(.+\)/g, '$1');
           const onClick = () => {
             cell.node.scrollIntoView();
           };
@@ -112,7 +112,7 @@ function activateTOC(
         .filter(line => line.value[0] === '#');
       lines.forEach(line => {
         const level = line.value.search(/[^#]/);
-        const text = line.value.slice(level);
+        const text = line.value.slice(level).replace(/\[(.+)\]\(.+\)/g, '$1');
         const onClick = () => {
           editor.editor.setCursorPosition({line: line.idx, column: 0});
         };
