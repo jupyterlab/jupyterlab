@@ -1,11 +1,16 @@
 # jupyterlab-toc
 
-Table of Contents extension for JupyterLab
+A Table of Contents extension for JupyterLab.
+This auto-generates a table of contents in the left area when you have a notebook
+or markdown document open. The entries are clickable, and scroll the document
+to the heading in question.
+
+![Table of Contents](toc.gif "Table of Contents")
 
 
 ## Prerequisites
 
-* JupyterLab
+* JupyterLab v0.31
 
 ## Installation
 
@@ -18,15 +23,13 @@ jupyter labextension install jupyterlab-toc
 For a development install (requires npm version 4 or later), do the following in the repository directory:
 
 ```bash
-npm install
-npm run build
-jupyter labextension link .
+jlpm install
+jlpm run build
+jupyter labextension install .
 ```
 
 To rebuild the package and the JupyterLab app:
 
 ```bash
-npm run build
+jlpm run build
 jupyter lab build
-```
-
