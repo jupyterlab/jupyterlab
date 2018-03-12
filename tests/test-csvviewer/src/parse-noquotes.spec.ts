@@ -4,10 +4,9 @@
 import expect = require('expect.js');
 
 import {
-  parseDSVNoQuotes
+  parseDSVNoQuotes as parser
 } from '@jupyterlab/csvviewer';
 
-let parseDSV = parseDSVNoQuotes;
 
 describe('csvviewer/parsenoquotes', () => {
 
@@ -15,20 +14,18 @@ describe('csvviewer/parsenoquotes', () => {
 
     it('does basic parsing of csv files', () => {
       let data = `a,b,c,d\r\n0,1,2,3\r\n4,5,6,7`;
-      let options = {data, columnOffsets: false};
-      let offsets = parseDSV(options);
-      expect(offsets.nrows).to.eql(3);
-      expect(offsets.ncols).to.eql(0);
-      expect(offsets.offsets).to.eql([0, 9, 18]);
-    });
+      let options = {data};
+      let results;
 
-    it('does basic parsing of csv files with column offsets', () => {
-      let data = `a,b,c,d\r\n0,1,2,3\r\n4,5,6,7`;
-      let options = {data, columnOffsets: true};
-      let offsets = parseDSV(options);
-      expect(offsets.nrows).to.eql(3);
-      expect(offsets.ncols).to.eql(4);
-      expect(offsets.offsets).to.eql([0, 2, 4, 6, 9, 11, 13, 15, 18, 20, 22, 24]);
+      results = parser({...options, columnOffsets: false});
+      expect(results.nrows).to.eql(3);
+      expect(results.ncols).to.eql(0);
+      expect(results.offsets).to.eql([0, 9, 18]);
+
+      results = parser({...options, columnOffsets: true});
+      expect(results.nrows).to.eql(3);
+      expect(results.ncols).to.eql(4);
+      expect(results.offsets).to.eql([0, 2, 4, 6, 9, 11, 13, 15, 18, 20, 22, 24]);
     });
 
     // For simplicity, we'll use \n as a row delimiter below.
@@ -38,11 +35,11 @@ describe('csvviewer/parsenoquotes', () => {
       let options = {data, rowDelimiter: '\n'};
       let results;
 
-      results = parseDSV({...options, columnOffsets: false});
+      results = parser({...options, columnOffsets: false});
       expect(results.nrows).to.eql(3);
       expect(results.offsets).to.eql([0, 8, 16]);
 
-      results = parseDSV({...options, columnOffsets: true});
+      results = parser({...options, columnOffsets: true});
       expect(results.nrows).to.eql(3);
       expect(results.ncols).to.eql(4);
       expect(results.offsets).to.eql([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]);
@@ -53,11 +50,11 @@ describe('csvviewer/parsenoquotes', () => {
       let options = {data, delimiter: '\t', rowDelimiter: '\n'};
       let results;
 
-      results = parseDSV({...options, columnOffsets: false});
+      results = parser({...options, columnOffsets: false});
       expect(results.nrows).to.eql(3);
       expect(results.offsets).to.eql([0, 8, 16]);
 
-      results = parseDSV({...options, columnOffsets: true});
+      results = parser({...options, columnOffsets: true});
       expect(results.nrows).to.eql(3);
       expect(results.ncols).to.eql(4);
       expect(results.offsets).to.eql([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]);
@@ -68,11 +65,11 @@ describe('csvviewer/parsenoquotes', () => {
       let options = {data, rowDelimiter: '\n', startIndex: 8};
       let results;
 
-      results = parseDSV({...options, columnOffsets: false});
+      results = parser({...options, columnOffsets: false});
       expect(results.nrows).to.eql(2);
       expect(results.offsets).to.eql([8, 16]);
 
-      results = parseDSV({...options, columnOffsets: true});
+      results = parser({...options, columnOffsets: true});
       expect(results.nrows).to.eql(2);
       expect(results.ncols).to.eql(4);
       expect(results.offsets).to.eql([8, 10, 12, 14, 16, 18, 20, 22]);
@@ -83,11 +80,11 @@ describe('csvviewer/parsenoquotes', () => {
       let options = {data, rowDelimiter: '\n', maxRows: 2};
       let results;
 
-      results = parseDSV({...options, columnOffsets: false});
+      results = parser({...options, columnOffsets: false});
       expect(results.nrows).to.eql(2);
       expect(results.offsets).to.eql([0, 8]);
 
-      results = parseDSV({...options, columnOffsets: true});
+      results = parser({...options, columnOffsets: true});
       expect(results.nrows).to.eql(2);
       expect(results.ncols).to.eql(4);
       expect(results.offsets).to.eql([0, 2, 4, 6, 8, 10, 12, 14]);
@@ -98,11 +95,11 @@ describe('csvviewer/parsenoquotes', () => {
       let options = {data, rowDelimiter: '\n', startIndex: 8, maxRows: 1};
       let results;
 
-      results = parseDSV({...options, columnOffsets: false});
+      results = parser({...options, columnOffsets: false});
       expect(results.nrows).to.eql(1);
       expect(results.offsets).to.eql([8]);
 
-      results = parseDSV({...options, columnOffsets: true});
+      results = parser({...options, columnOffsets: true});
       expect(results.nrows).to.eql(1);
       expect(results.ncols).to.eql(4);
       expect(results.offsets).to.eql([8, 10, 12, 14]);
@@ -113,12 +110,11 @@ describe('csvviewer/parsenoquotes', () => {
       let options = {data, rowDelimiter: '\n'};
       let results;
 
-      // results = parseDSV({...options, columnOffsets: false});
-      // expect(results.nrows).to.eql(3);
-      // expect(results.offsets).to.eql([0, 8, 12]);
+      results = parser({...options, columnOffsets: false});
+      expect(results.nrows).to.eql(3);
+      expect(results.offsets).to.eql([0, 8, 11]);
 
-      results = parseDSV({...options, columnOffsets: true});
-
+      results = parser({...options, columnOffsets: true});
       expect(results.nrows).to.eql(3);
       expect(results.ncols).to.eql(4);
       expect(results.offsets).to.eql([0, 2, 4, 6, 8, 10, 10, 10, 11, 13, 15, 17]);
@@ -129,12 +125,11 @@ describe('csvviewer/parsenoquotes', () => {
       let options = {data, rowDelimiter: '\r\n'};
       let results;
 
-      // results = parseDSV({...options, columnOffsets: false});
-      // expect(results.nrows).to.eql(3);
-      // expect(results.offsets).to.eql([0, 8, 12]);
+      results = parser({...options, columnOffsets: false});
+      expect(results.nrows).to.eql(3);
+      expect(results.offsets).to.eql([0, 9, 13]);
 
-      results = parseDSV({...options, columnOffsets: true});
-
+      results = parser({...options, columnOffsets: true});
       expect(results.nrows).to.eql(3);
       expect(results.ncols).to.eql(4);
       expect(results.offsets).to.eql([ 0, 2, 4, 6, 9, 11, 11, 11, 13, 15, 17, 19 ]);
@@ -145,12 +140,11 @@ describe('csvviewer/parsenoquotes', () => {
       let options = {data, rowDelimiter: '\n', ncols: 5};
       let results;
 
-      // results = parseDSV({...options, columnOffsets: false});
-      // expect(results.nrows).to.eql(3);
-      // expect(results.offsets).to.eql([0, 8, 12]);
+      results = parser({...options, columnOffsets: false});
+      expect(results.nrows).to.eql(3);
+      expect(results.offsets).to.eql([0, 8, 11]);
 
-      results = parseDSV({...options, columnOffsets: true});
-
+      results = parser({...options, columnOffsets: true});
       expect(results.nrows).to.eql(3);
       expect(results.ncols).to.eql(5);
       expect(results.offsets).to.eql([0, 2, 4, 6, 7, 8, 10, 10, 10, 10, 11, 13, 15, 17, 19]);
@@ -161,12 +155,11 @@ describe('csvviewer/parsenoquotes', () => {
       let options = {data, rowDelimiter: '\r\n', ncols: 5};
       let results;
 
-      // results = parseDSV({...options, columnOffsets: false});
-      // expect(results.nrows).to.eql(3);
-      // expect(results.offsets).to.eql([0, 8, 12]);
+      results = parser({...options, columnOffsets: false});
+      expect(results.nrows).to.eql(3);
+      expect(results.offsets).to.eql([0, 9, 13]);
 
-      results = parseDSV({...options, columnOffsets: true});
-
+      results = parser({...options, columnOffsets: true});
       expect(results.nrows).to.eql(3);
       expect(results.ncols).to.eql(5);
       expect(results.offsets).to.eql([0, 2, 4, 6, 7, 9, 11, 11, 11, 11, 13, 15, 17, 19, 21]);
@@ -177,12 +170,11 @@ describe('csvviewer/parsenoquotes', () => {
       let options = {data, rowDelimiter: '\n', ncols: 7};
       let results;
 
-      // results = parseDSV({...options, columnOffsets: false});
-      // expect(results.nrows).to.eql(3);
-      // expect(results.offsets).to.eql([0, 8, 12]);
+      results = parser({...options, columnOffsets: false});
+      expect(results.nrows).to.eql(1);
+      expect(results.offsets).to.eql([0]);
 
-      results = parseDSV({...options, columnOffsets: true});
-
+      results = parser({...options, columnOffsets: true});
       expect(results.nrows).to.eql(1);
       expect(results.ncols).to.eql(7);
       expect(results.offsets).to.eql([0, 2, 4, 6, 7, 7, 7]);
@@ -193,11 +185,11 @@ describe('csvviewer/parsenoquotes', () => {
       let options = {data, rowDelimiter: '\n', ncols: 7};
       let results;
 
-      // results = parseDSV({...options, columnOffsets: false});
-      // expect(results.nrows).to.eql(3);
-      // expect(results.offsets).to.eql([0, 8, 12]);
-      results = parseDSV({...options, columnOffsets: true});
+      results = parser({...options, columnOffsets: false});
+      expect(results.nrows).to.eql(1);
+      expect(results.offsets).to.eql([0]);
 
+      results = parser({...options, columnOffsets: true});
       expect(results.nrows).to.eql(1);
       expect(results.ncols).to.eql(7);
       expect(results.offsets).to.eql([0, 2, 4, 6, 7, 7, 7]);
@@ -208,27 +200,26 @@ describe('csvviewer/parsenoquotes', () => {
       let options = {data, rowDelimiter: '\n'};
       let results;
 
-      // results = parseDSV({...options, columnOffsets: false});
-      // expect(results.nrows).to.eql(3);
-      // expect(results.offsets).to.eql([0, 8, 12]);
+      results = parser({...options, columnOffsets: false});
+      expect(results.nrows).to.eql(1);
+      expect(results.offsets).to.eql([0]);
 
-      results = parseDSV({...options, columnOffsets: true});
+      results = parser({...options, columnOffsets: true});
       expect(results.nrows).to.eql(1);
       expect(results.ncols).to.eql(1);
       expect(results.offsets).to.eql([0]);
     });
 
-    it('handles adding or deleting columns as necessary', () => {
+    it('handles adding columns or merging columns as necessary', () => {
       let data = `a,b,c\n,c,d,e,f\ng,h`;
       let options = {data, rowDelimiter: '\n'};
       let results;
 
-      // results = parseDSV({...options, columnOffsets: false});
-      // expect(results.nrows).to.eql(3);
-      // expect(results.offsets).to.eql([0, 8, 12]);
+      results = parser({...options, columnOffsets: false});
+      expect(results.nrows).to.eql(3);
+      expect(results.offsets).to.eql([0, 6, 15]);
 
-      results = parseDSVNoQuotes({...options, columnOffsets: true});
-
+      results = parser({...options, columnOffsets: true});
       expect(results.nrows).to.eql(3);
       expect(results.ncols).to.eql(3);
       expect(results.offsets).to.eql([0, 2, 4, 6, 7, 9, 15, 17, 18]);

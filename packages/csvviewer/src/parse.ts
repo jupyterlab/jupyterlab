@@ -10,6 +10,7 @@ Possible options to add to the parser:
 - Skip rows with empty columns
 - Logging an error for too many or too few fields on a line
 - Ignore whitespace around delimiters
+- Add an exported function in this file for getting a field from the returned offsets array (including stripping field or row delimiters and parsing quoted data). Right now this logic is in the DSVModel. Likely we want to keep the logic there for speed, but having it here as well will make the parser more self-contained and usable by others.
 - Sanity check on field size, with an error if the field exceeds the size
 - Tests against https://github.com/maxogden/csv-spectrum
 - Benchmark against https://www.npmjs.com/package/csv-parser and https://www.npmjs.com/package/csv-string and fast-csv.
@@ -64,6 +65,11 @@ namespace IParser {
 
     /**
      * The quote character for quoting fields. Defaults to the double quote (").
+     *
+     * #### Notes
+     * As specified in [RFC 4180](https://tools.ietf.org/html/rfc4180), quotes
+     * are escaped in a quoted field by doubling them (for example, "a""b" is the field
+     * a"b).
      */
     quote?: string;
 
