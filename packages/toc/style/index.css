@@ -20,9 +20,12 @@
 |----------------------------------------------------------------------------*/
 
 .jp-TableOfContents {
+  display: flex;
+  flex-direction: column;
   background: var(--jp-layout-color1);
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size0);
+  height: 100%;
 }
 
 .jp-TableOfContents-content {

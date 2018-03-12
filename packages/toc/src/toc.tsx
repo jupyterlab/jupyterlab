@@ -29,7 +29,6 @@ export class TableOfContents extends Widget {
   constructor(docmanager: IDocumentManager) {
     super();
     this._docmanager = docmanager;
-    this.addClass('jp-TableOfContents');
   }
 
   /**
@@ -159,6 +158,7 @@ export class TOCTree extends React.Component<ITOCTreeProps, {}> {
    */
   render() {
     // Map the heading objects onto a list of JSX elements.
+    let i = 0;
     let listing: JSX.Element[] = this.props.toc.map(el => {
       let level = Math.round(el.level);
 
@@ -175,14 +175,14 @@ export class TOCTree extends React.Component<ITOCTreeProps, {}> {
 
       return React.createElement(
         `h${level}`,
-        {key: `${el.text}-${el.level}`, onClick: clickHandler},
+        {key: `${el.text}-${el.level}-${i++}`, onClick: clickHandler},
         <a href="">{el.text}</a>,
       );
     });
 
     // Return the JSX component.
     return (
-      <div>
+      <div className='jp-TableOfContents'>
         <div className="jp-TableOfContents-header">
           <h1>Table of Contents</h1>
         </div>

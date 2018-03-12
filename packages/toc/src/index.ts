@@ -1,7 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {JupyterLab, JupyterLabPlugin} from '@jupyterlab/application';
+import {
+  ILayoutRestorer,
+  JupyterLab,
+  JupyterLabPlugin,
+} from '@jupyterlab/application';
 
 import {IDocumentManager} from '@jupyterlab/docmanager';
 
@@ -23,7 +27,12 @@ import '../style/index.css';
 const extension: JupyterLabPlugin<void> = {
   id: 'jupyterlab-toc',
   autoStart: true,
-  requires: [IDocumentManager, IEditorTracker, INotebookTracker],
+  requires: [
+    IDocumentManager,
+    IEditorTracker,
+    ILayoutRestorer,
+    INotebookTracker,
+  ],
   activate: activateTOC,
 };
 
@@ -34,6 +43,7 @@ function activateTOC(
   app: JupyterLab,
   docmanager: IDocumentManager,
   editorTracker: IEditorTracker,
+  restorer: ILayoutRestorer,
   notebookTracker: INotebookTracker,
 ): void {
   // Create the ToC widget.
@@ -45,7 +55,10 @@ function activateTOC(
   // Add the ToC to the left area.
   toc.title.label = 'Contents';
   toc.id = 'table-of-contents';
-  app.shell.addToLeftArea(toc);
+  app.shell.addToLeftArea(toc, {rank: 700});
+
+  // Add the ToC widget to the application restorer.
+  restorer.add(toc, 'juputerlab-toc');
 
   // Create a notebook TableOfContentsRegistry.IGenerator
   const notebookGenerator: TableOfContentsRegistry.IGenerator<NotebookPanel> = {
@@ -90,13 +103,15 @@ function activateTOC(
       let model = editor.model;
       const lines = model.value.text
         .split('\n')
-        .map( (value, idx) => { return { value, idx } })
+        .map((value, idx) => {
+          return {value, idx};
+        })
         .filter(line => line.value[0] === '#');
       lines.forEach(line => {
         const level = line.value.search(/[^#]/);
         const text = line.value.slice(level);
         const onClick = () => {
-          editor.editor.setCursorPosition({ line: line.idx, column: 0 });
+          editor.editor.setCursorPosition({line: line.idx, column: 0});
         };
         headings.push({text, level, onClick});
       });
