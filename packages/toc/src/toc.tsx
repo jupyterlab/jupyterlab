@@ -33,28 +33,35 @@ const RENDER_TIMEOUT = 1000;
  * A widget for hosting a notebook table-of-contents.
  */
 export
-class NotebookTableOfContents extends Widget {
+class TableOfContents extends Widget {
   /**
    * Create a new table of contents.
    */
-  constructor(notebook: Notebook) {
+  constructor() {
     super();
-    this.addClass('jp-NotebookTableOfContents');
-    this._notebook = notebook;
-    notebook.modelChanged.connect((nb, args) => {
-      // Dispose an old activity monitor if it exists
-      if (this._monitor) {
-        this._monitor.dispose();
-        this._monitor = null;
-      }
+    this.addClass('jp-TableOfContents');
+  }
 
-      // Throttle the rendering rate of the table of contents.
-      this._monitor = new ActivityMonitor({
-        signal: notebook.model.contentChanged,
-        timeout: RENDER_TIMEOUT
+  /**
+   * The current notebook for the ToC.
+   */
+  get notebook(): Notebook {
+    return this._notebook;
+  }
+  set notebook(notebook: Notebook) {
+    this._notebook = notebook;
+    // Dispose an old activity monitor if it existsd
+    if (this._monitor) {
+      this._monitor.dispose();
+      this._monitor = null;
+    }
+
+    // Throttle the rendering rate of the table of contents.
+    this._monitor = new ActivityMonitor({
+      signal: notebook.model.contentChanged,
+      timeout: RENDER_TIMEOUT
       });
-      this._monitor.activityStopped.connect(this.update, this);
-    });
+    this._monitor.activityStopped.connect(this.update, this);
   }
 
   /**
@@ -165,7 +172,7 @@ class TOCTree extends React.Component<ITOCTreeProps, {}> {
     // Return the JSX component.
     return (
       <div>
-        <div className='jp-NotebookTableOfContents-header'>
+        <div className='jp-TableOfContents-header'>
           <h1>Table of Contents</h1>
         </div>
        { listing }
