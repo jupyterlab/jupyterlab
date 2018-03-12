@@ -615,8 +615,6 @@ namespace DSVModel {
 
     /**
      * The data source for the data model.
-     *
-     * The data model takes full ownership of the data source.
      */
     data: string;
 
