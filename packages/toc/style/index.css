@@ -1,0 +1,65 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+
+/*-----------------------------------------------------------------------------
+| Private CSS variables
+|----------------------------------------------------------------------------*/
+
+
+:root {
+  --jp-private-toc-indent-width: 8px;
+  --jp-private-toc-padding: 8px;
+}
+
+/*-----------------------------------------------------------------------------
+| Table of Contents
+|----------------------------------------------------------------------------*/
+
+.jp-TableOfContents {
+  overflow: auto;
+  padding: var(--jp-private-toc-padding);
+  min-width: 120px;
+  font-size: 0.5em;
+}
+
+.jp-TableOfContents h1 {
+  margin-left: 0px;
+}
+
+.jp-TableOfContents h2 {
+  margin-left: calc(var(--jp-private-toc-indent-width));
+}
+
+.jp-TableOfContents h3 {
+  margin-left: calc(2*var(--jp-private-toc-indent-width));
+}
+
+.jp-TableOfContents h4 {
+  margin-left: calc(3*var(--jp-private-toc-indent-width));
+}
+
+.jp-TableOfContents h5 {
+  margin-left: calc(4*var(--jp-private-toc-indent-width));
+}
+
+.jp-TableOfContents h6 {
+  margin-left: calc(5*var(--jp-private-toc-indent-width));
+}
+
+.jp-TableOfContents-header h1 {
+  margin: 0;
+  text-decoration: underline;
+}
+
+.jp-TableOfContents a {
+  text-decoration: none;
+  color: var(--jp-content-link-color);
+}
+
+.jp-TableOfContents a:visited {
+  text-decoration: none;
+  color: var(--jp-content-link-color);
+}

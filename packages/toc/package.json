@@ -1,0 +1,50 @@
+{
+  "name": "jupyterlab-toc",
+  "version": "0.1.0",
+  "description": "Table of Contents extension for JupyterLab",
+  "keywords": [
+    "jupyter",
+    "jupyterlab",
+    "jupyterlab-extension"
+  ],
+  "homepage": "https://github.com/ian-r-rose/jupyterlab-toc",
+  "bugs": {
+    "url": "https://github.com/ian-r-rose/jupyterlab-toc/issues"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Ian Rose",
+  "files": [
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ian-r-rose/jupyterlab-toc.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "@jupyterlab/application": "^0.15.0",
+    "@jupyterlab/coreutils": "^1.0.10",
+    "@jupyterlab/notebook": "^0.15.7",
+    "@phosphor/algorithm": "^1.1.2",
+    "@phosphor/messaging": "^1.2.2",
+    "@phosphor/widgets": "^1.5.0",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^16.0.40",
+    "@types/react-dom": "^16.0.4",
+    "rimraf": "^2.6.1",
+    "typescript": "~2.6.0"
+  },
+  "jupyterlab": {
+    "extension": true
+  }
+}
