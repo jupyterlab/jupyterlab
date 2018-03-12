@@ -21,7 +21,6 @@ export class TableOfContentsRegistry {
   ): TableOfContentsRegistry.IGenerator | undefined {
     let generator: TableOfContentsRegistry.IGenerator | undefined;
     this._generators.forEach(gen => {
-      console.log(gen);
       if (gen.tracker.has(widget)) {
         // If isEnabled is present, check for it.
         if (gen.isEnabled && !gen.isEnabled(widget)) {

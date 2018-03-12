@@ -38,9 +38,8 @@
   margin: 4px 0px;
   padding: 12px 0 4px 12px;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
-  text-transform: uppercase;
   letter-spacing: 1px;
-  font-size: var(--jp-ui-font-size0);
+  font-size: var(--jp-ui-font-size2);
 }
 
 .jp-TableOfContents h1 {

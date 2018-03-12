@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {ActivityMonitor} from '@jupyterlab/coreutils';
+import {ActivityMonitor, PathExt} from '@jupyterlab/coreutils';
 
 import {IDocumentManager} from '@jupyterlab/docmanager';
 
@@ -84,10 +84,15 @@ export class TableOfContents extends Widget {
     }
 
     let toc: IHeading[] = [];
+    let title = 'Table of Contents';
     if (this._current) {
       toc = this._current.generator.generate(this._current.widget);
+      const context = this._docmanager.contextForWidget(this._current.widget);
+      if (context) {
+        title = PathExt.basename(context.localPath);
+      }
     }
-    ReactDOM.render(<TOCTree toc={toc} />, this.node);
+    ReactDOM.render(<TOCTree title={title} toc={toc} />, this.node);
   }
 
   /**
@@ -144,9 +149,54 @@ export interface IHeading {
  */
 export interface ITOCTreeProps extends React.Props<TOCTree> {
   /**
+   * A title to display.
+   */
+  title: string;
+
+  /**
    * A list of IHeadings to render.
    */
   toc: IHeading[];
+}
+
+/**
+ * Props for the TOCItem component.
+ */
+export interface ITOCItemProps extends React.Props<TOCItem> {
+  /**
+   * An IHeading to render.
+   */
+  heading: IHeading;
+}
+
+/**
+ * A React component for a table of contents entry.
+ */
+export class TOCItem extends React.Component<ITOCItemProps, {}> {
+  /**
+   * Render the item.
+   */
+  render() {
+    const heading = this.props.heading;
+    let level = Math.round(heading.level);
+
+    // Clamp the header level between 1 and six.
+    level = Math.max(Math.min(level, 6), 1);
+
+    // Create an onClick handler for the TOC item
+    // that scrolls the anchor into view.
+    const clickHandler = (evt: MouseEvent) => {
+      evt.preventDefault();
+      evt.stopPropagation();
+      heading.onClick();
+    };
+
+    return React.createElement(
+      `h${level}`,
+      {onClick: clickHandler},
+      <a href="">{heading.text}</a>,
+    );
+  }
 }
 
 /**
@@ -160,31 +210,14 @@ export class TOCTree extends React.Component<ITOCTreeProps, {}> {
     // Map the heading objects onto a list of JSX elements.
     let i = 0;
     let listing: JSX.Element[] = this.props.toc.map(el => {
-      let level = Math.round(el.level);
-
-      // Clamp the header level between 1 and six.
-      level = Math.max(Math.min(level, 6), 1);
-
-      // Create an onClick handler for the TOC item
-      // that scrolls the anchor into view.
-      const clickHandler = (evt: MouseEvent) => {
-        evt.preventDefault();
-        evt.stopPropagation();
-        el.onClick();
-      };
-
-      return React.createElement(
-        `h${level}`,
-        {key: `${el.text}-${el.level}-${i++}`, onClick: clickHandler},
-        <a href="">{el.text}</a>,
-      );
+      return <TOCItem heading={el} key={`${el.text}-${el.level}-${i++}`} />;
     });
 
     // Return the JSX component.
     return (
-      <div className='jp-TableOfContents'>
+      <div className="jp-TableOfContents">
         <div className="jp-TableOfContents-header">
-          <h1>Table of Contents</h1>
+          <h1>{this.props.title}</h1>
         </div>
         <div className="jp-TableOfContents-content">{listing}</div>
       </div>
