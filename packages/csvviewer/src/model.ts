@@ -104,14 +104,14 @@ class DSVModel extends DataModel implements IDisposable {
   /**
    * Whether this model has been disposed.
    */
-  get isDisposed() {
+  get isDisposed(): boolean {
     return this._isDisposed;
   }
 
   /**
    * A promise that resolves when the model has parsed all of its data.
    */
-  get ready() {
+  get ready(): Promise<void> {
     return this._ready.promise;
   }
 
@@ -158,7 +158,7 @@ class DSVModel extends DataModel implements IDisposable {
    *
    * @param returns - The data value for the specified cell.
    */
-  data(region: DataModel.CellRegion, row: number, column: number): any {
+  data(region: DataModel.CellRegion, row: number, column: number): string {
     let value: string;
 
     // Look up the field and value for the region.
@@ -194,7 +194,7 @@ class DSVModel extends DataModel implements IDisposable {
   /**
    * Dispose the resources held by this model.
    */
-  dispose() {
+  dispose(): void {
     if (this._isDisposed) {
       return;
     }
@@ -213,7 +213,7 @@ class DSVModel extends DataModel implements IDisposable {
    * incrementally higher endRow. Rows that have already been parsed will not be
    * parsed again.
    */
-  private _computeRowOffsets(endRow = 4294967295) {
+  private _computeRowOffsets(endRow = 4294967295): void {
     // If we've already parsed up to endRow, or if we've already parsed the
     // entire data set, return early.
     if (this._rowCount >= endRow || this._doneParsing === true) {
@@ -323,7 +323,7 @@ class DSVModel extends DataModel implements IDisposable {
    * @param column - The column number of the data item.
    * @returns The parsed string for the data item.
    */
-  private _getField(row: number, column: number) {
+  private _getField(row: number, column: number): string {
     // Declare local variables.
     let value: string;
     let nextIndex;
@@ -446,7 +446,7 @@ class DSVModel extends DataModel implements IDisposable {
    * we parse the first 500 rows to get something up on the screen, then we
    * parse the full data string asynchronously.
    */
-  private _parseAsync() {
+  private _parseAsync(): void {
     // Number of rows to get initially.
     let currentRows = this._initialRows;
 
@@ -516,7 +516,7 @@ class DSVModel extends DataModel implements IDisposable {
   /**
    * Reset the parser state.
    */
-  private _resetParser() {
+  private _resetParser(): void {
     this._columnCount = undefined;
 
     // First row offset is *always* 0, so we always have the first row offset.
