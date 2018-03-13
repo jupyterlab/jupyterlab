@@ -1,0 +1,43 @@
+{
+  "name": "jupyterlab_html",
+  "version": "0.1.0",
+  "description": "Display HTML in IFrame",
+  "keywords": [
+    "jupyter",
+    "jupyterlab",
+    "jupyterlab-extension"
+  ],
+  "homepage": "https://github.com/mflevine/jupyterlab_html",
+  "bugs": {
+    "url": "https://github.com/mflevine/jupyterlab_html/issues"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Max Levine",
+  "files": [
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mflevine/jupyterlab_html.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib",
+    "prepack": "npm run clean && npm run build",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "@jupyterlab/rendermime-interfaces": "^1.0.3",
+    "@phosphor/widgets": "^1.5.0"
+  },
+  "devDependencies": {
+    "rimraf": "~2.6.2",
+    "typescript": "~2.6.2"
+  },
+  "jupyterlab": {
+    "mimeExtension": true
+  }
+}
