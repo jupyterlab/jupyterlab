@@ -10,7 +10,7 @@
 
 
 :root {
-  --jp-private-toc-indent-width: 8px;
+  --jp-private-toc-indent-width: 32px;
   --jp-private-toc-padding: 8px;
   --jp-private-toc-font-size: 0.75em;
 }
@@ -36,34 +36,40 @@
 
 .jp-TableOfContents-header h1 {
   margin: 4px 0px;
-  padding: 12px 0 4px 12px;
+  padding: var(--jp-private-toc-padding);
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   letter-spacing: 1px;
   font-size: var(--jp-ui-font-size2);
 }
 
 .jp-TableOfContents h1 {
-  margin-left: 0px;
+  margin: 2px 0 2px 0;
+  font-weight: normal;
 }
 
 .jp-TableOfContents h2 {
-  margin-left: calc(var(--jp-private-toc-indent-width));
+  margin: 2px 0 2px calc(var(--jp-private-toc-indent-width));
+  font-weight: normal;
 }
 
 .jp-TableOfContents h3 {
-  margin-left: calc(2*var(--jp-private-toc-indent-width));
+  margin: 2px 0 2px calc(2*var(--jp-private-toc-indent-width));
+  font-weight: normal;
 }
 
 .jp-TableOfContents h4 {
-  margin-left: calc(3*var(--jp-private-toc-indent-width));
+  margin: 2px 0 2px calc(3*var(--jp-private-toc-indent-width));
+  font-weight: normal;
 }
 
 .jp-TableOfContents h5 {
-  margin-left: calc(4*var(--jp-private-toc-indent-width));
+  margin: 2px 0 2px calc(4*var(--jp-private-toc-indent-width));
+  font-weight: normal;
 }
 
 .jp-TableOfContents h6 {
-  margin-left: calc(5*var(--jp-private-toc-indent-width));
+  margin: 2px 0 2px calc(5*var(--jp-private-toc-indent-width));
+  font-weight: normal;
 }
 
 .jp-TableOfContents a {
