@@ -51,11 +51,6 @@ class RenderedHTML extends Widget implements IRenderMime.IRenderer {
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     const data = model.data[this._mimeType] as string;
     this.node.querySelector('iframe').setAttribute('srcdoc', data)
-    var elements = this.node.querySelector('iframe').getElementsByTagName('a'),
-    len = elements.length;
-    while( len-- ) {
-        elements[len].target = "_parent";
-    }
     return Promise.resolve(void 0);
   }
 
@@ -107,7 +102,6 @@ namespace Private {
    */
   export
   function createNode(): HTMLElement {
-    console.log("RAWR");
     let node = document.createElement('div');
     node.className = HTML_CONTAINER_CLASS;
     let iframe = document.createElement('iframe');
