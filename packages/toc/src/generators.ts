@@ -33,22 +33,14 @@ export function createNotebookGenerator(
           return;
         }
 
-        // Get the lines that start with a '#'
-        const lines = model.value.text
-          .split('\n')
-          .filter(line => line[0] === '#');
-
-        // Iterate over the lines to get the header level and
-        // the text for the line.
-        lines.forEach(line => {
-          const level = line.search(/[^#]/);
-          // Take special care to parse markdown links into raw text.
-          const text = line.slice(level).replace(/\[(.+)\]\(.+\)/g, '$1');
-          const onClick = () => {
+        const onClickFactory = () => {
+          return () => {
             cell.node.scrollIntoView();
           };
-          headings.push({text, level, onClick});
-        });
+        };
+        headings = headings.concat(
+          Private.getMarkdownHeadings(model.value.text, onClickFactory),
+        );
       });
       return headings;
     },
@@ -80,31 +72,13 @@ export function createMarkdownGenerator(
       );
     },
     generate: editor => {
-      let headings: IHeading[] = [];
       let model = editor.model;
-
-      // Split the text into lines, with the line number for each.
-      // We will use the line number to scroll the editor upon
-      // TOC item click.
-      const lines = model.value.text
-        .split('\n')
-        .map((value, idx) => {
-          return {value, idx};
-        })
-        .filter(line => line.value[0] === '#');
-
-      // Iterate over the lines to get the header level and
-      // the text for the line.
-      lines.forEach(line => {
-        const level = line.value.search(/[^#]/);
-        // Take special care to parse markdown links into raw text.
-        const text = line.value.slice(level).replace(/\[(.+)\]\(.+\)/g, '$1');
-        const onClick = () => {
-          editor.editor.setCursorPosition({line: line.idx, column: 0});
+      let onClickFactory = (line: number) => {
+        return () => {
+          editor.editor.setCursorPosition({line, column: 0});
         };
-        headings.push({text, level, onClick});
-      });
-      return headings;
+      };
+      return Private.getMarkdownHeadings(model.value.text, onClickFactory);
     },
   };
 }
@@ -163,6 +137,52 @@ export function createLatexGenerator(
  * A private namespace for miscellaneous things.
  */
 namespace Private {
+  export function getMarkdownHeadings(
+    text: string,
+    onClickFactory: (line: number) => (() => void),
+  ) {
+    // Split the text into lines.
+    const lines = text.split('\n');
+    let headings: IHeading[] = [];
+
+    // Iterate over the lines to get the header level and
+    // the text for the line.
+    lines.forEach((line, idx) => {
+      // Make an onClick handler for this line.
+      const onClick = onClickFactory(idx);
+
+      // First test for '#'-style headers.
+      let match = line.match(/^([#]{1,6}) (.*)/);
+      if (match) {
+        const level = match[1].length;
+        // Take special care to parse markdown links into raw text.
+        const text = match[2].replace(/\[(.+)\]\(.+\)/g, '$1');
+        headings.push({text, level, onClick});
+        return;
+      }
+
+      // Next test for '==='-style headers.
+      match = line.match(/^([=]{2,}|[-]{2,})/);
+      if (match && idx > 0) {
+        const level = match[1][0] === '=' ? 1 : 2;
+        // Take special care to parse markdown links into raw text.
+        const text = lines[idx - 1].replace(/\[(.+)\]\(.+\)/g, '$1');
+        headings.push({text, level, onClick});
+        return;
+      }
+
+      // Finally test for HTML headers. This will not catch multiline
+      // headers, nor will it catch multiple headers on the same line.
+      // It should do a decent job of catching many, though.
+      match = line.match(/<h([1-6])>(.*)<\/h\1>/);
+      if (match) {
+        const level = parseInt(match[1]);
+        const text = match[2];
+        headings.push({text, level, onClick});
+      }
+    });
+    return headings;
+  }
   /**
    * A mapping from LaTeX section headers to HTML header
    * levels. `part` and `chapter` are less common in my experience,
