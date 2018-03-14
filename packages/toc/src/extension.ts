@@ -9,13 +9,13 @@ import {
 
 import {IDocumentManager} from '@jupyterlab/docmanager';
 
-import {FileEditor, IEditorTracker} from '@jupyterlab/fileeditor';
+import {IEditorTracker} from '@jupyterlab/fileeditor';
 
-import {INotebookTracker, NotebookPanel} from '@jupyterlab/notebook';
+import {INotebookTracker} from '@jupyterlab/notebook';
 
-import {each} from '@phosphor/algorithm';
+import {TableOfContents} from './toc';
 
-import {IHeading, TableOfContents} from './toc';
+import {createNotebookGenerator, createMarkdownGenerator} from './generators';
 
 import {ITableOfContentsRegistry, TableOfContentsRegistry} from './registry';
 
@@ -36,8 +36,6 @@ const extension: JupyterLabPlugin<ITableOfContentsRegistry> = {
   ],
   activate: activateTOC,
 };
-
-
 
 /**
  * Activate the ToC extension.
@@ -64,63 +62,10 @@ function activateTOC(
   restorer.add(toc, 'juputerlab-toc');
 
   // Create a notebook TableOfContentsRegistry.IGenerator
-  const notebookGenerator: TableOfContentsRegistry.IGenerator<NotebookPanel> = {
-    tracker: notebookTracker,
-    generate: panel => {
-      let headings: IHeading[] = [];
-      each(panel.notebook.widgets, cell => {
-        let model = cell.model;
-        if (model.type !== 'markdown') {
-          return;
-        }
-        const lines = model.value.text
-          .split('\n')
-          .filter(line => line[0] === '#');
-        lines.forEach(line => {
-          const level = line.search(/[^#]/);
-          const text = line.slice(level).replace(/\[(.+)\]\(.+\)/g, '$1');
-          const onClick = () => {
-            cell.node.scrollIntoView();
-          };
-          headings.push({text, level, onClick});
-        });
-      });
-      return headings;
-    },
-  };
+  const notebookGenerator = createNotebookGenerator(notebookTracker);
 
   // Create an markdown editor TableOfContentsRegistry.IGenerator
-  const markdownGenerator: TableOfContentsRegistry.IGenerator<FileEditor> = {
-    tracker: editorTracker,
-    isEnabled: editor => {
-      let mime = editor.model.mimeType;
-      return (
-        mime === 'text/x-ipthongfm' ||
-        mime === 'text/x-markdown' ||
-        mime === 'text/x-gfm' ||
-        mime === 'text/markdown'
-      );
-    },
-    generate: editor => {
-      let headings: IHeading[] = [];
-      let model = editor.model;
-      const lines = model.value.text
-        .split('\n')
-        .map((value, idx) => {
-          return {value, idx};
-        })
-        .filter(line => line.value[0] === '#');
-      lines.forEach(line => {
-        const level = line.value.search(/[^#]/);
-        const text = line.value.slice(level).replace(/\[(.+)\]\(.+\)/g, '$1');
-        const onClick = () => {
-          editor.editor.setCursorPosition({line: line.idx, column: 0});
-        };
-        headings.push({text, level, onClick});
-      });
-      return headings;
-    },
-  };
+  const markdownGenerator = createMarkdownGenerator(editorTracker);
 
   registry.addGenerator(notebookGenerator);
   registry.addGenerator(markdownGenerator);
