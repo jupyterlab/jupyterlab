@@ -13,6 +13,8 @@ import {IEditorTracker} from '@jupyterlab/fileeditor';
 
 import {INotebookTracker} from '@jupyterlab/notebook';
 
+import {IRenderMimeRegistry} from '@jupyterlab/rendermime';
+
 import {TableOfContents} from './toc';
 
 import {
@@ -37,6 +39,7 @@ const extension: JupyterLabPlugin<ITableOfContentsRegistry> = {
     IEditorTracker,
     ILayoutRestorer,
     INotebookTracker,
+    IRenderMimeRegistry,
   ],
   activate: activateTOC,
 };
@@ -50,9 +53,10 @@ function activateTOC(
   editorTracker: IEditorTracker,
   restorer: ILayoutRestorer,
   notebookTracker: INotebookTracker,
+  rendermime: IRenderMimeRegistry,
 ): ITableOfContentsRegistry {
   // Create the ToC widget.
-  const toc = new TableOfContents(docmanager);
+  const toc = new TableOfContents({ docmanager, rendermime });
 
   // Create the ToC registry.
   const registry = new TableOfContentsRegistry();

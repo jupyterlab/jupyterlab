@@ -23,6 +23,7 @@ export function createNotebookGenerator(
 ): TableOfContentsRegistry.IGenerator<NotebookPanel> {
   return {
     tracker,
+    usesLatex: true,
     generate: panel => {
       let headings: IHeading[] = [];
       each(panel.notebook.widgets, cell => {
@@ -66,6 +67,7 @@ export function createMarkdownGenerator(
 ): TableOfContentsRegistry.IGenerator<FileEditor> {
   return {
     tracker,
+    usesLatex: true,
     isEnabled: editor => {
       // Only enable this if the editor mimetype matches
       // one of a few markdown variants.
@@ -119,6 +121,7 @@ export function createLatexGenerator(
 ): TableOfContentsRegistry.IGenerator<FileEditor> {
   return {
     tracker,
+    usesLatex: true,
     isEnabled: editor => {
       // Only enable this if the editor mimetype matches
       // one of a few LaTeX variants.

@@ -5,6 +5,8 @@ import {ActivityMonitor, PathExt} from '@jupyterlab/coreutils';
 
 import {IDocumentManager} from '@jupyterlab/docmanager';
 
+import {IRenderMimeRegistry} from '@jupyterlab/rendermime';
+
 import {Message} from '@phosphor/messaging';
 
 import {Widget} from '@phosphor/widgets';
@@ -26,9 +28,10 @@ export class TableOfContents extends Widget {
   /**
    * Create a new table of contents.
    */
-  constructor(docmanager: IDocumentManager) {
+  constructor(options: TableOfContents.IOptions) {
     super();
-    this._docmanager = docmanager;
+    this._docmanager = options.docmanager;
+    this._rendermime = options.rendermime;
   }
 
   /**
@@ -92,7 +95,11 @@ export class TableOfContents extends Widget {
         title = PathExt.basename(context.localPath);
       }
     }
-    ReactDOM.render(<TOCTree title={title} toc={toc} />, this.node);
+    ReactDOM.render(<TOCTree title={title} toc={toc} />, this.node, () => {
+      if (this._current.generator.usesLatex === true) {
+        this._rendermime.latexTypesetter.typeset(this.node);
+      }
+    });
   }
 
   /**
@@ -102,6 +109,7 @@ export class TableOfContents extends Widget {
     this.update();
   }
 
+  private _rendermime: IRenderMimeRegistry;
   private _docmanager: IDocumentManager;
   private _current: TableOfContents.ICurrentWidget | null;
   private _monitor: ActivityMonitor<any, any> | null;
@@ -111,6 +119,21 @@ export class TableOfContents extends Widget {
  * A namespace for TableOfContents statics.
  */
 export namespace TableOfContents {
+  /**
+   * Options for the constructor.
+   */
+  export interface IOptions {
+    /**
+     * The document manager for the application.
+     */
+    docmanager: IDocumentManager;
+
+    /**
+     * The rendermime for the application.
+     */
+    rendermime: IRenderMimeRegistry;
+  }
+
   /**
    * A type representing a tuple of a widget,
    * and a generator that knows how to generate
