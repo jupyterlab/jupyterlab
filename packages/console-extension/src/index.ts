@@ -94,7 +94,7 @@ namespace CommandIDs {
   const enterToExecute = 'console:enter-to-execute';
 
   export
-  const shiftEnterToExecute = 'consol:shift-enter-to-execute';
+  const shiftEnterToExecute = 'console:shift-enter-to-execute';
 }
 
 
