@@ -15,7 +15,11 @@ import {INotebookTracker} from '@jupyterlab/notebook';
 
 import {TableOfContents} from './toc';
 
-import {createNotebookGenerator, createMarkdownGenerator} from './generators';
+import {
+  createLatexGenerator,
+  createNotebookGenerator,
+  createMarkdownGenerator,
+} from './generators';
 
 import {ITableOfContentsRegistry, TableOfContentsRegistry} from './registry';
 
@@ -63,12 +67,15 @@ function activateTOC(
 
   // Create a notebook TableOfContentsRegistry.IGenerator
   const notebookGenerator = createNotebookGenerator(notebookTracker);
+  registry.addGenerator(notebookGenerator);
 
   // Create an markdown editor TableOfContentsRegistry.IGenerator
   const markdownGenerator = createMarkdownGenerator(editorTracker);
-
-  registry.addGenerator(notebookGenerator);
   registry.addGenerator(markdownGenerator);
+
+  // Create a latex editor TableOfContentsRegistry.IGenerator
+  const latexGenerator = createLatexGenerator(editorTracker);
+  registry.addGenerator(latexGenerator);
 
   // Change the ToC when the active widget changes.
   app.shell.currentChanged.connect(() => {

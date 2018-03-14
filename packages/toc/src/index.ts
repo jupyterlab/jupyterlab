@@ -3,3 +3,4 @@
 
 export * from './toc';
 export * from './registry';
+export * from './generators';
