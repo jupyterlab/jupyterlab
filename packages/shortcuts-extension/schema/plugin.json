@@ -175,19 +175,19 @@
       },
       "type": "object"
     },
-    "imageviewer:rotate-right": {
+    "imageviewer:rotate-clockwise": {
       "default": { },
       "properties": {
-        "command": { "default": "imageviewer:rotate-right" },
+        "command": { "default": "imageviewer:rotate-clockwise" },
         "keys": { "default": ["]"] },
         "selector": { "default": ".jp-ImageViewer" }
       },
       "type": "object"
     },
-    "imageviewer:rotate-left": {
+    "imageviewer:rotate-counterclockwise": {
       "default": { },
       "properties": {
-        "command": { "default": "imageviewer:rotate-left" },
+        "command": { "default": "imageviewer:rotate-counterclockwise" },
         "keys": { "default": ["["] },
         "selector": { "default": ".jp-ImageViewer" }
       },

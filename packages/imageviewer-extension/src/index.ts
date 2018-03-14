@@ -33,10 +33,10 @@ namespace CommandIDs {
   const flipVertical = 'imageviewer:flip-vertical';
 
   export
-  const rotateRight = 'imageviewer:rotate-right';
+  const rotateClockwise = 'imageviewer:rotate-clockwise';
 
   export
-  const rotateLeft = 'imageviewer:rotate-left';
+  const rotateCounterclockwise = 'imageviewer:rotate-counterclockwise';
 
   export
   const invertColors = 'imageviewer:invert-colors';
@@ -113,7 +113,7 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRe
 
   const category = 'Image Viewer';
 
-  [CommandIDs.zoomIn, CommandIDs.zoomOut, CommandIDs.resetImage, CommandIDs.rotateRight, CommandIDs.rotateLeft, CommandIDs.flipHorizontal, CommandIDs.flipVertical, CommandIDs.invertColors]
+  [CommandIDs.zoomIn, CommandIDs.zoomOut, CommandIDs.resetImage, CommandIDs.rotateClockwise, CommandIDs.rotateCounterclockwise, CommandIDs.flipHorizontal, CommandIDs.flipVertical, CommandIDs.invertColors]
     .forEach(command => { palette.addItem({ command, category }); });
 
   return tracker;
@@ -153,15 +153,15 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
     isEnabled
   });
 
-  commands.addCommand('imageviewer:rotate-right', {
-    execute: rotateRight,
-    label: 'Rotate Right (CW)',
+  commands.addCommand('imageviewer:rotate-clockwise', {
+    execute: rotateClockwise,
+    label: 'Rotate Clockwise',
     isEnabled
   });
 
-  commands.addCommand('imageviewer:rotate-left', {
-    execute: rotateLeft,
-    label: 'Rotate Left (CCW)',
+  commands.addCommand('imageviewer:rotate-counterclockwise', {
+    execute: rotateCounterclockwise,
+    label: 'Rotate Counterclockwise',
     isEnabled
   });
 
@@ -209,19 +209,19 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
     }
   }
 
-  function rotateRight(): void {
+  function rotateClockwise(): void {
     const widget = tracker.currentWidget;
 
     if (widget) {
-      widget.rotateRight();
+      widget.rotateClockwise();
     }
   }
 
-  function rotateLeft(): void {
+  function rotateCounterclockwise(): void {
     const widget = tracker.currentWidget;
 
     if (widget) {
-      widget.rotateLeft();
+      widget.rotateCounterclockwise();
     }
   }
 

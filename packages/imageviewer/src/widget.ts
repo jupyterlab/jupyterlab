@@ -108,17 +108,17 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
   }
 
   /**
-   * Rotate the image left (counter-clockwise).
+   * Rotate the image counter-clockwise (left).
    */
-  rotateLeft(): void {
+  rotateCounterclockwise(): void {
     this._matrix = Private.prod(this._matrix, Private.rotateLeftMatrix);
     this._updateStyle();
   }
 
   /**
-   * Rotate the image right (clockwise).
+   * Rotate the image clockwise (right).
    */
-  rotateRight(): void {
+  rotateClockwise(): void {
     this._matrix = Private.prod(this._matrix, Private.rotateRightMatrix);
     this._updateStyle();
   }
