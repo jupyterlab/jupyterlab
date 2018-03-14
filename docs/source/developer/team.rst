@@ -1,9 +1,8 @@
 Team
 ----
 
-JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by an open community of contributors. JupyterLab's current maintainers are as follows:
-
-(listed in alphabetical order, with affiliation, and main areas of contribution)
+JupyterLab is part of `Project Jupyter <http://jupyter.org/>`__ and is developed by an open community of contributors.
+JupyterLab's current maintainers are listed in alphabetical order, with affiliation, and main areas of contribution:
 
 * Chris Colbert, Project Jupyter (co-creator, application/low-level architecture,
   technical leadership, vision, phosphor.js)
