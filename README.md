@@ -16,20 +16,23 @@
 
 
 An extensible environment for interactive and reproducible computing, based on the
-Jupyter Notebook and Architecture.
+Jupyter Notebook and Architecture.  [Currently in beta.](https://blog.jupyter.org/jupyterlab-is-ready-for-users-5a6f039b8906https://blog.jupyter.org/jupyterlab-is-ready-for-users-5a6f039b8906)
 
-JupyterLab is the next-generation user interface for Project Jupyter. It offers
+[JupyterLab](http://jupyterlab.readthedocs.io/en/stable/) is the next-generation user interface for [Project Jupyter](https://jupyter.org). It offers
 all the familiar building blocks of the classic Jupyter Notebook (notebook,
 terminal, text editor, file browser, rich outputs, etc.) in a flexible and
-powerful user inteface that can be extended through third party extensions.
+powerful user inteface.
 Eventually, JupyterLab will replace the classic Jupyter Notebook after
 JupyterLab reaches 1.0.
 
-**JupyterLab is currently in beta.** The beta releases are suitable for general
+JupyterLab can be extended using extensions that are [npm](https://www.npmjs.com/) packages
+and use our public APIs. You can search for the GitHub topic [jupyterlab-extension](https://github.com/topics/jupyterlab-extension) to find extensions. To learn more about extensions, see our  [user documentation](https://jupyterlab.readthedocs.io/en/latest/user/extensions.html).
+
+The beta releases are suitable for general
 usage. For JupyterLab extension developers, the extension APIs will continue to
 evolve until the 1.0 release.
 
-For a good overview of JupyterLab, please see [this link](https://channel9.msdn.com/Events/PyData/Seattle2017/BRK11) to a recent talk we gave about JupyterLab at PyData Seattle (2017).
+Read the latest version of our documentation on [ReadTheDocs](http://jupyterlab.readthedocs.io/en/latest/).
 
 ----
 
@@ -37,19 +40,9 @@ For a good overview of JupyterLab, please see [this link](https://channel9.msdn.
 
 ### Installation
 
-If you use ``conda``, you can install as:
+You can [install](http://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html) JupyterLab using `conda`, `pip`, or `pipenv`.
 
-```bash
-conda install -c conda-forge jupyterlab
-```
-
-If you use ``pip``, you can install it as:
-
-```bash
-pip install jupyterlab
-```
-
-Note: For all methods of installation, if you are using a version of Jupyter Notebook earlier than 5.3, then you must also run the following command
+Note: For all methods of installation, **if you are using a version of Jupyter Notebook earlier than 5.3**, then you must also run the following command
 after installation to enable the JupyterLab server extension:
 
 ```bash
@@ -58,9 +51,27 @@ jupyter serverextension enable --py jupyterlab --sys-prefix
 
 Instructions on how to install the project from the git sources are available in our [contributor documentation](CONTRIBUTING.md).
 
-Note: If installing using `pip install --user`, you must add the user-level
+#### conda
+
+If you use ``conda``, you can install as:
+
+```bash
+conda install -c conda-forge jupyterlab
+```
+
+#### pip
+
+If you use ``pip``, you can install it as:
+
+```bash
+pip install jupyterlab
+```
+
+If installing using `pip install --user`, you must add the user-level
  `bin` directory to your `PATH` environment variable in order to launch
  `jupyter lab`.
+
+#### pipenv
 
 If you use ``pipenv``, you can install it as:
 
@@ -91,39 +102,22 @@ Start up JupyterLab using:
 jupyter lab
 ```
 
-JupyterLab will open automatically in your browser. You may also access
-JupyterLab by entering the notebook server's URL (`http://localhost:8888`) in
-the browser.
+JupyterLab will open automatically in your browser. See our [documentation](http://jupyterlab.readthedocs.io/en/stable/getting_started/starting.html) for additional details.
 
-### Prerequisites
+### Prerequisites and Supported Browsers
 
 Jupyter notebook version 4.3 or later. To check the notebook version:
 
 ```bash
 jupyter notebook --version
 ```
+The latest versions of the following browsers are currently *known to work*:
 
-### Supported runtimes
+- Firefox
+- Chrome
+- Safari
 
-The runtime versions which are currently *known to work*:
-
-- Firefox Latest
-- Chrome Latest
-- Safari Latest
-
-Earlier browser versions may also work, but come with no guarantees.
-
-JupyterLab uses CSS Variables for styling, which is one reason for the
-minimum versions listed above.  IE 11+ or Edge 14 do not support
-CSS Variables, and are not directly supported at this time.
-A tool like [postcss](http://postcss.org/) can be used to convert the CSS files in the
-`jupyterlab/build` directory manually if desired.
-
-----
-
-## Documentation
-
-Read our documentation on [ReadTheDocs](http://jupyterlab.readthedocs.io/en/latest/).
+See our [documentation](http://jupyterlab.readthedocs.io/en/latest/getting_started/installation.html) for additional details.
 
 ----
 
@@ -135,55 +129,22 @@ If you would like to contribute to the project, please read our [contributor doc
 
 JupyterLab follows the official [Jupyter Code of Conduct](https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md).
 
-### Extensions
+### Extending JupyterLab
 
-JupyterLab can be extended using extensions that are [npm](https://www.npmjs.com/) packages
-and use our public APIs. See our documentation
-for [users](https://jupyterlab.readthedocs.io/en/latest/user/extensions.html) and [developers](https://jupyterlab.readthedocs.io/en/latest/developer/extension_dev.html).
+To start developing your own extension, see our [developers documentation](https://jupyterlab.readthedocs.io/en/latest/developer/extension_dev.html) and [API docs](http://jupyterlab.github.io/jupyterlab/globals.html).
 
 ### License
 
 We use a shared copyright model that enables all contributors to maintain the
-copyright on their contributions. All code is licensed under the terms of the revised BSD license.
+copyright on their contributions. All code is licensed under the terms of the revised [BSD license](https://github.com/jupyterlab/jupyterlab/blob/master/LICENSE).
 
 ### Team
 
-JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by an open community of contributors. JupyterLab's current maintainers are as follows:
-
-(listed in alphabetical order, with affiliation, and main areas of contribution)
-
-* Chris Colbert, Project Jupyter (co-creator, application/low-level architecture,
-  technical leadership, vision, phosphor.js)
-* Afshin Darian, Project Jupyter (co-creator, settings, inspector, completer,
-  prolific contributions throughout the code base).
-* Jessica Forde, Project Jupyter (demo, documentation)
-* Tim George, Cal Poly (UI/UX design, strategy, management, user needs analysis)
-* Brian Granger, Cal Poly (co-creator, strategy, vision, management, UI/UX design,
-  architecture).
-* Jason Grout, Bloomberg (co-creator, vision, general development).
-* Cameron Oelsen, Cal Poly (UI/UX design).
-* Fernando Perez, UC Berkeley (co-creator, vision).
-* Ian Rose, UC Berkeley (Real-time collaboration, document architecture).
-* Saul Shanabrook, Quansight (general development, extensions)
-* Steven Silvester, JPMorgan Chase (co-creator, release management, packaging,
-  prolific contributions throughout the code base).
-
-This list is provided to help provide context about who we are and how our team functions.
-This team is accompanied by a much larger group of contributors to JupyterLab and Project Jupyter as a whole. If you would like to be listed here, please submit a pull request with
-your information.
+JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by an open community of contributors. Our [maintainer team]() is accompanied by a much larger group of contributors to JupyterLab and Project Jupyter as a whole.
 
 ----
 
 ## Getting help
 
 We encourage you to ask questions on the [mailing list](https://groups.google.com/forum/#!forum/jupyter),
-and you may participate in development discussions or get live help on [Gitter](https://gitter.im/jupyterlab/jupyterlab).
-
-
-## Resources
-
-- [Reporting Issues](https://github.com/jupyterlab/jupyterlab/issues)
-- [Architecture tutorial](https://jupyterlab.readthedocs.io/en/latest/index.html)
-- [API Docs](http://jupyterlab.github.io/jupyterlab/globals.html)
-- [Documentation for Project Jupyter](https://jupyter.readthedocs.io/en/latest/index.html) | [PDF](https://media.readthedocs.org/pdf/jupyter/latest/jupyter.pdf)
-- [Project Jupyter website](https://jupyter.org)
+and you may participate in development discussions or get live help on [Gitter](https://gitter.im/jupyterlab/jupyterlab).  Please use our [issues page](https://github.com/jupyterlab/jupyterlab/issues) to provide feedback or submit a bug report. 
