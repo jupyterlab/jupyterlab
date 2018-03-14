@@ -83,6 +83,13 @@ export namespace TableOfContentsRegistry {
     isEnabled ?: (widget: W) => boolean;
 
     /**
+     * Whether the document uses LaTeX typesetting.
+     *
+     * Defaults to `false`.
+     */
+    usesLatex?: boolean;
+
+    /**
      * A function that takes the widget, and produces
      * a list of headings.
      */

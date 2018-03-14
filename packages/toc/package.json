@@ -36,6 +36,7 @@
     "@jupyterlab/docmanager": "^0.15.5",
     "@jupyterlab/fileeditor": "^0.15.4",
     "@jupyterlab/notebook": "^0.15.7",
+    "@jupyterlab/rendermime": "^0.15.4",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/coreutils": "^1.3.0",
     "@phosphor/messaging": "^1.2.2",
