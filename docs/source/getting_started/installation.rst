@@ -3,7 +3,13 @@
 Installation
 ------------
 
-JupyterLab can be installed using ``conda`` or ``pip``:
+JupyterLab can be installed using ``conda``, ``pip``, or ``pipenv``. If you are using a version of Jupyter Notebook earlier than 5.3, then
+you must also run the following command to enable the JupyterLab
+server extension:
+
+.. code:: bash
+
+    jupyter serverextension enable --py jupyterlab --sys-prefix
 
 If you use ``conda``, you can install it with:
 
@@ -17,13 +23,28 @@ If you use ``pip``, you can install it with:
 
     pip install jupyterlab
 
-If you are using a version of Jupyter Notebook earlier than 5.3, then
-you must also run the following command to enable the JupyterLab
-server extension:
+If installing using ```pip install --user``, you must add the user-level
+     ``bin`` directory to your `PATH` environment variable in order to launch
+     ```jupyter lab``.
+
+If you use ``pipenv``, you can install it as:
 
 .. code:: bash
+     pipenv install jupyterlab
+     pipenv shell
 
-    jupyter serverextension enable --py jupyterlab --sys-prefix
+or from a git checkout:
+
+.. code:: bash
+     pipenv install git+git://github.com/jupyterlab/jupyterlab.git#egg=jupyterlab
+     pipenv shell
+
+When using ``pipenv``, in order to launch ``jupyter lab``, you must activate the project's virtualenv. For example, in the directory where ``pipenv``'s `Pipfile` and `Pipfile.lock` live (i.e., where you ran the above commands):
+
+.. code:: bash
+     pipenv shell
+     jupyter lab
+
 
 Prerequisites
 ~~~~~~~~~~~~~
@@ -44,5 +65,10 @@ The following browsers are currently known to work:
 -  Chrome (latest version)
 -  Safari (latest version)
 
-Earlier browser versions or other browsers may also work, but may not be
-tested.
+Earlier browser versions may also work, but come with no guarantees.
+
+JupyterLab uses CSS Variables for styling, which is one reason for the
+minimum versions listed above.  IE 11+ or Edge 14 do not support
+CSS Variables, and are not directly supported at this time.
+A tool like `postcss <http://postcss.org/>`__ can be used to convert the CSS files in the
+```jupyterlab/build`` directory manually if desired.
