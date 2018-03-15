@@ -28,7 +28,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  CSVToolbar
+  CSVToolbar, DELIMITERS
 } from './toolbar';
 
 
@@ -83,6 +83,8 @@ class CSVViewer extends Widget implements DocumentRegistry.IReadyWidget {
     this._onPathChanged();
 
     this._context.ready.then(() => {
+      let text = this._context.model.toString();
+      this._toolbar.selectValue(Private.detectDelimiter(text));
       this._updateGrid();
       this._ready.resolve(undefined);
       // Throttle the rendering rate of the widget.
@@ -196,6 +198,26 @@ class CSVViewerFactory extends ABCWidgetFactory<CSVViewer, DocumentRegistry.IMod
  * The namespace for the module implementation details.
  */
 namespace Private {
+  /**
+   * Try to auto-detect the delimiter to use for this file.
+   *
+   * @param text - The text from the file.
+   *
+   * @returns A string to use as the delimiter.
+   */
+  export
+  function detectDelimiter(text: string): string {
+    let firstLine = text.split('\n', 1)[0];
+    if (firstLine.indexOf(",") >= 0) {
+      return ",";
+    } else if (firstLine.indexOf("\t") >= 0) {
+      return "\t";
+    } else if (firstLine.indexOf(";") >= 0) {
+      return ";";
+    }
+    return ",";
+  }
+
   /**
    * Parse DSV text with the given delimiter.
    *
