@@ -148,10 +148,10 @@
       },
       "type": "object"
     },
-    "imageviewer:reset-zoom": {
+    "imageviewer:reset-image": {
       "default": { },
       "properties": {
-        "command": { "default": "imageviewer:reset-zoom" },
+        "command": { "default": "imageviewer:reset-image" },
         "keys": { "default": ["0"] },
         "selector": { "default": ".jp-ImageViewer" }
       },
@@ -171,6 +171,51 @@
       "properties": {
         "command": { "default": "imageviewer:zoom-out" },
         "keys": { "default": ["-"] },
+        "selector": { "default": ".jp-ImageViewer" }
+      },
+      "type": "object"
+    },
+    "imageviewer:rotate-clockwise": {
+      "default": { },
+      "properties": {
+        "command": { "default": "imageviewer:rotate-clockwise" },
+        "keys": { "default": ["]"] },
+        "selector": { "default": ".jp-ImageViewer" }
+      },
+      "type": "object"
+    },
+    "imageviewer:rotate-counterclockwise": {
+      "default": { },
+      "properties": {
+        "command": { "default": "imageviewer:rotate-counterclockwise" },
+        "keys": { "default": ["["] },
+        "selector": { "default": ".jp-ImageViewer" }
+      },
+      "type": "object"
+    },
+    "imageviewer:flip-vertical": {
+      "default": { },
+      "properties": {
+        "command": { "default": "imageviewer:flip-vertical" },
+        "keys": { "default": ["V"] },
+        "selector": { "default": ".jp-ImageViewer" }
+      },
+      "type": "object"
+    },
+    "imageviewer:flip-horizontal": {
+      "default": { },
+      "properties": {
+        "command": { "default": "imageviewer:flip-horizontal" },
+        "keys": { "default": ["H"] },
+        "selector": { "default": ".jp-ImageViewer" }
+      },
+      "type": "object"
+    },
+    "imageviewer:invert-colors": {
+      "default": { },
+      "properties": {
+        "command": { "default": "imageviewer:invert-colors" },
+        "keys": { "default": ["I"] },
         "selector": { "default": ".jp-ImageViewer" }
       },
       "type": "object"
