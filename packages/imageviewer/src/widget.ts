@@ -111,7 +111,7 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
    * Rotate the image counter-clockwise (left).
    */
   rotateCounterclockwise(): void {
-    this._matrix = Private.prod(this._matrix, Private.rotateLeftMatrix);
+    this._matrix = Private.prod(this._matrix, Private.rotateCounterclockwiseMatrix);
     this._updateStyle();
   }
 
@@ -119,7 +119,7 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
    * Rotate the image clockwise (right).
    */
   rotateClockwise(): void {
-    this._matrix = Private.prod(this._matrix, Private.rotateRightMatrix);
+    this._matrix = Private.prod(this._matrix, Private.rotateClockwiseMatrix);
     this._updateStyle();
   }
 
@@ -233,13 +233,13 @@ namespace Private {
    * Clockwise rotation transformation matrix.
    */
   export
-  const rotateRightMatrix = [0, 1, -1, 0];
+  const rotateClockwiseMatrix = [0, 1, -1, 0];
 
   /**
    * Counter-clockwise rotation transformation matrix.
    */
   export
-  const rotateLeftMatrix = [0, -1, 1, 0];
+  const rotateCounterclockwiseMatrix = [0, -1, 1, 0];
 
   /**
    * Horizontal flip transformation matrix.
