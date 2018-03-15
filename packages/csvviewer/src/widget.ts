@@ -143,7 +143,7 @@ class CSVViewer extends Widget implements DocumentRegistry.IReadyWidget {
   }
 
   /**
-   * Create the json model for the grid.
+   * Create the model for the grid.
    */
   private _updateGrid(): void {
     let data: string = this._context.model.toString();
