@@ -468,24 +468,24 @@ namespace Private {
   type Envelope = { readonly v: ReadonlyJSONValue };
 
   /**
-   * The interval (in ms) at which the window name is pinged.
+   * The timeout (in ms) to wait for beacon responders.
    */
-  const interval = 100;
+  const TIMEOUT = 100;
 
   /**
    * The internal prefix for private local storage keys.
    */
-  const prefix = '@jupyterlab/coreutils:StateDB';
+  const PREFIX = '@jupyterlab/coreutils:StateDB';
 
   /**
    * The local storage beacon key.
    */
-  const beacon = `${prefix}:beacon`;
+  const BEACON = `${PREFIX}:beacon`;
 
   /**
-   * The known window names.
+   * The local storage window prefix.
    */
-  let windows = fetchWindowNames();
+  const WINDOW = `${PREFIX}:window-`;
 
   /**
    * The window name.
@@ -498,20 +498,42 @@ namespace Private {
   let promise: Promise<string>;
 
   /**
+   * Wait until a window name is available and resolve.
+   */
+  function awaitName(resolve: (value: string) => void): void {
+    window.setTimeout(() => {
+      if (name) {
+        return resolve(name);
+      }
+
+      createName().then(value => {
+        name = value;
+        resolve(name);
+      });
+    }, TIMEOUT);
+  }
+
+  /**
+   * Create a name for this window.
+   */
+  function createName(): Promise<string> {
+    console.log('I should generate a name');
+    return Promise.resolve('');
+  }
+
+  /**
    * Fetch the known window names.
    */
   function fetchWindowNames(): { [name: string]: number } {
       const names: { [name: string]: number } = { };
       const { localStorage } = window;
-      const windowPrefix = `${prefix}:window-`;
       let i = localStorage.length;
 
       while (i) {
         let key = localStorage.key(--i);
 
-        if (key && key.indexOf(windowPrefix) === 0) {
-          let name = key.replace(windowPrefix, '');
-          names[name] = parseInt(localStorage.getItem(key));
+        if (key && key.indexOf(WINDOW) === 0) {
+          names[key.replace(WINDOW, '')] = parseInt(localStorage.getItem(key));
         }
       }
 
@@ -519,14 +541,19 @@ namespace Private {
   }
 
   /**
-   * Respond to a beacon request.
+   * Fire off the signal beacon to solicit pings from other JupyterLab windows.
+   */
+  function beacon(): void {
+    window.localStorage.setItem(BEACON, `${(new Date()).getTime()}`);
+  }
+
+  /**
+   * Respond to a signal beacon.
    */
   function ping(): void {
-    if (!name) {
-      return;
+    if (name) {
+      window.localStorage.setItem(name, `${(new Date()).getTime()}`);
     }
-
-    window.localStorage.setItem(name, `${(new Date()).getTime()}`);
   }
 
   /**
@@ -534,23 +561,25 @@ namespace Private {
    */
   function storageHandler(event: StorageEvent) {
     const { key } = event;
-    const windowPrefix = `${prefix}:window-`;
 
     console.log('event key', key);
-    if (key === beacon) {
+
+    if (key === BEACON) {
       console.log('The beacon has been fired');
-      ping();
+      return ping();
+    }
+
+    if (key.indexOf(WINDOW) !== 0) {
       return;
     }
-    if (key.indexOf(windowPrefix) === 0) {
-      let name = key.replace(windowPrefix, '');
 
-      if (name in windows) {
-        console.log(`Window ${name} is a known window.`);
-      } else {
-        console.log(`Window ${name} is an uknown window.`);
-      }
-      return;
+    const windows = fetchWindowNames();
+    const name = key.replace(WINDOW, '');
+
+    if (name in windows) {
+      console.log(`Window ${name} is a known window.`);
+    } else {
+      console.log(`Window ${name} is an unknown window.`);
     }
   }
 
@@ -559,22 +588,10 @@ namespace Private {
    */
   export
   function windowName(): Promise<string> {
-    if (promise) {
-      return promise;
-    }
-
-    promise = new Promise((resolve) => {
-      if (name) {
-        return name;
-      }
-
-      setTimeout(() => {
-        window.localStorage.setItem(beacon, `${(new Date()).getTime()}`);
-        resolve('');
-      }, interval * 2);
-    });
-
-    return promise;
+    return promise || (promise = new Promise((resolve) => {
+      beacon();
+      awaitName(resolve);
+    }));
   }
 
   /**
