@@ -78,7 +78,6 @@ class DefaultKernel implements Kernel.IKernel {
     this._username = options.username || '';
     this._futures = new Map<string, KernelFutureHandler>();
     this._commPromises = new Map<string, Promise<Kernel.IComm>>();
-    this._comms = new Map<string, Kernel.IComm>();
     this._createSocket();
     Private.runningKernels.push(this);
   }
@@ -229,8 +228,10 @@ class DefaultKernel implements Kernel.IKernel {
     this._futures.forEach((future, key) => {
       future.dispose();
     });
-    this._comms.forEach((comm, key) => {
-      comm.dispose();
+    this._commPromises.forEach((promise, key) => {
+      promise.then(comm => {
+        comm.dispose();
+      });
     });
     this._displayIdToParentIds.clear();
     this._msgIdToDisplayIds.clear();
@@ -617,16 +618,21 @@ class DefaultKernel implements Kernel.IKernel {
    * #### Notes
    * If a client-side comm already exists, it is returned.
    */
-  connectToComm(targetName: string, commId?: string): Kernel.IComm {
+  connectToComm(targetName: string, commId?: string): Promise<Kernel.IComm> {
     let id = commId || uuid();
-    let comm = this._comms.get(id) || new CommHandler(
-      targetName,
-      id,
-      this,
-      () => { this._unregisterComm(id); }
-    );
-    this._comms.set(id, comm);
-    return comm;
+    if (this._commPromises.has(id)) {
+      return this._commPromises.get(id);
+    }
+    let promise = Promise.resolve(void 0).then(() => {
+      return new CommHandler(
+        targetName,
+        id,
+        this,
+        () => { this._unregisterComm(id); }
+      );
+    });
+    this._commPromises.set(id, promise);
+    return promise;
   }
 
   /**
@@ -756,12 +762,13 @@ class DefaultKernel implements Kernel.IKernel {
     this._futures.forEach((future, key) => {
       future.dispose();
     });
-    this._comms.forEach((comm, key) => {
-      comm.dispose();
+    this._commPromises.forEach((promise, key) => {
+      promise.then(comm => {
+        comm.dispose();
+      });
     });
     this._futures = new Map<string, KernelFutureHandler>();
     this._commPromises = new Map<string, Promise<Kernel.IComm>>();
-    this._comms = new Map<string, Kernel.IComm>();
     this._displayIdToParentIds.clear();
     this._msgIdToDisplayIds.clear();
   }
@@ -794,8 +801,6 @@ class DefaultKernel implements Kernel.IKernel {
           if (this.isDisposed) {
             return;
           }
-          this._commPromises.delete(comm.commId);
-          this._comms.set(comm.commId, comm);
           return comm;
         });
     });
@@ -809,12 +814,8 @@ class DefaultKernel implements Kernel.IKernel {
     let content = msg.content;
     let promise = this._commPromises.get(content.comm_id);
     if (!promise) {
-      let comm = this._comms.get(content.comm_id);
-      if (!comm) {
-        console.error('Comm not found for comm id ' + content.comm_id);
-        return;
-      }
-      promise = Promise.resolve(comm);
+      console.error('Comm not found for comm id ' + content.comm_id);
+      return;
     }
     promise.then((comm) => {
       if (!comm) {
@@ -840,38 +841,28 @@ class DefaultKernel implements Kernel.IKernel {
     let content = msg.content;
     let promise = this._commPromises.get(content.comm_id);
     if (!promise) {
-      let comm = this._comms.get(content.comm_id);
+      // We do have a registered comm for this comm id, ignore.
+      return;
+    }
+    promise.then((comm) => {
       if (!comm) {
-        // We do have a registered comm for this comm id, ignore.
         return;
-      } else {
+      }
+      try {
         let onMsg = comm.onMsg;
         if (onMsg) {
           onMsg(msg);
         }
+      } catch (e) {
+        console.error('Exception handling comm msg: ', e, e.stack, msg);
       }
-    } else {
-      promise.then((comm) => {
-        if (!comm) {
-          return;
-        }
-        try {
-          let onMsg = comm.onMsg;
-          if (onMsg) {
-            onMsg(msg);
-          }
-        } catch (e) {
-          console.error('Exception handling comm msg: ', e, e.stack, msg);
-        }
-      });
-    }
+    });
   }
 
   /**
    * Unregister a comm instance.
    */
   private _unregisterComm(commId: string) {
-    this._comms.delete(commId);
     this._commPromises.delete(commId);
   }
 
@@ -1034,7 +1025,6 @@ class DefaultKernel implements Kernel.IKernel {
   private _isReady = false;
   private _futures: Map<string, KernelFutureHandler>;
   private _commPromises: Map<string, Promise<Kernel.IComm | undefined>>;
-  private _comms: Map<string, Kernel.IComm>;
   private _targetRegistry: { [key: string]: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => void; } = Object.create(null);
   private _info: KernelMessage.IInfoReply | null = null;
   private _pendingMessages: KernelMessage.IMessage[] = [];
