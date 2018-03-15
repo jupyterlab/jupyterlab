@@ -504,8 +504,7 @@ class DSVModel extends DataModel implements IDisposable {
     }
 
     // Define a function to recursively parse the next chunk after a delay.
-    let that = this;
-    function delayedParse() {
+    let delayedParse = () => {
       // Parse up to the new end row.
       let done = parseChunk(currentRows + chunkRows);
       currentRows += chunkRows;
@@ -518,11 +517,11 @@ class DSVModel extends DataModel implements IDisposable {
 
       // If we aren't done, the schedule another parse.
       if (done) {
-        that._delayedParse = null;
+        this._delayedParse = null;
       } else {
-        that._delayedParse = window.setTimeout(delayedParse, delay);
+        this._delayedParse = window.setTimeout(delayedParse, delay);
       }
-    }
+    };
 
     // Parse full data string in chunks, delayed by a few milliseconds to give the UI a chance to draw.
     this._delayedParse = window.setTimeout(delayedParse, delay);
