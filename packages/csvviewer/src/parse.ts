@@ -74,12 +74,6 @@ namespace IParser {
     quote?: string;
 
     /**
-     * Whether to use a regex to shortcut processing. If false, use a loop-based
-     * shortcut which sometimes is faster. Defaults to false.
-     */
-    regex?: boolean;
-
-    /**
      * The starting index in the string for processing. Defaults to 0. This
      * index should be the first character of a new row. This must be less than
      * data.length.
@@ -174,7 +168,6 @@ function parseDSV(options: IParser.IOptions): IParser.IResults {
     maxRows = 0xFFFFFFFF,
     rowDelimiter = '\r\n',
     quote = '"',
-    regex = false,
   } = options;
 
   // ncols will be set automatically if it is undefined.
@@ -192,7 +185,6 @@ function parseDSV(options: IParser.IOptions): IParser.IResults {
   const CH_LF = 10; // \n
   const CH_CR = 13; // \r
   const endIndex = data.length;
-  const endfield = new RegExp(`[${delimiter}${rowDelimiter}]`, 'g');
   const { QUOTED_FIELD, QUOTED_FIELD_QUOTE, UNQUOTED_FIELD, NEW_FIELD, NEW_ROW } = STATE;
   const { CR, LF, CRLF } = ROW_DELIMITER;
   const [rowDelimiterCode, rowDelimiterLength] = (rowDelimiter === '\r\n' ? [CRLF, 2] : (rowDelimiter === '\r' ? [CR, 1] : [LF, 1]));
@@ -335,24 +327,13 @@ function parseDSV(options: IParser.IOptions): IParser.IResults {
     // row or field delimiter.
     case UNQUOTED_FIELD:
       // Skip ahead to either the next field delimiter or possible start of a
-      // row delimiter (CR or LF). In some cases and different browsers, the
-      // regex approach is faster by quite a bit, but in others, the loop is
-      // faster. More testing is needed to see which approach we want to keep.
-      if (regex) {
-        endfield.lastIndex = i;
-        let match = endfield.exec(data);
-        if (match) {
-          i = match.index;
-          char = data.charCodeAt(i);
+      // row delimiter (CR or LF).
+      while (i < endIndex) {
+        char = data.charCodeAt(i);
+        if (char === CH_DELIMITER || char === CH_LF || char === CH_CR) {
+          break;
         }
-      } else {
-        while (i < endIndex) {
-          char = data.charCodeAt(i);
-          if (char === CH_DELIMITER || char === CH_LF || char === CH_CR) {
-            break;
-          }
-          i++;
-        }
+        i++;
       }
 
       // Process the character we're seeing in an unquoted field.
