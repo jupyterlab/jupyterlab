@@ -85,8 +85,8 @@ Images
 
 JupyterLab supports image data in cell output and as files in the above
 formats. In the image file viewer, you can use keyboard shortcuts such
-as ``+`` and ``-`` to zoom the image, ``[`` and ``]`` to rotate the image, 
-and ``H`` and ``V`` to flip the image horizontally and vertically. Use 
+as ``+`` and ``-`` to zoom the image, ``[`` and ``]`` to rotate the image,
+and ``H`` and ``V`` to flip the image horizontally and vertically. Use
 ``I`` to invert the colors, and use ``0`` to reset the image.
 
 To edit an SVG image as a text file, right-click on the SVG filename in
@@ -126,6 +126,10 @@ browser and select the “Editor” item in the “Open With” submenu:
   <div class="jp-youtube-video">
     <iframe src="https://www.youtube-nocookie.com/embed/b5oAoVB3Wd4?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
+
+Our powerful grid viewer can handle large CSVs.
+Click on `this example on the PhospohorJS website <http://phosphorjs.github.io/examples/datagrid/index.html>`__ to see a
+trillion row, trillion column CSV example.
 
 JSON
 ~~~~
