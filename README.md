@@ -12,7 +12,7 @@
 [![Documentation Status](https://readthedocs.org/projects/jupyterlab/badge/?version=stable)](https://readthedocs.org/projects/jupyterlab/badge/?version=stable)
 [![Google Group](https://img.shields.io/badge/-Google%20Group-lightgrey.svg)](https://groups.google.com/forum/#!forum/jupyter)
 [![Join the Gitter Chat](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/jupyterlab/jupyterlab)
-[![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/master?urlpath=lab%2Ftree%2Fdemo)
+[![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/18a9793b58ba86660b5ab964e1aeaf7324d667c8?urlpath=lab%2Ftree%2Fdemo%2FLorenz.ipynb)
 
 
 An extensible environment for interactive and reproducible computing, based on the
@@ -147,4 +147,4 @@ JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by
 ## Getting help
 
 We encourage you to ask questions on the [mailing list](https://groups.google.com/forum/#!forum/jupyter),
-and you may participate in development discussions or get live help on [Gitter](https://gitter.im/jupyterlab/jupyterlab).  Please use our [issues page](https://github.com/jupyterlab/jupyterlab/issues) to provide feedback or submit a bug report. 
+and you may participate in development discussions or get live help on [Gitter](https://gitter.im/jupyterlab/jupyterlab).  Please use our [issues page](https://github.com/jupyterlab/jupyterlab/issues) to provide feedback or submit a bug report.
