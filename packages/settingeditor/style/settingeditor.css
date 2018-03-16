@@ -69,6 +69,7 @@
 
 
 #setting-editor .jp-SettingEditorInstructions-title {
+  color: var(--jp-ui-font-color0);
   font-size: 32px;
   font-weight: 200;
   line-height: 78px;
@@ -77,6 +78,7 @@
 
 
 #setting-editor .jp-SettingEditorInstructions-text {
+  color: var(--jp-ui-font-color0);
   font-size: var(--jp-ui-font-size2);
 }
 
