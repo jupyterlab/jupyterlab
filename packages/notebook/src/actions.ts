@@ -1444,6 +1444,7 @@ namespace Private {
    *
    * #### Notes
    * The cell after the last selected cell will be activated.
+   * If the last cell is deleted, then the previous one will be activated.
    * It will add a code cell if all cells are deleted.
    * This action can be undone.
    */
@@ -1466,7 +1467,8 @@ namespace Private {
     if (toDelete.length > 0) {
       // Delete the cells as one undo event.
       cells.beginCompoundOperation();
-      each(toDelete.reverse(), i => {
+      // Delete cells in reverse order to maintain the correct indices.
+      toDelete.reverse().forEach(i => {
         cells.remove(i);
       });
       // Add a new cell if the notebook is empty. This is done
@@ -1481,7 +1483,9 @@ namespace Private {
       // *after* the last selected cell.
       // Note: The activeCellIndex is clamped to the available cells,
       // so if the last cell is deleted the previous cell will be activated.
-      widget.activeCellIndex = toDelete[0];
+      // The *first* index is the index of the last cell in the initial
+      // toDelete list due to the `reverse` operation above.
+      widget.activeCellIndex = toDelete[0] - toDelete.length + 1;
     }
 
     // Deselect any remaining, undeletable cells. Do this even if we don't
