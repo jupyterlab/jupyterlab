@@ -127,8 +127,8 @@ browser and select the “Editor” item in the “Open With” submenu:
     <iframe src="https://www.youtube-nocookie.com/embed/b5oAoVB3Wd4?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
-Our powerful grid viewer can handle large CSVs.
-Click on `this example on the PhospohorJS website <http://phosphorjs.github.io/examples/datagrid/index.html>`__ to see a
+Our powerful grid viewer can handle large CSVs.  The `demo <https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/18a9793b58ba86660b5ab964e1aeaf7324d667c8?urlpath=lab%2Ftree%2Fdemo%2FLorenz.ipynb>`__ contains a 200MB public transportation file from Geneva named ``big.csv`` with ~1.2 million rows.
+To see how JupyterLab can handle even larger datasets, `click on this example on the PhospohorJS website <http://phosphorjs.github.io/examples/datagrid/index.html>`__ to see a
 trillion row, trillion column CSV example.
 
 JSON
