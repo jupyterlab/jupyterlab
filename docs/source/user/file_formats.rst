@@ -107,10 +107,12 @@ CSV
 -  File extension: ``.csv``
 -  MIME type: None
 
-Files with rows of comma-separated values (CSV files) are a common
-format for tabular data. The default viewer for CSV files in JupyterLab
-is a high-performance data grid viewer (which can also handle tab- and
-semicolon-separated values):
+Files with rows of comma-separated values (CSV files) are a common format for
+tabular data. The default viewer for CSV files in JupyterLab is a
+high-performance data grid viewer (which can also handle tab- and
+semicolon-separated values). JupyterLab can open files up to the maximum string
+size in the browser (which ranges from approximately 250MB to 2GB, depending on
+the browser):
 
 .. raw:: html
 
