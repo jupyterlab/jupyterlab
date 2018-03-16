@@ -16,7 +16,7 @@
 
 
 An extensible environment for interactive and reproducible computing, based on the
-Jupyter Notebook and Architecture.  [Currently in beta.](https://blog.jupyter.org/jupyterlab-is-ready-for-users-5a6f039b8906https://blog.jupyter.org/jupyterlab-is-ready-for-users-5a6f039b8906)
+Jupyter Notebook and Architecture.  [Currently in beta.](https://blog.jupyter.org/jupyterlab-is-ready-for-users-5a6f039b8906)
 
 [JupyterLab](http://jupyterlab.readthedocs.io/en/stable/) is the next-generation user interface for [Project Jupyter](https://jupyter.org). It offers
 all the familiar building blocks of the classic Jupyter Notebook (notebook,
