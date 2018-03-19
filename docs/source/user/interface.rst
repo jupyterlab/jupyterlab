@@ -55,10 +55,13 @@ and a list of tabs in the main work area:
    :align: center
    :class: jp-screenshot
 
+.. _left_sidebar_toggle:
+
 The left sidebar can be collapsed or expanded by selecting "Show Left Area"
 in the View menu or by clicking on the active sidebar tab:
 
-.. raw:: html
+
+.. raw:: html 
 
   <div class="jp-youtube-video">
      <iframe src="https://www.youtube-nocookie.com/embed/PlJGecfetek?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
@@ -70,6 +73,8 @@ JupyterLab extensions can add additional panels to the left sidebar.
 
 Main Work Area
 ~~~~~~~~~~~~~~
+
+.. _main_area_vid:
 
 The main work area in JupyterLab enables you to arrange documents (notebooks,
 text files, etc.) and other activities (terminals, code consoles, etc.) into
@@ -104,6 +109,8 @@ The same information is also available in the Tabs menu:
    :align: center
    :class: jp-screenshot
 
+.. _tabs_singledocument:
+
 It is often useful to focus on a single document or activity without closing
 other tabs in the main work area. Single-document mode enable this, while making
 it simple to return to your multi-activity layout in the main work area.
@@ -121,6 +128,8 @@ area is restored.
 Context Menus
 ~~~~~~~~~~~~~
 
+.. _context_menus_rightclick:
+
 Many parts of JupyterLab, such as notebooks, text files, code consoles,
 and tabs, have context menus that can be accessed by right-clicking on
 the element:
@@ -130,6 +139,8 @@ the element:
   <div class="jp-youtube-video">
     <iframe src="https://www.youtube-nocookie.com/embed/y30fs6kg6fc?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
+
+.. _context_menus_shiftrightclick:
 
 The browser’s native context menu can be accessed by holding down
 ``Shift`` and right-clicking:
@@ -144,6 +155,8 @@ The browser’s native context menu can be accessed by holding down
 
 Keyboard Shortcuts
 ~~~~~~~~~~~~~~~~~~
+
+.. _shortcuts_settings:
 
 As in the classic Notebook, you can navigate the user interface through keyboard
 shortcuts. You can find and customize the current list of keyboard shortcuts by
