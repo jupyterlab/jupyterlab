@@ -76,7 +76,10 @@ interface ICellModel extends CodeEditor.IModel {
 }
 
 export class ExecutionTimes {
-  constructor(public start: moment.Moment | null, public end: moment.Moment | null) {}
+  readonly duration: moment.Duration | null;
+  constructor(public start: moment.Moment | null, public end: moment.Moment | null) {
+    this.duration = start && end ? moment.duration(end.diff(start)) : null;
+  }
 
   static fromMetadata(metadata: ExecutionTimes.IMetadata | undefined) {
     if (metadata === undefined) {

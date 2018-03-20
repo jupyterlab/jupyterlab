@@ -20,7 +20,7 @@ import {
 } from '@jupyterlab/codemirror';
 
 import {
-  ICellModel, ICodeCellModel, CodeCellModel
+  ICellModel, ICodeCellModel, CodeCellModel, ExecutionTimes
 } from './model';
 
 
@@ -56,10 +56,10 @@ class ExecutionTimeWidget extends Widget {
     super();
     const n = document.createElement('div');
     this.node.appendChild(n);
-    n.textContent = JSON.stringify(model.executionTimes);
-    const slot = (_: any, executionTimes: any) => {
-      n.textContent = JSON.stringify(executionTimes);
+    const slot = (_: any, executionTimes: ExecutionTimes) => {
+      n.textContent = executionTimes.duration ? executionTimes.duration.toISOString() : '';
     };
+    slot(null, model.executionTimes);
     model.executionTimesSignal.connect(slot);
     this._dispose = () => {
       model.executionTimesSignal.disconnect(slot);
