@@ -77,8 +77,20 @@ interface ICellModel extends CodeEditor.IModel {
 
 export class ExecutionTimes {
   readonly duration: moment.Duration | null;
-  constructor(public start: moment.Moment | null, public end: moment.Moment | null) {
+  constructor(public readonly start: moment.Moment | null, public readonly end: moment.Moment | null) {
     this.duration = start && end ? moment.duration(end.diff(start)) : null;
+  }
+
+  withEnd(end: moment.Moment | null): ExecutionTimes {
+    return new ExecutionTimes(this.start, end);
+  }
+
+  withEndString(endString: string): ExecutionTimes {
+    return this.withEnd(ExecutionTimes.parseSafe(endString));
+  }
+
+  static fromStartString(startString: string): ExecutionTimes {
+    return new ExecutionTimes(ExecutionTimes.parseSafe(startString), null);
   }
 
   static fromMetadata(metadata: ExecutionTimes.IMetadata | undefined) {
@@ -150,6 +162,8 @@ interface ICodeCellModel extends ICellModel {
   executionTimesSignal: ISignal<this, ExecutionTimes>;
 
   proccessExecuteReplyMsg(msg: KernelMessage.IExecuteReplyMsg): void;
+
+  processStatusMessage(msg: KernelMessage.IStatusMsg): void;
 
   /**
    * The cell outputs.
@@ -473,6 +487,19 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
       start_time: msg.metadata.started as string,
       end_time: msg.header.date as string
     });
+  }
+
+  processStatusMessage(msg: KernelMessage.IStatusMsg) {
+    switch (msg.content.execution_state) {
+      case 'idle':
+        this.executionTimes = this.executionTimes.withEndString(msg.header.date as string);
+        return;
+      case 'busy':
+        this.executionTimes = ExecutionTimes.fromStartString(msg.header.date as string);
+        return;
+      default:
+        return;
+    }
   }
 
   /**
