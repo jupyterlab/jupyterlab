@@ -37,12 +37,13 @@ export class TableOfContents extends Widget {
   /**
    * The current widget-generator tuple for the ToC.
    */
-  get current(): TableOfContents.ICurrentWidget {
+  get current(): TableOfContents.ICurrentWidget | null {
     return this._current;
   }
-  set current(value: TableOfContents.ICurrentWidget) {
+  set current(value: TableOfContents.ICurrentWidget | null) {
     // If they are the same as previously, do nothing.
     if (
+      value &&
       this._current &&
       this._current.widget === value.widget &&
       this._current.generator === value.generator
@@ -96,7 +97,11 @@ export class TableOfContents extends Widget {
       }
     }
     ReactDOM.render(<TOCTree title={title} toc={toc} />, this.node, () => {
-      if (this._current.generator.usesLatex === true) {
+      if (
+        this._current &&
+        this._current.generator.usesLatex === true &&
+        this._rendermime.latexTypesetter
+      ) {
         this._rendermime.latexTypesetter.typeset(this.node);
       }
     });
