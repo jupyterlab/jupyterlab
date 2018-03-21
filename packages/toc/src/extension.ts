@@ -89,6 +89,11 @@ function activateTOC(
     }
     let generator = registry.findGeneratorForWidget(widget);
     if (!generator) {
+      // If the previously used widget is still available, stick with it.
+      // Otherwise, set the current TOC widget to null.
+      if (toc.current.widget.isAttached) {
+        toc.current = null;
+      }
       return;
     }
     toc.current = {widget, generator};
