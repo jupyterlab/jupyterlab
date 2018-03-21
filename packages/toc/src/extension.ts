@@ -56,7 +56,7 @@ function activateTOC(
   rendermime: IRenderMimeRegistry,
 ): ITableOfContentsRegistry {
   // Create the ToC widget.
-  const toc = new TableOfContents({ docmanager, rendermime });
+  const toc = new TableOfContents({docmanager, rendermime});
 
   // Create the ToC registry.
   const registry = new TableOfContentsRegistry();
@@ -91,7 +91,7 @@ function activateTOC(
     if (!generator) {
       // If the previously used widget is still available, stick with it.
       // Otherwise, set the current TOC widget to null.
-      if (toc.current.widget.isAttached) {
+      if (toc.current && toc.current.widget.isDisposed) {
         toc.current = null;
       }
       return;
