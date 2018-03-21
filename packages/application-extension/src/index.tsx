@@ -13,9 +13,7 @@ import {
   IStateDB, PageConfig
 } from '@jupyterlab/coreutils';
 
-import {
-  h
-} from '@phosphor/virtualdom';
+import * as React from 'react';
 
 
 /**
@@ -69,7 +67,11 @@ const main: JupyterLabPlugin<void> = {
   activate: (app: JupyterLab, palette: ICommandPalette) => {
     // If there were errors registering plugins, tell the user.
     if (app.registerPluginErrors.length !== 0) {
-      const body = h.pre(app.registerPluginErrors.map(e => e.message).join('\n'));
+      const body = (
+        <pre>
+          {app.registerPluginErrors.map(e => e.message).join('\n')}
+        </pre>
+      );
       let options = {
         title: 'Error Registering Plugins',
         body,
@@ -104,7 +106,7 @@ const main: JupyterLabPlugin<void> = {
       }).catch(err => {
         showDialog({
           title: 'Build Failed',
-          body: h.pre(err.message)
+          body: (<pre>{err.message}</pre>)
         });
       });
     };
@@ -117,13 +119,13 @@ const main: JupyterLabPlugin<void> = {
         if (response.status !== 'needed') {
           return;
         }
-        let body = h.div(
-          h.p(
-            'JupyterLab build is suggested:',
-            h.br(),
-            h.pre(response.message)
-          )
-        );
+        let body = (<div>
+          <p>
+            JupyterLab build is suggested:
+            <br />
+            <pre>{response.message}</pre>
+          </p>
+        </div>);
         showDialog({
           title: 'Build Recommended',
           body,
