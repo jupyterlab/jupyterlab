@@ -101,18 +101,16 @@ submenu:
 
 .. _csv:
 
-CSV
-~~~
+Delimiter-separated Values
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  File extension: ``.csv``
+-  File extension: ``.csv``, ``.tsv``
 -  MIME type: None
 
-Files with rows of comma-separated values (CSV files) are a common format for
-tabular data. The default viewer for CSV files in JupyterLab is a
-high-performance data grid viewer (which can also handle tab- and
-semicolon-separated values). JupyterLab can open files up to the maximum string
-size in the browser (which ranges from approximately 250MB to 2GB, depending on
-the browser):
+Files with rows of delimiter-separated values (CSV files, TSV files) are a common format for
+tabular data. The default viewer for these files in JupyterLab is a
+high-performance data grid viewer which can handles comma-separated, tab-separated, and
+semicolon-separated values:
 
 .. raw:: html
 
@@ -129,9 +127,23 @@ browser and select the “Editor” item in the “Open With” submenu:
     <iframe src="https://www.youtube-nocookie.com/embed/b5oAoVB3Wd4?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
-Our powerful grid viewer can handle large CSVs.  The `demo <https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/18a9793b58ba86660b5ab964e1aeaf7324d667c8?urlpath=lab%2Ftree%2Fdemo%2FLorenz.ipynb>`__ contains a 200MB public transportation file from Geneva named ``big.csv`` with ~1.2 million rows.
-To see how PhosphorJS can handle even larger datasets, `click on this example on the PhospohorJS website <http://phosphorjs.github.io/examples/datagrid/index.html>`__ to see a
-trillion row, trillion column example.
+JupyterLab's powerful grid viewer can load files up to the maximum string
+size in the browser. Our experience testing the grid viewer on various browsers suggests that maximum string size varies with browser.
+Below is a table that reflects the maximum size we've successfully tested the grid viewer by browser:
+
++---------+----------+
+| Browser | Max Size |
++=========+==========+
+| Firefox | ~200MB   |
++---------+----------+
+| Chrome  | ~700MB   |
++---------+----------+
+| Safari  | ~1.5GB   |
++---------+----------+
+| IE      | ~1.5GB   |
++---------+----------+
+
+These numbers are intented to be conservative estimates.  Additionally, string encoding will also affect the ability to load CSV-like files on JupyterLab.
 
 JSON
 ~~~~
