@@ -137,7 +137,7 @@ Below is a table that shows the sizes of the largest test files we successfully 
 +---------+----------+
 | Chrome  |  730MB   |
 +---------+----------+
-| Safari  |  1.7GB   |
+| Safari  |  1.8GB   |
 +---------+----------+
 
 The actual maximum size of files that can be successfully loaded will vary depending on the browser version and file content.
