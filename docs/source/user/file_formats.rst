@@ -127,23 +127,21 @@ browser and select the “Editor” item in the “Open With” submenu:
     <iframe src="https://www.youtube-nocookie.com/embed/b5oAoVB3Wd4?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
-JupyterLab's powerful grid viewer can load files up to the maximum string
-size in the browser. Our experience testing the grid viewer on various browsers suggests that maximum string size varies with browser.
-Below is a table that reflects the maximum size we've successfully tested the grid viewer by browser:
+JupyterLab's grid viewer can open large files, up to the maximum string size of the particular browser.
+Below is a table that shows the sizes of the largest test files we successfully opened in each browser we support:
 
 +---------+----------+
 | Browser | Max Size |
 +=========+==========+
-| Firefox | ~200MB   |
+| Firefox |  250MB   |
 +---------+----------+
-| Chrome  | ~700MB   |
+| Chrome  |  700MB   |
 +---------+----------+
-| Safari  | ~1.5GB   |
-+---------+----------+
-| IE      | ~1.5GB   |
+| Safari  |  1.5GB   |
 +---------+----------+
 
-These numbers are intented to be conservative estimates.  Additionally, string encoding will also affect the ability to load CSV-like files on JupyterLab.
+These numbers are conservative estimates.
+The actual maxiumum size of files that can be successfully loaded will vary depending on the browser version and file content.
 
 JSON
 ~~~~
