@@ -135,13 +135,12 @@ Below is a table that shows the sizes of the largest test files we successfully 
 +=========+==========+
 | Firefox |  250MB   |
 +---------+----------+
-| Chrome  |  700MB   |
+| Chrome  |  730MB   |
 +---------+----------+
-| Safari  |  1.5GB   |
+| Safari  |  1.7GB   |
 +---------+----------+
 
-These numbers are conservative estimates.
-The actual maxiumum size of files that can be successfully loaded will vary depending on the browser version and file content.
+The actual maximum size of files that can be successfully loaded will vary depending on the browser version and file content.
 
 JSON
 ~~~~
