@@ -862,7 +862,7 @@ learning, here are some suggestions about what to try next:
 -  Push your extension git repository to GitHub.
 -  Give users the ability to pin comics in separate, permanent panels.
 -  Learn how to write `other kinds of
-   extensions <./extension_dev.md>`__.
+   extensions <./extension_dev.html>`__.
 
 .. |Completed xkcd extension screenshot| image:: xkcd_tutorial_complete.png
 .. |Empty xkcd extension panel| image:: xkcd_tutorial_empty.png

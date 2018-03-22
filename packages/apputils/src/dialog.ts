@@ -14,12 +14,14 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  VirtualDOM, VirtualElement, h
-} from '@phosphor/virtualdom';
-
-import {
   PanelLayout, Panel, Widget
 } from '@phosphor/widgets';
+
+import * as React from 'react';
+
+import {
+  ReactElementWidget
+} from './vdom';
 
 import {
   Styling
@@ -444,7 +446,7 @@ namespace Dialog {
    * The header input types.
    */
   export
-  type HeaderType = VirtualElement | string;
+  type HeaderType = React.ReactElement<any> | string;
 
   /**
    * The result of a dialog.
@@ -477,7 +479,7 @@ namespace Dialog {
    * The body input types.
    */
   export
-  type BodyType<T> = IBodyWidget<T> | VirtualElement | string;
+  type BodyType<T> = IBodyWidget<T> | React.ReactElement<any> | string;
 
   /**
    * Create an accept button.
@@ -584,7 +586,7 @@ namespace Dialog {
         header = new Widget({ node: document.createElement('span') });
         header.node.textContent = title;
       } else {
-        header = new Widget({ node: VirtualDOM.realize(title) });
+        header = new ReactElementWidget(title);
       }
       header.addClass('jp-Dialog-header');
       Styling.styleNode(header.node);
@@ -606,7 +608,7 @@ namespace Dialog {
       } else if (value instanceof Widget) {
         body = value;
       } else {
-        body = new Widget({ node: VirtualDOM.realize(value) });
+        body = new ReactElementWidget(value);
       }
       body.addClass('jp-Dialog-body');
       Styling.styleNode(body.node);
@@ -638,16 +640,13 @@ namespace Dialog {
      * @returns A node for the button.
      */
     createButtonNode(button: IButton): HTMLElement {
-      let className = this.createItemClass(button);
-      // We use realize here instead of creating
-      // nodes with document.createElement as a
-      // shorthand, and only because this is not
-      // called often.
-      return VirtualDOM.realize(
-        h.button({ className },
-              this.renderIcon(button),
-              this.renderLabel(button))
+      const e = document.createElement(
+        'button'
       );
+      e.className = this.createItemClass(button);
+      e.appendChild(this.renderIcon(button));
+      e.appendChild(this.renderLabel(button));
+      return e;
     }
 
     /**
@@ -686,11 +685,15 @@ namespace Dialog {
      *
      * @param data - The data to use for rendering the icon.
      *
-     * @returns A virtual element representing the icon.
+     * @returns An HTML element representing the icon.
      */
-    renderIcon(data: IButton): VirtualElement {
-      return h.div({ className: this.createIconClass(data) },
-                   data.iconLabel);
+    renderIcon(data: IButton): HTMLElement {
+      const e = document.createElement('div');
+      e.className = this.createIconClass(data);
+      e.appendChild(
+        document.createTextNode(data.iconLabel)
+      );
+      return e;
     }
 
     /**
@@ -711,12 +714,14 @@ namespace Dialog {
      *
      * @param data - The data to use for rendering the label.
      *
-     * @returns A virtual element representing the item label.
+     * @returns An HTML element representing the item label.
      */
-    renderLabel(data: IButton): VirtualElement {
-      let className = 'jp-Dialog-buttonLabel';
-      let title = data.caption;
-      return h.div({ className, title }, data.label);
+    renderLabel(data: IButton): HTMLElement {
+      const e = document.createElement('div');
+      e.className = 'jp-Dialog-buttonLabel';
+      e.title = data.caption;
+      e.appendChild(document.createTextNode(data.label));
+      return e;
     }
   }
 
