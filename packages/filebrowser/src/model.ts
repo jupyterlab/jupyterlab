@@ -29,6 +29,11 @@ import {
   ISignal, Signal
 } from '@phosphor/signaling';
 
+import {
+  showDialog,
+  Dialog
+} from '@jupyterlab/apputils';
+
 
 /**
  * The duration of auto-refresh in ms.
@@ -313,14 +318,22 @@ class FileBrowserModel implements IDisposable {
    */
   upload(file: File): Promise<Contents.IModel> {
     // Skip large files with a warning.
+    let p: Promise<void>;
     if (file.size > this._maxUploadSizeMb * 1024 * 1024) {
-      let msg = `Cannot upload file (>${this._maxUploadSizeMb} MB) `;
-      msg += `"${file.name}"`;
-      console.warn(msg);
-      return Promise.reject<Contents.IModel>(new Error(msg));
+      p = showDialog({
+        title: 'Large file size warning',
+        body: `The file size is ${Math.round(file.size / (1024 * 1024))} MB. Do you still want to upload it?`,
+        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'UPLOAD'})]
+      }).then(result => {
+        if (this.isDisposed || !result.button.accept) {
+          return Promise.reject('File not uploaded');
+        }
+      });
+    } else {
+      p = Promise.resolve();
     }
 
-    return this.refresh().then(() => {
+    return p.then(() => this.refresh()).then(() => {
       if (this.isDisposed) {
         return Promise.resolve(false);
       }
