@@ -1,7 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import {ISanitizer} from '@jupyterlab/apputils';
+
 import {FileEditor, IEditorTracker} from '@jupyterlab/fileeditor';
+
+import {MarkdownCell} from '@jupyterlab/cells';
 
 import {INotebookTracker, NotebookPanel} from '@jupyterlab/notebook';
 
@@ -20,6 +24,7 @@ import {IHeading} from './toc';
  */
 export function createNotebookGenerator(
   tracker: INotebookTracker,
+  sanitizer: ISanitizer,
 ): TableOfContentsRegistry.IGenerator<NotebookPanel> {
   return {
     tracker,
@@ -33,14 +38,35 @@ export function createNotebookGenerator(
           return;
         }
 
-        const onClickFactory = () => {
-          return () => {
-            cell.node.scrollIntoView();
+        // If the cell is rendered, generate the ToC items from
+        // the HTML. If it is not rendered, generate them from
+        // the text of the cell.
+        if ((cell as MarkdownCell).rendered) {
+          const onClickFactory = (el: Element) => {
+            return () => {
+              if (!(cell as MarkdownCell).rendered) {
+                cell.node.scrollIntoView();
+              } else {
+                el.scrollIntoView();
+              }
+            };
           };
-        };
-        headings = headings.concat(
-          Private.getMarkdownHeadings(model.value.text, onClickFactory),
-        );
+          headings = headings.concat(
+            Private.getRenderedHTMLHeadings(cell.node, onClickFactory, sanitizer),
+          );
+        } else {
+          const onClickFactory = (line: number) => {
+            return () => {
+              cell.node.scrollIntoView();
+              if (!(cell as MarkdownCell).rendered) {
+                cell.editor.setCursorPosition({line, column: 0});
+              }
+            };
+          };
+          headings = headings.concat(
+            Private.getMarkdownHeadings(model.value.text, onClickFactory),
+          );
+        }
       });
       return headings;
     },
@@ -120,7 +146,7 @@ export function createLatexGenerator(
           /^\s*\\(section|subsection|subsubsection){(.+)}/,
         );
         if (match) {
-          const level = Private.LatexLevels[match[1]];
+          const level = Private.latexLevels[match[1]];
           const text = match[2];
           const onClick = () => {
             editor.editor.setCursorPosition({line: line.idx, column: 0});
@@ -137,10 +163,14 @@ export function createLatexGenerator(
  * A private namespace for miscellaneous things.
  */
 namespace Private {
+  /**
+   * Given a string of markdown, get the markdown headings
+   * in that string.
+   */
   export function getMarkdownHeadings(
     text: string,
     onClickFactory: (line: number) => (() => void),
-  ) {
+  ): IHeading[] {
     // Split the text into lines.
     const lines = text.split('\n');
     let headings: IHeading[] = [];
@@ -174,7 +204,7 @@ namespace Private {
       // Finally test for HTML headers. This will not catch multiline
       // headers, nor will it catch multiple headers on the same line.
       // It should do a decent job of catching many, though.
-      match = line.match(/<h([1-6])>(.*)<\/h\1>/);
+      match = line.match(/<h([1-6])>(.*)<\/h\1>/i);
       if (match) {
         const level = parseInt(match[1]);
         const text = match[2];
@@ -183,12 +213,37 @@ namespace Private {
     });
     return headings;
   }
+
+  /**
+   * Given an HTML element, generate ToC headings
+   * by finding all the headers and making IHeading objects for them.
+   */
+  export function getRenderedHTMLHeadings(
+    node: HTMLElement,
+    onClickFactory: (el: Element) => (() => void),
+    sanitizer: ISanitizer,
+  ): IHeading[] {
+    let headings: IHeading[] = [];
+    let headingNodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    for (let i = 0; i < headingNodes.length; i++) {
+      const heading = headingNodes[i];
+      const level = parseInt(heading.tagName[1]);
+      const text = heading.textContent;
+      let html = sanitizer.sanitize(heading.innerHTML, sanitizerOptions);
+      html = html.replace('¶', ''); // Remove the anchor symbol.
+
+      const onClick = onClickFactory(heading);
+      headings.push({level, text, html, onClick});
+    }
+    return headings;
+  }
+
   /**
    * A mapping from LaTeX section headers to HTML header
    * levels. `part` and `chapter` are less common in my experience,
    * so assign them to header level 1.
    */
-  export const LatexLevels: {[label: string]: number} = {
+  export const latexLevels: {[label: string]: number} = {
     part: 1, // Only available for report and book classes
     chapter: 1, // Only available for report and book classes
     section: 1,
@@ -196,5 +251,40 @@ namespace Private {
     subsubsection: 3,
     paragraph: 4,
     subparagraph: 5,
+  };
+
+  /**
+   * Allowed HTML tags for the ToC entries. We use this to
+   * sanitize HTML headings, if they are given. We specifically
+   * disallow anchor tags, since we are adding our own.
+   */
+  const sanitizerOptions = {
+    allowedTags: [
+      'p',
+      'blockquote',
+      'b',
+      'i',
+      'strong',
+      'em',
+      'strike',
+      'code',
+      'br',
+      'div',
+      'span',
+      'pre',
+      'del',
+    ],
+    allowedAttributes: {
+      // Allow "class" attribute for <code> tags.
+      code: ['class'],
+      // Allow "class" attribute for <span> tags.
+      span: ['class'],
+      // Allow "class" attribute for <div> tags.
+      div: ['class'],
+      // Allow "class" attribute for <p> tags.
+      p: ['class'],
+      // Allow "class" attribute for <pre> tags.
+      pre: ['class'],
+    },
   };
 }
