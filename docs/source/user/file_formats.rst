@@ -85,8 +85,8 @@ Images
 
 JupyterLab supports image data in cell output and as files in the above
 formats. In the image file viewer, you can use keyboard shortcuts such
-as ``+`` and ``-`` to zoom the image, ``[`` and ``]`` to rotate the image, 
-and ``H`` and ``V`` to flip the image horizontally and vertically. Use 
+as ``+`` and ``-`` to zoom the image, ``[`` and ``]`` to rotate the image,
+and ``H`` and ``V`` to flip the image horizontally and vertically. Use
 ``I`` to invert the colors, and use ``0`` to reset the image.
 
 To edit an SVG image as a text file, right-click on the SVG filename in
@@ -101,24 +101,25 @@ submenu:
 
 .. _csv:
 
-CSV
-~~~
+Delimiter-separated Values
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  File extension: ``.csv``
 -  MIME type: None
 
-Files with rows of comma-separated values (CSV files) are a common format for
-tabular data. The default viewer for CSV files in JupyterLab is a
-high-performance data grid viewer (which can also handle tab- and
-semicolon-separated values). JupyterLab can open files up to the maximum string
-size in the browser (which ranges from approximately 250MB to 2GB, depending on
-the browser):
+Files with rows of delimiter-separated values, such as CSV files, are a common format for
+tabular data. The default viewer for these files in JupyterLab is a
+high-performance data grid viewer which can handles comma-separated, tab-separated, and
+semicolon-separated values:
 
 .. raw:: html
 
   <div class="jp-youtube-video">
     <iframe src="https://www.youtube-nocookie.com/embed/z6xuZ9H3Imo?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
+
+While tab-separated value files can be read by the grid viewer, it currently does not automatically recognize ``.tsv`` files.
+To view, you must change the extension to ``.csv`` and set the delimiter to tabs.
 
 To edit a CSV file as a text file, right-click on the file in the file
 browser and select the “Editor” item in the “Open With” submenu:
@@ -128,6 +129,21 @@ browser and select the “Editor” item in the “Open With” submenu:
   <div class="jp-youtube-video">
     <iframe src="https://www.youtube-nocookie.com/embed/b5oAoVB3Wd4?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
+
+JupyterLab's grid viewer can open large files, up to the maximum string size of the particular browser.
+Below is a table that shows the sizes of the largest test files we successfully opened in each browser we support:
+
++---------+----------+
+| Browser | Max Size |
++=========+==========+
+| Firefox |  250MB   |
++---------+----------+
+| Chrome  |  730MB   |
++---------+----------+
+| Safari  |  1.8GB   |
++---------+----------+
+
+The actual maximum size of files that can be successfully loaded will vary depending on the browser version and file content.
 
 JSON
 ~~~~
