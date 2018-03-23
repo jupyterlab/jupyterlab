@@ -37,6 +37,10 @@
   margin: var(--jp-toolbar-header-margin);
 }
 
+.jp-FileBrowser-toolbar.jp-Toolbar .jp-Toolbar-item {
+  flex: 1 1 auto;
+}
+
 
 .jp-BreadCrumbs {
   flex: 0 0 auto;
@@ -65,8 +69,8 @@
 |----------------------------------------------------------------------------*/
 
 
-.jp-FileBrowser-toolbar.jp-Toolbar > .jp-Toolbar-button {
-  flex: 1 1 auto;
+.jp-FileBrowser-toolbar.jp-Toolbar .jp-Toolbar-button {
+  width: 100%;
   height: var(--jp-private-filebrowser-button-height);
   line-height: var(--jp-private-filebrowser-button-height);
   color: var(--jp-layout-color1);

@@ -2,19 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Message
-} from '@phosphor/messaging';
-
-import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
   NotebookActions
 } from './actions';
 
 import {
-  showDialog, Dialog, Styling, Toolbar, ToolbarButton
+  showDialog, Dialog, Toolbar, ToolbarButton, ToolbarSelect
 } from '@jupyterlab/apputils';
 
 import {
@@ -59,11 +51,6 @@ const TOOLBAR_PASTE_CLASS = 'jp-PasteIcon';
  * The class name added to toolbar run button.
  */
 const TOOLBAR_RUN_CLASS = 'jp-RunIcon';
-
-/**
- * The class name added to toolbar cell type dropdown wrapper.
- */
-const TOOLBAR_CELLTYPE_CLASS = 'jp-Notebook-toolbarCellType';
 
 /**
  * The class name added to toolbar cell type dropdown.
@@ -183,8 +170,25 @@ namespace ToolbarItems {
    * It can handle a change to the context.
    */
   export
-  function createCellTypeItem(panel: NotebookPanel): Widget {
-    return new CellTypeSwitcher(panel.notebook);
+  function createCellTypeItem(widget: Notebook): CellTypeSelect {
+    return new CellTypeSelect({
+      className: TOOLBAR_CELLTYPE_DROPDOWN_CLASS,
+      onChange: (event: React.ChangeEvent<HTMLSelectElement>): void => {
+        const { value } = event.target;
+        if (value === '-') {
+          return;
+        }
+        NotebookActions.changeCellType(widget, value as nbformat.CellType);
+        widget.activate();
+      },
+      onKeyDown: (event: React.KeyboardEvent<HTMLSelectElement>): void => {
+        if (event.keyCode === 13) {
+          // On Enter
+          widget.activate();
+        }
+      },
+      options: ['Code', 'Markdown', 'Raw']
+    }, widget);
   }
 
   /**
@@ -201,7 +205,7 @@ namespace ToolbarItems {
     toolbar.addItem('run', createRunButton(panel));
     toolbar.addItem('interrupt', Toolbar.createInterruptButton(panel.session));
     toolbar.addItem('restart', Toolbar.createRestartButton(panel.session));
-    toolbar.addItem('cellType', createCellTypeItem(panel));
+    toolbar.addItem('cellType', createCellTypeItem(panel.notebook));
     toolbar.addItem('spacer', Toolbar.createSpacerItem());
     toolbar.addItem('kernelName', Toolbar.createKernelNameItem(panel.session));
     toolbar.addItem('kernelStatus', Toolbar.createKernelStatusItem(panel.session));
@@ -209,148 +213,45 @@ namespace ToolbarItems {
 }
 
 
-/**
- * A toolbar widget that switches cell types.
- */
-class CellTypeSwitcher extends Widget {
+export
+class CellTypeSelect extends ToolbarSelect {
   /**
-   * Construct a new cell type switcher.
+   * Construct a new toolbar button.
    */
-  constructor(widget: Notebook) {
-    super({ node: createCellTypeSwitcherNode() });
-    this.addClass(TOOLBAR_CELLTYPE_CLASS);
-
-    this._select = this.node.firstChild as HTMLSelectElement;
-    Styling.wrapSelect(this._select);
-    this._wildCard = document.createElement('option');
-    this._wildCard.value = '-';
-    this._wildCard.textContent = '-';
-    this._notebook = widget;
-
-    // Set the initial value.
+  constructor(options: ToolbarSelect.IOptions, widget: Notebook) {
+    super(options);
+    this._widget = widget;
     if (widget.model) {
       this._updateValue();
     }
-
     // Follow the type of the active cell.
     widget.activeCellChanged.connect(this._updateValue, this);
-
     // Follow a change in the selection.
     widget.selectionChanged.connect(this._updateValue, this);
-  }
-
-  /**
-   * Handle the DOM events for the widget.
-   *
-   * @param event - The DOM event sent to the widget.
-   *
-   * #### Notes
-   * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the dock panel's node. It should
-   * not be called directly by user code.
-   */
-  handleEvent(event: Event): void {
-    switch (event.type) {
-    case 'change':
-      this._evtChange(event);
-      break;
-    case 'keydown':
-      this._evtKeyDown(event as KeyboardEvent);
-      break;
-    default:
-      break;
-    }
-  }
-
-  /**
-   * Handle `after-attach` messages for the widget.
-   */
-  protected onAfterAttach(msg: Message): void {
-    this._select.addEventListener('change', this);
-    this._select.addEventListener('keydown', this);
-  }
-
-  /**
-   * Handle `before-detach` messages for the widget.
-   */
-  protected onBeforeDetach(msg: Message): void {
-    this._select.removeEventListener('change', this);
-    this._select.removeEventListener('keydown', this);
-  }
-
-  /**
-   * Handle `changed` events for the widget.
-   */
-  private _evtChange(event: Event): void {
-    let select = this._select;
-    let widget = this._notebook;
-    if (select.value === '-') {
-      return;
-    }
-    if (!this._changeGuard) {
-      let value = select.value as nbformat.CellType;
-      NotebookActions.changeCellType(widget, value);
-      widget.activate();
-    }
-  }
-
-  /**
-   * Handle `keydown` events for the widget.
-   */
-  private _evtKeyDown(event: KeyboardEvent): void {
-    if (event.keyCode === 13) {  // Enter
-      this._notebook.activate();
-    }
   }
 
   /**
    * Update the value of the dropdown from the widget state.
    */
   private _updateValue(): void {
-    let widget = this._notebook;
-    let select = this._select;
-    if (!widget.activeCell) {
+    if (!this._widget.activeCell) {
       return;
     }
-    let mType: string = widget.activeCell.model.type;
-    for (let i = 0; i < widget.widgets.length; i++) {
-      let child = widget.widgets[i];
-      if (widget.isSelectedOrActive(child)) {
-        if (child.model.type !== mType) {
-          mType = '-';
-          select.appendChild(this._wildCard);
-          break;
+    let cellType: string = this._widget.activeCell.model.type;
+    this._widget.widgets.forEach(child => {
+      if (this._widget.isSelectedOrActive(child)) {
+        if (child.model.type !== cellType) {
+          cellType = '-';
+          this.props.options = this.props.options.concat('-');
         }
       }
+    });
+    if (cellType !== '-') {
+      this.props.options = this.props.options.filter((option: string) => option !== '-');
+      this.props.selected = cellType;
     }
-    if (mType !== '-') {
-      select.remove(3);
-    }
-    this._changeGuard = true;
-    select.value = mType;
-    this._changeGuard = false;
+    this.render();
   }
 
-  private _changeGuard = false;
-  private _wildCard: HTMLOptionElement = null;
-  private _select: HTMLSelectElement = null;
-  private _notebook: Notebook = null;
-}
-
-
-/**
- * Create the node for the cell type switcher.
- */
-function createCellTypeSwitcherNode(): HTMLElement {
-  let div = document.createElement('div');
-  let select = document.createElement('select');
-  for (let t of ['Code', 'Markdown', 'Raw']) {
-    let option = document.createElement('option');
-    option.value = t.toLowerCase();
-    option.textContent = t;
-    select.appendChild(option);
-  }
-  select.className = TOOLBAR_CELLTYPE_DROPDOWN_CLASS;
-  div.appendChild(select);
-  return div;
+  private _widget: Notebook;
 }
