@@ -104,10 +104,10 @@ submenu:
 Delimiter-separated Values
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  File extension: ``.csv``, ``.tsv``
+-  File extension: ``.csv``,
 -  MIME type: None
 
-Files with rows of delimiter-separated values (CSV files, TSV files) are a common format for
+Files with rows of delimiter-separated values, such as CSV files, are a common format for
 tabular data. The default viewer for these files in JupyterLab is a
 high-performance data grid viewer which can handles comma-separated, tab-separated, and
 semicolon-separated values:
@@ -117,6 +117,9 @@ semicolon-separated values:
   <div class="jp-youtube-video">
     <iframe src="https://www.youtube-nocookie.com/embed/z6xuZ9H3Imo?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
+
+While tab-separated value files can be read by the grid viewer, it currently does not automatically recognize ``.tsv`` files.
+To view, you must change the extension to ``.csv`` and set the delimiter to tabs.
 
 To edit a CSV file as a text file, right-click on the file in the file
 browser and select the “Editor” item in the “Open With” submenu:
