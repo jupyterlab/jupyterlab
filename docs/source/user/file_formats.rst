@@ -104,7 +104,7 @@ submenu:
 Delimiter-separated Values
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  File extension: ``.csv``,
+-  File extension: ``.csv``
 -  MIME type: None
 
 Files with rows of delimiter-separated values, such as CSV files, are a common format for
