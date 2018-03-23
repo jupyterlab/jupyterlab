@@ -199,6 +199,10 @@ namespace Private {
     return headings;
   }
 
+  /**
+   * Given an HTML element, generate ToC headings
+   * by finding all the headers and making IHeading objects for them.
+   */
   export function getRenderedHTMLHeadings(
     node: HTMLElement,
     sanitizer: ISanitizer,
@@ -209,7 +213,8 @@ namespace Private {
       const heading = headingNodes[i];
       const level = parseInt(heading.tagName[1]);
       const text = heading.textContent;
-      const html = sanitizer.sanitize(heading.innerHTML, sanitizerOptions);
+      let html = sanitizer.sanitize(heading.innerHTML, sanitizerOptions);
+      html = html.replace('¶', ''); // Remove the anchor symbol.
 
       const onClick = () => {
         heading.scrollIntoView();
