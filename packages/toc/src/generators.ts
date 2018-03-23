@@ -38,14 +38,29 @@ export function createNotebookGenerator(
           return;
         }
 
+        // If the cell is rendered, generate the ToC items from
+        // the HTML. If it is not rendered, generate them from
+        // the text of the cell.
         if ((cell as MarkdownCell).rendered) {
+          const onClickFactory = (el: Element) => {
+            return () => {
+              if (!(cell as MarkdownCell).rendered) {
+                cell.node.scrollIntoView();
+              } else {
+                el.scrollIntoView();
+              }
+            };
+          };
           headings = headings.concat(
-            Private.getRenderedHTMLHeadings(cell.node, sanitizer),
+            Private.getRenderedHTMLHeadings(cell.node, onClickFactory, sanitizer),
           );
         } else {
-          const onClickFactory = () => {
+          const onClickFactory = (line: number) => {
             return () => {
               cell.node.scrollIntoView();
+              if (!(cell as MarkdownCell).rendered) {
+                cell.editor.setCursorPosition({line, column: 0});
+              }
             };
           };
           headings = headings.concat(
@@ -205,6 +220,7 @@ namespace Private {
    */
   export function getRenderedHTMLHeadings(
     node: HTMLElement,
+    onClickFactory: (el: Element) => (() => void),
     sanitizer: ISanitizer,
   ): IHeading[] {
     let headings: IHeading[] = [];
@@ -216,9 +232,7 @@ namespace Private {
       let html = sanitizer.sanitize(heading.innerHTML, sanitizerOptions);
       html = html.replace('¶', ''); // Remove the anchor symbol.
 
-      const onClick = () => {
-        heading.scrollIntoView();
-      };
+      const onClick = onClickFactory(heading);
       headings.push({level, text, html, onClick});
     }
     return headings;
