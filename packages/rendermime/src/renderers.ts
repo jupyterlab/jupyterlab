@@ -2,9 +2,13 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+
+// AnsiUp 2.0 exports with a 'default' name that seems to prevent imports
 import {
-  ansi_to_html, escape_for_html
+  AnsiUp
 } from 'ansi_up';
+
+const AnsiUpConstructor = require('ansi_up').default;
 
 import * as marked
   from 'marked';
@@ -500,11 +504,12 @@ function renderText(options: renderText.IRenderOptions): Promise<void> {
   // Unpack the options.
   let { host, source } = options;
 
-  // Escape the terminal codes and HTML tags.
-  let data = escape_for_html(source);
+  let ansiUp: AnsiUp = new AnsiUpConstructor();
+  ansiUp.escape_for_html = true;
+  ansiUp.use_classes = true;
 
   // Create the HTML content.
-  let content = ansi_to_html(data, { use_classes: true });
+  let content = ansiUp.ansi_to_html(source);
 
   // Set the inner HTML for the host node.
   host.innerHTML = `<pre>${content}</pre>`;
