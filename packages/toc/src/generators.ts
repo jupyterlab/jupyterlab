@@ -3,6 +3,8 @@
 
 import {FileEditor, IEditorTracker} from '@jupyterlab/fileeditor';
 
+import {MarkdownCell} from '@jupyterlab/cells';
+
 import {INotebookTracker, NotebookPanel} from '@jupyterlab/notebook';
 
 import {each} from '@phosphor/algorithm';
@@ -33,14 +35,20 @@ export function createNotebookGenerator(
           return;
         }
 
-        const onClickFactory = () => {
-          return () => {
-            cell.node.scrollIntoView();
+        if ((cell as MarkdownCell).rendered) {
+          headings = headings.concat(
+            Private.getRenderedHTMLHeadings(cell.node),
+          );
+        } else {
+          const onClickFactory = () => {
+            return () => {
+              cell.node.scrollIntoView();
+            };
           };
-        };
-        headings = headings.concat(
-          Private.getMarkdownHeadings(model.value.text, onClickFactory),
-        );
+          headings = headings.concat(
+            Private.getMarkdownHeadings(model.value.text, onClickFactory),
+          );
+        }
       });
       return headings;
     },
@@ -120,7 +128,7 @@ export function createLatexGenerator(
           /^\s*\\(section|subsection|subsubsection){(.+)}/,
         );
         if (match) {
-          const level = Private.LatexLevels[match[1]];
+          const level = Private.latexLevels[match[1]];
           const text = match[2];
           const onClick = () => {
             editor.editor.setCursorPosition({line: line.idx, column: 0});
@@ -137,10 +145,14 @@ export function createLatexGenerator(
  * A private namespace for miscellaneous things.
  */
 namespace Private {
+  /**
+   * Given a string of markdown, get the markdown headings
+   * in that string.
+   */
   export function getMarkdownHeadings(
     text: string,
     onClickFactory: (line: number) => (() => void),
-  ) {
+  ): IHeading[] {
     // Split the text into lines.
     const lines = text.split('\n');
     let headings: IHeading[] = [];
@@ -174,7 +186,7 @@ namespace Private {
       // Finally test for HTML headers. This will not catch multiline
       // headers, nor will it catch multiple headers on the same line.
       // It should do a decent job of catching many, though.
-      match = line.match(/<h([1-6])>(.*)<\/h\1>/);
+      match = line.match(/<h([1-6])>(.*)<\/h\1>/i);
       if (match) {
         const level = parseInt(match[1]);
         const text = match[2];
@@ -183,12 +195,29 @@ namespace Private {
     });
     return headings;
   }
+
+  export function getRenderedHTMLHeadings(node: HTMLElement): IHeading[] {
+    let headings: IHeading[] = [];
+    let headingNodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    for (let i = 0; i < headingNodes.length; i++) {
+      const heading = headingNodes[i];
+      const level = parseInt(heading.tagName[1]);
+      const text = heading.textContent;
+      const html = heading.innerHTML;
+      const onClick = () => {
+        heading.scrollIntoView();
+      };
+      headings.push({level, text, html, onClick});
+    }
+    return headings;
+  }
+
   /**
    * A mapping from LaTeX section headers to HTML header
    * levels. `part` and `chapter` are less common in my experience,
    * so assign them to header level 1.
    */
-  export const LatexLevels: {[label: string]: number} = {
+  export const latexLevels: {[label: string]: number} = {
     part: 1, // Only available for report and book classes
     chapter: 1, // Only available for report and book classes
     section: 1,

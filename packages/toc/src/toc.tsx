@@ -151,7 +151,7 @@ export namespace TableOfContents {
 }
 
 /**
- * An object that represents a markdown heading.
+ * An object that represents a heading.
  */
 export interface IHeading {
   /**
@@ -170,6 +170,16 @@ export interface IHeading {
    * the parent widget to this item.
    */
   onClick: () => void;
+
+  /**
+   * If there is special markup, we can instead
+   * render the heading using a raw HTML string. This
+   * HTML *should be properly sanitized!*
+   *
+   * For instance, this can be used to render
+   * already-renderd-to-html markdown headings.
+   */
+  html?: string;
 }
 
 /**
@@ -219,11 +229,21 @@ export class TOCItem extends React.Component<ITOCItemProps, {}> {
       heading.onClick();
     };
 
-    return React.createElement(
-      `h${level}`,
-      {onClick: clickHandler},
-      <a href="">{heading.text}</a>,
-    );
+    if (heading.html) {
+      return React.createElement(
+        `h${level}`,
+        {
+          onClick: clickHandler,
+          dangerouslySetInnerHTML: {__html: heading.html},
+        },
+      );
+    } else {
+      return React.createElement(
+        `h${level}`,
+        {onClick: clickHandler},
+        <a href="">{heading.text}</a>,
+      );
+    }
   }
 }
 
