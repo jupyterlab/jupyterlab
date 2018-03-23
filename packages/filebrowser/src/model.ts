@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IChangedArgs, IStateDB, PathExt
+  IChangedArgs, IStateDB, PathExt, PageConfig
 } from '@jupyterlab/coreutils';
 
 import {
@@ -313,13 +313,23 @@ class FileBrowserModel implements IDisposable {
    * @returns A promise containing the new file contents model.
    *
    * #### Notes
-   * This will fail to upload files that are too big to be sent in one
-   * request to the server.
+   * On Notebook version < 5.1.0, this will fail to upload files that are too
+   * big to be sent in one request to the server. On newer versions, it will
+   * just confirm those upload and send them chunked.
    */
   upload(file: File): Promise<Contents.IModel> {
-    // Skip large files with a warning.
+    const largeFile = file.size > this._maxUploadSizeMb * 1024 * 1024;
+    const supportsLargeUpload = PageConfig.getNotebookVersion() >= [5, 1, 0];
+
+    if (largeFile && !supportsLargeUpload) {
+      let msg = `Cannot upload file (>${this._maxUploadSizeMb} MB) `;
+      msg += `"${file.name}"`;
+      console.warn(msg);
+      return Promise.reject<Contents.IModel>(new Error(msg));
+    }
+
     let p: Promise<void>;
-    if (file.size > this._maxUploadSizeMb * 1024 * 1024) {
+    if (largeFile) {
       p = showDialog({
         title: 'Large file size warning',
         body: `The file size is ${Math.round(file.size / (1024 * 1024))} MB. Do you still want to upload it?`,

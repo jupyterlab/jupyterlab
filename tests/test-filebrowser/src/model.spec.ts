@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  StateDB, uuid
+  StateDB, uuid, PageConfig
 } from '@jupyterlab/coreutils';
 
 import {
@@ -344,6 +344,30 @@ describe('filebrowser/model', () => {
         let file = new File(['<p>Hello world!</p>'], fname,
                             { type: 'text/html' });
         model.upload(file).catch(done);
+      });
+
+      describe('older notebook version', () => {
+        let prevNotebookVersion: string;
+
+        before(() => {
+          prevNotebookVersion = PageConfig.setOption('notebookVersion', JSON.stringify([5, 0, 0]));
+        });
+
+        after(() => {
+          PageConfig.setOption('notebookVersion', prevNotebookVersion);
+        });
+      });
+
+      describe('newer notebook version', () => {
+        let prevNotebookVersion: string;
+
+        before(() => {
+          prevNotebookVersion = PageConfig.setOption('notebookVersion', JSON.stringify([5, 1, 0]));
+        });
+
+        after(() => {
+          PageConfig.setOption('notebookVersion', prevNotebookVersion);
+        });
       });
 
     });
