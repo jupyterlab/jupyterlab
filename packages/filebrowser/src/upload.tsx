@@ -8,6 +8,10 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
+  Button
+} from '@jupyterlab/ui';
+
+import {
   FileBrowserModel
 } from './model';
 
@@ -45,38 +49,49 @@ const UPLOAD_CLASS = 'jp-id-upload';
 export
 class Uploader extends VDomRenderer<null> {
   /**
-   * Construct a new toolbar button.
+   * Construct a new kernel name widget.
    */
   constructor(options: Uploader.IOptions) {
     super();
     this.props = options;
     this.state = { value: '' };
+    this.addClass('jp-Toolbar-item');
+    this.removeClass('p-Widget');
   }
 
-  handleInputChange = () => {
-    const files = Array.prototype.slice.call(this._input.files) as File[];
+  /**
+   * The 'change' handler for the input field.
+   */
+  private _onInputChanged = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.prototype.slice.call(event.target.files) as File[];
     const pending = files.map((file) => this.props.model.upload(file));
     Promise.all(pending).catch((error) => {
       showErrorMessage('Upload Error', error);
     });
   }
 
-  handleInputClick = () => {
+  /**
+   * The 'click' handler for the input field.
+   */
+  private _onInputClicked = () => {
     // In order to allow repeated uploads of the same file (with delete in between),
     // we need to clear the input value to trigger a change event.
     this.state = { value: '' };
-    this.update();
+    this.render();
   }
 
   /**
    * Render the Toolbar to virtual DOM nodes.
    */
   protected render(): React.ReactElement<any> {
+    const className = `${UPLOAD_CLASS} jp-Toolbar-button`;
     return (
-      <div
-        className={UPLOAD_CLASS}
-        onClick={this.handleInputClick}
-        title="Upload Files"
+      <Button
+        className={className}
+        onClick={() => {
+          this._input.click();
+        }}
+        tooltip="Upload Files"
       >
         <span className={CONTENT_CLASS}>
           <span
@@ -86,18 +101,21 @@ class Uploader extends VDomRenderer<null> {
           />
         </span>
         <input
-          ref={(ref) => (this._input = ref)}
+          ref={(ref) => {
+            this._input = ref;
+          }}
+          style={{ display: 'none' }}
           value={this.state.value}
-          onClick={this.handleInputClick}
-          onChange={this.handleInputChange}
+          onClick={this._onInputClicked}
+          onChange={this._onInputChanged}
           type="file"
           multiple
         />
-      </div>
+      </Button>
     );
   }
 
-  private props: Uploader.IOptions;
+  props: Uploader.IOptions;
   private state: { value: string };
   private _input: HTMLInputElement;
 }

@@ -23,7 +23,10 @@ import {
 
 import * as React from 'react';
 
-import { Button, IButtonProps } from '@jupyterlab/ui';
+import {
+  Button,
+  Select
+} from '@jupyterlab/ui';
 
 import {
   VDomRenderer,
@@ -63,6 +66,11 @@ const TOOLBAR_INTERRUPT_CLASS = 'jp-StopIcon';
  * The class name added to toolbar restart button.
  */
 const TOOLBAR_RESTART_CLASS = 'jp-RefreshIcon';
+
+/**
+ * The class name added to toolbar cell type dropdown wrapper.
+ */
+const TOOLBAR_CELLTYPE_CLASS = 'jp-Notebook-toolbarCellType';
 
 /**
  * The class name added to toolbar kernel name text.
@@ -156,7 +164,6 @@ class Toolbar<T extends Widget = Widget> extends Widget {
     if (existing) {
       return false;
     }
-    widget.addClass(TOOLBAR_ITEM_CLASS);
     const layout = this.layout as PanelLayout;
     layout.insertWidget(index, widget);
     Private.nameProperty.set(widget, name);
@@ -357,19 +364,21 @@ class ToolbarButton extends VDomRenderer<null> {
   /**
    * Construct a new toolbar button.
    */
-  constructor(options: IButtonProps) {
+  constructor(options: ToolbarButton.IOptions) {
     super();
     this.props = options;
-    this.addClass(TOOLBAR_BUTTON_CLASS);
+    this.addClass(TOOLBAR_ITEM_CLASS);
+    this.removeClass('p-Widget');
   }
   /**
    * Render the Toolbar to virtual DOM nodes.
    */
   protected render(): React.ReactElement<any> {
-    return <Button {...this.props} />;
+    const className = `${this.props.className} ${TOOLBAR_BUTTON_CLASS}`;
+    return <Button {...this.props} className={className} />;
   }
 
-  private props: IButtonProps;
+  props: ToolbarButton.IOptions;
 }
 
 
@@ -398,6 +407,72 @@ namespace ToolbarButton {
      */
     tooltip?: string;
     // children?: any;
+    [key: string]: any;
+  }
+}
+
+
+/**
+ * A widget which acts as a button in a toolbar.
+ */
+export
+class ToolbarSelect extends VDomRenderer<null> {
+  /**
+   * Construct a new toolbar button.
+   */
+  constructor(options: ToolbarSelect.IOptions) {
+    super();
+    this.props = options;
+    this.addClass(TOOLBAR_ITEM_CLASS);
+    this.addClass(TOOLBAR_CELLTYPE_CLASS);
+    // this.removeClass('p-Widget');
+  }
+
+  /**
+   * Render the Toolbar to virtual DOM nodes.
+   */
+  protected render(): React.ReactElement<any> {
+    return <Select {...this.props} />;
+  }
+
+  props: ToolbarSelect.IOptions;
+}
+
+
+/**
+ * A namespace for `ToolbarButton` statics.
+ */
+export
+namespace ToolbarSelect {
+  /**
+   * The options used to construct a toolbar button.
+   */
+  export
+  interface IOptions {
+    /**
+     * The callback for a click event.
+     */
+    onChange: (event?: React.ChangeEvent<HTMLSelectElement>) => void;
+
+    /**
+     * The callback for a click event.
+     */
+    onKeyDown?: (event?: React.KeyboardEvent<HTMLSelectElement>) => void;
+
+    /**
+     * The class name added to the button.
+     */
+    className: string;
+
+    /**
+     * The list of options to add to select.
+     */
+    options: string[];
+
+    /**
+     * The selected option value.
+     */
+    selected?: string;
     [key: string]: any;
   }
 }
@@ -474,6 +549,7 @@ namespace Private {
      */
     constructor() {
       super();
+      this.addClass(TOOLBAR_ITEM_CLASS);
       this.addClass(TOOLBAR_SPACER_CLASS);
     }
   }
@@ -492,8 +568,9 @@ namespace Private {
         onClick: () => {
           session.selectKernel();
         },
-        tooltip: 'Switch kernel'
-        });
+        tooltip: 'Switch kernel',
+        children: session.kernelDisplayName
+      });
       this._onKernelChanged(session);
       session.kernelChanged.connect(this._onKernelChanged, this);
     }
@@ -502,8 +579,11 @@ namespace Private {
      * Update the text of the kernel name item.
      */
     private _onKernelChanged(session: IClientSession): void {
-      this.node.textContent = session.kernelDisplayName;
+      this.props.children = session.kernelDisplayName;
+      this.render();
     }
+
+    props: ToolbarButton.IOptions;
   }
 
   /**
@@ -516,6 +596,7 @@ namespace Private {
      */
     constructor(session: IClientSession) {
       super();
+      this.addClass(TOOLBAR_ITEM_CLASS);
       this.addClass(TOOLBAR_KERNEL_STATUS_CLASS);
       this._onStatusChanged(session);
       session.statusChanged.connect(this._onStatusChanged, this);
