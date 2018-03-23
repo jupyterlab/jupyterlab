@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import {ISanitizer} from '@jupyterlab/apputils';
+
 import {FileEditor, IEditorTracker} from '@jupyterlab/fileeditor';
 
 import {MarkdownCell} from '@jupyterlab/cells';
@@ -22,6 +24,7 @@ import {IHeading} from './toc';
  */
 export function createNotebookGenerator(
   tracker: INotebookTracker,
+  sanitizer: ISanitizer,
 ): TableOfContentsRegistry.IGenerator<NotebookPanel> {
   return {
     tracker,
@@ -37,7 +40,7 @@ export function createNotebookGenerator(
 
         if ((cell as MarkdownCell).rendered) {
           headings = headings.concat(
-            Private.getRenderedHTMLHeadings(cell.node),
+            Private.getRenderedHTMLHeadings(cell.node, sanitizer),
           );
         } else {
           const onClickFactory = () => {
@@ -196,14 +199,18 @@ namespace Private {
     return headings;
   }
 
-  export function getRenderedHTMLHeadings(node: HTMLElement): IHeading[] {
+  export function getRenderedHTMLHeadings(
+    node: HTMLElement,
+    sanitizer: ISanitizer,
+  ): IHeading[] {
     let headings: IHeading[] = [];
     let headingNodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6');
     for (let i = 0; i < headingNodes.length; i++) {
       const heading = headingNodes[i];
       const level = parseInt(heading.tagName[1]);
       const text = heading.textContent;
-      const html = heading.innerHTML;
+      const html = sanitizer.sanitize(heading.innerHTML, sanitizerOptions);
+
       const onClick = () => {
         heading.scrollIntoView();
       };
@@ -225,5 +232,40 @@ namespace Private {
     subsubsection: 3,
     paragraph: 4,
     subparagraph: 5,
+  };
+
+  /**
+   * Allowed HTML tags for the ToC entries. We use this to
+   * sanitize HTML headings, if they are given. We specifically
+   * disallow anchor tags, since we are adding our own.
+   */
+  const sanitizerOptions = {
+    allowedTags: [
+      'p',
+      'blockquote',
+      'b',
+      'i',
+      'strong',
+      'em',
+      'strike',
+      'code',
+      'br',
+      'div',
+      'span',
+      'pre',
+      'del',
+    ],
+    allowedAttributes: {
+      // Allow "class" attribute for <code> tags.
+      code: ['class'],
+      // Allow "class" attribute for <span> tags.
+      span: ['class'],
+      // Allow "class" attribute for <div> tags.
+      div: ['class'],
+      // Allow "class" attribute for <p> tags.
+      p: ['class'],
+      // Allow "class" attribute for <pre> tags.
+      pre: ['class'],
+    },
   };
 }

@@ -70,7 +70,10 @@ function activateTOC(
   restorer.add(toc, 'juputerlab-toc');
 
   // Create a notebook TableOfContentsRegistry.IGenerator
-  const notebookGenerator = createNotebookGenerator(notebookTracker);
+  const notebookGenerator = createNotebookGenerator(
+    notebookTracker,
+    rendermime.sanitizer,
+  );
   registry.addGenerator(notebookGenerator);
 
   // Create an markdown editor TableOfContentsRegistry.IGenerator

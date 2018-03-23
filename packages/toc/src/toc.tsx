@@ -230,13 +230,11 @@ export class TOCItem extends React.Component<ITOCItemProps, {}> {
     };
 
     if (heading.html) {
-      return React.createElement(
-        `h${level}`,
-        {
-          onClick: clickHandler,
-          dangerouslySetInnerHTML: {__html: heading.html},
-        },
-      );
+      const el = React.createElement(`h${level}`, {
+        onClick: clickHandler,
+        dangerouslySetInnerHTML: {__html: heading.html},
+      });
+      return <a href="">{el}</a>;
     } else {
       return React.createElement(
         `h${level}`,
