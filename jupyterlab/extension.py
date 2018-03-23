@@ -29,8 +29,10 @@ def load_jupyter_server_extension(nbapp):
     """Load the JupyterLab server extension.
     """
     # Delay imports to speed up jlpmapp
+    import json
     from jupyterlab_launcher import add_handlers, LabConfig
     from notebook.utils import url_path_join as ujoin, url_escape
+    from notebook._version import version_info
     from tornado.ioloop import IOLoop
     from .build_handler import build_path, Builder, BuildHandler
     from .commands import (
@@ -86,7 +88,7 @@ def load_jupyter_server_extension(nbapp):
     page_config['buildCheck'] = not core_mode and not dev_mode
     page_config['token'] = nbapp.token
     page_config['devMode'] = dev_mode
-
+    page_config['notebookVersion'] = json.dumps(version_info)
     if nbapp.file_to_run and type(nbapp).__name__ == "LabApp":
         relpath = os.path.relpath(nbapp.file_to_run, nbapp.notebook_dir)
         uri = url_escape(ujoin('/lab/tree', *relpath.split(os.sep)))
