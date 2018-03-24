@@ -533,7 +533,9 @@ namespace Private {
         let key = localStorage.key(--i);
 
         if (key && key.indexOf(WINDOW) === 0) {
-          names[key.replace(WINDOW, '')] = parseInt(localStorage.getItem(key));
+          let name = key.replace(WINDOW, '');
+
+          names[name] = parseInt(localStorage.getItem(key), 10);
         }
       }
 
