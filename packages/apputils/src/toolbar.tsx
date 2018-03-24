@@ -425,7 +425,6 @@ class ToolbarSelect extends VDomRenderer<null> {
     this.props = options;
     this.addClass(TOOLBAR_ITEM_CLASS);
     this.addClass(TOOLBAR_CELLTYPE_CLASS);
-    // this.removeClass('p-Widget');
   }
 
   /**

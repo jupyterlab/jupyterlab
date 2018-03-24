@@ -48,13 +48,17 @@ export interface ISelectState {
  * A base select comopnent.
  */
 export class Select extends React.Component<ISelectProps, ISelectState> {
-  static defaultProps = {
-    className: '',
-  };
+  constructor(props: ISelectProps) {
+    super(props);
+    this.state = {
+      focused: false,
+      selected: props.selected || props.options[0]
+    };
+  }
 
-  state = {
-    focused: false,
-    selected: this.props.selected || this.props.options[0]
+  static defaultProps: ISelectProps = {
+    className: '',
+    options: []
   };
 
   handleChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
@@ -93,7 +97,7 @@ export class Select extends React.Component<ISelectProps, ISelectState> {
           className={classNames.join(' ')}
           onChange={this.handleChange}
           onFocus={this.handleFocus}
-          value={this.props.selected || this.state.selected}
+          value={selected || this.state.selected}
           {...props}
         >
           {options.map((text, index) => (
