@@ -171,24 +171,7 @@ namespace ToolbarItems {
    */
   export
   function createCellTypeItem(widget: Notebook): CellTypeSelect {
-    return new CellTypeSelect({
-      className: TOOLBAR_CELLTYPE_DROPDOWN_CLASS,
-      onChange: (event: React.ChangeEvent<HTMLSelectElement>): void => {
-        const { value } = event.target;
-        if (value === '-') {
-          return;
-        }
-        NotebookActions.changeCellType(widget, value as nbformat.CellType);
-        widget.activate();
-      },
-      onKeyDown: (event: React.KeyboardEvent<HTMLSelectElement>): void => {
-        if (event.keyCode === 13) {
-          // On Enter
-          widget.activate();
-        }
-      },
-      options: ['Code', 'Markdown', 'Raw']
-    }, widget);
+    return new CellTypeSelect(widget);
   }
 
   /**
@@ -218,8 +201,25 @@ class CellTypeSelect extends ToolbarSelect {
   /**
    * Construct a new toolbar button.
    */
-  constructor(options: ToolbarSelect.IOptions, widget: Notebook) {
-    super(options);
+  constructor(widget: Notebook) {
+    super({
+      className: TOOLBAR_CELLTYPE_DROPDOWN_CLASS,
+      onChange: (event: React.ChangeEvent<HTMLSelectElement>): void => {
+        const { value } = event.target;
+        if (value === '-') {
+          return;
+        }
+        NotebookActions.changeCellType(widget, value as nbformat.CellType);
+        widget.activate();
+      },
+      onKeyDown: (event: React.KeyboardEvent<HTMLSelectElement>): void => {
+        if (event.keyCode === 13) {
+          // On Enter
+          widget.activate();
+        }
+      },
+      options: ['Code', 'Markdown', 'Raw']
+    });
     this._widget = widget;
     if (widget.model) {
       this._updateValue();
@@ -250,7 +250,7 @@ class CellTypeSelect extends ToolbarSelect {
       this.props.options = this.props.options.filter((option: string) => option !== '-');
       this.props.selected = cellType;
     }
-    this.render();
+    this.update();
   }
 
   private _widget: Notebook;
