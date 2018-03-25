@@ -13,7 +13,7 @@ JupyterLab commands:
    :align: center
    :class: jp-screenshot
 
-.. _access_palette:
+.. _access-palette:
 
 The command palette can be accessed using the keyboard shortcut
 ``Command/Ctrl Shift C``:

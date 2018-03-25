@@ -15,7 +15,7 @@ there.
    :align: center
    :class: jp-screenshot
 
-.. _open_terminal:
+.. _open-terminal:
 
 To open a new terminal, click the ``+`` button in the file browser and
 select the terminal in the new Launcher tab:
@@ -26,7 +26,7 @@ select the terminal in the new Launcher tab:
      <iframe src="https://www.youtube-nocookie.com/embed/ynMjz1tiq9o?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
-.. _close_terminal:
+.. _close-terminal:
 
 Closing a terminal tab will leave it running on the server, but you can
 re-open it using the Running tab in the left sidebar:

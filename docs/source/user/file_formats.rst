@@ -62,7 +62,7 @@ Markdown
 Markdown is a simple and popular markup language used for text cells in
 the Jupyter Notebook.
 
-.. _edit_markdown:
+.. _edit-markdown:
 
 Markdown documents can be edited as text files or rendered inline:
 
@@ -91,7 +91,7 @@ as ``+`` and ``-`` to zoom the image, ``[`` and ``]`` to rotate the image,
 and ``H`` and ``V`` to flip the image horizontally and vertically. Use
 ``I`` to invert the colors, and use ``0`` to reset the image.
 
-.. _edit_svg:
+.. _edit-svg:
 
 To edit an SVG image as a text file, right-click on the SVG filename in
 the file browser and select the “Editor” item in the “Open With”
@@ -111,7 +111,7 @@ Delimiter-separated Values
 -  File extension: ``.csv``
 -  MIME type: None
 
-.. _view_csv:
+.. _view-csv:
 
 Files with rows of delimiter-separated values, such as CSV files, are a common format for
 tabular data. The default viewer for these files in JupyterLab is a
@@ -127,7 +127,7 @@ semicolon-separated values:
 While tab-separated value files can be read by the grid viewer, it currently does not automatically recognize ``.tsv`` files.
 To view, you must change the extension to ``.csv`` and set the delimiter to tabs.
 
-.. _edit_csv:
+.. _edit-csv:
 
 To edit a CSV file as a text file, right-click on the file in the file
 browser and select the “Editor” item in the “Open With” submenu:
@@ -159,7 +159,7 @@ JSON
 -  File extension: ``.json``
 -  MIME type: ``application/json``
 
-.. _view_json:
+.. _view-json:
 
 JavaScript Object Notation (JSON) files are common in data science.
 JupyterLab supports displaying JSON data in cell output or viewing a
@@ -171,7 +171,7 @@ JSON file using a searchable tree view:
     <iframe src="https://www.youtube-nocookie.com/embed/FRj1r7-7kiQ?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
-.. _edit_json:
+.. _edit-json:
 
 To edit the JSON as a text file, right-click on the filename in the file
 browser and select the “Editor” item in the “Open With” submenu:
@@ -206,7 +206,7 @@ PDF
 -  File extension: ``.pdf``
 -  MIME type: ``application/pdf``
 
-.. _view_pdf:
+.. _view-pdf:
 
 PDF is a common standard file format for documents. To view a PDF file
 in JupyterLab, double-click on the file in the file browser:
@@ -237,7 +237,7 @@ visualizations to be encoded as JSON data. For more information, see the
 documentation of Vega or Vega-Lite. JupyterLab supports rendering Vega
 2.x and Vega-Lite 1.x data in files and cell output.
 
-.. _open_vega:
+.. _open-vega:
 
 Vega-Lite 1.x files, with a ``.vl`` or ``.vl.json`` file extension, can
 be opened by double-clicking the file in the file browser:
@@ -248,7 +248,7 @@ be opened by double-clicking the file in the file browser:
     <iframe src="https://www.youtube-nocookie.com/embed/Dddtyz5fWkU?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
-.. _open_vega_with:
+.. _open-vega-with:
 
 The files can also be opened in the JSON viewer or file editor through
 the “Open With…” submenu in the file browser content menu:
@@ -259,7 +259,7 @@ the “Open With…” submenu in the file browser content menu:
     <iframe src="https://www.youtube-nocookie.com/embed/qaiGRXh4jxc?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
-.. _vega_multiple_views:
+.. _vega-multiple-views:
 
 As with other files in JupyterLab, multiple views of a single file
 remain synchronized, enabling you to interactively edit and render
@@ -300,7 +300,7 @@ format <https://github.com/nteract/vdom>`__ for virtual DOM data.
 JupyterLab can render this data using react.js. This works for both VDOM
 files with the ``.vdom`` extension, or within notebook output.
 
-.. _edit_vdom:
+.. _edit-vdom:
 
 Here is an example of a ``.vdom`` file being edited and rendered
 interactively:
