@@ -1,4 +1,4 @@
-.. _working_with_files:
+.. _working-with-files:
 
 Working with Files
 ------------------
@@ -22,7 +22,7 @@ Many actions on files can also be carried out in the File menu:
    :align: center
    :class: jp-screenshot
 
-.. _open_file:
+.. _open-file:
 
 To open any file, double-click on its name in the file browser:
 
@@ -42,7 +42,7 @@ You can also drag a file into the main work area to create a new tab:
      <iframe src="https://www.youtube-nocookie.com/embed/uwMmHeDmRxk?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
-.. _multiple_viewers:
+.. _multiple-viewers:
 
 Many files types have :ref:`multiple viewers/editors <file-and-output-formats>`.
 For example, you can open a Markdown file in a :ref:`text editor <file_editor>` or as rendered HTML.
@@ -56,7 +56,7 @@ file browser and use the "Open With..." submenu to select the viewer/editor:
      <iframe src="https://www.youtube-nocookie.com/embed/1kEgUqAeYo0?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
-.. _single_doc_sync:
+.. _single-doc-sync:
 
 A single file can be open simultaneously in multiple viewer/editors and
 they will remain in sync:
@@ -67,7 +67,7 @@ they will remain in sync:
      <iframe src="https://www.youtube-nocookie.com/embed/87ALbxm1Y3I?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
-.. _file_navigation:
+.. _file-navigation:
 
 The file system can be navigated by double-clicking on folders in the
 listing or clicking on the folders at the top of the directory listing:
@@ -78,7 +78,7 @@ listing or clicking on the folders at the top of the directory listing:
      <iframe src="https://www.youtube-nocookie.com/embed/2OHwJzjG-l4?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
-.. _file_share:
+.. _file-share:
 
 Right-click on a file or directory and select "Copy Shareable Link" to
 copy a URL that can be used to open JupyterLab with that file or
@@ -91,7 +91,7 @@ directory open.
 Creating Files and Activities
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. _file_create_plus:
+.. _file-create-plus:
 
 Create new files or activities by clicking the ``+`` button at the top
 of the file browser. This will open a new Launcher tab in the main work area,
@@ -103,7 +103,7 @@ which enables you to pick an activity and kernel:
      <iframe src="https://www.youtube-nocookie.com/embed/QL0IxDAOEc0?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
-.. _file_create_menu:
+.. _file-create-menu:
 
 You can also create new documents or activities using the File menu:
 
@@ -111,7 +111,7 @@ You can also create new documents or activities using the File menu:
    :align: center
    :class: jp-screenshot
 
-.. _current_directory:
+.. _current-directory:
 
 The current working directory of a new activity or document will be the
 directory listed in the file browser (except for a terminal, which
@@ -123,7 +123,7 @@ always starts in the root directory of the file browser):
      <iframe src="https://www.youtube-nocookie.com/embed/OfISSOTiGTY?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
-.. _file_rename:
+.. _file-rename:
 
 A new file is created with a default name. Rename a file by
 right-clicking on its name in the file browser and selecting “Rename”
@@ -138,7 +138,7 @@ from the context menu:
 Uploading and Downloading
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. _file_upload:
+.. _file-upload:
 
 Files can be uploaded to the current directory of the file browser by
 dragging and dropping files onto the file browser, or by clicking the
@@ -150,7 +150,7 @@ dragging and dropping files onto the file browser, or by clicking the
      <iframe src="https://www.youtube-nocookie.com/embed/1bd2QHqQSH4?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
-.. _file_download:
+.. _file-download:
 
 Any file in JupyterLab can be downloaded by right-clicking its name in
 the file browser and selecting “Download” from the context menu:

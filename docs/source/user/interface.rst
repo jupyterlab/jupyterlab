@@ -19,7 +19,7 @@ cell tools inspector <notebook>`, and the :ref:`tabs list <tabs>`.
    :align: center
    :class: jp-screenshot
 
-.. _menu_bar:
+.. _menu-bar:
 
 Menu Bar
 ~~~~~~~~
@@ -42,7 +42,7 @@ default menus are:
 :ref:`JupyterLab extensions <user_extensions>` can also create new top-level menus in the menu
 bar.
 
-.. _left_sidebar:
+.. _left-sidebar:
 
 Left Sidebar
 ~~~~~~~~~~~~
@@ -55,7 +55,7 @@ and a list of tabs in the main work area:
    :align: center
    :class: jp-screenshot
 
-.. _left_sidebar_toggle:
+.. _left-sidebar-toggle:
 
 The left sidebar can be collapsed or expanded by selecting "Show Left Area"
 in the View menu or by clicking on the active sidebar tab:
@@ -69,12 +69,12 @@ in the View menu or by clicking on the active sidebar tab:
 
 JupyterLab extensions can add additional panels to the left sidebar.
 
-.. _main_area:
+.. _main-area:
 
 Main Work Area
 ~~~~~~~~~~~~~~
 
-.. _main_area_vid:
+.. _main-area-vid:
 
 The main work area in JupyterLab enables you to arrange documents (notebooks,
 text files, etc.) and other activities (terminals, code consoles, etc.) into
@@ -109,7 +109,7 @@ The same information is also available in the Tabs menu:
    :align: center
    :class: jp-screenshot
 
-.. _tabs_singledocument:
+.. _tabs-singledocument:
 
 It is often useful to focus on a single document or activity without closing
 other tabs in the main work area. Single-document mode enable this, while making
@@ -128,7 +128,7 @@ area is restored.
 Context Menus
 ~~~~~~~~~~~~~
 
-.. _context_menus_rightclick:
+.. _context-menus-rightclick:
 
 Many parts of JupyterLab, such as notebooks, text files, code consoles,
 and tabs, have context menus that can be accessed by right-clicking on
@@ -140,7 +140,7 @@ the element:
     <iframe src="https://www.youtube-nocookie.com/embed/y30fs6kg6fc?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
-.. _context_menus_shiftrightclick:
+.. _context-menus-shiftrightclick:
 
 The browser’s native context menu can be accessed by holding down
 ``Shift`` and right-clicking:
@@ -156,7 +156,7 @@ The browser’s native context menu can be accessed by holding down
 Keyboard Shortcuts
 ~~~~~~~~~~~~~~~~~~
 
-.. _shortcuts_settings:
+.. _shortcuts-settings:
 
 As in the classic Notebook, you can navigate the user interface through keyboard
 shortcuts. You can find and customize the current list of keyboard shortcuts by
@@ -169,7 +169,7 @@ Keyboard Shortcuts in the Settings tab.
        <iframe src="https://www.youtube-nocookie.com/embed/rhW3kAExCik?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
     </div>
 
-.. _editor_keymaps:
+.. _editor-keymaps:
 
 You can also customize the :ref:`text editor <file_editor>` to use vim, emacs, or Sublime Text
 keyboard maps by using the Text Editor Key Map submenu in the Settings
