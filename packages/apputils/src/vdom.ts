@@ -106,6 +106,28 @@ abstract class VDomRenderer<T extends VDomRenderer.IModel | null> extends Widget
   private _modelChanged = new Signal<this, void>(this);
 }
 
+/**
+ * Phosphor widget that renders React Element(s).
+ *
+ * All messages will re-render the element.
+ */
+export
+class ReactElementWidget extends VDomRenderer<any> {
+  /**
+   * Creates a Phosphor widget that renders the element(s) `es`.
+   */
+  constructor(es: Array<React.ReactElement<any>> | React.ReactElement<any> | null) {
+    super();
+    this._es = es;
+  }
+
+  render():  Array<React.ReactElement<any>> | React.ReactElement<any> | null {
+    return this._es;
+  }
+
+  private _es: Array<React.ReactElement<any>> | React.ReactElement<any> | null;
+}
+
 
 /**
  * The namespace for VDomRenderer statics.

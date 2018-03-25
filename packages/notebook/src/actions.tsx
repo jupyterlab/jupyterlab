@@ -26,9 +26,7 @@ import {
   ElementExt
 } from '@phosphor/domutils';
 
-import {
-  h
-} from '@phosphor/virtualdom';
+import * as React from 'react';
 
 import {
   INotebookModel
@@ -40,15 +38,17 @@ import {
 
 
 // The message to display to the user when prompting to trust the notebook.
-const TRUST_MESSAGE = h.p(
-  'A trusted Jupyter notebook may execute hidden malicious code when you ',
-  'open it.',
-  h.br(),
-  'Selecting trust will re-render this notebook in a trusted state.',
-  h.br(),
-  'For more information, see the',
-  h.a({ href: 'https://jupyter-notebook.readthedocs.io/en/stable/security.html' },
-      'Jupyter security documentation'),
+const TRUST_MESSAGE = (
+  <p>
+    A trusted Jupyter notebook may execute hidden malicious code when you
+    open it.
+    <br />
+    Selecting trust will re-render this notebook in a trusted state.
+    <br />
+    For more information, see the
+    <a href='https://jupyter-notebook.readthedocs.io/en/stable/security.html'>
+      Jupyter security documentation</a>
+  </p>
 );
 
 

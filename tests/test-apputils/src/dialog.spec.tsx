@@ -14,10 +14,6 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  VirtualDOM, h
-} from '@phosphor/virtualdom';
-
-import {
   Widget
 } from '@phosphor/widgets';
 
@@ -28,6 +24,8 @@ import {
 import {
   Dialog, showDialog
 } from '@jupyterlab/apputils';
+
+import * as React from 'react';
 
 import {
   acceptDialog, dismissDialog, waitForDialog
@@ -98,7 +96,7 @@ describe('@jupyterlab/apputils', () => {
     });
 
     it('should accept a virtualdom body', () => {
-      let body = h.div([h.input(), h.select()]);
+      let body = (<div><input /><select /></div>);
       let promise = showDialog({ body }).then(result => {
         expect(result.button.accept).to.equal(true);
         expect(result.value).to.equal(null);
@@ -378,7 +376,7 @@ describe('@jupyterlab/apputils', () => {
         });
 
         it('should focus the primary element', () => {
-          let body = h.div([h.input()]);
+          let body = (<div><input /></div>);
           dialog = new TestDialog({ body, focusNodeSelector: 'input' });
           Widget.attach(dialog, document.body);
           expect((document.activeElement as HTMLElement).localName).to.equal('input');
@@ -465,7 +463,7 @@ describe('@jupyterlab/apputils', () => {
           });
 
           it('should create the body from a virtual node', () => {
-            let vnode = h.div({}, [h.input(), h.select(), h.button()]);
+            let vnode = (<div><input /><select /><button /></div>);
             let widget = renderer.createBody(vnode);
             let button = widget.node.querySelector('button');
             expect(button.className).to.contain('jp-mod-styled');
@@ -520,7 +518,7 @@ describe('@jupyterlab/apputils', () => {
         describe('#renderIcon()', () => {
 
           it('should render an icon element for a dialog item', () => {
-            let node = VirtualDOM.realize(renderer.renderIcon(data));
+            let node = renderer.renderIcon(data);
             expect(node.className).to.contain('jp-Dialog-buttonIcon');
             expect(node.textContent).to.equal('foo');
           });
@@ -551,7 +549,7 @@ describe('@jupyterlab/apputils', () => {
         describe('#renderLabel()', () => {
 
           it('should render a label element for a button', () => {
-            let node = VirtualDOM.realize(renderer.renderLabel(data));
+            let node = renderer.renderLabel(data);
             expect(node.className).to.equal('jp-Dialog-buttonLabel');
             expect(node.title).to.equal(data.caption);
             expect(node.textContent).to.equal(data.label);
