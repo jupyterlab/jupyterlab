@@ -12,7 +12,7 @@ cells.
 .. _create-console:
 
 Create a new code console by clicking the ``+`` button in the :ref:`file
-browser <left_sidebar>` and selecting the kernel:
+browser <left-sidebar>` and selecting the kernel:
 
 .. raw:: html
 
@@ -55,7 +55,7 @@ right-clicking on the code console and selecting “Clear Console Cells”:
 
 .. _log-inspect:
 
-Creating a code console from the :ref:`file menu <menu_bar>` lets you select an existing
+Creating a code console from the :ref:`file menu <menu-bar>` lets you select an existing
 kernel for the code console. The code console then acts as a log of
 computations in that kernel, and a place you can interactively inspect
 and run code in the kernel:

@@ -8,10 +8,10 @@ exploratory computing. While JupyterLab has many features found in
 traditional integrated development environments (IDEs), it remains
 focused on interactive, exploratory computing.
 
-The JupyterLab interface consists of a :ref:`main work area <main_area>`
+The JupyterLab interface consists of a :ref:`main work area <main-area>`
 containing tabs of documents and activities, a collapsible :ref:`left sidebar
-<left_sidebar>`, and a :ref:`menu bar <menu_bar>`. The left sidebar contains a
-:ref:`file browser <working_with_files>`, the :ref:`list of running kernels and
+<left-sidebar>`, and a :ref:`menu bar <menu-bar>`. The left sidebar contains a
+:ref:`file browser <working-with-files>`, the :ref:`list of running kernels and
 terminals <running>`, the :ref:`command palette <commands>`, the :ref:`notebook
 cell tools inspector <notebook>`, and the :ref:`tabs list <tabs>`.
 
@@ -171,7 +171,7 @@ Keyboard Shortcuts in the Settings tab.
 
 .. _editor-keymaps:
 
-You can also customize the :ref:`text editor <file_editor>` to use vim, emacs, or Sublime Text
+You can also customize the :ref:`text editor <file-editor>` to use vim, emacs, or Sublime Text
 keyboard maps by using the Text Editor Key Map submenu in the Settings
 menu:
 
