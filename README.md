@@ -42,7 +42,7 @@ Read the latest version of our documentation on [ReadTheDocs](http://jupyterlab.
 
 You can [install](http://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html) JupyterLab using `conda`, `pip`, or `pipenv`.
 
-Note: For all methods of installation, **if you are using a version of Jupyter Notebook earlier than 5.3**, then you must also run the following command
+**If you are using a version of Jupyter Notebook earlier than 5.3**, then you must also run the following command
 after installation to enable the JupyterLab server extension:
 
 ```bash
@@ -140,7 +140,7 @@ copyright on their contributions. All code is licensed under the terms of the re
 
 ### Team
 
-JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by an open community of contributors. Our [maintainer team]() is accompanied by a much larger group of contributors to JupyterLab and Project Jupyter as a whole.
+JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by an open community of contributors. Our [maintainer team](https://jupyterlab.readthedocs.io/en/latest/developer/team.html) is accompanied by a much larger group of contributors to JupyterLab and Project Jupyter as a whole.
 
 ----
 
