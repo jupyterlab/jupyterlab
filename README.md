@@ -42,13 +42,6 @@ Read the latest version of our documentation on [ReadTheDocs](http://jupyterlab.
 
 You can [install](http://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html) JupyterLab using `conda`, `pip`, or `pipenv`.
 
-**If you are using a version of Jupyter Notebook earlier than 5.3**, then you must also run the following command
-after installation to enable the JupyterLab server extension:
-
-```bash
-jupyter serverextension enable --py jupyterlab --sys-prefix
-```
-
 Instructions on how to install the project from the git sources are available in our [contributor documentation](CONTRIBUTING.md).
 
 #### conda
@@ -92,6 +85,15 @@ When using ``pipenv``, in order to launch `jupyter lab`, you must activate the p
 ```bash
 pipenv shell
 jupyter lab
+```
+
+### Installing with Previous Versions of Jupyter Notebook
+
+If you are using a version of Jupyter Notebook earlier than 5.3, then you must also run the following command
+after installation to enable the JupyterLab server extension:
+
+```bash
+jupyter serverextension enable --py jupyterlab --sys-prefix
 ```
 
 ### Running
