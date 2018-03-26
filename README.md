@@ -87,7 +87,7 @@ pipenv shell
 jupyter lab
 ```
 
-### Installing with Previous Versions of Jupyter Notebook
+#### Installing with Previous Versions of Jupyter Notebook
 
 If you are using a version of Jupyter Notebook earlier than 5.3, then you must also run the following command
 after installation to enable the JupyterLab server extension:
