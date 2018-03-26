@@ -23,11 +23,9 @@ interface IWindowResolver {
   /**
    * Resolve a window name to use as a handle among shared resources.
    *
-   * @param candidate - A potential preferred default window name.
-   *
    * @returns A promise that resolves to a window name.
    */
-  resolve(candidate: string): Promise<string>;
+  resolve(): Promise<string>;
 }
 
 
@@ -36,15 +34,38 @@ interface IWindowResolver {
  */
 export
 class WindowResolver implements IWindowResolver {
+  constructor(options: WindowResolver.IOptions = { candidate: '' }) {
+    this._candidate = options.candidate;
+  }
+
   /**
    * Resolve a window name to use as a handle among shared resources.
    *
-   * @param candidate - A potential preferred default window name.
-   *
    * @returns A promise that resolves to a window name.
    */
-  resolve(candidate: string): Promise<string> {
+  resolve(): Promise<string> {
+    console.log('Start with candidate:', this._candidate);
     return Private.windowName();
+  }
+
+  private _candidate: string;
+}
+
+
+/**
+ * A namespace for `WindowResolver` statics.
+ */
+export
+namespace WindowResolver {
+  /**
+   * The instantiation options for a window resolver.
+   */
+  export
+  interface IOptions {
+    /**
+     * A potential preferred default window name.
+     */
+    candidate: string;
   }
 }
 
