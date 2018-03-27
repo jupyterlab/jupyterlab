@@ -49,7 +49,8 @@ class RenderedHTML extends Widget implements IRenderMime.IRenderer {
    */
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     const data = model.data[this._mimeType] as string;
-    this.node.querySelector('iframe').setAttribute('srcdoc', data)
+    const blob = new Blob([data], {type: "text/html"});
+    this.node.querySelector('iframe').setAttribute('src', URL.createObjectURL(blob));
     return Promise.resolve(void 0);
   }
 
