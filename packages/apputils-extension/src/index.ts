@@ -12,7 +12,8 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  DataConnector, ISettingRegistry, IStateDB, SettingRegistry, StateDB, URLExt
+  DataConnector, ISettingRegistry, IStateDB, IWindowResolver, SettingRegistry,
+  StateDB, URLExt, WindowResolver
 } from '@jupyterlab/coreutils';
 
 import {
@@ -235,6 +236,23 @@ const themes: JupyterLabPlugin<IThemeManager> = {
 
 
 /**
+ * The default window name resolver provider.
+ */
+const resolver: JupyterLabPlugin<IWindowResolver> = {
+  id: '@jupyterlab/apputils-extension:resolver',
+  autoStart: true,
+  provides: IWindowResolver,
+  activate: app => {
+    const resolver = new WindowResolver({
+      candidate: Promise.resolve('hello')
+    });
+
+    return resolver;
+  }
+};
+
+
+/**
  * The default splash screen provider.
  */
 const splash: JupyterLabPlugin<ISplashScreen> = {
@@ -261,10 +279,14 @@ const state: JupyterLabPlugin<IStateDB> = {
   id: '@jupyterlab/apputils-extension:state',
   autoStart: true,
   provides: IStateDB,
-  requires: [IRouter],
-  activate: (app: JupyterLab, router: IRouter) => {
+  requires: [IRouter, IWindowResolver],
+  activate: (app: JupyterLab, router: IRouter, resolver: IWindowResolver) => {
     let debouncer: number;
     let resolved = false;
+
+    resolver.resolve().then(name => {
+      console.log(`The window resolver returns the name ${name}`);
+    });
 
     const { commands, info, serviceManager } = app;
     const { workspaces } = serviceManager;
@@ -442,7 +464,7 @@ const state: JupyterLabPlugin<IStateDB> = {
  * Export the plugins as default.
  */
 const plugins: JupyterLabPlugin<any>[] = [
-  palette, settings, state, splash, themes
+  palette, resolver, settings, state, splash, themes
 ];
 export default plugins;
 

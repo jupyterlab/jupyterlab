@@ -34,7 +34,7 @@ interface IWindowResolver {
  */
 export
 class WindowResolver implements IWindowResolver {
-  constructor(options: WindowResolver.IOptions = { candidate: '' }) {
+  constructor(options: WindowResolver.IOptions = { candidate: Promise.resolve('') }) {
     this._candidate = options.candidate;
   }
 
@@ -44,11 +44,14 @@ class WindowResolver implements IWindowResolver {
    * @returns A promise that resolves to a window name.
    */
   resolve(): Promise<string> {
-    console.log('Start with candidate:', this._candidate);
-    return Private.windowName();
+    return this._candidate.then(name => {
+      console.log('Start with candidate:', name);
+      return Private.windowName();
+    });
+
   }
 
-  private _candidate: string;
+  private _candidate: Promise<string>;
 }
 
 
@@ -65,7 +68,7 @@ namespace WindowResolver {
     /**
      * A potential preferred default window name.
      */
-    candidate: string;
+    candidate: Promise<string>;
   }
 }
 
