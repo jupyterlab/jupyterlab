@@ -1,6 +1,6 @@
 # jupyterlab_html
 
-Display HTML in IFrame
+JupyterLab extension to view HTML files in IFrame Tab.
 
 
 ## Prerequisites
@@ -10,7 +10,7 @@ Display HTML in IFrame
 ## Installation
 
 ```bash
-jupyter labextension install jupyterlab_html
+jupyter labextension install @mflevine/jupyterlab_html
 ```
 
 ## Development

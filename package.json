@@ -1,7 +1,7 @@
 {
-  "name": "jupyterlab_html",
-  "version": "0.1.0",
-  "description": "Display HTML in IFrame",
+  "name": "@mflevine/jupyterlab_html",
+  "version": "0.1.1",
+  "description": "JupyterLab extension to view HTML files in IFrame Tab",
   "keywords": [
     "jupyter",
     "jupyterlab",
