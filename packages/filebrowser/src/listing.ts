@@ -567,7 +567,6 @@ class DirListing extends Widget {
     return this.model.refresh().then(() => {
       if (this.isDisposed) {
         throw new Error('File browser is disposed.');
-        ;
       }
       let items = this._sortedItems;
       let index = ArrayExt.findFirstIndex(items, value => value.name === name);
