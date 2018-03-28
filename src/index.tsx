@@ -14,7 +14,7 @@ import '../style/index.css';
 /**
  * The CSS class to add to the Plotly Widget.
  */
-const CSS_CLASS = 'jp-RenderedHTML';
+const CSS_CLASS = 'jp-RenderedIFrame';
 
 /**
  * The CSS class for a Plotly icon.
@@ -34,7 +34,7 @@ export
 const HTML_CONTAINER_CLASS = 'jp-HTMLContainer';
 
 export
-class RenderedHTML extends Widget implements IRenderMime.IRenderer {
+class RenderedIFrame extends Widget implements IRenderMime.IRenderer {
   /**
    * Create a new widget for rendering HTML.
    */
@@ -65,7 +65,7 @@ export
 const rendererFactory: IRenderMime.IRendererFactory = {
   safe: true,
   mimeTypes: [MIME_TYPE],
-  createRenderer: options => new RenderedHTML(options)
+  createRenderer: options => new RenderedIFrame(options)
 };
 
 

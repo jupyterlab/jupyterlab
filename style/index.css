@@ -8,12 +8,12 @@
 }
 
 /* Document styles */
-.jp-MimeDocument .jp-RenderedHTML {
+.jp-MimeDocument .jp-RenderedIFrame {
   overflow: hidden;
 }
 
 /* Output styles */
-.jp-OutputArea .jp-RenderedHTML {
+.jp-OutputArea .jp-RenderedIFrame {
   min-height: 360px;
 }
 
@@ -22,7 +22,7 @@
   background-image: var(--jp-icon-html5);
 }
 
-.jp-RenderedHTML {
+.jp-RenderedIFrame {
   min-width: 100px;
   min-height: 100px;
   width: 100%;
@@ -30,7 +30,7 @@
 }
 
 
-.jp-RenderedHTML > iframe {
+.jp-RenderedIFrame > iframe {
   border: none;
 }
 
@@ -41,11 +41,11 @@ Because iframes steal all cursor events, the following two rules are necessary
 to suppress pointer events while resize drags are occuring. There may be a
 better solution to this problem.
 */
-body.p-mod-override-cursor .jp-RenderedHTML {
+body.p-mod-override-cursor .jp-RenderedIFrame {
   position: relative;
 }
 
-body.p-mod-override-cursor .jp-RenderedHTML:before {
+body.p-mod-override-cursor .jp-RenderedIFrame:before {
   content: '';
   position: absolute;
   top: 0;
