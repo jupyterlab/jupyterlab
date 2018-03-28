@@ -10,7 +10,7 @@
     "build:packages": "cd packages/metapackage && jlpm run build",
     "build:src": "lerna run build --scope \"@jupyterlab/!(test-|example-)*\"",
     "build:test": "lerna run build:test",
-    "build:themes": "lerna run build:webpack --scope \"@jupyterlab/theme-*-extension\"",
+    "build:themes": "lerna run build:webpack --scope \"@jupyterlab/theme-*\"",
     "build:update": "node buildutils/lib/update-core-mode.js",
     "build:utils": "cd buildutils && jlpm run build",
     "clean": "jlpm run clean:dev",
