@@ -566,12 +566,13 @@ class DirListing extends Widget {
     // Make sure the file is available.
     return this.model.refresh().then(() => {
       if (this.isDisposed) {
-        return;
+        throw new Error('File browser is disposed.');
+        ;
       }
       let items = this._sortedItems;
       let index = ArrayExt.findFirstIndex(items, value => value.name === name);
       if (index === -1) {
-        return;
+        throw new Error('Item does not exist.');
       }
       this._selectItem(index, false);
       MessageLoop.sendMessage(this, Widget.Msg.UpdateRequest);
@@ -762,12 +763,6 @@ class DirListing extends Widget {
     let paths = items.map(item => item.path);
     each(this._model.sessions(), session => {
       let index = ArrayExt.firstIndexOf(paths, session.path);
-
-      // If the path is not found, bail.
-      if (index === -1) {
-        return;
-      }
-
       let node = nodes[index];
       let name = session.kernel.name;
       let specs = this._model.specs;
@@ -1338,7 +1333,7 @@ class DirListing extends Widget {
       }
       if (this.isDisposed) {
         this._inRename = false;
-        return Promise.reject('Disposed') as Promise<string>;
+        throw new Error('File browser is disposed.');
       }
 
       const manager = this._manager;
@@ -1354,9 +1349,10 @@ class DirListing extends Widget {
       }).then(() => {
         if (this.isDisposed) {
           this._inRename = false;
-          return Promise.reject('Disposed') as Promise<string>;
+          throw new Error('File browser is disposed.');
         }
         if (this._inRename) {
+          // No need to catch because `newName` will always exit.
           this.selectItemByName(newName);
         }
         this._inRename = false;
@@ -1418,14 +1414,16 @@ class DirListing extends Widget {
     if (!newValue) {
       return;
     }
-    let name = args.newValue.name;
-    if (args.type === 'new' && name) {
-      this.selectItemByName(name).then(() => {
-        if (!this.isDisposed && newValue.type === 'directory') {
-          this._doRename();
-        }
-      });
+
+    if (args.type !== 'new' || !name) {
+      return;
     }
+
+    this.selectItemByName(name).then(() => {
+      if (!this.isDisposed && newValue.type === 'directory') {
+        this._doRename();
+      }
+    }).catch(() => { /* Ignore if file does not exist. */ });
   }
 
   /**
@@ -1437,7 +1435,8 @@ class DirListing extends Widget {
       return;
     }
     let basename = PathExt.basename(args);
-    this.selectItemByName(basename);
+    this.selectItemByName(basename)
+      .catch(() => { /* Ignore if file does not exist. */ });
   }
 
   private _model: FileBrowserModel;
