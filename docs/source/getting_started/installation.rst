@@ -3,13 +3,7 @@
 Installation
 ------------
 
-JupyterLab can be installed using ``conda``, ``pip``, or ``pipenv``. If you are using a version of Jupyter Notebook earlier than 5.3, then
-you must also run the following command to enable the JupyterLab
-server extension:
-
-.. code:: bash
-
-    jupyter serverextension enable --py jupyterlab --sys-prefix
+JupyterLab can be installed using ``conda``, ``pip``, or ``pipenv``.
 
 conda
 ~~~~~
@@ -58,6 +52,33 @@ For example, in the directory where ``pipenv``'s ``Pipfile`` and ``Pipfile.lock`
 
     pipenv shell
      jupyter lab
+
+Installing with Previous Versions of Notebook
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you are using a version of Jupyter Notebook earlier than 5.3, then you must also run the following command to enable the JupyterLab
+server extension:
+
+.. code:: bash
+
+    pipenv install jupyterlab
+     pipenv shell
+
+or from a git checkout:
+
+.. code:: bash
+
+    pipenv install git+git://github.com/jupyterlab/jupyterlab.git#egg=jupyterlab
+     pipenv shell
+
+When using ``pipenv``, in order to launch ``jupyter lab``, you must activate the project's virtualenv.
+For example, in the directory where ``pipenv``'s ``Pipfile`` and ``Pipfile.lock`` live (i.e., where you ran the above commands):
+
+.. code:: bash
+
+    pipenv shell
+     jupyter lab
+
 
 
 Prerequisites

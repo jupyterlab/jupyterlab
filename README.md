@@ -42,23 +42,38 @@ Read the latest version of our documentation on [ReadTheDocs](http://jupyterlab.
 
 You can [install](http://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html) JupyterLab using `conda`, `pip`, or `pipenv`.
 
+<<<<<<< HEAD
 **If you are using a version of Jupyter Notebook earlier than 5.3**, then you must also run the following command
 after installation to enable the JupyterLab server extension:
-
-```bash
-jupyter serverextension enable --py jupyterlab --sys-prefix
-```
-
+=======
 Instructions on how to install the project from the git sources are available in our [contributor documentation](CONTRIBUTING.md).
 
 #### conda
 
 If you use ``conda``, you can install as:
+>>>>>>> 7235a88a421d593ab5596632a9c4ccc186fa78ea
+
+```bash
+jupyter serverextension enable --py jupyterlab --sys-prefix
+```
+
+<<<<<<< HEAD
+Instructions on how to install the project from the git sources are available in our [contributor documentation](CONTRIBUTING.md).
+
+#### conda
+
+If you use ``conda``, you can install as:
+=======
+#### pip
+
+If you use ``pip``, you can install it as:
+>>>>>>> 7235a88a421d593ab5596632a9c4ccc186fa78ea
 
 ```bash
 conda install -c conda-forge jupyterlab
 ```
 
+<<<<<<< HEAD
 #### pip
 
 If you use ``pip``, you can install it as:
@@ -67,6 +82,8 @@ If you use ``pip``, you can install it as:
 pip install jupyterlab
 ```
 
+=======
+>>>>>>> 7235a88a421d593ab5596632a9c4ccc186fa78ea
 If installing using `pip install --user`, you must add the user-level
  `bin` directory to your `PATH` environment variable in order to launch
  `jupyter lab`.
@@ -92,6 +109,15 @@ When using ``pipenv``, in order to launch `jupyter lab`, you must activate the p
 ```bash
 pipenv shell
 jupyter lab
+```
+
+#### Installing with Previous Versions of Jupyter Notebook
+
+If you are using a version of Jupyter Notebook earlier than 5.3, then you must also run the following command
+after installation to enable the JupyterLab server extension:
+
+```bash
+jupyter serverextension enable --py jupyterlab --sys-prefix
 ```
 
 ### Running
@@ -140,7 +166,11 @@ copyright on their contributions. All code is licensed under the terms of the re
 
 ### Team
 
+<<<<<<< HEAD
 JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by an open community of contributors. Our [maintainer team](https://jupyterlab.readthedocs.io/en/latest/developer/team.html) is accompanied by a much larger group of contributors to JupyterLab and Project Jupyter as a whole.
+=======
+JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by an open community of contributors. Our maintainer team is accompanied by a much larger group of contributors to JupyterLab and Project Jupyter as a whole.
+>>>>>>> 7235a88a421d593ab5596632a9c4ccc186fa78ea
 
 ----
 
