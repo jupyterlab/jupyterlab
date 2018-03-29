@@ -16,6 +16,7 @@ node_modules
 .cache
 .vscode
 *.py[co]
+.pytest_cache
 __pycache__
 *.egg-info
 *~
