@@ -45,6 +45,7 @@ JupyterLab is the next-generation web-based user interface for Project Jupyter. 
    :caption: Developer Guide
 
    developer/repo
+   developer/team
    developer/extension_dev
    developer/documents
    developer/notebook
@@ -63,4 +64,3 @@ Indices and Tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
