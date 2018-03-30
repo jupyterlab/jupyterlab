@@ -317,82 +317,62 @@ class FileBrowserModel implements IDisposable {
    * big to be sent in one request to the server. On newer versions, it will
    * just confirm those upload and send them chunked.
    */
-  upload(file: File): Promise<Contents.IModel> {
-    const largeFile = file.size > this._maxUploadSizeMb * 1024 * 1024;
-    const supportsLargeUpload = PageConfig.getNotebookVersion() >= [5, 1, 0];
+  async upload(file: File): Promise<Contents.IModel> {
+    const {_largeFileSize, _chunkSize, _supportsChunked} = FileBrowserModel;
+    const largeFile = file.size > _largeFileSize;
+    const isNotebook = file.name.indexOf('.ipynb') !== -1;
+    const canSendChunked = _supportsChunked && !isNotebook;
 
-    if (largeFile && !supportsLargeUpload) {
-      let msg = `Cannot upload file (>${this._maxUploadSizeMb} MB) `;
-      msg += `"${file.name}"`;
+    if (largeFile && !canSendChunked) {
+      let msg = `Cannot upload file (>${_largeFileSize / (1024 * 1024) } MB). ${file.name}`;
       console.warn(msg);
-      return Promise.reject<Contents.IModel>(new Error(msg));
+      throw new Error(msg);
     }
 
-    let p: Promise<void>;
-    if (largeFile) {
-      p = showDialog({
-        title: 'Large file size warning',
-        body: `The file size is ${Math.round(file.size / (1024 * 1024))} MB. Do you still want to upload it?`,
-        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'UPLOAD'})]
-      }).then(result => {
-        if (this.isDisposed || !result.button.accept) {
-          return Promise.reject('File not uploaded');
-        }
-      });
-    } else {
-      p = Promise.resolve();
+    const err = new Error('File not uploaded');
+    if (largeFile && !await this._shouldUploadLarge(file)) {
+      throw err;
     }
+    await this.refresh();
+    if (this.isDisposed) {
+      throw err;
+    }
+    if ( find(this._items, i => i.name === file.name) && !await shouldOverwrite(file.name)) {
+      throw err;
+    }
+    const chunkedUpload = _supportsChunked && file.size > _chunkSize;
+    return await this._upload(file, isNotebook, chunkedUpload);
+  }
 
-    return p.then(() => this.refresh()).then(() => {
-      if (this.isDisposed) {
-        return Promise.resolve(false);
-      }
-      let item = find(this._items, i => i.name === file.name);
-      if (item) {
-        return shouldOverwrite(file.name);
-      }
-      return Promise.resolve(true);
-    }).then(value => {
-      if (value) {
-        return this._upload(file);
-      }
-      return Promise.reject('File not uploaded');
+
+  private async _shouldUploadLarge(file: File): Promise<boolean> {
+    const {button} = await showDialog({
+      title: 'Large file size warning',
+      body: `The file size is ${Math.round(file.size / (1024 * 1024))} MB. Do you still want to upload it?`,
+      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'UPLOAD'})]
     });
+    return !this.isDisposed && button.accept;
   }
 
   /**
    * Perform the actual upload.
    */
-  private async _upload(file: File): Promise<Contents.IModel> {
-    const chunkSize = 1024 * 1024;
+  private async _upload(file: File, isNotebook: boolean, chunked: boolean): Promise<Contents.IModel> {
+    const {_chunkSize} = FileBrowserModel;
 
     // Gather the file model parameters.
     let path = this._model.path;
     path = path ? path + '/' + file.name : file.name;
     let name = file.name;
-    let isNotebook = file.name.indexOf('.ipynb') !== -1;
     let type: Contents.ContentType = isNotebook ? 'notebook' : 'file';
     let format: Contents.FileFormat = isNotebook ? 'json' : 'base64';
 
-    let savedModel: Contents.IModel;
-    for (let chunk = 1; chunk && chunk !== -1;) {
-      // Get the file content.
+    const uploadInner = async (blob: Blob, chunk?: number): Promise<Contents.IModel> => {
       let reader = new FileReader();
       if (isNotebook) {
-        reader.readAsText(file);
-        // don't send chunked
-        chunk = undefined;
+        reader.readAsText(blob);
       } else {
-        const start = (chunk - 1) * chunkSize;
-        const end = start + chunkSize;
-        if (end > file.size) {
-          chunk = -1;
-        } else {
-          chunk++;
-        }
-        console.log(`${Math.floor(100 * start / file.size)}% done`);
-
-        reader.readAsArrayBuffer(file.slice(start, end));
+        reader.readAsArrayBuffer(blob);
       }
       await new Promise((resolve, reject) => {
         reader.onload = resolve;
@@ -405,11 +385,24 @@ class FileBrowserModel implements IDisposable {
         chunk,
         content: Private.getContent(reader)
       };
-
-      savedModel = await this.manager.services.contents.save(path, model);
+      return await this.manager.services.contents.save(path, model);
+    };
+    if (!chunked) {
+      return await uploadInner(file);
     }
 
-    return savedModel;
+    let finalModel: Contents.IModel;
+    for (let start = 0; !finalModel; start += _chunkSize) {
+      const end = start + _chunkSize;
+      const lastChunk = end >= file.size;
+      const chunk = lastChunk ? -1 : end / _chunkSize;
+      console.log(Math.floor(start / file.size * 100));
+      const currentModel = await uploadInner(file.slice(start, end), chunk);
+      if (lastChunk) {
+        finalModel = currentModel;
+      }
+    }
+    return finalModel;
   }
 
 
@@ -513,7 +506,9 @@ class FileBrowserModel implements IDisposable {
   private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
   private _items: Contents.IModel[] = [];
   private _key: string = '';
-  private _maxUploadSizeMb = 15;
+  private static _largeFileSize = 15 * 1024 * 1024;
+  private static _chunkSize = 1024 * 1024;
+  private static _supportsChunked = PageConfig.getNotebookVersion() >= [5, 1, 0];
   private _model: Contents.IModel;
   private _pathChanged = new Signal<this, IChangedArgs<string>>(this);
   private _paths = new Set<string>();
