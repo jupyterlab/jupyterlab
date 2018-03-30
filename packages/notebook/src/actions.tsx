@@ -279,9 +279,13 @@ namespace NotebookActions {
     let state = Private.getState(widget);
     let cells = widget.model.cells;
     let widgets = widget.widgets;
+    let focus = cells.length - 1;
     cells.beginCompoundOperation();
     for (let i = cells.length - 2; i > -1; i--) {
       if (widget.isSelectedOrActive(widgets[i])) {
+        if (focus == cells.length - 1) {
+            focus = i + 2;
+        }
         if (!widget.isSelectedOrActive(widgets[i + 1])) {
           cells.move(i, i + 1);
           if (widget.activeCellIndex === i) {
@@ -293,7 +297,8 @@ namespace NotebookActions {
       }
     }
     cells.endCompoundOperation();
-    Private.handleState(widget, state, true);
+    Private.handleState(widget, state, false);
+    ElementExt.scrollIntoViewIfNeeded(widget.node, widget.widgets[focus].node);
   }
 
   /**
@@ -309,9 +314,13 @@ namespace NotebookActions {
     let state = Private.getState(widget);
     let cells = widget.model.cells;
     let widgets = widget.widgets;
+    let focus = 0;
     cells.beginCompoundOperation();
     for (let i = 1; i < cells.length; i++) {
       if (widget.isSelectedOrActive(widgets[i])) {
+        if (focus == 0) {
+            focus = i - 2;
+        }
         if (!widget.isSelectedOrActive(widgets[i - 1])) {
           cells.move(i, i - 1);
           if (widget.activeCellIndex === i) {
@@ -323,7 +332,8 @@ namespace NotebookActions {
       }
     }
     cells.endCompoundOperation();
-    Private.handleState(widget, state, true);
+    Private.handleState(widget, state, false);
+    ElementExt.scrollIntoViewIfNeeded(widget.node, widget.widgets[focus].node);
   }
 
   /**
