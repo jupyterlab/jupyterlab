@@ -144,7 +144,7 @@ copyright on their contributions. All code is licensed under the terms of the re
 
 ### Team
 
-JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by an open community of contributors. Our maintainer team is accompanied by a much larger group of contributors to JupyterLab and Project Jupyter as a whole.
+JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by an open community of contributors. Our [maintainer team](https://jupyterlab.readthedocs.io/en/latest/developer/team.html) is accompanied by a much larger group of contributors to JupyterLab and Project Jupyter as a whole.
 
 ----
 
