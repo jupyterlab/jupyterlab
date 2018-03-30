@@ -279,12 +279,12 @@ namespace NotebookActions {
     let state = Private.getState(widget);
     let cells = widget.model.cells;
     let widgets = widget.widgets;
-    let focus = cells.length - 1;
+    let focus = -1;
     cells.beginCompoundOperation();
     for (let i = cells.length - 2; i > -1; i--) {
       if (widget.isSelectedOrActive(widgets[i])) {
-        if (focus == cells.length - 1) {
-            focus = i + 2;
+        if (focus == -1) {
+            focus = Math.min(cells.length - 1, i + 2);
         }
         if (!widget.isSelectedOrActive(widgets[i + 1])) {
           cells.move(i, i + 1);
@@ -314,12 +314,12 @@ namespace NotebookActions {
     let state = Private.getState(widget);
     let cells = widget.model.cells;
     let widgets = widget.widgets;
-    let focus = 0;
+    let focus = -1;
     cells.beginCompoundOperation();
     for (let i = 1; i < cells.length; i++) {
       if (widget.isSelectedOrActive(widgets[i])) {
-        if (focus == 0) {
-            focus = i - 2;
+        if (focus == -1) {
+            focus = Math.max(0, i - 2);
         }
         if (!widget.isSelectedOrActive(widgets[i - 1])) {
           cells.move(i, i - 1);
