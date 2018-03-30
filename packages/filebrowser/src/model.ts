@@ -329,7 +329,7 @@ class FileBrowserModel implements IDisposable {
       throw new Error(msg);
     }
 
-    const err = new Error('File not uploaded');
+    const err = 'File not uploaded';
     if (largeFile && !await this._shouldUploadLarge(file)) {
       throw err;
     }
