@@ -363,7 +363,9 @@ class FileBrowserModel implements IDisposable {
   /**
    * Perform the actual upload.
    */
-  private _upload(file: File): Promise<Contents.IModel> {
+  private async _upload(file: File): Promise<Contents.IModel> {
+    const chunkSize = 1024 * 1024;
+
     // Gather the file model parameters.
     let path = this._model.path;
     path = path ? path + '/' + file.name : file.name;
@@ -372,34 +374,43 @@ class FileBrowserModel implements IDisposable {
     let type: Contents.ContentType = isNotebook ? 'notebook' : 'file';
     let format: Contents.FileFormat = isNotebook ? 'json' : 'base64';
 
-    // Get the file content.
-    let reader = new FileReader();
-    if (isNotebook) {
-      reader.readAsText(file);
-    } else {
-      reader.readAsArrayBuffer(file);
+    let savedModel: Contents.IModel;
+    for (let chunk = 1; chunk && chunk !== -1;) {
+      // Get the file content.
+      let reader = new FileReader();
+      if (isNotebook) {
+        reader.readAsText(file);
+        // don't send chunked
+        chunk = undefined;
+      } else {
+        const start = (chunk - 1) * chunkSize;
+        const end = start + chunkSize;
+        if (end > file.size) {
+          chunk = -1;
+        } else {
+          chunk++;
+        }
+
+        reader.readAsArrayBuffer(file.slice(start, end));
+      }
+      await new Promise((resolve, reject) => {
+        reader.onload = resolve;
+        reader.onerror = event => reject(`Failed to upload "${file.name}":` + event);
+      });
+      let model: Partial<Contents.IModel> = {
+        type,
+        format,
+        name,
+        chunk,
+        content: Private.getContent(reader)
+      };
+
+      savedModel = await this.manager.services.contents.save(path, model);
     }
 
-    return new Promise<Contents.IModel>((resolve, reject) => {
-      reader.onload = (event: Event) => {
-        let model: Partial<Contents.IModel> = {
-          type: type,
-          format,
-          name,
-          content: Private.getContent(reader)
-        };
-
-        this.manager.services.contents.save(path, model).then(contents => {
-          resolve(contents);
-        }).catch(reject);
-      };
-
-      reader.onerror = (event: Event) => {
-        reject(Error(`Failed to upload "${file.name}":` + event));
-      };
-    });
-
+    return savedModel;
   }
+
 
   /**
    * Handle an updated contents model.
