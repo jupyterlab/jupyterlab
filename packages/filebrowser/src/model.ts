@@ -46,6 +46,11 @@ const REFRESH_DURATION = 10000;
 const MIN_REFRESH = 1000;
 
 
+export const LARGE_FILE_SIZE = 15 * 1024 * 1024;
+
+export const CHUNK_SIZE = 1024 * 1024;
+
+
 /**
  * An implementation of a file browser model.
  *
@@ -315,18 +320,18 @@ class FileBrowserModel implements IDisposable {
    * #### Notes
    * On Notebook version < 5.1.0, this will fail to upload files that are too
    * big to be sent in one request to the server. On newer versions, it will
-   * just confirm those upload and send them chunked.
+   * ask for confirmation then upload the file in 1 MB chunks.
    */
   async upload(file: File): Promise<Contents.IModel> {
-    const {_largeFileSize, _chunkSize, _supportsChunked} = FileBrowserModel;
-    const largeFile = file.size > _largeFileSize;
+    const supportsChunked = PageConfig.getNotebookVersion() >= [5, 1, 0];
+    const largeFile = file.size > LARGE_FILE_SIZE;
     const isNotebook = file.name.indexOf('.ipynb') !== -1;
-    const canSendChunked = _supportsChunked && !isNotebook;
+    const canSendChunked = supportsChunked && !isNotebook;
 
     if (largeFile && !canSendChunked) {
-      let msg = `Cannot upload file (>${_largeFileSize / (1024 * 1024) } MB). ${file.name}`;
+      let msg = `Cannot upload file (>${LARGE_FILE_SIZE / (1024 * 1024) } MB). ${file.name}`;
       console.warn(msg);
-      throw new Error(msg);
+      throw msg;
     }
 
     const err = 'File not uploaded';
@@ -340,7 +345,7 @@ class FileBrowserModel implements IDisposable {
     if ( find(this._items, i => i.name === file.name) && !await shouldOverwrite(file.name)) {
       throw err;
     }
-    const chunkedUpload = _supportsChunked && file.size > _chunkSize;
+    const chunkedUpload = supportsChunked && file.size > CHUNK_SIZE;
     return await this._upload(file, isNotebook, chunkedUpload);
   }
 
@@ -358,8 +363,6 @@ class FileBrowserModel implements IDisposable {
    * Perform the actual upload.
    */
   private async _upload(file: File, isNotebook: boolean, chunked: boolean): Promise<Contents.IModel> {
-    const {_chunkSize} = FileBrowserModel;
-
     // Gather the file model parameters.
     let path = this._model.path;
     path = path ? path + '/' + file.name : file.name;
@@ -392,11 +395,11 @@ class FileBrowserModel implements IDisposable {
     }
 
     let finalModel: Contents.IModel;
-    for (let start = 0; !finalModel; start += _chunkSize) {
-      const end = start + _chunkSize;
+    for (let start = 0; !finalModel; start += CHUNK_SIZE) {
+      const end = start + CHUNK_SIZE;
       const lastChunk = end >= file.size;
-      const chunk = lastChunk ? -1 : end / _chunkSize;
-      console.log(Math.floor(start / file.size * 100));
+      const chunk = lastChunk ? -1 : end / CHUNK_SIZE;
+      console.log(`Math.floor(start / file.size * 100)% done uploading ${path}`);
       const currentModel = await uploadInner(file.slice(start, end), chunk);
       if (lastChunk) {
         finalModel = currentModel;
@@ -506,9 +509,6 @@ class FileBrowserModel implements IDisposable {
   private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
   private _items: Contents.IModel[] = [];
   private _key: string = '';
-  private static _largeFileSize = 15 * 1024 * 1024;
-  private static _chunkSize = 1024 * 1024;
-  private static _supportsChunked = PageConfig.getNotebookVersion() >= [5, 1, 0];
   private _model: Contents.IModel;
   private _pathChanged = new Signal<this, IChangedArgs<string>>(this);
   private _paths = new Set<string>();

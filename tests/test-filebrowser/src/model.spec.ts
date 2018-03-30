@@ -20,7 +20,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  FileBrowserModel
+  FileBrowserModel, LARGE_FILE_SIZE, CHUNK_SIZE
 } from '@jupyterlab/filebrowser';
 
 import {
@@ -353,6 +353,16 @@ describe('filebrowser/model', () => {
           prevNotebookVersion = PageConfig.setOption('notebookVersion', JSON.stringify([5, 0, 0]));
         });
 
+        it('should not upload large file', () => {
+          const fname = uuid() + '.html';
+          const file = new File([new ArrayBuffer(LARGE_FILE_SIZE + 1)], fname);
+          return model.upload(file).then(() => {
+            expect().fail('Upload should have failed');
+          }).catch(err => {
+            expect(err).to.be(`Cannot upload file (>15 MB). ${fname}`);
+          });
+        });
+
         after(() => {
           PageConfig.setOption('notebookVersion', prevNotebookVersion);
         });
@@ -364,6 +374,27 @@ describe('filebrowser/model', () => {
         before(() => {
           prevNotebookVersion = PageConfig.setOption('notebookVersion', JSON.stringify([5, 1, 0]));
         });
+
+        it('should not upload large notebook file', () => {
+          const fname = uuid() + '.ipynb';
+          const file = new File([new ArrayBuffer(LARGE_FILE_SIZE + 1)], fname);
+          return model.upload(file).then(() => {
+            expect().fail('Upload should have failed');
+          }).catch(err => {
+            expect(err).to.be(`Cannot upload file (>15 MB). ${fname}`);
+          });
+        });
+
+        for (const size of [CHUNK_SIZE - 1, CHUNK_SIZE, CHUNK_SIZE + 1, 2 * CHUNK_SIZE]) {
+          it(`should upload a large file of size ${size}`, async () => {
+            const fname = uuid() + '.txt';
+            const content = 'a'.repeat(size);
+            const file = new File([content], fname);
+            await model.upload(file);
+            const contentsModel = await model.manager.services.contents.get(fname);
+            expect(contentsModel.content).to.be(content);
+          });
+        }
 
         after(() => {
           PageConfig.setOption('notebookVersion', prevNotebookVersion);
