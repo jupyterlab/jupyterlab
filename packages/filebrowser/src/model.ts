@@ -390,6 +390,7 @@ class FileBrowserModel implements IDisposable {
         } else {
           chunk++;
         }
+        console.log(`${Math.floor(100 * start / file.size)}% done`);
 
         reader.readAsArrayBuffer(file.slice(start, end));
       }
