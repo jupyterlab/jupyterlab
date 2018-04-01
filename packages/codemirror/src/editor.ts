@@ -41,6 +41,7 @@ import {
 } from './mode';
 
 import 'codemirror/addon/comment/comment.js';
+import 'codemirror/addon/display/rulers.js';
 import 'codemirror/addon/edit/matchbrackets.js';
 import 'codemirror/addon/edit/closebrackets.js';
 import 'codemirror/addon/scroll/scrollpastend.js';
@@ -1036,6 +1037,9 @@ namespace CodeMirrorEditor {
      * Whether to scroll past the end of the buffer.
      */
     scrollPastEnd?: boolean;
+
+
+    rulers?: Array<any>;
   }
 
   /**
@@ -1058,7 +1062,13 @@ namespace CodeMirrorEditor {
     lineSeparator: null,
     scrollbarStyle: 'native',
     lineWiseCopyCut: true,
-    scrollPastEnd: false
+    scrollPastEnd: false,
+    rulers: [{
+      column: 79,
+      color: 'red',
+      lineStyle: 'dashed',
+      width: 5
+    }]
   };
 
   /**
@@ -1169,6 +1179,8 @@ namespace Private {
       return editor.getOption('indentUnit');
     case 'autoClosingBrackets':
       return editor.getOption('autoCloseBrackets');
+    case 'rulers':
+      return editor.getOption('rulers');
     default:
       return editor.getOption(option);
     }
@@ -1196,6 +1208,9 @@ namespace Private {
       break;
     case 'autoClosingBrackets':
       editor.setOption('autoCloseBrackets', value);
+      break;
+    case 'rulers':
+      editor.setOption('rulers', value);
       break;
     case 'readOnly':
       let el = editor.getWrapperElement();
