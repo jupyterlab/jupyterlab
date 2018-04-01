@@ -495,7 +495,7 @@ function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
       label: 'Activate Previous Active Tab',
       execute: () => app.commands.execute(`tabmenu:activate-${previousId}`)      
     });  
-  }  
+  }
   
   app.restored.then(() => {
     // Iterate over the current widgets in the
@@ -511,8 +511,8 @@ function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
     };
     populateTabs();
     app.shell.layoutModified.connect(() => { populateTabs(); });
-    // Connect a listener to update the id of the 
-    // previously modified tab.
+    // Update the id of the previous active tab if
+    // a new tab is selected.
     app.shell.currentChanged.connect((sender, args) => {
       let widget = args.oldValue;
       if (!widget) {
