@@ -168,10 +168,8 @@ function activateFactory(app: JupyterLab, docManager: IDocumentManager, state: I
     node.addEventListener('contextmenu', (event: MouseEvent) => {
       event.preventDefault();
       const model = widget.modelForClick(event);
-      if (model) {
-        const menu = createContextMenu(model, commands, registry);
-        menu.open(event.clientX, event.clientY);
-      }
+      const menu = createContextMenu(model, commands, registry);
+      menu.open(event.clientX, event.clientY);
     });
 
     // Track the newly created file browser.
@@ -427,12 +425,20 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, bro
  * This function generates temporary commands with an incremented name. These
  * commands are disposed when the menu itself is disposed.
  */
-function createContextMenu(model: Contents.IModel, commands: CommandRegistry, registry: DocumentRegistry): Menu {
-  const path = model.path;
+function createContextMenu(model: Contents.IModel | undefined, commands: CommandRegistry, registry: DocumentRegistry): Menu {
+
   const menu = new Menu({ commands });
+
+  // If the user did not click on any file, we still want to show
+  // paste as a possibility.
+  if (!model) {
+    menu.addItem({ command: CommandIDs.paste });
+    return menu;
+  }
 
   menu.addItem({ command: CommandIDs.open });
 
+  const path = model.path;
   if (model.type !== 'directory') {
     const factories = registry.preferredWidgetFactories(path).map(f => f.name);
     if (path && factories.length > 1) {

@@ -173,7 +173,7 @@ class TestExtension(TestCase):
             data = json.load(fid)
         extensions = get_app_info(self.app_dir)['extensions']
         name = data['name']
-        assert not name in extensions
+        assert name not in extensions
         assert not check_extension(name)
 
     def test_validation(self):
@@ -383,7 +383,7 @@ class TestExtension(TestCase):
         install_extension(self.mock_extension, app_dir)
         disable_extension(self.pkg_names['extension'], app_dir)
         info = get_app_info(app_dir)
-        name = self.pkg_names['extension'] 
+        name = self.pkg_names['extension']
         assert name in info['disabled']
         assert not check_extension(name, app_dir)
         assert check_extension(name, app_dir, True)
@@ -402,7 +402,7 @@ class TestExtension(TestCase):
         disable_extension(self.pkg_names['extension'], app_dir)
         enable_extension(self.pkg_names['extension'], app_dir)
         info = get_app_info(app_dir)
-        name = self.pkg_names['extension'] 
+        name = self.pkg_names['extension']
         assert name not in info['disabled']
         assert check_extension(name, app_dir)
         disable_extension('@jupyterlab/notebook-extension', app_dir)

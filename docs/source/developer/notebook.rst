@@ -4,6 +4,8 @@ Notebook
 Background
 ~~~~~~~~~~
 
+.. _architecture-walkthrough:
+
 A JupyterLab architecture walkthrough from June 16, 2016, provides an overview of the notebook architecture.
 
 .. raw:: html

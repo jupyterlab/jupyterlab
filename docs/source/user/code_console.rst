@@ -1,4 +1,4 @@
-.. _code_console:
+.. _code-console:
 
 Code Consoles
 -------------
@@ -9,14 +9,18 @@ kernel, as opposed to the explicit ordering of cells in a notebook
 document. Code consoles also display rich output, just like notebook
 cells.
 
+.. _create-console:
+
 Create a new code console by clicking the ``+`` button in the :ref:`file
-browser <left_sidebar>` and selecting the kernel:
+browser <left-sidebar>` and selecting the kernel:
 
 .. raw:: html
 
   <div class="jp-youtube-video">
      <iframe src="https://www.youtube-nocookie.com/embed/7Sb_a6veU1s?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
+
+.. _run-code:
 
 Run code using ``Shift Enter``. Use the up and down arrows to browse the
 history of previously-run code:
@@ -27,6 +31,8 @@ history of previously-run code:
      <iframe src="https://www.youtube-nocookie.com/embed/L52yh9FPAtY?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
+.. _tab-completion:
+
 Tab completion (``Tab``) and tooltips (``Shift Tab``) work as in the
 notebook:
 
@@ -35,6 +41,8 @@ notebook:
   <div class="jp-youtube-video">
      <iframe src="https://www.youtube-nocookie.com/embed/WoqFgmSuigE?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
+
+.. _clear-cell:
 
 Clear the cells of the code console without restarting the kernel by
 right-clicking on the code console and selecting “Clear Console Cells”:
@@ -45,7 +53,9 @@ right-clicking on the code console and selecting “Clear Console Cells”:
      <iframe src="https://www.youtube-nocookie.com/embed/Aj7sQgP39z8?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
-Creating a code console from the :ref:`file menu <menu_bar>` lets you select an existing
+.. _log-inspect:
+
+Creating a code console from the :ref:`file menu <menu-bar>` lets you select an existing
 kernel for the code console. The code console then acts as a log of
 computations in that kernel, and a place you can interactively inspect
 and run code in the kernel:

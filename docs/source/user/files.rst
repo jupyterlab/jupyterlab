@@ -1,4 +1,4 @@
-.. _working_with_files:
+.. _working-with-files:
 
 Working with Files
 ------------------
@@ -22,6 +22,8 @@ Many actions on files can also be carried out in the File menu:
    :align: center
    :class: jp-screenshot
 
+.. _open-file:
+
 To open any file, double-click on its name in the file browser:
 
 .. raw:: html
@@ -29,6 +31,8 @@ To open any file, double-click on its name in the file browser:
   <div class="jp-youtube-video">
      <iframe src="https://www.youtube-nocookie.com/embed/Rh-vwjTwBTI?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
+
+.. _newtab:
 
 You can also drag a file into the main work area to create a new tab:
 
@@ -38,8 +42,10 @@ You can also drag a file into the main work area to create a new tab:
      <iframe src="https://www.youtube-nocookie.com/embed/uwMmHeDmRxk?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
+.. _multiple-viewers:
+
 Many files types have :ref:`multiple viewers/editors <file-and-output-formats>`.
-For example, you can open a Markdown file in a :ref:`text editor <file_editor>` or as rendered HTML.
+For example, you can open a Markdown file in a :ref:`text editor <file-editor>` or as rendered HTML.
 A JupyterLab extension can also add new viewers/editors for files.
 To open a file in a non-default viewer/editor, right-click on its name in the
 file browser and use the "Open With..." submenu to select the viewer/editor:
@@ -50,6 +56,8 @@ file browser and use the "Open With..." submenu to select the viewer/editor:
      <iframe src="https://www.youtube-nocookie.com/embed/1kEgUqAeYo0?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
+.. _single-doc-sync:
+
 A single file can be open simultaneously in multiple viewer/editors and
 they will remain in sync:
 
@@ -59,6 +67,8 @@ they will remain in sync:
      <iframe src="https://www.youtube-nocookie.com/embed/87ALbxm1Y3I?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
+.. _file-navigation:
+
 The file system can be navigated by double-clicking on folders in the
 listing or clicking on the folders at the top of the directory listing:
 
@@ -67,6 +77,8 @@ listing or clicking on the folders at the top of the directory listing:
   <div class="jp-youtube-video">
      <iframe src="https://www.youtube-nocookie.com/embed/2OHwJzjG-l4?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
+
+.. _file-share:
 
 Right-click on a file or directory and select "Copy Shareable Link" to
 copy a URL that can be used to open JupyterLab with that file or
@@ -79,6 +91,8 @@ directory open.
 Creating Files and Activities
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. _file-create-plus:
+
 Create new files or activities by clicking the ``+`` button at the top
 of the file browser. This will open a new Launcher tab in the main work area,
 which enables you to pick an activity and kernel:
@@ -89,11 +103,15 @@ which enables you to pick an activity and kernel:
      <iframe src="https://www.youtube-nocookie.com/embed/QL0IxDAOEc0?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
+.. _file-create-menu:
+
 You can also create new documents or activities using the File menu:
 
 .. image:: images/file_create_text_file.png
    :align: center
    :class: jp-screenshot
+
+.. _current-directory:
 
 The current working directory of a new activity or document will be the
 directory listed in the file browser (except for a terminal, which
@@ -104,6 +122,8 @@ always starts in the root directory of the file browser):
   <div class="jp-youtube-video">
      <iframe src="https://www.youtube-nocookie.com/embed/OfISSOTiGTY?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
+
+.. _file-rename:
 
 A new file is created with a default name. Rename a file by
 right-clicking on its name in the file browser and selecting “Rename”
@@ -118,6 +138,8 @@ from the context menu:
 Uploading and Downloading
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. _file-upload:
+
 Files can be uploaded to the current directory of the file browser by
 dragging and dropping files onto the file browser, or by clicking the
 "Upload Files" button at the top of the file browser:
@@ -127,6 +149,8 @@ dragging and dropping files onto the file browser, or by clicking the
   <div class="jp-youtube-video">
      <iframe src="https://www.youtube-nocookie.com/embed/1bd2QHqQSH4?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
+
+.. _file-download:
 
 Any file in JupyterLab can be downloaded by right-clicking its name in
 the file browser and selecting “Download” from the context menu:

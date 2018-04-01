@@ -433,15 +433,14 @@ class DirListing extends Widget {
    */
   shutdownKernels(): Promise<void> {
     const model = this._model;
-    const promises: Promise<void>[] = [];
     const items = this._sortedItems;
     const paths = items.map(item => item.path);
-    each(this._model.sessions(), session => {
+
+    const promises = toArray(this._model.sessions()).filter(session => {
       let index = ArrayExt.firstIndexOf(paths, session.path);
-      if (this._selection[items[index].name]) {
-        promises.push(model.manager.services.sessions.shutdown(session.id));
-      }
-    });
+      return this._selection[items[index].name];
+    }).map(session => model.manager.services.sessions.shutdown(session.id));
+
     return Promise.all(promises).then(() => {
       return undefined;
     }).catch(error => {
