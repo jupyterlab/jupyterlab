@@ -333,7 +333,9 @@ namespace NotebookActions {
     }
     cells.endCompoundOperation();
     Private.handleState(widget, state, false);
-    ElementExt.scrollIntoViewIfNeeded(widget.node, widget.widgets[focus].node);
+    if (focus != -1) {
+      ElementExt.scrollIntoViewIfNeeded(widget.node, widget.widgets[focus].node);
+    }
   }
 
   /**
