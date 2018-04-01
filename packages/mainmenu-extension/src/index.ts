@@ -485,18 +485,18 @@ function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
     return { command: commandID };
   };
 
-  let previousId = "";
-  
+  let previousId = '';
+
   // Command to toggle between the current
   // tab and the last modified tab.
   const commandID = 'application:activate-previous-active-tab';
   if (!commands.hasCommand(commandID)){
     commands.addCommand(commandID, {
       label: 'Activate Previous Active Tab',
-      execute: () => app.commands.execute(`tabmenu:activate-${previousId}`)      
-    });  
+      execute: () => app.commands.execute(`tabmenu:activate-${previousId}`)
+    });
   }
-  
+
   app.restored.then(() => {
     // Iterate over the current widgets in the
     // main area, and add them to the tab group
