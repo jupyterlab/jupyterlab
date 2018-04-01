@@ -298,7 +298,7 @@ namespace NotebookActions {
     }
     cells.endCompoundOperation();
     Private.handleState(widget, state, false);
-    if (focus == -1) {
+    if (focus != -1) {
       ElementExt.scrollIntoViewIfNeeded(widget.node, widget.widgets[focus].node);
     }
   }
