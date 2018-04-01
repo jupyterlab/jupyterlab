@@ -463,9 +463,9 @@ function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
   // Add commands for cycling the active tabs.
   menu.addGroup([
     { command: 'application:activate-next-tab' },
-    { command: 'application:activate-previous-tab' }
+    { command: 'application:activate-previous-tab' },
+    { command: 'application:activate-previous-active-tab' }
   ], 0);
-
 
   let tabGroup: Menu.IItemOptions[] = [];
 
@@ -485,6 +485,18 @@ function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
     return { command: commandID };
   };
 
+  let previousId = "";
+  
+  // Command to toggle between the current
+  // tab and the last modified tab.
+  const commandID = 'application:activate-previous-active-tab';
+  if (!commands.hasCommand(commandID)){
+    commands.addCommand(commandID, {
+      label: 'Activate Previous Active Tab',
+      execute: () => app.commands.execute(`tabmenu:activate-${previousId}`)      
+    });  
+  }  
+  
   app.restored.then(() => {
     // Iterate over the current widgets in the
     // main area, and add them to the tab group
@@ -499,6 +511,15 @@ function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
     };
     populateTabs();
     app.shell.layoutModified.connect(() => { populateTabs(); });
+    // Connect a listener to update the id of the 
+    // previously modified tab.
+    app.shell.currentChanged.connect((sender, args) => {
+      let widget = args.oldValue;
+      if (!widget) {
+        return;
+      }
+      previousId = widget.id;
+    });
   });
 }
 
