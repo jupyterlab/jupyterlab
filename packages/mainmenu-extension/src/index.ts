@@ -29,6 +29,9 @@ import {
 export
 namespace CommandIDs {
   export
+  const activatePreviouslyUsedTab = 'tabmenu:activate-previously-used-tab';
+
+  export
   const undo = 'editmenu:undo';
 
   export
@@ -123,6 +126,11 @@ const menuPlugin: JupyterLabPlugin<IMainMenu> = {
     palette.addItem({
       command: CommandIDs.shutdownAllKernels,
       category: 'Kernel Operations'
+    });
+
+    palette.addItem({
+      command: CommandIDs.activatePreviouslyUsedTab,
+      category: 'Tab Operations'
     });
 
     app.shell.addToTopArea(logo);
@@ -464,7 +472,7 @@ function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
   menu.addGroup([
     { command: 'application:activate-next-tab' },
     { command: 'application:activate-previous-tab' },
-    { command: 'application:activate-previous-active-tab' }
+    { command: CommandIDs.activatePreviouslyUsedTab }
   ], 0);
 
   let tabGroup: Menu.IItemOptions[] = [];
@@ -488,12 +496,11 @@ function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
   let previousId = '';
 
   // Command to toggle between the current
-  // tab and the last modified tab.
-  const commandID = 'application:activate-previous-active-tab';
-  if (!commands.hasCommand(commandID)) {
-    commands.addCommand(commandID, {
-      label: 'Activate Previous Active Tab',
-      execute: () => app.commands.execute(`tabmenu:activate-${previousId}`)
+  // tab and the last modified tab.  
+  if (!commands.hasCommand(CommandIDs.activatePreviouslyUsedTab)) {
+    commands.addCommand(CommandIDs.activatePreviouslyUsedTab, {
+      label: 'Activate Previously Used Tab',
+      execute: () => previousId && app.commands.execute(`tabmenu:activate-${previousId}`)
     });
   }
 
@@ -511,8 +518,7 @@ function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
     };
     populateTabs();
     app.shell.layoutModified.connect(() => { populateTabs(); });
-    // Update the id of the previous active tab if
-    // a new tab is selected.
+    // Update the id of the previously used tab.
     app.shell.currentChanged.connect((sender, args) => {
       let widget = args.oldValue;
       if (!widget) {

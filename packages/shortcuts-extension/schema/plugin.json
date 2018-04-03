@@ -22,10 +22,10 @@
       },
       "type": "object"
     },
-    "application:activate-previous-active-tab": {
+    "tabmenu:activate-previously-used-tab": {
       "default": { },
       "properties": {
-        "command": { "default": "application:activate-previous-active-tab" },
+        "command": { "default": "tabmenu:activate-previously-used-tab" },
         "keys": { "default": ["Ctrl Shift '"] },
         "selector": { "default": "body" }
       },
