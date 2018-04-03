@@ -60,6 +60,9 @@ namespace CommandIDs {
   const open = 'docmanager:open';
 
   export
+  const openTab = 'docmanager:open-tab';
+
+  export
   const openDirect = 'docmanager:open-direct';
 
   export
@@ -255,6 +258,18 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     icon: args => args['icon'] as string || '',
     label: args => (args['label'] || args['factory']) as string,
     mnemonic: args => args['mnemonic'] as number || -1
+  });
+
+  commands.addCommand(CommandIDs.openTab, {
+    execute: args => {
+      const path = typeof args['path'] === 'undefined' ? ''
+        : args['path'] as string;
+      return docManager.services.contents.getDownloadUrl(path).then((url) => {
+        window.open(url, '_blank');
+      });
+    },
+    icon: args => args['icon'] as string || '',
+    label: () => 'Open in New Tab'
   });
 
   commands.addCommand(CommandIDs.openDirect, {
