@@ -1,5 +1,5 @@
 // Type definitions for @nteract/transform-vdom v1.1.1
-// https://github.com/jupyterlab/jupyter-renderers
+// https://github.com/jupyterlab/jupyterlab
 // Definitions by: Grant Nestor <https://github.com/gnestor>
 
 
