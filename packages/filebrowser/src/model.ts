@@ -336,15 +336,15 @@ class FileBrowserModel implements IDisposable {
 
     const err = 'File not uploaded';
     if (largeFile && !await this._shouldUploadLarge(file)) {
-      throw err;
+      throw 'Cancelled large file upload';
     }
+    await this._uploadCheckDisposed();
     await this.refresh();
-    if (this.isDisposed) {
+    await this._uploadCheckDisposed();
+    if (find(this._items, i => i.name === file.name) && !await shouldOverwrite(file.name)) {
       throw err;
     }
-    if ( find(this._items, i => i.name === file.name) && !await shouldOverwrite(file.name)) {
-      throw err;
-    }
+    await this._uploadCheckDisposed();
     const chunkedUpload = supportsChunked && file.size > CHUNK_SIZE;
     return await this._upload(file, isNotebook, chunkedUpload);
   }
@@ -356,7 +356,7 @@ class FileBrowserModel implements IDisposable {
       body: `The file size is ${Math.round(file.size / (1024 * 1024))} MB. Do you still want to upload it?`,
       buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'UPLOAD'})]
     });
-    return !this.isDisposed && button.accept;
+    return button.accept;
   }
 
   /**
@@ -371,6 +371,7 @@ class FileBrowserModel implements IDisposable {
     let format: Contents.FileFormat = isNotebook ? 'json' : 'base64';
 
     const uploadInner = async (blob: Blob, chunk?: number): Promise<Contents.IModel> => {
+      await this._uploadCheckDisposed();
       let reader = new FileReader();
       if (isNotebook) {
         reader.readAsText(blob);
@@ -381,6 +382,7 @@ class FileBrowserModel implements IDisposable {
         reader.onload = resolve;
         reader.onerror = event => reject(`Failed to upload "${file.name}":` + event);
       });
+      await this._uploadCheckDisposed();
       let model: Partial<Contents.IModel> = {
         type,
         format,
@@ -390,6 +392,7 @@ class FileBrowserModel implements IDisposable {
       };
       return await this.manager.services.contents.save(path, model);
     };
+
     if (!chunked) {
       return await uploadInner(file);
     }
@@ -406,6 +409,13 @@ class FileBrowserModel implements IDisposable {
       }
     }
     return finalModel;
+  }
+
+  private _uploadCheckDisposed(): Promise<void> {
+    if (this.isDisposed) {
+      return Promise.reject('Filemanager disposed. File upload canceled');
+    }
+    return Promise.resolve();
   }
 
 
