@@ -617,7 +617,7 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
                  `while the current file seems to have been saved ` +
                  `${tDisk}`);
     let body = `The file has changed on disk since the last time it ` +
-               `ws opened or saved. ` +
+               `was opened or saved. ` +
                `Do you want to overwrite the file on disk with the version ` +
                ` open here, or load the version on disk (revert)?`;
     let revertBtn = Dialog.okButton({ label: 'REVERT' });
