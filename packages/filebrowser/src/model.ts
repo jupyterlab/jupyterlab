@@ -46,8 +46,14 @@ const REFRESH_DURATION = 10000;
 const MIN_REFRESH = 1000;
 
 
+/**
+ * The maximum upload size (in bytes) for notebook version < 5.1.0
+ */
 export const LARGE_FILE_SIZE = 15 * 1024 * 1024;
 
+/**
+ * The size (in bytes) of the biggest chunk we should upload at once.
+ */
 export const CHUNK_SIZE = 1024 * 1024;
 
 
