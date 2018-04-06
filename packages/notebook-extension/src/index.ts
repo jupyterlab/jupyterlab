@@ -113,6 +113,9 @@ namespace CommandIDs {
   const runAndInsert = 'notebook:run-cell-and-insert-below';
 
   export
+  const runInConsole = 'notebook:run-in-console';
+
+  export
   const runAll = 'notebook:run-all-cells';
 
   export
@@ -759,6 +762,57 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         const { context, content } = current;
 
         return NotebookActions.runAndInsert(content, context.session);
+      }
+    },
+    isEnabled
+  });
+  commands.addCommand(CommandIDs.runInConsole, {
+    label: 'Run Selected Text or Current Line in Console',
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        const { context, notebook } = current;
+
+        let cell = notebook.activeCell;
+        let path = context.path;
+        // ignore action in non-code cell
+        if (!cell || cell.model.type !== 'code')
+            return Promise.resolve(void 0);
+
+        let code = '';
+        const editor = cell.editor;
+        const selection = editor.getSelection();
+        const { start, end } = selection;
+        let selected = start.column !== end.column || start.line !== end.line;
+
+        if (selected) {
+          // Get the selected code from the editor.
+          const start = editor.getOffsetAt(selection.start);
+          const end = editor.getOffsetAt(selection.end);
+          code = editor.model.value.text.substring(start, end);
+        } else {
+          // no selection, submit whole line and advance
+          code = editor.getLine(selection.start.line);
+          const cursor = editor.getCursorPosition();
+          if (cursor.line + 1 !== editor.lineCount) {
+            editor.setCursorPosition({ line: cursor.line + 1, column: cursor.column });
+          }
+        }
+        // open a console, create if needed, the problem is that
+        // console.open will activate the console window, which we do not need
+        if (code) {
+          return commands.execute('console:open', {
+              path,
+              insertMode: 'split-bottom',
+              activate: false
+            }).then(() => {
+              commands.execute('console:inject', { activate: false, code, path }
+            );
+          });
+        } else {
+          return Promise.resolve(void 0);
+        }
       }
     },
     isEnabled
@@ -1558,6 +1612,7 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.run,
     CommandIDs.runAndAdvance,
     CommandIDs.runAndInsert,
+    CommandIDs.runInConsole,
     CommandIDs.clearOutputs,
     CommandIDs.toCode,
     CommandIDs.toMarkdown,
@@ -1771,7 +1826,8 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   // Add a run+insert and run+don't advance group to the run menu.
   const runExtras = [
     CommandIDs.runAndInsert,
-    CommandIDs.run
+    CommandIDs.run,
+    CommandIDs.runInConsole,
   ].map(command => { return { command }; });
 
   // Add a run all above/below group to the run menu.
