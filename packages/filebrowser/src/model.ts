@@ -58,6 +58,17 @@ export const CHUNK_SIZE = 1024 * 1024;
 
 
 /**
+ * An upload progress event for a file at `path`.
+ */
+export interface IUploadModel {
+  path: string;
+  /**
+   * % uploaded [0, 1)
+   */
+  progress: number;
+}
+
+/**
  * An implementation of a file browser model.
  *
  * #### Notes
@@ -153,6 +164,20 @@ class FileBrowserModel implements IDisposable {
    */
   get isDisposed(): boolean {
     return this._isDisposed;
+  }
+
+  /**
+   * A signal emitted when an upload progresses.
+   */
+  get uploadChanged(): ISignal<this, IChangedArgs<IUploadModel>> {
+    return this._uploadChanged;
+  }
+
+  /**
+   * Create an iterator over the status of all in progress uploads.
+   */
+  uploads(): IIterator<IUploadModel> {
+    return new ArrayIterator(this._uploads);
   }
 
   /**
@@ -404,16 +429,42 @@ class FileBrowserModel implements IDisposable {
     }
 
     let finalModel: Contents.IModel;
+
+    let upload = {path, progress: 0};
+    this._uploadChanged.emit({name: 'start',
+      newValue: upload,
+      oldValue: null
+    });
+
     for (let start = 0; !finalModel; start += CHUNK_SIZE) {
       const end = start + CHUNK_SIZE;
       const lastChunk = end >= file.size;
       const chunk = lastChunk ? -1 : end / CHUNK_SIZE;
-      console.log(`Math.floor(start / file.size * 100)% done uploading ${path}`);
+
+      const newUpload = {path, progress: start / file.size};
+      this._uploads.splice(this._uploads.indexOf(upload));
+      this._uploads.push(newUpload);
+      this._uploadChanged.emit({
+        name: 'update',
+        newValue: newUpload,
+        oldValue: upload
+      });
+      upload = newUpload;
+
       const currentModel = await uploadInner(file.slice(start, end), chunk);
+
       if (lastChunk) {
         finalModel = currentModel;
       }
     }
+
+    this._uploads.splice(this._uploads.indexOf(upload));
+    this._uploadChanged.emit({
+      name: 'finish',
+      newValue: null,
+      oldValue: upload
+    });
+
     return finalModel;
   }
 
@@ -540,6 +591,9 @@ class FileBrowserModel implements IDisposable {
   private _driveName: string;
   private _isDisposed = false;
   private _restored = new PromiseDelegate<void>();
+  private _uploads: IUploadModel[] = [];
+  private _uploadChanged = new Signal<this, IChangedArgs<IUploadModel>>(this);
+
 }
 
 

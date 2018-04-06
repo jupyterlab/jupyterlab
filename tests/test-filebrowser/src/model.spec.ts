@@ -26,6 +26,8 @@ import {
 import {
   acceptDialog, dismissDialog
 } from '../../utils';
+import { ISignal } from '@phosphor/signaling';
+import { IIterator } from '@phosphor/algorithm';
 
 
 describe('filebrowser/model', () => {
@@ -395,6 +397,24 @@ describe('filebrowser/model', () => {
             expect(contentsModel.content).to.be(content);
           });
         }
+        it(`should produce progress as a large file uploads`, async () => {
+          const fname = uuid() + '.txt';
+          const file = new File([new ArrayBuffer(2 * CHUNK_SIZE)], fname);
+
+          const {cleanup, values: [start, first, second, finished]} = signalToPromises(model.uploadChanged, 4);
+
+          model.upload(file);
+          expect(iteratorToList(model.uploads())).to.eql([]);
+          expect(await start).to.eql([model, {name: 'start', oldValue: null, newValue: {path: fname, progress: 0}}]);
+          expect(iteratorToList(model.uploads())).to.eql([{path: fname, progress: 0}]);
+          expect(await first).to.eql([model, {name: 'update', oldValue: {path: fname, progress: 0}, newValue: {path: fname, progress: 0}}]);
+          expect(iteratorToList(model.uploads())).to.eql([{path: fname, progress: 0}]);
+          expect(await second).to.eql([model, {name: 'update', oldValue: {path: fname, progress: 0}, newValue: {path: fname, progress: 1 / 2}}]);
+          expect(iteratorToList(model.uploads())).to.eql([{path: fname, progress: 1 / 2}]);
+          expect(await finished).to.eql([model, {name: 'finish', oldValue: {path: fname, progress: 1 / 2}, newValue: null}]);
+          expect(iteratorToList(model.uploads())).to.eql([]);
+          cleanup();
+        });
 
         after(() => {
           PageConfig.setOption('notebookVersion', prevNotebookVersion);
@@ -406,3 +426,40 @@ describe('filebrowser/model', () => {
   });
 
 });
+
+/**
+ * Creates a number of promises from a signal, which each resolve to the successive values in the signal.
+ */
+function signalToPromises<T, U>(signal: ISignal<T, U>, numberValues: number): {values: Promise<[T, U]>[], cleanup: () => void} {
+  const values: Promise<[T, U]>[] = new Array(numberValues);
+  const resolvers: Array<((value: [T, U]) => void)> = new Array(numberValues);
+
+  for (let i = 0; i < numberValues; i++) {
+    values[i] = new Promise<[T, U]>(resolve => {
+      resolvers[i] = resolve;
+    });
+  }
+
+  let current = 0;
+  function slot(sender: T, args: U) {
+    resolvers[current++]([sender, args]);
+  }
+  signal.connect(slot);
+
+  function cleanup() {
+    signal.disconnect(slot);
+  }
+  return {values, cleanup};
+}
+
+
+/**
+ * Convert an IIterator into a list.
+ */
+function iteratorToList<T>(i: IIterator<T>): T[] {
+  const a: T[] = [];
+  for (let v = i.next(); v !== undefined; v = i.next()) {
+    a.push(v);
+  }
+  return a;
+}
