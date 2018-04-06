@@ -3,12 +3,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-// AnsiUp 2.0 exports with a 'default' name that seems to prevent imports
 import {
-  AnsiUp
+  default as AnsiUp
 } from 'ansi_up';
-
-const AnsiUpConstructor = require('ansi_up').default;
 
 import * as marked
   from 'marked';
@@ -504,7 +501,7 @@ function renderText(options: renderText.IRenderOptions): Promise<void> {
   // Unpack the options.
   let { host, source } = options;
 
-  let ansiUp: AnsiUp = new AnsiUpConstructor();
+  const ansiUp = new AnsiUp();
   ansiUp.escape_for_html = true;
   ansiUp.use_classes = true;
 
