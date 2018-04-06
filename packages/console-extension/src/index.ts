@@ -232,15 +232,21 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
            && tracker.currentWidget === app.shell.currentWidget;
   }
 
+  interface IOpenOptions extends Partial<ConsolePanel.IOptions> {
+    // If there is an existing panel, return but do not activate it
+    activate?: boolean;
+  }
+
   let command = CommandIDs.open;
   commands.addCommand(command, {
-    execute: (args: Partial<ConsolePanel.IOptions>) => {
+    execute: (args: IOpenOptions) => {
       let path = args['path'];
       let widget = tracker.find(value => {
         return value.console.session.path === path;
       });
       if (widget) {
-        shell.activateById(widget.id);
+        if (args['activate'] !== false)
+          shell.activateById(widget.id);
       } else {
         return manager.ready.then(() => {
           let model = find(manager.sessions.running(), item => {
