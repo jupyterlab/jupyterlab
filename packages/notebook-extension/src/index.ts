@@ -777,8 +777,9 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         let cell = notebook.activeCell;
         let path = context.path;
         // ignore action in non-code cell
-        if (!cell || cell.model.type !== 'code')
+        if (!cell || cell.model.type !== 'code') {
             return Promise.resolve(void 0);
+        }
 
         let code = '';
         const editor = cell.editor;

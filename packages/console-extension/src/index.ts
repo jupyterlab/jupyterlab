@@ -245,8 +245,9 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
         return value.console.session.path === path;
       });
       if (widget) {
-        if (args['activate'] !== false)
+        if (args['activate'] !== false) {
           shell.activateById(widget.id);
+        }
       } else {
         return manager.ready.then(() => {
           let model = find(manager.sessions.running(), item => {
