@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
-    "noImplicitAny": false,
-    "noEmitOnError": false,
+    "noImplicitAny": true,
+    "noEmitOnError": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "noUnusedLocals": false,
+    "noUnusedLocals": true,
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "es5",
