@@ -117,6 +117,7 @@ module.exports = {
       { test: /^JUPYTERLAB_URL_LOADER_/, use: 'url-loader?limit=10000' },
       { test: /^JUPYTERLAB_FILE_LOADER_/, use: 'file-loader' },
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },
+      { test: /\.scss$/, use: ['style-loader', 'css-loader', 'sass-loader']},
       { test: /\.json$/, use: 'json-loader' },
       { test: /\.md$/, use: 'raw-loader' },
       { test: /\.txt$/, use: 'raw-loader' },
