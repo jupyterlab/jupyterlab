@@ -934,7 +934,7 @@ namespace CodeMirrorEditor {
     /**
      * The mode to use.
      */
-    mode?: string | Mode.ISpec;
+    mode?: string | Object | Mode.ISpec;
 
     /**
      * The theme to style the editor with.
