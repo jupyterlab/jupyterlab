@@ -269,7 +269,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
       });
     },
     icon: args => args['icon'] as string || '',
-    label: () => 'Open in New Tab'
+    label: () => 'Open in New Browser Tab'
   });
 
   commands.addCommand(CommandIDs.openDirect, {

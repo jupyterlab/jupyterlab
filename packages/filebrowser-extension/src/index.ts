@@ -363,7 +363,7 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, bro
       })));
     },
     iconClass: 'jp-MaterialIcon jp-AddIcon',
-    label: 'Open in New Tab',
+    label: 'Open in New Browser Tab',
     mnemonic: 0
   });
 
