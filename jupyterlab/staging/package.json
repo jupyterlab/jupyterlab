@@ -97,6 +97,8 @@
   },
   "devDependencies": {
     "@jupyterlab/buildutils": "^0.6.4",
+    "angular2-template-loader": "^0.6.2",
+    "awesome-typescript-loader": "^3.4.1",
     "css-loader": "~0.28.7",
     "file-loader": "~0.10.1",
     "fs-extra": "~4.0.2",
@@ -110,6 +112,7 @@
     "sort-package-json": "~1.7.1",
     "source-map-loader": "~0.2.1",
     "style-loader": "~0.13.2",
+    "typescript": "~2.6.2",
     "uglifyjs-webpack-plugin": "~1.1.5",
     "url-loader": "~0.5.9",
     "webpack": "~2.7.0",
