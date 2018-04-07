@@ -129,12 +129,11 @@ module.exports = {
         exclude: path.join(process.cwd(), 'node_modules')
       },
       { test: /\.ts$/, loaders: [
-          { 
-            loader: 'awesome-typescript-loader', 
-            options: { configFileName: path.join(process.cwd(), 'tsconfig.json') }
-          },
-          'angular2-template-loader'
-        ]
+        { 
+          loader: 'awesome-typescript-loader', 
+          options: { configFileName: path.join(process.cwd(), 'tsconfig.json') }
+        },
+        'angular2-template-loader']
       },
       { test: /\.component\.html$/, loader: 'html-loader' },
       { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
