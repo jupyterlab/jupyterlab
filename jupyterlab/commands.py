@@ -1330,7 +1330,7 @@ def _validate_extension(data):
 
     files = data['jupyterlab_extracted_files']
     main = data.get('main', 'index.js')
-    if not main.endswith('.js'):
+    if not (main.endswith('.js') or main.endswith('.ts')):
         main += '.js'
 
     if extension is True:
