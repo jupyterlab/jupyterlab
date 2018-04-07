@@ -748,6 +748,7 @@ class _AppHandler(object):
 
         for fname in ['index.js', 'webpack.config.js',
                       'webpack.prod.config.js',
+                      'tsconfig.json',
                       '.yarnrc', 'yarn.js']:
             target = pjoin(staging, fname)
             shutil.copy(pjoin(HERE, 'staging', fname), target)

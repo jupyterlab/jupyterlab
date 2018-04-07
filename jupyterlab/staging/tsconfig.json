@@ -1,15 +1,13 @@
 {
   "compilerOptions": {
-    "declaration": true,
-    "noImplicitAny": true,
-    "noEmitOnError": true,
+    "noImplicitAny": false,
+    "noEmitOnError": false,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "es5",
-    "outDir": "./lab-build",
     "lib": [
       "es2017",
       "dom"
