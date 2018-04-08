@@ -345,10 +345,6 @@
   dependencies:
     "@types/node" "*"
 
-"@types/vega@^0.0.30":
-  version "0.0.30"
-  resolved "https://registry.npmjs.org/@types/vega/-/vega-0.0.30.tgz#e66de30c6d1ed526c9f2bcbf55b675bb0767bc36"
-
 "@types/ws@~0.0.39":
   version "0.0.42"
   resolved "https://registry.npmjs.org/@types/ws/-/ws-0.0.42.tgz#2f46a7c736296140fa4b732ffffeba44599e2344"
@@ -8422,16 +8418,16 @@ vega-dataflow@3:
     vega-loader "2"
     vega-util "1"
 
-vega-embed@^3.1.1:
-  version "3.1.1"
-  resolved "https://registry.npmjs.org/vega-embed/-/vega-embed-3.1.1.tgz#f42bb4c86207b6e2c61e3ddb16fd43a88eb79ea1"
+vega-embed@^3.4.0:
+  version "3.5.0"
+  resolved "https://registry.npmjs.org/vega-embed/-/vega-embed-3.5.0.tgz#7c6df22f29ffec6a658af469462e1f916471fe98"
   dependencies:
     compare-versions "^3.1.0"
     d3-selection "^1.3.0"
-    vega-lib "^3.0.0"
-    vega-lite "^2.0.0"
+    vega-lib "^3.2.1"
+    vega-lite "^2.3.1"
     vega-schema-url-parser "^1.0.0"
-    vega-typings "^0.2.9"
+    vega-typings "^0.2.13"
 
 vega-encode@2:
   version "2.0.7"
@@ -8482,9 +8478,9 @@ vega-hierarchy@^2.1:
     vega-dataflow "3"
     vega-util "1"
 
-vega-lib@^3.0.0:
-  version "3.2.1"
-  resolved "https://registry.npmjs.org/vega-lib/-/vega-lib-3.2.1.tgz#feca4b054a0db492f92fd555e6c20be3f3c117d0"
+vega-lib@^3.2.1:
+  version "3.3.0"
+  resolved "https://registry.npmjs.org/vega-lib/-/vega-lib-3.3.0.tgz#ebfa32c1fefec9d71c1e4b58d3775be027aeb312"
   dependencies:
     vega-crossfilter "2"
     vega-dataflow "3"
@@ -8508,15 +8504,15 @@ vega-lib@^3.0.0:
     vega-voronoi "2"
     vega-wordcloud "^2.1"
 
-vega-lite@^2.0.0:
-  version "2.2.0"
-  resolved "https://registry.npmjs.org/vega-lite/-/vega-lite-2.2.0.tgz#0b3ee37a0b18475924d65a305de9256edb74a449"
+vega-lite@^2.3.1:
+  version "2.3.1"
+  resolved "https://registry.npmjs.org/vega-lite/-/vega-lite-2.3.1.tgz#a7abd16ef7d06b3f8ed8c873bca4be5c4a577369"
   dependencies:
     "@types/json-stable-stringify" "^1.0.32"
     json-stable-stringify "^1.0.1"
     tslib "^1.9.0"
     vega-event-selector "^2.0.0"
-    vega-typings "^0.2.9"
+    vega-typings "^0.2.11"
     vega-util "^1.7.0"
     yargs "^11.0.0"
 
@@ -8600,11 +8596,15 @@ vega-transforms@^1.2:
     vega-statistics "^1.2"
     vega-util "1"
 
-vega-typings@*, vega-typings@^0.2.9:
+vega-typings@*:
   version "0.2.9"
   resolved "https://registry.npmjs.org/vega-typings/-/vega-typings-0.2.9.tgz#e52d1ed5792eed6097807876c419831e52eea053"
   dependencies:
     prettier "^1.10.2"
+
+vega-typings@^0.2.11, vega-typings@^0.2.13:
+  version "0.2.13"
+  resolved "https://registry.npmjs.org/vega-typings/-/vega-typings-0.2.13.tgz#809077cb8737bb6383cf5b6d71f86f85e108218c"
 
 vega-util@1, vega-util@^1.7, vega-util@^1.7.0:
   version "1.7.0"

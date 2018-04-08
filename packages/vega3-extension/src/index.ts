@@ -84,10 +84,10 @@ class RenderedVega3 extends Widget implements IRenderMime.IRenderer {
           loader,
           actions: true
         };
-        return vegaEmbed(this.node as HTMLBaseElement, data, options).then((result: any) => {
+        return vegaEmbed(this.node as HTMLBaseElement, data, options).then(result => {
           // Add png representation of vega chart to output
           if (!model.data['image/png']) {
-            return result.view.toImageURL('png').then((imageData: any) => {
+            return result.view.toImageURL('png').then(imageData => {
               const data = { ...model.data, 'image/png': imageData.split(',')[1] };
               model.setData({ data });
             });
