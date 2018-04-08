@@ -77,16 +77,18 @@ class RenderedVega3 extends Widget implements IRenderMime.IRenderer {
     const data = model.data[this._mimeType] as JSONObject;
     const mode: Mode = this._mimeType === VEGA_MIME_TYPE ? 'vega' : 'vega-lite';
     return this._resolver.resolveUrl('').then((path: string) => {
-      const baseURL = `/files/${path}`;
-      const loader = vega.loader({ baseURL });
-      const options = {
-        mode,
-        loader,
-        actions: true
-      };
-      return vegaEmbed(this.node as HTMLBaseElement, data, options).then((result) => {
-        // result contains the Vega spec and view
-      }).catch(console.warn);
+      return this._resolver.getDownloadUrl(path).then(baseURL => {
+        const loader = vega.loader({ baseURL });
+        const options = {
+          mode,
+          loader,
+          actions: true
+        };
+        return vegaEmbed(this.node as HTMLBaseElement, data, options).then((result) => {
+          // result contains the Vega spec and view
+          return void 0;
+        }).catch(console.warn);
+      });
     });
   }
 
