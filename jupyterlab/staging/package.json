@@ -82,7 +82,7 @@
     "@phosphor/virtualdom": "^1.1.2",
     "@phosphor/widgets": "^1.5.0",
     "ajv": "~5.1.6",
-    "ansi_up": "~1.3.0",
+    "ansi_up": "^3.0.0",
     "codemirror": "~5.35.0",
     "comment-json": "^1.1.3",
     "es6-promise": "~4.1.1",

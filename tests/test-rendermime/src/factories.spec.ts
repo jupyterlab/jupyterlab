@@ -81,7 +81,7 @@ describe('rendermime/factories', () => {
         let model = createModel(mimeType, source);
         let w = f.createRenderer({ mimeType, ...defaultOptions });
         return w.renderModel(model).then(() => {
-          expect(w.node.innerHTML).to.be('<pre>There is no text but <span class="ansi-bright-green-fg ansi-red-bg">text</span>.\nWoo.</pre>');
+          expect(w.node.innerHTML).to.be('<pre>There is no text but <span style="font-weight:bold" class="ansi-green-fg ansi-red-bg">text</span>.\nWoo.</pre>');
         });
       });
 
@@ -92,7 +92,7 @@ describe('rendermime/factories', () => {
         let model = createModel(mimeType, source);
         let w = f.createRenderer({ mimeType, ...defaultOptions });
         return w.renderModel(model).then(() => {
-          expect(w.node.innerHTML).to.be('<pre>There is no text &lt;script&gt;window.x=1&lt;/script&gt; but <span class="ansi-bright-green-fg ansi-red-bg">text</span>.\nWoo.</pre>');
+          expect(w.node.innerHTML).to.be('<pre>There is no text &lt;script&gt;window.x=1&lt;/script&gt; but <span style="font-weight:bold" class="ansi-green-fg ansi-red-bg">text</span>.\nWoo.</pre>');
         });
       });
 

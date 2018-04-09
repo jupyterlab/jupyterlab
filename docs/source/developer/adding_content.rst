@@ -15,7 +15,7 @@ As an example: Add a leaflet viewer plugin for geoJSON files.
 
 -  If there are no typings, we must create our own. An example typings
    file that exports functions is
-   `ansi_up <https://github.com/jupyterlab/jupyterlab/blob/master/packages/rendermime/typings/ansi_up/ansi_up.d.ts>`__.
+   `path-posix <https://github.com/jupyterlab/jupyterlab/blob/master/packages/coreutils/typings/path-posix/path-posix.d.ts>`__.
    An example with a class is
    `xterm <https://github.com/jupyterlab/jupyterlab/blob/master/packages/terminal/typings/xterm/xterm.d.ts>`__.
 
