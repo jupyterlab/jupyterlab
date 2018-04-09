@@ -19,8 +19,6 @@ import site
 import sys
 import tarfile
 from threading import Event
-# from urllib.request import Request, urlopen, urljoin, quote
-# from urllib.error import URLError
 
 from ipython_genutils.tempdir import TemporaryDirectory
 from jupyter_core.paths import jupyter_config_path
