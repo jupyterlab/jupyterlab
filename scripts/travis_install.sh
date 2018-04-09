@@ -21,7 +21,7 @@ conda update -q conda
 conda info -a # for debugging
 
 conda remove --name test --all || true
-conda create -n test -c notebook pytest python=$PYTHON
+conda create -n test -c conda-forge notebook pytest python=$PYTHON
 source activate test
 
 # create jupyter base dir (needed for config retrieval)
