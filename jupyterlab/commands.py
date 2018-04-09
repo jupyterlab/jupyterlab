@@ -19,8 +19,6 @@ import site
 import sys
 import tarfile
 from threading import Event
-from urllib.request import Request, urlopen, urljoin, quote
-from urllib.error import URLError
 
 from ipython_genutils.tempdir import TemporaryDirectory
 from jupyter_core.paths import jupyter_config_path
@@ -29,6 +27,15 @@ from notebook.nbextensions import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 from .semver import Range, gte, lt, lte, gt, make_semver
 from .jlpmapp import YARN_PATH, HERE, which
 from .process import Process, WatchHelper
+
+if sys.version_info.major < 3:
+    from urllib2 import Request, urlopen, quote
+    from urllib2 import URLError
+    from urlparse import urljoin
+
+else:
+    from urllib.request import Request, urlopen, urljoin, quote
+    from urllib.error import URLError
 
 
 # The regex for expecting the webpack output.
@@ -1570,7 +1577,6 @@ def _fetch_package_metadata(registry, name, logger):
     """Fetch the metadata for a package from the npm registry"""
     req = Request(
         urljoin(registry, quote(name, safe='@')),
-        method='GET',
         headers={
             'Accept': ('application/vnd.npm.install-v1+json;'
                         ' q=1.0, application/json; q=0.8, */*')
