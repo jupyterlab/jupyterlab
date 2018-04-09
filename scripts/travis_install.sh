@@ -21,13 +21,7 @@ conda update -q conda
 conda info -a # for debugging
 
 conda remove --name test --all || true
-
-if [[ $GROUP == py2 ]]; then
-    conda create -n test -c notebook pytest python=2
-else
-    conda create -n test -c notebook pytest python=3
-fi
-
+conda create -n test -c notebook pytest python=$PYTHON
 source activate test
 
 # create jupyter base dir (needed for config retrieval)
