@@ -156,6 +156,7 @@ body.p-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
 
 
 .jp-Stdin-prompt {
+  color: var(--jp-content-font-color0);
   padding-right: var(--jp-code-padding);
   vertical-align: baseline;
   flex: 0 0 auto;
@@ -166,6 +167,7 @@ body.p-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
   font-family: var(--jp-code-font-family);
   font-size: inherit;
   color: inherit;
+  background-color: inherit;
   width: auto;
   /* make sure input baseline aligns with prompt */
   vertical-align: baseline;
