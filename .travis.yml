@@ -15,8 +15,6 @@ env:
     - GROUP=js
     - GROUP=js_cov
     - GROUP=python PYTHON=2
-    - GROUP=python PYTHON=3.3
-    - GROUP=python PYTHON=3.4
     - GROUP=python PYTHON=3.5
     - GROUP=python PYTHON=3
     - GROUP=integrity
