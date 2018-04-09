@@ -14,14 +14,15 @@ env:
   matrix:
     - GROUP=js
     - GROUP=js_cov
-    - GROUP=py3 PYTHON=3.3
-    - GROUP=py3 PYTHON=3.4
-    - GROUP=py3 PYTHON=3.5
-    - GROUP=py3 PYTHON=3
-    - GROUP=py2 PYTHON=2
+    - GROUP=python PYTHON=2
+    - GROUP=python PYTHON=3.3
+    - GROUP=python PYTHON=3.4
+    - GROUP=python PYTHON=3.5
+    - GROUP=python PYTHON=3
     - GROUP=integrity
     - GROUP=js_services
-    - GROUP=cli
+    - GROUP=cli PYTHON=2
+    - GROUP=cli PYTHON=3
     - GROUP=docs
   global:
   - PYTHON=3

@@ -11,7 +11,7 @@ export PATH="$MINICONDA_DIR/bin:$PATH"
 source activate test
 
 
-if [[ $GROUP == py2 || $GROUP == py3 ]]; then
+if [[ $GROUP == python ]]; then
     # Run the python tests
     py.test -v
 fi
