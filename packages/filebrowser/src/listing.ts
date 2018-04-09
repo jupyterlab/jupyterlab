@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  IDocumentManager, renameFile
+  IDocumentManager, isValidFileName, renameFile
 } from '@jupyterlab/docmanager';
 
 import {
@@ -1329,6 +1329,16 @@ class DirListing extends Widget {
         this._inRename = false;
         return original;
       }
+      if (!isValidFileName(newName)) {
+        showErrorMessage('Rename Error', Error(
+            `"${newName}" is not a valid name for a file. ` +
+            `Names must have nonzero length, ` +
+            `and cannot include "/", "\\", or ":"`
+        ));
+        this._inRename = false;
+        return original;
+      }
+
       if (this.isDisposed) {
         this._inRename = false;
         throw new Error('File browser is disposed.');

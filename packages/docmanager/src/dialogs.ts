@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Dialog, showDialog
+  Dialog, showDialog, showErrorMessage
 } from '@jupyterlab/apputils';
 
 import {
@@ -54,7 +54,7 @@ interface IFileContainer extends JSONObject {
 
 
 /**
- * Rename a file with an optional dialog.
+ * Rename a file with a dialog.
  */
 export
 function renameDialog(manager: IDocumentManager, oldPath: string): Promise<Contents.IModel | null> {
@@ -64,7 +64,12 @@ function renameDialog(manager: IDocumentManager, oldPath: string): Promise<Conte
     focusNodeSelector: 'input',
     buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'RENAME' })]
   }).then(result => {
-    if (!result.value) {
+    if (!isValidFileName(result.value)) {
+      showErrorMessage('Rename Error', Error(
+          `"${result.value}" is not a valid name for a file. ` +
+          `Names must have nonzero length, ` +
+          `and cannot include "/", "\\", or ":"`
+      ));
       return null;
     }
     let basePath = PathExt.dirname(oldPath);
@@ -75,7 +80,7 @@ function renameDialog(manager: IDocumentManager, oldPath: string): Promise<Conte
 
 
 /**
- * Rename a file with optional dialog.
+ * Rename a file, asking for confirmation if it is overwriting another.
  */
 export
 function renameFile(manager: IDocumentManager, oldPath: string, newPath: string): Promise<Contents.IModel | null> {
@@ -106,6 +111,17 @@ function shouldOverwrite(path: string): Promise<boolean> {
   return showDialog(options).then(result => {
     return Promise.resolve(result.button.accept);
   });
+}
+
+/**
+ * Test whether a name is a valid file name
+ *
+ * Disallows "/", "\", and ":" in file names, as well as names with zero length.
+ */
+export
+function isValidFileName(name: string): boolean {
+  const validNameExp = /[\/\\:]/;
+  return name.length > 0 && !validNameExp.test(name);
 }
 
 
