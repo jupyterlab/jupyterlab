@@ -264,6 +264,11 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     execute: args => {
       const path = typeof args['path'] === 'undefined' ? ''
         : args['path'] as string;
+
+        if (!path) {
+          return;
+        }
+
       return docManager.services.contents.getDownloadUrl(path).then(url => {
         window.open(url, '_blank');
       });
