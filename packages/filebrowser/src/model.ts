@@ -101,6 +101,15 @@ class FileBrowserModel implements IDisposable {
     services.contents.fileChanged.connect(this._onFileChanged, this);
     services.sessions.runningChanged.connect(this._onRunningChanged, this);
 
+    this._unloadEventListener = (e: Event) => {
+      if (this._uploads.length > 0) {
+        const confirmationMessage = 'Files still uploading';
+
+        (e as any).returnValue = confirmationMessage;
+        return confirmationMessage;
+      }
+    };
+    window.addEventListener('beforeunload', this._unloadEventListener);
     this._scheduleUpdate();
     this._startTimer();
   }
@@ -187,6 +196,7 @@ class FileBrowserModel implements IDisposable {
     if (this.isDisposed) {
       return;
     }
+    window.removeEventListener('beforeunload', this._unloadEventListener);
     this._isDisposed = true;
     clearTimeout(this._timeoutId);
     this._sessions.length = 0;
@@ -593,7 +603,7 @@ class FileBrowserModel implements IDisposable {
   private _restored = new PromiseDelegate<void>();
   private _uploads: IUploadModel[] = [];
   private _uploadChanged = new Signal<this, IChangedArgs<IUploadModel>>(this);
-
+  private _unloadEventListener: (e: Event) => string;
 }
 
 
