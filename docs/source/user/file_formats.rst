@@ -115,7 +115,7 @@ Delimiter-separated Values
 
 Files with rows of delimiter-separated values, such as CSV files, are a common format for
 tabular data. The default viewer for these files in JupyterLab is a
-high-performance data grid viewer which can handles comma-separated, tab-separated, and
+high-performance data grid viewer which can display comma-separated, tab-separated, and
 semicolon-separated values:
 
 .. raw:: html
