@@ -14,13 +14,16 @@ env:
   matrix:
     - GROUP=js
     - GROUP=js_cov
-    - GROUP=py3
-    - GROUP=py2
+    - GROUP=python PYTHON=2
+    - GROUP=python PYTHON=3.5
+    - GROUP=python PYTHON=3
     - GROUP=integrity
     - GROUP=js_services
-    - GROUP=cli
+    - GROUP=cli PYTHON=2
+    - GROUP=cli PYTHON=3
     - GROUP=docs
   global:
+  - PYTHON=3
   - MINICONDA_DIR="$HOME/miniconda"
   - GH_REF: github.com/jupyterlab/jupyterlab.git
   - secure: MWpTI6cj3/Bnmtrr0Oqlp2JeWqDneB9aEjlQDaRxLOkqVbxhqDcYW9qAgZZP+sq29vT5oVMWzyCirteKxJfG2vy3HQE1XNLhz82Sf/7sE6DQ51gohl0CcOeA/uA8hCXEw97hneFWsZgHKqSoch7nVDsE3qfYgO+930jHlnxYApJGP9hZFv2Q2NVa6+99kipEYS4BY/yBDYKy6/t4kXcnBrUlNaPtdjnXcrY9esLZ7EQtkaG5VqcQVIBaLJKGF5Q7Aufj5nCFaZ6hZDF1Bi/AbmIbVWFyiT+22i8DZK6YwenECckyzoWkl+bEhYepWsgBKh/BDgPBAmPWKHgU5V4apDaGqZBhF7FP6H02AdZYYuCwl47jyakqvWLZW7oDmorL+HsWG5HQ3m0tMT2ywdbwNOiD39tiPPXjsvROh5ys9vL6NzQvxILCeEOnzcZrFuxi2LGEZfnlqRIjkh1llUAvNc3mOycRLWDOwVQa2+U59qDRXCSY2RD+MOfcdFUGengVujTMaAPMBUa3E33/ZIOOKJtR5TIajYZvd9B2uDlz02QfvTK+hrTaNYJjRZ8WCaeSM/CIKdoLw+29MNO6eqtchw0/vNvM8c9EkhrhMQKcY04OecVhmZkemFhd4SD5l92VX3z3xSxLkmazfNkj3CigWDXNxfDd2ORoGjA46Pga8RM=
