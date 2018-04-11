@@ -55,7 +55,7 @@ def check_assets():
     targets = [
         'static/package.json',
         'schemas/@jupyterlab/shortcuts-extension/plugin.json',
-        'themes/@jupyterlab/theme-light-extension/images/jupyterlab.svg'
+        'themes/@jupyterlab/theme-light-extension/index.css'
     ]
 
     for t in targets:
