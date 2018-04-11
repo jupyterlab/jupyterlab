@@ -12,7 +12,7 @@ Here is an animation showing the extension's use, with a notebook from the
 
 ## Prerequisites
 
-* JupyterLab v0.31
+* JupyterLab v0.32
 
 ## Installation
 

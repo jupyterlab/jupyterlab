@@ -91,7 +91,7 @@ export function createMarkdownGenerator(
       // one of a few markdown variants.
       let mime = editor.model.mimeType;
       return (
-        mime === 'text/x-ipthongfm' ||
+        mime === 'text/x-ipythongfm' ||
         mime === 'text/x-markdown' ||
         mime === 'text/x-gfm' ||
         mime === 'text/markdown'
