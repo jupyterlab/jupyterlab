@@ -808,9 +808,8 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
               insertMode: 'split-bottom',
               activate: false
             }).then(() => {
-              commands.execute('console:inject', { activate: false, code, path }
-            );
-          });
+              return commands.execute('console:inject', { activate: false, code, path });
+            });
         } else {
           return Promise.resolve(void 0);
         }
