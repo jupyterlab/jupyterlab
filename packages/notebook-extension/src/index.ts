@@ -812,6 +812,8 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
                 // if the panel is newly created, we can only submit after the kernel is connected
                 panel.session.statusChanged.connect(() => {
                   if (panel.session.status == 'connected') {
+                    // cell will lose focus during the creation of the console
+                    editor.focus();
                     return commands.execute('console:inject', { activate: false, code, path });
                   }
                 }, panel);
