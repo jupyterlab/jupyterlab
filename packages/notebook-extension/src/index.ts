@@ -807,8 +807,18 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
               path,
               insertMode: 'split-bottom',
               activate: false
-            }).then(() => {
-              return commands.execute('console:inject', { activate: false, code, path });
+            }).then((panel) => {
+              if (panel.session.status == 'unknown') {
+                // if the panel is newly created, we can only submit after the kernel is connected
+                panel.session.statusChanged.connect(() => {
+                  if (panel.session.status == 'connected') {
+                    return commands.execute('console:inject', { activate: false, code, path });
+                  }
+                }, panel);
+              } else {
+                // otherwise we send the code to console directly
+                return commands.execute('console:inject', { activate: false, code, path });
+              }
             });
         } else {
           return Promise.resolve(void 0);

@@ -248,6 +248,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
         if (args['activate'] !== false) {
           shell.activateById(widget.id);
         }
+        return widget;
       } else {
         return manager.ready.then(() => {
           let model = find(manager.sessions.running(), item => {
