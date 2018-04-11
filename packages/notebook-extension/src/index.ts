@@ -821,6 +821,9 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
                 // otherwise we send the code to console directly
                 return commands.execute('console:inject', { activate: false, code, path });
               }
+            }).catch((error) => {
+              console.log(error);
+              return Promise.resolve(void 0);
             });
         } else {
           return Promise.resolve(void 0);
