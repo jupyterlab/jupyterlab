@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-cells",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "build": "tsc",
@@ -15,11 +15,11 @@
     "watch:src": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^0.15.5",
-    "@jupyterlab/cells": "^0.15.4",
-    "@jupyterlab/codeeditor": "^0.15.4",
-    "@jupyterlab/coreutils": "^1.0.10",
-    "@jupyterlab/outputarea": "^0.15.6",
+    "@jupyterlab/apputils": "^0.16.0",
+    "@jupyterlab/cells": "^0.16.0",
+    "@jupyterlab/codeeditor": "^0.15.5",
+    "@jupyterlab/coreutils": "^1.1.0",
+    "@jupyterlab/outputarea": "^0.16.0",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/widgets": "^1.5.0",

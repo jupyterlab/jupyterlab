@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/csvviewer-extension",
-  "version": "0.15.4",
+  "version": "0.16.0",
   "description": "JupyterLab - CSV Widget Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -29,9 +29,9 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.15.4",
-    "@jupyterlab/apputils": "^0.15.5",
-    "@jupyterlab/csvviewer": "^0.15.4"
+    "@jupyterlab/application": "^0.16.0",
+    "@jupyterlab/apputils": "^0.16.0",
+    "@jupyterlab/csvviewer": "^0.16.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

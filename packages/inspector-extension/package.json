@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/inspector-extension",
-  "version": "0.15.4",
+  "version": "0.16.0",
   "description": "JupyterLab - Code Inspector Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -29,11 +29,11 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.15.4",
-    "@jupyterlab/apputils": "^0.15.5",
-    "@jupyterlab/console": "^0.15.4",
-    "@jupyterlab/inspector": "^0.15.4",
-    "@jupyterlab/notebook": "^0.15.7",
+    "@jupyterlab/application": "^0.16.0",
+    "@jupyterlab/apputils": "^0.16.0",
+    "@jupyterlab/console": "^0.16.0",
+    "@jupyterlab/inspector": "^0.16.0",
+    "@jupyterlab/notebook": "^0.16.0",
     "@phosphor/disposable": "^1.1.2"
   },
   "devDependencies": {

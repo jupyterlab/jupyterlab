@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/docregistry",
-  "version": "0.15.5",
+  "version": "0.16.0",
   "description": "JupyterLab - Document Registry",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -30,14 +30,14 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^0.15.5",
-    "@jupyterlab/codeeditor": "^0.15.4",
-    "@jupyterlab/codemirror": "^0.15.4",
-    "@jupyterlab/coreutils": "^1.0.10",
-    "@jupyterlab/observables": "^1.0.6",
-    "@jupyterlab/rendermime": "^0.15.4",
-    "@jupyterlab/rendermime-interfaces": "^1.0.6",
-    "@jupyterlab/services": "^1.1.4",
+    "@jupyterlab/apputils": "^0.16.0",
+    "@jupyterlab/codeeditor": "^0.15.5",
+    "@jupyterlab/codemirror": "^0.16.0",
+    "@jupyterlab/coreutils": "^1.1.0",
+    "@jupyterlab/observables": "^1.0.7",
+    "@jupyterlab/rendermime": "^0.16.0",
+    "@jupyterlab/rendermime-interfaces": "^1.0.7",
+    "@jupyterlab/services": "^2.0.0",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/coreutils": "^1.3.0",
     "@phosphor/disposable": "^1.1.2",
