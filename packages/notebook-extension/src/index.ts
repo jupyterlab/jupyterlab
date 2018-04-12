@@ -808,10 +808,10 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
               insertMode: 'split-bottom',
               activate: false
             }).then((panel) => {
-              if (panel.session.status == 'unknown') {
+              if (panel.session.status === 'unknown') {
                 // if the panel is newly created, we can only submit after the kernel is connected
                 panel.session.statusChanged.connect(() => {
-                  if (panel.session.status == 'connected') {
+                  if (panel.session.status === 'connected') {
                     // cell will lose focus during the creation of the console
                     editor.focus();
                     return commands.execute('console:inject', { activate: false, code, path });
