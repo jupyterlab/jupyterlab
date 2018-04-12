@@ -81,7 +81,7 @@ interface ICodeCellModel extends ICellModel {
    * #### Notes
    * This is a read-only property.
    */
-  type: 'code';
+  readonly type: 'code';
 
   /**
    * The code cell's prompt number. Will be null if the cell has not been run.
@@ -91,7 +91,7 @@ interface ICodeCellModel extends ICellModel {
   /**
    * The cell outputs.
    */
-  outputs: IOutputAreaModel;
+  readonly outputs: IOutputAreaModel;
 }
 
 
@@ -103,7 +103,7 @@ interface IMarkdownCellModel extends ICellModel {
   /**
    * The type of the cell.
    */
-  type: 'markdown';
+  readonly type: 'markdown';
  }
 
 
@@ -115,7 +115,7 @@ interface IRawCellModel extends ICellModel {
   /**
    * The type of the cell.
    */
-  type: 'raw';
+  readonly type: 'raw';
 }
 
 
@@ -460,7 +460,7 @@ namespace CodeCellModel {
    * The default implementation of an `IContentFactory`.
    */
   export
-  class ContentFactory {
+  class ContentFactory implements IContentFactory {
     /**
      * Create an output area.
      */
@@ -470,7 +470,7 @@ namespace CodeCellModel {
   }
 
   /**
-   * The shared `ConetntFactory` instance.
+   * The shared `ContentFactory` instance.
    */
   export
   const defaultContentFactory = new ContentFactory();
