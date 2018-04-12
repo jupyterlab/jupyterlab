@@ -20,6 +20,10 @@ import {
 } from '@phosphor/widgets';
 
 import {
+  AttachmentsResolver
+} from '@jupyterlab/attachments';
+
+import {
   IClientSession
 } from '@jupyterlab/apputils';
 
@@ -816,7 +820,13 @@ class MarkdownCell extends Cell {
   constructor(options: MarkdownCell.IOptions) {
     super(options);
     this.addClass(MARKDOWN_CELL_CLASS);
-    this._rendermime = options.rendermime;
+    // Ensure we can resolve attachments:
+    this._rendermime = options.rendermime.clone({
+      resolver: new AttachmentsResolver({
+        parent: options.rendermime.resolver,
+        model: this.model.attachments,
+      })
+    });
 
     // Throttle the rendering rate of the widget.
     this._monitor = new ActivityMonitor({
