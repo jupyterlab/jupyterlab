@@ -32,7 +32,7 @@
   "dependencies": {
     "@jupyterlab/apputils": "^0.15.5",
     "@jupyterlab/cells": "^0.15.4",
-    "@jupyterlab/codeeditor": "^0.15.4",
+    "@jupyterlab/codeeditor": "^0.15.8",
     "@jupyterlab/coreutils": "^1.0.10",
     "@jupyterlab/docregistry": "^0.15.5",
     "@jupyterlab/observables": "^1.0.6",

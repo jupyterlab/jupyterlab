@@ -15,7 +15,7 @@
     "watch:src": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/codeeditor": "^0.15.4",
+    "@jupyterlab/codeeditor": "^0.15.8",
     "@jupyterlab/codemirror": "^0.15.4",
     "@jupyterlab/observables": "^1.0.6",
     "@phosphor/messaging": "^1.2.2",

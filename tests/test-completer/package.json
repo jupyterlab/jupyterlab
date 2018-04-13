@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@jupyterlab/apputils": "^0.15.5",
-    "@jupyterlab/codeeditor": "^0.15.4",
+    "@jupyterlab/codeeditor": "^0.15.8",
     "@jupyterlab/codemirror": "^0.15.4",
     "@jupyterlab/completer": "^0.15.5",
     "@phosphor/algorithm": "^1.1.2",

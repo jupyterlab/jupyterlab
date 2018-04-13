@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/codeeditor",
-  "version": "0.15.4",
+  "version": "0.15.8",
   "description": "JupyterLab - Abstract Code Editor",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
