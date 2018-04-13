@@ -23,7 +23,7 @@ import {
 } from '@jupyterlab/observables';
 
 import {
-  IAttachmentModel, AttachmentModel
+  IAttachmentModel, AttachmentModel, imageRendererFactory
 } from '@jupyterlab/rendermime';
 
 import {
@@ -409,6 +409,10 @@ class AttachmentsResolver implements IRenderMime.IResolver {
     }
     const {data} = this._model.get(key);
     const mimeType = Object.keys(data)[0];
+    // Only support known safe types:
+    if (imageRendererFactory.mimeTypes.indexOf(mimeType) === -1) {
+      return Promise.resolve('');
+    }
     const dataUrl = `data:${mimeType};base64,${data[mimeType]}`;
     return Promise.resolve(dataUrl);
   }
