@@ -39,6 +39,7 @@
     "test:chrome": "lerna run test:chrome --scope \"@jupyterlab/test-*\" --concurrency 1 --stream",
     "test:firefox": "lerna run test:firefox --scope \"@jupyterlab/test-*\" --concurrency 1 --stream",
     "test:ie": "lerna run test:ie --scope \"@jupyterlab/test-*\" --concurrency 1 --stream",
+    "test:saucelabs": "lerna exec --scope \"@jupyterlab/test-*\" --ignore @jupyterlab/test-root --concurrency 1 --stream -- python run-test.py --browsers=SL_Chrome,SL_Firefox,SL_Safari",
     "test:services": "cd packages/services && jlpm test && cd examples/node && python main.py",
     "update:dependency": "node buildutils/lib/update-dependency.js",
     "watch": "run-p watch:dev watch:themes",

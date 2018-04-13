@@ -5,6 +5,7 @@ dist: trusty
 sudo: required
 addons:
   firefox: latest
+  sauce_connect: true
 cache:
   yarn: true
   directories:
@@ -13,6 +14,7 @@ cache:
 env:
   matrix:
     - GROUP=js
+    - GROUP=js SAUCELABS=True
     - GROUP=js_cov
     - GROUP=python PYTHON=2
     - GROUP=python PYTHON=3.5

@@ -16,6 +16,7 @@
   },
   "devDependencies": {
     "karma": "~1.7.1",
+    "karma-sauce-launcher": "1.2.0",
     "rimraf": "~2.6.2",
     "typescript": "~2.6.2"
   }

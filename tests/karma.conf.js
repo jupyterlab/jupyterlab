@@ -5,7 +5,7 @@ module.exports = function (config) {
   config.set({
     basePath: '.',
     frameworks: ['mocha'],
-    reporters: ['mocha'],
+    reporters: ['mocha', 'saucelabs'],
     client: {
       mocha: {
         timeout : 10000, // 10 seconds - upped from 2 seconds
@@ -34,6 +34,32 @@ module.exports = function (config) {
     port: 9876,
     colors: true,
     singleRun: true,
+    sauceLabs: {
+      testName: process.env.LERNA_PACKAGE_NAME,
+      recordScreenshots: true
+    },
+    customLaunchers: {
+      SL_Chrome: {
+        base: 'SauceLabs',
+        browserName: 'chrome',
+        version: 'latest'
+      },
+      SL_Firefox: {
+        base: 'SauceLabs',
+        browserName: 'firefox',
+        version: 'latest'
+      },
+      SL_Safari: {
+        base: 'SauceLabs',
+        browserName: 'safari',
+        version: 'latest'
+      }
+    },
     logLevel: config.LOG_INFO
   });
+
+  if (process.env.TRAVIS) {
+    config.sauceLabs.tunnelIdentifier = process.env.TRAVIS_JOB_NUMBER;
+    config.sauceLabs.startConnect = false;
+  }
 };

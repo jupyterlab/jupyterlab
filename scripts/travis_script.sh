@@ -21,7 +21,11 @@ if [[ $GROUP == js ]]; then
 
     jlpm build:packages
     jlpm build:test
-    jlpm test
+    if [[ $SAUCELABS ]]; then
+        jlpm test:saucelabs
+    else
+        jlpm test
+    fi
     jlpm run clean
 fi
 
