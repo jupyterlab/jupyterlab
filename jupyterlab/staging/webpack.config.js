@@ -111,12 +111,16 @@ module.exports = {
     publicPath: jlab.publicUrl || '{{base_url}}lab/static/',
     filename: '[name].[chunkhash].js'
   },
+  resolve: {
+    extensions: ['.js', '.json', '.ts']
+  },
   module: {
     rules: [
       { test: /^JUPYTERLAB_RAW_LOADER_/, use: 'raw-loader' },
       { test: /^JUPYTERLAB_URL_LOADER_/, use: 'url-loader?limit=10000' },
       { test: /^JUPYTERLAB_FILE_LOADER_/, use: 'file-loader' },
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },
+      { test: /\.scss$/, use: ['style-loader', 'css-loader', 'sass-loader']},
       { test: /\.json$/, use: 'json-loader' },
       { test: /\.md$/, use: 'raw-loader' },
       { test: /\.txt$/, use: 'raw-loader' },
@@ -124,6 +128,14 @@ module.exports = {
         // eslint-disable-next-line no-undef
         exclude: path.join(process.cwd(), 'node_modules')
       },
+      { test: /\.ts$/, loaders: [
+        { 
+          loader: 'awesome-typescript-loader', 
+          options: { configFileName: path.join(process.cwd(), 'tsconfig.json') }
+        },
+        'angular2-template-loader']
+      },
+      { test: /\.component\.html$/, loader: 'html-loader' },
       { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
       { test: /\.js.map$/, use: 'file-loader' },
       { test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/, use: 'url-loader?limit=10000&mimetype=application/font-woff' },

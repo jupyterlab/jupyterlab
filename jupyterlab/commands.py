@@ -755,6 +755,7 @@ class _AppHandler(object):
 
         for fname in ['index.js', 'webpack.config.js',
                       'webpack.prod.config.js',
+                      'tsconfig.json',
                       '.yarnrc', 'yarn.js']:
             target = pjoin(staging, fname)
             shutil.copy(pjoin(HERE, 'staging', fname), target)
@@ -1336,7 +1337,7 @@ def _validate_extension(data):
 
     files = data['jupyterlab_extracted_files']
     main = data.get('main', 'index.js')
-    if not main.endswith('.js'):
+    if not (main.endswith('.js') or main.endswith('.ts')):
         main += '.js'
 
     if extension is True:
