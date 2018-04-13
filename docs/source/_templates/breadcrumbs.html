@@ -1,14 +1,49 @@
 {% extends '!breadcrumbs.html' %}
 
 {% block breadcrumbs %}
-  <div>
-    <a href="https://jupyter.org/documentation">
-      <img src="./_static/jupyter_logo.svg" width="120px">
-    </a>
-  </div>
   <li><a href="{{ pathto(master_doc) }}">{{ _('Docs') }}</a> &raquo;</li>
     {% for doc in parents %}
       <li><a href="{{ doc.link|e }}">{{ doc.title }}</a> &raquo;</li>
     {% endfor %}
   <li>{{ title }}</li>
+{% endblock %}
+  {% block breadcrumbs_aside %}
+    <li class="wy-breadcrumbs-aside">
+    {% if hasdoc(pagename) %}
+      {% if display_github %}
+      {% if check_meta and 'github_url' in meta %}
+        <!-- User defined GitHub URL -->
+        <a href="{{ meta['github_url'] }}" class="fa fa-github"> {{ _('Edit on GitHub') }}</a>
+      {% else %}
+        <a href="https://{{ github_host|default("github.com") }}/{{ github_user }}/{{ github_repo }}/{{ theme_vcs_pageview_mode|default("blob") }}/{{ github_version }}{{ conf_py_path }}{{ pagename }}{{ suffix }}" class="fa fa-github"> {{ _('Edit on GitHub') }}</a>
+      {% endif %}
+      {% elif display_bitbucket %}
+      {% if check_meta and 'bitbucket_url' in meta %}
+        <!-- User defined Bitbucket URL -->
+        <a href="{{ meta['bitbucket_url'] }}" class="fa fa-bitbucket"> {{ _('Edit on Bitbucket') }}</a>
+      {% else %}
+        <a href="https://bitbucket.org/{{ bitbucket_user }}/{{ bitbucket_repo }}/src/{{ bitbucket_version}}{{ conf_py_path }}{{ pagename }}{{ suffix }}?mode={{ theme_vcs_pageview_mode|default("view") }}" class="fa fa-bitbucket"> {{ _('Edit on Bitbucket') }}</a>
+      {% endif %}
+      {% elif display_gitlab %}
+      {% if check_meta and 'gitlab_url' in meta %}
+        <!-- User defined GitLab URL -->
+        <a href="{{ meta['gitlab_url'] }}" class="fa fa-gitlab"> {{ _('Edit on GitLab') }}</a>
+      {% else %}
+        <a href="https://{{ gitlab_host|default("gitlab.com") }}/{{ gitlab_user }}/{{ gitlab_repo }}/{{ theme_vcs_pageview_mode|default("blob") }}/{{ gitlab_version }}{{ conf_py_path }}{{ pagename }}{{ suffix }}" class="fa fa-gitlab"> {{ _('Edit on GitLab') }}</a>
+      {% endif %}
+      {% elif show_source and source_url_prefix %}
+      <a href="{{ source_url_prefix }}{{ pagename }}{{ suffix }}">{{ _('View page source') }}</a>
+      {% elif show_source and has_source and sourcename %}
+      <a href="{{ pathto('_sources/' + sourcename, true)|e }}" rel="nofollow"> {{ _('View page source') }}</a>
+      {% endif %}
+    {% endif %}
+    </li>
+    <li class="wy-breadcrumbs-aside">
+      <a href="https://jupyter.org/documentation">
+        <img src="{{ pathto('_static/jupyter_logo.svg', 1) }}"></img>
+        {{ _('Jupyter') }}
+      </a>
+      &vert;
+      &nbsp;
+    </li>
 {% endblock %}

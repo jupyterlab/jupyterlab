@@ -2,8 +2,9 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+
 import {
-  ansi_to_html, escape_for_html
+  default as AnsiUp
 } from 'ansi_up';
 
 import * as marked
@@ -500,11 +501,12 @@ function renderText(options: renderText.IRenderOptions): Promise<void> {
   // Unpack the options.
   let { host, source } = options;
 
-  // Escape the terminal codes and HTML tags.
-  let data = escape_for_html(source);
+  const ansiUp = new AnsiUp();
+  ansiUp.escape_for_html = true;
+  ansiUp.use_classes = true;
 
   // Create the HTML content.
-  let content = ansi_to_html(data, { use_classes: true });
+  let content = ansiUp.ansi_to_html(source);
 
   // Set the inner HTML for the host node.
   host.innerHTML = `<pre>${content}</pre>`;

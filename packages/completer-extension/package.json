@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/completer-extension",
-  "version": "0.15.4",
+  "version": "0.16.0",
   "description": "JupyterLab - Completer Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -29,10 +29,10 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.15.4",
-    "@jupyterlab/completer": "^0.15.5",
-    "@jupyterlab/console": "^0.15.4",
-    "@jupyterlab/notebook": "^0.15.7",
+    "@jupyterlab/application": "^0.16.0",
+    "@jupyterlab/completer": "^0.16.0",
+    "@jupyterlab/console": "^0.16.0",
+    "@jupyterlab/notebook": "^0.16.0",
     "@phosphor/widgets": "^1.5.0"
   },
   "devDependencies": {

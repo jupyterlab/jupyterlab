@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  IDocumentManager, renameFile
+  IDocumentManager, isValidFileName, renameFile
 } from '@jupyterlab/docmanager';
 
 import {
@@ -565,12 +565,12 @@ class DirListing extends Widget {
     // Make sure the file is available.
     return this.model.refresh().then(() => {
       if (this.isDisposed) {
-        return;
+        throw new Error('File browser is disposed.');
       }
       let items = this._sortedItems;
       let index = ArrayExt.findFirstIndex(items, value => value.name === name);
       if (index === -1) {
-        return;
+        throw new Error('Item does not exist.');
       }
       this._selectItem(index, false);
       MessageLoop.sendMessage(this, Widget.Msg.UpdateRequest);
@@ -717,8 +717,7 @@ class DirListing extends Widget {
 
     // Remove any excess item nodes.
     while (nodes.length > items.length) {
-      let node = nodes.pop();
-      content.removeChild(node!);
+      content.removeChild(nodes.pop());
     }
 
     // Add any missing item nodes.
@@ -730,16 +729,15 @@ class DirListing extends Widget {
     }
 
     // Remove extra classes from the nodes.
-    each(nodes, item => {
+    nodes.forEach(item => {
       item.classList.remove(SELECTED_CLASS);
       item.classList.remove(RUNNING_CLASS);
       item.classList.remove(CUT_CLASS);
     });
 
     // Add extra classes to item nodes based on widget state.
-    for (let i = 0, n = items.length; i < n; ++i) {
+    items.forEach((item, i) => {
       let node = nodes[i];
-      let item = items[i];
       let ft = this._manager.registry.getFileTypeForModel(item);
       renderer.updateItemNode(node, item, ft);
       if (this._selection[item.name]) {
@@ -748,25 +746,26 @@ class DirListing extends Widget {
           node.classList.add(CUT_CLASS);
         }
       }
-    }
+    });
 
     // Handle the selectors on the widget node.
-    let selectedNames = Object.keys(this._selection);
-    if (selectedNames.length > 1) {
-      this.addClass(MULTI_SELECTED_CLASS);
-    }
-    if (selectedNames.length) {
+    let selected = Object.keys(this._selection).length;
+    if (selected) {
       this.addClass(SELECTED_CLASS);
+      if (selected > 1) {
+        this.addClass(MULTI_SELECTED_CLASS);
+      }
     }
 
     // Handle file session statuses.
-    let paths = toArray(map(items, item => item.path));
+    let paths = items.map(item => item.path);
     each(this._model.sessions(), session => {
       let index = ArrayExt.firstIndexOf(paths, session.path);
       let node = nodes[index];
-      node.classList.add(RUNNING_CLASS);
       let name = session.kernel.name;
       let specs = this._model.specs;
+
+      node.classList.add(RUNNING_CLASS);
       if (specs) {
         name = specs.kernelspecs[name].display_name;
       }
@@ -1330,9 +1329,19 @@ class DirListing extends Widget {
         this._inRename = false;
         return original;
       }
+      if (!isValidFileName(newName)) {
+        showErrorMessage('Rename Error', Error(
+            `"${newName}" is not a valid name for a file. ` +
+            `Names must have nonzero length, ` +
+            `and cannot include "/", "\\", or ":"`
+        ));
+        this._inRename = false;
+        return original;
+      }
+
       if (this.isDisposed) {
         this._inRename = false;
-        return Promise.reject('Disposed') as Promise<string>;
+        throw new Error('File browser is disposed.');
       }
 
       const manager = this._manager;
@@ -1348,9 +1357,10 @@ class DirListing extends Widget {
       }).then(() => {
         if (this.isDisposed) {
           this._inRename = false;
-          return Promise.reject('Disposed') as Promise<string>;
+          throw new Error('File browser is disposed.');
         }
         if (this._inRename) {
+          // No need to catch because `newName` will always exit.
           this.selectItemByName(newName);
         }
         this._inRename = false;
@@ -1412,14 +1422,16 @@ class DirListing extends Widget {
     if (!newValue) {
       return;
     }
-    let name = args.newValue.name;
-    if (args.type === 'new' && name) {
-      this.selectItemByName(name).then(() => {
-        if (!this.isDisposed && newValue.type === 'directory') {
-          this._doRename();
-        }
-      });
+
+    if (args.type !== 'new' || !name) {
+      return;
     }
+
+    this.selectItemByName(name).then(() => {
+      if (!this.isDisposed && newValue.type === 'directory') {
+        this._doRename();
+      }
+    }).catch(() => { /* Ignore if file does not exist. */ });
   }
 
   /**
@@ -1431,7 +1443,8 @@ class DirListing extends Widget {
       return;
     }
     let basename = PathExt.basename(args);
-    this.selectItemByName(basename);
+    this.selectItemByName(basename)
+      .catch(() => { /* Ignore if file does not exist. */ });
   }
 
   private _model: FileBrowserModel;

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-application",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "build": "tsc",
@@ -15,9 +15,9 @@
     "watch:src": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.15.4",
-    "@jupyterlab/apputils": "^0.15.5",
-    "@jupyterlab/coreutils": "^1.0.10",
+    "@jupyterlab/application": "^0.16.0",
+    "@jupyterlab/apputils": "^0.16.0",
+    "@jupyterlab/coreutils": "^1.1.0",
     "@phosphor/commands": "^1.4.0",
     "@phosphor/coreutils": "^1.3.0",
     "@phosphor/messaging": "^1.2.2",

@@ -318,8 +318,14 @@ class OutputArea extends Widget {
    */
   private _setOutput(index: number, model: IOutputModel): void {
     let layout = this.layout as PanelLayout;
-    layout.widgets[index].dispose();
-    this._insertOutput(index, model);
+    let panel = layout.widgets[index] as Panel;
+    let renderer = panel.widgets[1] as IRenderMime.IRenderer;
+    if (renderer.renderModel) {
+      renderer.renderModel(model);
+    } else {
+      layout.widgets[index].dispose();
+      this._insertOutput(index, model);
+    }
   }
 
   /**

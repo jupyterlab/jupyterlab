@@ -32,6 +32,11 @@ logger = logging.getLogger(__name__)
 
 SEMVER_SPEC_VERSION = '2.0.0'
 
+# Python 2/3 compatibility
+try:
+  string_type = basestring
+except NameError:
+  string_type = str
 
 class _R(object):
     def __init__(self, i):
@@ -313,7 +318,7 @@ def semver(version, loose):
             return version
         else:
             version = version.version
-    elif not isinstance(version, str):  # xxx:
+    elif not isinstance(version, string_type):  # xxx:
         raise ValueError("Invalid Version: {}".format(version))
 
     """
@@ -764,7 +769,7 @@ class Range(object):
         if not version:  # xxx
             return False
 
-        if isinstance(version, str):
+        if isinstance(version, string_type):
             version = make_semver(version, loose=self.loose)
 
         for e in self.set:

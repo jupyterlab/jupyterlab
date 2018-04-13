@@ -934,7 +934,7 @@ namespace CodeMirrorEditor {
     /**
      * The mode to use.
      */
-    mode?: string | Mode.ISpec;
+    mode?: string | Mode.IMode;
 
     /**
      * The theme to style the editor with.
@@ -1225,4 +1225,3 @@ CodeMirrorEditor.addCommand(
 CodeMirrorEditor.addCommand(
   'indentMoreOrinsertTab', Private.indentMoreOrinsertTab
 );
-

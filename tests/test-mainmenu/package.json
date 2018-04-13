@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-mainmenu",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "build": "tsc",
@@ -15,8 +15,8 @@
     "watch:src": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^0.15.5",
-    "@jupyterlab/mainmenu": "^0.4.4",
+    "@jupyterlab/apputils": "^0.16.0",
+    "@jupyterlab/mainmenu": "^0.5.0",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/commands": "^1.4.0",
     "@phosphor/widgets": "^1.5.0",

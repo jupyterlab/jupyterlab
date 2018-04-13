@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-inspector",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "build": "tsc",
@@ -15,7 +15,7 @@
     "watch:src": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/inspector": "^0.15.4",
+    "@jupyterlab/inspector": "^0.16.0",
     "@phosphor/signaling": "^1.2.2",
     "@phosphor/widgets": "^1.5.0",
     "expect.js": "~0.3.1"

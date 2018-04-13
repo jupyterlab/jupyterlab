@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-notebook",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "build": "tsc",
@@ -15,14 +15,14 @@
     "watch:src": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^0.15.5",
-    "@jupyterlab/cells": "^0.15.4",
-    "@jupyterlab/codemirror": "^0.15.4",
-    "@jupyterlab/coreutils": "^1.0.10",
-    "@jupyterlab/docregistry": "^0.15.5",
-    "@jupyterlab/notebook": "^0.15.7",
-    "@jupyterlab/observables": "^1.0.6",
-    "@jupyterlab/services": "^1.1.4",
+    "@jupyterlab/apputils": "^0.16.0",
+    "@jupyterlab/cells": "^0.16.0",
+    "@jupyterlab/codemirror": "^0.16.0",
+    "@jupyterlab/coreutils": "^1.1.0",
+    "@jupyterlab/docregistry": "^0.16.0",
+    "@jupyterlab/notebook": "^0.16.0",
+    "@jupyterlab/observables": "^1.0.7",
+    "@jupyterlab/services": "^2.0.0",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/widgets": "^1.5.0",

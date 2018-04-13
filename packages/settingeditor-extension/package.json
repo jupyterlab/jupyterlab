@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/settingeditor-extension",
-  "version": "0.10.4",
+  "version": "0.11.0",
   "description": "JupyterLab - Setting Editor Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -30,12 +30,12 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.15.4",
-    "@jupyterlab/apputils": "^0.15.5",
-    "@jupyterlab/codeeditor": "^0.15.4",
-    "@jupyterlab/coreutils": "^1.0.10",
-    "@jupyterlab/rendermime": "^0.15.4",
-    "@jupyterlab/settingeditor": "^0.4.4"
+    "@jupyterlab/application": "^0.16.0",
+    "@jupyterlab/apputils": "^0.16.0",
+    "@jupyterlab/codeeditor": "^0.15.5",
+    "@jupyterlab/coreutils": "^1.1.0",
+    "@jupyterlab/rendermime": "^0.16.0",
+    "@jupyterlab/settingeditor": "^0.5.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

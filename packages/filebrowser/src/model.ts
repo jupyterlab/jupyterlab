@@ -405,12 +405,7 @@ class FileBrowserModel implements IDisposable {
    * Handle a change to the running sessions.
    */
   private _onRunningChanged(sender: Session.IManager, models: IterableOrArrayLike<Session.IModel>): void {
-    this._sessions.length = 0;
-    each(models, model => {
-      if (this._paths.has(model.path)) {
-        this._sessions.push(model);
-      }
-    });
+    this._populateSessions(models);
     this._refreshed.emit(void 0);
   }
 
@@ -419,18 +414,32 @@ class FileBrowserModel implements IDisposable {
    */
   private _onFileChanged(sender: Contents.IManager, change: Contents.IChangedArgs): void {
     let path = this._model.path;
-    let value = change.oldValue;
-    if (value && value.path && PathExt.dirname(value.path) === path) {
-      this._fileChanged.emit(change);
+    let { sessions } = this.manager.services;
+    let { oldValue, newValue } = change;
+    let value = oldValue && oldValue.path &&
+      PathExt.dirname(oldValue.path) === path ? oldValue
+        : newValue && newValue.path && PathExt.dirname(newValue.path) === path
+          ? newValue : undefined;
+
+    // If either the old value or the new value is in the current path, update.
+    if (value) {
       this._scheduleUpdate();
+      this._populateSessions(sessions.running());
+      this._fileChanged.emit(change);
       return;
     }
-    value = change.newValue;
-    if (value && value.path && PathExt.dirname(value.path) === path) {
-      this._fileChanged.emit(change);
-      this._scheduleUpdate();
-      return;
-    }
+  }
+
+  /**
+   * Populate the model's sessions collection.
+   */
+  private _populateSessions(models: IterableOrArrayLike<Session.IModel>): void {
+    this._sessions.length = 0;
+    each(models, model => {
+      if (this._paths.has(model.path)) {
+        this._sessions.push(model);
+      }
+    });
   }
 
   /**

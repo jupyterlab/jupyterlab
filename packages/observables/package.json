@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/observables",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Data structures which may be observed for changes.",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
