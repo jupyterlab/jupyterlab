@@ -157,12 +157,15 @@ JupyterLab's current maintainers are listed in alphabetical order, with affiliat
 * Brian Granger, Cal Poly (co-creator, strategy, vision, management, UI/UX design,
   architecture).
 * Jason Grout, Bloomberg (co-creator, vision, general development).
-* Cameron Oelsen, Cal Poly (UI/UX design).
 * Fernando Perez, UC Berkeley (co-creator, vision).
 * Ian Rose, UC Berkeley (Real-time collaboration, document architecture).
 * Saul Shanabrook, Quansight (general development, extensions)
 * Steven Silvester, JPMorgan Chase (co-creator, release management, packaging,
   prolific contributions throughout the code base).
+  
+ Maintainer emeritus:
+ 
+ * Cameron Oelsen, Cal Poly (UI/UX design).
 
 This list is provided to help provide context about who we are and how our team functions.
 If you would like to be listed, please submit a pull request with your information.
