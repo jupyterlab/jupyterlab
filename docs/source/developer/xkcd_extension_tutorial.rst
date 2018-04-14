@@ -259,6 +259,13 @@ to get a reference to the command palette interface.
       ICommandPalette
     } from '@jupyterlab/apputils';
 
+We will also need to install this dependency. Run the following command in the
+repository root folder.
+
+.. code:: bash
+
+    npm install --save @jupyterlab/apputils
+
 Locate the ``extension`` object of type ``JupyterLabPlugin``. Change the
 definition so that it reads like so:
 
@@ -318,6 +325,13 @@ top of the file.
       Widget
     } from '@phosphor/widgets';
 
+We will also need to install this dependency. Run the following.
+
+.. code:: bash
+
+    npm install --save @phosphor/widgets
+
+
 Then modify the ``activate`` function again so that it has the following
 code:
 
@@ -373,7 +387,7 @@ single *xkcd.com* tab should come to the foreground.
 
 If your widget is not behaving, compare your code with the reference
 project state at the `01-show-a-panel
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.31-01-show-a-panel>`__.
+tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.32-01-show-a-panel>`__.
 Once you've got everything working properly, git commit your changes and
 carry on.
 
@@ -424,7 +438,7 @@ panel. You'll address both of these problems in the upcoming sections.
 
 If you don't see a comic at all, compare your code with the
 `02-show-a-comic
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.31-02-show-a-comic>`__
+tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.32-02-show-a-comic>`__
 in the reference project. When it's working, make another git commit.
 
 .. code:: bash
@@ -507,7 +521,7 @@ of the comic.
 
 If anything is misbehaving, compare your code with the reference project
 `03-style-and-attribute
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.31-03-style-and-attribute>`__.
+tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.32-03-style-and-attribute>`__.
 When everything is working as expected, make another commit.
 
 .. code:: bash
@@ -535,6 +549,13 @@ Add the following additional import to the top of the file.
     import {
       Message
     } from '@phosphor/messaging';
+
+We will also need to install this dependency. Run the following.
+
+.. code:: bash
+
+    npm install --save @phosphor/messaging
+
 
 Then add the class just below the import statements in the ``index.ts``
 file.
@@ -652,7 +673,7 @@ comic.
 
 If anything is amiss, compare your code with the
 `04-refactor-and-refresh
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.31-04-refactor-and-refresh>`__
+tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.32-04-refactor-and-refresh>`__
 to debug. Once it's working properly, commit it.
 
 .. code:: bash
@@ -695,6 +716,13 @@ entire list of import statements looks like the following:
     } from '@phosphor/widgets';
 
     import '../style/index.css';
+
+
+We will also need to install the new dependency. Run the following.
+
+.. code:: bash
+
+    npm install --save @phosphor/coreutils
 
 Then, add the ``ILayoutRestorer`` interface to the ``JupyterLabPlugin``
 definition. This addition passes the global ``LayoutRestorer`` to the
@@ -771,7 +799,7 @@ the panel and refresh the browser tab. You should not see an xkcd tab
 after the refresh.
 
 Refer to the `05-restore-panel-state
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.31-05-restore-panel-state>`__
+tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.32-05-restore-panel-state>`__
 if your extension is misbehaving. Make a commit when the state of your
 extension persists properly.
 
@@ -831,7 +859,7 @@ directly. If it doesn't appear, make sure you've updated the package
 name properly in the ``package.json`` and run the npm command correctly.
 Compare your work with the state of the reference project at the
 `06-prepare-to-publish
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.31-06-prepare-to-publish>`__
+tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.32-06-prepare-to-publish>`__
 for further debugging.
 
 |Extension page on npmjs.com|
