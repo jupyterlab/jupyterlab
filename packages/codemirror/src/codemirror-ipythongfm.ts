@@ -25,13 +25,12 @@ CodeMirror.defineMode('ipythongfm', (config: CodeMirror.EditorConfiguration, mod
   return CodeMirror.multiplexingMode(
     gfmMode,
     {
-      open: '$', close: '$',
+      open: '$$', close: '$$',
       mode: texMode,
       delimStyle: 'delimit'
     },
     {
-      // not sure this works as $$ is interpreted at (opening $, closing $, as defined just above)
-      open: '$$', close: '$$',
+      open: '$', close: '$',
       mode: texMode,
       delimStyle: 'delimit'
     },
