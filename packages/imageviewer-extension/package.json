@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^0.16.1",
-    "@jupyterlab/apputils": "^0.16.1",
+    "@jupyterlab/apputils": "^0.16.2",
     "@jupyterlab/imageviewer": "^0.16.1"
   },
   "devDependencies": {

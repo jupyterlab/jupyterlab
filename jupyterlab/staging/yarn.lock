@@ -45,9 +45,9 @@
     "@phosphor/widgets" "^1.5.0"
     es6-promise "~4.1.1"
 
-"@jupyterlab/apputils@^0.16.1":
-  version "0.16.1"
-  resolved "https://registry.npmjs.org/@jupyterlab/apputils/-/apputils-0.16.1.tgz#da92b7adaaa70d7cc5a995ce5dba2603f0aeac5d"
+"@jupyterlab/apputils@^0.16.1", "@jupyterlab/apputils@^0.16.2":
+  version "0.16.2"
+  resolved "https://registry.npmjs.org/@jupyterlab/apputils/-/apputils-0.16.2.tgz#34bd7f29db17f63ffc0f96e3ecae4482b0280baf"
   dependencies:
     "@jupyterlab/coreutils" "^1.1.1"
     "@jupyterlab/services" "^2.0.1"
@@ -61,6 +61,7 @@
     "@phosphor/signaling" "^1.2.2"
     "@phosphor/virtualdom" "^1.1.2"
     "@phosphor/widgets" "^1.5.0"
+    "@types/react" "~16.0.19"
     react "~16.2.0"
     react-dom "~16.2.0"
     sanitize-html "~1.14.3"
@@ -875,6 +876,10 @@
   version "1.0.32"
   resolved "https://registry.npmjs.org/@types/json-stable-stringify/-/json-stable-stringify-1.0.32.tgz#121f6917c4389db3923640b2e68de5fa64dda88e"
 
+"@types/react@~16.0.19":
+  version "16.0.41"
+  resolved "https://registry.npmjs.org/@types/react/-/react-16.0.41.tgz#72146737f4d439dc95a53315de4bfb43ac8542ca"
+
 abbrev@1:
   version "1.1.1"
   resolved "https://registry.npmjs.org/abbrev/-/abbrev-1.1.1.tgz#f8f2c887ad10bf67f634f005b6987fed3179aac8"
@@ -1341,8 +1346,8 @@ caniuse-api@^1.5.2:
     lodash.uniq "^4.5.0"
 
 caniuse-db@^1.0.30000529, caniuse-db@^1.0.30000634, caniuse-db@^1.0.30000639:
-  version "1.0.30000828"
-  resolved "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000828.tgz#ed6d6f03b5a81fb291c3c0e088828b11a70948bf"
+  version "1.0.30000830"
+  resolved "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000830.tgz#6e45255b345649fd15ff59072da1e12bb3de2f13"
 
 caseless@~0.12.0:
   version "0.12.0"

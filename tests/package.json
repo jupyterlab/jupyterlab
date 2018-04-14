@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {},
   "dependencies": {
-    "@jupyterlab/apputils": "^0.16.1",
+    "@jupyterlab/apputils": "^0.16.2",
     "@jupyterlab/cells": "^0.16.1",
     "@jupyterlab/codeeditor": "^0.16.0",
     "@jupyterlab/codemirror": "^0.16.1",

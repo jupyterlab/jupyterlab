@@ -12,7 +12,7 @@
   "dependencies": {
     "@jupyterlab/application": "^0.16.1",
     "@jupyterlab/application-extension": "^0.16.1",
-    "@jupyterlab/apputils": "^0.16.1",
+    "@jupyterlab/apputils": "^0.16.2",
     "@jupyterlab/apputils-extension": "^0.16.1",
     "@jupyterlab/cells": "^0.16.1",
     "@jupyterlab/codeeditor": "^0.16.0",
