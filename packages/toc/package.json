@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^0.16.0",
-    "@jupyterlab/apputils": "^0.16",
+    "@jupyterlab/apputils": "^0.16.2",
     "@jupyterlab/cells": "^0.16",
     "@jupyterlab/coreutils": "^1.0",
     "@jupyterlab/docmanager": "^0.16",
@@ -46,10 +46,13 @@
     "react-dom": "~16.2.0"
   },
   "devDependencies": {
-    "@types/react": "~16.3.9",
+    "@types/react": "~16.0.19",
     "@types/react-dom": "~16.0.5",
     "rimraf": "^2.6.1",
     "typescript": "~2.6.0"
+  },
+  "resolutions": {
+    "@types/react": "~16.0.19"
   },
   "jupyterlab": {
     "extension": "lib/extension.js"
