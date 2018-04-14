@@ -42,7 +42,7 @@
     "@phosphor/signaling": "^1.2.2",
     "@phosphor/virtualdom": "^1.1.2",
     "@phosphor/widgets": "^1.5.0",
-    "@types/react": "^16.0.19",
+    "@types/react": "~16.0.19",
     "react": "~16.2.0",
     "react-dom": "~16.2.0",
     "sanitize-html": "~1.14.3"
