@@ -24,6 +24,7 @@ let MISSING: { [key: string]: string[] } = {
 };
 
 let UNUSED: { [key: string]: string[] } = {
+  '@jupyterlab/apputils': ['@types/react'],
   '@jupyterlab/apputils-extension': ['es6-promise'],
   '@jupyterlab/theme-dark-extension': ['font-awesome'],
   '@jupyterlab/theme-light-extension': ['font-awesome'],
