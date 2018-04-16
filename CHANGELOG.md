@@ -1,5 +1,28 @@
 # JupyterLab Changelog
 
+## [Beta 2 (v0.32.0)](https://github.com/jupyterlab/jupyterlab/releases/tag/v0.32.0)
+#### Apr 16, 2018
+This is the second in the JupyterLab Beta series of releases. It contains many enhancements, bugfixes, and  refinements, including:
+
+* Better handling of a corrupted or invalid state database ([#3619](https://github.com/jupyterlab/jupyterlab/issues/3619), [#3622](https://github.com/jupyterlab/jupyterlab/issues/3622), [#3687](https://github.com/jupyterlab/jupyterlab/issues/3687), [#4114](https://github.com/jupyterlab/jupyterlab/issues/4114)).
+* Fixing file dirty status indicator ([#3652](https://github.com/jupyterlab/jupyterlab/issues/3652)).
+* New option for whether to autosave documents ([#3734](https://github.com/jupyterlab/jupyterlab/issues/3734)).
+* More commands in the notebook context menu ([#3770](https://github.com/jupyterlab/jupyterlab/issues/3770), [#3909](https://github.com/jupyterlab/jupyterlab/issues/3909))
+* Defensively checking for completion metadata from kernels ([#3888](https://github.com/jupyterlab/jupyterlab/issues/3888))
+* New "Shutdown all" button  in the Running panel ([#3764](https://github.com/jupyterlab/jupyterlab/issues/3764))
+* Performance improvements wherein non-focused documents poll the server less ([#3931](https://github.com/jupyterlab/jupyterlab/issues/3931))
+* Changing the keyboard shortcut for singled-document-mode to something less easy to trigger ([#3889](https://github.com/jupyterlab/jupyterlab/issues/3889))
+* Performance improvements for rendering text streams, especially around progress bars ([#4045](https://github.com/jupyterlab/jupyterlab/issues/4045)).
+* Canceling a "Restart Kernel" now functions correctly ([#3703](https://github.com/jupyterlab/jupyterlab/issues/3703)).
+* Defer loading file contents until after the application has been restored ([#4087](https://github.com/jupyterlab/jupyterlab/issues/4087)).
+* Ability to rotate, flip, and invert images in the image viewer ([#4000](https://github.com/jupyterlab/jupyterlab/issues/4000))
+* Major performance improvements for large CSV viewing ([#3997](https://github.com/jupyterlab/jupyterlab/issues/3997)).
+* Always show the context menu in the file browser, even for an empty directory ([#4264](https://github.com/jupyterlab/jupyterlab/issues/4264)).
+* Handle asynchronous comm messages in the services library more correctly (Note: this means `@jupyterlab/services` is now at version 2.0!) ([[#4115](https://github.com/jupyterlab/jupyterlab/issues/4115)](https://github.com/jupyterlab/jupyterlab/pull/4115)).
+* Display the kernel banner in the console when a kernel is restarted to mark the restart ([[#3663](https://github.com/jupyterlab/jupyterlab/issues/3663)](https://github.com/jupyterlab/jupyterlab/pull/3663)).
+* Many tweaks to the UI, as well as better error handling.
+
+
 ## [Beta 1 (v0.31.0)](https://github.com/jupyterlab/jupyterlab/releases/tag/v0.31.0)
 #### Jan 11, 2018
 - Add a `/tree` handler and `Copy Shareable Link ` to file listing right click menu: https://github.com/jupyterlab/jupyterlab/pull/3396
