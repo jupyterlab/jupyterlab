@@ -218,11 +218,13 @@ class DefaultKernel implements Kernel.IKernel {
    * Clone the current kernel with a new clientId.
    */
   clone(): Kernel.IKernel {
-    return new DefaultKernel({
+    let new_kernel = new DefaultKernel({
       name: this._name,
       username: this._username,
       serverSettings: this.serverSettings
     }, this._id);
+    this._preprocessors.forEach(x => new_kernel.registerPreprocessor(x));
+    return new_kernel;
   }
 
   /**
