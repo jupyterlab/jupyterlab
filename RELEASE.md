@@ -16,6 +16,8 @@ for twine setup instructions and for why twine is the recommended method.
 
 ## Getting a clean environment
 
+For convenience, here are commands for getting a completely clean repo. This makes sure that we don't have any extra tags or commits in our repo (especially since we will push our tags later in the process), and that we are on the master branch.
+
 ```bash
 cd release
 conda remove --all -y -n jlabrelease
