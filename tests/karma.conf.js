@@ -28,8 +28,9 @@ module.exports = function (config) {
       noInfo: true,
       stats: 'errors-only'
     },
-    browserNoActivityTimeout: 31000, // 31 seconds - upped from 10 seconds
+    browserNoActivityTimeout: 120000, // 120 seconds - upped from 10 seconds
     browserDisconnectTimeout: 31000, // 31 seconds - upped from 2 seconds
+    captureTimeout: 0,
     browserDisconnectTolerance: 2,
     port: 9876,
     colors: true,
