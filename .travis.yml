@@ -5,13 +5,17 @@ dist: trusty
 sudo: required
 addons:
   firefox: latest
-  sauce_connect:
-    no_ssl_bump_domains: all
 cache:
   yarn: true
   directories:
     - $HOME/miniconda
     - $HOME/.cache/pip
+matrix:
+  include:
+  - env: GROUP=js SAUCELABS=True
+    addons: 
+      sauce_connect:
+        no_ssl_bump_domains: all
 env:
   matrix:
     - GROUP=js
