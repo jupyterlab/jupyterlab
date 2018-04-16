@@ -259,8 +259,9 @@ to get a reference to the command palette interface.
       ICommandPalette
     } from '@jupyterlab/apputils';
 
-We will also need to install this dependency. Run the following command in the
-repository root folder.
+You will also need to install this dependency. Run the following command in the
+repository root folder install the dependency and save it to your
+`package.json`:
 
 .. code:: bash
 
@@ -325,7 +326,7 @@ top of the file.
       Widget
     } from '@phosphor/widgets';
 
-We will also need to install this dependency. Run the following.
+Install this dependency as well:
 
 .. code:: bash
 
@@ -550,7 +551,7 @@ Add the following additional import to the top of the file.
       Message
     } from '@phosphor/messaging';
 
-We will also need to install this dependency. Run the following.
+Install this dependency:
 
 .. code:: bash
 
@@ -718,7 +719,7 @@ entire list of import statements looks like the following:
     import '../style/index.css';
 
 
-We will also need to install the new dependency. Run the following.
+Install this dependency:
 
 .. code:: bash
 
