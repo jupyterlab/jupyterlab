@@ -533,12 +533,20 @@ namespace OutputArea {
    * Execute code on an output area.
    */
   export
-  function execute(code: string, output: OutputArea, session: IClientSession): Promise<KernelMessage.IExecuteReplyMsg> {
+  function execute(code: string | KernelMessage.IExecuteRequest, output: OutputArea, session: IClientSession): Promise<KernelMessage.IExecuteReplyMsg> {
     // Override the default for `stop_on_error`.
-    let content: KernelMessage.IExecuteRequest = {
-      code,
-      stop_on_error: true
-    };
+    let content: KernelMessage.IExecuteRequest;
+
+    // code can be either a string (code itself) or a IExecuteRequest that has
+    // been prepared with other options
+    if (typeof code === 'string') {
+      content = {
+        code: code as string,
+        stop_on_error: true
+      };
+    } else {
+      content = code as KernelMessage.IExecuteRequest;
+    }
 
     if (!session.kernel) {
       return Promise.reject('Session has no kernel.');

@@ -782,7 +782,15 @@ namespace CodeCell {
     cell.setPrompt('*');
     model.trusted = true;
 
-    return OutputArea.execute(code, cell.outputArea, session).then(msg => {
+    let content: KernelMessage.IExecuteRequest = {
+      code,
+      stop_on_error: true
+    };
+    // allow kernel preprocessors to process execute request according
+    // to cell metadata and other extension specific information
+    session.kernel.preprocessExecuteRequest(cell, content);
+
+    return OutputArea.execute(content, cell.outputArea, session).then(msg => {
       model.executionCount = msg.content.execution_count;
       return msg;
     }).catch(e => {

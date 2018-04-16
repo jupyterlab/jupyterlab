@@ -237,6 +237,18 @@ namespace Kernel {
     requestHistory(content: KernelMessage.IHistoryRequest): Promise<KernelMessage.IHistoryReplyMsg>;
 
     /**
+     * register a "preprocessor" that processes IExecuteRequest with cell meta clearData
+     * and possibly other frontend information. The processors will be called before a
+     * cell executes specified code.
+     */
+    registerPreprocessor(processor: (cell: any, request: KernelMessage.IExecuteRequest) => boolean): void;
+
+    /**
+     * process IExecuteRequest will registered registerPreprocessor
+     */
+    preprocessExecuteRequest(cell: any, msg: KernelMessage.IExecuteRequest): boolean;
+
+    /**
      * Send an `execute_request` message.
      *
      * @param content - The content of the request.

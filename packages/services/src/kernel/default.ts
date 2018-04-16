@@ -62,6 +62,13 @@ const KERNELSPEC_SERVICE_URL = 'api/kernelspecs';
 declare var requirejs: any;
 
 
+// a sample function that could be defined by an extension to
+// pass cell meta data to the kernel.
+// see https://github.com/jupyter/notebook/pull/3391 for details
+function add_meta_info(cell: any, msg: KernelMessage.IExecuteRequest): boolean {
+  msg.cell_metadata = cell.model.metadata;
+  return true;
+}
 /**
  * Implementation of the Kernel object
  */
@@ -78,8 +85,12 @@ class DefaultKernel implements Kernel.IKernel {
     this._username = options.username || '';
     this._futures = new Map<string, KernelFutureHandler>();
     this._commPromises = new Map<string, Promise<Kernel.IComm>>();
+    this._preprocessors = [];
     this._createSocket();
     Private.runningKernels.push(this);
+    // for demonstration only. An extension would register a preprocessors
+    // when a kernel is connected.
+    this.registerPreprocessor(add_meta_info);
   }
 
   /**
@@ -459,6 +470,35 @@ class DefaultKernel implements Kernel.IKernel {
     };
     let msg = KernelMessage.createShellMessage(options, content);
     return Private.handleShellMessage(this, msg) as Promise<KernelMessage.IHistoryReplyMsg>;
+  }
+
+  /**
+   * register a "preprocessor" that processes IExecuteRequest with cell meta clearData
+   * and possibly other frontend information. The processors will be called before a
+   * cell executes specified code.
+   */
+  registerPreprocessor(processor: (cell: any, request: KernelMessage.IExecuteRequest) => boolean): void {
+    this._preprocessors.push(processor);
+  }
+
+  /**
+   * process IExecuteRequest will registered registerPreprocessor
+   */
+  preprocessExecuteRequest(cell: any, msg: KernelMessage.IExecuteRequest): boolean {
+    let continueHandling: boolean;
+    for (let i=0; i < this._preprocessors.length; ++i) {
+      if (this._preprocessors[i] === null) { continue; }
+      try {
+        continueHandling = this._preprocessors[i](cell, msg);
+      } catch (err) {
+        continueHandling = true;
+        console.error(err);
+      }
+      if (continueHandling === false) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**
@@ -1037,6 +1077,7 @@ class DefaultKernel implements Kernel.IKernel {
   private _msgIdToDisplayIds = new Map<string, string[]>();
   private _terminated = new Signal<this, void>(this);
   private _noOp = () => { /* no-op */};
+  private _preprocessors : ((cell: any, msg: KernelMessage.IExecuteRequest) => boolean)[] = [];
 }
 
 
