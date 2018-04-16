@@ -36,18 +36,23 @@ module.exports = function (config) {
     singleRun: true,
     sauceLabs: {
       testName: process.env.LERNA_PACKAGE_NAME,
-      recordScreenshots: true
+      recordScreenshots: true,
+      connectOptions: {
+        '--no-ssl-bump-domains': 'all'
+      }
     },
     customLaunchers: {
       SL_Chrome: {
         base: 'SauceLabs',
         browserName: 'chrome',
-        version: 'latest'
+        version: 'latest',
+        extendedDebugging : true
       },
       SL_Firefox: {
         base: 'SauceLabs',
         browserName: 'firefox',
-        version: 'latest'
+        version: 'latest',
+        extendedDebugging : true
       },
       SL_Safari: {
         base: 'SauceLabs',

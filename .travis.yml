@@ -5,7 +5,8 @@ dist: trusty
 sudo: required
 addons:
   firefox: latest
-  sauce_connect: true
+  sauce_connect:
+    no_ssl_bump_domains: all
 cache:
   yarn: true
   directories:
