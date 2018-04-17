@@ -60,7 +60,7 @@ namespace CommandIDs {
   const open = 'docmanager:open';
 
   export
-  const openTab = 'docmanager:open-tab';
+  const openBrowserTab = 'docmanager:open-browser-tab';
 
   export
   const openDirect = 'docmanager:open-direct';
@@ -260,7 +260,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     mnemonic: args => args['mnemonic'] as number || -1
   });
 
-  commands.addCommand(CommandIDs.openTab, {
+  commands.addCommand(CommandIDs.openBrowserTab, {
     execute: args => {
       const path = typeof args['path'] === 'undefined' ? ''
         : args['path'] as string;
