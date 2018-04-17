@@ -20,7 +20,7 @@
   "dependencies": {
     "@jupyterlab/application": "^0.16.0",
     "@jupyterlab/rendermime": "^0.16.0",
-    "mathjax3": "3.0.0-alpha.4"
+    "mathjax3": "3.0.0-alpha.5"
   },
   "devDependencies": {
     "rimraf": "^2.6.2",
