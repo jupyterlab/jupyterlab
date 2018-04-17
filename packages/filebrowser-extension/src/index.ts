@@ -81,6 +81,9 @@ namespace CommandIDs {
   const open = 'filebrowser:open';
 
   export
+  const openTab = 'filebrowser:open-tab';
+
+  export
   const paste = 'filebrowser:paste';
 
   export
@@ -347,6 +350,23 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, bro
     mnemonic: 0
   });
 
+  commands.addCommand(CommandIDs.openTab, {
+    execute: () => {
+      const widget = tracker.currentWidget;
+
+      if (!widget) {
+        return;
+      }
+
+      return Promise.all(toArray(map(widget.selectedItems(), item => {
+        return commands.execute('docmanager:open-tab', { path: item.path });
+      })));
+    },
+    iconClass: 'jp-MaterialIcon jp-AddIcon',
+    label: 'Open in New Browser Tab',
+    mnemonic: 0
+  });
+
   commands.addCommand(CommandIDs.paste, {
     execute: () => {
       const widget = tracker.currentWidget;
@@ -440,6 +460,7 @@ function createContextMenu(model: Contents.IModel | undefined, commands: Command
 
   const path = model.path;
   if (model.type !== 'directory') {
+    menu.addItem({ command: CommandIDs.openTab });
     const factories = registry.preferredWidgetFactories(path).map(f => f.name);
     if (path && factories.length > 1) {
       const command =  'docmanager:open';
