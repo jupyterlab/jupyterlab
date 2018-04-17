@@ -18,13 +18,13 @@
     "mathjax"
   ],
   "dependencies": {
-    "@jupyterlab/application": "^0.15.0",
-    "@jupyterlab/rendermime": "^0.15.0",
-    "mathjax3": "3.0.0-alpha.2"
+    "@jupyterlab/application": "^0.16.0",
+    "@jupyterlab/rendermime": "^0.16.0",
+    "mathjax3": "3.0.0-alpha.4"
   },
   "devDependencies": {
     "rimraf": "^2.6.2",
-    "typescript": "~2.4.2"
+    "typescript": "~2.6.2"
   },
   "scripts": {
     "build": "tsc",

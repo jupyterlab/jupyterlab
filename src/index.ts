@@ -25,14 +25,18 @@ import {
 } from 'mathjax3/mathjax3/output/chtml';
 
 import {
+  browserAdaptor
+} from 'mathjax3/mathjax3/adaptors/browserAdaptor';
+
+import {
   TeXFont
 } from 'mathjax3/mathjax3/output/chtml/fonts/tex';
 
-// Handler for HTML documents.
 import {
-  HTMLHandler
-} from "mathjax3/mathjax3/handlers/html/HTMLHandler.js";
-MathJax.handlers.register(new HTMLHandler());
+  RegisterHTMLHandler
+} from "mathjax3/mathjax3/handlers/html";
+
+RegisterHTMLHandler(browserAdaptor());
 
 // Load the MathJax fonts
 import '../style/index.css';
@@ -50,7 +54,6 @@ class MathJax3Typesetter implements ILatexTypesetter {
 
   constructor() {
     const chtml = new CHTML({ font: new emptyFont() });
-    chtml.nodes.document = window.document;
     const tex = new TeX({inlineMath: [['$', '$'], ['\\(', '\\)'] ]});
     this._html = MathJax.document(window.document, {
       InputJax: tex,
