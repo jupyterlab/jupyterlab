@@ -356,7 +356,7 @@ class _AppHandler(object):
                 uninstalled.remove(extension)
                 config['uninstalled_core_extensions'] = uninstalled
                 self._write_build_config(config)
-            return
+            return False
 
         # Create the app dirs if needed.
         self._ensure_app_dirs()
