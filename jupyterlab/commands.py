@@ -1166,15 +1166,15 @@ class _AppHandler(object):
         info['path'] = target
         return info
 
-    def _extract_package(self, source, tempdir):
+    def _extract_package(self, source, tempdir, quiet=False):
         # npm pack the extension
         is_dir = osp.exists(source) and osp.isdir(source)
         if is_dir and not osp.exists(pjoin(source, 'node_modules')):
-            self._run(['node', YARN_PATH, 'install'], cwd=source)
+            self._run(['node', YARN_PATH, 'install'], cwd=source, quiet=quiet)
 
         info = dict(source=source, is_dir=is_dir)
 
-        ret = self._run([which('npm'), 'pack', source], cwd=tempdir)
+        ret = self._run([which('npm'), 'pack', source], cwd=tempdir, quiet=quiet)
         if ret != 0:
             msg = '"%s" is not a valid npm package'
             raise ValueError(msg % source)
@@ -1215,7 +1215,8 @@ class _AppHandler(object):
                 # Found a compatible version
                 # Verify that the version is a valid extension.
                 with TemporaryDirectory() as tempdir:
-                    info = self._extract_package('%s@%s' % (name, version), tempdir)
+                    info = self._extract_package(
+                        '%s@%s' % (name, version), tempdir, quiet=True)
                 if _validate_extension(info['data']):
                     # Invalid, do not consider other versions
                     return
