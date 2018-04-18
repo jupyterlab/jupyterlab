@@ -28,7 +28,8 @@ from jupyterlab.commands import (
     install_extension, uninstall_extension, list_extensions,
     build, link_package, unlink_package, build_check,
     disable_extension, enable_extension, get_app_info,
-    check_extension, _test_overlap, _get_core_data
+    check_extension, _test_overlap, _get_core_data,
+    update_extension,
 )
 
 here = os.path.dirname(os.path.abspath(__file__))
@@ -489,7 +490,7 @@ class TestExtension(TestCase):
                 }
             }
 
-        def _mock_extract(self, source, tempdir):
+        def _mock_extract(self, source, tempdir, *args, **kwargs):
             data = dict(
                 name=source, version='2.1.0',
                 jupyterlab=dict(extension=True),
@@ -529,3 +530,92 @@ class TestExtension(TestCase):
             orig_install = commands._AppHandler._install_extension
             with p3, pytest.raises(Success):
                 install_extension('mockextension')
+
+
+    def test_update_single(self):
+        installed = []
+        def _mock_install(self, name, *args, **kwargs):
+            installed.append(name[0] + name[1:].split('@')[0])
+            return dict(name=name, is_dir=False, path='foo/bar/' + name)
+
+        def _mock_latest(self, name):
+            return '10000.0.0'
+
+        p1 = patch.object(
+            commands._AppHandler,
+            '_install_extension',
+            _mock_install)
+        p2 = patch.object(
+            commands._AppHandler,
+            '_latest_compatible_package_version',
+            _mock_latest)
+
+        install_extension(self.mock_extension)
+        install_extension(self.mock_mimeextension)
+
+        with p1, p2:
+            assert True == update_extension(self.pkg_names['extension'])
+        assert installed == [self.pkg_names['extension']]
+
+
+    def test_update_missing_extension(self):
+        assert False == update_extension('foo')
+
+
+    def test_update_multiple(self):
+        installed = []
+        def _mock_install(self, name, *args, **kwargs):
+            installed.append(name[0] + name[1:].split('@')[0])
+            return dict(name=name, is_dir=False, path='foo/bar/' + name)
+
+        def _mock_latest(self, name):
+            return '10000.0.0'
+
+        p1 = patch.object(
+            commands._AppHandler,
+            '_install_extension',
+            _mock_install)
+        p2 = patch.object(
+            commands._AppHandler,
+            '_latest_compatible_package_version',
+            _mock_latest)
+
+        install_extension(self.mock_extension)
+        install_extension(self.mock_mimeextension)
+
+        with p1, p2:
+            assert True == update_extension(self.pkg_names['extension'])
+            assert True == update_extension(self.pkg_names['mimeextension'])
+        assert installed == [self.pkg_names['extension'], self.pkg_names['mimeextension']]
+
+    def test_update_all(self):
+        updated = []
+        def _mock_update(self, name, *args, **kwargs):
+            updated.append(name[0] + name[1:].split('@')[0])
+            return True
+
+        original_app_info = commands._AppHandler._get_app_info
+        def _mock_app_info(self):
+            info = original_app_info(self)
+            info['local_extensions'] = []
+            return info
+
+
+        install_extension(self.mock_extension)
+        install_extension(self.mock_mimeextension)
+
+        p1 = patch.object(
+            commands._AppHandler,
+            '_update_extension',
+            _mock_update)
+
+        # local packages are not updated, so mock them as non-local:
+        p2 = patch.object(
+            commands._AppHandler,
+            '_get_app_info',
+            _mock_app_info
+        )
+
+        with p1, p2:
+            assert True == update_extension(None, all=True)
+        assert sorted(updated) == [self.pkg_names['extension'], self.pkg_names['mimeextension']]

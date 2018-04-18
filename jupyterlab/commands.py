@@ -30,12 +30,12 @@ from .jlpmapp import YARN_PATH, HERE
 
 if sys.version_info.major < 3:
     from urllib2 import Request, urlopen, quote
-    from urllib2 import URLError
+    from urllib2 import URLError, HTTPError
     from urlparse import urljoin
 
 else:
     from urllib.request import Request, urlopen, urljoin, quote
-    from urllib.error import URLError
+    from urllib.error import URLError, HTTPError
 
 
 # The regex for expecting the webpack output.
@@ -235,6 +235,14 @@ def uninstall_extension(name, app_dir=None, logger=None):
     return handler.uninstall_extension(name)
 
 
+def update_extension(name=None, all=False, app_dir=None, logger=None):
+    """Update an extension by name.
+    """
+    _node_check()
+    handler = _AppHandler(app_dir, logger)
+    return handler.update_extension(name, all)
+
+
 def clean(app_dir=None):
     """Clean the JupyterLab application directory."""
     app_dir = app_dir or get_app_dir()
@@ -353,9 +361,11 @@ class _AppHandler(object):
             config = self._read_build_config()
             uninstalled = config.get('uninstalled_core_extensions', [])
             if extension in uninstalled:
+                self.logger.info('Installing core extension %s' % extension)
                 uninstalled.remove(extension)
                 config['uninstalled_core_extensions'] = uninstalled
                 self._write_build_config(config)
+                return True
             return False
 
         # Create the app dirs if needed.
@@ -540,14 +550,15 @@ class _AppHandler(object):
         # Allow for uninstalled core extensions.
         data = self.info['core_data']
         if name in self.info['core_extensions']:
-            self.logger.info('Uninstalling core extension %s' % name)
             config = self._read_build_config()
             uninstalled = config.get('uninstalled_core_extensions', [])
             if name not in uninstalled:
+                self.logger.info('Uninstalling core extension %s' % name)
                 uninstalled.append(name)
                 config['uninstalled_core_extensions'] = uninstalled
                 self._write_build_config(config)
-            return True
+                return True
+            return False
 
         local = self.info['local_extensions']
 
@@ -567,6 +578,36 @@ class _AppHandler(object):
 
         self.logger.warn('No labextension named "%s" installed' % name)
         return False
+
+    def update_extension(self, name=None, all_ext=False):
+        if all_ext:
+            should_rebuild = False
+            for (extname, _) in self.info['extensions'].items():
+                if extname in self.info['local_extensions']:
+                    continue
+                updated = self._update_extension(extname)
+                # Rebuild if at least one update happens:
+                should_rebuild = should_rebuild or updated
+            return should_rebuild
+
+        if name not in self.info['extensions']:
+            self.logger.warn('No labextension named "%s" installed' % name)
+            return False
+        return self._update_extension(name)
+
+    def _update_extension(self, name):
+        try:
+            latest = self._latest_compatible_package_version(name)
+        except URLError:
+            return False
+        if latest is None:
+            return False
+        if latest == self.info['extensions'][name]['version']:
+            self.logger.info('Extension %r already up to date' % name)
+            return False
+        self.logger.info('Updating %s to version %s' % (name, latest))
+        return self.install_extension('%s@%s' % (name, latest))
+
 
     def link_package(self, path):
         """Link a package at the given path.
