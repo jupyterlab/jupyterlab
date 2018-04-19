@@ -27,14 +27,6 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  ConsolePanel
-} from '@jupyterlab/console';
-
-import {
-  NotebookPanel
-} from '@jupyterlab/notebook';
-
-import {
   IClientSession
 } from '@jupyterlab/apputils';
 
@@ -677,14 +669,7 @@ class ApplicationShell extends Widget {
     this._currentChanged.emit(args);
     this._onLayoutModified();
 
-    if (args.newValue instanceof ConsolePanel) {
-      this._onCurrentSession(args.newValue.session);
-    } else if (args.newValue instanceof NotebookPanel) {
-      this._onCurrentSession(args.newValue.session);
-    } else {
-      this._onCurrentSession(undefined);
-    }
-
+    this._onCurrentSession(args.newValue ? (args.newValue as any).session : undefined);
   }
 
   /**
