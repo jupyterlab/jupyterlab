@@ -152,28 +152,12 @@ const main: JupyterLabPlugin<void> = {
       }
     });
 
-    let isBusy = false;
     const favicon = document.querySelector('link[rel="shortcut icon"]') as HTMLLinkElement;
-    const icons = ['favicon-busy-1.ico', 'favicon-busy-3.ico', 'favicon-busy-3.ico'];
-
-    let interval = 0;
-    let i = 0;
-
     app.serviceManager.sessions.runningChanged.connect((_, sessions) => {
-      const newIsBusy = sessions.map(s => s.kernel.execution_state).indexOf('busy') !== -1;
-      if (newIsBusy !== isBusy) {
-        isBusy = newIsBusy;
-        console.log({isBusy});
-        if (isBusy && !interval) {
-          interval = window.setInterval(() => {
-              favicon.href = `/static/base/images/${icons[i++ % 3]}`;
-          }, 300);
-        } else {
-            window.clearInterval(interval);
-            favicon.href = '/static/base/images/favicon.ico';
-            interval = i = 0;
-        }
-      }
+      const isBusy = sessions.map(s => s.kernel.execution_state).indexOf('busy') !== -1;
+      const filename = isBusy ? 'favicon-busy-1.ico' : 'favicon.ico';
+      console.log(isBusy);
+      favicon.href = `/static/base/images/${filename}`;
     });
   },
   autoStart: true
