@@ -32,10 +32,10 @@
   },
   "dependencies": {
     "@jupyterlab/apputils": "^0.16.3",
-    "@jupyterlab/console": "^0.15.4",
+    "@jupyterlab/console": "^0.16.2",
     "@jupyterlab/coreutils": "^1.1.2",
     "@jupyterlab/docregistry": "^0.16.2",
-    "@jupyterlab/notebook": "^0.15.7",
+    "@jupyterlab/notebook": "^0.16.2",
     "@jupyterlab/rendermime": "^0.16.2",
     "@jupyterlab/rendermime-interfaces": "^1.0.9",
     "@jupyterlab/services": "^2.0.2",
