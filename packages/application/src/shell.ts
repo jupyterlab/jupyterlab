@@ -26,6 +26,21 @@ import {
   DocumentRegistry
 } from '@jupyterlab/docregistry';
 
+import {
+  ConsolePanel
+} from '@jupyterlab/console';
+
+import {
+  NotebookPanel
+} from '@jupyterlab/notebook';
+
+import {
+  IClientSession
+} from '@jupyterlab/apputils';
+
+import {
+  Kernel
+} from '@jupyterlab/services';
 
 /**
  * The class name added to AppShell instances.
@@ -661,6 +676,32 @@ class ApplicationShell extends Widget {
     }
     this._currentChanged.emit(args);
     this._onLayoutModified();
+
+    if (args.newValue instanceof ConsolePanel) {
+      this._onCurrentSession(args.newValue.session);
+    } else if (args.newValue instanceof NotebookPanel) {
+      this._onCurrentSession(args.newValue.session);
+    } else {
+      this._onCurrentSession(undefined);
+    }
+
+  }
+
+  /**
+   * Handle a change to the session of the current widget.
+   */
+  private _onCurrentSession(session?: IClientSession) {
+    this._onCurrentStatus(session, session ? session.status : undefined);
+    Signal.disconnectReceiver(this._onCurrentStatus);
+    if (session) {
+      session.statusChanged.connect(this._onCurrentStatus);
+    }
+  }
+
+  private _onCurrentStatus(sender?: IClientSession, status?: Kernel.Status) {
+    const filename = status === 'busy' ? 'favicon-busy-1.ico' : 'favicon.ico';
+    const favicon = document.querySelector('link[rel="shortcut icon"]') as HTMLLinkElement;
+    favicon.href = `/static/base/images/${filename}`;
   }
 
   /**

@@ -151,14 +151,6 @@ const main: JupyterLabPlugin<void> = {
         return (event as any).returnValue = message;
       }
     });
-
-    const favicon = document.querySelector('link[rel="shortcut icon"]') as HTMLLinkElement;
-    app.serviceManager.sessions.runningChanged.connect((_, sessions) => {
-      const isBusy = sessions.map(s => s.kernel.execution_state).indexOf('busy') !== -1;
-      const filename = isBusy ? 'favicon-busy-1.ico' : 'favicon.ico';
-      console.log(isBusy);
-      favicon.href = `/static/base/images/${filename}`;
-    });
   },
   autoStart: true
 };
