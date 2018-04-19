@@ -258,10 +258,11 @@ Kernel.getSpecs().then(kernelSpecs => {
     name: kernelSpecs.default,
   });
 }).then(kernel => {
-  let comm = kernel.connectToComm('test');
-  comm.open('initial state');
-  comm.send('test');
-  comm.close('bye');
+  let comm = kernel.connectToComm('test').then(comm => {
+    comm.open('initial state');
+    comm.send('test');
+    comm.close('bye');
+  });
 });
 
 // Create a comm from the client side.

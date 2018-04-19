@@ -1150,7 +1150,7 @@ class _AppHandler(object):
                 # Extend message to better guide the user what to do:
                 conflicts = '\n'.join(msg.splitlines()[2:])
                 msg = ''.join((
-                    self._format_no_compatible_package_version(extension),
+                    self._format_no_compatible_package_version(name),
                     "\n\n",
                     conflicts))
 

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/theme-light-extension",
-  "version": "0.16.0",
+  "version": "0.16.2",
   "description": "JupyterLab - Default Light Theme",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -35,8 +35,8 @@
     "watch:webpack": "webpack --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.16.0",
-    "@jupyterlab/apputils": "^0.16.0",
+    "@jupyterlab/application": "^0.16.2",
+    "@jupyterlab/apputils": "^0.16.3",
     "font-awesome": "~4.7.0"
   },
   "devDependencies": {

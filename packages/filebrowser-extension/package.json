@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/filebrowser-extension",
-  "version": "0.16.0",
+  "version": "0.16.2",
   "description": "JupyterLab - Filebrowser Widget Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -29,14 +29,14 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.16.0",
-    "@jupyterlab/apputils": "^0.16.0",
-    "@jupyterlab/coreutils": "^1.1.0",
-    "@jupyterlab/docmanager": "^0.16.0",
-    "@jupyterlab/docregistry": "^0.16.0",
-    "@jupyterlab/filebrowser": "^0.16.0",
-    "@jupyterlab/launcher": "^0.16.0",
-    "@jupyterlab/services": "^2.0.0",
+    "@jupyterlab/application": "^0.16.2",
+    "@jupyterlab/apputils": "^0.16.3",
+    "@jupyterlab/coreutils": "^1.1.2",
+    "@jupyterlab/docmanager": "^0.16.2",
+    "@jupyterlab/docregistry": "^0.16.2",
+    "@jupyterlab/filebrowser": "^0.16.2",
+    "@jupyterlab/launcher": "^0.16.2",
+    "@jupyterlab/services": "^2.0.2",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/commands": "^1.4.0",
     "@phosphor/widgets": "^1.5.0"

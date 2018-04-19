@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/shortcuts-extension",
-  "version": "0.16.0",
+  "version": "0.16.2",
   "description": "JupyterLab - Shortcuts Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -30,8 +30,8 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.16.0",
-    "@jupyterlab/coreutils": "^1.1.0",
+    "@jupyterlab/application": "^0.16.2",
+    "@jupyterlab/coreutils": "^1.1.2",
     "@phosphor/commands": "^1.4.0",
     "@phosphor/coreutils": "^1.3.0",
     "@phosphor/disposable": "^1.1.2"

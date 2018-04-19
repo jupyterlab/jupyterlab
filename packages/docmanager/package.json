@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/docmanager",
-  "version": "0.16.0",
+  "version": "0.16.2",
   "description": "JupyterLab - Document Manager",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -29,10 +29,10 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^0.16.0",
-    "@jupyterlab/coreutils": "^1.1.0",
-    "@jupyterlab/docregistry": "^0.16.0",
-    "@jupyterlab/services": "^2.0.0",
+    "@jupyterlab/apputils": "^0.16.3",
+    "@jupyterlab/coreutils": "^1.1.2",
+    "@jupyterlab/docregistry": "^0.16.2",
+    "@jupyterlab/services": "^2.0.2",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/coreutils": "^1.3.0",
     "@phosphor/disposable": "^1.1.2",

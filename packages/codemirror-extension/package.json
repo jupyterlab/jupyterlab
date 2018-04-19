@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/codemirror-extension",
-  "version": "0.16.0",
+  "version": "0.16.2",
   "description": "JupyterLab - CodeMirror Provider Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -30,12 +30,12 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.16.0",
-    "@jupyterlab/codeeditor": "^0.15.5",
-    "@jupyterlab/codemirror": "^0.16.0",
-    "@jupyterlab/coreutils": "^1.1.0",
-    "@jupyterlab/fileeditor": "^0.16.0",
-    "@jupyterlab/mainmenu": "^0.5.0",
+    "@jupyterlab/application": "^0.16.2",
+    "@jupyterlab/codeeditor": "^0.16.1",
+    "@jupyterlab/codemirror": "^0.16.2",
+    "@jupyterlab/coreutils": "^1.1.2",
+    "@jupyterlab/fileeditor": "^0.16.2",
+    "@jupyterlab/mainmenu": "^0.5.2",
     "@phosphor/widgets": "^1.5.0",
     "codemirror": "~5.35.0"
   },

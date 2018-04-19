@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/rendermime-extension",
-  "version": "0.10.0",
+  "version": "0.10.2",
   "description": "A rendermime extension for JupyterLab",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -28,8 +28,8 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.16.0",
-    "@jupyterlab/rendermime": "^0.16.0"
+    "@jupyterlab/application": "^0.16.2",
+    "@jupyterlab/rendermime": "^0.16.2"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

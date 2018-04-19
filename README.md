@@ -50,7 +50,7 @@ If you use ``conda``, you can install as:
 
 
 ```bash
-jupyter serverextension enable --py jupyterlab --sys-prefix
+conda install -c conda-forge jupyterlab
 ```
 
 #### pip
@@ -144,7 +144,31 @@ copyright on their contributions. All code is licensed under the terms of the re
 
 ### Team
 
-JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by an open community of contributors. Our [maintainer team](https://jupyterlab.readthedocs.io/en/latest/developer/team.html) is accompanied by a much larger group of contributors to JupyterLab and Project Jupyter as a whole.
+JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by an open community of contributors. Our maintainer team is accompanied by a much larger group of contributors to JupyterLab and Project Jupyter as a whole.
+
+JupyterLab's current maintainers are listed in alphabetical order, with affiliation, and main areas of contribution:
+
+* Chris Colbert, Project Jupyter (co-creator, application/low-level architecture,
+  technical leadership, vision, phosphor.js)
+* Afshin Darian, Project Jupyter (co-creator, settings, inspector, completer,
+  prolific contributions throughout the code base).
+* Jessica Forde, Project Jupyter (demo, documentation)
+* Tim George, Cal Poly (UI/UX design, strategy, management, user needs analysis)
+* Brian Granger, Cal Poly (co-creator, strategy, vision, management, UI/UX design,
+  architecture).
+* Jason Grout, Bloomberg (co-creator, vision, general development).
+* Fernando Perez, UC Berkeley (co-creator, vision).
+* Ian Rose, UC Berkeley (Real-time collaboration, document architecture).
+* Saul Shanabrook, Quansight (general development, extensions)
+* Steven Silvester, JPMorgan Chase (co-creator, release management, packaging,
+  prolific contributions throughout the code base).
+  
+ Maintainer emeritus:
+ 
+ * Cameron Oelsen, Cal Poly (UI/UX design).
+
+This list is provided to help provide context about who we are and how our team functions.
+If you would like to be listed, please submit a pull request with your information.
 
 ----
 

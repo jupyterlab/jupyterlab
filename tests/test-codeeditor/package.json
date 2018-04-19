@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-codeeditor",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "private": true,
   "scripts": {
     "build": "tsc",
@@ -15,9 +15,9 @@
     "watch:src": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/codeeditor": "^0.15.5",
-    "@jupyterlab/codemirror": "^0.16.0",
-    "@jupyterlab/observables": "^1.0.7",
+    "@jupyterlab/codeeditor": "^0.16.1",
+    "@jupyterlab/codemirror": "^0.16.2",
+    "@jupyterlab/observables": "^1.0.9",
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/widgets": "^1.5.0",
     "expect.js": "~0.3.1",
