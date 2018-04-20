@@ -256,55 +256,55 @@
       },
       "type": "object"
     },
-    "notebook:change-to-cell-heading-1": {
+    "notebook:change-cell-to-heading-1": {
       "default": { },
       "properties": {
-        "command": { "default": "notebook:change-to-cell-heading-1" },
+        "command": { "default": "notebook:change-cell-to-heading-1" },
         "keys": { "default": ["1"] },
         "selector": { "default": ".jp-Notebook:focus" }
       },
       "type": "object"
     },
-    "notebook:change-to-cell-heading-2": {
+    "notebook:change-cell-to-heading-2": {
       "default": { },
       "properties": {
-        "command": { "default": "notebook:change-to-cell-heading-2" },
+        "command": { "default": "notebook:change-cell-to-heading-2" },
         "keys": { "default": ["2"] },
         "selector": { "default": ".jp-Notebook:focus" }
       },
       "type": "object"
     },
-    "notebook:change-to-cell-heading-3": {
+    "notebook:change-cell-to-heading-3": {
       "default": { },
       "properties": {
-        "command": { "default": "notebook:change-to-cell-heading-3" },
+        "command": { "default": "notebook:change-cell-to-heading-3" },
         "keys": { "default": ["3"] },
         "selector": { "default": ".jp-Notebook:focus" }
       },
       "type": "object"
     },
-    "notebook:change-to-cell-heading-4": {
+    "notebook:change-cell-to-heading-4": {
       "default": { },
       "properties": {
-        "command": { "default": "notebook:change-to-cell-heading-4" },
+        "command": { "default": "notebook:change-cell-to-heading-4" },
         "keys": { "default": ["4"] },
         "selector": { "default": ".jp-Notebook:focus" }
       },
       "type": "object"
     },
-    "notebook:change-to-cell-heading-5": {
+    "notebook:change-cell-to-heading-5": {
       "default": { },
       "properties": {
-        "command": { "default": "notebook:change-to-cell-heading-5" },
+        "command": { "default": "notebook:change-cell-to-heading-5" },
         "keys": { "default": ["5"] },
         "selector": { "default": ".jp-Notebook:focus" }
       },
       "type": "object"
     },
-    "notebook:change-to-cell-heading-6": {
+    "notebook:change-cell-to-heading-6": {
       "default": { },
       "properties": {
-        "command": { "default": "notebook:change-to-cell-heading-6" },
+        "command": { "default": "notebook:change-cell-to-heading-6" },
         "keys": { "default": ["6"] },
         "selector": { "default": ".jp-Notebook:focus" }
       },
