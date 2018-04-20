@@ -95,7 +95,7 @@ Create a repository
 ~~~~~~~~~~~~~~~~~~~
 
 Create a new repository for your extension. For example, on
-`Github <https://help.github.com/articles/create-a-repo/>`__. This is an
+`GitHub <https://help.github.com/articles/create-a-repo/>`__. This is an
 optional step but highly recommended if you want to share your
 extension.
 
