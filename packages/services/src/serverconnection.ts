@@ -5,6 +5,10 @@ import {
   PageConfig
 } from '@jupyterlab/coreutils';
 
+import {
+  URLExt
+} from '@jupyterlab/coreutils';
+
 
 /**
  * Handle the default `fetch` and `WebSocket` providers.
@@ -203,9 +207,26 @@ namespace Private {
    */
   export
   function makeSettings(options: Partial<ServerConnection.ISettings> = {}): ServerConnection.ISettings {
+    let extra: Partial<ServerConnection.ISettings> = {};
+    if (options.baseUrl && !options.wsUrl) {
+      // setting baseUrl = https://host...
+      // sets wsUrl = wss://host...
+      let baseUrl = options.baseUrl;
+      if (baseUrl.indexOf('http') !== 0) {
+        if (typeof location !== 'undefined') {
+          baseUrl = URLExt.join(location.origin, baseUrl);
+        } else {
+          baseUrl = URLExt.join('http://localhost:8888/', baseUrl);
+        }
+      }
+      extra = {
+        wsUrl: 'ws' + baseUrl.slice(4),
+      };
+    }
     return {
       ...ServerConnection.defaultSettings,
-      ...options
+      ...options,
+      ...extra,
     };
   }
 
