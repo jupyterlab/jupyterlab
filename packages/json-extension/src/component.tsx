@@ -67,9 +67,10 @@ class Component extends React.Component<IProps, IState> {
 
   render() {
     const { data, metadata } = this.props;
+    const root = metadata && metadata.root ? metadata.root as string : 'root';
     const keyPaths = this.state.filter
-      ? filterPaths(data, this.state.filter)
-      : ['root'];
+      ? filterPaths(data, this.state.filter, [root])
+      : [root];
     return (
       <div style={{
         position: 'relative',
@@ -124,6 +125,7 @@ class Component extends React.Component<IProps, IState> {
             arrowSign: { color: 'cm-variable' }
           }}
           invertTheme={false}
+          keyPath={[root]}
           labelRenderer={([label, type]) => {
             let className = 'cm-variable';
             // if (type === 'root') className = 'cm-variable-2';
