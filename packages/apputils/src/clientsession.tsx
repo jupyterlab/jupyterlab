@@ -609,6 +609,8 @@ class ClientSession implements IClientSession {
       if (model) {
         return this._changeKernel(model).then(() => true);
       }
+      // The case of the user selecting "No Kernel"
+      return true;
     }).then(selected => {
       this._dialog = null;
       return selected;

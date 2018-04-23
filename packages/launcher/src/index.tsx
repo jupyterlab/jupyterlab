@@ -111,7 +111,7 @@ interface ILauncherItem {
    * The callback must return the widget that was created so the launcher
    * can replace itself with the created widget.
    */
-  callback: (cwd: string, name: string) => Widget | Promise<Widget>;
+  callback: (cwd: string, name: string) => Widget | Promise<Widget> | undefined | Promise<void>;
 
   /**
    * The icon class for the launcher item.
@@ -394,10 +394,9 @@ function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcher
     let callback = item.callback as any;
     let value = callback(launcher.cwd, item.name);
     Promise.resolve(value).then(widget => {
-      if (!widget) {
-        throw new Error('Launcher callbacks must resolve with a widget');
+      if (widget) {
+        launcherCallback(widget);
       }
-      launcherCallback(widget);
       launcher.dispose();
     }).catch(err => {
       launcher.pending = false;
