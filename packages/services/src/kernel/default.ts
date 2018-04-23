@@ -109,6 +109,13 @@ class DefaultKernel implements Kernel.IKernel {
   }
 
   /**
+   * A signal emitted for any kernel messages sent or received.
+   */
+  get anyMessage(): ISignal<this, KernelMessage.IMessage> {
+    return this._anyMessage;
+  }
+
+  /**
    * A signal emitted for unhandled kernel message.
    */
   get unhandledMessage(): ISignal<this, KernelMessage.IMessage> {
@@ -266,6 +273,7 @@ class DefaultKernel implements Kernel.IKernel {
     } else {
       this._ws.send(serialize.serialize(msg));
     }
+    this._anyMessage.emit(msg);
     let future = new KernelFutureHandler(() => {
       let msgId = msg.header.msg_id;
       this._futures.delete(msgId);
@@ -555,6 +563,7 @@ class DefaultKernel implements Kernel.IKernel {
     } else {
       this._ws.send(serialize.serialize(msg));
     }
+    this._anyMessage.emit(msg);
   }
 
   /**
@@ -986,6 +995,7 @@ class DefaultKernel implements Kernel.IKernel {
       }
       this._iopubMessage.emit(msg as KernelMessage.IIOPubMessage);
     }
+    this._anyMessage.emit(msg);
   }
 
   /**
@@ -1032,6 +1042,7 @@ class DefaultKernel implements Kernel.IKernel {
   private _specPromise: Promise<Kernel.ISpecModel>;
   private _statusChanged = new Signal<this, Kernel.Status>(this);
   private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
+  private _anyMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _displayIdToParentIds = new Map<string, string[]>();
   private _msgIdToDisplayIds = new Map<string, string[]>();
