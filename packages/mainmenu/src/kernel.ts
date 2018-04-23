@@ -81,7 +81,7 @@ namespace IKernelMenu {
     /**
      * A function to change the kernel.
      */
-    changeKernel?: (widget: T) => Promise<void>;
+    changeKernel?: (widget: T) => Promise<boolean>;
 
     /**
      * A function to shut down the kernel.

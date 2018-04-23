@@ -136,7 +136,7 @@ interface IClientSession extends IDisposable {
   /**
    * Select a kernel for the session.
    */
-  selectKernel(): Promise<void>;
+  selectKernel(): Promise<boolean>;
 
   /**
    * Restart the session.
@@ -398,8 +398,10 @@ class ClientSession implements IClientSession {
 
   /**
    * Select a kernel for the session.
+   *
+   * @returns A promise that resolves with whether a kernel has been selected.
    */
-  selectKernel(): Promise<void> {
+  selectKernel(): Promise<boolean> {
     return this.initialize().then(() => {
       if (this.isDisposed) {
         return Promise.reject('Disposed');
@@ -568,7 +570,7 @@ class ClientSession implements IClientSession {
         () => this._selectKernel()
       );
     }
-    return this._selectKernel();
+    return this._selectKernel().then(() => void 0);
   }
 
   /**
@@ -589,9 +591,9 @@ class ClientSession implements IClientSession {
   /**
    * Select a kernel.
    */
-  private _selectKernel(): Promise<void> {
+  private _selectKernel(): Promise<boolean> {
     if (this.isDisposed) {
-      return Promise.resolve(void 0);
+      return Promise.resolve(false);
     }
     let dialog = this._dialog = new Dialog({
       title: 'Select Kernel',
@@ -601,16 +603,23 @@ class ClientSession implements IClientSession {
 
     return dialog.launch().then(result => {
       if (this.isDisposed || !result.button.accept) {
-        return;
+        return false;
       }
       let model = result.value;
       if (model === null && this._session) {
-        return this.shutdown().then(() => this._kernelChanged.emit(null));
+        return this.shutdown().then(() => {
+          this._kernelChanged.emit(null);
+          return true;
+        });
+
       }
       if (model) {
-        return this._changeKernel(model).then(() => void 0);
+        return this._changeKernel(model).then(() => true);
       }
-    }).then(() => { this._dialog = null; });
+    }).then(selected => {
+      this._dialog = null;
+      return selected;
+    });
   }
 
   /**
