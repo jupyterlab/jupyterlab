@@ -564,6 +564,8 @@ class ClientSession implements IClientSession {
     if (name) {
       return this._changeKernel({ name }).then(() => void 0);
     }
+    // If we are here, there is no kernel to start.
+    return Promise.resolve(void 0);
   }
 
   /**
