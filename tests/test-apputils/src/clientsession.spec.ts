@@ -262,14 +262,6 @@ describe('@jupyterlab/apputils', () => {
         });
       });
 
-      it('should present a dialog if there is no distinct kernel to start', () => {
-        session.kernelPreference = {};
-        acceptDialog();
-        return session.initialize().then(() => {
-          expect(session.kernel.name).to.be(manager.specs.default);
-        });
-      });
-
       it('should be a no-op if if the shouldStart kernelPreference is false', () => {
         session.kernelPreference = { shouldStart: false };
         return session.initialize().then(() => {
@@ -343,7 +335,8 @@ describe('@jupyterlab/apputils', () => {
         return session.initialize().then(() => {
           let { id, name } = session.kernel;
           acceptDialog();
-          return session.selectKernel().then(() => {
+          return session.selectKernel().then(selected => {
+            expect(selected).to.be(true);
             expect(session.kernel.id).to.not.be(id);
             expect(session.kernel.name).to.be(name);
           });
@@ -354,7 +347,8 @@ describe('@jupyterlab/apputils', () => {
         return session.initialize().then(() => {
           let { id, name } = session.kernel;
           dismissDialog();
-          return session.selectKernel().then(() => {
+          return session.selectKernel().then(selected => {
+            expect(selected).to.be(false);
             expect(session.kernel.id).to.be(id);
             expect(session.kernel.name).to.be(name);
           });
