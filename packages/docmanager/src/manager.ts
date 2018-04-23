@@ -19,7 +19,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  ArrayExt, find, map, toArray
+  ArrayExt, find
 } from '@phosphor/algorithm';
 
 import {
@@ -119,6 +119,8 @@ class DocumentManager implements IDisposable {
   }
   set autosave(value: boolean) {
     this._autosave = value;
+
+    // For each existing context, start/stop the autosave handler as needed.
     this._contexts.forEach(context => {
       const handler = Private.saveHandlerProperty.get(context);
       if (value === true && !handler.isActive) {
@@ -144,11 +146,17 @@ class DocumentManager implements IDisposable {
       return;
     }
     this._isDisposed = true;
+
+    // Clear any listeners for our signals.
     Signal.clearData(this);
+
+    // Close all the widgets for our contexts and dispose the widget manager.
     this._contexts.forEach(context => {
       this._widgetManager.closeWidgets(context);
     });
     this._widgetManager.dispose();
+
+    // Clear the context list.
     this._contexts.length = 0;
   }
 
@@ -169,12 +177,12 @@ class DocumentManager implements IDisposable {
 
   /**
    * Close all of the open documents.
+   *
+   * @returns A promise resolving when the widgets are closed.
    */
   closeAll(): Promise<void> {
     return Promise.all(
-      toArray(map(this._contexts, context => {
-        return this._widgetManager.closeWidgets(context);
-      }))
+      this._contexts.map(context => this._widgetManager.closeWidgets(context))
     ).then(() => undefined);
   }
 
@@ -182,13 +190,15 @@ class DocumentManager implements IDisposable {
    * Close the widgets associated with a given path.
    *
    * @param path - The target path.
+   *
+   * @returns A promise resolving when the widgets are closed.
    */
   closeFile(path: string): Promise<void> {
-    let context = this._contextForPath(path);
+    const context = this._contextForPath(path);
     if (context) {
       return this._widgetManager.closeWidgets(context);
     }
-    return Promise.resolve(void 0);
+    return Promise.resolve(undefined);
   }
 
   /**
@@ -196,7 +206,8 @@ class DocumentManager implements IDisposable {
    *
    * @param widget - The widget of interest.
    *
-   * @returns The context associated with the widget, or `undefined`.
+   * @returns The context associated with the widget, or `undefined` if no such
+   * context exists.
    */
   contextForWidget(widget: Widget): DocumentRegistry.Context | undefined {
     return this._widgetManager.contextForWidget(widget);
@@ -268,7 +279,7 @@ class DocumentManager implements IDisposable {
    * @returns The found widget, or `undefined`.
    *
    * #### Notes
-   * This can be used to use an existing widget instead of opening
+   * This can be used to find an existing widget instead of opening
    * a new widget.
    */
   findWidget(path: string, widgetName='default'): DocumentRegistry.IReadyWidget | undefined {
@@ -381,12 +392,20 @@ class DocumentManager implements IDisposable {
    */
   private _findContext(path: string, factoryName: string): Private.IContext | undefined {
     return find(this._contexts, context => {
-      return context.factoryName === factoryName && context.path === path;
+      // TODO: should the model factoryName just be exposed on a context object?
+      let contextFactoryName = Private.factoryNameProperty.get(context);
+      return contextFactoryName === factoryName && context.path === path;
     });
   }
 
   /**
    * Get a context for a given path.
+   *
+   * #### Notes
+   * There may be more than one context for a given path if the path is open
+   * with multiple model factories (for example, a notebook can be open with a
+   * notebook model factory and a text model factory). This returns the first
+   * context found.
    */
   private _contextForPath(path: string): Private.IContext | undefined {
     return find(this._contexts, context => context.path === path);
@@ -396,6 +415,13 @@ class DocumentManager implements IDisposable {
    * Create a context from a path and a model factory.
    */
   private _createContext(path: string, factory: DocumentRegistry.ModelFactory, kernelPreference: IClientSession.IKernelPreference): Private.IContext {
+    // TODO: Make it impossible to open two different contexts for the same
+    // path. Or at least prompt the closing of all widgets associated with the
+    // old context before opening the new context. This will make things much
+    // more consistent for the users, at the cost of some confusion about what
+    // models are and why sometimes they cannot open the same file in different
+    // widgets that have different models.
+
     // Allow options to be passed when adding a sibling.
     let adopter = (widget: DocumentRegistry.IReadyWidget, options?: DocumentRegistry.IOpenOptions) => {
       this._widgetManager.adoptWidget(context, widget);
@@ -417,6 +443,7 @@ class DocumentManager implements IDisposable {
         handler.start();
       }
     });
+    Private.factoryNameProperty.set(context, factory.name);
     context.disposed.connect(this._onContextDisposed, this);
     this._contexts.push(context);
     return context;
@@ -567,6 +594,15 @@ namespace Private {
   export
   const saveHandlerProperty = new AttachedProperty<DocumentRegistry.Context, SaveHandler | undefined>({
     name: 'saveHandler',
+    create: () => undefined
+  });
+
+  /**
+   * An attached property for the factory name used for a context.
+   */
+  export
+  const factoryNameProperty = new AttachedProperty<DocumentRegistry.Context, string | undefined>({
+    name: 'factoryName',
     create: () => undefined
   });
 
