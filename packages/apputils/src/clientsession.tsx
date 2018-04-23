@@ -554,10 +554,7 @@ class ClientSession implements IClientSession {
     }
     // Try to use an existing kernel.
     if (preference.id) {
-      return this._changeKernel({ id: preference.id }).then(
-        () => void 0,
-        () => this._selectKernel()
-      );
+      return this._changeKernel({ id: preference.id }).then(() => void 0);
     }
     let name = ClientSession.getDefaultKernel({
       specs: this.manager.specs,
@@ -565,12 +562,8 @@ class ClientSession implements IClientSession {
       preference
     });
     if (name) {
-      return this._changeKernel({ name }).then(
-        () => void 0,
-        () => this._selectKernel()
-      );
+      return this._changeKernel({ name }).then(() => void 0);
     }
-    return this._selectKernel().then(() => void 0);
   }
 
   /**
