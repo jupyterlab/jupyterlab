@@ -65,6 +65,7 @@ const USE_CAPTURE = true;
 
 /**
  * The number of colors defined for the completer type annotations.
+ * These are listed in completer/style/index.css#102-152.
  */
 const N_COLORS = 10;
 
