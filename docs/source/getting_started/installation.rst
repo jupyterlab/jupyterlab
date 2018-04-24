@@ -61,24 +61,7 @@ server extension:
 
 .. code:: bash
 
-    pipenv install jupyterlab
-     pipenv shell
-
-or from a git checkout:
-
-.. code:: bash
-
-    pipenv install git+git://github.com/jupyterlab/jupyterlab.git#egg=jupyterlab
-     pipenv shell
-
-When using ``pipenv``, in order to launch ``jupyter lab``, you must activate the project's virtualenv.
-For example, in the directory where ``pipenv``'s ``Pipfile`` and ``Pipfile.lock`` live (i.e., where you ran the above commands):
-
-.. code:: bash
-
-    pipenv shell
-     jupyter lab
-
+    jupyter serverextension enable --py jupyterlab --sys-prefix
 
 
 Prerequisites

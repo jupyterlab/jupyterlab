@@ -50,7 +50,7 @@ If you use ``conda``, you can install as:
 
 
 ```bash
-jupyter serverextension enable --py jupyterlab --sys-prefix
+conda install -c conda-forge jupyterlab
 ```
 
 #### pip
