@@ -19,7 +19,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  ArrayExt, find
+  ArrayExt, find, filter
 } from '@phosphor/algorithm';
 
 import {
@@ -194,11 +194,8 @@ class DocumentManager implements IDisposable {
    * @returns A promise resolving when the widgets are closed.
    */
   closeFile(path: string): Promise<void> {
-    const context = this._contextForPath(path);
-    if (context) {
-      return this._widgetManager.closeWidgets(context);
-    }
-    return Promise.resolve(undefined);
+    const close = this._contextsForPath(path).map(c => this._widgetManager.closeWidgets(c));
+    return Promise.all(close).then(x => undefined);
   }
 
   /**
@@ -259,12 +256,8 @@ class DocumentManager implements IDisposable {
   deleteFile(path: string): Promise<void> {
     return this.services.sessions.stopIfNeeded(path).then(() => {
       return this.services.contents.delete(path);
-    })
-    .then(() => {
-      let context = this._contextForPath(path);
-      if (context) {
-        return this._widgetManager.deleteWidgets(context);
-      }
+    }).then(() => {
+      this._contextsForPath(path).forEach(context => this._widgetManager.deleteWidgets(context));
       return Promise.resolve(void 0);
     });
   }
@@ -290,9 +283,12 @@ class DocumentManager implements IDisposable {
       }
       widgetName = factory.name;
     }
-    let context = this._contextForPath(path);
-    if (context) {
-      return this._widgetManager.findWidget(context, widgetName);
+
+    for (let context of this._contextsForPath(path)) {
+      let widget = this._widgetManager.findWidget(context, widgetName);
+      if (widget) {
+        return widget;
+      }
     }
     return undefined;
   }
@@ -399,16 +395,15 @@ class DocumentManager implements IDisposable {
   }
 
   /**
-   * Get a context for a given path.
+   * Get the contexts for a given path.
    *
    * #### Notes
    * There may be more than one context for a given path if the path is open
    * with multiple model factories (for example, a notebook can be open with a
-   * notebook model factory and a text model factory). This returns the first
-   * context found.
+   * notebook model factory and a text model factory).
    */
-  private _contextForPath(path: string): Private.IContext | undefined {
-    return find(this._contexts, context => context.path === path);
+  private _contextsForPath(path: string): Private.IContext[] {
+    return this._contexts.filter(context => context.path === path);
   }
 
   /**
