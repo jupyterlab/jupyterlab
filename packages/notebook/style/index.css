@@ -285,12 +285,12 @@
 }
 
 .jp-LinkedOutputView .jp-OutputArea {
-  height: 100%;
+  height: calc(100% - var(--jp-toolbar-micro-height));
   display: block;
 }
 
 .jp-LinkedOutputView .jp-OutputArea-child:only-child {
-  height: 100%;
+  height: calc(100% - var(--jp-toolbar-micro-height));
 }
 
 .jp-LinkedOutputView-toolbar {
