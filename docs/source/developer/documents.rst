@@ -3,7 +3,7 @@
 Documents
 ---------
 
-JupyterLab can be extended in two ways via:
+JupyterLab can be extended in several ways:
 
 -  Extensions (top level): Application extensions extend the
    functionality of JupyterLab itself, and we cover them in the
@@ -13,7 +13,7 @@ JupyterLab can be extended in two ways via:
    application, and we cover them in this section.
 
 For this section, the term 'document' refers to any visual thing that
-is backed by a file stored on disk (i.e. uses Contents API).
+is backed by a file stored on disk (e.g. uses Contents API).
 
 The `Document
 Registry <http://jupyterlab.github.io/jupyterlab/classes/_docregistry_src_registry_.documentregistry.html>`__
@@ -118,3 +118,33 @@ The *Document Manager* handles:
 
 The *File Browser* uses the *Document Manager* to open documents and
 manage them.
+
+
+New Documents Docs
+------------------
+
+A 'document' in JupyterLab is represented by a model instance implementing the `IModel http://jupyterlab.github.io/jupyterlab/interfaces/_docregistry_src_registry_.documentregistry.imodel.html`__ interface. The model interface is intentionally fairly small, and concentrates on representing the data in the document and signaling changes to that data. Each model has an associated `context http://jupyterlab.github.io/jupyterlab/interfaces/_docregistry_src_registry_.documentregistry.icontext.html`__ instance as well. The context for a model is the bridge between the internal data of the document, stored in the model, and the file metadata and operations possible on the file, such as save and revert. Since many objects will need both the context and the model, the context contains a reference to the model as its `.model` attribute.
+
+A single file path can have multiple different models (and hence different contexts) representing the file. For example, a notebook can be opened with a notebook model and with a text model. Models for the same file path do not directly communicate with each other.
+
+`Document widgets http://jupyterlab.github.io/jupyterlab/interfaces/_docregistry_src_registry_.documentregistry.ireadywidget.html`__ represent a view of a document model. There can be multiple document widgets associated with a single document model, and they can naturally stay in sync with each other since they are views on the same underlying data model.
+
+Registration
+^^^^^^^^^^^^
+
+Factory functions registered with the docregistry create document models and widgets.
+
+Models
+~~~~~~
+A plugin can register a model factory function associated with specific file types. A plugin can also register new file types with the docregistry.
+
+Widgets
+^^^^^^^
+
+A plugin can register a widget factory function associated with specific model factory names.
+
+
+Creation
+^^^^^^^^
+A document widget is created from JupyterLab (for example, by a user opening a file). The widget creation causes the associated model to be created if it is not already created.
+

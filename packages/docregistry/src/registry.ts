@@ -675,7 +675,7 @@ namespace DocumentRegistry {
     disposed: ISignal<this, void>;
 
     /**
-     * Get the model associated with the document.
+     * The data model for the document.
      */
     readonly model: T;
 
@@ -697,11 +697,11 @@ namespace DocumentRegistry {
     readonly localPath: string;
 
     /**
-     * The current contents model associated with the document
+     * The document metadata, stored as a services contents model.
      *
      * #### Notes
-     * The contents model will be null until the context is ready.
-     * It will have an  empty `contents` field.
+     * This will be null until the context is 'ready'. Since we only store
+     * metadata here, the `.contents` attribute will always be empty.
      */
     readonly contentsModel: Contents.IModel | null;
 
