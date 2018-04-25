@@ -513,14 +513,13 @@ namespace Private {
    * check the tracker and return the extender, if any,
    * that holds the widget.
    */
-  function findExtender<E extends IMenuExtender<Widget>>(widget: Widget, s: Set<E>): E {
-    let extender: E;
-    s.forEach(value => {
+  function findExtender<E extends IMenuExtender<Widget>>(widget: Widget, s: Set<E>): E | undefined {
+    for (let value of s) {
       if (value.tracker.has(widget)) {
-        extender = value;
+        return value;
       }
-    });
-    return extender;
+    }
+    return undefined;
   }
 
   /**
