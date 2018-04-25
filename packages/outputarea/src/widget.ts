@@ -400,7 +400,21 @@ class OutputArea extends Widget {
       if (isolated === true) {
         output = new Private.IsolatedRenderer(output);
       }
-      output.renderModel(model);
+      output.renderModel(model).catch(error => {
+         // Add stderr message to output
+        const stderr = `Javascript Error: ${error.message}. This usually means there's a typo in your chart specification. See the JavaScript console for the full traceback.`;
+        const data = { 'application/vnd.jupyter.stderr': stderr };
+        model.setData({ data });
+        // Manually append stderr message to output and modify node attributes
+        output.node.innerHTML = `<pre>Javascript Error: ${error.message}</pre>`;
+        (output.node.classList as any).forEach((className: string) => {
+          if (['p-Widget', 'jp-OutputArea-output'].indexOf(className) < 0) {
+            output.removeClass(className);
+          }
+        });
+        output.addClass('jp-RenderedText');
+        output.node.setAttribute('data-mime-type', 'application/vnd.jupyter.stderr');
+      });
       widget = output;
     } else {
       widget = new Widget();
