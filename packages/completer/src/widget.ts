@@ -63,6 +63,12 @@ const MAX_HEIGHT = 200;
  */
 const USE_CAPTURE = true;
 
+/**
+ * The number of colors defined for the completer type annotations.
+ * These are listed in completer/style/index.css#102-152.
+ */
+const N_COLORS = 10;
+
 
 /**
  * A widget that enables text completion.
@@ -725,7 +731,7 @@ namespace Completer {
         let typeNode = document.createElement('span');
         let type = typeMap[item.raw] || '';
         typeNode.textContent = (type[0] || '').toLowerCase();
-        let colorIndex: number = orderedTypes.indexOf(type) + 1;
+        let colorIndex = orderedTypes.indexOf(type) % N_COLORS + 1;
         typeNode.className = 'jp-Completer-type';
         typeNode.setAttribute(`data-color-index`, colorIndex.toString());
         li.title = type;
