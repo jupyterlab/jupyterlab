@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  each, find, IIterator
+  each
 } from '@phosphor/algorithm';
 
 import {
@@ -508,34 +508,17 @@ export default menuPlugin;
  * A namespace for Private data.
  */
 namespace Private {
-
   /**
-   * An adapter to use ES2015 iterators with Phosphor iterator functions.
-   *
-   * #### Notes
-   * Something like this will eventually make its way into Phosphor and then can
-   * be deleted from here.
+   * Return the first value of the iterable that satisfies the predicate
+   * function.
    */
-  class ES2015Adaptor<T> implements IIterator<T> {
-
-    constructor(it: Iterable<T> /* defined in lib.es2015.iterable.d.ts */) {
-      this._it = it[Symbol.iterator]();
+  function find<T>(it: Iterable<T>, predicate: (value: T) => boolean): T | undefined {
+    for (let value of it) {
+      if (predicate(value)) {
+        return value;
+      }
     }
-
-    iter(): IIterator<T> {
-      return this;
-    }
-
-    clone(): IIterator<T> {
-      throw 'not implemented';
-    }
-
-    next(): T | undefined {
-      let { done, value } = this._it.next();
-      return done ? undefined : value;
-    }
-
-    private _it: Iterator<T>;
+    return undefined;
   }
 
   /**
@@ -544,7 +527,7 @@ namespace Private {
   export
   function delegateLabel<E extends IMenuExtender<Widget>>(app: JupyterLab, s: Set<E>, label: keyof E): string {
     let widget = app.shell.currentWidget;
-    const extender = find(new ES2015Adaptor(s), value => value.tracker.has(widget));
+    const extender = find(s, value => value.tracker.has(widget));
     if (!extender) {
       return '';
     }
@@ -559,7 +542,7 @@ namespace Private {
   function delegateExecute<E extends IMenuExtender<Widget>>(app: JupyterLab, s: Set<E>, executor: keyof E): () => Promise<any> {
     return () => {
       let widget = app.shell.currentWidget;
-      const extender = find(new ES2015Adaptor(s), value => value.tracker.has(widget));
+      const extender = find(s, value => value.tracker.has(widget));
       if (!extender) {
         return Promise.resolve(void 0);
       }
@@ -575,7 +558,7 @@ namespace Private {
   function delegateEnabled<E extends IMenuExtender<Widget>>(app: JupyterLab, s: Set<E>, executor: keyof E): () => boolean {
     return () => {
       let widget = app.shell.currentWidget;
-      const extender = find(new ES2015Adaptor(s), value => value.tracker.has(widget));
+      const extender = find(s, value => value.tracker.has(widget));
       return !!extender && !!extender[executor] &&
         (extender.isEnabled ? extender.isEnabled(widget) : true);
     };
@@ -589,7 +572,7 @@ namespace Private {
   function delegateToggled<E extends IMenuExtender<Widget>>(app: JupyterLab, s: Set<E>, toggled: keyof E): () => boolean {
     return () => {
       let widget = app.shell.currentWidget;
-      const extender = find(new ES2015Adaptor(s), value => value.tracker.has(widget));
+      const extender = find(s, value => value.tracker.has(widget));
       return !!extender && !!extender[toggled] && !!extender[toggled](widget);
     };
   }
