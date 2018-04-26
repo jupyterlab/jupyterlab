@@ -121,7 +121,7 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
    *
    * #### Notes
    * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the dock panel's node. It should
+   * called in response to events on the main area widget's node. It should
    * not be called directly by user code.
    */
   handleEvent(event: Event): void {
