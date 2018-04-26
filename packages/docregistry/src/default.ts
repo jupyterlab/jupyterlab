@@ -277,7 +277,7 @@ class Base64ModelFactory extends TextModelFactory {
 
 
 /**
- * The default implemetation of a widget factory.
+ * The default implementation of a widget factory.
  */
 export
 abstract class ABCWidgetFactory<T extends DocumentRegistry.IReadyWidget, U extends DocumentRegistry.IModel> implements DocumentRegistry.IWidgetFactory<T, U> {

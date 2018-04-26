@@ -26,7 +26,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IClientSession
+  IClientSession, Toolbar
 } from '@jupyterlab/apputils';
 
 import {
@@ -841,17 +841,6 @@ namespace DocumentRegistry {
   }
 
   /**
-   * A widget for a document.
-   */
-  export
-  interface IReadyWidget extends Widget {
-    /**
-     * A promise that resolves when the widget is ready.
-     */
-    readonly ready: Promise<void>;
-  }
-
-  /**
    * The options used to open a widget.
    */
   export
@@ -881,26 +870,36 @@ namespace DocumentRegistry {
    * The interface for a widget factory.
    */
   export
-  interface IWidgetFactory<T extends IReadyWidget, U extends IModel> extends IDisposable, IWidgetFactoryOptions {
+  interface IWidgetFactory<T extends Widget, U extends IModel> extends IDisposable, IWidgetFactoryOptions {
     /**
-     * A signal emitted when a widget is created.
+     * A signal emitted when a new widget is created.
      */
-    widgetCreated: ISignal<IWidgetFactory<T, U>, T>;
+    documentWidgetCreated: ISignal<IWidgetFactory<T, U>, IDocumentWidget<T, U>>;
 
     /**
-     * Create a new widget given a context.
-     *
-     * #### Notes
-     * It should emit the [widgetCreated] signal with the new widget.
+     * Create a new content widget which will be initialized later.
      */
-    createNew(context: IContext<U>): T;
+    create(): T;
+
+    /**
+     * Initialize a content widget.
+     *
+     * @returns a promise that resolves when the content widget is ready to be
+     * visible.
+     */
+    initialize(context: IContext<U>, toolbar: Toolbar<Widget>, content: T): Promise<void>;
+
+    /**
+     * Called when a new document widget is created. Should emit the documentWidgetCreated signal.
+     */
+    documentWidget(documentWidget: IDocumentWidget<T, U>): void;
   }
 
   /**
    * A type alias for a standard widget factory.
    */
   export
-  type WidgetFactory = IWidgetFactory<IReadyWidget, IModel>;
+  type WidgetFactory = IWidgetFactory<Widget, IModel>;
 
   /**
    * An interface for a widget extension.
@@ -1193,6 +1192,27 @@ namespace DocumentRegistry {
   ];
 }
 
+/**
+ * An interface for a document widget.
+ */
+export
+interface IDocumentWidget<T extends Widget, U extends DocumentRegistry.IModel> extends Widget {
+  readonly content: T;
+  readonly contentReady: Promise<void>;
+  readonly context: DocumentRegistry.IContext<U>;
+  readonly toolbar: Toolbar<Widget>;
+}
+
+export
+namespace IDocumentWidget {
+  export
+  interface IOptions<T extends Widget, U extends DocumentRegistry.IModel> extends Widget.IOptions {
+    readonly content: T;
+    readonly contentReady: Promise<void>;
+    readonly context: DocumentRegistry.IContext<U>;
+    readonly toolbar: Toolbar<Widget>;
+  }
+}
 
 /**
  * A private namespace for DocumentRegistry data.
