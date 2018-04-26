@@ -46,7 +46,7 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
     const content = this.content = options.content;
     const toolbar = this.toolbar = options.toolbar || new Toolbar();
 
-    const layout = this.layout = new BoxLayout();
+    const layout = this.layout = new BoxLayout({spacing: 0});
     layout.direction = 'top-to-bottom';
     layout.addWidget(toolbar);
     layout.addWidget(content);
