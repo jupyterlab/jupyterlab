@@ -222,7 +222,7 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
    *
    * #### Notes
    * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the dock panel's node. It should
+   * called in response to events on the notebook's node. It should
    * not be called directly by user code.
    */
   handleEvent(event: Event): void {
@@ -231,7 +231,7 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
     case 'mouseout':
       let target = event.target as HTMLElement;
       if (this.toolbar.node.contains(document.activeElement) &&
-          target.localName !== 'select') {
+          target.tagName !== 'SELECT') {
         this.notebook.node.focus();
       }
       break;
