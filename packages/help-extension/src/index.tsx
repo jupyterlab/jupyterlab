@@ -22,10 +22,6 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Message
-} from '@phosphor/messaging';
-
-import {
   Menu
 } from '@phosphor/widgets';
 

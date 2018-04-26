@@ -35,7 +35,6 @@
     "@jupyterlab/coreutils": "^1.1.2",
     "@jupyterlab/mainmenu": "^0.5.2",
     "@jupyterlab/services": "^2.0.2",
-    "@phosphor/messaging": "^1.2.2",
     "@phosphor/widgets": "^1.5.0",
     "react": "~16.2.0"
   },

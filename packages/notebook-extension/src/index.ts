@@ -56,7 +56,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  Menu, Widget
+  Menu
 } from '@phosphor/widgets';
 
 
