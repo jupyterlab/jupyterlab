@@ -216,7 +216,7 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
    * Give focus to the content.
    */
   private _focusContent(): void {
-    if (!this.node.contains(document.activeElement)) {
+    if (!this.content.node.contains(document.activeElement)) {
       this.content.node.focus();
     }
     // Give the content a chance to activate.
