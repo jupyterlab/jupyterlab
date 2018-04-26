@@ -19,6 +19,7 @@
 
 
 .jp-RenderedText pre,
+.jp-RenderedJavaScript pre,
 .jp-RenderedHTMLCommon pre {
   color: var(--jp-content-font-color1);
   border: none;

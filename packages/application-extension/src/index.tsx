@@ -10,12 +10,10 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IStateDB, PageConfig, URLExt
+  IStateDB, PageConfig
 } from '@jupyterlab/coreutils';
 
-import {
-  h
-} from '@phosphor/virtualdom';
+import * as React from 'react';
 
 
 /**
@@ -52,12 +50,37 @@ namespace CommandIDs {
 
 
 /**
+ * The routing regular expressions used by the application plugin.
+ */
+namespace Patterns {
+  export
+  const tree = /^\/tree\/(.+)/;
+}
+
+
+/**
  * The main extension.
  */
 const main: JupyterLabPlugin<void> = {
   id: '@jupyterlab/application-extension:main',
   requires: [ICommandPalette],
   activate: (app: JupyterLab, palette: ICommandPalette) => {
+    // If there were errors registering plugins, tell the user.
+    if (app.registerPluginErrors.length !== 0) {
+      const body = (
+        <pre>
+          {app.registerPluginErrors.map(e => e.message).join('\n')}
+        </pre>
+      );
+      let options = {
+        title: 'Error Registering Plugins',
+        body,
+        buttons: [Dialog.okButton()],
+        okText: 'DISMISS'
+      };
+      showDialog(options).then(() => { /* no-op */ });
+    }
+
     addCommands(app, palette);
 
     // If the currently active widget changes,
@@ -83,7 +106,7 @@ const main: JupyterLabPlugin<void> = {
       }).catch(err => {
         showDialog({
           title: 'Build Failed',
-          body: h.pre(err.message)
+          body: (<pre>{err.message}</pre>)
         });
       });
     };
@@ -96,13 +119,13 @@ const main: JupyterLabPlugin<void> = {
         if (response.status !== 'needed') {
           return;
         }
-        let body = h.div(
-          h.p(
-            'JupyterLab build is suggested:',
-            h.br(),
-            h.pre(response.message)
-          )
-        );
+        let body = (<div>
+          <p>
+            JupyterLab build is suggested:
+            <br />
+            <pre>{response.message}</pre>
+          </p>
+        </div>);
         showDialog({
           title: 'Build Recommended',
           body,
@@ -165,28 +188,33 @@ const router: JupyterLabPlugin<IRouter> = {
   id: '@jupyterlab/application-extension:router',
   activate: (app: JupyterLab) => {
     const { commands } = app;
-    const base = URLExt.join(
-      PageConfig.getBaseUrl(),
-      PageConfig.getOption('pageUrl')
-    );
+    const base = PageConfig.getOption('pageUrl');
     const router = new Router({ base, commands });
-    const pattern = /^\/tree\/(.*)/;
 
     commands.addCommand(CommandIDs.tree, {
-      execute: (args: IRouter.ICommandArgs) => {
-        return app.restored.then(() => {
-          const path = decodeURIComponent((args.path.match(pattern)[1]));
+      execute: (args: IRouter.ILocation) => {
+        const path = decodeURIComponent((args.path.match(Patterns.tree)[1]));
 
-          // Change the URL back to the base application URL.
-          window.history.replaceState({ }, '', base);
+        // File browser navigation waits for the application to be restored.
+        // As a result, this command cannot return a promise because it would
+        // create a circular dependency on the restored promise that would
+        // cause the application to never restore.
+        const opened = commands.execute('filebrowser:navigate-main', { path });
 
-          return commands.execute('filebrowser:navigate-main', { path });
-        });
+        // Change the URL back to the base application URL without adding the
+        // URL change to the browser history.
+        opened.then(() => { router.navigate('', { silent: true }); });
       }
     });
 
-    router.register({ command: CommandIDs.tree, pattern });
-    app.started.then(() => { router.route(window.location.href); });
+    router.register({ command: CommandIDs.tree, pattern: Patterns.tree });
+    app.started.then(() => {
+      // Route the very first request on load.
+      router.route();
+
+      // Route all pop state events.
+      window.addEventListener('popstate', () => { router.route(); });
+    });
 
     return router;
   },
@@ -200,20 +228,17 @@ const router: JupyterLabPlugin<IRouter> = {
  */
 const notfound: JupyterLabPlugin<void> = {
   id: '@jupyterlab/application-extension:notfound',
-  activate: (app: JupyterLab) => {
+  activate: (app: JupyterLab, router: IRouter) => {
     const bad = PageConfig.getOption('notFoundUrl');
+    const base = router.base;
 
     if (!bad) {
       return;
     }
 
-    const base = URLExt.join(
-      PageConfig.getBaseUrl(),
-      PageConfig.getOption('pageUrl')
-    );
-
-    // Change the URL back to the base application URL.
-    window.history.replaceState({ }, '', base);
+    // Change the URL back to the base application URL without adding the
+    // URL change to the browser history.
+    router.navigate('', { silent: true });
 
     showDialog({
       title: 'Path Not Found',
@@ -221,6 +246,7 @@ const notfound: JupyterLabPlugin<void> = {
       buttons: [Dialog.okButton()]
     });
   },
+  requires: [IRouter],
   autoStart: true
 };
 

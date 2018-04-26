@@ -26,9 +26,7 @@ import {
   ElementExt
 } from '@phosphor/domutils';
 
-import {
-  h
-} from '@phosphor/virtualdom';
+import * as React from 'react';
 
 import {
   INotebookModel
@@ -40,15 +38,17 @@ import {
 
 
 // The message to display to the user when prompting to trust the notebook.
-const TRUST_MESSAGE = h.p(
-  'A trusted Jupyter notebook may execute hidden malicious code when you ',
-  'open it.',
-  h.br(),
-  'Selecting trust will re-render this notebook in a trusted state.',
-  h.br(),
-  'For more information, see the',
-  h.a({ href: 'https://jupyter-notebook.readthedocs.io/en/stable/security.html' },
-      'Jupyter security documentation'),
+const TRUST_MESSAGE = (
+  <p>
+    A trusted Jupyter notebook may execute hidden malicious code when you
+    open it.
+    <br />
+    Selecting trust will re-render this notebook in a trusted state.
+    <br />
+    For more information, see the
+    <a href='https://jupyter-notebook.readthedocs.io/en/stable/security.html'>
+      Jupyter security documentation</a>
+  </p>
 );
 
 
@@ -977,7 +977,7 @@ namespace NotebookActions {
     let cells = widget.widgets;
     each(cells, (cell: Cell) => {
       if (widget.isSelectedOrActive(cell) && cell.model.type === 'code') {
-        (cell as CodeCell).inputHidden = true;
+        (cell as CodeCell).outputHidden = true;
       }
     });
     Private.handleState(widget, state);
@@ -997,7 +997,7 @@ namespace NotebookActions {
     let cells = widget.widgets;
     each(cells, (cell: Cell) => {
       if (widget.isSelectedOrActive(cell) && cell.model.type === 'code') {
-        (cell as CodeCell).inputHidden = false;
+        (cell as CodeCell).outputHidden = false;
       }
     });
     Private.handleState(widget, state);
@@ -1444,6 +1444,7 @@ namespace Private {
    *
    * #### Notes
    * The cell after the last selected cell will be activated.
+   * If the last cell is deleted, then the previous one will be activated.
    * It will add a code cell if all cells are deleted.
    * This action can be undone.
    */
@@ -1466,7 +1467,8 @@ namespace Private {
     if (toDelete.length > 0) {
       // Delete the cells as one undo event.
       cells.beginCompoundOperation();
-      each(toDelete.reverse(), i => {
+      // Delete cells in reverse order to maintain the correct indices.
+      toDelete.reverse().forEach(i => {
         cells.remove(i);
       });
       // Add a new cell if the notebook is empty. This is done
@@ -1481,7 +1483,9 @@ namespace Private {
       // *after* the last selected cell.
       // Note: The activeCellIndex is clamped to the available cells,
       // so if the last cell is deleted the previous cell will be activated.
-      widget.activeCellIndex = toDelete[0];
+      // The *first* index is the index of the last cell in the initial
+      // toDelete list due to the `reverse` operation above.
+      widget.activeCellIndex = toDelete[0] - toDelete.length + 1;
     }
 
     // Deselect any remaining, undeletable cells. Do this even if we don't

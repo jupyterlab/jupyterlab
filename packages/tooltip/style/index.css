@@ -25,5 +25,6 @@
 }
 
 .jp-Tooltip pre {
+  white-space: pre-wrap;
   margin: 0;
 }

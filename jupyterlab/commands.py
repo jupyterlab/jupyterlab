@@ -24,9 +24,18 @@ from ipython_genutils.tempdir import TemporaryDirectory
 from jupyter_core.paths import jupyter_config_path
 from notebook.nbextensions import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 
-from .semver import Range, gte, lt, lte, gt
+from .semver import Range, gte, lt, lte, gt, make_semver
 from .jlpmapp import YARN_PATH, HERE, which
 from .process import Process, WatchHelper
+
+if sys.version_info.major < 3:
+    from urllib2 import Request, urlopen, quote
+    from urllib2 import URLError
+    from urlparse import urljoin
+
+else:
+    from urllib.request import Request, urlopen, urljoin, quote
+    from urllib.error import URLError
 
 
 # The regex for expecting the webpack output.
@@ -97,6 +106,14 @@ def ensure_dev(logger=None):
     if not osp.exists(pjoin(parent, 'node_modules')):
         yarn_proc = Process(['node', YARN_PATH], cwd=parent, logger=logger)
         yarn_proc.wait()
+
+    theme_packages = ['theme-light-extension', 'theme-dark-extension']
+    for theme in theme_packages:
+        base_path = pjoin(parent, 'packages', theme)
+        if not osp.exists(pjoin(base_path, 'static')):
+            yarn_proc = Process(['node', YARN_PATH, 'build:webpack'], cwd=base_path,
+                                logger=logger)
+            yarn_proc.wait()
 
     if not osp.exists(pjoin(parent, 'dev_mode', 'static')):
         yarn_proc = Process(['node', YARN_PATH, 'build'], cwd=parent,
@@ -320,6 +337,8 @@ class _AppHandler(object):
         self.logger = logger or logging.getLogger('jupyterlab')
         self.info = self._get_app_info()
         self.kill_event = kill_event or Event()
+        # TODO: Make this configurable
+        self.registry = 'https://registry.npmjs.org'
 
     def install_extension(self, extension, existing=None):
         """Install an extension package into JupyterLab.
@@ -1109,6 +1128,32 @@ class _AppHandler(object):
             msg = _format_compatibility_errors(
                 data['name'], data['version'], errors
             )
+            # Check for compatible version unless:
+            # - A specific version was requested (@ in name,
+            #   but after first char to allow for scope marker).
+            # - Package is locally installed.
+            if '@' not in extension[1:] and not info['is_dir']:
+                name = info['name']
+                try:
+                    version = self._latest_compatible_package_version(name)
+                except URLError:
+                    # We cannot add any additional information to error message
+                    raise ValueError(msg)
+
+                if version and name:
+                    self.logger.warning('Incompatible extension:\n%s', msg)
+                    self.logger.warning('Found compatible version: %s', version)
+                    with TemporaryDirectory() as tempdir2:
+                        return self._install_extension(
+                            '%s@%s' % (name, version), tempdir2)
+
+                # Extend message to better guide the user what to do:
+                conflicts = '\n'.join(msg.splitlines()[2:])
+                msg = ''.join((
+                    self._format_no_compatible_package_version(name),
+                    "\n\n",
+                    conflicts))
+
             raise ValueError(msg)
 
         # Move the file to the app directory.
@@ -1150,6 +1195,75 @@ class _AppHandler(object):
 
         return info
 
+
+    def _latest_compatible_package_version(self, name):
+        """Get the latest compatible version of a package"""
+        core_data = self.info['core_data']
+        metadata = _fetch_package_metadata(self.registry, name, self.logger)
+        versions = metadata.get('versions', [])
+
+        # Sort pre-release first, as we will reverse the sort:
+        def sort_key(key_value):
+            return _semver_key(key_value[0], prerelease_first=True)
+
+        for version, data in sorted(versions.items(),
+                                    key=sort_key,
+                                    reverse=True):
+            deps = data.get('dependencies', {})
+            errors = _validate_compatibility(name, deps, core_data)
+            if not errors:
+                # Found a compatible version
+                # Verify that the version is a valid extension.
+                with TemporaryDirectory() as tempdir:
+                    info = self._extract_package('%s@%s' % (name, version), tempdir)
+                if _validate_extension(info['data']):
+                    # Invalid, do not consider other versions
+                    return
+                # Valid
+                return version
+
+    def _format_no_compatible_package_version(self, name):
+        """Get the latest compatible version of a package"""
+        core_data = self.info['core_data']
+        metadata = _fetch_package_metadata(self.registry, name, self.logger)
+        versions = metadata.get('versions', [])
+
+        # Sort pre-release first, as we will reverse the sort:
+        def sort_key(key_value):
+            return _semver_key(key_value[0], prerelease_first=True)
+
+        store = tuple(sorted(versions.items(), key=sort_key, reverse=True))
+        latest_deps = store[0][1].get('dependencies', {})
+        core_deps = core_data['dependencies']
+        singletons = core_data['jupyterlab']['singletonPackages']
+
+        # Whether lab version is too new:
+        lab_newer_than_latest = False
+        # Whether the latest version of the extension depend on a "future" version
+        # of a singleton package (from the perspective of current lab version):
+        latest_newer_than_lab = False
+
+        for (key, value) in latest_deps.items():
+            if key in singletons:
+                c = _compare_ranges(core_deps[key], value)
+                lab_newer_than_latest = lab_newer_than_latest or c < 0
+                latest_newer_than_lab = latest_newer_than_lab or c > 0
+
+        if lab_newer_than_latest:
+            # All singleton deps in current version of lab are newer than those
+            # in the latest version of the extension
+            return ("This extension does not yet support the current version of "
+                    "JupyterLab.\n")
+
+
+        parts = ["No version of {extension} could be found that is compatible with "
+                 "the current version of JupyterLab."]
+        if latest_newer_than_lab:
+            parts.extend(("However, it seems to support a new version of JupyterLab.",
+                          "Consider upgrading JupyterLab."))
+
+        return " ".join(parts).format(extension=name)
+
     def _run(self, cmd, **kwargs):
         """Run the command using our logger and abort callback.
 
@@ -1187,7 +1301,7 @@ def _normalize_path(extension):
 def _read_package(target):
     """Read the package data in a given target tarball.
     """
-    tar = tarfile.open(target, "r:gz")
+    tar = tarfile.open(target, "r")
     f = tar.extractfile('package/package.json')
     data = json.loads(f.read().decode('utf8'))
     data['jupyterlab_extracted_files'] = [
@@ -1254,7 +1368,7 @@ def _tarsum(input_file):
     """
     Compute the recursive sha sum of a tar file.
     """
-    tar = tarfile.open(input_file, "r:gz")
+    tar = tarfile.open(input_file, "r")
     chunk_size = 100 * 1024
     h = hashlib.new("sha1")
 
@@ -1310,6 +1424,20 @@ def _test_overlap(spec1, spec2):
     Returns `None` if we cannot determine compatibility,
     otherwise whether there is an overlap
     """
+    cmp = _compare_ranges(spec1, spec2)
+    if cmp is None:
+        return
+    return cmp == 0
+
+
+def _compare_ranges(spec1, spec2):
+    """Test whether two version specs overlap.
+
+    Returns `None` if we cannot determine compatibility,
+    otherwise return 0 if there is an overlap, 1 if
+    spec1 is lower/older than spec2, and -1 if spec1
+    is higher/newer than spec2.
+    """
     # Test for overlapping semver ranges.
     r1 = Range(spec1, True)
     r2 = Range(spec2, True)
@@ -1346,12 +1474,17 @@ def _test_overlap(spec1, spec2):
         ly = noop
 
     # Check for overlap.
-    return (
-        gte(x1, y1, True) and ly(x1, y2, True) or
+    if (gte(x1, y1, True) and ly(x1, y2, True) or
         gy(x2, y1, True) and ly(x2, y2, True) or
         gte(y1, x1, True) and lx(y1, x2, True) or
         gx(y2, x1, True) and lx(y2, x2, True)
-    )
+       ):
+       return 0
+    if gte(y1, x2, True):
+        return 1
+    if gte(x1, y2, True):
+        return -1
+    raise AssertionError('Unexpected case comparing version ranges')
 
 
 def _is_disabled(name, disabled=[]):
@@ -1397,6 +1530,67 @@ def _get_core_extensions():
     """
     data = _get_core_data()['jupyterlab']
     return list(data['extensions']) + list(data['mimeExtensions'])
+
+
+def _semver_prerelease_key(prerelease):
+    """Sort key for prereleases.
+
+    Precedence for two pre-release versions with the same
+    major, minor, and patch version MUST be determined by
+    comparing each dot separated identifier from left to
+    right until a difference is found as follows:
+    identifiers consisting of only digits are compare
+    numerically and identifiers with letters or hyphens
+    are compared lexically in ASCII sort order. Numeric
+    identifiers always have lower precedence than non-
+    numeric identifiers. A larger set of pre-release
+    fields has a higher precedence than a smaller set,
+    if all of the preceding identifiers are equal.
+    """
+    for entry in prerelease:
+        if isinstance(entry, int):
+            # Assure numerics always sort before string
+            yield ('', entry)
+        else:
+            # Use ASCII compare:
+            yield (entry,)
+
+
+def _semver_key(version, prerelease_first=False):
+    v = make_semver(version, True)
+    if prerelease_first:
+        key = (0,) if v.prerelease else (1,)
+    else:
+        key = ()
+    key = key + (v.major, v.minor, v.patch)
+    if not prerelease_first:
+        #  NOT having a prerelease is > having one
+        key = key + (0,) if v.prerelease else (1,)
+    if v.prerelease:
+        key = key + tuple(_semver_prerelease_key(
+            v.prerelease))
+
+    return key
+
+
+def _fetch_package_metadata(registry, name, logger):
+    """Fetch the metadata for a package from the npm registry"""
+    req = Request(
+        urljoin(registry, quote(name, safe='@')),
+        headers={
+            'Accept': ('application/vnd.npm.install-v1+json;'
+                        ' q=1.0, application/json; q=0.8, */*')
+        }
+    )
+    logger.debug('Fetching URL: %s' % (req.full_url))
+    try:
+        with urlopen(req) as response:
+            return json.load(response)
+    except URLError as exc:
+        logger.warning(
+            'Failed to fetch package metadata for %r: %r',
+            name, exc)
+        raise
 
 
 if __name__ == '__main__':

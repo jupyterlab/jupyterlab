@@ -543,6 +543,11 @@ namespace CodeEditor {
      *   contained in the editor.
      */
     getPositionForCoordinate(coordinate: ICoordinate): IPosition | null;
+
+    /**
+     * Inserts a new line at the cursor position and indents it.
+     */
+    newIndentedLine(): void;
   }
 
   /**

@@ -6,7 +6,7 @@
 JupyterLab Documentation
 ========================
 
-JupyterLab is the next-generation web-based user interface for Project Jupyter. `Try it on Binder <https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/master?urlpath=lab>`__.
+JupyterLab is the next-generation web-based user interface for Project Jupyter. `Try it on Binder <https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/master?urlpath=lab/tree/demo>`__.
 
 .. image:: ./images/jupyterlab.png
    :align: center
@@ -63,4 +63,3 @@ Indices and Tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-

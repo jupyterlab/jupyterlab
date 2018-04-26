@@ -14,6 +14,23 @@ We publish the npm packages, a Python source package, and a Python universal bin
 See the Python docs on [package uploading](https://packaging.python.org/guides/tool-recommendations/)
 for twine setup instructions and for why twine is the recommended method.
 
+## Getting a clean environment
+
+For convenience, here are commands for getting a completely clean repo. This makes sure that we don't have any extra tags or commits in our repo (especially since we will push our tags later in the process), and that we are on the master branch.
+
+```bash
+cd release
+conda remove --all -y -n jlabrelease
+rm -rf jupyterlab
+
+conda create -c conda-forge -y -n jlabrelease notebook nodejs twine
+conda activate jlabrelease
+git clone git@github.com:jupyterlab/jupyterlab.git
+cd jupyterlab
+pip install -ve .
+```
+
+
 ### Publish the npm packages
 
 The command below ensures the latest dependencies and built files,
@@ -83,6 +100,27 @@ xckd repo
 
 ### Updating the xkcd tutorial
 
+- Clone the repo if you don't have it
+
+```bash
+git clone git@github.com:jupyterlab/jupyterlab_xkcd.git
+```
+
+If the updates are simple, it may be enough to check out a new branch based on
+the current base branch, then rebase from the root commit, editing the root
+commit and other commits that involve installing packages to update to the new
+versions:
+
+```bash
+git checkout -b 0.xx # whatever the new version is
+git rebase -i --root
+```
+
+"Edit" the commits that involve installing packages, so you can update the
+package.json. Then skip down to the step below about creating tags. If the edits
+are more substantial than just updating package versions, then do the next steps
+instead.
+
 - Create a new empty branch in the xkcd repo.
 
 ```bash
@@ -106,6 +144,8 @@ file from the previous branch, as well as the `package.json` fields up to
 `license`.
 - Push the branch and set it as the default branch for the tutorial repo.
 - Submit the PR to JupyterLab
+- Publish the new @jupyterlab/xkcd npm package. Make sure to update the version
+  number in the last commit of the branch.
 
 If you make a mistake and need to start over, clear the tags using the
 following pattern:

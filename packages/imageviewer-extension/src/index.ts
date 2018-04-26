@@ -18,13 +18,28 @@ import {
  */
 namespace CommandIDs {
   export
-  const resetZoom = 'imageviewer:reset-zoom';
+  const resetImage = 'imageviewer:reset-image';
 
   export
   const zoomIn = 'imageviewer:zoom-in';
 
   export
   const zoomOut = 'imageviewer:zoom-out';
+
+  export
+  const flipHorizontal = 'imageviewer:flip-horizontal';
+
+  export
+  const flipVertical = 'imageviewer:flip-vertical';
+
+  export
+  const rotateClockwise = 'imageviewer:rotate-clockwise';
+
+  export
+  const rotateCounterclockwise = 'imageviewer:rotate-counterclockwise';
+
+  export
+  const invertColors = 'imageviewer:invert-colors';
 }
 
 
@@ -98,7 +113,7 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRe
 
   const category = 'Image Viewer';
 
-  [CommandIDs.zoomIn, CommandIDs.zoomOut, CommandIDs.resetZoom]
+  [CommandIDs.zoomIn, CommandIDs.zoomOut, CommandIDs.resetImage, CommandIDs.rotateClockwise, CommandIDs.rotateCounterclockwise, CommandIDs.flipHorizontal, CommandIDs.flipVertical, CommandIDs.invertColors]
     .forEach(command => { palette.addItem({ command, category }); });
 
   return tracker;
@@ -132,9 +147,39 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
     isEnabled
   });
 
-  commands.addCommand('imageviewer:reset-zoom', {
-    execute: resetZoom,
-    label: 'Reset Zoom',
+  commands.addCommand('imageviewer:reset-image', {
+    execute: resetImage,
+    label: 'Reset Image',
+    isEnabled
+  });
+
+  commands.addCommand('imageviewer:rotate-clockwise', {
+    execute: rotateClockwise,
+    label: 'Rotate Clockwise',
+    isEnabled
+  });
+
+  commands.addCommand('imageviewer:rotate-counterclockwise', {
+    execute: rotateCounterclockwise,
+    label: 'Rotate Counterclockwise',
+    isEnabled
+  });
+
+  commands.addCommand('imageviewer:flip-horizontal', {
+    execute: flipHorizontal,
+    label: 'Flip image horizontally',
+    isEnabled
+  });
+
+  commands.addCommand('imageviewer:flip-vertical', {
+    execute: flipVertical,
+    label: 'Flip image vertically',
+    isEnabled
+  });
+
+  commands.addCommand('imageviewer:invert-colors', {
+    execute: invertColors,
+    label: 'Invert Colors',
     isEnabled
   });
 
@@ -154,11 +199,54 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
     }
   }
 
-  function resetZoom(): void {
+  function resetImage(): void {
     const widget = tracker.currentWidget;
 
     if (widget) {
       widget.scale = 1;
+      widget.colorinversion = 0;
+      widget.resetRotationFlip();
+    }
+  }
+
+  function rotateClockwise(): void {
+    const widget = tracker.currentWidget;
+
+    if (widget) {
+      widget.rotateClockwise();
+    }
+  }
+
+  function rotateCounterclockwise(): void {
+    const widget = tracker.currentWidget;
+
+    if (widget) {
+      widget.rotateCounterclockwise();
+    }
+  }
+
+  function flipHorizontal(): void {
+    const widget = tracker.currentWidget;
+
+    if (widget) {
+      widget.flipHorizontal();
+    }
+  }
+
+  function flipVertical(): void {
+    const widget = tracker.currentWidget;
+
+    if (widget) {
+      widget.flipVertical();
+    }
+  }
+
+  function invertColors(): void {
+    const widget = tracker.currentWidget;
+
+    if (widget) {
+      widget.colorinversion += 1;
+      widget.colorinversion %= 2;
     }
   }
 }

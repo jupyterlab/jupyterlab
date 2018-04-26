@@ -45,9 +45,6 @@
   background: var(--jp-layout-color0);
 }
 
-.jp-NotebookPanel > .jp-Notebook {
-  height: calc(100% - var(--jp-private-notebook-panel-toolbar-height));
-}
 
 .jp-Notebook::after {
   display: block;
@@ -288,11 +285,12 @@
 }
 
 .jp-LinkedOutputView .jp-OutputArea {
-  height: 100%;
+  height: calc(100% - var(--jp-toolbar-micro-height));
+  display: block;
 }
 
 .jp-LinkedOutputView .jp-OutputArea-child:only-child {
-  height: 100%;
+  height: calc(100% - var(--jp-toolbar-micro-height));
 }
 
 .jp-LinkedOutputView-toolbar {

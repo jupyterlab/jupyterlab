@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as dsv from 'd3-dsv';
-
 import {
   ActivityMonitor, PathExt
 } from '@jupyterlab/coreutils';
@@ -16,7 +14,7 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  DataGrid, JSONModel
+  DataGrid
 } from '@phosphor/datagrid';
 
 import {
@@ -31,6 +29,9 @@ import {
   CSVToolbar
 } from './toolbar';
 
+import {
+  DSVModel
+} from './model';
 
 /**
  * The class name added to a CSV viewer.
@@ -71,7 +72,7 @@ class CSVViewer extends Widget implements DocumentRegistry.IReadyWidget {
 
     this._grid = new DataGrid();
     this._grid.addClass(CSV_GRID_CLASS);
-    this._grid.headerVisibility = 'column';
+    this._grid.headerVisibility = 'all';
 
     this._toolbar = new CSVToolbar({ selected: this._delimiter });
     this._toolbar.delimiterChanged.connect(this._onDelimiterChanged, this);
@@ -142,13 +143,16 @@ class CSVViewer extends Widget implements DocumentRegistry.IReadyWidget {
   }
 
   /**
-   * Create the json model for the grid.
+   * Create the model for the grid.
    */
   private _updateGrid(): void {
-    let text = this._context.model.toString();
-    let [columns, data] = Private.parse(text, this._delimiter);
-    let fields = columns.map(name => ({ name, type: 'string' }));
-    this._grid.model = new JSONModel({ data, schema: { fields } });
+    let data: string = this._context.model.toString();
+    let delimiter = this._delimiter;
+    let oldModel = this._grid.model as DSVModel;
+    this._grid.model = new DSVModel({ data, delimiter });
+    if (oldModel) {
+      oldModel.dispose();
+    }
   }
 
   private _context: DocumentRegistry.Context;
@@ -188,64 +192,5 @@ class CSVViewerFactory extends ABCWidgetFactory<CSVViewer, DocumentRegistry.IMod
    */
   protected createNewWidget(context: DocumentRegistry.Context): CSVViewer {
     return new CSVViewer({ context });
-  }
-}
-
-
-/**
- * The namespace for the module implementation details.
- */
-namespace Private {
-  /**
-   * Parse DSV text with the given delimiter.
-   *
-   * @param text - The DSV text to parse.
-   *
-   * @param delimiter - The delimiter for parsing.
-   *
-   * @returns A tuple of `[columnNames, dataRows]`
-   */
-  export
-  function parse(text: string, delimiter: string): [string[], dsv.DSVRowString[]] {
-    let columns: string[] = [];
-    let rowFn: RowFn | null = null;
-    let rows = dsv.dsvFormat(delimiter).parseRows(text, row => {
-      if (rowFn) {
-        return rowFn(row);
-      }
-      columns = uniquifyColumns(row);
-      rowFn = makeRowFn(columns);
-    });
-    return [columns, rows];
-  }
-
-  /**
-   * Replace duplicate column names with unique substitutes.
-   */
-  function uniquifyColumns(columns: string[]): string[] {
-    let unique: string[] = [];
-    let set: { [key: string]: boolean } = Object.create(null);
-    for (let name of columns) {
-      let uniqueName = name;
-      for (let i = 1; uniqueName in set; ++i) {
-        uniqueName = `${name}.${i}`;
-      }
-      set[uniqueName] = true;
-      unique.push(uniqueName);
-    }
-    return unique;
-  }
-
-  /**
-   * A type alias for a row conversion function.
-   */
-  type RowFn = (r: string[]) => dsv.DSVRowString;
-
-  /**
-   * Create a row conversion function for the given column names.
-   */
-  function makeRowFn(columns: string[]): RowFn {
-    let pairs = columns.map((name, i) => `'${name}':r[${i}]`).join(',');
-    return (new Function('r', `return {${pairs}};`)) as RowFn;
   }
 }

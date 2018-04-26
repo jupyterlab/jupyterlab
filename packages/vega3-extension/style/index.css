@@ -4,24 +4,22 @@
 |----------------------------------------------------------------------------*/
 
 
-.jp-RenderedVegaCommon .vega-actions a {
+.jp-RenderedVegaCommon3 .vega-actions a {
   margin-right: 8px;
   font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color2);
 }
 
 
-.jp-BaseVegaWidget .jp-RenderedVegaCommon
+.jp-RenderedVegaCommon3
  {
   margin-left: 8px;
   margin-top: 8px;
 }
 
-
-.jp-MimeDocument.jp-Document .jp-RenderedVegaCommon {
+.jp-MimeDocument .jp-RenderedVegaCommon3 {
   padding: 16px;
 }
-
 
 .vega canvas {
   background: var(--jp-vega-background);

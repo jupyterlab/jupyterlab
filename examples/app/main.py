@@ -51,13 +51,18 @@ class ExampleApp(NotebookApp):
         wsettings['page_config_data']['token'] = self.token
         wsettings['page_config_data']['pageUrl'] = page_url
         wsettings['page_config_data']['themesUrl'] = themes_path
+        mathjax_config = wsettings.get('mathjax_config',
+                'TeX-AMS_HTML-full,Safe')
+        wsettings['page_config_data'].setdefault('mathjaxConfig',
+                mathjax_config)
+        wsettings['page_config_data'].setdefault('mathjaxUrl', self.mathjax_url)
 
         default_handlers = [
             (ujoin(base_url, '/example?'), ExampleHandler),
             ((settings_path, SettingsHandler, {
                 'schemas_dir': os.path.join(HERE, 'build', 'schemas'),
-                'settings_dir': '',
-                'app_settings_dir': ''
+                'settings_dir': os.path.join(HERE, 'build', 'settings'),
+                'app_settings_dir': os.path.join(HERE, 'build', 'schemas'),
             })),
             ((ujoin(themes_path, "(.*)"), ThemesHandler, {
                 'themes_url': themes_path,

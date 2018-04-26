@@ -275,8 +275,8 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
 
   [
    'jupyter', 'default', 'abcdef', 'base16-dark', 'base16-light',
-   'hopscotch', 'material', 'mbo', 'mdn-like', 'seti', 'the-matrix',
-   'xq-light', 'zenburn'
+   'hopscotch', 'material', 'mbo', 'mdn-like', 'seti', 'solarized dark',
+   'solarized light', 'the-matrix', 'xq-light', 'zenburn'
   ].forEach(name => themeMenu.addItem({
     command: CommandIDs.changeTheme,
     args: { theme: name }

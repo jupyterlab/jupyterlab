@@ -1,6 +1,6 @@
-# @jupyterlab/vega2-extension
+# @jupyterlab/vega3-extension
 
-A mime-renderer extension for JupyterLab that provides support for rendering Vega and Vega-lite documents and mimebundles.
+A mime-renderer extension for JupyterLab that provides support for rendering Vega and Vega-Lite documents and mimebundles.
 
 
 Example in Python:
@@ -10,8 +10,8 @@ Example in Python:
 from IPython.display import display
 
 display({
-    "application/vnd.vegalite.v1+json": {
-        "$schema": "https://vega.github.io/schema/vega-lite/v1.json",
+    "application/vnd.vegalite.v2+json": {
+        "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
         "description": "A simple bar chart with embedded data.",
         "data": {
             "values": [

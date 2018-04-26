@@ -1,10 +1,10 @@
 {
   "name": "@jupyterlab/json-extension",
-  "version": "0.15.4",
+  "version": "0.15.7",
   "description": "JupyterLab - JSON Renderer",
-  "homepage": "https://github.com/jupyterlab/jupyter-renderers",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
-    "url": "https://github.com/jupyterlab/jupyter-renderers/issues"
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
@@ -20,7 +20,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jupyterlab/jupyter-renderers.git"
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
     "build": "tsc",
@@ -29,11 +29,11 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/rendermime-interfaces": "^1.0.6",
+    "@jupyterlab/rendermime-interfaces": "^1.0.9",
     "@phosphor/coreutils": "^1.3.0",
     "@phosphor/widgets": "^1.5.0",
-    "react": "~16.0.0",
-    "react-dom": "~16.0.0",
+    "react": "~16.2.0",
+    "react-dom": "~16.2.0",
     "react-highlighter": "^0.4.0",
     "react-json-tree": "^0.10.9"
   },

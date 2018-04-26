@@ -37,10 +37,13 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
    * Construct a new image widget.
    */
   constructor(context: DocumentRegistry.Context) {
-    super({ node: Private.createNode() });
+    super();
     this.context = context;
     this.node.tabIndex = -1;
     this.addClass(IMAGE_CLASS);
+
+    this._img = document.createElement('img');
+    this.node.appendChild(this._img);
 
     this._onTitleChanged();
     context.pathChanged.connect(this._onTitleChanged, this);
@@ -79,10 +82,61 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
       return;
     }
     this._scale = value;
-    let scaleNode = this.node.querySelector('div') as HTMLElement;
-    let transform: string;
-    transform = `scale(${value})`;
-    scaleNode.style.transform = transform;
+    this._updateStyle();
+  }
+
+  /**
+   * The color inversion of the image.
+   */
+  get colorinversion(): number {
+    return this._colorinversion;
+  }
+  set colorinversion(value: number) {
+    if (value === this._colorinversion) {
+        return;
+    }
+    this._colorinversion = value;
+    this._updateStyle();
+  }
+
+  /**
+   * Reset rotation and flip transformations.
+   */
+  resetRotationFlip(): void {
+    this._matrix = [1, 0, 0, 1];
+    this._updateStyle();
+  }
+
+  /**
+   * Rotate the image counter-clockwise (left).
+   */
+  rotateCounterclockwise(): void {
+    this._matrix = Private.prod(this._matrix, Private.rotateCounterclockwiseMatrix);
+    this._updateStyle();
+  }
+
+  /**
+   * Rotate the image clockwise (right).
+   */
+  rotateClockwise(): void {
+    this._matrix = Private.prod(this._matrix, Private.rotateClockwiseMatrix);
+    this._updateStyle();
+  }
+
+  /**
+   * Flip the image horizontally.
+   */
+  flipHorizontal(): void {
+    this._matrix = Private.prod(this._matrix, Private.flipHMatrix);
+    this._updateStyle();
+  }
+
+  /**
+   * Flip the image vertically.
+   */
+  flipVertical(): void {
+    this._matrix = Private.prod(this._matrix, Private.flipVMatrix);
+    this._updateStyle();
   }
 
   /**
@@ -119,13 +173,25 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
       return;
     }
     let content = context.model.toString();
-    let src = `data:${cm.mimetype};${cm.format},${content}`;
-    let node = this.node.querySelector('img') as HTMLImageElement;
-    node.setAttribute('src', src);
+    this._img.src = `data:${cm.mimetype};${cm.format},${content}`;
+  }
+
+  /**
+   * Update the image CSS style, including the transform and filter.
+   */
+  private _updateStyle(): void {
+    let [a, b, c, d] = this._matrix;
+    let [tX, tY] = Private.prodVec(this._matrix, [1, 1]);
+    let transform = `matrix(${a}, ${b}, ${c}, ${d}, 0, 0) translate(${tX < 0 ? -100 : 0}%, ${tY < 0 ? -100 : 0}%) `;
+    this._img.style.transform = `scale(${this._scale}) ${transform}`;
+    this._img.style.filter = `invert(${this._colorinversion})`;
   }
 
   private _scale = 1;
+  private _matrix = [1, 0, 0, 1];
+  private _colorinversion = 0;
   private _ready = new PromiseDelegate<void>();
+  private _img: HTMLImageElement;
 }
 
 
@@ -147,15 +213,43 @@ class ImageViewerFactory extends ABCWidgetFactory<ImageViewer, DocumentRegistry.
  */
 namespace Private {
   /**
-   * Create the node for the image widget.
+   * Multiply 2x2 matrices.
    */
   export
-  function createNode(): HTMLElement {
-    let node = document.createElement('div');
-    let innerNode = document.createElement('div');
-    let image = document.createElement('img');
-    node.appendChild(innerNode);
-    innerNode.appendChild(image);
-    return node;
+  function prod([a11, a12, a21, a22]: number[], [b11, b12, b21, b22]: number[]): number[] {
+    return [a11 * b11 + a12 * b21, a11 * b12 + a12 * b22,
+            a21 * b11 + a22 * b21, a21 * b12 + a22 * b22];
   }
+
+  /**
+   * Multiply a 2x2 matrix and a 2x1 vector.
+   */
+  export
+  function prodVec([a11, a12, a21, a22]: number[], [b1, b2]: number[]): number[] {
+    return [a11 * b1 + a12 * b2, a21 * b1 + a22 * b2];
+  }
+
+  /**
+   * Clockwise rotation transformation matrix.
+   */
+  export
+  const rotateClockwiseMatrix = [0, 1, -1, 0];
+
+  /**
+   * Counter-clockwise rotation transformation matrix.
+   */
+  export
+  const rotateCounterclockwiseMatrix = [0, -1, 1, 0];
+
+  /**
+   * Horizontal flip transformation matrix.
+   */
+  export
+  const flipHMatrix = [-1, 0, 0, 1];
+
+  /**
+   * Vertical flip transformation matrix.
+   */
+  export
+  const flipVMatrix = [1, 0, 0, -1];
 }

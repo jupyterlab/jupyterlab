@@ -81,6 +81,9 @@ namespace CommandIDs {
   const open = 'filebrowser:open';
 
   export
+  const openBrowserTab = 'filebrowser:open-browser-tab';
+
+  export
   const paste = 'filebrowser:paste';
 
   export
@@ -168,10 +171,8 @@ function activateFactory(app: JupyterLab, docManager: IDocumentManager, state: I
     node.addEventListener('contextmenu', (event: MouseEvent) => {
       event.preventDefault();
       const model = widget.modelForClick(event);
-      if (model) {
-        const menu = createContextMenu(model, commands, registry);
-        menu.open(event.clientX, event.clientY);
-      }
+      const menu = createContextMenu(model, commands, registry);
+      menu.open(event.clientX, event.clientY);
     });
 
     // Track the newly created file browser.
@@ -349,6 +350,23 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, bro
     mnemonic: 0
   });
 
+  commands.addCommand(CommandIDs.openBrowserTab, {
+    execute: () => {
+      const widget = tracker.currentWidget;
+
+      if (!widget) {
+        return;
+      }
+
+      return Promise.all(toArray(map(widget.selectedItems(), item => {
+        return commands.execute('docmanager:open-browser-tab', { path: item.path });
+      })));
+    },
+    iconClass: 'jp-MaterialIcon jp-AddIcon',
+    label: 'Open in New Browser Tab',
+    mnemonic: 0
+  });
+
   commands.addCommand(CommandIDs.paste, {
     execute: () => {
       const widget = tracker.currentWidget;
@@ -427,13 +445,22 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, bro
  * This function generates temporary commands with an incremented name. These
  * commands are disposed when the menu itself is disposed.
  */
-function createContextMenu(model: Contents.IModel, commands: CommandRegistry, registry: DocumentRegistry): Menu {
-  const path = model.path;
+function createContextMenu(model: Contents.IModel | undefined, commands: CommandRegistry, registry: DocumentRegistry): Menu {
+
   const menu = new Menu({ commands });
+
+  // If the user did not click on any file, we still want to show
+  // paste as a possibility.
+  if (!model) {
+    menu.addItem({ command: CommandIDs.paste });
+    return menu;
+  }
 
   menu.addItem({ command: CommandIDs.open });
 
+  const path = model.path;
   if (model.type !== 'directory') {
+    menu.addItem({ command: CommandIDs.openBrowserTab });
     const factories = registry.preferredWidgetFactories(path).map(f => f.name);
     if (path && factories.length > 1) {
       const command =  'docmanager:open';

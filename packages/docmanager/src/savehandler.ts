@@ -134,6 +134,11 @@ class SaveHandler implements IDisposable {
       // Restart the update to pick up the new interval.
       this._setTimer();
     }).catch(err => {
+      // If the user canceled the save, do nothing.
+      if (err.message === 'Cancel') {
+        return;
+      }
+      // Otherwise, log the error.
       console.error('Error in Auto-Save', err.message);
     });
   }

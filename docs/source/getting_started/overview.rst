@@ -17,7 +17,7 @@ components in a flexible, integrated, and extensible manner. You can
 work area using tabs and splitters. Documents and activities integrate with each
 other, enabling new workflows for interactive computing, for example:
 
--  :ref:`code_console` provide transient scratchpads for running code
+-  :ref:`code-console` provide transient scratchpads for running code
    interactively, with full support for rich output. A code console can be
    linked to a notebook kernel as a computation log from the notebook, for
    example.
@@ -37,7 +37,7 @@ Vega, Vega-Lite, etc.) and can also display rich kernel output in these formats.
 See :ref:`file-and-output-formats` for more information.
 
 To navigate the user interface, JupyterLab offers :ref:`customizable keyboard
-shortcuts <shortcuts>` and the ability to use :ref:`key maps <editor_keymaps>`
+shortcuts <shortcuts>` and the ability to use :ref:`key maps <editor-keymaps>`
 from vim, emacs, and Sublime Text in the text editor.
 
 JupyterLab :ref:`extensions <user_extensions>` can customize or enhance any part
@@ -53,7 +53,7 @@ classic Jupyter Notebook.
 Beta Series and Beyond
 ~~~~~~~~~~~~~~~~~~~~~~
 The developer API will evolve in beta releases and will stabilize in JupyterLab 1.0.
-We appreciate feedback on our `GitHub issues page <https://github.com/jupyterlab/jupyterlab/issues>`
+We appreciate feedback on our `GitHub issues page <https://github.com/jupyterlab/jupyterlab/issues>`__
 as we evolve towards a stable extension development API for JupyterLab 1.0.
 
 We plan to release JupyterLab 1.0 later in 2018.

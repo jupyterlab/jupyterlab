@@ -70,36 +70,42 @@ describe('jupyter.services - Comm', () => {
     context('#connectToComm()', () => {
 
       it('should create an instance of IComm', () => {
-        let comm = kernel.connectToComm('test');
-        expect(comm.targetName).to.be('test');
-        expect(typeof comm.commId).to.be('string');
+        return kernel.connectToComm('test').then(comm => {
+          expect(comm.targetName).to.be('test');
+          expect(typeof comm.commId).to.be('string');
+        });
       });
 
       it('should use the given id', () => {
-        let comm = kernel.connectToComm('test', '1234');
-        expect(comm.targetName).to.be('test');
-        expect(comm.commId).to.be('1234');
+        return kernel.connectToComm('test', '1234').then(comm => {
+          expect(comm.targetName).to.be('test');
+          expect(comm.commId).to.be('1234');
+        });
       });
 
       it('should create an instance of IComm', () => {
-        let comm = kernel.connectToComm('test', '1234');
-        expect(comm.targetName).to.be('test');
-        expect(comm.commId).to.be('1234');
+        return kernel.connectToComm('test', '1234').then(comm => {
+          expect(comm.targetName).to.be('test');
+          expect(comm.commId).to.be('1234');
+        });
       });
 
       it('should use the given id', () => {
-        let comm = kernel.connectToComm('test', '1234');
-        expect(comm.targetName).to.be('test');
-        expect(comm.commId).to.be('1234');
+        return kernel.connectToComm('test', '1234').then(comm => {
+          expect(comm.targetName).to.be('test');
+          expect(comm.commId).to.be('1234');
+        });
       });
 
       it('should reuse an existing comm', (done) => {
-        let comm = kernel.connectToComm('test', '1234');
-        comm.onClose = () => {
-          done();
-        };
-        let comm2 = kernel.connectToComm('test', '1234');
-        comm2.close();  // should trigger comm to close
+        kernel.connectToComm('test', '1234').then(comm => {
+          comm.onClose = () => {
+            done();
+          };
+          kernel.connectToComm('test', '1234').then(comm2 => {
+            comm2.close();  // should trigger comm to close
+          });
+        });
       });
     });
 
@@ -110,7 +116,6 @@ describe('jupyter.services - Comm', () => {
           disposable.dispose();
           let content = msg.content;
           expect(content.data).to.be('hello');
-          kernel.connectToComm(content.target_name, content.comm_id);
           comm.dispose();
           done();
         });
@@ -149,28 +154,31 @@ describe('jupyter.services - Comm', () => {
     context('#isDisposed', () => {
 
       it('should be true after we dispose of the comm', () => {
-        let comm = kernel.connectToComm('test');
-        expect(comm.isDisposed).to.be(false);
-        comm.dispose();
-        expect(comm.isDisposed).to.be(true);
+        return kernel.connectToComm('test').then(comm => {
+          expect(comm.isDisposed).to.be(false);
+          comm.dispose();
+          expect(comm.isDisposed).to.be(true);
+        });
       });
 
       it('should be safe to call multiple times', () => {
-        let comm = kernel.connectToComm('test');
-        expect(comm.isDisposed).to.be(false);
-        expect(comm.isDisposed).to.be(false);
-        comm.dispose();
-        expect(comm.isDisposed).to.be(true);
-        expect(comm.isDisposed).to.be(true);
+        return kernel.connectToComm('test').then(comm => {
+          expect(comm.isDisposed).to.be(false);
+          expect(comm.isDisposed).to.be(false);
+          comm.dispose();
+          expect(comm.isDisposed).to.be(true);
+          expect(comm.isDisposed).to.be(true);
+        });
       });
     });
 
     context('#dispose()', () => {
 
       it('should dispose of the resources held by the comm', () => {
-        let comm = kernel.connectToComm('foo');
-        comm.dispose();
-        expect(comm.isDisposed).to.be(true);
+        return kernel.connectToComm('foo').then(comm => {
+          comm.dispose();
+          expect(comm.isDisposed).to.be(true);
+        });
       });
     });
 
@@ -180,10 +188,15 @@ describe('jupyter.services - Comm', () => {
 
     let comm: Kernel.IComm;
 
+    beforeEach(() => {
+      return kernel.connectToComm('test').then(c => {
+        comm = c;
+      });
+    });
+
     context('#id', () => {
 
       it('should be a string', () => {
-        comm = kernel.connectToComm('test');
         expect(typeof comm.commId).to.be('string');
       });
 
@@ -192,7 +205,6 @@ describe('jupyter.services - Comm', () => {
     context('#name', () => {
 
       it('should be a string', () => {
-        comm = kernel.connectToComm('test');
         expect(comm.targetName).to.be('test');
       });
 
@@ -201,7 +213,6 @@ describe('jupyter.services - Comm', () => {
     context('#onClose', () => {
 
       it('should be readable and writable function', (done) => {
-        comm = kernel.connectToComm('test');
         expect(comm.onClose).to.be(undefined);
         comm.onClose = msg => {
           done();
@@ -223,7 +234,6 @@ describe('jupyter.services - Comm', () => {
 
     context('#onMsg', () => {
       it('should be readable and writable function', (done) => {
-        comm = kernel.connectToComm('test');
         comm.onMsg = (msg) => {
           done();
         };
@@ -254,7 +264,6 @@ describe('jupyter.services - Comm', () => {
       it('should send a message to the server', () => {
         let future = kernel.requestExecute({ code: TARGET });
         future.done.then(() => {
-          comm = kernel.connectToComm('test');
           let encoder = new TextEncoder('utf8');
           let data = encoder.encode('hello');
           future = comm.open({ foo: 'bar' }, { fizz: 'buzz' }, [data, data.buffer]);
@@ -267,7 +276,6 @@ describe('jupyter.services - Comm', () => {
     context('#send()', () => {
 
       it('should send a message to the server', () => {
-        comm = kernel.connectToComm('test');
         return comm.open().done.then(() => {
           let future = comm.send({ foo: 'bar' }, { fizz: 'buzz' });
           return future.done;
@@ -275,7 +283,6 @@ describe('jupyter.services - Comm', () => {
       });
 
       it('should pass through a buffers field', () => {
-        comm = kernel.connectToComm('test');
         return comm.open().done.then(() => {
           let future = comm.send({ buffers: 'bar' });
           return future.done;
@@ -287,7 +294,6 @@ describe('jupyter.services - Comm', () => {
     context('#close()', () => {
 
       it('should send a message to the server', () => {
-        comm = kernel.connectToComm('test');
         return comm.open().done.then(() => {
           let encoder = new TextEncoder('utf8');
           let data = encoder.encode('hello');
@@ -297,7 +303,6 @@ describe('jupyter.services - Comm', () => {
       });
 
       it('should trigger an onClose', (done) => {
-        comm = kernel.connectToComm('test');
         comm.open().done.then(() => {
           comm.onClose = (msg: KernelMessage.ICommCloseMsg) => {
             expect(msg.content.data).to.eql({ foo: 'bar' });
@@ -309,7 +314,6 @@ describe('jupyter.services - Comm', () => {
       });
 
       it('should not send subsequent messages', () => {
-        comm = kernel.connectToComm('test');
         return comm.open().done.then(() => {
           return comm.close({ foo: 'bar' }).done;
         }).then(() => {
