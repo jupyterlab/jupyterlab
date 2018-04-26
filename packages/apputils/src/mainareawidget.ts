@@ -48,8 +48,8 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
 
     const layout = this.layout = new BoxLayout();
     layout.direction = 'top-to-bottom';
-    layout.addWidget(content);
     layout.addWidget(toolbar);
+    layout.addWidget(content);
     BoxLayout.setStretch(toolbar, 0);
     BoxLayout.setStretch(content, 1);
 
