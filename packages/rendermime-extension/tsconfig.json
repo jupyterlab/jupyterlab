@@ -8,9 +8,7 @@
     "moduleResolution": "node",
     "target": "ES2015",
     "outDir": "./lib",
-    "lib": [
-      "ES2015", "DOM", , 
-    ]
+    "lib": ["ES2015", "DOM"]
   },
   "include": ["src/*"]
 }

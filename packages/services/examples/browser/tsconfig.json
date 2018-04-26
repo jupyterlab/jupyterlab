@@ -5,7 +5,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "ES2015",
-    "lib": ["dom", "ES2015"],
+    "lib": ["ES2015", "DOM"],
     "types": [],
     "outDir": "build"
   }

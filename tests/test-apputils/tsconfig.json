@@ -7,9 +7,7 @@
     "moduleResolution": "node",
     "target": "ES2015",
     "outDir": "./build",
-    "lib": [
-      "ES2015", "DOM", , 
-    ],
+    "lib": ["ES2015", "DOM"],
     "jsx": "react"
   }
 }

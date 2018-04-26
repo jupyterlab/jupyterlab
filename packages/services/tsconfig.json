@@ -4,7 +4,7 @@
     "noImplicitAny": true,
     "noEmitOnError": true,
     "noUnusedLocals": true,
-    "lib": ["dom", "ES2015"],
+    "lib": ["ES2015", "DOM"],
     "types": ["text-encoding"],
     "module": "commonjs",
     "moduleResolution": "node",
