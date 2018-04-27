@@ -274,32 +274,6 @@
   line-height: 1.4;
 }
 
-
-/*-----------------------------------------------------------------------------
-| Output Area View
-|----------------------------------------------------------------------------*/
-
-
-.jp-LinkedOutputView .jp-OutputArea-prompt {
-  display: none;
-}
-
-.jp-LinkedOutputView .jp-OutputArea {
-  height: calc(100% - var(--jp-toolbar-micro-height));
-  display: block;
-}
-
-.jp-LinkedOutputView .jp-OutputArea-child:only-child {
-  height: calc(100% - var(--jp-toolbar-micro-height));
-}
-
-.jp-LinkedOutputView-toolbar {
-  box-shadow: var(--jp-toolbar-box-shadow);
-  background: var(--jp-toolbar-background);
-  height: var(--jp-toolbar-micro-height);
-  z-index: 1;
-}
-
 /*-----------------------------------------------------------------------------
 | Presentation Mode (.jp-mod-presentationMode)
 |----------------------------------------------------------------------------*/
