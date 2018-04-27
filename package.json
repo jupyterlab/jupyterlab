@@ -53,7 +53,8 @@
     "eslint": "^4.12.1",
     "lerna": "^2.4.0",
     "npm-run-all": "~4.1.1",
-    "tslint": "^5.8.0"
+    "tslint": "^5.8.0",
+    "yarn": "^1.6.0"
   },
   "workspaces": [
     "dev_mode",
