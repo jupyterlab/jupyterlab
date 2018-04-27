@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, InstanceTracker
+  ICommandPalette, InstanceTracker, MainAreaWidget
 } from '@jupyterlab/apputils';
 
 import {
@@ -73,7 +73,7 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, registry: ISetting
   const namespace = 'setting-editor';
   const factoryService = editorServices.factoryService;
   const editorFactory = factoryService.newInlineEditor;
-  const tracker = new InstanceTracker<SettingEditor>({ namespace });
+  const tracker = new InstanceTracker<MainAreaWidget<SettingEditor>>({ namespace });
   let editor: SettingEditor;
 
   // Handle state restoration.
@@ -84,10 +84,10 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, registry: ISetting
   });
 
   commands.addCommand(CommandIDs.debug, {
-    execute: () => { tracker.currentWidget.toggleDebug(); },
+    execute: () => { tracker.currentWidget.content.toggleDebug(); },
     iconClass: 'jp-MaterialIcon jp-BugIcon',
     label: 'Debug User Settings In Inspector',
-    isToggled: () => tracker.currentWidget.isDebugVisible
+    isToggled: () => tracker.currentWidget.content.isDebugVisible
   });
 
   commands.addCommand(CommandIDs.open, {
@@ -117,30 +117,30 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, registry: ISetting
         args.forEach(id => { commands.notifyCommandChanged(id); });
       });
 
-      tracker.add(editor);
       editor.id = namespace;
       editor.title.label = 'Settings';
       editor.title.iconClass = 'jp-SettingsIcon';
-      editor.title.closable = true;
-      shell.addToMainArea(editor);
-      shell.activateById(editor.id);
+
+      let main = new MainAreaWidget({ content: editor });
+      tracker.add(main);
+      shell.addToMainArea(main);
     },
     label: 'Advanced Settings Editor'
   });
   palette.addItem({ category: 'Settings', command: CommandIDs.open });
 
   commands.addCommand(CommandIDs.revert, {
-    execute: () => { tracker.currentWidget.revert(); },
+    execute: () => { tracker.currentWidget.content.revert(); },
     iconClass: 'jp-MaterialIcon jp-UndoIcon',
     label: 'Revert User Settings',
-    isEnabled: () => tracker.currentWidget.canRevertRaw
+    isEnabled: () => tracker.currentWidget.content.canRevertRaw
   });
 
   commands.addCommand(CommandIDs.save, {
-    execute: () => tracker.currentWidget.save(),
+    execute: () => tracker.currentWidget.content.save(),
     iconClass: 'jp-MaterialIcon jp-SaveIcon',
     label: 'Save User Settings',
-    isEnabled: () => tracker.currentWidget.canSaveRaw
+    isEnabled: () => tracker.currentWidget.content.canSaveRaw
   });
 
   return tracker;

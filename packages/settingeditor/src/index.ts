@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IInstanceTracker
+  IInstanceTracker, MainAreaWidget
 } from '@jupyterlab/apputils';
 
 import {
@@ -23,7 +23,7 @@ export * from './settingeditor';
  * The setting editor tracker token.
  */
 export
-const ISettingEditorTracker = new Token<SettingEditor>('@jupyterlab/settingeditor:ISettingEditorTracker');
+const ISettingEditorTracker = new Token<ISettingEditorTracker>('@jupyterlab/settingeditor:ISettingEditorTracker');
 /* tslint:enable */
 
 
@@ -31,4 +31,4 @@ const ISettingEditorTracker = new Token<SettingEditor>('@jupyterlab/settingedito
  * A class that tracks the setting editor.
  */
 export
-interface ISettingEditorTracker extends IInstanceTracker<SettingEditor> {}
+interface ISettingEditorTracker extends IInstanceTracker<MainAreaWidget<SettingEditor>> {}

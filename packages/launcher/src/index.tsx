@@ -18,10 +18,6 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  Message
-} from '@phosphor/messaging';
-
-import {
   AttachedProperty
 } from '@phosphor/properties';
 
@@ -255,14 +251,6 @@ class Launcher extends VDomRenderer<LauncherModel> {
   }
   set pending(value: boolean) {
     this._pending = value;
-  }
-
-  /**
-   * Handle `'activate-request'` messages.
-   */
-  protected onActivateRequest(msg: Message): void {
-    this.node.tabIndex = -1;
-    this.node.focus();
   }
 
   /**

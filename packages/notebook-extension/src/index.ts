@@ -56,7 +56,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  Menu, PanelLayout, Widget
+  Menu
 } from '@phosphor/widgets';
 
 
@@ -1278,21 +1278,14 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       // Clone the OutputArea
       const current = getCurrent({ ...args, activate: false });
       const nb = current.notebook;
-      const outputAreaView = (nb.activeCell as CodeCell).cloneOutputArea();
-      // Create an empty toolbar
-      const toolbar = new Widget();
-      toolbar.addClass('jp-Toolbar');
-      toolbar.addClass('jp-LinkedOutputView-toolbar');
+      const content = (nb.activeCell as CodeCell).cloneOutputArea();
       // Create a MainAreaWidget
-      const layout = new PanelLayout();
-      const widget = new MainAreaWidget({ layout });
+      const widget = new MainAreaWidget({ content });
       widget.id = `LinkedOutputView-${uuid()}`;
       widget.title.label = 'Output View';
       widget.title.icon = NOTEBOOK_ICON_CLASS;
       widget.title.caption = current.title.label ? `For Notebook: ${current.title.label}` : 'For Notebook:';
       widget.addClass('jp-LinkedOutputView');
-      layout.addWidget(toolbar);
-      layout.addWidget(outputAreaView);
       current.context.addSibling(
         widget, { ref: current.id, mode: 'split-bottom' }
       );

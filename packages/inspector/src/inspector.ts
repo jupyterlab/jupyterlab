@@ -14,10 +14,6 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  Message
-} from '@phosphor/messaging';
-
-import {
   ISignal
 } from '@phosphor/signaling';
 
@@ -273,22 +269,6 @@ class InspectorPanel extends TabPanel implements IInspector {
     // Dispose the inspector child items.
     Object.keys(items).forEach(i => { items[i].dispose(); });
     super.dispose();
-  }
-
-  /**
-   * Handle `'activate-request'` messages.
-   */
-  protected onActivateRequest(msg: Message): void {
-    this.node.tabIndex = -1;
-    this.node.focus();
-  }
-
-  /**
-   * Handle `'close-request'` messages.
-   */
-  protected onCloseRequest(msg: Message): void {
-    super.onCloseRequest(msg);
-    this.dispose();
   }
 
   /**

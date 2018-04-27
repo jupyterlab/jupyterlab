@@ -84,7 +84,7 @@ const TOOLBAR_IDLE_CLASS = 'jp-CircleIcon';
  * A class which provides a toolbar widget.
  */
 export
-class Toolbar<T extends Widget> extends Widget {
+class Toolbar<T extends Widget = Widget> extends Widget {
   /**
    * Construct a new toolbar widget.
    */

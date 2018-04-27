@@ -206,14 +206,6 @@ class SettingEditor extends Widget {
   }
 
   /**
-   * Handle `'activate-request'` messages.
-   */
-  protected onActivateRequest(msg: Message): void {
-    this.node.tabIndex = -1;
-    this.node.focus();
-  }
-
-  /**
    * Handle `'after-attach'` messages.
    */
   protected onAfterAttach(msg: Message): void {
