@@ -27,6 +27,10 @@ source activate test
 # create jupyter base dir (needed for config retrieval)
 mkdir ~/.jupyter
 
+# Building should work without yarn installed globally, so uninstall the
+# global yarn that Travis installs automatically.
+sudo rm -rf `which yarn`
+yarn --version
 
 # Install and enable the server extension
 pip install -v -e ".[test]"
