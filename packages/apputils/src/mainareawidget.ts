@@ -45,13 +45,16 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
 
     const content = this.content = options.content;
     const toolbar = this.toolbar = options.toolbar || new Toolbar();
+    const spinner = this._spinner;
 
     const layout = this.layout = new BoxLayout({spacing: 0});
     layout.direction = 'top-to-bottom';
-    layout.addWidget(toolbar);
-    layout.addWidget(content);
+
     BoxLayout.setStretch(toolbar, 0);
     BoxLayout.setStretch(content, 1);
+    BoxLayout.setStretch(spinner, 1);
+
+    layout.addWidget(toolbar);
 
     if (!content.id) {
       content.id = uuid();
@@ -65,29 +68,32 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
     content.disposed.connect(() => this.dispose());
 
     if (options.populated) {
-      this.node.appendChild(this._spinner.node);
+      layout.addWidget(spinner);
       this.populated = options.populated;
       this.populated.then(() => {
         this._isPopulated = true;
-        const active = document.activeElement;
-        this.node.removeChild(this._spinner.node);
-        if (active === this._spinner.node) {
+        const active = document.activeElement === spinner.node;
+        spinner.dispose();
+        layout.addWidget(content);
+        if (active) {
           this._focusContent();
         }
-        this._spinner.dispose();
-      // Catch a population error.
       }).catch(e => {
-        this.node.removeChild(this._spinner.node);
-        this._spinner.dispose();
+        // Catch a population error.
+        const error = new Widget();
         // Show the error to the user.
         const pre = document.createElement('pre');
         pre.textContent = String(e);
-        this.node.appendChild(pre);
+        error.node.appendChild(pre);
+        BoxLayout.setStretch(error, 1);
+        spinner.dispose();
+        layout.addWidget(error);
       });
     // Handle no populated promise.
     } else {
+      spinner.dispose();
+      layout.addWidget(content);
       this._isPopulated = true;
-      this._spinner.dispose();
       this.populated = Promise.resolve(void 0);
     }
   }
