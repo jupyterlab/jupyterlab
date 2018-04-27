@@ -343,8 +343,7 @@ namespace Private {
   function convertBundle(bundle: nbformat.IMimeBundle): JSONObject {
     let map: JSONObject = Object.create(null);
     for (let mimeType in bundle) {
-      let item = extract(bundle, mimeType);
-      map[mimeType] = item;
+      map[mimeType] = extract(bundle, mimeType);
     }
     return map;
   }
