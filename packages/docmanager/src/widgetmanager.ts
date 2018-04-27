@@ -97,6 +97,9 @@ class DocumentWidgetManager implements IDisposable {
    * @throws If the factory is not registered.
    */
   createWidget(factory: DocumentRegistry.WidgetFactory, context: DocumentRegistry.Context): DocumentRegistry.IReadyWidget {
+
+    let content = factory.create();
+
     let widget = factory.createNew(context);
     Private.factoryProperty.set(widget, factory);
 

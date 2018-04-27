@@ -879,15 +879,15 @@ namespace DocumentRegistry {
     /**
      * Create a new content widget which will be initialized later.
      */
-    create(): T;
+    createContent(): T;
 
     /**
      * Initialize a content widget.
      *
      * @returns a promise that resolves when the content widget is ready to be
-     * visible.
+     * shown.
      */
-    initialize(context: IContext<U>, toolbar: Toolbar<Widget>, content: T): Promise<void>;
+    populate(context: IContext<U>, toolbar: Toolbar<Widget>, content: T): Promise<void>;
 
     /**
      * Called when a new document widget is created. Should emit the documentWidgetCreated signal.
@@ -1196,9 +1196,9 @@ namespace DocumentRegistry {
  * An interface for a document widget.
  */
 export
-interface IDocumentWidget<T extends Widget, U extends DocumentRegistry.IModel> extends Widget {
+interface IDocumentWidget<T extends Widget = Widget, U extends DocumentRegistry.IModel = DocumentRegistry.IModel> extends Widget {
   readonly content: T;
-  readonly contentReady: Promise<void>;
+  readonly populated: Promise<void>;
   readonly context: DocumentRegistry.IContext<U>;
   readonly toolbar: Toolbar<Widget>;
 }
@@ -1206,11 +1206,11 @@ interface IDocumentWidget<T extends Widget, U extends DocumentRegistry.IModel> e
 export
 namespace IDocumentWidget {
   export
-  interface IOptions<T extends Widget, U extends DocumentRegistry.IModel> extends Widget.IOptions {
+  interface IOptions<T extends Widget = Widget, U extends DocumentRegistry.IModel = DocumentRegistry.IModel> extends Widget.IOptions {
     readonly content: T;
-    readonly contentReady: Promise<void>;
     readonly context: DocumentRegistry.IContext<U>;
     readonly toolbar: Toolbar<Widget>;
+    readonly populated: Promise<void>;
   }
 }
 

@@ -18,6 +18,14 @@ import {
 } from '@phosphor/signaling';
 
 import {
+  Widget
+} from '@phosphor/widgets';
+
+import {
+  Toolbar
+} from '@jupyterlab/apputils';
+
+import {
   CodeEditor
 } from '@jupyterlab/codeeditor';
 
@@ -30,7 +38,7 @@ import {
 } from '@jupyterlab/observables';
 
 import {
-  DocumentRegistry
+  DocumentRegistry, IDocumentWidget
 } from './index';
 
 
@@ -280,7 +288,7 @@ class Base64ModelFactory extends TextModelFactory {
  * The default implementation of a widget factory.
  */
 export
-abstract class ABCWidgetFactory<T extends DocumentRegistry.IReadyWidget, U extends DocumentRegistry.IModel> implements DocumentRegistry.IWidgetFactory<T, U> {
+abstract class ABCWidgetFactory<T extends Widget = Widget, U extends DocumentRegistry.IModel = DocumentRegistry.IModel> implements DocumentRegistry.IWidgetFactory<T, U> {
   /**
    * Construct a new `ABCWidgetFactory`.
    */
@@ -297,8 +305,8 @@ abstract class ABCWidgetFactory<T extends DocumentRegistry.IReadyWidget, U exten
   /**
    * A signal emitted when a widget is created.
    */
-  get widgetCreated(): ISignal<DocumentRegistry.IWidgetFactory<T, U>, T> {
-    return this._widgetCreated;
+  get documentWidgetCreated(): ISignal<DocumentRegistry.IWidgetFactory<T, U>, T> {
+    return this._documentWidgetCreated;
   }
 
   /**
@@ -365,12 +373,27 @@ abstract class ABCWidgetFactory<T extends DocumentRegistry.IReadyWidget, U exten
   }
 
   /**
+   * Create a new empty content widget.
+   */
+  abstract createContent(): T;
+
+  /**
+   * Populate a content widget.
+   *
+   * @returns a promise that resolves when the content widget is ready to be
+   * shown.
+   */
+  abstract populate(context: DocumentRegistry.IContext<U>, toolbar: Toolbar<Widget>, content: T): Promise<void>;
+
+  abstract documentWidget(documentWidget: IDocumentWidget<T, U>): void;
+
+  /**
    * Create a new widget given a document model and a context.
    *
    * #### Notes
    * It should emit the [widgetCreated] signal with the new widget.
    */
-  createNew(context: DocumentRegistry.IContext<U>): T {
+  createContent(context: DocumentRegistry.IContext<U>): T {
     let widget = this.createNewWidget(context);
     this._widgetCreated.emit(widget);
     return widget;
@@ -389,5 +412,5 @@ abstract class ABCWidgetFactory<T extends DocumentRegistry.IReadyWidget, U exten
   private _modelName: string;
   private _fileTypes: string[];
   private _defaultFor: string[];
-  private _widgetCreated = new Signal<DocumentRegistry.IWidgetFactory<T, U>, T>(this);
+  private _documentWidgetCreated = new Signal<DocumentRegistry.IWidgetFactory<T, U>, T>(this);
 }

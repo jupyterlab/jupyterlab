@@ -256,7 +256,7 @@ namespace MainAreaWidget {
     toolbar?: Toolbar;
 
     /**
-     * An optional promise for when the content is fully populated.
+     * An optional promise for when the content is ready to be shown.
      */
     populated?: Promise<void>;
   }
