@@ -73,7 +73,6 @@ function activate(app: JupyterLab, palette: ICommandPalette): ILauncher {
       const launcher = new Launcher({ cwd, callback });
 
       launcher.model = model;
-      launcher.id = id;
       launcher.title.label = 'Launcher';
       launcher.title.iconClass = 'jp-LauncherIcon';
 
@@ -81,6 +80,7 @@ function activate(app: JupyterLab, palette: ICommandPalette): ILauncher {
 
       // If there are any other widgets open, remove the launcher close icon.
       main.title.closable = !!toArray(shell.widgets('main')).length;
+      main.id = id;
 
       shell.addToMainArea(main, { activate: args['activate'] as boolean });
 
