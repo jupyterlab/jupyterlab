@@ -25,3 +25,11 @@ class DocumentWidget extends MainAreaWidget implements IDocumentWidget {
 
   readonly context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
 }
+
+export
+namespace DocumentWidget {
+    export
+    interface IOptions extends MainAreaWidget.IOptions {
+        context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
+    }
+}
