@@ -1,6 +1,6 @@
 {
   "name": "typescript-browser-with-output",
-  "version": "0.12.2",
+  "version": "0.12.3",
   "private": true,
   "scripts": {
     "build": "tsc && webpack",
@@ -8,9 +8,9 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@jupyterlab/outputarea": "^0.16.2",
-    "@jupyterlab/rendermime": "^0.16.2",
-    "@jupyterlab/services": "^2.0.2",
+    "@jupyterlab/outputarea": "^0.16.3",
+    "@jupyterlab/rendermime": "^0.16.3",
+    "@jupyterlab/services": "^2.0.3",
     "es6-promise": "~4.1.1"
   },
   "devDependencies": {
