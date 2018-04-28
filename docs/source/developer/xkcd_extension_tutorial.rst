@@ -321,7 +321,7 @@ top of the file.
 Then modify the ``activate`` function again so that it has the following
 code:
 
-.. code:: typescript
+.. code-block:: typescript
 
       activate: (app: JupyterLab, palette: ICommandPalette) => {
         console.log('JupyterLab extension jupyterlab_xkcd is activated!');
@@ -377,7 +377,7 @@ tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.31-01-show-a-panel>`__
 Once you've got everything working properly, git commit your changes and
 carry on.
 
-.. code:: bash
+.. code-block:: bash
 
     git add .
     git commit -m 'Show xkcd command on panel'
@@ -389,7 +389,7 @@ You've got an empty panel. It's time to add a comic to it. Go back to
 your code editor. Add the following code below the lines that create a
 ``Widget`` instance and above the lines that define the command.
 
-.. code:: typescript
+.. code-block:: typescript
 
         // Add an image element to the panel
         let img = document.createElement('img');
@@ -441,7 +441,7 @@ Center the comic and add attribution
 Open ``style/index.css`` in our extension project directory for editing.
 Add the following lines to it.
 
-.. code:: css
+.. code-block:: css
 
     .jp-xkcdWidget {
         display: flex;
@@ -467,7 +467,8 @@ the CSS file in the ``index.ts`` file. Modify the the ``activate``
 function to apply the CSS classes and add the attribution badge markup.
 The beginning of the function should read like the following:
 
-.. code:: typescript
+.. code-block:: typescript
+      :emphasize-lines: 9,13,16-22
 
       activate: (app: JupyterLab, palette: ICommandPalette) => {
         console.log('JupyterLab extension jupyterlab_xkcd is activated!');
@@ -530,7 +531,7 @@ parts:
 Start by refactoring the widget code into the new ``XkcdWidget`` class.
 Add the following additional import to the top of the file.
 
-.. code:: typescript
+.. code-block:: typescript
 
     import {
       Message
@@ -539,7 +540,7 @@ Add the following additional import to the top of the file.
 Then add the class just below the import statements in the ``index.ts``
 file.
 
-.. code:: typescript
+.. code-block:: typescript
 
     /**
      * An xckd comic viewer.
@@ -599,7 +600,7 @@ or to refresh the comic in the exist widget when the command runs again.
 The code for the ``activate`` function should read as follows after
 these changes:
 
-.. code:: typescript
+.. code-block:: typescript
 
     /**
      * Activate the xckd widget extension.
@@ -634,7 +635,7 @@ Remove the ``activate`` function definition from the
 ``JupyterLabPlugin`` object and refer instead to the top-level function
 like so:
 
-.. code:: typescript
+.. code-block:: typescript
 
     const extension: JupyterLabPlugin<void> = {
       id: 'jupyterlab_xkcd',
@@ -672,7 +673,7 @@ extension behave this way too.
 Update the imports at the top of your ``index.ts`` file so that the
 entire list of import statements looks like the following:
 
-.. code:: typescript
+.. code-block:: typescript
 
     import {
       JupyterLab, JupyterLabPlugin, ILayoutRestorer // new
@@ -717,7 +718,7 @@ Finally, rewrite the ``activate`` function so that it:
    to use it to save/restore panel state
 3. Creates, tracks, shows, and refreshes the widget panel appropriately
 
-.. code:: typescript
+.. code-block:: typescript
 
     function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRestorer) {
       console.log('JupyterLab extension jupyterlab_xkcd is activated!');
