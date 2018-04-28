@@ -15,7 +15,10 @@
   display: flex;
   flex-direction: row;
   border-bottom: var(--jp-border-width) solid var(--jp-toolbar-border-color);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  background: var(--jp-toolbar-background);
   min-height: var(--jp-toolbar-micro-height);
+  z-index: 1;
 }
 
 
