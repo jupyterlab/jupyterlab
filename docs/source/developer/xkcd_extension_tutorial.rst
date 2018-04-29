@@ -674,6 +674,7 @@ Update the imports at the top of your ``index.ts`` file so that the
 entire list of import statements looks like the following:
 
 .. code-block:: typescript
+    :emphasize-lines: 2,6,9-11
 
     import {
       JupyterLab, JupyterLabPlugin, ILayoutRestorer // new
