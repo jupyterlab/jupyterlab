@@ -256,10 +256,16 @@ const notfound: JupyterLabPlugin<void> = {
  */
 const faviconbusy: JupyterLabPlugin<void> = {
   id: '@jupyterlab/application-extension:faviconbusy',
-  activate: async ({serviceManager: {kernels}}: JupyterLab) => {
-    await kernels.ready;
-    kernels.runningChanged.connect((_, kernels) => {
-      const isBusy = kernels.some(kernel => kernel.execution_state === 'busy');
+  activate: async (app: JupyterLab) => {
+    await app.serviceManager.kernels.ready;
+
+    let isBusy = false;
+    app.serviceManager.kernels.runningChanged.connect((_, kernels) => {
+      const newIsBusy = kernels.some(kernel => kernel.execution_state === 'busy');
+      if (newIsBusy === isBusy) {
+        return;
+      }
+      isBusy = newIsBusy;
       const filename = isBusy ? 'favicon-busy-1.ico' : 'favicon.ico';
       const favicon = document.querySelector('link[rel="shortcut icon"]') as HTMLLinkElement;
       favicon.href = `/static/base/images/${filename}`;
