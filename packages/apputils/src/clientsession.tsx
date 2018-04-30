@@ -229,6 +229,7 @@ class ClientSession implements IClientSession {
    */
   constructor(options: ClientSession.IOptions) {
     this.manager = options.manager;
+    this._kernelManager = options.kernelManager;
     this._path = options.path || uuid();
     this._type = options.type || '';
     this._name = options.name || '';
@@ -739,6 +740,9 @@ class ClientSession implements IClientSession {
    * Handle a change to the session status.
    */
   private _onStatusChanged(): void {
+    if (this._kernelManager) {
+      this._kernelManager.updateStatus(this.kernel.id, this.status);
+    }
     this._statusChanged.emit(this.status);
   }
 
@@ -773,6 +777,7 @@ class ClientSession implements IClientSession {
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);
   private _dialog: Dialog<any> | null = null;
+  private _kernelManager: Kernel.IManager;
 }
 
 
@@ -810,6 +815,11 @@ namespace ClientSession {
      * A kernel preference.
      */
     kernelPreference?: IClientSession.IKernelPreference;
+
+    /**
+     * A kernel manager instance.
+     */
+    kernelManager?: Kernel.IManager;
   }
 
   /**

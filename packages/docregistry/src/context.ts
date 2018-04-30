@@ -80,12 +80,12 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     let ext = PathExt.extname(this._path);
     this.session = new ClientSession({
       manager: manager.sessions,
+      kernelManager: manager.kernels,
       path: this._path,
       type: ext === '.ipynb' ? 'notebook' : 'file',
       name: PathExt.basename(localPath),
       kernelPreference: options.kernelPreference || { shouldStart: false }
     });
-    this.session.statusChanged.connect(this._onStatusChanged, this);
     this.session.propertyChanged.connect(this._onSessionChanged, this);
     manager.contents.fileChanged.connect(this._onFileChanged, this);
 
@@ -382,13 +382,6 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       this._path = path;
       this._pathChanged.emit(path);
     }
-  }
-
-  /**
-   * Handle a change to a kernel status.
-   */
-  private _onStatusChanged(sender: IClientSession, status: string): void {
-    this._manager.kernels.updateStatus(sender.kernel.id, status);
   }
 
   /**

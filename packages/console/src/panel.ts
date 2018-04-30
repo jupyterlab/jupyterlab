@@ -70,6 +70,7 @@ class ConsolePanel extends Panel {
 
     let session = this._session = new ClientSession({
       manager: manager.sessions,
+      kernelManager: manager.kernels,
       path,
       name: name || `Console ${count}`,
       type: 'console',
