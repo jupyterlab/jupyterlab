@@ -26,13 +26,6 @@ import {
   DocumentRegistry
 } from '@jupyterlab/docregistry';
 
-import {
-  IClientSession
-} from '@jupyterlab/apputils';
-
-import {
-  Kernel
-} from '@jupyterlab/services';
 
 /**
  * The class name added to AppShell instances.
@@ -668,25 +661,6 @@ class ApplicationShell extends Widget {
     }
     this._currentChanged.emit(args);
     this._onLayoutModified();
-
-    this._onCurrentSessionChanged(args.newValue ? (args.newValue as any).session : undefined);
-  }
-
-  /**
-   * Handle a change to the session of the current widget.
-   */
-  private _onCurrentSessionChanged(session?: IClientSession) {
-    this._onCurrentStatusChanged(session, session ? session.status : undefined);
-    Signal.disconnectReceiver(this._onCurrentStatusChanged);
-    if (session) {
-      session.statusChanged.connect(this._onCurrentStatusChanged);
-    }
-  }
-
-  private _onCurrentStatusChanged(sender?: IClientSession, status?: Kernel.Status) {
-    const filename = status === 'busy' ? 'favicon-busy-1.ico' : 'favicon.ico';
-    const favicon = document.querySelector('link[rel="shortcut icon"]') as HTMLLinkElement;
-    favicon.href = `/static/base/images/${filename}`;
   }
 
   /**

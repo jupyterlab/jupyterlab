@@ -657,6 +657,11 @@ namespace Kernel {
      * @returns A promise that resolves when all of the kernels are shut down.
      */
     shutdownAll(): Promise<void>;
+
+    /**
+     * Update a kernel's execuction status.
+     */
+    updateStatus(id: string, status: string): void;
   }
 
   /**
@@ -832,6 +837,12 @@ namespace Kernel {
      * The name of the kernel.
      */
     readonly name: string;
+
+    /**
+     * The execution state of the kernel.
+     */
+    readonly execution_state?: string;
+
   }
 
   /**

@@ -252,6 +252,25 @@ const notfound: JupyterLabPlugin<void> = {
 
 
 /**
+ * The favicon changing based on kernel busy status extension.
+ */
+const faviconbusy: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/application-extension:faviconbusy',
+  activate: async ({serviceManager: {kernels}}: JupyterLab) => {
+    await kernels.ready;
+    kernels.runningChanged.connect((_, kernels) => {
+      const isBusy = kernels.some(kernel => kernel.execution_state === 'busy');
+      const filename = isBusy ? 'favicon-busy-1.ico' : 'favicon.ico';
+      const favicon = document.querySelector('link[rel="shortcut icon"]') as HTMLLinkElement;
+      favicon.href = `/static/base/images/${filename}`;
+    });
+  },
+  requires: [],
+  autoStart: true
+};
+
+
+/**
  * Add the main application commands.
  */
 function addCommands(app: JupyterLab, palette: ICommandPalette): void {
@@ -358,6 +377,6 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [main, layout, router, notfound];
+const plugins: JupyterLabPlugin<any>[] = [main, layout, router, notfound, faviconbusy];
 
 export default plugins;
