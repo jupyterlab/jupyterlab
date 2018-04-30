@@ -46,8 +46,8 @@ A plugin adds a core functionality to the application:
    the default export.
 
    We provide two cookie cutters to create JuptyerLab plugin extensions in
-   `CommonJS <https://github.com/jupyterlab/extension-cookiecutter-js>`_ and
-   `TypeScript <https://github.com/jupyterlab/extension-cookiecutter-ts>`_.
+   `CommonJS <https://github.com/jupyterlab/extension-cookiecutter-js>`__ and
+   `TypeScript <https://github.com/jupyterlab/extension-cookiecutter-ts>`__.
 
 The default plugins in the JupyterLab application include:
 
