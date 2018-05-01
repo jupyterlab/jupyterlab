@@ -275,6 +275,13 @@ class CodeConsole extends Widget {
   }
 
   /**
+   * Toggle ForeignHandler
+   */
+  toggleForeignHandler() {
+    this._foreignHandler.enabled = ! this._foreignHandler.enabled;
+  }
+
+  /**
    * Execute the current prompt.
    *
    * @param force - Whether to force execution without checking code

@@ -86,6 +86,9 @@ namespace CommandIDs {
 
   export
   const changeKernel = 'console:change-kernel';
+
+  export
+  const toggleEcho = 'console:toggle-echo';
 }
 
 
@@ -399,6 +402,17 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     isEnabled
   });
 
+  commands.addCommand(CommandIDs.toggleEcho, {
+    label: 'Toggle echo…',
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      return current.console.toggleForeignHandler();
+    },
+    isEnabled
+  });
   // Add command palette items
   [
     CommandIDs.create,
@@ -410,6 +424,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     CommandIDs.interrupt,
     CommandIDs.changeKernel,
     CommandIDs.closeAndShutdown,
+    CommandIDs.toggleEcho,
   ].forEach(command => {
     palette.addItem({ command, category, args: { 'isPalette': true } });
   });
@@ -487,6 +502,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
 
   app.contextMenu.addItem({command: CommandIDs.clear, selector: '.jp-CodeConsole-content'});
   app.contextMenu.addItem({command: CommandIDs.restart, selector: '.jp-CodeConsole'});
+  app.contextMenu.addItem({command: CommandIDs.toggleEcho, selector: '.jp-CodeConsole'});
 
   return tracker;
 }
