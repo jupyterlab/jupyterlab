@@ -403,13 +403,14 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
   });
 
   commands.addCommand(CommandIDs.toggleEcho, {
-    label: 'Toggle echo…',
+    label: 'Toggle echo',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
         return;
       }
-      return current.console.toggleForeignHandler();
+      current.console.echoEnabled = !current.console.echoEnabled;
+      return current.console.echoEnabled;
     },
     isEnabled
   });

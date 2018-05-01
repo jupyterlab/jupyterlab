@@ -275,10 +275,14 @@ class CodeConsole extends Widget {
   }
 
   /**
-   * Toggle ForeignHandler
+   * Set whether the foreignHandler is able to inject foreign cells into a
+   * console.
    */
-  toggleForeignHandler() {
-    this._foreignHandler.enabled = ! this._foreignHandler.enabled;
+  get echoEnabled(): boolean {
+    return this._foreignHandler.enabled;
+  }
+  set echoEnabled(value: boolean) {
+    this._foreignHandler.enabled = value;
   }
 
   /**

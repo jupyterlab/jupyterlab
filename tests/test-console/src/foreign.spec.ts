@@ -147,12 +147,13 @@ describe('@jupyterlab/console', () => {
 
     describe('#enabled', () => {
 
-      it('should default to `true`', () => {
+      it('should default to `false`', () => {
         expect(handler.enabled).to.be(false);
       });
 
       it('should allow foreign cells to be injected if `true`', done => {
         let code = 'print("#enabled:true")';
+        handler.enabled = true;
         handler.injected.connect(() => { done(); });
         foreign.kernel.requestExecute({ code, stop_on_error: true });
       });
