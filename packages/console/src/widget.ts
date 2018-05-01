@@ -278,10 +278,10 @@ class CodeConsole extends Widget {
    * Set whether the foreignHandler is able to inject foreign cells into a
    * console.
    */
-  get echoEnabled(): boolean {
+  get showAllActivity(): boolean {
     return this._foreignHandler.enabled;
   }
-  set echoEnabled(value: boolean) {
+  set showAllActivity(value: boolean) {
     this._foreignHandler.enabled = value;
   }
 

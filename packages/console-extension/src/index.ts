@@ -88,7 +88,7 @@ namespace CommandIDs {
   const changeKernel = 'console:change-kernel';
 
   export
-  const toggleEcho = 'console:toggle-echo';
+  const toggleShowAllActivity = 'console:toggle-show-all-kernel-activity';
 }
 
 
@@ -402,16 +402,16 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     isEnabled
   });
 
-  commands.addCommand(CommandIDs.toggleEcho, {
-    label: 'Toggle echo',
+  commands.addCommand(CommandIDs.toggleShowAllActivity, {
+    label: args => args['isPalette'] ? 'Show only console activity' : 'Show all kernel activity',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
         return;
       }
-      current.console.echoEnabled = !current.console.echoEnabled;
-      return current.console.echoEnabled;
+      current.console.showAllActivity = !current.console.showAllActivity;
     },
+    isToggled: () => tracker.currentWidget.console.showAllActivity,
     isEnabled
   });
   // Add command palette items
@@ -425,7 +425,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     CommandIDs.interrupt,
     CommandIDs.changeKernel,
     CommandIDs.closeAndShutdown,
-    CommandIDs.toggleEcho,
+    CommandIDs.toggleShowAllActivity,
   ].forEach(command => {
     palette.addItem({ command, category, args: { 'isPalette': true } });
   });
@@ -503,7 +503,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
 
   app.contextMenu.addItem({command: CommandIDs.clear, selector: '.jp-CodeConsole-content'});
   app.contextMenu.addItem({command: CommandIDs.restart, selector: '.jp-CodeConsole'});
-  app.contextMenu.addItem({command: CommandIDs.toggleEcho, selector: '.jp-CodeConsole'});
+  app.contextMenu.addItem({command: CommandIDs.toggleShowAllActivity, selector: '.jp-CodeConsole'});
 
   return tracker;
 }
