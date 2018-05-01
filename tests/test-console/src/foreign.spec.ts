@@ -148,7 +148,7 @@ describe('@jupyterlab/console', () => {
     describe('#enabled', () => {
 
       it('should default to `true`', () => {
-        expect(handler.enabled).to.be(true);
+        expect(handler.enabled).to.be(false);
       });
 
       it('should allow foreign cells to be injected if `true`', done => {
