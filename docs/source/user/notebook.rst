@@ -109,7 +109,7 @@ Create a new synchronized view of a cell’s output:
 
 .. _tab-completion:
 
-Tab completion (activated with the ``Tab`` key) now includes additional
+Tab completion (activated with the ``Tab`` key) can now include additional
 information about the types of the matched items:
 
 .. raw:: html
@@ -117,6 +117,10 @@ information about the types of the matched items:
   <div class="jp-youtube-video">
      <iframe src="https://www.youtube-nocookie.com/embed/MuNr0i8LgpM?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
+
+Note: IPython 6.3.1 has temporarily disabled type annotations.
+To re-enable them, add ``c.Completer.use_jedi = True`` to an
+`ipython_config.py <http://ipython.readthedocs.io/en/stable/development/config.html>`__ file. 
 
 .. _tooltip:
 
