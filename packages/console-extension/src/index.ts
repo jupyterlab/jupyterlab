@@ -403,7 +403,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
   });
 
   commands.addCommand(CommandIDs.toggleShowAllActivity, {
-    label: args => 'Show all other kernel activity',
+    label: args => 'Show All Other Kernel Activity',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
