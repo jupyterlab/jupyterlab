@@ -800,8 +800,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
             editor.setCursorPosition({ line: cursor.line + 1, column: cursor.column });
           }
         }
-        // open a console, create if needed, the problem is that
-        // console.open will activate the console window, which we do not need
+        // open a console, create if needed
         if (code) {
           return commands.execute('console:open', {
               path,
