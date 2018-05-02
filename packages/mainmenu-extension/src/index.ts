@@ -509,18 +509,16 @@ export default menuPlugin;
  */
 namespace Private {
   /**
-   * Given a widget and a set containing IMenuExtenders,
-   * check the tracker and return the extender, if any,
-   * that holds the widget.
+   * Return the first value of the iterable that satisfies the predicate
+   * function.
    */
-  function findExtender<E extends IMenuExtender<Widget>>(widget: Widget, s: Set<E>): E {
-    let extender: E;
-    s.forEach(value => {
-      if (value.tracker.has(widget)) {
-        extender = value;
+  function find<T>(it: Iterable<T>, predicate: (value: T) => boolean): T | undefined {
+    for (let value of it) {
+      if (predicate(value)) {
+        return value;
       }
-    });
-    return extender;
+    }
+    return undefined;
   }
 
   /**
@@ -529,7 +527,7 @@ namespace Private {
   export
   function delegateLabel<E extends IMenuExtender<Widget>>(app: JupyterLab, s: Set<E>, label: keyof E): string {
     let widget = app.shell.currentWidget;
-    const extender = findExtender(widget, s);
+    const extender = find(s, value => value.tracker.has(widget));
     if (!extender) {
       return '';
     }
@@ -544,7 +542,7 @@ namespace Private {
   function delegateExecute<E extends IMenuExtender<Widget>>(app: JupyterLab, s: Set<E>, executor: keyof E): () => Promise<any> {
     return () => {
       let widget = app.shell.currentWidget;
-      const extender = findExtender(widget, s);
+      const extender = find(s, value => value.tracker.has(widget));
       if (!extender) {
         return Promise.resolve(void 0);
       }
@@ -560,7 +558,7 @@ namespace Private {
   function delegateEnabled<E extends IMenuExtender<Widget>>(app: JupyterLab, s: Set<E>, executor: keyof E): () => boolean {
     return () => {
       let widget = app.shell.currentWidget;
-      const extender = findExtender(widget, s);
+      const extender = find(s, value => value.tracker.has(widget));
       return !!extender && !!extender[executor] &&
         (extender.isEnabled ? extender.isEnabled(widget) : true);
     };
@@ -574,7 +572,7 @@ namespace Private {
   function delegateToggled<E extends IMenuExtender<Widget>>(app: JupyterLab, s: Set<E>, toggled: keyof E): () => boolean {
     return () => {
       let widget = app.shell.currentWidget;
-      const extender = findExtender(widget, s);
+      const extender = find(s, value => value.tracker.has(widget));
       return !!extender && !!extender[toggled] && !!extender[toggled](widget);
     };
   }
