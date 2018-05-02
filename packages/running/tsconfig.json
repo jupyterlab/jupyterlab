@@ -9,6 +9,7 @@
     "target": "ES2015",
     "outDir": "./lib",
     "lib": ["ES2015", "DOM"],
+    "jsx": "react",
     "types": []
   },
   "include": ["src/*"]
