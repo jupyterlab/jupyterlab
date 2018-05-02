@@ -403,8 +403,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
   });
 
   commands.addCommand(CommandIDs.toggleShowAllActivity, {
-    label: args => args['isPalette'] ? 'Toggle Show All Kernel Activity' : 'Show All Kernel Activity',
-
+    label: args => 'Show All Kernel Activity',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
@@ -412,7 +411,9 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
       }
       current.console.showAllActivity = !current.console.showAllActivity;
     },
-    isToggled: () => tracker.currentWidget ? tracker.currentWidget.console.showAllActivity : false,
+    isToggled: () => tracker.currentWidget ?
+                     tracker.currentWidget.console.showAllActivity :
+                     false,
     isEnabled
   });
   // Add command palette items
@@ -428,7 +429,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     CommandIDs.closeAndShutdown,
     CommandIDs.toggleShowAllActivity,
   ].forEach(command => {
-    palette.addItem({ command, category, args: { 'isPalette': true } });
+    palette.addItem({ command, category });
   });
 
   // Add a console creator to the File menu
