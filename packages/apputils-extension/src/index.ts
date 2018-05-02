@@ -183,7 +183,14 @@ const themes: JupyterLabPlugin<IThemeManager> = {
         if (args['theme'] === manager.theme) {
           return;
         }
-        manager.setTheme(args['theme'] as string);
+        manager.setTheme(args['theme'] as string).then(() => {
+          // The theme manager only loads new CSS onto the page,
+          // and anything that has rendered this command's `isToggled`
+          // state will not have updated when that happens (such as
+          // the application command palette). Force a refresh of those
+          // rendered commands.
+          commands.notifyCommandChanged(CommandIDs.changeTheme);
+        });
       }
     });
 
