@@ -433,16 +433,18 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   commands.addCommand(CommandIDs.showInFileBrowser, {
-      label: () => `Show in file browser`,
-      isEnabled,
-      execute: () => {
-        if (isEnabled()) {
-          let context = docManager.contextForWidget(app.shell.currentWidget);
-          // 'activate-main' is needed if this command is selected in the "open tabs" sidebar
-          commands.execute('filebrowser:activate-main');
-          commands.execute('filebrowser:navigate-main', {path: context.path});
-        }
+    label: () => `Show in file browser`,
+    isEnabled,
+    execute: () => {
+      let context = docManager.contextForWidget(app.shell.currentWidget);
+      if (!context) {
+        return;
       }
+
+      // 'activate-main' is needed if this command is selected in the "open tabs" sidebar
+      commands.execute('filebrowser:activate-main');
+      commands.execute('filebrowser:navigate-main', {path: context.path});
+    }
   });
 
   app.contextMenu.addItem({
@@ -456,9 +458,9 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     rank: 2
   });
   app.contextMenu.addItem({
-      command: CommandIDs.showInFileBrowser,
-      selector: '[data-type="document-title"]',
-      rank: 3
+    command: CommandIDs.showInFileBrowser,
+    selector: '[data-type="document-title"]',
+    rank: 3
   });
 
   [
