@@ -412,7 +412,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
       }
       current.console.showAllActivity = !current.console.showAllActivity;
     },
-    isToggled: () => tracker.currentWidget.console.showAllActivity,
+    isToggled: () => tracker.currentWidget ? tracker.currentWidget.console.showAllActivity : false,
     isEnabled
   });
   // Add command palette items
