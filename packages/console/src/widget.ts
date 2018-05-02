@@ -275,6 +275,17 @@ class CodeConsole extends Widget {
   }
 
   /**
+   * Set whether the foreignHandler is able to inject foreign cells into a
+   * console.
+   */
+  get showAllActivity(): boolean {
+    return this._foreignHandler.enabled;
+  }
+  set showAllActivity(value: boolean) {
+    this._foreignHandler.enabled = value;
+  }
+
+  /**
    * Execute the current prompt.
    *
    * @param force - Whether to force execution without checking code

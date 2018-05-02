@@ -86,6 +86,9 @@ namespace CommandIDs {
 
   export
   const changeKernel = 'console:change-kernel';
+
+  export
+  const toggleShowAllActivity = 'console:toggle-show-all-kernel-activity';
 }
 
 
@@ -399,6 +402,19 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     isEnabled
   });
 
+  commands.addCommand(CommandIDs.toggleShowAllActivity, {
+    label: args => args['isPalette'] ? 'Toggle Show All Kernel Activity' : 'Show All Kernel Activity',
+
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      current.console.showAllActivity = !current.console.showAllActivity;
+    },
+    isToggled: () => tracker.currentWidget ? tracker.currentWidget.console.showAllActivity : false,
+    isEnabled
+  });
   // Add command palette items
   [
     CommandIDs.create,
@@ -410,6 +426,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     CommandIDs.interrupt,
     CommandIDs.changeKernel,
     CommandIDs.closeAndShutdown,
+    CommandIDs.toggleShowAllActivity,
   ].forEach(command => {
     palette.addItem({ command, category, args: { 'isPalette': true } });
   });
@@ -487,6 +504,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
 
   app.contextMenu.addItem({command: CommandIDs.clear, selector: '.jp-CodeConsole-content'});
   app.contextMenu.addItem({command: CommandIDs.restart, selector: '.jp-CodeConsole'});
+  app.contextMenu.addItem({command: CommandIDs.toggleShowAllActivity, selector: '.jp-CodeConsole'});
 
   return tracker;
 }
