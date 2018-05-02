@@ -6,9 +6,9 @@
     "noUnusedLocals": true,
     "module": "commonjs",
     "moduleResolution": "node",
-    "target": "ES5",
+    "target": "ES2015",
     "outDir": "./lib",
-    "lib": ["ES5", "ES2015.Core", "ES2015.Promise", "ES2015.Collection", "DOM"],
+    "lib": ["ES2015", "DOM"],
     "jsx": "react",
     "types": ["node"]
   },

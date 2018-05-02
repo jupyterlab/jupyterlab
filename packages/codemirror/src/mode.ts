@@ -96,7 +96,9 @@ namespace Mode {
 
     // Fetch the mode asynchronously.
     return new Promise<ISpec>((resolve, reject) => {
-      require([`codemirror/mode/${spec.mode}/${spec.mode}.js`], () => {
+      // An arrow function below seems to miscompile in our current webpack to
+      // invalid js.
+      require([`codemirror/mode/${spec.mode}/${spec.mode}.js`], function() {
         resolve(spec);
       });
     });

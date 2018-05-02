@@ -4,11 +4,11 @@
     "noImplicitAny": true,
     "noEmitOnError": true,
     "noUnusedLocals": true,
-    "lib": ["dom", "es5", "es2015.collection", "es2015.promise"],
+    "lib": ["ES2015", "DOM"],
     "types": ["text-encoding"],
     "module": "commonjs",
     "moduleResolution": "node",
-    "target": "ES5",
+    "target": "ES2015",
     "outDir": "./lib"
   },
   "include": ["src/*"],

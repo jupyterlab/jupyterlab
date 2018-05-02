@@ -4,8 +4,8 @@
     "noEmitOnError": true,
     "module": "commonjs",
     "moduleResolution": "node",
-    "target": "ES5",
-    "lib": ["dom", "es5", "es2015.collection", "es2015.promise"],
+    "target": "ES2015",
+    "lib": ["ES2015", "DOM"],
     "types": [],
     "outDir": "build"
   }
