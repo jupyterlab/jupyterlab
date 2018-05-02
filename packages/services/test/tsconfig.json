@@ -3,12 +3,12 @@
     "experimentalDecorators": true,
     "noImplicitAny": true,
     "noEmitOnError": true,
-    "lib": ["ES2015", "DOM"],
+    "lib": ["es2015", "dom"],
     "types": ["mocha"],
     "esModuleInterop": true,
     "module": "commonjs",
     "moduleResolution": "node",
-    "target": "ES2015",
+    "target": "es2015",
     "outDir": "./build"
   }
 }
