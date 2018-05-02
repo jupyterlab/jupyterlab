@@ -104,6 +104,7 @@ describe('console/widget', () => {
 
       it('should reflect the contents of the widget', () => {
         let force = true;
+        widget.showAllActivity = true;
         Widget.attach(widget, document.body);
         return (widget.session as ClientSession).initialize().then(() => {
           return widget.execute(force);

@@ -225,6 +225,7 @@ describe('@jupyterlab/console', () => {
 
       it('should inject relevant cells into the parent', done => {
         let code = 'print("#onIOPubMessage:enabled")';
+        handler.enabled = true;
         let parent = handler.parent as TestParent;
         expect(parent.widgets.length).to.be(0);
         handler.injected.connect(() => {
@@ -237,6 +238,7 @@ describe('@jupyterlab/console', () => {
       it('should not reject relevant iopub messages', done => {
         let code = 'print("#onIOPubMessage:relevant")';
         let called = 0;
+        handler.enabled = true;
         handler.rejected.connect(() => {
           done(new Error('rejected relevant iopub message'));
         });
