@@ -27,6 +27,10 @@ import {
 } from '@jupyterlab/rendermime-interfaces';
 
 import {
+ toArray
+} from '@phosphor/algorithm';
+
+import {
   removeMath, replaceMath
 } from './latex';
 
@@ -331,16 +335,10 @@ function renderMarkdown(options: renderMarkdown.IRenderOptions): Promise<void> {
       console.warn('JupyterLab does not execute inline JavaScript in HTML output');
     }
 
-    // TODO arbitrary script execution is disabled for now.
-    // Eval any script tags contained in the HTML. This is not done
-    // automatically by the browser when script tags are created by
-    // setting `innerHTML`. The santizer should have removed all of
-    // the script tags for untrusted source, but this extra trusted
-    // check is just extra insurance.
-    // if (trusted) {
-    //   // TODO really want to run scripts?
-    //   Private.evalInnerHTMLScriptTags(host);
-    // }
+    if (trusted) {
+      // TODO really want to run scripts?
+      Private.evalInnerHTMLScriptTags(host);
+    }
 
     // Handle default behavior of nodes.
     Private.handleDefaults(host);
@@ -543,8 +541,6 @@ namespace renderText {
  * The namespace for module implementation details.
  */
 namespace Private {
-  // This is disabled for now until we decide we actually really
-  // truly want to allow arbitrary script execution.
   /**
    * Eval the script tags contained in a host populated by `innerHTML`.
    *
@@ -553,35 +549,35 @@ namespace Private {
    * around that by creating new equivalent script nodes manually, and
    * replacing the originals.
    */
-  // export
-  // function evalInnerHTMLScriptTags(host: HTMLElement): void {
-  //   // Create a snapshot of the current script nodes.
-  //   let scripts = toArray(host.getElementsByTagName('script'));
+  export
+  function evalInnerHTMLScriptTags(host: HTMLElement): void {
+    // Create a snapshot of the current script nodes.
+    let scripts = toArray(host.getElementsByTagName('script'));
 
-  //   // Loop over each script node.
-  //   for (let script of scripts) {
-  //     // Skip any scripts which no longer have a parent.
-  //     if (!script.parentNode) {
-  //       continue;
-  //     }
+    // Loop over each script node.
+    for (let script of scripts) {
+      // Skip any scripts which no longer have a parent.
+      if (!script.parentNode) {
+        continue;
+      }
 
-  //     // Create a new script node which will be clone.
-  //     let clone = document.createElement('script');
+      // Create a new script node which will be clone.
+      let clone = document.createElement('script');
 
-  //     // Copy the attributes into the clone.
-  //     let attrs = script.attributes;
-  //     for (let i = 0, n = attrs.length; i < n; ++i) {
-  //       let { name, value } = attrs[i];
-  //       clone.setAttribute(name, value);
-  //     }
+      // Copy the attributes into the clone.
+      let attrs = script.attributes;
+      for (let i = 0, n = attrs.length; i < n; ++i) {
+        let { name, value } = attrs[i];
+        clone.setAttribute(name, value);
+      }
 
-  //     // Copy the text content into the clone.
-  //     clone.textContent = script.textContent;
+      // Copy the text content into the clone.
+      clone.textContent = script.textContent;
 
-  //     // Replace the old script in the parent.
-  //     script.parentNode.replaceChild(clone, script);
-  //   }
-  // }
+      // Replace the old script in the parent.
+      script.parentNode.replaceChild(clone, script);
+    }
+  }
 
   /**
    * Render markdown for the specified content.
