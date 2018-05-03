@@ -14,6 +14,13 @@ function evalInContext(code: string, element: Element, document: Document, windo
 
 export class ExperimentalRenderedJavascript extends RenderedJavaScript {
   render(model: IRenderMime.IMimeModel): Promise<void> {
+    if (!model.trusted) {
+      // If output is not trusted, render an informative error message
+      this.addClass('jp-RenderedText');
+      this.node.innerHTML = `<pre>JupyterLab does not execute inline JavaScript that is not trusted</pre>`;
+      this.node.setAttribute('data-mime-type', 'application/vnd.jupyter.stderr');
+      return Promise.reject(new Error('Javascript output not trusted'));
+    }
     try {
       evalInContext(model.data[this.mimeType] as string, this.node, document, window);
       return Promise.resolve(undefined);
