@@ -10,18 +10,23 @@ cache:
   directories:
     - $HOME/miniconda
     - $HOME/.cache/pip
+matrix:
+  include:
+    - env: GROUP=js SAUCELABS=True
+      addons: 
+        sauce_connect:
+          no_ssl_bump_domains: all
+    - env: GROUP=js
+    - env: GROUP=js_cov
+    - env: GROUP=python PYTHON=2
+    - env: GROUP=python PYTHON=3.5
+    - env: GROUP=python PYTHON=3
+    - env: GROUP=integrity
+    - env: GROUP=js_services
+    - env: GROUP=cli PYTHON=2
+    - env: GROUP=cli PYTHON=3
+    - env: GROUP=docs
 env:
-  matrix:
-    - GROUP=js
-    - GROUP=js_cov
-    - GROUP=python PYTHON=2
-    - GROUP=python PYTHON=3.5
-    - GROUP=python PYTHON=3
-    - GROUP=integrity
-    - GROUP=js_services
-    - GROUP=cli PYTHON=2
-    - GROUP=cli PYTHON=3
-    - GROUP=docs
   global:
   - PYTHON=3
   - MINICONDA_DIR="$HOME/miniconda"
