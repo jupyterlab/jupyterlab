@@ -68,6 +68,7 @@
 
 .jp-RenderedText[data-mime-type="application/vnd.jupyter.stderr"] {
   background: var(--jp-rendermime-error-background);
+  padding-top: var(--jp-code-padding);
 }
 
 
