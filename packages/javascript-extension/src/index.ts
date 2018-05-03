@@ -14,33 +14,42 @@ function evalInContext(code: string, element: Element, document: Document, windo
 
 export class ExperimentalRenderedJavascript extends RenderedJavaScript {
   render(model: IRenderMime.IMimeModel): Promise<void> {
-    if (!model.trusted) {
-      // If output is not trusted, render an informative error message
-      this.addClass('jp-RenderedText');
-      this.node.innerHTML = `<pre>JupyterLab does not execute inline JavaScript that is not trusted</pre>`;
-      this.node.setAttribute('data-mime-type', 'application/vnd.jupyter.stderr');
-      return Promise.reject(new Error('Javascript output not trusted'));
-    }
-    try {
-      const data = model.data[this.mimeType] as string;
-      evalInContext(data, this.node, document, window);
-      // If output is empty after evaluating, render the plain
-      // text data
-      if (this.node.innerHTML === '') {
-        const text = model.data['text/plain'] as string;
-        const output = document.createElement('pre');
-        output.textContent = text;
-        this.node.appendChild(output);
+    const renderJavascript = () => {
+      try {
+        const data = model.data[this.mimeType] as string;
+        evalInContext(data, this.node, document, window);
+        // If output is empty after evaluating, render the plain
+        // text data
+        if (this.node.innerHTML === '') {
+          const text = model.data['text/plain'] as string;
+          const output = document.createElement('pre');
+          output.textContent = text;
+          this.node.appendChild(output);
+        }
+        return Promise.resolve();
+      } catch (error) {
+        // If output is not trusted, render an informative error message
+        this.addClass('jp-RenderedText');
+        this.node.innerHTML = `<pre>Javascript Error: ${error.message}</pre>`;
+        this.node.setAttribute('data-mime-type', 'application/vnd.jupyter.stderr');
+        return Promise.reject(error);
       }
-      return Promise.resolve(undefined);
-    } catch (error) {
-      // If output is not trusted, render an informative error message
-      this.addClass('jp-RenderedText');
-      this.node.innerHTML = `<pre>Javascript Error: ${error.message}</pre>`;
-      this.node.setAttribute('data-mime-type', 'application/vnd.jupyter.stderr');
-      return Promise.reject(error);
+    };
+    if (!model.trusted || !this._enabled) {
+      // If output is not trusted or if arbitrary Javascript execution is not enabled, render an informative error message
+      this.node.innerHTML = `<pre>Are you sure that you want to run arbitrary Javascript within your JupyterLab session?</pre>
+      <button>Run</button>`;
+      this.node.querySelector('button').onclick = (event) => {
+        this._enabled = true;
+        this.node.innerHTML = '';
+        renderJavascript();
+      };
+      return Promise.resolve();
     }
+    renderJavascript();
   }
+
+  private _enabled: boolean = false;
 }
 
 /**
