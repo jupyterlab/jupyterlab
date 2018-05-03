@@ -22,9 +22,19 @@ export class ExperimentalRenderedJavascript extends RenderedJavaScript {
       return Promise.reject(new Error('Javascript output not trusted'));
     }
     try {
-      evalInContext(model.data[this.mimeType] as string, this.node, document, window);
+      const data = model.data[this.mimeType] as string;
+      evalInContext(data, this.node, document, window);
+      // If output is empty after evaluating, render the plain
+      // text data
+      if (this.node.innerHTML === '') {
+        const text = model.data['text/plain'] as string;
+        const output = document.createElement('pre');
+        output.textContent = text;
+        this.node.appendChild(output);
+      }
       return Promise.resolve(undefined);
     } catch (error) {
+      // If output is not trusted, render an informative error message
       this.addClass('jp-RenderedText');
       this.node.innerHTML = `<pre>Javascript Error: ${error.message}</pre>`;
       this.node.setAttribute('data-mime-type', 'application/vnd.jupyter.stderr');
