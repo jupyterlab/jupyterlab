@@ -48,7 +48,7 @@ export class ExperimentalRenderedJavascript extends RenderedJavaScript {
  */
 export
 const rendererFactory: IRenderMime.IRendererFactory = {
-  safe: true,
+  safe: false,
   mimeTypes: [TEXT_JAVASCRIPT_MIMETYPE, APPLICATION_JAVASCRIPT_MIMETYPE],
   createRenderer: options => new ExperimentalRenderedJavascript(options)
 };
