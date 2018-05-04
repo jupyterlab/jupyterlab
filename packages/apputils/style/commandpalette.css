@@ -136,7 +136,7 @@
 
 
 .p-CommandPalette-item {
-  padding: 4px 12px 4px 0px;
+  padding: 4px 12px 4px 4px;
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
   font-weight: 400;
@@ -177,7 +177,7 @@
 }
 
 .p-CommandPalette-item .jp-CommandPalette-itemIcon {
-  padding: 0px 2px 0px 4px;
+  padding: 0px 0px 0px 4px;
   position: relative;
   width: 16px;
   top: 2px;
