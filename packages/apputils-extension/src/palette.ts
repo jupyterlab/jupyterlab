@@ -8,6 +8,10 @@ import {
 } from '@phosphor/disposable';
 
 import {
+  VirtualElement, h
+} from '@phosphor/virtualdom';
+
+import {
   CommandPalette
 } from '@phosphor/widgets';
 
@@ -74,6 +78,43 @@ class Palette implements ICommandPalette {
   private _palette: CommandPalette;
 }
 
+/**
+ * A custom renderer for the command palette that adds
+ * `isToggled` checkmarks to the items.
+ */
+class Renderer extends CommandPalette.Renderer {
+    /**
+     * Render the icon element for a menu item.
+     *
+     * @param data - The data to use for rendering the icon.
+     *
+     * @returns A virtual element representing the item icon.
+     */
+    renderItemIcon(data: CommandPalette.IItemRenderData): VirtualElement {
+      let className = 'jp-CommandPalette-itemIcon';
+      return h.div({ className });
+    }
+
+    /**
+     * Render the virtual element for a command palette item.
+     *
+     * @param data - The data to use for rendering the item.
+     *
+     * @returns A virtual element representing the item.
+     */
+    renderItem(data: CommandPalette.IItemRenderData): VirtualElement {
+      let className = this.createItemClass(data);
+      let dataset = this.createItemDataset(data);
+      return (
+        h.li({ className, dataset },
+          this.renderItemIcon(data),
+          this.renderItemLabel(data),
+          this.renderItemShortcut(data),
+          this.renderItemCaption(data)
+        )
+      );
+    }
+}
 
 /**
  * Activate the command palette.
@@ -81,7 +122,8 @@ class Palette implements ICommandPalette {
 export
 function activatePalette(app: JupyterLab, restorer: ILayoutRestorer): ICommandPalette {
   const { commands, shell } = app;
-  const palette = new CommandPalette({ commands });
+  const renderer = new Renderer();
+  const palette = new CommandPalette({ commands, renderer });
 
   // Let the application restorer track the command palette for restoration of
   // application state (e.g. setting the command palette as the current side bar

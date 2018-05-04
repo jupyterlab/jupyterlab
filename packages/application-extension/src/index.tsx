@@ -280,49 +280,50 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
 
   command = CommandIDs.toggleLeftArea;
   app.commands.addCommand(command, {
-    label: args => args['isPalette'] ?
-    'Toggle Left Area' : 'Show Left Area',
+    label: args => 'Show Left Area',
     execute: () => {
       if (app.shell.leftCollapsed) {
         app.shell.expandLeft();
       } else {
         app.shell.collapseLeft();
-        app.shell.activateById(app.shell.currentWidget.id);
+        if (app.shell.currentWidget) {
+          app.shell.activateById(app.shell.currentWidget.id);
+        }
       }
     },
     isToggled: () => !app.shell.leftCollapsed,
     isVisible: () => !app.shell.isEmpty('left')
   });
-  palette.addItem({ command, category, args: { 'isPalette': true } });
+  palette.addItem({ command, category });
 
   command = CommandIDs.toggleRightArea;
   app.commands.addCommand(command, {
-    label: args => args['isPalette'] ?
-    'Toggle Right Area' : 'Show Right Area',
+    label: args => 'Show Right Area',
     execute: () => {
       if (app.shell.rightCollapsed) {
         app.shell.expandRight();
       } else {
         app.shell.collapseRight();
-        app.shell.activateById(app.shell.currentWidget.id);
+        if (app.shell.currentWidget) {
+          app.shell.activateById(app.shell.currentWidget.id);
+        }
       }
     },
     isToggled: () => !app.shell.rightCollapsed,
     isVisible: () => !app.shell.isEmpty('right')
   });
-  palette.addItem({ command, category, args: { 'isPalette': true } });
+  palette.addItem({ command, category });
 
   command = CommandIDs.togglePresentationMode;
   app.commands.addCommand(command, {
-    label: args => args['isPalette'] ?
-      'Toggle Presentation Mode' : 'Presentation Mode',
+    label: args => 'Presentation Mode',
     execute: () => {
       app.shell.presentationMode = !app.shell.presentationMode;
     },
     isToggled: () => app.shell.presentationMode,
     isVisible: () => true
   });
-  palette.addItem({ command, category,  args: { 'isPalette': true } });
+  palette.addItem({ command, category });
 
   command = CommandIDs.setMode;
   app.commands.addCommand(command, {
@@ -342,8 +343,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
 
   command = CommandIDs.toggleMode;
   app.commands.addCommand(command, {
-    label: args => args['isPalette'] ?
-      'Toggle Single-Document Mode' : 'Single-Document Mode',
+    label: 'Single-Document Mode',
     isToggled: () => app.shell.mode === 'single-document',
     execute: () => {
       const args = app.shell.mode === 'multiple-document' ?
@@ -351,7 +351,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
       return app.commands.execute(CommandIDs.setMode, args);
     }
   });
-  palette.addItem({ command, category, args: { 'isPalette': true } });
+  palette.addItem({ command, category });
 }
 
 

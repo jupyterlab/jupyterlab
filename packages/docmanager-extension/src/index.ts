@@ -416,8 +416,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   commands.addCommand(CommandIDs.toggleAutosave, {
-    label: args =>
-      args['isPalette'] ? 'Toggle Document Autosave' : 'Autosave Documents',
+    label: 'Autosave Documents',
     isToggled: () => docManager.autosave,
     execute: () => {
       const value = !docManager.autosave;
@@ -447,13 +446,9 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     CommandIDs.saveAs,
     CommandIDs.clone,
     CommandIDs.close,
-    CommandIDs.closeAllFiles
+    CommandIDs.closeAllFiles,
+    CommandIDs.toggleAutosave
   ].forEach(command => { palette.addItem({ command, category }); });
-  palette.addItem({
-    command: CommandIDs.toggleAutosave,
-    category,
-    args: { isPalette: true }
-  });
 }
 
 
