@@ -870,36 +870,26 @@ namespace DocumentRegistry {
    * The interface for a widget factory.
    */
   export
-  interface IWidgetFactory<T extends Widget, U extends IModel> extends IDisposable, IWidgetFactoryOptions {
+  interface IWidgetFactory<T extends IDocumentWidget, U extends IModel> extends IDisposable, IWidgetFactoryOptions {
     /**
      * A signal emitted when a new widget is created.
      */
-    documentWidgetCreated: ISignal<IWidgetFactory<T, U>, IDocumentWidget<T, U>>;
+    widgetCreated: ISignal<IWidgetFactory<T, U>, IDocumentWidget<T, U>>;
 
     /**
-     * Create a new content widget which will be initialized later.
-     */
-    createContent(): T;
-
-    /**
-     * Initialize a content widget.
+     * Create a new widget given a context.
      *
-     * @returns a promise that resolves when the content widget is ready to be
-     * shown.
+     * #### Notes
+     * It should emit the [widgetCreated] signal with the new widget.
      */
-    populate(context: IContext<U>, toolbar: Toolbar<Widget>, content: T): Promise<void>;
-
-    /**
-     * Called when a new document widget is created. Should emit the documentWidgetCreated signal.
-     */
-    documentWidget(documentWidget: IDocumentWidget<T, U>): void;
+    createNew(context: IContext<U>): T;
   }
 
   /**
    * A type alias for a standard widget factory.
    */
   export
-  type WidgetFactory = IWidgetFactory<Widget, IModel>;
+  type WidgetFactory = IWidgetFactory<IDocumentWidget, IModel>;
 
   /**
    * An interface for a widget extension.
@@ -1201,17 +1191,6 @@ interface IDocumentWidget<T extends Widget = Widget, U extends DocumentRegistry.
   readonly populated: Promise<void>;
   readonly context: DocumentRegistry.IContext<U>;
   readonly toolbar: Toolbar<Widget>;
-}
-
-export
-namespace IDocumentWidget {
-  export
-  interface IOptions<T extends Widget = Widget, U extends DocumentRegistry.IModel = DocumentRegistry.IModel> extends Widget.IOptions {
-    readonly content: T;
-    readonly context: DocumentRegistry.IContext<U>;
-    readonly toolbar: Toolbar<Widget>;
-    readonly populated: Promise<void>;
-  }
 }
 
 /**
