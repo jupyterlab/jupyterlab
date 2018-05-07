@@ -82,6 +82,9 @@ namespace CommandIDs {
 
   export
   const toggleAutosave = 'docmanager:toggle-autosave';
+
+  export
+  const showInFileBrowser = 'docmanager:show-in-file-browser';
 }
 
 const pluginId = '@jupyterlab/docmanager-extension:plugin';
@@ -428,6 +431,21 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     }
   });
 
+  commands.addCommand(CommandIDs.showInFileBrowser, {
+    label: () => `Show in file browser`,
+    isEnabled,
+    execute: () => {
+      let context = docManager.contextForWidget(app.shell.currentWidget);
+      if (!context) {
+        return;
+      }
+
+      // 'activate-main' is needed if this command is selected in the "open tabs" sidebar
+      commands.execute('filebrowser:activate-main');
+      commands.execute('filebrowser:navigate-main', {path: context.path});
+    }
+  });
+
   app.contextMenu.addItem({
     command: CommandIDs.rename,
     selector: '[data-type="document-title"]',
@@ -437,6 +455,11 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     command: CommandIDs.clone,
     selector: '[data-type="document-title"]',
     rank: 2
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.showInFileBrowser,
+    selector: '[data-type="document-title"]',
+    rank: 3
   });
 
   [
