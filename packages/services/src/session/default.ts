@@ -677,7 +677,7 @@ namespace Private {
   }
 
   /**
-   * Create a new session, or return an existing session if a session if
+   * Create a new session, or return an existing session if
    * the session path already exists
    */
   export
