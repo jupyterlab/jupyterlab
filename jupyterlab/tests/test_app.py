@@ -30,6 +30,13 @@ from jupyterlab.process_app import ProcessApp
 HERE = osp.realpath(osp.dirname(__file__))
 
 
+try:
+    basestring
+    PY2 = True
+except NameError:
+    PY2 = False
+
+
 def _create_notebook_dir():
     """Create a temporary directory with some file structure."""
     root_dir = tempfile.mkdtemp(prefix='mock_contents')
@@ -186,6 +193,9 @@ class KarmaTestApp(ProcessTestApp):
                 '"@jupyterlab/test-<package_dir_name>"' % name
             )
 
+        if PY2:
+            karma_inject_file = karma_inject_file.encode('utf-8')
+            folder = folder.encode('utf-8')
         env = os.environ.copy()
         env['KARMA_INJECT_FILE'] = karma_inject_file
         env.setdefault('KARMA_FILE_PATTERN', pattern)
