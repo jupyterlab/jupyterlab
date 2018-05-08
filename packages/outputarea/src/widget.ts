@@ -404,6 +404,10 @@ class OutputArea extends Widget {
       widget = output;
     } else {
       widget = new Widget();
+      widget.node.innerHTML =
+        `No ${model.trusted ? '' : '(safe) '}renderer could be ` +
+        'found for output. It has the following MIME types: ' +
+        Object.keys(model.data).join(', ');
     }
     return widget;
   }
