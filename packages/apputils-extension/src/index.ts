@@ -173,24 +173,25 @@ const themes: JupyterLabPlugin<IThemeManager> = {
       when
     });
 
+    // Keep a synchronously set reference to the current theme,
+    // since the asynchronous setting of the theme in `changeTheme`
+    // can lead to an incorrect toggle on the currently used theme.
+    let currentTheme = manager.theme;
+
     commands.addCommand(CommandIDs.changeTheme, {
       label: args => {
         const theme = args['theme'] as string;
         return  args['isPalette'] ? `Use ${theme} Theme` : theme;
       },
-      isToggled: args => args['theme'] === manager.theme,
+      isToggled: args => args['theme'] === currentTheme,
       execute: args => {
-        if (args['theme'] === manager.theme) {
+        const theme = args['theme'] as string;
+        if (theme === manager.theme) {
           return;
         }
-        manager.setTheme(args['theme'] as string).then(() => {
-          // The theme manager only loads new CSS onto the page,
-          // and anything that has rendered this command's `isToggled`
-          // state will not have updated when that happens (such as
-          // the application command palette). Force a refresh of those
-          // rendered commands.
-          commands.notifyCommandChanged(CommandIDs.changeTheme);
-        });
+        currentTheme = theme;
+        manager.setTheme(args['theme'] as string);
+        commands.notifyCommandChanged(CommandIDs.changeTheme);
       }
     });
 
