@@ -201,6 +201,35 @@ describe('rendermime/registry', () => {
         });
         expect(r.preferredMimeType(model.data, true)).to.be('text/html');
       });
+
+      it('should return `undefined` if only unsafe options with `ensure`', () => {
+        let model = createModel({
+          'image/svg+xml': '',
+        });
+        expect(r.preferredMimeType(model.data, true)).to.be(void 0);
+      });
+
+      it('should return `undefined` if only unsafe options with `ensure`', () => {
+        let model = createModel({
+          'image/svg+xml': '',
+        });
+        expect(r.preferredMimeType(model.data, 'ensure')).to.be(void 0);
+      });
+
+      it('should return safe option if called with `prefer`', () => {
+        let model = createModel({
+          'image/svg+xml': '',
+          'text/plain': '',
+        });
+        expect(r.preferredMimeType(model.data, 'prefer')).to.be('text/plain');
+      });
+
+      it('should return unsafe option if called with `prefer`, and no safe alternative', () => {
+        let model = createModel({
+          'image/svg+xml': '',
+        });
+        expect(r.preferredMimeType(model.data, 'prefer')).to.be('image/svg+xml');
+      });
     });
 
     describe('#clone()', () => {
