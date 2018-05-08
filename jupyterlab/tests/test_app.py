@@ -187,9 +187,9 @@ class KarmaTestApp(ProcessTestApp):
             )
 
         env = os.environ.copy()
-        env['KARMA_INJECT_FILE'] = karma_inject_file.encode('utf-8')
+        env['KARMA_INJECT_FILE'] = karma_inject_file
         env.setdefault('KARMA_FILE_PATTERN', pattern)
-        env.setdefault('KARMA_COVER_FOLDER', folder.encode('utf-8'))
+        env.setdefault('KARMA_COVER_FOLDER', folder)
         cwd = self.karma_base_dir
         cmd = ['karma', 'start'] + sys.argv[1:]
         return cmd, dict(env=env, cwd=cwd)
