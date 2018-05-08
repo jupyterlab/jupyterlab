@@ -289,6 +289,12 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     });
   });
 
+  // Keep the rendered commands that are per-widget up to date.
+  tracker.currentChanged.connect(() => {
+    commands.notifyCommandChanged(CommandIDs.changeMode);
+  });
+
+
   // Add some of the editor settings to the settings menu.
   mainMenu.settingsMenu.addGroup([
     { type: 'submenu' as Menu.ItemType, submenu: keyMapMenu },

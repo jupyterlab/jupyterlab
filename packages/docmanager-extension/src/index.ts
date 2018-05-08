@@ -48,9 +48,6 @@ namespace CommandIDs {
   const closeAllFiles = 'docmanager:close-all-files';
 
   export
-  const createFrom = 'docmanager:create-from';
-
-  export
   const deleteFile = 'docmanager:delete-file';
 
   export
@@ -139,11 +136,20 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
     // Register the file operations commands.
     addCommands(app, docManager, palette, opener, settingRegistry);
 
+    // Keep the registered commands up-to-date.
+    app.shell.currentChanged.connect(() => {
+      Object.keys(CommandIDs).forEach(key => {
+        app.commands.notifyCommandChanged((CommandIDs as any)[key]);
+      });
+    });
+
+    // Keep up to date with the settings registry.
     const onSettingsUpdated = (settings: ISettingRegistry.ISettings) => {
       const autosave = settings.get('autosave').composite as boolean | null;
       docManager.autosave = (autosave === true || autosave === false)
                             ? autosave
                             : true;
+      app.commands.notifyCommandChanged(CommandIDs.toggleAutosave);
     };
 
     // Fetch the initial state of the settings.
