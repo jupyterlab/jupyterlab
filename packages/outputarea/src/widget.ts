@@ -400,15 +400,12 @@ class OutputArea extends Widget {
       if (isolated === true) {
         output = new Private.IsolatedRenderer(output);
       }
+      const className = output.node.className;
       output.renderModel(model).catch(error => {
         // Manually append error message to output
         output.node.innerHTML = `<pre>Javascript Error: ${error.message}</pre>`;
         // Remove mime-type-specific CSS classes
-        (output.node.classList as any).forEach((className: string) => {
-          if (['p-Widget', 'jp-OutputArea-output'].indexOf(className) < 0) {
-            output.removeClass(className);
-          }
-        });
+        output.node.className = className;
         // Add stderr-specific attributes
         output.addClass('jp-RenderedText');
         output.node.setAttribute('data-mime-type', 'application/vnd.jupyter.stderr');
