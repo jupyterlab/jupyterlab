@@ -8,14 +8,16 @@ Extension Developer Guide
    The extension developer API is not stable and will evolve in JupyterLab beta
    releases. The extension developer API will be stable in JupyterLab 1.0.
 
-JupyterLab can be extended in three ways via:
+JupyterLab can be extended in four ways via:
 
 -  **application plugins (top level):** Application plugins extend the
    functionality of JupyterLab itself.
--  **mime renderer extension (top level):** Mime Renderer extensions are
+-  **mime renderer extensions (top level):** Mime Renderer extensions are
    a convenience for creating an extension that can render mime data and
    potentially render files of a given type.
--  document widget extensions (lower level): Document widget extensions
+-  **theme extensions (top level):** Theme extensions allow you to customize the appearance of
+   JupyterLab by adding your own fonts, CSS rules, and graphics to the application.
+-  **document widget extensions (lower level):** Document widget extensions
    extend the functionality of document widgets added to the
    application, and we cover them in :ref:`documents`.
 
@@ -272,12 +274,15 @@ The theme extension is installed in the same way as a regular extension (see
 Standard (General-Purpose) Extensions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-See the example, `How to Extend the Notebook
+JupyterLab's modular architecture is based around the idea
+
+For a concrete example of a standerd extension, see `How to Extend the Notebook
 Plugin <./notebook.html#how-to-extend-the-notebook-plugin>`__. Notice
 that the mime renderer and themes extensions above use a limited,
 simplified interface to JupyterLab's extension system. Modifying the
 notebook plugin requires the full, general-purpose interface to the
 extension system.
+
 
 Extension Settings
 ~~~~~~~~~~~~~~~~~~
