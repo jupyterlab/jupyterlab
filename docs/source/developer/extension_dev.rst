@@ -168,7 +168,7 @@ If you must install a extension into a development branch of JupyterLab, you hav
     jlpm run add:sibling <path-or-url>
 
 in the JupyterLab root directory, where ``<path-or-url>`` refers either
-to an extension npm package on the local filesystem, or a URL to a git
+to an extension npm package on the local file system, or a URL to a git
 repository for an extension npm package. This operation may be
 subsequently reversed by running
 
@@ -276,7 +276,7 @@ Standard (General-Purpose) Extensions
 
 JupyterLab's modular architecture is based around the idea
 that all extensions are on equal footing, and that they interact
-with each other through the typed interface that provided by ``Token`` objects.
+with each other through typed interfaces that are provided by ``Token`` objects.
 An extension can provide a ``Token`` to the application,
 which other extensions can then request for their own use.
 
@@ -297,7 +297,7 @@ might want to use them in your extensions.
   in the left panel. Use this to add commands to the palette.
 - ``@jupyterlab/apputils:ISplashScreen``: An interface to the splash screen for the application.
   Use this if you want to show the splash screen for your own purposes.
-- ``@jupyterlab/apputils:IThemeManager``: An interface to the theme manager for the applicatation.
+- ``@jupyterlab/apputils:IThemeManager``: An interface to the theme manager for the application.
   Most extensions will not need to use this, as they can register a
   `theme extension <#themes>`__.
 - ``@jupyterlab/codeeditor:IEditorServices``: An interface to the text editor provider
@@ -332,7 +332,7 @@ might want to use them in your extensions.
   Use this to add the ability to hook into the variable inspector to your extension.
 - ``@jupyterlab/launcher:ILauncher``: An interface to the application activity launcher.
   Use this to add your extension activities to the launcher panel.
-- ``@jupyterlab/mainmenu:IMainMenu``: An interface to the main menubar for the application.
+- ``@jupyterlab/mainmenu:IMainMenu``: An interface to the main menu bar for the application.
   Use this if you want to add your own menu items.
 - ``@jupyterlab/notebook:ICellTools``: An interface to the ``Cell Tools`` panel in the
   application left area. Use this to add your own functionality to the panel.
@@ -354,12 +354,12 @@ might want to use them in your extensions.
   Use this if you want to be able to iterate over and interact with terminals
   created by the application.
 - ``@jupyterlab/tooltip:ITooltipManager``: An interface to the tooltip manager for the application.
-  Use this to allow your extension to invoke a tooltop.
+  Use this to allow your extension to invoke a tooltip.
 
 Standard Extension Example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-For a concrete example of a standerd extension, see `How to Extend the Notebook
+For a concrete example of a standard extension, see `How to Extend the Notebook
 Plugin <./notebook.html#how-to-extend-the-notebook-plugin>`__. Notice
 that the mime renderer and themes extensions above use a limited,
 simplified interface to JupyterLab's extension system. Modifying the
@@ -445,7 +445,7 @@ Context Menus
 JupyterLab has an application-wide context menu available as
 ``app.contextMenu``. See the Phosphor
 `docs <http://phosphorjs.github.io/phosphor/api/widgets/interfaces/contextmenu.iitemoptions.html>`__
-for the item creation options. If you wish to preempt the the
+for the item creation options. If you wish to preempt the
 application context menu, you can use a 'contextmenu' event listener and
 call ``event.stopPropagation`` to prevent the application context menu
 handler from being called (it is listening in the bubble phase on the
