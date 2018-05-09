@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IChangedArgs
+  IChangedArgs, PathExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -409,6 +409,18 @@ class DocumentWidget<T extends Widget = Widget, U extends DocumentRegistry.IMode
   constructor(options: DocumentWidget.IOptions<T, U>) {
     super(options);
     this.context = options.context;
+
+    this.context.pathChanged.connect(this._onPathChanged, this);
+    this._onPathChanged();
+  }
+
+  // TODO: redefine the populated/isPopulated to *also* wait for the context load/rendering
+
+  /**
+   * Handle a path change.
+   */
+  private _onPathChanged(): void {
+    this.title.label = PathExt.basename(this.context.localPath);
   }
 
   readonly context: DocumentRegistry.IContext<U>;
@@ -417,7 +429,7 @@ class DocumentWidget<T extends Widget = Widget, U extends DocumentRegistry.IMode
 export
 namespace DocumentWidget {
   export
-  interface IOptions<T extends Widget, U extends DocumentRegistry.IModel> extends MainAreaWidget.IOptions<T> {
+  interface IOptions<T extends Widget = Widget, U extends DocumentRegistry.IModel = DocumentRegistry.IModel> extends MainAreaWidget.IOptions<T> {
       context: DocumentRegistry.IContext<U>;
   }
 }
