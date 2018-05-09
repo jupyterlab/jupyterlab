@@ -266,8 +266,8 @@ Once you select a name, title and a description, a new theme folder will
 be created in the current directory. You can move that new folder to a
 location of your choice, and start making desired changes.
 
-The theme extension is installed the same as a regular extension (see
-[extension authoring](#Extension Authoring)).
+The theme extension is installed in the same way as a regular extension (see
+`extension authoring <#extension-authoring>`__).
 
 Standard (General-Purpose) Extensions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
