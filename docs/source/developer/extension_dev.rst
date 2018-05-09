@@ -275,6 +275,79 @@ Standard (General-Purpose) Extensions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 JupyterLab's modular architecture is based around the idea
+that all extensions are on equal footing, and that they interact
+with each other through the typed interface that provided by ``Token`` objects.
+An extension can provide a ``Token`` to the application,
+which other extensions can then request for their own use.
+
+Core Tokens
+^^^^^^^^^^^
+
+The core packages of JupyterLab provide a set of tokens,
+which are listed here, along with short descriptions of when you
+might want to use them in your extensions.
+
+- ``@jupyterlab/application:ILayoutRestorer``: An interface to the application layout
+  restoration functionality. Use this to have your activities restored across
+  page loads.
+- ``@jupyterlab/application:IRouter``:
+- ``@jupyterlab/apputils:ICommandPalette``: An interface to the application command palette
+  in the left panel. Use this to add commands to the palette.
+- ``@jupyterlab/apputils:ISplashScreen``: An interface to the splash screen for the application.
+  Use this if you want to show the splash screen for your own purposes.
+- ``@jupyterlab/apputils:IThemeManager``:
+- ``@jupyterlab/codeeditor:IEditorServices``: An interface to the text editor provider
+  for the application. Use this to create new text editors and host them in your
+  UI elements.
+- ``@jupyterlab/completer:ICompletionManager``:
+- ``@jupyterlab/console:IConsoleTracker``: An instance tracker for code consoles.
+  Use this if you want to be able to iterate over and interact with code consoles
+  created by the application.
+- ``@jupyterlab/console:IContentFactory``: A factory object that creates new code
+  consoles. Use this if you want to create and host code consoles in your own UI elements.
+- ``@jupyterlab/coreutils:ISettingRegistry``: An interface to the JupyterLab settings system.
+  Use this if you want to store settings for your application.
+  See `extension settings <#extension-settings>`__ for more information.
+- ``@jupyterlab/coreutils:IStateDB``: An interface to the JupyterLab state database.
+  Use this if you want to store data that will persist across page loads.
+  See `state database <#state-database>`__ for more information.
+- ``@jupyterlab/docmanager:IDocumentManager``: An interface to the manager for all
+  documents used by the application. Use this if you want to open and close documents,
+  create and delete files, and otherwise interact with the file system.
+- ``@jupyterlab/filebrowser:IFileBrowserFactory``: A factory object that creates file browsers.
+  Use this if you want to create your own file browser (e.g., for a custom storage backend),
+  or to interact with other file browsers that have been created by extensions.
+- ``@jupyterlab/fileeditor:IEditorTracker``: An instance tracker for file editors.
+  Use this if you want to be able to iterate over and interact with file editors
+  created by the application.
+- ``@jupyterlab/imageviewer:IImageTracker``: An instance tracker for images.
+  Use this if you want to be able to iterate over and interact with images
+  viewed by the application.
+- ``@jupyterlab/inspector:IInspector``: 
+- ``@jupyterlab/launcher:ILauncher``: An interface to the application activity launcher.
+  Use this to add your extension activities to the launcher panel.
+- ``@jupyterlab/mainmenu:IMainMenu``: An interface to the main menubar for the application.
+  Use this if you want to add your own menu items.
+- ``@jupyterlab/notebook:ICellTools``: An interface to the ``Cell Tools`` panel in the
+  application left area. Use this to add your own functionality to the panel.
+- ``@jupyterlab/notebook:IContentFactory``: A factory object that creates new notebooks.
+  Use this if you want to create and host notebooks in your own UI elements.
+- ``@jupyterlab/notebook:INotebookTracker``: An instance tracker for code consoles.
+  Use this if you want to be able to iterate over and interact with notebooks
+  created by the application.
+- ``@jupyterlab/rendermime:IRenderMimeRegistry``:
+- ``@jupyterlab/rendermime:ILatexTypesetter``: An interface to the LaTeX typesetter for the
+  application. Use this if you want to typeset math in your extension.
+- ``@jupyterlab/settingeditor:ISettingEditorTracker``: An instance tracker for setting editors.
+  Use this if you want to be able to iterate over and interact with setting editors
+  created by the application.
+- ``@jupyterlab/terminal:ITerminalTracker``: An instance tracker for terminals.
+  Use this if you want to be able to iterate over and interact with terminals
+  created by the application.
+- ``@jupyterlab/tooltip:ITooltipManager``:
+
+Standard Extension Example
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For a concrete example of a standerd extension, see `How to Extend the Notebook
 Plugin <./notebook.html#how-to-extend-the-notebook-plugin>`__. Notice
