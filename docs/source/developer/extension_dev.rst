@@ -290,16 +290,21 @@ might want to use them in your extensions.
 - ``@jupyterlab/application:ILayoutRestorer``: An interface to the application layout
   restoration functionality. Use this to have your activities restored across
   page loads.
-- ``@jupyterlab/application:IRouter``:
+- ``@jupyterlab/application:IRouter``: The URL router used by the application.
+  Use this to add custom URL-routing for your extension (e.g., to invoke
+  a command if the user navigates to a sub-path).
 - ``@jupyterlab/apputils:ICommandPalette``: An interface to the application command palette
   in the left panel. Use this to add commands to the palette.
 - ``@jupyterlab/apputils:ISplashScreen``: An interface to the splash screen for the application.
   Use this if you want to show the splash screen for your own purposes.
-- ``@jupyterlab/apputils:IThemeManager``:
+- ``@jupyterlab/apputils:IThemeManager``: An interface to the theme manager for the applicatation.
+  Most extensions will not need to use this, as they can register a
+  `theme extension <#themes>`__.
 - ``@jupyterlab/codeeditor:IEditorServices``: An interface to the text editor provider
   for the application. Use this to create new text editors and host them in your
   UI elements.
-- ``@jupyterlab/completer:ICompletionManager``:
+- ``@jupyterlab/completer:ICompletionManager``: An interface to the completion manager
+  for the application. Use this to allow your extension to invoke a completer.
 - ``@jupyterlab/console:IConsoleTracker``: An instance tracker for code consoles.
   Use this if you want to be able to iterate over and interact with code consoles
   created by the application.
@@ -323,7 +328,8 @@ might want to use them in your extensions.
 - ``@jupyterlab/imageviewer:IImageTracker``: An instance tracker for images.
   Use this if you want to be able to iterate over and interact with images
   viewed by the application.
-- ``@jupyterlab/inspector:IInspector``: 
+- ``@jupyterlab/inspector:IInspector``: An interface for adding variable inspectors to widgets.
+  Use this to add the ability to hook into the variable inspector to your extension.
 - ``@jupyterlab/launcher:ILauncher``: An interface to the application activity launcher.
   Use this to add your extension activities to the launcher panel.
 - ``@jupyterlab/mainmenu:IMainMenu``: An interface to the main menubar for the application.
@@ -335,7 +341,10 @@ might want to use them in your extensions.
 - ``@jupyterlab/notebook:INotebookTracker``: An instance tracker for code consoles.
   Use this if you want to be able to iterate over and interact with notebooks
   created by the application.
-- ``@jupyterlab/rendermime:IRenderMimeRegistry``:
+- ``@jupyterlab/rendermime:IRenderMimeRegistry``: An interface to the rendermime registry
+  for the application. Use this to create renderers for various mime-types in your extension.
+  Most extensions will not need to use this, as they can register a
+  `mime renderer extension <#mime-renderer-extensions>`__.
 - ``@jupyterlab/rendermime:ILatexTypesetter``: An interface to the LaTeX typesetter for the
   application. Use this if you want to typeset math in your extension.
 - ``@jupyterlab/settingeditor:ISettingEditorTracker``: An instance tracker for setting editors.
@@ -344,7 +353,8 @@ might want to use them in your extensions.
 - ``@jupyterlab/terminal:ITerminalTracker``: An instance tracker for terminals.
   Use this if you want to be able to iterate over and interact with terminals
   created by the application.
-- ``@jupyterlab/tooltip:ITooltipManager``:
+- ``@jupyterlab/tooltip:ITooltipManager``: An interface to the tooltip manager for the application.
+  Use this to allow your extension to invoke a tooltop.
 
 Standard Extension Example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
