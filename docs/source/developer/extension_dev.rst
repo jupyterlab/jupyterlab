@@ -366,9 +366,18 @@ simplified interface to JupyterLab's extension system. Modifying the
 notebook plugin requires the full, general-purpose interface to the
 extension system.
 
+Storing Extension Data
+^^^^^^^^^^^^^^^^^^^^^^
+
+In addition to the file system that is accessed by using the
+``@jupyterlab/services`` package, JupyterLab offers two ways for
+extensions to store data: a client-side state database that is built on
+top of ``localStorage`` and a plugin settings system that provides for
+default setting values and user overrides.
+
 
 Extension Settings
-~~~~~~~~~~~~~~~~~~
+``````````````````
 
 An extension can specify user settings using a JSON Schema. The schema
 definition should be in a file that resides in the ``schemaDir``
@@ -394,17 +403,8 @@ See the
 `fileeditor-extension <https://github.com/jupyterlab/jupyterlab/tree/master/packages/fileeditor-extension>`__
 for another example of an extension that uses settings.
 
-Storing Extension Data
-~~~~~~~~~~~~~~~~~~~~~~
-
-In addition to the file system that is accessed by using the
-``@jupyterlab/services`` package, JupyterLab offers two ways for
-extensions to store data: a client-side state database that is built on
-top of ``localStorage`` and a plugin settings system that provides for
-default setting values and user overrides.
-
 State Database
-^^^^^^^^^^^^^^
+``````````````
 
 The state database can be accessed by importing ``IStateDB`` from
 ``@jupyterlab/coreutils`` and adding it to the list of ``requires`` for
