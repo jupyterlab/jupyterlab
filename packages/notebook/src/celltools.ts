@@ -238,16 +238,14 @@ namespace CellTools {
   /**
    * A singleton conflatable `'activecell-changed'` message.
    */
-  export
   // tslint:disable-next-line
-  const ActiveCellMessage = new ConflatableMessage('activecell-changed');
+  export const ActiveCellMessage = new ConflatableMessage('activecell-changed');
 
   /**
    * A singleton conflatable `'selection-changed'` message.
    */
-  export
   // tslint:disable-next-line
-  const SelectionMessage = new ConflatableMessage('selection-changed');
+  export const SelectionMessage = new ConflatableMessage('selection-changed');
 
   /**
    * The base cell tool, meant to be subclassed.

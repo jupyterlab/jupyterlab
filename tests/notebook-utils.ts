@@ -36,9 +36,8 @@ import {
 /**
  * The default notebook content.
  */
-export
 // tslint:disable-next-line
-const DEFAULT_CONTENT: nbformat.INotebookContent = require('../examples/notebook/test.ipynb') as nbformat.INotebookContent;
+export const DEFAULT_CONTENT: nbformat.INotebookContent = require('../examples/notebook/test.ipynb') as nbformat.INotebookContent;
 DEFAULT_CONTENT.metadata = { orig_nbformat: 1 };
 
 export
