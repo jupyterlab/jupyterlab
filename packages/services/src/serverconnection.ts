@@ -2,11 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  PageConfig
-} from '@jupyterlab/coreutils';
-
-import {
-  URLExt
+  PageConfig, URLExt
 } from '@jupyterlab/coreutils';
 
 
@@ -209,8 +205,7 @@ namespace Private {
   function makeSettings(options: Partial<ServerConnection.ISettings> = {}): ServerConnection.ISettings {
     let extra: Partial<ServerConnection.ISettings> = {};
     if (options.baseUrl && !options.wsUrl) {
-      // setting baseUrl = https://host...
-      // sets wsUrl = wss://host...
+      // Setting baseUrl to https://host... sets wsUrl to wss://host...
       let baseUrl = options.baseUrl;
       if (baseUrl.indexOf('http') !== 0) {
         if (typeof location !== 'undefined') {
@@ -226,7 +221,7 @@ namespace Private {
     return {
       ...ServerConnection.defaultSettings,
       ...options,
-      ...extra,
+      ...extra
     };
   }
 
