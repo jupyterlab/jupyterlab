@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  MimeDocumentFactory, MimeDocument
+  MimeDocumentFactory, MimeContent, IDocumentWidget
 } from '@jupyterlab/docregistry';
 
 import {
@@ -58,7 +58,7 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, rendermime: IRende
     });
     const { commands } = app;
     const namespace = 'rendered-markdown';
-    const tracker = new InstanceTracker<MimeDocument>({ namespace });
+    const tracker = new InstanceTracker<IDocumentWidget<MimeContent>>({ namespace });
 
     app.docRegistry.addWidgetFactory(factory);
 

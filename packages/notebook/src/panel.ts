@@ -78,7 +78,7 @@ const DIRTY_CLASS = 'jp-mod-dirty';
  * kernel on the context.
  */
 export
-class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
+class NotebookPanel extends Widget {
   /**
    * Construct a new notebook panel.
    */
@@ -104,7 +104,7 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
       mimeTypeService: options.mimeTypeService,
       editorConfig: options.editorConfig,
     };
-    let notebook = this.notebook = contentFactory.createNotebook(nbOptions);
+    let notebook = this.content = this.notebook = contentFactory.createNotebook(nbOptions);
     notebook.addClass(NOTEBOOK_PANEL_NOTEBOOK_CLASS);
 
     layout.addWidget(toolbar);
@@ -156,6 +156,11 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
    * The notebook used by the widget.
    */
   readonly notebook: Notebook;
+
+  /**
+   * The notebook used by the widget.
+   */
+  readonly content: Notebook;
 
   /**
    * Get the toolbar used by the widget.

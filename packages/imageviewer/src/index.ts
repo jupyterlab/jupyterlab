@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
+
+import {
   Token
 } from '@phosphor/coreutils';
 
@@ -22,7 +26,7 @@ export * from './widget';
  * A class that tracks editor widgets.
  */
 export
-interface IImageTracker extends IInstanceTracker<ImageViewer> {}
+interface IImageTracker extends IInstanceTracker<IDocumentWidget<ImageViewer>> {}
 
 
 /* tslint:disable */

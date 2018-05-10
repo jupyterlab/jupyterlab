@@ -167,7 +167,7 @@ class FileEditorCodeWrapper extends CodeEditorWrapper {
  * A document widget for editors.
  */
 export
-class FileEditor extends Widget implements DocumentRegistry.IReadyWidget {
+class FileEditor extends Widget {
   /**
    * Construct a new editor widget.
    */
@@ -365,7 +365,8 @@ class FileEditorFactory extends ABCWidgetFactory<IDocumentWidget<FileEditor>, Do
       context,
       mimeTypeService: this._services.mimeTypeService
     });
-    const widget = new DocumentWidget({ content, context })
+    const widget = new DocumentWidget({ content, context });
+    return widget;
   }
 
   private _services: IEditorServices;

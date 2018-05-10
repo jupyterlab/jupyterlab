@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  ABCWidgetFactory, DocumentRegistry
+  ABCWidgetFactory, DocumentRegistry, IDocumentWidget, DocumentWidget
 } from '@jupyterlab/docregistry';
 
 import {
@@ -32,7 +32,7 @@ const IMAGE_CLASS = 'jp-ImageViewer';
  * A widget for images.
  */
 export
-class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
+class ImageViewer extends Widget {
   /**
    * Construct a new image widget.
    */
@@ -199,12 +199,14 @@ class ImageViewer extends Widget implements DocumentRegistry.IReadyWidget {
  * A widget factory for images.
  */
 export
-class ImageViewerFactory extends ABCWidgetFactory<ImageViewer, DocumentRegistry.IModel> {
+class ImageViewerFactory extends ABCWidgetFactory<IDocumentWidget<ImageViewer>, DocumentRegistry.IModel> {
   /**
    * Create a new widget given a context.
    */
-  protected createNewWidget(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): ImageViewer {
-    return new ImageViewer(context);
+  protected createNewWidget(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): IDocumentWidget<ImageViewer> {
+    const content = new ImageViewer(context);
+    const widget = new DocumentWidget({ content, context });
+    return widget;
   }
 }
 
