@@ -22,7 +22,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  Toolbar, MainAreaWidget
+  MainAreaWidget
 } from '@jupyterlab/apputils';
 
 import {

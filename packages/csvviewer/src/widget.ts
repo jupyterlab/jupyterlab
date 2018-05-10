@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  ABCWidgetFactory, DocumentRegistry
+  ABCWidgetFactory, DocumentRegistry, IDocumentWidget, DocumentWidget
 } from '@jupyterlab/docregistry';
 
 import {
@@ -58,7 +58,7 @@ const RENDER_TIMEOUT = 1000;
  * A viewer for CSV tables.
  */
 export
-class CSVViewer extends Widget implements DocumentRegistry.IReadyWidget {
+class CSVViewer extends Widget {
   /**
    * Construct a new CSV viewer.
    */
@@ -186,11 +186,13 @@ namespace CSVViewer {
  * A widget factory for CSV widgets.
  */
 export
-class CSVViewerFactory extends ABCWidgetFactory<CSVViewer, DocumentRegistry.IModel> {
+class CSVViewerFactory extends ABCWidgetFactory<IDocumentWidget<CSVViewer>, DocumentRegistry.IModel> {
   /**
    * Create a new widget given a context.
    */
-  protected createNewWidget(context: DocumentRegistry.Context): CSVViewer {
-    return new CSVViewer({ context });
+  protected createNewWidget(context: DocumentRegistry.Context): IDocumentWidget<CSVViewer> {
+    const content = new CSVViewer({ context });
+    const widget = new DocumentWidget({ content, context });
+    return widget;
   }
 }

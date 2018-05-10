@@ -2,11 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  showErrorMessage, MainAreaWidget
+  showErrorMessage
 } from '@jupyterlab/apputils';
 
 import {
-  ActivityMonitor, PathExt
+  ActivityMonitor
 } from '@jupyterlab/coreutils';
 
 import {
@@ -22,7 +22,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  SingletonLayout, Widget
+  PanelLayout, Widget
 } from '@phosphor/widgets';
 
 import {
@@ -50,8 +50,10 @@ class MimeContent extends Widget {
     this._context = options.context;
     this._renderer = options.renderer;
 
-    const layout = new SingletonLayout();
-    layout.widget = this._renderer;
+    // TODO: Use SingletonLayout when a new version of phosphor is released. See
+    // https://github.com/phosphorjs/phosphor/issues/337
+    const layout = new PanelLayout();
+    layout.addWidget(this._renderer);
     this.layout = layout;
 
     this._context.ready.then(() => {
@@ -186,7 +188,7 @@ namespace MimeContent {
    * The options used to initialize a MimeDocument.
    */
   export
-  interface IOptions extends DocumentWidget.IOptions<IRenderMime.IRenderer> {
+  interface IOptions {
     /**
      * Context
      */
@@ -234,7 +236,7 @@ class MimeDocumentFactory extends ABCWidgetFactory<IDocumentWidget<MimeContent>,
   /**
    * Create a new widget given a context.
    */
-  protected createNewWidget(context: DocumentRegistry.Context): MainAreaWidget {
+  protected createNewWidget(context: DocumentRegistry.Context): IDocumentWidget<MimeContent> {
     const ft = this._fileType;
     const mimeType = ft.mimeTypes.length ? ft.mimeTypes[0] : 'text/plain';
 
@@ -254,7 +256,7 @@ class MimeDocumentFactory extends ABCWidgetFactory<IDocumentWidget<MimeContent>,
     content.title.iconClass = ft.iconClass;
     content.title.iconLabel = ft.iconLabel;
 
-    const widget = new DocumentWidget({content});
+    const widget = new DocumentWidget({ content, context });
 
     return widget;
   }

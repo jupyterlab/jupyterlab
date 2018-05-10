@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  ABCWidgetFactory, DocumentRegistry
+  ABCWidgetFactory, DocumentRegistry, DocumentWidget, IDocumentWidget
 } from '@jupyterlab/docregistry';
 
 import {
@@ -343,7 +343,7 @@ namespace FileEditor {
  * A widget factory for editors.
  */
 export
-class FileEditorFactory extends ABCWidgetFactory<FileEditor, DocumentRegistry.ICodeModel> {
+class FileEditorFactory extends ABCWidgetFactory<IDocumentWidget<FileEditor>, DocumentRegistry.ICodeModel> {
   /**
    * Construct a new editor widget factory.
    */
@@ -355,16 +355,17 @@ class FileEditorFactory extends ABCWidgetFactory<FileEditor, DocumentRegistry.IC
   /**
    * Create a new widget given a context.
    */
-  protected createNewWidget(context: DocumentRegistry.CodeContext): FileEditor {
+  protected createNewWidget(context: DocumentRegistry.CodeContext): IDocumentWidget<FileEditor> {
     let func = this._services.factoryService.newDocumentEditor;
     let factory: CodeEditor.Factory = options => {
       return func(options);
     };
-    return new FileEditor({
+    const content = new FileEditor({
       factory,
       context,
       mimeTypeService: this._services.mimeTypeService
     });
+    const widget = new DocumentWidget({ content, context })
   }
 
   private _services: IEditorServices;

@@ -1188,7 +1188,7 @@ namespace DocumentRegistry {
 export
 interface IDocumentWidget<T extends Widget = Widget, U extends DocumentRegistry.IModel = DocumentRegistry.IModel> extends Widget {
   readonly content: T;
-  readonly populated: Promise<void>;
+  readonly ready: Promise<void>;
   readonly context: DocumentRegistry.IContext<U>;
   readonly toolbar: Toolbar<Widget>;
 }
