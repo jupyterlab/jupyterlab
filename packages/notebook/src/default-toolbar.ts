@@ -61,6 +61,11 @@ const TOOLBAR_PASTE_CLASS = 'jp-PasteIcon';
 const TOOLBAR_RUN_CLASS = 'jp-RunIcon';
 
 /**
+ * The class name added to toolbar step button.
+ */
+const TOOLBAR_STEP_CLASS = 'jp-StepIcon';
+
+/**
  * The class name added to toolbar cell type dropdown wrapper.
  */
 const TOOLBAR_CELLTYPE_CLASS = 'jp-Notebook-toolbarCellType';
@@ -172,6 +177,21 @@ namespace ToolbarItems {
   }
 
   /**
+   * Create a step toolbar item.
+   */
+  export
+  function createRunInConsoleButton(panel: NotebookPanel): ToolbarButton {
+    return new ToolbarButton({
+      className: TOOLBAR_STEP_CLASS,
+      onClick: () => {
+        // trigger command notebook:run-in-console, how?
+      },
+      tooltip: 'Run the selected text or current line in console'
+    });
+  }
+
+
+  /**
    * Create a cell type switcher item.
    *
    * #### Notes
@@ -199,6 +219,7 @@ namespace ToolbarItems {
     toolbar.addItem('copy', createCopyButton(panel));
     toolbar.addItem('paste', createPasteButton(panel));
     toolbar.addItem('run', createRunButton(panel));
+    toolbar.addItem('runInConsole', createRunInConsoleButton(panel));
     toolbar.addItem('interrupt', Toolbar.createInterruptButton(panel.session));
     toolbar.addItem('restart', Toolbar.createRestartButton(panel.session));
     toolbar.addItem('cellType', createCellTypeItem(panel));

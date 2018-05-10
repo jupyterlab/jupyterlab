@@ -206,6 +206,15 @@ describe('@jupyterlab/notebook', () => {
 
     });
 
+    describe('#createStepButton()', () => {
+
+      it('should have the `\'jp-StepIcon\'` class', () => {
+        let button = ToolbarItems.createStepButton(panel);
+        expect(button.hasClass('jp-StepIcon')).to.be(true);
+      });
+
+    });
+
     describe('#createCellTypeItem()', () => {
 
       it('should track the cell type of the current cell', () => {
