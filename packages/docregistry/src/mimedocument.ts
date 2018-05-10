@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  showErrorMessage
+  showErrorMessage, MainAreaWidget
 } from '@jupyterlab/apputils';
 
 import {
@@ -22,7 +22,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  BoxLayout, Widget
+  SingletonLayout, Widget
 } from '@phosphor/widgets';
 
 import {
@@ -35,29 +35,40 @@ import {
 
 
 /**
- * A widget for rendered mimetype document.
+ * A content widget for a rendered mimetype document.
  */
 export
-class MimeDocument extends DocumentWidget<IRenderMime.IRenderer> {
+class MimeContent extends Widget {
   /**
    * Construct a new widget.
    */
-  constructor(options: MimeDocument.IOptions) {
-    super(options);
-    this.addClass('jp-MimeDocument');
+  constructor(options: MimeContent.IOptions) {
+    super();
+    this.addClass('jp-MimeDocument'); // maybe move to the MainAreaWidget in the factory?
     this._mimeType = options.mimeType;
     this._dataType = options.dataType || 'string';
+    this._context = options.context;
+    this._renderer = options.renderer;
 
-    Promise.all([this.context.ready, this.populated)
-    this.context.ready.then(() => {
-      if (this.isDisposed) {
-        return;
-      }
+    const layout = new SingletonLayout();
+    layout.widget = this._renderer;
+    this.layout = layout;
+
+    this._context.ready.then(() => {
       return this._render();
     }).then(() => {
+
+      // After rendering for the first time, send an activation request if we
+      // are currently focused.
+      if (this.node === document.activeElement) {
+        // We want to synchronously send (not post) the activate message, while
+        // we know this node still has focus.
+        MessageLoop.sendMessage(this._renderer, Widget.Msg.ActivateRequest);
+      }
+
       // Throttle the rendering rate of the widget.
       this._monitor = new ActivityMonitor({
-        signal: this.context.model.contentChanged,
+        signal: this._context.model.contentChanged,
         timeout: options.renderTimeout
       });
       this._monitor.activityStopped.connect(this.update, this);
@@ -88,24 +99,10 @@ class MimeDocument extends DocumentWidget<IRenderMime.IRenderer> {
   }
 
   /**
-   * Handle `'activate-request'` messages.
-   */
-  protected onActivateRequest(msg: Message): void {
-    if (!this._hasRendered) {
-      this.node.focus();
-      return;
-    }
-    MessageLoop.sendMessage(this.content, Widget.Msg.ActivateRequest);
-    if (!this.node.contains(document.activeElement)) {
-      this.node.focus();
-    }
-  }
-
-  /**
    * Handle an `update-request` message to the widget.
    */
   protected onUpdateRequest(msg: Message): void {
-    if (this.context.isReady) {
+    if (this._context.isReady) {
       this._render();
     }
   }
@@ -113,13 +110,21 @@ class MimeDocument extends DocumentWidget<IRenderMime.IRenderer> {
   /**
    * Render the mime content.
    */
-  private _render(): Promise<void> {
+  private async _render(): Promise<void> {
+    if (this.isDisposed) {
+      return;
+    }
+
+    // Since rendering is async, we note render requests that happen while we
+    // actually are rendering for a future rendering.
     if (this._isRendering) {
       this._renderRequested = true;
       return;
     }
+
+    // Set up for this rendering pass.
     this._renderRequested = false;
-    let context = this.context;
+    let context = this._context;
     let model = context.model;
     let data: JSONObject = {};
     if (this._dataType === 'string') {
@@ -129,23 +134,21 @@ class MimeDocument extends DocumentWidget<IRenderMime.IRenderer> {
     }
     let mimeModel = new MimeModel({ data, callback: this._changeCallback });
 
-    this._isRendering = true;
-    return this.content.renderModel(mimeModel).then(() => {
-      // Handle the first render after an activation.
-      if (!this._hasRendered && this.node === document.activeElement) {
-        MessageLoop.sendMessage(this.content, Widget.Msg.ActivateRequest);
-      }
-      this._hasRendered = true;
+    try {
+      // Do the rendering asynchronously.
+      this._isRendering = true;
+      await this._renderer.renderModel(mimeModel);
       this._isRendering = false;
+
+      // If there is an outstanding request to render, go ahead and render
       if (this._renderRequested) {
         return this._render();
       }
-    }).catch(reason => {
+    } catch (error) {
       // Dispose the document if rendering fails.
-      requestAnimationFrame(() => { this.dispose(); });
-
-      showErrorMessage(`Renderer Failure: ${context.path}`, reason);
-    });
+      requestAnimationFrame(() => { this._renderer.dispose(); });
+      showErrorMessage(`Renderer Failure: ${context.path}`, error);
+    }
   }
 
   /**
@@ -157,17 +160,18 @@ class MimeDocument extends DocumentWidget<IRenderMime.IRenderer> {
     }
     let data = options.data[this._mimeType];
     if (typeof data === 'string') {
-      this.context.model.fromString(data);
+      this._context.model.fromString(data);
     } else {
-      this.context.model.fromJSON(data);
+      this._context.model.fromJSON(data);
     }
   }
 
+  private _context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
+  private _renderer: IRenderMime.IRenderer;
   private _monitor: ActivityMonitor<any, any> | null;
   private _mimeType: string;
   private _ready = new PromiseDelegate<void>();
   private _dataType: 'string' | 'json';
-  private _hasRendered = false;
   private _isRendering = false;
   private _renderRequested = false;
 }
@@ -177,16 +181,21 @@ class MimeDocument extends DocumentWidget<IRenderMime.IRenderer> {
  * The namespace for MimeDocument class statics.
  */
 export
-namespace MimeDocument {
+namespace MimeContent {
   /**
    * The options used to initialize a MimeDocument.
    */
   export
   interface IOptions extends DocumentWidget.IOptions<IRenderMime.IRenderer> {
     /**
-     * The rendermime instance.
+     * Context
      */
-    rendermime: RenderMimeRegistry;
+    context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
+
+    /**
+     * The renderer instance.
+     */
+    renderer: IRenderMime.IRenderer;
 
     /**
      * The mime type.
@@ -210,7 +219,7 @@ namespace MimeDocument {
  * An implementation of a widget factory for a rendered mimetype document.
  */
 export
-class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument, DocumentRegistry.IModel> {
+class MimeDocumentFactory extends ABCWidgetFactory<IDocumentWidget<MimeContent>, DocumentRegistry.IModel> {
   /**
    * Construct a new markdown widget factory.
    */
@@ -225,26 +234,28 @@ class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument, DocumentRegistr
   /**
    * Create a new widget given a context.
    */
-  protected createNewWidget(context: DocumentRegistry.Context): MimeDocument {
-    let ft = this._fileType;
-    let mimeType = ft.mimeTypes.length ? ft.mimeTypes[0] : 'text/plain';
+  protected createNewWidget(context: DocumentRegistry.Context): MainAreaWidget {
+    const ft = this._fileType;
+    const mimeType = ft.mimeTypes.length ? ft.mimeTypes[0] : 'text/plain';
 
-
-    let rendermime = this._rendermime.clone({
+    const rendermime = this._rendermime.clone({
       resolver: context.urlResolver
     });
-    let content = rendermime.createRenderer(mimeType);
+    const renderer = rendermime.createRenderer(mimeType);
 
-    let widget = new MimeDocument({
+    const content = new MimeContent({
       context,
-      content,
+      renderer,
       mimeType,
       renderTimeout: this._renderTimeout,
       dataType: this._dataType,
     });
 
-    widget.title.iconClass = ft.iconClass;
-    widget.title.iconLabel = ft.iconLabel;
+    content.title.iconClass = ft.iconClass;
+    content.title.iconLabel = ft.iconLabel;
+
+    const widget = new DocumentWidget({content});
+
     return widget;
   }
 

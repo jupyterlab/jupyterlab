@@ -400,6 +400,16 @@ abstract class ABCWidgetFactory<T extends IDocumentWidget, U extends DocumentReg
   private _widgetCreated = new Signal<DocumentRegistry.IWidgetFactory<T, U>, T>(this);
 }
 
+/**
+ * How do we imagine most things using document widgets? Notebooks, images, etc., could be wanting to modify the toolbar, etc. So I imagine we'd have a notebook document widget inheriting from the document widget, rather than a main area widget with a notebook content widget. Or maybe most things have both a content widget and a document widget.
+ * 
+ * Most of the time, the content widget will want direct access to the context. It also makes sense to have the context on the document widget so outsiders can use it, and the toolbar can use it?
+ * 
+ * 
+ * IDocumentWidget needs to just take a context and possibly a promise, I think, and provide a content, toolbar, context, and ready promise. So we should *not* extend the mainarea ioptions.
+ * 
+ * For the implementation, perhaps we just make the BaseMainAreaWidget handle the focus bits, make a new MainAreaWidget class that lets you pass in the content widget, and have documentwidget class that handles the context part on top of the base main area widget class, and then perhaps a convenience document widget that lets you pass in the content widget, so people don't have to keep making their own subclasses?
+ */
 
 /**
  * A document widget implementation.

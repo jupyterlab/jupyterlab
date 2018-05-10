@@ -30,6 +30,20 @@ import {
  * This widget is `closable` by default.
  * This widget is automatically disposed when closed.
  * This widget ensures its own focus when activated.
+ * 
+ * You can pass in a ready promise - when the ready promise resolves, the content widget will be shown. In the case of a document widget, the ready promise passed in should probably be combined with the context ready promise? Or perhaps it's the responsibility of the one creating the document widget to hook the context up?
+ * 
+ * I want to support a class that lets you just pass in a content widget and a ready promise, and I also want to support the use case of a subclass that creates the content widget.
+ * 
+ * The case of creating the content widget probably doesn't need some of the things here, such as the automatic migration of the title attribute. So perhaps that *is* a separate case? When I create my own widget.  Same thing about the toolbar - some widgets will want to create their own toolbar instead of pass in one.
+ * 
+ * The other way to deal with this is to have the factory create the content widget and toolbar, and pass those into a mainareawidget. The document widget merely has the toolbar, content, and context accessors, and a ready promise/isReady function. The IDocumentWidget interface makes it so that we don't actually expose the constructor. So we actually *do* create the content widget and toolbar in the factory function.
+ * 
+ * For the notebook factory function, MainAreaWidget takes the place of the notebook panel
+ * 
+ * So what about the content widget that needs access to the context? Does the IDocumentWidget have a *content* that has a context attribute? That may make more sense than having the context on the overall panel?
+ * 
+ * So how about this: Let's explore having the main widget like it is, and the factory providing a content that is context-aware 
  */
 export
 class MainAreaWidget<T extends Widget = Widget> extends Widget {
@@ -67,11 +81,11 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
     this.title.changed.connect(this._updateContentTitle, this);
     content.disposed.connect(() => this.dispose());
 
-    if (options.populated) {
+    if (options.ready) {
       layout.addWidget(spinner);
-      this.populated = options.populated;
-      this.populated.then(() => {
-        this._isPopulated = true;
+      this._ready = options.ready;
+      this.ready.then(() => {
+        this._isReady = true;
         const active = document.activeElement === spinner.node;
         spinner.dispose();
         layout.addWidget(content);
@@ -93,8 +107,8 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
     } else {
       spinner.dispose();
       layout.addWidget(content);
-      this._isPopulated = true;
-      this.populated = Promise.resolve(void 0);
+      this._isReady = true;
+      this._ready = Promise.resolve(void 0);
     }
   }
 
@@ -111,14 +125,16 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
   /**
    * Whether the widget is fully populated.
    */
-  get isPopulated(): boolean {
-    return this._isPopulated;
+  get isReady(): boolean {
+    return this._isReady;
   }
 
   /**
    * A promise that resolves when the widget is fully populated.
    */
-  readonly populated: Promise<void>;
+  get ready(): Promise<void> {
+    return this._ready;
+  }
 
   /**
    * Handle the DOM events for the widget.
@@ -135,7 +151,7 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
     case 'mouseup':
     case 'mouseout':
       let target = event.target as HTMLElement;
-      if (this._isPopulated &&
+      if (this._isReady &&
           this.toolbar.node.contains(document.activeElement) &&
           target.tagName !== 'SELECT') {
         this._focusContent();
@@ -166,7 +182,7 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    if (this._isPopulated) {
+    if (this._isReady) {
       this._focusContent();
     } else {
       this._spinner.node.focus();
@@ -222,6 +238,7 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
    * Give focus to the content.
    */
   private _focusContent(): void {
+    // TODO: perhaps we give the widget a chance to activate, and if that doesn't change the focus, *then* we focus the content node.
     if (!this.content.node.contains(document.activeElement)) {
       this.content.node.focus();
     }
@@ -230,8 +247,10 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
   }
 
   private _changeGuard = false;
-  private _isPopulated = false;
   private _spinner = new Spinner();
+
+  private _isReady = false;
+  private _ready: Promise<void>;
 }
 
 
@@ -258,6 +277,6 @@ namespace MainAreaWidget {
     /**
      * An optional promise for when the content is ready to be shown.
      */
-    populated?: Promise<void>;
+    ready?: Promise<void>;
   }
 }

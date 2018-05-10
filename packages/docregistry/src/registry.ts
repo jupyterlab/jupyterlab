@@ -874,7 +874,7 @@ namespace DocumentRegistry {
     /**
      * A signal emitted when a new widget is created.
      */
-    widgetCreated: ISignal<IWidgetFactory<T, U>, IDocumentWidget<T, U>>;
+    widgetCreated: ISignal<IWidgetFactory<T, U>, T>;
 
     /**
      * Create a new widget given a context.
