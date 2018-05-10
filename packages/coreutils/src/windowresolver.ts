@@ -36,6 +36,7 @@ export
 class WindowResolver implements IWindowResolver {
   constructor(options: WindowResolver.IOptions = { candidate: Promise.resolve('') }) {
     this._candidate = options.candidate;
+    Private.initialize();
   }
 
   /**
@@ -95,6 +96,12 @@ namespace Private {
    * The local storage window prefix.
    */
   const WINDOW = `${PREFIX}:window-`;
+
+
+  /**
+   * The initialization flag.
+   */
+  let initialized = false;
 
   /**
    * The window name.
@@ -206,7 +213,15 @@ namespace Private {
   }
 
   /**
-   * Start the storage event handler immediately.
+   * Start the storage event handler.
    */
-  window.addEventListener('storage', storageHandler);
+  export
+  function initialize(): void {
+    if (initialized) {
+      return;
+    }
+
+    initialized = true;
+    window.addEventListener('storage', storageHandler);
+  }
 }
