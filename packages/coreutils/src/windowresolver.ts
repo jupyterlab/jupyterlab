@@ -34,7 +34,7 @@ interface IWindowResolver {
  */
 export
 class WindowResolver implements IWindowResolver {
-  constructor(options: WindowResolver.IOptions = { candidate: Promise.resolve('') }) {
+  constructor(options: WindowResolver.IOptions = { candidate: null }) {
     this._candidate = options.candidate;
     Private.initialize();
   }
@@ -45,14 +45,12 @@ class WindowResolver implements IWindowResolver {
    * @returns A promise that resolves to a window name.
    */
   resolve(): Promise<string> {
-    return this._candidate.then(name => {
-      console.log('Start with candidate:', name);
-      return Private.windowName();
-    });
+    console.log('Start with candidate:', this._candidate);
+    return Private.windowName();
 
   }
 
-  private _candidate: Promise<string>;
+  private _candidate: string | null;
 }
 
 
@@ -67,9 +65,13 @@ namespace WindowResolver {
   export
   interface IOptions {
     /**
-     * A potential preferred default window name.
+     * A potential preferred default window name or `null` if unavailable.
+     *
+     * #### Notes
+     * Typically, the name candidate should be a JupyterLab workspace name or
+     * `null` if there is no workspace.
      */
-    candidate: Promise<string>;
+    candidate: string | null;
   }
 }
 

@@ -242,10 +242,10 @@ const resolver: JupyterLabPlugin<IWindowResolver> = {
   id: '@jupyterlab/apputils-extension:resolver',
   autoStart: true,
   provides: IWindowResolver,
-  activate: app => {
-    const resolver = new WindowResolver({
-      candidate: Promise.resolve('hello')
-    });
+  requires: [IRouter],
+  activate: (app: JupyterLab, router: IRouter) => {
+    const candidate = Private.getWorkspace(router) || null;
+    const resolver = new WindowResolver({ candidate });
 
     return resolver;
   }
