@@ -3,9 +3,9 @@
 
 import {ISanitizer} from '@jupyterlab/apputils';
 
-import {FileEditor, IEditorTracker} from '@jupyterlab/fileeditor';
+import {CodeCell, CodeCellModel, MarkdownCell} from '@jupyterlab/cells';
 
-import {MarkdownCell} from '@jupyterlab/cells';
+import {FileEditor, IEditorTracker} from '@jupyterlab/fileeditor';
 
 import {INotebookTracker, NotebookPanel} from '@jupyterlab/notebook';
 
@@ -14,6 +14,10 @@ import {each} from '@phosphor/algorithm';
 import {TableOfContentsRegistry} from './registry';
 
 import {IHeading} from './toc';
+
+const VDOM_MIME_TYPE = 'application/vdom.v1+json';
+
+const HTML_MIME_TYPE = 'text/html';
 
 /**
  * Create a TOC generator for notebooks.
@@ -33,39 +37,71 @@ export function createNotebookGenerator(
       let headings: IHeading[] = [];
       each(panel.notebook.widgets, cell => {
         let model = cell.model;
-        // Only parse markdown cells
-        if (model.type !== 'markdown') {
-          return;
-        }
+        // Only parse markdown cells or code cell outputs
+        if (model.type === 'code') {
+          // Iterate over the outputs, and parse them if they
+          // are rendered markdown or HTML.
+          for (let i = 0; i < (model as CodeCellModel).outputs.length; i++) {
+            // Filter out the outputs that are not rendered HTML
+            // (that is, markdown, vdom, or text/html)
+            const outputModel = (model as CodeCellModel).outputs.get(i);
+            const dataTypes = Object.keys(outputModel.data);
+            const htmlData = dataTypes.filter(
+              t => Private.isMarkdown(t) || Private.isDOM(t),
+            );
+            if (!htmlData.length) {
+              continue;
+            }
 
-        // If the cell is rendered, generate the ToC items from
-        // the HTML. If it is not rendered, generate them from
-        // the text of the cell.
-        if ((cell as MarkdownCell).rendered) {
-          const onClickFactory = (el: Element) => {
-            return () => {
-              if (!(cell as MarkdownCell).rendered) {
-                cell.node.scrollIntoView();
-              } else {
+            // If the output has rendered HTML, parse it for headers.
+            const outputWidget = (cell as CodeCell).outputArea.widgets[i];
+            const onClickFactory = (el: Element) => {
+              return () => {
                 el.scrollIntoView();
-              }
+              };
             };
-          };
-          headings = headings.concat(
-            Private.getRenderedHTMLHeadings(cell.node, onClickFactory, sanitizer),
-          );
-        } else {
-          const onClickFactory = (line: number) => {
-            return () => {
-              cell.node.scrollIntoView();
-              if (!(cell as MarkdownCell).rendered) {
-                cell.editor.setCursorPosition({line, column: 0});
-              }
+            headings = headings.concat(
+              Private.getRenderedHTMLHeadings(
+                outputWidget.node,
+                onClickFactory,
+                sanitizer,
+              ),
+            );
+          }
+        } else if (model.type === 'markdown') {
+          // If the cell is rendered, generate the ToC items from
+          // the HTML. If it is not rendered, generate them from
+          // the text of the cell.
+          if ((cell as MarkdownCell).rendered) {
+            const onClickFactory = (el: Element) => {
+              return () => {
+                if (!(cell as MarkdownCell).rendered) {
+                  cell.node.scrollIntoView();
+                } else {
+                  el.scrollIntoView();
+                }
+              };
             };
-          };
-          headings = headings.concat(
-            Private.getMarkdownHeadings(model.value.text, onClickFactory),
-          );
+            headings = headings.concat(
+              Private.getRenderedHTMLHeadings(
+                cell.node,
+                onClickFactory,
+                sanitizer,
+              ),
+            );
+          } else {
+            const onClickFactory = (line: number) => {
+              return () => {
+                cell.node.scrollIntoView();
+                if (!(cell as MarkdownCell).rendered) {
+                  cell.editor.setCursorPosition({line, column: 0});
+                }
+              };
+            };
+            headings = headings.concat(
+              Private.getMarkdownHeadings(model.value.text, onClickFactory),
+            );
+          }
         }
       });
       return headings;
@@ -89,13 +125,7 @@ export function createMarkdownGenerator(
     isEnabled: editor => {
       // Only enable this if the editor mimetype matches
       // one of a few markdown variants.
-      let mime = editor.model.mimeType;
-      return (
-        mime === 'text/x-ipythongfm' ||
-        mime === 'text/x-markdown' ||
-        mime === 'text/x-gfm' ||
-        mime === 'text/markdown'
-      );
+      return Private.isMarkdown(editor.model.mimeType);
     },
     generate: editor => {
       let model = editor.model;
@@ -236,6 +266,28 @@ namespace Private {
       headings.push({level, text, html, onClick});
     }
     return headings;
+  }
+
+  /**
+   * Return whether the mime type is some flavor of markdown.
+   */
+  export function isMarkdown(mime: string): boolean {
+    return (
+      mime === 'text/x-ipythongfm' ||
+      mime === 'text/x-markdown' ||
+      mime === 'text/x-gfm' ||
+      mime === 'text/markdown'
+    );
+  }
+
+  /**
+   * Return whether the mime type is DOM-ish (html or vdom).
+   */
+  export function isDOM(mime: string): boolean {
+    return (
+      mime === VDOM_MIME_TYPE ||
+      mime === HTML_MIME_TYPE
+    );
   }
 
   /**
