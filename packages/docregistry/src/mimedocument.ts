@@ -30,7 +30,7 @@ import {
 } from './default';
 
 import {
-  DocumentRegistry, IDocumentWidget
+  DocumentRegistry
 } from './registry';
 
 
@@ -216,12 +216,15 @@ namespace MimeContent {
   }
 }
 
+export
+class MimeDocument extends DocumentWidget<MimeContent> {
+}
 
 /**
  * An implementation of a widget factory for a rendered mimetype document.
  */
 export
-class MimeDocumentFactory extends ABCWidgetFactory<IDocumentWidget<MimeContent>, DocumentRegistry.IModel> {
+class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument, DocumentRegistry.IModel> {
   /**
    * Construct a new markdown widget factory.
    */
@@ -236,7 +239,7 @@ class MimeDocumentFactory extends ABCWidgetFactory<IDocumentWidget<MimeContent>,
   /**
    * Create a new widget given a context.
    */
-  protected createNewWidget(context: DocumentRegistry.Context): IDocumentWidget<MimeContent> {
+  protected createNewWidget(context: DocumentRegistry.Context): MimeDocument {
     const ft = this._fileType;
     const mimeType = ft.mimeTypes.length ? ft.mimeTypes[0] : 'text/plain';
 
@@ -256,7 +259,7 @@ class MimeDocumentFactory extends ABCWidgetFactory<IDocumentWidget<MimeContent>,
     content.title.iconClass = ft.iconClass;
     content.title.iconLabel = ft.iconLabel;
 
-    const widget = new DocumentWidget({ content, context });
+    const widget = new MimeDocument({ content, context });
 
     return widget;
   }

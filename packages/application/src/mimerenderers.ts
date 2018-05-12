@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IDocumentWidget, MimeDocumentFactory, DocumentRegistry, MimeContent
+  MimeDocumentFactory, DocumentRegistry, MimeDocument
 } from '@jupyterlab/docregistry';
 
 import {
@@ -104,7 +104,7 @@ function createRendermimePlugin(item: IRenderMime.IExtension): JupyterLabPlugin<
 
         const factoryName = factory.name;
         const namespace = `${factoryName}-renderer`;
-        const tracker = new InstanceTracker<IDocumentWidget<MimeContent>>({ namespace });
+        const tracker = new InstanceTracker<MimeDocument>({ namespace });
 
         // Handle state restoration.
         restorer.restore(tracker, {
