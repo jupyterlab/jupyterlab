@@ -83,13 +83,16 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
    */
   protected createNewWidget(context: DocumentRegistry.IContext<INotebookModel>): NotebookPanel {
     let rendermime = this.rendermime.clone({ resolver: context.urlResolver });
+
     let panel = new NotebookPanel({
       rendermime,
       contentFactory: this.contentFactory,
       mimeTypeService: this.mimeTypeService,
-      editorConfig: this._editorConfig
+      editorConfig: this._editorConfig,
+      context,
+      // TODO: passing in explicitly undefined content is an awkward way to get the content made by the panel.
+      content: undefined
     });
-    panel.context = context;
     ToolbarItems.populateDefaults(panel);
     return panel;
   }

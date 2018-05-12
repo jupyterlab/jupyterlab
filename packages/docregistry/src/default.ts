@@ -424,15 +424,16 @@ class DocumentWidget<T extends Widget = Widget, U extends DocumentRegistry.IMode
 
     this.context = options.context;
 
+    // Handle context path changes
     this.context.pathChanged.connect(this._onPathChanged, this);
-    this._onPathChanged();
+    this._onPathChanged(this.context, this.context.path);
   }
 
   /**
    * Handle a path change.
    */
-  private _onPathChanged(): void {
-    this.title.label = PathExt.basename(this.context.localPath);
+  private _onPathChanged(sender: DocumentRegistry.IContext<U>, path: string): void {
+    this.title.label = PathExt.basename(sender.localPath);
   }
 
   readonly context: DocumentRegistry.IContext<U>;
