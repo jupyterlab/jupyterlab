@@ -604,7 +604,7 @@
       "default": { },
       "properties": {
         "command": { "default": "runmenu:run-all" },
-        "keys": { "default": ["Ctrl Shift Enter"] },
+        "keys": { "default": ["Accel Shift Enter"] },
         "selector": { "default": "[data-jp-code-runner]" }
       },
       "type": "object"
