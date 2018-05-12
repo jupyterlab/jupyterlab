@@ -417,14 +417,16 @@ abstract class ABCWidgetFactory<T extends IDocumentWidget, U extends DocumentReg
 export
 class DocumentWidget<T extends Widget = Widget, U extends DocumentRegistry.IModel = DocumentRegistry.IModel> extends MainAreaWidget<T> implements IDocumentWidget<T, U> {
   constructor(options: DocumentWidget.IOptions<T, U>) {
+
+    // Include the context ready promise in the widget ready promise
+    options.ready = Promise.all([options.ready, options.context.ready]).then( () => { return; });
     super(options);
+
     this.context = options.context;
 
     this.context.pathChanged.connect(this._onPathChanged, this);
     this._onPathChanged();
   }
-
-  // TODO: redefine the populated/isPopulated to *also* wait for the context load/rendering
 
   /**
    * Handle a path change.
