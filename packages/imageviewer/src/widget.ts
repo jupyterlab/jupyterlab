@@ -199,7 +199,7 @@ class ImageViewer extends Widget {
  * A widget factory for images.
  */
 export
-class ImageViewerFactory extends ABCWidgetFactory<IDocumentWidget<ImageViewer>, DocumentRegistry.IModel> {
+class ImageViewerFactory extends ABCWidgetFactory<IDocumentWidget<ImageViewer>> {
   /**
    * Create a new widget given a context.
    */

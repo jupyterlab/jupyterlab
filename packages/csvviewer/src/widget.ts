@@ -186,7 +186,7 @@ namespace CSVViewer {
  * A widget factory for CSV widgets.
  */
 export
-class CSVViewerFactory extends ABCWidgetFactory<IDocumentWidget<CSVViewer>, DocumentRegistry.IModel> {
+class CSVViewerFactory extends ABCWidgetFactory<IDocumentWidget<CSVViewer>> {
   /**
    * Create a new widget given a context.
    */

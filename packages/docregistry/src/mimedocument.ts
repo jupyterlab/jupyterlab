@@ -224,7 +224,7 @@ class MimeDocument extends DocumentWidget<MimeContent> {
  * An implementation of a widget factory for a rendered mimetype document.
  */
 export
-class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument, DocumentRegistry.IModel> {
+class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
   /**
    * Construct a new markdown widget factory.
    */

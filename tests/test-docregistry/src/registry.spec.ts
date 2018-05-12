@@ -24,7 +24,7 @@ import {
 } from '@jupyterlab/docregistry';
 
 
-class WidgetFactory extends ABCWidgetFactory<IDocumentWidget, DocumentRegistry.IModel> {
+class WidgetFactory extends ABCWidgetFactory<IDocumentWidget> {
 
   protected createNewWidget(context: DocumentRegistry.Context): IDocumentWidget {
     const content = new Widget();
