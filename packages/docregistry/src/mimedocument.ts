@@ -22,7 +22,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  PanelLayout, Widget
+  BoxLayout, Widget
 } from '@phosphor/widgets';
 
 import {
@@ -52,9 +52,9 @@ class MimeContent extends Widget {
 
     // TODO: Use SingletonLayout when a new version of phosphor is released. See
     // https://github.com/phosphorjs/phosphor/issues/337
-    const layout = new PanelLayout();
+    const layout = this.layout = new BoxLayout({ spacing: 0 });
     layout.addWidget(this._renderer);
-    this.layout = layout;
+    BoxLayout.setStretch(this._renderer, 1);
 
     this._context.ready.then(() => {
       return this._render();
