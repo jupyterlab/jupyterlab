@@ -27,10 +27,6 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IEditorMimeTypeService
-} from '@jupyterlab/codeeditor';
-
-import {
   IChangedArgs
 } from '@jupyterlab/coreutils';
 
@@ -47,7 +43,7 @@ import {
 } from './model';
 
 import {
-  Notebook, StaticNotebook
+  Notebook
 } from './widget';
 
 
@@ -78,36 +74,16 @@ class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   /**
    * Construct a new notebook panel.
    */
-  constructor(options: NotebookPanel.IOptions) {
+  constructor(options: DocumentWidget.IOptions<Notebook, INotebookModel>) {
     // Set default options
     const notebookReady = new PromiseDelegate<void>();
     options.ready = Promise.all([options.ready, notebookReady.promise]).then(() => { return; });
-
-    // Notebook
-    if (!options.content) {
-      let contentFactory = options.contentFactory = (
-        options.contentFactory || NotebookPanel.defaultContentFactory
-      );
-      let nbOptions: Notebook.IOptions = {
-        rendermime: options.rendermime,
-        languagePreference: options.languagePreference,
-        contentFactory: contentFactory,
-        mimeTypeService: options.mimeTypeService,
-        editorConfig: options.editorConfig,
-      };
-      options.content = contentFactory.createNotebook(nbOptions);
-    }
-
     super(options);
     this._activated = new Signal<this, void>(this);
 
+    // Set up CSS classes
     this.addClass(NOTEBOOK_PANEL_CLASS);
-    this.rendermime = options.rendermime;
-
-    // Toolbar
     this.toolbar.addClass(NOTEBOOK_PANEL_TOOLBAR_CLASS);
-
-    // Notebook
     this.content.addClass(NOTEBOOK_PANEL_NOTEBOOK_CLASS);
 
     // Set up things related to the context
@@ -157,7 +133,7 @@ class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    * The client session used by the panel.
    */
   get session(): IClientSession {
-    return this.context ? this.context.session : null;
+    return this.context.session;
   }
 
   /**
@@ -170,14 +146,24 @@ class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   }
 
   /**
-   * The factory used by the widget.
+   * The content factory for the notebook.
+   *
+   * TODO: deprecate this in favor of the .content attribute
+   *
    */
-  readonly contentFactory: NotebookPanel.IContentFactory;
+  get contentFactory(): Notebook.IContentFactory {
+    return this.content.contentFactory;
+  }
 
   /**
-   * The Rendermime instance used by the widget.
+   * The rendermime instance for the notebook.
+   *
+   * TODO: deprecate this in favor of the .content attribute
+   *
    */
-  readonly rendermime: RenderMimeRegistry;
+  get rendermime(): RenderMimeRegistry {
+    return this.content.rendermime;
+  }
 
   /**
    * The notebook used by the widget.
@@ -279,37 +265,6 @@ class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
  * A namespace for `NotebookPanel` statics.
  */
 export namespace NotebookPanel {
-  /**
-   * An options interface for NotebookPanels.
-   */
-  export
-  interface IOptions extends DocumentWidget.IOptions<Notebook, INotebookModel> {
-    /**
-     * The rendermime instance used by the panel.
-     */
-    rendermime: RenderMimeRegistry;
-
-    /**
-     * The language preference for the model.
-     */
-    languagePreference?: string;
-
-    /**
-     * The content factory for the panel.
-     */
-    contentFactory?: IContentFactory;
-
-    /**
-     * The mimeType service.
-     */
-    mimeTypeService: IEditorMimeTypeService;
-
-    /**
-     * The notebook cell editor configuration.
-     */
-    editorConfig?: StaticNotebook.IEditorConfig;
-  }
-
   /**
    * A content factory interface for NotebookPanel.
    */

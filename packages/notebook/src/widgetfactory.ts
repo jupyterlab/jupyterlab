@@ -43,10 +43,9 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
   constructor(options: NotebookWidgetFactory.IOptions) {
     super(options);
     this.rendermime = options.rendermime;
-    this.contentFactory = options.contentFactory;
+    this.contentFactory = options.contentFactory || NotebookPanel.defaultContentFactory;
     this.mimeTypeService = options.mimeTypeService;
-    this._editorConfig = options.editorConfig
-                         || StaticNotebook.defaultEditorConfig;
+    this._editorConfig = options.editorConfig || StaticNotebook.defaultEditorConfig;
   }
 
   /*
@@ -84,17 +83,17 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
   protected createNewWidget(context: DocumentRegistry.IContext<INotebookModel>): NotebookPanel {
     let rendermime = this.rendermime.clone({ resolver: context.urlResolver });
 
-    let panel = new NotebookPanel({
+    let nbOptions = {
       rendermime,
       contentFactory: this.contentFactory,
       mimeTypeService: this.mimeTypeService,
       editorConfig: this._editorConfig,
-      context,
-      // TODO: passing in explicitly undefined content is an awkward way to get the content made by the panel.
-      content: undefined
-    });
-    ToolbarItems.populateDefaults(panel);
-    return panel;
+    };
+    let content = this.contentFactory.createNotebook(nbOptions);
+
+    let widget = new NotebookPanel({ context, content });
+    ToolbarItems.populateDefaults(widget);
+    return widget;
   }
 
   private _editorConfig: StaticNotebook.IEditorConfig;
