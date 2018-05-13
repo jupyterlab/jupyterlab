@@ -27,10 +27,6 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  IChangedArgs
-} from '@jupyterlab/coreutils';
-
-import {
   DocumentWidget
 } from '@jupyterlab/docregistry';
 
@@ -55,12 +51,6 @@ const NOTEBOOK_PANEL_CLASS = 'jp-NotebookPanel';
 const NOTEBOOK_PANEL_TOOLBAR_CLASS = 'jp-NotebookPanel-toolbar';
 
 const NOTEBOOK_PANEL_NOTEBOOK_CLASS = 'jp-NotebookPanel-notebook';
-
-/**
- * The class name added to a dirty widget.
- */
-const DIRTY_CLASS = 'jp-mod-dirty';
-
 
 /**
  * A widget that hosts a notebook toolbar and content area.
@@ -88,8 +78,6 @@ class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
 
     // Set up things related to the context
     this.content.model = this.context.model;
-    this._handleDirtyState();
-    this.context.model.stateChanged.connect(this.onModelStateChanged, this);
     this.context.session.kernelChanged.connect(this._onKernelChanged, this);
 
     this.context.ready.then(() => {
@@ -197,15 +185,6 @@ class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   }
 
   /**
-   * Handle a change in the model state.
-   */
-  protected onModelStateChanged(sender: INotebookModel, args: IChangedArgs<any>): void {
-    if (args.name === 'dirty') {
-      this._handleDirtyState();
-    }
-  }
-
-  /**
    * Handle a change in the kernel by updating the document metadata.
    */
   private _onKernelChanged(sender: any, kernel: Kernel.IKernelConnection): void {
@@ -241,20 +220,6 @@ class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
         language: spec.language
       });
     });
-  }
-
-  /**
-   * Handle the dirty state of the model.
-   */
-  private _handleDirtyState(): void {
-    if (!this.model) {
-      return;
-    }
-    if (this.model.dirty) {
-      this.title.className += ` ${DIRTY_CLASS}`;
-    } else {
-      this.title.className = this.title.className.replace(DIRTY_CLASS, '');
-    }
   }
 
   private _activated: Signal<this, void>;

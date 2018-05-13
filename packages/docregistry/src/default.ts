@@ -411,6 +411,12 @@ abstract class ABCWidgetFactory<T extends IDocumentWidget, U extends DocumentReg
  * For the implementation, perhaps we just make the BaseMainAreaWidget handle the focus bits, make a new MainAreaWidget class that lets you pass in the content widget, and have documentwidget class that handles the context part on top of the base main area widget class, and then perhaps a convenience document widget that lets you pass in the content widget, so people don't have to keep making their own subclasses?
  */
 
+
+/**
+ * The class name added to a dirty widget.
+ */
+const DIRTY_CLASS = 'jp-mod-dirty';
+
 /**
  * A document widget implementation.
  */
@@ -427,6 +433,10 @@ class DocumentWidget<T extends Widget = Widget, U extends DocumentRegistry.IMode
     // Handle context path changes
     this.context.pathChanged.connect(this._onPathChanged, this);
     this._onPathChanged(this.context, this.context.path);
+
+    // Listen for changes in the dirty state.
+    this.context.model.stateChanged.connect(this._onModelStateChanged, this);
+    this.context.ready.then(() => { this._handleDirtyState(); });
   }
 
   /**
@@ -434,6 +444,26 @@ class DocumentWidget<T extends Widget = Widget, U extends DocumentRegistry.IMode
    */
   private _onPathChanged(sender: DocumentRegistry.IContext<U>, path: string): void {
     this.title.label = PathExt.basename(sender.localPath);
+  }
+
+  /**
+   * Handle a change to the context model state.
+   */
+  private _onModelStateChanged(sender: DocumentRegistry.IModel, args: IChangedArgs<any>): void {
+    if (args.name === 'dirty') {
+      this._handleDirtyState();
+    }
+  }
+
+  /**
+   * Handle the dirty state of the context model.
+   */
+  private _handleDirtyState(): void {
+    if (this.context.model.dirty) {
+      this.title.className += ` ${DIRTY_CLASS}`;
+    } else {
+      this.title.className = this.title.className.replace(DIRTY_CLASS, '');
+    }
   }
 
   readonly context: DocumentRegistry.IContext<U>;

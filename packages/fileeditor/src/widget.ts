@@ -6,10 +6,6 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IChangedArgs, PathExt
-} from '@jupyterlab/coreutils';
-
-import {
   ABCWidgetFactory, DocumentRegistry, DocumentWidget, IDocumentWidget
 } from '@jupyterlab/docregistry';
 
@@ -34,12 +30,6 @@ const CODE_RUNNER = 'jpCodeRunner';
  * The data attribute added to a widget that can undo.
  */
 const UNDOER = 'jpUndoer';
-
-/**
- * The class name added to a dirty widget.
- */
-const DIRTY_CLASS = 'jp-mod-dirty';
-
 
 /**
  * A code editor wrapper for the file editor.
@@ -186,10 +176,6 @@ class FileEditor extends Widget {
     context.pathChanged.connect(this._onPathChanged, this);
     this._onPathChanged();
 
-    // Listen for changes in the dirty state.
-    context.model.stateChanged.connect(this._onModelStateChanged, this);
-    context.ready.then(() => { this._handleDirtyState(); });
-
 
     let layout = this.layout = new BoxLayout({ spacing: 0 });
     let toolbar = new Widget();
@@ -280,27 +266,6 @@ class FileEditor extends Widget {
 
     editor.model.mimeType =
       this._mimeTypeService.getMimeTypeByFilePath(localPath);
-    this.title.label = PathExt.basename(localPath);
-  }
-
-  /**
-   * Handle a change to the context model state.
-   */
-  private _onModelStateChanged(sender: DocumentRegistry.IModel, args: IChangedArgs<any>): void {
-    if (args.name === 'dirty') {
-      this._handleDirtyState();
-    }
-  }
-
-  /**
-   * Handle the dirty state of the context model.
-   */
-  private _handleDirtyState(): void {
-    if (this._context.model.dirty) {
-      this.title.className += ` ${DIRTY_CLASS}`;
-    } else {
-      this.title.className = this.title.className.replace(DIRTY_CLASS, '');
-    }
   }
 
   private editorWidget: FileEditorCodeWrapper;
