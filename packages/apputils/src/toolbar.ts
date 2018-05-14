@@ -97,7 +97,9 @@ class ToolbarLayout extends PanelLayout {
   protected onFitRequest(msg: Message): void {
     super.onFitRequest(msg);
     if (this.parent!.isAttached) {
-      if (some(this.widgets, w => w.isVisible)) {
+      // If there are any widgets not explicitly hidden, expand the toolbar to
+      // accommodate them.
+      if (some(this.widgets, w => !w.isHidden)) {
         this.parent!.node.style.minHeight = 'var(--jp-private-toolbar-height)';
       } else {
         this.parent!.node.style.minHeight = '';
