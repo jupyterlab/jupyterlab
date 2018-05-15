@@ -11,9 +11,10 @@ General
 -  `What is
    JupyterLab? <https://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html>`__
 -  `How stable is
-   JupyterLab? <https://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html>`__
+   JupyterLab? <https://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html#stability>`__
 -  `What will happen to the classic Jupyter
-   Notebook? <https://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html#beta>`__
+   Notebook? <https://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html#classic>`__
+-  `How long will JupyterLab be in beta? <https://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html#beta>`__
 -  `Where is the documentation for
    JupyterLab? <https://jupyterlab.readthedocs.io/en/stable/>`__
 

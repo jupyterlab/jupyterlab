@@ -4,7 +4,6 @@ Overview
 --------
 
 JupyterLab is the next-generation web-based user interface for Project Jupyter.
-The beta release series of JupyterLab is stable for daily use.
 
 .. image:: ../user/images/interface_jupyterlab.png
    :align: center
@@ -48,6 +47,22 @@ JupyterLab is served from the same `server
 `notebook document format <http://nbformat.readthedocs.io/en/latest/>`__ as the
 classic Jupyter Notebook.
 
+.. _stability:
+
+Stability of JupyterLab
+~~~~~~~~~~~~~~~~~~~~~~~
+
+The current beta release of JupyterLab is stable for daily use.  
+Likewise, all future releases in the beta series will be stable for daily use.
+
+.. _classic:
+
+Classic Jupyter Notebook
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+JupyterLab 1.0 will eventually replace the classic Jupyter Notebook.
+Throughout this transition, the same notebook document format will be supported by both the classic Notebook and JupyterLab.
+
 .. _beta:
 
 Beta Series and Beyond
@@ -60,7 +75,3 @@ We plan to release JupyterLab 1.0 later in 2018.
 The beta releases leading up to 1.0 will focus on
 stabilizing the extension development API, UI/UX improvements,
 and additional core features.
-All releases in the beta series will be stable enough for daily usage.
-
-JupyterLab 1.0 will eventually replace the classic Jupyter Notebook.
-Throughout this transition, the same notebook document format will be supported by both the classic Notebook and JupyterLab.
