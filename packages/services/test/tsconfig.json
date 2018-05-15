@@ -3,12 +3,11 @@
     "experimentalDecorators": true,
     "noImplicitAny": true,
     "noEmitOnError": true,
-    "lib": ["DOM", "ES5", "ES2015.Promise", "ES2015.Collection", 
-            "ES2015.Iterable", "ES2015.Symbol"],
+    "lib": ["ES2015", "DOM"],
     "types": ["mocha"],
     "module": "commonjs",
     "moduleResolution": "node",
-    "target": "ES5",
+    "target": "ES2015",
     "outDir": "./build"
   }
 }

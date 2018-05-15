@@ -82,6 +82,9 @@ namespace CommandIDs {
 
   export
   const toggleAutosave = 'docmanager:toggle-autosave';
+
+  export
+  const showInFileBrowser = 'docmanager:show-in-file-browser';
 }
 
 const pluginId = '@jupyterlab/docmanager-extension:plugin';
@@ -416,8 +419,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   commands.addCommand(CommandIDs.toggleAutosave, {
-    label: args =>
-      args['isPalette'] ? 'Toggle Document Autosave' : 'Autosave Documents',
+    label: 'Autosave Documents',
     isToggled: () => docManager.autosave,
     execute: () => {
       const value = !docManager.autosave;
@@ -426,6 +428,21 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
       .catch((reason: Error) => {
         console.error(`Failed to set ${pluginId}:${key} - ${reason.message}`);
       });
+    }
+  });
+
+  commands.addCommand(CommandIDs.showInFileBrowser, {
+    label: () => `Show in file browser`,
+    isEnabled,
+    execute: () => {
+      let context = docManager.contextForWidget(app.shell.currentWidget);
+      if (!context) {
+        return;
+      }
+
+      // 'activate-main' is needed if this command is selected in the "open tabs" sidebar
+      commands.execute('filebrowser:activate-main');
+      commands.execute('filebrowser:navigate-main', {path: context.path});
     }
   });
 
@@ -439,6 +456,11 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     selector: '[data-type="document-title"]',
     rank: 2
   });
+  app.contextMenu.addItem({
+    command: CommandIDs.showInFileBrowser,
+    selector: '[data-type="document-title"]',
+    rank: 3
+  });
 
   [
     CommandIDs.openDirect,
@@ -447,13 +469,9 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     CommandIDs.saveAs,
     CommandIDs.clone,
     CommandIDs.close,
-    CommandIDs.closeAllFiles
+    CommandIDs.closeAllFiles,
+    CommandIDs.toggleAutosave
   ].forEach(command => { palette.addItem({ command, category }); });
-  palette.addItem({
-    command: CommandIDs.toggleAutosave,
-    category,
-    args: { isPalette: true }
-  });
 }
 
 

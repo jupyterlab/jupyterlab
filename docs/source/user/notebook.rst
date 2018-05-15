@@ -139,7 +139,7 @@ You can connect a :ref:`code console <code-console>` to a notebook kernel to hav
 computations done in the kernel, in the order in which they were done.
 The attached code console also provides a place to interactively inspect
 kernel state without changing the notebook. Right-click on a notebook
-and select “Create Console for Notebook”:
+and select “New Console for Notebook”:
 
 .. raw:: html
 

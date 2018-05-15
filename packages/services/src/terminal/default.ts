@@ -198,7 +198,7 @@ class DefaultTerminalSession implements TerminalSession.ISession {
       let wsUrl = URLExt.join(settings.wsUrl, `terminals/websocket/${name}`);
 
       if (token) {
-        wsUrl = wsUrl + `?token=${token}`;
+        wsUrl = wsUrl + `?token=${encodeURIComponent(token)}`;
       }
 
       socket = this._ws = new settings.WebSocket(wsUrl);

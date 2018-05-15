@@ -47,7 +47,7 @@
     "svg-url-loader": "~2.3.1",
     "svgo": "~1.0.4",
     "svgo-loader": "~2.1.0",
-    "typescript": "~2.6.2",
+    "typescript": "~2.8.3",
     "url-loader": "~0.5.9",
     "webpack": "~2.7.0"
   },

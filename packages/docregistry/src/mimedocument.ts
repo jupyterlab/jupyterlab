@@ -76,6 +76,10 @@ class MimeContent extends Widget {
       this._monitor.activityStopped.connect(this.update, this);
 
       this._ready.resolve(undefined);
+    }).catch(reason => {
+      // Dispose the document if rendering fails.
+      requestAnimationFrame(() => { this.dispose(); });
+      showErrorMessage(`Renderer Failure: ${context.path}`, reason);
     });
   }
 
@@ -148,8 +152,8 @@ class MimeContent extends Widget {
       }
     } catch (error) {
       // Dispose the document if rendering fails.
-      requestAnimationFrame(() => { this._renderer.dispose(); });
-      showErrorMessage(`Renderer Failure: ${context.path}`, error);
+      requestAnimationFrame(() => { this.dispose(); });
+      showErrorMessage(`Renderer Failure: ${context.path}`, reason);
     }
   }
 

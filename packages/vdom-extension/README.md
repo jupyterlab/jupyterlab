@@ -71,7 +71,7 @@ div(
 )
 ```
 
-To render a `.vdom` or `.vdom.json` file as a tree, simply open it:
+To render a `.vdom` or `.vdom.json` file, simply open it:
 
 ## Development
 

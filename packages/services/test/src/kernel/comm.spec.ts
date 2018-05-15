@@ -264,7 +264,7 @@ describe('jupyter.services - Comm', () => {
       it('should send a message to the server', () => {
         let future = kernel.requestExecute({ code: TARGET });
         future.done.then(() => {
-          let encoder = new TextEncoder('utf8');
+          let encoder = new TextEncoder();
           let data = encoder.encode('hello');
           future = comm.open({ foo: 'bar' }, { fizz: 'buzz' }, [data, data.buffer]);
           return future.done;
@@ -295,7 +295,7 @@ describe('jupyter.services - Comm', () => {
 
       it('should send a message to the server', () => {
         return comm.open().done.then(() => {
-          let encoder = new TextEncoder('utf8');
+          let encoder = new TextEncoder();
           let data = encoder.encode('hello');
           let future = comm.close({ foo: 'bar' }, { }, [data, data.buffer]);
           return future.done;
