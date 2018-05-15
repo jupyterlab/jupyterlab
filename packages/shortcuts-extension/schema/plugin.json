@@ -600,6 +600,15 @@
       },
       "type": "object"
     },
+    "runmenu:run-all": {
+      "default": { },
+      "properties": {
+        "command": { "default": "runmenu:run-all" },
+        "keys": { "default": ["Accel Shift Enter"] },
+        "selector": { "default": "[data-jp-code-runner]" }
+      },
+      "type": "object"
+    },
     "settingeditor:debug": {
       "default": { },
       "properties": {
