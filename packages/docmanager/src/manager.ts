@@ -388,9 +388,7 @@ class DocumentManager implements IDisposable {
    */
   private _findContext(path: string, factoryName: string): Private.IContext | undefined {
     return find(this._contexts, context => {
-      // TODO: should the model factoryName just be exposed on a context object?
-      let contextFactoryName = Private.factoryNameProperty.get(context);
-      return contextFactoryName === factoryName && context.path === path;
+      return context.factoryName === factoryName && context.path === path;
     });
   }
 
@@ -438,7 +436,6 @@ class DocumentManager implements IDisposable {
         handler.start();
       }
     });
-    Private.factoryNameProperty.set(context, factory.name);
     context.disposed.connect(this._onContextDisposed, this);
     this._contexts.push(context);
     return context;
@@ -593,16 +590,11 @@ namespace Private {
   });
 
   /**
-   * An attached property for the factory name used for a context.
-   */
-  export
-  const factoryNameProperty = new AttachedProperty<DocumentRegistry.Context, string | undefined>({
-    name: 'factoryName',
-    create: () => undefined
-  });
-
-  /**
    * A type alias for a standard context.
+   *
+   * #### Notes
+   * We define this as an interface of a specific implementation so that we can
+   * use the implementation-specific functions.
    */
   export
   interface IContext extends Context<DocumentRegistry.IModel> { /* no op */ }
