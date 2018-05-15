@@ -8,14 +8,11 @@ our documentation or our GitHub repo.
 General
 -------
 
--  `What is
-   JupyterLab? <https://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html>`__
--  `How stable is
-   JupyterLab? <https://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html#stability>`__
--  `What will happen to the classic Jupyter
-   Notebook? <https://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html#classic>`__
--  `How long will JupyterLab be in beta? <https://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html#beta>`__
--  `Where is the documentation for
+-  :ref:`What is JupyterLab? <overview>`
+-  :ref:`How stable is JupyterLab? <stability>`
+-  :ref:`What will happen to the classic Jupyter Notebook? <classic>`
+-  :ref:`How long will JupyterLab be in beta? <beta>`
+-  `Where is the official online documentation for
    JupyterLab? <https://jupyterlab.readthedocs.io/en/stable/>`__
 
 Development
@@ -25,5 +22,4 @@ Development
    feedback? <https://github.com/jupyterlab/jupyterlab/issues>`__
 -  `How can you
    contribute? <https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md>`__
--  `How can you extend or customize
-   JupyterLab? <https://jupyterlab.readthedocs.io/en/stable/user/extensions.html>`__
+-  :ref:`How can you extend or customize JupyterLab? <user_extensions>`
