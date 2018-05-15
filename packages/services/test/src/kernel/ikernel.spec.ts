@@ -433,7 +433,7 @@ describe('Kernel.IKernel', () => {
           username: kernel.username,
           session: kernel.clientId
         };
-        let encoder = new TextEncoder('utf8');
+        let encoder = new TextEncoder();
         let data = encoder.encode('hello');
         let msg = KernelMessage.createShellMessage(options, {}, {}, [data, data.buffer]);
         kernel.sendShellMessage(msg, true);
