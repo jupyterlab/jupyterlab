@@ -265,4 +265,33 @@ namespace MainAreaWidget {
      */
     ready?: Promise<void>;
   }
+
+  /**
+   * An options object for main area widget subclasses providing their own
+   * default content.
+   *
+   * #### Notes
+   * This makes it easier to have a subclass that provides its own default
+   * content. This can go away once we upgrade to TypeScript 2.8 and have an
+   * easy way to make a single property optional, ala
+   * https://stackoverflow.com/a/46941824
+   */
+  export
+  interface IOptionsOptionalContent<T extends Widget = Widget> extends Widget.IOptions {
+    /**
+     * The child widget to wrap.
+     */
+    content?: T;
+
+    /**
+     * The toolbar to use for the widget.  Defaults to an empty toolbar.
+     */
+    toolbar?: Toolbar;
+
+    /**
+     * An optional promise for when the content is ready to be shown.
+     */
+    ready?: Promise<void>;
+  }
+
 }

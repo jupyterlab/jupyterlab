@@ -166,6 +166,42 @@ namespace CSVViewer {
   }
 }
 
+export
+class CSVDocumentWidget extends DocumentWidget<CSVViewer> {
+  constructor(options: CSVDocumentWidget.IOptions) {
+    let {content, context, delimiter, ready, ...other} = options;
+    content = content || Private.createContent(context);
+    ready = Promise.all([ready, content.ready]).then(() => undefined );
+    super({content, context, ready, ...other});
+
+    if (delimiter) {
+      content.delimiter = delimiter;
+    }
+    const csvDelimiter = new CSVDelimiter({ selected: content.delimiter });
+    this.toolbar.addItem('delimiter', csvDelimiter);
+    csvDelimiter.delimiterChanged.connect((sender: CSVDelimiter, delimiter: string) => { content.delimiter = delimiter; });
+  }
+}
+
+
+export
+namespace CSVDocumentWidget {
+  // TODO: In TypeScript 2.8, we can make just the content property optional
+  // using something like https://stackoverflow.com/a/46941824, instead of
+  // inheriting from this IOptionsOptionalContent.
+
+  export
+  interface IOptions extends DocumentWidget.IOptionsOptionalContent<CSVViewer> {
+    delimiter?: string;
+  }
+}
+
+namespace Private {
+  export
+  function createContent(context: DocumentRegistry.IContext<DocumentRegistry.IModel>) {
+    return new CSVViewer({ context });
+  }
+}
 
 /**
  * A widget factory for CSV widgets.
@@ -176,11 +212,6 @@ class CSVViewerFactory extends ABCWidgetFactory<IDocumentWidget<CSVViewer>> {
    * Create a new widget given a context.
    */
   protected createNewWidget(context: DocumentRegistry.Context): IDocumentWidget<CSVViewer> {
-    const content = new CSVViewer({ context });
-    const widget = new DocumentWidget({ content, context, ready: content.ready });
-    const csvDelimiter = new CSVDelimiter({ selected: content.delimiter });
-    widget.toolbar.addItem('delimiter', csvDelimiter);
-    csvDelimiter.delimiterChanged.connect((sender: CSVDelimiter, delimiter: string) => { content.delimiter = delimiter; });
-    return widget;
+    return new CSVDocumentWidget({ context });
   }
 }

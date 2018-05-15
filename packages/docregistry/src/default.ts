@@ -475,4 +475,9 @@ namespace DocumentWidget {
   interface IOptions<T extends Widget = Widget, U extends DocumentRegistry.IModel = DocumentRegistry.IModel> extends MainAreaWidget.IOptions<T> {
       context: DocumentRegistry.IContext<U>;
   }
+
+  export
+  interface IOptionsOptionalContent<T extends Widget = Widget, U extends DocumentRegistry.IModel = DocumentRegistry.IModel> extends MainAreaWidget.IOptionsOptionalContent<T> {
+      context: DocumentRegistry.IContext<U>;
+  }
 }
