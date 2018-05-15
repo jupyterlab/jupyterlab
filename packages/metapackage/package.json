@@ -26,7 +26,7 @@
   "scripts": {
     "build": "tsc && node build.js",
     "clean": "rimraf lib",
-    "docs": "typedoc --mode modules --module commonjs --excludeNotExported --target es5 --moduleResolution node --name JupyterLab --out ../../docs/api .",
+    "docs": "typedoc --mode modules --module commonjs --excludeNotExported --target es2015 --moduleResolution node --name JupyterLab --out ../../docs/api .",
     "prepublishOnly": "npm run build",
     "watch": "tsc -w",
     "watch:files": "node watch-files.js"
