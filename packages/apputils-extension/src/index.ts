@@ -244,10 +244,15 @@ const resolver: JupyterLabPlugin<IWindowResolver> = {
   provides: IWindowResolver,
   requires: [IRouter],
   activate: (app: JupyterLab, router: IRouter) => {
-    const candidate = Private.getWorkspace(router) || null;
-    const resolver = new WindowResolver({ candidate });
+    const candidate = Private.getWorkspace(router) || '';
+    const resolver = new WindowResolver();
 
-    return resolver;
+    return resolver.resolve(candidate)
+      .then(() => resolver)
+      .catch(reason => {
+        console.log('Window resolution failed.', reason);
+        throw reason;
+      });
   }
 };
 

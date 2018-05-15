@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Token
+  PromiseDelegate, Token
 } from '@phosphor/coreutils';
 
 
@@ -21,11 +21,9 @@ const IWindowResolver = new Token<IWindowResolver>('@jupyterlab/coreutils:IWindo
 export
 interface IWindowResolver {
   /**
-   * Resolve a window name to use as a handle among shared resources.
-   *
-   * @returns A promise that resolves to a window name.
+   * A window name to use as a handle among shared resources.
    */
-  resolve(): Promise<string>;
+  readonly name: string;
 }
 
 
@@ -34,46 +32,34 @@ interface IWindowResolver {
  */
 export
 class WindowResolver implements IWindowResolver {
-  constructor(options: WindowResolver.IOptions = { candidate: null }) {
-    this._candidate = options.candidate;
+  constructor() {
     Private.initialize();
+  }
+
+  /**
+   * The resolved window name.
+   */
+  get name(): string {
+    return this._name;
   }
 
   /**
    * Resolve a window name to use as a handle among shared resources.
    *
-   * @returns A promise that resolves to a window name.
+   * @param candidate - A potential preferred default window name.
+   *
+   * #### Notes
+   * Typically, the name candidate should be a JupyterLab workspace name or
+   * an empty string if there is no workspace.
    */
-  resolve(): Promise<string> {
-    console.log('Start with candidate:', this._candidate);
-    return Private.windowName();
+  resolve(candidate: string): Promise<void> {
+    return Private.windowName(candidate).then(name => { this._name = name; });
 
   }
 
-  private _candidate: string | null;
+  private _name: string;
 }
 
-
-/**
- * A namespace for `WindowResolver` statics.
- */
-export
-namespace WindowResolver {
-  /**
-   * The instantiation options for a window resolver.
-   */
-  export
-  interface IOptions {
-    /**
-     * A potential preferred default window name or `null` if unavailable.
-     *
-     * #### Notes
-     * Typically, the name candidate should be a JupyterLab workspace name or
-     * `null` if there is no workspace.
-     */
-    candidate: string | null;
-  }
-}
 
 /*
  * A namespace for private module data.
@@ -113,20 +99,20 @@ namespace Private {
   /**
    * The window name promise.
    */
-  let promise: Promise<string>;
+  let delegate = new PromiseDelegate<string>();
 
   /**
    * Wait until a window name is available and resolve.
    */
-  function awaitName(resolve: (value: string) => void): void {
+  function awaitName(candidate: string): void {
     window.setTimeout(() => {
       if (name) {
-        return resolve(name);
+        return delegate.resolve(name);
       }
 
       createName().then(value => {
         name = value;
-        resolve(name);
+        delegate.resolve(name);
       });
     }, TIMEOUT);
   }
@@ -207,11 +193,15 @@ namespace Private {
    * Returns a promise that resolves with the window name used for restoration.
    */
   export
-  function windowName(): Promise<string> {
-    return promise || (promise = new Promise((resolve) => {
-      beacon();
-      awaitName(resolve);
-    }));
+  function windowName(candidate: string): Promise<string> {
+    if (name) {
+      return delegate.promise;
+    }
+
+    console.log('Resolve a window name, start with candidate:', candidate);
+    beacon();
+    awaitName(candidate);
+    return delegate.promise;
   }
 
   /**
