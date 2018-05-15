@@ -533,7 +533,10 @@ namespace Private {
     if (!extender) {
       return '';
     }
-    return extender[label];
+    // Coerce the result to be a string. When Typedoc is updated to use
+    // Typescript 2.8, we can possibly use conditional types to get Typescript
+    // to recognize this is a string.
+    return extender[label] as any as string;
   }
 
   /**
@@ -548,7 +551,11 @@ namespace Private {
       if (!extender) {
         return Promise.resolve(void 0);
       }
-      return extender[executor](widget);
+      // Coerce the result to be a function. When Typedoc is updated to use
+      // Typescript 2.8, we can possibly use conditional types to get Typescript
+      // to recognize this is a function.
+      let f = extender[executor] as any as (w: Widget) => Promise<any>;
+      return f(widget);
     };
   }
 
@@ -575,7 +582,10 @@ namespace Private {
     return () => {
       let widget = app.shell.currentWidget;
       const extender = findExtender(widget, s);
-      return !!extender && !!extender[toggled] && !!extender[toggled](widget);
+      // Coerce extender[toggled] to be a function. When Typedoc is updated to use
+      // Typescript 2.8, we can possibly use conditional types to get Typescript
+      // to recognize this is a function.
+      return !!extender && !!extender[toggled] && !!(extender[toggled] as any as (w: Widget) => (() => boolean))(widget);
     };
   }
 }

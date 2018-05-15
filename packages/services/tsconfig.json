@@ -5,7 +5,7 @@
     "noEmitOnError": true,
     "noUnusedLocals": true,
     "lib": ["ES2015", "DOM"],
-    "types": ["text-encoding"],
+    "types": [],
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "ES2015",
