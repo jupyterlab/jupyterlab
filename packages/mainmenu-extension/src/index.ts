@@ -524,16 +524,23 @@ namespace Private {
   }
 
   /**
+   * A type that corersponds to the string properties of the generic T (e.g., 'noun')
+   */
+  type StringProps<T> = { [K in keyof T]: T[K] extends string ? K : never }[keyof T];
+
+  type FunctionPropertyNames<T> = { [K in keyof T]: T[K] extends Function ? K : never }[keyof T];
+
+  /**
    * A utility function that delegates a portion of a label to an IMenuExtender.
    */
   export
-  function delegateLabel<E extends IMenuExtender<Widget>>(app: JupyterLab, s: Set<E>, label: keyof E): string {
+  function delegateLabel<E extends IMenuExtender<Widget>>(app: JupyterLab, s: Set<E>, label: StringProps<E>): string {
     let widget = app.shell.currentWidget;
     const extender = findExtender(widget, s);
     if (!extender) {
       return '';
     }
-    return extender[label];
+    return extender[label] as any as string;
   }
 
   /**
@@ -541,14 +548,15 @@ namespace Private {
    * to an IMenuExtender.
    */
   export
-  function delegateExecute<E extends IMenuExtender<Widget>>(app: JupyterLab, s: Set<E>, executor: keyof E): () => Promise<any> {
+  function delegateExecute<E extends IMenuExtender<Widget>>(app: JupyterLab, s: Set<E>, executor: FunctionPropertyNames<E>): () => Promise<any> {
     return () => {
       let widget = app.shell.currentWidget;
       const extender = findExtender(widget, s);
       if (!extender) {
         return Promise.resolve(void 0);
       }
-      return extender[executor](widget);
+      let f = extender[executor] as any as (w: Widget) => Promise<any>;
+      return f(widget);
     };
   }
 
@@ -575,7 +583,7 @@ namespace Private {
     return () => {
       let widget = app.shell.currentWidget;
       const extender = findExtender(widget, s);
-      return !!extender && !!extender[toggled] && !!extender[toggled](widget);
+      return !!extender && !!extender[toggled] && !!(extender[toggled] as any as (w: Widget) => boolean)(widget);
     };
   }
 }
