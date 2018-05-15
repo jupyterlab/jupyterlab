@@ -91,7 +91,8 @@
     "quotemark": [
       true,
       "single",
-      "avoid-escape"
+      "avoid-escape",
+      "jsx-double"
     ],
     "radix": true,
     "semicolon": [true, "always"],
@@ -136,7 +137,8 @@
       true,
       "check-format",
       "allow-leading-underscore",
-      "ban-keywords"
+      "ban-keywords",
+      "allow-pascal-case"
     ],
     "whitespace": [
       true,
