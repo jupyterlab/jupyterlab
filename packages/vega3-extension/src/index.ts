@@ -96,17 +96,6 @@ class RenderedVega3 extends Widget implements IRenderMime.IRenderer {
             });
           }
           return void 0;
-        }).catch(error => {
-          // Add stderr message to output
-          const stderr = `Javascript Error: ${error.message}. This usually means there's a typo in your chart specification. See the JavaScript console for the full traceback.`;
-          const data = { 'application/vnd.jupyter.stderr': stderr };
-          model.setData({ data });
-          // Manually append stderr message to output and modify node attributes
-          this.node.innerHTML = `<pre>Javascript Error: ${error.message}. This usually means there's a typo in your chart specification. See the JavaScript console for the full traceback.</pre>`;
-          this.addClass('jp-RenderedText');
-          this.removeClass(VEGA_COMMON_CLASS);
-          this.node.setAttribute('data-mime-type', 'application/vnd.jupyter.stderr');
-          return void 0;
         });
       });
     });
