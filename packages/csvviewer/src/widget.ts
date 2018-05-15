@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ActivityMonitor, PathExt
+  ActivityMonitor
 } from '@jupyterlab/coreutils';
 
 import {
@@ -26,7 +26,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  CSVToolbar
+  CSVDelimiter
 } from './toolbar';
 
 import {
@@ -37,11 +37,6 @@ import {
  * The class name added to a CSV viewer.
  */
 const CSV_CLASS = 'jp-CSVViewer';
-
-/**
- * The class name added to a CSV viewer toolbar.
- */
-const CSV_VIEWER_CLASS = 'jp-CSVViewer-toolbar';
 
 /**
  * The class name added to a CSV viewer datagrid.
@@ -73,15 +68,7 @@ class CSVViewer extends Widget {
     this._grid = new DataGrid();
     this._grid.addClass(CSV_GRID_CLASS);
     this._grid.headerVisibility = 'all';
-
-    this._toolbar = new CSVToolbar({ selected: this._delimiter });
-    this._toolbar.delimiterChanged.connect(this._onDelimiterChanged, this);
-    this._toolbar.addClass(CSV_VIEWER_CLASS);
-    layout.addWidget(this._toolbar);
     layout.addWidget(this._grid);
-
-    context.pathChanged.connect(this._onPathChanged, this);
-    this._onPathChanged();
 
     this._context.ready.then(() => {
       this._updateGrid();
@@ -110,6 +97,20 @@ class CSVViewer extends Widget {
   }
 
   /**
+   * The delimiter for the file.
+   */
+  get delimiter(): string {
+    return this._delimiter;
+  }
+  set delimiter(value: string) {
+    if (value === this._delimiter) {
+      return;
+    }
+    this._delimiter = value;
+    this._updateGrid();
+  }
+
+  /**
    * Dispose of the resources used by the widget.
    */
   dispose(): void {
@@ -128,21 +129,6 @@ class CSVViewer extends Widget {
   }
 
   /**
-   * Handle a change in delimiter.
-   */
-  private _onDelimiterChanged(sender: CSVToolbar, delimiter: string): void {
-    this._delimiter = delimiter;
-    this._updateGrid();
-  }
-
-  /**
-   * Handle a change in path.
-   */
-  private _onPathChanged(): void {
-    this.title.label = PathExt.basename(this._context.localPath);
-  }
-
-  /**
    * Create the model for the grid.
    */
   private _updateGrid(): void {
@@ -157,7 +143,6 @@ class CSVViewer extends Widget {
 
   private _context: DocumentRegistry.Context;
   private _grid: DataGrid;
-  private _toolbar: CSVToolbar;
   private _monitor: ActivityMonitor<any, any> | null = null;
   private _delimiter = ',';
   private _ready = new PromiseDelegate<void>();
@@ -192,7 +177,10 @@ class CSVViewerFactory extends ABCWidgetFactory<IDocumentWidget<CSVViewer>> {
    */
   protected createNewWidget(context: DocumentRegistry.Context): IDocumentWidget<CSVViewer> {
     const content = new CSVViewer({ context });
-    const widget = new DocumentWidget({ content, context });
+    const widget = new DocumentWidget({ content, context, ready: content.ready });
+    const csvDelimiter = new CSVDelimiter({ selected: content.delimiter });
+    widget.toolbar.addItem('delimiter', csvDelimiter);
+    csvDelimiter.delimiterChanged.connect((sender: CSVDelimiter, delimiter: string) => { content.delimiter = delimiter; });
     return widget;
   }
 }

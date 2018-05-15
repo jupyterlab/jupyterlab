@@ -3,11 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-
-:root {
-  --jp-private-csvviewer-toolbar-height: 24px;
-}
-
 .jp-CSVViewer {
   display: flex;
   flex-direction: column;
@@ -17,40 +12,40 @@
   font-size: var(--jp-ui-font-size1);
 }
 
-.jp-CSVToolbar {
+.jp-CSVDelimiter {
     display: flex;
     flex: 0 0 auto;
     flex-direction: row;
     border: none;
-    height: var(--jp-private-csvviewer-toolbar-height);
+    min-height: 24px;
     background: var(--jp-toolbar-background);
     z-index: 1;
 }
 
-.jp-CSVToolbar .jp-CSVToolbar-label {
+.jp-CSVDelimiter .jp-CSVDelimiter-label {
     color: var(--jp-ui-font-color1);
     font-size: var(--jp-ui-font-size1);
-    line-height: var(--jp-private-csvviewer-toolbar-height);
     padding-left: 8px;
     padding-right: 8px;
 }
 
 
-.jp-CSVToolbar .jp-CSVToolbar-dropdown {
+.jp-CSVDelimiter .jp-CSVDelimiter-dropdown {
     flex: 0 0 auto;
     vertical-align: middle;
-    border: var(--jp-border-width) solid var(--jp-border-color1);
     border-radius: 0;
     outline: none;
-    width: 40px;
     height: 20px;
     margin-top: 2px;
     margin-bottom: 2px;
 }
 
 
-.jp-CSVToolbar .jp-CSVToolbar-dropdown select.jp-mod-styled {
+.jp-CSVDelimiter .jp-CSVDelimiter-dropdown select.jp-mod-styled {
   font-size: var(--jp-ui-font-size1);
+  background-color: transparent;
+  height: 20px;
+  padding-right: 20px;
 }
 
 
