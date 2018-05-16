@@ -404,8 +404,8 @@ const state: JupyterLabPlugin<IStateDB> = {
       label: 'Reset Application State',
       execute: () => {
         commands.execute(CommandIDs.recoverState)
-          .then(() => { document.location.reload(); })
-          .catch(() => { document.location.reload(); });
+          .then(() => { router.reload(); })
+          .catch(() => { router.reload(); });
       }
     });
 
@@ -422,7 +422,7 @@ const state: JupyterLabPlugin<IStateDB> = {
         // If the state database has already been resolved, resetting is
         // impossible without reloading.
         if (resolved) {
-          return document.location.reload();
+          return router.reload();
         }
 
         // Empty the state database.

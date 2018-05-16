@@ -63,8 +63,8 @@ namespace Patterns {
  */
 const main: JupyterLabPlugin<void> = {
   id: '@jupyterlab/application-extension:main',
-  requires: [ICommandPalette],
-  activate: (app: JupyterLab, palette: ICommandPalette) => {
+  requires: [ICommandPalette, IRouter],
+  activate: (app: JupyterLab, palette: ICommandPalette, router: IRouter) => {
     // If there were errors registering plugins, tell the user.
     if (app.registerPluginErrors.length !== 0) {
       const body = (
@@ -101,7 +101,7 @@ const main: JupyterLabPlugin<void> = {
         });
       }).then(result => {
         if (result.button.accept) {
-          location.reload();
+          router.reload();
         }
       }).catch(err => {
         showDialog({
