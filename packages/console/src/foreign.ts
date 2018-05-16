@@ -112,7 +112,7 @@ class ForeignHandler implements IDisposable {
     switch (msgType) {
     case 'execute_input':
       let inputMsg = msg as KernelMessage.IExecuteInputMsg;
-      cell = this._newCell(parentMsgId);
+      cell = this._cells.has(parentMsgId) ? this._cells.get(parentMsgId) : this._newCell(parentMsgId);
       let model = cell.model;
       model.executionCount = inputMsg.content.execution_count;
       model.value.text = inputMsg.content.code;
@@ -143,6 +143,14 @@ class ForeignHandler implements IDisposable {
       if (cell) {
         cell.model.outputs.clear(wait);
       }
+      return true;
+    case 'status':
+      let statusMsg = msg as KernelMessage.IStatusMsg;
+
+      cell = this._cells.has(parentMsgId) ? this._cells.get(parentMsgId) : this._newCell(parentMsgId);
+      model = cell.model;
+      model.processStatusMessage(statusMsg);
+      parent.update();
       return true;
     default:
       return false;

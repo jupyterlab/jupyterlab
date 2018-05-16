@@ -3,8 +3,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import * as moment from 'moment';
+
 import {
-  JSONExt, JSONValue
+  JSONExt, JSONValue, JSONObject
 } from '@phosphor/coreutils';
 
 import {
@@ -26,6 +28,10 @@ import {
 import {
   IOutputAreaModel, OutputAreaModel
 } from '@jupyterlab/outputarea';
+
+import {
+  KernelMessage
+} from '@jupyterlab/services';
 
 
 /**
@@ -69,6 +75,70 @@ interface ICellModel extends CodeEditor.IModel {
   toJSON(): nbformat.ICell;
 }
 
+export class ExecutionTimes {
+  readonly duration: moment.Duration | null;
+  constructor(public readonly start: moment.Moment | null, public readonly end: moment.Moment | null) {
+    this.duration = start && end ? moment.duration(end.diff(start)) : null;
+  }
+
+  withEnd(end: moment.Moment | null): ExecutionTimes {
+    return new ExecutionTimes(this.start, end);
+  }
+
+  withEndString(endString: string): ExecutionTimes {
+    return this.withEnd(ExecutionTimes.parseSafe(endString));
+  }
+
+  static fromStartString(startString: string): ExecutionTimes {
+    return new ExecutionTimes(ExecutionTimes.parseSafe(startString), null);
+  }
+
+  static fromMetadata(metadata: ExecutionTimes.IMetadata | undefined) {
+    if (metadata === undefined) {
+      return new ExecutionTimes(null, null);
+    }
+    const {start_time, end_time} = metadata;
+    return new ExecutionTimes(
+      start_time ? ExecutionTimes.parseSafe(start_time) : null,
+      end_time ? ExecutionTimes.parseSafe(end_time) : null,
+    );
+  }
+
+  equals(other: ExecutionTimes): boolean {
+    return this.start === other.start && this.end === other.end;
+  }
+
+  toMetadata(): ExecutionTimes.IMetadata | undefined {
+    if (this.start === null && this.end === null) {
+      return undefined;
+    }
+    const metadata: ExecutionTimes.IMetadata = {};
+    if (this.start !== null) {
+      metadata.start_time = this.start.toISOString();
+    }
+    if (this.end !== null) {
+      metadata.end_time = this.end.toISOString();
+    }
+    return metadata;
+  }
+}
+
+export namespace ExecutionTimes {
+  export const METADATA_KEY = 'ExecuteTime';
+
+  export interface IMetadata {
+    start_time?: string;
+    end_time?: string;
+  }
+
+  export function parseSafe(s: string) {
+    const m = moment(s, moment.ISO_8601, true);
+    if (!m.isValid()) {
+      throw new Error(`ExecutionTimes: Failed to parse "${s}" as ISO 8601 datetime at ${m.invalidAt()}`);
+    }
+    return m;
+  }
+}
 
 /**
  * The definition of a code cell.
@@ -87,6 +157,13 @@ interface ICodeCellModel extends ICellModel {
    * The code cell's prompt number. Will be null if the cell has not been run.
    */
   executionCount: nbformat.ExecutionCount;
+
+  executionTimes: ExecutionTimes;
+  executionTimesSignal: ISignal<this, ExecutionTimes>;
+
+  proccessExecuteReplyMsg(msg: KernelMessage.IExecuteReplyMsg): void;
+
+  processStatusMessage(msg: KernelMessage.IStatusMsg): void;
 
   /**
    * The cell outputs.
@@ -319,6 +396,8 @@ class MarkdownCellModel extends CellModel {
  */
 export
 class CodeCellModel extends CellModel implements ICodeCellModel {
+
+  executionTimesSignal: Signal<this, ExecutionTimes>;
   /**
    * Construct a new code cell with optional original cell content.
    */
@@ -340,6 +419,8 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
       }
     }
     executionCount.changed.connect(this._onExecutionCountChanged, this);
+
+    this.executionTimesSignal = new Signal<this, ExecutionTimes>(this);
 
     this._outputs = factory.createOutputArea({
       trusted,
@@ -368,6 +449,57 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
       return;
     }
     this.modelDB.setValue('executionCount', newValue || null);
+  }
+
+  /**
+   * The execution times for the cell.
+   */
+  get executionTimes(): ExecutionTimes {
+    return ExecutionTimes.fromMetadata(
+      this.metadata.get(ExecutionTimes.METADATA_KEY) as JSONObject
+    );
+  }
+
+  set executionTimes(executionTimes: ExecutionTimes) {
+    const oldExecutionTimes = this.executionTimes;
+
+    if (!executionTimes.equals(oldExecutionTimes)) {
+      const metadata = executionTimes.toMetadata();
+      if (metadata === undefined) {
+        this.metadata.delete(ExecutionTimes.METADATA_KEY);
+      } else {
+        this.metadata.set(ExecutionTimes.METADATA_KEY, metadata as JSONObject);
+      }
+
+      this.contentChanged.emit(undefined);
+      this.stateChanged.emit({
+        name: 'executionTimes',
+        oldValue: oldExecutionTimes,
+        newValue: executionTimes
+      });
+
+      this.executionTimesSignal.emit(executionTimes);
+    }
+  }
+
+  proccessExecuteReplyMsg(msg: KernelMessage.IExecuteReplyMsg) {
+    this.executionTimes = ExecutionTimes.fromMetadata({
+      start_time: msg.metadata.started as string,
+      end_time: msg.header.date as string
+    });
+  }
+
+  processStatusMessage(msg: KernelMessage.IStatusMsg) {
+    switch (msg.content.execution_state) {
+      case 'idle':
+        this.executionTimes = this.executionTimes.withEndString(msg.header.date as string);
+        return;
+      case 'busy':
+        this.executionTimes = ExecutionTimes.fromStartString(msg.header.date as string);
+        return;
+      default:
+        return;
+    }
   }
 
   /**

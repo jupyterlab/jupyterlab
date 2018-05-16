@@ -15,7 +15,7 @@ import {
 
 import {
   ICellModel, ICodeCellModel,
-  CodeCell, Cell, MarkdownCell
+  CodeCell, Cell, MarkdownCell, ExecutionTimes
 } from '@jupyterlab/cells';
 
 import {
@@ -850,6 +850,7 @@ namespace NotebookActions {
         cell.outputs.clear();
         (child as CodeCell).outputHidden = false;
         cell.executionCount = null;
+        cell.executionTimes = new ExecutionTimes(null, null);
       }
       i++;
     });
@@ -876,6 +877,7 @@ namespace NotebookActions {
       if (cell.type === 'code') {
         cell.outputs.clear();
         cell.executionCount = null;
+        cell.executionTimes = new ExecutionTimes(null, null);
         (child as CodeCell).outputHidden = false;
       }
       i++;
