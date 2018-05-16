@@ -30,16 +30,11 @@ import {
 
 import {
   VDomRenderer,
-  // VDomModel
 } from './vdom';
 
 import {
   IClientSession
 } from './clientsession';
-
-// import {
-//   Styling
-// } from './styling';
 
 
 /**
@@ -406,8 +401,7 @@ namespace ToolbarButton {
      * The tooltip added to the button node.
      */
     tooltip?: string;
-    // children?: any;
-    [key: string]: any;
+    children?: React.ReactNode;
   }
 }
 
@@ -472,7 +466,6 @@ namespace ToolbarSelect {
      * The selected option value.
      */
     selected?: string;
-    [key: string]: any;
   }
 }
 

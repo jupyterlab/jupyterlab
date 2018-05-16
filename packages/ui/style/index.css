@@ -3,21 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-
-/* Private CSS variables */
-
-
-:root {
-  
-}
-
-
-/* UI */
-
-.jp-ui {
-  
-}
-
 .jp-button {
   display: inline-block;
   height: 24px;

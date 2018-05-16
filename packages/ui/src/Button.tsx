@@ -31,33 +31,32 @@ interface IButtonProps {
   [key: string]: any;
 }
 
+export type ButtonProps = IButtonProps & React.DetailedHTMLProps<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>;
+
 
 /**
  * A base button comopnent.
  */
 export
-class Button extends React.Component<IButtonProps> {
-  static defaultProps = {
-    className: '',
-    tooltip: ''
-   };
-
-  handleClick = (event?: React.MouseEvent<HTMLElement>): void => {
-    if (this.props.onClick) {
-      this.props.onClick(event);
-    }
-  }
-
-  render() {
-    const classNames = [...this.props.className.split(' '), UI_CLASS, BUTTON_CLASS, STYLED_CLASS];
-    return (
-      <button
-        className={classNames.join(' ')}
-        onClick={this.handleClick}
-        title={this.props.tooltip}
-      >
-        {this.props.children}
-      </button>
-    );
-  }
-}
+const Button = (props: ButtonProps) => {
+  const {
+    className,
+    tooltip,
+    ...buttonProps
+  } = props;
+  const classNames = [...className.split(' '), UI_CLASS, BUTTON_CLASS, STYLED_CLASS];
+  return (
+    <button
+      className={classNames.join(' ')}
+      onClick={(event?: React.MouseEvent<HTMLElement>): void => {
+        if (props.onClick) {
+          props.onClick(event);
+        }
+      }}
+      title={tooltip}
+      {...buttonProps}
+    >
+      {props.children}
+    </button>
+  );
+};

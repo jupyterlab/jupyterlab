@@ -33,7 +33,6 @@ export interface ISelectProps {
   onKeydown?: (event: React.KeyboardEvent<HTMLSelectElement>) => void;
   options: string[];
   selected?: string;
-  [prop: string]: any;
 }
 
 /**
@@ -44,11 +43,13 @@ export interface ISelectState {
   selected: string;
 }
 
+export type SelectProps = ISelectProps & React.DetailedHTMLProps<React.SelectHTMLAttributes<HTMLSelectElement>, HTMLSelectElement>;
+
 /**
  * A base select comopnent.
  */
-export class Select extends React.Component<ISelectProps, ISelectState> {
-  constructor(props: ISelectProps) {
+export class Select extends React.Component<SelectProps, ISelectState> {
+  constructor(props: SelectProps) {
     super(props);
     this.state = {
       focused: false,
@@ -56,7 +57,7 @@ export class Select extends React.Component<ISelectProps, ISelectState> {
     };
   }
 
-  static defaultProps: ISelectProps = {
+  static defaultProps: SelectProps = {
     className: '',
     options: []
   };

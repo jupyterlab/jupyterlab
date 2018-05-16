@@ -24,8 +24,6 @@
 
 .jp-Toolbar .jp-Toolbar-item {
   flex: 0 0 auto;
-  /* padding-left: 8px;
-  padding-right: 8px; */
   font-size: var(--jp-ui-font-size1);
   line-height: var(--jp-private-toolbar-height);
   height: 100%;

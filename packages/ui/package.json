@@ -35,6 +35,6 @@
   "devDependencies": {
     "@types/react": "~16.0.19",
     "rimraf": "~2.6.2",
-    "typescript": "~2.6.2"
+    "typescript": "~2.8.3"
   }
 }
