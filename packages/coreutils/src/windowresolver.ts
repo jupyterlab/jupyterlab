@@ -32,6 +32,9 @@ interface IWindowResolver {
  */
 export
 class WindowResolver implements IWindowResolver {
+  /**
+   * Create a new window name resolver.
+   */
   constructor() {
     Private.initialize();
   }
@@ -51,10 +54,12 @@ class WindowResolver implements IWindowResolver {
    * #### Notes
    * Typically, the name candidate should be a JupyterLab workspace name or
    * an empty string if there is no workspace.
+   *
+   * If the returned promise rejects, a window name cannot be resolved without
+   * user intervention, which typically means navigation to a new URL.
    */
   resolve(candidate: string): Promise<void> {
     return Private.windowName(candidate).then(name => { this._name = name; });
-
   }
 
   private _name: string;
@@ -198,7 +203,7 @@ namespace Private {
       return delegate.promise;
     }
 
-    console.log('Resolve a window name, start with candidate:', candidate);
+    console.log(`Resolve a window name, start with candidate: "${candidate}"`);
     beacon();
     awaitName(candidate);
     return delegate.promise;

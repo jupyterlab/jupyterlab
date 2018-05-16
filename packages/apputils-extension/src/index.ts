@@ -247,6 +247,8 @@ const resolver: JupyterLabPlugin<IWindowResolver> = {
     const candidate = Private.getWorkspace(router) || '';
     const resolver = new WindowResolver();
 
+    console.log('router.current.path', router.current.path);
+    console.log('Candidate is', candidate);
     return resolver.resolve(candidate)
       .then(() => resolver)
       .catch(reason => {
@@ -289,9 +291,7 @@ const state: JupyterLabPlugin<IStateDB> = {
     let debouncer: number;
     let resolved = false;
 
-    resolver.resolve().then(name => {
-      console.log(`The window resolver returns the name ${name}`);
-    });
+    console.log(`Window resolver has name: "${resolver.name}"`);
 
     const { commands, info, serviceManager } = app;
     const { workspaces } = serviceManager;
