@@ -273,7 +273,9 @@ describe('fileeditorcodewrapper', () => {
     describe('#createNewWidget()', () => {
 
       it('should create a document widget', () => {
-        expect(widgetFactory.createNew(context)).to.be.a(DocumentWidget);
+        const d = widgetFactory.createNew(context);
+        expect(d).to.be.a(DocumentWidget);
+        expect(d.content).to.be.a(FileEditor);
       });
 
     });

@@ -20,7 +20,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  Base64ModelFactory, Context, DocumentRegistry
+  Base64ModelFactory, Context, DocumentRegistry, DocumentWidget
 } from '@jupyterlab/docregistry';
 
 import {
@@ -194,7 +194,7 @@ describe('ImageViewerFactory', () => {
 
   describe('#createNewWidget', () => {
 
-    it('should create an image widget', () => {
+    it('should create an image document widget', () => {
       let factory = new ImageViewerFactory({
         name: 'Image',
         modelName: 'base64',
@@ -202,7 +202,9 @@ describe('ImageViewerFactory', () => {
         defaultFor: ['png']
       });
       let context = createFileContext(IMAGE.path);
-      expect(factory.createNew(context)).to.be.an(ImageViewer);
+      let d = factory.createNew(context);
+      expect(d).to.be.an(DocumentWidget);
+      expect(d.content).to.be.an(ImageViewer);
     });
 
   });
