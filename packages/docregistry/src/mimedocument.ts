@@ -79,7 +79,7 @@ class MimeContent extends Widget {
     }).catch(reason => {
       // Dispose the document if rendering fails.
       requestAnimationFrame(() => { this.dispose(); });
-      showErrorMessage(`Renderer Failure: ${context.path}`, reason);
+      showErrorMessage(`Renderer Failure: ${this._context.path}`, reason);
     });
   }
 
@@ -150,7 +150,7 @@ class MimeContent extends Widget {
       if (this._renderRequested) {
         return this._render();
       }
-    } catch (error) {
+    } catch (reason) {
       // Dispose the document if rendering fails.
       requestAnimationFrame(() => { this.dispose(); });
       showErrorMessage(`Renderer Failure: ${context.path}`, reason);
