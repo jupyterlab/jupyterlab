@@ -136,7 +136,7 @@ describe('docregistry/mimedocument', () => {
             expect(dContext.model.toString()).to.be('bar');
             done();
           });
-          const renderer = RENDERMIME.createRenderer('text/markdown');
+          const renderer = RENDERMIME.createRenderer('text/foo');
           let widget = new LogRenderer({
             context: dContext,
             renderer,
