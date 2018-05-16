@@ -434,14 +434,6 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
   addCommands(app, services, tracker);
   populatePalette(palette);
 
-  // Keep the rendered commands up-to-date.
-  tracker.currentChanged.connect(() => {
-    Object.keys(CommandIDs).forEach(key => {
-      app.commands.notifyCommandChanged((CommandIDs as any)[key]);
-    });
-  });
-
-
   let id = 0; // The ID counter for notebook panels.
 
   factory.widgetCreated.connect((sender, widget) => {

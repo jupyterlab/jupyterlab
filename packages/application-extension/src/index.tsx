@@ -86,9 +86,7 @@ const main: JupyterLabPlugin<void> = {
     // If the application shell layout is modified,
     // trigger a refresh of the commands.
     app.shell.layoutModified.connect(() => {
-      Object.keys(CommandIDs).forEach(key => {
-        app.commands.notifyCommandChanged((CommandIDs as any)[key]);
-      });
+      app.commands.notifyCommandChanged();
     });
 
     let builder = app.serviceManager.builder;

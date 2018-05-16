@@ -111,13 +111,6 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRe
 
   addCommands(app, tracker);
 
-  // Keep the rendered commands up-to-date.
-  tracker.currentChanged.connect(() => {
-    Object.keys(CommandIDs).forEach(key => {
-      app.commands.notifyCommandChanged((CommandIDs as any)[key]);
-    });
-  });
-
   const category = 'Image Viewer';
 
   [CommandIDs.zoomIn, CommandIDs.zoomOut, CommandIDs.resetImage, CommandIDs.rotateClockwise, CommandIDs.rotateCounterclockwise, CommandIDs.flipHorizontal, CommandIDs.flipVertical, CommandIDs.invertColors]

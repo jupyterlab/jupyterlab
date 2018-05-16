@@ -432,13 +432,6 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     palette.addItem({ command, category });
   });
 
-  // Keep the rendered commands up-to-date.
-  tracker.currentChanged.connect(() => {
-    Object.keys(CommandIDs).forEach(key => {
-      app.commands.notifyCommandChanged((CommandIDs as any)[key]);
-    });
-  });
-
   // Add a console creator to the File menu
   mainMenu.fileMenu.newMenu.addGroup([{ command: CommandIDs.create }], 0);
 

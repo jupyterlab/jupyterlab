@@ -118,13 +118,6 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     palette.addItem({ command, category, args: { 'isPalette': true } });
   });
 
-  // Keep the rendered commands up-to-date.
-  tracker.currentChanged.connect(() => {
-    Object.keys(CommandIDs).forEach(key => {
-      app.commands.notifyCommandChanged((CommandIDs as any)[key]);
-    });
-  });
-
   // Add terminal creation to the file menu.
   mainMenu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 20);
 

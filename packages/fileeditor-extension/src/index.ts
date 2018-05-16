@@ -133,15 +133,6 @@ function activate(app: JupyterLab, consoleTracker: IConsoleTracker, editorServic
   });
 
   /**
-   * Refresh the rendered commands.
-   */
-  const refreshCommands = () => {
-    Object.keys(CommandIDs).forEach(key => {
-      app.commands.notifyCommandChanged((CommandIDs as any)[key]);
-    });
-  };
-
-  /**
    * Update the setting values.
    */
   function updateSettings(settings: ISettingRegistry.ISettings): void {
@@ -151,7 +142,8 @@ function activate(app: JupyterLab, consoleTracker: IConsoleTracker, editorServic
       config[key] = (cached[key] === null || cached[key] === undefined) ?
         CodeEditor.defaultConfig[key] : cached[key];
     });
-    refreshCommands();
+    // Trigger a refresh of the rendered commands
+    app.commands.notifyCommandChanged();
   }
 
   /**
@@ -170,9 +162,6 @@ function activate(app: JupyterLab, consoleTracker: IConsoleTracker, editorServic
       editor.setOption(key, config[key]);
     });
   }
-
-  // Keep the rendered commands up-to-date.
-  tracker.currentChanged.connect(refreshCommands);
 
   // Add a console creator to the File menu
   // Fetch the initial state of the settings.
