@@ -299,12 +299,8 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
 
   command = CommandIDs.toggleRightArea;
   app.commands.addCommand(command, {
-<<<<<<< HEAD:packages/application-extension/src/index.ts
     label: args => args['isPalette'] ?
     'Toggle Right Sidebar' : 'Show Right Sidebar',
-=======
-    label: args => 'Show Right Area',
->>>>>>> upstream/master:packages/application-extension/src/index.tsx
     execute: () => {
       if (app.shell.rightCollapsed) {
         app.shell.expandRight();
