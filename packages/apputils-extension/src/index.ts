@@ -190,7 +190,7 @@ const themes: JupyterLabPlugin<IThemeManager> = {
           return;
         }
         currentTheme = theme;
-        manager.setTheme(args['theme'] as string);
+        manager.setTheme(theme);
         commands.notifyCommandChanged(CommandIDs.changeTheme);
       }
     });
