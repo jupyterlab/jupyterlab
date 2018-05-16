@@ -1,5 +1,5 @@
 **[Installation](#installation)** |
-**[Documentation](http://jupyterlab.readthedocs.io/en/latest/)** |
+**[Documentation](http://jupyterlab.readthedocs.io)** |
 **[Contributing](#contributing)** |
 **[License](#license)** |
 **[Team](#team)** |
