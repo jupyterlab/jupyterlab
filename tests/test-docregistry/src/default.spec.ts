@@ -4,17 +4,31 @@
 import expect = require('expect.js');
 
 import {
+  UUID
+} from '@phosphor/coreutils';
+
+import {
   Widget
 } from '@phosphor/widgets';
 
 import {
   ABCWidgetFactory, Base64ModelFactory, DocumentModel,
-  DocumentRegistry, DocumentWidget, IDocumentWidget, TextModelFactory
+  DocumentRegistry, DocumentWidget, IDocumentWidget, TextModelFactory, Context
 } from '@jupyterlab/docregistry';
+
+import {
+  ServiceManager
+} from '@jupyterlab/services';
 
 import {
   createFileContext
 } from '../../utils';
+
+function asyncTimer(time: number, value: any) {
+  return new Promise((resolve, reject) => {
+    setTimeout(resolve(value), time);
+  });
+}
 
 
 class WidgetFactory extends ABCWidgetFactory<IDocumentWidget> {
@@ -546,6 +560,77 @@ describe('docregistry/default', () => {
     });
 
   });
+
+  describe.only('DocumentWidget', () => {
+
+    let manager: ServiceManager.IManager;
+
+    let context: Context<DocumentRegistry.IModel>;
+    let content: Widget;
+    let widget: DocumentWidget;
+
+    let setup = () => {
+      context = createFileContext(undefined, manager);
+      content = new Widget();
+      widget = new DocumentWidget({ context, content });
+    };
+
+    before(async () => {
+      manager = new ServiceManager();
+      await manager.ready;
+    });
+
+    describe('#constructor', () => {
+      beforeEach(setup);
+
+      it('should set the title for the path', () => {
+        expect(widget.title.label).to.be(context.localPath);
+      });
+
+      it('should update the title when the path changes', async () => {
+        let path = UUID.uuid4() + '.jl';
+        await context.initialize(true);
+        await manager.contents.rename(context.path, path);
+        expect(widget.title.label).to.be(path);
+      });
+
+      it('should add the dirty class when the model is dirty', async () => {
+        await context.initialize(true);
+        await context.ready;
+        context.model.fromString('bar');
+        expect(widget.title.className).to.contain('jp-mod-dirty');
+      });
+
+      it('should store the context', () => {
+        expect(widget.context).to.be(context);
+      });
+
+    });
+
+    describe('#ready', () => {
+      beforeEach(setup);
+
+      it('should resolve after the ready and context ready promises', async () => {
+        let x = Object.create(null);
+        let ready = asyncTimer(300, x);
+        let contextReady = Promise.all([context.ready, x]);
+        let widget = new DocumentWidget({ context, content, ready: ready});
+        expect(widget.isReady).to.be(false);
+
+        // Our promise should resolve before the widget ready promise.
+        expect(await Promise.race([widget.ready, ready])).to.be(x);
+        // The context ready promise should also resolve first.
+        context.initialize(true);
+        expect(await Promise.race([widget.ready, contextReady])).to.eql([undefined, x]);
+        // The widget.ready promise should finally resolve.
+        expect(await widget.ready).to.be(undefined);
+      });
+
+    });
+
+  });
+
+
 
 });
 
