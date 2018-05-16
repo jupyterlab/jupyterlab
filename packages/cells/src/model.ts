@@ -299,7 +299,7 @@ export
 class AttachmentsCellModel extends CellModel {
 
   /**
-   * Construct a new code cell with optional original cell content.
+   * Construct a new cell with optional attachments.
    */
   constructor(options: AttachmentsCellModel.IOptions) {
     super(options);
@@ -309,7 +309,7 @@ class AttachmentsCellModel extends CellModel {
     let attachments: nbformat.IAttachments | undefined;
     let cell = options.cell;
     if (cell && (cell.cell_type === 'raw' || cell.cell_type === 'markdown')) {
-      attachments = (cell  as (nbformat.IRawCell | nbformat.IMarkdownCell)).attachments;
+      attachments = (cell as (nbformat.IRawCell | nbformat.IMarkdownCell)).attachments;
     }
 
     this._attachments = factory.createAttachmentsModel({
