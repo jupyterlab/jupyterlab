@@ -189,7 +189,6 @@ class StaticNotebook extends Widget {
     super();
     this.addClass(NB_CLASS);
     this.node.dataset[KERNEL_USER] = 'true';
-    this.node.dataset[CODE_RUNNER] = 'true';
     this.node.dataset[UNDOER] = 'true';
     this.rendermime = options.rendermime;
     this.layout = new Private.NotebookPanelLayout();
@@ -1829,6 +1828,11 @@ class Notebook extends StaticNotebook {
     } else {
       // No cell has focus, ensure command mode.
       this.mode = 'command';
+    }
+    if (this.mode === 'command' && target !== this.node) {
+      delete this.node.dataset[CODE_RUNNER];
+    } else {
+      this.node.dataset[CODE_RUNNER] = 'true';
     }
   }
 

@@ -104,6 +104,7 @@ describe('console/widget', () => {
 
       it('should reflect the contents of the widget', () => {
         let force = true;
+        widget.showAllActivity = true;
         Widget.attach(widget, document.body);
         return (widget.session as ClientSession).initialize().then(() => {
           return widget.execute(force);
@@ -286,8 +287,8 @@ describe('console/widget', () => {
         widget.promptCell.model.value.text = 'foo';
 
         let serialized = widget.serialize();
-        expect(serialized).to.have.length(2);
-        expect(serialized[1].source).to.be('foo');
+        expect(serialized).to.have.length(1);
+        expect(serialized[0].source).to.be('foo');
       });
 
     });

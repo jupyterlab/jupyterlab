@@ -40,7 +40,7 @@ data_files_spec = [
 package_data_spec = dict()
 package_data_spec[NAME] = [
     'staging/*', 'staging/templates/*', 'static/**', 'tests/mock_packages/**',
-    'themes/**', 'schemas/**'
+    'themes/**', 'schemas/**', 'node-version-check.js'
 ]
 
 staging = pjoin(HERE, NAME, 'staging')
@@ -55,7 +55,7 @@ def check_assets():
     targets = [
         'static/package.json',
         'schemas/@jupyterlab/shortcuts-extension/plugin.json',
-        'themes/@jupyterlab/theme-light-extension/images/jupyterlab.svg'
+        'themes/@jupyterlab/theme-light-extension/index.css'
     ]
 
     for t in targets:

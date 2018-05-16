@@ -47,9 +47,19 @@ const HEADER_CLASS = 'jp-RunningSessions-header';
 const REFRESH_CLASS = 'jp-RunningSessions-headerRefresh';
 
 /**
- * The class name added to a shutdown all button.
+ * The class name added to shutdown all buttons.
  */
-const SHUTDOWN_CLASS = 'jp-RunningSessions-headerShutdownAll';
+const SHUTDOWN_CLASS = 'jp-RunningSessions-shutdownAll';
+
+/**
+ * The class name added to a shutdown all terminals button.
+ */
+const SHUTDOWN_TERMINALS_CLASS = 'jp-RunningSessions-terminalShutdownAll';
+
+/**
+ * The class name added to a shutdown all sessions button.
+ */
+const SHUTDOWN_SESSIONS_CLASS = 'jp-RunningSessions-sessionShutdownAll';
 
 /**
  * The class name added to the running terminal sessions section.
@@ -299,7 +309,8 @@ class RunningSessions extends Widget {
     let sessionSection = DOMUtils.findElement(this.node, SESSIONS_CLASS);
     let sessionList = DOMUtils.findElement(sessionSection, LIST_CLASS);
     let refresh = DOMUtils.findElement(this.node, REFRESH_CLASS);
-    let shutdown = DOMUtils.findElement(this.node, SHUTDOWN_CLASS);
+    let shutdownTerms = DOMUtils.findElement(this.node, SHUTDOWN_TERMINALS_CLASS);
+    let shutdownSessions = DOMUtils.findElement(this.node, SHUTDOWN_SESSIONS_CLASS);
     let renderer = this._renderer;
     let clientX = event.clientX;
     let clientY = event.clientY;
@@ -310,18 +321,32 @@ class RunningSessions extends Widget {
       return;
     }
 
-    // Check for a shutdown.
-    if (ElementExt.hitTest(shutdown, clientX, clientY)) {
+    // Check for terminals shutdown.
+    if (ElementExt.hitTest(shutdownTerms, clientX, clientY)) {
       showDialog({
-        title: 'Shutdown All?',
-        body: 'Shut down all kernels and terminals?',
+        title: 'Shutdown All Terminals?',
+        body: 'Shut down all terminals?',
+        buttons: [
+          Dialog.cancelButton(), Dialog.warnButton({ label: 'SHUTDOWN' })
+        ]
+      }).then(result => {
+        if (result.button.accept) {
+          this._manager.terminals.shutdownAll();
+        }
+      });
+    }
+
+    // Check for sessions shutdown.
+    if (ElementExt.hitTest(shutdownSessions, clientX, clientY)) {
+      showDialog({
+        title: 'Shutdown All Sessions?',
+        body: 'Shut down all sessions?',
         buttons: [
           Dialog.cancelButton(), Dialog.warnButton({ label: 'SHUTDOWN' })
         ]
       }).then(result => {
         if (result.button.accept) {
           this._manager.sessions.shutdownAll();
-          this._manager.terminals.shutdownAll();
         }
       });
     }
@@ -538,11 +563,6 @@ namespace RunningSessions {
       refresh.className = REFRESH_CLASS;
       header.appendChild(refresh);
 
-      let shutdown = document.createElement('button');
-      shutdown.title = 'Shutdown All Kernels…';
-      shutdown.className = SHUTDOWN_CLASS;
-      header.appendChild(shutdown);
-
       node.appendChild(header);
       node.appendChild(terminals);
       node.appendChild(sessions);
@@ -557,6 +577,12 @@ namespace RunningSessions {
     createTerminalHeaderNode(): HTMLElement {
       let node = document.createElement('div');
       node.textContent = 'Terminal Sessions';
+
+      let shutdown = document.createElement('button');
+      shutdown.title = 'Shutdown All Terminal Sessions…';
+      shutdown.className = `${SHUTDOWN_CLASS} ${SHUTDOWN_TERMINALS_CLASS}`;
+      node.appendChild(shutdown);
+
       return node;
     }
 
@@ -568,6 +594,12 @@ namespace RunningSessions {
     createSessionHeaderNode(): HTMLElement {
       let node = document.createElement('div');
       node.textContent = 'Kernel Sessions';
+
+      let shutdown = document.createElement('button');
+      shutdown.title = 'Shutdown All Kernel Sessions…';
+      shutdown.className = `${SHUTDOWN_CLASS} ${SHUTDOWN_SESSIONS_CLASS}`;
+      node.appendChild(shutdown);
+
       return node;
     }
 

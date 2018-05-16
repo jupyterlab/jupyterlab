@@ -343,14 +343,7 @@ namespace Private {
   function convertBundle(bundle: nbformat.IMimeBundle): JSONObject {
     let map: JSONObject = Object.create(null);
     for (let mimeType in bundle) {
-      let item = bundle[mimeType];
-      // Convert multi-line strings to strings.
-      if (JSONExt.isArray(item)) {
-        item = (item as string[]).join('\n');
-      } else if (!JSONExt.isPrimitive(item)) {
-        item = JSON.parse(JSON.stringify(item));
-      }
-      map[mimeType] = item;
+      map[mimeType] = extract(bundle, mimeType);
     }
     return map;
   }

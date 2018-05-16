@@ -74,7 +74,6 @@ class Palette implements ICommandPalette {
   private _palette: CommandPalette;
 }
 
-
 /**
  * Activate the command palette.
  */

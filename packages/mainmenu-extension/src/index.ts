@@ -135,6 +135,7 @@ const menuPlugin: JupyterLabPlugin<IMainMenu> = {
 /**
  * Create the basic `Edit` menu.
  */
+export
 function createEditMenu(app: JupyterLab, menu: EditMenu): void {
   const commands = menu.menu.commands;
 
@@ -212,6 +213,7 @@ function createEditMenu(app: JupyterLab, menu: EditMenu): void {
 /**
  * Create the basic `File` menu.
  */
+export
 function createFileMenu(app: JupyterLab, menu: FileMenu): void {
   const commands = menu.menu.commands;
 
@@ -282,6 +284,7 @@ function createFileMenu(app: JupyterLab, menu: FileMenu): void {
 /**
  * Create the basic `Kernel` menu.
  */
+export
 function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
   const commands = menu.menu.commands;
 
@@ -358,6 +361,7 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
 /**
  * Create the basic `View` menu.
  */
+export
 function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
   const commands = menu.menu.commands;
 
@@ -401,6 +405,7 @@ function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
   ], 1000);
 }
 
+export
 function createRunMenu(app: JupyterLab, menu: RunMenu): void {
   const commands = menu.menu.commands;
 
@@ -446,9 +451,12 @@ function createRunMenu(app: JupyterLab, menu: RunMenu): void {
   menu.addGroup(runAllGroup, 999);
 }
 
+export
 function createSettingsMenu(app: JupyterLab, menu: SettingsMenu): void {
   menu.addGroup([{ command: 'settingeditor:open' }], 1000);
 }
+
+export
 function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
   const commands = app.commands;
 
@@ -525,7 +533,10 @@ namespace Private {
     if (!extender) {
       return '';
     }
-    return extender[label];
+    // Coerce the result to be a string. When Typedoc is updated to use
+    // Typescript 2.8, we can possibly use conditional types to get Typescript
+    // to recognize this is a string.
+    return extender[label] as any as string;
   }
 
   /**
@@ -540,7 +551,11 @@ namespace Private {
       if (!extender) {
         return Promise.resolve(void 0);
       }
-      return extender[executor](widget);
+      // Coerce the result to be a function. When Typedoc is updated to use
+      // Typescript 2.8, we can possibly use conditional types to get Typescript
+      // to recognize this is a function.
+      let f = extender[executor] as any as (w: Widget) => Promise<any>;
+      return f(widget);
     };
   }
 
@@ -567,7 +582,10 @@ namespace Private {
     return () => {
       let widget = app.shell.currentWidget;
       const extender = findExtender(widget, s);
-      return !!extender && !!extender[toggled] && !!extender[toggled](widget);
+      // Coerce extender[toggled] to be a function. When Typedoc is updated to use
+      // Typescript 2.8, we can possibly use conditional types to get Typescript
+      // to recognize this is a function.
+      return !!extender && !!extender[toggled] && !!(extender[toggled] as any as (w: Widget) => (() => boolean))(widget);
     };
   }
 }

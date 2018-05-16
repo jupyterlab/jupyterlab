@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  renameDialog, DocumentManager, IDocumentManager
+  renameDialog, getOpenPath, DocumentManager, IDocumentManager
 } from '@jupyterlab/docmanager';
 
 import {
@@ -48,9 +48,6 @@ namespace CommandIDs {
   const closeAllFiles = 'docmanager:close-all-files';
 
   export
-  const createFrom = 'docmanager:create-from';
-
-  export
   const deleteFile = 'docmanager:delete-file';
 
   export
@@ -58,6 +55,12 @@ namespace CommandIDs {
 
   export
   const open = 'docmanager:open';
+
+  export
+  const openBrowserTab = 'docmanager:open-browser-tab';
+
+  export
+  const openDirect = 'docmanager:open-direct';
 
   export
   const rename = 'docmanager:rename';
@@ -76,6 +79,9 @@ namespace CommandIDs {
 
   export
   const toggleAutosave = 'docmanager:toggle-autosave';
+
+  export
+  const showInFileBrowser = 'docmanager:show-in-file-browser';
 }
 
 const pluginId = '@jupyterlab/docmanager-extension:plugin';
@@ -124,16 +130,19 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
       }
     };
     const registry = app.docRegistry;
-    const docManager = new DocumentManager({ registry, manager, opener });
+    const when = app.restored.then(() => void 0);
+    const docManager = new DocumentManager({ registry, manager, opener, when });
 
     // Register the file operations commands.
     addCommands(app, docManager, palette, opener, settingRegistry);
 
+    // Keep up to date with the settings registry.
     const onSettingsUpdated = (settings: ISettingRegistry.ISettings) => {
       const autosave = settings.get('autosave').composite as boolean | null;
       docManager.autosave = (autosave === true || autosave === false)
                             ? autosave
                             : true;
+      app.commands.notifyCommandChanged(CommandIDs.toggleAutosave);
     };
 
     // Fetch the initial state of the settings.
@@ -246,14 +255,53 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
       const kernel = args['kernel'] as Kernel.IModel || void 0;
       const options = args['options'] as DocumentRegistry.IOpenOptions || void 0;
       return docManager.services.contents.get(path, { content: false })
-        .then(() => docManager.openOrReveal(path, factory, kernel, options))
-        .then(widget => {
-          return widget.ready.then(() => { return widget; });
-        });
+        .then(() => docManager.openOrReveal(path, factory, kernel, options));
     },
     icon: args => args['icon'] as string || '',
     label: args => (args['label'] || args['factory']) as string,
     mnemonic: args => args['mnemonic'] as number || -1
+  });
+
+  commands.addCommand(CommandIDs.openBrowserTab, {
+    execute: args => {
+      const path = typeof args['path'] === 'undefined' ? ''
+        : args['path'] as string;
+
+      if (!path) {
+        return;
+      }
+
+      return docManager.services.contents.getDownloadUrl(path).then(url => {
+        window.open(url, '_blank');
+      });
+    },
+    icon: args => args['icon'] as string || '',
+    label: () => 'Open in New Browser Tab'
+  });
+
+  commands.addCommand(CommandIDs.openDirect, {
+    label: () => 'Open from Path',
+    caption: 'Open from path',
+    isEnabled: () => true,
+    execute: () => {
+      return getOpenPath(docManager.services.contents).then(path => {
+        if (!path) {
+          return;
+        }
+        docManager.services.contents.get(path, { content: false }).then( (args) => {
+          // exists
+          return commands.execute(CommandIDs.open, {path: path});
+        }, () => {
+          // does not exist
+          return showDialog({
+            title: 'Cannot open',
+            body: 'File not found',
+            buttons: [Dialog.okButton()]
+          });
+        });
+        return;
+      });
+    },
   });
 
   commands.addCommand(CommandIDs.restoreCheckpoint, {
@@ -285,7 +333,15 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
             buttons: [Dialog.okButton()]
           });
         }
-        return context.save().then(() => context.createCheckpoint());
+        return context.save()
+          .then(() => context.createCheckpoint())
+          .catch(err => {
+            // If the save was canceled by user-action, do nothing.
+            if (err.message === 'Cancel') {
+              return;
+            }
+            throw err;
+          });
       }
     }
   });
@@ -362,8 +418,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   commands.addCommand(CommandIDs.toggleAutosave, {
-    label: args =>
-      args['isPalette'] ? 'Toggle Document Autosave' : 'Autosave Documents',
+    label: 'Autosave Documents',
     isToggled: () => docManager.autosave,
     execute: () => {
       const value = !docManager.autosave;
@@ -372,6 +427,21 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
       .catch((reason: Error) => {
         console.error(`Failed to set ${pluginId}:${key} - ${reason.message}`);
       });
+    }
+  });
+
+  commands.addCommand(CommandIDs.showInFileBrowser, {
+    label: () => `Show in file browser`,
+    isEnabled,
+    execute: () => {
+      let context = docManager.contextForWidget(app.shell.currentWidget);
+      if (!context) {
+        return;
+      }
+
+      // 'activate-main' is needed if this command is selected in the "open tabs" sidebar
+      commands.execute('filebrowser:activate-main');
+      commands.execute('filebrowser:navigate-main', {path: context.path});
     }
   });
 
@@ -385,20 +455,22 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     selector: '[data-type="document-title"]',
     rank: 2
   });
+  app.contextMenu.addItem({
+    command: CommandIDs.showInFileBrowser,
+    selector: '[data-type="document-title"]',
+    rank: 3
+  });
 
   [
+    CommandIDs.openDirect,
     CommandIDs.save,
     CommandIDs.restoreCheckpoint,
     CommandIDs.saveAs,
     CommandIDs.clone,
     CommandIDs.close,
-    CommandIDs.closeAllFiles
+    CommandIDs.closeAllFiles,
+    CommandIDs.toggleAutosave
   ].forEach(command => { palette.addItem({ command, category }); });
-  palette.addItem({
-    command: CommandIDs.toggleAutosave,
-    category,
-    args: { isPalette: true }
-  });
 }
 
 

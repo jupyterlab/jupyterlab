@@ -160,7 +160,7 @@ class ForeignHandler implements IDisposable {
   }
 
   private _cells = new Map<string, CodeCell>();
-  private _enabled = true;
+  private _enabled = false;
   private _parent: ForeignHandler.IReceiver;
   private _factory: () => CodeCell;
   private _isDisposed = false;

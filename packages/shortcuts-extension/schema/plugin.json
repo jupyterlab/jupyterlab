@@ -26,7 +26,7 @@
       "default": { },
       "properties": {
         "command": { "default": "application:toggle-mode" },
-        "keys": { "default": ["Accel Shift Enter"] },
+        "keys": { "default": ["Accel Shift D"] },
         "selector": { "default": "body" }
       },
       "type": "object"
@@ -103,6 +103,15 @@
       },
       "type": "object"
     },
+    "docmanager:save-as": {
+      "default": { },
+      "properties": {
+        "command": { "default": "docmanager:save-as" },
+        "keys": { "default": ["Accel Shift S"] },
+        "selector": { "default": "body" }
+      },
+      "type": "object"
+    },
     "editmenu:undo": {
       "default": { },
       "properties": {
@@ -148,10 +157,10 @@
       },
       "type": "object"
     },
-    "imageviewer:reset-zoom": {
+    "imageviewer:reset-image": {
       "default": { },
       "properties": {
-        "command": { "default": "imageviewer:reset-zoom" },
+        "command": { "default": "imageviewer:reset-image" },
         "keys": { "default": ["0"] },
         "selector": { "default": ".jp-ImageViewer" }
       },
@@ -171,6 +180,51 @@
       "properties": {
         "command": { "default": "imageviewer:zoom-out" },
         "keys": { "default": ["-"] },
+        "selector": { "default": ".jp-ImageViewer" }
+      },
+      "type": "object"
+    },
+    "imageviewer:rotate-clockwise": {
+      "default": { },
+      "properties": {
+        "command": { "default": "imageviewer:rotate-clockwise" },
+        "keys": { "default": ["]"] },
+        "selector": { "default": ".jp-ImageViewer" }
+      },
+      "type": "object"
+    },
+    "imageviewer:rotate-counterclockwise": {
+      "default": { },
+      "properties": {
+        "command": { "default": "imageviewer:rotate-counterclockwise" },
+        "keys": { "default": ["["] },
+        "selector": { "default": ".jp-ImageViewer" }
+      },
+      "type": "object"
+    },
+    "imageviewer:flip-vertical": {
+      "default": { },
+      "properties": {
+        "command": { "default": "imageviewer:flip-vertical" },
+        "keys": { "default": ["V"] },
+        "selector": { "default": ".jp-ImageViewer" }
+      },
+      "type": "object"
+    },
+    "imageviewer:flip-horizontal": {
+      "default": { },
+      "properties": {
+        "command": { "default": "imageviewer:flip-horizontal" },
+        "keys": { "default": ["H"] },
+        "selector": { "default": ".jp-ImageViewer" }
+      },
+      "type": "object"
+    },
+    "imageviewer:invert-colors": {
+      "default": { },
+      "properties": {
+        "command": { "default": "imageviewer:invert-colors" },
+        "keys": { "default": ["I"] },
         "selector": { "default": ".jp-ImageViewer" }
       },
       "type": "object"
@@ -211,55 +265,55 @@
       },
       "type": "object"
     },
-    "notebook:change-to-cell-heading-1": {
+    "notebook:change-cell-to-heading-1": {
       "default": { },
       "properties": {
-        "command": { "default": "notebook:change-to-cell-heading-1" },
+        "command": { "default": "notebook:change-cell-to-heading-1" },
         "keys": { "default": ["1"] },
         "selector": { "default": ".jp-Notebook:focus" }
       },
       "type": "object"
     },
-    "notebook:change-to-cell-heading-2": {
+    "notebook:change-cell-to-heading-2": {
       "default": { },
       "properties": {
-        "command": { "default": "notebook:change-to-cell-heading-2" },
+        "command": { "default": "notebook:change-cell-to-heading-2" },
         "keys": { "default": ["2"] },
         "selector": { "default": ".jp-Notebook:focus" }
       },
       "type": "object"
     },
-    "notebook:change-to-cell-heading-3": {
+    "notebook:change-cell-to-heading-3": {
       "default": { },
       "properties": {
-        "command": { "default": "notebook:change-to-cell-heading-3" },
+        "command": { "default": "notebook:change-cell-to-heading-3" },
         "keys": { "default": ["3"] },
         "selector": { "default": ".jp-Notebook:focus" }
       },
       "type": "object"
     },
-    "notebook:change-to-cell-heading-4": {
+    "notebook:change-cell-to-heading-4": {
       "default": { },
       "properties": {
-        "command": { "default": "notebook:change-to-cell-heading-4" },
+        "command": { "default": "notebook:change-cell-to-heading-4" },
         "keys": { "default": ["4"] },
         "selector": { "default": ".jp-Notebook:focus" }
       },
       "type": "object"
     },
-    "notebook:change-to-cell-heading-5": {
+    "notebook:change-cell-to-heading-5": {
       "default": { },
       "properties": {
-        "command": { "default": "notebook:change-to-cell-heading-5" },
+        "command": { "default": "notebook:change-cell-to-heading-5" },
         "keys": { "default": ["5"] },
         "selector": { "default": ".jp-Notebook:focus" }
       },
       "type": "object"
     },
-    "notebook:change-to-cell-heading-6": {
+    "notebook:change-cell-to-heading-6": {
       "default": { },
       "properties": {
-        "command": { "default": "notebook:change-to-cell-heading-6" },
+        "command": { "default": "notebook:change-cell-to-heading-6" },
         "keys": { "default": ["6"] },
         "selector": { "default": ".jp-Notebook:focus" }
       },
@@ -551,6 +605,15 @@
       "properties": {
         "command": { "default": "runmenu:run" },
         "keys": { "default": ["Shift Enter"] },
+        "selector": { "default": "[data-jp-code-runner]" }
+      },
+      "type": "object"
+    },
+    "runmenu:run-all": {
+      "default": { },
+      "properties": {
+        "command": { "default": "runmenu:run-all" },
+        "keys": { "default": ["Accel Shift Enter"] },
         "selector": { "default": "[data-jp-code-runner]" }
       },
       "type": "object"

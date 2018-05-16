@@ -4,6 +4,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-MainAreaWidget:focus {
+.jp-MainAreaWidget > :focus {
   outline: none;
 }
+

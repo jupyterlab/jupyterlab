@@ -56,7 +56,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  Menu, PanelLayout, Widget
+  Menu
 } from '@phosphor/widgets';
 
 
@@ -344,12 +344,12 @@ function activateCellTools(app: JupyterLab, tracker: INotebookTracker, editorSer
 
   // Create message hook for triggers to save to the database.
   const hook = (sender: any, message: Message): boolean => {
-    switch (message) {
-      case Widget.Msg.ActivateRequest:
+    switch (message.type) {
+      case 'activate-request':
         state.save(id, { open: true });
         break;
-      case Widget.Msg.AfterHide:
-      case Widget.Msg.CloseRequest:
+      case 'after-hide':
+      case 'close-request':
         state.remove(id);
         break;
       default:
@@ -592,68 +592,48 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
     selector: '.jp-Notebook .jp-Cell',
     rank: 7
   });
+  app.contextMenu.addItem({
+    type: 'separator',
+    selector: '.jp-Notebook .jp-Cell',
+    rank: 8
+  });
 
   // CodeCell context menu groups
   app.contextMenu.addItem({
-    type: 'separator',
-    selector: '.jp-Notebook .jp-CodeCell',
-    rank: 8
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.clearOutputs,
+    command: CommandIDs.createOutputView,
     selector: '.jp-Notebook .jp-CodeCell',
     rank: 9
   });
   app.contextMenu.addItem({
-    command: CommandIDs.clearAllOutputs,
+    type: 'separator',
     selector: '.jp-Notebook .jp-CodeCell',
     rank: 10
   });
   app.contextMenu.addItem({
-    type: 'separator',
+    command: CommandIDs.clearOutputs,
     selector: '.jp-Notebook .jp-CodeCell',
     rank: 11
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.enableOutputScrolling,
-    selector: '.jp-Notebook .jp-CodeCell',
-    rank: 12
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.disableOutputScrolling,
-    selector: '.jp-Notebook .jp-CodeCell',
-    rank: 13
-  });
-  app.contextMenu.addItem({
-    type: 'separator',
-    selector: '.jp-Notebook .jp-CodeCell',
-    rank: 14
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.createOutputView,
-    selector: '.jp-Notebook .jp-CodeCell',
-    rank: 15
   });
 
 
   // Notebook context menu groups
   app.contextMenu.addItem({
-    type: 'separator',
+    command: CommandIDs.clearAllOutputs,
     selector: '.jp-Notebook',
     rank: 0
   });
   app.contextMenu.addItem({
-    command: CommandIDs.undoCellAction,
+    type: 'separator',
     selector: '.jp-Notebook',
     rank: 1
   });
   app.contextMenu.addItem({
-    command: CommandIDs.redoCellAction,
+    command: CommandIDs.enableOutputScrolling,
     selector: '.jp-Notebook',
     rank: 2
   });
   app.contextMenu.addItem({
-    command: CommandIDs.restart,
+    command: CommandIDs.disableOutputScrolling,
     selector: '.jp-Notebook',
     rank: 3
   });
@@ -663,12 +643,30 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
     rank: 4
   });
   app.contextMenu.addItem({
-    command: CommandIDs.createConsole,
+    command: CommandIDs.undoCellAction,
     selector: '.jp-Notebook',
     rank: 5
   });
-
-
+  app.contextMenu.addItem({
+    command: CommandIDs.redoCellAction,
+    selector: '.jp-Notebook',
+    rank: 6
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.restart,
+    selector: '.jp-Notebook',
+    rank: 7
+  });
+  app.contextMenu.addItem({
+    type: 'separator',
+    selector: '.jp-Notebook',
+    rank: 8
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.createConsole,
+    selector: '.jp-Notebook',
+    rank: 9
+  });
 
   return tracker;
 }
@@ -708,8 +706,6 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     if (!isEnabled()) { return false; }
     const { notebook } = tracker.currentWidget;
     const index = notebook.activeCellIndex;
-    // Can't run above if we are at the top of a notebook.
-    if (index === notebook.widgets.length - 1) { return false; }
     // If there are selections that are not the active cell,
     // this command is confusing, so disable it.
     for (let i = 0; i < notebook.widgets.length; ++i) {
@@ -783,7 +779,12 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.runAllAbove(notebook, context.session);
       }
     },
-    isEnabled: isEnabledAndSingleSelected
+    isEnabled: () => {
+      // Can't run above if there are multiple cells selected,
+      // or if we are at the top of the notebook.
+      return isEnabledAndSingleSelected() &&
+             tracker.currentWidget.notebook.activeCellIndex !== 0;
+    }
   });
   commands.addCommand(CommandIDs.runAllBelow, {
     label: 'Run Selected Cell and All Below',
@@ -796,7 +797,13 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return NotebookActions.runAllBelow(notebook, context.session);
       }
     },
-    isEnabled: isEnabledAndSingleSelected
+    isEnabled: () => {
+      // Can't run below if there are multiple cells selected,
+      // or if we are at the bottom of the notebook.
+      return isEnabledAndSingleSelected() &&
+             tracker.currentWidget.notebook.activeCellIndex !==
+             tracker.currentWidget.notebook.widgets.length - 1;
+    }
   });
   commands.addCommand(CommandIDs.restart, {
     label: 'Restart Kernel…',
@@ -902,8 +909,12 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       if (current) {
         const { context, notebook, session } = current;
 
-        return session.restart()
-          .then(() => { NotebookActions.runAll(notebook, context.session); });
+        return session.restart().then(restarted => {
+          if (restarted) {
+            NotebookActions.runAll(notebook, context.session);
+          }
+          return restarted;
+        });
       }
     },
     isEnabled
@@ -1267,21 +1278,14 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       // Clone the OutputArea
       const current = getCurrent({ ...args, activate: false });
       const nb = current.notebook;
-      const outputAreaView = (nb.activeCell as CodeCell).cloneOutputArea();
-      // Create an empty toolbar
-      const toolbar = new Widget();
-      toolbar.addClass('jp-Toolbar');
-      toolbar.addClass('jp-LinkedOutputView-toolbar');
+      const content = (nb.activeCell as CodeCell).cloneOutputArea();
       // Create a MainAreaWidget
-      const layout = new PanelLayout();
-      const widget = new MainAreaWidget({ layout });
+      const widget = new MainAreaWidget({ content });
       widget.id = `LinkedOutputView-${uuid()}`;
       widget.title.label = 'Output View';
       widget.title.icon = NOTEBOOK_ICON_CLASS;
       widget.title.caption = current.title.label ? `For Notebook: ${current.title.label}` : 'For Notebook:';
       widget.addClass('jp-LinkedOutputView');
-      layout.addWidget(toolbar);
-      layout.addWidget(outputAreaView);
       current.context.addSibling(
         widget, { ref: current.id, mode: 'split-bottom' }
       );
@@ -1644,8 +1648,12 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
     noun: 'All Outputs',
     restartKernel: current => current.session.restart(),
     restartKernelAndClear: current => {
-      NotebookActions.clearAllOutputs(current.notebook);
-      return current.session.restart();
+      return current.session.restart().then(restarted => {
+        if (restarted) {
+          NotebookActions.clearAllOutputs(current.notebook);
+        }
+        return restarted;
+      });
     },
     changeKernel: current => current.session.selectKernel(),
     shutdownKernel: current => current.session.shutdown(),
@@ -1714,8 +1722,12 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
     restartAndRunAll: current => {
       const { context, notebook } = current;
       return context.session.restart()
-      .then(() => { NotebookActions.runAll(notebook, context.session); })
-      .then(() => void 0);
+      .then(restarted => {
+        if (restarted) {
+          NotebookActions.runAll(notebook, context.session);
+        }
+        return restarted;
+      });
     }
   } as IRunMenu.ICodeRunner<NotebookPanel>);
 

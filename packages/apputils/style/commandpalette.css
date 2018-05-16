@@ -106,7 +106,7 @@
 
 
 .p-CommandPalette-header {
-  padding: 12px 0 4px 12px;
+  padding: 12px 0 4px 22px;
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size0);
   font-weight: 600;
@@ -136,10 +136,11 @@
 
 
 .p-CommandPalette-item {
-  padding: 4px 12px;
+  padding: 4px 12px 4px 4px;
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
   font-weight: 400;
+  display: flex;
 }
 
 
@@ -157,6 +158,9 @@
   background: var(--jp-layout-color2);
 }
 
+.p-CommandPalette-itemContent {
+  overflow: hidden;
+}
 
 .p-CommandPalette-itemLabel > mark {
   color: var(--jp-ui-font-color0);
@@ -169,6 +173,27 @@
   color: rgba(0, 0, 0, 0.4);
 }
 
+.p-CommandPalette-item.p-mod-toggled .p-CommandPalette-itemIcon {
+  background-image: var(--jp-icon-checkmark);
+  background-size: 16px;
+  background-repeat: no-repeat;
+}
+
+.p-CommandPalette-item .p-CommandPalette-itemIcon {
+  padding: 0px 0px 0px 4px;
+  position: relative;
+  width: 16px;
+  top: 2px;
+  flex: 0 0 auto;
+}
+
+.p-CommandPalette-item.p-mod-disabled .p-CommandPalette-itemIcon {
+  opacity: 0.4;
+}
+
+.p-CommandPalette-item .p-CommandPalette-itemShortcut {
+  flex: 0 0 auto;
+}
 
 .p-CommandPalette-itemCaption {
   display: none;

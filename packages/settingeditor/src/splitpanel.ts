@@ -14,7 +14,7 @@ import {
 
 /**
  * A deprecated split panel that will be removed when the phosphor split panel
- * supports a handle moved signal.
+ * supports a handle moved signal. See https://github.com/phosphorjs/phosphor/issues/297.
  */
 export
 class SplitPanel extends SPanel {
@@ -27,7 +27,7 @@ class SplitPanel extends SPanel {
     super.handleEvent(event);
 
     if (event.type === 'mouseup') {
-      (this.handleMoved as Signal<any, void>).emit(void 0);
+      (this.handleMoved as Signal<any, void>).emit(undefined);
     }
   }
 }

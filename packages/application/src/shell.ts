@@ -252,7 +252,7 @@ class ApplicationShell extends Widget {
     // layout has been restored.
     widgets.forEach(widget => {
       if (!widget.parent) {
-        this.addToMainArea(widget);
+        this.addToMainArea(widget, { activate: false });
       }
     });
 
@@ -403,6 +403,10 @@ class ApplicationShell extends Widget {
     let mode = options.mode || 'tab-after';
 
     dock.addWidget(widget, { mode, ref });
+
+    if (options.activate !== false) {
+      dock.activateWidget(widget);
+    }
   }
 
   /**

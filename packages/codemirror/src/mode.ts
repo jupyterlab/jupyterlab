@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  JSONValue
+} from '@phosphor/coreutils';
+
+import {
   IEditorMimeTypeService
 } from '@jupyterlab/codeeditor';
 
@@ -38,7 +42,7 @@ declare var require: any;
 export
 namespace Mode {
   /**
-   * The interface of a codemirror mode spec.
+   * The interface of a codemirror modeInfo spec.
    */
   export
   interface ISpec {
@@ -46,6 +50,15 @@ namespace Mode {
     name?: string;
     mode: string;
     mime: string;
+  }
+
+  /**
+   * The interface of a codemirror mode spec.
+   */
+  export
+  interface IMode {
+    name: string;
+    [key: string]: JSONValue;
   }
 
   /**
@@ -83,7 +96,9 @@ namespace Mode {
 
     // Fetch the mode asynchronously.
     return new Promise<ISpec>((resolve, reject) => {
-      require([`codemirror/mode/${spec.mode}/${spec.mode}.js`], () => {
+      // An arrow function below seems to miscompile in our current webpack to
+      // invalid js.
+      require([`codemirror/mode/${spec.mode}/${spec.mode}.js`], function() {
         resolve(spec);
       });
     });

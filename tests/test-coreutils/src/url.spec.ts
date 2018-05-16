@@ -84,10 +84,16 @@ describe('@jupyterlab/coreutils', () => {
     describe('.isLocal()', () => {
 
       it('should test whether the url is a local url', () => {
-        expect(URLExt.isLocal('//foo')).to.equal(false);
-        expect(URLExt.isLocal('http://foo')).to.equal(false);
-        expect(URLExt.isLocal('/foo/bar')).to.equal(true);
-        expect(URLExt.isLocal('foo.txt')).to.equal(true);
+        expect(URLExt.isLocal('https://foo/bar.txt')).to.equal(false);
+        expect(URLExt.isLocal('http://foo/bar.txt')).to.equal(false);
+        expect(URLExt.isLocal('//foo/bar.txt')).to.equal(false);
+        expect(URLExt.isLocal('../foo/bar.txt')).to.equal(true);
+        expect(URLExt.isLocal('./foo/bar.txt')).to.equal(true);
+        expect(URLExt.isLocal('/foo/bar.txt')).to.equal(true);
+        expect(URLExt.isLocal('foo/bar.txt')).to.equal(true);
+        expect(URLExt.isLocal('bar.txt')).to.equal(true);
+        expect(URLExt.isLocal('file://foo/bar.txt')).to.equal(false);
+        expect(URLExt.isLocal('data:text/plain,123ABC')).to.equal(false);
       });
 
     });

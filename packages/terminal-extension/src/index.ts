@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, InstanceTracker
+  ICommandPalette, InstanceTracker, MainAreaWidget
 } from '@jupyterlab/apputils';
 
 import {
@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/launcher';
 
 import {
-  IMainMenu, IEditMenu
+  IMainMenu
 } from '@jupyterlab/mainmenu';
 
 import {
@@ -82,7 +82,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   const { commands, serviceManager } = app;
   const category = 'Terminal';
   const namespace = 'terminal';
-  const tracker = new InstanceTracker<Terminal>({ namespace });
+  const tracker = new InstanceTracker<MainAreaWidget<Terminal>>({ namespace });
 
   // Bail if there are no terminals available.
   if (!serviceManager.terminals.isAvailable()) {
@@ -93,8 +93,8 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   // Handle state restoration.
   restorer.restore(tracker, {
     command: CommandIDs.createNew,
-    args: widget => ({ name: widget.session.name }),
-    name: widget => widget.session && widget.session.name
+    args: widget => ({ name: widget.content.session.name }),
+    name: widget => widget.content.session && widget.content.session.name
   });
 
   addCommands(app, serviceManager, tracker);
@@ -121,19 +121,6 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   // Add terminal creation to the file menu.
   mainMenu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 20);
 
-  // Add terminal clearing to the edit menu.
-  mainMenu.editMenu.clearers.add({
-    tracker,
-    noun: 'Terminal',
-    clearCurrent: current => {
-      current.refresh().then(() => {
-        if (current) {
-          current.activate();
-        }
-      });
-    }
-  } as IEditMenu.IClearer<Terminal>);
-
   // Add a launcher item if the launcher is available.
   if (launcher) {
     launcher.add({
@@ -155,7 +142,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
  * Add the commands for the terminal.
  */
 export
-function addCommands(app: JupyterLab, services: ServiceManager, tracker: InstanceTracker<Terminal>) {
+function addCommands(app: JupyterLab, services: ServiceManager, tracker: InstanceTracker<MainAreaWidget<Terminal>>) {
   let { commands, shell } = app;
 
   /**
@@ -177,17 +164,17 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
       const promise = name ? services.terminals.connectTo(name)
         : services.terminals.startNew();
 
-      term.title.closable = true;
       term.title.icon = TERMINAL_ICON_CLASS;
       term.title.label = '...';
-      shell.addToMainArea(term);
+      let main = new MainAreaWidget({ content: term });
+      shell.addToMainArea(main);
 
       return promise.then(session => {
         term.session = session;
-        tracker.add(term);
-        shell.activateById(term.id);
+        tracker.add(main);
+        shell.activateById(main.id);
 
-        return term;
+        return main;
       }).catch(() => { term.dispose(); });
     }
   });
@@ -197,7 +184,8 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
       const name = args['name'] as string;
       // Check for a running terminal with the given name.
       const widget = tracker.find(value => {
-        return value.session && value.session.name === name || false;
+        let content = value.content;
+        return content.session && content.session.name === name || false;
       });
       if (widget) {
         shell.activateById(widget.id);
@@ -209,7 +197,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
   });
 
   commands.addCommand(CommandIDs.refresh, {
-    label: 'Clear Terminal',
+    label: 'Refresh Terminal',
     caption: 'Refresh the current terminal session',
     execute: () => {
       let current = tracker.currentWidget;
@@ -218,51 +206,58 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
       }
       shell.activateById(current.id);
 
-      return current.refresh().then(() => {
+      return current.content.refresh().then(() => {
         if (current) {
-          current.activate();
+          current.content.activate();
         }
       });
     },
     isEnabled: () => tracker.currentWidget !== null
   });
 
-  commands.addCommand('terminal:increase-font', {
+  commands.addCommand(CommandIDs.increaseFont, {
     label: 'Increase Terminal Font Size',
     execute: () => {
       let options = Terminal.defaultOptions;
       if (options.fontSize < 72) {
         options.fontSize++;
-        tracker.forEach(widget => { widget.fontSize = options.fontSize; });
+        tracker.forEach(widget => {
+          widget.content.fontSize = options.fontSize;
+        });
       }
     },
     isEnabled
   });
 
-  commands.addCommand('terminal:decrease-font', {
+  commands.addCommand(CommandIDs.decreaseFont, {
     label: 'Decrease Terminal Font Size',
     execute: () => {
       let options = Terminal.defaultOptions;
       if (options.fontSize > 9) {
         options.fontSize--;
-        tracker.forEach(widget => { widget.fontSize = options.fontSize; });
+        tracker.forEach(widget => {
+          widget.content.fontSize = options.fontSize;
+        });
       }
     },
     isEnabled
   });
 
   let terminalTheme: Terminal.Theme = 'dark';
-  commands.addCommand('terminal:toggle-theme', {
+  commands.addCommand(CommandIDs.toggleTheme, {
     label: 'Use Dark Terminal Theme',
     caption: 'Whether to use the dark terminal theme',
     isToggled: () => terminalTheme === 'dark',
     execute: () => {
       terminalTheme = terminalTheme === 'dark' ? 'light' : 'dark';
+      let options = Terminal.defaultOptions;
+      options.theme = terminalTheme;
       tracker.forEach(widget => {
-        if (widget.theme !== terminalTheme) {
-          widget.theme = terminalTheme;
+        if (widget.content.theme !== terminalTheme) {
+          widget.content.theme = terminalTheme;
         }
       });
+      commands.notifyCommandChanged(CommandIDs.toggleTheme);
     },
     isEnabled
   });

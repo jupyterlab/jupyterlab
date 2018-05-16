@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, InstanceTracker
+  ICommandPalette, InstanceTracker, MainAreaWidget
 } from '@jupyterlab/apputils';
 
 import {
@@ -50,7 +50,7 @@ const inspector: JupyterLabPlugin<IInspector> = {
     const command = CommandIDs.open;
     const label = 'Open Inspector';
     const namespace = 'inspector';
-    const tracker = new InstanceTracker<InspectorPanel>({ namespace });
+    const tracker = new InstanceTracker<MainAreaWidget<InspectorPanel>>({ namespace });
 
     /**
      * Create and track a new inspector.
@@ -60,7 +60,6 @@ const inspector: JupyterLabPlugin<IInspector> = {
 
       inspector.id = 'jp-inspector';
       inspector.title.label = 'Inspector';
-      inspector.title.closable = true;
       inspector.disposed.connect(() => {
         if (manager.inspector === inspector) {
           manager.inspector = null;
@@ -68,7 +67,8 @@ const inspector: JupyterLabPlugin<IInspector> = {
       });
 
       // Track the inspector.
-      tracker.add(inspector);
+      let widget = new MainAreaWidget({ content: inspector });
+      tracker.add(widget);
 
       // Add the default inspector child items.
       Private.defaultInspectorItems.forEach(item => { inspector.add(item); });
@@ -89,11 +89,11 @@ const inspector: JupyterLabPlugin<IInspector> = {
       execute: () => {
         if (!manager.inspector || manager.inspector.isDisposed) {
           manager.inspector = newInspectorPanel();
-          shell.addToMainArea(manager.inspector);
         }
-        if (manager.inspector.isAttached) {
-          shell.activateById(manager.inspector.id);
+        if (!manager.inspector.isAttached) {
+          shell.addToMainArea(manager.inspector.parent, { activate: false });
         }
+        shell.activateById(manager.inspector.parent.id);
       }
     });
     palette.addItem({ command, category });

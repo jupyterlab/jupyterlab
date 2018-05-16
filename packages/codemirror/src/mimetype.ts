@@ -40,8 +40,11 @@ class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
    * If a mime type cannot be found returns the default mime type `text/plain`, never `null`.
    */
   getMimeTypeByFilePath(path: string): string {
-    if (PathExt.extname(path) === '.ipy') {
+    const ext = PathExt.extname(path);
+    if (ext === '.ipy') {
       return 'text/x-python';
+    } else if (ext === '.md') {
+      return 'text/x-ipythongfm';
     }
     let mode = Mode.findByFileName(path) || Mode.findBest('');
     return mode.mime;

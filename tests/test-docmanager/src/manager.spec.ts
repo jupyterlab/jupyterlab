@@ -146,7 +146,7 @@ describe('@jupyterlab/docmanager', () => {
           let id = session.kernel.id;
           widget = manager.open(session.path, 'default', { id });
           context = manager.contextForWidget(widget);
-          return context.ready;
+          return context.session.ready;
         }).then(() => {
           expect(context.session.kernel).to.be.ok();
           return context.session.shutdown();
@@ -203,7 +203,7 @@ describe('@jupyterlab/docmanager', () => {
           id = session.kernel.id;
           widget = manager.createNew(session.path, 'default', { id });
           context = manager.contextForWidget(widget);
-          return context.ready;
+          return context.session.ready;
         }).then(() => {
           expect(context.session.kernel.id).to.be(id);
           return context.session.shutdown();

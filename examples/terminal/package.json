@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-terminal",
-  "version": "0.15.2",
+  "version": "0.16.2",
   "private": true,
   "scripts": {
     "build": "tsc && webpack",
@@ -8,10 +8,10 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@jupyterlab/services": "^1.1.2",
-    "@jupyterlab/terminal": "^0.15.2",
-    "@jupyterlab/theme-light-extension": "^0.15.2",
-    "@phosphor/widgets": "^1.5.0",
+    "@jupyterlab/services": "^2.0.2",
+    "@jupyterlab/terminal": "^0.16.2",
+    "@jupyterlab/theme-light-extension": "^0.16.2",
+    "@phosphor/widgets": "^1.6.0",
     "es6-promise": "~4.1.1"
   },
   "devDependencies": {
@@ -21,7 +21,7 @@
     "raw-loader": "~0.5.1",
     "rimraf": "~2.6.2",
     "style-loader": "~0.13.2",
-    "typescript": "~2.6.2",
+    "typescript": "~2.8.3",
     "url-loader": "~0.5.9",
     "watch": "~1.0.2",
     "webpack": "~2.7.0",

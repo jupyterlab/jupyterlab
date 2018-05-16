@@ -8,8 +8,8 @@
 
 
 :root {
-  --jp-private-launcher-top-margin: 16px;
-  --jp-private-launcher-side-margin: 32px;
+  --jp-private-launcher-top-padding: 16px;
+  --jp-private-launcher-side-padding: 32px;
   --jp-private-launcher-card-size: 100px;
   --jp-private-launcher-card-label-height: 25px;
   --jp-private-launcher-card-icon-height: 75px;
@@ -34,18 +34,6 @@
 }
 
 
-.jp-Launcher::before {
-  content: '';
-  display: block;
-  height: var(--jp-toolbar-micro-height);
-  width: 100%;
-  background: var(--jp-toolbar-background);
-  border-bottom: 1px solid var(--jp-toolbar-border-color);
-  box-shadow: var(--jp-toolbar-box-shadow);
-  z-index: 1;
-}
-
-
 .jp-Launcher-body {
   width: 100%;
   height: 100%;
@@ -67,9 +55,9 @@
 .jp-Launcher-content {
   width: 85%;
   height: 100%;
-  margin-top: var(--jp-private-launcher-top-margin);
-  margin-left: var(--jp-private-launcher-side-margin);
-  margin-right: var(--jp-private-launcher-side-margin);
+  padding-top: var(--jp-private-launcher-top-padding);
+  padding-left: var(--jp-private-launcher-side-padding);
+  padding-right: var(--jp-private-launcher-side-padding);
   box-sizing: border-box;
 }
 

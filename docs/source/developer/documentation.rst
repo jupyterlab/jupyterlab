@@ -93,7 +93,7 @@ Keyboard Shortcuts
 
 Typeset keyboard shortcuts as follows:
 
--  Monospace typeface, with no spaces between individual keys:
+-  Monospace typeface, with spaces between individual keys:
    ``Shift Enter``.
 -  For modifiers, use the platform independent word describing key:
    ``Shift``.
@@ -118,7 +118,7 @@ preparing them:
    using the capture software of your choice. **Do not include any of the
    desktop background**.
 
--  For PNGs, reduce their size using pngqant.
+-  For PNGs, reduce their size using pngquant.
    For movies, upload them to the IPython/Juptyter YouTube channel
    and embed them in the docs with an iframe. The pngs can live in the main repository.
    The movies should be added to the ``jupyterlab-media`` repository.

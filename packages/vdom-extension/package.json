@@ -1,10 +1,10 @@
 {
   "name": "@jupyterlab/vdom-extension",
-  "version": "0.15.2",
+  "version": "0.15.7",
   "description": "JupyterLab - VDOM Renderer",
-  "homepage": "https://github.com/jupyterlab/jupyter-renderers",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
-    "url": "https://github.com/jupyterlab/jupyter-renderers/issues"
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
@@ -20,7 +20,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jupyterlab/jupyter-renderers.git"
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
     "build": "tsc",
@@ -29,17 +29,17 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/rendermime-interfaces": "^1.0.4",
+    "@jupyterlab/rendermime-interfaces": "^1.0.9",
     "@nteract/transform-vdom": "^1.1.1",
-    "@phosphor/widgets": "^1.5.0",
-    "react": "~16.0.0",
-    "react-dom": "~16.0.0"
+    "@phosphor/widgets": "^1.6.0",
+    "react": "~16.2.0",
+    "react-dom": "~16.2.0"
   },
   "devDependencies": {
     "@types/react": "~16.0.19",
     "@types/react-dom": "~16.0.2",
     "rimraf": "~2.6.2",
-    "typescript": "~2.6.2"
+    "typescript": "~2.8.3"
   },
   "jupyterlab": {
     "mimeExtension": true

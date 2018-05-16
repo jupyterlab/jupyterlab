@@ -11,7 +11,7 @@ CSS checklist
 
 -  CSS classnames are defined inline in the code. We used to put them as
    all caps file-level ``const``\ s, but we are moving away from that.
--  CSS files for packages are located within the ``src/style``
+-  CSS files for packages are located within the ``style``
    subdirectory and imported into the plugin's ``index.css``.
 -  The JupyterLab default CSS variables in the ``theme-light-extension``
    and ``theme-dark-extension`` packages are used to style packages
@@ -92,7 +92,7 @@ We are organizing our CSS files in the following manner:
    itself.
 -  Multiple CSS files may be used and organized as needed, but they
    should be imported into a single ``index.css`` at the top-level of
-   the plugin.
+   the plugin as `import '../style/index.css';`.
 
 CSS class names
 ~~~~~~~~~~~~~~~

@@ -23,7 +23,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  PanelLayout, Widget
+  BoxLayout, Widget
 } from '@phosphor/widgets';
 
 import {
@@ -90,7 +90,7 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
       options.contentFactory || NotebookPanel.defaultContentFactory
     );
 
-    let layout = this.layout = new PanelLayout();
+    let layout = this.layout = new BoxLayout();
 
     // Toolbar
     let toolbar = new Toolbar();
@@ -109,6 +109,9 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
 
     layout.addWidget(toolbar);
     layout.addWidget(this.notebook);
+
+    BoxLayout.setStretch(toolbar, 0);
+    BoxLayout.setStretch(this.notebook, 1);
   }
 
   /**
@@ -158,7 +161,7 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
    * Get the toolbar used by the widget.
    */
   get toolbar(): Toolbar<Widget> {
-    return (this.layout as PanelLayout).widgets[0] as Toolbar<Widget>;
+    return (this.layout as BoxLayout).widgets[0] as Toolbar<Widget>;
   }
 
   /**
@@ -219,7 +222,7 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
    *
    * #### Notes
    * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the dock panel's node. It should
+   * called in response to events on the notebook's node. It should
    * not be called directly by user code.
    */
   handleEvent(event: Event): void {
@@ -228,7 +231,7 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
     case 'mouseout':
       let target = event.target as HTMLElement;
       if (this.toolbar.node.contains(document.activeElement) &&
-          target.localName !== 'select') {
+          target.tagName !== 'SELECT') {
         this.notebook.node.focus();
       }
       break;

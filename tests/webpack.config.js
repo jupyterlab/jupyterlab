@@ -5,7 +5,7 @@ var path = require('path');
 var CheckerPlugin = require('awesome-typescript-loader').CheckerPlugin;
 
 
-// Use sourcemaps if in watch mode;
+// Use sourcemaps if in watch or debug mode;
 var devtool = 'eval';
 if (process.argv.indexOf('--watch') !== -1) {
   devtool = 'cheap-module-eval-sourcemap';
@@ -44,6 +44,7 @@ module.exports = {
         exclude: path.join(process.cwd(), 'node_modules')
       },
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },
+      { test: /\.csv$/, use: 'raw-loader' },
       { test: /\.(json|ipynb)$/, use: 'json-loader' },
       { test: /\.html$/, use: 'file-loader' },
       { test: /\.md$/, use: 'raw-loader' },

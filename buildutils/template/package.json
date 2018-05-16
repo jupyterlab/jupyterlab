@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/template",
-  "version": "0.4.2",
+  "version": "0.4.7",
   "description": "JupyterLab - Package Template",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -29,6 +29,6 @@
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
-    "typescript": "~2.6.2"
+    "typescript": "~2.8.3"
   }
 }

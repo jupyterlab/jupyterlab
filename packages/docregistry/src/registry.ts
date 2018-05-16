@@ -870,6 +870,11 @@ namespace DocumentRegistry {
      * to the main area relative to a reference widget.
      */
     mode?: DockLayout.InsertMode;
+
+    /**
+     * Whether to activate the widget.  Defaults to `true`.
+     */
+    activate?: boolean;
   }
 
   /**
@@ -1121,12 +1126,6 @@ namespace DocumentRegistry {
       displayName: 'CSV File',
       extensions: ['.csv'],
       mimeTypes: ['text/csv'],
-      iconClass: 'jp-MaterialIcon jp-SpreadsheetIcon'
-    },
-    {
-      name: 'xls',
-      displayName: 'Spreadsheet',
-      extensions: ['.xls'],
       iconClass: 'jp-MaterialIcon jp-SpreadsheetIcon'
     },
     {

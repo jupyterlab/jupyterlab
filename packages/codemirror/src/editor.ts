@@ -483,6 +483,10 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     this.doc.setSelections(cmSelections, 0);
   }
 
+  newIndentedLine(): void {
+    this.execCommand('newlineAndIndent');
+  }
+
   /**
    * Execute a codemirror command on the editor.
    *
@@ -930,7 +934,7 @@ namespace CodeMirrorEditor {
     /**
      * The mode to use.
      */
-    mode?: string | Mode.ISpec;
+    mode?: string | Mode.IMode;
 
     /**
      * The theme to style the editor with.
@@ -1175,6 +1179,11 @@ namespace Private {
    */
   export
   function setOption<K extends keyof CodeMirrorEditor.IConfig>(editor: CodeMirror.Editor, option: K, value: CodeMirrorEditor.IConfig[K]): void {
+    // Don't bother setting the option if it is already the same.
+    const oldValue = getOption(editor, option);
+    if (oldValue === value) {
+      return;
+    }
     switch (option) {
     case 'lineWrap':
       editor.setOption('lineWrapping', value);
@@ -1216,4 +1225,3 @@ CodeMirrorEditor.addCommand(
 CodeMirrorEditor.addCommand(
   'indentMoreOrinsertTab', Private.indentMoreOrinsertTab
 );
-

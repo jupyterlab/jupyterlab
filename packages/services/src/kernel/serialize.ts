@@ -78,7 +78,7 @@ function deserializeBinary(buf: ArrayBuffer): KernelMessage.IMessage {
 function serializeBinary(msg: KernelMessage.IMessage): ArrayBuffer {
   let offsets: number[] = [];
   let buffers: ArrayBuffer[] = [];
-  let encoder = new TextEncoder('utf8');
+  let encoder = new TextEncoder();
   let origBuffers: (ArrayBuffer | ArrayBufferView)[] = [];
   if (msg.buffers !== undefined) {
     origBuffers = msg.buffers;

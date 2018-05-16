@@ -83,23 +83,49 @@ namespace URLExt {
    * @returns an encoded url query.
    *
    * #### Notes
-   * From [stackoverflow](http://stackoverflow.com/a/30707423).
+   * Modified version of [stackoverflow](http://stackoverflow.com/a/30707423).
    */
   export
   function objectToQueryString(value: JSONObject): string {
-    return '?' + Object.keys(value).map(key =>
-      encodeURIComponent(key) + '=' + encodeURIComponent(String(value[key]))
-    ).join('&');
+    const keys = Object.keys(value);
+
+    if (!keys.length) {
+      return '';
+    }
+
+    return '?' + keys.map(key => {
+      const content = encodeURIComponent(String(value[key]));
+
+      return key + (content ? '=' + content : '');
+    }).join('&');
+  }
+
+  /**
+   * Return a parsed object that represents the values in a query string.
+   */
+  export
+  function queryStringToObject(value: string): JSONObject {
+    return value.replace(/^\?/, '').split('&').reduce((acc, val) => {
+      const [key, value] = val.split('=');
+
+      acc[key] = decodeURIComponent(value || '');
+
+      return acc;
+    }, { } as { [key: string]: string });
   }
 
   /**
    * Test whether the url is a local url.
+   *
+   * #### Notes
+   * This function returns `false` for any fully qualified url, including
+   * `data:`, `file:`, and `//` protocol URLs.
    */
   export
   function isLocal(url: string): boolean {
-    const { host, protocol } = parse(url);
+    const { protocol } = parse(url);
 
-    return protocol !== 'data:' && host === location.host || host === '';
+    return url.toLowerCase().indexOf(protocol) !== 0 && url.indexOf('//') !== 0;
   }
 
   /**

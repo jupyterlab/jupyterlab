@@ -11,10 +11,12 @@ dev_mode/static
 dev_mode/themes
 dev_mode/workspaces
 
+packages/theme-*/static
 node_modules
 .cache
 .vscode
 *.py[co]
+.pytest_cache
 __pycache__
 *.egg-info
 *~

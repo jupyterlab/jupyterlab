@@ -43,6 +43,15 @@ describe('@jupyterlab/services', () => {
         expect(settings.token).to.be(PageConfig.getOption('token'));
       });
 
+      it('should use baseUrl for wsUrl', () => {
+        let conf: Partial<ServerConnection.ISettings> = {
+          baseUrl: 'https://host/path'
+        };
+        let settings = ServerConnection.makeSettings(conf);
+        expect(settings.baseUrl).to.be(conf.baseUrl);
+        expect(settings.wsUrl).to.be('wss://host/path');
+      });
+
       it('should handle overrides', () => {
         let defaults: Partial<ServerConnection.ISettings> = {
           baseUrl: 'foo',

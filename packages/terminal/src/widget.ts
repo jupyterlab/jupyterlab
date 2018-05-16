@@ -200,14 +200,6 @@ class Terminal extends Widget {
   }
 
   /**
-   * Dispose of the terminal when closing.
-   */
-  protected onCloseRequest(msg: Message): void {
-    super.onCloseRequest(msg);
-    this.dispose();
-  }
-
-  /**
    * On resize, use the computed row and column sizes to resize the terminal.
    */
   protected onResize(msg: Widget.ResizeMessage): void {

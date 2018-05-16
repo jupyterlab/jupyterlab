@@ -55,7 +55,7 @@ import {
  * The main menu token.
  */
 export
-const IMainMenu = new Token<IMainMenu>('@jupyterlab/apputils:IMainMenu');
+const IMainMenu = new Token<IMainMenu>('@jupyterlab/mainmenu:IMainMenu');
 /* tslint:enable */
 
 

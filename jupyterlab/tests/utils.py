@@ -40,6 +40,7 @@ class LabTestBase(NotebookTestBase):
         runtime_dir = cls.runtime_dir = tmp('runtime')
         lab_dir = cls.lab_dir = tmp('lab')
         lab_settings = cls.lab_settings = tmp('labsettings')
+        lab_workspaces = cls.lab_workspaces = tmp('labworkspaces')
         cls.notebook_dir = tmp('notebooks')
         cls.env_patch = patch.dict('os.environ', {
             'HOME': cls.home_dir,
@@ -70,8 +71,14 @@ class LabTestBase(NotebookTestBase):
         started = Event()
 
         def start_thread():
+            if 'asyncio' in sys.modules:
+                import asyncio
+                asyncio.set_event_loop(asyncio.new_event_loop())
             app = cls.notebook = LabApp(
+                app_dir=lab_dir,
                 port=cls.port,
+                user_settings_dir=lab_settings,
+                workspaces_dir=lab_workspaces,
                 port_retries=0,
                 open_browser=False,
                 config_dir=cls.config_dir,

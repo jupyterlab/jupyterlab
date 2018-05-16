@@ -87,6 +87,7 @@ class DocumentManager implements IDisposable {
     this.services = options.manager;
 
     this._opener = options.opener;
+    this._when = options.when || options.manager.ready;
 
     let widgetManager = new DocumentWidgetManager({ registry: this.registry });
     widgetManager.activateRequested.connect(this._onActivateRequested, this);
@@ -468,6 +469,7 @@ class DocumentManager implements IDisposable {
     );
 
     let context: Private.IContext | null = null;
+    let ready: Promise<void> = Promise.resolve(undefined);
 
     // Handle the load-from-disk case
     if (which === 'open') {
@@ -477,16 +479,20 @@ class DocumentManager implements IDisposable {
         context = this._createContext(path, factory, preference);
         // Populate the model, either from disk or a
         // model backend.
-        context.fromStore();
+        ready = this._when.then(() => context.initialize(false));
       }
     } else if (which === 'create') {
       context = this._createContext(path, factory, preference);
       // Immediately save the contents to disk.
-      context.save();
+      ready = this._when.then(() => context.initialize(true));
     }
 
     let widget = this._widgetManager.createWidget(widgetFactory, context!);
     this._opener.open(widget, options || {});
+
+    // If the initial opening of the context fails, dispose of the widget.
+    ready.catch(err => { widget.close(); });
+
     return widget;
   }
 
@@ -503,6 +509,7 @@ class DocumentManager implements IDisposable {
   private _widgetManager: DocumentWidgetManager;
   private _isDisposed = false;
   private _autosave = true;
+  private _when: Promise<void>;
 }
 
 
@@ -530,6 +537,11 @@ namespace DocumentManager {
      * A widget opener for sibling widgets.
      */
     opener: IWidgetOpener;
+
+    /**
+     * A promise for when to start using the manager.
+     */
+    when?: Promise<void>;
   }
 
   /**
