@@ -88,6 +88,12 @@ directory open.
    :align: center
    :class: jp-screenshot
 
+.. _file-copy-path:
+
+Right-click on a file or directory and select "Copy Path" to copy the
+filesystem relative path. This can be used for passing arguments to open
+files in functions called in various kernels.
+
 Creating Files and Activities
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
