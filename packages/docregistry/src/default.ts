@@ -425,7 +425,7 @@ class DocumentWidget<T extends Widget = Widget, U extends DocumentRegistry.IMode
   constructor(options: DocumentWidget.IOptions<T, U>) {
 
     // Include the context ready promise in the widget ready promise
-    options.ready = Promise.all([options.ready, options.context.ready]).then( () => { return; });
+    options.ready = Promise.all([options.ready, options.context.ready]);
     super(options);
 
     this.context = options.context;

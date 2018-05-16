@@ -171,7 +171,7 @@ class CSVDocumentWidget extends DocumentWidget<CSVViewer> {
   constructor(options: CSVDocumentWidget.IOptions) {
     let {content, context, delimiter, ready, ...other} = options;
     content = content || Private.createContent(context);
-    ready = Promise.all([ready, content.ready]).then(() => undefined );
+    ready = Promise.all([ready, content.ready]);
     super({content, context, ready, ...other});
 
     if (delimiter) {

@@ -69,7 +69,9 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
 
     if (options.ready) {
       layout.addWidget(spinner);
-      this._ready = options.ready;
+      // Make sure the ready promise is a Promise<void> to avoid leaking any
+      // results.
+      this._ready = options.ready.then(() => undefined);
       this.ready.then(() => {
         this._isReady = true;
         const active = document.activeElement === spinner.node;
@@ -263,7 +265,7 @@ namespace MainAreaWidget {
     /**
      * An optional promise for when the content is ready to be shown.
      */
-    ready?: Promise<void>;
+    ready?: Promise<any>;
   }
 
   /**
@@ -291,7 +293,7 @@ namespace MainAreaWidget {
     /**
      * An optional promise for when the content is ready to be shown.
      */
-    ready?: Promise<void>;
+    ready?: Promise<any>;
   }
 
 }

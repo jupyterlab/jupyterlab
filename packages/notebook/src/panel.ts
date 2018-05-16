@@ -67,7 +67,7 @@ class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   constructor(options: DocumentWidget.IOptions<Notebook, INotebookModel>) {
     // Set default options
     const notebookReady = new PromiseDelegate<void>();
-    options.ready = Promise.all([options.ready, notebookReady.promise]).then(() => { return; });
+    options.ready = Promise.all([options.ready, notebookReady.promise]);
     super(options);
     this._activated = new Signal<this, void>(this);
 
