@@ -6,11 +6,11 @@
     "noUnusedLocals": true,
     "module": "commonjs",
     "moduleResolution": "node",
-    "target": "ES2015",
+    "target": "ES5",
     "outDir": "./lib",
-    "lib": ["ES2015", "DOM"],
-    "jsx": "react",
+    "lib": ["ES5", "ES2015.Promise", "DOM", "ES2015.Collection"],
     "types": [],
+    "jsx": "react"
   },
   "include": ["src/*"]
 }
