@@ -289,6 +289,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     });
   });
 
+
   // Add some of the editor settings to the settings menu.
   mainMenu.settingsMenu.addGroup([
     { type: 'submenu' as Menu.ItemType, submenu: keyMapMenu },

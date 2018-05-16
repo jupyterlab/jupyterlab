@@ -158,6 +158,9 @@
   background: var(--jp-layout-color2);
 }
 
+.p-CommandPalette-itemContent {
+  overflow: hidden;
+}
 
 .p-CommandPalette-itemLabel > mark {
   color: var(--jp-ui-font-color0);
@@ -170,13 +173,13 @@
   color: rgba(0, 0, 0, 0.4);
 }
 
-.p-CommandPalette-item.p-mod-toggled .jp-CommandPalette-itemIcon {
+.p-CommandPalette-item.p-mod-toggled .p-CommandPalette-itemIcon {
   background-image: var(--jp-icon-checkmark);
   background-size: 16px;
   background-repeat: no-repeat;
 }
 
-.p-CommandPalette-item .jp-CommandPalette-itemIcon {
+.p-CommandPalette-item .p-CommandPalette-itemIcon {
   padding: 0px 0px 0px 4px;
   position: relative;
   width: 16px;
@@ -184,12 +187,8 @@
   flex: 0 0 auto;
 }
 
-.p-CommandPalette-item.p-mod-disabled .jp-CommandPalette-itemIcon {
+.p-CommandPalette-item.p-mod-disabled .p-CommandPalette-itemIcon {
   opacity: 0.4;
-}
-
-.p-CommandPalette-item .p-CommandPalette-itemLabel {
-  flex: 1 1 auto;
 }
 
 .p-CommandPalette-item .p-CommandPalette-itemShortcut {
