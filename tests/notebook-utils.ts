@@ -18,7 +18,11 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  NotebookPanel, Notebook, NotebookModel, StaticNotebook
+  Context
+} from '@jupyterlab/docregistry';
+
+import {
+  INotebookModel, NotebookPanel, Notebook, NotebookModel, StaticNotebook
 } from '@jupyterlab/notebook';
 
 import {
@@ -108,7 +112,7 @@ function createNotebookPanelFactory(): NotebookPanel.IContentFactory {
 export
 function createNotebook(): Notebook {
   return new Notebook({
-    rendermime,
+    rendermime: defaultRenderMime(),
     contentFactory: createNotebookFactory(),
     mimeTypeService
   });
@@ -119,11 +123,10 @@ function createNotebook(): Notebook {
  * Create a notebook panel widget.
  */
 export
-function createNotebookPanel(): NotebookPanel {
+function createNotebookPanel(context: Context<INotebookModel>): NotebookPanel {
   return new NotebookPanel({
-    rendermime,
-    contentFactory: createNotebookPanelFactory(),
-    mimeTypeService
+    content: createNotebook(),
+    context
   });
 }
 

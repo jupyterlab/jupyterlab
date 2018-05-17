@@ -21,14 +21,8 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  createFileContext
+  createFileContext, sleep
 } from '../../utils';
-
-function asyncTimer(time: number, value: any) {
-  return new Promise((resolve, reject) => {
-    setTimeout(resolve(value), time);
-  });
-}
 
 
 class WidgetFactory extends ABCWidgetFactory<IDocumentWidget> {
@@ -612,7 +606,7 @@ describe('docregistry/default', () => {
 
       it('should resolve after the ready and context ready promises', async () => {
         let x = Object.create(null);
-        let ready = asyncTimer(300, x);
+        let ready = sleep(300, x);
         let contextReady = Promise.all([context.ready, x]);
         let widget = new DocumentWidget({ context, content, ready: ready});
         expect(widget.isReady).to.be(false);

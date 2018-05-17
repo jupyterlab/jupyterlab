@@ -78,6 +78,7 @@ class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
 
     // Set up things related to the context
     this.content.model = this.context.model;
+    // TODO: what happens when the context model changes? Can the context model change?
     this.context.session.kernelChanged.connect(this._onKernelChanged, this);
 
     this.context.ready.then(() => {
@@ -122,15 +123,6 @@ class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    */
   get session(): IClientSession {
     return this.context.session;
-  }
-
-  /**
-   * A convenience method to access the notebook.
-   *
-   * TODO: deprecate this in favor of the .content attribute
-   */
-  get notebook(): Notebook {
-    return this.content;
   }
 
   /**

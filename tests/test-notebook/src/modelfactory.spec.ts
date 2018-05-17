@@ -16,7 +16,7 @@ import {
 } from '@jupyterlab/notebook';
 
 
-describe('notebook/notebook/modelfactory', () => {
+describe('@jupyterlab/notebook', () => {
 
   describe('NotebookModelFactory', () => {
 

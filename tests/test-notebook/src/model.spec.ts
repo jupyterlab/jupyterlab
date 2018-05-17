@@ -27,8 +27,12 @@ import {
   DEFAULT_CONTENT
 } from '../../notebook-utils';
 
+import {
+  moment
+} from '../../utils';
 
-describe('notebook/notebook/model', () => {
+
+describe('@jupyterlab/notebook', () => {
 
   describe('NotebookModel', () => {
 
@@ -134,14 +138,12 @@ describe('notebook/notebook/model', () => {
           expect(model.dirty).to.be(true);
         });
 
-        it('should add a new code cell when cells are cleared', (done) => {
+        it('should add a new code cell when cells are cleared', async () => {
           let model = new NotebookModel();
           model.cells.clear();
-          requestAnimationFrame(() => {
-            expect(model.cells.length).to.be(1);
-            expect(model.cells.get(0)).to.be.a(CodeCellModel);
-            done();
-          });
+          await moment();
+          expect(model.cells.length).to.be(1);
+          expect(model.cells.get(0)).to.be.a(CodeCellModel);
         });
 
       });

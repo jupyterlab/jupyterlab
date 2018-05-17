@@ -20,7 +20,7 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
-  Context
+  Context, DocumentWidget
 } from '@jupyterlab/docregistry';
 
 import {
