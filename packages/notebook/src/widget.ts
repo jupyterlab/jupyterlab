@@ -372,7 +372,8 @@ class StaticNotebook extends Widget {
       oldValue.cells.changed.disconnect(this._onCellsChanged, this);
       oldValue.metadata.changed.disconnect(this.onMetadataChanged, this);
       oldValue.contentChanged.disconnect(this.onModelContentChanged, this);
-      // TODO: reuse existing cell widgets if possible.
+      // TODO: reuse existing cell widgets if possible. Remember to initially
+      // clear the history of each cell if we do this.
       while (layout.widgets.length) {
         this._removeCell(0);
       }
@@ -1309,9 +1310,16 @@ class Notebook extends StaticNotebook {
    * Handle a new model.
    */
   protected onModelChanged(oldValue: INotebookModel, newValue: INotebookModel): void {
+    super.onModelChanged(oldValue, newValue);
+
     // Try to set the active cell index to 0.
     // It will be set to `-1` if there is no new model or the model is empty.
     this.activeCellIndex = 0;
+
+    // Clear the undo history of each cell.
+    if (this.model) {
+      this.model.cells.clearUndo();
+    }
   }
 
   /**

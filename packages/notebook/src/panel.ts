@@ -7,10 +7,6 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  each
-} from '@phosphor/algorithm';
-
-import {
   PromiseDelegate, Token
 } from '@phosphor/coreutils';
 
@@ -85,28 +81,19 @@ class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       if (this.isDisposed) {
         return;
       }
-      let model = this.context.model;
 
-      // TODO: this logic is being called too soon - the cells aren't available yet, and the widgets aren't created.
-      // Clear the undo state of the cells.
-      if (model) {
-        model.cells.clearUndo();
-        each(this.content.widgets, widget => {
-          widget.editor.clearHistory();
-        });
-      }
+      // The notebook widget is now ready to be shown.
+      notebookReady.resolve(undefined);
+    });
 
-      // If we have just a single empty code cell, change the notebook mode to
-      // edit mode. This happens for example when we have a new notebook.
+    this.ready.then(() => {
+      // Set the document edit mode on initial open if it looks like a new document.
       if (this.content.widgets.length === 1) {
         let cellModel = this.content.widgets[0].model;
         if (cellModel.type === 'code' && cellModel.value.text === '') {
           this.content.mode = 'edit';
         }
       }
-
-      // The notebook widget is now ready to be shown.
-      notebookReady.resolve(undefined);
     });
 
   }
