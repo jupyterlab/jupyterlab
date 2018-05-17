@@ -86,6 +86,59 @@ export class JupyterLab extends Application<ApplicationShell> {
   readonly registerPluginErrors: Array<Error> = [];
 
   /**
+   * A method invoked on a document `'contextmenu'` event.
+   *
+   * #### Notes
+   * The default implementation of this method opens the application
+   * `contextMenu` at the current mouse position.
+   *
+   * If the application context menu has no matching content *or* if
+   * the shift key is pressed, the default browser context menu will
+   * be opened instead.
+   *
+   * A subclass may reimplement this method as needed.
+   */
+  protected evtContextMenu(event: MouseEvent): void {
+    if (event.shiftKey) {
+      return;
+    }
+
+    this._contextEvent = event;
+    if (this.contextMenu.open(event)) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  }
+
+  get contextMenuEvent(): Event {
+    return this._contextEvent;
+  }
+
+  get contextMenuTargetPath(): string {
+    if (!this.contextMenuEvent) {
+      return;
+    }
+
+    let target = this.contextMenuEvent.target as HTMLSelectElement;
+    let pathRe = /[Pp]ath:\s?(.*)\n?/;
+
+    let pathMatch = target.title.match(pathRe);
+
+    if (pathMatch == null) {
+      // if path could not be found in .title, search for it in .parentElement
+      pathMatch = target.parentElement.title.match(pathRe);
+    }
+
+    if (pathMatch == null) {
+      // (for now) no other place to search, just return
+      return;
+    }
+
+    // return the found path
+    return pathMatch[1];
+  }
+
+  /**
    * Whether the application is dirty.
    */
   get isDirty(): boolean {
@@ -204,6 +257,7 @@ export class JupyterLab extends Application<ApplicationShell> {
     });
   }
 
+  private _contextEvent: Event;
   private _info: JupyterLab.IInfo;
   private _dirtyCount = 0;
   private _busyCount = 0;

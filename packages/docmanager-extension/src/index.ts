@@ -176,12 +176,24 @@ function addCommands(
     const { currentWidget } = shell;
     return !!(currentWidget && docManager.contextForWidget(currentWidget));
   };
-  const fileType = () => {
-    const { currentWidget } = shell;
-    if (!currentWidget) {
+
+  // fetches the doc widget associated with the most recent contextmenu event
+  const contextMenuWidget = (): Widget => {
+    let path = app.contextMenuTargetPath;
+    if (!path) {
+      // fall back to active doc widget if path cannot be obtained from event
+      return app.shell.currentWidget;
+    }
+
+    return docManager.findWidget(path);
+  };
+
+  // operates on active widget by default
+  const fileType = (widget: Widget = shell.currentWidget) => {
+    if (!widget) {
       return 'File';
     }
-    const context = docManager.contextForWidget(currentWidget);
+    const context = docManager.contextForWidget(widget);
     if (!context) {
       return '';
     }
@@ -491,21 +503,21 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.rename, {
-    label: () => `Rename ${fileType()}…`,
+    label: () => `Rename ${fileType(contextMenuWidget())}…`,
     isEnabled,
     execute: () => {
       if (isEnabled()) {
-        let context = docManager.contextForWidget(shell.currentWidget);
+        let context = docManager.contextForWidget(contextMenuWidget());
         return renameDialog(docManager, context!.path);
       }
     }
   });
 
   commands.addCommand(CommandIDs.clone, {
-    label: () => `New View for ${fileType()}`,
+    label: () => `New View for ${fileType(contextMenuWidget())}`,
     isEnabled,
     execute: args => {
-      const widget = shell.currentWidget;
+      const widget = contextMenuWidget();
       const options =
         (args['options'] as DocumentRegistry.IOpenOptions) || void 0;
       if (!widget) {
@@ -537,7 +549,7 @@ function addCommands(
     label: () => `Show in File Browser`,
     isEnabled,
     execute: () => {
-      let context = docManager.contextForWidget(shell.currentWidget);
+      let context = docManager.contextForWidget(contextMenuWidget());
       if (!context) {
         return;
       }
