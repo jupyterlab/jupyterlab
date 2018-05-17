@@ -206,7 +206,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
   /**
    * Create a console for a given path.
    */
-  function createConsole(options: ICreateOptions): Promise<ConsolePanel> {
+  function createConsole(options: ICreateOptions): Promise<ConsolePanel | undefined> {
     let panel: ConsolePanel;
     return manager.ready.then(() => {
       panel = new ConsolePanel({
@@ -227,7 +227,22 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
         }
       );
       shell.activateById(panel.id);
-      return panel;
+
+      // If we don't have a kernel preference, bring up the selection dialog.
+      if (!options.kernelPreference) {
+        return panel.session.selectKernel().then(selected => {
+          // If the user canceled the selection, consider it
+          // canceling the new console, and close it.
+          if (!selected) {
+            panel.close();
+            return void 0;
+          } else {
+            return panel;
+          }
+        });
+      } else {
+        return panel;
+      }
     });
   }
 

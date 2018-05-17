@@ -136,7 +136,7 @@ interface IClientSession extends IDisposable {
   /**
    * Select a kernel for the session.
    */
-  selectKernel(): Promise<void>;
+  selectKernel(): Promise<boolean>;
 
   /**
    * Restart the session.
@@ -398,8 +398,10 @@ class ClientSession implements IClientSession {
 
   /**
    * Select a kernel for the session.
+   *
+   * @returns A promise that resolves with whether a kernel has been selected.
    */
-  selectKernel(): Promise<void> {
+  selectKernel(): Promise<boolean> {
     return this.initialize().then(() => {
       if (this.isDisposed) {
         return Promise.reject('Disposed');
@@ -552,10 +554,7 @@ class ClientSession implements IClientSession {
     }
     // Try to use an existing kernel.
     if (preference.id) {
-      return this._changeKernel({ id: preference.id }).then(
-        () => void 0,
-        () => this._selectKernel()
-      );
+      return this._changeKernel({ id: preference.id }).then(() => void 0);
     }
     let name = ClientSession.getDefaultKernel({
       specs: this.manager.specs,
@@ -563,12 +562,10 @@ class ClientSession implements IClientSession {
       preference
     });
     if (name) {
-      return this._changeKernel({ name }).then(
-        () => void 0,
-        () => this._selectKernel()
-      );
+      return this._changeKernel({ name }).then(() => void 0);
     }
-    return this._selectKernel();
+    // If we are here, there is no kernel to start.
+    return Promise.resolve(void 0);
   }
 
   /**
@@ -589,9 +586,9 @@ class ClientSession implements IClientSession {
   /**
    * Select a kernel.
    */
-  private _selectKernel(): Promise<void> {
+  private _selectKernel(): Promise<boolean> {
     if (this.isDisposed) {
-      return Promise.resolve(void 0);
+      return Promise.resolve(false);
     }
     let dialog = this._dialog = new Dialog({
       title: 'Select Kernel',
@@ -601,16 +598,25 @@ class ClientSession implements IClientSession {
 
     return dialog.launch().then(result => {
       if (this.isDisposed || !result.button.accept) {
-        return;
+        return false;
       }
       let model = result.value;
       if (model === null && this._session) {
-        return this.shutdown().then(() => this._kernelChanged.emit(null));
+        return this.shutdown().then(() => {
+          this._kernelChanged.emit(null);
+          return true;
+        });
+
       }
       if (model) {
-        return this._changeKernel(model).then(() => void 0);
+        return this._changeKernel(model).then(() => true);
       }
-    }).then(() => { this._dialog = null; });
+      // The case of the user selecting "No Kernel"
+      return true;
+    }).then(selected => {
+      this._dialog = null;
+      return selected;
+    });
   }
 
   /**

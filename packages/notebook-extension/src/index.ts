@@ -44,7 +44,7 @@ import {
 } from '@jupyterlab/rendermime';
 
 import {
-  ServiceManager
+  ServiceManager, Contents
 } from '@jupyterlab/services';
 
 import {
@@ -501,14 +501,38 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
   populateMenus(app, mainMenu, tracker);
 
   // Utility function to create a new notebook.
-  const createNew = (cwd: string, kernelName?: string) => {
+  const createNew = (cwd: string, kernelName?: string): Promise<NotebookPanel | undefined> => {
+    let widget: NotebookPanel;
+    let contents: Contents.IModel;
     return commands.execute(
       'docmanager:new-untitled', { path: cwd, type: 'notebook' }
     ).then(model => {
+      contents = model;
       return commands.execute('docmanager:open', {
         path: model.path, factory: FACTORY,
         kernel: { name: kernelName }
       });
+    }).then((panel: NotebookPanel) => {
+      widget = panel;
+      // Check if we need to select a kernel for the notebook.
+      if (kernelName) {
+        return widget;
+      } else {
+        return widget.session.selectKernel().then(selected => {
+          // If the user cancels kernel selection, consider
+          // it to cancel notebook creation.
+          // Delete the file and close the panel.
+          if (selected) {
+            return widget;
+          } else {
+            widget.notebook.model.dirty = false;
+            widget.close();
+            return commands.execute('docmanager:delete-file', {
+              path: contents.path
+            });
+          }
+        });
+      }
     });
   };
 

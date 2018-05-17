@@ -20,10 +20,6 @@ import {
 } from '@jupyterlab/console';
 
 import {
-  dismissDialog
-} from '../../utils';
-
-import {
   createConsolePanelFactory, rendermime, mimeTypeService, editorFactory
 } from './utils';
 
@@ -109,7 +105,6 @@ describe('console/panel', () => {
 
       it('should start the session', () => {
         Widget.attach(panel, document.body);
-        dismissDialog();
         return panel.session.ready;
       });
 
@@ -123,7 +118,6 @@ describe('console/panel', () => {
         MessageLoop.sendMessage(panel, Widget.Msg.ActivateRequest);
         expect(panel.methods).to.contain('onActivateRequest');
         expect(panel.console.promptCell.editor.hasFocus()).to.be(true);
-        return dismissDialog();
       });
 
     });
