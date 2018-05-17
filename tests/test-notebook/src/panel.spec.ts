@@ -4,10 +4,6 @@
 import expect = require('expect.js');
 
 import {
-  ServiceManager
-} from '@jupyterlab/services';
-
-import {
   Context
 } from '@jupyterlab/docregistry';
 
@@ -33,15 +29,6 @@ import {
  * Default data.
  */
 const contentFactory = createNotebookPanelFactory();
-const options = { rendermime, mimeTypeService, contentFactory };
-
-
-function createPanel(context: Context<INotebookModel>): NotebookPanel {
-  const panel = createNotebookPanel(context);
-  context.model.fromJSON(DEFAULT_CONTENT);
-  return panel;
-}
-
 
 describe('@jupyterlab/notebook', () => {
 

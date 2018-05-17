@@ -39,7 +39,7 @@ class TestTracker extends NotebookTracker {
 
 describe('@jupyterlab/notebook', () => {
 
-  describe.only('NotebookTracker', () => {
+  describe('NotebookTracker', () => {
 
     let context: Context<INotebookModel>;
 

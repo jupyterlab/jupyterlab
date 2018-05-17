@@ -7,6 +7,11 @@ import {
   toArray
 } from '@phosphor/algorithm';
 
+
+import {
+  PromiseDelegate
+} from '@phosphor/coreutils';
+
 import {
   Widget
 } from '@phosphor/widgets';
@@ -36,7 +41,7 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
-  createNotebookContext
+  createNotebookContext, moment
 } from '../../utils';
 
 import {
@@ -150,7 +155,7 @@ describe('@jupyterlab/notebook', () => {
         Widget.attach(button, document.body);
         NotebookActions.copy(panel.content);
         button.node.click();
-        await 0;
+        await moment();
         expect(panel.content.widgets.length).to.be(count + 1);
         button.dispose();
       });
@@ -164,26 +169,34 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#createRunButton()', () => {
 
-      it.skip('should run and advance when clicked', (done) => {
+      it('should run and advance when clicked', async () => {
         let button = ToolbarItems.createRunButton(panel);
         let widget = panel.content;
-        let next = widget.widgets[1] as MarkdownCell;
-        widget.select(next);
-        let cell = widget.activeCell as CodeCell;
-        cell.model.outputs.clear();
-        next.rendered = false;
+
+        // Clear and select the first two cells.
+        const codeCell = widget.widgets[0] as CodeCell;
+        codeCell.model.outputs.clear();
+        widget.select(codeCell);
+        const mdCell = widget.widgets[1] as MarkdownCell;
+        mdCell.rendered = false;
+        widget.select(mdCell);
+
         Widget.attach(button, document.body);
-        const session = panel.context.session;
-        panel.context.session.kernel.ready.then(() => {
-          session.statusChanged.connect((sender, status) => {
-            if (status === 'idle' && cell.model.outputs.length > 0) {
-              expect(next.rendered).to.be(true);
-              button.dispose();
-              done();
-            }
-          });
-          button.node.click();
+        await context.ready;
+        await context.session.ready;
+        await context.session.kernel.ready;
+        const p = new PromiseDelegate();
+        context.session.statusChanged.connect((sender, status) => {
+          // Find the right status idle message
+          if (status === 'idle' && codeCell.model.outputs.length > 0) {
+            expect(mdCell.rendered).to.be(true);
+            expect(widget.activeCellIndex).to.equal(2);
+            button.dispose();
+            p.resolve(0);
+          }
         });
+        button.node.click();
+        await p.promise;
       });
 
       it('should have the `\'jp-RunIcon\'` class', () => {

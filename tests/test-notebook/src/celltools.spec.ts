@@ -32,7 +32,7 @@ import {
 } from '../../notebook-utils';
 
 import {
-  createNotebookContext
+  createNotebookContext, moment
 } from '../../utils';
 
 class LogTool extends CellTools.Tool {
@@ -123,7 +123,7 @@ describe('@jupyterlab/notebook', () => {
       tabpanel.node.style.height = '800px';
       Widget.attach(tabpanel, document.body);
       // Give the posted messages a chance to be handled.
-      await undefined;
+      await moment();
     });
 
     afterEach(() => {

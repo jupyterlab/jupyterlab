@@ -20,7 +20,7 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
-  Context, DocumentWidget
+  Context
 } from '@jupyterlab/docregistry';
 
 import {
@@ -47,23 +47,20 @@ function createFactory(): NotebookWidgetFactory {
 }
 
 
-describe('notebook/notebook/widgetfactory', () => {
-
-  let context: Context<INotebookModel>;
-
-  beforeEach(() => {
-    return createNotebookContext().then(c => {
-      context = c;
-    });
-  });
-
-  afterEach(() => {
-    return context.session.shutdown().then(() => {
-      context.dispose();
-    });
-  });
+describe('@jupyterlab/notebook', () => {
 
   describe('NotebookWidgetFactory', () => {
+
+    let context: Context<INotebookModel>;
+
+    beforeEach(async () => {
+      context = await createNotebookContext();
+    });
+
+    afterEach(async () => {
+      await context.session.shutdown();
+      context.dispose();
+    });
 
     describe('#constructor()', () => {
 
