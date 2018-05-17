@@ -56,8 +56,7 @@ namespace CommandIDs {
   // For main browser only.
   export const hideBrowser = 'filebrowser:hide-main';
 
-  // For main browser only.
-  export const navigate = 'filebrowser:navigate-main';
+  export const navigate = 'filebrowser:navigate';
 
   export const open = 'filebrowser:open';
 
@@ -73,8 +72,7 @@ namespace CommandIDs {
   // For main browser only.
   export const copyPath = 'filebrowser:copy-path';
 
-  // For main browser only.
-  export const showBrowser = 'filebrowser:activate-main';
+  export const showBrowser = 'filebrowser:activate';
 
   export const shutdown = 'filebrowser:shutdown';
 
@@ -224,6 +222,23 @@ function addCommands(
   tracker: InstanceTracker<FileBrowser>,
   browser: FileBrowser
 ): void {
+  const getBrowserForPath = (path: string): FileBrowser => {
+    const driveName = app.serviceManager.contents.driveName(path);
+
+    if (driveName) {
+      let browserForPath = tracker.find((fb: FileBrowser) => fb.id.toLowerCase().startsWith(driveName.toLowerCase()));
+
+      if (!browserForPath) {
+        // warn that no filebrowser could be found for this driveName
+        console.warn(`${CommandIDs.navigate} failed to find filebrowser for path: ${path}`); return;
+      }
+
+      return browserForPath;
+    }
+
+    // if driveName is empty, assume the main filebrowser
+    return browser;
+  };
   const { commands } = app;
 
   commands.addCommand(CommandIDs.del, {
@@ -299,8 +314,11 @@ function addCommands(
   commands.addCommand(CommandIDs.navigate, {
     execute: args => {
       const path = (args.path as string) || '';
+      const browserForPath = getBrowserForPath(path);
       const services = app.serviceManager;
-      const open = 'docmanager:open';
+      // const driveName = services.contents.driveName(path);
+      const localPath = services.contents.localPath(path);
+      // const open = 'docmanager:open';
       const failure = (reason: any) => {
         console.warn(`${CommandIDs.navigate} failed to open: ${path}`, reason);
       };
@@ -308,16 +326,16 @@ function addCommands(
       return services.ready
         .then(() => services.contents.get(path))
         .then(value => {
-          const { model } = browser;
-          const { restored } = model;
+          const {model} = browserForPath;
+          const {restored} = model;
 
           if (value.type === 'directory') {
-            return restored.then(() => model.cd(`/${path}`));
+            return restored.then(() => model.cd(`/${localPath}`));
           }
 
           return restored
-            .then(() => model.cd(`/${PathExt.dirname(path)}`))
-            .then(() => commands.execute(open, { path }));
+            .then(() => model.cd(`/${PathExt.dirname(localPath)}`))
+            .then(() => commands.execute('docmanager:open', {path: path}));
         })
         .catch(failure);
     }
@@ -424,8 +442,16 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.showBrowser, {
-    execute: () => {
-      app.shell.activateById(browser.id);
+    execute: args => {
+      const path = args.path as string || '';
+      const browserForPath = getBrowserForPath(path);
+
+      if (Object.is(browser, browserForPath)) {
+        app.shell.activateById(browserForPath.id);
+      }
+      else {
+        app.shell.activateById(browserForPath.parent.id);
+      }
     }
   });
 
