@@ -125,7 +125,7 @@ function createApp(manager: ServiceManager.IManager): void {
   let nbWidget = docManager.open(NOTEBOOK) as NotebookPanel;
   let palette = new CommandPalette({ commands });
 
-  const editor = nbWidget.notebook.activeCell && nbWidget.notebook.activeCell.editor;
+  const editor = nbWidget.content.activeCell && nbWidget.content.activeCell.editor;
   const model = new CompleterModel();
   const completer = new Completer({ editor, model });
   const connector = new KernelConnector({ session: nbWidget.session });
@@ -135,7 +135,7 @@ function createApp(manager: ServiceManager.IManager): void {
   handler.editor = editor;
 
   // Listen for active cell changes.
-  nbWidget.notebook.activeCellChanged.connect((sender, cell) => {
+  nbWidget.content.activeCellChanged.connect((sender, cell) => {
     handler.editor = cell && cell.editor;
   });
 
@@ -170,7 +170,7 @@ function createApp(manager: ServiceManager.IManager): void {
   commands.addCommand(cmdIds.invokeNotebook, {
     label: 'Invoke Notebook',
     execute: () => {
-      if (nbWidget.notebook.activeCell.model.type === 'code') {
+      if (nbWidget.content.activeCell.model.type === 'code') {
         return commands.execute(cmdIds.invoke);
       }
     }
@@ -178,7 +178,7 @@ function createApp(manager: ServiceManager.IManager): void {
   commands.addCommand(cmdIds.selectNotebook, {
     label: 'Select Notebook',
     execute: () => {
-      if (nbWidget.notebook.activeCell.model.type === 'code') {
+      if (nbWidget.content.activeCell.model.type === 'code') {
         return commands.execute(cmdIds.select);
       }
     }
@@ -206,48 +206,48 @@ function createApp(manager: ServiceManager.IManager): void {
   commands.addCommand(cmdIds.runAndAdvance, {
     label: 'Run and Advance',
     execute: () => {
-      NotebookActions.runAndAdvance(nbWidget.notebook, nbWidget.context.session);
+      NotebookActions.runAndAdvance(nbWidget.content, nbWidget.context.session);
     }
   });
   commands.addCommand(cmdIds.editMode, {
     label: 'Edit Mode',
-    execute: () => { nbWidget.notebook.mode = 'edit'; }
+    execute: () => { nbWidget.content.mode = 'edit'; }
   });
   commands.addCommand(cmdIds.commandMode, {
     label: 'Command Mode',
-    execute: () => { nbWidget.notebook.mode = 'command'; }
+    execute: () => { nbWidget.content.mode = 'command'; }
   });
   commands.addCommand(cmdIds.selectBelow, {
     label: 'Select Below',
-    execute: () => NotebookActions.selectBelow(nbWidget.notebook)
+    execute: () => NotebookActions.selectBelow(nbWidget.content)
   });
   commands.addCommand(cmdIds.selectAbove, {
     label: 'Select Above',
-    execute: () => NotebookActions.selectAbove(nbWidget.notebook)
+    execute: () => NotebookActions.selectAbove(nbWidget.content)
   });
   commands.addCommand(cmdIds.extendAbove, {
     label: 'Extend Above',
-    execute: () => NotebookActions.extendSelectionAbove(nbWidget.notebook)
+    execute: () => NotebookActions.extendSelectionAbove(nbWidget.content)
   });
   commands.addCommand(cmdIds.extendBelow, {
     label: 'Extend Below',
-    execute: () => NotebookActions.extendSelectionBelow(nbWidget.notebook)
+    execute: () => NotebookActions.extendSelectionBelow(nbWidget.content)
   });
   commands.addCommand(cmdIds.merge, {
     label: 'Merge Cells',
-    execute: () => NotebookActions.mergeCells(nbWidget.notebook)
+    execute: () => NotebookActions.mergeCells(nbWidget.content)
   });
   commands.addCommand(cmdIds.split, {
     label: 'Split Cell',
-    execute: () => NotebookActions.splitCell(nbWidget.notebook)
+    execute: () => NotebookActions.splitCell(nbWidget.content)
   });
   commands.addCommand(cmdIds.undo, {
     label: 'Undo',
-    execute: () => NotebookActions.undo(nbWidget.notebook)
+    execute: () => NotebookActions.undo(nbWidget.content)
   });
   commands.addCommand(cmdIds.redo, {
     label: 'Redo',
-    execute: () => NotebookActions.redo(nbWidget.notebook)
+    execute: () => NotebookActions.redo(nbWidget.content)
   });
 
   let category = 'Notebook Operations';

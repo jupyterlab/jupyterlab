@@ -186,7 +186,7 @@ const notebooks: JupyterLabPlugin<void> = {
   activate: (app: JupyterLab, manager: ICompletionManager, notebooks: INotebookTracker): void => {
     // Create a handler for each notebook that is created.
     notebooks.widgetAdded.connect((sender, panel) => {
-      const cell = panel.notebook.activeCell;
+      const cell = panel.content.activeCell;
       const editor = cell && cell.editor;
       const session = panel.session;
       const parent = panel;
@@ -194,7 +194,7 @@ const notebooks: JupyterLabPlugin<void> = {
       const handler = manager.register({ connector, editor, parent });
 
       // Listen for active cell changes.
-      panel.notebook.activeCellChanged.connect((sender, cell) => {
+      panel.content.activeCellChanged.connect((sender, cell) => {
         handler.editor = cell && cell.editor;
       });
     });
@@ -203,7 +203,7 @@ const notebooks: JupyterLabPlugin<void> = {
     app.commands.addCommand(CommandIDs.invokeNotebook, {
       execute: () => {
         const panel = notebooks.currentWidget;
-        if (panel && panel.notebook.activeCell.model.type === 'code') {
+        if (panel && panel.content.activeCell.model.type === 'code') {
           return app.commands.execute(CommandIDs.invoke, { id: panel.id });
         }
       }

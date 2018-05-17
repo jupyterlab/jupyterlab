@@ -132,7 +132,7 @@ describe('@jupyterlab/notebook', () => {
       it('should pass the editor config to the notebook', () => {
         let factory = createFactory();
         let panel = factory.createNew(context);
-        expect(panel.notebook.editorConfig).to.be(defaultEditorConfig);
+        expect(panel.content.editorConfig).to.be(defaultEditorConfig);
       });
 
       it('should populate the default toolbar items', () => {

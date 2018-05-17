@@ -180,11 +180,11 @@ const notebooks: JupyterLabPlugin<void> = {
       handlers[parent.id] = handler;
 
       // Set the initial editor.
-      let cell = parent.notebook.activeCell;
+      let cell = parent.content.activeCell;
       handler.editor = cell && cell.editor;
 
       // Listen for active cell changes.
-      parent.notebook.activeCellChanged.connect((sender, cell) => {
+      parent.content.activeCellChanged.connect((sender, cell) => {
         handler.editor = cell && cell.editor;
       });
 
