@@ -34,6 +34,7 @@ utils.getLernaPaths().forEach(pkgPath => {
   handlePackage(pkgPath);
 });
 handlePackage(path.resolve('.'));
+utils.run('yarn');
 
 
 /**
