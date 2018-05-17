@@ -1016,7 +1016,7 @@ namespace Private {
       prefix(description || nondescript),
       prefix(line(length)),
       '',
-      keys.map(key => docstring(schema, key)).join('\n\n'),
+      keys.map(key => docstring(schema, key)).join(',\n\n'),
       '}'
     ].join('\n');
   }
