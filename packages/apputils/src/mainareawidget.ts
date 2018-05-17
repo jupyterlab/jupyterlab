@@ -71,8 +71,7 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
       layout.addWidget(spinner);
       // Make sure the ready promise is a Promise<void> to avoid leaking any
       // results.
-      this._ready = options.ready.then(() => undefined);
-      this.ready.then(() => {
+      this._ready = options.ready.then(() => {
         this._isReady = true;
         const active = document.activeElement === spinner.node;
         spinner.dispose();
@@ -90,6 +89,7 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
         BoxLayout.setStretch(error, 1);
         spinner.dispose();
         layout.addWidget(error);
+        throw(error);
       });
     // Handle no populated promise.
     } else {
