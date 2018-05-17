@@ -404,7 +404,7 @@ class ClientSession implements IClientSession {
       if (this.isDisposed) {
         return Promise.reject('Disposed');
       }
-      return this._selectKernel();
+      return this._selectKernel(true);
     });
   }
 
@@ -554,7 +554,7 @@ class ClientSession implements IClientSession {
     if (preference.id) {
       return this._changeKernel({ id: preference.id }).then(
         () => void 0,
-        () => this._selectKernel()
+        () => this._selectKernel(false)
       );
     }
     let name = ClientSession.getDefaultKernel({
@@ -565,10 +565,10 @@ class ClientSession implements IClientSession {
     if (name) {
       return this._changeKernel({ name }).then(
         () => void 0,
-        () => this._selectKernel()
+        () => this._selectKernel(false)
       );
     }
-    return this._selectKernel();
+    return this._selectKernel(false);
   }
 
   /**
@@ -588,15 +588,21 @@ class ClientSession implements IClientSession {
 
   /**
    * Select a kernel.
+   *
+   * @param cancellable: whether the dialog should have a cancel button.
    */
-  private _selectKernel(): Promise<void> {
+  private _selectKernel(cancellable: boolean): Promise<void> {
     if (this.isDisposed) {
       return Promise.resolve(void 0);
     }
+    const buttons = cancellable ?
+      [ Dialog.cancelButton(), Dialog.okButton({ label: 'SELECT' }) ] :
+      [ Dialog.okButton({ label: 'SELECT' }) ];
+
     let dialog = this._dialog = new Dialog({
       title: 'Select Kernel',
       body: new Private.KernelSelector(this),
-      buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'SELECT' })]
+      buttons
     });
 
     return dialog.launch().then(result => {
