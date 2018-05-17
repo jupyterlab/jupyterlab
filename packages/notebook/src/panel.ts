@@ -151,6 +151,16 @@ class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   readonly content: Notebook;
 
   /**
+   * The notebook used by the widget.
+   *
+   * #### Notes
+   * This attribute is deprecated. Use `.content` instead.
+   */
+  get notebook(): Notebook {
+    return this.content;
+  }
+
+  /**
    * The model for the widget.
    */
   get model(): INotebookModel {
