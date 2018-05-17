@@ -5314,6 +5314,10 @@ xterm@~2.8.1:
   version "2.8.1"
   resolved "https://registry.npmjs.org/xterm/-/xterm-2.8.1.tgz#3f6b939bcb8d015a1f247d66257102cb16a0b2e1"
 
+xterm@~3.3.0:
+  version "3.3.0"
+  resolved "https://registry.npmjs.org/xterm/-/xterm-3.3.0.tgz#b09a19fc2cd5decd21112e5c9dab0b61991f6cf3"
+
 y18n@^3.2.1:
   version "3.2.1"
   resolved "https://registry.npmjs.org/y18n/-/y18n-3.2.1.tgz#6d15fba884c08679c0d77e88e7759e811e07fa41"
