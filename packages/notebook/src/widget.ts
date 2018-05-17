@@ -861,8 +861,11 @@ class Notebook extends StaticNotebook {
 
   /**
    * Get the active cell widget.
+   *
+   * #### Notes
+   * This is a cell or undefined if there is no active cell.
    */
-  get activeCell(): Cell {
+  get activeCell(): Cell | undefined {
     return this._activeCell;
   }
 
@@ -870,10 +873,10 @@ class Notebook extends StaticNotebook {
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
-    if (this._activeCell === null) {
+    if (this.isDisposed) {
       return;
     }
-    this._activeCell = null;
+    this._activeCell = undefined;
     super.dispose();
   }
 
@@ -1910,7 +1913,7 @@ class Notebook extends StaticNotebook {
 
 
   private _activeCellIndex = -1;
-  private _activeCell: Cell = null;
+  private _activeCell: Cell | undefined = undefined;
   private _mode: NotebookMode = 'command';
   private _drag: Drag = null;
   private _dragData: { pressX: number, pressY: number, index: number } = null;

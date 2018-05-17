@@ -48,21 +48,11 @@ describe('@jupyterlab/notebook', () => {
   describe('NotebookPanel', () => {
 
     let context: Context<INotebookModel>;
-    let manager: ServiceManager.IManager;
-  
-    before(async () => {
-      manager = new ServiceManager();
-      await manager.ready;
-    });
-  
-    after(() => {
-      manager.dispose();
-    });
-  
+
     beforeEach(async () => {
-      context = await createNotebookContext('', manager);
+      context = await createNotebookContext();
     });
-  
+
     afterEach(async () => {
       await context.session.shutdown();
       context.dispose();
@@ -128,14 +118,13 @@ describe('@jupyterlab/notebook', () => {
     describe('#dispose()', () => {
 
       it('should dispose of the resources used by the widget', () => {
-        let panel = new NotebookPanel(options);
-        panel.context = context;
+        let panel = createNotebookPanel(context);
         panel.dispose();
         expect(panel.isDisposed).to.be(true);
       });
 
       it('should be safe to call more than once', () => {
-        let panel = new NotebookPanel(options);
+        let panel = createNotebookPanel(context);
         panel.dispose();
         panel.dispose();
         expect(panel.isDisposed).to.be(true);
@@ -143,27 +132,7 @@ describe('@jupyterlab/notebook', () => {
 
     });
 
-
-    describe('#onModelStateChanged()', () => {
-
-      it('should be called when the model state changes', () => {
-        let panel = createPanel(context);
-        panel.methods = [];
-        panel.model.dirty = false;
-        expect(panel.methods).to.contain('onModelStateChanged');
-      });
-
-      it('should update the title className based on the dirty state', () => {
-        let panel = createPanel(context);
-        panel.model.dirty = true;
-        expect(panel.title.className).to.contain('jp-mod-dirty');
-        panel.model.dirty = false;
-        expect(panel.title.className).to.not.contain('jp-mod-dirty');
-      });
-
-    });
-
-    describe('.ContentFactory', () => {
+    describe.skip('.ContentFactory', () => {
       // TODO: make notebook panel still take a content factory for a notebook, and use that for a default notebook? This also moves all creation options to the notebook panel that are now just part of the content widget. That would be more backwards compatible, even if it departs a bit from our story about document widgets.
       describe('#constructor', () => {
 
