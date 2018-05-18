@@ -28,13 +28,7 @@ from jupyterlab.process_app import ProcessApp
 
 
 HERE = osp.realpath(osp.dirname(__file__))
-
-
-try:
-    basestring
-    PY2 = True
-except NameError:
-    PY2 = False
+PY2 = sys.version_info[0] < 3
 
 
 def _create_notebook_dir():
