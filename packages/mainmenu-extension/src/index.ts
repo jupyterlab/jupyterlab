@@ -493,6 +493,7 @@ function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
   if (!commands.hasCommand(commandID)){
     commands.addCommand(commandID, {
       label: 'Activate Previous Active Tab',
+      isEnabled: () => !!previousId,
       execute: () => app.commands.execute(`tabmenu:activate-${previousId}`)      
     });  
   }
@@ -504,10 +505,15 @@ function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
     const populateTabs = () => {
       menu.removeGroup(tabGroup);
       tabGroup.length = 0;
+      let isPreviouslyUsedTabAttached = false;
       each(app.shell.widgets('main'), widget => {
+        if (widget.id === previousId) {
+          isPreviouslyUsedTabAttached = true;
+        }
         tabGroup.push(createMenuItem(widget));
       });
       menu.addGroup(tabGroup, 1);
+      previousId = isPreviouslyUsedTabAttached ? previousId : '';
     };
     populateTabs();
     app.shell.layoutModified.connect(() => { populateTabs(); });
