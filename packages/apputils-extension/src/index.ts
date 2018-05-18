@@ -37,7 +37,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  activatePalette
+  activatePalette, restorePalette
 } from './palette';
 
 import '../style/index.css';
@@ -134,6 +134,22 @@ const palette: JupyterLabPlugin<ICommandPalette> = {
   activate: activatePalette,
   id: '@jupyterlab/apputils-extension:palette',
   provides: ICommandPalette,
+  autoStart: true
+};
+
+
+/**
+ * The default commmand palette's restoration extension.
+ *
+ * #### Notes
+ * The command palette's restoration logic is handled separately from the
+ * command palette provider extension because the layout restorer dependency
+ * causes the command palette to be unavailable to other extensions earlier
+ * in the application load cycle.
+ */
+const paletteRestorer: JupyterLabPlugin<void> = {
+  activate: restorePalette,
+  id: '@jupyterlab/apputils-extension:palette-restorer',
   requires: [ILayoutRestorer],
   autoStart: true
 };
@@ -469,7 +485,7 @@ const state: JupyterLabPlugin<IStateDB> = {
  * Export the plugins as default.
  */
 const plugins: JupyterLabPlugin<any>[] = [
-  palette, resolver, settings, state, splash, themes
+  palette, paletteRestorer, resolver, settings, state, splash, themes
 ];
 export default plugins;
 
