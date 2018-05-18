@@ -280,7 +280,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
 
   command = CommandIDs.toggleLeftArea;
   app.commands.addCommand(command, {
-    label: args => 'Show Left Area',
+    label: args => 'Show Left Sidebar',
     execute: () => {
       if (app.shell.leftCollapsed) {
         app.shell.expandLeft();
@@ -298,7 +298,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
 
   command = CommandIDs.toggleRightArea;
   app.commands.addCommand(command, {
-    label: args => 'Show Right Area',
+    label: args => 'Show Right Sidebar',
     execute: () => {
       if (app.shell.rightCollapsed) {
         app.shell.expandRight();
