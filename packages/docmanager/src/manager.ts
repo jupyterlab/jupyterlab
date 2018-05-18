@@ -388,7 +388,7 @@ class DocumentManager implements IDisposable {
    */
   private _findContext(path: string, factoryName: string): Private.IContext | undefined {
     return find(this._contexts, context => {
-      return context.factoryName === factoryName && context.path === path;
+      return context.path === path && context.factoryName === factoryName;
     });
   }
 
