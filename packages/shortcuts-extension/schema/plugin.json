@@ -26,7 +26,7 @@
       "default": { },
       "properties": {
         "command": { "default": "tabmenu:activate-previously-used-tab" },
-        "keys": { "default": ["Ctrl Shift '"] },
+        "keys": { "default": ["Accel Shift '"] },
         "selector": { "default": "body" }
       },
       "type": "object"

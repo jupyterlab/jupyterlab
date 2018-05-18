@@ -496,7 +496,7 @@ function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
   let previousId = '';
 
   // Command to toggle between the current
-  // tab and the last modified tab.
+  // tab and the previously used tab.
   if (!commands.hasCommand(CommandIDs.activatePreviouslyUsedTab)) {
     commands.addCommand(CommandIDs.activatePreviouslyUsedTab, {
       label: 'Activate Previously Used Tab',
