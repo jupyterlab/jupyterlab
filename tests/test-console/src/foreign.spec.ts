@@ -4,8 +4,8 @@
 import expect = require('expect.js');
 
 import {
-  uuid
-} from '@jupyterlab/coreutils';
+  UUID
+} from '@phosphor/coreutils';
 
 import {
   KernelMessage, Session
@@ -107,7 +107,7 @@ describe('@jupyterlab/console', () => {
     let session: IClientSession;
 
     before(() => {
-      let path = uuid();
+      let path = UUID.uuid4();
       let sessions = [Session.startNew({ path }), Session.startNew({ path })];
       return Promise.all(sessions).then(([one, two]) => {
         local = one;

@@ -4,8 +4,8 @@
 import expect = require('expect.js');
 
 import {
-  uuid
-} from '@jupyterlab/coreutils';
+  UUID
+} from '@phosphor/coreutils';
 
 import {
   ServiceManager
@@ -37,7 +37,7 @@ describe('docregistry/savehandler', () => {
   });
 
   beforeEach(() => {
-    context = new Context({ manager, factory, path: uuid() + '.txt' });
+    context = new Context({ manager, factory, path: UUID.uuid4() + '.txt' });
     handler = new SaveHandler({ context });
     return context.initialize(true);
   });

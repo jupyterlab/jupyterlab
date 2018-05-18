@@ -18,8 +18,12 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  ISettingRegistry, IStateDB, PageConfig, URLExt, uuid
+  ISettingRegistry, IStateDB, PageConfig, URLExt
 } from '@jupyterlab/coreutils';
+
+import {
+  UUID
+} from '@phosphor/coreutils';
 
 import  {
   IFileBrowserFactory
@@ -1289,7 +1293,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const content = (nb.activeCell as CodeCell).cloneOutputArea();
       // Create a MainAreaWidget
       const widget = new MainAreaWidget({ content });
-      widget.id = `LinkedOutputView-${uuid()}`;
+      widget.id = `LinkedOutputView-${UUID.uuid4()}`;
       widget.title.label = 'Output View';
       widget.title.icon = NOTEBOOK_ICON_CLASS;
       widget.title.caption = current.title.label ? `For Notebook: ${current.title.label}` : 'For Notebook:';

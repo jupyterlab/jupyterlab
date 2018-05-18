@@ -10,8 +10,12 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  PathExt, Time, uuid
+  PathExt, Time
 } from '@jupyterlab/coreutils';
+
+import {
+  UUID
+} from '@phosphor/coreutils';
 
 import {
   RenderMimeRegistry
@@ -66,7 +70,7 @@ class ConsolePanel extends Panel {
     );
     let count = Private.count++;
     if (!path) {
-      path = `${basePath || ''}/console-${count}-${uuid()}`;
+      path = `${basePath || ''}/console-${count}-${UUID.uuid4()}`;
     }
 
     let session = this._session = new ClientSession({

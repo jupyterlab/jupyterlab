@@ -20,8 +20,12 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IChangedArgs, nbformat, uuid
+  IChangedArgs, nbformat
 } from '@jupyterlab/coreutils';
+
+import {
+    UUID
+} from '@phosphor/coreutils';
 
 import {
   IObservableJSON, IModelDB, IObservableValue, ObservableValue
@@ -145,7 +149,7 @@ class CellModel extends CodeEditor.Model implements ICellModel {
   constructor(options: CellModel.IOptions) {
     super({modelDB: options.modelDB});
 
-    this.id = options.id || uuid();
+    this.id = options.id || UUID.uuid4();
 
     this.value.changed.connect(this.onGenericChange, this);
 

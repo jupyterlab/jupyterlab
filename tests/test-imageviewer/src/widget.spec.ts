@@ -4,8 +4,8 @@
 import expect = require('expect.js');
 
 import {
-  uuid
-} from '@jupyterlab/coreutils';
+  UUID
+} from '@phosphor/coreutils';
 
 import {
   Contents, ServiceManager
@@ -52,7 +52,7 @@ class LogImage extends ImageViewer {
  * The common image model.
  */
 const IMAGE: Partial<Contents.IModel> = {
-  path: uuid() + '.png',
+  path: UUID.uuid4() + '.png',
   type: 'file',
   mimetype: 'image/png',
   content:  'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
@@ -100,7 +100,7 @@ describe('ImageViewer', () => {
     });
 
     it('should keep the title in sync with the file name', (done) => {
-      let newPath = (IMAGE as any).path = uuid() + '.png';
+      let newPath = (IMAGE as any).path = UUID.uuid4() + '.png';
       expect(widget.title.label).to.be(context.path);
       context.pathChanged.connect(() => {
         expect(widget.title.label).to.be(newPath);

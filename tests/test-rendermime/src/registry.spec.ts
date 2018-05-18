@@ -4,8 +4,8 @@
 import expect = require('expect.js');
 
 import {
-  uuid
-} from '@jupyterlab/coreutils';
+  UUID
+} from '@phosphor/coreutils';
 
 import {
   Contents, Drive, ServiceManager, Session
@@ -307,7 +307,7 @@ describe('rendermime/registry', () => {
         contents = manager.contents;
         contents.addDrive(drive);
         return manager.ready.then(() => {
-          return manager.sessions.startNew({ path: uuid() });
+          return manager.sessions.startNew({ path: UUID.uuid4() });
         }).then(s => {
           session = s;
           resolver = new RenderMimeRegistry.UrlResolver({

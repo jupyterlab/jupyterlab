@@ -17,10 +17,10 @@
   },
   "dependencies": {
     "@jupyterlab/codemirror": "^0.17.0-0",
-    "@jupyterlab/coreutils": "^2.0.0-0",
     "@jupyterlab/docregistry": "^0.17.0-0",
     "@jupyterlab/fileeditor": "^0.17.0-0",
     "@jupyterlab/services": "^3.0.0-0",
+    "@phosphor/coreutils": "^1.3.0",
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/widgets": "^1.6.0",
     "expect.js": "~0.3.1",

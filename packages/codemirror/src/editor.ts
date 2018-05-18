@@ -28,8 +28,8 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  uuid
-} from '@jupyterlab/coreutils';
+  UUID
+} from '@phosphor/coreutils';
 
 import {
   IObservableMap, IObservableString, ICollaborator
@@ -102,7 +102,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     host.addEventListener('blur', this, true);
     host.addEventListener('scroll', this, true);
 
-    this._uuid = options.uuid || uuid();
+    this._uuid = options.uuid || UUID.uuid4();
 
     // Handle selection style.
     let style = options.selectionStyle || {};

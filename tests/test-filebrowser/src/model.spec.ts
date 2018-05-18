@@ -4,8 +4,12 @@
 import expect = require('expect.js');
 
 import {
-  StateDB, uuid, PageConfig
+  StateDB, PageConfig
 } from '@jupyterlab/coreutils';
+
+import {
+  UUID
+} from '@phosphor/coreutils';
 
 import {
   DocumentManager, IDocumentManager
@@ -299,7 +303,7 @@ describe('filebrowser/model', () => {
     describe('#upload()', () => {
 
       it('should upload a file object', (done) => {
-        let fname = uuid() + '.html';
+        let fname = UUID.uuid4() + '.html';
         let file = new File(['<p>Hello world!</p>'], fname,
                             { type: 'text/html' });
         model.upload(file).then(contents => {
@@ -309,7 +313,7 @@ describe('filebrowser/model', () => {
       });
 
       it('should overwrite', () => {
-        let fname = uuid() + '.html';
+        let fname = UUID.uuid4() + '.html';
         let file = new File(['<p>Hello world!</p>'], fname,
                             { type: 'text/html' });
         return model.upload(file).then(contents => {
@@ -322,7 +326,7 @@ describe('filebrowser/model', () => {
       });
 
       it('should not overwrite', () => {
-        let fname = uuid() + '.html';
+        let fname = UUID.uuid4() + '.html';
         let file = new File(['<p>Hello world!</p>'], fname,
                             { type: 'text/html' });
         return model.upload(file).then(contents => {
@@ -335,7 +339,7 @@ describe('filebrowser/model', () => {
       });
 
       it('should emit the fileChanged signal', (done) => {
-        let fname = uuid() + '.html';
+        let fname = UUID.uuid4() + '.html';
         model.fileChanged.connect((sender, args) => {
           expect(sender).to.be(model);
           expect(args.type).to.be('save');
@@ -356,7 +360,7 @@ describe('filebrowser/model', () => {
         });
 
         it('should not upload large file', () => {
-          const fname = uuid() + '.html';
+          const fname = UUID.uuid4() + '.html';
           const file = new File([new ArrayBuffer(LARGE_FILE_SIZE + 1)], fname);
           return model.upload(file).then(() => {
             expect().fail('Upload should have failed');
@@ -378,7 +382,7 @@ describe('filebrowser/model', () => {
         });
 
         it('should not upload large notebook file', () => {
-          const fname = uuid() + '.ipynb';
+          const fname = UUID.uuid4() + '.ipynb';
           const file = new File([new ArrayBuffer(LARGE_FILE_SIZE + 1)], fname);
           return model.upload(file).then(() => {
             expect().fail('Upload should have failed');
@@ -389,7 +393,7 @@ describe('filebrowser/model', () => {
 
         for (const size of [CHUNK_SIZE - 1, CHUNK_SIZE, CHUNK_SIZE + 1, 2 * CHUNK_SIZE]) {
           it(`should upload a large file of size ${size}`, async () => {
-            const fname = uuid() + '.txt';
+            const fname = UUID.uuid4() + '.txt';
             const content = 'a'.repeat(size);
             const file = new File([content], fname);
             await model.upload(file);
@@ -398,7 +402,7 @@ describe('filebrowser/model', () => {
           });
         }
         it(`should produce progress as a large file uploads`, async () => {
-          const fname = uuid() + '.txt';
+          const fname = UUID.uuid4() + '.txt';
           const file = new File([new ArrayBuffer(2 * CHUNK_SIZE)], fname);
 
           const {cleanup, values: [start, first, second, finished]} = signalToPromises(model.uploadChanged, 4);

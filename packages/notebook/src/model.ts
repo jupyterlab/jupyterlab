@@ -11,8 +11,12 @@ import {
 } from '@jupyterlab/cells';
 
 import {
-  nbformat, uuid
+  nbformat
 } from '@jupyterlab/coreutils';
+
+import {
+  UUID
+} from '@phosphor/coreutils';
 
 import {
   IObservableJSON, IObservableUndoableList,
@@ -428,7 +432,7 @@ namespace NotebookModel {
       }
       if (this.modelDB) {
         if (!options.id) {
-          options.id = uuid();
+          options.id = UUID.uuid4();
         }
         options.modelDB = this.modelDB.view(options.id);
       }
@@ -446,7 +450,7 @@ namespace NotebookModel {
     createMarkdownCell(options: CellModel.IOptions): IMarkdownCellModel {
       if (this.modelDB) {
         if (!options.id) {
-          options.id = uuid();
+          options.id = UUID.uuid4();
         }
         options.modelDB = this.modelDB.view(options.id);
       }
@@ -464,7 +468,7 @@ namespace NotebookModel {
     createRawCell(options: CellModel.IOptions): IRawCellModel {
       if (this.modelDB) {
         if (!options.id) {
-          options.id = uuid();
+          options.id = UUID.uuid4();
         }
         options.modelDB = this.modelDB.view(options.id);
       }

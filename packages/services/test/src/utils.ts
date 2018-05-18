@@ -8,15 +8,14 @@ import WebSocket from 'ws';
 import expect from 'expect.js';
 
 import {
-  uuid
-} from '@jupyterlab/coreutils';
+  UUID
+} from '@phosphor/coreutils';
 
 import {
   JSONObject, JSONPrimitive, PromiseDelegate
 } from '@phosphor/coreutils';
 
 import { Response } from 'node-fetch';
-
 
 import {
   ISignal, Signal
@@ -433,7 +432,7 @@ class KernelTester extends SocketTester {
    */
   async start(): Promise<Kernel.IKernel> {
     // Set up the kernel request response.
-    handleRequest(this, 201, { name: 'test', id: uuid() });
+    handleRequest(this, 201, { name: 'test', id: UUID.uuid4() });
 
     // Construct a new kernel.
     let serverSettings = this.serverSettings;
@@ -487,13 +486,13 @@ class KernelTester extends SocketTester {
       if (data.header.msg_type === 'kernel_info_request') {
         // First send status busy message.
         this.parentHeader = data.header;
-        this.sendStatus(uuid(), 'busy');
+        this.sendStatus(UUID.uuid4(), 'busy');
 
         // Then send the kernel_info_reply message.
-        this.sendKernelInfoReply(uuid(), EXAMPLE_KERNEL_INFO);
+        this.sendKernelInfoReply(UUID.uuid4(), EXAMPLE_KERNEL_INFO);
 
         // Then send status idle message.
-        this.sendStatus(uuid(), 'idle');
+        this.sendStatus(UUID.uuid4(), 'idle');
         this.parentHeader = undefined;
       } else {
         let onMessage = this._onMessage;
@@ -504,7 +503,7 @@ class KernelTester extends SocketTester {
     });
   }
 
-  readonly serverSessionId = uuid();
+  readonly serverSessionId = UUID.uuid4();
 
   private _initialStatus = 'starting';
   private _kernel: Kernel.IKernel | null = null;
@@ -519,11 +518,11 @@ class KernelTester extends SocketTester {
 export
 function createSessionModel(id?: string): Session.IModel {
   return {
-    id: id || uuid(),
-    path: uuid(),
+    id: id || UUID.uuid4(),
+    path: UUID.uuid4(),
     name: '',
     type: '',
-    kernel: { id: uuid(), name: uuid() }
+    kernel: { id: UUID.uuid4(), name: UUID.uuid4() }
   };
 }
 
@@ -549,7 +548,7 @@ class SessionTester extends SocketTester {
   async startSession(): Promise<Session.ISession> {
     handleRequest(this, 201, createSessionModel());
     let serverSettings = this.serverSettings;
-    this._session = await Session.startNew({ path: uuid(), serverSettings });
+    this._session = await Session.startNew({ path: UUID.uuid4(), serverSettings });
     await this.ready;
     await this._session.kernel.ready;
     return this._session;
@@ -641,7 +640,7 @@ class SessionTester extends SocketTester {
     });
   }
 
-  readonly serverSessionId = uuid();
+  readonly serverSessionId = UUID.uuid4();
   private _initialStatus = 'starting';
   private _session: Session.ISession;
   private _onMessage: (msg: KernelMessage.IMessage) => void = null;

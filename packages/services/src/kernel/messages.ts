@@ -2,8 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  nbformat, uuid
+  nbformat
 } from '@jupyterlab/coreutils';
+
+import {
+  UUID
+} from '@phosphor/coreutils';
+
 
 import {
   JSONObject, JSONValue
@@ -29,7 +34,7 @@ namespace KernelMessage {
         username: options.username || '',
         version: '5.2',
         session: options.session,
-        msg_id: options.msgId || uuid(),
+        msg_id: options.msgId || UUID.uuid4(),
         msg_type: options.msgType
       },
       parent_header: { },

@@ -12,8 +12,8 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  uuid
-} from '@jupyterlab/coreutils';
+  UUID
+} from '@phosphor/coreutils';
 
 import {
   acceptDialog, dismissDialog
@@ -250,7 +250,7 @@ describe('@jupyterlab/apputils', () => {
       it('should connect to an existing kernel', () => {
         let other: Session.ISession;
         session.dispose();
-        return manager.startNew({ path: uuid() }).then(o => {
+        return manager.startNew({ path: UUID.uuid4() }).then(o => {
           other = o;
           session = new ClientSession({
             manager, kernelPreference: { id: other.kernel.id }

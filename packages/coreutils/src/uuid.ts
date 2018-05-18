@@ -1,7 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
 /**
+ * WARNING - This function is deprecated.
+ * Please use  '@phosphor/coreutils' UUID.uuid4() instead.
+ *
  * Get a random hex string (not a formal UUID).
  *
  * @param length - The length of the hex string.

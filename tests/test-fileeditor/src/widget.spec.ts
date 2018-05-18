@@ -16,8 +16,8 @@ import {
 } from 'simulate-event';
 
 import {
-  uuid
-} from '@jupyterlab/coreutils';
+  UUID
+} from '@phosphor/coreutils';
 
 import {
   ServiceManager
@@ -81,7 +81,7 @@ describe('fileeditorcodewrapper', () => {
     let widget: FileEditorCodeWrapper;
 
     beforeEach(() => {
-      let path = uuid() + '.py';
+      let path = UUID.uuid4() + '.py';
       context = new Context({ manager, factory: modelFactory, path });
       widget = new FileEditorCodeWrapper({
         factory: options => factoryService.newDocumentEditor(options),
@@ -126,7 +126,7 @@ describe('fileeditorcodewrapper', () => {
     let widget: LogFileEditor;
 
     beforeEach(() => {
-      let path = uuid() + '.py';
+      let path = UUID.uuid4() + '.py';
       context = new Context({ manager, factory: modelFactory, path });
       widget = new LogFileEditor({
         factory: options => factoryService.newDocumentEditor(options),
@@ -163,7 +163,7 @@ describe('fileeditorcodewrapper', () => {
           done();
         });
         context.initialize(true).then(() => {
-          return manager.contents.rename(context.path, uuid() + '.jl');
+          return manager.contents.rename(context.path, UUID.uuid4() + '.jl');
         }).catch(done);
       });
 

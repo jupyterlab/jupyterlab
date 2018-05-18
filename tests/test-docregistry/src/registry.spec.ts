@@ -4,8 +4,9 @@
 import expect = require('expect.js');
 
 import {
-  uuid
-} from '@jupyterlab/coreutils';
+  UUID
+} from '@phosphor/coreutils';
+
 
 import {
   toArray
@@ -45,7 +46,7 @@ class WidgetExtension implements DocumentRegistry.WidgetExtension {
 
 function createFactory(modelName?: string) {
   return new WidgetFactory({
-    name: uuid(),
+    name: UUID.uuid4(),
     modelName: modelName || 'text',
     fileTypes: ['text', 'foobar'],
     defaultFor: ['text', 'foobar']

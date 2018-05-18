@@ -2,8 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  uuid
-} from '@jupyterlab/coreutils';
+  UUID
+} from '@phosphor/coreutils';
 
 import {
   Message
@@ -41,7 +41,7 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
   constructor(options: MainAreaWidget.IOptions<T>) {
     super(options);
     this.addClass('jp-MainAreaWidget');
-    this.id = uuid();
+    this.id = UUID.uuid4();
 
     const content = this._content = options.content;
     const toolbar = this._toolbar = options.toolbar || new Toolbar();
@@ -55,7 +55,7 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
     layout.addWidget(content);
 
     if (!content.id) {
-      content.id = uuid();
+      content.id = UUID.uuid4();
     }
     content.node.tabIndex = -1;
 
