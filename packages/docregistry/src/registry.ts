@@ -646,6 +646,15 @@ namespace DocumentRegistry {
      * Should emit a [contentChanged] signal.
      */
     fromJSON(value: any): void;
+
+    /**
+     * Initialize model state after initial data load.
+     *
+     * #### Notes
+     * This function must be called after the initial data is loaded to set up
+     * initial model state, such as an initial undo stack, etc.
+     */
+    initialize(): void;
   }
 
   /**

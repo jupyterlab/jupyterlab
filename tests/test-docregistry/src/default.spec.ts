@@ -555,7 +555,7 @@ describe('docregistry/default', () => {
 
   });
 
-  describe.only('DocumentWidget', () => {
+  describe('DocumentWidget', () => {
 
     let manager: ServiceManager.IManager;
 

@@ -155,6 +155,13 @@ class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeMo
   }
 
   /**
+   * Initialize the model with its current state.
+   */
+  initialize(): void {
+    return;
+  }
+
+  /**
    * Trigger a state change signal.
    */
   protected triggerStateChange(args: IChangedArgs<any>): void {

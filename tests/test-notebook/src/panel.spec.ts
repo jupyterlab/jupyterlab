@@ -53,17 +53,6 @@ describe('@jupyterlab/notebook', () => {
         expect(panel).to.be.a(NotebookPanel);
       });
 
-      it('should initialize the model state', async () => {
-        context.model.fromJSON(DEFAULT_CONTENT);
-        await context.initialize(true);
-        await context.ready;
-        expect(context.model.cells.canUndo).to.be(true);
-        const panel = createNotebookPanel(context);
-        expect(panel.content.model).to.be(context.model);
-        // Model state is reset, including the undo history.
-        expect(panel.content.model.cells.canUndo).to.be(false);
-      });
-
       it('should change notebook to edit mode if we have a single empty code cell', async () => {
         const panel = createNotebookPanel(context);
         const model = panel.content.model;

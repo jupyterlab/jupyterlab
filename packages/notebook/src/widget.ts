@@ -1315,11 +1315,6 @@ class Notebook extends StaticNotebook {
     // Try to set the active cell index to 0.
     // It will be set to `-1` if there is no new model or the model is empty.
     this.activeCellIndex = 0;
-
-    // Clear the undo history of each cell.
-    if (this.model) {
-      this.model.cells.clearUndo();
-    }
   }
 
   /**

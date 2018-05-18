@@ -252,6 +252,14 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   }
 
   /**
+   * Initialize the model with its current state.
+   */
+  initialize(): void {
+    super.initialize();
+    this.cells.clearUndo();
+  }
+
+  /**
    * Handle a change in the cells list.
    */
   private _onCellsChanged(list: IObservableList<ICellModel>, change: IObservableList.IChangedArgs<ICellModel>): void {

@@ -216,19 +216,21 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
    */
   initialize(isNew: boolean): Promise<void> {
     if (isNew) {
+      this._model.initialize();
       return this._save();
     }
     if (this._modelDB) {
       return this._modelDB.connected.then(() => {
         if (this._modelDB.isPrepopulated) {
+          this._model.initialize();
           this._save();
           return void 0;
         } else {
-          return this._revert();
+          return this._revert(true);
         }
       });
     } else {
-      return this._revert();
+      return this._revert(true);
     }
   }
 
@@ -483,8 +485,11 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
 
   /**
    * Revert the document contents to disk contents.
+   *
+   * @param initializeModel - call the model's initialization function after
+   * deserializing the content.
    */
-  private _revert(): Promise<void> {
+  private _revert(initializeModel: boolean = false): Promise<void> {
     let opts: Contents.IFetchOptions = {
       format: this._factory.fileFormat,
       type: this._factory.contentType,
@@ -501,6 +506,9 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       let dirty = false;
       if (contents.format === 'json') {
         model.fromJSON(contents.content);
+        if (initializeModel) {
+          model.initialize();
+        }
       } else {
         let content = contents.content;
         // Convert line endings if necessary, marking the file
@@ -510,6 +518,9 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
           content = content.replace(/\r\n|\r/g, '\n');
         }
         model.fromString(content);
+        if (initializeModel) {
+          model.initialize();
+        }
       }
       this._updateContentsModel(contents);
       model.dirty = dirty;

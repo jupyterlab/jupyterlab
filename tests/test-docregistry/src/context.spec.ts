@@ -24,8 +24,13 @@ import {
 } from '@jupyterlab/rendermime';
 
 import {
-  waitForDialog, acceptDialog, dismissDialog
+  waitForDialog, acceptDialog, dismissDialog, createNotebookContext
 } from '../../utils';
+
+import {
+  DEFAULT_CONTENT
+} from '../../notebook-utils';
+
 
 
 describe('docregistry/context', () => {
@@ -106,19 +111,42 @@ describe('docregistry/context', () => {
 
     describe('#ready()', () => {
 
-      it('should resolve when the file is saved for the first time', (done) => {
-        context.ready.then(done, done);
-        context.initialize(true).catch(done);
+      it('should resolve when the file is saved for the first time', async () => {
+        await context.initialize(true);
+        await context.ready;
       });
 
-      it('should resolve when the file is reverted for the first time', (done) => {
+      it('should resolve when the file is reverted for the first time', async () => {
         manager.contents.save(context.path, {
           type: factory.contentType,
           format: factory.fileFormat,
           content: 'foo'
         });
-        context.ready.then(done, done);
-        context.initialize(false).catch(done);
+        await context.initialize(false);
+        await context.ready;
+      });
+
+      it('should initialize the model when the file is saved for the first time', async () => {
+        const context = await createNotebookContext();
+        context.model.fromJSON(DEFAULT_CONTENT);
+        expect(context.model.cells.canUndo).to.be(true);
+        await context.initialize(true);
+        await context.ready;
+        expect(context.model.cells.canUndo).to.be(false);
+      });
+
+      it('should initialize the model when the file is reverted for the first time', async () => {
+        const context = await createNotebookContext();
+        manager.contents.save(context.path, {
+          type: 'notebook',
+          format: 'json',
+          content: DEFAULT_CONTENT
+        });
+        context.model.fromJSON(DEFAULT_CONTENT);
+        expect(context.model.cells.canUndo).to.be(true);
+        await context.initialize(false);
+        await context.ready;
+        expect(context.model.cells.canUndo).to.be(false);
       });
 
     });
@@ -208,20 +236,17 @@ describe('docregistry/context', () => {
 
     describe('#save()', () => {
 
-      it('should save the contents of the file to disk', () => {
-        return context.initialize(true).then(() => {
-          context.model.fromString('foo');
-          return context.save();
-        }).then(() => {
-          let opts: Contents.IFetchOptions = {
-            format: factory.fileFormat,
-            type: factory.contentType,
-            content: true
-          };
-          return manager.contents.get(context.path, opts);
-        }).then(model => {
-          expect(model.content).to.be('foo');
-        });
+      it('should save the contents of the file to disk', async () => {
+        await context.initialize(true);
+        context.model.fromString('foo');
+        await context.save();
+        let opts: Contents.IFetchOptions = {
+          format: factory.fileFormat,
+          type: factory.contentType,
+          content: true
+        };
+        const model = await manager.contents.get(context.path, opts);
+        expect(model.content).to.be('foo');
       });
 
     });
