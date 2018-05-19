@@ -30,7 +30,7 @@ export
 namespace CommandIDs {
   export
   const activatePreviouslyUsedTab = 'tabmenu:activate-previously-used-tab';
-  
+
   export
   const undo = 'editmenu:undo';
 
@@ -128,6 +128,11 @@ const menuPlugin: JupyterLabPlugin<IMainMenu> = {
       category: 'Kernel Operations'
     });
 
+    palette.addItem({
+      command: CommandIDs.activatePreviouslyUsedTab,
+      category: 'Main Area'
+    });
+    
     app.shell.addToTopArea(logo);
     app.shell.addToTopArea(menu);
 
@@ -493,7 +498,7 @@ function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
   // Command to toggle between the current
   // tab and the last modified tab.
   commands.addCommand(CommandIDs.activatePreviouslyUsedTab, {
-    label: 'Activate Previous Active Tab',
+    label: 'Activate Previously Used Tab',
     isEnabled: () => !!previousId,
     execute: () => previousId && app.commands.execute(`tabmenu:activate-${previousId}`)
   });
