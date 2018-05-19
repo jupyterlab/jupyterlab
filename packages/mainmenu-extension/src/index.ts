@@ -132,7 +132,7 @@ const menuPlugin: JupyterLabPlugin<IMainMenu> = {
       command: CommandIDs.activatePreviouslyUsedTab,
       category: 'Main Area'
     });
-    
+
     app.shell.addToTopArea(logo);
     app.shell.addToTopArea(menu);
 
@@ -493,8 +493,8 @@ function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
     return { command: commandID };
   };
 
-  let previousId = "";
-  
+  let previousId = '';
+
   // Command to toggle between the current
   // tab and the last modified tab.
   commands.addCommand(CommandIDs.activatePreviouslyUsedTab, {
@@ -502,7 +502,7 @@ function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
     isEnabled: () => !!previousId,
     execute: () => previousId && app.commands.execute(`tabmenu:activate-${previousId}`)
   });
-  
+
   app.restored.then(() => {
     // Iterate over the current widgets in the
     // main area, and add them to the tab group
