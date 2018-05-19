@@ -29,6 +29,9 @@ import {
 export
 namespace CommandIDs {
   export
+  const activatePreviouslyUsedTab = 'tabmenu:activate-previously-used-tab';
+  
+  export
   const undo = 'editmenu:undo';
 
   export
@@ -464,7 +467,7 @@ function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
   menu.addGroup([
     { command: 'application:activate-next-tab' },
     { command: 'application:activate-previous-tab' },
-    { command: 'application:activate-previous-active-tab' }
+    { command: CommandIDs.activatePreviouslyUsedTab }
   ], 0);
 
   let tabGroup: Menu.IItemOptions[] = [];
@@ -489,14 +492,11 @@ function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
   
   // Command to toggle between the current
   // tab and the last modified tab.
-  const commandID = 'application:activate-previous-active-tab';
-  if (!commands.hasCommand(commandID)){
-    commands.addCommand(commandID, {
-      label: 'Activate Previous Active Tab',
-      isEnabled: () => !!previousId,
-      execute: () => app.commands.execute(`tabmenu:activate-${previousId}`)      
-    });  
-  }
+  commands.addCommand(CommandIDs.activatePreviouslyUsedTab, {
+    label: 'Activate Previous Active Tab',
+    isEnabled: () => !!previousId,
+    execute: () => previousId && app.commands.execute(`tabmenu:activate-${previousId}`)
+  });
   
   app.restored.then(() => {
     // Iterate over the current widgets in the
