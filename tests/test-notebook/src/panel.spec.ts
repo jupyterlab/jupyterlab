@@ -108,8 +108,8 @@ describe('@jupyterlab/notebook', () => {
 
     });
 
-    describe.skip('.ContentFactory', () => {
-      // TODO: make notebook panel still take a content factory for a notebook, and use that for a default notebook? This also moves all creation options to the notebook panel that are now just part of the content widget. That would be more backwards compatible, even if it departs a bit from our story about document widgets.
+    describe('.ContentFactory', () => {
+
       describe('#constructor', () => {
 
         it('should create a new ContentFactory', () => {
