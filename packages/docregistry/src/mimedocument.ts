@@ -50,8 +50,6 @@ class MimeContent extends Widget {
     this._context = options.context;
     this._renderer = options.renderer;
 
-    // TODO: Use SingletonLayout when a new version of phosphor is released. See
-    // https://github.com/phosphorjs/phosphor/issues/337
     const layout = this.layout = new BoxLayout({ spacing: 0 });
     layout.addWidget(this._renderer);
     BoxLayout.setStretch(this._renderer, 1);

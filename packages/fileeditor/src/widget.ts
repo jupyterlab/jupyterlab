@@ -176,12 +176,6 @@ class FileEditor extends Widget {
     context.pathChanged.connect(this._onPathChanged, this);
     this._onPathChanged();
 
-
-    // TODO: Use SingletonLayout when a new version of phosphor is released. See
-    // https://github.com/phosphorjs/phosphor/issues/337. Be careful: using a
-    // PanelLayout results in the CodeMirror scrollbar not working, and even if
-    // setting the overflow to auto, the codemirror scroll-past-end doesn't
-    // work.
     let layout = this.layout = new BoxLayout({ spacing: 0 });
     layout.addWidget(editorWidget);
     BoxLayout.setStretch(editorWidget, 1);
