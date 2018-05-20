@@ -57,11 +57,11 @@ and a list of tabs in the main work area:
 
 .. _left-sidebar-toggle:
 
-The left sidebar can be collapsed or expanded by selecting "Show Left Area"
+The left sidebar can be collapsed or expanded by selecting "Show Left Sidebar"
 in the View menu or by clicking on the active sidebar tab:
 
 
-.. raw:: html 
+.. raw:: html
 
   <div class="jp-youtube-video">
      <iframe src="https://www.youtube-nocookie.com/embed/PlJGecfetek?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>

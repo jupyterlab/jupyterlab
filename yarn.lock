@@ -14,13 +14,13 @@
   version "1.1.2"
   resolved "https://registry.npmjs.org/@phosphor/algorithm/-/algorithm-1.1.2.tgz#fd1de9104c9a7f34e92864586ddf2e7f2e7779e8"
 
-"@phosphor/application@^1.5.0":
-  version "1.5.0"
-  resolved "https://registry.npmjs.org/@phosphor/application/-/application-1.5.0.tgz#8d44677b1d62a54de90926bf25c921e7a5a25a49"
+"@phosphor/application@^1.6.0":
+  version "1.6.0"
+  resolved "https://registry.npmjs.org/@phosphor/application/-/application-1.6.0.tgz#e1f1bf300680f982881d222a77b24ba8589d3fa2"
   dependencies:
-    "@phosphor/commands" "^1.4.0"
+    "@phosphor/commands" "^1.5.0"
     "@phosphor/coreutils" "^1.3.0"
-    "@phosphor/widgets" "^1.5.0"
+    "@phosphor/widgets" "^1.6.0"
 
 "@phosphor/collections@^1.1.2":
   version "1.1.2"
@@ -28,9 +28,9 @@
   dependencies:
     "@phosphor/algorithm" "^1.1.2"
 
-"@phosphor/commands@^1.4.0":
-  version "1.4.0"
-  resolved "https://registry.npmjs.org/@phosphor/commands/-/commands-1.4.0.tgz#7e236a4c015daf37a9586fde29188c3dac20162f"
+"@phosphor/commands@^1.5.0":
+  version "1.5.0"
+  resolved "https://registry.npmjs.org/@phosphor/commands/-/commands-1.5.0.tgz#68c137008e2d536828405fd4ebab43675d65d42b"
   dependencies:
     "@phosphor/algorithm" "^1.1.2"
     "@phosphor/coreutils" "^1.3.0"
@@ -43,9 +43,9 @@
   version "1.3.0"
   resolved "https://registry.npmjs.org/@phosphor/coreutils/-/coreutils-1.3.0.tgz#63292d381c012c5ab0d0196e83ced829b7e04a42"
 
-"@phosphor/datagrid@^0.1.5":
-  version "0.1.5"
-  resolved "https://registry.npmjs.org/@phosphor/datagrid/-/datagrid-0.1.5.tgz#a4ff39ced37e3797b75e9c2c5d2e3c5c0a7914b6"
+"@phosphor/datagrid@^0.1.6":
+  version "0.1.6"
+  resolved "https://registry.npmjs.org/@phosphor/datagrid/-/datagrid-0.1.6.tgz#c5f6d423c2899b22c137b60f07c9054bbce59004"
   dependencies:
     "@phosphor/algorithm" "^1.1.2"
     "@phosphor/coreutils" "^1.3.0"
@@ -54,7 +54,7 @@
     "@phosphor/dragdrop" "^1.3.0"
     "@phosphor/messaging" "^1.2.2"
     "@phosphor/signaling" "^1.2.2"
-    "@phosphor/widgets" "^1.5.0"
+    "@phosphor/widgets" "^1.6.0"
 
 "@phosphor/disposable@^1.1.2":
   version "1.1.2"
@@ -100,12 +100,12 @@
   dependencies:
     "@phosphor/algorithm" "^1.1.2"
 
-"@phosphor/widgets@^1.5.0":
-  version "1.5.0"
-  resolved "https://registry.npmjs.org/@phosphor/widgets/-/widgets-1.5.0.tgz#5f998e86f5fde78d8aa44d7dc147686ca661681e"
+"@phosphor/widgets@^1.6.0":
+  version "1.6.0"
+  resolved "https://registry.npmjs.org/@phosphor/widgets/-/widgets-1.6.0.tgz#ebba8008b6b13247d03e73e5f3872c90d2c9c78f"
   dependencies:
     "@phosphor/algorithm" "^1.1.2"
-    "@phosphor/commands" "^1.4.0"
+    "@phosphor/commands" "^1.5.0"
     "@phosphor/coreutils" "^1.3.0"
     "@phosphor/disposable" "^1.1.2"
     "@phosphor/domutils" "^1.1.2"
@@ -8755,9 +8755,9 @@ xtend@^4.0.0, xtend@^4.0.1, xtend@~4.0.1:
   version "4.0.1"
   resolved "https://registry.npmjs.org/xtend/-/xtend-4.0.1.tgz#a5c6d532be656e23db820efb943a1f04998d63af"
 
-xterm@~2.8.1:
-  version "2.8.1"
-  resolved "https://registry.npmjs.org/xterm/-/xterm-2.8.1.tgz#3f6b939bcb8d015a1f247d66257102cb16a0b2e1"
+xterm@~3.3.0:
+  version "3.3.0"
+  resolved "https://registry.npmjs.org/xterm/-/xterm-3.3.0.tgz#b09a19fc2cd5decd21112e5c9dab0b61991f6cf3"
 
 y18n@^3.2.1:
   version "3.2.1"

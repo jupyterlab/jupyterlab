@@ -29,6 +29,9 @@ import {
 export
 namespace CommandIDs {
   export
+  const activatePreviouslyUsedTab = 'tabmenu:activate-previously-used-tab';
+
+  export
   const undo = 'editmenu:undo';
 
   export
@@ -123,6 +126,11 @@ const menuPlugin: JupyterLabPlugin<IMainMenu> = {
     palette.addItem({
       command: CommandIDs.shutdownAllKernels,
       category: 'Kernel Operations'
+    });
+
+    palette.addItem({
+      command: CommandIDs.activatePreviouslyUsedTab,
+      category: 'Main Area'
     });
 
     app.shell.addToTopArea(logo);
@@ -463,9 +471,9 @@ function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
   // Add commands for cycling the active tabs.
   menu.addGroup([
     { command: 'application:activate-next-tab' },
-    { command: 'application:activate-previous-tab' }
+    { command: 'application:activate-previous-tab' },
+    { command: CommandIDs.activatePreviouslyUsedTab }
   ], 0);
-
 
   let tabGroup: Menu.IItemOptions[] = [];
 
@@ -485,6 +493,16 @@ function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
     return { command: commandID };
   };
 
+  let previousId = '';
+
+  // Command to toggle between the current
+  // tab and the last modified tab.
+  commands.addCommand(CommandIDs.activatePreviouslyUsedTab, {
+    label: 'Activate Previously Used Tab',
+    isEnabled: () => !!previousId,
+    execute: () => previousId && app.commands.execute(`tabmenu:activate-${previousId}`)
+  });
+
   app.restored.then(() => {
     // Iterate over the current widgets in the
     // main area, and add them to the tab group
@@ -492,13 +510,27 @@ function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
     const populateTabs = () => {
       menu.removeGroup(tabGroup);
       tabGroup.length = 0;
+      let isPreviouslyUsedTabAttached = false;
       each(app.shell.widgets('main'), widget => {
+        if (widget.id === previousId) {
+          isPreviouslyUsedTabAttached = true;
+        }
         tabGroup.push(createMenuItem(widget));
       });
       menu.addGroup(tabGroup, 1);
+      previousId = isPreviouslyUsedTabAttached ? previousId : '';
     };
     populateTabs();
     app.shell.layoutModified.connect(() => { populateTabs(); });
+    // Update the id of the previous active tab if
+    // a new tab is selected.
+    app.shell.currentChanged.connect((sender, args) => {
+      let widget = args.oldValue;
+      if (!widget) {
+        return;
+      }
+      previousId = widget.id;
+    });
   });
 }
 

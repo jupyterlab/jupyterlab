@@ -41,7 +41,7 @@
     "@jupyterlab/launcher": "^0.16.2",
     "@jupyterlab/mainmenu": "^0.5.2",
     "@phosphor/coreutils": "^1.3.0",
-    "@phosphor/widgets": "^1.5.0"
+    "@phosphor/widgets": "^1.6.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

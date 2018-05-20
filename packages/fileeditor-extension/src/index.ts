@@ -146,6 +146,8 @@ function activate(app: JupyterLab, consoleTracker: IConsoleTracker, editorServic
       config[key] = (cached[key] === null || cached[key] === undefined) ?
         CodeEditor.defaultConfig[key] : cached[key];
     });
+    // Trigger a refresh of the rendered commands
+    app.commands.notifyCommandChanged();
   }
 
   /**
@@ -165,6 +167,7 @@ function activate(app: JupyterLab, consoleTracker: IConsoleTracker, editorServic
     });
   }
 
+  // Add a console creator to the File menu
   // Fetch the initial state of the settings.
   Promise.all([settingRegistry.load(id), restored]).then(([settings]) => {
     updateSettings(settings);

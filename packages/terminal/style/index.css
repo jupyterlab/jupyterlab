@@ -6,95 +6,19 @@
 @import url('~xterm/src/xterm.css');
 
 
-:root {
-  --jp-private-terminal-lightCursor-color: var(--md-grey-700);
-}
-
-
 .jp-Terminal {
   min-width: 240px;
   min-height: 120px;
-  padding: 8px;
-  margin: 0;
+  background: black;
+}
+
+
+.jp-Terminal.jp-mod-light {
+  background: white;
 }
 
 
 .jp-Terminal-body {
-  font-family: var(--jp-code-font-family);
-  outline: none;
-  user-select: text;
-  -webkit-user-select: text;
+  padding: 8px;
 }
 
-
-.terminal {
-  font-family: var(--jp-code-font-family);
-}
-
-
-.terminal .xterm-viewport {
-  overflow-y: auto;
-}
-
-
-.jp-Terminal-dark {
-  background: black;
-  color: white;
-}
-
-
-/**
- * xterm.js ships with the dark theme. Here we add the somewhat subtle styles to get a light theme.
- * This approach is taken directly from the xterm.js css and modified for our light theme.
- */
-
-.jp-Terminal-light {
-  background: white;
-  color: black;
-}
-
-
-.jp-Terminal-light .terminal {
-  background: white;
-  color: black;
-}
-
-
-.jp-Terminal-light .terminal.focus:not(.xterm-cursor-style-underline):not(.xterm-cursor-style-bar) .terminal-cursor {
-    background-color: var(--jp-private-terminal-lightCursor-color);
-    color: white;
-}
-
-
-.jp-Terminal-light .terminal:not(.focus) .terminal-cursor {
-    outline: 1px solid var(--jp-private-terminal-lightCursor-color);
-}
-
-
-.jp-Terminal-light .terminal:not(.xterm-cursor-style-underline):not(.xterm-cursor-style-bar).focus.xterm-cursor-blink-on .terminal-cursor {
-    background-color: transparent;
-    color: inherit;
-}
-
-
-.jp-Terminal-light .terminal.xterm-cursor-style-bar .terminal-cursor::before,
-.jp-Terminal-light .terminal.xterm-cursor-style-underline .terminal-cursor::before {
-    background-color: var(--jp-private-terminal-lightCursor-color);
-}
-
-
-.jp-Terminal-light .terminal.xterm-cursor-style-bar.focus.xterm-cursor-blink .terminal-cursor::before,
-.jp-Terminal-light .terminal.xterm-cursor-style-underline.focus.xterm-cursor-blink .terminal-cursor::before {
-    background-color: var(--jp-private-terminal-lightCursor-color);
-}
-
-
-.jp-Terminal-light .terminal .composition-view {
-    background: white;
-    color: black;
-}
-
-
-.jp-Terminal-light .terminal .xterm-viewport {
-    background-color: white;
-}

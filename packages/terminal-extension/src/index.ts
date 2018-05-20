@@ -215,7 +215,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
     isEnabled: () => tracker.currentWidget !== null
   });
 
-  commands.addCommand('terminal:increase-font', {
+  commands.addCommand(CommandIDs.increaseFont, {
     label: 'Increase Terminal Font Size',
     execute: () => {
       let options = Terminal.defaultOptions;
@@ -229,7 +229,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
     isEnabled
   });
 
-  commands.addCommand('terminal:decrease-font', {
+  commands.addCommand(CommandIDs.decreaseFont, {
     label: 'Decrease Terminal Font Size',
     execute: () => {
       let options = Terminal.defaultOptions;
@@ -244,7 +244,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
   });
 
   let terminalTheme: Terminal.Theme = 'dark';
-  commands.addCommand('terminal:toggle-theme', {
+  commands.addCommand(CommandIDs.toggleTheme, {
     label: 'Use Dark Terminal Theme',
     caption: 'Whether to use the dark terminal theme',
     isToggled: () => terminalTheme === 'dark',
@@ -257,6 +257,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
           widget.content.theme = terminalTheme;
         }
       });
+      commands.notifyCommandChanged(CommandIDs.toggleTheme);
     },
     isEnabled
   });

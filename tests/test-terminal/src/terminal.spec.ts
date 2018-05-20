@@ -8,10 +8,6 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  Platform
-} from '@phosphor/domutils';
-
-import {
   Message, MessageLoop
 } from '@phosphor/messaging';
 
@@ -74,8 +70,12 @@ describe('terminal/index', () => {
       }).then(done, done);
     });
 
-    beforeEach(() => {
+    beforeEach((done) => {
       widget = new LogTerminal();
+      Widget.attach(widget, document.body);
+      requestAnimationFrame(() => {
+        done();
+      });
     });
 
     afterEach(() => {
@@ -125,21 +125,13 @@ describe('terminal/index', () => {
 
     describe('#theme', () => {
 
-      it('should be dark by default', (done) => {
+      it('should be dark by default', () => {
         expect(widget.theme).to.be('dark');
-        requestAnimationFrame(() => {
-          expect(widget.hasClass('jp-Terminal-dark')).to.be(true);
-          done();
-        });
       });
 
-      it('should be light if we change it', (done) => {
+      it('should be light if we change it', () => {
         widget.theme = 'light';
         expect(widget.theme).to.be('light');
-        requestAnimationFrame(() => {
-          expect(widget.hasClass('jp-Terminal-light')).to.be(true);
-          done();
-        });
       });
 
     });
@@ -178,6 +170,7 @@ describe('terminal/index', () => {
 
       it('should post an update request', (done) => {
         widget.session = session;
+        Widget.detach(widget);
         Widget.attach(widget, document.body);
         requestAnimationFrame(() => {
           expect(widget.methods).to.contain('onUpdateRequest');
@@ -192,6 +185,7 @@ describe('terminal/index', () => {
       it('should post an update request', (done) => {
         widget.session = session;
         widget.hide();
+        Widget.detach(widget);
         Widget.attach(widget, document.body);
         requestAnimationFrame(() => {
           widget.methods = [];
@@ -222,12 +216,12 @@ describe('terminal/index', () => {
     describe('#onUpdateRequest()', () => {
 
       it('should set the style of the terminal', () => {
+        Widget.detach(widget);
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
         let style = window.getComputedStyle(widget.node);
         expect(style.backgroundColor).to.be('rgb(0, 0, 0)');
-        expect(style.color).to.be('rgb(255, 255, 255)');
       });
 
     });
@@ -244,6 +238,7 @@ describe('terminal/index', () => {
     describe('#onActivateRequest', () => {
 
       it('should focus the terminal element', () => {
+        Widget.detach(widget);
         Widget.attach(widget, document.body);
         expect(widget.node.contains(document.activeElement)).to.be(false);
         MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);

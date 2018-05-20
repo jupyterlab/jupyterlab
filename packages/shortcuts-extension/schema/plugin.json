@@ -22,6 +22,15 @@
       },
       "type": "object"
     },
+    "tabmenu:activate-previously-used-tab": {
+      "default": { },
+      "properties": {
+        "command": { "default": "tabmenu:activate-previously-used-tab" },
+        "keys": { "default": ["Accel Shift '"] },
+        "selector": { "default": "body" }
+      },
+      "type": "object"
+    },
     "application:toggle-mode": {
       "default": { },
       "properties": {
@@ -99,6 +108,15 @@
       "properties": {
         "command": { "default": "docmanager:save" },
         "keys": { "default": ["Accel S"] },
+        "selector": { "default": "body" }
+      },
+      "type": "object"
+    },
+    "docmanager:save-as": {
+      "default": { },
+      "properties": {
+        "command": { "default": "docmanager:save-as" },
+        "keys": { "default": ["Accel Shift S"] },
         "selector": { "default": "body" }
       },
       "type": "object"

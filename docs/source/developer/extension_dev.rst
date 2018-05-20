@@ -8,14 +8,16 @@ Extension Developer Guide
    The extension developer API is not stable and will evolve in JupyterLab beta
    releases. The extension developer API will be stable in JupyterLab 1.0.
 
-JupyterLab can be extended in three ways via:
+JupyterLab can be extended in four ways via:
 
 -  **application plugins (top level):** Application plugins extend the
    functionality of JupyterLab itself.
--  **mime renderer extension (top level):** Mime Renderer extensions are
+-  **mime renderer extensions (top level):** Mime Renderer extensions are
    a convenience for creating an extension that can render mime data and
    potentially render files of a given type.
--  document widget extensions (lower level): Document widget extensions
+-  **theme extensions (top level):** Theme extensions allow you to customize the appearance of
+   JupyterLab by adding your own fonts, CSS rules, and graphics to the application.
+-  **document widget extensions (lower level):** Document widget extensions
    extend the functionality of document widgets added to the
    application, and we cover them in :ref:`documents`.
 
@@ -166,7 +168,7 @@ If you must install a extension into a development branch of JupyterLab, you hav
     jlpm run add:sibling <path-or-url>
 
 in the JupyterLab root directory, where ``<path-or-url>`` refers either
-to an extension npm package on the local filesystem, or a URL to a git
+to an extension npm package on the local file system, or a URL to a git
 repository for an extension npm package. This operation may be
 subsequently reversed by running
 
@@ -266,21 +268,116 @@ Once you select a name, title and a description, a new theme folder will
 be created in the current directory. You can move that new folder to a
 location of your choice, and start making desired changes.
 
-The theme extension is installed the same as a regular extension (see
-[extension authoring](#Extension Authoring)).
+The theme extension is installed in the same way as a regular extension (see
+`extension authoring <#extension-authoring>`__).
 
 Standard (General-Purpose) Extensions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-See the example, `How to Extend the Notebook
+JupyterLab's modular architecture is based around the idea
+that all extensions are on equal footing, and that they interact
+with each other through typed interfaces that are provided by ``Token`` objects.
+An extension can provide a ``Token`` to the application,
+which other extensions can then request for their own use.
+
+Core Tokens
+^^^^^^^^^^^
+
+The core packages of JupyterLab provide a set of tokens,
+which are listed here, along with short descriptions of when you
+might want to use them in your extensions.
+
+- ``@jupyterlab/application:ILayoutRestorer``: An interface to the application layout
+  restoration functionality. Use this to have your activities restored across
+  page loads.
+- ``@jupyterlab/application:IRouter``: The URL router used by the application.
+  Use this to add custom URL-routing for your extension (e.g., to invoke
+  a command if the user navigates to a sub-path).
+- ``@jupyterlab/apputils:ICommandPalette``: An interface to the application command palette
+  in the left panel. Use this to add commands to the palette.
+- ``@jupyterlab/apputils:ISplashScreen``: An interface to the splash screen for the application.
+  Use this if you want to show the splash screen for your own purposes.
+- ``@jupyterlab/apputils:IThemeManager``: An interface to the theme manager for the application.
+  Most extensions will not need to use this, as they can register a
+  `theme extension <#themes>`__.
+- ``@jupyterlab/codeeditor:IEditorServices``: An interface to the text editor provider
+  for the application. Use this to create new text editors and host them in your
+  UI elements.
+- ``@jupyterlab/completer:ICompletionManager``: An interface to the completion manager
+  for the application. Use this to allow your extension to invoke a completer.
+- ``@jupyterlab/console:IConsoleTracker``: An instance tracker for code consoles.
+  Use this if you want to be able to iterate over and interact with code consoles
+  created by the application.
+- ``@jupyterlab/console:IContentFactory``: A factory object that creates new code
+  consoles. Use this if you want to create and host code consoles in your own UI elements.
+- ``@jupyterlab/coreutils:ISettingRegistry``: An interface to the JupyterLab settings system.
+  Use this if you want to store settings for your application.
+  See `extension settings <#extension-settings>`__ for more information.
+- ``@jupyterlab/coreutils:IStateDB``: An interface to the JupyterLab state database.
+  Use this if you want to store data that will persist across page loads.
+  See `state database <#state-database>`__ for more information.
+- ``@jupyterlab/docmanager:IDocumentManager``: An interface to the manager for all
+  documents used by the application. Use this if you want to open and close documents,
+  create and delete files, and otherwise interact with the file system.
+- ``@jupyterlab/filebrowser:IFileBrowserFactory``: A factory object that creates file browsers.
+  Use this if you want to create your own file browser (e.g., for a custom storage backend),
+  or to interact with other file browsers that have been created by extensions.
+- ``@jupyterlab/fileeditor:IEditorTracker``: An instance tracker for file editors.
+  Use this if you want to be able to iterate over and interact with file editors
+  created by the application.
+- ``@jupyterlab/imageviewer:IImageTracker``: An instance tracker for images.
+  Use this if you want to be able to iterate over and interact with images
+  viewed by the application.
+- ``@jupyterlab/inspector:IInspector``: An interface for adding variable inspectors to widgets.
+  Use this to add the ability to hook into the variable inspector to your extension.
+- ``@jupyterlab/launcher:ILauncher``: An interface to the application activity launcher.
+  Use this to add your extension activities to the launcher panel.
+- ``@jupyterlab/mainmenu:IMainMenu``: An interface to the main menu bar for the application.
+  Use this if you want to add your own menu items.
+- ``@jupyterlab/notebook:ICellTools``: An interface to the ``Cell Tools`` panel in the
+  application left area. Use this to add your own functionality to the panel.
+- ``@jupyterlab/notebook:IContentFactory``: A factory object that creates new notebooks.
+  Use this if you want to create and host notebooks in your own UI elements.
+- ``@jupyterlab/notebook:INotebookTracker``: An instance tracker for code consoles.
+  Use this if you want to be able to iterate over and interact with notebooks
+  created by the application.
+- ``@jupyterlab/rendermime:IRenderMimeRegistry``: An interface to the rendermime registry
+  for the application. Use this to create renderers for various mime-types in your extension.
+  Most extensions will not need to use this, as they can register a
+  `mime renderer extension <#mime-renderer-extensions>`__.
+- ``@jupyterlab/rendermime:ILatexTypesetter``: An interface to the LaTeX typesetter for the
+  application. Use this if you want to typeset math in your extension.
+- ``@jupyterlab/settingeditor:ISettingEditorTracker``: An instance tracker for setting editors.
+  Use this if you want to be able to iterate over and interact with setting editors
+  created by the application.
+- ``@jupyterlab/terminal:ITerminalTracker``: An instance tracker for terminals.
+  Use this if you want to be able to iterate over and interact with terminals
+  created by the application.
+- ``@jupyterlab/tooltip:ITooltipManager``: An interface to the tooltip manager for the application.
+  Use this to allow your extension to invoke a tooltip.
+
+Standard Extension Example
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+For a concrete example of a standard extension, see `How to Extend the Notebook
 Plugin <./notebook.html#how-to-extend-the-notebook-plugin>`__. Notice
 that the mime renderer and themes extensions above use a limited,
 simplified interface to JupyterLab's extension system. Modifying the
 notebook plugin requires the full, general-purpose interface to the
 extension system.
 
+Storing Extension Data
+^^^^^^^^^^^^^^^^^^^^^^
+
+In addition to the file system that is accessed by using the
+``@jupyterlab/services`` package, JupyterLab offers two ways for
+extensions to store data: a client-side state database that is built on
+top of ``localStorage`` and a plugin settings system that provides for
+default setting values and user overrides.
+
+
 Extension Settings
-~~~~~~~~~~~~~~~~~~
+``````````````````
 
 An extension can specify user settings using a JSON Schema. The schema
 definition should be in a file that resides in the ``schemaDir``
@@ -306,17 +403,8 @@ See the
 `fileeditor-extension <https://github.com/jupyterlab/jupyterlab/tree/master/packages/fileeditor-extension>`__
 for another example of an extension that uses settings.
 
-Storing Extension Data
-~~~~~~~~~~~~~~~~~~~~~~
-
-In addition to the file system that is accessed by using the
-``@jupyterlab/services`` package, JupyterLab offers two ways for
-extensions to store data: a client-side state database that is built on
-top of ``localStorage`` and a plugin settings system that provides for
-default setting values and user overrides.
-
 State Database
-^^^^^^^^^^^^^^
+``````````````
 
 The state database can be accessed by importing ``IStateDB`` from
 ``@jupyterlab/coreutils`` and adding it to the list of ``requires`` for
@@ -357,7 +445,7 @@ Context Menus
 JupyterLab has an application-wide context menu available as
 ``app.contextMenu``. See the Phosphor
 `docs <http://phosphorjs.github.io/phosphor/api/widgets/interfaces/contextmenu.iitemoptions.html>`__
-for the item creation options. If you wish to preempt the the
+for the item creation options. If you wish to preempt the
 application context menu, you can use a 'contextmenu' event listener and
 call ``event.stopPropagation`` to prevent the application context menu
 handler from being called (it is listening in the bubble phase on the

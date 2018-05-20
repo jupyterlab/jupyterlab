@@ -95,6 +95,10 @@ namespace CommandIDs {
 
   // For main browser only.
   export
+  const copyPath = 'filebrowser:copy-path';
+
+  // For main browser only.
+  export
   const showBrowser = 'filebrowser:activate-main';
 
   export
@@ -405,6 +409,20 @@ function addCommands(app: JupyterLab, tracker: InstanceTracker<FileBrowser>, bro
     label: 'Copy Shareable Link'
   });
 
+  commands.addCommand(CommandIDs.copyPath, {
+    execute: () => {
+      const item = browser.selectedItems().next();
+      if (!item) {
+        return;
+      }
+
+      Clipboard.copyToSystem(item.path);
+    },
+    isVisible: () => toArray(browser.selectedItems()).length === 1,
+    iconClass: 'jp-MaterialIcon jp-FileIcon',
+    label: 'Copy Path'
+  });
+
   commands.addCommand(CommandIDs.showBrowser, {
     execute: () => { app.shell.activateById(browser.id); }
   });
@@ -490,6 +508,7 @@ function createContextMenu(model: Contents.IModel | undefined, commands: Command
   }
 
   menu.addItem({ command: CommandIDs.share });
+  menu.addItem({ command: CommandIDs.copyPath });
 
   return menu;
 }
