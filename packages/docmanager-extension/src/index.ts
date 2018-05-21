@@ -479,7 +479,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   [
     CommandIDs.openDirect,
     CommandIDs.save,
-	CommandIDs.reload,
+    CommandIDs.reload,
     CommandIDs.restoreCheckpoint,
     CommandIDs.saveAs,
     CommandIDs.clone,
