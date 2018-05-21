@@ -18,8 +18,7 @@ export class ExperimentalRenderedJavascript extends RenderedJavaScript {
       try {
         const data = model.data[this.mimeType] as string;
         evalInContext(data, this.node, document, window);
-        // If output is empty after evaluating, render the plain
-        // text data
+        // If output is empty after evaluating, render the plain text value
         if (this.node.innerHTML === '') {
           const text = model.data['text/plain'] as string;
           const output = document.createElement('pre');
@@ -28,10 +27,6 @@ export class ExperimentalRenderedJavascript extends RenderedJavaScript {
         }
         return Promise.resolve();
       } catch (error) {
-        // If output is not trusted, render an informative error message
-        this.addClass('jp-RenderedText');
-        this.node.innerHTML = `<pre>Javascript Error: ${error.message}</pre>`;
-        this.node.setAttribute('data-mime-type', 'application/vnd.jupyter.stderr');
         return Promise.reject(error);
       }
     };
