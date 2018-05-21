@@ -32,6 +32,20 @@ import {
 
 /* tslint:disable */
 /**
+ * The application recovery theme token.
+ */
+export
+const IRecoveryTheme = new Token('@jupyterlab/apputils:IRecoveryTheme');
+
+
+/**
+ * The application recovery theme interface.
+ */
+export
+interface IRecoveryTheme {}
+
+
+/**
  * The theme manager token.
  */
 export
