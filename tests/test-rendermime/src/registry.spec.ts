@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  Contents, ServiceManager, Session
+  Contents, Drive, ServiceManager, Session
 } from '@jupyterlab/services';
 
 import {
@@ -274,7 +274,9 @@ describe('rendermime/registry', () => {
 
       before(() => {
         const manager = new ServiceManager();
+        const drive = new Drive({ name: 'extra' });
         contents = manager.contents;
+        contents.addDrive(drive);
         return manager.ready.then(() => {
           return manager.sessions.startNew({ path: uuid() });
         }).then(s => {
@@ -329,6 +331,22 @@ describe('rendermime/registry', () => {
           return resolver.getDownloadUrl('http://foo').then(path => {
             expect(path).to.be('http://foo');
           });
+        });
+
+      });
+
+      context('#isLocal', () => {
+
+        it('should return true for a registered IDrive`', () => {
+          expect(resolver.isLocal('extra:path/to/file')).to.be(true);
+        });
+
+        it('should return false for an unrecognized Drive`', () => {
+          expect(resolver.isLocal('unregistered:path/to/file')).to.be(false);
+        });
+
+        it('should return true for a normal filesystem-like path`', () => {
+          expect(resolver.isLocal('path/to/file')).to.be(true);
         });
 
       });
