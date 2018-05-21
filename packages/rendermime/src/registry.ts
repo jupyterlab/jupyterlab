@@ -374,7 +374,7 @@ namespace RenderMimeRegistry {
      * Resolve a relative url to a correct server path.
      */
     resolveUrl(url: string): Promise<string> {
-      if (URLExt.isLocal(url)) {
+      if (this.isLocal(url)) {
         let cwd = PathExt.dirname(this._session.path);
         url = PathExt.resolve(cwd, url);
       }
@@ -385,10 +385,24 @@ namespace RenderMimeRegistry {
      * Get the download url of a given absolute server path.
      */
     getDownloadUrl(path: string): Promise<string> {
-      if (URLExt.isLocal(path)) {
+      if (this.isLocal(path)) {
         return this._contents.getDownloadUrl(path);
       }
       return Promise.resolve(path);
+    }
+
+    /**
+     * Whether the URL should be handled by the resolver
+     * or not.
+     *
+     * #### Notes
+     * This is similar to the `isLocal` check in `URLExt`,
+     * but it also checks whether the path points to any
+     * of the `IDrive`s that may be registered with the contents
+     * manager.
+     */
+    isLocal(url: string): boolean {
+      return URLExt.isLocal(url) || !!this._contents.driveName(url);
     }
 
     private _session: Session.ISession | IClientSession;

@@ -330,6 +330,17 @@ namespace IRenderMime {
      * Get the download url of a given absolute server path.
      */
     getDownloadUrl(path: string): Promise<string>;
+
+    /**
+     * Whether the URL should be handled by the resolver
+     * or not.
+     *
+     * #### Notes
+     * This is similar to the `isLocal` check in `URLExt`,
+     * but can also perform additional checks on whether the
+     * resolver should handle a given URL.
+     */
+    isLocal?: (url: string) => boolean;
   }
 
   /**
