@@ -30,12 +30,11 @@
   },
   "dependencies": {
     "@jupyterlab/rendermime": "^0.16.2",
-    "@jupyterlab/rendermime-interfaces": "^1.0.9",
-    "@phosphor/widgets": "^1.5.0"
+    "@jupyterlab/rendermime-interfaces": "^1.0.9"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
-    "typescript": "~2.6.2"
+    "typescript": "~2.8.3"
   },
   "jupyterlab": {
     "mimeExtension": true
