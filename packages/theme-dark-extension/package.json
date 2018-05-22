@@ -12,8 +12,11 @@
     "lib/*.d.ts",
     "lib/*.js.map",
     "lib/*.js",
-    "static/index.css",
-    "static/*.ttf"
+    "static/*.css",
+    "static/*.ttf",
+    "static/*.eot",
+    "static/*.woff",
+    "static/*.woff2"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

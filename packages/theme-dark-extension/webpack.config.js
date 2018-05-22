@@ -2,11 +2,14 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const path = require('path');
 
 module.exports = {
-  entry: './style/index.css',
+  entry: {
+    index: './style/index.css',
+    embed: './style/embed.css'
+  },
   output: {
     path: path.resolve(__dirname, 'static'),
-    // we won't use this JS file, only the extracted CSS
-    filename: 'ignore.js'
+    // we won't use these JS files, only the extracted CSS
+    filename: '[name].js'
   },
   module: {
     rules: [
@@ -22,20 +25,18 @@ module.exports = {
         use: [
           {
             loader: 'svg-url-loader',
-            options: {
-            }
+            options: {}
           },
           {
             loader: 'svgo-loader',
             options: {
-              plugins: [
-              ]
+              plugins: []
             }
           }
         ]
       },
       {
-        test: /\.(png|jpg|gif|ttf)$/,
+        test: /\.(png|jpg|gif|ttf|woff|woff2|eot)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
         use: [
           {
             loader: 'url-loader',
@@ -47,7 +48,5 @@ module.exports = {
       }
     ]
   },
-  plugins: [
-    new ExtractTextPlugin('index.css'),
-  ]
+  plugins: [new ExtractTextPlugin('[name].css')]
 };
