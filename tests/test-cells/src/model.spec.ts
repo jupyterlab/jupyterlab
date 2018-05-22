@@ -302,7 +302,7 @@ describe('cells/model', () => {
             } as nbformat.IDisplayData
           ],
           source: 'foo',
-          metadata: { trusted: false, collapsed: true }
+          metadata: { trusted: false }
         };
         let model = new CodeCellModel({ cell });
         expect(model).to.be.a(CodeCellModel);
