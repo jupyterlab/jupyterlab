@@ -28,6 +28,7 @@ from jupyterlab.process_app import ProcessApp
 
 
 HERE = osp.realpath(osp.dirname(__file__))
+PY2 = sys.version_info[0] < 3
 
 
 def _create_notebook_dir():
@@ -186,10 +187,13 @@ class KarmaTestApp(ProcessTestApp):
                 '"@jupyterlab/test-<package_dir_name>"' % name
             )
 
+        if PY2:
+            karma_inject_file = karma_inject_file.encode('utf-8')
+            folder = folder.encode('utf-8')
         env = os.environ.copy()
-        env['KARMA_INJECT_FILE'] = karma_inject_file.encode('utf-8')
+        env['KARMA_INJECT_FILE'] = karma_inject_file
         env.setdefault('KARMA_FILE_PATTERN', pattern)
-        env.setdefault('KARMA_COVER_FOLDER', folder.encode('utf-8'))
+        env.setdefault('KARMA_COVER_FOLDER', folder)
         cwd = self.karma_base_dir
         cmd = ['karma', 'start'] + sys.argv[1:]
         return cmd, dict(env=env, cwd=cwd)

@@ -382,7 +382,7 @@ class OutputArea extends Widget {
   protected createRenderedMimetype(model: IOutputModel): Widget {
     let widget: Widget;
     let mimeType = this.rendermime.preferredMimeType(
-      model.data, !model.trusted
+      model.data, model.trusted ? 'any' : 'ensure'
     );
     if (mimeType) {
       let metadata = model.metadata;
@@ -413,6 +413,10 @@ class OutputArea extends Widget {
       widget = output;
     } else {
       widget = new Widget();
+      widget.node.innerHTML =
+        `No ${model.trusted ? '' : '(safe) '}renderer could be ` +
+        'found for output. It has the following MIME types: ' +
+        Object.keys(model.data).join(', ');
     }
     return widget;
   }
