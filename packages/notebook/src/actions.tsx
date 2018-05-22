@@ -1098,8 +1098,10 @@ namespace NotebookActions {
     each(cells, (cell: Cell) => {
       if (cell.model.type === 'code') {
         const {outputHidden, model} = (cell as CodeCell);
-        if (outputHidden !== model.initiallyCollapsed) {
-          model.initiallyCollapsed = outputHidden;
+        if (outputHidden) {
+          model.metadata.set('collapsed', true);
+        } else {
+          model.metadata.delete('collapsed');
         }
       }
     });

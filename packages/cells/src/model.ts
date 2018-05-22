@@ -89,11 +89,6 @@ interface ICodeCellModel extends ICellModel {
   executionCount: nbformat.ExecutionCount;
 
   /**
-   * Whether the code cell was opened as collapsed.
-   */
-  initiallyCollapsed: boolean;
-
-  /**
    * The cell outputs.
    */
   outputs: IOutputAreaModel;
@@ -373,24 +368,6 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
       return;
     }
     this.modelDB.setValue('executionCount', newValue || null);
-  }
-
-  /**
-   * Whether the cell output is collapsed.
-   */
-  get initiallyCollapsed(): boolean {
-    const collapsed = this.metadata.get('collapsed') as boolean | undefined;
-    if (collapsed === undefined) {
-      return false;
-    }
-    return collapsed;
-  }
-  set initiallyCollapsed(newValue: boolean) {
-    let oldValue = this.initiallyCollapsed;
-    if (newValue === oldValue) {
-      return;
-    }
-    this.metadata.set('collapsed', newValue);
   }
 
   /**

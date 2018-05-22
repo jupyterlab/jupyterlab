@@ -380,29 +380,6 @@ describe('cells/model', () => {
 
     });
 
-    describe('#initiallyCollapsed', () => {
-
-      it('should initialize from the metadata', () => {
-        let cell: nbformat.ICodeCell = {
-          cell_type: 'code',
-          execution_count: 1,
-          outputs: [],
-          source: 'foo',
-          metadata: { trusted: false, collapsed: true }
-        };
-        let model = new CodeCellModel({ cell });
-        expect(model.initiallyCollapsed).to.be(true);
-      });
-
-      it('should be settable', () => {
-        let model = new CodeCellModel({});
-        expect(model.initiallyCollapsed).to.be(false);
-        model.initiallyCollapsed = true;
-        expect(model.initiallyCollapsed).to.be(true);
-      });
-
-    });
-
     describe('#outputs', () => {
 
       it('should be an output area model', () => {

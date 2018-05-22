@@ -572,7 +572,7 @@ class CodeCell extends Cell {
     });
 
     // Modify state
-    this.outputHidden = this.model.initiallyCollapsed;
+    this.outputHidden = (this.model.metadata.get('collapsed') as boolean | undefined) || false;
     this.setPrompt(`${model.executionCount || ''}`);
     model.stateChanged.connect(this.onStateChanged, this);
     model.metadata.changed.connect(this.onMetadataChanged, this);

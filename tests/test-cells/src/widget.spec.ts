@@ -388,7 +388,7 @@ describe('cells/widget', () => {
 
       it('should initialize from the model', () => {
         const collapsedModel = new CodeCellModel({});
-        collapsedModel.initiallyCollapsed = true;
+        collapsedModel.metadata.set('collapsed', true);
         let widget = new CodeCell({ model: collapsedModel, rendermime });
         expect(widget.outputHidden).to.be(true);
       });
