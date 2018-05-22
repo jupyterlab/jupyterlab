@@ -82,6 +82,10 @@ jupyter lab build  # Build the app dir assets (optional)
 
 Notes:
 
+* A few of the scripts will run "python". If your target python is called something else (such as "python3") then parts of the build will fail. You may wish to build in a conda environment, or make an alias.
+
+* There are versions of Node that are too modern. You should use a version of Node < 10.
+
 * The `jlpm` command is a JupyterLab-provided, locked version of the [yarn](https://yarnpkg.com/en/) package manager.  If you have `yarn` installed
 already, you can use the `yarn` command when developing, and it will use the
 local version of `yarn` in `jupyterlab/yarn.js` when run in the repository or
