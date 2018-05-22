@@ -6,23 +6,19 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  IRecoveryTheme, IThemeManager
+  IThemeManager
 } from '@jupyterlab/apputils';
-
-
-/**
- * The Jupyter Light Theme stylesheet.
- */
-const style = '@jupyterlab/theme-light-extension/index.css';
 
 
 /**
  * A plugin for the Jupyter Light Theme.
  */
-const theme: JupyterLabPlugin<void> = {
+const plugin: JupyterLabPlugin<void> = {
   id: '@jupyterlab/theme-light-extension:plugin',
   requires: [IThemeManager],
   activate: function(app: JupyterLab, manager: IThemeManager) {
+    const style = '@jupyterlab/theme-light-extension/index.css';
+
     manager.register({
       name: 'JupyterLab Light',
       load: () => manager.loadCSS(style),
@@ -33,20 +29,4 @@ const theme: JupyterLabPlugin<void> = {
 };
 
 
-/**
- * A plugin for the Jupyter Light Theme.
- */
-const recoveryTheme: JupyterLabPlugin<IRecoveryTheme> = {
-  id: '@jupyterlab/theme-light-extension:recovery',
-  requires: [IThemeManager],
-  activate: (app: JupyterLab, manager: IThemeManager) => manager.loadCSS(style),
-  autoStart: true,
-  provides: IRecoveryTheme
-};
-
-
-/**
- * Export the plugins as default.
- */
-const plugins: JupyterLabPlugin<any>[] = [theme, recoveryTheme];
-export default plugins;
+export default plugin;

@@ -17,9 +17,11 @@ const plugin: JupyterLabPlugin<void> = {
   id: '@jupyterlab/theme-dark-extension:plugin',
   requires: [IThemeManager],
   activate: (app: JupyterLab, manager: IThemeManager) => {
+    const style = '@jupyterlab/theme-dark-extension/index.css';
+
     manager.register({
       name: 'JupyterLab Dark',
-      load: () => manager.loadCSS('@jupyterlab/theme-dark-extension/index.css'),
+      load: () => manager.loadCSS(style),
       unload: () => Promise.resolve(undefined)
     });
   },
