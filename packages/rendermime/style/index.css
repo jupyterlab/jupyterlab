@@ -287,6 +287,36 @@
   padding: 0px;
 }
 
+.jp-RenderedHTMLCommon h1 pre,
+.jp-RenderedHTMLCommon h1 code {
+  font-size: unset;
+}
+
+.jp-RenderedHTMLCommon h2 pre,
+.jp-RenderedHTMLCommon h2 code {
+  font-size: unset;
+}
+
+.jp-RenderedHTMLCommon h3 pre,
+.jp-RenderedHTMLCommon h3 code {
+  font-size: unset;
+}
+
+.jp-RenderedHTMLCommon h4 pre,
+.jp-RenderedHTMLCommon h4 code {
+  font-size: unset;
+}
+
+.jp-RenderedHTMLCommon h5 pre,
+.jp-RenderedHTMLCommon h5 code {
+  font-size: unset;
+}
+
+.jp-RenderedHTMLCommon h6 pre,
+.jp-RenderedHTMLCommon h6 code {
+  font-size: unset;
+}
+
 /* Tables */
 
 .jp-RenderedHTMLCommon table {
