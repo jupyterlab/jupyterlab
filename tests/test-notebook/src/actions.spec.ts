@@ -1348,7 +1348,11 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.persistOutputsCollapsed(widget);
         for (const cell of widget.widgets) {
           if (cell instanceof CodeCell) {
-            expect(cell.model.initiallyCollapsed).to.be(cell.outputHidden);
+            if (cell.outputHidden) {
+              expect(cell.model.metadata.get('collapsed')).to.be(true);
+            } else {
+              expect(cell.model.metadata.has('collapsed')).to.be(false);
+            }
           }
         }
       });
