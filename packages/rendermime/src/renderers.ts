@@ -78,7 +78,7 @@ function renderHTML(options: renderHTML.IOptions): Promise<void> {
   // }
 
   // Handle default behavior of nodes.
-  Private.handleDefaults(host);
+  Private.handleDefaults(host, resolver);
 
   // Patch the urls if a resolver is available.
   let promise: Promise<void>;
@@ -343,7 +343,7 @@ function renderMarkdown(options: renderMarkdown.IRenderOptions): Promise<void> {
     // }
 
     // Handle default behavior of nodes.
-    Private.handleDefaults(host);
+    Private.handleDefaults(host, resolver);
 
     // Apply ids to the header nodes.
     Private.headerAnchors(host);
@@ -608,12 +608,15 @@ namespace Private {
    * Handle the default behavior of nodes.
    */
   export
-  function handleDefaults(node: HTMLElement): void {
+  function handleDefaults(node: HTMLElement, resolver?: IRenderMime.IResolver): void {
     // Handle anchor elements.
     let anchors = node.getElementsByTagName('a');
     for (let i = 0; i < anchors.length; i++) {
       let path = anchors[i].href;
-      if (URLExt.isLocal(path)) {
+      const isLocal = (resolver && resolver.isLocal) ?
+                      resolver.isLocal(path) :
+                      URLExt.isLocal(path);
+      if (isLocal) {
         anchors[i].target = '_self';
       } else {
         anchors[i].target = '_blank';
@@ -677,7 +680,7 @@ namespace Private {
       let headers = node.getElementsByTagName(headerType);
       for (let i=0; i < headers.length; i++) {
         let header = headers[i];
-        header.id = header.innerHTML.replace(/ /g, '-');
+        header.id = encodeURIComponent(header.innerHTML.replace(/ /g, '-'));
         let anchor = document.createElement('a');
         anchor.target = '_self';
         anchor.textContent = '¶';
@@ -693,7 +696,10 @@ namespace Private {
    */
   function handleAttr(node: HTMLElement, name: 'src' | 'href', resolver: IRenderMime.IResolver): Promise<void> {
     let source = node.getAttribute(name);
-    if (!source || URLExt.parse(source).protocol === 'data:') {
+    const isLocal = resolver.isLocal ?
+                    resolver.isLocal(source) :
+                    URLExt.isLocal(source);
+    if (!source || !isLocal) {
       return Promise.resolve(undefined);
     }
     node.setAttribute(name, '');
@@ -718,8 +724,11 @@ namespace Private {
     // Get the link path without the location prepended.
     // (e.g. "./foo.md#Header 1" vs "http://localhost:8888/foo.md#Header 1")
     let href = anchor.getAttribute('href');
+    const isLocal = resolver.isLocal ?
+                    resolver.isLocal(href) :
+                    URLExt.isLocal(href);
     // Bail if it is not a file-like url.
-    if (!href || href.indexOf('://') !== -1 && href.indexOf('//') === 0) {
+    if (!href || !isLocal) {
       return Promise.resolve(undefined);
     }
     // Remove the hash until we can handle it.
@@ -736,7 +745,7 @@ namespace Private {
     // Get the appropriate file path.
     return resolver.resolveUrl(href).then(path => {
       // Handle the click override.
-      if (linkHandler && URLExt.isLocal(path)) {
+      if (linkHandler) {
         linkHandler.handleLink(anchor, path);
       }
       // Get the appropriate file download path.
