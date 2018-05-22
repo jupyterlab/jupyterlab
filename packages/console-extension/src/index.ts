@@ -166,7 +166,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
 
   // The launcher callback.
   let callback = (cwd: string, name: string) => {
-    return createConsole({ basePath: cwd, kernelPreference: { name } });
+    return createConsole({ basePath: cwd, kernelPreference: { name }});
   };
 
   // Add a launcher item if the launcher is available.
@@ -214,6 +214,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
         contentFactory,
         mimeTypeService: editorServices.mimeTypeService,
         rendermime,
+        setBusy: app.setBusy.bind(app),
         ...options as Partial<ConsolePanel.IOptions>
       });
 

@@ -18,7 +18,7 @@ import {
 } from './contents';
 
 import {
-  Kernel, KernelManager
+  Kernel
 } from './kernel';
 
 import {
@@ -61,7 +61,6 @@ class ServiceManager implements ServiceManager.IManager {
     this.terminals = new TerminalManager(options);
     this.builder = new BuildManager(options);
     this.workspaces = new WorkspaceManager(options);
-    this.kernels = new KernelManager(options);
 
     this.sessions.specsChanged.connect((sender, specs) => {
       this._specsChanged.emit(specs);
@@ -102,7 +101,6 @@ class ServiceManager implements ServiceManager.IManager {
     this.contents.dispose();
     this.sessions.dispose();
     this.terminals.dispose();
-    this.kernels.dispose();
   }
 
   /**
@@ -146,11 +144,6 @@ class ServiceManager implements ServiceManager.IManager {
    * Get the workspace manager instance.
    */
   readonly workspaces: WorkspaceManager;
-
-  /**
-   * Get the kernels manager instance.
-   */
-  readonly kernels: KernelManager;
 
   /**
    * Test whether the manager is ready.
@@ -222,11 +215,6 @@ namespace ServiceManager {
      * The terminals manager for the manager.
      */
     readonly terminals: TerminalSession.IManager;
-
-    /**
-     * The kernels manager for the manager.
-     */
-    readonly kernels: Kernel.IManager;
 
     /**
      * Test whether the manager is ready.

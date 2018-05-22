@@ -259,22 +259,6 @@ class KernelManager implements Kernel.IManager {
   }
 
   /**
-   * Update a kernel's execuction status.
-   */
-  updateStatus(id: string, status: string) {
-    for (let i = 0; i < this._models.length; i++) {
-      const model = this._models[i];
-      if (model.id === id) {
-        if (model.execution_state !== status) {
-          this._models[i] = {...model, execution_state: status};
-          this._runningChanged.emit(this._models.slice());
-        }
-        break;
-      }
-    }
-  }
-
-  /**
    * Handle a kernel terminating.
    */
   private _onTerminated(id: string): void {
