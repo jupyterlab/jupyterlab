@@ -135,6 +135,7 @@ class OutputArea extends Widget {
       this._insertOutput(i, output);
     }
     model.changed.connect(this.onModelChanged, this);
+    model.stateChanged.connect(this.onStateChanged, this);
   }
 
   /**
@@ -247,6 +248,16 @@ class OutputArea extends Widget {
       break;
     default:
       break;
+    }
+  }
+
+  /**
+   * Follow changes on the output model state.
+   */
+  protected onStateChanged(sender: IOutputAreaModel): void {
+    for (let i = 0; i < this.model.length; i++) {
+      this._setOutput(i, this.model.get(i));
+      this.outputLengthChanged.emit(this.model.length);
     }
   }
 
