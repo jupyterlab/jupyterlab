@@ -752,7 +752,7 @@ class ClientSession implements IClientSession {
       } else {
         if (this._busyDisposable) {
           this._busyDisposable.dispose();
-          delete this._busyDisposable;
+          this._busyDisposable = null;
         }
       }
     }
@@ -792,7 +792,7 @@ class ClientSession implements IClientSession {
   private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);
   private _dialog: Dialog<any> | null = null;
   private _setBusy: () => IDisposable | undefined;
-  private _busyDisposable: IDisposable | undefined;
+  private _busyDisposable: IDisposable | null = null;
 }
 
 
