@@ -382,7 +382,7 @@ class OutputArea extends Widget {
   protected createRenderedMimetype(model: IOutputModel): Widget {
     let widget: Widget;
     let mimeType = this.rendermime.preferredMimeType(
-      model.data, !model.trusted
+      model.data, model.trusted ? 'any' : 'ensure'
     );
     if (mimeType) {
       let metadata = model.metadata;

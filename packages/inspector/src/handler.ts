@@ -157,7 +157,7 @@ class InspectionHandler implements IDisposable, IInspector.IInspectable {
       }
 
       const { data } = reply;
-      const mimeType = this._rendermime.preferredMimeType(data, true);
+      const mimeType = this._rendermime.preferredMimeType(data);
 
       if (mimeType) {
         const widget = this._rendermime.createRenderer(mimeType);

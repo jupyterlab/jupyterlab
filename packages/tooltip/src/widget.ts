@@ -79,7 +79,7 @@ class Tooltip extends Widget {
     this._editor = options.editor;
     this._rendermime = options.rendermime;
 
-    const mimeType = this._rendermime.preferredMimeType(options.bundle, false);
+    const mimeType = this._rendermime.preferredMimeType(options.bundle, 'any');
 
     if (!mimeType) {
       return;

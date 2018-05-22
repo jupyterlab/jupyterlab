@@ -177,12 +177,12 @@ describe('rendermime/registry', () => {
           'text/plain': 'foo',
           'text/html': '<h1>foo</h1>'
         });
-        expect(r.preferredMimeType(model.data, false)).to.be('text/html');
+        expect(r.preferredMimeType(model.data, 'any')).to.be('text/html');
       });
 
       it('should return `undefined` if there are no registered mimeTypes', () => {
         let model = createModel({ 'text/fizz': 'buzz' });
-        expect(r.preferredMimeType(model.data, false)).to.be(void 0);
+        expect(r.preferredMimeType(model.data, 'any')).to.be(void 0);
       });
 
       it('should select the mimeType that is safe', () => {
@@ -191,7 +191,7 @@ describe('rendermime/registry', () => {
           'text/javascript': 'window.x = 1',
           'image/png': 'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
         });
-        expect(r.preferredMimeType(model.data, true)).to.be('image/png');
+        expect(r.preferredMimeType(model.data)).to.be('image/png');
       });
 
       it('should render the mimeType that is sanitizable', () => {
@@ -199,14 +199,14 @@ describe('rendermime/registry', () => {
           'text/plain': 'foo',
           'text/html': '<h1>foo</h1>'
         });
-        expect(r.preferredMimeType(model.data, true)).to.be('text/html');
+        expect(r.preferredMimeType(model.data)).to.be('text/html');
       });
 
-      it('should return `undefined` if only unsafe options with `ensure`', () => {
+      it('should return `undefined` if only unsafe options with default `ensure`', () => {
         let model = createModel({
           'image/svg+xml': '',
         });
-        expect(r.preferredMimeType(model.data, true)).to.be(void 0);
+        expect(r.preferredMimeType(model.data)).to.be(void 0);
       });
 
       it('should return `undefined` if only unsafe options with `ensure`', () => {

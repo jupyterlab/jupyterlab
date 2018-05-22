@@ -116,20 +116,18 @@ class RenderMimeRegistry {
    *
    * @param bundle - The bundle of mime data.
    *
-   * @param safe - How to consider safe/unsafe factories. If true or 'ensure',
-   *   it will only consider safe factories. If false, any factory will be
+   * @param safe - How to consider safe/unsafe factories. If 'ensure',
+   *   it will only consider safe factories. If 'any', any factory will be
    *   considered. If 'prefer', unsafe factories will be considered, but
    *   only after the safe options have been exhausted.
    *
    * @returns The preferred mime type from the available factories,
    *   or `undefined` if the mime type cannot be rendered.
    */
-  preferredMimeType(bundle: ReadonlyJSONObject, safe: boolean | 'prefer' | 'ensure'): string | undefined {
-    if (safe === 'ensure') {
-      safe = true;  // Equivalent
-    }
+  preferredMimeType(bundle: ReadonlyJSONObject, safe: 'ensure' | 'prefer' | 'any' = 'ensure'): string | undefined {
+
     // Try to find a safe factory first, if preferred.
-    if (safe === true || safe === 'prefer') {
+    if (safe === 'ensure' || safe === 'prefer') {
       for (let mt of this.mimeTypes) {
         if (mt in bundle && this._factories[mt].safe) {
           return mt;
@@ -137,7 +135,7 @@ class RenderMimeRegistry {
       }
     }
 
-    if (safe === 'prefer' || safe === false) {
+    if (safe !== 'ensure') {
       // Otherwise, search for the best factory among all factories.
       for (let mt of this.mimeTypes) {
         if (mt in bundle) {
