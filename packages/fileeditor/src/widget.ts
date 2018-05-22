@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  BoxLayout, Widget
+  StackedLayout, Widget
 } from '@phosphor/widgets';
 
 import {
@@ -176,9 +176,8 @@ class FileEditor extends Widget {
     context.pathChanged.connect(this._onPathChanged, this);
     this._onPathChanged();
 
-    let layout = this.layout = new BoxLayout({ spacing: 0 });
+    let layout = this.layout = new StackedLayout();
     layout.addWidget(editorWidget);
-    BoxLayout.setStretch(editorWidget, 1);
   }
 
   /**

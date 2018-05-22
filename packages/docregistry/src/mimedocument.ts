@@ -22,7 +22,7 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  BoxLayout, Widget
+  StackedLayout, Widget
 } from '@phosphor/widgets';
 
 import {
@@ -50,9 +50,8 @@ class MimeContent extends Widget {
     this._context = options.context;
     this._renderer = options.renderer;
 
-    const layout = this.layout = new BoxLayout({ spacing: 0 });
+    const layout = this.layout = new StackedLayout();
     layout.addWidget(this._renderer);
-    BoxLayout.setStretch(this._renderer, 1);
 
     this._context.ready.then(() => {
       return this._render();
