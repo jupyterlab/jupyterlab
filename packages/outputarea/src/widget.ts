@@ -257,8 +257,8 @@ class OutputArea extends Widget {
   protected onStateChanged(sender: IOutputAreaModel): void {
     for (let i = 0; i < this.model.length; i++) {
       this._setOutput(i, this.model.get(i));
-      this.outputLengthChanged.emit(this.model.length);
     }
+    this.outputLengthChanged.emit(this.model.length);
   }
 
   /**
