@@ -1090,7 +1090,7 @@ namespace NotebookActions {
    */
   export
   function persistOutputsCollapsed(widget: Notebook): void {
-    if (!widget.model || !widget.activeCell) {
+    if (!widget.model) {
       return;
     }
     let state = Private.getState(widget);

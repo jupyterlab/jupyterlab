@@ -1585,7 +1585,7 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.hideAllOutputs,
     CommandIDs.showAllOutputs,
     CommandIDs.enableOutputScrolling,
-    CommandIDs.disableOutputScrolling,
+    CommandIDs.disableOutputScrolling
   ].forEach(command => { palette.addItem({ command, category }); });
 }
 
@@ -1646,8 +1646,7 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
     name: 'Notebook',
     persistAndSave: (current: NotebookPanel) => {
       NotebookActions.persistOutputsCollapsed(current.notebook);
-      app.commands.execute('docmanager:save');
-      return Promise.resolve();
+      return app.commands.execute('docmanager:save');
     }
   } as IFileMenu.IPersistAndSave<NotebookPanel>);
 
