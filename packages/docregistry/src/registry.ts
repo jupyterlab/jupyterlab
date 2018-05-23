@@ -1204,7 +1204,7 @@ interface IDocumentWidget<T extends Widget = Widget, U extends DocumentRegistry.
   /**
    * A promise resolving when the content widget is ready to be revealed.
    */
-  readonly ready: Promise<void>;
+  readonly reveal: Promise<void>;
 
   /**
    * The context associated with the document.

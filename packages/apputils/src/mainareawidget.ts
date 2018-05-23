@@ -67,12 +67,12 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
     this.title.changed.connect(this._updateContentTitle, this);
     content.disposed.connect(() => this.dispose());
 
-    if (options.ready) {
+    if (options.reveal) {
       layout.addWidget(spinner);
       // Make sure the ready promise is a Promise<void> to avoid leaking any
       // results.
-      this._ready = options.ready.then(() => {
-        this._isReady = true;
+      this._reveal = options.reveal.then(() => {
+        this._isRevealed = true;
         const active = document.activeElement === spinner.node;
         spinner.dispose();
         layout.addWidget(content);
@@ -95,8 +95,8 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
     } else {
       spinner.dispose();
       layout.addWidget(content);
-      this._isReady = true;
-      this._ready = Promise.resolve(void 0);
+      this._isRevealed = true;
+      this._reveal = Promise.resolve(undefined);
     }
   }
 
@@ -111,17 +111,17 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
   readonly toolbar: Toolbar;
 
   /**
-   * Whether the widget is fully populated.
+   * Whether the widget is revealed.
    */
-  get isReady(): boolean {
-    return this._isReady;
+  get isRevealed(): boolean {
+    return this._isRevealed;
   }
 
   /**
-   * A promise that resolves when the widget is fully populated.
+   * A promise that resolves when the widget is ready to be revealed.
    */
-  get ready(): Promise<void> {
-    return this._ready;
+  get reveal(): Promise<void> {
+    return this._reveal;
   }
 
   /**
@@ -139,7 +139,7 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
     case 'mouseup':
     case 'mouseout':
       let target = event.target as HTMLElement;
-      if (this._isReady &&
+      if (this._isRevealed &&
           this.toolbar.node.contains(document.activeElement) &&
           target.tagName !== 'SELECT') {
         this._focusContent();
@@ -170,7 +170,7 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    if (this._isReady) {
+    if (this._isRevealed) {
       this._focusContent();
     } else {
       this._spinner.node.focus();
@@ -239,8 +239,8 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
   private _changeGuard = false;
   private _spinner = new Spinner();
 
-  private _isReady = false;
-  private _ready: Promise<void>;
+  private _isRevealed = false;
+  private _reveal: Promise<void>;
 }
 
 
@@ -265,9 +265,9 @@ namespace MainAreaWidget {
     toolbar?: Toolbar;
 
     /**
-     * An optional promise for when the content is ready to be shown.
+     * An optional promise for when the content is ready to be revealed.
      */
-    ready?: Promise<any>;
+    reveal?: Promise<any>;
   }
 
   /**
@@ -293,9 +293,9 @@ namespace MainAreaWidget {
     toolbar?: Toolbar;
 
     /**
-     * An optional promise for when the content is ready to be shown.
+     * An optional promise for when the content is ready to be revealed.
      */
-    ready?: Promise<any>;
+    reveal?: Promise<any>;
   }
 
 }

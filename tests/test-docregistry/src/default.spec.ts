@@ -601,23 +601,23 @@ describe('docregistry/default', () => {
 
     });
 
-    describe('#ready', () => {
+    describe('#reveal', () => {
       beforeEach(setup);
 
-      it('should resolve after the ready and context ready promises', async () => {
+      it('should resolve after the reveal and context ready promises', async () => {
         let x = Object.create(null);
-        let ready = sleep(300, x);
+        let reveal = sleep(300, x);
         let contextReady = Promise.all([context.ready, x]);
-        let widget = new DocumentWidget({ context, content, ready: ready});
-        expect(widget.isReady).to.be(false);
+        let widget = new DocumentWidget({ context, content, reveal});
+        expect(widget.isRevealed).to.be(false);
 
-        // Our promise should resolve before the widget ready promise.
-        expect(await Promise.race([widget.ready, ready])).to.be(x);
+        // Our promise should resolve before the widget reveal promise.
+        expect(await Promise.race([widget.reveal, reveal])).to.be(x);
         // The context ready promise should also resolve first.
         context.initialize(true);
-        expect(await Promise.race([widget.ready, contextReady])).to.eql([undefined, x]);
-        // The widget.ready promise should finally resolve.
-        expect(await widget.ready).to.be(undefined);
+        expect(await Promise.race([widget.reveal, contextReady])).to.eql([undefined, x]);
+        // The widget.reveal promise should finally resolve.
+        expect(await widget.reveal).to.be(undefined);
       });
 
     });

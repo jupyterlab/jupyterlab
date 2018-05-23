@@ -419,8 +419,8 @@ export
 class DocumentWidget<T extends Widget = Widget, U extends DocumentRegistry.IModel = DocumentRegistry.IModel> extends MainAreaWidget<T> implements IDocumentWidget<T, U> {
   constructor(options: DocumentWidget.IOptions<T, U>) {
 
-    // Include the context ready promise in the widget ready promise
-    options.ready = Promise.all([options.ready, options.context.ready]);
+    // Include the context ready promise in the widget reveal promise
+    options.reveal = Promise.all([options.reveal, options.context.ready]);
     super(options);
 
     this.context = options.context;

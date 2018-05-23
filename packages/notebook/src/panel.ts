@@ -62,8 +62,8 @@ class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    */
   constructor(options: DocumentWidget.IOptions<Notebook, INotebookModel>) {
     // Set default options
-    const notebookReady = new PromiseDelegate<void>();
-    options.ready = Promise.all([options.ready, notebookReady.promise]);
+    const notebookReveal = new PromiseDelegate<void>();
+    options.reveal = Promise.all([options.reveal, notebookReveal.promise]);
     super(options);
     this._activated = new Signal<this, void>(this);
 
@@ -81,11 +81,11 @@ class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
         return;
       }
 
-      // The notebook widget is now ready to be shown.
-      notebookReady.resolve(undefined);
+      // The notebook widget is now ready to be revealed.
+      notebookReveal.resolve(undefined);
     });
 
-    this.ready.then(() => {
+    this.reveal.then(() => {
       // Set the document edit mode on initial open if it looks like a new document.
       if (this.content.widgets.length === 1) {
         let cellModel = this.content.widgets[0].model;
