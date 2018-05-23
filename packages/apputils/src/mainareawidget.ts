@@ -69,13 +69,13 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
 
     if (options.reveal) {
       layout.addWidget(spinner);
-      // Make sure the ready promise is a Promise<void> to avoid leaking any
+      // Make sure the revealed promise is a Promise<void> to avoid leaking any
       // results.
       this._revealed = options.reveal.then(() => {
-        this._isRevealed = true;
         const active = document.activeElement === spinner.node;
         spinner.dispose();
         layout.addWidget(content);
+        this._isRevealed = true;
         if (active) {
           this._focusContent();
         }
@@ -88,10 +88,12 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
         error.node.appendChild(pre);
         BoxLayout.setStretch(error, 1);
         spinner.dispose();
+        content.dispose();
         layout.addWidget(error);
+        this._isRevealed = true;
         throw(error);
       });
-    // Handle no populated promise.
+    // Handle no reveal promise.
     } else {
       spinner.dispose();
       layout.addWidget(content);
@@ -111,7 +113,7 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
   readonly toolbar: Toolbar;
 
   /**
-   * Whether the widget is revealed.
+   * Whether the content widget or an error is revealed.
    */
   get isRevealed(): boolean {
     return this._isRevealed;
