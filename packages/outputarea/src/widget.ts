@@ -135,6 +135,7 @@ class OutputArea extends Widget {
       this._insertOutput(i, output);
     }
     model.changed.connect(this.onModelChanged, this);
+    model.stateChanged.connect(this.onStateChanged, this);
   }
 
   /**
@@ -251,6 +252,16 @@ class OutputArea extends Widget {
   }
 
   /**
+   * Follow changes on the output model state.
+   */
+  protected onStateChanged(sender: IOutputAreaModel): void {
+    for (let i = 0; i < this.model.length; i++) {
+      this._setOutput(i, this.model.get(i));
+    }
+    this.outputLengthChanged.emit(this.model.length);
+  }
+
+  /**
    * Clear the widget inputs and outputs.
    */
   private _clear(): void {
@@ -319,7 +330,7 @@ class OutputArea extends Widget {
   private _setOutput(index: number, model: IOutputModel): void {
     let layout = this.layout as PanelLayout;
     let panel = layout.widgets[index] as Panel;
-    let renderer = panel.widgets[1] as IRenderMime.IRenderer;
+    let renderer = (panel.widgets ? panel.widgets[1] : panel) as IRenderMime.IRenderer;
     if (renderer.renderModel) {
       renderer.renderModel(model);
     } else {
