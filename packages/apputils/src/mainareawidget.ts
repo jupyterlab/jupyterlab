@@ -226,11 +226,13 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
    * Give focus to the content.
    */
   private _focusContent(): void {
-    // TODO: perhaps we give the widget a chance to activate, and if that doesn't change the focus, *then* we focus the content node.
+    // Focus the content node if we aren't already focused on it or a
+    // descendent.
     if (!this.content.node.contains(document.activeElement)) {
       this.content.node.focus();
     }
-    // Give the content a chance to activate.
+
+    // Activate the content asynchronously (which may change the focus).
     this.content.activate();
   }
 
