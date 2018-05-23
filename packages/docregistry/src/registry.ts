@@ -1196,9 +1196,24 @@ namespace DocumentRegistry {
  */
 export
 interface IDocumentWidget<T extends Widget = Widget, U extends DocumentRegistry.IModel = DocumentRegistry.IModel> extends Widget {
+  /**
+   * The content widget.
+   */
   readonly content: T;
+
+  /**
+   * A promise resolving when the content widget is ready to be revealed.
+   */
   readonly ready: Promise<void>;
+
+  /**
+   * The context associated with the document.
+   */
   readonly context: DocumentRegistry.IContext<U>;
+
+  /**
+   * The toolbar for the widget.
+   */
   readonly toolbar: Toolbar<Widget>;
 }
 

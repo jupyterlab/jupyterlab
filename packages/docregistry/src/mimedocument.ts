@@ -44,7 +44,7 @@ class MimeContent extends Widget {
    */
   constructor(options: MimeContent.IOptions) {
     super();
-    this.addClass('jp-MimeDocument'); // maybe move to the MainAreaWidget in the factory?
+    this.addClass('jp-MimeDocument');
     this._mimeType = options.mimeType;
     this._dataType = options.dataType || 'string';
     this._context = options.context;

@@ -13,7 +13,7 @@ JupyterLab can be extended in several ways:
    application, and we cover them in this section.
 
 For this section, the term 'document' refers to any visual thing that
-is backed by a file stored on disk (e.g. uses Contents API).
+is backed by a file stored on disk (i.e. uses Contents API).
 
 Overview of document architecture
 ---------------------------------
