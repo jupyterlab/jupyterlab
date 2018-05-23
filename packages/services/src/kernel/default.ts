@@ -109,17 +109,20 @@ class DefaultKernel implements Kernel.IKernel {
   }
 
   /**
-   * A signal emitted for any kernel messages sent or received.
-   */
-  get anyMessage(): ISignal<this, DefaultKernel.IAnyMessageArgs> {
-    return this._anyMessage;
-  }
-
-  /**
    * A signal emitted for unhandled kernel message.
    */
   get unhandledMessage(): ISignal<this, KernelMessage.IMessage> {
     return this._unhandledMessage;
+  }
+
+  /**
+   * A signal emitted for any kernel message.
+   *
+   * Note: The behavior is undefined if the message is modified
+   * during message handling. As such, it should be treated as read-only.
+   */
+  get anyMessage(): ISignal<this, DefaultKernel.IAnyMessageArgs> {
+    return this._anyMessage;
   }
 
   /**
