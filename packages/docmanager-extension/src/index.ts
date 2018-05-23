@@ -320,7 +320,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   commands.addCommand(CommandIDs.restoreCheckpoint, {
-    label: () => `Revert ${fileType()} to Saved`,
+    label: () => `Revert ${fileType()} to Checkpoint`,
     caption: 'Revert contents to previous checkpoint',
     isEnabled,
     execute: () => {
