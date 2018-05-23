@@ -601,7 +601,7 @@ describe('docregistry/default', () => {
 
     });
 
-    describe('#reveal', () => {
+    describe('#revealed', () => {
       beforeEach(setup);
 
       it('should resolve after the reveal and context ready promises', async () => {
@@ -612,12 +612,12 @@ describe('docregistry/default', () => {
         expect(widget.isRevealed).to.be(false);
 
         // Our promise should resolve before the widget reveal promise.
-        expect(await Promise.race([widget.reveal, reveal])).to.be(x);
+        expect(await Promise.race([widget.revealed, reveal])).to.be(x);
         // The context ready promise should also resolve first.
         context.initialize(true);
-        expect(await Promise.race([widget.reveal, contextReady])).to.eql([undefined, x]);
-        // The widget.reveal promise should finally resolve.
-        expect(await widget.reveal).to.be(undefined);
+        expect(await Promise.race([widget.revealed, contextReady])).to.eql([undefined, x]);
+        // The widget.revealed promise should finally resolve.
+        expect(await widget.revealed).to.be(undefined);
       });
 
     });

@@ -72,7 +72,7 @@ class CSVViewer extends Widget {
 
     this._context.ready.then(() => {
       this._updateGrid();
-      this._reveal.resolve(undefined);
+      this._revealed.resolve(undefined);
       // Throttle the rendering rate of the widget.
       this._monitor = new ActivityMonitor({
         signal: context.model.contentChanged,
@@ -92,8 +92,8 @@ class CSVViewer extends Widget {
   /**
    * A promise that resolves when the csv viewer is ready to be revealed.
    */
-  get reveal() {
-    return this._reveal.promise;
+  get revealed() {
+    return this._revealed.promise;
   }
 
   /**
@@ -145,7 +145,7 @@ class CSVViewer extends Widget {
   private _grid: DataGrid;
   private _monitor: ActivityMonitor<any, any> | null = null;
   private _delimiter = ',';
-  private _reveal = new PromiseDelegate<void>();
+  private _revealed = new PromiseDelegate<void>();
 }
 
 
@@ -171,7 +171,7 @@ class CSVDocumentWidget extends DocumentWidget<CSVViewer> {
   constructor(options: CSVDocumentWidget.IOptions) {
     let {content, context, delimiter, reveal, ...other} = options;
     content = content || Private.createContent(context);
-    reveal = Promise.all([reveal, content.reveal]);
+    reveal = Promise.all([reveal, content.revealed]);
     super({content, context, reveal, ...other});
 
     if (delimiter) {

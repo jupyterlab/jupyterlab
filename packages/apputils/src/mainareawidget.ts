@@ -71,7 +71,7 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
       layout.addWidget(spinner);
       // Make sure the ready promise is a Promise<void> to avoid leaking any
       // results.
-      this._reveal = options.reveal.then(() => {
+      this._revealed = options.reveal.then(() => {
         this._isRevealed = true;
         const active = document.activeElement === spinner.node;
         spinner.dispose();
@@ -96,7 +96,7 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
       spinner.dispose();
       layout.addWidget(content);
       this._isRevealed = true;
-      this._reveal = Promise.resolve(undefined);
+      this._revealed = Promise.resolve(undefined);
     }
   }
 
@@ -118,10 +118,10 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
   }
 
   /**
-   * A promise that resolves when the widget is ready to be revealed.
+   * A promise that resolves when the widget is revealed.
    */
-  get reveal(): Promise<void> {
-    return this._reveal;
+  get revealed(): Promise<void> {
+    return this._revealed;
   }
 
   /**
@@ -240,7 +240,7 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
   private _spinner = new Spinner();
 
   private _isRevealed = false;
-  private _reveal: Promise<void>;
+  private _revealed: Promise<void>;
 }
 
 
