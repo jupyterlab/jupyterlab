@@ -7,7 +7,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  PromiseDelegate, Token
+  Token
 } from '@phosphor/coreutils';
 
 import {
@@ -61,9 +61,6 @@ class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    * Construct a new notebook panel.
    */
   constructor(options: DocumentWidget.IOptions<Notebook, INotebookModel>) {
-    // Set default options
-    const notebookReveal = new PromiseDelegate<void>();
-    options.reveal = Promise.all([options.reveal, notebookReveal.promise]);
     super(options);
     this._activated = new Signal<this, void>(this);
 
@@ -76,16 +73,7 @@ class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     this.content.model = this.context.model;
     this.context.session.kernelChanged.connect(this._onKernelChanged, this);
 
-    this.context.ready.then(() => {
-      if (this.isDisposed) {
-        return;
-      }
-
-      // The notebook widget is now ready to be revealed.
-      notebookReveal.resolve(undefined);
-    });
-
-    this.reveal.then(() => {
+    this.revealed.then(() => {
       // Set the document edit mode on initial open if it looks like a new document.
       if (this.content.widgets.length === 1) {
         let cellModel = this.content.widgets[0].model;
