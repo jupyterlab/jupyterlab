@@ -212,7 +212,14 @@ class Cell extends Widget {
       });
     }
 
-    // Modify state
+  }
+
+  /**
+   * Modify some state for initialization.
+   *
+   * Should be called at the end of the subclasses's constructor.
+   */
+  protected initializeState() {
     const jupyter = this.model.metadata.get('jupyter') || {} as any;
     this.inputHidden = jupyter.source_hidden || false;
   }
@@ -581,6 +588,7 @@ class CodeCell extends Cell {
     const jupyter = this.model.metadata.get('jupyter') || {} as any;
     this.outputHidden = (this.model.metadata.get('collapsed') || jupyter.outputs_hidden || false) as boolean;
     this.setPrompt(`${model.executionCount || ''}`);
+    super.initializeState();
     model.stateChanged.connect(this.onStateChanged, this);
     model.metadata.changed.connect(this.onMetadataChanged, this);
   }
@@ -840,6 +848,8 @@ class MarkdownCell extends Cell {
     this._updateRenderedInput().then(() => {
       this._ready.resolve(void 0);
     });
+
+    super.initializeState();
   }
 
   /**
@@ -985,6 +995,7 @@ class RawCell extends Cell {
   constructor(options: Cell.IOptions) {
     super(options);
     this.addClass(RAW_CELL_CLASS);
+    super.initializeState();
   }
 
   /**
