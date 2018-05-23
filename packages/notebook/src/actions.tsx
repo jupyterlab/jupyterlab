@@ -1113,10 +1113,10 @@ namespace NotebookActions {
         // https://github.com/jupyterlab/jupyterlab/pull/3981#issuecomment-391139167
         if (outputHidden) {
           model.metadata.set('collapsed', true);
-          jupyter.source_hidden = true;
+          jupyter.outputs_hidden = true;
         } else {
           model.metadata.delete('collapsed');
-          delete jupyter.source_hidden;
+          delete jupyter.outputs_hidden;
         }
 
         if (outputsScrolled) {
