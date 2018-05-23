@@ -174,6 +174,7 @@ class Cell extends Widget {
     super();
     this.addClass(CELL_CLASS);
     let model = this._model = options.model;
+    this._inputHidden = (model.metadata.get('source_hidden') || false) as boolean;
     let contentFactory = this.contentFactory = (
       options.contentFactory || Cell.defaultContentFactory
     );
@@ -380,7 +381,7 @@ class Cell extends Widget {
   private _model: ICellModel = null;
   private _header: ICellHeader = null;
   private _footer: ICellFooter = null;
-  private _inputHidden = false;
+  private _inputHidden: boolean;
   private _input: InputArea = null;
   private _inputCollapser: InputCollapser = null;
   private _inputWrapper: Widget = null;
@@ -545,6 +546,9 @@ class CodeCell extends Cell {
     let contentFactory = this.contentFactory;
     let model = this.model;
 
+    const metadataScrolled = model.metadata.get('scrolled') as boolean | 'auto' | undefined;
+    this._outputsScrolled = metadataScrolled === 'auto' ? false : metadataScrolled || false;
+
     // Insert the output before the cell footer.
     let outputWrapper = this._outputWrapper = new Panel();
     outputWrapper.addClass(CELL_OUTPUT_WRAPPER_CLASS);
@@ -572,7 +576,7 @@ class CodeCell extends Cell {
     });
 
     // Modify state
-    this.outputHidden = (this.model.metadata.get('collapsed') as boolean | undefined) || false;
+    this.outputHidden = (this.model.metadata.get('collapsed') || this.model.metadata.get('outputs_hidden') || false) as boolean;
     this.setPrompt(`${model.executionCount || ''}`);
     model.stateChanged.connect(this.onStateChanged, this);
     model.metadata.changed.connect(this.onMetadataChanged, this);
@@ -736,7 +740,7 @@ class CodeCell extends Cell {
 
   private _rendermime: RenderMimeRegistry = null;
   private _outputHidden: boolean;
-  private _outputsScrolled = false;
+  private _outputsScrolled: boolean;
   private _outputWrapper: Widget = null;
   private _outputCollapser: OutputCollapser = null;
   private _outputPlaceholder: OutputPlaceholder = null;

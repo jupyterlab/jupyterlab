@@ -388,8 +388,17 @@ describe('cells/widget', () => {
 
       it('should initialize from the model', () => {
         const collapsedModel = new CodeCellModel({});
-        collapsedModel.metadata.set('collapsed', true);
         let widget = new CodeCell({ model: collapsedModel, rendermime });
+        expect(widget.outputHidden).to.be(false);
+
+        collapsedModel.metadata.set('collapsed', true);
+        collapsedModel.metadata.set('outputs_hidden', false);
+        widget = new CodeCell({ model: collapsedModel, rendermime });
+        expect(widget.outputHidden).to.be(true);
+
+        collapsedModel.metadata.set('collapsed', false);
+        collapsedModel.metadata.set('outputs_hidden', true);
+        widget = new CodeCell({ model: collapsedModel, rendermime });
         expect(widget.outputHidden).to.be(true);
       });
 
@@ -398,6 +407,28 @@ describe('cells/widget', () => {
         expect(widget.outputHidden).to.be(false);
         widget.outputHidden = true;
         expect(widget.outputHidden).to.be(true);
+      });
+
+    });
+
+    describe('#outputsScrolled', () => {
+
+      it('should initialize from the model', () => {
+        const collapsedModel = new CodeCellModel({});
+        let widget = new CodeCell({ model: collapsedModel, rendermime });
+        expect(widget.outputsScrolled).to.be(false);
+
+        collapsedModel.metadata.set('scrolled', false);
+        widget = new CodeCell({ model: collapsedModel, rendermime });
+        expect(widget.outputsScrolled).to.be(false);
+
+        collapsedModel.metadata.set('scrolled', 'auto');
+        widget = new CodeCell({ model: collapsedModel, rendermime });
+        expect(widget.outputsScrolled).to.be(false);
+
+        collapsedModel.metadata.set('scrolled', true);
+        widget = new CodeCell({ model: collapsedModel, rendermime });
+        expect(widget.outputsScrolled).to.be(true);
       });
 
     });

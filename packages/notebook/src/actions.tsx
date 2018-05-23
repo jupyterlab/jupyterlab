@@ -1089,20 +1089,47 @@ namespace NotebookActions {
    * @param widget - The target notebook widget.
    */
   export
-  function persistOutputsCollapsed(widget: Notebook): void {
+  function persistViewState(widget: Notebook): void {
     if (!widget.model) {
       return;
     }
     let state = Private.getState(widget);
     let cells = widget.widgets;
     each(cells, (cell: Cell) => {
+      const {model, inputHidden} = cell;
+      const metadata = model.metadata;
+      const jupyter = metadata.get('jupyter') as any || {};
+
+      if (inputHidden) {
+        jupyter.source_hidden = true;
+      } else {
+        delete jupyter.source_hidden;
+      }
+
       if (cell.model.type === 'code') {
-        const {outputHidden, model} = (cell as CodeCell);
+        const {outputHidden, outputsScrolled} = (cell as CodeCell);
+
+        // set both metadata keys
+        // https://github.com/jupyterlab/jupyterlab/pull/3981#issuecomment-391139167
         if (outputHidden) {
           model.metadata.set('collapsed', true);
+          jupyter.source_hidden = true;
         } else {
           model.metadata.delete('collapsed');
+          delete jupyter.source_hidden;
         }
+
+        if (outputsScrolled) {
+          model.metadata.set('scrolled', true);
+        } else {
+          model.metadata.delete('scrolled');
+        }
+      }
+
+      if (Object.keys(jupyter).length === 0) {
+        metadata.delete('jupyter');
+      } else {
+        metadata.set('jupyter', jupyter);
       }
     });
     Private.handleState(widget, state);
