@@ -617,5 +617,5 @@ class TestExtension(TestCase):
         )
 
         with p1, p2:
-            assert True == update_extension(None, all=True)
+            assert True == update_extension(None, all_=True)
         assert sorted(updated) == [self.pkg_names['extension'], self.pkg_names['mimeextension']]

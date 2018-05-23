@@ -235,12 +235,12 @@ def uninstall_extension(name, app_dir=None, logger=None):
     return handler.uninstall_extension(name)
 
 
-def update_extension(name=None, all=False, app_dir=None, logger=None):
+def update_extension(name=None, all_=False, app_dir=None, logger=None):
     """Update an extension by name.
     """
     _node_check()
     handler = _AppHandler(app_dir, logger)
-    return handler.update_extension(name, all)
+    return handler.update_extension(name, all_)
 
 
 def clean(app_dir=None):

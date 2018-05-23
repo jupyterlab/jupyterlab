@@ -121,7 +121,7 @@ class UpdateLabExtensionApp(BaseExtensionApp):
             self.log.warn('Specify an extension to update, or use --all to update all extensions')
             return False
         if self.all:
-            return update_extension(all=True, app_dir=self.app_dir, logger=self.log)
+            return update_extension(all_=True, app_dir=self.app_dir, logger=self.log)
         return any([
             update_extension(name=arg, app_dir=self.app_dir, logger=self.log)
             for arg in self.extra_args
