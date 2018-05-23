@@ -8,7 +8,8 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, ISplashScreen, IThemeManager, ThemeManager
+  Dialog, ICommandPalette, ISplashScreen, IThemeManager,
+  ThemeManager
 } from '@jupyterlab/apputils';
 
 import {
@@ -179,15 +180,11 @@ const themes: JupyterLabPlugin<IThemeManager> = {
   optional: [ICommandPalette, IMainMenu],
   activate: (app: JupyterLab, settingRegistry: ISettingRegistry, splash: ISplashScreen, palette: ICommandPalette | null, mainMenu: IMainMenu | null): IThemeManager => {
     const host = app.shell;
-    const when = app.started;
     const commands = app.commands;
-
+    const url = app.info.urls.themes;
+    const key = themes.id;
     const manager = new ThemeManager({
-      key: themes.id,
-      host, settingRegistry,
-      url: app.info.urls.themes,
-      splash,
-      when
+      key, host, settingRegistry, splash, url
     });
 
     // Keep a synchronously set reference to the current theme,
@@ -217,7 +214,7 @@ const themes: JupyterLabPlugin<IThemeManager> = {
     if (mainMenu) {
       const themeMenu = new Menu({ commands });
       themeMenu.title.label = 'JupyterLab Theme';
-      manager.ready.then(() => {
+      app.restored.then(() => {
         const command = CommandIDs.changeTheme;
         const isPalette = false;
 
@@ -232,7 +229,7 @@ const themes: JupyterLabPlugin<IThemeManager> = {
 
     // If we have a command palette, add theme switching options to it.
     if (palette) {
-      manager.ready.then(() => {
+      app.restored.then(() => {
         const category = 'Settings';
         const command = CommandIDs.changeTheme;
         const isPalette = true;
@@ -266,6 +263,7 @@ const resolver: JupyterLabPlugin<IWindowResolver> = {
     console.log('router.current.path', router.current.path);
     console.log('Candidate is', candidate);
     return resolver.resolve(candidate)
+      // .then(() => Private.redirect())
       .then(() => resolver)
       .catch(reason => {
         console.log('Window resolution failed.', reason);
@@ -574,6 +572,25 @@ namespace Private {
       debouncer = window.setTimeout(() => {
         recover(fn);
       }, SPLASH_RECOVER_TIMEOUT);
+    });
+  }
+
+  /**
+   * Allows the user to clear state if splash screen takes too long.
+   */
+  export
+  function redirect(): Promise<void> {
+    const dialog = new Dialog({
+      title: 'We have a problem!',
+      body: `Please enter a workspace name to prevent your session
+        from colliding with an open JupyterLab window.`,
+      buttons: [
+        Dialog.warnButton({ label: 'Create Workspace' })
+      ]
+    });
+
+    return dialog.launch().then(result => {
+      dialog.dispose();
     });
   }
 
