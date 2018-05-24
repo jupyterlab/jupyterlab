@@ -41,7 +41,8 @@
     "@phosphor/signaling": "^1.2.2",
     "@phosphor/widgets": "^1.6.0",
     "ansi_up": "^3.0.0",
-    "marked": "~0.3.9"
+    "marked": "~0.3.9",
+    "tslib": "^1.9.1"
   },
   "devDependencies": {
     "@types/marked": "~0.0.28",

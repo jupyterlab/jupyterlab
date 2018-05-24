@@ -35,7 +35,8 @@
     "@jupyterlab/codeeditor": "^0.16.1",
     "@jupyterlab/coreutils": "^1.1.2",
     "@jupyterlab/rendermime": "^0.16.2",
-    "@jupyterlab/settingeditor": "^0.5.2"
+    "@jupyterlab/settingeditor": "^0.5.2",
+    "tslib": "^1.9.1"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

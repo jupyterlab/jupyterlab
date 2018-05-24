@@ -98,6 +98,10 @@ function ensurePackage(options: IEnsurePackageOptions): string[] {
 
   // Look for unused packages
   Object.keys(deps).forEach(name => {
+    // ignore tslib: https://github.com/Microsoft/tslib
+    if (name === 'tslib') {
+      return;
+    }
     if (unused.indexOf(name) !== -1) {
       return;
     }

@@ -34,7 +34,8 @@
     "@jupyterlab/coreutils": "^1.1.2",
     "@phosphor/commands": "^1.5.0",
     "@phosphor/coreutils": "^1.3.0",
-    "@phosphor/disposable": "^1.1.2"
+    "@phosphor/disposable": "^1.1.2",
+    "tslib": "^1.9.1"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

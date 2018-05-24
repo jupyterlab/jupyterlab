@@ -40,7 +40,8 @@
   "dependencies": {
     "@jupyterlab/application": "^0.16.2",
     "@jupyterlab/apputils": "^0.16.3",
-    "font-awesome": "~4.7.0"
+    "font-awesome": "~4.7.0",
+    "tslib": "^1.9.1"
   },
   "devDependencies": {
     "css-loader": "~0.28.7",

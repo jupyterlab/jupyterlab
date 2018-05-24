@@ -43,7 +43,8 @@
     "@phosphor/disposable": "^1.1.2",
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/signaling": "^1.2.2",
-    "@phosphor/widgets": "^1.6.0"
+    "@phosphor/widgets": "^1.6.0",
+    "tslib": "^1.9.1"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

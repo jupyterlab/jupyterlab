@@ -38,6 +38,7 @@
     "minimist": "~1.2.0",
     "moment": "~2.21.0",
     "path-posix": "~1.0.0",
+    "tslib": "^1.9.1",
     "url-parse": "~1.1.9"
   },
   "devDependencies": {

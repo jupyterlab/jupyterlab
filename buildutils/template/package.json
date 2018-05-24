@@ -27,6 +27,9 @@
     "prepublishOnly": "npm run build",
     "watch": "tsc -w"
   },
+  "dependencies": {
+    "tslib": "^1.9.1"
+  },
   "devDependencies": {
     "rimraf": "~2.6.2",
     "typescript": "~2.8.3"

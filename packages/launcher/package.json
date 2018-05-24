@@ -36,7 +36,8 @@
     "@phosphor/disposable": "^1.1.2",
     "@phosphor/properties": "^1.1.2",
     "@phosphor/widgets": "^1.6.0",
-    "react": "~16.2.0"
+    "react": "~16.2.0",
+    "tslib": "^1.9.1"
   },
   "devDependencies": {
     "@types/react": "~16.0.19",

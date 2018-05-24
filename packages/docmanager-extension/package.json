@@ -37,7 +37,8 @@
     "@jupyterlab/docregistry": "^0.16.2",
     "@jupyterlab/mainmenu": "^0.5.2",
     "@jupyterlab/services": "^2.0.2",
-    "@phosphor/disposable": "^1.1.2"
+    "@phosphor/disposable": "^1.1.2",
+    "tslib": "^1.9.1"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

@@ -45,7 +45,8 @@
     "@types/react": "~16.0.19",
     "react": "~16.2.0",
     "react-dom": "~16.2.0",
-    "sanitize-html": "~1.14.3"
+    "sanitize-html": "~1.14.3",
+    "tslib": "^1.9.1"
   },
   "devDependencies": {
     "@types/react-dom": "~16.0.2",
