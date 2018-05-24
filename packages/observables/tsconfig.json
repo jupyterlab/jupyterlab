@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "declaration": true,
+    "importHelpers": true,
     "noImplicitAny": true,
     "noEmitOnError": true,
     "noUnusedLocals": true,

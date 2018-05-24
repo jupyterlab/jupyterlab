@@ -33,7 +33,8 @@
     "@jupyterlab/application": "^0.16.2",
     "@jupyterlab/apputils": "^0.16.3",
     "@jupyterlab/docregistry": "^0.16.2",
-    "@jupyterlab/rendermime": "^0.16.2"
+    "@jupyterlab/rendermime": "^0.16.2",
+    "tslib": "^1.9.1"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

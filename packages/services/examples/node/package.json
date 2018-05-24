@@ -9,6 +9,7 @@
   "dependencies": {
     "@jupyterlab/services": "^2.0.2",
     "node-fetch": "~1.7.3",
+    "tslib": "^1.9.1",
     "ws": "~1.1.4"
   },
   "devDependencies": {

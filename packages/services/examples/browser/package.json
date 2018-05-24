@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "@jupyterlab/services": "^2.0.2",
-    "es6-promise": "~4.1.1"
+    "es6-promise": "~4.1.1",
+    "tslib": "^1.9.1"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

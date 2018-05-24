@@ -39,7 +39,8 @@
     "@jupyterlab/services": "^2.0.2",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/commands": "^1.5.0",
-    "@phosphor/widgets": "^1.6.0"
+    "@phosphor/widgets": "^1.6.0",
+    "tslib": "^1.9.1"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

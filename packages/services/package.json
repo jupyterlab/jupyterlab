@@ -51,6 +51,7 @@
     "@phosphor/disposable": "^1.1.2",
     "@phosphor/signaling": "^1.2.2",
     "node-fetch": "~1.7.3",
+    "tslib": "^1.9.1",
     "ws": "~1.1.4"
   },
   "devDependencies": {

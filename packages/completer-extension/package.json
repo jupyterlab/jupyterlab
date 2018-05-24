@@ -33,7 +33,8 @@
     "@jupyterlab/completer": "^0.16.2",
     "@jupyterlab/console": "^0.16.2",
     "@jupyterlab/notebook": "^0.16.2",
-    "@phosphor/widgets": "^1.6.0"
+    "@phosphor/widgets": "^1.6.0",
+    "tslib": "^1.9.1"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
