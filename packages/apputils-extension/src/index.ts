@@ -570,7 +570,7 @@ namespace Private {
       debouncer = window.setTimeout(() => {
         recover(fn);
       }, SPLASH_RECOVER_TIMEOUT);
-    });
+    }).catch(() => { /* no-op */ });
   }
 
   /**
