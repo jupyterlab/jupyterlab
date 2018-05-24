@@ -178,14 +178,12 @@ const themes: JupyterLabPlugin<IThemeManager> = {
   id: '@jupyterlab/apputils-extension:themes',
   requires: [ISettingRegistry, ISplashScreen],
   optional: [ICommandPalette, IMainMenu],
-  activate: (app: JupyterLab, settingRegistry: ISettingRegistry, splash: ISplashScreen, palette: ICommandPalette | null, mainMenu: IMainMenu | null): IThemeManager => {
+  activate: (app: JupyterLab, settings: ISettingRegistry, splash: ISplashScreen, palette: ICommandPalette | null, mainMenu: IMainMenu | null): IThemeManager => {
     const host = app.shell;
     const commands = app.commands;
     const url = app.info.urls.themes;
     const key = themes.id;
-    const manager = new ThemeManager({
-      key, host, settingRegistry, splash, url
-    });
+    const manager = new ThemeManager({ key, host, settings, splash, url });
 
     // Keep a synchronously set reference to the current theme,
     // since the asynchronous setting of the theme in `changeTheme`
