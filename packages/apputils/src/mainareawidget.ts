@@ -43,8 +43,8 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
     this.addClass('jp-MainAreaWidget');
     this.id = uuid();
 
-    const content = this.content = options.content;
-    const toolbar = this.toolbar = options.toolbar || new Toolbar();
+    const content = this._content = options.content;
+    const toolbar = this._toolbar = options.toolbar || new Toolbar();
     const spinner = this._spinner;
 
     const layout = this.layout = new BoxLayout({spacing: 0});
@@ -53,8 +53,6 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
     BoxLayout.setStretch(toolbar, 0);
     BoxLayout.setStretch(content, 1);
     BoxLayout.setStretch(spinner, 1);
-
-    layout.addWidget(toolbar);
 
     if (!content.id) {
       content.id = uuid();
@@ -65,15 +63,18 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
     content.title.changed.connect(this._updateTitle, this);
     this.title.closable = true;
     this.title.changed.connect(this._updateContentTitle, this);
-    content.disposed.connect(() => this.dispose());
 
     if (options.reveal) {
       layout.addWidget(spinner);
-      // Make sure the revealed promise is a Promise<void> to avoid leaking any
-      // results.
       this._revealed = options.reveal.then(() => {
+        if (content.isDisposed) {
+          this.dispose();
+          return;
+        }
+        content.disposed.connect(() => this.dispose());
         const active = document.activeElement === spinner.node;
         spinner.dispose();
+        layout.addWidget(toolbar);
         layout.addWidget(content);
         this._isRevealed = true;
         if (active) {
@@ -89,14 +90,19 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
         BoxLayout.setStretch(error, 1);
         spinner.dispose();
         content.dispose();
+        this._content = null;
+        toolbar.dispose();
+        this._toolbar = null;
         layout.addWidget(error);
         this._isRevealed = true;
         throw(error);
       });
-    // Handle no reveal promise.
     } else {
+      // Handle no reveal promise.
       spinner.dispose();
+      layout.addWidget(toolbar);
       layout.addWidget(content);
+      content.disposed.connect(() => this.dispose());
       this._isRevealed = true;
       this._revealed = Promise.resolve(undefined);
     }
@@ -105,12 +111,16 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
   /**
    * The content hosted by the widget.
    */
-  readonly content: T;
+  get content(): T {
+    return this._content;
+  }
 
   /**
    * The toolbar hosted by the widget.
    */
-  readonly toolbar: Toolbar;
+  get toolbar(): Toolbar {
+    return this._toolbar;
+  }
 
   /**
    * Whether the content widget or an error is revealed.
@@ -141,7 +151,7 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
     case 'mouseup':
     case 'mouseout':
       let target = event.target as HTMLElement;
-      if (this._isRevealed &&
+      if (this._isRevealed && this._content &&
           this.toolbar.node.contains(document.activeElement) &&
           target.tagName !== 'SELECT') {
         this._focusContent();
@@ -173,7 +183,9 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
    */
   protected onActivateRequest(msg: Message): void {
     if (this._isRevealed) {
-      this._focusContent();
+      if (this._content) {
+        this._focusContent();
+      }
     } else {
       this._spinner.node.focus();
     }
@@ -238,6 +250,8 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
     this.content.activate();
   }
 
+  private _content: T;
+  private _toolbar: Toolbar;
   private _changeGuard = false;
   private _spinner = new Spinner();
 
