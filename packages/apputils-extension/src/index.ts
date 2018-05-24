@@ -41,6 +41,10 @@ import {
   activatePalette, restorePalette
 } from './palette';
 
+import {
+  RedirectForm
+} from './redirect';
+
 import '../style/index.css';
 
 
@@ -261,12 +265,12 @@ const resolver: JupyterLabPlugin<IWindowResolver> = {
     console.log('router.current.path', router.current.path);
     console.log('Candidate is', candidate);
     return resolver.resolve(candidate)
-      // .then(() => Private.redirect())
       .then(() => resolver)
       .catch(reason => {
         console.log('Window resolution failed.', reason);
-        throw reason;
-      });
+        return Private.redirect();
+      })
+      .then(() => resolver);
   }
 };
 
@@ -580,8 +584,7 @@ namespace Private {
   function redirect(): Promise<void> {
     const dialog = new Dialog({
       title: 'We have a problem!',
-      body: `Please enter a workspace name to prevent your session
-        from colliding with an open JupyterLab window.`,
+      body: new RedirectForm(),
       buttons: [
         Dialog.warnButton({ label: 'Create Workspace' })
       ]

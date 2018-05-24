@@ -59,7 +59,8 @@ class WindowResolver implements IWindowResolver {
    * user intervention, which typically means navigation to a new URL.
    */
   resolve(candidate: string): Promise<void> {
-    return Private.windowName(candidate).then(name => { this._name = name; });
+    return Promise.reject('ruh roh');
+    // return Private.windowName(candidate).then(name => { this._name = name; });
   }
 
   private _name: string;
@@ -180,7 +181,7 @@ namespace Private {
       return ping();
     }
 
-    if (key.indexOf(WINDOW) !== 0) {
+    if (!key || key.indexOf(WINDOW) !== 0) {
       return;
     }
 
