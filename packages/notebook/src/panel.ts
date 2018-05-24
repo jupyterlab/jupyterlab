@@ -62,7 +62,6 @@ class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    */
   constructor(options: DocumentWidget.IOptions<Notebook, INotebookModel>) {
     super(options);
-    this._activated = new Signal<this, void>(this);
 
     // Set up CSS classes
     this.addClass(NOTEBOOK_PANEL_CLASS);
@@ -188,7 +187,7 @@ class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     });
   }
 
-  private _activated: Signal<this, void>;
+  private _activated = new Signal<this, void>(this);
 }
 
 
