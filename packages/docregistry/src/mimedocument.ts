@@ -217,6 +217,9 @@ namespace MimeContent {
   }
 }
 
+/**
+ * A document widget for mime content.
+ */
 export
 class MimeDocument extends DocumentWidget<MimeContent> {
 }

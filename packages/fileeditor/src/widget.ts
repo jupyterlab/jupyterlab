@@ -154,7 +154,7 @@ class FileEditorCodeWrapper extends CodeEditorWrapper {
 
 
 /**
- * A document widget for editors.
+ * A widget for editors.
  */
 export
 class FileEditor extends Widget {

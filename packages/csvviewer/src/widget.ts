@@ -166,6 +166,9 @@ namespace CSVViewer {
   }
 }
 
+/**
+ * A document widget for CSV content widgets.
+ */
 export
 class CSVDocumentWidget extends DocumentWidget<CSVViewer> {
   constructor(options: CSVDocumentWidget.IOptions) {
