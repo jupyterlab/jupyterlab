@@ -6,6 +6,7 @@
 /// <reference path="../../coreutils/typings/url-parse/url-parse.d.ts"/>
 /// <reference path="../../terminal/src/xterm.d.ts"/>
 /// <reference path="../../vdom-extension/src/transform-vdom.d.ts"/>
+/// <reference path="../../vega3-extension/src/json.d.ts"/>
 
 // TextEncoder interfaces for typedoc, since typedoc is still using TypeScript 2.7
 // Remove these when typedoc is updated to use TypeScript 2.8
