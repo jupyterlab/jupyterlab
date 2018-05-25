@@ -49,10 +49,10 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
 
     const layout = this.layout = new BoxLayout({spacing: 0});
     layout.direction = 'top-to-bottom';
-
     BoxLayout.setStretch(toolbar, 0);
     BoxLayout.setStretch(content, 1);
-    BoxLayout.setStretch(spinner, 1);
+    layout.addWidget(toolbar);
+    layout.addWidget(content);
 
     if (!content.id) {
       content.id = uuid();
@@ -65,7 +65,7 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
     this.title.changed.connect(this._updateContentTitle, this);
 
     if (options.reveal) {
-      layout.addWidget(spinner);
+      this.node.appendChild(spinner.node);
       this._revealed = options.reveal.then(() => {
         if (content.isDisposed) {
           this.dispose();
@@ -73,21 +73,21 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
         }
         content.disposed.connect(() => this.dispose());
         const active = document.activeElement === spinner.node;
+        this.node.removeChild(spinner.node);
         spinner.dispose();
-        layout.addWidget(toolbar);
-        layout.addWidget(content);
         this._isRevealed = true;
         if (active) {
           this._focusContent();
         }
       }).catch(e => {
-        // Catch a population error.
+        // Show a revealed promise error.
         const error = new Widget();
         // Show the error to the user.
         const pre = document.createElement('pre');
         pre.textContent = String(e);
         error.node.appendChild(pre);
         BoxLayout.setStretch(error, 1);
+        this.node.removeChild(spinner.node);
         spinner.dispose();
         content.dispose();
         this._content = null;
@@ -100,8 +100,6 @@ class MainAreaWidget<T extends Widget = Widget> extends Widget {
     } else {
       // Handle no reveal promise.
       spinner.dispose();
-      layout.addWidget(toolbar);
-      layout.addWidget(content);
       content.disposed.connect(() => this.dispose());
       this._isRevealed = true;
       this._revealed = Promise.resolve(undefined);
