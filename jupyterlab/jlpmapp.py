@@ -73,4 +73,4 @@ def main(argv=None):
     """
     # Make sure node is available.
     argv = argv or sys.argv[1:]
-    execvp('node', ['node', YARN_PATH] + argv)
+    execvp('node', ['node', '--max-old-space-size=8192', YARN_PATH] + argv)
