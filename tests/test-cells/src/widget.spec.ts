@@ -392,12 +392,12 @@ describe('cells/widget', () => {
         expect(widget.outputHidden).to.be(false);
 
         collapsedModel.metadata.set('collapsed', true);
-        collapsedModel.metadata.set('outputs_hidden', false);
+        collapsedModel.metadata.set('jupyter', {outputs_hidden: false});
         widget = new CodeCell({ model: collapsedModel, rendermime });
         expect(widget.outputHidden).to.be(true);
 
         collapsedModel.metadata.set('collapsed', false);
-        collapsedModel.metadata.set('outputs_hidden', true);
+        collapsedModel.metadata.set('jupyter', {outputs_hidden: true});
         widget = new CodeCell({ model: collapsedModel, rendermime });
         expect(widget.outputHidden).to.be(true);
       });

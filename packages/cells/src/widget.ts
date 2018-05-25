@@ -602,7 +602,7 @@ class CodeCell extends Cell {
     super.initializeState();
 
     const metadataScrolled = this.model.metadata.get('scrolled');
-    this.outputsScrolled = metadataScrolled === 'auto' || metadataScrolled === true;
+    this.outputsScrolled = metadataScrolled === true;
 
     const jupyter = this.model.metadata.get('jupyter') || {} as any;
     const collapsed = this.model.metadata.get('collapsed');
