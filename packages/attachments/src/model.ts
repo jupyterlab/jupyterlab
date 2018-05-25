@@ -417,6 +417,17 @@ class AttachmentsResolver implements IRenderMime.IResolver {
     return Promise.resolve(dataUrl);
   }
 
+  /**
+   * Whether the URL should be handled by the resolver
+   * or not.
+   */
+  isLocal(url: string): boolean {
+    if (this._parent && !url.startsWith('attachment:')) {
+      return this._parent.isLocal(url);
+    }
+    return true;
+  }
+
   private _model: IAttachmentsModel;
   private _parent: IRenderMime.IResolver | null;
 }
