@@ -594,16 +594,15 @@ namespace Private {
       dialog.dispose();
 
       if (result.value) {
-        // This promise will never resolve because the application navigates
-        // away to a new location. The `navigate()` call happens inside the
-        // promise in order to satisfy the compiler.
-        return new Promise<void>(() => {
-          const url = `workspaces/${result.value}`;
-          const hard = true;
-          const silent = true;
+        const url = `workspaces/${result.value}`;
 
-          router.navigate(url, { hard, silent });
-        });
+        // Navigate to a new workspace URL and abandon this session altogether.
+        router.navigate(url, { hard: true, silent: true });
+
+        // This promise will never resolve because the application navigates
+        // away to a new location. It only exists to satisfy the return type
+        // of the `redirect` function.
+        return new Promise<void>(() => { /* no-op */ });
       }
 
       return redirect(router, true);
