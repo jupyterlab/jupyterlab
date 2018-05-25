@@ -86,7 +86,7 @@ namespace Private {
   const BEACON = `${PREFIX}:beacon`;
 
   /**
-   * The local storage window prefix.
+   * The local storage window key.
    */
   const WINDOW = `${PREFIX}:window`;
 
@@ -142,11 +142,11 @@ namespace Private {
   function ping(): void {
     if (!resolved) {
       console.log('ping [delayed]');
-      window.setTimeout(ping, TIMEOUT / 4);
+      window.setTimeout(ping, TIMEOUT);
       return;
     }
 
-    console.log('ping', WINDOW, name);
+    console.log(`Ping ${WINDOW} with value: "${name}"`);
     window.localStorage.removeItem(WINDOW);
     window.localStorage.setItem(WINDOW, name);
   }
@@ -158,21 +158,17 @@ namespace Private {
     const { key, newValue } = event;
 
     if (key === BEACON) {
-      console.log('The beacon has been fired');
       return ping();
     }
 
-    if (resolved) {
+    if (resolved || key !== WINDOW || newValue === null) {
       return;
     }
 
-    if (key === WINDOW) {
-      console.log('Received window name', newValue);
-    }
-
-    if (key === WINDOW && candidate === newValue) {
+    console.log(`Received window name "${newValue}"`);
+    if (candidate === newValue) {
       resolved = true;
-      delegate.reject(`Window name candidate "${candidate}" was rejected`);
+      delegate.reject(`Window name candidate "${candidate}" already exists`);
     }
   }
 

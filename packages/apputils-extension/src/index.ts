@@ -262,10 +262,7 @@ const resolver: JupyterLabPlugin<IWindowResolver> = {
     const candidate = Private.getWorkspace(router) || '';
     const resolver = new WindowResolver();
 
-    console.log('router.current.path', router.current.path);
-    console.log('Candidate is', candidate);
     return resolver.resolve(candidate)
-      .then(() => resolver)
       .catch(reason => {
         console.log('Window resolution failed.', reason);
         return Private.redirect(router);
