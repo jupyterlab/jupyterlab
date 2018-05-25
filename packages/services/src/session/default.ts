@@ -18,10 +18,6 @@ import {
 } from '../kernel';
 
 import {
-  DefaultKernel
-} from '../kernel/default';
-
-import {
   ServerConnection
 } from '..';
 
@@ -100,7 +96,7 @@ class DefaultSession implements Session.ISession {
    * Note: The behavior is undefined if the message is modified
    * during message handling. As such, it should be treated as read-only.
    */
-  get anyMessage(): ISignal<this, DefaultKernel.IAnyMessageArgs> {
+  get anyMessage(): ISignal<this, Kernel.IAnyMessageArgs> {
     return this._anyMessage;
   }
 
@@ -352,7 +348,7 @@ class DefaultSession implements Session.ISession {
   /**
    * Handle any kernel messages.
    */
-  protected onAnyMessage(sender: Kernel.IKernel, args: DefaultKernel.IAnyMessageArgs) {
+  protected onAnyMessage(sender: Kernel.IKernel, args: Kernel.IAnyMessageArgs) {
     this._anyMessage.emit(args);
   }
 
@@ -408,7 +404,7 @@ class DefaultSession implements Session.ISession {
   private _statusChanged = new Signal<this, Kernel.Status>(this);
   private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
-  private _anyMessage = new Signal<this, DefaultKernel.IAnyMessageArgs>(this);
+  private _anyMessage = new Signal<this, Kernel.IAnyMessageArgs>(this);
   private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);
   private _terminated = new Signal<this, void>(this);
 }

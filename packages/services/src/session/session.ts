@@ -22,10 +22,6 @@ import {
 } from '../kernel';
 
 import {
-  DefaultKernel
-} from '../kernel/default';
-
-import {
   ServerConnection
 } from '..';
 
@@ -80,7 +76,7 @@ namespace Session {
      * Note: The behavior is undefined if the message is modified
      * during message handling. As such, it should be treated as read-only.
      */
-    anyMessage: ISignal<this, DefaultKernel.IAnyMessageArgs>;
+    anyMessage: ISignal<this, Kernel.IAnyMessageArgs>;
 
     /**
      * Unique id of the session.

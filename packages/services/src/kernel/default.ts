@@ -121,7 +121,7 @@ class DefaultKernel implements Kernel.IKernel {
    * Note: The behavior is undefined if the message is modified
    * during message handling. As such, it should be treated as read-only.
    */
-  get anyMessage(): ISignal<this, DefaultKernel.IAnyMessageArgs> {
+  get anyMessage(): ISignal<this, Kernel.IAnyMessageArgs> {
     return this._anyMessage;
   }
 
@@ -1045,7 +1045,7 @@ class DefaultKernel implements Kernel.IKernel {
   private _specPromise: Promise<Kernel.ISpecModel>;
   private _statusChanged = new Signal<this, Kernel.Status>(this);
   private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
-  private _anyMessage = new Signal<this, DefaultKernel.IAnyMessageArgs>(this);
+  private _anyMessage = new Signal<this, Kernel.IAnyMessageArgs>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _displayIdToParentIds = new Map<string, string[]>();
   private _msgIdToDisplayIds = new Map<string, string[]>();
@@ -1177,22 +1177,6 @@ namespace DefaultKernel {
   export
   function shutdownAll(settings?: ServerConnection.ISettings): Promise<void> {
     return Private.shutdownAll(settings);
-  }
-
-  /**
-   * Arguments interface for the anyMessage signal.
-   */
-  export
-  interface IAnyMessageArgs {
-    /**
-     * The message that is being signaled.
-     */
-    msg: KernelMessage.IMessage;
-
-    /**
-     * The direction of the message.
-     */
-    direction: 'send' | 'recv';
   }
 }
 
