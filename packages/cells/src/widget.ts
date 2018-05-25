@@ -221,7 +221,7 @@ class Cell extends Widget {
    */
   protected initializeState() {
     const jupyter = this.model.metadata.get('jupyter') || {} as any;
-    this.inputHidden = jupyter.source_hidden || false;
+    this.inputHidden = jupyter.source_hidden === true;
   }
 
   /**
@@ -583,12 +583,7 @@ class CodeCell extends Cell {
     });
 
     // Modify state
-    const metadataScrolled = model.metadata.get('scrolled') as boolean | 'auto' | undefined;
-    this.outputsScrolled = metadataScrolled === 'auto' ? false : metadataScrolled || false;
-    const jupyter = this.model.metadata.get('jupyter') || {} as any;
-    this.outputHidden = (this.model.metadata.get('collapsed') || jupyter.outputs_hidden || false) as boolean;
-    this.setPrompt(`${model.executionCount || ''}`);
-    super.initializeState();
+    this.initializeState();
     model.stateChanged.connect(this.onStateChanged, this);
     model.metadata.changed.connect(this.onMetadataChanged, this);
   }
@@ -597,6 +592,25 @@ class CodeCell extends Cell {
    * The model used by the widget.
    */
   readonly model: ICodeCellModel;
+
+  /**
+   * Modify some state for initialization.
+   *
+   * Should be called at the end of the subclasses's constructor.
+   */
+  protected initializeState() {
+    super.initializeState();
+
+    const metadataScrolled = this.model.metadata.get('scrolled');
+    this.outputsScrolled = metadataScrolled === 'auto' || metadataScrolled === true;
+
+    const jupyter = this.model.metadata.get('jupyter') || {} as any;
+    const collapsed = this.model.metadata.get('collapsed');
+    this.outputHidden = collapsed === true || jupyter.outputs_hidden === true;
+
+    this.setPrompt(`${this.model.executionCount || ''}`);
+  }
+
 
   /**
    * Get the output area for the cell.
