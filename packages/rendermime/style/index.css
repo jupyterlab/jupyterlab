@@ -91,6 +91,7 @@
 
 .jp-RenderedHTMLCommon {
   color: var(--jp-content-font-color1);
+  font-family: var(--jp-content-font-family);
   font-size: var(--jp-content-font-size1);
   line-height: var(--jp-content-line-height);
   /* Give a bit more R padding on Markdown text to keep line lengths reasonable */
