@@ -582,13 +582,17 @@ namespace Private {
    */
   export
   function redirect(): Promise<void> {
+    const form = new RedirectForm();
     const dialog = new Dialog({
       title: 'We have a problem!',
-      body: new RedirectForm(),
-      buttons: [
-        Dialog.warnButton({ label: 'Create Workspace' })
-      ]
+      body: form,
+      focusNodeSelector: 'input',
+      buttons: [Dialog.okButton({ label: 'Create Workspace' })]
     });
+
+    form.label = `Please enter a workspace name to prevent your session
+      from colliding with an open JupyterLab window.`;
+    form.placeholder = 'url-friendly-workspace-name';
 
     return dialog.launch().then(result => {
       dialog.dispose();
