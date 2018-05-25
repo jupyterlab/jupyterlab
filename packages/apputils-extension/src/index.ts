@@ -42,7 +42,7 @@ import {
 } from './palette';
 
 import {
-  RedirectForm
+  createRedirectForm
 } from './redirect';
 
 import '../style/index.css';
@@ -268,7 +268,7 @@ const resolver: JupyterLabPlugin<IWindowResolver> = {
       .then(() => resolver)
       .catch(reason => {
         console.log('Window resolution failed.', reason);
-        return Private.redirect();
+        return Private.redirect(router);
       })
       .then(() => resolver);
   }
@@ -581,8 +581,8 @@ namespace Private {
    * Allows the user to clear state if splash screen takes too long.
    */
   export
-  function redirect(): Promise<void> {
-    const form = new RedirectForm();
+  function redirect(router: IRouter, warn = false): Promise<void> {
+    const form = createRedirectForm(warn);
     const dialog = new Dialog({
       title: 'We have a problem!',
       body: form,
@@ -590,12 +590,23 @@ namespace Private {
       buttons: [Dialog.okButton({ label: 'Create Workspace' })]
     });
 
-    form.label = `Please enter a workspace name to prevent your session
-      from colliding with an open JupyterLab window.`;
-    form.placeholder = 'url-friendly-workspace-name';
-
     return dialog.launch().then(result => {
       dialog.dispose();
+
+      if (result.value) {
+        // This promise will never resolve because the application navigates
+        // away to a new location. The `navigate()` call happens inside the
+        // promise in order to satisfy the compiler.
+        return new Promise<void>(() => {
+          const url = `workspaces/${result.value}`;
+          const hard = true;
+          const silent = true;
+
+          router.navigate(url, { hard, silent });
+        });
+      }
+
+      return redirect(router, true);
     });
   }
 
