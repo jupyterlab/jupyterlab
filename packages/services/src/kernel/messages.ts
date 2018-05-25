@@ -713,6 +713,8 @@ namespace KernelMessage {
        * Mapping of comm ids to target names.
        */
       comms: { [commId: string]: { 'target_name': string } };
+
+      status: 'ok' | 'error';
     };
   }
 
