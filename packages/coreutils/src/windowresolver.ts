@@ -59,8 +59,7 @@ class WindowResolver implements IWindowResolver {
    * user intervention, which typically means navigation to a new URL.
    */
   resolve(candidate: string): Promise<void> {
-    return Promise.reject('ruh roh');
-    // return Private.windowName(candidate).then(name => { this._name = name; });
+    return Private.windowName(candidate).then(name => { this._name = name; });
   }
 
   private _name: string;
@@ -74,7 +73,7 @@ namespace Private {
   /**
    * The timeout (in ms) to wait for beacon responders.
    */
-  const TIMEOUT = 100;
+  const TIMEOUT = 250;
 
   /**
    * The internal prefix for private local storage keys.
@@ -89,13 +88,17 @@ namespace Private {
   /**
    * The local storage window prefix.
    */
-  const WINDOW = `${PREFIX}:window-`;
-
+  const WINDOW = `${PREFIX}:window`;
 
   /**
    * The initialization flag.
    */
   let initialized = false;
+
+  /**
+   * A potential preferred default window name.
+   */
+  let candidate: string;
 
   /**
    * The window name.
@@ -108,48 +111,22 @@ namespace Private {
   let delegate = new PromiseDelegate<string>();
 
   /**
+   * Whether the name resolution has completed.
+   */
+  let resolved = false;
+
+  /**
    * Wait until a window name is available and resolve.
    */
-  function awaitName(candidate: string): void {
+  function awaitName(): void {
     window.setTimeout(() => {
-      if (name) {
-        return delegate.resolve(name);
+      if (resolved) {
+        return;
       }
 
-      createName().then(value => {
-        name = value;
-        delegate.resolve(name);
-      });
+      resolved = true;
+      delegate.resolve(name = candidate);
     }, TIMEOUT);
-  }
-
-  /**
-   * Create a name for this window.
-   */
-  function createName(): Promise<string> {
-    console.log('I should generate a name');
-    return Promise.resolve('');
-  }
-
-  /**
-   * Fetch the known window names.
-   */
-  function fetchWindowNames(): { [name: string]: number } {
-      const names: { [name: string]: number } = { };
-      const { localStorage } = window;
-      let i = localStorage.length;
-
-      while (i) {
-        let key = localStorage.key(--i);
-
-        if (key && key.indexOf(WINDOW) === 0) {
-          let name = key.replace(WINDOW, '');
-
-          names[name] = parseInt(localStorage.getItem(key), 10);
-        }
-      }
-
-      return names;
   }
 
   /**
@@ -163,35 +140,39 @@ namespace Private {
    * Respond to a signal beacon.
    */
   function ping(): void {
-    if (name) {
-      window.localStorage.setItem(name, `${(new Date()).getTime()}`);
+    if (!resolved) {
+      console.log('ping [delayed]');
+      window.setTimeout(ping, TIMEOUT / 4);
+      return;
     }
+
+    console.log('ping', WINDOW, name);
+    window.localStorage.removeItem(WINDOW);
+    window.localStorage.setItem(WINDOW, name);
   }
 
   /**
    * The window storage event handler.
    */
   function storageHandler(event: StorageEvent) {
-    const { key } = event;
-
-    console.log('event key', key);
+    const { key, newValue } = event;
 
     if (key === BEACON) {
       console.log('The beacon has been fired');
       return ping();
     }
 
-    if (!key || key.indexOf(WINDOW) !== 0) {
+    if (resolved) {
       return;
     }
 
-    const windows = fetchWindowNames();
-    const name = key.replace(WINDOW, '');
+    if (key === WINDOW) {
+      console.log('Received window name', newValue);
+    }
 
-    if (name in windows) {
-      console.log(`Window ${name} is a known window.`);
-    } else {
-      console.log(`Window ${name} is an unknown window.`);
+    if (key === WINDOW && candidate === newValue) {
+      resolved = true;
+      delegate.reject(`Window name candidate "${candidate}" was rejected`);
     }
   }
 
@@ -199,14 +180,17 @@ namespace Private {
    * Returns a promise that resolves with the window name used for restoration.
    */
   export
-  function windowName(candidate: string): Promise<string> {
-    if (name) {
+  function windowName(potential: string): Promise<string> {
+    if (resolved) {
       return delegate.promise;
     }
 
+    candidate = potential;
+
     console.log(`Resolve a window name, start with candidate: "${candidate}"`);
     beacon();
-    awaitName(candidate);
+    awaitName();
+
     return delegate.promise;
   }
 
