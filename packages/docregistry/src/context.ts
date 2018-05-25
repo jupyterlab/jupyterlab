@@ -83,7 +83,8 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
       path: this._path,
       type: ext === '.ipynb' ? 'notebook' : 'file',
       name: PathExt.basename(localPath),
-      kernelPreference: options.kernelPreference || { shouldStart: false }
+      kernelPreference: options.kernelPreference || { shouldStart: false },
+      setBusy: options.setBusy
     });
     this.session.propertyChanged.connect(this._onSessionChanged, this);
     manager.contents.fileChanged.connect(this._onFileChanged, this);
@@ -741,6 +742,11 @@ export namespace Context {
      * An optional callback for opening sibling widgets.
      */
     opener?: (widget: Widget) => void;
+
+    /**
+     * A function to call when the kernel is busy.
+     */
+    setBusy?: () => IDisposable;
   }
 }
 

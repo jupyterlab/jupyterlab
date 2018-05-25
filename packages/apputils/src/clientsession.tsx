@@ -232,6 +232,7 @@ class ClientSession implements IClientSession {
     this._path = options.path || uuid();
     this._type = options.type || '';
     this._name = options.name || '';
+    this._setBusy = options.setBusy;
     this._kernelPreference = options.kernelPreference || {};
   }
 
@@ -739,6 +740,23 @@ class ClientSession implements IClientSession {
    * Handle a change to the session status.
    */
   private _onStatusChanged(): void {
+
+    // Set that this kernel is busy, if we haven't already
+    // If we have already, and now we aren't busy, dispose
+    // of the busy disposable.
+    if (this._setBusy) {
+      if (this.status === 'busy') {
+        if (!this._busyDisposable) {
+          this._busyDisposable = this._setBusy();
+        }
+      } else {
+        if (this._busyDisposable) {
+          this._busyDisposable.dispose();
+          this._busyDisposable = null;
+        }
+      }
+    }
+
     this._statusChanged.emit(this.status);
   }
 
@@ -773,6 +791,8 @@ class ClientSession implements IClientSession {
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);
   private _dialog: Dialog<any> | null = null;
+  private _setBusy: () => IDisposable | undefined;
+  private _busyDisposable: IDisposable | null = null;
 }
 
 
@@ -810,6 +830,11 @@ namespace ClientSession {
      * A kernel preference.
      */
     kernelPreference?: IClientSession.IKernelPreference;
+
+    /**
+     * A function to call when the session becomes busy.
+     */
+    setBusy?: () => IDisposable;
   }
 
   /**

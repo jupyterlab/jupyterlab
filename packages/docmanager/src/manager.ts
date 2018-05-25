@@ -92,6 +92,7 @@ class DocumentManager implements IDisposable {
     let widgetManager = new DocumentWidgetManager({ registry: this.registry });
     widgetManager.activateRequested.connect(this._onActivateRequested, this);
     this._widgetManager = widgetManager;
+    this._setBusy = options.setBusy;
   }
 
   /**
@@ -427,7 +428,8 @@ class DocumentManager implements IDisposable {
       factory,
       path,
       kernelPreference,
-      modelDBFactory
+      modelDBFactory,
+      setBusy: this._setBusy
     });
     let handler = new SaveHandler({ context });
     Private.saveHandlerProperty.set(context, handler);
@@ -529,6 +531,7 @@ class DocumentManager implements IDisposable {
   private _isDisposed = false;
   private _autosave = true;
   private _when: Promise<void>;
+  private _setBusy: () => IDisposable;
 }
 
 
@@ -561,6 +564,11 @@ namespace DocumentManager {
      * A promise for when to start using the manager.
      */
     when?: Promise<void>;
+
+    /**
+     * A function called when a kernel is busy.
+     */
+    setBusy?: () => IDisposable;
   }
 
   /**

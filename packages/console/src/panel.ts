@@ -36,6 +36,7 @@ import {
 import {
   CodeConsole
 } from './widget';
+import { IDisposable } from '@phosphor/disposable';
 
 
 /**
@@ -73,7 +74,8 @@ class ConsolePanel extends Panel {
       path,
       name: name || `Console ${count}`,
       type: 'console',
-      kernelPreference: options.kernelPreference
+      kernelPreference: options.kernelPreference,
+      setBusy: options.setBusy
     });
 
     let resolver = new RenderMimeRegistry.UrlResolver({
@@ -222,6 +224,11 @@ namespace ConsolePanel {
      * The service used to look up mime types.
      */
     mimeTypeService: IEditorMimeTypeService;
+
+    /**
+     * A function to call when the kernel is busy.
+     */
+    setBusy?: () => IDisposable;
   }
 
   /**

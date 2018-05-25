@@ -39,6 +39,7 @@ import {
 import {
   ApplicationShell
 } from './shell';
+import { ISignal, Signal } from '@phosphor/signaling';
 
 export { ApplicationShell } from './shell';
 export { ILayoutRestorer, LayoutRestorer } from './layoutrestorer';
@@ -62,6 +63,7 @@ class JupyterLab extends Application<ApplicationShell> {
    */
   constructor(options: JupyterLab.IOptions = {}) {
     super({ shell: new ApplicationShell() });
+    this._busySignal = new Signal(this);
     this._info = { ...JupyterLab.defaultInfo, ...options };
     if (this._info.devMode) {
       this.shell.addClass('jp-mod-devMode');
@@ -109,6 +111,21 @@ class JupyterLab extends Application<ApplicationShell> {
   }
 
   /**
+   * Whether the application is busy.
+   */
+  get isBusy(): boolean {
+    return this._busyCount > 0;
+  }
+
+  /**
+   * Returns a signal for when application changes it's busy status.
+   */
+  get busySignal(): ISignal<JupyterLab, boolean> {
+    return this._busySignal;
+  }
+
+
+  /**
    * The information about the application.
    */
   get info(): JupyterLab.IInfo {
@@ -134,6 +151,26 @@ class JupyterLab extends Application<ApplicationShell> {
     this._dirtyCount++;
     return new DisposableDelegate(() => {
       this._dirtyCount = Math.max(0, this._dirtyCount - 1);
+    });
+  }
+
+  /**
+   * Set the application state to busy.
+   *
+   * @returns A disposable used to clear the dirty state for the caller.
+   */
+  setBusy(): IDisposable {
+    const oldBusy = this.isBusy;
+    this._busyCount++;
+    if (this.isBusy !== oldBusy) {
+      this._busySignal.emit(this.isBusy);
+    }
+    return new DisposableDelegate(() => {
+      const oldBusy = this.isBusy;
+      this._busyCount--;
+      if (this.isBusy !== oldBusy) {
+        this._busySignal.emit(this.isBusy);
+      }
     });
   }
 
@@ -171,6 +208,8 @@ class JupyterLab extends Application<ApplicationShell> {
 
   private _info: JupyterLab.IInfo;
   private _dirtyCount = 0;
+  private _busyCount = 0;
+  private _busySignal: Signal<JupyterLab, boolean>;
 }
 
 

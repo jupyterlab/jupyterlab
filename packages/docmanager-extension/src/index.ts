@@ -121,7 +121,7 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
     };
     const registry = app.docRegistry;
     const when = app.restored.then(() => void 0);
-    const docManager = new DocumentManager({ registry, manager, opener, when });
+    const docManager = new DocumentManager({ registry, manager, opener, when, setBusy: app.setBusy.bind(app) });
 
     // Register the file operations commands.
     addCommands(app, docManager, palette, opener, settingRegistry);
