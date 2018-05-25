@@ -13,6 +13,9 @@ import {
   CSVViewer, CSVViewerFactory
 } from '@jupyterlab/csvviewer';
 
+import {
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
 
 /**
  * The name of the factory that creates CSV widgets.
@@ -47,7 +50,7 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer): void {
     defaultFor: ['csv'],
     readOnly: true
   });
-  const tracker = new InstanceTracker<CSVViewer>({ namespace: 'csvviewer' });
+  const tracker = new InstanceTracker<IDocumentWidget<CSVViewer>>({ namespace: 'csvviewer' });
 
   // Handle state restoration.
   restorer.restore(tracker, {

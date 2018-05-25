@@ -35,6 +35,24 @@ import {
 } from '@jupyterlab/rendermime';
 
 
+
+/**
+ * Return a promise that resolves in the given milliseconds with the given value.
+ */
+export
+function sleep<T>(milliseconds: number = 0, value?: T): Promise<T> {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => { resolve(value); }, milliseconds);
+  });
+}
+
+export
+function moment<T>(value?: T): Promise<T> {
+  return new Promise((resolve, reject) => {
+    requestAnimationFrame(() => { resolve(value); });
+  });
+}
+
 /**
  * Get a copy of the default rendermime instance.
  */
@@ -82,14 +100,13 @@ function createFileContext(path?: string, manager?: ServiceManager.IManager): Co
  * Create a context for a notebook.
  */
 export
-function createNotebookContext(path?: string, manager?: ServiceManager.IManager): Promise<Context<INotebookModel>> {
+async function createNotebookContext(path?: string, manager?: ServiceManager.IManager): Promise<Context<INotebookModel>> {
   manager = manager || Private.manager;
-  return manager.ready.then(() => {
-    let factory = Private.notebookFactory;
-    path = path || uuid() + '.ipynb';
-    return new Context({
-      manager, factory, path, kernelPreference: { name: manager.specs.default }
-    });
+  await manager.ready;
+  const factory = Private.notebookFactory;
+  path = path || uuid() + '.ipynb';
+  return new Context({
+    manager, factory, path, kernelPreference: { name: manager.specs.default }
   });
 }
 

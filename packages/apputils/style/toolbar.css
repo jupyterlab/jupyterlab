@@ -18,12 +18,14 @@
   box-shadow: var(--jp-toolbar-box-shadow);
   background: var(--jp-toolbar-background);
   min-height: var(--jp-toolbar-micro-height);
+  padding: 2px;
   z-index: 1;
 }
 
 
 .jp-Toolbar > .jp-Toolbar-item {
   flex: 0 0 auto;
+  display: flex;
   padding-left: 8px;
   padding-right: 8px;
   font-size: var(--jp-ui-font-size1);

@@ -144,7 +144,7 @@ const notebooks: JupyterLabPlugin<void> = {
           return;
         }
 
-        const anchor = parent.notebook;
+        const anchor = parent.content;
         const editor = anchor.activeCell.editor;
         const kernel = parent.session.kernel;
         const rendermime = parent.rendermime;

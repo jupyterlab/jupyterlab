@@ -28,7 +28,7 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
-  acceptDialog, createClientSession, dismissDialog
+  acceptDialog, createClientSession, dismissDialog, moment
 } from '../../utils';
 
 import {
@@ -277,17 +277,14 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCellIndex).to.be(widget.widgets.length - 1);
       });
 
-      it('should add a code cell if all cells are deleted', (done) => {
+      it('should add a code cell if all cells are deleted', async () => {
         for (let i = 0; i < widget.widgets.length; i++) {
           widget.select(widget.widgets[i]);
         }
         NotebookActions.deleteCells(widget);
-        requestAnimationFrame(() => {
-          expect(widget.widgets.length).to.be(1);
-          expect(widget.activeCell).to.be.a(CodeCell);
-          done();
-        });
-
+        await moment();
+        expect(widget.widgets.length).to.be(1);
+        expect(widget.activeCell).to.be.a(CodeCell);
       });
 
       it('should be undo-able', () => {
@@ -1106,16 +1103,14 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.widgets[0].model.value.text).to.be(source);
       });
 
-      it('should add a new code cell if all cells were cut', (done) => {
+      it('should add a new code cell if all cells were cut', async () => {
         for (let i = 0; i < widget.widgets.length; i++) {
           widget.select(widget.widgets[i]);
         }
         NotebookActions.cut(widget);
-        requestAnimationFrame(() => {
-          expect(widget.widgets.length).to.be(1);
-          expect(widget.activeCell).to.be.a(CodeCell);
-          done();
-        });
+        await moment();
+        expect(widget.widgets.length).to.be(1);
+        expect(widget.activeCell).to.be.a(CodeCell);
       });
 
     });

@@ -18,11 +18,19 @@ import {
 } from '@phosphor/signaling';
 
 import {
+  Widget
+} from '@phosphor/widgets';
+
+import {
+  MainAreaWidget
+} from '@jupyterlab/apputils';
+
+import {
   CodeEditor
 } from '@jupyterlab/codeeditor';
 
 import {
-  IChangedArgs
+  IChangedArgs, PathExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -30,7 +38,7 @@ import {
 } from '@jupyterlab/observables';
 
 import {
-  DocumentRegistry
+  DocumentRegistry, IDocumentWidget
 } from './index';
 
 
@@ -144,6 +152,13 @@ class DocumentModel extends CodeEditor.Model implements DocumentRegistry.ICodeMo
    */
   fromJSON(value: JSONValue): void {
     this.fromString(JSON.stringify(value));
+  }
+
+  /**
+   * Initialize the model with its current state.
+   */
+  initialize(): void {
+    return;
   }
 
   /**
@@ -277,10 +292,10 @@ class Base64ModelFactory extends TextModelFactory {
 
 
 /**
- * The default implemetation of a widget factory.
+ * The default implementation of a widget factory.
  */
 export
-abstract class ABCWidgetFactory<T extends DocumentRegistry.IReadyWidget, U extends DocumentRegistry.IModel> implements DocumentRegistry.IWidgetFactory<T, U> {
+abstract class ABCWidgetFactory<T extends IDocumentWidget, U extends DocumentRegistry.IModel = DocumentRegistry.IModel> implements DocumentRegistry.IWidgetFactory<T, U> {
   /**
    * Construct a new `ABCWidgetFactory`.
    */
@@ -390,4 +405,74 @@ abstract class ABCWidgetFactory<T extends DocumentRegistry.IReadyWidget, U exten
   private _fileTypes: string[];
   private _defaultFor: string[];
   private _widgetCreated = new Signal<DocumentRegistry.IWidgetFactory<T, U>, T>(this);
+}
+
+/**
+ * The class name added to a dirty widget.
+ */
+const DIRTY_CLASS = 'jp-mod-dirty';
+
+/**
+ * A document widget implementation.
+ */
+export
+class DocumentWidget<T extends Widget = Widget, U extends DocumentRegistry.IModel = DocumentRegistry.IModel> extends MainAreaWidget<T> implements IDocumentWidget<T, U> {
+  constructor(options: DocumentWidget.IOptions<T, U>) {
+
+    // Include the context ready promise in the widget reveal promise
+    options.reveal = Promise.all([options.reveal, options.context.ready]);
+    super(options);
+
+    this.context = options.context;
+
+    // Handle context path changes
+    this.context.pathChanged.connect(this._onPathChanged, this);
+    this._onPathChanged(this.context, this.context.path);
+
+    // Listen for changes in the dirty state.
+    this.context.model.stateChanged.connect(this._onModelStateChanged, this);
+    this.context.ready.then(() => { this._handleDirtyState(); });
+  }
+
+  /**
+   * Handle a path change.
+   */
+  private _onPathChanged(sender: DocumentRegistry.IContext<U>, path: string): void {
+    this.title.label = PathExt.basename(sender.localPath);
+  }
+
+  /**
+   * Handle a change to the context model state.
+   */
+  private _onModelStateChanged(sender: DocumentRegistry.IModel, args: IChangedArgs<any>): void {
+    if (args.name === 'dirty') {
+      this._handleDirtyState();
+    }
+  }
+
+  /**
+   * Handle the dirty state of the context model.
+   */
+  private _handleDirtyState(): void {
+    if (this.context.model.dirty) {
+      this.title.className += ` ${DIRTY_CLASS}`;
+    } else {
+      this.title.className = this.title.className.replace(DIRTY_CLASS, '');
+    }
+  }
+
+  readonly context: DocumentRegistry.IContext<U>;
+}
+
+export
+namespace DocumentWidget {
+  export
+  interface IOptions<T extends Widget = Widget, U extends DocumentRegistry.IModel = DocumentRegistry.IModel> extends MainAreaWidget.IOptions<T> {
+      context: DocumentRegistry.IContext<U>;
+  }
+
+  export
+  interface IOptionsOptionalContent<T extends Widget = Widget, U extends DocumentRegistry.IModel = DocumentRegistry.IModel> extends MainAreaWidget.IOptionsOptionalContent<T> {
+      context: DocumentRegistry.IContext<U>;
+  }
 }

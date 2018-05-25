@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  showDialog, showErrorMessage, Spinner, Dialog, ICommandPalette
+  showDialog, showErrorMessage, Dialog, ICommandPalette
 } from '@jupyterlab/apputils';
 
 import {
@@ -108,16 +108,6 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
         };
         if (!widget.isAttached) {
           app.shell.addToMainArea(widget, options || {});
-
-          // Add a loading spinner, and remove it when the widget is ready.
-          if (widget.ready !== undefined) {
-            const spinner = new Spinner();
-            widget.node.appendChild(spinner.node);
-            widget.ready.then(() => {
-              widget.node.removeChild(spinner.node);
-              spinner.dispose();
-            });
-          }
         }
         shell.activateById(widget.id);
 

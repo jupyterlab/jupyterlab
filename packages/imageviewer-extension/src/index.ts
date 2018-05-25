@@ -10,6 +10,10 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
+
+import {
   ImageViewer, ImageViewerFactory, IImageTracker
 } from '@jupyterlab/imageviewer';
 
@@ -85,7 +89,7 @@ function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRe
     defaultFor: FILE_TYPES,
     readOnly: true
   });
-  const tracker = new InstanceTracker<ImageViewer>({ namespace });
+  const tracker = new InstanceTracker<IDocumentWidget<ImageViewer>>({ namespace });
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -184,7 +188,7 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
   });
 
   function zoomIn(): void {
-    const widget = tracker.currentWidget;
+    const widget = tracker.currentWidget.content;
 
     if (widget) {
       widget.scale = widget.scale > 1 ? widget.scale + 0.5 : widget.scale * 2;
@@ -192,7 +196,7 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
   }
 
   function zoomOut(): void {
-    const widget = tracker.currentWidget;
+    const widget = tracker.currentWidget.content;
 
     if (widget) {
       widget.scale = widget.scale > 1 ? widget.scale - 0.5 : widget.scale / 2;
@@ -200,7 +204,7 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
   }
 
   function resetImage(): void {
-    const widget = tracker.currentWidget;
+    const widget = tracker.currentWidget.content;
 
     if (widget) {
       widget.scale = 1;
@@ -210,7 +214,7 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
   }
 
   function rotateClockwise(): void {
-    const widget = tracker.currentWidget;
+    const widget = tracker.currentWidget.content;
 
     if (widget) {
       widget.rotateClockwise();
@@ -218,7 +222,7 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
   }
 
   function rotateCounterclockwise(): void {
-    const widget = tracker.currentWidget;
+    const widget = tracker.currentWidget.content;
 
     if (widget) {
       widget.rotateCounterclockwise();
@@ -226,7 +230,7 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
   }
 
   function flipHorizontal(): void {
-    const widget = tracker.currentWidget;
+    const widget = tracker.currentWidget.content;
 
     if (widget) {
       widget.flipHorizontal();
@@ -234,7 +238,7 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
   }
 
   function flipVertical(): void {
-    const widget = tracker.currentWidget;
+    const widget = tracker.currentWidget.content;
 
     if (widget) {
       widget.flipVertical();
@@ -242,7 +246,7 @@ function addCommands(app: JupyterLab, tracker: IImageTracker) {
   }
 
   function invertColors(): void {
-    const widget = tracker.currentWidget;
+    const widget = tracker.currentWidget.content;
 
     if (widget) {
       widget.colorinversion += 1;

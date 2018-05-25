@@ -20,21 +20,15 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  ABCWidgetFactory, Base64ModelFactory, DocumentRegistry
+  ABCWidgetFactory, Base64ModelFactory, DocumentRegistry, DocumentWidget, IDocumentWidget
 } from '@jupyterlab/docregistry';
 
 
-class DocWidget extends Widget implements DocumentRegistry.IReadyWidget {
-  get ready(): Promise<void> {
-    return Promise.resolve(undefined);
-  }
-}
+class WidgetFactory extends ABCWidgetFactory<IDocumentWidget> {
 
-
-class WidgetFactory extends ABCWidgetFactory<DocumentRegistry.IReadyWidget, DocumentRegistry.IModel> {
-
-  protected createNewWidget(context: DocumentRegistry.Context): DocumentRegistry.IReadyWidget {
-    let widget = new DocWidget();
+  protected createNewWidget(context: DocumentRegistry.Context): IDocumentWidget {
+    const content = new Widget();
+    const widget = new DocumentWidget({ content, context });
     widget.addClass('WidgetFactory');
     return widget;
   }

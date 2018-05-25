@@ -3,7 +3,7 @@
 Documents
 ---------
 
-JupyterLab can be extended in two ways via:
+JupyterLab can be extended in several ways:
 
 -  Extensions (top level): Application extensions extend the
    functionality of JupyterLab itself, and we cover them in the
@@ -14,6 +14,16 @@ JupyterLab can be extended in two ways via:
 
 For this section, the term 'document' refers to any visual thing that
 is backed by a file stored on disk (i.e. uses Contents API).
+
+Overview of document architecture
+---------------------------------
+
+A 'document' in JupyterLab is represented by a model instance implementing the `IModel http://jupyterlab.github.io/jupyterlab/interfaces/_docregistry_src_registry_.documentregistry.imodel.html`__ interface. The model interface is intentionally fairly small, and concentrates on representing the data in the document and signaling changes to that data. Each model has an associated `context http://jupyterlab.github.io/jupyterlab/interfaces/_docregistry_src_registry_.documentregistry.icontext.html`__ instance as well. The context for a model is the bridge between the internal data of the document, stored in the model, and the file metadata and operations possible on the file, such as save and revert. Since many objects will need both the context and the model, the context contains a reference to the model as its `.model` attribute.
+
+A single file path can have multiple different models (and hence different contexts) representing the file. For example, a notebook can be opened with a notebook model and with a text model. Different models for the same file path do not directly communicate with each other.
+
+`Document widgets http://jupyterlab.github.io/jupyterlab/interfaces/_docregistry_src_registry_.documentregistry.ireadywidget.html`__ represent a view of a document model. There can be multiple document widgets associated with a single document model, and they naturally stay in sync with each other since they are views on the same underlying data model.
+
 
 The `Document
 Registry <http://jupyterlab.github.io/jupyterlab/classes/_docregistry_src_registry_.documentregistry.html>`__
@@ -32,10 +42,10 @@ Document Registry
 
 *Document widget extensions* in the JupyterLab application can register:
 
--  widget factories
--  model factories
--  widget extension factories
 -  file types
+-  model factories for specific file types
+-  widget factories for specific model factories
+-  widget extension factories
 -  file creators
 
 `Widget Factories <http://jupyterlab.github.io/jupyterlab/classes/_docregistry_src_registry_.documentregistry.html#addwidgetfactory>`__

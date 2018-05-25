@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IIterator, find, map
+  IIterator, find, map, some
 } from '@phosphor/algorithm';
 
 import {
@@ -10,7 +10,7 @@ import {
 } from '@phosphor/commands';
 
 import {
-  Message
+  Message, MessageLoop
 } from '@phosphor/messaging';
 
 import {
@@ -79,6 +79,126 @@ const TOOLBAR_BUSY_CLASS = 'jp-FilledCircleIcon';
 const TOOLBAR_IDLE_CLASS = 'jp-CircleIcon';
 
 
+/**
+ * A layout for toolbars.
+ *
+ * #### Notes
+ * This layout automatically collapses its height if there are no visible
+ * toolbar widgets, and expands to the standard toolbar height if there are
+ * visible toolbar widgets.
+ */
+class ToolbarLayout extends PanelLayout {
+  /**
+   * A message handler invoked on a `'fit-request'` message.
+   *
+   * If any child widget is visible, expand the toolbar height to the normal
+   * toolbar height.
+   */
+  protected onFitRequest(msg: Message): void {
+    super.onFitRequest(msg);
+    if (this.parent!.isAttached) {
+      // If there are any widgets not explicitly hidden, expand the toolbar to
+      // accommodate them.
+      if (some(this.widgets, w => !w.isHidden)) {
+        this.parent!.node.style.minHeight = 'var(--jp-private-toolbar-height)';
+      } else {
+        this.parent!.node.style.minHeight = '';
+      }
+    }
+
+    // Set the dirty flag to ensure only a single update occurs.
+    this._dirty = true;
+
+    // Notify the ancestor that it should fit immediately. This may
+    // cause a resize of the parent, fulfilling the required update.
+    if (this.parent!.parent) {
+      MessageLoop.sendMessage(this.parent!.parent!, Widget.Msg.FitRequest);
+    }
+
+    // If the dirty flag is still set, the parent was not resized.
+    // Trigger the required update on the parent widget immediately.
+    if (this._dirty) {
+      MessageLoop.sendMessage(this.parent!, Widget.Msg.UpdateRequest);
+    }
+  }
+
+  /**
+   * A message handler invoked on an `'update-request'` message.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    super.onUpdateRequest(msg);
+    if (this.parent!.isVisible) {
+      this._dirty = false;
+    }
+  }
+
+  /**
+   * A message handler invoked on a `'child-shown'` message.
+   */
+  protected onChildShown(msg: Widget.ChildMessage): void {
+    super.onChildShown(msg);
+
+    // Post a fit request for the parent widget.
+    this.parent!.fit();
+  }
+
+  /**
+   * A message handler invoked on a `'child-hidden'` message.
+   */
+  protected onChildHidden(msg: Widget.ChildMessage): void {
+    super.onChildHidden(msg);
+
+    // Post a fit request for the parent widget.
+    this.parent!.fit();
+  }
+
+  /**
+   * A message handler invoked on a `'before-attach'` message.
+   */
+  protected onBeforeAttach(msg: Message): void {
+    super.onBeforeAttach(msg);
+
+    // Post a fit request for the parent widget.
+    this.parent!.fit();
+  }
+
+  /**
+   * Attach a widget to the parent's DOM node.
+   *
+   * @param index - The current index of the widget in the layout.
+   *
+   * @param widget - The widget to attach to the parent.
+   *
+   * #### Notes
+   * This is a reimplementation of the superclass method.
+   */
+  protected attachWidget(index: number, widget: Widget): void {
+    super.attachWidget(index, widget);
+
+    // Post a fit request for the parent widget.
+    this.parent!.fit();
+  }
+
+  /**
+   * Detach a widget from the parent's DOM node.
+   *
+   * @param index - The previous index of the widget in the layout.
+   *
+   * @param widget - The widget to detach from the parent.
+   *
+   * #### Notes
+   * This is a reimplementation of the superclass method.
+   */
+  protected detachWidget(index: number, widget: Widget): void {
+    super.detachWidget(index, widget);
+
+    // Post a fit request for the parent widget.
+    this.parent!.fit();
+  }
+
+  private _dirty = false;
+}
+
 
 /**
  * A class which provides a toolbar widget.
@@ -91,7 +211,7 @@ class Toolbar<T extends Widget = Widget> extends Widget {
   constructor() {
     super();
     this.addClass(TOOLBAR_CLASS);
-    this.layout = new PanelLayout();
+    this.layout = new ToolbarLayout();
   }
 
   /**
@@ -100,7 +220,7 @@ class Toolbar<T extends Widget = Widget> extends Widget {
    * @returns An iterator over the toolbar item names.
    */
   names(): IIterator<string> {
-    let layout = this.layout as PanelLayout;
+    let layout = this.layout as ToolbarLayout;
     return map(layout.widgets, widget => {
       return Private.nameProperty.get(widget);
     });
@@ -122,7 +242,7 @@ class Toolbar<T extends Widget = Widget> extends Widget {
    * The item can be removed from the toolbar by setting its parent to `null`.
    */
   addItem(name: string, widget: T): boolean {
-    let layout = this.layout as PanelLayout;
+    let layout = this.layout as ToolbarLayout;
     return this.insertItem(layout.widgets.length, name, widget);
   }
 
@@ -148,7 +268,7 @@ class Toolbar<T extends Widget = Widget> extends Widget {
       return false;
     }
     widget.addClass(TOOLBAR_ITEM_CLASS);
-    let layout = this.layout as PanelLayout;
+    let layout = this.layout as ToolbarLayout;
     layout.insertWidget(index, widget);
     Private.nameProperty.set(widget, name);
     return true;

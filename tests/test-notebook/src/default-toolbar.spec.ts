@@ -4,19 +4,20 @@
 import expect = require('expect.js');
 
 import {
-  IClientSession
-} from '@jupyterlab/apputils';
-
-import {
   toArray
 } from '@phosphor/algorithm';
+
+
+import {
+  PromiseDelegate
+} from '@phosphor/coreutils';
 
 import {
   Widget
 } from '@phosphor/widgets';
 
 import {
-  Context, DocumentRegistry
+  Context
 } from '@jupyterlab/docregistry';
 
 import {
@@ -40,59 +41,34 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
-  createNotebookContext
+  createNotebookContext, moment
 } from '../../utils';
 
 import {
-  DEFAULT_CONTENT, createNotebookPanelFactory, rendermime, clipboard,
-  mimeTypeService
+  DEFAULT_CONTENT, clipboard, createNotebookPanel
 } from '../../notebook-utils';
 
 
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
 
-function startSession(context: DocumentRegistry.IContext<INotebookModel>): Promise<IClientSession> {
-  return (context as any).initialize(true).then(() => {
-    return context.ready;
-  }).then(() => {
-    return context.session.kernel.ready;
-  }).then(() => {
-    return context.session;
-  });
-}
-
-
 describe('@jupyterlab/notebook', () => {
-
-  let context: Context<INotebookModel>;
-
-  beforeEach(() => {
-    return createNotebookContext().then(c => {
-      context = c;
-      return context.initialize(true);
-    });
-  });
-
-  afterEach(() => {
-    return context.session.shutdown().then(() => {
-      context.dispose();
-    });
-  });
 
   describe('ToolbarItems', () => {
 
+    let context: Context<INotebookModel>;
     let panel: NotebookPanel;
-    const contentFactory = createNotebookPanelFactory();
 
-    beforeEach(() => {
-      panel = new NotebookPanel({ rendermime, contentFactory,
-                                  mimeTypeService });
+    beforeEach(async () => {
+      context = await createNotebookContext();
+      await context.initialize(true);
+      panel = createNotebookPanel(context);
       context.model.fromJSON(DEFAULT_CONTENT);
-      panel.context = context;
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+      await context.session.shutdown();
+      context.dispose();
       panel.dispose();
     });
 
@@ -121,8 +97,8 @@ describe('@jupyterlab/notebook', () => {
         let button = ToolbarItems.createInsertButton(panel);
         Widget.attach(button, document.body);
         button.node.click();
-        expect(panel.notebook.activeCellIndex).to.be(1);
-        expect(panel.notebook.activeCell).to.be.a(CodeCell);
+        expect(panel.content.activeCellIndex).to.be(1);
+        expect(panel.content.activeCell).to.be.a(CodeCell);
         button.dispose();
       });
 
@@ -137,10 +113,10 @@ describe('@jupyterlab/notebook', () => {
 
       it('should cut when clicked', () => {
         let button = ToolbarItems.createCutButton(panel);
-        let count = panel.notebook.widgets.length;
+        let count = panel.content.widgets.length;
         Widget.attach(button, document.body);
         button.node.click();
-        expect(panel.notebook.widgets.length).to.be(count - 1);
+        expect(panel.content.widgets.length).to.be(count - 1);
         expect(clipboard.hasData(JUPYTER_CELL_MIME)).to.be(true);
         button.dispose();
       });
@@ -156,10 +132,10 @@ describe('@jupyterlab/notebook', () => {
 
       it('should copy when clicked', () => {
         let button = ToolbarItems.createCopyButton(panel);
-        let count = panel.notebook.widgets.length;
+        let count = panel.content.widgets.length;
         Widget.attach(button, document.body);
         button.node.click();
-        expect(panel.notebook.widgets.length).to.be(count);
+        expect(panel.content.widgets.length).to.be(count);
         expect(clipboard.hasData(JUPYTER_CELL_MIME)).to.be(true);
         button.dispose();
       });
@@ -173,17 +149,15 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#createPasteButton()', () => {
 
-      it('should paste when clicked', (done) => {
+      it('should paste when clicked', async () => {
         let button = ToolbarItems.createPasteButton(panel);
-        let count = panel.notebook.widgets.length;
+        let count = panel.content.widgets.length;
         Widget.attach(button, document.body);
-        NotebookActions.copy(panel.notebook);
+        NotebookActions.copy(panel.content);
         button.node.click();
-        requestAnimationFrame(() => {
-          expect(panel.notebook.widgets.length).to.be(count + 1);
-          button.dispose();
-          done();
-        });
+        await moment();
+        expect(panel.content.widgets.length).to.be(count + 1);
+        button.dispose();
       });
 
       it('should have the `\'jp-PasteIcon\'` class', () => {
@@ -195,25 +169,34 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#createRunButton()', () => {
 
-      it('should run and advance when clicked', (done) => {
+      it('should run and advance when clicked', async () => {
         let button = ToolbarItems.createRunButton(panel);
-        let widget = panel.notebook;
-        let next = widget.widgets[1] as MarkdownCell;
-        widget.select(next);
-        let cell = widget.activeCell as CodeCell;
-        cell.model.outputs.clear();
-        next.rendered = false;
+        let widget = panel.content;
+
+        // Clear and select the first two cells.
+        const codeCell = widget.widgets[0] as CodeCell;
+        codeCell.model.outputs.clear();
+        widget.select(codeCell);
+        const mdCell = widget.widgets[1] as MarkdownCell;
+        mdCell.rendered = false;
+        widget.select(mdCell);
+
         Widget.attach(button, document.body);
-        startSession(panel.context).then(session => {
-          session.statusChanged.connect((sender, status) => {
-            if (status === 'idle' && cell.model.outputs.length > 0) {
-              expect(next.rendered).to.be(true);
-              button.dispose();
-              done();
-            }
-          });
-          button.node.click();
-        }).catch(done);
+        await context.ready;
+        await context.session.ready;
+        await context.session.kernel.ready;
+        const p = new PromiseDelegate();
+        context.session.statusChanged.connect((sender, status) => {
+          // Find the right status idle message
+          if (status === 'idle' && codeCell.model.outputs.length > 0) {
+            expect(mdCell.rendered).to.be(true);
+            expect(widget.activeCellIndex).to.equal(2);
+            button.dispose();
+            p.resolve(0);
+          }
+        });
+        button.node.click();
+        await p.promise;
       });
 
       it('should have the `\'jp-RunIcon\'` class', () => {
@@ -229,7 +212,7 @@ describe('@jupyterlab/notebook', () => {
         let item = ToolbarItems.createCellTypeItem(panel);
         let node = item.node.getElementsByTagName('select')[0] as HTMLSelectElement;
         expect(node.value).to.be('code');
-        panel.notebook.activeCellIndex++;
+        panel.content.activeCellIndex++;
         expect(node.value).to.be('markdown');
       });
 
@@ -237,7 +220,7 @@ describe('@jupyterlab/notebook', () => {
         let item = ToolbarItems.createCellTypeItem(panel);
         let node = item.node.getElementsByTagName('select')[0] as HTMLSelectElement;
         expect(node.value).to.be('code');
-        panel.notebook.select(panel.notebook.widgets[1]);
+        panel.content.select(panel.content.widgets[1]);
         expect(node.value).to.be('-');
       });
 
@@ -247,17 +230,8 @@ describe('@jupyterlab/notebook', () => {
         expect(node.value).to.be('code');
         let cell = panel.model.contentFactory.createCodeCell({});
         panel.model.cells.insert(1, cell);
-        panel.notebook.select(panel.notebook.widgets[1]);
+        panel.content.select(panel.content.widgets[1]);
         expect(node.value).to.be('code');
-      });
-
-      it('should handle a change in context', () => {
-        let item = ToolbarItems.createCellTypeItem(panel);
-        context.model.fromJSON(DEFAULT_CONTENT);
-        panel.context = null;
-        panel.notebook.activeCellIndex++;
-        let node = item.node.getElementsByTagName('select')[0];
-        expect((node as HTMLSelectElement).value).to.be('markdown');
       });
 
     });

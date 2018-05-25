@@ -2,15 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  BoxLayout, Widget
+  StackedLayout, Widget
 } from '@phosphor/widgets';
 
 import {
-  IChangedArgs, PathExt
-} from '@jupyterlab/coreutils';
-
-import {
-  ABCWidgetFactory, DocumentRegistry
+  ABCWidgetFactory, DocumentRegistry, DocumentWidget, IDocumentWidget
 } from '@jupyterlab/docregistry';
 
 import {
@@ -34,12 +30,6 @@ const CODE_RUNNER = 'jpCodeRunner';
  * The data attribute added to a widget that can undo.
  */
 const UNDOER = 'jpUndoer';
-
-/**
- * The class name added to a dirty widget.
- */
-const DIRTY_CLASS = 'jp-mod-dirty';
-
 
 /**
  * A code editor wrapper for the file editor.
@@ -164,10 +154,10 @@ class FileEditorCodeWrapper extends CodeEditorWrapper {
 
 
 /**
- * A document widget for editors.
+ * A widget for editors.
  */
 export
-class FileEditor extends Widget implements DocumentRegistry.IReadyWidget {
+class FileEditor extends Widget {
   /**
    * Construct a new editor widget.
    */
@@ -186,19 +176,8 @@ class FileEditor extends Widget implements DocumentRegistry.IReadyWidget {
     context.pathChanged.connect(this._onPathChanged, this);
     this._onPathChanged();
 
-    // Listen for changes in the dirty state.
-    context.model.stateChanged.connect(this._onModelStateChanged, this);
-    context.ready.then(() => { this._handleDirtyState(); });
-
-
-    let layout = this.layout = new BoxLayout({ spacing: 0 });
-    let toolbar = new Widget();
-    toolbar.addClass('jp-Toolbar');
-
-    layout.addWidget(toolbar);
-    BoxLayout.setStretch(toolbar, 0);
+    let layout = this.layout = new StackedLayout();
     layout.addWidget(editorWidget);
-    BoxLayout.setStretch(editorWidget, 1);
   }
 
   /**
@@ -280,27 +259,6 @@ class FileEditor extends Widget implements DocumentRegistry.IReadyWidget {
 
     editor.model.mimeType =
       this._mimeTypeService.getMimeTypeByFilePath(localPath);
-    this.title.label = PathExt.basename(localPath);
-  }
-
-  /**
-   * Handle a change to the context model state.
-   */
-  private _onModelStateChanged(sender: DocumentRegistry.IModel, args: IChangedArgs<any>): void {
-    if (args.name === 'dirty') {
-      this._handleDirtyState();
-    }
-  }
-
-  /**
-   * Handle the dirty state of the context model.
-   */
-  private _handleDirtyState(): void {
-    if (this._context.model.dirty) {
-      this.title.className += ` ${DIRTY_CLASS}`;
-    } else {
-      this.title.className = this.title.className.replace(DIRTY_CLASS, '');
-    }
   }
 
   private editorWidget: FileEditorCodeWrapper;
@@ -343,7 +301,7 @@ namespace FileEditor {
  * A widget factory for editors.
  */
 export
-class FileEditorFactory extends ABCWidgetFactory<FileEditor, DocumentRegistry.ICodeModel> {
+class FileEditorFactory extends ABCWidgetFactory<IDocumentWidget<FileEditor>, DocumentRegistry.ICodeModel> {
   /**
    * Construct a new editor widget factory.
    */
@@ -355,16 +313,18 @@ class FileEditorFactory extends ABCWidgetFactory<FileEditor, DocumentRegistry.IC
   /**
    * Create a new widget given a context.
    */
-  protected createNewWidget(context: DocumentRegistry.CodeContext): FileEditor {
+  protected createNewWidget(context: DocumentRegistry.CodeContext): IDocumentWidget<FileEditor> {
     let func = this._services.factoryService.newDocumentEditor;
     let factory: CodeEditor.Factory = options => {
       return func(options);
     };
-    return new FileEditor({
+    const content = new FileEditor({
       factory,
       context,
       mimeTypeService: this._services.mimeTypeService
     });
+    const widget = new DocumentWidget({ content, context });
+    return widget;
   }
 
   private _services: IEditorServices;

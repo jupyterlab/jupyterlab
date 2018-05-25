@@ -37,22 +37,19 @@ class TestTracker extends NotebookTracker {
 }
 
 
-describe('notebook/tracker', () => {
+describe('@jupyterlab/notebook', () => {
 
   describe('NotebookTracker', () => {
 
     let context: Context<INotebookModel>;
 
-    beforeEach(() => {
-      return createNotebookContext().then(c => {
-        context = c;
-      });
+    beforeEach(async () => {
+      context = await createNotebookContext();
     });
 
-    afterEach(() => {
-      return context.session.shutdown().then(() => {
-        context.dispose();
-      });
+    afterEach(async () => {
+      await context.session.shutdown();
+      context.dispose();
     });
 
     describe('#constructor()', () => {
@@ -73,17 +70,17 @@ describe('notebook/tracker', () => {
 
       it('should be `null` if a tracked notebook has no active cell', () => {
         let tracker = new NotebookTracker({ namespace });
-        let panel = createNotebookPanel();
+        let panel = createNotebookPanel(context);
+        panel.content.model.cells.clear();
         tracker.add(panel);
         expect(tracker.activeCell).to.be(null);
       });
 
       it('should be the active cell if a tracked notebook has one', () => {
         let tracker = new NotebookTracker({ namespace });
-        let panel = createNotebookPanel();
+        let panel = createNotebookPanel(context);
         tracker.add(panel);
-        panel.context = context;
-        panel.notebook.model.fromJSON(DEFAULT_CONTENT);
+        panel.content.model.fromJSON(DEFAULT_CONTENT);
         expect(tracker.activeCell).to.be.a(Cell);
         panel.dispose();
       });
@@ -94,14 +91,13 @@ describe('notebook/tracker', () => {
 
       it('should emit a signal when the active cell changes', () => {
         let tracker = new NotebookTracker({ namespace });
-        let panel = createNotebookPanel();
+        let panel = createNotebookPanel(context);
         let count = 0;
         tracker.activeCellChanged.connect(() => { count++; });
-        panel.context = context;
-        panel.notebook.model.fromJSON(DEFAULT_CONTENT);
+        panel.content.model.fromJSON(DEFAULT_CONTENT);
         tracker.add(panel);
         expect(count).to.be(1);
-        panel.notebook.activeCellIndex = 1;
+        panel.content.activeCellIndex = 1;
         expect(count).to.be(2);
         panel.dispose();
       });
@@ -112,7 +108,7 @@ describe('notebook/tracker', () => {
 
       it('should be called when the active cell changes', () => {
         let tracker = new TestTracker({ namespace });
-        let panel = createNotebookPanel();
+        let panel = createNotebookPanel(context);
         tracker.add(panel);
         expect(tracker.methods).to.contain('onCurrentChanged');
       });

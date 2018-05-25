@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  MimeDocument, MimeDocumentFactory, DocumentRegistry
+  MimeDocumentFactory, DocumentRegistry, MimeDocument
 } from '@jupyterlab/docregistry';
 
 import {

@@ -47,23 +47,20 @@ function createFactory(): NotebookWidgetFactory {
 }
 
 
-describe('notebook/notebook/widgetfactory', () => {
-
-  let context: Context<INotebookModel>;
-
-  beforeEach(() => {
-    return createNotebookContext().then(c => {
-      context = c;
-    });
-  });
-
-  afterEach(() => {
-    return context.session.shutdown().then(() => {
-      context.dispose();
-    });
-  });
+describe('@jupyterlab/notebook', () => {
 
   describe('NotebookWidgetFactory', () => {
+
+    let context: Context<INotebookModel>;
+
+    beforeEach(async () => {
+      context = await createNotebookContext();
+    });
+
+    afterEach(async () => {
+      await context.session.shutdown();
+      context.dispose();
+    });
 
     describe('#constructor()', () => {
 
@@ -135,7 +132,7 @@ describe('notebook/notebook/widgetfactory', () => {
       it('should pass the editor config to the notebook', () => {
         let factory = createFactory();
         let panel = factory.createNew(context);
-        expect(panel.notebook.editorConfig).to.be(defaultEditorConfig);
+        expect(panel.content.editorConfig).to.be(defaultEditorConfig);
       });
 
       it('should populate the default toolbar items', () => {

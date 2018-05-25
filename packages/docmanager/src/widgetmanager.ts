@@ -34,7 +34,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  DocumentRegistry
+  DocumentRegistry, IDocumentWidget
 } from '@jupyterlab/docregistry';
 
 import {
@@ -96,7 +96,7 @@ class DocumentWidgetManager implements IDisposable {
    *
    * @throws If the factory is not registered.
    */
-  createWidget(factory: DocumentRegistry.WidgetFactory, context: DocumentRegistry.Context): DocumentRegistry.IReadyWidget {
+  createWidget(factory: DocumentRegistry.WidgetFactory, context: DocumentRegistry.Context): IDocumentWidget {
     let widget = factory.createNew(context);
     Private.factoryProperty.set(widget, factory);
 
@@ -125,7 +125,7 @@ class DocumentWidgetManager implements IDisposable {
    *
    * @param widget - The widget to adopt.
    */
-  adoptWidget(context: DocumentRegistry.Context, widget: DocumentRegistry.IReadyWidget): void {
+  adoptWidget(context: DocumentRegistry.Context, widget: IDocumentWidget): void {
     let widgets = Private.widgetsProperty.get(context);
     widgets.push(widget);
     MessageLoop.installMessageHook(widget, this);
@@ -146,7 +146,7 @@ class DocumentWidgetManager implements IDisposable {
    * This can be used to use an existing widget instead of opening
    * a new widget.
    */
-  findWidget(context: DocumentRegistry.Context, widgetName: string): DocumentRegistry.IReadyWidget | undefined {
+  findWidget(context: DocumentRegistry.Context, widgetName: string): IDocumentWidget | undefined {
     let widgets = Private.widgetsProperty.get(context);
     if (!widgets) {
       return undefined;
@@ -182,7 +182,7 @@ class DocumentWidgetManager implements IDisposable {
    *  Uses the same widget factory and context as the source, or throws
    *  if the source widget is not managed by this manager.
    */
-  cloneWidget(widget: Widget): DocumentRegistry.IReadyWidget | undefined {
+  cloneWidget(widget: Widget): IDocumentWidget | undefined {
     let context = Private.contextProperty.get(widget);
     if (!context) {
       return undefined;
@@ -448,7 +448,7 @@ namespace Private {
    * A private attached property for the widgets associated with a context.
    */
   export
-  const widgetsProperty = new AttachedProperty<DocumentRegistry.Context, DocumentRegistry.IReadyWidget[]>({
+  const widgetsProperty = new AttachedProperty<DocumentRegistry.Context, IDocumentWidget[]>({
     name: 'widgets',
     create: () => []
   });

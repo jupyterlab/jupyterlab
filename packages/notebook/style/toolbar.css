@@ -7,10 +7,6 @@
 | Variables
 |----------------------------------------------------------------------------*/
 
-:root {
-  --jp-private-notebook-panel-toolbar-height: 28px;
-}
-
 /*-----------------------------------------------------------------------------
 
 /*-----------------------------------------------------------------------------
@@ -20,17 +16,7 @@
 
 .jp-NotebookPanel-toolbar {
   padding: 2px;
-  min-height: var(--jp-private-notebook-panel-toolbar-height);
-  box-shadow: var(--jp-toolbar-box-shadow);
-  background: var(--jp-toolbar-background);
-  z-index: 1;
 }
-
-
-/* Top-level toolbar item */
-.jp-Toolbar-item.jp-Notebook-toolbarCellType  {
-}
-
 
 /* select wrapper */
 .jp-Toolbar-item.jp-Notebook-toolbarCellType > .jp-select-wrapper {

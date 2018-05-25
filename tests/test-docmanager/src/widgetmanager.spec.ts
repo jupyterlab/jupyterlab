@@ -24,7 +24,7 @@ import {
 } from '@jupyterlab/docmanager';
 
 import {
-  DocumentRegistry, TextModelFactory, ABCWidgetFactory, Context
+  DocumentRegistry, TextModelFactory, ABCWidgetFactory, Context, DocumentWidget, IDocumentWidget
 } from '@jupyterlab/docregistry';
 
 import {
@@ -32,18 +32,11 @@ import {
 } from '../../utils';
 
 
+class WidgetFactory extends ABCWidgetFactory<IDocumentWidget> {
 
-class DocWidget extends Widget implements DocumentRegistry.IReadyWidget {
-  get ready(): Promise<void> {
-    return Promise.resolve(undefined);
-  }
-}
-
-
-class WidgetFactory extends ABCWidgetFactory<DocumentRegistry.IReadyWidget, DocumentRegistry.IModel> {
-
-  protected createNewWidget(context: DocumentRegistry.Context): DocumentRegistry.IReadyWidget {
-    let widget = new DocWidget();
+  protected createNewWidget(context: DocumentRegistry.Context): IDocumentWidget {
+    const content = new Widget();
+    const widget = new DocumentWidget({ content, context });
     widget.addClass('WidgetFactory');
     return widget;
   }
@@ -160,20 +153,23 @@ describe('@jupyterlab/docmanager', () => {
     describe('#adoptWidget()', () => {
 
       it('should install a message hook', () => {
-        let widget = new DocWidget();
+        const content = new Widget();
+        const widget = new DocumentWidget({ content, context });
         manager.adoptWidget(context, widget);
         MessageLoop.sendMessage(widget, new Message('foo'));
         expect(manager.methods).to.contain('messageHook');
       });
 
       it('should add the document class', () => {
-        let widget = new DocWidget();
+        const content = new Widget();
+        const widget = new DocumentWidget({ content, context });
         manager.adoptWidget(context, widget);
         expect(widget.hasClass('jp-Document')).to.be(true);
       });
 
       it('should be retrievable', () => {
-        let widget = new DocWidget();
+        const content = new Widget();
+        const widget = new DocumentWidget({ content, context });
         manager.adoptWidget(context, widget);
         expect(manager.contextForWidget(widget)).to.be(context);
       });
@@ -240,7 +236,8 @@ describe('@jupyterlab/docmanager', () => {
     describe('#messageHook()', () => {
 
       it('should be called for a message to a tracked widget', () => {
-        let widget = new DocWidget();
+        const content = new Widget();
+        const widget = new DocumentWidget({ content, context });
         manager.adoptWidget(context, widget);
         MessageLoop.sendMessage(widget, new Message('foo'));
         expect(manager.methods).to.contain('messageHook');

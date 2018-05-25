@@ -481,7 +481,7 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
    * Update the settings of the current tracker instances.
    */
   function updateTracker(): void {
-    tracker.forEach(widget => { widget.notebook.editorConfig = editorConfig; });
+    tracker.forEach(widget => { widget.content.editorConfig = editorConfig; });
   }
 
   // Fetch the initial state of the settings.
@@ -704,12 +704,12 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
    */
   function isEnabledAndSingleSelected(): boolean {
     if (!isEnabled()) { return false; }
-    const { notebook } = tracker.currentWidget;
-    const index = notebook.activeCellIndex;
+    const { content } = tracker.currentWidget;
+    const index = content.activeCellIndex;
     // If there are selections that are not the active cell,
     // this command is confusing, so disable it.
-    for (let i = 0; i < notebook.widgets.length; ++i) {
-      if (notebook.isSelected(notebook.widgets[i]) && i !== index) {
+    for (let i = 0; i < content.widgets.length; ++i) {
+      if (content.isSelected(content.widgets[i]) && i !== index) {
         return false;
       }
     }
@@ -722,9 +722,9 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        const { context, notebook } = current;
+        const { context, content } = current;
 
-        return NotebookActions.runAndAdvance(notebook, context.session);
+        return NotebookActions.runAndAdvance(content, context.session);
       }
     },
     isEnabled
@@ -735,9 +735,9 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        const { context, notebook } = current;
+        const { context, content } = current;
 
-        return NotebookActions.run(notebook, context.session);
+        return NotebookActions.run(content, context.session);
       }
     },
     isEnabled
@@ -748,9 +748,9 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        const { context, notebook } = current;
+        const { context, content } = current;
 
-        return NotebookActions.runAndInsert(notebook, context.session);
+        return NotebookActions.runAndInsert(content, context.session);
       }
     },
     isEnabled
@@ -761,9 +761,9 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        const { context, notebook } = current;
+        const { context, content } = current;
 
-        return NotebookActions.runAll(notebook, context.session);
+        return NotebookActions.runAll(content, context.session);
       }
     },
     isEnabled
@@ -774,16 +774,16 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        const { context, notebook } = current;
+        const { context, content } = current;
 
-        return NotebookActions.runAllAbove(notebook, context.session);
+        return NotebookActions.runAllAbove(content, context.session);
       }
     },
     isEnabled: () => {
       // Can't run above if there are multiple cells selected,
       // or if we are at the top of the notebook.
       return isEnabledAndSingleSelected() &&
-             tracker.currentWidget.notebook.activeCellIndex !== 0;
+             tracker.currentWidget.content.activeCellIndex !== 0;
     }
   });
   commands.addCommand(CommandIDs.runAllBelow, {
@@ -792,17 +792,17 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        const { context, notebook } = current;
+        const { context, content } = current;
 
-        return NotebookActions.runAllBelow(notebook, context.session);
+        return NotebookActions.runAllBelow(content, context.session);
       }
     },
     isEnabled: () => {
       // Can't run below if there are multiple cells selected,
       // or if we are at the bottom of the notebook.
       return isEnabledAndSingleSelected() &&
-             tracker.currentWidget.notebook.activeCellIndex !==
-             tracker.currentWidget.notebook.widgets.length - 1;
+             tracker.currentWidget.content.activeCellIndex !==
+             tracker.currentWidget.content.widgets.length - 1;
     }
   });
   commands.addCommand(CommandIDs.restart, {
@@ -846,9 +846,9 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        const { context, notebook } = current;
+        const { context, content } = current;
 
-        return NotebookActions.trust(notebook).then(() => context.save());
+        return NotebookActions.trust(content).then(() => context.save());
       }
     },
     isEnabled
@@ -893,10 +893,10 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        const { notebook, session } = current;
+        const { content, session } = current;
 
         return session.restart()
-          .then(() => { NotebookActions.clearAllOutputs(notebook); });
+          .then(() => { NotebookActions.clearAllOutputs(content); });
       }
     },
     isEnabled
@@ -907,11 +907,11 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        const { context, notebook, session } = current;
+        const { context, content, session } = current;
 
         return session.restart().then(restarted => {
           if (restarted) {
-            NotebookActions.runAll(notebook, context.session);
+            NotebookActions.runAll(content, context.session);
           }
           return restarted;
         });
@@ -925,7 +925,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.clearAllOutputs(current.notebook);
+        return NotebookActions.clearAllOutputs(current.content);
       }
     },
     isEnabled
@@ -936,7 +936,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.clearOutputs(current.notebook);
+        return NotebookActions.clearOutputs(current.content);
       }
     },
     isEnabled
@@ -964,7 +964,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.changeCellType(current.notebook, 'code');
+        return NotebookActions.changeCellType(current.content, 'code');
       }
     },
     isEnabled
@@ -975,7 +975,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.changeCellType(current.notebook, 'markdown');
+        return NotebookActions.changeCellType(current.content, 'markdown');
       }
     },
     isEnabled
@@ -986,7 +986,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.changeCellType(current.notebook, 'raw');
+        return NotebookActions.changeCellType(current.content, 'raw');
       }
     },
     isEnabled
@@ -997,7 +997,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.cut(current.notebook);
+        return NotebookActions.cut(current.content);
       }
     },
     isEnabled
@@ -1008,7 +1008,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.copy(current.notebook);
+        return NotebookActions.copy(current.content);
       }
     },
     isEnabled
@@ -1019,7 +1019,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.paste(current.notebook, 'below');
+        return NotebookActions.paste(current.content, 'below');
       }
     },
     isEnabled
@@ -1030,7 +1030,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.paste(current.notebook, 'above');
+        return NotebookActions.paste(current.content, 'above');
       }
     },
     isEnabled
@@ -1041,7 +1041,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.paste(current.notebook, 'replace');
+        return NotebookActions.paste(current.content, 'replace');
       }
     },
     isEnabled
@@ -1052,7 +1052,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.deleteCells(current.notebook);
+        return NotebookActions.deleteCells(current.content);
       }
     },
     isEnabled
@@ -1063,7 +1063,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.splitCell(current.notebook);
+        return NotebookActions.splitCell(current.content);
       }
     },
     isEnabled
@@ -1074,7 +1074,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.mergeCells(current.notebook);
+        return NotebookActions.mergeCells(current.content);
       }
     },
     isEnabled
@@ -1085,7 +1085,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.insertAbove(current.notebook);
+        return NotebookActions.insertAbove(current.content);
       }
     },
     isEnabled
@@ -1096,7 +1096,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.insertBelow(current.notebook);
+        return NotebookActions.insertBelow(current.content);
       }
     },
     isEnabled
@@ -1107,7 +1107,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.selectAbove(current.notebook);
+        return NotebookActions.selectAbove(current.content);
       }
     },
     isEnabled
@@ -1118,7 +1118,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.selectBelow(current.notebook);
+        return NotebookActions.selectBelow(current.content);
       }
     },
     isEnabled
@@ -1129,7 +1129,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.extendSelectionAbove(current.notebook);
+        return NotebookActions.extendSelectionAbove(current.content);
       }
     },
     isEnabled
@@ -1140,7 +1140,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.extendSelectionBelow(current.notebook);
+        return NotebookActions.extendSelectionBelow(current.content);
       }
     },
     isEnabled
@@ -1151,7 +1151,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.selectAll(current.notebook);
+        return NotebookActions.selectAll(current.content);
       }
     },
     isEnabled
@@ -1162,7 +1162,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.deselectAll(current.notebook);
+        return NotebookActions.deselectAll(current.content);
       }
     },
     isEnabled
@@ -1173,7 +1173,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.moveUp(current.notebook);
+        return NotebookActions.moveUp(current.content);
       }
     },
     isEnabled
@@ -1184,7 +1184,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.moveDown(current.notebook);
+        return NotebookActions.moveDown(current.content);
       }
     },
     isEnabled
@@ -1195,7 +1195,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.toggleAllLineNumbers(current.notebook);
+        return NotebookActions.toggleAllLineNumbers(current.content);
       }
     },
     isEnabled
@@ -1206,7 +1206,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        current.notebook.mode = 'command';
+        current.content.mode = 'command';
       }
     },
     isEnabled
@@ -1217,7 +1217,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        current.notebook.mode = 'edit';
+        current.content.mode = 'edit';
       }
     },
     isEnabled
@@ -1228,7 +1228,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.undo(current.notebook);
+        return NotebookActions.undo(current.content);
       }
     },
     isEnabled
@@ -1239,7 +1239,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.redo(current.notebook);
+        return NotebookActions.redo(current.content);
       }
     },
     isEnabled
@@ -1277,7 +1277,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     execute: args => {
       // Clone the OutputArea
       const current = getCurrent({ ...args, activate: false });
-      const nb = current.notebook;
+      const nb = current.content;
       const content = (nb.activeCell as CodeCell).cloneOutputArea();
       // Create a MainAreaWidget
       const widget = new MainAreaWidget({ content });
@@ -1323,7 +1323,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.setMarkdownHeader(current.notebook, 1);
+        return NotebookActions.setMarkdownHeader(current.content, 1);
       }
     },
     isEnabled
@@ -1334,7 +1334,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.setMarkdownHeader(current.notebook, 2);
+        return NotebookActions.setMarkdownHeader(current.content, 2);
       }
     },
     isEnabled
@@ -1345,7 +1345,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.setMarkdownHeader(current.notebook, 3);
+        return NotebookActions.setMarkdownHeader(current.content, 3);
       }
     },
     isEnabled
@@ -1356,7 +1356,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.setMarkdownHeader(current.notebook, 4);
+        return NotebookActions.setMarkdownHeader(current.content, 4);
       }
     },
     isEnabled
@@ -1367,7 +1367,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.setMarkdownHeader(current.notebook, 5);
+        return NotebookActions.setMarkdownHeader(current.content, 5);
       }
     },
     isEnabled
@@ -1378,7 +1378,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.setMarkdownHeader(current.notebook, 6);
+        return NotebookActions.setMarkdownHeader(current.content, 6);
       }
     },
     isEnabled
@@ -1389,7 +1389,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.hideCode(current.notebook);
+        return NotebookActions.hideCode(current.content);
       }
     },
     isEnabled
@@ -1400,7 +1400,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.showCode(current.notebook);
+        return NotebookActions.showCode(current.content);
       }
     },
     isEnabled
@@ -1411,7 +1411,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.hideAllCode(current.notebook);
+        return NotebookActions.hideAllCode(current.content);
       }
     },
     isEnabled
@@ -1422,7 +1422,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.showAllCode(current.notebook);
+        return NotebookActions.showAllCode(current.content);
       }
     },
     isEnabled
@@ -1433,7 +1433,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.hideOutput(current.notebook);
+        return NotebookActions.hideOutput(current.content);
       }
     },
     isEnabled
@@ -1444,7 +1444,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.showOutput(current.notebook);
+        return NotebookActions.showOutput(current.content);
       }
     },
     isEnabled
@@ -1455,7 +1455,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.hideAllOutputs(current.notebook);
+        return NotebookActions.hideAllOutputs(current.content);
       }
     },
     isEnabled
@@ -1466,7 +1466,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.showAllOutputs(current.notebook);
+        return NotebookActions.showAllOutputs(current.content);
       }
     },
     isEnabled
@@ -1477,7 +1477,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.enableOutputScrolling(current.notebook);
+        return NotebookActions.enableOutputScrolling(current.content);
       }
     },
     isEnabled
@@ -1488,7 +1488,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.disableOutputScrolling(current.notebook);
+        return NotebookActions.disableOutputScrolling(current.content);
       }
     },
     isEnabled
@@ -1583,8 +1583,8 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   // Add undo/redo hooks to the edit menu.
   mainMenu.editMenu.undoers.add({
     tracker,
-    undo: widget => { widget.notebook.activeCell.editor.undo(); },
-    redo: widget => { widget.notebook.activeCell.editor.redo(); }
+    undo: widget => { widget.content.activeCell.editor.undo(); },
+    redo: widget => { widget.content.activeCell.editor.redo(); }
   } as IEditMenu.IUndoer<NotebookPanel>);
 
   // Add a clearer to the edit menu
@@ -1593,10 +1593,10 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
     noun: 'Outputs',
     pluralNoun: 'Outputs',
     clearCurrent: (current: NotebookPanel) => {
-      return NotebookActions.clearOutputs(current.notebook);
+      return NotebookActions.clearOutputs(current.content);
     },
     clearAll: (current: NotebookPanel) => {
-      return NotebookActions.clearAllOutputs(current.notebook);
+      return NotebookActions.clearAllOutputs(current.content);
     }
   } as IEditMenu.IClearer<NotebookPanel>);
 
@@ -1650,7 +1650,7 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
     restartKernelAndClear: current => {
       return current.session.restart().then(restarted => {
         if (restarted) {
-          NotebookActions.clearAllOutputs(current.notebook);
+          NotebookActions.clearAllOutputs(current.content);
         }
         return restarted;
       });
@@ -1696,10 +1696,10 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
   mainMenu.viewMenu.editorViewers.add({
     tracker,
     toggleLineNumbers: widget => {
-      NotebookActions.toggleAllLineNumbers(widget.notebook);
+      NotebookActions.toggleAllLineNumbers(widget.content);
     },
     lineNumbersToggled: widget => {
-      const config = widget.notebook.editorConfig;
+      const config = widget.content.editorConfig;
       return !!(config.code.lineNumbers && config.markdown.lineNumbers &&
         config.raw.lineNumbers);
     }
@@ -1710,21 +1710,21 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
     tracker,
     noun: 'Cells',
     run: current => {
-      const { context, notebook } = current;
-      return NotebookActions.runAndAdvance(notebook, context.session)
+      const { context, content } = current;
+      return NotebookActions.runAndAdvance(content, context.session)
       .then(() => void 0);
     },
     runAll: current => {
-      const { context, notebook } = current;
-      return NotebookActions.runAll(notebook, context.session)
+      const { context, content } = current;
+      return NotebookActions.runAll(content, context.session)
       .then(() => void 0);
     },
     restartAndRunAll: current => {
-      const { context, notebook } = current;
+      const { context, content } = current;
       return context.session.restart()
       .then(restarted => {
         if (restarted) {
-          NotebookActions.runAll(notebook, context.session);
+          NotebookActions.runAll(content, context.session);
         }
         return restarted;
       });

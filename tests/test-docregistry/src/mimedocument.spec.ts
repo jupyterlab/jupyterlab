@@ -8,12 +8,12 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  PanelLayout
+  BoxLayout
 } from '@phosphor/widgets';
 
 import {
   DocumentRegistry, Context,
-  MimeDocument, MimeDocumentFactory
+  MimeContent, MimeDocument, MimeDocumentFactory
 } from '@jupyterlab/docregistry';
 
 import {
@@ -28,7 +28,7 @@ import {
 const RENDERMIME = defaultRenderMime();
 
 
-class LogRenderer extends MimeDocument {
+class LogRenderer extends MimeContent {
   methods: string[] = [];
 
   protected onAfterAttach(msg: Message): void {
@@ -89,19 +89,20 @@ describe('docregistry/mimedocument', () => {
 
   });
 
-  describe('MimeDocument', () => {
+  describe('MimeContent', () => {
 
     describe('#constructor()', () => {
 
       it('should require options', () => {
-        let widget = new MimeDocument({
+        const renderer = RENDERMIME.createRenderer('text/markdown');
+        let widget = new MimeContent({
           context: dContext,
-          rendermime: RENDERMIME,
+          renderer,
           mimeType: 'text/markdown',
           renderTimeout: 1000,
           dataType: 'string'
         });
-        expect(widget).to.be.a(MimeDocument);
+        expect(widget).to.be.a(MimeContent);
       });
 
     });
@@ -109,17 +110,18 @@ describe('docregistry/mimedocument', () => {
     describe('#ready', () => {
 
       it('should resolve when the widget is ready', () => {
+        const renderer = RENDERMIME.createRenderer('text/markdown');
         let widget = new LogRenderer({
           context: dContext,
-          rendermime: RENDERMIME,
+          renderer,
           mimeType: 'text/markdown',
           renderTimeout: 1000,
           dataType: 'string'
         });
         dContext.initialize(true);
         return widget.ready.then(() => {
-          let layout = widget.layout as PanelLayout;
-          expect(layout.widgets.length).to.be(2);
+          let layout = widget.layout as BoxLayout;
+          expect(layout.widgets.length).to.be(1);
         });
       });
 
@@ -134,10 +136,10 @@ describe('docregistry/mimedocument', () => {
             expect(dContext.model.toString()).to.be('bar');
             done();
           });
-
+          const renderer = RENDERMIME.createRenderer('text/foo');
           let widget = new LogRenderer({
             context: dContext,
-            rendermime: RENDERMIME,
+            renderer,
             mimeType: 'text/foo',
             renderTimeout: 1000,
             dataType: 'string'

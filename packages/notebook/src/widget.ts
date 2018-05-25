@@ -372,7 +372,8 @@ class StaticNotebook extends Widget {
       oldValue.cells.changed.disconnect(this._onCellsChanged, this);
       oldValue.metadata.changed.disconnect(this.onMetadataChanged, this);
       oldValue.contentChanged.disconnect(this.onModelContentChanged, this);
-      // TODO: reuse existing cell widgets if possible.
+      // TODO: reuse existing cell widgets if possible. Remember to initially
+      // clear the history of each cell if we do this.
       while (layout.widgets.length) {
         this._removeCell(0);
       }
@@ -861,8 +862,11 @@ class Notebook extends StaticNotebook {
 
   /**
    * Get the active cell widget.
+   *
+   * #### Notes
+   * This is a cell or undefined if there is no active cell.
    */
-  get activeCell(): Cell {
+  get activeCell(): Cell | undefined {
     return this._activeCell;
   }
 
@@ -870,10 +874,10 @@ class Notebook extends StaticNotebook {
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
-    if (this._activeCell === null) {
+    if (this.isDisposed) {
       return;
     }
-    this._activeCell = null;
+    this._activeCell = undefined;
     super.dispose();
   }
 
@@ -1306,6 +1310,8 @@ class Notebook extends StaticNotebook {
    * Handle a new model.
    */
   protected onModelChanged(oldValue: INotebookModel, newValue: INotebookModel): void {
+    super.onModelChanged(oldValue, newValue);
+
     // Try to set the active cell index to 0.
     // It will be set to `-1` if there is no new model or the model is empty.
     this.activeCellIndex = 0;
@@ -1910,7 +1916,7 @@ class Notebook extends StaticNotebook {
 
 
   private _activeCellIndex = -1;
-  private _activeCell: Cell = null;
+  private _activeCell: Cell | undefined = undefined;
   private _mode: NotebookMode = 'command';
   private _drag: Drag = null;
   private _dragData: { pressX: number, pressY: number, index: number } = null;

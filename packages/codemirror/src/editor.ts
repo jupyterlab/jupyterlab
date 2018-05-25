@@ -120,6 +120,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
 
     // Handle initial values for text, mimetype, and selections.
     doc.setValue(model.value.text);
+    this.clearHistory();
     this._onMimeTypeChanged();
     this._onCursorActivity();
     this._timer = window.setInterval(() => { this._checkSync(); }, 3000);
