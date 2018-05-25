@@ -1394,7 +1394,7 @@ describe('@jupyterlab/notebook', () => {
             expect(cell.model.metadata.has('collapsed')).to.be(false);
             expect(cell.model.metadata.has('scrolled')).to.be(false);
           }
-          expect(cell.model.metadata.has('jupyter')).to.eql({
+          expect(cell.model.metadata.get('jupyter')).to.eql({
             source_hidden: true
           });
         }
