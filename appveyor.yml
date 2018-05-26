@@ -8,7 +8,6 @@ matrix:
 environment:
   nodejs_version: "6.9"
   matrix:
-
     - PYTHON: C:\Miniconda
       PYTHON_VERSION: 2.7
       NAME: javascript
@@ -46,7 +45,6 @@ install:
   - 'SET "PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"'
   # Install our package:
   - 'pip install --upgrade -e ".[test]"'
-  - 'pip install pywinpty==0.5.1'
   - 'jupyter kernelspec list'
   - 'jlpm versions'
   - 'jlpm config current'
