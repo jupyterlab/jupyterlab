@@ -478,7 +478,6 @@ function createContextMenu(model: Contents.IModel | undefined, commands: Command
 
   const path = model.path;
   if (model.type !== 'directory') {
-    menu.addItem({ command: CommandIDs.openBrowserTab });
     const factories = registry.preferredWidgetFactories(path).map(f => f.name);
     if (path && factories.length > 1) {
       const command =  'docmanager:open';
@@ -489,6 +488,7 @@ function createContextMenu(model: Contents.IModel | undefined, commands: Command
       });
       menu.addItem({ type: 'submenu', submenu: openWith });
     }
+    menu.addItem({ command: CommandIDs.openBrowserTab });
   }
 
   menu.addItem({ command: CommandIDs.rename });
