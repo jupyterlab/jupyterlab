@@ -10,13 +10,13 @@ environment:
     APPVEYOR_RDP_PASSWORD: "dcca4c4863E30d56c2e0dda6327370b3#"
   nodejs_version: "6.9"
   matrix:
-    - PYTHON: C:\Miniconda36-x64
-      PYTHON_VERSION: 3.6
-      NAME: python
-
     - PYTHON: C:\Miniconda
       PYTHON_VERSION: 2.7
       NAME: javascript
+
+    - PYTHON: C:\Miniconda36-x64
+      PYTHON_VERSION: 3.6
+      NAME: python
 
     - PYTHON: C:\Miniconda36-x64
       PYTHON_VERSION: 3.6
