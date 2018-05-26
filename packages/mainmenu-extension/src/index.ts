@@ -278,6 +278,7 @@ function createFileMenu(app: JupyterLab, menu: FileMenu): void {
 
   // Add the re group.
   const reGroup = [
+    'docmanager:reload',
     'docmanager:restore-checkpoint',
     'docmanager:rename'
   ].map(command => { return { command }; });

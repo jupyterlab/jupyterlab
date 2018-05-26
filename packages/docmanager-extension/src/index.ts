@@ -63,6 +63,9 @@ namespace CommandIDs {
   const openDirect = 'docmanager:open-direct';
 
   export
+  const reload = 'docmanager:reload';
+
+  export
   const rename = 'docmanager:rename';
 
   export
@@ -294,8 +297,20 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     },
   });
 
+  commands.addCommand(CommandIDs.reload, {
+    label: () => `Reload ${fileType()} from Disk`,
+    caption: 'Reload contents from disk',
+    isEnabled,
+    execute: () => {
+      if (isEnabled()) {
+        let context = docManager.contextForWidget(app.shell.currentWidget);
+        return context.revert();
+      }
+    }
+  });
+
   commands.addCommand(CommandIDs.restoreCheckpoint, {
-    label: () => `Revert ${fileType()} to Saved`,
+    label: () => `Revert ${fileType()} to Checkpoint`,
     caption: 'Revert contents to previous checkpoint',
     isEnabled,
     execute: () => {
@@ -454,6 +469,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   [
     CommandIDs.openDirect,
     CommandIDs.save,
+    CommandIDs.reload,
     CommandIDs.restoreCheckpoint,
     CommandIDs.saveAs,
     CommandIDs.clone,
