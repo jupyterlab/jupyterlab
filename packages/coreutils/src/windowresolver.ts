@@ -140,15 +140,11 @@ namespace Private {
    * Respond to a signal beacon.
    */
   function ping(): void {
-    if (!resolved) {
-      console.log('ping [delayed]');
-      window.setTimeout(ping, TIMEOUT);
-      return;
-    }
-
-    console.log(`Ping ${WINDOW} with value: "${name}"`);
-    window.localStorage.removeItem(WINDOW);
-    window.localStorage.setItem(WINDOW, name);
+    delegate.promise.then(() => {
+      console.log(`Ping ${WINDOW} with value: "${name}"`);
+      window.localStorage.removeItem(WINDOW);
+      window.localStorage.setItem(WINDOW, name);
+    }).catch(() => { /* no-op */ });
   }
 
   /**
