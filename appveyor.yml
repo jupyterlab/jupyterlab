@@ -10,14 +10,13 @@ environment:
     APPVEYOR_RDP_PASSWORD: "dcca4c4863E30d56c2e0dda6327370b3#"
   nodejs_version: "6.9"
   matrix:
+    - PYTHON: C:\Miniconda36-x64
+      PYTHON_VERSION: 3.6
+      NAME: python
 
     - PYTHON: C:\Miniconda
       PYTHON_VERSION: 2.7
       NAME: javascript
-
-    - PYTHON: C:\Miniconda36-x64
-      PYTHON_VERSION: 3.6
-      NAME: python
 
     - PYTHON: C:\Miniconda36-x64
       PYTHON_VERSION: 3.6
@@ -48,7 +47,6 @@ install:
   - 'SET "PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"'
   # Install our package:
   - 'pip install --upgrade -e ".[test]"'
-  - 'pip install pywinpty'
   - 'jupyter kernelspec list'
   - 'jlpm versions'
   - 'jlpm config current'
@@ -59,5 +57,5 @@ build: off
 test_script:
   - cmd /E:ON /V:ON /C .\\scripts\\appveyor.cmd
 
-on_finish:
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+# on_finish:
+  # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
