@@ -6,6 +6,8 @@ matrix:
 
 # environment variables
 environment:
+  global:
+    APPVEYOR_RDP_PASSWORD: "dcca4c4863E30d56c2e0dda6327370b3#"
   nodejs_version: "6.9"
   matrix:
 
@@ -56,3 +58,6 @@ build: off
 # to run your custom scripts instead of automatic tests
 test_script:
   - cmd /E:ON /V:ON /C .\\scripts\\appveyor.cmd
+
+on_finish:
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
