@@ -48,7 +48,7 @@ install:
   - 'SET "PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"'
   # Install our package:
   - 'pip install --upgrade -e ".[test]"'
-  - 'pip install pywinpty==0.5.1'
+  - 'pip install pywinpty'
   - 'jupyter kernelspec list'
   - 'jlpm versions'
   - 'jlpm config current'
