@@ -8,8 +8,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, ISplashScreen, IThemeManager,
-  ThemeManager
+  Dialog, ICommandPalette, ISplashScreen, IThemeManager, ThemeManager
 } from '@jupyterlab/apputils';
 
 import {

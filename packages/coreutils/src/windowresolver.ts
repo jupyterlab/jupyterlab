@@ -59,7 +59,7 @@ class WindowResolver implements IWindowResolver {
    * user intervention, which typically means navigation to a new URL.
    */
   resolve(candidate: string): Promise<void> {
-    return Private.windowName(candidate).then(name => { this._name = name; });
+    return Private.resolve(candidate).then(name => { this._name = name; });
   }
 
   private _name: string;
@@ -71,9 +71,9 @@ class WindowResolver implements IWindowResolver {
  */
 namespace Private {
   /**
-   * The timeout (in ms) to wait for beacon responders.
+   * The local storage beacon key.
    */
-  const TIMEOUT = 250;
+  const BEACON = `${PREFIX}:beacon`;
 
   /**
    * The internal prefix for private local storage keys.
@@ -81,9 +81,9 @@ namespace Private {
   const PREFIX = '@jupyterlab/coreutils:StateDB';
 
   /**
-   * The local storage beacon key.
+   * The timeout (in ms) to wait for beacon responders.
    */
-  const BEACON = `${PREFIX}:beacon`;
+  const TIMEOUT = 250;
 
   /**
    * The local storage window key.
@@ -91,19 +91,9 @@ namespace Private {
   const WINDOW = `${PREFIX}:window`;
 
   /**
-   * The initialization flag.
-   */
-  let initialized = false;
-
-  /**
    * A potential preferred default window name.
    */
   let candidate: string;
-
-  /**
-   * The window name.
-   */
-  let name: string;
 
   /**
    * The window name promise.
@@ -111,23 +101,19 @@ namespace Private {
   let delegate = new PromiseDelegate<string>();
 
   /**
+   * The initialization flag.
+   */
+  let initialized = false;
+
+  /**
+   * The window name.
+   */
+  let name: string;
+
+  /**
    * Whether the name resolution has completed.
    */
   let resolved = false;
-
-  /**
-   * Wait until a window name is available and resolve.
-   */
-  function awaitName(): void {
-    window.setTimeout(() => {
-      if (resolved) {
-        return;
-      }
-
-      resolved = true;
-      delegate.resolve(name = candidate);
-    }, TIMEOUT);
-  }
 
   /**
    * Fire off the signal beacon to solicit pings from other JupyterLab windows.
@@ -150,7 +136,7 @@ namespace Private {
   /**
    * The window storage event handler.
    */
-  function storageHandler(event: StorageEvent) {
+  function storage(event: StorageEvent) {
     const { key, newValue } = event;
 
     if (key === BEACON) {
@@ -168,22 +154,21 @@ namespace Private {
     }
   }
 
+
   /**
-   * Returns a promise that resolves with the window name used for restoration.
+   * Wait until a window name is available and resolve.
    */
-  export
-  function windowName(potential: string): Promise<string> {
-    if (resolved) {
-      return delegate.promise;
-    }
-
-    candidate = potential;
-
-    console.log(`Resolve a window name, start with candidate: "${candidate}"`);
-    beacon();
-    awaitName();
-
-    return delegate.promise;
+  function wait(): void {
+    // If the window name has not already been resolved, accept the candidate.
+    // The only kind of resolution that can happen otherwise, is a rejection in
+    // the storage handler upon receipt of a window name that is identical to
+    // the candidate.
+    window.setTimeout(() => {
+      if (!resolved) {
+        resolved = true;
+        delegate.resolve(name = candidate);
+      }
+    }, TIMEOUT);
   }
 
   /**
@@ -196,6 +181,24 @@ namespace Private {
     }
 
     initialized = true;
-    window.addEventListener('storage', storageHandler);
+    window.addEventListener('storage', storage);
+  }
+
+  /**
+   * Returns a promise that resolves with the window name used for restoration.
+   */
+  export
+  function resolve(potential: string): Promise<string> {
+    if (resolved) {
+      return delegate.promise;
+    }
+
+    candidate = potential;
+
+    console.log(`Resolve a window name, start with candidate: "${candidate}"`);
+    beacon();
+    wait();
+
+    return delegate.promise;
   }
 }
