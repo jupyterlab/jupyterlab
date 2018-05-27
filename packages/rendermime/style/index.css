@@ -282,7 +282,7 @@
   background-color: var(--jp-layout-color0);
   color: var(--jp-content-font-color1);
   font-family: var(--jp-code-font-family);
-  font-size: var(--jp-code-font-size);
+  font-size: inherit;
   line-height: var(--jp-code-line-height);
   padding: 0px;
 }
