@@ -49,7 +49,7 @@ class WindowResolver implements IWindowResolver {
   /**
    * Resolve a window name to use as a handle among shared resources.
    *
-   * @param candidate - A potential preferred default window name.
+   * @param candidate - The potential window name being resolved.
    *
    * #### Notes
    * Typically, the name candidate should be a JupyterLab workspace name or
@@ -71,14 +71,14 @@ class WindowResolver implements IWindowResolver {
  */
 namespace Private {
   /**
-   * The local storage beacon key.
-   */
-  const BEACON = `${PREFIX}:beacon`;
-
-  /**
    * The internal prefix for private local storage keys.
    */
   const PREFIX = '@jupyterlab/coreutils:StateDB';
+
+  /**
+   * The local storage beacon key.
+   */
+  const BEACON = `${PREFIX}:beacon`;
 
   /**
    * The timeout (in ms) to wait for beacon responders.

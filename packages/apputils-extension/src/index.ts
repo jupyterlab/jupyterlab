@@ -284,7 +284,13 @@ const splash: JupyterLabPlugin<ISplashScreen> = {
         const { commands, restored } = app;
         const recovery = () => { commands.execute(CommandIDs.reset); };
 
-        return Private.showSplash(restored, recovery);
+        // If the reset command is available, show the recovery UI.
+        if (commands.hasCommand(CommandIDs.reset)) {
+          return Private.showSplash(restored, recovery);
+        }
+
+        // If the reset command is unavailable, showing the UI is superfluous.
+        return new DisposableDelegate(() => { /* no-op */ });
       }
     };
   }
