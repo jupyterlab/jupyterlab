@@ -1502,7 +1502,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        NotebookActions.persistViewState(current.notebook);
+        NotebookActions.persistViewState(current.content);
         app.commands.execute('docmanager:save');
       }
     },
@@ -1645,7 +1645,7 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
     action: 'with View State',
     name: 'Notebook',
     persistAndSave: (current: NotebookPanel) => {
-      NotebookActions.persistViewState(current.notebook);
+      NotebookActions.persistViewState(current.content);
       return app.commands.execute('docmanager:save');
     }
   } as IFileMenu.IPersistAndSave<NotebookPanel>);
