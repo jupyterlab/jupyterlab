@@ -211,6 +211,17 @@ class Cell extends Widget {
         this.editor.setOption(key, options.editorConfig[key]);
       });
     }
+
+  }
+
+  /**
+   * Modify some state for initialization.
+   *
+   * Should be called at the end of the subclasses's constructor.
+   */
+  protected initializeState() {
+    const jupyter = this.model.metadata.get('jupyter') || {} as any;
+    this.inputHidden = jupyter.source_hidden === true;
   }
 
   /**
@@ -572,7 +583,7 @@ class CodeCell extends Cell {
     });
 
     // Modify state
-    this.setPrompt(`${model.executionCount || ''}`);
+    this.initializeState();
     model.stateChanged.connect(this.onStateChanged, this);
     model.metadata.changed.connect(this.onMetadataChanged, this);
   }
@@ -581,6 +592,25 @@ class CodeCell extends Cell {
    * The model used by the widget.
    */
   readonly model: ICodeCellModel;
+
+  /**
+   * Modify some state for initialization.
+   *
+   * Should be called at the end of the subclasses's constructor.
+   */
+  protected initializeState() {
+    super.initializeState();
+
+    const metadataScrolled = this.model.metadata.get('scrolled');
+    this.outputsScrolled = metadataScrolled === true;
+
+    const jupyter = this.model.metadata.get('jupyter') || {} as any;
+    const collapsed = this.model.metadata.get('collapsed');
+    this.outputHidden = collapsed === true || jupyter.outputs_hidden === true;
+
+    this.setPrompt(`${this.model.executionCount || ''}`);
+  }
+
 
   /**
    * Get the output area for the cell.
@@ -735,7 +765,7 @@ class CodeCell extends Cell {
 
   private _rendermime: RenderMimeRegistry = null;
   private _outputHidden = false;
-  private _outputsScrolled = false;
+  private _outputsScrolled: boolean;
   private _outputWrapper: Widget = null;
   private _outputCollapser: OutputCollapser = null;
   private _outputPlaceholder: OutputPlaceholder = null;
@@ -832,6 +862,8 @@ class MarkdownCell extends Cell {
     this._updateRenderedInput().then(() => {
       this._ready.resolve(void 0);
     });
+
+    super.initializeState();
   }
 
   /**
@@ -977,6 +1009,7 @@ class RawCell extends Cell {
   constructor(options: Cell.IOptions) {
     super(options);
     this.addClass(RAW_CELL_CLASS);
+    super.initializeState();
   }
 
   /**

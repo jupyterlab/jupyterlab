@@ -157,6 +157,15 @@
       },
       "type": "object"
     },
+    "filemenu:persist-and-save": {
+      "default": { },
+      "properties": {
+        "command": { "default": "filemenu:persist-and-save" },
+        "keys": { "default": ["Ctrl Shift S"] },
+        "selector": { "default": "body" }
+      },
+      "type": "object"
+    },
     "help:toggle": {
       "default": { },
       "properties": {

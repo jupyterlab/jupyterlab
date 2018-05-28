@@ -88,6 +88,25 @@ describe('@jupyterlab/mainmenu', () => {
 
     });
 
+    describe('#persistAndSavers', () => {
+
+      it('should allow setting of an IPersistAndSave', () => {
+        const persistAndSaver: IFileMenu.IPersistAndSave<Wodget> = {
+          tracker,
+          name: 'Wodget',
+          action: 'with Save',
+          persistAndSave: widget => {
+            widget.state = 'saved';
+            return Promise.resolve(void 0);
+          }
+        };
+        menu.persistAndSavers.add(persistAndSaver);
+        delegateExecute(wodget, menu.persistAndSavers, 'persistAndSave');
+        expect(wodget.state).to.be('saved');
+      });
+
+    });
+
     describe('#consoleCreators', () => {
 
       it('should allow setting of an IConsoleCreator', () => {

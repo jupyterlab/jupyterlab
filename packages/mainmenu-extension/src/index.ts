@@ -53,6 +53,9 @@ namespace CommandIDs {
   const closeAndCleanup = 'filemenu:close-and-cleanup';
 
   export
+  const persistAndSave = 'filemenu:persist-and-save';
+
+  export
   const createConsole = 'filemenu:create-console';
 
   export
@@ -240,6 +243,21 @@ function createFileMenu(app: JupyterLab, menu: FileMenu): void {
       Private.delegateExecute(app, menu.closeAndCleaners, 'closeAndCleanup')
   });
 
+  // Add a delegator command for persisting data then saving.
+  commands.addCommand(CommandIDs.persistAndSave, {
+    label: () => {
+      const action =
+        Private.delegateLabel(app, menu.persistAndSavers, 'action');
+      const name =
+        Private.delegateLabel(app, menu.persistAndSavers, 'name');
+      return `Save ${name} ${action || 'with Extras'}`;
+    },
+    isEnabled:
+      Private.delegateEnabled(app, menu.persistAndSavers, 'persistAndSave'),
+    execute:
+      Private.delegateExecute(app, menu.persistAndSavers, 'persistAndSave')
+  });
+
   // Add a delegator command for creating a console for an activity.
   commands.addCommand(CommandIDs.createConsole, {
     label: () => {
@@ -272,6 +290,7 @@ function createFileMenu(app: JupyterLab, menu: FileMenu): void {
   // Add save group.
   const saveGroup = [
     'docmanager:save',
+    'filemenu:persist-and-save',
     'docmanager:save-as',
     'docmanager:save-all'
   ].map(command => { return { command }; });

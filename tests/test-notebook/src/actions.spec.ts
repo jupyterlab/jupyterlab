@@ -1335,6 +1335,72 @@ describe('@jupyterlab/notebook', () => {
 
     });
 
+    describe('#persistViewState()', () => {
+      it('input hidden, output hidden and scrolled', () => {
+        for (const cell of widget.widgets) {
+          cell.inputHidden = true;
+          if (cell instanceof CodeCell) {
+            cell.outputHidden = true;
+            cell.outputsScrolled = true;
+          }
+        }
+        NotebookActions.persistViewState(widget);
+        for (const cell of widget.widgets) {
+          if (cell instanceof CodeCell) {
+            expect(cell.model.metadata.get('collapsed')).to.be(true);
+            expect(cell.model.metadata.get('scrolled')).to.be(true);
+            expect(cell.model.metadata.get('jupyter')).to.eql({
+              source_hidden: true,
+              outputs_hidden: true
+            });
+          } else {
+            expect(cell.model.metadata.get('jupyter')).to.eql({
+              source_hidden: true,
+            });
+          }
+        }
+      });
+
+      it('input hidden, output hidden and not scrolled', () => {
+        for (const cell of widget.widgets) {
+          cell.inputHidden = false;
+          if (cell instanceof CodeCell) {
+            cell.outputHidden = false;
+            cell.outputsScrolled = false;
+          }
+        }
+        NotebookActions.persistViewState(widget);
+        for (const cell of widget.widgets) {
+          if (cell instanceof CodeCell) {
+            expect(cell.model.metadata.has('collapsed')).to.be(false);
+            expect(cell.model.metadata.has('scrolled')).to.be(false);
+          }
+          expect(cell.model.metadata.has('jupyter')).to.be(false);
+        }
+      });
+
+      it('input hidden, output shown and not scrolled', () => {
+
+        for (const cell of widget.widgets) {
+          cell.inputHidden = true;
+          if (cell instanceof CodeCell) {
+            cell.outputHidden = false;
+            cell.outputsScrolled = false;
+          }
+        }
+        NotebookActions.persistViewState(widget);
+        for (const cell of widget.widgets) {
+          if (cell instanceof CodeCell) {
+            expect(cell.model.metadata.has('collapsed')).to.be(false);
+            expect(cell.model.metadata.has('scrolled')).to.be(false);
+          }
+          expect(cell.model.metadata.get('jupyter')).to.eql({
+            source_hidden: true
+          });
+        }
+      });
+    });
+
     describe('#setMarkdownHeader()', () => {
 
       it('should set the markdown header level of selected cells', () => {

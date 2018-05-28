@@ -355,7 +355,7 @@ namespace CellTools {
         this._cellModel = null;
         return;
       }
-      let promptNode = activeCell.promptNode.cloneNode(true) as HTMLElement;
+      let promptNode = activeCell.promptNode ? activeCell.promptNode.cloneNode(true) as HTMLElement : null;
       let prompt = new Widget({ node: promptNode });
       let factory = activeCell.contentFactory.editorFactory;
 

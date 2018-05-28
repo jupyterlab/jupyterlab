@@ -249,6 +249,9 @@ namespace CommandIDs {
 
   export
   const disableOutputScrolling = 'notebook:disable-output-scrolling';
+
+  export
+  const saveWithView = 'notebook:save-with-view';
 }
 
 
@@ -1493,6 +1496,18 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
     },
     isEnabled
   });
+  commands.addCommand(CommandIDs.saveWithView, {
+    label: 'Save Notebook with View State',
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        NotebookActions.persistViewState(current.content);
+        app.commands.execute('docmanager:save');
+      }
+    },
+    isEnabled
+  });
 }
 
 
@@ -1519,7 +1534,8 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.reconnectToKernel,
     CommandIDs.createConsole,
     CommandIDs.closeAndShutdown,
-    CommandIDs.trust
+    CommandIDs.trust,
+    CommandIDs.saveWithView
   ].forEach(command => { palette.addItem({ command, category }); });
 
   EXPORT_TO_FORMATS.forEach(exportToFormat => {
@@ -1622,6 +1638,17 @@ function populateMenus(app: JupyterLab, mainMenu: IMainMenu, tracker: INotebookT
       });
     }
   } as IFileMenu.ICloseAndCleaner<NotebookPanel>);
+
+  // Add a save with view command to the file menu.
+  mainMenu.fileMenu.persistAndSavers.add({
+    tracker,
+    action: 'with View State',
+    name: 'Notebook',
+    persistAndSave: (current: NotebookPanel) => {
+      NotebookActions.persistViewState(current.content);
+      return app.commands.execute('docmanager:save');
+    }
+  } as IFileMenu.IPersistAndSave<NotebookPanel>);
 
   // Add a notebook group to the File menu.
   let exportTo = new Menu({ commands } );
