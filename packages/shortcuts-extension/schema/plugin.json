@@ -161,7 +161,7 @@
       "default": { },
       "properties": {
         "command": { "default": "filemenu:persist-and-save" },
-        "keys": { "default": ["Accel Ctrl S"] },
+        "keys": { "default": ["Ctrl Shift S"] },
         "selector": { "default": "body" }
       },
       "type": "object"
