@@ -91,6 +91,16 @@ class DefaultSession implements Session.ISession {
   }
 
   /**
+   * A signal emitted for any kernel message.
+   *
+   * Note: The behavior is undefined if the message is modified
+   * during message handling. As such, it should be treated as read-only.
+   */
+  get anyMessage(): ISignal<this, Kernel.IAnyMessageArgs> {
+    return this._anyMessage;
+  }
+
+  /**
    * A signal emitted when a session property changes.
    */
   get propertyChanged(): ISignal<this, 'path' | 'name' | 'type'> {
@@ -311,6 +321,7 @@ class DefaultSession implements Session.ISession {
     kernel.statusChanged.connect(this.onKernelStatus, this);
     kernel.unhandledMessage.connect(this.onUnhandledMessage, this);
     kernel.iopubMessage.connect(this.onIOPubMessage, this);
+    kernel.anyMessage.connect(this.onAnyMessage, this);
   }
 
   /**
@@ -332,6 +343,13 @@ class DefaultSession implements Session.ISession {
    */
   protected onUnhandledMessage(sender: Kernel.IKernel, msg: KernelMessage.IMessage) {
     this._unhandledMessage.emit(msg);
+  }
+
+  /**
+   * Handle any kernel messages.
+   */
+  protected onAnyMessage(sender: Kernel.IKernel, args: Kernel.IAnyMessageArgs) {
+    this._anyMessage.emit(args);
   }
 
   /**
@@ -386,6 +404,7 @@ class DefaultSession implements Session.ISession {
   private _statusChanged = new Signal<this, Kernel.Status>(this);
   private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
+  private _anyMessage = new Signal<this, Kernel.IAnyMessageArgs>(this);
   private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);
   private _terminated = new Signal<this, void>(this);
 }

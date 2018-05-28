@@ -182,6 +182,96 @@ describe('Kernel.IKernel', () => {
 
   });
 
+  context('#anyMessage', () => {
+
+    it('should be emitted for an unhandled message', (done) => {
+      tester = new KernelTester();
+      tester.start().then(kernel => {
+        kernel.anyMessage.connect((k, args) => {
+          if (args.msg.header.msg_type === 'kernel_info_reply' ||
+              args.msg.header.msg_type === 'kernel_info_request') {
+            // Skip these leading messages
+            return;
+          }
+          expect(args.msg.header.msg_type).to.be('foo');
+          expect(args.direction).to.be('recv');
+          done();
+        });
+        let msg = KernelMessage.createShellMessage({
+          msgType: 'foo',
+          channel: 'shell',
+          session: kernel.clientId
+        });
+        msg.parent_header = msg.header;
+        tester.send(msg);
+      }).catch(done);
+    });
+
+    it('should be emitted for an iopub message', (done) => {
+      tester = new KernelTester();
+      tester.start().then(kernel => {
+        kernel.anyMessage.connect((k, args) => {
+          if (args.msg.header.msg_type === 'kernel_info_reply' ||
+              args.msg.header.msg_type === 'kernel_info_request') {
+            // Skip these leading messages
+            return;
+          }
+          expect(args.direction).to.be('recv');
+          done();
+        });
+        let msg = KernelMessage.createMessage({
+          msgType: 'status',
+          channel: 'iopub',
+          session: kernel.clientId
+        }) as KernelMessage.IStatusMsg;
+        msg.content.execution_state = 'idle';
+        msg.parent_header = msg.header;
+        tester.send(msg);
+      }).catch(done);
+    });
+
+    it('should be emitted for an stdin message', (done) => {
+      tester = new KernelTester();
+      tester.start().then(kernel => {
+        kernel.anyMessage.connect((k, args) => {
+          if (args.msg.header.msg_type === 'kernel_info_reply' ||
+              args.msg.header.msg_type === 'kernel_info_request') {
+            // Skip these leading messages
+            return;
+          }
+          expect(args.msg.content.value).to.be('foo');
+          expect(args.direction).to.be('send');
+          done();
+        });
+        kernel.sendInputReply({value: 'foo'});
+      }).catch(done);
+    });
+
+    it('should not be emitted for a different client session', () => {
+      tester = new KernelTester();
+      return tester.start().then(kernel => {
+        let called = false;
+        kernel.anyMessage.connect((k, args) => {
+          if (args.msg.header.msg_type === 'kernel_info_reply' ||
+              args.msg.header.msg_type === 'kernel_info_request') {
+            // Skip these leading messages
+            return;
+          }
+          called = true;
+        });
+        let msg = KernelMessage.createShellMessage({
+          msgType: 'foo',
+          channel: 'shell',
+          session: 'baz'
+        });
+        msg.parent_header = msg.header;
+        tester.send(msg);
+        expect(called).to.be(false);
+      });
+    });
+
+  });
+
   context('#id', () => {
 
     it('should be a string', () => {

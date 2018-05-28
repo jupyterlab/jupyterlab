@@ -373,6 +373,14 @@ namespace Kernel {
     unhandledMessage: ISignal<this, KernelMessage.IMessage>;
 
     /**
+     * A signal emitted for any kernel message.
+     *
+     * Note: The behavior is undefined if the message is modified
+     * during message handling. As such, it should be treated as read-only.
+     */
+    anyMessage: ISignal<this, IAnyMessageArgs>;
+
+    /**
      * The server settings for the kernel.
      */
     readonly serverSettings: ServerConnection.ISettings;
@@ -890,5 +898,21 @@ namespace Kernel {
      * A mapping of kernel spec name to spec.
      */
     readonly kernelspecs: { [key: string]: ISpecModel };
+  }
+
+  /**
+   * Arguments interface for the anyMessage signal.
+   */
+  export
+  interface IAnyMessageArgs {
+    /**
+     * The message that is being signaled.
+     */
+    msg: KernelMessage.IMessage;
+
+    /**
+     * The direction of the message.
+     */
+    direction: 'send' | 'recv';
   }
 }
