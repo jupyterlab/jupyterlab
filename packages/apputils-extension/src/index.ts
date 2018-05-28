@@ -176,7 +176,7 @@ const themes: JupyterLabPlugin<IThemeManager> = {
     // Keep a synchronously set reference to the current theme,
     // since the asynchronous setting of the theme in `changeTheme`
     // can lead to an incorrect toggle on the currently used theme.
-    let currentTheme = manager.theme;
+    let currentTheme: string;
 
     commands.addCommand(CommandIDs.changeTheme, {
       label: args => {
@@ -219,6 +219,7 @@ const themes: JupyterLabPlugin<IThemeManager> = {
         const category = 'Settings';
         const command = CommandIDs.changeTheme;
         const isPalette = true;
+        currentTheme = manager.theme;
 
         manager.themes.forEach(theme => {
           palette.addItem({ command, args: { isPalette, theme }, category });
