@@ -62,7 +62,7 @@ class WindowResolver implements IWindowResolver {
     return Private.resolve(candidate).then(name => { this._name = name; });
   }
 
-  private _name: string;
+  private _name: string | null = null;
 }
 
 
@@ -82,8 +82,14 @@ namespace Private {
 
   /**
    * The timeout (in ms) to wait for beacon responders.
+   *
+   * #### Notes
+   * This value is a whole number between 100 and 500 in order to prevent
+   * perfect timeout collisions between multiple simultaneously opening windows
+   * that have the same URL. This is an edge case because multiple windows
+   * should not ordinarily share the same URL, but it can be contrived.
    */
-  const TIMEOUT = 250;
+  const TIMEOUT = Math.floor(100 + Math.random() * 400);
 
   /**
    * The local storage window key.
@@ -119,6 +125,7 @@ namespace Private {
    * Fire off the signal beacon to solicit pings from other JupyterLab windows.
    */
   function beacon(): void {
+    window.localStorage.removeItem(BEACON);
     window.localStorage.setItem(BEACON, `${(new Date()).getTime()}`);
   }
 
@@ -126,11 +133,8 @@ namespace Private {
    * Respond to a signal beacon.
    */
   function ping(): void {
-    delegate.promise.then(() => {
-      console.log(`Ping ${WINDOW} with value: "${name}"`);
-      window.localStorage.removeItem(WINDOW);
-      window.localStorage.setItem(WINDOW, name);
-    }).catch(() => { /* no-op */ });
+    window.localStorage.removeItem(WINDOW);
+    window.localStorage.setItem(WINDOW, resolved ? name : candidate);
   }
 
   /**
@@ -139,15 +143,22 @@ namespace Private {
   function storage(event: StorageEvent) {
     const { key, newValue } = event;
 
+    // All the keys we care about have values.
+    if (newValue === null) {
+      return;
+    }
+
+    // If the beacon was fired, respond with a ping.
     if (key === BEACON) {
       return ping();
     }
 
-    if (resolved || key !== WINDOW || newValue === null) {
+    // If the window name is known, bail.
+    if (resolved || key !== WINDOW) {
       return;
     }
 
-    console.log(`Received window name "${newValue}"`);
+    // If a reported window name and candidate collide, reject the candidate.
     if (candidate === newValue) {
       resolved = true;
       delegate.reject(`Window name candidate "${candidate}" already exists`);
@@ -160,7 +171,7 @@ namespace Private {
    */
   function wait(): void {
     // If the window name has not already been resolved, accept the candidate.
-    // The only kind of resolution that can happen otherwise, is a rejection in
+    // The only kind of resolution that can happen otherwise is a rejection in
     // the storage handler upon receipt of a window name that is identical to
     // the candidate.
     window.setTimeout(() => {
@@ -193,10 +204,13 @@ namespace Private {
       return delegate.promise;
     }
 
+    // Set the local candidate.
     candidate = potential;
 
-    console.log(`Resolve a window name, start with candidate: "${candidate}"`);
+    // Fire the beacon to collect other windows' names.
     beacon();
+
+    // Wait until other windows have reported before claiming the candidate.
     wait();
 
     return delegate.promise;

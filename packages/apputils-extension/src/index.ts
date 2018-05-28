@@ -210,8 +210,7 @@ const themes: JupyterLabPlugin<IThemeManager> = {
       }
     });
 
-    // If we have a main menu, add the theme manager
-    // to the settings menu.
+    // If we have a main menu, add the theme manager to the settings menu.
     if (mainMenu) {
       const themeMenu = new Menu({ commands });
       themeMenu.title.label = 'JupyterLab Theme';
@@ -308,8 +307,6 @@ const state: JupyterLabPlugin<IStateDB> = {
   activate: (app: JupyterLab, router: IRouter, resolver: IWindowResolver) => {
     let debouncer: number;
     let resolved = false;
-
-    console.log(`Window resolver has name: "${resolver.name}"`);
 
     const { commands, info, serviceManager } = app;
     const { workspaces } = serviceManager;
