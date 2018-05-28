@@ -52,6 +52,9 @@ class ImageViewer extends Widget {
       if (this.isDisposed) {
         return;
       }
+      const contents = context.contentsModel;
+      this._format = contents.format === 'base64' ? ';base64' : '';
+      this._mimeType = contents.mimetype;
       this._render();
       context.model.contentChanged.connect(this.update, this);
       context.fileChanged.connect(this.update, this);
@@ -173,7 +176,7 @@ class ImageViewer extends Widget {
       return;
     }
     let content = context.model.toString();
-    this._img.src = `data:${cm.mimetype};${cm.format},${content}`;
+    this._img.src = `data:${this._mimeType}${this._format},${content}`;
   }
 
   /**
@@ -187,6 +190,8 @@ class ImageViewer extends Widget {
     this._img.style.filter = `invert(${this._colorinversion})`;
   }
 
+  private _format: string;
+  private _mimeType: string;
   private _scale = 1;
   private _matrix = [1, 0, 0, 1];
   private _colorinversion = 0;
