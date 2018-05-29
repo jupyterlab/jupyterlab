@@ -60,6 +60,7 @@
     "@jupyterlab/imageviewer-extension": "^0.16.2",
     "@jupyterlab/inspector": "^0.16.2",
     "@jupyterlab/inspector-extension": "^0.16.2",
+    "@jupyterlab/javascript-extension": "^0.15.7",
     "@jupyterlab/json-extension": "^0.15.7",
     "@jupyterlab/launcher": "^0.16.2",
     "@jupyterlab/launcher-extension": "^0.16.2",
