@@ -346,7 +346,7 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
       values: outputs,
       modelDB: this.modelDB
     });
-    this._outputs.stateChanged.connect(this.onGenericChange, this);
+    this._outputs.changed.connect(this.onGenericChange, this);
   }
 
   /**
