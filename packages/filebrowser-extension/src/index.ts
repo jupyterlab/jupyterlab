@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Clipboard, InstanceTracker, ToolbarButton
+  Clipboard, InstanceTracker, MainAreaWidget, ToolbarButton
 } from '@jupyterlab/apputils';
 
 import {
@@ -517,12 +517,14 @@ function createContextMenu(model: Contents.IModel | undefined, commands: Command
 /**
  * Create a launcher for a given filebrowser widget.
  */
-function createLauncher(commands: CommandRegistry, browser: FileBrowser): Promise<Launcher> {
+function createLauncher(commands: CommandRegistry, browser: FileBrowser): Promise<MainAreaWidget<Launcher>> {
   const { model } = browser;
 
   return commands.execute('launcher:create', { cwd: model.path })
-    .then((launcher: Launcher) => {
-      model.pathChanged.connect(() => { launcher.cwd = model.path; }, launcher);
-      return launcher;
-    });
+  .then((launcher: MainAreaWidget<Launcher>) => {
+    model.pathChanged.connect(() => {
+      launcher.content.cwd = model.path;
+    }, launcher);
+    return launcher;
+  });
 }
