@@ -4,15 +4,18 @@
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { RenderedJavaScript } from '@jupyterlab/rendermime';
 
-export const TEXT_JAVASCRIPT_MIMETYPE = 'text/javascript';
-export const APPLICATION_JAVASCRIPT_MIMETYPE = 'application/javascript';
+export
+const TEXT_JAVASCRIPT_MIMETYPE = 'text/javascript';
+export
+const APPLICATION_JAVASCRIPT_MIMETYPE = 'application/javascript';
 
 function evalInContext(code: string, element: Element, document: Document, window: Window) {
    // tslint:disable-next-line
   return eval(code);
 }
 
-export class ExperimentalRenderedJavascript extends RenderedJavaScript {
+export
+class ExperimentalRenderedJavascript extends RenderedJavaScript {
   render(model: IRenderMime.IMimeModel): Promise<void> {
     const renderJavascript = () => {
       try {
@@ -36,7 +39,7 @@ export class ExperimentalRenderedJavascript extends RenderedJavaScript {
       <button>Run</button>`;
       this.node.querySelector('button').onclick = (event) => {
         this.node.innerHTML = '';
-        return renderJavascript();
+        renderJavascript();
       };
       return Promise.resolve();
     }
