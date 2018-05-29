@@ -3,21 +3,33 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-
-/*-----------------------------------------------------------------------------
-| Private CSS variables
-|----------------------------------------------------------------------------*/
-
-
-:root {
-  --jp-private-toc-indent-width: 32px;
-  --jp-private-toc-padding: 8px;
-  --jp-private-toc-font-size: 0.75em;
-}
-
 /*-----------------------------------------------------------------------------
 | Table of Contents
 |----------------------------------------------------------------------------*/
+
+.jp-TableOfContents-content {
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  overflow: auto;
+  background-color: var(--jp-layout-color1);
+}
+
+.jp-TableOfContents-content li {
+  display: flex;
+  flex-direction: row;
+  padding: 4px 12px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  cursor: pointer;
+}
+
+.jp-TableOfContents-content li:hover {
+  background: var(--jp-layout-color2);
+}
 
 .jp-TableOfContents {
   display: flex;
@@ -28,56 +40,13 @@
   height: 100%;
 }
 
-.jp-TableOfContents-content {
-  overflow: auto;
-  padding: var(--jp-private-toc-padding);
-  font-size: var(--jp-private-toc-font-size);
-}
-
-.jp-TableOfContents-header h1 {
-  margin: 4px 0px;
-  padding: var(--jp-private-toc-padding);
+.jp-TableOfContents header {
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  flex: 0 0 auto;
+  font-size: var(--jp-ui-font-size0);
+  font-weight: 600;
   letter-spacing: 1px;
-  font-size: var(--jp-ui-font-size2);
-}
-
-.jp-TableOfContents h1 {
-  margin: 2px 0 2px 0;
-  font-weight: normal;
-}
-
-.jp-TableOfContents h2 {
-  margin: 2px 0 2px calc(var(--jp-private-toc-indent-width));
-  font-weight: normal;
-}
-
-.jp-TableOfContents h3 {
-  margin: 2px 0 2px calc(2*var(--jp-private-toc-indent-width));
-  font-weight: normal;
-}
-
-.jp-TableOfContents h4 {
-  margin: 2px 0 2px calc(3*var(--jp-private-toc-indent-width));
-  font-weight: normal;
-}
-
-.jp-TableOfContents h5 {
-  margin: 2px 0 2px calc(4*var(--jp-private-toc-indent-width));
-  font-weight: normal;
-}
-
-.jp-TableOfContents h6 {
-  margin: 2px 0 2px calc(5*var(--jp-private-toc-indent-width));
-  font-weight: normal;
-}
-
-.jp-TableOfContents a {
-  text-decoration: none;
-  color: var(--jp-content-link-color);
-}
-
-.jp-TableOfContents a:visited {
-  text-decoration: none;
-  color: var(--jp-content-link-color);
+  margin: 0px;
+  padding: 12px 0 4px 12px;
+  text-transform: uppercase;
 }

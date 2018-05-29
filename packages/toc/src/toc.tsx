@@ -215,33 +215,40 @@ export class TOCItem extends React.Component<ITOCItemProps, {}> {
    * Render the item.
    */
   render() {
-    const heading = this.props.heading;
-    let level = Math.round(heading.level);
+    const { heading } = this.props;
 
+    let level = Math.round(heading.level);
     // Clamp the header level between 1 and six.
     level = Math.max(Math.min(level, 6), 1);
 
+    const paddingLeft = (level -1) * 12;
+
     // Create an onClick handler for the TOC item
     // that scrolls the anchor into view.
-    const clickHandler = (evt: MouseEvent) => {
-      evt.preventDefault();
-      evt.stopPropagation();
+    const handleClick = (event: React.SyntheticEvent<HTMLSpanElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
       heading.onClick();
     };
 
+    let content;
+
     if (heading.html) {
-      const el = React.createElement(`h${level}`, {
-        onClick: clickHandler,
-        dangerouslySetInnerHTML: {__html: heading.html},
-      });
-      return <a href="">{el}</a>;
+      content = (
+        <span
+          dangerouslySetInnerHTML={{ __html: heading.html }}
+          style={{ paddingLeft }}
+        />
+      );
     } else {
-      return React.createElement(
-        `h${level}`,
-        {onClick: clickHandler},
-        <a href="">{heading.text}</a>,
+      content = (
+        <span style={{ paddingLeft }}>
+          {heading.text}
+        </span>
       );
     }
+
+    return <li onClick={handleClick}>{content}</li>;
   }
 }
 
@@ -262,10 +269,8 @@ export class TOCTree extends React.Component<ITOCTreeProps, {}> {
     // Return the JSX component.
     return (
       <div className="jp-TableOfContents">
-        <div className="jp-TableOfContents-header">
-          <h1>{this.props.title}</h1>
-        </div>
-        <div className="jp-TableOfContents-content">{listing}</div>
+        <header>{this.props.title}</header>
+        <ul className="jp-TableOfContents-content">{listing}</ul>
       </div>
     );
   }
