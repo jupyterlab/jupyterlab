@@ -33,13 +33,6 @@ interface IWindowResolver {
 export
 class WindowResolver implements IWindowResolver {
   /**
-   * Create a new window name resolver.
-   */
-  constructor() {
-    Private.initialize();
-  }
-
-  /**
    * The resolved window name.
    */
   get name(): string {
@@ -107,9 +100,9 @@ namespace Private {
   let delegate = new PromiseDelegate<string>();
 
   /**
-   * The initialization flag.
+   * The known window names.
    */
-  let initialized = false;
+  let known: { [window: string]: null } = { };
 
   /**
    * The window name.
@@ -124,15 +117,7 @@ namespace Private {
   /**
    * Start the storage event handler.
    */
-  export
   function initialize(): void {
-    if (initialized) {
-      return;
-    }
-
-    // Only initialize once.
-    initialized = true;
-
     // Listen to all storage events for beacons and window names.
     window.addEventListener('storage', (event: StorageEvent) => {
       const { key, newValue } = event;
@@ -154,12 +139,22 @@ namespace Private {
         return;
       }
 
+      // Store the reported window name.
+      known[newValue] = null;
+
       // If a reported window name and candidate collide, reject the candidate.
-      if (candidate === newValue) {
-        resolved = true;
-        delegate.reject(`Window name candidate "${candidate}" already exists`);
+      if (candidate in known) {
+        reject();
       }
     });
+  }
+
+  /**
+   * Reject the candidate.
+   */
+  function reject(): void {
+    resolved = true;
+    delegate.reject(`Window name candidate "${candidate}" already exists`);
   }
 
   /**
@@ -173,6 +168,11 @@ namespace Private {
 
     // Set the local candidate.
     candidate = potential;
+
+    if (candidate in known) {
+      reject();
+      return delegate.promise;
+    }
 
     // Wait until other windows have reported before claiming the candidate.
     window.setTimeout(() => {
@@ -192,4 +192,7 @@ namespace Private {
 
     return delegate.promise;
   }
+
+  // Initialize the storage listener at runtime.
+  (() => { initialize(); })();
 }
