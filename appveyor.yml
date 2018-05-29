@@ -6,7 +6,7 @@ matrix:
 
 # environment variables
 environment:
-  nodejs_version: "6.9"
+  nodejs_version: "lts"
   matrix:
 
     - PYTHON: C:\Miniconda
@@ -48,6 +48,7 @@ install:
   - 'pip install --upgrade -e ".[test]"'
   - 'pip install pywinpty==0.5.1'
   - 'jupyter kernelspec list'
+  - 'node --version'
   - 'jlpm versions'
   - 'jlpm config current'
 
