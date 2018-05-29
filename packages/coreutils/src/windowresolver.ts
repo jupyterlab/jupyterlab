@@ -114,73 +114,12 @@ namespace Private {
   /**
    * The window name.
    */
-  let name: string;
+  let name: string | null = null;
 
   /**
    * Whether the name resolution has completed.
    */
   let resolved = false;
-
-  /**
-   * Fire off the signal beacon to solicit pings from other JupyterLab windows.
-   */
-  function beacon(): void {
-    window.localStorage.removeItem(BEACON);
-    window.localStorage.setItem(BEACON, `${(new Date()).getTime()}`);
-  }
-
-  /**
-   * Respond to a signal beacon.
-   */
-  function ping(): void {
-    window.localStorage.removeItem(WINDOW);
-    window.localStorage.setItem(WINDOW, resolved ? name : candidate);
-  }
-
-  /**
-   * The window storage event handler.
-   */
-  function storage(event: StorageEvent) {
-    const { key, newValue } = event;
-
-    // All the keys we care about have values.
-    if (newValue === null) {
-      return;
-    }
-
-    // If the beacon was fired, respond with a ping.
-    if (key === BEACON) {
-      return ping();
-    }
-
-    // If the window name is known, bail.
-    if (resolved || key !== WINDOW) {
-      return;
-    }
-
-    // If a reported window name and candidate collide, reject the candidate.
-    if (candidate === newValue) {
-      resolved = true;
-      delegate.reject(`Window name candidate "${candidate}" already exists`);
-    }
-  }
-
-
-  /**
-   * Wait until a window name is available and resolve.
-   */
-  function wait(): void {
-    // If the window name has not already been resolved, accept the candidate.
-    // The only kind of resolution that can happen otherwise is a rejection in
-    // the storage handler upon receipt of a window name that is identical to
-    // the candidate.
-    window.setTimeout(() => {
-      if (!resolved) {
-        resolved = true;
-        delegate.resolve(name = candidate);
-      }
-    }, TIMEOUT);
-  }
 
   /**
    * Start the storage event handler.
@@ -191,8 +130,36 @@ namespace Private {
       return;
     }
 
+    // Only initialize once.
     initialized = true;
-    window.addEventListener('storage', storage);
+
+    // Listen to all storage events for beacons and window names.
+    window.addEventListener('storage', (event: StorageEvent) => {
+      const { key, newValue } = event;
+
+      // All the keys we care about have values.
+      if (newValue === null) {
+        return;
+      }
+
+      // If the beacon was fired, respond with a ping.
+      if (key === BEACON) {
+        window.localStorage.removeItem(WINDOW);
+        window.localStorage.setItem(WINDOW, resolved ? name : candidate);
+        return;
+      }
+
+      // If the window name is known, bail.
+      if (resolved || key !== WINDOW) {
+        return;
+      }
+
+      // If a reported window name and candidate collide, reject the candidate.
+      if (candidate === newValue) {
+        resolved = true;
+        delegate.reject(`Window name candidate "${candidate}" already exists`);
+      }
+    });
   }
 
   /**
@@ -207,11 +174,21 @@ namespace Private {
     // Set the local candidate.
     candidate = potential;
 
-    // Fire the beacon to collect other windows' names.
-    beacon();
-
     // Wait until other windows have reported before claiming the candidate.
-    wait();
+    window.setTimeout(() => {
+      // If the window name has not already been resolved, accept the candidate.
+      // The only kind of resolution that can happen otherwise is a rejection in
+      // the storage handler upon receipt of a window name that is identical to
+      // the candidate.
+      if (!resolved) {
+        resolved = true;
+        delegate.resolve(name = candidate);
+      }
+    }, TIMEOUT);
+
+    // Fire the beacon to collect other windows' names.
+    window.localStorage.removeItem(BEACON);
+    window.localStorage.setItem(BEACON, `${(new Date()).getTime()}`);
 
     return delegate.promise;
   }
