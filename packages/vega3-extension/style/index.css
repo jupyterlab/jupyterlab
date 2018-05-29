@@ -3,14 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-
-.jp-RenderedVegaCommon3 .vega-actions a {
-  margin-right: 8px;
-  font-size: var(--jp-ui-font-size1);
-  color: var(--jp-ui-font-color2);
-}
-
-
 .jp-RenderedVegaCommon3
  {
   margin-left: 8px;
