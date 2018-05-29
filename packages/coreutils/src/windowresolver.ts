@@ -92,7 +92,7 @@ namespace Private {
   /**
    * A potential preferred default window name.
    */
-  let candidate: string;
+  let candidate: string | null = null;
 
   /**
    * The window name promise.
@@ -129,12 +129,10 @@ namespace Private {
 
       // If the beacon was fired, respond with a ping.
       if (key === BEACON) {
-        window.localStorage.removeItem(WINDOW);
-        window.localStorage.setItem(WINDOW, resolved ? name : candidate);
-        return;
+        return ping(resolved ? name : candidate);
       }
 
-      // If the window name is known, bail.
+      // If the window name is resolved, bail.
       if (resolved || key !== WINDOW) {
         return;
       }
@@ -147,6 +145,18 @@ namespace Private {
         reject();
       }
     });
+  }
+
+  /**
+   * Ping peers with payload.
+   */
+  function ping(payload: string): void {
+    if (payload === null) {
+      return;
+    }
+
+    window.localStorage.removeItem(WINDOW);
+    window.localStorage.setItem(WINDOW, payload);
   }
 
   /**
@@ -176,19 +186,27 @@ namespace Private {
 
     // Wait until other windows have reported before claiming the candidate.
     window.setTimeout(() => {
-      // If the window name has not already been resolved, accept the candidate.
-      // The only kind of resolution that can happen otherwise is a rejection in
-      // the storage handler upon receipt of a window name that is identical to
-      // the candidate.
-      if (!resolved) {
-        resolved = true;
-        delegate.resolve(name = candidate);
+      if (resolved) {
+        return;
       }
+
+      // If the window name has not already been resolved, check one last time
+      // to confirm it is not a duplicate before resolving.
+      if (candidate in known) {
+        return reject();
+      }
+
+      resolved = true;
+      delegate.resolve(name = candidate);
+      ping(name);
     }, TIMEOUT);
 
     // Fire the beacon to collect other windows' names.
     window.localStorage.removeItem(BEACON);
     window.localStorage.setItem(BEACON, `${(new Date()).getTime()}`);
+
+    // Immediately ping the candidate value.
+    ping(candidate);
 
     return delegate.promise;
   }
