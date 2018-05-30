@@ -1127,6 +1127,13 @@ namespace DocumentRegistry {
       iconClass: 'jp-MaterialIcon jp-SpreadsheetIcon'
     },
     {
+      name: 'tsv',
+      displayName: 'TSV File',
+      extensions: ['.tsv'],
+      mimeTypes: ['text/csv'],
+      iconClass: 'jp-MaterialIcon jp-SpreadsheetIcon'
+    },
+    {
       name: 'r',
       displayName: 'R File',
       mimeTypes: ['text/x-rsrc'],
