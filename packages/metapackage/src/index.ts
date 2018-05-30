@@ -60,4 +60,4 @@ import '@jupyterlab/theme-light-extension';
 import '@jupyterlab/tooltip';
 import '@jupyterlab/tooltip-extension';
 import '@jupyterlab/vdom-extension';
-import '@jupyterlab/vega3-extension';
+import '@jupyterlab/vega4-extension';
