@@ -838,6 +838,19 @@ class _AppHandler(object):
                 path = path.lower()
             return path
 
+        jlab['linkedPackages'] = dict()
+
+        # Handle local extensions.
+        for (key, source) in local.items():
+            jlab['linkedPackages'][key] = source
+
+        # Handle linked packages.
+        for (key, item) in linked.items():
+            path = pjoin(self.app_dir, 'staging', 'linked_packages')
+            path = pjoin(path, item['filename'])
+            data['dependencies'][key] = format_path(path)
+            jlab['linkedPackages'][key] = item['source']
+
         # Handle extensions
         compat_errors = self._get_extension_compat()
         for (key, value) in extensions.items():
@@ -861,19 +874,6 @@ class _AppHandler(object):
                 if ext is True:
                     ext = ''
                 jlab[item + 's'][key] = ext
-
-        jlab['linkedPackages'] = dict()
-
-        # Handle local extensions.
-        for (key, source) in local.items():
-            jlab['linkedPackages'][key] = source
-
-        # Handle linked packages.
-        for (key, item) in linked.items():
-            path = pjoin(self.app_dir, 'staging', 'linked_packages')
-            path = pjoin(path, item['filename'])
-            data['dependencies'][key] = format_path(path)
-            jlab['linkedPackages'][key] = item['source']
 
         # Handle uninstalled core extensions.
         for item in self.info['uninstalled_core']:
