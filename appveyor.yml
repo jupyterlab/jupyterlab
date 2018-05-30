@@ -46,7 +46,6 @@ install:
   # Install our package:
   - 'pip install --upgrade -e ".[test]"'
   - 'jupyter kernelspec list'
-  - 'node --version'
   - 'jlpm versions'
   - 'jlpm config current'
 
