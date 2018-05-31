@@ -166,6 +166,7 @@ namespace CSVViewer {
   }
 }
 
+
 /**
  * A document widget for CSV content widgets.
  */
@@ -220,7 +221,7 @@ class CSVViewerFactory extends ABCWidgetFactory<IDocumentWidget<CSVViewer>> {
 }
 
 /**
- * A widget factory for CSV widgets.
+ * A widget factory for TSV widgets.
  */
 export
 class TSVViewerFactory extends ABCWidgetFactory<IDocumentWidget<CSVViewer>> {

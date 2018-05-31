@@ -18,9 +18,10 @@ import {
 } from '@jupyterlab/docregistry';
 
 /**
- * The name of the factory that creates CSV widgets.
+ * The name of the factories that creates widgets.
  */
-const FACTORY = 'Table';
+const FACTORY_CSV = 'CSVTable';
+const FACTORY_TSV = 'TSVTable';
 
 
 /**
@@ -30,7 +31,7 @@ const FACTORY = 'Table';
 const csv: JupyterLabPlugin<void> = {
     activate: (app: JupyterLab, restorer: ILayoutRestorer): void => {
         const factory = new CSVViewerFactory({
-            name: FACTORY,
+            name: FACTORY_CSV,
             fileTypes: ['csv'],
             defaultFor: ['csv'],
             readOnly: true
@@ -40,7 +41,7 @@ const csv: JupyterLabPlugin<void> = {
         // Handle state restoration.
         restorer.restore(tracker, {
             command: 'docmanager:open',
-            args: widget => ({ path: widget.context.path, factory: FACTORY }),
+            args: widget => ({ path: widget.context.path, factory: FACTORY_CSV }),
             name: widget => widget.context.path
         });
 
@@ -58,7 +59,7 @@ const csv: JupyterLabPlugin<void> = {
             }
         });
     },
-    id: '@jupyterlab/csvviewer-extension:csv-plugin',
+    id: '@jupyterlab/csvviewer-extension:csv',
     requires: [ILayoutRestorer],
     autoStart: true
 };
@@ -71,17 +72,17 @@ const csv: JupyterLabPlugin<void> = {
 const tsv: JupyterLabPlugin<void> = {
     activate: (app: JupyterLab, restorer: ILayoutRestorer): void => {
         const factory = new TSVViewerFactory({
-            name: FACTORY,
+            name: FACTORY_TSV,
             fileTypes: ['tsv'],
             defaultFor: ['tsv'],
             readOnly: true
         });
-        const tracker = new InstanceTracker<IDocumentWidget<CSVViewer>>({ namespace: 'csvviewer' });
+        const tracker = new InstanceTracker<IDocumentWidget<CSVViewer>>({ namespace: 'tsvviewer' });
 
         // Handle state restoration.
         restorer.restore(tracker, {
             command: 'docmanager:open',
-            args: widget => ({ path: widget.context.path, factory: FACTORY }),
+            args: widget => ({ path: widget.context.path, factory: FACTORY_TSV }),
             name: widget => widget.context.path
         });
 
@@ -99,7 +100,7 @@ const tsv: JupyterLabPlugin<void> = {
             }
         });
     },
-    id: '@jupyterlab/csvviewer-extension:tsv-plugin',
+    id: '@jupyterlab/csvviewer-extension:tsv',
     requires: [ILayoutRestorer],
     autoStart: true
 };
@@ -108,5 +109,5 @@ const tsv: JupyterLabPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [tsv, csv];
+const plugins: JupyterLabPlugin<any>[] = [csv, tsv];
 export default plugins;
