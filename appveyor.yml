@@ -6,7 +6,7 @@ matrix:
 
 # environment variables
 environment:
-  nodejs_version: "6.9"
+  nodejs_version: "lts"
   matrix:
 
     - PYTHON: C:\Miniconda
