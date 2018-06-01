@@ -113,8 +113,12 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
     };
 
     let model = this._model = options.model;
-    let editor = this._editor = CodeMirror(host, {});
-    Private.handleConfig(editor, options.config || {});
+    let config = options.config || {};
+    let fullConfig = this._config = {
+      ...CodeMirrorEditor.defaultConfig,
+      ...config
+    };
+    let editor = this._editor = Private.createEditor(host, fullConfig);
 
     let doc = editor.getDoc();
 
@@ -261,14 +265,18 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
    * Get a config option for the editor.
    */
   getOption<K extends keyof CodeMirrorEditor.IConfig>(option: K): CodeMirrorEditor.IConfig[K] {
-    return Private.getOption(this.editor, option);
+    return this._config[option];
   }
 
   /**
    * Set a config option for the editor.
    */
   setOption<K extends keyof CodeMirrorEditor.IConfig>(option: K, value: CodeMirrorEditor.IConfig[K]): void {
-    Private.setOption(this.editor, option, value);
+    // Don't bother setting the option if it is already the same.
+    if (this._config[option] !== value) {
+      this._config[option] = value;
+      Private.setOption(this.editor, option, value);
+    }
   }
 
   /**
@@ -898,6 +906,7 @@ class CodeMirrorEditor implements CodeEditor.IEditor {
   private _editor: CodeMirror.Editor;
   protected selectionMarkers: { [key: string]: CodeMirror.TextMarker[] | undefined } = {};
   private _caretHover: HTMLElement | null;
+  private readonly _config: CodeMirrorEditor.IConfig;
   private _hoverTimeout: number;
   private _hoverId: string;
   private _keydownHandlers = new Array<CodeEditor.KeydownHandler>();
@@ -981,7 +990,7 @@ namespace CodeMirrorEditor {
      * (it will default to be to the right of all other gutters).
      * These class names are the keys passed to setGutterMarker.
      */
-    gutters?: ReadonlyArray<string>;
+    gutters?: string[];
 
     /**
      * Determines whether the gutter scrolls along with the content
@@ -1051,7 +1060,7 @@ namespace CodeMirrorEditor {
     electricChars: true,
     keyMap: 'default',
     extraKeys: null,
-    gutters: Object.freeze([]),
+    gutters: [],
     fixedGutter: true,
     showCursorWhenSelecting: false,
     coverGutterNextToScrollbar: false,
@@ -1080,19 +1089,32 @@ namespace CodeMirrorEditor {
  * The namespace for module private data.
  */
 namespace Private {
-  /**
-   * Handle the codemirror configuration options.
-   */
   export
-  function handleConfig(editor: CodeMirror.Editor, config: Partial<CodeMirrorEditor.IConfig>): void {
-    let fullConfig: CodeMirrorEditor.IConfig = {
-      ...CodeMirrorEditor.defaultConfig,
-      ...config
+  function createEditor(host: HTMLElement, config: CodeMirrorEditor.IConfig): CodeMirror.Editor {
+    let {
+      autoClosingBrackets,
+      fontFamily,
+      fontSize,
+      insertSpaces,
+      lineWrap,
+      tabSize,
+      readOnly,
+      ...otherOptions
+    } = config;
+    let bareConfig =  {
+      autoCloseBrackets: autoClosingBrackets,
+      indentUnit: tabSize,
+      indentWithTabs: !insertSpaces,
+      lineWrapping: lineWrap,
+      readOnly,
+      ...otherOptions
     };
-    let key: keyof CodeMirrorEditor.IConfig;
-    for (key in fullConfig) {
-      Private.setOption(editor, key, fullConfig[key]);
-    }
+    return CodeMirror(el => {
+      el.style.fontFamily = fontFamily;
+      el.style.fontSize = fontSize + 'px';
+      el.classList.toggle(READ_ONLY_CLASS, readOnly);
+      host.appendChild(el);
+    }, bareConfig);
   }
 
   /**
@@ -1157,34 +1179,11 @@ namespace Private {
   }
 
   /**
-   * Get a config option for the editor.
-   */
-  export
-  function getOption<K extends keyof CodeMirrorEditor.IConfig>(editor: CodeMirror.Editor, option: K): CodeMirrorEditor.IConfig[K] {
-    switch (option) {
-    case 'lineWrap':
-      return editor.getOption('lineWrapping');
-    case 'insertSpaces':
-      return !editor.getOption('indentWithTabs');
-    case 'tabSize':
-      return editor.getOption('indentUnit');
-    case 'autoClosingBrackets':
-      return editor.getOption('autoCloseBrackets');
-    default:
-      return editor.getOption(option);
-    }
-  }
-
-  /**
    * Set a config option for the editor.
    */
   export
   function setOption<K extends keyof CodeMirrorEditor.IConfig>(editor: CodeMirror.Editor, option: K, value: CodeMirrorEditor.IConfig[K]): void {
-    // Don't bother setting the option if it is already the same.
-    const oldValue = getOption(editor, option);
-    if (oldValue === value) {
-      return;
-    }
+    let el = editor.getWrapperElement();
     switch (option) {
     case 'lineWrap':
       editor.setOption('lineWrapping', value);
@@ -1199,9 +1198,14 @@ namespace Private {
       editor.setOption('autoCloseBrackets', value);
       break;
     case 'readOnly':
-      let el = editor.getWrapperElement();
       el.classList.toggle(READ_ONLY_CLASS, value);
       editor.setOption(option, value);
+      break;
+    case 'fontFamily':
+      el.style.fontFamily = value;
+      break;
+    case 'fontSize':
+      el.style.fontSize = value + 'px';
       break;
     default:
       editor.setOption(option, value);

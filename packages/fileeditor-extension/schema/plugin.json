@@ -9,6 +9,12 @@
         "autoClosingBrackets": {
           "type": "boolean"
         },
+        "fontFamily": {
+          "type": "string"
+        },
+        "fontSize": {
+          "type": "number"
+        },
         "lineNumbers": {
           "type": "boolean"
         },
@@ -39,6 +45,8 @@
       "$ref": "#/definitions/editorConfig",
       "default": {
         "autoClosingBrackets": true,
+        "fontFamily": "'Source Code Pro', monospace",
+        "fontSize": 13,
         "lineNumbers": true,
         "lineWrap": true,
         "matchBrackets": true,

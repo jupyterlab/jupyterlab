@@ -23,8 +23,6 @@
 
 .CodeMirror {
   line-height: var(--jp-code-line-height);
-  font-size: var(--jp-code-font-size);
-  font-family: var(--jp-code-font-family);
   height: auto;
   /* Changed to auto to autogrow */
 }
