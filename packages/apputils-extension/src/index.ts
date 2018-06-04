@@ -313,7 +313,8 @@ const state: JupyterLabPlugin<IStateDB> = {
     const transform = new PromiseDelegate<StateDB.DataTransform>();
     const state = new StateDB({
       namespace: info.namespace,
-      transform: transform.promise
+      transform: transform.promise,
+      windowName: resolver.name
     });
 
     commands.addCommand(CommandIDs.recoverState, {
