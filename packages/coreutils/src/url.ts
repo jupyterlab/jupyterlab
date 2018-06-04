@@ -104,7 +104,7 @@ namespace URLExt {
    * Return a parsed object that represents the values in a query string.
    */
   export
-  function queryStringToObject(value: string): JSONObject {
+  function queryStringToObject(value: string): { [key: string]: string } {
     return value.replace(/^\?/, '').split('&').reduce((acc, val) => {
       const [key, value] = val.split('=');
 
