@@ -4,6 +4,34 @@
 |----------------------------------------------------------------------------*/
 
 import {
+  AttachmentsResolver
+} from '@jupyterlab/attachments';
+
+import {
+  IClientSession
+} from '@jupyterlab/apputils';
+
+import {
+  IChangedArgs, ActivityMonitor
+} from '@jupyterlab/coreutils';
+
+import {
+  CodeEditor, CodeEditorWrapper
+} from '@jupyterlab/codeeditor';
+
+import {
+  IObservableMap
+} from '@jupyterlab/observables';
+
+import {
+  OutputArea, SimplifiedOutputArea, IOutputPrompt, OutputPrompt, IStdin, Stdin
+} from '@jupyterlab/outputarea';
+
+import {
+  IRenderMime, MimeModel, RenderMimeRegistry
+} from '@jupyterlab/rendermime';
+
+import {
   KernelMessage
 } from '@jupyterlab/services';
 
@@ -20,28 +48,16 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IClientSession
-} from '@jupyterlab/apputils';
+  InputCollapser, OutputCollapser
+} from './collapser';
 
 import {
-  IChangedArgs, ActivityMonitor
-} from '@jupyterlab/coreutils';
+  CellHeader, CellFooter, ICellHeader, ICellFooter
+} from './headerfooter';
 
 import {
-  CodeEditor, CodeEditorWrapper
-} from '@jupyterlab/codeeditor';
-
-import {
-  IRenderMime, MimeModel, RenderMimeRegistry
-} from '@jupyterlab/rendermime';
-
-import {
-  IObservableMap
-} from '@jupyterlab/observables';
-
-import {
-  OutputArea, SimplifiedOutputArea, IOutputPrompt, OutputPrompt, IStdin, Stdin
-} from '@jupyterlab/outputarea';
+  InputArea, IInputPrompt, InputPrompt
+} from './inputarea';
 
 import {
   ICellModel, ICodeCellModel,
@@ -49,20 +65,8 @@ import {
 } from './model';
 
 import {
-  InputCollapser, OutputCollapser
-} from './collapser';
-
-import {
-  InputArea, IInputPrompt, InputPrompt
-} from './inputarea';
-
-import {
   InputPlaceholder, OutputPlaceholder
 } from './placeholder';
-
-import {
-  CellHeader, CellFooter, ICellHeader, ICellFooter
-} from './headerfooter';
 
 
 /**
@@ -846,7 +850,13 @@ class MarkdownCell extends Cell {
   constructor(options: MarkdownCell.IOptions) {
     super(options);
     this.addClass(MARKDOWN_CELL_CLASS);
-    this._rendermime = options.rendermime;
+    // Ensure we can resolve attachments:
+    this._rendermime = options.rendermime.clone({
+      resolver: new AttachmentsResolver({
+        parent: options.rendermime.resolver,
+        model: this.model.attachments,
+      })
+    });
 
     // Throttle the rendering rate of the widget.
     this._monitor = new ActivityMonitor({

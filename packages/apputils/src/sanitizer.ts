@@ -87,6 +87,10 @@ class Sanitizer implements ISanitizer {
     transformTags: {
       // Set the "rel" attribute for <a> tags to "nofollow".
       'a': sanitize.simpleTransform('a', { 'rel': 'nofollow' })
+    },
+    allowedSchemesByTag: {
+      // Allow 'attachment:' img src (used for markdown cell attachments).
+      'img': sanitize.defaults.allowedSchemes.concat(['attachment']),
     }
   };
 }

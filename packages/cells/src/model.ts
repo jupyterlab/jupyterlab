@@ -12,6 +12,10 @@ import {
 } from '@phosphor/signaling';
 
 import {
+  IAttachmentsModel, AttachmentsModel
+} from '@jupyterlab/attachments';
+
+import {
   CodeEditor
 } from '@jupyterlab/codeeditor';
 
@@ -69,6 +73,17 @@ interface ICellModel extends CodeEditor.IModel {
   toJSON(): nbformat.ICell;
 }
 
+/**
+ * The definition of a model cell object for a cell with attachments.
+ */
+export
+interface IAttachmentsCellModel extends ICellModel {
+  /**
+   * The cell attachments
+   */
+  readonly attachments: IAttachmentsModel;
+}
+
 
 /**
  * The definition of a code cell.
@@ -81,7 +96,7 @@ interface ICodeCellModel extends ICellModel {
    * #### Notes
    * This is a read-only property.
    */
-  type: 'code';
+  readonly type: 'code';
 
   /**
    * The code cell's prompt number. Will be null if the cell has not been run.
@@ -91,7 +106,7 @@ interface ICodeCellModel extends ICellModel {
   /**
    * The cell outputs.
    */
-  outputs: IOutputAreaModel;
+  readonly outputs: IOutputAreaModel;
 }
 
 
@@ -99,11 +114,11 @@ interface ICodeCellModel extends ICellModel {
  * The definition of a markdown cell.
  */
 export
-interface IMarkdownCellModel extends ICellModel {
+interface IMarkdownCellModel extends IAttachmentsCellModel {
   /**
    * The type of the cell.
    */
-  type: 'markdown';
+  readonly type: 'markdown';
  }
 
 
@@ -111,11 +126,11 @@ interface IMarkdownCellModel extends ICellModel {
  * The definition of a raw cell.
  */
 export
-interface IRawCellModel extends ICellModel {
+interface IRawCellModel extends IAttachmentsCellModel {
   /**
    * The type of the cell.
    */
-  type: 'raw';
+  readonly type: 'raw';
 }
 
 
@@ -278,10 +293,106 @@ namespace CellModel {
 
 
 /**
+ * A base implementation for cell models with attachments.
+ */
+export
+class AttachmentsCellModel extends CellModel {
+
+  /**
+   * Construct a new cell with optional attachments.
+   */
+  constructor(options: AttachmentsCellModel.IOptions) {
+    super(options);
+    let factory = (options.contentFactory ||
+      AttachmentsCellModel.defaultContentFactory
+    );
+    let attachments: nbformat.IAttachments | undefined;
+    let cell = options.cell;
+    if (cell && (cell.cell_type === 'raw' || cell.cell_type === 'markdown')) {
+      attachments = (cell as (nbformat.IRawCell | nbformat.IMarkdownCell)).attachments;
+    }
+
+    this._attachments = factory.createAttachmentsModel({
+      values: attachments,
+      modelDB: this.modelDB
+    });
+    this._attachments.stateChanged.connect(this.onGenericChange, this);
+  }
+
+  /**
+   * Get the attachments of the model.
+   */
+  get attachments(): IAttachmentsModel {
+    return this._attachments;
+  }
+
+  /**
+   * Serialize the model to JSON.
+   */
+  toJSON(): nbformat.IRawCell | nbformat.IMarkdownCell {
+    let cell = super.toJSON() as (nbformat.IRawCell | nbformat.IMarkdownCell);
+    cell.attachments = this.attachments.toJSON();
+    return cell;
+  }
+
+  private _attachments: IAttachmentsModel | null = null;
+
+}
+
+
+/**
+ * The namespace for `AttachmentsCellModel` statics.
+ */
+export
+namespace AttachmentsCellModel {
+  /**
+   * The options used to initialize a `AttachmentsCellModel`.
+   */
+  export
+  interface IOptions extends CellModel.IOptions {
+    /**
+     * The factory for attachment model creation.
+     */
+    contentFactory?: IContentFactory;
+  }
+
+  /**
+   * A factory for creating code cell model content.
+   */
+  export
+  interface IContentFactory {
+    /**
+     * Create an output area.
+     */
+    createAttachmentsModel(options: IAttachmentsModel.IOptions): IAttachmentsModel;
+  }
+
+  /**
+   * The default implementation of an `IContentFactory`.
+   */
+  export
+  class ContentFactory implements IContentFactory {
+    /**
+     * Create an attachments model.
+     */
+    createAttachmentsModel(options: IAttachmentsModel.IOptions): IAttachmentsModel {
+      return new AttachmentsModel(options);
+    }
+  }
+
+  /**
+   * The shared `ContentFactory` instance.
+   */
+  export
+  const defaultContentFactory = new ContentFactory();
+}
+
+
+/**
  * An implementation of a raw cell model.
  */
 export
-class RawCellModel extends CellModel {
+class RawCellModel extends AttachmentsCellModel {
   /**
    * The type of the cell.
    */
@@ -295,7 +406,7 @@ class RawCellModel extends CellModel {
  * An implementation of a markdown cell model.
  */
 export
-class MarkdownCellModel extends CellModel {
+class MarkdownCellModel extends AttachmentsCellModel {
   /**
    * Construct a markdown cell model from optional cell content.
    */
@@ -460,7 +571,7 @@ namespace CodeCellModel {
    * The default implementation of an `IContentFactory`.
    */
   export
-  class ContentFactory {
+  class ContentFactory implements IContentFactory {
     /**
      * Create an output area.
      */
@@ -470,7 +581,7 @@ namespace CodeCellModel {
   }
 
   /**
-   * The shared `ConetntFactory` instance.
+   * The shared `ContentFactory` instance.
    */
   export
   const defaultContentFactory = new ContentFactory();

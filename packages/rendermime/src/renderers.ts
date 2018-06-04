@@ -729,9 +729,12 @@ namespace Private {
     return resolver.resolveUrl(source).then(path => {
       return resolver.getDownloadUrl(path);
     }).then(url => {
-      // Bust caching for local src attrs.
-      // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest#Bypassing_the_cache
-      url += ((/\?/).test(url) ? '&' : '?') + (new Date()).getTime();
+      // Check protocol again in case it changed:
+      if (URLExt.parse(url).protocol !== 'data:') {
+        // Bust caching for local src attrs.
+        // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest#Bypassing_the_cache
+        url += ((/\?/).test(url) ? '&' : '?') + (new Date()).getTime();
+      }
       node.setAttribute(name, url);
     }).catch(err => {
       // If there was an error getting the url,
