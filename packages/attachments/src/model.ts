@@ -401,13 +401,14 @@ class AttachmentsResolver implements IRenderMime.IResolver {
     // Return a data URL with the data of the url
     const key = path.slice('attachment:'.length);
     if (!this._model.has(key)) {
-      return Promise.resolve('');
+      // Resolve with unprocessed path, to show as broken image
+      return Promise.resolve(path);
     }
     const {data} = this._model.get(key);
     const mimeType = Object.keys(data)[0];
     // Only support known safe types:
     if (imageRendererFactory.mimeTypes.indexOf(mimeType) === -1) {
-      return Promise.resolve('');
+      return Promise.reject(`Cannot render unknown image mime type "${mimeType}".`);
     }
     const dataUrl = `data:${mimeType};base64,${data[mimeType]}`;
     return Promise.resolve(dataUrl);
