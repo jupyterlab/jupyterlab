@@ -4,22 +4,6 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  KernelMessage
-} from '@jupyterlab/services';
-
-import {
-  JSONValue, PromiseDelegate
-} from '@phosphor/coreutils';
-
-import {
-  Message
-} from '@phosphor/messaging';
-
-import {
-  PanelLayout, Panel, Widget
-} from '@phosphor/widgets';
-
-import {
   AttachmentsResolver
 } from '@jupyterlab/attachments';
 
@@ -36,10 +20,6 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  IRenderMime, MimeModel, RenderMimeRegistry
-} from '@jupyterlab/rendermime';
-
-import {
   IObservableMap
 } from '@jupyterlab/observables';
 
@@ -48,25 +28,45 @@ import {
 } from '@jupyterlab/outputarea';
 
 import {
-  ICellModel, ICodeCellModel,
-  IMarkdownCellModel, IRawCellModel
-} from './model';
+  IRenderMime, MimeModel, RenderMimeRegistry
+} from '@jupyterlab/rendermime';
+
+import {
+  KernelMessage
+} from '@jupyterlab/services';
+
+import {
+  JSONValue, PromiseDelegate
+} from '@phosphor/coreutils';
+
+import {
+  Message
+} from '@phosphor/messaging';
+
+import {
+  PanelLayout, Panel, Widget
+} from '@phosphor/widgets';
 
 import {
   InputCollapser, OutputCollapser
 } from './collapser';
 
 import {
+  CellHeader, CellFooter, ICellHeader, ICellFooter
+} from './headerfooter';
+
+import {
   InputArea, IInputPrompt, InputPrompt
 } from './inputarea';
 
 import {
-  InputPlaceholder, OutputPlaceholder
-} from './placeholder';
+  ICellModel, ICodeCellModel,
+  IMarkdownCellModel, IRawCellModel
+} from './model';
 
 import {
-  CellHeader, CellFooter, ICellHeader, ICellFooter
-} from './headerfooter';
+  InputPlaceholder, OutputPlaceholder
+} from './placeholder';
 
 
 /**

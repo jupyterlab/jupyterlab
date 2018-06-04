@@ -77,7 +77,7 @@ interface ICellModel extends CodeEditor.IModel {
  * The definition of a model cell object for a cell with attachments.
  */
 export
-interface IAttchmentsCellModel extends ICellModel {
+interface IAttachmentsCellModel extends ICellModel {
   /**
    * The cell attachments
    */
@@ -114,7 +114,7 @@ interface ICodeCellModel extends ICellModel {
  * The definition of a markdown cell.
  */
 export
-interface IMarkdownCellModel extends IAttchmentsCellModel {
+interface IMarkdownCellModel extends IAttachmentsCellModel {
   /**
    * The type of the cell.
    */
@@ -126,7 +126,7 @@ interface IMarkdownCellModel extends IAttchmentsCellModel {
  * The definition of a raw cell.
  */
 export
-interface IRawCellModel extends IAttchmentsCellModel {
+interface IRawCellModel extends IAttachmentsCellModel {
   /**
    * The type of the cell.
    */

@@ -2,19 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  each
-} from '@phosphor/algorithm';
-
-import {
-  IDisposable
-} from '@phosphor/disposable';
-
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
-
-import {
-  nbformat,
+  nbformat
 } from '@jupyterlab/coreutils';
 
 import {
@@ -29,6 +17,14 @@ import {
 import {
   IRenderMime
 } from '@jupyterlab/rendermime-interfaces';
+
+import {
+  IDisposable
+} from '@phosphor/disposable';
+
+import {
+  ISignal, Signal
+} from '@phosphor/signaling';
 
 
 /**
@@ -255,7 +251,7 @@ class AttachmentsModel implements IAttachmentsModel {
    * Clear all of the attachments.
    */
   clear(): void {
-    each(this.map.values(), (item: IAttachmentModel) => { item.dispose(); });
+    this.map.values().forEach((item: IAttachmentModel) => { item.dispose(); });
     this.map.clear();
   }
 
@@ -267,7 +263,7 @@ class AttachmentsModel implements IAttachmentsModel {
    */
   fromJSON(values: nbformat.IAttachments) {
     this.clear();
-    each(Object.keys(values), (key) => { this._add(key, values[key]); });
+    Object.keys(values).forEach((key) => { this._add(key, values[key]); });
   }
 
   /**
@@ -379,7 +375,7 @@ namespace AttachmentsModel {
 export
 class AttachmentsResolver implements IRenderMime.IResolver {
   /**
-   *
+   * Create an attachments resolver object.
    */
   constructor(options: AttachmentsResolver.IOptions) {
     this._parent = options.parent || null;

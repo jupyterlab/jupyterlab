@@ -2,13 +2,6 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-import {
-  JSONExt, JSONObject, JSONValue, ReadonlyJSONObject
-} from '@phosphor/coreutils';
-
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
 
 import {
   nbformat
@@ -21,6 +14,14 @@ import {
 import {
   IRenderMime
 } from '@jupyterlab/rendermime-interfaces';
+
+import {
+  JSONExt, JSONObject, JSONValue, ReadonlyJSONObject
+} from '@phosphor/coreutils';
+
+import {
+  ISignal, Signal
+} from '@phosphor/signaling';
 
 import {
   MimeModel
@@ -229,7 +230,7 @@ namespace Private {
     if (JSONExt.isPrimitive(item)) {
       return item;
     }
-    return JSON.parse(JSON.stringify(item));
+    return JSONExt.deepCopy(item);
   }
 
   /**
@@ -238,14 +239,7 @@ namespace Private {
   function convertBundle(bundle: nbformat.IMimeBundle): JSONObject {
     let map: JSONObject = Object.create(null);
     for (let mimeType in bundle) {
-      let item = bundle[mimeType];
-      // Convert multi-line strings to strings.
-      if (JSONExt.isArray(item)) {
-        item = (item as string[]).join('\n');
-      } else if (!JSONExt.isPrimitive(item)) {
-        item = JSON.parse(JSON.stringify(item));
-      }
-      map[mimeType] = item;
+      map[mimeType] = extract(bundle, mimeType);
     }
     return map;
   }
