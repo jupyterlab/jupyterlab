@@ -169,7 +169,9 @@ class ThemeManager {
     // attempting to load the settings. Because outstanding promises cannot
     // be aborted, the order in which they occur must be enforced.
     if (outstanding) {
-      outstanding.then(() => { this._loadSettings(); });
+      outstanding
+        .then(() => { this._loadSettings(); })
+        .catch(() => { this._loadSettings(); });
       this._outstanding = null;
       return;
     }
@@ -187,6 +189,9 @@ class ThemeManager {
     // If the request has taken too long, give up.
     if (requests[theme] > REQUEST_THRESHOLD) {
       const fallback = settings.default('theme') as string;
+
+      // Stop tracking the requests for this theme.
+      delete requests[theme];
 
       if (!themes[fallback]) {
         this._onError(`Neither theme ${theme} nor default ${fallback} loaded.`);
