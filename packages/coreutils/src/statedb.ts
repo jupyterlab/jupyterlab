@@ -202,10 +202,10 @@ class StateDB implements IStateDB {
    */
   fetchNamespace(namespace: string): Promise<IStateItem[]> {
     return this._ready.then(() => {
-      const prefix = `${this._window}:${this.namespace}:${namespace}:`;
-      const replace = `${this._window}:${this.namespace}:`;
+      const prefix = `${this._window}:${this.namespace}:`;
+      const mask = (key: string) => key.replace(prefix, '');
 
-      return StateDB.fetchNamespace(prefix, key => key.replace(replace, ''));
+      return StateDB.fetchNamespace(`${prefix}${namespace}:`, mask);
     });
   }
 
@@ -254,12 +254,9 @@ class StateDB implements IStateDB {
   toJSON(): Promise<ReadonlyJSONObject> {
     return this._ready.then(() => {
       const prefix = `${this._window}:${this.namespace}:`;
+      const mask = (key: string) => key.replace(prefix, '');
 
-      return StateDB.fetchNamespace(prefix, key => key.replace(prefix, ''))
-        .reduce((acc, val) => {
-          acc[val.id] = val.value;
-          return acc;
-        }, { } as Partial<ReadonlyJSONObject>);
+      return StateDB.toJSON(prefix, mask);
     });
   }
 
@@ -464,6 +461,20 @@ namespace StateDB {
     }
 
     return items;
+  }
+
+
+  /**
+   * Return a serialized copy of a namespace's contents from local storage.
+   *
+   * @returns The namespace contents as JSON.
+   */
+  export
+  function toJSON(namespace: string, mask: (key: string) => string = key => key): ReadonlyJSONObject {
+    return fetchNamespace(namespace, mask).reduce((acc, val) => {
+      acc[val.id] = val.value;
+      return acc;
+    }, { } as Partial<ReadonlyJSONObject>);
   }
 }
 
