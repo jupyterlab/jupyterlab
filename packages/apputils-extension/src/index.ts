@@ -379,7 +379,11 @@ const state: JupyterLabPlugin<IStateDB> = {
 
     commands.addCommand(CommandIDs.loadState, {
       execute: (args: IRouter.ILocation) => {
+        const { hash, path, search } = args;
         const workspace = Private.getWorkspace(router);
+        const query = URLExt.queryStringToObject(search || '');
+        const clone = query['clone'];
+        const source = typeof clone === 'string' ? clone : workspace;
 
         // If there is no workspace, bail.
         if (!workspace) {
@@ -389,8 +393,25 @@ const state: JupyterLabPlugin<IStateDB> = {
         // Any time the local state database changes, save the workspace.
         state.changed.connect(listener, state);
 
+        // If a workspace is being cloned, copy it out of local storage instead
+        // of making a round trip to the server.
+        if (source === clone) {
+          // Maintain the query string parameters but remove `clone`.
+          delete query['clone'];
+
+          const prefix = `${source}:${info.namespace}:`;
+          const mask = (key: string) => key.replace(prefix, '');
+          const contents = StateDB.toJSON(prefix, mask);
+          const url = path + URLExt.objectToQueryString(query) + hash;
+
+          router.navigate(url, { silent: true });
+          resolved = true;
+          transform.resolve({ type: 'overwrite', contents });
+          return commands.execute(CommandIDs.saveState);
+        }
+
         // Fetch the workspace and overwrite the state database.
-        return workspaces.fetch(workspace).then(session => {
+        return workspaces.fetch(source).then(session => {
           // If this command is called after a reset, the state database will
           // already be resolved.
           if (!resolved) {
