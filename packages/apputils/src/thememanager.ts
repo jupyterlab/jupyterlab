@@ -233,12 +233,12 @@ class ThemeManager {
     const old = current ? themes[current].unload() : Promise.resolve();
 
     return Promise.all([old, themes[theme].load()]).then(() => {
-      splash.dispose();
       this._current = theme;
       Private.fitAll(this._host);
-    }).catch(reason => {
       splash.dispose();
+    }).catch(reason => {
       this._onError(reason);
+      splash.dispose();
     });
   }
 

@@ -25,6 +25,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  CommandRegistry
+} from '@phosphor/commands';
+
+import {
   PromiseDelegate
 } from '@phosphor/coreutils';
 
@@ -281,15 +285,8 @@ const splash: JupyterLabPlugin<ISplashScreen> = {
     return {
       show: () => {
         const { commands, restored } = app;
-        const recovery = () => { commands.execute(CommandIDs.reset); };
 
-        // If the reset command is available, show the recovery UI.
-        if (commands.hasCommand(CommandIDs.reset)) {
-          return Private.showSplash(restored, recovery);
-        }
-
-        // If the reset command is unavailable, showing the UI is superfluous.
-        return new DisposableDelegate(() => { /* no-op */ });
+        return Private.showSplash(restored, commands, CommandIDs.reset);
       }
     };
   }
@@ -645,10 +642,10 @@ namespace Private {
    *
    * @param ready - A promise that must be resolved before splash disappears.
    *
-   * @param recovery - A function that recovers from a hanging splash.
+   * @param recovery - A command that recovers from a hanging splash.
    */
   export
-  function showSplash(ready: Promise<any>, recovery: () => void): IDisposable {
+  function showSplash(ready: Promise<any>, commands: CommandRegistry, recovery: string): IDisposable {
     splash.classList.remove('splash-fade');
     splashCount++;
 
@@ -656,7 +653,9 @@ namespace Private {
       window.clearTimeout(debouncer);
     }
     debouncer = window.setTimeout(() => {
-      recover(recovery);
+      if (commands.hasCommand(recovery)) {
+        recover(() => { commands.execute(recovery); });
+      }
     }, SPLASH_RECOVER_TIMEOUT);
 
     document.body.appendChild(splash);
