@@ -228,6 +228,12 @@
   dependencies:
     "@types/react" "*"
 
+"@types/react-paginate@^4.3.2":
+  version "4.3.2"
+  resolved "https://registry.npmjs.org/@types/react-paginate/-/react-paginate-4.3.2.tgz#a79b150e179655ea27fce8ab9c49948b924918b0"
+  dependencies:
+    "@types/react" "*"
+
 "@types/react@*", "@types/react@~16.0.19":
   version "16.0.40"
   resolved "https://registry.npmjs.org/@types/react/-/react-16.0.40.tgz#caabc2296886f40b67f6fc80f0f3464476461df9"
@@ -323,6 +329,10 @@
 "@types/sanitize-html@~1.14.0":
   version "1.14.0"
   resolved "https://registry.npmjs.org/@types/sanitize-html/-/sanitize-html-1.14.0.tgz#9a03ec58306e24feaa3fbdb8ab593934d53ecb05"
+
+"@types/semver@^5.5.0":
+  version "5.5.0"
+  resolved "https://registry.npmjs.org/@types/semver/-/semver-5.5.0.tgz#146c2a29ee7d3bae4bf2fcb274636e264c813c45"
 
 "@types/shelljs@0.7.8":
   version "0.7.8"
@@ -6623,7 +6633,7 @@ promise@^7.1.1:
   dependencies:
     asap "~2.0.3"
 
-prop-types@^15.5.8, prop-types@^15.6.0:
+prop-types@^15.5.8, prop-types@^15.6.0, prop-types@^15.6.1:
   version "15.6.1"
   resolved "https://registry.npmjs.org/prop-types/-/prop-types-15.6.1.tgz#36644453564255ddda391191fb3a125cbdf654ca"
   dependencies:
@@ -6822,6 +6832,12 @@ react-json-tree@^0.11.0:
     babel-runtime "^6.6.1"
     prop-types "^15.5.8"
     react-base16-styling "^0.5.1"
+
+react-paginate@^5.2.3:
+  version "5.2.3"
+  resolved "https://registry.npmjs.org/react-paginate/-/react-paginate-5.2.3.tgz#1eea032f760a86736ad61fb64dab37a9e99fa351"
+  dependencies:
+    prop-types "^15.6.1"
 
 react@~16.4.0:
   version "16.4.0"
