@@ -77,12 +77,12 @@ namespace Private {
    * The timeout (in ms) to wait for beacon responders.
    *
    * #### Notes
-   * This value is a whole number between 100 and 500 in order to prevent
+   * This value is a whole number between 200 and 500 in order to prevent
    * perfect timeout collisions between multiple simultaneously opening windows
    * that have the same URL. This is an edge case because multiple windows
    * should not ordinarily share the same URL, but it can be contrived.
    */
-  const TIMEOUT = Math.floor(100 + Math.random() * 400);
+  const TIMEOUT = Math.floor(200 + Math.random() * 300);
 
   /**
    * The local storage window key.
@@ -142,8 +142,10 @@ namespace Private {
         return;
       }
 
+      const reported = newValue.replace(/\-\d+$/, '');
+
       // Store the reported window name.
-      known[newValue] = null;
+      known[reported] = null;
 
       // If a reported window name and candidate collide, reject the candidate.
       if (candidate in known) {
@@ -160,8 +162,9 @@ namespace Private {
       return;
     }
 
-    window.localStorage.removeItem(WINDOW);
-    window.localStorage.setItem(WINDOW, payload);
+    const { localStorage } = window;
+
+    localStorage.setItem(WINDOW, `${payload}-${(new Date().getTime())}`);
   }
 
   /**
@@ -189,8 +192,10 @@ namespace Private {
       return delegate.promise;
     }
 
+    const { localStorage, setTimeout } = window;
+
     // Wait until other windows have reported before claiming the candidate.
-    window.setTimeout(() => {
+    setTimeout(() => {
       if (resolved) {
         return;
       }
@@ -207,11 +212,7 @@ namespace Private {
     }, TIMEOUT);
 
     // Fire the beacon to collect other windows' names.
-    window.localStorage.removeItem(BEACON);
-    window.localStorage.setItem(BEACON, `${(new Date()).getTime()}`);
-
-    // Immediately ping the candidate value.
-    ping(candidate);
+    localStorage.setItem(BEACON, `${Math.random()}-${(new Date()).getTime()}`);
 
     return delegate.promise;
   }
