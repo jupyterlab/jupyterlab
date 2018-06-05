@@ -29,8 +29,8 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/rendermime": "^0.16.2",
-    "@jupyterlab/rendermime-interfaces": "^1.0.9"
+    "@jupyterlab/rendermime": "^0.16.3",
+    "@jupyterlab/rendermime-interfaces": "^1.0.10"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
