@@ -11,5 +11,6 @@ export * from './session';
 export * from './setting';
 export * from './terminal';
 export * from './workspace';
+export * from './wsconnection';
 
 export { Builder } from './builder';
