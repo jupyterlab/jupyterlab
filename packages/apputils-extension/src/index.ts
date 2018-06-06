@@ -56,7 +56,7 @@ import '../style/index.css';
  * to allow for multiple quickly executed state changes to result in a single
  * workspace save operation.
  */
-const WORKSPACE_SAVE_DEBOUNCE_INTERVAL = 1500;
+const WORKSPACE_SAVE_DEBOUNCE_INTERVAL = 750;
 
 /**
  * The interval in milliseconds before recover options appear during splash.
@@ -435,6 +435,8 @@ const state: JupyterLabPlugin<IStateDB> = {
         return promise.catch(reason => {
           console.warn(`${CommandIDs.loadState} failed:`, reason);
         }).then(() => {
+          const immediate = true;
+
           if (source === clone) {
             // Maintain the query string parameters but remove `clone`.
             delete query['clone'];
@@ -446,7 +448,7 @@ const state: JupyterLabPlugin<IStateDB> = {
           }
 
           // After the state database has finished loading, save it.
-          return commands.execute(CommandIDs.saveState);
+          return commands.execute(CommandIDs.saveState, { immediate });
         });
       }
     });
