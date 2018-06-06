@@ -77,10 +77,7 @@ class WorkspaceManager {
     const { baseUrl, pageUrl } = serverSettings;
     const base = baseUrl + pageUrl;
     const url = Private.url(base, id);
-    const init = {
-      body: JSON.stringify(workspace),
-      method: 'PUT'
-    };
+    const init = { body: JSON.stringify(workspace), method: 'PUT' };
     const promise = ServerConnection.makeRequest(url, init, serverSettings);
 
     return promise.then(response => {

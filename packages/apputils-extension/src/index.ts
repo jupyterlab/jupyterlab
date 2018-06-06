@@ -93,7 +93,10 @@ namespace CommandIDs {
  */
 namespace Patterns {
   export
-  const loadState = /(^\/workspaces\/([^?]+)|((\?clone\=|\&clone\=)([^&]+)($|&)))/;
+  const cloneState = /(\?clone\=|\&clone\=)([^&]+)($|&)/;
+
+  export
+  const loadState = /^\/workspaces\/([^?]+)/;
 
   export
   const resetOnLoad = /(\?reset|\&reset)($|&)/;
@@ -266,7 +269,7 @@ const resolver: JupyterLabPlugin<IWindowResolver> = {
 
     return resolver.resolve(candidate)
       .catch(reason => {
-        console.warn('Window resolution failed.', reason);
+        console.warn('Window resolution failed:', reason);
 
         return Private.redirect(router);
       })
@@ -377,6 +380,12 @@ const state: JupyterLabPlugin<IStateDB> = {
 
     commands.addCommand(CommandIDs.loadState, {
       execute: (args: IRouter.ILocation) => {
+        // Since the command can be executed an arbitrary number of times, make
+        // sure it is safe to call multiple times.
+        if (resolved) {
+          return;
+        }
+
         const { hash, path, search } = args;
         const workspace = Private.getWorkspace(router);
         const query = URLExt.queryStringToObject(search || '');
@@ -395,7 +404,7 @@ const state: JupyterLabPlugin<IStateDB> = {
 
           resolved = true;
           transform.resolve({ type: 'overwrite', contents });
-          promise = commands.execute(CommandIDs.saveState);
+          promise = Promise.resolve();
         }
 
 
@@ -408,7 +417,7 @@ const state: JupyterLabPlugin<IStateDB> = {
             transform.resolve({ type: 'overwrite', contents: saved.data });
           }
         }).catch(reason => {
-          console.warn(`Fetching workspace (${workspace}) failed.`, reason);
+          console.warn(`Fetching workspace (${workspace}) failed:`, reason);
 
           // If the workspace does not exist, cancel the data transformation and
           // save a workspace with the current user state data.
@@ -421,8 +430,6 @@ const state: JupyterLabPlugin<IStateDB> = {
           if (workspace) {
             state.changed.connect(listener, state);
           }
-
-          return commands.execute(CommandIDs.saveState);
         });
 
         return promise.catch(reason => {
@@ -437,12 +444,19 @@ const state: JupyterLabPlugin<IStateDB> = {
 
             router.navigate(url, { silent });
           }
+
+          // After the state database has finished loading, save it.
+          return commands.execute(CommandIDs.saveState);
         });
       }
     });
+    // Both the load state and clone state patterns should trigger the load
+    // state command if the URL matches one of them.
     router.register({
-      command: CommandIDs.loadState,
-      pattern: Patterns.loadState
+      command: CommandIDs.loadState, pattern: Patterns.loadState
+    });
+    router.register({
+      command: CommandIDs.loadState, pattern: Patterns.cloneState
     });
 
     commands.addCommand(CommandIDs.reset, {
