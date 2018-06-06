@@ -51,7 +51,7 @@ export class DefaultKernel implements Kernel.IKernel {
    * Construct a kernel object.
    */
   constructor(options: Kernel.IOptions, id: string) {
-    this._name = options.name;
+    this._name = options.name || this._name;
     this._id = id;
     this.serverSettings =
       options.serverSettings || ServerConnection.makeSettings();
