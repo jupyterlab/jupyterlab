@@ -26,7 +26,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IClientSession, Toolbar
+  IClientSession
 } from '@jupyterlab/apputils';
 
 import {
@@ -488,21 +488,21 @@ class DocumentRegistry implements IDisposable {
    */
   getFileTypeForModel(model: Partial<Contents.IModel>): DocumentRegistry.IFileType {
     switch (model.type) {
-      case 'directory':
-        return find(this._fileTypes, ft => ft.contentType === 'directory') || DocumentRegistry.defaultDirectoryFileType;
-      case 'notebook':
-        return find(this._fileTypes, ft => ft.contentType === 'notebook') ||
-          DocumentRegistry.defaultNotebookFileType;
-      default:
-        // Find the best matching extension.
-        if (model.name || model.path) {
-          let name = model.name || PathExt.basename(model.path);
-          let fts = this.getFileTypesForPath(name);
-          if (fts.length > 0) {
-            return fts[0];
-          }
+    case 'directory':
+      return find(this._fileTypes, ft => ft.contentType === 'directory') || DocumentRegistry.defaultDirectoryFileType;
+    case 'notebook':
+      return find(this._fileTypes, ft => ft.contentType === 'notebook') ||
+        DocumentRegistry.defaultNotebookFileType;
+    default:
+      // Find the best matching extension.
+      if (model.name || model.path) {
+        let name = model.name || PathExt.basename(model.path);
+        let fts = this.getFileTypesForPath(name);
+        if (fts.length > 0) {
+          return fts[0];
         }
-        return this.getFileType('text') || DocumentRegistry.defaultTextFileType;
+      }
+      return this.getFileType('text') || DocumentRegistry.defaultTextFileType;
     }
   }
 
@@ -646,15 +646,6 @@ namespace DocumentRegistry {
      * Should emit a [contentChanged] signal.
      */
     fromJSON(value: any): void;
-
-    /**
-     * Initialize model state after initial data load.
-     *
-     * #### Notes
-     * This function must be called after the initial data is loaded to set up
-     * initial model state, such as an initial undo stack, etc.
-     */
-    initialize(): void;
   }
 
   /**
@@ -684,7 +675,7 @@ namespace DocumentRegistry {
     disposed: ISignal<this, void>;
 
     /**
-     * The data model for the document.
+     * Get the model associated with the document.
      */
     readonly model: T;
 
@@ -706,11 +697,11 @@ namespace DocumentRegistry {
     readonly localPath: string;
 
     /**
-     * The document metadata, stored as a services contents model.
+     * The current contents model associated with the document
      *
      * #### Notes
-     * This will be null until the context is 'ready'. Since we only store
-     * metadata here, the `.contents` attribute will always be empty.
+     * The contents model will be null until the context is ready.
+     * It will have an  empty `contents` field.
      */
     readonly contentsModel: Contents.IModel | null;
 
@@ -799,14 +790,14 @@ namespace DocumentRegistry {
    * A type alias for a context.
    */
   export
-    type Context = IContext<IModel>;
+  type Context = IContext<IModel>;
 
 
   /**
    * A type alias for a code context.
    */
   export
-    type CodeContext = IContext<ICodeModel>;
+  type CodeContext = IContext<ICodeModel>;
 
   /**
    * The options used to initialize a widget factory.
@@ -850,6 +841,17 @@ namespace DocumentRegistry {
   }
 
   /**
+   * A widget for a document.
+   */
+  export
+  interface IReadyWidget extends Widget {
+    /**
+     * A promise that resolves when the widget is ready.
+     */
+    readonly ready: Promise<void>;
+  }
+
+  /**
    * The options used to open a widget.
    */
   export
@@ -879,9 +881,9 @@ namespace DocumentRegistry {
    * The interface for a widget factory.
    */
   export
-  interface IWidgetFactory<T extends IDocumentWidget, U extends IModel> extends IDisposable, IWidgetFactoryOptions {
+  interface IWidgetFactory<T extends IReadyWidget, U extends IModel> extends IDisposable, IWidgetFactoryOptions {
     /**
-     * A signal emitted when a new widget is created.
+     * A signal emitted when a widget is created.
      */
     widgetCreated: ISignal<IWidgetFactory<T, U>, T>;
 
@@ -898,7 +900,7 @@ namespace DocumentRegistry {
    * A type alias for a standard widget factory.
    */
   export
-    type WidgetFactory = IWidgetFactory<IDocumentWidget, IModel>;
+  type WidgetFactory = IWidgetFactory<IReadyWidget, IModel>;
 
   /**
    * An interface for a widget extension.
@@ -915,7 +917,7 @@ namespace DocumentRegistry {
    * A type alias for a standard widget extension.
    */
   export
-    type WidgetExtension = IWidgetExtension<Widget, IModel>;
+  type WidgetExtension = IWidgetExtension<Widget, IModel>;
 
   /**
    * The interface for a model factory.
@@ -956,13 +958,13 @@ namespace DocumentRegistry {
    * A type alias for a standard model factory.
    */
   export
-    type ModelFactory = IModelFactory<IModel>;
+  type ModelFactory = IModelFactory<IModel>;
 
   /**
    * A type alias for a code model factory.
    */
   export
-    type CodeModelFactory = IModelFactory<ICodeModel>;
+  type CodeModelFactory = IModelFactory<ICodeModel>;
 
   /**
    * An interface for a file type.
@@ -1198,31 +1200,6 @@ namespace DocumentRegistry {
   ];
 }
 
-/**
- * An interface for a document widget.
- */
-export
-interface IDocumentWidget<T extends Widget = Widget, U extends DocumentRegistry.IModel = DocumentRegistry.IModel> extends Widget {
-  /**
-   * The content widget.
-   */
-  readonly content: T;
-
-  /**
-   * A promise resolving after the content widget is revealed.
-   */
-  readonly revealed: Promise<void>;
-
-  /**
-   * The context associated with the document.
-   */
-  readonly context: DocumentRegistry.IContext<U>;
-
-  /**
-   * The toolbar for the widget.
-   */
-  readonly toolbar: Toolbar<Widget>;
-}
 
 /**
  * A private namespace for DocumentRegistry data.
