@@ -81,7 +81,7 @@ function activateCsv(app: JupyterLab, restorer: ILayoutRestorer): void {
       widget.title.iconLabel = ft.iconLabel;
     }
   });
-};
+}
 
 /**
  * Activate cssviewer extension for TSV files
@@ -117,7 +117,7 @@ function activateTsv(app: JupyterLab, restorer: ILayoutRestorer): void {
       widget.title.iconLabel = ft.iconLabel;
     }
   });
-};
+}
 
 /**
  * Export the plugins as default.
