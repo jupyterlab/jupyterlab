@@ -26,7 +26,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IClientSession
+  IClientSession, Toolbar
 } from '@jupyterlab/apputils';
 
 import {
@@ -646,6 +646,15 @@ namespace DocumentRegistry {
      * Should emit a [contentChanged] signal.
      */
     fromJSON(value: any): void;
+
+    /**
+     * Initialize model state after initial data load.
+     *
+     * #### Notes
+     * This function must be called after the initial data is loaded to set up
+     * initial model state, such as an initial undo stack, etc.
+     */
+    initialize(): void;
   }
 
   /**
@@ -675,7 +684,7 @@ namespace DocumentRegistry {
     disposed: ISignal<this, void>;
 
     /**
-     * Get the model associated with the document.
+     * The data model for the document.
      */
     readonly model: T;
 
@@ -697,11 +706,11 @@ namespace DocumentRegistry {
     readonly localPath: string;
 
     /**
-     * The current contents model associated with the document
+     * The document metadata, stored as a services contents model.
      *
      * #### Notes
-     * The contents model will be null until the context is ready.
-     * It will have an  empty `contents` field.
+     * This will be null until the context is 'ready'. Since we only store
+     * metadata here, the `.contents` attribute will always be empty.
      */
     readonly contentsModel: Contents.IModel | null;
 
@@ -841,17 +850,6 @@ namespace DocumentRegistry {
   }
 
   /**
-   * A widget for a document.
-   */
-  export
-  interface IReadyWidget extends Widget {
-    /**
-     * A promise that resolves when the widget is ready.
-     */
-    readonly ready: Promise<void>;
-  }
-
-  /**
    * The options used to open a widget.
    */
   export
@@ -881,9 +879,9 @@ namespace DocumentRegistry {
    * The interface for a widget factory.
    */
   export
-  interface IWidgetFactory<T extends IReadyWidget, U extends IModel> extends IDisposable, IWidgetFactoryOptions {
+  interface IWidgetFactory<T extends IDocumentWidget, U extends IModel> extends IDisposable, IWidgetFactoryOptions {
     /**
-     * A signal emitted when a widget is created.
+     * A signal emitted when a new widget is created.
      */
     widgetCreated: ISignal<IWidgetFactory<T, U>, T>;
 
@@ -900,7 +898,7 @@ namespace DocumentRegistry {
    * A type alias for a standard widget factory.
    */
   export
-  type WidgetFactory = IWidgetFactory<IReadyWidget, IModel>;
+  type WidgetFactory = IWidgetFactory<IDocumentWidget, IModel>;
 
   /**
    * An interface for a widget extension.
@@ -1200,6 +1198,31 @@ namespace DocumentRegistry {
   ];
 }
 
+/**
+ * An interface for a document widget.
+ */
+export
+interface IDocumentWidget<T extends Widget = Widget, U extends DocumentRegistry.IModel = DocumentRegistry.IModel> extends Widget {
+  /**
+   * The content widget.
+   */
+  readonly content: T;
+
+  /**
+   * A promise resolving after the content widget is revealed.
+   */
+  readonly revealed: Promise<void>;
+
+  /**
+   * The context associated with the document.
+   */
+  readonly context: DocumentRegistry.IContext<U>;
+
+  /**
+   * The toolbar for the widget.
+   */
+  readonly toolbar: Toolbar<Widget>;
+}
 
 /**
  * A private namespace for DocumentRegistry data.
