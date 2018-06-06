@@ -5,8 +5,7 @@ import {
   JSONExt
 } from '@phosphor/coreutils';
 
-import * as minimist
-  from 'minimist';
+import minimist from 'minimist';
 
 import {
   URLExt

@@ -1,8 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as moment
- from 'moment';
+import moment from 'moment';
 
 
 /**

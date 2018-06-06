@@ -5,6 +5,7 @@
     "noEmitOnError": true,
     "lib": ["ES2015", "DOM"],
     "types": ["mocha"],
+    "esModuleInterop": true,
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "ES2015",

@@ -3,6 +3,7 @@
     "noImplicitAny": true,
     "noEmitOnError": true,
     "noUnusedLocals": true,
+    "esModuleInterop": true,
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "ES2015",

@@ -6,6 +6,7 @@
     "noUnusedLocals": true,
     "lib": ["ES2015", "DOM"],
     "types": [],
+    "esModuleInterop": true,
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "ES2015",
