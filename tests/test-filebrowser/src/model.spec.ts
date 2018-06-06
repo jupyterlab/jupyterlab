@@ -4,7 +4,7 @@
 import expect = require('expect.js');
 
 import {
-  StateDB, uuid
+  StateDB, uuid, PageConfig
 } from '@jupyterlab/coreutils';
 
 import {
@@ -20,12 +20,14 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  FileBrowserModel
+  FileBrowserModel, LARGE_FILE_SIZE, CHUNK_SIZE
 } from '@jupyterlab/filebrowser';
 
 import {
   acceptDialog, dismissDialog
 } from '../../utils';
+import { ISignal } from '@phosphor/signaling';
+import { IIterator } from '@phosphor/algorithm';
 
 
 describe('filebrowser/model', () => {
@@ -346,8 +348,118 @@ describe('filebrowser/model', () => {
         model.upload(file).catch(done);
       });
 
+      describe('older notebook version', () => {
+        let prevNotebookVersion: string;
+
+        before(() => {
+          prevNotebookVersion = PageConfig.setOption('notebookVersion', JSON.stringify([5, 0, 0]));
+        });
+
+        it('should not upload large file', () => {
+          const fname = uuid() + '.html';
+          const file = new File([new ArrayBuffer(LARGE_FILE_SIZE + 1)], fname);
+          return model.upload(file).then(() => {
+            expect().fail('Upload should have failed');
+          }).catch(err => {
+            expect(err).to.be(`Cannot upload file (>15 MB). ${fname}`);
+          });
+        });
+
+        after(() => {
+          PageConfig.setOption('notebookVersion', prevNotebookVersion);
+        });
+      });
+
+      describe('newer notebook version', () => {
+        let prevNotebookVersion: string;
+
+        before(() => {
+          prevNotebookVersion = PageConfig.setOption('notebookVersion', JSON.stringify([5, 1, 0]));
+        });
+
+        it('should not upload large notebook file', () => {
+          const fname = uuid() + '.ipynb';
+          const file = new File([new ArrayBuffer(LARGE_FILE_SIZE + 1)], fname);
+          return model.upload(file).then(() => {
+            expect().fail('Upload should have failed');
+          }).catch(err => {
+            expect(err).to.be(`Cannot upload file (>15 MB). ${fname}`);
+          });
+        });
+
+        for (const size of [CHUNK_SIZE - 1, CHUNK_SIZE, CHUNK_SIZE + 1, 2 * CHUNK_SIZE]) {
+          it(`should upload a large file of size ${size}`, async () => {
+            const fname = uuid() + '.txt';
+            const content = 'a'.repeat(size);
+            const file = new File([content], fname);
+            await model.upload(file);
+            const contentsModel = await model.manager.services.contents.get(fname);
+            expect(contentsModel.content).to.be(content);
+          });
+        }
+        it(`should produce progress as a large file uploads`, async () => {
+          const fname = uuid() + '.txt';
+          const file = new File([new ArrayBuffer(2 * CHUNK_SIZE)], fname);
+
+          const {cleanup, values: [start, first, second, finished]} = signalToPromises(model.uploadChanged, 4);
+
+          model.upload(file);
+          expect(iteratorToList(model.uploads())).to.eql([]);
+          expect(await start).to.eql([model, {name: 'start', oldValue: null, newValue: {path: fname, progress: 0}}]);
+          expect(iteratorToList(model.uploads())).to.eql([{path: fname, progress: 0}]);
+          expect(await first).to.eql([model, {name: 'update', oldValue: {path: fname, progress: 0}, newValue: {path: fname, progress: 0}}]);
+          expect(iteratorToList(model.uploads())).to.eql([{path: fname, progress: 0}]);
+          expect(await second).to.eql([model, {name: 'update', oldValue: {path: fname, progress: 0}, newValue: {path: fname, progress: 1 / 2}}]);
+          expect(iteratorToList(model.uploads())).to.eql([{path: fname, progress: 1 / 2}]);
+          expect(await finished).to.eql([model, {name: 'finish', oldValue: {path: fname, progress: 1 / 2}, newValue: null}]);
+          expect(iteratorToList(model.uploads())).to.eql([]);
+          cleanup();
+        });
+
+        after(() => {
+          PageConfig.setOption('notebookVersion', prevNotebookVersion);
+        });
+      });
+
     });
 
   });
 
 });
+
+/**
+ * Creates a number of promises from a signal, which each resolve to the successive values in the signal.
+ */
+function signalToPromises<T, U>(signal: ISignal<T, U>, numberValues: number): {values: Promise<[T, U]>[], cleanup: () => void} {
+  const values: Promise<[T, U]>[] = new Array(numberValues);
+  const resolvers: Array<((value: [T, U]) => void)> = new Array(numberValues);
+
+  for (let i = 0; i < numberValues; i++) {
+    values[i] = new Promise<[T, U]>(resolve => {
+      resolvers[i] = resolve;
+    });
+  }
+
+  let current = 0;
+  function slot(sender: T, args: U) {
+    resolvers[current++]([sender, args]);
+  }
+  signal.connect(slot);
+
+  function cleanup() {
+    signal.disconnect(slot);
+  }
+  return {values, cleanup};
+}
+
+
+/**
+ * Convert an IIterator into a list.
+ */
+function iteratorToList<T>(i: IIterator<T>): T[] {
+  const a: T[] = [];
+  for (let v = i.next(); v !== undefined; v = i.next()) {
+    a.push(v);
+  }
+  return a;
+}

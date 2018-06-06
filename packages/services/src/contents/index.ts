@@ -104,6 +104,11 @@ namespace Contents {
     readonly content: any;
 
     /**
+     * The chunk of the file upload.
+     */
+    readonly chunk?: number;
+
+    /**
      * The format of the file `content`.
      *
      * #### Notes

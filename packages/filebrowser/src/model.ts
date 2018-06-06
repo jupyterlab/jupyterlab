@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IChangedArgs, IStateDB, PathExt
+  IChangedArgs, IStateDB, PathExt, PageConfig
 } from '@jupyterlab/coreutils';
 
 import {
@@ -29,6 +29,11 @@ import {
   ISignal, Signal
 } from '@phosphor/signaling';
 
+import {
+  showDialog,
+  Dialog
+} from '@jupyterlab/apputils';
+
 
 /**
  * The duration of auto-refresh in ms.
@@ -40,6 +45,28 @@ const REFRESH_DURATION = 10000;
  */
 const MIN_REFRESH = 1000;
 
+
+/**
+ * The maximum upload size (in bytes) for notebook version < 5.1.0
+ */
+export const LARGE_FILE_SIZE = 15 * 1024 * 1024;
+
+/**
+ * The size (in bytes) of the biggest chunk we should upload at once.
+ */
+export const CHUNK_SIZE = 1024 * 1024;
+
+
+/**
+ * An upload progress event for a file at `path`.
+ */
+export interface IUploadModel {
+  path: string;
+  /**
+   * % uploaded [0, 1)
+   */
+  progress: number;
+}
 
 /**
  * An implementation of a file browser model.
@@ -74,6 +101,15 @@ class FileBrowserModel implements IDisposable {
     services.contents.fileChanged.connect(this._onFileChanged, this);
     services.sessions.runningChanged.connect(this._onRunningChanged, this);
 
+    this._unloadEventListener = (e: Event) => {
+      if (this._uploads.length > 0) {
+        const confirmationMessage = 'Files still uploading';
+
+        (e as any).returnValue = confirmationMessage;
+        return confirmationMessage;
+      }
+    };
+    window.addEventListener('beforeunload', this._unloadEventListener);
     this._scheduleUpdate();
     this._startTimer();
   }
@@ -140,12 +176,27 @@ class FileBrowserModel implements IDisposable {
   }
 
   /**
+   * A signal emitted when an upload progresses.
+   */
+  get uploadChanged(): ISignal<this, IChangedArgs<IUploadModel>> {
+    return this._uploadChanged;
+  }
+
+  /**
+   * Create an iterator over the status of all in progress uploads.
+   */
+  uploads(): IIterator<IUploadModel> {
+    return new ArrayIterator(this._uploads);
+  }
+
+  /**
    * Dispose of the resources held by the model.
    */
   dispose(): void {
     if (this.isDisposed) {
       return;
     }
+    window.removeEventListener('beforeunload', this._unloadEventListener);
     this._isDisposed = true;
     clearTimeout(this._timeoutId);
     this._sessions.length = 0;
@@ -308,75 +359,132 @@ class FileBrowserModel implements IDisposable {
    * @returns A promise containing the new file contents model.
    *
    * #### Notes
-   * This will fail to upload files that are too big to be sent in one
-   * request to the server.
+   * On Notebook version < 5.1.0, this will fail to upload files that are too
+   * big to be sent in one request to the server. On newer versions, it will
+   * ask for confirmation then upload the file in 1 MB chunks.
    */
-  upload(file: File): Promise<Contents.IModel> {
-    // Skip large files with a warning.
-    if (file.size > this._maxUploadSizeMb * 1024 * 1024) {
-      let msg = `Cannot upload file (>${this._maxUploadSizeMb} MB) `;
-      msg += `"${file.name}"`;
+  async upload(file: File): Promise<Contents.IModel> {
+    const supportsChunked = PageConfig.getNotebookVersion() >= [5, 1, 0];
+    const largeFile = file.size > LARGE_FILE_SIZE;
+    const isNotebook = file.name.indexOf('.ipynb') !== -1;
+    const canSendChunked = supportsChunked && !isNotebook;
+
+    if (largeFile && !canSendChunked) {
+      let msg = `Cannot upload file (>${LARGE_FILE_SIZE / (1024 * 1024) } MB). ${file.name}`;
       console.warn(msg);
-      return Promise.reject<Contents.IModel>(new Error(msg));
+      throw msg;
     }
 
-    return this.refresh().then(() => {
-      if (this.isDisposed) {
-        return Promise.resolve(false);
-      }
-      let item = find(this._items, i => i.name === file.name);
-      if (item) {
-        return shouldOverwrite(file.name);
-      }
-      return Promise.resolve(true);
-    }).then(value => {
-      if (value) {
-        return this._upload(file);
-      }
-      return Promise.reject('File not uploaded');
+    const err = 'File not uploaded';
+    if (largeFile && !await this._shouldUploadLarge(file)) {
+      throw 'Cancelled large file upload';
+    }
+    await this._uploadCheckDisposed();
+    await this.refresh();
+    await this._uploadCheckDisposed();
+    if (find(this._items, i => i.name === file.name) && !await shouldOverwrite(file.name)) {
+      throw err;
+    }
+    await this._uploadCheckDisposed();
+    const chunkedUpload = supportsChunked && file.size > CHUNK_SIZE;
+    return await this._upload(file, isNotebook, chunkedUpload);
+  }
+
+
+  private async _shouldUploadLarge(file: File): Promise<boolean> {
+    const {button} = await showDialog({
+      title: 'Large file size warning',
+      body: `The file size is ${Math.round(file.size / (1024 * 1024))} MB. Do you still want to upload it?`,
+      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'UPLOAD'})]
     });
+    return button.accept;
   }
 
   /**
    * Perform the actual upload.
    */
-  private _upload(file: File): Promise<Contents.IModel> {
+  private async _upload(file: File, isNotebook: boolean, chunked: boolean): Promise<Contents.IModel> {
     // Gather the file model parameters.
     let path = this._model.path;
     path = path ? path + '/' + file.name : file.name;
     let name = file.name;
-    let isNotebook = file.name.indexOf('.ipynb') !== -1;
     let type: Contents.ContentType = isNotebook ? 'notebook' : 'file';
     let format: Contents.FileFormat = isNotebook ? 'json' : 'base64';
 
-    // Get the file content.
-    let reader = new FileReader();
-    if (isNotebook) {
-      reader.readAsText(file);
-    } else {
-      reader.readAsArrayBuffer(file);
+    const uploadInner = async (blob: Blob, chunk?: number): Promise<Contents.IModel> => {
+      await this._uploadCheckDisposed();
+      let reader = new FileReader();
+      if (isNotebook) {
+        reader.readAsText(blob);
+      } else {
+        reader.readAsArrayBuffer(blob);
+      }
+      await new Promise((resolve, reject) => {
+        reader.onload = resolve;
+        reader.onerror = event => reject(`Failed to upload "${file.name}":` + event);
+      });
+      await this._uploadCheckDisposed();
+      let model: Partial<Contents.IModel> = {
+        type,
+        format,
+        name,
+        chunk,
+        content: Private.getContent(reader)
+      };
+      return await this.manager.services.contents.save(path, model);
+    };
+
+    if (!chunked) {
+      return await uploadInner(file);
     }
 
-    return new Promise<Contents.IModel>((resolve, reject) => {
-      reader.onload = (event: Event) => {
-        let model: Partial<Contents.IModel> = {
-          type: type,
-          format,
-          name,
-          content: Private.getContent(reader)
-        };
+    let finalModel: Contents.IModel;
 
-        this.manager.services.contents.save(path, model).then(contents => {
-          resolve(contents);
-        }).catch(reject);
-      };
-
-      reader.onerror = (event: Event) => {
-        reject(Error(`Failed to upload "${file.name}":` + event));
-      };
+    let upload = {path, progress: 0};
+    this._uploadChanged.emit({name: 'start',
+      newValue: upload,
+      oldValue: null
     });
 
+    for (let start = 0; !finalModel; start += CHUNK_SIZE) {
+      const end = start + CHUNK_SIZE;
+      const lastChunk = end >= file.size;
+      const chunk = lastChunk ? -1 : end / CHUNK_SIZE;
+
+      const newUpload = {path, progress: start / file.size};
+      this._uploads.splice(this._uploads.indexOf(upload));
+      this._uploads.push(newUpload);
+      this._uploadChanged.emit({
+        name: 'update',
+        newValue: newUpload,
+        oldValue: upload
+      });
+      upload = newUpload;
+
+      const currentModel = await uploadInner(file.slice(start, end), chunk);
+
+      if (lastChunk) {
+        finalModel = currentModel;
+      }
+    }
+
+    this._uploads.splice(this._uploads.indexOf(upload));
+    this._uploadChanged.emit({
+      name: 'finish',
+      newValue: null,
+      oldValue: upload
+    });
+
+    return finalModel;
   }
+
+  private _uploadCheckDisposed(): Promise<void> {
+    if (this.isDisposed) {
+      return Promise.reject('Filemanager disposed. File upload canceled');
+    }
+    return Promise.resolve();
+  }
+
 
   /**
    * Handle an updated contents model.
@@ -478,7 +586,6 @@ class FileBrowserModel implements IDisposable {
   private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
   private _items: Contents.IModel[] = [];
   private _key: string = '';
-  private _maxUploadSizeMb = 15;
   private _model: Contents.IModel;
   private _pathChanged = new Signal<this, IChangedArgs<string>>(this);
   private _paths = new Set<string>();
@@ -494,6 +601,9 @@ class FileBrowserModel implements IDisposable {
   private _driveName: string;
   private _isDisposed = false;
   private _restored = new PromiseDelegate<void>();
+  private _uploads: IUploadModel[] = [];
+  private _uploadChanged = new Signal<this, IChangedArgs<IUploadModel>>(this);
+  private _unloadEventListener: (e: Event) => string;
 }
 
 
