@@ -9,5 +9,6 @@
     "target": "ES2015",
     "outDir": "./build",
     "lib": ["ES2015", "DOM"]
-  }
+  },
+  "include": ["src/*"]
 }
