@@ -121,8 +121,8 @@
   resolved "https://registry.npmjs.org/@types/chai/-/chai-4.0.10.tgz#0eb222c7353adde8e0980bea04165d4d3b6afef3"
 
 "@types/codemirror@~0.0.46":
-  version "0.0.55"
-  resolved "https://registry.npmjs.org/@types/codemirror/-/codemirror-0.0.55.tgz#f4292b7a5f33b2aab509501c3db7e45d19a7c057"
+  version "0.0.57"
+  resolved "https://registry.npmjs.org/@types/codemirror/-/codemirror-0.0.57.tgz#1b10e330be084e066772883fc3022aae22907cd4"
 
 "@types/comment-json@^1.1.0":
   version "1.1.1"
