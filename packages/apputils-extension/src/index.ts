@@ -93,7 +93,7 @@ namespace CommandIDs {
  */
 namespace Patterns {
   export
-  const loadState = /^\/workspaces\/([^?]+)/;
+  const loadState = /(^\/workspaces\/([^?]+)|((\?clone\=|\&clone\=)([^&]+)($|&)))/;
 
   export
   const resetOnLoad = /(\?reset|\&reset)($|&)/;
@@ -266,7 +266,8 @@ const resolver: JupyterLabPlugin<IWindowResolver> = {
 
     return resolver.resolve(candidate)
       .catch(reason => {
-        console.log('Window resolution failed.', reason);
+        console.warn('Window resolution failed.', reason);
+
         return Private.redirect(router);
       })
       .then(() => resolver);
@@ -382,38 +383,29 @@ const state: JupyterLabPlugin<IStateDB> = {
         const clone = query['clone'];
         const source = typeof clone === 'string' ? clone : workspace;
 
-        // If there is no workspace, bail.
-        if (!workspace) {
-          return;
-        }
+        let promise: Promise<any>;
 
-        // Any time the local state database changes, save the workspace.
-        state.changed.connect(listener, state);
-
-        // If a workspace is being cloned, copy it out of local storage instead
-        // of making a round trip to the server.
-        if (source === clone) {
-          // Maintain the query string parameters but remove `clone`.
-          delete query['clone'];
-
+        // If the default /lab workspace is being cloned, copy it out of local
+        // storage instead of making a round trip to the server because it
+        // does not exist on the server.
+        if (source === clone && source === '') {
           const prefix = `${source}:${info.namespace}:`;
           const mask = (key: string) => key.replace(prefix, '');
           const contents = StateDB.toJSON(prefix, mask);
-          const url = path + URLExt.objectToQueryString(query) + hash;
 
-          router.navigate(url, { silent: true });
           resolved = true;
           transform.resolve({ type: 'overwrite', contents });
-          return commands.execute(CommandIDs.saveState);
+          promise = commands.execute(CommandIDs.saveState);
         }
 
-        // Fetch the workspace and overwrite the state database.
-        return workspaces.fetch(source).then(session => {
+
+        // If there is no promise, fetch the source and overwrite the database.
+        promise = promise || workspaces.fetch(source).then(saved => {
           // If this command is called after a reset, the state database will
           // already be resolved.
           if (!resolved) {
             resolved = true;
-            transform.resolve({ type: 'overwrite', contents: session.data });
+            transform.resolve({ type: 'overwrite', contents: saved.data });
           }
         }).catch(reason => {
           console.warn(`Fetching workspace (${workspace}) failed.`, reason);
@@ -424,8 +416,27 @@ const state: JupyterLabPlugin<IStateDB> = {
             resolved = true;
             transform.resolve({ type: 'cancel', contents: null });
           }
+        }).then(() => {
+          // Any time the local state database changes, save the workspace.
+          if (workspace) {
+            state.changed.connect(listener, state);
+          }
 
           return commands.execute(CommandIDs.saveState);
+        });
+
+        return promise.catch(reason => {
+          console.warn(`${CommandIDs.loadState} failed:`, reason);
+        }).then(() => {
+          if (source === clone) {
+            // Maintain the query string parameters but remove `clone`.
+            delete query['clone'];
+
+            const url = path + URLExt.objectToQueryString(query) + hash;
+            const silent = true;
+
+            router.navigate(url, { silent });
+          }
         });
       }
     });
