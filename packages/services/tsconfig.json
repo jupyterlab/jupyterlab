@@ -1,15 +1,6 @@
 {
+  "extends": "../../tsconfig",
   "compilerOptions": {
-    "declaration": true,
-    "noImplicitAny": true,
-    "noEmitOnError": true,
-    "noUnusedLocals": true,
-    "lib": ["ES2015", "DOM"],
-    "types": [],
-    "esModuleInterop": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "target": "ES2015",
     "outDir": "./lib"
   },
   "include": ["src/*"],
