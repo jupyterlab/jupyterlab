@@ -166,6 +166,7 @@ namespace CSVViewer {
   }
 }
 
+
 /**
  * A document widget for CSV content widgets.
  */
@@ -218,3 +219,18 @@ class CSVViewerFactory extends ABCWidgetFactory<IDocumentWidget<CSVViewer>> {
     return new CSVDocumentWidget({ context });
   }
 }
+
+/**
+ * A widget factory for TSV widgets.
+ */
+export
+class TSVViewerFactory extends ABCWidgetFactory<IDocumentWidget<CSVViewer>> {
+  /**
+   * Create a new widget given a context.
+   */
+  protected createNewWidget(context: DocumentRegistry.Context): IDocumentWidget<CSVViewer> {
+    const delimiter = '\t';
+    return new CSVDocumentWidget({context, delimiter});
+  }
+}
+

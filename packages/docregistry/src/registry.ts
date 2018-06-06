@@ -488,21 +488,21 @@ class DocumentRegistry implements IDisposable {
    */
   getFileTypeForModel(model: Partial<Contents.IModel>): DocumentRegistry.IFileType {
     switch (model.type) {
-    case 'directory':
-      return find(this._fileTypes, ft => ft.contentType === 'directory') || DocumentRegistry.defaultDirectoryFileType;
-    case 'notebook':
-      return find(this._fileTypes, ft => ft.contentType === 'notebook') ||
-        DocumentRegistry.defaultNotebookFileType;
-    default:
-      // Find the best matching extension.
-      if (model.name || model.path) {
-        let name = model.name || PathExt.basename(model.path);
-        let fts = this.getFileTypesForPath(name);
-        if (fts.length > 0) {
-          return fts[0];
+      case 'directory':
+        return find(this._fileTypes, ft => ft.contentType === 'directory') || DocumentRegistry.defaultDirectoryFileType;
+      case 'notebook':
+        return find(this._fileTypes, ft => ft.contentType === 'notebook') ||
+          DocumentRegistry.defaultNotebookFileType;
+      default:
+        // Find the best matching extension.
+        if (model.name || model.path) {
+          let name = model.name || PathExt.basename(model.path);
+          let fts = this.getFileTypesForPath(name);
+          if (fts.length > 0) {
+            return fts[0];
+          }
         }
-      }
-      return this.getFileType('text') || DocumentRegistry.defaultTextFileType;
+        return this.getFileType('text') || DocumentRegistry.defaultTextFileType;
     }
   }
 
@@ -799,14 +799,14 @@ namespace DocumentRegistry {
    * A type alias for a context.
    */
   export
-  type Context = IContext<IModel>;
+    type Context = IContext<IModel>;
 
 
   /**
    * A type alias for a code context.
    */
   export
-  type CodeContext = IContext<ICodeModel>;
+    type CodeContext = IContext<ICodeModel>;
 
   /**
    * The options used to initialize a widget factory.
@@ -898,7 +898,7 @@ namespace DocumentRegistry {
    * A type alias for a standard widget factory.
    */
   export
-  type WidgetFactory = IWidgetFactory<IDocumentWidget, IModel>;
+    type WidgetFactory = IWidgetFactory<IDocumentWidget, IModel>;
 
   /**
    * An interface for a widget extension.
@@ -915,7 +915,7 @@ namespace DocumentRegistry {
    * A type alias for a standard widget extension.
    */
   export
-  type WidgetExtension = IWidgetExtension<Widget, IModel>;
+    type WidgetExtension = IWidgetExtension<Widget, IModel>;
 
   /**
    * The interface for a model factory.
@@ -956,13 +956,13 @@ namespace DocumentRegistry {
    * A type alias for a standard model factory.
    */
   export
-  type ModelFactory = IModelFactory<IModel>;
+    type ModelFactory = IModelFactory<IModel>;
 
   /**
    * A type alias for a code model factory.
    */
   export
-  type CodeModelFactory = IModelFactory<ICodeModel>;
+    type CodeModelFactory = IModelFactory<ICodeModel>;
 
   /**
    * An interface for a file type.
@@ -1123,6 +1123,13 @@ namespace DocumentRegistry {
       name: 'csv',
       displayName: 'CSV File',
       extensions: ['.csv'],
+      mimeTypes: ['text/csv'],
+      iconClass: 'jp-MaterialIcon jp-SpreadsheetIcon'
+    },
+    {
+      name: 'tsv',
+      displayName: 'TSV File',
+      extensions: ['.tsv'],
       mimeTypes: ['text/csv'],
       iconClass: 'jp-MaterialIcon jp-SpreadsheetIcon'
     },
