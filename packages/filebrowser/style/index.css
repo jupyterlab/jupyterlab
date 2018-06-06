@@ -298,11 +298,11 @@
   padding-left: 4px;
   margin-left: 4px;
   width: 160px;
-  background-color: rgba(255,255,255,.7);
+  background-color: var(--jp-ui-inverse-font-color2);
   box-shadow: var(--jp-elevation-z2);
   border-radius: 0px;
   color: var(--jp-ui-font-color1);
-  transform: translateX(-2%) translateY(4%);
+  transform: translateX(-40%) translateY(-58%);
 }
 
 
