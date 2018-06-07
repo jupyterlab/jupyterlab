@@ -8381,8 +8381,8 @@ vega-hierarchy@^3.0.0:
     vega-wordcloud "^3.0.0"
 
 vega-lite@^2.4.3:
-  version "2.5.1"
-  resolved "https://registry.npmjs.org/vega-lite/-/vega-lite-2.5.1.tgz#8c5188e1174d6d3cf15dddb9f04b10acc0188f56"
+  version "2.5.2"
+  resolved "https://registry.npmjs.org/vega-lite/-/vega-lite-2.5.2.tgz#adb1d34af09f8942e14459aa53f029c14a7c46cf"
   dependencies:
     "@types/json-stable-stringify" "^1.0.32"
     json-stable-stringify "^1.0.1"
