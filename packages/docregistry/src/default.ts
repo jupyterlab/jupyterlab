@@ -282,6 +282,7 @@ export abstract class ABCWidgetFactory<
     this._name = options.name;
     this._readOnly = options.readOnly === undefined ? false : options.readOnly;
     this._defaultFor = options.defaultFor ? options.defaultFor.slice() : [];
+    this._defaultRendered = (options.defaultRendered || []).slice();
     this._fileTypes = options.fileTypes.slice();
     this._modelName = options.modelName || 'text';
     this._preferKernel = !!options.preferKernel;
@@ -345,6 +346,14 @@ export abstract class ABCWidgetFactory<
   }
 
   /**
+   * The file types for which the factory should be the default for
+   * rendering a document model, if different from editing.
+   */
+  get defaultRendered(): string[] {
+    return this._defaultRendered.slice();
+  }
+
+  /**
    * Whether the widgets prefer having a kernel started.
    */
   get preferKernel(): boolean {
@@ -383,6 +392,7 @@ export abstract class ABCWidgetFactory<
   private _modelName: string;
   private _fileTypes: string[];
   private _defaultFor: string[];
+  private _defaultRendered: string[];
   private _widgetCreated = new Signal<DocumentRegistry.IWidgetFactory<T, U>, T>(
     this
   );
