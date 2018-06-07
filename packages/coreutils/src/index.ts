@@ -14,4 +14,3 @@ export * from './text';
 export * from './time';
 export * from './url';
 export * from './uuid';
-export * from './windowresolver';

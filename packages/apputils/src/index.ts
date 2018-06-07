@@ -20,3 +20,4 @@ export * from './styling';
 export * from './thememanager';
 export * from './toolbar';
 export * from './vdom';
+export * from './windowresolver';

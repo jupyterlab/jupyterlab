@@ -11,7 +11,7 @@ import {
  * The default window resolver token.
  */
 export
-const IWindowResolver = new Token<IWindowResolver>('@jupyterlab/coreutils:IWindowResolver');
+const IWindowResolver = new Token<IWindowResolver>('@jupyterlab/apputils:IWindowResolver');
 /* tslint:enable */
 
 
@@ -118,11 +118,6 @@ namespace Private {
    * Start the storage event handler.
    */
   function initialize(): void {
-    // If this library is not running in the browser, bail.
-    if (typeof window === 'undefined') {
-      return;
-    }
-
     // Listen to all storage events for beacons and window names.
     window.addEventListener('storage', (event: StorageEvent) => {
       const { key, newValue } = event;

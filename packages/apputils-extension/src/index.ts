@@ -8,12 +8,12 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, ISplashScreen, IThemeManager, ThemeManager
+  Dialog, ICommandPalette, ISplashScreen, IThemeManager, IWindowResolver,
+  ThemeManager, WindowResolver
 } from '@jupyterlab/apputils';
 
 import {
-  DataConnector, ISettingRegistry, IStateDB, IWindowResolver, SettingRegistry,
-  StateDB, URLExt, WindowResolver
+  DataConnector, ISettingRegistry, IStateDB, SettingRegistry, StateDB, URLExt
 } from '@jupyterlab/coreutils';
 
 import {
