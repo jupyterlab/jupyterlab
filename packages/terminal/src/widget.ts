@@ -188,7 +188,7 @@ class Terminal extends Widget {
    */
   protected onResize(msg: Widget.ResizeMessage): void {
     this._offsetWidth = msg.width;
-    this._offetHeight = msg.height;
+    this._offsetHeight = msg.height;
     this._needsResize = true;
     this.update();
   }
@@ -272,8 +272,8 @@ class Terminal extends Widget {
     if (this._offsetWidth === -1) {
       this._offsetWidth = this.node.offsetWidth;
     }
-    if (this._offetHeight === -1) {
-      this._offetHeight = this.node.offsetHeight;
+    if (this._offsetHeight === -1) {
+      this._offsetHeight = this.node.offsetHeight;
     }
     this._setSessionSize();
     this._needsResize = false;
@@ -284,7 +284,7 @@ class Terminal extends Widget {
    */
   private _setSessionSize(): void {
     let content = [
-      this._term.rows, this._term.cols, this._offetHeight, this._offsetWidth
+      this._term.rows, this._term.cols, this._offsetHeight, this._offsetWidth
     ];
     if (this._session) {
       this._session.send({ type: 'set_size', content });
@@ -298,7 +298,7 @@ class Terminal extends Widget {
   private _initialCommand: string;
   private _termOpened = false;
   private _offsetWidth = -1;
-  private _offetHeight = -1;
+  private _offsetHeight = -1;
 }
 
 
