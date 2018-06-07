@@ -134,7 +134,8 @@ namespace Private {
 
       // If the beacon was fired, respond with a ping.
       if (key === BEACON && candidate !== null) {
-        return ping(resolved ? name : candidate);
+        ping(resolved ? name : candidate);
+        return;
       }
 
       // If the window name is resolved, bail.

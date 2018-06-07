@@ -273,7 +273,7 @@ class Router implements IRouter {
    * Cause a hard reload of the document.
    */
   reload(): void {
-    document.location.reload();
+    window.location.reload();
   }
 
   /**

@@ -358,6 +358,11 @@ const state: JupyterLabPlugin<IStateDB> = {
         }
 
         debouncer = window.setTimeout(() => {
+          // Prevent a race condition between the timeout and saving.
+          if (!conflated) {
+            return;
+          }
+
           state.toJSON()
             .then(data => workspaces.save(id, { data, metadata }))
             .then(() => {
