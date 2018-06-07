@@ -11,8 +11,8 @@ import {
 /**
  * The form label.
  */
-const LABEL = `This window conflicts with another open JupyterLab window.
-  Please enter a workspace name.`;
+const LABEL = `This workspace is already in use in another JupyterLab window.
+  Please enter another workspace name.`;
 
 /**
  * The form input field placeholder.

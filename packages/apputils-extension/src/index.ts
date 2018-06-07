@@ -634,10 +634,10 @@ namespace Private {
   function redirect(router: IRouter, warn = false): Promise<void> {
     const form = createRedirectForm(warn);
     const dialog = new Dialog({
-      title: 'We have a problem!',
+      title: 'Please use a different workspace.',
       body: form,
       focusNodeSelector: 'input',
-      buttons: [Dialog.okButton({ label: 'Create Workspace' })]
+      buttons: [Dialog.okButton({ label: 'Switch Workspace' })]
     });
 
     return dialog.launch().then(result => {
