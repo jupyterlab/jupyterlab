@@ -91,6 +91,13 @@ export namespace IRenderMime {
      * The file types for which the factory should be the default.
      */
     readonly defaultFor?: ReadonlyArray<string>;
+
+    /**
+     * The file types for which the factory should be the default for rendering,
+     * if that is different than the default factory (which may be for editing)
+     * If undefined, then it will fall back on the default file type.
+     */
+    readonly defaultRendered?: ReadonlyArray<string>;
   }
 
   /**
