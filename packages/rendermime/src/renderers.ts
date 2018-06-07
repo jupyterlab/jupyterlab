@@ -767,7 +767,7 @@ namespace Private {
       .then(path => {
         // Handle the click override.
         if (linkHandler) {
-          linkHandler.handleLink(anchor, path);
+          linkHandler.handleLink(anchor, path, hash);
         }
         // Get the appropriate file download path.
         return resolver.getDownloadUrl(path);

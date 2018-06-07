@@ -303,8 +303,14 @@ export namespace IRenderMime {
   export interface ILinkHandler {
     /**
      * Add the link handler to the node.
+     *
+     * @param node: the node for which to handle the link.
+     *
+     * @param path: the path to open when the link is clicked.
+     *
+     * @param id: an optional element id to scroll to when the path is opened.
      */
-    handleLink(node: HTMLElement, url: string): void;
+    handleLink(node: HTMLElement, path: string, id?: string): void;
   }
 
   /**

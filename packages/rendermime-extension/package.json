@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^0.17.0-1",
+    "@jupyterlab/docmanager": "^0.17.0-1",
     "@jupyterlab/rendermime": "^0.17.0-1"
   },
   "devDependencies": {
