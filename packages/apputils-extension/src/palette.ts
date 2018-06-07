@@ -78,17 +78,9 @@ class Palette implements ICommandPalette {
  * Activate the command palette.
  */
 export
-function activatePalette(app: JupyterLab, restorer: ILayoutRestorer): ICommandPalette {
+function activatePalette(app: JupyterLab): ICommandPalette {
   const { commands, shell } = app;
-  const palette = new CommandPalette({ commands });
-
-  // Let the application restorer track the command palette for restoration of
-  // application state (e.g. setting the command palette as the current side bar
-  // widget).
-  restorer.add(palette, 'command-palette');
-
-  palette.id = 'command-palette';
-  palette.title.label = 'Commands';
+  const palette = Private.createPalette(app);
 
   commands.addCommand(CommandIDs.activate, {
     execute: () => { shell.activateById(palette.id); },
@@ -100,4 +92,41 @@ function activatePalette(app: JupyterLab, restorer: ILayoutRestorer): ICommandPa
   shell.addToLeftArea(palette);
 
   return new Palette(palette);
+}
+
+/**
+ * Restore the command palette.
+ */
+export
+function restorePalette(app: JupyterLab, restorer: ILayoutRestorer): void {
+  const palette = Private.createPalette(app);
+
+  // Let the application restorer track the command palette for restoration of
+  // application state (e.g. setting the command palette as the current side bar
+  // widget).
+  restorer.add(palette, 'command-palette');
+}
+
+/**
+ * The namespace for module private data.
+ */
+namespace Private {
+  /**
+   * The private command palette instance.
+   */
+  let palette: CommandPalette;
+
+  /**
+   * Create the application-wide command palette.
+   */
+  export
+  function createPalette(app: JupyterLab): CommandPalette {
+    if (!palette) {
+      palette = new CommandPalette({ commands: app.commands });
+      palette.id = 'command-palette';
+      palette.title.label = 'Commands';
+    }
+
+    return palette;
+  }
 }

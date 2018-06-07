@@ -16,15 +16,13 @@ import {
 const plugin: JupyterLabPlugin<void> = {
   id: '@jupyterlab/theme-dark-extension:plugin',
   requires: [IThemeManager],
-  activate: function(app: JupyterLab, manager: IThemeManager) {
+  activate: (app: JupyterLab, manager: IThemeManager) => {
+    const style = '@jupyterlab/theme-dark-extension/index.css';
+
     manager.register({
       name: 'JupyterLab Dark',
-      load: function() {
-        return manager.loadCSS('@jupyterlab/theme-dark-extension/index.css');
-      },
-      unload: function() {
-        return Promise.resolve(void 0);
-      }
+      load: () => manager.loadCSS(style),
+      unload: () => Promise.resolve(undefined)
     });
   },
   autoStart: true

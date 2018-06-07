@@ -8,7 +8,8 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, ISplashScreen, IThemeManager, ThemeManager
+  Dialog, ICommandPalette, ISplashScreen, IThemeManager, IWindowResolver,
+  ThemeManager, WindowResolver
 } from '@jupyterlab/apputils';
 
 import {
@@ -24,6 +25,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  CommandRegistry
+} from '@phosphor/commands';
+
+import {
   PromiseDelegate
 } from '@phosphor/coreutils';
 
@@ -36,8 +41,12 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  activatePalette
+  activatePalette, restorePalette
 } from './palette';
+
+import {
+  createRedirectForm
+} from './redirect';
 
 import '../style/index.css';
 
@@ -47,7 +56,7 @@ import '../style/index.css';
  * to allow for multiple quickly executed state changes to result in a single
  * workspace save operation.
  */
-const WORKSPACE_SAVE_DEBOUNCE_INTERVAL = 1500;
+const WORKSPACE_SAVE_DEBOUNCE_INTERVAL = 750;
 
 /**
  * The interval in milliseconds before recover options appear during splash.
@@ -83,6 +92,9 @@ namespace CommandIDs {
  * The routing regular expressions used by the apputils plugin.
  */
 namespace Patterns {
+  export
+  const cloneState = /(\?clone\=|\&clone\=)([^&]+)($|&)/;
+
   export
   const loadState = /^\/workspaces\/([^?]+)/;
 
@@ -133,6 +145,22 @@ const palette: JupyterLabPlugin<ICommandPalette> = {
   activate: activatePalette,
   id: '@jupyterlab/apputils-extension:palette',
   provides: ICommandPalette,
+  autoStart: true
+};
+
+
+/**
+ * The default commmand palette's restoration extension.
+ *
+ * #### Notes
+ * The command palette's restoration logic is handled separately from the
+ * command palette provider extension because the layout restorer dependency
+ * causes the command palette to be unavailable to other extensions earlier
+ * in the application load cycle.
+ */
+const paletteRestorer: JupyterLabPlugin<void> = {
+  activate: restorePalette,
+  id: '@jupyterlab/apputils-extension:palette-restorer',
   requires: [ILayoutRestorer],
   autoStart: true
 };
@@ -160,18 +188,12 @@ const themes: JupyterLabPlugin<IThemeManager> = {
   id: '@jupyterlab/apputils-extension:themes',
   requires: [ISettingRegistry, ISplashScreen],
   optional: [ICommandPalette, IMainMenu],
-  activate: (app: JupyterLab, settingRegistry: ISettingRegistry, splash: ISplashScreen, palette: ICommandPalette | null, mainMenu: IMainMenu | null): IThemeManager => {
+  activate: (app: JupyterLab, settings: ISettingRegistry, splash: ISplashScreen, palette: ICommandPalette | null, mainMenu: IMainMenu | null): IThemeManager => {
     const host = app.shell;
-    const when = app.started;
     const commands = app.commands;
-
-    const manager = new ThemeManager({
-      key: themes.id,
-      host, settingRegistry,
-      url: app.info.urls.themes,
-      splash,
-      when
-    });
+    const url = app.info.urls.themes;
+    const key = themes.id;
+    const manager = new ThemeManager({ key, host, settings, splash, url });
 
     // Keep a synchronously set reference to the current theme,
     // since the asynchronous setting of the theme in `changeTheme`
@@ -195,12 +217,11 @@ const themes: JupyterLabPlugin<IThemeManager> = {
       }
     });
 
-    // If we have a main menu, add the theme manager
-    // to the settings menu.
+    // If we have a main menu, add the theme manager to the settings menu.
     if (mainMenu) {
       const themeMenu = new Menu({ commands });
       themeMenu.title.label = 'JupyterLab Theme';
-      manager.ready.then(() => {
+      app.restored.then(() => {
         const command = CommandIDs.changeTheme;
         const isPalette = false;
 
@@ -215,7 +236,7 @@ const themes: JupyterLabPlugin<IThemeManager> = {
 
     // If we have a command palette, add theme switching options to it.
     if (palette) {
-      manager.ready.then(() => {
+      app.restored.then(() => {
         const category = 'Settings';
         const command = CommandIDs.changeTheme;
         const isPalette = true;
@@ -235,6 +256,29 @@ const themes: JupyterLabPlugin<IThemeManager> = {
 
 
 /**
+ * The default window name resolver provider.
+ */
+const resolver: JupyterLabPlugin<IWindowResolver> = {
+  id: '@jupyterlab/apputils-extension:resolver',
+  autoStart: true,
+  provides: IWindowResolver,
+  requires: [IRouter],
+  activate: (app: JupyterLab, router: IRouter) => {
+    const candidate = Private.getWorkspace(router) || '';
+    const resolver = new WindowResolver();
+
+    return resolver.resolve(candidate)
+      .catch(reason => {
+        console.warn('Window resolution failed:', reason);
+
+        return Private.redirect(router);
+      })
+      .then(() => resolver);
+  }
+};
+
+
+/**
  * The default splash screen provider.
  */
 const splash: JupyterLabPlugin<ISplashScreen> = {
@@ -245,9 +289,8 @@ const splash: JupyterLabPlugin<ISplashScreen> = {
     return {
       show: () => {
         const { commands, restored } = app;
-        const recovery = () => { commands.execute(CommandIDs.reset); };
 
-        return Private.showSplash(restored, recovery);
+        return Private.showSplash(restored, commands, CommandIDs.reset);
       }
     };
   }
@@ -261,8 +304,8 @@ const state: JupyterLabPlugin<IStateDB> = {
   id: '@jupyterlab/apputils-extension:state',
   autoStart: true,
   provides: IStateDB,
-  requires: [IRouter],
-  activate: (app: JupyterLab, router: IRouter) => {
+  requires: [IRouter, IWindowResolver],
+  activate: (app: JupyterLab, router: IRouter, resolver: IWindowResolver) => {
     let debouncer: number;
     let resolved = false;
 
@@ -271,7 +314,8 @@ const state: JupyterLabPlugin<IStateDB> = {
     const transform = new PromiseDelegate<StateDB.DataTransform>();
     const state = new StateDB({
       namespace: info.namespace,
-      transform: transform.promise
+      transform: transform.promise,
+      windowName: resolver.name
     });
 
     commands.addCommand(CommandIDs.recoverState, {
@@ -314,6 +358,11 @@ const state: JupyterLabPlugin<IStateDB> = {
         }
 
         debouncer = window.setTimeout(() => {
+          // Prevent a race condition between the timeout and saving.
+          if (!conflated) {
+            return;
+          }
+
           state.toJSON()
             .then(data => workspaces.save(id, { data, metadata }))
             .then(() => {
@@ -336,26 +385,44 @@ const state: JupyterLabPlugin<IStateDB> = {
 
     commands.addCommand(CommandIDs.loadState, {
       execute: (args: IRouter.ILocation) => {
-        const workspace = Private.getWorkspace(router);
-
-        // If there is no workspace, bail.
-        if (!workspace) {
+        // Since the command can be executed an arbitrary number of times, make
+        // sure it is safe to call multiple times.
+        if (resolved) {
           return;
         }
 
-        // Any time the local state database changes, save the workspace.
-        state.changed.connect(listener, state);
+        const { hash, path, search } = args;
+        const workspace = Private.getWorkspace(router);
+        const query = URLExt.queryStringToObject(search || '');
+        const clone = query['clone'];
+        const source = typeof clone === 'string' ? clone : workspace;
 
-        // Fetch the workspace and overwrite the state database.
-        return workspaces.fetch(workspace).then(session => {
+        let promise: Promise<any>;
+
+        // If the default /lab workspace is being cloned, copy it out of local
+        // storage instead of making a round trip to the server because it
+        // does not exist on the server.
+        if (source === clone && source === '') {
+          const prefix = `${source}:${info.namespace}:`;
+          const mask = (key: string) => key.replace(prefix, '');
+          const contents = StateDB.toJSON(prefix, mask);
+
+          resolved = true;
+          transform.resolve({ type: 'overwrite', contents });
+          promise = Promise.resolve();
+        }
+
+
+        // If there is no promise, fetch the source and overwrite the database.
+        promise = promise || workspaces.fetch(source).then(saved => {
           // If this command is called after a reset, the state database will
           // already be resolved.
           if (!resolved) {
             resolved = true;
-            transform.resolve({ type: 'overwrite', contents: session.data });
+            transform.resolve({ type: 'overwrite', contents: saved.data });
           }
         }).catch(reason => {
-          console.warn(`Fetching workspace (${workspace}) failed.`, reason);
+          console.warn(`Fetching workspace (${workspace}) failed:`, reason);
 
           // If the workspace does not exist, cancel the data transformation and
           // save a workspace with the current user state data.
@@ -363,22 +430,48 @@ const state: JupyterLabPlugin<IStateDB> = {
             resolved = true;
             transform.resolve({ type: 'cancel', contents: null });
           }
+        }).then(() => {
+          // Any time the local state database changes, save the workspace.
+          if (workspace) {
+            state.changed.connect(listener, state);
+          }
+        });
 
-          return commands.execute(CommandIDs.saveState);
+        return promise.catch(reason => {
+          console.warn(`${CommandIDs.loadState} failed:`, reason);
+        }).then(() => {
+          const immediate = true;
+
+          if (source === clone) {
+            // Maintain the query string parameters but remove `clone`.
+            delete query['clone'];
+
+            const url = path + URLExt.objectToQueryString(query) + hash;
+            const silent = true;
+
+            router.navigate(url, { silent });
+          }
+
+          // After the state database has finished loading, save it.
+          return commands.execute(CommandIDs.saveState, { immediate });
         });
       }
     });
+    // Both the load state and clone state patterns should trigger the load
+    // state command if the URL matches one of them.
     router.register({
-      command: CommandIDs.loadState,
-      pattern: Patterns.loadState
+      command: CommandIDs.loadState, pattern: Patterns.loadState
+    });
+    router.register({
+      command: CommandIDs.loadState, pattern: Patterns.cloneState
     });
 
     commands.addCommand(CommandIDs.reset, {
       label: 'Reset Application State',
       execute: () => {
         commands.execute(CommandIDs.recoverState)
-          .then(() => { document.location.reload(); })
-          .catch(() => { document.location.reload(); });
+          .then(() => { router.reload(); })
+          .catch(() => { router.reload(); });
       }
     });
 
@@ -395,7 +488,7 @@ const state: JupyterLabPlugin<IStateDB> = {
         // If the state database has already been resolved, resetting is
         // impossible without reloading.
         if (resolved) {
-          return document.location.reload();
+          return router.reload();
         }
 
         // Empty the state database.
@@ -442,7 +535,7 @@ const state: JupyterLabPlugin<IStateDB> = {
  * Export the plugins as default.
  */
 const plugins: JupyterLabPlugin<any>[] = [
-  palette, settings, state, splash, themes
+  palette, paletteRestorer, resolver, settings, state, splash, themes
 ];
 export default plugins;
 
@@ -531,6 +624,38 @@ namespace Private {
       debouncer = window.setTimeout(() => {
         recover(fn);
       }, SPLASH_RECOVER_TIMEOUT);
+    }).catch(() => { /* no-op */ });
+  }
+
+  /**
+   * Allows the user to clear state if splash screen takes too long.
+   */
+  export
+  function redirect(router: IRouter, warn = false): Promise<void> {
+    const form = createRedirectForm(warn);
+    const dialog = new Dialog({
+      title: 'Please use a different workspace.',
+      body: form,
+      focusNodeSelector: 'input',
+      buttons: [Dialog.okButton({ label: 'Switch Workspace' })]
+    });
+
+    return dialog.launch().then(result => {
+      dialog.dispose();
+
+      if (result.value) {
+        const url = `workspaces/${result.value}`;
+
+        // Navigate to a new workspace URL and abandon this session altogether.
+        router.navigate(url, { hard: true, silent: true });
+
+        // This promise will never resolve because the application navigates
+        // away to a new location. It only exists to satisfy the return type
+        // of the `redirect` function.
+        return new Promise<void>(() => { /* no-op */ });
+      }
+
+      return redirect(router, true);
     });
   }
 
@@ -549,10 +674,10 @@ namespace Private {
    *
    * @param ready - A promise that must be resolved before splash disappears.
    *
-   * @param recovery - A function that recovers from a hanging splash.
+   * @param recovery - A command that recovers from a hanging splash.
    */
   export
-  function showSplash(ready: Promise<any>, recovery: () => void): IDisposable {
+  function showSplash(ready: Promise<any>, commands: CommandRegistry, recovery: string): IDisposable {
     splash.classList.remove('splash-fade');
     splashCount++;
 
@@ -560,7 +685,9 @@ namespace Private {
       window.clearTimeout(debouncer);
     }
     debouncer = window.setTimeout(() => {
-      recover(recovery);
+      if (commands.hasCommand(recovery)) {
+        recover(() => { commands.execute(recovery); });
+      }
     }, SPLASH_RECOVER_TIMEOUT);
 
     document.body.appendChild(splash);

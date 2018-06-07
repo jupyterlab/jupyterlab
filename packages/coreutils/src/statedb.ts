@@ -98,16 +98,17 @@ class StateDB implements IStateDB {
    * @param options - The instantiation options for a state database.
    */
   constructor(options: StateDB.IOptions) {
-    const { namespace, transform } = options;
+    const { namespace, transform, windowName } = options;
 
     this.namespace = namespace;
 
-    if (!transform) {
-      this._ready = Promise.resolve(undefined);
-      return;
-    }
+    this._window = windowName || '';
+    this._ready = (transform || Promise.resolve(null)).then(transformation => {
 
-    this._ready = transform.then(transformation => {
+      if (!transformation) {
+        return;
+      }
+
       const { contents, type } = transformation;
 
       switch (type) {
@@ -180,16 +181,7 @@ class StateDB implements IStateDB {
    * retrieving the data. Non-existence of an `id` will succeed with `null`.
    */
   fetch(id: string): Promise<ReadonlyJSONValue | undefined> {
-    return this._ready.then(() => {
-      const key = `${this.namespace}:${id}`;
-      const value = window.localStorage.getItem(key);
-
-      if (value) {
-        const envelope = JSON.parse(value) as Private.Envelope;
-
-        return envelope.v;
-      }
-    });
+    return this._ready.then(() => this._fetch(id));
   }
 
   /**
@@ -197,7 +189,7 @@ class StateDB implements IStateDB {
    *
    * @param namespace - The namespace to retrieve.
    *
-   * @returns A promise that bears a collection data payloads for a namespace.
+   * @returns A promise that bears a collection of payloads for a namespace.
    *
    * #### Notes
    * Namespaces are entirely conventional entities. The `id` values of stored
@@ -210,32 +202,10 @@ class StateDB implements IStateDB {
    */
   fetchNamespace(namespace: string): Promise<IStateItem[]> {
     return this._ready.then(() => {
-      const { localStorage } = window;
-      const prefix = `${this.namespace}:${namespace}:`;
-      let items: IStateItem[] = [];
-      let i = localStorage.length;
+      const prefix = `${this._window}:${this.namespace}:`;
+      const mask = (key: string) => key.replace(prefix, '');
 
-      while (i) {
-        let key = localStorage.key(--i);
-
-        if (key && key.indexOf(prefix) === 0) {
-          let value = localStorage.getItem(key);
-
-          try {
-            let envelope = JSON.parse(value) as Private.Envelope;
-
-            items.push({
-              id: key.replace(`${this.namespace}:`, ''),
-              value: envelope ? envelope.v : undefined
-            });
-          } catch (error) {
-            console.warn(error);
-            localStorage.removeItem(key);
-          }
-        }
-      }
-
-      return items;
+      return StateDB.fetchNamespace(`${prefix}${namespace}:`, mask);
     });
   }
 
@@ -248,7 +218,7 @@ class StateDB implements IStateDB {
    */
   remove(id: string): Promise<void> {
     return this._ready.then(() => {
-      window.localStorage.removeItem(`${this.namespace}:${id}`);
+      this._remove(id);
       this._changed.emit({ id, type: 'remove' });
     });
   }
@@ -283,31 +253,10 @@ class StateDB implements IStateDB {
    */
   toJSON(): Promise<ReadonlyJSONObject> {
     return this._ready.then(() => {
-      const { localStorage } = window;
-      const prefix = `${this.namespace}:`;
-      const contents: Partial<ReadonlyJSONObject> =  { };
-      let i = localStorage.length;
+      const prefix = `${this._window}:${this.namespace}:`;
+      const mask = (key: string) => key.replace(prefix, '');
 
-      while (i) {
-        let key = localStorage.key(--i);
-
-        if (key && key.indexOf(prefix) === 0) {
-          let value = localStorage.getItem(key);
-
-          try {
-            let envelope = JSON.parse(value) as Private.Envelope;
-
-            if (envelope) {
-              contents[key.replace(prefix, '')] = envelope.v;
-            }
-          } catch (error) {
-            console.warn(error);
-            localStorage.removeItem(key);
-          }
-        }
-      }
-
-      return contents;
+      return StateDB.toJSON(prefix, mask);
     });
   }
 
@@ -319,7 +268,7 @@ class StateDB implements IStateDB {
    */
   private _clear(): void {
     const { localStorage } = window;
-    const prefix = `${this.namespace}:`;
+    const prefix = `${this._window}:${this.namespace}:`;
     let i = localStorage.length;
 
     while (i) {
@@ -329,6 +278,25 @@ class StateDB implements IStateDB {
         localStorage.removeItem(key);
       }
     }
+  }
+
+  /**
+   * Fetch a value from the database.
+   *
+   * #### Notes
+   * Unlike the public `fetch` method, this method is synchronous.
+   */
+  private _fetch(id: string): ReadonlyJSONValue | undefined {
+      const key = `${this._window}:${this.namespace}:${id}`;
+      const value = window.localStorage.getItem(key);
+
+      if (value) {
+        const envelope = JSON.parse(value) as Private.Envelope;
+
+        return envelope.v;
+      }
+
+      return undefined;
   }
 
   /**
@@ -347,13 +315,25 @@ class StateDB implements IStateDB {
   }
 
   /**
+   * Remove a key in the database.
+   *
+   * #### Notes
+   * Unlike the public `remove` method, this method is synchronous.
+   */
+  private _remove(id: string): void {
+    const key = `${this._window}:${this.namespace}:${id}`;
+
+    window.localStorage.removeItem(key);
+  }
+
+  /**
    * Save a key and its value in the database.
    *
    * #### Notes
    * Unlike the public `save` method, this method is synchronous.
    */
   private _save(id: string, value: ReadonlyJSONValue): void {
-    const key = `${this.namespace}:${id}`;
+    const key = `${this._window}:${this.namespace}:${id}`;
     const envelope: Private.Envelope = { v: value };
     const serialized = JSON.stringify(envelope);
     const length = serialized.length;
@@ -368,6 +348,7 @@ class StateDB implements IStateDB {
 
   private _changed = new Signal<this, StateDB.Change>(this);
   private _ready: Promise<void>;
+  private _window: string;
 }
 
 /**
@@ -426,6 +407,74 @@ namespace StateDB {
      * client requests.
      */
     transform?: Promise<DataTransform>;
+
+    /**
+     * An optional name for the application window.
+     *
+     * #### Notes
+     * In environments where multiple windows can instantiate a state database,
+     * a window name is necessary to prefix all keys that are stored within the
+     * local storage that is shared by all windows. In JupyterLab, this window
+     * name is generated by the `IWindowResolver` extension.
+     */
+    windowName?: string;
+  }
+
+  /**
+   * Retrieve all the saved bundles for a given namespace in local storage.
+   *
+   * @param prefix - The namespace to retrieve.
+   *
+   * @param mask - Optional mask function to transform each key retrieved.
+   *
+   * @returns A collection of data payloads for a given prefix.
+   *
+   * #### Notes
+   * If there are any errors in retrieving the data, they will be logged to the
+   * console in order to optimistically return any extant data without failing.
+   */
+  export
+  function fetchNamespace(namespace: string, mask: (key: string) => string = key => key): IStateItem[] {
+    const { localStorage } = window;
+
+    let items: IStateItem[] = [];
+    let i = localStorage.length;
+
+    while (i) {
+      let key = localStorage.key(--i);
+
+      if (key && key.indexOf(namespace) === 0) {
+        let value = localStorage.getItem(key);
+
+        try {
+          let envelope = JSON.parse(value) as Private.Envelope;
+
+          items.push({
+            id: mask(key),
+            value: envelope ? envelope.v : undefined
+          });
+        } catch (error) {
+          console.warn(error);
+          localStorage.removeItem(key);
+        }
+      }
+    }
+
+    return items;
+  }
+
+
+  /**
+   * Return a serialized copy of a namespace's contents from local storage.
+   *
+   * @returns The namespace contents as JSON.
+   */
+  export
+  function toJSON(namespace: string, mask: (key: string) => string = key => key): ReadonlyJSONObject {
+    return fetchNamespace(namespace, mask).reduce((acc, val) => {
+      acc[val.id] = val.value;
+      return acc;
+    }, { } as Partial<ReadonlyJSONObject>);
   }
 }
 

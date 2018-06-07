@@ -10,7 +10,7 @@ import {
 } from '@phosphor/algorithm';
 
 import {
-  PromiseDelegate, Token
+  Token
 } from '@phosphor/coreutils';
 
 import {
@@ -47,6 +47,17 @@ interface IThemeManager extends ThemeManager {}
 
 
 /**
+ * The number of milliseconds between theme loading attempts.
+ */
+const REQUEST_INTERVAL = 75;
+
+/**
+ * The number of times to attempt to load a theme before giving up.
+ */
+const REQUEST_THRESHOLD = 20;
+
+
+/**
  * A class that provides theme management.
  */
 export
@@ -55,35 +66,25 @@ class ThemeManager {
    * Construct a new theme manager.
    */
   constructor(options: ThemeManager.IOptions) {
-    const { key, when, url, splash } = options;
-    const registry = options.settingRegistry;
-    const promises = Promise.all([registry.load(key), when]);
+    const { host, key, splash, url } = options;
+    const registry = options.settings;
+
+    this._base = url;
+    this._host = host;
     this._splash = splash;
 
-    this._baseUrl = url;
-
-    when.then(() => { this._sealed = true; });
-
-    this._host = options.host;
-    this._splashDisposable = splash.show();
-    this.ready = promises.then(([settings]) => {
+    registry.load(key).then(settings => {
       this._settings = settings;
-      this._settings.changed.connect(this._onSettingsChanged, this);
-
-      return this._handleSettings();
+      this._settings.changed.connect(this._loadSettings, this);
+      this._loadSettings();
     });
   }
-
-  /**
-   * A promise that resolves when the theme manager is ready.
-   */
-  readonly ready: Promise<void>;
 
   /**
    * Get the name of the current theme.
    */
   get theme(): string | null {
-    return this._loadedTheme;
+    return this._current;
   }
 
   /**
@@ -94,10 +95,29 @@ class ThemeManager {
   }
 
   /**
-   * Set the current theme.
+   * Load a theme CSS file by path.
+   *
+   * @param path - The path of the file to load.
    */
-  setTheme(name: string): Promise<void> {
-    return this.ready.then(() => this._settings.set('theme', name));
+  loadCSS(path: string): Promise<void> {
+    const base = this._base;
+    const href = URLExt.isLocal(path) ? URLExt.join(base, path) : path;
+    const links = this._links;
+
+    return new Promise((resolve, reject) => {
+      const link = document.createElement('link');
+
+      link.setAttribute('rel', 'stylesheet');
+      link.setAttribute('type', 'text/css');
+      link.setAttribute('href', href);
+      link.addEventListener('load', () => { resolve(undefined); });
+      link.addEventListener('error', () => {
+        reject(`Stylesheet failed to load: ${href}`);
+      });
+
+      document.body.appendChild(link);
+      links.push(link);
+    });
   }
 
   /**
@@ -108,129 +128,124 @@ class ThemeManager {
    * @returns A disposable that can be used to unregister the theme.
    */
   register(theme: ThemeManager.ITheme): IDisposable {
-    if (this._sealed) {
-      throw new Error('Cannot register themes after startup');
-    }
+    const { name } = theme;
+    const themes = this._themes;
 
-    const name = theme.name;
-
-    if (this._themes[name]) {
+    if (themes[name]) {
       throw new Error(`Theme already registered for ${name}`);
     }
-    this._themes[name] = theme;
 
-    return new DisposableDelegate(() => { delete this._themes[name]; });
+    themes[name] = theme;
+
+    return new DisposableDelegate(() => { delete themes[name]; });
   }
 
   /**
-   * Load a theme CSS file by path.
-   *
-   * @param path - The path of the file to load.
+   * Set the current theme.
    */
-  loadCSS(path: string): Promise<void> {
-    const link = document.createElement('link');
-    const delegate = new PromiseDelegate<void>();
-    const href = URLExt.isLocal(path) ? URLExt.join(this._baseUrl, path) : path;
-
-    link.rel = 'stylesheet';
-    link.type = 'text/css';
-    link.href = href;
-    link.addEventListener('load', () => { delegate.resolve(undefined); });
-    link.addEventListener('error', () => {
-      delegate.reject(`Stylesheet failed to load: ${href}`);
-    });
-    document.body.appendChild(link);
-    this._links.push(link);
-
-    return delegate.promise;
-  }
-
-  /**
-   * Handle a change to the settings.
-   */
-  private _onSettingsChanged(sender: ISettingRegistry.ISettings): void {
-    this._pendingTheme = sender.composite['theme'] as string;
-    if (!this._themes[this._pendingTheme]) {
-      return;
-    }
-    if (this._pendingTheme === this._loadedTheme) {
-      return;
-    }
-    if (this._loadPromise) {
-      return;
-    }
-    this._loadTheme();
+  setTheme(name: string): Promise<void> {
+    return this._settings.set('theme', name);
   }
 
   /**
    * Handle the current settings.
    */
-  private _handleSettings(): Promise<void> {
-    const settings = this._settings;
-    let theme = settings.composite['theme'] as string;
+  private _loadSettings(): void {
+    const outstanding = this._outstanding;
+    const pending = this._pending;
+    const requests = this._requests;
 
-    if (!this._themes[theme]) {
-      const old = theme;
-
-      theme = settings.default('theme') as string;
-      if (!this._themes[theme]) {
-        this._onError(new Error(`Default theme "${theme}" did not load.`));
-      }
-      console.warn(`Could not load theme "${old}", using default "${theme}".`);
+    // If another request is pending, cancel it.
+    if (pending) {
+      window.clearTimeout(pending);
+      this._pending = 0;
     }
-    this._pendingTheme = theme;
 
-    return this._loadTheme().catch(reason => { this._onError(reason); });
+    const settings = this._settings;
+    const themes = this._themes;
+    const theme = settings.composite['theme'] as string;
+
+    // If another promise is outstanding, wait until it finishes before
+    // attempting to load the settings. Because outstanding promises cannot
+    // be aborted, the order in which they occur must be enforced.
+    if (outstanding) {
+      outstanding
+        .then(() => { this._loadSettings(); })
+        .catch(() => { this._loadSettings(); });
+      this._outstanding = null;
+      return;
+    }
+
+    // Increment the request counter.
+    requests[theme] = requests[theme] ? requests[theme] + 1 : 1;
+
+    // If the theme exists, load it right away.
+    if (themes[theme]) {
+      this._outstanding = this._loadTheme(theme);
+      delete requests[theme];
+      return;
+    }
+
+    // If the request has taken too long, give up.
+    if (requests[theme] > REQUEST_THRESHOLD) {
+      const fallback = settings.default('theme') as string;
+
+      // Stop tracking the requests for this theme.
+      delete requests[theme];
+
+      if (!themes[fallback]) {
+        this._onError(`Neither theme ${theme} nor default ${fallback} loaded.`);
+        return;
+      }
+
+      console.warn(`Could not load theme ${theme}, using default ${fallback}.`);
+      this._outstanding = this._loadTheme(fallback);
+      return;
+    }
+
+    // If the theme does not yet exist, attempt to wait for it.
+    this._pending = window.setTimeout(() => {
+      this._loadSettings();
+    }, REQUEST_INTERVAL);
   }
 
   /**
    * Load the theme.
+   *
+   * #### Notes
+   * This method assumes that the `theme` exists.
    */
-  private _loadTheme(): Promise<void> {
-    let newTheme = this._themes[this._pendingTheme];
-    let oldPromise = Promise.resolve(void 0);
-    let oldTheme = this._themes[this._loadedTheme];
-    if (oldTheme) {
-      this._splashDisposable = this._splash.show();
-      oldPromise = oldTheme.unload();
-    }
-    this._pendingTheme = '';
-    this._loadPromise = oldPromise.then(() => {
-      this._links.forEach(link => {
-        if (link.parentElement) {
-          link.parentElement.removeChild(link);
-        }
-      });
-      this._links.length = 0;
-      return newTheme.load();
-    }).then(() => {
-      this._loadedTheme = newTheme.name;
-      this._finishLoad();
-    }).then(() => {
-      this._splashDisposable.dispose();
-    }).catch(error => {
-      this._onError(error);
+  private _loadTheme(theme: string): Promise<void> {
+    const current = this._current;
+    const links = this._links;
+    const themes = this._themes;
+    const splash = this._splash.show();
+
+    // Unload any CSS files that have been loaded.
+    links.forEach(link => {
+      if (link.parentElement) {
+        link.parentElement.removeChild(link);
+      }
     });
-    return this._loadPromise;
-  }
+    links.length = 0;
 
-  /**
-   * Handle a load finished.
-   */
-  private _finishLoad(): void {
-    Private.fitAll(this._host);
-    this._loadPromise = null;
+    // Unload the previously loaded theme.
+    const old = current ? themes[current].unload() : Promise.resolve();
 
-    if (this._pendingTheme) {
-      this._loadTheme();
-    }
+    return Promise.all([old, themes[theme].load()]).then(() => {
+      this._current = theme;
+      Private.fitAll(this._host);
+      splash.dispose();
+    }).catch(reason => {
+      this._onError(reason);
+      splash.dispose();
+    });
   }
 
   /**
    * Handle a theme error.
    */
   private _onError(reason: any): void {
-    this._splashDisposable.dispose();
     showDialog({
       title: 'Error Loading Theme',
       body: String(reason),
@@ -238,17 +253,16 @@ class ThemeManager {
     });
   }
 
-  private _baseUrl: string;
-  private _themes: { [key: string]: ThemeManager.ITheme } = {};
-  private _links: HTMLLinkElement[] = [];
+  private _base: string;
+  private _current: string | null = null;
   private _host: Widget;
+  private _links: HTMLLinkElement[] = [];
+  private _outstanding: Promise<void> | null = null;
+  private _pending = 0;
+  private _requests: { [theme: string]: number } = { };
   private _settings: ISettingRegistry.ISettings;
-  private _pendingTheme = '';
-  private _loadedTheme: string | null = null;
-  private _loadPromise: Promise<void> | null = null;
-  private _sealed = false;
   private _splash: ISplashScreen;
-  private _splashDisposable: IDisposable;
+  private _themes: { [key: string]: ThemeManager.ITheme } = { };
 }
 
 
@@ -263,34 +277,29 @@ namespace ThemeManager {
   export
   interface IOptions {
     /**
-     * The setting registry key that holds theme setting data.
-     */
-    key: string;
-
-    /**
-     * The url for local theme loading.
-     */
-    url: string;
-
-    /**
-     * The settings registry.
-     */
-    settingRegistry: ISettingRegistry;
-
-    /**
      * The host widget for the theme manager.
      */
     host: Widget;
 
     /**
-     * A promise for when all themes should have been registered.
+     * The setting registry key that holds theme setting data.
      */
-    when: Promise<void>;
+    key: string;
+
+    /**
+     * The settings registry.
+     */
+    settings: ISettingRegistry;
 
     /**
      * The splash screen to show when loading themes.
      */
     splash: ISplashScreen;
+
+    /**
+     * The url for local theme loading.
+     */
+    url: string;
   }
 
   /**

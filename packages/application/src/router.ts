@@ -83,6 +83,11 @@ interface IRouter {
   register(options: IRouter.IRegisterOptions): IDisposable;
 
   /**
+   * Cause a hard reload of the document.
+   */
+  reload(): void;
+
+  /**
    * Route a specific path to an action.
    *
    * @param url - The URL string that will be routed.
@@ -135,6 +140,12 @@ namespace IRouter {
    */
   export
   interface INavOptions {
+    /**
+     * Whether the navigation should be hard URL change instead of an HTML
+     * history API change.
+     */
+    hard?: boolean;
+
     /**
      * Whether the navigation should be added to the browser's history.
      */
@@ -224,12 +235,16 @@ class Router implements IRouter {
   navigate(path: string, options: IRouter.INavOptions = { }): void {
     const url = path ? URLExt.join(this.base, path) : this.base;
     const { history } = window;
-    const { silent } = options;
+    const { hard, silent } = options;
 
     if (silent) {
       history.replaceState({ }, '', url);
     } else {
       history.pushState({ }, '', url);
+    }
+
+    if (hard) {
+      return this.reload();
     }
 
     // Because a `route()` call may still be in the stack after having received
@@ -252,6 +267,13 @@ class Router implements IRouter {
     rules.set(pattern, { command, rank });
 
     return new DisposableDelegate(() => { rules.delete(pattern); });
+  }
+
+  /**
+   * Cause a hard reload of the document.
+   */
+  reload(): void {
+    window.location.reload();
   }
 
   /**

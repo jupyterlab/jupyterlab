@@ -318,7 +318,9 @@ class Dialog<T> extends Widget {
     ArrayExt.removeFirstOf(Private.launchQueue, promise.promise);
     let body = this._body;
     let value: T | null = null;
-    if (button.accept && body instanceof Widget && typeof body.getValue === 'function') {
+    if (button.accept &&
+      body instanceof Widget &&
+      typeof body.getValue === 'function') {
       value = body.getValue();
     }
     this.dispose();

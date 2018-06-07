@@ -30,15 +30,21 @@ describe('StateDB', () => {
       let key = 'foo';
       let correct = 'bar';
       let incorrect = 'baz';
+      let transformation: StateDB.DataTransform = {
+        type: 'overwrite',
+        contents: { [key]: correct }
+      };
 
       // By sharing a namespace, the two databases will share data.
       prepopulate.save(key, incorrect)
+        .then(() => prepopulate.fetch(key))
+        .then(value => { expect(value).to.be(incorrect); })
+        .then(() => { transform.resolve(transformation); })
         .then(() => db.fetch(key))
         .then(value => { expect(value).to.be(correct); })
         .then(() => db.clear())
         .then(done)
         .catch(done);
-      transform.resolve({ type: 'overwrite', contents: { [key]: correct } });
     });
 
     it('should allow a merge data transformation', done => {
