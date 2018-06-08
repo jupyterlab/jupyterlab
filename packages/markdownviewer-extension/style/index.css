@@ -7,7 +7,7 @@
   --jp-private-markdownviewer-padding: 32px;
 }
 
-.jp-Document.jp-MimeDocument .jp-RenderedMarkdown {
+.jp-Document .jp-MimeDocument .jp-RenderedMarkdown {
   padding-top: var(--jp-private-markdownviewer-padding);
   padding-right: var(--jp-private-markdownviewer-padding);
   padding-bottom: var(--jp-private-markdownviewer-padding);
