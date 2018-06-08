@@ -24,7 +24,7 @@ from ipython_genutils.tempdir import TemporaryDirectory
 from ipykernel.kernelspec import write_kernel_spec
 import jupyter_core
 
-from jupyterlab.process_app import ProcessApp
+from jupyterlab_launcher.process_app import ProcessApp
 
 
 HERE = osp.realpath(osp.dirname(__file__))
