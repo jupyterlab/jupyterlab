@@ -33,6 +33,6 @@
     "@types/chai": "~4.0.10",
     "karma": "~1.7.1",
     "rimraf": "~2.6.2",
-    "typescript": "~2.8.3"
+    "typescript": "~2.9.1"
   }
 }

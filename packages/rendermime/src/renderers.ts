@@ -7,8 +7,7 @@ import {
   default as AnsiUp
 } from 'ansi_up';
 
-import * as marked
-  from 'marked';
+import marked from 'marked';
 
 import {
   ISanitizer

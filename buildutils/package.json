@@ -38,7 +38,7 @@
     "inquirer": "~3.3.0",
     "path": "~0.12.7",
     "sort-package-json": "~1.7.1",
-    "typescript": "~2.8.3"
+    "typescript": "~2.9.1"
   },
   "devDependencies": {
     "@types/fs-extra": "~4.0.3",

@@ -5,8 +5,7 @@ import {
   JSONObject
 } from '@phosphor/coreutils';
 
-import * as urlparse
- from 'url-parse';
+import urlparse from 'url-parse';
 
 /**
  * The namespace for URL-related functions.

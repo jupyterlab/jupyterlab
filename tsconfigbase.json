@@ -1,14 +1,14 @@
 {
   "compilerOptions": {
-    "experimentalDecorators": true,
+    "declaration": true,
     "noImplicitAny": true,
     "noEmitOnError": true,
-    "lib": ["ES2015", "DOM"],
-    "types": ["mocha"],
+    "noUnusedLocals": true,
     "esModuleInterop": true,
     "module": "commonjs",
     "moduleResolution": "node",
-    "target": "ES2015",
-    "outDir": "./build"
+    "target": "es2015",
+    "lib": ["dom", "es2015"],
+    "types": []
   }
 }

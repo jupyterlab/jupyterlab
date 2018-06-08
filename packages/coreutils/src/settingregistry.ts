@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as Ajv from 'ajv';
+import Ajv from 'ajv';
 
 import * as json from 'comment-json';
 

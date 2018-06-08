@@ -121,8 +121,8 @@
   resolved "https://registry.npmjs.org/@types/chai/-/chai-4.0.10.tgz#0eb222c7353adde8e0980bea04165d4d3b6afef3"
 
 "@types/codemirror@~0.0.46":
-  version "0.0.55"
-  resolved "https://registry.npmjs.org/@types/codemirror/-/codemirror-0.0.55.tgz#f4292b7a5f33b2aab509501c3db7e45d19a7c057"
+  version "0.0.57"
+  resolved "https://registry.npmjs.org/@types/codemirror/-/codemirror-0.0.57.tgz#1b10e330be084e066772883fc3022aae22907cd4"
 
 "@types/comment-json@^1.1.0":
   version "1.1.1"
@@ -2151,12 +2151,6 @@ d3-format@^1.2.2, d3-format@^1.3.0:
   version "1.3.0"
   resolved "https://registry.npmjs.org/d3-format/-/d3-format-1.3.0.tgz#a3ac44269a2011cdb87c7b5693040c18cddfff11"
 
-d3-geo@1:
-  version "1.9.1"
-  resolved "https://registry.npmjs.org/d3-geo/-/d3-geo-1.9.1.tgz#157e3b0f917379d0f73bebfff3be537f49fa7356"
-  dependencies:
-    d3-array "1"
-
 d3-geo@^1.10.0:
   version "1.10.0"
   resolved "https://registry.npmjs.org/d3-geo/-/d3-geo-1.10.0.tgz#2972d18014f1e38fc1f8bb6d545377bdfb00c9ab"
@@ -2173,7 +2167,7 @@ d3-interpolate@1:
   dependencies:
     d3-color "1"
 
-d3-interpolate@^1.1.6:
+d3-interpolate@^1.1.6, d3-interpolate@^1.2.0:
   version "1.2.0"
   resolved "https://registry.npmjs.org/d3-interpolate/-/d3-interpolate-1.2.0.tgz#40d81bd8e959ff021c5ea7545bc79b8d22331c41"
   dependencies:
@@ -2187,14 +2181,14 @@ d3-quadtree@1:
   version "1.0.3"
   resolved "https://registry.npmjs.org/d3-quadtree/-/d3-quadtree-1.0.3.tgz#ac7987e3e23fe805a990f28e1b50d38fcb822438"
 
-d3-scale-chromatic@^1.2:
-  version "1.2.0"
-  resolved "https://registry.npmjs.org/d3-scale-chromatic/-/d3-scale-chromatic-1.2.0.tgz#25820d059c0eccc33e85f77561f37382a817ab58"
+d3-scale-chromatic@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.npmjs.org/d3-scale-chromatic/-/d3-scale-chromatic-1.3.0.tgz#7ee38ffcaa7ad55cfed83a6a668aac5570c653c4"
   dependencies:
     d3-color "1"
     d3-interpolate "1"
 
-d3-scale@2:
+d3-scale@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/d3-scale/-/d3-scale-2.0.0.tgz#fd8ac78381bc2ed741d8c71770437a5e0549a5a5"
   dependencies:
@@ -2221,7 +2215,7 @@ d3-time-format@2, d3-time-format@^2.1.1:
   dependencies:
     d3-time "1"
 
-d3-time@1:
+d3-time@1, d3-time@^1.0.8:
   version "1.0.8"
   resolved "https://registry.npmjs.org/d3-time/-/d3-time-1.0.8.tgz#dbd2d6007bf416fe67a76d17947b784bffea1e84"
 
@@ -7946,9 +7940,9 @@ trim-right@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npmjs.org/trim-right/-/trim-right-1.0.1.tgz#cb2e1203067e0c8de1f614094b9fe45704ea6003"
 
-tslib@^1.8.0, tslib@^1.8.1, tslib@^1.9.0:
-  version "1.9.0"
-  resolved "https://registry.npmjs.org/tslib/-/tslib-1.9.0.tgz#e37a86fda8cbbaf23a057f473c9f4dc64e5fc2e8"
+tslib@^1.8.0, tslib@^1.8.1, tslib@^1.9.2:
+  version "1.9.2"
+  resolved "https://registry.npmjs.org/tslib/-/tslib-1.9.2.tgz#8be0cc9a1f6dc7727c38deb16c2ebd1a2892988e"
 
 tslint@~5.10.0:
   version "5.10.0"
@@ -8050,9 +8044,9 @@ typescript@2.7.2:
   version "2.7.2"
   resolved "https://registry.npmjs.org/typescript/-/typescript-2.7.2.tgz#2d615a1ef4aee4f574425cdff7026edf81919836"
 
-typescript@~2.8.3:
-  version "2.8.3"
-  resolved "https://registry.npmjs.org/typescript/-/typescript-2.8.3.tgz#5d817f9b6f31bb871835f4edf0089f21abe6c170"
+typescript@~2.9.1:
+  version "2.9.1"
+  resolved "https://registry.npmjs.org/typescript/-/typescript-2.9.1.tgz#fdb19d2c67a15d11995fd15640e373e09ab09961"
 
 ua-parser-js@^0.7.9:
   version "0.7.17"
@@ -8298,17 +8292,17 @@ vega-dataflow@^4.0.0, vega-dataflow@^4.0.1:
     vega-util "^1.7.0"
 
 vega-embed@^3.13.2:
-  version "3.13.2"
-  resolved "https://registry.npmjs.org/vega-embed/-/vega-embed-3.13.2.tgz#c82460d8c39953c4c69f340de007266d447abebf"
+  version "3.14.0"
+  resolved "https://registry.npmjs.org/vega-embed/-/vega-embed-3.14.0.tgz#92403ffbd4f05913f53096a3f01bf087e6f0f900"
   dependencies:
     d3-selection "^1.3.0"
     json-stringify-pretty-compact "^1.2.0"
     semver "^5.5.0"
-    vega-lib "^4.0.0-rc.1 || ^3.3.0"
+    vega-lib "^4.0.0-rc.2 || ^3.3.0"
     vega-lite "^2.4.3"
     vega-schema-url-parser "^1.0.0"
-    vega-themes "^2.0.0"
-    vega-tooltip "^0.10.1"
+    vega-themes "^2.1.0"
+    vega-tooltip "^0.11.0"
 
 vega-encode@^3.0.0:
   version "3.0.0"
@@ -8359,13 +8353,12 @@ vega-hierarchy@^3.0.0:
     vega-dataflow "^4.0.0"
     vega-util "^1.7.0"
 
-"vega-lib@^4.0.0-rc.1 || ^3.3.0":
-  version "4.0.0-rc.1"
-  resolved "https://registry.npmjs.org/vega-lib/-/vega-lib-4.0.0-rc.1.tgz#2d85bb2c273b6fdbadc6a022cd588d790ed52140"
+"vega-lib@^4.0.0-rc.2 || ^3.3.0":
+  version "4.0.0-rc.2"
+  resolved "https://registry.npmjs.org/vega-lib/-/vega-lib-4.0.0-rc.2.tgz#c77fba0adb55d85b44d2bd3421dc5d0ef22fdd9b"
   dependencies:
-    vega-canvas "^1.0.1"
     vega-crossfilter "^3.0.0"
-    vega-dataflow "^4.0.0"
+    vega-dataflow "^4.0.1"
     vega-encode "^3.0.0"
     vega-event-selector "^2.0.0"
     vega-expression "^2.3.1"
@@ -8373,29 +8366,29 @@ vega-hierarchy@^3.0.0:
     vega-geo "^3.0.0"
     vega-hierarchy "^3.0.0"
     vega-loader "^3.0.0"
-    vega-parser "^3.0.2"
+    vega-parser "^3.1.0"
     vega-projection "^1.1.0"
-    vega-runtime "^3.0.0"
-    vega-scale "^2.1.1"
-    vega-scenegraph "^3.0.0"
+    vega-runtime "^3.0.1"
+    vega-scale "^2.2.0"
+    vega-scenegraph "^3.1.0"
     vega-statistics "^1.2.1"
     vega-transforms "^2.0.0"
     vega-typings "*"
     vega-util "^1.7.0"
-    vega-view "^3.0.0"
+    vega-view "^3.2.0"
     vega-view-transforms "^2.0.0"
     vega-voronoi "^3.0.0"
     vega-wordcloud "^3.0.0"
 
 vega-lite@^2.4.3:
-  version "2.4.3"
-  resolved "https://registry.npmjs.org/vega-lite/-/vega-lite-2.4.3.tgz#34b3ff72bbe0a8c52b6074958f17abe80e7ef5f4"
+  version "2.5.2"
+  resolved "https://registry.npmjs.org/vega-lite/-/vega-lite-2.5.2.tgz#adb1d34af09f8942e14459aa53f029c14a7c46cf"
   dependencies:
     "@types/json-stable-stringify" "^1.0.32"
     json-stable-stringify "^1.0.1"
-    tslib "^1.9.0"
+    tslib "^1.9.2"
     vega-event-selector "^2.0.0"
-    vega-typings "^0.2.16"
+    vega-typings "^0.3.4"
     vega-util "^1.7.0"
     yargs "^11.0.0"
 
@@ -8409,7 +8402,7 @@ vega-loader@^3.0.0:
     topojson-client "^3.0.0"
     vega-util "^1.7.0"
 
-vega-parser@^3.0.2, vega-parser@^3.1.0:
+vega-parser@^3.1.0:
   version "3.1.0"
   resolved "https://registry.npmjs.org/vega-parser/-/vega-parser-3.1.0.tgz#8d83cfc613428885cbe9e1103674aeca2d0b2945"
   dependencies:
@@ -8427,28 +8420,28 @@ vega-parser@^3.0.2, vega-parser@^3.1.0:
     vega-util "^1.7.0"
 
 vega-projection@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.npmjs.org/vega-projection/-/vega-projection-1.1.0.tgz#46452fd12927201d1a7f7ef8f61d6e24253dbcd2"
+  version "1.2.0"
+  resolved "https://registry.npmjs.org/vega-projection/-/vega-projection-1.2.0.tgz#812c955251dab495fda83d9406ba72d9833a2014"
   dependencies:
-    d3-geo "1"
+    d3-geo "^1.10.0"
 
-vega-runtime@^3.0.0, vega-runtime@^3.0.1:
+vega-runtime@^3.0.1:
   version "3.0.1"
   resolved "https://registry.npmjs.org/vega-runtime/-/vega-runtime-3.0.1.tgz#d90ee0ed1c1e992df90399ebfc363583a9cc916d"
   dependencies:
     vega-dataflow "^4.0.1"
     vega-util "^1.7.0"
 
-vega-scale@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.npmjs.org/vega-scale/-/vega-scale-2.1.1.tgz#6ccdb796d9bcf86ceb677af5f9474a08cb01aaea"
+vega-scale@^2.1.1, vega-scale@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.npmjs.org/vega-scale/-/vega-scale-2.2.0.tgz#676c0aa2e744ee378bc5dc3fc1251d249f468d40"
   dependencies:
-    d3-array "1"
-    d3-interpolate "1"
-    d3-scale "2"
-    d3-scale-chromatic "^1.2"
-    d3-time "1"
-    vega-util "1"
+    d3-array "^1.2.1"
+    d3-interpolate "^1.2.0"
+    d3-scale "^2.0.0"
+    d3-scale-chromatic "^1.3.0"
+    d3-time "^1.0.8"
+    vega-util "^1.7.0"
 
 vega-scenegraph@^3.0.0, vega-scenegraph@^3.1.0:
   version "3.1.0"
@@ -8470,15 +8463,15 @@ vega-statistics@^1.2.1:
   dependencies:
     d3-array "1"
 
-vega-themes@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.npmjs.org/vega-themes/-/vega-themes-2.0.0.tgz#3f314ac9f9ffeeb1f61866897408416fa36ec607"
+vega-themes@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.npmjs.org/vega-themes/-/vega-themes-2.1.0.tgz#83879e95cdc14bd960620d60bdc4547ee690666a"
   dependencies:
-    vega-typings "^0.2.15"
+    vega-typings "^0.3.3"
 
-vega-tooltip@^0.10.1:
-  version "0.10.2"
-  resolved "https://registry.npmjs.org/vega-tooltip/-/vega-tooltip-0.10.2.tgz#832c73d5009603540bacbcc5584e097c03e1d593"
+vega-tooltip@^0.11.0:
+  version "0.11.0"
+  resolved "https://registry.npmjs.org/vega-tooltip/-/vega-tooltip-0.11.0.tgz#b7212911615b73c2359d41d53db25f45862a8623"
   dependencies:
     vega-util "^1.7.0"
 
@@ -8491,9 +8484,11 @@ vega-transforms@^2.0.0:
     vega-statistics "^1.2.1"
     vega-util "^1.7.0"
 
-vega-typings@*, vega-typings@^0.2.15, vega-typings@^0.2.16:
-  version "0.2.17"
-  resolved "https://registry.npmjs.org/vega-typings/-/vega-typings-0.2.17.tgz#9f26775173b3d234d68dfe4c482037743786b8d2"
+vega-typings@*, vega-typings@^0.3.3, vega-typings@^0.3.4:
+  version "0.3.6"
+  resolved "https://registry.npmjs.org/vega-typings/-/vega-typings-0.3.6.tgz#7d37e9259a978b622d8fb79d7a60537491099618"
+  dependencies:
+    vega-util "^1.7.0"
 
 vega-util@1, vega-util@^1.7.0:
   version "1.7.0"
@@ -8507,7 +8502,7 @@ vega-view-transforms@^2.0.0:
     vega-scenegraph "^3.0.0"
     vega-util "^1.7.0"
 
-vega-view@^3.0.0:
+vega-view@^3.2.0:
   version "3.2.0"
   resolved "https://registry.npmjs.org/vega-view/-/vega-view-3.2.0.tgz#b64ccc60ef21bc636dbcfd91e3be61f25991b5f2"
   dependencies:

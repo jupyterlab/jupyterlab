@@ -9,8 +9,7 @@ import {
   IEditorMimeTypeService
 } from '@jupyterlab/codeeditor';
 
-import * as CodeMirror
-  from 'codemirror';
+import CodeMirror from 'codemirror';
 
 import 'codemirror/mode/meta';
 import 'codemirror/addon/runmode/runmode';
