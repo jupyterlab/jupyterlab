@@ -26,19 +26,9 @@ module.exports = {
   module: {
     rules: [
       { test: /\.tsx?$/, use: [
-        {loader: 'cache-loader'},
-        {
-          loader: 'thread-loader',
-          options: {
-              workers: threadCpus,
-          },
-      },
-      {
-          loader: 'ts-loader',
-          options: {
-              happyPackMode: true
-          }
-      }
+        { loader: 'cache-loader' },
+        { loader: 'thread-loader', options: {workers: threadCpus} },
+        { loader: 'ts-loader', options: {happyPackMode: true} },
       ]},
       { test: /\.js$/,
         use: ['source-map-loader'],
