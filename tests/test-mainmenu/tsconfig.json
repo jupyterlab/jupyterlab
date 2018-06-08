@@ -2,7 +2,6 @@
   "extends": "../tsconfigtestbase",
   "compilerOptions": {
     "outDir": "./build"
-
   },
   "include": ["src/*"]
 }
