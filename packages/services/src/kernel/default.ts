@@ -623,7 +623,7 @@ class DefaultKernel implements Kernel.IKernel {
    * callback will be overidden.  A registered comm target handler will take
    * precedence over a comm which specifies a `target_module`.
    */
-  registerCommTarget(targetName: string, callback: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => void): IDisposable {
+  registerCommTarget(targetName: string, callback: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => Promise<void> | void): IDisposable {
     this._targetRegistry[targetName] = callback;
     return new DisposableDelegate(() => {
       if (!this.isDisposed) {

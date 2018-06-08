@@ -323,7 +323,7 @@ namespace Kernel {
      * callback will be overidden.  A registered comm target handler will take
      * precedence over a comm which specifies a `target_module`.
      */
-    registerCommTarget(targetName: string, callback: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => Promise<void>): IDisposable;
+    registerCommTarget(targetName: string, callback: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => Promise<void> | void): IDisposable;
 
     /**
      * Register an IOPub message hook.
