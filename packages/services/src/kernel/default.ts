@@ -77,7 +77,7 @@ class DefaultKernel implements Kernel.IKernel {
     this._clientId = options.clientId || uuid();
     this._username = options.username || '';
     this._futures = new Map<string, KernelFutureHandler>();
-    this._commPromises = new Map<string, Promise<Kernel.IComm>>();
+    this._comms = new Map<string, Kernel.IComm>();
     this._createSocket();
     Private.runningKernels.push(this);
   }
@@ -103,6 +103,10 @@ class DefaultKernel implements Kernel.IKernel {
 
   /**
    * A signal emitted for iopub kernel messages.
+   *
+   * #### Notes
+   * This signal is emitted after the iopub message is handled, which may
+   * asynchronously after it is received.
    */
   get iopubMessage(): ISignal<this, KernelMessage.IIOPubMessage> {
     return this._iopubMessage;
@@ -235,14 +239,8 @@ class DefaultKernel implements Kernel.IKernel {
     this._terminated.emit(void 0);
     this._status = 'dead';
     this._clearSocket();
-    this._futures.forEach((future, key) => {
-      future.dispose();
-    });
-    this._commPromises.forEach((promise, key) => {
-      promise.then(comm => {
-        comm.dispose();
-      });
-    });
+    this._futures.forEach(future => { future.dispose(); });
+    this._comms.forEach(comm => { comm.dispose(); });
     this._displayIdToParentIds.clear();
     this._msgIdToDisplayIds.clear();
     ArrayExt.removeFirstOf(Private.runningKernels, this);
@@ -627,24 +625,25 @@ class DefaultKernel implements Kernel.IKernel {
   /**
    * Connect to a comm, or create a new one.
    *
+   * TODO: should we change this to a synchronous function? There's nothing
+   * asynchronous about it now.
+   *
    * #### Notes
    * If a client-side comm already exists, it is returned.
    */
-  connectToComm(targetName: string, commId?: string): Promise<Kernel.IComm> {
+  async connectToComm(targetName: string, commId?: string): Promise<Kernel.IComm> {
     let id = commId || uuid();
-    if (this._commPromises.has(id)) {
-      return this._commPromises.get(id);
+    if (this._comms.has(id)) {
+      return this._comms.get(id);
     }
-    let promise = Promise.resolve(void 0).then(() => {
-      return new CommHandler(
-        targetName,
-        id,
-        this,
-        () => { this._unregisterComm(id); }
-      );
-    });
-    this._commPromises.set(id, promise);
-    return promise;
+    let comm = new CommHandler(
+      targetName,
+      id,
+      this,
+      () => { this._unregisterComm(id); }
+    );
+    this._comms.set(id, comm);
+    return comm;
   }
 
   /**
@@ -652,7 +651,7 @@ class DefaultKernel implements Kernel.IKernel {
    *
    * @returns Whether the message was handled.
    */
-  private _handleDisplayId(displayId: string, msg: KernelMessage.IMessage): boolean {
+  private async _handleDisplayId(displayId: string, msg: KernelMessage.IMessage): Promise<boolean> {
     let msgId = (msg.parent_header as KernelMessage.IHeader).msg_id;
     let parentIds = this._displayIdToParentIds.get(displayId);
     if (parentIds) {
@@ -668,12 +667,12 @@ class DefaultKernel implements Kernel.IKernel {
       };
       (updateMsg.header as any).msg_type = 'update_display_data';
 
-      parentIds.map((parentId) => {
+      await Promise.all(parentIds.map(async (parentId) => {
         let future = this._futures && this._futures.get(parentId);
         if (future) {
-          future.handleMsg(updateMsg);
+          await future.handleMsg(updateMsg);
         }
-      });
+      }));
     }
 
     // We're done here if it's update_display.
@@ -697,7 +696,7 @@ class DefaultKernel implements Kernel.IKernel {
     }
     this._msgIdToDisplayIds.set(msgId, displayIds);
 
-    // Let it propagate to the intended recipient.
+    // Let the message propagate to the intended recipient.
     return false;
   }
 
@@ -771,16 +770,10 @@ class DefaultKernel implements Kernel.IKernel {
   private _clearState(): void {
     this._isReady = false;
     this._pendingMessages = [];
-    this._futures.forEach((future, key) => {
-      future.dispose();
-    });
-    this._commPromises.forEach((promise, key) => {
-      promise.then(comm => {
-        comm.dispose();
-      });
-    });
+    this._futures.forEach(future => { future.dispose(); });
+    this._comms.forEach(comm => { comm.dispose(); });
     this._futures = new Map<string, KernelFutureHandler>();
-    this._commPromises = new Map<string, Promise<Kernel.IComm>>();
+    this._comms = new Map<string, Kernel.IComm>();
     this._displayIdToParentIds.clear();
     this._msgIdToDisplayIds.clear();
   }
@@ -788,94 +781,77 @@ class DefaultKernel implements Kernel.IKernel {
   /**
    * Handle a `comm_open` kernel message.
    */
-  private _handleCommOpen(msg: KernelMessage.ICommOpenMsg): void {
+  private async _handleCommOpen(msg: KernelMessage.ICommOpenMsg): Promise<void> {
     let content = msg.content;
     if (this.isDisposed) {
       return;
     }
-    let promise = Private.loadObject(content.target_name, content.target_module,
-      this._targetRegistry).then(target => {
-        let comm = new CommHandler(
-          content.target_name,
-          content.comm_id,
-          this,
-          () => { this._unregisterComm(content.comm_id); }
-        );
-        let response : any;
-        try {
-          response = target(comm, msg);
-        } catch (e) {
-          comm.close();
-          console.error('Exception opening new comm');
-          throw(e);
-        }
-        return Promise.resolve(response).then(() => {
-          if (this.isDisposed) {
-            return;
-          }
-          return comm;
-        });
-    });
-    this._commPromises.set(content.comm_id, promise);
+    let target = await Private.loadObject(content.target_name, content.target_module, this._targetRegistry);
+    let comm = new CommHandler(
+      content.target_name,
+      content.comm_id,
+      this,
+      () => { this._unregisterComm(content.comm_id); }
+    );
+    try {
+      await target(comm, msg);
+    } catch (e) {
+      // TODO: do we need to await this?
+      await comm.close();
+      console.error('Exception opening new comm');
+      throw(e);
+    }
+    // TODO: do we need to check if the comm is disposed?
+    this._comms.set(content.comm_id, comm);
   }
 
   /**
    * Handle 'comm_close' kernel message.
    */
-  private _handleCommClose(msg: KernelMessage.ICommCloseMsg): void {
+  private async _handleCommClose(msg: KernelMessage.ICommCloseMsg): Promise<void> {
     let content = msg.content;
-    let promise = this._commPromises.get(content.comm_id);
-    if (!promise) {
+    let comm = this._comms.get(content.comm_id);
+    if (!comm) {
       console.error('Comm not found for comm id ' + content.comm_id);
       return;
     }
-    promise.then((comm) => {
-      if (!comm) {
-        return;
+    this._unregisterComm(comm.commId);
+    try {
+      let onClose = comm.onClose;
+      if (onClose) {
+        await onClose(msg);
       }
-      this._unregisterComm(comm.commId);
-      try {
-        let onClose = comm.onClose;
-        if (onClose) {
-          onClose(msg);
-        }
-        (comm as CommHandler).dispose();
-      } catch (e) {
-        console.error('Exception closing comm: ', e, e.stack, msg);
-      }
-    });
+      (comm as CommHandler).dispose();
+    } catch (e) {
+      console.error('Exception closing comm: ', e, e.stack, msg);
+    }
   }
 
   /**
    * Handle a 'comm_msg' kernel message.
    */
-  private _handleCommMsg(msg: KernelMessage.ICommMsgMsg): void {
+  private async _handleCommMsg(msg: KernelMessage.ICommMsgMsg): Promise<void> {
     let content = msg.content;
-    let promise = this._commPromises.get(content.comm_id);
-    if (!promise) {
+    let comm = this._comms.get(content.comm_id);
+    if (!comm) {
       // We do have a registered comm for this comm id, ignore.
       return;
     }
-    promise.then((comm) => {
-      if (!comm) {
-        return;
+    try {
+      let onMsg = comm.onMsg;
+      if (onMsg) {
+        await onMsg(msg);
       }
-      try {
-        let onMsg = comm.onMsg;
-        if (onMsg) {
-          onMsg(msg);
-        }
-      } catch (e) {
-        console.error('Exception handling comm msg: ', e, e.stack, msg);
-      }
-    });
+    } catch (e) {
+      console.error('Exception handling comm msg: ', e, e.stack, msg);
+    }
   }
 
   /**
    * Unregister a comm instance.
    */
   private _unregisterComm(commId: string) {
-    this._commPromises.delete(commId);
+    this._comms.delete(commId);
   }
 
   /**
@@ -933,12 +909,16 @@ class DefaultKernel implements Kernel.IKernel {
 
   /**
    * Handle a websocket message, validating and routing appropriately.
+   *
+   * TODO: convert to asynchronous processing.
    */
   private _onWSMessage = (evt: MessageEvent) => {
     if (this._wsStopped) {
       // If the socket is being closed, ignore any messages
       return;
     }
+
+    // Notify immediately if there is an error with the message.
     let msg = serialize.deserialize(evt.data);
     try {
       validate.validateMessage(msg);
@@ -947,8 +927,21 @@ class DefaultKernel implements Kernel.IKernel {
       return;
     }
 
+    // Handle the message asynchronously, in the order received.
+    this._msgChain = this._msgChain.then(() => {
+      return this._handleMessage(msg);
+    });
+
+    // TODO: should this emit happen asynchronously? Should we have two events,
+    // one for a message received here, and then another after it is handled
+    // asynchronously?
+    this._anyMessage.emit({msg, direction: 'recv'});
+  }
+
+  private async _handleMessage(msg: KernelMessage.IMessage): Promise<void> {
     let handled = false;
 
+    // Check to see if we have a display_id we need to reroute.
     if (msg.parent_header && msg.channel === 'iopub') {
       switch (msg.header.msg_type) {
       case 'display_data':
@@ -958,7 +951,7 @@ class DefaultKernel implements Kernel.IKernel {
         let transient = (msg.content.transient || {}) as JSONObject;
         let displayId = transient['display_id'] as string;
         if (displayId) {
-          handled = this._handleDisplayId(displayId, msg);
+          handled = await this._handleDisplayId(displayId, msg);
         }
         break;
       default:
@@ -970,7 +963,7 @@ class DefaultKernel implements Kernel.IKernel {
       let parentHeader = msg.parent_header as KernelMessage.IHeader;
       let future = this._futures && this._futures.get(parentHeader.msg_id);
       if (future) {
-        future.handleMsg(msg);
+        await future.handleMsg(msg);
       } else {
         // If the message was sent by us and was not iopub, it is orphaned.
         let owned = parentHeader.session === this.clientId;
@@ -982,23 +975,23 @@ class DefaultKernel implements Kernel.IKernel {
     if (msg.channel === 'iopub') {
       switch (msg.header.msg_type) {
       case 'status':
+        // Updating the status is synchronous, and we call no user code
         this._updateStatus((msg as KernelMessage.IStatusMsg).content.execution_state);
         break;
       case 'comm_open':
-        this._handleCommOpen(msg as KernelMessage.ICommOpenMsg);
+        await this._handleCommOpen(msg as KernelMessage.ICommOpenMsg);
         break;
       case 'comm_msg':
-        this._handleCommMsg(msg as KernelMessage.ICommMsgMsg);
+        await this._handleCommMsg(msg as KernelMessage.ICommMsgMsg);
         break;
       case 'comm_close':
-        this._handleCommClose(msg as KernelMessage.ICommCloseMsg);
+        await this._handleCommClose(msg as KernelMessage.ICommCloseMsg);
         break;
       default:
         break;
       }
       this._iopubMessage.emit(msg as KernelMessage.IIOPubMessage);
     }
-    this._anyMessage.emit({msg, direction: 'recv'});
   }
 
   /**
@@ -1037,7 +1030,7 @@ class DefaultKernel implements Kernel.IKernel {
   private _reconnectAttempt = 0;
   private _isReady = false;
   private _futures: Map<string, KernelFutureHandler>;
-  private _commPromises: Map<string, Promise<Kernel.IComm | undefined>>;
+  private _comms: Map<string, Kernel.IComm>;
   private _targetRegistry: { [key: string]: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => void; } = Object.create(null);
   private _info: KernelMessage.IInfoReply | null = null;
   private _pendingMessages: KernelMessage.IMessage[] = [];
@@ -1050,6 +1043,7 @@ class DefaultKernel implements Kernel.IKernel {
   private _displayIdToParentIds = new Map<string, string[]>();
   private _msgIdToDisplayIds = new Map<string, string[]>();
   private _terminated = new Signal<this, void>(this);
+  private _msgChain = Promise.resolve();
   private _noOp = () => { /* no-op */};
 }
 

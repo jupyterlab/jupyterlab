@@ -56,7 +56,7 @@ class CommHandler extends DisposableDelegate implements Kernel.IComm {
    *
    * **See also:** [[ICommClose]], [[close]]
    */
-  get onClose(): (msg: KernelMessage.ICommCloseMsg) => void {
+  get onClose(): (msg: KernelMessage.ICommCloseMsg) => Promise<void> | void {
     return this._onClose;
   }
 
@@ -69,21 +69,21 @@ class CommHandler extends DisposableDelegate implements Kernel.IComm {
    *
    * **See also:** [[close]]
    */
-  set onClose(cb: (msg: KernelMessage.ICommCloseMsg) => void) {
+  set onClose(cb: (msg: KernelMessage.ICommCloseMsg) => Promise<void> | void) {
     this._onClose = cb;
   }
 
   /**
    * Get the callback for a comm message received event.
    */
-  get onMsg(): (msg: KernelMessage.ICommMsgMsg) => void {
+  get onMsg(): (msg: KernelMessage.ICommMsgMsg) => Promise<void> | void {
     return this._onMsg;
   }
 
   /**
    * Set the callback for a comm message received event.
    */
-  set onMsg(cb: (msg: KernelMessage.ICommMsgMsg) => void) {
+  set onMsg(cb: (msg: KernelMessage.ICommMsgMsg) => Promise<void> | void) {
     this._onMsg = cb;
   }
 
@@ -180,6 +180,6 @@ class CommHandler extends DisposableDelegate implements Kernel.IComm {
   private _target = '';
   private _id = '';
   private _kernel: Kernel.IKernel;
-  private _onClose: (msg: KernelMessage.ICommCloseMsg) => void;
-  private _onMsg: (msg: KernelMessage.ICommMsgMsg) => void;
+  private _onClose: (msg: KernelMessage.ICommCloseMsg) => Promise<void> | void;
+  private _onMsg: (msg: KernelMessage.ICommMsgMsg) => Promise<void> | void;
 }

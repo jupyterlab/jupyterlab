@@ -17,7 +17,6 @@ import {
   KernelMessage
 } from './messages';
 
-
 /**
  * Implementation of a kernel future.
  */
@@ -53,42 +52,42 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
   /**
    * Get the reply handler.
    */
-  get onReply(): (msg: KernelMessage.IShellMessage) => void {
+  get onReply(): (msg: KernelMessage.IShellMessage) => Promise<void> | void {
     return this._reply;
   }
 
   /**
    * Set the reply handler.
    */
-  set onReply(cb: (msg: KernelMessage.IShellMessage) => void) {
+  set onReply(cb: (msg: KernelMessage.IShellMessage) => Promise<void> | void) {
     this._reply = cb;
   }
 
   /**
    * Get the iopub handler.
    */
-  get onIOPub(): (msg: KernelMessage.IIOPubMessage) => void {
+  get onIOPub(): (msg: KernelMessage.IIOPubMessage) => Promise<void> | void {
     return this._iopub;
   }
 
   /**
    * Set the iopub handler.
    */
-  set onIOPub(cb: (msg: KernelMessage.IIOPubMessage) => void) {
+  set onIOPub(cb: (msg: KernelMessage.IIOPubMessage) => Promise<void> | void) {
     this._iopub = cb;
   }
 
   /**
    * Get the stdin handler.
    */
-  get onStdin(): (msg: KernelMessage.IStdinMessage) => void {
+  get onStdin(): (msg: KernelMessage.IStdinMessage) => Promise<void> | void {
     return this._stdin;
   }
 
   /**
    * Set the stdin handler.
    */
-  set onStdin(cb: (msg: KernelMessage.IStdinMessage) => void) {
+  set onStdin(cb: (msg: KernelMessage.IStdinMessage) => Promise<void> | void) {
     this._stdin = cb;
   }
 
@@ -105,7 +104,7 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
    * If a hook is registered during the hook processing, it won't run until the next message.
    * If a hook is removed during the hook processing, it will be deactivated immediately.
    */
-  registerMessageHook(hook: (msg: KernelMessage.IIOPubMessage) => boolean): void {
+  registerMessageHook(hook: (msg: KernelMessage.IIOPubMessage) => Promise<boolean> | boolean): void {
     this._hooks.add(hook);
   }
 
@@ -117,7 +116,7 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
    * #### Notes
    * If a hook is removed during the hook processing, it will be deactivated immediately.
    */
-  removeMessageHook(hook: (msg: KernelMessage.IIOPubMessage) => boolean): void {
+  removeMessageHook(hook: (msg: KernelMessage.IIOPubMessage) => Promise<boolean> | boolean): void {
     if (this.isDisposed) {
       return;
     }
@@ -148,25 +147,25 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
   /**
    * Handle an incoming kernel message.
    */
-  handleMsg(msg: KernelMessage.IMessage): void {
+  async handleMsg(msg: KernelMessage.IMessage): Promise<void> {
     switch (msg.channel) {
     case 'shell':
-      this._handleReply(msg as KernelMessage.IShellMessage);
+      await this._handleReply(msg as KernelMessage.IShellMessage);
       break;
     case 'stdin':
-      this._handleStdin(msg as KernelMessage.IStdinMessage);
+      await this._handleStdin(msg as KernelMessage.IStdinMessage);
       break;
     case 'iopub':
-      this._handleIOPub(msg as KernelMessage.IIOPubMessage);
+      await this._handleIOPub(msg as KernelMessage.IIOPubMessage);
       break;
     default:
       break;
     }
   }
 
-  private _handleReply(msg: KernelMessage.IShellMessage): void {
+  private async _handleReply(msg: KernelMessage.IShellMessage): Promise<void> {
     let reply = this._reply;
-    if (reply) { reply(msg); }
+    if (reply) { await reply(msg); }
     this._replyMsg = msg;
     this._setFlag(Private.KernelFutureFlag.GotReply);
     if (this._testFlag(Private.KernelFutureFlag.GotIdle)) {
@@ -174,15 +173,15 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
     }
   }
 
-  private _handleStdin(msg: KernelMessage.IStdinMessage): void {
+  private async _handleStdin(msg: KernelMessage.IStdinMessage): Promise<void> {
     let stdin = this._stdin;
-    if (stdin) { stdin(msg); }
+    if (stdin) { await stdin(msg); }
   }
 
-  private _handleIOPub(msg: KernelMessage.IIOPubMessage): void {
-    let process = this._hooks.process(msg);
+  private async _handleIOPub(msg: KernelMessage.IIOPubMessage): Promise<void> {
+    let process = await this._hooks.process(msg);
     let iopub = this._iopub;
-    if (process && iopub) { iopub(msg); }
+    if (process && iopub) { await iopub(msg); }
     if (KernelMessage.isStatusMsg(msg) &&
         msg.content.execution_state === 'idle') {
       this._setFlag(Private.KernelFutureFlag.GotIdle);
@@ -221,9 +220,9 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
 
   private _msg: KernelMessage.IShellMessage;
   private _status = 0;
-  private _stdin: (msg: KernelMessage.IStdinMessage) => void = Private.noOp;
-  private _iopub: (msg: KernelMessage.IIOPubMessage) => void = Private.noOp;
-  private _reply: (msg: KernelMessage.IShellMessage) => void = Private.noOp;
+  private _stdin: (msg: KernelMessage.IStdinMessage) => Promise<void> | void = Private.noOp;
+  private _iopub: (msg: KernelMessage.IIOPubMessage) => Promise<void> | void = Private.noOp;
+  private _reply: (msg: KernelMessage.IShellMessage) => Promise<void> | void = Private.noOp;
   private _done = new PromiseDelegate<KernelMessage.IShellMessage>();
   private _replyMsg: KernelMessage.IShellMessage;
   private _hooks = new Private.HookList<KernelMessage.IIOPubMessage>();
@@ -238,11 +237,6 @@ namespace Private {
   export
   const noOp = () => { /* no-op */ };
 
-  /**
-   * A polyfill for a function to run code outside of the current execution context.
-   */
-  let defer = typeof requestAnimationFrame === 'function' ? requestAnimationFrame : setImmediate;
-
   export
   class HookList<T> {
     /**
@@ -250,7 +244,7 @@ namespace Private {
      *
      * @param hook - The callback to register.
      */
-    add(hook: (msg: T) => boolean): void {
+    add(hook: (msg: T) => boolean | Promise<boolean>): void {
       this.remove(hook);
       this._hooks.push(hook);
     }
@@ -260,7 +254,7 @@ namespace Private {
      *
      * @param hook - The callback to remove.
      */
-    remove(hook: (msg: T) => boolean): void {
+    remove(hook: (msg: T) => boolean | Promise<boolean>): void {
       let index = this._hooks.indexOf(hook);
       if (index >= 0) {
         this._hooks[index] = null;
@@ -272,28 +266,42 @@ namespace Private {
      * Process a message through the hooks.
      *
      * #### Notes
-     * The most recently registered hook is run first.
-     * If the hook returns false, any later hooks will not run.
-     * If a hook throws an error, the error is logged to the console and the next hook is run.
-     * If a hook is registered during the hook processing, it won't run until the next message.
-     * If a hook is removed during the hook processing, it will be deactivated immediately.
+     * The hooks can be asynchronous, returning a promise, and hook processing
+     * pauses until the promise resolves. The most recently registered hook is
+     * run first. If the hook returns false, any later hooks will not run. If a
+     * hook throws an error, the error is logged to the console and the next
+     * hook is run. If a hook is registered during the hook processing, it won't
+     * run until the next message. If a hook is removed during the hook
+     * processing, it will be deactivated immediately.
      */
-    process(msg: T): boolean {
+    async process(msg: T): Promise<boolean> {
+      // Wait until we can start a new process run.
+      await this._processing;
+
+      // Reserve a process run for ourselves.
+      let processing = new PromiseDelegate<void>();
+      this._processing = processing.promise;
+
       let continueHandling: boolean;
-      // most recently-added hook is called first
+
+      // Call the end hook (most recently-added) first. Starting at the end also
+      // guarantees that hooks added during the processing will not be run in
+      // this invocation.
       for (let i = this._hooks.length - 1; i >= 0; i--) {
         let hook = this._hooks[i];
         if (hook === null) { continue; }
         try {
-          continueHandling = hook(msg);
+          continueHandling = await hook(msg);
         } catch (err) {
           continueHandling = true;
           console.error(err);
         }
         if (continueHandling === false) {
+          processing.resolve(undefined);
           return false;
         }
       }
+      processing.resolve(undefined);
       return true;
     }
 
@@ -301,10 +309,13 @@ namespace Private {
      * Schedule a cleanup of the list, removing any hooks that have been nulled out.
      */
     private _scheduleCompact(): void {
-      if (!this._cleanupScheduled) {
-        this._cleanupScheduled = true;
-        defer(() => {
-          this._cleanupScheduled = false;
+      if (!this._compactScheduled) {
+        this._compactScheduled = true;
+
+        // Make sure we compact the list between processing phases. We may want
+        // to rate-limit this compaction with a requestAnimationFrame as well.
+        this._processing = this._processing.then(() => {
+          this._compactScheduled = false;
           this._compact();
         });
       }
@@ -326,8 +337,9 @@ namespace Private {
       this._hooks.length -= numNulls;
     }
 
-    private _hooks: (((msg: T) => boolean) | null)[] = [];
-    private _cleanupScheduled: boolean;
+    private _hooks: (((msg: T) => boolean | Promise<boolean>) | null)[] = [];
+    private _compactScheduled: boolean;
+    private _processing: Promise<void>;
   }
 
   /**
