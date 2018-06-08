@@ -1,8 +1,9 @@
 {
-  "extends": "../../tsconfigbase",
+  "extends": "../tsconfigtestbase",
   "compilerOptions": {
     "jsx": "react",
     "outDir": "./build"
+
   },
   "include": ["src/*"]
 }
