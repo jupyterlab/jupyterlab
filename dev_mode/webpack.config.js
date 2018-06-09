@@ -122,7 +122,7 @@ module.exports = {
       { test: /\.txt$/, use: 'raw-loader' },
       { test: /\.js$/, use: ['source-map-loader'], enforce: 'pre',
         // eslint-disable-next-line no-undef
-        exclude: path.join(process.cwd(), 'node_modules')
+        exclude: /node_modules/
       },
       { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
       { test: /\.js.map$/, use: 'file-loader' },

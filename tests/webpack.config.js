@@ -34,7 +34,7 @@ module.exports = {
         use: ['source-map-loader'],
         enforce: 'pre',
         // eslint-disable-next-line no-undef
-        exclude: path.join(process.cwd(), 'node_modules')
+        exclude: /node_modules/
       },
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },
       { test: /\.csv$/, use: 'raw-loader' },
