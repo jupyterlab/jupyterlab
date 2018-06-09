@@ -5,6 +5,8 @@
     "noEmitOnError": true,
     "noUnusedLocals": true,
     "esModuleInterop": true,
+    "preserveWatchOutput": true,
+    "listEmittedFiles": true,
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "es2015",
