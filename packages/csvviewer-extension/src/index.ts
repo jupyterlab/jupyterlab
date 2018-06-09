@@ -66,7 +66,7 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer): void {
     tracker.add(widget);
     // Notify the instance tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => { tracker.save(widget); });
-
+    console.log(3);
     if (ft) {
       widget.title.iconClass = ft.iconClass;
       widget.title.iconLabel = ft.iconLabel;

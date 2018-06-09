@@ -34,7 +34,7 @@
     "clean": "rimraf lib",
     "prepublishOnly": "npm run build",
     "watch": "run-p watch:**",
-    "watch:typescript": "tsc -w",
+    "watch:typescript": "tsc -w --listEmittedFiles",
     "watch:webpack": "webpack --watch"
   },
   "dependencies": {

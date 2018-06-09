@@ -26,7 +26,7 @@
     "build": "tsc",
     "clean": "rimraf lib",
     "prepublishOnly": "npm run build",
-    "watch": "tsc -w"
+    "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
     "@phosphor/algorithm": "^1.1.2",
