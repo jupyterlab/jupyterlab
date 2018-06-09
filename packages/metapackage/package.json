@@ -28,7 +28,7 @@
     "clean": "rimraf lib",
     "docs": "typedoc --mode modules --module commonjs --excludeNotExported --target es2015 --moduleResolution node --name JupyterLab --out ../../docs/api --skipLibCheck .",
     "prepublishOnly": "npm run build",
-    "watch": "tsc -w",
+    "watch": "tsc -w --listEmittedFiles",
     "watch:files": "node watch-files.js"
   },
   "dependencies": {

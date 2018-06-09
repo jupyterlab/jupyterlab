@@ -39,9 +39,9 @@
     "test:coverage": "python test/run_test.py --TestApp.coverage==True",
     "test:debug": "python test/run_test.py --debug",
     "test:devtool": "python test/run_test.py --TestApp.devtool==True",
-    "watch": "tsc -w",
+    "watch": "tsc -w --listEmittedFiles",
     "watch:all": "npm-run-all -p watch watch:test",
-    "watch:test": "tsc -w --project test"
+    "watch:test": "tsc -w --listEmittedFiles --project test"
   },
   "dependencies": {
     "@jupyterlab/coreutils": "^1.1.2",

@@ -12,7 +12,7 @@
     "test:firefox": "python run-test.py --browsers=Firefox karma.conf.js",
     "test:ie": "python run-test.py  --browsers=IE karma.conf.js",
     "watch": "python run-test.py --singleRun=false",
-    "watch:src": "tsc -w"
+    "watch:src": "tsc -w --listEmittedFiles"
   },
   "devDependencies": {
     "karma": "~1.7.1",
