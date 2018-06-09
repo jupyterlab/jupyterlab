@@ -161,8 +161,8 @@ def watch_packages(logger=None):
     logger = logger or logging.getLogger('jupyterlab')
     ts_dir = osp.realpath(osp.join(HERE, '..', 'packages', 'metapackage'))
 
-    # Run typescript watch and wait for compilation.
-    ts_regex = r'.* Compilation complete\. Watching for file changes\.'
+    # Run typescript watch and wait for the string indicating it is done.
+    ts_regex = r'.* Found 0 errors\. Watching for file changes\.'
     ts_proc = WatchHelper(['node', YARN_PATH, 'run', 'watch'],
         cwd=ts_dir, logger=logger, startup_regex=ts_regex)
 
