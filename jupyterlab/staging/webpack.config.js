@@ -102,6 +102,7 @@ JupyterLabPlugin.prototype._first = true;
 
 
 module.exports = {
+  mode: 'development',
   entry: {
     main: ['whatwg-fetch', path.resolve(buildDir, 'index.out.js')],
     vendor: jlab.vendor
@@ -170,12 +171,6 @@ module.exports = {
       title: jlab.name || 'JupyterLab'
     }),
     new webpack.HashedModuleIdsPlugin(),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'vendor'
-    }),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'manifest'
-    }),
     new JupyterLabPlugin({})
   ]
 };
