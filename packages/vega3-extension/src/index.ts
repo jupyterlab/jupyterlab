@@ -15,7 +15,11 @@ import {
   IRenderMime
 } from '@jupyterlab/rendermime-interfaces';
 
-import vegaEmbed, { Mode, vega, EmbedOptions } from 'vega-embed';
+// import vegaEmbed, { Mode, vega, EmbedOptions } from 'vega-embed';
+/**
+ * An import for vega types
+ */
+import * as VegaModuleType from 'vega-embed';
 
 import '../style/index.css';
 
@@ -74,32 +78,34 @@ class RenderedVega3 extends Widget implements IRenderMime.IRenderer {
    * Render Vega/Vega-Lite into this widget's node.
    */
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-    const data = model.data[this._mimeType] as JSONObject;
-    const metadata = model.metadata[this._mimeType] as { embed_options?: EmbedOptions };
-    const embedOptions = metadata && metadata.embed_options ? metadata.embed_options : {};
-    const mode: Mode = this._mimeType === VEGA_MIME_TYPE ? 'vega' : 'vega-lite';
-    return this._resolver.resolveUrl('').then((path: string) => {
-      return this._resolver.getDownloadUrl(path).then(baseURL => {
-        const loader = vega.loader({ baseURL });
-        const options: EmbedOptions = {
-          actions: true,
-          defaultStyle: true,
-          ...embedOptions,
-          mode,
-          loader
-        };
-        const el = document.createElement('div');
-        this.node.innerHTML = '';  // clear the output before attaching a chart
-        this.node.appendChild(el);
-        return vegaEmbed(el, data, options).then(result => {
-          // Add png representation of vega chart to output
-          if (!model.data['image/png']) {
-            return result.view.toImageURL('png').then(imageData => {
-              const data = { ...model.data, 'image/png': imageData.split(',')[1] };
-              model.setData({ data });
-            });
-          }
-          return void 0;
+    return import(/* webpackChunkName: "vega" */ 'vega-embed').then((vega: typeof VegaModuleType) => {
+      const data = model.data[this._mimeType] as JSONObject;
+      const metadata = model.metadata[this._mimeType] as { embed_options?: VegaModuleType.EmbedOptions };
+      const embedOptions = metadata && metadata.embed_options ? metadata.embed_options : {};
+      const mode: VegaModuleType.Mode = this._mimeType === VEGA_MIME_TYPE ? 'vega' : 'vega-lite';
+      return this._resolver.resolveUrl('').then((path: string) => {
+        return this._resolver.getDownloadUrl(path).then(baseURL => {
+          const loader = vega.vega.loader({ baseURL });
+          const options: VegaModuleType.EmbedOptions = {
+            actions: true,
+            defaultStyle: true,
+            ...embedOptions,
+            mode,
+            loader
+          };
+          const el = document.createElement('div');
+          this.node.innerHTML = '';  // clear the output before attaching a chart
+          this.node.appendChild(el);
+          return vega.default(el, data, options).then(result => {
+            // Add png representation of vega chart to output
+            if (!model.data['image/png']) {
+              return result.view.toImageURL('png').then(imageData => {
+                const data = { ...model.data, 'image/png': imageData.split(',')[1] };
+                model.setData({ data });
+              });
+            }
+            return void 0;
+          });
         });
       });
     });
