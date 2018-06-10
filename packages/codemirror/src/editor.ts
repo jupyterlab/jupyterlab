@@ -1096,6 +1096,7 @@ namespace Private {
       fontFamily,
       fontSize,
       insertSpaces,
+      lineHeight,
       lineWrap,
       tabSize,
       readOnly,
@@ -1110,9 +1111,18 @@ namespace Private {
       ...otherOptions
     };
     return CodeMirror(el => {
-      el.style.fontFamily = fontFamily;
-      el.style.fontSize = fontSize + 'px';
-      el.classList.toggle(READ_ONLY_CLASS, readOnly);
+      if (fontFamily) {
+        el.style.fontFamily = fontFamily;
+      }
+      if (fontSize) {
+        el.style.fontSize = fontSize + 'px';
+      }
+      if (lineHeight) {
+        el.style.lineHeight = lineHeight.toString();
+      }
+      if (readOnly) {
+        el.classList.add(READ_ONLY_CLASS);
+      }
       host.appendChild(el);
     }, bareConfig);
   }
@@ -1205,7 +1215,10 @@ namespace Private {
       el.style.fontFamily = value;
       break;
     case 'fontSize':
-      el.style.fontSize = value + 'px';
+      el.style.fontSize = value ? value + 'px' : null;
+      break;
+    case 'lineHeight':
+      el.style.lineHeight = value ? value.toString() : null;
       break;
     default:
       editor.setOption(option, value);

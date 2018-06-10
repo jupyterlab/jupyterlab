@@ -562,14 +562,19 @@ namespace CodeEditor {
   export
   interface IConfig {
     /**
-     * The family of the font used in text editors.
+     * User preferred font family for text editors.
      */
-    fontFamily: string;
+    fontFamily: string | null;
 
     /**
-     * The size in pixel of the font used in text editors.
+     * User preferred size in pixel of the font used in text editors.
      */
-    fontSize: number;
+    fontSize: number | null;
+
+    /**
+     * User preferred text line height, as a multiplier of font size.
+     */
+    lineHeight: number | null;
 
     /**
      * Whether line numbers should be displayed.
@@ -612,8 +617,9 @@ namespace CodeEditor {
    */
   export
   let defaultConfig: IConfig = {
-    fontFamily: '\'Source Code Pro\', monospace',
-    fontSize: 13,
+    fontFamily: null,
+    fontSize: null,
+    lineHeight: null,
     lineNumbers: false,
     lineWrap: true,
     readOnly: false,

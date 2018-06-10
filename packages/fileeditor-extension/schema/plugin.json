@@ -10,10 +10,15 @@
           "type": "boolean"
         },
         "fontFamily": {
-          "type": "string"
+          "type": ["string", "null"]
         },
         "fontSize": {
-          "type": "number"
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "maximum": 100
+        },
+        "lineHeight": {
+          "type": ["number", "null"]
         },
         "lineNumbers": {
           "type": "boolean"
@@ -45,8 +50,9 @@
       "$ref": "#/definitions/editorConfig",
       "default": {
         "autoClosingBrackets": true,
-        "fontFamily": "'Source Code Pro', monospace",
-        "fontSize": 13,
+        "fontFamily": null,
+        "fontSize": null,
+        "lineHeight": null,
         "lineNumbers": true,
         "lineWrap": true,
         "matchBrackets": true,
