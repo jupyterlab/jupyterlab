@@ -1,4 +1,3 @@
-var path = require('path');
 var ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 var cpus = require('os').cpus().length;
