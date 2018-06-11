@@ -82,11 +82,9 @@ function maybeSync(localPath, name, rest) {
 function JupyterLabPlugin() { }
 
 JupyterLabPlugin.prototype.apply = function(compiler) {
-
-  compiler.plugin('after-emit', function(compilation, callback) {
+  compiler.hooks.afterEmit.tap('JupyterLabPlugin', function() {
     var staticDir = jlab.staticDir;
     if (!staticDir) {
-      callback();
       return;
     }
     // Ensure a clean static directory on the first emit.
@@ -95,7 +93,6 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
     }
     this._first = false;
     fs.copySync(buildDir, staticDir);
-    callback();
   }.bind(this));
 };
 
