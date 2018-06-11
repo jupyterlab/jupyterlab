@@ -14,6 +14,6 @@
   "devDependencies": {
     "rimraf": "~2.6.2",
     "webpack": "~4.12.0",
-    "webpack-command": "^0.2.1"
+    "webpack-cli": "^3.0.3"
   }
 }
