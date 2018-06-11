@@ -8,6 +8,7 @@ var fs = require('fs-extra');
 var Handlebars = require('handlebars');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var webpack = require('webpack');
+var DuplicatePackageCheckerPlugin = require("duplicate-package-checker-webpack-plugin");
 
 var Build = require('@jupyterlab/buildutils').Build;
 var package_data = require('./package.json');
@@ -177,6 +178,9 @@ module.exports = {
   bail: true,
   devtool: 'source-map',
   plugins: [
+    new DuplicatePackageCheckerPlugin({
+      verbose: true
+    }),
     new HtmlWebpackPlugin({
       template: path.join('templates', 'template.html'),
       title: jlab.name || 'JupyterLab'
