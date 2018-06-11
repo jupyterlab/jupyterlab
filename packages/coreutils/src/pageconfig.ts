@@ -140,8 +140,9 @@ namespace PageConfig {
     const base = getBaseUrl();
     const page = getOption('pageUrl');
     const workspace = getOption('workspace');
+    const includeWorkspace = !!options.workspace;
 
-    if (workspace) {
+    if (includeWorkspace && workspace) {
       return URLExt.join(base, page, 'workspaces', workspace, 'tree');
     } else {
       return URLExt.join(base, page, 'tree');
