@@ -1,4 +1,4 @@
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
 
 module.exports = {
@@ -14,7 +14,7 @@ module.exports = {
   },
   module: {
     rules: [
-      { test: /\.css$/, use: [MiniCssExtractPlugin.loader, "css-loader"]},
+      { test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader']},
       { test: /\.svg/, use: [
         { loader: 'svg-url-loader', options: {} },
         { loader: 'svgo-loader', options: {plugins: []} }
@@ -28,8 +28,8 @@ module.exports = {
     new MiniCssExtractPlugin({
       // Options similar to the same options in webpackOptions.output
       // both options are optional
-      filename: "[name].css",
-      chunkFilename: "[id].css"
+      filename: '[name].css',
+      chunkFilename: '[id].css'
     })
   ]
 };
