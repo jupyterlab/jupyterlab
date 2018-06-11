@@ -179,7 +179,11 @@ module.exports = {
   devtool: 'source-map',
   plugins: [
     new DuplicatePackageCheckerPlugin({
-      verbose: true
+      verbose: true,
+      exclude(instance) {
+        // ignore known duplicates
+        return ['domelementtype', 'hash-base', 'inherits'].includes(instance.name);
+      }
     }),
     new HtmlWebpackPlugin({
       template: path.join('templates', 'template.html'),
