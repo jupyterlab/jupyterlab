@@ -1,4 +1,4 @@
-var UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+var UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 var merge = require('webpack-merge');
 var common = require('./webpack.config');
 
