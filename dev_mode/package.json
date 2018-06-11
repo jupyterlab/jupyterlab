@@ -3,8 +3,8 @@
   "version": "0.16.2",
   "private": true,
   "scripts": {
-    "build": "webpack",
-    "build:prod": "webpack --config webpack.prod.config.js",
+    "build": "webpack --profile --json > stats.json",
+    "build:prod": "webpack --profile --config webpack.prod.config.js --json > stats.json",
     "clean": "rimraf build",
     "prepublishOnly": "npm run build",
     "watch": "webpack --watch"
