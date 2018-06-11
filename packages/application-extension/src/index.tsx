@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, showDialog
+  Dialog, ICommandPalette, IWindowResolver, showDialog, showErrorMessage
 } from '@jupyterlab/apputils';
 
 import {
@@ -63,8 +63,15 @@ namespace Patterns {
  */
 const main: JupyterLabPlugin<void> = {
   id: '@jupyterlab/application-extension:main',
-  requires: [ICommandPalette, IRouter],
-  activate: (app: JupyterLab, palette: ICommandPalette, router: IRouter) => {
+  requires: [ICommandPalette, IRouter, IWindowResolver],
+  activate: (app: JupyterLab, palette: ICommandPalette, router: IRouter, resolver: IWindowResolver) => {
+    // Requiring the window resolver guarantees that the application extension
+    // only loads if there is a viable window name. Otherwise, the application
+    // will short-circuit and ask the user to navigate away.
+    const workspace = resolver.name ? `"${resolver.name}"` : '[default: /lab]';
+
+    console.log(`Starting ${main.id} in workspace ${workspace}`);
+
     // If there were errors registering plugins, tell the user.
     if (app.registerPluginErrors.length !== 0) {
       const body = (
@@ -72,13 +79,8 @@ const main: JupyterLabPlugin<void> = {
           {app.registerPluginErrors.map(e => e.message).join('\n')}
         </pre>
       );
-      let options = {
-        title: 'Error Registering Plugins',
-        body,
-        buttons: [Dialog.okButton()],
-        okText: 'DISMISS'
-      };
-      showDialog(options).then(() => { /* no-op */ });
+
+      showErrorMessage('Error Registering Plugins', { message: body });
     }
 
     addCommands(app, palette);
@@ -89,9 +91,8 @@ const main: JupyterLabPlugin<void> = {
       app.commands.notifyCommandChanged();
     });
 
-    let builder = app.serviceManager.builder;
-
-    let doBuild = () => {
+    const builder = app.serviceManager.builder;
+    const build = () => {
       return builder.build().then(() => {
         return showDialog({
           title: 'Build Complete',
@@ -104,37 +105,33 @@ const main: JupyterLabPlugin<void> = {
           router.reload();
         }
       }).catch(err => {
-        showDialog({
-          title: 'Build Failed',
-          body: (<pre>{err.message}</pre>)
-        });
+        showDialog({ title: 'Build Failed', body: (<pre>{err.message}</pre>) });
       });
     };
 
     if (builder.isAvailable && builder.shouldCheck) {
       builder.getStatus().then(response => {
         if (response.status === 'building') {
-          return doBuild();
+          return build();
         }
+
         if (response.status !== 'needed') {
           return;
         }
-        let body = (<div>
+
+        const body = (<div>
           <p>
             JupyterLab build is suggested:
             <br />
             <pre>{response.message}</pre>
           </p>
         </div>);
+
         showDialog({
           title: 'Build Recommended',
           body,
           buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'BUILD' })]
-        }).then(result => {
-          if (result.button.accept) {
-            return doBuild();
-          }
-        });
+        }).then(result => result.button.accept ? build() : undefined);
       });
     }
 
