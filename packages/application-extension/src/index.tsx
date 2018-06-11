@@ -70,7 +70,7 @@ const main: JupyterLabPlugin<void> = {
     // will short-circuit and ask the user to navigate away.
     const workspace = resolver.name ? `"${resolver.name}"` : '[default: /lab]';
 
-    console.log(`Starting ${main.id} in workspace ${workspace}`);
+    console.log(`Starting application in workspace: ${workspace}`);
 
     // If there were errors registering plugins, tell the user.
     if (app.registerPluginErrors.length !== 0) {
@@ -105,7 +105,7 @@ const main: JupyterLabPlugin<void> = {
           router.reload();
         }
       }).catch(err => {
-        showDialog({ title: 'Build Failed', body: (<pre>{err.message}</pre>) });
+        showErrorMessage('Build Failed', { message: <pre>{err.message}</pre> });
       });
     };
 
@@ -242,6 +242,9 @@ const notfound: JupyterLabPlugin<void> = {
   activate: (app: JupyterLab, router: IRouter) => {
     const bad = PageConfig.getOption('notFoundUrl');
     const base = router.base;
+    const message = `
+      The path: ${bad} was not found. JupyterLab redirected to: ${base}
+    `;
 
     if (!bad) {
       return;
@@ -251,11 +254,7 @@ const notfound: JupyterLabPlugin<void> = {
     // URL change to the browser history.
     router.navigate('', { silent: true });
 
-    showDialog({
-      title: 'Path Not Found',
-      body: `The path: ${bad} was not found. JupyterLab redirected to: ${base}`,
-      buttons: [Dialog.okButton()]
-    });
+    showErrorMessage('Path Not Found', { message });
   },
   requires: [IRouter],
   autoStart: true
