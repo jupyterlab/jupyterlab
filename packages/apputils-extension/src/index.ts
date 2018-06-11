@@ -13,7 +13,8 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  DataConnector, ISettingRegistry, IStateDB, SettingRegistry, StateDB, URLExt
+  DataConnector, ISettingRegistry, IStateDB, PageConfig, SettingRegistry,
+  StateDB, URLExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -273,7 +274,11 @@ const resolver: JupyterLabPlugin<IWindowResolver> = {
 
         return Private.redirect(router);
       })
-      .then(() => resolver);
+      .then(() => {
+        PageConfig.setOption('workspace', resolver.name);
+
+        return resolver;
+      });
   }
 };
 
