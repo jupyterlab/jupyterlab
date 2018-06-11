@@ -139,11 +139,12 @@ namespace PageConfig {
   function getTreeUrl(options: ITreeOptions = { }): string {
     const base = getBaseUrl();
     const page = getOption('pageUrl');
+    const workspaces = getOption('workspacesUrl');
     const workspace = getOption('workspace');
     const includeWorkspace = !!options.workspace;
 
     if (includeWorkspace && workspace) {
-      return URLExt.join(base, page, 'workspaces', workspace, 'tree');
+      return URLExt.join(base, workspaces, workspace, 'tree');
     } else {
       return URLExt.join(base, page, 'tree');
     }
