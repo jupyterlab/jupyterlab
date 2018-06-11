@@ -105,13 +105,23 @@ module.exports = {
   mode: 'development',
   profile: true,
   entry: {
-    main: ['whatwg-fetch', path.resolve(buildDir, 'index.out.js')],
-    vendor: jlab.vendor
+    main: ['whatwg-fetch', path.resolve(buildDir, 'index.out.js')]
   },
   output: {
     path: path.resolve(buildDir),
     publicPath: jlab.publicUrl || '{{base_url}}lab/static/',
     filename: '[name].[chunkhash].js'
+  },
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+      cacheGroups: {
+        // Split out the vega files, which are large and not always needed.
+        vega: {
+          test: /[\\/]node_modules[\\/]vega/
+        }
+      }
+    }
   },
   module: {
     rules: [
