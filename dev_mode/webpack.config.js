@@ -104,7 +104,6 @@ JupyterLabPlugin.prototype._first = true;
 
 module.exports = {
   mode: 'development',
-  profile: true,
   entry: {
     main: ['whatwg-fetch', path.resolve(buildDir, 'index.out.js')]
   },

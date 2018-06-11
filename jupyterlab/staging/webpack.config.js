@@ -8,6 +8,7 @@ var fs = require('fs-extra');
 var Handlebars = require('handlebars');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var webpack = require('webpack');
+var DuplicatePackageCheckerPlugin = require("duplicate-package-checker-webpack-plugin");
 
 var Build = require('@jupyterlab/buildutils').Build;
 var package_data = require('./package.json');
@@ -104,13 +105,23 @@ JupyterLabPlugin.prototype._first = true;
 module.exports = {
   mode: 'development',
   entry: {
-    main: ['whatwg-fetch', path.resolve(buildDir, 'index.out.js')],
-    vendor: jlab.vendor
+    main: ['whatwg-fetch', path.resolve(buildDir, 'index.out.js')]
   },
   output: {
     path: path.resolve(buildDir),
     publicPath: jlab.publicUrl || '{{base_url}}lab/static/',
     filename: '[name].[chunkhash].js'
+  },
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+      cacheGroups: {
+        // Split out the vega files, which are large and not always needed.
+        vega: {
+          test: /[\\/]node_modules[\\/]vega/
+        }
+      }
+    }
   },
   module: {
     rules: [
@@ -166,6 +177,13 @@ module.exports = {
   bail: true,
   devtool: 'source-map',
   plugins: [
+    new DuplicatePackageCheckerPlugin({
+      verbose: true,
+      exclude(instance) {
+        // ignore known duplicates
+        return ['domelementtype', 'hash-base', 'inherits'].includes(instance.name);
+      }
+    }),
     new HtmlWebpackPlugin({
       template: path.join('templates', 'template.html'),
       title: jlab.name || 'JupyterLab'
