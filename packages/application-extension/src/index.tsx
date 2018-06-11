@@ -54,7 +54,7 @@ namespace CommandIDs {
  */
 namespace Patterns {
   export
-  const tree = /^\/tree\/(.+)/;
+  const tree = /[^?]*(\/tree\/([^?]+))/;
 }
 
 
@@ -188,23 +188,6 @@ const router: JupyterLabPlugin<IRouter> = {
     const base = PageConfig.getOption('pageUrl');
     const router = new Router({ base, commands });
 
-    commands.addCommand(CommandIDs.tree, {
-      execute: (args: IRouter.ILocation) => {
-        const path = decodeURIComponent((args.path.match(Patterns.tree)[1]));
-
-        // File browser navigation waits for the application to be restored.
-        // As a result, this command cannot return a promise because it would
-        // create a circular dependency on the restored promise that would
-        // cause the application to never restore.
-        const opened = commands.execute('filebrowser:navigate-main', { path });
-
-        // Change the URL back to the base application URL without adding the
-        // URL change to the browser history.
-        opened.then(() => { router.navigate('', { silent: true }); });
-      }
-    });
-
-    router.register({ command: CommandIDs.tree, pattern: Patterns.tree });
     app.started.then(() => {
       // Route the very first request on load.
       router.route();
@@ -217,6 +200,42 @@ const router: JupyterLabPlugin<IRouter> = {
   },
   autoStart: true,
   provides: IRouter
+};
+
+
+/**
+ * The tree route handler provider.
+ */
+const tree: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/application-extension:tree',
+  autoStart: true,
+  requires: [IRouter],
+  activate: (app: JupyterLab, router: IRouter) => {
+    const { commands } = app;
+
+    commands.addCommand(CommandIDs.tree, {
+      execute: (args: IRouter.ILocation) => {
+        const path = decodeURIComponent((args.path.match(Patterns.tree)[2]));
+
+        // File browser navigation waits for the application to be restored.
+        // As a result, this command cannot return a promise because it would
+        // create a circular dependency on the restored promise that would
+        // cause the application to never restore.
+        const opened = commands.execute('filebrowser:navigate-main', { path });
+
+        // Remove the tree portion of the URL while leaving the rest intact.
+        // Change the URL silently.
+        opened.then(() => {
+          const { request } = router.current;
+          const url = request.replace(request.match(Patterns.tree)[1], '');
+
+          router.navigate(url, { silent: true });
+        });
+      }
+    });
+
+    router.register({ command: CommandIDs.tree, pattern: Patterns.tree });
+  }
 };
 
 
@@ -372,6 +391,8 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [main, layout, router, notfound, busy];
+const plugins: JupyterLabPlugin<any>[] = [
+  main, layout, router, tree, notfound, busy
+];
 
 export default plugins;
