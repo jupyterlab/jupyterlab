@@ -42,10 +42,11 @@
     "simulate-event": "~1.4.0"
   },
   "devDependencies": {
-    "awesome-typescript-loader": "~3.4.1",
+    "cache-loader": "^1.2.2",
     "css-loader": "~0.28.7",
     "es6-promise": "~4.1.1",
     "file-loader": "~0.10.1",
+    "fork-ts-checker-webpack-plugin": "^0.4.2",
     "fs-extra": "~4.0.2",
     "istanbul-instrumenter-loader": "~3.0.0",
     "json-loader": "~0.5.7",
@@ -63,6 +64,8 @@
     "raw-loader": "~0.5.1",
     "rimraf": "~2.6.2",
     "style-loader": "~0.13.2",
+    "thread-loader": "^1.1.5",
+    "ts-loader": "^3.5.0",
     "typescript": "~2.9.1",
     "url-loader": "~0.5.9",
     "webpack": "~2.7.0"

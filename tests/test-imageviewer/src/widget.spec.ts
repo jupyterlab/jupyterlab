@@ -72,7 +72,7 @@ const OTHER = ('iVBORw0KGgoAAAANSUhEUgAAAAUA' +
 describe('ImageViewer', () => {
 
   let factory = new Base64ModelFactory();
-  let context: DocumentRegistry.Context;
+  let context: Context<DocumentRegistry.IModel>;
   let manager: ServiceManager.IManager;
   let widget: LogImage;
 
