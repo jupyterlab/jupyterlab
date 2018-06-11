@@ -96,7 +96,7 @@ namespace Patterns {
   const cloneState = /(\?clone\=|\&clone\=)([^&]+)($|&)/;
 
   export
-  const loadState = /^\/workspaces\/([^?]+)/;
+  const loadState = /^\/workspaces\/([^?\/]+)/;
 
   export
   const resetOnLoad = /(\?reset|\&reset)($|&)/;
