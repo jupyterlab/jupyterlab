@@ -215,7 +215,7 @@ const tree: JupyterLabPlugin<void> = {
 
     commands.addCommand(CommandIDs.tree, {
       execute: (args: IRouter.ILocation) => {
-        const { request } = router.current;
+        const { request } = args;
         const path = decodeURIComponent((args.path.match(Patterns.tree)[2]));
         const url = request.replace(request.match(Patterns.tree)[1], '');
         const immediate = true;
