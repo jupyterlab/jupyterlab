@@ -215,22 +215,17 @@ const tree: JupyterLabPlugin<void> = {
 
     commands.addCommand(CommandIDs.tree, {
       execute: (args: IRouter.ILocation) => {
+        const { request } = router.current;
         const path = decodeURIComponent((args.path.match(Patterns.tree)[2]));
+        const url = request.replace(request.match(Patterns.tree)[1], '');
+        const immediate = true;
 
-        // File browser navigation waits for the application to be restored.
-        // As a result, this command cannot return a promise because it would
-        // create a circular dependency on the restored promise that would
-        // cause the application to never restore.
-        const opened = commands.execute('filebrowser:navigate-main', { path });
+        // Silently remove the tree portion of the URL leaving the rest intact.
+        router.navigate(url, { silent: true });
 
-        // Remove the tree portion of the URL while leaving the rest intact.
-        // Change the URL silently.
-        opened.then(() => {
-          const { request } = router.current;
-          const url = request.replace(request.match(Patterns.tree)[1], '');
-
-          router.navigate(url, { silent: true });
-        });
+        return commands.execute('filebrowser:navigate-main', { path })
+          .then(() => commands.execute('apputils:save-statedb', { immediate }))
+          .catch(reason => { console.warn(`Tree routing failed:`, reason); });
       }
     });
 
