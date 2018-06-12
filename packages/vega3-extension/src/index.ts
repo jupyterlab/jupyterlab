@@ -80,7 +80,10 @@ class RenderedVega3 extends Widget implements IRenderMime.IRenderer {
     const mode: Mode = this._mimeType === VEGA_MIME_TYPE ? 'vega' : 'vega-lite';
     return this._resolver.resolveUrl('').then((path: string) => {
       return this._resolver.getDownloadUrl(path).then(baseURL => {
-        const loader = vega.loader({ baseURL });
+        const loader = vega.loader({
+          baseURL,
+          http: { credentials: 'same-origin' }
+        });
         const options: EmbedOptions = {
           actions: true,
           defaultStyle: true,
