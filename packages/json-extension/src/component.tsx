@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import * as ReactDOM from 'react-dom';
 
-import Highlight = require('react-highlighter');
+import Highlight from 'react-highlighter';
 
 import JSONTree from 'react-json-tree';
 
