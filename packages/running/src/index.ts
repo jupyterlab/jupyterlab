@@ -322,7 +322,8 @@ class RunningSessions extends Widget {
     }
 
     // Check for terminals shutdown.
-    if (ElementExt.hitTest(shutdownTerms, clientX, clientY)) {
+    // Terminals might be disabled, check node exist first.
+    if (shutdownTerms && ElementExt.hitTest(shutdownTerms, clientX, clientY)) {
       showDialog({
         title: 'Shutdown All Terminals?',
         body: 'Shut down all terminals?',
