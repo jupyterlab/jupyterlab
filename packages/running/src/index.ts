@@ -321,11 +321,9 @@ class RunningSessions extends Widget {
       return;
     }
 
-    // Create a dummy div if terminals are not available.
-    shutdownTerms = shutdownTerms || document.createElement('div');
-
     // Check for terminals shutdown.
-    if (ElementExt.hitTest(shutdownTerms, clientX, clientY)) {
+    // Terminals might be disabled, check node exist first.
+    if (shutdownTerms && ElementExt.hitTest(shutdownTerms, clientX, clientY)) {
       showDialog({
         title: 'Shutdown All Terminals?',
         body: 'Shut down all terminals?',
