@@ -2,9 +2,9 @@ import * as React from 'react';
 
 import * as ReactDOM from 'react-dom';
 
-import JSONTree from 'react-json-tree';
+import Highlight = require('react-highlighter');
 
-import * as Highlight from 'react-highlighter';
+import JSONTree from 'react-json-tree';
 
 import {
   JSONValue,
@@ -48,9 +48,7 @@ class Component extends React.Component<IProps, IState> {
      */
     ReactDOM.findDOMNode(this.input).addEventListener(
       'keydown',
-      (event: Event) => {
-        event.stopPropagation();
-      },
+      (event: Event) => { event.stopPropagation(); },
       false
     );
   }
@@ -58,9 +56,7 @@ class Component extends React.Component<IProps, IState> {
   componentWillUnmount() {
     ReactDOM.findDOMNode(this.input).removeEventListener(
       'keydown',
-      (event: Event) => {
-        event.stopPropagation();
-      },
+      (event: Event) => { event.stopPropagation(); },
       false
     );
   }
@@ -72,10 +68,7 @@ class Component extends React.Component<IProps, IState> {
       ? filterPaths(data, this.state.filter, [root])
       : [root];
     return (
-      <div style={{
-        position: 'relative',
-        width: '100%'
-      }}>
+      <div style={{ position: 'relative', width: '100%' }}>
         <input
           ref={ref => this.input = ref}
           onChange={event => {
