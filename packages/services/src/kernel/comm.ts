@@ -51,8 +51,7 @@ class CommHandler extends DisposableDelegate implements Kernel.IComm {
    * Get the callback for a comm close event.
    *
    * #### Notes
-   * This is called when the comm is closed from either the server or
-   * client.
+   * This is called when the comm is closed from either the server or client.
    *
    * **See also:** [[ICommClose]], [[close]]
    */
@@ -64,8 +63,10 @@ class CommHandler extends DisposableDelegate implements Kernel.IComm {
    * Set the callback for a comm close event.
    *
    * #### Notes
-   * This is called when the comm is closed from either the server or
-   * client.
+   * This is called when the comm is closed from either the server or client. If
+   * the function returns a promise, and the kernel was closed from the server,
+   * kernel message processing will pause until the returned promise is
+   * fulfilled.
    *
    * **See also:** [[close]]
    */
@@ -82,6 +83,10 @@ class CommHandler extends DisposableDelegate implements Kernel.IComm {
 
   /**
    * Set the callback for a comm message received event.
+   *
+   * #### Notes
+   * This is called when a comm message is received. If the function returns a
+   * promise, kernel message processing will pause until it is fulfilled.
    */
   set onMsg(cb: (msg: KernelMessage.ICommMsgMsg) => Promise<void> | void) {
     this._onMsg = cb;
@@ -171,6 +176,7 @@ class CommHandler extends DisposableDelegate implements Kernel.IComm {
     let onClose = this._onClose;
     if (onClose) {
       let ioMsg = KernelMessage.createMessage(options, content, metadata, buffers);
+      // TODO: should we somehow pause message processing if onClose returns a promise?
       onClose(ioMsg as KernelMessage.ICommCloseMsg);
     }
     this.dispose();
