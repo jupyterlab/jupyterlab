@@ -6571,9 +6571,9 @@ react-base16-styling@^0.5.1:
     lodash.flow "^3.3.0"
     pure-color "^1.2.0"
 
-react-dom@~16.2.0:
-  version "16.2.0"
-  resolved "https://registry.npmjs.org/react-dom/-/react-dom-16.2.0.tgz#69003178601c0ca19b709b33a83369fe6124c044"
+react-dom@~16.4.0:
+  version "16.4.0"
+  resolved "https://registry.npmjs.org/react-dom/-/react-dom-16.4.0.tgz#099f067dd5827ce36a29eaf9a6cdc7cbf6216b1e"
   dependencies:
     fbjs "^0.8.16"
     loose-envify "^1.1.0"
@@ -6589,17 +6589,17 @@ react-highlighter@^0.4.0:
     escape-string-regexp "^1.0.5"
     prop-types "^15.6.0"
 
-react-json-tree@^0.10.9:
-  version "0.10.9"
-  resolved "https://registry.npmjs.org/react-json-tree/-/react-json-tree-0.10.9.tgz#7263173a2cc8bf05eac63b0419c3ce75b232e284"
+react-json-tree@^0.11.0:
+  version "0.11.0"
+  resolved "https://registry.npmjs.org/react-json-tree/-/react-json-tree-0.11.0.tgz#f5b17e83329a9c76ae38be5c04fda3a7fd684a35"
   dependencies:
     babel-runtime "^6.6.1"
     prop-types "^15.5.8"
     react-base16-styling "^0.5.1"
 
-react@~16.2.0:
-  version "16.2.0"
-  resolved "https://registry.npmjs.org/react/-/react-16.2.0.tgz#a31bd2dab89bff65d42134fa187f24d054c273ba"
+react@~16.4.0:
+  version "16.4.0"
+  resolved "https://registry.npmjs.org/react/-/react-16.4.0.tgz#402c2db83335336fba1962c08b98c6272617d585"
   dependencies:
     fbjs "^0.8.16"
     loose-envify "^1.1.0"
