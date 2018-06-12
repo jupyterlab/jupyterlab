@@ -375,8 +375,8 @@ namespace Kernel {
     /**
      * A signal emitted for any kernel message.
      *
-     * Note: The behavior is undefined if the message is modified
-     * during message handling. As such, it should be treated as read-only.
+     * The behavior is undefined if the message is modified during message
+     * handling. As such, the message should be treated as read-only.
      */
     anyMessage: ISignal<this, IAnyMessageArgs>;
 
@@ -920,7 +920,7 @@ namespace Kernel {
     /**
      * The message that is being signaled.
      */
-    msg: KernelMessage.IMessage;
+    msg: Readonly<KernelMessage.IMessage>;
 
     /**
      * The direction of the message.

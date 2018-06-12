@@ -122,8 +122,9 @@ class DefaultKernel implements Kernel.IKernel {
   /**
    * A signal emitted for any kernel message.
    *
-   * Note: The behavior is undefined if the message is modified
-   * during message handling. As such, it should be treated as read-only.
+   * #### Notes
+   * The behavior is undefined if the message is modified during message
+   * handling. As such, the message should be treated as read-only.
    */
   get anyMessage(): ISignal<this, Kernel.IAnyMessageArgs> {
     return this._anyMessage;
