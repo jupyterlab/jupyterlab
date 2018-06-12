@@ -1,4 +1,3 @@
-var path = require('path');
 var ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 var cpus = require('os').cpus().length;
@@ -34,11 +33,11 @@ module.exports = {
         use: ['source-map-loader'],
         enforce: 'pre',
         // eslint-disable-next-line no-undef
-        exclude: path.join(process.cwd(), 'node_modules')
+        exclude: /node_modules/
       },
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },
       { test: /\.csv$/, use: 'raw-loader' },
-      { test: /\.(json|ipynb)$/, use: 'json-loader' },
+      { test: /\.ipynb$/, use: 'json-loader' },
       { test: /\.html$/, use: 'file-loader' },
       { test: /\.md$/, use: 'raw-loader' },
       { test: /\.(jpg|png|gif)$/, use: 'file-loader' },

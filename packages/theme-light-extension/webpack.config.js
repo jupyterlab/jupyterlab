@@ -1,7 +1,8 @@
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
 
 module.exports = {
+  mode: 'production',
   entry: {
     index: './style/index.css',
     embed: './style/embed.css'
@@ -13,40 +14,22 @@ module.exports = {
   },
   module: {
     rules: [
-      {
-        test: /\.css$/,
-        use: ExtractTextPlugin.extract({
-          fallback: 'style-loader',
-          use: 'css-loader'
-        })
-      },
-      {
-        test: /\.svg/,
-        use: [
-          {
-            loader: 'svg-url-loader',
-            options: {}
-          },
-          {
-            loader: 'svgo-loader',
-            options: {
-              plugins: []
-            }
-          }
-        ]
-      },
-      {
-        test: /\.(png|jpg|gif|ttf|woff|woff2|eot)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-        use: [
-          {
-            loader: 'url-loader',
-            options: {
-              limit: 10000
-            }
-          }
-        ]
+      { test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader']},
+      { test: /\.svg/, use: [
+        { loader: 'svg-url-loader', options: {} },
+        { loader: 'svgo-loader', options: {plugins: []} }
+      ]},
+      { test: /\.(png|jpg|gif|ttf|woff|woff2|eot)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+        use: [{ loader: 'url-loader', options: {limit: 10000} }]
       }
     ]
   },
-  plugins: [new ExtractTextPlugin('[name].css')]
+  plugins: [
+    new MiniCssExtractPlugin({
+      // Options similar to the same options in webpackOptions.output
+      // both options are optional
+      filename: '[name].css',
+      chunkFilename: '[id].css'
+    })
+  ]
 };

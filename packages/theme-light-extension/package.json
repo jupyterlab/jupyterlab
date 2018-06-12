@@ -44,15 +44,16 @@
   },
   "devDependencies": {
     "css-loader": "~0.28.7",
-    "extract-text-webpack-plugin": "~2.1.2",
+    "mini-css-extract-plugin": "^0.4.0",
     "npm-run-all": "~4.1.1",
     "rimraf": "~2.6.2",
     "svg-url-loader": "~2.3.1",
     "svgo": "~1.0.4",
     "svgo-loader": "~2.1.0",
     "typescript": "~2.9.1",
-    "url-loader": "~0.5.9",
-    "webpack": "~2.7.0"
+    "url-loader": "~1.0.1",
+    "webpack": "~4.12.0",
+    "webpack-cli": "^3.0.3"
   },
   "jupyterlab": {
     "extension": true,
