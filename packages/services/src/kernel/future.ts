@@ -19,6 +19,11 @@ import {
 
 /**
  * Implementation of a kernel future.
+ *
+ * If a reply is expected, the Future is considered done when both a `reply`
+ * message and an `idle` iopub status message have been received.  Otherwise, it
+ * is considered done when the `idle` status is received.
+ *
  */
 export
 class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
@@ -97,12 +102,18 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
    * @param hook - The callback invoked for an IOPub message.
    *
    * #### Notes
-   * The IOPub hook system allows you to preempt the handlers for IOPub messages handled
-   * by the future. The most recently registered hook is run first.
-   * If the hook returns false, any later hooks and the future's onIOPub handler will not run.
-   * If a hook throws an error, the error is logged to the console and the next hook is run.
-   * If a hook is registered during the hook processing, it won't run until the next message.
-   * If a hook is removed during the hook processing, it will be deactivated immediately.
+   * The IOPub hook system allows you to preempt the handlers for IOPub
+   * messages handled by the future.
+   *
+   * The most recently registered hook is run first. A hook can return a
+   * boolean or a promise to a boolean, in which case all kernel message
+   * processing pauses until the promise is fulfilled. If a hook return value
+   * resolves to false, any later hooks will not run and the function will
+   * return a promise resolving to false. If a hook throws an error, the error
+   * is logged to the console and the next hook is run. If a hook is
+   * registered during the hook processing, it will not run until the next
+   * message. If a hook is removed during the hook processing, it will be
+   * deactivated immediately.
    */
   registerMessageHook(hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>): void {
     if (this.isDisposed) {
@@ -269,16 +280,17 @@ namespace Private {
     /**
      * Process a message through the hooks.
      *
-     * @returns a promise resolving to false if any hook resolved as false, otherwise true
+     * @returns a promise resolving to false if any hook resolved as false,
+     * otherwise true
      *
      * #### Notes
-     * The hooks can be asynchronous, returning a promise, and hook processing
-     * pauses until the promise resolves. The most recently registered hook is
-     * run first. If a hook returns false (or a promise resolving to false), any
+     * The most recently registered hook is run first. A hook can return a
+     * boolean or a promise to a boolean, in which case processing pauses until
+     * the promise is fulfilled. If a hook return value resolves to false, any
      * later hooks will not run and the function will return a promise resolving
      * to false. If a hook throws an error, the error is logged to the console
      * and the next hook is run. If a hook is registered during the hook
-     * processing, it won't run until the next message. If a hook is removed
+     * processing, it will not run until the next message. If a hook is removed
      * during the hook processing, it will be deactivated immediately.
      */
     async process(msg: T): Promise<boolean> {

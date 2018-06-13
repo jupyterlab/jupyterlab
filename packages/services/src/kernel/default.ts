@@ -586,6 +586,59 @@ class DefaultKernel implements Kernel.IKernel {
   }
 
   /**
+   * Connect to a comm, or create a new one.
+   *
+   * #### Notes
+   * If a client-side comm already exists with the given commId, it is returned.
+   */
+  connectToComm(targetName: string, commId: string = uuid()): Kernel.IComm {
+    if (this._comms.has(commId)) {
+      return this._comms.get(commId);
+    }
+    let comm = new CommHandler(
+      targetName,
+      commId,
+      this,
+      () => { this._unregisterComm(commId); }
+    );
+    this._comms.set(commId, comm);
+    return comm;
+  }
+
+  /**
+   * Register a comm target handler.
+   *
+   * @param targetName - The name of the comm target.
+   *
+   * @param callback - The callback invoked for a comm open message.
+   *
+   * @returns A disposable used to unregister the comm target.
+   *
+   * #### Notes
+   * Only one comm target can be registered to a target name at a time, an
+   * existing callback for the same target name will be overidden.  A registered
+   * comm target handler will take precedence over a comm which specifies a
+   * `target_module`.
+   *
+   * If the callback returns a promise, kernel message processing will pause
+   * until the returned promise is fulfilled.
+   *
+   * TODO: perhaps, just like with registerMessageHook, we should just
+   * provide a removeCommTarget function instead of returning a disposable.
+   * Presumably it's just as easy for someone to store the comm target name as
+   * it is to store the disposable. Since there is only one callback, you don't even
+   * need to store the callback.
+   */
+  registerCommTarget(targetName: string, callback: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => void | PromiseLike<void>): IDisposable {
+    this._targetRegistry[targetName] = callback;
+    return new DisposableDelegate(() => {
+      if (!this.isDisposed) {
+        delete this._targetRegistry[targetName];
+      }
+    });
+  }
+
+  /**
    * Register an IOPub message hook.
    *
    * @param msg_id - The parent_header message id the hook will intercept.
@@ -595,13 +648,18 @@ class DefaultKernel implements Kernel.IKernel {
    * @returns A disposable used to unregister the message hook.
    *
    * #### Notes
-   * The IOPub hook system allows you to preempt the handlers for IOPub messages
-   * with a given parent_header message id. The most recently registered hook is
-   * run first. If the hook returns false, any later hooks and the future's
-   * onIOPub handler will not run. If a hook throws an error, the error is
-   * logged to the console and the next hook is run. If a hook is registered
-   * during the hook processing, it won't run until the next message. If a hook
-   * is disposed during the hook processing, it will be deactivated immediately.
+   * The IOPub hook system allows you to preempt the handlers for IOPub
+   * messages that are responses to a given message id.
+   *
+   * The most recently registered hook is run first. A hook can return a
+   * boolean or a promise to a boolean, in which case all kernel message
+   * processing pauses until the promise is fulfilled. If a hook return value
+   * resolves to false, any later hooks will not run and the function will
+   * return a promise resolving to false. If a hook throws an error, the error
+   * is logged to the console and the next hook is run. If a hook is
+   * registered during the hook processing, it will not run until the next
+   * message. If a hook is removed during the hook processing, it will be
+   * deactivated immediately.
    *
    * See also [[IFuture.registerMessageHook]].
    *
@@ -625,58 +683,7 @@ class DefaultKernel implements Kernel.IKernel {
     });
   }
 
-  /**
-   * Register a comm target handler.
-   *
-   * @param targetName - The name of the comm target.
-   *
-   * @param callback - The callback invoked for a comm open message.
-   *
-   * @returns A disposable used to unregister the comm target.
-   *
-   * #### Notes
-   * Only one comm target can be registered to a target name at a time, an
-   * existing callback for the same target name will be overidden.  A registered
-   * comm target handler will take precedence over a comm which specifies a
-   * `target_module`.
-   *
-   * If the callback returns a promise, kernel message processing will pause
-   * until the returned promise is fulfilled.
-   *
-   * TODO: perhaps, just like with registerMessageHook above, we should just
-   * provide a removeCommTarget function instead of returning a disposable.
-   * Presumably it's just as easy for someone to store the comm target name as
-   * it is to store the disposable. Since there is only one callback, you don't even
-   * need to store the callback.
-   */
-  registerCommTarget(targetName: string, callback: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => void | PromiseLike<void>): IDisposable {
-    this._targetRegistry[targetName] = callback;
-    return new DisposableDelegate(() => {
-      if (!this.isDisposed) {
-        delete this._targetRegistry[targetName];
-      }
-    });
-  }
 
-  /**
-   * Connect to a comm, or create a new one.
-   *
-   * #### Notes
-   * If a client-side comm already exists with the given commId, it is returned.
-   */
-  connectToComm(targetName: string, commId: string = uuid()): Kernel.IComm {
-    if (this._comms.has(commId)) {
-      return this._comms.get(commId);
-    }
-    let comm = new CommHandler(
-      targetName,
-      commId,
-      this,
-      () => { this._unregisterComm(commId); }
-    );
-    this._comms.set(commId, comm);
-    return comm;
-  }
 
   /**
    * Handle a message with a display id.
