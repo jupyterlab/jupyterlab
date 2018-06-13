@@ -1394,7 +1394,7 @@ class Notebook extends StaticNotebook {
     }
     let widget = this.widgets[index];
 
-    if (widget && widget.editorWidget.node.contains(target)) {
+    if (!event.shiftKey && widget && widget.editorWidget.node.contains(target)) {
       // Prevent CodeMirror from focusing the editor.
       // TODO: find an editor-agnostic solution.
       event.preventDefault();
