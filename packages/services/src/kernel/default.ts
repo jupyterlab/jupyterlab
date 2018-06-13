@@ -1538,9 +1538,7 @@ namespace Private {
   export
   async function handleShellMessage(kernel: Kernel.IKernel, msg: KernelMessage.IShellMessage): Promise<KernelMessage.IShellMessage> {
     let future = kernel.sendShellMessage(msg, true);
-    let reply = new PromiseDelegate<KernelMessage.IShellMessage>();
-    future.onReply = reply.resolve;
-    return reply.promise;
+    return future.done;
   }
 
   /**
