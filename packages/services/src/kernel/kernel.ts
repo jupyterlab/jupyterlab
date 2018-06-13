@@ -349,7 +349,7 @@ namespace Kernel {
      *
      * See also [[IFuture.registerMessageHook]].
      */
-    registerMessageHook(msgId: string, hook: (msg: KernelMessage.IIOPubMessage) => boolean): IDisposable;
+    registerMessageHook(msgId: string, hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>): IDisposable;
   }
 
   /**
