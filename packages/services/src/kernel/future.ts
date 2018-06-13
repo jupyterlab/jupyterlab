@@ -104,7 +104,7 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
    * If a hook is registered during the hook processing, it won't run until the next message.
    * If a hook is removed during the hook processing, it will be deactivated immediately.
    */
-  registerMessageHook(hook: (msg: KernelMessage.IIOPubMessage) => boolean | Promise<boolean>): void {
+  registerMessageHook(hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>): void {
     if (this.isDisposed) {
       throw new Error('Kernel future is disposed');
     }
@@ -119,7 +119,7 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
    * #### Notes
    * If a hook is removed during the hook processing, it will be deactivated immediately.
    */
-  removeMessageHook(hook: (msg: KernelMessage.IIOPubMessage) => boolean | Promise<boolean>): void {
+  removeMessageHook(hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>): void {
     if (this.isDisposed) {
       return;
     }
@@ -248,7 +248,7 @@ namespace Private {
      *
      * @param hook - The callback to register.
      */
-    add(hook: (msg: T) => boolean | Promise<boolean>): void {
+    add(hook: (msg: T) => boolean | PromiseLike<boolean>): void {
       this.remove(hook);
       this._hooks.push(hook);
     }
@@ -258,7 +258,7 @@ namespace Private {
      *
      * @param hook - The callback to remove.
      */
-    remove(hook: (msg: T) => boolean | Promise<boolean>): void {
+    remove(hook: (msg: T) => boolean | PromiseLike<boolean>): void {
       let index = this._hooks.indexOf(hook);
       if (index >= 0) {
         this._hooks[index] = null;
@@ -341,7 +341,7 @@ namespace Private {
       this._hooks.length -= numNulls;
     }
 
-    private _hooks: (((msg: T) => boolean | Promise<boolean>) | null)[] = [];
+    private _hooks: (((msg: T) => boolean | PromiseLike<boolean>) | null)[] = [];
     private _compactScheduled: boolean;
     private _processing: Promise<void>;
   }

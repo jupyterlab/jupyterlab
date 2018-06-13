@@ -611,7 +611,7 @@ class DefaultKernel implements Kernel.IKernel {
    * as easy to keep the message id and hook function as it is to keep the
    * disposable, so might as well avoid the allocation).
    */
-  registerMessageHook(msgId: string, hook: (msg: KernelMessage.IIOPubMessage) => boolean | Promise<boolean>): IDisposable {
+  registerMessageHook(msgId: string, hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>): IDisposable {
     let future = this._futures && this._futures.get(msgId);
     if (future) {
       future.registerMessageHook(hook);
