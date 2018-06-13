@@ -104,7 +104,10 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
    * If a hook is registered during the hook processing, it won't run until the next message.
    * If a hook is removed during the hook processing, it will be deactivated immediately.
    */
-  registerMessageHook(hook: (msg: KernelMessage.IIOPubMessage) => Promise<boolean> | boolean): void {
+  registerMessageHook(hook: (msg: KernelMessage.IIOPubMessage) => boolean | Promise<boolean>): void {
+    if (this.isDisposed) {
+      throw new Error('Kernel future is disposed');
+    }
     this._hooks.add(hook);
   }
 
@@ -116,7 +119,7 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
    * #### Notes
    * If a hook is removed during the hook processing, it will be deactivated immediately.
    */
-  removeMessageHook(hook: (msg: KernelMessage.IIOPubMessage) => Promise<boolean> | boolean): void {
+  removeMessageHook(hook: (msg: KernelMessage.IIOPubMessage) => boolean | Promise<boolean>): void {
     if (this.isDisposed) {
       return;
     }
@@ -138,6 +141,7 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
     this._stdin = Private.noOp;
     this._iopub = Private.noOp;
     this._reply = Private.noOp;
+    this._hooks = null;
     if (!this._testFlag(Private.KernelFutureFlag.IsDone)) {
       this._done.reject(new Error('Canceled'));
     }
@@ -250,7 +254,7 @@ namespace Private {
     }
 
     /**
-     * Remove a hook.
+     * Remove a hook, if it exists in the hook list.
      *
      * @param hook - The callback to remove.
      */

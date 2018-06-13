@@ -605,16 +605,20 @@ class DefaultKernel implements Kernel.IKernel {
    *
    * See also [[IFuture.registerMessageHook]].
    *
-   * TODO: should this hook be an async function, and we wait to process the
-   * hooks until the promise is resolved?
+   * TODO: like phosphor, perhaps we shouldn't return a disposable, which keeps
+   * a basically just keeps a reference to the msgId. Instead, just make the
+   * user call a new removeMessageHook function directly (presumably it's just
+   * as easy to keep the message id and hook function as it is to keep the
+   * disposable, so might as well avoid the allocation).
    */
-  registerMessageHook(msgId: string, hook: (msg: KernelMessage.IIOPubMessage) => boolean): IDisposable {
+  registerMessageHook(msgId: string, hook: (msg: KernelMessage.IIOPubMessage) => boolean | Promise<boolean>): IDisposable {
     let future = this._futures && this._futures.get(msgId);
     if (future) {
       future.registerMessageHook(hook);
     }
+
     return new DisposableDelegate(() => {
-      future = this._futures && this._futures.get(msgId);
+      let future = this._futures && this._futures.get(msgId);
       if (future) {
         future.removeMessageHook(hook);
       }
@@ -638,8 +642,14 @@ class DefaultKernel implements Kernel.IKernel {
    *
    * If the callback returns a promise, kernel message processing will pause
    * until the returned promise is fulfilled.
+   *
+   * TODO: perhaps, just like with registerMessageHook above, we should just
+   * provide a removeCommTarget function instead of returning a disposable.
+   * Presumably it's just as easy for someone to store the comm target name as
+   * it is to store the disposable. Since there is only one callback, you don't even
+   * need to store the callback.
    */
-  registerCommTarget(targetName: string, callback: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => Promise<void> | void): IDisposable {
+  registerCommTarget(targetName: string, callback: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => void | Promise<void>): IDisposable {
     this._targetRegistry[targetName] = callback;
     return new DisposableDelegate(() => {
       if (!this.isDisposed) {
