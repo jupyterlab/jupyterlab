@@ -316,11 +316,15 @@ namespace Private {
       if (!this._compactScheduled) {
         this._compactScheduled = true;
 
-        // Make sure we compact the list between processing phases. We may want
-        // to rate-limit this compaction with a requestAnimationFrame as well.
-        this._processing = this._processing.then(() => {
-          this._compactScheduled = false;
-          this._compact();
+        // Schedule a compaction in between processing runs. We do the
+        // scheduling in an animation frame to rate-limit our compactions. If we
+        // need to compact more frequently, we can change this to directly
+        // schedule the compaction.
+        requestAnimationFrame(() => {
+          this._processing = this._processing.then(() => {
+            this._compactScheduled = false;
+            this._compact();
+          });
         });
       }
     }
