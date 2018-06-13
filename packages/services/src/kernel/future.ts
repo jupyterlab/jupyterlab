@@ -25,10 +25,10 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
   /**
    * Construct a new KernelFutureHandler.
    */
-  constructor(cb: () => void, msg: KernelMessage.IShellMessage, expectShell: boolean, disposeOnDone: boolean, kernel: Kernel.IKernel) {
+  constructor(cb: () => void, msg: KernelMessage.IShellMessage, expectReply: boolean, disposeOnDone: boolean, kernel: Kernel.IKernel) {
     super(cb);
     this._msg = msg;
-    if (!expectShell) {
+    if (!expectReply) {
       this._setFlag(Private.KernelFutureFlag.GotReply);
     }
     this._disposeOnDone = disposeOnDone;
@@ -269,20 +269,23 @@ namespace Private {
     /**
      * Process a message through the hooks.
      *
+     * @returns a promise resolving to false if any hook resolved as false, otherwise true
+     *
      * #### Notes
      * The hooks can be asynchronous, returning a promise, and hook processing
      * pauses until the promise resolves. The most recently registered hook is
-     * run first. If the hook returns false, any later hooks will not run. If a
-     * hook throws an error, the error is logged to the console and the next
-     * hook is run. If a hook is registered during the hook processing, it won't
-     * run until the next message. If a hook is removed during the hook
-     * processing, it will be deactivated immediately.
+     * run first. If a hook returns false (or a promise resolving to false), any
+     * later hooks will not run and the function will return a promise resolving
+     * to false. If a hook throws an error, the error is logged to the console
+     * and the next hook is run. If a hook is registered during the hook
+     * processing, it won't run until the next message. If a hook is removed
+     * during the hook processing, it will be deactivated immediately.
      */
     async process(msg: T): Promise<boolean> {
       // Wait until we can start a new process run.
       await this._processing;
 
-      // Reserve a process run for ourselves.
+      // Start the next process run.
       let processing = new PromiseDelegate<void>();
       this._processing = processing.promise;
 
@@ -290,21 +293,29 @@ namespace Private {
 
       // Call the end hook (most recently-added) first. Starting at the end also
       // guarantees that hooks added during the processing will not be run in
-      // this invocation.
+      // this process run.
       for (let i = this._hooks.length - 1; i >= 0; i--) {
         let hook = this._hooks[i];
+
+        // If the hook has been removed, continue to the next one.
         if (hook === null) { continue; }
+
+        // Execute the hook and log any errors.
         try {
           continueHandling = await hook(msg);
         } catch (err) {
           continueHandling = true;
           console.error(err);
         }
+
+        // If the hook resolved to false, stop processing and return.
         if (continueHandling === false) {
           processing.resolve(undefined);
           return false;
         }
       }
+
+      // All hooks returned true (or errored out), so return true.
       processing.resolve(undefined);
       return true;
     }

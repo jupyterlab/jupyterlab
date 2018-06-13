@@ -115,14 +115,16 @@ namespace Kernel {
      * Send a message to the kernel's shell channel, yielding a future object
      * for accepting replies.
      *
-     * If `expectReply` is given and `true`, the future is disposed when both a
-     * shell reply and an idle status message are received. If `expectReply`
-     * is not given or is `false`, the future is disposed when an idle status
-     * message is received.
+     * If `expectReply` is given and `true`, the future is done when both a
+     * shell reply and an idle status message are received, and the `.done`
+     * promise resolves to the reply. If `expectReply` is not given or is
+     * `false`, the future is done when an idle status message is received, and
+     * the `.done` promise resolves to `undefined`.
      *
      * If `disposeOnDone` is given and `false`, the future will not be disposed
-     * of when the future is done, instead relying on the caller to dispose of it.
-     * This allows for the handling of out-of-order output from ill-behaved kernels.
+     * of when the future is done, instead relying on the caller to dispose of
+     * it. This allows for the handling of out-of-order output from ill-behaved
+     * kernels.
      *
      * All replies are validated as valid kernel messages.
      *
@@ -136,7 +138,7 @@ namespace Kernel {
      * @returns A promise that resolves when the kernel has reconnected.
      *
      * #### Notes
-     * This is not actually a  standard HTTP request, but useful function
+     * This is not actually a standard HTTP request, but useful function
      * nonetheless for reconnecting to the kernel if the connection is somehow
      * lost.
      */
