@@ -1359,53 +1359,53 @@ namespace Private {
    * Start a new kernel.
    */
   export
-  function startNew(options: Kernel.IOptions): Promise<Kernel.IKernel> {
+  async function startNew(options: Kernel.IOptions): Promise<Kernel.IKernel> {
     let settings = options.serverSettings || ServerConnection.makeSettings();
     let url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL);
     let init = {
       method: 'POST',
       body: JSON.stringify({ name: options.name })
     };
-    return ServerConnection.makeRequest(url, init, settings).then(response => {
-      if (response.status !== 201) {
-        throw new ServerConnection.ResponseError(response);
-      }
-      return response.json();
-    }).then(data => {
-      validate.validateModel(data);
-      return new DefaultKernel({
-        ...options,
-        name: data.name,
-        serverSettings: settings
-      }, data.id);
-    });
+    let response = await ServerConnection.makeRequest(url, init, settings);
+    if (response.status !== 201) {
+      throw new ServerConnection.ResponseError(response);
+    }
+    let data = await response.json();
+    validate.validateModel(data);
+    return new DefaultKernel({
+      ...options,
+      name: data.name,
+      serverSettings: settings
+    }, data.id);
   }
 
   /**
    * Connect to a running kernel.
+   *
+   * TODO: why is this function async?
    */
   export
-  function connectTo(model: Kernel.IModel, settings?: ServerConnection.ISettings): Promise<Kernel.IKernel> {
+  async function connectTo(model: Kernel.IModel, settings?: ServerConnection.ISettings): Promise<Kernel.IKernel> {
     let serverSettings = settings || ServerConnection.makeSettings();
     let kernel = find(runningKernels, value => {
       return value.id === model.id;
     });
     if (kernel) {
-      return Promise.resolve(kernel.clone());
+      return kernel.clone();
     }
 
-    return Promise.resolve(new DefaultKernel(
+    return new DefaultKernel(
       { name: model.name, serverSettings }, model.id
-    ));
+    );
   }
 
   /**
    * Restart a kernel.
    */
   export
-  function restartKernel(kernel: Kernel.IKernel, settings?: ServerConnection.ISettings): Promise<void> {
+  async function restartKernel(kernel: Kernel.IKernel, settings?: ServerConnection.ISettings): Promise<void> {
     if (kernel.status === 'dead') {
-      return Promise.reject(new Error('Kernel is dead'));
+      throw new Error('Kernel is dead');
     }
     settings = settings || ServerConnection.makeSettings();
     let url = URLExt.join(
@@ -1419,30 +1419,28 @@ namespace Private {
         k.handleRestart();
       }
     });
-    return ServerConnection.makeRequest(url, init, settings).then(response => {
-      if (response.status !== 200) {
-        throw new ServerConnection.ResponseError(response);
+    let response = await ServerConnection.makeRequest(url, init, settings);
+    if (response.status !== 200) {
+      throw new ServerConnection.ResponseError(response);
+    }
+    let data = await response.json();
+    validate.validateModel(data);
+    // Reconnect the other kernels asynchronously, but don't wait for them.
+    each(runningKernels, k => {
+      if (k !== kernel && k.id === kernel.id) {
+        k.reconnect();
       }
-      return response.json();
-    }).then(data => {
-      validate.validateModel(data);
-      // Reconnect the other kernels asynchronously.
-      each(runningKernels, k => {
-        if (k !== kernel && k.id === kernel.id) {
-          k.reconnect();
-        }
-      });
-      return kernel.reconnect();
     });
+    return kernel.reconnect();
   }
 
   /**
    * Interrupt a kernel.
    */
   export
-  function interruptKernel(kernel: Kernel.IKernel, settings?: ServerConnection.ISettings): Promise<void> {
+  async function interruptKernel(kernel: Kernel.IKernel, settings?: ServerConnection.ISettings): Promise<void> {
     if (kernel.status === 'dead') {
-      return Promise.reject(new Error('Kernel is dead'));
+      throw new Error('Kernel is dead');
     }
     settings = settings || ServerConnection.makeSettings();
     let url = URLExt.join(
@@ -1450,35 +1448,30 @@ namespace Private {
       encodeURIComponent(kernel.id), 'interrupt'
     );
     let init = { method: 'POST' };
-    return ServerConnection.makeRequest(url, init, settings).then(response => {
-      if (response.status !== 204) {
-        throw new ServerConnection.ResponseError(response);
-      }
-    });
+    let response = await ServerConnection.makeRequest(url, init, settings);
+    if (response.status !== 204) {
+      throw new ServerConnection.ResponseError(response);
+    }
   }
 
   /**
    * Delete a kernel.
    */
   export
-  function shutdownKernel(id: string, settings?: ServerConnection.ISettings): Promise<void> {
+  async function shutdownKernel(id: string, settings?: ServerConnection.ISettings): Promise<void> {
     settings = settings || ServerConnection.makeSettings();
     let url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL,
                                 encodeURIComponent(id));
     let init = { method: 'DELETE' };
-    return ServerConnection.makeRequest(url, init, settings).then(response => {
-      if (response.status === 404) {
-        response.json().then(data => {
-          let msg = (
-            data.message || `The kernel "${id}"" does not exist on the server`
-          );
-          console.warn(msg);
-        });
-      } else if (response.status !== 204) {
-        throw new ServerConnection.ResponseError(response);
-      }
-      killKernels(id);
-    });
+    let response = await ServerConnection.makeRequest(url, init, settings);
+    if (response.status === 404) {
+      let data = await response.json();
+      let msg = data.message || `The kernel "${id}"" does not exist on the server`;
+      console.warn(msg);
+    } else if (response.status !== 204) {
+      throw new ServerConnection.ResponseError(response);
+    }
+    killKernels(id);
   }
 
   /**
@@ -1489,13 +1482,10 @@ namespace Private {
    * @returns A promise that resolves when all the kernels are shut down.
    */
   export
-  function shutdownAll(settings?: ServerConnection.ISettings): Promise<void> {
+  async function shutdownAll(settings?: ServerConnection.ISettings): Promise<void> {
     settings = settings || ServerConnection.makeSettings();
-    return listRunning(settings).then(running => {
-      each(running, k => {
-        shutdownKernel(k.id, settings);
-      });
-    });
+    let running = await listRunning(settings);
+    await Promise.all(running.map(k => shutdownKernel(k.id, settings)));
   }
 
   /**
@@ -1513,19 +1503,17 @@ namespace Private {
    * Get a full kernel model from the server by kernel id string.
    */
   export
-  function getKernelModel(id: string, settings?: ServerConnection.ISettings): Promise<Kernel.IModel> {
+  async function getKernelModel(id: string, settings?: ServerConnection.ISettings): Promise<Kernel.IModel> {
     settings = settings || ServerConnection.makeSettings();
     let url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL,
                                 encodeURIComponent(id));
-    return ServerConnection.makeRequest(url, {}, settings).then(response => {
-      if (response.status !== 200) {
-        throw new ServerConnection.ResponseError(response);
-      }
-      return response.json();
-    }).then(data => {
-      validate.validateModel(data);
-      return data;
-    });
+    let response = await ServerConnection.makeRequest(url, {}, settings);
+    if (response.status !== 200) {
+      throw new ServerConnection.ResponseError(response);
+    }
+    let data = await response.json();
+    validate.validateModel(data);
+    return data;
   }
 
   /**
@@ -1548,14 +1536,11 @@ namespace Private {
    * Send a kernel message to the kernel and resolve the reply message.
    */
   export
-  function handleShellMessage(kernel: Kernel.IKernel, msg: KernelMessage.IShellMessage): Promise<KernelMessage.IShellMessage> {
-    let future: Kernel.IFuture;
-    try {
-      future = kernel.sendShellMessage(msg, true);
-    } catch (e) {
-      return Promise.reject(e);
-    }
-    return new Promise(resolve => { future.onReply = resolve; });
+  async function handleShellMessage(kernel: Kernel.IKernel, msg: KernelMessage.IShellMessage): Promise<KernelMessage.IShellMessage> {
+    let future = kernel.sendShellMessage(msg, true);
+    let reply = new PromiseDelegate<KernelMessage.IShellMessage>();
+    future.onReply = reply.resolve;
+    return reply.promise;
   }
 
   /**
