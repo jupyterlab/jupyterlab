@@ -2,12 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
   IRenderMime
 } from '@jupyterlab/rendermime-interfaces';
+
+import {
+  Widget
+} from '@phosphor/widgets';
 
 import * as React from 'react';
 

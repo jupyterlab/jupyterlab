@@ -1,3 +1,6 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import * as React from 'react';
 
 import * as ReactDOM from 'react-dom';
@@ -7,9 +10,7 @@ import Highlight from 'react-highlighter';
 import JSONTree from 'react-json-tree';
 
 import {
-  JSONValue,
-  JSONObject,
-  JSONArray
+  JSONArray, JSONObject, JSONValue
 } from '@phosphor/coreutils';
 
 
