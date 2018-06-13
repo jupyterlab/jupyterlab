@@ -1499,7 +1499,7 @@ namespace Private {
    * Kill the kernels by id.
    */
   function killKernels(id: string): void {
-    each(toArray(runningKernels), kernel => {
+    each(runningKernels, kernel => {
       if (kernel.id === id) {
         kernel.dispose();
       }
