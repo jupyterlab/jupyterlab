@@ -813,10 +813,28 @@ class DefaultKernel implements Kernel.IKernel {
   }
 
   /**
+   * Check to make sure it is okay to proceed to handle a message.
+   *
+   * #### Notes
+   * Because we handle messages asynchronously, before a message is handled the
+   * kernel might be disposed or restarted (and have a different session id).
+   * This function throws an error in each of these cases. This is meant to be
+   * called at the start of an asynchronous message handler.
+   */
+  private _assertCurrentMessage(msg: KernelMessage.IMessage) {
+    if (this.isDisposed) {
+      throw new Error('Kernel object is disposed');
+    }
+    if (msg.header.session !== this._kernelSession) {
+      throw new Error(`Message from old kernel session: ${msg.header.msg_type}`);
+    }
+  }
+
+  /**
    * Handle a `comm_open` kernel message.
    */
   private async _handleCommOpen(msg: KernelMessage.ICommOpenMsg): Promise<void> {
-    this._checkCurrentMessage(msg);
+    this._assertCurrentMessage(msg);
     let content = msg.content;
     let comm = new CommHandler(
       content.target_name,
@@ -841,28 +859,10 @@ class DefaultKernel implements Kernel.IKernel {
   }
 
   /**
-   * Check to make sure it is okay to proceed to handle a message.
-   *
-   * #### Notes
-   * Because we handle messages asynchronously, before a message is handled the
-   * kernel might be disposed or restarted (and have a different session id).
-   * This function throws an error in each of these cases. This is meant to be
-   * called at the start of an asynchronous message handler.
-   */
-  private _checkCurrentMessage(msg: KernelMessage.IMessage) {
-    if (this.isDisposed) {
-      throw new Error('Kernel object is disposed');
-    }
-    if (msg.header.session !== this._kernelSession) {
-      throw new Error(`Message from old kernel session: ${msg.header.msg_type}`);
-    }
-  }
-
-  /**
    * Handle 'comm_close' kernel message.
    */
   private async _handleCommClose(msg: KernelMessage.ICommCloseMsg): Promise<void> {
-    this._checkCurrentMessage(msg);
+    this._assertCurrentMessage(msg);
     let content = msg.content;
     let comm = this._comms.get(content.comm_id);
     if (!comm) {
@@ -881,7 +881,7 @@ class DefaultKernel implements Kernel.IKernel {
    * Handle a 'comm_msg' kernel message.
    */
   private async _handleCommMsg(msg: KernelMessage.ICommMsgMsg): Promise<void> {
-    this._checkCurrentMessage(msg);
+    this._assertCurrentMessage(msg);
     let content = msg.content;
     let comm = this._comms.get(content.comm_id);
     if (!comm) {
@@ -983,7 +983,7 @@ class DefaultKernel implements Kernel.IKernel {
       // corresponds to the current kernel. kernel_info_reply messages can
       // change the kernel session, so we allow those to pass.
       if (msg.header.msg_type !== 'kernel_info_reply') {
-        this._checkCurrentMessage(msg);
+        this._assertCurrentMessage(msg);
       }
 
       // Return so that any promises from handling a message are fulfilled
@@ -1016,7 +1016,7 @@ class DefaultKernel implements Kernel.IKernel {
         if (displayId) {
           handled = await this._handleDisplayId(displayId, msg);
           // The await above may make this message out of date, so check again.
-          this._checkCurrentMessage(msg);
+          this._assertCurrentMessage(msg);
         }
         break;
       default:
@@ -1029,7 +1029,7 @@ class DefaultKernel implements Kernel.IKernel {
       let future = this._futures && this._futures.get(parentHeader.msg_id);
       if (future) {
         await future.handleMsg(msg);
-        this._checkCurrentMessage(msg);
+        this._assertCurrentMessage(msg);
       } else {
         // If the message was sent by us and was not iopub, it is orphaned.
         let owned = parentHeader.session === this.clientId;
@@ -1041,7 +1041,7 @@ class DefaultKernel implements Kernel.IKernel {
     if (msg.channel === 'iopub') {
       switch (msg.header.msg_type) {
       case 'status':
-        // Updating the status is synchronous, and we call no user code
+        // Updating the status is synchronous, and we call no async user code
         this._updateStatus((msg as KernelMessage.IStatusMsg).content.execution_state);
         break;
       case 'comm_open':
@@ -1056,7 +1056,7 @@ class DefaultKernel implements Kernel.IKernel {
       default:
         break;
       }
-      this._checkCurrentMessage(msg);
+      this._assertCurrentMessage(msg);
       this._iopubMessage.emit(msg as KernelMessage.IIOPubMessage);
     }
   }
