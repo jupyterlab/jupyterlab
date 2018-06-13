@@ -52,42 +52,42 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
   /**
    * Get the reply handler.
    */
-  get onReply(): (msg: KernelMessage.IShellMessage) => void | Promise<void> {
+  get onReply(): (msg: KernelMessage.IShellMessage) => void | PromiseLike<void> {
     return this._reply;
   }
 
   /**
    * Set the reply handler.
    */
-  set onReply(cb: (msg: KernelMessage.IShellMessage) => void | Promise<void>) {
+  set onReply(cb: (msg: KernelMessage.IShellMessage) => void | PromiseLike<void>) {
     this._reply = cb;
   }
 
   /**
    * Get the iopub handler.
    */
-  get onIOPub(): (msg: KernelMessage.IIOPubMessage) => void | Promise<void> {
+  get onIOPub(): (msg: KernelMessage.IIOPubMessage) => void | PromiseLike<void> {
     return this._iopub;
   }
 
   /**
    * Set the iopub handler.
    */
-  set onIOPub(cb: (msg: KernelMessage.IIOPubMessage) => void | Promise<void>) {
+  set onIOPub(cb: (msg: KernelMessage.IIOPubMessage) => void | PromiseLike<void>) {
     this._iopub = cb;
   }
 
   /**
    * Get the stdin handler.
    */
-  get onStdin(): (msg: KernelMessage.IStdinMessage) => void | Promise<void> {
+  get onStdin(): (msg: KernelMessage.IStdinMessage) => void | PromiseLike<void> {
     return this._stdin;
   }
 
   /**
    * Set the stdin handler.
    */
-  set onStdin(cb: (msg: KernelMessage.IStdinMessage) => void | Promise<void>) {
+  set onStdin(cb: (msg: KernelMessage.IStdinMessage) => void | PromiseLike<void>) {
     this._stdin = cb;
   }
 
@@ -224,9 +224,9 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
 
   private _msg: KernelMessage.IShellMessage;
   private _status = 0;
-  private _stdin: (msg: KernelMessage.IStdinMessage) => void | Promise<void> = Private.noOp;
-  private _iopub: (msg: KernelMessage.IIOPubMessage) => void | Promise<void> = Private.noOp;
-  private _reply: (msg: KernelMessage.IShellMessage) => void | Promise<void> = Private.noOp;
+  private _stdin: (msg: KernelMessage.IStdinMessage) => void | PromiseLike<void> = Private.noOp;
+  private _iopub: (msg: KernelMessage.IIOPubMessage) => void | PromiseLike<void> = Private.noOp;
+  private _reply: (msg: KernelMessage.IShellMessage) => void | PromiseLike<void> = Private.noOp;
   private _done = new PromiseDelegate<KernelMessage.IShellMessage>();
   private _replyMsg: KernelMessage.IShellMessage;
   private _hooks = new Private.HookList<KernelMessage.IIOPubMessage>();

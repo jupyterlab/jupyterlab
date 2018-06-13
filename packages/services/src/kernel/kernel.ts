@@ -320,7 +320,7 @@ namespace Kernel {
      * callback will be overidden.  A registered comm target handler will take
      * precedence over a comm which specifies a `target_module`.
      */
-    registerCommTarget(targetName: string, callback: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => void | Promise<void>): IDisposable;
+    registerCommTarget(targetName: string, callback: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => void | PromiseLike<void>): IDisposable;
 
     /**
      * Register an IOPub message hook.
@@ -696,7 +696,7 @@ namespace Kernel {
      * If the handler returns a promise, message processing pauses until the
      * promise is resolved.
      */
-    onReply: (msg: KernelMessage.IShellMessage) => void | Promise<void>;
+    onReply: (msg: KernelMessage.IShellMessage) => void | PromiseLike<void>;
 
     /**
      * The stdin handler for the kernel future.
@@ -705,7 +705,7 @@ namespace Kernel {
      * If the handler returns a promise, message processing pauses until the
      * promise is resolved.
      */
-    onStdin: (msg: KernelMessage.IStdinMessage) => void | Promise<void>;
+    onStdin: (msg: KernelMessage.IStdinMessage) => void | PromiseLike<void>;
 
     /**
      * The iopub handler for the kernel future.
@@ -714,7 +714,7 @@ namespace Kernel {
      * If the handler returns a promise, message processing pauses until the
      * promise is resolved.
      */
-    onIOPub: (msg: KernelMessage.IIOPubMessage) => void | Promise<void>;
+    onIOPub: (msg: KernelMessage.IIOPubMessage) => void | PromiseLike<void>;
 
     /**
      * Register hook for IOPub messages.
@@ -769,12 +769,12 @@ namespace Kernel {
      * This is called when the comm is closed from either the server or
      * client.
      */
-    onClose: (msg: KernelMessage.ICommCloseMsg) => void | Promise<void>;
+    onClose: (msg: KernelMessage.ICommCloseMsg) => void | PromiseLike<void>;
 
     /**
      * Callback for a comm message received event.
      */
-    onMsg: (msg: KernelMessage.ICommMsgMsg) => void | Promise<void>;
+    onMsg: (msg: KernelMessage.ICommMsgMsg) => void | PromiseLike<void>;
 
     /**
      * Open a comm with optional data and metadata.

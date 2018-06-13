@@ -649,7 +649,7 @@ class DefaultKernel implements Kernel.IKernel {
    * it is to store the disposable. Since there is only one callback, you don't even
    * need to store the callback.
    */
-  registerCommTarget(targetName: string, callback: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => void | Promise<void>): IDisposable {
+  registerCommTarget(targetName: string, callback: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => void | PromiseLike<void>): IDisposable {
     this._targetRegistry[targetName] = callback;
     return new DisposableDelegate(() => {
       if (!this.isDisposed) {
