@@ -636,24 +636,20 @@ class DefaultKernel implements Kernel.IKernel {
   /**
    * Connect to a comm, or create a new one.
    *
-   * TODO: should we change this to a synchronous function? There's nothing
-   * asynchronous about it now.
-   *
    * #### Notes
-   * If a client-side comm already exists, it is returned.
+   * If a client-side comm already exists with the given commId, it is returned.
    */
-  async connectToComm(targetName: string, commId?: string): Promise<Kernel.IComm> {
-    let id = commId || uuid();
-    if (this._comms.has(id)) {
-      return this._comms.get(id);
+  connectToComm(targetName: string, commId: string = uuid()): Kernel.IComm {
+    if (this._comms.has(commId)) {
+      return this._comms.get(commId);
     }
     let comm = new CommHandler(
       targetName,
-      id,
+      commId,
       this,
-      () => { this._unregisterComm(id); }
+      () => { this._unregisterComm(commId); }
     );
-    this._comms.set(id, comm);
+    this._comms.set(commId, comm);
     return comm;
   }
 

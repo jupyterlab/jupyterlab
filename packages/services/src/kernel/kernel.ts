@@ -302,12 +302,9 @@ namespace Kernel {
      *
      * @param id - The comm id.
      *
-     * @returns A promise that resolves with a comm instance.
-     *
-     * #### Notes
-     * If a promise to client-side comm already exists, it is returned.
+     * @returns A comm instance.
      */
-    connectToComm(targetName: string, commId?: string): Promise<Kernel.IComm>;
+    connectToComm(targetName: string, commId?: string): Kernel.IComm;
 
     /**
      * Register a comm target handler.
