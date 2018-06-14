@@ -410,7 +410,7 @@ class DefaultKernel implements Kernel.IKernel {
    * before we say the kernel is ready, and cache the info and the kernel
    * session id. Further calls to this should returned the cached results.
    */
-  requestKernelInfo(): Promise<KernelMessage.IInfoReplyMsg> {
+  async requestKernelInfo(): Promise<KernelMessage.IInfoReplyMsg> {
     let options: KernelMessage.IOptions = {
       msgType: 'kernel_info_request',
       channel: 'shell',
@@ -418,14 +418,13 @@ class DefaultKernel implements Kernel.IKernel {
       session: this._clientId
     };
     let msg = KernelMessage.createShellMessage(options);
-    return Private.handleShellMessage(this, msg).then(reply => {
-      if (this.isDisposed) {
-        throw new Error('Disposed kernel');
-      }
-      this._info = (reply as KernelMessage.IInfoReplyMsg).content;
-      this._kernelSession = reply.header.session;
-      return reply as KernelMessage.IInfoReplyMsg;
-    });
+    let reply = (await Private.handleShellMessage(this, msg)) as KernelMessage.IInfoReplyMsg;
+    if (this.isDisposed) {
+      throw new Error('Disposed kernel');
+    }
+    this._info = reply.content;
+    this._kernelSession = reply.header.session;
+    return reply;
   }
 
   /**
