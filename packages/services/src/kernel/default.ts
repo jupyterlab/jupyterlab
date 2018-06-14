@@ -246,7 +246,7 @@ class DefaultKernel implements Kernel.IKernel {
     this._futures.forEach(future => { future.dispose(); });
     this._comms.forEach(comm => { comm.dispose(); });
     this._kernelSession = '';
-    this._msgChain = Promise.reject('Kernel is disposed');
+    this._msgChain = null;
     this._displayIdToParentIds.clear();
     this._msgIdToDisplayIds.clear();
     ArrayExt.removeFirstOf(Private.runningKernels, this);
@@ -419,7 +419,6 @@ class DefaultKernel implements Kernel.IKernel {
       throw new Error('Disposed kernel');
     }
     this._info = reply.content;
-    this._kernelSession = reply.header.session;
     return reply;
   }
 
@@ -831,14 +830,16 @@ class DefaultKernel implements Kernel.IKernel {
    * Because we handle messages asynchronously, before a message is handled the
    * kernel might be disposed or restarted (and have a different session id).
    * This function throws an error in each of these cases. This is meant to be
-   * called at the start of an asynchronous message handler.
+   * called at the start of an asynchronous message handler to cancel message
+   * processing if the message no longer is valid.
    */
   private _assertCurrentMessage(msg: KernelMessage.IMessage) {
     if (this.isDisposed) {
       throw new Error('Kernel object is disposed');
     }
+
     if (msg.header.session !== this._kernelSession) {
-      throw new Error(`Message from old kernel session: ${msg.header.msg_type}`);
+      throw new Error(`Canceling handling of old message: ${msg.header.msg_type}`);
     }
   }
 
@@ -983,6 +984,9 @@ class DefaultKernel implements Kernel.IKernel {
       // We throw the error so that it bubbles up to the top, and displays the right stack.
       throw error;
     }
+
+    // Update the current kernel session id
+    this._kernelSession = msg.header.session;
 
     // Handle the message asynchronously, in the order received.
     this._msgChain = this._msgChain.then(() => {
