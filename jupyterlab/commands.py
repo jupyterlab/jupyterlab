@@ -694,14 +694,21 @@ class _AppHandler(object):
 
     def toggle_extension(self, extension, value):
         """Enable or disable a lab extension.
+
+        Returns `True` if a rebuild is recommended, `False` otherwise.
         """
         config = self._read_page_config()
         disabled = config.setdefault('disabledExtensions', [])
+        did_something = False
         if value and extension not in disabled:
             disabled.append(extension)
-        if not value and extension in disabled:
+            did_something = True
+        elif not value and extension in disabled:
             disabled.remove(extension)
-        self._write_page_config(config)
+            did_something = True
+        if did_something:
+            self._write_page_config(config)
+        return did_something
 
     def check_extension(self, extension, check_installed_only=False):
         """Check if a lab extension is enabled or disabled
