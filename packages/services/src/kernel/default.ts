@@ -855,11 +855,9 @@ class DefaultKernel implements Kernel.IKernel {
       let target = await Private.loadObject(content.target_name, content.target_module, this._targetRegistry);
       await target(comm, msg);
     } catch (e) {
-      // TODO: should we wait for the comm to close? other places we are just
-      // waiting for client-side processing, but here we are waiting for a
-      // message round trip. It would probably be more consistent to just wait
-      // for the comm's onClose client-side function to return.
-      await comm.close().done;
+      // Close the comm asynchronously. We cannot block message processing on
+      // kernel messages to wait for another kernel message.
+      comm.close();
       console.error('Exception opening new comm');
       throw(e);
     }
@@ -892,8 +890,6 @@ class DefaultKernel implements Kernel.IKernel {
     let content = msg.content;
     let comm = this._comms.get(content.comm_id);
     if (!comm) {
-      // We do not have a registered comm for this comm id, ignore.
-      // TODO: should we print an error like we do for _handleCommClose?
       return;
     }
     let onMsg = comm.onMsg;
@@ -999,12 +995,10 @@ class DefaultKernel implements Kernel.IKernel {
     }).catch(error => {
       // Log any errors in handling the message, thus resetting the _msgChain
       // promise so we can process more messages.
-      // TODO: this messes up the error stack in the error, which is sad (the error stack will be printed, but the nice clickable error stack in the console won't be there, instead it will point to here.).
       console.error(error);
     });
 
-    // TODO: Should we have another signal emitted when a message is handled
-    // asynchronously?
+    // Emit the message recieve signal
     this._anyMessage.emit({msg, direction: 'recv'});
   }
 

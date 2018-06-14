@@ -176,7 +176,8 @@ class CommHandler extends DisposableDelegate implements Kernel.IComm {
     let onClose = this._onClose;
     if (onClose) {
       let ioMsg = KernelMessage.createMessage(options, content, metadata, buffers);
-      // TODO: should we somehow pause message processing if onClose returns a promise?
+      // In the future, we may want to communicate back to the user the possible
+      // promise returned from onClose.
       onClose(ioMsg as KernelMessage.ICommCloseMsg);
     }
     this.dispose();
