@@ -314,8 +314,6 @@ namespace Kernel {
      *
      * @param callback - The callback invoked for a comm open message.
      *
-     * @returns A disposable used to unregister the comm target.
-     *
      * #### Notes
      * Only one comm target can be registered to a target name at a time, an
      * existing callback for the same target name will be overidden.  A registered
@@ -325,7 +323,19 @@ namespace Kernel {
      * If the callback returns a promise, kernel message processing will pause
      * until the returned promise is fulfilled.
      */
-    registerCommTarget(targetName: string, callback: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => void | PromiseLike<void>): IDisposable;
+    registerCommTarget(targetName: string, callback: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => void | PromiseLike<void>): void;
+
+    /**
+     * Remove a comm target handler.
+     *
+     * @param targetName - The name of the comm target to remove.
+     *
+     * @param callback - The callback to remove.
+     *
+     * #### Notes
+     * The comm target is only removed if it matches the callback argument.
+     */
+    removeCommTarget(targetName: string, callback: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => void | PromiseLike<void>): void;
 
     /**
      * Register an IOPub message hook.
@@ -334,8 +344,6 @@ namespace Kernel {
      * intercept.
      *
      * @param hook - The callback invoked for the message.
-     *
-     * @returns A disposable used to unregister the message hook.
      *
      * #### Notes
      * The IOPub hook system allows you to preempt the handlers for IOPub
@@ -349,7 +357,17 @@ namespace Kernel {
      *
      * See also [[IFuture.registerMessageHook]].
      */
-    registerMessageHook(msgId: string, hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>): IDisposable;
+    registerMessageHook(msgId: string, hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>): void;
+
+    /**
+     * Remove an IOPub message hook.
+     *
+     * @param msg_id - The parent_header message id the hook intercepted.
+     *
+     * @param hook - The callback invoked for the message.
+     *
+     */
+    removeMessageHook(msgId: string, hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>): void;
   }
 
   /**

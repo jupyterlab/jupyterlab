@@ -629,13 +629,24 @@ class DefaultKernel implements Kernel.IKernel {
    * it is to store the disposable. Since there is only one callback, you don't even
    * need to store the callback.
    */
-  registerCommTarget(targetName: string, callback: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => void | PromiseLike<void>): IDisposable {
+  registerCommTarget(targetName: string, callback: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => void | PromiseLike<void>): void {
     this._targetRegistry[targetName] = callback;
-    return new DisposableDelegate(() => {
-      if (!this.isDisposed) {
-        delete this._targetRegistry[targetName];
-      }
-    });
+  }
+
+  /**
+   * Remove a comm target handler.
+   *
+   * @param targetName - The name of the comm target to remove.
+   *
+   * @param callback - The callback to remove.
+   *
+   * #### Notes
+   * The comm target is only removed if it matches the callback argument.
+   */
+  removeCommTarget(targetName: string, callback: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => void | PromiseLike<void>): void {
+    if (!this.isDisposed && this._targetRegistry[targetName] === callback) {
+      delete this._targetRegistry[targetName];
+    }
   }
 
   /**
@@ -644,8 +655,6 @@ class DefaultKernel implements Kernel.IKernel {
    * @param msg_id - The parent_header message id the hook will intercept.
    *
    * @param hook - The callback invoked for the message.
-   *
-   * @returns A disposable used to unregister the message hook.
    *
    * #### Notes
    * The IOPub hook system allows you to preempt the handlers for IOPub
@@ -662,27 +671,28 @@ class DefaultKernel implements Kernel.IKernel {
    * deactivated immediately.
    *
    * See also [[IFuture.registerMessageHook]].
-   *
-   * TODO: like phosphor, perhaps we shouldn't return a disposable, which keeps
-   * a basically just keeps a reference to the msgId. Instead, just make the
-   * user call a new removeMessageHook function directly (presumably it's just
-   * as easy to keep the message id and hook function as it is to keep the
-   * disposable, so might as well avoid the allocation).
    */
-  registerMessageHook(msgId: string, hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>): IDisposable {
+  registerMessageHook(msgId: string, hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>): void {
     let future = this._futures && this._futures.get(msgId);
     if (future) {
       future.registerMessageHook(hook);
     }
-
-    return new DisposableDelegate(() => {
-      let future = this._futures && this._futures.get(msgId);
-      if (future) {
-        future.removeMessageHook(hook);
-      }
-    });
   }
 
+  /**
+   * Remove an IOPub message hook.
+   *
+   * @param msg_id - The parent_header message id the hook intercepted.
+   *
+   * @param hook - The callback invoked for the message.
+   *
+   */
+  removeMessageHook(msgId: string, hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>): void {
+    let future = this._futures && this._futures.get(msgId);
+    if (future) {
+      future.removeMessageHook(hook);
+    }
+  }
 
 
   /**
