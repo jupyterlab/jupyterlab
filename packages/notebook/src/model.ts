@@ -2,10 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  each
-} from '@phosphor/algorithm';
-
-import {
   DocumentModel, DocumentRegistry
 } from '@jupyterlab/docregistry';
 
@@ -265,19 +261,15 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   private _onCellsChanged(list: IObservableList<ICellModel>, change: IObservableList.IChangedArgs<ICellModel>): void {
     switch (change.type) {
     case 'add':
-      each(change.newValues, cell => {
+      change.newValues.forEach(cell => {
         cell.contentChanged.connect(this.triggerContentChange, this);
       });
       break;
     case 'remove':
-      each(change.oldValues, cell => { /* no op */
-      });
       break;
     case 'set':
-      each(change.newValues, cell => {
+      change.newValues.forEach(cell => {
         cell.contentChanged.connect(this.triggerContentChange, this);
-      });
-      each(change.oldValues, cell => { /* no op */
       });
       break;
     default:
