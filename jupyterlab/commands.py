@@ -240,7 +240,9 @@ def update_extension(name=None, all_=False, app_dir=None, logger=None):
     """
     _node_check()
     handler = _AppHandler(app_dir, logger)
-    return handler.update_extension(name, all_)
+    if all_ is True:
+        return handler.update_all_extensions()
+    return handler.update_extension(name)
 
 
 def clean(app_dir=None):
@@ -579,17 +581,25 @@ class _AppHandler(object):
         self.logger.warn('No labextension named "%s" installed' % name)
         return False
 
-    def update_extension(self, name=None, all_ext=False):
-        if all_ext:
-            should_rebuild = False
-            for (extname, _) in self.info['extensions'].items():
-                if extname in self.info['local_extensions']:
-                    continue
-                updated = self._update_extension(extname)
-                # Rebuild if at least one update happens:
-                should_rebuild = should_rebuild or updated
-            return should_rebuild
+    def update_all_extensions(self):
+        """Update all non-local extensions.
 
+        Returns `True` if a rebuild is recommended, `False` otherwise.
+        """
+        should_rebuild = False
+        for (extname, _) in self.info['extensions'].items():
+            if extname in self.info['local_extensions']:
+                continue
+            updated = self._update_extension(extname)
+            # Rebuild if at least one update happens:
+            should_rebuild = should_rebuild or updated
+        return should_rebuild
+
+    def update_extension(self, name):
+        """Update an extension by name.
+
+        Returns `True` if a rebuild is recommended, `False` otherwise.
+        """
         if name not in self.info['extensions']:
             self.logger.warn('No labextension named "%s" installed' % name)
             return False
