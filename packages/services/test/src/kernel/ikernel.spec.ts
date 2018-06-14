@@ -1181,7 +1181,7 @@ describe('Kernel.IKernel', () => {
         kernel.registerMessageHook(parentHeader.msg_id, (msg) => {
           if (calls.length > 0) {
             // delete the hook the second time around
-            toDeleteHook.dispose();
+            kernel.removeMessageHook(parentHeader.msg_id, toDelete);
           }
           calls.push('first');
           return true;
