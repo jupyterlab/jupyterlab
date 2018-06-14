@@ -281,7 +281,7 @@ class NotebookModel extends DocumentModel implements INotebookModel {
       });
       break;
     default:
-      return;
+      break;
     }
     let factory = this.contentFactory;
     // Add code cell if there are no cells remaining.
