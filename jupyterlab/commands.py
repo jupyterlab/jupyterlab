@@ -221,6 +221,8 @@ def install_extension(extension, app_dir=None, logger=None):
     """Install an extension package into JupyterLab.
 
     The extension is first validated.
+
+    Returns `True` if a rebuild is recommended, `False` otherwise.
     """
     _node_check()
     handler = _AppHandler(app_dir, logger)
@@ -229,6 +231,8 @@ def install_extension(extension, app_dir=None, logger=None):
 
 def uninstall_extension(name, app_dir=None, logger=None):
     """Uninstall an extension by name or path.
+
+    Returns `True` if a rebuild is recommended, `False` otherwise.
     """
     _node_check()
     handler = _AppHandler(app_dir, logger)
@@ -240,6 +244,8 @@ def update_extension(name=None, all_=False, app_dir=None, logger=None):
 
     Either `name` must be given as a string, or `all_` must be `True`.
     If `all_` is `True`, the value of `name` is ignored.
+
+    Returns `True` if a rebuild is recommended, `False` otherwise.
     """
     _node_check()
     handler = _AppHandler(app_dir, logger)
@@ -281,6 +287,8 @@ def get_app_info(app_dir=None, logger=None):
 
 def enable_extension(extension, app_dir=None, logger=None):
     """Enable a JupyterLab extension.
+
+    Returns `True` if a rebuild is recommended, `False` otherwise.
     """
     handler = _AppHandler(app_dir, logger)
     return handler.toggle_extension(extension, False)
@@ -288,6 +296,8 @@ def enable_extension(extension, app_dir=None, logger=None):
 
 def disable_extension(extension, app_dir=None, logger=None):
     """Disable a JupyterLab package.
+
+    Returns `True` if a rebuild is recommended, `False` otherwise.
     """
     handler = _AppHandler(app_dir, logger)
     return handler.toggle_extension(extension, True)
@@ -318,13 +328,18 @@ def list_extensions(app_dir=None, logger=None):
 
 
 def link_package(path, app_dir=None, logger=None):
-    """Link a package against the JupyterLab build."""
+    """Link a package against the JupyterLab build.
+
+    Returns `True` if a rebuild is recommended, `False` otherwise.
+    """
     handler = _AppHandler(app_dir, logger)
     return handler.link_package(path)
 
 
 def unlink_package(package, app_dir=None, logger=None):
     """Unlink a package from JupyterLab by path or name.
+
+    Returns `True` if a rebuild is recommended, `False` otherwise.
     """
     handler = _AppHandler(app_dir, logger)
     return handler.unlink_package(package)
