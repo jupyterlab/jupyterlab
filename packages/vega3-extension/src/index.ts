@@ -74,17 +74,18 @@ class RenderedVega3 extends Widget implements IRenderMime.IRenderer {
    * Render Vega/Vega-Lite into this widget's node.
    */
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-    return import(
-      /* webpackChunkName: "vega" */
-      'vega-embed'
-    ).then((vega: typeof VegaModuleType) => {
-      const data = model.data[this._mimeType] as JSONObject;
-      const metadata = model.metadata[this._mimeType] as { embed_options?: VegaModuleType.EmbedOptions };
-      const embedOptions = metadata && metadata.embed_options ? metadata.embed_options : {};
-      const mode: VegaModuleType.Mode = this._mimeType === VEGA_MIME_TYPE ? 'vega' : 'vega-lite';
+    const data = model.data[this._mimeType] as JSONObject;
+    const metadata = model.metadata[this._mimeType] as { embed_options?: VegaModuleType.EmbedOptions };
+    const embedOptions = metadata && metadata.embed_options ? metadata.embed_options : {};
+    const mode: VegaModuleType.Mode = this._mimeType === VEGA_MIME_TYPE ? 'vega' : 'vega-lite';
+
+    return require.ensure(['vega-embed'], (vega: typeof VegaModuleType) => {
       return this._resolver.resolveUrl('').then((path: string) => {
         return this._resolver.getDownloadUrl(path).then(baseURL => {
-          const loader = vega.vega.loader({ baseURL });
+          const loader = vega.vega.loader({
+            baseURL,
+            http: { credentials: 'same-origin' }
+          });
           const options: VegaModuleType.EmbedOptions = {
             actions: true,
             defaultStyle: true,

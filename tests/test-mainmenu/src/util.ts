@@ -30,11 +30,15 @@ function findExtender<E extends IMenuExtender<Widget>>(widget: Widget, s: Set<E>
  */
 export
 function delegateExecute<E extends IMenuExtender<Widget>>(widget: Widget, s: Set<E>, executor: keyof E): Promise<any> {
-  const extender = findExtender(widget, s);
-  if (!extender) {
-    return Promise.resolve(void 0);
-  }
-  return extender[executor](widget);
+    const extender = findExtender(widget, s);
+    if (!extender) {
+      return Promise.resolve(void 0);
+    }
+    // Coerce the result to be a function. When Typedoc is updated to use
+    // Typescript 2.8, we can possibly use conditional types to get Typescript
+    // to recognize this is a function.
+    let f = extender[executor] as any as (w: Widget) => Promise<any>;
+    return f(widget);
 }
 
 /**
@@ -44,5 +48,12 @@ function delegateExecute<E extends IMenuExtender<Widget>>(widget: Widget, s: Set
 export
 function delegateToggled<E extends IMenuExtender<Widget>>(widget: Widget, s: Set<E>, toggled: keyof E): boolean {
   const extender = findExtender(widget, s);
-  return !!extender && !!extender[toggled] && !!extender[toggled](widget);
+  if (extender && extender[toggled]) {
+    // Coerce the result to be a function. When Typedoc is updated to use
+    // Typescript 2.8, we can possibly use conditional types to get Typescript
+    // to recognize this is a function.
+    let f = extender[toggled] as any as (w: Widget) => boolean;
+    return f(widget);
+  }
+  return false;
 }

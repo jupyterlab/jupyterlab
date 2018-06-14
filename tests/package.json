@@ -38,17 +38,18 @@
     "chai": "~4.1.2",
     "expect.js": "~0.3.1",
     "json-to-html": "~0.1.2",
-    "react": "~16.2.0",
+    "react": "~16.4.0",
     "simulate-event": "~1.4.0"
   },
   "devDependencies": {
-    "awesome-typescript-loader": "~3.4.1",
+    "cache-loader": "^1.2.2",
     "css-loader": "~0.28.7",
     "es6-promise": "~4.1.1",
-    "file-loader": "~0.10.1",
+    "file-loader": "~1.1.11",
+    "fork-ts-checker-webpack-plugin": "^0.4.2",
     "fs-extra": "~4.0.2",
     "istanbul-instrumenter-loader": "~3.0.0",
-    "json-loader": "~0.5.7",
+    "json-loader": "^0.5.7",
     "karma": "~1.7.1",
     "karma-chrome-launcher": "~0.2.3",
     "karma-coverage": "~0.5.5",
@@ -62,9 +63,11 @@
     "mocha": "~3.5.3",
     "raw-loader": "~0.5.1",
     "rimraf": "~2.6.2",
-    "style-loader": "~0.13.2",
+    "style-loader": "~0.21.0",
+    "thread-loader": "^1.1.5",
+    "ts-loader": "^4.4.0",
     "typescript": "~2.9.1",
-    "url-loader": "~0.5.9",
-    "webpack": "~2.7.0"
+    "url-loader": "~1.0.1",
+    "webpack": "~4.12.0"
   }
 }

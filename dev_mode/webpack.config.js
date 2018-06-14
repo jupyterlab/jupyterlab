@@ -8,6 +8,7 @@ var fs = require('fs-extra');
 var Handlebars = require('handlebars');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var webpack = require('webpack');
+var DuplicatePackageCheckerPlugin = require('duplicate-package-checker-webpack-plugin');
 
 var Build = require('@jupyterlab/buildutils').Build;
 var package_data = require('./package.json');
@@ -81,11 +82,9 @@ function maybeSync(localPath, name, rest) {
 function JupyterLabPlugin() { }
 
 JupyterLabPlugin.prototype.apply = function(compiler) {
-
-  compiler.plugin('after-emit', function(compilation, callback) {
+  compiler.hooks.afterEmit.tap('JupyterLabPlugin', function() {
     var staticDir = jlab.staticDir;
     if (!staticDir) {
-      callback();
       return;
     }
     // Ensure a clean static directory on the first emit.
@@ -94,7 +93,6 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
     }
     this._first = false;
     fs.copySync(buildDir, staticDir);
-    callback();
   }.bind(this));
 };
 
@@ -102,14 +100,25 @@ JupyterLabPlugin.prototype._first = true;
 
 
 module.exports = {
+  mode: 'development',
   entry: {
-    main: ['whatwg-fetch', path.resolve(buildDir, 'index.out.js')],
-    vendor: jlab.vendor
+    main: ['whatwg-fetch', path.resolve(buildDir, 'index.out.js')]
   },
   output: {
     path: path.resolve(buildDir),
     publicPath: jlab.publicUrl || '{{base_url}}lab/static/',
     filename: '[name].[chunkhash].js'
+  },
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+      cacheGroups: {
+        // Split out the vega files, which are large and not always needed.
+        vega: {
+          test: /[\\/]node_modules[\\/]vega/
+        }
+      }
+    }
   },
   module: {
     rules: [
@@ -117,12 +126,11 @@ module.exports = {
       { test: /^JUPYTERLAB_URL_LOADER_/, use: 'url-loader?limit=10000' },
       { test: /^JUPYTERLAB_FILE_LOADER_/, use: 'file-loader' },
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },
-      { test: /\.json$/, use: 'json-loader' },
       { test: /\.md$/, use: 'raw-loader' },
       { test: /\.txt$/, use: 'raw-loader' },
       { test: /\.js$/, use: ['source-map-loader'], enforce: 'pre',
         // eslint-disable-next-line no-undef
-        exclude: path.join(process.cwd(), 'node_modules')
+        exclude: /node_modules/
       },
       { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
       { test: /\.js.map$/, use: 'file-loader' },
@@ -166,17 +174,18 @@ module.exports = {
   bail: true,
   devtool: 'source-map',
   plugins: [
+    new DuplicatePackageCheckerPlugin({
+      verbose: true,
+      exclude(instance) {
+        // ignore known duplicates
+        return ['domelementtype', 'hash-base', 'inherits'].includes(instance.name);
+      }
+    }),
     new HtmlWebpackPlugin({
       template: path.join('templates', 'template.html'),
       title: jlab.name || 'JupyterLab'
     }),
     new webpack.HashedModuleIdsPlugin(),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'vendor'
-    }),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'manifest'
-    }),
     new JupyterLabPlugin({})
   ]
 };

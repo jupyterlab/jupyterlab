@@ -13,7 +13,8 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  DataConnector, ISettingRegistry, IStateDB, SettingRegistry, StateDB, URLExt
+  DataConnector, ISettingRegistry, IStateDB, PageConfig, SettingRegistry,
+  StateDB, URLExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -93,10 +94,10 @@ namespace CommandIDs {
  */
 namespace Patterns {
   export
-  const cloneState = /(\?clone\=|\&clone\=)([^&]+)($|&)/;
+  const cloneState = /[?&]clone([=&]|$)/;
 
   export
-  const loadState = /^\/workspaces\/([^?]+)/;
+  const loadState = /^\/workspaces\/([^?\/]+)/;
 
   export
   const resetOnLoad = /(\?reset|\&reset)($|&)/;
@@ -273,7 +274,11 @@ const resolver: JupyterLabPlugin<IWindowResolver> = {
 
         return Private.redirect(router);
       })
-      .then(() => resolver);
+      .then(() => {
+        PageConfig.setOption('workspace', resolver.name);
+
+        return resolver;
+      });
   }
 };
 
@@ -304,8 +309,8 @@ const state: JupyterLabPlugin<IStateDB> = {
   id: '@jupyterlab/apputils-extension:state',
   autoStart: true,
   provides: IStateDB,
-  requires: [IRouter, IWindowResolver],
-  activate: (app: JupyterLab, router: IRouter, resolver: IWindowResolver) => {
+  requires: [IRouter, IWindowResolver, ISplashScreen],
+  activate: (app: JupyterLab, router: IRouter, resolver: IWindowResolver, splash: ISplashScreen) => {
     let debouncer: number;
     let resolved = false;
 
@@ -447,9 +452,13 @@ const state: JupyterLabPlugin<IStateDB> = {
             delete query['clone'];
 
             const url = path + URLExt.objectToQueryString(query) + hash;
-            const silent = true;
+            const cloned = commands.execute(CommandIDs.saveState, { immediate })
+              .then(() => router.stop);
 
-            router.navigate(url, { silent });
+            // After the state has been cloned, navigate to the URL.
+            cloned.then(() => { router.navigate(url, { silent: true }); });
+
+            return cloned;
           }
 
           // After the state database has finished loading, save it.
@@ -458,12 +467,15 @@ const state: JupyterLabPlugin<IStateDB> = {
       }
     });
     // Both the load state and clone state patterns should trigger the load
-    // state command if the URL matches one of them.
+    // state command if the URL matches one of them, but cloning a workspace
+    // outranks loading it because it is an explicit user action.
     router.register({
-      command: CommandIDs.loadState, pattern: Patterns.loadState
+      command: CommandIDs.loadState, pattern: Patterns.cloneState,
+      rank: 20 // Set loading rank at a higher priority than the default 100.
     });
     router.register({
-      command: CommandIDs.loadState, pattern: Patterns.cloneState
+      command: CommandIDs.loadState, pattern: Patterns.loadState,
+      rank: 30 // Set loading rank at a higher priority than the default 100.
     });
 
     commands.addCommand(CommandIDs.reset, {
@@ -480,10 +492,13 @@ const state: JupyterLabPlugin<IStateDB> = {
         const { hash, path, search } = args;
         const query = URLExt.queryStringToObject(search || '');
         const reset = 'reset' in query;
+        const clone = 'clone' in query;
 
         if (!reset) {
           return;
         }
+
+        const loading = splash.show();
 
         // If the state database has already been resolved, resetting is
         // impossible without reloading.
@@ -498,12 +513,21 @@ const state: JupyterLabPlugin<IStateDB> = {
         // Maintain the query string parameters but remove `reset`.
         delete query['reset'];
 
+        const silent = true;
+        const hard = true;
         const url = path + URLExt.objectToQueryString(query) + hash;
         const cleared = commands.execute(CommandIDs.recoverState)
           .then(() => router.stop); // Stop routing before new route navigation.
 
         // After the state has been reset, navigate to the URL.
-        cleared.then(() => { router.navigate(url, { silent: true }); });
+        if (clone) {
+          cleared.then(() => { router.navigate(url, { silent, hard }); });
+        } else {
+          cleared.then(() => {
+            router.navigate(url, { silent });
+            loading.dispose();
+          });
+        }
 
         return cleared;
       }

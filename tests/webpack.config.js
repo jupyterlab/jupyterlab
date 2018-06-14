@@ -1,9 +1,8 @@
-var path = require('path');
-// `CheckerPlugin` is optional. Use it if you want async error reporting.
-// We need this plugin to detect a `--watch` mode. It may be removed later
-// after https://github.com/webpack/webpack/issues/3460 will be resolved.
-var CheckerPlugin = require('awesome-typescript-loader').CheckerPlugin;
+var ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
+var cpus = require('os').cpus().length;
+var forkCheckerCpus = cpus > 2 ? 2 : 1;
+var threadCpus = cpus - forkCheckerCpus;
 
 // Use sourcemaps if in watch or debug mode;
 var devtool = 'eval';
@@ -13,39 +12,32 @@ if (process.argv.indexOf('--watch') !== -1) {
 
 module.exports = {
   resolve: {
-    extensions: ['.ts', '.js']
+    extensions: ['.ts', '.tsx', '.js']
   },
   bail: true,
   devtool: devtool,
   plugins: [
-    new CheckerPlugin(),
+    new ForkTsCheckerWebpackPlugin({
+      workers: forkCheckerCpus,
+      checkSyntacticErrors: true
+    })
   ],
   module: {
     rules: [
-      {
-        test: /\.ts$/,
-        use: [
-          {
-            loader: 'awesome-typescript-loader',
-            query: {
-              sourceMap: false,
-              inlineSourceMap: true,
-              compilerOptions: {
-                removeComments: true
-              }
-            }
-          }
-        ]
-      },
+      { test: /\.tsx?$/, use: [
+        { loader: 'cache-loader' },
+        { loader: 'thread-loader', options: {workers: threadCpus} },
+        { loader: 'ts-loader', options: {happyPackMode: true} },
+      ]},
       { test: /\.js$/,
         use: ['source-map-loader'],
         enforce: 'pre',
         // eslint-disable-next-line no-undef
-        exclude: path.join(process.cwd(), 'node_modules')
+        exclude: /node_modules/
       },
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },
       { test: /\.csv$/, use: 'raw-loader' },
-      { test: /\.(json|ipynb)$/, use: 'json-loader' },
+      { test: /\.ipynb$/, use: 'json-loader' },
       { test: /\.html$/, use: 'file-loader' },
       { test: /\.md$/, use: 'raw-loader' },
       { test: /\.(jpg|png|gif)$/, use: 'file-loader' },

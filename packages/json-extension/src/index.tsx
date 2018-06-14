@@ -2,12 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
   IRenderMime
 } from '@jupyterlab/rendermime-interfaces';
+
+import {
+  Widget
+} from '@phosphor/widgets';
 
 import * as React from 'react';
 
@@ -51,12 +51,13 @@ class RenderedJSON extends Widget implements IRenderMime.IRenderer {
    */
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     const data = model.data[this._mimeType] as any;
-    const metadata = model.metadata[this._mimeType] as any || {};
+    const metadata = model.metadata[this._mimeType] as any || { };
     const props = { data, metadata, theme: 'cm-s-jupyter' };
+
     return new Promise<void>((resolve, reject) => {
-      ReactDOM.render(<Component {...props} />, this.node, () => {
-        resolve(undefined);
-      });
+      const component = <Component {...props} />;
+
+      ReactDOM.render(component, this.node, () => { resolve(); });
     });
   }
 

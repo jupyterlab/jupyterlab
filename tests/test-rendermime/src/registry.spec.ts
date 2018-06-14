@@ -266,7 +266,7 @@ describe('rendermime/registry', () => {
       it('should remove a factory by mimeType', () => {
         r.removeMimeType('text/html');
         let model = createModel({ 'text/html': '<h1>foo</h1>' });
-        expect(r.preferredMimeType(model.data, true)).to.be(void 0);
+        expect(r.preferredMimeType(model.data, 'any')).to.be(void 0);
       });
 
       it('should be a no-op if the mimeType is not registered', () => {

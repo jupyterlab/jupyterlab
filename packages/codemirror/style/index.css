@@ -160,6 +160,7 @@
   background: transparent;
 }
 
+.cm-s-jupyter .CodeMirror-cursor   { border-left: 1.4px solid var(--jp-editor-cursor-color); }
 .cm-s-jupyter span.cm-keyword      { color: var(--jp-mirror-editor-keyword-color); font-weight: bold; }
 .cm-s-jupyter span.cm-atom         { color: var(--jp-mirror-editor-atom-color); }
 .cm-s-jupyter span.cm-number       { color: var(--jp-mirror-editor-number-color); }

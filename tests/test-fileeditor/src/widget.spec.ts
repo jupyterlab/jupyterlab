@@ -68,7 +68,7 @@ describe('fileeditorcodewrapper', () => {
   let factoryService = new CodeMirrorEditorFactory();
   let modelFactory = new TextModelFactory();
   let mimeTypeService = new CodeMirrorMimeTypeService();
-  let context: DocumentRegistry.CodeContext;
+  let context: Context<DocumentRegistry.ICodeModel>;
   let manager: ServiceManager.IManager;
 
   before((done) => {

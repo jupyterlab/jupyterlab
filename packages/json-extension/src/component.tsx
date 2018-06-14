@@ -1,15 +1,16 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import * as React from 'react';
 
 import * as ReactDOM from 'react-dom';
 
+import Highlight from 'react-highlighter';
+
 import JSONTree from 'react-json-tree';
 
-import * as Highlight from 'react-highlighter';
-
 import {
-  JSONValue,
-  JSONObject,
-  JSONArray
+  JSONArray, JSONObject, JSONValue
 } from '@phosphor/coreutils';
 
 
@@ -48,9 +49,7 @@ class Component extends React.Component<IProps, IState> {
      */
     ReactDOM.findDOMNode(this.input).addEventListener(
       'keydown',
-      (event: Event) => {
-        event.stopPropagation();
-      },
+      (event: Event) => { event.stopPropagation(); },
       false
     );
   }
@@ -58,9 +57,7 @@ class Component extends React.Component<IProps, IState> {
   componentWillUnmount() {
     ReactDOM.findDOMNode(this.input).removeEventListener(
       'keydown',
-      (event: Event) => {
-        event.stopPropagation();
-      },
+      (event: Event) => { event.stopPropagation(); },
       false
     );
   }
@@ -72,10 +69,7 @@ class Component extends React.Component<IProps, IState> {
       ? filterPaths(data, this.state.filter, [root])
       : [root];
     return (
-      <div style={{
-        position: 'relative',
-        width: '100%'
-      }}>
+      <div style={{ position: 'relative', width: '100%' }}>
         <input
           ref={ref => this.input = ref}
           onChange={event => {

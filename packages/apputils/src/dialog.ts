@@ -51,14 +51,13 @@ function showDialog<T>(options: Partial<Dialog.IOptions<T>>={}): Promise<Dialog.
  */
 export
 function showErrorMessage(title: string, error: any): Promise<void> {
-  console.error(error);
-  let options = {
+  console.warn('Showing error:', error);
+
+  return showDialog({
     title: title,
     body: error.message || title,
-    buttons: [Dialog.okButton()],
-    okText: 'DISMISS'
-  };
-  return showDialog(options).then(() => { /* no-op */ });
+    buttons: [Dialog.okButton({ label: 'DISMISS' })]
+  }).then(() => { /* no-op */ });
 }
 
 /**

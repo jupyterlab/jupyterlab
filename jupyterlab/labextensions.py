@@ -18,7 +18,8 @@ from traitlets import Bool, Unicode
 from .commands import (
     install_extension, uninstall_extension, list_extensions,
     enable_extension, disable_extension, check_extension,
-    link_package, unlink_package, build, get_app_version, HERE
+    link_package, unlink_package, build, get_app_version, HERE,
+    update_extension,
 )
 
 
@@ -41,6 +42,13 @@ check_flags['installed'] = (
     {'CheckLabExtensionsApp': {'should_check_installed_only': True}},
     "Check only if the extension is installed."
 )
+
+update_flags = copy(flags)
+update_flags['all'] = (
+    {'UpdateLabExtensionApp': {'all': True}},
+    "Update all extensions"
+)
+
 aliases = dict(base_aliases)
 aliases['app-dir'] = 'BaseExtensionApp.app_dir'
 
@@ -97,6 +105,25 @@ class InstallLabExtensionApp(BaseExtensionApp):
         self.extra_args = self.extra_args or [os.getcwd()]
         return any([
             install_extension(arg, self.app_dir, logger=self.log)
+            for arg in self.extra_args
+        ])
+
+
+class UpdateLabExtensionApp(BaseExtensionApp):
+    description = "Update labextension(s)"
+    flags = update_flags
+
+    all = Bool(False, config=True,
+        help="Whether to update all extensions")
+
+    def run_task(self):
+        if not self.all and not self.extra_args:
+            self.log.warn('Specify an extension to update, or use --all to update all extensions')
+            return False
+        if self.all:
+            return update_extension(all_=True, app_dir=self.app_dir, logger=self.log)
+        return any([
+            update_extension(name=arg, app_dir=self.app_dir, logger=self.log)
             for arg in self.extra_args
         ])
 
@@ -199,6 +226,7 @@ class LabExtensionApp(JupyterApp):
 
     subcommands = dict(
         install=(InstallLabExtensionApp, "Install labextension(s)"),
+        update=(UpdateLabExtensionApp, "Update labextension(s)"),
         uninstall=(UninstallLabExtensionApp, "Uninstall labextension(s)"),
         list=(ListLabExtensionsApp, "List labextensions"),
         link=(LinkLabExtensionApp, "Link labextension(s)"),

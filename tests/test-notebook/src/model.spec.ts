@@ -122,12 +122,34 @@ describe('@jupyterlab/notebook', () => {
 
       context('cells `changed` signal', () => {
 
-        it('should emit a `contentChanged` signal', () => {
+        it('should emit a `contentChanged` signal upon cell addition', () => {
           let model = new NotebookModel();
           let cell = model.contentFactory.createCodeCell({});
           let called = false;
           model.contentChanged.connect(() => { called = true; });
           model.cells.push(cell);
+          expect(called).to.be(true);
+        });
+
+        it('should emit a `contentChanged` signal upon cell removal', () => {
+          let model = new NotebookModel();
+          let cell = model.contentFactory.createCodeCell({});
+          model.cells.push(cell);
+          let called = false;
+          model.contentChanged.connect(() => { called = true; });
+          model.cells.remove(0);
+          expect(called).to.be(true);
+        });
+
+        it('should emit a `contentChanged` signal upon cell move', () => {
+          let model = new NotebookModel();
+          let cell0 = model.contentFactory.createCodeCell({});
+          let cell1 = model.contentFactory.createCodeCell({});
+          model.cells.push(cell0);
+          model.cells.push(cell1);
+          let called = false;
+          model.contentChanged.connect(() => { called = true; });
+          model.cells.move(0, 1);
           expect(called).to.be(true);
         });
 

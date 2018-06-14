@@ -20,7 +20,7 @@ import {
 } from '../../utils';
 
 import {
-  DEFAULT_CONTENT, createNotebookPanelFactory, rendermime,
+  createNotebookPanelFactory, rendermime,
   mimeTypeService, editorFactory, createNotebookPanel, createNotebook
 } from '../../notebook-utils';
 
