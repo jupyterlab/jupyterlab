@@ -662,7 +662,9 @@ class _AppHandler(object):
         return True
 
     def unlink_package(self, path):
-        """Link a package by name or at the given path.
+        """Unlink a package by name or at the given path.
+
+        A ValueError is raised if the path is not an unlinkable package.
 
         Returns `True` if a rebuild is recommended, `False` otherwise.
         """
@@ -691,6 +693,7 @@ class _AppHandler(object):
             raise ValueError('No linked package for %s' % path)
 
         self._write_build_config(config)
+        return True
 
     def toggle_extension(self, extension, value):
         """Enable or disable a lab extension.
