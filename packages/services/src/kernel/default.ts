@@ -6,16 +6,12 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  ArrayExt, each, find, toArray
+  ArrayExt, each, find
 } from '@phosphor/algorithm';
 
 import {
   JSONExt, JSONObject, PromiseDelegate
 } from '@phosphor/coreutils';
-
-import {
-  DisposableDelegate, IDisposable
-} from '@phosphor/disposable';
 
 import {
   ISignal, Signal
