@@ -1219,7 +1219,7 @@ namespace DefaultKernel {
    * Kernel object info is used to create another instance.
    */
   export
-  function connectTo(model: Kernel.IModel, settings?: ServerConnection.ISettings): Promise<Kernel.IKernel> {
+  function connectTo(model: Kernel.IModel, settings?: ServerConnection.ISettings): Kernel.IKernel {
     return Private.connectTo(model, settings);
   }
 
@@ -1389,11 +1389,9 @@ namespace Private {
 
   /**
    * Connect to a running kernel.
-   *
-   * TODO: why is this function async?
    */
   export
-  async function connectTo(model: Kernel.IModel, settings?: ServerConnection.ISettings): Promise<Kernel.IKernel> {
+  function connectTo(model: Kernel.IModel, settings?: ServerConnection.ISettings): Kernel.IKernel {
     let serverSettings = settings || ServerConnection.makeSettings();
     let kernel = find(runningKernels, value => {
       return value.id === model.id;

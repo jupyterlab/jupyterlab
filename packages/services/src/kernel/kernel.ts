@@ -517,7 +517,7 @@ namespace Kernel {
    * Kernel object info is used to create another instance.
    */
   export
-  function connectTo(model: Kernel.IModel, settings?: ServerConnection.ISettings): Promise<IKernel> {
+  function connectTo(model: Kernel.IModel, settings?: ServerConnection.ISettings): IKernel {
     return DefaultKernel.connectTo(model, settings);
   }
 
@@ -670,7 +670,7 @@ namespace Kernel {
      *
      * @returns A promise that resolves with the new kernel instance.
      */
-    connectTo(model: Kernel.IModel): Promise<IKernel>;
+    connectTo(model: Kernel.IModel): IKernel;
 
     /**
      * Shut down a kernel by id.

@@ -529,16 +529,15 @@ namespace Private {
    * @returns - A promise that resolves with a started session.
    */
   export
-  function createSession(model: Session.IModel, settings?: ServerConnection.ISettings): Promise<DefaultSession> {
+  function createSession(model: Session.IModel, settings?: ServerConnection.ISettings): DefaultSession {
     settings = settings || ServerConnection.makeSettings();
-    return Kernel.connectTo(model.kernel, settings).then(kernel => {
-      return new DefaultSession({
-        path: model.path,
-        type: model.type,
-        name: model.name,
-        serverSettings: settings
-      }, model.id, kernel);
-    });
+    let kernel = Kernel.connectTo(model.kernel, settings);
+    return new DefaultSession({
+      path: model.path,
+      type: model.type,
+      name: model.name,
+      serverSettings: settings
+    }, model.id, kernel);
   }
 
   /**
