@@ -236,7 +236,10 @@ def uninstall_extension(name, app_dir=None, logger=None):
 
 
 def update_extension(name=None, all_=False, app_dir=None, logger=None):
-    """Update an extension by name.
+    """Update an extension by name, or all extensions.
+
+    Either `name` must be given as a string, or `all_` must be `True`.
+    If `all_` is `True`, the value of `name` is ignored.
     """
     _node_check()
     handler = _AppHandler(app_dir, logger)
@@ -342,6 +345,8 @@ def get_app_version(app_dir=None):
 class _AppHandler(object):
 
     def __init__(self, app_dir, logger=None, kill_event=None):
+        """Create a new _AppHandler object
+        """
         self.app_dir = app_dir or get_app_dir()
         self.sys_dir = get_app_dir()
         self.logger = logger or logging.getLogger('jupyterlab')
@@ -354,6 +359,8 @@ class _AppHandler(object):
         """Install an extension package into JupyterLab.
 
         The extension is first validated.
+
+        Returns `True` if a rebuild is recommended, `False` otherwise.
         """
         extension = _normalize_path(extension)
         extensions = self.info['extensions']
@@ -548,6 +555,8 @@ class _AppHandler(object):
 
     def uninstall_extension(self, name):
         """Uninstall an extension by name.
+
+        Returns `True` if a rebuild is recommended, `False` otherwise.
         """
         # Allow for uninstalled core extensions.
         data = self.info['core_data']
@@ -606,6 +615,10 @@ class _AppHandler(object):
         return self._update_extension(name)
 
     def _update_extension(self, name):
+        """Update an extension by name.
+
+        Returns `True` if a rebuild is recommended, `False` otherwise.
+        """
         try:
             latest = self._latest_compatible_package_version(name)
         except URLError:
@@ -621,6 +634,8 @@ class _AppHandler(object):
 
     def link_package(self, path):
         """Link a package at the given path.
+
+        Returns `True` if a rebuild is recommended, `False` otherwise.
         """
         path = _normalize_path(path)
         if not osp.exists(path) or not osp.isdir(path):
@@ -648,6 +663,8 @@ class _AppHandler(object):
 
     def unlink_package(self, path):
         """Link a package by name or at the given path.
+
+        Returns `True` if a rebuild is recommended, `False` otherwise.
         """
         path = _normalize_path(path)
         config = self._read_build_config()
@@ -938,10 +955,17 @@ class _AppHandler(object):
         return data
 
     def _check_local(self, name, source, dname):
+        """Check if a local package has changed.
+
+        `dname` is the directory name of existing package tar archives.
+        """
         # Extract the package in a temporary directory.
         with TemporaryDirectory() as tempdir:
             info = self._extract_package(source, tempdir)
             # Test if the file content has changed.
+            # This relies on `_extract_package` adding the hashsum
+            # to the filename, allowing a simple exist check to
+            # compare the hash to the "cache" in dname.
             target = pjoin(dname, info['filename'])
             return not osp.exists(target)
 
@@ -1218,7 +1242,12 @@ class _AppHandler(object):
         return info
 
     def _extract_package(self, source, tempdir, quiet=False):
-        # npm pack the extension
+        """Call `npm pack` for an extension.
+
+        The pack command will download the package tar if `source` is
+        a package name, or run `npm pack` locally if `source` is a
+        directory.
+        """
         is_dir = osp.exists(source) and osp.isdir(source)
         if is_dir and not osp.exists(pjoin(source, 'node_modules')):
             self._run(['node', YARN_PATH, 'install'], cwd=source, quiet=quiet)
@@ -1609,6 +1638,18 @@ def _semver_prerelease_key(prerelease):
 
 
 def _semver_key(version, prerelease_first=False):
+    """A sort key-function for sorting semver verion string.
+
+    The default sorting order is ascending (0.x -> 1.x -> 2.x).
+
+    If `prerelease_first`, pre-releases will come before
+    ALL other semver keys (not just those with same version).
+    I.e (1.0-pre, 2.0-pre -> 0.x -> 1.x -> 2.x).
+
+    Otherwise it will sort in the standard way that it simply
+    comes before any release with shared version string
+    (0.x -> 1.0-pre -> 1.x -> 2.0-pre -> 2.x).
+    """
     v = make_semver(version, True)
     if prerelease_first:
         key = (0,) if v.prerelease else (1,)
