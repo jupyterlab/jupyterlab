@@ -62,7 +62,7 @@ if [[ $GROUP == docs ]]; then
     # Verify tutorial docs build
     pushd docs
     conda remove --name test_docs --all || true
-    conda env create -n test_docs -f environment.yml
+    conda env create -q -n test_docs -f environment.yml
     set +ev
     source activate test_docs
     set -ev
@@ -110,7 +110,7 @@ if [[ $GROUP == integrity ]]; then
 
     # Make sure we can non-dev install.
     conda remove --name test_install --all || true
-    conda create -n test_install notebook python=3.5
+    conda create -q -n test_install notebook python=3.5
     set +ev
     source activate test_install
     set -ev

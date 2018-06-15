@@ -24,7 +24,7 @@ conda update -q conda
 conda info -a # for debugging
 
 conda remove --name test --all || true
-conda create -n test -c conda-forge notebook pytest python=$PYTHON
+conda create -q -n test --quiet -c conda-forge notebook pytest python=$PYTHON
 set +ev
 source activate test
 set -ev
@@ -35,7 +35,7 @@ mkdir ~/.jupyter
 # Building should work without yarn installed globally, so uninstall the
 # global yarn that Travis installs automatically.
 sudo rm -rf `which yarn`
-yarn --version
+! yarn --version
 
 # Install and enable the server extension
 pip install -v -e ".[test]"
