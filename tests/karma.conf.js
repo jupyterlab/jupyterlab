@@ -12,6 +12,9 @@ module.exports = function (config) {
         retries: 3 // Allow for slow server on CI.
       }
     },
+    mochaReporter: {
+      output: "minimal"
+    },
     files: [
       {pattern: path.resolve('./build/injector.js'), watched: false},
       {pattern: process.env.KARMA_FILE_PATTERN, watched: false}
