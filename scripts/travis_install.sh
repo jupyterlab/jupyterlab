@@ -28,7 +28,7 @@ conda update -q conda
 conda info -a # for debugging
 
 conda remove --name test --all || true
-conda create -q -n test --quiet -c conda-forge notebook nodejs pytest python=$PYTHON
+conda create -q -n test --quiet -c conda-forge notebook pytest python=$PYTHON
 set +ev
 source activate test
 set -ev
