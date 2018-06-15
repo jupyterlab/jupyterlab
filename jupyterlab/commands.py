@@ -5,6 +5,7 @@
 # Distributed under the terms of the Modified BSD License.
 from __future__ import print_function
 
+import contextlib
 from distutils.version import LooseVersion
 import errno
 import glob
@@ -32,7 +33,6 @@ if sys.version_info.major < 3:
     from urllib2 import Request, urlopen, quote
     from urllib2 import URLError, HTTPError
     from urlparse import urljoin
-    import contextlib
 else:
     from urllib.request import Request, urlopen, urljoin, quote
     from urllib.error import URLError, HTTPError
