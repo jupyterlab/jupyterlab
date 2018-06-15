@@ -22,6 +22,7 @@ env:
     - GROUP=cli PYTHON=2
     - GROUP=cli PYTHON=3
     - GROUP=docs
+    - GROUP=nothing
   global:
   - PYTHON=3
   - MINICONDA_DIR="$HOME/miniconda"
