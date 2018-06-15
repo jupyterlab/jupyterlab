@@ -202,7 +202,7 @@ class DefaultSession implements Session.ISession {
   update(model: Session.IModel): Promise<void> {
     // Avoid a race condition if we are waiting for a REST call return.
     if (this._updating) {
-      return Promise.resolve(void 0);
+      return Promise.resolve();
     }
     let oldModel = this.model;
     this._path = model.path;
@@ -218,7 +218,7 @@ class DefaultSession implements Session.ISession {
     }
 
     this._handleModelChange(oldModel);
-    return Promise.resolve(void 0);
+    return Promise.resolve();
   }
 
   /**
@@ -231,7 +231,7 @@ class DefaultSession implements Session.ISession {
     this._isDisposed = true;
     this._kernel.dispose();
     this._statusChanged.emit('dead');
-    this._terminated.emit(void 0);
+    this._terminated.emit(undefined);
     Private.removeRunning(this);
     Signal.clearData(this);
   }
@@ -252,7 +252,7 @@ class DefaultSession implements Session.ISession {
       return Promise.reject(new Error('Session is disposed'));
     }
     let data = JSON.stringify({ path });
-    return this._patch(data).then(() => { return void 0; });
+    return this._patch(data).then(() => undefined);
   }
 
   /**
@@ -263,7 +263,7 @@ class DefaultSession implements Session.ISession {
       return Promise.reject(new Error('Session is disposed'));
     }
     let data = JSON.stringify({ name });
-    return this._patch(data).then(() => { return void 0; });
+    return this._patch(data).then(() => undefined);
   }
 
   /**
@@ -274,7 +274,7 @@ class DefaultSession implements Session.ISession {
       return Promise.reject(new Error('Session is disposed'));
     }
     let data = JSON.stringify({ type });
-    return this._patch(data).then(() => { return void 0; });
+    return this._patch(data).then(() => undefined);
   }
 
   /**
@@ -687,7 +687,7 @@ namespace Private {
    */
   export
   function startNew(options: Session.IOptions): Promise<Session.ISession> {
-    if (options.path === void 0) {
+    if (options.path === undefined) {
       return Promise.reject(new Error('Must specify a path'));
     }
     return startSession(options).then(model => {

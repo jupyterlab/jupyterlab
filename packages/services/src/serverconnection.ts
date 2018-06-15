@@ -263,7 +263,7 @@ namespace Private {
       request.headers.append('Authorization', `token ${settings.token}`);
     } else if (typeof document !== 'undefined' && document.cookie) {
       let xsrfToken = getCookie('_xsrf');
-      if (xsrfToken !== void 0) {
+      if (xsrfToken !== undefined) {
         authenticated = true;
         request.headers.append('X-XSRFToken', xsrfToken);
       }
@@ -288,6 +288,6 @@ namespace Private {
   function getCookie(name: string) {
     // from tornado docs: http://www.tornadoweb.org/en/stable/guide/security.html
     let r = document.cookie.match('\\b' + name + '=([^;]*)\\b');
-    return r ? r[1] : void 0;
+    return r ? r[1] : undefined;
   }
 }

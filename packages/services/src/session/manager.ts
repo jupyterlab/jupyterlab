@@ -188,7 +188,7 @@ class SessionManager implements Session.IManager {
         const id = matches[0].id;
         return this.shutdown(id).catch(() => { /* no-op */ });
       }
-    }).catch(() => Promise.resolve(void 0)); // Always succeed.
+    }).catch(() => undefined); // Always succeed.
   }
 
   /**

@@ -140,7 +140,12 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
     this._iopub = Private.noOp;
     this._reply = Private.noOp;
     if (!this._testFlag(Private.KernelFutureFlag.IsDone)) {
+      // Reject the `done` promise, but catch its error here in case no one else
+      // is waiting for the promise to resolve. This prevents the error from
+      // being displayed in the console but does not prevent it from being
+      // caught by a client who is waiting for it.
       this._done.reject(new Error('Canceled'));
+      this._done.promise.catch(() => { /* no-op */ });
     }
     super.dispose();
   }
