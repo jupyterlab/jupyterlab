@@ -13,6 +13,7 @@ import os
 import shutil
 import sys
 import tempfile
+import logging
 
 try:
     from unittest.mock import patch
@@ -202,6 +203,7 @@ class KarmaTestApp(ProcessTestApp):
 def run_karma(base_dir):
     """Run a karma test in the given base directory.
     """
+    logging.disable(logging.ERROR)
     app = KarmaTestApp.instance()
     app.karma_base_dir = base_dir
     app.initialize([])
