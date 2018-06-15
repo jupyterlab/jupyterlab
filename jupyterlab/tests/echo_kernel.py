@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+import logging
+
 from ipykernel.kernelapp import IPKernelApp
 from ipykernel.kernelbase import Kernel
-
 
 class EchoKernel(Kernel):
     implementation = 'Echo'
@@ -33,4 +34,5 @@ class EchoKernelApp(IPKernelApp):
 
 
 if __name__ == '__main__':
+    logging.disable(logging.ERROR)
     EchoKernelApp.launch_instance()
