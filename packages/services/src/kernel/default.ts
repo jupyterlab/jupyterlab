@@ -1441,7 +1441,7 @@ namespace Private {
         k.reconnect();
       }
     });
-    return kernel.reconnect();
+    await kernel.reconnect();
   }
 
   /**
