@@ -6,7 +6,6 @@ set -ev
 set -o pipefail
 
 # Building should work without yarn installed globally
-rm /home/travis/.yarn/bin/*
 !yarn --version
 
 # The miniconda directory may exist if it has been restored from cache
