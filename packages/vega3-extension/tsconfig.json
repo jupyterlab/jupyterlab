@@ -1,15 +1,7 @@
 {
   "compilerOptions": {
-    "lib": [
-      "es5",
-      "es2015.promise",
-      "dom",
-      "es2015.collection",
-      "es2016",
-      "es6"
-    ],
-    "module": "esnext",
-    "outDir": "./lib"
+    "outDir": "./lib",
+    "types": ["node"]
   },
   "extends": "../../tsconfigbase",
   "include": [

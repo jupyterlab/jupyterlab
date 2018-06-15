@@ -111,13 +111,7 @@ module.exports = {
   },
   optimization: {
     splitChunks: {
-      chunks: 'all',
-      cacheGroups: {
-        // Split out the vega files, which are large and not always needed.
-        vega: {
-          test: /[\\/]node_modules[\\/]vega/
-        }
-      }
+      chunks: 'all'
     }
   },
   module: {

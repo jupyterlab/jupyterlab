@@ -79,8 +79,8 @@ class RenderedVega3 extends Widget implements IRenderMime.IRenderer {
     const embedOptions = metadata && metadata.embed_options ? metadata.embed_options : {};
     const mode: VegaModuleType.Mode = this._mimeType === VEGA_MIME_TYPE ? 'vega' : 'vega-lite';
 
-    return require.ensure(['vega-embed'], (vega: typeof VegaModuleType) => {
-      return this._resolver.resolveUrl('').then((path: string) => {
+    return this._ensureVega().then((vega) => {
+      this._resolver.resolveUrl('').then((path: string) => {
         return this._resolver.getDownloadUrl(path).then(baseURL => {
           const loader = vega.vega.loader({
             baseURL,
@@ -108,6 +108,22 @@ class RenderedVega3 extends Widget implements IRenderMime.IRenderer {
           });
         });
       });
+    });
+  }
+
+  private _ensureVega(): Promise<typeof VegaModuleType> {
+    return new Promise((resolve, reject) => {
+      (require as any).ensure(
+        ['vega-embed'],
+        (require: any) => {
+          resolve(require('vega-embed') as typeof VegaModuleType);
+        },
+        (error: any) => {
+          console.error(error);
+          reject();
+        },
+        'vega'
+      );
     });
   }
 
