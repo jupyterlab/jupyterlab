@@ -38,7 +38,7 @@ sudo rm -rf `which yarn`
 ! yarn --version
 
 # Install and enable the server extension
-pip install -v -e ".[test]"
+pip install -q -e ".[test]"
 jlpm versions
 jlpm config current
 jupyter serverextension enable --py jupyterlab

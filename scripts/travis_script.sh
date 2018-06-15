@@ -114,7 +114,7 @@ if [[ $GROUP == integrity ]]; then
     set +ev
     source activate test_install
     set -ev
-    pip install ".[test]"  # this populates <sys_prefix>/share/jupyter/lab
+    pip install -q ".[test]"  # this populates <sys_prefix>/share/jupyter/lab
     python -m jupyterlab.selenium_check
     # Make sure we can run the build
     jupyter lab build
@@ -182,7 +182,7 @@ if [[ $GROUP == cli ]]; then
 
     # Test theme creation - make sure we can add it as a package, build,
     # and run selenium
-    pip install pexpect
+    pip install -q pexpect
     python scripts/create_theme.py
     mv foo packages
     jlpm run integrity || exit 0
