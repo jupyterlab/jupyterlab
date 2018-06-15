@@ -207,10 +207,17 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
   }
 
   private _handleDone(): void {
+    console.log('handle done');
     if (this._testFlag(Private.KernelFutureFlag.IsDone)) {
       return;
     }
     this._setFlag(Private.KernelFutureFlag.IsDone);
+    // console.log('set done, resolving done');
+    // console.log(this.msg, this._testFlag(Private.KernelFutureFlag.DisposeOnDone),
+    // this._testFlag(Private.KernelFutureFlag.GotIdle),
+    //   this._testFlag(Private.KernelFutureFlag.GotReply),
+    //     this._testFlag(Private.KernelFutureFlag.IsDone));
+
     this._done.resolve(this._replyMsg);
     if (this._disposeOnDone) {
       this.dispose();

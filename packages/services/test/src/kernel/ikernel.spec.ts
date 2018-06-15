@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  JSONObject
+  JSONObject, PromiseDelegate
 } from '@phosphor/coreutils';
 
 import {
@@ -30,50 +30,48 @@ describe('Kernel.IKernel', () => {
   let specs: Kernel.ISpecModels;
   let tester: KernelTester;
 
-  before(() => {
-    return Kernel.getSpecs().then(s => {
-      specs = s;
-      return Kernel.startNew();
-    }).then(k => {
-      defaultKernel = k;
-      // Start another kernel.
-      return Kernel.startNew();
-    });
+  before(async () => {
+    specs = await Kernel.getSpecs();
+    defaultKernel = await Kernel.startNew();
   });
 
-  beforeEach(() => {
-    return defaultKernel.restart();
+  beforeEach(async () => {
+    await defaultKernel.restart();
+    // await defaultKernel.ready;
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     if (tester) {
+      await tester.shutdown();
       tester.dispose();
+      tester = undefined;
     }
   });
 
-  after(() => {
-    Kernel.shutdownAll();
+  after(async () => {
+    await Kernel.shutdownAll();
   });
 
   context('#terminated', () => {
 
-    it('should be emitted when the kernel is shut down', (done) => {
-      Kernel.startNew().then(kernel => {
-        kernel.terminated.connect((sender, args) => {
-          expect(sender).to.be(kernel);
-          expect(args).to.be(void 0);
-          kernel.dispose();
-          done();
-        });
-        return kernel.shutdown();
-      }).catch(done);
+    it('should be emitted when the kernel is shut down', async () => {
+      let called = false;
+      const kernel = await Kernel.startNew();
+      kernel.terminated.connect((sender, args) => {
+        expect(sender).to.be(kernel);
+        expect(args).to.be(void 0);
+        kernel.dispose();
+        called = true;
+      });
+      await kernel.shutdown();
+      expect(called).to.be(true);
     });
 
   });
 
   context('#statusChanged', () => {
 
-    it('should be a signal following the Kernel status', () => {
+    it('should be a signal following the Kernel status', async () => {
       let object = {};
       let called = false;
       defaultKernel.statusChanged.connect(() => {
@@ -82,16 +80,15 @@ describe('Kernel.IKernel', () => {
           called = true;
         }
       }, object);
-      return defaultKernel.requestExecute({ code: 'a=1' }, true).done.then(() => {
-        expect(called).to.be(true);
-      });
+      await defaultKernel.requestExecute({ code: 'a=1' }, true).done;
+      expect(called).to.be(true);
     });
 
   });
 
-  context('#iopubMessage', () => {
+  context('#iopubMessage', async () => {
 
-    it('should be emitted for an iopub message', () => {
+    it('should be emitted for an iopub message', async () => {
       let object = {};
       let called = false;
       defaultKernel.iopubMessage.connect((k, msg) => {
@@ -99,67 +96,76 @@ describe('Kernel.IKernel', () => {
         Signal.disconnectReceiver(object);
         called = true;
       }, object);
-      return defaultKernel.requestExecute({ code: 'a=1' }, true).done.then(() => {
-        expect(called).to.be(true);
-      });
+      await defaultKernel.requestExecute({ code: 'a=1' }, true).done;
+      expect(called).to.be(true);
     });
 
-    it('should be emitted regardless of the sender', (done) => {
+    it('should be emitted regardless of the sender', async () => {
+      let done = new PromiseDelegate();
       tester = new KernelTester();
-      tester.start().then(kernel => {
-        kernel.iopubMessage.connect((k, msg) => {
-          expect(msg.header.msg_type).to.be('status');
-          done();
-        });
-        let msg = KernelMessage.createMessage({
-          msgType: 'status',
-          channel: 'iopub',
-          session: 'baz'
-        }) as KernelMessage.IStatusMsg;
-        msg.content.execution_state = 'idle';
-        msg.parent_header = msg.header;
-        tester.send(msg);
-      }).catch(done);
+      const kernel = await tester.start();
+      kernel.iopubMessage.connect((k, msg) => {
+        expect(msg.header.msg_type).to.be('status');
+        done.resolve(null);
+      });
+      let msg = KernelMessage.createMessage({
+        msgType: 'status',
+        channel: 'iopub',
+        session: 'baz'
+      }) as KernelMessage.IStatusMsg;
+      msg.content.execution_state = 'idle';
+      msg.parent_header = msg.header;
+      tester.sendStatus('busy');
+      tester.send(msg);
+      tester.sendStatus('idle');
+      await done.promise;
     });
 
   });
 
   context('#unhandledMessage', () => {
 
-    it('should be emitted for an unhandled message', (done) => {
+    it.only('should be emitted for an unhandled message', async () => {
+      let done = new PromiseDelegate();
       tester = new KernelTester();
-      tester.start().then(kernel => {
-        kernel.unhandledMessage.connect((k, msg) => {
-          expect(msg.header.msg_type).to.be('foo');
-          done();
-        });
-        let msg = KernelMessage.createShellMessage({
-          msgType: 'foo',
-          channel: 'shell',
-          session: kernel.clientId
-        });
-        msg.parent_header = msg.header;
-        tester.send(msg);
-      }).catch(done);
+      const kernel = await tester.start();
+      kernel.unhandledMessage.connect((k, msg) => {
+        expect(msg.header.msg_type).to.be('foo');
+        done.resolve(null);
+      });
+      let msg = KernelMessage.createShellMessage({
+        msgType: 'foo',
+        channel: 'shell',
+        session: kernel.clientId
+      });
+      tester.sendStatus('busy');
+      tester.send(msg);
+      tester.sendStatus('idle');
+      await done.promise;
     });
 
-    it('should not be emitted for an iopub signal', () => {
+    it('should not be emitted for an iopub signal', async () => {
+      let done = new PromiseDelegate();
       tester = new KernelTester();
-      return tester.start().then(kernel => {
-        let called = false;
-        kernel.unhandledMessage.connect((k, msg) => {
-          called = true;
-        });
-        let msg = KernelMessage.createMessage({
-          msgType: 'status',
-          channel: 'iopub',
-          session: kernel.clientId
-        }) as KernelMessage.IStatusMsg;
-        msg.content.execution_state = 'idle';
-        msg.parent_header = msg.header;
-        tester.send(msg);
-        expect(called).to.be(false);
+      const kernel = await tester.start();
+
+      // We'll send two messages, first an iopub message, then a shell message.
+      // The unhandledMessage signal should only emit once for the shell message.
+      kernel.unhandledMessage.connect((k, msg) => {
+        expect(msg.header.msg_type).to.be('foo');
+        done.resolve(null);
       });
+
+      tester.sendStatus('idle');
+
+      let msg = KernelMessage.createShellMessage({
+        msgType: 'foo',
+        channel: 'shell',
+        session: kernel.clientId
+      });
+      tester.send(msg);
+
+      await done.promise;
     });
 
     it('should not be emitted for a different client session', () => {

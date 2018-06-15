@@ -243,11 +243,11 @@ class SocketTester implements IService {
       wsUrl: 'ws://localhost:8080/',
       WebSocket: WebSocket as any
     });
-    this._promiseDelegate = new PromiseDelegate<void>();
+    this._ready = new PromiseDelegate<void>();
     this._server.on('connection', ws => {
       this._ws = ws;
       this.onSocket(ws);
-      this._promiseDelegate.resolve(void 0);
+      this._ready.resolve(undefined);
       let connect = this._onConnect;
       if (connect) {
         connect(ws);
@@ -257,47 +257,41 @@ class SocketTester implements IService {
 
   readonly serverSettings: ServerConnection.ISettings;
 
-  start(): Promise<Kernel.IKernel> {
-    handleRequest(this, 201, { name: 'test', id: uuid() });
-    let serverSettings = this.serverSettings;
-    return Kernel.startNew({ serverSettings }).then(k => {
-      this._kernel = k;
-      return k;
-    });
+  get ready() {
+    return this._ready.promise;
   }
 
+  /**
+   * Dispose the socket test rig.
+   */
   dispose(): void {
     if (this.isDisposed) {
       return;
-    }
-    if (this._kernel) {
-      this._kernel.dispose();
     }
     this._server.close();
     this._server = null;
   }
 
+  /**
+   * Test if the socket test rig is disposed.
+   */
   get isDisposed(): boolean {
     return this._server === null;
   }
 
   /**
-   * Send a raw message to the server.
+   * Send a raw message from the server to a connected client.
    */
   sendRaw(msg: string | ArrayBuffer) {
-    this._promiseDelegate.promise.then(() => {
-      this._ws.send(msg);
-    });
+    this._ws.send(msg);
   }
 
   /**
    * Close the socket.
    */
-  close() {
-    this._promiseDelegate.promise.then(() => {
-      this._promiseDelegate = new PromiseDelegate<void>();
-      this._ws.close();
-    });
+  async close(): Promise<void> {
+    this._ready = new PromiseDelegate<void>();
+    this._ws.close();
   }
 
   /**
@@ -307,13 +301,15 @@ class SocketTester implements IService {
     this._onConnect = cb;
   }
 
+  /**
+   * A callback executed when a new server websocket is created.
+   */
   protected onSocket(sock: WebSocket): void { /* no-op */ }
 
   private _ws: WebSocket = null;
-  private _promiseDelegate: PromiseDelegate<void> = null;
+  private _ready: PromiseDelegate<void> = null;
   private _server: WebSocket.Server = null;
   private _onConnect: (ws: WebSocket) => void = null;
-  private _kernel: Kernel.IKernel | null = null;
   protected settings: ServerConnection.ISettings;
 }
 
@@ -332,18 +328,53 @@ class KernelTester extends SocketTester {
     this._initialStatus = status;
   }
 
-  sendStatus(status: string) {
+  /**
+   * Send the status from the server to the client.
+   */
+  sendStatus(status: string, parentHeader?: KernelMessage.IHeader) {
     let options: KernelMessage.IOptions = {
       msgType: 'status',
       channel: 'iopub',
-      session: uuid(),
+      session: this._kernelSessionId
     };
     let msg = KernelMessage.createMessage(options, { execution_state: status } );
+    if (parentHeader) {
+      msg.parent_header = parentHeader;
+    }
     this.send(msg);
   }
 
+  /**
+   * Send a kernel message from the server to the client.
+   */
   send(msg: KernelMessage.IMessage): void {
     this.sendRaw(serialize(msg));
+  }
+
+  /**
+   * Start a client-side kernel talking to our websocket server.
+   */
+  async start(): Promise<Kernel.IKernel> {
+    // Set up the kernel request response.
+    handleRequest(this, 201, { name: 'test', id: uuid() });
+
+    // Construct a new kernel.
+    let serverSettings = this.serverSettings;
+    this._kernel = await Kernel.startNew({ serverSettings });
+    await this.ready;
+    await this._kernel.ready;
+    return this._kernel;
+  }
+
+  /**
+   * Shut down the current kernel
+   */
+  async shutdown(): Promise<void> {
+    if (this._kernel) {
+      // Set up the kernel request response.
+      handleRequest(this, 204, {});
+      await this._kernel.shutdown();
+    }
   }
 
   /**
@@ -353,6 +384,20 @@ class KernelTester extends SocketTester {
     this._onMessage = cb;
   }
 
+  /**
+   * Dispose the tester.
+   */
+  dispose() {
+    super.dispose();
+    if (this._kernel) {
+      this._kernel.dispose();
+      this._kernel = null;
+    }
+  }
+
+  /**
+   * Set up a new server websocket to pretend like it is a server kernel.
+   */
   protected onSocket(sock: WebSocket): void {
     super.onSocket(sock);
     this.sendStatus(this._initialStatus);
@@ -361,11 +406,18 @@ class KernelTester extends SocketTester {
         msg = new Uint8Array(msg).buffer;
       }
       let data = deserialize(msg);
+      console.log('RECEIVED MESSAGE:', data.header.msg_id, data.header.msg_type);
       if (data.header.msg_type === 'kernel_info_request') {
-        data.parent_header = data.header;
-        data.header.msg_type = 'kernel_info_reply';
-        data.content = EXAMPLE_KERNEL_INFO;
-        this.send(data);
+        this.sendStatus('busy', data.header);
+        let options: KernelMessage.IOptions = {
+          msgType: 'kernel_info_reply',
+          channel: 'shell',
+          session: this._kernelSessionId
+        };
+        let msg = KernelMessage.createMessage(options, EXAMPLE_KERNEL_INFO );
+        msg.parent_header = data.header;
+        this.send(msg);
+        this.sendStatus('idle', data.header);
       } else {
         let onMessage = this._onMessage;
         if (onMessage) {
@@ -377,6 +429,8 @@ class KernelTester extends SocketTester {
 
   private _initialStatus = 'starting';
   private _onMessage: (msg: KernelMessage.IMessage) => void = null;
+  private _kernel: Kernel.IKernel | null = null;
+  private _kernelSessionId = uuid();
 }
 
 
@@ -398,26 +452,27 @@ function createSessionModel(id?: string): Session.IModel {
 
 /**
  * Session test rig.
+ *
+ * TODO: does this need to inherit from KernelTester? Should it inherit from
+ * SocketTester?
  */
 export
 class SessionTester extends KernelTester {
   /**
    * Start a mock session.
    */
-  startSession(): Promise<Session.ISession> {
+  async startSession(): Promise<Session.ISession> {
     handleRequest(this, 201, createSessionModel());
     let serverSettings = this.serverSettings;
-    return Session.startNew({ path: uuid(), serverSettings }).then(s => {
-      this._session = s;
-      return s;
-    });
+    this._session = await Session.startNew({ path: uuid(), serverSettings });
+    return this._session;
   }
 
   dispose(): void {
+    super.dispose();
     if (this._session) {
       this._session.dispose();
     }
-    super.dispose();
   }
 
   private _session: Session.ISession;
