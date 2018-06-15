@@ -6,10 +6,6 @@
 set -ev
 set -o pipefail
 
-export PATH="$MINICONDA_DIR/bin:$PATH"
-set +ev
-source activate test
-set -ev
 
 if [[ $GROUP == python ]]; then
     # Run the python tests
@@ -59,15 +55,8 @@ if [[ $GROUP == docs ]]; then
 
     # Verify tutorial docs build
     pushd docs
-    conda remove --name test_docs --all || true
-    conda env create -q -n test_docs -f environment.yml
-    set +ev
-    source activate test_docs
-    set -ev
+    pip install sphinx sphinx_rtd_theme recommonmark
     make html
-    set +ev
-    source deactivate
-    set -ev
     popd
 fi
 
