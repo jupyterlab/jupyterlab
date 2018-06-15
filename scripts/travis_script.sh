@@ -3,13 +3,15 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-set -ex
+set -ev
+set -o pipefail
 export DISPLAY=:99.0
 sh -e /etc/init.d/xvfb start || true
 
 export PATH="$MINICONDA_DIR/bin:$PATH"
+set +ev
 source activate test
-
+set -ev
 
 if [[ $GROUP == python ]]; then
     # Run the python tests
@@ -61,9 +63,13 @@ if [[ $GROUP == docs ]]; then
     pushd docs
     conda remove --name test_docs --all || true
     conda env create -n test_docs -f environment.yml
+    set +ev
     source activate test_docs
+    set -ev
     make html
+    set +ev
     source deactivate
+    set -ev
     popd
 fi
 
@@ -105,7 +111,9 @@ if [[ $GROUP == integrity ]]; then
     # Make sure we can non-dev install.
     conda remove --name test_install --all || true
     conda create -n test_install notebook python=3.5
+    set +ev
     source activate test_install
+    set -ev
     pip install ".[test]"  # this populates <sys_prefix>/share/jupyter/lab
     python -m jupyterlab.selenium_check
     # Make sure we can run the build
@@ -119,7 +127,9 @@ if [[ $GROUP == integrity ]]; then
     sleep 5
     kill $TASK_PID
     wait $TASK_PID
+    set +ev
     source deactivate
+    set -ev
 fi
 
 
