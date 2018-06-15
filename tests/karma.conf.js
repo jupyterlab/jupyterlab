@@ -13,7 +13,7 @@ module.exports = function (config) {
       }
     },
     mochaReporter: {
-      output: "minimal"
+      output: 'minimal'
     },
     files: [
       {pattern: path.resolve('./build/injector.js'), watched: false},
@@ -35,7 +35,7 @@ module.exports = function (config) {
     browserDisconnectTimeout: 31000, // 31 seconds - upped from 2 seconds
     browserDisconnectTolerance: 2,
     browserConsoleLogOptions: {
-      level: "error"
+      level: 'error'
     },
     port: 9876,
     colors: true,
