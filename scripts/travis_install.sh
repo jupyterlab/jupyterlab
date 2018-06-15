@@ -6,7 +6,7 @@ set -ev
 set -o pipefail
 
 # Building should work without yarn installed globally
-!yarn --version
+! which yarn
 
 # The miniconda directory may exist if it has been restored from cache
 if [ -d "$MINICONDA_DIR" ] && [ -e "$MINICONDA_DIR/bin/conda" ]; then
