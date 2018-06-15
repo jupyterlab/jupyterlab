@@ -8,6 +8,7 @@
     "coverage": "python run-test.py --browsers=Firefox karma-cov.conf.js",
     "test": "jlpm run test:firefox",
     "test:chrome": "python run-test.py --browsers=Chrome karma.conf.js",
+    "test:chrome-headless": "python run-test.py --browsers=ChromeHeadless karma.conf.js",
     "test:debug": "python run-test.py  --browsers=Chrome --singleRun=false --debug=true --browserNoActivityTimeout=10000000 karma.conf.js",
     "test:firefox": "python run-test.py --browsers=Firefox karma.conf.js",
     "test:ie": "python run-test.py  --browsers=IE karma.conf.js",
@@ -25,6 +26,8 @@
   },
   "devDependencies": {
     "karma": "~1.7.1",
+    "karma-chrome-launcher": "^2.2.0",
+    "puppeteer": "^1.5.0",
     "rimraf": "~2.6.2",
     "typescript": "~2.9.1"
   }

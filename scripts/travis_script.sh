@@ -5,8 +5,6 @@
 
 set -ev
 set -o pipefail
-export DISPLAY=:99.0
-sh -e /etc/init.d/xvfb start || true
 
 export PATH="$MINICONDA_DIR/bin:$PATH"
 set +ev

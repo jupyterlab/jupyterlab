@@ -1,12 +1,15 @@
 var path = require('path');
 var webpack = require('./webpack.config');
 
+process.env.CHROME_BIN = require('puppeteer').executablePath()
+
 module.exports = function (config) {
   config.set({
     basePath: '.',
     frameworks: ['mocha'],
     reporters: ['mocha'],
     client: {
+      captureConsole: false,
       mocha: {
         timeout : 10000, // 10 seconds - upped from 2 seconds
         retries: 3 // Allow for slow server on CI.
@@ -34,9 +37,6 @@ module.exports = function (config) {
     browserNoActivityTimeout: 31000, // 31 seconds - upped from 10 seconds
     browserDisconnectTimeout: 31000, // 31 seconds - upped from 2 seconds
     browserDisconnectTolerance: 2,
-    browserConsoleLogOptions: {
-      level: 'error'
-    },
     port: 9876,
     colors: true,
     singleRun: true,
