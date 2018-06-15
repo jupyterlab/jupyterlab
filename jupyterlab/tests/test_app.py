@@ -146,9 +146,6 @@ class KarmaTestApp(ProcessTestApp):
                       terminalsAvailable=str(terminalsAvailable),
                       foo='bar')
 
-        print('\n\nNotebook config:')
-        print(json.dumps(config))
-
         cwd = self.karma_base_dir
 
         karma_inject_file = pjoin(cwd, 'build', 'injector.js')
