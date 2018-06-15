@@ -232,16 +232,12 @@ class DefaultKernel implements Kernel.IKernel {
       return;
     }
     this._isDisposed = true;
-    this._terminated.emit(void 0);
+    this._terminated.emit(undefined);
     this._status = 'dead';
     this._clearSocket();
-    this._futures.forEach((future, key) => {
-      future.dispose();
-    });
-    this._commPromises.forEach((promise, key) => {
-      promise.then(comm => {
-        comm.dispose();
-      });
+    this._futures.forEach(future => { future.dispose(); });
+    this._commPromises.forEach(promise => {
+      promise.then(comm => { comm.dispose(); });
     });
     this._displayIdToParentIds.clear();
     this._msgIdToDisplayIds.clear();
@@ -635,7 +631,7 @@ class DefaultKernel implements Kernel.IKernel {
     if (this._commPromises.has(id)) {
       return this._commPromises.get(id);
     }
-    let promise = Promise.resolve(void 0).then(() => {
+    let promise = Promise.resolve(undefined).then(() => {
       return new CommHandler(
         targetName,
         id,
@@ -924,7 +920,7 @@ class DefaultKernel implements Kernel.IKernel {
     this._updateStatus('connected');
     // Get the kernel info, signaling that the kernel is ready.
     this.requestKernelInfo().then(() => {
-      this._connectionPromise.resolve(void 0);
+      this._connectionPromise.resolve(undefined);
     }).catch(err => {
       this._connectionPromise.reject(err);
     });
@@ -1512,7 +1508,7 @@ namespace Private {
           throw new Error('requirejs not found');
         }
         requirejs([moduleName], (mod: any) => {
-          if (mod[name] === void 0) {
+          if (mod[name] === undefined) {
             let msg = `Object '${name}' not found in module '${moduleName}'`;
             reject(new Error(msg));
           } else {

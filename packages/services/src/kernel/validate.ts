@@ -43,7 +43,7 @@ function validateProperty(object: any, name: string, typeName?: string): void {
   if (!object.hasOwnProperty(name)) {
     throw Error(`Missing property '${name}'`);
   }
-  if (typeName !== void 0) {
+  if (typeName !== undefined) {
     let valid = true;
     let value = object[name];
     switch (typeName) {
@@ -95,7 +95,7 @@ function validateIOPubContent(msg: KernelMessage.IIOPubMessage) : void {
   if (msg.channel === 'iopub') {
     let fields = IOPUB_CONTENT_FIELDS[msg.header.msg_type];
     // Check for unknown message type.
-    if (fields === void 0) {
+    if (fields === undefined) {
       return;
     }
     let names = Object.keys(fields);

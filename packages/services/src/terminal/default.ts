@@ -108,7 +108,7 @@ class DefaultTerminalSession implements TerminalSession.ISession {
       return;
     }
 
-    this.terminated.emit(void 0);
+    this.terminated.emit(undefined);
     this._isDisposed = true;
     if (this._ws) {
       this._ws.close();

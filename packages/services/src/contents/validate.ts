@@ -14,7 +14,7 @@ function validateProperty(object: any, name: string, typeName?: string): void {
   if (!object.hasOwnProperty(name)) {
     throw Error(`Missing property '${name}'`);
   }
-  if (typeName !== void 0) {
+  if (typeName !== undefined) {
     let valid = true;
     let value = object[name];
     switch (typeName) {
