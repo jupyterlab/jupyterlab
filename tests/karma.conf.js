@@ -34,9 +34,12 @@ module.exports = function (config) {
     browserNoActivityTimeout: 31000, // 31 seconds - upped from 10 seconds
     browserDisconnectTimeout: 31000, // 31 seconds - upped from 2 seconds
     browserDisconnectTolerance: 2,
+    browserConsoleLogOptions: {
+      level: "error"
+    },
     port: 9876,
     colors: true,
     singleRun: true,
-    logLevel: config.LOG_INFO
+    logLevel: config.LOG_ERROR
   });
 };
