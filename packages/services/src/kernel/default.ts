@@ -278,6 +278,11 @@ class DefaultKernel implements Kernel.IKernel {
     if (!this._isReady || !this._ws) {
       this._pendingMessages.push(msg);
     } else {
+      let msgType = msg.header.msg_type;
+      if (msgType === 'status') {
+        msgType += ' ' + (msg.content as any).execution_state;
+      }
+      console.log(`JS KERNEL SENT     MESSAGE: K${this.id.slice(0, 6)} M${msg.header.msg_id.slice(0, 6)} ${msgType}`);
       this._ws.send(serialize.serialize(msg));
     }
     this._anyMessage.emit({msg, direction: 'send'});
@@ -835,6 +840,7 @@ class DefaultKernel implements Kernel.IKernel {
    */
   private _assertCurrentMessage(msg: KernelMessage.IMessage) {
     if (this.isDisposed) {
+      console.log(msg);
       throw new Error('Kernel object is disposed');
     }
 
@@ -985,6 +991,16 @@ class DefaultKernel implements Kernel.IKernel {
       throw error;
     }
 
+    let parentId = '';
+    if ((msg.parent_header as any).msg_id) {
+      parentId = 'P' + (msg.parent_header as any).msg_id.slice(0, 6) + ' ';
+    }
+    let msgType = msg.header.msg_type;
+    if (msgType === 'status') {
+      msgType += ' ' + (msg.content as any).execution_state;
+    }
+    console.log(`JS KERNEL RECEIVED MESSAGE: K${this.id.slice(0, 6)} ${parentId}M${msg.header.msg_id.slice(0, 6)} ${msgType} `);
+
     // Update the current kernel session id
     this._kernelSession = msg.header.session;
 
@@ -1066,7 +1082,10 @@ class DefaultKernel implements Kernel.IKernel {
       default:
         break;
       }
-      this._assertCurrentMessage(msg);
+      // If the message was a status dead message, we might have disposed ourselves.
+      if (!this.isDisposed) {
+        this._assertCurrentMessage(msg);
+      }
       this._iopubMessage.emit(msg as KernelMessage.IIOPubMessage);
     }
   }

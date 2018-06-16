@@ -160,6 +160,16 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
       // caught by a client who is waiting for it.
       this._done.reject(new Error('Canceled'));
       this._done.promise.catch(() => { /* no-op */ });
+
+
+      let status = [];
+      if (!this._testFlag(Private.KernelFutureFlag.GotIdle)) {
+        status.push('idle');
+      }
+      if (!this._testFlag(Private.KernelFutureFlag.GotReply)) {
+        status.push('reply');
+      }
+      console.warn(`*************** DISPOSED BEFORE DONE: K${this._kernel.id.slice(0, 6)} missing ${status.join(' ')}`);
     }
     super.dispose();
   }
@@ -212,8 +222,9 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
   }
 
   private _handleDone(): void {
-    console.log('handle done');
+    console.log(`JS KERNEL: M${this.msg.header.msg_id.slice(0, 6)} done`);
     if (this._testFlag(Private.KernelFutureFlag.IsDone)) {
+      console.log(`JS KERNEL: M${this.msg.header.msg_id.slice(0, 6)} actually already done`);
       return;
     }
     this._setFlag(Private.KernelFutureFlag.IsDone);

@@ -15,6 +15,11 @@ import {
 
 import { Response } from 'node-fetch';
 
+
+import {
+  ISignal, Signal
+} from '@phosphor/signaling';
+
 import {
   Contents, TerminalSession, ServerConnection
 } from '../../lib';
@@ -207,17 +212,19 @@ function handleRequest(item: IService, status: number, body: any) {
 
 
 /**
- * Expect a failure on a promise with the given message, then call `done`.
+ * Expect a failure on a promise with the given message, then call `done` if provided.
  */
 export
-function expectFailure(promise: Promise<any>, done: () => void, message?: string): Promise<any> {
-  return promise.then((msg: any) => {
+async function expectFailure(promise: Promise<any>, done?: () => void, message?: string): Promise<any> {
+  let result = promise.then((msg: any) => {
     throw Error('Expected failure did not occur');
   }, (error: Error) => {
     if (message && error.message.indexOf(message) === -1) {
       throw Error(`Error "${message}" not in: "${error.message}"`);
     }
-  }).then(done, done);
+  });
+
+  return done ? result.then(done, done) : result;
 }
 
 
@@ -238,9 +245,10 @@ class SocketTester implements IService {
    * Create a new request and socket tester.
    */
   constructor() {
-    this._server = new WebSocket.Server({ port: 8080 });
+    const port = 8081;
+    this._server = new WebSocket.Server({ port });
     this.serverSettings = ServerConnection.makeSettings({
-      wsUrl: 'ws://localhost:8080/',
+      wsUrl: `ws://localhost:${port}/`,
       WebSocket: WebSocket as any
     });
     this._ready = new PromiseDelegate<void>();
@@ -335,7 +343,7 @@ class KernelTester extends SocketTester {
     let options: KernelMessage.IOptions = {
       msgType: 'status',
       channel: 'iopub',
-      session: this._kernelSessionId
+      session: this.serverSessionId
     };
     let msg = KernelMessage.createMessage(options, { execution_state: status } );
     if (parentHeader) {
@@ -400,19 +408,19 @@ class KernelTester extends SocketTester {
    */
   protected onSocket(sock: WebSocket): void {
     super.onSocket(sock);
-    this.sendStatus(this._initialStatus);
+    // this.sendStatus(this._initialStatus);
     sock.on('message', (msg: any) => {
       if (msg instanceof Buffer) {
         msg = new Uint8Array(msg).buffer;
       }
       let data = deserialize(msg);
-      console.log('RECEIVED MESSAGE:', data.header.msg_id, data.header.msg_type);
+      console.log(`SERVER RECEIVED MESSAGE:    K${this._kernel.id.slice(0, 6)} M${data.header.msg_id.slice(0, 6)} ${data.header.msg_type}`);
       if (data.header.msg_type === 'kernel_info_request') {
         this.sendStatus('busy', data.header);
         let options: KernelMessage.IOptions = {
           msgType: 'kernel_info_reply',
           channel: 'shell',
-          session: this._kernelSessionId
+          session: this.serverSessionId
         };
         let msg = KernelMessage.createMessage(options, EXAMPLE_KERNEL_INFO );
         msg.parent_header = data.header;
@@ -427,10 +435,11 @@ class KernelTester extends SocketTester {
     });
   }
 
+  readonly serverSessionId = uuid();
+
   private _initialStatus = 'starting';
   private _onMessage: (msg: KernelMessage.IMessage) => void = null;
   private _kernel: Kernel.IKernel | null = null;
-  private _kernelSessionId = uuid();
 }
 
 
@@ -509,3 +518,67 @@ class TerminalTester extends SocketTester {
   private _onMessage: (msg: TerminalSession.IMessage) => void = null;
 }
 
+
+/**
+ * Test a single emission from a signal.
+ *
+ * @param signal - The signal we are listening on.
+ * @param test - An optional function which contains the tests.
+ * @param shouldTest - An optional function to determine which emission to
+ * check.
+ *
+ * @returns a promise that rejects if the function throws an error (e.g., if an
+ * expect test doesn't pass), and resolves otherwise.
+ *
+ * #### Notes
+ * Only the first emission will be tested (or the first for which the check
+ * function returns true, if it is supplied).
+ *
+ * You can test to see if any signal comes which matches a criteria by just
+ * giving a shouldTest function. You can test the very first signal by just
+ * giving a test function. And you can test the first signal matching the
+ * shouldTest criteria by giving both.
+ */
+export
+function testEmission<T, U>(signal: ISignal<T, U>, options: {
+  test?: (a: T, b: U) => void,
+  shouldTest?: (a: T, b: U) => boolean
+}): Promise<void> {
+  const done = new PromiseDelegate<void>();
+
+  let object = {};
+  signal.connect((sender: T, args: U) => {
+    if (!options.shouldTest || options.shouldTest(sender, args)) {
+      try {
+        Signal.disconnectReceiver(object);
+        if (options.test) {
+          options.test(sender, args);
+        }
+      } catch (e) {
+        done.reject(e);
+        throw e;
+      }
+      done.resolve(null);
+    }
+  }, object);
+  return done.promise;
+}
+
+
+
+/**
+ * Return a promise that resolves in the given milliseconds with the given value.
+ */
+export
+function sleep<T>(milliseconds: number = 0, value?: T): Promise<T> {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => { resolve(value); }, milliseconds);
+  });
+}
+
+export
+function moment<T>(value?: T): Promise<T> {
+  return new Promise((resolve, reject) => {
+    requestAnimationFrame(() => { resolve(value); });
+  });
+}
