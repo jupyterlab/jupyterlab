@@ -51,7 +51,7 @@ def target_func(comm, msg):
 get_ipython().kernel.comm_manager.register_target("test", target_func)
 `;
 
-describe('jupyter.services - Comm', () => {
+describe.skip('jupyter.services - Comm', () => {
 
   let kernel: Kernel.IKernel;
 

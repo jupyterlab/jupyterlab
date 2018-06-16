@@ -24,7 +24,7 @@ import {
 } from '../utils';
 
 
-describe.only('Kernel.IKernel', () => {
+describe('Kernel.IKernel', () => {
   let defaultKernel: Kernel.IKernel;
   let specs: Kernel.ISpecModels;
 
