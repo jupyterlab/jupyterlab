@@ -17,6 +17,13 @@ import {
   KernelMessage
 } from './messages';
 
+// from Phosphor
+export
+const defer = (() => {
+  let ok = typeof requestAnimationFrame === 'function';
+  return ok ? requestAnimationFrame : setImmediate;
+})();
+
 /**
  * Implementation of a kernel future.
  *
@@ -366,7 +373,7 @@ namespace Private {
         // scheduling in an animation frame to rate-limit our compactions. If we
         // need to compact more frequently, we can change this to directly
         // schedule the compaction.
-        requestAnimationFrame(() => {
+        defer(() => {
           this._processing = this._processing.then(() => {
             this._compactScheduled = false;
             this._compact();
