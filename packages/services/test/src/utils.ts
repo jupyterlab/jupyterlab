@@ -416,7 +416,10 @@ class KernelTester extends SocketTester {
       let data = deserialize(msg);
       console.log(`SERVER RECEIVED MESSAGE:    K${this._kernel.id.slice(0, 6)} M${data.header.msg_id.slice(0, 6)} ${data.header.msg_type}`);
       if (data.header.msg_type === 'kernel_info_request') {
+        // First send status busy message.
         this.sendStatus('busy', data.header);
+
+        // Then send the kernel_info_reply message.
         let options: KernelMessage.IOptions = {
           msgType: 'kernel_info_reply',
           channel: 'shell',
@@ -425,6 +428,8 @@ class KernelTester extends SocketTester {
         let msg = KernelMessage.createMessage(options, EXAMPLE_KERNEL_INFO );
         msg.parent_header = data.header;
         this.send(msg);
+
+        // Then send status idle message.
         this.sendStatus('idle', data.header);
       } else {
         let onMessage = this._onMessage;
