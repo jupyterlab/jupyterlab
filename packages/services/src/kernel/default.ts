@@ -1085,8 +1085,9 @@ class DefaultKernel implements Kernel.IKernel {
       // If the message was a status dead message, we might have disposed ourselves.
       if (!this.isDisposed) {
         this._assertCurrentMessage(msg);
+        // the message wouldn't be emitted if we were disposed anyway.
+        this._iopubMessage.emit(msg as KernelMessage.IIOPubMessage);
       }
-      this._iopubMessage.emit(msg as KernelMessage.IIOPubMessage);
     }
   }
 
@@ -1442,6 +1443,12 @@ namespace Private {
       encodeURIComponent(kernel.id), 'restart'
     );
     let init = { method: 'POST' };
+
+    // TODO: If we handleRestart before making the server request, we sever the
+    // communication link before the shutdown_reply message comes, so we end up
+    // getting the shutdown_reply messages after we reconnect, which is weird.
+    // We might want to move the handleRestart to after we get the response back
+
     // Handle the restart on all of the kernels with the same id.
     each(runningKernels, k => {
       if (k.id === kernel.id) {
