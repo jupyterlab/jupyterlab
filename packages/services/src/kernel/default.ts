@@ -760,6 +760,7 @@ class DefaultKernel implements Kernel.IKernel {
       this._ws.onclose = this._noOp;
       this._ws.onerror = this._noOp;
       this._ws.onmessage = this._noOp;
+      console.log('closing ws connection: ' + this.id.slice(0, 6));
       this._ws.close();
       this._ws = null;
     }
@@ -1098,6 +1099,7 @@ class DefaultKernel implements Kernel.IKernel {
     if (this._wsStopped || !this._ws) {
       return;
     }
+    console.log('WS Closed');
     // Clear the websocket event handlers and the socket itself.
     this._ws.onclose = this._noOp;
     this._ws.onerror = this._noOp;
@@ -1507,6 +1509,7 @@ namespace Private {
     } else if (response.status !== 204) {
       throw new ServerConnection.ResponseError(response);
     }
+    console.log('killing kernels');
     killKernels(id);
   }
 
@@ -1528,8 +1531,10 @@ namespace Private {
    * Kill the kernels by id.
    */
   function killKernels(id: string): void {
+    console.log('disposing kernel id', id);
     each(runningKernels, kernel => {
       if (kernel.id === id) {
+        console.log('disposing kernel');
         kernel.dispose();
       }
     });

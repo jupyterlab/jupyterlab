@@ -229,7 +229,7 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
   }
 
   private _handleDone(): void {
-    console.log(`JS KERNEL: M${this.msg.header.msg_id.slice(0, 6)} done`);
+    console.log(`JS KERNEL: M${this.msg.header.msg_id.slice(0, 6)} future done`);
     if (this._testFlag(Private.KernelFutureFlag.IsDone)) {
       console.log(`JS KERNEL: M${this.msg.header.msg_id.slice(0, 6)} actually already done`);
       return;
