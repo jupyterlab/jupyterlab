@@ -10,6 +10,7 @@ mkdir ~/.jupyter
 
 # Install and enable the server extension
 pip install -q --upgrade pip
+pip --version
 pip install -q -e ".[test]"
 jlpm versions
 jlpm config current
