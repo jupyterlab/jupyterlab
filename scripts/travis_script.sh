@@ -96,27 +96,20 @@ if [[ $GROUP == integrity ]]; then
     jupyter labextension list
 
     # Make sure we can non-dev install.
-    conda remove --name test_install --all || true
-    conda create -q -n test_install notebook python=3.5
-    set +ev
-    source activate test_install
-    set -ev
-    pip install -q ".[test]"  # this populates <sys_prefix>/share/jupyter/lab
-    python -m jupyterlab.selenium_check
+    virtualenv test_install
+    ./test_install/bin/pip install -q ".[test]"  # this populates <sys_prefix>/share/jupyter/lab
+    ./test_install/bin/python -m jupyterlab.selenium_check
     # Make sure we can run the build
-    jupyter lab build
+    ./test_install/bin/jupyter lab build
 
     # Make sure we can start and kill the lab server
-    jupyter lab --no-browser &
+    ./test_install/bin/jupyter lab --no-browser &
     TASK_PID=$!
     # Make sure the task is running
     ps -p $TASK_PID || exit 1
     sleep 5
     kill $TASK_PID
     wait $TASK_PID
-    set +ev
-    source deactivate
-    set -ev
 fi
 
 
