@@ -18,6 +18,12 @@ module.exports = function (config) {
     mochaReporter: {
       output: 'minimal'
     },
+    customLaunchers: {
+      ChromeHeadlessNoSandbox: {
+        base: 'ChromeHeadless',
+        flags: ['--no-sandbox']
+      }
+    },
     files: [
       {pattern: path.resolve('./build/injector.js'), watched: false},
       {pattern: process.env.KARMA_FILE_PATTERN, watched: false}
