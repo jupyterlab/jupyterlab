@@ -30,6 +30,10 @@ import {
 } from './messages';
 
 
+export
+// let log = console.log;
+let log = (...x: any[]) => { return; };
+
 /**
  * A namespace for kernel types, interfaces, and type checker functions.
  */

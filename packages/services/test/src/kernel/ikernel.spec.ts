@@ -16,7 +16,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  Kernel, KernelMessage
+  Kernel, KernelMessage, log
 } from '../../../lib/kernel';
 
 import {
@@ -36,7 +36,7 @@ describe('Kernel.IKernel', () => {
   beforeEach(async () => {
     defaultKernel = await Kernel.startNew();
     await defaultKernel.ready;
-    console.log(`beforeEach: starting kernel ${defaultKernel.id.slice(0, 6)}`);
+    log(`beforeEach: starting kernel ${defaultKernel.id.slice(0, 6)}`);
 
     // await defaultKernel.restart();
     // await defaultKernel.ready;
@@ -44,12 +44,12 @@ describe('Kernel.IKernel', () => {
 
   afterEach(async () => {
     if (defaultKernel.status !== 'dead') {
-      console.log(`afterEach: shutting down kernel ${defaultKernel.id.slice(0, 6)}`);
+      log(`afterEach: shutting down kernel ${defaultKernel.id.slice(0, 6)}`);
       await defaultKernel.shutdown();
       defaultKernel.dispose();
     }
-    console.log();
-    console.log('-----------------------------------------------------------------------------------------');
+    log();
+    log('-----------------------------------------------------------------------------------------');
   });
 
   after(async () => {

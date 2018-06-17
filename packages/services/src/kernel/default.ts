@@ -26,7 +26,7 @@ import {
 } from './comm';
 
 import {
-  Kernel
+  Kernel, log
 } from './kernel';
 
 import {
@@ -42,7 +42,6 @@ import * as serialize
 
 import * as validate
   from './validate';
-
 
 /**
  * The url for the kernel service.
@@ -282,7 +281,7 @@ class DefaultKernel implements Kernel.IKernel {
       if (msgType === 'status') {
         msgType += ' ' + (msg.content as any).execution_state;
       }
-      console.log(`JS KERNEL SENT     MESSAGE: K${this.id.slice(0, 6)} M${msg.header.msg_id.slice(0, 6)} ${msgType}`);
+      log(`JS KERNEL SENT     MESSAGE: K${this.id.slice(0, 6)} M${msg.header.msg_id.slice(0, 6)} ${msgType}`);
       this._ws.send(serialize.serialize(msg));
     }
     this._anyMessage.emit({msg, direction: 'send'});
@@ -760,7 +759,7 @@ class DefaultKernel implements Kernel.IKernel {
       this._ws.onclose = this._noOp;
       this._ws.onerror = this._noOp;
       this._ws.onmessage = this._noOp;
-      console.log('closing ws connection: ' + this.id.slice(0, 6));
+      log('closing ws connection: ' + this.id.slice(0, 6));
       this._ws.close();
       this._ws = null;
     }
@@ -841,7 +840,7 @@ class DefaultKernel implements Kernel.IKernel {
    */
   private _assertCurrentMessage(msg: KernelMessage.IMessage) {
     if (this.isDisposed) {
-      console.log(msg);
+      log(msg);
       throw new Error('Kernel object is disposed');
     }
 
@@ -928,7 +927,7 @@ class DefaultKernel implements Kernel.IKernel {
 
     // Strip any authentication from the display string.
     let display = partialUrl.replace(/^((?:\w+:)?\/\/)(?:[^@\/]+@)/, '$1');
-    console.log('Starting WebSocket:', display);
+    log('Starting WebSocket:', display);
 
     let url = URLExt.join(
         partialUrl,
@@ -1000,7 +999,7 @@ class DefaultKernel implements Kernel.IKernel {
     if (msgType === 'status') {
       msgType += ' ' + (msg.content as any).execution_state;
     }
-    console.log(`JS KERNEL RECEIVED MESSAGE: K${this.id.slice(0, 6)} ${parentId}M${msg.header.msg_id.slice(0, 6)} ${msgType} `);
+    log(`JS KERNEL RECEIVED MESSAGE: K${this.id.slice(0, 6)} ${parentId}M${msg.header.msg_id.slice(0, 6)} ${msgType} `);
 
     // Update the current kernel session id
     this._kernelSession = msg.header.session;
@@ -1099,7 +1098,7 @@ class DefaultKernel implements Kernel.IKernel {
     if (this._wsStopped || !this._ws) {
       return;
     }
-    console.log('WS Closed');
+    log('WS Closed');
     // Clear the websocket event handlers and the socket itself.
     this._ws.onclose = this._noOp;
     this._ws.onerror = this._noOp;
@@ -1509,7 +1508,7 @@ namespace Private {
     } else if (response.status !== 204) {
       throw new ServerConnection.ResponseError(response);
     }
-    console.log('killing kernels');
+    log('killing kernels');
     killKernels(id);
   }
 
@@ -1531,10 +1530,10 @@ namespace Private {
    * Kill the kernels by id.
    */
   function killKernels(id: string): void {
-    console.log('disposing kernel id', id);
+    log('disposing kernel id', id);
     each(runningKernels, kernel => {
       if (kernel.id === id) {
-        console.log('disposing kernel');
+        log('disposing kernel');
         kernel.dispose();
       }
     });
