@@ -1,0 +1,12 @@
+{
+	"full_name": "Name",
+	"email": "email@gmail.com",
+	"github_username": "user",
+	"project_name": "jupyterlab-statusbar",
+	"directory_name": "jupyterlab-statusbar",
+	"project_slug": "jupyterlab-statusbar",
+	"project_short_description": "Jupyterlab -- a status bar",
+	"release_date": "2017",
+	"version": "1.0"	
+
+}
