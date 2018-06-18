@@ -78,7 +78,7 @@ describe('Kernel.IFuture', () => {
           calls.push('first');
           // Check to make sure we actually got the messages we expected.
           if (msg.header.msg_type === 'stream') {
-            expect((msg as KernelMessage.IStreamMsg).content.text).to.be('foo1');
+            expect((msg as KernelMessage.IStreamMsg).content.text).to.be('foo');
           } else {
             expect((msg as KernelMessage.IStatusMsg).content.execution_state).to.be('idle');
           }
