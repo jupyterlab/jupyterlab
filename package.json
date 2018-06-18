@@ -1,15 +1,15 @@
 {
-  "name": "statusbar",
+  "name": "jupyterlab-statusbar",
   "version": "0.1.0",
-  "description": "statusbar",
+  "description": "A status bar for JupyterLab",
   "keywords": [
     "jupyter",
     "jupyterlab",
     "jupyterlab-extension"
   ],
-  "homepage": "https://github.com/my_name/jupyterlab_myextension",
+  "homepage": "https://github.com/jupyterlab/jupyterlab-statusbar",
   "bugs": {
-    "url": "https://github.com/my_name/jupyterlab_myextension/issues"
+    "url": "https://github.com/jupyterlab/jupyterlab-statusbar/issues"
   },
   "license": "BSD-3-Clause",
   "author": "Richa Gadgil",
@@ -21,7 +21,7 @@
   "types": "lib/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/my_name/jupyterlab_myextension.git"
+    "url": "https://github.com/jupyterlab/jupyterlab-statusbar.git"
   },
   "scripts": {
     "build": "tsc",
