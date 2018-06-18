@@ -24,7 +24,7 @@ JupyterLab can be extended in four ways via:
 See :ref:`xkcd_extension_tutorial` to learn how to make a simple JupyterLab extension.
 
 To understand how to wrap an **Angular** application as a JupyterLab extension,
-see the `"Create your own Angular JupyerLab extension" <https://github.com/SimonBiggs/scriptedforms/blob/master/scriptedforms/docs/create-your-own-angular-jupyterlab-extension.md#create-your-own-angular-jupyerlab-extension>`_ guide provided by 
+see the `"Create your own Angular JupyerLab extension" <https://github.com/SimonBiggs/scriptedforms/blob/master/scriptedforms/docs/create-your-own-angular-jupyterlab-extension.md#create-your-own-angular-jupyerlab-extension>`_ guide provided by
 `Scripted Forms <https://github.com/SimonBiggs/scriptedforms>`_.
 
 A JupyterLab application is comprised of:
@@ -262,7 +262,7 @@ application.
 
 To quickly create a theme based on the JupyterLab Light Theme, follow
 the instructions in the `contributing
-guide <CONTRIBUTING.html#setting-up-a-development-environment>`__ and
+guide <https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md#setting-up-a-development-environment>`__ and
 then run ``jlpm run create:theme`` from the repository root directory.
 Once you select a name, title and a description, a new theme folder will
 be created in the current directory. You can move that new folder to a
