@@ -1296,38 +1296,34 @@ namespace Private {
    * Run the selected cells.
    */
   export
-  function runSelected(widget: Notebook, session?: IClientSession): Promise<boolean> {
-    widget.mode = 'command';
-    let selected: Cell[] = [];
-    let lastIndex = widget.activeCellIndex;
-    let i = 0;
-    each(widget.widgets, child => {
-      if (widget.isSelectedOrActive(child)) {
-        selected.push(child);
-        lastIndex = i;
-      }
-      i++;
-    });
-    widget.activeCellIndex = lastIndex;
-    widget.deselectAll();
+  function runSelected(notebook: Notebook, session?: IClientSession): Promise<boolean> {
+    notebook.mode = 'command';
 
-    let promises: Promise<boolean>[] = [];
-    each(selected, child => {
-      promises.push(runCell(widget, child, session));
-    });
-    return Promise.all(promises).then(results => {
-      if (widget.isDisposed) {
-        return false;
+    let lastIndex = notebook.activeCellIndex;
+    const selected = notebook.widgets.filter((child, index) => {
+      const active = notebook.isSelectedOrActive(child);
+
+      if (active) {
+        lastIndex = index;
       }
-      // Post an update request.
-      widget.update();
-      for (let result of results) {
-        if (!result) {
+
+      return active;
+    });
+
+    notebook.activeCellIndex = lastIndex;
+    notebook.deselectAll();
+
+    return Promise.all(selected.map(child => runCell(notebook, child, session)))
+      .then(results => {
+        if (notebook.isDisposed) {
           return false;
         }
-      }
-      return true;
-    });
+
+        // Post an update request.
+        notebook.update();
+
+        return results.every(result => result);
+      });
   }
 
   /**

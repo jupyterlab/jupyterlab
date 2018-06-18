@@ -35,7 +35,7 @@ import {
 
 import {
   CellTools, ICellTools, INotebookTracker, NotebookActions,
-  NotebookModelFactory,  NotebookPanel, NotebookTracker, NotebookWidgetFactory,
+  NotebookModelFactory, NotebookPanel, NotebookTracker, NotebookWidgetFactory,
   StaticNotebook
 } from '@jupyterlab/notebook';
 
