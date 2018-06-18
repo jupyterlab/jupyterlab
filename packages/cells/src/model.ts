@@ -331,7 +331,9 @@ class AttachmentsCellModel extends CellModel {
    */
   toJSON(): nbformat.IRawCell | nbformat.IMarkdownCell {
     let cell = super.toJSON() as (nbformat.IRawCell | nbformat.IMarkdownCell);
-    cell.attachments = this.attachments.toJSON();
+    if (this.attachments.length) {
+      cell.attachments = this.attachments.toJSON();
+    }
     return cell;
   }
 
