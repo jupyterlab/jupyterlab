@@ -9,7 +9,7 @@ import '../style/index.css';
  * Initialization data for the statusbar extension.
  */
 const extension: JupyterLabPlugin<void> = {
-  id: 'statusbar',
+  id: 'jupyterlab-statusbar',
   autoStart: true,
   activate: (app: JupyterLab) => {
     console.log('JupyterLab extension statusbar is activated!');
