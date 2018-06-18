@@ -26,6 +26,10 @@ import {
   ElementExt
 } from '@phosphor/domutils';
 
+import {
+  ISignal, Signal
+} from '@phosphor/signaling';
+
 import * as React from 'react';
 
 import {
@@ -51,7 +55,6 @@ const TRUST_MESSAGE = (
   </p>
 );
 
-
 /**
  * The mimetype used for Jupyter cell data.
  */
@@ -59,13 +62,38 @@ const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
 
 /**
- * A namespace for handling actions on a notebook.
+ * A collection of actions that run against notebooks.
  *
  * #### Notes
  * All of the actions are a no-op if there is no model on the notebook.
  * The actions set the widget `mode` to `'command'` unless otherwise specified.
  * The actions will preserve the selection on the notebook widget unless
  * otherwise specified.
+ */
+export
+class NotebookActions {
+  /**
+   * A signal that emits whenever a cell is run.
+   */
+  static get executed(): ISignal<null, { parent: Notebook, child: Cell }> {
+    return Private.executed;
+  }
+
+  /**
+   * A private constructor for the `NotebookActions` class.
+   *
+   * #### Notes
+   * This class can never be instantiated. Its static member `executed` will be
+   * merged with the `NotebookActions` namespace. The reason it exists as a
+   * standalone class is because at run time, the `Private.executed` variable
+   * does not yet exist, so it needs to be referenced via a getter.
+   */
+  private constructor() { }
+}
+
+
+/**
+ * A namespace for `NotebookActions` static methods.
  */
 export
 namespace NotebookActions {
@@ -1220,6 +1248,12 @@ namespace NotebookActions {
  */
 namespace Private {
   /**
+   * A signal that emits whenever a cell is run.
+   */
+  export
+  const executed = new Signal<null, { parent: Notebook, child: Cell }>(null);
+
+  /**
    * The interface for a widget state.
    */
   export
@@ -1296,12 +1330,12 @@ namespace Private {
    * Run the selected cells.
    */
   export
-  function runSelected(notebook: Notebook, session?: IClientSession): Promise<boolean> {
-    notebook.mode = 'command';
+  function runSelected(widget: Notebook, session?: IClientSession): Promise<boolean> {
+    widget.mode = 'command';
 
-    let lastIndex = notebook.activeCellIndex;
-    const selected = notebook.widgets.filter((child, index) => {
-      const active = notebook.isSelectedOrActive(child);
+    let lastIndex = widget.activeCellIndex;
+    const selected = widget.widgets.filter((child, index) => {
+      const active = widget.isSelectedOrActive(child);
 
       if (active) {
         lastIndex = index;
@@ -1310,17 +1344,17 @@ namespace Private {
       return active;
     });
 
-    notebook.activeCellIndex = lastIndex;
-    notebook.deselectAll();
+    widget.activeCellIndex = lastIndex;
+    widget.deselectAll();
 
-    return Promise.all(selected.map(child => runCell(notebook, child, session)))
+    return Promise.all(selected.map(child => runCell(widget, child, session)))
       .then(results => {
-        if (notebook.isDisposed) {
+        if (widget.isDisposed) {
           return false;
         }
 
         // Post an update request.
-        notebook.update();
+        widget.update();
 
         return results.every(result => result);
       });
@@ -1347,10 +1381,17 @@ namespace Private {
               handlePayload(content, parent, child);
             }
           }
-          return reply ? reply.content.status === 'ok' : true;
-        }).catch(e => {
-          if (e.message !== 'Canceled') {
-            throw e;
+
+          const run = reply ? reply.content.status === 'ok' : true;
+
+          if (reply ? reply.content.status === 'ok' : true) {
+            executed.emit({ parent, child });
+          }
+
+          return run;
+        }).catch(reason => {
+          if (reason.message !== 'Canceled') {
+            throw reason;
           }
           return false;
         });
@@ -1360,6 +1401,9 @@ namespace Private {
     default:
       break;
     }
+
+    executed.emit({ parent, child });
+
     return Promise.resolve(true);
   }
 
