@@ -75,7 +75,7 @@ class NotebookActions {
   /**
    * A signal that emits whenever a cell is run.
    */
-  static get executed(): ISignal<any, { parent: Notebook, child: Cell }> {
+  static get executed(): ISignal<any, { notebook: Notebook, cell: Cell }> {
     return Private.executed;
   }
 
@@ -1307,7 +1307,7 @@ namespace Private {
    * A signal that emits whenever a cell is run.
    */
   export
-  const executed = new Signal<any, { parent: Notebook, child: Cell }>({ });
+  const executed = new Signal<any, { notebook: Notebook, cell: Cell }>({ });
 
   /**
    * The interface for a widget state.
@@ -1423,17 +1423,17 @@ namespace Private {
   /**
    * Run a cell.
    */
-  function runCell(parent: Notebook, child: Cell, session?: IClientSession): Promise<boolean> {
-    switch (child.model.type) {
+  function runCell(notebook: Notebook, cell: Cell, session?: IClientSession): Promise<boolean> {
+    switch (cell.model.type) {
     case 'markdown':
-      (child as MarkdownCell).rendered = true;
-      child.inputHidden = false;
-      executed.emit({ parent, child });
+      (cell as MarkdownCell).rendered = true;
+      cell.inputHidden = false;
+      executed.emit({ notebook, cell });
       break;
     case 'code':
       if (session) {
-        return CodeCell.execute(child as CodeCell, session).then(reply => {
-          if (child.isDisposed) {
+        return CodeCell.execute(cell as CodeCell, session).then(reply => {
+          if (cell.isDisposed) {
             return false;
           }
 
@@ -1445,7 +1445,7 @@ namespace Private {
             const content = reply.content as KernelMessage.IExecuteOkReply;
 
             if (content.payload && content.payload.length) {
-              handlePayload(content, parent, child);
+              handlePayload(content, notebook, cell);
             }
 
             return true;
@@ -1460,13 +1460,13 @@ namespace Private {
           return false;
         }).then(ran => {
           if (ran) {
-            executed.emit({ parent, child });
+            executed.emit({ notebook, cell });
           }
 
           return ran;
         });
       }
-      (child.model as ICodeCellModel).executionCount = null;
+      (cell.model as ICodeCellModel).executionCount = null;
       break;
     default:
       break;
@@ -1483,7 +1483,7 @@ namespace Private {
    * the kernel type definitions.
    * See [Payloads (DEPRECATED)](https://jupyter-client.readthedocs.io/en/latest/messaging.html#payloads-deprecated).
    */
-  function handlePayload(content: KernelMessage.IExecuteOkReply, parent: Notebook, child: Cell) {
+  function handlePayload(content: KernelMessage.IExecuteOkReply, notebook: Notebook, cell: Cell) {
     const setNextInput = content.payload.filter(i => {
       return (i as any).source === 'set_next_input';
     })[0];
@@ -1496,20 +1496,20 @@ namespace Private {
     const replace = (setNextInput as any).replace;
 
     if (replace) {
-      child.model.value.text = text;
+      cell.model.value.text = text;
       return;
     }
 
     // Create a new code cell and add as the next cell.
-    const cell = parent.model.contentFactory.createCodeCell({ });
-    const cells = parent.model.cells;
-    const index = ArrayExt.firstIndexOf(toArray(cells), child.model);
+    const newCell = notebook.model.contentFactory.createCodeCell({ });
+    const cells = notebook.model.cells;
+    const index = ArrayExt.firstIndexOf(toArray(cells), cell.model);
 
-    cell.value.text = text;
+    newCell.value.text = text;
     if (index === -1) {
-      cells.push(cell);
+      cells.push(newCell);
     } else {
-      cells.insert(index + 1, cell);
+      cells.insert(index + 1, newCell);
     }
   }
 
