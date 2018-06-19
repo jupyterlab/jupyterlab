@@ -75,7 +75,7 @@ class NotebookActions {
   /**
    * A signal that emits whenever a cell is run.
    */
-  static get executed(): ISignal<null, { parent: Notebook, child: Cell }> {
+  static get executed(): ISignal<any, { parent: Notebook, child: Cell }> {
     return Private.executed;
   }
 
@@ -1251,7 +1251,7 @@ namespace Private {
    * A signal that emits whenever a cell is run.
    */
   export
-  const executed = new Signal<null, { parent: Notebook, child: Cell }>(null);
+  const executed = new Signal<any, { parent: Notebook, child: Cell }>({ });
 
   /**
    * The interface for a widget state.
