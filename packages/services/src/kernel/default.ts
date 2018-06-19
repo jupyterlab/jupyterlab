@@ -1502,8 +1502,7 @@ namespace Private {
     let init = { method: 'DELETE' };
     let response = await ServerConnection.makeRequest(url, init, settings);
     if (response.status === 404) {
-      let data = await response.json();
-      let msg = data.message || `The kernel "${id}"" does not exist on the server`;
+      let msg = `The kernel "${id}" does not exist on the server`;
       console.warn(msg);
     } else if (response.status !== 204) {
       throw new ServerConnection.ResponseError(response);
