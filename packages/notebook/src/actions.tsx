@@ -1376,15 +1376,18 @@ namespace Private {
           if (child.isDisposed) {
             return false;
           }
-          if (reply && reply.content.status === 'ok') {
-            let content = reply.content as KernelMessage.IExecuteOkReply;
+
+          if (!reply) {
+            return true;
+          }
+
+          if (reply.content.status === 'ok') {
+            const content = reply.content as KernelMessage.IExecuteOkReply;
+
             if (content.payload && content.payload.length) {
               handlePayload(content, parent, child);
             }
-          }
 
-          if (reply ? reply.content.status === 'ok' : true) {
-            executed.emit({ parent, child });
             return true;
           }
 
@@ -1393,7 +1396,14 @@ namespace Private {
           if (reason.message !== 'Canceled') {
             throw reason;
           }
+
           return false;
+        }).then(ran => {
+          if (ran) {
+            executed.emit({ parent, child });
+          }
+
+          return ran;
         });
       }
       (child.model as ICodeCellModel).executionCount = null;
