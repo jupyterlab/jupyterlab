@@ -1368,6 +1368,7 @@ namespace Private {
     case 'markdown':
       (child as MarkdownCell).rendered = true;
       child.inputHidden = false;
+      executed.emit({ parent, child });
       break;
     case 'code':
       if (session) {
@@ -1382,13 +1383,12 @@ namespace Private {
             }
           }
 
-          const run = reply ? reply.content.status === 'ok' : true;
-
           if (reply ? reply.content.status === 'ok' : true) {
             executed.emit({ parent, child });
+            return true;
           }
 
-          return run;
+          return false;
         }).catch(reason => {
           if (reason.message !== 'Canceled') {
             throw reason;
@@ -1401,8 +1401,6 @@ namespace Private {
     default:
       break;
     }
-
-    executed.emit({ parent, child });
 
     return Promise.resolve(true);
   }
