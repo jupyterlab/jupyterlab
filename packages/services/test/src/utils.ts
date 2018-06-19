@@ -408,6 +408,7 @@ class KernelTester extends SocketTester {
    */
   protected onSocket(sock: WebSocket): void {
     super.onSocket(sock);
+    // TODO: Does the kernel actually send the status in the original websocket? Can it ever send the status?
     // this.sendStatus(this._initialStatus);
     sock.on('message', (msg: any) => {
       if (msg instanceof Buffer) {
