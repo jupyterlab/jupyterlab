@@ -26,17 +26,16 @@ describe('Kernel.IFuture', () => {
     Kernel.shutdownAll();
   });
 
-  it('should have a msg attribute', () => {
-    return Kernel.startNew().then(kernel => {
-      let future = kernel.requestExecute({ code: 'print("hello")' });
-      expect(typeof future.msg.header.msg_id).to.be('string');
-      return future.done;
-    });
+  it('should have a msg attribute', async () => {
+    const kernel = await Kernel.startNew();
+    const future = kernel.requestExecute({ code: 'print("hello")' });
+    expect(typeof future.msg.header.msg_id).to.be('string');
+    await future.done;
   });
 
   describe('Message hooks', () => {
 
-    it('should have the most recently registered hook run first', () => {
+    it('should have the most recently registered hook run first', async () => {
       let options: KernelMessage.IExecuteRequest = {
         code: 'test',
         silent: false,
@@ -91,14 +90,12 @@ describe('Kernel.IFuture', () => {
         };
       });
 
-      return tester.start().then(k => {
-        kernel = k;
-        future = kernel.requestExecute(options, false);
-        return future.done;
-      }).then(() => {
-        // the last hook was called for the stream and the status message.
-        expect(calls).to.eql(['first', 'last', 'iopub', 'first', 'last', 'iopub']);
-      });
+      kernel = await tester.start();
+      future = kernel.requestExecute(options, false);
+      await future.done;
+
+      // the last hook was called for the stream and the status message.
+      expect(calls).to.eql(['first', 'last', 'iopub', 'first', 'last', 'iopub']);
     });
 
     it('should abort processing if a hook returns false, but the done logic should still work', () => {
