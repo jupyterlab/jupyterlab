@@ -62,11 +62,12 @@ describe('terminal', () => {
 
     describe('#serverSettings', () => {
 
-      it('should be the server settings', () => {
+      it('should get the server settings', () => {
         manager.dispose();
-        let serverSettings = ServerConnection.makeSettings({ baseUrl: 'foo' });
+        let serverSettings = ServerConnection.makeSettings();
+        let token = serverSettings.token;
         manager = new TerminalManager({ serverSettings });
-        expect(manager.serverSettings.baseUrl).to.be('foo');
+        expect(manager.serverSettings.token).to.be(token);
       });
 
     });

@@ -71,9 +71,10 @@ describe('kernel/manager', () => {
 
       it('should get the server settings', () => {
         manager.dispose();
-        let serverSettings = makeSettings({ baseUrl: 'foo' });
+        let serverSettings = makeSettings();
+        let token = serverSettings.token;
         manager = new KernelManager({ serverSettings });
-        expect(manager.serverSettings.baseUrl).to.be('foo');
+        expect(manager.serverSettings.token).to.be(token);
       });
 
     });
