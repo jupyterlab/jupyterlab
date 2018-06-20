@@ -127,12 +127,15 @@ class ApplicationShell extends Widget {
 
     BoxLayout.setStretch(topPanel, 0);
     BoxLayout.setStretch(hboxPanel, 1);
-    BoxLayout.setStretch(bottomPanel, 0);
+    /*BoxLayout.setStretch(bottomPanel, 0);*/
     
 
     rootLayout.addWidget(topPanel);
     rootLayout.addWidget(hboxPanel);
     rootLayout.addWidget(bottomPanel);
+
+    /*bottomPanel.addWidget(bottomHandler.sideBar);
+    BoxLayout.setStretch(bottomPanel, 1);*/
 
     this.layout = rootLayout;
 
@@ -196,6 +199,7 @@ class ApplicationShell extends Widget {
   get rightCollapsed(): boolean {
     return !this._rightHandler.sideBar.currentTitle;
   }
+
 
   /**
    * Whether JupyterLab is in presentation mode with the `jp-mod-presentationMode` CSS class.
@@ -482,6 +486,7 @@ class ApplicationShell extends Widget {
     this._onLayoutModified();
   }
 
+ 
   /**
    * Expand the left area.
    *
