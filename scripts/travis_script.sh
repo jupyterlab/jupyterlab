@@ -96,7 +96,7 @@ if [[ $GROUP == integrity ]]; then
     jupyter labextension list
 
     # Make sure we can non-dev install.
-    virtualenv test_install
+    virtualenv -p $(which python3) test_install
     ./test_install/bin/pip install -q ".[test]"  # this populates <sys_prefix>/share/jupyter/lab
     ./test_install/bin/python -m jupyterlab.selenium_check
     # Make sure we can run the build
