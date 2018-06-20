@@ -1382,6 +1382,12 @@ class Notebook extends StaticNotebook {
    * Handle `contextmenu` event.
    */
   private _evtContextMenuCapture(event: PointerEvent): void {
+    // Allow the event to propagate un-modified if the user
+    // is holding the shift-key (and probably requesting
+    // the native context menu).
+    if (event.shiftKey) {
+      return;
+    }
     // `event.target` sometimes gives an orphaned node in Firefox 57, which
     // can have `null` anywhere in its parent tree. If we fail to find a
     // cell using `event.target`, try again using a target reconstructed from
@@ -1394,7 +1400,7 @@ class Notebook extends StaticNotebook {
     }
     let widget = this.widgets[index];
 
-    if (!event.shiftKey && widget && widget.editorWidget.node.contains(target)) {
+    if (widget && widget.editorWidget.node.contains(target)) {
       // Prevent CodeMirror from focusing the editor.
       // TODO: find an editor-agnostic solution.
       event.preventDefault();
