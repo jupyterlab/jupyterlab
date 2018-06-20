@@ -73,6 +73,7 @@ class ApplicationShell extends Widget {
     this.addClass(APPLICATION_SHELL_CLASS);
     this.id = 'main';
 
+    let bottomPanel = this._bottomPanel = new Panel();
     let topPanel = this._topPanel = new Panel();
     let hboxPanel = this._hboxPanel = new BoxPanel();
     let dockPanel = this._dockPanel = new DockPanel();
@@ -83,6 +84,8 @@ class ApplicationShell extends Widget {
     let rightHandler = this._rightHandler = new Private.SideBarHandler('right');
     let rootLayout = new BoxLayout();
 
+
+    bottomPanel.id = 'jp-bottom-panel';
     topPanel.id = 'jp-top-panel';
     hboxPanel.id = 'jp-main-content-panel';
     dockPanel.id = 'jp-main-dock-panel';
@@ -124,9 +127,12 @@ class ApplicationShell extends Widget {
 
     BoxLayout.setStretch(topPanel, 0);
     BoxLayout.setStretch(hboxPanel, 1);
+    BoxLayout.setStretch(bottomPanel, 0);
+    
 
     rootLayout.addWidget(topPanel);
     rootLayout.addWidget(hboxPanel);
+    rootLayout.addWidget(bottomPanel);
 
     this.layout = rootLayout;
 
@@ -190,6 +196,7 @@ class ApplicationShell extends Widget {
   get rightCollapsed(): boolean {
     return !this._rightHandler.sideBar.currentTitle;
   }
+
 
   /**
    * Whether JupyterLab is in presentation mode with the `jp-mod-presentationMode` CSS class.
@@ -441,6 +448,25 @@ class ApplicationShell extends Widget {
     this._onLayoutModified();
   }
 
+
+  /**
+   * Add a widget to the bottom content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
+   */
+
+  addToBottomArea(widget: Widget, options: ApplicationShell.ISideAreaOptions = {}): void {
+    if (!widget.id) {
+      console.error('Widgets added to app shell must have unique id property.');
+      return;
+    }
+    // Temporary: widgets are added to the panel in order of insertion.
+    this._bottomPanel.addWidget(widget);
+    this._onLayoutModified();
+  }
+
+
   /**
    * Collapse the left area.
    */
@@ -457,6 +483,7 @@ class ApplicationShell extends Widget {
     this._onLayoutModified();
   }
 
+ 
   /**
    * Expand the left area.
    *
@@ -502,6 +529,8 @@ class ApplicationShell extends Widget {
       return this._dockPanel.isEmpty;
     case 'top':
       return this._topPanel.widgets.length === 0;
+    case 'bottom':
+      return this._bottomPanel.widgets.length === 0;
     case 'right':
       return this._rightHandler.stackedPanel.widgets.length === 0;
     default:
@@ -581,7 +610,9 @@ class ApplicationShell extends Widget {
         return iter(this._rightHandler.sideBar.titles.map(t => t.owner));
       case 'top':
         return this._topPanel.children();
-      default:
+      case 'bottom':
+	return this._bottomPanel.children();
+     default:
         throw new Error('Invalid area');
     }
   }
@@ -702,6 +733,7 @@ class ApplicationShell extends Widget {
   private _rightHandler: Private.SideBarHandler;
   private _tracker = new FocusTracker<Widget>();
   private _topPanel: Panel;
+  private _bottomPanel: Panel;
 }
 
 
@@ -714,7 +746,7 @@ namespace ApplicationShell {
    * The areas of the application shell where widgets can reside.
    */
   export
-  type Area = 'main' | 'top' | 'left' | 'right';
+  type Area = 'main' | 'top' | 'left' | 'right' | 'bottom';
 
   /**
    * The restorable description of an area within the main dock panel.
