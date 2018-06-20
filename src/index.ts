@@ -6,6 +6,10 @@ import {
   Token
 } from '@phosphor/coreutils';
 
+import {
+  Widget
+} from '@phosphor/widgets';
+
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 
 export
@@ -14,16 +18,17 @@ interface IStatusBar {
 }
 
 export
-interface IStatusItem {
-
+class StatusBar extends Widget implements IStatusBar {
+  constructor(options: StatusBar.IOptions) {
+    super();
+  }
 }
 
 export
-class StatusBar implements IStatusBar {
-  constructor(options: StatusBar.IOptions) {
+abstract class StatusBarItem extends Widget {}
 
-  }
-}
+export
+class ManagedStatusBarItem extends StatusBarItem {}
 
 export
 namespace StatusBar {
