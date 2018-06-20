@@ -79,7 +79,7 @@ export default plugin;
  * Activate the terminal plugin.
  */
 function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer, launcher: ILauncher | null): ITerminalTracker {
-  const { commands, serviceManager } = app;
+  const { serviceManager } = app;
   const category = 'Terminal';
   const namespace = 'terminal';
   const tracker = new InstanceTracker<MainAreaWidget<Terminal>>({ namespace });
@@ -124,11 +124,9 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   // Add a launcher item if the launcher is available.
   if (launcher) {
     launcher.add({
-      displayName: 'Terminal',
+      command: CommandIDs.createNew,
       category: 'Other',
       rank: 0,
-      iconClass: TERMINAL_ICON_CLASS,
-      callback: () => commands.execute(CommandIDs.createNew)
     });
   }
 
@@ -157,6 +155,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
   commands.addCommand(CommandIDs.createNew, {
     label: args => args['isPalette'] ? 'New Terminal' : 'Terminal',
     caption: 'Start a new terminal session',
+    iconClass: TERMINAL_ICON_CLASS,
     execute: args => {
       const name = args['name'] as string;
       const initialCommand = args['initialCommand'] as string;
