@@ -128,7 +128,7 @@ class ApplicationShell extends Widget {
     BoxLayout.setStretch(topPanel, 0);
     BoxLayout.setStretch(hboxPanel, 1);
     BoxLayout.setStretch(bottomPanel, 0);
-    
+
     rootLayout.addWidget(topPanel);
     rootLayout.addWidget(hboxPanel);
     rootLayout.addWidget(bottomPanel);
