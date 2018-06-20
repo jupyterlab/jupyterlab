@@ -1,7 +1,7 @@
-# statusbar
+# JupyterLab Status Bar
 
-statusbar
-
+This extension creates a generic statusbar component it the main JupyterLab view. This extension can be used by other
+extensions to add custom elements into the statusbar.
 
 ## Prerequisites
 
@@ -29,4 +29,3 @@ To rebuild the package and the JupyterLab app:
 npm run build
 jupyter lab build
 ```
-
