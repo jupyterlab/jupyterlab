@@ -5,7 +5,7 @@ const URL = process.argv[2];
 async function main() {
   console.info("Starting Chrome Headless");
 
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({args: ['--no-sandbox']});
   const page = await browser.newPage();
   console.info("Navigating to page:", URL);
 
