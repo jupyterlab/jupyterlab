@@ -1,3 +1,6 @@
+// Local CSS must be loaded prior to loading other libs.
+import '../style/index.css';
+
 import {
   JupyterLab, JupyterLabPlugin,
 } from '@jupyterlab/application';
