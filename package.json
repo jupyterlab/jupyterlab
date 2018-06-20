@@ -14,11 +14,16 @@
   "license": "BSD-3-Clause",
   "author": "Richa Gadgil",
   "files": [
-    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
-    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
+    "lib/*.d.ts",
+    "lib/*.js.map",
+    "lib/*.js",
+    "style/*.css"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib/"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/jupyterlab/jupyterlab-statusbar.git"
@@ -26,7 +31,7 @@
   "scripts": {
     "build": "tsc",
     "clean": "rimraf lib",
-    "watch": "tsc -w"
+    "watch": "tsc -w  --listEmittedFiles"
   },
   "dependencies": {
     "@jupyterlab/application": "^0.16.3",
@@ -35,7 +40,7 @@
   },
   "devDependencies": {
     "rimraf": "^2.6.1",
-    "typescript": "~2.6.0"
+    "typescript": "~2.9.1"
   },
   "jupyterlab": {
     "extension": true
