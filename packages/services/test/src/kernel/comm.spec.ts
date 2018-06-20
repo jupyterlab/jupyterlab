@@ -51,7 +51,7 @@ def target_func(comm, msg):
 get_ipython().kernel.comm_manager.register_target("test", target_func)
 `;
 
-describe.skip('jupyter.services - Comm', () => {
+describe('jupyter.services - Comm', () => {
 
   let kernel: Kernel.IKernel;
 
@@ -86,7 +86,7 @@ describe.skip('jupyter.services - Comm', () => {
         expect(comm.commId).to.be('1234');
       });
 
-      it('should reuse an existing comm', (done) => {
+      it('should reuse an existing comm', () => {
         let comm = kernel.connectToComm('test', '1234');
         let comm2 = kernel.connectToComm('test', '1234');
         expect(comm).to.be(comm2);
@@ -106,7 +106,7 @@ describe.skip('jupyter.services - Comm', () => {
         await kernel.requestExecute({ code: SEND }, true).done;
 
         // Get the comm.
-        let [comm, msg]: [Kernel.IComm, KernelMessage.ICommOpenMsg] = await promise.promise;
+        let [comm, msg] = await promise.promise;
         expect(msg.content.data).to.be('hello');
 
         // Clean up
