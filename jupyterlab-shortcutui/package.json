@@ -15,8 +15,7 @@
   "author": "Noah Stapp",
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
-    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
-    "schema/jupyterlab-shortcutui.json"
+    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -39,7 +38,6 @@
     "typescript": "~2.6.0"
   },
   "jupyterlab": {
-    "extension": true,
-    "schemaDir": "schema"
+    "extension": true
   }
 }

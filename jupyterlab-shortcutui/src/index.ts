@@ -20,7 +20,7 @@ import {
 
 import {
   Widget
-} from '@phosphor/widgets';
+} from '@phosphor/widgets'; 
 
 import {
   ICommandPalette
@@ -55,8 +55,30 @@ import {
  * (`'*'`) selector. For almost any use case where a global keyboard shortcut is
  * required, using the `'body'` selector is more appropriate.
  */
+
+ function displayShortcuts(id: string, settingReqistry: ISettingRegistry, widget: Widget) {
+  let commandPairs : JSONObject;
+  let currentDiv: HTMLDivElement;
+  // Clear widget's HTML 
+  widget.node.innerHTML = '';
+  // Load the default keybindings
+  settingReqistry.load(plugin.id)
+  // Get the composite of user and default settings
+  .then(setting => 
+    commandPairs = setting.composite)
+  // Get each command-shortcut pair and add it the widget's DOM as a div's content
+  .then(commandPairs => 
+    Object.keys(commandPairs).forEach(function(key) {
+    currentDiv = document.createElement('div');
+    currentDiv.innerHTML = key + ' : ' + commandPairs[key]['keys'];
+    widget.node.appendChild(currentDiv);
+    console.log(key + ' : ' + commandPairs[key]['keys']);
+  }));
+  widget.update();
+ }
+
 const plugin: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/shortcutui:plugin',
+  id: '@jupyterlab/jupyterlab-shortcutui:plugin',
   requires: [ISettingRegistry, ICommandPalette],
   activate: (app: JupyterLab, settingReqistry: ISettingRegistry, palette: ICommandPalette): void => {
     console.log('jupyterlab-shortcutui activated!');
@@ -64,8 +86,9 @@ const plugin: JupyterLabPlugin<void> = {
 
     let widget: Widget = new Widget();
     widget.id = 'jupyterlab-shortcutui';
-    widget.title.label = 'shortcutui';
+    widget.title.label = 'Shortcut UI';
     widget.title.closable = true;
+
     // Add an application command
     const command: string = 'shortcutui:open';
     app.commands.addCommand(command, {
@@ -78,17 +101,15 @@ const plugin: JupyterLabPlugin<void> = {
         // Activate the widget
         app.shell.activateById(widget.id);
       }
-    });
+    }); 
 
-    // Add the command to the palette.
-    palette.addItem({command, category: 'TEST'});
+    palette.addItem({command, category: 'AAA'});
 
-    console.log(plugin.id);
     // Load command settings
-    settingReqistry.load('/schema/plugin.json').then(settings => {
-      Private.loadShortcuts(commands, settings.composite);
+    settingReqistry.load(plugin.id).then(settings => {
+      Private.loadShortcuts(commands, settings.composite, plugin.id, settingReqistry, widget);
       settings.changed.connect(() => {
-        Private.loadShortcuts(commands, settings.composite);
+        Private.loadShortcuts(commands, settings.composite, plugin.id, settingReqistry, widget);
       });
     }).catch((reason: Error) => {
       console.error('Loading shortcut settings failed.', reason.message);
@@ -117,7 +138,8 @@ namespace Private {
    * Load the keyboard shortcuts from settings.
    */
   export
-  function loadShortcuts(commands: CommandRegistry, composite: JSONObject): void {
+  function loadShortcuts(commands: CommandRegistry, composite: JSONObject, id: string, settingReqistry: ISettingRegistry, widget: Widget): void {
+    console.log('Changed shortcut!');
     if (disposables) {
       disposables.dispose();
     }
@@ -130,6 +152,7 @@ namespace Private {
 
       return acc;
     }, new DisposableSet());
+    displayShortcuts(plugin.id, settingReqistry, widget);
   }
 
   /**
