@@ -63,10 +63,10 @@ import {
   widget.node.innerHTML = '';
   // Load the default keybindings
   settingReqistry.load(plugin.id)
-  // Get the composite of user and default settings
+  // Get the JSON object composite of user and default settings
   .then(setting => 
     commandPairs = setting.composite)
-  // Get each command-shortcut pair and add it the widget's DOM as a div's content
+  // Get each command-shortcut pair from the JSON object and add it the widget's DOM as a div's content
   .then(commandPairs => 
     Object.keys(commandPairs).forEach(function(key) {
     currentDiv = document.createElement('div');
