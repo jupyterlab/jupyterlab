@@ -6,7 +6,13 @@ import {
   Token
 } from '@phosphor/coreutils';
 
+import {
+  Widget
+} from '@phosphor/widgets';
+
 import { ISettingRegistry } from '@jupyterlab/coreutils';
+
+const STATUSBAR_ITEM_CLASS = 'jp-Statusbar-item';
 
 export
 interface IStatusBar {
@@ -14,14 +20,41 @@ interface IStatusBar {
 }
 
 export
-interface IStatusItem {
+class StatusBar extends Widget implements IStatusBar {
+  constructor(options: StatusBar.IOptions) {
+    super();
+  }
+}
+
+export
+abstract class StatusBarItem extends Widget {
+  constructor(/*params*/)
+  {
+    super({node: document.createElement('statusbutton')})
+    
+
+  }
+}
+
+export
+class ManagedStatusBarItem extends StatusBarItem {
+  /*construct ManagedStatusBarItem*/
+  constructor(options: ManagedStatusBarItem.IOptions = {}){
+    super();
+  }
+  /*add something to handle event?*/
+
 
 }
 
 export
-class StatusBar implements IStatusBar {
-  constructor(options: StatusBar.IOptions) {
-
+namespace ManagedStatusBarItem{
+  export
+  interface IOptions{
+      color?: string;
+      icon?: string;
+      text?: string;
+      commandId?: string;
   }
 }
 
