@@ -58,6 +58,7 @@ namespace ManagedStatusBarItem{
   }
 }
 
+
 export
 namespace StatusBar {
 
