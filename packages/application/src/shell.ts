@@ -127,8 +127,7 @@ class ApplicationShell extends Widget {
 
     BoxLayout.setStretch(topPanel, 0);
     BoxLayout.setStretch(hboxPanel, 1);
-    BoxLayout.setStretch(bottomPanel, 0);
-    
+    BoxLayout.setStretch(bottomPanel, 0);    
 
     rootLayout.addWidget(topPanel);
     rootLayout.addWidget(hboxPanel);
@@ -483,7 +482,6 @@ class ApplicationShell extends Widget {
     this._onLayoutModified();
   }
 
- 
   /**
    * Expand the left area.
    *
@@ -611,8 +609,8 @@ class ApplicationShell extends Widget {
       case 'top':
         return this._topPanel.children();
       case 'bottom':
-	return this._bottomPanel.children();
-     default:
+	      return this._bottomPanel.children();
+      default:
         throw new Error('Invalid area');
     }
   }
