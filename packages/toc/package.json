@@ -1,5 +1,5 @@
 {
-  "name": "jupyterlab-toc",
+  "name": "@jupyterlab/toc",
   "version": "0.2.1",
   "private": false,
   "description": "Table of Contents extension for JupyterLab",
