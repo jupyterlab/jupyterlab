@@ -2,19 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ILayoutRestorer, JupyterLab, JupyterLabPlugin
-} from '@jupyterlab/application';
-
-import {
-  InstanceTracker
-} from '@jupyterlab/apputils';
-
-import {
-  MimeDocumentFactory, MimeDocument
-} from '@jupyterlab/docregistry';
-
-import {
-  IRenderMimeRegistry
+  IRenderMime, markdownRendererFactory
 } from '@jupyterlab/rendermime';
 
 import '../style/index.css';
@@ -26,71 +14,20 @@ const FACTORY = 'Markdown Preview';
 
 
 /**
- * The command IDs used by the document manager plugin.
+ * The markdown mime renderer extension.
  */
-namespace CommandIDs {
-  export
-  const preview = 'markdownviewer:open';
-}
-
-
-/**
- * The markdown handler extension.
- */
-const plugin: JupyterLabPlugin<void> = {
-  activate,
-  id: '@jupyterlab/markdownviewer-extension:plugin',
-  requires: [ILayoutRestorer, IRenderMimeRegistry],
-  autoStart: true
+const extension: IRenderMime.IExtension = {
+  id: '@jupyterlab/markdownviewer-extension:factory',
+  rendererFactory: markdownRendererFactory,
+  dataType: 'string',
+  documentWidgetFactoryOptions: {
+    name: FACTORY,
+    primaryFileType: 'markdown',
+    fileTypes: ['markdown'],
+  },
 };
 
-
 /**
- * Activate the markdown plugin.
+ * Export the extension as default.
  */
-function activate(app: JupyterLab, restorer: ILayoutRestorer, rendermime: IRenderMimeRegistry) {
-    const primaryFileType = app.docRegistry.getFileType('markdown');
-    const factory = new MimeDocumentFactory({
-      name: FACTORY,
-      primaryFileType,
-      fileTypes: ['markdown'],
-      rendermime
-    });
-    const { commands } = app;
-    const namespace = 'rendered-markdown';
-    const tracker = new InstanceTracker<MimeDocument>({ namespace });
-
-    app.docRegistry.addWidgetFactory(factory);
-
-    // Handle state restoration.
-    restorer.restore(tracker, {
-      command: 'docmanager:open',
-      args: widget => ({ path: widget.context.path, factory: FACTORY }),
-      name: widget => widget.context.path
-    });
-
-    factory.widgetCreated.connect((sender, widget) => {
-      // Notify the instance tracker if restore data needs to update.
-      widget.context.pathChanged.connect(() => { tracker.save(widget); });
-      tracker.add(widget);
-    });
-
-    commands.addCommand(CommandIDs.preview, {
-      label: 'Markdown Preview',
-      execute: (args) => {
-        let path = args['path'];
-        if (typeof path !== 'string') {
-          return;
-        }
-        return commands.execute('docmanager:open', {
-          path, factory: FACTORY
-        });
-      }
-    });
-  }
-
-
-/**
- * Export the plugin as default.
- */
-export default plugin;
+export default extension;
