@@ -330,6 +330,7 @@ describe('Kernel.IKernel', () => {
       await emission;
     });
 
+    // TODO: seems to be sporadically failing
     it('should get a restarting status', async () => {
       const emission = testEmission(defaultKernel.statusChanged, {
         find: () => defaultKernel.status === 'restarting'
@@ -638,6 +639,7 @@ describe('Kernel.IKernel', () => {
 
   context('#restart()', () => {
 
+    // TODO: seems to be sporadically failing
     it('should restart and resolve with a valid server response', async () => {
      await defaultKernel.restart();
      await defaultKernel.ready;
