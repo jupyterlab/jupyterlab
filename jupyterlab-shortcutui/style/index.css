@@ -1,0 +1,5 @@
+.jp-shortcutWidget {
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+}

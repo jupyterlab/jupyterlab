@@ -18,13 +18,21 @@ import {
   DisposableSet, IDisposable
 } from '@phosphor/disposable';
 
-import {
-  Widget
-} from '@phosphor/widgets'; 
+// import {
+//   Widget
+// } from '@phosphor/widgets'; 
 
 import {
   ICommandPalette
 } from '@jupyterlab/apputils';
+
+import {
+  ReactElementWidget
+} from '@jupyterlab/apputils';
+
+import * as React from 'react';
+
+import '../style/index.css';
 
 /**
  * The default shortcuts extension.
@@ -56,26 +64,67 @@ import {
  * required, using the `'body'` selector is more appropriate.
  */
 
- function displayShortcuts(id: string, settingReqistry: ISettingRegistry, widget: Widget) {
-  let commandPairs : JSONObject;
-  let currentDiv: HTMLDivElement;
-  // Clear widget's HTML 
-  widget.node.innerHTML = '';
-  // Load the default keybindings
-  settingReqistry.load(plugin.id)
-  // Get the JSON object composite of user and default settings
-  .then(setting => 
-    commandPairs = setting.composite)
-  // Get each command-shortcut pair from the JSON object and add it the widget's DOM as a div's content
-  .then(commandPairs => 
-    Object.keys(commandPairs).forEach(function(key) {
-    currentDiv = document.createElement('div');
-    currentDiv.innerHTML = key + ' : ' + commandPairs[key]['keys'];
-    widget.node.appendChild(currentDiv);
-    console.log(key + ' : ' + commandPairs[key]['keys']);
-  }));
-  widget.update();
+class ShortCutListWidget extends ReactElementWidget {
+  constructor(es: React.ReactElement<any>) {
+    super(es);
+  }
+}
+
+interface ShortcutListProps {
+  keyBindings: Array<CommandRegistry.IKeyBinding>;
+}
+
+ interface ShortcutListState {
+  keyBindings?: ReadonlyArray<CommandRegistry.IKeyBinding>;
  }
+
+ interface ShortcutListItemProps {
+   key: string;
+   command: CommandRegistry.IKeyBinding;
+ }
+
+class ShortcutListItem extends React.Component<ShortcutListItemProps> {
+  constructor(props) {
+    super(props);
+  }
+  render() {
+    return (
+      <div className="jp-cmditem">
+        <div className="jp-cmdlabel">{this.props.command['command']}-{this.props.command['keys']}</div>
+      </div>
+    );
+  }
+}
+
+class ShortcutList extends React.Component<ShortcutListProps, ShortcutListState> {
+  constructor(props) {
+    super(props);
+    this.state = {keyBindings: this.props.keyBindings};
+    console.log('state:');
+    console.log(this.state);
+  }
+
+  updateCommands = () => {
+    this.setState({keyBindings: this.props.keyBindings});
+    console.log('state:');
+    console.log(this.state);
+  }
+
+  render() {
+    let commandItems = this.state.keyBindings.map(item => 
+      <ShortcutListItem key={item.command + item.keys[0]} command={item}/>
+      );
+    return (
+      <div className="jp-shortcutlist">
+         {commandItems}
+      </div>
+    );
+  }
+}
+
+//  function displayShortcuts(id: string, settingReqistry: ISettingRegistry, widget: ShortCutListWidget) {
+//   widget.es.updateCommands();
+//  }
 
 const plugin: JupyterLabPlugin<void> = {
   id: '@jupyterlab/jupyterlab-shortcutui:plugin',
@@ -84,10 +133,12 @@ const plugin: JupyterLabPlugin<void> = {
     console.log('jupyterlab-shortcutui activated!');
     const { commands } = app;
 
-    let widget: Widget = new Widget();
+    let shortcutList = React.createElement(ShortcutList, {keyBindings: app.commands.keyBindings});
+    let widget: ShortCutListWidget = new ShortCutListWidget(shortcutList);
     widget.id = 'jupyterlab-shortcutui';
     widget.title.label = 'Shortcut UI';
     widget.title.closable = true;
+    widget.addClass('jp-shortcutWidget');
 
     // Add an application command
     const command: string = 'shortcutui:open';
@@ -107,9 +158,9 @@ const plugin: JupyterLabPlugin<void> = {
 
     // Load command settings
     settingReqistry.load(plugin.id).then(settings => {
-      Private.loadShortcuts(commands, settings.composite, plugin.id, settingReqistry, widget);
+      Private.loadShortcuts(commands, settings.composite, plugin.id, settingReqistry);
       settings.changed.connect(() => {
-        Private.loadShortcuts(commands, settings.composite, plugin.id, settingReqistry, widget);
+        Private.loadShortcuts(commands, settings.composite, plugin.id, settingReqistry);
       });
     }).catch((reason: Error) => {
       console.error('Loading shortcut settings failed.', reason.message);
@@ -138,7 +189,7 @@ namespace Private {
    * Load the keyboard shortcuts from settings.
    */
   export
-  function loadShortcuts(commands: CommandRegistry, composite: JSONObject, id: string, settingReqistry: ISettingRegistry, widget: Widget): void {
+  function loadShortcuts(commands: CommandRegistry, composite: JSONObject, id: string, settingReqistry: ISettingRegistry): void {
     console.log('Changed shortcut!');
     if (disposables) {
       disposables.dispose();
@@ -152,7 +203,6 @@ namespace Private {
 
       return acc;
     }, new DisposableSet());
-    displayShortcuts(plugin.id, settingReqistry, widget);
   }
 
   /**
