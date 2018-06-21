@@ -26,7 +26,7 @@ import {
 } from './comm';
 
 import {
-  Kernel, log
+  Kernel//, log
 } from './kernel';
 
 import {
@@ -281,7 +281,7 @@ class DefaultKernel implements Kernel.IKernel {
       if (msgType === 'status') {
         msgType += ' ' + (msg.content as any).execution_state;
       }
-      log(`JS KERNEL SENT     MESSAGE: K${this.id.slice(0, 6)} M${msg.header.msg_id.slice(0, 6)} ${msgType}`);
+      // log(`JS KERNEL SENT     MESSAGE: K${this.id.slice(0, 6)} M${msg.header.msg_id.slice(0, 6)} ${msgType}`);
       this._ws.send(serialize.serialize(msg));
     }
     this._anyMessage.emit({msg, direction: 'send'});
@@ -759,7 +759,7 @@ class DefaultKernel implements Kernel.IKernel {
       this._ws.onclose = this._noOp;
       this._ws.onerror = this._noOp;
       this._ws.onmessage = this._noOp;
-      log('closing ws connection: ' + this.id.slice(0, 6));
+      // log('closing ws connection: ' + this.id.slice(0, 6));
       this._ws.close();
       this._ws = null;
     }
@@ -840,7 +840,6 @@ class DefaultKernel implements Kernel.IKernel {
    */
   private _assertCurrentMessage(msg: KernelMessage.IMessage) {
     if (this.isDisposed) {
-      log(msg);
       throw new Error('Kernel object is disposed');
     }
 
@@ -992,15 +991,15 @@ class DefaultKernel implements Kernel.IKernel {
       throw error;
     }
 
-    let parentId = '';
-    if ((msg.parent_header as any).msg_id) {
-      parentId = 'P' + (msg.parent_header as any).msg_id.slice(0, 6) + ' ';
-    }
-    let msgType = msg.header.msg_type;
-    if (msgType === 'status') {
-      msgType += ' ' + (msg.content as any).execution_state;
-    }
-    log(`JS KERNEL RECEIVED MESSAGE: K${this.id.slice(0, 6)} C${this.clientId.slice(0, 6)} ${parentId}M${msg.header.msg_id.slice(0, 6)} ${msgType} `);
+    // let parentId = '';
+    // if ((msg.parent_header as any).msg_id) {
+    //   parentId = 'P' + (msg.parent_header as any).msg_id.slice(0, 6) + ' ';
+    // }
+    // let msgType = msg.header.msg_type;
+    // if (msgType === 'status') {
+    //   msgType += ' ' + (msg.content as any).execution_state;
+    // }
+    // log(`JS KERNEL RECEIVED MESSAGE: K${this.id.slice(0, 6)} C${this.clientId.slice(0, 6)} ${parentId}M${msg.header.msg_id.slice(0, 6)} ${msgType} `);
 
     // Update the current kernel session id
     this._kernelSession = msg.header.session;
@@ -1099,7 +1098,7 @@ class DefaultKernel implements Kernel.IKernel {
     if (this._wsStopped || !this._ws) {
       return;
     }
-    log('WS Closed');
+    // log('WS Closed');
     // Clear the websocket event handlers and the socket itself.
     this._ws.onclose = this._noOp;
     this._ws.onerror = this._noOp;
