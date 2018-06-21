@@ -528,33 +528,34 @@ class TerminalTester extends SocketTester {
 /**
  * Test a single emission from a signal.
  *
- * @param signal - The signal we are listening on.
- * @param test - An optional function which contains the tests.
- * @param shouldTest - An optional function to determine which emission to
- * check.
+ * @param signal - The signal we are listening to.
+ * @param find - An optional function to determine which emission to test,
+ * defaulting to the first emission.
+ * @param test - An optional function which contains the tests for the emission.
  *
  * @returns a promise that rejects if the function throws an error (e.g., if an
  * expect test doesn't pass), and resolves otherwise.
  *
  * #### Notes
- * Only the first emission will be tested (or the first for which the check
- * function returns true, if it is supplied).
+ * The first emission for which the find function returns true will be tested in
+ * the test function. If the find function is not given, the first signal
+ * emission will be tested.
  *
  * You can test to see if any signal comes which matches a criteria by just
- * giving a shouldTest function. You can test the very first signal by just
+ * giving a find function. You can test the very first signal by just
  * giving a test function. And you can test the first signal matching the
- * shouldTest criteria by giving both.
+ * find criteria by giving both.
  */
 export
 function testEmission<T, U>(signal: ISignal<T, U>, options: {
+  find?: (a: T, b: U) => boolean
   test?: (a: T, b: U) => void,
-  shouldTest?: (a: T, b: U) => boolean
 }): Promise<void> {
   const done = new PromiseDelegate<void>();
 
   let object = {};
   signal.connect((sender: T, args: U) => {
-    if (!options.shouldTest || options.shouldTest(sender, args)) {
+    if (!options.find || options.find(sender, args)) {
       try {
         Signal.disconnectReceiver(object);
         if (options.test) {

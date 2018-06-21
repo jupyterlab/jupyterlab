@@ -102,7 +102,7 @@ describe('Kernel.IKernel', () => {
       const kernel = await tester.start();
       const msgId = uuid();
       const emission = testEmission(kernel.iopubMessage, {
-        shouldTest: (k, msg) => (msg.header.msg_id === msgId)
+        find: (k, msg) => (msg.header.msg_id === msgId)
       });
       let msg = KernelMessage.createMessage({
         msgType: 'status',
@@ -130,7 +130,7 @@ describe('Kernel.IKernel', () => {
       const kernel = await tester.start();
       const msgId = uuid();
       const emission = testEmission(kernel.unhandledMessage, {
-        shouldTest: (k, msg) => (msg.header.msg_id === msgId)
+        find: (k, msg) => (msg.header.msg_id === msgId)
       });
       let msg = KernelMessage.createShellMessage({
         msgType: 'foo',
@@ -324,7 +324,7 @@ describe('Kernel.IKernel', () => {
 
     it('should get an idle status', async () => {
       const emission = testEmission(defaultKernel.statusChanged, {
-        shouldTest: () => defaultKernel.status === 'idle'
+        find: () => defaultKernel.status === 'idle'
       });
       await defaultKernel.requestExecute({ code: 'a=1'}).done;
       await emission;
@@ -332,7 +332,7 @@ describe('Kernel.IKernel', () => {
 
     it('should get a restarting status', async () => {
       const emission = testEmission(defaultKernel.statusChanged, {
-        shouldTest: () => defaultKernel.status === 'restarting'
+        find: () => defaultKernel.status === 'restarting'
       });
       await defaultKernel.restart();
       await emission;
@@ -340,7 +340,7 @@ describe('Kernel.IKernel', () => {
 
     it('should get a busy status', async () => {
       const emission = testEmission(defaultKernel.statusChanged, {
-        shouldTest: () => defaultKernel.status === 'busy'
+        find: () => defaultKernel.status === 'busy'
       });
       await defaultKernel.requestExecute({ code: 'a=1' }, true).done;
       await emission;
@@ -351,7 +351,7 @@ describe('Kernel.IKernel', () => {
       const kernel = await tester.start();
       await kernel.ready;
       const emission = testEmission(kernel.statusChanged, {
-        shouldTest: () => kernel.status === 'reconnecting'
+        find: () => kernel.status === 'reconnecting'
       });
 
       await tester.close();
@@ -364,7 +364,7 @@ describe('Kernel.IKernel', () => {
       const kernel = await tester.start();
       await kernel.ready;
       const dead = testEmission(kernel.statusChanged, {
-        shouldTest: () => kernel.status === 'dead'
+        find: () => kernel.status === 'dead'
       });
       tester.sendStatus('dead');
       await dead;
@@ -545,7 +545,7 @@ describe('Kernel.IKernel', () => {
 
       // Create a promise that resolves when the kernel's status changes to dead
       const dead = testEmission(kernel.statusChanged, {
-        shouldTest: () => kernel.status === 'dead'
+        find: () => kernel.status === 'dead'
       });
       tester.sendStatus('dead');
       await dead;
@@ -624,7 +624,7 @@ describe('Kernel.IKernel', () => {
 
       // Create a promise that resolves when the kernel's status changes to dead
       const dead = testEmission(kernel.statusChanged, {
-        shouldTest: () => kernel.status === 'dead'
+        find: () => kernel.status === 'dead'
       });
       tester.sendStatus('dead');
       await dead;
@@ -685,10 +685,10 @@ describe('Kernel.IKernel', () => {
     it('should emit `"reconnecting"`, then `"connected"` status', async () => {
       let connectedEmission: Promise<void>;
       const emission = testEmission(defaultKernel.statusChanged, {
-        shouldTest: () => defaultKernel.status === 'reconnecting',
+        find: () => defaultKernel.status === 'reconnecting',
         test: () => {
           connectedEmission = testEmission(defaultKernel.statusChanged, {
-            shouldTest: () => defaultKernel.status === 'connected'
+            find: () => defaultKernel.status === 'connected'
           });
         }
       });
@@ -731,7 +731,7 @@ describe('Kernel.IKernel', () => {
 
       // Create a promise that resolves when the kernel's status changes to dead
       const dead = testEmission(kernel.statusChanged, {
-        shouldTest: () => kernel.status === 'dead'
+        find: () => kernel.status === 'dead'
       });
       tester.sendStatus('dead');
       await dead;
@@ -780,7 +780,7 @@ describe('Kernel.IKernel', () => {
 
       // Create a promise that resolves when the kernel's status changes to dead
       const dead = testEmission(kernel.statusChanged, {
-        shouldTest: () => kernel.status === 'dead'
+        find: () => kernel.status === 'dead'
       });
       tester.sendStatus('dead');
       await dead;
@@ -853,7 +853,7 @@ describe('Kernel.IKernel', () => {
 
       // Create a promise that resolves when the kernel's status changes to dead
       const dead = testEmission(kernel.statusChanged, {
-        shouldTest: () => kernel.status === 'dead'
+        find: () => kernel.status === 'dead'
       });
       tester.sendStatus('dead');
       await dead;
