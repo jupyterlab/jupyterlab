@@ -233,7 +233,6 @@ describe('kernel/manager', () => {
     describe('shutdown()', () => {
 
       it('should shut down a kernel by id', async () => {
-        let temp: Kernel.IKernel;
         let kernel = await manager.startNew();
         await kernel.ready;
         await manager.shutdown(kernel.id);

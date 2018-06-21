@@ -112,7 +112,6 @@ describe('kernel', () => {
       tester = new KernelTester();
       tester.initialStatus = 'dead';
       // const kernel = await tester.start();
-      
       // TODO: The idea here is that if a kernel immediately replies that it is dead,
       // we still construct the kernel object and give it a chance to handle the
       // dead status. When is this going to happen? A kernel typically doesn't
