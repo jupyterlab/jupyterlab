@@ -284,6 +284,40 @@ describe('@jupyterlab/apputils', () => {
 
     });
 
+    describe('#filter()', () => {
+
+      it('should filter according to a predicate function', () => {
+        let tracker = new InstanceTracker<Widget>({ namespace });
+        let widgetA = new Widget();
+        let widgetB = new Widget();
+        let widgetC = new Widget();
+        widgetA.id = 'include-A';
+        widgetB.id = 'include-B';
+        widgetC.id = 'exclude-C';
+        tracker.add(widgetA);
+        tracker.add(widgetB);
+        tracker.add(widgetC);
+        let list = tracker.filter(widget => widget.id.indexOf('include') !== -1);
+        expect(list.length).to.be(2);
+        expect(list[0]).to.be(widgetA);
+        expect(list[1]).to.be(widgetB);
+      });
+
+      it('should return an empty array if no item is found', () => {
+        let tracker = new InstanceTracker<Widget>({ namespace });
+        let widgetA = new Widget();
+        let widgetB = new Widget();
+        let widgetC = new Widget();
+        widgetA.id = 'A';
+        widgetB.id = 'B';
+        widgetC.id = 'C';
+        tracker.add(widgetA);
+        tracker.add(widgetB);
+        tracker.add(widgetC);
+        expect(tracker.filter(widget => widget.id === 'D').length).to.be(0);
+      });
+
+    });
     describe('#forEach()', () => {
 
       it('should iterate through all the tracked items', () => {
