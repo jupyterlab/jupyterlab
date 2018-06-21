@@ -1000,7 +1000,7 @@ class DefaultKernel implements Kernel.IKernel {
     if (msgType === 'status') {
       msgType += ' ' + (msg.content as any).execution_state;
     }
-    log(`JS KERNEL RECEIVED MESSAGE: K${this.id.slice(0, 6)} ${parentId}M${msg.header.msg_id.slice(0, 6)} ${msgType} `);
+    log(`JS KERNEL RECEIVED MESSAGE: K${this.id.slice(0, 6)} C${this.clientId.slice(0, 6)} ${parentId}M${msg.header.msg_id.slice(0, 6)} ${msgType} `);
 
     // Update the current kernel session id
     this._kernelSession = msg.header.session;

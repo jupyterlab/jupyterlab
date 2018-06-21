@@ -31,8 +31,8 @@ import {
 
 
 export
-// let log = console.log;
-let log = (...x: any[]) => { return; };
+let log = console.log;
+// log = (...x: any[]) => { return; };
 
 /**
  * A namespace for kernel types, interfaces, and type checker functions.
