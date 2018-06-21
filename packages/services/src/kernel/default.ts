@@ -926,8 +926,9 @@ class DefaultKernel implements Kernel.IKernel {
                                  encodeURIComponent(this._id));
 
     // Strip any authentication from the display string.
+    // TODO - Audit tests for extra websockets started
     let display = partialUrl.replace(/^((?:\w+:)?\/\/)(?:[^@\/]+@)/, '$1');
-    log('Starting WebSocket:', display);
+    console.log('Starting WebSocket:', display);
 
     let url = URLExt.join(
         partialUrl,
@@ -1507,7 +1508,6 @@ namespace Private {
     } else if (response.status !== 204) {
       throw new ServerConnection.ResponseError(response);
     }
-    log('killing kernels');
     killKernels(id);
   }
 
@@ -1529,11 +1529,9 @@ namespace Private {
    * Kill the kernels by id.
    */
   function killKernels(id: string): void {
-    log('disposing kernel id', id);
     // Iterate on an array copy so disposals will not affect the iteration.
     runningKernels.slice().forEach(kernel => {
       if (kernel.id === id) {
-        log('disposing kernel');
         kernel.dispose();
       }
     });
