@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  MimeDocumentFactory, MimeDocument
+  IMarkdownViewerTracker, MimeDocumentFactory, MimeDocument
 } from '@jupyterlab/docregistry';
 
 import {
@@ -37,10 +37,11 @@ namespace CommandIDs {
 /**
  * The markdown handler extension.
  */
-const plugin: JupyterLabPlugin<void> = {
+const plugin: JupyterLabPlugin<IMarkdownViewerTracker> = {
   activate,
   id: '@jupyterlab/markdownviewer-extension:plugin',
   requires: [ILayoutRestorer, IRenderMimeRegistry],
+  provides: IMarkdownViewerTracker,
   autoStart: true
 };
 
@@ -87,6 +88,8 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, rendermime: IRende
         });
       }
     });
+
+    return tracker;
   }
 
 
