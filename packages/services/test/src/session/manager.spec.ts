@@ -283,7 +283,7 @@ describe('session/manager', () => {
         expect(temp.isDisposed).to.be(true);
       });
 
-      it.skip('should emit a runningChanged signal', async () => {
+      it('should emit a runningChanged signal', async () => {
         let called = false;
         let session = await startNew(manager);
         await session.kernel.ready;

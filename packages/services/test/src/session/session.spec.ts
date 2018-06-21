@@ -29,7 +29,7 @@ import {
 
 import {
   expectFailure, handleRequest, makeSettings,
-  SessionTester, createSessionModel, getRequestHandler, init
+  SessionTester, createSessionModel, getRequestHandler, init, testEmission
 } from '../utils';
 
 
@@ -224,7 +224,7 @@ describe('session', () => {
       await Session.shutdown(session.id);
     });
 
-    it.skip('should handle a 404 status', () => {
+    it('should handle a 404 status', () => {
       return Session.shutdown(uuid());
     });
 
@@ -298,23 +298,25 @@ describe('session', () => {
 
     context('#unhandledMessage', () => {
 
-      it.skip('should be emitted for an unhandled message', (done) => {
-        let tester = new SessionTester();
-        let msgType = uuid();
-        tester.startSession().then(session => {
-          session.unhandledMessage.connect((s, msg) => {
-            expect(msg.header.msg_type).to.be(msgType);
-            tester.dispose();
-            done();
-          });
-          let msg = KernelMessage.createMessage({
-            msgType: msgType,
-            channel: 'shell',
-            session: session.kernel.clientId
-          });
-          msg.parent_header = msg.header;
-          tester.send(msg);
-        }).catch(done);
+      it('should be emitted for an unhandled message', async () => {
+        const tester = new SessionTester();
+        const session = await tester.startSession();
+        await session.kernel.ready;
+        const msgId = uuid();
+        const emission = testEmission(session.unhandledMessage, {
+          find: (k, msg) => (msg.header.msg_id === msgId)
+        });
+        let msg = KernelMessage.createShellMessage({
+          msgType: 'foo',
+          channel: 'shell',
+          session: tester.serverSessionId,
+          msgId
+        });
+        msg.parent_header = {session: session.kernel.clientId};
+        tester.send(msg);
+        await emission;
+        await tester.shutdown();
+        tester.dispose();
       });
 
     });
@@ -596,7 +598,7 @@ describe('session', () => {
 
     });
 
-    context.skip('#shutdown()', () => {
+    context('#shutdown()', () => {
 
       it('should shut down properly', () => {
         return startNew().then(session => {

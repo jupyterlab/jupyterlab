@@ -378,7 +378,7 @@ class KernelTester extends SocketTester {
    * Shut down the current kernel
    */
   async shutdown(): Promise<void> {
-    if (this._kernel) {
+    if (this._kernel && !this._kernel.isDisposed) {
       // Set up the kernel request response.
       handleRequest(this, 204, {});
       await this._kernel.shutdown();
@@ -397,7 +397,7 @@ class KernelTester extends SocketTester {
    */
   dispose() {
     super.dispose();
-    if (this._kernel) {
+    if (this._kernel && !this._kernel.isDisposed) {
       this._kernel.dispose();
       this._kernel = null;
     }
@@ -444,8 +444,8 @@ class KernelTester extends SocketTester {
   readonly serverSessionId = uuid();
 
   private _initialStatus = 'starting';
-  private _onMessage: (msg: KernelMessage.IMessage) => void = null;
   private _kernel: Kernel.IKernel | null = null;
+  private _onMessage: (msg: KernelMessage.IMessage) => void = null;
 }
 
 
@@ -472,7 +472,17 @@ function createSessionModel(id?: string): Session.IModel {
  * SocketTester?
  */
 export
-class SessionTester extends KernelTester {
+class SessionTester extends SocketTester {
+
+
+  get initialStatus(): string {
+    return this._initialStatus;
+  }
+
+  set initialStatus(status: string) {
+    this._initialStatus = status;
+  }
+
   /**
    * Start a mock session.
    */
@@ -480,17 +490,103 @@ class SessionTester extends KernelTester {
     handleRequest(this, 201, createSessionModel());
     let serverSettings = this.serverSettings;
     this._session = await Session.startNew({ path: uuid(), serverSettings });
+    await this.ready;
+    await this._session.kernel.ready;
     return this._session;
+  }
+
+  /**
+   * Shut down the current session
+   */
+  async shutdown(): Promise<void> {
+    if (this._session) {
+      // Set up the session request response.
+      handleRequest(this, 204, {});
+      await this._session.shutdown();
+    }
   }
 
   dispose(): void {
     super.dispose();
     if (this._session) {
       this._session.dispose();
+      this._session = null;
     }
   }
 
+  /**
+   * Send the status from the server to the client.
+   */
+  sendStatus(status: string, parentHeader?: KernelMessage.IHeader) {
+    let options: KernelMessage.IOptions = {
+      msgType: 'status',
+      channel: 'iopub',
+      session: this.serverSessionId
+    };
+    let msg = KernelMessage.createMessage(options, { execution_state: status } );
+    if (parentHeader) {
+      msg.parent_header = parentHeader;
+    }
+    this.send(msg);
+  }
+
+
+  /**
+   * Send a kernel message from the server to the client.
+   */
+  send(msg: KernelMessage.IMessage): void {
+    this.sendRaw(serialize(msg));
+  }
+
+
+  /**
+   * Register the message callback with the websocket server.
+   */
+  onMessage(cb: (msg: KernelMessage.IMessage) => void): void {
+    this._onMessage = cb;
+  }
+
+  /**
+   * Set up a new server websocket to pretend like it is a server kernel.
+   */
+  protected onSocket(sock: WebSocket): void {
+    super.onSocket(sock);
+    sock.on('message', (msg: any) => {
+      if (msg instanceof Buffer) {
+        msg = new Uint8Array(msg).buffer;
+      }
+      let data = deserialize(msg);
+      log(`SERVER RECEIVED MESSAGE:    K${this._session.kernel.id.slice(0, 6)} M${data.header.msg_id.slice(0, 6)} ${data.header.msg_type}`);
+      if (data.header.msg_type === 'kernel_info_request') {
+        // First send status busy message.
+        this.sendStatus('busy', data.header);
+
+        // Then send the kernel_info_reply message.
+        let options: KernelMessage.IOptions = {
+          msgType: 'kernel_info_reply',
+          channel: 'shell',
+          session: this.serverSessionId
+        };
+        let msg = KernelMessage.createMessage(options, EXAMPLE_KERNEL_INFO );
+        msg.parent_header = data.header;
+        this.send(msg);
+
+        // Then send status idle message.
+        this.sendStatus('idle', data.header);
+      } else {
+        let onMessage = this._onMessage;
+        if (onMessage) {
+          onMessage(data);
+        }
+      }
+    });
+  }
+
+  readonly serverSessionId = uuid();
+  private _initialStatus = 'starting';
   private _session: Session.ISession;
+  private _onMessage: (msg: KernelMessage.IMessage) => void = null;
+
 }
 
 
