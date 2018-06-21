@@ -502,103 +502,130 @@ describe('Kernel.IKernel', () => {
     });
   });
 
-  context.skip('#sendShellMessage()', () => {
+  context('#sendShellMessage()', () => {
 
-    it('should send a message to the kernel', (done) => {
+    it('should send a message to the kernel', async () => {
       const tester = new KernelTester();
-      tester.start().then(kernel => {
-        let options: KernelMessage.IOptions = {
-          msgType: 'custom',
-          channel: 'shell',
-          username: kernel.username,
-          session: kernel.clientId
-        };
-        let msg = KernelMessage.createShellMessage(options);
-        kernel.sendShellMessage(msg, true);
-      }).catch(done);
-      tester.onMessage(msg => {
-        expect(msg.header.msg_type).to.be('custom');
-        done();
-      });
-    });
-
-    it('should send a binary message', (done) => {
-      const tester = new KernelTester();
-      tester.start().then(kernel => {
-        let options: KernelMessage.IOptions = {
-          msgType: 'custom',
-          channel: 'shell',
-          username: kernel.username,
-          session: kernel.clientId
-        };
-        let encoder = new TextEncoder();
-        let data = encoder.encode('hello');
-        let msg = KernelMessage.createShellMessage(options, {}, {}, [data, data.buffer]);
-        kernel.sendShellMessage(msg, true);
-      }).catch(done);
+      let kernel = await tester.start();
+      let done = new PromiseDelegate<void>();
+      let msgId = uuid();
 
       tester.onMessage(msg => {
-        let decoder = new TextDecoder('utf8');
-        let item = msg.buffers[0] as DataView;
-        expect(decoder.decode(item)).to.be('hello');
-        done();
+        try {
+          expect(msg.header.msg_id).to.be(msgId);
+        } catch (e) {
+          done.reject(e);
+          throw e;
+        }
+        done.resolve(null);
       });
+
+      let options: KernelMessage.IOptions = {
+        msgType: 'custom',
+        channel: 'shell',
+        username: kernel.username,
+        session: kernel.clientId,
+        msgId
+      };
+      let msg = KernelMessage.createShellMessage(options);
+      kernel.sendShellMessage(msg, true);
+      await done;
+      await tester.shutdown();
+      tester.dispose();
     });
 
-    it('should fail if the kernel is dead', (done) => {
+    it('should send a binary message', async () => {
       const tester = new KernelTester();
-      tester.start().then(kernel => {
-        let options: KernelMessage.IOptions = {
-          msgType: 'custom',
-          channel: 'shell',
-          username: kernel.username,
-          session: kernel.clientId
-        };
-        let msg = KernelMessage.createShellMessage(options);
-        tester.sendStatus('dead');
-        kernel.statusChanged.connect(() => {
-          try {
-            kernel.sendShellMessage(msg, true);
-          } catch (err) {
-            expect(err.message).to.be('Kernel is dead');
-            done();
-          }
-        });
+      let kernel = await tester.start();
+      let done = new PromiseDelegate<void>();
+      let msgId = uuid();
+
+      tester.onMessage(msg => {
+        try {
+          let decoder = new TextDecoder('utf8');
+          let item = msg.buffers[0] as DataView;
+          expect(decoder.decode(item)).to.be('hello');
+        } catch (e) {
+          done.reject(e);
+          throw e;
+        }
+        done.resolve(null);
       });
+
+      let options: KernelMessage.IOptions = {
+        msgType: 'custom',
+        channel: 'shell',
+        username: kernel.username,
+        session: kernel.clientId,
+        msgId
+      };
+      let encoder = new TextEncoder();
+      let data = encoder.encode('hello');
+      let msg = KernelMessage.createShellMessage(options, {}, {}, [data, data.buffer]);
+      kernel.sendShellMessage(msg, true);
+      await done;
+      await tester.shutdown();
+      tester.dispose();
     });
 
-    it('should handle out of order messages', () => {
+    it('should fail if the kernel is dead', async () => {
       const tester = new KernelTester();
-      return tester.start().then(kernel => {
-        let options: KernelMessage.IOptions = {
-          msgType: 'custom',
-          channel: 'shell',
-          username: kernel.username,
-          session: kernel.clientId
-        };
-        let msg = KernelMessage.createShellMessage(options);
-        let future = kernel.sendShellMessage(msg, true);
-        let newMsg: KernelMessage.IMessage;
+      let kernel = await tester.start();
 
-        tester.onMessage((msg) => {
-          // trigger onDone
-          options.msgType = 'status';
-          options.channel = 'iopub';
-          newMsg = KernelMessage.createMessage(options, { execution_state: 'idle' });
+      // Create a promise that resolves when the kernel's status changes to dead
+      const dead = testEmission(kernel.statusChanged, {
+        shouldTest: () => kernel.status === 'dead'
+      });
+      tester.sendStatus('dead');
+      await dead;
+
+      let options: KernelMessage.IOptions = {
+        msgType: 'custom',
+        channel: 'shell',
+        username: kernel.username,
+        session: kernel.clientId
+      };
+      let msg = KernelMessage.createShellMessage(options);
+      expect(() => {kernel.sendShellMessage(msg, true); }).to.throwException(/Kernel is dead/);
+      await tester.shutdown();
+      tester.dispose();
+    });
+
+    it('should handle out of order messages', async () => {
+      // This test that a future.done promise resolves when a status idle and
+      // reply come through, even if the status comes first.
+      const tester = new KernelTester();
+      let kernel = await tester.start();
+
+      let options: KernelMessage.IOptions = {
+        msgType: 'custom',
+        channel: 'shell',
+        username: kernel.username,
+        session: kernel.clientId
+      };
+      let msg = KernelMessage.createShellMessage(options);
+      let future = kernel.sendShellMessage(msg, true);
+
+      let newMsg: KernelMessage.IMessage;
+      tester.onMessage((msg) => {
+        // trigger onDone
+        options.msgType = 'status';
+        options.channel = 'iopub';
+        newMsg = KernelMessage.createMessage(options, { execution_state: 'idle' });
+        newMsg.parent_header = msg.header;
+        tester.send(newMsg);
+
+        future.onIOPub = () => {
+          options.msgType = 'custom';
+          options.channel = 'shell';
+          newMsg = KernelMessage.createShellMessage(options);
           newMsg.parent_header = msg.header;
           tester.send(newMsg);
-
-          future.onIOPub = () => {
-            options.msgType = 'custom';
-            options.channel = 'shell';
-            newMsg = KernelMessage.createShellMessage(options);
-            newMsg.parent_header = msg.header;
-            tester.send(newMsg);
-          };
-        });
-
-        return future.done;
+        };
       });
+      await future.done;
+      await tester.shutdown();
+      tester.dispose();
     });
   });
 
