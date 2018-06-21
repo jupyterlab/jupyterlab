@@ -3,7 +3,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  ManagedStatusBarItem, StatusBarItem
+  ManagedStatusItem, StatusItem
 } from './statusitems';
 
 import {
@@ -14,7 +14,7 @@ import {
   ApplicationShell
 } from '@jupyterlab/application';
 
-const STATUS_BAR_CLASS = "jp-status-bar";
+const STATUS_BAR_CLASS = 'jp-status-bar';
 
 export
 class StatusBar extends Widget implements IStatusBar {
@@ -28,16 +28,28 @@ class StatusBar extends Widget implements IStatusBar {
     this._addSelfToHost(this._host);
   }
 
-  createManagedStatusItem(id: string): ManagedStatusBarItem {
+  createManagedStatusItem(id: string, options?: ManagedStatusItem.IOptions): ManagedStatusItem {
     if (id in this._statusItems) {
       throw new Error(`Status item ${id} already registered.`);
     }
 
-    return ({} as ManagedStatusBarItem);
+    // Create a new managed status
+    let widget = new ManagedStatusItem(options);
+
+    this._statusItems[id] = widget;
+
+    return widget;
   }
 
-  registerStatusItem(id: String, widget: StatusBarItem): StatusBarItem {
-    return widget;
+  registerStatusItem(id: string, widget: StatusItem) {
+    if (id in this._statusItems) {
+      throw new Error(`Status item ${id} already registered.`);
+    }
+
+    // Move the provided widget into the status bar container
+    widget.parent = this;
+
+    this._statusItems[id] = widget;
   }
 
   /**
@@ -71,7 +83,7 @@ class StatusBar extends Widget implements IStatusBar {
     host.addToTopArea(this);
   }
 
-  private _statusItems: { [id: string]: Private.IStatusItem } = Object.create(null);
+  private _statusItems: { [id: string]: StatusItem } = Object.create(null);
   private _host: ApplicationShell = null;
 }
 
@@ -83,20 +95,6 @@ namespace StatusBar {
    */
   export
   interface IOptions {
-    host: ApplicationShell
-  }
-
-  export
-  interface IStatusItemChangedArgs {
-
+    host: ApplicationShell;
   }
 }
-
-export
-namespace Private {
-    export
-    interface IStatusItem {
-      widget: StatusBarItem,
-      id: string
-    }
-  }

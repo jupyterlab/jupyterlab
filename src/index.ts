@@ -14,10 +14,10 @@ import {
 } from './statusbar';
 
 import {
-  ManagedStatusBarItem, StatusBarItem
+  ManagedStatusItem, StatusItem
 } from './statusitems';
 
-export {ManagedStatusBarItem, StatusBarItem}
+export { ManagedStatusItem, StatusItem };
 
 
 export
@@ -25,13 +25,15 @@ interface IStatusBar {
   listStatusItems(): string[];
   hasStatusItem(id: string): boolean;
 
-  createManagedStatusItem(id: string): ManagedStatusBarItem;
-  registerStatusItem(id: string, widget: StatusBarItem): StatusBarItem;
+  createManagedStatusItem(id: string): ManagedStatusItem;
+  registerStatusItem(id: string, widget: StatusItem): void;
 }
 
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 
+
 export
+// tslint:disable-next-line:variable-name
 const IStatusBar = new Token<IStatusBar>('jupyterlab-statusbar:statusbar');
 
 /**

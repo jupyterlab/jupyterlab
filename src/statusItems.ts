@@ -4,13 +4,12 @@ import {
 } from '@phosphor/widgets';
 
 export
-abstract class StatusBarItem extends Widget {}
+abstract class StatusItem extends Widget {}
 
 export
-class ManagedStatusBarItem extends StatusBarItem {
+class ManagedStatusItem extends StatusItem {
 
-    /*construct ManagedStatusBarItem*/
-    constructor(options: ManagedStatusBarItem.IOptions = {}) {
+    constructor(options: ManagedStatusItem.IOptions = {}) {
         super();
 
         this._color = options.color;
@@ -47,7 +46,7 @@ class ManagedStatusBarItem extends StatusBarItem {
 }
 
 export
-namespace ManagedStatusBarItem {
+namespace ManagedStatusItem {
 
     export
     interface IOptions {
