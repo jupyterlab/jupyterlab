@@ -1530,7 +1530,8 @@ namespace Private {
    */
   function killKernels(id: string): void {
     log('disposing kernel id', id);
-    each(runningKernels, kernel => {
+    // Iterate on an array copy so disposals will not affect the iteration.
+    runningKernels.slice().forEach(kernel => {
       if (kernel.id === id) {
         log('disposing kernel');
         kernel.dispose();

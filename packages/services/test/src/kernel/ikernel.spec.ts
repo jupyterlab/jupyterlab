@@ -768,12 +768,13 @@ describe('Kernel.IKernel', () => {
       tester.dispose();
     });
 
-    it.skip('should dispose of all kernel instances', async () => {
+    it('should dispose of all kernel instances', async () => {
       let kernel0 = await Kernel.startNew();
       let kernel1 = await Kernel.connectTo(kernel0.model);
+      await kernel0.ready;
       await kernel1.ready;
       await kernel0.shutdown();
-      // kernel1 is being disposed, but asynchronously?
+      expect(kernel0.isDisposed).to.be(true);
       expect(kernel1.isDisposed).to.be(true);
     });
 
