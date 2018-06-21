@@ -45,7 +45,7 @@ class MimeContent extends Widget {
   constructor(options: MimeContent.IOptions) {
     super();
     this.addClass('jp-MimeDocument');
-    this._mimeType = options.mimeType;
+    this.mimeType = options.mimeType;
     this._dataType = options.dataType || 'string';
     this._context = options.context;
     this._renderer = options.renderer;
@@ -79,6 +79,11 @@ class MimeContent extends Widget {
       showErrorMessage(`Renderer Failure: ${this._context.path}`, reason);
     });
   }
+
+  /**
+   * The mimetype for this rendered content.
+   */
+  readonly mimeType: string;
 
   /**
    * A promise that resolves when the widget is ready.
@@ -131,9 +136,9 @@ class MimeContent extends Widget {
     let model = context.model;
     let data: JSONObject = {};
     if (this._dataType === 'string') {
-      data[this._mimeType] = model.toString();
+      data[this.mimeType] = model.toString();
     } else {
-      data[this._mimeType] = model.toJSON();
+      data[this.mimeType] = model.toJSON();
     }
     let mimeModel = new MimeModel({ data, callback: this._changeCallback });
 
@@ -158,10 +163,10 @@ class MimeContent extends Widget {
    * A bound change callback.
    */
   private _changeCallback = (options: IRenderMime.IMimeModel.ISetDataOptions) => {
-    if (!options.data || !options.data[this._mimeType]) {
+    if (!options.data || !options.data[this.mimeType]) {
       return;
     }
-    let data = options.data[this._mimeType];
+    let data = options.data[this.mimeType];
     if (typeof data === 'string') {
       this._context.model.fromString(data);
     } else {
@@ -172,7 +177,6 @@ class MimeContent extends Widget {
   private _context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
   private _renderer: IRenderMime.IRenderer;
   private _monitor: ActivityMonitor<any, any> | null;
-  private _mimeType: string;
   private _ready = new PromiseDelegate<void>();
   private _dataType: 'string' | 'json';
   private _isRendering = false;
