@@ -1,3 +1,6 @@
+// Local CSS must be loaded prior to loading other libs.
+import '../style/index.css';
+
 import {
   JupyterLab, JupyterLabPlugin,
 } from '@jupyterlab/application';
@@ -7,70 +10,26 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  Widget
-} from '@phosphor/widgets';
+  StatusBar
+} from './statusbar';
 
-import { ISettingRegistry } from '@jupyterlab/coreutils';
+import {
+  ManagedStatusBarItem, StatusBarItem
+} from './statusitems';
 
-const STATUSBAR_ITEM_CLASS = 'jp-Statusbar-item';
+export {ManagedStatusBarItem, StatusBarItem}
+
 
 export
 interface IStatusBar {
+  listStatusItems(): string[];
+  hasStatusItem(id: string): boolean;
 
+  createManagedStatusItem(id: string): ManagedStatusBarItem;
+  registerStatusItem(id: string, widget: StatusBarItem): StatusBarItem;
 }
 
-export
-class StatusBar extends Widget implements IStatusBar {
-  constructor(options: StatusBar.IOptions) {
-    super();
-  }
-}
-
-export
-abstract class StatusBarItem extends Widget {
-  constructor(/*params*/)
-  {
-    super({node: document.createElement('statusbutton')})
-    
-
-  }
-}
-
-export
-class ManagedStatusBarItem extends StatusBarItem {
-  /*construct ManagedStatusBarItem*/
-  constructor(options: ManagedStatusBarItem.IOptions = {}){
-    super();
-  }
-  /*add something to handle event?*/
-
-
-}
-
-export
-namespace ManagedStatusBarItem{
-  export
-  interface IOptions{
-      color?: string;
-      icon?: string;
-      text?: string;
-      commandId?: string;
-  }
-}
-
-
-export
-namespace StatusBar {
-
-  /**
-   * Options for creating a new StatusBar instance
-   */
-  export
-  interface IOptions {
-
-  }
-}
-
+import { ISettingRegistry } from '@jupyterlab/coreutils';
 
 export
 const IStatusBar = new Token<IStatusBar>('jupyterlab-statusbar:statusbar');
@@ -84,7 +43,7 @@ const statusbar: JupyterLabPlugin<IStatusBar> = {
   requires: [ISettingRegistry],
   provides: IStatusBar,
   activate: (app: JupyterLab) => {
-    return new StatusBar({ })
+    return new StatusBar({ host: app.shell })
   }
 };
 

@@ -1,0 +1,8 @@
+@import url('~@phosphor/widgets/style/index.css');
+
+#jp-status-bar {
+    border-bottom: var(--jp-border-width) solid var(--jp-border-color0);
+    background: var(--jp-info-color0);
+    min-height: var(--jp-private-menubar-height);
+    min-width: 500px;
+}
