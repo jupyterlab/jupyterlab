@@ -9,11 +9,11 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  CommandLinker
+  CommandLinker, IInstanceTracker, InstanceTracker
 } from '@jupyterlab/apputils';
 
 import {
-  Base64ModelFactory, DocumentRegistry
+  Base64ModelFactory, DocumentRegistry, MimeDocument
 } from '@jupyterlab/docregistry';
 
 import {
@@ -77,8 +77,11 @@ class JupyterLab extends Application<ApplicationShell> {
     let registry = this.docRegistry = new DocumentRegistry();
     registry.addModelFactory(new Base64ModelFactory());
 
+    const namespace = 'application-mimedocuments';
+    const tracker = this.mimeDocumentTracker = new InstanceTracker<MimeDocument>({ namespace });
+
     if (options.mimeExtensions) {
-      let plugins = createRendermimePlugins(options.mimeExtensions);
+      let plugins = createRendermimePlugins(tracker, options.mimeExtensions);
       plugins.forEach(plugin => { this.registerPlugin(plugin); });
     }
   }
@@ -102,6 +105,11 @@ class JupyterLab extends Application<ApplicationShell> {
    * A list of all errors encountered when registering plugins.
    */
   readonly registerPluginErrors: Array<Error> = [];
+
+  /**
+   * An instance tracker for mime documents.
+   */
+  readonly mimeDocumentTracker: IInstanceTracker<MimeDocument>;
 
   /**
    * Whether the application is dirty.

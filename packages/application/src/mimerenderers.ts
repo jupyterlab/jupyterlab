@@ -30,7 +30,7 @@ import {
  * Create rendermime plugins for rendermime extension modules.
  */
 export
-function createRendermimePlugins(extensions: IRenderMime.IExtensionModule[]): JupyterLabPlugin<void>[] {
+function createRendermimePlugins(mimeDocumentTracker: InstanceTracker<MimeDocument>, extensions: IRenderMime.IExtensionModule[]): JupyterLabPlugin<void>[] {
   const plugins: JupyterLabPlugin<void>[] = [];
 
   extensions.forEach(mod => {
@@ -44,7 +44,9 @@ function createRendermimePlugins(extensions: IRenderMime.IExtensionModule[]): Ju
       data = [data] as ReadonlyArray<IRenderMime.IExtension>;
     }
     (data as ReadonlyArray<IRenderMime.IExtension>)
-      .forEach(item => { plugins.push(createRendermimePlugin(item)); });
+      .forEach(item => {
+        plugins.push(createRendermimePlugin(mimeDocumentTracker, item));
+      });
   });
 
   return plugins;
@@ -55,7 +57,7 @@ function createRendermimePlugins(extensions: IRenderMime.IExtensionModule[]): Ju
  * Create rendermime plugins for rendermime extension modules.
  */
 export
-function createRendermimePlugin(item: IRenderMime.IExtension): JupyterLabPlugin<void> {
+function createRendermimePlugin(mimeDocumentTracker: InstanceTracker<MimeDocument>, item: IRenderMime.IExtension): JupyterLabPlugin<void> {
   return {
     id: item.id,
     requires: [ILayoutRestorer, IRenderMimeRegistry],
@@ -117,6 +119,9 @@ function createRendermimePlugin(item: IRenderMime.IExtension): JupyterLabPlugin<
           // Notify the instance tracker if restore data needs to update.
           widget.context.pathChanged.connect(() => { tracker.save(widget); });
           tracker.add(widget);
+          // Also add the widget to the application mime document tracker
+          // so that it can be accessible to extensions.
+          mimeDocumentTracker.add(widget);
         });
       });
     }
