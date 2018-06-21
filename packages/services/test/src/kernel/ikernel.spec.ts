@@ -269,44 +269,6 @@ describe('Kernel.IKernel', () => {
       await emission;
     });
 
-    it.skip('should not be emitted for a different client session', async () => {
-      const kernel = await tester.start();
-
-      // We'll send two messages, first a message with a different session, then
-      // one with the current session. The anyMessage signal should only
-      // emit once for the current session message.
-      const msgId = uuid();
-      const emission = testEmission(kernel.anyMessage, {
-        test: (k, args) => {
-          expect(args.msg.header.msg_id).to.be(msgId);
-          expect((args.msg.parent_header as any).session).to.be(kernel.clientId);
-          expect(args.msg.header.msg_type).to.be('foo');
-          expect(args.direction).to.be('recv');
-        }
-      });
-
-      // Send a shell message with a different session.
-      let msg1 = KernelMessage.createShellMessage({
-        msgType: 'foo',
-        channel: 'shell',
-        session: tester.serverSessionId,
-        msgId: 'wrong message'
-      });
-      msg1.parent_header = {session: 'different session'};
-      tester.send(msg1);
-
-      // Send a shell message with the correct session.
-      let msg2 = KernelMessage.createShellMessage({
-        msgType: 'foo',
-        channel: 'shell',
-        session: tester.serverSessionId,
-        msgId
-      });
-      msg2.parent_header = {session: kernel.clientId};
-      tester.send(msg2);
-      await emission;
-    });
-
   });
 
   context('#id', () => {
