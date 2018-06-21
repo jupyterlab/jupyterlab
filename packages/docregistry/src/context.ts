@@ -362,12 +362,29 @@ class Context<T extends DocumentRegistry.IModel> implements DocumentRegistry.ICo
     }
     let oldPath = change.oldValue && change.oldValue.path;
     let newPath = change.newValue && change.newValue.path;
-    if (newPath && oldPath === this._path) {
+
+    if (newPath && this._path.indexOf(oldPath) === 0) {
+      let changeModel = change.newValue;
+      // When folder name changed, `oldPath` is `foo`, `newPath` is `bar` and `this._path` is `foo/test`,
+      // we should update `foo/test` to `bar/test` as well
+      if (oldPath !== this._path) {
+        newPath = this._path.replace(new RegExp(`^${oldPath}`), newPath);
+        oldPath = this._path;
+        // Update client file model from folder change
+        changeModel = {
+          last_modified: change.newValue.created,
+          path: newPath
+        };
+      }
       this.session.setPath(newPath);
+      const updateModel = {
+        ...this._contentsModel,
+        ...changeModel
+      };
       const localPath = this._manager.contents.localPath(newPath);
       this.session.setName(PathExt.basename(localPath));
       this._path = newPath;
-      this._updateContentsModel(change.newValue as Contents.IModel);
+      this._updateContentsModel(updateModel as Contents.IModel);
       this._pathChanged.emit(this._path);
     }
   }
