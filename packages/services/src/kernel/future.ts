@@ -10,7 +10,7 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  Kernel//, log
+  Kernel// , log
 } from './kernel';
 
 import {

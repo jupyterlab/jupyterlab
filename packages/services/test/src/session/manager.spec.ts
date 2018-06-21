@@ -244,7 +244,7 @@ describe('session/manager', () => {
     describe('#findByPath()', () => {
 
       it('should find an existing session by path', async () => {
-        let newModel = await manager.findByPath(session.path)
+        let newModel = await manager.findByPath(session.path);
         expect(newModel.id).to.be(session.id);
       });
 

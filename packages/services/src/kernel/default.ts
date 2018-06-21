@@ -26,7 +26,7 @@ import {
 } from './comm';
 
 import {
-  Kernel//, log
+  Kernel// , log
 } from './kernel';
 
 import {
