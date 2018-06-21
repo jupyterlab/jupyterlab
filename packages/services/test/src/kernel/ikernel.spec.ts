@@ -346,41 +346,50 @@ describe('Kernel.IKernel', () => {
       await emission;
     });
 
-    it.skip('should get a reconnecting status', (done) => {
+    it('should get a reconnecting status', async () => {
       const tester = new KernelTester();
-      tester.start().then(kernel => {
-        kernel.statusChanged.connect(() => {
-          if (kernel.status === 'reconnecting') {
-            done();
-          }
-        });
-        tester.close();
-      }).catch(done);
+      const kernel = await tester.start();
+      await kernel.ready;
+      const emission = testEmission(kernel.statusChanged, {
+        shouldTest: () => kernel.status === 'reconnecting'
+      });
+
+      await tester.close();
+      await emission;
+      tester.dispose();
     });
 
-    it.skip('should get a dead status', (done) => {
+    it('should get a dead status', async () => {
       const tester = new KernelTester();
-      tester.start().then(kernel => {
-        kernel.statusChanged.connect(() => {
-          if (kernel.status === 'dead') {
-            done();
-          }
-        });
-        tester.sendStatus('dead');
-      }).catch(done);
+      const kernel = await tester.start();
+      await kernel.ready;
+      const dead = testEmission(kernel.statusChanged, {
+        shouldTest: () => kernel.status === 'dead'
+      });
+      tester.sendStatus('dead');
+      await dead;
+      tester.dispose();
     });
 
-    it.skip('should handle an invalid status', (done) => {
+    it('should not emit an invalid status', async () => {
       const tester = new KernelTester();
-      tester.start().then(kernel => {
-        kernel.statusChanged.connect(() => {
-          if (kernel.status === 'idle') {
-            done();
-          }
-        });
-        tester.sendStatus('celebrating');
-        tester.sendStatus('idle');
-      }).catch(done);
+      const kernel = await tester.start();
+      await kernel.ready;
+      const emission = testEmission(kernel.statusChanged, {
+        test: (k, status) => {
+          expect(status).to.be('busy');
+          expect(kernel.status).to.be('busy');
+        }
+      });
+
+      // This invalid status is not emitted.
+      tester.sendStatus('invalid-status');
+
+      // This valid status is emitted.
+      tester.sendStatus('busy');
+
+      await emission;
+      tester.dispose();
     });
   });
 
