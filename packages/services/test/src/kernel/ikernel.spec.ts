@@ -603,7 +603,10 @@ describe('Kernel.IKernel', () => {
   context('#interrupt()', () => {
 
     it('should interrupt and resolve with a valid server response', async () => {
-      await defaultKernel.interrupt();
+      let kernel = await Kernel.startNew();
+      await kernel.ready;
+      await kernel.interrupt();
+      await kernel.shutdown();
     });
 
     it('should throw an error for an invalid response', async () => {
