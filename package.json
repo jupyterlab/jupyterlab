@@ -29,10 +29,10 @@
     "url": "https://github.com/jupyterlab/jupyterlab-statusbar.git"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "npm run lint:ts && tsc",
     "clean": "rimraf lib",
     "watch": "tsc -w  --listEmittedFiles",
-    "lint": "tslint -c tslint.json 'src/**/*.ts'"
+    "lint:ts": "tslint -p tsconfig.json --exclude '**/*.d.ts'"
   },
   "dependencies": {
     "@jupyterlab/application": "^0.16.3",

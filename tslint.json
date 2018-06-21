@@ -6,11 +6,10 @@
       "statements"
     ],
     "ban": [
-      true,
-      [ "_", "forEach" ],
-      [ "_", "each" ],
-      [ "$", "each" ],
-      [ "angular", "forEach" ]
+      true, ["_", "forEach"],
+      ["_", "each"],
+      ["$", "each"],
+      ["angular", "forEach"]
     ],
     "class-name": true,
     "comment-format": [
@@ -30,7 +29,6 @@
     ],
     "jsdoc-format": true,
     "label-position": true,
-    "label-undefined": true,
     "max-line-length": [
       false
     ],
@@ -45,19 +43,8 @@
     "no-bitwise": true,
     "no-conditional-assignment": true,
     "no-consecutive-blank-lines": false,
-    "no-console": [
-      true,
-      "debug",
-      "info",
-      "time",
-      "timeEnd",
-      "trace"
-    ],
-    "no-construct": true,
-    "no-constructor-vars": true,
     "no-debugger": true,
     "no-default-export": false,
-    "no-duplicate-key": true,
     "no-duplicate-variable": true,
     "no-empty": true,
     "no-eval": true,
@@ -66,7 +53,7 @@
     "no-invalid-this": [
       true,
       "check-function-in-method"
-      ],
+    ],
     "no-null-keyword": false,
     "no-reference": true,
     "no-require-imports": false,
@@ -74,7 +61,6 @@
     "no-string-literal": false,
     "no-switch-case-fall-through": true,
     "no-trailing-whitespace": true,
-    "no-unreachable": true,
     "no-unused-expression": true,
     "no-unused-variable": true,
     "no-use-before-declare": false,
@@ -92,6 +78,17 @@
     "one-variable-per-declaration": [true,
       "ignore-for-loop"
     ],
+    "no-console": {
+      "severity": "warning",
+      "options": [
+        "debug",
+        "info",
+        "log",
+        "time",
+        "timeEnd",
+        "trace"
+      ]
+    },
     "quotemark": [
       true,
       "single",
