@@ -17,7 +17,7 @@ import {
 
 import {
   expectFailure, KernelTester, makeSettings,
-  PYTHON_SPEC, getRequestHandler
+  PYTHON_SPEC, getRequestHandler, testEmission
 } from '../utils';
 
 
@@ -154,22 +154,16 @@ describe('kernel', () => {
       expectFailure(kernelPromise, done, '');
     });
 
-    it.skip('should auto-reconnect on websocket error', (done) => {
-      // TODO: this also relies on the kernel getting initial status of
-      // 'unknown' and then 'starting'.
+    it('should auto-reconnect on websocket error', async () => {
       tester = new KernelTester();
-      tester.start().then(kernel => {
-        expect(kernel.status).to.be('unknown');
-        kernel.statusChanged.connect(() => {
-          if (kernel.status === 'reconnecting') {
-            done();
-          }
-          if (kernel.status === 'starting') {
-            tester.close();
-          }
-        });
-      });
+      const kernel = await tester.start();
+      await kernel.ready;
 
+      const emission = testEmission(kernel.statusChanged, {
+        find: (k, status) => status === 'reconnecting'
+      });
+      tester.close();
+      await emission;
     });
 
   });
