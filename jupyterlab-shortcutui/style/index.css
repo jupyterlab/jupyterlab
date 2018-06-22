@@ -1,5 +1,24 @@
 .jp-shortcutWidget {
     display: flex;
     flex-direction: column;
-    overflow: auto;
+    overflow-y: scroll;
+    background: #EEEEEE;
+    padding-left: 10px;
+}
+
+p {
+    font: 'Moneserrat';
+    font-weight: 400;
+    size: 14px;
+    color: #616161;
+}
+
+input {
+    height: 10px;
+    padding: 2px;
+    background: white;
+}
+
+.widgetDiv {
+    display: inline-block;
 }
