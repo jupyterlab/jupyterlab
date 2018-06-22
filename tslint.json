@@ -21,7 +21,8 @@
     "forin": false,
     "indent": [
       true,
-      "spaces"
+      "spaces",
+      2
     ],
     "interface-name": [
       true,
@@ -43,6 +44,16 @@
     "no-bitwise": true,
     "no-conditional-assignment": true,
     "no-consecutive-blank-lines": false,
+    "no-console": {
+      "severity": "warning",
+      "options": ["debug",
+        "info",
+        "time",
+        "timeEnd",
+        "trace"
+      ]
+    },
+    "no-construct": true,
     "no-debugger": true,
     "no-default-export": false,
     "no-duplicate-variable": true,
@@ -62,7 +73,6 @@
     "no-switch-case-fall-through": true,
     "no-trailing-whitespace": true,
     "no-unused-expression": true,
-    "no-unused-variable": true,
     "no-use-before-declare": false,
     "no-var-keyword": true,
     "no-var-requires": true,
@@ -78,17 +88,6 @@
     "one-variable-per-declaration": [true,
       "ignore-for-loop"
     ],
-    "no-console": {
-      "severity": "warning",
-      "options": [
-        "debug",
-        "info",
-        "log",
-        "time",
-        "timeEnd",
-        "trace"
-      ]
-    },
     "quotemark": [
       true,
       "single",

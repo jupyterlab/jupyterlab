@@ -1,10 +1,6 @@
 import {
-  Widget
+  Widget, BoxLayout
 } from '@phosphor/widgets';
-
-import {
-  ManagedStatusItem, StatusItem
-} from './statusitems';
 
 import {
   IStatusBar
@@ -25,31 +21,24 @@ class StatusBar extends Widget implements IStatusBar {
 
     this.id = STATUS_BAR_CLASS;
 
-    this._addSelfToHost(this._host);
+    this._host.addToTopArea(this);
   }
 
-  createManagedStatusItem(id: string, options?: ManagedStatusItem.IOptions): ManagedStatusItem {
+  registerStatusItem(id: string, widget: Widget, opts: IStatusBar.IStatusItemOptions) {
     if (id in this._statusItems) {
       throw new Error(`Status item ${id} already registered.`);
     }
 
-    // Create a new managed status
-    let widget = new ManagedStatusItem(options);
+    let align = opts.align ? opts.align : 'left';
+    let priority = opts.priority === undefined ? opts.priority : 0;
 
-    this._statusItems[id] = widget;
+    let wrapper = {
+      widget,
+      align,
+      priority
+    };
 
-    return widget;
-  }
-
-  registerStatusItem(id: string, widget: StatusItem) {
-    if (id in this._statusItems) {
-      throw new Error(`Status item ${id} already registered.`);
-    }
-
-    // Move the provided widget into the status bar container
-    widget.parent = this;
-
-    this._statusItems[id] = widget;
+    this._statusItems[id] = wrapper;
   }
 
   /**
@@ -79,11 +68,7 @@ class StatusBar extends Widget implements IStatusBar {
     return this._host;
   }
 
-  private _addSelfToHost(host: ApplicationShell) {
-    host.addToTopArea(this);
-  }
-
-  private _statusItems: { [id: string]: StatusItem } = Object.create(null);
+  private _statusItems: { [id: string]: StatusBar.IItem } = Object.create(null);
   private _host: ApplicationShell = null;
 }
 
@@ -96,5 +81,12 @@ namespace StatusBar {
   export
   interface IOptions {
     host: ApplicationShell;
+  }
+
+  export
+  interface IItem {
+    align: IStatusBar.Alignment;
+    priority: number;
+    widget: Widget;
   }
 }
