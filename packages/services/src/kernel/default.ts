@@ -1374,7 +1374,7 @@ namespace Private {
    */
   export
   function updateRunningKernels(kernels: Kernel.IModel[]): Kernel.IModel[] {
-    each(runningKernels, kernel => {
+    each(runningKernels.slice(), kernel => {
       let updated = find(kernels, model => {
         return kernel.id === model.id;
       });
@@ -1451,7 +1451,7 @@ namespace Private {
     // We might want to move the handleRestart to after we get the response back
 
     // Handle the restart on all of the kernels with the same id.
-    each(runningKernels, k => {
+    each(runningKernels.slice(), k => {
       if (k.id === kernel.id) {
         k.handleRestart();
       }
@@ -1463,7 +1463,7 @@ namespace Private {
     let data = await response.json();
     validate.validateModel(data);
     // Reconnect the other kernels asynchronously, but don't wait for them.
-    each(runningKernels, k => {
+    each(runningKernels.slice(), k => {
       if (k !== kernel && k.id === kernel.id) {
         k.reconnect();
       }
