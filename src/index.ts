@@ -38,6 +38,8 @@ namespace IStatusBar {
   }
 }
 
+// Export default status bar items
+import { helloStatusItem } from './defaults';
 
 export
 // tslint:disable-next-line:variable-name
@@ -49,11 +51,14 @@ const IStatusBar = new Token<IStatusBar>('jupyterlab-statusbar:statusbar');
 const statusbar: JupyterLabPlugin<IStatusBar> = {
   id: 'jupyterlab-statusbar',
   autoStart: true,
-  requires: [],
   provides: IStatusBar,
   activate: (app: JupyterLab) => {
     return new StatusBar({ host: app.shell });
   }
 };
 
-export default statusbar;
+const plugins: JupyterLabPlugin<any>[] = [
+  statusbar, helloStatusItem
+];
+
+export default plugins;

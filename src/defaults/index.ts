@@ -12,26 +12,36 @@ import {
 
 import { VirtualDOM, h } from '@phosphor/virtualdom';
 
-const HELLO_WORLD_STATUS_ITEM_ID = 'jupyterlab-statusbar/hello-world';
+export
+class HelloStatus extends Widget {
+    constructor(subject: string) {
+        super();
+
+        this._text = `Hello ${subject}!`;
+    }
+
+    onAfterAttach() {
+        VirtualDOM.render(h.p(this._text), this.node);
+    }
+
+    private _text: string;
+}
 
 /**
  * Initialization data for the statusbar extension.
  */
-const helloWorldStatusItem: JupyterLabPlugin<void> = {
-    id: HELLO_WORLD_STATUS_ITEM_ID,
+export
+const helloStatusItem: JupyterLabPlugin<HelloStatus> = {
+    id: 'jupyterlab-statusbar:hello-world',
     autoStart: true,
     requires: [IStatusBar],
-    activate: (app: JupyterLab, statusBar: IStatusBar) => {
-        let helloStatusItem = createTextStatusItem('Hello world!');
-        let helloStatusItemOpts = { align: 'left' } as IStatusBar.IStatusItemOptions;
-        statusBar.registerStatusItem(HELLO_WORLD_STATUS_ITEM_ID, helloStatusItem, helloStatusItemOpts);
+    activate: (_app: JupyterLab, statusBar: IStatusBar) => {
+        console.log('Initialized hello status item!');
+        let helloStatus =  new HelloStatus('world');
+        let helloStatusOpts = { align: 'left' } as IStatusBar.IStatusItemOptions;
+
+        statusBar.registerStatusItem('hello-world-status-item', helloStatus, helloStatusOpts);
+
+        return helloStatus;
     }
 };
-
-function createTextStatusItem(text: string): Widget {
-    let widget = new Widget();
-
-    VirtualDOM.render(h.div(text), widget.node);
-
-    return widget;
-}
