@@ -57,7 +57,7 @@ function createRendermimePlugins(extensions: IRenderMime.IExtensionModule[]): Ju
   const plugins: JupyterLabPlugin<void | IMimeDocumentTracker>[] = [];
 
   const namespace = 'application-mimedocuments';
-  const mimeDocumentTracker = new InstanceTracker<MimeDocument>({ namespace });
+  const tracker = new InstanceTracker<MimeDocument>({ namespace });
 
   extensions.forEach(mod => {
     let data = mod.default;
@@ -71,7 +71,7 @@ function createRendermimePlugins(extensions: IRenderMime.IExtensionModule[]): Ju
     }
     (data as ReadonlyArray<IRenderMime.IExtension>)
       .forEach(item => {
-        plugins.push(createRendermimePlugin(mimeDocumentTracker, item));
+        plugins.push(createRendermimePlugin(tracker, item));
       });
   });
 
@@ -83,7 +83,7 @@ function createRendermimePlugins(extensions: IRenderMime.IExtensionModule[]): Ju
     provides: IMimeDocumentTracker,
     autoStart: true,
     activate: (app: JupyterLab, restorer: ILayoutRestorer) => {
-      restorer.restore(mimeDocumentTracker, {
+      restorer.restore(tracker, {
         command: 'docmanager:open',
         args: widget => ({
           path: widget.context.path,
@@ -92,7 +92,7 @@ function createRendermimePlugins(extensions: IRenderMime.IExtensionModule[]): Ju
         name: widget =>
           `${widget.context.path}:${Private.factoryNameProperty.get(widget)}`
       });
-      return mimeDocumentTracker;
+      return tracker;
     }
   });
 
@@ -104,7 +104,7 @@ function createRendermimePlugins(extensions: IRenderMime.IExtensionModule[]): Ju
  * Create rendermime plugins for rendermime extension modules.
  */
 export
-function createRendermimePlugin(mimeDocumentTracker: InstanceTracker<MimeDocument>, item: IRenderMime.IExtension): JupyterLabPlugin<void> {
+function createRendermimePlugin(tracker: InstanceTracker<MimeDocument>, item: IRenderMime.IExtension): JupyterLabPlugin<void> {
   return {
     id: item.id,
     requires: [ILayoutRestorer, IRenderMimeRegistry],
@@ -156,9 +156,9 @@ function createRendermimePlugin(mimeDocumentTracker: InstanceTracker<MimeDocumen
           Private.factoryNameProperty.set(widget, factory.name);
           // Notify the instance tracker if restore data needs to update.
           widget.context.pathChanged.connect(() => {
-            mimeDocumentTracker.save(widget);
+            tracker.save(widget);
           });
-          mimeDocumentTracker.add(widget);
+          tracker.add(widget);
         });
       });
     }
