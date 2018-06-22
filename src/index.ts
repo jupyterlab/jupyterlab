@@ -10,28 +10,37 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  StatusBar
-} from './statusbar';
+  Widget
+} from '@phosphor/widgets';
 
 import {
-  ManagedStatusBarItem, StatusBarItem
-} from './statusitems';
-
-export {ManagedStatusBarItem, StatusBarItem}
-
+  StatusBar
+} from './statusbar';
 
 export
 interface IStatusBar {
   listStatusItems(): string[];
   hasStatusItem(id: string): boolean;
 
-  createManagedStatusItem(id: string): ManagedStatusBarItem;
-  registerStatusItem(id: string, widget: StatusBarItem): StatusBarItem;
+  registerStatusItem(id: string, widget: Widget, opts: IStatusBar.IStatusItemOptions): void;
 }
 
-import { ISettingRegistry } from '@jupyterlab/coreutils';
+export
+namespace IStatusBar {
+
+  export
+  type Alignment = 'right' | 'left';
+
+  export
+  interface IStatusItemOptions {
+    align?: IStatusBar.Alignment;
+    priority?: number;
+  }
+}
+
 
 export
+// tslint:disable-next-line:variable-name
 const IStatusBar = new Token<IStatusBar>('jupyterlab-statusbar:statusbar');
 
 /**
@@ -40,10 +49,10 @@ const IStatusBar = new Token<IStatusBar>('jupyterlab-statusbar:statusbar');
 const statusbar: JupyterLabPlugin<IStatusBar> = {
   id: 'jupyterlab-statusbar',
   autoStart: true,
-  requires: [ISettingRegistry],
+  requires: [],
   provides: IStatusBar,
   activate: (app: JupyterLab) => {
-    return new StatusBar({ host: app.shell })
+    return new StatusBar({ host: app.shell });
   }
 };
 

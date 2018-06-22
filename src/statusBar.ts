@@ -1,10 +1,6 @@
 import {
-  Widget
+  Widget, BoxLayout
 } from '@phosphor/widgets';
-
-import {
-  ManagedStatusBarItem, StatusBarItem
-} from './statusitems';
 
 import {
   IStatusBar
@@ -14,7 +10,7 @@ import {
   ApplicationShell
 } from '@jupyterlab/application';
 
-const STATUS_BAR_CLASS = "jp-status-bar";
+const STATUS_BAR_CLASS = 'jp-status-bar';
 
 export
 class StatusBar extends Widget implements IStatusBar {
@@ -25,19 +21,24 @@ class StatusBar extends Widget implements IStatusBar {
 
     this.id = STATUS_BAR_CLASS;
 
-    this._addSelfToHost(this._host);
+    this._host.addToTopArea(this);
   }
 
-  createManagedStatusItem(id: string): ManagedStatusBarItem {
+  registerStatusItem(id: string, widget: Widget, opts: IStatusBar.IStatusItemOptions) {
     if (id in this._statusItems) {
       throw new Error(`Status item ${id} already registered.`);
     }
 
-    return ({} as ManagedStatusBarItem);
-  }
+    let align = opts.align ? opts.align : 'left';
+    let priority = opts.priority === undefined ? opts.priority : 0;
 
-  registerStatusItem(id: String, widget: StatusBarItem): StatusBarItem {
-    return widget;
+    let wrapper = {
+      widget,
+      align,
+      priority
+    };
+
+    this._statusItems[id] = wrapper;
   }
 
   /**
@@ -67,11 +68,7 @@ class StatusBar extends Widget implements IStatusBar {
     return this._host;
   }
 
-  private _addSelfToHost(host: ApplicationShell) {
-    host.addToTopArea(this);
-  }
-
-  private _statusItems: { [id: string]: Private.IStatusItem } = Object.create(null);
+  private _statusItems: { [id: string]: StatusBar.IItem } = Object.create(null);
   private _host: ApplicationShell = null;
 }
 
@@ -83,20 +80,13 @@ namespace StatusBar {
    */
   export
   interface IOptions {
-    host: ApplicationShell
+    host: ApplicationShell;
   }
 
   export
-  interface IStatusItemChangedArgs {
-
+  interface IItem {
+    align: IStatusBar.Alignment;
+    priority: number;
+    widget: Widget;
   }
 }
-
-export
-namespace Private {
-    export
-    interface IStatusItem {
-      widget: StatusBarItem,
-      id: string
-    }
-  }
