@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  InstanceTracker
+  IInstanceTracker, InstanceTracker
 } from '@jupyterlab/apputils';
 
 import {
@@ -18,6 +18,10 @@ import {
 } from '@jupyterlab/rendermime-interfaces';
 
 import {
+  Token
+} from '@phosphor/coreutils';
+
+import {
   AttachedProperty
 } from '@phosphor/properties';
 
@@ -31,11 +35,29 @@ import {
 
 
 /**
+ * A class that tracks mime documents.
+ */
+export
+interface IMimeDocumentTracker extends IInstanceTracker<MimeDocument> {}
+
+/* tslint:disable */
+/**
+ * The mime document tracker token.
+ */
+export
+const IMimeDocumentTracker = new Token<IMimeDocumentTracker>('@jupyterlab/application:IMimeDocumentTracker');
+/* tslint:enable */
+
+
+/**
  * Create rendermime plugins for rendermime extension modules.
  */
 export
-function createRendermimePlugins(mimeDocumentTracker: InstanceTracker<MimeDocument>, extensions: IRenderMime.IExtensionModule[]): JupyterLabPlugin<void>[] {
-  const plugins: JupyterLabPlugin<void>[] = [];
+function createRendermimePlugins(extensions: IRenderMime.IExtensionModule[]): JupyterLabPlugin<void | IMimeDocumentTracker>[] {
+  const plugins: JupyterLabPlugin<void | IMimeDocumentTracker>[] = [];
+
+  const namespace = 'application-mimedocuments';
+  const mimeDocumentTracker = new InstanceTracker<MimeDocument>({ namespace });
 
   extensions.forEach(mod => {
     let data = mod.default;
@@ -53,10 +75,12 @@ function createRendermimePlugins(mimeDocumentTracker: InstanceTracker<MimeDocume
       });
   });
 
-  // Also add a meta-plugin handling state restoration.
+  // Also add a meta-plugin handling state restoration
+  // and exposing the mime document instance tracker.
   plugins.push({
-    id: '@jupyterlab/mimedocument-restorer:plugin',
+    id: '@jupyterlab/application:mimedocument',
     requires: [ILayoutRestorer],
+    provides: IMimeDocumentTracker,
     autoStart: true,
     activate: (app: JupyterLab, restorer: ILayoutRestorer) => {
       restorer.restore(mimeDocumentTracker, {
@@ -68,6 +92,7 @@ function createRendermimePlugins(mimeDocumentTracker: InstanceTracker<MimeDocume
         name: widget =>
           `${widget.context.path}:${Private.factoryNameProperty.get(widget)}`
       });
+      return mimeDocumentTracker;
     }
   });
 
