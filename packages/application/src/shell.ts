@@ -133,6 +133,9 @@ class ApplicationShell extends Widget {
     rootLayout.addWidget(hboxPanel);
     rootLayout.addWidget(bottomPanel);
 
+    //initially hiding bottom panel when no elements inside
+    this._bottomPanel.hide();
+
     this.layout = rootLayout;
 
     // Connect change listeners.
@@ -463,6 +466,11 @@ class ApplicationShell extends Widget {
     // Temporary: widgets are added to the panel in order of insertion.
     this._bottomPanel.addWidget(widget);
     this._onLayoutModified();
+
+    if(this._bottomPanel.isHidden)
+    {
+      this._bottomPanel.show();
+    }
   }
 
 
