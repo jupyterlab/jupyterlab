@@ -73,6 +73,20 @@ class StatusBar extends Widget implements IStatusBar {
 }
 
 export
+class StatusBarSide {
+  constructor(alignment: IStatusBar.Alignment) {
+   this._layout = new BoxLayout();
+    if(alignment === 'left') {
+      this._layout.direction = 'left-to-right';
+    }
+    else {
+      this._layout.direction = 'right-to-left';
+    }
+  }
+  private _layout: BoxLayout;
+}
+
+export
 namespace StatusBar {
 
   /**
