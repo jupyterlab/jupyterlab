@@ -90,7 +90,7 @@ class Sanitizer implements ISanitizer {
       // Set the "rel" attribute for <a> tags to "nofollow".
       'a': sanitize.simpleTransform('a', { 'rel': 'nofollow' }),
       // Set the "disabled" attribute for <input> tags.
-      'input': sanitize.simpleTransform('input', { 'disabled': true })
+      'input': sanitize.simpleTransform('input', { 'disabled': 'true' })
     },
     allowedSchemesByTag: {
       // Allow 'attachment:' img src (used for markdown cell attachments).
