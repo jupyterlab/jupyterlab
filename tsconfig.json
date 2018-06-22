@@ -11,5 +11,7 @@
     "lib": ["es5", "es2015.promise", "dom"],
     "types": []
   },
-  "include": ["src/*"]
+  "include": [
+    "./src/**/*.*"
+  ]
 }
