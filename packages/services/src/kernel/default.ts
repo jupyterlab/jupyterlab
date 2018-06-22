@@ -115,7 +115,8 @@ class DefaultKernel implements Kernel.IKernel {
    * A signal emitted for unhandled kernel message.
    *
    * #### Notes
-   * This signal is emitted for a message that was not handled.
+   * This signal is emitted for a message that was not handled. It is emitted
+   * during the asynchronous message handling code.
    */
   get unhandledMessage(): ISignal<this, KernelMessage.IMessage> {
     return this._unhandledMessage;
@@ -125,6 +126,9 @@ class DefaultKernel implements Kernel.IKernel {
    * A signal emitted for any kernel message.
    *
    * #### Notes
+   * This signal is emitted when a message is received, before it is handled
+   * asynchronously.
+   *
    * The behavior is undefined if the message is modified during message
    * handling. As such, the message should be treated as read-only.
    */
@@ -620,12 +624,6 @@ class DefaultKernel implements Kernel.IKernel {
    *
    * If the callback returns a promise, kernel message processing will pause
    * until the returned promise is fulfilled.
-   *
-   * TODO: perhaps, just like with registerMessageHook, we should just
-   * provide a removeCommTarget function instead of returning a disposable.
-   * Presumably it's just as easy for someone to store the comm target name as
-   * it is to store the disposable. Since there is only one callback, you don't even
-   * need to store the callback.
    */
   registerCommTarget(targetName: string, callback: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => void | PromiseLike<void>): void {
     this._targetRegistry[targetName] = callback;
@@ -639,7 +637,7 @@ class DefaultKernel implements Kernel.IKernel {
    * @param callback - The callback to remove.
    *
    * #### Notes
-   * The comm target is only removed if it matches the callback argument.
+   * The comm target is only removed the callback argument matches.
    */
   removeCommTarget(targetName: string, callback: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => void | PromiseLike<void>): void {
     if (!this.isDisposed && this._targetRegistry[targetName] === callback) {
