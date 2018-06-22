@@ -1,5 +1,5 @@
 import {
-  Widget, BoxLayout
+  Widget
 } from '@phosphor/widgets';
 
 import {
@@ -46,7 +46,7 @@ class StatusBar extends Widget implements IStatusBar {
    *
    * @returns A new array of the status bar item ids.
    */
-  listStatusItems(): string[] {
+  listItems(): string[] {
     return Object.keys(this._statusItems);
   }
 
@@ -57,7 +57,7 @@ class StatusBar extends Widget implements IStatusBar {
    *
    * @returns `true` if the status item is in the status bar, `false` otherwise.
    */
-  hasStatusItem(id: string): boolean {
+  hasItem(id: string): boolean {
     return id in this._statusItems;
   }
 

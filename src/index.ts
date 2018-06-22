@@ -19,8 +19,8 @@ import {
 
 export
 interface IStatusBar {
-  listStatusItems(): string[];
-  hasStatusItem(id: string): boolean;
+  listItems(): string[];
+  hasItem(id: string): boolean;
 
   registerStatusItem(id: string, widget: Widget, opts: IStatusBar.IStatusItemOptions): void;
 }
