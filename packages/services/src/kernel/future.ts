@@ -10,7 +10,7 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  Kernel// , log
+  Kernel, log
 } from './kernel';
 
 import {
@@ -229,18 +229,11 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
   }
 
   private _handleDone(): void {
-    // log(`JS KERNEL: K${this._kernel.id.slice(0, 6)} M${this.msg.header.msg_id.slice(0, 6)} future done`);
+    log(`JS KERNEL: K${this._kernel.id.slice(0, 6)} M${this.msg.header.msg_id.slice(0, 6)} future done`);
     if (this._testFlag(Private.KernelFutureFlag.IsDone)) {
-      // log(`JS KERNEL: K${this._kernel.id.slice(0, 6)} M${this.msg.header.msg_id.slice(0, 6)} actually already done`);
       return;
     }
     this._setFlag(Private.KernelFutureFlag.IsDone);
-    // log('set done, resolving done');
-    // log(this.msg, this._testFlag(Private.KernelFutureFlag.DisposeOnDone),
-    // this._testFlag(Private.KernelFutureFlag.GotIdle),
-    //   this._testFlag(Private.KernelFutureFlag.GotReply),
-    //     this._testFlag(Private.KernelFutureFlag.IsDone));
-
     this._done.resolve(this._replyMsg);
     if (this._disposeOnDone) {
       this.dispose();
