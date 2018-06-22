@@ -18,6 +18,10 @@ import {
 } from '@jupyterlab/rendermime-interfaces';
 
 import {
+  AttachedProperty
+} from '@phosphor/properties';
+
+import {
   JupyterLab, JupyterLabPlugin
 } from './index';
 
@@ -47,6 +51,24 @@ function createRendermimePlugins(mimeDocumentTracker: InstanceTracker<MimeDocume
       .forEach(item => {
         plugins.push(createRendermimePlugin(mimeDocumentTracker, item));
       });
+  });
+
+  // Also add a meta-plugin handling state restoration.
+  plugins.push({
+    id: '@jupyterlab/mimedocument-restorer:plugin',
+    requires: [ILayoutRestorer],
+    autoStart: true,
+    activate: (app: JupyterLab, restorer: ILayoutRestorer) => {
+      restorer.restore(mimeDocumentTracker, {
+        command: 'docmanager:open',
+        args: widget => ({
+          path: widget.context.path,
+          factory: Private.factoryNameProperty.get(widget)
+        }),
+        name: widget =>
+          `${widget.context.path}:${Private.factoryNameProperty.get(widget)}`
+      });
+    }
   });
 
   return plugins;
@@ -104,26 +126,31 @@ function createRendermimePlugin(mimeDocumentTracker: InstanceTracker<MimeDocumen
         });
         registry.addWidgetFactory(factory);
 
-        const factoryName = factory.name;
-        const namespace = `${factoryName}-renderer`;
-        const tracker = new InstanceTracker<MimeDocument>({ namespace });
-
-        // Handle state restoration.
-        restorer.restore(tracker, {
-          command: 'docmanager:open',
-          args: widget => ({ path: widget.context.path, factory: factoryName }),
-          name: widget => widget.context.path
-        });
 
         factory.widgetCreated.connect((sender, widget) => {
+          Private.factoryNameProperty.set(widget, factory.name);
           // Notify the instance tracker if restore data needs to update.
-          widget.context.pathChanged.connect(() => { tracker.save(widget); });
-          tracker.add(widget);
-          // Also add the widget to the application mime document tracker
-          // so that it can be accessible to extensions.
+          widget.context.pathChanged.connect(() => {
+            mimeDocumentTracker.save(widget);
+          });
           mimeDocumentTracker.add(widget);
         });
       });
     }
   };
+}
+
+/**
+ * Private namespace for the module.
+ */
+namespace Private {
+  /**
+   * An attached property for keeping the factory name
+   * that was used to create a mimedocument.
+   */
+  export
+  const factoryNameProperty = new AttachedProperty<MimeDocument, string>({
+    name: 'factoryName',
+    create: () => undefined
+  });
 }
