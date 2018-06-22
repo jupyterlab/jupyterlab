@@ -133,7 +133,7 @@ class ApplicationShell extends Widget {
     rootLayout.addWidget(hboxPanel);
     rootLayout.addWidget(bottomPanel);
 
-    //initially hiding bottom panel when no elements inside
+    // initially hiding bottom panel when no elements inside
     this._bottomPanel.hide();
 
     this.layout = rootLayout;
@@ -467,8 +467,7 @@ class ApplicationShell extends Widget {
     this._bottomPanel.addWidget(widget);
     this._onLayoutModified();
 
-    if(this._bottomPanel.isHidden)
-    {
+    if(this._bottomPanel.isHidden) {
       this._bottomPanel.show();
     }
   }
