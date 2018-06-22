@@ -1006,14 +1006,6 @@ class DefaultKernel implements Kernel.IKernel {
 
     // Handle the message asynchronously, in the order received.
     this._msgChain = this._msgChain.then(() => {
-
-      // If the message isn't a kernel_info_reply, check to make sure it
-      // corresponds to the current kernel. kernel_info_reply messages can
-      // change the kernel session, so we allow those to pass.
-      if (msg.header.msg_type !== 'kernel_info_reply') {
-        this._assertCurrentMessage(msg);
-      }
-
       // Return so that any promises from handling a message are fulfilled
       // before proceeding to the next message.
       return this._handleMessage(msg);
