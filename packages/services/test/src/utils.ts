@@ -1,9 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import encoding = require('text-encoding');
+import encoding from 'text-encoding';
 
-import WebSocket = require('ws');
+import WebSocket from 'ws';
+
+import expect from 'expect.js';
 
 import {
   uuid
@@ -628,6 +630,7 @@ class TerminalTester extends SocketTester {
  * @param find - An optional function to determine which emission to test,
  * defaulting to the first emission.
  * @param test - An optional function which contains the tests for the emission.
+ * @param value - An optional value that the promise resolves to if it is successful.
  *
  * @returns a promise that rejects if the function throws an error (e.g., if an
  * expect test doesn't pass), and resolves otherwise.
@@ -643,12 +646,12 @@ class TerminalTester extends SocketTester {
  * find criteria by giving both.
  */
 export
-function testEmission<T, U>(signal: ISignal<T, U>, options: {
+async function testEmission<T, U, V>(signal: ISignal<T, U>, options: {
   find?: (a: T, b: U) => boolean
   test?: (a: T, b: U) => void,
-}): Promise<void> {
-  const done = new PromiseDelegate<void>();
-
+  value?: V
+}): Promise<V> {
+  const done = new PromiseDelegate<V>();
   let object = {};
   signal.connect((sender: T, args: U) => {
     if (!options.find || options.find(sender, args)) {
@@ -659,15 +662,57 @@ function testEmission<T, U>(signal: ISignal<T, U>, options: {
         }
       } catch (e) {
         done.reject(e);
-        throw e;
+        // throw e;
       }
-      done.resolve(null);
+      done.resolve(options.value || undefined);
     }
   }, object);
   return done.promise;
 }
 
+/**
+ * Test that promises resolve in order.
+ *
+ * @param promises - a list of promises in the order they should resolve
+ * @param resolutions - a list of resolved values expected from the promises
+ *
+ * #### Notes
+ * The promises must resolve to different values (i.e., resolutions must be a
+ * list of unique values) for this function to work.
+ */
+export
+function testResolveOrder<T1, T2, T3, T4, T5, T6, T7>(promises: [PromiseLike<T1>, PromiseLike<T2>, PromiseLike<T3>, PromiseLike<T4>, PromiseLike<T5>, PromiseLike<T6>, PromiseLike<T6>], resolutions: [T1, T2, T3, T4, T5, T6, T7]): Promise<void>;
+export
+function testResolveOrder<T1, T2, T3, T4, T5, T6>(promises: [PromiseLike<T1>, PromiseLike<T2>, PromiseLike<T3>, PromiseLike<T4>, PromiseLike<T5>, PromiseLike<T6>], resolutions: [T1, T2, T3, T4, T5, T6]): Promise<void>;
+export
+function testResolveOrder<T1, T2, T3, T4, T5>(promises: [PromiseLike<T1>, PromiseLike<T2>, PromiseLike<T3>, PromiseLike<T4>, PromiseLike<T5>], resolutions: [T1, T2, T3, T4, T5]): Promise<void>;
+export
+function testResolveOrder<T1, T2, T3, T4>(promises: [PromiseLike<T1>, PromiseLike<T2>, PromiseLike<T3>, PromiseLike<T4>], resolutions: [T1, T2, T3, T4]): Promise<void>;
+export
+function testResolveOrder<T1, T2, T3>(promises: [PromiseLike<T1>, PromiseLike<T2>, PromiseLike<T3>], resolutions: [T1, T2, T3]): Promise<void>;
+export
+async function testResolveOrder<T1, T2>(promises: [PromiseLike<T1>, PromiseLike<T2>], resolutions: [T1, T2]): Promise<void>;
+export
+async function testResolveOrder(promises: PromiseLike<any>[], resolutions: any[]): Promise<void> {
+  // We construct all of the races synchronously so that the winner can truly be determined
+  let subsequences = promises.map((value, index) => Promise.race(promises.slice(index)));
+  for (let i = 0; i < subsequences.length; i++) {
+    expect(await subsequences[i]).to.be(resolutions[i]);
+  }
+}
 
+/**
+ * Test to see if a promise is fulfilled.
+ *
+ * @returns true if the promise is fulfilled (either resolved or rejected), and
+ * false if the promise is still pending.
+ */
+export
+async function isFulfilled<T>(p: PromiseLike<T>): Promise<boolean> {
+  let x = Object.create(null);
+  let result = await (Promise.race([p, x]).catch(() => false));
+  return result !== x;
+}
 
 /**
  * Return a promise that resolves in the given milliseconds with the given value.
@@ -676,12 +721,5 @@ export
 function sleep<T>(milliseconds: number = 0, value?: T): Promise<T> {
   return new Promise((resolve, reject) => {
     setTimeout(() => { resolve(value); }, milliseconds);
-  });
-}
-
-export
-function moment<T>(value?: T): Promise<T> {
-  return new Promise((resolve, reject) => {
-    requestAnimationFrame(() => { resolve(value); });
   });
 }
