@@ -467,7 +467,7 @@ class ApplicationShell extends Widget {
     this._bottomPanel.addWidget(widget);
     this._onLayoutModified();
 
-    if(this._bottomPanel.isHidden) {
+    if (this._bottomPanel.isHidden) {
       this._bottomPanel.show();
     }
   }
