@@ -39,6 +39,7 @@ interface ShortcutListProps {
    value: string;
    keyBinding: JSONValue;
    keyBindingFetched: boolean;
+   source: string;
  }
 
 class ShortcutListItem extends React.Component<ShortcutListItemProps, ShortcutListItemState> {
@@ -47,7 +48,8 @@ class ShortcutListItem extends React.Component<ShortcutListItemProps, ShortcutLi
     this.state = {
       value: "",
       keyBindingFetched: false,
-      keyBinding: undefined
+      keyBinding: undefined,
+      source: "Default"
     };
   }
 
@@ -55,11 +57,18 @@ class ShortcutListItem extends React.Component<ShortcutListItemProps, ShortcutLi
     this.getCommandKeybinding(this.state.keyBinding);
   }
 
+  componentWillReceiveProps() {
+    this.getCommandKeybinding(this.state.keyBinding);
+  }
+
   handleUpdate = () => {
     let removeKeybindingPromise = this.props.settingRegistry.remove(this.props.shortcutPlugin, this.props.command);
     let setKeybindingPromise = this.props.settingRegistry.set(this.props.shortcutPlugin, this.props.command, {command: this.props.command, keys: [this.state.value], selector: this.props.command['selector']});
     Promise.all([removeKeybindingPromise, setKeybindingPromise]);
-    this.setState({value:""});
+    this.setState({
+      value:"",
+      source: "Custom"
+    });
     this.getCommandKeybinding(this.state.keyBinding);
   }
 
@@ -87,6 +96,13 @@ class ShortcutListItem extends React.Component<ShortcutListItemProps, ShortcutLi
     });
   }
 
+  resetKeybinding = () => {
+    this.props.settingRegistry.remove(this.props.shortcutPlugin, this.props.command).then(result => {
+      this.setState({source: "Default"});
+      this.getCommandKeybinding(this.state.keyBinding)
+    });
+  }
+
   getCommandKeybinding = (keyBinding: JSONValue) => {
     this.props.settingRegistry.get(this.props.shortcutPlugin, this.props.command).then(result => {
       if(result != undefined) {
@@ -96,14 +112,31 @@ class ShortcutListItem extends React.Component<ShortcutListItemProps, ShortcutLi
   }
 
   render() {
+    let commandLabel: string;
+    let commandLabelArray: string[]
+    commandLabel = this.props.command.split(":")[1].replace("-", " ");
+    commandLabelArray = commandLabel.split(" ");
+    commandLabelArray = commandLabelArray.map(function(item) {
+      return item.charAt(0).toUpperCase() + item.substring(1);
+    })
+    commandLabel = commandLabelArray.toString().replace(",", " ");
     if(!this.state.keyBindingFetched) { 
       return null
     };
     return (
       <div className="jp-cmditem">
-        <div className="jp-cmdlabel">{this.props.command} {(this.state.keyBinding === undefined ? '' : this.state.keyBinding['keys'])}</div>
-        <input className="jp-input" value={this.state.value} onChange={this.updateInputValue} onKeyDown={this.handleInput}></input>
-        <button className="jp-button" onClick={this.handleUpdate}>Submit</button>
+        <div className="jp-cmdlabelcontainer">
+          <div className="jp-cmdlabel">{commandLabel}</div>
+        </div>
+        <div className="jp-cmdbindingcontainer">
+          <div className="jp-cmdbinding">{(this.state.keyBinding === undefined ? '' : this.state.keyBinding['keys'])}</div>
+          <input className="jp-input" value={this.state.value} onChange={this.updateInputValue} onKeyDown={this.handleInput}></input>
+          <button className="jp-button" onClick={this.handleUpdate}>Submit</button>
+          {(this.state.source === "Custom") ? <button className="jp-button" onClick={this.resetKeybinding}>Reset</button>: null}
+        </div>
+        <div className="jp-cmdsourcecontainer">
+          <div className="jp-cmdsource">{this.state.source}</div>
+        </div>
       </div>
     );
   }
@@ -114,6 +147,12 @@ class ShortcutList extends React.Component<ShortcutListProps, {}> {
     super(props);
   }
 
+  resetKeybindings = () => {
+    this.props.settingRegistry.load(this.props.shortcutPlugin).then(settings => Object.keys(settings.user).forEach(key => {
+      this.props.settingRegistry.remove(this.props.shortcutPlugin, key);
+    })).then(settings => this.forceUpdate());
+  }
+
   render() {
     let commandItems: Array<JSX.Element> = new Array<JSX.Element>();
     this.props.commandList.forEach(command => 
@@ -121,7 +160,10 @@ class ShortcutList extends React.Component<ShortcutListProps, {}> {
       );
     return (
       <div className="jp-shortcutlist">
-         {commandItems}
+        <button className="jp-button" onClick={this.resetKeybindings}>Reset All</button>
+        <div className="jp-shortcutlistcontainer">
+          {commandItems}
+         </div>
       </div>
     );
   }
@@ -134,14 +176,14 @@ const plugin: JupyterLabPlugin<void> = {
     let shortcutList = React.createElement(ShortcutList, {commandList: app.commands.listCommands(), settingRegistry: settingRegistry, shortcutPlugin: '@jupyterlab/shortcuts-extension:plugin'});
     let widget: ReactElementWidget = new ReactElementWidget(shortcutList);
     widget.id = 'jupyterlab-shortcutui';
-    widget.title.label = 'Shortcut UI';
+    widget.title.label = 'Keyboard Shortcut Settings';
     widget.title.closable = true;
     widget.addClass('jp-shortcutWidget');
 
     // Add an application command
     const command: string = 'shortcutui:open';
     app.commands.addCommand(command, {
-      label: 'Shortcut UI',
+      label: 'Keyboard Shortcut Settings',
       execute: () => {
         if (!widget.isAttached) {
           // Attach the widget to the main work area if it's not there

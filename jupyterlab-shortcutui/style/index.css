@@ -6,6 +6,43 @@
     padding-left: 10px;
 }
 
+.jp-shortcutlistcontainer {
+    padding-left: 300px;
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+}
+
+.jp-shortcutlistcontainer div {
+    display: inline-block;
+}
+.jp-cmdlabelcontainer {
+    order: 1; 
+    flex-basis: 30%; 
+    width: 30%;
+    height: 100px;
+}
+
+.jp-cmdbindingcontainer {
+    order: 3; 
+    flex-basis: 50%; 
+    width: 50%;
+    height: 100px;
+}
+
+.jp-cmdbinding {
+    padding-right: 10px;
+}
+
+.jp-cmdsourcecontainer {
+    order: 2; 
+    flex-basis: 10%; 
+    width: 10%;
+    height: 100px;
+}
+
 p {
     font: 'Moneserrat';
     font-weight: 400;
@@ -17,8 +54,4 @@ input {
     height: 10px;
     padding: 2px;
     background: white;
-}
-
-.widgetDiv {
-    display: inline-block;
 }
