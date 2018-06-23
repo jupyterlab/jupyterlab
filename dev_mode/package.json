@@ -137,7 +137,6 @@
       "@jupyterlab/inspector-extension": "",
       "@jupyterlab/launcher-extension": "",
       "@jupyterlab/mainmenu-extension": "",
-      "@jupyterlab/markdownviewer-extension": "",
       "@jupyterlab/mathjax2-extension": "",
       "@jupyterlab/notebook-extension": "",
       "@jupyterlab/rendermime-extension": "",
@@ -153,6 +152,7 @@
     "mimeExtensions": {
       "@jupyterlab/javascript-extension": "",
       "@jupyterlab/json-extension": "",
+      "@jupyterlab/markdownviewer-extension": "",
       "@jupyterlab/pdf-extension": "",
       "@jupyterlab/vdom-extension": "",
       "@jupyterlab/vega3-extension": ""

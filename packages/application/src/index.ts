@@ -41,9 +41,10 @@ import {
 } from './shell';
 import { ISignal, Signal } from '@phosphor/signaling';
 
-export { ApplicationShell } from './shell';
 export { ILayoutRestorer, LayoutRestorer } from './layoutrestorer';
+export { IMimeDocumentTracker } from './mimerenderers';
 export { IRouter, Router } from './router';
+export { ApplicationShell } from './shell';
 
 
 /**
