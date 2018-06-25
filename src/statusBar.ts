@@ -1,5 +1,5 @@
 import {
-  Widget, BoxLayout
+  Widget, BoxPanel, BoxLayout
 } from '@phosphor/widgets';
 
 import {
@@ -13,24 +13,32 @@ import {
 const STATUS_BAR_CLASS = 'jp-status-bar';
 
 export
-class StatusBar extends Widget implements IStatusBar {
+class StatusBar extends BoxPanel implements IStatusBar {
   constructor(options: StatusBar.IOptions) {
     super();
-
     this._host = options.host;
 
     this.id = STATUS_BAR_CLASS;
 
-    let logo = new Widget();
-    logo.addClass('jp-MainAreaPortraitIcon');
-    logo.addClass('jp-JupyterIcon');
-    logo.id = 'jp-MainLogo';
-    let logostatus = { align: 'right' } as IStatusBar.IStatusItemOptions;
 
-    this.registerStatusItem('logo', logo, logostatus);
+    let leftPanel = this._leftPanel = new BoxPanel();
+    let rightPanel = this._rightPanel = new BoxPanel();
+    let rootLayout = new BoxLayout();
+
+    rootLayout.direction = 'left-to-right';
+    rootLayout.addWidget(leftPanel);
+    // possible split panel here?
+    rootLayout.addWidget(rightPanel);
+
+    leftPanel.direction = 'left-to-right';
+    rightPanel.direction = 'right-to-left';
+
+    this.layout = rootLayout;
 
     this._host.addToTopArea(this);
   }
+
+
 
   registerStatusItem(id: string, widget: Widget, opts: IStatusBar.IStatusItemOptions) {
     if (id in this._statusItems) {
@@ -39,6 +47,14 @@ class StatusBar extends Widget implements IStatusBar {
 
     let align = opts.align ? opts.align : 'left';
     let priority = opts.priority === undefined ? opts.priority : 0;
+
+    if (align === 'left') {
+      this._leftPanel.insertWidget(priority, widget);
+    }
+    if (align === 'right') {
+      this._rightPanel.this.insertWidget(priority, widget);
+    }
+
 
     let wrapper = {
       widget,
@@ -78,6 +94,8 @@ class StatusBar extends Widget implements IStatusBar {
 
   private _statusItems: { [id: string]: StatusBar.IItem } = Object.create(null);
   private _host: ApplicationShell = null;
+  private _leftPanel: BoxPanel;
+  private _rightPanel: BoxPanel;
 }
 
 export
