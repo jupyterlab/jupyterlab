@@ -4,11 +4,13 @@
     "noImplicitAny": true,
     "noEmitOnError": true,
     "noUnusedLocals": true,
+    "esModuleInterop": true,
+    "preserveWatchOutput": true,
     "module": "commonjs",
     "moduleResolution": "node",
-    "target": "es5",
+    "target": "es2015",
     "outDir": "./lib",
-    "lib": ["es5", "es2015.promise", "dom"],
+    "lib": ["dom", "es2015"],
     "types": []
   },
   "include": [

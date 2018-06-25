@@ -8,7 +8,7 @@ import {
 
 import {
     IStatusBar
-} from './..';
+} from './../statusBar';
 
 import { VirtualDOM, h } from '@phosphor/virtualdom';
 
@@ -32,7 +32,7 @@ class HelloStatus extends Widget {
  */
 export
 const helloStatusItem: JupyterLabPlugin<HelloStatus> = {
-    id: 'jupyterlab-statusbar:hello-world',
+    id: 'jupyterlab-statusbar/default-items:hello-world',
     autoStart: true,
     requires: [IStatusBar],
     activate: (_app: JupyterLab, statusBar: IStatusBar) => {
