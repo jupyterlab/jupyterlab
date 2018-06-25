@@ -297,7 +297,12 @@ class SettingEditor extends Widget {
 
     // Allow the message queue (which includes fit requests that might disrupt
     // setting relative sizes) to clear before setting sizes.
-    requestAnimationFrame(() => { panel.setRelativeSizes(state.sizes); });
+    requestAnimationFrame(() => {
+      panel.setRelativeSizes(state.sizes);
+      SplitPanel.setStretch(this._list, 0);
+      SplitPanel.setStretch(this._instructions, 1);
+      SplitPanel.setStretch(this._editor, 1);
+    });
   }
 
   /**
