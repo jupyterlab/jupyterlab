@@ -107,6 +107,10 @@ class SettingEditor extends Widget {
     panel.addWidget(list);
     panel.addWidget(instructions);
 
+    SplitPanel.setStretch(list, 0);
+    SplitPanel.setStretch(instructions, 1);
+    SplitPanel.setStretch(editor, 1);
+
     editor.stateChanged.connect(this._onStateChanged, this);
     list.changed.connect(this._onStateChanged, this);
     panel.handleMoved.connect(this._onStateChanged, this);
@@ -297,12 +301,7 @@ class SettingEditor extends Widget {
 
     // Allow the message queue (which includes fit requests that might disrupt
     // setting relative sizes) to clear before setting sizes.
-    requestAnimationFrame(() => {
-      panel.setRelativeSizes(state.sizes);
-      SplitPanel.setStretch(this._list, 0);
-      SplitPanel.setStretch(this._instructions, 1);
-      SplitPanel.setStretch(this._editor, 1);
-    });
+    requestAnimationFrame(() => { panel.setRelativeSizes(state.sizes); });
   }
 
   /**
