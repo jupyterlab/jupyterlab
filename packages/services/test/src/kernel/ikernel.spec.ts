@@ -996,8 +996,9 @@ describe('Kernel.IKernel', () => {
           tester.send(msgDone);
         };
 
-        kernel.registerMessageHook(parentHeader.msg_id, (msg) => {
-          calls.push('last');
+        kernel.registerMessageHook(parentHeader.msg_id, async (msg) => {
+          // Make this hook call asynchronous
+          await calls.push('last');
           return true;
         });
 
@@ -1065,8 +1066,8 @@ describe('Kernel.IKernel', () => {
           return false;
         });
 
-        future.onIOPub = () => {
-          calls.push('iopub');
+        future.onIOPub = async () => {
+          await calls.push('iopub');
         };
       });
 

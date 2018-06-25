@@ -68,8 +68,8 @@ describe('Kernel.IFuture', () => {
           tester.send(msgDone);
         };
 
-        future.registerMessageHook((msg) => {
-          calls.push('last');
+        future.registerMessageHook(async (msg) => {
+          await calls.push('last');
           return true;
         });
 
@@ -136,7 +136,7 @@ describe('Kernel.IFuture', () => {
           return true;
         });
 
-        future.registerMessageHook((msg) => {
+        future.registerMessageHook(async (msg) => {
           calls.push('first');
           return false;
         });
