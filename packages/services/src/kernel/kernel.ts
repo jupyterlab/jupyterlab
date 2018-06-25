@@ -765,7 +765,7 @@ namespace Kernel {
      * message. If a hook is removed during the hook processing, it will be
      * deactivated immediately.
      */
-    registerMessageHook(hook: (msg: KernelMessage.IIOPubMessage) => boolean): void;
+    registerMessageHook(hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>): void;
 
     /**
      * Remove a hook for IOPub messages.
@@ -775,7 +775,7 @@ namespace Kernel {
      * #### Notes
      * If a hook is removed during the hook processing, it will be deactivated immediately.
      */
-    removeMessageHook(hook: (msg: KernelMessage.IIOPubMessage) => boolean): void;
+    removeMessageHook(hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>): void;
 
     /**
      * Send an `input_reply` message.
