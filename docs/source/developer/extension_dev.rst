@@ -59,7 +59,7 @@ The default plugins in the JupyterLab application include:
    - Sets the default set of shortcuts for the application.
 -  `Images <https://github.com/jupyterlab/jupyterlab/blob/master/packages/imageviewer-extension/src/index.ts>`__
    - Adds a widget factory for displaying image files.
--  `Help <https://github.com/jupyterlab/jupyterlab/blob/master/packages/help-extension/src/index.ts>`__
+-  `Help <https://github.com/jupyterlab/jupyterlab/blob/master/packages/help-extension/src/index.tsx>`__
    - Adds a side bar widget for displaying external documentation.
 -  `File
    Browser <https://github.com/jupyterlab/jupyterlab/blob/master/packages/filebrowser-extension/src/index.ts>`__
