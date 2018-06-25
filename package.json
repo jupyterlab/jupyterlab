@@ -14,9 +14,9 @@
   "license": "BSD-3-Clause",
   "author": "Richa Gadgil",
   "files": [
-    "lib/*.d.ts",
-    "lib/*.js.map",
-    "lib/*.js",
+    "lib/**/*.d.ts",
+    "lib/**/*.js.map",
+    "lib/**/*.js",
     "style/*.css"
   ],
   "main": "lib/index.js",
