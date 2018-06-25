@@ -29,17 +29,18 @@ interface ShortcutListProps {
 }
 
  interface ShortcutListItemProps {
-   key: string;
-   command: string;
-   settingRegistry: ISettingRegistry;
-   shortcutPlugin: string;
- }
+  command: string;
+  category: string;
+  settingRegistry: ISettingRegistry;
+  shortcutPlugin: string;
+}
 
  interface ShortcutListItemState {
    value: string;
    keyBinding: JSONValue;
    keyBindingFetched: boolean;
    source: string;
+   displayInput: boolean;
  }
 
  interface ShortcutMenuProps {
@@ -57,6 +58,13 @@ interface ShortcutListProps {
   categoryList: Array<string>;
  }
 
+ interface ShortcutCategoryProps {
+  category: string;
+  commandsinCategory: string[];
+  settingRegistry: ISettingRegistry;
+  shortcutPlugin: string;
+}
+
 class ShortcutListItem extends React.Component<ShortcutListItemProps, ShortcutListItemState> {
   constructor(props) {
     super(props);
@@ -64,7 +72,8 @@ class ShortcutListItem extends React.Component<ShortcutListItemProps, ShortcutLi
       value: "",
       keyBindingFetched: false,
       keyBinding: undefined,
-      source: "Default"
+      source: "Default",
+      displayInput:false
     }
   }
 
@@ -113,7 +122,10 @@ class ShortcutListItem extends React.Component<ShortcutListItemProps, ShortcutLi
 
   resetKeybinding = () => {
     this.props.settingRegistry.remove(this.props.shortcutPlugin, this.props.command).then(result => {
-      this.setState({source: "Default"});
+      this.setState(prevState => ({
+        displayInput: !prevState.displayInput,
+        source: "Default"
+      }));
       this.getCommandKeybinding(this.state.keyBinding)
     });
   }
@@ -138,6 +150,12 @@ class ShortcutListItem extends React.Component<ShortcutListItemProps, ShortcutLi
     this.getCommandKeybinding(this.state.keyBinding)
   }
 
+  toggleInput = () => {
+    this.setState(prevState => ({
+      displayInput: !prevState.displayInput
+    }));
+  }
+
   render() {
     let commandLabel: string;
     let commandLabelArray: string[]
@@ -152,20 +170,48 @@ class ShortcutListItem extends React.Component<ShortcutListItemProps, ShortcutLi
     };
     return (
       <div className="jp-cmditem">
-        <div className="jp-cmdlabelcontainer">
-          <div className="jp-cmdlabel">{commandLabel}</div>
+        <div className="jp-label-container">
+          <div className="jp-label">{commandLabel}</div>
         </div>
-        <div className="jp-cmdbindingcontainer">
+        <div className="jp-shortcut-container">
           {(this.state.keyBinding === undefined || this.state.keyBinding['keys'][0] === "" ? null : <button className="jp-shortcut" onClick={this.deleteShortcut}>{this.state.keyBinding['keys']}</button>)}
-          <input className="jp-input" value={this.state.value} onChange={this.updateInputValue} onKeyDown={this.handleInput}></input>
-          <button className="jp-submit" onClick={this.handleUpdate}>Submit</button>
-          {(this.state.source === "Custom") ? <button className="jp-button" onClick={this.resetKeybinding}>Reset</button>: null}
+          <span className="jp-input-plus" onClick={this.toggleInput}>+</span>
+          {(this.state.displayInput ? (
+            <div className="jp-input-container">
+              <input className="jp-input" value={this.state.value} onChange={this.updateInputValue} onKeyDown={this.handleInput}></input>
+              <button className="jp-submit" onClick={this.handleUpdate}>Submit</button>
+            </div>
+          )
+            : (
+            null
+            )
+          )}
         </div>
-        <div className="jp-cmdsourcecontainer">
-          <div className="jp-cmdsource">{this.state.source}</div>
+        <div className="jp-source-container">
+          <div className="jp-source">{this.state.source}</div>
+          {(this.state.source === "Custom") ? <a className="jp-reset" onClick={this.resetKeybinding}>reset</a>: null}
         </div>
       </div>
     );
+  }
+}
+
+class ShortcutCategory extends React.Component<ShortcutCategoryProps, {}> {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    let commandItems: Array<JSX.Element> = new Array<JSX.Element>();
+    this.props.commandsinCategory.forEach(command => { 
+      commandItems.push(<ShortcutListItem shortcutPlugin = {this.props.shortcutPlugin} category={this.props.category} key={command} command={command} settingRegistry={this.props.settingRegistry}/>);
+    });
+    return (
+      <div className="jp-shortcut-category">
+        <h3>{this.props.category}</h3>
+        {commandItems}
+      </div>
+    )
   }
 }
 
@@ -180,11 +226,27 @@ class ShortcutList extends React.Component<ShortcutListProps, {}> {
     })).then(settings => this.forceUpdate());
   }
 
+  createShortcutList = () => {
+    let shortCutListItems: Array<JSX.Element> = new Array<JSX.Element>();
+    let commandCategories: Array<string> = new Array<string>();
+    this.props.commandList.forEach(command => { 
+      if(commandCategories.indexOf(command.split(":")[0]) === -1) {
+        commandCategories.push(command.split(":")[0]);
+      }
+    });
+    commandCategories.forEach(category => {
+      let commandItems: Array<string> = new Array<string>();
+      this.props.commandList.forEach(command => {
+        if(command.split(":")[0] === category) {
+          commandItems.push(command);
+        }
+    });
+    shortCutListItems.push(<ShortcutCategory key={category} category={category} commandsinCategory={commandItems} settingRegistry={this.props.settingRegistry} shortcutPlugin={this.props.shortcutPlugin} />);
+  });
+    return shortCutListItems;
+  }
+
   render() {
-    let commandItems: Array<JSX.Element> = new Array<JSX.Element>();
-    this.props.commandList.forEach(command => 
-      commandItems.push(<ShortcutListItem shortcutPlugin = {this.props.shortcutPlugin} key={command} command={command} settingRegistry={this.props.settingRegistry}/>)
-      );
     return (
       <div className="jp-shortcutlist">
         <div className="jp-shortcuttopnav">
@@ -201,7 +263,7 @@ class ShortcutList extends React.Component<ShortcutListProps, {}> {
         </div>
         <div className="jp-shortcutlistmain">
           <div className="jp-shortcutlistcontainer">
-            {commandItems}
+            {this.createShortcutList()}
           </div>
         </div>
       </div>
