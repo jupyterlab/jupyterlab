@@ -15,6 +15,68 @@
     align-items: stretch;
 }
 
+.jp-cmditem {
+        height: 30px;
+        padding: 10px;
+        display: flex;
+        width: 1000px;
+        background: inherit;
+}
+
+.jp-cmdlabel {
+        display: inline-block;
+        font: 'Moneserrat';
+        font-weight: 400;
+        size: 14px;
+        color: #616161;
+        padding-right: 10px;
+        align-self: left; 
+}
+
+.jp-shortcut {
+        font: "Source Code Pro";
+        font-style: "Regular";
+        font-size: 13px;
+        fill: solid;
+        background: #F4F3F4;
+        border-radius: 2px;
+        border-color: #BDBDBD;
+        border-width: 0.75px;
+        margin-right: 20px;
+    }
+
+.jp-shortcut:hover {
+    border-width: 1.25px;
+}
+    
+.jp-shortcut:active {
+    border-color: #828282;
+    background: #E0E0E0;
+}
+
+.jp-shortcut:focus {
+    outline: none;
+}
+
+.jp-shortcut::after {
+    content: '     ×';
+}
+
+.jp-input {
+    background: #F4F4F4;
+    border-radius: 2px;
+    border-width: 0.75px;
+    border-color: #BDBDBD;
+}
+    
+.jp-input:focus {
+    outline: none;
+}
+
+.jp-submit:focus {
+    outline:none;
+}
+
 .jp-shortcutlistcontainer div {
     display: inline-block;
 }

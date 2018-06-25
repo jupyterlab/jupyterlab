@@ -50,7 +50,7 @@ class ShortcutListItem extends React.Component<ShortcutListItemProps, ShortcutLi
       keyBindingFetched: false,
       keyBinding: undefined,
       source: "Default"
-    };
+    }
   }
 
   componentDidMount() {
@@ -73,8 +73,8 @@ class ShortcutListItem extends React.Component<ShortcutListItemProps, ShortcutLi
   }
 
   handleInput = (event) => {
-    if (event.key=="Backspace"){
-      this.setState({value: this.state.value.substr(0, this.state.value.lastIndexOf(' ')+1)});
+    if (event.key == "Backspace"){
+      this.setState({value: this.state.value.substr(0, this.state.value.lastIndexOf(' ') + 1)});
     }
     else if (event.key == "Control"){
       this.setState({value: this.state.value + " Ctrl"});
@@ -108,18 +108,30 @@ class ShortcutListItem extends React.Component<ShortcutListItemProps, ShortcutLi
       if(result != undefined) {
         this.setState({keyBinding :result.composite});
       }
-    }).then(result => this.setState({keyBindingFetched: true}));
+    }).then(result => 
+      this.setState({keyBindingFetched: true}));
+  }
+
+  deleteShortcut = () => {
+    let removeKeybindingPromise = this.props.settingRegistry.remove(this.props.shortcutPlugin, this.props.command);
+    let setKeybindingPromise = this.props.settingRegistry.set(this.props.shortcutPlugin, this.props.command, {command: this.props.command, keys: [""], selector: this.props.command['selector']});
+    Promise.all([removeKeybindingPromise, setKeybindingPromise]);
+    this.setState({
+      value: "",
+      source: "Custom"
+    });
+    this.getCommandKeybinding(this.state.keyBinding)
   }
 
   render() {
     let commandLabel: string;
     let commandLabelArray: string[]
-    commandLabel = this.props.command.split(":")[1].replace("-", " ");
+    commandLabel = this.props.command.split(":")[1].replace(/-/g, " ");
     commandLabelArray = commandLabel.split(" ");
     commandLabelArray = commandLabelArray.map(function(item) {
       return item.charAt(0).toUpperCase() + item.substring(1);
     })
-    commandLabel = commandLabelArray.toString().replace(",", " ");
+    commandLabel = commandLabelArray.toString().replace(/,/g, " ");
     if(!this.state.keyBindingFetched) { 
       return null
     };
@@ -129,9 +141,9 @@ class ShortcutListItem extends React.Component<ShortcutListItemProps, ShortcutLi
           <div className="jp-cmdlabel">{commandLabel}</div>
         </div>
         <div className="jp-cmdbindingcontainer">
-          <div className="jp-cmdbinding">{(this.state.keyBinding === undefined ? '' : this.state.keyBinding['keys'])}</div>
+          {(this.state.keyBinding === undefined || this.state.keyBinding['keys'][0] === "" ? null : <button className="jp-shortcut" onClick={this.deleteShortcut}>{this.state.keyBinding['keys']}</button>)}
           <input className="jp-input" value={this.state.value} onChange={this.updateInputValue} onKeyDown={this.handleInput}></input>
-          <button className="jp-button" onClick={this.handleUpdate}>Submit</button>
+          <button className="jp-submit" onClick={this.handleUpdate}>Submit</button>
           {(this.state.source === "Custom") ? <button className="jp-button" onClick={this.resetKeybinding}>Reset</button>: null}
         </div>
         <div className="jp-cmdsourcecontainer">
