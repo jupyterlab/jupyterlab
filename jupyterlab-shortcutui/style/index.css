@@ -1,0 +1,119 @@
+.jp-shortcutWidget {
+    display: flex;
+    flex-direction: column;
+    overflow-y: scroll;
+    background: #EEEEEE;
+    padding-left: 10px;
+}
+
+.jp-shortcutlistcontainer {
+    padding-left: 300px;
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+}
+
+.jp-cmditem {
+        height: 30px;
+        padding: 10px;
+        display: flex;
+        width: 1000px;
+        background: inherit;
+}
+
+.jp-cmdlabel {
+        display: inline-block;
+        font: 'Moneserrat';
+        font-weight: 400;
+        size: 14px;
+        color: #616161;
+        padding-right: 10px;
+        align-self: left; 
+}
+
+.jp-shortcut {
+        font: "Source Code Pro";
+        font-style: "Regular";
+        font-size: 13px;
+        fill: solid;
+        background: #F4F3F4;
+        border-radius: 2px;
+        border-color: #BDBDBD;
+        border-width: 0.75px;
+        margin-right: 20px;
+    }
+
+.jp-shortcut:hover {
+    border-width: 1.25px;
+}
+    
+.jp-shortcut:active {
+    border-color: #828282;
+    background: #E0E0E0;
+}
+
+.jp-shortcut:focus {
+    outline: none;
+}
+
+.jp-shortcut::after {
+    content: '     ×';
+}
+
+.jp-input {
+    background: #F4F4F4;
+    border-radius: 2px;
+    border-width: 0.75px;
+    border-color: #BDBDBD;
+}
+    
+.jp-input:focus {
+    outline: none;
+}
+
+.jp-submit:focus {
+    outline:none;
+}
+
+.jp-shortcutlistcontainer div {
+    display: inline-block;
+}
+.jp-cmdlabelcontainer {
+    order: 1; 
+    flex-basis: 30%; 
+    width: 30%;
+    height: 100px;
+}
+
+.jp-cmdbindingcontainer {
+    order: 3; 
+    flex-basis: 50%; 
+    width: 50%;
+    height: 100px;
+}
+
+.jp-cmdbinding {
+    padding-right: 10px;
+}
+
+.jp-cmdsourcecontainer {
+    order: 2; 
+    flex-basis: 10%; 
+    width: 10%;
+    height: 100px;
+}
+
+p {
+    font: 'Moneserrat';
+    font-weight: 400;
+    size: 14px;
+    color: #616161;
+}
+
+input {
+    height: 10px;
+    padding: 2px;
+    background: white;
+}
