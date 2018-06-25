@@ -73,7 +73,7 @@ class ApplicationShell extends Widget {
     this.addClass(APPLICATION_SHELL_CLASS);
     this.id = 'main';
 
-    let bottomPanel = this._bottomPanel = new Panel();
+    let bottomPanel = this._bottomPanel = new BoxPanel();
     let topPanel = this._topPanel = new Panel();
     let hboxPanel = this._hboxPanel = new BoxPanel();
     let dockPanel = this._dockPanel = new DockPanel();
@@ -99,6 +99,7 @@ class ApplicationShell extends Widget {
     rightHandler.sideBar.addClass('jp-mod-right');
     rightHandler.stackedPanel.id = 'jp-right-stack';
 
+    bottomPanel.direction = 'left-to-right';
     hboxPanel.spacing = 0;
     dockPanel.spacing = 5;
     hsplitPanel.spacing = 1;
