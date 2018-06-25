@@ -37,6 +37,7 @@ const helloStatusItem: JupyterLabPlugin<HelloStatus> = {
     requires: [IStatusBar],
     activate: (_app: JupyterLab, statusBar: IStatusBar) => {
         console.log('Initialized hello status item!');
+        console.log('aksjdfhlaksjdhflkajshdf akdsjhfkaj!');
         let helloStatus =  new HelloStatus('world');
         let helloStatusOpts = { align: 'left' } as IStatusBar.IStatusItemOptions;
 

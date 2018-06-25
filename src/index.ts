@@ -7,7 +7,7 @@ import {
 
 import {
   StatusBar, IStatusBar
-} from './statusbar';
+} from './statusBar';
 
 // Export default status bar items
 import { helloStatusItem } from './defaults';
@@ -15,16 +15,17 @@ import { helloStatusItem } from './defaults';
 /**
  * Initialization data for the statusbar extension.
  */
-const statusbar: JupyterLabPlugin<IStatusBar> = {
+const statusBar: JupyterLabPlugin<IStatusBar> = {
   id: 'jupyterlab-statusbar/statusbar',
   provides: IStatusBar,
+  autoStart: true,
   activate: (app: JupyterLab) => {
     return new StatusBar({ host: app.shell });
   }
 };
 
 const plugins: JupyterLabPlugin<any>[] = [
-  statusbar, helloStatusItem
+  statusBar, helloStatusItem
 ];
 
 export default plugins;
