@@ -21,6 +21,14 @@ class StatusBar extends Widget implements IStatusBar {
 
     this.id = STATUS_BAR_CLASS;
 
+    let logo = new Widget();
+    logo.addClass('jp-MainAreaPortraitIcon');
+    logo.addClass('jp-JupyterIcon');
+    logo.id = 'jp-MainLogo';
+    let logostatus = { align: 'right' } as IStatusBar.IStatusItemOptions;
+
+    this.registerStatusItem('logo', logo, logostatus);
+
     this._host.addToTopArea(this);
   }
 
