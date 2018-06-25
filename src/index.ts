@@ -6,54 +6,29 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Token
-} from '@phosphor/coreutils';
+  StatusBar, IStatusBar
+} from './statusBar';
 
-import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
-  StatusBar
-} from './statusbar';
-
-export
-interface IStatusBar {
-  listStatusItems(): string[];
-  hasStatusItem(id: string): boolean;
-
-  registerStatusItem(id: string, widget: Widget, opts: IStatusBar.IStatusItemOptions): void;
-}
-
-export
-namespace IStatusBar {
-
-  export
-  type Alignment = 'right' | 'left';
-
-  export
-  interface IStatusItemOptions {
-    align?: IStatusBar.Alignment;
-    priority?: number;
-  }
-}
-
-
-export
-// tslint:disable-next-line:variable-name
-const IStatusBar = new Token<IStatusBar>('jupyterlab-statusbar:statusbar');
+// Export default status bar items
+import { helloStatusItem } from './defaults';
 
 /**
  * Initialization data for the statusbar extension.
  */
-const statusbar: JupyterLabPlugin<IStatusBar> = {
-  id: 'jupyterlab-statusbar',
-  autoStart: true,
-  requires: [],
+const statusBar: JupyterLabPlugin<IStatusBar> = {
+  id: 'jupyterlab-statusbar/statusbar',
   provides: IStatusBar,
+  autoStart: true,
   activate: (app: JupyterLab) => {
     return new StatusBar({ host: app.shell });
   }
 };
 
-export default statusbar;
+const plugins: JupyterLabPlugin<any>[] = [
+  statusBar, helloStatusItem
+];
+
+export default plugins;
+
+export * from './statusBar';
+export * from './defaults';

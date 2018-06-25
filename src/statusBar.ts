@@ -3,12 +3,37 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  IStatusBar
-} from './index';
+  Token
+} from '@phosphor/coreutils';
 
 import {
   ApplicationShell
 } from '@jupyterlab/application';
+
+export
+// tslint:disable-next-line:variable-name
+const IStatusBar = new Token<IStatusBar>('jupyterlab-statusbar/IStatusBar');
+
+export
+interface IStatusBar {
+  listItems(): string[];
+  hasItem(id: string): boolean;
+
+  registerStatusItem(id: string, widget: Widget, opts: IStatusBar.IStatusItemOptions): void;
+}
+
+export
+namespace IStatusBar {
+
+  export
+  type Alignment = 'right' | 'left';
+
+  export
+  interface IStatusItemOptions {
+    align?: IStatusBar.Alignment;
+    priority?: number;
+  }
+}
 
 const STATUS_BAR_CLASS = 'jp-status-bar';
 
@@ -70,7 +95,7 @@ class StatusBar extends BoxPanel implements IStatusBar {
    *
    * @returns A new array of the status bar item ids.
    */
-  listStatusItems(): string[] {
+  listItems(): string[] {
     return Object.keys(this._statusItems);
   }
 
@@ -81,7 +106,7 @@ class StatusBar extends BoxPanel implements IStatusBar {
    *
    * @returns `true` if the status item is in the status bar, `false` otherwise.
    */
-  hasStatusItem(id: string): boolean {
+  hasItem(id: string): boolean {
     return id in this._statusItems;
   }
 
