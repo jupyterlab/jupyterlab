@@ -42,6 +42,21 @@ interface ShortcutListProps {
    source: string;
  }
 
+ interface ShortcutMenuProps {
+   categoryList: Array<string>;
+ }
+
+ interface ShortcutMenuItemProps {
+   category: string;
+ }
+
+ interface UserInterfaceProps {
+  commandList: string[];
+  settingRegistry: ISettingRegistry;
+  shortcutPlugin: string;
+  categoryList: Array<string>;
+ }
+
 class ShortcutListItem extends React.Component<ShortcutListItemProps, ShortcutListItemState> {
   constructor(props) {
     super(props);
@@ -172,12 +187,75 @@ class ShortcutList extends React.Component<ShortcutListProps, {}> {
       );
     return (
       <div className="jp-shortcutlist">
-        <button className="jp-button" onClick={this.resetKeybindings}>Reset All</button>
-        <div className="jp-shortcutlistcontainer">
-          {commandItems}
-         </div>
+        <div className="jp-shortcuttopnav">
+          <a className="jp-link" onClick={this.resetKeybindings}>Reset All</a>
+          <div className = 'jp-searchcontainer'>
+            <input className="jp-search"></input>
+          </div>
+          <a className="jp-link">Advanced Editor</a>
+        </div>
+        <div className="jp-shortcutlistheader">
+          <div className="jp-col1">Command</div>
+          <div className="jp-col2">Shortcut</div>
+          <div className='jp-col3'>Source</div>
+        </div>
+        <div className="jp-shortcutlistmain">
+          <div className="jp-shortcutlistcontainer">
+            {commandItems}
+          </div>
+        </div>
       </div>
     );
+  }
+}
+
+class ShortcutMenuItem extends React.Component<ShortcutMenuItemProps, {}> {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    return (
+      <div className="jp-shortcutmenuitem">
+        <a href="#" className="jp-shortcutmenulabel">{this.props.category}</a>
+      </div>
+    )
+  }
+}
+
+class ShortcutMenu extends React.Component<ShortcutMenuProps, {}> {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    let categoryItems: Array<JSX.Element> = new Array<JSX.Element>();
+    this.props.categoryList.forEach(cat =>
+      categoryItems.push(<ShortcutMenuItem category = {cat} key = {cat}/>)
+    )
+    return (
+      <div className="jp-shortcutmenu">
+        <div className="jp-shortcutmenucontainer">
+          {categoryItems}
+        </div>
+      </div>
+    )
+  }
+}
+
+class ShortcutUI extends React.Component<UserInterfaceProps, {}> {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    return (
+      <div className = "jp-shortcutui">
+        <div className = 'jp-topwhitespace'></div>
+        <ShortcutMenu categoryList = {this.props.categoryList} />
+        <ShortcutList commandList = {this.props.commandList} settingRegistry = {this.props.settingRegistry} shortcutPlugin = {this.props.shortcutPlugin}/>
+      </div>
+    )
   }
 }
 
@@ -185,8 +263,13 @@ const plugin: JupyterLabPlugin<void> = {
   id: '@jupyterlab/jupyterlab-shortcutui:plugin',
   requires: [ISettingRegistry, ICommandPalette],
   activate: (app: JupyterLab, settingRegistry: ISettingRegistry, palette: ICommandPalette): void => {
-    let shortcutList = React.createElement(ShortcutList, {commandList: app.commands.listCommands(), settingRegistry: settingRegistry, shortcutPlugin: '@jupyterlab/shortcuts-extension:plugin'});
-    let widget: ReactElementWidget = new ReactElementWidget(shortcutList);
+    let categories = ['abcde','bcdef','cdefg','defgh','efghi'];
+
+    let shortcutUI = React.createElement(ShortcutUI, {commandList: app.commands.listCommands(), settingRegistry: settingRegistry, 
+        shortcutPlugin: '@jupyterlab/shortcuts-extension:plugin', categoryList: categories})
+
+    let widget: ReactElementWidget = new ReactElementWidget(shortcutUI);
+
     widget.id = 'jupyterlab-shortcutui';
     widget.title.label = 'Keyboard Shortcut Settings';
     widget.title.closable = true;
