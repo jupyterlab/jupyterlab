@@ -1,5 +1,5 @@
 import {
-  Widget, BoxPanel, BoxLayout
+  Widget, PanelLayout, Panel
 } from '@phosphor/widgets';
 
 import {
@@ -9,6 +9,10 @@ import {
 import {
   ApplicationShell
 } from '@jupyterlab/application';
+
+// import {
+//   IIterable, IIterator, iter
+// } from '@phosphor/algorithm';
 
 export
 // tslint:disable-next-line:variable-name
@@ -35,35 +39,43 @@ namespace IStatusBar {
   }
 }
 
+const STATUS_BAR_ID = 'jq-main-status-bar';
+
 const STATUS_BAR_CLASS = 'jp-status-bar';
 
+const STATUS_BAR_SIDE_CLASS = 'jq-status-bar-side';
+const STATUS_BAR_LEFT_SIDE_CLASS = 'jq-status-bar-left';
+const STATUS_BAR_RIGHT_SIDE_CLASS = 'jq-status-bar-right';
+
+const STATUS_BAR_ITEM_CLASS = 'jq-status-bar-item';
+
 export
-class StatusBar extends BoxPanel implements IStatusBar {
+class StatusBar extends Widget implements IStatusBar {
   constructor(options: StatusBar.IOptions) {
     super();
+
     this._host = options.host;
 
-    this.id = STATUS_BAR_CLASS;
+    this.id = STATUS_BAR_ID;
+    this.addClass(STATUS_BAR_CLASS);
 
+    this.layout = new PanelLayout();
+    this._leftSide = new Panel();
+    this._rightSide = new Panel();
 
-    let leftPanel = this._leftPanel = new BoxPanel();
-    let rightPanel = this._rightPanel = new BoxPanel();
-    let rootLayout = new BoxLayout();
+    this._leftSide.addClass(STATUS_BAR_LEFT_SIDE_CLASS);
+    this._leftSide.addClass(STATUS_BAR_SIDE_CLASS);
+    this._rightSide.addClass(STATUS_BAR_RIGHT_SIDE_CLASS);
+    this._rightSide.addClass(STATUS_BAR_SIDE_CLASS);
 
-    rootLayout.direction = 'left-to-right';
-    rootLayout.addWidget(leftPanel);
-    // possible split panel here?
-    rootLayout.addWidget(rightPanel);
+    // this._leftSide.direction = 'left-to-right';
+    // this._rightSide.direction = 'right-to-left';
 
-    leftPanel.direction = 'left-to-right';
-    rightPanel.direction = 'right-to-left';
-
-    this.layout = rootLayout;
+    (this.layout as PanelLayout).addWidget(this._leftSide);
+    (this.layout as PanelLayout).addWidget(this._rightSide);
 
     this._host.addToTopArea(this);
   }
-
-
 
   registerStatusItem(id: string, widget: Widget, opts: IStatusBar.IStatusItemOptions) {
     if (id in this._statusItems) {
@@ -71,15 +83,7 @@ class StatusBar extends BoxPanel implements IStatusBar {
     }
 
     let align = opts.align ? opts.align : 'left';
-    let priority = opts.priority === undefined ? opts.priority : 0;
-
-    if (align === 'left') {
-      this._leftPanel.insertWidget(priority, widget);
-    }
-    if (align === 'right') {
-      this._rightPanel.this.insertWidget(priority, widget);
-    }
-
+    let priority = (opts.priority !== undefined) ? opts.priority : 0;
 
     let wrapper = {
       widget,
@@ -87,7 +91,15 @@ class StatusBar extends BoxPanel implements IStatusBar {
       priority
     };
 
+    widget.addClass(STATUS_BAR_ITEM_CLASS);
+
     this._statusItems[id] = wrapper;
+
+    if (align === 'left') {
+      this._leftSide.insertWidget(priority, widget);
+    } else {
+      this._rightSide.insertWidget(priority, widget);
+    }
   }
 
   /**
@@ -119,22 +131,9 @@ class StatusBar extends BoxPanel implements IStatusBar {
 
   private _statusItems: { [id: string]: StatusBar.IItem } = Object.create(null);
   private _host: ApplicationShell = null;
-  private _leftPanel: BoxPanel;
-  private _rightPanel: BoxPanel;
-}
 
-export
-class StatusBarSide {
-  constructor(alignment: IStatusBar.Alignment) {
-   this._layout = new BoxLayout();
-    if(alignment === 'left') {
-      this._layout.direction = 'left-to-right';
-    }
-    else {
-      this._layout.direction = 'right-to-left';
-    }
-  }
-  private _layout: BoxLayout;
+  private _leftSide: Panel;
+  private _rightSide: Panel;
 }
 
 export
