@@ -15,7 +15,7 @@ import {
   expectFailure, isFulfilled, testEmission, testResolveOrder
 } from './utils';
 
-describe.only('test/utils', () => {
+describe('test/utils', () => {
 
   context('testResolveOrder', () => {
 
@@ -118,6 +118,59 @@ describe.only('test/utils', () => {
       expect(await isFulfilled(p.promise)).to.be(true);
     });
 
+  });
+
+  context('Patterns', () => {
+
+    it('should be straightforward to test the order of signal emissions', async () => {
+      let owner = {};
+      let x = new Signal<{}, number>(owner);
+      let emission1 = testEmission(x, {
+        find: (a, b) => b === 1,
+        value: 1
+      });
+      let emission2 = testEmission(x, {
+        find: (a, b) => b === 2,
+        value: 2
+      });
+      let emission3 = testEmission(x, {
+        find: (a, b) => b === 3,
+        value: 3
+      });
+      const order = testResolveOrder([emission3, emission2, emission1], [3, 2, 1]);
+      // We await the emits to give the emission promises a chance to resolve
+      // before the next emission.
+      await x.emit(0);
+      await x.emit(3);
+      await x.emit(2);
+      await x.emit(1);
+      await order;
+    });
+
+    it('should be straightfoward to fail if the order of signal emissions is not as expected', async () => {
+      let owner = {};
+      let x = new Signal<{}, number>(owner);
+      let emission1 = testEmission(x, {
+        find: (a, b) => b === 1,
+        value: 1
+      });
+      let emission2 = testEmission(x, {
+        find: (a, b) => b === 2,
+        value: 2
+      });
+      let emission3 = testEmission(x, {
+        find: (a, b) => b === 3,
+        value: 3
+      });
+      const order = testResolveOrder([emission3, emission1, emission2], [3, 1, 2]);
+      // We await the emits to give the emission promises a chance to resolve
+      // before the next emission.
+      await x.emit(0);
+      await x.emit(3);
+      await x.emit(2);
+      await x.emit(1);
+      expectFailure(order, null, 'expected 2 to equal 1');
+    });
   });
 
 });
