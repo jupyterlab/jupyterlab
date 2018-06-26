@@ -339,19 +339,86 @@ class KernelTester extends SocketTester {
   }
 
   /**
+   * The parent header sent on messages.
+   *
+   * #### Notes:
+   * Set to `undefined` to send no parent header.
+   */
+  parentHeader: KernelMessage.IHeader | undefined;
+
+  /**
    * Send the status from the server to the client.
    */
-  sendStatus(status: string, parentHeader?: KernelMessage.IHeader) {
-    let options: KernelMessage.IOptions = {
-      msgType: 'status',
-      channel: 'iopub',
-      session: this.serverSessionId
-    };
-    let msg = KernelMessage.createMessage(options, { execution_state: status } );
-    if (parentHeader) {
-      msg.parent_header = parentHeader;
-    }
+  sendStatus(msgId: string, status: Kernel.Status) {
+    return this.sendMessage({msgId, msgType: 'status', channel: 'iopub'}, {execution_state: status});
+  }
+
+  /**
+   * Send an iopub stream message.
+   */
+  sendStream(msgId: string, content: KernelMessage.IStreamMsg['content']) {
+    return this.sendMessage({msgId, msgType: 'stream', channel: 'iopub'}, content);
+  }
+
+  /**
+   * Send an iopub display message.
+   */
+  sendDisplayData(msgId: string, content: KernelMessage.IDisplayDataMsg['content']) {
+    return this.sendMessage({msgId, msgType: 'display_data', channel: 'iopub'}, content);
+  }
+
+  /**
+   * Send an iopub display message.
+   */
+  sendUpdateDisplayData(msgId: string, content: KernelMessage.IUpdateDisplayDataMsg['content']) {
+    return this.sendMessage({msgId, msgType: 'update_display_data', channel: 'iopub'}, content);
+  }
+  /**
+   * Send an iopub comm open message.
+   */
+  sendCommOpen(msgId: string, content: KernelMessage.ICommOpenMsg['content']) {
+    return this.sendMessage({msgId, msgType: 'comm_open', channel: 'iopub'}, content);
+  }
+
+  /**
+   * Send an iopub comm close message.
+   */
+  sendCommClose(msgId: string, content: KernelMessage.ICommCloseMsg['content']) {
+    return this.sendMessage({msgId, msgType: 'comm_close', channel: 'iopub'}, content);
+  }
+
+  /**
+   * Send an iopub comm message.
+   */
+  sendCommMsg(msgId: string, content: KernelMessage.ICommMsgMsg['content']) {
+    return this.sendMessage({msgId, msgType: 'comm_msg', channel: 'iopub'}, content);
+  }
+
+  sendExecuteResult(msgId: string, content: KernelMessage.IExecuteResultMsg['content']) {
+    return this.sendMessage({msgId, msgType: 'execute_result', channel: 'iopub'}, content);
+  }
+
+  sendExecuteReply(msgId: string, content: KernelMessage.IExecuteReply['content']) {
+    return this.sendMessage({msgId, msgType: 'execute_reply', channel: 'shell'}, content);
+  }
+
+  sendKernelInfoReply(msgId: string, content: KernelMessage.IInfoReplyMsg['content']) {
+    return this.sendMessage({msgId, msgType: 'kernel_info_reply', channel: 'shell'}, content);
+  }
+
+  sendInputRequest(msgId: string, content: KernelMessage.IInputRequestMsg['content']) {
+    return this.sendMessage({msgId, msgType: 'input_request', channel: 'stdin'}, content);
+  }
+
+  /**
+   * Send a kernel message with sensible defaults.
+   */
+  sendMessage(options: MakeOptional<KernelMessage.IOptions, 'session'>, content: any) {
+    options.session = this.serverSessionId;
+    let msg = KernelMessage.createMessage(options as KernelMessage.IOptions, content);
+    msg.parent_header = this.parentHeader;
     this.send(msg);
+    return msg.header.msg_id;
   }
 
   /**
@@ -420,20 +487,15 @@ class KernelTester extends SocketTester {
       // log(`SERVER RECEIVED MESSAGE:    K${this._kernel.id.slice(0, 6)} M${data.header.msg_id.slice(0, 6)} ${data.header.msg_type}`);
       if (data.header.msg_type === 'kernel_info_request') {
         // First send status busy message.
-        this.sendStatus('busy', data.header);
+        this.parentHeader = data.header;
+        this.sendStatus(uuid(), 'busy');
 
         // Then send the kernel_info_reply message.
-        let options: KernelMessage.IOptions = {
-          msgType: 'kernel_info_reply',
-          channel: 'shell',
-          session: this.serverSessionId
-        };
-        let msg = KernelMessage.createMessage(options, EXAMPLE_KERNEL_INFO );
-        msg.parent_header = data.header;
-        this.send(msg);
+        this.sendKernelInfoReply(uuid(), EXAMPLE_KERNEL_INFO);
 
         // Then send status idle message.
-        this.sendStatus('idle', data.header);
+        this.sendStatus(uuid(), 'idle');
+        this.parentHeader = undefined;
       } else {
         let onMessage = this._onMessage;
         if (onMessage) {
@@ -469,9 +531,6 @@ function createSessionModel(id?: string): Session.IModel {
 
 /**
  * Session test rig.
- *
- * TODO: does this need to inherit from KernelTester? Should it inherit from
- * SocketTester?
  */
 export
 class SessionTester extends SocketTester {
@@ -652,7 +711,7 @@ async function testEmission<T, U, V>(signal: ISignal<T, U>, options: {
   value?: V
 }): Promise<V> {
   const done = new PromiseDelegate<V>();
-  let object = {};
+  const object = {};
   signal.connect((sender: T, args: U) => {
     if (!options.find || options.find(sender, args)) {
       try {
@@ -723,3 +782,18 @@ function sleep<T>(milliseconds: number = 0, value?: T): Promise<T> {
     setTimeout(() => { resolve(value); }, milliseconds);
   });
 }
+
+
+/**
+ * Make a new type with the given keys declared as optional.
+ *
+ * #### Notes
+ * An example:
+ *
+ * interface A {a: number, b: string}
+ * type B = MakeOptional<A, 'a'>
+ * let x: B = {b: 'test'}
+ */
+type MakeOptional<T, K> = Pick<T, Exclude<keyof T, K>> & {
+  [P in Extract<keyof T, K>]?: T[P]
+};

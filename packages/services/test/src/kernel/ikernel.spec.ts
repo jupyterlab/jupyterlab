@@ -20,7 +20,7 @@ import {
 } from '../../../lib/kernel';
 
 import {
-  expectFailure, KernelTester, handleRequest, createMsg, sleep, testEmission
+  expectFailure, KernelTester, handleRequest, createMsg, testEmission
 } from '../utils';
 
 
@@ -154,7 +154,7 @@ describe('Kernel.IKernel', () => {
       });
 
       // Send an iopub message.
-      tester.sendStatus('idle');
+      tester.sendStatus(uuid(), 'idle');
 
       // Send a shell message.
       let msg = KernelMessage.createShellMessage({
@@ -248,12 +248,7 @@ describe('Kernel.IKernel', () => {
           expect(args.direction).to.be('recv');
         }
       });
-      tester.sendStatus('idle', {
-        msg_id: msgId,
-        session: kernel.clientId,
-        username: '',
-        version: '',
-        msg_type: ''});
+      tester.sendStatus(uuid(), 'idle');
       await emission;
     });
 
@@ -332,7 +327,7 @@ describe('Kernel.IKernel', () => {
 
     // TODO: seems to be sporadically timing out if we await the restart. See
     // https://github.com/jupyter/notebook/issues/3705.
-    it.only('should get a restarting status', async () => {
+    it('should get a restarting status', async () => {
       const emission = testEmission(defaultKernel.statusChanged, {
         find: () => defaultKernel.status === 'restarting'
       });
@@ -368,7 +363,7 @@ describe('Kernel.IKernel', () => {
       const dead = testEmission(kernel.statusChanged, {
         find: () => kernel.status === 'dead'
       });
-      tester.sendStatus('dead');
+      tester.sendStatus(uuid(), 'dead');
       await dead;
       tester.dispose();
     });
@@ -385,10 +380,10 @@ describe('Kernel.IKernel', () => {
       });
 
       // This invalid status is not emitted.
-      tester.sendStatus('invalid-status');
+      tester.sendStatus(uuid(), 'invalid-status' as Kernel.Status);
 
       // This valid status is emitted.
-      tester.sendStatus('busy');
+      tester.sendStatus(uuid(), 'busy');
 
       await emission;
       tester.dispose();
@@ -549,7 +544,7 @@ describe('Kernel.IKernel', () => {
       const dead = testEmission(kernel.statusChanged, {
         find: () => kernel.status === 'dead'
       });
-      tester.sendStatus('dead');
+      tester.sendStatus(uuid(), 'dead');
       await dead;
 
       let options: KernelMessage.IOptions = {
@@ -631,7 +626,7 @@ describe('Kernel.IKernel', () => {
       const dead = testEmission(kernel.statusChanged, {
         find: () => kernel.status === 'dead'
       });
-      tester.sendStatus('dead');
+      tester.sendStatus(uuid(), 'dead');
       await dead;
       await expectFailure(kernel.interrupt(), null, 'Kernel is dead');
       tester.dispose();
@@ -742,7 +737,7 @@ describe('Kernel.IKernel', () => {
       const dead = testEmission(kernel.statusChanged, {
         find: () => kernel.status === 'dead'
       });
-      tester.sendStatus('dead');
+      tester.sendStatus(uuid(), 'dead');
       await dead;
       await expectFailure(kernel.shutdown(), null, 'Kernel is dead');
       tester.dispose();
@@ -791,7 +786,7 @@ describe('Kernel.IKernel', () => {
       const dead = testEmission(kernel.statusChanged, {
         find: () => kernel.status === 'dead'
       });
-      tester.sendStatus('dead');
+      tester.sendStatus(uuid(), 'dead');
       await dead;
       expectFailure(kernel.requestComplete(options), null, 'Kernel is dead');
       tester.dispose();
@@ -864,14 +859,13 @@ describe('Kernel.IKernel', () => {
       const dead = testEmission(kernel.statusChanged, {
         find: () => kernel.status === 'dead'
       });
-      tester.sendStatus('dead');
+      tester.sendStatus(uuid(), 'dead');
       await dead;
       expect(() => { kernel.sendInputReply({ value: 'test' }); }).to.throwException(/Kernel is dead/);
       tester.dispose();
     });
   });
 
-  // TODO: here
   context('#requestExecute()', () => {
 
     it('should send and handle incoming messages', async () => {
@@ -1197,4 +1191,164 @@ describe('Kernel.IKernel', () => {
 
   });
 
+  context('handles messages asynchronously', () => {
+
+    // TODO: Also check that messages are canceled appropriately. In particular, when
+    // a kernel is restarted, then a message is sent for a comm open from the
+    // old session, the comm open should be canceled.
+
+    it('should run handlers in order', async () => {
+      let options: KernelMessage.IExecuteRequest = {
+        code: 'test',
+        silent: false,
+        store_history: true,
+        user_expressions: {},
+        allow_stdin: true,
+        stop_on_error: false
+      };
+
+      const tester = new KernelTester();
+      const kernel = await tester.start();
+      const future = kernel.requestExecute(options, false);
+
+      // The list of emissions from the anyMessage signal.
+      const msgSignal: string[][] = [];
+      const msgSignalExpected: string[][] = [];
+
+      // The list of message processing calls
+      const calls: string[][] = [];
+      const callsExpected: string[][] = [];
+
+      function pushIopub(msgId: string) {
+        callsExpected.push([msgId, 'future hook a']);
+        callsExpected.push([msgId, 'future hook b']);
+        callsExpected.push([msgId, 'kernel hook a']);
+        callsExpected.push([msgId, 'kernel hook b']);
+        callsExpected.push([msgId, 'iopub']);
+        msgSignalExpected.push([msgId, 'iopub']);
+      }
+
+      function pushCommOpen(msgId: string) {
+        pushIopub(msgId);
+        callsExpected.push([msgId, 'comm open']);
+      }
+
+      function pushCommMsg(msgId: string) {
+        pushIopub(msgId);
+        callsExpected.push([msgId, 'comm msg']);
+      }
+
+      function pushCommClose(msgId: string) {
+        pushIopub(msgId);
+        callsExpected.push([msgId, 'comm close']);
+      }
+
+      function pushStdin(msgId: string) {
+        callsExpected.push([msgId, 'stdin']);
+        msgSignalExpected.push([msgId, 'stdin']);
+      }
+
+      function pushReply(msgId: string) {
+        callsExpected.push([msgId, 'reply']);
+        msgSignalExpected.push([msgId, 'shell']);
+      }
+
+      let anyMessageDone = new PromiseDelegate();
+      let handlingBlock = new PromiseDelegate();
+
+      tester.onMessage((message) => {
+        tester.onMessage(() => { return; });
+        tester.parentHeader = message.header;
+
+        pushIopub(tester.sendStatus('busy', 'busy'));
+        pushIopub(tester.sendStream('stdout', { 'name': 'stdout', 'text': 'foo' }));
+        pushCommOpen(tester.sendCommOpen('comm open', {target_name: 'commtarget', comm_id: 'commid', data: {}}));
+        pushIopub(tester.sendDisplayData('display 1', {data: {}, metadata: {}}));
+        pushCommMsg(tester.sendCommMsg('comm 1', {comm_id: 'commid', data: {}}));
+        pushCommMsg(tester.sendCommMsg('comm 2', {comm_id: 'commid', data: {}}));
+        pushCommClose(tester.sendCommClose('comm close', {comm_id: 'commid', data: {}}));
+        pushStdin(tester.sendInputRequest('stdin', {prompt: '', password: false}));
+        pushIopub(tester.sendDisplayData('display 2', {data: {}, metadata: {}, transient: {display_id: 'displayid'} }));
+        pushIopub(tester.sendUpdateDisplayData('update display', {data: {}, metadata: {}, transient: {display_id: 'displayid'}}));
+        pushIopub(tester.sendExecuteResult('execute result', {execution_count: 1, data: {}, metadata: {}}));
+        pushIopub(tester.sendStatus('idle', 'idle'));
+        pushReply(tester.sendExecuteReply('execute reply', {}));
+
+        tester.parentHeader = undefined;
+      });
+
+      kernel.anyMessage.connect((k, args) => {
+        msgSignal.push([args.msg.header.msg_id, args.msg.channel]);
+        if (args.msg.header.msg_id === 'execute reply') {
+          anyMessageDone.resolve(undefined);
+        }
+      });
+
+      kernel.registerMessageHook(future.msg.header.msg_id, async (msg) => {
+        // Make this hook call asynchronous
+        await calls.push([msg.header.msg_id, 'kernel hook b']);
+        return true;
+      });
+
+      kernel.registerMessageHook(future.msg.header.msg_id, async (msg) => {
+        calls.push([msg.header.msg_id, 'kernel hook a']);
+        return true;
+      });
+
+      kernel.registerCommTarget('commtarget', async (comm, msg) => {
+        await calls.push([msg.header.msg_id, 'comm open']);
+
+        comm.onMsg = async (msg) => {
+          await calls.push([msg.header.msg_id, 'comm msg']);
+        };
+        comm.onClose = async (msg) => {
+          await calls.push([msg.header.msg_id, 'comm close']);
+        };
+      });
+
+      future.registerMessageHook(async (msg) => {
+        await calls.push([msg.header.msg_id, 'future hook b']);
+        return true;
+      });
+
+      future.registerMessageHook(async (msg) => {
+        // Delay processing until after we've checked the anyMessage results.
+        await handlingBlock.promise;
+        await calls.push([msg.header.msg_id, 'future hook a']);
+        return true;
+      });
+
+      future.onIOPub = async (msg) => {
+        await calls.push([msg.header.msg_id, 'iopub']);
+      };
+
+      future.onStdin = async (msg) => {
+        await calls.push([msg.header.msg_id, 'stdin']);
+      };
+
+      future.onReply = async (msg) => {
+        await calls.push([msg.header.msg_id, 'reply']);
+      };
+
+      // Give the kernel time to receive and queue up the messages.
+      await anyMessageDone.promise;
+
+      // At this point, the synchronous anyMessage signal should have been
+      // emitted for every message, but no actual message handling should have
+      // happened.
+      expect(msgSignal).to.eql(msgSignalExpected);
+      expect(calls).to.eql([]);
+
+      // Release the lock on message processing.
+      handlingBlock.resolve(undefined);
+      await future.done;
+      expect(calls).to.eql(callsExpected);
+
+      await tester.shutdown();
+      tester.dispose();
+    });
+
+
+
+  });
 });
