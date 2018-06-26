@@ -180,3 +180,16 @@ menu:
     <div class="jp-youtube-video">
        <iframe src="https://www.youtube-nocookie.com/embed/COheO7sA4-U?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
     </div>
+
+.. _urls:
+
+URLs
+~~~~
+
+.. _url-tree:
+
+Like the classic notebook, JupyterLab provides a way for users to copy URLs that
+open a specific notebook or file. Additionally, JupyterLab URLs are an advanced
+part of the user interface that allows for managing workspaces. These two
+functions -- file paths and workspaces -- can be combined in URLs that open a
+specific file in a specific workspace.
