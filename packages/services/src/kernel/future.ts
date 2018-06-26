@@ -10,7 +10,7 @@ import {
 } from '@phosphor/disposable';
 
 import {
-  Kernel, log
+  Kernel
 } from './kernel';
 
 import {
@@ -176,7 +176,9 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
       if (!this._testFlag(Private.KernelFutureFlag.GotReply)) {
         status.push('reply');
       }
-      console.warn(`*************** DISPOSED BEFORE DONE: K${this._kernel.id.slice(0, 6)} M${this._msg.header.msg_id.slice(0, 6)} missing ${status.join(' ')}`);
+
+      // TODO: Check tests for any kernels that are disposed before done
+      // console.warn(`*************** DISPOSED BEFORE DONE: K${this._kernel.id.slice(0, 6)} M${this._msg.header.msg_id.slice(0, 6)} missing ${status.join(' ')}`);
     }
     super.dispose();
   }
@@ -229,7 +231,6 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
   }
 
   private _handleDone(): void {
-    log(`JS KERNEL: K${this._kernel.id.slice(0, 6)} M${this.msg.header.msg_id.slice(0, 6)} future done`);
     if (this._testFlag(Private.KernelFutureFlag.IsDone)) {
       return;
     }

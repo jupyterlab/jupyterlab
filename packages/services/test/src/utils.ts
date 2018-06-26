@@ -27,7 +27,7 @@ import {
 } from '../../lib';
 
 import {
-  Kernel, KernelMessage, log
+  Kernel, KernelMessage
 } from '../../lib/kernel';
 
 import {
@@ -484,7 +484,6 @@ class KernelTester extends SocketTester {
         msg = new Uint8Array(msg).buffer;
       }
       let data = deserialize(msg);
-      // log(`SERVER RECEIVED MESSAGE:    K${this._kernel.id.slice(0, 6)} M${data.header.msg_id.slice(0, 6)} ${data.header.msg_type}`);
       if (data.header.msg_type === 'kernel_info_request') {
         // First send status busy message.
         this.parentHeader = data.header;
@@ -617,7 +616,6 @@ class SessionTester extends SocketTester {
         msg = new Uint8Array(msg).buffer;
       }
       let data = deserialize(msg);
-      // log(`SERVER RECEIVED MESSAGE:    K${this._session.kernel.id.slice(0, 6)} M${data.header.msg_id.slice(0, 6)} ${data.header.msg_type}`);
       if (data.header.msg_type === 'kernel_info_request') {
         // First send status busy message.
         this.sendStatus('busy', data.header);
