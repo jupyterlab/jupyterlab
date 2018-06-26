@@ -687,7 +687,8 @@ class TerminalTester extends SocketTester {
  * @param find - An optional function to determine which emission to test,
  * defaulting to the first emission.
  * @param test - An optional function which contains the tests for the emission.
- * @param value - An optional value that the promise resolves to if it is successful.
+ * @param value - An optional value that the promise resolves to if it is
+ * successful.
  *
  * @returns a promise that rejects if the function throws an error (e.g., if an
  * expect test doesn't pass), and resolves otherwise.
@@ -698,9 +699,12 @@ class TerminalTester extends SocketTester {
  * emission will be tested.
  *
  * You can test to see if any signal comes which matches a criteria by just
- * giving a find function. You can test the very first signal by just
- * giving a test function. And you can test the first signal matching the
- * find criteria by giving both.
+ * giving a find function. You can test the very first signal by just giving a
+ * test function. And you can test the first signal matching the find criteria
+ * by giving both.
+ *
+ * The reason this function is asynchronous is so that the thing causing the
+ * signal emission (such as a websocket message) can be asynchronous.
  */
 export
 async function testEmission<T, U, V>(signal: ISignal<T, U>, options: {
@@ -719,7 +723,6 @@ async function testEmission<T, U, V>(signal: ISignal<T, U>, options: {
         }
       } catch (e) {
         done.reject(e);
-        // throw e;
       }
       done.resolve(options.value || undefined);
     }

@@ -169,7 +169,7 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
       this._done.promise.catch(() => { /* no-op */ });
 
 
-      // TODO: Check tests for any kernels that are disposed before done
+      // TODO: Uncomment the following logging code, and check for any tests that trigger it.
       // let status = [];
       // if (!this._testFlag(Private.KernelFutureFlag.GotIdle)) {
       //   status.push('idle');

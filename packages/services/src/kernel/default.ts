@@ -1119,7 +1119,7 @@ class DefaultKernel implements Kernel.IKernel {
   private _displayIdToParentIds = new Map<string, string[]>();
   private _msgIdToDisplayIds = new Map<string, string[]>();
   private _terminated = new Signal<this, void>(this);
-  private _msgChain = Promise.resolve();
+  private _msgChain: Promise<void> | null = Promise.resolve();
   private _noOp = () => { /* no-op */};
 }
 
@@ -1428,7 +1428,7 @@ namespace Private {
     // We might want to move the handleRestart to after we get the response back
 
     // Handle the restart on all of the kernels with the same id.
-    each(runningKernels.slice(), k => {
+    each(runningKernels, k => {
       if (k.id === kernel.id) {
         k.handleRestart();
       }
@@ -1440,7 +1440,7 @@ namespace Private {
     let data = await response.json();
     validate.validateModel(data);
     // Reconnect the other kernels asynchronously, but don't wait for them.
-    each(runningKernels.slice(), k => {
+    each(runningKernels, k => {
       if (k !== kernel && k.id === kernel.id) {
         k.reconnect();
       }
