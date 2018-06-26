@@ -165,12 +165,12 @@ describe('Kernel.IKernel', () => {
       const kernel = await tester.start();
 
       // We'll send two messages, first a message with a different session, then
-      // one with the current session. The unhandledMessage signal should only
-      // emit once for the current session message.
-      const msgId = uuid();
+      // one with the current client session. The unhandledMessage signal should
+      // only emit once for the current session message.
+      const msgId = 'message from right session';
       const emission = testEmission(kernel.unhandledMessage, {
         test: (k, msg) => {
-          expect(msg.header.session).to.be(kernel.clientId);
+          expect((msg.parent_header as KernelMessage.IHeader).session).to.be(kernel.clientId);
           expect(msg.header.msg_id).to.be(msgId);
         }
       });
@@ -180,6 +180,7 @@ describe('Kernel.IKernel', () => {
         msgType: 'foo',
         channel: 'shell',
         session: tester.serverSessionId,
+        msgId: 'message from wrong session'
       });
       msg1.parent_header = {session: 'wrong session'};
       tester.send(msg1);
