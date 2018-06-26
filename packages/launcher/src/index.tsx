@@ -285,10 +285,12 @@ namespace ILauncher {
      * The command ID for the launcher item.
      *
      * #### Notes
-     * The command's `execute` method should return
-     * the widget that was created so that the launcher
-     * can replace itself with the widget in the correct
-     * location.
+     * If the command's `execute` method returns a `Widget` or
+     * a promise that resolves with a `Widget`, then that widget will
+     * replace the launcher in the same location of the application
+     * shell. If the `execute` method does something else
+     * (i.e., create a modal dialog), then the launcher will not be
+     * disposed.
      */
     command: string;
 
@@ -369,11 +371,11 @@ function Card(kernel: boolean, item: ILauncher.IItemOptions, launcher: Launcher,
       cwd: launcher.cwd
     });
     Promise.resolve(value).then(widget => {
-      if (!widget) {
-        throw new Error('Launcher commands must resolve with a widget');
+      launcher.pending = false;
+      if (widget instanceof Widget) {
+        launcherCallback(widget);
+        launcher.dispose();
       }
-      launcherCallback(widget);
-      launcher.dispose();
     }).catch(err => {
       launcher.pending = false;
       showErrorMessage('Launcher Error', err);
