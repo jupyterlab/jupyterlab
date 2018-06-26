@@ -366,14 +366,13 @@ function Card(kernel: boolean, item: ILauncher.IItemOptions, launcher: Launcher,
       return;
     }
     launcher.pending = true;
-    let value = commands.execute(command, {
+    commands.execute(command, {
       ...item.args,
       cwd: launcher.cwd
-    });
-    Promise.resolve(value).then(widget => {
+    }).then(value => {
       launcher.pending = false;
-      if (widget instanceof Widget) {
-        launcherCallback(widget);
+      if (value instanceof Widget) {
+        launcherCallback(value);
         launcher.dispose();
       }
     }).catch(err => {
