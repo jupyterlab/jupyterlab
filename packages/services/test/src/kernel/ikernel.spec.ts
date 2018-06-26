@@ -232,15 +232,15 @@ describe('Kernel.IKernel', () => {
 
     it('should be emitted for an iopub message', async () => {
       const kernel = await tester.start();
-      const msgId = uuid();
+      const msgId = 'idle status';
 
       const emission = testEmission(kernel.anyMessage, {
         test: (k, args) => {
-          expect((args.msg.parent_header as any).msg_id).to.be(msgId);
+          expect((args.msg.header as any).msg_id).to.be(msgId);
           expect(args.direction).to.be('recv');
         }
       });
-      tester.sendStatus(uuid(), 'idle');
+      tester.sendStatus(msgId, 'idle');
       await emission;
     });
 
