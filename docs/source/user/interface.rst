@@ -183,8 +183,8 @@ menu:
 
 .. _urls:
 
-URLs
-~~~~
+URLs (``/tree``, ``/workspaces``, etc.)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. _url-tree:
 
@@ -192,4 +192,35 @@ Like the classic notebook, JupyterLab provides a way for users to copy URLs that
 open a specific notebook or file. Additionally, JupyterLab URLs are an advanced
 part of the user interface that allows for managing workspaces. These two
 functions -- file paths and workspaces -- can be combined in URLs that open a
-specific file in a specific workspace.
+specific file in a specific workspace. JupyterLab's file navigation URLS adopts
+the nomenclature of the classic notebook; these URLs are ``/tree/`` URLs:
+
+.. code-block:: none
+
+  http(s)://<server:port>/<lab-location>/lab/tree/path/to/notebook.ipynb
+
+
+.. _url-workspaces:
+
+JupyterLab sessions always reside in a *workspace*. Workspaces contain the state
+of JupyterLab: the files that are currently open, the layout of the application
+areas and tabs, etc. When the page is refreshed, the workspace is restored.
+
+The *default workspace* is not named, it is simply the main ``/lab`` URL:
+
+.. code-block:: none
+
+  http(s)://<server:port>/<lab-location>/lab
+
+All other workspaces are named in the URL:
+
+.. code-block:: none
+
+  http(s)://<server:port>/<lab-location>/lab/workspaces/foo
+  http(s)://<server:port>/<lab-location>/lab/workspaces/bar
+  http(s)://<server:port>/<lab-location>/lab/workspaces/baz
+
+Unlike the default (``/lab``) workspace, which only saves its state on the
+user's local browser, named workspaces save their state on the server, so a
+named workspace URL can be shared between multiple users (or browsers) as long
+as they have access to the same server.
