@@ -272,8 +272,8 @@ namespace Private {
    * Defer a computation.
    *
    * #### NOTES
-   * We can't just use requestAnimationFrame since it is not available in our
-   * testing setup. This implementation is from Phosphor:
+   * We can't just use requestAnimationFrame since it is not available in node.
+   * This implementation is from Phosphor:
    * https://github.com/phosphorjs/phosphor/blob/e88e4321289bb1198f3098e7bda40736501f2ed8/tests/test-messaging/src/index.spec.ts#L63
    */
   const defer = (() => {
