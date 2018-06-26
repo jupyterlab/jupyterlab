@@ -444,7 +444,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   commands.addCommand(CommandIDs.showInFileBrowser, {
-    label: () => `Show in file browser`,
+    label: () => `Show in File Browser`,
     isEnabled,
     execute: () => {
       let context = docManager.contextForWidget(app.shell.currentWidget);
