@@ -30,15 +30,11 @@ describe('Kernel.IKernel', () => {
 
   before(async () => {
     specs = await Kernel.getSpecs();
-    // defaultKernel = await Kernel.startNew();
   });
 
   beforeEach(async () => {
     defaultKernel = await Kernel.startNew();
     await defaultKernel.ready;
-
-    // await defaultKernel.restart();
-    // await defaultKernel.ready;
   });
 
   afterEach(async () => {
