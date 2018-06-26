@@ -169,15 +169,14 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
       this._done.promise.catch(() => { /* no-op */ });
 
 
-      let status = [];
-      if (!this._testFlag(Private.KernelFutureFlag.GotIdle)) {
-        status.push('idle');
-      }
-      if (!this._testFlag(Private.KernelFutureFlag.GotReply)) {
-        status.push('reply');
-      }
-
       // TODO: Check tests for any kernels that are disposed before done
+      // let status = [];
+      // if (!this._testFlag(Private.KernelFutureFlag.GotIdle)) {
+      //   status.push('idle');
+      // }
+      // if (!this._testFlag(Private.KernelFutureFlag.GotReply)) {
+      //   status.push('reply');
+      // }
       // console.warn(`*************** DISPOSED BEFORE DONE: K${this._kernel.id.slice(0, 6)} M${this._msg.header.msg_id.slice(0, 6)} missing ${status.join(' ')}`);
     }
     super.dispose();

@@ -175,7 +175,7 @@ describe('Kernel.IKernel', () => {
         }
       });
 
-      // Send a shell message with a different session.
+      // Send a shell message with the wrong client (parent) session.
       let msg1 = KernelMessage.createShellMessage({
         msgType: 'foo',
         channel: 'shell',
@@ -184,11 +184,11 @@ describe('Kernel.IKernel', () => {
       msg1.parent_header = {session: 'wrong session'};
       tester.send(msg1);
 
-      // Send a shell message.
+      // Send a shell message with the right client (parent) session.
       let msg2 = KernelMessage.createShellMessage({
         msgType: 'foo',
         channel: 'shell',
-        session: kernel.clientId,
+        session: tester.serverSessionId,
         msgId: msgId
       });
       msg2.parent_header = {session: kernel.clientId};

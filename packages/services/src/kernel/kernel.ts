@@ -705,6 +705,7 @@ namespace Kernel {
     /**
      * A promise that resolves when the future is done.
      *
+     * #### Notes
      * The future is done when there are no more responses expected from the
      * kernel.
      *
