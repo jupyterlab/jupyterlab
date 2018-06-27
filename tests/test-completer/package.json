@@ -28,8 +28,8 @@
     "simulate-event": "~1.4.0"
   },
   "devDependencies": {
-    "karma": "~1.7.1",
-    "karma-chrome-launcher": "^2.2.0",
+    "karma": "~2.0.4",
+    "karma-chrome-launcher": "~2.2.0",
     "puppeteer": "^1.5.0",
     "rimraf": "~2.6.2",
     "typescript": "~2.9.1"
