@@ -2,7 +2,7 @@
 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
-set -ev
+set -evx
 set -o pipefail
 
 # Building should work without yarn installed globally, so uninstall the
