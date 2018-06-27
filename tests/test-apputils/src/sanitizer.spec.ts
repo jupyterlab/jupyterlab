@@ -90,6 +90,17 @@ describe('defaultSanitizer', () => {
       expect(defaultSanitizer.sanitize(audio)).to.be(audio);
     });
 
+    it('should allow input tags but disable them', () => {
+      let html = defaultSanitizer.sanitize('<input type="checkbox" checked />');
+      let div = document.createElement('div');
+      let input: HTMLInputElement;
+
+      div.innerHTML = html;
+      input = div.querySelector('input');
+
+      expect(input.disabled).to.be(true);
+    });
+
   });
 
 });
