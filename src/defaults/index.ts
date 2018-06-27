@@ -19,10 +19,6 @@ class HelloStatus extends Widget {
 
         this._text = `Hello ${subject}!`;
 
-        this.onFitRequest = () => {
-            console.log(`Fitting ${subject}`);
-        };
-
         VirtualDOM.render(h.div(new VirtualText(this._text)), this.node);
     }
 
