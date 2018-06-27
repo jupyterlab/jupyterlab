@@ -70,7 +70,7 @@ function activate(app: JupyterLab, palette: ICommandPalette): ILauncher {
       const callback = (item: Widget) => {
         shell.addToMainArea(item, { ref: id });
       };
-      const launcher = new Launcher({ cwd, callback });
+      const launcher = new Launcher({ cwd, callback, commands });
 
       launcher.model = model;
       launcher.title.label = 'Launcher';
