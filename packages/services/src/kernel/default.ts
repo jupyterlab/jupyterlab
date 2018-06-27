@@ -1142,10 +1142,9 @@ namespace DefaultKernel {
    * If the kernel was already started via `startNewKernel`, we return its
    * `Kernel.IModel`.
    *
-   * Otherwise, we attempt to find to the existing
-   * kernel.
-   * The promise is fulfilled when the kernel is found,
-   * otherwise the promise is rejected.
+   * Otherwise, we attempt to find an existing kernel by connecting to the
+   * server. The promise is fulfilled when the kernel is found, otherwise the
+   * promise is rejected.
    */
   export
   function findById(id: string, settings?: ServerConnection.ISettings): Promise<Kernel.IModel> {
@@ -1269,6 +1268,8 @@ namespace Private {
 
   /**
    * Find a kernel by id.
+   *
+   * Will reach out to the server if needed to find the kernel.
    */
   export
   function findById(id: string, settings?: ServerConnection.ISettings): Promise<Kernel.IModel> {

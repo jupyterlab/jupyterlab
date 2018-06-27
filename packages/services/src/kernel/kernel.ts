@@ -39,11 +39,11 @@ namespace Kernel {
    * Interface of a Kernel connection that is managed by a session.
    *
    * #### Notes
-   * The Kernel object is tied to the lifetime of the Kernel id, which is
-   * a unique id for the Kernel session on the server.  The Kernel object
-   * manages a websocket connection internally, and will auto-restart if the
-   * websocket temporarily loses connection.  Restarting creates a new Kernel
-   * process on the server, but preserves the Kernel id.
+   * The Kernel object is tied to the lifetime of the Kernel id, which is a
+   * unique id for the Kernel session on the server.  The Kernel object manages
+   * a websocket connection internally, and will auto-restart if the websocket
+   * temporarily loses connection.  Restarting creates a new Kernel process on
+   * the server, but preserves the Kernel id.
    */
   export
   interface IKernelConnection extends IDisposable {
@@ -69,6 +69,9 @@ namespace Kernel {
 
     /**
      * The client unique id.
+     *
+     * #### Notes
+     * This should be unique for a particular kernel connection object.
      */
     readonly clientId: string;
 
@@ -86,26 +89,35 @@ namespace Kernel {
     readonly info: KernelMessage.IInfoReply | null;
 
     /**
-     * Test whether the manager is ready.
+     * Test whether the kernel is ready.
+     *
+     * #### Notes
+     * A kernel is ready when the communication channel is active and we have
+     * cached the kernel info.
      */
     readonly isReady: boolean;
 
     /**
-     * A promise that resolves when the kernel is initially ready.
+     * A promise that resolves when the kernel is initially ready after a start
+     * or restart.
+     *
+     * #### Notes
+     * A kernel is ready when the communication channel is active and we have
+     * cached the kernel info.
      */
     readonly ready: Promise<void>;
 
     /**
      * Get the kernel spec.
      *
-     * @returns A promise that resolves with the kernel spec.
+     * @returns A promise that resolves with the kernel spec for this kernel.
      */
     getSpec(): Promise<Kernel.ISpecModel>;
 
     /**
      * Send a shell message to the kernel.
      *
-     * @param msg - The fully formed shell message to send.
+     * @param msg - The fully-formed shell message to send.
      *
      * @param expectReply - Whether to expect a shell reply message.
      *
@@ -116,10 +128,11 @@ namespace Kernel {
      * for accepting replies.
      *
      * If `expectReply` is given and `true`, the future is done when both a
-     * shell reply and an idle status message are received, and the `.done`
-     * promise resolves to the reply. If `expectReply` is not given or is
-     * `false`, the future is done when an idle status message is received, and
-     * the `.done` promise resolves to `undefined`.
+     * shell reply and an idle status message are received with the appropriate
+     * parent header, in which case the `.done` promise resolves to the reply.
+     * If `expectReply` is not given or is `false`, the future is done when an
+     * idle status message with the appropriate parent header is received, in
+     * which case the `.done` promise resolves to `undefined`.
      *
      * If `disposeOnDone` is given and `false`, the future will not be disposed
      * of when the future is done, instead relying on the caller to dispose of
@@ -244,10 +257,14 @@ namespace Kernel {
      *
      * @param disposeOnDone - Whether to dispose of the future when done.
      *
-     * @returns A promise that resolves with the response message.
+     * @returns A kernel future.
      *
      * #### Notes
-     * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#execute).
+     * See [Messaging in
+     * Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#execute).
+     *
+     * This method returns a kernel future, rather than a promise, since execution may
+     * have many response messages (for example, many iopub display messages).
      *
      * Future `onReply` is called with the `execute_reply` content when the
      * shell reply is received and validated.
@@ -392,7 +409,7 @@ namespace Kernel {
 
     /**
      * A signal emitted for unhandled non-iopub kernel messages that claimed to
-     * be responses for messages we sent.
+     * be responses for messages we sent using this kernel object.
      */
     unhandledMessage: ISignal<this, KernelMessage.IMessage>;
 
@@ -416,10 +433,11 @@ namespace Kernel {
      * @returns A promise that resolves when the kernel has shut down.
      *
      * #### Notes
-     * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels).
+     * Uses the [Jupyter Notebook
+     * API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels).
      *
-     * On a valid response, closes the websocket, disposes of the kernel
-     * object, emits the [[terminated]] signal, and fulfills the promise.
+     * On a valid response, closes the websocket, emits the [[terminated]]
+     * signal, disposes of the kernel object, and fulfills the promise.
      *
      * The promise will be rejected if the kernel status is `'dead'`, the
      * request fails, or the response is invalid.
@@ -438,12 +456,9 @@ namespace Kernel {
    *
    * #### Notes
    * If the kernel was already started via `startNewKernel`, we return its
-   * `Kernel.IModel`.
-   *
-   * Otherwise, we attempt to find to the existing
-   * kernel.
-   * The promise is fulfilled when the kernel is found,
-   * otherwise the promise is rejected.
+   * `Kernel.IModel`. Otherwise, we attempt to find the existing kernel. The
+   * promise is fulfilled when the kernel is found, otherwise the promise is
+   * rejected.
    */
   export
   function findById(id: string, settings?: ServerConnection.ISettings): Promise<IModel> {
@@ -664,7 +679,7 @@ namespace Kernel {
     findById(id: string): Promise<IModel>;
 
     /**
-     * Connect to an existing  kernel.
+     * Connect to an existing kernel.
      *
      * @param model - The model of the target kernel.
      *

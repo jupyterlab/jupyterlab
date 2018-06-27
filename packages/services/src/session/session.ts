@@ -278,14 +278,9 @@ namespace Session {
    * Session object is used as the fulfillment value.
    *
    * Otherwise, we attempt to connect to the existing session.
-   * The promise is fulfilled when the session is ready on the server,
-   * otherwise the promise is rejected.
-   *
-   * If the session was not already started and no `options` are given,
-   * the promise is rejected.
    */
   export
-  function connectTo(model: Session.IModel, settings?: ServerConnection.ISettings): Promise<ISession> {
+  function connectTo(model: Session.IModel, settings?: ServerConnection.ISettings): ISession {
     return DefaultSession.connectTo(model, settings);
   }
 
@@ -446,9 +441,9 @@ namespace Session {
      *
      * @param options - The session options to use.
      *
-     * @returns A promise that resolves with the new session instance.
+     * @returns The new session instance.
      */
-    connectTo(model: Session.IModel): Promise<ISession>;
+    connectTo(model: Session.IModel): ISession;
 
     /**
      * Shut down a session by id.
