@@ -287,15 +287,15 @@ describe('session/manager', () => {
         let called = false;
         let session = await startNew(manager);
         await session.kernel.ready;
-        manager.runningChanged.connect((sender, args) => {
-          if (session.isDisposed) {
-              called = true;
+        manager.runningChanged.connect((sender, sessions) => {
+          // Make sure the sessions list does not have our shutdown session in it.
+          if (!sessions.find(s => s.id === session.id)) {
+            called = true;
           }
         });
 
         await manager.shutdown(session.id);
-        // TODO: why doesn't this work?
-        // expect(called).to.be(true);
+        expect(called).to.be(true);
         expect(session.isDisposed).to.be(true);
       });
 
