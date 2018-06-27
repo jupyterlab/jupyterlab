@@ -68,8 +68,8 @@ class Sanitizer implements ISanitizer {
       'a': sanitize.defaults.allowedAttributes['a'].concat('rel'),
       // Allow the "src" attribute for <img> tags.
       'img': ['src', 'height', 'width', 'alt'],
-      // Allow the "type" attribute for <input> tags.
-      'input': ['type', 'disabled'],
+      // Allow "type", "disabled", and "checked" attributes for <input> tags.
+      'input': ['type', 'disabled', 'checked'],
       // Allow "class" attribute for <code> tags.
       'code': ['class'],
       // Allow "class" attribute for <span> tags.
