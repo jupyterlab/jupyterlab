@@ -1,3 +1,8 @@
+# need sudo to remove yarn from path
+# https://docs.travis-ci.com/user/reference/overview/#Virtualisation-Environment-vs-Operating-System
+sudo: required
+dist: trusty
+
 language: python
 python: 3.6
 cache:
