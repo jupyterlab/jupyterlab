@@ -25,12 +25,6 @@ module.exports = function (config) {
       {pattern: path.resolve('./build/injector.js'), watched: false},
       {pattern: process.env.KARMA_FILE_PATTERN, watched: false}
     ],
-    customLaunchers: {
-      ChromeHeadlessNoSandbox: {
-        base: 'ChromeHeadless',
-        flags: ['--no-sandbox']
-      }
-    },
     preprocessors: {
       'build/injector.js': ['webpack'],
       'src/*.spec.ts': ['webpack', 'sourcemap']
