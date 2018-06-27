@@ -239,15 +239,15 @@ workspace into a new workspace.
 
 .. _url-reset:
 
-If something goes wrong with a workspace, or if simply needs to be cleared of
+If something goes wrong with a workspace, or if it simply needs to be cleared of
 its contents, it can be ``reset``.
 
-* To reset the contents of the workspace ``foo`` :
+* To reset the contents of the workspace ``foo``:
   ``/lab/workspaces/foo?reset``
 * To reset the contents of the default workspace:
   ``/lab?reset``
 
-These URL functions can be used separately as above, or in combination, *e.g.*:
+These URL functions can be used separately as above, or in combination, e.g.:
 
 * To reset the workspace ``foo`` and to load a specific notebook afterward:
   ``/lab/workspaces/foo/tree/path/to/notebook.ipynb?reset``
