@@ -19,6 +19,14 @@ cell tools inspector <notebook>`, and the :ref:`tabs list <tabs>`.
    :align: center
    :class: jp-screenshot
 
+JupyterLab sessions always reside in a :ref:`workspace <url-workspaces>`.
+Workspaces contain the state of JupyterLab: the files that are currently open,
+the layout of the application areas and tabs, etc.
+Workspaces can be saved on the server with
+:ref:`named workspace URLs <url-workspaces>`.
+To learn more about URLs in Jupyterlab, visit :ref:`urls`.
+
+
 .. _menu-bar:
 
 Menu Bar
@@ -180,79 +188,3 @@ menu:
     <div class="jp-youtube-video">
        <iframe src="https://www.youtube-nocookie.com/embed/COheO7sA4-U?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
     </div>
-
-.. _urls:
-
-URLs (``/tree``, ``/workspaces``, etc.)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. _url-tree:
-
-Like the classic notebook, JupyterLab provides a way for users to copy URLs that
-open a specific notebook or file. Additionally, JupyterLab URLs are an advanced
-part of the user interface that allows for managing workspaces. These two
-functions -- file paths and workspaces -- can be combined in URLs that open a
-specific file in a specific workspace. JupyterLab's file navigation URLS adopts
-the nomenclature of the classic notebook; these URLs are ``/tree`` URLs:
-
-.. code-block:: none
-
-  http(s)://<server:port>/<lab-location>/lab/tree/path/to/notebook.ipynb
-
-
-.. _url-workspaces:
-
-JupyterLab sessions always reside in a *workspace*. Workspaces contain the state
-of JupyterLab: the files that are currently open, the layout of the application
-areas and tabs, etc. When the page is refreshed, the workspace is restored.
-
-The *default workspace* is not named, it is simply the main ``/lab`` URL:
-
-.. code-block:: none
-
-  http(s)://<server:port>/<lab-location>/lab
-
-All other workspaces are named in the URL:
-
-.. code-block:: none
-
-  http(s)://<server:port>/<lab-location>/lab/workspaces/foo
-  http(s)://<server:port>/<lab-location>/lab/workspaces/bar
-  http(s)://<server:port>/<lab-location>/lab/workspaces/baz
-
-Unlike the default (``/lab``) workspace, which only saves its state on the
-user's local browser, named workspaces save their state on the server, so a
-named workspace URL can be shared between multiple users (or browsers) as long
-as they have access to the same server.
-
-.. _url-clone:
-
-One useful feature of workspaces is the ability to ``clone`` the contents of a
-workspace into a new workspace.
-
-* To copy the contents of the workspace ``foo`` into the workspace ``bar``:
-  ``/lab/workspaces/bar?clone=foo``
-* To copy the contents of the default workspace into the workspace ``foo``:
-  ``/lab/workspaces/foo?clone``
-* To copy the contents of the workspace ``foo`` into the default workspace:
-  ``/lab?clone=foo``
-
-.. _url-reset:
-
-If something goes wrong with a workspace, or if it simply needs to be cleared of
-its contents, it can be ``reset``.
-
-* To reset the contents of the workspace ``foo``:
-  ``/lab/workspaces/foo?reset``
-* To reset the contents of the default workspace:
-  ``/lab?reset``
-
-These URL functions can be used separately as above, or in combination, e.g.:
-
-* To reset the workspace ``foo`` and to load a specific notebook afterward:
-  ``/lab/workspaces/foo/tree/path/to/notebook.ipynb?reset``
-* To clone the contents of the workspace ``bar`` into the workspace ``foo`` and
-  to load a notebook afterward:
-  ``/lab/workspaces/foo/tree/path/to/notebook.ipynb?clone=bar``
-* To reset the contents of the default workspace and to load a notebook:
-  ``/lab/tree/path/to/notebook.ipynb?reset``

@@ -28,6 +28,7 @@ JupyterLab is the next-generation web-based user interface for Project Jupyter. 
    :caption: User Guide
 
    user/interface
+   user/urls
    user/files
    user/file_editor
    user/notebook
