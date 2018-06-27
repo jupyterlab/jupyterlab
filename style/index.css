@@ -5,25 +5,15 @@
     background: var(--jp-warn-color2);
     min-height: var(--jp-private-menubar-height);
     min-width: 500px;
-    display: flex;
-    justify-content: space-between;
 }
 
 .jq-status-bar-side {
-    display: flex;
-    align-items: center;
-    height: 100%;
-}
-
-.jp-status-bar-left {
-    flex-direction: row;
-}
-
-.jp-status-bar-right {
-    flex-direction: row-reverse;
+    min-height: 500px;
 }
 
 .jq-status-bar-item {
     margin: 5px;
     font-size: xx-small;
+    min-height: var(--jp-private-menu-item-height);
+    min-width: var(--jp-private-menu-item-width);
 }

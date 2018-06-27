@@ -1,5 +1,5 @@
 import {
-  Widget, PanelLayout, Panel
+  Widget, PanelLayout, SplitPanel, BoxPanel
 } from '@phosphor/widgets';
 
 import {
@@ -39,15 +39,12 @@ namespace IStatusBar {
   }
 }
 
-const STATUS_BAR_ID = 'jq-main-status-bar';
+const STATUS_BAR_ID = 'jp-main-status-bar';
 
 const STATUS_BAR_CLASS = 'jp-status-bar';
-
-const STATUS_BAR_SIDE_CLASS = 'jq-status-bar-side';
-const STATUS_BAR_LEFT_SIDE_CLASS = 'jq-status-bar-left';
-const STATUS_BAR_RIGHT_SIDE_CLASS = 'jq-status-bar-right';
-
-const STATUS_BAR_ITEM_CLASS = 'jq-status-bar-item';
+const STATUS_BAR_SPLIT_CONTAINER_CLASS = 'jp-status-bar-split-container';
+const STATUS_BAR_SIDE_CLASS = 'jp-status-bar-side';
+const STATUS_BAR_ITEM_CLASS = 'jp-status-bar-item';
 
 export
 class StatusBar extends Widget implements IStatusBar {
@@ -59,20 +56,26 @@ class StatusBar extends Widget implements IStatusBar {
     this.id = STATUS_BAR_ID;
     this.addClass(STATUS_BAR_CLASS);
 
-    this.layout = new PanelLayout();
-    this._leftSide = new Panel();
-    this._rightSide = new Panel();
+    let rootLayout = this.layout = new PanelLayout();
+    let splitContainer = this._splitContainer = new SplitPanel({
+      orientation: 'horizontal',
+      renderer: SplitPanel.defaultRenderer,
+      spacing: 1,
+    });
+    splitContainer.addClass(STATUS_BAR_SPLIT_CONTAINER_CLASS);
 
-    this._leftSide.addClass(STATUS_BAR_LEFT_SIDE_CLASS);
-    this._leftSide.addClass(STATUS_BAR_SIDE_CLASS);
-    this._rightSide.addClass(STATUS_BAR_RIGHT_SIDE_CLASS);
-    this._rightSide.addClass(STATUS_BAR_SIDE_CLASS);
+    let leftPanel = this._leftSide = new BoxPanel({ direction: 'left-to-right' });
+    let rightPanel = this._rightSide = new BoxPanel({ direction: 'right-to-left' });
 
-    // this._leftSide.direction = 'left-to-right';
-    // this._rightSide.direction = 'right-to-left';
+    leftPanel.addClass(STATUS_BAR_SIDE_CLASS);
+    SplitPanel.setStretch(leftPanel, 0);
 
-    (this.layout as PanelLayout).addWidget(this._leftSide);
-    (this.layout as PanelLayout).addWidget(this._rightSide);
+    rightPanel.addClass(STATUS_BAR_SIDE_CLASS);
+    SplitPanel.setStretch(rightPanel, 1);
+
+    splitContainer.addWidget(leftPanel);
+    splitContainer.addWidget(rightPanel);
+    rootLayout.addWidget(splitContainer);
 
     this._host.addToTopArea(this);
   }
@@ -96,10 +99,12 @@ class StatusBar extends Widget implements IStatusBar {
     this._statusItems[id] = wrapper;
 
     if (align === 'left') {
-      this._leftSide.insertWidget(priority, widget);
+      this._leftSide.addWidget(widget);
     } else {
-      this._rightSide.insertWidget(priority, widget);
+      this._rightSide.addWidget(widget);
     }
+
+    widget.show();
   }
 
   /**
@@ -132,8 +137,10 @@ class StatusBar extends Widget implements IStatusBar {
   private _statusItems: { [id: string]: StatusBar.IItem } = Object.create(null);
   private _host: ApplicationShell = null;
 
-  private _leftSide: Panel;
-  private _rightSide: Panel;
+  private _leftSide: BoxPanel;
+  private _rightSide: BoxPanel;
+
+  private _splitContainer: SplitPanel;
 }
 
 export

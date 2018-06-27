@@ -10,7 +10,7 @@ import {
     IStatusBar
 } from './../statusBar';
 
-import { VirtualDOM, VirtualText } from '@phosphor/virtualdom';
+import { VirtualDOM, VirtualText, h } from '@phosphor/virtualdom';
 
 export
 class HelloStatus extends Widget {
@@ -18,10 +18,12 @@ class HelloStatus extends Widget {
         super();
 
         this._text = `Hello ${subject}!`;
-    }
 
-    onAfterAttach() {
-        VirtualDOM.render(new VirtualText(this._text), this.node);
+        this.onFitRequest = () => {
+            console.log(`Fitting ${subject}`);
+        };
+
+        VirtualDOM.render(h.div(new VirtualText(this._text)), this.node);
     }
 
     private _text: string;
