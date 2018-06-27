@@ -13,15 +13,11 @@ import {
 import { VirtualDOM, VirtualText, h } from '@phosphor/virtualdom';
 
 export
-class HelloStatus extends Widget {
-    constructor(subject: string) {
+class TextStatus extends Widget {
+    constructor(text: string) {
         super();
 
-        this._text = `Hello ${subject}!`;
-
-        this.onFitRequest = () => {
-            console.log(`Fitting ${subject}`);
-        };
+        this._text = text;
 
         VirtualDOM.render(h.div(new VirtualText(this._text)), this.node);
     }
@@ -39,13 +35,13 @@ const helloStatusItem: JupyterLabPlugin<void> = {
     requires: [IStatusBar],
     activate: (_app: JupyterLab, statusBar: IStatusBar) => {
         statusBar.registerStatusItem(
-            'hello-world-status-item-left', new HelloStatus('left world'), { align: 'left' });
+            'hello-world-status-item-left', new TextStatus('Hello left world'), { align: 'left' });
         statusBar.registerStatusItem(
-            'hello-world-status-item-left-2', new HelloStatus('left world 2'), { align: 'left' });
+            'hello-world-status-item-left-2', new TextStatus('Hello left world 2'), { align: 'left' });
 
         statusBar.registerStatusItem(
-            'hello-world-status-item-right', new HelloStatus('right world'), { align: 'right' });
+            'hello-world-status-item-right', new TextStatus('Hello right world'), { align: 'right' });
         statusBar.registerStatusItem(
-            'hello-world-status-item-right-2', new HelloStatus('right world 2'), { align: 'right' });
+            'hello-world-status-item-right-2', new TextStatus('Hello right world 2'), { align: 'right' });
     }
 };
