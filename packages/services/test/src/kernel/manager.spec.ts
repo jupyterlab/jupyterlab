@@ -16,7 +16,7 @@ import {
 } from '../../../lib/kernel';
 
 import {
-  PYTHON_SPEC, KERNELSPECS, handleRequest, makeSettings
+  PYTHON_SPEC, KERNELSPECS, handleRequest, makeSettings, testEmission
 } from '../utils';
 
 
@@ -71,9 +71,10 @@ describe('kernel/manager', () => {
 
       it('should get the server settings', () => {
         manager.dispose();
-        let serverSettings = makeSettings({ baseUrl: 'foo' });
+        let serverSettings = makeSettings();
+        let token = serverSettings.token;
         manager = new KernelManager({ serverSettings });
-        expect(manager.serverSettings.baseUrl).to.be('foo');
+        expect(manager.serverSettings.token).to.be(token);
       });
 
     });
@@ -231,27 +232,22 @@ describe('kernel/manager', () => {
 
     describe('shutdown()', () => {
 
-      it('should shut down a kernel by id', () => {
-        let temp: Kernel.IKernel;
-        manager.startNew().then(k => {
-          temp = k;
-          return manager.shutdown(k.id);
-        }).then(() => {
-          expect(temp.isDisposed).to.be(true);
-        });
+      it('should shut down a kernel by id', async () => {
+        let kernel = await manager.startNew();
+        await kernel.ready;
+        await manager.shutdown(kernel.id);
+        expect(kernel.isDisposed).to.be(true);
       });
 
-      it('should emit a runningChanged signal', () => {
-        let called = false;
-        return manager.startNew().then(k => {
-          manager.runningChanged.connect((sender, args) => {
-            expect(k.isDisposed).to.be(false);
-            called = true;
-          });
-          return manager.shutdown(k.id);
-        }).then(() => {
-          expect(called).to.be(true);
+      it('should emit a runningChanged signal', async () => {
+        let kernel = await manager.startNew();
+        const emission = testEmission(manager.runningChanged, {
+          test: () => {
+            expect(kernel.isDisposed).to.be(false);
+          }
         });
+        await manager.shutdown(kernel.id);
+        await emission;
       });
 
     });

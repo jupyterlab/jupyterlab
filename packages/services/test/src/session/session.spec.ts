@@ -29,7 +29,7 @@ import {
 
 import {
   expectFailure, handleRequest, makeSettings,
-  SessionTester, createSessionModel, getRequestHandler, init
+  SessionTester, createSessionModel, getRequestHandler, init, testEmission
 } from '../utils';
 
 
@@ -60,20 +60,21 @@ describe('session', () => {
   let session: Session.ISession;
   let defaultSession: Session.ISession;
 
-  before(() => {
-    return startNew().then(s => {
-      defaultSession = s;
-    });
+  before(async () => {
+    defaultSession = await startNew();
+    await defaultSession.kernel.ready;
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     if (session && !session.isDisposed) {
-      return session.shutdown();
+      await session.kernel.ready;
+      await session.shutdown();
     }
   });
 
-  after(() => {
-    return defaultSession.shutdown();
+  after(async () => {
+    await defaultSession.kernel.ready;
+    await defaultSession.shutdown();
   });
 
   describe('Session.listRunning()', () => {
@@ -115,7 +116,7 @@ describe('session', () => {
 
   describe('Session.startNew', () => {
 
-    it('should start a session', () => {
+    it('should start a session', async () => {
       return startNew().then(s => {
         session = s;
         expect(session.id).to.be.ok();
@@ -217,11 +218,10 @@ describe('session', () => {
 
   describe('Session.shutdown()', () => {
 
-    it('should shut down a kernel by id', () => {
-      return startNew().then(s => {
-        session = s;
-        return Session.shutdown(s.id);
-      });
+    it('should shut down a kernel by id', async () => {
+      session = await startNew();
+      await session.kernel.ready;
+      await Session.shutdown(session.id);
     });
 
     it('should handle a 404 status', () => {
@@ -234,31 +234,34 @@ describe('session', () => {
 
     context('#terminated', () => {
 
-      it('should emit when the session is shut down', () => {
+      it('should emit when the session is shut down', async () => {
         let called = false;
-        return startNew().then(session => {
-          session.terminated.connect(() => {
-            called = true;
-          });
-          return session.shutdown();
-        }).then(() => {
-          expect(called).to.be(true);
+        session = await startNew();
+        await session.kernel.ready;
+        session.terminated.connect(() => {
+          called = true;
         });
+        await session.shutdown();
+        session.dispose();
+        expect(called).to.be(true);
       });
     });
 
     context('#kernelChanged', () => {
 
-      it('should emit when the kernel changes', () => {
+      it('should emit when the kernel changes', async () => {
+
         let called = false;
         let object = {};
         defaultSession.kernelChanged.connect((s, kernel) => {
           called = true;
           Signal.disconnectReceiver(object);
         }, object);
-        return defaultSession.changeKernel({ name: defaultSession.kernel.name }).then(() => {
-          expect(called).to.be(true);
-        });
+        let previous = defaultSession.kernel;
+        await defaultSession.changeKernel({ name: previous.name });
+        await defaultSession.kernel.ready;
+        expect(called).to.be(true);
+        previous.dispose();
       });
 
     });
@@ -295,23 +298,25 @@ describe('session', () => {
 
     context('#unhandledMessage', () => {
 
-      it('should be emitted for an unhandled message', (done) => {
-        let tester = new SessionTester();
-        let msgType = uuid();
-        tester.startSession().then(session => {
-          session.unhandledMessage.connect((s, msg) => {
-            expect(msg.header.msg_type).to.be(msgType);
-            tester.dispose();
-            done();
-          });
-          let msg = KernelMessage.createMessage({
-            msgType: msgType,
-            channel: 'shell',
-            session: session.kernel.clientId
-          });
-          msg.parent_header = msg.header;
-          tester.send(msg);
-        }).catch(done);
+      it('should be emitted for an unhandled message', async () => {
+        const tester = new SessionTester();
+        const session = await tester.startSession();
+        await session.kernel.ready;
+        const msgId = uuid();
+        const emission = testEmission(session.unhandledMessage, {
+          find: (k, msg) => (msg.header.msg_id === msgId)
+        });
+        let msg = KernelMessage.createShellMessage({
+          msgType: 'foo',
+          channel: 'shell',
+          session: tester.serverSessionId,
+          msgId
+        });
+        msg.parent_header = {session: session.kernel.clientId};
+        tester.send(msg);
+        await emission;
+        await tester.shutdown();
+        tester.dispose();
       });
 
     });
@@ -551,34 +556,44 @@ describe('session', () => {
 
     context('#changeKernel()', () => {
 
-      it('should create a new kernel with the new name', () => {
-        let previous = defaultSession.kernel;
-        let name = previous.name;
-        return defaultSession.changeKernel({ name }).then(kernel => {
-          expect(kernel.name).to.be(name);
-          expect(defaultSession.kernel).to.not.be(previous);
-        });
+      it('should create a new kernel with the new name', async () => {
+        session = await startNew();
+        let previous = session.kernel;
+        await previous.ready;
+        await session.changeKernel({ name: previous.name });
+        await session.kernel.ready;
+        expect(session.kernel.name).to.be(previous.name);
+        expect(session.kernel.id).to.not.be(previous.id);
+        expect(session.kernel).to.not.be(previous);
+        previous.dispose();
       });
 
-      it('should accept the id of the new kernel', () => {
-        let previous = defaultSession.kernel;
-        return Kernel.startNew().then(kernel => {
-          return defaultSession.changeKernel({ id: kernel.id });
-        }).then(() => {
-          let kernel = defaultSession.kernel;
-          expect(kernel.id).to.not.be(previous.id);
-          expect(kernel).to.not.be(previous);
-        });
+      it('should accept the id of the new kernel', async () => {
+        session = await startNew();
+        let previous = session.kernel;
+        await previous.ready;
+        let kernel = await Kernel.startNew();
+        await kernel.ready;
+        await session.changeKernel({ id: kernel.id });
+        await session.kernel.ready;
+        expect(session.kernel.id).to.be(kernel.id);
+        expect(session.kernel).to.not.be(previous);
+        expect(session.kernel).to.not.be(kernel);
+        await previous.dispose();
+        await kernel.dispose();
       });
 
-      it('should update the session path if it has changed', () => {
-        let model = { ...defaultSession.model, path: 'foo.ipynb' };
-        let name = defaultSession.kernel.name;
-        handleRequest(defaultSession, 200, model);
-        return defaultSession.changeKernel({ name }).then(kernel => {
-          expect(kernel.name).to.be(name);
-          expect(defaultSession.path).to.be(model.path);
-        });
+      it('should update the session path if it has changed', async () => {
+        session = await startNew();
+        let previous = session.kernel;
+        await previous.ready;
+        let model = { ...session.model, path: 'foo.ipynb' };
+        handleRequest(session, 200, model);
+        await session.changeKernel({ name: previous.name });
+        await session.kernel.ready;
+        expect(session.kernel.name).to.be(previous.name);
+        expect(session.path).to.be(model.path);
+        previous.dispose();
       });
 
     });

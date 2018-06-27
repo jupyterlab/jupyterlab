@@ -115,14 +115,16 @@ namespace Kernel {
      * Send a message to the kernel's shell channel, yielding a future object
      * for accepting replies.
      *
-     * If `expectReply` is given and `true`, the future is disposed when both a
-     * shell reply and an idle status message are received. If `expectReply`
-     * is not given or is `false`, the future is disposed when an idle status
-     * message is received.
+     * If `expectReply` is given and `true`, the future is done when both a
+     * shell reply and an idle status message are received, and the `.done`
+     * promise resolves to the reply. If `expectReply` is not given or is
+     * `false`, the future is done when an idle status message is received, and
+     * the `.done` promise resolves to `undefined`.
      *
      * If `disposeOnDone` is given and `false`, the future will not be disposed
-     * of when the future is done, instead relying on the caller to dispose of it.
-     * This allows for the handling of out-of-order output from ill-behaved kernels.
+     * of when the future is done, instead relying on the caller to dispose of
+     * it. This allows for the handling of out-of-order output from ill-behaved
+     * kernels.
      *
      * All replies are validated as valid kernel messages.
      *
@@ -136,9 +138,8 @@ namespace Kernel {
      * @returns A promise that resolves when the kernel has reconnected.
      *
      * #### Notes
-     * This is not actually a  standard HTTP request, but useful function
-     * nonetheless for reconnecting to the kernel if the connection is somehow
-     * lost.
+     * This just refreshes the connection to an existing kernel, and does not
+     * perform an HTTP request to the server or restart the kernel.
      */
     reconnect(): Promise<void>;
 
@@ -302,12 +303,9 @@ namespace Kernel {
      *
      * @param id - The comm id.
      *
-     * @returns A promise that resolves with a comm instance.
-     *
-     * #### Notes
-     * If a promise to client-side comm already exists, it is returned.
+     * @returns A comm instance.
      */
-    connectToComm(targetName: string, commId?: string): Promise<Kernel.IComm>;
+    connectToComm(targetName: string, commId?: string): Kernel.IComm;
 
     /**
      * Register a comm target handler.
@@ -316,35 +314,60 @@ namespace Kernel {
      *
      * @param callback - The callback invoked for a comm open message.
      *
-     * @returns A disposable used to unregister the comm target.
+     * #### Notes
+     * Only one comm target can be registered to a target name at a time, an
+     * existing callback for the same target name will be overidden.  A registered
+     * comm target handler will take precedence over a comm which specifies a
+     * `target_module`.
+     *
+     * If the callback returns a promise, kernel message processing will pause
+     * until the returned promise is fulfilled.
+     */
+    registerCommTarget(targetName: string, callback: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => void | PromiseLike<void>): void;
+
+    /**
+     * Remove a comm target handler.
+     *
+     * @param targetName - The name of the comm target to remove.
+     *
+     * @param callback - The callback to remove.
      *
      * #### Notes
-     * Only one comm target can be registered at a time, an existing
-     * callback will be overidden.  A registered comm target handler will take
-     * precedence over a comm which specifies a `target_module`.
+     * The comm target is only removed if it matches the callback argument.
      */
-    registerCommTarget(targetName: string, callback: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => void): IDisposable;
+    removeCommTarget(targetName: string, callback: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => void | PromiseLike<void>): void;
 
     /**
      * Register an IOPub message hook.
      *
-     * @param msg_id - The parent_header message id in messages the hook should intercept.
+     * @param msg_id - The parent_header message id in messages the hook should
+     * intercept.
      *
      * @param hook - The callback invoked for the message.
      *
-     * @returns A disposable used to unregister the message hook.
-     *
      * #### Notes
-     * The IOPub hook system allows you to preempt the handlers for IOPub messages with a
-     * given parent_header message id. The most recently registered hook is run first.
-     * If the hook returns false, any later hooks and the future's onIOPub handler will not run.
-     * If a hook throws an error, the error is logged to the console and the next hook is run.
-     * If a hook is registered during the hook processing, it won't run until the next message.
-     * If a hook is disposed during the hook processing, it will be deactivated immediately.
+     * The IOPub hook system allows you to preempt the handlers for IOPub
+     * messages with a given parent_header message id. The most recently
+     * registered hook is run first. If a hook return value resolves to false,
+     * any later hooks and the future's onIOPub handler will not run. If a hook
+     * throws an error, the error is logged to the console and the next hook is
+     * run. If a hook is registered during the hook processing, it will not run
+     * until the next message. If a hook is disposed during the hook processing,
+     * it will be deactivated immediately.
      *
      * See also [[IFuture.registerMessageHook]].
      */
-    registerMessageHook(msgId: string, hook: (msg: KernelMessage.IIOPubMessage) => boolean): IDisposable;
+    registerMessageHook(msgId: string, hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>): void;
+
+    /**
+     * Remove an IOPub message hook.
+     *
+     * @param msg_id - The parent_header message id the hook intercepted.
+     *
+     * @param hook - The callback invoked for the message.
+     *
+     */
+    removeMessageHook(msgId: string, hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>): void;
   }
 
   /**
@@ -363,20 +386,22 @@ namespace Kernel {
     statusChanged: ISignal<this, Kernel.Status>;
 
     /**
-     * A signal emitted for iopub kernel messages.
+     * A signal emitted after an iopub kernel message is handled.
      */
     iopubMessage: ISignal<this, KernelMessage.IIOPubMessage>;
 
     /**
-     * A signal emitted for unhandled kernel message.
+     * A signal emitted for unhandled non-iopub kernel messages that claimed to
+     * be responses for messages we sent.
      */
     unhandledMessage: ISignal<this, KernelMessage.IMessage>;
 
     /**
-     * A signal emitted for any kernel message.
+     * A signal emitted when any kernel message is sent or received.
      *
-     * Note: The behavior is undefined if the message is modified
-     * during message handling. As such, it should be treated as read-only.
+     * #### Notes
+     * This signal is emitted before any message handling has happened. The
+     * message should be treated as read-only.
      */
     anyMessage: ISignal<this, IAnyMessageArgs>;
 
@@ -393,14 +418,11 @@ namespace Kernel {
      * #### Notes
      * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels).
      *
-     * On a valid response, closes the websocket and disposes of the kernel
-     * object, and fulfills the promise.
+     * On a valid response, closes the websocket, disposes of the kernel
+     * object, emits the [[terminated]] signal, and fulfills the promise.
      *
-     * The promise will be rejected if the kernel status is `'dead'` or if the
-     * request fails or the response is invalid.
-     *
-     * If the server call is successful, the [[terminated]] signal will be
-     * emitted.
+     * The promise will be rejected if the kernel status is `'dead'`, the
+     * request fails, or the response is invalid.
      */
     shutdown(): Promise<void>;
   }
@@ -668,15 +690,10 @@ namespace Kernel {
   }
 
   /**
-   * Object providing a Future interface for message callbacks.
+   * A Future interface for responses from the kernel.
    *
-   * The future will self-dispose after `isDone` is
-   * set and the registered `onDone` handler is called.
-   *
-   * If a `reply` is expected, the Future is considered done when
-   * both a `reply` message and an `idle` iopub status message have
-   * been received.  Otherwise, it is considered done when the `idle` status is
-   * received.
+   * When a message is sent to a kernel, a Future is created to handle any
+   * responses that may come from the kernel.
    */
   export
   interface IFuture extends IDisposable {
@@ -688,24 +705,43 @@ namespace Kernel {
     /**
      * A promise that resolves when the future is done.
      *
-     * The contents of the promise is the reply message.
+     * #### Notes
+     * The future is done when there are no more responses expected from the
+     * kernel.
+     *
+     * The `done` promise resolves to the reply message if there is one,
+     * otherwise it resolves to `undefined`.
      */
-    readonly done: Promise<KernelMessage.IShellMessage>;
+    readonly done: Promise<KernelMessage.IShellMessage | undefined>;
 
     /**
      * The reply handler for the kernel future.
+     *
+     * #### Notes
+     * If the handler returns a promise, all kernel message processing pauses
+     * until the promise is resolved. If there is a reply message, the future
+     * `done` promise also resolves to the reply message after this handler has
+     * been called.
      */
-    onReply: (msg: KernelMessage.IShellMessage) => void;
+    onReply: (msg: KernelMessage.IShellMessage) => void | PromiseLike<void>;
 
     /**
      * The stdin handler for the kernel future.
+     *
+     * #### Notes
+     * If the handler returns a promise, all kernel message processing pauses
+     * until the promise is resolved.
      */
-    onStdin: (msg: KernelMessage.IStdinMessage) => void;
+    onStdin: (msg: KernelMessage.IStdinMessage) => void | PromiseLike<void>;
 
     /**
      * The iopub handler for the kernel future.
+     *
+     * #### Notes
+     * If the handler returns a promise, all kernel message processing pauses
+     * until the promise is resolved.
      */
-    onIOPub: (msg: KernelMessage.IIOPubMessage) => void;
+    onIOPub: (msg: KernelMessage.IIOPubMessage) => void | PromiseLike<void>;
 
     /**
      * Register hook for IOPub messages.
@@ -713,14 +749,20 @@ namespace Kernel {
      * @param hook - The callback invoked for an IOPub message.
      *
      * #### Notes
-     * The IOPub hook system allows you to preempt the handlers for IOPub messages handled
-     * by the future. The most recently registered hook is run first.
-     * If the hook returns false, any later hooks and the future's onIOPub handler will not run.
-     * If a hook throws an error, the error is logged to the console and the next hook is run.
-     * If a hook is registered during the hook processing, it won't run until the next message.
-     * If a hook is removed during the hook processing, it will be deactivated immediately.
+     * The IOPub hook system allows you to preempt the handlers for IOPub
+     * messages handled by the future.
+     *
+     * The most recently registered hook is run first. A hook can return a
+     * boolean or a promise to a boolean, in which case all kernel message
+     * processing pauses until the promise is fulfilled. If a hook return value
+     * resolves to false, any later hooks will not run and the function will
+     * return a promise resolving to false. If a hook throws an error, the error
+     * is logged to the console and the next hook is run. If a hook is
+     * registered during the hook processing, it will not run until the next
+     * message. If a hook is removed during the hook processing, it will be
+     * deactivated immediately.
      */
-    registerMessageHook(hook: (msg: KernelMessage.IIOPubMessage) => boolean): void;
+    registerMessageHook(hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>): void;
 
     /**
      * Remove a hook for IOPub messages.
@@ -730,7 +772,7 @@ namespace Kernel {
      * #### Notes
      * If a hook is removed during the hook processing, it will be deactivated immediately.
      */
-    removeMessageHook(hook: (msg: KernelMessage.IIOPubMessage) => boolean): void;
+    removeMessageHook(hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>): void;
 
     /**
      * Send an `input_reply` message.
@@ -757,15 +799,21 @@ namespace Kernel {
      * Callback for a comm close event.
      *
      * #### Notes
-     * This is called when the comm is closed from either the server or
-     * client.
+     * This is called when the comm is closed from either the server or client.
+     * If this is called in response to a kernel message and the handler returns
+     * a promise, all kernel message processing pauses until the promise is
+     * resolved.
      */
-    onClose: (msg: KernelMessage.ICommCloseMsg) => void;
+    onClose: (msg: KernelMessage.ICommCloseMsg) => void | PromiseLike<void>;
 
     /**
      * Callback for a comm message received event.
+     *
+     * #### Notes
+     * If the handler returns a promise, all kernel message processing pauses
+     * until the promise is resolved.
      */
-    onMsg: (msg: KernelMessage.ICommMsgMsg) => void;
+    onMsg: (msg: KernelMessage.ICommMsgMsg) => void | PromiseLike<void>;
 
     /**
      * Open a comm with optional data and metadata.
@@ -908,7 +956,7 @@ namespace Kernel {
     /**
      * The message that is being signaled.
      */
-    msg: KernelMessage.IMessage;
+    msg: Readonly<KernelMessage.IMessage>;
 
     /**
      * The direction of the message.
