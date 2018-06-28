@@ -573,15 +573,6 @@
       },
       "type": "object"
     },
-    "notebook:run-selected-or-current-line-in-console": {
-      "default": { },
-      "properties": {
-        "command": { "default": "notebook:run-in-console" },
-        "keys": { "default": ["Ctrl Shift Enter"] },
-        "selector": { "default": ".jp-Notebook.jp-mod-editMode" }
-      },
-      "type": "object"
-    },
     "notebook:select-all": {
       "default": { },
       "properties": {
