@@ -108,7 +108,7 @@ class DefaultTerminalSession implements TerminalSession.ISession {
       return;
     }
 
-    this.terminated.emit(void 0);
+    this.terminated.emit(undefined);
     this._isDisposed = true;
     if (this._ws) {
       this._ws.close();
@@ -150,7 +150,7 @@ class DefaultTerminalSession implements TerminalSession.ISession {
    * @returns A promise that resolves when the terminal has reconnected.
    */
   reconnect(): Promise<void> {
-    this._autoReconnectAttempt = 0;
+    this._reconnectAttempt = 0;
     this._readyPromise = this._initializeSocket();
     return this._readyPromise;
   }
@@ -174,7 +174,7 @@ class DefaultTerminalSession implements TerminalSession.ISession {
   /**
    * Connect to the websocket.
    */
-  private _initializeSocket = (): Promise<void> => {
+  private _initializeSocket(): Promise<void> {
     const name = this._name;
     let socket = this._ws;
 
@@ -211,10 +211,10 @@ class DefaultTerminalSession implements TerminalSession.ISession {
 
         const data = JSON.parse(event.data) as JSONPrimitive[];
 
-        if (this._autoReconnectAttempt > 0) {
-          // after reconnection, ignore all messages until 'setup' sent by terminado
+        if (this._reconnectAttempt > 0) {
+          // After reconnection, ignore all messages until a 'setup' message.
           if (data[0] === 'setup') {
-            this._autoReconnectAttempt = 0;
+            this._reconnectAttempt = 0;
           }
           return;
         }
@@ -239,31 +239,37 @@ class DefaultTerminalSession implements TerminalSession.ISession {
       };
 
       socket.onclose = (event: CloseEvent) => {
-        console.error(`Terminal websocket closed: ${event.code}`);
+        console.warn(`Terminal websocket closed: ${event.code}`);
         this._reconnectSocket();
       };
     });
   }
 
-  private _reconnectSocket = (): void => {
+  private _reconnectSocket(): void {
     if (this._isDisposed || !this._ws) {
       return;
     }
-    if (this._autoReconnectAttempt < this._autoReconnectLimit) {
-      this._isReady = false;
-      let timeout = Math.pow(2, this._autoReconnectAttempt);
-      console.error('Terminal websocket reconnecting in ' + timeout + ' seconds.');
-      setTimeout(() => {
-        this._initializeSocket().then(() => {
-          console.error('Terminal websocket reconnected');
-        }).catch((e) => {
-          console.error(`Terminal websocket reconnecting error`);
-        });
-      }, 1e3 * timeout);
-      this._autoReconnectAttempt += 1;
-    } else {
-      console.error(`Terminal websocket reconnecting aborted after ${this._autoReconnectAttempt} attemptions`);
+
+    const attempt = this._reconnectAttempt;
+    const limit = this._reconnectLimit;
+
+    if (attempt >= limit) {
+      console.log(`Terminal reconnect aborted: ${attempt} attempts`);
+      return;
     }
+
+    const timeout = Math.pow(2, attempt);
+
+    console.log(`Terminal will attempt to reconnect in ${timeout}s`);
+    this._isReady = false;
+    this._reconnectAttempt += 1;
+
+    setTimeout(() => {
+      this._initializeSocket()
+        .then(() => { console.log('Terminal reconnected'); })
+        .catch(reason => { console.warn(`Terminal reconnect failed`, reason);
+        });
+    }, 1e3 * timeout);
   }
 
   private _isDisposed = false;
@@ -275,9 +281,8 @@ class DefaultTerminalSession implements TerminalSession.ISession {
   private _url: string;
   private _ws: WebSocket | null = null;
   private _noOp = () => { /* no-op */};
-
-  private _autoReconnectAttempt = 0;
-  private _autoReconnectLimit = 7;
+  private _reconnectLimit = 7;
+  private _reconnectAttempt = 0;
 }
 
 
@@ -303,7 +308,7 @@ namespace DefaultTerminalSession {
    * @returns A promise that resolves with the session instance.
    */
   export
-  function startNew(options: TerminalSession.IOptions = {}): Promise<TerminalSession.ISession> {
+  function startNew(options: TerminalSession.IOptions = { }): Promise<TerminalSession.ISession> {
     if (!TerminalSession.isAvailable()) {
       throw Private.unavailableMsg;
     }
