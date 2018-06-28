@@ -227,6 +227,13 @@ class ApplicationShell extends Widget {
       return;
     }
 
+    // Changing the mode of the dock panel can result in mulitple layout
+    // modified signals being emitted as the widgets are rearranged.
+    // During that time, it may not be reliable to query the dock panel
+    // state. Here we prevent the layout modified signal from being emitted
+    // until the mode is finished switching.
+    this._modifiedGuard = true;
+
     if (mode === 'single-document') {
       this._cachedLayout = dock.saveLayout();
       dock.mode = mode;
@@ -239,6 +246,9 @@ class ApplicationShell extends Widget {
 
       // Set the mode data attribute on the document body.
       document.body.setAttribute(MODE_ATTRIBUTE, mode);
+
+      this._modifiedGuard = false;
+      this._onLayoutModified();
       return;
     }
 
@@ -274,6 +284,9 @@ class ApplicationShell extends Widget {
 
     // Set the mode data attribute on the document body.
     document.body.setAttribute(MODE_ATTRIBUTE, mode);
+
+    this._modifiedGuard = false;
+    this._onLayoutModified();
   }
 
   /**
@@ -704,7 +717,9 @@ class ApplicationShell extends Widget {
    * Handle a change to the layout.
    */
   private _onLayoutModified(): void {
-    this._layoutModified.emit(void 0);
+    if (!this._modifiedGuard) {
+      this._layoutModified.emit(void 0);
+    }
   }
 
   /**
@@ -740,6 +755,8 @@ class ApplicationShell extends Widget {
   private _tracker = new FocusTracker<Widget>();
   private _topPanel: Panel;
   private _bottomPanel: Panel;
+  private _modifiedGuard = false;
+  private _addOptionsCache = new Map<Widget, ApplicationShell.IMainAreaOptions>();
 }
 
 
