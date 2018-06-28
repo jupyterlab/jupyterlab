@@ -116,6 +116,25 @@ describe('csvviewer/model', () => {
       expect([0, 1, 2].map(i => d.data('body', 1, i))).to.eql(['d', 'e', 'f']);
     });
 
+    it('handles having only a header', () => {
+      let d = new DSVModel({data: 'a,b,c\n', delimiter: ',', header: true});
+      expect(d.rowCount('column-header')).to.be(1);
+      expect(d.rowCount('body')).to.be(0);
+      expect(d.columnCount('row-header')).to.be(1);
+      expect(d.columnCount('body')).to.be(3);
+      expect([0, 1, 2].map(i => d.data('column-header', 0, i))).to.eql(['a', 'b', 'c']);
+    });
+
+    it('handles single non-header line', () => {
+      let d = new DSVModel({data: 'a,b,c\n', delimiter: ',', header: false});
+      expect(d.rowCount('column-header')).to.be(1);
+      expect(d.rowCount('body')).to.be(1);
+      expect(d.columnCount('row-header')).to.be(1);
+      expect(d.columnCount('body')).to.be(3);
+      expect([0, 1, 2].map(i => d.data('column-header', 0, i))).to.eql(['1', '2', '3']);
+      expect([0, 1, 2].map(i => d.data('body', 0, i))).to.eql(['a', 'b', 'c']);
+    });
+
     it('handles CRLF row delimiter', () => {
       let d = new DSVModel({data: 'a,b,c\r\nd,e,f\r\n', delimiter: ',', rowDelimiter: '\r\n'});
       expect(d.rowCount('column-header')).to.be(1);

@@ -262,11 +262,13 @@ class DSVModel extends DataModel implements IDisposable {
 
     // Return if we didn't actually get any new rows beyond the one we've
     // already parsed.
-    if (nrows <= 1) {
+    if (this._startedParsing && nrows <= 1) {
       this._doneParsing = true;
       this._ready.resolve(undefined);
       return;
     }
+
+    this._startedParsing = true;
 
     // Update the row count.
     let oldRowCount = this._rowCount;
@@ -536,6 +538,7 @@ class DSVModel extends DataModel implements IDisposable {
     // First row offset is *always* 0, so we always have the first row offset.
     this._rowOffsets = new Uint32Array(1);
     this._rowCount = 1;
+    this._startedParsing = false;
 
     this._columnOffsets = new Uint32Array(0);
 
@@ -602,6 +605,7 @@ class DSVModel extends DataModel implements IDisposable {
 
   // Bookkeeping variables.
   private _delayedParse: number = null;
+  private _startedParsing: boolean = false;
   private _doneParsing: boolean = false;
   private _isDisposed: boolean = false;
   private _ready = new PromiseDelegate<void>();

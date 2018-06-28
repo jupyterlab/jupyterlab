@@ -45,6 +45,21 @@ describe('csvviewer/parsenoquotes', () => {
       expect(results.offsets).to.eql([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]);
     });
 
+    it('handles single-line data', () => {
+      let data = `a,b,c,d\n`;
+      let options = {data, rowDelimiter: '\n'};
+      let results;
+
+      results = parser({...options, columnOffsets: false});
+      expect(results.nrows).to.eql(1);
+      expect(results.offsets).to.eql([0]);
+
+      results = parser({...options, columnOffsets: true});
+      expect(results.nrows).to.eql(1);
+      expect(results.ncols).to.eql(4);
+      expect(results.offsets).to.eql([0, 2, 4, 6]);
+    });
+
     it('handles changing the field delimiter', () => {
       let data = `a\tb\tc\td\n0\t1\t2\t3\n4\t5\t6\t7\n`;
       let options = {data, delimiter: '\t', rowDelimiter: '\n'};
