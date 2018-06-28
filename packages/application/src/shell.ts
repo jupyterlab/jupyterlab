@@ -269,12 +269,18 @@ class ApplicationShell extends Widget {
 
     // Add any widgets created during single document mode, which have
     // subsequently been removed from the dock panel after the multiple document
-    // layout has been restored.
+    // layout has been restored. If the widget has add options cached for
+    // it (i.e., if it has been placed with respect to another widget),
+    // then take that into account.
     widgets.forEach(widget => {
       if (!widget.parent) {
-        this.addToMainArea(widget, { activate: false });
+        this.addToMainArea(widget, {
+          ...this._addOptionsCache.get(widget),
+          activate: false
+        });
       }
     });
+    this._addOptionsCache.clear();
 
     // In case the active widget in the dock panel is *not* the active widget
     // of the application, defer to the application.
@@ -426,6 +432,14 @@ class ApplicationShell extends Widget {
     let mode = options.mode || 'tab-after';
 
     dock.addWidget(widget, { mode, ref });
+
+    // The dock panel doesn't account for placement information while
+    // in single document mode, so upon rehydrating any widgets that were
+    // added will not be in the correct place. Cache the placement information
+    // here so that we can later rehydrate correctly.
+    if (dock.mode === 'single-document') {
+      this._addOptionsCache.set(widget, options);
+    }
 
     if (options.activate !== false) {
       dock.activateWidget(widget);
