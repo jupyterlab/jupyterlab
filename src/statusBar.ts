@@ -56,7 +56,7 @@ class StatusBar extends Widget implements IStatusBar {
     let splitContainer = this._splitContainer = new SplitPanel({
       orientation: 'horizontal',
       renderer: SplitPanel.defaultRenderer,
-      spacing: 1,
+      spacing: 5, // this should match the --jp-statusbar-margin
     });
     splitContainer.addClass(STATUS_BAR_SPLIT_CONTAINER_CLASS);
 
