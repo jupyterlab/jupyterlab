@@ -525,14 +525,13 @@ class ClientSession implements IClientSession {
     let model = find(manager.running(), item => {
       return item.path === this._path;
     });
-    if (!model) {
-      return;
-    }
-    try {
-      let session = manager.connectTo(model);
-      this._handleNewSession(session);
-    } catch (err) {
-      this._handleSessionError(err);
+    if (model) {
+      try {
+        let session = manager.connectTo(model);
+        this._handleNewSession(session);
+      } catch (err) {
+        this._handleSessionError(err);
+      }
     }
     await this._startIfNecessary();
     this._isReady = true;
