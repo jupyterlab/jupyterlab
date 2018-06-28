@@ -7,13 +7,11 @@
     min-width: 500px;
 }
 
-.jq-status-bar-side {
+.jp-status-bar-side {
     min-height: 500px;
 }
 
-.jq-status-bar-item {
-    margin: 5px;
-    font-size: xx-small;
-    min-height: var(--jp-private-menu-item-height);
-    min-width: var(--jp-private-menu-item-width);
+.jp-status-bar-item {
+    min-height: var(--jp-private-menubar-height);
+    min-width: var(--jp-private-menubar-height);
 }
