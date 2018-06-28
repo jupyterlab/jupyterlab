@@ -10,7 +10,7 @@ import {
     IStatusBar
 } from './../statusBar';
 
-import { VirtualDOM, h } from '@phosphor/virtualdom';
+import { VirtualDOM, VirtualText, h } from '@phosphor/virtualdom';
 
 export
 class HelloStatus extends Widget {
@@ -18,10 +18,8 @@ class HelloStatus extends Widget {
         super();
 
         this._text = `Hello ${subject}!`;
-    }
 
-    onAfterAttach() {
-        VirtualDOM.render(h.p(this._text), this.node);
+        VirtualDOM.render(h.div(new VirtualText(this._text)), this.node);
     }
 
     private _text: string;
@@ -31,18 +29,19 @@ class HelloStatus extends Widget {
  * Initialization data for the statusbar extension.
  */
 export
-const helloStatusItem: JupyterLabPlugin<HelloStatus> = {
+const helloStatusItem: JupyterLabPlugin<void> = {
     id: 'jupyterlab-statusbar/default-items:hello-world',
     autoStart: true,
     requires: [IStatusBar],
     activate: (_app: JupyterLab, statusBar: IStatusBar) => {
-        console.log('Initialized hello status item!');
-        console.log('aksjdfhlaksjdhflkajshdf akdsjhfkaj!');
-        let helloStatus =  new HelloStatus('world');
-        let helloStatusOpts = { align: 'left' } as IStatusBar.IStatusItemOptions;
+        statusBar.registerStatusItem(
+            'hello-world-status-item-left', new HelloStatus('left world'), { align: 'left' });
+        statusBar.registerStatusItem(
+            'hello-world-status-item-left-2', new HelloStatus('left world 2'), { align: 'left' });
 
-        statusBar.registerStatusItem('hello-world-status-item', helloStatus, helloStatusOpts);
-
-        return helloStatus;
+        statusBar.registerStatusItem(
+            'hello-world-status-item-right', new HelloStatus('right world'), { align: 'right' });
+        statusBar.registerStatusItem(
+            'hello-world-status-item-right-2', new HelloStatus('right world 2'), { align: 'right' });
     }
 };
