@@ -52,7 +52,7 @@ classic Jupyter Notebook.
 Stability of JupyterLab
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-The current beta release of JupyterLab is stable for daily use.  
+The current beta release of JupyterLab is stable for daily use.
 Likewise, all future releases in the beta series will be stable for daily use.
 
 .. _classic:
