@@ -290,6 +290,9 @@ might want to use them in your extensions.
 - ``@jupyterlab/application:ILayoutRestorer``: An interface to the application layout
   restoration functionality. Use this to have your activities restored across
   page loads.
+- ``@jupyterlab/application:IMimeDocumentTracker``: An instance tracker for documents
+  rendered using a mime renderer extension. Use this if you want to list and interact
+  with documents rendered by such extensions.
 - ``@jupyterlab/application:IRouter``: The URL router used by the application.
   Use this to add custom URL-routing for your extension (e.g., to invoke
   a command if the user navigates to a sub-path).
@@ -300,6 +303,9 @@ might want to use them in your extensions.
 - ``@jupyterlab/apputils:IThemeManager``: An interface to the theme manager for the application.
   Most extensions will not need to use this, as they can register a
   `theme extension <#themes>`__.
+- ``@jupyterlab/apputils:IWindowResolver``: An interface to a window resolver for the
+  application. JupyterLab workspaces are given a name, which are determined using
+  the window resolver. Require this if you want to use the name of the current workspace.
 - ``@jupyterlab/codeeditor:IEditorServices``: An interface to the text editor provider
   for the application. Use this to create new text editors and host them in your
   UI elements.
