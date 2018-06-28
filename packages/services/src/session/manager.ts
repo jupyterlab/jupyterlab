@@ -209,7 +209,7 @@ class SessionManager implements Session.IManager {
    * Connect to a running session.  See also [[connectToSession]].
    */
   connectTo(model: Session.IModel): Session.ISession {
-    const session = Session.connectTo(model, this.serverSettings)
+    const session = Session.connectTo(model, this.serverSettings);
     this._onStarted(session);
     return session;
   }
