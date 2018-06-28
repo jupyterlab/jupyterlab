@@ -199,19 +199,17 @@ describe('session', () => {
   describe('Session.connectTo()', () => {
 
     it('should connect to a running session', () => {
-      return Session.connectTo(defaultSession.model).then(newSession => {
-        expect(newSession.id).to.be(defaultSession.id);
-        expect(newSession.kernel.id).to.be(defaultSession.kernel.id);
-        expect(newSession).to.not.be(defaultSession);
-        expect(newSession.kernel).to.not.be(defaultSession.kernel);
-      });
+      let newSession = Session.connectTo(defaultSession.model);
+      expect(newSession.id).to.be(defaultSession.id);
+      expect(newSession.kernel.id).to.be(defaultSession.kernel.id);
+      expect(newSession).to.not.be(defaultSession);
+      expect(newSession.kernel).to.not.be(defaultSession.kernel);
     });
 
     it('should accept server settings', () => {
       let serverSettings = makeSettings();
-      return Session.connectTo(defaultSession.model, serverSettings).then(session => {
-        expect(session.id).to.be.ok();
-      });
+      const session = Session.connectTo(defaultSession.model, serverSettings);
+      expect(session.id).to.be.ok();
     });
 
   });
@@ -406,48 +404,43 @@ describe('session', () => {
     context('#isDisposed', () => {
 
       it('should be true after we dispose of the session', () => {
-        return Session.connectTo(defaultSession.model).then(session => {
-          expect(session.isDisposed).to.be(false);
-          session.dispose();
-          expect(session.isDisposed).to.be(true);
-        });
+        const session = Session.connectTo(defaultSession.model);
+        expect(session.isDisposed).to.be(false);
+        session.dispose();
+        expect(session.isDisposed).to.be(true);
       });
 
       it('should be safe to call multiple times', () => {
-        return Session.connectTo(defaultSession.model).then(session => {
-          expect(session.isDisposed).to.be(false);
-          expect(session.isDisposed).to.be(false);
-          session.dispose();
-          expect(session.isDisposed).to.be(true);
-          expect(session.isDisposed).to.be(true);
-        });
+        const session = Session.connectTo(defaultSession.model);
+        expect(session.isDisposed).to.be(false);
+        expect(session.isDisposed).to.be(false);
+        session.dispose();
+        expect(session.isDisposed).to.be(true);
+        expect(session.isDisposed).to.be(true);
       });
     });
 
     context('#dispose()', () => {
 
       it('should dispose of the resources held by the session', () => {
-        return Session.connectTo(defaultSession.model).then(session => {
-          session.dispose();
-          expect(session.isDisposed).to.be(true);
-        });
+        const session = Session.connectTo(defaultSession.model);
+        session.dispose();
+        expect(session.isDisposed).to.be(true);
       });
 
       it('should be safe to call twice', () => {
-        return Session.connectTo(defaultSession.model).then(session => {
-          session.dispose();
-          expect(session.isDisposed).to.be(true);
-          session.dispose();
-          expect(session.isDisposed).to.be(true);
-        });
+        const session = Session.connectTo(defaultSession.model);
+        session.dispose();
+        expect(session.isDisposed).to.be(true);
+        session.dispose();
+        expect(session.isDisposed).to.be(true);
       });
 
       it('should be safe to call if the kernel is disposed', () => {
-        return Session.connectTo(defaultSession.model).then(session => {
-          session.kernel.dispose();
-          session.dispose();
-          expect(session.isDisposed).to.be(true);
-        });
+        const session = Session.connectTo(defaultSession.model);
+        session.kernel.dispose();
+        session.dispose();
+        expect(session.isDisposed).to.be(true);
       });
 
     });
@@ -476,12 +469,11 @@ describe('session', () => {
         expectFailure(defaultSession.setPath(uuid()), done);
       });
 
-      it('should fail if the session is disposed', (done) => {
-        Session.connectTo(defaultSession.model).then(session => {
-          session.dispose();
-          let promise = session.setPath(uuid());
-          expectFailure(promise, done, 'Session is disposed');
-        }).catch(done);
+      it('should fail if the session is disposed', async () => {
+        const session = Session.connectTo(defaultSession.model);
+        session.dispose();
+        let promise = session.setPath(uuid());
+        await expectFailure(promise, null, 'Session is disposed');
       });
 
     });
@@ -510,12 +502,11 @@ describe('session', () => {
         expectFailure(defaultSession.setType(uuid()), done);
       });
 
-      it('should fail if the session is disposed', (done) => {
-        Session.connectTo(defaultSession.model).then(session => {
-          session.dispose();
-          let promise = session.setPath(uuid());
-          expectFailure(promise, done, 'Session is disposed');
-        }).catch(done);
+      it('should fail if the session is disposed', async () => {
+        const session = Session.connectTo(defaultSession.model);
+        session.dispose();
+        let promise = session.setPath(uuid());
+        await expectFailure(promise, null, 'Session is disposed');
       });
 
     });
@@ -544,12 +535,11 @@ describe('session', () => {
         expectFailure(defaultSession.setName(uuid()), done);
       });
 
-      it('should fail if the session is disposed', (done) => {
-        Session.connectTo(defaultSession.model).then(session => {
-          session.dispose();
-          let promise = session.setPath(uuid());
-          expectFailure(promise, done, 'Session is disposed');
-        });
+      it('should fail if the session is disposed', async () => {
+        const session = Session.connectTo(defaultSession.model);
+        session.dispose();
+        let promise = session.setPath(uuid());
+        await expectFailure(promise, null, 'Session is disposed');
       });
 
     });
@@ -643,25 +633,17 @@ describe('session', () => {
         expectFailure(defaultSession.shutdown(), done, '');
       });
 
-      it('should fail if the session is disposed', (done) => {
-        Session.connectTo(defaultSession.model).then(session => {
-          session.dispose();
-          expectFailure(session.shutdown(), done, 'Session is disposed');
-        }).catch(done);
+      it('should fail if the session is disposed', async () => {
+        const session = Session.connectTo(defaultSession.model);
+        session.dispose();
+        await expectFailure(session.shutdown(), null, 'Session is disposed');
       });
 
-      it('should dispose of all session instances', () => {
-        let session0: Session.ISession;
-        let session1: Session.ISession;
-        return startNew().then(s => {
-          session0 = s;
-          return Session.connectTo(session0.model);
-        }).then(s => {
-          session1 = s;
-          return session0.shutdown();
-        }).then(() => {
-          expect(session1.isDisposed).to.be(true);
-        });
+      it('should dispose of all session instances', async () => {
+        let session0 = await startNew();
+        let session1 = Session.connectTo(session0.model);
+        await session0.shutdown();
+        expect(session1.isDisposed).to.be(true);
       });
 
     });

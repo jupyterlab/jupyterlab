@@ -170,19 +170,17 @@ describe('kernel', () => {
 
     it('should connect to an exisiting kernel', () => {
       let id = defaultKernel.id;
-      return Kernel.connectTo(defaultKernel.model).then(kernel => {
-        expect(kernel.id).to.be(id);
-        kernel.dispose();
-      });
+      const kernel = Kernel.connectTo(defaultKernel.model);
+      expect(kernel.id).to.be(id);
+      kernel.dispose();
     });
 
     it('should accept server settings', () => {
       let id = defaultKernel.id;
       let serverSettings = makeSettings();
-      return Kernel.connectTo(defaultKernel.model, serverSettings).then(kernel => {
-        expect(kernel.id).to.be(id);
-        kernel.dispose();
-      });
+      const kernel = Kernel.connectTo(defaultKernel.model, serverSettings);
+      expect(kernel.id).to.be(id);
+      kernel.dispose();
     });
 
   });

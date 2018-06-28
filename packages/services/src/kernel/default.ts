@@ -1142,10 +1142,9 @@ namespace DefaultKernel {
    * If the kernel was already started via `startNewKernel`, we return its
    * `Kernel.IModel`.
    *
-   * Otherwise, we attempt to find to the existing
-   * kernel.
-   * The promise is fulfilled when the kernel is found,
-   * otherwise the promise is rejected.
+   * Otherwise, we attempt to find an existing kernel by connecting to the
+   * server. The promise is fulfilled when the kernel is found, otherwise the
+   * promise is rejected.
    */
   export
   function findById(id: string, settings?: ServerConnection.ISettings): Promise<Kernel.IModel> {
@@ -1212,14 +1211,14 @@ namespace DefaultKernel {
    *
    * @param settings - The server settings for the request.
    *
-   * @returns A promise that resolves with the kernel object.
+   * @returns The kernel object.
    *
    * #### Notes
    * If the kernel was already started via `startNewKernel`, the existing
    * Kernel object info is used to create another instance.
    */
   export
-  function connectTo(model: Kernel.IModel, settings?: ServerConnection.ISettings): Promise<Kernel.IKernel> {
+  function connectTo(model: Kernel.IModel, settings?: ServerConnection.ISettings): Kernel.IKernel {
     return Private.connectTo(model, settings);
   }
 
@@ -1269,6 +1268,8 @@ namespace Private {
 
   /**
    * Find a kernel by id.
+   *
+   * Will reach out to the server if needed to find the kernel.
    */
   export
   function findById(id: string, settings?: ServerConnection.ISettings): Promise<Kernel.IModel> {
@@ -1389,11 +1390,9 @@ namespace Private {
 
   /**
    * Connect to a running kernel.
-   *
-   * TODO: why is this function async?
    */
   export
-  async function connectTo(model: Kernel.IModel, settings?: ServerConnection.ISettings): Promise<Kernel.IKernel> {
+  function connectTo(model: Kernel.IModel, settings?: ServerConnection.ISettings): Kernel.IKernel {
     let serverSettings = settings || ServerConnection.makeSettings();
     let kernel = find(runningKernels, value => {
       return value.id === model.id;

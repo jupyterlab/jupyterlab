@@ -191,11 +191,10 @@ class KernelManager implements Kernel.IManager {
    *
    * @returns A promise that resolves with the new kernel instance.
    */
-  connectTo(model: Kernel.IModel): Promise<Kernel.IKernel> {
-    return Kernel.connectTo(model, this.serverSettings).then(kernel => {
-      this._onStarted(kernel);
-      return kernel;
-    });
+  connectTo(model: Kernel.IModel): Kernel.IKernel {
+    let kernel = Kernel.connectTo(model, this.serverSettings);
+    this._onStarted(kernel);
+    return kernel;
   }
 
   /**

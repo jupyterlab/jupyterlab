@@ -214,9 +214,8 @@ describe('kernel/manager', () => {
 
       it('should connect to an existing kernel', () => {
         let id = kernel.id;
-        return manager.connectTo(kernel.model).then(kernel => {
-          expect(kernel.model.id).to.be(id);
-        });
+        let newConnection = manager.connectTo(kernel.model);
+        expect(newConnection.model.id).to.be(id);
       });
 
       it('should emit a runningChanged signal', (done) => {
@@ -224,7 +223,7 @@ describe('kernel/manager', () => {
           done();
         });
         Kernel.startNew().then(k => {
-          return manager.connectTo(k.model);
+          manager.connectTo(k.model);
         }).catch(done);
       });
 
