@@ -772,9 +772,9 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
       const current = getCurrent(args);
 
       if (current) {
-        const { context, notebook } = current;
+        const { context, content } = current;
 
-        let cell = notebook.activeCell;
+        let cell = content.activeCell;
         let path = context.path;
         // ignore action in non-code cell
         if (!cell || cell.model.type !== 'code') {
