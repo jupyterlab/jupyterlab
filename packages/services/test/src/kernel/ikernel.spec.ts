@@ -423,15 +423,15 @@ describe('Kernel.IKernel', () => {
 
   context('#isDisposed', () => {
 
-    it('should be true after we dispose of the kernel', async () => {
-      let kernel = await Kernel.connectTo(defaultKernel.model);
+    it('should be true after we dispose of the kernel', () => {
+      let kernel = Kernel.connectTo(defaultKernel.model);
       expect(kernel.isDisposed).to.be(false);
       kernel.dispose();
       expect(kernel.isDisposed).to.be(true);
     });
 
-    it('should be safe to call multiple times', async () => {
-      let kernel = await Kernel.connectTo(defaultKernel.model);
+    it('should be safe to call multiple times', () => {
+      let kernel = Kernel.connectTo(defaultKernel.model);
       expect(kernel.isDisposed).to.be(false);
       expect(kernel.isDisposed).to.be(false);
       kernel.dispose();
@@ -442,16 +442,16 @@ describe('Kernel.IKernel', () => {
 
   context('#dispose()', () => {
 
-    it('should dispose of the resources held by the kernel', async () => {
-      let kernel = await Kernel.connectTo(defaultKernel.model);
+    it('should dispose of the resources held by the kernel', () => {
+      let kernel = Kernel.connectTo(defaultKernel.model);
       let future = kernel.requestExecute({ code: 'foo' });
       expect(future.isDisposed).to.be(false);
       kernel.dispose();
       expect(future.isDisposed).to.be(true);
     });
 
-    it('should be safe to call twice', async () => {
-      const kernel = await Kernel.connectTo(defaultKernel.model);
+    it('should be safe to call twice', () => {
+      const kernel = Kernel.connectTo(defaultKernel.model);
       let future = kernel.requestExecute({ code: 'foo' });
       expect(future.isDisposed).to.be(false);
       kernel.dispose();
@@ -738,7 +738,7 @@ describe('Kernel.IKernel', () => {
 
     it('should dispose of all kernel instances', async () => {
       let kernel0 = await Kernel.startNew();
-      let kernel1 = await Kernel.connectTo(kernel0.model);
+      let kernel1 = Kernel.connectTo(kernel0.model);
       await kernel0.ready;
       await kernel1.ready;
       await kernel0.shutdown();

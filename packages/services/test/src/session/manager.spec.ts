@@ -264,12 +264,11 @@ describe('session/manager', () => {
     describe('#connectTo()', () => {
 
       it('should connect to a running session', () => {
-        return manager.connectTo(session.model).then(newSession => {
-          expect(newSession.id).to.be(session.id);
-          expect(newSession.kernel.id).to.be(session.kernel.id);
-          expect(newSession).to.not.be(session);
-          expect(newSession.kernel).to.not.be(session.kernel);
-        });
+        const newSession = manager.connectTo(session.model);
+        expect(newSession.id).to.be(session.id);
+        expect(newSession.kernel.id).to.be(session.kernel.id);
+        expect(newSession).to.not.be(session);
+        expect(newSession.kernel).to.not.be(session.kernel);
       });
 
     });
