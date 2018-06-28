@@ -78,7 +78,7 @@ class SessionManager implements Session.IManager {
   }
 
   /**
-   * Test whether the terminal manager is disposed.
+   * Test whether the manager is disposed.
    */
   get isDisposed(): boolean {
     return this._isDisposed;
