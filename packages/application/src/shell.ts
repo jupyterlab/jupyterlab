@@ -227,6 +227,8 @@ class ApplicationShell extends Widget {
       return;
     }
 
+    const applicationCurrentWidget = this.currentWidget;
+
     // Changing the mode of the dock panel can result in mulitple layout
     // modified signals being emitted as the widgets are rearranged.
     // During that time, it may not be reliable to query the dock panel
@@ -284,8 +286,8 @@ class ApplicationShell extends Widget {
 
     // In case the active widget in the dock panel is *not* the active widget
     // of the application, defer to the application.
-    if (this.currentWidget) {
-      dock.activateWidget(this.currentWidget);
+    if (applicationCurrentWidget) {
+      dock.activateWidget(applicationCurrentWidget);
     }
 
     // Set the mode data attribute on the document body.
