@@ -1211,7 +1211,7 @@ namespace DefaultKernel {
    *
    * @param settings - The server settings for the request.
    *
-   * @returns A promise that resolves with the kernel object.
+   * @returns The kernel object.
    *
    * #### Notes
    * If the kernel was already started via `startNewKernel`, the existing

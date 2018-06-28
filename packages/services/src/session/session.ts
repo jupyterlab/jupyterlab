@@ -271,7 +271,7 @@ namespace Session {
    *
    * @param settigns - The server settings.
    *
-   * @returns A promise that resolves with the session instance.
+   * @returns The session instance.
    *
    * #### Notes
    * If the session was already started via `startNew`, the existing
