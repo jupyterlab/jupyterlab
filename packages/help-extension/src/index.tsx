@@ -219,8 +219,8 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
           // Create the header of the about dialog
           let headerLogo = (<img src={kernelIconUrl} />);
           let title = (
-            <span className='jp-About-header'>,
-              {headerLogo},
+            <span className='jp-About-header'>
+              {headerLogo}
               <div className='jp-About-header-info'>{kernelName}</div>
             </span>
           );
@@ -281,7 +281,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
       );
       let title = (
         <span className='jp-About-header'>
-          {headerLogo},
+          {headerLogo}
           <div className='jp-About-header-info'>
             {headerWordmark}
             {versionInfo}
