@@ -202,9 +202,6 @@
   background-image: var(--jp-icon-run);
 }
 
-.jp-StepIcon {
-  background-image: var(--jp-icon-step);
-}
 
 .jp-SaveIcon {
   background-image: var(--jp-icon-save);
