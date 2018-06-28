@@ -562,6 +562,21 @@ namespace CodeEditor {
   export
   interface IConfig {
     /**
+     * User preferred font family for text editors.
+     */
+    fontFamily: string | null;
+
+    /**
+     * User preferred size in pixel of the font used in text editors.
+     */
+    fontSize: number | null;
+
+    /**
+     * User preferred text line height, as a multiplier of font size.
+     */
+    lineHeight: number | null;
+
+    /**
      * Whether line numbers should be displayed.
      */
     lineNumbers: boolean;
@@ -602,6 +617,9 @@ namespace CodeEditor {
    */
   export
   let defaultConfig: IConfig = {
+    fontFamily: null,
+    fontSize: null,
+    lineHeight: null,
     lineNumbers: false,
     lineWrap: true,
     readOnly: false,
