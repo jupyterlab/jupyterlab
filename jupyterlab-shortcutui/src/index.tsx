@@ -6,9 +6,9 @@ import {
   ISettingRegistry
 } from '@jupyterlab/coreutils';
 
-import {
-  JSONValue
-} from '@phosphor/coreutils';
+// import {
+//   JSONValue //, JSONObject
+// } from '@phosphor/coreutils';
 
 import {
   ICommandPalette
@@ -22,81 +22,62 @@ import * as React from 'react';
 
 import '../style/index.css';
 
+//import { CommandPalette } from '@phosphor/widgets';
+
+
+interface UserInterfaceProps {
+  commandList: string[];
+  settingRegistry: ISettingRegistry;
+  shortcutPlugin: string;
+  categories: Array<string>;
+ }
+
+ interface UserInterfaceState {
+   shortcutList: Object[];
+   shortcutsFetched: boolean;
+ }
+
 interface ShortcutListProps {
-  commandList: string[];
-  settingRegistry: ISettingRegistry;
-  shortcutPlugin: string;
+  shortcuts: Object[]
+  handleUpdate: Function;
+  resetShortcut: Function;
 }
 
- interface ShortcutListItemProps {
-  command: string;
+interface TopNavProps {
+  resetShortcuts: Function;
+}
+
+interface ShortcutCategoryProps {
   category: string;
-  settingRegistry: ISettingRegistry;
-  shortcutPlugin: string;
+  shortcuts: Object[];
+  handleUpdate: Function;
+  resetShortcut: Function;
 }
 
- interface ShortcutListItemState {
-   value: string;
-   keyBinding: JSONValue;
-   keyBindingFetched: boolean;
-   source: string;
-   displayInput: boolean;
- }
-
- interface ShortcutMenuProps {
-   categoryList: Array<string>;
- }
-
- interface ShortcutMenuItemProps {
-   category: string;
- }
-
- interface UserInterfaceProps {
-  commandList: string[];
-  settingRegistry: ISettingRegistry;
-  shortcutPlugin: string;
-  categoryList: Array<string>;
- }
-
- interface ShortcutCategoryProps {
+interface ShortcutItemProps {
+  command: Object;
   category: string;
-  commandsinCategory: string[];
-  settingRegistry: ISettingRegistry;
-  shortcutPlugin: string;
+  handleUpdate: Function;
+  resetShortcut: Function;
 }
 
-class ShortcutListItem extends React.Component<ShortcutListItemProps, ShortcutListItemState> {
+interface ShortcutItemState {
+  value: string;
+  displayInput: boolean;
+}
+
+/* React component for each command shortcut item */
+class ShortcutItem extends React.Component<ShortcutItemProps, ShortcutItemState> {
   constructor(props) {
     super(props);
     this.state = {
       value: "",
-      keyBindingFetched: false,
-      keyBinding: undefined,
-      source: "Default",
-      displayInput:false
+      displayInput: false
     }
   }
 
-  componentDidMount() {
-    this.getCommandKeybinding(this.state.keyBinding);
-  }
-
-  componentWillReceiveProps() {
-    this.getCommandKeybinding(this.state.keyBinding);
-  }
-
-  handleUpdate = () => {
-    let removeKeybindingPromise = this.props.settingRegistry.remove(this.props.shortcutPlugin, this.props.command);
-    let setKeybindingPromise = this.props.settingRegistry.set(this.props.shortcutPlugin, this.props.command, {command: this.props.command, keys: [this.state.value], selector: this.props.command['selector']});
-    Promise.all([removeKeybindingPromise, setKeybindingPromise]);
-    this.setState({
-      value:"",
-      source: "Custom"
-    });
-    this.getCommandKeybinding(this.state.keyBinding);
-  }
-
-  handleInput = (event) => {
+  /* Parse and normalize user input */
+  handleInput = (event: any) => {
     if (event.key == "Backspace"){
       this.setState({value: this.state.value.substr(0, this.state.value.lastIndexOf(' ') + 1)});
     }
@@ -114,156 +95,105 @@ class ShortcutListItem extends React.Component<ShortcutListItemProps, ShortcutLi
     }
   }
 
-  updateInputValue = (event) => {
+  /* Update input box's displayed value */
+  updateInputValue = (event: any) => {
     this.setState({
       value: event.target.value
     });
   }
 
-  resetKeybinding = () => {
-    this.props.settingRegistry.remove(this.props.shortcutPlugin, this.props.command).then(result => {
-      this.setState(prevState => ({
-        displayInput: !prevState.displayInput,
-        source: "Default"
-      }));
-      this.getCommandKeybinding(this.state.keyBinding)
-    });
-  }
-
-  getCommandKeybinding = (keyBinding: JSONValue) => {
-    this.props.settingRegistry.get(this.props.shortcutPlugin, this.props.command).then(result => {
-      if(result != undefined) {
-        this.setState({keyBinding :result.composite});
-      }
-    }).then(result => 
-      this.setState({keyBindingFetched: true}));
-  }
-
-  deleteShortcut = () => {
-    let removeKeybindingPromise = this.props.settingRegistry.remove(this.props.shortcutPlugin, this.props.command);
-    let setKeybindingPromise = this.props.settingRegistry.set(this.props.shortcutPlugin, this.props.command, {command: this.props.command, keys: [""], selector: this.props.command['selector']});
-    Promise.all([removeKeybindingPromise, setKeybindingPromise]);
-    this.setState({
-      value: "",
-      source: "Custom"
-    });
-    this.getCommandKeybinding(this.state.keyBinding)
-  }
-
+  /* Toggle display state of input area */
   toggleInput = () => {
     this.setState(prevState => ({
-      displayInput: !prevState.displayInput
+      displayInput: !prevState.displayInput,
+      value: ""
     }));
   }
 
-  render() {
+  /* Generate command label from id */
+  createLabel = (): string => {
     let commandLabel: string;
     let commandLabelArray: string[]
-    commandLabel = this.props.command.split(":")[1].replace(/-/g, " ");
+    commandLabel = this.props.command['composite']['command'].split(":")[1].replace(/-/g, " ");
     commandLabelArray = commandLabel.split(" ");
     commandLabelArray = commandLabelArray.map(function(item) {
       return item.charAt(0).toUpperCase() + item.substring(1);
     })
     commandLabel = commandLabelArray.toString().replace(/,/g, " ");
-    if(!this.state.keyBindingFetched) { 
-      return null
-    };
+    return commandLabel;
+  }
+
+  render() {
     return (
       <div className="jp-cmditem">
         <div className="jp-label-container">
-          <div className="jp-label">{commandLabel}</div>
+          <div className="jp-label">{this.createLabel()}</div>
         </div>
         <div className="jp-shortcut-container">
-          {(this.state.keyBinding === undefined || this.state.keyBinding['keys'][0] === "" ? null : <button className="jp-shortcut" onClick={this.deleteShortcut}>{this.state.keyBinding['keys']}</button>)}
+          <button className="jp-shortcut" onClick={() => this.props.handleUpdate(this.props.command, "")}>{this.props.command['composite']['keys']}</button>
           <span className="jp-input-plus" onClick={this.toggleInput}>+</span>
           {(this.state.displayInput ? (
             <div className="jp-input-container">
               <input className="jp-input" value={this.state.value} onChange={this.updateInputValue} onKeyDown={this.handleInput}></input>
-              <button className="jp-submit" onClick={this.handleUpdate}>Submit</button>
+              <button className="jp-submit" onClick={() => {this.props.handleUpdate(this.props.command, this.state.value); this.toggleInput();}}>Submit</button>
             </div>
-          )
-            : (
+          ) : (
             null
             )
           )}
         </div>
         <div className="jp-source-container">
-          <div className="jp-source">{this.state.source}</div>
-          {(this.state.source === "Custom") ? <a className="jp-reset" onClick={this.resetKeybinding}>reset</a>: null}
+          <div className="jp-source">{"Default"}</div>
+          <a className="jp-reset" onClick={() =>this.props.resetShortcut(this.props.command['composite']['command'])}>reset</a>
         </div>
       </div>
     );
   }
 }
 
+/* React component for listing each command category */
 class ShortcutCategory extends React.Component<ShortcutCategoryProps, {}> {
   constructor(props) {
     super(props);
   }
 
   render() {
-    let commandItems: Array<JSX.Element> = new Array<JSX.Element>();
-    this.props.commandsinCategory.forEach(command => { 
-      commandItems.push(<ShortcutListItem shortcutPlugin = {this.props.shortcutPlugin} category={this.props.category} key={command} command={command} settingRegistry={this.props.settingRegistry}/>);
-    });
+    console.log(this.props.shortcuts);
     return (
       <div className="jp-shortcut-category">
-        <h3>{this.props.category}</h3>
-        {commandItems}
+        <p>{this.props.category}</p>
+        {this.props.shortcuts.map(obj => <ShortcutItem key={obj['composite']['command']} resetShortcut={this.props.resetShortcut} command={obj} category={this.props.category} handleUpdate={this.props.handleUpdate}/>)}
       </div>
     )
   }
 }
 
+/*React component for top navigation*/
+class TopNav extends React.Component<TopNavProps,{}> {
+  render() {return (
+    <div className="jp-shortcuttopnav">
+      <a className="jp-link" onClick={() => this.props.resetShortcuts()}>Reset All</a>
+      <div className = "jp-searchcontainer">
+        <input className="jp-search"></input>
+      </div>
+      <a className="jp-link">Advanced Editor</a>
+    </div>
+  )}
+}
+
+/* React component for list of all categories and shortcuts */
 class ShortcutList extends React.Component<ShortcutListProps, {}> {
-  constructor(props) {
-    super(props);
-  }
-
-  resetKeybindings = () => {
-    this.props.settingRegistry.load(this.props.shortcutPlugin).then(settings => Object.keys(settings.user).forEach(key => {
-      this.props.settingRegistry.remove(this.props.shortcutPlugin, key);
-    })).then(settings => this.forceUpdate());
-  }
-
-  createShortcutList = () => {
-    let shortCutListItems: Array<JSX.Element> = new Array<JSX.Element>();
-    let commandCategories: Array<string> = new Array<string>();
-    this.props.commandList.forEach(command => { 
-      if(commandCategories.indexOf(command.split(":")[0]) === -1) {
-        commandCategories.push(command.split(":")[0]);
-      }
-    });
-    commandCategories.forEach(category => {
-      let commandItems: Array<string> = new Array<string>();
-      this.props.commandList.forEach(command => {
-        if(command.split(":")[0] === category) {
-          commandItems.push(command);
-        }
-    });
-    shortCutListItems.push(<ShortcutCategory key={category} category={category} commandsinCategory={commandItems} settingRegistry={this.props.settingRegistry} shortcutPlugin={this.props.shortcutPlugin} />);
-  });
-    return shortCutListItems;
-  }
-
   render() {
     return (
       <div className="jp-shortcutlist">
-        <div className="jp-shortcuttopnav">
-          <a className="jp-link" onClick={this.resetKeybindings}>Reset All</a>
-          <div className = 'jp-searchcontainer'>
-            <input className="jp-search"></input>
-          </div>
-          <a className="jp-link">Advanced Editor</a>
-        </div>
         <div className="jp-shortcutlistheader">
           <div className="jp-col1">Command</div>
           <div className="jp-col2">Shortcut</div>
-          <div className='jp-col3'>Source</div>
+          <div className="jp-col3">Source</div>
         </div>
         <div className="jp-shortcutlistmain">
           <div className="jp-shortcutlistcontainer">
-            {this.createShortcutList()}
+            {this.props.shortcuts.map((obj, index) => <ShortcutCategory handleUpdate={this.props.handleUpdate} resetShortcut={this.props.resetShortcut} key={obj['category']} category={obj['category']} shortcuts={obj['shortcuts']}/>)}
           </div>
         </div>
       </div>
@@ -271,51 +201,71 @@ class ShortcutList extends React.Component<ShortcutListProps, {}> {
   }
 }
 
-class ShortcutMenuItem extends React.Component<ShortcutMenuItemProps, {}> {
+class ShortcutUI extends React.Component<UserInterfaceProps, UserInterfaceState> {
   constructor(props) {
     super(props);
   }
 
-  render() {
-    return (
-      <div className="jp-shortcutmenuitem">
-        <a href="#" className="jp-shortcutmenulabel">{this.props.category}</a>
-      </div>
+  state = {
+    shortcutList: undefined,
+    shortcutsFetched: false
+  }
+
+  componentDidMount() {
+    this.getInitialState();
+  }
+
+  getInitialState = () => {
+    console.log('getting initial state');
+    let shortcutList = this.props.commandList.map(command => { 
+      return this.getCommandShortcut(command);
+      }
     )
-  }
-}
 
-class ShortcutMenu extends React.Component<ShortcutMenuProps, {}> {
-  constructor(props) {
-    super(props);
+    Promise.all(shortcutList).then(shortcuts => {
+      let commandShortcuts = this.props.categories.map(category => {
+        return {category: category, shortcuts: shortcuts.filter(shortcut => shortcut.composite['command'].split(":")[0] === category)};
+      })
+      this.setState({shortcutList: commandShortcuts, shortcutsFetched: true})
+    })
+  }
+
+  /* Reset all shortcuts to their defaults */
+  resetShortcuts = () => {
+    console.log('resetting shortcuts');
+    this.props.settingRegistry.load(this.props.shortcutPlugin).then(settings => Object.keys(settings.user).forEach(key => {
+      this.props.settingRegistry.remove(this.props.shortcutPlugin, key);
+    })).then(() => this.getInitialState());
+  }
+
+  /* Set new shortcut for command, refresh state */
+  handleUpdate = (commandObject: Object, value: string) => {
+    console.log('updating',commandObject,'to',value);
+    let removeKeybindingPromise = this.props.settingRegistry.remove(this.props.shortcutPlugin, commandObject['composite']['command']);
+    let setKeybindingPromise = this.props.settingRegistry.set(this.props.shortcutPlugin, commandObject['composite']['command'], {command: commandObject['composite']['command'], keys: [value], selector: commandObject['composite']['selector']});
+    Promise.all([removeKeybindingPromise, setKeybindingPromise]);
+    this.getInitialState();
+  }
+
+
+  /* Fetch shortcut from SettingRegistry */
+  getCommandShortcut = (commandName: string) => {
+    return this.props.settingRegistry.get(this.props.shortcutPlugin, commandName)}
+
+  
+  resetShortcut = (commandName: string) => {
+    this.props.settingRegistry.remove(this.props.shortcutPlugin, commandName).then(() => this.getInitialState());
   }
 
   render() {
-    let categoryItems: Array<JSX.Element> = new Array<JSX.Element>();
-    this.props.categoryList.forEach(cat =>
-      categoryItems.push(<ShortcutMenuItem category = {cat} key = {cat}/>)
-    )
-    return (
-      <div className="jp-shortcutmenu">
-        <div className="jp-shortcutmenucontainer">
-          {categoryItems}
-        </div>
-      </div>
-    )
-  }
-}
-
-class ShortcutUI extends React.Component<UserInterfaceProps, {}> {
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
+    if (!this.state.shortcutsFetched) {
+      return null
+    }
     return (
       <div className = "jp-shortcutui">
         <div className = 'jp-topwhitespace'></div>
-        <ShortcutMenu categoryList = {this.props.categoryList} />
-        <ShortcutList commandList = {this.props.commandList} settingRegistry = {this.props.settingRegistry} shortcutPlugin = {this.props.shortcutPlugin}/>
+        <TopNav resetShortcuts={this.resetShortcuts}/>
+        <ShortcutList shortcuts={this.state.shortcutList} resetShortcut={this.resetShortcut} handleUpdate={this.handleUpdate}/>
       </div>
     )
   }
@@ -325,39 +275,45 @@ const plugin: JupyterLabPlugin<void> = {
   id: '@jupyterlab/jupyterlab-shortcutui:plugin',
   requires: [ISettingRegistry, ICommandPalette],
   activate: (app: JupyterLab, settingRegistry: ISettingRegistry, palette: ICommandPalette): void => {
-    let categories = ['abcde','bcdef','cdefg','defgh','efghi'];
 
-    let shortcutUI = React.createElement(ShortcutUI, {commandList: app.commands.listCommands(), settingRegistry: settingRegistry, 
-        shortcutPlugin: '@jupyterlab/shortcuts-extension:plugin', categoryList: categories})
+    let commandlist = new Array<string>();
+    settingRegistry.load('@jupyterlab/shortcuts-extension:plugin').then(settings => Object.keys(settings.composite).forEach(key => {
+      commandlist.push(key); })).then(settings => {
+      let categories: Array<string> = new Array<string>();
+      commandlist.forEach(command => { 
+        if(categori
+          es.indexOf(command.split(":")[0]) === -1) {
+          categories.push(command.split(":")[0]);
+        }
+      });
 
+    let shortcutUI = React.createElement(ShortcutUI, {commandList: commandlist, categories: categories, settingRegistry: settingRegistry, shortcutPlugin: '@jupyterlab/shortcuts-extension:plugin'});
     let widget: ReactElementWidget = new ReactElementWidget(shortcutUI);
-
     widget.id = 'jupyterlab-shortcutui';
     widget.title.label = 'Keyboard Shortcut Settings';
     widget.title.closable = true;
     widget.addClass('jp-shortcutWidget');
-
-    // Add an application command
+    
+    /* Add an application command */
     const command: string = 'shortcutui:open';
     app.commands.addCommand(command, {
       label: 'Keyboard Shortcut Settings',
       execute: () => {
         if (!widget.isAttached) {
-          // Attach the widget to the main work area if it's not there
+          /* Attach the widget to the main work area if it's not there */
           app.shell.addToMainArea(widget);
         }
-        // Activate the widget
+        /* Activate the widget */
         app.shell.activateById(widget.id);
       }
     }); 
-
-    palette.addItem({command, category: 'AAA'});
+    palette.addItem({command, category: 'Settings'});
+    })
+    
     },
     autoStart: true
 };
 
 
-/**
- * Export the plugin as default.
- */
+/* Export the plugin as default */
 export default plugin;

@@ -1,4 +1,4 @@
-/*Top Whitespace*/
+/* Top Whitespace */
 .jp-topwhitespace {
     content: " ";
     height:var(--jp-toolbar-micro-height); 
@@ -12,14 +12,14 @@
     position: static;
 }
 
-/*Global/general*/
+/* Global/general */
 .jp-shortcutWidget {
     display: flex;
     flex-direction: column;
     overflow-y: scroll;
 }
 
-/*Top Navigation*/
+/* Top Navigation */
 .jp-shortcuttopnav {
     display: flex;
     padding: 10px;
@@ -27,9 +27,18 @@
     padding-bottom: 60px;
 }
 
+/* Top Navigation links */
 .jp-link {
     color: #64B5F6;
     text-decoration: none;
+}
+
+.jp-link:hover {
+    text-decoration: underline;
+}
+
+.jp-link:active {
+    color: #2916F3;
 }
 
 .jp-link:nth-of-type(1) {
@@ -51,6 +60,8 @@
     width: 50%;
 }
 
+/* Column labels */
+
 .jp-col1 {
     width: 30%;
     text-align: left;
@@ -66,7 +77,7 @@
     text-align: left;
 }
 
-/*SideBar*/
+/* Category Sidebar */
 .jp-shortcutmenu {
     width: 15%;
     height: 100%;
@@ -102,10 +113,10 @@
     background-color: #2196F3;
 }
 
-/*Main Shortcut List*/
+/* Main Shortcut List */
 .jp-shortcutlist {
-    margin-left: 20%;
-    width: 60%;
+    /*margin-left: 20%;*/
+    width: 100%;
     margin-top: 10px;
     display: flex;
     flex-wrap: nowrap;
@@ -135,6 +146,7 @@
     padding-left: 10px;
 }
 
+/* Shortcut command items */
 .jp-cmditem {
     height: 20px;
     padding: 10px;
@@ -142,6 +154,7 @@
     width: 100%;
 }
 
+/* Command label */
 .jp-cmdlabel {
         display: inline-block;
         font: 'Moneserrat';
@@ -152,6 +165,7 @@
         align-self: left; 
 }
 
+/* Command shortcut */
 .jp-shortcut {
         font: "Source Code Pro";
         font-style: "Regular";
@@ -181,6 +195,7 @@
     content: '     ×';
 }
 
+/* Input area */
 .jp-input-container {
     display: inline-block;
     margin-left: 30px;
@@ -234,16 +249,6 @@
     width: 50%;
 }
 
-.jp-shortcut {
-    font-family: "Source Code Pro";
-    font-size: 13px;
-    background: #F4F3F4;
-    border-radius: 2px;
-    border-color: #BDBDBD;
-    border-width: 0.75px;
-    margin-right: 15px;
-}
-
 .jp-source-container {
     order: 3; 
     flex-basis: 20%; 
@@ -252,6 +257,7 @@
 
 .jp-source {
     display: inline-block;
+    color: #616161;
 }
 
 p {
