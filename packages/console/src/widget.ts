@@ -157,6 +157,7 @@ class CodeConsole extends Widget {
 
     this._onKernelChanged();
     this.session.kernelChanged.connect(this._onKernelChanged, this);
+    this.addBanner();
     this.session.statusChanged.connect(this._onKernelStatusChanged, this);
   }
 
@@ -633,6 +634,7 @@ class CodeConsole extends Widget {
       this._banner.dispose();
       this._banner = null;
     }
+    this.addBanner();
   }
 
   /**
@@ -645,7 +647,6 @@ class CodeConsole extends Widget {
       if (!kernel) {
         return;
       }
-      this.addBanner();
       kernel.requestKernelInfo().then(() => {
         if (this.isDisposed || !kernel || !kernel.info) {
           return;
@@ -654,6 +655,8 @@ class CodeConsole extends Widget {
       }).catch(err => {
         console.error('could not get kernel info');
       });
+    } else if (this.session.status === 'restarting') {
+      this.addBanner();
     }
   }
 
