@@ -1,6 +1,6 @@
-# vega3-extension
+# vega4-extension
 
-A JupyterLab extension for rendering Vega and Vega-Lite
+A JupyterLab extension for rendering [Vega](https://vega.github.io/vega) 4 and [Vega-Lite](https://vega.github.io/vega-lite) 2.
 
 ![demo](http://g.recordit.co/USoTkuCOfR.gif)
 
