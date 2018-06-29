@@ -15,11 +15,6 @@ import {
 
 
 /**
- * The extensionmanager-view namespace token.
- */
-const namespace = 'extensionmanagerview';
-
-/**
  * IDs of the commands added by this extension.
  */
 namespace CommandIDs {
@@ -52,22 +47,13 @@ const plugin: JupyterLabPlugin<void> = {
       return;
     }
 
-    const { commands, shell, serviceManager} = app;
+    const { shell, serviceManager} = app;
     const view = new ExtensionView(serviceManager);
 
     view.id = 'extensionmanager.main-view';
-    restorer.add(view, namespace);
     view.title.label = 'Extensions';
+    restorer.add(view, view.id);
     shell.addToLeftArea(view);
-
-
-    // If the layout is a fresh session without saved data, open file view.
-    app.restored.then(layout => {
-      if (layout.fresh) {
-        commands.execute(CommandIDs.showExtensionManager, undefined);
-      }
-    });
-
     addCommands(app, view);
   }
 };
@@ -95,9 +81,9 @@ function addCommands(app: JupyterLab, view: ExtensionView): void {
   commands.addCommand(CommandIDs.toggleExtensionManager, {
     execute: () => {
       if (view.isHidden) {
-        return commands.execute(CommandIDs.showExtensionManager, void 0);
+        return commands.execute(CommandIDs.showExtensionManager, undefined);
       } else {
-        return commands.execute(CommandIDs.hideExtensionManager, void 0);
+        return commands.execute(CommandIDs.hideExtensionManager, undefined);
       }
     }
   });
