@@ -42,8 +42,8 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<void> = {
   id: '@jupyterlab/extensionmanager-extension:plugin',
   autoStart: true,
-  requires: [ISettingRegistry, ILayoutRestorer, IRouter],
-  activate: async (app: JupyterLab, registry: ISettingRegistry, restorer: ILayoutRestorer, router: IRouter) => {
+  requires: [ISettingRegistry, ILayoutRestorer],
+  activate: async (app: JupyterLab, registry: ISettingRegistry, restorer: ILayoutRestorer) => {
     const settings = await registry.load(plugin.id);
     const enabled = settings.composite['enabled'] === true;
 
@@ -59,10 +59,6 @@ const plugin: JupyterLabPlugin<void> = {
     restorer.add(view, view.id);
     shell.addToLeftArea(view);
     addCommands(app, view);
-
-    // If the extension is enabled or disabled, refresh the page.
-    app.restored
-      .then(() => { settings.changed.connect(() => { router.reload(); }); });
   }
 };
 
@@ -73,24 +69,28 @@ const plugin: JupyterLabPlugin<void> = {
 const menu: JupyterLabPlugin<void> = {
   id: '@jupyterlab/extensionmanager-extension:menu',
   autoStart: true,
-  requires: [ISettingRegistry, IMainMenu],
-  activate: async (app: JupyterLab, registry: ISettingRegistry, menu: IMainMenu) => {
-    const { commands } = app;
+  requires: [ISettingRegistry, IMainMenu, IRouter],
+  activate: async (app: JupyterLab, registry: ISettingRegistry, menu: IMainMenu, router: IRouter) => {
     const key = 'enabled';
     const settings = await registry.load(plugin.id);
 
-    commands.addCommand(CommandIDs.enable, {
+    app.commands.addCommand(CommandIDs.enable, {
       label: 'Enable Extension Manager (requires Node.js/npm)',
       isToggled: () => settings.composite[key] === true,
       execute: () => {
         const enabled = settings.composite[key] === true;
 
-        return registry.set(plugin.id, key, !enabled).catch((reason: Error) => {
+        return settings.set(key, !enabled).catch((reason: Error) => {
           console.error(`Failed to set ${plugin.id}:${key}`, reason.message);
         });
       }
     });
     menu.settingsMenu.addGroup([{ command: CommandIDs.enable }]);
+
+    // If the extension is enabled or disabled, refresh the page.
+    app.restored
+      .then(() => { settings.changed.connect(() => { router.reload(); }); });
+
   }
 };
 
