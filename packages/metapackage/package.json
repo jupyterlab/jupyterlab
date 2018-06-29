@@ -51,6 +51,8 @@
     "@jupyterlab/docmanager": "^0.16.2",
     "@jupyterlab/docmanager-extension": "^0.16.2",
     "@jupyterlab/docregistry": "^0.16.2",
+    "@jupyterlab/extensionmanager": "^0.16.0",
+    "@jupyterlab/extensionmanager-extension": "^0.16.0",
     "@jupyterlab/faq-extension": "^0.16.2",
     "@jupyterlab/filebrowser": "^0.16.2",
     "@jupyterlab/filebrowser-extension": "^0.16.2",

@@ -20,6 +20,8 @@ import '@jupyterlab/csvviewer-extension';
 import '@jupyterlab/docmanager';
 import '@jupyterlab/docmanager-extension';
 import '@jupyterlab/docregistry';
+import '@jupyterlab/extensionmanager';
+import '@jupyterlab/extensionmanager-extension';
 import '@jupyterlab/faq-extension';
 import '@jupyterlab/filebrowser';
 import '@jupyterlab/filebrowser-extension';
