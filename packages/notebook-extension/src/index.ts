@@ -525,7 +525,7 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
       return 'Notebook';
     },
     caption: 'Create a new notebook',
-    iconClass: 'jp-NotebookIcon',
+    iconClass: args => args['isLauncher'] ? '' : 'jp-NotebookIcon',
     execute: args => {
       const cwd = args['cwd'] || browserFactory ?
         browserFactory.defaultBrowser.model.path : '';
@@ -1544,8 +1544,12 @@ function populatePalette(palette: ICommandPalette): void {
   ].forEach(command => { palette.addItem({ command, category }); });
 
   EXPORT_TO_FORMATS.forEach(exportToFormat => {
-    let args = { 'format': exportToFormat['format'], 'label': exportToFormat['label'], 'isPalette': true };
-    palette.addItem({ command: CommandIDs.exportToFormat, category: category, args: args });
+    let args = {
+      'format': exportToFormat['format'],
+      'label': exportToFormat['label'],
+      'isPalette': true
+    };
+    palette.addItem({ command: CommandIDs.exportToFormat, category, args });
   });
 
   category = 'Notebook Cell Operations';
