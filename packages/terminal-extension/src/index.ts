@@ -155,7 +155,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
   commands.addCommand(CommandIDs.createNew, {
     label: args => args['isPalette'] ? 'New Terminal' : 'Terminal',
     caption: 'Start a new terminal session',
-    iconClass: TERMINAL_ICON_CLASS,
+    iconClass: args => args['isPalette'] ? '' : TERMINAL_ICON_CLASS,
     execute: args => {
       const name = args['name'] as string;
       const initialCommand = args['initialCommand'] as string;

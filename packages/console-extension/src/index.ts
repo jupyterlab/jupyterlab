@@ -267,7 +267,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
       }
       return 'Console';
     },
-    iconClass: 'jp-CodeConsoleIcon',
+    iconClass: args => args['isPalette'] ? '' : 'jp-CodeConsoleIcon',
     execute: args => {
       let basePath = args['basePath'] as string || args['cwd'] as string ||
         browserFactory.defaultBrowser.model.path;
@@ -523,7 +523,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     CommandIDs.closeAndShutdown,
     CommandIDs.toggleShowAllActivity,
   ].forEach(command => {
-    palette.addItem({ command, category });
+    palette.addItem({ command, category, args: { isPalette: true } });
   });
 
   // Add a console creator to the File menu
