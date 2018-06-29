@@ -70,8 +70,8 @@ class ExtensionManager(object):
         self.log = log
         self.app_dir = app_dir
         self._outdated = None
-        # Start fetching data on outdated extensions immediately
-        IOLoop.current().spawn_callback(self._get_outdated)
+        # To start fetching data on outdated extensions immediately, uncomment:
+        # IOLoop.current().spawn_callback(self._get_outdated)
 
     @gen.coroutine
     def list_extensions(self):
