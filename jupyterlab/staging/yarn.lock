@@ -753,9 +753,9 @@
     react "~16.2.0"
     react-dom "~16.2.0"
 
-"@jupyterlab/vega4-extension@^0.15.2":
+"@jupyterlab/vega3-extension@^0.15.2":
   version "0.15.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/vega4-extension/-/vega4-extension-0.15.2.tgz#a35e43cde38d7d801d00399a62b1bed4e45fa926"
+  resolved "https://registry.npmjs.org/@jupyterlab/vega3-extension/-/vega3-extension-0.15.2.tgz#a35e43cde38d7d801d00399a62b1bed4e45fa926"
   dependencies:
     "@jupyterlab/rendermime-interfaces" "^1.0.9"
     "@phosphor/coreutils" "^1.3.0"
