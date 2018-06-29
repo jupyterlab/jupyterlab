@@ -13,35 +13,39 @@ import {
   ExtensionView
 } from '@jupyterlab/extensionmanager';
 
+import {
+  IMainMenu
+} from '@jupyterlab/mainmenu';
+
 
 /**
  * IDs of the commands added by this extension.
  */
 namespace CommandIDs {
   export
-  const hideExtensionManager = 'extensionmanager:hide-main';
+  const enable = 'extensionmanager:enable';
 
   export
-  const showExtensionManager = 'extensionmanager:activate-main';
+  const hide = 'extensionmanager:hide-main';
 
   export
-  const toggleExtensionManager = 'extensionmanager:toggle-main';
+  const show = 'extensionmanager:activate-main';
+
+  export
+  const toggle = 'extensionmanager:toggle-main';
 }
 
 
 /**
- * Initialization data for the extensionmanager plugin.
+ * The extension manager plugin.
  */
 const plugin: JupyterLabPlugin<void> = {
   id: '@jupyterlab/extensionmanager-extension:plugin',
   autoStart: true,
-  requires: [ILayoutRestorer, ISettingRegistry, IRouter],
-  activate: async (app: JupyterLab, restorer: ILayoutRestorer, registry: ISettingRegistry, router: IRouter) => {
+  requires: [ISettingRegistry, ILayoutRestorer, IRouter],
+  activate: async (app: JupyterLab, registry: ISettingRegistry, restorer: ILayoutRestorer, router: IRouter) => {
     const settings = await registry.load(plugin.id);
-    const enabled = settings.composite['enabled'] as boolean;
-
-    // If the extension is enabled or disabled, refresh the page.
-    settings.changed.connect(() => { router.reload(); });
+    const enabled = settings.composite['enabled'] === true;
 
     if (!enabled) {
       return;
@@ -55,6 +59,38 @@ const plugin: JupyterLabPlugin<void> = {
     restorer.add(view, view.id);
     shell.addToLeftArea(view);
     addCommands(app, view);
+
+    // If the extension is enabled or disabled, refresh the page.
+    app.restored
+      .then(() => { settings.changed.connect(() => { router.reload(); }); });
+  }
+};
+
+
+/**
+ * The menu item for enabling/disabling the extension manager plugin.
+ */
+const menu: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/extensionmanager-extension:menu',
+  autoStart: true,
+  requires: [ISettingRegistry, IMainMenu],
+  activate: async (app: JupyterLab, registry: ISettingRegistry, menu: IMainMenu) => {
+    const { commands } = app;
+    const key = 'enabled';
+    const settings = await registry.load(plugin.id);
+
+    commands.addCommand(CommandIDs.enable, {
+      label: 'Enable Extension Manager (requires Node.js/npm)',
+      isToggled: () => settings.composite[key] === true,
+      execute: () => {
+        const enabled = settings.composite[key] === true;
+
+        return registry.set(plugin.id, key, !enabled).catch((reason: Error) => {
+          console.error(`Failed to set ${plugin.id}:${key}`, reason.message);
+        });
+      }
+    });
+    menu.settingsMenu.addGroup([{ command: CommandIDs.enable }]);
   }
 };
 
@@ -65,12 +101,12 @@ const plugin: JupyterLabPlugin<void> = {
 function addCommands(app: JupyterLab, view: ExtensionView): void {
   const { commands } = app;
 
-  commands.addCommand(CommandIDs.showExtensionManager, {
+  commands.addCommand(CommandIDs.show, {
     label: 'Show Extension Manager',
     execute: () => { app.shell.activateById(view.id); }
   });
 
-  commands.addCommand(CommandIDs.hideExtensionManager, {
+  commands.addCommand(CommandIDs.hide, {
     execute: () => {
       if (!view.isHidden) {
         app.shell.collapseLeft();
@@ -78,12 +114,12 @@ function addCommands(app: JupyterLab, view: ExtensionView): void {
     }
   });
 
-  commands.addCommand(CommandIDs.toggleExtensionManager, {
+  commands.addCommand(CommandIDs.toggle, {
     execute: () => {
       if (view.isHidden) {
-        return commands.execute(CommandIDs.showExtensionManager, undefined);
+        return commands.execute(CommandIDs.show, undefined);
       } else {
-        return commands.execute(CommandIDs.hideExtensionManager, undefined);
+        return commands.execute(CommandIDs.hide, undefined);
       }
     }
   });
@@ -92,4 +128,8 @@ function addCommands(app: JupyterLab, view: ExtensionView): void {
 }
 
 
-export default plugin;
+/**
+ * Export the plugins as the default.
+ */
+const plugins: JupyterLabPlugin<any>[] = [plugin, menu];
+export default plugins;
