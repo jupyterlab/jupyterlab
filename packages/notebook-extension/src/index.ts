@@ -1522,6 +1522,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
 function populatePalette(palette: ICommandPalette): void {
   let category = 'Notebook Operations';
   [
+    CommandIDs.createNew,
     CommandIDs.interrupt,
     CommandIDs.restart,
     CommandIDs.restartClear,
