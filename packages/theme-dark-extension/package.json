@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/theme-dark-extension",
-  "version": "0.16.2",
+  "version": "0.17.0-0",
   "description": "JupyterLab - Default Dark Theme",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -38,8 +38,8 @@
     "watch:webpack": "webpack --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.16.2",
-    "@jupyterlab/apputils": "^0.16.3",
+    "@jupyterlab/application": "^0.17.0-0",
+    "@jupyterlab/apputils": "^0.17.0-0",
     "font-awesome": "~4.7.0"
   },
   "devDependencies": {
