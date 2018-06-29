@@ -9,8 +9,6 @@ import {
   ExtensionView
 } from '@jupyterlab/extensionmanager';
 
-import '@jupyterlab/extensionmanager/style/index.css';
-
 
 /**
  * The extensionmanager-view namespace token.
