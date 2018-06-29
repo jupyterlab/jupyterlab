@@ -150,13 +150,12 @@ class AttachmentsModel implements IAttachmentsModel {
     this.contentFactory = (options.contentFactory ||
       AttachmentsModel.defaultContentFactory
     );
-    this.map = new ObservableMap<IAttachmentModel>();
     if (options.values) {
       for (let key of Object.keys(options.values)) {
-        this._add(key, options.values[key]);
+        this.set(key, options.values[key]);
       }
     }
-    this.map.changed.connect(this._onMapChanged, this);
+    this._map.changed.connect(this._onMapChanged, this);
 
     // If we are given a IModelDB, keep an up-to-date
     // serialized copy of the AttachmentsModel in it.
@@ -190,14 +189,14 @@ class AttachmentsModel implements IAttachmentsModel {
    * The keys of the attachments in the model.
    */
   get keys(): ReadonlyArray<string> {
-    return this.map.keys();
+    return this._map.keys();
   }
 
   /**
    * Get the length of the items in the model.
    */
   get length(): number {
-    return this.map ? Object.keys(this.map).length : 0;
+    return this._map.keys().length;
   }
 
   /**
@@ -220,7 +219,7 @@ class AttachmentsModel implements IAttachmentsModel {
       return;
     }
     this._isDisposed = true;
-    this.map.dispose();
+    this._map.dispose();
     Signal.clearData(this);
   }
 
@@ -228,31 +227,31 @@ class AttachmentsModel implements IAttachmentsModel {
    * Whether the specified key is set.
    */
   has(key: string): boolean {
-    return this.map.has(key);
+    return this._map.has(key);
   }
 
   /**
-   * Get an item at the specified index.
+   * Get an item at the specified key.
    */
   get(key: string): IAttachmentModel {
-    return this.map.get(key);
+    return this._map.get(key);
   }
 
   /**
-   * Set the value at the specified index.
+   * Set the value at the specified key.
    */
   set(key: string, value: nbformat.IMimeBundle): void {
     // Normalize stream data.
     let item = this._createItem({ value });
-    this.map.set(key, item);
+    this._map.set(key, item);
   }
 
   /**
    * Clear all of the attachments.
    */
   clear(): void {
-    this.map.values().forEach((item: IAttachmentModel) => { item.dispose(); });
-    this.map.clear();
+    this._map.values().forEach((item: IAttachmentModel) => { item.dispose(); });
+    this._map.clear();
   }
 
   /**
@@ -263,7 +262,7 @@ class AttachmentsModel implements IAttachmentsModel {
    */
   fromJSON(values: nbformat.IAttachments) {
     this.clear();
-    Object.keys(values).forEach((key) => { this._add(key, values[key]); });
+    Object.keys(values).forEach((key) => { this.set(key, values[key]); });
   }
 
   /**
@@ -271,24 +270,11 @@ class AttachmentsModel implements IAttachmentsModel {
    */
   toJSON(): nbformat.IAttachments {
     let ret: nbformat.IAttachments = {};
-    for (let key of this.map.keys()) {
-      ret[key] = this.map.get(key).toJSON();
+    for (let key of this._map.keys()) {
+      ret[key] = this._map.get(key).toJSON();
     }
     return ret;
   }
-
-  /**
-   * Add an item to the list.
-   */
-  private _add(key: string, value: nbformat.IMimeBundle): void {
-    // Create the new item.
-    let item = this._createItem({ value });
-
-    // Add the item to our list and return the new length.
-    this.map.set(key, item);
-  }
-
-  protected map: IObservableMap<IAttachmentModel> = null;
 
   /**
    * Create an attachment item and hook up its signals.
@@ -332,6 +318,7 @@ class AttachmentsModel implements IAttachmentsModel {
     this._stateChanged.emit(void 0);
   }
 
+  private _map = new ObservableMap<IAttachmentModel>();
   private _isDisposed = false;
   private _stateChanged = new Signal<IAttachmentsModel, void>(this);
   private _changed = new Signal<this, IAttachmentsModel.ChangedArgs>(this);
@@ -347,7 +334,7 @@ class AttachmentsModel implements IAttachmentsModel {
 export
 namespace AttachmentsModel {
   /**
-   * The default implementation of a `IModelOutputFactory`.
+   * The default implementation of a `IAttachemntsModel.IContentFactory`.
    */
   export
   class ContentFactory implements IAttachmentsModel.IContentFactory {

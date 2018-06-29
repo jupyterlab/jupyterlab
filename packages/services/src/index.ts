@@ -10,3 +10,5 @@ export * from './session';
 export * from './setting';
 export * from './terminal';
 export * from './workspace';
+
+export { Builder } from './builder';

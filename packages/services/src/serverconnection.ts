@@ -211,6 +211,8 @@ namespace Private {
         if (typeof location !== 'undefined') {
           baseUrl = URLExt.join(location.origin, baseUrl);
         } else {
+          // TODO: Why are we hardcoding localhost and 8888? That doesn't seem
+          // good. See https://github.com/jupyterlab/jupyterlab/issues/4761
           baseUrl = URLExt.join('http://localhost:8888/', baseUrl);
         }
       }

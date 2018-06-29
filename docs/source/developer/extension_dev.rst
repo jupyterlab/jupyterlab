@@ -24,7 +24,7 @@ JupyterLab can be extended in four ways via:
 See :ref:`xkcd_extension_tutorial` to learn how to make a simple JupyterLab extension.
 
 To understand how to wrap an **Angular** application as a JupyterLab extension,
-see the `"Create your own Angular JupyerLab extension" <https://github.com/SimonBiggs/scriptedforms/blob/master/scriptedforms/docs/create-your-own-angular-jupyterlab-extension.md#create-your-own-angular-jupyerlab-extension>`_ guide provided by 
+see the `"Create your own Angular JupyerLab extension" <https://github.com/SimonBiggs/scriptedforms/blob/master/scriptedforms/docs/create-your-own-angular-jupyterlab-extension.md#create-your-own-angular-jupyerlab-extension>`_ guide provided by
 `Scripted Forms <https://github.com/SimonBiggs/scriptedforms>`_.
 
 A JupyterLab application is comprised of:
@@ -59,7 +59,7 @@ The default plugins in the JupyterLab application include:
    - Sets the default set of shortcuts for the application.
 -  `Images <https://github.com/jupyterlab/jupyterlab/blob/master/packages/imageviewer-extension/src/index.ts>`__
    - Adds a widget factory for displaying image files.
--  `Help <https://github.com/jupyterlab/jupyterlab/blob/master/packages/help-extension/src/index.ts>`__
+-  `Help <https://github.com/jupyterlab/jupyterlab/blob/master/packages/help-extension/src/index.tsx>`__
    - Adds a side bar widget for displaying external documentation.
 -  `File
    Browser <https://github.com/jupyterlab/jupyterlab/blob/master/packages/filebrowser-extension/src/index.ts>`__
@@ -262,7 +262,7 @@ application.
 
 To quickly create a theme based on the JupyterLab Light Theme, follow
 the instructions in the `contributing
-guide <CONTRIBUTING.html#setting-up-a-development-environment>`__ and
+guide <https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md#setting-up-a-development-environment>`__ and
 then run ``jlpm run create:theme`` from the repository root directory.
 Once you select a name, title and a description, a new theme folder will
 be created in the current directory. You can move that new folder to a
@@ -290,6 +290,9 @@ might want to use them in your extensions.
 - ``@jupyterlab/application:ILayoutRestorer``: An interface to the application layout
   restoration functionality. Use this to have your activities restored across
   page loads.
+- ``@jupyterlab/application:IMimeDocumentTracker``: An instance tracker for documents
+  rendered using a mime renderer extension. Use this if you want to list and interact
+  with documents rendered by such extensions.
 - ``@jupyterlab/application:IRouter``: The URL router used by the application.
   Use this to add custom URL-routing for your extension (e.g., to invoke
   a command if the user navigates to a sub-path).
@@ -300,6 +303,9 @@ might want to use them in your extensions.
 - ``@jupyterlab/apputils:IThemeManager``: An interface to the theme manager for the application.
   Most extensions will not need to use this, as they can register a
   `theme extension <#themes>`__.
+- ``@jupyterlab/apputils:IWindowResolver``: An interface to a window resolver for the
+  application. JupyterLab workspaces are given a name, which are determined using
+  the window resolver. Require this if you want to use the name of the current workspace.
 - ``@jupyterlab/codeeditor:IEditorServices``: An interface to the text editor provider
   for the application. Use this to create new text editors and host them in your
   UI elements.

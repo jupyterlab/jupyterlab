@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, InstanceTracker, showDialog
+  Dialog, IClientSession, ICommandPalette, InstanceTracker, showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -164,11 +164,6 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     when: manager.ready
   });
 
-  // The launcher callback.
-  let callback = (cwd: string, name: string) => {
-    return createConsole({ basePath: cwd, kernelPreference: { name }});
-  };
-
   // Add a launcher item if the launcher is available.
   if (launcher) {
     manager.ready.then(() => {
@@ -178,7 +173,6 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
       }
       let baseUrl = PageConfig.getBaseUrl();
       for (let name in specs.kernelspecs) {
-        let displayName = specs.kernelspecs[name].display_name;
         let rank = name === specs.default ? 0 : Infinity;
         let kernelIconUrl = specs.kernelspecs[name].resources['logo-64x64'];
         if (kernelIconUrl) {
@@ -186,11 +180,9 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
           kernelIconUrl = baseUrl + kernelIconUrl.slice(index);
         }
         launcher.add({
-          displayName,
+          command: CommandIDs.create,
+          args: { isLauncher: true, kernelPreference: { name } },
           category: 'Console',
-          name,
-          iconClass: 'jp-CodeConsoleIcon',
-          callback,
           rank,
           kernelIconUrl
         });
@@ -265,9 +257,20 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
 
   command = CommandIDs.create;
   commands.addCommand(command, {
-    label: args => args['isPalette'] ? 'New Console' : 'Console',
-    execute: (args: Partial<ConsolePanel.IOptions>) => {
-      let basePath = args.basePath || browserFactory.defaultBrowser.model.path;
+    label: args => {
+      if (args['isPalette']) {
+        return 'New Console';
+      } else if (args['isLauncher'] && args['kernelPreference']) {
+        const kernelPreference =
+          args['kernelPreference'] as IClientSession.IKernelPreference;
+        return manager.specs.kernelspecs[kernelPreference.name].display_name;
+      }
+      return 'Console';
+    },
+    iconClass: args => args['isPalette'] ? '' : 'jp-CodeConsoleIcon',
+    execute: args => {
+      let basePath = args['basePath'] as string || args['cwd'] as string ||
+        browserFactory.defaultBrowser.model.path;
       return createConsole({ basePath, ...args });
     }
   });
@@ -520,7 +523,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     CommandIDs.closeAndShutdown,
     CommandIDs.toggleShowAllActivity,
   ].forEach(command => {
-    palette.addItem({ command, category });
+    palette.addItem({ command, category, args: { isPalette: true } });
   });
 
   // Add a console creator to the File menu

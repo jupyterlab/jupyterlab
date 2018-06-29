@@ -46,6 +46,11 @@ body {
   min-height: var(--jp-private-menubar-height);
 }
 
+#jp-bottom-panel {
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color0);
+  background: var(--jp-layout-color1);
+  display: flex;
+}
 
 /* Sibling imports */
 @import './datagrid.css';

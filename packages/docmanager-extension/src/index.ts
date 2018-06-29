@@ -35,6 +35,11 @@ import {
 
 
 /**
+ * The name of the factory that creates markdown widgets.
+ */
+const MARKDOWN_FACTORY = 'Markdown Preview';
+
+/**
  * The command IDs used by the document manager plugin.
  */
 namespace CommandIDs {
@@ -85,6 +90,9 @@ namespace CommandIDs {
 
   export
   const showInFileBrowser = 'docmanager:show-in-file-browser';
+
+  export
+  const markdownPreview = 'markdownviewer:open';
 }
 
 const pluginId = '@jupyterlab/docmanager-extension:plugin';
@@ -436,7 +444,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
   });
 
   commands.addCommand(CommandIDs.showInFileBrowser, {
-    label: () => `Show in file browser`,
+    label: () => `Show in File Browser`,
     isEnabled,
     execute: () => {
       let context = docManager.contextForWidget(app.shell.currentWidget);
@@ -449,6 +457,20 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
       commands.execute('filebrowser:navigate-main', {path: context.path});
     }
   });
+
+  commands.addCommand(CommandIDs.markdownPreview, {
+    label: 'Markdown Preview',
+    execute: (args) => {
+      let path = args['path'];
+      if (typeof path !== 'string') {
+        return;
+      }
+      return commands.execute('docmanager:open', {
+        path, factory: MARKDOWN_FACTORY
+      });
+    }
+  });
+
 
   app.contextMenu.addItem({
     command: CommandIDs.rename,

@@ -5,6 +5,7 @@
 # Distributed under the terms of the Modified BSD License.
 from __future__ import print_function
 
+import contextlib
 from distutils.version import LooseVersion
 import errno
 import glob
@@ -32,7 +33,6 @@ if sys.version_info.major < 3:
     from urllib2 import Request, urlopen, quote
     from urllib2 import URLError, HTTPError
     from urlparse import urljoin
-
 else:
     from urllib.request import Request, urlopen, urljoin, quote
     from urllib.error import URLError, HTTPError
@@ -350,6 +350,27 @@ def get_app_version(app_dir=None):
     app_dir = app_dir or get_app_dir()
     handler = _AppHandler(app_dir)
     return handler.info['version']
+
+
+def get_latest_compatible_package_versions(names, app_dir=None, logger=None):
+    """Get the latest compatible version of a list of packages.
+    """
+    app_dir = app_dir or get_app_dir()
+    handler = _AppHandler(app_dir, logger)
+    return handler.latest_compatible_package_versions(names)
+
+
+def read_package(target):
+    """Read the package data in a given target tarball.
+    """
+    tar = tarfile.open(target, "r")
+    f = tar.extractfile('package/package.json')
+    data = json.loads(f.read().decode('utf8'))
+    data['jupyterlab_extracted_files'] = [
+        f.path[len('package/'):] for f in tar.getmembers()
+    ]
+    tar.close()
+    return data
 
 
 # ----------------------------------------------------------------------
@@ -1043,7 +1064,7 @@ class _AppHandler(object):
         extensions = dict()
         location = 'app' if dname == self.app_dir else 'sys'
         for target in glob.glob(pjoin(dname, 'extensions', '*.tgz')):
-            data = _read_package(target)
+            data = read_package(target)
             deps = data.get('dependencies', dict())
             name = data['name']
             jlab = data.get('jupyterlab', dict())
@@ -1085,7 +1106,7 @@ class _AppHandler(object):
 
         for path in glob.glob(pjoin(dname, '*.tgz')):
             path = osp.realpath(path)
-            data = _read_package(path)
+            data = read_package(path)
             name = data['name']
             if name not in info:
                 self.logger.warn('Removing orphaned linked package %s' % name)
@@ -1285,7 +1306,7 @@ class _AppHandler(object):
             raise ValueError(msg % source)
 
         path = glob.glob(pjoin(tempdir, '*.tgz'))[0]
-        info['data'] = _read_package(path)
+        info['data'] = read_package(path)
         if is_dir:
             info['sha'] = sha = _tarsum(path)
             target = path.replace('.tgz', '-%s.tgz' % sha)
@@ -1304,7 +1325,10 @@ class _AppHandler(object):
     def _latest_compatible_package_version(self, name):
         """Get the latest compatible version of a package"""
         core_data = self.info['core_data']
-        metadata = _fetch_package_metadata(self.registry, name, self.logger)
+        try:
+            metadata = _fetch_package_metadata(self.registry, name, self.logger)
+        except URLError:
+            return
         versions = metadata.get('versions', [])
 
         # Sort pre-release first, as we will reverse the sort:
@@ -1328,32 +1352,84 @@ class _AppHandler(object):
                 # Valid
                 return version
 
+    def latest_compatible_package_versions(self, names):
+        """Get the latest compatible versions of several packages
+
+        Like _latest_compatible_package_version, but optimized for
+        retrieving the latest version for several packages in one go.
+        """
+        core_data = self.info['core_data']
+
+        keys = []
+        for name in names:
+            try:
+                metadata = _fetch_package_metadata(self.registry, name, self.logger)
+            except URLError:
+                continue
+            versions = metadata.get('versions', [])
+
+            # Sort pre-release first, as we will reverse the sort:
+            def sort_key(key_value):
+                return _semver_key(key_value[0], prerelease_first=True)
+
+            for version, data in sorted(versions.items(),
+                                        key=sort_key,
+                                        reverse=True):
+                deps = data.get('dependencies', {})
+                errors = _validate_compatibility(name, deps, core_data)
+                if not errors:
+                    # Found a compatible version
+                    keys.append('%s@%s' % (name, version))
+                    break  # break inner for
+
+
+        versions = {}
+        if not keys:
+            return versions
+        with TemporaryDirectory() as tempdir:
+            ret = self._run([which('npm'), 'pack'] + keys, cwd=tempdir, quiet=True)
+            if ret != 0:
+                msg = '"%s" is not a valid npm package'
+                raise ValueError(msg % keys)
+
+            for key in keys:
+                fname = key[0].replace('@', '') + key[1:].replace('@', '-').replace('/', '-') + '.tgz'
+                data = read_package(os.path.join(tempdir, fname))
+                # Verify that the version is a valid extension.
+                if not _validate_extension(data):
+                    # Valid
+                    versions[key] = data['version']
+        return versions
+
     def _format_no_compatible_package_version(self, name):
         """Get the latest compatible version of a package"""
         core_data = self.info['core_data']
-        metadata = _fetch_package_metadata(self.registry, name, self.logger)
-        versions = metadata.get('versions', [])
-
-        # Sort pre-release first, as we will reverse the sort:
-        def sort_key(key_value):
-            return _semver_key(key_value[0], prerelease_first=True)
-
-        store = tuple(sorted(versions.items(), key=sort_key, reverse=True))
-        latest_deps = store[0][1].get('dependencies', {})
-        core_deps = core_data['dependencies']
-        singletons = core_data['jupyterlab']['singletonPackages']
-
         # Whether lab version is too new:
         lab_newer_than_latest = False
         # Whether the latest version of the extension depend on a "future" version
         # of a singleton package (from the perspective of current lab version):
         latest_newer_than_lab = False
+        try:
+            metadata = _fetch_package_metadata(self.registry, name, self.logger)
+        except URLError:
+            pass
+        else:
+            versions = metadata.get('versions', [])
 
-        for (key, value) in latest_deps.items():
-            if key in singletons:
-                c = _compare_ranges(core_deps[key], value)
-                lab_newer_than_latest = lab_newer_than_latest or c < 0
-                latest_newer_than_lab = latest_newer_than_lab or c > 0
+            # Sort pre-release first, as we will reverse the sort:
+            def sort_key(key_value):
+                return _semver_key(key_value[0], prerelease_first=True)
+
+            store = tuple(sorted(versions.items(), key=sort_key, reverse=True))
+            latest_deps = store[0][1].get('dependencies', {})
+            core_deps = core_data['dependencies']
+            singletons = core_data['jupyterlab']['singletonPackages']
+
+            for (key, value) in latest_deps.items():
+                if key in singletons:
+                    c = _compare_ranges(core_deps[key], value)
+                    lab_newer_than_latest = lab_newer_than_latest or c < 0
+                    latest_newer_than_lab = latest_newer_than_lab or c > 0
 
         if lab_newer_than_latest:
             # All singleton deps in current version of lab are newer than those
@@ -1402,19 +1478,6 @@ def _normalize_path(extension):
     if osp.exists(extension):
         extension = osp.abspath(extension)
     return extension
-
-
-def _read_package(target):
-    """Read the package data in a given target tarball.
-    """
-    tar = tarfile.open(target, "r")
-    f = tar.extractfile('package/package.json')
-    data = json.loads(f.read().decode('utf8'))
-    data['jupyterlab_extracted_files'] = [
-        f.path[len('package/'):] for f in tar.getmembers()
-    ]
-    tar.close()
-    return data
 
 
 def _validate_extension(data):
@@ -1700,9 +1763,12 @@ def _fetch_package_metadata(registry, name, logger):
                         ' q=1.0, application/json; q=0.8, */*')
         }
     )
-    logger.debug('Fetching URL: %s' % (req.full_url))
     try:
-        with urlopen(req) as response:
+        logger.debug('Fetching URL: %s' % (req.full_url))
+    except AttributeError:
+        logger.debug('Fetching URL: %s' % (req.get_full_url()))
+    try:
+        with contextlib.closing(urlopen(req)) as response:
             return json.load(response)
     except URLError as exc:
         logger.warning(
