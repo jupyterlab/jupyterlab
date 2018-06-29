@@ -12,6 +12,7 @@
     "lib/*.d.ts",
     "lib/*.js.map",
     "lib/*.js",
+    "schema/*.json",
     "style/*.css"
   ],
   "main": "lib/index.js",
@@ -31,6 +32,7 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^0.16.2",
+    "@jupyterlab/coreutils": "^1.1.2",
     "@jupyterlab/extensionmanager": "^0.16.0"
   },
   "devDependencies": {
@@ -38,6 +40,7 @@
     "typescript": "~2.9.1"
   },
   "jupyterlab": {
-    "extension": true
+    "extension": true,
+    "schemaDir": "schema"
   }
 }

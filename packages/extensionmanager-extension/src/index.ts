@@ -2,8 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin, ILayoutRestorer
+  ILayoutRestorer, IRouter, JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
+
+import {
+  ISettingRegistry
+} from '@jupyterlab/coreutils';
 
 import {
   ExtensionView
@@ -13,7 +17,7 @@ import {
 /**
  * The extensionmanager-view namespace token.
  */
-const namespaceToken = 'extensionmanagerview';
+const namespace = 'extensionmanagerview';
 
 /**
  * IDs of the commands added by this extension.
@@ -31,17 +35,28 @@ namespace CommandIDs {
 
 
 /**
- * Initialization data for the extensionmanager extension.
+ * Initialization data for the extensionmanager plugin.
  */
-const extension: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/javascript-extension:plugin',
+const plugin: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/extensionmanager-extension:plugin',
   autoStart: true,
-  requires: [ILayoutRestorer],
-  activate: (app: JupyterLab, restorer: ILayoutRestorer) => {
+  requires: [ILayoutRestorer, ISettingRegistry, IRouter],
+  activate: async (app: JupyterLab, restorer: ILayoutRestorer, registry: ISettingRegistry, router: IRouter) => {
+    const settings = await registry.load(plugin.id);
+    const enabled = settings.composite['enabled'] as boolean;
+
+    // If the extension is enabled or disabled, refresh the page.
+    settings.changed.connect(() => { router.reload(); });
+
+    if (!enabled) {
+      return;
+    }
+
     const { commands, shell, serviceManager} = app;
     const view = new ExtensionView(serviceManager);
+
     view.id = 'extensionmanager.main-view';
-    restorer.add(view, namespaceToken);
+    restorer.add(view, namespace);
     view.title.label = 'Extensions';
     shell.addToLeftArea(view);
 
@@ -49,7 +64,7 @@ const extension: JupyterLabPlugin<void> = {
     // If the layout is a fresh session without saved data, open file view.
     app.restored.then(layout => {
       if (layout.fresh) {
-        commands.execute(CommandIDs.showExtensionManager, void 0);
+        commands.execute(CommandIDs.showExtensionManager, undefined);
       }
     });
 
@@ -91,4 +106,4 @@ function addCommands(app: JupyterLab, view: ExtensionView): void {
 }
 
 
-export default extension;
+export default plugin;
