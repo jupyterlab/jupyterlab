@@ -1,3 +1,6 @@
+import * as ReactDOM from 'react-dom';
+import * as React from 'react';
+
 import {
     JupyterLabPlugin, JupyterLab
 } from '@jupyterlab/application';
@@ -10,30 +13,33 @@ import {
     IStatusBar
 } from './../statusBar';
 
-import { VirtualDOM, h } from '@phosphor/virtualdom';
+
+import { IconItem } from '../component/icon';
 
 export
-class Icon extends Widget {
+class RunningSession extends Widget {
     constructor(src: string) {
         super();
 
         this._src = src;
 
-        VirtualDOM.render(h.img({src: this._src}, null), this.node);
-
+        ReactDOM.render(<IconItem source={this._src} />, this.node);
+        
     }
 
     private _src: string;
 }
 
-/**
+/*
  * Initialization data for the statusbar extension.
  */
+
 export
-const iconItem: JupyterLabPlugin<void> = {
+const runningSessionItem: JupyterLabPlugin<void> = {
     id: 'jupyterlab-statusbar/default-items:icon-item',
     autoStart: true,
     requires: [IStatusBar],
-    activate: (_app: JupyterLab, statusBar: IStatusBar) => {//
+    activate: (_app: JupyterLab, statusBar: IStatusBar) => {
+        statusBar.registerStatusItem('image', new RunningSession('./image'), {align: 'right'});
     }
-};
+}; 

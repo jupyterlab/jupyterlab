@@ -10,8 +10,7 @@ import {
 } from './statusBar';
 
 // Export default status bar items
-import { iconItem } from './component/icon';
-import { textItem } from './component/text';
+import { runningSessionItem } from './default';
 
 /**
  * Initialization data for the statusbar extension.
@@ -26,11 +25,9 @@ const statusBar: JupyterLabPlugin<IStatusBar> = {
 };
 
 const plugins: JupyterLabPlugin<any>[] = [
-  statusBar, textItem, iconItem
+  statusBar, runningSessionItem
 ];
 
 export default plugins;
 
 export * from './statusBar';
-export * from './component/icon';
-export * from './component/text';
