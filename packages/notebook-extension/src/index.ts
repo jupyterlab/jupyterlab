@@ -690,16 +690,12 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
 function addCommands(app: JupyterLab, services: ServiceManager, tracker: NotebookTracker): void {
   const { commands, shell } = app;
 
+  /**
+   * Get the current NotebookPanel widget
+   */
   // Get the current widget and activate unless the args specify otherwise.
-  function getCurrent(args: ReadonlyJSONObject): NotebookPanel | null {
-    const widget = tracker.currentWidget;
-    const activate = args['activate'] !== false;
-
-    if (activate && widget) {
-      shell.activateById(widget.id);
-    }
-
-    return widget;
+  function getCurrent(): NotebookPanel | null {
+    return tracker.currentWidget;
   }
 
   /**
@@ -730,7 +726,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.runAndAdvance, {
     label: 'Run Selected Cells',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         const { context, content } = current;
@@ -743,7 +739,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.run, {
     label: 'Run Selected Cells and Don\'t Advance',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         const { context, content } = current;
@@ -756,7 +752,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.runAndInsert, {
     label: 'Run Selected Cells and Insert Below',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         const { context, content } = current;
@@ -769,7 +765,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.runInConsole, {
     label: 'Run Selected Text or Current Line in Console',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         const { context, content } = current;
@@ -834,7 +830,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.runAll, {
     label: 'Run All Cells',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         const { context, content } = current;
@@ -847,7 +843,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.runAllAbove, {
     label: 'Run All Above Selected Cell',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         const { context, content } = current;
@@ -865,7 +861,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.runAllBelow, {
     label: 'Run Selected Cell and All Below',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         const { context, content } = current;
@@ -884,7 +880,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.restart, {
     label: 'Restart Kernel…',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return current.session.restart();
@@ -895,7 +891,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.closeAndShutdown, {
     label: 'Close and Shutdown',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (!current) {
         return;
@@ -919,7 +915,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.trust, {
     label: () => 'Trust Notebook',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         const { context, content } = current;
@@ -936,7 +932,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         return (args['isPalette'] ? 'Export Notebook to ' : '') + formatLabel;
     },
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (!current) {
         return;
@@ -966,7 +962,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.restartClear, {
     label: 'Restart Kernel and Clear All Outputs…',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         const { content, session } = current;
@@ -980,7 +976,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.restartRunAll, {
     label: 'Restart Kernel and Run All Cells…',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         const { context, content, session } = current;
@@ -998,7 +994,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.clearAllOutputs, {
     label: 'Clear All Outputs',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.clearAllOutputs(current.content);
@@ -1009,7 +1005,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.clearOutputs, {
     label: 'Clear Outputs',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.clearOutputs(current.content);
@@ -1020,7 +1016,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.interrupt, {
     label: 'Interrupt Kernel',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (!current) {
         return;
@@ -1037,7 +1033,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.toCode, {
     label: 'Change to Code Cell Type',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent({ activate: !!args['activate'] });
 
       if (current) {
         return NotebookActions.changeCellType(current.content, 'code');
@@ -1048,7 +1044,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.toMarkdown, {
     label: 'Change to Markdown Cell Type',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.changeCellType(current.content, 'markdown');
@@ -1059,7 +1055,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.toRaw, {
     label: 'Change to Raw Cell Type',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.changeCellType(current.content, 'raw');
@@ -1070,7 +1066,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.cut, {
     label: 'Cut Cells',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.cut(current.content);
@@ -1081,7 +1077,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.copy, {
     label: 'Copy Cells',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.copy(current.content);
@@ -1092,7 +1088,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.pasteBelow, {
     label: 'Paste Cells Below',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.paste(current.content, 'below');
@@ -1103,7 +1099,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.pasteAbove, {
     label: 'Paste Cells Above',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.paste(current.content, 'above');
@@ -1114,7 +1110,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.pasteAndReplace, {
     label: 'Paste Cells and Replace',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.paste(current.content, 'replace');
@@ -1125,7 +1121,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.deleteCell, {
     label: 'Delete Cells',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.deleteCells(current.content);
@@ -1136,7 +1132,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.split, {
     label: 'Split Cell',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.splitCell(current.content);
@@ -1147,7 +1143,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.merge, {
     label: 'Merge Selected Cells',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.mergeCells(current.content);
@@ -1158,7 +1154,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.insertAbove, {
     label: 'Insert Cell Above',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.insertAbove(current.content);
@@ -1169,7 +1165,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.insertBelow, {
     label: 'Insert Cell Below',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.insertBelow(current.content);
@@ -1180,7 +1176,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.selectAbove, {
     label: 'Select Cell Above',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.selectAbove(current.content);
@@ -1191,7 +1187,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.selectBelow, {
     label: 'Select Cell Below',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.selectBelow(current.content);
@@ -1202,7 +1198,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.extendAbove, {
     label: 'Extend Selection Above',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.extendSelectionAbove(current.content);
@@ -1213,7 +1209,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.extendBelow, {
     label: 'Extend Selection Below',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.extendSelectionBelow(current.content);
@@ -1224,7 +1220,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.selectAll, {
     label: 'Select All Cells',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.selectAll(current.content);
@@ -1235,7 +1231,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.deselectAll, {
     label: 'Deselect All Cells',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.deselectAll(current.content);
@@ -1246,7 +1242,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.moveUp, {
     label: 'Move Cells Up',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.moveUp(current.content);
@@ -1257,7 +1253,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.moveDown, {
     label: 'Move Cells Down',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.moveDown(current.content);
@@ -1268,7 +1264,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.toggleAllLines, {
     label: 'Toggle All Line Numbers',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.toggleAllLineNumbers(current.content);
@@ -1279,7 +1275,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.commandMode, {
     label: 'Enter Command Mode',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         current.content.mode = 'command';
@@ -1290,7 +1286,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.editMode, {
     label: 'Enter Edit Mode',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         current.content.mode = 'edit';
@@ -1301,7 +1297,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.undoCellAction, {
     label: 'Undo Cell Operation',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.undo(current.content);
@@ -1312,7 +1308,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.redoCellAction, {
     label: 'Redo Cell Operation',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.redo(current.content);
@@ -1323,7 +1319,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.changeKernel, {
     label: 'Change Kernel…',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return current.context.session.selectKernel();
@@ -1334,7 +1330,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.reconnectToKernel, {
     label: 'Reconnect To Kernel',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (!current) {
         return;
@@ -1374,7 +1370,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.createConsole, {
     label: 'New Console for Notebook',
     execute: args => {
-      const current = getCurrent({ ...args, activate: false });
+      const current = getCurrent();
       const widget = tracker.currentWidget;
 
       if (!current || !widget) {
@@ -1396,7 +1392,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.markdown1, {
     label: 'Change to Heading 1',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.setMarkdownHeader(current.content, 1);
@@ -1407,7 +1403,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.markdown2, {
     label: 'Change to Heading 2',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.setMarkdownHeader(current.content, 2);
@@ -1418,7 +1414,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.markdown3, {
     label: 'Change to Heading 3',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.setMarkdownHeader(current.content, 3);
@@ -1429,7 +1425,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.markdown4, {
     label: 'Change to Heading 4',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.setMarkdownHeader(current.content, 4);
@@ -1440,7 +1436,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.markdown5, {
     label: 'Change to Heading 5',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.setMarkdownHeader(current.content, 5);
@@ -1451,7 +1447,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.markdown6, {
     label: 'Change to Heading 6',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.setMarkdownHeader(current.content, 6);
@@ -1462,7 +1458,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.hideCode, {
     label: 'Collapse Selected Code',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.hideCode(current.content);
@@ -1473,7 +1469,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.showCode, {
     label: 'Expand Selected Code',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.showCode(current.content);
@@ -1484,7 +1480,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.hideAllCode, {
     label: 'Collapse All Code',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.hideAllCode(current.content);
@@ -1495,7 +1491,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.showAllCode, {
     label: 'Expand All Code',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.showAllCode(current.content);
@@ -1506,7 +1502,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.hideOutput, {
     label: 'Collapse Selected Outputs',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.hideOutput(current.content);
@@ -1517,7 +1513,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.showOutput, {
     label: 'Expand Selected Outputs',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.showOutput(current.content);
@@ -1528,7 +1524,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.hideAllOutputs, {
     label: 'Collapse All Outputs',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.hideAllOutputs(current.content);
@@ -1539,7 +1535,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.showAllOutputs, {
     label: 'Expand All Outputs',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.showAllOutputs(current.content);
@@ -1550,7 +1546,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.enableOutputScrolling, {
     label: 'Enable Scrolling for Outputs',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.enableOutputScrolling(current.content);
@@ -1561,7 +1557,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.disableOutputScrolling, {
     label: 'Disable Scrolling for Outputs',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         return NotebookActions.disableOutputScrolling(current.content);
@@ -1572,7 +1568,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.saveWithView, {
     label: 'Save Notebook with View State',
     execute: args => {
-      const current = getCurrent(args);
+      const current = getCurrent();
 
       if (current) {
         NotebookActions.persistViewState(current.content);
