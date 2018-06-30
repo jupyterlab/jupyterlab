@@ -107,6 +107,23 @@ describe('docregistry/mimedocument', () => {
 
     });
 
+    describe('#context', () => {
+
+      it('should return the context associated with the widget', () => {
+        const renderer = RENDERMIME.createRenderer('text/markdown');
+        let widget = new LogRenderer({
+          context: dContext,
+          renderer,
+          mimeType: 'text/markdown',
+          renderTimeout: 1000,
+          dataType: 'string'
+        });
+        dContext.initialize(true);
+        expect(widget.context).to.be(dContext);
+      });
+
+    });
+
     describe('#ready', () => {
 
       it('should resolve when the widget is ready', () => {

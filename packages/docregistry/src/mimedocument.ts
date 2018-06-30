@@ -86,6 +86,13 @@ class MimeContent extends Widget {
   readonly mimeType: string;
 
   /**
+   * The context associated with the rendered content.
+   */
+  get context(): DocumentRegistry.IContext<DocumentRegistry.IModel> {
+    return this._context;
+  }
+
+  /**
    * A promise that resolves when the widget is ready.
    */
   get ready(): Promise<void> {
