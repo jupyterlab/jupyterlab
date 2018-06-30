@@ -257,7 +257,7 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
           if (model) {
             return createConsole(args);
           }
-          return Promise.reject(`No running console for path: ${path}`);
+          return Promise.reject(`No running kernel session for path: ${path}`);
         });
       }
     },
