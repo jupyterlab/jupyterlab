@@ -190,9 +190,29 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
     });
   }
 
+  /**
+   * The options used to create a widget.
+   */
   interface ICreateOptions extends Partial<ConsolePanel.IOptions> {
-    ref?: string;
+    /**
+     * The reference widget id for the insert location.
+     *
+     * The default is `null`.
+     */
+    ref?: string | null;
+
+    /**
+     * The tab insert mode.
+     *
+     * An insert mode is used to specify how a widget should be added
+     * to the main area relative to a reference widget.
+     */
     insertMode?: DockLayout.InsertMode;
+
+    /**
+     * Whether to activate the widget.  Defaults to `true`.
+     */
+    activate?: boolean;
   }
 
   /**
@@ -219,7 +239,9 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
           ref: options.ref || null, mode: options.insertMode || 'tab-after'
         }
       );
-      shell.activateById(panel.id);
+      if (options.activate !== false) {
+        shell.activateById(panel.id);
+      }
       return panel;
     });
   }
@@ -232,8 +254,13 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
            && tracker.currentWidget === app.shell.currentWidget;
   }
 
+  /**
+   * The options used to open a console.
+   */
   interface IOpenOptions extends Partial<ConsolePanel.IOptions> {
-    // If there is an existing panel, return but do not activate it
+    /**
+     * Whether to activate the console.  Defaults to `true`.
+     */
     activate?: boolean;
   }
 
