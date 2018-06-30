@@ -1,22 +1,32 @@
 @import url('~@phosphor/widgets/style/index.css');
 
 .jp-status-bar {
-    --jp-statusbar-margin: 4px;
+    --jp-statusbar-margin: 8px;
 
     border: var(--jp-border-width) solid var(--jp-toolbar-border-color);
     background: var(--jp-toolbar-background);
     min-height: var(--jp-private-menubar-height);
-    min-width: 1000px;
+    min-width: 400px;
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .jp-status-bar-side {
-    min-height: 500px;
-    margin-left: var(--jp-statusbar-margin);
-    margin-right: var(--jp-statusbar-margin);
+    display: flex;
+    align-items: center;
+}
+
+.jp-status-bar-left {
+    flex-direction: row;
+}
+
+.jp-status-bar-right {
+    flex-direction: row-reverse;
 }
 
 .jp-status-bar-item {
-    min-height: var(--jp-private-menubar-height);
-    min-width: var(--jp-private-menubar-height);
-    margin: var(--jp-statusbar-margin);
+    margin: 0 var(--jp-statusbar-margin);
 }

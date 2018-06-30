@@ -1,5 +1,5 @@
 import {
-  Widget, PanelLayout, SplitPanel, BoxPanel
+  Widget, Panel, PanelLayout
 } from '@phosphor/widgets';
 
 import {
@@ -38,8 +38,9 @@ namespace IStatusBar {
 const STATUS_BAR_ID = 'jp-main-status-bar';
 
 const STATUS_BAR_CLASS = 'jp-status-bar';
-const STATUS_BAR_SPLIT_CONTAINER_CLASS = 'jp-status-bar-split-container';
 const STATUS_BAR_SIDE_CLASS = 'jp-status-bar-side';
+const STATUS_BAR_LEFT_SIDE_CLASS = 'jp-status-bar-left';
+const STATUS_BAR_RIGHT_SIDE_CLASS = 'jp-status-bar-right';
 const STATUS_BAR_ITEM_CLASS = 'jp-status-bar-item';
 
 export
@@ -53,25 +54,18 @@ class StatusBar extends Widget implements IStatusBar {
     this.addClass(STATUS_BAR_CLASS);
 
     let rootLayout = this.layout = new PanelLayout();
-    let splitContainer = this._splitContainer = new SplitPanel({
-      orientation: 'horizontal',
-      renderer: SplitPanel.defaultRenderer,
-      spacing: 5, // this should match the --jp-statusbar-margin
-    });
-    splitContainer.addClass(STATUS_BAR_SPLIT_CONTAINER_CLASS);
 
-    let leftPanel = this._leftSide = new BoxPanel({ direction: 'left-to-right' });
-    let rightPanel = this._rightSide = new BoxPanel({ direction: 'right-to-left' });
+    let leftPanel = this._leftSide = new Panel();
+    let rightPanel = this._rightSide = new Panel();
 
     leftPanel.addClass(STATUS_BAR_SIDE_CLASS);
-    SplitPanel.setStretch(leftPanel, 0);
+    leftPanel.addClass(STATUS_BAR_LEFT_SIDE_CLASS);
 
     rightPanel.addClass(STATUS_BAR_SIDE_CLASS);
-    SplitPanel.setStretch(rightPanel, 1);
+    rightPanel.addClass(STATUS_BAR_RIGHT_SIDE_CLASS);
 
-    splitContainer.addWidget(leftPanel);
-    splitContainer.addWidget(rightPanel);
-    rootLayout.addWidget(splitContainer);
+    rootLayout.addWidget(leftPanel);
+    rootLayout.addWidget(rightPanel);
 
     this._host.addToTopArea(this);
   }
@@ -133,10 +127,8 @@ class StatusBar extends Widget implements IStatusBar {
   private _statusItems: { [id: string]: StatusBar.IItem } = Object.create(null);
   private _host: ApplicationShell = null;
 
-  private _leftSide: BoxPanel;
-  private _rightSide: BoxPanel;
-
-  private _splitContainer: SplitPanel;
+  private _leftSide: Panel;
+  private _rightSide: Panel;
 }
 
 export
