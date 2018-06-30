@@ -10,6 +10,10 @@ import {
   ApplicationShell
 } from '@jupyterlab/application';
 
+// import {
+//   IIterable, IIterator, iter
+// } from '@phosphor/algorithm';
+
 export
 // tslint:disable-next-line:variable-name
 const IStatusBar = new Token<IStatusBar>('jupyterlab-statusbar/IStatusBar');
