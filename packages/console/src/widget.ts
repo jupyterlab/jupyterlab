@@ -157,7 +157,6 @@ class CodeConsole extends Widget {
 
     this._onKernelChanged();
     this.session.kernelChanged.connect(this._onKernelChanged, this);
-    this.addBanner();
     this.session.statusChanged.connect(this._onKernelStatusChanged, this);
   }
 
