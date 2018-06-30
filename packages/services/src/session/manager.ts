@@ -174,8 +174,8 @@ class SessionManager implements Session.IManager {
   }
 
   /**
-   * Find a session associated with a path and stop it is the only session using
-   * that kernel.
+   * Find a session associated with a path and stop it if it is the only session
+   * using that kernel.
    *
    * @param path - The path in question.
    *
