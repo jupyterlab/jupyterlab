@@ -6,6 +6,10 @@ import {
 } from '@jupyterlab/application';
 
 import {
+  IMainMenu, MainMenu
+} from '@jupyterlab/mainmenu';
+
+import {
   StatusBar, IStatusBar
 } from './statusBar';
 
@@ -19,7 +23,11 @@ const statusBar: JupyterLabPlugin<IStatusBar> = {
   id: 'jupyterlab-statusbar/statusbar',
   provides: IStatusBar,
   autoStart: true,
-  activate: (app: JupyterLab) => {
+  requires: [IMainMenu],
+  activate: (app: JupyterLab, menu: IMainMenu) => {
+    let mainMenu = (menu as MainMenu);
+    mainMenu.close();
+
     return new StatusBar({ host: app.shell });
   }
 };
