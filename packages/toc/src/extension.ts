@@ -3,6 +3,7 @@
 
 import {
   ILayoutRestorer,
+  IMimeDocumentTracker,
   JupyterLab,
   JupyterLabPlugin,
 } from '@jupyterlab/application';
@@ -21,6 +22,7 @@ import {
   createLatexGenerator,
   createNotebookGenerator,
   createMarkdownGenerator,
+  createRenderedMarkdownGenerator,
 } from './generators';
 
 import {ITableOfContentsRegistry, TableOfContentsRegistry} from './registry';
@@ -38,6 +40,7 @@ const extension: JupyterLabPlugin<ITableOfContentsRegistry> = {
     IDocumentManager,
     IEditorTracker,
     ILayoutRestorer,
+    IMimeDocumentTracker,
     INotebookTracker,
     IRenderMimeRegistry,
   ],
@@ -52,6 +55,7 @@ function activateTOC(
   docmanager: IDocumentManager,
   editorTracker: IEditorTracker,
   restorer: ILayoutRestorer,
+  mimeDocumentTracker: IMimeDocumentTracker,
   notebookTracker: INotebookTracker,
   rendermime: IRenderMimeRegistry,
 ): ITableOfContentsRegistry {
@@ -79,6 +83,13 @@ function activateTOC(
   // Create an markdown editor TableOfContentsRegistry.IGenerator
   const markdownGenerator = createMarkdownGenerator(editorTracker);
   registry.addGenerator(markdownGenerator);
+
+  // Create an rendered markdown editor TableOfContentsRegistry.IGenerator
+  const renderedMarkdownGenerator = createRenderedMarkdownGenerator(
+    mimeDocumentTracker,
+    rendermime.sanitizer
+  );
+  registry.addGenerator(renderedMarkdownGenerator);
 
   // Create a latex editor TableOfContentsRegistry.IGenerator
   const latexGenerator = createLatexGenerator(editorTracker);
