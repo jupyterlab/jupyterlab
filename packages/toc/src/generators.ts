@@ -5,6 +5,8 @@ import {ISanitizer} from '@jupyterlab/apputils';
 
 import {CodeCell, CodeCellModel, MarkdownCell} from '@jupyterlab/cells';
 
+import {IDocumentWidget} from '@jupyterlab/docregistry';
+
 import {FileEditor, IEditorTracker} from '@jupyterlab/fileeditor';
 
 import {INotebookTracker, NotebookPanel} from '@jupyterlab/notebook';
@@ -35,7 +37,7 @@ export function createNotebookGenerator(
     usesLatex: true,
     generate: panel => {
       let headings: IHeading[] = [];
-      each(panel.notebook.widgets, cell => {
+      each(panel.content.widgets, cell => {
         let model = cell.model;
         // Only parse markdown cells or code cell outputs
         if (model.type === 'code') {
@@ -118,20 +120,20 @@ export function createNotebookGenerator(
  */
 export function createMarkdownGenerator(
   tracker: IEditorTracker,
-): TableOfContentsRegistry.IGenerator<FileEditor> {
+): TableOfContentsRegistry.IGenerator<IDocumentWidget<FileEditor>> {
   return {
     tracker,
     usesLatex: true,
     isEnabled: editor => {
       // Only enable this if the editor mimetype matches
       // one of a few markdown variants.
-      return Private.isMarkdown(editor.model.mimeType);
+      return Private.isMarkdown(editor.content.model.mimeType);
     },
     generate: editor => {
-      let model = editor.model;
+      let model = editor.content.model;
       let onClickFactory = (line: number) => {
         return () => {
-          editor.editor.setCursorPosition({line, column: 0});
+          editor.content.editor.setCursorPosition({line, column: 0});
         };
       };
       return Private.getMarkdownHeadings(model.value.text, onClickFactory);
@@ -148,19 +150,19 @@ export function createMarkdownGenerator(
  */
 export function createLatexGenerator(
   tracker: IEditorTracker,
-): TableOfContentsRegistry.IGenerator<FileEditor> {
+): TableOfContentsRegistry.IGenerator<IDocumentWidget<FileEditor>> {
   return {
     tracker,
     usesLatex: true,
     isEnabled: editor => {
       // Only enable this if the editor mimetype matches
       // one of a few LaTeX variants.
-      let mime = editor.model.mimeType;
+      let mime = editor.content.model.mimeType;
       return mime === 'text/x-latex' || mime === 'text/x-stex';
     },
     generate: editor => {
       let headings: IHeading[] = [];
-      let model = editor.model;
+      let model = editor.content.model;
 
       // Split the text into lines, with the line number for each.
       // We will use the line number to scroll the editor upon
@@ -179,7 +181,7 @@ export function createLatexGenerator(
           const level = Private.latexLevels[match[1]];
           const text = match[2];
           const onClick = () => {
-            editor.editor.setCursorPosition({line: line.idx, column: 0});
+            editor.content.editor.setCursorPosition({line: line.idx, column: 0});
           };
           headings.push({text, level, onClick});
         }
