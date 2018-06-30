@@ -798,24 +798,17 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         }
         // open a console, create if needed
         if (code) {
+          editor.focus();
           return commands.execute('console:open', {
               path,
               insertMode: 'split-bottom',
               activate: false
             }).then((panel) => {
-              if (panel.session.status === 'unknown') {
-                // if the panel is newly created, we can only submit after the kernel is connected
-                panel.session.statusChanged.connect(() => {
-                  if (panel.session.status === 'connected') {
-                    // cell will lose focus during the creation of the console
-                    editor.focus();
-                    return commands.execute('console:inject', { activate: false, code, path });
-                  }
-                }, panel);
-              } else {
-                // otherwise we send the code to console directly
-                return commands.execute('console:inject', { activate: false, code, path });
-              }
+              // TODO: If the panel was created, the editor loses focus.
+              // if (!editor.hasFocus) {
+              //   editor.focus();
+              // }
+              commands.execute('console:inject', { activate: false, code, path });
             }).catch((error) => {
               console.log(error);
               return Promise.resolve(void 0);
