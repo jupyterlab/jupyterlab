@@ -42,7 +42,6 @@
     "simulate-event": "~1.4.0"
   },
   "devDependencies": {
-    "cache-loader": "^1.2.2",
     "css-loader": "~0.28.7",
     "es6-promise": "~4.1.1",
     "file-loader": "~1.1.11",
