@@ -4,6 +4,10 @@
 import expect = require('expect.js');
 
 import {
+  PromiseDelegate
+} from '@phosphor/coreutils';
+
+import {
   KernelMessage, Kernel
 } from '../../../lib/kernel';
 
@@ -16,35 +20,36 @@ import {
 init();
 
 
-let BLIP = [
-  'from ipykernel.comm import Comm',
-  'comm = Comm(target_name="test", data="hello")',
-  'comm.send(data="hello")',
-  'comm.close("goodbye")'
-].join('\n');
+let BLIP = `
+from ipykernel.comm import Comm
+comm = Comm(target_name="test", data="hello")
+comm.send(data="hello")
+comm.close("goodbye")
+`;
 
-let RECEIVE = [
-  'def _recv(msg):',
-  '    data = msg["content"]["data"]',
-  '    if data == "quit":',
-  '         comm.close("goodbye")',
-  '    else:',
-  '         comm.send(data)'
-].join('\n');
+let RECEIVE = `
+def _recv(msg):
+    data = msg["content"]["data"]
+    if data == "quit":
+         comm.close("goodbye")
+    else:
+         comm.send(data)
+`;
 
-let SEND = RECEIVE + '\n' + [
-  'from ipykernel.comm import Comm',
-  'comm = Comm(target_name="test", data="hello")',
-  'comm.send(data="hello")',
-  'comm.on_msg(_recv)'
-].join('\n');
+let SEND = `
+${RECEIVE}
+from ipykernel.comm import Comm
+comm = Comm(target_name="test", data="hello")
+comm.send(data="hello")
+comm.on_msg(_recv)
+`;
 
-let TARGET = RECEIVE + '\n' + [
-  'def target_func(comm, msg):',
-  '    comm.on_msg(_recv)',
-  'get_ipython().kernel.comm_manager.register_target("test", target_func)'
-].join('\n');
-
+let TARGET = `
+${RECEIVE}
+def target_func(comm, msg):
+    comm.on_msg(_recv)
+get_ipython().kernel.comm_manager.register_target("test", target_func)
+`;
 
 describe('jupyter.services - Comm', () => {
 
@@ -70,72 +75,73 @@ describe('jupyter.services - Comm', () => {
     context('#connectToComm()', () => {
 
       it('should create an instance of IComm', () => {
-        return kernel.connectToComm('test').then(comm => {
-          expect(comm.targetName).to.be('test');
-          expect(typeof comm.commId).to.be('string');
-        });
+        let comm = kernel.connectToComm('test');
+        expect(comm.targetName).to.be('test');
+        expect(typeof comm.commId).to.be('string');
       });
 
       it('should use the given id', () => {
-        return kernel.connectToComm('test', '1234').then(comm => {
-          expect(comm.targetName).to.be('test');
-          expect(comm.commId).to.be('1234');
-        });
+        let comm = kernel.connectToComm('test', '1234');
+        expect(comm.targetName).to.be('test');
+        expect(comm.commId).to.be('1234');
       });
 
-      it('should create an instance of IComm', () => {
-        return kernel.connectToComm('test', '1234').then(comm => {
-          expect(comm.targetName).to.be('test');
-          expect(comm.commId).to.be('1234');
-        });
-      });
-
-      it('should use the given id', () => {
-        return kernel.connectToComm('test', '1234').then(comm => {
-          expect(comm.targetName).to.be('test');
-          expect(comm.commId).to.be('1234');
-        });
-      });
-
-      it('should reuse an existing comm', (done) => {
-        kernel.connectToComm('test', '1234').then(comm => {
-          comm.onClose = () => {
-            done();
-          };
-          kernel.connectToComm('test', '1234').then(comm2 => {
-            comm2.close();  // should trigger comm to close
-          });
-        });
+      it('should reuse an existing comm', () => {
+        let comm = kernel.connectToComm('test', '1234');
+        let comm2 = kernel.connectToComm('test', '1234');
+        expect(comm).to.be(comm2);
       });
     });
 
     context('#registerCommTarget()', () => {
 
-      it('should call the provided callback', (done) => {
-        let disposable = kernel.registerCommTarget('test', (comm, msg) => {
-          disposable.dispose();
-          let content = msg.content;
-          expect(content.data).to.be('hello');
-          comm.dispose();
-          done();
-        });
-        kernel.requestExecute({ code: BLIP }, true).done.catch(done);
+      it('should call the provided callback', async () => {
+        let promise = new PromiseDelegate<[Kernel.IComm, KernelMessage.ICommOpenMsg]>();
+        let hook = (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => {
+          promise.resolve([comm, msg]);
+        };
+        kernel.registerCommTarget('test', hook);
+
+        // Request the comm creation.
+        await kernel.requestExecute({ code: SEND }, true).done;
+
+        // Get the comm.
+        let [comm, msg] = await promise.promise;
+        expect(msg.content.data).to.be('hello');
+
+        // Clean up
+        kernel.removeCommTarget('test', hook);
+        comm.dispose();
       });
+
     });
 
     context('#commInfo()', () => {
 
-      it('should get the comm info', (done) => {
-        let disposable = kernel.registerCommTarget('test', (comm, msg) => {
-          disposable.dispose();
-          kernel.requestCommInfo({ }).then((msg) => {
-            let comms = msg.content.comms;
-            expect(comms[comm.commId].target_name).to.be('test');
-            comm.dispose();
-            done();
-          }).catch(done);
-        });
-        kernel.requestExecute({ code: SEND }, true).done.catch(done);
+      it('should get the comm info', async () => {
+
+        let commPromise = new PromiseDelegate<Kernel.IComm>();
+        let hook = (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => {
+          commPromise.resolve(comm);
+        };
+        kernel.registerCommTarget('test', hook);
+
+        // Request the comm creation.
+        await kernel.requestExecute({ code: SEND }, true).done;
+
+        // Get the comm.
+        let comm = await commPromise.promise;
+
+        // Ask the kernel for the list of current comms.
+        let msg = await kernel.requestCommInfo({ });
+
+        // Test to make sure the comm we just created is listed.
+        let comms = msg.content.comms;
+        expect(comms[comm.commId].target_name).to.be('test');
+
+        // Clean up
+        kernel.removeCommTarget('test', hook);
+        comm.dispose();
       });
 
       it('should allow an optional target', () => {
@@ -154,31 +160,28 @@ describe('jupyter.services - Comm', () => {
     context('#isDisposed', () => {
 
       it('should be true after we dispose of the comm', () => {
-        return kernel.connectToComm('test').then(comm => {
-          expect(comm.isDisposed).to.be(false);
-          comm.dispose();
-          expect(comm.isDisposed).to.be(true);
-        });
+        let comm = kernel.connectToComm('test');
+        expect(comm.isDisposed).to.be(false);
+        comm.dispose();
+        expect(comm.isDisposed).to.be(true);
       });
 
       it('should be safe to call multiple times', () => {
-        return kernel.connectToComm('test').then(comm => {
-          expect(comm.isDisposed).to.be(false);
-          expect(comm.isDisposed).to.be(false);
-          comm.dispose();
-          expect(comm.isDisposed).to.be(true);
-          expect(comm.isDisposed).to.be(true);
-        });
+        let comm = kernel.connectToComm('test');
+        expect(comm.isDisposed).to.be(false);
+        expect(comm.isDisposed).to.be(false);
+        comm.dispose();
+        expect(comm.isDisposed).to.be(true);
+        expect(comm.isDisposed).to.be(true);
       });
     });
 
     context('#dispose()', () => {
 
       it('should dispose of the resources held by the comm', () => {
-        return kernel.connectToComm('foo').then(comm => {
-          comm.dispose();
-          expect(comm.isDisposed).to.be(true);
-        });
+        let comm = kernel.connectToComm('foo');
+        comm.dispose();
+        expect(comm.isDisposed).to.be(true);
       });
     });
 
@@ -189,9 +192,7 @@ describe('jupyter.services - Comm', () => {
     let comm: Kernel.IComm;
 
     beforeEach(() => {
-      return kernel.connectToComm('test').then(c => {
-        comm = c;
-      });
+      comm = kernel.connectToComm('test');
     });
 
     context('#id', () => {

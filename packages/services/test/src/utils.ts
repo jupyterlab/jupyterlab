@@ -1,9 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import encoding = require('text-encoding');
+import encoding from 'text-encoding';
 
-import WebSocket = require('ws');
+import WebSocket from 'ws';
+
+import expect from 'expect.js';
 
 import {
   uuid
@@ -14,6 +16,11 @@ import {
 } from '@phosphor/coreutils';
 
 import { Response } from 'node-fetch';
+
+
+import {
+  ISignal, Signal
+} from '@phosphor/signaling';
 
 import {
   Contents, TerminalSession, ServerConnection
@@ -207,17 +214,19 @@ function handleRequest(item: IService, status: number, body: any) {
 
 
 /**
- * Expect a failure on a promise with the given message, then call `done`.
+ * Expect a failure on a promise with the given message, then call `done` if provided.
  */
 export
-function expectFailure(promise: Promise<any>, done: () => void, message?: string): Promise<any> {
-  return promise.then((msg: any) => {
+async function expectFailure(promise: Promise<any>, done?: () => void, message?: string): Promise<any> {
+  let result = promise.then((msg: any) => {
     throw Error('Expected failure did not occur');
   }, (error: Error) => {
     if (message && error.message.indexOf(message) === -1) {
       throw Error(`Error "${message}" not in: "${error.message}"`);
     }
-  }).then(done, done);
+  });
+
+  return done ? result.then(done, done) : result;
 }
 
 
@@ -238,16 +247,17 @@ class SocketTester implements IService {
    * Create a new request and socket tester.
    */
   constructor() {
-    this._server = new WebSocket.Server({ port: 8080 });
+    const port = 8081;
+    this._server = new WebSocket.Server({ port });
     this.serverSettings = ServerConnection.makeSettings({
-      wsUrl: 'ws://localhost:8080/',
+      wsUrl: `ws://localhost:${port}/`,
       WebSocket: WebSocket as any
     });
-    this._promiseDelegate = new PromiseDelegate<void>();
+    this._ready = new PromiseDelegate<void>();
     this._server.on('connection', ws => {
       this._ws = ws;
       this.onSocket(ws);
-      this._promiseDelegate.resolve(void 0);
+      this._ready.resolve(undefined);
       let connect = this._onConnect;
       if (connect) {
         connect(ws);
@@ -257,47 +267,41 @@ class SocketTester implements IService {
 
   readonly serverSettings: ServerConnection.ISettings;
 
-  start(): Promise<Kernel.IKernel> {
-    handleRequest(this, 201, { name: 'test', id: uuid() });
-    let serverSettings = this.serverSettings;
-    return Kernel.startNew({ serverSettings }).then(k => {
-      this._kernel = k;
-      return k;
-    });
+  get ready() {
+    return this._ready.promise;
   }
 
+  /**
+   * Dispose the socket test rig.
+   */
   dispose(): void {
     if (this.isDisposed) {
       return;
-    }
-    if (this._kernel) {
-      this._kernel.dispose();
     }
     this._server.close();
     this._server = null;
   }
 
+  /**
+   * Test if the socket test rig is disposed.
+   */
   get isDisposed(): boolean {
     return this._server === null;
   }
 
   /**
-   * Send a raw message to the server.
+   * Send a raw message from the server to a connected client.
    */
   sendRaw(msg: string | ArrayBuffer) {
-    this._promiseDelegate.promise.then(() => {
-      this._ws.send(msg);
-    });
+    this._ws.send(msg);
   }
 
   /**
    * Close the socket.
    */
-  close() {
-    this._promiseDelegate.promise.then(() => {
-      this._promiseDelegate = new PromiseDelegate<void>();
-      this._ws.close();
-    });
+  async close(): Promise<void> {
+    this._ready = new PromiseDelegate<void>();
+    this._ws.close();
   }
 
   /**
@@ -307,13 +311,15 @@ class SocketTester implements IService {
     this._onConnect = cb;
   }
 
+  /**
+   * A callback executed when a new server websocket is created.
+   */
   protected onSocket(sock: WebSocket): void { /* no-op */ }
 
   private _ws: WebSocket = null;
-  private _promiseDelegate: PromiseDelegate<void> = null;
+  private _ready: PromiseDelegate<void> = null;
   private _server: WebSocket.Server = null;
   private _onConnect: (ws: WebSocket) => void = null;
-  private _kernel: Kernel.IKernel | null = null;
   protected settings: ServerConnection.ISettings;
 }
 
@@ -332,18 +338,120 @@ class KernelTester extends SocketTester {
     this._initialStatus = status;
   }
 
-  sendStatus(status: string) {
-    let options: KernelMessage.IOptions = {
-      msgType: 'status',
-      channel: 'iopub',
-      session: uuid(),
-    };
-    let msg = KernelMessage.createMessage(options, { execution_state: status } );
-    this.send(msg);
+  /**
+   * The parent header sent on messages.
+   *
+   * #### Notes:
+   * Set to `undefined` to send no parent header.
+   */
+  parentHeader: KernelMessage.IHeader | undefined;
+
+  /**
+   * Send the status from the server to the client.
+   */
+  sendStatus(msgId: string, status: Kernel.Status) {
+    return this.sendMessage({msgId, msgType: 'status', channel: 'iopub'}, {execution_state: status});
   }
 
+  /**
+   * Send an iopub stream message.
+   */
+  sendStream(msgId: string, content: KernelMessage.IStreamMsg['content']) {
+    return this.sendMessage({msgId, msgType: 'stream', channel: 'iopub'}, content);
+  }
+
+  /**
+   * Send an iopub display message.
+   */
+  sendDisplayData(msgId: string, content: KernelMessage.IDisplayDataMsg['content']) {
+    return this.sendMessage({msgId, msgType: 'display_data', channel: 'iopub'}, content);
+  }
+
+  /**
+   * Send an iopub display message.
+   */
+  sendUpdateDisplayData(msgId: string, content: KernelMessage.IUpdateDisplayDataMsg['content']) {
+    return this.sendMessage({msgId, msgType: 'update_display_data', channel: 'iopub'}, content);
+  }
+  /**
+   * Send an iopub comm open message.
+   */
+  sendCommOpen(msgId: string, content: KernelMessage.ICommOpenMsg['content']) {
+    return this.sendMessage({msgId, msgType: 'comm_open', channel: 'iopub'}, content);
+  }
+
+  /**
+   * Send an iopub comm close message.
+   */
+  sendCommClose(msgId: string, content: KernelMessage.ICommCloseMsg['content']) {
+    return this.sendMessage({msgId, msgType: 'comm_close', channel: 'iopub'}, content);
+  }
+
+  /**
+   * Send an iopub comm message.
+   */
+  sendCommMsg(msgId: string, content: KernelMessage.ICommMsgMsg['content']) {
+    return this.sendMessage({msgId, msgType: 'comm_msg', channel: 'iopub'}, content);
+  }
+
+  sendExecuteResult(msgId: string, content: KernelMessage.IExecuteResultMsg['content']) {
+    return this.sendMessage({msgId, msgType: 'execute_result', channel: 'iopub'}, content);
+  }
+
+  sendExecuteReply(msgId: string, content: KernelMessage.IExecuteReply['content']) {
+    return this.sendMessage({msgId, msgType: 'execute_reply', channel: 'shell'}, content);
+  }
+
+  sendKernelInfoReply(msgId: string, content: KernelMessage.IInfoReplyMsg['content']) {
+    return this.sendMessage({msgId, msgType: 'kernel_info_reply', channel: 'shell'}, content);
+  }
+
+  sendInputRequest(msgId: string, content: KernelMessage.IInputRequestMsg['content']) {
+    return this.sendMessage({msgId, msgType: 'input_request', channel: 'stdin'}, content);
+  }
+
+  /**
+   * Send a kernel message with sensible defaults.
+   */
+  sendMessage(options: MakeOptional<KernelMessage.IOptions, 'session'>, content: any) {
+    options.session = this.serverSessionId;
+    let msg = KernelMessage.createMessage(options as KernelMessage.IOptions, content);
+    msg.parent_header = this.parentHeader;
+    this.send(msg);
+    return msg.header.msg_id;
+  }
+
+  /**
+   * Send a kernel message from the server to the client.
+   */
   send(msg: KernelMessage.IMessage): void {
     this.sendRaw(serialize(msg));
+  }
+
+  /**
+   * Start a client-side kernel talking to our websocket server.
+   */
+  async start(): Promise<Kernel.IKernel> {
+    // Set up the kernel request response.
+    handleRequest(this, 201, { name: 'test', id: uuid() });
+
+    // Construct a new kernel.
+    let serverSettings = this.serverSettings;
+    this._kernel = await Kernel.startNew({ serverSettings });
+    await this.ready;
+    await this._kernel.ready;
+    return this._kernel;
+  }
+
+  /**
+   * Shut down the current kernel
+   */
+  async shutdown(): Promise<void> {
+    if (this._kernel && !this._kernel.isDisposed) {
+      // Set up the kernel request response.
+      handleRequest(this, 204, {});
+      await this._kernel.shutdown();
+    }
   }
 
   /**
@@ -353,19 +461,40 @@ class KernelTester extends SocketTester {
     this._onMessage = cb;
   }
 
+  /**
+   * Dispose the tester.
+   */
+  dispose() {
+    super.dispose();
+    if (this._kernel && !this._kernel.isDisposed) {
+      this._kernel.dispose();
+      this._kernel = null;
+    }
+  }
+
+  /**
+   * Set up a new server websocket to pretend like it is a server kernel.
+   */
   protected onSocket(sock: WebSocket): void {
     super.onSocket(sock);
-    this.sendStatus(this._initialStatus);
+    // TODO: Does the kernel actually send the status in the original websocket? Can it ever send the status?
+    // this.sendStatus(this._initialStatus);
     sock.on('message', (msg: any) => {
       if (msg instanceof Buffer) {
         msg = new Uint8Array(msg).buffer;
       }
       let data = deserialize(msg);
       if (data.header.msg_type === 'kernel_info_request') {
-        data.parent_header = data.header;
-        data.header.msg_type = 'kernel_info_reply';
-        data.content = EXAMPLE_KERNEL_INFO;
-        this.send(data);
+        // First send status busy message.
+        this.parentHeader = data.header;
+        this.sendStatus(uuid(), 'busy');
+
+        // Then send the kernel_info_reply message.
+        this.sendKernelInfoReply(uuid(), EXAMPLE_KERNEL_INFO);
+
+        // Then send status idle message.
+        this.sendStatus(uuid(), 'idle');
+        this.parentHeader = undefined;
       } else {
         let onMessage = this._onMessage;
         if (onMessage) {
@@ -375,7 +504,10 @@ class KernelTester extends SocketTester {
     });
   }
 
+  readonly serverSessionId = uuid();
+
   private _initialStatus = 'starting';
+  private _kernel: Kernel.IKernel | null = null;
   private _onMessage: (msg: KernelMessage.IMessage) => void = null;
 }
 
@@ -400,27 +532,120 @@ function createSessionModel(id?: string): Session.IModel {
  * Session test rig.
  */
 export
-class SessionTester extends KernelTester {
+class SessionTester extends SocketTester {
+
+
+  get initialStatus(): string {
+    return this._initialStatus;
+  }
+
+  set initialStatus(status: string) {
+    this._initialStatus = status;
+  }
+
   /**
    * Start a mock session.
    */
-  startSession(): Promise<Session.ISession> {
+  async startSession(): Promise<Session.ISession> {
     handleRequest(this, 201, createSessionModel());
     let serverSettings = this.serverSettings;
-    return Session.startNew({ path: uuid(), serverSettings }).then(s => {
-      this._session = s;
-      return s;
-    });
+    this._session = await Session.startNew({ path: uuid(), serverSettings });
+    await this.ready;
+    await this._session.kernel.ready;
+    return this._session;
+  }
+
+  /**
+   * Shut down the current session
+   */
+  async shutdown(): Promise<void> {
+    if (this._session) {
+      // Set up the session request response.
+      handleRequest(this, 204, {});
+      await this._session.shutdown();
+    }
   }
 
   dispose(): void {
+    super.dispose();
     if (this._session) {
       this._session.dispose();
+      this._session = null;
     }
-    super.dispose();
   }
 
+  /**
+   * Send the status from the server to the client.
+   */
+  sendStatus(status: string, parentHeader?: KernelMessage.IHeader) {
+    let options: KernelMessage.IOptions = {
+      msgType: 'status',
+      channel: 'iopub',
+      session: this.serverSessionId
+    };
+    let msg = KernelMessage.createMessage(options, { execution_state: status } );
+    if (parentHeader) {
+      msg.parent_header = parentHeader;
+    }
+    this.send(msg);
+  }
+
+
+  /**
+   * Send a kernel message from the server to the client.
+   */
+  send(msg: KernelMessage.IMessage): void {
+    this.sendRaw(serialize(msg));
+  }
+
+
+  /**
+   * Register the message callback with the websocket server.
+   */
+  onMessage(cb: (msg: KernelMessage.IMessage) => void): void {
+    this._onMessage = cb;
+  }
+
+  /**
+   * Set up a new server websocket to pretend like it is a server kernel.
+   */
+  protected onSocket(sock: WebSocket): void {
+    super.onSocket(sock);
+    sock.on('message', (msg: any) => {
+      if (msg instanceof Buffer) {
+        msg = new Uint8Array(msg).buffer;
+      }
+      let data = deserialize(msg);
+      if (data.header.msg_type === 'kernel_info_request') {
+        // First send status busy message.
+        this.sendStatus('busy', data.header);
+
+        // Then send the kernel_info_reply message.
+        let options: KernelMessage.IOptions = {
+          msgType: 'kernel_info_reply',
+          channel: 'shell',
+          session: this.serverSessionId
+        };
+        let msg = KernelMessage.createMessage(options, EXAMPLE_KERNEL_INFO );
+        msg.parent_header = data.header;
+        this.send(msg);
+
+        // Then send status idle message.
+        this.sendStatus('idle', data.header);
+      } else {
+        let onMessage = this._onMessage;
+        if (onMessage) {
+          onMessage(data);
+        }
+      }
+    });
+  }
+
+  readonly serverSessionId = uuid();
+  private _initialStatus = 'starting';
   private _session: Session.ISession;
+  private _onMessage: (msg: KernelMessage.IMessage) => void = null;
+
 }
 
 
@@ -454,3 +679,80 @@ class TerminalTester extends SocketTester {
   private _onMessage: (msg: TerminalSession.IMessage) => void = null;
 }
 
+
+/**
+ * Test a single emission from a signal.
+ *
+ * @param signal - The signal we are listening to.
+ * @param find - An optional function to determine which emission to test,
+ * defaulting to the first emission.
+ * @param test - An optional function which contains the tests for the emission.
+ * @param value - An optional value that the promise resolves to if it is
+ * successful.
+ *
+ * @returns a promise that rejects if the function throws an error (e.g., if an
+ * expect test doesn't pass), and resolves otherwise.
+ *
+ * #### Notes
+ * The first emission for which the find function returns true will be tested in
+ * the test function. If the find function is not given, the first signal
+ * emission will be tested.
+ *
+ * You can test to see if any signal comes which matches a criteria by just
+ * giving a find function. You can test the very first signal by just giving a
+ * test function. And you can test the first signal matching the find criteria
+ * by giving both.
+ *
+ * The reason this function is asynchronous is so that the thing causing the
+ * signal emission (such as a websocket message) can be asynchronous.
+ */
+export
+async function testEmission<T, U, V>(signal: ISignal<T, U>, options: {
+  find?: (a: T, b: U) => boolean
+  test?: (a: T, b: U) => void,
+  value?: V
+}): Promise<V> {
+  const done = new PromiseDelegate<V>();
+  const object = {};
+  signal.connect((sender: T, args: U) => {
+    if (!options.find || options.find(sender, args)) {
+      try {
+        Signal.disconnectReceiver(object);
+        if (options.test) {
+          options.test(sender, args);
+        }
+      } catch (e) {
+        done.reject(e);
+      }
+      done.resolve(options.value || undefined);
+    }
+  }, object);
+  return done.promise;
+}
+
+/**
+ * Test to see if a promise is fulfilled.
+ *
+ * @returns true if the promise is fulfilled (either resolved or rejected), and
+ * false if the promise is still pending.
+ */
+export
+async function isFulfilled<T>(p: PromiseLike<T>): Promise<boolean> {
+  let x = Object.create(null);
+  let result = await (Promise.race([p, x]).catch(() => false));
+  return result !== x;
+}
+
+/**
+ * Make a new type with the given keys declared as optional.
+ *
+ * #### Notes
+ * An example:
+ *
+ * interface A {a: number, b: string}
+ * type B = MakeOptional<A, 'a'>
+ * let x: B = {b: 'test'}
+ */
+type MakeOptional<T, K> = Pick<T, Exclude<keyof T, K>> & {
+  [P in Extract<keyof T, K>]?: T[P]
+};

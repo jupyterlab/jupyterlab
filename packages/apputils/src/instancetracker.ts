@@ -71,11 +71,28 @@ interface IInstanceTracker<T extends Widget> extends IDisposable {
   readonly size: number;
 
   /**
+   * Find the first widget in the tracker that satisfies a filter function.
+   *
+   * @param - fn The filter function to call on each widget.
+   *
+   * #### Notes
+   * If no widget is found, the value returned is `undefined`.
+   */
+  find(fn: (widget: T) => boolean): T | undefined;
+
+  /**
    * Iterate through each widget in the tracker.
    *
    * @param fn - The function to call on each widget.
    */
   forEach(fn: (widget: T) => void): void;
+
+  /**
+   * Filter the widgets in the tracker based on a predicate.
+   *
+   * @param fn - The function by which to filter.
+   */
+  filter(fn: (widget: T) => boolean): T[];
 
   /**
    * Check if this tracker has the specified widget.
@@ -261,6 +278,15 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    */
   forEach(fn: (widget: T) => void): void {
     each(this._tracker.widgets, widget => { fn(widget); });
+  }
+
+  /**
+   * Filter the widgets in the tracker based on a predicate.
+   *
+   * @param fn - The function by which to filter.
+   */
+  filter(fn: (widget: T) => boolean): T[] {
+    return this._tracker.widgets.filter(fn);
   }
 
   /**

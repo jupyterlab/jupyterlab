@@ -376,20 +376,19 @@ function activate(app: JupyterLab, consoleTracker: IConsoleTracker, editorServic
   commands.addCommand(CommandIDs.createNew, {
     label: 'Text File',
     caption: 'Create a new text file',
-    execute: () => {
-      let cwd = browserFactory.defaultBrowser.model.path;
-      return createNew(cwd);
+    iconClass: EDITOR_ICON_CLASS,
+    execute: args => {
+      let cwd = args['cwd'] || browserFactory.defaultBrowser.model.path;
+      return createNew(cwd as string);
     }
   });
 
   // Add a launcher item if the launcher is available.
   if (launcher) {
     launcher.add({
-      displayName: 'Text Editor',
+      command: CommandIDs.createNew,
       category: 'Other',
       rank: 1,
-      iconClass: EDITOR_ICON_CLASS,
-      callback: createNew
     });
   }
 

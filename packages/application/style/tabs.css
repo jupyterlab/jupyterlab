@@ -10,7 +10,7 @@
 :root {
   /* These need to be root because tabs get attached to the body during dragging. */
   --jp-private-horizontal-tab-height: 24px;
-  --jp-private-horizontal-tab-width: 144px;
+  --jp-private-horizontal-tab-width: 216px;
   --jp-private-horizontal-tab-active-top-border: 2px;
 }
 
@@ -47,7 +47,7 @@
 .p-DockPanel-tabBar .p-TabBar-tab {
   flex: 0 1 var(--jp-private-horizontal-tab-width);
   min-height: calc(var(--jp-private-horizontal-tab-height) + var(--jp-border-width));
-  min-width: 35px;
+  min-width: 36px;
   margin-left: calc(-1*var(--jp-border-width));
   line-height: var(--jp-private-horizontal-tab-height);
   padding: 0px 8px;

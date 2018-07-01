@@ -107,6 +107,10 @@ class SettingEditor extends Widget {
     panel.addWidget(list);
     panel.addWidget(instructions);
 
+    SplitPanel.setStretch(list, 0);
+    SplitPanel.setStretch(instructions, 1);
+    SplitPanel.setStretch(editor, 1);
+
     editor.stateChanged.connect(this._onStateChanged, this);
     list.changed.connect(this._onStateChanged, this);
     panel.handleMoved.connect(this._onStateChanged, this);

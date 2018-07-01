@@ -41,10 +41,9 @@ describe('session/manager', () => {
   let manager: SessionManager;
   let session: Session.ISession;
 
-  before(() => {
-    return Session.startNew({ path: uuid() }).then(s => {
-      session = s;
-    });
+  before(async () => {
+    session = await Session.startNew({ path: uuid() });
+    await session.kernel.ready;
   });
 
   beforeEach(() => {
@@ -74,9 +73,10 @@ describe('session/manager', () => {
 
       it('should get the server settings', () => {
         manager.dispose();
-        let serverSettings = ServerConnection.makeSettings({ baseUrl: 'foo' });
+        let serverSettings = ServerConnection.makeSettings();
+        let token = serverSettings.token;
         manager = new SessionManager({ serverSettings });
-        expect(manager.serverSettings.baseUrl).to.be('foo');
+        expect(manager.serverSettings.token).to.be(token);
       });
 
     });
@@ -196,6 +196,8 @@ describe('session/manager', () => {
 
     describe('#refreshRunning()', () => {
 
+      // Sometimes there is an extra kernel_info_request, which means that a
+      // future is prematurely disposed.
       it('should refresh the list of session ids', () => {
         return manager.refreshRunning().then(() => {
           let running = toArray(manager.running());
@@ -220,31 +222,30 @@ describe('session/manager', () => {
 
     describe('#startNew()', () => {
 
-      it('should start a session', () => {
-        return manager.startNew({ path: uuid() }).then(session => {
-          expect(session.id).to.be.ok();
-          return session.shutdown();
-        });
+      it('should start a session', async () => {
+        let session = await manager.startNew({ path: uuid() });
+        await session.kernel.ready;
+        expect(session.id).to.be.ok();
+        return session.shutdown();
       });
 
-      it('should emit a runningChanged signal', () => {
+      it('should emit a runningChanged signal', async () => {
         let called = false;
         manager.runningChanged.connect(() => {
           called = true;
         });
-        return manager.startNew({ path: uuid() }).then(() => {
-          expect(called).to.be(true);
-        });
+        let session = await manager.startNew({ path: uuid() });
+        await session.kernel.ready;
+        expect(called).to.be(true);
       });
 
     });
 
     describe('#findByPath()', () => {
 
-      it('should find an existing session by path', () => {
-        return manager.findByPath(session.path).then(newModel => {
-          expect(newModel.id).to.be(session.id);
-        });
+      it('should find an existing session by path', async () => {
+        let newModel = await manager.findByPath(session.path);
+        expect(newModel.id).to.be(session.id);
       });
 
     });
@@ -263,40 +264,38 @@ describe('session/manager', () => {
     describe('#connectTo()', () => {
 
       it('should connect to a running session', () => {
-        return manager.connectTo(session.model).then(newSession => {
-          expect(newSession.id).to.be(session.id);
-          expect(newSession.kernel.id).to.be(session.kernel.id);
-          expect(newSession).to.not.be(session);
-          expect(newSession.kernel).to.not.be(session.kernel);
-        });
+        const newSession = manager.connectTo(session.model);
+        expect(newSession.id).to.be(session.id);
+        expect(newSession.kernel.id).to.be(session.kernel.id);
+        expect(newSession).to.not.be(session);
+        expect(newSession.kernel).to.not.be(session.kernel);
       });
 
     });
 
     describe('shutdown()', () => {
 
-      it('should shut down a session by id', () => {
-        let temp: Session.ISession;
-        return startNew(manager).then(s => {
-          temp = s;
-          return manager.shutdown(s.id);
-        }).then(() => {
-          expect(temp.isDisposed).to.be(true);
-        });
+      it('should shut down a session by id', async () => {
+        let temp = await startNew(manager);
+        await temp.kernel.ready;
+        await manager.shutdown(temp.id);
+        expect(temp.isDisposed).to.be(true);
       });
 
-      it('should emit a runningChanged signal', () => {
+      it('should emit a runningChanged signal', async () => {
         let called = false;
-        return startNew(manager).then(s => {
-          manager.runningChanged.connect((sender, args) => {
-            if (s.isDisposed) {
-              called = true;
-            }
-          });
-          return manager.shutdown(s.id);
-        }).then(() => {
-          expect(called).to.be(true);
+        let session = await startNew(manager);
+        await session.kernel.ready;
+        manager.runningChanged.connect((sender, sessions) => {
+          // Make sure the sessions list does not have our shutdown session in it.
+          if (!sessions.find(s => s.id === session.id)) {
+            called = true;
+          }
         });
+
+        await manager.shutdown(session.id);
+        expect(called).to.be(true);
+        expect(session.isDisposed).to.be(true);
       });
 
     });

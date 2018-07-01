@@ -78,7 +78,7 @@ class SessionManager implements Session.IManager {
   }
 
   /**
-   * Test whether the terminal manager is disposed.
+   * Test whether the manager is disposed.
    */
   get isDisposed(): boolean {
     return this._isDisposed;
@@ -208,11 +208,10 @@ class SessionManager implements Session.IManager {
   /*
    * Connect to a running session.  See also [[connectToSession]].
    */
-  connectTo(model: Session.IModel): Promise<Session.ISession> {
-    return Session.connectTo(model, this.serverSettings).then(session => {
-      this._onStarted(session);
-      return session;
-    });
+  connectTo(model: Session.IModel): Session.ISession {
+    const session = Session.connectTo(model, this.serverSettings);
+    this._onStarted(session);
+    return session;
   }
 
   /**

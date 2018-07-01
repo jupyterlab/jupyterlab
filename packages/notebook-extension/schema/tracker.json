@@ -9,6 +9,17 @@
         "autoClosingBrackets": {
           "type": "boolean"
         },
+        "fontFamily": {
+          "type": ["string", "null"]
+        },
+        "fontSize": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "maximum": 100
+        },
+        "lineHeight": {
+          "type": ["number", "null"]
+        },
         "lineNumbers": {
           "type": "boolean"
         },
@@ -39,6 +50,9 @@
       "$ref": "#/definitions/editorConfig",
       "default": {
         "autoClosingBrackets": true,
+        "fontFamily": null,
+        "fontSize": null,
+        "lineHeight": null,
         "lineNumbers": false,
         "lineWrap": false,
         "matchBrackets": true,
@@ -53,6 +67,9 @@
       "$ref": "#/definitions/editorConfig",
       "default": {
         "autoClosingBrackets": false,
+        "fontFamily": null,
+        "fontSize": null,
+        "lineHeight": null,
         "lineNumbers": false,
         "lineWrap": true,
         "matchBrackets": false,
@@ -67,6 +84,9 @@
       "$ref": "#/definitions/editorConfig",
       "default": {
         "autoClosingBrackets": false,
+        "fontFamily": null,
+        "fontSize": null,
+        "lineHeight": null,
         "lineNumbers": false,
         "lineWrap": true,
         "matchBrackets": false,

@@ -515,30 +515,27 @@ class ClientSession implements IClientSession {
    * If a default kernel is available, we connect to it.
    * Otherwise we ask the user to select a kernel.
    */
-  initialize(): Promise<void> {
+  async initialize(): Promise<void> {
     if (this._initializing || this._isReady) {
       return this._ready.promise;
     }
     this._initializing = true;
     let manager = this.manager;
-    return manager.ready.then(() => {
-      let model = find(manager.running(), item => {
-        return item.path === this._path;
-      });
-      if (!model) {
-        return;
-      }
-      return manager.connectTo(model).then(session => {
-        this._handleNewSession(session);
-      }).catch(err => {
-        this._handleSessionError(err);
-      });
-    }).then(() => {
-      return this._startIfNecessary();
-    }).then(() => {
-      this._isReady = true;
-      this._ready.resolve(void 0);
+    await manager.ready;
+    let model = find(manager.running(), item => {
+      return item.path === this._path;
     });
+    if (model) {
+      try {
+        let session = manager.connectTo(model);
+        this._handleNewSession(session);
+      } catch (err) {
+        this._handleSessionError(err);
+      }
+    }
+    await this._startIfNecessary();
+    this._isReady = true;
+    this._ready.resolve(undefined);
   }
 
   /**

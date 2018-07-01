@@ -179,13 +179,9 @@
   version "4.14.104"
   resolved "https://registry.npmjs.org/@types/lodash/-/lodash-4.14.104.tgz#53ee2357fa2e6e68379341d92eb2ecea4b11bb80"
 
-"@types/marked@0.3.0":
+"@types/marked@0.3.0", "@types/marked@~0.3.0":
   version "0.3.0"
   resolved "https://registry.npmjs.org/@types/marked/-/marked-0.3.0.tgz#583c223dd33385a1dda01aaf77b0cd0411c4b524"
-
-"@types/marked@~0.0.28":
-  version "0.0.28"
-  resolved "https://registry.npmjs.org/@types/marked/-/marked-0.0.28.tgz#44ba754e9fa51432583e8eb30a7c4dd249b52faa"
 
 "@types/minimatch@*", "@types/minimatch@3.0.3":
   version "3.0.3"
@@ -229,6 +225,12 @@
 "@types/react-json-tree@^0.6.3":
   version "0.6.7"
   resolved "https://registry.npmjs.org/@types/react-json-tree/-/react-json-tree-0.6.7.tgz#a4ac442c2a2278bb48091581adb687ea80e9908e"
+  dependencies:
+    "@types/react" "*"
+
+"@types/react-paginate@^4.3.2":
+  version "4.3.2"
+  resolved "https://registry.npmjs.org/@types/react-paginate/-/react-paginate-4.3.2.tgz#a79b150e179655ea27fce8ab9c49948b924918b0"
   dependencies:
     "@types/react" "*"
 
@@ -327,6 +329,10 @@
 "@types/sanitize-html@~1.14.0":
   version "1.14.0"
   resolved "https://registry.npmjs.org/@types/sanitize-html/-/sanitize-html-1.14.0.tgz#9a03ec58306e24feaa3fbdb8ab593934d53ecb05"
+
+"@types/semver@^5.5.0":
+  version "5.5.0"
+  resolved "https://registry.npmjs.org/@types/semver/-/semver-5.5.0.tgz#146c2a29ee7d3bae4bf2fcb274636e264c813c45"
 
 "@types/shelljs@0.7.8":
   version "0.7.8"
@@ -1675,9 +1681,9 @@ code-point-at@^1.0.0:
   version "1.1.0"
   resolved "https://registry.npmjs.org/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
 
-codemirror@~5.37.0:
-  version "5.37.0"
-  resolved "https://registry.npmjs.org/codemirror/-/codemirror-5.37.0.tgz#c349b584e158f590277f26d37c2469a6bc538036"
+codemirror@~5.39.0:
+  version "5.39.0"
+  resolved "https://registry.npmjs.org/codemirror/-/codemirror-5.39.0.tgz#4654f7d2f7e525e04a62e72d9482348ccb37dce5"
 
 collection-visit@^1.0.0:
   version "1.0.0"
@@ -5459,9 +5465,9 @@ marked@^0.3.17:
   version "0.3.19"
   resolved "https://registry.npmjs.org/marked/-/marked-0.3.19.tgz#5d47f709c4c9fc3c216b6d46127280f40b39d790"
 
-marked@~0.3.9:
-  version "0.3.17"
-  resolved "https://registry.npmjs.org/marked/-/marked-0.3.17.tgz#607f06668b3c6b1246b28f13da76116ac1aa2d2b"
+marked@~0.4.0:
+  version "0.4.0"
+  resolved "https://registry.npmjs.org/marked/-/marked-0.4.0.tgz#9ad2c2a7a1791f10a852e0112f77b571dce10c66"
 
 math-expression-evaluator@^1.2.14:
   version "1.2.17"
@@ -6800,7 +6806,7 @@ promisify-call@^2.0.2:
   dependencies:
     with-callback "^1.0.2"
 
-prop-types@^15.5.8, prop-types@^15.6.0:
+prop-types@^15.5.8, prop-types@^15.6.0, prop-types@^15.6.1:
   version "15.6.1"
   resolved "https://registry.npmjs.org/prop-types/-/prop-types-15.6.1.tgz#36644453564255ddda391191fb3a125cbdf654ca"
   dependencies:
@@ -7047,6 +7053,12 @@ react-json-tree@^0.11.0:
     babel-runtime "^6.6.1"
     prop-types "^15.5.8"
     react-base16-styling "^0.5.1"
+
+react-paginate@^5.2.3:
+  version "5.2.3"
+  resolved "https://registry.npmjs.org/react-paginate/-/react-paginate-5.2.3.tgz#1eea032f760a86736ad61fb64dab37a9e99fa351"
+  dependencies:
+    prop-types "^15.6.1"
 
 react@~16.4.0:
   version "16.4.0"
@@ -8552,9 +8564,9 @@ typescript@2.7.2:
   version "2.7.2"
   resolved "https://registry.npmjs.org/typescript/-/typescript-2.7.2.tgz#2d615a1ef4aee4f574425cdff7026edf81919836"
 
-typescript@~2.9.1:
-  version "2.9.1"
-  resolved "https://registry.npmjs.org/typescript/-/typescript-2.9.1.tgz#fdb19d2c67a15d11995fd15640e373e09ab09961"
+typescript@~2.9.2:
+  version "2.9.2"
+  resolved "https://registry.npmjs.org/typescript/-/typescript-2.9.2.tgz#1cbf61d05d6b96269244eb6a3bce4bd914e0f00c"
 
 ua-parser-js@^0.7.9:
   version "0.7.17"
@@ -8811,16 +8823,16 @@ vega-dataflow@^4.0.0, vega-dataflow@^4.0.1:
     vega-loader "^3.0.0"
     vega-util "^1.7.0"
 
-vega-embed@^3.13.2:
-  version "3.14.0"
-  resolved "https://registry.npmjs.org/vega-embed/-/vega-embed-3.14.0.tgz#92403ffbd4f05913f53096a3f01bf087e6f0f900"
+vega-embed@^3.15.0:
+  version "3.15.0"
+  resolved "https://registry.npmjs.org/vega-embed/-/vega-embed-3.15.0.tgz#066a20857312d267fea405d81e47215f30d83fcb"
   dependencies:
     d3-selection "^1.3.0"
     json-stringify-pretty-compact "^1.2.0"
     semver "^5.5.0"
     vega-lib "^4.0.0-rc.2 || ^3.3.0"
-    vega-lite "^2.4.3"
-    vega-schema-url-parser "^1.0.0"
+    vega-lite "^2.5.2"
+    vega-schema-url-parser "^1.1.0"
     vega-themes "^2.1.0"
     vega-tooltip "^0.11.0"
 
@@ -8900,7 +8912,7 @@ vega-hierarchy@^3.0.0:
     vega-voronoi "^3.0.0"
     vega-wordcloud "^3.0.0"
 
-vega-lite@^2.4.3:
+vega-lite@^2.5.2:
   version "2.5.2"
   resolved "https://registry.npmjs.org/vega-lite/-/vega-lite-2.5.2.tgz#adb1d34af09f8942e14459aa53f029c14a7c46cf"
   dependencies:
@@ -8973,9 +8985,9 @@ vega-scenegraph@^3.0.0, vega-scenegraph@^3.1.0:
     vega-loader "^3.0.0"
     vega-util "^1.7.0"
 
-vega-schema-url-parser@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.npmjs.org/vega-schema-url-parser/-/vega-schema-url-parser-1.0.0.tgz#fc17631e354280d663ed39e3fa8eddb62145402e"
+vega-schema-url-parser@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.npmjs.org/vega-schema-url-parser/-/vega-schema-url-parser-1.1.0.tgz#39168ec04e5468ce278a06c16ec0d126035a85b5"
 
 vega-statistics@^1.2.1:
   version "1.2.1"
@@ -9005,8 +9017,8 @@ vega-transforms@^2.0.0:
     vega-util "^1.7.0"
 
 vega-typings@*, vega-typings@^0.3.3, vega-typings@^0.3.4:
-  version "0.3.6"
-  resolved "https://registry.npmjs.org/vega-typings/-/vega-typings-0.3.6.tgz#7d37e9259a978b622d8fb79d7a60537491099618"
+  version "0.3.15"
+  resolved "https://registry.npmjs.org/vega-typings/-/vega-typings-0.3.15.tgz#347b9065935e83ca23386d07b7d029a8b1c2619c"
   dependencies:
     vega-util "^1.7.0"
 
@@ -9398,9 +9410,9 @@ yargs@~3.10.0:
     decamelize "^1.0.0"
     window-size "0.1.0"
 
-yarn@^1.7.0:
-  version "1.7.0"
-  resolved "https://registry.npmjs.org/yarn/-/yarn-1.7.0.tgz#0076b9fde6010e01950526a609bc53bc175ef925"
+yarn@1.6.0:
+  version "1.6.0"
+  resolved "https://registry.npmjs.org/yarn/-/yarn-1.6.0.tgz#9cec6f7986dc237d39ec705ce74d95155fe55d4b"
 
 yauzl@2.4.1:
   version "2.4.1"

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-codemirror",
-  "version": "0.2.2",
+  "version": "0.3.0-0",
   "private": true,
   "scripts": {
     "build": "tsc",
@@ -16,8 +16,8 @@
     "watch:src": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/codeeditor": "^0.16.1",
-    "@jupyterlab/codemirror": "^0.16.2",
+    "@jupyterlab/codeeditor": "^0.17.0-0",
+    "@jupyterlab/codemirror": "^0.17.0-0",
     "expect.js": "~0.3.1",
     "simulate-event": "~1.4.0"
   },
@@ -26,6 +26,6 @@
     "karma-chrome-launcher": "~2.2.0",
     "puppeteer": "^1.5.0",
     "rimraf": "~2.6.2",
-    "typescript": "~2.9.1"
+    "typescript": "~2.9.2"
   }
 }

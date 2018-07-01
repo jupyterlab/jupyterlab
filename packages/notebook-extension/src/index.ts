@@ -35,7 +35,7 @@ import {
 
 import {
   CellTools, ICellTools, INotebookTracker, NotebookActions,
-  NotebookModelFactory,  NotebookPanel, NotebookTracker, NotebookWidgetFactory,
+  NotebookModelFactory, NotebookPanel, NotebookTracker, NotebookWidgetFactory,
   StaticNotebook
 } from '@jupyterlab/notebook';
 
@@ -515,14 +515,22 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
     });
   };
 
-  // Add a command for creating a new notebook in the File Menu.
+  // Add a command for creating a new notebook.
   commands.addCommand(CommandIDs.createNew, {
-    label: 'Notebook',
+    label: args => {
+      const kernelName = args['kernelName'] as string || '';
+      if (args['isLauncher'] && args['kernelName']) {
+        return services.specs.kernelspecs[kernelName].display_name;
+      }
+      return 'Notebook';
+    },
     caption: 'Create a new notebook',
-    execute: () => {
-      let cwd = browserFactory ?
+    iconClass: args => args['isLauncher'] ? '' : 'jp-NotebookIcon',
+    execute: args => {
+      const cwd = args['cwd'] || browserFactory ?
         browserFactory.defaultBrowser.model.path : '';
-      return createNew(cwd);
+      const kernelName = args['kernelName'] as string || '';
+      return createNew(cwd, kernelName);
     }
   });
 
@@ -534,7 +542,6 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
       const baseUrl = PageConfig.getBaseUrl();
 
       for (let name in specs.kernelspecs) {
-        let displayName = specs.kernelspecs[name].display_name;
         let rank = name === specs.default ? 0 : Infinity;
         let kernelIconUrl = specs.kernelspecs[name].resources['logo-64x64'];
         if (kernelIconUrl) {
@@ -542,11 +549,9 @@ function activateNotebookHandler(app: JupyterLab, mainMenu: IMainMenu, palette: 
           kernelIconUrl = baseUrl + kernelIconUrl.slice(index);
         }
         launcher.add({
-          displayName,
+          command: CommandIDs.createNew,
+          args: { isLauncher: true, kernelName: name },
           category: 'Notebook',
-          name,
-          iconClass: 'jp-NotebookIcon',
-          callback: createNew,
           rank,
           kernelIconUrl
         });
@@ -1517,6 +1522,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
 function populatePalette(palette: ICommandPalette): void {
   let category = 'Notebook Operations';
   [
+    CommandIDs.createNew,
     CommandIDs.interrupt,
     CommandIDs.restart,
     CommandIDs.restartClear,
@@ -1539,8 +1545,12 @@ function populatePalette(palette: ICommandPalette): void {
   ].forEach(command => { palette.addItem({ command, category }); });
 
   EXPORT_TO_FORMATS.forEach(exportToFormat => {
-    let args = { 'format': exportToFormat['format'], 'label': exportToFormat['label'], 'isPalette': true };
-    palette.addItem({ command: CommandIDs.exportToFormat, category: category, args: args });
+    let args = {
+      'format': exportToFormat['format'],
+      'label': exportToFormat['label'],
+      'isPalette': true
+    };
+    palette.addItem({ command: CommandIDs.exportToFormat, category, args });
   });
 
   category = 'Notebook Cell Operations';

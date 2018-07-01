@@ -82,6 +82,26 @@ describe('@jupyterlab/notebook', () => {
       return Promise.all([session.shutdown(), ipySession.shutdown()]);
     });
 
+    describe('#executed', () => {
+
+      it('should emit when Markdown and code cells are run', () => {
+        let cell = widget.activeCell as CodeCell;
+        let next = widget.widgets[1] as MarkdownCell;
+        let emitted = 0;
+
+        widget.select(next);
+        cell.model.outputs.clear();
+        next.rendered = false;
+        NotebookActions.executed.connect(() => { emitted += 1; });
+
+        return NotebookActions.run(widget, session).then(result => {
+          expect(emitted).to.be(2);
+          expect(next.rendered).to.be(true);
+        });
+      });
+
+    });
+
     describe('#splitCell({})', () => {
 
       it('should split the active cell into two cells', () => {
@@ -470,7 +490,7 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#run()', () => {
 
-      it('should run the selected cells', function () {
+      it('should run the selected cells', () => {
         let next = widget.widgets[1] as MarkdownCell;
         widget.select(next);
         let cell = widget.activeCell as CodeCell;

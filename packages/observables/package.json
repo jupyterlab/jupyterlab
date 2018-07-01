@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/observables",
-  "version": "1.0.9",
+  "version": "2.0.0-0",
   "description": "Data structures which may be observed for changes.",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,6 +36,6 @@
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
-    "typescript": "~2.9.1"
+    "typescript": "~2.9.2"
   }
 }

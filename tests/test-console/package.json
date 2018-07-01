@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-console",
-  "version": "0.2.2",
+  "version": "0.3.0-0",
   "private": true,
   "scripts": {
     "build": "tsc",
@@ -16,13 +16,13 @@
     "watch:src": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^0.16.3",
-    "@jupyterlab/cells": "^0.16.2",
-    "@jupyterlab/codeeditor": "^0.16.1",
-    "@jupyterlab/codemirror": "^0.16.2",
-    "@jupyterlab/console": "^0.16.2",
-    "@jupyterlab/coreutils": "^1.1.2",
-    "@jupyterlab/services": "^2.0.2",
+    "@jupyterlab/apputils": "^0.17.0-0",
+    "@jupyterlab/cells": "^0.17.0-0",
+    "@jupyterlab/codeeditor": "^0.17.0-0",
+    "@jupyterlab/codemirror": "^0.17.0-0",
+    "@jupyterlab/console": "^0.17.0-0",
+    "@jupyterlab/coreutils": "^2.0.0-0",
+    "@jupyterlab/services": "^3.0.0-0",
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/signaling": "^1.2.2",
     "@phosphor/widgets": "^1.6.0",
@@ -33,6 +33,6 @@
     "karma-chrome-launcher": "~2.2.0",
     "puppeteer": "^1.5.0",
     "rimraf": "~2.6.2",
-    "typescript": "~2.9.1"
+    "typescript": "~2.9.2"
   }
 }

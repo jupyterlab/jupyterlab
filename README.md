@@ -21,7 +21,7 @@ Jupyter Notebook and Architecture.  [Currently in beta.](https://blog.jupyter.or
 [JupyterLab](http://jupyterlab.readthedocs.io/en/stable/) is the next-generation user interface for [Project Jupyter](https://jupyter.org). It offers
 all the familiar building blocks of the classic Jupyter Notebook (notebook,
 terminal, text editor, file browser, rich outputs, etc.) in a flexible and
-powerful user inteface.
+powerful user interface.
 Eventually, JupyterLab will replace the classic Jupyter Notebook after
 JupyterLab reaches 1.0.
 

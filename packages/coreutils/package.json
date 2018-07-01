@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/coreutils",
-  "version": "1.1.2",
+  "version": "2.0.0-0",
   "description": "JupyterLab - Core Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -44,6 +44,6 @@
     "@types/comment-json": "^1.1.0",
     "@types/minimist": "~1.2.0",
     "rimraf": "~2.6.2",
-    "typescript": "~2.9.1"
+    "typescript": "~2.9.2"
   }
 }

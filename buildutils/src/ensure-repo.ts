@@ -30,7 +30,7 @@ let UNUSED: { [key: string]: string[] } = {
   '@jupyterlab/theme-light-extension': ['font-awesome'],
   '@jupyterlab/services': ['node-fetch', 'ws'],
   '@jupyterlab/test-csvviewer': ['csv-spectrum'],
-  '@jupyterlab/vega3-extension': ['vega', 'vega-lite']
+  '@jupyterlab/vega4-extension': ['vega', 'vega-lite']
 };
 
 let pkgData: { [key: string]: any } = {};
