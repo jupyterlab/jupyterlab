@@ -10,10 +10,6 @@ module.exports = function (config) {
     reporters: ['mocha'],
     client: {
       captureConsole: true,
-      mocha: {
-        timeout : 10000, // 10 seconds - upped from 2 seconds
-        retries: 3 // Allow for slow server on CI.
-      }
     },
     files: [
       {pattern: path.resolve('./build/injector.js'), watched: false},
@@ -31,9 +27,6 @@ module.exports = function (config) {
       noInfo: true,
       stats: 'errors-only'
     },
-    browserNoActivityTimeout: 31000, // 31 seconds - upped from 10 seconds
-    browserDisconnectTimeout: 31000, // 31 seconds - upped from 2 seconds
-    browserDisconnectTolerance: 2,
     port: 9876,
     colors: true,
     singleRun: true,
