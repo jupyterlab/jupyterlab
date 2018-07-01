@@ -7,8 +7,7 @@ language: python
 python: 3.6
 cache:
   pip: true
-  directories:
-    -$HOME/.yarn-cache
+  yarn: true
 matrix:
   include:
   - env: GROUP=js
