@@ -15,9 +15,6 @@ module.exports = function (config) {
         retries: 3 // Allow for slow server on CI.
       }
     },
-    mochaReporter: {
-      output: 'minimal'
-    },
     files: [
       {pattern: path.resolve('./build/injector.js'), watched: false},
       {pattern: process.env.KARMA_FILE_PATTERN, watched: false}
@@ -40,6 +37,6 @@ module.exports = function (config) {
     port: 9876,
     colors: true,
     singleRun: true,
-    logLevel: config.LOG_ERROR
+    logLevel: config.LOG_INFO
   });
 };

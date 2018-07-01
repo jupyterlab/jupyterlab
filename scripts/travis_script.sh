@@ -17,7 +17,7 @@ if [[ $GROUP == js ]]; then
 
     jlpm build:packages
     jlpm build:test
-    jlpm test
+    jlpm test --loglevel success > /dev/null
     jlpm run clean
 fi
 
@@ -26,7 +26,7 @@ if [[ $GROUP == js_cov ]]; then
 
     jlpm run build:packages
     jlpm run build:test
-    jlpm run coverage
+    jlpm run coverage --loglevel success > /dev/null
 
     # Run the services node example.
     pushd packages/services/examples/node
