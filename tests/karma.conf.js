@@ -9,7 +9,7 @@ module.exports = function (config) {
     frameworks: ['mocha'],
     reporters: ['mocha'],
     client: {
-      captureConsole: false,
+      captureConsole: true,
       mocha: {
         timeout : 10000, // 10 seconds - upped from 2 seconds
         retries: 3 // Allow for slow server on CI.
