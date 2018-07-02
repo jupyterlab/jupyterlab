@@ -29,9 +29,9 @@
     "url": "https://github.com/jupyterlab/jupyterlab-statusbar.git"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "npm run lint:ts && tsc",
     "clean": "rimraf lib",
-    "watch": "npm-watch",
+    "watch": "tsc -w  --listEmittedFiles",
     "lint:ts": "tslint -p tsconfig.json --exclude '**/*.d.ts'"
   },
   "dependencies": {
@@ -52,16 +52,11 @@
   "devDependencies": {
     "@types/react": "~16.0.19",
     "@types/react-dom": "~16.0.2",
-    "npm-watch": "^0.3.0",
     "rimraf": "^2.6.1",
     "tslint": "^5.10.0",
     "typescript": "^2.9.2"
   },
   "jupyterlab": {
     "extension": true
-  },
-  "watch": {
-    "build": "src/**/*.ts",
-    "lint:ts": "src/**/*.ts"
   }
 }
