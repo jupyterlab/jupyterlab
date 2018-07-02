@@ -141,7 +141,7 @@ describe('@jupyterlab/notebook', () => {
           expect(called).to.be(true);
         });
 
-        it.skip('should emit a `contentChanged` signal upon cell move', () => {
+        it('should emit a `contentChanged` signal upon cell move', () => {
           let model = new NotebookModel();
           let cell0 = model.contentFactory.createCodeCell({});
           let cell1 = model.contentFactory.createCodeCell({});
