@@ -3,30 +3,18 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import {
-  JupyterLabPlugin
-} from '@jupyterlab/application';
+import { JupyterLabPlugin } from '@jupyterlab/application';
 
-import {
-  PageConfig
-} from '@jupyterlab/coreutils';
+import { PageConfig } from '@jupyterlab/coreutils';
 
-import {
-  ILatexTypesetter
-} from '@jupyterlab/rendermime';
+import { ILatexTypesetter } from '@jupyterlab/rendermime';
 
-import {
-  IRenderMime
-} from '@jupyterlab/rendermime-interfaces';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
-import {
-  PromiseDelegate
-} from '@phosphor/coreutils';
-
+import { PromiseDelegate } from '@phosphor/coreutils';
 
 // Stub for window MathJax.
 declare var MathJax: any;
-
 
 /**
  * The MathJax latexTypesetter plugin.
@@ -38,19 +26,15 @@ const plugin: JupyterLabPlugin<ILatexTypesetter> = {
   activate: () => new MathJaxTypesetter()
 };
 
-
 /**
  * Export the plugin as default.
  */
-export
-default plugin;
-
+export default plugin;
 
 /**
  * The MathJax Typesetter.
  */
-export
-class MathJaxTypesetter implements IRenderMime.ILatexTypesetter {
+export class MathJaxTypesetter implements IRenderMime.ILatexTypesetter {
   /**
    * Typeset the math in a node.
    *
@@ -101,8 +85,8 @@ class MathJaxTypesetter implements IRenderMime.ILatexTypesetter {
   private _onLoad(): void {
     MathJax.Hub.Config({
       tex2jax: {
-        inlineMath: [ ['$', '$'], ['\\(', '\\)'] ],
-        displayMath: [ ['$$', '$$'], ['\\[', '\\]'] ],
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
         processEscapes: true,
         processEnvironments: true
       },
@@ -110,15 +94,15 @@ class MathJaxTypesetter implements IRenderMime.ILatexTypesetter {
       // we use CSS to left justify single line equations in code cells.
       displayAlign: 'center',
       CommonHTML: {
-         linebreaks: { automatic: true }
-       },
+        linebreaks: { automatic: true }
+      },
       'HTML-CSS': {
-          availableFonts: [],
-          imageFont: null,
-          preferredFont: null,
-          webFont: 'STIX-Web',
-          styles: {'.MathJax_Display': {'margin': 0}},
-          linebreaks: { automatic: true }
+        availableFonts: [],
+        imageFont: null,
+        preferredFont: null,
+        webFont: 'STIX-Web',
+        styles: { '.MathJax_Display': { margin: 0 } },
+        linebreaks: { automatic: true }
       },
       skipStartupTypeset: true
     });

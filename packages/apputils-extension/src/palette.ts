@@ -3,32 +3,20 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import {
-  DisposableDelegate, IDisposable
-} from '@phosphor/disposable';
+import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
-import {
-  CommandPalette
-} from '@phosphor/widgets';
+import { CommandPalette } from '@phosphor/widgets';
 
-import {
-  ILayoutRestorer, JupyterLab
-} from '@jupyterlab/application';
+import { ILayoutRestorer, JupyterLab } from '@jupyterlab/application';
 
-import {
-  ICommandPalette, IPaletteItem
-} from '@jupyterlab/apputils';
-
-
+import { ICommandPalette, IPaletteItem } from '@jupyterlab/apputils';
 
 /**
  * The command IDs used by the apputils extension.
  */
 namespace CommandIDs {
-  export
-  const activate = 'apputils:activate-command-palette';
+  export const activate = 'apputils:activate-command-palette';
 }
-
 
 /**
  * A thin wrapper around the `CommandPalette` class to conform with the
@@ -68,7 +56,9 @@ class Palette implements ICommandPalette {
    */
   addItem(options: IPaletteItem): IDisposable {
     let item = this._palette.addItem(options as CommandPalette.IItemOptions);
-    return new DisposableDelegate(() => { this._palette.removeItem(item); });
+    return new DisposableDelegate(() => {
+      this._palette.removeItem(item);
+    });
   }
 
   private _palette: CommandPalette;
@@ -77,13 +67,14 @@ class Palette implements ICommandPalette {
 /**
  * Activate the command palette.
  */
-export
-function activatePalette(app: JupyterLab): ICommandPalette {
+export function activatePalette(app: JupyterLab): ICommandPalette {
   const { commands, shell } = app;
   const palette = Private.createPalette(app);
 
   commands.addCommand(CommandIDs.activate, {
-    execute: () => { shell.activateById(palette.id); },
+    execute: () => {
+      shell.activateById(palette.id);
+    },
     label: 'Activate Command Palette'
   });
 
@@ -97,8 +88,10 @@ function activatePalette(app: JupyterLab): ICommandPalette {
 /**
  * Restore the command palette.
  */
-export
-function restorePalette(app: JupyterLab, restorer: ILayoutRestorer): void {
+export function restorePalette(
+  app: JupyterLab,
+  restorer: ILayoutRestorer
+): void {
   const palette = Private.createPalette(app);
 
   // Let the application restorer track the command palette for restoration of
@@ -119,8 +112,7 @@ namespace Private {
   /**
    * Create the application-wide command palette.
    */
-  export
-  function createPalette(app: JupyterLab): CommandPalette {
+  export function createPalette(app: JupyterLab): CommandPalette {
     if (!palette) {
       palette = new CommandPalette({ commands: app.commands });
       palette.id = 'command-palette';

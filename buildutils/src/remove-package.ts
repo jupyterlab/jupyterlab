@@ -15,12 +15,11 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as utils from './utils';
 
-
 // Make sure we have required command line arguments.
 if (process.argv.length < 3) {
-    let msg = '** Must supply a target extension name';
-    process.stderr.write(msg);
-    process.exit(1);
+  let msg = '** Must supply a target extension name';
+  process.stderr.write(msg);
+  process.exit(1);
 }
 
 // Get the package name or path.
@@ -30,12 +29,17 @@ let basePath = path.resolve('.');
 // Get the package.json of the extension.
 let packagePath = path.join(basePath, 'packages', target, 'package.json');
 if (!fs.existsSync(packagePath)) {
-    packagePath = require.resolve(path.join(target, 'package.json'));
+  packagePath = require.resolve(path.join(target, 'package.json'));
 }
 let data = utils.readJSONFile(packagePath);
 
 // Remove the extension path from packages/metapackage/tsconfig.json
-let tsconfigPath = path.join(basePath, 'packages', 'metapackage', 'tsconfig.json');
+let tsconfigPath = path.join(
+  basePath,
+  'packages',
+  'metapackage',
+  'tsconfig.json'
+);
 let tsconfig = utils.readJSONFile(tsconfigPath);
 tsconfig.compilerOptions.paths[data.name] = undefined;
 fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');

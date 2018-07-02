@@ -3,17 +3,11 @@
 
 import expect = require('expect.js');
 
-import {
-  ObservableMap
-} from '@jupyterlab/observables';
-
+import { ObservableMap } from '@jupyterlab/observables';
 
 describe('@jupyterlab/observables', () => {
-
   describe('ObservableMap', () => {
-
     describe('#constructor()', () => {
-
       it('should accept no arguments', () => {
         let value = new ObservableMap<number>();
         expect(value instanceof ObservableMap).to.be(true);
@@ -21,7 +15,6 @@ describe('@jupyterlab/observables', () => {
     });
 
     describe('#type', () => {
-
       it('should return `Map`', () => {
         let value = new ObservableMap<number>();
         expect(value.type).to.be('Map');
@@ -38,11 +31,12 @@ describe('@jupyterlab/observables', () => {
     });
 
     describe('#changed', () => {
-
       it('should be emitted when the map changes state', () => {
         let called = false;
         let value = new ObservableMap<number>();
-        value.changed.connect(() => { called = true; });
+        value.changed.connect(() => {
+          called = true;
+        });
         value.set('entry', 1);
         expect(called).to.be(true);
       });
@@ -61,22 +55,18 @@ describe('@jupyterlab/observables', () => {
         value.set('entry', 0);
         expect(called).to.be(true);
       });
-
     });
 
     describe('#isDisposed', () => {
-
       it('should test whether the map is disposed', () => {
         let value = new ObservableMap<number>();
         expect(value.isDisposed).to.be(false);
         value.dispose();
         expect(value.isDisposed).to.be(true);
       });
-
     });
 
     describe('#dispose()', () => {
-
       it('should dispose of the resources held by the map', () => {
         let value = new ObservableMap<number>();
         value.set('one', 1);
@@ -84,11 +74,9 @@ describe('@jupyterlab/observables', () => {
         value.dispose();
         expect(value.isDisposed).to.be(true);
       });
-
     });
 
     describe('#set()', () => {
-
       it('should set the item at a specific key', () => {
         let value = new ObservableMap<number>();
         value.set('one', 1);
@@ -164,7 +152,6 @@ describe('@jupyterlab/observables', () => {
     });
 
     describe('#delete()', () => {
-
       it('should remove an item from the map', () => {
         let value = new ObservableMap<number>();
         value.set('one', 1);
@@ -200,11 +187,9 @@ describe('@jupyterlab/observables', () => {
         value.delete('two');
         expect(called).to.be(true);
       });
-
     });
 
     describe('#clear()', () => {
-
       it('should remove all items from the map', () => {
         let value = new ObservableMap<number>();
         value.set('one', 1);

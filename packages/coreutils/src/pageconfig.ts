@@ -1,16 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  JSONExt
-} from '@phosphor/coreutils';
+import { JSONExt } from '@phosphor/coreutils';
 
 import minimist from 'minimist';
 
-import {
-  URLExt
-} from './url';
-
+import { URLExt } from './url';
 
 /**
  * Declare stubs for the node variables.
@@ -18,17 +13,14 @@ import {
 declare var process: any;
 declare var require: any;
 
-
 /**
  * The namespace for Page Config functions.
  */
-export
-namespace PageConfig {
+export namespace PageConfig {
   /**
    * The tree URL construction options.
    */
-  export
-  interface ITreeOptions {
+  export interface ITreeOptions {
     /**
      * If `true`, the tree URL will include the current workspace, if any.
      */
@@ -53,8 +45,7 @@ namespace PageConfig {
    * with a `--jupyter-config-data` option pointing to a JSON settings
    * file.
    */
-  export
-  function getOption(name: string): string {
+  export function getOption(name: string): string {
     if (configData) {
       return configData[name] || Private.getBodyData(name);
     }
@@ -67,7 +58,7 @@ namespace PageConfig {
 
       if (el) {
         configData = JSON.parse(el.textContent || '') as {
-          [key: string]: string
+          [key: string]: string;
         };
         found = true;
       }
@@ -95,7 +86,9 @@ namespace PageConfig {
     } else {
       for (let key in configData) {
         // Quote characters are escaped, unescape them.
-        configData[key] = String(configData[key]).split('&#39;').join('"');
+        configData[key] = String(configData[key])
+          .split('&#39;')
+          .join('"');
       }
     }
     return configData![name] || '';
@@ -109,8 +102,7 @@ namespace PageConfig {
    *
    * @returns The last config value or an empty string if it doesn't exist.
    */
-  export
-  function setOption(name: string, value: string): string {
+  export function setOption(name: string, value: string): string {
     const last = getOption(name);
 
     configData![name] = value;
@@ -120,12 +112,13 @@ namespace PageConfig {
   /**
    * Get the base url for a Jupyter application.
    */
-  export
-  function getBaseUrl(): string {
+  export function getBaseUrl(): string {
     let baseUrl = getOption('baseUrl');
     if (!baseUrl || baseUrl === '/') {
-      baseUrl = (typeof location === 'undefined' ?
-                 'http://localhost:8888/' : location.origin + '/');
+      baseUrl =
+        typeof location === 'undefined'
+          ? 'http://localhost:8888/'
+          : location.origin + '/';
     }
     return URLExt.parse(baseUrl).toString();
   }
@@ -135,8 +128,7 @@ namespace PageConfig {
    *
    * @param options - The tree URL construction options.
    */
-  export
-  function getTreeUrl(options: ITreeOptions = { }): string {
+  export function getTreeUrl(options: ITreeOptions = {}): string {
     const base = getBaseUrl();
     const page = getOption('pageUrl');
     const workspaces = getOption('workspacesUrl');
@@ -153,8 +145,7 @@ namespace PageConfig {
   /**
    * Get the base websocket url for a Jupyter application.
    */
-  export
-  function getWsUrl(baseUrl?: string): string {
+  export function getWsUrl(baseUrl?: string): string {
     let wsUrl = getOption('wsUrl');
     if (!wsUrl) {
       baseUrl = baseUrl || getBaseUrl();
@@ -173,16 +164,14 @@ namespace PageConfig {
   /**
    * Get the authorization token for a Jupyter application.
    */
-  export
-  function getToken(): string {
+  export function getToken(): string {
     return getOption('token') || Private.getBodyData('jupyterApiToken');
   }
 
   /**
    * Get the Notebook version info [major, minor, patch].
    */
-  export
-  function getNotebookVersion(): [number, number, number] {
+  export function getNotebookVersion(): [number, number, number] {
     const notebookVersion = getOption('notebookVersion');
     if (notebookVersion === '') {
       return [0, 0, 0];
@@ -190,13 +179,11 @@ namespace PageConfig {
     return JSON.parse(notebookVersion);
   }
 
-
   /**
    * Private page config data for the Jupyter application.
    */
   let configData: { [key: string]: string } | null = null;
 }
-
 
 /**
  * A namespace for module private data.
@@ -207,8 +194,7 @@ namespace Private {
    * We should never have any encoded URLs anywhere else in code
    * until we are building an actual request.
    */
-  export
-  function getBodyData(key: string): string {
+  export function getBodyData(key: string): string {
     if (typeof document === 'undefined' || !document.body) {
       return '';
     }

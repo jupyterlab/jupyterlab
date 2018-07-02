@@ -1,39 +1,31 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  VDomRenderer
-} from '@jupyterlab/apputils';
+import { VDomRenderer } from '@jupyterlab/apputils';
 
-import {
-  ServiceManager
-} from '@jupyterlab/services';
+import { ServiceManager } from '@jupyterlab/services';
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
 import * as React from 'react';
 
 import ReactPaginate from 'react-paginate';
 
-import {
-  ListModel, IEntry, Action
-} from './model';
-
+import { ListModel, IEntry, Action } from './model';
 
 // TODO: Replace pagination with lazy loading of lower search results
-
 
 /**
  * Search bar VDOM component.
  */
-export
-class SearchBar extends React.Component<SearchBar.IProperties, SearchBar.IState> {
+export class SearchBar extends React.Component<
+  SearchBar.IProperties,
+  SearchBar.IState
+> {
   constructor(props: SearchBar.IProperties) {
     super(props);
     this.state = {
-      value: '',
+      value: ''
     };
   }
 
@@ -42,14 +34,14 @@ class SearchBar extends React.Component<SearchBar.IProperties, SearchBar.IState>
    */
   render(): React.ReactElement<any> {
     return (
-      <div className='jp-extensionmanager-search-bar'>
-        <div className='jp-extensionmanager-search-wrapper'>
+      <div className="jp-extensionmanager-search-bar">
+        <div className="jp-extensionmanager-search-wrapper">
           <input
-            type='text'
-            className='jp-extensionmanager-input'
-            placeholder={ this.props.placeholder }
-            onChange={ this.handleChange.bind(this) }
-            value={ this.state.value }
+            type="text"
+            className="jp-extensionmanager-input"
+            placeholder={this.props.placeholder}
+            onChange={this.handleChange.bind(this)}
+            value={this.state.value}
           />
         </div>
       </div>
@@ -62,7 +54,7 @@ class SearchBar extends React.Component<SearchBar.IProperties, SearchBar.IState>
   handleChange(e: KeyboardEvent) {
     let target = e.target as HTMLInputElement;
     this.setState({
-      value: target.value,
+      value: target.value
     });
   }
 }
@@ -70,13 +62,11 @@ class SearchBar extends React.Component<SearchBar.IProperties, SearchBar.IState>
 /**
  * The namespace for search bar statics.
  */
-export
-namespace SearchBar {
+export namespace SearchBar {
   /**
    * React properties for search bar component.
    */
-  export
-  interface IProperties {
+  export interface IProperties {
     /**
      * The placeholder string to use in the search bar input field when empty.
      */
@@ -86,8 +76,7 @@ namespace SearchBar {
   /**
    * React state for search bar component.
    */
-  export
-  interface IState {
+  export interface IState {
     /**
      * The value of the search bar input field.
      */
@@ -102,18 +91,18 @@ namespace SearchBar {
  */
 function BuildPrompt(props: BuildPrompt.IProperties): React.ReactElement<any> {
   return (
-    <div className='jp-extensionmanager-buildprompt'>
-      <div className='jp-extensionmanager-buildmessage'>
+    <div className="jp-extensionmanager-buildprompt">
+      <div className="jp-extensionmanager-buildmessage">
         A build is needed to include the latest changes
       </div>
       <button
-        className='jp-extensionmanager-rebuild'
+        className="jp-extensionmanager-rebuild"
         onClick={props.performBuild}
       >
         Rebuild
       </button>
       <button
-        className='jp-extensionmanager-ignorebuild'
+        className="jp-extensionmanager-ignorebuild"
         onClick={props.ignoreBuild}
       >
         Ignore
@@ -129,8 +118,7 @@ namespace BuildPrompt {
   /**
    * Properties for build prompt react component.
    */
-  export
-  interface IProperties {
+  export interface IProperties {
     /**
      * Callback for when a build is requested.
      */
@@ -143,12 +131,11 @@ namespace BuildPrompt {
   }
 }
 
-
 /**
  * VDOM for visualizing an extension entry.
  */
 function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
-  const {entry} = props;
+  const { entry } = props;
   const flagClasses = [];
   if (entry.installed) {
     flagClasses.push('jp-extensionmanager-entry-installed');
@@ -164,37 +151,39 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
   }
   return (
     <li className={`jp-extensionmanager-entry ${flagClasses.join(' ')}`}>
-      <div className='jp-extensionmanager-entry-name'>{entry.name}</div>
-      <div className='jp-extensionmanager-entry-content'>
-        <div className='jp-extensionmanager-entry-description'>{entry.description}</div>
-        <div className='jp-extensionmanager-entry-buttons'>
+      <div className="jp-extensionmanager-entry-name">{entry.name}</div>
+      <div className="jp-extensionmanager-entry-content">
+        <div className="jp-extensionmanager-entry-description">
+          {entry.description}
+        </div>
+        <div className="jp-extensionmanager-entry-buttons">
           <button
-            className='jp-extensionmanager-install'
+            className="jp-extensionmanager-install"
             onClick={() => props.performAction('install', entry)}
           >
             Install
           </button>
           <button
-            className='jp-extensionmanager-update'
+            className="jp-extensionmanager-update"
             // An install action will update the extension:
             onClick={() => props.performAction('install', entry)}
           >
             Update
           </button>
           <button
-            className='jp-extensionmanager-uninstall'
+            className="jp-extensionmanager-uninstall"
             onClick={() => props.performAction('uninstall', entry)}
           >
             Uninstall
           </button>
           <button
-            className='jp-extensionmanager-enable'
+            className="jp-extensionmanager-enable"
             onClick={() => props.performAction('enable', entry)}
           >
             Enable
           </button>
           <button
-            className='jp-extensionmanager-disable'
+            className="jp-extensionmanager-disable"
             onClick={() => props.performAction('disable', entry)}
           >
             Disable
@@ -208,10 +197,8 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
 /**
  * The namespace for extension entry statics.
  */
-export
-namespace ListEntry {
-  export
-  interface IProperties {
+export namespace ListEntry {
+  export interface IProperties {
     /**
      * The entry to visualize.
      */
@@ -224,45 +211,53 @@ namespace ListEntry {
   }
 }
 
-
 /**
  * List view widget for extensions
  */
-export
-function ListView(props: ListView.IProperties): React.ReactElement<any> {
+export function ListView(props: ListView.IProperties): React.ReactElement<any> {
   const entryViews = [];
   for (let entry of props.entries) {
     entryViews.push(
-      <ListEntry entry={entry} key={entry.name} performAction={props.performAction}/>
+      <ListEntry
+        entry={entry}
+        key={entry.name}
+        performAction={props.performAction}
+      />
     );
   }
   let pagination;
   if (props.numPages > 1) {
     pagination = (
-      <div className='jp-extensionmanager-pagination'>
-        <ReactPaginate previousLabel={'<'}
-                       nextLabel={'>'}
-                       breakLabel={<a href=''>...</a>}
-                       breakClassName={'break-me'}
-                       pageCount={props.numPages}
-                       marginPagesDisplayed={2}
-                       pageRangeDisplayed={5}
-                       onPageChange={(data: {selected: number}) => props.onPage(data.selected)}
-                       containerClassName={'pagination'}
-                       activeClassName={'active'} />
+      <div className="jp-extensionmanager-pagination">
+        <ReactPaginate
+          previousLabel={'<'}
+          nextLabel={'>'}
+          breakLabel={<a href="">...</a>}
+          breakClassName={'break-me'}
+          pageCount={props.numPages}
+          marginPagesDisplayed={2}
+          pageRangeDisplayed={5}
+          onPageChange={(data: { selected: number }) =>
+            props.onPage(data.selected)
+          }
+          containerClassName={'pagination'}
+          activeClassName={'active'}
+        />
       </div>
     );
   }
   const listview = (
-    <ul className='jp-extensionmanager-listview'>
-      {entryViews}
-    </ul>
+    <ul className="jp-extensionmanager-listview">{entryViews}</ul>
   );
   return (
-    <div className='jp-extensionmanager-listview-wrapper'>
-      {
-        entryViews.length > 0 ? listview : <div key='message' className='jp-extensionmanager-listview-message'>No entries</div>
-      }
+    <div className="jp-extensionmanager-listview-wrapper">
+      {entryViews.length > 0 ? (
+        listview
+      ) : (
+        <div key="message" className="jp-extensionmanager-listview-message">
+          No entries
+        </div>
+      )}
       {pagination}
     </div>
   );
@@ -271,10 +266,8 @@ function ListView(props: ListView.IProperties): React.ReactElement<any> {
 /**
  * The namespace for list view widget statics.
  */
-export
-namespace ListView {
-  export
-  interface IProperties {
+export namespace ListView {
+  export interface IProperties {
     /**
      * The extension entries to display.
      */
@@ -297,12 +290,10 @@ namespace ListView {
   }
 }
 
-
 /**
  * The main view for the discovery extension.
  */
-export
-class ExtensionView extends VDomRenderer<ListModel> {
+export class ExtensionView extends VDomRenderer<ListModel> {
   constructor(serviceManager: ServiceManager) {
     super();
     this.model = new ListModel(serviceManager);
@@ -313,8 +304,10 @@ class ExtensionView extends VDomRenderer<ListModel> {
    * The search input node.
    */
   get inputNode(): HTMLInputElement {
-    return this.node.getElementsByClassName('jp-extensionmanager-input')[0] as HTMLInputElement;
-}
+    return this.node.getElementsByClassName(
+      'jp-extensionmanager-input'
+    )[0] as HTMLInputElement;
+  }
 
   /**
    * Render the extension view using the virtual DOM.
@@ -322,25 +315,24 @@ class ExtensionView extends VDomRenderer<ListModel> {
   protected render(): React.ReactElement<any>[] {
     const model = this.model!;
     let pages = Math.ceil(model.totalEntries / model.pagination);
-    let elements = [
-      <SearchBar
-        key='searchbar'
-        placeholder='SEARCH'
-      />,
-    ];
+    let elements = [<SearchBar key="searchbar" placeholder="SEARCH" />];
     if (model.promptBuild) {
       elements.push(
         <BuildPrompt
-          key='buildpromt'
-          performBuild={() => { model.performBuild(); }}
-          ignoreBuild={() => { model.ignoreBuildRecommendation(); }}
+          key="buildpromt"
+          performBuild={() => {
+            model.performBuild();
+          }}
+          ignoreBuild={() => {
+            model.ignoreBuildRecommendation();
+          }}
         />
       );
     }
     // Indicator element for pending actions:
     elements.push(
       <div
-        key='pending'
+        key="pending"
         className={`jp-extensionmanager-pending ${
           model.hasPendingActions() ? 'jp-mod-hasPending' : ''
         }`}
@@ -350,59 +342,69 @@ class ExtensionView extends VDomRenderer<ListModel> {
     if (!model.initialized) {
       model.initialize();
       content.push(
-        <div  key='loading-placeholder' className='jp-extensionmanager-loader'>Updating extensions list</div>
+        <div key="loading-placeholder" className="jp-extensionmanager-loader">
+          Updating extensions list
+        </div>
       );
     } else if (!model.query && model.serverConnectionError !== null) {
       content.push(
-        <div key='error-msg' className='jp-extensionmanager-error'>
+        <div key="error-msg" className="jp-extensionmanager-error">
           <p>
-            Error communicating with server extension. Consult
-            the documentation for
-            how to ensure that it is enabled.
+            Error communicating with server extension. Consult the documentation
+            for how to ensure that it is enabled.
           </p>
 
-          <p>
-            Reason given:
-          </p>
-          <pre>
-            {model.serverConnectionError}
-          </pre>
+          <p>Reason given:</p>
+          <pre>{model.serverConnectionError}</pre>
         </div>
       );
     } else if (!model.query && model.installed.length) {
       content.push(
-        <header key='installed-header'>Installed<button
-          className='jp-extensionmanager-refresh'
-          onClick={() => { model.refreshInstalled(); }}>&#8635;</button></header>,
+        <header key="installed-header">
+          Installed<button
+            className="jp-extensionmanager-refresh"
+            onClick={() => {
+              model.refreshInstalled();
+            }}
+          >
+            &#8635;
+          </button>
+        </header>,
         <ListView
-          key='installed'
+          key="installed"
           entries={model.installed}
           numPages={1}
-          onPage={(value) => { /* no-op */ }}
+          onPage={value => {
+            /* no-op */
+          }}
           performAction={this.onAction.bind(this)}
-          />,
+        />
       );
     } else if (model.searchError === null) {
       content.push(
-        <header key='installable-header'>Search results</header>,
+        <header key="installable-header">Search results</header>,
         <ListView
-          key='installable'
+          key="installable"
           entries={model.searchResult}
           numPages={pages}
-          onPage={(value) => { this.onPage(value); }}
+          onPage={value => {
+            this.onPage(value);
+          }}
           performAction={this.onAction.bind(this)}
-        />,
+        />
       );
     } else {
       content.push(
-        <div key='error-msg' className='jp-extensionmanager-error'>
-          Error searching for extensions{model.searchError ? `: ${model.searchError}` : '.' }
-        </div>,
+        <div key="error-msg" className="jp-extensionmanager-error">
+          Error searching for extensions{model.searchError
+            ? `: ${model.searchError}`
+            : '.'}
+        </div>
       );
     }
     elements.push(
-      <div key='content' className='jp-extensionmanager-content'>
-       {content}
+      <div key="content" className="jp-extensionmanager-content">
+        {content}
       </div>
     );
     return elements;
@@ -434,16 +436,16 @@ class ExtensionView extends VDomRenderer<ListModel> {
    */
   onAction(action: Action, entry: IEntry) {
     switch (action) {
-    case 'install':
-      return this.model!.install(entry);
-    case 'uninstall':
-      return this.model!.uninstall(entry);
-    case 'enable':
-      return this.model!.enable(entry);
-    case 'disable':
-      return this.model!.disable(entry);
-    default:
-      throw new Error(`Invalid action: ${action}`);
+      case 'install':
+        return this.model!.install(entry);
+      case 'uninstall':
+        return this.model!.uninstall(entry);
+      case 'enable':
+        return this.model!.enable(entry);
+      case 'disable':
+        return this.model!.disable(entry);
+      default:
+        throw new Error(`Invalid action: ${action}`);
     }
   }
 
@@ -459,15 +461,15 @@ class ExtensionView extends VDomRenderer<ListModel> {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'input':
-      this.onSearch(this.inputNode.value);
-      break;
-    case 'focus':
-    case 'blur':
-      this._toggleFocused();
-      break;
-    default:
-      break;
+      case 'input':
+        this.onSearch(this.inputNode.value);
+        break;
+      case 'focus':
+      case 'blur':
+        this._toggleFocused();
+        break;
+      default:
+        break;
     }
   }
 

@@ -1,26 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Menu
-} from '@phosphor/widgets';
+import { Menu } from '@phosphor/widgets';
 
-import {
-  IJupyterLabMenu, JupyterLabMenu
-} from './labmenu';
+import { IJupyterLabMenu, JupyterLabMenu } from './labmenu';
 
 /**
  * An interface for a Tabs menu.
  */
-export
-interface ITabsMenu extends IJupyterLabMenu {
-}
+export interface ITabsMenu extends IJupyterLabMenu {}
 
 /**
  * An extensible Tabs menu for the application.
  */
-export
-class TabsMenu extends JupyterLabMenu implements ITabsMenu {
+export class TabsMenu extends JupyterLabMenu implements ITabsMenu {
   /**
    * Construct the tabs menu.
    */

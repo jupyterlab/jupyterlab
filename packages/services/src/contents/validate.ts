@@ -1,10 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Contents
-} from './index';
-
+import { Contents } from './index';
 
 /**
  * Validate a property as being on an object, and optionally
@@ -18,14 +15,14 @@ function validateProperty(object: any, name: string, typeName?: string): void {
     let valid = true;
     let value = object[name];
     switch (typeName) {
-    case 'array':
-      valid = Array.isArray(value);
-      break;
-    case 'object':
-      valid = typeof value !== 'undefined';
-      break;
-    default:
-      valid = typeof value === typeName;
+      case 'array':
+        valid = Array.isArray(value);
+        break;
+      case 'object':
+        valid = typeof value !== 'undefined';
+        break;
+      default:
+        valid = typeof value === typeName;
     }
     if (!valid) {
       throw new Error(`Property '${name}' is not of type '${typeName}`);
@@ -36,8 +33,7 @@ function validateProperty(object: any, name: string, typeName?: string): void {
 /**
  * Validate an `Contents.IModel` object.
  */
-export
-function validateContentsModel(model: Contents.IModel): void {
+export function validateContentsModel(model: Contents.IModel): void {
   validateProperty(model, 'name', 'string');
   validateProperty(model, 'path', 'string');
   validateProperty(model, 'type', 'string');
@@ -48,12 +44,12 @@ function validateContentsModel(model: Contents.IModel): void {
   validateProperty(model, 'format', 'object');
 }
 
-
 /**
  * Validate an `Contents.ICheckpointModel` object.
  */
-export
-function validateCheckpointModel(model: Contents.ICheckpointModel): void  {
+export function validateCheckpointModel(
+  model: Contents.ICheckpointModel
+): void {
   validateProperty(model, 'id', 'string');
   validateProperty(model, 'last_modified', 'string');
 }

@@ -7,7 +7,6 @@
 | Variables
 |----------------------------------------------------------------------------*/
 
-
 :root {
   --jp-private-commandpalette-search-height: 28px;
 }
@@ -15,7 +14,6 @@
 /*-----------------------------------------------------------------------------
 | Overall styles
 |----------------------------------------------------------------------------*/
-
 
 .p-CommandPalette {
   padding-bottom: 0px;
@@ -29,7 +27,6 @@
 /*-----------------------------------------------------------------------------
 | Search
 |----------------------------------------------------------------------------*/
-
 
 .p-CommandPalette-search {
   padding: 8px;
@@ -47,15 +44,13 @@
   height: 30px;
 }
 
-
 .p-CommandPalette.p-mod-focused .p-CommandPalette-wrapper {
   border: var(--jp-border-width) solid var(--md-blue-500);
   box-shadow: inset 0 0 4px var(--md-blue-300);
 }
 
-
 .p-CommandPalette-wrapper::after {
-  content: " ";
+  content: ' ';
   color: white;
   background-color: var(--jp-brand-color1);
   position: absolute;
@@ -81,29 +76,24 @@
   line-height: var(--jp-private-commandpalette-search-height);
 }
 
-
 .p-CommandPalette-input::-webkit-input-placeholder {
   color: var(--jp-ui-font-color3);
   font-size: var(--jp-ui-font-size1);
 }
-
 
 .p-CommandPalette-input::-moz-placeholder {
   color: var(--jp-ui-font-color3);
   font-size: var(--jp-ui-font-size1);
 }
 
-
 .p-CommandPalette-input:-ms-input-placeholder {
   color: var(--jp-ui-font-color3);
   font-size: var(--jp-ui-font-size1);
 }
 
-
 /*-----------------------------------------------------------------------------
 | Results
 |----------------------------------------------------------------------------*/
-
 
 .p-CommandPalette-header {
   padding: 12px 0 4px 22px;
@@ -116,11 +106,9 @@
   letter-spacing: 1px;
 }
 
-
 .p-CommandPalette-header.p-mod-active {
   background: var(--jp-layout-color2);
 }
-
 
 .p-CommandPalette-header:hover::before {
   content: '\2026'; /* ellipsis */
@@ -128,12 +116,10 @@
   margin-right: 4px;
 }
 
-
 .p-CommandPalette-header > mark {
   background-color: transparent;
   font-weight: bold;
 }
-
 
 .p-CommandPalette-item {
   padding: 4px 12px 4px 4px;
@@ -143,16 +129,13 @@
   display: flex;
 }
 
-
 .p-CommandPalette-item.p-mod-disabled {
   color: var(--jp-ui-font-color3);
 }
 
-
 .p-CommandPalette-item.p-mod-active {
   background: var(--jp-layout-color3);
 }
-
 
 .p-CommandPalette-item:hover:not(.p-mod-active):not(.p-mod-disabled) {
   background: var(--jp-layout-color2);
@@ -167,7 +150,6 @@
   background-color: transparent;
   font-weight: bold;
 }
-
 
 .p-CommandPalette-item.p-mod-disabled mark {
   color: rgba(0, 0, 0, 0.4);
@@ -199,21 +181,19 @@
   display: none;
 }
 
-
 .p-CommandPalette-content {
   background-color: var(--jp-layout-color1);
 }
 
-
 .p-CommandPalette-content:empty:after {
-    content: "No results";
-    margin: auto;
-    margin-top: 20px;
-    width: 100px;
-    display: block;
-    font-size: var(--jp-ui-font-size2);
-    font-family: var(--jp-ui-font-family);
-    font-weight: lighter;
+  content: 'No results';
+  margin: auto;
+  margin-top: 20px;
+  width: 100px;
+  display: block;
+  font-size: var(--jp-ui-font-size2);
+  font-family: var(--jp-ui-font-family);
+  font-weight: lighter;
 }
 
 .p-CommandPalette-emptyMessage {
@@ -222,5 +202,4 @@
   line-height: 1.32;
   padding: 0px 8px;
   color: var(--jp-content-font-color3);
-
 }

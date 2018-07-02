@@ -13,7 +13,6 @@
 | Styles
 |----------------------------------------------------------------------------*/
 
-
 .jp-NotebookPanel-toolbar {
   padding: 2px;
 }
@@ -24,12 +23,10 @@
   background-color: var(--jp-notebook-select-background);
 }
 
-
 .jp-Toolbar-item.jp-Notebook-toolbarCellType .jp-select-wrapper.jp-mod-focused {
   border: none;
   box-shadow: none;
 }
-
 
 /* Actual select element */
 .jp-Notebook-toolbarCellType select.jp-Notebook-toolbarCellTypeDropdown {

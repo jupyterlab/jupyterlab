@@ -1,21 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IInspector, InspectorPanel
-} from '@jupyterlab/inspector';
+import { IInspector, InspectorPanel } from '@jupyterlab/inspector';
 
-import {
-  IDisposable
-} from '@phosphor/disposable';
-
+import { IDisposable } from '@phosphor/disposable';
 
 /**
  * A class that manages inspector widget instances and offers persistent
  * `IInspector` instance that other plugins can communicate with.
  */
-export
-class InspectorManager implements IInspector {
+export class InspectorManager implements IInspector {
   /**
    * The current inspector widget.
    */

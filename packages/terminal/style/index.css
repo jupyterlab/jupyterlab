@@ -5,20 +5,16 @@
 
 @import url('~xterm/src/xterm.css');
 
-
 .jp-Terminal {
   min-width: 240px;
   min-height: 120px;
   background: black;
 }
 
-
 .jp-Terminal.jp-mod-light {
   background: white;
 }
 
-
 .jp-Terminal-body {
   padding: 8px;
 }
-

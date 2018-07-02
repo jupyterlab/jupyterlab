@@ -1,30 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IObservableJSON
-} from '@jupyterlab/observables';
+import { IObservableJSON } from '@jupyterlab/observables';
 
-import {
-  JSONExt, JSONObject
-} from '@phosphor/coreutils';
+import { JSONExt, JSONObject } from '@phosphor/coreutils';
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
 import * as React from 'react';
 
 import * as ReactDOM from 'react-dom';
 
-import {
-  CodeEditor
-} from './editor';
-
+import { CodeEditor } from './editor';
 
 /**
  * The class name added to a JSONEditor instance.
@@ -76,12 +65,10 @@ const COMMIT_CLASS = 'jp-JSONEditor-commitButton';
  */
 const COLLAPSED_CLASS = 'jp-mod-collapsed';
 
-
 /**
  * A widget for editing observable JSON.
  */
-export
-class JSONEditor extends Widget {
+export class JSONEditor extends Widget {
   /**
    * Construct a new JSON editor.
    */
@@ -263,7 +250,10 @@ class JSONEditor extends Widget {
   /**
    * Handle a change to the metadata of the source.
    */
-  private _onSourceChanged(sender: IObservableJSON, args: IObservableJSON.IChangedArgs) {
+  private _onSourceChanged(
+    sender: IObservableJSON,
+    args: IObservableJSON.IChangedArgs
+  ) {
     if (this._changeGuard) {
       return;
     }
@@ -282,9 +272,8 @@ class JSONEditor extends Widget {
     try {
       let value = JSON.parse(this.editor.model.value.text);
       this.removeClass(ERROR_CLASS);
-      this._inputDirty = (
-        !this._changeGuard && !JSONExt.deepEqual(value, this._originalValue)
-      );
+      this._inputDirty =
+        !this._changeGuard && !JSONExt.deepEqual(value, this._originalValue);
     } catch (err) {
       this.addClass(ERROR_CLASS);
       this._inputDirty = true;
@@ -310,35 +299,35 @@ class JSONEditor extends Widget {
   private _evtClick(event: MouseEvent): void {
     let target = event.target as HTMLElement;
     switch (target) {
-    case this.revertButtonNode:
-      this._setValue();
-      break;
-    case this.commitButtonNode:
-      if (!this.commitButtonNode.hidden && !this.hasClass(ERROR_CLASS)) {
-        this._changeGuard = true;
-        this._mergeContent();
-        this._changeGuard = false;
+      case this.revertButtonNode:
         this._setValue();
-      }
-      break;
-    case this.titleNode:
-    case this.collapserNode:
-      if (this.collapsible) {
-        let collapser = this.collapserNode;
-        if (collapser.classList.contains(COLLAPSED_CLASS)) {
-          collapser.classList.remove(COLLAPSED_CLASS);
-          this.editorHostNode.classList.remove(COLLAPSED_CLASS);
-        } else {
-          collapser.classList.add(COLLAPSED_CLASS);
-          this.editorHostNode.classList.add(COLLAPSED_CLASS);
+        break;
+      case this.commitButtonNode:
+        if (!this.commitButtonNode.hidden && !this.hasClass(ERROR_CLASS)) {
+          this._changeGuard = true;
+          this._mergeContent();
+          this._changeGuard = false;
+          this._setValue();
         }
-      }
-      break;
-    case this.editorHostNode:
-      this.editor.focus();
-      break;
-    default:
-      break;
+        break;
+      case this.titleNode:
+      case this.collapserNode:
+        if (this.collapsible) {
+          let collapser = this.collapserNode;
+          if (collapser.classList.contains(COLLAPSED_CLASS)) {
+            collapser.classList.remove(COLLAPSED_CLASS);
+            this.editorHostNode.classList.remove(COLLAPSED_CLASS);
+          } else {
+            collapser.classList.add(COLLAPSED_CLASS);
+            this.editorHostNode.classList.add(COLLAPSED_CLASS);
+          }
+        }
+        break;
+      case this.editorHostNode:
+        this.editor.focus();
+        break;
+      default:
+        break;
     }
   }
 
@@ -347,7 +336,7 @@ class JSONEditor extends Widget {
    */
   private _mergeContent(): void {
     let model = this.editor.model;
-    let current = this._source ? this._source.toJSON() : { };
+    let current = this._source ? this._source.toJSON() : {};
     let old = this._originalValue;
     let user = JSON.parse(model.value.text) as JSONObject;
     let source = this.source;
@@ -384,7 +373,7 @@ class JSONEditor extends Widget {
     this.commitButtonNode.hidden = true;
     this.removeClass(ERROR_CLASS);
     let model = this.editor.model;
-    let content = this._source ? this._source.toJSON() : { };
+    let content = this._source ? this._source.toJSON() : {};
     this._changeGuard = true;
     if (content === void 0) {
       model.value.text = 'No data!';
@@ -411,17 +400,14 @@ class JSONEditor extends Widget {
   private _changeGuard = false;
 }
 
-
 /**
  * The static namespace JSONEditor class statics.
  */
-export
-namespace JSONEditor {
+export namespace JSONEditor {
   /**
    * The options used to initialize a json editor.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The editor factory used by the editor.
      */
@@ -439,7 +425,6 @@ namespace JSONEditor {
   }
 }
 
-
 /**
  * The namespace for module private data.
  */
@@ -447,23 +432,25 @@ namespace Private {
   /**
    * Create the JSON Editor node's content.
    */
-  export
-  function createEditorContent(options: JSONEditor.IOptions): React.ReactElement<any> {
+  export function createEditorContent(
+    options: JSONEditor.IOptions
+  ): React.ReactElement<any> {
     const revertTitle = 'Revert changes to data';
     const confirmTitle = 'Commit changes to data';
     const title = options.title || '';
-    const collapseClass = options.collapsible ?
-      `${COLLAPSER_CLASS} ${COLLAPSE_ENABLED_CLASS}` : COLLAPSER_CLASS;
+    const collapseClass = options.collapsible
+      ? `${COLLAPSER_CLASS} ${COLLAPSE_ENABLED_CLASS}`
+      : COLLAPSER_CLASS;
 
     return (
       <React.Fragment>
         <div className={HEADER_CLASS}>
           <span className={TITLE_CLASS}>{title}</span>
-          <span className={collapseClass}></span>
-          <span className={REVERT_CLASS} title={revertTitle}></span>
-          <span className={COMMIT_CLASS} title={confirmTitle}></span>
+          <span className={collapseClass} />
+          <span className={REVERT_CLASS} title={revertTitle} />
+          <span className={COMMIT_CLASS} title={confirmTitle} />
         </div>
-        <div className={HOST_CLASS}></div>
+        <div className={HOST_CLASS} />
       </React.Fragment>
     );
   }

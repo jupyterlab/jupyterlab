@@ -14,13 +14,17 @@ module.exports = {
   },
   module: {
     rules: [
-      { test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader']},
-      { test: /\.svg/, use: [
-        { loader: 'svg-url-loader', options: {} },
-        { loader: 'svgo-loader', options: {plugins: []} }
-      ]},
-      { test: /\.(png|jpg|gif|ttf|woff|woff2|eot)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-        use: [{ loader: 'url-loader', options: {limit: 10000} }]
+      { test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] },
+      {
+        test: /\.svg/,
+        use: [
+          { loader: 'svg-url-loader', options: {} },
+          { loader: 'svgo-loader', options: { plugins: [] } }
+        ]
+      },
+      {
+        test: /\.(png|jpg|gif|ttf|woff|woff2|eot)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+        use: [{ loader: 'url-loader', options: { limit: 10000 } }]
       }
     ]
   },

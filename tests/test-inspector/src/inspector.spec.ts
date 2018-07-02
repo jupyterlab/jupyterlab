@@ -3,28 +3,23 @@
 
 import expect = require('expect.js');
 
-import {
-  Signal
-} from '@phosphor/signaling';
+import { Signal } from '@phosphor/signaling';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {
-  IInspector, InspectorPanel
-} from '@jupyterlab/inspector';
-
+import { IInspector, InspectorPanel } from '@jupyterlab/inspector';
 
 class TestInspectorPanel extends InspectorPanel {
   methods: string[] = [];
 
-  protected onInspectorUpdate(sender: any, args: IInspector.IInspectorUpdate): void {
+  protected onInspectorUpdate(
+    sender: any,
+    args: IInspector.IInspectorUpdate
+  ): void {
     super.onInspectorUpdate(sender, args);
     this.methods.push('onInspectorUpdate');
   }
 }
-
 
 class TestInspectable implements IInspector.IInspectable {
   disposed = new Signal<this, void>(this);
@@ -36,13 +31,9 @@ class TestInspectable implements IInspector.IInspectable {
   standby = false;
 }
 
-
 describe('inspector/index', () => {
-
   describe('Inspector', () => {
-
     describe('#constructor()', () => {
-
       it('should construct a new inspector widget', () => {
         let widget = new InspectorPanel();
         expect(widget).to.be.an(InspectorPanel);
@@ -67,11 +58,9 @@ describe('inspector/index', () => {
         expect(widget).to.be.an(InspectorPanel);
         expect(widget.tabBar.isHidden).to.be(false);
       });
-
     });
 
     describe('#source', () => {
-
       it('should default to `null`', () => {
         let widget = new InspectorPanel();
         expect(widget.source).to.be(null);
@@ -88,11 +77,9 @@ describe('inspector/index', () => {
         widget.source = new TestInspectable();
         expect(widget.source).to.be.a(TestInspectable);
       });
-
     });
 
     describe('#add()', () => {
-
       it('should add inspector child items', () => {
         let panel = new InspectorPanel();
         let original = panel.widgets.length;
@@ -112,11 +99,9 @@ describe('inspector/index', () => {
         disposable.dispose();
         expect(panel.widgets.length).to.be(original);
       });
-
     });
 
     describe('#dispose()', () => {
-
       it('should dispose of the resources used by the inspector', () => {
         let widget = new InspectorPanel();
         expect(widget.isDisposed).to.be(false);
@@ -131,12 +116,9 @@ describe('inspector/index', () => {
         widget.dispose();
         expect(widget.isDisposed).to.be(true);
       });
-
     });
 
-
     describe('#onInspectorUpdate()', () => {
-
       it('should fire when a source updates', () => {
         let widget = new TestInspectorPanel();
         widget.source = new TestInspectable();
@@ -147,9 +129,6 @@ describe('inspector/index', () => {
         });
         expect(widget.methods).to.contain('onInspectorUpdate');
       });
-
     });
-
   });
-
 });

@@ -4,7 +4,6 @@ var fs = require('fs-extra');
 var path = require('path');
 var watch = require('watch');
 
-
 // Handle a change to a file.
 function handleFile(filename) {
   var parts = filename.split(path.sep);
@@ -15,9 +14,9 @@ function handleFile(filename) {
 }
 
 // Watch the files in lib.
-watch.createMonitor('lib', function (monitor) {
-  monitor.on('created', function (f) {
-    watch.createMonitor(f, function (submonitor) {
+watch.createMonitor('lib', function(monitor) {
+  monitor.on('created', function(f) {
+    watch.createMonitor(f, function(submonitor) {
       submonitor.on('changed', handleFile);
     });
   });

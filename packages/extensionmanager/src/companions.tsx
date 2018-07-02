@@ -1,22 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Dialog, showDialog
-} from '@jupyterlab/apputils';
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 
-import {
-  Kernel
-} from '@jupyterlab/services';
+import { Kernel } from '@jupyterlab/services';
 
 import * as React from 'react';
-
 
 /**
  * An object representing a companion installation info.
  */
-export
-interface IInstallInfoEntry {
+export interface IInstallInfoEntry {
   /**
    * The name of the companion package/module.
    */
@@ -28,12 +22,10 @@ interface IInstallInfoEntry {
   bundles_extension?: boolean;
 }
 
-
 /**
  * An object representing a server extension install info.
  */
-export
-interface IInstallInfo {
+export interface IInstallInfo {
   /**
    * The base/default install info.
    */
@@ -53,8 +45,7 @@ interface IInstallInfo {
 /**
  * An object representing a kernel companion install info.
  */
-export
-interface IKernelInstallInfo extends IInstallInfo {
+export interface IKernelInstallInfo extends IInstallInfo {
   /**
    * A specification of which kernels the current install info applies to.
    */
@@ -67,31 +58,29 @@ interface IKernelInstallInfo extends IInstallInfo {
     /**
      * A regular expression for matching kernel display name.
      */
-    display_name? : string;
+    display_name?: string;
   };
 }
 
 /**
  * An object combining a kernel companion install info with matching specs.
  */
-export
-type KernelCompanion = {
+export type KernelCompanion = {
   /**
    * The kernel companion install info.
    */
-  kernelInfo: IKernelInstallInfo,
+  kernelInfo: IKernelInstallInfo;
 
   /**
    * The kernels that match the install info.
    */
-  kernels: Kernel.ISpecModel[]
+  kernels: Kernel.ISpecModel[];
 };
 
 /**
  * An object representing the companion discovery metadata in package.json.
  */
-export
-interface IJupyterLabPackageData {
+export interface IJupyterLabPackageData {
   jupyterlab?: {
     discovery?: {
       /**
@@ -107,55 +96,58 @@ interface IJupyterLabPackageData {
   };
 }
 
-
 /**
  * Prompt the user what do about companion packages, if present.
  *
  * @param builder the build manager
  */
-export
-function presentCompanions(kernelCompanions: KernelCompanion[],
-                           serverCompanion: IInstallInfo | undefined): Promise<boolean> {
+export function presentCompanions(
+  kernelCompanions: KernelCompanion[],
+  serverCompanion: IInstallInfo | undefined
+): Promise<boolean> {
   let entries = [];
   if (serverCompanion) {
     entries.push(
       <p>
-      This package has indicated that it needs a corresponding server extension:
-      <code> {serverCompanion.base.name!}</code>
+        This package has indicated that it needs a corresponding server
+        extension:
+        <code> {serverCompanion.base.name!}</code>
       </p>
     );
   }
   if (kernelCompanions.length > 0) {
     entries.push(
-      <p>This package has indicated that it needs a corresponding package for the kernel.</p>
+      <p>
+        This package has indicated that it needs a corresponding package for the
+        kernel.
+      </p>
     );
     for (let entry of kernelCompanions) {
       entries.push(
         <p>
-        The package
-        <code>{entry.kernelInfo.base.name!}</code>,
-         is required by the following kernels:
+          The package
+          <code>{entry.kernelInfo.base.name!}</code>, is required by the
+          following kernels:
         </p>
       );
       let kernelEntries = [];
       for (let kernel of entry.kernels) {
         kernelEntries.push(
-          <li><code>{kernel.display_name}</code></li>);
+          <li>
+            <code>{kernel.display_name}</code>
+          </li>
+        );
       }
-      entries.push((
-        <ul>
-        {...kernelEntries}
-        </ul>
-      ));
+      entries.push(<ul>{kernelEntries}</ul>);
     }
   }
   let body = (
     <div>
-    {...entries}
+      {entries}
       <p>
         You should make sure that the indicated packages are installed before
-        trying to use the extension. Do you want to continue with the
-        extension installation?
+        trying to use the extension. Do you want to continue with the extension
+        installation?
       </p>
     </div>
   );
@@ -166,8 +158,9 @@ function presentCompanions(kernelCompanions: KernelCompanion[],
       Dialog.cancelButton(),
       Dialog.okButton({
         label: 'OK',
-        caption: 'Install the Jupyterlab extension.',
-      })],
+        caption: 'Install the Jupyterlab extension.'
+      })
+    ]
   }).then(result => {
     return result.button.accept;
   });

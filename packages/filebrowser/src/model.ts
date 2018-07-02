@@ -2,38 +2,31 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IChangedArgs, IStateDB, PathExt, PageConfig
+  IChangedArgs,
+  IStateDB,
+  PathExt,
+  PageConfig
 } from '@jupyterlab/coreutils';
 
-import {
-  IDocumentManager, shouldOverwrite
-} from '@jupyterlab/docmanager';
+import { IDocumentManager, shouldOverwrite } from '@jupyterlab/docmanager';
+
+import { Contents, Kernel, Session } from '@jupyterlab/services';
 
 import {
-  Contents, Kernel, Session
-} from '@jupyterlab/services';
-
-import {
-  ArrayIterator, each, find, IIterator, IterableOrArrayLike
+  ArrayIterator,
+  each,
+  find,
+  IIterator,
+  IterableOrArrayLike
 } from '@phosphor/algorithm';
 
-import {
-  PromiseDelegate, ReadonlyJSONObject
-} from '@phosphor/coreutils';
+import { PromiseDelegate, ReadonlyJSONObject } from '@phosphor/coreutils';
 
-import {
-  IDisposable
-} from '@phosphor/disposable';
+import { IDisposable } from '@phosphor/disposable';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  showDialog,
-  Dialog
-} from '@jupyterlab/apputils';
-
+import { showDialog, Dialog } from '@jupyterlab/apputils';
 
 /**
  * The duration of auto-refresh in ms.
@@ -45,7 +38,6 @@ const REFRESH_DURATION = 10000;
  */
 const MIN_REFRESH = 1000;
 
-
 /**
  * The maximum upload size (in bytes) for notebook version < 5.1.0
  */
@@ -55,7 +47,6 @@ export const LARGE_FILE_SIZE = 15 * 1024 * 1024;
  * The size (in bytes) of the biggest chunk we should upload at once.
  */
 export const CHUNK_SIZE = 1024 * 1024;
-
 
 /**
  * An upload progress event for a file at `path`.
@@ -75,8 +66,7 @@ export interface IUploadModel {
  * All paths parameters without a leading `'/'` are interpreted as relative to
  * the current directory.  Supports `'../'` syntax.
  */
-export
-class FileBrowserModel implements IDisposable {
+export class FileBrowserModel implements IDisposable {
   /**
    * Construct a new file browser model.
    */
@@ -240,8 +230,11 @@ class FileBrowserModel implements IDisposable {
    */
   cd(newValue = '.'): Promise<void> {
     if (newValue !== '.') {
-      newValue = Private.normalizePath(this.manager.services.contents,
-                                       this._model.path, newValue);
+      newValue = Private.normalizePath(
+        this.manager.services.contents,
+        this._model.path,
+        newValue
+      );
     } else {
       newValue = this._pendingPath || this._model.path;
     }
@@ -256,39 +249,42 @@ class FileBrowserModel implements IDisposable {
       this._sessions.length = 0;
     }
     let services = this.manager.services;
-    this._pending = services.contents.get(newValue, options).then(contents => {
-      if (this.isDisposed) {
-        return;
-      }
-      this._refreshDuration = REFRESH_DURATION;
-      this._handleContents(contents);
-      this._pendingPath = null;
-      if (oldValue !== newValue) {
-        // If there is a state database and a unique key, save the new path.
-        if (this._state && this._key) {
-          this._state.save(this._key, { path: newValue });
+    this._pending = services.contents
+      .get(newValue, options)
+      .then(contents => {
+        if (this.isDisposed) {
+          return;
         }
+        this._refreshDuration = REFRESH_DURATION;
+        this._handleContents(contents);
+        this._pendingPath = null;
+        if (oldValue !== newValue) {
+          // If there is a state database and a unique key, save the new path.
+          if (this._state && this._key) {
+            this._state.save(this._key, { path: newValue });
+          }
 
-        this._pathChanged.emit({
-          name: 'path',
-          oldValue,
-          newValue
-        });
-      }
-      this._onRunningChanged(services.sessions, services.sessions.running());
-      this._refreshed.emit(void 0);
-    }).catch(error => {
-      this._pendingPath = null;
-      if (error.message === 'Not Found') {
-        error.message = `Directory not found: "${this._model.path}"`;
-        console.error(error);
-        this._connectionFailure.emit(error);
-        this.cd('/');
-      } else {
-        this._refreshDuration = REFRESH_DURATION * 10;
-        this._connectionFailure.emit(error);
-      }
-    });
+          this._pathChanged.emit({
+            name: 'path',
+            oldValue,
+            newValue
+          });
+        }
+        this._onRunningChanged(services.sessions, services.sessions.running());
+        this._refreshed.emit(void 0);
+      })
+      .catch(error => {
+        this._pendingPath = null;
+        if (error.message === 'Not Found') {
+          error.message = `Directory not found: "${this._model.path}"`;
+          console.error(error);
+          this._connectionFailure.emit(error);
+          this.cd('/');
+        } else {
+          this._refreshDuration = REFRESH_DURATION * 10;
+          this._connectionFailure.emit(error);
+        }
+      });
     return this._pending;
   }
 
@@ -333,18 +329,21 @@ class FileBrowserModel implements IDisposable {
     const manager = this.manager;
     const key = `file-browser-${id}:cwd`;
     const ready = manager.services.ready;
-    return Promise.all([state.fetch(key), ready]).then(([cwd]) => {
-      if (!cwd) {
-        this._restored.resolve(void 0);
-        return;
-      }
+    return Promise.all([state.fetch(key), ready])
+      .then(([cwd]) => {
+        if (!cwd) {
+          this._restored.resolve(void 0);
+          return;
+        }
 
-      const path = (cwd as ReadonlyJSONObject)['path'] as string;
-      const localPath = manager.services.contents.localPath(path);
-      return manager.services.contents.get(path)
-        .then(() => this.cd(localPath))
-        .catch(() => state.remove(key));
-    }).catch(() => state.remove(key))
+        const path = (cwd as ReadonlyJSONObject)['path'] as string;
+        const localPath = manager.services.contents.localPath(path);
+        return manager.services.contents
+          .get(path)
+          .then(() => this.cd(localPath))
+          .catch(() => state.remove(key));
+      })
+      .catch(() => state.remove(key))
       .then(() => {
         this._key = key;
         this._restored.resolve(void 0);
@@ -370,7 +369,9 @@ class FileBrowserModel implements IDisposable {
     const canSendChunked = supportsChunked && !isNotebook;
 
     if (largeFile && !canSendChunked) {
-      let msg = `Cannot upload file (>${LARGE_FILE_SIZE / (1024 * 1024) } MB). ${file.name}`;
+      let msg = `Cannot upload file (>${LARGE_FILE_SIZE / (1024 * 1024)} MB). ${
+        file.name
+      }`;
       console.warn(msg);
       throw msg;
     }
@@ -382,7 +383,10 @@ class FileBrowserModel implements IDisposable {
     await this._uploadCheckDisposed();
     await this.refresh();
     await this._uploadCheckDisposed();
-    if (find(this._items, i => i.name === file.name) && !await shouldOverwrite(file.name)) {
+    if (
+      find(this._items, i => i.name === file.name) &&
+      !await shouldOverwrite(file.name)
+    ) {
       throw err;
     }
     await this._uploadCheckDisposed();
@@ -390,12 +394,13 @@ class FileBrowserModel implements IDisposable {
     return await this._upload(file, isNotebook, chunkedUpload);
   }
 
-
   private async _shouldUploadLarge(file: File): Promise<boolean> {
-    const {button} = await showDialog({
+    const { button } = await showDialog({
       title: 'Large file size warning',
-      body: `The file size is ${Math.round(file.size / (1024 * 1024))} MB. Do you still want to upload it?`,
-      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'UPLOAD'})]
+      body: `The file size is ${Math.round(
+        file.size / (1024 * 1024)
+      )} MB. Do you still want to upload it?`,
+      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'UPLOAD' })]
     });
     return button.accept;
   }
@@ -403,7 +408,11 @@ class FileBrowserModel implements IDisposable {
   /**
    * Perform the actual upload.
    */
-  private async _upload(file: File, isNotebook: boolean, chunked: boolean): Promise<Contents.IModel> {
+  private async _upload(
+    file: File,
+    isNotebook: boolean,
+    chunked: boolean
+  ): Promise<Contents.IModel> {
     // Gather the file model parameters.
     let path = this._model.path;
     path = path ? path + '/' + file.name : file.name;
@@ -411,7 +420,10 @@ class FileBrowserModel implements IDisposable {
     let type: Contents.ContentType = isNotebook ? 'notebook' : 'file';
     let format: Contents.FileFormat = isNotebook ? 'json' : 'base64';
 
-    const uploadInner = async (blob: Blob, chunk?: number): Promise<Contents.IModel> => {
+    const uploadInner = async (
+      blob: Blob,
+      chunk?: number
+    ): Promise<Contents.IModel> => {
       await this._uploadCheckDisposed();
       let reader = new FileReader();
       if (isNotebook) {
@@ -421,7 +433,8 @@ class FileBrowserModel implements IDisposable {
       }
       await new Promise((resolve, reject) => {
         reader.onload = resolve;
-        reader.onerror = event => reject(`Failed to upload "${file.name}":` + event);
+        reader.onerror = event =>
+          reject(`Failed to upload "${file.name}":` + event);
       });
       await this._uploadCheckDisposed();
       let model: Partial<Contents.IModel> = {
@@ -440,8 +453,9 @@ class FileBrowserModel implements IDisposable {
 
     let finalModel: Contents.IModel;
 
-    let upload = {path, progress: 0};
-    this._uploadChanged.emit({name: 'start',
+    let upload = { path, progress: 0 };
+    this._uploadChanged.emit({
+      name: 'start',
       newValue: upload,
       oldValue: null
     });
@@ -451,7 +465,7 @@ class FileBrowserModel implements IDisposable {
       const lastChunk = end >= file.size;
       const chunk = lastChunk ? -1 : end / CHUNK_SIZE;
 
-      const newUpload = {path, progress: start / file.size};
+      const newUpload = { path, progress: start / file.size };
       this._uploads.splice(this._uploads.indexOf(upload));
       this._uploads.push(newUpload);
       this._uploadChanged.emit({
@@ -485,7 +499,6 @@ class FileBrowserModel implements IDisposable {
     return Promise.resolve();
   }
 
-
   /**
    * Handle an updated contents model.
    */
@@ -512,7 +525,10 @@ class FileBrowserModel implements IDisposable {
   /**
    * Handle a change to the running sessions.
    */
-  private _onRunningChanged(sender: Session.IManager, models: IterableOrArrayLike<Session.IModel>): void {
+  private _onRunningChanged(
+    sender: Session.IManager,
+    models: IterableOrArrayLike<Session.IModel>
+  ): void {
     this._populateSessions(models);
     this._refreshed.emit(void 0);
   }
@@ -520,14 +536,19 @@ class FileBrowserModel implements IDisposable {
   /**
    * Handle a change on the contents manager.
    */
-  private _onFileChanged(sender: Contents.IManager, change: Contents.IChangedArgs): void {
+  private _onFileChanged(
+    sender: Contents.IManager,
+    change: Contents.IChangedArgs
+  ): void {
     let path = this._model.path;
     let { sessions } = this.manager.services;
     let { oldValue, newValue } = change;
-    let value = oldValue && oldValue.path &&
-      PathExt.dirname(oldValue.path) === path ? oldValue
+    let value =
+      oldValue && oldValue.path && PathExt.dirname(oldValue.path) === path
+        ? oldValue
         : newValue && newValue.path && PathExt.dirname(newValue.path) === path
-          ? newValue : undefined;
+          ? newValue
+          : undefined;
 
     // If either the old value or the new value is in the current path, update.
     if (value) {
@@ -564,7 +585,7 @@ class FileBrowserModel implements IDisposable {
         return;
       }
       let date = new Date().getTime();
-      if ((date - this._lastRefresh) > this._refreshDuration) {
+      if (date - this._lastRefresh > this._refreshDuration) {
         this.refresh();
       }
     }, MIN_REFRESH);
@@ -575,7 +596,7 @@ class FileBrowserModel implements IDisposable {
    */
   private _scheduleUpdate(): void {
     let date = new Date().getTime();
-    if ((date - this._lastRefresh) > MIN_REFRESH) {
+    if (date - this._lastRefresh > MIN_REFRESH) {
       this.refresh();
     } else {
       this._requested = true;
@@ -606,17 +627,14 @@ class FileBrowserModel implements IDisposable {
   private _unloadEventListener: (e: Event) => string;
 }
 
-
 /**
  * The namespace for the `FileBrowserModel` class statics.
  */
-export
-namespace FileBrowserModel {
+export namespace FileBrowserModel {
   /**
    * An options object for initializing a file browser.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * A document manager instance.
      */
@@ -637,7 +655,6 @@ namespace FileBrowserModel {
   }
 }
 
-
 /**
  * The namespace for the file browser model private data.
  */
@@ -648,8 +665,7 @@ namespace Private {
    * If the result is an `ArrayBuffer`, return a Base64-encoded string.
    * Otherwise, return the JSON parsed result.
    */
-  export
-  function getContent(reader: FileReader): any {
+  export function getContent(reader: FileReader): any {
     if (reader.result instanceof ArrayBuffer) {
       // Base64-encode binary file data.
       let bytes = '';
@@ -667,8 +683,11 @@ namespace Private {
   /**
    * Normalize a path based on a root directory, accounting for relative paths.
    */
-  export
-  function normalizePath(contents: Contents.IManager, root: string, path: string): string {
+  export function normalizePath(
+    contents: Contents.IManager,
+    root: string,
+    path: string
+  ): string {
     const driveName = contents.driveName(root);
     const localPath = contents.localPath(root);
     const resolved = PathExt.resolve(localPath, path);

@@ -1,9 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IRenderMime, markdownRendererFactory
-} from '@jupyterlab/rendermime';
+import { IRenderMime, markdownRendererFactory } from '@jupyterlab/rendermime';
 
 import '../style/index.css';
 
@@ -11,7 +9,6 @@ import '../style/index.css';
  * The name of the factory that creates markdown widgets.
  */
 const FACTORY = 'Markdown Preview';
-
 
 /**
  * The markdown mime renderer extension.
@@ -23,8 +20,8 @@ const extension: IRenderMime.IExtension = {
   documentWidgetFactoryOptions: {
     name: FACTORY,
     primaryFileType: 'markdown',
-    fileTypes: ['markdown'],
-  },
+    fileTypes: ['markdown']
+  }
 };
 
 /**

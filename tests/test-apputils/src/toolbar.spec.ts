@@ -3,41 +3,23 @@
 
 import expect = require('expect.js');
 
-import {
-  ClientSession, Toolbar, ToolbarButton
-} from '@jupyterlab/apputils';
+import { ClientSession, Toolbar, ToolbarButton } from '@jupyterlab/apputils';
 
-import {
-  toArray
-} from '@phosphor/algorithm';
+import { toArray } from '@phosphor/algorithm';
 
-import {
-  CommandRegistry
-} from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {
-  ReadonlyJSONObject
-} from '@phosphor/coreutils';
+import { ReadonlyJSONObject } from '@phosphor/coreutils';
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {
-  simulate
-} from 'simulate-event';
+import { simulate } from 'simulate-event';
 
-import {
-  createClientSession
-} from '../../utils';
-
+import { createClientSession } from '../../utils';
 
 class LogToolbarButton extends ToolbarButton {
-
   events: string[] = [];
 
   methods: string[] = [];
@@ -58,9 +40,7 @@ class LogToolbarButton extends ToolbarButton {
   }
 }
 
-
 describe('@jupyterlab/apputils', () => {
-
   let widget: Toolbar<Widget>;
   let session: ClientSession;
 
@@ -73,13 +53,13 @@ describe('@jupyterlab/apputils', () => {
 
   afterEach(() => {
     widget.dispose();
-    return session.shutdown().then(() => { session.dispose(); });
+    return session.shutdown().then(() => {
+      session.dispose();
+    });
   });
 
   describe('Toolbar', () => {
-
     describe('#constructor()', () => {
-
       it('should construct a new toolbar widget', () => {
         let widget = new Toolbar();
         expect(widget).to.be.a(Toolbar);
@@ -89,22 +69,18 @@ describe('@jupyterlab/apputils', () => {
         let widget = new Toolbar();
         expect(widget.hasClass('jp-Toolbar')).to.be(true);
       });
-
     });
 
     describe('#names()', () => {
-
       it('should get an ordered list the toolbar item names', () => {
         widget.addItem('foo', new Widget());
         widget.addItem('bar', new Widget());
         widget.addItem('baz', new Widget());
         expect(toArray(widget.names())).to.eql(['foo', 'bar', 'baz']);
       });
-
     });
 
     describe('#addItem()', () => {
-
       it('should add an item to the toolbar', () => {
         let item = new Widget();
         expect(widget.addItem('test', item)).to.be(true);
@@ -121,11 +97,9 @@ describe('@jupyterlab/apputils', () => {
         widget.addItem('test', new Widget());
         expect(widget.addItem('test', new Widget())).to.be(false);
       });
-
     });
 
     describe('#insertItem()', () => {
-
       it('should insert the item into the toolbar', () => {
         widget.addItem('a', new Widget());
         widget.addItem('b', new Widget());
@@ -139,11 +113,9 @@ describe('@jupyterlab/apputils', () => {
         widget.insertItem(10, 'c', new Widget());
         expect(toArray(widget.names())).to.eql(['a', 'b', 'c']);
       });
-
     });
 
     describe('.createFromCommand', () => {
-
       let commands = new CommandRegistry();
       let testLogCommandId = 'test:toolbar-log';
       let logArgs: ReadonlyJSONObject[] = [];
@@ -151,7 +123,9 @@ describe('@jupyterlab/apputils', () => {
       let toggled = true;
       let visible = false;
       commands.addCommand(testLogCommandId, {
-        execute: (args) => { logArgs.push(args); },
+        execute: args => {
+          logArgs.push(args);
+        },
         label: 'Test log command label',
         caption: 'Test log command caption',
         usage: 'Test log command usage',
@@ -160,7 +134,7 @@ describe('@jupyterlab/apputils', () => {
         className: 'test-log-class',
         isEnabled: () => enabled,
         isToggled: () => toggled,
-        isVisible: () => visible,
+        isVisible: () => visible
       });
 
       it('should create a button', () => {
@@ -171,7 +145,11 @@ describe('@jupyterlab/apputils', () => {
 
       it('should dispose the button if the action is removed', () => {
         let id = 'to-be-removed';
-        let cmd = commands.addCommand(id, { execute: () => { return; } });
+        let cmd = commands.addCommand(id, {
+          execute: () => {
+            return;
+          }
+        });
         let button = Toolbar.createFromCommand(commands, id);
         cmd.dispose();
         expect(button.isDisposed).to.be(true);
@@ -224,8 +202,10 @@ describe('@jupyterlab/apputils', () => {
       it('should add use the command label if no icon class/label', () => {
         let id = 'to-be-removed';
         let cmd = commands.addCommand(id, {
-          execute: () => { return; },
-          label: 'Label-only button',
+          execute: () => {
+            return;
+          },
+          label: 'Label-only button'
         });
         let button = Toolbar.createFromCommand(commands, id);
         expect(button.node.childElementCount).to.be(0);
@@ -237,7 +217,9 @@ describe('@jupyterlab/apputils', () => {
         let id = 'to-be-removed';
         let iconClassValue: string | null = null;
         let cmd = commands.addCommand(id, {
-          execute: () => { /* no op */ },
+          execute: () => {
+            /* no op */
+          },
           label: 'Label-only button',
           iconClass: () => iconClassValue
         });
@@ -254,46 +236,37 @@ describe('@jupyterlab/apputils', () => {
 
         cmd.dispose();
       });
-
     });
 
     describe('.createInterruptButton()', () => {
-
-      it('should have the `\'jp-StopIcon\'` class', () => {
+      it("should have the `'jp-StopIcon'` class", () => {
         let button = Toolbar.createInterruptButton(session);
         expect(button.hasClass('jp-StopIcon')).to.be(true);
       });
-
     });
 
     describe('.createRestartButton()', () => {
-
-      it('should have the `\'jp-RefreshIcon\'` class', () => {
+      it("should have the `'jp-RefreshIcon'` class", () => {
         let button = Toolbar.createRestartButton(session);
         expect(button.hasClass('jp-RefreshIcon')).to.be(true);
       });
-
     });
 
-
     describe('.createKernelNameItem()', () => {
-
-      it('should display the `\'display_name\'` of the kernel', () => {
+      it("should display the `'display_name'` of the kernel", () => {
         let item = Toolbar.createKernelNameItem(session);
         return session.initialize().then(() => {
           expect(item.node.textContent).to.be(session.kernelDisplayName);
         });
       });
 
-      it('should display `\'No Kernel!\'` if there is no kernel', () => {
+      it("should display `'No Kernel!'` if there is no kernel", () => {
         let item = Toolbar.createKernelNameItem(session);
         expect(item.node.textContent).to.be('No Kernel!');
       });
-
     });
 
     describe('.createKernelStatusItem()', () => {
-
       beforeEach(() => {
         return session.initialize().then(() => {
           return session.kernel.ready;
@@ -333,23 +306,22 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should handle a starting session', () => {
-        return session.shutdown().then(() => {
-          return createClientSession();
-        }).then(session => {
-          let item = Toolbar.createKernelStatusItem(session);
-          expect(item.node.title).to.be('Kernel Starting');
-          expect(item.hasClass('jp-FilledCircleIcon')).to.be(true);
-        });
+        return session
+          .shutdown()
+          .then(() => {
+            return createClientSession();
+          })
+          .then(session => {
+            let item = Toolbar.createKernelStatusItem(session);
+            expect(item.node.title).to.be('Kernel Starting');
+            expect(item.hasClass('jp-FilledCircleIcon')).to.be(true);
+          });
       });
-
     });
-
   });
 
   describe('ToolbarButton', () => {
-
     describe('#constructor()', () => {
-
       it('should accept no arguments', () => {
         let button = new ToolbarButton();
         expect(button).to.be.a(ToolbarButton);
@@ -358,17 +330,17 @@ describe('@jupyterlab/apputils', () => {
       it('should accept options', () => {
         let button = new ToolbarButton({
           className: 'foo',
-          onClick: () => { return void 0; },
+          onClick: () => {
+            return void 0;
+          },
           tooltip: 'bar'
         });
         expect(button.hasClass('foo')).to.be(true);
         expect(button.node.title).to.be('bar');
       });
-
     });
 
     describe('#dispose()', () => {
-
       it('should dispose of the resources used by the widget', () => {
         let button = new ToolbarButton();
         button.dispose();
@@ -381,17 +353,16 @@ describe('@jupyterlab/apputils', () => {
         button.dispose();
         expect(button.isDisposed).to.be(true);
       });
-
     });
 
     describe('#handleEvent()', () => {
-
       context('click', () => {
-
-        it('should activate the callback', (done) => {
+        it('should activate the callback', done => {
           let called = false;
           let button = new ToolbarButton({
-            onClick: () => { called = true; },
+            onClick: () => {
+              called = true;
+            }
           });
           Widget.attach(button, document.body);
           requestAnimationFrame(() => {
@@ -401,13 +372,10 @@ describe('@jupyterlab/apputils', () => {
             done();
           });
         });
-
       });
-
     });
 
     describe('#onAfterAttach()', () => {
-
       it('should add event listeners to the node', () => {
         let button = new LogToolbarButton();
         Widget.attach(button, document.body);
@@ -416,12 +384,10 @@ describe('@jupyterlab/apputils', () => {
         expect(button.events).to.contain('click');
         button.dispose();
       });
-
     });
 
     describe('#onBeforeDetach()', () => {
-
-      it('should remove event listeners from the node', (done) => {
+      it('should remove event listeners from the node', done => {
         let button = new LogToolbarButton();
         Widget.attach(button, document.body);
         requestAnimationFrame(() => {
@@ -433,9 +399,6 @@ describe('@jupyterlab/apputils', () => {
           done();
         });
       });
-
     });
-
   });
-
 });

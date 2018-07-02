@@ -3,26 +3,15 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import {
-  PanelLayout
-} from '@phosphor/widgets';
+import { PanelLayout } from '@phosphor/widgets';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {
-  CodeEditor, CodeEditorWrapper
-} from '@jupyterlab/codeeditor';
+import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
-import {
-  CodeMirrorEditorFactory
-} from '@jupyterlab/codemirror';
+import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror';
 
-import {
-  ICellModel
-} from './model';
-
+import { ICellModel } from './model';
 
 /**
  * The class name added to input area widgets.
@@ -44,38 +33,34 @@ const INPUT_PROMPT_CLASS = 'jp-InputPrompt';
  */
 const INPUT_AREA_EDITOR_CLASS = 'jp-InputArea-editor';
 
-
 /******************************************************************************
  * InputArea
  ******************************************************************************/
 
-
 /**
  * An input area widget, which hosts a prompt and an editor widget.
  */
-export
-class InputArea extends Widget {
+export class InputArea extends Widget {
   /**
    * Construct an input area widget.
    */
   constructor(options: InputArea.IOptions) {
     super();
     this.addClass(INPUT_AREA_CLASS);
-    let model = this.model = options.model;
-    let contentFactory = this.contentFactory = (
-        options.contentFactory || InputArea.defaultContentFactory
-    );
+    let model = (this.model = options.model);
+    let contentFactory = (this.contentFactory =
+      options.contentFactory || InputArea.defaultContentFactory);
 
     // Prompt
-    let prompt = this._prompt = contentFactory.createInputPrompt();
+    let prompt = (this._prompt = contentFactory.createInputPrompt());
     prompt.addClass(INPUT_AREA_PROMPT_CLASS);
 
     // Editor
     let editorOptions = { model, factory: contentFactory.editorFactory };
-    let editor = this._editor = new CodeEditorWrapper(editorOptions);
+    let editor = (this._editor = new CodeEditorWrapper(editorOptions));
     editor.addClass(INPUT_AREA_EDITOR_CLASS);
 
-    let layout = this.layout = new PanelLayout();
+    let layout = (this.layout = new PanelLayout());
     layout.addWidget(prompt);
     layout.addWidget(editor);
   }
@@ -160,17 +145,14 @@ class InputArea extends Widget {
   private _rendered: Widget = null;
 }
 
-
 /**
  * A namespace for `InputArea` statics.
  */
-export
-namespace InputArea {
+export namespace InputArea {
   /**
    * The options used to create an `InputArea`.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The model used by the widget.
      */
@@ -190,8 +172,7 @@ namespace InputArea {
    * The content factory is used to create children in a way
    * that can be customized.
    */
-  export
-  interface IContentFactory {
+  export interface IContentFactory {
     /**
      * The editor factory we need to include in `CodeEditorWratter.IOptions`.
      *
@@ -211,13 +192,12 @@ namespace InputArea {
    *
    * This defaults to using an `editorFactory` based on CodeMirror.
    */
-  export
-  class ContentFactory implements IContentFactory {
+  export class ContentFactory implements IContentFactory {
     /**
      * Construct a `ContentFactory`.
      */
     constructor(options: ContentFactory.IOptions = {}) {
-      this._editor = (options.editorFactory || defaultEditorFactory);
+      this._editor = options.editorFactory || defaultEditorFactory;
     }
 
     /**
@@ -240,13 +220,11 @@ namespace InputArea {
   /**
    * A namespace for the input area content factory.
    */
-  export
-  namespace ContentFactory {
+  export namespace ContentFactory {
     /**
      * Options for the content factory.
      */
-    export
-    interface IOptions {
+    export interface IOptions {
       /**
        * The editor factory used by the content factory.
        *
@@ -268,27 +246,22 @@ namespace InputArea {
   /**
    * The default editor factory singleton based on CodeMirror.
    */
-  export
-  const defaultEditorFactory: CodeEditor.Factory = _createDefaultEditorFactory();
+  export const defaultEditorFactory: CodeEditor.Factory = _createDefaultEditorFactory();
 
   /**
    * The default `ContentFactory` instance.
    */
-  export
-  const defaultContentFactory = new ContentFactory({});
+  export const defaultContentFactory = new ContentFactory({});
 }
-
 
 /******************************************************************************
  * InputPrompt
  ******************************************************************************/
 
-
 /**
  * The interface for the input prompt.
  */
-export
-interface IInputPrompt extends Widget {
+export interface IInputPrompt extends Widget {
   /**
    * The execution count of the prompt.
    */
@@ -298,8 +271,7 @@ interface IInputPrompt extends Widget {
 /**
  * The default input prompt implementation.
  */
-export
-class InputPrompt extends Widget implements IInputPrompt {
+export class InputPrompt extends Widget implements IInputPrompt {
   /*
    * Create an output prompt widget.
    */
@@ -319,7 +291,7 @@ class InputPrompt extends Widget implements IInputPrompt {
     if (value === null) {
       this.node.textContent = ' ';
     } else {
-        this.node.textContent = `In [${value || ' '}]:`;
+      this.node.textContent = `In [${value || ' '}]:`;
     }
   }
 

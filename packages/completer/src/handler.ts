@@ -1,34 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  CodeEditor
-} from '@jupyterlab/codeeditor';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import {
-  IDataConnector, Text
-} from '@jupyterlab/coreutils';
+import { IDataConnector, Text } from '@jupyterlab/coreutils';
 
-import {
-  ReadonlyJSONObject, JSONObject, JSONArray
-} from '@phosphor/coreutils';
+import { ReadonlyJSONObject, JSONObject, JSONArray } from '@phosphor/coreutils';
 
-import {
-  IDisposable
-} from '@phosphor/disposable';
+import { IDisposable } from '@phosphor/disposable';
 
-import {
-  Message, MessageLoop
-} from '@phosphor/messaging';
+import { Message, MessageLoop } from '@phosphor/messaging';
 
-import {
-  Signal
-} from '@phosphor/signaling';
+import { Signal } from '@phosphor/signaling';
 
-import {
-  Completer
-} from './widget';
-
+import { Completer } from './widget';
 
 /**
  * A class added to editors that can host a completer.
@@ -40,12 +25,10 @@ const COMPLETER_ENABLED_CLASS: string = 'jp-mod-completer-enabled';
  */
 const COMPLETER_ACTIVE_CLASS: string = 'jp-mod-completer-active';
 
-
 /**
  * A completion handler for editors.
  */
-export
-class CompletionHandler implements IDisposable {
+export class CompletionHandler implements IDisposable {
   /**
    * Construct a new completion handler for a widget.
    */
@@ -69,10 +52,20 @@ class CompletionHandler implements IDisposable {
    * it is acceptable for the other methods to be simple functions that return
    * rejected promises.
    */
-  get connector(): IDataConnector<CompletionHandler.IReply, void, CompletionHandler.IRequest> {
+  get connector(): IDataConnector<
+    CompletionHandler.IReply,
+    void,
+    CompletionHandler.IRequest
+  > {
     return this._connector;
   }
-  set connector(connector: IDataConnector<CompletionHandler.IReply, void, CompletionHandler.IRequest>) {
+  set connector(
+    connector: IDataConnector<
+      CompletionHandler.IReply,
+      void,
+      CompletionHandler.IRequest
+    >
+  ) {
     this._connector = connector;
   }
 
@@ -145,18 +138,21 @@ class CompletionHandler implements IDisposable {
    */
   processMessage(msg: Message): void {
     switch (msg.type) {
-    case CompletionHandler.Msg.InvokeRequest.type:
-      this.onInvokeRequest(msg);
-      break;
-    default:
-      break;
+      case CompletionHandler.Msg.InvokeRequest.type:
+        this.onInvokeRequest(msg);
+        break;
+      default:
+        break;
     }
   }
 
   /**
    * Get the state of the text editor at the given position.
    */
-  protected getState(editor: CodeEditor.IEditor, position: CodeEditor.IPosition): Completer.ITextState {
+  protected getState(
+    editor: CodeEditor.IEditor,
+    position: CodeEditor.IPosition
+  ): Completer.ITextState {
     return {
       text: editor.model.value.text,
       lineHeight: editor.lineHeight,
@@ -207,8 +203,9 @@ class CompletionHandler implements IDisposable {
 
     let editor = this._editor;
     if (editor) {
-      this._makeRequest(editor.getCursorPosition())
-        .catch(reason => { console.log('Invoke request bailed', reason); });
+      this._makeRequest(editor.getCursorPosition()).catch(reason => {
+        console.log('Invoke request bailed', reason);
+      });
     }
   }
 
@@ -347,25 +344,28 @@ class CompletionHandler implements IDisposable {
     const state = this.getState(editor, position);
     const request: CompletionHandler.IRequest = { text, offset };
 
-    return this._connector.fetch(request).then(reply => {
-      if (this.isDisposed) {
-        throw new Error('Handler is disposed');
-      }
+    return this._connector
+      .fetch(request)
+      .then(reply => {
+        if (this.isDisposed) {
+          throw new Error('Handler is disposed');
+        }
 
-      // If a newer completion request has created a pending request, bail.
-      if (pending !== this._pending) {
-        throw new Error('A newer completion request is pending');
-      }
+        // If a newer completion request has created a pending request, bail.
+        if (pending !== this._pending) {
+          throw new Error('A newer completion request is pending');
+        }
 
-      this._onReply(state, reply);
-    }).catch(reason => {
-      // Completion request failures or negative results fail silently.
-      const model = this.completer.model;
+        this._onReply(state, reply);
+      })
+      .catch(reason => {
+        // Completion request failures or negative results fail silently.
+        const model = this.completer.model;
 
-      if (model) {
-        model.reset(true);
-      }
-    });
+        if (model) {
+          model.reset(true);
+        }
+      });
   }
 
   /**
@@ -375,7 +375,10 @@ class CompletionHandler implements IDisposable {
    *
    * @param reply - The API response returned for a completion request.
    */
-  private _onReply(state: Completer.ITextState, reply: CompletionHandler.IReply): void {
+  private _onReply(
+    state: Completer.ITextState,
+    reply: CompletionHandler.IReply
+  ): void {
     const model = this.completer.model;
     const text = state.text;
 
@@ -391,7 +394,9 @@ class CompletionHandler implements IDisposable {
     const matchSet = new Set(reply.matches || []);
 
     if (reply.matches) {
-      matchSet.forEach(match => { matches.push(match); });
+      matchSet.forEach(match => {
+        matches.push(match);
+      });
     }
 
     // Extract the optional type map. The current implementation uses
@@ -400,9 +405,9 @@ class CompletionHandler implements IDisposable {
     // their own types.
     // Even though the `metadata` field is required, it has historically not
     // been used. Defensively check if it exists.
-    const metadata = reply.metadata || { };
+    const metadata = reply.metadata || {};
     const types = metadata._jupyter_types_experimental as JSONArray;
-    const typeMap: Completer.TypeMap = { };
+    const typeMap: Completer.TypeMap = {};
 
     if (types) {
       types.forEach((item: JSONObject) => {
@@ -428,24 +433,25 @@ class CompletionHandler implements IDisposable {
     };
   }
 
-  private _connector: IDataConnector<CompletionHandler.IReply, void, CompletionHandler.IRequest>;
+  private _connector: IDataConnector<
+    CompletionHandler.IReply,
+    void,
+    CompletionHandler.IRequest
+  >;
   private _editor: CodeEditor.IEditor | null = null;
   private _enabled = false;
   private _pending = 0;
   private _isDisposed = false;
 }
 
-
 /**
  * A namespace for cell completion handler statics.
  */
-export
-namespace CompletionHandler {
+export namespace CompletionHandler {
   /**
    * The instantiation options for cell completion handlers.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The completion widget the handler will connect to.
      */
@@ -465,8 +471,7 @@ namespace CompletionHandler {
   /**
    * A reply to a completion request.
    */
-  export
-  interface IReply {
+  export interface IReply {
     /**
      * The starting index for the substring being replaced by completion.
      */
@@ -491,8 +496,7 @@ namespace CompletionHandler {
   /**
    * The details of a completion request.
    */
-  export
-  interface IRequest {
+  export interface IRequest {
     /**
      * The cursor offset position within the text being completed.
      */
@@ -507,14 +511,12 @@ namespace CompletionHandler {
   /**
    * A namespace for completion handler messages.
    */
-  export
-  namespace Msg {
+  export namespace Msg {
     /* tslint:disable */
     /**
      * A singleton `'invoke-request'` message.
      */
-    export
-    const InvokeRequest = new Message('invoke-request');
+    export const InvokeRequest = new Message('invoke-request');
     /* tslint:enable */
   }
 }

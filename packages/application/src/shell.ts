@@ -2,30 +2,35 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ArrayExt, each, find, IIterator, iter, toArray
+  ArrayExt,
+  each,
+  find,
+  IIterator,
+  iter,
+  toArray
 } from '@phosphor/algorithm';
 
-import {
-  PromiseDelegate
-} from '@phosphor/coreutils';
+import { PromiseDelegate } from '@phosphor/coreutils';
+
+import { Message, MessageLoop, IMessageHandler } from '@phosphor/messaging';
+
+import { ISignal, Signal } from '@phosphor/signaling';
 
 import {
-  Message, MessageLoop, IMessageHandler
-} from '@phosphor/messaging';
-
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
-
-import {
-  BoxLayout, BoxPanel, DockLayout, DockPanel, FocusTracker,
-  Panel, SplitPanel, StackedPanel, TabBar, Title, Widget
+  BoxLayout,
+  BoxPanel,
+  DockLayout,
+  DockPanel,
+  FocusTracker,
+  Panel,
+  SplitPanel,
+  StackedPanel,
+  TabBar,
+  Title,
+  Widget
 } from '@phosphor/widgets';
 
-import {
-  DocumentRegistry
-} from '@jupyterlab/docregistry';
-
+import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 /**
  * The class name added to AppShell instances.
@@ -59,12 +64,10 @@ const MODE_ATTRIBUTE = 'data-shell-mode';
 
 const ACTIVITY_CLASS = 'jp-Activity';
 
-
 /**
  * The application shell for JupyterLab.
  */
-export
-class ApplicationShell extends Widget {
+export class ApplicationShell extends Widget {
   /**
    * Construct a new application shell.
    */
@@ -73,17 +76,18 @@ class ApplicationShell extends Widget {
     this.addClass(APPLICATION_SHELL_CLASS);
     this.id = 'main';
 
-    let bottomPanel = this._bottomPanel = new BoxPanel();
-    let topPanel = this._topPanel = new Panel();
-    let hboxPanel = this._hboxPanel = new BoxPanel();
-    let dockPanel = this._dockPanel = new DockPanel();
+    let bottomPanel = (this._bottomPanel = new BoxPanel());
+    let topPanel = (this._topPanel = new Panel());
+    let hboxPanel = (this._hboxPanel = new BoxPanel());
+    let dockPanel = (this._dockPanel = new DockPanel());
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 
-    let hsplitPanel = this._hsplitPanel = new SplitPanel();
-    let leftHandler = this._leftHandler = new Private.SideBarHandler('left');
-    let rightHandler = this._rightHandler = new Private.SideBarHandler('right');
+    let hsplitPanel = (this._hsplitPanel = new SplitPanel());
+    let leftHandler = (this._leftHandler = new Private.SideBarHandler('left'));
+    let rightHandler = (this._rightHandler = new Private.SideBarHandler(
+      'right'
+    ));
     let rootLayout = new BoxLayout();
-
 
     bottomPanel.id = 'jp-bottom-panel';
     topPanel.id = 'jp-top-panel';
@@ -147,8 +151,14 @@ class ApplicationShell extends Widget {
     this._dockPanel.layoutModified.connect(this._onLayoutModified, this);
 
     // Catch current changed events on the side handlers.
-    this._leftHandler.sideBar.currentChanged.connect(this._onLayoutModified, this);
-    this._rightHandler.sideBar.currentChanged.connect(this._onLayoutModified, this);
+    this._leftHandler.sideBar.currentChanged.connect(
+      this._onLayoutModified,
+      this
+    );
+    this._rightHandler.sideBar.currentChanged.connect(
+      this._onLayoutModified,
+      this
+    );
   }
 
   /**
@@ -199,7 +209,6 @@ class ApplicationShell extends Widget {
   get rightCollapsed(): boolean {
     return !this._rightHandler.sideBar.currentTitle;
   }
-
 
   /**
    * Whether JupyterLab is in presentation mode with the `jp-mod-presentationMode` CSS class.
@@ -252,7 +261,6 @@ class ApplicationShell extends Widget {
 
     // Restore the original layout.
     if (this._cachedLayout) {
-
       // Remove any disposed widgets in the cached layout and restore.
       Private.normalizeAreaConfig(dock, this._cachedLayout.main);
       dock.restoreLayout(this._cachedLayout);
@@ -387,7 +395,10 @@ class ApplicationShell extends Widget {
    * #### Notes
    * Widgets must have a unique `id` property, which will be used as the DOM id.
    */
-  addToLeftArea(widget: Widget, options: ApplicationShell.ISideAreaOptions = {}): void {
+  addToLeftArea(
+    widget: Widget,
+    options: ApplicationShell.ISideAreaOptions = {}
+  ): void {
     if (!widget.id) {
       console.error('Widgets added to app shell must have unique id property.');
       return;
@@ -408,7 +419,10 @@ class ApplicationShell extends Widget {
    * In the options, `ref` defaults to `null`, `mode` defaults to `'tab-after'`,
    * and `activate` defaults to `true`.
    */
-  addToMainArea(widget: Widget, options: ApplicationShell.IMainAreaOptions = {}): void {
+  addToMainArea(
+    widget: Widget,
+    options: ApplicationShell.IMainAreaOptions = {}
+  ): void {
     if (!widget.id) {
       console.error('Widgets added to app shell must have unique id property.');
       return;
@@ -444,7 +458,10 @@ class ApplicationShell extends Widget {
    * #### Notes
    * Widgets must have a unique `id` property, which will be used as the DOM id.
    */
-  addToRightArea(widget: Widget, options: ApplicationShell.ISideAreaOptions = {}): void {
+  addToRightArea(
+    widget: Widget,
+    options: ApplicationShell.ISideAreaOptions = {}
+  ): void {
     if (!widget.id) {
       console.error('Widgets added to app shell must have unique id property.');
       return;
@@ -460,7 +477,10 @@ class ApplicationShell extends Widget {
    * #### Notes
    * Widgets must have a unique `id` property, which will be used as the DOM id.
    */
-  addToTopArea(widget: Widget, options: ApplicationShell.ISideAreaOptions = {}): void {
+  addToTopArea(
+    widget: Widget,
+    options: ApplicationShell.ISideAreaOptions = {}
+  ): void {
     if (!widget.id) {
       console.error('Widgets added to app shell must have unique id property.');
       return;
@@ -470,7 +490,6 @@ class ApplicationShell extends Widget {
     this._onLayoutModified();
   }
 
-
   /**
    * Add a widget to the bottom content area.
    *
@@ -478,7 +497,10 @@ class ApplicationShell extends Widget {
    * Widgets must have a unique `id` property, which will be used as the DOM id.
    */
 
-  addToBottomArea(widget: Widget, options: ApplicationShell.ISideAreaOptions = {}): void {
+  addToBottomArea(
+    widget: Widget,
+    options: ApplicationShell.ISideAreaOptions = {}
+  ): void {
     if (!widget.id) {
       console.error('Widgets added to app shell must have unique id property.');
       return;
@@ -491,7 +513,6 @@ class ApplicationShell extends Widget {
       this._bottomPanel.show();
     }
   }
-
 
   /**
    * Collapse the left area.
@@ -540,7 +561,9 @@ class ApplicationShell extends Widget {
     // Make a copy of all the widget in the dock panel (using `toArray()`)
     // before removing them because removing them while iterating through them
     // modifies the underlying data of the iterator.
-    each(toArray(this._dockPanel.widgets()), widget => { widget.close(); });
+    each(toArray(this._dockPanel.widgets()), widget => {
+      widget.close();
+    });
   }
 
   /**
@@ -548,18 +571,18 @@ class ApplicationShell extends Widget {
    */
   isEmpty(area: ApplicationShell.Area): boolean {
     switch (area) {
-    case 'left':
-      return this._leftHandler.stackedPanel.widgets.length === 0;
-    case 'main':
-      return this._dockPanel.isEmpty;
-    case 'top':
-      return this._topPanel.widgets.length === 0;
-    case 'bottom':
-      return this._bottomPanel.widgets.length === 0;
-    case 'right':
-      return this._rightHandler.stackedPanel.widgets.length === 0;
-    default:
-      return true;
+      case 'left':
+        return this._leftHandler.stackedPanel.widgets.length === 0;
+      case 'main':
+        return this._dockPanel.isEmpty;
+      case 'top':
+        return this._topPanel.widgets.length === 0;
+      case 'bottom':
+        return this._bottomPanel.widgets.length === 0;
+      case 'right':
+        return this._rightHandler.stackedPanel.widgets.length === 0;
+      default:
+        return true;
     }
   }
 
@@ -612,8 +635,9 @@ class ApplicationShell extends Widget {
     return {
       mainArea: {
         currentWidget: this._tracker.currentWidget,
-        dock: this.mode === 'single-document' ?
-          this._cachedLayout || this._dockPanel.saveLayout()
+        dock:
+          this.mode === 'single-document'
+            ? this._cachedLayout || this._dockPanel.saveLayout()
             : this._dockPanel.saveLayout(),
         mode: this._dockPanel.mode
       },
@@ -663,15 +687,13 @@ class ApplicationShell extends Widget {
     const index = bars.indexOf(current);
 
     if (direction === 'previous') {
-      return index > 0 ? bars[index - 1]
-        : index === 0 ? bars[len - 1]
-          : null;
+      return index > 0 ? bars[index - 1] : index === 0 ? bars[len - 1] : null;
     }
 
     // Otherwise, direction is 'next'.
-    return index < len - 1 ? bars[index + 1]
-      : index === len - 1 ? bars[0]
-        : null;
+    return index < len - 1
+      ? bars[index + 1]
+      : index === len - 1 ? bars[0] : null;
   }
 
   /*
@@ -691,13 +713,17 @@ class ApplicationShell extends Widget {
   /**
    * Handle a change to the dock area active widget.
    */
-  private _onActiveChanged(sender: any, args: FocusTracker.IChangedArgs<Widget>): void {
+  private _onActiveChanged(
+    sender: any,
+    args: FocusTracker.IChangedArgs<Widget>
+  ): void {
     if (args.newValue) {
       args.newValue.title.className += ` ${ACTIVE_CLASS}`;
     }
     if (args.oldValue) {
-      args.oldValue.title.className = (
-        args.oldValue.title.className.replace(ACTIVE_CLASS, '')
+      args.oldValue.title.className = args.oldValue.title.className.replace(
+        ACTIVE_CLASS,
+        ''
       );
     }
     this._activeChanged.emit(args);
@@ -706,13 +732,17 @@ class ApplicationShell extends Widget {
   /**
    * Handle a change to the dock area current widget.
    */
-  private _onCurrentChanged(sender: any, args: FocusTracker.IChangedArgs<Widget>): void {
+  private _onCurrentChanged(
+    sender: any,
+    args: FocusTracker.IChangedArgs<Widget>
+  ): void {
     if (args.newValue) {
       args.newValue.title.className += ` ${CURRENT_CLASS}`;
     }
     if (args.oldValue) {
-      args.oldValue.title.className = (
-        args.oldValue.title.className.replace(CURRENT_CLASS, '')
+      args.oldValue.title.className = args.oldValue.title.className.replace(
+        CURRENT_CLASS,
+        ''
       );
     }
     this._currentChanged.emit(args);
@@ -738,7 +768,10 @@ class ApplicationShell extends Widget {
   /**
    * A message hook for child add/remove messages on the main area dock panel.
    */
-  private _dockChildHook = (handler: IMessageHandler, msg: Message): boolean => {
+  private _dockChildHook = (
+    handler: IMessageHandler,
+    msg: Message
+  ): boolean => {
     switch (msg.type) {
       case 'child-added':
         (msg as Widget.ChildMessage).child.addClass(ACTIVITY_CLASS);
@@ -752,11 +785,15 @@ class ApplicationShell extends Widget {
         break;
     }
     return true;
-  }
+  };
 
-  private _activeChanged = new Signal<this, ApplicationShell.IChangedArgs>(this);
+  private _activeChanged = new Signal<this, ApplicationShell.IChangedArgs>(
+    this
+  );
   private _cachedLayout: DockLayout.ILayoutConfig | null = null;
-  private _currentChanged = new Signal<this, ApplicationShell.IChangedArgs>(this);
+  private _currentChanged = new Signal<this, ApplicationShell.IChangedArgs>(
+    this
+  );
   private _dockPanel: DockPanel;
   private _hboxPanel: BoxPanel;
   private _hsplitPanel: SplitPanel;
@@ -769,38 +806,35 @@ class ApplicationShell extends Widget {
   private _topPanel: Panel;
   private _bottomPanel: Panel;
   private _debouncer = 0;
-  private _addOptionsCache = new Map<Widget, ApplicationShell.IMainAreaOptions>();
+  private _addOptionsCache = new Map<
+    Widget,
+    ApplicationShell.IMainAreaOptions
+  >();
 }
-
 
 /**
  * The namespace for `ApplicationShell` class statics.
  */
-export
-namespace ApplicationShell {
+export namespace ApplicationShell {
   /**
    * The areas of the application shell where widgets can reside.
    */
-  export
-  type Area = 'main' | 'top' | 'left' | 'right' | 'bottom';
+  export type Area = 'main' | 'top' | 'left' | 'right' | 'bottom';
 
   /**
    * The restorable description of an area within the main dock panel.
    */
-  export
-  type AreaConfig = DockLayout.AreaConfig;
+  export type AreaConfig = DockLayout.AreaConfig;
 
   /**
    * An arguments object for the changed signals.
    */
-  export
-  type IChangedArgs = FocusTracker.IChangedArgs<Widget>;
+  export type IChangedArgs = FocusTracker.IChangedArgs<Widget>;
 
   /**
    * A description of the application's user interface layout.
    */
-  export
-  interface ILayout {
+  export interface ILayout {
     /**
      * Indicates whether fetched session restore data was actually retrieved
      * from the state database or whether it is a fresh blank slate.
@@ -831,8 +865,7 @@ namespace ApplicationShell {
   /**
    * The restorable description of the main application area.
    */
-  export
-  interface IMainArea {
+  export interface IMainArea {
     /**
      * The current widget that has application focus.
      */
@@ -852,8 +885,7 @@ namespace ApplicationShell {
   /**
    * The restorable description of a sidebar in the user interface.
    */
-  export
-  interface ISideArea {
+  export interface ISideArea {
     /**
      * A flag denoting whether the sidebar has been collapsed.
      */
@@ -873,8 +905,7 @@ namespace ApplicationShell {
   /**
    * The options for adding a widget to a side area of the shell.
    */
-  export
-  interface ISideAreaOptions {
+  export interface ISideAreaOptions {
     /**
      * The rank order of the widget among its siblings.
      */
@@ -884,17 +915,14 @@ namespace ApplicationShell {
   /**
    * The options for adding a widget to a side area of the shell.
    */
-  export
-  interface IMainAreaOptions extends DocumentRegistry.IOpenOptions {}
+  export interface IMainAreaOptions extends DocumentRegistry.IOpenOptions {}
 }
-
 
 namespace Private {
   /**
    * An object which holds a widget and its sort rank.
    */
-  export
-  interface IRankItem {
+  export interface IRankItem {
     /**
      * The widget for the item.
      */
@@ -909,32 +937,35 @@ namespace Private {
   /**
    * A less-than comparison function for side bar rank items.
    */
-  export
-  function itemCmp(first: IRankItem, second: IRankItem): number {
+  export function itemCmp(first: IRankItem, second: IRankItem): number {
     return first.rank - second.rank;
   }
 
   /**
    * Removes widgets that have been disposed from an area config, mutates area.
    */
-  export
-  function normalizeAreaConfig(parent: DockPanel, area?: DockLayout.AreaConfig | null): void {
+  export function normalizeAreaConfig(
+    parent: DockPanel,
+    area?: DockLayout.AreaConfig | null
+  ): void {
     if (!area) {
       return;
     }
     if (area.type === 'tab-area') {
-      area.widgets = area.widgets
-        .filter(widget => !widget.isDisposed && widget.parent === parent) as Widget[];
+      area.widgets = area.widgets.filter(
+        widget => !widget.isDisposed && widget.parent === parent
+      ) as Widget[];
       return;
     }
-    area.children.forEach(child => { normalizeAreaConfig(parent, child); });
+    area.children.forEach(child => {
+      normalizeAreaConfig(parent, child);
+    });
   }
 
   /**
    * A class which manages a side bar and related stacked panel.
    */
-  export
-  class SideBarHandler {
+  export class SideBarHandler {
     /**
      * Construct a new side bar handler.
      */
@@ -950,7 +981,10 @@ namespace Private {
       this._stackedPanel.hide();
       this._lastCurrent = null;
       this._sideBar.currentChanged.connect(this._onCurrentChanged, this);
-      this._sideBar.tabActivateRequested.connect(this._onTabActivateRequested, this);
+      this._sideBar.tabActivateRequested.connect(
+        this._onTabActivateRequested,
+        this
+      );
       this._stackedPanel.widgetRemoved.connect(this._onWidgetRemoved, this);
     }
 
@@ -1088,9 +1122,16 @@ namespace Private {
     /**
      * Handle the `currentChanged` signal from the sidebar.
      */
-    private _onCurrentChanged(sender: TabBar<Widget>, args: TabBar.ICurrentChangedArgs<Widget>): void {
-      const oldWidget = args.previousTitle ? this._findWidgetByTitle(args.previousTitle) : null;
-      const newWidget = args.currentTitle ? this._findWidgetByTitle(args.currentTitle) : null;
+    private _onCurrentChanged(
+      sender: TabBar<Widget>,
+      args: TabBar.ICurrentChangedArgs<Widget>
+    ): void {
+      const oldWidget = args.previousTitle
+        ? this._findWidgetByTitle(args.previousTitle)
+        : null;
+      const newWidget = args.currentTitle
+        ? this._findWidgetByTitle(args.currentTitle)
+        : null;
       if (oldWidget) {
         oldWidget.hide();
       }
@@ -1110,7 +1151,10 @@ namespace Private {
     /**
      * Handle a `tabActivateRequest` signal from the sidebar.
      */
-    private _onTabActivateRequested(sender: TabBar<Widget>, args: TabBar.ITabActivateRequestedArgs<Widget>): void {
+    private _onTabActivateRequested(
+      sender: TabBar<Widget>,
+      args: TabBar.ITabActivateRequestedArgs<Widget>
+    ): void {
       args.title.owner.activate();
     }
 
@@ -1132,6 +1176,4 @@ namespace Private {
     private _stackedPanel: StackedPanel;
     private _lastCurrent: Widget | null;
   }
-
 }
-

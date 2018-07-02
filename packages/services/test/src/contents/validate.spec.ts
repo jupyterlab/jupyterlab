@@ -4,18 +4,14 @@
 import expect = require('expect.js');
 
 import {
-  validateContentsModel, validateCheckpointModel
+  validateContentsModel,
+  validateCheckpointModel
 } from '../../../lib/contents/validate';
 
-import {
-  DEFAULT_FILE
-} from '../utils';
-
+import { DEFAULT_FILE } from '../utils';
 
 describe('validate', () => {
-
   describe('validateContentsModel()', () => {
-
     it('should pass with valid data', () => {
       validateContentsModel(DEFAULT_FILE);
     });
@@ -31,13 +27,11 @@ describe('validate', () => {
       model.type = 1;
       expect(() => validateContentsModel(model)).to.throwError();
     });
-
   });
 
   describe('validateCheckpointModel()', () => {
-
     it('should pass with valid data', () => {
-      validateCheckpointModel({ id: 'foo', last_modified: 'yesterday '});
+      validateCheckpointModel({ id: 'foo', last_modified: 'yesterday ' });
     });
 
     it('should fail on missing data', () => {
@@ -46,10 +40,8 @@ describe('validate', () => {
     });
 
     it('should fail on incorrect data', () => {
-      let model = { id: 1, last_modified: '1'};
+      let model = { id: 1, last_modified: '1' };
       expect(() => validateCheckpointModel(model as any)).to.throwError();
     });
-
   });
-
 });

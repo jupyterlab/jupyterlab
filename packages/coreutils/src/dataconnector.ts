@@ -1,10 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IDataConnector
-} from './interfaces';
-
+import { IDataConnector } from './interfaces';
 
 /**
  * An abstract class that adheres to the data connector interface.
@@ -15,8 +12,8 @@ import {
  * default implementation that returns a promise that will always reject. This
  * class is a convenience superclass for connectors that only need to `fetch`.
  */
-export
-abstract class DataConnector<T, U = T, V = string> implements IDataConnector<T, U, V> {
+export abstract class DataConnector<T, U = T, V = string>
+  implements IDataConnector<T, U, V> {
   /**
    * Retrieve an item from the data connector.
    *
