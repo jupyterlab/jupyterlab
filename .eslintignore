@@ -4,3 +4,4 @@ node_modules
 **/build
 jupyterlab/staging/yarn.js
 jupyterlab/static
+jupyterlab/chrome-test.js
