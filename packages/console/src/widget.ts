@@ -459,9 +459,6 @@ class CodeConsole extends Widget {
     editor.addKeydownHandler(this._onEditorKeydown);
 
     this._history.editor = editor;
-    if (this.isAttached) {
-      this.activate();
-    }
     this._promptCellCreated.emit(promptCell);
   }
 
