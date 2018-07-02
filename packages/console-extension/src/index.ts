@@ -236,12 +236,11 @@ function activateConsole(app: JupyterLab, mainMenu: IMainMenu, palette: ICommand
       tracker.add(panel);
       shell.addToMainArea(
         panel, {
-          ref: options.ref || null, mode: options.insertMode || 'tab-after'
+          ref: options.ref,
+          mode: options.insertMode,
+          activate: options.activate
         }
       );
-      if (options.activate !== false) {
-        shell.activateById(panel.id);
-      }
       return panel;
     });
   }
