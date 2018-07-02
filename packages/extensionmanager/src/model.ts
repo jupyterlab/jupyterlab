@@ -1,38 +1,28 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  VDomModel
-} from '@jupyterlab/apputils';
+import { VDomModel } from '@jupyterlab/apputils';
 
-import {
-  ServerConnection, ServiceManager, Kernel
-} from '@jupyterlab/services';
+import { ServerConnection, ServiceManager, Kernel } from '@jupyterlab/services';
 
 import * as semver from 'semver';
 
-import {
-  doBuild
-} from './build-helper';
+import { doBuild } from './build-helper';
 
 import {
-  presentCompanions, IKernelInstallInfo, KernelCompanion
+  presentCompanions,
+  IKernelInstallInfo,
+  KernelCompanion
 } from './companions';
 
-import {
-  reportInstallError
-} from './dialog';
+import { reportInstallError } from './dialog';
 
-import {
-  Searcher, ISearchResult
-} from './query';
-
+import { Searcher, ISearchResult } from './query';
 
 /**
  * Information about an extension.
  */
-export
-interface IEntry {
+export interface IEntry {
   /**
    * The name of the extension.
    */
@@ -69,12 +59,10 @@ interface IEntry {
   installed_version: string;
 }
 
-
 /**
  * Wire format for installed extensions.
  */
-export
-interface IInstalledEntry {
+export interface IInstalledEntry {
   /**
    * The name of the extension.
    */
@@ -111,12 +99,10 @@ interface IInstalledEntry {
   status: 'ok' | 'warning' | 'error' | 'deprecated' | null;
 }
 
-
 /**
  * An object representing a server reply to performing an action.
  */
-export
-interface IActionReply {
+export interface IActionReply {
   /**
    * The status category of the reply.
    */
@@ -128,7 +114,6 @@ interface IActionReply {
   message?: string;
 }
 
-
 /**
  * The server API path for querying/modifying installed extensions.
  */
@@ -137,15 +122,12 @@ const EXTENSION_API_PATH = 'lab/api/extensions';
 /**
  * Extension actions that the server API accepts
  */
-export
-type Action = 'install' | 'uninstall' | 'enable' | 'disable';
-
+export type Action = 'install' | 'uninstall' | 'enable' | 'disable';
 
 /**
  * Model for an extension list.
  */
-export
-class ListModel extends VDomModel {
+export class ListModel extends VDomModel {
   constructor(serviceManager: ServiceManager) {
     super();
     this._installed = [];
@@ -185,8 +167,10 @@ class ListModel extends VDomModel {
    *
    * @param res Promise to an npm query result.
    */
-  protected async translateSearchResult(res: Promise<ISearchResult>): Promise<{[key: string]: IEntry}> {
-    let entries: {[key: string]: IEntry} = {};
+  protected async translateSearchResult(
+    res: Promise<ISearchResult>
+  ): Promise<{ [key: string]: IEntry }> {
+    let entries: { [key: string]: IEntry } = {};
     for (let obj of (await res).objects) {
       let pkg = obj.package;
       entries[pkg.name] = {
@@ -196,7 +180,7 @@ class ListModel extends VDomModel {
         enabled: false,
         status: null,
         latest_version: pkg.version,
-        installed_version: '',
+        installed_version: ''
       };
     }
     return entries;
@@ -207,21 +191,25 @@ class ListModel extends VDomModel {
    *
    * @param res Promise to the server reply data.
    */
-  protected async translateInstalled(res: Promise<IInstalledEntry[]>): Promise<{[key: string]: IEntry}> {
+  protected async translateInstalled(
+    res: Promise<IInstalledEntry[]>
+  ): Promise<{ [key: string]: IEntry }> {
     const promises = [];
-    const entries: {[key: string]: IEntry} = {};
+    const entries: { [key: string]: IEntry } = {};
     for (let pkg of await res) {
-      promises.push(res.then((info) => {
-        entries[pkg.name] = {
-          name: pkg.name,
-          description: pkg.description,
-          installed: pkg.installed !== false,
-          enabled: pkg.enabled,
-          status: pkg.status,
-          latest_version: pkg.latest_version,
-          installed_version: pkg.installed_version,
-        };
-      }));
+      promises.push(
+        res.then(info => {
+          entries[pkg.name] = {
+            name: pkg.name,
+            description: pkg.description,
+            installed: pkg.installed !== false,
+            enabled: pkg.enabled,
+            status: pkg.status,
+            latest_version: pkg.latest_version,
+            installed_version: pkg.installed_version
+          };
+        })
+      );
     }
     return Promise.all(promises).then(() => {
       return entries;
@@ -283,21 +271,32 @@ class ListModel extends VDomModel {
   /**
    * Make a request to the server for info about its installed extensions.
    */
-  protected fetchInstalled(refreshInstalled=false): Promise<IInstalledEntry[]> {
-    const url = new URL(EXTENSION_API_PATH, this.serverConnectionSettings.baseUrl);
+  protected fetchInstalled(
+    refreshInstalled = false
+  ): Promise<IInstalledEntry[]> {
+    const url = new URL(
+      EXTENSION_API_PATH,
+      this.serverConnectionSettings.baseUrl
+    );
     if (refreshInstalled) {
       url.searchParams.append('refresh', '1');
     }
     const request = ServerConnection.makeRequest(
-      url.toString(), {}, this.serverConnectionSettings).then((response) => {
-        handleError(response);
-        return response.json() as Promise<IInstalledEntry[]>;
-      });
-    request.then(() => {
-      this.serverConnectionError = null;
-    }, (reason) => {
-      this.serverConnectionError = reason.toString();
+      url.toString(),
+      {},
+      this.serverConnectionSettings
+    ).then(response => {
+      handleError(response);
+      return response.json() as Promise<IInstalledEntry[]>;
     });
+    request.then(
+      () => {
+        this.serverConnectionError = null;
+      },
+      reason => {
+        this.serverConnectionError = reason.toString();
+      }
+    );
     return request;
   }
 
@@ -305,13 +304,15 @@ class ListModel extends VDomModel {
    * Initialize the model.
    */
   initialize() {
-    this.update().then(() => {
-      this.initialized = true;
-      this.stateChanged.emit(undefined);
-    }).catch(() => {
-      this.initialized = true;
-      this.stateChanged.emit(undefined);
-    });
+    this.update()
+      .then(() => {
+        this.initialized = true;
+        this.stateChanged.emit(undefined);
+      })
+      .catch(() => {
+        this.initialized = true;
+        this.stateChanged.emit(undefined);
+      });
   }
 
   /**
@@ -321,10 +322,16 @@ class ListModel extends VDomModel {
    *
    * Emits the `stateChanged` signal on succesfull completion.
    */
-  protected async update(refreshInstalled=false) {
-    let search = this.searcher.searchExtensions(this.query, this.page, this.pagination);
+  protected async update(refreshInstalled = false) {
+    let search = this.searcher.searchExtensions(
+      this.query,
+      this.page,
+      this.pagination
+    );
     let searchMapPromise = this.translateSearchResult(search);
-    let installedMap = await this.translateInstalled(this.fetchInstalled(refreshInstalled));
+    let installedMap = await this.translateInstalled(
+      this.fetchInstalled(refreshInstalled)
+    );
     let searchMap;
     try {
       searchMap = await searchMapPromise;
@@ -362,25 +369,38 @@ class ListModel extends VDomModel {
    * @param action A valid action to perform.
    * @param entry The extension to perform the action on.
    */
-  protected _performAction(action: string, entry: IEntry): Promise<IActionReply> {
-    const url = new URL(EXTENSION_API_PATH, this.serverConnectionSettings.baseUrl);
+  protected _performAction(
+    action: string,
+    entry: IEntry
+  ): Promise<IActionReply> {
+    const url = new URL(
+      EXTENSION_API_PATH,
+      this.serverConnectionSettings.baseUrl
+    );
     let request: RequestInit = {
       method: 'POST',
       body: JSON.stringify({
         cmd: action,
-        extension_name: entry.name,
-      }),
+        extension_name: entry.name
+      })
     };
-    const completed = ServerConnection.makeRequest(url.toString(), request, this.serverConnectionSettings).then((response) => {
+    const completed = ServerConnection.makeRequest(
+      url.toString(),
+      request,
+      this.serverConnectionSettings
+    ).then(response => {
       handleError(response);
       this.triggerBuildCheck();
       return response.json() as Promise<IActionReply>;
     });
-    completed.then(() => {
-      this.serverConnectionError = null;
-    }, (reason) => {
-      this.serverConnectionError = reason.toString();
-    });
+    completed.then(
+      () => {
+        this.serverConnectionError = null;
+      },
+      reason => {
+        this.serverConnectionError = reason.toString();
+      }
+    );
     this._addPendingAction(completed);
     return completed;
   }
@@ -421,16 +441,16 @@ class ListModel extends VDomModel {
   install(entry: IEntry) {
     if (entry.installed) {
       // Updating
-      return this._performAction('install', entry).then((data) => {
+      return this._performAction('install', entry).then(data => {
         if (data.status !== 'ok') {
           reportInstallError(entry.name, data.message);
         }
         this.update();
       });
     }
-    this.checkCompanionPackages(entry).then((shouldInstall) => {
+    this.checkCompanionPackages(entry).then(shouldInstall => {
       if (shouldInstall) {
-        return this._performAction('install', entry).then((data) => {
+        return this._performAction('install', entry).then(data => {
           if (data.status !== 'ok') {
             reportInstallError(entry.name, data.message);
           }
@@ -449,7 +469,7 @@ class ListModel extends VDomModel {
     if (!entry.installed) {
       throw new Error(`Not installed, cannot uninstall: ${entry.name}`);
     }
-    this._performAction('uninstall', entry).then((data) => {
+    this._performAction('uninstall', entry).then(data => {
       this.update();
     });
   }
@@ -463,7 +483,7 @@ class ListModel extends VDomModel {
     if (entry.enabled) {
       throw new Error(`Already enabled: ${entry.name}`);
     }
-    this._performAction('enable', entry).then((data) => {
+    this._performAction('enable', entry).then(data => {
       this.update();
     });
   }
@@ -477,7 +497,7 @@ class ListModel extends VDomModel {
     if (!entry.enabled) {
       throw new Error(`Already disabled: ${entry.name}`);
     }
-    this._performAction('disable', entry).then((data) => {
+    this._performAction('disable', entry).then(data => {
       this.update();
     });
   }
@@ -488,24 +508,26 @@ class ListModel extends VDomModel {
    * @param entry An entry indicating which extension to check.
    */
   checkCompanionPackages(entry: IEntry): Promise<boolean> {
-    return this.searcher.fetchPackageData(entry.name, entry.latest_version).then((data) => {
-      if (!data || !data.jupyterlab || !data.jupyterlab.discovery) {
-        return true;
-      }
-      let discovery = data.jupyterlab.discovery;
-      let kernelCompanions: KernelCompanion[] = [];
-      if (discovery.kernel) {
-        // match specs
-        for (let kernelInfo of discovery.kernel) {
-          let matches = matchSpecs(kernelInfo, this.serviceManager.specs);
-          kernelCompanions.push({kernelInfo, kernels: matches});
+    return this.searcher
+      .fetchPackageData(entry.name, entry.latest_version)
+      .then(data => {
+        if (!data || !data.jupyterlab || !data.jupyterlab.discovery) {
+          return true;
         }
-      }
-      if (kernelCompanions.length < 1 && !discovery.server) {
-        return true;
-      }
-      return presentCompanions(kernelCompanions, discovery.server);
-    });
+        let discovery = data.jupyterlab.discovery;
+        let kernelCompanions: KernelCompanion[] = [];
+        if (discovery.kernel) {
+          // match specs
+          for (let kernelInfo of discovery.kernel) {
+            let matches = matchSpecs(kernelInfo, this.serviceManager.specs);
+            kernelCompanions.push({ kernelInfo, kernels: matches });
+          }
+        }
+        if (kernelCompanions.length < 1 && !discovery.server) {
+          return true;
+        }
+        return presentCompanions(kernelCompanions, discovery.server);
+      });
   }
 
   /**
@@ -607,14 +629,16 @@ class ListModel extends VDomModel {
   private _pendingActions: Promise<any>[] = [];
 }
 
-
 /**
  * Match kernel specs against kernel spec regexps
  *
  * @param kernelInfo The info containing the regexp patterns
  * @param specs The available kernel specs.
  */
-function matchSpecs(kernelInfo: IKernelInstallInfo, specs: Kernel.ISpecModels | null): Kernel.ISpecModel[] {
+function matchSpecs(
+  kernelInfo: IKernelInstallInfo,
+  specs: Kernel.ISpecModels | null
+): Kernel.ISpecModel[] {
   if (!specs) {
     return [];
   }
@@ -643,7 +667,6 @@ function matchSpecs(kernelInfo: IKernelInstallInfo, specs: Kernel.ISpecModels | 
   }
   return matches;
 }
-
 
 /**
  * Convert a response to an exception on error.

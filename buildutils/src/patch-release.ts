@@ -7,7 +7,6 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as utils from './utils';
 
-
 // Make sure we have required command line arguments.
 if (process.argv.length < 3) {
   let msg = '** Must supply a target package';
@@ -30,7 +29,7 @@ console.log('Patching', target, '...');
 // Use npm here so this file can be used outside of JupyterLab.
 utils.run('npm run build:packages');
 utils.run('npm version patch', { cwd: packagePath });
-utils.run('npm publish', { cwd: packagePath});
+utils.run('npm publish', { cwd: packagePath });
 
 // Update the static folder.
 utils.run('npm run build:update');

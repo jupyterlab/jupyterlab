@@ -3,15 +3,10 @@
 
 import expect = require('expect.js');
 
-import {
-  removeMath, replaceMath
-} from '@jupyterlab/rendermime';
-
+import { removeMath, replaceMath } from '@jupyterlab/rendermime';
 
 describe('jupyter-ui', () => {
-
   describe('removeMath()', () => {
-
     it('should split the text into text and math', () => {
       let input = 'hello, $ /alpha $, there';
       let { text, math } = removeMath(input);
@@ -30,28 +25,28 @@ describe('jupyter-ui', () => {
       let input = ' @@0@@ hello, $ /alpha $, there';
       let { text, math } = removeMath(input);
       expect(text).to.be(' @@0@@ hello, @@1@@, there');
-      expect(math).to.eql([ '@@0@@', '$ /alpha $' ]);
+      expect(math).to.eql(['@@0@@', '$ /alpha $']);
     });
 
     it('should handle unbalanced braces', () => {
       let input = 'hello, $ /alpha { $, there';
       let { text, math } = removeMath(input);
       expect(text).to.be('hello, @@0@@, there');
-      expect(math).to.eql(['$ /alpha { $' ]);
+      expect(math).to.eql(['$ /alpha { $']);
     });
 
     it('should handle balanced braces', () => {
       let input = 'hello, $ /alpha { } $, there';
       let { text, math } = removeMath(input);
       expect(text).to.be('hello, @@0@@, there');
-      expect(math).to.eql(['$ /alpha { } $' ]);
+      expect(math).to.eql(['$ /alpha { } $']);
     });
 
     it('should handle math blocks', () => {
       let input = 'hello, $$\nfoo\n$$, there';
       let { text, math } = removeMath(input);
       expect(text).to.be('hello, @@0@@, there');
-      expect(math).to.eql(['$$\nfoo\n$$' ]);
+      expect(math).to.eql(['$$\nfoo\n$$']);
     });
 
     it('should handle begin statements', () => {
@@ -74,7 +69,7 @@ describe('jupyter-ui', () => {
       expect(math).to.eql([]);
     });
 
-    it('should handle `\\\\\(` delimiters for math', () => {
+    it('should handle `\\\\(` delimiters for math', () => {
       let input = `hello, \\\\\(
           /alpha
       \\\\\), there`;
@@ -83,7 +78,7 @@ describe('jupyter-ui', () => {
       expect(math).to.eql(['\\\\(\n          /alpha\n      \\\\)']);
     });
 
-    it('should handle `\\\\\[` delimiters for math', () => {
+    it('should handle `\\\\[` delimiters for math', () => {
       let input = `hello, \\\\\[
           /alpha
       \\\\\], there`;
@@ -91,18 +86,13 @@ describe('jupyter-ui', () => {
       expect(text).to.be('hello, @@0@@, there');
       expect(math).to.eql(['\\\\[\n          /alpha\n      \\\\]']);
     });
-
   });
 
   describe('replaceMath()', () => {
-
     it('should recombine text split with removeMath', () => {
       let input = 'hello, $ /alpha $, there';
       let { text, math } = removeMath(input);
       expect(replaceMath(text, math)).to.be(input);
     });
-
   });
-
 });
-

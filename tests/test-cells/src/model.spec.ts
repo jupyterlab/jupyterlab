@@ -3,38 +3,30 @@
 
 import expect = require('expect.js');
 
-import {
-  toArray
-} from '@phosphor/algorithm';
+import { toArray } from '@phosphor/algorithm';
+
+import { IChangedArgs, nbformat } from '@jupyterlab/coreutils';
 
 import {
-  IChangedArgs, nbformat
-} from '@jupyterlab/coreutils';
-
-import {
-  CellModel, RawCellModel, MarkdownCellModel, CodeCellModel
+  CellModel,
+  RawCellModel,
+  MarkdownCellModel,
+  CodeCellModel
 } from '@jupyterlab/cells';
 
-import {
-  OutputAreaModel
-} from '@jupyterlab/outputarea';
+import { OutputAreaModel } from '@jupyterlab/outputarea';
 
-import {
-  DEFAULT_OUTPUTS
-} from '../../utils';
-
+import { DEFAULT_OUTPUTS } from '../../utils';
 
 class TestModel extends CellModel {
-  get type(): 'raw' { return 'raw'; }
+  get type(): 'raw' {
+    return 'raw';
+  }
 }
 
-
 describe('cells/model', () => {
-
   describe('CellModel', () => {
-
     describe('#constructor()', () => {
-
       it('should create a cell model', () => {
         let model = new CellModel({});
         expect(model).to.be.a(CellModel);
@@ -61,24 +53,22 @@ describe('cells/model', () => {
         expect(model).to.be.a(CellModel);
         expect(model.value.text).to.equal((cell.source as string[]).join(''));
       });
-
     });
 
     describe('#contentChanged', () => {
-
       it('should signal when model content has changed', () => {
         let model = new CellModel({});
         let called = false;
-        model.contentChanged.connect(() => { called = true; });
+        model.contentChanged.connect(() => {
+          called = true;
+        });
         expect(called).to.be(false);
         model.value.text = 'foo';
         expect(called).to.be(true);
       });
-
     });
 
     describe('#stateChanged', () => {
-
       it('should signal when model state has changed', () => {
         let model = new CodeCellModel({});
         let called = false;
@@ -94,18 +84,18 @@ describe('cells/model', () => {
       it('should not signal when model state has not changed', () => {
         let model = new CodeCellModel({});
         let called = 0;
-        model.stateChanged.connect(() => { called++; });
+        model.stateChanged.connect(() => {
+          called++;
+        });
         expect(called).to.be(0);
         model.executionCount = 1;
         expect(called).to.be(1);
         model.executionCount = 1;
         expect(called).to.be(1);
       });
-
     });
 
     describe('#trusted', () => {
-
       it('should be the trusted state of the cell', () => {
         let model = new CodeCellModel({});
         expect(model.trusted).to.be(false);
@@ -122,11 +112,9 @@ describe('cells/model', () => {
         model.trusted = true;
         expect(model.outputs.get(0).trusted).to.be(true);
       });
-
     });
 
     describe('#metadataChanged', () => {
-
       it('should signal when model metadata has changed', () => {
         let model = new TestModel({});
         let listener = (sender: any, args: any) => {
@@ -142,18 +130,18 @@ describe('cells/model', () => {
       it('should not signal when model metadata has not changed', () => {
         let model = new TestModel({});
         let called = 0;
-        model.metadata.changed.connect(() => { called++; });
+        model.metadata.changed.connect(() => {
+          called++;
+        });
         expect(called).to.be(0);
         model.metadata.set('foo', 'bar');
         expect(called).to.be(1);
         model.metadata.set('foo', 'bar');
         expect(called).to.be(1);
       });
-
     });
 
     describe('#source', () => {
-
       it('should default to an empty string', () => {
         let model = new CellModel({});
         expect(model.value.text).to.be.empty();
@@ -165,11 +153,9 @@ describe('cells/model', () => {
         model.value.text = 'foo';
         expect(model.value.text).to.be('foo');
       });
-
     });
 
     describe('#isDisposed', () => {
-
       it('should be false by default', () => {
         let model = new CellModel({});
         expect(model.isDisposed).to.be(false);
@@ -180,11 +166,9 @@ describe('cells/model', () => {
         model.dispose();
         expect(model.isDisposed).to.be(true);
       });
-
     });
 
     describe('#dispose()', () => {
-
       it('should dispose of the resources held by the model', () => {
         let model = new TestModel({});
         model.dispose();
@@ -197,11 +181,9 @@ describe('cells/model', () => {
         model.dispose();
         expect(model.isDisposed).to.be(true);
       });
-
     });
 
     describe('#toJSON()', () => {
-
       it('should return a base cell encapsulation of the model value', () => {
         let cell: nbformat.IRawCell = {
           cell_type: 'raw',
@@ -224,11 +206,9 @@ describe('cells/model', () => {
         expect(model.toJSON()).to.not.equal(cell);
         expect(model.toJSON()).to.eql(cell);
       });
-
     });
 
     describe('#metadata', () => {
-
       it('should handle a metadata for the cell', () => {
         let model = new CellModel({});
         expect(model.metadata.get('foo')).to.be(void 0);
@@ -246,45 +226,35 @@ describe('cells/model', () => {
       it('should trigger changed signal', () => {
         let model = new CellModel({});
         let called = false;
-        model.metadata.changed.connect(() => { called = true; });
+        model.metadata.changed.connect(() => {
+          called = true;
+        });
         model.metadata.set('foo', 1);
         expect(called).to.be(true);
       });
-
     });
-
   });
 
   describe('RawCellModel', () => {
-
     describe('#type', () => {
-
       it('should be set with type "raw"', () => {
         let model = new RawCellModel({});
         expect(model.type).to.be('raw');
       });
-
     });
-
   });
 
   describe('MarkdownCellModel', () => {
-
     describe('#type', () => {
-
       it('should be set with type "markdown"', () => {
         let model = new MarkdownCellModel({});
         expect(model.type).to.be('markdown');
       });
-
     });
-
   });
 
   describe('CodeCellModel', () => {
-
     describe('#constructor()', () => {
-
       it('should create a code cell model', () => {
         let model = new CodeCellModel({});
         expect(model).to.be.a(CodeCellModel);
@@ -317,25 +287,23 @@ describe('cells/model', () => {
         } as nbformat.IDisplayData;
         let model = new CodeCellModel({});
         let called = false;
-        model.contentChanged.connect(() => { called = true; });
+        model.contentChanged.connect(() => {
+          called = true;
+        });
         expect(called).to.be(false);
         model.outputs.add(data);
         expect(called).to.be(true);
       });
-
     });
 
     describe('#type', () => {
-
       it('should be set with type "code"', () => {
         let model = new CodeCellModel({});
         expect(model.type).to.be('code');
       });
-
     });
 
     describe('#executionCount', () => {
-
       it('should show the execution count of the cell', () => {
         let cell: nbformat.ICodeCell = {
           cell_type: 'code',
@@ -358,7 +326,9 @@ describe('cells/model', () => {
       it('should emit a state change signal when set', () => {
         let model = new CodeCellModel({});
         let called = false;
-        model.stateChanged.connect(() => { called = true; });
+        model.stateChanged.connect(() => {
+          called = true;
+        });
         expect(model.executionCount).to.be(null);
         expect(called).to.be(false);
         model.executionCount = 1;
@@ -369,7 +339,9 @@ describe('cells/model', () => {
       it('should not signal when state has not changed', () => {
         let model = new CodeCellModel({});
         let called = 0;
-        model.stateChanged.connect(() => { called++; });
+        model.stateChanged.connect(() => {
+          called++;
+        });
         expect(model.executionCount).to.be(null);
         expect(called).to.be(0);
         model.executionCount = 1;
@@ -377,20 +349,16 @@ describe('cells/model', () => {
         model.executionCount = 1;
         expect(called).to.be(1);
       });
-
     });
 
     describe('#outputs', () => {
-
       it('should be an output area model', () => {
         let model = new CodeCellModel({});
         expect(model.outputs).to.be.an(OutputAreaModel);
       });
-
     });
 
     describe('#dispose()', () => {
-
       it('should dispose of the resources held by the model', () => {
         let model = new CodeCellModel({});
         expect(model.outputs).to.be.an(OutputAreaModel);
@@ -405,11 +373,9 @@ describe('cells/model', () => {
         model.dispose();
         expect(model.isDisposed).to.be(true);
       });
-
     });
 
     describe('#toJSON()', () => {
-
       it('should return a code cell encapsulation of the model value', () => {
         let cell: nbformat.ICodeCell = {
           cell_type: 'code',
@@ -419,7 +385,7 @@ describe('cells/model', () => {
               output_type: 'display_data',
               data: {
                 'text/plain': 'foo',
-                'application/json': { 'bar': 1 }
+                'application/json': { bar: 1 }
               },
               metadata: {}
             } as nbformat.IDisplayData
@@ -434,39 +400,32 @@ describe('cells/model', () => {
         let output = serialized.outputs[0] as any;
         expect(output.data['application/json']['bar']).to.be(1);
       });
-
     });
 
     describe('.ContentFactory', () => {
-
       describe('#constructor()', () => {
-
         it('should create a new output area factory', () => {
           let factory = new CodeCellModel.ContentFactory();
           expect(factory).to.be.a(CodeCellModel.ContentFactory);
         });
-
       });
 
       describe('#createOutputArea()', () => {
-
         it('should create an output area model', () => {
           let factory = new CodeCellModel.ContentFactory();
-          expect(factory.createOutputArea({ trusted: true })).to.be.an(OutputAreaModel);
+          expect(factory.createOutputArea({ trusted: true })).to.be.an(
+            OutputAreaModel
+          );
         });
-
       });
-
     });
 
     describe('.defaultContentFactory', () => {
-
       it('should be an ContentFactory', () => {
-        expect(CodeCellModel.defaultContentFactory).to.be.a(CodeCellModel.ContentFactory);
+        expect(CodeCellModel.defaultContentFactory).to.be.a(
+          CodeCellModel.ContentFactory
+        );
       });
-
     });
-
   });
-
 });

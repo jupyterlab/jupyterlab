@@ -1,52 +1,38 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  JupyterLab, JupyterLabPlugin
-} from '@jupyterlab/application';
+import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 
 import {
-  CompleterModel, Completer, CompletionHandler, ICompletionManager,
+  CompleterModel,
+  Completer,
+  CompletionHandler,
+  ICompletionManager,
   KernelConnector
 } from '@jupyterlab/completer';
 
-import {
-  IConsoleTracker
-} from '@jupyterlab/console';
+import { IConsoleTracker } from '@jupyterlab/console';
 
-import {
-  INotebookTracker
-} from '@jupyterlab/notebook';
+import { INotebookTracker } from '@jupyterlab/notebook';
 
-import {
-  Widget
-} from '@phosphor/widgets';
-
-
+import { Widget } from '@phosphor/widgets';
 
 /**
  * The command IDs used by the completer plugin.
  */
 namespace CommandIDs {
-  export
-  const invoke = 'completer:invoke';
+  export const invoke = 'completer:invoke';
 
-  export
-  const invokeConsole = 'completer:invoke-console';
+  export const invokeConsole = 'completer:invoke-console';
 
-  export
-  const invokeNotebook = 'completer:invoke-notebook';
+  export const invokeNotebook = 'completer:invoke-notebook';
 
-  export
-  const select = 'completer:select';
+  export const select = 'completer:select';
 
-  export
-  const selectConsole = 'completer:select-console';
+  export const selectConsole = 'completer:select-console';
 
-  export
-  const selectNotebook = 'completer:select-notebook';
+  export const selectNotebook = 'completer:select-notebook';
 }
-
 
 /**
  * A plugin providing code completion for editors.
@@ -87,7 +73,9 @@ const manager: JupyterLabPlugin<ICompletionManager> = {
     });
 
     return {
-      register: (completable: ICompletionManager.ICompletable): ICompletionManager.ICompletableAttributes => {
+      register: (
+        completable: ICompletionManager.ICompletable
+      ): ICompletionManager.ICompletableAttributes => {
         const { connector, editor, parent } = completable;
         const model = new CompleterModel();
         const completer = new Completer({ editor, model });
@@ -120,7 +108,6 @@ const manager: JupyterLabPlugin<ICompletionManager> = {
   }
 };
 
-
 /**
  * An extension that registers consoles for code completion.
  */
@@ -128,7 +115,11 @@ const consoles: JupyterLabPlugin<void> = {
   id: '@jupyterlab/completer-extension:consoles',
   requires: [ICompletionManager, IConsoleTracker],
   autoStart: true,
-  activate: (app: JupyterLab, manager: ICompletionManager, consoles: IConsoleTracker): void => {
+  activate: (
+    app: JupyterLab,
+    manager: ICompletionManager,
+    consoles: IConsoleTracker
+  ): void => {
     // Create a handler for each console that is created.
     consoles.widgetAdded.connect((sender, panel) => {
       const anchor = panel.console;
@@ -183,7 +174,11 @@ const notebooks: JupyterLabPlugin<void> = {
   id: '@jupyterlab/completer-extension:notebooks',
   requires: [ICompletionManager, INotebookTracker],
   autoStart: true,
-  activate: (app: JupyterLab, manager: ICompletionManager, notebooks: INotebookTracker): void => {
+  activate: (
+    app: JupyterLab,
+    manager: ICompletionManager,
+    notebooks: INotebookTracker
+  ): void => {
     // Create a handler for each notebook that is created.
     notebooks.widgetAdded.connect((sender, panel) => {
       const cell = panel.content.activeCell;

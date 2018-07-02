@@ -8,18 +8,15 @@ import * as glob from 'glob';
 import * as path from 'path';
 import * as utils from './utils';
 
-
 /**
  *  A namespace for JupyterLab build utilities.
  */
-export
-namespace Build {
+export namespace Build {
   /**
    * The options used to ensure a root package has the appropriate
    * assets for its JupyterLab extension packages.
    */
-  export
-  interface IEnsureOptions {
+  export interface IEnsureOptions {
     /**
      * The output directory where the build assets should reside.
      */
@@ -34,8 +31,7 @@ namespace Build {
   /**
    * The JupyterLab extension attributes in a module.
    */
-  export
-  interface ILabExtension {
+  export interface ILabExtension {
     /**
      * Indicates whether the extension is a standalone extension.
      *
@@ -74,8 +70,7 @@ namespace Build {
   /**
    * A minimal definition of a module's package definition (i.e., package.json).
    */
-  export
-  interface IModule {
+  export interface IModule {
     /**
      * The JupyterLab metadata/
      */
@@ -95,8 +90,7 @@ namespace Build {
   /**
    * Ensures that the assets of plugin packages are populated for a build.
    */
-  export
-  function ensureAssets(options: IEnsureOptions): void {
+  export function ensureAssets(options: IEnsureOptions): void {
     let { output, packageNames } = options;
 
     packageNames.forEach(function(name) {
@@ -108,7 +102,9 @@ namespace Build {
 
       // Handle schemas.
       if (schemaDir) {
-        const schemas = glob.sync(path.join(path.join(packageDir, schemaDir), '*'));
+        const schemas = glob.sync(
+          path.join(path.join(packageDir, schemaDir), '*')
+        );
         const destination = path.join(output, 'schemas', name);
 
         // Remove the existing directory if necessary.
@@ -137,7 +133,10 @@ namespace Build {
         });
 
         // Write the package.json file for future comparison.
-        fs.copySync(path.join(packageDir, 'package.json'), path.join(destination, 'package.json'));
+        fs.copySync(
+          path.join(packageDir, 'package.json'),
+          path.join(destination, 'package.json')
+        );
       }
 
       // Handle themes.
@@ -148,7 +147,10 @@ namespace Build {
         // Remove the existing directory if necessary.
         if (fs.existsSync(destination)) {
           try {
-            const oldPackageData = require(path.join(destination, 'package.json'));
+            const oldPackageData = require(path.join(
+              destination,
+              'package.json'
+            ));
             if (oldPackageData.version === packageData.version) {
               fs.removeSync(destination);
             }
@@ -164,7 +166,10 @@ namespace Build {
         fs.copySync(from, destination);
 
         // Write the package.json file for future comparison.
-        fs.copySync(path.join(packageDir, 'package.json'), path.join(destination, 'package.json'));
+        fs.copySync(
+          path.join(packageDir, 'package.json'),
+          path.join(destination, 'package.json')
+        );
       }
     });
   }
@@ -172,8 +177,7 @@ namespace Build {
   /**
    * Returns JupyterLab extension metadata from a module.
    */
-  export
-  function normalizeExtension(module: IModule): ILabExtension {
+  export function normalizeExtension(module: IModule): ILabExtension {
     let { jupyterlab, main, name } = module;
 
     main = main || 'index.js';

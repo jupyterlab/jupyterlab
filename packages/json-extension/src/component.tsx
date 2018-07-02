@@ -9,36 +9,28 @@ import Highlight from 'react-highlighter';
 
 import JSONTree from 'react-json-tree';
 
-import {
-  JSONArray, JSONObject, JSONValue
-} from '@phosphor/coreutils';
-
+import { JSONArray, JSONObject, JSONValue } from '@phosphor/coreutils';
 
 /**
  * The properties for the JSON tree component.
  */
-export
-interface IProps {
+export interface IProps {
   data: JSONValue;
   metadata?: JSONObject;
   theme?: string;
 }
 
-
 /**
  * The state of the JSON tree component.
  */
-export
-interface IState {
+export interface IState {
   filter?: string;
 }
-
 
 /**
  * A component that renders JSON data as a collapsible tree.
  */
-export
-class Component extends React.Component<IProps, IState> {
+export class Component extends React.Component<IProps, IState> {
   state = { filter: '' };
   input: Element = null;
   timer: number = 0;
@@ -49,7 +41,9 @@ class Component extends React.Component<IProps, IState> {
      */
     ReactDOM.findDOMNode(this.input).addEventListener(
       'keydown',
-      (event: Event) => { event.stopPropagation(); },
+      (event: Event) => {
+        event.stopPropagation();
+      },
       false
     );
   }
@@ -57,33 +51,32 @@ class Component extends React.Component<IProps, IState> {
   componentWillUnmount() {
     ReactDOM.findDOMNode(this.input).removeEventListener(
       'keydown',
-      (event: Event) => { event.stopPropagation(); },
+      (event: Event) => {
+        event.stopPropagation();
+      },
       false
     );
   }
 
   render() {
     const { data, metadata } = this.props;
-    const root = metadata && metadata.root ? metadata.root as string : 'root';
+    const root = metadata && metadata.root ? (metadata.root as string) : 'root';
     const keyPaths = this.state.filter
       ? filterPaths(data, this.state.filter, [root])
       : [root];
     return (
       <div style={{ position: 'relative', width: '100%' }}>
         <input
-          ref={ref => this.input = ref}
+          ref={ref => (this.input = ref)}
           onChange={event => {
             if (this.timer) {
               window.clearTimeout(this.timer);
             }
             const filter = event.target.value;
-            this.timer = window.setTimeout(
-              () => {
-                this.setState({ filter } as IState);
-                this.timer = 0;
-              },
-              300
-            );
+            this.timer = window.setTimeout(() => {
+              this.setState({ filter } as IState);
+              this.timer = 0;
+            }, 300);
           }}
           style={{
             position: 'absolute',
@@ -95,8 +88,8 @@ class Component extends React.Component<IProps, IState> {
             fontSize: 13,
             padding: '4px 2px'
           }}
-          type='text'
-          placeholder='Filter...'
+          type="text"
+          placeholder="Filter..."
         />
         <JSONTree
           data={data}
@@ -162,7 +155,8 @@ class Component extends React.Component<IProps, IState> {
           shouldExpandNode={(keyPath, data, level) =>
             metadata && metadata.expanded
               ? true
-              : keyPaths.join(',').includes(keyPath.join(','))}
+              : keyPaths.join(',').includes(keyPath.join(','))
+          }
         />
       </div>
     );
@@ -193,22 +187,22 @@ function objectIncludes(data: JSONValue, query: string): boolean {
   return JSON.stringify(data).includes(query);
 }
 
-
-function filterPaths(data: JSONValue, query: string, parent: JSONArray = ['root']): JSONArray {
+function filterPaths(
+  data: JSONValue,
+  query: string,
+  parent: JSONArray = ['root']
+): JSONArray {
   if (Array.isArray(data)) {
-    return data.reduce(
-      (result: JSONArray, item: JSONValue, index: number) => {
-        if (item && typeof item === 'object' && objectIncludes(item, query)) {
-          return [
-            ...result,
-            [index, ...parent].join(','),
-            ...filterPaths(item, query, [index, ...parent])
-          ];
-        }
-        return result;
-      },
-      []
-    ) as JSONArray;
+    return data.reduce((result: JSONArray, item: JSONValue, index: number) => {
+      if (item && typeof item === 'object' && objectIncludes(item, query)) {
+        return [
+          ...result,
+          [index, ...parent].join(','),
+          ...filterPaths(item, query, [index, ...parent])
+        ];
+      }
+      return result;
+    }, []) as JSONArray;
   }
   if (typeof data === 'object') {
     return Object.keys(data).reduce((result: JSONArray, key: string) => {

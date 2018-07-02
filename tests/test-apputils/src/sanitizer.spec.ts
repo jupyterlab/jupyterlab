@@ -3,15 +3,10 @@
 
 import expect = require('expect.js');
 
-import {
-  defaultSanitizer
-} from '@jupyterlab/apputils';
-
+import { defaultSanitizer } from '@jupyterlab/apputils';
 
 describe('defaultSanitizer', () => {
-
   describe('#sanitize()', () => {
-
     it('should allow h1 tags', () => {
       let h1 = '<h1>foo</h1>';
       expect(defaultSanitizer.sanitize(h1)).to.be(h1);
@@ -28,7 +23,8 @@ describe('defaultSanitizer', () => {
     });
 
     it('should allow img tags and some attributes', () => {
-      let img = '<img src="smiley.gif" alt="Smiley face" height="42" width="42" />';
+      let img =
+        '<img src="smiley.gif" alt="Smiley face" height="42" width="42" />';
       expect(defaultSanitizer.sanitize(img)).to.be(img);
     });
 
@@ -38,7 +34,7 @@ describe('defaultSanitizer', () => {
     });
 
     it('should set the rel attribute for <a> tags to "nofollow', () => {
-      let a ='<a rel="foo" href="bar">Baz</a>';
+      let a = '<a rel="foo" href="bar">Baz</a>';
       let expected = a.replace('foo', 'nofollow');
       expect(defaultSanitizer.sanitize(a)).to.be(expected);
     });
@@ -79,14 +75,15 @@ describe('defaultSanitizer', () => {
     });
 
     it('should allow video tags with some attributes', () => {
-      let video = '<video src="my/video.mp4" height="42" width="42"' +
-                  ' autoplay controls loop muted></video>';
+      let video =
+        '<video src="my/video.mp4" height="42" width="42"' +
+        ' autoplay controls loop muted></video>';
       expect(defaultSanitizer.sanitize(video)).to.be(video);
     });
 
     it('should allow audio tags with some attributes', () => {
-      let audio = '<audio src="my/audio.ogg autoplay loop ' +
-                  'controls muted"></audio>';
+      let audio =
+        '<audio src="my/audio.ogg autoplay loop ' + 'controls muted"></audio>';
       expect(defaultSanitizer.sanitize(audio)).to.be(audio);
     });
 
@@ -100,7 +97,5 @@ describe('defaultSanitizer', () => {
 
       expect(input.disabled).to.be(true);
     });
-
   });
-
 });

@@ -3,38 +3,35 @@
 
 import expect = require('expect.js');
 
-import {
-  UUID
-} from '@phosphor/coreutils';
+import { UUID } from '@phosphor/coreutils';
+
+import { Widget } from '@phosphor/widgets';
 
 import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
-  ABCWidgetFactory, Base64ModelFactory, DocumentModel,
-  DocumentRegistry, DocumentWidget, IDocumentWidget, TextModelFactory, Context
+  ABCWidgetFactory,
+  Base64ModelFactory,
+  DocumentModel,
+  DocumentRegistry,
+  DocumentWidget,
+  IDocumentWidget,
+  TextModelFactory,
+  Context
 } from '@jupyterlab/docregistry';
 
-import {
-  ServiceManager
-} from '@jupyterlab/services';
+import { ServiceManager } from '@jupyterlab/services';
 
-import {
-  createFileContext, sleep
-} from '../../utils';
-
+import { createFileContext, sleep } from '../../utils';
 
 class WidgetFactory extends ABCWidgetFactory<IDocumentWidget> {
-
-  protected createNewWidget(context: DocumentRegistry.Context): IDocumentWidget {
+  protected createNewWidget(
+    context: DocumentRegistry.Context
+  ): IDocumentWidget {
     const content = new Widget();
     const widget = new DocumentWidget({ content, context });
     widget.addClass('WidgetFactory');
     return widget;
   }
 }
-
 
 function createFactory(): WidgetFactory {
   return new WidgetFactory({
@@ -43,41 +40,33 @@ function createFactory(): WidgetFactory {
   });
 }
 
-
 describe('docregistry/default', () => {
-
   describe('ABCWidgetFactory', () => {
-
     describe('#fileTypes', () => {
-
       it('should be the value passed in', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileTypes: ['text'],
+          fileTypes: ['text']
         });
         expect(factory.fileTypes).to.eql(['text']);
       });
-
     });
 
     describe('#name', () => {
-
       it('should be the value passed in', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileTypes: ['text'],
+          fileTypes: ['text']
         });
         expect(factory.name).to.be('test');
       });
-
     });
 
     describe('#defaultFor', () => {
-
       it('should default to an empty array', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileTypes: ['text'],
+          fileTypes: ['text']
         });
         expect(factory.defaultFor).to.eql([]);
       });
@@ -90,15 +79,13 @@ describe('docregistry/default', () => {
         });
         expect(factory.defaultFor).to.eql(['text']);
       });
-
     });
 
     describe('#readOnly', () => {
-
       it('should default to false', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileTypes: ['text'],
+          fileTypes: ['text']
         });
         expect(factory.readOnly).to.be(false);
       });
@@ -111,15 +98,13 @@ describe('docregistry/default', () => {
         });
         expect(factory.readOnly).to.be(true);
       });
-
     });
 
     describe('#modelName', () => {
-
       it('should default to `text`', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileTypes: ['text'],
+          fileTypes: ['text']
         });
         expect(factory.modelName).to.be('text');
       });
@@ -135,11 +120,10 @@ describe('docregistry/default', () => {
     });
 
     describe('#preferKernel', () => {
-
       it('should default to false', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileTypes: ['text'],
+          fileTypes: ['text']
         });
         expect(factory.preferKernel).to.be(false);
       });
@@ -152,15 +136,13 @@ describe('docregistry/default', () => {
         });
         expect(factory.preferKernel).to.be(true);
       });
-
     });
 
     describe('#canStartKernel', () => {
-
       it('should default to false', () => {
         let factory = new WidgetFactory({
           name: 'test',
-          fileTypes: ['text'],
+          fileTypes: ['text']
         });
         expect(factory.canStartKernel).to.be(false);
       });
@@ -173,22 +155,18 @@ describe('docregistry/default', () => {
         });
         expect(factory.canStartKernel).to.be(true);
       });
-
     });
 
     describe('#isDisposed', () => {
-
       it('should get whether the factory has been disposed', () => {
         let factory = createFactory();
         expect(factory.isDisposed).to.be(false);
         factory.dispose();
         expect(factory.isDisposed).to.be(true);
       });
-
     });
 
     describe('#dispose()', () => {
-
       it('should dispose of the resources held by the factory', () => {
         let factory = createFactory();
         factory.dispose();
@@ -201,57 +179,43 @@ describe('docregistry/default', () => {
         factory.dispose();
         expect(factory.isDisposed).to.be(true);
       });
-
     });
 
     describe('#createNew()', () => {
-
       it('should create a new widget given a document model and a context', () => {
         let factory = createFactory();
         let context = createFileContext();
         let widget = factory.createNew(context);
         expect(widget).to.be.a(Widget);
       });
-
     });
-
   });
 
   describe('Base64ModelFactory', () => {
-
     describe('#name', () => {
-
       it('should get the name of the model type', () => {
         let factory = new Base64ModelFactory();
         expect(factory.name).to.be('base64');
       });
-
     });
 
     describe('#contentType', () => {
-
       it('should get the file type', () => {
         let factory = new Base64ModelFactory();
         expect(factory.contentType).to.be('file');
       });
-
     });
 
     describe('#fileFormat', () => {
-
       it('should get the file format', () => {
         let factory = new Base64ModelFactory();
         expect(factory.fileFormat).to.be('base64');
       });
-
     });
-
   });
 
   describe('DocumentModel', () => {
-
     describe('#constructor()', () => {
-
       it('should create a new document model', () => {
         let model = new DocumentModel();
         expect(model).to.be.a(DocumentModel);
@@ -261,22 +225,18 @@ describe('docregistry/default', () => {
         let model = new DocumentModel('foo');
         expect(model.defaultKernelLanguage).to.be('foo');
       });
-
     });
 
     describe('#isDisposed', () => {
-
       it('should get whether the model has been disposed', () => {
         let model = new DocumentModel();
         expect(model.isDisposed).to.be(false);
         model.dispose();
         expect(model.isDisposed).to.be(true);
       });
-
     });
 
     describe('#contentChanged', () => {
-
       it('should be emitted when the content of the model changes', () => {
         let model = new DocumentModel();
         let called = false;
@@ -292,15 +252,15 @@ describe('docregistry/default', () => {
       it('should not be emitted if the content does not change', () => {
         let model = new DocumentModel();
         let called = false;
-        model.contentChanged.connect(() => { called = true; });
+        model.contentChanged.connect(() => {
+          called = true;
+        });
         model.fromString('');
         expect(called).to.be(false);
       });
-
     });
 
     describe('#stateChanged', () => {
-
       it('should be emitted when the state of the model changes', () => {
         let model = new DocumentModel();
         let called = false;
@@ -318,15 +278,15 @@ describe('docregistry/default', () => {
       it('should not be emitted if the state does not change', () => {
         let model = new DocumentModel();
         let called = false;
-        model.stateChanged.connect(() => { called = true; });
+        model.stateChanged.connect(() => {
+          called = true;
+        });
         model.dirty = false;
         expect(called).to.be(false);
       });
-
     });
 
     describe('#dirty', () => {
-
       it('should get the dirty state of the document', () => {
         let model = new DocumentModel();
         expect(model.dirty).to.be(false);
@@ -349,15 +309,15 @@ describe('docregistry/default', () => {
       it('should not emit `stateChanged` when not changed', () => {
         let model = new DocumentModel();
         let called = false;
-        model.stateChanged.connect(() => { called = true; });
+        model.stateChanged.connect(() => {
+          called = true;
+        });
         model.dirty = false;
         expect(called).to.be(false);
       });
-
     });
 
     describe('#readOnly', () => {
-
       it('should get the read only state of the document', () => {
         let model = new DocumentModel();
         expect(model.readOnly).to.be(false);
@@ -380,24 +340,22 @@ describe('docregistry/default', () => {
       it('should not emit `stateChanged` when not changed', () => {
         let model = new DocumentModel();
         let called = false;
-        model.stateChanged.connect(() => { called = true; });
+        model.stateChanged.connect(() => {
+          called = true;
+        });
         model.readOnly = false;
         expect(called).to.be(false);
       });
-
     });
 
     describe('#defaultKernelName', () => {
-
       it('should get the default kernel name of the document', () => {
         let model = new DocumentModel();
         expect(model.defaultKernelName).to.be('');
       });
-
     });
 
     describe('defaultKernelLanguage', () => {
-
       it('should get the default kernel langauge of the document', () => {
         let model = new DocumentModel();
         expect(model.defaultKernelLanguage).to.be('');
@@ -407,11 +365,9 @@ describe('docregistry/default', () => {
         let model = new DocumentModel('foo');
         expect(model.defaultKernelLanguage).to.be('foo');
       });
-
     });
 
     describe('#dispose()', () => {
-
       it('should dispose of the resources held by the document manager', () => {
         let model = new DocumentModel();
         model.dispose();
@@ -424,94 +380,74 @@ describe('docregistry/default', () => {
         model.dispose();
         expect(model.isDisposed).to.be(true);
       });
-
     });
 
     describe('#toString()', () => {
-
       it('should serialize the model to a string', () => {
         let model = new DocumentModel();
         expect(model.toString()).to.be('');
       });
-
     });
 
     describe('#fromString()', () => {
-
       it('should deserialize the model from a string', () => {
         let model = new DocumentModel();
         model.fromString('foo');
         expect(model.toString()).to.be('foo');
       });
-
     });
 
     describe('#toJSON()', () => {
-
       it('should serialize the model to JSON', () => {
         let model = new DocumentModel();
-        let data = { 'foo': 1 };
+        let data = { foo: 1 };
         model.fromJSON(data);
         expect(model.toJSON()).to.eql(data);
       });
-
     });
 
     describe('#fromJSON()', () => {
-
       it('should deserialize the model from JSON', () => {
         let model = new DocumentModel();
         let data = null;
         model.fromJSON(data);
         expect(model.toString()).to.be('null');
       });
-
     });
-
   });
 
   describe('TextModelFactory', () => {
-
     describe('#name', () => {
-
       it('should get the name of the model type', () => {
         let factory = new TextModelFactory();
         expect(factory.name).to.be('text');
       });
-
     });
 
     describe('#contentType', () => {
-
       it('should get the file type', () => {
         let factory = new TextModelFactory();
         expect(factory.contentType).to.be('file');
       });
-
     });
 
     describe('#fileFormat', () => {
-
       it('should get the file format', () => {
         let factory = new TextModelFactory();
         expect(factory.fileFormat).to.be('text');
       });
-
     });
 
     describe('#isDisposed', () => {
-
       it('should get whether the factory is disposed', () => {
         let factory = new TextModelFactory();
         expect(factory.isDisposed).to.be(false);
         factory.dispose();
         expect(factory.isDisposed).to.be(true);
       });
-
     });
 
     describe('#dispose()', () => {
-
       it('should dispose of the resources held by the factory', () => {
         let factory = new TextModelFactory();
         factory.dispose();
@@ -524,11 +460,9 @@ describe('docregistry/default', () => {
         factory.dispose();
         expect(factory.isDisposed).to.be(true);
       });
-
     });
 
     describe('#createNew()', () => {
-
       it('should create a new model', () => {
         let factory = new TextModelFactory();
         let model = factory.createNew();
@@ -540,23 +474,18 @@ describe('docregistry/default', () => {
         let model = factory.createNew('foo');
         expect(model.defaultKernelLanguage).to.be('foo');
       });
-
     });
 
     describe('#preferredLanguage()', () => {
-
       it('should get the preferred kernel language given an extension', () => {
         let factory = new TextModelFactory();
         expect(factory.preferredLanguage('.py')).to.be('python');
         expect(factory.preferredLanguage('.jl')).to.be('julia');
       });
-
     });
-
   });
 
   describe('DocumentWidget', () => {
-
     let manager: ServiceManager.IManager;
 
     let context: Context<DocumentRegistry.IModel>;
@@ -598,7 +527,6 @@ describe('docregistry/default', () => {
       it('should store the context', () => {
         expect(widget.context).to.be(context);
       });
-
     });
 
     describe('#revealed', () => {
@@ -608,23 +536,20 @@ describe('docregistry/default', () => {
         let x = Object.create(null);
         let reveal = sleep(300, x);
         let contextReady = Promise.all([context.ready, x]);
-        let widget = new DocumentWidget({ context, content, reveal});
+        let widget = new DocumentWidget({ context, content, reveal });
         expect(widget.isRevealed).to.be(false);
 
         // Our promise should resolve before the widget reveal promise.
         expect(await Promise.race([widget.revealed, reveal])).to.be(x);
         // The context ready promise should also resolve first.
         context.initialize(true);
-        expect(await Promise.race([widget.revealed, contextReady])).to.eql([undefined, x]);
+        expect(await Promise.race([widget.revealed, contextReady])).to.eql([
+          undefined,
+          x
+        ]);
         // The widget.revealed promise should finally resolve.
         expect(await widget.revealed).to.be(undefined);
       });
-
     });
-
   });
-
-
-
 });
-

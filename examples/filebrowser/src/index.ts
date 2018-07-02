@@ -1,53 +1,32 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import 'es6-promise/auto';  // polyfill Promise on IE
+import 'es6-promise/auto'; // polyfill Promise on IE
 import '@jupyterlab/theme-light-extension/static/embed.css';
 import '../index.css';
 
-import {
-  each
-} from '@phosphor/algorithm';
+import { each } from '@phosphor/algorithm';
+
+import { CommandRegistry } from '@phosphor/commands';
+
+import { DockPanel, Menu, SplitPanel, Widget } from '@phosphor/widgets';
+
+import { ServiceManager } from '@jupyterlab/services';
+
+import { Dialog, ToolbarButton, showDialog } from '@jupyterlab/apputils';
+
+import { FileBrowser, FileBrowserModel } from '@jupyterlab/filebrowser';
+
+import { DocumentManager } from '@jupyterlab/docmanager';
+
+import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import {
-  CommandRegistry
-} from '@phosphor/commands';
-
-import {
-  DockPanel, Menu, SplitPanel, Widget
-} from '@phosphor/widgets';
-
-import {
-  ServiceManager
-} from '@jupyterlab/services';
-
-import {
-  Dialog, ToolbarButton, showDialog
-} from '@jupyterlab/apputils';
-
-import {
-  FileBrowser, FileBrowserModel
-} from '@jupyterlab/filebrowser';
-
-import {
-  DocumentManager
-} from '@jupyterlab/docmanager';
-
-import {
-  DocumentRegistry
-} from '@jupyterlab/docregistry';
-
-import {
-  CodeMirrorEditorFactory, CodeMirrorMimeTypeService
+  CodeMirrorEditorFactory,
+  CodeMirrorMimeTypeService
 } from '@jupyterlab/codemirror';
 
-import {
-  FileEditorFactory
-} from '@jupyterlab/fileeditor';
-
-
-
-
+import { FileEditorFactory } from '@jupyterlab/fileeditor';
 
 function main(): void {
   let manager = new ServiceManager();
@@ -55,7 +34,6 @@ function main(): void {
     createApp(manager);
   });
 }
-
 
 function createApp(manager: ServiceManager.IManager): void {
   let widgets: Widget[] = [];
@@ -112,12 +90,14 @@ function createApp(manager: ServiceManager.IManager): void {
   let creator = new ToolbarButton({
     className: 'jp-AddIcon',
     onClick: () => {
-      docManager.newUntitled({
-        type: 'file',
-        path: fbModel.path
-      }).then(model => {
-        docManager.open(model.path);
-      });
+      docManager
+        .newUntitled({
+          type: 'file',
+          path: fbModel.path
+        })
+        .then(model => {
+          docManager.open(model.path);
+        });
     }
   });
   creator.addClass('jp-MaterialIcon');
@@ -157,7 +137,9 @@ function createApp(manager: ServiceManager.IManager): void {
     label: 'Rename',
     icon: 'fa fa-edit',
     mnemonic: 0,
-    execute: () => { fbWidget.rename(); }
+    execute: () => {
+      fbWidget.rename();
+    }
   });
   commands.addCommand('file-save', {
     execute: () => {
@@ -168,45 +150,61 @@ function createApp(manager: ServiceManager.IManager): void {
   commands.addCommand('file-cut', {
     label: 'Cut',
     icon: 'fa fa-cut',
-    execute: () => { fbWidget.cut(); }
+    execute: () => {
+      fbWidget.cut();
+    }
   });
   commands.addCommand('file-copy', {
     label: 'Copy',
     icon: 'fa fa-copy',
     mnemonic: 0,
-    execute: () => { fbWidget.copy(); }
+    execute: () => {
+      fbWidget.copy();
+    }
   });
   commands.addCommand('file-delete', {
     label: 'Delete',
     icon: 'fa fa-remove',
     mnemonic: 0,
-    execute: () => { fbWidget.delete(); }
+    execute: () => {
+      fbWidget.delete();
+    }
   });
   commands.addCommand('file-duplicate', {
     label: 'Duplicate',
     icon: 'fa fa-copy',
     mnemonic: 0,
-    execute: () => { fbWidget.duplicate(); }
+    execute: () => {
+      fbWidget.duplicate();
+    }
   });
   commands.addCommand('file-paste', {
     label: 'Paste',
     icon: 'fa fa-paste',
     mnemonic: 0,
-    execute: () => { fbWidget.paste(); }
+    execute: () => {
+      fbWidget.paste();
+    }
   });
   commands.addCommand('file-download', {
     label: 'Download',
     icon: 'fa fa-download',
-    execute: () => { fbWidget.download(); }
+    execute: () => {
+      fbWidget.download();
+    }
   });
   commands.addCommand('file-shutdown-kernel', {
     label: 'Shutdown Kernel',
     icon: 'fa fa-stop-circle-o',
-    execute: () => { fbWidget.shutdownKernels(); }
+    execute: () => {
+      fbWidget.shutdownKernels();
+    }
   });
   commands.addCommand('file-dialog-demo', {
     label: 'Dialog Demo',
-    execute: () => { dialogDemo(); }
+    execute: () => {
+      dialogDemo();
+    }
   });
   commands.addCommand('file-info-demo', {
     label: 'Info Demo',
@@ -230,7 +228,7 @@ function createApp(manager: ServiceManager.IManager): void {
     selector: '.jp-CodeMirrorEditor',
     command: 'file-save'
   });
-  window.addEventListener('keydown', (event) => {
+  window.addEventListener('keydown', event => {
     commands.processKeydownEvent(event);
   });
 
@@ -261,9 +259,10 @@ function createApp(manager: ServiceManager.IManager): void {
   Widget.attach(panel, document.body);
 
   // Handle resize events.
-  window.addEventListener('resize', () => { panel.update(); });
+  window.addEventListener('resize', () => {
+    panel.update();
+  });
 }
-
 
 /**
  * Create a non-functional dialog demo.
@@ -287,6 +286,5 @@ function dialogDemo(): void {
     title: 'Create new notebook'
   });
 }
-
 
 window.addEventListener('load', main);

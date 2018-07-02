@@ -4,18 +4,20 @@
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { RenderedJavaScript } from '@jupyterlab/rendermime';
 
-export
-const TEXT_JAVASCRIPT_MIMETYPE = 'text/javascript';
-export
-const APPLICATION_JAVASCRIPT_MIMETYPE = 'application/javascript';
+export const TEXT_JAVASCRIPT_MIMETYPE = 'text/javascript';
+export const APPLICATION_JAVASCRIPT_MIMETYPE = 'application/javascript';
 
-function evalInContext(code: string, element: Element, document: Document, window: Window) {
-   // tslint:disable-next-line
+function evalInContext(
+  code: string,
+  element: Element,
+  document: Document,
+  window: Window
+) {
+  // tslint:disable-next-line
   return eval(code);
 }
 
-export
-class ExperimentalRenderedJavascript extends RenderedJavaScript {
+export class ExperimentalRenderedJavascript extends RenderedJavaScript {
   render(model: IRenderMime.IMimeModel): Promise<void> {
     const renderJavascript = () => {
       try {
@@ -37,7 +39,7 @@ class ExperimentalRenderedJavascript extends RenderedJavaScript {
       // If output is not trusted or if arbitrary Javascript execution is not enabled, render an informative error message
       this.node.innerHTML = `<pre>Are you sure that you want to run arbitrary Javascript within your JupyterLab session?</pre>
       <button>Run</button>`;
-      this.node.querySelector('button').onclick = (event) => {
+      this.node.querySelector('button').onclick = event => {
         this.node.innerHTML = '';
         renderJavascript();
       };
@@ -50,8 +52,7 @@ class ExperimentalRenderedJavascript extends RenderedJavaScript {
 /**
  * A mime renderer factory for text/javascript data.
  */
-export
-const rendererFactory: IRenderMime.IRendererFactory = {
+export const rendererFactory: IRenderMime.IRendererFactory = {
   safe: false,
   mimeTypes: [TEXT_JAVASCRIPT_MIMETYPE, APPLICATION_JAVASCRIPT_MIMETYPE],
   createRenderer: options => new ExperimentalRenderedJavascript(options)

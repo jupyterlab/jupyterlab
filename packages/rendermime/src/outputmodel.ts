@@ -3,35 +3,26 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 import {
-  JSONExt, JSONObject, JSONValue, ReadonlyJSONObject
+  JSONExt,
+  JSONObject,
+  JSONValue,
+  ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  nbformat
-} from '@jupyterlab/coreutils';
+import { nbformat } from '@jupyterlab/coreutils';
 
-import {
-  IObservableJSON, ObservableJSON
-} from '@jupyterlab/observables';
+import { IObservableJSON, ObservableJSON } from '@jupyterlab/observables';
 
-import {
-  IRenderMime
-} from '@jupyterlab/rendermime-interfaces';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
-import {
-  MimeModel
-} from './mimemodel';
-
+import { MimeModel } from './mimemodel';
 
 /**
  * The interface for an output model.
  */
-export
-interface IOutputModel extends IRenderMime.IMimeModel {
+export interface IOutputModel extends IRenderMime.IMimeModel {
   /**
    * A signal emitted when the output model changes.
    */
@@ -63,17 +54,14 @@ interface IOutputModel extends IRenderMime.IMimeModel {
   toJSON(): nbformat.IOutput;
 }
 
-
 /**
  * The namespace for IOutputModel sub-interfaces.
  */
-export
-namespace IOutputModel {
+export namespace IOutputModel {
   /**
    * The options used to create a notebook output model.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The raw output value.
      */
@@ -86,12 +74,10 @@ namespace IOutputModel {
   }
 }
 
-
 /**
  * The default implementation of a notebook output model.
  */
-export
-class OutputModel implements IOutputModel {
+export class OutputModel implements IOutputModel {
   /**
    * Construct a new output model.
    */
@@ -107,11 +93,11 @@ class OutputModel implements IOutputModel {
     for (let key in value) {
       // Ignore data and metadata that were stripped.
       switch (key) {
-      case 'data':
-      case 'metadata':
-        break;
-      default:
-        this._raw[key] = Private.extract(value, key);
+        case 'data':
+        case 'metadata':
+          break;
+        default:
+          this._raw[key] = Private.extract(value, key);
       }
     }
     this.type = value.output_type;
@@ -195,14 +181,14 @@ class OutputModel implements IOutputModel {
       output[key] = Private.extract(this._raw, key);
     }
     switch (this.type) {
-    case 'display_data':
-    case 'execute_result':
-    case 'update_display_data':
-      output['data'] = this.data as JSONObject;
-      output['metadata'] = this.metadata as JSONObject;
-      break;
-    default:
-      break;
+      case 'display_data':
+      case 'execute_result':
+      case 'update_display_data':
+        output['data'] = this.data as JSONObject;
+        output['metadata'] = this.metadata as JSONObject;
+        break;
+      default:
+        break;
     }
     // Remove transient data.
     delete output['transient'];
@@ -212,7 +198,10 @@ class OutputModel implements IOutputModel {
   /**
    * Update an observable JSON object using a readonly JSON object.
    */
-  private _updateObservable(observable: IObservableJSON, data: ReadonlyJSONObject) {
+  private _updateObservable(
+    observable: IObservableJSON,
+    data: ReadonlyJSONObject
+  ) {
     let oldKeys = observable.keys();
     let newKeys = Object.keys(data);
 
@@ -241,12 +230,10 @@ class OutputModel implements IOutputModel {
   private _metadata: IObservableJSON;
 }
 
-
 /**
  * The namespace for OutputModel statics.
  */
-export
-namespace OutputModel {
+export namespace OutputModel {
   /**
    * Get the data for an output.
    *
@@ -254,8 +241,7 @@ namespace OutputModel {
    *
    * @returns - The data for the payload.
    */
-  export
-  function getData(output: nbformat.IOutput): JSONObject {
+  export function getData(output: nbformat.IOutput): JSONObject {
     return Private.getData(output);
   }
 
@@ -266,12 +252,10 @@ namespace OutputModel {
    *
    * @returns - The metadata for the payload.
    */
-  export
-  function getMetadata(output: nbformat.IOutput): JSONObject {
+  export function getMetadata(output: nbformat.IOutput): JSONObject {
     return Private.getMetadata(output);
   }
 }
-
 
 /**
  * The namespace for module private data.
@@ -280,10 +264,13 @@ namespace Private {
   /**
    * Get the data from a notebook output.
    */
-  export
-  function getData(output: nbformat.IOutput): JSONObject {
+  export function getData(output: nbformat.IOutput): JSONObject {
     let bundle: nbformat.IMimeBundle = {};
-    if (nbformat.isExecuteResult(output) || nbformat.isDisplayData(output) || nbformat.isDisplayUpdate(output)) {
+    if (
+      nbformat.isExecuteResult(output) ||
+      nbformat.isDisplayData(output) ||
+      nbformat.isDisplayUpdate(output)
+    ) {
       bundle = (output as nbformat.IExecuteResult).data;
     } else if (nbformat.isStream(output)) {
       if (output.name === 'stderr') {
@@ -293,9 +280,8 @@ namespace Private {
       }
     } else if (nbformat.isError(output)) {
       let traceback = output.traceback.join('\n');
-      bundle['application/vnd.jupyter.stderr'] = (
-        traceback || `${output.ename}: ${output.evalue}`
-      );
+      bundle['application/vnd.jupyter.stderr'] =
+        traceback || `${output.ename}: ${output.evalue}`;
     }
     return convertBundle(bundle);
   }
@@ -303,8 +289,7 @@ namespace Private {
   /**
    * Get the metadata from an output message.
    */
-  export
-  function getMetadata(output: nbformat.IOutput): JSONObject {
+  export function getMetadata(output: nbformat.IOutput): JSONObject {
     let value: JSONObject = Object.create(null);
     if (nbformat.isExecuteResult(output) || nbformat.isDisplayData(output)) {
       for (let key in output.metadata) {
@@ -317,8 +302,9 @@ namespace Private {
   /**
    * Get the bundle options given output model options.
    */
-  export
-  function getBundleOptions(options: IOutputModel.IOptions): MimeModel.IOptions {
+  export function getBundleOptions(
+    options: IOutputModel.IOptions
+  ): MimeModel.IOptions {
     let data = getData(options.value);
     let metadata = getMetadata(options.value);
     let trusted = !!options.trusted;
@@ -328,8 +314,7 @@ namespace Private {
   /**
    * Extract a value from a JSONObject.
    */
-  export
-  function extract(value: JSONObject, key: string): JSONValue {
+  export function extract(value: JSONObject, key: string): JSONValue {
     let item = value[key];
     if (JSONExt.isPrimitive(item)) {
       return item;

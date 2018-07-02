@@ -1,37 +1,28 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  each, map, toArray
-} from '@phosphor/algorithm';
+import { each, map, toArray } from '@phosphor/algorithm';
+
+import { IDisposable } from '@phosphor/disposable';
+
+import { ISignal, Signal } from '@phosphor/signaling';
+
+import { nbformat } from '@jupyterlab/coreutils';
 
 import {
-  IDisposable
-} from '@phosphor/disposable';
-
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
-
-import {
-  nbformat,
-} from '@jupyterlab/coreutils';
-
-import {
-  IObservableList, ObservableList,
-  IObservableValue, ObservableValue, IModelDB
+  IObservableList,
+  ObservableList,
+  IObservableValue,
+  ObservableValue,
+  IModelDB
 } from '@jupyterlab/observables';
 
-import {
-  IOutputModel, OutputModel
-} from '@jupyterlab/rendermime';
-
+import { IOutputModel, OutputModel } from '@jupyterlab/rendermime';
 
 /**
  * The model for an output area.
  */
-export
-interface IOutputAreaModel extends IDisposable {
+export interface IOutputAreaModel extends IDisposable {
   /**
    * A signal emitted when the model state changes.
    */
@@ -97,17 +88,14 @@ interface IOutputAreaModel extends IDisposable {
   toJSON(): nbformat.IOutput[];
 }
 
-
 /**
  * The namespace for IOutputAreaModel interfaces.
  */
-export
-namespace IOutputAreaModel {
+export namespace IOutputAreaModel {
   /**
    * The options used to create a output area model.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The initial values for the model.
      */
@@ -134,14 +122,12 @@ namespace IOutputAreaModel {
   /**
    * A type alias for changed args.
    */
-  export
-  type ChangedArgs = IObservableList.IChangedArgs<IOutputModel>;
+  export type ChangedArgs = IObservableList.IChangedArgs<IOutputModel>;
 
   /**
    * The interface for an output content factory.
    */
-  export
-  interface IContentFactory {
+  export interface IContentFactory {
     /**
      * Create an output model.
      */
@@ -152,19 +138,19 @@ namespace IOutputAreaModel {
 /**
  * The default implementation of the IOutputAreaModel.
  */
-export
-class OutputAreaModel implements IOutputAreaModel {
+export class OutputAreaModel implements IOutputAreaModel {
   /**
    * Construct a new observable outputs instance.
    */
   constructor(options: IOutputAreaModel.IOptions = {}) {
     this._trusted = !!options.trusted;
-    this.contentFactory = (options.contentFactory ||
-      OutputAreaModel.defaultContentFactory
-    );
+    this.contentFactory =
+      options.contentFactory || OutputAreaModel.defaultContentFactory;
     this.list = new ObservableList<IOutputModel>();
     if (options.values) {
-      each(options.values, value => { this._add(value); });
+      each(options.values, value => {
+        this._add(value);
+      });
     }
     this.list.changed.connect(this._onListChanged, this);
 
@@ -220,7 +206,7 @@ class OutputAreaModel implements IOutputAreaModel {
     if (value === this._trusted) {
       return;
     }
-    let trusted = this._trusted = value;
+    let trusted = (this._trusted = value);
     for (let i = 0; i < this.list.length; i++) {
       let item = this.list.get(i);
       let value = item.toJSON();
@@ -299,7 +285,9 @@ class OutputAreaModel implements IOutputAreaModel {
       this.clearNext = true;
       return;
     }
-    each(this.list, (item: IOutputModel) => { item.dispose(); });
+    each(this.list, (item: IOutputModel) => {
+      item.dispose();
+    });
     this.list.clear();
   }
 
@@ -311,14 +299,16 @@ class OutputAreaModel implements IOutputAreaModel {
    */
   fromJSON(values: nbformat.IOutput[]) {
     this.clear();
-    each(values, value => { this._add(value); });
+    each(values, value => {
+      this._add(value);
+    });
   }
 
   /**
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.IOutput[] {
-    return toArray(map(this.list, (output: IOutputModel) => output.toJSON() ));
+    return toArray(map(this.list, (output: IOutputModel) => output.toJSON()));
   }
 
   /**
@@ -331,8 +321,11 @@ class OutputAreaModel implements IOutputAreaModel {
     this._normalize(value);
 
     // Consolidate outputs if they are stream outputs of the same kind.
-    if (nbformat.isStream(value) && this._lastStream &&
-        value.name === this._lastName) {
+    if (
+      nbformat.isStream(value) &&
+      this._lastStream &&
+      value.name === this._lastName
+    ) {
       // In order to get a list change event, we add the previous
       // text to the current item and replace the previous item.
       // This also replaces the metadata of the last item.
@@ -435,7 +428,10 @@ class OutputAreaModel implements IOutputAreaModel {
   /**
    * Handle a change to the list.
    */
-  private _onListChanged(sender: IObservableList<IOutputModel>, args: IObservableList.IChangedArgs<IOutputModel>) {
+  private _onListChanged(
+    sender: IObservableList<IOutputModel>,
+    args: IObservableList.IChangedArgs<IOutputModel>
+  ) {
     if (this._serialized && !this._changeGuard) {
       this._changeGuard = true;
       this._serialized.set(this.toJSON());
@@ -448,7 +444,10 @@ class OutputAreaModel implements IOutputAreaModel {
    * If the serialized version of the outputs have changed due to a remote
    * action, then update the model accordingly.
    */
-  private _onSerializedChanged(sender: IObservableValue, args: ObservableValue.IChangedArgs) {
+  private _onSerializedChanged(
+    sender: IObservableValue,
+    args: ObservableValue.IChangedArgs
+  ) {
     if (!this._changeGuard) {
       this._changeGuard = true;
       this.fromJSON(args.newValue as nbformat.IOutput[]);
@@ -474,17 +473,14 @@ class OutputAreaModel implements IOutputAreaModel {
   private _changeGuard = false;
 }
 
-
 /**
  * The namespace for OutputAreaModel class statics.
  */
-export
-namespace OutputAreaModel {
+export namespace OutputAreaModel {
   /**
    * The default implementation of a `IModelOutputFactory`.
    */
-  export
-  class ContentFactory implements IOutputAreaModel.IContentFactory {
+  export class ContentFactory implements IOutputAreaModel.IContentFactory {
     /**
      * Create an output model.
      */
@@ -496,6 +492,5 @@ namespace OutputAreaModel {
   /**
    * The default output model factory.
    */
-  export
-  const defaultContentFactory = new ContentFactory();
+  export const defaultContentFactory = new ContentFactory();
 }

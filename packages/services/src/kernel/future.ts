@@ -1,21 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  PromiseDelegate
-} from '@phosphor/coreutils';
+import { PromiseDelegate } from '@phosphor/coreutils';
 
-import {
-  DisposableDelegate
-} from '@phosphor/disposable';
+import { DisposableDelegate } from '@phosphor/disposable';
 
-import {
-  Kernel
-} from './kernel';
+import { Kernel } from './kernel';
 
-import {
-  KernelMessage
-} from './messages';
+import { KernelMessage } from './messages';
 
 /**
  * Implementation of a kernel future.
@@ -25,12 +17,18 @@ import {
  * is considered done when the `idle` status is received.
  *
  */
-export
-class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
+export class KernelFutureHandler extends DisposableDelegate
+  implements Kernel.IFuture {
   /**
    * Construct a new KernelFutureHandler.
    */
-  constructor(cb: () => void, msg: KernelMessage.IShellMessage, expectReply: boolean, disposeOnDone: boolean, kernel: Kernel.IKernel) {
+  constructor(
+    cb: () => void,
+    msg: KernelMessage.IShellMessage,
+    expectReply: boolean,
+    disposeOnDone: boolean,
+    kernel: Kernel.IKernel
+  ) {
     super(cb);
     this._msg = msg;
     if (!expectReply) {
@@ -57,42 +55,54 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
   /**
    * Get the reply handler.
    */
-  get onReply(): (msg: KernelMessage.IShellMessage) => void | PromiseLike<void> {
+  get onReply(): (
+    msg: KernelMessage.IShellMessage
+  ) => void | PromiseLike<void> {
     return this._reply;
   }
 
   /**
    * Set the reply handler.
    */
-  set onReply(cb: (msg: KernelMessage.IShellMessage) => void | PromiseLike<void>) {
+  set onReply(
+    cb: (msg: KernelMessage.IShellMessage) => void | PromiseLike<void>
+  ) {
     this._reply = cb;
   }
 
   /**
    * Get the iopub handler.
    */
-  get onIOPub(): (msg: KernelMessage.IIOPubMessage) => void | PromiseLike<void> {
+  get onIOPub(): (
+    msg: KernelMessage.IIOPubMessage
+  ) => void | PromiseLike<void> {
     return this._iopub;
   }
 
   /**
    * Set the iopub handler.
    */
-  set onIOPub(cb: (msg: KernelMessage.IIOPubMessage) => void | PromiseLike<void>) {
+  set onIOPub(
+    cb: (msg: KernelMessage.IIOPubMessage) => void | PromiseLike<void>
+  ) {
     this._iopub = cb;
   }
 
   /**
    * Get the stdin handler.
    */
-  get onStdin(): (msg: KernelMessage.IStdinMessage) => void | PromiseLike<void> {
+  get onStdin(): (
+    msg: KernelMessage.IStdinMessage
+  ) => void | PromiseLike<void> {
     return this._stdin;
   }
 
   /**
    * Set the stdin handler.
    */
-  set onStdin(cb: (msg: KernelMessage.IStdinMessage) => void | PromiseLike<void>) {
+  set onStdin(
+    cb: (msg: KernelMessage.IStdinMessage) => void | PromiseLike<void>
+  ) {
     this._stdin = cb;
   }
 
@@ -115,7 +125,9 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
    * message. If a hook is removed during the hook processing, it will be
    * deactivated immediately.
    */
-  registerMessageHook(hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>): void {
+  registerMessageHook(
+    hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>
+  ): void {
     if (this.isDisposed) {
       throw new Error('Kernel future is disposed');
     }
@@ -130,13 +142,14 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
    * #### Notes
    * If a hook is removed during the hook processing, it will be deactivated immediately.
    */
-  removeMessageHook(hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>): void {
+  removeMessageHook(
+    hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>
+  ): void {
     if (this.isDisposed) {
       return;
     }
     this._hooks.remove(hook);
   }
-
 
   /**
    * Send an `input_reply` message.
@@ -159,8 +172,9 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
       // being displayed in the console, but does not prevent it from being
       // caught by a client who is waiting for it.
       this._done.reject(new Error('Canceled'));
-      this._done.promise.catch(() => { /* no-op */ });
-
+      this._done.promise.catch(() => {
+        /* no-op */
+      });
 
       // TODO: Uncomment the following logging code, and check for any tests that trigger it.
       // let status = [];
@@ -180,23 +194,25 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
    */
   async handleMsg(msg: KernelMessage.IMessage): Promise<void> {
     switch (msg.channel) {
-    case 'shell':
-      await this._handleReply(msg as KernelMessage.IShellMessage);
-      break;
-    case 'stdin':
-      await this._handleStdin(msg as KernelMessage.IStdinMessage);
-      break;
-    case 'iopub':
-      await this._handleIOPub(msg as KernelMessage.IIOPubMessage);
-      break;
-    default:
-      break;
+      case 'shell':
+        await this._handleReply(msg as KernelMessage.IShellMessage);
+        break;
+      case 'stdin':
+        await this._handleStdin(msg as KernelMessage.IStdinMessage);
+        break;
+      case 'iopub':
+        await this._handleIOPub(msg as KernelMessage.IIOPubMessage);
+        break;
+      default:
+        break;
     }
   }
 
   private async _handleReply(msg: KernelMessage.IShellMessage): Promise<void> {
     let reply = this._reply;
-    if (reply) { await reply(msg); }
+    if (reply) {
+      await reply(msg);
+    }
     this._replyMsg = msg;
     this._setFlag(Private.KernelFutureFlag.GotReply);
     if (this._testFlag(Private.KernelFutureFlag.GotIdle)) {
@@ -206,15 +222,21 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
 
   private async _handleStdin(msg: KernelMessage.IStdinMessage): Promise<void> {
     let stdin = this._stdin;
-    if (stdin) { await stdin(msg); }
+    if (stdin) {
+      await stdin(msg);
+    }
   }
 
   private async _handleIOPub(msg: KernelMessage.IIOPubMessage): Promise<void> {
     let process = await this._hooks.process(msg);
     let iopub = this._iopub;
-    if (process && iopub) { await iopub(msg); }
-    if (KernelMessage.isStatusMsg(msg) &&
-        msg.content.execution_state === 'idle') {
+    if (process && iopub) {
+      await iopub(msg);
+    }
+    if (
+      KernelMessage.isStatusMsg(msg) &&
+      msg.content.execution_state === 'idle'
+    ) {
       this._setFlag(Private.KernelFutureFlag.GotIdle);
       if (this._testFlag(Private.KernelFutureFlag.GotReply)) {
         this._handleDone();
@@ -251,9 +273,15 @@ class KernelFutureHandler extends DisposableDelegate implements Kernel.IFuture {
 
   private _msg: KernelMessage.IShellMessage;
   private _status = 0;
-  private _stdin: (msg: KernelMessage.IStdinMessage) => void | PromiseLike<void> = Private.noOp;
-  private _iopub: (msg: KernelMessage.IIOPubMessage) => void | PromiseLike<void> = Private.noOp;
-  private _reply: (msg: KernelMessage.IShellMessage) => void | PromiseLike<void> = Private.noOp;
+  private _stdin: (
+    msg: KernelMessage.IStdinMessage
+  ) => void | PromiseLike<void> = Private.noOp;
+  private _iopub: (
+    msg: KernelMessage.IIOPubMessage
+  ) => void | PromiseLike<void> = Private.noOp;
+  private _reply: (
+    msg: KernelMessage.IShellMessage
+  ) => void | PromiseLike<void> = Private.noOp;
   private _done = new PromiseDelegate<KernelMessage.IShellMessage>();
   private _replyMsg: KernelMessage.IShellMessage;
   private _hooks = new Private.HookList<KernelMessage.IIOPubMessage>();
@@ -265,8 +293,9 @@ namespace Private {
   /**
    * A no-op function.
    */
-  export
-  const noOp = () => { /* no-op */ };
+  export const noOp = () => {
+    /* no-op */
+  };
 
   /**
    * Defer a computation.
@@ -281,8 +310,7 @@ namespace Private {
     return ok ? requestAnimationFrame : setImmediate;
   })();
 
-  export
-  class HookList<T> {
+  export class HookList<T> {
     /**
      * Register a hook.
      *
@@ -339,7 +367,9 @@ namespace Private {
         let hook = this._hooks[i];
 
         // If the hook has been removed, continue to the next one.
-        if (hook === null) { continue; }
+        if (hook === null) {
+          continue;
+        }
 
         // Execute the hook and log any errors.
         try {
@@ -397,7 +427,9 @@ namespace Private {
       this._hooks.length -= numNulls;
     }
 
-    private _hooks: (((msg: T) => boolean | PromiseLike<boolean>) | null)[] = [];
+    private _hooks: (
+      | ((msg: T) => boolean | PromiseLike<boolean>)
+      | null)[] = [];
     private _compactScheduled: boolean;
     private _processing: Promise<void>;
   }
@@ -405,11 +437,10 @@ namespace Private {
   /**
    * Bit flags for the kernel future state.
    */
-  export
-  enum KernelFutureFlag {
+  export enum KernelFutureFlag {
     GotReply = 0x1,
     GotIdle = 0x2,
     IsDone = 0x4,
-    DisposeOnDone = 0x8,
+    DisposeOnDone = 0x8
   }
 }

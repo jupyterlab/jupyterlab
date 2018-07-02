@@ -8,5 +8,3 @@
   "excludeExternals": "true",
   "exclude": "**/node_modules/@types/**/*.ts"
 }
-
-

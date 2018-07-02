@@ -5,7 +5,6 @@
 **[Team](#team)** |
 **[Getting help](#getting-help)** |
 
-
 # [JupyterLab](http://jupyterlab.github.io/jupyterlab/)
 
 [![Build Status](https://travis-ci.org/jupyterlab/jupyterlab.svg?branch=master)](https://travis-ci.org/jupyterlab/jupyterlab)
@@ -14,9 +13,8 @@
 [![Join the Gitter Chat](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/jupyterlab/jupyterlab)
 [![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/18a9793b58ba86660b5ab964e1aeaf7324d667c8?urlpath=lab%2Ftree%2Fdemo%2FLorenz.ipynb)
 
-
 An extensible environment for interactive and reproducible computing, based on the
-Jupyter Notebook and Architecture.  [Currently in beta.](https://blog.jupyter.org/jupyterlab-is-ready-for-users-5a6f039b8906)
+Jupyter Notebook and Architecture. [Currently in beta.](https://blog.jupyter.org/jupyterlab-is-ready-for-users-5a6f039b8906)
 
 [JupyterLab](http://jupyterlab.readthedocs.io/en/stable/) is the next-generation user interface for [Project Jupyter](https://jupyter.org). It offers
 all the familiar building blocks of the classic Jupyter Notebook (notebook,
@@ -26,7 +24,7 @@ Eventually, JupyterLab will replace the classic Jupyter Notebook after
 JupyterLab reaches 1.0.
 
 JupyterLab can be extended using extensions that are [npm](https://www.npmjs.com/) packages
-and use our public APIs. You can search for the GitHub topic [jupyterlab-extension](https://github.com/topics/jupyterlab-extension) to find extensions. To learn more about extensions, see our  [user documentation](https://jupyterlab.readthedocs.io/en/latest/user/extensions.html).
+and use our public APIs. You can search for the GitHub topic [jupyterlab-extension](https://github.com/topics/jupyterlab-extension) to find extensions. To learn more about extensions, see our [user documentation](https://jupyterlab.readthedocs.io/en/latest/user/extensions.html).
 
 The beta releases are suitable for general
 usage. For JupyterLab extension developers, the extension APIs will continue to
@@ -34,7 +32,7 @@ evolve until the 1.0 release.
 
 Read the latest version of our documentation on [ReadTheDocs](http://jupyterlab.readthedocs.io/en/latest/).
 
-----
+---
 
 ## Getting started
 
@@ -46,8 +44,7 @@ Instructions on how to install the project from the git sources are available in
 
 #### conda
 
-If you use ``conda``, you can install as:
-
+If you use `conda`, you can install as:
 
 ```bash
 conda install -c conda-forge jupyterlab
@@ -55,20 +52,19 @@ conda install -c conda-forge jupyterlab
 
 #### pip
 
-If you use ``pip``, you can install it as:
-
+If you use `pip`, you can install it as:
 
 ```bash
 pip install jupyterlab
 ```
 
 If installing using `pip install --user`, you must add the user-level
- `bin` directory to your `PATH` environment variable in order to launch
- `jupyter lab`.
+`bin` directory to your `PATH` environment variable in order to launch
+`jupyter lab`.
 
 #### pipenv
 
-If you use ``pipenv``, you can install it as:
+If you use `pipenv`, you can install it as:
 
 ```bash
 pipenv install jupyterlab
@@ -82,7 +78,7 @@ pipenv install git+git://github.com/jupyterlab/jupyterlab.git#egg=jupyterlab
 pipenv shell
 ```
 
-When using ``pipenv``, in order to launch `jupyter lab`, you must activate the project's virtualenv. For example, in the directory where ``pipenv``'s `Pipfile` and `Pipfile.lock` live (i.e., where you ran the above commands):
+When using `pipenv`, in order to launch `jupyter lab`, you must activate the project's virtualenv. For example, in the directory where `pipenv`'s `Pipfile` and `Pipfile.lock` live (i.e., where you ran the above commands):
 
 ```bash
 pipenv shell
@@ -115,15 +111,16 @@ Jupyter notebook version 4.3 or later. To check the notebook version:
 ```bash
 jupyter notebook --version
 ```
-The latest versions of the following browsers are currently *known to work*:
 
-- Firefox
-- Chrome
-- Safari
+The latest versions of the following browsers are currently _known to work_:
+
+* Firefox
+* Chrome
+* Safari
 
 See our [documentation](http://jupyterlab.readthedocs.io/en/latest/getting_started/installation.html) for additional details.
 
-----
+---
 
 ## Development
 
@@ -163,16 +160,16 @@ JupyterLab's current maintainers are listed in alphabetical order, with affiliat
 * Steven Silvester, JPMorgan Chase (co-creator, release management, packaging,
   prolific contributions throughout the code base).
 
- Maintainer emeritus:
+Maintainer emeritus:
 
- * Cameron Oelsen, Cal Poly (UI/UX design).
+* Cameron Oelsen, Cal Poly (UI/UX design).
 
 This list is provided to help provide context about who we are and how our team functions.
 If you would like to be listed, please submit a pull request with your information.
 
-----
+---
 
 ## Getting help
 
 We encourage you to ask questions on the [mailing list](https://groups.google.com/forum/#!forum/jupyter),
-and you may participate in development discussions or get live help on [Gitter](https://gitter.im/jupyterlab/jupyterlab).  Please use our [issues page](https://github.com/jupyterlab/jupyterlab/issues) to provide feedback or submit a bug report.
+and you may participate in development discussions or get live help on [Gitter](https://gitter.im/jupyterlab/jupyterlab). Please use our [issues page](https://github.com/jupyterlab/jupyterlab/issues) to provide feedback or submit a bug report.

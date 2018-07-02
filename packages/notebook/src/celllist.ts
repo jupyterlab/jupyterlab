@@ -2,32 +2,32 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ArrayExt, IIterator, IterableOrArrayLike, each, toArray, ArrayIterator
+  ArrayExt,
+  IIterator,
+  IterableOrArrayLike,
+  each,
+  toArray,
+  ArrayIterator
 } from '@phosphor/algorithm';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
+
+import { ICellModel } from '@jupyterlab/cells';
 
 import {
-  ICellModel
-} from '@jupyterlab/cells';
-
-import {
-  IObservableMap, ObservableMap, IObservableList,
-  IObservableUndoableList, IModelDB
+  IObservableMap,
+  ObservableMap,
+  IObservableList,
+  IObservableUndoableList,
+  IModelDB
 } from '@jupyterlab/observables';
 
-import {
-  NotebookModel
-} from './model';
-
+import { NotebookModel } from './model';
 
 /**
  * A cell list object that supports undo/redo.
  */
-export
-class CellList implements IObservableUndoableList<ICellModel> {
+export class CellList implements IObservableUndoableList<ICellModel> {
   /**
    * Construct the cell list.
    */
@@ -247,7 +247,9 @@ class CellList implements IObservableUndoableList<ICellModel> {
    */
   removeValue(cell: ICellModel): number {
     let index = ArrayExt.findFirstIndex(
-      toArray(this._cellOrder), id => (this._cellMap.get(id) === cell));
+      toArray(this._cellOrder),
+      id => this._cellMap.get(id) === cell
+    );
     this.remove(index);
     return index;
   }
@@ -450,8 +452,10 @@ class CellList implements IObservableUndoableList<ICellModel> {
     // Dispose of cells not in the current
     // cell order.
     for (let key of this._cellMap.keys()) {
-      if (ArrayExt.findFirstIndex(
-         toArray(this._cellOrder), id => id === key) === -1) {
+      if (
+        ArrayExt.findFirstIndex(toArray(this._cellOrder), id => id === key) ===
+        -1
+      ) {
         let cell = this._cellMap.get(key) as ICellModel;
         cell.dispose();
         this._cellMap.delete(key);
@@ -460,22 +464,25 @@ class CellList implements IObservableUndoableList<ICellModel> {
     this._cellOrder.clearUndo();
   }
 
-  private _onOrderChanged(order: IObservableUndoableList<string>, change: IObservableList.IChangedArgs<string>): void {
+  private _onOrderChanged(
+    order: IObservableUndoableList<string>,
+    change: IObservableList.IChangedArgs<string>
+  ): void {
     if (change.type === 'add' || change.type === 'set') {
-      each(change.newValues, (id) => {
+      each(change.newValues, id => {
         if (!this._cellMap.has(id)) {
           let cellDB = this._factory.modelDB;
           let cellType = cellDB.createValue(id + '.type');
           let cell: ICellModel;
           switch (cellType.get()) {
             case 'code':
-              cell = this._factory.createCodeCell({ id: id});
+              cell = this._factory.createCodeCell({ id: id });
               break;
             case 'markdown':
-              cell = this._factory.createMarkdownCell({ id: id});
+              cell = this._factory.createMarkdownCell({ id: id });
               break;
             default:
-              cell = this._factory.createRawCell({ id: id});
+              cell = this._factory.createRawCell({ id: id });
               break;
           }
           this._cellMap.set(id, cell);
@@ -484,10 +491,10 @@ class CellList implements IObservableUndoableList<ICellModel> {
     }
     let newValues: ICellModel[] = [];
     let oldValues: ICellModel[] = [];
-    each(change.newValues, (id) => {
+    each(change.newValues, id => {
       newValues.push(this._cellMap.get(id));
     });
-    each(change.oldValues, (id) => {
+    each(change.oldValues, id => {
       oldValues.push(this._cellMap.get(id));
     });
     this._changed.emit({
@@ -502,6 +509,8 @@ class CellList implements IObservableUndoableList<ICellModel> {
   private _isDisposed: boolean = false;
   private _cellOrder: IObservableUndoableList<string> = null;
   private _cellMap: IObservableMap<ICellModel> = null;
-  private _changed = new Signal<this, IObservableList.IChangedArgs<ICellModel>>(this);
+  private _changed = new Signal<this, IObservableList.IChangedArgs<ICellModel>>(
+    this
+  );
   private _factory: NotebookModel.IContentFactory = null;
 }

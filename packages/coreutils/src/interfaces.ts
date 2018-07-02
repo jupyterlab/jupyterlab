@@ -1,12 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-
 /**
  * A generic interface for change emitter payloads.
  */
-export
-interface IChangedArgs<T> {
+export interface IChangedArgs<T> {
   /**
    * The name of the changed attribute.
    */
@@ -23,12 +21,10 @@ interface IChangedArgs<T> {
   newValue: T;
 }
 
-
 /**
  * The description of a general purpose data connector.
  */
-export
-interface IDataConnector<T, U = T, V = string> {
+export interface IDataConnector<T, U = T, V = string> {
   /**
    * Retrieve an item from the data connector.
    *

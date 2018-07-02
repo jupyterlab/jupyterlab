@@ -3,22 +3,13 @@
 
 import expect = require('expect.js');
 
-import {
-  toArray
-} from '@phosphor/algorithm';
+import { toArray } from '@phosphor/algorithm';
 
-import {
-  JSONExt
-} from '@phosphor/coreutils';
+import { JSONExt } from '@phosphor/coreutils';
 
-import {
-  CodeEditor
-} from '@jupyterlab/codeeditor';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import {
-  CompleterModel, Completer
-} from '@jupyterlab/completer';
-
+import { CompleterModel, Completer } from '@jupyterlab/completer';
 
 function makeState(text: string): Completer.ITextState {
   return {
@@ -31,45 +22,43 @@ function makeState(text: string): Completer.ITextState {
   };
 }
 
-
 describe('completer/model', () => {
-
   describe('CompleterModel', () => {
-
     describe('#constructor()', () => {
-
       it('should create a completer model', () => {
         let model = new CompleterModel();
         expect(model).to.be.a(CompleterModel);
       });
-
     });
 
     describe('#stateChanged', () => {
-
       it('should signal when model options have changed', () => {
         let model = new CompleterModel();
         let called = 0;
-        let listener = (sender: any, args: void) => { called++; };
+        let listener = (sender: any, args: void) => {
+          called++;
+        };
         model.stateChanged.connect(listener);
         expect(called).to.be(0);
         model.setOptions(['foo']);
         expect(called).to.be(1);
-        model.setOptions(['foo'], {foo: 'instance'});
+        model.setOptions(['foo'], { foo: 'instance' });
         expect(called).to.be(2);
       });
 
       it('should not signal when options have not changed', () => {
         let model = new CompleterModel();
         let called = 0;
-        let listener = (sender: any, args: void) => { called++; };
+        let listener = (sender: any, args: void) => {
+          called++;
+        };
         model.stateChanged.connect(listener);
         expect(called).to.be(0);
         model.setOptions(['foo']);
         model.setOptions(['foo']);
         expect(called).to.be(1);
-        model.setOptions(['foo'], {foo: 'instance'});
-        model.setOptions(['foo'], {foo: 'instance'});
+        model.setOptions(['foo'], { foo: 'instance' });
+        model.setOptions(['foo'], { foo: 'instance' });
         expect(called).to.be(2);
         model.setOptions([], {});
         model.setOptions([], {});
@@ -79,7 +68,9 @@ describe('completer/model', () => {
       it('should signal when original request changes', () => {
         let model = new CompleterModel();
         let called = 0;
-        let listener = (sender: any, args: void) => { called++; };
+        let listener = (sender: any, args: void) => {
+          called++;
+        };
         model.stateChanged.connect(listener);
         expect(called).to.be(0);
         model.original = makeState('foo');
@@ -91,7 +82,9 @@ describe('completer/model', () => {
       it('should not signal when original request has not changed', () => {
         let model = new CompleterModel();
         let called = 0;
-        let listener = (sender: any, args: void) => { called++; };
+        let listener = (sender: any, args: void) => {
+          called++;
+        };
         model.stateChanged.connect(listener);
         expect(called).to.be(0);
         model.original = makeState('foo');
@@ -110,7 +103,9 @@ describe('completer/model', () => {
         let cursor: Completer.ICursorSpan = { start: 0, end: 0 };
         let request = makeState(currentValue);
         let change = makeState(newValue);
-        let listener = (sender: any, args: void) => { called++; };
+        let listener = (sender: any, args: void) => {
+          called++;
+        };
         model.stateChanged.connect(listener);
         expect(called).to.be(0);
         model.original = request;
@@ -130,7 +125,9 @@ describe('completer/model', () => {
         let cursor: Completer.ICursorSpan = { start: 0, end: 0 };
         let request = makeState(currentValue);
         let change = makeState(newValue);
-        let listener = (sender: any, args: void) => { called++; };
+        let listener = (sender: any, args: void) => {
+          called++;
+        };
         model.stateChanged.connect(listener);
         expect(called).to.be(0);
         model.original = request;
@@ -143,11 +140,9 @@ describe('completer/model', () => {
         model.current = null;
         expect(called).to.be(3);
       });
-
     });
 
     describe('#items()', () => {
-
       it('should return an unfiltered list of items if query is blank', () => {
         let model = new CompleterModel();
         let want: Completer.IItem[] = [
@@ -190,11 +185,9 @@ describe('completer/model', () => {
         model.query = 'qu';
         expect(toArray(model.items())).to.eql(want);
       });
-
     });
 
     describe('#options()', () => {
-
       it('should default to an empty iterator', () => {
         let model = new CompleterModel();
         expect(model.options().next()).to.be(void 0);
@@ -211,15 +204,13 @@ describe('completer/model', () => {
       it('should return the typeMap', () => {
         let model = new CompleterModel();
         let options = ['foo'];
-        let typeMap = {foo: 'instance'};
+        let typeMap = { foo: 'instance' };
         model.setOptions(options, typeMap);
         expect(JSONExt.deepEqual(model.typeMap(), typeMap)).to.be.ok();
       });
-
     });
 
     describe('#original', () => {
-
       it('should default to null', () => {
         let model = new CompleterModel();
         expect(model.original).to.be(null);
@@ -231,11 +222,9 @@ describe('completer/model', () => {
         model.original = request;
         expect(model.original).to.equal(request);
       });
-
     });
 
     describe('#current', () => {
-
       it('should default to null', () => {
         let model = new CompleterModel();
         expect(model.current).to.be(null);
@@ -289,11 +278,9 @@ describe('completer/model', () => {
         expect(model.original).to.be(null);
         expect(model.options().next()).to.be(void 0);
       });
-
     });
 
     describe('#cursor', () => {
-
       it('should default to null', () => {
         let model = new CompleterModel();
         expect(model.cursor).to.be(null);
@@ -309,25 +296,21 @@ describe('completer/model', () => {
         model.cursor = cursor;
         expect(model.cursor).to.be(cursor);
       });
-
     });
 
     describe('#isDisposed', () => {
-
       it('should be true if model has been disposed', () => {
         let model = new CompleterModel();
         expect(model.isDisposed).to.be(false);
         model.dispose();
         expect(model.isDisposed).to.be(true);
       });
-
     });
 
     describe('#dispose()', () => {
-
       it('should dispose of the model resources', () => {
         let model = new CompleterModel();
-        model.setOptions(['foo'], {foo: 'instance'});
+        model.setOptions(['foo'], { foo: 'instance' });
         expect(model.isDisposed).to.be(false);
         model.dispose();
         expect(model.isDisposed).to.be(true);
@@ -340,11 +323,9 @@ describe('completer/model', () => {
         model.dispose();
         expect(model.isDisposed).to.be(true);
       });
-
     });
 
     describe('#handleTextChange()', () => {
-
       it('should set current change value', () => {
         let model = new CompleterModel();
         let currentValue = 'foo';
@@ -373,11 +354,9 @@ describe('completer/model', () => {
         model.handleTextChange(change);
         expect(model.original).to.be(null);
       });
-
     });
 
     describe('#createPatch()', () => {
-
       it('should return a patch value', () => {
         let model = new CompleterModel();
         let patch = 'foobar';
@@ -411,9 +390,6 @@ describe('completer/model', () => {
         model.cursor = cursor;
         expect(model.createPatch(patch)).to.eql(want);
       });
-
     });
-
   });
-
 });

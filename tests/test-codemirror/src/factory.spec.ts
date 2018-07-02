@@ -3,20 +3,17 @@
 
 import expect = require('expect.js');
 
-import {
-  CodeEditor
-} from '@jupyterlab/codeeditor';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import {
-  CodeMirrorEditorFactory, CodeMirrorEditor
+  CodeMirrorEditorFactory,
+  CodeMirrorEditor
 } from '@jupyterlab/codemirror';
-
 
 class ExposeCodeMirrorEditorFactory extends CodeMirrorEditorFactory {
   public inlineCodeMirrorConfig: CodeMirrorEditor.IConfig;
   public documentCodeMirrorConfig: CodeMirrorEditor.IConfig;
 }
-
 
 describe('CodeMirrorEditorFactory', () => {
   let host: HTMLElement;
@@ -26,7 +23,7 @@ describe('CodeMirrorEditorFactory', () => {
     lineNumbers: false,
     lineWrap: true,
     extraKeys: {
-      'Ctrl-Tab': 'indentAuto',
+      'Ctrl-Tab': 'indentAuto'
     }
   };
 
@@ -41,34 +38,34 @@ describe('CodeMirrorEditorFactory', () => {
   });
 
   describe('#constructor()', () => {
-
     it('should create a CodeMirrorEditorFactory', () => {
       let factory = new CodeMirrorEditorFactory();
       expect(factory).to.be.a(CodeMirrorEditorFactory);
     });
 
     it('should create a CodeMirrorEditorFactory', () => {
-
       let factory = new ExposeCodeMirrorEditorFactory(options);
       expect(factory).to.be.a(CodeMirrorEditorFactory);
-      expect(factory.inlineCodeMirrorConfig.extraKeys).to.eql(options.extraKeys);
-      expect(factory.documentCodeMirrorConfig.extraKeys).to.eql(options.extraKeys);
+      expect(factory.inlineCodeMirrorConfig.extraKeys).to.eql(
+        options.extraKeys
+      );
+      expect(factory.documentCodeMirrorConfig.extraKeys).to.eql(
+        options.extraKeys
+      );
     });
-
   });
 
   describe('#newInlineEditor', () => {
-
     it('should create a new editor', () => {
       let factory = new CodeMirrorEditorFactory();
-      let editor = factory.newInlineEditor({host, model});
+      let editor = factory.newInlineEditor({ host, model });
       expect(editor).to.be.a(CodeMirrorEditor);
       editor.dispose();
     });
 
     it('should create a new editor with given options', () => {
       let factory = new CodeMirrorEditorFactory(options);
-      let editor = factory.newInlineEditor({host, model}) as CodeMirrorEditor;
+      let editor = factory.newInlineEditor({ host, model }) as CodeMirrorEditor;
       expect(editor).to.be.a(CodeMirrorEditor);
       for (let key in Object.keys(options)) {
         let option = key as keyof CodeMirrorEditor.IConfig;
@@ -76,21 +73,22 @@ describe('CodeMirrorEditorFactory', () => {
       }
       editor.dispose();
     });
-
   });
 
   describe('#newDocumentEditor', () => {
-
     it('should create a new editor', () => {
       let factory = new CodeMirrorEditorFactory();
-      let editor = factory.newDocumentEditor({host, model});
+      let editor = factory.newDocumentEditor({ host, model });
       expect(editor).to.be.a(CodeMirrorEditor);
       editor.dispose();
     });
 
     it('should create a new editor with given options', () => {
       let factory = new CodeMirrorEditorFactory(options);
-      let editor = factory.newDocumentEditor({host, model}) as CodeMirrorEditor;
+      let editor = factory.newDocumentEditor({
+        host,
+        model
+      }) as CodeMirrorEditor;
       expect(editor).to.be.a(CodeMirrorEditor);
       for (let key in Object.keys(options)) {
         let option = key as keyof CodeMirrorEditor.IConfig;
@@ -98,7 +96,5 @@ describe('CodeMirrorEditorFactory', () => {
       }
       editor.dispose();
     });
-
   });
-
 });

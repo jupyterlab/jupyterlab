@@ -1,18 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IDisposable
-} from '@phosphor/disposable';
+import { IDisposable } from '@phosphor/disposable';
 
-import {
-  Signal
-} from '@phosphor/signaling';
+import { Signal } from '@phosphor/signaling';
 
-import {
-  DocumentRegistry
-} from '@jupyterlab/docregistry';
-
+import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 /**
  * A class that manages the auto saving of a document.
@@ -20,8 +13,7 @@ import {
  * #### Notes
  * Implements https://github.com/ipython/ipython/wiki/IPEP-15:-Autosaving-the-IPython-Notebook.
  */
-export
-class SaveHandler implements IDisposable {
+export class SaveHandler implements IDisposable {
   /**
    * Construct a new save handler.
    */
@@ -124,23 +116,29 @@ class SaveHandler implements IDisposable {
     }
 
     let start = new Date().getTime();
-    context.save().then(() => {
-      if (this.isDisposed) {
-        return;
-      }
-      let duration = new Date().getTime() - start;
-      // New save interval: higher of 10x save duration or min interval.
-      this._interval = Math.max(this._multiplier * duration, this._minInterval);
-      // Restart the update to pick up the new interval.
-      this._setTimer();
-    }).catch(err => {
-      // If the user canceled the save, do nothing.
-      if (err.message === 'Cancel') {
-        return;
-      }
-      // Otherwise, log the error.
-      console.error('Error in Auto-Save', err.message);
-    });
+    context
+      .save()
+      .then(() => {
+        if (this.isDisposed) {
+          return;
+        }
+        let duration = new Date().getTime() - start;
+        // New save interval: higher of 10x save duration or min interval.
+        this._interval = Math.max(
+          this._multiplier * duration,
+          this._minInterval
+        );
+        // Restart the update to pick up the new interval.
+        this._setTimer();
+      })
+      .catch(err => {
+        // If the user canceled the save, do nothing.
+        if (err.message === 'Cancel') {
+          return;
+        }
+        // Otherwise, log the error.
+        console.error('Error in Auto-Save', err.message);
+      });
   }
 
   private _autosaveTimer = -1;
@@ -153,17 +151,14 @@ class SaveHandler implements IDisposable {
   private _multiplier = 10;
 }
 
-
 /**
  * A namespace for `SaveHandler` statics.
  */
-export
-namespace SaveHandler {
+export namespace SaveHandler {
   /**
    * The options used to create a save handler.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The context asssociated with the file.
      */

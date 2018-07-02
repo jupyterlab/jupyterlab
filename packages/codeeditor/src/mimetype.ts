@@ -1,16 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  nbformat
-} from '@jupyterlab/coreutils';
-
+import { nbformat } from '@jupyterlab/coreutils';
 
 /**
  * The mime type service of a code editor.
  */
-export
-interface IEditorMimeTypeService {
+export interface IEditorMimeTypeService {
   /**
    * Get a mime type for the given language info.
    *
@@ -36,15 +32,12 @@ interface IEditorMimeTypeService {
   getMimeTypeByFilePath(filePath: string): string;
 }
 
-
 /**
  * A namespace for `IEditorMimeTypeService`.
  */
-export
-namespace IEditorMimeTypeService {
+export namespace IEditorMimeTypeService {
   /**
    * The default mime type.
    */
-  export
-  const defaultMimeType: string = 'text/plain';
+  export const defaultMimeType: string = 'text/plain';
 }

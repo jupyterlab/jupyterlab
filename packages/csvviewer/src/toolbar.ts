@@ -1,26 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  each, zip
-} from '@phosphor/algorithm';
+import { each, zip } from '@phosphor/algorithm';
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {
-  Styling
-} from '@jupyterlab/apputils';
-
+import { Styling } from '@jupyterlab/apputils';
 
 /**
  * The supported parsing delimiters.
@@ -44,13 +33,10 @@ const CSV_DELIMITER_LABEL_CLASS = 'jp-CSVDelimiter-label';
  */
 const CSV_DELIMITER_DROPDOWN_CLASS = 'jp-CSVDelimiter-dropdown';
 
-
-
 /**
  * A widget for selecting a delimiter.
  */
-export
-class CSVDelimiter extends Widget {
+export class CSVDelimiter extends Widget {
   /**
    * Construct a new csv table widget.
    */
@@ -85,11 +71,11 @@ class CSVDelimiter extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'change':
-      this._delimiterChanged.emit(this.selectNode.value);
-      break;
-    default:
-      break;
+      case 'change':
+        this._delimiterChanged.emit(this.selectNode.value);
+        break;
+      default:
+        break;
     }
   }
 
@@ -110,24 +96,20 @@ class CSVDelimiter extends Widget {
   private _delimiterChanged = new Signal<this, string>(this);
 }
 
-
 /**
  * A namespace for `CSVToolbar` statics.
  */
-export
-namespace CSVToolbar {
+export namespace CSVToolbar {
   /**
    * The instantiation options for a CSV toolbar.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The initially selected delimiter.
      */
     selected: string;
   }
 }
-
 
 /**
  * A namespace for private toolbar methods.
@@ -136,8 +118,7 @@ namespace Private {
   /**
    * Create the node for the delimiter switcher.
    */
-  export
-  function createNode(selected: string): HTMLElement {
+  export function createNode(selected: string): HTMLElement {
     let div = document.createElement('div');
     let label = document.createElement('span');
     let select = document.createElement('select');

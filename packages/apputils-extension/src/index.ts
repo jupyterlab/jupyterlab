@@ -4,53 +4,49 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  ILayoutRestorer, IRouter, JupyterLab, JupyterLabPlugin
+  ILayoutRestorer,
+  IRouter,
+  JupyterLab,
+  JupyterLabPlugin
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, ISplashScreen, IThemeManager, IWindowResolver,
-  ThemeManager, WindowResolver
+  Dialog,
+  ICommandPalette,
+  ISplashScreen,
+  IThemeManager,
+  IWindowResolver,
+  ThemeManager,
+  WindowResolver
 } from '@jupyterlab/apputils';
 
 import {
-  DataConnector, ISettingRegistry, IStateDB, PageConfig, SettingRegistry,
-  StateDB, URLExt
+  DataConnector,
+  ISettingRegistry,
+  IStateDB,
+  PageConfig,
+  SettingRegistry,
+  StateDB,
+  URLExt
 } from '@jupyterlab/coreutils';
 
-import {
-  IMainMenu
-} from '@jupyterlab/mainmenu';
+import { IMainMenu } from '@jupyterlab/mainmenu';
 
-import {
-  ServiceManager
-} from '@jupyterlab/services';
+import { ServiceManager } from '@jupyterlab/services';
 
-import {
-  CommandRegistry
-} from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {
-  PromiseDelegate
-} from '@phosphor/coreutils';
+import { PromiseDelegate } from '@phosphor/coreutils';
 
-import {
-  DisposableDelegate, IDisposable
-} from '@phosphor/disposable';
+import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
-import {
-  Menu
-} from '@phosphor/widgets';
+import { Menu } from '@phosphor/widgets';
 
-import {
-  activatePalette, restorePalette
-} from './palette';
+import { activatePalette, restorePalette } from './palette';
 
-import {
-  createRedirectForm
-} from './redirect';
+import { createRedirectForm } from './redirect';
 
 import '../style/index.css';
-
 
 /**
  * The interval in milliseconds that calls to save a workspace are debounced
@@ -64,50 +60,41 @@ const WORKSPACE_SAVE_DEBOUNCE_INTERVAL = 750;
  */
 const SPLASH_RECOVER_TIMEOUT = 12000;
 
-
 /**
  * The command IDs used by the apputils plugin.
  */
 namespace CommandIDs {
-  export
-  const changeTheme = 'apputils:change-theme';
+  export const changeTheme = 'apputils:change-theme';
 
-  export
-  const loadState = 'apputils:load-statedb';
+  export const loadState = 'apputils:load-statedb';
 
-  export
-  const recoverState = 'apputils:recover-statedb';
+  export const recoverState = 'apputils:recover-statedb';
 
-  export
-  const reset = 'apputils:reset';
+  export const reset = 'apputils:reset';
 
-  export
-  const resetOnLoad = 'apputils:reset-on-load';
+  export const resetOnLoad = 'apputils:reset-on-load';
 
-  export
-  const saveState = 'apputils:save-statedb';
+  export const saveState = 'apputils:save-statedb';
 }
-
 
 /**
  * The routing regular expressions used by the apputils plugin.
  */
 namespace Patterns {
-  export
-  const cloneState = /[?&]clone([=&]|$)/;
+  export const cloneState = /[?&]clone([=&]|$)/;
 
-  export
-  const loadState = /^\/workspaces\/([^?\/]+)/;
+  export const loadState = /^\/workspaces\/([^?\/]+)/;
 
-  export
-  const resetOnLoad = /(\?reset|\&reset)($|&)/;
+  export const resetOnLoad = /(\?reset|\&reset)($|&)/;
 }
-
 
 /**
  * A data connector to access plugin settings.
  */
-class SettingsConnector extends DataConnector<ISettingRegistry.IPlugin, string> {
+class SettingsConnector extends DataConnector<
+  ISettingRegistry.IPlugin,
+  string
+> {
   /**
    * Create a new settings connector.
    */
@@ -138,7 +125,6 @@ class SettingsConnector extends DataConnector<ISettingRegistry.IPlugin, string> 
   private _manager: ServiceManager;
 }
 
-
 /**
  * The default commmand palette extension.
  */
@@ -148,7 +134,6 @@ const palette: JupyterLabPlugin<ICommandPalette> = {
   provides: ICommandPalette,
   autoStart: true
 };
-
 
 /**
  * The default commmand palette's restoration extension.
@@ -166,7 +151,6 @@ const paletteRestorer: JupyterLabPlugin<void> = {
   autoStart: true
 };
 
-
 /**
  * The default setting registry provider.
  */
@@ -181,7 +165,6 @@ const settings: JupyterLabPlugin<ISettingRegistry> = {
   provides: ISettingRegistry
 };
 
-
 /**
  * The default theme manager provider.
  */
@@ -189,7 +172,13 @@ const themes: JupyterLabPlugin<IThemeManager> = {
   id: '@jupyterlab/apputils-extension:themes',
   requires: [ISettingRegistry, ISplashScreen],
   optional: [ICommandPalette, IMainMenu],
-  activate: (app: JupyterLab, settings: ISettingRegistry, splash: ISplashScreen, palette: ICommandPalette | null, mainMenu: IMainMenu | null): IThemeManager => {
+  activate: (
+    app: JupyterLab,
+    settings: ISettingRegistry,
+    splash: ISplashScreen,
+    palette: ICommandPalette | null,
+    mainMenu: IMainMenu | null
+  ): IThemeManager => {
     const host = app.shell;
     const commands = app.commands;
     const url = app.info.urls.themes;
@@ -204,7 +193,7 @@ const themes: JupyterLabPlugin<IThemeManager> = {
     commands.addCommand(CommandIDs.changeTheme, {
       label: args => {
         const theme = args['theme'] as string;
-        return  args['isPalette'] ? `Use ${theme} Theme` : theme;
+        return args['isPalette'] ? `Use ${theme} Theme` : theme;
       },
       isToggled: args => args['theme'] === currentTheme,
       execute: args => {
@@ -230,9 +219,15 @@ const themes: JupyterLabPlugin<IThemeManager> = {
           themeMenu.addItem({ command, args: { isPalette, theme } });
         });
       });
-      mainMenu.settingsMenu.addGroup([{
-        type: 'submenu' as Menu.ItemType, submenu: themeMenu
-      }], 0);
+      mainMenu.settingsMenu.addGroup(
+        [
+          {
+            type: 'submenu' as Menu.ItemType,
+            submenu: themeMenu
+          }
+        ],
+        0
+      );
     }
 
     // If we have a command palette, add theme switching options to it.
@@ -255,7 +250,6 @@ const themes: JupyterLabPlugin<IThemeManager> = {
   provides: IThemeManager
 };
 
-
 /**
  * The default window name resolver provider.
  */
@@ -268,7 +262,8 @@ const resolver: JupyterLabPlugin<IWindowResolver> = {
     const candidate = Private.getWorkspace(router) || '';
     const resolver = new WindowResolver();
 
-    return resolver.resolve(candidate)
+    return resolver
+      .resolve(candidate)
       .catch(reason => {
         console.warn('Window resolution failed:', reason);
 
@@ -281,7 +276,6 @@ const resolver: JupyterLabPlugin<IWindowResolver> = {
       });
   }
 };
-
 
 /**
  * The default splash screen provider.
@@ -301,7 +295,6 @@ const splash: JupyterLabPlugin<ISplashScreen> = {
   }
 };
 
-
 /**
  * The default state database for storing application state.
  */
@@ -310,7 +303,12 @@ const state: JupyterLabPlugin<IStateDB> = {
   autoStart: true,
   provides: IStateDB,
   requires: [IRouter, IWindowResolver, ISplashScreen],
-  activate: (app: JupyterLab, router: IRouter, resolver: IWindowResolver, splash: ISplashScreen) => {
+  activate: (
+    app: JupyterLab,
+    router: IRouter,
+    resolver: IWindowResolver,
+    splash: ISplashScreen
+  ) => {
     let debouncer: number;
     let resolved = false;
 
@@ -330,7 +328,8 @@ const state: JupyterLabPlugin<IStateDB> = {
 
         // Clear the state silently so that the state changed signal listener
         // will not be triggered as it causes a save state.
-        return state.clear(silent)
+        return state
+          .clear(silent)
           .then(() => commands.execute(CommandIDs.saveState, { immediate }));
       }
     });
@@ -368,7 +367,8 @@ const state: JupyterLabPlugin<IStateDB> = {
             return;
           }
 
-          state.toJSON()
+          state
+            .toJSON()
             .then(data => workspaces.save(id, { data, metadata }))
             .then(() => {
               conflated.resolve(undefined);
@@ -417,73 +417,90 @@ const state: JupyterLabPlugin<IStateDB> = {
           promise = Promise.resolve();
         }
 
-
         // If there is no promise, fetch the source and overwrite the database.
-        promise = promise || workspaces.fetch(source).then(saved => {
-          // If this command is called after a reset, the state database will
-          // already be resolved.
-          if (!resolved) {
-            resolved = true;
-            transform.resolve({ type: 'overwrite', contents: saved.data });
-          }
-        }).catch(reason => {
-          console.warn(`Fetching workspace (${workspace}) failed:`, reason);
+        promise =
+          promise ||
+          workspaces
+            .fetch(source)
+            .then(saved => {
+              // If this command is called after a reset, the state database will
+              // already be resolved.
+              if (!resolved) {
+                resolved = true;
+                transform.resolve({ type: 'overwrite', contents: saved.data });
+              }
+            })
+            .catch(reason => {
+              console.warn(`Fetching workspace (${workspace}) failed:`, reason);
 
-          // If the workspace does not exist, cancel the data transformation and
-          // save a workspace with the current user state data.
-          if (!resolved) {
-            resolved = true;
-            transform.resolve({ type: 'cancel', contents: null });
-          }
-        }).then(() => {
-          // Any time the local state database changes, save the workspace.
-          if (workspace) {
-            state.changed.connect(listener, state);
-          }
-        });
+              // If the workspace does not exist, cancel the data transformation and
+              // save a workspace with the current user state data.
+              if (!resolved) {
+                resolved = true;
+                transform.resolve({ type: 'cancel', contents: null });
+              }
+            })
+            .then(() => {
+              // Any time the local state database changes, save the workspace.
+              if (workspace) {
+                state.changed.connect(listener, state);
+              }
+            });
 
-        return promise.catch(reason => {
-          console.warn(`${CommandIDs.loadState} failed:`, reason);
-        }).then(() => {
-          const immediate = true;
+        return promise
+          .catch(reason => {
+            console.warn(`${CommandIDs.loadState} failed:`, reason);
+          })
+          .then(() => {
+            const immediate = true;
 
-          if (source === clone) {
-            // Maintain the query string parameters but remove `clone`.
-            delete query['clone'];
+            if (source === clone) {
+              // Maintain the query string parameters but remove `clone`.
+              delete query['clone'];
 
-            const url = path + URLExt.objectToQueryString(query) + hash;
-            const cloned = commands.execute(CommandIDs.saveState, { immediate })
-              .then(() => router.stop);
+              const url = path + URLExt.objectToQueryString(query) + hash;
+              const cloned = commands
+                .execute(CommandIDs.saveState, { immediate })
+                .then(() => router.stop);
 
-            // After the state has been cloned, navigate to the URL.
-            cloned.then(() => { router.navigate(url, { silent: true }); });
+              // After the state has been cloned, navigate to the URL.
+              cloned.then(() => {
+                router.navigate(url, { silent: true });
+              });
 
-            return cloned;
-          }
+              return cloned;
+            }
 
-          // After the state database has finished loading, save it.
-          return commands.execute(CommandIDs.saveState, { immediate });
-        });
+            // After the state database has finished loading, save it.
+            return commands.execute(CommandIDs.saveState, { immediate });
+          });
       }
     });
     // Both the load state and clone state patterns should trigger the load
     // state command if the URL matches one of them, but cloning a workspace
     // outranks loading it because it is an explicit user action.
     router.register({
-      command: CommandIDs.loadState, pattern: Patterns.cloneState,
+      command: CommandIDs.loadState,
+      pattern: Patterns.cloneState,
       rank: 20 // Set loading rank at a higher priority than the default 100.
     });
     router.register({
-      command: CommandIDs.loadState, pattern: Patterns.loadState,
+      command: CommandIDs.loadState,
+      pattern: Patterns.loadState,
       rank: 30 // Set loading rank at a higher priority than the default 100.
     });
 
     commands.addCommand(CommandIDs.reset, {
       label: 'Reset Application State',
       execute: () => {
-        commands.execute(CommandIDs.recoverState)
-          .then(() => { router.reload(); })
-          .catch(() => { router.reload(); });
+        commands
+          .execute(CommandIDs.recoverState)
+          .then(() => {
+            router.reload();
+          })
+          .catch(() => {
+            router.reload();
+          });
       }
     });
 
@@ -516,12 +533,15 @@ const state: JupyterLabPlugin<IStateDB> = {
         const silent = true;
         const hard = true;
         const url = path + URLExt.objectToQueryString(query) + hash;
-        const cleared = commands.execute(CommandIDs.recoverState)
+        const cleared = commands
+          .execute(CommandIDs.recoverState)
           .then(() => router.stop); // Stop routing before new route navigation.
 
         // After the state has been reset, navigate to the URL.
         if (clone) {
-          cleared.then(() => { router.navigate(url, { silent, hard }); });
+          cleared.then(() => {
+            router.navigate(url, { silent, hard });
+          });
         } else {
           cleared.then(() => {
             router.navigate(url, { silent });
@@ -554,15 +574,19 @@ const state: JupyterLabPlugin<IStateDB> = {
   }
 };
 
-
 /**
  * Export the plugins as default.
  */
 const plugins: JupyterLabPlugin<any>[] = [
-  palette, paletteRestorer, resolver, settings, state, splash, themes
+  palette,
+  paletteRestorer,
+  resolver,
+  settings,
+  state,
+  splash,
+  themes
 ];
 export default plugins;
-
 
 /**
  * The namespace for module private data.
@@ -571,42 +595,41 @@ namespace Private {
   /**
    * Returns the workspace name from the URL, if it exists.
    */
-  export
-  function getWorkspace(router: IRouter): string {
+  export function getWorkspace(router: IRouter): string {
     const match = router.current.path.match(Patterns.loadState);
 
-    return match && decodeURIComponent(match[1]) || '';
+    return (match && decodeURIComponent(match[1])) || '';
   }
 
   /**
    * Create a splash element.
    */
   function createSplash(): HTMLElement {
-      const splash = document.createElement('div');
-      const galaxy = document.createElement('div');
-      const logo = document.createElement('div');
+    const splash = document.createElement('div');
+    const galaxy = document.createElement('div');
+    const logo = document.createElement('div');
 
-      splash.id = 'jupyterlab-splash';
-      galaxy.id = 'galaxy';
-      logo.id = 'main-logo';
+    splash.id = 'jupyterlab-splash';
+    galaxy.id = 'galaxy';
+    logo.id = 'main-logo';
 
-      galaxy.appendChild(logo);
-      ['1', '2', '3'].forEach(id => {
-        const moon = document.createElement('div');
-        const planet = document.createElement('div');
+    galaxy.appendChild(logo);
+    ['1', '2', '3'].forEach(id => {
+      const moon = document.createElement('div');
+      const planet = document.createElement('div');
 
-        moon.id = `moon${id}`;
-        moon.className = 'moon orbit';
-        planet.id = `planet${id}`;
-        planet.className = 'planet';
+      moon.id = `moon${id}`;
+      moon.className = 'moon orbit';
+      planet.id = `planet${id}`;
+      planet.className = 'planet';
 
-        moon.appendChild(planet);
-        galaxy.appendChild(moon);
-      });
+      moon.appendChild(planet);
+      galaxy.appendChild(moon);
+    });
 
-      splash.appendChild(galaxy);
+    splash.appendChild(galaxy);
 
-      return splash;
+    return splash;
   }
 
   /**
@@ -637,25 +660,29 @@ namespace Private {
       ]
     });
 
-    dialog.launch().then(result => {
-      if (result.button.accept) {
-        return fn();
-      }
+    dialog
+      .launch()
+      .then(result => {
+        if (result.button.accept) {
+          return fn();
+        }
 
-      dialog.dispose();
-      dialog = null;
+        dialog.dispose();
+        dialog = null;
 
-      debouncer = window.setTimeout(() => {
-        recover(fn);
-      }, SPLASH_RECOVER_TIMEOUT);
-    }).catch(() => { /* no-op */ });
+        debouncer = window.setTimeout(() => {
+          recover(fn);
+        }, SPLASH_RECOVER_TIMEOUT);
+      })
+      .catch(() => {
+        /* no-op */
+      });
   }
 
   /**
    * Allows the user to clear state if splash screen takes too long.
    */
-  export
-  function redirect(router: IRouter, warn = false): Promise<void> {
+  export function redirect(router: IRouter, warn = false): Promise<void> {
     const form = createRedirectForm(warn);
     const dialog = new Dialog({
       title: 'Please use a different workspace.',
@@ -676,7 +703,9 @@ namespace Private {
         // This promise will never resolve because the application navigates
         // away to a new location. It only exists to satisfy the return type
         // of the `redirect` function.
-        return new Promise<void>(() => { /* no-op */ });
+        return new Promise<void>(() => {
+          /* no-op */
+        });
       }
 
       return redirect(router, true);
@@ -700,8 +729,11 @@ namespace Private {
    *
    * @param recovery - A command that recovers from a hanging splash.
    */
-  export
-  function showSplash(ready: Promise<any>, commands: CommandRegistry, recovery: string): IDisposable {
+  export function showSplash(
+    ready: Promise<any>,
+    commands: CommandRegistry,
+    recovery: string
+  ): IDisposable {
     splash.classList.remove('splash-fade');
     splashCount++;
 
@@ -710,7 +742,9 @@ namespace Private {
     }
     debouncer = window.setTimeout(() => {
       if (commands.hasCommand(recovery)) {
-        recover(() => { commands.execute(recovery); });
+        recover(() => {
+          commands.execute(recovery);
+        });
       }
     }, SPLASH_RECOVER_TIMEOUT);
 
@@ -730,10 +764,11 @@ namespace Private {
           }
 
           splash.classList.add('splash-fade');
-          window.setTimeout(() => { document.body.removeChild(splash); }, 500);
+          window.setTimeout(() => {
+            document.body.removeChild(splash);
+          }, 500);
         }
       });
     });
   }
 }
-

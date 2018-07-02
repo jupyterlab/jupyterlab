@@ -1,40 +1,27 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IEditorMimeTypeService
-} from '@jupyterlab/codeeditor';
+import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 
-import {
-  ABCWidgetFactory, DocumentRegistry
-} from '@jupyterlab/docregistry';
+import { ABCWidgetFactory, DocumentRegistry } from '@jupyterlab/docregistry';
 
-import {
-  RenderMimeRegistry
-} from '@jupyterlab/rendermime';
+import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import {
-  ToolbarItems
-} from './default-toolbar';
+import { ToolbarItems } from './default-toolbar';
 
-import {
-  INotebookModel
-} from './model';
+import { INotebookModel } from './model';
 
-import {
-  NotebookPanel
-} from './panel';
+import { NotebookPanel } from './panel';
 
-import {
-  StaticNotebook
-} from './widget';
-
+import { StaticNotebook } from './widget';
 
 /**
  * A widget factory for notebook panels.
  */
-export
-class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookModel> {
+export class NotebookWidgetFactory extends ABCWidgetFactory<
+  NotebookPanel,
+  INotebookModel
+> {
   /**
    * Construct a new notebook widget factory.
    *
@@ -43,9 +30,11 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
   constructor(options: NotebookWidgetFactory.IOptions) {
     super(options);
     this.rendermime = options.rendermime;
-    this.contentFactory = options.contentFactory || NotebookPanel.defaultContentFactory;
+    this.contentFactory =
+      options.contentFactory || NotebookPanel.defaultContentFactory;
     this.mimeTypeService = options.mimeTypeService;
-    this._editorConfig = options.editorConfig || StaticNotebook.defaultEditorConfig;
+    this._editorConfig =
+      options.editorConfig || StaticNotebook.defaultEditorConfig;
   }
 
   /*
@@ -80,14 +69,16 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
    * The factory will start the appropriate kernel and populate
    * the default toolbar items using `ToolbarItems.populateDefaults`.
    */
-  protected createNewWidget(context: DocumentRegistry.IContext<INotebookModel>): NotebookPanel {
+  protected createNewWidget(
+    context: DocumentRegistry.IContext<INotebookModel>
+  ): NotebookPanel {
     let rendermime = this.rendermime.clone({ resolver: context.urlResolver });
 
     let nbOptions = {
       rendermime,
       contentFactory: this.contentFactory,
       mimeTypeService: this.mimeTypeService,
-      editorConfig: this._editorConfig,
+      editorConfig: this._editorConfig
     };
     let content = this.contentFactory.createNotebook(nbOptions);
 
@@ -99,18 +90,15 @@ class NotebookWidgetFactory extends ABCWidgetFactory<NotebookPanel, INotebookMod
   private _editorConfig: StaticNotebook.IEditorConfig;
 }
 
-
 /**
  * The namespace for `NotebookWidgetFactory` statics.
  */
-export
-namespace NotebookWidgetFactory {
+export namespace NotebookWidgetFactory {
   /**
    * The options used to construct a `NotebookWidgetFactory`.
    */
-  export
-  interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
-     /*
+  export interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
+    /*
       * A rendermime instance.
       */
     rendermime: RenderMimeRegistry;

@@ -2,9 +2,7 @@
 // https://github.com/jupyterlab/jupyterlab
 // Definitions by: Grant Nestor <https://github.com/gnestor>
 
-
 declare module '@nteract/transform-vdom' {
-
   import * as React from 'react';
 
   interface IVDOMElement {
@@ -18,6 +16,5 @@ declare module '@nteract/transform-vdom' {
     data: IVDOMElement;
   }
 
-  export default class VDOM extends React.Component<IVDOMProps, {}> { }
-
+  export default class VDOM extends React.Component<IVDOMProps, {}> {}
 }

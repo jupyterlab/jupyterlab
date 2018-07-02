@@ -1,34 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
+
+import { Widget } from '@phosphor/widgets';
+
+import { NotebookActions } from './actions';
 
 import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
-  NotebookActions
-} from './actions';
-
-import {
-  showDialog, Dialog, Styling, Toolbar, ToolbarButton
+  showDialog,
+  Dialog,
+  Styling,
+  Toolbar,
+  ToolbarButton
 } from '@jupyterlab/apputils';
 
-import {
-  nbformat
-} from '@jupyterlab/coreutils';
+import { nbformat } from '@jupyterlab/coreutils';
 
-import {
-  NotebookPanel
-} from './panel';
+import { NotebookPanel } from './panel';
 
-import {
-  Notebook
-} from './widget';
-
+import { Notebook } from './widget';
 
 /**
  * The class name added to toolbar save button.
@@ -70,17 +61,14 @@ const TOOLBAR_CELLTYPE_CLASS = 'jp-Notebook-toolbarCellType';
  */
 const TOOLBAR_CELLTYPE_DROPDOWN_CLASS = 'jp-Notebook-toolbarCellTypeDropdown';
 
-
 /**
  * A namespace for the default toolbar items.
  */
-export
-namespace ToolbarItems {
+export namespace ToolbarItems {
   /**
    * Create save button toolbar item.
    */
-  export
-  function createSaveButton(panel: NotebookPanel): ToolbarButton {
+  export function createSaveButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
       className: TOOLBAR_SAVE_CLASS,
       onClick: () => {
@@ -104,8 +92,7 @@ namespace ToolbarItems {
   /**
    * Create an insert toolbar item.
    */
-  export
-  function createInsertButton(panel: NotebookPanel): ToolbarButton {
+  export function createInsertButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
       className: TOOLBAR_INSERT_CLASS,
       onClick: () => {
@@ -118,8 +105,7 @@ namespace ToolbarItems {
   /**
    * Create a cut toolbar item.
    */
-  export
-  function createCutButton(panel: NotebookPanel): ToolbarButton {
+  export function createCutButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
       className: TOOLBAR_CUT_CLASS,
       onClick: () => {
@@ -132,8 +118,7 @@ namespace ToolbarItems {
   /**
    * Create a copy toolbar item.
    */
-  export
-  function createCopyButton(panel: NotebookPanel): ToolbarButton {
+  export function createCopyButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
       className: TOOLBAR_COPY_CLASS,
       onClick: () => {
@@ -146,8 +131,7 @@ namespace ToolbarItems {
   /**
    * Create a paste toolbar item.
    */
-  export
-  function createPasteButton(panel: NotebookPanel): ToolbarButton {
+  export function createPasteButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
       className: TOOLBAR_PASTE_CLASS,
       onClick: () => {
@@ -160,8 +144,7 @@ namespace ToolbarItems {
   /**
    * Create a run toolbar item.
    */
-  export
-  function createRunButton(panel: NotebookPanel): ToolbarButton {
+  export function createRunButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
       className: TOOLBAR_RUN_CLASS,
       onClick: () => {
@@ -182,16 +165,14 @@ namespace ToolbarItems {
    * cell types of the selected cells.
    * It can handle a change to the context.
    */
-  export
-  function createCellTypeItem(panel: NotebookPanel): Widget {
+  export function createCellTypeItem(panel: NotebookPanel): Widget {
     return new CellTypeSwitcher(panel.content);
   }
 
   /**
    * Add the default items to the panel toolbar.
    */
-  export
-  function populateDefaults(panel: NotebookPanel): void {
+  export function populateDefaults(panel: NotebookPanel): void {
     let toolbar = panel.toolbar;
     toolbar.addItem('save', createSaveButton(panel));
     toolbar.addItem('insert', createInsertButton(panel));
@@ -204,10 +185,12 @@ namespace ToolbarItems {
     toolbar.addItem('cellType', createCellTypeItem(panel));
     toolbar.addItem('spacer', Toolbar.createSpacerItem());
     toolbar.addItem('kernelName', Toolbar.createKernelNameItem(panel.session));
-    toolbar.addItem('kernelStatus', Toolbar.createKernelStatusItem(panel.session));
+    toolbar.addItem(
+      'kernelStatus',
+      Toolbar.createKernelStatusItem(panel.session)
+    );
   }
 }
-
 
 /**
  * A toolbar widget that switches cell types.
@@ -251,14 +234,14 @@ class CellTypeSwitcher extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'change':
-      this._evtChange(event);
-      break;
-    case 'keydown':
-      this._evtKeyDown(event as KeyboardEvent);
-      break;
-    default:
-      break;
+      case 'change':
+        this._evtChange(event);
+        break;
+      case 'keydown':
+        this._evtKeyDown(event as KeyboardEvent);
+        break;
+      default:
+        break;
     }
   }
 
@@ -298,7 +281,8 @@ class CellTypeSwitcher extends Widget {
    * Handle `keydown` events for the widget.
    */
   private _evtKeyDown(event: KeyboardEvent): void {
-    if (event.keyCode === 13) {  // Enter
+    if (event.keyCode === 13) {
+      // Enter
       this._notebook.activate();
     }
   }
@@ -336,7 +320,6 @@ class CellTypeSwitcher extends Widget {
   private _select: HTMLSelectElement = null;
   private _notebook: Notebook = null;
 }
-
 
 /**
  * Create the node for the cell type switcher.

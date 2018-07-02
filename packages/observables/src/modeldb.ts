@@ -1,65 +1,46 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IDisposable, DisposableSet
-} from '@phosphor/disposable';
+import { IDisposable, DisposableSet } from '@phosphor/disposable';
+
+import { ISignal, Signal } from '@phosphor/signaling';
+
+import { JSONExt, JSONValue, JSONObject } from '@phosphor/coreutils';
+
+import { ObservableMap } from './observablemap';
+
+import { IObservableJSON, ObservableJSON } from './observablejson';
+
+import { IObservableString, ObservableString } from './observablestring';
 
 import {
-  ISignal, Signal
-} from '@phosphor/signaling';
-
-import {
-  JSONExt, JSONValue, JSONObject
-} from '@phosphor/coreutils';
-
-import {
-  ObservableMap
-} from './observablemap';
-
-import {
-  IObservableJSON, ObservableJSON
-} from './observablejson';
-
-import {
-  IObservableString, ObservableString
-} from './observablestring';
-
-import {
-  IObservableUndoableList, ObservableUndoableList
+  IObservableUndoableList,
+  ObservableUndoableList
 } from './undoablelist';
 
-import {
-  IObservableMap
-} from './observablemap';
-
+import { IObservableMap } from './observablemap';
 
 /**
  * String type annotations for Observable objects that can be
  * created and placed in the IModelDB interface.
  */
-export
-type ObservableType = 'Map' | 'List' | 'String' | 'Value';
-
+export type ObservableType = 'Map' | 'List' | 'String' | 'Value';
 
 /**
  * Base interface for Observable objects.
  */
-export
-interface IObservable extends IDisposable {
+export interface IObservable extends IDisposable {
   /**
    * The type of this object.
    */
   readonly type: ObservableType;
 }
 
-
 /**
  * Interface for an Observable object that represents
  * an opaque JSON value.
  */
-export
-interface IObservableValue extends IObservable {
+export interface IObservableValue extends IObservable {
   /**
    * The type of this object.
    */
@@ -81,13 +62,11 @@ interface IObservableValue extends IObservable {
   set(value: JSONValue): void;
 }
 
-
 /**
  * Interface for an object representing a single collaborator
  * on a realtime model.
  */
-export
-interface ICollaborator extends JSONObject {
+export interface ICollaborator extends JSONObject {
   /**
    * A user id for the collaborator.
    * This might not be unique, if the user has more than
@@ -120,26 +99,22 @@ interface ICollaborator extends JSONObject {
   readonly shortName: string;
 }
 
-
 /**
  * Interface for an IObservableMap that tracks collaborators.
  */
-export
-interface ICollaboratorMap extends IObservableMap<ICollaborator> {
+export interface ICollaboratorMap extends IObservableMap<ICollaborator> {
   /**
    * The local collaborator on a model.
    */
   readonly localCollaborator: ICollaborator;
 }
 
-
 /**
  * An interface for a path based database for
  * creating and storing values, which is agnostic
  * to the particular type of store in the backend.
  */
-export
-interface IModelDB extends IDisposable {
+export interface IModelDB extends IDisposable {
   /**
    * The base path for the `IModelDB`. This is prepended
    * to all the paths that are passed in to the member
@@ -271,12 +246,10 @@ interface IModelDB extends IDisposable {
   dispose(): void;
 }
 
-
 /**
  * A concrete implementation of an `IObservableValue`.
  */
-export
-class ObservableValue implements IObservableValue {
+export class ObservableValue implements IObservableValue {
   /**
    * Constructor for the value.
    *
@@ -346,17 +319,14 @@ class ObservableValue implements IObservableValue {
   private _isDisposed = false;
 }
 
-
 /**
  * The namespace for the `ObservableValue` class statics.
  */
-export
-namespace ObservableValue {
+export namespace ObservableValue {
   /**
    * The changed args object emitted by the `IObservableValue`.
    */
-  export
-  class IChangedArgs {
+  export class IChangedArgs {
     /**
      * The old value.
      */
@@ -369,12 +339,10 @@ namespace ObservableValue {
   }
 }
 
-
 /**
  * A concrete implementation of an `IModelDB`.
  */
-export
-class ModelDB implements IModelDB {
+export class ModelDB implements IModelDB {
   /**
    * Constructor for the `ModelDB`.
    */
@@ -471,7 +439,8 @@ class ModelDB implements IModelDB {
    */
   createList<T extends JSONValue>(path: string): IObservableUndoableList<T> {
     let vec = new ObservableUndoableList<T>(
-      new ObservableUndoableList.IdentitySerializer<T>());
+      new ObservableUndoableList.IdentitySerializer<T>()
+    );
     this._disposables.add(vec);
     this.set(path, vec);
     return vec;
@@ -539,7 +508,6 @@ class ModelDB implements IModelDB {
     (val as ObservableValue).set(value);
   }
 
-
   /**
    * Create a view onto a subtree of the model database.
    *
@@ -549,7 +517,7 @@ class ModelDB implements IModelDB {
    *   `IModelDB`, with `basePath` prepended to all paths.
    */
   view(basePath: string): ModelDB {
-    let view = new ModelDB({basePath, baseDB: this});
+    let view = new ModelDB({ basePath, baseDB: this });
     this._disposables.add(view);
     return view;
   }
@@ -601,13 +569,11 @@ class ModelDB implements IModelDB {
 /**
  * A namespace for the `ModelDB` class statics.
  */
-export
-namespace ModelDB {
+export namespace ModelDB {
   /**
    * Options for creating a `ModelDB` object.
    */
-  export
-  interface ICreateOptions {
+  export interface ICreateOptions {
     /**
      * The base path to prepend to all the path arguments.
      */
@@ -623,8 +589,7 @@ namespace ModelDB {
   /**
    * A factory interface for creating `IModelDB` objects.
    */
-  export
-  interface IFactory {
+  export interface IFactory {
     /**
      * Create a new `IModelDB` instance.
      */

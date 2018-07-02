@@ -5,7 +5,7 @@
   "description": "Keyboard shortcut settings for JupyterLab.",
   "properties": {
     "application:activate-next-tab": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "application:activate-next-tab" },
         "keys": { "default": ["Ctrl Shift ]"] },
@@ -14,7 +14,7 @@
       "type": "object"
     },
     "application:activate-previous-tab": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "application:activate-previous-tab" },
         "keys": { "default": ["Ctrl Shift ["] },
@@ -23,7 +23,7 @@
       "type": "object"
     },
     "tabmenu:activate-previously-used-tab": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "tabmenu:activate-previously-used-tab" },
         "keys": { "default": ["Accel Shift '"] },
@@ -32,7 +32,7 @@
       "type": "object"
     },
     "application:toggle-mode": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "application:toggle-mode" },
         "keys": { "default": ["Accel Shift D"] },
@@ -41,7 +41,7 @@
       "type": "object"
     },
     "application:toggle-left-area": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "application:toggle-left-area" },
         "keys": { "default": ["Accel B"] },
@@ -50,7 +50,7 @@
       "type": "object"
     },
     "apputils:activate-command-palette": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "apputils:activate-command-palette" },
         "keys": { "default": ["Accel Shift C"] },
@@ -59,25 +59,29 @@
       "type": "object"
     },
     "completer:invoke-console": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "completer:invoke-console" },
         "keys": { "default": ["Tab"] },
-        "selector": { "default": ".jp-CodeConsole-promptCell .jp-mod-completer-enabled" }
+        "selector": {
+          "default": ".jp-CodeConsole-promptCell .jp-mod-completer-enabled"
+        }
       },
       "type": "object"
     },
     "completer:invoke-notebook": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "completer:invoke-notebook" },
         "keys": { "default": ["Tab"] },
-        "selector": { "default": ".jp-Notebook.jp-mod-editMode .jp-mod-completer-enabled" }
+        "selector": {
+          "default": ".jp-Notebook.jp-mod-editMode .jp-mod-completer-enabled"
+        }
       },
       "type": "object"
     },
     "console:linebreak": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "console:linebreak" },
         "keys": { "default": ["Enter"] },
@@ -86,7 +90,7 @@
       "type": "object"
     },
     "console:run-forced": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "console:run-forced" },
         "keys": { "default": ["Shift Enter"] },
@@ -95,7 +99,7 @@
       "type": "object"
     },
     "docmanager:close": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "docmanager:close" },
         "keys": { "default": ["Ctrl Q"] },
@@ -104,7 +108,7 @@
       "type": "object"
     },
     "docmanager:save": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "docmanager:save" },
         "keys": { "default": ["Accel S"] },
@@ -113,7 +117,7 @@
       "type": "object"
     },
     "docmanager:save-as": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "docmanager:save-as" },
         "keys": { "default": ["Accel Shift S"] },
@@ -122,7 +126,7 @@
       "type": "object"
     },
     "editmenu:undo": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "editmenu:undo" },
         "keys": { "default": ["Ctrl Z"] },
@@ -131,7 +135,7 @@
       "type": "object"
     },
     "editmenu:redo": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "editmenu:redo" },
         "keys": { "default": ["Ctrl Shift Z"] },
@@ -140,7 +144,7 @@
       "type": "object"
     },
     "filebrowser:create-main-launcher": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "filebrowser:create-main-launcher" },
         "keys": { "default": ["Accel Shift L"] },
@@ -149,7 +153,7 @@
       "type": "object"
     },
     "filebrowser:toggle-main": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "filebrowser:toggle-main" },
         "keys": { "default": ["Accel Shift F"] },
@@ -158,7 +162,7 @@
       "type": "object"
     },
     "filemenu:persist-and-save": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "filemenu:persist-and-save" },
         "keys": { "default": ["Ctrl Shift S"] },
@@ -167,7 +171,7 @@
       "type": "object"
     },
     "help:toggle": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "help:toggle" },
         "keys": { "default": ["Ctrl Shift H"] },
@@ -176,7 +180,7 @@
       "type": "object"
     },
     "imageviewer:reset-image": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "imageviewer:reset-image" },
         "keys": { "default": ["0"] },
@@ -185,7 +189,7 @@
       "type": "object"
     },
     "imageviewer:zoom-in": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "imageviewer:zoom-in" },
         "keys": { "default": ["="] },
@@ -194,7 +198,7 @@
       "type": "object"
     },
     "imageviewer:zoom-out": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "imageviewer:zoom-out" },
         "keys": { "default": ["-"] },
@@ -203,7 +207,7 @@
       "type": "object"
     },
     "imageviewer:rotate-clockwise": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "imageviewer:rotate-clockwise" },
         "keys": { "default": ["]"] },
@@ -212,7 +216,7 @@
       "type": "object"
     },
     "imageviewer:rotate-counterclockwise": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "imageviewer:rotate-counterclockwise" },
         "keys": { "default": ["["] },
@@ -221,7 +225,7 @@
       "type": "object"
     },
     "imageviewer:flip-vertical": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "imageviewer:flip-vertical" },
         "keys": { "default": ["V"] },
@@ -230,7 +234,7 @@
       "type": "object"
     },
     "imageviewer:flip-horizontal": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "imageviewer:flip-horizontal" },
         "keys": { "default": ["H"] },
@@ -239,7 +243,7 @@
       "type": "object"
     },
     "imageviewer:invert-colors": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "imageviewer:invert-colors" },
         "keys": { "default": ["I"] },
@@ -248,7 +252,7 @@
       "type": "object"
     },
     "inspector:open": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "inspector:open" },
         "keys": { "default": ["Accel I"] },
@@ -257,7 +261,7 @@
       "type": "object"
     },
     "kernelmenu:interrupt": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "kernelmenu:interrupt" },
         "keys": { "default": ["I", "I"] },
@@ -266,7 +270,7 @@
       "type": "object"
     },
     "kernelmenu:restart": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "kernelmenu:restart" },
         "keys": { "default": ["0", "0"] },
@@ -275,7 +279,7 @@
       "type": "object"
     },
     "notebook:change-cell-to-code": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:change-cell-to-code" },
         "keys": { "default": ["Y"] },
@@ -284,7 +288,7 @@
       "type": "object"
     },
     "notebook:change-cell-to-heading-1": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:change-cell-to-heading-1" },
         "keys": { "default": ["1"] },
@@ -293,7 +297,7 @@
       "type": "object"
     },
     "notebook:change-cell-to-heading-2": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:change-cell-to-heading-2" },
         "keys": { "default": ["2"] },
@@ -302,7 +306,7 @@
       "type": "object"
     },
     "notebook:change-cell-to-heading-3": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:change-cell-to-heading-3" },
         "keys": { "default": ["3"] },
@@ -311,7 +315,7 @@
       "type": "object"
     },
     "notebook:change-cell-to-heading-4": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:change-cell-to-heading-4" },
         "keys": { "default": ["4"] },
@@ -320,7 +324,7 @@
       "type": "object"
     },
     "notebook:change-cell-to-heading-5": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:change-cell-to-heading-5" },
         "keys": { "default": ["5"] },
@@ -329,7 +333,7 @@
       "type": "object"
     },
     "notebook:change-cell-to-heading-6": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:change-cell-to-heading-6" },
         "keys": { "default": ["6"] },
@@ -338,7 +342,7 @@
       "type": "object"
     },
     "notebook:change-cell-to-markdown": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:change-cell-to-markdown" },
         "keys": { "default": ["M"] },
@@ -347,7 +351,7 @@
       "type": "object"
     },
     "notebook:change-cell-to-raw": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:change-cell-to-raw" },
         "keys": { "default": ["R"] },
@@ -356,7 +360,7 @@
       "type": "object"
     },
     "notebook:copy-cell": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:copy-cell" },
         "keys": { "default": ["C"] },
@@ -365,7 +369,7 @@
       "type": "object"
     },
     "notebook:cut-cell": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:cut-cell" },
         "keys": { "default": ["X"] },
@@ -374,7 +378,7 @@
       "type": "object"
     },
     "notebook:delete-cell": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:delete-cell" },
         "keys": { "default": ["D", "D"] },
@@ -383,7 +387,7 @@
       "type": "object"
     },
     "notebook:enter-command-mode-1": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:enter-command-mode" },
         "keys": { "default": ["Escape"] },
@@ -394,7 +398,7 @@
       "type": "object"
     },
     "notebook:enter-command-mode-2": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:enter-command-mode" },
         "keys": { "default": ["Ctrl M"] },
@@ -403,7 +407,7 @@
       "type": "object"
     },
     "notebook:enter-edit-mode": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:enter-edit-mode" },
         "keys": { "default": ["Enter"] },
@@ -412,7 +416,7 @@
       "type": "object"
     },
     "notebook:extend-marked-cells-above-1": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:extend-marked-cells-above" },
         "keys": { "default": ["Shift ArrowUp"] },
@@ -421,7 +425,7 @@
       "type": "object"
     },
     "notebook:extend-marked-cells-above-2": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:extend-marked-cells-above" },
         "keys": { "default": ["Shift K"] },
@@ -430,7 +434,7 @@
       "type": "object"
     },
     "notebook:extend-marked-cells-below-1": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:extend-marked-cells-below" },
         "keys": { "default": ["Shift ArrowDown"] },
@@ -439,7 +443,7 @@
       "type": "object"
     },
     "notebook:extend-marked-cells-below-2": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:extend-marked-cells-below" },
         "keys": { "default": ["Shift J"] },
@@ -448,7 +452,7 @@
       "type": "object"
     },
     "notebook:insert-cell-above": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:insert-cell-above" },
         "keys": { "default": ["A"] },
@@ -457,7 +461,7 @@
       "type": "object"
     },
     "notebook:insert-cell-below": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:insert-cell-below" },
         "keys": { "default": ["B"] },
@@ -466,7 +470,7 @@
       "type": "object"
     },
     "notebook:merge-cells": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:merge-cells" },
         "keys": { "default": ["Shift M"] },
@@ -475,7 +479,7 @@
       "type": "object"
     },
     "notebook:move-cursor-down-1": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:move-cursor-down" },
         "keys": { "default": ["ArrowDown"] },
@@ -484,7 +488,7 @@
       "type": "object"
     },
     "notebook:move-cursor-down-2": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:move-cursor-down" },
         "keys": { "default": ["J"] },
@@ -493,7 +497,7 @@
       "type": "object"
     },
     "notebook:move-cursor-up-1": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:move-cursor-up" },
         "keys": { "default": ["ArrowUp"] },
@@ -502,7 +506,7 @@
       "type": "object"
     },
     "notebook:move-cursor-up-2": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:move-cursor-up" },
         "keys": { "default": ["K"] },
@@ -511,7 +515,7 @@
       "type": "object"
     },
     "notebook:paste-cell-below": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:paste-cell-below" },
         "keys": { "default": ["V"] },
@@ -520,7 +524,7 @@
       "type": "object"
     },
     "notebook:redo-cell-action": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:redo-cell-action" },
         "keys": { "default": ["Shift Z"] },
@@ -529,7 +533,7 @@
       "type": "object"
     },
     "notebook:run-cell-1": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:run-cell" },
         "keys": { "default": ["Ctrl Enter"] },
@@ -538,7 +542,7 @@
       "type": "object"
     },
     "notebook:run-cell-2": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:run-cell" },
         "keys": { "default": ["Ctrl Enter"] },
@@ -547,7 +551,7 @@
       "type": "object"
     },
     "notebook:run-cell-and-insert-below-1": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:run-cell-and-insert-below" },
         "keys": { "default": ["Alt Enter"] },
@@ -556,7 +560,7 @@
       "type": "object"
     },
     "notebook:run-cell-and-insert-below-2": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:run-cell-and-insert-below" },
         "keys": { "default": ["Alt Enter"] },
@@ -565,7 +569,7 @@
       "type": "object"
     },
     "notebook:run-cell-and-select-next": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:run-cell-and-select-next" },
         "keys": { "default": ["Shift Enter"] },
@@ -574,7 +578,7 @@
       "type": "object"
     },
     "notebook:select-all": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:select-all" },
         "keys": { "default": ["Accel A"] },
@@ -583,7 +587,7 @@
       "type": "object"
     },
     "notebook:split-cell-at-cursor": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:split-cell-at-cursor" },
         "keys": { "default": ["Ctrl Shift -"] },
@@ -592,7 +596,7 @@
       "type": "object"
     },
     "notebook:toggle-all-cell-line-numbers": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:toggle-all-cell-line-numbers" },
         "keys": { "default": ["Shift L"] },
@@ -601,7 +605,7 @@
       "type": "object"
     },
     "notebook:toggle-cell-line-numbers": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:toggle-cell-line-numbers" },
         "keys": { "default": ["L"] },
@@ -610,7 +614,7 @@
       "type": "object"
     },
     "notebook:undo-cell-action": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "notebook:undo-cell-action" },
         "keys": { "default": ["Z"] },
@@ -619,7 +623,7 @@
       "type": "object"
     },
     "runmenu:run": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "runmenu:run" },
         "keys": { "default": ["Shift Enter"] },
@@ -628,7 +632,7 @@
       "type": "object"
     },
     "runmenu:run-all": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "runmenu:run-all" },
         "keys": { "default": ["Accel Shift Enter"] },
@@ -637,7 +641,7 @@
       "type": "object"
     },
     "settingeditor:debug": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "settingeditor:debug" },
         "keys": { "default": ["Accel I"] },
@@ -646,7 +650,7 @@
       "type": "object"
     },
     "settingeditor:open": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "settingeditor:open" },
         "keys": { "default": ["Accel ,"] },
@@ -655,7 +659,7 @@
       "type": "object"
     },
     "settingeditor:save": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "settingeditor:save" },
         "keys": { "default": ["Accel S"] },
@@ -664,16 +668,18 @@
       "type": "object"
     },
     "tooltip:dismiss-console": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "tooltip:dismiss" },
         "keys": { "default": ["Escape"] },
-        "selector": { "default": "body.jp-mod-tooltip .jp-CodeConsole-promptCell" }
+        "selector": {
+          "default": "body.jp-mod-tooltip .jp-CodeConsole-promptCell"
+        }
       },
       "type": "object"
     },
     "tooltip:dismiss-notebook": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "tooltip:dismiss" },
         "keys": { "default": ["Escape"] },
@@ -682,25 +688,31 @@
       "type": "object"
     },
     "tooltip:launch-console": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "tooltip:launch-console" },
         "keys": { "default": ["Shift Tab"] },
-        "selector": { "default": ".jp-CodeConsole-promptCell .jp-InputArea-editor:not(.jp-mod-has-primary-selection)" }
+        "selector": {
+          "default":
+            ".jp-CodeConsole-promptCell .jp-InputArea-editor:not(.jp-mod-has-primary-selection)"
+        }
       },
       "type": "object"
     },
     "tooltip:launch-notebook": {
-      "default": { },
+      "default": {},
       "properties": {
         "command": { "default": "tooltip:launch-notebook" },
         "keys": { "default": ["Shift Tab"] },
-        "selector": { "default": ".jp-Notebook.jp-mod-editMode .jp-InputArea-editor:not(.jp-mod-has-primary-selection)" }
+        "selector": {
+          "default":
+            ".jp-Notebook.jp-mod-editMode .jp-InputArea-editor:not(.jp-mod-has-primary-selection)"
+        }
       },
       "type": "object"
     }
   },
-  "oneOf": [ {"$ref": "#/definitions/shortcut" } ],
+  "oneOf": [{ "$ref": "#/definitions/shortcut" }],
   "type": "object",
   "definitions": {
     "shortcut": {

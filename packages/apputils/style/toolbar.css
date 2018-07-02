@@ -8,7 +8,6 @@
   --jp-private-toolbar-height: 28px;
 }
 
-
 .jp-Toolbar {
   color: var(--jp-ui-font-color1);
   flex: 0 0 auto;
@@ -22,7 +21,6 @@
   z-index: 1;
 }
 
-
 .jp-Toolbar > .jp-Toolbar-item {
   flex: 0 0 auto;
   display: flex;
@@ -32,7 +30,6 @@
   line-height: var(--jp-private-toolbar-height);
   height: 100%;
 }
-
 
 .jp-Toolbar-item.jp-Toolbar-button {
   display: inline-block;
@@ -45,18 +42,15 @@
   border: 1px solid var(--jp-layout-color1);
 }
 
-
 .jp-Toolbar-item.jp-Toolbar-button:focus {
   box-shadow: var(--jp-toolbar-box-shadow);
   border: 1px solid var(--jp-toolbar-border-color);
 }
 
-
 .jp-Toolbar-button:enabled:hover {
   border: 1px solid var(--jp-toolbar-border-color);
-  box-shadow: 0px 0px 2px 0px rgba(0,0,0,0.24);
+  box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.24);
 }
-
 
 .jp-Toolbar-button:enabled:active {
   border: 1px solid var(--jp-toolbar-border-color);
@@ -78,7 +72,6 @@
   flex-shrink: 1;
 }
 
-
 .jp-Toolbar > .jp-Toolbar-item.jp-Toolbar-kernelName {
   width: auto;
   text-transform: none; /* kernel names can benefit from visible case */
@@ -87,7 +80,6 @@
   font-size: var(--jp-ui-font-size1);
   line-height: 22px;
 }
-
 
 .jp-Toolbar-item.jp-Toolbar-kernelStatus {
   display: inline-block;

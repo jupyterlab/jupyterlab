@@ -1,42 +1,23 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IIterator, IterableOrArrayLike, toArray
-} from '@phosphor/algorithm';
+import { IIterator, IterableOrArrayLike, toArray } from '@phosphor/algorithm';
 
-import {
-  JSONObject, JSONExt
-} from '@phosphor/coreutils';
+import { JSONObject, JSONExt } from '@phosphor/coreutils';
 
-import {
-  IDisposable
-} from '@phosphor/disposable';
+import { IDisposable } from '@phosphor/disposable';
 
-import {
-  ElementExt
-} from '@phosphor/domutils';
+import { ElementExt } from '@phosphor/domutils';
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {
-  HoverBox, defaultSanitizer
-} from '@jupyterlab/apputils';
+import { HoverBox, defaultSanitizer } from '@jupyterlab/apputils';
 
-import {
-  CodeEditor
-} from '@jupyterlab/codeeditor';
-
+import { CodeEditor } from '@jupyterlab/codeeditor';
 
 /**
  * The class name added to completer menu items.
@@ -69,12 +50,10 @@ const USE_CAPTURE = true;
  */
 const N_COLORS = 10;
 
-
 /**
  * A widget that enables text completion.
  */
-export
-class Completer extends Widget {
+export class Completer extends Widget {
   /**
    * Construct a text completer menu widget.
    */
@@ -121,7 +100,7 @@ class Completer extends Widget {
     return this._model;
   }
   set model(model: Completer.IModel | null) {
-    if (!model && !this._model || model === this._model) {
+    if ((!model && !this._model) || model === this._model) {
       return;
     }
     if (this._model) {
@@ -156,17 +135,17 @@ class Completer extends Widget {
       return;
     }
     switch (event.type) {
-    case 'keydown':
-      this._evtKeydown(event as KeyboardEvent);
-      break;
-    case 'mousedown':
-      this._evtMousedown(event as MouseEvent);
-      break;
-    case 'scroll':
-      this._evtScroll(event as MouseEvent);
-      break;
-    default:
-      break;
+      case 'keydown':
+        this._evtKeydown(event as KeyboardEvent);
+        break;
+      case 'mousedown':
+        this._evtMousedown(event as MouseEvent);
+        break;
+      case 'scroll':
+        this._evtScroll(event as MouseEvent);
+        break;
+      default:
+        break;
     }
   }
 
@@ -270,8 +249,11 @@ class Completer extends Widget {
 
     // Populate the completer items.
     for (let item of items) {
-      let li = this._renderer
-        .createItemNode(item!, model.typeMap(), orderedTypes);
+      let li = this._renderer.createItemNode(
+        item!,
+        model.typeMap(),
+        orderedTypes
+      );
       node.appendChild(li);
     }
 
@@ -334,7 +316,7 @@ class Completer extends Widget {
       return;
     }
     switch (event.keyCode) {
-      case 9:  // Tab key
+      case 9: // Tab key
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
@@ -382,7 +364,6 @@ class Completer extends Widget {
 
     let target = event.target as HTMLElement;
     while (target !== document.documentElement) {
-
       // If the user has made a selection, emit its value and reset the widget.
       if (target.classList.contains(ITEM_CLASS)) {
         event.preventDefault();
@@ -424,7 +405,9 @@ class Completer extends Widget {
     }
 
     // Set the geometry of the node asynchronously.
-    requestAnimationFrame(() => { this._setGeometry(); });
+    requestAnimationFrame(() => {
+      this._setGeometry();
+    });
   }
 
   /**
@@ -497,20 +480,16 @@ class Completer extends Widget {
   private _visibilityChanged = new Signal<this, void>(this);
 }
 
-
-export
-namespace Completer {
+export namespace Completer {
   /**
    * A type map that may add type annotations to completer matches.
    */
-  export
-  type TypeMap = { [index: string]: string; };
+  export type TypeMap = { [index: string]: string };
 
   /**
    * The initialization options for a completer widget.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The semantic parent of the completer widget, its referent editor.
      */
@@ -527,12 +506,10 @@ namespace Completer {
     renderer?: IRenderer;
   }
 
-
   /**
    * An interface for a completion request reflecting the state of the editor.
    */
-  export
-  interface ITextState extends JSONObject {
+  export interface ITextState extends JSONObject {
     /**
      * The current value of the editor.
      */
@@ -562,8 +539,7 @@ namespace Completer {
   /**
    * The data model backing a code completer widget.
    */
-  export
-  interface IModel extends IDisposable {
+  export interface IModel extends IDisposable {
     /**
      * A signal emitted when state of the completer menu changes.
      */
@@ -618,7 +594,10 @@ namespace Completer {
     /**
      * Set the available options in the completer menu.
      */
-    setOptions(options: IterableOrArrayLike<string>, typeMap?: JSONObject): void;
+    setOptions(
+      options: IterableOrArrayLike<string>,
+      typeMap?: JSONObject
+    ): void;
 
     /**
      * Handle a cursor change.
@@ -646,8 +625,7 @@ namespace Completer {
   /**
    * An object describing a completion option injection into text.
    */
-  export
-  interface IPatch {
+  export interface IPatch {
     /**
      * The patched text.
      */
@@ -659,12 +637,10 @@ namespace Completer {
     offset: number;
   }
 
-
   /**
    * A completer menu item.
    */
-  export
-  interface IItem {
+  export interface IItem {
     /**
      * The highlighted, marked up text of a visible completer item.
      */
@@ -676,12 +652,10 @@ namespace Completer {
     raw: string;
   }
 
-
   /**
    * A cursor span.
    */
-  export
-  interface ICursorSpan extends JSONObject {
+  export interface ICursorSpan extends JSONObject {
     /**
      * The start position of the cursor.
      */
@@ -693,27 +667,32 @@ namespace Completer {
     end: number;
   }
 
-
   /**
    * A renderer for completer widget nodes.
    */
-  export
-  interface IRenderer {
+  export interface IRenderer {
     /**
      * Create an item node (an `li` element) for a text completer menu.
      */
-    createItemNode(item: IItem, typeMap: TypeMap, orderedTypes: string[]): HTMLLIElement;
+    createItemNode(
+      item: IItem,
+      typeMap: TypeMap,
+      orderedTypes: string[]
+    ): HTMLLIElement;
   }
 
   /**
    * The default implementation of an `IRenderer`.
    */
-  export
-  class Renderer implements IRenderer {
+  export class Renderer implements IRenderer {
     /**
      * Create an item node for a text completer menu.
      */
-    createItemNode(item: IItem, typeMap: TypeMap, orderedTypes: string[]): HTMLLIElement {
+    createItemNode(
+      item: IItem,
+      typeMap: TypeMap,
+      orderedTypes: string[]
+    ): HTMLLIElement {
       let li = document.createElement('li');
       li.className = ITEM_CLASS;
       // Set the raw, un-marked up value as a data attribute.
@@ -722,9 +701,9 @@ namespace Completer {
       let matchNode = document.createElement('code');
       matchNode.className = 'jp-Completer-match';
       // Use innerHTML because search results include <mark> tags.
-      matchNode.innerHTML = defaultSanitizer.sanitize(
-        item.text, { allowedTags: ['mark'] }
-      );
+      matchNode.innerHTML = defaultSanitizer.sanitize(item.text, {
+        allowedTags: ['mark']
+      });
 
       // If there are types provided add those.
       if (!JSONExt.deepEqual(typeMap, {})) {
@@ -751,10 +730,8 @@ namespace Completer {
   /**
    * The default `IRenderer` instance.
    */
-  export
-  const defaultRenderer = new Renderer();
+  export const defaultRenderer = new Renderer();
 }
-
 
 /**
  * A namespace for completer widget private data.
@@ -763,8 +740,7 @@ namespace Private {
   /**
    * Returns the common subset string that a list of strings shares.
    */
-  export
-  function commonSubset(values: string[]): string {
+  export function commonSubset(values: string[]): string {
     let len = values.length;
     let subset = '';
     if (len < 2) {
@@ -786,8 +762,7 @@ namespace Private {
   /**
    * Returns the list of raw item values currently in the DOM.
    */
-  export
-  function itemValues(items: NodeList): string[] {
+  export function itemValues(items: NodeList): string[] {
     let values: string[] = [];
     for (let i = 0, len = items.length; i < len; i++) {
       values.push((items[i] as HTMLElement).getAttribute('data-value'));
@@ -798,12 +773,13 @@ namespace Private {
   /**
    * Returns true for any modified click event (i.e., not a left-click).
    */
-  export
-  function nonstandardClick(event: MouseEvent): boolean {
-    return event.button !== 0 ||
+  export function nonstandardClick(event: MouseEvent): boolean {
+    return (
+      event.button !== 0 ||
       event.altKey ||
       event.ctrlKey ||
       event.shiftKey ||
-      event.metaKey;
+      event.metaKey
+    );
   }
 }

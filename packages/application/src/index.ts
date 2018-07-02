@@ -4,41 +4,23 @@
 // Local CSS must be loaded prior to loading other libs.
 import '../style/index.css';
 
-import {
-  PageConfig
-} from '@jupyterlab/coreutils';
+import { PageConfig } from '@jupyterlab/coreutils';
 
-import {
-  CommandLinker
-} from '@jupyterlab/apputils';
+import { CommandLinker } from '@jupyterlab/apputils';
 
-import {
-  Base64ModelFactory, DocumentRegistry
-} from '@jupyterlab/docregistry';
+import { Base64ModelFactory, DocumentRegistry } from '@jupyterlab/docregistry';
 
-import {
-  IRenderMime
-} from '@jupyterlab/rendermime-interfaces';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
-import {
-  ServiceManager
-} from '@jupyterlab/services';
+import { ServiceManager } from '@jupyterlab/services';
 
-import {
-  Application, IPlugin
-} from '@phosphor/application';
+import { Application, IPlugin } from '@phosphor/application';
 
-import {
-  DisposableDelegate, IDisposable
-} from '@phosphor/disposable';
+import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
-import {
-  createRendermimePlugins
-} from './mimerenderers';
+import { createRendermimePlugins } from './mimerenderers';
 
-import {
-  ApplicationShell
-} from './shell';
+import { ApplicationShell } from './shell';
 import { ISignal, Signal } from '@phosphor/signaling';
 
 export { ILayoutRestorer, LayoutRestorer } from './layoutrestorer';
@@ -46,19 +28,15 @@ export { IMimeDocumentTracker } from './mimerenderers';
 export { IRouter, Router } from './router';
 export { ApplicationShell } from './shell';
 
-
 /**
  * The type for all JupyterLab plugins.
  */
-export
-type JupyterLabPlugin<T> = IPlugin<JupyterLab, T>;
-
+export type JupyterLabPlugin<T> = IPlugin<JupyterLab, T>;
 
 /**
  * JupyterLab is the main application class. It is instantiated once and shared.
  */
-export
-class JupyterLab extends Application<ApplicationShell> {
+export class JupyterLab extends Application<ApplicationShell> {
   /**
    * Construct a new JupyterLab object.
    */
@@ -75,12 +53,14 @@ class JupyterLab extends Application<ApplicationShell> {
     let linker = new CommandLinker({ commands: this.commands });
     this.commandLinker = linker;
 
-    let registry = this.docRegistry = new DocumentRegistry();
+    let registry = (this.docRegistry = new DocumentRegistry());
     registry.addModelFactory(new Base64ModelFactory());
 
     if (options.mimeExtensions) {
       let plugins = createRendermimePlugins(options.mimeExtensions);
-      plugins.forEach(plugin => { this.registerPlugin(plugin); });
+      plugins.forEach(plugin => {
+        this.registerPlugin(plugin);
+      });
     }
   }
 
@@ -124,7 +104,6 @@ class JupyterLab extends Application<ApplicationShell> {
   get busySignal(): ISignal<JupyterLab, boolean> {
     return this._busySignal;
   }
-
 
   /**
    * The information about the application.
@@ -204,7 +183,9 @@ class JupyterLab extends Application<ApplicationShell> {
    * @param mods - The plugin modules to register.
    */
   registerPluginModules(mods: JupyterLab.IPluginModule[]): void {
-    mods.forEach(mod => { this.registerPluginModule(mod); });
+    mods.forEach(mod => {
+      this.registerPluginModule(mod);
+    });
   }
 
   private _info: JupyterLab.IInfo;
@@ -213,23 +194,19 @@ class JupyterLab extends Application<ApplicationShell> {
   private _busySignal: Signal<JupyterLab, boolean>;
 }
 
-
 /**
  * The namespace for `JupyterLab` class statics.
  */
-export
-namespace JupyterLab {
+export namespace JupyterLab {
   /**
    * The options used to initialize a JupyterLab object.
    */
-  export
-  interface IOptions extends Partial<IInfo> {}
+  export interface IOptions extends Partial<IInfo> {}
 
   /**
    * The information about a JupyterLab application.
    */
-  export
-  interface IInfo {
+  export interface IInfo {
     /**
      * The name of the JupyterLab application.
      */
@@ -253,12 +230,12 @@ namespace JupyterLab {
     /**
      * The collection of deferred extension patterns and matched extensions.
      */
-    readonly deferred: { patterns: string[], matches: string[] };
+    readonly deferred: { patterns: string[]; matches: string[] };
 
     /**
      * The collection of disabled extension patterns and matched extensions.
      */
-    readonly disabled: { patterns: string[], matches: string[] };
+    readonly disabled: { patterns: string[]; matches: string[] };
 
     /**
      * The mime renderer extensions.
@@ -269,23 +246,23 @@ namespace JupyterLab {
      * The urls used by the application.
      */
     readonly urls: {
-      readonly page: string,
-      readonly public: string,
-      readonly settings: string,
-      readonly themes: string
+      readonly page: string;
+      readonly public: string;
+      readonly settings: string;
+      readonly themes: string;
     };
 
     /**
      * The local directories used by the application.
      */
     readonly directories: {
-      readonly appSettings: string,
-      readonly schemas: string,
-      readonly static: string,
-      readonly templates: string,
-      readonly themes: string,
-      readonly userSettings: string,
-      readonly serverRoot: string
+      readonly appSettings: string;
+      readonly schemas: string;
+      readonly static: string;
+      readonly templates: string;
+      readonly themes: string;
+      readonly userSettings: string;
+      readonly serverRoot: string;
     };
 
     /**
@@ -297,8 +274,7 @@ namespace JupyterLab {
   /**
    * The default application info.
    */
-  export
-  const defaultInfo: IInfo = {
+  export const defaultInfo: IInfo = {
     name: PageConfig.getOption('appName') || 'JupyterLab',
     namespace: PageConfig.getOption('appNamespace'),
     version: PageConfig.getOption('appVersion') || 'unknown',
@@ -328,8 +304,7 @@ namespace JupyterLab {
    * The interface for a module that exports a plugin or plugins as
    * the default value.
    */
-  export
-  interface IPluginModule {
+  export interface IPluginModule {
     /**
      * The default export.
      */

@@ -1,19 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Menu, Widget
-} from '@phosphor/widgets';
+import { Menu, Widget } from '@phosphor/widgets';
 
-import {
-  IJupyterLabMenu, IMenuExtender, JupyterLabMenu
-} from './labmenu';
+import { IJupyterLabMenu, IMenuExtender, JupyterLabMenu } from './labmenu';
 
 /**
  * An interface for a View menu.
  */
-export
-interface IViewMenu extends IJupyterLabMenu {
+export interface IViewMenu extends IJupyterLabMenu {
   /**
    * A set storing IKernelUsers for the Kernel menu.
    */
@@ -23,8 +18,7 @@ interface IViewMenu extends IJupyterLabMenu {
 /**
  * An extensible View menu for the application.
  */
-export
-class ViewMenu extends JupyterLabMenu implements IViewMenu {
+export class ViewMenu extends JupyterLabMenu implements IViewMenu {
   /**
    * Construct the view menu.
    */
@@ -32,8 +26,7 @@ class ViewMenu extends JupyterLabMenu implements IViewMenu {
     super(options);
     this.menu.title.label = 'View';
 
-    this.editorViewers =
-      new Set<IViewMenu.IEditorViewer<Widget>>();
+    this.editorViewers = new Set<IViewMenu.IEditorViewer<Widget>>();
   }
 
   /**
@@ -53,14 +46,12 @@ class ViewMenu extends JupyterLabMenu implements IViewMenu {
 /**
  * Namespace for IViewMenu.
  */
-export
-namespace IViewMenu {
+export namespace IViewMenu {
   /**
    * Interface for a text editor viewer to register
    * itself with the text editor extension points.
    */
-  export
-  interface IEditorViewer<T extends Widget> extends IMenuExtender<T> {
+  export interface IEditorViewer<T extends Widget> extends IMenuExtender<T> {
     /**
      * Whether to show line numbers in the editor.
      */

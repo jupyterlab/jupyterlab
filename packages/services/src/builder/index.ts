@@ -1,32 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  PageConfig, URLExt
-} from '@jupyterlab/coreutils';
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
-import {
-  ServerConnection
-} from '../serverconnection';
-
+import { ServerConnection } from '../serverconnection';
 
 /**
  * The url for the lab build service.
  */
 const BUILD_SETTINGS_URL = 'lab/api/build';
 
-
 /**
  * The static namespace for `BuildManager`.
  */
-export
-class BuildManager {
+export class BuildManager {
   /**
    * Create a new setting manager.
    */
-  constructor(options: BuildManager.IOptions = { }) {
-    this.serverSettings = options.serverSettings ||
-      ServerConnection.makeSettings();
+  constructor(options: BuildManager.IOptions = {}) {
+    this.serverSettings =
+      options.serverSettings || ServerConnection.makeSettings();
   }
 
   /**
@@ -57,22 +50,23 @@ class BuildManager {
     const { serverSettings } = this;
     const promise = ServerConnection.makeRequest(url, {}, serverSettings);
 
-    return promise.then(response => {
-      if (response.status !== 200) {
-        throw new ServerConnection.ResponseError(response);
-      }
+    return promise
+      .then(response => {
+        if (response.status !== 200) {
+          throw new ServerConnection.ResponseError(response);
+        }
 
-      return response.json();
-    }).then(data => {
-      if (typeof data.status !== 'string') {
-        throw new Error('Invalid data');
-      }
-      if (typeof data.message !== 'string') {
-        throw new Error('Invalid data');
-      }
-      return data;
-
-    });
+        return response.json();
+      })
+      .then(data => {
+        if (typeof data.status !== 'string') {
+          throw new Error('Invalid data');
+        }
+        if (typeof data.message !== 'string') {
+          throw new Error('Invalid data');
+        }
+        return data;
+      });
   }
 
   /**
@@ -90,7 +84,9 @@ class BuildManager {
         throw new ServerConnection.ResponseError(response, 'Build aborted');
       }
       if (response.status !== 200) {
-        let message = `Build failed with ${response.status}, please run 'jupyter lab build' on the server for full output`;
+        let message = `Build failed with ${
+          response.status
+        }, please run 'jupyter lab build' on the server for full output`;
         throw new ServerConnection.ResponseError(response, message);
       }
     });
@@ -114,17 +110,14 @@ class BuildManager {
   }
 }
 
-
 /**
  * A namespace for `BuildManager` statics.
  */
-export
-namespace BuildManager {
+export namespace BuildManager {
   /**
    * The instantiation options for a setting manager.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The server settings used to make API requests.
      */
@@ -134,8 +127,7 @@ namespace BuildManager {
   /**
    * The build status response from the server.
    */
-  export
-  interface IStatus {
+  export interface IStatus {
     /**
      * Whether a build is needed.
      */
@@ -148,15 +140,12 @@ namespace BuildManager {
   }
 }
 
-
 /**
  * A namespace for builder API interfaces.
  */
-export
-namespace Builder {
+export namespace Builder {
   /**
    * The interface for the build manager.
    */
-  export
-  interface IManager extends BuildManager { }
+  export interface IManager extends BuildManager {}
 }

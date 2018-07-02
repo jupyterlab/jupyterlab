@@ -1,37 +1,32 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  nbformat
-} from '@jupyterlab/coreutils';
+import { nbformat } from '@jupyterlab/coreutils';
 
 import {
-  IObservableMap, ObservableMap,
-  IObservableValue, ObservableValue, IModelDB
+  IObservableMap,
+  ObservableMap,
+  IObservableValue,
+  ObservableValue,
+  IModelDB
 } from '@jupyterlab/observables';
 
 import {
-  IAttachmentModel, AttachmentModel, imageRendererFactory
+  IAttachmentModel,
+  AttachmentModel,
+  imageRendererFactory
 } from '@jupyterlab/rendermime';
 
-import {
-  IRenderMime
-} from '@jupyterlab/rendermime-interfaces';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
-import {
-  IDisposable
-} from '@phosphor/disposable';
+import { IDisposable } from '@phosphor/disposable';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
-
+import { ISignal, Signal } from '@phosphor/signaling';
 
 /**
  * The model for attachments.
  */
-export
-interface IAttachmentsModel extends IDisposable {
+export interface IAttachmentsModel extends IDisposable {
   /**
    * A signal emitted when the model state changes.
    */
@@ -91,17 +86,14 @@ interface IAttachmentsModel extends IDisposable {
   toJSON(): nbformat.IAttachments;
 }
 
-
 /**
  * The namespace for IAttachmentsModel interfaces.
  */
-export
-namespace IAttachmentsModel {
+export namespace IAttachmentsModel {
   /**
    * The options used to create a attachments model.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The initial values for the model.
      */
@@ -123,14 +115,12 @@ namespace IAttachmentsModel {
   /**
    * A type alias for changed args.
    */
-  export
-  type ChangedArgs = IObservableMap.IChangedArgs<IAttachmentModel>;
+  export type ChangedArgs = IObservableMap.IChangedArgs<IAttachmentModel>;
 
   /**
    * The interface for an attachment content factory.
    */
-  export
-  interface IContentFactory {
+  export interface IContentFactory {
     /**
      * Create an attachment model.
      */
@@ -141,15 +131,13 @@ namespace IAttachmentsModel {
 /**
  * The default implementation of the IAttachmentsModel.
  */
-export
-class AttachmentsModel implements IAttachmentsModel {
+export class AttachmentsModel implements IAttachmentsModel {
   /**
    * Construct a new observable outputs instance.
    */
   constructor(options: IAttachmentsModel.IOptions = {}) {
-    this.contentFactory = (options.contentFactory ||
-      AttachmentsModel.defaultContentFactory
-    );
+    this.contentFactory =
+      options.contentFactory || AttachmentsModel.defaultContentFactory;
     if (options.values) {
       for (let key of Object.keys(options.values)) {
         this.set(key, options.values[key]);
@@ -250,7 +238,9 @@ class AttachmentsModel implements IAttachmentsModel {
    * Clear all of the attachments.
    */
   clear(): void {
-    this._map.values().forEach((item: IAttachmentModel) => { item.dispose(); });
+    this._map.values().forEach((item: IAttachmentModel) => {
+      item.dispose();
+    });
     this._map.clear();
   }
 
@@ -262,7 +252,9 @@ class AttachmentsModel implements IAttachmentsModel {
    */
   fromJSON(values: nbformat.IAttachments) {
     this.clear();
-    Object.keys(values).forEach((key) => { this.set(key, values[key]); });
+    Object.keys(values).forEach(key => {
+      this.set(key, values[key]);
+    });
   }
 
   /**
@@ -289,7 +281,10 @@ class AttachmentsModel implements IAttachmentsModel {
   /**
    * Handle a change to the list.
    */
-  private _onMapChanged(sender: IObservableMap<IAttachmentModel>, args: IObservableMap.IChangedArgs<IAttachmentModel>) {
+  private _onMapChanged(
+    sender: IObservableMap<IAttachmentModel>,
+    args: IObservableMap.IChangedArgs<IAttachmentModel>
+  ) {
     if (this._serialized && !this._changeGuard) {
       this._changeGuard = true;
       this._serialized.set(this.toJSON());
@@ -303,7 +298,10 @@ class AttachmentsModel implements IAttachmentsModel {
    * If the serialized version of the outputs have changed due to a remote
    * action, then update the model accordingly.
    */
-  private _onSerializedChanged(sender: IObservableValue, args: ObservableValue.IChangedArgs) {
+  private _onSerializedChanged(
+    sender: IObservableValue,
+    args: ObservableValue.IChangedArgs
+  ) {
     if (!this._changeGuard) {
       this._changeGuard = true;
       this.fromJSON(args.newValue as nbformat.IAttachments);
@@ -327,21 +325,20 @@ class AttachmentsModel implements IAttachmentsModel {
   private _changeGuard = false;
 }
 
-
 /**
  * The namespace for AttachmentsModel class statics.
  */
-export
-namespace AttachmentsModel {
+export namespace AttachmentsModel {
   /**
    * The default implementation of a `IAttachemntsModel.IContentFactory`.
    */
-  export
-  class ContentFactory implements IAttachmentsModel.IContentFactory {
+  export class ContentFactory implements IAttachmentsModel.IContentFactory {
     /**
      * Create an attachment model.
      */
-    createAttachmentModel(options: IAttachmentModel.IOptions): IAttachmentModel {
+    createAttachmentModel(
+      options: IAttachmentModel.IOptions
+    ): IAttachmentModel {
       return new AttachmentModel(options);
     }
   }
@@ -349,18 +346,15 @@ namespace AttachmentsModel {
   /**
    * The default attachment model factory.
    */
-  export
-  const defaultContentFactory = new ContentFactory();
+  export const defaultContentFactory = new ContentFactory();
 }
-
 
 /**
  * A resolver for cell attachments 'attchment:filename'.
  *
  * Will resolve to a data: url.
  */
-export
-class AttachmentsResolver implements IRenderMime.IResolver {
+export class AttachmentsResolver implements IRenderMime.IResolver {
   /**
    * Create an attachments resolver object.
    */
@@ -391,11 +385,13 @@ class AttachmentsResolver implements IRenderMime.IResolver {
       // Resolve with unprocessed path, to show as broken image
       return Promise.resolve(path);
     }
-    const {data} = this._model.get(key);
+    const { data } = this._model.get(key);
     const mimeType = Object.keys(data)[0];
     // Only support known safe types:
     if (imageRendererFactory.mimeTypes.indexOf(mimeType) === -1) {
-      return Promise.reject(`Cannot render unknown image mime type "${mimeType}".`);
+      return Promise.reject(
+        `Cannot render unknown image mime type "${mimeType}".`
+      );
     }
     const dataUrl = `data:${mimeType};base64,${data[mimeType]}`;
     return Promise.resolve(dataUrl);
@@ -416,17 +412,14 @@ class AttachmentsResolver implements IRenderMime.IResolver {
   private _parent: IRenderMime.IResolver | null;
 }
 
-
 /**
  * The namespace for `AttachmentsResolver` class statics.
  */
-export
-namespace AttachmentsResolver {
+export namespace AttachmentsResolver {
   /**
    * The options used to create an AttachmentsResolver.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The attachments model to resolve against.
      */

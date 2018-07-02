@@ -3,30 +3,22 @@
 
 import expect = require('expect.js');
 
-import {
-  uuid
-} from '@jupyterlab/coreutils';
+import { uuid } from '@jupyterlab/coreutils';
+
+import { toArray } from '@phosphor/algorithm';
+
+import { Signal } from '@phosphor/signaling';
+
+import { JSONExt } from '@phosphor/coreutils';
 
 import {
-  toArray
-} from '@phosphor/algorithm';
-
-import {
-  Signal
-} from '@phosphor/signaling';
-
-import {
-  JSONExt
-} from '@phosphor/coreutils';
-
-import {
-  Kernel, ServerConnection, SessionManager, Session
+  Kernel,
+  ServerConnection,
+  SessionManager,
+  Session
 } from '../../../lib';
 
-import {
-  KERNELSPECS, handleRequest
-} from '../utils';
-
+import { KERNELSPECS, handleRequest } from '../utils';
 
 /**
  * Start a new session on with a default name.
@@ -35,9 +27,7 @@ function startNew(manager: SessionManager): Promise<Session.ISession> {
   return manager.startNew({ path: uuid() });
 }
 
-
 describe('session/manager', () => {
-
   let manager: SessionManager;
   let session: Session.ISession;
 
@@ -60,17 +50,13 @@ describe('session/manager', () => {
   });
 
   describe('SessionManager', () => {
-
     describe('#constructor()', () => {
-
       it('should create a new session manager', () => {
         expect(manager instanceof SessionManager).to.be(true);
       });
-
     });
 
     describe('#serverSettings', () => {
-
       it('should get the server settings', () => {
         manager.dispose();
         let serverSettings = ServerConnection.makeSettings();
@@ -78,21 +64,17 @@ describe('session/manager', () => {
         manager = new SessionManager({ serverSettings });
         expect(manager.serverSettings.token).to.be(token);
       });
-
     });
 
     describe('#specs', () => {
-
       it('should be the kernel specs', () => {
         return manager.ready.then(() => {
           expect(manager.specs.default).to.be.ok();
         });
       });
-
     });
 
     describe('#isReady', () => {
-
       it('should test whether the manager is ready', () => {
         manager.dispose();
         manager = new SessionManager();
@@ -101,31 +83,25 @@ describe('session/manager', () => {
           expect(manager.isReady).to.be(true);
         });
       });
-
     });
 
     describe('#ready', () => {
-
       it('should resolve when the manager is ready', () => {
         return manager.ready;
       });
-
     });
 
     describe('#running()', () => {
-
       it('should get the running sessions', () => {
         return manager.refreshRunning().then(() => {
           let running = toArray(manager.running());
           expect(running.length).to.be.greaterThan(0);
         });
       });
-
     });
 
     describe('#specsChanged', () => {
-
-      it('should be emitted when the specs change', (done) => {
+      it('should be emitted when the specs change', done => {
         let specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
         specs.default = 'shell';
         handleRequest(manager, 200, specs);
@@ -137,12 +113,10 @@ describe('session/manager', () => {
         });
         manager.refreshSpecs();
       });
-
     });
 
     describe('#runningChanged', () => {
-
-      it('should be emitted when the running sessions changed', (done) => {
+      it('should be emitted when the running sessions changed', done => {
         let object = {};
         manager.runningChanged.connect((sender, args) => {
           expect(sender).to.be(manager);
@@ -155,15 +129,17 @@ describe('session/manager', () => {
 
       it('should be emitted when a session is shut down', () => {
         let called = false;
-        return startNew(manager).then(s => {
-          manager.runningChanged.connect(() => {
-            manager.dispose();
-            called = true;
+        return startNew(manager)
+          .then(s => {
+            manager.runningChanged.connect(() => {
+              manager.dispose();
+              called = true;
+            });
+            return s.shutdown();
+          })
+          .then(() => {
+            expect(called).to.be(true);
           });
-          return s.shutdown();
-        }).then(() => {
-          expect(called).to.be(true);
-        });
       });
 
       it('should be emitted when a session is renamed', () => {
@@ -172,11 +148,14 @@ describe('session/manager', () => {
           manager.dispose();
           called = true;
         });
-        return session.setPath(uuid()).then(() => {
-          return manager.refreshRunning();
-        }).then(() => {
-          expect(called).to.be(true);
-        });
+        return session
+          .setPath(uuid())
+          .then(() => {
+            return manager.refreshRunning();
+          })
+          .then(() => {
+            expect(called).to.be(true);
+          });
       });
 
       it('should be emitted when a session changes kernels', () => {
@@ -185,17 +164,18 @@ describe('session/manager', () => {
           manager.dispose();
           called = true;
         });
-        return session.changeKernel({ name: session.kernel.name }).then(() => {
-          return manager.refreshRunning();
-        }).then(() => {
-          expect(called).to.be(true);
-        });
+        return session
+          .changeKernel({ name: session.kernel.name })
+          .then(() => {
+            return manager.refreshRunning();
+          })
+          .then(() => {
+            expect(called).to.be(true);
+          });
       });
-
     });
 
     describe('#refreshRunning()', () => {
-
       // Sometimes there is an extra kernel_info_request, which means that a
       // future is prematurely disposed.
       it('should refresh the list of session ids', () => {
@@ -204,11 +184,9 @@ describe('session/manager', () => {
           expect(running.length).to.be.greaterThan(0);
         });
       });
-
     });
 
     describe('#refreshSpecs()', () => {
-
       it('should refresh the specs', () => {
         let specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
         specs.default = 'shell';
@@ -217,11 +195,9 @@ describe('session/manager', () => {
           expect(manager.specs.default).to.be(specs.default);
         });
       });
-
     });
 
     describe('#startNew()', () => {
-
       it('should start a session', async () => {
         let session = await manager.startNew({ path: uuid() });
         await session.kernel.ready;
@@ -238,31 +214,24 @@ describe('session/manager', () => {
         await session.kernel.ready;
         expect(called).to.be(true);
       });
-
     });
 
     describe('#findByPath()', () => {
-
       it('should find an existing session by path', async () => {
         let newModel = await manager.findByPath(session.path);
         expect(newModel.id).to.be(session.id);
       });
-
     });
 
-
     describe('#findById()', () => {
-
       it('should find an existing session by id', () => {
         return manager.findById(session.id).then(newModel => {
           expect(newModel.id).to.be(session.id);
         });
       });
-
     });
 
     describe('#connectTo()', () => {
-
       it('should connect to a running session', () => {
         const newSession = manager.connectTo(session.model);
         expect(newSession.id).to.be(session.id);
@@ -270,11 +239,9 @@ describe('session/manager', () => {
         expect(newSession).to.not.be(session);
         expect(newSession.kernel).to.not.be(session.kernel);
       });
-
     });
 
     describe('shutdown()', () => {
-
       it('should shut down a session by id', async () => {
         let temp = await startNew(manager);
         await temp.kernel.ready;
@@ -297,9 +264,6 @@ describe('session/manager', () => {
         expect(called).to.be(true);
         expect(session.isDisposed).to.be(true);
       });
-
     });
-
   });
-
 });
