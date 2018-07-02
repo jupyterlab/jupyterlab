@@ -804,16 +804,11 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
         }
         // open a console, create if needed
         if (code) {
-          editor.focus();
           return commands.execute('console:open', {
               path,
               insertMode: 'split-bottom',
               activate: false
             }).then((panel) => {
-              // TODO: If the panel was created, the editor loses focus.
-              // if (!editor.hasFocus) {
-              //   editor.focus();
-              // }
               commands.execute('console:inject', { activate: false, code, path });
             }).catch((error) => {
               console.log(error);
