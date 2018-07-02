@@ -99,6 +99,11 @@ interface ICodeCellModel extends ICellModel {
   readonly type: 'code';
 
   /**
+   * Serialize the model to JSON.
+   */
+  toJSON(): nbformat.ICodeCell;
+
+  /**
    * The code cell's prompt number. Will be null if the cell has not been run.
    */
   executionCount: nbformat.ExecutionCount;
@@ -119,6 +124,11 @@ interface IMarkdownCellModel extends IAttachmentsCellModel {
    * The type of the cell.
    */
   readonly type: 'markdown';
+
+  /**
+   * Serialize the model to JSON.
+   */
+  toJSON(): nbformat.IMarkdownCell;
  }
 
 
@@ -131,6 +141,29 @@ interface IRawCellModel extends IAttachmentsCellModel {
    * The type of the cell.
    */
   readonly type: 'raw';
+
+  /**
+   * Serialize the model to JSON.
+   */
+  toJSON(): nbformat.IRawCell;
+}
+
+
+export
+function isCodeCellModel(model: ICellModel): model is ICodeCellModel {
+  return model.type === 'code';
+}
+
+
+export
+function isMarkdownCellModel(model: ICellModel): model is IMarkdownCellModel {
+  return model.type === 'markdown';
+}
+
+
+export
+function isRawCellModel(model: ICellModel): model is IRawCellModel {
+  return model.type === 'raw';
 }
 
 
@@ -401,6 +434,14 @@ class RawCellModel extends AttachmentsCellModel {
   get type(): 'raw' {
     return 'raw';
   }
+
+  /**
+   * Serialize the model to JSON.
+   */
+  toJSON(): nbformat.IRawCell {
+    return super.toJSON() as nbformat.IRawCell;
+  }
+
 }
 
 
@@ -423,6 +464,13 @@ class MarkdownCellModel extends AttachmentsCellModel {
    */
   get type(): 'markdown' {
     return 'markdown';
+  }
+
+  /**
+   * Serialize the model to JSON.
+   */
+  toJSON(): nbformat.IMarkdownCell {
+    return super.toJSON() as nbformat.IMarkdownCell;
   }
 }
 
