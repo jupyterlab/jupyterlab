@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  Cell, CellModel, CodeCell, CodeCellModel, ICodeCellModel, IRawCellModel,
+  Cell, CellModel, CodeCell, CodeCellModel, ICodeCellModel, isCodeCellModel, IRawCellModel,
   RawCell, RawCellModel
 } from '@jupyterlab/cells';
 
@@ -31,7 +31,7 @@ import {
 } from '@jupyterlab/services';
 
 import {
-  map, toArray
+  each
 } from '@phosphor/algorithm';
 
 import {
@@ -121,7 +121,7 @@ class CodeConsole extends Widget {
     this.node.tabIndex = -1;  // Allow the widget to take focus.
 
     // Create the panels that hold the content and input.
-    let layout = this.layout = new PanelLayout();
+    const layout = this.layout = new PanelLayout();
     this._cells = new ObservableList<Cell>();
     this._content = new Panel();
     this._input = new Panel();
@@ -198,7 +198,8 @@ class CodeConsole extends Widget {
    * The list of content cells in the console.
    *
    * #### Notes
-   * This list does not include the banner or the prompt for a console.
+   * This list does not include the current banner or the prompt for a console.
+   * It may include previous banners as raw cells.
    */
   get cells(): IObservableList<Cell> {
     return this._cells;
@@ -355,19 +356,24 @@ class CodeConsole extends Widget {
 
   /**
    * Serialize the output.
+   *
+   * #### Notes
+   * This only serializes the code cells and the prompt cell if it exists, and
+   * skips any old banner cells.
    */
   serialize(): nbformat.ICodeCell[] {
-    let promptCell = this.promptCell;
-    let layout = this._content.layout as PanelLayout;
-    // Serialize content.
-    let output = map(layout.widgets, widget => {
-      return (widget as CodeCell).model.toJSON() as nbformat.ICodeCell;
+    const cells: nbformat.ICodeCell[] = [];
+    each(this._cells, cell => {
+      let model = cell.model;
+      if (isCodeCellModel(model)) {
+        cells.push(model.toJSON());
+      }
     });
-    if (!promptCell) {
-      return toArray(output);
+
+    if (this.promptCell) {
+      cells.push(this.promptCell.model.toJSON());
     }
-    // Serialize prompt cell and return.
-    return toArray(output).concat(promptCell.model.toJSON() as nbformat.ICodeCell);
+    return cells;
   }
 
   /**
@@ -578,7 +584,7 @@ class CodeConsole extends Widget {
    */
   private _onCellDisposed(sender: Widget, args: void): void {
     if (!this.isDisposed) {
-      this._cells.removeValue(sender as CodeCell);
+      this._cells.removeValue(sender as Cell);
     }
   }
 
