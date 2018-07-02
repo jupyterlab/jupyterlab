@@ -10,7 +10,7 @@ import {
 } from './statusBar';
 
 // Export default status bar items
-import { runningSessionItem } from './default';
+import { runningSessionItem } from './defaults';
 
 /**
  * Initialization data for the statusbar extension.
