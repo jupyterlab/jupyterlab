@@ -115,19 +115,10 @@
 
 /* Main Shortcut List */
 .jp-shortcutlist {
-    /*margin-left: 20%;*/
+    margin: 0 0 40px 0;
     width: 100%;
-    margin-top: 10px;
-    display: flex;
-    flex-wrap: nowrap;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: stretch;
-    position: relative;
-}
-
-.jp-shortcut-category .jp-cmditem:not(:last-child){
-    border-bottom: #BDBDBD 1px solid; 
+    display: table;
+    border-collapse: collapse;
 }
 
 .jp-shortcut-category h3 {
@@ -138,12 +129,10 @@
 
 
 .jp-shortcutlistheader {
-    display: -webkit-box;
     width: 100%;
     height: 40px;
     font-size: 16px;
     font-weight: 600;
-    padding-left: 10px;
 }
 
 /* Shortcut command items */
@@ -169,12 +158,11 @@
 .jp-shortcut {
         font: "Source Code Pro";
         font-style: "Regular";
-        font-size: 13px;
+        font-size: 13px;    
         fill: solid;
         background: #F4F3F4;
         border-radius: 2px;
         border-color: #BDBDBD;
-        border-width: 0.75px;
         margin-right: 15px;
     }
 
@@ -227,11 +215,11 @@
     outline:none; 
 }
 
-.jp-label-container {
+/* .jp-label-container {
     order: 1; 
     flex-basis: 30%; 
     width: 30%;
-}
+} */
 
 .jp-label {
     display: inline-block;
@@ -243,7 +231,7 @@
     align-self: left; 
 }
 
-.jp-shortcut-container {
+/* .jp-shortcut-container {
     order: 2; 
     flex-basis: 50%; 
     width: 50%;
@@ -253,7 +241,7 @@
     order: 3; 
     flex-basis: 20%; 
     width: 20%;
-}
+} */
 
 .jp-source {
     display: inline-block;
@@ -281,4 +269,20 @@ input {
 
 .jp-reset:hover {
     text-decoration: underline;
+}
+
+.row {
+    display: table-row;
+    border-bottom: #BDBDBD 1px solid; 
+}
+
+.cell {
+    padding: 6px 12px;
+    display: table-cell;
+    width: 25%;
+}
+
+.table-header {
+    font-weight: bold;
+    font-size: 20px;
 }
