@@ -74,7 +74,7 @@ class StatusBar extends Widget implements IStatusBar {
     this._host.addToBottomArea(this);
   }
 
-  registerStatusItem(id: string, widget: Widget, opts: IStatusBar.IStatusItemOptions) {
+  registerStatusItem(id: string, widget: Widget, opts: IStatusBar.IStatusItemOptions = {}) {
     if (id in this._statusItems) {
       throw new Error(`Status item ${id} already registered.`);
     }
