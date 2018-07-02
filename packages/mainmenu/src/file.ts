@@ -1,19 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Menu, Widget
-} from '@phosphor/widgets';
+import { Menu, Widget } from '@phosphor/widgets';
 
-import {
-  IJupyterLabMenu, IMenuExtender, JupyterLabMenu
-} from './labmenu';
+import { IJupyterLabMenu, IMenuExtender, JupyterLabMenu } from './labmenu';
 
 /**
  * An interface for a File menu.
  */
-export
-interface IFileMenu extends IJupyterLabMenu {
+export interface IFileMenu extends IJupyterLabMenu {
   /**
    * A submenu for creating new files/launching new activities.
    */
@@ -29,7 +24,6 @@ interface IFileMenu extends IJupyterLabMenu {
    */
   readonly persistAndSavers: Set<IFileMenu.IPersistAndSave<Widget>>;
 
-
   /**
    * A set storing IConsoleCreators for the File menu.
    */
@@ -39,8 +33,7 @@ interface IFileMenu extends IJupyterLabMenu {
 /**
  * An extensible FileMenu for the application.
  */
-export
-class FileMenu extends JupyterLabMenu implements IFileMenu {
+export class FileMenu extends JupyterLabMenu implements IFileMenu {
   constructor(options: Menu.IOptions) {
     super(options);
 
@@ -49,12 +42,9 @@ class FileMenu extends JupyterLabMenu implements IFileMenu {
     // Create the "New" submenu.
     this.newMenu = new JupyterLabMenu(options, false);
     this.newMenu.menu.title.label = 'New';
-    this.closeAndCleaners =
-      new Set<IFileMenu.ICloseAndCleaner<Widget>>();
-    this.persistAndSavers =
-      new Set<IFileMenu.IPersistAndSave<Widget>>();
-    this.consoleCreators =
-      new Set<IFileMenu.IConsoleCreator<Widget>>();
+    this.closeAndCleaners = new Set<IFileMenu.ICloseAndCleaner<Widget>>();
+    this.persistAndSavers = new Set<IFileMenu.IPersistAndSave<Widget>>();
+    this.consoleCreators = new Set<IFileMenu.IConsoleCreator<Widget>>();
   }
 
   /**
@@ -66,7 +56,6 @@ class FileMenu extends JupyterLabMenu implements IFileMenu {
    * The close and cleanup extension point.
    */
   readonly closeAndCleaners: Set<IFileMenu.ICloseAndCleaner<Widget>>;
-
 
   /**
    * The persist and save extension point.
@@ -88,18 +77,15 @@ class FileMenu extends JupyterLabMenu implements IFileMenu {
   }
 }
 
-
 /**
  * Namespace for IFileMenu
  */
-export
-namespace IFileMenu {
+export namespace IFileMenu {
   /**
    * Interface for an activity that has some cleanup action associated
    * with it in addition to merely closing its widget in the main area.
    */
-  export
-  interface ICloseAndCleaner<T extends Widget> extends IMenuExtender<T> {
+  export interface ICloseAndCleaner<T extends Widget> extends IMenuExtender<T> {
     /**
      * A label to use for the activity that is being cleaned up.
      */
@@ -120,8 +106,7 @@ namespace IFileMenu {
    * Interface for an activity that has some persistance action
    * before saving.
    */
-  export
-  interface IPersistAndSave<T extends Widget> extends IMenuExtender<T> {
+  export interface IPersistAndSave<T extends Widget> extends IMenuExtender<T> {
     /**
      * A label to use for the activity that is being saved.
      */
@@ -141,8 +126,7 @@ namespace IFileMenu {
   /**
    * Interface for a command to create a console for an activity.
    */
-  export
-  interface IConsoleCreator<T extends Widget> extends IMenuExtender<T> {
+  export interface IConsoleCreator<T extends Widget> extends IMenuExtender<T> {
     /**
      * A label to use for the activity for which a console is being created.
      */

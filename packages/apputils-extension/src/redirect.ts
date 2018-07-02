@@ -3,10 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import {
-  Widget
-} from '@phosphor/widgets';
-
+import { Widget } from '@phosphor/widgets';
 
 /**
  * The form label.
@@ -24,12 +21,10 @@ const PLACEHOLDER = 'url-friendly-workspace-name';
  */
 const WARNING = 'Please enter a value.';
 
-
 /**
  * The UI for the recovery option to redirect to a different workspace.
  */
-export
-class RedirectForm extends Widget {
+export class RedirectForm extends Widget {
   /**
    * Create a redirect form.
    */
@@ -75,12 +70,10 @@ class RedirectForm extends Widget {
   }
 }
 
-
 /**
  * Return a new redirect form, populated with default language.
  */
-export
-function createRedirectForm(warn = false): RedirectForm {
+export function createRedirectForm(warn = false): RedirectForm {
   const form = new RedirectForm();
 
   form.label = LABEL;
@@ -90,7 +83,6 @@ function createRedirectForm(warn = false): RedirectForm {
   return form;
 }
 
-
 /**
  * A namespace for private module data.
  */
@@ -98,8 +90,7 @@ namespace Private {
   /**
    * Create the redirect form's content.
    */
-  export
-  function createNode(): HTMLElement {
+  export function createNode(): HTMLElement {
     const node = document.createElement('div');
     const label = document.createElement('label');
     const input = document.createElement('input');

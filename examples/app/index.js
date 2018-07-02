@@ -4,7 +4,6 @@
 // ES6 Promise polyfill
 require('es6-promise/auto');
 
-
 window.addEventListener('load', function() {
   require('font-awesome/css/font-awesome.min.css');
   var JupyterLab = require('@jupyterlab/application').JupyterLab;

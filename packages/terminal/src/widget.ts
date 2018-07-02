@@ -1,25 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  TerminalSession
-} from '@jupyterlab/services';
+import { TerminalSession } from '@jupyterlab/services';
 
-import {
-  Message, MessageLoop
-} from '@phosphor/messaging';
+import { Message, MessageLoop } from '@phosphor/messaging';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {
-  Terminal as Xterm, ITerminalOptions as IXtermOptions
-} from 'xterm';
+import { Terminal as Xterm, ITerminalOptions as IXtermOptions } from 'xterm';
 
-import {
-  fit
-} from 'xterm/lib/addons/fit';
+import { fit } from 'xterm/lib/addons/fit';
 
 /**
  * The class name added to a terminal widget.
@@ -31,12 +21,10 @@ const TERMINAL_CLASS = 'jp-Terminal';
  */
 const TERMINAL_BODY_CLASS = 'jp-Terminal-body';
 
-
 /**
  * A widget which manages a terminal session.
  */
-export
-class Terminal extends Widget {
+export class Terminal extends Widget {
   /**
    * Construct a new terminal widget.
    *
@@ -242,25 +230,28 @@ class Terminal extends Widget {
     });
 
     this._term.on('title', (title: string) => {
-        this.title.label = title;
+      this.title.label = title;
     });
   }
 
   /**
    * Handle a message from the terminal session.
    */
-  private _onMessage(sender: TerminalSession.ISession, msg: TerminalSession.IMessage): void {
+  private _onMessage(
+    sender: TerminalSession.ISession,
+    msg: TerminalSession.IMessage
+  ): void {
     switch (msg.type) {
-    case 'stdout':
-      if (msg.content) {
-        this._term.write(msg.content[0] as string);
-      }
-      break;
-    case 'disconnect':
-      this._term.write('\r\n\r\n[Finished... Term Session]\r\n');
-      break;
-    default:
-      break;
+      case 'stdout':
+        if (msg.content) {
+          this._term.write(msg.content[0] as string);
+        }
+        break;
+      case 'disconnect':
+        this._term.write('\r\n\r\n[Finished... Term Session]\r\n');
+        break;
+      default:
+        break;
     }
   }
 
@@ -284,7 +275,10 @@ class Terminal extends Widget {
    */
   private _setSessionSize(): void {
     let content = [
-      this._term.rows, this._term.cols, this._offsetHeight, this._offsetWidth
+      this._term.rows,
+      this._term.cols,
+      this._offsetHeight,
+      this._offsetWidth
     ];
     if (this._session) {
       this._session.send({ type: 'set_size', content });
@@ -301,17 +295,14 @@ class Terminal extends Widget {
   private _offsetHeight = -1;
 }
 
-
 /**
  * The namespace for `Terminal` class statics.
  */
-export
-namespace Terminal {
+export namespace Terminal {
   /**
    * Options for the terminal widget.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The font size of the terminal in pixels.
      */
@@ -336,8 +327,7 @@ namespace Terminal {
   /**
    * The default options used for creating terminals.
    */
-  export
-  const defaultOptions: IOptions = {
+  export const defaultOptions: IOptions = {
     theme: 'dark',
     fontSize: 13,
     cursorBlink: true,
@@ -347,10 +337,8 @@ namespace Terminal {
   /**
    * A type for the terminal theme.
    */
-  export
-  type Theme = 'light' | 'dark';
+  export type Theme = 'light' | 'dark';
 }
-
 
 /**
  * A namespace for private data.
@@ -359,8 +347,9 @@ namespace Private {
   /**
    * Get term.js options from ITerminalOptions.
    */
-  export
-  function getConfig(options: Partial<Terminal.IOptions>): IXtermOptions {
+  export function getConfig(
+    options: Partial<Terminal.IOptions>
+  ): IXtermOptions {
     let config: IXtermOptions = {};
     if (options.cursorBlink !== void 0) {
       config.cursorBlink = options.cursorBlink;
@@ -378,30 +367,27 @@ namespace Private {
   /**
    * An incrementing counter for ids.
    */
-  export
-  let id = 0;
+  export let id = 0;
 
   /**
    * The light terminal theme.
    */
-  export
-  const lightTheme = {
+  export const lightTheme = {
     foreground: '#000',
     background: '#fff',
-    cursor: '#616161',  // md-grey-700
-    cursorAccent: '#F5F5F5',  // md-grey-100
-    selection: 'rgba(97, 97, 97, 0.3)',  // md-grey-700
+    cursor: '#616161', // md-grey-700
+    cursorAccent: '#F5F5F5', // md-grey-100
+    selection: 'rgba(97, 97, 97, 0.3)' // md-grey-700
   };
 
   /**
    * The dark terminal theme.
    */
-  export
-  const darkTheme = {
+  export const darkTheme = {
     foreground: '#fff',
     background: '#000',
     cursor: '#fff',
     cursorAccent: '#000',
-    selection: 'rgba(255, 255, 255, 0.3)',
+    selection: 'rgba(255, 255, 255, 0.3)'
   };
 }

@@ -1,14 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  JupyterLab, JupyterLabPlugin
-} from '@jupyterlab/application';
+import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 
-import {
-  IThemeManager
-} from '@jupyterlab/apputils';
-
+import { IThemeManager } from '@jupyterlab/apputils';
 
 /**
  * A plugin for the Jupyter Light Theme.
@@ -27,6 +22,5 @@ const plugin: JupyterLabPlugin<void> = {
   },
   autoStart: true
 };
-
 
 export default plugin;

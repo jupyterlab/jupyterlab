@@ -1,33 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  ElementExt
-} from '@phosphor/domutils';
+import { ElementExt } from '@phosphor/domutils';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {
- Dialog, DOMUtils, showDialog
-} from '@jupyterlab/apputils';
+import { Dialog, DOMUtils, showDialog } from '@jupyterlab/apputils';
 
-import {
-  PathExt
-} from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
 
-import {
-  ServiceManager, Session, TerminalSession
-} from '@jupyterlab/services';
+import { ServiceManager, Session, TerminalSession } from '@jupyterlab/services';
 
 import '../style/index.css';
 
@@ -131,12 +117,10 @@ const FILE_ICON_CLASS = 'jp-mod-file';
  */
 const TERMINAL_ICON_CLASS = 'jp-mod-terminal';
 
-
 /**
  * A class that exposes the running terminal and kernel sessions.
  */
-export
-class RunningSessions extends Widget {
+export class RunningSessions extends Widget {
   /**
    * Construct a new running widget.
    */
@@ -144,7 +128,7 @@ class RunningSessions extends Widget {
     super({
       node: (options.renderer || RunningSessions.defaultRenderer).createNode()
     });
-    let manager = this._manager = options.manager;
+    let manager = (this._manager = options.manager);
     this._renderer = options.renderer || RunningSessions.defaultRenderer;
     this.addClass(RUNNING_CLASS);
 
@@ -253,7 +237,10 @@ class RunningSessions extends Widget {
     let termSection = DOMUtils.findElement(this.node, TERMINALS_CLASS);
     let termList = DOMUtils.findElement(termSection, LIST_CLASS) as HTMLElement;
     let sessionSection = DOMUtils.findElement(this.node, SESSIONS_CLASS);
-    let sessionList = DOMUtils.findElement(sessionSection, LIST_CLASS) as HTMLLIElement;
+    let sessionList = DOMUtils.findElement(
+      sessionSection,
+      LIST_CLASS
+    ) as HTMLLIElement;
     let renderer = this._renderer;
     let specs = this._manager.specs;
 
@@ -309,8 +296,14 @@ class RunningSessions extends Widget {
     let sessionSection = DOMUtils.findElement(this.node, SESSIONS_CLASS);
     let sessionList = DOMUtils.findElement(sessionSection, LIST_CLASS);
     let refresh = DOMUtils.findElement(this.node, REFRESH_CLASS);
-    let shutdownTerms = DOMUtils.findElement(this.node, SHUTDOWN_TERMINALS_CLASS);
-    let shutdownSessions = DOMUtils.findElement(this.node, SHUTDOWN_SESSIONS_CLASS);
+    let shutdownTerms = DOMUtils.findElement(
+      this.node,
+      SHUTDOWN_TERMINALS_CLASS
+    );
+    let shutdownSessions = DOMUtils.findElement(
+      this.node,
+      SHUTDOWN_SESSIONS_CLASS
+    );
     let renderer = this._renderer;
     let clientX = event.clientX;
     let clientY = event.clientY;
@@ -328,7 +321,8 @@ class RunningSessions extends Widget {
         title: 'Shutdown All Terminals?',
         body: 'Shut down all terminals?',
         buttons: [
-          Dialog.cancelButton(), Dialog.warnButton({ label: 'SHUTDOWN' })
+          Dialog.cancelButton(),
+          Dialog.warnButton({ label: 'SHUTDOWN' })
         ]
       }).then(result => {
         if (result.button.accept) {
@@ -343,7 +337,8 @@ class RunningSessions extends Widget {
         title: 'Shutdown All Sessions?',
         body: 'Shut down all sessions?',
         buttons: [
-          Dialog.cancelButton(), Dialog.warnButton({ label: 'SHUTDOWN' })
+          Dialog.cancelButton(),
+          Dialog.warnButton({ label: 'SHUTDOWN' })
         ]
       }).then(result => {
         if (result.button.accept) {
@@ -385,7 +380,10 @@ class RunningSessions extends Widget {
   /**
    * Handle a change to the running sessions.
    */
-  private _onSessionsChanged(sender: Session.IManager, models: Session.IModel[]): void {
+  private _onSessionsChanged(
+    sender: Session.IManager,
+    models: Session.IModel[]
+  ): void {
     // Strip out non-file backed sessions.
     this._runningSessions = [];
     for (let session of models) {
@@ -400,7 +398,10 @@ class RunningSessions extends Widget {
   /**
    * Handle a change to the running terminals.
    */
-  private _onTerminalsChanged(sender: TerminalSession.IManager, models: TerminalSession.IModel[]): void {
+  private _onTerminalsChanged(
+    sender: TerminalSession.IManager,
+    models: TerminalSession.IModel[]
+  ): void {
     this._runningTerminals = models;
     this.update();
   }
@@ -411,20 +412,19 @@ class RunningSessions extends Widget {
   private _runningTerminals: TerminalSession.IModel[] = [];
   private _refreshId = -1;
   private _sessionOpenRequested = new Signal<this, Session.IModel>(this);
-  private _terminalOpenRequested = new Signal<this, TerminalSession.IModel>(this);
+  private _terminalOpenRequested = new Signal<this, TerminalSession.IModel>(
+    this
+  );
 }
-
 
 /**
  * The namespace for the `RunningSessions` class statics.
  */
-export
-namespace RunningSessions {
+export namespace RunningSessions {
   /**
    * An options object for creating a running sessions widget.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * A service manager instance.
      */
@@ -441,8 +441,7 @@ namespace RunningSessions {
   /**
    * A renderer for use with a running sessions widget.
    */
-  export
-  interface IRenderer {
+  export interface IRenderer {
     /**
      * Create the root node for the running sessions widget.
      */
@@ -523,7 +522,10 @@ namespace RunningSessions {
      * This method should completely reset the state of the node to
      * reflect the data for the session models.
      */
-    updateTerminalNode(node: HTMLLIElement, model: TerminalSession.IModel): void;
+    updateTerminalNode(
+      node: HTMLLIElement,
+      model: TerminalSession.IModel
+    ): void;
 
     /**
      * Populate a node with running kernel session data.
@@ -538,15 +540,17 @@ namespace RunningSessions {
      * This method should completely reset the state of the node to
      * reflect the data for the session models.
      */
-    updateSessionNode(node: HTMLLIElement, model: Session.IModel, kernelName: string): void;
+    updateSessionNode(
+      node: HTMLLIElement,
+      model: Session.IModel,
+      kernelName: string
+    ): void;
   }
-
 
   /**
    * The default implementation of `IRenderer`.
    */
-  export
-  class Renderer implements IRenderer {
+  export class Renderer implements IRenderer {
     /**
      * Create the root node for the running sessions widget.
      */
@@ -697,7 +701,10 @@ namespace RunningSessions {
      * This method should completely reset the state of the node to
      * reflect the data for the session models.
      */
-    updateTerminalNode(node: HTMLLIElement, model: TerminalSession.IModel): void {
+    updateTerminalNode(
+      node: HTMLLIElement,
+      model: TerminalSession.IModel
+    ): void {
       let label = DOMUtils.findElement(node, ITEM_LABEL_CLASS);
       label.textContent = `terminals/${model.name}`;
     }
@@ -715,7 +722,11 @@ namespace RunningSessions {
      * This method should completely reset the state of the node to
      * reflect the data for the session models.
      */
-    updateSessionNode(node: HTMLLIElement, model: Session.IModel, kernelName: string): void {
+    updateSessionNode(
+      node: HTMLLIElement,
+      model: Session.IModel,
+      kernelName: string
+    ): void {
       let icon = DOMUtils.findElement(node, ITEM_ICON_CLASS);
       let name = model.name || PathExt.basename(model.path);
 
@@ -728,10 +739,7 @@ namespace RunningSessions {
       }
       let label = DOMUtils.findElement(node, ITEM_LABEL_CLASS);
       label.textContent = name;
-      let title = (
-        `Path: ${model.path}\n` +
-        `Kernel: ${kernelName}`
-      );
+      let title = `Path: ${model.path}\n` + `Kernel: ${kernelName}`;
       label.title = title;
     }
   }
@@ -739,6 +747,5 @@ namespace RunningSessions {
   /**
    * The default `Renderer` instance.
    */
-  export
-  const defaultRenderer = new Renderer();
+  export const defaultRenderer = new Renderer();
 }

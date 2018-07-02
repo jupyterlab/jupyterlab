@@ -3,28 +3,20 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import {
-  ISettingRegistry
-} from '@jupyterlab/coreutils';
+import { ISettingRegistry } from '@jupyterlab/coreutils';
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
 import * as React from 'react';
 
 import * as ReactDOM from 'react-dom';
 
-
 /**
  * A tabular editor for plugin settings.
  */
-export
-class TableEditor extends Widget {
+export class TableEditor extends Widget {
   /**
    * Create a new table editor for settings.
    */
@@ -79,17 +71,14 @@ class TableEditor extends Widget {
   private _settings: ISettingRegistry.ISettings | null = null;
 }
 
-
 /**
  * A namespace for `TableEditor` statics.
  */
-export
-namespace TableEditor {
+export namespace TableEditor {
   /**
    * The instantiation options for a table editor.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * A function the table editor calls on save errors.
      */
@@ -97,20 +86,20 @@ namespace TableEditor {
   }
 }
 
-
 /**
  * A namespace for private module data.
  */
 namespace Private {
-
   /**
    * Populate the fieldset with a specific plugin's metadata.
    */
-  export
-  function populateTable(node: HTMLElement, settings: ISettingRegistry.ISettings): void {
+  export function populateTable(
+    node: HTMLElement,
+    settings: ISettingRegistry.ISettings
+  ): void {
     const { plugin, schema } = settings;
-    const fields: { [property: string]: React.ReactElement<any> } = { };
-    const properties = schema.properties || { };
+    const fields: { [property: string]: React.ReactElement<any> } = {};
+    const properties = schema.properties || {};
     const title = `(${plugin}) ${schema.description}`;
     const label = `Fields - ${schema.title || plugin}`;
 
@@ -124,29 +113,30 @@ namespace Private {
 
       fields[property] = (
         <tr key={property}>
-          <td className='jp-SettingsTableEditor-key' title={title}>
+          <td className="jp-SettingsTableEditor-key" title={title}>
             <code title={title}>{property}</code>
           </td>
-          <td className='jp-SettingsTableEditor-value' title={valueTitle}>
+          <td className="jp-SettingsTableEditor-value" title={valueTitle}>
             <code title={valueTitle}>{value}</code>
           </td>
-          <td className='jp-SettingsTableEditor-type'>{type}</td>
+          <td className="jp-SettingsTableEditor-type">{type}</td>
         </tr>
       );
     });
 
     const rows = Object.keys(fields)
-      .sort((a, b) => a.localeCompare(b)).map(property => fields[property]);
+      .sort((a, b) => a.localeCompare(b))
+      .map(property => fields[property]);
     const fragment = (
       <React.Fragment>
         <legend title={title}>{label}</legend>
-        <div className='jp-SettingsTableEditor-wrapper'>
+        <div className="jp-SettingsTableEditor-wrapper">
           <table>
             <thead>
               <tr>
-                <th className='jp-SettingsTableEditor-key'>Key</th>
-                <th className='jp-SettingsTableEditor-value'>Default</th>
-                <th className='jp-SettingsTableEditor-type'>Type</th>
+                <th className="jp-SettingsTableEditor-key">Key</th>
+                <th className="jp-SettingsTableEditor-value">Default</th>
+                <th className="jp-SettingsTableEditor-type">Type</th>
               </tr>
             </thead>
             <tbody>{rows}</tbody>
@@ -159,4 +149,3 @@ namespace Private {
     ReactDOM.render(fragment, node);
   }
 }
-

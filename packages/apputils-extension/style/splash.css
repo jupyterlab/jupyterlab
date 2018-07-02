@@ -16,11 +16,9 @@
   background-color: white;
 }
 
-
 .splash-fade {
-  animation: .5s fade-out forwards;
+  animation: 0.5s fade-out forwards;
 }
-
 
 #galaxy {
   position: relative;
@@ -37,7 +35,7 @@
   width: 100%;
   height: 100%;
   z-index: 1;
-  animation: .3s fade-in linear forwards;
+  animation: 0.3s fade-in linear forwards;
 }
 
 .planet {
@@ -77,7 +75,7 @@
 }
 
 #moon1 .planet {
-  background-color: #6F7070;
+  background-color: #6f7070;
   height: 12px;
   width: 12px;
   border-radius: 50%;
@@ -106,57 +104,62 @@
   border-radius: 50%;
 }
 
-.dot1, .dot2 {
-width: 60%;
-height: 60%;
-display: inline-block;
-position: absolute;
-top: 0;
-background-color: #333;
-border-radius: 100%;
+.dot1,
+.dot2 {
+  width: 60%;
+  height: 60%;
+  display: inline-block;
+  position: absolute;
+  top: 0;
+  background-color: #333;
+  border-radius: 100%;
 
--webkit-animation: sk-bounce 2.0s infinite ease-in-out;
-animation: sk-bounce 2.0s infinite ease-in-out;
+  -webkit-animation: sk-bounce 2s infinite ease-in-out;
+  animation: sk-bounce 2s infinite ease-in-out;
 }
 
 .dot2 {
-top: auto;
-bottom: 0;
+  top: auto;
+  bottom: 0;
 }
-
 
 @-webkit-keyframes sk-bounce {
-  0%, 100% { -webkit-transform: scale(0.0) }
-  50% { -webkit-transform: scale(1.0) }
-}
-
-
-@keyframes sk-bounce {
-  0%, 100% {
-    transform: scale(0.0);
-    -webkit-transform: scale(0.0);
-  } 50% {
-    transform: scale(1.0);
-    -webkit-transform: scale(1.0);
+  0%,
+  100% {
+    -webkit-transform: scale(0);
+  }
+  50% {
+    -webkit-transform: scale(1);
   }
 }
 
+@keyframes sk-bounce {
+  0%,
+  100% {
+    transform: scale(0);
+    -webkit-transform: scale(0);
+  }
+  50% {
+    transform: scale(1);
+    -webkit-transform: scale(1);
+  }
+}
 
 @keyframes orbit {
   0% {
-      transform: rotateZ(0deg);
+    transform: rotateZ(0deg);
   }
   100% {
-      transform: rotateZ(-720deg);
+    transform: rotateZ(-720deg);
   }
 }
 
 @keyframes orbit2 {
   0% {
-      transform: rotateZ(0deg);
+    transform: rotateZ(0deg);
   }
   100% {
-      transform: rotateZ(720deg);
+    transform: rotateZ(720deg);
   }
 }
 

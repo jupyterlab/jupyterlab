@@ -3,59 +3,36 @@
 
 import CodeMirror from 'codemirror';
 
-import {
-  Menu
-} from '@phosphor/widgets';
+import { Menu } from '@phosphor/widgets';
 
-import {
-  JupyterLab, JupyterLabPlugin
-} from '@jupyterlab/application';
+import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 
-import {
-  IMainMenu, IEditMenu
-} from '@jupyterlab/mainmenu';
+import { IMainMenu, IEditMenu } from '@jupyterlab/mainmenu';
 
-import {
-  IEditorServices
-} from '@jupyterlab/codeeditor';
+import { IEditorServices } from '@jupyterlab/codeeditor';
 
-import {
-  editorServices, CodeMirrorEditor, Mode
-} from '@jupyterlab/codemirror';
+import { editorServices, CodeMirrorEditor, Mode } from '@jupyterlab/codemirror';
 
-import {
-  ISettingRegistry, IStateDB
-} from '@jupyterlab/coreutils';
+import { ISettingRegistry, IStateDB } from '@jupyterlab/coreutils';
 
-import {
-  IDocumentWidget
-} from '@jupyterlab/docregistry';
+import { IDocumentWidget } from '@jupyterlab/docregistry';
 
-import {
-  IEditorTracker, FileEditor
-} from '@jupyterlab/fileeditor';
-
+import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
 
 /**
  * The command IDs used by the codemirror plugin.
  */
 namespace CommandIDs {
-  export
-  const changeKeyMap = 'codemirror:change-keymap';
+  export const changeKeyMap = 'codemirror:change-keymap';
 
-  export
-  const changeTheme = 'codemirror:change-theme';
+  export const changeTheme = 'codemirror:change-theme';
 
-  export
-  const changeMode = 'codemirror:change-mode';
+  export const changeMode = 'codemirror:change-mode';
 
-  export
-  const find = 'codemirror:find';
+  export const find = 'codemirror:find';
 
-  export
-  const findAndReplace = 'codemirror:find-and-replace';
+  export const findAndReplace = 'codemirror:find-and-replace';
 }
-
 
 /**
  * The editor services.
@@ -66,23 +43,15 @@ const services: JupyterLabPlugin<IEditorServices> = {
   activate: activateEditorServices
 };
 
-
-
 /**
  * The editor commands.
  */
 const commands: JupyterLabPlugin<void> = {
   id: '@jupyterlab/codemirror-extension:commands',
-  requires: [
-    IEditorTracker,
-    IMainMenu,
-    IStateDB,
-    ISettingRegistry
-  ],
+  requires: [IEditorTracker, IMainMenu, IStateDB, ISettingRegistry],
   activate: activateEditorCommands,
   autoStart: true
 };
-
 
 /**
  * Export the plugins as default.
@@ -90,12 +59,10 @@ const commands: JupyterLabPlugin<void> = {
 const plugins: JupyterLabPlugin<any>[] = [commands, services];
 export default plugins;
 
-
 /**
  * The plugin ID used as the key in the setting registry.
  */
 const id = commands.id;
-
 
 /**
  * Set up the editor services.
@@ -107,11 +74,16 @@ function activateEditorServices(app: JupyterLab): IEditorServices {
   return editorServices;
 }
 
-
 /**
  * Set up the editor widget menu and commands.
  */
-function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMenu: IMainMenu, state: IStateDB, settingRegistry: ISettingRegistry): void {
+function activateEditorCommands(
+  app: JupyterLab,
+  tracker: IEditorTracker,
+  mainMenu: IMainMenu,
+  state: IStateDB,
+  settingRegistry: ISettingRegistry
+): void {
   const { commands, restored } = app;
   let { theme, keyMap } = CodeMirrorEditor.defaultConfig;
 
@@ -119,8 +91,8 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
    * Update the setting values.
    */
   function updateSettings(settings: ISettingRegistry.ISettings): void {
-    keyMap = settings.get('keyMap').composite as string | null || keyMap;
-    theme = settings.get('theme').composite as string | null || theme;
+    keyMap = (settings.get('keyMap').composite as string | null) || keyMap;
+    theme = (settings.get('theme').composite as string | null) || theme;
   }
 
   /**
@@ -137,17 +109,19 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
   }
 
   // Fetch the initial state of the settings.
-  Promise.all([settingRegistry.load(id), restored]).then(([settings]) => {
-    updateSettings(settings);
-    updateTracker();
-    settings.changed.connect(() => {
+  Promise.all([settingRegistry.load(id), restored])
+    .then(([settings]) => {
       updateSettings(settings);
       updateTracker();
+      settings.changed.connect(() => {
+        updateSettings(settings);
+        updateTracker();
+      });
+    })
+    .catch((reason: Error) => {
+      console.error(reason.message);
+      updateTracker();
     });
-  }).catch((reason: Error) => {
-    console.error(reason.message);
-    updateTracker();
-  });
 
   /**
    * Handle the settings of new widgets.
@@ -164,8 +138,10 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
    * A test for whether the tracker has an active widget.
    */
   function isEnabled(): boolean {
-    return tracker.currentWidget !== null &&
-           tracker.currentWidget === app.shell.currentWidget;
+    return (
+      tracker.currentWidget !== null &&
+      tracker.currentWidget === app.shell.currentWidget
+    );
   }
 
   /**
@@ -183,7 +159,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     label: args => args['theme'] as string,
     execute: args => {
       const key = 'theme';
-      const value = theme = args['theme'] as string || theme;
+      const value = (theme = (args['theme'] as string) || theme);
 
       updateTracker();
       return settingRegistry.set(id, key, value).catch((reason: Error) => {
@@ -200,7 +176,7 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     },
     execute: args => {
       const key = 'keyMap';
-      const value = keyMap = args['keyMap'] as string || keyMap;
+      const value = (keyMap = (args['keyMap'] as string) || keyMap);
 
       updateTracker();
       return settingRegistry.set(id, key, value).catch((reason: Error) => {
@@ -261,29 +237,45 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     }
   });
 
-  Mode.getModeInfo().sort((a, b) => {
-    let aName = a.name || '';
-    let bName = b.name || '';
-    return aName.localeCompare(bName);
-  }).forEach(spec => {
-    // Avoid mode name with a curse word.
-    if (spec.mode.indexOf('brainf') === 0) {
-      return;
-    }
-    modeMenu.addItem({
-      command: CommandIDs.changeMode,
-      args: {...spec}
+  Mode.getModeInfo()
+    .sort((a, b) => {
+      let aName = a.name || '';
+      let bName = b.name || '';
+      return aName.localeCompare(bName);
+    })
+    .forEach(spec => {
+      // Avoid mode name with a curse word.
+      if (spec.mode.indexOf('brainf') === 0) {
+        return;
+      }
+      modeMenu.addItem({
+        command: CommandIDs.changeMode,
+        args: { ...spec }
+      });
     });
-  });
 
   [
-   'jupyter', 'default', 'abcdef', 'base16-dark', 'base16-light',
-   'hopscotch', 'material', 'mbo', 'mdn-like', 'seti', 'solarized dark',
-   'solarized light', 'the-matrix', 'xq-light', 'zenburn'
-  ].forEach(name => themeMenu.addItem({
-    command: CommandIDs.changeTheme,
-    args: { theme: name }
-  }));
+    'jupyter',
+    'default',
+    'abcdef',
+    'base16-dark',
+    'base16-light',
+    'hopscotch',
+    'material',
+    'mbo',
+    'mdn-like',
+    'seti',
+    'solarized dark',
+    'solarized light',
+    'the-matrix',
+    'xq-light',
+    'zenburn'
+  ].forEach(name =>
+    themeMenu.addItem({
+      command: CommandIDs.changeTheme,
+      args: { theme: name }
+    })
+  );
 
   ['default', 'sublime', 'vim', 'emacs'].forEach(name => {
     keyMapMenu.addItem({
@@ -292,12 +284,14 @@ function activateEditorCommands(app: JupyterLab, tracker: IEditorTracker, mainMe
     });
   });
 
-
   // Add some of the editor settings to the settings menu.
-  mainMenu.settingsMenu.addGroup([
-    { type: 'submenu' as Menu.ItemType, submenu: keyMapMenu },
-    { type: 'submenu' as Menu.ItemType, submenu: themeMenu }
-  ], 10);
+  mainMenu.settingsMenu.addGroup(
+    [
+      { type: 'submenu' as Menu.ItemType, submenu: keyMapMenu },
+      { type: 'submenu' as Menu.ItemType, submenu: themeMenu }
+    ],
+    10
+  );
 
   // Add the syntax highlighting submenu to the `View` menu.
   mainMenu.viewMenu.addGroup([{ type: 'submenu', submenu: modeMenu }], 40);

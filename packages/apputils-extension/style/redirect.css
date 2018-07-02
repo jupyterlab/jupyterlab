@@ -5,12 +5,11 @@
 |----------------------------------------------------------------------------*/
 
 .jp-RedirectForm input {
-	display: block;
-	margin-top: 10px;
-	width: 100%;
+  display: block;
+  margin-top: 10px;
+  width: 100%;
 }
 
-
 .jp-RedirectForm-warning {
-	color: var(--jp-warn-color0);
+  color: var(--jp-warn-color0);
 }

@@ -1,41 +1,26 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  JupyterLab, JupyterLabPlugin
-} from '@jupyterlab/application';
+import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 
-import {
-  ICommandPalette, MainAreaWidget
-} from '@jupyterlab/apputils';
+import { ICommandPalette, MainAreaWidget } from '@jupyterlab/apputils';
 
-import {
-  ILauncher, LauncherModel, Launcher
-} from '@jupyterlab/launcher';
+import { ILauncher, LauncherModel, Launcher } from '@jupyterlab/launcher';
 
-import {
-  toArray
-} from '@phosphor/algorithm';
+import { toArray } from '@phosphor/algorithm';
 
-import {
-  JSONObject
-} from '@phosphor/coreutils';
+import { JSONObject } from '@phosphor/coreutils';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
 import '../style/index.css';
-
 
 /**
  * The command IDs used by the launcher plugin.
  */
 namespace CommandIDs {
-  export
-  const create = 'launcher:create';
+  export const create = 'launcher:create';
 }
-
 
 /**
  * A service providing an interface to the the launcher.
@@ -48,12 +33,10 @@ const plugin: JupyterLabPlugin<ILauncher> = {
   autoStart: true
 };
 
-
 /**
  * Export the plugin as default.
  */
 export default plugin;
-
 
 /**
  * Activate the launcher.
@@ -93,11 +76,10 @@ function activate(app: JupyterLab, palette: ICommandPalette): ILauncher {
     }
   });
 
-  palette.addItem({ command: CommandIDs.create, category: 'Launcher'});
+  palette.addItem({ command: CommandIDs.create, category: 'Launcher' });
 
   return model;
 }
-
 
 /**
  * The namespace for module private data.
@@ -106,6 +88,5 @@ namespace Private {
   /**
    * The incrementing id used for launcher widgets.
    */
-  export
-  let id = 0;
+  export let id = 0;
 }

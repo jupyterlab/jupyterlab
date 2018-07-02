@@ -1,19 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Menu, Widget
-} from '@phosphor/widgets';
+import { Menu, Widget } from '@phosphor/widgets';
 
-import {
-  IJupyterLabMenu, IMenuExtender, JupyterLabMenu
-} from './labmenu';
+import { IJupyterLabMenu, IMenuExtender, JupyterLabMenu } from './labmenu';
 
 /**
  * An interface for a Run menu.
  */
-export
-interface IRunMenu extends IJupyterLabMenu {
+export interface IRunMenu extends IJupyterLabMenu {
   /**
    * A set storing ICodeRunner for the Run menu.
    *
@@ -26,8 +21,7 @@ interface IRunMenu extends IJupyterLabMenu {
 /**
  * An extensible Run menu for the application.
  */
-export
-class RunMenu extends JupyterLabMenu implements IRunMenu {
+export class RunMenu extends JupyterLabMenu implements IRunMenu {
   /**
    * Construct the run menu.
    */
@@ -35,8 +29,7 @@ class RunMenu extends JupyterLabMenu implements IRunMenu {
     super(options);
     this.menu.title.label = 'Run';
 
-    this.codeRunners =
-      new Set<IRunMenu.ICodeRunner<Widget>>();
+    this.codeRunners = new Set<IRunMenu.ICodeRunner<Widget>>();
   }
 
   /**
@@ -59,14 +52,12 @@ class RunMenu extends JupyterLabMenu implements IRunMenu {
 /**
  * A namespace for RunMenu statics.
  */
-export
-namespace IRunMenu {
+export namespace IRunMenu {
   /**
    * An object that runs code, which may be
    * registered with the Run menu.
    */
-  export
-  interface ICodeRunner<T extends Widget> extends IMenuExtender<T> {
+  export interface ICodeRunner<T extends Widget> extends IMenuExtender<T> {
     /**
      * A string label for the thing that is being run,
      * which is used to populate the menu labels.

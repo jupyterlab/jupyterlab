@@ -7,11 +7,9 @@
 | Variables
 |----------------------------------------------------------------------------*/
 
-
 /*-----------------------------------------------------------------------------
 | DockPanel
 |----------------------------------------------------------------------------*/
-
 
 .p-DockPanel-widget {
   background: var(--jp-layout-color0);
@@ -19,7 +17,6 @@
   border-right: var(--jp-border-width) solid var(--jp-border-color1);
   border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
 }
-
 
 .p-DockPanel-overlay {
   background: rgba(33, 150, 243, 0.1);
@@ -29,7 +26,6 @@
   transition-timing-function: ease;
 }
 
-
 .p-DockPanel-overlay.p-mod-root-top,
 .p-DockPanel-overlay.p-mod-root-left,
 .p-DockPanel-overlay.p-mod-root-right,
@@ -37,4 +33,3 @@
 .p-DockPanel-overlay.p-mod-root-center {
   border-width: 2px;
 }
-

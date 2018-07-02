@@ -3,40 +3,23 @@
 
 import expect = require('expect.js');
 
-import {
-  ApplicationShell, LayoutRestorer
-} from '@jupyterlab/application';
+import { ApplicationShell, LayoutRestorer } from '@jupyterlab/application';
 
-import {
-  InstanceTracker
-} from '@jupyterlab/apputils';
+import { InstanceTracker } from '@jupyterlab/apputils';
 
-import {
-  StateDB
-} from '@jupyterlab/coreutils';
+import { StateDB } from '@jupyterlab/coreutils';
 
-import {
-  CommandRegistry
-} from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {
-  PromiseDelegate
-} from '@phosphor/coreutils';
+import { PromiseDelegate } from '@phosphor/coreutils';
 
-import {
-  DockPanel, Widget
-} from '@phosphor/widgets';
-
+import { DockPanel, Widget } from '@phosphor/widgets';
 
 const NAMESPACE = 'jupyterlab-layout-restorer-tests';
 
-
 describe('apputils', () => {
-
   describe('LayoutRestorer', () => {
-
     describe('#constructor()', () => {
-
       it('should construct a new layout restorer', () => {
         let restorer = new LayoutRestorer({
           first: Promise.resolve<void>(void 0),
@@ -45,11 +28,9 @@ describe('apputils', () => {
         });
         expect(restorer).to.be.a(LayoutRestorer);
       });
-
     });
 
     describe('#restored', () => {
-
       it('should be a promise available right away', () => {
         let restorer = new LayoutRestorer({
           first: Promise.resolve<void>(void 0),
@@ -66,14 +47,16 @@ describe('apputils', () => {
           registry: new CommandRegistry(),
           state: new StateDB({ namespace: NAMESPACE })
         });
-        restorer.restored.then(() => { done(); }).catch(done);
+        restorer.restored
+          .then(() => {
+            done();
+          })
+          .catch(done);
         ready.resolve(void 0);
       });
-
     });
 
     describe('#add()', () => {
-
       it('should add a widget to be tracked by the restorer', done => {
         let ready = new PromiseDelegate<void>();
         let restorer = new LayoutRestorer({
@@ -90,29 +73,32 @@ describe('apputils', () => {
         };
         restorer.add(currentWidget, 'test-one');
         ready.resolve(void 0);
-        restorer.restored.then(() => restorer.save(dehydrated))
+        restorer.restored
+          .then(() => restorer.save(dehydrated))
           .then(() => restorer.fetch())
           .then(layout => {
             expect(layout.mainArea.currentWidget).to.be(currentWidget);
             expect(layout.mainArea.mode).to.be(mode);
             done();
-          }).catch(done);
+          })
+          .catch(done);
       });
-
     });
 
     describe('#fetch()', () => {
-
       it('should always return a value', done => {
         let restorer = new LayoutRestorer({
           first: Promise.resolve(void 0),
           registry: new CommandRegistry(),
           state: new StateDB({ namespace: NAMESPACE })
         });
-        restorer.fetch().then(layout => {
-          expect(layout).to.be.ok();
-          done();
-        }).catch(done);
+        restorer
+          .fetch()
+          .then(layout => {
+            expect(layout).to.be.ok();
+            done();
+          })
+          .catch(done);
       });
 
       it('should fetch saved data', done => {
@@ -136,54 +122,65 @@ describe('apputils', () => {
         };
         restorer.add(currentWidget, 'test-one');
         ready.resolve(void 0);
-        restorer.restored.then(() => restorer.save(dehydrated))
+        restorer.restored
+          .then(() => restorer.save(dehydrated))
           .then(() => restorer.fetch())
           .then(layout => {
             expect(layout).to.eql(dehydrated);
             done();
-          }).catch(done);
+          })
+          .catch(done);
       });
-
     });
 
     describe('#restore()', () => {
-
       it('should restore the widgets in a tracker', done => {
         let tracker = new InstanceTracker<Widget>({ namespace: 'foo-widget' });
         let registry = new CommandRegistry();
         let state = new StateDB({ namespace: NAMESPACE });
         let ready = new PromiseDelegate<void>();
         let restorer = new LayoutRestorer({
-          first: ready.promise, registry, state
+          first: ready.promise,
+          registry,
+          state
         });
         let called = false;
         let key = `${tracker.namespace}:${tracker.namespace}`;
 
         registry.addCommand(tracker.namespace, {
-          execute: () => { called = true; }
+          execute: () => {
+            called = true;
+          }
         });
-        state.save(key, { data: null }).then(() => {
-          ready.resolve(undefined);
-          return restorer.restore(tracker, {
-            args: () => null,
-            name: () => tracker.namespace,
-            command: tracker.namespace
-          });
-        }).catch(done);
+        state
+          .save(key, { data: null })
+          .then(() => {
+            ready.resolve(undefined);
+            return restorer.restore(tracker, {
+              args: () => null,
+              name: () => tracker.namespace,
+              command: tracker.namespace
+            });
+          })
+          .catch(done);
         restorer.restored
-          .then(() => { expect(called).to.be(true); })
+          .then(() => {
+            expect(called).to.be(true);
+          })
           .then(() => state.remove(key))
-          .then(() => { done(); })
+          .then(() => {
+            done();
+          })
           .catch(done);
       });
-
     });
 
     describe('#save()', () => {
-
       it('should not run before `first` promise', done => {
         let restorer = new LayoutRestorer({
-          first: new Promise(() => { /* no op */ }),
+          first: new Promise(() => {
+            /* no op */
+          }),
           registry: new CommandRegistry(),
           state: new StateDB({ namespace: NAMESPACE })
         });
@@ -192,9 +189,14 @@ describe('apputils', () => {
           leftArea: { currentWidget: null, collapsed: true, widgets: null },
           rightArea: { collapsed: true, currentWidget: null, widgets: null }
         };
-        restorer.save(dehydrated)
-          .then(() => { done('save() ran before `first` promise resolved.'); })
-          .catch(() => { done(); });
+        restorer
+          .save(dehydrated)
+          .then(() => {
+            done('save() ran before `first` promise resolved.');
+          })
+          .catch(() => {
+            done();
+          });
       });
 
       it('should save data', done => {
@@ -218,16 +220,15 @@ describe('apputils', () => {
         };
         restorer.add(currentWidget, 'test-one');
         ready.resolve(void 0);
-        restorer.restored.then(() => restorer.save(dehydrated))
+        restorer.restored
+          .then(() => restorer.save(dehydrated))
           .then(() => restorer.fetch())
           .then(layout => {
             expect(layout).to.eql(dehydrated);
             done();
-          }).catch(done);
+          })
+          .catch(done);
       });
-
     });
-
   });
-
 });

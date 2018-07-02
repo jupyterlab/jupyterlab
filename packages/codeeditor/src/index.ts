@@ -1,17 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Token
-} from '@phosphor/coreutils';
+import { Token } from '@phosphor/coreutils';
 
-import {
-  IEditorFactoryService
-} from './factory';
+import { IEditorFactoryService } from './factory';
 
-import {
-  IEditorMimeTypeService
-} from './mimetype';
+import { IEditorMimeTypeService } from './mimetype';
 
 import '../style/index.css';
 
@@ -21,21 +15,19 @@ export * from './widget';
 export * from './factory';
 export * from './mimetype';
 
-
 /* tslint:disable */
 /**
  * Code editor services token.
  */
-export
-const IEditorServices = new Token<IEditorServices>('@jupyterlab/codeeditor:IEditorServices');
+export const IEditorServices = new Token<IEditorServices>(
+  '@jupyterlab/codeeditor:IEditorServices'
+);
 /* tslint:enable */
-
 
 /**
  * Code editor services.
  */
-export
-interface IEditorServices {
+export interface IEditorServices {
   /**
    * The code editor factory.
    */

@@ -3,58 +3,44 @@
 
 import expect = require('expect.js');
 
-import {
-  CommandRegistry
-} from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {
-  h, VirtualNode, VirtualDOM
-} from '@phosphor/virtualdom';
+import { h, VirtualNode, VirtualDOM } from '@phosphor/virtualdom';
 
-import {
-  simulate
-} from 'simulate-event';
+import { simulate } from 'simulate-event';
 
-import {
-  CommandLinker
-} from '@jupyterlab/apputils';
-
+import { CommandLinker } from '@jupyterlab/apputils';
 
 describe('@jupyterlab/apputils', () => {
-
   describe('CommandLinker', () => {
-
     describe('#constructor()', () => {
-
       it('should create a command linker', () => {
         let linker = new CommandLinker({ commands: new CommandRegistry() });
         expect(linker).to.be.a(CommandLinker);
         linker.dispose();
       });
-
     });
 
     describe('#isDisposed', () => {
-
       it('should test whether a command linker has been disposed', () => {
         let linker = new CommandLinker({ commands: new CommandRegistry() });
         expect(linker.isDisposed).to.be(false);
         linker.dispose();
         expect(linker.isDisposed).to.be(true);
       });
-
     });
 
     describe('#connectNode()', () => {
-
       it('should connect a node to a command', () => {
         let called = false;
         let command = 'commandlinker:connect-node';
-        let commands =new CommandRegistry();
+        let commands = new CommandRegistry();
         let linker = new CommandLinker({ commands });
         let node = document.createElement('div');
         let disposable = commands.addCommand(command, {
-          execute: () => { called = true; }
+          execute: () => {
+            called = true;
+          }
         });
 
         document.body.appendChild(node);
@@ -68,19 +54,19 @@ describe('@jupyterlab/apputils', () => {
         linker.dispose();
         disposable.dispose();
       });
-
     });
 
     describe('#disconnectNode()', () => {
-
       it('should disconnect a node from a command', () => {
         let called = false;
         let command = 'commandlinker:disconnect-node';
-        let commands =new CommandRegistry();
+        let commands = new CommandRegistry();
         let linker = new CommandLinker({ commands });
         let node = document.createElement('div');
         let disposable = commands.addCommand(command, {
-          execute: () => { called = true; }
+          execute: () => {
+            called = true;
+          }
         });
 
         document.body.appendChild(node);
@@ -104,31 +90,29 @@ describe('@jupyterlab/apputils', () => {
         linker.dispose();
         disposable.dispose();
       });
-
     });
 
     describe('#dispose()', () => {
-
       it('should dispose the resources held by the linker', () => {
         let linker = new CommandLinker({ commands: new CommandRegistry() });
         expect(linker.isDisposed).to.be(false);
         linker.dispose();
         expect(linker.isDisposed).to.be(true);
       });
-
     });
 
     describe('#populateVNodeDataset()', () => {
-
       it('should connect a node to a command', () => {
         let called = false;
         let command = 'commandlinker:connect-node';
-        let commands =new CommandRegistry();
+        let commands = new CommandRegistry();
         let linker = new CommandLinker({ commands });
         let node: HTMLElement;
         let vnode: VirtualNode;
         let disposable = commands.addCommand(command, {
-          execute: () => { called = true; }
+          execute: () => {
+            called = true;
+          }
         });
 
         vnode = h.div({ dataset: linker.populateVNodeDataset(command, null) });
@@ -143,9 +127,6 @@ describe('@jupyterlab/apputils', () => {
         linker.dispose();
         disposable.dispose();
       });
-
     });
-
   });
-
 });

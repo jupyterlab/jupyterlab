@@ -4,7 +4,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-
 .jp-Spinner {
   position: absolute;
   display: flex;
@@ -19,7 +18,6 @@
   outline: none;
 }
 
-
 .jp-SpinnerContent {
   font-size: 10px;
   margin: 50px auto;
@@ -28,15 +26,19 @@
   height: 3em;
   border-radius: 50%;
   background: var(--jp-brand-color3);
-  background: linear-gradient(to right, #F37626 10%, rgba(255, 255, 255, 0) 42%);
+  background: linear-gradient(
+    to right,
+    #f37626 10%,
+    rgba(255, 255, 255, 0) 42%
+  );
   position: relative;
-  animation: load3 1.0s infinite linear, fadeIn 1.0s;
+  animation: load3 1s infinite linear, fadeIn 1s;
 }
 
 .jp-SpinnerContent:before {
   width: 50%;
   height: 50%;
-  background: #F37626;
+  background: #f37626;
   border-radius: 100% 0 0 0;
   position: absolute;
   top: 0;
@@ -63,7 +65,7 @@
     opacity: 0;
   }
   100% {
-    opacity: 1.;
+    opacity: 1;
   }
 }
 

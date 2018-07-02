@@ -1,34 +1,23 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  JSONObject
-} from '@phosphor/coreutils';
+import { JSONObject } from '@phosphor/coreutils';
+
+import { Message } from '@phosphor/messaging';
+
+import { PanelLayout } from '@phosphor/widgets';
+
+import { Widget } from '@phosphor/widgets';
+
+import { CodeEditor } from '@jupyterlab/codeeditor';
+
+import { HoverBox } from '@jupyterlab/apputils';
 
 import {
-  Message
-} from '@phosphor/messaging';
-
-import {
-  PanelLayout
-} from '@phosphor/widgets';
-
-import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
-  CodeEditor
-} from '@jupyterlab/codeeditor';
-
-import {
-  HoverBox
-} from '@jupyterlab/apputils';
-
-import {
-  IRenderMime, RenderMimeRegistry, MimeModel
+  IRenderMime,
+  RenderMimeRegistry,
+  MimeModel
 } from '@jupyterlab/rendermime';
-
 
 /**
  * The class name added to each tooltip.
@@ -63,15 +52,14 @@ const USE_CAPTURE = true;
 /**
  * A tooltip widget.
  */
-export
-class Tooltip extends Widget {
+export class Tooltip extends Widget {
   /**
    * Instantiate a tooltip.
    */
   constructor(options: Tooltip.IOptions) {
     super();
 
-    const layout = this.layout = new PanelLayout();
+    const layout = (this.layout = new PanelLayout());
     const model = new MimeModel({ data: options.bundle });
 
     this.anchor = options.anchor;
@@ -126,24 +114,24 @@ class Tooltip extends Widget {
     const target = event.target as HTMLElement;
 
     switch (event.type) {
-    case 'keydown':
-      if (node.contains(target)) {
-        return;
-      }
-      this.dispose();
-      break;
-    case 'mousedown':
-      if (node.contains(target)) {
-        this.activate();
-        return;
-      }
-      this.dispose();
-      break;
-    case 'scroll':
-      this._evtScroll(event as MouseEvent);
-      break;
-    default:
-      break;
+      case 'keydown':
+        if (node.contains(target)) {
+          return;
+        }
+        this.dispose();
+        break;
+      case 'mousedown':
+        if (node.contains(target)) {
+          this.activate();
+          return;
+        }
+        this.dispose();
+        break;
+      case 'scroll':
+        this._evtScroll(event as MouseEvent);
+        break;
+      default:
+        break;
     }
   }
 
@@ -201,7 +189,7 @@ class Tooltip extends Widget {
   /**
    * Set the geometry of the tooltip widget.
    */
-  private _setGeometry():  void {
+  private _setGeometry(): void {
     // Find the start of the current token for hover box placement.
     const editor = this._editor;
     const cursor = editor.getCursorPosition();
@@ -246,13 +234,11 @@ class Tooltip extends Widget {
 /**
  * A namespace for tooltip widget statics.
  */
-export
-namespace Tooltip {
+export namespace Tooltip {
   /**
    * Instantiation options for a tooltip widget.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The anchor widget that the tooltip widget tracks.
      */

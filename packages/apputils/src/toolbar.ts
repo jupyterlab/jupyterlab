@@ -1,34 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IIterator, find, map, some
-} from '@phosphor/algorithm';
+import { IIterator, find, map, some } from '@phosphor/algorithm';
 
-import {
-  CommandRegistry
-} from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {
-  Message, MessageLoop
-} from '@phosphor/messaging';
+import { Message, MessageLoop } from '@phosphor/messaging';
 
-import {
-  AttachedProperty
-} from '@phosphor/properties';
+import { AttachedProperty } from '@phosphor/properties';
 
-import {
-  PanelLayout, Widget
-} from '@phosphor/widgets';
+import { PanelLayout, Widget } from '@phosphor/widgets';
 
-import {
-  IClientSession
-} from './clientsession';
+import { IClientSession } from './clientsession';
 
-import {
-  Styling
-} from './styling';
-
+import { Styling } from './styling';
 
 /**
  * The class name added to toolbars.
@@ -75,9 +60,7 @@ const TOOLBAR_KERNEL_STATUS_CLASS = 'jp-Toolbar-kernelStatus';
  */
 const TOOLBAR_BUSY_CLASS = 'jp-FilledCircleIcon';
 
-
 const TOOLBAR_IDLE_CLASS = 'jp-CircleIcon';
-
 
 /**
  * A layout for toolbars.
@@ -199,12 +182,10 @@ class ToolbarLayout extends PanelLayout {
   private _dirty = false;
 }
 
-
 /**
  * A class which provides a toolbar widget.
  */
-export
-class Toolbar<T extends Widget = Widget> extends Widget {
+export class Toolbar<T extends Widget = Widget> extends Widget {
   /**
    * Construct a new toolbar widget.
    */
@@ -286,13 +267,13 @@ class Toolbar<T extends Widget = Widget> extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'click':
-      if (!this.node.contains(document.activeElement) && this.parent) {
-        this.parent.activate();
-      }
-      break;
-    default:
-      break;
+      case 'click':
+        if (!this.node.contains(document.activeElement) && this.parent) {
+          this.parent.activate();
+        }
+        break;
+      default:
+        break;
     }
   }
 
@@ -311,12 +292,10 @@ class Toolbar<T extends Widget = Widget> extends Widget {
   }
 }
 
-
 /**
  * The namespace for Toolbar class statics.
  */
-export
-namespace Toolbar {
+export namespace Toolbar {
   /**
    * Create a toolbar item for a command or `null` if the command does not exist
    * in the registry.
@@ -326,8 +305,10 @@ namespace Toolbar {
    * If there is no icon label, and no icon class, the main label will
    * be added.
    */
-  export
-  function createFromCommand(commands: CommandRegistry, id: string): ToolbarButton | null {
+  export function createFromCommand(
+    commands: CommandRegistry,
+    id: string
+  ): ToolbarButton | null {
     if (!commands.hasCommand(id)) {
       return null;
     }
@@ -346,9 +327,12 @@ namespace Toolbar {
     Private.setNodeContentFromCommand(button.node, commands, id);
 
     // Ensure that we pick up relevant changes to the command:
-    function onChange(sender: CommandRegistry, args: CommandRegistry.ICommandChangedArgs) {
+    function onChange(
+      sender: CommandRegistry,
+      args: CommandRegistry.ICommandChangedArgs
+    ) {
       if (args.id !== id) {
-        return;  // Not our command
+        return; // Not our command
       }
 
       if (args.type === 'removed') {
@@ -384,12 +368,12 @@ namespace Toolbar {
     return button;
   }
 
-
   /**
    * Create an interrupt toolbar item.
    */
-  export
-  function createInterruptButton(session: IClientSession): ToolbarButton {
+  export function createInterruptButton(
+    session: IClientSession
+  ): ToolbarButton {
     return new ToolbarButton({
       className: TOOLBAR_INTERRUPT_CLASS,
       onClick: () => {
@@ -401,12 +385,10 @@ namespace Toolbar {
     });
   }
 
-
   /**
    * Create a restart toolbar item.
    */
-  export
-  function createRestartButton(session: IClientSession): ToolbarButton {
+  export function createRestartButton(session: IClientSession): ToolbarButton {
     return new ToolbarButton({
       className: TOOLBAR_RESTART_CLASS,
       onClick: () => {
@@ -416,7 +398,6 @@ namespace Toolbar {
     });
   }
 
-
   /**
    * Create a toolbar spacer item.
    *
@@ -424,11 +405,9 @@ namespace Toolbar {
    * It is a flex spacer that separates the left toolbar items
    * from the right toolbar items.
    */
-  export
-  function createSpacerItem(): Widget {
+  export function createSpacerItem(): Widget {
     return new Private.Spacer();
   }
-
 
   /**
    * Create a kernel name indicator item.
@@ -438,11 +417,9 @@ namespace Toolbar {
    * or `'No Kernel!'` if there is no kernel.
    * It can handle a change in context or kernel.
    */
-  export
-  function createKernelNameItem(session: IClientSession): ToolbarButton {
+  export function createKernelNameItem(session: IClientSession): ToolbarButton {
     return new Private.KernelName(session);
   }
-
 
   /**
    * Create a kernel status indicator item.
@@ -453,18 +430,15 @@ namespace Toolbar {
    * It will show the current status in the node title.
    * It can handle a change to the context or the kernel.
    */
-  export
-  function createKernelStatusItem(session: IClientSession): Widget {
+  export function createKernelStatusItem(session: IClientSession): Widget {
     return new Private.KernelStatus(session);
   }
 }
 
-
 /**
  * A widget which acts as a button in a toolbar.
  */
-export
-class ToolbarButton extends Widget {
+export class ToolbarButton extends Widget {
   /**
    * Construct a new toolbar button.
    */
@@ -474,11 +448,17 @@ class ToolbarButton extends Widget {
     this.addClass(TOOLBAR_BUTTON_CLASS);
     this._onClick = options.onClick || Private.noOp;
 
-    const classes = options.className ?
-      options.className.trim().replace(/\s{2,}/g, ' ').split(/\s/) : null;
+    const classes = options.className
+      ? options.className
+          .trim()
+          .replace(/\s{2,}/g, ' ')
+          .split(/\s/)
+      : null;
 
     if (classes) {
-      classes.forEach(name => { this.addClass(name); });
+      classes.forEach(name => {
+        this.addClass(name);
+      });
     }
 
     this.node.title = options.tooltip || '';
@@ -496,13 +476,13 @@ class ToolbarButton extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'click':
-      if ((event as MouseEvent).button === 0) {
-        this._onClick();
-      }
-      break;
-    default:
-      break;
+      case 'click':
+        if ((event as MouseEvent).button === 0) {
+          this._onClick();
+        }
+        break;
+      default:
+        break;
     }
   }
 
@@ -523,17 +503,14 @@ class ToolbarButton extends Widget {
   private _onClick: () => void;
 }
 
-
 /**
  * A namespace for `ToolbarButton` statics.
  */
-export
-namespace ToolbarButton {
+export namespace ToolbarButton {
   /**
    * The options used to construct a toolbar button.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The callback for a click event.
      */
@@ -551,7 +528,6 @@ namespace ToolbarButton {
   }
 }
 
-
 /**
  * A namespace for private data.
  */
@@ -559,8 +535,7 @@ namespace Private {
   /**
    * An attached property for the name of a toolbar item.
    */
-  export
-  const nameProperty = new AttachedProperty<Widget, string>({
+  export const nameProperty = new AttachedProperty<Widget, string>({
     name: 'name',
     create: () => ''
   });
@@ -568,22 +543,27 @@ namespace Private {
   /**
    * ToolbarButton tooltip formatter for a command.
    */
-  export
-  function commandTooltip(commands: CommandRegistry, id: string): string {
+  export function commandTooltip(
+    commands: CommandRegistry,
+    id: string
+  ): string {
     return commands.caption(id);
   }
 
   /**
    * A no-op function.
    */
-  export
-  function noOp() { /* no-op */ }
+  export function noOp() {
+    /* no-op */
+  }
 
   /**
    * Get the class names for a command based ToolBarButton
    */
-  export
-  function commandClassName(commands: CommandRegistry, id: string): string {
+  export function commandClassName(
+    commands: CommandRegistry,
+    id: string
+  ): string {
     let name = commands.className(id);
     // Add the boolean state classes.
     if (commands.isToggled(id)) {
@@ -598,8 +578,11 @@ namespace Private {
   /**
    * Fill the node of a command based ToolBarButton.
    */
-  export
-  function setNodeContentFromCommand(node: HTMLElement, commands: CommandRegistry, id: string): void {
+  export function setNodeContentFromCommand(
+    node: HTMLElement,
+    commands: CommandRegistry,
+    id: string
+  ): void {
     const iconClass = commands.iconClass(id);
     const iconLabel = commands.iconLabel(id);
     const label = commands.label(id);
@@ -616,8 +599,7 @@ namespace Private {
   /**
    * A spacer widget.
    */
-  export
-  class Spacer extends Widget {
+  export class Spacer extends Widget {
     /**
      * Construct a new spacer widget.
      */
@@ -630,8 +612,7 @@ namespace Private {
   /**
    * A kernel name widget.
    */
-  export
-  class KernelName extends ToolbarButton {
+  export class KernelName extends ToolbarButton {
     /**
      * Construct a new kernel name widget.
      */
@@ -642,7 +623,7 @@ namespace Private {
           session.selectKernel();
         },
         tooltip: 'Switch kernel'
-        });
+      });
       this._onKernelChanged(session);
       session.kernelChanged.connect(this._onKernelChanged, this);
     }
@@ -658,8 +639,7 @@ namespace Private {
   /**
    * A toolbar item that displays kernel status.
    */
-  export
-  class KernelStatus extends Widget {
+  export class KernelStatus extends Widget {
     /**
      * Construct a new kernel status widget.
      */

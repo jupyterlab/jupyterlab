@@ -3,11 +3,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-
 /*-----------------------------------------------------------------------------
 | RenderedText
 |----------------------------------------------------------------------------*/
-
 
 .jp-RenderedText {
   text-align: left;
@@ -16,7 +14,6 @@
   line-height: var(--jp-code-line-height);
   font-family: var(--jp-code-font-family);
 }
-
 
 .jp-RenderedText pre,
 .jp-RenderedJavaScript pre,
@@ -27,55 +24,115 @@
   padding: 0px;
 }
 
-
 /* ansi_up creates classed spans for console foregrounds and backgrounds. */
-.jp-RenderedText pre .ansi-black-fg { color: #3E424D; }
-.jp-RenderedText pre .ansi-red-fg { color: #E75C58; }
-.jp-RenderedText pre .ansi-green-fg { color: #00A250; }
-.jp-RenderedText pre .ansi-yellow-fg { color: #DDB62B; }
-.jp-RenderedText pre .ansi-blue-fg { color: #208FFB; }
-.jp-RenderedText pre .ansi-magenta-fg { color: #D160C4; }
-.jp-RenderedText pre .ansi-cyan-fg { color: #60C6C8; }
-.jp-RenderedText pre .ansi-white-fg { color: #C5C1B4; }
+.jp-RenderedText pre .ansi-black-fg {
+  color: #3e424d;
+}
+.jp-RenderedText pre .ansi-red-fg {
+  color: #e75c58;
+}
+.jp-RenderedText pre .ansi-green-fg {
+  color: #00a250;
+}
+.jp-RenderedText pre .ansi-yellow-fg {
+  color: #ddb62b;
+}
+.jp-RenderedText pre .ansi-blue-fg {
+  color: #208ffb;
+}
+.jp-RenderedText pre .ansi-magenta-fg {
+  color: #d160c4;
+}
+.jp-RenderedText pre .ansi-cyan-fg {
+  color: #60c6c8;
+}
+.jp-RenderedText pre .ansi-white-fg {
+  color: #c5c1b4;
+}
 
-.jp-RenderedText pre .ansi-black-bg { background-color: #3E424D; }
-.jp-RenderedText pre .ansi-red-bg { background-color: #E75C58; }
-.jp-RenderedText pre .ansi-green-bg { background-color: #00A250; }
-.jp-RenderedText pre .ansi-yellow-bg { background-color: #DDB62B; }
-.jp-RenderedText pre .ansi-blue-bg { background-color: #208FFB; }
-.jp-RenderedText pre .ansi-magenta-bg { background-color: #D160C4; }
-.jp-RenderedText pre .ansi-cyan-bg { background-color: #60C6C8; }
-.jp-RenderedText pre .ansi-white-bg { background-color: #C5C1B4; }
+.jp-RenderedText pre .ansi-black-bg {
+  background-color: #3e424d;
+}
+.jp-RenderedText pre .ansi-red-bg {
+  background-color: #e75c58;
+}
+.jp-RenderedText pre .ansi-green-bg {
+  background-color: #00a250;
+}
+.jp-RenderedText pre .ansi-yellow-bg {
+  background-color: #ddb62b;
+}
+.jp-RenderedText pre .ansi-blue-bg {
+  background-color: #208ffb;
+}
+.jp-RenderedText pre .ansi-magenta-bg {
+  background-color: #d160c4;
+}
+.jp-RenderedText pre .ansi-cyan-bg {
+  background-color: #60c6c8;
+}
+.jp-RenderedText pre .ansi-white-bg {
+  background-color: #c5c1b4;
+}
 
-.jp-RenderedText pre .ansi-bright-black-fg { color: #282C36; }
-.jp-RenderedText pre .ansi-bright-red-fg { color: #B22B31; }
-.jp-RenderedText pre .ansi-bright-green-fg { color: #007427; }
-.jp-RenderedText pre .ansi-bright-yellow-fg { color: #B27D12; }
-.jp-RenderedText pre .ansi-bright-blue-fg { color: #0065CA; }
-.jp-RenderedText pre .ansi-bright-magenta-fg { color: #A03196; }
-.jp-RenderedText pre .ansi-bright-cyan-fg { color: #258F8F; }
-.jp-RenderedText pre .ansi-bright-white-fg { color: #A1A6B2; }
+.jp-RenderedText pre .ansi-bright-black-fg {
+  color: #282c36;
+}
+.jp-RenderedText pre .ansi-bright-red-fg {
+  color: #b22b31;
+}
+.jp-RenderedText pre .ansi-bright-green-fg {
+  color: #007427;
+}
+.jp-RenderedText pre .ansi-bright-yellow-fg {
+  color: #b27d12;
+}
+.jp-RenderedText pre .ansi-bright-blue-fg {
+  color: #0065ca;
+}
+.jp-RenderedText pre .ansi-bright-magenta-fg {
+  color: #a03196;
+}
+.jp-RenderedText pre .ansi-bright-cyan-fg {
+  color: #258f8f;
+}
+.jp-RenderedText pre .ansi-bright-white-fg {
+  color: #a1a6b2;
+}
 
-.jp-RenderedText pre .ansi-bright-black-bg { background-color: #282C36; }
-.jp-RenderedText pre .ansi-bright-red-bg { background-color: #B22B31; }
-.jp-RenderedText pre .ansi-bright-green-bg { background-color: #007427; }
-.jp-RenderedText pre .ansi-bright-yellow-bg { background-color: #B27D12; }
-.jp-RenderedText pre .ansi-bright-blue-bg { background-color: #0065CA; }
-.jp-RenderedText pre .ansi-bright-magenta-bg { background-color: #A03196; }
-.jp-RenderedText pre .ansi-bright-cyan-bg { background-color: #258F8F; }
-.jp-RenderedText pre .ansi-bright-white-bg { background-color: #A1A6B2; }
+.jp-RenderedText pre .ansi-bright-black-bg {
+  background-color: #282c36;
+}
+.jp-RenderedText pre .ansi-bright-red-bg {
+  background-color: #b22b31;
+}
+.jp-RenderedText pre .ansi-bright-green-bg {
+  background-color: #007427;
+}
+.jp-RenderedText pre .ansi-bright-yellow-bg {
+  background-color: #b27d12;
+}
+.jp-RenderedText pre .ansi-bright-blue-bg {
+  background-color: #0065ca;
+}
+.jp-RenderedText pre .ansi-bright-magenta-bg {
+  background-color: #a03196;
+}
+.jp-RenderedText pre .ansi-bright-cyan-bg {
+  background-color: #258f8f;
+}
+.jp-RenderedText pre .ansi-bright-white-bg {
+  background-color: #a1a6b2;
+}
 
-
-.jp-RenderedText[data-mime-type="application/vnd.jupyter.stderr"] {
+.jp-RenderedText[data-mime-type='application/vnd.jupyter.stderr'] {
   background: var(--jp-rendermime-error-background);
   padding-top: var(--jp-code-padding);
 }
 
-
 /*-----------------------------------------------------------------------------
 | RenderedLatex
 |----------------------------------------------------------------------------*/
-
 
 .jp-RenderedLatex {
   color: var(--jp-content-font-color1);
@@ -83,11 +140,9 @@
   line-height: var(--jp-content-line-height);
 }
 
-
 /*-----------------------------------------------------------------------------
 | RenderedHTML
 |----------------------------------------------------------------------------*/
-
 
 .jp-RenderedHTMLCommon {
   color: var(--jp-content-font-color1);
@@ -98,44 +153,36 @@
   padding-right: 20px;
 }
 
-
 .jp-RenderedHTMLCommon .MathJax_Display {
   margin: 0;
 }
-
 
 .jp-RenderedHTMLCommon em {
   font-style: italic;
 }
 
-
 .jp-RenderedHTMLCommon strong {
   font-weight: bold;
 }
 
-
 .jp-RenderedHTMLCommon u {
   text-decoration: underline;
 }
-
 
 .jp-RenderedHTMLCommon a:link {
   text-decoration: none;
   color: var(--jp-content-link-color);
 }
 
-
 .jp-RenderedHTMLCommon a:hover {
   text-decoration: underline;
   color: var(--jp-content-link-color);
 }
 
-
 .jp-RenderedHTMLCommon a:visited {
   text-decoration: none;
   color: var(--jp-content-link-color);
 }
-
 
 /* Headings */
 
@@ -148,9 +195,9 @@
   line-height: var(--jp-content-heading-line-height);
   font-weight: var(--jp-content-heading-font-weight);
   font-style: normal;
-  margin: var(--jp-content-heading-margin-top) 0 var(--jp-content-heading-margin-bottom) 0;
+  margin: var(--jp-content-heading-margin-top) 0
+    var(--jp-content-heading-margin-bottom) 0;
 }
-
 
 .jp-RenderedHTMLCommon h1:first-child,
 .jp-RenderedHTMLCommon h2:first-child,
@@ -158,9 +205,8 @@
 .jp-RenderedHTMLCommon h4:first-child,
 .jp-RenderedHTMLCommon h5:first-child,
 .jp-RenderedHTMLCommon h6:first-child {
-  margin-top: calc( 0.5 * var(--jp-content-heading-margin-top) );
+  margin-top: calc(0.5 * var(--jp-content-heading-margin-top));
 }
-
 
 .jp-RenderedHTMLCommon h1:last-child,
 .jp-RenderedHTMLCommon h2:last-child,
@@ -168,34 +214,28 @@
 .jp-RenderedHTMLCommon h4:last-child,
 .jp-RenderedHTMLCommon h5:last-child,
 .jp-RenderedHTMLCommon h6:last-child {
-  margin-bottom: calc( 0.5 * var(--jp-content-heading-margin-bottom) );
+  margin-bottom: calc(0.5 * var(--jp-content-heading-margin-bottom));
 }
-
 
 .jp-RenderedHTMLCommon h1 {
   font-size: var(--jp-content-font-size5);
 }
 
-
 .jp-RenderedHTMLCommon h2 {
   font-size: var(--jp-content-font-size4);
 }
-
 
 .jp-RenderedHTMLCommon h3 {
   font-size: var(--jp-content-font-size3);
 }
 
-
 .jp-RenderedHTMLCommon h4 {
   font-size: var(--jp-content-font-size2);
 }
 
-
 .jp-RenderedHTMLCommon h5 {
   font-size: var(--jp-content-font-size1);
 }
-
 
 .jp-RenderedHTMLCommon h6 {
   font-size: var(--jp-content-font-size0);
@@ -208,52 +248,42 @@
   padding-left: 2em;
 }
 
-
 .jp-RenderedHTMLCommon ul {
   list-style: disc;
 }
-
 
 .jp-RenderedHTMLCommon ul ul {
   list-style: square;
 }
 
-
 .jp-RenderedHTMLCommon ul ul ul {
   list-style: circle;
 }
-
 
 .jp-RenderedHTMLCommon ol {
   list-style: decimal;
 }
 
-
 .jp-RenderedHTMLCommon ol ol {
   list-style: upper-alpha;
 }
-
 
 .jp-RenderedHTMLCommon ol ol ol {
   list-style: lower-alpha;
 }
 
-
 .jp-RenderedHTMLCommon ol ol ol ol {
   list-style: lower-roman;
 }
-
 
 .jp-RenderedHTMLCommon ol ol ol ol ol {
   list-style: decimal;
 }
 
-
 .jp-RenderedHTMLCommon ol,
 .jp-RenderedHTMLCommon ul {
   margin-bottom: 1em;
 }
-
 
 .jp-RenderedHTMLCommon ul ul,
 .jp-RenderedHTMLCommon ul ol,
@@ -262,7 +292,6 @@
   margin-bottom: 0em;
 }
 
-
 .jp-RenderedHTMLCommon hr {
   color: var(--jp-border-color2);
   background-color: var(--jp-border-color1);
@@ -270,11 +299,9 @@
   margin-bottom: 1em;
 }
 
-
 .jp-RenderedHTMLCommon > pre {
   margin: 1.5em 2em;
 }
-
 
 .jp-RenderedHTMLCommon pre,
 .jp-RenderedHTMLCommon code {
@@ -300,12 +327,10 @@
   margin-right: auto;
 }
 
-
 .jp-RenderedHTMLCommon thead {
   border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
   vertical-align: bottom;
 }
-
 
 .jp-RenderedHTMLCommon td,
 .jp-RenderedHTMLCommon th,
@@ -319,53 +344,43 @@
   border: none;
 }
 
-
 .jp-RenderedMarkdown.jp-RenderedHTMLCommon td,
 .jp-RenderedMarkdown.jp-RenderedHTMLCommon th {
   max-width: none;
 }
 
-
 .jp-RenderedHTMLCommon th {
   font-weight: bold;
 }
-
 
 .jp-RenderedHTMLCommon tbody tr:nth-child(odd) {
   background: var(--jp-layout-color0);
 }
 
-
 .jp-RenderedHTMLCommon tbody tr:nth-child(even) {
-  background: var(  --jp-rendermime-table-row-background);
+  background: var(--jp-rendermime-table-row-background);
 }
-
 
 .jp-RenderedHTMLCommon tbody tr:hover {
-  background: var( --jp-rendermime-table-row-hover-background);
+  background: var(--jp-rendermime-table-row-hover-background);
 }
-
 
 .jp-RenderedHTMLCommon table {
   margin-bottom: 1em;
 }
-
 
 .jp-RenderedHTMLCommon p {
   text-align: left;
   margin: 0px;
 }
 
-
 .jp-RenderedHTMLCommon p {
   margin-bottom: 1em;
 }
 
-
 .jp-RenderedHTMLCommon img {
-    -moz-force-broken-image-icon: 1;
+  -moz-force-broken-image-icon: 1;
 }
-
 
 /* Restrict to direct children as other images could be nested in other content. */
 .jp-RenderedHTMLCommon > img {
@@ -375,7 +390,6 @@
   margin-bottom: 1em;
 }
 
-
 .jp-RenderedHTMLCommon img,
 .jp-RenderedImage img,
 .jp-RenderedHTMLCommon svg,
@@ -384,7 +398,6 @@
   height: auto;
 }
 
-
 .jp-RenderedHTMLCommon img.jp-mod-unconfined,
 .jp-RenderedImage img.jp-mod-unconfined,
 .jp-RenderedHTMLCommon svg.jp-mod-unconfined,
@@ -392,11 +405,9 @@
   max-width: none;
 }
 
-
 .jp-RenderedHTMLCommon .alert {
   margin-bottom: 1em;
 }
-
 
 .jp-RenderedHTMLCommon blockquote {
   margin: 1em 2em;
@@ -419,7 +430,6 @@ h6:hover .jp-InternalAnchorLink {
   visibility: visible;
 }
 
-
 /* Most direct children of .jp-RenderedHTMLCommon have a margin-bottom of 1.0.
  * At the bottom of cells this is a bit too much as there is also spacing
  * between cells. Going all the way to 0 gets too tight between markdown and
@@ -428,8 +438,6 @@ h6:hover .jp-InternalAnchorLink {
 .jp-RenderedHTMLCommon > *:last-child {
   margin-bottom: 0.5em;
 }
-
-
 
 /*-----------------------------------------------------------------------------
 | RenderedPDF

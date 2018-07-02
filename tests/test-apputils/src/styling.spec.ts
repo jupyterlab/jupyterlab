@@ -1,29 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  expect
-} from 'chai';
+import { expect } from 'chai';
 
-import {
-  VirtualDOM, h
-} from '@phosphor/virtualdom';
+import { VirtualDOM, h } from '@phosphor/virtualdom';
 
-import {
-  simulate
-} from 'simulate-event';
+import { simulate } from 'simulate-event';
 
-import {
-  Styling
-} from '@jupyterlab/apputils';
-
+import { Styling } from '@jupyterlab/apputils';
 
 describe('@jupyterlab/apputils', () => {
-
   describe('Styling', () => {
-
     describe('.styleNode()', () => {
-
       it('should style descendant nodes for select, input and button', () => {
         let vnode = h.div({}, [h.button(), h.select(), h.input()]);
         let node = VirtualDOM.realize(vnode);
@@ -49,11 +37,9 @@ describe('@jupyterlab/apputils', () => {
         expect(wrapper.className).to.not.contain('jp-mod-focused');
         document.body.removeChild(parent);
       });
-
     });
 
     describe('.styleNodeByTag()', () => {
-
       it('should style descendant nodes for the given tag', () => {
         let vnode = h.div({}, [h.span(), h.div({}, h.span())]);
         let node = VirtualDOM.realize(vnode);
@@ -66,11 +52,9 @@ describe('@jupyterlab/apputils', () => {
         Styling.styleNodeByTag(div, 'div');
         expect(div.className).to.contain('jp-mod-styled');
       });
-
     });
 
     describe('.wrapSelect()', () => {
-
       it('should wrap the select node', () => {
         let select = document.createElement('select');
         let wrapper = Styling.wrapSelect(select);
@@ -86,9 +70,6 @@ describe('@jupyterlab/apputils', () => {
         expect(wrapper.className).to.not.contain('jp-mod-focused');
         document.body.removeChild(wrapper);
       });
-
     });
-
   });
-
 });

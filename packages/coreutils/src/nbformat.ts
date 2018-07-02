@@ -5,33 +5,26 @@
 // https://nbformat.readthedocs.io/en/latest/format_description.html
 // https://github.com/jupyter/nbformat/blob/master/nbformat/v4/nbformat.v4.schema.json
 
-import {
-  JSONObject, JSONExt
-} from '@phosphor/coreutils';
-
+import { JSONObject, JSONExt } from '@phosphor/coreutils';
 
 /**
  * A namespace for nbformat interfaces.
  */
-export
-namespace nbformat {
+export namespace nbformat {
   /**
    * The major version of the notebook format.
    */
-  export
-  const MAJOR_VERSION: number = 4;
+  export const MAJOR_VERSION: number = 4;
 
   /**
    * The minor version of the notebook format.
    */
-  export
-  const MINOR_VERSION: number = 2;
+  export const MINOR_VERSION: number = 2;
 
   /**
    * The kernelspec metadata.
    */
-  export
-  interface IKernelspecMetadata extends JSONObject {
+  export interface IKernelspecMetadata extends JSONObject {
     name: string;
     display_name: string;
   }
@@ -39,8 +32,7 @@ namespace nbformat {
   /**
    * The language info metatda
    */
-  export
-  interface ILanguageInfoMetadata extends  JSONObject {
+  export interface ILanguageInfoMetadata extends JSONObject {
     name: string;
     codemirror_mode?: string | JSONObject;
     file_extension?: string;
@@ -51,8 +43,7 @@ namespace nbformat {
   /**
    * The default metadata for the notebook.
    */
-  export
-  interface INotebookMetadata extends JSONObject {
+  export interface INotebookMetadata extends JSONObject {
     kernelspec?: IKernelspecMetadata;
     language_info?: ILanguageInfoMetadata;
     orig_nbformat: number;
@@ -61,8 +52,7 @@ namespace nbformat {
   /**
    * The notebook content.
    */
-  export
-  interface INotebookContent extends JSONObject {
+  export interface INotebookContent extends JSONObject {
     metadata: INotebookMetadata;
     nbformat_minor: number;
     nbformat: number;
@@ -72,36 +62,31 @@ namespace nbformat {
   /**
    * A multiline string.
    */
-  export
-  type MultilineString = string | string[];
+  export type MultilineString = string | string[];
 
   /**
    * A mime-type keyed dictionary of data.
    */
-  export
-  interface IMimeBundle extends JSONObject {
+  export interface IMimeBundle extends JSONObject {
     [key: string]: MultilineString | JSONObject;
   }
 
   /**
    * Media attachments (e.g. inline images).
    */
-  export
-  interface IAttachments {
+  export interface IAttachments {
     [key: string]: IMimeBundle;
   }
 
   /**
    * The code cell's prompt number. Will be null if the cell has not been run.
    */
-  export
-  type ExecutionCount = number | null;
+  export type ExecutionCount = number | null;
 
   /**
    * Cell output metadata.
    */
-  export
-  type OutputMetadata = JSONObject;
+  export type OutputMetadata = JSONObject;
 
   /**
    * Validate a mime type/value pair.
@@ -112,8 +97,10 @@ namespace nbformat {
    *
    * @returns Whether the type/value pair are valid.
    */
-  export
-  function validateMimeValue(type: string, value: MultilineString | JSONObject): boolean {
+  export function validateMimeValue(
+    type: string,
+    value: MultilineString | JSONObject
+  ): boolean {
     // Check if "application/json" or "application/foo+json"
     const jsonTest = /^application\/(.*?)+\+json$/;
     const isJSONType = type === 'application/json' || jsonTest.test(type);
@@ -154,14 +141,12 @@ namespace nbformat {
   /**
    * A type which describes the type of cell.
    */
-  export
-  type CellType = 'code' | 'markdown' | 'raw';
+  export type CellType = 'code' | 'markdown' | 'raw';
 
   /**
    * Cell-level metadata.
    */
-  export
-  interface IBaseCellMetadata extends JSONObject {
+  export interface IBaseCellMetadata extends JSONObject {
     /**
      * Whether the cell is trusted.
      *
@@ -187,8 +172,7 @@ namespace nbformat {
   /**
    * The base cell interface.
    */
-  export
-  interface IBaseCell extends JSONObject {
+  export interface IBaseCell extends JSONObject {
     /**
      * String identifying the type of cell.
      */
@@ -208,8 +192,7 @@ namespace nbformat {
   /**
    * Metadata for the raw cell.
    */
-  export
-  interface IRawCellMetadata extends IBaseCellMetadata {
+  export interface IRawCellMetadata extends IBaseCellMetadata {
     /**
      * Raw cell metadata format for nbconvert.
      */
@@ -219,8 +202,7 @@ namespace nbformat {
   /**
    * A raw cell.
    */
-  export
-  interface IRawCell extends IBaseCell {
+  export interface IRawCell extends IBaseCell {
     /**
      * String identifying the type of cell.
      */
@@ -240,8 +222,7 @@ namespace nbformat {
   /**
    * A markdown cell.
    */
-  export
-  interface IMarkdownCell extends IBaseCell {
+  export interface IMarkdownCell extends IBaseCell {
     /**
      * String identifying the type of cell.
      */
@@ -256,8 +237,7 @@ namespace nbformat {
   /**
    * Metadata for a code cell.
    */
-  export
-  interface ICodeCellMetadata extends IBaseCellMetadata {
+  export interface ICodeCellMetadata extends IBaseCellMetadata {
     /**
      * Whether the cell is collapsed/expanded.
      */
@@ -272,8 +252,7 @@ namespace nbformat {
   /**
    * A code cell.
    */
-  export
-  interface ICodeCell extends IBaseCell {
+  export interface ICodeCell extends IBaseCell {
     /**
      * String identifying the type of cell.
      */
@@ -298,57 +277,56 @@ namespace nbformat {
   /**
    * An unrecognized cell.
    */
-  export
-  interface IUnrecognizedCell extends IBaseCell { }
-
+  export interface IUnrecognizedCell extends IBaseCell {}
 
   /**
    * A cell union type.
    */
-  export
-  type ICell = IRawCell | IMarkdownCell | ICodeCell | IUnrecognizedCell;
+  export type ICell = IRawCell | IMarkdownCell | ICodeCell | IUnrecognizedCell;
 
   /**
    * Test whether a cell is a raw cell.
    */
-  export
-  function isRaw(cell: ICell): cell is IRawCell {
+  export function isRaw(cell: ICell): cell is IRawCell {
     return cell.cell_type === 'raw';
   }
 
   /**
    * Test whether a cell is a markdown cell.
    */
-  export
-  function isMarkdown(cell: ICell): cell is IMarkdownCell {
+  export function isMarkdown(cell: ICell): cell is IMarkdownCell {
     return cell.cell_type === 'markdown';
   }
 
   /**
    * Test whether a cell is a code cell.
    */
-  export
-  function isCode(cell: ICell): cell is ICodeCell {
+  export function isCode(cell: ICell): cell is ICodeCell {
     return cell.cell_type === 'code';
   }
 
   /**
    * A union metadata type.
    */
-  export
-  type ICellMetadata = IBaseCellMetadata | IRawCellMetadata | ICodeCellMetadata;
+  export type ICellMetadata =
+    | IBaseCellMetadata
+    | IRawCellMetadata
+    | ICodeCellMetadata;
 
   /**
    * The valid output types.
    */
-  export
-  type OutputType = 'execute_result' | 'display_data' | 'stream' | 'error' | 'update_display_data';
+  export type OutputType =
+    | 'execute_result'
+    | 'display_data'
+    | 'stream'
+    | 'error'
+    | 'update_display_data';
 
   /**
    * The base output type.
    */
-  export
-  interface IBaseOutput extends JSONObject {
+  export interface IBaseOutput extends JSONObject {
     /**
      * Type of cell output.
      */
@@ -358,8 +336,7 @@ namespace nbformat {
   /**
    * Result of executing a code cell.
    */
-  export
-  interface IExecuteResult extends IBaseOutput {
+  export interface IExecuteResult extends IBaseOutput {
     /**
      * Type of cell output.
      */
@@ -384,8 +361,7 @@ namespace nbformat {
   /**
    * Data displayed as a result of code cell execution.
    */
-  export
-  interface IDisplayData extends IBaseOutput {
+  export interface IDisplayData extends IBaseOutput {
     /**
      * Type of cell output.
      */
@@ -405,8 +381,7 @@ namespace nbformat {
   /**
    * Data displayed as an update to existing display data.
    */
-  export
-  interface IDisplayUpdate extends IBaseOutput {
+  export interface IDisplayUpdate extends IBaseOutput {
     /**
      * Type of cell output.
      */
@@ -426,8 +401,7 @@ namespace nbformat {
   /**
    * Stream output from a code cell.
    */
-  export
-  interface IStream extends IBaseOutput {
+  export interface IStream extends IBaseOutput {
     /**
      * Type of cell output.
      */
@@ -447,14 +421,12 @@ namespace nbformat {
   /**
    * An alias for a stream type.
    */
-  export
-  type StreamType = 'stdout' | 'stderr';
+  export type StreamType = 'stdout' | 'stderr';
 
   /**
    * Output of an error that occurred during code cell execution.
    */
-  export
-  interface IError extends IBaseOutput {
+  export interface IError extends IBaseOutput {
     /**
      * Type of cell output.
      */
@@ -479,52 +451,50 @@ namespace nbformat {
   /**
    * Unrecognized output.
    */
-  export
-  interface IUnrecognizedOutput extends IBaseOutput { }
+  export interface IUnrecognizedOutput extends IBaseOutput {}
 
   /**
    * Test whether an output is an execute result.
    */
-  export
-  function isExecuteResult(output: IOutput): output is IExecuteResult {
+  export function isExecuteResult(output: IOutput): output is IExecuteResult {
     return output.output_type === 'execute_result';
   }
 
   /**
    * Test whether an output is from display data.
    */
-  export
-  function isDisplayData(output: IOutput): output is IDisplayData {
+  export function isDisplayData(output: IOutput): output is IDisplayData {
     return output.output_type === 'display_data';
   }
 
   /**
    * Test whether an output is from updated display data.
    */
-  export
-  function isDisplayUpdate(output: IOutput): output is IDisplayUpdate {
+  export function isDisplayUpdate(output: IOutput): output is IDisplayUpdate {
     return output.output_type === 'update_display_data';
   }
 
   /**
    * Test whether an output is from a stream.
    */
-  export
-  function isStream(output: IOutput): output is IStream {
+  export function isStream(output: IOutput): output is IStream {
     return output.output_type === 'stream';
   }
 
   /**
    * Test whether an output is from a stream.
    */
-  export
-  function isError(output: IOutput): output is IError {
+  export function isError(output: IOutput): output is IError {
     return output.output_type === 'error';
   }
 
   /**
    * An output union type.
    */
-  export
-  type IOutput = IUnrecognizedOutput | IExecuteResult | IDisplayData | IStream | IError;
+  export type IOutput =
+    | IUnrecognizedOutput
+    | IExecuteResult
+    | IDisplayData
+    | IStream
+    | IError;
 }

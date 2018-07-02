@@ -3,37 +3,26 @@
 
 import expect = require('expect.js');
 
-import {
-  toArray
-} from '@phosphor/algorithm';
+import { toArray } from '@phosphor/algorithm';
+
+import { INotebookModel } from '@jupyterlab/notebook';
+
+import { NotebookPanel } from '@jupyterlab/notebook';
+
+import { NotebookWidgetFactory } from '@jupyterlab/notebook';
+
+import { Context } from '@jupyterlab/docregistry';
+
+import { createNotebookContext } from '../../utils';
 
 import {
-  INotebookModel
-} from '@jupyterlab/notebook';
-
-import {
-  NotebookPanel
-} from '@jupyterlab/notebook';
-
-import {
-  NotebookWidgetFactory
-} from '@jupyterlab/notebook';
-
-import {
-  Context
-} from '@jupyterlab/docregistry';
-
-import {
-  createNotebookContext
-} from '../../utils';
-
-import {
-  createNotebookPanelFactory, defaultEditorConfig, rendermime, mimeTypeService
+  createNotebookPanelFactory,
+  defaultEditorConfig,
+  rendermime,
+  mimeTypeService
 } from '../../notebook-utils';
 
-
 const contentFactory = createNotebookPanelFactory();
-
 
 function createFactory(): NotebookWidgetFactory {
   return new NotebookWidgetFactory({
@@ -46,11 +35,8 @@ function createFactory(): NotebookWidgetFactory {
   });
 }
 
-
 describe('@jupyterlab/notebook', () => {
-
   describe('NotebookWidgetFactory', () => {
-
     let context: Context<INotebookModel>;
 
     beforeEach(async () => {
@@ -63,27 +49,22 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#constructor()', () => {
-
       it('should create a notebook widget factory', () => {
         let factory = createFactory();
         expect(factory).to.be.a(NotebookWidgetFactory);
       });
-
     });
 
     describe('#isDisposed', () => {
-
       it('should get whether the factory has been disposed', () => {
         let factory = createFactory();
         expect(factory.isDisposed).to.be(false);
         factory.dispose();
         expect(factory.isDisposed).to.be(true);
       });
-
     });
 
     describe('#dispose()', () => {
-
       it('should dispose of the resources held by the factory', () => {
         let factory = createFactory();
         factory.dispose();
@@ -96,11 +77,9 @@ describe('@jupyterlab/notebook', () => {
         factory.dispose();
         expect(factory.isDisposed).to.be(true);
       });
-
     });
 
     describe('#editorConfig', () => {
-
       it('should be the editor config passed into the constructor', () => {
         let factory = createFactory();
         expect(factory.editorConfig).to.be(defaultEditorConfig);
@@ -112,11 +91,9 @@ describe('@jupyterlab/notebook', () => {
         factory.editorConfig = newConfig;
         expect(factory.editorConfig).to.be(newConfig);
       });
-
     });
 
     describe('#createNew()', () => {
-
       it('should create a new `NotebookPanel` widget', () => {
         let factory = createFactory();
         let panel = factory.createNew(context);
@@ -143,9 +120,6 @@ describe('@jupyterlab/notebook', () => {
         expect(items).to.contain('restart');
         expect(items).to.contain('kernelStatus');
       });
-
     });
-
   });
-
 });

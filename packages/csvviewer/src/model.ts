@@ -1,21 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  DataModel
-} from '@phosphor/datagrid';
+import { DataModel } from '@phosphor/datagrid';
 
-import {
-  IDisposable
-} from '@phosphor/disposable';
+import { IDisposable } from '@phosphor/disposable';
 
-import {
-  PromiseDelegate
-} from '@phosphor/coreutils';
+import { PromiseDelegate } from '@phosphor/coreutils';
 
-import {
-  parseDSV, parseDSVNoQuotes, IParser
-} from './parse';
+import { parseDSV, parseDSVNoQuotes, IParser } from './parse';
 
 /*
 Possible ideas for further implementation:
@@ -33,9 +25,9 @@ Possible ideas for further implementation:
 /**
  * Possible delimiter-separated data parsers.
  */
-const PARSERS: {[key: string]: IParser} = {
-  'quotes': parseDSV,
-  'noquotes': parseDSVNoQuotes
+const PARSERS: { [key: string]: IParser } = {
+  quotes: parseDSV,
+  noquotes: parseDSVNoQuotes
 };
 
 /**
@@ -44,8 +36,7 @@ const PARSERS: {[key: string]: IParser} = {
  * #### Notes
  * This model handles data with up to 2**32 characters.
  */
-export
-class DSVModel extends DataModel implements IDisposable {
+export class DSVModel extends DataModel implements IDisposable {
   /**
    * Create a data model with static CSV data.
    *
@@ -55,7 +46,7 @@ class DSVModel extends DataModel implements IDisposable {
     super();
     let {
       data,
-      delimiter=',',
+      delimiter = ',',
       rowDelimiter = undefined,
       quote = '"',
       quoteParser = undefined,
@@ -84,7 +75,7 @@ class DSVModel extends DataModel implements IDisposable {
 
     if (quoteParser === undefined) {
       // Check for the existence of quotes if the quoteParser is not set.
-      quoteParser = (data.indexOf(quote) >= 0);
+      quoteParser = data.indexOf(quote) >= 0;
     }
     this._parser = quoteParser ? 'quotes' : 'noquotes';
 
@@ -163,28 +154,28 @@ class DSVModel extends DataModel implements IDisposable {
 
     // Look up the field and value for the region.
     switch (region) {
-    case 'body':
-      if (this._header.length === 0) {
-        value = this._getField(row, column);
-      } else {
-        value = this._getField(row + 1, column);
-      }
-      break;
-    case 'column-header':
-      if (this._header.length === 0) {
-        value = (column + 1).toString();
-      } else {
-        value = this._header[column];
-      }
-      break;
-    case 'row-header':
-      value = (row + 1).toString();
-      break;
-    case 'corner-header':
-      value = '';
-      break;
-    default:
-      throw 'unreachable';
+      case 'body':
+        if (this._header.length === 0) {
+          value = this._getField(row, column);
+        } else {
+          value = this._getField(row + 1, column);
+        }
+        break;
+      case 'column-header':
+        if (this._header.length === 0) {
+          value = (column + 1).toString();
+        } else {
+          value = this._header[column];
+        }
+        break;
+      case 'row-header':
+        value = (row + 1).toString();
+        break;
+      case 'corner-header':
+        value = '';
+        break;
+      default:
+        throw 'unreachable';
     }
 
     // Return the final value.
@@ -209,7 +200,9 @@ class DSVModel extends DataModel implements IDisposable {
     if (this._doneParsing === false) {
       // Explicitly catch this rejection at least once so an error is not thrown
       // to the console.
-      this.ready.catch(() => { return; });
+      this.ready.catch(() => {
+        return;
+      });
       this._ready.reject(undefined);
     }
     if (this._delayedParse !== null) {
@@ -238,19 +231,19 @@ class DSVModel extends DataModel implements IDisposable {
     // Compute the column count if we don't already have it.
     if (this._columnCount === undefined) {
       // Get number of columns in first row
-      this._columnCount = (PARSERS[this._parser]({
+      this._columnCount = PARSERS[this._parser]({
         data: this._data,
         delimiter: this._delimiter,
         rowDelimiter: this._rowDelimiter,
         quote: this._quote,
         columnOffsets: true,
         maxRows: 1
-      })).ncols;
+      }).ncols;
     }
 
     // Parse the data up to and including the requested row, starting from the
     // last row offset we have.
-    let {nrows, offsets} = PARSERS[this._parser]({
+    let { nrows, offsets } = PARSERS[this._parser]({
       data: this._data,
       startIndex: this._rowOffsets[this._rowCount - 1],
       delimiter: this._delimiter,
@@ -302,20 +295,26 @@ class DSVModel extends DataModel implements IDisposable {
       if (this._rowCount <= maxColumnOffsetsRows) {
         // Expand the existing column offset array for new column offsets.
         let oldColumnOffsets = this._columnOffsets;
-        this._columnOffsets = new Uint32Array(this._rowCount * this._columnCount);
+        this._columnOffsets = new Uint32Array(
+          this._rowCount * this._columnCount
+        );
         this._columnOffsets.set(oldColumnOffsets);
-        this._columnOffsets.fill(0xFFFFFFFF, oldColumnOffsets.length);
+        this._columnOffsets.fill(0xffffffff, oldColumnOffsets.length);
       } else {
         // If not, then our cache size is at most the maximum number of rows we
         // fill in the cache at a time.
         let oldColumnOffsets = this._columnOffsets;
-        this._columnOffsets = new Uint32Array(Math.min(this._maxCacheGet, maxColumnOffsetsRows) * this._columnCount);
+        this._columnOffsets = new Uint32Array(
+          Math.min(this._maxCacheGet, maxColumnOffsetsRows) * this._columnCount
+        );
 
         // Fill in the entries we already have.
-        this._columnOffsets.set(oldColumnOffsets.subarray(0, this._columnOffsets.length));
+        this._columnOffsets.set(
+          oldColumnOffsets.subarray(0, this._columnOffsets.length)
+        );
 
         // Invalidate the rest of the entries.
-        this._columnOffsets.fill(0xFFFFFFFF, oldColumnOffsets.length);
+        this._columnOffsets.fill(0xffffffff, oldColumnOffsets.length);
         this._columnOffsetsStartingRow = 0;
       }
     }
@@ -371,7 +370,10 @@ class DSVModel extends DataModel implements IDisposable {
 
         // The string may or may not end in a row delimiter (RFC 4180 2.2), so
         // we explicitly check if we should trim off a row delimiter.
-        if (this._data[nextIndex - 1] === this._rowDelimiter[this._rowDelimiter.length - 1]) {
+        if (
+          this._data[nextIndex - 1] ===
+          this._rowDelimiter[this._rowDelimiter.length - 1]
+        ) {
           trimRight += this._rowDelimiter.length;
         }
       }
@@ -420,21 +422,24 @@ class DSVModel extends DataModel implements IDisposable {
     if (rowIndex < 0 || rowIndex > this._columnOffsets.length) {
       // Row isn't in the cache, so we invalidate the entire cache and set up
       // the cache to hold the requested row.
-      this._columnOffsets.fill(0xFFFFFFFF);
+      this._columnOffsets.fill(0xffffffff);
       this._columnOffsetsStartingRow = row;
       rowIndex = 0;
     }
 
     // Check to see if we need to fetch the row data into the cache.
-    if (this._columnOffsets[rowIndex] === 0xFFFFFFFF) {
+    if (this._columnOffsets[rowIndex] === 0xffffffff) {
       // Figure out how many rows below us also need to be fetched.
       let maxRows = 1;
-      while (maxRows <= this._maxCacheGet && this._columnOffsets[rowIndex + maxRows * ncols] === 0xFFFFFF) {
+      while (
+        maxRows <= this._maxCacheGet &&
+        this._columnOffsets[rowIndex + maxRows * ncols] === 0xffffff
+      ) {
         maxRows++;
       }
 
       // Parse the data to get the column offsets.
-      let {offsets} = PARSERS[this._parser]({
+      let { offsets } = PARSERS[this._parser]({
         data: this._data,
         delimiter: this._delimiter,
         rowDelimiter: this._rowDelimiter,
@@ -546,7 +551,9 @@ class DSVModel extends DataModel implements IDisposable {
     if (this._doneParsing === false) {
       // Explicitly catch this rejection at least once so an error is not thrown
       // to the console.
-      this.ready.catch(() => { return; });
+      this.ready.catch(() => {
+        return;
+      });
       this._ready.reject(undefined);
     }
     this._doneParsing = false;
@@ -602,7 +609,6 @@ class DSVModel extends DataModel implements IDisposable {
    */
   private _initialRows: number;
 
-
   // Bookkeeping variables.
   private _delayedParse: number = null;
   private _startedParsing: boolean = false;
@@ -611,18 +617,14 @@ class DSVModel extends DataModel implements IDisposable {
   private _ready = new PromiseDelegate<void>();
 }
 
-
 /**
  * The namespace for the `DSVModel` class statics.
  */
-export
-namespace DSVModel {
-
+export namespace DSVModel {
   /**
    * An options object for initializing a delimiter-separated data model.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The field delimiter, such as ',' or '\t'.
      *

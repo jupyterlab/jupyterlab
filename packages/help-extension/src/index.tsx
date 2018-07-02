@@ -2,28 +2,27 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ILayoutRestorer, JupyterLab, JupyterLabPlugin
+  ILayoutRestorer,
+  JupyterLab,
+  JupyterLabPlugin
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, IFrame, InstanceTracker, MainAreaWidget, showDialog
+  Dialog,
+  ICommandPalette,
+  IFrame,
+  InstanceTracker,
+  MainAreaWidget,
+  showDialog
 } from '@jupyterlab/apputils';
 
-import {
-  PageConfig, URLExt
-} from '@jupyterlab/coreutils';
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
-import {
-  IMainMenu
-} from '@jupyterlab/mainmenu';
+import { IMainMenu } from '@jupyterlab/mainmenu';
 
-import {
-  KernelMessage
-} from '@jupyterlab/services';
+import { KernelMessage } from '@jupyterlab/services';
 
-import {
-  Menu
-} from '@phosphor/widgets';
+import { Menu } from '@phosphor/widgets';
 
 import * as React from 'react';
 
@@ -33,31 +32,22 @@ import '../style/index.css';
  * The command IDs used by the help plugin.
  */
 namespace CommandIDs {
-  export
-  const open = 'help:open';
+  export const open = 'help:open';
 
-  export
-  const about = 'help:about';
+  export const about = 'help:about';
 
-  export
-  const activate = 'help:activate';
+  export const activate = 'help:activate';
 
-  export
-  const close = 'help:close';
+  export const close = 'help:close';
 
-  export
-  const show = 'help:show';
+  export const show = 'help:show';
 
-  export
-  const hide = 'help:hide';
+  export const hide = 'help:hide';
 
-  export
-  const toggle = 'help:toggle';
+  export const toggle = 'help:toggle';
 
-  export
-  const launchClassic = 'help:launch-classic-notebook';
+  export const launchClassic = 'help:launch-classic-notebook';
 }
-
 
 /**
  * A flag denoting whether the application is loaded over HTTPS.
@@ -84,7 +74,8 @@ const RESOURCES = [
   },
   {
     text: 'Markdown Reference',
-    url: 'https://help.github.com/articles/' +
+    url:
+      'https://help.github.com/articles/' +
       'getting-started-with-writing-and-formatting-on-github/'
   }
 ];
@@ -92,7 +83,6 @@ const RESOURCES = [
 RESOURCES.sort((a: any, b: any) => {
   return a.text.localeCompare(b.text);
 });
-
 
 /**
  * The help handler extension.
@@ -104,12 +94,10 @@ const plugin: JupyterLabPlugin<void> = {
   autoStart: true
 };
 
-
 /**
  * Export the plugin as default.
  */
 export default plugin;
-
 
 /**
  * Activate the help handler extension.
@@ -118,7 +106,12 @@ export default plugin;
  *
  * returns A promise that resolves when the extension is activated.
  */
-function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer): void {
+function activate(
+  app: JupyterLab,
+  mainMenu: IMainMenu,
+  palette: ICommandPalette,
+  restorer: ILayoutRestorer
+): void {
   let counter = 0;
   const category = 'Help';
   const namespace = 'help-doc';
@@ -129,7 +122,10 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   // Handle state restoration.
   restorer.restore(tracker, {
     command: CommandIDs.open,
-    args: widget => ({ url: widget.content.url, text: widget.content.title.label }),
+    args: widget => ({
+      url: widget.content.url,
+      text: widget.content.title.label
+    }),
     name: widget => widget.content.url
   });
 
@@ -153,10 +149,14 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     CommandIDs.about,
     'faq-jupyterlab:open',
     CommandIDs.launchClassic
-  ].map(command => { return { command }; });
+  ].map(command => {
+    return { command };
+  });
   helpMenu.addGroup(labGroup, 0);
-  const resourcesGroup = RESOURCES
-    .map(args => ({ args, command: CommandIDs.open }));
+  const resourcesGroup = RESOURCES.map(args => ({
+    args,
+    command: CommandIDs.open
+  }));
   helpMenu.addGroup(resourcesGroup, 10);
 
   // Generate a cache of the kernel help links.
@@ -193,9 +193,11 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
           return result;
         }
         helpMenu.kernelUsers.forEach(u => {
-          if (u.tracker.has(widget) &&
-              u.getKernel(widget) &&
-              u.getKernel(widget).name === name) {
+          if (
+            u.tracker.has(widget) &&
+            u.getKernel(widget) &&
+            u.getKernel(widget).name === name
+          ) {
             result = true;
           }
         });
@@ -217,19 +219,15 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
         isEnabled: usesKernel,
         execute: () => {
           // Create the header of the about dialog
-          let headerLogo = (<img src={kernelIconUrl} />);
+          let headerLogo = <img src={kernelIconUrl} />;
           let title = (
-            <span className='jp-About-header'>
+            <span className="jp-About-header">
               {headerLogo}
-              <div className='jp-About-header-info'>{kernelName}</div>
+              <div className="jp-About-header-info">{kernelName}</div>
             </span>
           );
-          const banner = (<pre>{kernelInfo.banner}</pre>);
-          let body = (
-            <div className='jp-About-body'>
-              {banner}
-            </div>
-          );
+          const banner = <pre>{kernelInfo.banner}</pre>;
+          let body = <div className="jp-About-body">{banner}</div>;
 
           showDialog({
             title,
@@ -247,13 +245,15 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
 
       // Add the kernel info help_links to the Help menu.
       const kernelGroup: Menu.IItemOptions[] = [];
-      (session.kernel.info.help_links || []).forEach((link) => {
+      (session.kernel.info.help_links || []).forEach(link => {
         const commandId = `help-menu-${name}:${link.text}`;
         commands.addCommand(commandId, {
           label: link.text,
           isVisible: usesKernel,
           isEnabled: usesKernel,
-          execute: () => { commands.execute(CommandIDs.open, link); }
+          execute: () => {
+            commands.execute(CommandIDs.open, link);
+          }
         });
         kernelGroup.push({ command: commandId });
       });
@@ -267,22 +267,21 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   commands.addCommand(CommandIDs.about, {
     label: `About ${info.name}`,
     execute: () => {
-
       // Create the header of the about dialog
-      let headerLogo = (<div className='jp-About-header-logo'/>);
-      let headerWordmark = (<div className='jp-About-header-wordmark'/>);
+      let headerLogo = <div className="jp-About-header-logo" />;
+      let headerWordmark = <div className="jp-About-header-wordmark" />;
       let release = 'Beta Release Series';
       let versionNumber = `Version ${info.version}`;
       let versionInfo = (
-        <span className='jp-About-version-info'>
-          <span className='jp-About-release'>{release}</span>
-          <span className='jp-About-version'>{versionNumber}</span>
+        <span className="jp-About-version-info">
+          <span className="jp-About-release">{release}</span>
+          <span className="jp-About-version">{versionNumber}</span>
         </span>
       );
       let title = (
-        <span className='jp-About-header'>
+        <span className="jp-About-header">
           {headerLogo}
-          <div className='jp-About-header-info'>
+          <div className="jp-About-header-info">
             {headerWordmark}
             {versionInfo}
           </div>
@@ -291,28 +290,23 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
 
       // Create the body of the about dialog
       let jupyterURL = 'https://jupyter.org/about.html';
-      let contributorsURL = 'https://github.com/jupyterlab/jupyterlab/graphs/contributors';
+      let contributorsURL =
+        'https://github.com/jupyterlab/jupyterlab/graphs/contributors';
       let externalLinks = (
-        <span className='jp-About-externalLinks'>
-          <a
-            href={contributorsURL}
-            target='_blank'
-            className='jp-Button-flat'
-          >CONTRIBUTOR LIST</a>
-          <a
-            href={jupyterURL}
-            target='_blank'
-            className='jp-Button-flat'
-          >ABOUT PROJECT JUPYTER</a>
+        <span className="jp-About-externalLinks">
+          <a href={contributorsURL} target="_blank" className="jp-Button-flat">
+            CONTRIBUTOR LIST
+          </a>
+          <a href={jupyterURL} target="_blank" className="jp-Button-flat">
+            ABOUT PROJECT JUPYTER
+          </a>
         </span>
       );
       let copyright = (
-        <span
-          className='jp-About-copyright'
-        >© 2018 Project Jupyter</span>
+        <span className="jp-About-copyright">© 2018 Project Jupyter</span>
       );
       let body = (
-        <div className='jp-About-body'>
+        <div className="jp-About-body">
           {externalLinks}
           {copyright}
         </div>
@@ -349,10 +343,11 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     }
   });
 
-
   commands.addCommand(CommandIDs.launchClassic, {
     label: 'Launch Classic Notebook',
-    execute: () => { window.open(PageConfig.getBaseUrl() + 'tree'); }
+    execute: () => {
+      window.open(PageConfig.getBaseUrl() + 'tree');
+    }
   });
 
   RESOURCES.forEach(args => {
@@ -360,5 +355,4 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   });
   palette.addItem({ command: 'apputils:reset', category });
   palette.addItem({ command: CommandIDs.launchClassic, category });
-
 }

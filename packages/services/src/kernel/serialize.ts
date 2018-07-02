@@ -1,10 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  KernelMessage
-} from './messages';
-
+import { KernelMessage } from './messages';
 
 /**
  * Deserialize and return the unpacked message.
@@ -12,8 +9,9 @@ import {
  * #### Notes
  * Handles JSON blob strings and binary messages.
  */
-export
-function deserialize(data: ArrayBuffer | string): KernelMessage.IMessage {
+export function deserialize(
+  data: ArrayBuffer | string
+): KernelMessage.IMessage {
   let value: KernelMessage.IMessage;
   if (typeof data === 'string') {
     value = JSON.parse(data);
@@ -23,7 +21,6 @@ function deserialize(data: ArrayBuffer | string): KernelMessage.IMessage {
   return value;
 }
 
-
 /**
  * Serialize a kernel message for transport.
  *
@@ -31,8 +28,7 @@ function deserialize(data: ArrayBuffer | string): KernelMessage.IMessage {
  * If there is binary content, an `ArrayBuffer` is returned,
  * otherwise the message is converted to a JSON string.
  */
-export
-function serialize(msg: KernelMessage.IMessage): string | ArrayBuffer {
+export function serialize(msg: KernelMessage.IMessage): string | ArrayBuffer {
   let value: string | ArrayBuffer;
   if (msg.buffers && msg.buffers.length) {
     value = serializeBinary(msg);
@@ -41,7 +37,6 @@ function serialize(msg: KernelMessage.IMessage): string | ArrayBuffer {
   }
   return value;
 }
-
 
 /**
  * Deserialize a binary message to a Kernel Message.
@@ -58,7 +53,7 @@ function deserializeBinary(buf: ArrayBuffer): KernelMessage.IMessage {
     offsets.push(data.getUint32(i * 4));
   }
   let jsonBytes = new Uint8Array(buf.slice(offsets[0], offsets[1]));
-  let msg = JSON.parse((new TextDecoder('utf8')).decode(jsonBytes));
+  let msg = JSON.parse(new TextDecoder('utf8').decode(jsonBytes));
   // the remaining chunks are stored as DataViews in msg.buffers
   msg.buffers = [];
   for (let i = 1; i < nbufs; i++) {
@@ -68,7 +63,6 @@ function deserializeBinary(buf: ArrayBuffer): KernelMessage.IMessage {
   }
   return msg;
 }
-
 
 /**
  * Implement the binary serialization protocol.

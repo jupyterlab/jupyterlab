@@ -2,16 +2,14 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ILayoutRestorer, JupyterLab, JupyterLabPlugin
+  ILayoutRestorer,
+  JupyterLab,
+  JupyterLabPlugin
 } from '@jupyterlab/application';
 
-import {
-  each
-} from '@phosphor/algorithm';
+import { each } from '@phosphor/algorithm';
 
-import {
-  TabBar, Widget
-} from '@phosphor/widgets';
+import { TabBar, Widget } from '@phosphor/widgets';
 
 import '../style/index.css';
 
@@ -35,11 +33,15 @@ const plugin: JupyterLabPlugin<void> = {
     app.restored.then(() => {
       const populate = () => {
         tabs.clearTabs();
-        each(shell.widgets('main'), widget => { tabs.addTab(widget.title); });
+        each(shell.widgets('main'), widget => {
+          tabs.addTab(widget.title);
+        });
       };
 
       // Connect signal handlers.
-      shell.layoutModified.connect(() => { populate(); });
+      shell.layoutModified.connect(() => {
+        populate();
+      });
       tabs.tabActivateRequested.connect((sender, tab) => {
         shell.activateById(tab.title.owner.id);
       });
@@ -54,7 +56,6 @@ const plugin: JupyterLabPlugin<void> = {
   autoStart: true,
   requires: [ILayoutRestorer]
 };
-
 
 /**
  * Export the plugin as default.

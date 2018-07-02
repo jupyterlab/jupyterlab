@@ -3,21 +3,17 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-
 .jp-ImageJupyterLab {
   background-image: var(--jp-image-jupyterlab);
 }
-
 
 .jp-ImageJupyterLab-wordmark {
   background-image: var(--jp-image-jupyterlab-wordmark);
 }
 
-
 .jp-ImageJupyter-favicon {
   background-image: var(--jp-image-jupyter-favicon);
 }
-
 
 .jp-JupyterIcon {
   background-image: var(--jp-image-jupyter);

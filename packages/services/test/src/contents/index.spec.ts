@@ -4,13 +4,18 @@
 import expect = require('expect.js');
 
 import {
-  Contents, ContentsManager, Drive, ServerConnection
+  Contents,
+  ContentsManager,
+  Drive,
+  ServerConnection
 } from '../../../lib';
 
 import {
-  DEFAULT_FILE, makeSettings, expectFailure, handleRequest
+  DEFAULT_FILE,
+  makeSettings,
+  expectFailure,
+  handleRequest
 } from '../utils';
-
 
 let DEFAULT_DIR: Contents.IModel = {
   name: 'bar',
@@ -21,8 +26,8 @@ let DEFAULT_DIR: Contents.IModel = {
   writable: false,
   mimetype: '',
   content: [
-    { name: 'buzz.txt', path: 'foo/bar/buzz.txt'},
-    { name: 'bazz.py', path: 'foo/bar/bazz.py'}
+    { name: 'buzz.txt', path: 'foo/bar/buzz.txt' },
+    { name: 'bazz.py', path: 'foo/bar/bazz.py' }
   ],
   format: 'json'
 };
@@ -32,12 +37,8 @@ let DEFAULT_CP: Contents.ICheckpointModel = {
   last_modified: 'yesterday'
 };
 
-
-
 describe('contents', () => {
-
   describe('#constructor()', () => {
-
     it('should accept no options', () => {
       let contents = new ContentsManager();
       expect(contents).to.be.a(ContentsManager);
@@ -49,12 +50,10 @@ describe('contents', () => {
       });
       expect(contents).to.be.a(ContentsManager);
     });
-
   });
 
   describe('#fileChanged', () => {
-
-    it('should be emitted when a file changes', (done) => {
+    it('should be emitted when a file changes', done => {
       let contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_FILE);
       contents.fileChanged.connect((sender, args) => {
@@ -67,7 +66,7 @@ describe('contents', () => {
       contents.newUntitled().catch(done);
     });
 
-    it('should include the full path for additional drives', (done) => {
+    it('should include the full path for additional drives', done => {
       let contents = new ContentsManager();
       let drive = new Drive({ name: 'other' });
       contents.addDrive(drive);
@@ -78,23 +77,18 @@ describe('contents', () => {
       });
       contents.newUntitled({ path: 'other:' }).catch(done);
     });
-
-
   });
 
   describe('#isDisposed', () => {
-
     it('should test whether the manager is disposed', () => {
       let contents = new ContentsManager();
       expect(contents.isDisposed).to.be(false);
       contents.dispose();
       expect(contents.isDisposed).to.be(true);
     });
-
   });
 
   describe('#dispose()', () => {
-
     it('should dispose of the resources used by the manager', () => {
       let contents = new ContentsManager();
       expect(contents.isDisposed).to.be(false);
@@ -103,86 +97,84 @@ describe('contents', () => {
       contents.dispose();
       expect(contents.isDisposed).to.be(true);
     });
-
   });
 
   describe('#addDrive()', () => {
-
     it('should add a new drive to the manager', () => {
       let contents = new ContentsManager();
       contents.addDrive(new Drive({ name: 'other' }));
       handleRequest(contents, 200, DEFAULT_FILE);
       return contents.get('other:');
     });
-
   });
 
   describe('#localPath()', () => {
-
     it('should parse the local part of a path', () => {
       const contents = new ContentsManager();
       contents.addDrive(new Drive({ name: 'other' }));
       contents.addDrive(new Drive({ name: 'alternative' }));
 
-      expect(contents.localPath('other:foo/bar/example.txt'))
-      .to.be('foo/bar/example.txt');
+      expect(contents.localPath('other:foo/bar/example.txt')).to.be(
+        'foo/bar/example.txt'
+      );
 
-      expect(contents.localPath('alternative:/foo/bar/example.txt'))
-      .to.be('foo/bar/example.txt');
+      expect(contents.localPath('alternative:/foo/bar/example.txt')).to.be(
+        'foo/bar/example.txt'
+      );
     });
 
     it('should allow the ":" character in other parts of the path', () => {
       const contents = new ContentsManager();
       contents.addDrive(new Drive({ name: 'other' }));
 
-      expect(contents.localPath('other:foo/odd:directory/example:file.txt'))
-      .to.be('foo/odd:directory/example:file.txt');
+      expect(
+        contents.localPath('other:foo/odd:directory/example:file.txt')
+      ).to.be('foo/odd:directory/example:file.txt');
     });
 
     it('should leave alone names with ":" that are not drive names', () => {
       const contents = new ContentsManager();
       contents.addDrive(new Drive({ name: 'other' }));
 
-      expect(contents.localPath('which:foo/odd:directory/example:file.txt'))
-      .to.be('which:foo/odd:directory/example:file.txt');
+      expect(
+        contents.localPath('which:foo/odd:directory/example:file.txt')
+      ).to.be('which:foo/odd:directory/example:file.txt');
     });
-
   });
 
   describe('.driveName()', () => {
-
     it('should parse the drive name a path', () => {
       const contents = new ContentsManager();
       contents.addDrive(new Drive({ name: 'other' }));
       contents.addDrive(new Drive({ name: 'alternative' }));
 
-      expect(contents.driveName('other:foo/bar/example.txt'))
-      .to.be('other');
+      expect(contents.driveName('other:foo/bar/example.txt')).to.be('other');
 
-      expect(contents.driveName('alternative:/foo/bar/example.txt'))
-      .to.be('alternative');
+      expect(contents.driveName('alternative:/foo/bar/example.txt')).to.be(
+        'alternative'
+      );
     });
 
     it('should allow the ":" character in other parts of the path', () => {
       const contents = new ContentsManager();
       contents.addDrive(new Drive({ name: 'other' }));
 
-      expect(contents.driveName('other:foo/odd:directory/example:file.txt'))
-      .to.be('other');
+      expect(
+        contents.driveName('other:foo/odd:directory/example:file.txt')
+      ).to.be('other');
     });
 
     it('should leave alone names with ":" that are not drive names', () => {
       const contents = new ContentsManager();
       contents.addDrive(new Drive({ name: 'other' }));
 
-      expect(contents.driveName('which:foo/odd:directory/example:file.txt'))
-      .to.be('');
+      expect(
+        contents.driveName('which:foo/odd:directory/example:file.txt')
+      ).to.be('');
     });
-
   });
 
   describe('#get()', () => {
-
     it('should get a file', () => {
       let contents = new ContentsManager();
       handleRequest(contents, 200, DEFAULT_FILE);
@@ -223,17 +215,15 @@ describe('contents', () => {
       });
     });
 
-    it('should fail for an incorrect response', (done) => {
+    it('should fail for an incorrect response', done => {
       let contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_DIR);
       let get = contents.get('/foo');
       expectFailure(get, done, 'Invalid response: 201 Created');
     });
-
   });
 
   describe('#getDownloadUrl()', () => {
-
     let settings = ServerConnection.makeSettings({
       baseUrl: 'http://foo'
     });
@@ -280,12 +270,9 @@ describe('contents', () => {
         expect(urls[2]).to.be('http://foo/files/bar.txt');
       });
     });
-
-
   });
 
   describe('#newUntitled()', () => {
-
     it('should create a file', () => {
       let contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_FILE);
@@ -330,7 +317,7 @@ describe('contents', () => {
       });
     });
 
-    it('should emit the fileChanged signal', (done) => {
+    it('should emit the fileChanged signal', done => {
       let contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_FILE);
       contents.fileChanged.connect((sender, args) => {
@@ -342,7 +329,7 @@ describe('contents', () => {
       contents.newUntitled({ type: 'file', ext: 'test' }).catch(done);
     });
 
-    it('should fail for an incorrect model', (done) => {
+    it('should fail for an incorrect model', done => {
       let contents = new ContentsManager();
       let dir = JSON.parse(JSON.stringify(DEFAULT_DIR));
       dir.name = 1;
@@ -356,20 +343,18 @@ describe('contents', () => {
       expectFailure(newFile, done);
     });
 
-    it('should fail for an incorrect response', (done) => {
+    it('should fail for an incorrect response', done => {
       let contents = new ContentsManager();
       handleRequest(contents, 200, DEFAULT_DIR);
       let newDir = contents.newUntitled();
       expectFailure(newDir, done, 'Invalid response: 200 OK');
     });
-
   });
 
   describe('#delete()', () => {
-
     it('should delete a file', () => {
       let contents = new ContentsManager();
-      handleRequest(contents, 204, { });
+      handleRequest(contents, 204, {});
       return contents.delete('/foo/bar.txt');
     });
 
@@ -381,7 +366,7 @@ describe('contents', () => {
       return contents.delete('other:/foo/bar.txt');
     });
 
-    it('should emit the fileChanged signal', (done) => {
+    it('should emit the fileChanged signal', done => {
       let contents = new ContentsManager();
       let path = '/foo/bar.txt';
       handleRequest(contents, 204, { path });
@@ -393,31 +378,29 @@ describe('contents', () => {
       contents.delete(path).catch(done);
     });
 
-    it('should fail for an incorrect response', (done) => {
+    it('should fail for an incorrect response', done => {
       let contents = new ContentsManager();
-      handleRequest(contents, 200, { });
+      handleRequest(contents, 200, {});
       let del = contents.delete('/foo/bar.txt');
       expectFailure(del, done, 'Invalid response: 200 OK');
     });
 
-    it('should throw a specific error', (done) => {
+    it('should throw a specific error', done => {
       let contents = new ContentsManager();
-      handleRequest(contents, 400, { });
+      handleRequest(contents, 400, {});
       let del = contents.delete('/foo/');
       expectFailure(del, done, '');
     });
 
-    it('should throw a general error', (done) => {
+    it('should throw a general error', done => {
       let contents = new ContentsManager();
-      handleRequest(contents, 500, { });
+      handleRequest(contents, 500, {});
       let del = contents.delete('/foo/');
       expectFailure(del, done, '');
     });
-
   });
 
   describe('#rename()', () => {
-
     it('should rename a file', () => {
       let contents = new ContentsManager();
       handleRequest(contents, 200, DEFAULT_FILE);
@@ -438,7 +421,7 @@ describe('contents', () => {
       });
     });
 
-    it('should emit the fileChanged signal', (done) => {
+    it('should emit the fileChanged signal', done => {
       let contents = new ContentsManager();
       handleRequest(contents, 200, DEFAULT_FILE);
       contents.fileChanged.connect((sender, args) => {
@@ -450,7 +433,7 @@ describe('contents', () => {
       contents.rename('/foo/bar.txt', '/foo/baz.txt').catch(done);
     });
 
-    it('should fail for an incorrect model', (done) => {
+    it('should fail for an incorrect model', done => {
       let contents = new ContentsManager();
       let dir = JSON.parse(JSON.stringify(DEFAULT_FILE));
       delete dir.path;
@@ -459,17 +442,15 @@ describe('contents', () => {
       expectFailure(rename, done);
     });
 
-    it('should fail for an incorrect response', (done) => {
+    it('should fail for an incorrect response', done => {
       let contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_FILE);
       let rename = contents.rename('/foo/bar.txt', '/foo/baz.txt');
       expectFailure(rename, done, 'Invalid response: 201 Created');
     });
-
   });
 
   describe('#save()', () => {
-
     it('should save a file', () => {
       let contents = new ContentsManager();
       handleRequest(contents, 200, DEFAULT_FILE);
@@ -499,7 +480,7 @@ describe('contents', () => {
       });
     });
 
-    it('should emit the fileChanged signal', (done) => {
+    it('should emit the fileChanged signal', done => {
       let contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_FILE);
       contents.fileChanged.connect((sender, args) => {
@@ -511,7 +492,7 @@ describe('contents', () => {
       contents.save('/foo', { type: 'file', name: 'test' }).catch(done);
     });
 
-    it('should fail for an incorrect model', (done) => {
+    it('should fail for an incorrect model', done => {
       let contents = new ContentsManager();
       let file = JSON.parse(JSON.stringify(DEFAULT_FILE));
       delete file.format;
@@ -520,17 +501,15 @@ describe('contents', () => {
       expectFailure(save, done);
     });
 
-    it('should fail for an incorrect response', (done) => {
+    it('should fail for an incorrect response', done => {
       let contents = new ContentsManager();
       handleRequest(contents, 204, DEFAULT_FILE);
       let save = contents.save('/foo', { type: 'file', name: 'test' });
       expectFailure(save, done, 'Invalid response: 204 No Content');
     });
-
   });
 
   describe('#copy()', () => {
-
     it('should copy a file', () => {
       let contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_FILE);
@@ -549,7 +528,7 @@ describe('contents', () => {
       });
     });
 
-    it('should emit the fileChanged signal', (done) => {
+    it('should emit the fileChanged signal', done => {
       let contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_FILE);
       contents.fileChanged.connect((sender, args) => {
@@ -561,7 +540,7 @@ describe('contents', () => {
       contents.copy('/foo/bar.txt', '/baz').catch(done);
     });
 
-    it('should fail for an incorrect model', (done) => {
+    it('should fail for an incorrect model', done => {
       let contents = new ContentsManager();
       let file = JSON.parse(JSON.stringify(DEFAULT_FILE));
       delete file.type;
@@ -570,17 +549,15 @@ describe('contents', () => {
       expectFailure(copy, done);
     });
 
-    it('should fail for an incorrect response', (done) => {
+    it('should fail for an incorrect response', done => {
       let contents = new ContentsManager();
       handleRequest(contents, 200, DEFAULT_FILE);
       let copy = contents.copy('/foo/bar.txt', '/baz');
       expectFailure(copy, done, 'Invalid response: 200 OK');
     });
-
   });
 
   describe('#createCheckpoint()', () => {
-
     it('should create a checkpoint', () => {
       let contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_CP);
@@ -601,7 +578,7 @@ describe('contents', () => {
       });
     });
 
-    it('should fail for an incorrect model', (done) => {
+    it('should fail for an incorrect model', done => {
       let contents = new ContentsManager();
       let cp = JSON.parse(JSON.stringify(DEFAULT_CP));
       delete cp.last_modified;
@@ -610,17 +587,15 @@ describe('contents', () => {
       expectFailure(checkpoint, done);
     });
 
-    it('should fail for an incorrect response', (done) => {
+    it('should fail for an incorrect response', done => {
       let contents = new ContentsManager();
       handleRequest(contents, 200, DEFAULT_CP);
       let checkpoint = contents.createCheckpoint('/foo/bar.txt');
       expectFailure(checkpoint, done, 'Invalid response: 200 OK');
     });
-
   });
 
   describe('#listCheckpoints()', () => {
-
     it('should list the checkpoints', () => {
       let contents = new ContentsManager();
       handleRequest(contents, 200, [DEFAULT_CP, DEFAULT_CP]);
@@ -641,7 +616,7 @@ describe('contents', () => {
       });
     });
 
-    it('should fail for an incorrect model', (done) => {
+    it('should fail for an incorrect model', done => {
       let contents = new ContentsManager();
       let cp = JSON.parse(JSON.stringify(DEFAULT_CP));
       delete cp.id;
@@ -656,22 +631,22 @@ describe('contents', () => {
       expectFailure(checkpoints, second);
     });
 
-    it('should fail for an incorrect response', (done) => {
+    it('should fail for an incorrect response', done => {
       let contents = new ContentsManager();
-      handleRequest(contents, 201, { });
+      handleRequest(contents, 201, {});
       let checkpoints = contents.listCheckpoints('/foo/bar.txt');
       expectFailure(checkpoints, done, 'Invalid response: 201 Created');
     });
-
   });
 
   describe('#restoreCheckpoint()', () => {
-
     it('should restore a checkpoint', () => {
       let contents = new ContentsManager();
-      handleRequest(contents, 204, { });
-      let checkpoint = contents.restoreCheckpoint('/foo/bar.txt',
-                                                  DEFAULT_CP.id);
+      handleRequest(contents, 204, {});
+      let checkpoint = contents.restoreCheckpoint(
+        '/foo/bar.txt',
+        DEFAULT_CP.id
+      );
       return checkpoint;
     });
 
@@ -679,27 +654,29 @@ describe('contents', () => {
       let contents = new ContentsManager();
       let other = new Drive({ name: 'other' });
       contents.addDrive(other);
-      handleRequest(other, 204, { });
-      let checkpoint = contents.restoreCheckpoint('other:/foo/bar.txt',
-                                                  DEFAULT_CP.id);
+      handleRequest(other, 204, {});
+      let checkpoint = contents.restoreCheckpoint(
+        'other:/foo/bar.txt',
+        DEFAULT_CP.id
+      );
       return checkpoint;
     });
 
-    it('should fail for an incorrect response', (done) => {
+    it('should fail for an incorrect response', done => {
       let contents = new ContentsManager();
-      handleRequest(contents, 200, { });
-      let checkpoint = contents.restoreCheckpoint('/foo/bar.txt',
-                                                  DEFAULT_CP.id);
+      handleRequest(contents, 200, {});
+      let checkpoint = contents.restoreCheckpoint(
+        '/foo/bar.txt',
+        DEFAULT_CP.id
+      );
       expectFailure(checkpoint, done, 'Invalid response: 200 OK');
     });
-
   });
 
   describe('#deleteCheckpoint()', () => {
-
     it('should delete a checkpoint', () => {
       let contents = new ContentsManager();
-      handleRequest(contents, 204, { });
+      handleRequest(contents, 204, {});
       return contents.deleteCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
     });
 
@@ -707,29 +684,23 @@ describe('contents', () => {
       let contents = new ContentsManager();
       let other = new Drive({ name: 'other' });
       contents.addDrive(other);
-      handleRequest(other, 204, { });
+      handleRequest(other, 204, {});
       return contents.deleteCheckpoint('other:/foo/bar.txt', DEFAULT_CP.id);
     });
 
-    it('should fail for an incorrect response', (done) => {
+    it('should fail for an incorrect response', done => {
       let contents = new ContentsManager();
-      handleRequest(contents, 200, { });
-      let checkpoint = contents.deleteCheckpoint('/foo/bar.txt',
-                                                  DEFAULT_CP.id);
+      handleRequest(contents, 200, {});
+      let checkpoint = contents.deleteCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
       expectFailure(checkpoint, done, 'Invalid response: 200 OK');
     });
-
   });
-
 });
 
-
 describe('drive', () => {
-
   let serverSettings = makeSettings();
 
   describe('#constructor()', () => {
-
     it('should accept no options', () => {
       let drive = new Drive();
       expect(drive).to.be.a(Drive);
@@ -741,7 +712,6 @@ describe('drive', () => {
       });
       expect(drive).to.be.a(Drive);
     });
-
   });
 
   describe('#name', () => {
@@ -751,12 +721,10 @@ describe('drive', () => {
       });
       expect(drive.name).to.be('name');
     });
-
   });
 
   describe('#fileChanged', () => {
-
-    it('should be emitted when a file changes', (done) => {
+    it('should be emitted when a file changes', done => {
       let drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);
       drive.fileChanged.connect((sender, args) => {
@@ -768,22 +736,18 @@ describe('drive', () => {
       });
       drive.newUntitled().catch(done);
     });
-
   });
 
   describe('#isDisposed', () => {
-
     it('should test whether the drive is disposed', () => {
       let drive = new Drive();
       expect(drive.isDisposed).to.be(false);
       drive.dispose();
       expect(drive.isDisposed).to.be(true);
     });
-
   });
 
   describe('#dispose()', () => {
-
     it('should dispose of the resources used by the drive', () => {
       let drive = new Drive();
       expect(drive.isDisposed).to.be(false);
@@ -792,11 +756,9 @@ describe('drive', () => {
       drive.dispose();
       expect(drive.isDisposed).to.be(true);
     });
-
   });
 
   describe('#get()', () => {
-
     it('should get a file', () => {
       let drive = new Drive();
       handleRequest(drive, 200, DEFAULT_FILE);
@@ -827,17 +789,15 @@ describe('drive', () => {
       });
     });
 
-    it('should fail for an incorrect response', (done) => {
+    it('should fail for an incorrect response', done => {
       let drive = new Drive();
       handleRequest(drive, 201, DEFAULT_DIR);
       let get = drive.get('/foo');
       expectFailure(get, done, 'Invalid response: 201 Created');
     });
-
   });
 
   describe('#getDownloadUrl()', () => {
-
     let settings = ServerConnection.makeSettings({
       baseUrl: 'http://foo'
     });
@@ -867,11 +827,9 @@ describe('drive', () => {
         expect(url).to.be('http://foo/files/fizz/../bar.txt');
       });
     });
-
   });
 
   describe('#newUntitled()', () => {
-
     it('should create a file', () => {
       let drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);
@@ -893,7 +851,7 @@ describe('drive', () => {
       });
     });
 
-    it('should emit the fileChanged signal', (done) => {
+    it('should emit the fileChanged signal', done => {
       let drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);
       drive.fileChanged.connect((sender, args) => {
@@ -918,7 +876,7 @@ describe('drive', () => {
       });
     });
 
-    it('should fail for an incorrect model', (done) => {
+    it('should fail for an incorrect model', done => {
       let drive = new Drive();
       let dir = JSON.parse(JSON.stringify(DEFAULT_DIR));
       dir.name = 1;
@@ -932,24 +890,22 @@ describe('drive', () => {
       expectFailure(newFile, done);
     });
 
-    it('should fail for an incorrect response', (done) => {
+    it('should fail for an incorrect response', done => {
       let drive = new Drive();
       handleRequest(drive, 200, DEFAULT_DIR);
       let newDir = drive.newUntitled();
       expectFailure(newDir, done, 'Invalid response: 200 OK');
     });
-
   });
 
   describe('#delete()', () => {
-
     it('should delete a file', () => {
       let drive = new Drive();
-      handleRequest(drive, 204, { });
+      handleRequest(drive, 204, {});
       return drive.delete('/foo/bar.txt');
     });
 
-    it('should emit the fileChanged signal', (done) => {
+    it('should emit the fileChanged signal', done => {
       let drive = new Drive();
       let path = '/foo/bar.txt';
       handleRequest(drive, 204, { path });
@@ -963,35 +919,33 @@ describe('drive', () => {
 
     it('should accept server settings', () => {
       let drive = new Drive({ serverSettings });
-      handleRequest(drive, 204, { });
+      handleRequest(drive, 204, {});
       drive.delete('/foo/bar.txt');
     });
 
-    it('should fail for an incorrect response', (done) => {
+    it('should fail for an incorrect response', done => {
       let drive = new Drive();
-      handleRequest(drive, 200, { });
+      handleRequest(drive, 200, {});
       let del = drive.delete('/foo/bar.txt');
       expectFailure(del, done, 'Invalid response: 200 OK');
     });
 
-    it('should throw a specific error', (done) => {
+    it('should throw a specific error', done => {
       let drive = new Drive();
-      handleRequest(drive, 400, { });
+      handleRequest(drive, 400, {});
       let del = drive.delete('/foo/');
       expectFailure(del, done, '');
     });
 
-    it('should throw a general error', (done) => {
+    it('should throw a general error', done => {
       let drive = new Drive();
-      handleRequest(drive, 500, { });
+      handleRequest(drive, 500, {});
       let del = drive.delete('/foo/');
       expectFailure(del, done, '');
     });
-
   });
 
   describe('#rename()', () => {
-
     it('should rename a file', () => {
       let drive = new Drive();
       handleRequest(drive, 200, DEFAULT_FILE);
@@ -1001,7 +955,7 @@ describe('drive', () => {
       });
     });
 
-    it('should emit the fileChanged signal', (done) => {
+    it('should emit the fileChanged signal', done => {
       let drive = new Drive();
       handleRequest(drive, 200, DEFAULT_FILE);
       drive.fileChanged.connect((sender, args) => {
@@ -1022,7 +976,7 @@ describe('drive', () => {
       });
     });
 
-    it('should fail for an incorrect model', (done) => {
+    it('should fail for an incorrect model', done => {
       let drive = new Drive();
       let dir = JSON.parse(JSON.stringify(DEFAULT_FILE));
       delete dir.path;
@@ -1031,17 +985,15 @@ describe('drive', () => {
       expectFailure(rename, done);
     });
 
-    it('should fail for an incorrect response', (done) => {
+    it('should fail for an incorrect response', done => {
       let drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);
       let rename = drive.rename('/foo/bar.txt', '/foo/baz.txt');
       expectFailure(rename, done, 'Invalid response: 201 Created');
     });
-
   });
 
   describe('#save()', () => {
-
     it('should save a file', () => {
       let drive = new Drive();
       handleRequest(drive, 200, DEFAULT_FILE);
@@ -1060,7 +1012,7 @@ describe('drive', () => {
       });
     });
 
-    it('should emit the fileChanged signal', (done) => {
+    it('should emit the fileChanged signal', done => {
       let drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);
       drive.fileChanged.connect((sender, args) => {
@@ -1081,7 +1033,7 @@ describe('drive', () => {
       });
     });
 
-    it('should fail for an incorrect model', (done) => {
+    it('should fail for an incorrect model', done => {
       let drive = new Drive();
       let file = JSON.parse(JSON.stringify(DEFAULT_FILE));
       delete file.format;
@@ -1090,17 +1042,15 @@ describe('drive', () => {
       expectFailure(save, done);
     });
 
-    it('should fail for an incorrect response', (done) => {
+    it('should fail for an incorrect response', done => {
       let drive = new Drive();
       handleRequest(drive, 204, DEFAULT_FILE);
       let save = drive.save('/foo', { type: 'file', name: 'test' });
       expectFailure(save, done, 'Invalid response: 204 No Content');
     });
-
   });
 
   describe('#copy()', () => {
-
     it('should copy a file', () => {
       let drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);
@@ -1109,7 +1059,7 @@ describe('drive', () => {
       });
     });
 
-    it('should emit the fileChanged signal', (done) => {
+    it('should emit the fileChanged signal', done => {
       let drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);
       drive.fileChanged.connect((sender, args) => {
@@ -1129,7 +1079,7 @@ describe('drive', () => {
       });
     });
 
-    it('should fail for an incorrect model', (done) => {
+    it('should fail for an incorrect model', done => {
       let drive = new Drive();
       let file = JSON.parse(JSON.stringify(DEFAULT_FILE));
       delete file.type;
@@ -1138,17 +1088,15 @@ describe('drive', () => {
       expectFailure(copy, done);
     });
 
-    it('should fail for an incorrect response', (done) => {
+    it('should fail for an incorrect response', done => {
       let drive = new Drive();
       handleRequest(drive, 200, DEFAULT_FILE);
       let copy = drive.copy('/foo/bar.txt', '/baz');
       expectFailure(copy, done, 'Invalid response: 200 OK');
     });
-
   });
 
   describe('#createCheckpoint()', () => {
-
     it('should create a checkpoint', () => {
       let drive = new Drive();
       handleRequest(drive, 201, DEFAULT_CP);
@@ -1167,7 +1115,7 @@ describe('drive', () => {
       });
     });
 
-    it('should fail for an incorrect model', (done) => {
+    it('should fail for an incorrect model', done => {
       let drive = new Drive();
       let cp = JSON.parse(JSON.stringify(DEFAULT_CP));
       delete cp.last_modified;
@@ -1176,17 +1124,15 @@ describe('drive', () => {
       expectFailure(checkpoint, done);
     });
 
-    it('should fail for an incorrect response', (done) => {
+    it('should fail for an incorrect response', done => {
       let drive = new Drive();
       handleRequest(drive, 200, DEFAULT_CP);
       let checkpoint = drive.createCheckpoint('/foo/bar.txt');
       expectFailure(checkpoint, done, 'Invalid response: 200 OK');
     });
-
   });
 
   describe('#listCheckpoints()', () => {
-
     it('should list the checkpoints', () => {
       let drive = new Drive();
       handleRequest(drive, 200, [DEFAULT_CP, DEFAULT_CP]);
@@ -1205,7 +1151,7 @@ describe('drive', () => {
       });
     });
 
-    it('should fail for an incorrect model', (done) => {
+    it('should fail for an incorrect model', done => {
       let drive = new Drive();
       let cp = JSON.parse(JSON.stringify(DEFAULT_CP));
       delete cp.id;
@@ -1220,101 +1166,99 @@ describe('drive', () => {
       expectFailure(checkpoints, second);
     });
 
-    it('should fail for an incorrect response', (done) => {
+    it('should fail for an incorrect response', done => {
       let drive = new Drive();
-      handleRequest(drive, 201, { });
+      handleRequest(drive, 201, {});
       let checkpoints = drive.listCheckpoints('/foo/bar.txt');
       expectFailure(checkpoints, done, 'Invalid response: 201 Created');
     });
-
   });
 
   describe('#restoreCheckpoint()', () => {
-
     it('should restore a checkpoint', () => {
       let drive = new Drive();
-      handleRequest(drive, 204, { });
-      let checkpoint = drive.restoreCheckpoint('/foo/bar.txt',
-                                                  DEFAULT_CP.id);
+      handleRequest(drive, 204, {});
+      let checkpoint = drive.restoreCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
       return checkpoint;
     });
 
     it('should accept server settings', () => {
       let drive = new Drive({ serverSettings });
-      handleRequest(drive, 204, { });
-      let checkpoint = drive.restoreCheckpoint('/foo/bar.txt',
-                                                  DEFAULT_CP.id);
+      handleRequest(drive, 204, {});
+      let checkpoint = drive.restoreCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
       return checkpoint;
     });
 
-    it('should fail for an incorrect response', (done) => {
+    it('should fail for an incorrect response', done => {
       let drive = new Drive();
-      handleRequest(drive, 200, { });
-      let checkpoint = drive.restoreCheckpoint('/foo/bar.txt',
-                                                  DEFAULT_CP.id);
+      handleRequest(drive, 200, {});
+      let checkpoint = drive.restoreCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
       expectFailure(checkpoint, done, 'Invalid response: 200 OK');
     });
-
   });
 
   describe('#deleteCheckpoint()', () => {
-
     it('should delete a checkpoint', () => {
       let drive = new Drive();
-      handleRequest(drive, 204, { });
+      handleRequest(drive, 204, {});
       return drive.deleteCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
     });
 
     it('should accept server settings', () => {
       let drive = new Drive({ serverSettings });
-      handleRequest(drive, 204, { });
+      handleRequest(drive, 204, {});
       return drive.deleteCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
     });
 
-    it('should fail for an incorrect response', (done) => {
+    it('should fail for an incorrect response', done => {
       let drive = new Drive();
-      handleRequest(drive, 200, { });
-      let checkpoint = drive.deleteCheckpoint('/foo/bar.txt',
-                                                  DEFAULT_CP.id);
+      handleRequest(drive, 200, {});
+      let checkpoint = drive.deleteCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
       expectFailure(checkpoint, done, 'Invalid response: 200 OK');
     });
-
   });
 
   describe('integration tests', () => {
-
     it('should list a directory and get the file contents', () => {
       let contents = new ContentsManager();
       let content: Contents.IModel[];
       let path = '';
-      return contents.get('src').then(listing => {
-        content = listing.content as Contents.IModel[];
-        for (let i = 0; i < content.length; i++) {
-          if (content[i].type === 'file') {
-            path = content[i].path;
-            return contents.get(path, { type: 'file' });
+      return contents
+        .get('src')
+        .then(listing => {
+          content = listing.content as Contents.IModel[];
+          for (let i = 0; i < content.length; i++) {
+            if (content[i].type === 'file') {
+              path = content[i].path;
+              return contents.get(path, { type: 'file' });
+            }
           }
-        }
-      }).then(msg => {
-        expect(msg.path).to.be(path);
-      });
+        })
+        .then(msg => {
+          expect(msg.path).to.be(path);
+        });
     });
 
     it('should create a new file, rename it, and delete it', () => {
       let contents = new ContentsManager();
       let options: Contents.ICreateOptions = { type: 'file', ext: '.ipynb' };
-      return contents.newUntitled(options).then(model0 => {
-        return contents.rename(model0.path, 'foo.ipynb');
-      }).then(model1 => {
-        expect(model1.path).to.be('foo.ipynb');
-        return contents.delete('foo.ipynb');
-      });
+      return contents
+        .newUntitled(options)
+        .then(model0 => {
+          return contents.rename(model0.path, 'foo.ipynb');
+        })
+        .then(model1 => {
+          expect(model1.path).to.be('foo.ipynb');
+          return contents.delete('foo.ipynb');
+        });
     });
 
     it('should create a file by name and delete it', () => {
       let contents = new ContentsManager();
       let options: Partial<Contents.IModel> = {
-        type: 'file', content: '', format: 'text'
+        type: 'file',
+        content: '',
+        format: 'text'
       };
       return contents.save('baz.txt', options).then(model0 => {
         return contents.delete('baz.txt');
@@ -1324,25 +1268,31 @@ describe('drive', () => {
     it('should exercise the checkpoint API', () => {
       let contents = new ContentsManager();
       let options: Partial<Contents.IModel> = {
-        type: 'file', format: 'text', content: 'foo'
+        type: 'file',
+        format: 'text',
+        content: 'foo'
       };
       let checkpoint: Contents.ICheckpointModel;
-      return contents.save('baz.txt', options).then(model0 => {
-        expect(model0.name).to.be('baz.txt');
-        return contents.createCheckpoint('baz.txt');
-      }).then(value => {
-        checkpoint = value;
-        return contents.listCheckpoints('baz.txt');
-      }).then(checkpoints => {
-        expect(checkpoints[0]).to.eql(checkpoint);
-        return contents.restoreCheckpoint('baz.txt', checkpoint.id);
-      }).then(() => {
-        return contents.deleteCheckpoint('baz.txt', checkpoint.id);
-      }).then(() => {
-        return contents.delete('baz.txt');
-      });
+      return contents
+        .save('baz.txt', options)
+        .then(model0 => {
+          expect(model0.name).to.be('baz.txt');
+          return contents.createCheckpoint('baz.txt');
+        })
+        .then(value => {
+          checkpoint = value;
+          return contents.listCheckpoints('baz.txt');
+        })
+        .then(checkpoints => {
+          expect(checkpoints[0]).to.eql(checkpoint);
+          return contents.restoreCheckpoint('baz.txt', checkpoint.id);
+        })
+        .then(() => {
+          return contents.deleteCheckpoint('baz.txt', checkpoint.id);
+        })
+        .then(() => {
+          return contents.delete('baz.txt');
+        });
     });
-
   });
-
 });

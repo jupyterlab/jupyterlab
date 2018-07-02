@@ -3,71 +3,58 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import {
-  AttachmentsResolver
-} from '@jupyterlab/attachments';
+import { AttachmentsResolver } from '@jupyterlab/attachments';
+
+import { IClientSession } from '@jupyterlab/apputils';
+
+import { IChangedArgs, ActivityMonitor } from '@jupyterlab/coreutils';
+
+import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
+
+import { IObservableMap } from '@jupyterlab/observables';
 
 import {
-  IClientSession
-} from '@jupyterlab/apputils';
-
-import {
-  IChangedArgs, ActivityMonitor
-} from '@jupyterlab/coreutils';
-
-import {
-  CodeEditor, CodeEditorWrapper
-} from '@jupyterlab/codeeditor';
-
-import {
-  IObservableMap
-} from '@jupyterlab/observables';
-
-import {
-  OutputArea, SimplifiedOutputArea, IOutputPrompt, OutputPrompt, IStdin, Stdin
+  OutputArea,
+  SimplifiedOutputArea,
+  IOutputPrompt,
+  OutputPrompt,
+  IStdin,
+  Stdin
 } from '@jupyterlab/outputarea';
 
 import {
-  IRenderMime, MimeModel, RenderMimeRegistry
+  IRenderMime,
+  MimeModel,
+  RenderMimeRegistry
 } from '@jupyterlab/rendermime';
 
-import {
-  KernelMessage
-} from '@jupyterlab/services';
+import { KernelMessage } from '@jupyterlab/services';
+
+import { JSONValue, PromiseDelegate } from '@phosphor/coreutils';
+
+import { Message } from '@phosphor/messaging';
+
+import { PanelLayout, Panel, Widget } from '@phosphor/widgets';
+
+import { InputCollapser, OutputCollapser } from './collapser';
 
 import {
-  JSONValue, PromiseDelegate
-} from '@phosphor/coreutils';
-
-import {
-  Message
-} from '@phosphor/messaging';
-
-import {
-  PanelLayout, Panel, Widget
-} from '@phosphor/widgets';
-
-import {
-  InputCollapser, OutputCollapser
-} from './collapser';
-
-import {
-  CellHeader, CellFooter, ICellHeader, ICellFooter
+  CellHeader,
+  CellFooter,
+  ICellHeader,
+  ICellFooter
 } from './headerfooter';
 
-import {
-  InputArea, IInputPrompt, InputPrompt
-} from './inputarea';
+import { InputArea, IInputPrompt, InputPrompt } from './inputarea';
 
 import {
-  ICellModel, ICodeCellModel,
-  IMarkdownCellModel, IRawCellModel
+  ICellModel,
+  ICodeCellModel,
+  IMarkdownCellModel,
+  IRawCellModel
 } from './model';
 
-import {
-  InputPlaceholder, OutputPlaceholder
-} from './placeholder';
-
+import { InputPlaceholder, OutputPlaceholder } from './placeholder';
 
 /**
  * The CSS class added to cell widgets.
@@ -165,35 +152,32 @@ const RENDER_TIMEOUT = 1000;
  * Cell
  ******************************************************************************/
 
-
 /**
  * A base cell widget.
  */
-export
-class Cell extends Widget {
+export class Cell extends Widget {
   /**
    * Construct a new base cell widget.
    */
   constructor(options: Cell.IOptions) {
     super();
     this.addClass(CELL_CLASS);
-    let model = this._model = options.model;
-    let contentFactory = this.contentFactory = (
-      options.contentFactory || Cell.defaultContentFactory
-    );
+    let model = (this._model = options.model);
+    let contentFactory = (this.contentFactory =
+      options.contentFactory || Cell.defaultContentFactory);
     this.layout = new PanelLayout();
 
     // Header
-    let header = this._header = contentFactory.createCellHeader();
+    let header = (this._header = contentFactory.createCellHeader());
     header.addClass(CELL_HEADER_CLASS);
     (this.layout as PanelLayout).addWidget(header);
 
     // Input
-    let inputWrapper = this._inputWrapper = new Panel();
+    let inputWrapper = (this._inputWrapper = new Panel());
     inputWrapper.addClass(CELL_INPUT_WRAPPER_CLASS);
-    let inputCollapser = this._inputCollapser = new InputCollapser();
+    let inputCollapser = (this._inputCollapser = new InputCollapser());
     inputCollapser.addClass(CELL_INPUT_COLLAPSER_CLASS);
-    let input = this._input = new InputArea({model, contentFactory });
+    let input = (this._input = new InputArea({ model, contentFactory }));
     input.addClass(CELL_INPUT_AREA_CLASS);
     inputWrapper.addWidget(inputCollapser);
     inputWrapper.addWidget(input);
@@ -204,18 +188,18 @@ class Cell extends Widget {
     });
 
     // Footer
-    let footer = this._footer = this.contentFactory.createCellFooter();
+    let footer = (this._footer = this.contentFactory.createCellFooter());
     footer.addClass(CELL_FOOTER_CLASS);
     (this.layout as PanelLayout).addWidget(footer);
 
     // Editor settings
     if (options.editorConfig) {
-      Object.keys(options.editorConfig)
-      .forEach((key: keyof CodeEditor.IConfig) => {
-        this.editor.setOption(key, options.editorConfig[key]);
-      });
+      Object.keys(options.editorConfig).forEach(
+        (key: keyof CodeEditor.IConfig) => {
+          this.editor.setOption(key, options.editorConfig[key]);
+        }
+      );
     }
-
   }
 
   /**
@@ -224,7 +208,7 @@ class Cell extends Widget {
    * Should be called at the end of the subclasses's constructor.
    */
   protected initializeState() {
-    const jupyter = this.model.metadata.get('jupyter') || {} as any;
+    const jupyter = this.model.metadata.get('jupyter') || ({} as any);
     this.inputHidden = jupyter.source_hidden === true;
   }
 
@@ -240,7 +224,8 @@ class Cell extends Widget {
     if (!this._inputHidden) {
       return this._input.promptNode;
     } else {
-      return ((this._inputPlaceholder.node as HTMLElement).firstElementChild as HTMLElement);
+      return (this._inputPlaceholder.node as HTMLElement)
+        .firstElementChild as HTMLElement;
     }
   }
 
@@ -400,20 +385,16 @@ class Cell extends Widget {
   private _inputCollapser: InputCollapser = null;
   private _inputWrapper: Widget = null;
   private _inputPlaceholder: InputPlaceholder = null;
-
 }
-
 
 /**
  * The namespace for the `Cell` class statics.
  */
-export
-namespace Cell {
+export namespace Cell {
   /**
    * An options object for initializing a cell widget.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The model used by the cell.
      */
@@ -439,8 +420,9 @@ namespace Cell {
    * provide a single factory object for all notebook/cell/outputarea related
    * widgets.
    */
-  export
-  interface IContentFactory extends OutputArea.IContentFactory, InputArea.IContentFactory {
+  export interface IContentFactory
+    extends OutputArea.IContentFactory,
+      InputArea.IContentFactory {
     /**
      * Create a new cell header for the parent widget.
      */
@@ -450,7 +432,6 @@ namespace Cell {
      * Create a new cell header for the parent widget.
      */
     createCellFooter(): ICellFooter;
-
   }
 
   /**
@@ -458,13 +439,13 @@ namespace Cell {
    *
    * This includes a CodeMirror editor factory to make it easy to use out of the box.
    */
-  export
-  class ContentFactory implements IContentFactory {
+  export class ContentFactory implements IContentFactory {
     /**
      * Create a content factory for a cell.
      */
     constructor(options: ContentFactory.IOptions = {}) {
-      this._editorFactory = (options.editorFactory || InputArea.defaultEditorFactory);
+      this._editorFactory =
+        options.editorFactory || InputArea.defaultEditorFactory;
     }
 
     /**
@@ -515,13 +496,11 @@ namespace Cell {
   /**
    * A namespace for cell content factory.
    */
-  export
-  namespace ContentFactory {
+  export namespace ContentFactory {
     /**
      * Options for the content factory.
      */
-    export
-    interface IOptions {
+    export interface IOptions {
       /**
        * The editor factory used by the content factory.
        *
@@ -535,8 +514,7 @@ namespace Cell {
   /**
    * The default content factory for cells.
    */
-  export
-  const defaultContentFactory = new ContentFactory();
+  export const defaultContentFactory = new ContentFactory();
 }
 
 /******************************************************************************
@@ -546,8 +524,7 @@ namespace Cell {
 /**
  * A widget for a code cell.
  */
-export
-class CodeCell extends Cell {
+export class CodeCell extends Cell {
   /**
    * Construct a code cell widget.
    */
@@ -556,20 +533,20 @@ class CodeCell extends Cell {
     this.addClass(CODE_CELL_CLASS);
 
     // Only save options not handled by parent constructor.
-    let rendermime = this._rendermime = options.rendermime;
+    let rendermime = (this._rendermime = options.rendermime);
     let contentFactory = this.contentFactory;
     let model = this.model;
 
     // Insert the output before the cell footer.
-    let outputWrapper = this._outputWrapper = new Panel();
+    let outputWrapper = (this._outputWrapper = new Panel());
     outputWrapper.addClass(CELL_OUTPUT_WRAPPER_CLASS);
-    let outputCollapser = this._outputCollapser = new OutputCollapser();
+    let outputCollapser = (this._outputCollapser = new OutputCollapser());
     outputCollapser.addClass(CELL_OUTPUT_COLLAPSER_CLASS);
-    let output = this._output = new OutputArea({
+    let output = (this._output = new OutputArea({
       model: model.outputs,
       rendermime,
       contentFactory: contentFactory
-    });
+    }));
     output.addClass(CELL_OUTPUT_AREA_CLASS);
     // Set a CSS if there are no outputs, and connect a signal for future
     // changes to the number of outputs. This is for conditional styling
@@ -608,13 +585,12 @@ class CodeCell extends Cell {
     const metadataScrolled = this.model.metadata.get('scrolled');
     this.outputsScrolled = metadataScrolled === true;
 
-    const jupyter = this.model.metadata.get('jupyter') || {} as any;
+    const jupyter = this.model.metadata.get('jupyter') || ({} as any);
     const collapsed = this.model.metadata.get('collapsed');
     this.outputHidden = collapsed === true || jupyter.outputs_hidden === true;
 
     this.setPrompt(`${this.model.executionCount || ''}`);
   }
-
 
   /**
    * Get the output area for the cell.
@@ -696,7 +672,7 @@ class CodeCell extends Cell {
     return new SimplifiedOutputArea({
       model: this.model.outputs,
       contentFactory: this.contentFactory,
-      rendermime: this._rendermime,
+      rendermime: this._rendermime
     });
   }
 
@@ -707,7 +683,10 @@ class CodeCell extends Cell {
     if (this.isDisposed) {
       return;
     }
-    this._output.outputLengthChanged.disconnect(this._outputLengthHandler, this);
+    this._output.outputLengthChanged.disconnect(
+      this._outputLengthHandler,
+      this
+    );
     this._rendermime = null;
     this._output = null;
     this._outputWrapper = null;
@@ -733,25 +712,28 @@ class CodeCell extends Cell {
    */
   protected onStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
     switch (args.name) {
-    case 'executionCount':
-      this.setPrompt(`${(model as ICodeCellModel).executionCount || ''}`);
-      break;
-    default:
-      break;
+      case 'executionCount':
+        this.setPrompt(`${(model as ICodeCellModel).executionCount || ''}`);
+        break;
+      default:
+        break;
     }
   }
 
   /**
    * Handle changes in the metadata.
    */
-  protected onMetadataChanged(model: IObservableMap<JSONValue>, args: IObservableMap.IChangedArgs<JSONValue>): void {
+  protected onMetadataChanged(
+    model: IObservableMap<JSONValue>,
+    args: IObservableMap.IChangedArgs<JSONValue>
+  ): void {
     switch (args.key) {
-    case 'collapsed':
-    case 'scrolled':
-      this.update();
-      break;
-    default:
-      break;
+      case 'collapsed':
+      case 'scrolled':
+        this.update();
+        break;
+      default:
+        break;
     }
   }
 
@@ -776,17 +758,14 @@ class CodeCell extends Cell {
   private _output: OutputArea = null;
 }
 
-
 /**
  * The namespace for the `CodeCell` class statics.
  */
-export
-namespace CodeCell {
+export namespace CodeCell {
   /**
    * An options object for initializing a base cell widget.
    */
-  export
-  interface IOptions extends Cell.IOptions {
+  export interface IOptions extends Cell.IOptions {
     /**
      * The model used by the cell.
      */
@@ -801,8 +780,10 @@ namespace CodeCell {
   /**
    * Execute a cell given a client session.
    */
-  export
-  function execute(cell: CodeCell, session: IClientSession): Promise<KernelMessage.IExecuteReplyMsg> {
+  export function execute(
+    cell: CodeCell,
+    session: IClientSession
+  ): Promise<KernelMessage.IExecuteReplyMsg> {
     let model = cell.model;
     let code = model.value.text;
     if (!code.trim() || !session.kernel) {
@@ -816,18 +797,19 @@ namespace CodeCell {
     cell.setPrompt('*');
     model.trusted = true;
 
-    return OutputArea.execute(code, cell.outputArea, session).then(msg => {
-      model.executionCount = msg.content.execution_count;
-      return msg;
-    }).catch(e => {
-      if (e.message === 'Canceled') {
-        cell.setPrompt('');
-      }
-      throw e;
-    });
+    return OutputArea.execute(code, cell.outputArea, session)
+      .then(msg => {
+        model.executionCount = msg.content.execution_count;
+        return msg;
+      })
+      .catch(e => {
+        if (e.message === 'Canceled') {
+          cell.setPrompt('');
+        }
+        throw e;
+      });
   }
 }
-
 
 /******************************************************************************
  * MarkdownCell
@@ -842,8 +824,7 @@ namespace CodeCell {
  * or the input area model changes.  We don't support automatically
  * updating the rendered text in all of these cases.
  */
-export
-class MarkdownCell extends Cell {
+export class MarkdownCell extends Cell {
   /**
    * Construct a Markdown cell widget.
    */
@@ -854,7 +835,7 @@ class MarkdownCell extends Cell {
     this._rendermime = options.rendermime.clone({
       resolver: new AttachmentsResolver({
         parent: options.rendermime.resolver,
-        model: this.model.attachments,
+        model: this.model.attachments
       })
     });
 
@@ -944,10 +925,10 @@ class MarkdownCell extends Cell {
    */
   private _updateRenderedInput(): Promise<void> {
     let model = this.model;
-    let text = model && model.value.text || DEFAULT_MARKDOWN_TEXT;
+    let text = (model && model.value.text) || DEFAULT_MARKDOWN_TEXT;
     // Do not re-render if the text has not changed.
     if (text !== this._prevText) {
-      let mimeModel = new MimeModel({ data: { 'text/markdown': text }});
+      let mimeModel = new MimeModel({ data: { 'text/markdown': text } });
       if (!this._renderer) {
         this._renderer = this._rendermime.createRenderer('text/markdown');
         this._renderer.addClass(MARKDOWN_OUTPUT_CLASS);
@@ -978,17 +959,14 @@ class MarkdownCell extends Cell {
   private _ready = new PromiseDelegate<void>();
 }
 
-
 /**
  * The namespace for the `CodeCell` class statics.
  */
-export
-namespace MarkdownCell {
+export namespace MarkdownCell {
   /**
    * An options object for initializing a base cell widget.
    */
-  export
-  interface IOptions extends Cell.IOptions {
+  export interface IOptions extends Cell.IOptions {
     /**
      * The model used by the cell.
      */
@@ -998,21 +976,17 @@ namespace MarkdownCell {
      * The mime renderer for the cell widget.
      */
     rendermime: RenderMimeRegistry;
-
   }
 }
-
 
 /******************************************************************************
  * RawCell
  ******************************************************************************/
 
-
 /**
  * A widget for a raw cell.
  */
-export
-class RawCell extends Cell {
+export class RawCell extends Cell {
   /**
    * Construct a raw cell widget.
    */
@@ -1039,17 +1013,14 @@ class RawCell extends Cell {
   readonly model: IRawCellModel;
 }
 
-
 /**
  * The namespace for the `RawCell` class statics.
  */
-export
-namespace RawCell {
+export namespace RawCell {
   /**
    * An options object for initializing a base cell widget.
    */
-  export
-  interface IOptions extends Cell.IOptions {
+  export interface IOptions extends Cell.IOptions {
     /**
      * The model used by the cell.
      */

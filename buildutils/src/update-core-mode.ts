@@ -25,16 +25,20 @@ utils.writePackageData(path.join(staging, 'package.json'), data);
 
 // Update our staging files.
 [
-  'index.js', 'webpack.config.js', 'webpack.prod.config.js', 'templates'
+  'index.js',
+  'webpack.config.js',
+  'webpack.prod.config.js',
+  'templates'
 ].forEach(name => {
-    fs.copySync(path.join('.', 'dev_mode', name),
-                path.join('.', 'jupyterlab', 'staging', name));
+  fs.copySync(
+    path.join('.', 'dev_mode', name),
+    path.join('.', 'jupyterlab', 'staging', name)
+  );
 });
 
 // Create a new yarn.lock file to ensure it is correct.
 fs.removeSync(path.join(staging, 'yarn.lock'));
 utils.run('jlpm', { cwd: staging });
-
 
 // Build the core assets.
 utils.run('jlpm run build:prod', { cwd: staging });

@@ -6,14 +6,12 @@
 import * as path from 'path';
 import * as utils from './utils';
 
-
 // Make sure we have required command line arguments.
 if (process.argv.length !== 3) {
   let msg = '** Must supply a library name\n';
   process.stderr.write(msg);
   process.exit(1);
 }
-
 
 let name = process.argv[2];
 
@@ -22,7 +20,6 @@ utils.getLernaPaths().forEach(pkgPath => {
   handlePackage(pkgPath);
 });
 handlePackage(path.resolve('.'));
-
 
 /**
  * Handle an individual package on the path - update the dependency.

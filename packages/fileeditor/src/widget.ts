@@ -1,25 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  StackedLayout, Widget
-} from '@phosphor/widgets';
+import { StackedLayout, Widget } from '@phosphor/widgets';
 
 import {
-  ABCWidgetFactory, DocumentRegistry, DocumentWidget, IDocumentWidget
+  ABCWidgetFactory,
+  DocumentRegistry,
+  DocumentWidget,
+  IDocumentWidget
 } from '@jupyterlab/docregistry';
 
 import {
-  CodeEditor, IEditorServices, IEditorMimeTypeService, CodeEditorWrapper
+  CodeEditor,
+  IEditorServices,
+  IEditorMimeTypeService,
+  CodeEditorWrapper
 } from '@jupyterlab/codeeditor';
 
-import {
-  PromiseDelegate
-} from '@phosphor/coreutils';
+import { PromiseDelegate } from '@phosphor/coreutils';
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
 /**
  * The data attribute added to a widget that can run code.
@@ -34,8 +34,7 @@ const UNDOER = 'jpUndoer';
 /**
  * A code editor wrapper for the file editor.
  */
-export
-class FileEditorCodeWrapper extends CodeEditorWrapper {
+export class FileEditorCodeWrapper extends CodeEditorWrapper {
   /**
    * Construct a new editor widget.
    */
@@ -45,7 +44,7 @@ class FileEditorCodeWrapper extends CodeEditorWrapper {
       model: options.context.model
     });
 
-    const context = this._context = options.context;
+    const context = (this._context = options.context);
     const editor = this.editor;
 
     this.addClass('jp-FileEditorCodeWrapper');
@@ -53,7 +52,9 @@ class FileEditorCodeWrapper extends CodeEditorWrapper {
     this.node.dataset[UNDOER] = 'true';
 
     editor.model.value.text = context.model.toString();
-    context.ready.then(() => { this._onContextReady(); });
+    context.ready.then(() => {
+      this._onContextReady();
+    });
 
     if (context.model.modelDB.isCollaborative) {
       let modelDB = context.model.modelDB;
@@ -152,12 +153,10 @@ class FileEditorCodeWrapper extends CodeEditorWrapper {
   private _ready = new PromiseDelegate<void>();
 }
 
-
 /**
  * A widget for editors.
  */
-export
-class FileEditor extends Widget {
+export class FileEditor extends Widget {
   /**
    * Construct a new editor widget.
    */
@@ -165,10 +164,10 @@ class FileEditor extends Widget {
     super();
     this.addClass('jp-FileEditor');
 
-    const context = this._context = options.context;
+    const context = (this._context = options.context);
     this._mimeTypeService = options.mimeTypeService;
 
-    let editorWidget = this.editorWidget = new FileEditorCodeWrapper(options);
+    let editorWidget = (this.editorWidget = new FileEditorCodeWrapper(options));
     this.editor = editorWidget.editor;
     this.model = editorWidget.model;
 
@@ -176,7 +175,7 @@ class FileEditor extends Widget {
     context.pathChanged.connect(this._onPathChanged, this);
     this._onPathChanged();
 
-    let layout = this.layout = new StackedLayout();
+    let layout = (this.layout = new StackedLayout());
     layout.addWidget(editorWidget);
   }
 
@@ -209,11 +208,11 @@ class FileEditor extends Widget {
       return;
     }
     switch (event.type) {
-    case 'mousedown':
-      this._ensureFocus();
-      break;
-    default:
-      break;
+      case 'mousedown':
+        this._ensureFocus();
+        break;
+      default:
+        break;
     }
   }
 
@@ -257,8 +256,9 @@ class FileEditor extends Widget {
     const editor = this.editor;
     const localPath = this._context.localPath;
 
-    editor.model.mimeType =
-      this._mimeTypeService.getMimeTypeByFilePath(localPath);
+    editor.model.mimeType = this._mimeTypeService.getMimeTypeByFilePath(
+      localPath
+    );
   }
 
   private editorWidget: FileEditorCodeWrapper;
@@ -268,17 +268,14 @@ class FileEditor extends Widget {
   private _mimeTypeService: IEditorMimeTypeService;
 }
 
-
 /**
  * The namespace for editor widget statics.
  */
-export
-namespace FileEditor {
+export namespace FileEditor {
   /**
    * The options used to create an editor widget.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * A code editor factory.
      */
@@ -296,12 +293,13 @@ namespace FileEditor {
   }
 }
 
-
 /**
  * A widget factory for editors.
  */
-export
-class FileEditorFactory extends ABCWidgetFactory<IDocumentWidget<FileEditor>, DocumentRegistry.ICodeModel> {
+export class FileEditorFactory extends ABCWidgetFactory<
+  IDocumentWidget<FileEditor>,
+  DocumentRegistry.ICodeModel
+> {
   /**
    * Construct a new editor widget factory.
    */
@@ -313,7 +311,9 @@ class FileEditorFactory extends ABCWidgetFactory<IDocumentWidget<FileEditor>, Do
   /**
    * Create a new widget given a context.
    */
-  protected createNewWidget(context: DocumentRegistry.CodeContext): IDocumentWidget<FileEditor> {
+  protected createNewWidget(
+    context: DocumentRegistry.CodeContext
+  ): IDocumentWidget<FileEditor> {
     let func = this._services.factoryService.newDocumentEditor;
     let factory: CodeEditor.Factory = options => {
       return func(options);
@@ -330,17 +330,14 @@ class FileEditorFactory extends ABCWidgetFactory<IDocumentWidget<FileEditor>, Do
   private _services: IEditorServices;
 }
 
-
 /**
  * The namespace for `FileEditorFactory` class statics.
  */
-export
-namespace FileEditorFactory {
+export namespace FileEditorFactory {
   /**
    * The options used to create an editor widget factory.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The editor services used by the factory.
      */

@@ -3,39 +3,35 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import {
-  DataConnector, ISchemaValidator
-} from '@jupyterlab/coreutils';
+import { DataConnector, ISchemaValidator } from '@jupyterlab/coreutils';
+
+import { InspectionHandler, InspectorPanel } from '@jupyterlab/inspector';
 
 import {
-  InspectionHandler, InspectorPanel
-} from '@jupyterlab/inspector';
-
-import {
-  RenderMimeRegistry, standardRendererFactories
+  RenderMimeRegistry,
+  standardRendererFactories
 } from '@jupyterlab/rendermime';
 
-import {
-  ReadonlyJSONObject
-} from '@phosphor/coreutils';
+import { ReadonlyJSONObject } from '@phosphor/coreutils';
 
-import {
-  RawEditor
-} from './raweditor';
-
+import { RawEditor } from './raweditor';
 
 /**
  * Create a raw editor inspector.
  */
-export
-function createInspector(editor: RawEditor, rendermime?: RenderMimeRegistry): InspectorPanel {
+export function createInspector(
+  editor: RawEditor,
+  rendermime?: RenderMimeRegistry
+): InspectorPanel {
   const connector = new InspectorConnector(editor);
   const inspector = new InspectorPanel();
   const handler = new InspectionHandler({
     connector,
-    rendermime: rendermime || new RenderMimeRegistry({
-      initialFactories: standardRendererFactories
-    })
+    rendermime:
+      rendermime ||
+      new RenderMimeRegistry({
+        initialFactories: standardRendererFactories
+      })
   });
 
   inspector.add({
@@ -50,7 +46,6 @@ function createInspector(editor: RawEditor, rendermime?: RenderMimeRegistry): In
   return inspector;
 }
 
-
 /**
  * The data connector used to populate a code inspector.
  *
@@ -59,7 +54,11 @@ function createInspector(editor: RawEditor, rendermime?: RenderMimeRegistry): In
  * one request per 100ms. This means that using the connector to populate
  * multiple client objects can lead to missed fetch responses.
  */
-class InspectorConnector extends DataConnector<InspectionHandler.IReply, void, InspectionHandler.IRequest> {
+class InspectorConnector extends DataConnector<
+  InspectionHandler.IReply,
+  void,
+  InspectionHandler.IRequest
+> {
   constructor(editor: RawEditor) {
     super();
     this._editor = editor;
@@ -68,10 +67,12 @@ class InspectorConnector extends DataConnector<InspectionHandler.IReply, void, I
   /**
    * Fetch inspection requests.
    */
-  fetch(request: InspectionHandler.IRequest): Promise<InspectionHandler.IReply> {
+  fetch(
+    request: InspectionHandler.IRequest
+  ): Promise<InspectionHandler.IReply> {
     return new Promise<InspectionHandler.IReply>(resolve => {
       // Debounce requests at a rate of 100ms.
-      const current = this._current = window.setTimeout(() => {
+      const current = (this._current = window.setTimeout(() => {
         if (current !== this._current) {
           return resolve(null);
         }
@@ -82,14 +83,14 @@ class InspectorConnector extends DataConnector<InspectionHandler.IReply, void, I
           return resolve(null);
         }
 
-        resolve({ data: Private.render(errors), metadata: { } });
-      }, 100);
+        resolve({ data: Private.render(errors), metadata: {} });
+      }, 100));
     });
   }
 
   private _validate(raw: string): ISchemaValidator.IError[] | null {
     const editor = this._editor;
-    const data = { composite: { }, user: { } };
+    const data = { composite: {}, user: {} };
     const id = editor.settings.plugin;
     const schema = editor.settings.schema;
     const validator = editor.registry.validator;
@@ -101,7 +102,6 @@ class InspectorConnector extends DataConnector<InspectionHandler.IReply, void, I
   private _editor: RawEditor;
 }
 
-
 /**
  * A namespace for private module data.
  */
@@ -109,8 +109,9 @@ namespace Private {
   /**
    * Render validation errors as an HTML string.
    */
-  export
-  function render(errors: ISchemaValidator.IError[]): ReadonlyJSONObject {
+  export function render(
+    errors: ISchemaValidator.IError[]
+  ): ReadonlyJSONObject {
     return { 'text/markdown': errors.map(renderError).join('') };
   }
 

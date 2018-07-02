@@ -1,38 +1,30 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  PathExt
-} from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
 
 import {
-  ABCWidgetFactory, DocumentRegistry, IDocumentWidget, DocumentWidget
+  ABCWidgetFactory,
+  DocumentRegistry,
+  IDocumentWidget,
+  DocumentWidget
 } from '@jupyterlab/docregistry';
 
-import {
-  PromiseDelegate
-} from '@phosphor/coreutils';
+import { PromiseDelegate } from '@phosphor/coreutils';
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
-import {
-  Widget
-} from '@phosphor/widgets';
-
+import { Widget } from '@phosphor/widgets';
 
 /**
  * The class name added to a imageviewer.
  */
 const IMAGE_CLASS = 'jp-ImageViewer';
 
-
 /**
  * A widget for images.
  */
-export
-class ImageViewer extends Widget {
+export class ImageViewer extends Widget {
   /**
    * Construct a new image widget.
    */
@@ -96,7 +88,7 @@ class ImageViewer extends Widget {
   }
   set colorinversion(value: number) {
     if (value === this._colorinversion) {
-        return;
+      return;
     }
     this._colorinversion = value;
     this._updateStyle();
@@ -114,7 +106,10 @@ class ImageViewer extends Widget {
    * Rotate the image counter-clockwise (left).
    */
   rotateCounterclockwise(): void {
-    this._matrix = Private.prod(this._matrix, Private.rotateCounterclockwiseMatrix);
+    this._matrix = Private.prod(
+      this._matrix,
+      Private.rotateCounterclockwiseMatrix
+    );
     this._updateStyle();
   }
 
@@ -185,7 +180,9 @@ class ImageViewer extends Widget {
   private _updateStyle(): void {
     let [a, b, c, d] = this._matrix;
     let [tX, tY] = Private.prodVec(this._matrix, [1, 1]);
-    let transform = `matrix(${a}, ${b}, ${c}, ${d}, 0, 0) translate(${tX < 0 ? -100 : 0}%, ${tY < 0 ? -100 : 0}%) `;
+    let transform = `matrix(${a}, ${b}, ${c}, ${d}, 0, 0) translate(${
+      tX < 0 ? -100 : 0
+    }%, ${tY < 0 ? -100 : 0}%) `;
     this._img.style.transform = `scale(${this._scale}) ${transform}`;
     this._img.style.filter = `invert(${this._colorinversion})`;
   }
@@ -199,16 +196,18 @@ class ImageViewer extends Widget {
   private _img: HTMLImageElement;
 }
 
-
 /**
  * A widget factory for images.
  */
-export
-class ImageViewerFactory extends ABCWidgetFactory<IDocumentWidget<ImageViewer>> {
+export class ImageViewerFactory extends ABCWidgetFactory<
+  IDocumentWidget<ImageViewer>
+> {
   /**
    * Create a new widget given a context.
    */
-  protected createNewWidget(context: DocumentRegistry.IContext<DocumentRegistry.IModel>): IDocumentWidget<ImageViewer> {
+  protected createNewWidget(
+    context: DocumentRegistry.IContext<DocumentRegistry.IModel>
+  ): IDocumentWidget<ImageViewer> {
     const content = new ImageViewer(context);
     const widget = new DocumentWidget({ content, context });
     return widget;
@@ -222,41 +221,45 @@ namespace Private {
   /**
    * Multiply 2x2 matrices.
    */
-  export
-  function prod([a11, a12, a21, a22]: number[], [b11, b12, b21, b22]: number[]): number[] {
-    return [a11 * b11 + a12 * b21, a11 * b12 + a12 * b22,
-            a21 * b11 + a22 * b21, a21 * b12 + a22 * b22];
+  export function prod(
+    [a11, a12, a21, a22]: number[],
+    [b11, b12, b21, b22]: number[]
+  ): number[] {
+    return [
+      a11 * b11 + a12 * b21,
+      a11 * b12 + a12 * b22,
+      a21 * b11 + a22 * b21,
+      a21 * b12 + a22 * b22
+    ];
   }
 
   /**
    * Multiply a 2x2 matrix and a 2x1 vector.
    */
-  export
-  function prodVec([a11, a12, a21, a22]: number[], [b1, b2]: number[]): number[] {
+  export function prodVec(
+    [a11, a12, a21, a22]: number[],
+    [b1, b2]: number[]
+  ): number[] {
     return [a11 * b1 + a12 * b2, a21 * b1 + a22 * b2];
   }
 
   /**
    * Clockwise rotation transformation matrix.
    */
-  export
-  const rotateClockwiseMatrix = [0, 1, -1, 0];
+  export const rotateClockwiseMatrix = [0, 1, -1, 0];
 
   /**
    * Counter-clockwise rotation transformation matrix.
    */
-  export
-  const rotateCounterclockwiseMatrix = [0, -1, 1, 0];
+  export const rotateCounterclockwiseMatrix = [0, -1, 1, 0];
 
   /**
    * Horizontal flip transformation matrix.
    */
-  export
-  const flipHMatrix = [-1, 0, 0, 1];
+  export const flipHMatrix = [-1, 0, 0, 1];
 
   /**
    * Vertical flip transformation matrix.
    */
-  export
-  const flipVMatrix = [1, 0, 0, -1];
+  export const flipVMatrix = [1, 0, 0, -1];
 }

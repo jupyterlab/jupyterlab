@@ -11,17 +11,14 @@ const HOVERBOX_CLASS = 'jp-HoverBox';
  */
 const OUTOFVIEW_CLASS = 'jp-mod-outofview';
 
-
 /**
  * A namespace for `HoverBox` members.
  */
-export
-namespace HoverBox {
+export namespace HoverBox {
   /**
    * Options for setting the geometry of a hovering node and its anchor node.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The referent anchor rectangle to which the hover box is bound.
      *
@@ -73,8 +70,8 @@ namespace HoverBox {
      * the different render modes.
      */
     offset?: {
-      horizontal?: number,
-      vertical?: { above?: number, below?: number }
+      horizontal?: number;
+      vertical?: { above?: number; below?: number };
     };
 
     /**
@@ -94,14 +91,12 @@ namespace HoverBox {
     style?: CSSStyleDeclaration;
   }
 
-
   /**
    * Set the visible dimensions of a hovering box anchored to an editor cursor.
    *
    * @param options - The hover box geometry calculation options.
    */
-  export
-  function setGeometry(options: IOptions): void {
+  export function setGeometry(options: IOptions): void {
     const { anchor, host, node, privilege } = options;
 
     // Add hover box class if it does not exist.
@@ -134,10 +129,13 @@ namespace HoverBox {
     let maxHeight = parseInt(style.maxHeight!, 10) || options.maxHeight;
 
     // Determine whether to render above or below; check privilege.
-    const renderBelow = privilege === 'forceAbove' ? false
-      : privilege === 'forceBelow' ? true
-        : privilege === 'above' ?
-          spaceAbove < maxHeight && spaceAbove < spaceBelow
+    const renderBelow =
+      privilege === 'forceAbove'
+        ? false
+        : privilege === 'forceBelow'
+          ? true
+          : privilege === 'above'
+            ? spaceAbove < maxHeight && spaceAbove < spaceBelow
             : spaceBelow >= maxHeight || spaceBelow >= spaceAbove;
 
     if (renderBelow) {
@@ -150,7 +148,8 @@ namespace HoverBox {
     node.style.maxHeight = `${maxHeight}px`;
 
     // Make sure the box ought to be visible.
-    const withinBounds = maxHeight > minHeight &&
+    const withinBounds =
+      maxHeight > minHeight &&
       (spaceBelow >= minHeight || spaceAbove >= minHeight);
 
     if (!withinBounds) {
@@ -159,16 +158,23 @@ namespace HoverBox {
     }
 
     // Position the box vertically.
-    const offsetAbove = options.offset && options.offset.vertical &&
-      options.offset.vertical.above || 0;
-    const offsetBelow = options.offset && options.offset.vertical &&
-      options.offset.vertical.below || 0;
-    const top = renderBelow ? (innerHeight - spaceBelow) + offsetBelow
-      : (spaceAbove - node.getBoundingClientRect().height) + offsetAbove;
+    const offsetAbove =
+      (options.offset &&
+        options.offset.vertical &&
+        options.offset.vertical.above) ||
+      0;
+    const offsetBelow =
+      (options.offset &&
+        options.offset.vertical &&
+        options.offset.vertical.below) ||
+      0;
+    const top = renderBelow
+      ? innerHeight - spaceBelow + offsetBelow
+      : spaceAbove - node.getBoundingClientRect().height + offsetAbove;
     node.style.top = `${Math.floor(top)}px`;
 
     // Position the box horizontally.
-    const offsetHorizontal = options.offset && options.offset.horizontal || 0;
+    const offsetHorizontal = (options.offset && options.offset.horizontal) || 0;
     let left = anchor.left + offsetHorizontal;
 
     node.style.left = `${Math.ceil(left)}px`;

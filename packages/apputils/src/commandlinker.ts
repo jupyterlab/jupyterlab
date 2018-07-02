@@ -3,22 +3,13 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import {
-  JSONExt, JSONObject
-} from '@phosphor/coreutils';
+import { JSONExt, JSONObject } from '@phosphor/coreutils';
 
-import {
-  IDisposable
-} from '@phosphor/disposable';
+import { IDisposable } from '@phosphor/disposable';
 
-import {
-  CommandRegistry
-} from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {
-  ElementDataset
-} from '@phosphor/virtualdom';
-
+import { ElementDataset } from '@phosphor/virtualdom';
 
 /**
  * The command data attribute added to nodes that are connected.
@@ -30,13 +21,11 @@ const COMMAND_ATTR = 'commandlinker-command';
  */
 const ARGS_ATTR = 'commandlinker-args';
 
-
 /**
  * A static class that provides helper methods to generate clickable nodes that
  * execute registered commands with pre-populated arguments.
  */
-export
-class CommandLinker implements IDisposable {
+export class CommandLinker implements IDisposable {
   /**
    * Instantiate a new command linker.
    */
@@ -81,7 +70,11 @@ class CommandLinker implements IDisposable {
    * 1. If a node is connected, the default click action will be prevented.
    * 2. The `HTMLElement` passed in should be clickable.
    */
-  connectNode(node: HTMLElement, command: string, args?: JSONObject): HTMLElement {
+  connectNode(
+    node: HTMLElement,
+    command: string,
+    args?: JSONObject
+  ): HTMLElement {
     node.setAttribute(`data-${COMMAND_ATTR}`, command);
     if (args !== void 0) {
       node.setAttribute(`data-${ARGS_ATTR}`, JSON.stringify(args));
@@ -122,11 +115,11 @@ class CommandLinker implements IDisposable {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'click':
-      this._evtClick(event as MouseEvent);
-      break;
-    default:
-      return;
+      case 'click':
+        this._evtClick(event as MouseEvent);
+        break;
+      default:
+        return;
     }
   }
 
@@ -200,17 +193,14 @@ class CommandLinker implements IDisposable {
   private _isDisposed = false;
 }
 
-
 /**
  * A namespace for command linker statics.
  */
-export
-namespace CommandLinker {
+export namespace CommandLinker {
   /**
    * The instantiation options for a command linker.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The command registry instance that all linked commands will use.
      */

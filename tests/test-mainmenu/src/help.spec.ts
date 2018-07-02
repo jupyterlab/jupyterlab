@@ -3,19 +3,12 @@
 
 import expect = require('expect.js');
 
-import {
-  CommandRegistry
-} from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {
-  HelpMenu
-} from '@jupyterlab/mainmenu';
-
+import { HelpMenu } from '@jupyterlab/mainmenu';
 
 describe('@jupyterlab/mainmenu', () => {
-
   describe('HelpMenu', () => {
-
     let commands: CommandRegistry;
     let menu: HelpMenu;
 
@@ -36,9 +29,6 @@ describe('@jupyterlab/mainmenu', () => {
         expect(menu).to.be.an(HelpMenu);
         expect(menu.menu.title.label).to.be('Help');
       });
-
     });
-
   });
-
 });
