@@ -17,7 +17,9 @@ export class NotebookTrustStatus extends React.Component<
 > {
     state = {
         numTrustedCells: 0,
-        numCells: 0
+        numCells: 0,
+        activeCellTrusted: false,
+        hasActiveDocument: false
     };
 
     constructor(props: NotebookTrustStatus.IProps) {
@@ -28,7 +30,7 @@ export class NotebookTrustStatus extends React.Component<
     }
 
     onDocumentChange = (tracker: INotebookTracker) => {
-        if (tracker.currentWidget) {
+        if (tracker.currentWidget !== null) {
             let cells = toArray(tracker.currentWidget.model.cells);
             let numTrustedCells = cells.reduce((accum, current) => {
                 if (current.trusted) {
@@ -41,29 +43,41 @@ export class NotebookTrustStatus extends React.Component<
 
             this.setState({
                 numTrustedCells,
-                numCells
+                numCells,
+                activeCellTrusted: tracker.activeCell
+                    ? tracker.activeCell.model.trusted
+                    : false,
+                hasActiveDocument: true
             });
         } else {
             this.setState({
                 numTrustedCells: 0,
-                numCells: 0
+                numCells: 0,
+                activeCellTrusted: false,
+                hasActiveDocument: false
             });
         }
     };
 
     render() {
         return (
-            <div>
-                Trusting {this.state.numTrustedCells} of {this.state.numCells}
-            </div>
+            this.state.hasActiveDocument && (
+                <div>
+                    Trusting {this.state.numTrustedCells} of{' '}
+                    {this.state.numCells} cells. Current cell is{' '}
+                    {this.state.activeCellTrusted ? 'trusted' : 'not trusted'}.
+                </div>
+            )
         );
     }
 }
 
 export namespace NotebookTrustStatus {
     export interface IState {
-        numTrustedCells: number;
         numCells: number;
+        numTrustedCells: number;
+        activeCellTrusted: boolean;
+        hasActiveDocument: boolean;
     }
 
     export interface IProps {
