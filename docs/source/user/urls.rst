@@ -14,7 +14,7 @@ specific file in a specific workspace <url-combine>`.
 File Navigation with ``/tree``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-JupyterLab's file navigation URLS adopts
+JupyterLab's file navigation URLs adopts
 the nomenclature of the classic notebook; these URLs are ``/tree`` URLs:
 
 .. code-block:: none
