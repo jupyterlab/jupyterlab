@@ -227,6 +227,8 @@ class ApplicationShell extends Widget {
       return;
     }
 
+    const applicationCurrentWidget = this.currentWidget;
+
     if (mode === 'single-document') {
       this._cachedLayout = dock.saveLayout();
       dock.mode = mode;
@@ -259,17 +261,23 @@ class ApplicationShell extends Widget {
 
     // Add any widgets created during single document mode, which have
     // subsequently been removed from the dock panel after the multiple document
-    // layout has been restored.
+    // layout has been restored. If the widget has add options cached for
+    // it (i.e., if it has been placed with respect to another widget),
+    // then take that into account.
     widgets.forEach(widget => {
       if (!widget.parent) {
-        this.addToMainArea(widget, { activate: false });
+        this.addToMainArea(widget, {
+          ...this._addOptionsCache.get(widget),
+          activate: false
+        });
       }
     });
+    this._addOptionsCache.clear();
 
     // In case the active widget in the dock panel is *not* the active widget
     // of the application, defer to the application.
-    if (this.currentWidget) {
-      dock.activateWidget(this.currentWidget);
+    if (applicationCurrentWidget) {
+      dock.activateWidget(applicationCurrentWidget);
     }
 
     // Set the mode data attribute on the document body.
@@ -386,7 +394,7 @@ class ApplicationShell extends Widget {
     }
     let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
     this._leftHandler.addWidget(widget, rank!);
-    this._layoutModified.emit(void 0);
+    this._onLayoutModified();
   }
 
   /**
@@ -413,6 +421,14 @@ class ApplicationShell extends Widget {
     let mode = options.mode || 'tab-after';
 
     dock.addWidget(widget, { mode, ref });
+
+    // The dock panel doesn't account for placement information while
+    // in single document mode, so upon rehydrating any widgets that were
+    // added will not be in the correct place. Cache the placement information
+    // here so that we can later rehydrate correctly.
+    if (dock.mode === 'single-document') {
+      this._addOptionsCache.set(widget, options);
+    }
 
     if (options.activate !== false) {
       dock.activateWidget(widget);
@@ -704,7 +720,16 @@ class ApplicationShell extends Widget {
    * Handle a change to the layout.
    */
   private _onLayoutModified(): void {
-    this._layoutModified.emit(void 0);
+    // The dock can emit layout modified signals while in transient
+    // states (for instance, when switching from single-document to
+    // multiple-document mode). In those states, it can be unreliable
+    // for the signal consumers to query layout properties.
+    // We fix this by debouncing the layout modified signal so that it
+    // is only emitted after rearranging is done.
+    window.clearTimeout(this._debouncer);
+    this._debouncer = window.setTimeout(() => {
+      this._layoutModified.emit(undefined);
+    }, 0);
   }
 
   /**
@@ -740,6 +765,8 @@ class ApplicationShell extends Widget {
   private _tracker = new FocusTracker<Widget>();
   private _topPanel: Panel;
   private _bottomPanel: Panel;
+  private _debouncer = 0;
+  private _addOptionsCache = new Map<Widget, ApplicationShell.IMainAreaOptions>();
 }
 
 
