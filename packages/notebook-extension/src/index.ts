@@ -769,7 +769,9 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Noteboo
   commands.addCommand(CommandIDs.runInConsole, {
     label: 'Run Selected Text or Current Line in Console',
     execute: args => {
-      const current = getCurrent(args);
+      // Default to not activating the notebook (thereby putting the notebook
+      // into command mode)
+      const current = getCurrent({activate: false, ...args});
 
       if (current) {
         const { context, content } = current;
