@@ -562,9 +562,9 @@ export class CodeConsole extends Widget {
   /**
    * Handle cell disposed signals.
    */
-  private _onCellDisposed(sender: Widget, args: void): void {
+  private _onCellDisposed(sender: Cell, args: void): void {
     if (!this.isDisposed) {
-      this._cells.removeValue(sender as Cell);
+      this._cells.removeValue(sender);
     }
   }
 
