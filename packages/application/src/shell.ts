@@ -413,8 +413,11 @@ export class ApplicationShell extends Widget {
    *
    * #### Notes
    * Widgets must have a unique `id` property, which will be used as the DOM id.
-   * All widgets added to the main area should be disposed after removal (or
-   * simply disposed in order to remove).
+   * All widgets added to the main area should be disposed after removal
+   * (disposal before removal will remove the widget automatically).
+   *
+   * In the options, `ref` defaults to `null`, `mode` defaults to `'tab-after'`,
+   * and `activate` defaults to `true`.
    */
   addToMainArea(
     widget: Widget,

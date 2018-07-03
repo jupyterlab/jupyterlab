@@ -9,6 +9,7 @@ import {
   CodeCell,
   CodeCellModel,
   ICodeCellModel,
+  isCodeCellModel,
   IRawCellModel,
   RawCell,
   RawCellModel
@@ -24,7 +25,7 @@ import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { KernelMessage } from '@jupyterlab/services';
 
-import { map, toArray } from '@phosphor/algorithm';
+import { each } from '@phosphor/algorithm';
 
 import { Message } from '@phosphor/messaging';
 
@@ -100,7 +101,7 @@ export class CodeConsole extends Widget {
     this.node.tabIndex = -1; // Allow the widget to take focus.
 
     // Create the panels that hold the content and input.
-    let layout = (this.layout = new PanelLayout());
+    const layout = (this.layout = new PanelLayout());
     this._cells = new ObservableList<Cell>();
     this._content = new Panel();
     this._input = new Panel();
@@ -174,7 +175,8 @@ export class CodeConsole extends Widget {
    * The list of content cells in the console.
    *
    * #### Notes
-   * This list does not include the banner or the prompt for a console.
+   * This list does not include the current banner or the prompt for a console.
+   * It may include previous banners as raw cells.
    */
   get cells(): IObservableList<Cell> {
     return this._cells;
@@ -331,21 +333,24 @@ export class CodeConsole extends Widget {
 
   /**
    * Serialize the output.
+   *
+   * #### Notes
+   * This only serializes the code cells and the prompt cell if it exists, and
+   * skips any old banner cells.
    */
   serialize(): nbformat.ICodeCell[] {
-    let promptCell = this.promptCell;
-    let layout = this._content.layout as PanelLayout;
-    // Serialize content.
-    let output = map(layout.widgets, widget => {
-      return (widget as CodeCell).model.toJSON() as nbformat.ICodeCell;
+    const cells: nbformat.ICodeCell[] = [];
+    each(this._cells, cell => {
+      let model = cell.model;
+      if (isCodeCellModel(model)) {
+        cells.push(model.toJSON());
+      }
     });
-    if (!promptCell) {
-      return toArray(output);
+
+    if (this.promptCell) {
+      cells.push(this.promptCell.model.toJSON());
     }
-    // Serialize prompt cell and return.
-    return toArray(output).concat(
-      promptCell.model.toJSON() as nbformat.ICodeCell
-    );
+    return cells;
   }
 
   /**
@@ -437,9 +442,6 @@ export class CodeConsole extends Widget {
     editor.addKeydownHandler(this._onEditorKeydown);
 
     this._history.editor = editor;
-    if (this.isAttached) {
-      this.activate();
-    }
     this._promptCellCreated.emit(promptCell);
   }
 
@@ -560,9 +562,9 @@ export class CodeConsole extends Widget {
   /**
    * Handle cell disposed signals.
    */
-  private _onCellDisposed(sender: Widget, args: void): void {
+  private _onCellDisposed(sender: Cell, args: void): void {
     if (!this.isDisposed) {
-      this._cells.removeValue(sender as CodeCell);
+      this._cells.removeValue(sender);
     }
   }
 
@@ -621,6 +623,7 @@ export class CodeConsole extends Widget {
       this._banner.dispose();
       this._banner = null;
     }
+    this.addBanner();
   }
 
   /**
@@ -633,7 +636,6 @@ export class CodeConsole extends Widget {
       if (!kernel) {
         return;
       }
-      this.addBanner();
       kernel
         .requestKernelInfo()
         .then(() => {
@@ -645,6 +647,8 @@ export class CodeConsole extends Widget {
         .catch(err => {
           console.error('could not get kernel info');
         });
+    } else if (this.session.status === 'restarting') {
+      this.addBanner();
     }
   }
 

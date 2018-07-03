@@ -176,9 +176,29 @@ function activateConsole(
     });
   }
 
+  /**
+   * The options used to create a widget.
+   */
   interface ICreateOptions extends Partial<ConsolePanel.IOptions> {
-    ref?: string;
+    /**
+     * The reference widget id for the insert location.
+     *
+     * The default is `null`.
+     */
+    ref?: string | null;
+
+    /**
+     * The tab insert mode.
+     *
+     * An insert mode is used to specify how a widget should be added
+     * to the main area relative to a reference widget.
+     */
     insertMode?: DockLayout.InsertMode;
+
+    /**
+     * Whether to activate the widget.  Defaults to `true`.
+     */
+    activate?: boolean;
   }
 
   /**
@@ -203,10 +223,10 @@ function activateConsole(
         // Add the console panel to the tracker.
         tracker.add(panel);
         shell.addToMainArea(panel, {
-          ref: options.ref || null,
-          mode: options.insertMode || 'tab-after'
+          ref: options.ref,
+          mode: options.insertMode,
+          activate: options.activate
         });
-        shell.activateById(panel.id);
         return panel;
       });
   }
@@ -221,15 +241,28 @@ function activateConsole(
     );
   }
 
+  /**
+   * The options used to open a console.
+   */
+  interface IOpenOptions extends Partial<ConsolePanel.IOptions> {
+    /**
+     * Whether to activate the console.  Defaults to `true`.
+     */
+    activate?: boolean;
+  }
+
   let command = CommandIDs.open;
   commands.addCommand(command, {
-    execute: (args: Partial<ConsolePanel.IOptions>) => {
+    execute: (args: IOpenOptions) => {
       let path = args['path'];
       let widget = tracker.find(value => {
         return value.console.session.path === path;
       });
       if (widget) {
-        shell.activateById(widget.id);
+        if (args['activate'] !== false) {
+          shell.activateById(widget.id);
+        }
+        return widget;
       } else {
         return manager.ready.then(() => {
           let model = find(manager.sessions.running(), item => {
@@ -238,7 +271,7 @@ function activateConsole(
           if (model) {
             return createConsole(args);
           }
-          return Promise.reject(`No running console for path: ${path}`);
+          return Promise.reject(`No running kernel session for path: ${path}`);
         });
       }
     }
