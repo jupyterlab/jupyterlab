@@ -1,40 +1,85 @@
 import * as ReactDOM from 'react-dom';
 import * as React from 'react';
 
-import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
+import {
+    JupyterLabPlugin, JupyterLab
+} from '@jupyterlab/application';
 
-import { Widget } from '@phosphor/widgets';
+import {
+   Kernel, KernelManager
+} from '@jupyterlab/services';
 
-import { IStatusBar } from './../statusBar';
+import {
+    Widget
+} from '@phosphor/widgets';
 
-import { IconItem } from '../component';
+import {
+    IStatusBar
+} from './../statusBar';
 
-export class RunningSession extends Widget {
-  constructor(src: string) {
-    super();
 
-    this._src = src;
+export
+namespace RunningComponent {
+    export
+    interface IState {
+        kernelSession: number;
+    }
+    export
+    interface IProps {
+        kernelManager: KernelManager;
+    }
+}
 
-    ReactDOM.render(<IconItem source={this._src} />, this.node);
-  }
+export
+class RunningComponent extends React.Component<RunningComponent.IProps, RunningComponent.IState> {
+    state = {
+        kernelSession: 0,
+    };
 
-  private _src: string;
+    constructor(props: RunningComponent.IProps) {
+        super(props);
+        this.props.kernelManager.runningChanged.connect(this.updateKernel);
+    }
+
+    componentDidMount() {
+        this.updateKernel();
+    }
+
+    updateKernel = () =>  {
+        Kernel.listRunning().then(value => this.setState({kernelSession: value.length}));
+    }
+
+    render() {
+        return(<div>{this.state.kernelSession} Kernels Active</div>);
+    }
+
+}
+
+export
+class RunningSession extends Widget {
+    constructor() {
+        super();
+        this._manager = new KernelManager();
+    }
+
+      onBeforeAttach() {
+            ReactDOM.render(<RunningComponent kernelManager = {this._manager} />, this.node);
+      }
+
+      private _manager: KernelManager;
 }
 
 /*
  * Initialization data for the statusbar extension.
  */
-export const runningSessionItem: JupyterLabPlugin<void> = {
-  id: 'jupyterlab-statusbar/default-items:icon-item',
-  autoStart: true,
-  requires: [IStatusBar],
-  activate: (_app: JupyterLab, statusBar: IStatusBar) => {
-    statusBar.registerStatusItem(
-      'image-1',
-      new RunningSession(
-        'https://emojipedia-us.s3.amazonaws.com/thumbs/120/apple/129/waving-hand-sign_1f44b.png'
-      ),
-      { align: 'right' }
-    );
-  }
+
+export
+const runningSessionItem: JupyterLabPlugin<void> = {
+    id: 'jupyterlab-statusbar/default-items:icon-item',
+    autoStart: true,
+    requires: [IStatusBar],
+    activate: (_app: JupyterLab, statusBar: IStatusBar, manager: KernelManager) => {
+        statusBar.registerStatusItem('image', new RunningSession(), {align: 'left'});
+    }
 };
+
