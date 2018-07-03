@@ -2,7 +2,7 @@ import * as ReactDOM from 'react-dom';
 import * as React from 'react';
 
 import {
-    JupyterLabPlugin, JupyterLab, ApplicationShell, 
+    JupyterLabPlugin, JupyterLab, ApplicationShell,
 } from '@jupyterlab/application';
 
 import {
@@ -53,7 +53,6 @@ class RunningComponent extends React.Component<RunningComponent.IProps, RunningC
     }
 
     handleClick = () => {
-        console.log('hello');
         this.props.shellHost.expandLeft();
         this.props.shellHost.activateById('jp-running-sessions');
     }
@@ -64,8 +63,8 @@ class RunningComponent extends React.Component<RunningComponent.IProps, RunningC
 }
 
 export
-class RunningSession extends Widget {
-    constructor(opts: AppShell.IOptions) {
+class RunningKernels extends Widget {
+    constructor(opts: RunningKernels.IOptions) {
         super();
         this._manager = new KernelManager();
         this._host = opts.host;
@@ -83,17 +82,17 @@ class RunningSession extends Widget {
  */
 
 export
-const runningSessionItem: JupyterLabPlugin<void> = {
-    id: 'jupyterlab-statusbar/default-items:icon-item',
+const runningKernelsItem: JupyterLabPlugin<void> = {
+    id: 'jupyterlab-statusbar/default-items:running-kernels',
     autoStart: true,
     requires: [IStatusBar],
     activate: (app: JupyterLab, statusBar: IStatusBar, manager: KernelManager) => {
-        statusBar.registerStatusItem('image', new RunningSession( {host: app.shell} ), {align: 'left'});
+        statusBar.registerStatusItem('running-kernels-item', new RunningKernels( {host: app.shell} ), {align: 'left'});
     }
 };
 
 export
-namespace AppShell {
+namespace RunningKernels {
 
   /**
    * Options for creating a new StatusBar instance

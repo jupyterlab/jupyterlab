@@ -72,7 +72,6 @@ class StatusBar extends Widget implements IStatusBar {
     rootLayout.addWidget(rightPanel);
 
     this._host.addToBottomArea(this);
-
   }
 
   registerStatusItem(id: string, widget: Widget, opts: IStatusBar.IStatusItemOptions = {}) {
