@@ -279,7 +279,7 @@ input {
 .cell {
     padding: 6px 12px;
     display: table-cell;
-    width: 25%;
+    width: 20%;
 }
 
 .table-header {
